@@ -144,6 +144,32 @@ MAX_FOOTER_TEXT = 120
 #: glance; a sentence there would have to be set too small to read as one.
 MAX_WATERMARK_TEXT = 40
 
+#: Sheet orientation. ``portrait`` is today's behaviour. Landscape swaps the
+#: configured page size's sides, for the generators that read the workspace page
+#: size (:func:`resolve_page_size`).
+PAGE_ORIENTATIONS = ("portrait", "landscape")
+
+#: How the shared page footer writes the page number. ``page_of`` is today's
+#: line ("Page 3 of 7", "Page 3" while the count is unknown); ``page`` is
+#: "Page 3" always; ``short`` is the compact "3 / 7"; ``number`` is the bare
+#: digit for a document filed inside a bundle that numbers its own pages.
+PAGE_NUMBER_FORMATS = ("page_of", "page", "short", "number")
+
+#: What the footer says about when the document was printed. ``auto`` keeps
+#: today's behaviour: the default footer line carries "Generated: <date>" and a
+#: custom footer carries nothing. The other three move the stamp to its own
+#: right-hand line under the footer and take it out of the default line, so the
+#: date is never printed twice.
+PRINT_STAMPS = ("auto", "none", "date", "datetime")
+
+#: Watermark layout: across the page corner to corner (today), or level.
+WATERMARK_LAYOUTS = ("diagonal", "horizontal")
+
+#: Watermark opacity bounds in percent. Below 5 it does not print on a laser
+#: printer; above 40 it competes with the table underneath.
+MIN_WATERMARK_OPACITY = 5
+MAX_WATERMARK_OPACITY = 40
+
 #: ``#rgb`` and ``#rrggbb``, the two forms the colour input emits.
 _HEX_COLOR = re.compile(r"^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$")
 
@@ -167,6 +193,14 @@ DEFAULT_APPEARANCE: dict[str, Any] = {
     "show_page_numbers": True,
     "show_letterhead": True,
     "watermark_text": "",
+    "watermark_opacity": 14,
+    "watermark_layout": "diagonal",
+    "page_orientation": "portrait",
+    "header_show_contact": False,
+    "header_rule": True,
+    "page_number_format": "page_of",
+    "print_stamp": "auto",
+    "footer_show_registration": False,
 }
 
 
@@ -199,6 +233,24 @@ def _bounded_int(value: Any, low: int, high: int, fallback: int) -> int:
     return max(low, min(high, int(value)))
 
 
+#: Fields that hold one of a fixed set of words.
+_CHOICES: dict[str, tuple[str, ...]] = {
+    "page_orientation": PAGE_ORIENTATIONS,
+    "page_number_format": PAGE_NUMBER_FORMATS,
+    "print_stamp": PRINT_STAMPS,
+    "watermark_layout": WATERMARK_LAYOUTS,
+}
+
+#: Fields that are an on/off switch.
+_BOOLEAN_FIELDS = (
+    "show_page_numbers",
+    "show_letterhead",
+    "header_show_contact",
+    "header_rule",
+    "footer_show_registration",
+)
+
+
 def _clean_field(field: str, value: Any) -> Any:
     """``value`` as the sanitiser keeps it, or ``None`` when it is not usable.
 
@@ -229,7 +281,12 @@ def _clean_field(field: str, value: Any) -> Any:
         # Whitespace collapses because the mark is drawn as one line, and a
         # newline typed into the field would otherwise print as a gap.
         return " ".join(value.split())[:MAX_WATERMARK_TEXT] if isinstance(value, str) else None
-    if field in ("show_page_numbers", "show_letterhead"):
+    if field in _CHOICES:
+        choice = value.strip().lower() if isinstance(value, str) else ""
+        return choice if choice in _CHOICES[field] else None
+    if field == "watermark_opacity":
+        return _bounded_int(value, MIN_WATERMARK_OPACITY, MAX_WATERMARK_OPACITY, 0) or None
+    if field in _BOOLEAN_FIELDS:
         return value if isinstance(value, bool) else None
     return None
 
@@ -341,7 +398,22 @@ _LETTERHEAD_FIELDS = ("show_letterhead", "logo_align", "accent_color")
 #: :func:`app.core.register_export.build_record_pdf`. The other four print no
 #: footer. The watermark belongs here because it is drawn by the same page
 #: callback as the footer, so exactly the generators with a footer carry it.
-_FOOTER_FIELDS = ("footer_text", "footer_color", "show_page_numbers", "watermark_text")
+_FOOTER_FIELDS = (
+    "footer_text",
+    "footer_color",
+    "show_page_numbers",
+    "watermark_text",
+    "watermark_opacity",
+    "watermark_layout",
+)
+
+#: The second footer line (the registration line and the print stamp), drawn by
+#: :func:`app.core.pdf_branding.draw_footer_second_line`. Listed apart from
+#: :data:`_FOOTER_FIELDS` because only the generators that call that helper
+#: honour it (the RFI and the meeting minutes). The daily report already prints
+#: a second footer line of its own, and a record form built by
+#: ``register_export`` joins the list when its footer makes the call.
+_FOOTER_EXTRA_FIELDS = ("print_stamp", "footer_show_registration")
 
 #: The sheet of :func:`app.core.register_export.build_record_pdf`: portrait A4,
 #: 20 mm at the sides and 18 mm top and bottom, an unpadded frame.
@@ -361,7 +433,7 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             "rfi",
             "Request for information",
             "settings.document_templates.types.rfi",
-            _LETTERHEAD_FIELDS + _FOOTER_FIELDS,
+            _LETTERHEAD_FIELDS + _FOOTER_FIELDS + _FOOTER_EXTRA_FIELDS,
             # app.modules.rfi.pdf_export: A4, its own unpadded frame.
             DocumentSheet("A4", False, (20.0, 20.0, 18.0, 18.0), 0.0),
         ),
@@ -402,7 +474,7 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             "meeting_minutes",
             "Meeting minutes",
             "settings.document_templates.types.meeting_minutes",
-            _LETTERHEAD_FIELDS + _FOOTER_FIELDS,
+            _LETTERHEAD_FIELDS + _FOOTER_FIELDS + _FOOTER_EXTRA_FIELDS,
             # app.modules.meetings.pdf and the export in meetings.router: A4,
             # a padded frame 20 mm in from every edge.
             DocumentSheet("A4", False, (20.0, 20.0, 20.0, 20.0), _SIMPLE_DOC_PADDING),
@@ -776,9 +848,12 @@ def write_hidden_sections(doc_type: str, payload: Any, data_dir: Path | None = N
 
 
 def resolve_page_size(appearance: dict[str, Any] | None = None) -> tuple[float, float]:
-    """Return the (width, height) in points for the configured page size."""
+    """Return the (width, height) in points for the configured page size and orientation."""
     data = appearance if isinstance(appearance, dict) else read_appearance()
     name = data.get("page_size")
     if name not in PAGE_SIZES:
         name = DEFAULT_APPEARANCE["page_size"]
-    return PAGE_SIZES[name]
+    width, height = PAGE_SIZES[name]
+    if data.get("page_orientation") == "landscape":
+        return (max(width, height), min(width, height))
+    return (width, height)

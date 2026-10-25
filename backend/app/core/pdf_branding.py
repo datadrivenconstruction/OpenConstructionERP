@@ -512,10 +512,11 @@ def _draw_page_furniture(
         # -- Footer: brand + generated date (left), page number (right). --
         page_text = ""
         if appearance.get("show_page_numbers", True):
-            if getattr(doc, "page_count", 0) > 0:
-                page_text = f"Page {doc.page} of {doc.page_count}"
-            else:
-                page_text = f"Page {getattr(doc, 'page', 1)}"
+            page_text = page_number_text(
+                appearance.get("page_number_format"),
+                page=getattr(doc, "page", 1),
+                total=getattr(doc, "page_count", 0),
+            )
         custom_footer = (appearance.get("footer_text") or "").strip()
         suffix = ""
         if custom_footer:
@@ -525,9 +526,12 @@ def _draw_page_furniture(
             # signed contract is a support ticket.
             footer_left = custom_footer[:160]
         elif default_line:
-            generated = datetime.now(tz=UTC).strftime("%Y-%m-%d")
             footer_left = _company_name(branding)[:160]
-            suffix = f"  |  Generated: {generated}"
+            # Only the "auto" stamp setting keeps the date in this line; the
+            # others print it on the line below, or not at all.
+            if (appearance.get("print_stamp") or "auto") == "auto":
+                generated = datetime.now(tz=UTC).strftime("%Y-%m-%d")
+                suffix = f"  |  Generated: {generated}"
         else:
             footer_left = ""
         face, size = BODY_FONT, 7.0
@@ -552,6 +556,7 @@ def _draw_page_furniture(
             canvas.drawRightString(right_x, 10.0 * MM, page_text)
 
         canvas.restoreState()
+        draw_footer_second_line(canvas, appearance, left=left, right_x=right_x)
     except Exception:  # noqa: BLE001 - brand draw must never break a PDF export
         logger.debug("%s draw failed; page left unbranded", caller, exc_info=True)
         # Best-effort: balance the graphics state if we managed to save it.
@@ -559,6 +564,147 @@ def _draw_page_furniture(
             canvas.restoreState()
         except Exception:  # noqa: BLE001
             pass
+
+
+def page_number_text(fmt: Any, *, page: int, total: int = 0) -> str:
+    """The page number as the footer writes it, for a ``page_number_format``.
+
+    ``page_of`` (the default, and what an unknown value falls back to) is the
+    line the footer has always printed: "Page 3 of 7", or "Page 3" while the
+    page count is not known. ``total`` is zero or less when it is not. Shared by
+    the page furniture and any generator that draws its own English footer.
+    """
+    if fmt == "number":
+        return str(page)
+    if fmt == "short":
+        return f"{page} / {total}" if total > 0 else str(page)
+    if fmt == "page" or total <= 0:
+        return f"Page {page}"
+    return f"Page {page} of {total}"
+
+
+def _print_stamp_text(mode: Any) -> str:
+    """The "Printed: ..." text for a ``print_stamp`` mode, empty when none is wanted."""
+    now = datetime.now(tz=UTC)
+    if mode == "date":
+        return f"Printed: {now:%Y-%m-%d}"
+    if mode == "datetime":
+        return f"Printed: {now:%Y-%m-%d %H:%M} UTC"
+    return ""
+
+
+def draw_footer_second_line(canvas: Any, appearance: dict[str, Any], *, left: float, right_x: float) -> bool:
+    """Print the registration line and the print stamp under the footer.
+
+    Two optional pieces share one baseline: the company profile's registration
+    line (VAT ID, commercial register number, licence numbers) on the left when
+    ``footer_show_registration`` is on, and the print date or date and time on
+    the right when ``print_stamp`` asks for one. Shared by every page callback
+    that draws a footer from the appearance, so a document type offers the two
+    settings exactly where it prints them.
+
+    Args:
+        canvas: The page's canvas. Its state is saved and restored here.
+        appearance: The resolved appearance of the document being drawn.
+        left: Left edge of the text, in points.
+        right_x: Right edge of the text, in points.
+
+    Returns:
+        Whether anything was drawn. ``False`` when both pieces are off or empty;
+        never raises, like the rest of the page furniture.
+    """
+    try:
+        stamp = _print_stamp_text(appearance.get("print_stamp"))
+        registration = ""
+        if appearance.get("footer_show_registration"):
+            registration = _profile_text(_read_company_profile(), "registration_line")
+        if not (stamp or registration):
+            return False
+
+        from reportlab.lib import colors
+
+        from app.core.pdf_fonts import BODY_FONT, pdf_fit_line, pdf_room_beside
+
+        canvas.saveState()
+        try:
+            canvas.setFillColor(colors.HexColor(appearance.get("footer_color") or _FOOTER_COLOR))
+            size = _FOOTER_SECOND_LINE_SIZE
+            if stamp:
+                canvas.setFont(BODY_FONT, size)
+                canvas.drawRightString(right_x, _FOOTER_SECOND_LINE_Y, stamp)
+            if registration:
+                text, face, fitted = pdf_fit_line(
+                    registration[:160],
+                    pdf_room_beside(right_x - left, stamp, size=size),
+                    size=size,
+                    base=BODY_FONT,
+                )
+                canvas.setFont(face, fitted)
+                canvas.drawString(left, _FOOTER_SECOND_LINE_Y, text)
+        finally:
+            canvas.restoreState()
+    except Exception:  # noqa: BLE001 - the footer's second line must never break a PDF export
+        logger.debug("footer second line skipped (draw failed)", exc_info=True)
+        return False
+    return True
+
+
+def _header_contact_room(align: str, span: float) -> float:
+    """The width the header's contact block may use, in points; 0 when there is no room.
+
+    The logo box takes its width from one side, or from the middle when it is
+    centred, and the block gets the rest of the band.
+    """
+    if align == "center":
+        room = (span - _LOGO_MAX_W) / 2.0 - 6.0
+    else:
+        room = span - _LOGO_MAX_W - 12.0
+    return room if room >= 40.0 else 0.0
+
+
+def _draw_header_contact(
+    canvas: Any,
+    profile: dict[str, Any],
+    *,
+    align: str,
+    left: float,
+    right_x: float,
+    page_h: float,
+) -> bool:
+    """Print the company's address and contact line opposite the header logo.
+
+    Two small lines on the side the logo is not on (a centred logo leaves the
+    right-hand side), each fitted into the room the logo box leaves. The address
+    runs on one line, its lines joined with a comma. Raises like any canvas
+    call; :func:`_draw_page_furniture` guards it.
+    """
+    from reportlab.lib import colors
+
+    from app.core.pdf_fonts import BODY_FONT, pdf_fit_line
+
+    address = ", ".join(line.strip() for line in _profile_text(profile, "address").split("\n") if line.strip())
+    contact = " · ".join(
+        part for part in (_profile_text(profile, key) for key in ("phone", "email", "website")) if part
+    )
+    lines = [line for line in (address, contact) if line]
+    if not lines:
+        return False
+    room = _header_contact_room(align, right_x - left)
+    if room <= 0.0:
+        return False
+    on_left = align == "right"
+    canvas.setFillColor(colors.HexColor(_LETTERHEAD_MUTED))
+    size = 6.5
+    baseline = page_h - 12.0 * MM
+    for line in lines:
+        text, face, fitted = pdf_fit_line(line[:200], room, size=size, base=BODY_FONT)
+        canvas.setFont(face, fitted)
+        if on_left:
+            canvas.drawString(left, baseline, text)
+        else:
+            canvas.drawRightString(right_x, baseline, text)
+        baseline -= 3.2 * MM
+    return True
 
 
 def _draw_header_band(
@@ -596,7 +742,15 @@ def _draw_header_band(
         # so a Chinese legal name is readable rather than a row of boxes running
         # past the margin. base keeps the weight: the ladder only goes bold when
         # it is told the face it starts from is a bold one.
-        name, face, size = pdf_fit_line(_company_name(branding)[:80], right_x - left, size=9.0, base=BOLD_FONT)
+        name_room = right_x - left
+        if appearance.get("header_show_contact", False):
+            # The contact block shares the band, so the name keeps to its half.
+            contact_room = _header_contact_room(align, name_room)
+            if contact_room > 0.0:
+                name_room = (
+                    name_room - 2.0 * (contact_room + 6.0) if align == "center" else name_room - contact_room - 12.0
+                )
+        name, face, size = pdf_fit_line(_company_name(branding)[:80], name_room, size=9.0, base=BOLD_FONT)
         canvas.setFont(face, size)
         canvas.setFillColor(colors.HexColor(appearance.get("accent_color") or _HEADER_COLOR))
         if align == "right":
@@ -605,10 +759,13 @@ def _draw_header_band(
             canvas.drawCentredString((left + right_x) / 2.0, header_baseline, name)
         else:
             canvas.drawString(left, header_baseline, name)
-    canvas.setStrokeColor(colors.HexColor("#cccccc"))
-    canvas.setLineWidth(0.5)
-    line_y = page_h - 17.0 * MM
-    canvas.line(left, line_y, right_x, line_y)
+    if appearance.get("header_show_contact", False):
+        _draw_header_contact(canvas, profile, align=align, left=left, right_x=right_x, page_h=page_h)
+    if appearance.get("header_rule", True):
+        canvas.setStrokeColor(colors.HexColor("#cccccc"))
+        canvas.setLineWidth(0.5)
+        line_y = page_h - 17.0 * MM
+        canvas.line(left, line_y, right_x, line_y)
 
 
 #: The watermark's ink: a mid grey at low opacity, so the mark reads as a mark
@@ -649,15 +806,41 @@ def draw_watermark(canvas: Any, appearance: dict[str, Any], *, page_w: float, pa
     if not text:
         return False
     try:
-        _draw_watermark_text(canvas, text, page_w=page_w, page_h=page_h)
+        _draw_watermark_text(
+            canvas,
+            text,
+            page_w=page_w,
+            page_h=page_h,
+            opacity=_watermark_opacity(appearance.get("watermark_opacity")),
+            level=appearance.get("watermark_layout") == "horizontal",
+        )
     except Exception:  # noqa: BLE001 - a watermark must never break a PDF export
         logger.debug("watermark draw failed; page left without it", exc_info=True)
         return False
     return True
 
 
-def _draw_watermark_text(canvas: Any, text: str, *, page_w: float, page_h: float) -> None:
-    """The body of :func:`draw_watermark`. Raises like any canvas call."""
+def _watermark_opacity(percent: Any) -> float:
+    """The watermark's alpha for a saved opacity percentage, the default when unusable."""
+    if isinstance(percent, bool) or not isinstance(percent, int | float) or not 0 < percent <= 100:
+        return _WATERMARK_ALPHA
+    return float(percent) / 100.0
+
+
+def _draw_watermark_text(
+    canvas: Any,
+    text: str,
+    *,
+    page_w: float,
+    page_h: float,
+    opacity: float = _WATERMARK_ALPHA,
+    level: bool = False,
+) -> None:
+    """The body of :func:`draw_watermark`. Raises like any canvas call.
+
+    ``level`` sets the mark horizontally across the middle of the page instead
+    of corner to corner.
+    """
     import math
 
     from reportlab.lib import colors
@@ -669,7 +852,7 @@ def _draw_watermark_text(canvas: Any, text: str, *, page_w: float, page_h: float
     from app.core.pdf_fonts import BOLD_FONT, pdf_fit_line, pdf_fitted_style, pdf_font_for_text
 
     diagonal = math.hypot(page_w, page_h)
-    room = diagonal * 0.7
+    room = (page_w * 0.8) if level else (diagonal * 0.7)
     face = pdf_font_for_text(text, bold=True, base=BOLD_FONT)
     unit = stringWidth(text, face, 1.0) or 1.0
     wanted = max(_WATERMARK_MIN_SIZE, min(_WATERMARK_MAX_SIZE, room / unit))
@@ -687,9 +870,10 @@ def _draw_watermark_text(canvas: Any, text: str, *, page_w: float, page_h: float
 
     canvas.saveState()
     try:
-        canvas.setFillAlpha(_WATERMARK_ALPHA)
+        canvas.setFillAlpha(opacity)
         canvas.translate(page_w / 2.0, page_h / 2.0)
-        canvas.rotate(math.degrees(math.atan2(page_h, page_w)))
+        if not level:
+            canvas.rotate(math.degrees(math.atan2(page_h, page_w)))
         mark.drawOn(canvas, -room / 2.0, -height / 2.0)
     finally:
         canvas.restoreState()
@@ -698,6 +882,11 @@ def _draw_watermark_text(canvas: Any, text: str, *, page_w: float, page_h: float
 # One millimetre in points - reportlab's unit, inlined so this module needs no
 # import-time reportlab dependency (the lazy imports above keep it import-safe).
 MM = 72.0 / 25.4
+
+#: The second footer line sits under the first, still inside the sheet's bottom
+#: margin, in a size a step below the footer's.
+_FOOTER_SECOND_LINE_Y = 5.5 * MM
+_FOOTER_SECOND_LINE_SIZE = 6.5
 
 
 def _page_size(doc: Any, canvas: Any = None) -> tuple[float, float]:
@@ -1166,6 +1355,8 @@ __all__ = [
     "branded_header_footer",
     "branded_header_logo",
     "branded_letterhead",
+    "draw_footer_second_line",
     "draw_watermark",
+    "page_number_text",
     "render_sample_pdf",
 ]

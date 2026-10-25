@@ -57,7 +57,7 @@ PROJECT_ID = uuid.UUID("11111111-2222-3333-4444-555555555555")
 #: A workspace look that differs from the platform default, so "the type
 #: inherits the workspace" and "the type fell back to the platform default"
 #: cannot be mistaken for each other.
-WORKSPACE = {"accent_color": "#123456", "footer_text": "Workspace footer"}
+WORKSPACE = {"accent_color": "#123456", "footer_text": "Workspace footer", "watermark_text": "WORKSPACE MARK"}
 
 #: One value per overridable field, each different from both the platform
 #: default and :data:`WORKSPACE`.
@@ -69,6 +69,10 @@ OVERRIDE_VALUES: dict[str, Any] = {
     "footer_color": "#00aa44",
     "show_page_numbers": False,
     "watermark_text": "PER-TYPE MARK",
+    "watermark_opacity": 30,
+    "watermark_layout": "horizontal",
+    "print_stamp": "datetime",
+    "footer_show_registration": True,
 }
 
 CONFIGURABLE = [key for key, kind in DOCUMENT_TYPES.items() if kind.configurable]
