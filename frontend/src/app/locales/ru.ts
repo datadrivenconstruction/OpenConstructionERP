@@ -45771,6 +45771,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Размер чертежа в этом масштабе: {{w}} м x {{h}} м",
   "dwg_takeoff.drawing_span_implausible": "Для строительного чертежа это необычно, возможно, единица в файле указана неверно. Проверьте её через «Калибровку»: выберите две точки и введите реальное расстояние между ними.",
   "dwg_takeoff.conv_converter_said": "Сообщение конвертера",
+  "dwg_takeoff.open_side_panel": "Слои и детали",
+  "dwg_takeoff.close_side_panel": "Назад к чертежу",
     "match_wizard.available_label": "Доступно для установки ({{n}})",
     "match_wizard.install_aria": "Установить {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} готов к использованию.",

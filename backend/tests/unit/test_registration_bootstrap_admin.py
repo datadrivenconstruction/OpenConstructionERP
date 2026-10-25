@@ -301,3 +301,14 @@ def test_promote_admin_without_an_email_exits_before_touching_the_database():
     with pytest.raises(SystemExit) as exc:
         cli.cmd_promote_admin(args)
     assert exc.value.code == 2
+
+
+@pytest.mark.asyncio
+async def test_registration_status_matches_what_register_would_do(session: AsyncSession) -> None:
+    """The login page hides "Create account" from this answer, so it must agree with register()."""
+    assert (await _service(session, mode="open").registration_status()) == {"mode": "open", "open": True}
+    # Closed on a fresh install still lets the first operator in.
+    assert (await _service(session, mode="closed").registration_status())["open"] is True
+    await _add_user(session, f"admin-{uuid.uuid4().hex[:6]}@example.com", role="admin")
+    assert (await _service(session, mode="closed").registration_status()) == {"mode": "closed", "open": False}
+    assert (await _service(session, mode="admin-approve").registration_status())["open"] is True

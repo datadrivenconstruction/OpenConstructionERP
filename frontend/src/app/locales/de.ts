@@ -45331,6 +45331,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Zeichnungsgröße bei diesem Maßstab: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Das ist für eine Bauzeichnung ungewöhnlich, die in der Datei gespeicherte Einheit ist möglicherweise falsch. Prüfen Sie sie mit Kalibrieren: zwei Punkte wählen und ihren realen Abstand eingeben.",
   "dwg_takeoff.conv_converter_said": "Meldung des Konverters",
+  "dwg_takeoff.open_side_panel": "Ebenen und Details",
+  "dwg_takeoff.close_side_panel": "Zurück zur Zeichnung",
     "match_wizard.available_label": "Verfügbar zur Installation ({{n}})",
     "match_wizard.install_aria": "{{region}} installieren",
     "match_wizard.install_toast_ok_msg": "{{label}} ist einsatzbereit.",

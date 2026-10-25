@@ -45349,6 +45349,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Tegningsstørrelse i denne målestokken: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Dette er uvanlig for en byggetegning, så enheten som er lagret i filen, kan være feil. Kontroller den med Kalibrér: velg to punkter og skriv inn den faktiske avstanden mellom dem.",
   "dwg_takeoff.conv_converter_said": "Konverterrapport",
+  "dwg_takeoff.open_side_panel": "Lag og detaljer",
+  "dwg_takeoff.close_side_panel": "Tilbake til tegningen",
     "match_wizard.available_label": "Tilgjengelig for installasjon ({{n}})",
     "match_wizard.install_aria": "Installer {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} er klar til bruk.",

@@ -45085,6 +45085,8 @@ const resource = {
     "dwg_takeoff.drawing_span": "A rajz mérete ezen a léptéken: {{w}} m x {{h}} m",
     "dwg_takeoff.drawing_span_implausible": "Ez szokatlan egy építési rajznál, ezért a fájlban tárolt mértékegység hibás lehet. Ellenőrizze a Kalibrálás gombbal: jelöljön ki két pontot, és írja be a valós távolságukat.",
     "dwg_takeoff.conv_converter_said": "Konverter jelentés",
+    "dwg_takeoff.open_side_panel": "Rétegek és részletek",
+    "dwg_takeoff.close_side_panel": "Vissza a rajzhoz",
     "match_wizard.available_label": "Telepíthető ({{n}})",
     "match_wizard.install_aria": "{{region}} telepítése",
     "match_wizard.install_toast_ok_msg": "A(z) {{label}} használatra kész.",

@@ -46172,6 +46172,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Rozmiar rysunku w tej skali: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "To nietypowe dla rysunku budowlanego, więc jednostka zapisana w pliku może być błędna. Sprawdź ją narzędziem Skalibruj: wskaż dwa punkty i wpisz ich rzeczywistą odległość.",
   "dwg_takeoff.conv_converter_said": "Raport konwertera",
+  "dwg_takeoff.open_side_panel": "Warstwy i szczegóły",
+  "dwg_takeoff.close_side_panel": "Wróć do rysunku",
     "match_wizard.available_label": "Dostępne do instalacji ({{n}})",
     "match_wizard.install_aria": "Zainstaluj {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} jest gotowy do użycia.",

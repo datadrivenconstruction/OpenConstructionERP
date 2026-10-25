@@ -39047,6 +39047,8 @@ const resource = {
     "dwg_takeoff.drawing_span": "Drawing size at this scale: {{w}} m x {{h}} m",
     "dwg_takeoff.drawing_span_implausible": "That is unusual for a construction drawing, so the unit stored in the file may be wrong. Check it with Calibrate: pick two points and type their real distance.",
     "dwg_takeoff.conv_converter_said": "Converter report",
+    "dwg_takeoff.open_side_panel": "Layers and details",
+    "dwg_takeoff.close_side_panel": "Back to the drawing",
     "integrations.available": "Available",
     "integrations.calendar_hint": "Subscribe in Google Calendar or Outlook:",
     "integrations.events": "Events to subscribe",

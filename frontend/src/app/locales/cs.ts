@@ -45773,6 +45773,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Velikost výkresu v tomto měřítku: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Pro stavební výkres je to neobvyklé, takže jednotka uložená v souboru může být špatně. Zkontrolujte ji pomocí Kalibrovat: vyberte dva body a zadejte jejich skutečnou vzdálenost.",
   "dwg_takeoff.conv_converter_said": "Protokol převodníku",
+  "dwg_takeoff.open_side_panel": "Vrstvy a podrobnosti",
+  "dwg_takeoff.close_side_panel": "Zpět na výkres",
     "match_wizard.available_label": "K dispozici k instalaci ({{n}})",
     "match_wizard.install_aria": "Nainstalovat {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} je připraven k použití.",

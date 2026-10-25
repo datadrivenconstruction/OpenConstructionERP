@@ -5192,6 +5192,9 @@ def _render_boq_xlsx(
                     max_length = max(max_length, len(str(val)))
         adjusted = min(max_length + 3, 60)
         ws.column_dimensions[get_column_letter(col_idx)].width = adjusted
+    # The round-trip UUIDs are for re-import only; hidden, a reader no longer
+    # sees internal ids beside section and position rows.
+    ws.column_dimensions[get_column_letter(id_col)].hidden = True
 
     # Align numeric columns to the right
     for row in ws.iter_rows(min_row=header_row + 1, max_row=total_row, min_col=4, max_col=6):

@@ -40296,6 +40296,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Бул масштабдагы чийменин өлчөмү: {{w}} м x {{h}} м",
   "dwg_takeoff.drawing_span_implausible": "Бул курулуш чиймеси үчүн адаттан тыш, ошондуктан файлда сакталган бирдик туура эмес болушу мүмкүн. Калибрлөө менен текшериңиз: эки чекитти тандап, алардын чыныгы аралыгын киргизиңиз.",
   "dwg_takeoff.conv_converter_said": "Конвертер отчету",
+  "dwg_takeoff.open_side_panel": "Катмарлар жана маалымат",
+  "dwg_takeoff.close_side_panel": "Чиймеге кайтуу",
     "integrations.available": "Жеткиликтүү",
     "integrations.calendar_hint": "Google Календар же Outlook'ка жазылыңыз:",
     "integrations.events": "Жазыла турган окуялар",

@@ -45682,6 +45682,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Bu ölçekteki çizim boyutu: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Bu bir inşaat çizimi için olağandışı, bu yüzden dosyada kayıtlı birim yanlış olabilir. Kalibre et ile kontrol edin: iki nokta seçin ve aralarındaki gerçek mesafeyi yazın.",
   "dwg_takeoff.conv_converter_said": "Dönüştürücü raporu",
+  "dwg_takeoff.open_side_panel": "Katmanlar ve ayrıntılar",
+  "dwg_takeoff.close_side_panel": "Çizime dön",
     "match_wizard.available_label": "Yüklemeye hazır ({{n}})",
     "match_wizard.install_aria": "Yükle {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} kullanıma hazır.",

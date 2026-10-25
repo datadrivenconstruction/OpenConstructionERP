@@ -12,6 +12,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { apiGet } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export interface PartnerPackBranding {
   primary_color: string;
@@ -72,9 +73,12 @@ export interface InstalledPacksResponse {
 }
 
 export function usePartnerPack() {
+  // The endpoint needs a session; asking before sign-in only logs a 401.
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   return useQuery<PartnerPackResponse>({
     queryKey: ['partner-pack', 'current'],
     queryFn: () => apiGet<PartnerPackResponse>('/v1/partner-pack/current'),
+    enabled: isAuthenticated,
     staleTime: 5 * 60_000,
     gcTime: 30 * 60_000,
     refetchOnWindowFocus: false,

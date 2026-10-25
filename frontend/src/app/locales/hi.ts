@@ -45354,6 +45354,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "इस पैमाने पर ड्रॉइंग का आकार: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "यह निर्माण ड्रॉइंग के लिए असामान्य है, इसलिए फ़ाइल में सहेजी गई इकाई गलत हो सकती है। कैलिब्रेट करें से जाँचें: दो बिंदु चुनें और उनकी वास्तविक दूरी टाइप करें।",
   "dwg_takeoff.conv_converter_said": "कनवर्टर रिपोर्ट",
+  "dwg_takeoff.open_side_panel": "लेयर और विवरण",
+  "dwg_takeoff.close_side_panel": "ड्रॉइंग पर वापस जाएँ",
     "match_wizard.available_label": "स्थापित करने के लिए उपलब्ध ({{n}})",
     "match_wizard.install_aria": "स्थापित करें {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} उपयोग के लिए तैयार है।",

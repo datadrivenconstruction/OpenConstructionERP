@@ -43404,6 +43404,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Tamaño del dibujo a esta escala: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Es inusual para un plano de construcción, así que la unidad guardada en el archivo puede ser incorrecta. Compruébalo con Calibrar: marca dos puntos y escribe su distancia real.",
   "dwg_takeoff.conv_converter_said": "Informe del convertidor",
+  "dwg_takeoff.open_side_panel": "Capas y detalles",
+  "dwg_takeoff.close_side_panel": "Volver al plano",
     "match_wizard.available_label": "Disponible para instalar ({{n}})",
     "match_wizard.install_aria": "Instalar {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} está listo para usarse.",

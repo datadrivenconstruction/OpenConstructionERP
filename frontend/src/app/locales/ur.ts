@@ -44384,6 +44384,8 @@ const resource = {
     "dwg_takeoff.drawing_span": "اس پیمانے پر ڈرائنگ کا سائز: {{w}} م x {{h}} م",
     "dwg_takeoff.drawing_span_implausible": "یہ کسی تعمیراتی ڈرائنگ کے لیے غیر معمولی ہے، اس لیے فائل میں محفوظ یونٹ غلط ہو سکتا ہے۔ Calibrate کریں کے ذریعے جانچیں: دو نقطے منتخب کریں اور ان کا اصل فاصلہ درج کریں۔",
     "dwg_takeoff.conv_converter_said": "کنورٹر رپورٹ",
+    "dwg_takeoff.open_side_panel": "تہیں اور تفصیلات",
+    "dwg_takeoff.close_side_panel": "ڈرائنگ پر واپس جائیں",
     "cases.adopt_a_cde_approval_preset.longdesc": "ایک CDE gate صرف اتنا ہی اچھا ہے جتنا اس کے پیچھے ریویو فلو۔ ایک خالی فارم سے منظوری route بنانے کی بجائے، ایک تیار ISO 19650 preset سے شروع کریں، اسے اپنے پروجیکٹ میں ایک قابلِ ترمیم route کے طور پر اپنائیں، اور حقیقی کام اس سے گزرنے سے پہلے اسے ڈھالیں۔",
     "cases.classify_the_delivery_route_for_a_work_package.longdesc": "دو work packages جو ملتے جلتے نظر آئیں دائرہ کار، استعمال اور مقام کے مطابق مکمل طور پر مختلف منظوری routes چاہ سکتے ہیں۔ ڈیزائن یا پروگرام lock ہونے سے پہلے route کی درجہ بندی کرنا ہی ٹیم کو آدھے راستے میں اصل route دریافت کرنے سے روکتا ہے۔",
     "cases.get_a_key_document_signed_off.longdesc": "ایک تکمیل سرٹیفکیٹ یا handover بیان جس کے پیچھے صاف دستخط trail نہ ہو تنازع میں کم قیمت رکھتا ہے۔ sign-off کو ایک ٹریک شدہ سیشن کے طور پر چلانا، دستاویز چننے سے لے کر ڈاؤن لوڈ شدہ manifest تک، ہی اسے بعد میں قائم رکھتا ہے۔",

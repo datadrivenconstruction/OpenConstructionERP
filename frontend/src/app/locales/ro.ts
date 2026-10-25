@@ -45581,6 +45581,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Dimensiunea desenului la această scară: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "Este neobișnuit pentru un desen de construcție, deci unitatea stocată în fișier poate fi greșită. Verificați cu Calibrare: alegeți două puncte și introduceți distanța reală dintre ele.",
   "dwg_takeoff.conv_converter_said": "Raport al convertorului",
+  "dwg_takeoff.open_side_panel": "Straturi și detalii",
+  "dwg_takeoff.close_side_panel": "Înapoi la desen",
     "match_wizard.available_label": "Disponibil pentru instalare ({{n}})",
     "match_wizard.install_aria": "Instalează {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} este gata de utilizare.",

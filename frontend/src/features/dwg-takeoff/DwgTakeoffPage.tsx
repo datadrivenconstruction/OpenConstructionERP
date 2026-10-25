@@ -107,7 +107,7 @@ import {
   uploadDrawingRevision,
   USER_MARKUP_LAYER,
 } from './api';
-import { Undo2, Redo2, Target, Search, ChevronUp, ChevronDown } from 'lucide-react';
+import { Undo2, Redo2, Target, Search, ChevronUp, ChevronDown, PanelRightOpen, PanelRightClose } from 'lucide-react';
 import type {
   DxfEntity,
   DxfLayer,
@@ -943,6 +943,8 @@ export function DwgTakeoffPage() {
     entityLabel?: string;
   } | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+  // Below md the side panel would take most of the screen, so it opens on demand.
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
   const [uploadName, setUploadName] = useState('');
   const [uploadDiscipline, setUploadDiscipline] = useState('architectural');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -4347,8 +4349,37 @@ export function DwgTakeoffPage() {
         </div>
 
         {/* ── Right Panel: Layers / Annotations / Properties ───── */}
+        {selectedDrawingId && !mobilePanelOpen && (
+          <button
+            type="button"
+            onClick={() => setMobilePanelOpen(true)}
+            className="md:hidden fixed bottom-24 right-3 z-30 flex items-center gap-1.5 rounded-full border border-border-light bg-surface-elevated px-3 py-2 text-xs font-medium text-content-primary shadow-lg"
+            aria-label={t('dwg_takeoff.open_side_panel', { defaultValue: 'Layers and details' })}
+          >
+            <PanelRightOpen size={14} />
+            {t('dwg_takeoff.open_side_panel', { defaultValue: 'Layers and details' })}
+          </button>
+        )}
         {selectedDrawingId && (
-          <div className="flex w-72 flex-shrink-0 flex-col border-l border-border-light bg-surface-primary text-content-primary shadow-xl shadow-black/30">
+          <div
+            className={clsx(
+              'w-72 flex-shrink-0 flex-col border-l border-border-light bg-surface-primary text-content-primary shadow-xl shadow-black/30',
+              mobilePanelOpen
+                ? 'flex fixed inset-y-0 right-0 z-40 w-[85vw] max-w-xs md:static md:z-auto md:w-72'
+                : 'hidden md:flex',
+            )}
+          >
+            {mobilePanelOpen && (
+              <button
+                type="button"
+                onClick={() => setMobilePanelOpen(false)}
+                className="md:hidden flex items-center justify-end gap-1.5 border-b border-border-light px-3 py-2 text-xs font-medium text-content-secondary"
+                aria-label={t('dwg_takeoff.close_side_panel', { defaultValue: 'Back to the drawing' })}
+              >
+                <PanelRightClose size={14} />
+                {t('dwg_takeoff.close_side_panel', { defaultValue: 'Back to the drawing' })}
+              </button>
+            )}
             {/* Group aggregation panel (RFC 11 §4.5) - visible when 2+ entities selected */}
             {selectedEntityIds.size > 1 && (
               <div

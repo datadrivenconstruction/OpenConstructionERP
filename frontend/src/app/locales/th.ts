@@ -45128,6 +45128,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "ขนาดแบบที่มาตราส่วนนี้: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "ค่านี้ผิดปกติสำหรับแบบก่อสร้าง หน่วยที่บันทึกในไฟล์อาจไม่ถูกต้อง ให้ตรวจสอบด้วยปรับเทียบ: เลือกจุดสองจุดแล้วพิมพ์ระยะจริงระหว่างจุดนั้น",
   "dwg_takeoff.conv_converter_said": "รายงานตัวแปลง",
+  "dwg_takeoff.open_side_panel": "เลเยอร์และรายละเอียด",
+  "dwg_takeoff.close_side_panel": "กลับไปที่แบบ",
     "match_wizard.available_label": "พร้อมสำหรับการติดตั้ง ({{n}})",
     "match_wizard.install_aria": "ติดตั้ง {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} พร้อมใช้งานแล้ว",

@@ -46048,6 +46048,8 @@ const resource = {
     "dwg_takeoff.drawing_span": "Розмір креслення в цьому масштабі: {{w}} м x {{h}} м",
     "dwg_takeoff.drawing_span_implausible": "Це незвично для будівельного креслення, тому одиниця виміру, збережена у файлі, може бути неправильною. Перевірте її за допомогою Калібрування: позначте дві точки та введіть їхню реальну відстань.",
     "dwg_takeoff.conv_converter_said": "Звіт конвертера",
+    "dwg_takeoff.open_side_panel": "Шари та деталі",
+    "dwg_takeoff.close_side_panel": "Назад до креслення",
     "match_wizard.available_label": "Доступно для встановлення ({{n}})",
     "match_wizard.install_aria": "Встановити {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} готовий до використання.",

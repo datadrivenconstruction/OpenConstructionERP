@@ -45634,6 +45634,8 @@ const resource = {
   "dwg_takeoff.drawing_span": "Dimensione del disegno a questa scala: {{w}} m x {{h}} m",
   "dwg_takeoff.drawing_span_implausible": "È insolito per un disegno edile, quindi l'unità memorizzata nel file potrebbe essere errata. Verificala con Calibra: scegli due punti e inserisci la loro distanza reale.",
   "dwg_takeoff.conv_converter_said": "Rapporto del convertitore",
+  "dwg_takeoff.open_side_panel": "Livelli e dettagli",
+  "dwg_takeoff.close_side_panel": "Torna al disegno",
     "match_wizard.available_label": "Disponibile per l'installazione ({{n}})",
     "match_wizard.install_aria": "Installa {{region}}",
     "match_wizard.install_toast_ok_msg": "{{label}} è pronto per l'uso.",
