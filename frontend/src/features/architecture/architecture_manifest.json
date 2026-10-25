@@ -37030,6 +37030,7 @@
         "repository.py",
         "router.py",
         "schemas.py",
+        "seed.py",
         "service.py",
         "validators.py",
         "wh347.py"
@@ -38801,7 +38802,8 @@
         }
       ],
       "import_dependencies": [
-        "payroll"
+        "payroll",
+        "projects"
       ]
     },
     {
@@ -278992,7 +278994,7 @@
     "total_relationships": 240,
     "total_routes": 4627,
     "total_schemas": 4120,
-    "total_python_files": 2810,
+    "total_python_files": 2811,
     "frontend_features": 209,
     "frontend_ts_files": 3606,
     "frontend_backend_mapped": 187
