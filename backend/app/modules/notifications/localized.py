@@ -12,8 +12,8 @@ row can be read in any language. Two places turn that into text on the server:
 
 Both go through :func:`render`. English is ``templates._TEMPLATES``, the
 existing source of truth; Turkish is ``templates_tr.TEMPLATES_TR`` and every
-other platform language is the ``notification_templates`` section of
-``core/document_catalogues``, all held to the same keys and placeholders by a
+other platform language is the ``document_catalogue.notification_templates``
+section of the locale files, all held to the same keys and placeholders by a
 test. A locale the platform does not carry answers in English, and says so in
 the log once per locale rather than on every message.
 

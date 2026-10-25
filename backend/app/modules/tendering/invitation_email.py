@@ -191,7 +191,7 @@ _TABLES: dict[str, dict[str, str]] = {
     },
 }
 
-# The platform's other languages come from ``core/document_catalogues`` (section ``tender_invite``).
+# The platform's other languages come from the locale files (``document_catalogue.tender_invite``).
 merge_missing(_TABLES, "tender_invite")
 
 #: Languages the email can be written in.

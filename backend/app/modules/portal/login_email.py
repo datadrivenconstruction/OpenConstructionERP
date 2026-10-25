@@ -252,7 +252,7 @@ _TABLES: dict[str, dict[str, str]] = {
     },
 }
 
-# The platform's other languages come from ``core/document_catalogues`` (section ``portal_login``).
+# The platform's other languages come from the locale files (``document_catalogue.portal_login``).
 merge_missing(_TABLES, "portal_login")
 
 #: Languages the email can be written in.

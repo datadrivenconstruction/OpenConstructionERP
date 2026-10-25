@@ -165,7 +165,7 @@ _LABELS: dict[str, dict[str, str]] = {
     },
 }
 
-# The platform's other languages come from ``core/document_catalogues`` (section ``cost_plan``).
+# The platform's other languages come from the locale files (``document_catalogue.cost_plan``).
 merge_missing(_LABELS, "cost_plan")
 
 #: The languages this workbook can be written in.

@@ -23,7 +23,7 @@ _COLUMN_WIDTHS = (25, 20, 22, 25, 15, 13, 30, 10, 10, 10, 20, 15, 18, 20, 18)
 _COLUMN_COUNT = len(_COLUMN_WIDTHS)
 
 # Workbook text per language. English and German live here; the platform's other
-# languages come from ``core/document_catalogues`` (section ``bim_requirements_excel``).
+# languages come from the locale files (``document_catalogue.bim_requirements_excel``).
 # ``h01`` ... ``h15`` are the column headers, ``d01`` ... ``d14`` the legend lines
 # (the Min and Max columns share one line).
 _STRINGS: dict[str, dict[str, str]] = {

@@ -49,7 +49,7 @@ FIELDS: Final[tuple[str, ...]] = (
 
 _BASE_LANGUAGES: Final[tuple[str, ...]] = ("en", "de", "es", "fr", "ru", "pt", "it", "nl", "pl", "tr")
 
-#: The platform's other languages, from ``core/document_catalogues`` (section ``schedule_headers``): per
+#: The platform's other languages, from the locale files (``document_catalogue.schedule_headers``): per
 #: language the header words of every field, the yes and no words and the template's example names.
 _CATALOGUE: Final[dict[str, dict]] = {
     lang: payload for lang, payload in section("schedule_headers").items() if lang not in _BASE_LANGUAGES

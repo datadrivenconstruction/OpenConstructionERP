@@ -128,7 +128,7 @@ _TABLES: dict[str, dict[str, str]] = {
     },
 }
 
-# The platform's other languages come from ``core/document_catalogues`` (section ``notification_email``).
+# The platform's other languages come from the locale files (``document_catalogue.notification_email``).
 merge_missing(_TABLES, "notification_email")
 
 #: Languages the notification email can be written in.

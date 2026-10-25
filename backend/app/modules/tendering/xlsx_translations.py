@@ -541,7 +541,7 @@ _STRINGS: dict[str, dict[str, str]] = {
     },
 }
 
-# The platform's other languages come from ``core/document_catalogues`` (section ``tender_xlsx``).
+# The platform's other languages come from the locale files (``document_catalogue.tender_xlsx``).
 merge_missing(_STRINGS, "tender_xlsx")
 
 SUPPORTED_XLSX_LOCALES: tuple[str, ...] = tuple(_STRINGS)

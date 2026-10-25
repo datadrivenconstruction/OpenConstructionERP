@@ -63,7 +63,7 @@ logger = logging.getLogger(__name__)
 
 _BASE_LANGUAGES = ("en", "de", "fr", "es", "it", "pt", "nl", "pl", "ru", "uk", "tr", "zh", "ja")
 
-# The platform's other languages, from ``core/document_catalogues`` (section ``module_suggest``): per language
+# The platform's other languages, from the locale files (``document_catalogue.module_suggest``): per language
 # the keywords of every concept, the label of every link target and the three status labels.
 _CATALOGUE: dict[str, dict] = {
     lang: payload for lang, payload in section("module_suggest").items() if lang not in _BASE_LANGUAGES
