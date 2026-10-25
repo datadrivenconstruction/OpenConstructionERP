@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   EMPTY_PACK_FILTERS,
   buildPackEntries,
+  companyPackMatches,
   filterPackEntries,
   groupPackEntries,
   hasActivePackFilters,
@@ -108,6 +109,14 @@ describe('URL state', () => {
     expect(parsed).toEqual(f({ types: ['partner'] }));
   });
 
+  it('writes the company-type chip into the type key after the pack types', () => {
+    const params = writePackFilters(new URLSearchParams(), f({ types: ['partner'], company: true }));
+    expect(params.get('type')).toBe('partner,company');
+    expect(parsePackFilters(params)).toEqual(f({ types: ['partner'], company: true }));
+    expect(parsePackFilters(new URLSearchParams('type=company'))).toEqual(f({ company: true }));
+    expect(hasActivePackFilters(f({ company: true }))).toBe(true);
+  });
+
   it('does not count sort as a filter', () => {
     expect(hasActivePackFilters(f({ sort: 'region' }))).toBe(false);
     expect(hasActivePackFilters(f({ q: '  ' }))).toBe(false);
@@ -146,6 +155,13 @@ describe('filtering', () => {
     expect(counts.status).toEqual({ active: 1, available: 4 });
   });
 
+  it('keeps installed packs out when only the company-type chip is chosen', () => {
+    expect(filterPackEntries(list, f({ company: true }), null)).toEqual([]);
+    expect(slugs(filterPackEntries(list, f({ company: true, types: ['industry'] }), null))).toEqual(['infra']);
+    // The chips still count what switching would find.
+    expect(packFacetCounts(list, f({ company: true }), null).types.country).toBe(5);
+  });
+
   it('filters a few hundred packs quickly', () => {
     const many = buildPackEntries(
       Array.from({ length: 400 }, (_, i) => pack(`p${i}`, { partner_name: `Pack ${i}`, metadata: { country: 'FR' } })),
@@ -154,6 +170,32 @@ describe('filtering', () => {
     const start = performance.now();
     for (let i = 0; i < 50; i += 1) filterPackEntries(many, f({ q: `pack ${i}` }), null);
     expect(performance.now() - start).toBeLessThan(500);
+  });
+});
+
+describe('company types', () => {
+  const builder = { key: 'general_contractor', haystack: 'general contractor bauunternehmen' };
+  const developer = { key: 'developer', haystack: 'developer property' };
+
+  it('shows with every type or with its own chip, not with another type alone', () => {
+    expect(companyPackMatches(builder, f({}), null)).toBe(true);
+    expect(companyPackMatches(builder, f({ company: true }), null)).toBe(true);
+    expect(companyPackMatches(builder, f({ types: ['country'] }), null)).toBe(false);
+    expect(companyPackMatches(builder, f({ types: ['country'], company: true }), null)).toBe(true);
+    expect(companyPackMatches(builder, f({ types: ['country'] }), null, 'type')).toBe(true);
+  });
+
+  it('has no market or language, so those filters leave it out', () => {
+    expect(companyPackMatches(builder, f({ region: 'europe' }), null)).toBe(false);
+    expect(companyPackMatches(builder, f({ lang: 'de' }), null)).toBe(false);
+  });
+
+  it('searches its text and follows the status filter', () => {
+    expect(companyPackMatches(builder, f({ q: 'Bauunternehmen' }), null)).toBe(true);
+    expect(companyPackMatches(developer, f({ q: 'bau' }), null)).toBe(false);
+    expect(companyPackMatches(developer, f({ status: 'active' }), 'developer')).toBe(true);
+    expect(companyPackMatches(builder, f({ status: 'active' }), 'developer')).toBe(false);
+    expect(companyPackMatches(builder, f({ status: 'available' }), 'developer')).toBe(true);
   });
 });
 

@@ -150,6 +150,9 @@ export type PackSort = (typeof PACK_SORTS)[number];
 export interface PackFilters {
   q: string;
   types: PackType[];
+  /** The company-type chip. Company types are presets, not installed packs,
+   *  so they sit beside ``types`` rather than in it. */
+  company: boolean;
   region: PackRegion | null;
   lang: string | null;
   status: PackStatus | null;
@@ -159,11 +162,15 @@ export interface PackFilters {
 export const EMPTY_PACK_FILTERS: PackFilters = {
   q: '',
   types: [],
+  company: false,
   region: null,
   lang: null,
   status: null,
   sort: 'recommended',
 };
+
+/** The value the company-type chip writes into the ``type`` query key. */
+export const COMPANY_PACK_TYPE = 'company';
 
 /** Query keys this catalogue owns. Anything else in the URL (``tab`` on the
  *  Modules page) is left alone. */
@@ -176,14 +183,13 @@ function oneOf<T extends string>(value: string | null, allowed: readonly T[]): T
 /** Read the filters from a query string. Unknown values are dropped rather
  *  than trusted, so a hand-edited or stale link degrades to "no filter". */
 export function parsePackFilters(params: URLSearchParams): PackFilters {
-  const types = (params.get('type') ?? '')
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s): s is PackType => (PACK_TYPES as readonly string[]).includes(s));
+  const raw = (params.get('type') ?? '').split(',').map((s) => s.trim());
+  const types = raw.filter((s): s is PackType => (PACK_TYPES as readonly string[]).includes(s));
   const lang = (params.get('lang') ?? '').trim().toLowerCase();
   return {
     q: params.get('q') ?? '',
     types: PACK_TYPES.filter((t) => types.includes(t)),
+    company: raw.includes(COMPANY_PACK_TYPE),
     region: oneOf(params.get('region'), PACK_REGIONS),
     lang: /^[a-z]{2,3}$/.test(lang) ? lang : null,
     status: oneOf(params.get('status'), PACK_STATUSES),
@@ -197,7 +203,9 @@ export function writePackFilters(params: URLSearchParams, filters: PackFilters):
   const next = new URLSearchParams(params);
   for (const key of PACK_FILTER_PARAMS) next.delete(key);
   if (filters.q) next.set('q', filters.q);
-  if (filters.types.length) next.set('type', PACK_TYPES.filter((t) => filters.types.includes(t)).join(','));
+  const types: string[] = PACK_TYPES.filter((t) => filters.types.includes(t));
+  if (filters.company) types.push(COMPANY_PACK_TYPE);
+  if (types.length) next.set('type', types.join(','));
   if (filters.region) next.set('region', filters.region);
   if (filters.lang) next.set('lang', filters.lang);
   if (filters.status) next.set('status', filters.status);
@@ -207,7 +215,9 @@ export function writePackFilters(params: URLSearchParams, filters: PackFilters):
 
 /** Whether anything narrows the list. Sort reorders and does not count. */
 export function hasActivePackFilters(filters: PackFilters): boolean {
-  return Boolean(filters.q.trim() || filters.types.length || filters.region || filters.lang || filters.status);
+  return Boolean(
+    filters.q.trim() || filters.types.length || filters.company || filters.region || filters.lang || filters.status,
+  );
 }
 
 /* ── Entries ────────────────────────────────────────────────────────────── */
@@ -296,7 +306,8 @@ export function buildPackEntries(packs: readonly PackManifest[], options: PackEn
 type Facet = 'type' | 'region' | 'lang' | 'status';
 
 function matches(entry: PackEntry, filters: PackFilters, activeSlug: string | null, skip?: Facet): boolean {
-  if (skip !== 'type' && filters.types.length && !filters.types.includes(entry.type)) return false;
+  // Only the company chip chosen means no installed pack is wanted.
+  if (skip !== 'type' && (filters.types.length || filters.company) && !filters.types.includes(entry.type)) return false;
   if (skip !== 'region' && filters.region && entry.region !== filters.region) return false;
   if (skip !== 'lang' && filters.lang && !entry.languages.includes(filters.lang)) return false;
   if (skip !== 'status' && filters.status) {
@@ -348,6 +359,37 @@ export function packFacetCounts(
     if (matches(e, filters, activeSlug, 'status')) status[e.slug === activeSlug ? 'active' : 'available'] += 1;
   }
   return { types, regions, langs, status };
+}
+
+/** A company type as the catalogue filters it: its preset key and the folded
+ *  text the search runs on. */
+export interface CompanyPackEntry {
+  key: string;
+  haystack: string;
+}
+
+/**
+ * Whether a company type passes the filters. It has no market and no language
+ * of its own, so a region or language filter leaves it out; ``skip`` works as
+ * in the pack facet counts.
+ */
+export function companyPackMatches(
+  entry: CompanyPackEntry,
+  filters: PackFilters,
+  activeKey: string | null,
+  skip?: Facet,
+): boolean {
+  if (skip !== 'type' && filters.types.length && !filters.company) return false;
+  if ((skip !== 'region' && filters.region) || (skip !== 'lang' && filters.lang)) return false;
+  if (skip !== 'status' && filters.status) {
+    const isActive = entry.key === activeKey;
+    if (filters.status === 'active' ? !isActive : isActive) return false;
+  }
+  const q = foldText(filters.q.trim());
+  if (q) {
+    for (const token of q.split(/\s+/)) if (!entry.haystack.includes(token)) return false;
+  }
+  return true;
 }
 
 /* ── Grouping ───────────────────────────────────────────────────────────── */
