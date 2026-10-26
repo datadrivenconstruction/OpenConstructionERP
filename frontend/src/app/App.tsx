@@ -322,6 +322,12 @@ const GuaranteesExposurePage = lazy(() =>
     default: m.GuaranteesExposurePage,
   }))
 );
+const WipReportPage = lazy(() =>
+  import('@/features/wip_report/WipReportPage').then((m) => ({ default: m.WipReportPage }))
+);
+const ProjectWipPage = lazy(() =>
+  import('@/features/wip_report/ProjectWipPage').then((m) => ({ default: m.ProjectWipPage }))
+);
 const MoCPage = lazy(() =>
   import('@/features/moc/MoCPage').then((m) => ({ default: m.MoCPage }))
 );
@@ -1584,6 +1590,8 @@ export default function App() {
             so it is NOT scoped to the active project. Note: /portfolio/capacity
             and /portfolio/leveling are distinct resource-planning surfaces. */}
         <Route path="/portfolio" element={<P title="Portfolio"><PortfolioPage /></P>} />
+        <Route path="/portfolio/wip" element={<P title="WIP report"><WipReportPage /></P>} />
+        <Route path="/projects/:projectId/wip" element={<P title="WIP report"><ProjectWipPage /></P>} />
 
         <Route path="/users" element={<P title="User Management"><UserManagementPage /></P>} />
         {/* Teams sit beside Users rather than under Governance: they are

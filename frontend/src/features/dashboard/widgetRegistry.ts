@@ -38,6 +38,7 @@ import {
   ClipboardCheck,
   ListChecks,
   Landmark,
+  FileBarChart,
   // Interoperability: dashboard <- estimate (2026-07-09)
   Package,
   // Learn-by-example cases card, folded into the registry 2026-07-21
@@ -338,6 +339,15 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descKey: 'field_clock.widget_desc',
     descDefault: 'People clocked in, clock taps awaiting approval and missing clock-outs',
     icon: Users,
+    defaultSpan: 2,
+  },
+  {
+    id: 'wip_summary',
+    labelKey: 'dashboard.layout.w_wip_summary',
+    labelDefault: 'WIP summary',
+    descKey: 'dashboard.layout.w_wip_summary_desc',
+    descDefault: 'Portfolio over-billing, under-billing and profit fade',
+    icon: FileBarChart,
     defaultSpan: 2,
   },
 
