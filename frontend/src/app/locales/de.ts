@@ -54459,6 +54459,8 @@ const resource = {
     // --- Learn: videos and cases ---
     "nav.videos": "Videoanleitungen",
     "nav.packs": "Pakete",
+    "nav.pinned_move_up": "{{item}} nach oben verschieben",
+    "nav.pinned_move_down": "{{item}} nach unten verschieben",
     "sidebar.group.learn": "Lernen",
     "sidebar.learn.hide": "Videoanleitungen und Anwendungsfälle ausblenden",
     "sidebar.learn.hide_short": "Ausblenden",
