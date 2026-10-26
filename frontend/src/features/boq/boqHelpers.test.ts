@@ -12,6 +12,7 @@ import { describe, it, expect } from 'vitest';
 import {
   classificationCode,
   convertToBase,
+  densityRowHeight,
   getUnitsForLocale,
   hasContributingResources,
   resourceAwareTotalInBase,
@@ -333,5 +334,12 @@ describe('catalogComponentAmounts', () => {
   it('prices a component without a cost at quantity x rate, one unit when unset', () => {
     expect(catalogComponentAmounts({ quantity: 3, unit_rate: 4, cost: null }).total).toBe(12);
     expect(catalogComponentAmounts({ unit_rate: 7 })).toEqual({ quantity: 1, unit_rate: 7, total: 7 });
+  });
+});
+
+describe('densityRowHeight', () => {
+  it('keeps the base height when comfortable and trims 4px when compact', () => {
+    expect(densityRowHeight(32, false)).toBe(32);
+    expect(densityRowHeight(32, true)).toBe(28);
   });
 });
