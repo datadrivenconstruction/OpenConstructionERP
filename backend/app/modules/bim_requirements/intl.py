@@ -30,6 +30,8 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from datetime import date, datetime
 
+from app.core.i18n import catalogue_table
+
 # -- Status vocabulary ------------------------------------------------------
 
 STATUS_MET = "pass"
@@ -51,23 +53,9 @@ _LOD_MAX = VALID_LOD_LEVELS[-1]
 
 _DEFAULT_LOCALE = "en"
 
-_STATUS_WORDS: dict[str, dict[str, str]] = {
-    "en": {
-        STATUS_MET: "Met",
-        STATUS_UNMET: "Unmet",
-        STATUS_NOT_APPLICABLE: "Not applicable",
-    },
-    "de": {
-        STATUS_MET: "Erfuellt",
-        STATUS_UNMET: "Nicht erfuellt",
-        STATUS_NOT_APPLICABLE: "Nicht zutreffend",
-    },
-    "ru": {
-        STATUS_MET: "Vypolneno",
-        STATUS_UNMET: "Ne vypolneno",
-        STATUS_NOT_APPLICABLE: "Ne primenimo",
-    },
-}
+_STATUS_WORDS: dict[str, dict[str, str]] = catalogue_table(
+    "bim_requirements.intl.status_words", ("pass", "fail", "not_applicable")
+)
 
 # One-line, plain-language explainers keyed by term, then locale.
 _EXPLAINERS: dict[str, dict[str, str]] = {

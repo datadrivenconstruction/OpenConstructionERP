@@ -14,20 +14,17 @@ plain counts, and dates elsewhere in the module are ISO 8601.
 
 from __future__ import annotations
 
+from app.core.i18n import catalogue_table
+
 #: Slot delivery states the service assigns (see ``_slot_status``).
-SLOT_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "verified": {"en": "verified", "de": "geprüft", "ru": "проверено"},
-    "bound": {"en": "attached", "de": "beigefügt", "ru": "приложено"},
-    "empty": {"en": "outstanding", "de": "ausstehend", "ru": "отсутствует"},
-}
+SLOT_STATUS_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "closeout.slot_status_labels", ("verified", "bound", "empty"), by_key=True
+)
 
 #: Package lifecycle states (draft -> in_progress -> ready -> issued).
-PACKAGE_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "draft": {"en": "draft", "de": "Entwurf", "ru": "черновик"},
-    "in_progress": {"en": "in progress", "de": "in Arbeit", "ru": "в работе"},
-    "ready": {"en": "ready", "de": "bereit", "ru": "готов"},
-    "issued": {"en": "issued", "de": "ausgestellt", "ru": "выдан"},
-}
+PACKAGE_STATUS_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "closeout.package_status_labels", ("draft", "in_progress", "ready", "issued"), by_key=True
+)
 
 #: Completeness bands over the percentage.
 BAND_EMPTY = "empty"

@@ -2,11 +2,11 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """International, Decimal-exact reporting math and plain-language explainers.
 
-This module is a small, dependency-free (stdlib only) toolkit of PURE
+This module is a small, dependency-free toolkit of PURE
 functions that the reporting layer can use to turn line amounts into a
 report total, a grouped cost breakdown, and a top-N selection - and to
-describe every one of those figures in plain language, localized to
-English, German and Russian with an English fallback.
+describe every one of those figures in plain language, localized into every
+interface language with an English fallback.
 
 Design goals (why this file exists)
 ------------------------------------
@@ -40,6 +40,9 @@ from collections.abc import Callable, Iterable, Sequence
 from dataclasses import dataclass
 from decimal import Decimal, InvalidOperation
 
+from app.core.i18n import SUPPORTED_LOCALES as _ALL_LOCALES
+from app.core.i18n import t
+
 __all__ = [
     "Breakdown",
     "GroupShare",
@@ -68,43 +71,9 @@ _CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
 
 DEFAULT_LOCALE = "en"
 
-#: Locales this module can localize a label / explainer into. Any other
-#: locale falls back to English.
-SUPPORTED_LOCALES: tuple[str, ...] = ("en", "de", "ru")
-
-# ── Localized labels (en / de / ru, English fallback) ──────────────────────
-#
-# Kept inline (not a JSON side-file) so the module stays self-contained and
-# import-free. Every key carries all three languages; a missing locale falls
-# back to English via :func:`label`.
-_LABELS: dict[str, dict[str, str]] = {
-    "report_total": {"en": "Report total", "de": "Berichtssumme", "ru": "Итого по отчету"},
-    "group_total": {"en": "Group total", "de": "Gruppensumme", "ru": "Итого по группе"},
-    "share_of_total": {
-        "en": "share of total",
-        "de": "Anteil an der Summe",
-        "ru": "доля от общей суммы",
-    },
-    "percent_of_total": {
-        "en": "percent of total",
-        "de": "Prozent der Summe",
-        "ru": "процент от общей суммы",
-    },
-    "breakdown": {"en": "Cost breakdown", "de": "Kostenaufschlüsselung", "ru": "Разбивка затрат"},
-    "top_n": {"en": "Top", "de": "Top", "ru": "Топ"},
-    "line": {"en": "line", "de": "Position", "ru": "позиция"},
-    "lines": {"en": "lines", "de": "Positionen", "ru": "позиции"},
-    "group": {"en": "group", "de": "Gruppe", "ru": "группа"},
-    "groups": {"en": "groups", "de": "Gruppen", "ru": "группы"},
-    "sum_of": {"en": "sum of", "de": "Summe aus", "ru": "сумма из"},
-    "of": {"en": "of", "de": "von", "ru": "из"},
-    "no_data": {"en": "no data", "de": "keine Daten", "ru": "нет данных"},
-    "zero_total_note": {
-        "en": "total is zero, so every share is reported as 0 percent",
-        "de": "die Summe ist null, daher wird jeder Anteil als 0 Prozent ausgewiesen",
-        "ru": "сумма равна нулю, поэтому каждая доля показана как 0 процентов",
-    },
-}
+#: Locales this module can localize an explainer into: every interface
+#: language. Sentences live in ``reporting.explain.*`` in ``backend/locales``.
+SUPPORTED_LOCALES: tuple[str, ...] = tuple(_ALL_LOCALES)
 
 # ── Classification standards (may be named; they are open standards) ───────
 #
@@ -117,25 +86,6 @@ _CLASSIFICATION_STANDARDS: dict[str, str] = {
     "uniformat": "UniFormat",
     "gaeb": "GAEB",
 }
-
-
-def label(key: str, locale: str = DEFAULT_LOCALE) -> str:
-    """Return a localized UI label, falling back to English then the key.
-
-    Args:
-        key: A key present in :data:`_LABELS`.
-        locale: Target locale (``en`` / ``de`` / ``ru``); any other value
-            falls back to English.
-
-    Returns:
-        The localized label. If the key is unknown the key itself is
-        returned so a missing label degrades to something readable rather
-        than raising.
-    """
-    entry = _LABELS.get(key)
-    if entry is None:
-        return key
-    return entry.get(locale) or entry.get(DEFAULT_LOCALE) or key
 
 
 def _norm_locale(locale: str | None) -> str:
@@ -537,7 +487,7 @@ def explain_report_total(
         total: The total (parseable by :func:`to_decimal`).
         line_count: How many lines were summed.
         currency: Optional ISO 4217 code to show alongside the amount.
-        locale: Target locale (``en`` / ``de`` / ``ru``; English fallback).
+        locale: Target locale (any interface language; English fallback).
 
     Returns:
         A single explanatory sentence.
@@ -550,8 +500,8 @@ def explain_report_total(
         raise ValueError(f"line_count must be zero or positive, got {line_count}")
     loc = _norm_locale(locale)
     money = format_money(total, currency)
-    unit = label("line", loc) if line_count == 1 else label("lines", loc)
-    return f"{label('report_total', loc)}: {money} ({label('sum_of', loc)} {line_count} {unit})."
+    plural = "one" if line_count == 1 else "other"
+    return t(f"reporting.explain.report_total_{plural}", loc, money=money, count=line_count)
 
 
 def explain_percent_of_total(
@@ -572,7 +522,7 @@ def explain_percent_of_total(
         part: The portion amount (parseable by :func:`to_decimal`).
         total: The overall total (parseable by :func:`to_decimal`).
         currency: Optional ISO 4217 code shown alongside both amounts.
-        locale: Target locale (``en`` / ``de`` / ``ru``; English fallback).
+        locale: Target locale (any interface language; English fallback).
 
     Returns:
         A single explanatory sentence.
@@ -584,11 +534,10 @@ def explain_percent_of_total(
     part_money = format_money(part, currency)
     total_money = format_money(total, currency)
     if to_decimal(total) == 0:
-        return f"{part_money} {label('of', loc)} {total_money}: {label('zero_total_note', loc)}."
+        return t("reporting.explain.percent_zero_total", loc, part=part_money, total=total_money)
     ratio = ratio_of_total(part, total)
     percent = format_ratio_as_percent(ratio, locale=loc)
-    is_word = "is" if loc == "en" else ("ist" if loc == "de" else "составляет")
-    return f"{part_money} {is_word} {percent} {label('of', loc)} {total_money} ({label('percent_of_total', loc)})."
+    return t("reporting.explain.percent_of_total", loc, part=part_money, percent=percent, total=total_money)
 
 
 def explain_breakdown(breakdown: Breakdown, *, locale: str | None = None) -> str:
@@ -599,7 +548,7 @@ def explain_breakdown(breakdown: Breakdown, *, locale: str | None = None) -> str
 
     Args:
         breakdown: A :class:`Breakdown` from :func:`group_breakdown`.
-        locale: Target locale (``en`` / ``de`` / ``ru``; English fallback).
+        locale: Target locale (any interface language; English fallback).
 
     Returns:
         A single explanatory sentence. An empty breakdown says "no data".
@@ -607,11 +556,9 @@ def explain_breakdown(breakdown: Breakdown, *, locale: str | None = None) -> str
     loc = _norm_locale(locale)
     n = len(breakdown.groups)
     if n == 0:
-        return f"{label('breakdown', loc)}: {label('no_data', loc)}."
-    unit = label("group", loc) if n == 1 else label("groups", loc)
+        return t("reporting.explain.breakdown_empty", loc)
     money = format_money(breakdown.total, breakdown.currency)
-    total_word = label("report_total", loc).lower()
-    return f"{label('breakdown', loc)}: {n} {unit}, {total_word} {money}."
+    return t(f"reporting.explain.breakdown_{'one' if n == 1 else 'other'}", loc, count=n, money=money)
 
 
 def explain_top_n(
@@ -627,7 +574,7 @@ def explain_top_n(
     Args:
         items: The selected items (the output of :func:`top_n_by_value`).
         requested_n: The N originally requested.
-        locale: Target locale (``en`` / ``de`` / ``ru``; English fallback).
+        locale: Target locale (any interface language; English fallback).
 
     Returns:
         A single explanatory sentence.
@@ -639,5 +586,4 @@ def explain_top_n(
         raise ValueError(f"requested_n must be zero or positive, got {requested_n}")
     loc = _norm_locale(locale)
     shown = len(items)
-    unit = label("line", loc) if shown == 1 else label("lines", loc)
-    return f"{label('top_n', loc)} {requested_n}: {shown} {label('of', loc)} {shown} {unit}."
+    return t(f"reporting.explain.top_n_{'one' if shown == 1 else 'other'}", loc, requested=requested_n, shown=shown)

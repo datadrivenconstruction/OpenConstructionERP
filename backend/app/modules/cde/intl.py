@@ -32,6 +32,7 @@ from datetime import date, datetime
 from typing import Any
 
 from app.core.cde_states import CDEState, CDEStateMachine
+from app.core.i18n import catalogue_table
 
 # ── Languages ─────────────────────────────────────────────────────────────
 
@@ -49,26 +50,9 @@ _UNKNOWN_STATE_KEY = "unknown"
 # ── Localized vocabulary ──────────────────────────────────────────────────
 
 # Short display label for each CDE state, per language. English is the fallback.
-_STATE_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "wip": "Work in progress",
-        "shared": "Shared",
-        "published": "Published",
-        "archived": "Archived",
-    },
-    "de": {
-        "wip": "In Bearbeitung",
-        "shared": "Freigegeben zur Abstimmung",
-        "published": "Veroeffentlicht",
-        "archived": "Archiviert",
-    },
-    "ru": {
-        "wip": "В работе",
-        "shared": "Опубликовано для согласования",
-        "published": "Выпущено",
-        "archived": "Архив",
-    },
-}
+_STATE_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "cde.intl.state_labels", ("wip", "shared", "published", "archived")
+)
 
 # One-line, plain-language explainer for each CDE state, per language.
 _STATE_EXPLAINERS: dict[str, dict[str, str]] = {

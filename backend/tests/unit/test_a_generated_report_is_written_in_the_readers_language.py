@@ -31,6 +31,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
+from app.core.i18n import SUPPORTED_LOCALES, get_all_translations
 from app.modules.reporting import report_translations as cat
 from app.modules.reporting.exporters import export_report
 from app.modules.reporting.renderer import _DEFAULT_SECTIONS, ReportRenderer
@@ -212,11 +213,11 @@ def test_the_pdf_document_metadata_names_the_language_it_was_written_in() -> Non
 
 
 def test_a_language_the_catalogue_does_not_hold_falls_back_to_english() -> None:
-    """Japanese is a supported interface language and not a supported
+    """Swahili is not an interface language, so it is not a supported
     report language, which is exactly why the routes must declare what
     they produced rather than what was asked for."""
-    assert cat.resolve_report_locale("ja", None) == "en"
-    assert _html("ja") == _html("en")
+    assert cat.resolve_report_locale("sw", None) == "en"
+    assert _html("sw") == _html("en")
 
 
 def test_a_regional_code_resolves_through_its_base_language() -> None:
@@ -227,25 +228,32 @@ def test_a_regional_code_resolves_through_its_base_language() -> None:
 def test_the_query_parameter_outranks_the_header() -> None:
     assert cat.resolve_report_locale("ru", "de,en;q=0.5") == "ru"
     assert cat.resolve_report_locale(None, "de,en;q=0.5") == "de"
-    assert cat.resolve_report_locale(None, "ja,ru;q=0.5") == "ru"
+    assert cat.resolve_report_locale(None, "sw,ru;q=0.5") == "ru"
 
 
 # ── Catalogue integrity ───────────────────────────────────────────────────
 
 
-@pytest.mark.parametrize(
-    "table_name",
-    ["_STRINGS", "_SECTION_TITLES", "_FIELD_LABELS"],
-)
-def test_every_supported_language_holds_every_key(table_name: str) -> None:
+_PREFIXES = ("reporting.doc.", "reporting.section.", "reporting.field.")
+# Languages whose catalogue the report keys are complete in; the rest read
+# English key by key until their translators fill them.
+_COMPLETE = ("en", "de", "ru")
+
+
+def _group(locale: str, prefix: str) -> dict[str, str]:
+    return {k: v for k, v in get_all_translations(locale).items() if k.startswith(prefix)}
+
+
+@pytest.mark.parametrize("prefix", _PREFIXES)
+def test_every_complete_language_holds_every_key(prefix: str) -> None:
     """A missing key silently serves English inside an otherwise translated
     document, which reads as a half-finished translation rather than as a
     fallback."""
-    table: dict[str, dict[str, str]] = getattr(cat, table_name)
-    assert set(table) == set(cat.SUPPORTED_REPORT_LOCALES)
-    english = set(table["en"])
-    for locale in cat.SUPPORTED_REPORT_LOCALES:
-        assert set(table[locale]) == english, f"{table_name}[{locale}]"
+    assert set(cat.SUPPORTED_REPORT_LOCALES) == set(SUPPORTED_LOCALES)
+    english = set(_group("en", prefix))
+    assert english
+    for locale in _COMPLETE:
+        assert set(_group(locale, prefix)) == english, f"{prefix}[{locale}]"
 
 
 def test_no_translated_value_is_left_as_the_english_one() -> None:
@@ -255,13 +263,11 @@ def test_no_translated_value_is_left_as_the_english_one() -> None:
     ``Budget``, ``Phase``, the two acronyms - so the assertion is on the
     bulk, not on every cell.
     """
-    for table_name in ("_STRINGS", "_SECTION_TITLES", "_FIELD_LABELS"):
-        table: dict[str, dict[str, str]] = getattr(cat, table_name)
-        for locale in cat.SUPPORTED_REPORT_LOCALES:
-            if locale == "en":
-                continue
-            copied = [k for k, v in table[locale].items() if v == table["en"][k]]
-            assert len(copied) <= 6, f"{table_name}[{locale}] copies English for {copied}"
+    for prefix in _PREFIXES:
+        english = _group("en", prefix)
+        for locale in _COMPLETE[1:]:
+            copied = [k for k, v in _group(locale, prefix).items() if v == english[k]]
+            assert len(copied) <= 6, f"{prefix}[{locale}] copies English for {copied}"
 
 
 def test_every_heading_the_platform_emits_is_translatable() -> None:

@@ -33,6 +33,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import date
 
+from app.core.i18n import catalogue_table
+
 # ── Vocabulary ────────────────────────────────────────────────────────────
 # Ordered from least to most serious so callers can sort or threshold on it.
 SEVERITY_ORDER: tuple[str, ...] = ("observation", "minor", "major", "critical")
@@ -50,26 +52,9 @@ SUPPORTED_LANGS: tuple[str, ...] = ("en", "de", "ru")
 _FALLBACK_LANG = "en"
 
 # Localized severity words (en / de / ru). English fallback on any gap.
-_SEVERITY_WORDS: dict[str, dict[str, str]] = {
-    "en": {
-        "observation": "observation",
-        "minor": "minor",
-        "major": "major",
-        "critical": "critical",
-    },
-    "de": {
-        "observation": "Beobachtung",
-        "minor": "geringfuegig",
-        "major": "erheblich",
-        "critical": "kritisch",
-    },
-    "ru": {
-        "observation": "nablyudenie",
-        "minor": "neznachitelnoe",
-        "major": "sushchestvennoe",
-        "critical": "kriticheskoe",
-    },
-}
+_SEVERITY_WORDS: dict[str, dict[str, str]] = catalogue_table(
+    "qms.intl.severity_words", ("observation", "minor", "major", "critical")
+)
 
 # Localized status words spanning every QMS entity (ITP plan, inspection,
 # NCR, punch item, audit, finding). English fallback on any gap.

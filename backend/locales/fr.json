@@ -618,5 +618,11 @@
       "draft": "Brouillon",
       "frozen": "Figé"
     }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Le nom du modèle d'IA est obsolète ou indisponible. Ouvrez Paramètres > IA et indiquez un nom de modèle valide.",
+      "not_configured": "IA non configurée. Veuillez ajouter votre clé API dans les Paramètres."
+    }
   }
 }

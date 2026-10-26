@@ -35,6 +35,8 @@ from collections.abc import Iterable
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
+from app.core.i18n import catalogue_table
+
 # Default money rounding step. Two decimal places suit most currencies; a
 # caller working in a zero-decimal or three-decimal currency passes its own
 # ``quantum``. This is a default, never a hardcoded assumption.
@@ -95,23 +97,9 @@ def explain(concept: str) -> str:
 # Russian. English is the fallback for any locale we do not carry.
 
 # Accommodation kind (``schemas._KIND_PATTERN``).
-_KIND_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "worker_camp": "Worker camp",
-        "rental": "Rental housing",
-        "hotel": "Hotel",
-    },
-    "de": {
-        "worker_camp": "Arbeiterunterkunft",
-        "rental": "Mietwohnung",
-        "hotel": "Hotel",
-    },
-    "ru": {
-        "worker_camp": "Рабочий городок",
-        "rental": "Арендное жилье",
-        "hotel": "Гостиница",
-    },
-}
+_KIND_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "accommodation.intl.kind_labels", ("worker_camp", "rental", "hotel")
+)
 
 # Room status (``schemas._ROOM_STATUS_PATTERN``).
 _ROOM_STATUS_LABELS: dict[str, dict[str, str]] = {

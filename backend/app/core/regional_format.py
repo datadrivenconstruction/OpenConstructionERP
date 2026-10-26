@@ -408,6 +408,61 @@ def format_date(
     return transliterate_digits(text, _chosen_digits(country_code, digits))
 
 
+#: Languages with no country row in ``COUNTRY_DEFAULTS``: the number pattern
+#: and date order their readers expect (CLDR conventions).
+_LANGUAGE_FORMATS: Final[dict[str, tuple[str, str]]] = {
+    "bg": ("1 234,56", "DD.MM.YYYY"),
+    "hr": ("1.234,56", "DD.MM.YYYY"),
+    "id": ("1.234,56", "DD/MM/YYYY"),
+    "ro": ("1.234,56", "DD.MM.YYYY"),
+    "th": ("1,234.56", "DD/MM/YYYY"),
+    "vi": ("1.234,56", "DD/MM/YYYY"),
+    "uz": ("1 234,56", "DD.MM.YYYY"),
+    "et": ("1 234,56", "DD.MM.YYYY"),
+    "ky": ("1 234,56", "DD.MM.YYYY"),
+    "bn": ("12,34,567.89", "DD/MM/YYYY"),
+    "kk": ("1 234,56", "DD.MM.YYYY"),
+    "fil": ("1,234.56", "MM/DD/YYYY"),
+    "ur": ("12,34,567.89", "DD/MM/YYYY"),
+    "fa": ("1,234.56", "YYYY/MM/DD"),
+    "he": ("1,234.56", "DD/MM/YYYY"),
+    "el": ("1.234,56", "DD/MM/YYYY"),
+}
+
+
+def country_for_language(language: str | None) -> str | None:
+    """The first country on file whose default locale is ``language``, else ``None``."""
+    code = (language or "").strip().lower().split("-")[0]
+    for country, entry in COUNTRY_DEFAULTS.items():
+        if entry.get("locale") == code:
+            return country
+    return None
+
+
+def number_style_for_language(language: str | None) -> NumberStyle:
+    """The separators a reader of ``language`` expects when no market is known.
+
+    English reads the Anglo style, so an English document keeps the
+    separators it always had. Digits stay Latin: a language does not choose
+    a digit system, a market does.
+    """
+    code = (language or "").strip().lower().split("-")[0]
+    if code in _LANGUAGE_FORMATS:
+        return PATTERN_STYLES[_LANGUAGE_FORMATS[code][0]]
+    if code == "en":
+        return ANGLO
+    return style_for_country(country_for_language(code)) or ANGLO
+
+
+def date_format_for_language(language: str | None) -> str:
+    """The date pattern a reader of ``language`` expects; ISO for English or unknown."""
+    code = (language or "").strip().lower().split("-")[0]
+    if code in _LANGUAGE_FORMATS:
+        return _LANGUAGE_FORMATS[code][1]
+    country = country_for_language(code) if code != "en" else None
+    return date_format_for_country(country) if country else "YYYY-MM-DD"
+
+
 __all__ = [
     "ANGLO",
     "CONTINENTAL",
@@ -422,7 +477,9 @@ __all__ = [
     "SWISS_APOSTROPHE",
     "TYPOGRAPHIC_APOSTROPHE",
     "NumberStyle",
+    "country_for_language",
     "date_format_for_country",
+    "date_format_for_language",
     "digit_system_for_country",
     "document_country",
     "document_digits",
@@ -430,6 +487,7 @@ __all__ = [
     "format_number",
     "normalise_digit_system",
     "number_style",
+    "number_style_for_language",
     "reset_document_digits",
     "set_document_digits",
     "style_for_country",

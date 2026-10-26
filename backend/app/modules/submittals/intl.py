@@ -36,6 +36,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import date
 
+from app.core.i18n import catalogue_table
+
 # ── Vocabulary (mirrors schemas.py / service.py) ──────────────────────────
 
 # Every submittal status the FSM can hold.
@@ -73,38 +75,19 @@ DEFAULT_LANGUAGE: str = "en"
 
 # ── Localised labels (English fallback) ───────────────────────────────────
 
-_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "draft": "Draft",
-        "submitted": "Submitted",
-        "under_review": "Under review",
-        "approved": "Approved",
-        "approved_as_noted": "Approved as noted",
-        "revise_and_resubmit": "Revise and resubmit",
-        "rejected": "Rejected",
-        "closed": "Closed",
-    },
-    "de": {
-        "draft": "Entwurf",
-        "submitted": "Eingereicht",
-        "under_review": "In Pruefung",
-        "approved": "Genehmigt",
-        "approved_as_noted": "Genehmigt mit Anmerkungen",
-        "revise_and_resubmit": "Ueberarbeiten und erneut einreichen",
-        "rejected": "Abgelehnt",
-        "closed": "Geschlossen",
-    },
-    "ru": {
-        "draft": "Черновик",
-        "submitted": "Отправлено",
-        "under_review": "На рассмотрении",
-        "approved": "Утверждено",
-        "approved_as_noted": "Утверждено с замечаниями",
-        "revise_and_resubmit": "Доработать и подать снова",
-        "rejected": "Отклонено",
-        "closed": "Закрыто",
-    },
-}
+_STATUS_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "submittals.intl.status_labels",
+    (
+        "draft",
+        "submitted",
+        "under_review",
+        "approved",
+        "approved_as_noted",
+        "revise_and_resubmit",
+        "rejected",
+        "closed",
+    ),
+)
 
 # Review outcome labels reuse the status wording for the four decisions.
 _OUTCOME_LABELS: dict[str, dict[str, str]] = {

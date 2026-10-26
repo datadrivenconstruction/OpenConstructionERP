@@ -31,6 +31,8 @@ rename one. :func:`vocabulary_term` guarantees a term either way.
 
 from __future__ import annotations
 
+from app.core.i18n import catalogue_table
+
 # ── The cycle ────────────────────────────────────────────────────────────────
 
 #: The six questions, in the order a requirement acquires answers to them, each
@@ -70,19 +72,23 @@ PHASE_SPINE: tuple[str, ...] = (
 #: Neutral words for the spine, for the majority of projects that run neither
 #: HOAI nor RIBA. A project that runs one of those reads :data:`PHASE_SYSTEMS`
 #: instead and sees its own official stage names.
-PHASE_LABELS: dict[str, dict[str, str]] = {
-    "strategy": {"en": "Strategy", "de": "Bedarfsplanung", "ru": "Стратегия"},
-    "brief": {"en": "Brief", "de": "Grundlagenermittlung", "ru": "Задание"},
-    "concept": {"en": "Concept", "de": "Vorplanung", "ru": "Концепция"},
-    "design": {"en": "Design", "de": "Entwurfsplanung", "ru": "Проект"},
-    "approval": {"en": "Permit", "de": "Genehmigungsplanung", "ru": "Согласование"},
-    "detail": {"en": "Detailed design", "de": "Ausführungsplanung", "ru": "Рабочая документация"},
-    "tender": {"en": "Tender", "de": "Ausschreibung", "ru": "Тендер"},
-    "award": {"en": "Award", "de": "Vergabe", "ru": "Заключение договора"},
-    "construction": {"en": "Construction", "de": "Ausführung", "ru": "Строительство"},
-    "handover": {"en": "Handover", "de": "Übergabe", "ru": "Передача"},
-    "operation": {"en": "Operation", "de": "Betrieb", "ru": "Эксплуатация"},
-}
+PHASE_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "requirements.phase_labels",
+    (
+        "strategy",
+        "brief",
+        "concept",
+        "design",
+        "approval",
+        "detail",
+        "tender",
+        "award",
+        "construction",
+        "handover",
+        "operation",
+    ),
+    by_key=True,
+)
 
 #: National stage systems keyed by spine phase. ``None`` means the system has no
 #: separate stage for that phase, which is information, not a gap to fill.

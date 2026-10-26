@@ -41,6 +41,8 @@ from collections.abc import Iterable
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
+from app.core.i18n import catalogue_table
+
 # Default money rounding step. Two decimal places suit most currencies; a
 # caller working in a zero-decimal or three-decimal currency passes its own
 # ``quantum``. This is a default, never a hardcoded assumption.
@@ -152,26 +154,9 @@ def explain(concept: str) -> str:
 # adds still renders readably.
 
 # Batch lifecycle status (mirrors the service FSM: draft/submitted/approved/posted).
-_BATCH_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "draft": "Draft",
-        "submitted": "Submitted for approval",
-        "approved": "Approved",
-        "posted": "Posted to ledger",
-    },
-    "de": {
-        "draft": "Entwurf",
-        "submitted": "Zur Genehmigung eingereicht",
-        "approved": "Genehmigt",
-        "posted": "Im Hauptbuch gebucht",
-    },
-    "ru": {
-        "draft": "Черновик",
-        "submitted": "Отправлено на утверждение",
-        "approved": "Утверждено",
-        "posted": "Проведено в учете",
-    },
-}
+_BATCH_STATUS_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "payroll.intl.batch_status_labels", ("draft", "submitted", "approved", "posted")
+)
 
 # Deduction bucket (mirrors ``schemas.DeductionType``: tax/social/pension/other).
 _DEDUCTION_TYPE_LABELS: dict[str, dict[str, str]] = {

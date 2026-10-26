@@ -132,7 +132,15 @@
     "missing_description": "Позиция {position} без описания",
     "missing_classification": "Позиция {position} без классификации",
     "duplicate_ordinal": "Дублирующийся номер: {ordinal}",
-    "rate_anomaly": "Расценка {rate} превышает порог ({threshold})"
+    "rate_anomaly": "Расценка {rate} превышает порог ({threshold})",
+    "nl": {
+      "not_a_string": "Ввод должен быть строкой.",
+      "empty": "Ввод пуст.",
+      "too_long": "Ввод превышает {max} символов.",
+      "ai_unparsable": "Ответ ИИ не удалось разобрать как документ DSL.",
+      "no_pattern": "Ни один шаблон не подошел к введенному предложению.",
+      "try": "Попробуйте: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D График",
@@ -327,7 +335,16 @@
     "pass": "Пройдена",
     "fail": "Не пройдена",
     "partial": "Частично",
-    "critical": "Критически"
+    "critical": "Критически",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Запланирована",
+        "in_progress": "В работе",
+        "completed": "Завершена",
+        "failed": "Провалена",
+        "cancelled": "Отменена"
+      }
+    }
   },
   "ncr": {
     "title": "Акты о несоответствиях",
@@ -347,7 +364,19 @@
     "submit": "Подать",
     "review": "На проверке",
     "approved_as_noted": "Утверждено с замечаниями",
-    "revise_resubmit": "Доработать и подать повторно"
+    "revise_resubmit": "Доработать и подать повторно",
+    "intl": {
+      "status_labels": {
+        "draft": "Черновик",
+        "submitted": "Отправлено",
+        "under_review": "На рассмотрении",
+        "approved": "Утверждено",
+        "approved_as_noted": "Утверждено с замечаниями",
+        "revise_and_resubmit": "Доработать и подать снова",
+        "rejected": "Отклонено",
+        "closed": "Закрыто"
+      }
+    }
   },
   "correspondence": {
     "title": "Переписка",
@@ -372,7 +401,15 @@
     "promote": "Перевести",
     "suitability": "Пригодность",
     "discipline": "Раздел проекта",
-    "revisions": "Ревизии"
+    "revisions": "Ревизии",
+    "intl": {
+      "state_labels": {
+        "wip": "В работе",
+        "shared": "Опубликовано для согласования",
+        "published": "Выпущено",
+        "archived": "Архив"
+      }
+    }
   },
   "transmittals": {
     "title": "Сопроводительные",
@@ -384,7 +421,14 @@
     "recipients": "Получатели",
     "acknowledge": "Подтвердить",
     "locked": "Заблокировано",
-    "issue_transmittal": "Выдать"
+    "issue_transmittal": "Выдать",
+    "intl": {
+      "status_words": {
+        "draft": "черновик",
+        "issued": "отправлено",
+        "responded": "отвечено"
+      }
+    }
   },
   "notifications": {
     "title": "Уведомления",
@@ -426,7 +470,101 @@
     "project_status": "Статус проекта",
     "cost_report": "Отчёт по стоимости",
     "schedule_status": "Статус графика",
-    "safety_report": "Отчёт по охране труда"
+    "safety_report": "Отчёт по охране труда",
+    "doc": {
+      "meta_report": "Отчет",
+      "meta_project": "Проект",
+      "meta_type": "Тип",
+      "meta_generated": "Создан",
+      "meta_currency": "Валюта",
+      "field_column": "Поле",
+      "value_column": "Значение",
+      "yes": "Да",
+      "no": "Нет",
+      "no_data_heading": "Нет данных",
+      "no_data_body": "Отчет сформирован на пустом снимке данных. Проверьте, вернули ли исходные модули (финансы, календарный план, охрана труда и т. д.) данные по выбранному проекту.",
+      "no_data_body_short": "Отчет сформирован на пустом снимке данных. Проверьте, вернули ли исходные модули данные по выбранному проекту.",
+      "footer_generated_by": "Сформировано в OpenConstructionERP {timestamp}.",
+      "worksheet_name": "Отчет",
+      "pdf_subject": "Отчет по проекту",
+      "overall_progress": "Общий прогресс",
+      "as_of": "На дату",
+      "recorded_by": "Кто внес",
+      "period": "Период",
+      "entries_suffix": "(записей: {count})",
+      "site_photo_alt": "Фото со стройплощадки",
+      "ai_summary_heading": "Сводка",
+      "ai_badge": "Сформировано ИИ",
+      "ai_note": "Сформировано ИИ по приведенным ниже данным проекта.",
+      "ai_note_confidence": "Сформировано ИИ по приведенным ниже данным проекта (достоверность {confidence}).",
+      "ai_note_review": "Проверьте перед отправкой заказчику."
+    },
+    "section": {
+      "project_overview": "Обзор проекта",
+      "key_performance_indicators": "Ключевые показатели",
+      "schedule_status": "Статус календарного плана",
+      "risk_summary": "Сводка по рискам",
+      "open_issues": "Открытые вопросы",
+      "cost_summary": "Сводка затрат",
+      "cost_breakdown": "Разбивка затрат",
+      "change_orders": "Изменения к договору",
+      "cash_flow": "Движение денежных средств",
+      "schedule_overview": "Обзор календарного плана",
+      "milestone_status": "Статус вех",
+      "critical_path": "Критический путь",
+      "3_week_lookahead": "План на три недели",
+      "safety_kpis": "Показатели охраны труда",
+      "incident_log": "Журнал происшествий",
+      "near_miss_reports": "Сообщения о предпосылках к происшествиям",
+      "safety_training": "Обучение по охране труда",
+      "inspection_summary": "Сводка по проверкам",
+      "by_inspection_type": "По типам проверок",
+      "punch_list_status": "Статус списка недоделок",
+      "recent_inspections": "Последние проверки",
+      "portfolio_overview": "Обзор портфеля",
+      "project_statuses": "Статусы проектов",
+      "kpi_comparison": "Сравнение KPI",
+      "portfolio_risks": "Риски портфеля",
+      "field_progress": "Ход работ на объекте",
+      "top_risks": "Основные риски",
+      "site_photos": "Фотографии с объекта",
+      "summary": "Сводка"
+    },
+    "field": {
+      "name": "Наименование",
+      "status": "Статус",
+      "phase": "Фаза",
+      "planned_start": "Плановое начало",
+      "planned_end": "Плановое окончание",
+      "schedule_progress_pct": "Выполнение плана, %",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Освоение бюджета, %",
+      "as_of": "На дату",
+      "progress_pct": "Выполнение, %",
+      "risk_score_avg": "Средний балл риска",
+      "open_rfis": "Открытые запросы (RFI)",
+      "open_submittals": "Открытые согласования",
+      "open_defects": "Открытые дефекты",
+      "open_observations": "Открытые замечания",
+      "budget": "Бюджет",
+      "committed": "Законтрактовано",
+      "actual": "Факт",
+      "payable": "Кредиторская задолженность",
+      "receivable": "Дебиторская задолженность",
+      "net_cash_flow": "Чистый денежный поток"
+    },
+    "explain": {
+      "report_total_one": "Итого по отчету: {money} (сумма по позициям: {count}).",
+      "report_total_other": "Итого по отчету: {money} (сумма по позициям: {count}).",
+      "percent_of_total": "{part} составляет {percent} из {total} (процент от общей суммы).",
+      "percent_zero_total": "{part} из {total}: сумма равна нулю, поэтому каждая доля показана как 0 процентов.",
+      "breakdown_empty": "Разбивка затрат: нет данных.",
+      "breakdown_one": "Разбивка затрат: групп {count}, итого по отчету {money}.",
+      "breakdown_other": "Разбивка затрат: групп {count}, итого по отчету {money}.",
+      "top_n_one": "Топ {requested}: {shown} из {shown} позиций.",
+      "top_n_other": "Топ {requested}: {shown} из {shown} позиций."
+    }
   },
   "gantt": {
     "title": "Диаграмма Ганта",
@@ -764,6 +902,197 @@
     "snapshot_status": {
       "draft": "Черновик",
       "frozen": "Заморожен"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Валовая стоимость девелопмента",
+      "total_development_cost": "Общие затраты на девелопмент",
+      "residual_land_value": "Остаточная стоимость земли",
+      "developer_profit": "Прибыль девелопера",
+      "profit_on_cost": "Прибыль к затратам",
+      "profit_on_gdv": "Прибыль к ВСД",
+      "construction_cost": "Стоимость строительства",
+      "professional_fees": "Профессиональные гонорары",
+      "contingency": "Резерв на непредвиденные расходы",
+      "finance_cost": "Финансовые издержки",
+      "sales_costs": "Затраты на продажи"
+    },
+    "status": {
+      "viable": "Жизнеспособный",
+      "unviable": "Нежизнеспособный",
+      "marginal": "Пограничный",
+      "pending": "Оценка не проведена"
+    },
+    "figure": {
+      "gross_development_value": "Общая стоимость продажи всех единиц проекта в одной валюте.",
+      "total_development_cost": "Все затраты на реализацию проекта, кроме самой земли: строительство, гонорары, резерв, финансирование и продажи.",
+      "residual_land_value": "Что остается на землю после вычета общих затрат на девелопмент и целевой прибыли девелопера из валовой стоимости девелопмента.",
+      "developer_profit": "Прибыль, которую девелопер намерен получить, заданная как целевая доля валовой стоимости девелопмента.",
+      "profit_on_cost": "Прибыль девелопера, деленная на общие затраты на девелопмент, в виде доли.",
+      "profit_on_gdv": "Прибыль девелопера, деленная на валовую стоимость девелопмента, в виде доли."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "СЧЁТ",
+      "date": "Дата: {value}",
+      "due": "Срок оплаты: {value}",
+      "from": "От",
+      "bill_to": "Плательщик",
+      "vat_id": "ИНН/НДС: {value}",
+      "ref": "Ссылка покупателя: {value}",
+      "th_description": "Наименование",
+      "th_qty": "Кол-во",
+      "th_unit": "Ед.",
+      "th_unit_price": "Цена",
+      "th_net": "Сумма без НДС ({currency})",
+      "net_total": "Итого без НДС",
+      "vat_total": "НДС",
+      "grand_total": "Итого к оплате с НДС",
+      "retention_prepaid": "Удержание / предоплата",
+      "amount_due": "К оплате",
+      "payment": "Оплата",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Счёт: {value}",
+      "bank_code": "Код банка: {value}",
+      "account_holder": "Владелец счёта: {value}",
+      "footer": "Этот PDF содержит встроенный электронный счёт EN 16931 (Factur-X / ZUGFeRD). Юридическую силу имеет встроенный XML."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Рабочий городок",
+        "rental": "Арендное жилье",
+        "hotel": "Гостиница"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Ожидает",
+        "approved": "Одобрено",
+        "rejected": "Отклонено"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Vypolneno",
+        "fail": "Ne vypolneno",
+        "not_applicable": "Ne primenimo"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Чертеж",
+        "contract": "Договор",
+        "specification": "Спецификация",
+        "photo": "Фото",
+        "correspondence": "Переписка",
+        "reality_capture": "Съемка объекта",
+        "other": "Прочее"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "В ожидании",
+        "approved": "Одобрено",
+        "rejected": "Отклонено",
+        "cancelled": "Отменено"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Черновик",
+        "submitted": "Отправлено на утверждение",
+        "approved": "Утверждено",
+        "posted": "Проведено в учете"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Открыт",
+        "assigned": "Назначен",
+        "in_progress": "В работе",
+        "resolved": "Устранён",
+        "verified": "Проверен",
+        "closed": "Закрыт"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "nablyudenie",
+        "minor": "neznachitelnoe",
+        "major": "sushchestvennoe",
+        "critical": "kriticheskoe"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Сотрудник",
+        "crew": "Бригада",
+        "equipment": "Оборудование",
+        "subcontractor": "Субподрядчик"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Имя модели ИИ устарело или недоступно. Откройте Настройки > ИИ и укажите актуальное имя модели.",
+      "not_configured": "ИИ не настроен. Пожалуйста, добавьте API-ключ в Настройках."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "проверено",
+      "bound": "приложено",
+      "empty": "отсутствует"
+    },
+    "package_status_labels": {
+      "draft": "черновик",
+      "in_progress": "в работе",
+      "ready": "готов",
+      "issued": "выдан"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "блокер",
+      "critical": "критично",
+      "warning": "предупреждение",
+      "suggestion": "рекомендация"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегия",
+      "brief": "Задание",
+      "concept": "Концепция",
+      "design": "Проект",
+      "approval": "Согласование",
+      "detail": "Рабочая документация",
+      "tender": "Тендер",
+      "award": "Заключение договора",
+      "construction": "Строительство",
+      "handover": "Передача",
+      "operation": "Эксплуатация"
     }
   }
 }

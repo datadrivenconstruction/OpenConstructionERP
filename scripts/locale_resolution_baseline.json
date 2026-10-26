@@ -15,23 +15,9 @@
       "band_label",
       "signal_label"
     ],
-    "app.modules.closeout.completeness": [
-      "package_status_label",
-      "slot_status_label"
-    ],
     "app.modules.daily_diary.pdf_translations": [
       "entry_type_label",
       "status_label"
-    ],
-    "app.modules.project_intelligence.scorer": [
-      "severity_label"
-    ],
-    "app.modules.reporting.intl": [
-      "label"
-    ],
-    "app.modules.reporting.report_translations": [
-      "field_label",
-      "section_title"
     ]
   }
 }

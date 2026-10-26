@@ -57,6 +57,7 @@ __all__ = [
 # them and sits above ``minor_units`` in that module.
 
 from app.core.currency_registry import CURRENCIES, minor_units, money_quantum
+from app.core.regional_format import format_number, number_style_for_language
 
 _CURRENCY_CODE_RE = re.compile(r"^[A-Z]{3}$")
 
@@ -320,7 +321,8 @@ def format_money(
     Args:
         amount: Decimal string amount (e.g. ``"1234.56"``).
         currency_code: ISO 4217 currency code.
-        locale: Display locale hint (``"en"`` or ``"de"``).
+        locale: Display language (any interface language). It picks the
+            separators and whether the symbol leads or trails.
 
     Returns:
         A human-readable string such as ``"€ 1,234.56"`` (en) or
@@ -335,37 +337,13 @@ def format_money(
     # Quantise to the expected number of decimal places.
     quantised = d.quantize(money_quantum(code), rounding=ROUND_HALF_UP)
 
-    if locale == "de":
-        formatted = _format_de(quantised, decimals)
-        return f"{formatted} {symbol}"
-
-    formatted = _format_en(quantised, decimals)
-    return f"{symbol} {formatted}"
-
-
-def _format_en(d: Decimal, decimals: int) -> str:
-    """Format a Decimal in English style: ``1,234.56``."""
-    sign = "-" if d < 0 else ""
-    d = abs(d)
-    int_part = int(d)
-    frac_part = d - int_part
-
-    int_str = f"{int_part:,}"
-
-    if decimals == 0:
-        return f"{sign}{int_str}"
-
-    frac_str = str(frac_part.quantize(Decimal(10) ** -decimals, rounding=ROUND_HALF_UP))
-    # frac_str is like "0.56"; take the part after the dot.
-    frac_digits = frac_str.split(".")[1] if "." in frac_str else "0" * decimals
-    return f"{sign}{int_str}.{frac_digits}"
-
-
-def _format_de(d: Decimal, decimals: int) -> str:
-    """Format a Decimal in German style: ``1.234,56``."""
-    en = _format_en(d, decimals)
-    # Swap: comma → TEMP, dot → comma, TEMP → dot.
-    return en.replace(",", "\x00").replace(".", ",").replace("\x00", ".")
+    style = number_style_for_language(locale)
+    formatted = format_number(quantised, decimals, style)
+    # Languages that group with a comma and point the decimal (English, CJK,
+    # Hindi, Thai) lead with the symbol; the others trail it.
+    if style.decimal == ".":
+        return f"{symbol} {formatted}"
+    return f"{formatted} {symbol}"
 
 
 # ── Reading an amount a person typed as text ──────────────────────────────────

@@ -39,6 +39,8 @@ from collections.abc import Iterable
 from datetime import date, datetime
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 
+from app.core.i18n import catalogue_table
+
 # ISO 8601 calendar date shape used across the module.
 ISO_DATE_FORMAT = "YYYY-MM-DD"
 
@@ -110,23 +112,9 @@ def explain(concept: str) -> str:
 # mirrors ``STEP_DECISIONS`` and the status table mirrors ``INSTANCE_STATUSES``
 # from ``models.py``.
 
-_DECISION_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected",
-    },
-    "de": {
-        "pending": "Ausstehend",
-        "approved": "Genehmigt",
-        "rejected": "Abgelehnt",
-    },
-    "ru": {
-        "pending": "Ожидает",
-        "approved": "Одобрено",
-        "rejected": "Отклонено",
-    },
-}
+_DECISION_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "approval_routes.intl.decision_labels", ("pending", "approved", "rejected")
+)
 
 _STATUS_LABELS: dict[str, dict[str, str]] = {
     "en": {

@@ -13,6 +13,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
+from app.core.i18n import catalogue_table
 from app.modules.project_intelligence.collector import ProjectState
 
 logger = logging.getLogger(__name__)
@@ -431,12 +432,9 @@ SEVERITIES: tuple[str, ...] = ("blocker", "critical", "warning", "suggestion")
 
 #: Localized severity word, per language. English is always present and is the
 #: fallback for any missing language or unknown severity.
-SEVERITY_LABELS: dict[str, dict[str, str]] = {
-    "blocker": {"en": "blocker", "de": "Blocker", "ru": "блокер"},
-    "critical": {"en": "critical", "de": "kritisch", "ru": "критично"},
-    "warning": {"en": "warning", "de": "Warnung", "ru": "предупреждение"},
-    "suggestion": {"en": "suggestion", "de": "Vorschlag", "ru": "рекомендация"},
-}
+SEVERITY_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "project_intelligence.severity_labels", ("blocker", "critical", "warning", "suggestion"), by_key=True
+)
 
 
 def severity_label(severity: str, lang: str = "en") -> str:

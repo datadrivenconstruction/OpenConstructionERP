@@ -29,6 +29,8 @@ from collections import Counter
 from collections.abc import Iterable, Mapping
 from datetime import datetime
 
+from app.core.i18n import catalogue_table
+
 # ── Vocabulary ───────────────────────────────────────────────────────────
 #
 # The canonical status and severity codes are the single source of truth for
@@ -61,32 +63,9 @@ DEFAULT_LOCALE: str = "en"
 
 # ── Translations (en / de / ru, English fall-back) ───────────────────────
 
-_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "open": "Open",
-        "assigned": "Assigned",
-        "in_progress": "In progress",
-        "resolved": "Resolved",
-        "verified": "Verified",
-        "closed": "Closed",
-    },
-    "de": {
-        "open": "Offen",
-        "assigned": "Zugewiesen",
-        "in_progress": "In Bearbeitung",
-        "resolved": "Behoben",
-        "verified": "Geprueft",
-        "closed": "Geschlossen",
-    },
-    "ru": {
-        "open": "Открыт",
-        "assigned": "Назначен",
-        "in_progress": "В работе",
-        "resolved": "Устранён",
-        "verified": "Проверен",
-        "closed": "Закрыт",
-    },
-}
+_STATUS_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "punchlist.intl.status_labels", ("open", "assigned", "in_progress", "resolved", "verified", "closed")
+)
 
 _SEVERITY_LABELS: dict[str, dict[str, str]] = {
     "en": {

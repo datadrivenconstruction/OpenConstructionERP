@@ -267,7 +267,8 @@ def test_normalise_locale_variants() -> None:
     assert normalise_locale("EN") == "en"
     assert normalise_locale("de-DE") == "de"
     assert normalise_locale("ru_RU") == "ru"
-    assert normalise_locale("fr") == FALLBACK_LOCALE
+    assert normalise_locale("fr") == "fr"
+    assert normalise_locale("sw") == FALLBACK_LOCALE
     assert normalise_locale(None) == FALLBACK_LOCALE
 
 
@@ -294,7 +295,7 @@ def test_localize_status_words() -> None:
 
 def test_supported_locales_and_fallback_declared() -> None:
     assert FALLBACK_LOCALE in SUPPORTED_LOCALES
-    assert set(SUPPORTED_LOCALES) == {"en", "de", "ru"}
+    assert {"en", "de", "ru", "fr", "ja", "ar"} <= set(SUPPORTED_LOCALES)
 
 
 # ── explainers ───────────────────────────────────────────────────────────
@@ -344,3 +345,10 @@ def test_no_banned_characters_in_explainers_terms_and_statuses() -> None:
     for status in ("viable", "unviable", "marginal", "pending"):
         for loc in SUPPORTED_LOCALES:
             _assert_clean(localize_status(status, loc))
+
+
+def test_explain_figure_follows_the_locale() -> None:
+    assert explain_figure("profit_on_gdv").startswith("Developer profit divided")
+    assert explain_figure("profit_on_gdv", "de").startswith("Entwicklergewinn")
+    assert explain_figure("profit_on_gdv", "ru").startswith("Прибыль")
+    assert explain_figure("nonsense", "de") == ""

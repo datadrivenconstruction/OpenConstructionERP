@@ -23,6 +23,7 @@ Usage:
 
 import json
 import logging
+from collections.abc import Iterable
 from contextvars import ContextVar
 from pathlib import Path
 from typing import Any
@@ -231,6 +232,8 @@ def t(key: str, locale: str | None = None, **kwargs: Any) -> str:
         Translated string, or key itself if not found.
     """
     loc = locale or get_locale()
+    if not _translations:
+        load_translations()
 
     # Requested locale, then its base language, then English, then the raw key,
     # and the walk is per key rather than per catalogue: a language whose file
@@ -269,6 +272,38 @@ def t(key: str, locale: str | None = None, **kwargs: Any) -> str:
     return template
 
 
+def lookup(key: str, locale: str | None = None) -> str | None:
+    """The raw template for ``key`` in ``locale``, or None when no catalogue has it.
+
+    Same walk as :func:`t` (region, base language, English) but a miss is
+    visible, for callers that have a better fallback than the key itself.
+    """
+    if not _translations:
+        load_translations()
+    for candidate in (*locale_candidates(locale or get_locale()), "en"):
+        template = _translations.get(candidate, {}).get(key)
+        if template is not None:
+            return template
+    return None
+
+
+def catalogue_table(namespace: str, keys: Iterable[str], *, by_key: bool = False) -> dict[str, dict[str, str]]:
+    """``{locale: {key: text}}`` for ``namespace.<key>`` over every interface language.
+
+    Gives a module that keeps a locale-keyed label table the full language
+    list without a hand-written column per language: a key a language lacks
+    reads in English, so every row is complete. ``by_key`` nests the other
+    way round, ``{key: {locale: text}}``.
+    """
+    names = tuple(keys)
+    if by_key:
+        return {name: {loc: lookup(f"{namespace}.{name}", loc) or name for loc in SUPPORTED_LOCALES} for name in names}
+    table: dict[str, dict[str, str]] = {}
+    for locale in SUPPORTED_LOCALES:
+        table[locale] = {name: lookup(f"{namespace}.{name}", locale) or name for name in names}
+    return table
+
+
 def get_all_translations(locale: str) -> dict[str, str]:
     """Get all translations for a locale (for frontend bundle).
 
@@ -276,6 +311,8 @@ def get_all_translations(locale: str) -> dict[str, str]:
     ``t`` does: pt-BR has no catalogue of its own and pt does, and handing back
     English for it would contradict what the same request gets key by key.
     """
+    if not _translations:
+        load_translations()
     resolved = resolve_locale(locale)
     if resolved is not None:
         return _translations[resolved]

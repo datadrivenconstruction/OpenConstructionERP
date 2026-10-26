@@ -28,6 +28,7 @@ import re
 from dataclasses import dataclass, field
 from typing import Any
 
+from app.core.i18n import t
 from app.core.validation.dsl.parser import (
     DSLError,
     parse_definition,
@@ -640,21 +641,14 @@ async def parse_nl_to_dsl(
         :class:`NlBuildResult`. Always non-None - even on error the
         caller can render ``errors`` and ``suggestions``.
     """
+    lang_norm = (lang if isinstance(lang, str) else "en").strip().lower() or "en"
     if not isinstance(text, str):
-        return NlBuildResult(
-            errors=["Input must be a string."],
-        )
+        return NlBuildResult(errors=[t("validation.nl.not_a_string", lang_norm)])
     stripped = text.strip()
     if not stripped:
-        return NlBuildResult(
-            errors=["Input is empty."],
-        )
+        return NlBuildResult(errors=[t("validation.nl.empty", lang_norm)])
     if len(stripped) > _MAX_INPUT_LEN:
-        return NlBuildResult(
-            errors=[f"Input exceeds {_MAX_INPUT_LEN} characters."],
-        )
-
-    lang_norm = (lang or "en").strip().lower() or "en"
+        return NlBuildResult(errors=[t("validation.nl.too_long", lang_norm, max=_MAX_INPUT_LEN)])
 
     # 1. Deterministic pattern matcher.
     matched = _try_patterns(stripped, lang_norm)
@@ -697,11 +691,8 @@ async def parse_nl_to_dsl(
             return NlBuildResult(
                 used_method="ai",
                 confidence=0.0,
-                errors=ai_errors
-                or [
-                    "AI response could not be parsed as a DSL document.",
-                ],
-                suggestions=_default_suggestions(),
+                errors=ai_errors or [t("validation.nl.ai_unparsable", lang_norm)],
+                suggestions=_default_suggestions(lang_norm),
             )
 
     # 3. Nothing matched - return a low-confidence empty result with
@@ -709,19 +700,20 @@ async def parse_nl_to_dsl(
     return NlBuildResult(
         used_method="fallback",
         confidence=0.0,
-        errors=["No pattern matched the input sentence."],
-        suggestions=_default_suggestions(),
+        errors=[t("validation.nl.no_pattern", lang_norm)],
+        suggestions=_default_suggestions(lang_norm),
     )
 
 
-def _default_suggestions() -> list[str]:
-    """Hints rendered when nothing matched - kept intent-free of locale."""
-    return [
-        "Try: 'all <entity> must have <field>'",
-        "Try: 'every <entity> must have <field> >= <number>'",
-        "Try: 'no <entity> can have <field> = <value>'",
-        "Try: 'there must be at least <N> <entity>'",
-    ]
+def _default_suggestions(lang: str = "en") -> list[str]:
+    """Hints rendered when nothing matched. The quoted sentence is the accepted syntax."""
+    patterns = (
+        "all <entity> must have <field>",
+        "every <entity> must have <field> >= <number>",
+        "no <entity> can have <field> = <value>",
+        "there must be at least <N> <entity>",
+    )
+    return [t("validation.nl.try", lang, pattern=pat) for pat in patterns]
 
 
 __all__ = [

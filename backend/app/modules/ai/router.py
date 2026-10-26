@@ -32,7 +32,7 @@ from app.core.file_signature import (
 from app.core.file_signature import (
     require as require_signature,
 )
-from app.core.i18n import get_locale
+from app.core.i18n import get_locale, t
 from app.core.validation.messages import translate
 from app.dependencies import (
     CurrentUserId,
@@ -1046,6 +1046,23 @@ async def advisor_chat(
         "da": "Danish",
         "fi": "Finnish",
         "bg": "Bulgarian",
+        "hu": "Hungarian",
+        "hr": "Croatian",
+        "id": "Indonesian",
+        "ro": "Romanian",
+        "th": "Thai",
+        "vi": "Vietnamese",
+        "uk": "Ukrainian",
+        "uz": "Uzbek",
+        "et": "Estonian",
+        "ky": "Kyrgyz",
+        "bn": "Bengali",
+        "kk": "Kazakh",
+        "fil": "Filipino",
+        "ur": "Urdu",
+        "fa": "Persian",
+        "he": "Hebrew",
+        "el": "Greek",
     }
     lang_name = _LOCALE_NAMES.get(locale, "English")
 
@@ -1146,17 +1163,7 @@ async def advisor_chat(
         # explicitly actionable message; otherwise forward the sanitized text.
         is_model_problem = "set the model name" in str(exc) or "denied access to model" in str(exc)
         if is_model_problem:
-            _model_msgs = {
-                "ru": "Имя модели ИИ устарело или недоступно. Откройте Настройки > ИИ и укажите актуальное имя модели.",
-                "de": "Der KI-Modellname ist veraltet oder nicht verfügbar. Öffnen Sie Einstellungen > KI und geben Sie einen aktuellen Modellnamen ein.",
-                "fr": "Le nom du modèle d'IA est obsolète ou indisponible. Ouvrez Paramètres > IA et indiquez un nom de modèle valide.",
-                "es": "El nombre del modelo de IA está desactualizado o no disponible. Abra Configuración > IA e indique un nombre de modelo válido.",
-            }
-            answer = _model_msgs.get(
-                locale,
-                "The AI model name is outdated or unavailable. Open Settings > AI "
-                "and set a currently valid model name for your provider.",
-            )
+            answer = t("ai.advisor.model_outdated", locale)
         else:
             answer = str(exc)
         used_db = False
@@ -1168,13 +1175,7 @@ async def advisor_chat(
             user_id,
             exc,
         )
-        _err_msgs = {
-            "ru": "ИИ не настроен. Пожалуйста, добавьте API-ключ в Настройках.",
-            "de": "KI nicht konfiguriert. Bitte fügen Sie Ihren API-Schlüssel in den Einstellungen hinzu.",
-            "fr": "IA non configurée. Veuillez ajouter votre clé API dans les Paramètres.",
-            "es": "IA no configurada. Agregue su clave API en Configuración.",
-        }
-        answer = _err_msgs.get(locale, "AI is not configured. Please set up an AI provider in Settings.")
+        answer = t("ai.advisor.not_configured", locale)
         used_db = False
 
     # 6. Build source references - only include if items seem relevant

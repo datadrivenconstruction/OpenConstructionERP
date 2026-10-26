@@ -618,5 +618,11 @@
       "draft": "Borrador",
       "frozen": "Congelada"
     }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "El nombre del modelo de IA está desactualizado o no disponible. Abra Configuración > IA e indique un nombre de modelo válido.",
+      "not_configured": "IA no configurada. Agregue su clave API en Configuración."
+    }
   }
 }

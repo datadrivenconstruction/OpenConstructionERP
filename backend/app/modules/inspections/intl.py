@@ -31,6 +31,8 @@ from collections import Counter
 from collections.abc import Iterable, Mapping
 from datetime import datetime, timedelta
 
+from app.core.i18n import catalogue_table
+
 # ── Vocabulary ───────────────────────────────────────────────────────────
 #
 # The canonical status and result codes are the single source of truth for the
@@ -58,29 +60,9 @@ DEFAULT_LOCALE: str = "en"
 
 # ── Translations (en / de / ru, English fall-back) ───────────────────────
 
-_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "scheduled": "Scheduled",
-        "in_progress": "In progress",
-        "completed": "Completed",
-        "failed": "Failed",
-        "cancelled": "Cancelled",
-    },
-    "de": {
-        "scheduled": "Geplant",
-        "in_progress": "In Bearbeitung",
-        "completed": "Abgeschlossen",
-        "failed": "Fehlgeschlagen",
-        "cancelled": "Abgebrochen",
-    },
-    "ru": {
-        "scheduled": "Запланирована",
-        "in_progress": "В работе",
-        "completed": "Завершена",
-        "failed": "Провалена",
-        "cancelled": "Отменена",
-    },
-}
+_STATUS_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "inspections.intl.status_labels", ("scheduled", "in_progress", "completed", "failed", "cancelled")
+)
 
 _RESULT_LABELS: dict[str, dict[str, str]] = {
     "en": {

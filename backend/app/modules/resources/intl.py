@@ -46,6 +46,8 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Any
 
+from app.core.i18n import catalogue_table
+
 # ── Localized vocabulary ─────────────────────────────────────────────────
 # Keys mirror the real module vocabulary (see schemas.py / models.py):
 #   resource_type   : person | crew | equipment | subcontractor
@@ -57,26 +59,9 @@ from typing import Any
 SUPPORTED_LOCALES: tuple[str, ...] = ("en", "de", "ru")
 FALLBACK_LOCALE = "en"
 
-RESOURCE_TYPE_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "person": "Person",
-        "crew": "Crew",
-        "equipment": "Equipment",
-        "subcontractor": "Subcontractor",
-    },
-    "de": {
-        "person": "Person",
-        "crew": "Kolonne",
-        "equipment": "Gerat",
-        "subcontractor": "Nachunternehmer",
-    },
-    "ru": {
-        "person": "Сотрудник",
-        "crew": "Бригада",
-        "equipment": "Оборудование",
-        "subcontractor": "Субподрядчик",
-    },
-}
+RESOURCE_TYPE_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "resources.intl.resource_type_labels", ("person", "crew", "equipment", "subcontractor")
+)
 
 RESOURCE_STATUS_LABELS: dict[str, dict[str, str]] = {
     "en": {

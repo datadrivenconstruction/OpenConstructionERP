@@ -30,6 +30,7 @@ from collections import Counter
 from dataclasses import dataclass
 from datetime import date, timedelta
 
+from app.core.i18n import catalogue_table
 from app.modules.transmittals.logic import (
     PURPOSE_CODES,
     VALID_STATUSES,
@@ -43,11 +44,9 @@ SUPPORTED_LOCALES: tuple[str, ...] = ("en", "de", "ru")
 
 # Short, plain-language label for each status, per language. English is the
 # fallback for any language not listed and for any status that has no entry.
-_STATUS_WORDS: dict[str, dict[str, str]] = {
-    "en": {"draft": "draft", "issued": "issued", "responded": "responded"},
-    "de": {"draft": "Entwurf", "issued": "ausgestellt", "responded": "beantwortet"},
-    "ru": {"draft": "черновик", "issued": "отправлено", "responded": "отвечено"},
-}
+_STATUS_WORDS: dict[str, dict[str, str]] = catalogue_table(
+    "transmittals.intl.status_words", ("draft", "issued", "responded")
+)
 
 # Short label for each purpose code, per language.
 _PURPOSE_WORDS: dict[str, dict[str, str]] = {

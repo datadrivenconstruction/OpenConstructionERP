@@ -35,6 +35,8 @@ from __future__ import annotations
 from collections.abc import Iterable
 from datetime import UTC, date, datetime, timedelta
 
+from app.core.i18n import catalogue_table
+
 __all__ = [
     "ACTIVE_STATUSES",
     "DEFAULT_LOCALE",
@@ -68,26 +70,9 @@ KNOWN_STATUSES: frozenset[str] = ACTIVE_STATUSES | TERMINAL_STATUSES
 
 # Localized status words. English is the fallback for any missing locale
 # or any status that is not in the table.
-_STATUS_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "pending": "Pending",
-        "approved": "Approved",
-        "rejected": "Rejected",
-        "cancelled": "Cancelled",
-    },
-    "de": {
-        "pending": "Ausstehend",
-        "approved": "Genehmigt",
-        "rejected": "Abgelehnt",
-        "cancelled": "Abgebrochen",
-    },
-    "ru": {
-        "pending": "В ожидании",
-        "approved": "Одобрено",
-        "rejected": "Отклонено",
-        "cancelled": "Отменено",
-    },
-}
+_STATUS_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "enterprise_workflows.intl.status_labels", ("pending", "approved", "rejected", "cancelled")
+)
 
 # Localized per-step action words. Keys match ALLOWED_ACTION_TYPES in the
 # service layer. English is the fallback.

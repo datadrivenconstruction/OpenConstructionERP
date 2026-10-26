@@ -47,6 +47,9 @@ from datetime import date
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from app.core.i18n import SUPPORTED_LOCALES as _ALL_LOCALES
+from app.core.i18n import lookup
+
 # ── Documented worldwide defaults ─────────────────────────────────────────────
 # A developer profit target of zero means "take no profit line". Callers opt
 # in to a positive ratio (0.20 for 20 percent) when appraising a real scheme.
@@ -55,117 +58,8 @@ DEFAULT_PROFIT_TARGET_RATIO: Decimal = Decimal("0")
 # The set of locales this module localises into. English is always the
 # fallback, so a missing translation or an unknown locale never breaks a
 # display path or leaks a raw key.
-SUPPORTED_LOCALES: tuple[str, ...] = ("en", "de", "ru")
+SUPPORTED_LOCALES: tuple[str, ...] = tuple(_ALL_LOCALES)
 FALLBACK_LOCALE: str = "en"
-
-
-# ── Plain-language glossary of appraisal figures ──────────────────────────────
-# Kept as plain English one-liners here so no figure in a feasibility study is
-# left unexplained for a first-time user. The API layer may still translate
-# these through the module's i18n bundle.
-_FIGURES: dict[str, str] = {
-    "gross_development_value": ("The total sales value of every unit in the scheme, all in one currency."),
-    "total_development_cost": (
-        "Every cost of delivering the scheme except the land itself: construction, "
-        "fees, contingency, finance and sales costs."
-    ),
-    "residual_land_value": (
-        "What is left for the land after the total development cost and the target "
-        "developer profit are taken out of the gross development value."
-    ),
-    "developer_profit": (
-        "The profit the developer aims to keep, set as a target ratio of the gross development value."
-    ),
-    "profit_on_cost": ("Developer profit divided by total development cost, carried as a ratio."),
-    "profit_on_gdv": ("Developer profit divided by the gross development value, carried as a ratio."),
-}
-
-
-# ── Localised term and status words (English fallback) ────────────────────────
-# Appraisal term words a user sees on a feasibility sheet, in en / de / ru.
-# German uses its plain spellings; Russian uses Cyrillic. Missing keys fall
-# back to English so nothing is ever shown as a raw code.
-_TERMS: dict[str, dict[str, str]] = {
-    "gross_development_value": {
-        "en": "Gross development value",
-        "de": "Bruttoentwicklungswert",
-        "ru": "Валовая стоимость девелопмента",
-    },
-    "total_development_cost": {
-        "en": "Total development cost",
-        "de": "Gesamtentwicklungskosten",
-        "ru": "Общие затраты на девелопмент",
-    },
-    "residual_land_value": {
-        "en": "Residual land value",
-        "de": "Residualer Grundstueckswert",
-        "ru": "Остаточная стоимость земли",
-    },
-    "developer_profit": {
-        "en": "Developer profit",
-        "de": "Entwicklergewinn",
-        "ru": "Прибыль девелопера",
-    },
-    "profit_on_cost": {
-        "en": "Profit on cost",
-        "de": "Gewinn auf Kosten",
-        "ru": "Прибыль к затратам",
-    },
-    "profit_on_gdv": {
-        "en": "Profit on GDV",
-        "de": "Gewinn auf BEW",
-        "ru": "Прибыль к ВСД",
-    },
-    "construction_cost": {
-        "en": "Construction cost",
-        "de": "Baukosten",
-        "ru": "Стоимость строительства",
-    },
-    "professional_fees": {
-        "en": "Professional fees",
-        "de": "Honorare",
-        "ru": "Профессиональные гонорары",
-    },
-    "contingency": {
-        "en": "Contingency",
-        "de": "Risikozuschlag",
-        "ru": "Резерв на непредвиденные расходы",
-    },
-    "finance_cost": {
-        "en": "Finance cost",
-        "de": "Finanzierungskosten",
-        "ru": "Финансовые издержки",
-    },
-    "sales_costs": {
-        "en": "Sales costs",
-        "de": "Vertriebskosten",
-        "ru": "Затраты на продажи",
-    },
-}
-
-# Feasibility / viability status words a scheme can carry, in en / de / ru.
-_STATUS_WORDS: dict[str, dict[str, str]] = {
-    "viable": {
-        "en": "Viable",
-        "de": "Wirtschaftlich tragfaehig",
-        "ru": "Жизнеспособный",
-    },
-    "unviable": {
-        "en": "Not viable",
-        "de": "Nicht tragfaehig",
-        "ru": "Нежизнеспособный",
-    },
-    "marginal": {
-        "en": "Marginal",
-        "de": "Grenzwertig",
-        "ru": "Пограничный",
-    },
-    "pending": {
-        "en": "Not appraised yet",
-        "de": "Noch nicht bewertet",
-        "ru": "Оценка не проведена",
-    },
-}
 
 
 def normalise_locale(locale: str | None) -> str:
@@ -182,19 +76,20 @@ def normalise_locale(locale: str | None) -> str:
     return base if base in SUPPORTED_LOCALES else FALLBACK_LOCALE
 
 
-def explain_figure(figure: str | None) -> str:
+def explain_figure(figure: str | None, locale: str | None = FALLBACK_LOCALE) -> str:
     """Return a one-line, plain-language explanation of an appraisal figure.
 
     Args:
         figure: A figure key such as ``gross_development_value``,
             ``total_development_cost``, ``residual_land_value``,
             ``profit_on_cost`` or ``profit_on_gdv`` (case-insensitive).
+        locale: A locale tag; reduced via ``normalise_locale``.
 
     Returns:
         The explanation string, or an empty string for an unknown figure.
     """
     key = (figure or "").strip().lower()
-    return _FIGURES.get(key, "")
+    return lookup(f"property_dev.figure.{key}", normalise_locale(locale)) or ""
 
 
 def localize_term(term: str | None, locale: str | None = FALLBACK_LOCALE) -> str:
@@ -209,11 +104,7 @@ def localize_term(term: str | None, locale: str | None = FALLBACK_LOCALE) -> str
         no translation, or an empty string for an unknown term.
     """
     key = (term or "").strip().lower()
-    entry = _TERMS.get(key)
-    if entry is None:
-        return ""
-    loc = normalise_locale(locale)
-    return entry.get(loc) or entry[FALLBACK_LOCALE]
+    return lookup(f"property_dev.term.{key}", normalise_locale(locale)) or ""
 
 
 def localize_status(status: str | None, locale: str | None = FALLBACK_LOCALE) -> str:
@@ -223,9 +114,8 @@ def localize_status(status: str | None, locale: str | None = FALLBACK_LOCALE) ->
     raising, so a display path never breaks on a new or missing code.
     """
     key = (status or "").strip().lower()
-    entry = _STATUS_WORDS.get(key, _STATUS_WORDS["pending"])
     loc = normalise_locale(locale)
-    return entry.get(loc) or entry[FALLBACK_LOCALE]
+    return lookup(f"property_dev.status.{key}", loc) or lookup("property_dev.status.pending", loc) or ""
 
 
 # ── Numeric coercion helpers (Decimal-exact, never NaN / inf) ─────────────────

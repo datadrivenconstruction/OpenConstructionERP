@@ -31,6 +31,8 @@ from dataclasses import dataclass
 from datetime import date, datetime
 from typing import Any
 
+from app.core.i18n import catalogue_table
+
 # ── Language vocabulary ────────────────────────────────────────────────────
 
 DEFAULT_LANGUAGE = "en"
@@ -49,35 +51,10 @@ APPROVAL_STATES: tuple[str, ...] = ("wip", "shared", "published", "archived")
 APPROVED_STATES: frozenset[str] = frozenset({"published"})
 
 # Localised document-type (category) words. English is the fallback.
-_CATEGORY_LABELS: dict[str, dict[str, str]] = {
-    "en": {
-        "drawing": "Drawing",
-        "contract": "Contract",
-        "specification": "Specification",
-        "photo": "Photo",
-        "correspondence": "Correspondence",
-        "reality_capture": "Reality capture",
-        "other": "Other",
-    },
-    "de": {
-        "drawing": "Zeichnung",
-        "contract": "Vertrag",
-        "specification": "Spezifikation",
-        "photo": "Foto",
-        "correspondence": "Korrespondenz",
-        "reality_capture": "Reality Capture",
-        "other": "Sonstiges",
-    },
-    "ru": {
-        "drawing": "Чертеж",
-        "contract": "Договор",
-        "specification": "Спецификация",
-        "photo": "Фото",
-        "correspondence": "Переписка",
-        "reality_capture": "Съемка объекта",
-        "other": "Прочее",
-    },
-}
+_CATEGORY_LABELS: dict[str, dict[str, str]] = catalogue_table(
+    "documents.intl.category_labels",
+    ("drawing", "contract", "specification", "photo", "correspondence", "reality_capture", "other"),
+)
 
 # Localised approval-status (CDE state) words. English is the fallback.
 _STATUS_LABELS: dict[str, dict[str, str]] = {
