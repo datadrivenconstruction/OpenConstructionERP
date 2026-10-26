@@ -618,5 +618,93 @@
       "draft": "ड्राफ़्ट",
       "frozen": "फ़्रीज़ किया गया"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, पृष्ठ {page}",
+    "text_change": "\"{old}\" बदलकर \"{new}\" किया गया",
+    "kind": {
+      "added": "जोड़ा गया",
+      "removed": "हटाया गया",
+      "modified": "संशोधित",
+      "text": "पाठ बदला गया"
+    },
+    "status": {
+      "open": "खुला",
+      "relevant": "प्रासंगिक",
+      "not_relevant": "अप्रासंगिक"
+    },
+    "errors": {
+      "revision_not_found": "इस प्रोजेक्ट में ड्रॉइंग रिविज़न नहीं मिला।",
+      "revision_not_parsed": "ड्रॉइंग का तुलना के लिए प्रोसेस किया हुआ संस्करण अभी नहीं है।",
+      "comparison_not_found": "तुलना नहीं मिली।",
+      "change_not_found": "बदलाव नहीं मिला।",
+      "same_revision": "तुलना के लिए दो अलग रिविज़न या पृष्ठ चुनें।",
+      "manual_points": "मैनुअल अलाइनमेंट के लिए हर रिविज़न पर दो अलग बिंदु चाहिए।",
+      "alignment_singular": "अलाइनमेंट लागू नहीं किया जा सकता: इससे शीट सिकुड़ जाती है।",
+      "region_empty": "बदलाव {seq} का कोई आकार नहीं है।",
+      "region_off_sheet": "बदलाव {seq} शीट के बाहर है।",
+      "module_missing": "इस क्रिया के लिए आवश्यक मॉड्यूल इंस्टॉल नहीं है।"
+    },
+    "rfi": {
+      "subject": "{sheet} पर ड्रॉइंग बदलाव {seq}",
+      "question": "{sheet} का रिविज़न {new} चिह्नित क्षेत्र ({kind}) में रिविज़न {old} से अलग है। कृपया बदलाव का उद्देश्य और मात्राओं पर असर की पुष्टि करें।"
+    },
+    "markup": {
+      "text": "रिविज़न बदलाव {seq}: {kind}"
+    },
+    "report": {
+      "title": "ड्रॉइंग रिविज़न तुलना",
+      "project": "प्रोजेक्ट",
+      "name": "तुलना",
+      "old_revision": "पुराना रिविज़न",
+      "new_revision": "नया रिविज़न",
+      "alignment": "अलाइनमेंट",
+      "alignment_none": "अलाइन नहीं (समान फ्रेम)",
+      "alignment_auto": "स्वचालित",
+      "alignment_manual": "मैनुअल, दो बिंदु",
+      "confidence": "विश्वसनीयता {value}",
+      "summary": "बदलाव",
+      "summary_counts": "कुल {total}: {added} जोड़े गए, {removed} हटाए गए, {modified} संशोधित, {text} पाठ",
+      "generated_on": "बनाने की तिथि",
+      "generated": "{timestamp} को बनाया गया",
+      "page_of": "पृष्ठ {page} / {total}",
+      "no_changes": "दोनों रिविज़न के बीच कोई बदलाव नहीं मिला।",
+      "col_no": "क्र.सं.",
+      "col_preview": "पूर्वावलोकन",
+      "col_kind": "बदलाव",
+      "col_location": "स्थान",
+      "col_detail": "विवरण",
+      "col_status": "स्थिति",
+      "col_comment": "टिप्पणी",
+      "col_follow_up": "अनुवर्ती कार्रवाई",
+      "page_at": "पृष्ठ {page}, {coords} पर",
+      "layer": "लेयर {layer}",
+      "entity_counts": "इकाइयाँ: {added} जोड़ी गईं, {removed} हटाई गईं, {modified} संशोधित",
+      "rfi": "RFI {number}",
+      "markup": "रिविज़न क्लाउड",
+      "remeasure": "पुनः मापन: {items} मात्राएँ, {positions} BOQ मदें"
+    },
+    "rules": {
+      "distinct_revisions_ok": "दोनों पक्ष अलग-अलग रिविज़न हैं।",
+      "distinct_revisions_fail": "तुलना एक शीट की तुलना उसी शीट से कर रही है।",
+      "distinct_revisions_hint": "ड्रॉइंग का पुराना और नया रिविज़न चुनें।",
+      "alignment_not_needed": "DWG रिविज़न ड्रॉइंग इकाइयाँ साझा करते हैं; अलाइनमेंट की ज़रूरत नहीं है।",
+      "alignment_missing_matrix": "तुलना में कोई अलाइनमेंट नहीं है।",
+      "alignment_singular": "अलाइनमेंट शीट को सिकोड़ देता है और लागू नहीं किया जा सकता।",
+      "alignment_scale": "अलाइनमेंट शीट का स्केल {scale} गुना बदलता है, जो एक ही ड्रॉइंग के रिविज़नों के अंतर से अधिक है।",
+      "alignment_low_confidence": "स्वचालित अलाइनमेंट अनिश्चित है (विश्वसनीयता {confidence})।",
+      "alignment_manual_points": "मैनुअल अलाइनमेंट के लिए दो बिंदु-युग्म चाहिए।",
+      "alignment_ok": "शीट अलाइनमेंट विश्वसनीय है।",
+      "alignment_hint": "दोनों रिविज़न में साझा दो चिह्नों, जैसे ग्रिड के कटान बिंदुओं, पर शीटों को हाथ से अलाइन करें।",
+      "region_empty": "बदलाव {seq} का कोई आकार नहीं है।",
+      "region_off_sheet": "बदलाव {seq} शीट के बाहर है।",
+      "regions_ok": "हर बदला हुआ क्षेत्र शीट पर है।",
+      "triaged_ok": "हर बदलाव की समीक्षा हो चुकी है।",
+      "triaged_open": "{count} बदलाव अभी खुले हैं।",
+      "triaged_hint": "हर बदलाव को प्रासंगिक या अप्रासंगिक चिह्नित करें।",
+      "followed_up_ok": "हर प्रासंगिक बदलाव पर अनुवर्ती कार्रवाई हो चुकी है।",
+      "followed_up_missing": "बदलाव {seq} प्रासंगिक चिह्नित है, पर उस पर टिप्पणी, RFI, क्लाउड या पुनः मापन का चिह्न नहीं है।",
+      "followed_up_hint": "बदलाव पर टिप्पणी करें, RFI या क्लाउड बनाएँ, या उसके भीतर की मात्राओं को पुनः मापन के लिए चिह्नित करें।"
+    }
   }
 }

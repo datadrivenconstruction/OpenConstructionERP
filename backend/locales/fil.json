@@ -618,5 +618,93 @@
       "draft": "Draft",
       "frozen": "Naka-lock"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, pahina {page}",
+    "text_change": "Ang \"{old}\" ay ginawang \"{new}\"",
+    "kind": {
+      "added": "Idinagdag",
+      "removed": "Inalis",
+      "modified": "Binago",
+      "text": "Nabago ang teksto"
+    },
+    "status": {
+      "open": "Bukas",
+      "relevant": "May kaugnayan",
+      "not_relevant": "Walang kaugnayan"
+    },
+    "errors": {
+      "revision_not_found": "Hindi nakita ang rebisyon ng drowing sa proyektong ito.",
+      "revision_not_parsed": "Wala pang naprosesong bersyon ang drowing na maikukumpara.",
+      "comparison_not_found": "Hindi nakita ang paghahambing.",
+      "change_not_found": "Hindi nakita ang pagbabago.",
+      "same_revision": "Pumili ng dalawang magkaibang rebisyon o pahina na ihahambing.",
+      "manual_points": "Kailangan ng manwal na pag-align ng dalawang magkaibang punto sa bawat rebisyon.",
+      "alignment_singular": "Hindi mailalapat ang pag-align: pinapaliit nito ang sheet.",
+      "region_empty": "Walang laki ang pagbabago {seq}.",
+      "region_off_sheet": "Nasa labas ng sheet ang pagbabago {seq}.",
+      "module_missing": "Hindi naka-install ang module na kailangan para sa aksyong ito."
+    },
+    "rfi": {
+      "subject": "Pagbabago sa drowing {seq} sa {sheet}",
+      "question": "Naiiba ang rebisyon {new} ng {sheet} sa rebisyon {old} sa minarkahang bahagi ({kind}). Pakikumpirma ang layunin ng pagbabago at kung apektado ang mga dami."
+    },
+    "markup": {
+      "text": "Pagbabago sa rebisyon {seq}: {kind}"
+    },
+    "report": {
+      "title": "Paghahambing ng mga rebisyon ng drowing",
+      "project": "Proyekto",
+      "name": "Paghahambing",
+      "old_revision": "Mas lumang rebisyon",
+      "new_revision": "Mas bagong rebisyon",
+      "alignment": "Pag-align",
+      "alignment_none": "Hindi naka-align (parehong frame)",
+      "alignment_auto": "Awtomatiko",
+      "alignment_manual": "Manwal, dalawang punto",
+      "confidence": "kumpiyansa {value}",
+      "summary": "Mga pagbabago",
+      "summary_counts": "Kabuuang {total}: {added} idinagdag, {removed} inalis, {modified} binago, {text} teksto",
+      "generated_on": "Petsa ng pagbuo",
+      "generated": "Binuo noong {timestamp}",
+      "page_of": "Pahina {page} ng {total}",
+      "no_changes": "Walang nakitang pagbabago sa pagitan ng dalawang rebisyon.",
+      "col_no": "Blg.",
+      "col_preview": "Preview",
+      "col_kind": "Pagbabago",
+      "col_location": "Lokasyon",
+      "col_detail": "Detalye",
+      "col_status": "Katayuan",
+      "col_comment": "Komento",
+      "col_follow_up": "Kasunod na aksyon",
+      "page_at": "Pahina {page} sa {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Mga entidad: {added} idinagdag, {removed} inalis, {modified} binago",
+      "rfi": "RFI {number}",
+      "markup": "Ulap ng rebisyon",
+      "remeasure": "Sukatin muli: {items} dami, {positions} aytem ng BOQ"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Magkaibang rebisyon ang dalawang panig.",
+      "distinct_revisions_fail": "Ihinahambing ng paghahambing ang isang sheet sa sarili nito.",
+      "distinct_revisions_hint": "Piliin ang mas luma at mas bagong rebisyon ng drowing.",
+      "alignment_not_needed": "Pareho ang mga yunit ng drowing ng mga rebisyon ng DWG; hindi kailangan ang pag-align.",
+      "alignment_missing_matrix": "Walang pag-align ang paghahambing.",
+      "alignment_singular": "Pinapaliit ng pag-align ang sheet at hindi ito mailalapat.",
+      "alignment_scale": "Binabago ng pag-align ang sukat ng sheet nang {scale}, higit sa pagkakaiba ng mga rebisyon ng iisang drowing.",
+      "alignment_low_confidence": "Hindi tiyak ang awtomatikong pag-align (kumpiyansa {confidence}).",
+      "alignment_manual_points": "Kailangan ng manwal na pag-align ng dalawang pares ng punto.",
+      "alignment_ok": "Kapani-paniwala ang pag-align ng sheet.",
+      "alignment_hint": "I-align nang manwal ang mga sheet sa dalawang marka na parehong nasa dalawang rebisyon, tulad ng mga krus ng grid.",
+      "region_empty": "Walang laki ang pagbabago {seq}.",
+      "region_off_sheet": "Nasa labas ng sheet ang pagbabago {seq}.",
+      "regions_ok": "Nasa sheet ang bawat binagong bahagi.",
+      "triaged_ok": "Nasuri na ang bawat pagbabago.",
+      "triaged_open": "{count} pagbabago ang bukas pa.",
+      "triaged_hint": "Markahan ang bawat pagbabago bilang may kaugnayan o walang kaugnayan.",
+      "followed_up_ok": "May kasunod na aksyon ang bawat pagbabagong may kaugnayan.",
+      "followed_up_missing": "Minarkahang may kaugnayan ang pagbabago {seq} pero walang komento, RFI, ulap, o marka ng muling pagsukat.",
+      "followed_up_hint": "Magkomento sa pagbabago, gumawa ng RFI o ulap, o markahan ang mga dami sa loob nito para sukatin muli."
+    }
   }
 }

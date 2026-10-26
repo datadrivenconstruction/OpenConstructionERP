@@ -2058,6 +2058,18 @@ class DwgTakeoffService:
             data = json.load(f)
         return data if isinstance(data, list) else []
 
+    async def load_version_entities(self, version: DwgDrawingVersion) -> list[dict[str, Any]]:
+        """The stored entity records of one parsed version, as the converter wrote them.
+
+        Public read for other modules (the revision compare diffs these entity
+        by entity). A missing or unreadable blob reads as no entities.
+        """
+        try:
+            return await self._load_raw_entities(version)
+        except (OSError, ValueError):
+            logger.warning("Entities unreadable for drawing version %s", version.id)
+            return []
+
     # ── Revision compare (Item 17) ──────────────────────────────────────
 
     async def list_drawing_versions(self, drawing_id: uuid.UUID) -> list[DwgDrawingVersion]:

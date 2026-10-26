@@ -618,5 +618,93 @@
       "draft": "Utkast",
       "frozen": "Fryst"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, sida {page}",
+    "text_change": "\"{old}\" ändrad till \"{new}\"",
+    "kind": {
+      "added": "Tillagd",
+      "removed": "Borttagen",
+      "modified": "Ändrad",
+      "text": "Text ändrad"
+    },
+    "status": {
+      "open": "Öppen",
+      "relevant": "Relevant",
+      "not_relevant": "Inte relevant"
+    },
+    "errors": {
+      "revision_not_found": "Ritningsrevisionen hittades inte i det här projektet.",
+      "revision_not_parsed": "Ritningen har ännu ingen bearbetad version att jämföra.",
+      "comparison_not_found": "Jämförelsen hittades inte.",
+      "change_not_found": "Ändringen hittades inte.",
+      "same_revision": "Välj två olika revisioner eller sidor att jämföra.",
+      "manual_points": "Manuell passning kräver två skilda punkter på varje revision.",
+      "alignment_singular": "Passningen kan inte tillämpas: den kollapsar bladet.",
+      "region_empty": "Ändring {seq} har ingen storlek.",
+      "region_off_sheet": "Ändring {seq} ligger utanför bladet.",
+      "module_missing": "Modulen som behövs för den här åtgärden är inte installerad."
+    },
+    "rfi": {
+      "subject": "Ritningsändring {seq} på {sheet}",
+      "question": "Revision {new} av {sheet} skiljer sig från revision {old} i det markerade området ({kind}). Bekräfta avsikten med ändringen och om mängder påverkas."
+    },
+    "markup": {
+      "text": "Revisionsändring {seq}: {kind}"
+    },
+    "report": {
+      "title": "Jämförelse av ritningsrevisioner",
+      "project": "Projekt",
+      "name": "Jämförelse",
+      "old_revision": "Äldre revision",
+      "new_revision": "Nyare revision",
+      "alignment": "Passning",
+      "alignment_none": "Inte passad (samma ram)",
+      "alignment_auto": "Automatisk",
+      "alignment_manual": "Manuell, två punkter",
+      "confidence": "säkerhet {value}",
+      "summary": "Ändringar",
+      "summary_counts": "Totalt {total}: {added} tillagda, {removed} borttagna, {modified} ändrade, {text} text",
+      "generated_on": "Skapad den",
+      "generated": "Skapad {timestamp}",
+      "page_of": "Sida {page} av {total}",
+      "no_changes": "Inga ändringar hittades mellan de två revisionerna.",
+      "col_no": "Nr",
+      "col_preview": "Förhandsvisning",
+      "col_kind": "Ändring",
+      "col_location": "Plats",
+      "col_detail": "Detalj",
+      "col_status": "Status",
+      "col_comment": "Kommentar",
+      "col_follow_up": "Uppföljning",
+      "page_at": "Sida {page} vid {coords}",
+      "layer": "Lager {layer}",
+      "entity_counts": "Objekt: {added} tillagda, {removed} borttagna, {modified} ändrade",
+      "rfi": "RFI {number}",
+      "markup": "Revisionsmoln",
+      "remeasure": "Mät om: {items} mängder, {positions} poster i kalkylen"
+    },
+    "rules": {
+      "distinct_revisions_ok": "De två sidorna är olika revisioner.",
+      "distinct_revisions_fail": "Jämförelsen jämför ett blad med sig självt.",
+      "distinct_revisions_hint": "Välj den äldre och den nyare revisionen av ritningen.",
+      "alignment_not_needed": "DWG-revisioner delar ritningsenheter; ingen passning behövs.",
+      "alignment_missing_matrix": "Jämförelsen har ingen passning.",
+      "alignment_singular": "Passningen kollapsar bladet och kan inte tillämpas.",
+      "alignment_scale": "Passningen skalar om bladet med {scale}, mer än revisioner av en ritning skiljer sig åt.",
+      "alignment_low_confidence": "Den automatiska passningen är osäker (säkerhet {confidence}).",
+      "alignment_manual_points": "En manuell passning kräver två punktpar.",
+      "alignment_ok": "Bladpassningen är rimlig.",
+      "alignment_hint": "Passa bladen för hand mot två märken som båda revisionerna delar, till exempel rutnätskorsningar.",
+      "region_empty": "Ändring {seq} har ingen storlek.",
+      "region_off_sheet": "Ändring {seq} ligger utanför bladet.",
+      "regions_ok": "Varje ändrat område ligger på bladet.",
+      "triaged_ok": "Varje ändring har granskats.",
+      "triaged_open": "{count} ändringar är fortfarande öppna.",
+      "triaged_hint": "Markera varje ändring som relevant eller inte relevant.",
+      "followed_up_ok": "Varje relevant ändring är uppföljd.",
+      "followed_up_missing": "Ändring {seq} är markerad som relevant men har ingen kommentar, RFI, moln eller flagga för ommätning.",
+      "followed_up_hint": "Kommentera ändringen, skapa en RFI eller ett moln, eller flagga mängderna i den för omätning."
+    }
   }
 }

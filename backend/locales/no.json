@@ -618,5 +618,93 @@
       "draft": "Utkast",
       "frozen": "Frosset"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, side {page}",
+    "text_change": "«{old}» endret til «{new}»",
+    "kind": {
+      "added": "Lagt til",
+      "removed": "Fjernet",
+      "modified": "Endret",
+      "text": "Tekst endret"
+    },
+    "status": {
+      "open": "Åpen",
+      "relevant": "Relevant",
+      "not_relevant": "Ikke relevant"
+    },
+    "errors": {
+      "revision_not_found": "Tegningsrevisjonen ble ikke funnet i dette prosjektet.",
+      "revision_not_parsed": "Tegningen har ennå ingen behandlet versjon å sammenligne.",
+      "comparison_not_found": "Sammenligningen ble ikke funnet.",
+      "change_not_found": "Endringen ble ikke funnet.",
+      "same_revision": "Velg to forskjellige revisjoner eller sider å sammenligne.",
+      "manual_points": "Manuell justering krever to forskjellige punkter på hver revisjon.",
+      "alignment_singular": "Justeringen kan ikke brukes: den klapper arket sammen.",
+      "region_empty": "Endring {seq} har ingen størrelse.",
+      "region_off_sheet": "Endring {seq} ligger utenfor arket.",
+      "module_missing": "Modulen som kreves for denne handlingen, er ikke installert."
+    },
+    "rfi": {
+      "subject": "Tegningsendring {seq} på {sheet}",
+      "question": "Revisjon {new} av {sheet} avviker fra revisjon {old} i det markerte området ({kind}). Bekreft hensikten med endringen og om mengder berøres."
+    },
+    "markup": {
+      "text": "Revisjonsendring {seq}: {kind}"
+    },
+    "report": {
+      "title": "Sammenligning av tegningsrevisjoner",
+      "project": "Prosjekt",
+      "name": "Sammenligning",
+      "old_revision": "Eldre revisjon",
+      "new_revision": "Nyere revisjon",
+      "alignment": "Justering",
+      "alignment_none": "Ikke justert (samme ramme)",
+      "alignment_auto": "Automatisk",
+      "alignment_manual": "Manuell, to punkter",
+      "confidence": "sikkerhet {value}",
+      "summary": "Endringer",
+      "summary_counts": "Totalt {total}: {added} lagt til, {removed} fjernet, {modified} endret, {text} tekst",
+      "generated_on": "Opprettet dato",
+      "generated": "Opprettet {timestamp}",
+      "page_of": "Side {page} av {total}",
+      "no_changes": "Det ble ikke funnet endringer mellom de to revisjonene.",
+      "col_no": "Nr.",
+      "col_preview": "Forhåndsvisning",
+      "col_kind": "Endring",
+      "col_location": "Plassering",
+      "col_detail": "Detalj",
+      "col_status": "Status",
+      "col_comment": "Kommentar",
+      "col_follow_up": "Oppfølging",
+      "page_at": "Side {page} ved {coords}",
+      "layer": "Lag {layer}",
+      "entity_counts": "Objekter: {added} lagt til, {removed} fjernet, {modified} endret",
+      "rfi": "RFI {number}",
+      "markup": "Revisjonssky",
+      "remeasure": "Mål om igjen: {items} mengder, {positions} poster i kalkylen"
+    },
+    "rules": {
+      "distinct_revisions_ok": "De to sidene er forskjellige revisjoner.",
+      "distinct_revisions_fail": "Sammenligningen sammenligner et ark med seg selv.",
+      "distinct_revisions_hint": "Velg den eldre og den nyere revisjonen av tegningen.",
+      "alignment_not_needed": "DWG-revisjoner deler tegningsenheter; justering er ikke nødvendig.",
+      "alignment_missing_matrix": "Sammenligningen har ingen justering.",
+      "alignment_singular": "Justeringen klapper arket sammen og kan ikke brukes.",
+      "alignment_scale": "Justeringen skalerer arket med {scale}, mer enn revisjoner av én tegning avviker.",
+      "alignment_low_confidence": "Den automatiske justeringen er usikker (sikkerhet {confidence}).",
+      "alignment_manual_points": "En manuell justering krever to punktpar.",
+      "alignment_ok": "Arkjusteringen er plausibel.",
+      "alignment_hint": "Juster arkene for hånd etter to merker som begge revisjonene deler, for eksempel rutenettkryss.",
+      "region_empty": "Endring {seq} har ingen størrelse.",
+      "region_off_sheet": "Endring {seq} ligger utenfor arket.",
+      "regions_ok": "Hvert endrede område ligger på arket.",
+      "triaged_ok": "Hver endring er gjennomgått.",
+      "triaged_open": "{count} endringer er fortsatt åpne.",
+      "triaged_hint": "Merk hver endring som relevant eller ikke relevant.",
+      "followed_up_ok": "Hver relevant endring er fulgt opp.",
+      "followed_up_missing": "Endring {seq} er merket som relevant, men har ingen kommentar, RFI, sky eller flagg for ommåling.",
+      "followed_up_hint": "Kommenter endringen, opprett en RFI eller sky, eller merk mengdene i den for ommåling."
+    }
   }
 }

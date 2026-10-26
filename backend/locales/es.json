@@ -618,5 +618,93 @@
       "draft": "Borrador",
       "frozen": "Congelada"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, página {page}",
+    "text_change": "«{old}» cambiado a «{new}»",
+    "kind": {
+      "added": "Añadido",
+      "removed": "Eliminado",
+      "modified": "Modificado",
+      "text": "Texto cambiado"
+    },
+    "status": {
+      "open": "Abierto",
+      "relevant": "Relevante",
+      "not_relevant": "No relevante"
+    },
+    "errors": {
+      "revision_not_found": "No se encontró la revisión del plano en este proyecto.",
+      "revision_not_parsed": "El plano aún no tiene una versión procesada para comparar.",
+      "comparison_not_found": "Comparación no encontrada.",
+      "change_not_found": "Cambio no encontrado.",
+      "same_revision": "Elija dos revisiones o páginas distintas para comparar.",
+      "manual_points": "La alineación manual necesita dos puntos distintos en cada revisión.",
+      "alignment_singular": "No se puede aplicar la alineación: colapsa la hoja.",
+      "region_empty": "El cambio {seq} no tiene tamaño.",
+      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
+      "module_missing": "El módulo necesario para esta acción no está instalado."
+    },
+    "rfi": {
+      "subject": "Cambio de plano {seq} en {sheet}",
+      "question": "La revisión {new} de {sheet} difiere de la revisión {old} en la zona marcada ({kind}). Confirme la intención del cambio y si afecta a las mediciones."
+    },
+    "markup": {
+      "text": "Cambio de revisión {seq}: {kind}"
+    },
+    "report": {
+      "title": "Comparación de revisiones de plano",
+      "project": "Proyecto",
+      "name": "Comparación",
+      "old_revision": "Revisión anterior",
+      "new_revision": "Revisión nueva",
+      "alignment": "Alineación",
+      "alignment_none": "Sin alinear (mismo marco)",
+      "alignment_auto": "Automática",
+      "alignment_manual": "Manual, dos puntos",
+      "confidence": "confianza {value}",
+      "summary": "Cambios",
+      "summary_counts": "{total} en total: {added} añadidos, {removed} eliminados, {modified} modificados, {text} de texto",
+      "generated_on": "Fecha de generación",
+      "generated": "Generado el {timestamp}",
+      "page_of": "Página {page} de {total}",
+      "no_changes": "No se encontraron cambios entre las dos revisiones.",
+      "col_no": "N.º",
+      "col_preview": "Vista previa",
+      "col_kind": "Cambio",
+      "col_location": "Ubicación",
+      "col_detail": "Detalle",
+      "col_status": "Estado",
+      "col_comment": "Comentario",
+      "col_follow_up": "Seguimiento",
+      "page_at": "Página {page} en {coords}",
+      "layer": "Capa {layer}",
+      "entity_counts": "Entidades: {added} añadidas, {removed} eliminadas, {modified} modificadas",
+      "rfi": "RFI {number}",
+      "markup": "Nube de revisión",
+      "remeasure": "Volver a medir: {items} mediciones, {positions} partidas del presupuesto"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Ambos lados son revisiones distintas.",
+      "distinct_revisions_fail": "La comparación compara una hoja consigo misma.",
+      "distinct_revisions_hint": "Elija la revisión anterior y la nueva del plano.",
+      "alignment_not_needed": "Las revisiones DWG comparten unidades de dibujo; no hace falta alinear.",
+      "alignment_missing_matrix": "La comparación no tiene alineación.",
+      "alignment_singular": "La alineación colapsa la hoja y no se puede aplicar.",
+      "alignment_scale": "La alineación reescala la hoja en {scale}, más de lo que difieren las revisiones de un mismo plano.",
+      "alignment_low_confidence": "La alineación automática es incierta (confianza {confidence}).",
+      "alignment_manual_points": "Una alineación manual necesita dos pares de puntos.",
+      "alignment_ok": "La alineación de la hoja es verosímil.",
+      "alignment_hint": "Alinee las hojas a mano con dos marcas comunes a ambas revisiones, como intersecciones de ejes.",
+      "region_empty": "El cambio {seq} no tiene tamaño.",
+      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
+      "regions_ok": "Todas las zonas modificadas están dentro de la hoja.",
+      "triaged_ok": "Todos los cambios han sido revisados.",
+      "triaged_open": "Aún hay {count} cambios abiertos.",
+      "triaged_hint": "Marque cada cambio como relevante o no relevante.",
+      "followed_up_ok": "Todo cambio relevante tiene seguimiento.",
+      "followed_up_missing": "El cambio {seq} está marcado como relevante pero no tiene comentario, RFI, marca ni indicador de nueva medición.",
+      "followed_up_hint": "Comente el cambio, emita una RFI o una marca, o señale las mediciones afectadas para volver a medir."
+    }
   }
 }

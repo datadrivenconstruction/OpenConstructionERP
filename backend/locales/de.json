@@ -765,5 +765,93 @@
       "draft": "Entwurf",
       "frozen": "Eingefroren"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, Seite {page}",
+    "text_change": "„{old}“ geändert in „{new}“",
+    "kind": {
+      "added": "Hinzugefügt",
+      "removed": "Entfernt",
+      "modified": "Geändert",
+      "text": "Text geändert"
+    },
+    "status": {
+      "open": "Offen",
+      "relevant": "Relevant",
+      "not_relevant": "Nicht relevant"
+    },
+    "errors": {
+      "revision_not_found": "Die Planrevision wurde in diesem Projekt nicht gefunden.",
+      "revision_not_parsed": "Der Plan hat noch keine verarbeitete Version zum Vergleichen.",
+      "comparison_not_found": "Vergleich nicht gefunden.",
+      "change_not_found": "Änderung nicht gefunden.",
+      "same_revision": "Wählen Sie zwei verschiedene Revisionen oder Seiten zum Vergleichen.",
+      "manual_points": "Die manuelle Ausrichtung benötigt zwei verschiedene Punkte je Revision.",
+      "alignment_singular": "Die Ausrichtung kann nicht angewendet werden: Sie lässt den Plan zusammenfallen.",
+      "region_empty": "Änderung {seq} hat keine Größe.",
+      "region_off_sheet": "Änderung {seq} liegt außerhalb des Plans.",
+      "module_missing": "Das für diese Aktion benötigte Modul ist nicht installiert."
+    },
+    "rfi": {
+      "subject": "Planänderung {seq} auf {sheet}",
+      "question": "Revision {new} von {sheet} weicht im markierten Bereich ({kind}) von Revision {old} ab. Bitte bestätigen Sie die Absicht der Änderung und ob Mengen betroffen sind."
+    },
+    "markup": {
+      "text": "Revisionsänderung {seq}: {kind}"
+    },
+    "report": {
+      "title": "Planrevisionsvergleich",
+      "project": "Projekt",
+      "name": "Vergleich",
+      "old_revision": "Ältere Revision",
+      "new_revision": "Neuere Revision",
+      "alignment": "Ausrichtung",
+      "alignment_none": "Nicht ausgerichtet (gleicher Rahmen)",
+      "alignment_auto": "Automatisch",
+      "alignment_manual": "Manuell, zwei Punkte",
+      "confidence": "Konfidenz {value}",
+      "summary": "Änderungen",
+      "summary_counts": "Insgesamt {total}: {added} hinzugefügt, {removed} entfernt, {modified} geändert, {text} Text",
+      "generated_on": "Erstellungsdatum",
+      "generated": "Erstellt am {timestamp}",
+      "page_of": "Seite {page} von {total}",
+      "no_changes": "Zwischen den beiden Revisionen wurden keine Änderungen gefunden.",
+      "col_no": "Nr.",
+      "col_preview": "Vorschau",
+      "col_kind": "Änderung",
+      "col_location": "Lage",
+      "col_detail": "Detail",
+      "col_status": "Status",
+      "col_comment": "Kommentar",
+      "col_follow_up": "Folgemaßnahme",
+      "page_at": "Seite {page} bei {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Objekte: {added} hinzugefügt, {removed} entfernt, {modified} geändert",
+      "rfi": "RFI {number}",
+      "markup": "Revisionswolke",
+      "remeasure": "Neu aufmessen: {items} Mengen, {positions} LV-Positionen"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Die beiden Seiten sind verschiedene Revisionen.",
+      "distinct_revisions_fail": "Der Vergleich vergleicht einen Plan mit sich selbst.",
+      "distinct_revisions_hint": "Wählen Sie die ältere und die neuere Revision des Plans.",
+      "alignment_not_needed": "DWG-Revisionen teilen sich die Zeichnungseinheiten; eine Ausrichtung ist nicht nötig.",
+      "alignment_missing_matrix": "Der Vergleich hat keine Ausrichtung.",
+      "alignment_singular": "Die Ausrichtung lässt den Plan zusammenfallen und kann nicht angewendet werden.",
+      "alignment_scale": "Die Ausrichtung skaliert den Plan um {scale}, mehr als sich Revisionen einer Zeichnung unterscheiden.",
+      "alignment_low_confidence": "Die automatische Ausrichtung ist unsicher (Konfidenz {confidence}).",
+      "alignment_manual_points": "Eine manuelle Ausrichtung benötigt zwei Punktpaare.",
+      "alignment_ok": "Die Planausrichtung ist plausibel.",
+      "alignment_hint": "Richten Sie die Pläne von Hand an zwei Marken aus, die beide Revisionen teilen, etwa Rasterschnittpunkten.",
+      "region_empty": "Änderung {seq} hat keine Größe.",
+      "region_off_sheet": "Änderung {seq} liegt außerhalb des Plans.",
+      "regions_ok": "Jeder geänderte Bereich liegt auf dem Plan.",
+      "triaged_ok": "Jede Änderung wurde geprüft.",
+      "triaged_open": "{count} Änderungen sind noch offen.",
+      "triaged_hint": "Markieren Sie jede Änderung als relevant oder nicht relevant.",
+      "followed_up_ok": "Jeder relevanten Änderung wird nachgegangen.",
+      "followed_up_missing": "Änderung {seq} ist als relevant markiert, hat aber keinen Kommentar, keine RFI, keine Markierung und kein Neuaufmaß-Kennzeichen.",
+      "followed_up_hint": "Kommentieren Sie die Änderung, erstellen Sie eine RFI oder Markierung oder kennzeichnen Sie die darin enthaltenen Mengen zum Neuaufmessen."
+    }
   }
 }

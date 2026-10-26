@@ -618,5 +618,93 @@
       "draft": "Wersja robocza",
       "frozen": "Zamrożony"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, strona {page}",
+    "text_change": "„{old}” zmieniono na „{new}”",
+    "kind": {
+      "added": "Dodano",
+      "removed": "Usunięto",
+      "modified": "Zmieniono",
+      "text": "Zmieniono tekst"
+    },
+    "status": {
+      "open": "Otwarte",
+      "relevant": "Istotne",
+      "not_relevant": "Nieistotne"
+    },
+    "errors": {
+      "revision_not_found": "Nie znaleziono rewizji rysunku w tym projekcie.",
+      "revision_not_parsed": "Rysunek nie ma jeszcze przetworzonej wersji do porównania.",
+      "comparison_not_found": "Nie znaleziono porównania.",
+      "change_not_found": "Nie znaleziono zmiany.",
+      "same_revision": "Wybierz dwie różne rewizje lub strony do porównania.",
+      "manual_points": "Ręczne dopasowanie wymaga dwóch różnych punktów na każdej rewizji.",
+      "alignment_singular": "Nie można zastosować dopasowania: zapada ono arkusz.",
+      "region_empty": "Zmiana {seq} nie ma rozmiaru.",
+      "region_off_sheet": "Zmiana {seq} leży poza arkuszem.",
+      "module_missing": "Moduł potrzebny do tej czynności nie jest zainstalowany."
+    },
+    "rfi": {
+      "subject": "Zmiana rysunku {seq} na {sheet}",
+      "question": "Rewizja {new} arkusza {sheet} różni się od rewizji {old} w zaznaczonym obszarze ({kind}). Potwierdź intencję zmiany oraz czy dotyczy ona ilości."
+    },
+    "markup": {
+      "text": "Zmiana rewizji {seq}: {kind}"
+    },
+    "report": {
+      "title": "Porównanie rewizji rysunku",
+      "project": "Projekt",
+      "name": "Porównanie",
+      "old_revision": "Starsza rewizja",
+      "new_revision": "Nowsza rewizja",
+      "alignment": "Dopasowanie",
+      "alignment_none": "Niedopasowane (ta sama ramka)",
+      "alignment_auto": "Automatyczne",
+      "alignment_manual": "Ręczne, dwa punkty",
+      "confidence": "pewność {value}",
+      "summary": "Zmiany",
+      "summary_counts": "Razem {total}: dodano {added}, usunięto {removed}, zmieniono {modified}, tekst {text}",
+      "generated_on": "Data wygenerowania",
+      "generated": "Wygenerowano {timestamp}",
+      "page_of": "Strona {page} z {total}",
+      "no_changes": "Między dwiema rewizjami nie znaleziono zmian.",
+      "col_no": "Lp.",
+      "col_preview": "Podgląd",
+      "col_kind": "Zmiana",
+      "col_location": "Lokalizacja",
+      "col_detail": "Szczegóły",
+      "col_status": "Status",
+      "col_comment": "Komentarz",
+      "col_follow_up": "Dalsze działanie",
+      "page_at": "Strona {page}, {coords}",
+      "layer": "Warstwa {layer}",
+      "entity_counts": "Obiekty: dodano {added}, usunięto {removed}, zmieniono {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Chmurka rewizji",
+      "remeasure": "Do ponownego obmiaru: {items} ilości, {positions} pozycji kosztorysu"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Obie strony są różnymi rewizjami.",
+      "distinct_revisions_fail": "Porównanie zestawia arkusz z nim samym.",
+      "distinct_revisions_hint": "Wybierz starszą i nowszą rewizję rysunku.",
+      "alignment_not_needed": "Rewizje DWG mają wspólne jednostki rysunku; dopasowanie nie jest potrzebne.",
+      "alignment_missing_matrix": "Porównanie nie ma dopasowania.",
+      "alignment_singular": "Dopasowanie zapada arkusz i nie można go zastosować.",
+      "alignment_scale": "Dopasowanie zmienia skalę arkusza o {scale}, więcej niż różnią się rewizje jednego rysunku.",
+      "alignment_low_confidence": "Automatyczne dopasowanie jest niepewne (pewność {confidence}).",
+      "alignment_manual_points": "Ręczne dopasowanie wymaga dwóch par punktów.",
+      "alignment_ok": "Dopasowanie arkusza jest wiarygodne.",
+      "alignment_hint": "Dopasuj arkusze ręcznie do dwóch znaczników wspólnych dla obu rewizji, np. przecięć osi siatki.",
+      "region_empty": "Zmiana {seq} nie ma rozmiaru.",
+      "region_off_sheet": "Zmiana {seq} leży poza arkuszem.",
+      "regions_ok": "Każdy zmieniony obszar leży na arkuszu.",
+      "triaged_ok": "Każdą zmianę sprawdzono.",
+      "triaged_open": "Otwartych zmian: {count}.",
+      "triaged_hint": "Oznacz każdą zmianę jako istotną lub nieistotną.",
+      "followed_up_ok": "Każda istotna zmiana ma dalsze działanie.",
+      "followed_up_missing": "Zmiana {seq} jest oznaczona jako istotna, ale nie ma komentarza, RFI, chmurki ani znacznika ponownego obmiaru.",
+      "followed_up_hint": "Skomentuj zmianę, utwórz RFI lub chmurkę albo oznacz ilości w jej obrębie do ponownego obmiaru."
+    }
   }
 }

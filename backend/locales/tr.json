@@ -618,5 +618,93 @@
       "draft": "Taslak",
       "frozen": "Dondurulmuş"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, sayfa {page}",
+    "text_change": "\"{old}\" değeri \"{new}\" olarak değişti",
+    "kind": {
+      "added": "Eklendi",
+      "removed": "Kaldırıldı",
+      "modified": "Değiştirildi",
+      "text": "Metin değişti"
+    },
+    "status": {
+      "open": "Açık",
+      "relevant": "İlgili",
+      "not_relevant": "İlgisiz"
+    },
+    "errors": {
+      "revision_not_found": "Çizim revizyonu bu projede bulunamadı.",
+      "revision_not_parsed": "Çizimin karşılaştırılacak işlenmiş bir sürümü henüz yok.",
+      "comparison_not_found": "Karşılaştırma bulunamadı.",
+      "change_not_found": "Değişiklik bulunamadı.",
+      "same_revision": "Karşılaştırmak için iki farklı revizyon veya sayfa seçin.",
+      "manual_points": "Elle hizalama, her revizyonda iki farklı nokta gerektirir.",
+      "alignment_singular": "Hizalama uygulanamaz: paftayı çökertiyor.",
+      "region_empty": "{seq} numaralı değişikliğin boyutu yok.",
+      "region_off_sheet": "{seq} numaralı değişiklik paftanın dışında kalıyor.",
+      "module_missing": "Bu işlem için gereken modül kurulu değil."
+    },
+    "rfi": {
+      "subject": "{sheet} üzerinde {seq} numaralı çizim değişikliği",
+      "question": "{sheet} paftasının {new} revizyonu, işaretli alanda ({kind}) {old} revizyonundan farklı. Lütfen değişikliğin amacını ve metrajları etkileyip etkilemediğini teyit edin."
+    },
+    "markup": {
+      "text": "Revizyon değişikliği {seq}: {kind}"
+    },
+    "report": {
+      "title": "Çizim revizyonu karşılaştırması",
+      "project": "Proje",
+      "name": "Karşılaştırma",
+      "old_revision": "Eski revizyon",
+      "new_revision": "Yeni revizyon",
+      "alignment": "Hizalama",
+      "alignment_none": "Hizalanmadı (aynı çerçeve)",
+      "alignment_auto": "Otomatik",
+      "alignment_manual": "Elle, iki nokta",
+      "confidence": "güvenilirlik {value}",
+      "summary": "Değişiklikler",
+      "summary_counts": "Toplam {total}: {added} eklendi, {removed} kaldırıldı, {modified} değiştirildi, {text} metin",
+      "generated_on": "Oluşturma tarihi",
+      "generated": "Oluşturulma: {timestamp}",
+      "page_of": "Sayfa {page} / {total}",
+      "no_changes": "İki revizyon arasında değişiklik bulunamadı.",
+      "col_no": "No",
+      "col_preview": "Önizleme",
+      "col_kind": "Değişiklik",
+      "col_location": "Konum",
+      "col_detail": "Ayrıntı",
+      "col_status": "Durum",
+      "col_comment": "Yorum",
+      "col_follow_up": "Takip",
+      "page_at": "Sayfa {page}, {coords}",
+      "layer": "Katman {layer}",
+      "entity_counts": "Nesneler: {added} eklendi, {removed} kaldırıldı, {modified} değiştirildi",
+      "rfi": "RFI {number}",
+      "markup": "Revizyon bulutu",
+      "remeasure": "Yeniden metraj: {items} metraj, {positions} keşif pozu"
+    },
+    "rules": {
+      "distinct_revisions_ok": "İki taraf farklı revizyonlar.",
+      "distinct_revisions_fail": "Karşılaştırma bir paftayı kendisiyle karşılaştırıyor.",
+      "distinct_revisions_hint": "Çizimin eski ve yeni revizyonunu seçin.",
+      "alignment_not_needed": "DWG revizyonları aynı çizim birimlerini paylaşır; hizalama gerekmez.",
+      "alignment_missing_matrix": "Karşılaştırmanın hizalaması yok.",
+      "alignment_singular": "Hizalama paftayı çökertiyor ve uygulanamaz.",
+      "alignment_scale": "Hizalama paftayı {scale} oranında ölçekliyor; bu, aynı çizimin revizyonları arasındaki farktan fazla.",
+      "alignment_low_confidence": "Otomatik hizalama belirsiz (güvenilirlik {confidence}).",
+      "alignment_manual_points": "Elle hizalama iki nokta çifti gerektirir.",
+      "alignment_ok": "Pafta hizalaması makul.",
+      "alignment_hint": "Paftaları, iki revizyonda da bulunan iki işarete, örneğin aks kesişimlerine göre elle hizalayın.",
+      "region_empty": "{seq} numaralı değişikliğin boyutu yok.",
+      "region_off_sheet": "{seq} numaralı değişiklik paftanın dışında kalıyor.",
+      "regions_ok": "Değişen her alan paftanın üzerinde.",
+      "triaged_ok": "Her değişiklik incelendi.",
+      "triaged_open": "{count} değişiklik hâlâ açık.",
+      "triaged_hint": "Her değişikliği ilgili veya ilgisiz olarak işaretleyin.",
+      "followed_up_ok": "Her ilgili değişiklik takip ediliyor.",
+      "followed_up_missing": "{seq} numaralı değişiklik ilgili olarak işaretli ancak yorumu, RFI'si, bulutu veya yeniden metraj işareti yok.",
+      "followed_up_hint": "Değişiklik hakkında yorum yapın, RFI veya bulut oluşturun ya da içindeki metrajları yeniden ölçüm için işaretleyin."
+    }
   }
 }

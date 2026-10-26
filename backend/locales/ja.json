@@ -618,5 +618,93 @@
       "draft": "下書き",
       "frozen": "確定済み"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}、{page}ページ",
+    "text_change": "「{old}」が「{new}」に変更されました",
+    "kind": {
+      "added": "追加",
+      "removed": "削除",
+      "modified": "変更",
+      "text": "文字変更"
+    },
+    "status": {
+      "open": "未処理",
+      "relevant": "要対応",
+      "not_relevant": "対応不要"
+    },
+    "errors": {
+      "revision_not_found": "このプロジェクトに図面の改訂版が見つかりません。",
+      "revision_not_parsed": "図面には、比較できる処理済みの版がまだありません。",
+      "comparison_not_found": "比較が見つかりません。",
+      "change_not_found": "変更が見つかりません。",
+      "same_revision": "比較する異なる改訂版またはページを2つ選択してください。",
+      "manual_points": "手動位置合わせには、各改訂版で異なる2点が必要です。",
+      "alignment_singular": "位置合わせを適用できません。シートが潰れてしまいます。",
+      "region_empty": "変更 {seq} にはサイズがありません。",
+      "region_off_sheet": "変更 {seq} はシートの外にあります。",
+      "module_missing": "この操作に必要なモジュールがインストールされていません。"
+    },
+    "rfi": {
+      "subject": "{sheet} の図面変更 {seq}",
+      "question": "{sheet} の改訂 {new} は、マークした範囲({kind})で改訂 {old} と異なります。変更の意図と、数量への影響の有無をご確認ください。"
+    },
+    "markup": {
+      "text": "改訂変更 {seq}:{kind}"
+    },
+    "report": {
+      "title": "図面改訂の比較",
+      "project": "プロジェクト",
+      "name": "比較",
+      "old_revision": "旧改訂",
+      "new_revision": "新改訂",
+      "alignment": "位置合わせ",
+      "alignment_none": "未調整(同一フレーム)",
+      "alignment_auto": "自動",
+      "alignment_manual": "手動(2点)",
+      "confidence": "信頼度 {value}",
+      "summary": "変更",
+      "summary_counts": "合計 {total} 件:追加 {added}、削除 {removed}、変更 {modified}、文字 {text}",
+      "generated_on": "作成日",
+      "generated": "作成日時 {timestamp}",
+      "page_of": "{total} ページ中 {page} ページ",
+      "no_changes": "2つの改訂版の間に変更は見つかりませんでした。",
+      "col_no": "番号",
+      "col_preview": "プレビュー",
+      "col_kind": "変更",
+      "col_location": "位置",
+      "col_detail": "詳細",
+      "col_status": "状態",
+      "col_comment": "コメント",
+      "col_follow_up": "フォローアップ",
+      "page_at": "{page}ページ、{coords}",
+      "layer": "レイヤー {layer}",
+      "entity_counts": "要素:追加 {added}、削除 {removed}、変更 {modified}",
+      "rfi": "RFI {number}",
+      "markup": "改訂雲",
+      "remeasure": "再積算:数量 {items} 件、BOQ 項目 {positions} 件"
+    },
+    "rules": {
+      "distinct_revisions_ok": "両側が異なる改訂版です。",
+      "distinct_revisions_fail": "この比較は、シートを自分自身と比較しています。",
+      "distinct_revisions_hint": "図面の旧改訂と新改訂を選択してください。",
+      "alignment_not_needed": "DWG の改訂版は図面単位が共通のため、位置合わせは不要です。",
+      "alignment_missing_matrix": "この比較には位置合わせがありません。",
+      "alignment_singular": "位置合わせによりシートが潰れるため、適用できません。",
+      "alignment_scale": "位置合わせによりシートが {scale} 倍に拡縮されます。同一図面の改訂版の差を超えています。",
+      "alignment_low_confidence": "自動位置合わせが不確かです(信頼度 {confidence})。",
+      "alignment_manual_points": "手動位置合わせには2組の点が必要です。",
+      "alignment_ok": "シートの位置合わせは妥当です。",
+      "alignment_hint": "両方の改訂版にある2つの目印(通り芯の交点など)で、手動でシートを位置合わせしてください。",
+      "region_empty": "変更 {seq} にはサイズがありません。",
+      "region_off_sheet": "変更 {seq} はシートの外にあります。",
+      "regions_ok": "変更された範囲はすべてシート上にあります。",
+      "triaged_ok": "すべての変更を確認済みです。",
+      "triaged_open": "未処理の変更が {count} 件あります。",
+      "triaged_hint": "各変更を「要対応」または「対応不要」にマークしてください。",
+      "followed_up_ok": "要対応の変更はすべてフォローアップ済みです。",
+      "followed_up_missing": "変更 {seq} は要対応ですが、コメント、RFI、改訂雲、再積算フラグがありません。",
+      "followed_up_hint": "変更にコメントするか、RFI または改訂雲を作成するか、内部の数量に再積算のフラグを付けてください。"
+    }
   }
 }

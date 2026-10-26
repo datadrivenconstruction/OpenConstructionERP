@@ -618,5 +618,93 @@
       "draft": "Mustand",
       "frozen": "Külmutatud"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, lk {page}",
+    "text_change": "\"{old}\" muudetud kujule \"{new}\"",
+    "kind": {
+      "added": "Lisatud",
+      "removed": "Eemaldatud",
+      "modified": "Muudetud",
+      "text": "Tekst muudetud"
+    },
+    "status": {
+      "open": "Avatud",
+      "relevant": "Oluline",
+      "not_relevant": "Ebaoluline"
+    },
+    "errors": {
+      "revision_not_found": "Joonise redaktsiooni ei leitud sellest projektist.",
+      "revision_not_parsed": "Joonisel pole veel töödeldud versiooni, mida võrrelda.",
+      "comparison_not_found": "Võrdlust ei leitud.",
+      "change_not_found": "Muudatust ei leitud.",
+      "same_revision": "Valige võrdlemiseks kaks erinevat redaktsiooni või lehte.",
+      "manual_points": "Käsitsi joondamine nõuab kahte erinevat punkti kummagi redaktsiooni peal.",
+      "alignment_singular": "Joondust ei saa rakendada: see variseb lehe kokku.",
+      "region_empty": "Muudatusel {seq} puudub suurus.",
+      "region_off_sheet": "Muudatus {seq} jääb lehest välja.",
+      "module_missing": "Selle toimingu jaoks vajalik moodul ei ole paigaldatud."
+    },
+    "rfi": {
+      "subject": "Joonise muudatus {seq} lehel {sheet}",
+      "question": "Lehe {sheet} redaktsioon {new} erineb redaktsioonist {old} märgitud alal ({kind}). Palun kinnitage muudatuse eesmärk ja kas see mõjutab koguseid."
+    },
+    "markup": {
+      "text": "Redaktsiooni muudatus {seq}: {kind}"
+    },
+    "report": {
+      "title": "Joonise redaktsioonide võrdlus",
+      "project": "Projekt",
+      "name": "Võrdlus",
+      "old_revision": "Vanem redaktsioon",
+      "new_revision": "Uuem redaktsioon",
+      "alignment": "Joondus",
+      "alignment_none": "Joondamata (sama raam)",
+      "alignment_auto": "Automaatne",
+      "alignment_manual": "Käsitsi, kaks punkti",
+      "confidence": "usaldusväärsus {value}",
+      "summary": "Muudatused",
+      "summary_counts": "Kokku {total}: lisatud {added}, eemaldatud {removed}, muudetud {modified}, teksti {text}",
+      "generated_on": "Koostamise kuupäev",
+      "generated": "Koostatud {timestamp}",
+      "page_of": "Lk {page} / {total}",
+      "no_changes": "Kahe redaktsiooni vahel muudatusi ei leitud.",
+      "col_no": "Nr",
+      "col_preview": "Eelvaade",
+      "col_kind": "Muudatus",
+      "col_location": "Asukoht",
+      "col_detail": "Üksikasjad",
+      "col_status": "Staatus",
+      "col_comment": "Kommentaar",
+      "col_follow_up": "Järgmine samm",
+      "page_at": "Lk {page}, {coords}",
+      "layer": "Kiht {layer}",
+      "entity_counts": "Objektid: lisatud {added}, eemaldatud {removed}, muudetud {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Redaktsioonipilv",
+      "remeasure": "Mõõda uuesti: {items} kogust, {positions} eelarve rida"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Mõlemad pooled on erinevad redaktsioonid.",
+      "distinct_revisions_fail": "Võrdlus võrdleb lehte iseendaga.",
+      "distinct_revisions_hint": "Valige joonise vanem ja uuem redaktsioon.",
+      "alignment_not_needed": "DWG redaktsioonidel on samad joonestusühikud; joondamist pole vaja.",
+      "alignment_missing_matrix": "Võrdlusel puudub joondus.",
+      "alignment_singular": "Joondus variseb lehe kokku ja seda ei saa rakendada.",
+      "alignment_scale": "Joondus muudab lehe mõõtkava {scale} korda, rohkem kui ühe joonise redaktsioonid erinevad.",
+      "alignment_low_confidence": "Automaatne joondus on ebakindel (usaldusväärsus {confidence}).",
+      "alignment_manual_points": "Käsitsi joondamine nõuab kahte punktipaari.",
+      "alignment_ok": "Lehe joondus on usutav.",
+      "alignment_hint": "Joondage lehed käsitsi kahe märgi järgi, mis on mõlemal redaktsioonil, näiteks teljeristumised.",
+      "region_empty": "Muudatusel {seq} puudub suurus.",
+      "region_off_sheet": "Muudatus {seq} jääb lehest välja.",
+      "regions_ok": "Iga muudetud ala asub lehel.",
+      "triaged_ok": "Iga muudatus on üle vaadatud.",
+      "triaged_open": "{count} muudatust on veel avatud.",
+      "triaged_hint": "Märkige iga muudatus oluliseks või ebaoluliseks.",
+      "followed_up_ok": "Iga olulise muudatusega on tegeletud.",
+      "followed_up_missing": "Muudatus {seq} on märgitud oluliseks, kuid sellel pole kommentaari, RFI-d, pilve ega ümbermõõtmise märget.",
+      "followed_up_hint": "Kommenteerige muudatust, koostage RFI või pilv või märkige selle sees olevad kogused ümbermõõtmiseks."
+    }
   }
 }

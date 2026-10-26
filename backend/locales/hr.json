@@ -618,5 +618,93 @@
       "draft": "Nacrt",
       "frozen": "Zamrznut"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, stranica {page}",
+    "text_change": "„{old}” promijenjeno u „{new}”",
+    "kind": {
+      "added": "Dodano",
+      "removed": "Uklonjeno",
+      "modified": "Izmijenjeno",
+      "text": "Tekst promijenjen"
+    },
+    "status": {
+      "open": "Otvoreno",
+      "relevant": "Relevantno",
+      "not_relevant": "Nerelevantno"
+    },
+    "errors": {
+      "revision_not_found": "Revizija nacrta nije pronađena u ovom projektu.",
+      "revision_not_parsed": "Nacrt još nema obrađenu verziju za usporedbu.",
+      "comparison_not_found": "Usporedba nije pronađena.",
+      "change_not_found": "Promjena nije pronađena.",
+      "same_revision": "Odaberite dvije različite revizije ili stranice za usporedbu.",
+      "manual_points": "Ručno poravnanje zahtijeva dvije različite točke na svakoj reviziji.",
+      "alignment_singular": "Poravnanje se ne može primijeniti: urušava list.",
+      "region_empty": "Promjena {seq} nema veličinu.",
+      "region_off_sheet": "Promjena {seq} leži izvan lista.",
+      "module_missing": "Modul potreban za ovu radnju nije instaliran."
+    },
+    "rfi": {
+      "subject": "Promjena nacrta {seq} na {sheet}",
+      "question": "Revizija {new} lista {sheet} razlikuje se od revizije {old} u označenom području ({kind}). Potvrdite namjeru promjene i utječe li na količine."
+    },
+    "markup": {
+      "text": "Promjena revizije {seq}: {kind}"
+    },
+    "report": {
+      "title": "Usporedba revizija nacrta",
+      "project": "Projekt",
+      "name": "Usporedba",
+      "old_revision": "Starija revizija",
+      "new_revision": "Novija revizija",
+      "alignment": "Poravnanje",
+      "alignment_none": "Nije poravnato (isti okvir)",
+      "alignment_auto": "Automatsko",
+      "alignment_manual": "Ručno, dvije točke",
+      "confidence": "pouzdanost {value}",
+      "summary": "Promjene",
+      "summary_counts": "Ukupno {total}: dodano {added}, uklonjeno {removed}, izmijenjeno {modified}, tekst {text}",
+      "generated_on": "Datum izrade",
+      "generated": "Izrađeno {timestamp}",
+      "page_of": "Stranica {page} od {total}",
+      "no_changes": "Između dviju revizija nisu pronađene promjene.",
+      "col_no": "Br.",
+      "col_preview": "Pregled",
+      "col_kind": "Promjena",
+      "col_location": "Lokacija",
+      "col_detail": "Detalji",
+      "col_status": "Status",
+      "col_comment": "Komentar",
+      "col_follow_up": "Daljnji korak",
+      "page_at": "Stranica {page} na {coords}",
+      "layer": "Sloj {layer}",
+      "entity_counts": "Objekti: dodano {added}, uklonjeno {removed}, izmijenjeno {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Revizijski oblačić",
+      "remeasure": "Ponovno izmjeriti: {items} količina, {positions} stavki troškovnika"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Obje strane su različite revizije.",
+      "distinct_revisions_fail": "Usporedba uspoređuje list sam sa sobom.",
+      "distinct_revisions_hint": "Odaberite stariju i noviju reviziju nacrta.",
+      "alignment_not_needed": "DWG revizije dijele jedinice crteža; poravnanje nije potrebno.",
+      "alignment_missing_matrix": "Usporedba nema poravnanje.",
+      "alignment_singular": "Poravnanje urušava list i ne može se primijeniti.",
+      "alignment_scale": "Poravnanje mijenja mjerilo lista za {scale}, više nego se razlikuju revizije jednog nacrta.",
+      "alignment_low_confidence": "Automatsko poravnanje je nesigurno (pouzdanost {confidence}).",
+      "alignment_manual_points": "Ručno poravnanje zahtijeva dva para točaka.",
+      "alignment_ok": "Poravnanje lista je vjerodostojno.",
+      "alignment_hint": "Ručno poravnajte listove prema dvije oznake zajedničke objema revizijama, na primjer sjecištima osi.",
+      "region_empty": "Promjena {seq} nema veličinu.",
+      "region_off_sheet": "Promjena {seq} leži izvan lista.",
+      "regions_ok": "Svako promijenjeno područje leži na listu.",
+      "triaged_ok": "Svaka promjena je pregledana.",
+      "triaged_open": "Otvorenih promjena: {count}.",
+      "triaged_hint": "Označite svaku promjenu kao relevantnu ili nerelevantnu.",
+      "followed_up_ok": "Svaka relevantna promjena ima daljnji korak.",
+      "followed_up_missing": "Promjena {seq} označena je kao relevantna, ali nema komentar, RFI, oblačić niti oznaku za ponovno mjerenje.",
+      "followed_up_hint": "Komentirajte promjenu, izradite RFI ili oblačić ili označite količine unutar nje za ponovno mjerenje."
+    }
   }
 }

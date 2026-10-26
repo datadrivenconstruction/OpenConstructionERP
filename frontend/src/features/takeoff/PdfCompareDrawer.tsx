@@ -301,6 +301,20 @@ export function PdfCompareDrawer({
           ))}
         </div>
 
+        {canCompare && (
+          <button
+            type="button"
+            onClick={() =>
+              navigate(`/drawing-compare?from=${encodeURIComponent(fromId)}&to=${encodeURIComponent(toId)}`)
+            }
+            className="inline-flex items-center gap-1.5 self-start text-xs font-medium text-oe-blue hover:underline"
+            data-testid="takeoff-compare-visual"
+          >
+            <GitCompare size={13} />
+            {t('takeoff_compare.open_visual', { defaultValue: 'Compare the sheets visually and list every change' })}
+          </button>
+        )}
+
         {/* States */}
         {canCompare && diffQuery.isLoading && (
           <div className="flex items-center justify-center gap-2 py-10 text-sm text-content-tertiary">

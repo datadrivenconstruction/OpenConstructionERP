@@ -789,5 +789,93 @@
       "draft": "مسودة",
       "frozen": "مجمّدة"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}، الصفحة {page}",
+    "text_change": "تم تغيير \"{old}\" إلى \"{new}\"",
+    "kind": {
+      "added": "مضاف",
+      "removed": "محذوف",
+      "modified": "معدّل",
+      "text": "تغيّر النص"
+    },
+    "status": {
+      "open": "مفتوح",
+      "relevant": "ذو صلة",
+      "not_relevant": "غير ذي صلة"
+    },
+    "errors": {
+      "revision_not_found": "لم يتم العثور على مراجعة المخطط في هذا المشروع.",
+      "revision_not_parsed": "لا توجد للمخطط نسخة معالجة للمقارنة بعد.",
+      "comparison_not_found": "لم يتم العثور على المقارنة.",
+      "change_not_found": "لم يتم العثور على التغيير.",
+      "same_revision": "اختر مراجعتين أو صفحتين مختلفتين للمقارنة.",
+      "manual_points": "تتطلب المحاذاة اليدوية نقطتين مختلفتين على كل مراجعة.",
+      "alignment_singular": "لا يمكن تطبيق المحاذاة: فهي تطوي اللوحة.",
+      "region_empty": "التغيير {seq} بلا حجم.",
+      "region_off_sheet": "التغيير {seq} يقع خارج اللوحة.",
+      "module_missing": "الوحدة المطلوبة لهذا الإجراء غير مثبّتة."
+    },
+    "rfi": {
+      "subject": "تغيير المخطط {seq} في {sheet}",
+      "question": "تختلف المراجعة {new} من {sheet} عن المراجعة {old} في المنطقة المحددة ({kind}). يرجى تأكيد الغرض من التغيير وما إذا كانت الكميات متأثرة."
+    },
+    "markup": {
+      "text": "تغيير المراجعة {seq}: {kind}"
+    },
+    "report": {
+      "title": "مقارنة مراجعات المخطط",
+      "project": "المشروع",
+      "name": "المقارنة",
+      "old_revision": "المراجعة الأقدم",
+      "new_revision": "المراجعة الأحدث",
+      "alignment": "المحاذاة",
+      "alignment_none": "غير محاذى (الإطار نفسه)",
+      "alignment_auto": "تلقائية",
+      "alignment_manual": "يدوية، نقطتان",
+      "confidence": "الثقة {value}",
+      "summary": "التغييرات",
+      "summary_counts": "الإجمالي {total}: {added} مضاف، {removed} محذوف، {modified} معدّل، {text} نصي",
+      "generated_on": "تاريخ الإنشاء",
+      "generated": "تم الإنشاء {timestamp}",
+      "page_of": "الصفحة {page} من {total}",
+      "no_changes": "لم يتم العثور على تغييرات بين المراجعتين.",
+      "col_no": "الرقم",
+      "col_preview": "معاينة",
+      "col_kind": "التغيير",
+      "col_location": "الموقع",
+      "col_detail": "التفاصيل",
+      "col_status": "الحالة",
+      "col_comment": "تعليق",
+      "col_follow_up": "المتابعة",
+      "page_at": "الصفحة {page} عند {coords}",
+      "layer": "الطبقة {layer}",
+      "entity_counts": "العناصر: {added} مضاف، {removed} محذوف، {modified} معدّل",
+      "rfi": "RFI {number}",
+      "markup": "سحابة المراجعة",
+      "remeasure": "إعادة القياس: {items} كميات، {positions} بنود جدول الكميات"
+    },
+    "rules": {
+      "distinct_revisions_ok": "الجانبان مراجعتان مختلفتان.",
+      "distinct_revisions_fail": "تقارن المقارنة اللوحة بنفسها.",
+      "distinct_revisions_hint": "اختر المراجعة الأقدم والأحدث للمخطط.",
+      "alignment_not_needed": "تشترك مراجعات DWG في وحدات الرسم؛ لا حاجة إلى محاذاة.",
+      "alignment_missing_matrix": "ليس للمقارنة محاذاة.",
+      "alignment_singular": "تطوي المحاذاة اللوحة ولا يمكن تطبيقها.",
+      "alignment_scale": "تغيّر المحاذاة مقياس اللوحة بمقدار {scale}، وهو أكبر مما تختلف به مراجعات المخطط الواحد.",
+      "alignment_low_confidence": "المحاذاة التلقائية غير مؤكدة (الثقة {confidence}).",
+      "alignment_manual_points": "تتطلب المحاذاة اليدوية زوجين من النقاط.",
+      "alignment_ok": "محاذاة اللوحة معقولة.",
+      "alignment_hint": "حاذِ اللوحات يدويًا على علامتين مشتركتين بين المراجعتين، مثل تقاطعات المحاور.",
+      "region_empty": "التغيير {seq} بلا حجم.",
+      "region_off_sheet": "التغيير {seq} يقع خارج اللوحة.",
+      "regions_ok": "كل منطقة متغيرة تقع على اللوحة.",
+      "triaged_ok": "تمت مراجعة كل تغيير.",
+      "triaged_open": "لا يزال {count} من التغييرات مفتوحًا.",
+      "triaged_hint": "علّم كل تغيير بأنه ذو صلة أو غير ذي صلة.",
+      "followed_up_ok": "كل تغيير ذي صلة تمت متابعته.",
+      "followed_up_missing": "التغيير {seq} معلَّم بأنه ذو صلة ولكن بلا تعليق أو RFI أو سحابة أو علامة إعادة قياس.",
+      "followed_up_hint": "علّق على التغيير، أو أنشئ RFI أو سحابة، أو علّم الكميات داخله لإعادة القياس."
+    }
   }
 }

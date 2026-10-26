@@ -618,5 +618,93 @@
       "draft": "Nháp",
       "frozen": "Đã khóa"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, trang {page}",
+    "text_change": "\"{old}\" đã đổi thành \"{new}\"",
+    "kind": {
+      "added": "Đã thêm",
+      "removed": "Đã xóa",
+      "modified": "Đã sửa",
+      "text": "Văn bản đã đổi"
+    },
+    "status": {
+      "open": "Đang mở",
+      "relevant": "Liên quan",
+      "not_relevant": "Không liên quan"
+    },
+    "errors": {
+      "revision_not_found": "Không tìm thấy phiên bản bản vẽ trong dự án này.",
+      "revision_not_parsed": "Bản vẽ chưa có phiên bản đã xử lý để so sánh.",
+      "comparison_not_found": "Không tìm thấy bản so sánh.",
+      "change_not_found": "Không tìm thấy thay đổi.",
+      "same_revision": "Chọn hai phiên bản hoặc hai trang khác nhau để so sánh.",
+      "manual_points": "Căn chỉnh thủ công cần hai điểm khác nhau trên mỗi phiên bản.",
+      "alignment_singular": "Không thể áp dụng căn chỉnh: nó làm xẹp tờ bản vẽ.",
+      "region_empty": "Thay đổi {seq} không có kích thước.",
+      "region_off_sheet": "Thay đổi {seq} nằm ngoài tờ bản vẽ.",
+      "module_missing": "Mô-đun cần cho thao tác này chưa được cài đặt."
+    },
+    "rfi": {
+      "subject": "Thay đổi bản vẽ {seq} trên {sheet}",
+      "question": "Phiên bản {new} của {sheet} khác phiên bản {old} ở vùng được đánh dấu ({kind}). Vui lòng xác nhận mục đích thay đổi và liệu khối lượng có bị ảnh hưởng không."
+    },
+    "markup": {
+      "text": "Thay đổi phiên bản {seq}: {kind}"
+    },
+    "report": {
+      "title": "So sánh các phiên bản bản vẽ",
+      "project": "Dự án",
+      "name": "So sánh",
+      "old_revision": "Phiên bản cũ",
+      "new_revision": "Phiên bản mới",
+      "alignment": "Căn chỉnh",
+      "alignment_none": "Chưa căn chỉnh (cùng khung)",
+      "alignment_auto": "Tự động",
+      "alignment_manual": "Thủ công, hai điểm",
+      "confidence": "độ tin cậy {value}",
+      "summary": "Thay đổi",
+      "summary_counts": "Tổng {total}: {added} thêm, {removed} xóa, {modified} sửa, {text} văn bản",
+      "generated_on": "Ngày tạo",
+      "generated": "Tạo lúc {timestamp}",
+      "page_of": "Trang {page} / {total}",
+      "no_changes": "Không tìm thấy thay đổi nào giữa hai phiên bản.",
+      "col_no": "STT",
+      "col_preview": "Xem trước",
+      "col_kind": "Thay đổi",
+      "col_location": "Vị trí",
+      "col_detail": "Chi tiết",
+      "col_status": "Trạng thái",
+      "col_comment": "Ghi chú",
+      "col_follow_up": "Xử lý tiếp",
+      "page_at": "Trang {page} tại {coords}",
+      "layer": "Lớp {layer}",
+      "entity_counts": "Đối tượng: {added} thêm, {removed} xóa, {modified} sửa",
+      "rfi": "RFI {number}",
+      "markup": "Đám mây phiên bản",
+      "remeasure": "Đo lại: {items} khối lượng, {positions} hạng mục BOQ"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Hai bên là các phiên bản khác nhau.",
+      "distinct_revisions_fail": "Phép so sánh đang so sánh một tờ bản vẽ với chính nó.",
+      "distinct_revisions_hint": "Chọn phiên bản cũ và phiên bản mới của bản vẽ.",
+      "alignment_not_needed": "Các phiên bản DWG dùng chung đơn vị bản vẽ; không cần căn chỉnh.",
+      "alignment_missing_matrix": "Phép so sánh chưa có căn chỉnh.",
+      "alignment_singular": "Căn chỉnh làm xẹp tờ bản vẽ và không thể áp dụng.",
+      "alignment_scale": "Căn chỉnh thay đổi tỷ lệ tờ bản vẽ {scale} lần, nhiều hơn mức các phiên bản của một bản vẽ thường khác nhau.",
+      "alignment_low_confidence": "Căn chỉnh tự động chưa chắc chắn (độ tin cậy {confidence}).",
+      "alignment_manual_points": "Căn chỉnh thủ công cần hai cặp điểm.",
+      "alignment_ok": "Căn chỉnh tờ bản vẽ là hợp lý.",
+      "alignment_hint": "Căn chỉnh thủ công các tờ theo hai dấu chung của cả hai phiên bản, chẳng hạn giao điểm lưới trục.",
+      "region_empty": "Thay đổi {seq} không có kích thước.",
+      "region_off_sheet": "Thay đổi {seq} nằm ngoài tờ bản vẽ.",
+      "regions_ok": "Mọi vùng thay đổi đều nằm trên tờ bản vẽ.",
+      "triaged_ok": "Mọi thay đổi đã được xem xét.",
+      "triaged_open": "Còn {count} thay đổi đang mở.",
+      "triaged_hint": "Đánh dấu từng thay đổi là liên quan hoặc không liên quan.",
+      "followed_up_ok": "Mọi thay đổi liên quan đều đã được xử lý tiếp.",
+      "followed_up_missing": "Thay đổi {seq} được đánh dấu liên quan nhưng chưa có ghi chú, RFI, đám mây hay cờ đo lại.",
+      "followed_up_hint": "Ghi chú vào thay đổi, tạo RFI hoặc đám mây, hoặc đánh dấu các khối lượng bên trong để đo lại."
+    }
   }
 }

@@ -789,5 +789,93 @@
       "draft": "پیش‌نویس",
       "frozen": "قفل‌شده"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}، صفحه {page}",
+    "text_change": "«{old}» به «{new}» تغییر کرد",
+    "kind": {
+      "added": "افزوده شد",
+      "removed": "حذف شد",
+      "modified": "اصلاح شد",
+      "text": "متن تغییر کرد"
+    },
+    "status": {
+      "open": "باز",
+      "relevant": "مرتبط",
+      "not_relevant": "نامرتبط"
+    },
+    "errors": {
+      "revision_not_found": "بازنگری نقشه در این پروژه یافت نشد.",
+      "revision_not_parsed": "نقشه هنوز نسخه پردازش‌شده‌ای برای مقایسه ندارد.",
+      "comparison_not_found": "مقایسه یافت نشد.",
+      "change_not_found": "تغییر یافت نشد.",
+      "same_revision": "برای مقایسه دو بازنگری یا صفحهٔ متفاوت انتخاب کنید.",
+      "manual_points": "هم‌ترازی دستی به دو نقطهٔ متمایز روی هر بازنگری نیاز دارد.",
+      "alignment_singular": "هم‌ترازی قابل اعمال نیست: برگه را فشرده می‌کند.",
+      "region_empty": "تغییر {seq} اندازه ندارد.",
+      "region_off_sheet": "تغییر {seq} بیرون از برگه قرار دارد.",
+      "module_missing": "ماژول لازم برای این کار نصب نشده است."
+    },
+    "rfi": {
+      "subject": "تغییر نقشه {seq} در {sheet}",
+      "question": "بازنگری {new} از {sheet} در ناحیهٔ علامت‌گذاری‌شده ({kind}) با بازنگری {old} تفاوت دارد. لطفاً منظور از تغییر و اثر آن بر مقادیر را تأیید کنید."
+    },
+    "markup": {
+      "text": "تغییر بازنگری {seq}: {kind}"
+    },
+    "report": {
+      "title": "مقایسهٔ بازنگری‌های نقشه",
+      "project": "پروژه",
+      "name": "مقایسه",
+      "old_revision": "بازنگری قدیمی‌تر",
+      "new_revision": "بازنگری جدیدتر",
+      "alignment": "هم‌ترازی",
+      "alignment_none": "هم‌تراز نشده (قاب یکسان)",
+      "alignment_auto": "خودکار",
+      "alignment_manual": "دستی، دو نقطه",
+      "confidence": "اطمینان {value}",
+      "summary": "تغییرات",
+      "summary_counts": "جمعاً {total}: {added} افزوده، {removed} حذف‌شده، {modified} اصلاح‌شده، {text} متنی",
+      "generated_on": "تاریخ تولید",
+      "generated": "تولید شده در {timestamp}",
+      "page_of": "صفحه {page} از {total}",
+      "no_changes": "بین دو بازنگری تغییری یافت نشد.",
+      "col_no": "ردیف",
+      "col_preview": "پیش‌نمایش",
+      "col_kind": "تغییر",
+      "col_location": "موقعیت",
+      "col_detail": "جزئیات",
+      "col_status": "وضعیت",
+      "col_comment": "توضیح",
+      "col_follow_up": "پیگیری",
+      "page_at": "صفحه {page} در {coords}",
+      "layer": "لایه {layer}",
+      "entity_counts": "اجزا: {added} افزوده، {removed} حذف‌شده، {modified} اصلاح‌شده",
+      "rfi": "RFI {number}",
+      "markup": "ابر بازنگری",
+      "remeasure": "اندازه‌گیری مجدد: {items} مقدار، {positions} ردیف صورت‌وضعیت"
+    },
+    "rules": {
+      "distinct_revisions_ok": "دو طرف بازنگری‌های متفاوتی هستند.",
+      "distinct_revisions_fail": "مقایسه، یک برگه را با خودش مقایسه می‌کند.",
+      "distinct_revisions_hint": "بازنگری قدیمی‌تر و جدیدتر نقشه را انتخاب کنید.",
+      "alignment_not_needed": "بازنگری‌های DWG واحدهای ترسیم مشترک دارند؛ هم‌ترازی لازم نیست.",
+      "alignment_missing_matrix": "مقایسه هم‌ترازی ندارد.",
+      "alignment_singular": "هم‌ترازی برگه را فشرده می‌کند و قابل اعمال نیست.",
+      "alignment_scale": "هم‌ترازی مقیاس برگه را {scale} برابر می‌کند، بیش از تفاوت معمول بازنگری‌های یک نقشه.",
+      "alignment_low_confidence": "هم‌ترازی خودکار نامطمئن است (اطمینان {confidence}).",
+      "alignment_manual_points": "هم‌ترازی دستی به دو جفت نقطه نیاز دارد.",
+      "alignment_ok": "هم‌ترازی برگه معقول است.",
+      "alignment_hint": "برگه‌ها را با دست روی دو نشانهٔ مشترک در هر دو بازنگری، مانند تقاطع‌های شبکهٔ محورها، هم‌تراز کنید.",
+      "region_empty": "تغییر {seq} اندازه ندارد.",
+      "region_off_sheet": "تغییر {seq} بیرون از برگه قرار دارد.",
+      "regions_ok": "هر ناحیهٔ تغییریافته روی برگه قرار دارد.",
+      "triaged_ok": "هر تغییر بررسی شده است.",
+      "triaged_open": "{count} تغییر هنوز باز است.",
+      "triaged_hint": "هر تغییر را مرتبط یا نامرتبط علامت بزنید.",
+      "followed_up_ok": "هر تغییر مرتبط پیگیری شده است.",
+      "followed_up_missing": "تغییر {seq} مرتبط علامت خورده اما توضیح، RFI، ابر یا نشانهٔ اندازه‌گیری مجدد ندارد.",
+      "followed_up_hint": "برای تغییر توضیح بنویسید، RFI یا ابر ایجاد کنید، یا مقادیر درون آن را برای اندازه‌گیری مجدد علامت بزنید."
+    }
   }
 }

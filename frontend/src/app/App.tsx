@@ -175,6 +175,9 @@ const BcfPage = lazy(() => import('@/features/bcf/BcfPage').then((m) => ({ defau
 const ModelReviewPage = lazy(() =>
   import('@/features/bim/ModelReviewPage').then((m) => ({ default: m.ModelReviewPage }))
 );
+const DrawingComparePage = lazy(() =>
+  import('@/features/drawing-compare/DrawingComparePage').then((m) => ({ default: m.DrawingComparePage }))
+);
 const PlanRoomPage = lazy(() =>
   import('@/features/plan-room/PlanRoomPage').then((m) => ({ default: m.PlanRoomPage }))
 );
@@ -1332,6 +1335,7 @@ export default function App() {
         <Route path="/bcf" element={<P title="Model Issues"><BcfPage /></P>} />
         <Route path="/model-review" element={<P title="Model Review"><ModelReviewPage /></P>} />
         <Route path="/plan-room" element={<P title="Plan Room"><PlanRoomPage /></P>} />
+        <Route path="/drawing-compare" element={<P title="Revision Compare"><DrawingComparePage /></P>} />
         <Route path="/progress" element={<P title="Progress"><ProgressPage /></P>} />
         <Route path="/assets" element={<P title="Asset Register"><AssetsPage /></P>} />
         <Route path="/bim/:modelId" element={<P title="BIM Viewer"><BIMPage /></P>} />

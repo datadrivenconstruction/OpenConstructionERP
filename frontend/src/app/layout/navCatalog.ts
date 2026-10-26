@@ -17,6 +17,7 @@ import type { LucideIcon } from 'lucide-react';
 
 import {
   Bookmark,
+  GitCompare,
   LayoutDashboard,
   FolderOpen,
   Table2,
@@ -379,6 +380,7 @@ export const navGroups: NavGroup[] = [
       // Plan room is still BETA: landing it in front of the users who chose the
       // simplest view is a decision somebody should make on purpose.
       { labelKey: 'nav.plan_room', to: '/plan-room', icon: Layers, badge: 'BETA', advancedOnly: true },
+      { labelKey: 'nav.drawing_compare', to: '/drawing-compare', icon: GitCompare, badge: 'BETA', advancedOnly: true },
       { labelKey: 'nav.markups', to: '/markups', icon: PenTool, advancedOnly: true },
     ],
   },

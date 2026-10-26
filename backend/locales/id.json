@@ -618,5 +618,93 @@
       "draft": "Draf",
       "frozen": "Beku"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, halaman {page}",
+    "text_change": "\"{old}\" diubah menjadi \"{new}\"",
+    "kind": {
+      "added": "Ditambahkan",
+      "removed": "Dihapus",
+      "modified": "Diubah",
+      "text": "Teks diubah"
+    },
+    "status": {
+      "open": "Terbuka",
+      "relevant": "Relevan",
+      "not_relevant": "Tidak relevan"
+    },
+    "errors": {
+      "revision_not_found": "Revisi gambar tidak ditemukan di proyek ini.",
+      "revision_not_parsed": "Gambar belum memiliki versi terproses untuk dibandingkan.",
+      "comparison_not_found": "Perbandingan tidak ditemukan.",
+      "change_not_found": "Perubahan tidak ditemukan.",
+      "same_revision": "Pilih dua revisi atau halaman yang berbeda untuk dibandingkan.",
+      "manual_points": "Penyelarasan manual memerlukan dua titik berbeda pada setiap revisi.",
+      "alignment_singular": "Penyelarasan tidak dapat diterapkan: lembar menjadi menciut.",
+      "region_empty": "Perubahan {seq} tidak memiliki ukuran.",
+      "region_off_sheet": "Perubahan {seq} berada di luar lembar.",
+      "module_missing": "Modul yang diperlukan untuk tindakan ini belum terpasang."
+    },
+    "rfi": {
+      "subject": "Perubahan gambar {seq} pada {sheet}",
+      "question": "Revisi {new} dari {sheet} berbeda dari revisi {old} pada area yang ditandai ({kind}). Mohon konfirmasi maksud perubahan dan apakah volume pekerjaan terpengaruh."
+    },
+    "markup": {
+      "text": "Perubahan revisi {seq}: {kind}"
+    },
+    "report": {
+      "title": "Perbandingan revisi gambar",
+      "project": "Proyek",
+      "name": "Perbandingan",
+      "old_revision": "Revisi lama",
+      "new_revision": "Revisi baru",
+      "alignment": "Penyelarasan",
+      "alignment_none": "Tidak diselaraskan (bingkai sama)",
+      "alignment_auto": "Otomatis",
+      "alignment_manual": "Manual, dua titik",
+      "confidence": "tingkat keyakinan {value}",
+      "summary": "Perubahan",
+      "summary_counts": "Total {total}: {added} ditambahkan, {removed} dihapus, {modified} diubah, {text} teks",
+      "generated_on": "Tanggal dibuat",
+      "generated": "Dibuat {timestamp}",
+      "page_of": "Halaman {page} dari {total}",
+      "no_changes": "Tidak ada perubahan yang ditemukan antara kedua revisi.",
+      "col_no": "No.",
+      "col_preview": "Pratinjau",
+      "col_kind": "Perubahan",
+      "col_location": "Lokasi",
+      "col_detail": "Detail",
+      "col_status": "Status",
+      "col_comment": "Komentar",
+      "col_follow_up": "Tindak lanjut",
+      "page_at": "Halaman {page} di {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Entitas: {added} ditambahkan, {removed} dihapus, {modified} diubah",
+      "rfi": "RFI {number}",
+      "markup": "Awan revisi",
+      "remeasure": "Ukur ulang: {items} volume, {positions} item BOQ"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Kedua sisi adalah revisi yang berbeda.",
+      "distinct_revisions_fail": "Perbandingan ini membandingkan sebuah lembar dengan dirinya sendiri.",
+      "distinct_revisions_hint": "Pilih revisi lama dan revisi baru dari gambar.",
+      "alignment_not_needed": "Revisi DWG memakai satuan gambar yang sama; penyelarasan tidak diperlukan.",
+      "alignment_missing_matrix": "Perbandingan tidak memiliki penyelarasan.",
+      "alignment_singular": "Penyelarasan menciutkan lembar dan tidak dapat diterapkan.",
+      "alignment_scale": "Penyelarasan mengubah skala lembar sebesar {scale}, lebih besar dari perbedaan antarrevisi satu gambar.",
+      "alignment_low_confidence": "Penyelarasan otomatis tidak pasti (tingkat keyakinan {confidence}).",
+      "alignment_manual_points": "Penyelarasan manual memerlukan dua pasang titik.",
+      "alignment_ok": "Penyelarasan lembar masuk akal.",
+      "alignment_hint": "Selaraskan lembar secara manual pada dua tanda yang dimiliki kedua revisi, seperti perpotongan grid.",
+      "region_empty": "Perubahan {seq} tidak memiliki ukuran.",
+      "region_off_sheet": "Perubahan {seq} berada di luar lembar.",
+      "regions_ok": "Setiap area yang berubah berada di dalam lembar.",
+      "triaged_ok": "Setiap perubahan telah ditinjau.",
+      "triaged_open": "{count} perubahan masih terbuka.",
+      "triaged_hint": "Tandai setiap perubahan sebagai relevan atau tidak relevan.",
+      "followed_up_ok": "Setiap perubahan yang relevan sudah ditindaklanjuti.",
+      "followed_up_missing": "Perubahan {seq} ditandai relevan tetapi tidak memiliki komentar, RFI, awan, atau tanda ukur ulang.",
+      "followed_up_hint": "Beri komentar pada perubahan, buat RFI atau awan, atau tandai volume di dalamnya untuk diukur ulang."
+    }
   }
 }

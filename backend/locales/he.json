@@ -789,5 +789,93 @@
       "draft": "טיוטה",
       "frozen": "מוקפאת"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, עמוד {page}",
+    "text_change": "\"{old}\" שונה ל-\"{new}\"",
+    "kind": {
+      "added": "נוסף",
+      "removed": "הוסר",
+      "modified": "שונה",
+      "text": "הטקסט שונה"
+    },
+    "status": {
+      "open": "פתוח",
+      "relevant": "רלוונטי",
+      "not_relevant": "לא רלוונטי"
+    },
+    "errors": {
+      "revision_not_found": "גרסת השרטוט לא נמצאה בפרויקט זה.",
+      "revision_not_parsed": "לשרטוט עדיין אין גרסה מעובדת להשוואה.",
+      "comparison_not_found": "ההשוואה לא נמצאה.",
+      "change_not_found": "השינוי לא נמצא.",
+      "same_revision": "בחרו שתי גרסאות או שני עמודים שונים להשוואה.",
+      "manual_points": "יישור ידני דורש שתי נקודות שונות בכל גרסה.",
+      "alignment_singular": "לא ניתן להחיל את היישור: הוא מכווץ את הגיליון.",
+      "region_empty": "לשינוי {seq} אין גודל.",
+      "region_off_sheet": "שינוי {seq} נמצא מחוץ לגיליון.",
+      "module_missing": "המודול הדרוש לפעולה זו אינו מותקן."
+    },
+    "rfi": {
+      "subject": "שינוי שרטוט {seq} ב-{sheet}",
+      "question": "גרסה {new} של {sheet} שונה מגרסה {old} באזור המסומן ({kind}). אנא אשרו את מטרת השינוי ואם הכמויות מושפעות."
+    },
+    "markup": {
+      "text": "שינוי גרסה {seq}: {kind}"
+    },
+    "report": {
+      "title": "השוואת גרסאות שרטוט",
+      "project": "פרויקט",
+      "name": "השוואה",
+      "old_revision": "גרסה ישנה",
+      "new_revision": "גרסה חדשה",
+      "alignment": "יישור",
+      "alignment_none": "לא מיושר (אותה מסגרת)",
+      "alignment_auto": "אוטומטי",
+      "alignment_manual": "ידני, שתי נקודות",
+      "confidence": "רמת ודאות {value}",
+      "summary": "שינויים",
+      "summary_counts": "סה\"כ {total}: {added} נוספו, {removed} הוסרו, {modified} שונו, {text} טקסט",
+      "generated_on": "תאריך יצירה",
+      "generated": "נוצר ב-{timestamp}",
+      "page_of": "עמוד {page} מתוך {total}",
+      "no_changes": "לא נמצאו שינויים בין שתי הגרסאות.",
+      "col_no": "מס'",
+      "col_preview": "תצוגה מקדימה",
+      "col_kind": "שינוי",
+      "col_location": "מיקום",
+      "col_detail": "פירוט",
+      "col_status": "סטטוס",
+      "col_comment": "הערה",
+      "col_follow_up": "המשך טיפול",
+      "page_at": "עמוד {page} ב-{coords}",
+      "layer": "שכבה {layer}",
+      "entity_counts": "ישויות: {added} נוספו, {removed} הוסרו, {modified} שונו",
+      "rfi": "RFI {number}",
+      "markup": "ענן גרסה",
+      "remeasure": "מדידה חוזרת: {items} כמויות, {positions} סעיפי כתב כמויות"
+    },
+    "rules": {
+      "distinct_revisions_ok": "שני הצדדים הם גרסאות שונות.",
+      "distinct_revisions_fail": "ההשוואה משווה גיליון לעצמו.",
+      "distinct_revisions_hint": "בחרו את הגרסה הישנה והחדשה של השרטוט.",
+      "alignment_not_needed": "גרסאות DWG חולקות יחידות שרטוט; אין צורך ביישור.",
+      "alignment_missing_matrix": "להשוואה אין יישור.",
+      "alignment_singular": "היישור מכווץ את הגיליון ולא ניתן להחילו.",
+      "alignment_scale": "היישור משנה את קנה המידה של הגיליון פי {scale}, יותר משגרסאות של אותו שרטוט נבדלות.",
+      "alignment_low_confidence": "היישור האוטומטי אינו בטוח (רמת ודאות {confidence}).",
+      "alignment_manual_points": "יישור ידני דורש שני זוגות נקודות.",
+      "alignment_ok": "יישור הגיליון סביר.",
+      "alignment_hint": "יישרו את הגיליונות ידנית לפי שני סימנים המשותפים לשתי הגרסאות, כמו מפגשי צירים.",
+      "region_empty": "לשינוי {seq} אין גודל.",
+      "region_off_sheet": "שינוי {seq} נמצא מחוץ לגיליון.",
+      "regions_ok": "כל אזור שהשתנה נמצא על הגיליון.",
+      "triaged_ok": "כל שינוי נבדק.",
+      "triaged_open": "{count} שינויים עדיין פתוחים.",
+      "triaged_hint": "סמנו כל שינוי כרלוונטי או לא רלוונטי.",
+      "followed_up_ok": "כל שינוי רלוונטי טופל להמשך.",
+      "followed_up_missing": "שינוי {seq} מסומן כרלוונטי אך אין לו הערה, RFI, ענן או סימון למדידה חוזרת.",
+      "followed_up_hint": "הוסיפו הערה לשינוי, פתחו RFI או ענן, או סמנו את הכמויות שבתוכו למדידה חוזרת."
+    }
   }
 }

@@ -618,5 +618,93 @@
       "draft": "Rozpracovaný",
       "frozen": "Zmrazený"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, strana {page}",
+    "text_change": "„{old}“ změněno na „{new}“",
+    "kind": {
+      "added": "Přidáno",
+      "removed": "Odstraněno",
+      "modified": "Změněno",
+      "text": "Změněn text"
+    },
+    "status": {
+      "open": "Otevřeno",
+      "relevant": "Relevantní",
+      "not_relevant": "Nerelevantní"
+    },
+    "errors": {
+      "revision_not_found": "Revize výkresu nebyla v tomto projektu nalezena.",
+      "revision_not_parsed": "Výkres zatím nemá zpracovanou verzi k porovnání.",
+      "comparison_not_found": "Porovnání nenalezeno.",
+      "change_not_found": "Změna nenalezena.",
+      "same_revision": "Vyberte dvě různé revize nebo strany k porovnání.",
+      "manual_points": "Ruční zarovnání vyžaduje dva různé body na každé revizi.",
+      "alignment_singular": "Zarovnání nelze použít: sbalí list.",
+      "region_empty": "Změna {seq} nemá žádnou velikost.",
+      "region_off_sheet": "Změna {seq} leží mimo list.",
+      "module_missing": "Modul potřebný pro tuto akci není nainstalován."
+    },
+    "rfi": {
+      "subject": "Změna výkresu {seq} na {sheet}",
+      "question": "Revize {new} listu {sheet} se v označené oblasti ({kind}) liší od revize {old}. Potvrďte záměr změny a zda se týká výměr."
+    },
+    "markup": {
+      "text": "Změna revize {seq}: {kind}"
+    },
+    "report": {
+      "title": "Porovnání revizí výkresu",
+      "project": "Projekt",
+      "name": "Porovnání",
+      "old_revision": "Starší revize",
+      "new_revision": "Novější revize",
+      "alignment": "Zarovnání",
+      "alignment_none": "Nezarovnáno (stejný rámeček)",
+      "alignment_auto": "Automatické",
+      "alignment_manual": "Ruční, dva body",
+      "confidence": "spolehlivost {value}",
+      "summary": "Změny",
+      "summary_counts": "Celkem {total}: přidáno {added}, odstraněno {removed}, změněno {modified}, text {text}",
+      "generated_on": "Datum vytvoření",
+      "generated": "Vytvořeno {timestamp}",
+      "page_of": "Strana {page} z {total}",
+      "no_changes": "Mezi oběma revizemi nebyly nalezeny žádné změny.",
+      "col_no": "Č.",
+      "col_preview": "Náhled",
+      "col_kind": "Změna",
+      "col_location": "Umístění",
+      "col_detail": "Detail",
+      "col_status": "Stav",
+      "col_comment": "Komentář",
+      "col_follow_up": "Navazující krok",
+      "page_at": "Strana {page} na {coords}",
+      "layer": "Hladina {layer}",
+      "entity_counts": "Entity: přidáno {added}, odstraněno {removed}, změněno {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Revizní obláček",
+      "remeasure": "Přeměřit: {items} výměr, {positions} položek rozpočtu"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Obě strany jsou různé revize.",
+      "distinct_revisions_fail": "Porovnání porovnává list sám se sebou.",
+      "distinct_revisions_hint": "Vyberte starší a novější revizi výkresu.",
+      "alignment_not_needed": "Revize DWG sdílejí jednotky výkresu; zarovnání není potřeba.",
+      "alignment_missing_matrix": "Porovnání nemá žádné zarovnání.",
+      "alignment_singular": "Zarovnání sbalí list a nelze je použít.",
+      "alignment_scale": "Zarovnání mění měřítko listu o {scale}, více, než se liší revize jednoho výkresu.",
+      "alignment_low_confidence": "Automatické zarovnání je nejisté (spolehlivost {confidence}).",
+      "alignment_manual_points": "Ruční zarovnání vyžaduje dva páry bodů.",
+      "alignment_ok": "Zarovnání listu je věrohodné.",
+      "alignment_hint": "Zarovnejte listy ručně podle dvou značek společných oběma revizím, například průsečíků os.",
+      "region_empty": "Změna {seq} nemá žádnou velikost.",
+      "region_off_sheet": "Změna {seq} leží mimo list.",
+      "regions_ok": "Každá změněná oblast leží na listu.",
+      "triaged_ok": "Každá změna byla posouzena.",
+      "triaged_open": "Otevřených změn: {count}.",
+      "triaged_hint": "Označte každou změnu jako relevantní nebo nerelevantní.",
+      "followed_up_ok": "Každá relevantní změna má navazující krok.",
+      "followed_up_missing": "Změna {seq} je označena jako relevantní, ale nemá komentář, RFI, obláček ani příznak přeměření.",
+      "followed_up_hint": "Okomentujte změnu, vystavte RFI nebo obláček, nebo označte výměry v ní k přeměření."
+    }
   }
 }

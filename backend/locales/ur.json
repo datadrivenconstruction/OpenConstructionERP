@@ -789,5 +789,93 @@
       "draft": "ڈرافٹ",
       "frozen": "منجمد"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}، صفحہ {page}",
+    "text_change": "\"{old}\" کو بدل کر \"{new}\" کر دیا گیا",
+    "kind": {
+      "added": "شامل کیا گیا",
+      "removed": "ہٹایا گیا",
+      "modified": "ترمیم شدہ",
+      "text": "متن تبدیل ہوا"
+    },
+    "status": {
+      "open": "کھلا",
+      "relevant": "متعلقہ",
+      "not_relevant": "غیر متعلقہ"
+    },
+    "errors": {
+      "revision_not_found": "اس پروجیکٹ میں ڈرائنگ ریویژن نہیں ملی۔",
+      "revision_not_parsed": "ڈرائنگ کا موازنے کے لیے پراسیس شدہ ورژن ابھی موجود نہیں۔",
+      "comparison_not_found": "موازنہ نہیں ملا۔",
+      "change_not_found": "تبدیلی نہیں ملی۔",
+      "same_revision": "موازنے کے لیے دو مختلف ریویژن یا صفحات منتخب کریں۔",
+      "manual_points": "دستی الائنمنٹ کے لیے ہر ریویژن پر دو مختلف نقطے درکار ہیں۔",
+      "alignment_singular": "الائنمنٹ لاگو نہیں ہو سکتی: یہ شیٹ کو سکیڑ دیتی ہے۔",
+      "region_empty": "تبدیلی {seq} کی کوئی جسامت نہیں ہے۔",
+      "region_off_sheet": "تبدیلی {seq} شیٹ سے باہر ہے۔",
+      "module_missing": "اس کارروائی کے لیے درکار ماڈیول انسٹال نہیں ہے۔"
+    },
+    "rfi": {
+      "subject": "{sheet} پر ڈرائنگ کی تبدیلی {seq}",
+      "question": "{sheet} کی ریویژن {new} نشان زد علاقے ({kind}) میں ریویژن {old} سے مختلف ہے۔ براہ کرم تبدیلی کا مقصد اور مقداروں پر اثر کی تصدیق کریں۔"
+    },
+    "markup": {
+      "text": "ریویژن کی تبدیلی {seq}: {kind}"
+    },
+    "report": {
+      "title": "ڈرائنگ ریویژنز کا موازنہ",
+      "project": "پروجیکٹ",
+      "name": "موازنہ",
+      "old_revision": "پرانی ریویژن",
+      "new_revision": "نئی ریویژن",
+      "alignment": "الائنمنٹ",
+      "alignment_none": "الائن نہیں (ایک ہی فریم)",
+      "alignment_auto": "خودکار",
+      "alignment_manual": "دستی، دو نقطے",
+      "confidence": "اعتماد {value}",
+      "summary": "تبدیلیاں",
+      "summary_counts": "کل {total}: {added} شامل، {removed} ہٹائی گئیں، {modified} ترمیم شدہ، {text} متن",
+      "generated_on": "تیار کرنے کی تاریخ",
+      "generated": "{timestamp} کو تیار کیا گیا",
+      "page_of": "صفحہ {page} از {total}",
+      "no_changes": "دونوں ریویژنز کے درمیان کوئی تبدیلی نہیں ملی۔",
+      "col_no": "نمبر",
+      "col_preview": "پیش منظر",
+      "col_kind": "تبدیلی",
+      "col_location": "مقام",
+      "col_detail": "تفصیل",
+      "col_status": "کیفیت",
+      "col_comment": "تبصرہ",
+      "col_follow_up": "فالو اپ",
+      "page_at": "صفحہ {page}، {coords} پر",
+      "layer": "لیئر {layer}",
+      "entity_counts": "اجزا: {added} شامل، {removed} ہٹائے گئے، {modified} ترمیم شدہ",
+      "rfi": "RFI {number}",
+      "markup": "ریویژن کلاؤڈ",
+      "remeasure": "دوبارہ پیمائش: {items} مقداریں، {positions} BOQ آئٹمز"
+    },
+    "rules": {
+      "distinct_revisions_ok": "دونوں طرف مختلف ریویژنز ہیں۔",
+      "distinct_revisions_fail": "موازنہ ایک شیٹ کا موازنہ اسی سے کر رہا ہے۔",
+      "distinct_revisions_hint": "ڈرائنگ کی پرانی اور نئی ریویژن منتخب کریں۔",
+      "alignment_not_needed": "DWG ریویژنز ڈرائنگ کی اکائیاں مشترک رکھتی ہیں؛ الائنمنٹ کی ضرورت نہیں۔",
+      "alignment_missing_matrix": "موازنے میں کوئی الائنمنٹ نہیں ہے۔",
+      "alignment_singular": "الائنمنٹ شیٹ کو سکیڑ دیتی ہے اور لاگو نہیں ہو سکتی۔",
+      "alignment_scale": "الائنمنٹ شیٹ کا اسکیل {scale} گنا بدلتی ہے، جو ایک ہی ڈرائنگ کی ریویژنز کے فرق سے زیادہ ہے۔",
+      "alignment_low_confidence": "خودکار الائنمنٹ غیر یقینی ہے (اعتماد {confidence})۔",
+      "alignment_manual_points": "دستی الائنمنٹ کے لیے نقطوں کے دو جوڑے درکار ہیں۔",
+      "alignment_ok": "شیٹ کی الائنمنٹ معقول ہے۔",
+      "alignment_hint": "شیٹس کو دونوں ریویژنز میں مشترک دو نشانات، جیسے گرڈ کے تقاطع، پر ہاتھ سے الائن کریں۔",
+      "region_empty": "تبدیلی {seq} کی کوئی جسامت نہیں ہے۔",
+      "region_off_sheet": "تبدیلی {seq} شیٹ سے باہر ہے۔",
+      "regions_ok": "ہر تبدیل شدہ علاقہ شیٹ پر موجود ہے۔",
+      "triaged_ok": "ہر تبدیلی کا جائزہ لیا جا چکا ہے۔",
+      "triaged_open": "{count} تبدیلیاں ابھی کھلی ہیں۔",
+      "triaged_hint": "ہر تبدیلی کو متعلقہ یا غیر متعلقہ نشان زد کریں۔",
+      "followed_up_ok": "ہر متعلقہ تبدیلی پر فالو اپ ہو چکا ہے۔",
+      "followed_up_missing": "تبدیلی {seq} متعلقہ نشان زد ہے مگر اس پر تبصرہ، RFI، کلاؤڈ یا دوبارہ پیمائش کا نشان نہیں ہے۔",
+      "followed_up_hint": "تبدیلی پر تبصرہ کریں، RFI یا کلاؤڈ بنائیں، یا اس کے اندر کی مقداروں کو دوبارہ پیمائش کے لیے نشان زد کریں۔"
+    }
   }
 }

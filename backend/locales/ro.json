@@ -618,5 +618,93 @@
       "draft": "Ciornă",
       "frozen": "Înghețat"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, pagina {page}",
+    "text_change": "„{old}” schimbat în „{new}”",
+    "kind": {
+      "added": "Adăugat",
+      "removed": "Eliminat",
+      "modified": "Modificat",
+      "text": "Text modificat"
+    },
+    "status": {
+      "open": "Deschis",
+      "relevant": "Relevant",
+      "not_relevant": "Nerelevant"
+    },
+    "errors": {
+      "revision_not_found": "Revizia desenului nu a fost găsită în acest proiect.",
+      "revision_not_parsed": "Desenul nu are încă o versiune procesată de comparat.",
+      "comparison_not_found": "Comparația nu a fost găsită.",
+      "change_not_found": "Modificarea nu a fost găsită.",
+      "same_revision": "Alegeți două revizii sau pagini diferite de comparat.",
+      "manual_points": "Alinierea manuală necesită două puncte distincte pe fiecare revizie.",
+      "alignment_singular": "Alinierea nu poate fi aplicată: strivește planșa.",
+      "region_empty": "Modificarea {seq} nu are dimensiune.",
+      "region_off_sheet": "Modificarea {seq} se află în afara planșei.",
+      "module_missing": "Modulul necesar acestei acțiuni nu este instalat."
+    },
+    "rfi": {
+      "subject": "Modificarea desenului {seq} pe {sheet}",
+      "question": "Revizia {new} a planșei {sheet} diferă de revizia {old} în zona marcată ({kind}). Vă rugăm să confirmați intenția modificării și dacă sunt afectate cantitățile."
+    },
+    "markup": {
+      "text": "Modificare de revizie {seq}: {kind}"
+    },
+    "report": {
+      "title": "Compararea reviziilor desenului",
+      "project": "Proiect",
+      "name": "Comparație",
+      "old_revision": "Revizie mai veche",
+      "new_revision": "Revizie mai nouă",
+      "alignment": "Aliniere",
+      "alignment_none": "Nealiniat (același cadru)",
+      "alignment_auto": "Automată",
+      "alignment_manual": "Manuală, două puncte",
+      "confidence": "încredere {value}",
+      "summary": "Modificări",
+      "summary_counts": "{total} în total: {added} adăugate, {removed} eliminate, {modified} modificate, {text} de text",
+      "generated_on": "Data generării",
+      "generated": "Generat la {timestamp}",
+      "page_of": "Pagina {page} din {total}",
+      "no_changes": "Nu s-au găsit modificări între cele două revizii.",
+      "col_no": "Nr.",
+      "col_preview": "Previzualizare",
+      "col_kind": "Modificare",
+      "col_location": "Locație",
+      "col_detail": "Detalii",
+      "col_status": "Stare",
+      "col_comment": "Comentariu",
+      "col_follow_up": "Urmărire",
+      "page_at": "Pagina {page} la {coords}",
+      "layer": "Strat {layer}",
+      "entity_counts": "Entități: {added} adăugate, {removed} eliminate, {modified} modificate",
+      "rfi": "RFI {number}",
+      "markup": "Nor de revizie",
+      "remeasure": "De remăsurat: {items} cantități, {positions} poziții din deviz"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Cele două părți sunt revizii diferite.",
+      "distinct_revisions_fail": "Comparația compară o planșă cu ea însăși.",
+      "distinct_revisions_hint": "Alegeți revizia mai veche și pe cea mai nouă a desenului.",
+      "alignment_not_needed": "Reviziile DWG au aceleași unități de desen; nu este nevoie de aliniere.",
+      "alignment_missing_matrix": "Comparația nu are aliniere.",
+      "alignment_singular": "Alinierea strivește planșa și nu poate fi aplicată.",
+      "alignment_scale": "Alinierea redimensionează planșa cu {scale}, mai mult decât diferă reviziile aceluiași desen.",
+      "alignment_low_confidence": "Alinierea automată este nesigură (încredere {confidence}).",
+      "alignment_manual_points": "O aliniere manuală necesită două perechi de puncte.",
+      "alignment_ok": "Alinierea planșei este plauzibilă.",
+      "alignment_hint": "Aliniați planșele manual după două repere comune ambelor revizii, de exemplu intersecții de axe.",
+      "region_empty": "Modificarea {seq} nu are dimensiune.",
+      "region_off_sheet": "Modificarea {seq} se află în afara planșei.",
+      "regions_ok": "Fiecare zonă modificată se află pe planșă.",
+      "triaged_ok": "Fiecare modificare a fost analizată.",
+      "triaged_open": "{count} modificări sunt încă deschise.",
+      "triaged_hint": "Marcați fiecare modificare ca relevantă sau nerelevantă.",
+      "followed_up_ok": "Fiecare modificare relevantă are urmărire.",
+      "followed_up_missing": "Modificarea {seq} este marcată ca relevantă, dar nu are comentariu, RFI, nor sau indicator de remăsurare.",
+      "followed_up_hint": "Comentați modificarea, emiteți un RFI sau un nor ori marcați cantitățile din ea pentru remăsurare."
+    }
   }
 }

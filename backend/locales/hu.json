@@ -618,5 +618,93 @@
       "draft": "Piszkozat",
       "frozen": "Lezárt"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, {page}. oldal",
+    "text_change": "„{old}” módosítva erre: „{new}”",
+    "kind": {
+      "added": "Hozzáadva",
+      "removed": "Eltávolítva",
+      "modified": "Módosítva",
+      "text": "Szöveg módosítva"
+    },
+    "status": {
+      "open": "Nyitott",
+      "relevant": "Releváns",
+      "not_relevant": "Nem releváns"
+    },
+    "errors": {
+      "revision_not_found": "A tervrevízió nem található ebben a projektben.",
+      "revision_not_parsed": "A tervnek még nincs feldolgozott verziója az összehasonlításhoz.",
+      "comparison_not_found": "Az összehasonlítás nem található.",
+      "change_not_found": "A módosítás nem található.",
+      "same_revision": "Válasszon két különböző revíziót vagy oldalt az összehasonlításhoz.",
+      "manual_points": "A kézi illesztéshez minden revízión két különböző pont kell.",
+      "alignment_singular": "Az illesztés nem alkalmazható: összeomlasztja a lapot.",
+      "region_empty": "A(z) {seq}. módosításnak nincs mérete.",
+      "region_off_sheet": "A(z) {seq}. módosítás a lapon kívül esik.",
+      "module_missing": "A művelethez szükséges modul nincs telepítve."
+    },
+    "rfi": {
+      "subject": "{seq}. tervmódosítás a(z) {sheet} lapon",
+      "question": "A(z) {sheet} lap {new} revíziója a megjelölt területen ({kind}) eltér a {old} revíziótól. Kérjük, erősítse meg a módosítás célját és azt, hogy érinti-e a mennyiségeket."
+    },
+    "markup": {
+      "text": "{seq}. revíziós módosítás: {kind}"
+    },
+    "report": {
+      "title": "Tervrevíziók összehasonlítása",
+      "project": "Projekt",
+      "name": "Összehasonlítás",
+      "old_revision": "Régebbi revízió",
+      "new_revision": "Újabb revízió",
+      "alignment": "Illesztés",
+      "alignment_none": "Nincs illesztve (azonos keret)",
+      "alignment_auto": "Automatikus",
+      "alignment_manual": "Kézi, két pont",
+      "confidence": "megbízhatóság {value}",
+      "summary": "Módosítások",
+      "summary_counts": "Összesen {total}: {added} hozzáadva, {removed} eltávolítva, {modified} módosítva, {text} szöveg",
+      "generated_on": "Készítés dátuma",
+      "generated": "Készült: {timestamp}",
+      "page_of": "{page}. oldal / {total}",
+      "no_changes": "A két revízió között nem található módosítás.",
+      "col_no": "Sz.",
+      "col_preview": "Előnézet",
+      "col_kind": "Módosítás",
+      "col_location": "Hely",
+      "col_detail": "Részletek",
+      "col_status": "Állapot",
+      "col_comment": "Megjegyzés",
+      "col_follow_up": "Követés",
+      "page_at": "{page}. oldal, {coords}",
+      "layer": "Réteg: {layer}",
+      "entity_counts": "Elemek: {added} hozzáadva, {removed} eltávolítva, {modified} módosítva",
+      "rfi": "RFI {number}",
+      "markup": "Revíziós felhő",
+      "remeasure": "Újramérés: {items} mennyiség, {positions} költségvetési tétel"
+    },
+    "rules": {
+      "distinct_revisions_ok": "A két oldal különböző revízió.",
+      "distinct_revisions_fail": "Az összehasonlítás a lapot önmagával hasonlítja össze.",
+      "distinct_revisions_hint": "Válassza ki a terv régebbi és újabb revízióját.",
+      "alignment_not_needed": "A DWG revíziók közös rajzegységet használnak; illesztésre nincs szükség.",
+      "alignment_missing_matrix": "Az összehasonlításnak nincs illesztése.",
+      "alignment_singular": "Az illesztés összeomlasztja a lapot, és nem alkalmazható.",
+      "alignment_scale": "Az illesztés {scale} szeresére méretezi a lapot, többel, mint ahogy egy terv revíziói eltérnek.",
+      "alignment_low_confidence": "Az automatikus illesztés bizonytalan (megbízhatóság {confidence}).",
+      "alignment_manual_points": "A kézi illesztéshez két pontpár kell.",
+      "alignment_ok": "A lap illesztése hihető.",
+      "alignment_hint": "Illessze a lapokat kézzel két olyan jelhez, amely mindkét revízión szerepel, például rácsmetszéspontokhoz.",
+      "region_empty": "A(z) {seq}. módosításnak nincs mérete.",
+      "region_off_sheet": "A(z) {seq}. módosítás a lapon kívül esik.",
+      "regions_ok": "Minden módosított terület a lapon van.",
+      "triaged_ok": "Minden módosítást átnéztek.",
+      "triaged_open": "{count} módosítás még nyitott.",
+      "triaged_hint": "Jelölje meg minden módosítást relevánsként vagy nem relevánsként.",
+      "followed_up_ok": "Minden releváns módosítást követnek.",
+      "followed_up_missing": "A(z) {seq}. módosítás relevánsként van megjelölve, de nincs hozzá megjegyzés, RFI, felhő vagy újramérési jelölő.",
+      "followed_up_hint": "Fűzzön megjegyzést a módosításhoz, hozzon létre RFI-t vagy felhőt, vagy jelölje meg a benne lévő mennyiségeket újramérésre."
+    }
   }
 }

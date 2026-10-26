@@ -789,5 +789,93 @@
       "draft": "Draft",
       "frozen": "Frozen"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, page {page}",
+    "text_change": "\"{old}\" changed to \"{new}\"",
+    "kind": {
+      "added": "Added",
+      "removed": "Removed",
+      "modified": "Modified",
+      "text": "Text changed"
+    },
+    "status": {
+      "open": "Open",
+      "relevant": "Relevant",
+      "not_relevant": "Not relevant"
+    },
+    "errors": {
+      "revision_not_found": "Drawing revision not found in this project.",
+      "revision_not_parsed": "The drawing has no processed version to compare yet.",
+      "comparison_not_found": "Comparison not found.",
+      "change_not_found": "Change not found.",
+      "same_revision": "Choose two different revisions or pages to compare.",
+      "manual_points": "Manual alignment needs two distinct points on each revision.",
+      "alignment_singular": "The alignment cannot be applied: it collapses the sheet.",
+      "region_empty": "Change {seq} has no size.",
+      "region_off_sheet": "Change {seq} lies outside the sheet.",
+      "module_missing": "The module needed for this action is not installed."
+    },
+    "rfi": {
+      "subject": "Drawing change {seq} on {sheet}",
+      "question": "Revision {new} of {sheet} differs from revision {old} in the marked area ({kind}). Please confirm the intent of the change and whether quantities are affected."
+    },
+    "markup": {
+      "text": "Revision change {seq}: {kind}"
+    },
+    "report": {
+      "title": "Drawing revision compare",
+      "project": "Project",
+      "name": "Comparison",
+      "old_revision": "Older revision",
+      "new_revision": "Newer revision",
+      "alignment": "Alignment",
+      "alignment_none": "Not aligned (same frame)",
+      "alignment_auto": "Automatic",
+      "alignment_manual": "Manual, two points",
+      "confidence": "confidence {value}",
+      "summary": "Changes",
+      "summary_counts": "{total} in total: {added} added, {removed} removed, {modified} modified, {text} text",
+      "generated_on": "Date generated",
+      "generated": "Generated {timestamp}",
+      "page_of": "Page {page} of {total}",
+      "no_changes": "No changes were found between the two revisions.",
+      "col_no": "No.",
+      "col_preview": "Preview",
+      "col_kind": "Change",
+      "col_location": "Location",
+      "col_detail": "Detail",
+      "col_status": "Status",
+      "col_comment": "Comment",
+      "col_follow_up": "Follow-up",
+      "page_at": "Page {page} at {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Entities: {added} added, {removed} removed, {modified} modified",
+      "rfi": "RFI {number}",
+      "markup": "Revision cloud",
+      "remeasure": "Re-measure: {items} quantities, {positions} BOQ positions"
+    },
+    "rules": {
+      "distinct_revisions_ok": "The two sides are different revisions.",
+      "distinct_revisions_fail": "The comparison compares a sheet with itself.",
+      "distinct_revisions_hint": "Pick the older and the newer revision of the drawing.",
+      "alignment_not_needed": "DWG revisions share drawing units; no alignment is needed.",
+      "alignment_missing_matrix": "The comparison has no alignment.",
+      "alignment_singular": "The alignment collapses the sheet and cannot be applied.",
+      "alignment_scale": "The alignment rescales the sheet by {scale}, more than revisions of one drawing differ.",
+      "alignment_low_confidence": "The automatic alignment is uncertain (confidence {confidence}).",
+      "alignment_manual_points": "A manual alignment needs two point pairs.",
+      "alignment_ok": "The sheet alignment is plausible.",
+      "alignment_hint": "Align the sheets by hand on two marks both revisions share, such as grid intersections.",
+      "region_empty": "Change {seq} has no size.",
+      "region_off_sheet": "Change {seq} lies outside the sheet.",
+      "regions_ok": "Every changed region lies on the sheet.",
+      "triaged_ok": "Every change has been reviewed.",
+      "triaged_open": "{count} changes are still open.",
+      "triaged_hint": "Mark each change as relevant or not relevant.",
+      "followed_up_ok": "Every relevant change is followed up.",
+      "followed_up_missing": "Change {seq} is marked relevant but has no comment, RFI, markup or re-measure flag.",
+      "followed_up_hint": "Comment on the change, raise an RFI or markup, or flag the quantities inside it for re-measure."
+    }
   }
 }

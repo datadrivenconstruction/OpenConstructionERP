@@ -618,5 +618,93 @@
       "draft": "草稿",
       "frozen": "已冻结"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label},第 {page} 页",
+    "text_change": "“{old}”已改为“{new}”",
+    "kind": {
+      "added": "新增",
+      "removed": "删除",
+      "modified": "修改",
+      "text": "文字变更"
+    },
+    "status": {
+      "open": "待处理",
+      "relevant": "相关",
+      "not_relevant": "不相关"
+    },
+    "errors": {
+      "revision_not_found": "在此项目中未找到图纸版本。",
+      "revision_not_parsed": "该图纸尚无可供比较的已处理版本。",
+      "comparison_not_found": "未找到比较。",
+      "change_not_found": "未找到变更。",
+      "same_revision": "请选择两个不同的版本或页面进行比较。",
+      "manual_points": "手动对齐需要在每个版本上选取两个不同的点。",
+      "alignment_singular": "无法应用该对齐:它会使图幅塌缩。",
+      "region_empty": "变更 {seq} 没有尺寸。",
+      "region_off_sheet": "变更 {seq} 位于图幅之外。",
+      "module_missing": "此操作所需的模块尚未安装。"
+    },
+    "rfi": {
+      "subject": "{sheet} 上的图纸变更 {seq}",
+      "question": "{sheet} 的版本 {new} 在标记区域({kind})与版本 {old} 不同。请确认变更意图,以及是否影响工程量。"
+    },
+    "markup": {
+      "text": "版本变更 {seq}:{kind}"
+    },
+    "report": {
+      "title": "图纸版本比较",
+      "project": "项目",
+      "name": "比较",
+      "old_revision": "旧版本",
+      "new_revision": "新版本",
+      "alignment": "对齐",
+      "alignment_none": "未对齐(同一图框)",
+      "alignment_auto": "自动",
+      "alignment_manual": "手动,两点",
+      "confidence": "置信度 {value}",
+      "summary": "变更",
+      "summary_counts": "共 {total} 项:新增 {added},删除 {removed},修改 {modified},文字 {text}",
+      "generated_on": "生成日期",
+      "generated": "生成于 {timestamp}",
+      "page_of": "第 {page} 页,共 {total} 页",
+      "no_changes": "两个版本之间未发现变更。",
+      "col_no": "序号",
+      "col_preview": "预览",
+      "col_kind": "变更",
+      "col_location": "位置",
+      "col_detail": "详情",
+      "col_status": "状态",
+      "col_comment": "备注",
+      "col_follow_up": "后续跟进",
+      "page_at": "第 {page} 页,位于 {coords}",
+      "layer": "图层 {layer}",
+      "entity_counts": "图元:新增 {added},删除 {removed},修改 {modified}",
+      "rfi": "RFI {number}",
+      "markup": "修订云线",
+      "remeasure": "重新计量:{items} 项工程量,{positions} 个 BOQ 清单项"
+    },
+    "rules": {
+      "distinct_revisions_ok": "两侧是不同的版本。",
+      "distinct_revisions_fail": "该比较是将图幅与其自身比较。",
+      "distinct_revisions_hint": "请选择图纸的旧版本和新版本。",
+      "alignment_not_needed": "DWG 版本共用图纸单位,无需对齐。",
+      "alignment_missing_matrix": "该比较没有对齐。",
+      "alignment_singular": "对齐会使图幅塌缩,无法应用。",
+      "alignment_scale": "对齐会将图幅缩放 {scale} 倍,超出同一图纸各版本之间的正常差异。",
+      "alignment_low_confidence": "自动对齐不确定(置信度 {confidence})。",
+      "alignment_manual_points": "手动对齐需要两对点。",
+      "alignment_ok": "图幅对齐合理。",
+      "alignment_hint": "请在两个版本共有的两个标记(如轴网交点)上手动对齐图幅。",
+      "region_empty": "变更 {seq} 没有尺寸。",
+      "region_off_sheet": "变更 {seq} 位于图幅之外。",
+      "regions_ok": "所有变更区域都在图幅上。",
+      "triaged_ok": "所有变更均已审核。",
+      "triaged_open": "仍有 {count} 项变更待处理。",
+      "triaged_hint": "请将每项变更标记为相关或不相关。",
+      "followed_up_ok": "所有相关变更均已跟进。",
+      "followed_up_missing": "变更 {seq} 已标记为相关,但没有备注、RFI、修订云线或重新计量标记。",
+      "followed_up_hint": "请为该变更添加备注、发起 RFI 或修订云线,或将其内的工程量标记为重新计量。"
+    }
   }
 }

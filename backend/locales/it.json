@@ -618,5 +618,93 @@
       "draft": "Bozza",
       "frozen": "Congelato"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, pagina {page}",
+    "text_change": "«{old}» modificato in «{new}»",
+    "kind": {
+      "added": "Aggiunto",
+      "removed": "Rimosso",
+      "modified": "Modificato",
+      "text": "Testo modificato"
+    },
+    "status": {
+      "open": "Aperto",
+      "relevant": "Rilevante",
+      "not_relevant": "Non rilevante"
+    },
+    "errors": {
+      "revision_not_found": "Revisione del disegno non trovata in questo progetto.",
+      "revision_not_parsed": "Il disegno non ha ancora una versione elaborata da confrontare.",
+      "comparison_not_found": "Confronto non trovato.",
+      "change_not_found": "Modifica non trovata.",
+      "same_revision": "Scegliere due revisioni o pagine diverse da confrontare.",
+      "manual_points": "L'allineamento manuale richiede due punti distinti su ciascuna revisione.",
+      "alignment_singular": "Impossibile applicare l'allineamento: schiaccia il foglio.",
+      "region_empty": "La modifica {seq} non ha dimensioni.",
+      "region_off_sheet": "La modifica {seq} si trova fuori dal foglio.",
+      "module_missing": "Il modulo necessario per questa azione non è installato."
+    },
+    "rfi": {
+      "subject": "Modifica del disegno {seq} su {sheet}",
+      "question": "La revisione {new} di {sheet} differisce dalla revisione {old} nell'area indicata ({kind}). Confermare l'intento della modifica e se le quantità sono interessate."
+    },
+    "markup": {
+      "text": "Modifica di revisione {seq}: {kind}"
+    },
+    "report": {
+      "title": "Confronto revisioni del disegno",
+      "project": "Progetto",
+      "name": "Confronto",
+      "old_revision": "Revisione precedente",
+      "new_revision": "Revisione più recente",
+      "alignment": "Allineamento",
+      "alignment_none": "Non allineato (stesso riquadro)",
+      "alignment_auto": "Automatico",
+      "alignment_manual": "Manuale, due punti",
+      "confidence": "affidabilità {value}",
+      "summary": "Modifiche",
+      "summary_counts": "{total} in totale: {added} aggiunte, {removed} rimosse, {modified} modificate, {text} di testo",
+      "generated_on": "Data di generazione",
+      "generated": "Generato il {timestamp}",
+      "page_of": "Pagina {page} di {total}",
+      "no_changes": "Nessuna modifica trovata tra le due revisioni.",
+      "col_no": "N.",
+      "col_preview": "Anteprima",
+      "col_kind": "Modifica",
+      "col_location": "Posizione",
+      "col_detail": "Dettaglio",
+      "col_status": "Stato",
+      "col_comment": "Commento",
+      "col_follow_up": "Seguito",
+      "page_at": "Pagina {page} a {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Entità: {added} aggiunte, {removed} rimosse, {modified} modificate",
+      "rfi": "RFI {number}",
+      "markup": "Nuvola di revisione",
+      "remeasure": "Da rimisurare: {items} quantità, {positions} voci di computo"
+    },
+    "rules": {
+      "distinct_revisions_ok": "I due lati sono revisioni diverse.",
+      "distinct_revisions_fail": "Il confronto mette a confronto un foglio con se stesso.",
+      "distinct_revisions_hint": "Scegliere la revisione precedente e quella più recente del disegno.",
+      "alignment_not_needed": "Le revisioni DWG condividono le unità di disegno; non serve alcun allineamento.",
+      "alignment_missing_matrix": "Il confronto non ha un allineamento.",
+      "alignment_singular": "L'allineamento schiaccia il foglio e non può essere applicato.",
+      "alignment_scale": "L'allineamento riscala il foglio di {scale}, più di quanto differiscano le revisioni di uno stesso disegno.",
+      "alignment_low_confidence": "L'allineamento automatico è incerto (affidabilità {confidence}).",
+      "alignment_manual_points": "Un allineamento manuale richiede due coppie di punti.",
+      "alignment_ok": "L'allineamento del foglio è plausibile.",
+      "alignment_hint": "Allineare i fogli a mano su due riferimenti comuni a entrambe le revisioni, come le intersezioni della griglia.",
+      "region_empty": "La modifica {seq} non ha dimensioni.",
+      "region_off_sheet": "La modifica {seq} si trova fuori dal foglio.",
+      "regions_ok": "Ogni area modificata si trova sul foglio.",
+      "triaged_ok": "Ogni modifica è stata esaminata.",
+      "triaged_open": "{count} modifiche sono ancora aperte.",
+      "triaged_hint": "Contrassegnare ogni modifica come rilevante o non rilevante.",
+      "followed_up_ok": "Ogni modifica rilevante ha un seguito.",
+      "followed_up_missing": "La modifica {seq} è contrassegnata come rilevante ma non ha commento, RFI, nuvola o indicatore di rimisura.",
+      "followed_up_hint": "Commentare la modifica, emettere una RFI o una nuvola, oppure segnalare le quantità interessate da rimisurare."
+    }
   }
 }

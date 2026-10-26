@@ -238,6 +238,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Design management': 'design.ui.title',
   'Drawing Sheets': 'sheets.page_title',
   'Plan Room': 'nav.plan_room',
+  'Revision Compare': 'nav.drawing_compare',
   'Project map': 'geo_hub.project_title',
   'Development map': 'geo_hub.development_title',
   // Commercial

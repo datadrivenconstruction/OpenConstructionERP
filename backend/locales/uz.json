@@ -618,5 +618,93 @@
       "draft": "Qoralama",
       "frozen": "Muzlatilgan"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, {page}-sahifa",
+    "text_change": "\"{old}\" \"{new}\" ga oʻzgartirildi",
+    "kind": {
+      "added": "Qoʻshildi",
+      "removed": "Olib tashlandi",
+      "modified": "Oʻzgartirildi",
+      "text": "Matn oʻzgartirildi"
+    },
+    "status": {
+      "open": "Ochiq",
+      "relevant": "Muhim",
+      "not_relevant": "Muhim emas"
+    },
+    "errors": {
+      "revision_not_found": "Chizma tahriri bu loyihada topilmadi.",
+      "revision_not_parsed": "Chizmaning solishtirish uchun qayta ishlangan versiyasi hali yoʻq.",
+      "comparison_not_found": "Solishtirish topilmadi.",
+      "change_not_found": "Oʻzgarish topilmadi.",
+      "same_revision": "Solishtirish uchun ikki xil tahrir yoki sahifani tanlang.",
+      "manual_points": "Qoʻlda tekislash uchun har bir tahrirda ikkita turli nuqta kerak.",
+      "alignment_singular": "Tekislashni qoʻllab boʻlmaydi: u varaqni siqib yuboradi.",
+      "region_empty": "{seq}-oʻzgarishning oʻlchami yoʻq.",
+      "region_off_sheet": "{seq}-oʻzgarish varaqdan tashqarida joylashgan.",
+      "module_missing": "Bu amal uchun zarur modul oʻrnatilmagan."
+    },
+    "rfi": {
+      "subject": "{sheet} varagʻidagi chizma oʻzgarishi {seq}",
+      "question": "{sheet} varagʻining {new}-tahriri belgilangan hududda ({kind}) {old}-tahrirdan farq qiladi. Oʻzgarish maqsadini va hajmlarga taʼsir qilish-qilmasligini tasdiqlang."
+    },
+    "markup": {
+      "text": "Tahrir oʻzgarishi {seq}: {kind}"
+    },
+    "report": {
+      "title": "Chizma tahrirlarini solishtirish",
+      "project": "Loyiha",
+      "name": "Solishtirish",
+      "old_revision": "Eski tahrir",
+      "new_revision": "Yangi tahrir",
+      "alignment": "Tekislash",
+      "alignment_none": "Tekislanmagan (bir xil ramka)",
+      "alignment_auto": "Avtomatik",
+      "alignment_manual": "Qoʻlda, ikki nuqta",
+      "confidence": "ishonchlilik {value}",
+      "summary": "Oʻzgarishlar",
+      "summary_counts": "Jami {total} ta: qoʻshilgan {added}, olib tashlangan {removed}, oʻzgartirilgan {modified}, matn {text}",
+      "generated_on": "Yaratilgan sana",
+      "generated": "Yaratilgan vaqt: {timestamp}",
+      "page_of": "{page}-sahifa, jami {total}",
+      "no_changes": "Ikki tahrir orasida oʻzgarishlar topilmadi.",
+      "col_no": "№",
+      "col_preview": "Koʻrib chiqish",
+      "col_kind": "Oʻzgarish",
+      "col_location": "Joylashuvi",
+      "col_detail": "Tafsilotlar",
+      "col_status": "Holati",
+      "col_comment": "Izoh",
+      "col_follow_up": "Keyingi amal",
+      "page_at": "{page}-sahifa, {coords}",
+      "layer": "Qatlam {layer}",
+      "entity_counts": "Obyektlar: qoʻshilgan {added}, olib tashlangan {removed}, oʻzgartirilgan {modified}",
+      "rfi": "RFI {number}",
+      "markup": "Tahrir buluti",
+      "remeasure": "Qayta oʻlchash: {items} hajm, {positions} ta BOQ bandi"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Ikkala tomon ham turli tahrirlar.",
+      "distinct_revisions_fail": "Solishtirish varaqni oʻzi bilan solishtirmoqda.",
+      "distinct_revisions_hint": "Chizmaning eski va yangi tahrirlarini tanlang.",
+      "alignment_not_needed": "DWG tahrirlari chizma birliklarini umumiy ishlatadi; tekislash shart emas.",
+      "alignment_missing_matrix": "Solishtirishda tekislash yoʻq.",
+      "alignment_singular": "Tekislash varaqni siqib yuboradi va uni qoʻllab boʻlmaydi.",
+      "alignment_scale": "Tekislash varaq masshtabini {scale} marta oʻzgartiradi, bu bitta chizma tahrirlari orasidagi farqdan koʻp.",
+      "alignment_low_confidence": "Avtomatik tekislash ishonchsiz (ishonchlilik {confidence}).",
+      "alignment_manual_points": "Qoʻlda tekislash uchun ikki juft nuqta kerak.",
+      "alignment_ok": "Varaq tekislanishi ishonarli.",
+      "alignment_hint": "Varaqlarni ikkala tahrirda umumiy boʻlgan ikki belgi, masalan oʻqlar kesishmasi boʻyicha qoʻlda tekislang.",
+      "region_empty": "{seq}-oʻzgarishning oʻlchami yoʻq.",
+      "region_off_sheet": "{seq}-oʻzgarish varaqdan tashqarida joylashgan.",
+      "regions_ok": "Har bir oʻzgargan hudud varaq ichida.",
+      "triaged_ok": "Har bir oʻzgarish koʻrib chiqildi.",
+      "triaged_open": "Ochiq oʻzgarishlar soni: {count}.",
+      "triaged_hint": "Har bir oʻzgarishni muhim yoki muhim emas deb belgilang.",
+      "followed_up_ok": "Har bir muhim oʻzgarish boʻyicha keyingi amal bajarilgan.",
+      "followed_up_missing": "{seq}-oʻzgarish muhim deb belgilangan, lekin unda izoh, RFI, bulut yoki qayta oʻlchash belgisi yoʻq.",
+      "followed_up_hint": "Oʻzgarishga izoh yozing, RFI yoki bulut yarating yoxud undagi hajmlarni qayta oʻlchashga belgilang."
+    }
   }
 }

@@ -618,5 +618,93 @@
       "draft": "Concept",
       "frozen": "Bevroren"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, pagina {page}",
+    "text_change": "\"{old}\" gewijzigd in \"{new}\"",
+    "kind": {
+      "added": "Toegevoegd",
+      "removed": "Verwijderd",
+      "modified": "Gewijzigd",
+      "text": "Tekst gewijzigd"
+    },
+    "status": {
+      "open": "Open",
+      "relevant": "Relevant",
+      "not_relevant": "Niet relevant"
+    },
+    "errors": {
+      "revision_not_found": "Tekeningrevisie niet gevonden in dit project.",
+      "revision_not_parsed": "De tekening heeft nog geen verwerkte versie om te vergelijken.",
+      "comparison_not_found": "Vergelijking niet gevonden.",
+      "change_not_found": "Wijziging niet gevonden.",
+      "same_revision": "Kies twee verschillende revisies of pagina's om te vergelijken.",
+      "manual_points": "Handmatig uitlijnen vereist twee verschillende punten op elke revisie.",
+      "alignment_singular": "De uitlijning kan niet worden toegepast: het blad klapt ineen.",
+      "region_empty": "Wijziging {seq} heeft geen afmeting.",
+      "region_off_sheet": "Wijziging {seq} ligt buiten het blad.",
+      "module_missing": "De module die voor deze actie nodig is, is niet geïnstalleerd."
+    },
+    "rfi": {
+      "subject": "Tekeningwijziging {seq} op {sheet}",
+      "question": "Revisie {new} van {sheet} wijkt in het gemarkeerde gebied ({kind}) af van revisie {old}. Bevestig de bedoeling van de wijziging en of hoeveelheden worden geraakt."
+    },
+    "markup": {
+      "text": "Revisiewijziging {seq}: {kind}"
+    },
+    "report": {
+      "title": "Vergelijking van tekeningrevisies",
+      "project": "Project",
+      "name": "Vergelijking",
+      "old_revision": "Oudere revisie",
+      "new_revision": "Nieuwere revisie",
+      "alignment": "Uitlijning",
+      "alignment_none": "Niet uitgelijnd (zelfde kader)",
+      "alignment_auto": "Automatisch",
+      "alignment_manual": "Handmatig, twee punten",
+      "confidence": "betrouwbaarheid {value}",
+      "summary": "Wijzigingen",
+      "summary_counts": "{total} in totaal: {added} toegevoegd, {removed} verwijderd, {modified} gewijzigd, {text} tekst",
+      "generated_on": "Aanmaakdatum",
+      "generated": "Gegenereerd op {timestamp}",
+      "page_of": "Pagina {page} van {total}",
+      "no_changes": "Tussen de twee revisies zijn geen wijzigingen gevonden.",
+      "col_no": "Nr.",
+      "col_preview": "Voorbeeld",
+      "col_kind": "Wijziging",
+      "col_location": "Locatie",
+      "col_detail": "Detail",
+      "col_status": "Status",
+      "col_comment": "Opmerking",
+      "col_follow_up": "Opvolging",
+      "page_at": "Pagina {page} op {coords}",
+      "layer": "Laag {layer}",
+      "entity_counts": "Objecten: {added} toegevoegd, {removed} verwijderd, {modified} gewijzigd",
+      "rfi": "RFI {number}",
+      "markup": "Revisiewolk",
+      "remeasure": "Opnieuw opmeten: {items} hoeveelheden, {positions} posten in de begroting"
+    },
+    "rules": {
+      "distinct_revisions_ok": "De twee zijden zijn verschillende revisies.",
+      "distinct_revisions_fail": "De vergelijking vergelijkt een blad met zichzelf.",
+      "distinct_revisions_hint": "Kies de oudere en de nieuwere revisie van de tekening.",
+      "alignment_not_needed": "DWG-revisies delen tekeneenheden; uitlijnen is niet nodig.",
+      "alignment_missing_matrix": "De vergelijking heeft geen uitlijning.",
+      "alignment_singular": "De uitlijning laat het blad ineenklappen en kan niet worden toegepast.",
+      "alignment_scale": "De uitlijning schaalt het blad met {scale}, meer dan revisies van één tekening verschillen.",
+      "alignment_low_confidence": "De automatische uitlijning is onzeker (betrouwbaarheid {confidence}).",
+      "alignment_manual_points": "Handmatig uitlijnen vereist twee puntparen.",
+      "alignment_ok": "De bladuitlijning is aannemelijk.",
+      "alignment_hint": "Lijn de bladen met de hand uit op twee merktekens die beide revisies delen, zoals rasterkruisingen.",
+      "region_empty": "Wijziging {seq} heeft geen afmeting.",
+      "region_off_sheet": "Wijziging {seq} ligt buiten het blad.",
+      "regions_ok": "Elk gewijzigd gebied ligt op het blad.",
+      "triaged_ok": "Elke wijziging is beoordeeld.",
+      "triaged_open": "{count} wijzigingen staan nog open.",
+      "triaged_hint": "Markeer elke wijziging als relevant of niet relevant.",
+      "followed_up_ok": "Elke relevante wijziging is opgevolgd.",
+      "followed_up_missing": "Wijziging {seq} is als relevant gemarkeerd maar heeft geen opmerking, RFI, wolk of markering voor opnieuw opmeten.",
+      "followed_up_hint": "Geef commentaar op de wijziging, maak een RFI of wolk, of markeer de hoeveelheden erin voor opnieuw opmeten."
+    }
   }
 }

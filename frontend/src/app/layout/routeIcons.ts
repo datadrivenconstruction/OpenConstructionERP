@@ -27,6 +27,7 @@
  * `useIconOverridesVersion()` from `./menuIcons`.
  */
 import {
+  GitCompare,
   LayoutDashboard,
   FolderOpen,
   HardDrive,
@@ -242,6 +243,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/photos': Camera,
   '/markups': PenTool,
   '/plan-room': Layers,
+  '/drawing-compare': GitCompare,
   // ── 16. Real Estate ───────────────────────────────────────────────
   '/property-dev': Building2,
   '/accommodation': Building2,

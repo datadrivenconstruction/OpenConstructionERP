@@ -618,5 +618,93 @@
       "draft": "Luonnos",
       "frozen": "Lukittu"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, sivu {page}",
+    "text_change": "\"{old}\" muutettu muotoon \"{new}\"",
+    "kind": {
+      "added": "Lisätty",
+      "removed": "Poistettu",
+      "modified": "Muutettu",
+      "text": "Teksti muutettu"
+    },
+    "status": {
+      "open": "Avoin",
+      "relevant": "Olennainen",
+      "not_relevant": "Ei olennainen"
+    },
+    "errors": {
+      "revision_not_found": "Piirustuksen versiota ei löytynyt tästä projektista.",
+      "revision_not_parsed": "Piirustuksella ei vielä ole käsiteltyä versiota vertailtavaksi.",
+      "comparison_not_found": "Vertailua ei löytynyt.",
+      "change_not_found": "Muutosta ei löytynyt.",
+      "same_revision": "Valitse vertailtavaksi kaksi eri versiota tai sivua.",
+      "manual_points": "Manuaalinen kohdistus vaatii kaksi eri pistettä kummastakin versiosta.",
+      "alignment_singular": "Kohdistusta ei voi käyttää: se romahduttaa arkin.",
+      "region_empty": "Muutoksella {seq} ei ole kokoa.",
+      "region_off_sheet": "Muutos {seq} on arkin ulkopuolella.",
+      "module_missing": "Tähän toimintoon tarvittavaa moduulia ei ole asennettu."
+    },
+    "rfi": {
+      "subject": "Piirustusmuutos {seq} arkilla {sheet}",
+      "question": "Arkin {sheet} versio {new} poikkeaa versiosta {old} merkityllä alueella ({kind}). Vahvista muutoksen tarkoitus ja koskeeko se määriä."
+    },
+    "markup": {
+      "text": "Versiomuutos {seq}: {kind}"
+    },
+    "report": {
+      "title": "Piirustusversioiden vertailu",
+      "project": "Projekti",
+      "name": "Vertailu",
+      "old_revision": "Vanhempi versio",
+      "new_revision": "Uudempi versio",
+      "alignment": "Kohdistus",
+      "alignment_none": "Ei kohdistettu (sama kehys)",
+      "alignment_auto": "Automaattinen",
+      "alignment_manual": "Manuaalinen, kaksi pistettä",
+      "confidence": "luotettavuus {value}",
+      "summary": "Muutokset",
+      "summary_counts": "Yhteensä {total}: {added} lisätty, {removed} poistettu, {modified} muutettu, {text} tekstiä",
+      "generated_on": "Luontipäivä",
+      "generated": "Luotu {timestamp}",
+      "page_of": "Sivu {page} / {total}",
+      "no_changes": "Versioiden välillä ei löytynyt muutoksia.",
+      "col_no": "Nro",
+      "col_preview": "Esikatselu",
+      "col_kind": "Muutos",
+      "col_location": "Sijainti",
+      "col_detail": "Tiedot",
+      "col_status": "Tila",
+      "col_comment": "Kommentti",
+      "col_follow_up": "Jatkotoimi",
+      "page_at": "Sivu {page}, {coords}",
+      "layer": "Taso {layer}",
+      "entity_counts": "Kohteet: {added} lisätty, {removed} poistettu, {modified} muutettu",
+      "rfi": "RFI {number}",
+      "markup": "Versiopilvi",
+      "remeasure": "Mittaa uudelleen: {items} määrää, {positions} kustannusarvion nimikettä"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Molemmat puolet ovat eri versioita.",
+      "distinct_revisions_fail": "Vertailu vertaa arkkia itseensä.",
+      "distinct_revisions_hint": "Valitse piirustuksen vanhempi ja uudempi versio.",
+      "alignment_not_needed": "DWG-versioilla on samat piirustusyksiköt; kohdistusta ei tarvita.",
+      "alignment_missing_matrix": "Vertailussa ei ole kohdistusta.",
+      "alignment_singular": "Kohdistus romahduttaa arkin, eikä sitä voi käyttää.",
+      "alignment_scale": "Kohdistus skaalaa arkkia kertoimella {scale}, enemmän kuin saman piirustuksen versiot eroavat.",
+      "alignment_low_confidence": "Automaattinen kohdistus on epävarma (luotettavuus {confidence}).",
+      "alignment_manual_points": "Manuaalinen kohdistus vaatii kaksi pisteparia.",
+      "alignment_ok": "Arkin kohdistus on uskottava.",
+      "alignment_hint": "Kohdista arkit käsin kahteen merkkiin, jotka ovat molemmissa versioissa, esimerkiksi ruudukon leikkauspisteisiin.",
+      "region_empty": "Muutoksella {seq} ei ole kokoa.",
+      "region_off_sheet": "Muutos {seq} on arkin ulkopuolella.",
+      "regions_ok": "Jokainen muuttunut alue on arkilla.",
+      "triaged_ok": "Jokainen muutos on tarkastettu.",
+      "triaged_open": "{count} muutosta on vielä avoinna.",
+      "triaged_hint": "Merkitse jokainen muutos olennaiseksi tai ei olennaiseksi.",
+      "followed_up_ok": "Jokaiselle olennaiselle muutokselle on jatkotoimi.",
+      "followed_up_missing": "Muutos {seq} on merkitty olennaiseksi, mutta sillä ei ole kommenttia, RFI:tä, pilveä eikä uudelleenmittausmerkintää.",
+      "followed_up_hint": "Kommentoi muutosta, luo RFI tai pilvi tai merkitse sen sisällä olevat määrät mitattavaksi uudelleen."
+    }
   }
 }

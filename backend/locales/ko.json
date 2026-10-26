@@ -618,5 +618,93 @@
       "draft": "작성 중",
       "frozen": "확정"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, {page}페이지",
+    "text_change": "\"{old}\"이(가) \"{new}\"(으)로 변경됨",
+    "kind": {
+      "added": "추가됨",
+      "removed": "삭제됨",
+      "modified": "수정됨",
+      "text": "텍스트 변경됨"
+    },
+    "status": {
+      "open": "미처리",
+      "relevant": "관련 있음",
+      "not_relevant": "관련 없음"
+    },
+    "errors": {
+      "revision_not_found": "이 프로젝트에서 도면 리비전을 찾을 수 없습니다.",
+      "revision_not_parsed": "비교할 수 있는 처리된 도면 버전이 아직 없습니다.",
+      "comparison_not_found": "비교를 찾을 수 없습니다.",
+      "change_not_found": "변경 사항을 찾을 수 없습니다.",
+      "same_revision": "비교할 서로 다른 리비전 또는 페이지 두 개를 선택하세요.",
+      "manual_points": "수동 정렬에는 각 리비전에서 서로 다른 두 점이 필요합니다.",
+      "alignment_singular": "정렬을 적용할 수 없습니다. 시트가 붕괴됩니다.",
+      "region_empty": "변경 {seq}에는 크기가 없습니다.",
+      "region_off_sheet": "변경 {seq}이(가) 시트 밖에 있습니다.",
+      "module_missing": "이 작업에 필요한 모듈이 설치되어 있지 않습니다."
+    },
+    "rfi": {
+      "subject": "{sheet}의 도면 변경 {seq}",
+      "question": "{sheet}의 리비전 {new}은(는) 표시된 영역({kind})에서 리비전 {old}과(와) 다릅니다. 변경 의도와 수량에 영향이 있는지 확인해 주세요."
+    },
+    "markup": {
+      "text": "리비전 변경 {seq}: {kind}"
+    },
+    "report": {
+      "title": "도면 리비전 비교",
+      "project": "프로젝트",
+      "name": "비교",
+      "old_revision": "이전 리비전",
+      "new_revision": "최신 리비전",
+      "alignment": "정렬",
+      "alignment_none": "정렬 안 됨(동일 프레임)",
+      "alignment_auto": "자동",
+      "alignment_manual": "수동, 두 점",
+      "confidence": "신뢰도 {value}",
+      "summary": "변경 사항",
+      "summary_counts": "총 {total}건: 추가 {added}, 삭제 {removed}, 수정 {modified}, 텍스트 {text}",
+      "generated_on": "생성일",
+      "generated": "생성 일시 {timestamp}",
+      "page_of": "{total}페이지 중 {page}페이지",
+      "no_changes": "두 리비전 사이에서 변경 사항을 찾지 못했습니다.",
+      "col_no": "번호",
+      "col_preview": "미리보기",
+      "col_kind": "변경",
+      "col_location": "위치",
+      "col_detail": "상세",
+      "col_status": "상태",
+      "col_comment": "의견",
+      "col_follow_up": "후속 조치",
+      "page_at": "{page}페이지, {coords}",
+      "layer": "레이어 {layer}",
+      "entity_counts": "객체: 추가 {added}, 삭제 {removed}, 수정 {modified}",
+      "rfi": "RFI {number}",
+      "markup": "리비전 구름",
+      "remeasure": "재측정: 물량 {items}건, BOQ 항목 {positions}건"
+    },
+    "rules": {
+      "distinct_revisions_ok": "양쪽이 서로 다른 리비전입니다.",
+      "distinct_revisions_fail": "이 비교는 시트를 자기 자신과 비교하고 있습니다.",
+      "distinct_revisions_hint": "도면의 이전 리비전과 최신 리비전을 선택하세요.",
+      "alignment_not_needed": "DWG 리비전은 도면 단위를 공유하므로 정렬이 필요하지 않습니다.",
+      "alignment_missing_matrix": "이 비교에는 정렬이 없습니다.",
+      "alignment_singular": "정렬하면 시트가 붕괴되어 적용할 수 없습니다.",
+      "alignment_scale": "정렬로 시트가 {scale}배 조정되며, 같은 도면의 리비전 간 차이보다 큽니다.",
+      "alignment_low_confidence": "자동 정렬이 불확실합니다(신뢰도 {confidence}).",
+      "alignment_manual_points": "수동 정렬에는 점 두 쌍이 필요합니다.",
+      "alignment_ok": "시트 정렬이 타당합니다.",
+      "alignment_hint": "두 리비전에 공통인 표시 두 곳(예: 그리드 교차점)을 기준으로 시트를 수동 정렬하세요.",
+      "region_empty": "변경 {seq}에는 크기가 없습니다.",
+      "region_off_sheet": "변경 {seq}이(가) 시트 밖에 있습니다.",
+      "regions_ok": "변경된 모든 영역이 시트 위에 있습니다.",
+      "triaged_ok": "모든 변경이 검토되었습니다.",
+      "triaged_open": "미처리 변경이 {count}건 남아 있습니다.",
+      "triaged_hint": "각 변경을 관련 있음 또는 관련 없음으로 표시하세요.",
+      "followed_up_ok": "관련 있는 모든 변경에 후속 조치가 되어 있습니다.",
+      "followed_up_missing": "변경 {seq}은(는) 관련 있음으로 표시되었지만 의견, RFI, 구름 표시, 재측정 플래그가 없습니다.",
+      "followed_up_hint": "변경에 의견을 달거나, RFI 또는 구름 표시를 생성하거나, 그 안의 물량에 재측정 플래그를 지정하세요."
+    }
   }
 }

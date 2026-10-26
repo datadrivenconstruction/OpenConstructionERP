@@ -618,5 +618,93 @@
       "draft": "Rascunho",
       "frozen": "Congelado"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, página {page}",
+    "text_change": "\"{old}\" alterado para \"{new}\"",
+    "kind": {
+      "added": "Adicionado",
+      "removed": "Removido",
+      "modified": "Modificado",
+      "text": "Texto alterado"
+    },
+    "status": {
+      "open": "Aberto",
+      "relevant": "Relevante",
+      "not_relevant": "Não relevante"
+    },
+    "errors": {
+      "revision_not_found": "Revisão do desenho não encontrada neste projeto.",
+      "revision_not_parsed": "O desenho ainda não tem uma versão processada para comparar.",
+      "comparison_not_found": "Comparação não encontrada.",
+      "change_not_found": "Alteração não encontrada.",
+      "same_revision": "Escolha duas revisões ou páginas diferentes para comparar.",
+      "manual_points": "O alinhamento manual precisa de dois pontos distintos em cada revisão.",
+      "alignment_singular": "Não é possível aplicar o alinhamento: ele colapsa a folha.",
+      "region_empty": "A alteração {seq} não tem tamanho.",
+      "region_off_sheet": "A alteração {seq} está fora da folha.",
+      "module_missing": "O módulo necessário para esta ação não está instalado."
+    },
+    "rfi": {
+      "subject": "Alteração do desenho {seq} em {sheet}",
+      "question": "A revisão {new} de {sheet} difere da revisão {old} na área marcada ({kind}). Confirme a intenção da alteração e se os quantitativos são afetados."
+    },
+    "markup": {
+      "text": "Alteração de revisão {seq}: {kind}"
+    },
+    "report": {
+      "title": "Comparação de revisões do desenho",
+      "project": "Projeto",
+      "name": "Comparação",
+      "old_revision": "Revisão anterior",
+      "new_revision": "Revisão mais recente",
+      "alignment": "Alinhamento",
+      "alignment_none": "Não alinhado (mesma moldura)",
+      "alignment_auto": "Automático",
+      "alignment_manual": "Manual, dois pontos",
+      "confidence": "confiança {value}",
+      "summary": "Alterações",
+      "summary_counts": "{total} no total: {added} adicionadas, {removed} removidas, {modified} modificadas, {text} de texto",
+      "generated_on": "Data de geração",
+      "generated": "Gerado em {timestamp}",
+      "page_of": "Página {page} de {total}",
+      "no_changes": "Nenhuma alteração foi encontrada entre as duas revisões.",
+      "col_no": "N.º",
+      "col_preview": "Pré-visualização",
+      "col_kind": "Alteração",
+      "col_location": "Localização",
+      "col_detail": "Detalhe",
+      "col_status": "Estado",
+      "col_comment": "Comentário",
+      "col_follow_up": "Seguimento",
+      "page_at": "Página {page} em {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Entidades: {added} adicionadas, {removed} removidas, {modified} modificadas",
+      "rfi": "RFI {number}",
+      "markup": "Nuvem de revisão",
+      "remeasure": "Remedir: {items} quantitativos, {positions} itens do orçamento"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Os dois lados são revisões diferentes.",
+      "distinct_revisions_fail": "A comparação compara uma folha com ela mesma.",
+      "distinct_revisions_hint": "Escolha a revisão anterior e a mais recente do desenho.",
+      "alignment_not_needed": "As revisões DWG partilham as unidades do desenho; não é preciso alinhar.",
+      "alignment_missing_matrix": "A comparação não tem alinhamento.",
+      "alignment_singular": "O alinhamento colapsa a folha e não pode ser aplicado.",
+      "alignment_scale": "O alinhamento redimensiona a folha em {scale}, mais do que diferem revisões de um mesmo desenho.",
+      "alignment_low_confidence": "O alinhamento automático é incerto (confiança {confidence}).",
+      "alignment_manual_points": "Um alinhamento manual precisa de dois pares de pontos.",
+      "alignment_ok": "O alinhamento da folha é plausível.",
+      "alignment_hint": "Alinhe as folhas à mão por duas marcas comuns às duas revisões, como interseções da malha.",
+      "region_empty": "A alteração {seq} não tem tamanho.",
+      "region_off_sheet": "A alteração {seq} está fora da folha.",
+      "regions_ok": "Todas as áreas alteradas estão na folha.",
+      "triaged_ok": "Todas as alterações foram revistas.",
+      "triaged_open": "{count} alterações ainda estão em aberto.",
+      "triaged_hint": "Marque cada alteração como relevante ou não relevante.",
+      "followed_up_ok": "Toda alteração relevante tem seguimento.",
+      "followed_up_missing": "A alteração {seq} está marcada como relevante mas não tem comentário, RFI, nuvem nem indicador de nova medição.",
+      "followed_up_hint": "Comente a alteração, emita uma RFI ou uma nuvem, ou sinalize os quantitativos afetados para remedir."
+    }
   }
 }

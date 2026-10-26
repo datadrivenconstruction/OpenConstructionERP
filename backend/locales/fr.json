@@ -618,5 +618,93 @@
       "draft": "Brouillon",
       "frozen": "Figé"
     }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, page {page}",
+    "text_change": "« {old} » remplacé par « {new} »",
+    "kind": {
+      "added": "Ajouté",
+      "removed": "Supprimé",
+      "modified": "Modifié",
+      "text": "Texte modifié"
+    },
+    "status": {
+      "open": "Ouvert",
+      "relevant": "Pertinent",
+      "not_relevant": "Non pertinent"
+    },
+    "errors": {
+      "revision_not_found": "Révision de plan introuvable dans ce projet.",
+      "revision_not_parsed": "Le plan n'a pas encore de version traitée à comparer.",
+      "comparison_not_found": "Comparaison introuvable.",
+      "change_not_found": "Modification introuvable.",
+      "same_revision": "Choisissez deux révisions ou pages différentes à comparer.",
+      "manual_points": "Le recalage manuel nécessite deux points distincts sur chaque révision.",
+      "alignment_singular": "Le recalage ne peut pas être appliqué : il écrase la feuille.",
+      "region_empty": "La modification {seq} n'a aucune taille.",
+      "region_off_sheet": "La modification {seq} se situe en dehors de la feuille.",
+      "module_missing": "Le module nécessaire à cette action n'est pas installé."
+    },
+    "rfi": {
+      "subject": "Modification de plan {seq} sur {sheet}",
+      "question": "La révision {new} de {sheet} diffère de la révision {old} dans la zone repérée ({kind}). Merci de confirmer l'intention de la modification et si les quantités sont concernées."
+    },
+    "markup": {
+      "text": "Modification de révision {seq} : {kind}"
+    },
+    "report": {
+      "title": "Comparaison de révisions de plan",
+      "project": "Projet",
+      "name": "Comparaison",
+      "old_revision": "Révision antérieure",
+      "new_revision": "Révision récente",
+      "alignment": "Recalage",
+      "alignment_none": "Non recalé (même cadre)",
+      "alignment_auto": "Automatique",
+      "alignment_manual": "Manuel, deux points",
+      "confidence": "confiance {value}",
+      "summary": "Modifications",
+      "summary_counts": "{total} au total : {added} ajoutées, {removed} supprimées, {modified} modifiées, {text} de texte",
+      "generated_on": "Date de génération",
+      "generated": "Généré le {timestamp}",
+      "page_of": "Page {page} sur {total}",
+      "no_changes": "Aucune modification n'a été trouvée entre les deux révisions.",
+      "col_no": "N°",
+      "col_preview": "Aperçu",
+      "col_kind": "Modification",
+      "col_location": "Emplacement",
+      "col_detail": "Détail",
+      "col_status": "Statut",
+      "col_comment": "Commentaire",
+      "col_follow_up": "Suite à donner",
+      "page_at": "Page {page} à {coords}",
+      "layer": "Calque {layer}",
+      "entity_counts": "Entités : {added} ajoutées, {removed} supprimées, {modified} modifiées",
+      "rfi": "RFI {number}",
+      "markup": "Nuage de révision",
+      "remeasure": "À remesurer : {items} quantités, {positions} postes du DQE"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Les deux côtés sont des révisions différentes.",
+      "distinct_revisions_fail": "La comparaison compare une feuille avec elle-même.",
+      "distinct_revisions_hint": "Choisissez la révision antérieure et la révision récente du plan.",
+      "alignment_not_needed": "Les révisions DWG partagent les unités du dessin ; aucun recalage n'est nécessaire.",
+      "alignment_missing_matrix": "La comparaison n'a aucun recalage.",
+      "alignment_singular": "Le recalage écrase la feuille et ne peut pas être appliqué.",
+      "alignment_scale": "Le recalage met la feuille à l'échelle de {scale}, plus que ce qui sépare des révisions d'un même plan.",
+      "alignment_low_confidence": "Le recalage automatique est incertain (confiance {confidence}).",
+      "alignment_manual_points": "Un recalage manuel nécessite deux paires de points.",
+      "alignment_ok": "Le recalage de la feuille est plausible.",
+      "alignment_hint": "Recalez les feuilles à la main sur deux repères communs aux deux révisions, comme des intersections de trame.",
+      "region_empty": "La modification {seq} n'a aucune taille.",
+      "region_off_sheet": "La modification {seq} se situe en dehors de la feuille.",
+      "regions_ok": "Chaque zone modifiée se trouve sur la feuille.",
+      "triaged_ok": "Chaque modification a été examinée.",
+      "triaged_open": "{count} modifications sont encore ouvertes.",
+      "triaged_hint": "Marquez chaque modification comme pertinente ou non pertinente.",
+      "followed_up_ok": "Chaque modification pertinente a une suite.",
+      "followed_up_missing": "La modification {seq} est marquée pertinente mais n'a ni commentaire, ni RFI, ni nuage, ni indicateur de remesurage.",
+      "followed_up_hint": "Commentez la modification, émettez une RFI ou un nuage, ou signalez les quantités concernées à remesurer."
+    }
   }
 }
