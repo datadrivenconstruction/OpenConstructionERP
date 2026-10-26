@@ -14,6 +14,10 @@ from __future__ import annotations
 import logging
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.core.cpm_profile import SchedulingOptions
 
 logger = logging.getLogger(__name__)
 
@@ -507,13 +511,30 @@ def offset_to_iso(offset: int, project_start: date) -> str:
     return (project_start + timedelta(days=int(offset))).isoformat()
 
 
+def _parse_project_start(project_start_date: str | None) -> date:
+    """The CPM origin: the given ISO date, else today."""
+    if project_start_date:
+        try:
+            return date.fromisoformat(project_start_date)
+        except (ValueError, TypeError):
+            return date.today()
+    return date.today()
+
+
 async def calculate_cpm(
     activities: list[dict],
     relationships: list[dict],
     calendar: dict | None = None,
     project_start_date: str | None = None,
+    *,
+    options: SchedulingOptions | None = None,
 ) -> list[dict]:
     """Run CPM on a set of activities and relationships.
+
+    With ``options`` (a scheduling profile: data date, actuals, progress mode,
+    lag calendar, open ends, critical rule) the pass runs in
+    :func:`app.core.cpm_profile.calculate_cpm_with_options`; without it the
+    plain planning pass below runs, unchanged.
 
     Each activity dict must have:
         - id: str (UUID as string)
@@ -547,17 +568,21 @@ async def calculate_cpm(
     if not activities:
         return []
 
+    if options is not None:
+        from app.core.cpm_profile import calculate_cpm_with_options
+
+        return calculate_cpm_with_options(
+            activities,
+            relationships,
+            calendar=calendar,
+            project_start=_parse_project_start(project_start_date),
+            options=options,
+        )
+
     work_days = _parse_work_days(calendar)
     exceptions = _parse_exceptions(calendar)
 
-    # Parse project start date
-    if project_start_date:
-        try:
-            p_start = date.fromisoformat(project_start_date)
-        except (ValueError, TypeError):
-            p_start = date.today()
-    else:
-        p_start = date.today()
+    p_start = _parse_project_start(project_start_date)
 
     # Build lookup structures
     act_map: dict[str, dict] = {}
