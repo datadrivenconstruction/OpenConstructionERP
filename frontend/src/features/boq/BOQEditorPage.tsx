@@ -53,7 +53,7 @@ import { buildLinkFromModelUrl, buildQuantityRulesUrl } from '@/features/bim/qua
 // AutocompleteInput used in sub-components, not directly here
 // import { AutocompleteInput } from './AutocompleteInput';
 import { AIChatPanel } from './AIChatPanel';
-import { importLanded, importToastText, type ImportToastResult } from './importToastText';
+import { importFidelityNotice, importLanded, importToastText, type ImportToastResult } from './importToastText';
 import { editorErrorText } from './editorErrorText';
 import { BOQRenameTitle } from './BOQRenameTitle';
 import { carriesPriceList, saveImportedPriceList } from './saveImportedPriceList';
@@ -4689,6 +4689,24 @@ export function BOQEditorPage() {
           title: toast.title,
           message: toast.message,
         });
+        const fidelity = importFidelityNotice(result);
+        if (fidelity) {
+          addToast(
+            {
+              type: fidelity.errors > 0 ? 'warning' : 'info',
+              title: t('boq.fidelity.import_toast_title', { defaultValue: 'Not everything in the file reached the bill' }),
+              message: t('boq.fidelity.import_toast', {
+                defaultValue: 'The import left out or changed data: {{errors}} critical, {{warnings}} warnings.',
+                errors: fidelity.errors,
+                warnings: fidelity.warnings,
+              }),
+              action: fidelity.id
+                ? { label: t('boq.fidelity.view_report', { defaultValue: 'View report' }), onClick: () => openFidelityReport(fidelity.id) }
+                : undefined,
+            },
+            { duration: 15000 },
+          );
+        }
         if (importLanded(result) && carriesPriceList(result.source_format)) {
           // The same file holds the price list the bill is priced from;
           // offer to keep it as a cost database without a second upload.
@@ -4753,7 +4771,7 @@ export function BOQEditorPage() {
         if (again) await importFileRef.current?.(file, true);
       }
     },
-    [boqId, addToast, queryClient, t, confirm],
+    [boqId, addToast, queryClient, t, confirm, openFidelityReport],
   );
 
   importFileRef.current = handleImportFile;

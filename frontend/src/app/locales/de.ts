@@ -60868,6 +60868,8 @@ const resource = {
     "boq.fidelity.view_report": "Bericht ansehen",
     "boq.fidelity.menu_check": "Prüfen, was die Datei verliert…",
     "boq.fidelity.import_title": "Nicht ins Leistungsverzeichnis übernommen: {{errors}} kritisch, {{warnings}} Warnungen, {{notes}} Hinweise",
+    "boq.fidelity.import_toast_title": "Nicht alles aus der Datei ist im Leistungsverzeichnis angekommen",
+    "boq.fidelity.import_toast": "Beim Import wurden Daten ausgelassen oder geändert: {{errors}} kritisch, {{warnings}} Warnungen.",
     "boq.scaling.applied": "Positionen skaliert: {{n}}",
     "boq.scaling.undo": "Rückgängig",
     "boq.scaling.undone": "Skalierung rückgängig gemacht",

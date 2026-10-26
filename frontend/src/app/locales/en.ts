@@ -52419,6 +52419,8 @@ const resource = {
     "boq.fidelity.view_report": "View report",
     "boq.fidelity.menu_check": "Check what the file loses…",
     "boq.fidelity.import_title": "Not carried into the bill: {{errors}} critical, {{warnings}} warnings, {{notes}} notes",
+    "boq.fidelity.import_toast_title": "Not everything in the file reached the bill",
+    "boq.fidelity.import_toast": "The import left out or changed data: {{errors}} critical, {{warnings}} warnings.",
     "boq.scaling.applied": "Positions scaled: {{n}}",
     "boq.scaling.undo": "Undo",
     "boq.scaling.undone": "Scaling undone",

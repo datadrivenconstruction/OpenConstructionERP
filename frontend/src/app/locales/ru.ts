@@ -61426,6 +61426,8 @@ const resource = {
     "boq.fidelity.view_report": "Открыть отчёт",
     "boq.fidelity.menu_check": "Проверить, что теряет файл…",
     "boq.fidelity.import_title": "Не перенесено в смету: критичных {{errors}}, предупреждений {{warnings}}, примечаний {{notes}}",
+    "boq.fidelity.import_toast_title": "Не все данные из файла попали в ведомость",
+    "boq.fidelity.import_toast": "При импорте данные пропущены или изменены: критичных {{errors}}, предупреждений {{warnings}}.",
     "boq.scaling.applied": "Позиций пересчитано: {{n}}",
     "boq.scaling.undo": "Отменить",
     "boq.scaling.undone": "Масштабирование отменено",

@@ -21,10 +21,11 @@ from __future__ import annotations
 import io
 import uuid
 from decimal import Decimal
+from pathlib import Path
 
 import pytest
 import pytest_asyncio
-from fastapi import HTTPException
+from fastapi import HTTPException, Response, UploadFile
 from sqlalchemy import select, update
 
 from app.core.validation.engine import ValidationContext
@@ -49,6 +50,8 @@ from app.modules.boq.router import (
     export_boq_csv,
     export_boq_excel,
     export_boq_gaeb,
+    import_boq_excel,
+    import_boq_gaeb,
 )
 from app.modules.boq.schemas import PositionCreate
 from app.modules.boq.service import BOQService
@@ -288,6 +291,75 @@ async def test_a_native_import_returns_and_stores_its_report(session) -> None:
     assert any(i["kind"] == "attachment_skipped" for i in fidelity["items"])
     (stored,) = [r for r in await _reports(session, boq.id) if r.direction == "import"]
     assert stored.format_id == "bc3" and stored.file_name == "obra.bc3"
+
+
+# ── legacy import routes ───────────────────────────────────────────────────
+
+_GAEB_X83 = Path(__file__).resolve().parents[2] / "fixtures" / "gaeb" / "oce_conformance_x83.x83"
+
+
+def _upload(name: str, content: bytes) -> UploadFile:
+    return UploadFile(file=io.BytesIO(content), filename=name)
+
+
+async def test_the_legacy_gaeb_route_returns_and_stores_the_import_report(session) -> None:
+    owner = await _user(session)
+    boq, _pos = await _bill(session, owner)
+    result = await import_boq_gaeb(
+        boq.id, Response(), str(owner.id), ROLE, session, _upload("lv.x83", _GAEB_X83.read_bytes()), BOQService(session)
+    )
+    fidelity = result["fidelity"]
+    assert fidelity["id"] and fidelity["format_id"] == "gaeb_xml" and fidelity["direction"] == "import"
+    assert fidelity["summary"]["total"] == len(fidelity["items"])
+    (stored,) = [r for r in await _reports(session, boq.id) if r.direction == "import"]
+    assert str(stored.id) == fidelity["id"]
+    assert stored.format_id == "gaeb_xml" and stored.file_name == "lv.x83"
+
+
+async def test_the_legacy_excel_route_reports_what_it_rejected_and_what_the_bill_cannot_carry(session) -> None:
+    owner = await _user(session)
+    boq, _pos = await _bill(session, owner)
+    sheet = "Pos,Description,Unit,Quantity,Unit Rate\n02.0010,Screed,m2,12,9.5\n02.0020,Paint,m2,abc,3\n"
+    result = await import_boq_excel(
+        boq.id, Response(), str(owner.id), ROLE, session, _upload("bill.csv", sheet.encode()), BOQService(session)
+    )
+    assert result["created"] == 1 and len(result["errors"]) == 1
+    fidelity = result["fidelity"]
+    assert fidelity["id"] and fidelity["format_id"] == "excel"
+    rejected = [i for i in fidelity["items"] if i["kind"] == "rejected_row"]
+    assert [i["position_ref"] for i in rejected] == ["02.0020"]
+    (stored,) = [r for r in await _reports(session, boq.id) if r.direction == "import"]
+    assert str(stored.id) == fidelity["id"] and stored.file_name == "bill.csv"
+
+
+async def test_a_clean_legacy_excel_import_still_stores_a_lossless_report(session) -> None:
+    owner = await _user(session)
+    boq, _pos = await _bill(session, owner)
+    sheet = "Pos,Description,Unit,Quantity,Unit Rate\n02.0010,Screed,m2,12,9.5\n"
+    result = await import_boq_excel(
+        boq.id, Response(), str(owner.id), ROLE, session, _upload("bill.csv", sheet.encode()), BOQService(session)
+    )
+    assert result["created"] == 1 and result["errors"] == []
+    assert result["fidelity"]["summary"]["critical"] == 0
+
+
+async def test_a_stranger_cannot_use_the_legacy_routes_and_no_report_is_stored(session) -> None:
+    owner = await _user(session)
+    stranger = await _user(session)
+    boq, _pos = await _bill(session, owner)
+    sheet = "Pos,Description,Unit,Quantity,Unit Rate\n02.0010,Screed,m2,12,9.5\n"
+    with pytest.raises(HTTPException) as denied:
+        await import_boq_excel(
+            boq.id,
+            Response(),
+            str(stranger.id),
+            ROLE,
+            session,
+            _upload("bill.csv", sheet.encode()),
+            BOQService(session),
+        )
+    assert denied.value.status_code == 404
+    assert await _reports(session, boq.id) == []
 
 
 # ── scaling ────────────────────────────────────────────────────────────────

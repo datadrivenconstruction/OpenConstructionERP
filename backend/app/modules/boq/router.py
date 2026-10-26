@@ -7339,6 +7339,17 @@ async def import_boq_excel(
     # boq_quality issues surface in the import response instead of only
     # via the later /validate/ call (philosophy: validation is a first-
     # class citizen of the core workflow). Gated by IMPORT_INLINE_VALIDATION.
+    fidelity = await _record_legacy_sheet_fidelity(
+        boq_id,
+        content,
+        file_name=file.filename or "import",
+        errors=errors,
+        warnings=warnings_list,
+        skipped=skipped,
+        actor_id=_user_id,
+        service=service,
+    )
+
     validation_report = None
     if (created + updated) > 0:
         validation_report = await _run_import_validation(boq_id, service, service.session)
@@ -7360,6 +7371,7 @@ async def import_boq_excel(
         "source_format": import_meta.get("source_format", "unknown") if import_meta else "unknown",
         "original_columns": import_meta.get("original_columns", []) if import_meta else [],
         "validation_report": validation_report,
+        "fidelity": fidelity,
         "summary": {
             "created": created,
             "updated": updated,
@@ -7506,6 +7518,17 @@ async def import_boq_gaeb(
         except Exception:
             logger.warning("Failed to persist GAEB import metadata for BOQ %s", boq_id, exc_info=True)
 
+    fidelity = await _record_import_fidelity(
+        boq_id,
+        GAEBXMLImporter.format_id,
+        imported_boq,
+        content,
+        file_name=file.filename or "gaeb",
+        persistence_errors=apply_summary["apply_errors"],
+        actor_id=_user_id,
+        service=service,
+    )
+
     validation_report = None
     if created > 0:
         validation_report = await _run_import_validation(boq_id, service, service.session)
@@ -7527,6 +7550,7 @@ async def import_boq_gaeb(
         "source_format": imported_boq.source_format,
         "currency": imported_boq.currency,
         "validation_report": validation_report,
+        "fidelity": fidelity,
     }
 
 
@@ -8234,6 +8258,45 @@ async def _record_import_fidelity(
     except Exception:  # noqa: BLE001 - diagnostics, never fail an import
         logger.warning("Import fidelity report failed for BOQ %s", boq_id, exc_info=True)
         return None
+
+
+async def _record_legacy_sheet_fidelity(
+    boq_id: uuid.UUID,
+    content: bytes,
+    *,
+    file_name: str,
+    errors: list[dict[str, Any]],
+    warnings: list[dict[str, Any]],
+    skipped: int,
+    actor_id: uuid.UUID | None,
+    service: BOQService,
+) -> dict[str, Any] | None:
+    """Fidelity report of a spreadsheet import done by the legacy route.
+
+    The registered reader supplies what the sheet held and the bill cannot
+    carry; the rows this route rejected, warned about and skipped replace the
+    reader's own tallies, so the report states what actually happened.
+    """
+    from dataclasses import replace
+
+    from app.modules.boq.importers.excel import ExcelImporter
+
+    try:
+        parsed = await ExcelImporter.parse(content, locale=get_locale())
+        imported = replace(parsed, errors=list(errors), warnings=list(warnings), skipped=skipped)
+    except Exception:  # noqa: BLE001 - the unparsable case was already answered by the route
+        logger.warning("Spreadsheet fidelity read failed for BOQ %s", boq_id, exc_info=True)
+        return None
+    return await _record_import_fidelity(
+        boq_id,
+        ExcelImporter.format_id,
+        imported,
+        content,
+        file_name=file_name,
+        persistence_errors=[],
+        actor_id=actor_id,
+        service=service,
+    )
 
 
 # ── Import preview endpoint ─────────────────────────────────────────────────

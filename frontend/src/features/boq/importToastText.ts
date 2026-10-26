@@ -32,6 +32,23 @@ export interface ImportToastResult {
   warnings?: { code?: string }[];
   /** What the native importer read, e.g. an XPWE bill's sections and measurement rows. */
   metadata?: { xpwe_sections?: number; measurement_rows?: number };
+  /** What the file held and the bill did not take; the stored report's id and counts. */
+  fidelity?: {
+    id?: string | null;
+    summary?: { critical?: number; by_severity?: { warning?: number } };
+  } | null;
+}
+
+/** Counts of the import's fidelity report worth telling the user about, or null when it is clean. */
+export function importFidelityNotice(
+  result: Pick<ImportToastResult, 'fidelity'>,
+): { id: string | null; errors: number; warnings: number } | null {
+  const summary = result.fidelity?.summary;
+  if (!summary) return null;
+  const errors = summary.critical ?? 0;
+  const warnings = summary.by_severity?.warning ?? 0;
+  if (errors + warnings === 0) return null;
+  return { id: result.fidelity?.id ?? null, errors, warnings };
 }
 
 export function importToastText(

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect } from 'vitest';
-import { importLanded, importToastText } from './importToastText';
+import { importFidelityNotice, importLanded, importToastText } from './importToastText';
 import en from '@/app/locales/en';
 import hr from '@/app/locales/hr';
 import de from '@/app/locales/de';
@@ -108,5 +108,27 @@ describe('importToastText', () => {
       tFrom(en.translation),
     );
     expect(noted.message).toBe('Warnings: 2');
+  });
+});
+
+describe('importFidelityNotice', () => {
+  it('names the stored report and its counts when something was left out', () => {
+    expect(
+      importFidelityNotice({ fidelity: { id: 'r1', summary: { critical: 2, by_severity: { warning: 3 } } } }),
+    ).toEqual({ id: 'r1', errors: 2, warnings: 3 });
+  });
+
+  it('stays silent for a lossless import, an info-only report and a missing report', () => {
+    expect(importFidelityNotice({ fidelity: { id: 'r1', summary: { critical: 0, by_severity: { warning: 0 } } } })).toBeNull();
+    expect(importFidelityNotice({ fidelity: null })).toBeNull();
+    expect(importFidelityNotice({})).toBeNull();
+  });
+
+  it('still counts when the report could not be stored', () => {
+    expect(importFidelityNotice({ fidelity: { id: null, summary: { critical: 1 } } })).toEqual({
+      id: null,
+      errors: 1,
+      warnings: 0,
+    });
   });
 });
