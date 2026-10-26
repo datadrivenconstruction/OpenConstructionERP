@@ -468,6 +468,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.resource_leveling', to: '/portfolio/leveling', icon: Scale, advancedOnly: true },
       { labelKey: 'nav.risk_register', to: '/risks', icon: ShieldAlert, advancedOnly: true },
       { labelKey: 'nav.cvr', to: '/cvr', icon: Scale, advancedOnly: true },
+      { labelKey: 'wip_report.title', to: '/portfolio/wip', icon: FileBarChart, advancedOnly: true },
       // Post-calculation closes the loop the rest of this group opens: what the
       // estimate allowed against what the site actually spent, per position.
       { labelKey: 'postcalc.title', to: '/postcalc', icon: Gauge, advancedOnly: true },
