@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "该送审资料处于版本 {revision}，但没有版本 {previous} 的审核记录，因此无法得知其被重新提交的原因",
+      "suggestion": "通过标记为“修改后重新提交”的审核进入新版本，或更正版本号"
+    },
+    "outcome_matches_status": {
+      "fail": "审核人的签章显示为 {outcome}，但送审资料的状态为 {status}",
+      "suggestion": "通过审核操作记录决定，使签章与状态同步变更"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "该项目需在 {on_site} 到达现场，但其送审资料却在 {submitted} 才提交",
+      "suggestion": "更正现场需用日期，或记录交付日期已经无法满足"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "该送审资料被标记为长周期采购项，但未填写交付周期，因而无法计算需要批准的截止日期",
+      "suggestion": "以周为单位填写从下单到现场交付的交付周期"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "为确保该项目按时到达，应于 {needed_by} 前获得批准；但之后 {days} 天仍未批准",
+      "suggestion": "催促审核，或与进度计划协商更晚的现场需用日期"
+    },
+    "material_has_manufacturer": {
+      "fail": "该材料送审资料未填写生产厂家，因此审核人没有可供批准的产品",
+      "suggestion": "填写拟用的生产厂家或品牌"
+    }
+  }
+}

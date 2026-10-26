@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Ce document est à l'indice {revision}, mais aucune revue de l'indice {previous} n'est enregistrée : personne ne peut savoir pourquoi il a été soumis à nouveau",
+      "suggestion": "Passez à un nouvel indice par une revue marquée « réviser et soumettre à nouveau », ou corrigez le numéro d'indice"
+    },
+    "outcome_matches_status": {
+      "fail": "Le visa du réviseur indique {outcome}, mais le statut du document est {status}",
+      "suggestion": "Enregistrez la décision par l'action de revue pour que le visa et le statut évoluent ensemble"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "L'élément est requis sur chantier le {on_site}, avant le dépôt de sa soumission le {submitted}",
+      "suggestion": "Corrigez la date de besoin sur chantier, ou notez que la date de livraison est déjà perdue"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Cette soumission est marquée comme approvisionnement long mais n'a pas de délai, la date à laquelle son approbation est nécessaire ne peut donc pas être calculée",
+      "suggestion": "Saisissez le délai en semaines entre la commande et la livraison sur chantier"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "L'approbation était nécessaire avant le {needed_by} pour que l'élément arrive à temps ; il n'est toujours pas approuvé {days} jours plus tard",
+      "suggestion": "Relancez la revue, ou convenez avec le planning d'une date de besoin sur chantier plus tardive"
+    },
+    "material_has_manufacturer": {
+      "fail": "Cette soumission de matériau ne désigne aucun fabricant, le réviseur n'a donc aucun produit à approuver",
+      "suggestion": "Saisissez le fabricant ou la marque proposé"
+    }
+  }
+}

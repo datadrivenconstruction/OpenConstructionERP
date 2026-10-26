@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Diese Einreichung steht auf Revision {revision}, aber es ist keine Prüfung der Revision {previous} erfasst, sodass nicht nachvollziehbar ist, warum sie erneut eingereicht wurde",
+      "suggestion": "Eine neue Revision über eine Prüfung mit dem Vermerk »überarbeiten und erneut einreichen« erreichen oder die Revisionsnummer korrigieren"
+    },
+    "outcome_matches_status": {
+      "fail": "Der Prüfstempel lautet {outcome}, der Status der Einreichung ist aber {status}",
+      "suggestion": "Die Entscheidung über die Prüfaktion erfassen, damit Stempel und Status gemeinsam aktualisiert werden"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Das Element wird auf der Baustelle am {on_site} benötigt, bevor seine Einreichung am {submitted} eingereicht wurde",
+      "suggestion": "Das Datum für den Bedarf auf der Baustelle korrigieren oder festhalten, dass der Liefertermin bereits verloren ist"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Diese Einreichung ist als Langläufer markiert, hat aber keine Lieferzeit, daher lässt sich das Datum, bis zu dem die Freigabe vorliegen muss, nicht ermitteln",
+      "suggestion": "Die Lieferzeit in Wochen von der Bestellung bis zur Lieferung auf die Baustelle eintragen"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Die Freigabe war bis {needed_by} nötig, damit das Element rechtzeitig eintrifft; sie liegt {days} Tage später immer noch nicht vor",
+      "suggestion": "Die Prüfung anmahnen oder mit dem Terminplan einen späteren Bedarfstermin auf der Baustelle vereinbaren"
+    },
+    "material_has_manufacturer": {
+      "fail": "Diese Materialeinreichung nennt keinen Hersteller, daher hat der Prüfer kein Produkt zum Freigeben",
+      "suggestion": "Den angebotenen Hersteller oder die Marke eintragen"
+    }
+  }
+}

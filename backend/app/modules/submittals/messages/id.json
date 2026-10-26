@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Submittal ini ada di revisi {revision}, tetapi tidak ada catatan tinjauan revisi {previous}, sehingga tidak ada yang dapat mengetahui alasan dikirim ulang",
+      "suggestion": "Capai revisi baru melalui tinjauan yang ditandai revise and resubmit, atau perbaiki nomor revisi"
+    },
+    "outcome_matches_status": {
+      "fail": "Stempel peninjau menyatakan {outcome}, tetapi status submittal adalah {status}",
+      "suggestion": "Catat keputusan melalui aksi tinjauan agar stempel dan status berubah bersamaan"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Item dibutuhkan di lokasi pada {on_site}, sebelum submittal-nya diajukan pada {submitted}",
+      "suggestion": "Perbaiki tanggal kebutuhan di lokasi, atau catat bahwa tanggal pengiriman sudah terlewat"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Submittal ini ditandai sebagai long lead tetapi tidak memiliki lead time, sehingga tanggal persetujuan yang dibutuhkan tidak dapat dihitung",
+      "suggestion": "Masukkan lead time dalam minggu dari pemesanan hingga pengiriman ke lokasi"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Persetujuan dibutuhkan pada {needed_by} agar item tiba tepat waktu; masih belum disetujui {days} hari kemudian",
+      "suggestion": "Tindak lanjuti tinjauan, atau sepakati dengan program tanggal kebutuhan di lokasi yang lebih lambat"
+    },
+    "material_has_manufacturer": {
+      "fail": "Submittal material ini tidak mencantumkan produsen, sehingga peninjau tidak memiliki produk untuk disetujui",
+      "suggestion": "Masukkan produsen atau merek yang ditawarkan"
+    }
+  }
+}

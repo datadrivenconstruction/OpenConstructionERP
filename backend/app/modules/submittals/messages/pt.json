@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Esta submissão está na revisão {revision}, mas não há registo de nenhuma análise da revisão {previous}, por isso ninguém consegue perceber porque foi reenviada",
+      "suggestion": "Chegue a uma nova revisão através de uma análise marcada como rever e reenviar, ou corrija o número da revisão"
+    },
+    "outcome_matches_status": {
+      "fail": "O carimbo do revisor indica {outcome}, mas o estado da submissão é {status}",
+      "suggestion": "Registe a decisão através da ação de análise para que o carimbo e o estado mudem em conjunto"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "O item é necessário em obra a {on_site}, antes de a sua submissão ter sido apresentada a {submitted}",
+      "suggestion": "Corrija a data de necessidade em obra, ou registe que a data de entrega já foi perdida"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Esta submissão está marcada como de longo prazo de entrega, mas não tem prazo de entrega, por isso não é possível calcular a data até à qual a aprovação é necessária",
+      "suggestion": "Introduza o prazo de entrega em semanas, desde a encomenda até à entrega em obra"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "A aprovação era necessária até {needed_by} para o item chegar a tempo; continua por aprovar {days} dias depois",
+      "suggestion": "Cobre a análise, ou acorde com o programa uma data de necessidade em obra mais tardia"
+    },
+    "material_has_manufacturer": {
+      "fail": "Esta submissão de material não indica nenhum fabricante, por isso o revisor não tem um produto para aprovar",
+      "suggestion": "Introduza o fabricante ou a marca proposta"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Deze inzending staat op revisie {revision}, maar er is geen beoordeling van revisie {previous} vastgelegd, dus niemand kan nagaan waarom ze opnieuw is ingediend",
+      "suggestion": "Bereik een nieuwe revisie via een beoordeling met de markering herzien en opnieuw indienen, of corrigeer het revisienummer"
+    },
+    "outcome_matches_status": {
+      "fail": "De stempel van de beoordelaar vermeldt {outcome}, maar de status van de inzending is {status}",
+      "suggestion": "Leg het besluit vast via de beoordelingsactie, zodat stempel en status samen veranderen"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Het onderdeel is op {on_site} nodig op de bouwplaats, voordat de inzending ervan op {submitted} is ingediend",
+      "suggestion": "Corrigeer de datum waarop het op de bouwplaats nodig is, of leg vast dat de leverdatum al verloren is"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Deze inzending is gemarkeerd als lange levertijd, maar heeft geen levertijd, dus de datum waarop de goedkeuring nodig is kan niet worden berekend",
+      "suggestion": "Voer de levertijd in weken in, van bestelling tot levering op de bouwplaats"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Goedkeuring was nodig vóór {needed_by} zodat het onderdeel op tijd aankomt; het is {days} dagen later nog steeds niet goedgekeurd",
+      "suggestion": "Volg de beoordeling op, of spreek met de planning een latere datum voor de bouwplaats af"
+    },
+    "material_has_manufacturer": {
+      "fail": "Deze materiaalinzending noemt geen fabrikant, dus de beoordelaar heeft geen product om goed te keuren",
+      "suggestion": "Voer de voorgestelde fabrikant of het merk in"
+    }
+  }
+}

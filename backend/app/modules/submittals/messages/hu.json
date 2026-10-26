@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Ez a benyújtás a(z) {revision} revízión van, de a(z) {previous} revízió felülvizsgálata nincs rögzítve, így senki nem tudja, miért küldték be újra",
+      "suggestion": "Új revíziót a „javítás és újraküldés” jelöléssel rögzített felülvizsgálaton keresztül érjen el, vagy javítsa a revíziószámot"
+    },
+    "outcome_matches_status": {
+      "fail": "A felülvizsgáló pecsétje {outcome} eredményt mutat, de a benyújtás állapota {status}",
+      "suggestion": "Rögzítse a döntést a felülvizsgálati művelettel, hogy a pecsét és az állapot együtt változzon"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "A tétel szükséges a helyszínen {on_site} napon, mielőtt a benyújtását {submitted} napon beadták",
+      "suggestion": "Javítsa a helyszíni szükségleti dátumot, vagy rögzítse, hogy a szállítási határidő már lekésett"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Ez a benyújtás hosszú szállítási idejűként van megjelölve, de nincs megadva szállítási idő, ezért nem számítható ki, meddig kell jóváhagyni",
+      "suggestion": "Adja meg a szállítási időt hetekben, a megrendeléstől a helyszíni szállításig"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "A jóváhagyásnak {needed_by} napig meg kellett volna történnie, hogy a tétel időben megérkezzen; {days} nappal később sincs jóváhagyva",
+      "suggestion": "Sürgesse a felülvizsgálatot, vagy egyezzen meg az ütemtervvel egy későbbi helyszíni szükségleti dátumban"
+    },
+    "material_has_manufacturer": {
+      "fail": "Ez az anyagbenyújtás nem nevez meg gyártót, így a felülvizsgálónak nincs jóváhagyandó terméke",
+      "suggestion": "Adja meg a felajánlott gyártót vagy márkát"
+    }
+  }
+}

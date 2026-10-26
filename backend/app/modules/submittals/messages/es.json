@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Este documento está en la revisión {revision}, pero no consta ninguna revisión de la revisión {previous}, así que nadie puede saber por qué se volvió a enviar",
+      "suggestion": "Llegue a una nueva revisión mediante una revisión marcada como revisar y reenviar, o corrija el número de revisión"
+    },
+    "outcome_matches_status": {
+      "fail": "El sello del revisor indica {outcome}, pero el estado del documento es {status}",
+      "suggestion": "Registre la decisión mediante la acción de revisión para que el sello y el estado cambien juntos"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "El elemento se necesita en obra el {on_site}, antes de que su documento se presentara el {submitted}",
+      "suggestion": "Corrija la fecha de necesidad en obra o registre que la fecha de entrega ya se ha perdido"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Este documento está marcado como de largo plazo de suministro, pero no tiene plazo de entrega, así que no se puede calcular la fecha en la que debe estar aprobado",
+      "suggestion": "Introduzca el plazo de entrega en semanas desde el pedido hasta la entrega en obra"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "La aprobación era necesaria antes del {needed_by} para que el elemento llegara a tiempo; sigue sin aprobarse {days} días después",
+      "suggestion": "Reclame la revisión o acuerde con el programa una fecha de necesidad en obra posterior"
+    },
+    "material_has_manufacturer": {
+      "fail": "Este documento de material no indica ningún fabricante, por lo que el revisor no tiene ningún producto que aprobar",
+      "suggestion": "Introduzca el fabricante o la marca que se ofrece"
+    }
+  }
+}

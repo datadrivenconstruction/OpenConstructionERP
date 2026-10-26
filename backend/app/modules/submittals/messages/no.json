@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Dette innsendte dokumentet er i revisjon {revision}, men ingen gjennomgang av revisjon {previous} er registrert, så ingen kan se hvorfor det ble sendt inn på nytt",
+      "suggestion": "Nå en ny revisjon gjennom en gjennomgang merket revider og send inn på nytt, eller rett revisjonsnummeret"
+    },
+    "outcome_matches_status": {
+      "fail": "Kontrollørens stempel sier {outcome}, men statusen på innsendingen er {status}",
+      "suggestion": "Registrer beslutningen gjennom gjennomgangshandlingen, slik at stempel og status endres sammen"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Elementet er påkrevd på byggeplassen {on_site}, før innsendingen ble levert {submitted}",
+      "suggestion": "Korriger datoen for behov på byggeplassen, eller registrer at leveringsdatoen allerede er tapt"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Denne innsendingen er merket som langtidslevering, men har ingen leveringstid, så datoen godkjenningen må være på plass kan ikke beregnes",
+      "suggestion": "Oppgi leveringstiden i uker fra bestilling til levering på byggeplassen"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Godkjenning var nødvendig innen {needed_by} for at elementet skulle komme i tide; det er fortsatt ikke godkjent {days} dager senere",
+      "suggestion": "Purr på gjennomgangen, eller avtal en senere dato for behov på byggeplassen med fremdriftsplanen"
+    },
+    "material_has_manufacturer": {
+      "fail": "Denne materialinnsendingen oppgir ingen produsent, så kontrolløren har ingen produkt å godkjenne",
+      "suggestion": "Oppgi produsenten eller merket som tilbys"
+    }
+  }
+}

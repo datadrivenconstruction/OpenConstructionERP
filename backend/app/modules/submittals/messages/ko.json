@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "이 제출물은 리비전 {revision}에 있지만 리비전 {previous}에 대한 검토 기록이 없어 왜 다시 제출되었는지 알 수 없습니다",
+      "suggestion": "\"수정 후 재제출\"로 표시된 검토를 거쳐 새 리비전에 도달하거나 리비전 번호를 수정하세요"
+    },
+    "outcome_matches_status": {
+      "fail": "검토자의 스탬프는 {outcome}을(를) 나타내지만 제출물의 상태는 {status}입니다",
+      "suggestion": "스탬프와 상태가 함께 바뀌도록 검토 작업을 통해 결정을 기록하세요"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "이 항목은 {on_site}에 현장에서 필요하지만, 제출물은 {submitted}에 접수되었습니다",
+      "suggestion": "현장 필요일을 수정하거나 납품 기한이 이미 지났음을 기록하세요"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "이 제출물은 장납기 항목으로 표시되어 있지만 리드타임이 없어 승인이 필요한 날짜를 계산할 수 없습니다",
+      "suggestion": "발주부터 현장 납품까지의 리드타임을 주 단위로 입력하세요"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "항목이 제때 도착하려면 {needed_by}까지 승인되어야 했지만, {days}일이 지난 지금도 승인되지 않았습니다",
+      "suggestion": "검토를 독촉하거나 공정표 담당자와 현장 필요일을 더 늦추는 데 합의하세요"
+    },
+    "material_has_manufacturer": {
+      "fail": "이 자재 제출물에는 제조사가 기재되지 않아 검토자가 승인할 제품이 없습니다",
+      "suggestion": "제안하는 제조사 또는 브랜드를 입력하세요"
+    }
+  }
+}

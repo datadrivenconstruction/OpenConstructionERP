@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Această documentație este în revizia {revision}, dar nu este înregistrată nicio verificare a reviziei {previous}, astfel încât nimeni nu poate afla de ce a fost retrimisă",
+      "suggestion": "Ajungeți la o nouă revizie printr-o verificare marcată ca revizuiți și retrimiteți sau corectați numărul reviziei"
+    },
+    "outcome_matches_status": {
+      "fail": "Ștampila reviewerului indică {outcome}, dar starea documentației este {status}",
+      "suggestion": "Înregistrați decizia prin acțiunea de verificare, astfel încât ștampila și starea să se schimbe împreună"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Articolul este necesar pe șantier la {on_site}, înainte ca documentația sa să fi fost depusă la {submitted}",
+      "suggestion": "Corectați data necesară pe șantier sau înregistrați că data livrării a fost deja pierdută"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Această documentație este marcată ca articol cu termen lung de livrare, dar nu are un termen de livrare, deci nu se poate calcula data până la care trebuie aprobată",
+      "suggestion": "Introduceți termenul de livrare în săptămâni, de la comandă până la livrarea pe șantier"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Aprobarea era necesară până la {needed_by} pentru ca articolul să sosească la timp; încă nu este aprobată după {days} zile",
+      "suggestion": "Urmăriți verificarea sau conveniți cu programul o dată ulterioară de necesitate pe șantier"
+    },
+    "material_has_manufacturer": {
+      "fail": "Această documentație pentru material nu menționează niciun producător, așa că reviewerul nu are un produs de aprobat",
+      "suggestion": "Introduceți producătorul sau marca oferită"
+    }
+  }
+}

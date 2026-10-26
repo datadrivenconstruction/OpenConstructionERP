@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Den här inlämningen är i revision {revision}, men ingen granskning av revision {previous} är registrerad, så ingen kan se varför den skickades in igen",
+      "suggestion": "Nå en ny revision genom en granskning märkt som revidera och skicka in igen, eller rätta revisionsnumret"
+    },
+    "outcome_matches_status": {
+      "fail": "Granskarens stämpel anger {outcome}, men inlämningens status är {status}",
+      "suggestion": "Registrera beslutet via granskningsåtgärden så att stämpel och status ändras tillsammans"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Posten behövs på arbetsplatsen {on_site}, innan dess inlämning gjordes {submitted}",
+      "suggestion": "Rätta det önskade datumet på arbetsplatsen, eller registrera att leveransdatumet redan har passerat"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Den här inlämningen är märkt som långledtid men saknar ledtid, så datumet då godkännandet behövs kan inte beräknas",
+      "suggestion": "Ange ledtiden i veckor från beställning till leverans på arbetsplatsen"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Godkännande behövdes senast {needed_by} för att posten skulle komma i tid; den är fortfarande inte godkänd {days} dagar senare",
+      "suggestion": "Följ upp granskningen, eller kom överens med tidplanen om ett senare datum för behov på arbetsplatsen"
+    },
+    "material_has_manufacturer": {
+      "fail": "Den här materialinlämningen anger ingen tillverkare, så granskaren har ingen produkt att godkänna",
+      "suggestion": "Ange tillverkaren eller varumärket som erbjuds"
+    }
+  }
+}

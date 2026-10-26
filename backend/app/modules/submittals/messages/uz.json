@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Bu taqdimot {revision} revizyasida, lekin {previous} revizyasining ko'rib chiqilishi qayd etilmagan, shuning uchun uning nega qayta yuborilgani hech kimga ma'lum emas",
+      "suggestion": "\"Tuzatib qayta yuborish\" deb belgilangan ko'rib chiqish orqali yangi revizyaga o'ting yoki revizyya raqamini tuzating"
+    },
+    "outcome_matches_status": {
+      "fail": "Tekshiruvchi muhri {outcome} ni ko'rsatadi, lekin taqdimot holati {status}",
+      "suggestion": "Qarorni ko'rib chiqish amali orqali qayd eting, shunda muhr va holat birga o'zgaradi"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Bu element {on_site} sanasida obyektda kerak, holbuki uning taqdimoti {submitted} sanasida topshirilgan",
+      "suggestion": "Obyektda kerak bo'ladigan sanani tuzating yoki yetkazib berish muddati allaqachon o'tib ketganini qayd eting"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Bu taqdimot uzoq yetkazib berish muddatli deb belgilangan, lekin yetkazib berish muddati ko'rsatilmagan, shuning uchun tasdiqlanishi kerak bo'lgan sanani hisoblab bo'lmaydi",
+      "suggestion": "Buyurtmadan obyektgacha yetkazib berish muddatini haftalarda kiriting"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Element o'z vaqtida yetib kelishi uchun tasdiqlash {needed_by} gacha kerak edi; {days} kun o'tgach ham tasdiqlanmagan",
+      "suggestion": "Ko'rib chiqishni kuzating yoki dastur bilan obyektda kerak bo'ladigan keyingi sanani kelishib oling"
+    },
+    "material_has_manufacturer": {
+      "fail": "Bu material taqdimotida ishlab chiqaruvchi ko'rsatilmagan, shuning uchun tekshiruvchida tasdiqlash uchun mahsulot yo'q",
+      "suggestion": "Taklif qilinayotgan ishlab chiqaruvchi yoki brendni kiriting"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Tento podklad je v revizi {revision}, ale není zaznamenáno žádné posouzení revize {previous}, takže nikdo nemůže zjistit, proč byl znovu odeslán",
+      "suggestion": "Dosáhněte nové revize prostřednictvím posouzení označeného jako revidovat a znovu odeslat, nebo opravte číslo revize"
+    },
+    "outcome_matches_status": {
+      "fail": "Razítko posuzovatele uvádí {outcome}, ale stav podkladu je {status}",
+      "suggestion": "Zaznamenejte rozhodnutí přes akci posouzení, aby se razítko a stav změnily společně"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Položka je potřebná na stavbě k {on_site}, dříve než byl podklad předán dne {submitted}",
+      "suggestion": "Opravte datum potřeby na stavbě, nebo zaznamenejte, že termín dodávky už je ztracen"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Tento podklad je označen jako položka s dlouhou dodací lhůtou, ale nemá uvedenou dodací lhůtu, takže nelze určit, do kdy musí být schválen",
+      "suggestion": "Zadejte dodací lhůtu ve týdnech od objednávky do dodání na stavbu"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Schválení bylo potřeba do {needed_by}, aby položka dorazila včas; po {days} dnech stále není schváleno",
+      "suggestion": "Urgujte posouzení, nebo se s harmonogramem dohodněte na pozdějším datu potřeby na stavbě"
+    },
+    "material_has_manufacturer": {
+      "fail": "Tento podklad materiálu neuvádí výrobce, takže posuzovatel nemá produkt, který by mohl schválit",
+      "suggestion": "Zadejte nabízeného výrobce nebo značku"
+    }
+  }
+}

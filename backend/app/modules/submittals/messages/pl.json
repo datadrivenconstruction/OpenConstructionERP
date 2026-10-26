@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Ten dokument jest w rewizji {revision}, ale nie zarejestrowano przeglądu rewizji {previous}, więc nikt nie wie, dlaczego został ponownie przesłany",
+      "suggestion": "Przejdź do nowej rewizji przez przegląd oznaczony jako popraw i prześlij ponownie albo popraw numer rewizji"
+    },
+    "outcome_matches_status": {
+      "fail": "Pieczątka recenzenta wskazuje {outcome}, ale status dokumentu to {status}",
+      "suggestion": "Zarejestruj decyzję przez akcję przeglądu, aby pieczątka i status zmieniały się razem"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Pozycja jest potrzebna na budowie {on_site}, zanim dokument został złożony {submitted}",
+      "suggestion": "Popraw termin potrzeby na budowie albo zapisz, że termin dostawy już minął"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Ten dokument jest oznaczony jako pozycja o długim czasie dostawy, ale nie ma podanego czasu realizacji, więc nie da się obliczyć terminu, do którego musi zostać zatwierdzony",
+      "suggestion": "Wpisz czas realizacji w tygodniach od zamówienia do dostawy na budowę"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Zatwierdzenie było potrzebne do {needed_by}, aby pozycja dotarła na czas; nadal nie jest zatwierdzone {days} dni później",
+      "suggestion": "Przypomnij o przeglądzie albo uzgodnij z harmonogramem późniejszy termin potrzeby na budowie"
+    },
+    "material_has_manufacturer": {
+      "fail": "Ten dokument materiałowy nie podaje producenta, więc recenzent nie ma produktu do zatwierdzenia",
+      "suggestion": "Wpisz oferowanego producenta lub markę"
+    }
+  }
+}

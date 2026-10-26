@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Ovaj podnesak je u reviziji {revision}, ali nije zabilježen pregled revizije {previous}, pa nitko ne može znati zašto je ponovno poslan",
+      "suggestion": "Dođite do nove revizije putem pregleda označenog kao revidirati i ponovno poslati ili ispravite broj revizije"
+    },
+    "outcome_matches_status": {
+      "fail": "Pečat revidenta glasi {outcome}, ali status podneska je {status}",
+      "suggestion": "Zabilježite odluku putem radnje pregleda kako bi se pečat i status mijenjali zajedno"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Stavka je potrebna na gradilištu {on_site}, prije nego što je njezin podnesak predan {submitted}",
+      "suggestion": "Ispravite datum potrebe na gradilištu ili zabilježite da je rok isporuke već prošao"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Ovaj podnesak je označen kao dugi rok isporuke, ali nema vrijeme isporuke, pa se ne može izračunati datum do kojeg mora biti odobren",
+      "suggestion": "Unesite vrijeme isporuke u tjednima od narudžbe do isporuke na gradilište"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Odobrenje je trebalo biti do {needed_by} kako bi stavka stigla na vrijeme; i dalje nije odobreno {days} dana kasnije",
+      "suggestion": "Pratite pregled ili se s programom dogovorite za kasniji datum potrebe na gradilištu"
+    },
+    "material_has_manufacturer": {
+      "fail": "Ovaj podnesak materijala ne navodi proizvođača, pa revident nema proizvod koji bi odobrio",
+      "suggestion": "Unesite ponuđenog proizvođača ili marku"
+    }
+  }
+}

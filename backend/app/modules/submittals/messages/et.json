@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "See esitus on versioonis {revision}, aga versiooni {previous} ülevaatust pole salvestatud, nii et keegi ei saa teada, miks see uuesti esitati",
+      "suggestion": "Jõudke uue versioonini ülevaatuse kaudu, mis on märgitud kui muuda ja esita uuesti, või parandage versiooninumber"
+    },
+    "outcome_matches_status": {
+      "fail": "Kontrollija templi järgi on tulemus {outcome}, kuid esituse staatus on {status}",
+      "suggestion": "Salvestage otsus ülevaatuse toimingu kaudu, et tempel ja staatus muutuksid koos"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Üksus on vajalik objektil {on_site}, enne kui selle esitus esitati {submitted}",
+      "suggestion": "Parandage objektil vajaminev kuupäev või salvestage, et tarnekuupäev on juba käest läinud"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "See esitus on märgitud pika tarneajaga üksusena, kuid tarneaeg on puudu, seega ei saa välja arvutada, millal kinnitus peaks olema valmis",
+      "suggestion": "Sisestage tarneaeg nädalates tellimisest kuni tarnimiseni objektile"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Kinnitus oli vaja saada hiljemalt {needed_by}, et üksus jõuaks õigeks ajaks; {days} päeva hiljem pole see veel kinnitatud",
+      "suggestion": "Nõudke ülevaatust või leppige programmiga kokku hilisem vajalik kuupäev objektil"
+    },
+    "material_has_manufacturer": {
+      "fail": "Selles materjali esituses pole tootjat nimetatud, seega ei ole kontrollijal toodet, mida kinnitada",
+      "suggestion": "Sisestage pakutav tootja või kaubamärk"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Dette indlæg er i revision {revision}, men der er ingen registreret gennemgang af revision {previous}, så ingen kan se, hvorfor det blev indsendt igen",
+      "suggestion": "Nå en ny revision via en gennemgang markeret som revider og indsend igen, eller ret revisionsnummeret"
+    },
+    "outcome_matches_status": {
+      "fail": "Granskerens stempel siger {outcome}, men indlæggets status er {status}",
+      "suggestion": "Registrér beslutningen via gennemgangshandlingen, så stempel og status ændres sammen"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Varen er påkrævet på pladsen den {on_site}, før dens indlæg blev indsendt den {submitted}",
+      "suggestion": "ret datoen for påkrævet på pladsen, eller registrér at leveringsdatoen allerede er tabt"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Dette indlæg er markeret som langtidsleverance, men har ingen leveringstid, så datoen for hvornår godkendelsen skal foreligge kan ikke beregnes",
+      "suggestion": "Angiv leveringstiden i uger fra bestilling til levering på pladsen"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Godkendelse skulle foreligge senest {needed_by}, for at varen kunne ankomme til tiden; den er stadig ikke godkendt {days} dage senere",
+      "suggestion": "Purr på gennemgangen, eller aftal en senere dato for påkrævet på pladsen med programmet"
+    },
+    "material_has_manufacturer": {
+      "fail": "Dette materialeindlæg angiver ingen producent, så granskeren har intet produkt at godkende",
+      "suggestion": "Angiv den producent eller det mærke, der tilbydes"
+    }
+  }
+}

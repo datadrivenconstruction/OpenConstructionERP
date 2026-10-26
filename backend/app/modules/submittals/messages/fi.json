@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Tämä hyväksyttävä asiakirja on revisiossa {revision}, mutta revision {previous} tarkastusta ei ole kirjattu, joten kukaan ei voi tietää, miksi se lähetettiin uudelleen",
+      "suggestion": "Siirry uuteen revisioon tarkastuksen kautta, joka on merkitty muokattavaksi ja lähetettäväksi uudelleen, tai korjaa revisionumero"
+    },
+    "outcome_matches_status": {
+      "fail": "Tarkastajan leimassa lukee {outcome}, mutta asiakirjan tila on {status}",
+      "suggestion": "Kirjaa päätös tarkastustoiminnon kautta, jotta leima ja tila muuttuvat yhdessä"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Kohde tarvitaan työmaalla {on_site}, ennen kuin sen asiakirja lähetettiin {submitted}",
+      "suggestion": "Korjaa työmaalla tarvittava päivämäärä tai kirjaa, että toimituspäivä on jo menetetty"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Tämä asiakirja on merkitty pitkäksi toimitusajaksi, mutta toimitusaikaa ei ole, joten päivää, johon mennessä hyväksynnän pitäisi olla valmis, ei voi laskea",
+      "suggestion": "Syötä toimitusaika viikkoina tilauksesta toimitukseen työmaalle"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Hyväksyntä piti saada {needed_by} mennessä, jotta kohde ehtii ajoissa; sitä ei ole vielä hyväksytty {days} päivää myöhemmin",
+      "suggestion": "Muistuta tarkastuksesta tai sovi ohjelman kanssa myöhäisempi työmaalla tarvittava päivä"
+    },
+    "material_has_manufacturer": {
+      "fail": "Tämä materiaalin asiakirja ei nimeä valmistajaa, joten tarkastajalla ei ole tuotetta hyväksyttäväksi",
+      "suggestion": "Syötä tarjottu valmistaja tai merkki"
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Questa campionatura è alla revisione {revision}, ma non risulta alcuna verifica della revisione {previous}, quindi nessuno può sapere perché sia stata inviata di nuovo",
+      "suggestion": "Arrivate a una nuova revisione tramite una verifica contrassegnata come revisiona e reinvia, oppure correggete il numero di revisione"
+    },
+    "outcome_matches_status": {
+      "fail": "Il timbro del revisore riporta {outcome}, ma lo stato della campionatura è {status}",
+      "suggestion": "Registrate la decisione con l'azione di verifica, così timbro e stato cambiano insieme"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "La voce è richiesta in cantiere il {on_site}, prima che la sua campionatura fosse presentata il {submitted}",
+      "suggestion": "Correggete la data di necessità in cantiere, oppure registrate che il termine di consegna è già perso"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Questa campionatura è contrassegnata come a lungo termine di consegna ma non ha un tempo di approvvigionamento, quindi non si può calcolare la data entro cui deve essere approvata",
+      "suggestion": "Inserite il tempo di approvvigionamento in settimane dall'ordine alla consegna in cantiere"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "L'approvazione era necessaria entro il {needed_by} perché la voce arrivi in tempo; risulta ancora non approvata {days} giorni dopo",
+      "suggestion": "Sollecitate la verifica, oppure concordate con il programma una data di necessità in cantiere più tardiva"
+    },
+    "material_has_manufacturer": {
+      "fail": "Questa campionatura di materiale non indica alcun produttore, quindi il revisore non ha un prodotto da approvare",
+      "suggestion": "Inserite il produttore o il marchio proposto"
+    }
+  }
+}

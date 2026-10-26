@@ -1,0 +1,28 @@
+{
+  "submittal": {
+    "resubmission_linked": {
+      "fail": "Ang submittal na ito ay nasa revision {revision}, ngunit walang nakatalang review ng revision {previous}, kaya walang makakaalam kung bakit ito muling ipinasa",
+      "suggestion": "Makarating sa bagong revision sa pamamagitan ng review na minarkahang revise and resubmit, o itama ang numero ng revision"
+    },
+    "outcome_matches_status": {
+      "fail": "Ang selyo ng reviewer ay nagsasabing {outcome}, ngunit ang status ng submittal ay {status}",
+      "suggestion": "Itala ang desisyon sa pamamagitan ng review action upang magbago nang sabay ang selyo at ang status"
+    },
+    "required_on_site_after_submitted": {
+      "fail": "Kailangan ang item sa site sa {on_site}, bago naisumite ang submittal nito noong {submitted}",
+      "suggestion": "Itama ang petsa ng kailangang nasa site, o itala na lumampas na ang petsa ng paghahatid"
+    },
+    "long_lead_has_lead_time": {
+      "fail": "Minarkahang long lead ang submittal na ito ngunit walang lead time, kaya hindi makalkula ang petsa kung kailan dapat aprubado ito",
+      "suggestion": "Ilagay ang lead time sa mga linggo mula sa order hanggang sa paghahatid sa site"
+    },
+    "approval_needed_by_not_passed": {
+      "fail": "Kailangang maaprubahan bago ang {needed_by} para dumating sa tamang oras ang item; hindi pa rin ito aprubado makalipas ang {days} araw",
+      "suggestion": "Sundan ang review, o sumang-ayon sa programa sa mas huling petsa ng kailangang nasa site"
+    },
+    "material_has_manufacturer": {
+      "fail": "Walang nakasaad na manufacturer sa submittal ng materyal na ito, kaya walang produktong maaaprubahan ang reviewer",
+      "suggestion": "Ilagay ang manufacturer o brand na iniaalok"
+    }
+  }
+}
