@@ -130,7 +130,7 @@ describe('CherryPickDialog', () => {
   });
 
   it('a merge targets main, takes every line and needs the confirmation', async () => {
-    const planSpy = vi.spyOn(branchApi, 'plan').mockResolvedValue({ ...plan, conflicts: 0, items: [plan.items[1]] });
+    const planSpy = vi.spyOn(branchApi, 'plan').mockResolvedValue({ ...plan, conflicts: 0, items: [plan.items[1]!] });
     const merge = vi.spyOn(branchApi, 'merge').mockResolvedValue({ ...result, target_boq_id: 'main', status: 'merged' });
     renderDialog('merge', 'b1');
     await waitFor(() => expect(planSpy).toHaveBeenCalledWith('main', 'b1'));

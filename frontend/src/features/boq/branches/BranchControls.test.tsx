@@ -77,7 +77,7 @@ describe('BranchControls', () => {
     expect(items[1]).toHaveTextContent('A. Estimator');
     expect(items[1]).toHaveTextContent(/-100/);
     expect(items[2]).toHaveTextContent('merged');
-    fireEvent.click(items[1]);
+    fireEvent.click(items[1]!);
     expect(onNavigate).toHaveBeenCalledWith('precast');
   });
 
