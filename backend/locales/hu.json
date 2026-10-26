@@ -2134,6 +2134,22 @@
         "Folyamatban",
         "Kész"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "{number}. kiegészítés a(z) {package} közbeszerzéshez",
+      "addendum_heading": "Közbeszerzési kiegészítés",
+      "greeting": "Tisztelt {company}!",
+      "greeting_generic": "Tisztelt Címzett!",
+      "addendum_intro": "A(z) {package} ajánlati csomaghoz {number}. kiegészítés jelent meg: {title}.",
+      "addendum_deadline": "Az ajánlattételi határidő {old}-ról/ről {new}-ra módosult.",
+      "addendum_boq": "A mennyiségi kiírás módosult ({revision}. verzió). Kérjük, az aktuális verziót árazza.",
+      "addendum_documents": "Kiadott dokumentumok: {documents}",
+      "addendum_ack": "Kérjük, igazolja vissza a kiegészítés kézhezvételét. Az az ajánlat, amely nem igazolja az összes kiegészítést, nem megfelelőnek minősülhet.",
+      "answer_subject": "A(z) {package} közbeszerzés {number}. tisztázása",
+      "answer_heading": "Közbeszerzési tisztázás",
+      "answer_intro": "A(z) {package} ajánlati csomagra vonatkozó kérdésre választ adtunk. A válasz minden ajánlattevőre vonatkozik.",
+      "question_label": "Kérdés",
+      "answer_label": "Válasz"
     }
   },
   "property_dev": {

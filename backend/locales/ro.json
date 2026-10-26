@@ -2135,6 +2135,22 @@
         "În lucru",
         "Finalizat"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} la licitația {package}",
+      "addendum_heading": "Addendum la licitație",
+      "greeting": "Stimată {company},",
+      "greeting_generic": "Stimați domni,",
+      "addendum_intro": "A fost emis addendumul {number} la pachetul de licitație {package}: {title}.",
+      "addendum_deadline": "Termenul de depunere a ofertelor a fost mutat de la {old} la {new}.",
+      "addendum_boq": "Devizul de cantități s-a modificat (revizia {revision}). Vă rugăm să prețuiți revizia în vigoare.",
+      "addendum_documents": "Documente emise: {documents}",
+      "addendum_ack": "Vă rugăm să confirmați primirea acestui addendum. Oferta care nu confirmă toate addendumurile poate fi considerată neconformă.",
+      "answer_subject": "Clarificarea {number} la licitația {package}",
+      "answer_heading": "Clarificare la licitație",
+      "answer_intro": "A fost răspuns la o întrebare privind pachetul de licitație {package}. Răspunsul se aplică tuturor ofertanților.",
+      "question_label": "Întrebare",
+      "answer_label": "Răspuns"
     }
   },
   "property_dev": {

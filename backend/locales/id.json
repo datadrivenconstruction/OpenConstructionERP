@@ -2138,6 +2138,22 @@
         "Sedang berjalan",
         "Selesai"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} untuk tender {package}",
+      "addendum_heading": "Addendum tender",
+      "greeting": "Yth. {company},",
+      "greeting_generic": "Yth. Bapak/Ibu,",
+      "addendum_intro": "Addendum {number} untuk paket tender {package} telah diterbitkan: {title}.",
+      "addendum_deadline": "Batas waktu pemasukan dipindahkan dari {old} ke {new}.",
+      "addendum_boq": "Bill of quantities telah berubah (revisi {revision}). Mohon hitung harga revisi yang berlaku.",
+      "addendum_documents": "Dokumen yang diterbitkan: {documents}",
+      "addendum_ack": "Mohon konfirmasi penerimaan addendum ini. Penawaran yang tidak mengonfirmasi setiap addendum dapat dianggap tidak memenuhi ketentuan.",
+      "answer_subject": "Klarifikasi {number} untuk tender {package}",
+      "answer_heading": "Klarifikasi tender",
+      "answer_intro": "Pertanyaan terkait paket tender {package} telah dijawab. Jawaban ini berlaku untuk semua peserta.",
+      "question_label": "Pertanyaan",
+      "answer_label": "Jawaban"
     }
   },
   "property_dev": {

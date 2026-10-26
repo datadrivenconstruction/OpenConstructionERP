@@ -1297,6 +1297,22 @@
         "চলমান",
         "সম্পন্ন"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "টেন্ডার {package}-এর অ্যাডেনডাম {number}",
+      "addendum_heading": "টেন্ডার অ্যাডেনডাম",
+      "greeting": "সম্মানিত {company},",
+      "greeting_generic": "সম্মানিত মহোদয়গণ,",
+      "addendum_intro": "টেন্ডার প্যাকেজ {package}-এর অ্যাডেনডাম {number} জারি হয়েছে: {title}।",
+      "addendum_deadline": "জমার শেষ সময় {old} থেকে {new}-এ সরানো হয়েছে।",
+      "addendum_boq": "বিল অব কোয়ান্টিটিজ পরিবর্তিত হয়েছে (সংশোধন {revision})। অনুগ্রহ করে বর্তমান সংশোধনের দর দিন।",
+      "addendum_documents": "জারি করা নথি: {documents}",
+      "addendum_ack": "অনুগ্রহ করে এই অ্যাডেনডামের প্রাপ্তি স্বীকার করুন। যে দরপত্র সব অ্যাডেনডাম স্বীকার করে না, তা অসম্মত বিবেচিত হতে পারে।",
+      "answer_subject": "টেন্ডার {package}-এর স্পষ্টীকরণ {number}",
+      "answer_heading": "টেন্ডার স্পষ্টীকরণ",
+      "answer_intro": "টেন্ডার প্যাকেজ {package} সংক্রান্ত একটি প্রশ্নের উত্তর দেওয়া হয়েছে। এই উত্তর সব দরদাতার জন্য প্রযোজ্য।",
+      "question_label": "প্রশ্ন",
+      "answer_label": "উত্তর"
     }
   },
   "document_forms": {

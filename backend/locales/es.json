@@ -2249,6 +2249,22 @@
         "En curso",
         "Terminado"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Adenda {number} al concurso {package}",
+      "addendum_heading": "Adenda al concurso",
+      "greeting": "Estimados señores de {company}:",
+      "greeting_generic": "Estimados señores:",
+      "addendum_intro": "Se ha emitido la adenda {number} al paquete de licitación {package}: {title}.",
+      "addendum_deadline": "La fecha límite de presentación se ha modificado de {old} a {new}.",
+      "addendum_boq": "El presupuesto de partidas ha cambiado (revisión {revision}). Le rogamos que presupueste la revisión vigente.",
+      "addendum_documents": "Documentos emitidos: {documents}",
+      "addendum_ack": "Le rogamos que confirme la recepción de esta adenda. Una oferta que no confirme todas las adendas podrá considerarse no conforme.",
+      "answer_subject": "Aclaración {number} al concurso {package}",
+      "answer_heading": "Aclaración del concurso",
+      "answer_intro": "Se ha respondido una consulta sobre el paquete de licitación {package}. La respuesta es aplicable a todos los licitadores.",
+      "question_label": "Consulta",
+      "answer_label": "Respuesta"
     }
   },
   "field_evidence": {

@@ -1576,3 +1576,9 @@ async def check_bid_integrity(
     """Recompute the SHA-256 of a bid's stored content and compare it with its receipt."""
     bid = await _verify_bid_access(service, session, bid_id, user_id, payload)
     return BidIntegrityResponse(**await SealedTenderService(session).verify(bid, user_id))  # type: ignore[arg-type]
+
+
+# Clarifications, timeline, addenda validation and the bidder-side addenda routes.
+from app.modules.tendering.addenda_router import router as _addenda_router  # noqa: E402
+
+router.include_router(_addenda_router)

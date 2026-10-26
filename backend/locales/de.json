@@ -2111,6 +2111,22 @@
         "In Bearbeitung",
         "Erledigt"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Nachtrag {number} zur Ausschreibung {package}",
+      "addendum_heading": "Nachtrag zur Ausschreibung",
+      "greeting": "Sehr geehrte Firma {company},",
+      "greeting_generic": "Sehr geehrte Damen und Herren,",
+      "addendum_intro": "Nachtrag {number} zum Ausschreibungspaket {package} wurde herausgegeben: {title}.",
+      "addendum_deadline": "Die Abgabefrist wurde von {old} auf {new} verschoben.",
+      "addendum_boq": "Das Leistungsverzeichnis wurde geändert (Revision {revision}). Bitte bepreisen Sie die aktuelle Revision.",
+      "addendum_documents": "Herausgegebene Dokumente: {documents}",
+      "addendum_ack": "Bitte bestätigen Sie den Erhalt dieses Nachtrags. Ein Angebot, das nicht alle Nachträge bestätigt, kann als nicht konform gewertet werden.",
+      "answer_subject": "Klarstellung {number} zur Ausschreibung {package}",
+      "answer_heading": "Klarstellung zur Ausschreibung",
+      "answer_intro": "Eine Frage zum Ausschreibungspaket {package} wurde beantwortet. Die Antwort gilt für alle Bieter.",
+      "question_label": "Frage",
+      "answer_label": "Antwort"
     }
   },
   "property_dev": {

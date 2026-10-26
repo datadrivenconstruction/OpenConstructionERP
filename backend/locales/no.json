@@ -2135,6 +2135,22 @@
         "Pågår",
         "Ferdig"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Tillegg {number} til anbudet {package}",
+      "addendum_heading": "Tillegg til anbud",
+      "greeting": "Til {company},",
+      "greeting_generic": "Til den det gjelder,",
+      "addendum_intro": "Tillegg {number} til anbudspakken {package} er utgitt: {title}.",
+      "addendum_deadline": "Innleveringsfristen er flyttet fra {old} til {new}.",
+      "addendum_boq": "Mengdefortegnelsen er endret (revisjon {revision}). Vennligst pris gjeldende revisjon.",
+      "addendum_documents": "Utgitte dokumenter: {documents}",
+      "addendum_ack": "Vennligst bekreft mottak av dette tillegget. Et tilbud som ikke bekrefter alle tillegg, kan bli ansett som ikke-kompatibelt.",
+      "answer_subject": "Avklaring {number} til anbudet {package}",
+      "answer_heading": "Avklaring til anbud",
+      "answer_intro": "Et spørsmål til anbudspakken {package} er besvart. Svaret gjelder for alle tilbydere.",
+      "question_label": "Spørsmål",
+      "answer_label": "Svar"
     }
   },
   "property_dev": {

@@ -2137,6 +2137,22 @@
         "В процес",
         "Приключено"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Допълнение {number} към търга {package}",
+      "addendum_heading": "Допълнение към търга",
+      "greeting": "Уважаеми {company},",
+      "greeting_generic": "Уважаеми дами и господа,",
+      "addendum_intro": "Издадено е допълнение {number} към пакета {package}: {title}.",
+      "addendum_deadline": "Крайният срок за подаване е променен от {old} на {new}.",
+      "addendum_boq": "Количествено-стойностната сметка е променена (ревизия {revision}). Моля, оценете текущата ревизия.",
+      "addendum_documents": "Издадени документи: {documents}",
+      "addendum_ack": "Моля, потвърдете получаването на това допълнение. Оферта, която не потвърждава всички допълнения, може да бъде приета за несъответстваща.",
+      "answer_subject": "Уточнение {number} по търга {package}",
+      "answer_heading": "Уточнение по търга",
+      "answer_intro": "На въпрос по търговия пакет {package} е даден отговор. Отговорът важи за всички участници.",
+      "question_label": "Въпрос",
+      "answer_label": "Отговор"
     }
   },
   "property_dev": {

@@ -32,6 +32,10 @@ def register_tendering_permissions() -> None:
             "tendering.addendum.create": Role.EDITOR,
             "tendering.addendum.publish": Role.EDITOR,
             "tendering.addendum.acknowledge": Role.EDITOR,
+            # Bidder questions: reading them shows who asked, so it stays buyer-side.
+            "tendering.clarification.read": Role.VIEWER,
+            "tendering.clarification.manage": Role.EDITOR,
+            "tendering.clarification.publish": Role.EDITOR,
             "tendering.leveling.read": Role.VIEWER,
             "tendering.leveling.run": Role.EDITOR,
             # Opening sealed bids reveals every price at once: a manager act.

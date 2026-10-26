@@ -279,6 +279,12 @@ async def _superseded(
     return old_docs, old_sheets, successor
 
 
+async def superseded_documents(session: AsyncSession, document_ids: set[str]) -> dict[str, str | None]:
+    """Recorded document ids the register has replaced since, mapped to the current revision's id."""
+    old_docs, _sheets, successor = await _superseded(session, document_ids, set())
+    return {doc_id: successor.get(doc_id) for doc_id in old_docs}
+
+
 async def _takeoff_docs_for(session: AsyncSession, project_id: uuid.UUID, source_ids: set[str]) -> dict[str, str]:
     """Project Files document id -> takeoff document id opened from it."""
     from app.modules.takeoff.models import TakeoffDocument  # noqa: PLC0415

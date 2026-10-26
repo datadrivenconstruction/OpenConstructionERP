@@ -2136,6 +2136,22 @@
         "Аткарылууда",
         "Аткарылды"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "{package} тендерине Кошумча {number}",
+      "addendum_heading": "Тендерге кошумча",
+      "greeting": "Урматтуу {company},",
+      "greeting_generic": "Урматтуу кызматкер,",
+      "addendum_intro": "{package} тендердик топтомуна Кошумча {number} чыгарылды: {title}.",
+      "addendum_deadline": "Сунуш тапшыруу мөөнөтү {old} күнүнөн {new} күнүнө которулду.",
+      "addendum_boq": "Көлөмдөр ведомосу өзгөрдү (кайра карап чыгуу {revision}). Учурдагы версияга баа коюңуз.",
+      "addendum_documents": "Чыгарылган документтер: {documents}",
+      "addendum_ack": "Бул кошумчаны алганыңызды ырастаңыз. Бардык кошумчаларды ырастабаган сунуш шартка ылайык эмес деп эсептелиши мүмкүн.",
+      "answer_subject": "{package} тендерине түшүндүрмө {number}",
+      "answer_heading": "Тендерге түшүндүрмө",
+      "answer_intro": "{package} тендердик топтомуна берилген суроого жооп берилди. Жооп бардык катышуучуларга тиешелүү.",
+      "question_label": "Суроо",
+      "answer_label": "Жооп"
     }
   },
   "property_dev": {

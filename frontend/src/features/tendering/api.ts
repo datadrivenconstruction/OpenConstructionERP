@@ -24,6 +24,35 @@ export interface AddendumAckEntry {
   user_id?: string;
 }
 
+export interface AddendumDocumentChange {
+  document_id?: string | null;
+  drawing_number?: string;
+  title: string;
+  revision?: string;
+  note?: string;
+  superseded?: boolean;
+  current_document_id?: string | null;
+}
+
+export type BoqChangeOp = 'add' | 'change' | 'delete';
+
+export interface AddendumBoqChange {
+  op: BoqChangeOp;
+  position_id?: string | null;
+  ordinal: string;
+  description: string;
+  unit: string;
+  quantity_before?: number | string | null;
+  quantity_after?: number | string | null;
+  description_before?: string | null;
+}
+
+export interface AddendumNotified {
+  recipient_id: string;
+  status: 'sent' | 'failed';
+  at: string;
+}
+
 export interface Addendum {
   id: string;
   package_id: string;
@@ -35,6 +64,24 @@ export interface Addendum {
   acknowledged_by: AddendumAckEntry[];
   created_at: string;
   updated_at: string;
+  document_changes?: AddendumDocumentChange[];
+  boq_changes?: AddendumBoqChange[];
+  boq_revision_no?: number | null;
+  previous_deadline?: string | null;
+  new_deadline?: string | null;
+  source_clarification_id?: string | null;
+  notified?: AddendumNotified[];
+  /** Invited firms that have not acknowledged this published addendum. */
+  pending_recipient_ids?: string[];
+}
+
+export interface AddendumCreateBody {
+  title: string;
+  body?: string;
+  document_changes?: AddendumDocumentChange[];
+  boq_changes?: AddendumBoqChange[];
+  new_deadline?: string;
+  source_clarification_id?: string;
 }
 
 export interface BidLevelingSummary {
@@ -101,7 +148,7 @@ export function listAddenda(packageId: string): Promise<Addendum[]> {
 
 export function createAddendum(
   packageId: string,
-  body: { title: string; body?: string },
+  body: AddendumCreateBody,
 ): Promise<Addendum> {
   return apiPost<Addendum>(`/v1/tendering/packages/${packageId}/addenda/`, body);
 }
@@ -131,6 +178,116 @@ export function acknowledgeAddendum(
   return apiPost<Addendum>(`/v1/tendering/addenda/${addendumId}/acknowledge/`, {
     bidder_id: bidderId,
   });
+}
+
+/* ── Clarifications (bidder Q&A) ──────────────────────────────────────── */
+
+export type ClarificationStatus = 'open' | 'answered' | 'published';
+
+export interface Clarification {
+  id: string;
+  package_id: string;
+  number: number;
+  question: string;
+  answer: string | null;
+  status: ClarificationStatus;
+  recipient_id: string | null;
+  asked_by_email: string | null;
+  asked_at: string;
+  answered_at: string | null;
+  published_at: string | null;
+  addendum_id: string | null;
+  days_before_closing: number | null;
+}
+
+const clarBase = (packageId: string) => `/v1/tendering/packages/${packageId}/clarifications/`;
+
+export function listClarifications(packageId: string): Promise<Clarification[]> {
+  return apiGet<Clarification[]>(clarBase(packageId));
+}
+
+export function createClarification(
+  packageId: string,
+  body: { question: string; recipient_id?: string; asked_by_email?: string },
+): Promise<Clarification> {
+  return apiPost<Clarification>(clarBase(packageId), body);
+}
+
+export function answerClarification(
+  packageId: string,
+  clarificationId: string,
+  answer: string,
+): Promise<Clarification> {
+  return apiPost<Clarification>(`${clarBase(packageId)}${clarificationId}/answer/`, { answer });
+}
+
+export function publishClarification(
+  packageId: string,
+  clarificationId: string,
+): Promise<Clarification> {
+  return apiPost<Clarification>(`${clarBase(packageId)}${clarificationId}/publish/`, {});
+}
+
+export function promoteClarification(
+  packageId: string,
+  clarificationId: string,
+): Promise<Addendum> {
+  return apiPost<Addendum>(`${clarBase(packageId)}${clarificationId}/promote/`, {});
+}
+
+/* ── Timeline and jurisdiction rules ──────────────────────────────────── */
+
+export interface TenderTimelineEvent {
+  kind: 'issued' | 'questions_closed' | 'addendum' | 'deadline_extended' | 'closing';
+  at: string;
+  label: string;
+  ref_id: string | null;
+  past: boolean;
+}
+
+export interface TenderRules {
+  country_code: string;
+  label: string;
+  addendum_min_days_before_closing: number | null;
+  answer_min_days_before_closing: number | null;
+  questions_close_days_before_closing: number | null;
+  bid_validity_days: number | null;
+  extend_deadline_if_late_addendum: boolean;
+  acknowledgement: string;
+  public_notice_of_changes: string;
+  source: string;
+  statute_reference: string;
+  confidence: string | number;
+}
+
+export interface TenderTimeline {
+  package_id: string;
+  events: TenderTimelineEvent[];
+  rules: TenderRules | null;
+}
+
+export function getTenderTimeline(packageId: string): Promise<TenderTimeline> {
+  return apiGet<TenderTimeline>(`/v1/tendering/packages/${packageId}/timeline/`);
+}
+
+export interface AddendaValidationResult {
+  rule_id: string;
+  severity: string;
+  passed: boolean;
+  message: string;
+  element_ref: string | null;
+  suggestion: string | null;
+}
+
+export interface AddendaValidation {
+  package_id: string;
+  passed: boolean;
+  results: AddendaValidationResult[];
+  rules?: TenderRules | null;
+}
+
+export function getAddendaValidation(packageId: string): Promise<AddendaValidation> {
+  return apiGet<AddendaValidation>(`/v1/tendering/packages/${packageId}/addenda/validation/`);
 }
 
 /* ── Bid leveling ─────────────────────────────────────────────────────── */

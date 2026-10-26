@@ -2130,6 +2130,22 @@
         "進行中",
         "完了"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "入札 {package} 補足資料 {number}",
+      "addendum_heading": "入札補足資料",
+      "greeting": "{company} 御中",
+      "greeting_generic": "ご担当者様",
+      "addendum_intro": "入札パッケージ {package} の補足資料 {number} を発行しました: {title}",
+      "addendum_deadline": "提出締切を {old} から {new} に変更しました。",
+      "addendum_boq": "数量内訳書が改訂されました（改訂 {revision}）。現在の版で単価をご入力ください。",
+      "addendum_documents": "発行資料: {documents}",
+      "addendum_ack": "本補足資料を受領された旨、ご確認ください。全ての補足資料を確認していない入札書類は、要件不適合と扱われる場合があります。",
+      "answer_subject": "入札 {package} に関する回答 {number}",
+      "answer_heading": "入札に関する回答",
+      "answer_intro": "入札パッケージ {package} に関するご質問への回答を掲載しました。この回答は全入札者に適用されます。",
+      "question_label": "質問",
+      "answer_label": "回答"
     }
   },
   "property_dev": {

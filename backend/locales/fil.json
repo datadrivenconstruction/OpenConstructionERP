@@ -2146,6 +2146,22 @@
         "Isinasagawa",
         "Tapos na"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} sa tender {package}",
+      "addendum_heading": "Tender addendum",
+      "greeting": "Mahal na {company},",
+      "greeting_generic": "Mahal na Ginoo o Ginang,",
+      "addendum_intro": "Inilabas ang Addendum {number} sa tender package {package}: {title}.",
+      "addendum_deadline": "Nailipat ang deadline ng pagsumite mula {old} patungong {new}.",
+      "addendum_boq": "Nagbago ang bill of quantities (rebisyon {revision}). Pakipresyuhan ang kasalukuyang rebisyon.",
+      "addendum_documents": "Mga inilabas na dokumento: {documents}",
+      "addendum_ack": "Pakikumpirma ang pagtanggap ng addendum na ito. Ang bid na hindi kumikilala sa bawat addendum ay maaaring ituring na hindi sumusunod.",
+      "answer_subject": "Paglilinaw {number} sa tender {package}",
+      "answer_heading": "Paglilinaw sa tender",
+      "answer_intro": "Nasagot na ang isang tanong tungkol sa tender package {package}. Naaangkop ang sagot sa lahat ng bidder.",
+      "question_label": "Tanong",
+      "answer_label": "Sagot"
     }
   },
   "property_dev": {

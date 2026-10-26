@@ -2130,6 +2130,22 @@
         "กำลังดำเนินการ",
         "เสร็จสิ้น"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} สำหรับการประมูล {package}",
+      "addendum_heading": "Addendum สำหรับการประมูล",
+      "greeting": "เรียน {company}",
+      "greeting_generic": "เรียน ท่านผู้เกี่ยวข้อง",
+      "addendum_intro": "ได้ออก Addendum {number} สำหรับแพ็กเกจประมูล {package} แล้ว: {title}",
+      "addendum_deadline": "กำหนดยื่นข้อเสนอถูกเลื่อนจาก {old} เป็น {new}",
+      "addendum_boq": "ใบประมาณราคา (BOQ) มีการเปลี่ยนแปลง (ฉบับ {revision}) กรุณาเสนอราคาตามฉบับปัจจุบัน",
+      "addendum_documents": "เอกสารที่ออก: {documents}",
+      "addendum_ack": "กรุณายืนยันการรับ Addendum นี้ ข้อเสนอที่ไม่ยืนยัน Addendum ทุกฉบับอาจถือว่าไม่เป็นไปตามข้อกำหนด",
+      "answer_subject": "คำชี้แจง {number} สำหรับการประมูล {package}",
+      "answer_heading": "คำชี้แจงการประมูล",
+      "answer_intro": "คำถามเกี่ยวกับแพ็กเกจประมูล {package} ได้รับคำตอบแล้ว คำตอบนี้มีผลกับผู้ยื่นข้อเสนอทุกราย",
+      "question_label": "คำถาม",
+      "answer_label": "คำตอบ"
     }
   },
   "property_dev": {

@@ -2135,6 +2135,22 @@
         "I gang",
         "Færdig"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Tillæg {number} til udbuddet {package}",
+      "addendum_heading": "Tillæg til udbuddet",
+      "greeting": "Kære {company},",
+      "greeting_generic": "Kære modtager,",
+      "addendum_intro": "Tillæg {number} til udbudspakken {package} er udsendt: {title}.",
+      "addendum_deadline": "Afleveringsfristen er flyttet fra {old} til {new}.",
+      "addendum_boq": "Mængdefortegnelsen er ændret (revision {revision}). Prisfastsæt venligst den aktuelle revision.",
+      "addendum_documents": "Udsendte dokumenter: {documents}",
+      "addendum_ack": "Bekræft venligst modtagelsen af dette tillæg. Et tilbud, der ikke bekræfter alle tillæg, kan blive betragtet som ikke-overensstemmende.",
+      "answer_subject": "Afklaring {number} til udbuddet {package}",
+      "answer_heading": "Udbudsafklaring",
+      "answer_intro": "Et spørgsmål til udbudspakken {package} er besvaret. Svaret gælder for alle bydere.",
+      "question_label": "Spørgsmål",
+      "answer_label": "Svar"
     }
   },
   "property_dev": {

@@ -2139,6 +2139,22 @@
         "جاری",
         "مکمل"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "ٹینڈر {package} پر ایڈنڈم {number}",
+      "addendum_heading": "ٹینڈر ایڈنڈم",
+      "greeting": "محترم {company}،",
+      "greeting_generic": "محترم صاحبان،",
+      "addendum_intro": "ٹینڈر پیکیج {package} پر ایڈنڈم {number} جاری ہوا ہے: {title}۔",
+      "addendum_deadline": "جمع کرانے کی آخری تاریخ {old} سے بدل کر {new} کر دی گئی ہے۔",
+      "addendum_boq": "بل آف کوانٹیٹیز میں تبدیلی ہوئی ہے (ریویژن {revision})۔ براہ کرم موجودہ ریویژن کی قیمت لگائیں۔",
+      "addendum_documents": "جاری شدہ دستاویزات: {documents}",
+      "addendum_ack": "براہ کرم اس ایڈنڈم کی وصولی کی تصدیق کریں۔ جو بولی تمام ایڈنڈم کی تصدیق نہیں کرتی، اسے غیر مطابق قرار دیا جا سکتا ہے۔",
+      "answer_subject": "ٹینڈر {package} پر وضاحت {number}",
+      "answer_heading": "ٹینڈر کی وضاحت",
+      "answer_intro": "ٹینڈر پیکیج {package} کے بارے میں ایک سوال کا جواب دیا گیا ہے۔ یہ جواب تمام بولی دہندگان پر لاگو ہوتا ہے۔",
+      "question_label": "سوال",
+      "answer_label": "جواب"
     }
   },
   "property_dev": {

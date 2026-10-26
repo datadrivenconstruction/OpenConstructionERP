@@ -2139,6 +2139,22 @@
         "Probíhá",
         "Hotovo"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Dodatek {number} k zakázce {package}",
+      "addendum_heading": "Dodatek k zakázce",
+      "greeting": "Vážený {company},",
+      "greeting_generic": "Vážení,",
+      "addendum_intro": "Byl vydán dodatek {number} k zakázce {package}: {title}.",
+      "addendum_deadline": "Termín pro podání nabídek byl posunut z {old} na {new}.",
+      "addendum_boq": "Soupis prací byl změněn (revize {revision}). Oceňte prosím aktuální revizi.",
+      "addendum_documents": "Vydané dokumenty: {documents}",
+      "addendum_ack": "Potvrďte prosím přijetí tohoto dodatku. Nabídka, která neuvede potvrzení všech dodatků, může být posouzena jako nevyhovující.",
+      "answer_subject": "Upřesnění {number} k zakázce {package}",
+      "answer_heading": "Upřesnění zakázky",
+      "answer_intro": "Na dotaz k zakázce {package} byla zodpovězena odpověď. Odpověď platí pro všechny uchazeče.",
+      "question_label": "Dotaz",
+      "answer_label": "Odpověď"
     }
   },
   "property_dev": {

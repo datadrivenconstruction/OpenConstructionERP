@@ -2136,6 +2136,22 @@
         "در حال انجام",
         "انجام‌شده"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "الحاقیه {number} مناقصه {package}",
+      "addendum_heading": "الحاقیه مناقصه",
+      "greeting": "{company} گرامی،",
+      "greeting_generic": "با سلام،",
+      "addendum_intro": "الحاقیه {number} بسته مناقصه {package} صادر شد: {title}.",
+      "addendum_deadline": "مهلت ارسال پیشنهاد از {old} به {new} تغییر یافت.",
+      "addendum_boq": "فهرست مقادیر تغییر کرده است (بازنگری {revision}). لطفاً بازنگری جاری را قیمت‌گذاری کنید.",
+      "addendum_documents": "اسناد صادرشده: {documents}",
+      "addendum_ack": "لطفاً دریافت این الحاقیه را تأیید کنید. پیشنهادی که همه الحاقیه‌ها را تأیید نکند ممکن است مطابق تلقی نشود.",
+      "answer_subject": "توضیح {number} مناقصه {package}",
+      "answer_heading": "توضیح مناقصه",
+      "answer_intro": "به یک پرسش درباره بسته مناقصه {package} پاسخ داده شد. این پاسخ برای همه پیشنهاددهندگان معتبر است.",
+      "question_label": "پرسش",
+      "answer_label": "پاسخ"
     }
   },
   "property_dev": {

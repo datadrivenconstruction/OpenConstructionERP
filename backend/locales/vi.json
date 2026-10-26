@@ -2132,6 +2132,22 @@
         "Đang thực hiện",
         "Hoàn thành"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Phụ lục {number} gói thầu {package}",
+      "addendum_heading": "Phụ lục gói thầu",
+      "greeting": "Kính gửi {company},",
+      "greeting_generic": "Kính gửi Quý nhà thầu,",
+      "addendum_intro": "Phụ lục {number} cho gói thầu {package} đã được phát hành: {title}.",
+      "addendum_deadline": "Hạn nộp hồ sơ đã được dời từ {old} sang {new}.",
+      "addendum_boq": "Bảng khối lượng mời thầu đã thay đổi (bản {revision}). Đề nghị chào giá theo bản hiện hành.",
+      "addendum_documents": "Tài liệu đã phát hành: {documents}",
+      "addendum_ack": "Đề nghị xác nhận đã nhận phụ lục này. Hồ sơ dự thầu không xác nhận đầy đủ các phụ lục có thể bị coi là không đáp ứng yêu cầu.",
+      "answer_subject": "Làm rõ {number} gói thầu {package}",
+      "answer_heading": "Làm rõ gói thầu",
+      "answer_intro": "Câu hỏi về gói thầu {package} đã được trả lời. Câu trả lời áp dụng cho tất cả nhà thầu.",
+      "question_label": "Câu hỏi",
+      "answer_label": "Trả lời"
     }
   },
   "property_dev": {

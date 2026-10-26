@@ -2137,6 +2137,22 @@
         "Орындалуда",
         "Орындалды"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "{package} тендеріне Қосымша {number}",
+      "addendum_heading": "Тендерге қосымша",
+      "greeting": "Құрметті {company},",
+      "greeting_generic": "Құрметті әріптес,",
+      "addendum_intro": "{package} тендерлік пакетіне Қосымша {number} шығарылды: {title}.",
+      "addendum_deadline": "Тапсыру мерзімі {old} күнінен {new} күніне ауыстырылды.",
+      "addendum_boq": "Көлемдер ведомосі өзгерді (қайта қарау {revision}). Қолданыстағы қайта қаралған нұсқаға баға қойыңыз.",
+      "addendum_documents": "Шығарылған құжаттар: {documents}",
+      "addendum_ack": "Осы қосымшаны алғаныңызды растаңыз. Барлық қосымшаны растамаған ұсыныс талаптарға сай емес деп танылуы мүмкін.",
+      "answer_subject": "{package} тендеріне түсіндірме {number}",
+      "answer_heading": "Тендерге түсіндірме",
+      "answer_intro": "{package} тендерлік пакетіне қатысты сұраққа жауап берілді. Бұл жауап барлық қатысушыларға қатысты.",
+      "question_label": "Сұрақ",
+      "answer_label": "Жауап"
     }
   },
   "property_dev": {

@@ -2244,6 +2244,22 @@
         "En cours",
         "Terminé"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Additif {number} à la consultation {package}",
+      "addendum_heading": "Additif à la consultation",
+      "greeting": "Madame, Monsieur de {company},",
+      "greeting_generic": "Madame, Monsieur,",
+      "addendum_intro": "L'additif {number} au lot de consultation {package} a été publié : {title}.",
+      "addendum_deadline": "La date limite de remise des offres est passée du {old} au {new}.",
+      "addendum_boq": "Le bordereau des quantités a été modifié (révision {revision}). Veuillez chiffrer la révision en vigueur.",
+      "addendum_documents": "Documents publiés : {documents}",
+      "addendum_ack": "Merci de bien vouloir accuser réception de cet additif. Une offre qui n'accuse pas réception de l'ensemble des additifs peut être considérée comme non conforme.",
+      "answer_subject": "Précision {number} à la consultation {package}",
+      "answer_heading": "Précision sur la consultation",
+      "answer_intro": "Une question portant sur le lot {package} a reçu une réponse. Cette réponse s'applique à tous les soumissionnaires.",
+      "question_label": "Question",
+      "answer_label": "Réponse"
     }
   },
   "field_evidence": {

@@ -274,6 +274,31 @@ def _package_scopes(packages: list[TenderPackageDef], items: list[Position]) -> 
     return [[items[index] for index in scope] for scope in picked]
 
 
+async def _seed_tender_addenda(session: AsyncSession, project_id: uuid.UUID, demo_id: str) -> None:
+    """Addenda, a BOQ revision and Q&A on the first package with three bids (selected demos only)."""
+    from app.modules.tendering.demo_addenda import DEMO_ADDENDA_COUNTRIES, seed_package_addenda
+
+    country = DEMO_ADDENDA_COUNTRIES.get(demo_id)
+    if country is None:
+        return
+    packages = (
+        (await session.execute(select(TenderPackage).where(TenderPackage.project_id == project_id))).scalars().all()
+    )
+    for pkg in packages:
+        bids = list((await session.execute(select(TenderBid).where(TenderBid.package_id == pkg.id))).scalars().all())
+        if len(bids) < 3 or not (pkg.metadata_ or {}).get("recipients"):
+            continue
+        scope = [str(x) for x in (pkg.metadata_ or {}).get("scope_position_ids") or []]
+        meta, new_deadline, rows = seed_package_addenda(
+            dict(pkg.metadata_ or {}), pkg.deadline or "", bids, pkg.id, country, scope
+        )
+        pkg.metadata_ = meta
+        pkg.deadline = new_deadline
+        session.add_all(rows)
+        await session.flush()
+        return
+
+
 def _seeded_distribution(
     status: str,
     deadline: date,
@@ -13119,6 +13144,7 @@ async def install_demo_project(
             session.add(bid)
 
     await session.flush()
+    await _seed_tender_addenda(session, project.id, demo_id)
 
     # Template-derived module rows. The 5 built-ins keep their hand-authored
     # dicts (they win on demo_id match); every other demo (the partner packs)

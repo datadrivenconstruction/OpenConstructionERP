@@ -2138,6 +2138,22 @@
         "قيد التنفيذ",
         "منجز"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "الملحق {number} للمناقصة {package}",
+      "addendum_heading": "ملحق المناقصة",
+      "greeting": "السادة {company}،",
+      "greeting_generic": "السادة المحترمون،",
+      "addendum_intro": "صدر الملحق {number} لحزمة المناقصة {package}: {title}.",
+      "addendum_deadline": "تم نقل الموعد النهائي لتقديم العروض من {old} إلى {new}.",
+      "addendum_boq": "تم تعديل جدول الكميات (المراجعة {revision}). يرجى تسعير المراجعة الحالية.",
+      "addendum_documents": "المستندات الصادرة: {documents}",
+      "addendum_ack": "يرجى تأكيد استلام هذا الملحق. قد يُعدّ أي عرض لا يؤكد جميع الملاحق غير مطابق للشروط.",
+      "answer_subject": "التوضيح {number} للمناقصة {package}",
+      "answer_heading": "توضيح المناقصة",
+      "answer_intro": "تمت الإجابة عن سؤال يخص حزمة المناقصة {package}. وتنطبق الإجابة على جميع المتقدمين.",
+      "question_label": "السؤال",
+      "answer_label": "الإجابة"
     }
   },
   "property_dev": {

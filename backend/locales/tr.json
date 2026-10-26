@@ -2096,6 +2096,22 @@
         "Devam ediyor",
         "Tamamlandı"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "{package} ihalesi için Ek {number}",
+      "addendum_heading": "İhale eki",
+      "greeting": "Sayın {company},",
+      "greeting_generic": "Sayın yetkili,",
+      "addendum_intro": "{package} ihale paketi için Ek {number} yayımlandı: {title}.",
+      "addendum_deadline": "Teklif son teslim tarihi {old} tarihinden {new} tarihine alınmıştır.",
+      "addendum_boq": "Metraj cetvelinde değişiklik yapıldı (revizyon {revision}). Lütfen güncel revizyonu fiyatlandırın.",
+      "addendum_documents": "Yayımlanan belgeler: {documents}",
+      "addendum_ack": "Lütfen bu ekin alındığını onaylayın. Tüm ekleri onaylamayan teklif uygun bulunmayabilir.",
+      "answer_subject": "{package} ihalesi için açıklama {number}",
+      "answer_heading": "İhale açıklaması",
+      "answer_intro": "{package} ihale paketine ilişkin bir soru yanıtlanmıştır. Yanıt tüm teklif verenler için geçerlidir.",
+      "question_label": "Soru",
+      "answer_label": "Yanıt"
     }
   },
   "property_dev": {

@@ -2140,6 +2140,22 @@
         "प्रगति में",
         "पूर्ण"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "निविदा {package} पर एडेंडम {number}",
+      "addendum_heading": "निविदा एडेंडम",
+      "greeting": "आदरणीय {company},",
+      "greeting_generic": "आदरणीय महोदय/महोदया,",
+      "addendum_intro": "निविदा पैकेज {package} के लिए एडेंडम {number} जारी किया गया है: {title}।",
+      "addendum_deadline": "जमा करने की अंतिम तिथि {old} से बढ़ाकर {new} कर दी गई है।",
+      "addendum_boq": "बिल ऑफ क्वांटिटीज़ में बदलाव हुआ है (संशोधन {revision})। कृपया वर्तमान संशोधन की दरें भरें।",
+      "addendum_documents": "जारी दस्तावेज़: {documents}",
+      "addendum_ack": "कृपया इस एडेंडम की प्राप्ति की पुष्टि करें। जो बोली सभी एडेंडम की पुष्टि नहीं करती, उसे अनुपालन-रहित माना जा सकता है।",
+      "answer_subject": "निविदा {package} पर स्पष्टीकरण {number}",
+      "answer_heading": "निविदा स्पष्टीकरण",
+      "answer_intro": "निविदा पैकेज {package} पर एक प्रश्न का उत्तर दिया गया है। यह उत्तर सभी बोलीदाताओं पर लागू होता है।",
+      "question_label": "प्रश्न",
+      "answer_label": "उत्तर"
     }
   },
   "property_dev": {

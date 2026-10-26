@@ -2134,6 +2134,22 @@
         "Pågående",
         "Klar"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Tillägg {number} till upphandlingen {package}",
+      "addendum_heading": "Tillägg till upphandlingen",
+      "greeting": "Till {company},",
+      "greeting_generic": "Till berörda,",
+      "addendum_intro": "Tillägg {number} till upphandlingspaketet {package} har publicerats: {title}.",
+      "addendum_deadline": "Sista dag för anbud har flyttats från {old} till {new}.",
+      "addendum_boq": "Mängdförteckningen har ändrats (revision {revision}). Vänligen prissätt den gällande revisionen.",
+      "addendum_documents": "Publicerade dokument: {documents}",
+      "addendum_ack": "Bekräfta vänligen mottagandet av detta tillägg. Ett anbud som inte bekräftar alla tillägg kan komma att bedömas som icke godkänt.",
+      "answer_subject": "Förtydligande {number} till upphandlingen {package}",
+      "answer_heading": "Förtydligande av upphandlingen",
+      "answer_intro": "En fråga om upphandlingspaketet {package} har besvarats. Svaret gäller alla anbudsgivare.",
+      "question_label": "Fråga",
+      "answer_label": "Svar"
     }
   },
   "property_dev": {

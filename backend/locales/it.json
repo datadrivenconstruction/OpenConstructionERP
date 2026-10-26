@@ -2106,6 +2106,22 @@
         "In corso",
         "Completato"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "Addendum {number} alla gara {package}",
+      "addendum_heading": "Addendum alla gara",
+      "greeting": "Gentile {company},",
+      "greeting_generic": "Gentili signori,",
+      "addendum_intro": "È stato emesso l'addendum {number} al pacchetto di gara {package}: {title}.",
+      "addendum_deadline": "La scadenza per la presentazione delle offerte è stata spostata da {old} a {new}.",
+      "addendum_boq": "Il computo metrico è stato modificato (revisione {revision}). Vi preghiamo di prezzare la revisione in vigore.",
+      "addendum_documents": "Documenti emessi: {documents}",
+      "addendum_ack": "Vi preghiamo di confermare la ricezione del presente addendum. Un'offerta che non confermi tutti gli addendum potrà essere considerata non conforme.",
+      "answer_subject": "Chiarimento {number} alla gara {package}",
+      "answer_heading": "Chiarimento di gara",
+      "answer_intro": "È stata data risposta a una domanda sul pacchetto di gara {package}. La risposta vale per tutti gli offerenti.",
+      "question_label": "Domanda",
+      "answer_label": "Risposta"
     }
   },
   "property_dev": {

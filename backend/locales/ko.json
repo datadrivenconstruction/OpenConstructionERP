@@ -2135,6 +2135,22 @@
         "진행 중",
         "완료"
       ]
+    },
+    "tender_addendum": {
+      "addendum_subject": "{package} 입찰 추가 공지 {number}",
+      "addendum_heading": "입찰 추가 공지",
+      "greeting": "{company} 귀하",
+      "greeting_generic": "관계자 귀하,",
+      "addendum_intro": "입찰 패키지 {package}에 대한 추가 공지 {number}가 발행되었습니다: {title}.",
+      "addendum_deadline": "입찰서 제출 마감일이 {old}에서 {new}(으)로 변경되었습니다.",
+      "addendum_boq": "내역서가 변경되었습니다(개정 {revision}). 현재 개정본으로 단가를 입력해 주십시오.",
+      "addendum_documents": "발행 문서: {documents}",
+      "addendum_ack": "본 추가 공지의 수신을 확인해 주십시오. 모든 추가 공지를 확인하지 않은 입찰은 요건 미충족으로 처리될 수 있습니다.",
+      "answer_subject": "{package} 입찰 질의 회신 {number}",
+      "answer_heading": "입찰 질의 회신",
+      "answer_intro": "입찰 패키지 {package}에 대한 질문에 답변이 게시되었습니다. 해당 답변은 모든 입찰자에게 적용됩니다.",
+      "question_label": "질문",
+      "answer_label": "답변"
     }
   },
   "property_dev": {

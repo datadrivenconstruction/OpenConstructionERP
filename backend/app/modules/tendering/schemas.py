@@ -302,6 +302,10 @@ class BidComparisonResponse(BaseModel):
     budget_total: Decimal = Decimal("0")
     rows: list[BidComparisonRow] = Field(default_factory=list)
     bid_totals: list[dict[str, Any]] = Field(default_factory=list)
+    # Tender BOQ revision bidders must price and the number of published addenda;
+    # each bid total carries ``boq_revision_no``, ``missing_addenda`` and ``compliant``.
+    current_boq_revision: int = 0
+    published_addenda: int = 0
 
     @field_serializer("budget_total", when_used="json")
     def _ser_budget_total(self, v: Decimal) -> str | None:
@@ -541,6 +545,33 @@ class DistributeResponse(BaseModel):
 # (no migration) while remaining fully persisted and FX-irrelevant.
 
 
+class AddendumDocumentChange(BaseModel):
+    """A tender document the addendum issues or replaces, at the revision issued."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    document_id: UUID | None = None
+    drawing_number: str | None = Field(default=None, max_length=120)
+    title: str = Field(default="", max_length=255)
+    revision: str | None = Field(default=None, max_length=40)
+    note: str = Field(default="", max_length=1000)
+
+
+class AddendumBOQChange(BaseModel):
+    """One bill line the addendum adds, changes or deletes, with before and after."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    op: Literal["add", "change", "delete"]
+    position_id: str | None = Field(default=None, max_length=64)
+    ordinal: str = Field(default="", max_length=60)
+    description: str = Field(default="", max_length=2000)
+    unit: str = Field(default="", max_length=30)
+    quantity_before: str | None = Field(default=None, max_length=40)
+    quantity_after: str | None = Field(default=None, max_length=40)
+    description_before: str | None = Field(default=None, max_length=2000)
+
+
 class AddendumAckEntry(BaseModel):
     """One bidder acknowledgement of a published addendum."""
 
@@ -556,6 +587,11 @@ class AddendumCreate(BaseModel):
 
     title: str = Field(..., min_length=1, max_length=200)
     body: str | None = Field(default=None, max_length=10000)
+    # What the addendum changes. Each part is optional; an addendum may only clarify.
+    document_changes: list[AddendumDocumentChange] = Field(default_factory=list, max_length=200)
+    boq_changes: list[AddendumBOQChange] = Field(default_factory=list, max_length=2000)
+    new_deadline: str | None = Field(default=None, max_length=100)
+    source_clarification_id: UUID | None = None
 
 
 class AddendumAcknowledgeRequest(BaseModel):
@@ -579,6 +615,81 @@ class AddendumResponse(BaseModel):
     acknowledged_by: list[AddendumAckEntry] = Field(default_factory=list)
     created_at: str
     updated_at: str
+    document_changes: list[dict[str, Any]] = Field(default_factory=list)
+    boq_changes: list[dict[str, Any]] = Field(default_factory=list)
+    boq_revision_no: int | None = None
+    previous_deadline: str | None = None
+    new_deadline: str | None = None
+    source_clarification_id: str | None = None
+    notified: list[dict[str, Any]] = Field(default_factory=list)
+    # Invited firms (recipient ids) that have not acknowledged a published addendum.
+    pending_recipient_ids: list[str] = Field(default_factory=list)
+
+
+class ClarificationCreate(BaseModel):
+    """A bidder question, entered by the buyer or through the bidder link."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    question: str = Field(..., min_length=3, max_length=5000)
+    recipient_id: str | None = Field(default=None, max_length=64)
+    asked_by_email: str = Field(default="", max_length=255)
+
+
+class ClarificationAnswer(BaseModel):
+    """The buyer's answer to one question."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    answer: str = Field(..., min_length=1, max_length=10000)
+
+
+class ClarificationResponse(BaseModel):
+    """A question and its answer as the buyer sees it (asker included)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    package_id: UUID
+    number: int
+    question: str
+    answer: str = ""
+    status: str
+    recipient_id: str | None = None
+    asked_by_email: str = ""
+    asked_at: datetime
+    answered_at: datetime | None = None
+    published_at: datetime | None = None
+    addendum_id: str | None = None
+    # Days left between the answer (or today) and closing; None without a deadline.
+    days_before_closing: int | None = None
+
+
+class PublicClarification(BaseModel):
+    """A published question and answer as every bidder sees it: no asker."""
+
+    number: int
+    question: str
+    answer: str
+    published_at: datetime | None = None
+
+
+class TimelineEvent(BaseModel):
+    """One dated step of a tender: issued, questions closed, addenda, closing."""
+
+    kind: str
+    at: str | None = None
+    label: str = ""
+    ref_id: str | None = None
+    past: bool = False
+
+
+class TenderTimelineResponse(BaseModel):
+    """The dated steps of a package plus the rules that set them."""
+
+    package_id: UUID
+    events: list[TimelineEvent] = Field(default_factory=list)
+    rules: dict[str, Any] = Field(default_factory=dict)
 
 
 # ── Award record (Vergabevermerk) ────────────────────────────────────────────

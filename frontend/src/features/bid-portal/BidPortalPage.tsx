@@ -38,6 +38,7 @@ import {
   type BidPortalLine,
   type BidPortalView,
 } from './api';
+import { TenderInfoSection } from './TenderInfoSection';
 
 type PageState =
   | { kind: 'loading' }
@@ -262,6 +263,8 @@ export function BidPortalPage() {
           <p className="pt-2 text-sm text-content-secondary whitespace-pre-line">{v.package_description}</p>
         )}
       </section>
+
+      <TenderInfoSection token={token} />
 
       {v.state === 'submitted' && (
         <div
