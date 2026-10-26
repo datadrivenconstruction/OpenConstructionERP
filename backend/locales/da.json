@@ -91,6 +91,44 @@
       "batch_progress": "Post {{current}} af {{total}}",
       "toast_applied_one": "{{count}} variant valgt",
       "toast_applied_other": "{{count}} varianter valgt"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Udvekslingsrapport"
+      },
+      "column": {
+        "severity": "Alvorlighed",
+        "kind": "Type tab",
+        "position": "Post",
+        "field": "Felt",
+        "original": "Oprindelig værdi",
+        "written": "Skrevet værdi",
+        "count": "Antal",
+        "detail": "Detaljer"
+      },
+      "severity": {
+        "error": "Kritisk",
+        "warning": "Advarsel",
+        "info": "Bemærkning"
+      },
+      "kind": {
+        "unsupported_element": "Element understøttes ikke",
+        "truncated_text": "Tekst afkortet",
+        "altered_text": "Tekst ændret",
+        "rounded_value": "Værdi afrundet",
+        "value_out_of_range": "Værdi uden for intervallet",
+        "dropped_attribute": "Attribut droppet",
+        "unmapped_unit": "Enhed ikke tilordnet",
+        "lost_hierarchy": "Hierarkiniveau tabt",
+        "markup_not_representable": "Tillæg kan ikke gengives",
+        "attachment_skipped": "Bilag sprunget over",
+        "changed_identifier": "Identifikator ændret",
+        "exceeds_limit": "Lagergrænse overskredet",
+        "rejected_row": "Række afvist",
+        "skipped_row": "Række sprunget over",
+        "parser_warning": "Advarsel fra læseren",
+        "roundtrip_mismatch": "Afvigelse i round trip"
+      }
     }
   },
   "costs": {

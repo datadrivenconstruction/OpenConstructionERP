@@ -91,6 +91,44 @@
       "batch_progress": "Элемент {{current}} из {{total}}",
       "toast_applied_one": "Выбран {{count}} вариант",
       "toast_applied_other": "Выбрано {{count}} варианта"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Отчёт об обмене"
+      },
+      "column": {
+        "severity": "Серьёзность",
+        "kind": "Вид потери",
+        "position": "Позиция",
+        "field": "Поле",
+        "original": "Исходное значение",
+        "written": "Записанное значение",
+        "count": "Количество",
+        "detail": "Подробности"
+      },
+      "severity": {
+        "error": "Критично",
+        "warning": "Предупреждение",
+        "info": "Примечание"
+      },
+      "kind": {
+        "unsupported_element": "Элемент не поддерживается",
+        "truncated_text": "Текст обрезан",
+        "altered_text": "Текст изменён",
+        "rounded_value": "Значение округлено",
+        "value_out_of_range": "Значение вне диапазона",
+        "dropped_attribute": "Атрибут отброшен",
+        "unmapped_unit": "Единица не сопоставлена",
+        "lost_hierarchy": "Уровень иерархии потерян",
+        "markup_not_representable": "Надбавка не представима",
+        "attachment_skipped": "Вложение пропущено",
+        "changed_identifier": "Идентификатор изменён",
+        "exceeds_limit": "Превышен предел хранения",
+        "rejected_row": "Строка отклонена",
+        "skipped_row": "Строка пропущена",
+        "parser_warning": "Предупреждение чтения",
+        "roundtrip_mismatch": "Расхождение при круговой проверке"
+      }
     }
   },
   "costs": {

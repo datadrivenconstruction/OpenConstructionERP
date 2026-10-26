@@ -91,6 +91,44 @@
       "batch_progress": "Позиция {{current}} от {{total}}",
       "toast_applied_one": "Избран е {{count}} вариант",
       "toast_applied_other": "Избрани са {{count}} варианта"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Отчет за обмена"
+      },
+      "column": {
+        "severity": "Сериозност",
+        "kind": "Вид загуба",
+        "position": "Позиция",
+        "field": "Поле",
+        "original": "Оригинална стойност",
+        "written": "Записана стойност",
+        "count": "Брой",
+        "detail": "Подробности"
+      },
+      "severity": {
+        "error": "Критично",
+        "warning": "Предупреждение",
+        "info": "Забележка"
+      },
+      "kind": {
+        "unsupported_element": "Неподдържан елемент",
+        "truncated_text": "Съкратен текст",
+        "altered_text": "Променен текст",
+        "rounded_value": "Закръглена стойност",
+        "value_out_of_range": "Стойност извън обхвата",
+        "dropped_attribute": "Отпаднал атрибут",
+        "unmapped_unit": "Неразпозната мерна единица",
+        "lost_hierarchy": "Загубено йерархично ниво",
+        "markup_not_representable": "Надбавка, която не може да се представи",
+        "attachment_skipped": "Пропуснато приложение",
+        "changed_identifier": "Променен идентификатор",
+        "exceeds_limit": "Превишен лимит на паметта",
+        "rejected_row": "Отхвърлен ред",
+        "skipped_row": "Пропуснат ред",
+        "parser_warning": "Предупреждение от четеца",
+        "roundtrip_mismatch": "Отклонение при кръгов обмен"
+      }
     }
   },
   "costs": {

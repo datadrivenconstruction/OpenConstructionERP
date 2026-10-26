@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "課税日「{tax_date}」を日付として解釈できないため、内訳書には課税日の税率ではなく本日の税率が適用されています",
       "suggestion": "課税日を日、月、四半期、または年で指定してください（{shapes}）。内訳書の基準日で課税する場合は空にしてください"
+    },
+    "exchange_fidelity": {
+      "fail_import": "{format} からのインポート: 項目 {ordinal}、{field} が正しく届きませんでした (ファイル: {original}、内訳書: {written})",
+      "fail_export": "{format} へのエクスポート: 項目 {ordinal}、{field} が正しく出力されませんでした (内訳書: {original}、ファイル: {written})",
+      "suggestion": "このファイルの交換レポートを開き、行または元データを修正して、交換をやり直してください"
     }
   },
   "din276": {

@@ -1844,6 +1844,88 @@ class ResourceSplitMismatch(ValidationRule):
         return results
 
 
+class ExchangeFidelityCritical(ValidationRule):
+    """The bill's latest import or export lost something that matters.
+
+    Reads ``data["exchange_fidelity"]``: per direction and format, the error
+    items of the newest stored exchange fidelity report (filled by
+    ``exchange_fidelity_service.with_exchange_fidelity``). An import that
+    refused rows or a file whose money no longer reconciles is an ERROR on the
+    bill: it holds less than the source. The same on an export is a WARNING:
+    the bill is whole, the file that left it is not. A bill with no stored
+    report gets no result at all, neither a pass nor a fail.
+    """
+
+    rule_id = "boq_quality.exchange_fidelity"
+    name = "Exchange Without Critical Loss"
+    standard = "boq_quality"
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "The latest import and export of the bill carried every line, quantity and amount across"
+
+    #: Results per report, so one damaged file cannot flood the dashboard.
+    MAX_RESULTS_PER_REPORT = 50
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        reports = data.get("exchange_fidelity")
+        if not isinstance(reports, list) or not reports:
+            return []
+        locale = _get_locale(context)
+        results: list[RuleResult] = []
+        for report in reports:
+            if not isinstance(report, dict):
+                continue
+            items = [it for it in report.get("items") or [] if isinstance(it, dict)]
+            direction = str(report.get("direction") or "")
+            fmt = str(report.get("format_id") or "")
+            severity = Severity.ERROR if direction == "import" else Severity.WARNING
+            if not items:
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=severity,
+                        category=self.category,
+                        passed=True,
+                        message=_ok(locale),
+                        details={"report_id": report.get("report_id"), "direction": direction, "format_id": fmt},
+                    )
+                )
+                continue
+            for item in items[: self.MAX_RESULTS_PER_REPORT]:
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=severity,
+                        category=self.category,
+                        passed=False,
+                        message=translate(
+                            f"boq_quality.exchange_fidelity.fail_{'import' if direction == 'import' else 'export'}",
+                            locale=locale,
+                            format=fmt,
+                            ordinal=item.get("position_ref") or "-",
+                            field=item.get("field") or "-",
+                            original=item.get("original") if item.get("original") is not None else "-",
+                            written=item.get("written") if item.get("written") is not None else "-",
+                        ),
+                        element_ref=item.get("position_id"),
+                        details={
+                            "report_id": report.get("report_id"),
+                            "direction": direction,
+                            "format_id": fmt,
+                            "kind": item.get("kind"),
+                            "field": item.get("field"),
+                            "original": item.get("original"),
+                            "written": item.get("written"),
+                        },
+                        suggestion=translate("boq_quality.exchange_fidelity.suggestion", locale=locale),
+                    )
+                )
+        return results
+
+
 class EmptyUnit(ValidationRule):
     rule_id = "boq_quality.empty_unit"
     name = "Position Has Unit"
@@ -11975,6 +12057,7 @@ def register_builtin_rules() -> None:
         (UnrealisticRate(), None),
         (TotalMismatch(), None),
         (ResourceSplitMismatch(), None),
+        (ExchangeFidelityCritical(), None),
         (EmptyUnit(), None),
         (SectionWithoutItems(), None),
         (RateVsBenchmark(), None),

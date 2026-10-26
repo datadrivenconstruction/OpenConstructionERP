@@ -91,6 +91,44 @@
       "batch_progress": "قلم {{current}} از {{total}}",
       "toast_applied_one": "{{count}} گزینه انتخاب شد",
       "toast_applied_other": "{{count}} گزینه انتخاب شد"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "گزارش تبادل"
+      },
+      "column": {
+        "severity": "شدت",
+        "kind": "نوع اتلاف",
+        "position": "ردیف",
+        "field": "فیلد",
+        "original": "مقدار اصلی",
+        "written": "مقدار نوشته‌شده",
+        "count": "تعداد",
+        "detail": "جزئیات"
+      },
+      "severity": {
+        "error": "بحرانی",
+        "warning": "هشدار",
+        "info": "نکته"
+      },
+      "kind": {
+        "unsupported_element": "عنصر پشتیبانی‌نشده",
+        "truncated_text": "متن کوتاه‌شده",
+        "altered_text": "متن تغییریافته",
+        "rounded_value": "مقدار گرد‌شده",
+        "value_out_of_range": "مقدار خارج از محدوده",
+        "dropped_attribute": "ویژگی حذف‌شده",
+        "unmapped_unit": "واحد نگاشت‌نشده",
+        "lost_hierarchy": "سطح سلسله‌مراتب از دست رفت",
+        "markup_not_representable": "ضریب افزایشی قابل نمایش نیست",
+        "attachment_skipped": "پیوست نادیده گرفته شد",
+        "changed_identifier": "شناسه تغییر کرد",
+        "exceeds_limit": "از حد ذخیره‌سازی فراتر رفت",
+        "rejected_row": "ردیف رد شد",
+        "skipped_row": "ردیف نادیده گرفته شد",
+        "parser_warning": "هشدار خواننده",
+        "roundtrip_mismatch": "اختلاف رفت‌وبرگشت"
+      }
     }
   },
   "costs": {

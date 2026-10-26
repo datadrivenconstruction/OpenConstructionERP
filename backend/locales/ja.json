@@ -91,6 +91,44 @@
       "batch_progress": "{{total}} 件中 {{current}} 件目",
       "toast_applied_one": "{{count}} 件のバリアントを選択しました",
       "toast_applied_other": "{{count}} 件のバリアントを選択しました"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "交換レポート"
+      },
+      "column": {
+        "severity": "重大度",
+        "kind": "欠落の種類",
+        "position": "項目",
+        "field": "フィールド",
+        "original": "元の値",
+        "written": "書き込まれた値",
+        "count": "件数",
+        "detail": "詳細"
+      },
+      "severity": {
+        "error": "重大",
+        "warning": "警告",
+        "info": "注記"
+      },
+      "kind": {
+        "unsupported_element": "未対応の要素",
+        "truncated_text": "テキスト切り詰め",
+        "altered_text": "テキスト変更",
+        "rounded_value": "値の丸め",
+        "value_out_of_range": "値が範囲外",
+        "dropped_attribute": "属性の破棄",
+        "unmapped_unit": "単位未対応",
+        "lost_hierarchy": "階層レベルの欠落",
+        "markup_not_representable": "諸経費を表現不可",
+        "attachment_skipped": "添付ファイルをスキップ",
+        "changed_identifier": "識別子の変更",
+        "exceeds_limit": "保存上限超過",
+        "rejected_row": "行を拒否",
+        "skipped_row": "行をスキップ",
+        "parser_warning": "リーダー警告",
+        "roundtrip_mismatch": "ラウンドトリップ不一致"
+      }
     }
   },
   "costs": {

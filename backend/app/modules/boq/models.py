@@ -9,6 +9,7 @@ Tables:
     oe_boq_activity_log - audit trail for BOQ mutations
     oe_boq_snapshot - point-in-time BOQ state for version history
     oe_boq_quantity_link - live model→position quantity binding
+    oe_boq_exchange_report - what an import or export did not carry across
 """
 
 import uuid
@@ -659,6 +660,64 @@ class QuantityLink(Base):
 # it here. Module model discovery (app.main create_all + tests._pg template +
 # conftest) imports ``app.modules.boq.models``; importing the copilot model from
 # this already-discovered module guarantees ``oe_boq_position_copilot_message``
+class BOQExchangeReport(Base):
+    """The exchange fidelity report of one import or export of a bill.
+
+    Written by every native import and every interchange export (and by an
+    on-demand check), so the question "what did the file we sent on Tuesday
+    not carry" has an answer after the download dialog is gone. ``items``
+    holds at most ``exchange_fidelity.MAX_STORED_ITEMS`` entries; ``summary``
+    counts all of them.
+    """
+
+    __tablename__ = "oe_boq_exchange_report"
+    __table_args__ = (Index("ix_boq_exchange_report_boq_created", "boq_id", "created_at"),)
+
+    boq_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    #: ``import`` | ``export``
+    direction: Mapped[str] = mapped_column(String(10), nullable=False)
+    #: Registry token: ``gaeb_xml``, ``bc3``, ``excel``, ``csv``, ``xpwe`` ...
+    format_id: Mapped[str] = mapped_column(String(30), nullable=False)
+    #: Format phase or flavour, e.g. ``x83`` / ``x84``; empty when none.
+    variant: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
+    file_name: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    #: True when the export was read back in memory and compared with the bill.
+    roundtrip: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    #: ``True`` for a check that produced no file (preview before export).
+    is_check: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    summary: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+    items: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    created_by: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_users_user.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    def __repr__(self) -> str:
+        return f"<BOQExchangeReport {self.direction} {self.format_id} boq={self.boq_id}>"
+
+
 # is created on a fresh database and seen by Alembic autogenerate, without
 # adding a hand-maintained import elsewhere. The change-flag model
 # (``oe_boq_change_flag``) is registered the same way.

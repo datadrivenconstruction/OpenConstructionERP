@@ -225,6 +225,11 @@
     "base_date_readable": {
       "fail": "La data base '{base_date}' non è una data, quindi il computo viene attualizzato al tasso di oggi invece che al proprio",
       "suggestion": "Indicare la base dei prezzi come giorno, mese, trimestre o anno ({shapes})"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Importazione da {format}: voce {ordinal}, {field} non è arrivato intatto (file: {original}, computo: {written})",
+      "fail_export": "Esportazione in {format}: voce {ordinal}, {field} non è uscito intatto (computo: {original}, file: {written})",
+      "suggestion": "Apri il report di scambio di questo file, correggi la riga o l'origine e ripeti lo scambio"
     }
   },
   "din276": {

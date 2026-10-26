@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Hindi wastong petsa ang tax date na '{tax_date}', kaya ang rate ng buwis ngayong araw ang ginagamit sa bill sa halip na ang rate sa sarili nitong petsa",
       "suggestion": "Ihayag ang tax date bilang araw, buwan, quarter o taon ({shapes}), o burahin ito upang gamitin ang base date ng bill sa pagbubuwis"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import mula sa {format}: item {ordinal}, ang {field} ay hindi dumating nang buo (file: {original}, bill: {written})",
+      "fail_export": "Export sa {format}: item {ordinal}, ang {field} ay hindi naisulat nang buo (bill: {original}, file: {written})",
+      "suggestion": "Buksan ang ulat ng palitan ng file na ito, ayusin ang hilera o ang pinagmulan, at ulitin ang palitan"
     }
   },
   "din276": {

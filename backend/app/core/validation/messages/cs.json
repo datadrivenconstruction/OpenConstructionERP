@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Daňové datum '{tax_date}' není platné datum, proto se soupis prací daní dnešní sazbou místo sazby platné k jeho datu",
       "suggestion": "Uveďte daňové datum jako den, měsíc, čtvrtletí nebo rok ({shapes}), nebo jej vymažte pro použití základního data soupisu prací"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import z {format}: položka {ordinal}, pole {field} nedorazilo nepoškozené (soubor: {original}, výkaz: {written})",
+      "fail_export": "Export do {format}: položka {ordinal}, pole {field} nebylo vypsáno nepoškozené (výkaz: {original}, soubor: {written})",
+      "suggestion": "Otevřete zprávu o výměně dat tohoto souboru, opravte řádek nebo zdroj a výměnu zopakujte"
     }
   },
   "din276": {

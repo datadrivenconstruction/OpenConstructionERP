@@ -91,6 +91,44 @@
       "batch_progress": "Nimike {{current}} / {{total}}",
       "toast_applied_one": "{{count}} vaihtoehto valittu",
       "toast_applied_other": "{{count}} vaihtoehtoa valittu"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Vaihtoraportti"
+      },
+      "column": {
+        "severity": "Vakavuus",
+        "kind": "Häviön laji",
+        "position": "Nimike",
+        "field": "Kenttä",
+        "original": "Alkuperäinen arvo",
+        "written": "Kirjoitettu arvo",
+        "count": "Lukumäärä",
+        "detail": "Tiedot"
+      },
+      "severity": {
+        "error": "Kriittinen",
+        "warning": "Varoitus",
+        "info": "Huomautus"
+      },
+      "kind": {
+        "unsupported_element": "Tukematon elementti",
+        "truncated_text": "Teksti lyhennetty",
+        "altered_text": "Teksti muutettu",
+        "rounded_value": "Arvo pyöristetty",
+        "value_out_of_range": "Arvo sallitun alueen ulkopuolella",
+        "dropped_attribute": "Ominaisuus pudotettu",
+        "unmapped_unit": "Yksikköä ei yhdistetty",
+        "lost_hierarchy": "Hierarkiataso hävisi",
+        "markup_not_representable": "Lisää ei voi esittää",
+        "attachment_skipped": "Liite ohitettu",
+        "changed_identifier": "Tunniste muuttui",
+        "exceeds_limit": "Tallennusraja ylittyi",
+        "rejected_row": "Rivi hylätty",
+        "skipped_row": "Rivi ohitettu",
+        "parser_warning": "Lukijan varoitus",
+        "roundtrip_mismatch": "Edestakaisen tarkistuksen poikkeama"
+      }
     }
   },
   "costs": {

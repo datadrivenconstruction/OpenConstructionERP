@@ -91,6 +91,44 @@
       "batch_progress": "Item {{current}} dari {{total}}",
       "toast_applied_one": "{{count}} varian dipilih",
       "toast_applied_other": "{{count}} varian dipilih"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Laporan pertukaran"
+      },
+      "column": {
+        "severity": "Tingkat keparahan",
+        "kind": "Jenis kehilangan",
+        "position": "Pos",
+        "field": "Kolom",
+        "original": "Nilai asli",
+        "written": "Nilai yang ditulis",
+        "count": "Jumlah",
+        "detail": "Detail"
+      },
+      "severity": {
+        "error": "Kritis",
+        "warning": "Peringatan",
+        "info": "Catatan"
+      },
+      "kind": {
+        "unsupported_element": "Elemen tidak didukung",
+        "truncated_text": "Teks terpotong",
+        "altered_text": "Teks diubah",
+        "rounded_value": "Nilai dibulatkan",
+        "value_out_of_range": "Nilai di luar rentang",
+        "dropped_attribute": "Atribut dibuang",
+        "unmapped_unit": "Satuan tidak dipetakan",
+        "lost_hierarchy": "Tingkat hierarki hilang",
+        "markup_not_representable": "Markup tidak dapat direpresentasikan",
+        "attachment_skipped": "Lampiran dilewati",
+        "changed_identifier": "Pengenal berubah",
+        "exceeds_limit": "Melebihi batas penyimpanan",
+        "rejected_row": "Baris ditolak",
+        "skipped_row": "Baris dilewati",
+        "parser_warning": "Peringatan pembaca",
+        "roundtrip_mismatch": "Selisih uji bolak-balik"
+      }
     }
   },
   "costs": {

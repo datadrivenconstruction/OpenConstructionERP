@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Tax date '{tax_date}' is not a date, so the bill is taxed at today's rate rather than its own",
       "suggestion": "State the tax date as a day, a month, a quarter or a year ({shapes}), or clear it to tax the bill on its base date"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import from {format}: position {ordinal}, {field} did not arrive intact (file: {original}, bill: {written})",
+      "fail_export": "Export to {format}: position {ordinal}, {field} did not leave intact (bill: {original}, file: {written})",
+      "suggestion": "Open the exchange report of this file, correct the line or the source, and repeat the exchange"
     }
   },
   "din276": {

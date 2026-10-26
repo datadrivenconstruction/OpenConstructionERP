@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Maksukuupäev '{tax_date}' ei ole kehtiv kuupäev, seega maksustatakse mahuloend tänase, mitte selle enda kuupäeva maksumääraga",
       "suggestion": "Määrake maksukuupäev päeva, kuu, kvartali või aastana ({shapes}) või tühjendage see, et kasutada mahuloendi baaskuupäeva"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import vormingust {format}: positsioon {ordinal}, väli {field} ei jõudnud kohale tervena (fail: {original}, mahutabel: {written})",
+      "fail_export": "Eksport vormingusse {format}: positsioon {ordinal}, väli {field} ei jõudnud väljundisse tervena (mahutabel: {original}, fail: {written})",
+      "suggestion": "Ava selle faili vahetusaruanne, paranda rida või allikas ja korda vahetust"
     }
   },
   "din276": {

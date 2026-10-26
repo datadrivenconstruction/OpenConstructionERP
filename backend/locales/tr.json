@@ -91,6 +91,44 @@
       "batch_progress": "Pozisyon {{current}} / {{total}}",
       "toast_applied_one": "{{count}} varyant seçildi",
       "toast_applied_other": "{{count}} varyant seçildi"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Aktarım raporu"
+      },
+      "column": {
+        "severity": "Önem derecesi",
+        "kind": "Kayıp türü",
+        "position": "Poz",
+        "field": "Alan",
+        "original": "Özgün değer",
+        "written": "Yazılan değer",
+        "count": "Adet",
+        "detail": "Ayrıntı"
+      },
+      "severity": {
+        "error": "Kritik",
+        "warning": "Uyarı",
+        "info": "Not"
+      },
+      "kind": {
+        "unsupported_element": "Öğe desteklenmiyor",
+        "truncated_text": "Metin kısaltıldı",
+        "altered_text": "Metin değiştirildi",
+        "rounded_value": "Değer yuvarlandı",
+        "value_out_of_range": "Değer aralık dışında",
+        "dropped_attribute": "Öznitelik atıldı",
+        "unmapped_unit": "Birim eşlenmedi",
+        "lost_hierarchy": "Hiyerarşi düzeyi kayboldu",
+        "markup_not_representable": "Ek oran gösterilemiyor",
+        "attachment_skipped": "Ek atlandı",
+        "changed_identifier": "Tanımlayıcı değişti",
+        "exceeds_limit": "Depolama sınırı aşıldı",
+        "rejected_row": "Satır reddedildi",
+        "skipped_row": "Satır atlandı",
+        "parser_warning": "Okuyucu uyarısı",
+        "roundtrip_mismatch": "Gidiş-dönüş uyuşmazlığı"
+      }
     }
   },
   "costs": {

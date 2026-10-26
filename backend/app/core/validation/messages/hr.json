@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Porezni datum '{tax_date}' nije valjan datum, pa se troškovnik oporezuje današnjom stopom umjesto stopom svojeg datuma",
       "suggestion": "Navedite porezni datum kao dan, mjesec, tromjesečje ili godinu ({shapes}) ili ga izbrišite za oporezivanje prema baznom datumu troškovnika"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Uvoz iz {format}: pozicija {ordinal}, {field} nije stigla neoštećena (datoteka: {original}, troškovnik: {written})",
+      "fail_export": "Izvoz u {format}: pozicija {ordinal}, {field} nije izašla neoštećena (troškovnik: {original}, datoteka: {written})",
+      "suggestion": "Otvorite izvješće o razmjeni ove datoteke, ispravite redak ili izvor i ponovite razmjenu"
     }
   },
   "din276": {

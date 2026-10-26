@@ -2416,8 +2416,9 @@ def create_app() -> FastAPI:
         # in X-Total-Count, and a BCF export returns how many topics went into
         # the archive in X-BCF-Topic-Count. A browser hides every response
         # header a server does not name here, so without this the count reaches
-        # a frontend served from another origin and cannot be read there.
-        expose_headers=["X-Total-Count", "X-BCF-Topic-Count"],
+        # a frontend served from another origin and cannot be read there. An
+        # interchange export names its exchange fidelity report the same way.
+        expose_headers=["X-Total-Count", "X-BCF-Topic-Count", "X-Exchange-Report-Id", "X-Exchange-Fidelity"],
     )
 
     # ── API Version header ──────────────────────────────────────────────

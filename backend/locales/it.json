@@ -91,6 +91,44 @@
       "batch_progress": "Voce {{current}} di {{total}}",
       "toast_applied_one": "{{count}} variante scelta",
       "toast_applied_other": "{{count}} varianti scelte"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Report di scambio"
+      },
+      "column": {
+        "severity": "Gravità",
+        "kind": "Tipo di perdita",
+        "position": "Voce",
+        "field": "Campo",
+        "original": "Valore originale",
+        "written": "Valore scritto",
+        "count": "Conteggio",
+        "detail": "Dettaglio"
+      },
+      "severity": {
+        "error": "Critico",
+        "warning": "Avviso",
+        "info": "Nota"
+      },
+      "kind": {
+        "unsupported_element": "Elemento non supportato",
+        "truncated_text": "Testo troncato",
+        "altered_text": "Testo alterato",
+        "rounded_value": "Valore arrotondato",
+        "value_out_of_range": "Valore fuori intervallo",
+        "dropped_attribute": "Attributo scartato",
+        "unmapped_unit": "Unità non associata",
+        "lost_hierarchy": "Livello gerarchico perso",
+        "markup_not_representable": "Maggiorazione non rappresentabile",
+        "attachment_skipped": "Allegato saltato",
+        "changed_identifier": "Identificatore modificato",
+        "exceeds_limit": "Supera il limite di archiviazione",
+        "rejected_row": "Riga rifiutata",
+        "skipped_row": "Riga saltata",
+        "parser_warning": "Avviso del lettore",
+        "roundtrip_mismatch": "Discrepanza nell'andata e ritorno"
+      }
     }
   },
   "costs": {

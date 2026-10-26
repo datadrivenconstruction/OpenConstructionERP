@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "A(z) „{tax_date}” adózási dátum nem érvényes dátum, ezért a költségvetés adója a mai, nem a saját időpontjának megfelelő kulccsal számítódik",
       "suggestion": "Az adózási dátumot nap, hónap, negyedév vagy év formájában adja meg ({shapes}), vagy törölje, hogy az adó a költségvetés bázisdátumához igazodjon"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import innen: {format}: {ordinal}. tétel, a(z) {field} nem érkezett meg sértetlenül (fájl: {original}, kiírás: {written})",
+      "fail_export": "Export ide: {format}: {ordinal}. tétel, a(z) {field} nem távozott sértetlenül (kiírás: {original}, fájl: {written})",
+      "suggestion": "Nyissa meg a fájl adatcsere-jelentését, javítsa a sort vagy a forrást, és ismételje meg az adatcserét"
     }
   },
   "din276": {

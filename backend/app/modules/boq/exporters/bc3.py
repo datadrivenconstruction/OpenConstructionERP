@@ -184,6 +184,7 @@ def build_bc3(
     project_name: str,
     project_currency: str,
     program_version: str = "",
+    trace: list[dict[str, Any]] | None = None,
 ) -> tuple[bytes, str]:
     """Build a FIEBDC-3 (BC3) budget document from a ``BOQWithSections``.
 
@@ -192,6 +193,10 @@ def build_bc3(
     booting the app. ``boq_data`` only needs ``name``, ``sections`` (each
     with ``ordinal``, ``description``, ``positions``) and ``positions``
     (ungrouped) - a duck-typed ``BOQWithSections``.
+
+    ``trace``, when given, receives one record per chapter and partida
+    stating the code, unit, summary and quantity actually written, for the
+    exchange fidelity report (``exchange_fidelity.analyze_bc3_export``).
 
     Returns ``(file_bytes, http_charset)``.
     """
@@ -253,6 +258,19 @@ def build_bc3(
 
         if qty_dec > 0:
             measures.append(f"~M|{parent_code}\\{code}|1|{qty}||")
+        if trace is not None:
+            trace.append(
+                {
+                    "type": "item",
+                    "id": str(getattr(pos, "id", "") or ""),
+                    "code": code,
+                    "unit": _clean_text(unit),
+                    "summary": _clean_text(description),
+                    "rate": rate,
+                    "qty": qty,
+                    "extended": _clean_text(extended) if extended.strip() else None,
+                }
+            )
 
         # A partida appears once in its parent; carry the measured quantity as
         # the decomposition yield so a receiving tool rolls up the same total.
@@ -263,6 +281,15 @@ def build_bc3(
         chap_code = _uniq(getattr(section, "ordinal", ""), "CAP")
         chap_desc = str(getattr(section, "description", "") or "")
         concepts.append(f"~C|{chap_code}||{_clean_text(chap_desc)}|0|||{_TYPE_CAPITULO}|")
+        if trace is not None:
+            trace.append(
+                {
+                    "type": "section",
+                    "id": str(getattr(section, "id", "") or ""),
+                    "code": chap_code,
+                    "summary": _clean_text(chap_desc),
+                }
+            )
         root_children.append(f"{chap_code}\\1\\1")
 
         chap_children: list[str] = []

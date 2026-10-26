@@ -91,6 +91,44 @@
       "batch_progress": "第 {{current}} 项，共 {{total}} 项",
       "toast_applied_one": "已选择 {{count}} 个方案",
       "toast_applied_other": "已选择 {{count}} 个方案"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "交换报告"
+      },
+      "column": {
+        "severity": "严重程度",
+        "kind": "损失类型",
+        "position": "清单项",
+        "field": "字段",
+        "original": "原始值",
+        "written": "写入值",
+        "count": "数量",
+        "detail": "详情"
+      },
+      "severity": {
+        "error": "严重",
+        "warning": "警告",
+        "info": "提示"
+      },
+      "kind": {
+        "unsupported_element": "不支持的元素",
+        "truncated_text": "文本已截断",
+        "altered_text": "文本已更改",
+        "rounded_value": "数值已舍入",
+        "value_out_of_range": "数值超出范围",
+        "dropped_attribute": "属性已丢弃",
+        "unmapped_unit": "单位未映射",
+        "lost_hierarchy": "层级丢失",
+        "markup_not_representable": "加成无法表示",
+        "attachment_skipped": "已跳过附件",
+        "changed_identifier": "标识符已更改",
+        "exceeds_limit": "超出存储上限",
+        "rejected_row": "行被拒绝",
+        "skipped_row": "行已跳过",
+        "parser_warning": "读取器警告",
+        "roundtrip_mismatch": "往返不一致"
+      }
     }
   },
   "costs": {

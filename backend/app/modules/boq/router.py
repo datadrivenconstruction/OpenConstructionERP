@@ -66,6 +66,7 @@ import tempfile
 import uuid
 import zipfile
 from collections.abc import Awaitable, Callable, Iterator, Mapping, Sequence
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
@@ -116,6 +117,8 @@ from app.modules.boq.copilot_schemas import (
     CopilotReviewRequest,
     CopilotReviewResponse,
 )
+from app.modules.boq.exchange_fidelity_router import exchange_fidelity_router
+from app.modules.boq.exchange_fidelity_service import with_exchange_fidelity
 from app.modules.boq.exchange_formats import ExchangeCatalogue, build_catalogue
 from app.modules.boq.gaeb_exchange_router import gaeb_exchange_router
 from app.modules.boq.importers.excel import (
@@ -245,6 +248,7 @@ router.include_router(resource_review_router)
 router.include_router(supplier_suggestion_router)
 router.include_router(change_review_router)
 router.include_router(gaeb_exchange_router)
+router.include_router(exchange_fidelity_router)
 _log = logging.getLogger(__name__)
 
 
@@ -3852,7 +3856,11 @@ async def _run_import_validation(
         report = await validation_engine.validate(
             data=await with_poz_catalogue_for_rule_sets(
                 session,
-                await with_project_context(session, boq_data.project_id, {"positions": positions_data}),
+                await with_project_context(
+                    session,
+                    boq_data.project_id,
+                    await with_exchange_fidelity(session, boq_id, {"positions": positions_data}),
+                ),
                 rule_sets,
             ),
             rule_sets=rule_sets,
@@ -4056,7 +4064,11 @@ async def validate_boq(
             await with_project_context(
                 session,
                 boq_data.project_id,
-                {"positions": positions_data, "markups": markups_data, **markup_context},
+                await with_exchange_fidelity(
+                    session,
+                    boq_id,
+                    {"positions": positions_data, "markups": markups_data, **markup_context},
+                ),
             ),
             rule_sets,
         ),
@@ -4750,6 +4762,28 @@ async def export_boq_csv(
     # IDOR guard: every BOQ read endpoint scopes to project owner/member;
     # exports must do the same before fetching any priced data.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    built = await _build_csv_export(service, boq_id, embed_markups)
+    return await _export_response(session, service, boq_id, built, _user_id)
+
+
+@dataclass(slots=True)
+class _BuiltExport:
+    """One export file built in memory, with what its fidelity report needs."""
+
+    content: bytes
+    filename: str
+    media_type: str
+    structured: Any
+    format_id: str
+    variant: str = ""
+    project_name: str = ""
+    project_id: uuid.UUID | None = None
+    trace: list[dict[str, Any]] | None = None
+    headers: dict[str, str] = field(default_factory=dict)
+
+
+async def _build_csv_export(service: BOQService, boq_id: uuid.UUID, embed_markups: bool | None) -> _BuiltExport:
+    """The CSV export of a bill, built in memory (route and fidelity check share it)."""
     # Use structured data to include markups in the grand total
     structured = await service.get_boq_structured_for_export(boq_id, embed_markups)
     # Issue #111 - freeze the project FX table into the exported artifact so
@@ -4761,16 +4795,55 @@ async def export_boq_csv(
     # a worker thread: on the event loop a large bill would hold up every other
     # request of the install until the last row is written.
     content = await asyncio.to_thread(_render_boq_csv, structured, base_ccy, fx_map)
-
-    filename = f"{structured.name}.csv"
-
-    return StreamingResponse(
-        iter([content]),
+    return _BuiltExport(
+        content=content.encode("utf-8"),
+        filename=f"{structured.name}.csv",
         media_type="text/csv; charset=utf-8",
-        headers={
-            "Content-Disposition": attachment_disposition(filename),
-        },
+        structured=structured,
+        format_id="csv",
+        project_id=structured.project_id,
     )
+
+
+async def _export_response(
+    session: Any,
+    service: BOQService,
+    boq_id: uuid.UUID,
+    built: _BuiltExport,
+    user_id: Any,
+) -> StreamingResponse:
+    """Stream an export and store its exchange fidelity report alongside.
+
+    The report never stands between the user and the file: an analysis or a
+    write that fails is logged and the download goes out without the headers.
+    """
+    from app.modules.boq.exchange_fidelity_service import analyze_export, record_report, report_headers
+
+    headers = {"Content-Disposition": attachment_disposition(built.filename), **built.headers}
+    try:
+        report = await analyze_export(
+            service,
+            boq_id,
+            built.structured,
+            format_id=built.format_id,
+            variant=built.variant,
+            project_name=built.project_name,
+            trace=built.trace,
+        )
+        row = await record_report(
+            session,
+            boq_id=boq_id,
+            report=report,
+            file_name=built.filename,
+            user_id=user_id,
+            project_id=built.project_id,
+        )
+        headers.update(report_headers(row, report))
+    except Exception:  # noqa: BLE001 - the file is what the user asked for
+        logger.warning(
+            "Exchange fidelity analysis failed for %s export of BOQ %s", built.format_id, boq_id, exc_info=True
+        )
+    return StreamingResponse(iter([built.content]), media_type=built.media_type, headers=headers)
 
 
 def _project_line(project: Any) -> str | None:
@@ -5279,6 +5352,14 @@ async def export_boq_excel(
     # IDOR guard: scope the export to the project owner/member, matching
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    built = await _build_excel_export(session, service, boq_id, embed_markups)
+    return await _export_response(session, service, boq_id, built, _user_id)
+
+
+async def _build_excel_export(
+    session: Any, service: BOQService, boq_id: uuid.UUID, embed_markups: bool | None
+) -> _BuiltExport:
+    """The Excel export of a bill, built in memory (route and fidelity check share it)."""
     from app.modules.boq.embedding import embed_enabled, embed_positions
 
     boq_data = await service.get_boq_with_positions(boq_id)
@@ -5322,20 +5403,18 @@ async def export_boq_excel(
         base_ccy=base_ccy,
         fx_map=fx_map,
     )
-
-    filename = f"{boq_data.name}.xlsx"
-
-    return StreamingResponse(
-        iter([xlsx]),
+    return _BuiltExport(
+        content=xlsx,
+        filename=f"{boq_data.name}.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": attachment_disposition(filename),
-            # The sheet's own text, the column headers and the project line, is
-            # written in English literals and the route takes no locale. Declaring
-            # it stops the Accept-Language middleware from labelling the workbook
-            # with the language the reader asked for.
-            "Content-Language": "en",
-        },
+        structured=structured_data,
+        format_id="excel",
+        project_id=boq_data.project_id,
+        # The sheet's own text, the column headers and the project line, is
+        # written in English literals and the route takes no locale. Declaring
+        # it stops the Accept-Language middleware from labelling the workbook
+        # with the language the reader asked for.
+        headers={"Content-Language": "en"},
     )
 
 
@@ -5619,11 +5698,24 @@ async def export_boq_gaeb(
     rebuilds the original dotted ordinal. ``@ID`` carries only an internal
     xs:ID handle (it is never used as the OZ).
     """
-    from app.modules.projects.repository import ProjectRepository
-
     # IDOR guard: scope the export to the project owner/member, matching
     # every other BOQ read endpoint.
     await _verify_boq_owner(session, boq_id, _user_id, payload)
+    built = await _build_gaeb_export(session, service, boq_id, gaeb_format, bid_type, embed_markups)
+    return await _export_response(session, service, boq_id, built, _user_id)
+
+
+async def _build_gaeb_export(
+    session: Any,
+    service: BOQService,
+    boq_id: uuid.UUID,
+    gaeb_format: str,
+    bid_type: str,
+    embed_markups: bool | None,
+) -> _BuiltExport:
+    """The GAEB DA XML export of a bill, built in memory with the writer's trace."""
+    from app.modules.projects.repository import ProjectRepository
+
     boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
 
     # Load project for label text + currency.
@@ -5635,6 +5727,7 @@ async def export_boq_gaeb(
     # Build the schema-valid document via the pure, unit-tested builder.
     # The builder walks every item of the bill and is pure CPU, so it runs in a
     # worker thread rather than holding up every other request on the loop.
+    trace: list[dict[str, Any]] = []
     xml_content = await asyncio.to_thread(
         build_gaeb_xml,
         boq_data,
@@ -5642,17 +5735,20 @@ async def export_boq_gaeb(
         project_currency=project_currency,
         gaeb_format=gaeb_format,
         bid_type=bid_type,
+        trace=trace,
     )
 
     ext = "X84" if gaeb_format == "x84" else "X83"
-    filename = f"{boq_data.name}.{ext}"
-
-    return StreamingResponse(
-        iter([xml_content]),
+    return _BuiltExport(
+        content=xml_content.encode("utf-8"),
+        filename=f"{boq_data.name}.{ext}",
         media_type="application/xml; charset=utf-8",
-        headers={
-            "Content-Disposition": attachment_disposition(filename),
-        },
+        structured=boq_data,
+        format_id="gaeb_xml",
+        variant=gaeb_format,
+        project_name=project_name,
+        project_id=boq_data.project_id,
+        trace=trace,
     )
 
 
@@ -5693,13 +5789,21 @@ async def export_boq_bc3(
     compatibility) and UTF-8 otherwise, declared honestly in the ``~V``
     record; the ``Content-Type`` charset matches.
     """
+    # IDOR guard: scope the export to the project owner/member, matching every
+    # other BOQ read endpoint.
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    built = await _build_bc3_export(session, service, boq_id, embed_markups)
+    return await _export_response(session, service, boq_id, built, _user_id)
+
+
+async def _build_bc3_export(
+    session: Any, service: BOQService, boq_id: uuid.UUID, embed_markups: bool | None
+) -> _BuiltExport:
+    """The BC3 export of a bill, built in memory with the writer's trace."""
     from app.config import get_settings
     from app.modules.boq.exporters.bc3 import build_bc3
     from app.modules.projects.repository import ProjectRepository
 
-    # IDOR guard: scope the export to the project owner/member, matching every
-    # other BOQ read endpoint.
-    await _verify_boq_owner(session, boq_id, _user_id, payload)
     boq_data = await service.get_boq_structured_for_export(boq_id, embed_markups)
 
     # Load project for label text + currency.
@@ -5710,22 +5814,24 @@ async def export_boq_bc3(
 
     # The builder walks every line of the bill and is pure CPU, so it runs in a
     # worker thread rather than holding up every other request on the loop.
+    trace: list[dict[str, Any]] = []
     data, http_charset = await asyncio.to_thread(
         build_bc3,
         boq_data,
         project_name=project_name,
         project_currency=project_currency,
         program_version=getattr(get_settings(), "app_version", "") or "",
+        trace=trace,
     )
-
-    filename = f"{boq_data.name}.bc3"
-
-    return StreamingResponse(
-        iter([data]),
+    return _BuiltExport(
+        content=data,
+        filename=f"{boq_data.name}.bc3",
         media_type=f"text/plain; charset={http_charset}",
-        headers={
-            "Content-Disposition": attachment_disposition(filename),
-        },
+        structured=boq_data,
+        format_id="bc3",
+        project_name=project_name,
+        project_id=boq_data.project_id,
+        trace=trace,
     )
 
 
@@ -5736,6 +5842,7 @@ def build_gaeb_xml(
     project_currency: str,
     gaeb_format: str,
     bid_type: str = "main",
+    trace: list[dict[str, Any]] | None = None,
 ) -> str:
     """Build a schema-valid GAEB DA XML 3.3 document string.
 
@@ -5750,6 +5857,10 @@ def build_gaeb_xml(
     flagged with ``alt_parent_ref`` / ``alt_markup_reason`` metadata get their
     rationale written as a ``BidComm`` (Bieter Kommentar), the schema element
     the X84 Item provides for bidder-side remarks.
+
+    ``trace``, when given, receives one record per bill name, item and markup
+    stating what was actually written, for the exchange fidelity report
+    (``exchange_fidelity.analyze_gaeb_export``).
     """
     import xml.etree.ElementTree as ET
     from datetime import date
@@ -5834,6 +5945,15 @@ def build_gaeb_xml(
     # X83 additionally allows LblBoQ, Date, OutlCompl. Emit the phase subset.
     boq_info = ET.SubElement(boq_el, "BoQInfo")
     ET.SubElement(boq_info, "Name").text = (boq_data.name or "")[:20]
+    if trace is not None:
+        trace.append(
+            {
+                "type": "boq",
+                "name": (boq_data.name or "")[:20],
+                "project_name": (project_name or "")[:60],
+                "priced": is_priced,
+            }
+        )
     if not is_priced:
         ET.SubElement(boq_info, "LblBoQ").text = (project_name or boq_data.name or "")[:60]
         ET.SubElement(boq_info, "Date").text = today
@@ -6083,7 +6203,7 @@ def build_gaeb_xml(
             lines.append(reason)
         return lines
 
-    def _emit_item(parent_list: ET.Element, pos: Any, parent_ordinal: str) -> None:
+    def _emit_item(parent_list: ET.Element, pos: Any, parent_ordinal: str, ctgy_part: str = "") -> None:
         """Write one schema-valid ``Item`` into an ``Itemlist``.
 
         Phase-correct element set:
@@ -6104,11 +6224,26 @@ def build_gaeb_xml(
         )
         qty_s, up_s, it_s = _gaeb_line_prices(pos.quantity, pos.unit_rate, pos.total)
         ET.SubElement(item, "Qty").text = qty_s
+        qu_written: str | None = None
         if is_priced:
             ET.SubElement(item, "UP").text = up_s
             ET.SubElement(item, "IT").text = it_s
         elif not _unit_was_invented(pos):
-            ET.SubElement(item, "QU").text = _gaeb_unit(pos.unit)[:4]
+            qu_written = _gaeb_unit(pos.unit)[:4]
+            ET.SubElement(item, "QU").text = qu_written
+        if trace is not None:
+            trace.append(
+                {
+                    "type": "item",
+                    "id": str(getattr(pos, "id", "") or ""),
+                    "oz": ".".join(p for p in (ctgy_part, item.get("RNoPart") or "") if p),
+                    "qty": qty_s,
+                    "up": up_s if is_priced else None,
+                    "it": it_s if is_priced else None,
+                    "qu": qu_written,
+                    "text_written": not is_priced,
+                }
+            )
         # AI Act art. 50(2): a row a model produced carries a parsable
         # ``[AI-GENERATED source=...]`` line. X83 has room for it in the long
         # text; X84 restricts DetailTxt, so it goes into the optional BidComm.
@@ -6157,6 +6292,17 @@ def build_gaeb_xml(
             )
         ET.SubElement(mk, "IT").text = _fmt_price(getattr(m, "amount", 0))
         _set_description(mk, str(getattr(m, "name", "") or "Markup"))
+        if trace is not None:
+            pct_el = mk.find("Markup")
+            trace.append(
+                {
+                    "type": "markup",
+                    "id": str(getattr(m, "id", "") or ""),
+                    "name": str(getattr(m, "name", "") or ""),
+                    "pct": pct_el.text if pct_el is not None else None,
+                    "it": _fmt_price(getattr(m, "amount", 0)),
+                }
+            )
 
     def _markup_base_for(m: Any, running_subtotal: Decimal) -> Decimal:
         """Resolve a markup's real base, mirroring ``_calculate_markup_amounts``.
@@ -6203,7 +6349,7 @@ def build_gaeb_xml(
             if section.positions:
                 itemlist = ET.SubElement(ctgy_body, "Itemlist")
                 for pos in section.positions:
-                    _emit_item(itemlist, pos, sec_ordinal)
+                    _emit_item(itemlist, pos, sec_ordinal, ctgy.get("RNoPart") or "")
             if is_priced:
                 subtotal = _to_dec(getattr(section, "subtotal", None))
                 if subtotal is None:
@@ -6222,7 +6368,7 @@ def build_gaeb_xml(
             ung_body = ET.SubElement(ung, "BoQBody")
             ung_list = ET.SubElement(ung_body, "Itemlist")
             for pos in boq_data.positions:
-                _emit_item(ung_list, pos, "")
+                _emit_item(ung_list, pos, "", "U")
             if is_priced:
                 ung_sub = sum(
                     (_to_dec(getattr(p, "total", 0)) or Decimal("0") for p in boq_data.positions),
@@ -7979,6 +8125,19 @@ async def _run_native_import(
                 exc_info=True,
             )
 
+    # What the file held and the bill did not take, stored with the import so
+    # the validation below (rule boq_quality.exchange_fidelity) can see it.
+    fidelity = await _record_import_fidelity(
+        boq_id,
+        chosen.format_id,
+        imported_boq,
+        content,
+        file_name=file_name,
+        persistence_errors=persistence_errors,
+        actor_id=actor_id,
+        service=service,
+    )
+
     # Run inline validation using the importer's declared rule packs
     # (philosophy: validation is a first-class citizen of every import).
     validation_report = None
@@ -8015,6 +8174,7 @@ async def _run_native_import(
         "format_id": chosen.format_id,
         "currency": imported_boq.currency,
         "validation_report": validation_report,
+        "fidelity": fidelity,
         "metadata": imported_boq.metadata,
         "method": "native",
         "summary": {
@@ -8028,6 +8188,52 @@ async def _run_native_import(
             "round_trip": bool(apply_summary["round_trip"]),
         },
     }
+
+
+async def _record_import_fidelity(
+    boq_id: uuid.UUID,
+    format_id: str,
+    imported_boq: "ImportedBOQ",
+    content: bytes,
+    *,
+    file_name: str,
+    persistence_errors: list[dict[str, Any]],
+    actor_id: uuid.UUID | None,
+    service: BOQService,
+) -> dict[str, Any] | None:
+    """Build and store the import's fidelity report; the report as returned, or ``None``.
+
+    Rows the bill refused on write are added to what the reader itself left
+    behind. Never raises: the positions are already committed.
+    """
+    from app.modules.boq.exchange_fidelity import analyze_import
+    from app.modules.boq.exchange_fidelity_service import record_report
+
+    try:
+        report = analyze_import(format_id, imported_boq, content)
+        for err in persistence_errors:
+            report.add(
+                "error",
+                "rejected_row",
+                "row",
+                position_ref=str(err.get("ordinal") or ""),
+                detail=str(err.get("error") or ""),
+            )
+        project_id = await service.position_repo.project_id_for_boq(boq_id)
+        row = await record_report(
+            service.session,
+            boq_id=boq_id,
+            report=report,
+            file_name=file_name,
+            user_id=actor_id,
+            project_id=project_id,
+        )
+        out = report.to_dict()
+        out["id"] = str(row.id) if row is not None else None
+        return out
+    except Exception:  # noqa: BLE001 - diagnostics, never fail an import
+        logger.warning("Import fidelity report failed for BOQ %s", boq_id, exc_info=True)
+        return None
 
 
 # ── Import preview endpoint ─────────────────────────────────────────────────
@@ -8164,7 +8370,15 @@ async def import_preview(
         truncated=truncated,
     )
 
-    return response.model_dump()
+    from app.modules.boq.exchange_fidelity import analyze_import
+
+    out = response.model_dump()
+    try:
+        out["fidelity"] = analyze_import(chosen.format_id, imported_boq, content).to_dict()
+    except Exception:  # noqa: BLE001 - the preview stands without the report
+        logger.warning("Import preview fidelity report failed for %s", file_name, exc_info=True)
+        out["fidelity"] = None
+    return out
 
 
 def _read_column_mapping(raw: str | None) -> dict[int, str] | None:

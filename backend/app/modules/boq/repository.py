@@ -23,6 +23,7 @@ from app.modules.boq.activity_text import READ_ONLY_ACTIVITY_ACTIONS
 from app.modules.boq.models import (
     BOQ,
     BOQActivityLog,
+    BOQExchangeReport,
     BOQMarkup,
     Position,
     QuantityLink,
@@ -985,6 +986,67 @@ class ActivityLogRepository:
         entries = list(result.scalars().all())
 
         return entries, total
+
+
+class ExchangeReportRepository:
+    """Data access for the exchange fidelity reports of a bill."""
+
+    def __init__(self, session: AsyncSession) -> None:
+        self.session = session
+
+    async def create(self, report: BOQExchangeReport) -> BOQExchangeReport:
+        """Insert one report."""
+        self.session.add(report)
+        await self.session.flush()
+        return report
+
+    async def get(self, boq_id: uuid.UUID, report_id: uuid.UUID) -> BOQExchangeReport | None:
+        """One report of ``boq_id``; ``None`` when it belongs to another bill or does not exist."""
+        stmt = select(BOQExchangeReport).where(BOQExchangeReport.id == report_id, BOQExchangeReport.boq_id == boq_id)
+        return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def list_for_boq(
+        self,
+        boq_id: uuid.UUID,
+        *,
+        direction: str | None = None,
+        limit: int = 50,
+    ) -> list[Row]:
+        """Newest first, without the item lists (the register shows counts only)."""
+        stmt = select(
+            BOQExchangeReport.id,
+            BOQExchangeReport.direction,
+            BOQExchangeReport.format_id,
+            BOQExchangeReport.variant,
+            BOQExchangeReport.file_name,
+            BOQExchangeReport.roundtrip,
+            BOQExchangeReport.is_check,
+            BOQExchangeReport.summary,
+            BOQExchangeReport.created_at,
+            BOQExchangeReport.created_by,
+        ).where(BOQExchangeReport.boq_id == boq_id)
+        if direction:
+            stmt = stmt.where(BOQExchangeReport.direction == direction)
+        stmt = stmt.order_by(BOQExchangeReport.created_at.desc()).limit(limit)
+        return list((await self.session.execute(stmt)).all())
+
+    async def latest_per_format(self, boq_id: uuid.UUID, *, limit: int = 20) -> list[BOQExchangeReport]:
+        """The newest real (not check-only) report per direction and format."""
+        stmt = (
+            select(BOQExchangeReport)
+            .where(BOQExchangeReport.boq_id == boq_id, BOQExchangeReport.is_check.is_(False))
+            .order_by(BOQExchangeReport.created_at.desc())
+            .limit(limit)
+        )
+        seen: set[tuple[str, str]] = set()
+        latest: list[BOQExchangeReport] = []
+        for report in (await self.session.execute(stmt)).scalars():
+            key = (report.direction, report.format_id)
+            if key in seen:
+                continue
+            seen.add(key)
+            latest.append(report)
+        return latest
 
 
 class QuantityLinkRepository:

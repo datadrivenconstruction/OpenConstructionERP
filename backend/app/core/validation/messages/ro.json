@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Data fiscală '{tax_date}' nu este o dată validă, deci devizul este taxat la cota de azi în loc de cota aferentă datei sale",
       "suggestion": "Indicați data fiscală ca zi, lună, trimestru sau an ({shapes}), sau ștergeți-o pentru a folosi data de bază a devizului"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import din {format}: poziția {ordinal}, {field} nu a ajuns intact (fișier: {original}, deviz: {written})",
+      "fail_export": "Export în {format}: poziția {ordinal}, {field} nu a plecat intact (deviz: {original}, fișier: {written})",
+      "suggestion": "Deschideți raportul de schimb al acestui fișier, corectați linia sau sursa și repetați schimbul"
     }
   },
   "din276": {

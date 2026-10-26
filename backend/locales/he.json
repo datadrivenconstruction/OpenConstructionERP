@@ -91,6 +91,44 @@
       "batch_progress": "פריט {{current}} מתוך {{total}}",
       "toast_applied_one": "{{count}} וריאנט נבחר",
       "toast_applied_other": "{{count}} וריאנטים נבחרו"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "דוח החלפה"
+      },
+      "column": {
+        "severity": "חומרה",
+        "kind": "סוג האובדן",
+        "position": "סעיף",
+        "field": "שדה",
+        "original": "ערך מקורי",
+        "written": "ערך שנכתב",
+        "count": "מספר",
+        "detail": "פרטים"
+      },
+      "severity": {
+        "error": "קריטי",
+        "warning": "אזהרה",
+        "info": "הערה"
+      },
+      "kind": {
+        "unsupported_element": "רכיב לא נתמך",
+        "truncated_text": "טקסט קוצר",
+        "altered_text": "טקסט שונה",
+        "rounded_value": "ערך עוגל",
+        "value_out_of_range": "ערך מחוץ לטווח",
+        "dropped_attribute": "מאפיין נזנח",
+        "unmapped_unit": "יחידה לא ממופה",
+        "lost_hierarchy": "רמת היררכיה אבדה",
+        "markup_not_representable": "תוספת שלא ניתן לייצג",
+        "attachment_skipped": "קובץ מצורף דולג",
+        "changed_identifier": "מזהה השתנה",
+        "exceeds_limit": "חריגה ממגבלת האחסון",
+        "rejected_row": "שורה נדחתה",
+        "skipped_row": "שורה דולגה",
+        "parser_warning": "אזהרת קורא",
+        "roundtrip_mismatch": "סטייה בהלוך-חזור"
+      }
     }
   },
   "costs": {

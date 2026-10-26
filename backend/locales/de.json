@@ -91,6 +91,44 @@
       "batch_progress": "Artikel {{current}} von {{total}}",
       "toast_applied_one": "{{count}} Variante übernommen",
       "toast_applied_other": "{{count}} Varianten übernommen"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Austauschbericht"
+      },
+      "column": {
+        "severity": "Schweregrad",
+        "kind": "Art des Verlusts",
+        "position": "Position",
+        "field": "Feld",
+        "original": "Originalwert",
+        "written": "Geschriebener Wert",
+        "count": "Anzahl",
+        "detail": "Detail"
+      },
+      "severity": {
+        "error": "Kritisch",
+        "warning": "Warnung",
+        "info": "Hinweis"
+      },
+      "kind": {
+        "unsupported_element": "Element nicht unterstützt",
+        "truncated_text": "Text gekürzt",
+        "altered_text": "Text verändert",
+        "rounded_value": "Wert gerundet",
+        "value_out_of_range": "Wert außerhalb des Bereichs",
+        "dropped_attribute": "Attribut verworfen",
+        "unmapped_unit": "Einheit nicht zugeordnet",
+        "lost_hierarchy": "Hierarchieebene verloren",
+        "markup_not_representable": "Zuschlag nicht darstellbar",
+        "attachment_skipped": "Anhang übersprungen",
+        "changed_identifier": "Kennung geändert",
+        "exceeds_limit": "Speichergrenze überschritten",
+        "rejected_row": "Zeile abgelehnt",
+        "skipped_row": "Zeile übersprungen",
+        "parser_warning": "Leser-Warnung",
+        "roundtrip_mismatch": "Round-Trip-Abweichung"
+      }
     }
   },
   "costs": {

@@ -91,6 +91,44 @@
       "batch_progress": "Item {{current}} sa {{total}}",
       "toast_applied_one": "{{count}} variant ang napili",
       "toast_applied_other": "{{count}} variant ang napili"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Ulat ng palitan"
+      },
+      "column": {
+        "severity": "Kalubhaan",
+        "kind": "Uri ng pagkawala",
+        "position": "Item",
+        "field": "Field",
+        "original": "Orihinal na halaga",
+        "written": "Naisulat na halaga",
+        "count": "Bilang",
+        "detail": "Detalye"
+      },
+      "severity": {
+        "error": "Kritikal",
+        "warning": "Babala",
+        "info": "Paalala"
+      },
+      "kind": {
+        "unsupported_element": "Hindi sinusuportahang elemento",
+        "truncated_text": "Pinaikli ang teksto",
+        "altered_text": "Binago ang teksto",
+        "rounded_value": "Binilog ang halaga",
+        "value_out_of_range": "Halagang wala sa saklaw",
+        "dropped_attribute": "Tinanggal na attribute",
+        "unmapped_unit": "Hindi naitapat na yunit",
+        "lost_hierarchy": "Nawalang antas ng hierarchy",
+        "markup_not_representable": "Hindi maipakitang markup",
+        "attachment_skipped": "Nilaktawang attachment",
+        "changed_identifier": "Nagbago ang identifier",
+        "exceeds_limit": "Lumampas sa limitasyon ng imbakan",
+        "rejected_row": "Tinanggihang hilera",
+        "skipped_row": "Nilaktawang hilera",
+        "parser_warning": "Babala ng reader",
+        "roundtrip_mismatch": "Paglihis sa round trip"
+      }
     }
   },
   "costs": {

@@ -91,6 +91,44 @@
       "batch_progress": "{{total}} tadan {{current}}-pozitsiya",
       "toast_applied_one": "{{count}} ta variant tanlandi",
       "toast_applied_other": "{{count}} ta variant tanlandi"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Almashinuv hisoboti"
+      },
+      "column": {
+        "severity": "Jiddiylik darajasi",
+        "kind": "Yo‘qotish turi",
+        "position": "Pozitsiya",
+        "field": "Maydon",
+        "original": "Asl qiymat",
+        "written": "Yozilgan qiymat",
+        "count": "Soni",
+        "detail": "Tafsilot"
+      },
+      "severity": {
+        "error": "Jiddiy",
+        "warning": "Ogohlantirish",
+        "info": "Izoh"
+      },
+      "kind": {
+        "unsupported_element": "Element qo‘llab-quvvatlanmaydi",
+        "truncated_text": "Matn qisqartirildi",
+        "altered_text": "Matn o‘zgartirildi",
+        "rounded_value": "Qiymat yaxlitlandi",
+        "value_out_of_range": "Qiymat diapazondan tashqarida",
+        "dropped_attribute": "Atribut tashlab yuborildi",
+        "unmapped_unit": "Birlik moslanmadi",
+        "lost_hierarchy": "Ierarxiya darajasi yo‘qoldi",
+        "markup_not_representable": "Ustamani aks ettirib bo‘lmaydi",
+        "attachment_skipped": "Biriktirma o‘tkazib yuborildi",
+        "changed_identifier": "Identifikator o‘zgartirildi",
+        "exceeds_limit": "Saqlash chegarasidan oshdi",
+        "rejected_row": "Qator rad etildi",
+        "skipped_row": "Qator o‘tkazib yuborildi",
+        "parser_warning": "O‘qish ogohlantirishi",
+        "roundtrip_mismatch": "Borib-qaytishdagi nomuvofiqlik"
+      }
     }
   },
   "costs": {

@@ -91,6 +91,44 @@
       "batch_progress": "Articolul {{current}} din {{total}}",
       "toast_applied_one": "{{count}} variantă aleasă",
       "toast_applied_other": "{{count}} variante alese"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Raport de schimb"
+      },
+      "column": {
+        "severity": "Gravitate",
+        "kind": "Tipul pierderii",
+        "position": "Poziție",
+        "field": "Câmp",
+        "original": "Valoare originală",
+        "written": "Valoare scrisă",
+        "count": "Număr",
+        "detail": "Detaliu"
+      },
+      "severity": {
+        "error": "Critic",
+        "warning": "Avertisment",
+        "info": "Notă"
+      },
+      "kind": {
+        "unsupported_element": "Element neacceptat",
+        "truncated_text": "Text trunchiat",
+        "altered_text": "Text modificat",
+        "rounded_value": "Valoare rotunjită",
+        "value_out_of_range": "Valoare în afara intervalului",
+        "dropped_attribute": "Atribut eliminat",
+        "unmapped_unit": "Unitate nemapată",
+        "lost_hierarchy": "Nivel ierarhic pierdut",
+        "markup_not_representable": "Majorare nereprezentabilă",
+        "attachment_skipped": "Atașament omis",
+        "changed_identifier": "Identificator schimbat",
+        "exceeds_limit": "Limita de stocare depășită",
+        "rejected_row": "Rând respins",
+        "skipped_row": "Rând omis",
+        "parser_warning": "Avertisment de la cititor",
+        "roundtrip_mismatch": "Neconcordanță la dus-întors"
+      }
     }
   },
   "costs": {

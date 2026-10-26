@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Tanggal pajak '{tax_date}' bukan tanggal yang valid, sehingga daftar kuantitas dikenai tarif pajak hari ini, bukan tarif pada tanggalnya",
       "suggestion": "Nyatakan tanggal pajak sebagai hari, bulan, triwulan, atau tahun ({shapes}), atau kosongkan untuk memakai tanggal dasar daftar kuantitas"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Impor dari {format}: pos {ordinal}, {field} tidak tiba utuh (berkas: {original}, daftar kuantitas: {written})",
+      "fail_export": "Ekspor ke {format}: pos {ordinal}, {field} tidak keluar utuh (daftar kuantitas: {original}, berkas: {written})",
+      "suggestion": "Buka laporan pertukaran berkas ini, perbaiki barisnya atau sumbernya, lalu ulangi pertukaran"
     }
   },
   "din276": {

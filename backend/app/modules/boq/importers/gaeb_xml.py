@@ -79,6 +79,14 @@ _MAX_DESCRIPTION_CHARS = 5000
 # the stored row.
 _MAX_LONG_TEXT_CHARS = 20000
 
+# Item children this reader turns into position fields. Any other child an
+# Item carries is reported on the exchange fidelity report, never dropped
+# silently. Price components are reported as a dropped attribute because they
+# hold the line's cost build-up; everything else as an unread element.
+_READ_ITEM_TAGS: frozenset[str] = frozenset({"Qty", "QU", "UP", "IT", "Description", "Provis"})
+_PRICE_COMPONENT_TAGS: frozenset[str] = frozenset({"UPComps", "UPBkdn"})
+_ATTACHMENT_TAGS: frozenset[str] = frozenset({"Attachment", "Image", "Picture"})
+
 # DP (Datenaustauschphase) number → DA-kind token. The previous map only
 # covered 81/83/84/86 and returned "x" for DP80/82/85 (FA-GAEB-005, the
 # X86/DP80 file detected as "x"). Cover the full DP80..DP86 range.
@@ -526,6 +534,12 @@ class GAEBXMLImporter:
         markup_items: list[dict[str, str]] = []
         unmapped_money = 0
         derived_qty = 0
+        # tag -> [count, first OZ] for elements this reader leaves behind.
+        unread: dict[tuple[str, str], list[Any]] = {}
+
+        def _note_unread(kind: str, tag: str, oz: str) -> None:
+            entry = unread.setdefault((kind, tag), [0, oz])
+            entry[0] += 1
 
         def _emit_item(item: ET.Element, rno_chain: list[str], section_oz: str) -> None:
             nonlocal unmapped_money, derived_qty
@@ -545,7 +559,27 @@ class GAEBXMLImporter:
             up_dec = _to_decimal(_text_of(item, "UP"))
             it_dec = _to_decimal(_text_of(item, "IT"))
 
-            description = _extract_description(item)[:_MAX_DESCRIPTION_CHARS]
+            full_description = _extract_description(item)
+            description = full_description[:_MAX_DESCRIPTION_CHARS]
+            if len(full_description) > _MAX_DESCRIPTION_CHARS:
+                result.fidelity.append(
+                    {
+                        "severity": "warning",
+                        "kind": "truncated_text",
+                        "field": "description",
+                        "position_ref": ordinal,
+                        "original": f"{len(full_description)} chars",
+                        "written": f"{_MAX_DESCRIPTION_CHARS} chars",
+                        "params": {"limit": _MAX_DESCRIPTION_CHARS},
+                    }
+                )
+            for child in item:
+                tag = _local(child.tag)
+                if tag in _READ_ITEM_TAGS:
+                    continue
+                _note_unread(
+                    "dropped_attribute" if tag in _PRICE_COMPONENT_TAGS else "unsupported_element", tag, ordinal
+                )
 
             # ── Money reconstruction ──────────────────────────────────────
             # X83/X81 carry Qty(+optionally UP). X84/X86 carry UP and IT but
@@ -639,7 +673,20 @@ class GAEBXMLImporter:
                 metadata["gaeb_it"] = str(it_dec)
             if rno_index:
                 metadata["gaeb_rno_index"] = rno_index
-            long_text = _extract_long_text(item)[:_MAX_LONG_TEXT_CHARS]
+            full_long_text = _extract_long_text(item)
+            long_text = full_long_text[:_MAX_LONG_TEXT_CHARS]
+            if len(full_long_text) > _MAX_LONG_TEXT_CHARS:
+                result.fidelity.append(
+                    {
+                        "severity": "warning",
+                        "kind": "truncated_text",
+                        "field": "long_text",
+                        "position_ref": ordinal,
+                        "original": f"{len(full_long_text)} chars",
+                        "written": f"{_MAX_LONG_TEXT_CHARS} chars",
+                        "params": {"limit": _MAX_LONG_TEXT_CHARS},
+                    }
+                )
             if long_text and long_text != description:
                 metadata["gaeb_long_text"] = long_text
             descr_txc = _extract_descr_txc(item)
@@ -725,6 +772,8 @@ class GAEBXMLImporter:
                             _emit_item(entry, rno_chain, section_oz)
                         elif etag == "MarkupItem":
                             _emit_markup(entry, rno_chain)
+                        else:
+                            _note_unread("unsupported_element", etag, section_oz)
                 elif tag in ("Item",):
                     _emit_item(child, rno_chain, section_oz)
                 elif tag == "MarkupItem":
@@ -733,6 +782,23 @@ class GAEBXMLImporter:
                     _walk(child, rno_chain, section_oz)
 
         _walk(top_body, [], "")
+
+        attachments = sum(1 for el in root.iter() if _local(el.tag) in _ATTACHMENT_TAGS)
+        if attachments:
+            unread[("attachment_skipped", "Attachment")] = [attachments, ""]
+        for (kind, tag), (count, first_oz) in unread.items():
+            result.fidelity.append(
+                {
+                    "severity": "info" if kind == "unsupported_element" else "warning",
+                    "kind": kind,
+                    "field": tag,
+                    "position_ref": first_oz,
+                    "original": tag,
+                    "written": None,
+                    "count": count,
+                    "params": {"tag": tag},
+                }
+            )
 
         if unmapped_money:
             result.warnings.append(

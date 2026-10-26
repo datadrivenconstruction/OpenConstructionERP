@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "La date fiscale « {tax_date} » n'est pas une date valide ; le bordereau utilise donc le taux fiscal d'aujourd'hui plutôt que celui de sa date fiscale",
       "suggestion": "Indiquez la date fiscale sous forme de jour, mois, trimestre ou année ({shapes}), ou effacez-la pour appliquer la fiscalité à la date de référence du bordereau"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import depuis {format} : le poste {ordinal}, {field} n'est pas arrivé intact (fichier : {original}, métré : {written})",
+      "fail_export": "Export vers {format} : le poste {ordinal}, {field} n'est pas parti intact (métré : {original}, fichier : {written})",
+      "suggestion": "Ouvrez le rapport d'échange de ce fichier, corrigez la ligne ou la source, puis recommencez l'échange"
     }
   },
   "din276": {

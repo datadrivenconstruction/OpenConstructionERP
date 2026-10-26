@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "A data fiscal «{tax_date}» não é uma data válida; por isso, a planilha utiliza a alíquota de hoje em vez da alíquota da sua data fiscal",
       "suggestion": "Informe a data fiscal como dia, mês, trimestre ou ano ({shapes}), ou remova-a para aplicar a tributação da data-base da planilha"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Importação de {format}: item {ordinal}, {field} não chegou intacto (arquivo: {original}, planilha: {written})",
+      "fail_export": "Exportação para {format}: item {ordinal}, {field} não saiu intacto (planilha: {original}, arquivo: {written})",
+      "suggestion": "Abra o relatório de intercâmbio deste arquivo, corrija a linha ou a origem e repita o intercâmbio"
     }
   },
   "din276": {

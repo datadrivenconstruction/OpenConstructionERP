@@ -91,6 +91,44 @@
       "batch_progress": "Post {{current}} av {{total}}",
       "toast_applied_one": "{{count}} variant vald",
       "toast_applied_other": "{{count}} varianter valda"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Utbytesrapport"
+      },
+      "column": {
+        "severity": "Allvarlighet",
+        "kind": "Typ av förlust",
+        "position": "Post",
+        "field": "Fält",
+        "original": "Originalvärde",
+        "written": "Skrivet värde",
+        "count": "Antal",
+        "detail": "Detalj"
+      },
+      "severity": {
+        "error": "Kritisk",
+        "warning": "Varning",
+        "info": "Anmärkning"
+      },
+      "kind": {
+        "unsupported_element": "Elementet stöds inte",
+        "truncated_text": "Text avkortad",
+        "altered_text": "Text ändrad",
+        "rounded_value": "Värde avrundat",
+        "value_out_of_range": "Värde utanför intervallet",
+        "dropped_attribute": "Attribut borttaget",
+        "unmapped_unit": "Enhet ej mappad",
+        "lost_hierarchy": "Hierarkinivå förlorad",
+        "markup_not_representable": "Påslag kan inte återges",
+        "attachment_skipped": "Bilaga hoppades över",
+        "changed_identifier": "Identifierare ändrad",
+        "exceeds_limit": "Lagringsgränsen överskriden",
+        "rejected_row": "Rad avvisad",
+        "skipped_row": "Rad överhoppad",
+        "parser_warning": "Läsarvarning",
+        "roundtrip_mismatch": "Avvikelse vid tur och retur"
+      }
     }
   },
   "costs": {

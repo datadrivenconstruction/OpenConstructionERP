@@ -91,6 +91,44 @@
       "batch_progress": "Kirje {{current}} / {{total}}",
       "toast_applied_one": "{{count}} variant valitud",
       "toast_applied_other": "{{count}} varianti valitud"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Vahetusaruanne"
+      },
+      "column": {
+        "severity": "Tõsidus",
+        "kind": "Kao liik",
+        "position": "Positsioon",
+        "field": "Väli",
+        "original": "Algne väärtus",
+        "written": "Kirjutatud väärtus",
+        "count": "Arv",
+        "detail": "Üksikasjad"
+      },
+      "severity": {
+        "error": "Kriitiline",
+        "warning": "Hoiatus",
+        "info": "Märkus"
+      },
+      "kind": {
+        "unsupported_element": "Toetamata element",
+        "truncated_text": "Tekst kärbitud",
+        "altered_text": "Tekst muudetud",
+        "rounded_value": "Väärtus ümardatud",
+        "value_out_of_range": "Väärtus väljaspool vahemikku",
+        "dropped_attribute": "Atribuut kõrvale jäetud",
+        "unmapped_unit": "Ühik sidumata",
+        "lost_hierarchy": "Hierarhiatase kadus",
+        "markup_not_representable": "Juurdehindlust ei saa kujutada",
+        "attachment_skipped": "Manus vahele jäetud",
+        "changed_identifier": "Tunnus muutus",
+        "exceeds_limit": "Mälupiir ületatud",
+        "rejected_row": "Rida tagasi lükatud",
+        "skipped_row": "Rida vahele jäetud",
+        "parser_warning": "Lugeja hoiatus",
+        "roundtrip_mismatch": "Edasi-tagasi kontrolli kõrvalekalle"
+      }
     }
   },
   "costs": {

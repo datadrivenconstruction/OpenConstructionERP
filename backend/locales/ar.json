@@ -91,6 +91,44 @@
       "batch_progress": "العنصر {{current}} من {{total}}",
       "toast_applied_one": "تم اختيار بديل واحد",
       "toast_applied_other": "تم اختيار {{count}} بديل"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "تقرير التبادل"
+      },
+      "column": {
+        "severity": "الخطورة",
+        "kind": "نوع الفقدان",
+        "position": "البند",
+        "field": "الحقل",
+        "original": "القيمة الأصلية",
+        "written": "القيمة المكتوبة",
+        "count": "العدد",
+        "detail": "التفاصيل"
+      },
+      "severity": {
+        "error": "حرج",
+        "warning": "تحذير",
+        "info": "ملاحظة"
+      },
+      "kind": {
+        "unsupported_element": "عنصر غير مدعوم",
+        "truncated_text": "نص مقتطع",
+        "altered_text": "نص معدّل",
+        "rounded_value": "قيمة مقربة",
+        "value_out_of_range": "قيمة خارج النطاق",
+        "dropped_attribute": "سمة محذوفة",
+        "unmapped_unit": "وحدة غير مطابقة",
+        "lost_hierarchy": "مستوى هرمي مفقود",
+        "markup_not_representable": "علاوة غير قابلة للتمثيل",
+        "attachment_skipped": "مرفق متجاهل",
+        "changed_identifier": "معرّف متغير",
+        "exceeds_limit": "تجاوز حد التخزين",
+        "rejected_row": "صف مرفوض",
+        "skipped_row": "صف متجاهل",
+        "parser_warning": "تحذير القارئ",
+        "roundtrip_mismatch": "اختلاف في الذهاب والإياب"
+      }
     }
   },
   "costs": {

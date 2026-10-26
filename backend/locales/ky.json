@@ -91,6 +91,44 @@
       "batch_progress": "{{total}} ичинен {{current}} пункт",
       "toast_applied_one": "{{count}} вариант тандалды",
       "toast_applied_other": "{{count}} вариант тандалды"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Алмашуу отчету"
+      },
+      "column": {
+        "severity": "Олуттуулугу",
+        "kind": "Жоготуунун түрү",
+        "position": "Позиция",
+        "field": "Талаа",
+        "original": "Баштапкы маани",
+        "written": "Жазылган маани",
+        "count": "Саны",
+        "detail": "Чоо-жайы"
+      },
+      "severity": {
+        "error": "Олуттуу",
+        "warning": "Эскертүү",
+        "info": "Белгилөө"
+      },
+      "kind": {
+        "unsupported_element": "Элемент колдоого алынбайт",
+        "truncated_text": "Текст кыскартылды",
+        "altered_text": "Текст өзгөртүлдү",
+        "rounded_value": "Маани тегеректелди",
+        "value_out_of_range": "Маани диапазондон тышкары",
+        "dropped_attribute": "Атрибут ыргытылды",
+        "unmapped_unit": "Өлчөө бирдиги дал келтирилген жок",
+        "lost_hierarchy": "Иерархия деңгээли жоголду",
+        "markup_not_representable": "Кошумча акыны көрсөтүү мүмкүн эмес",
+        "attachment_skipped": "Тиркеме өткөрүп жиберилди",
+        "changed_identifier": "Идентификатор өзгөрдү",
+        "exceeds_limit": "Сактоо чеги ашты",
+        "rejected_row": "Сап четке кагылды",
+        "skipped_row": "Сап өткөрүп жиберилди",
+        "parser_warning": "Окугучтун эскертүүсү",
+        "roundtrip_mismatch": "Айлануу текшерүүсүнүн дал келбестиги"
+      }
     }
   },
   "costs": {

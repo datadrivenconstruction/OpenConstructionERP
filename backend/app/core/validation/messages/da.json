@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Skattedatoen '{tax_date}' er ikke en dato, så mængdefortegnelsen beskattes med dagens sats frem for satsen på dens egen dato",
       "suggestion": "Angiv skattedatoen som en dag, måned, et kvartal eller år ({shapes}), eller ryd feltet for at bruge mængdefortegnelsens basisdato"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import fra {format}: post {ordinal}, {field} kom ikke uskadt frem (fil: {original}, mængdefortegnelse: {written})",
+      "fail_export": "Eksport til {format}: post {ordinal}, {field} blev ikke skrevet uskadt (mængdefortegnelse: {original}, fil: {written})",
+      "suggestion": "Åbn udvekslingsrapporten for denne fil, ret rækken eller kilden, og gentag udvekslingen"
     }
   },
   "din276": {

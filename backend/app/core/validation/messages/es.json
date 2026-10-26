@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "La fecha fiscal '{tax_date}' no es una fecha, por lo que la medición se grava al tipo de hoy y no al suyo propio",
       "suggestion": "Indique la fecha fiscal como día, mes, trimestre o año ({shapes}), o déjela vacía para gravar la medición según su fecha base"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Importación desde {format}: la partida {ordinal}, {field} no llegó intacta (archivo: {original}, presupuesto: {written})",
+      "fail_export": "Exportación a {format}: la partida {ordinal}, {field} no salió intacta (presupuesto: {original}, archivo: {written})",
+      "suggestion": "Abra el informe de intercambio de este archivo, corrija la línea o el origen y repita el intercambio"
     }
   },
   "din276": {

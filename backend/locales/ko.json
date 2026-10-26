@@ -91,6 +91,44 @@
       "batch_progress": "{{total}}개 중 {{current}}번째 항목",
       "toast_applied_one": "{{count}}개 대안을 선택했습니다",
       "toast_applied_other": "{{count}}개 대안을 선택했습니다"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "교환 보고서"
+      },
+      "column": {
+        "severity": "심각도",
+        "kind": "손실 유형",
+        "position": "항목",
+        "field": "필드",
+        "original": "원래 값",
+        "written": "기록된 값",
+        "count": "건수",
+        "detail": "상세"
+      },
+      "severity": {
+        "error": "치명적",
+        "warning": "경고",
+        "info": "참고"
+      },
+      "kind": {
+        "unsupported_element": "지원되지 않는 요소",
+        "truncated_text": "텍스트 잘림",
+        "altered_text": "텍스트 변경됨",
+        "rounded_value": "값 반올림됨",
+        "value_out_of_range": "값이 범위를 벗어남",
+        "dropped_attribute": "속성 삭제됨",
+        "unmapped_unit": "단위 매핑 안 됨",
+        "lost_hierarchy": "계층 수준 손실",
+        "markup_not_representable": "가산율 표현 불가",
+        "attachment_skipped": "첨부 파일 건너뜀",
+        "changed_identifier": "식별자 변경됨",
+        "exceeds_limit": "저장 한도 초과",
+        "rejected_row": "행 거부됨",
+        "skipped_row": "행 건너뜀",
+        "parser_warning": "리더 경고",
+        "roundtrip_mismatch": "왕복 불일치"
+      }
     }
   },
   "costs": {

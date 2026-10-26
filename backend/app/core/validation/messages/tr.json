@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "'{tax_date}' vergi tarihi geçerli bir tarih değil; bu yüzden keşif kendi tarihinin oranı yerine bugünkü vergi oranıyla vergilendiriliyor",
       "suggestion": "Vergi tarihini gün, ay, çeyrek veya yıl olarak belirtin ({shapes}); keşfin baz tarihinde vergilendirilmesi için alanı boşaltın"
+    },
+    "exchange_fidelity": {
+      "fail_import": "{format} içe aktarma: poz {ordinal}, {field} bozulmadan ulaşmadı (dosya: {original}, metraj: {written})",
+      "fail_export": "{format} dışa aktarma: poz {ordinal}, {field} bozulmadan çıkmadı (metraj: {original}, dosya: {written})",
+      "suggestion": "Bu dosyanın aktarım raporunu açın, satırı veya kaynağı düzeltin ve aktarımı yineleyin"
     }
   },
   "din276": {

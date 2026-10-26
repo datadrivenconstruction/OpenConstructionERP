@@ -91,6 +91,44 @@
       "batch_progress": "Post {{current}} av {{total}}",
       "toast_applied_one": "{{count}} variant valgt",
       "toast_applied_other": "{{count}} varianter valgt"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Utvekslingsrapport"
+      },
+      "column": {
+        "severity": "Alvorlighet",
+        "kind": "Type tap",
+        "position": "Post",
+        "field": "Felt",
+        "original": "Opprinnelig verdi",
+        "written": "Skrevet verdi",
+        "count": "Antall",
+        "detail": "Detaljer"
+      },
+      "severity": {
+        "error": "Kritisk",
+        "warning": "Advarsel",
+        "info": "Merknad"
+      },
+      "kind": {
+        "unsupported_element": "Element støttes ikke",
+        "truncated_text": "Tekst forkortet",
+        "altered_text": "Tekst endret",
+        "rounded_value": "Verdi avrundet",
+        "value_out_of_range": "Verdi utenfor område",
+        "dropped_attribute": "Attributt forkastet",
+        "unmapped_unit": "Enhet ikke tilordnet",
+        "lost_hierarchy": "Hierarkinivå gikk tapt",
+        "markup_not_representable": "Tillegg kan ikke representeres",
+        "attachment_skipped": "Vedlegg hoppet over",
+        "changed_identifier": "Identifikator endret",
+        "exceeds_limit": "Lagringsgrensen overskredet",
+        "rejected_row": "Rad avvist",
+        "skipped_row": "Rad hoppet over",
+        "parser_warning": "Leseradvarsel",
+        "roundtrip_mismatch": "Avvik i rundtur"
+      }
     }
   },
   "costs": {

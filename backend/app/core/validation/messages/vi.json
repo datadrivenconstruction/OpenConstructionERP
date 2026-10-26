@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Ngày tính thuế '{tax_date}' không phải ngày hợp lệ, nên bảng khối lượng được tính thuế theo mức hôm nay thay vì ngày tính thuế của nó",
       "suggestion": "Ghi ngày tính thuế dưới dạng ngày, tháng, quý hoặc năm ({shapes}), hoặc xóa để tính thuế theo ngày cơ sở của bảng khối lượng"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Nhập từ {format}: hạng mục {ordinal}, {field} đến không nguyên vẹn (tệp: {original}, bảng tiên lượng: {written})",
+      "fail_export": "Xuất sang {format}: hạng mục {ordinal}, {field} đi ra không nguyên vẹn (bảng tiên lượng: {original}, tệp: {written})",
+      "suggestion": "Mở báo cáo trao đổi của tệp này, sửa dòng hoặc nguồn rồi lặp lại việc trao đổi"
     }
   },
   "din276": {

@@ -65,6 +65,9 @@ _HDR_CONCEPT = "~C"
 _HDR_DECOMPOSITION = "~D"
 _HDR_TEXT = "~T"
 _HDR_MEASUREMENT = "~M"
+# Records that point at files (graphics ``~G``, documents ``~F``). The bill
+# keeps no attachment from a BC3, so each is reported as skipped.
+_ATTACHMENT_HEADERS: frozenset[str] = frozenset({"~G", "~F"})
 _HDR_DATA_CONFIG = "~DC"
 
 # Concept type → semantic role.
@@ -341,6 +344,9 @@ class BC3Importer:
         # decompose into other concepts) and pull a measurement quantity.
         decompositions: dict[str, list[tuple[str, float]]] = {}
         currency = ""
+        currency_raw = ""
+        # Record headers this reader does not turn into anything, with counts.
+        unread_headers: dict[str, int] = {}
 
         for rec in records:
             hdr = _record_header(rec)
@@ -352,6 +358,8 @@ class BC3Importer:
                 # we sniff the trailing fields for a 3-letter ISO code.
                 for f in fields:
                     f_up = f.strip().upper()
+                    if len(f_up) == 3 and f_up.isalpha() and f.strip().isupper() and not currency_raw:
+                        currency_raw = f_up
                     if (
                         len(f_up) == 3
                         and f_up.isalpha()
@@ -448,6 +456,8 @@ class BC3Importer:
                 # - last writer wins, matching FIEBDC reference behaviour).
                 if child in concepts:
                     concepts[child]["measured_qty"] = qty
+            elif hdr:
+                unread_headers[hdr] = unread_headers.get(hdr, 0) + 1
 
         # Identify leaf partidas: a concept is a partida if (a) its type
         # field is ``0`` or empty AND it is not itself a decomposition
@@ -538,6 +548,7 @@ class BC3Importer:
                 )
             )
 
+        cls._note_losses(result, concepts, decompositions, unread_headers, currency, currency_raw)
         result.metadata = {
             "bc3_encoding": encoding_used,
             "bc3_declared_charset": declared_charset,
@@ -546,3 +557,75 @@ class BC3Importer:
             "bc3_decompositions": len(decompositions),
         }
         return result
+
+    @staticmethod
+    def _note_losses(
+        result: ImportedBOQ,
+        concepts: dict[str, dict[str, Any]],
+        decompositions: dict[str, list[tuple[str, float]]],
+        unread_headers: dict[str, int],
+        currency: str,
+        currency_raw: str,
+    ) -> None:
+        """Record on ``result.fidelity`` what the file holds and the bill will not."""
+
+        def _is_chapter(code: str) -> bool:
+            ctype = concepts.get(code, {}).get("type", "")
+            return ctype == _CONCEPT_TYPE_CAPITULO or (not ctype and _looks_like_section_code(code))
+
+        for hdr, count in sorted(unread_headers.items()):
+            if hdr in _ATTACHMENT_HEADERS:
+                kind, severity = "attachment_skipped", "warning"
+            elif hdr == _HDR_COEFFICIENTS:
+                kind, severity = "markup_not_representable", "info"
+            else:
+                kind, severity = "unsupported_element", "info"
+            result.fidelity.append(
+                {
+                    "severity": severity,
+                    "kind": kind,
+                    "field": hdr,
+                    "original": hdr,
+                    "count": count,
+                    "params": {"tag": hdr},
+                }
+            )
+        for parent, children in decompositions.items():
+            if parent not in concepts:
+                continue
+            if _is_chapter(parent):
+                # A chapter decomposed into another chapter: the bill keeps one level.
+                for child, _qty in children:
+                    if _is_chapter(child):
+                        result.fidelity.append(
+                            {
+                                "severity": "warning",
+                                "kind": "lost_hierarchy",
+                                "field": "hierarchy",
+                                "position_ref": child,
+                                "original": f"{parent} > {child}",
+                                "written": child,
+                            }
+                        )
+            elif children and concepts[parent].get("type", "") in ("", _CONCEPT_TYPE_PARTIDA):
+                result.fidelity.append(
+                    {
+                        "severity": "warning",
+                        "kind": "dropped_attribute",
+                        "field": "resources",
+                        "position_ref": parent,
+                        "original": f"{len(children)} components",
+                        "written": None,
+                        "params": {"count": len(children)},
+                    }
+                )
+        if currency_raw and not currency:
+            result.fidelity.append(
+                {
+                    "severity": "warning",
+                    "kind": "dropped_attribute",
+                    "field": "currency",
+                    "original": currency_raw,
+                    "written": None,
+                }
+            )

@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "计税日期“{tax_date}”无效，因此清单使用当前税率，而非其计税日期对应的税率。",
       "suggestion": "请以日、月、季度或年份注明计税日期（{shapes}），或清空该字段以按清单基准日期计税。"
+    },
+    "exchange_fidelity": {
+      "fail_import": "从 {format} 导入：清单项 {ordinal}，{field} 未完整到达（文件：{original}，清单：{written}）",
+      "fail_export": "导出至 {format}：清单项 {ordinal}，{field} 未完整输出（清单：{original}，文件：{written}）",
+      "suggestion": "打开此文件的交换报告，更正该行或来源，然后重复交换"
     }
   },
   "din276": {

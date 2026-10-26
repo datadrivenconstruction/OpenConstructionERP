@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "과세일 '{tax_date}'을 날짜로 해석할 수 없어 내역서에 해당 과세일의 세율 대신 오늘의 세율이 적용됩니다",
       "suggestion": "과세일을 일, 월, 분기 또는 연도로 지정하세요({shapes}). 내역서 기준일에 따라 과세하려면 비워 두세요"
+    },
+    "exchange_fidelity": {
+      "fail_import": "{format}에서 가져오기: 항목 {ordinal}, {field}이(가) 온전히 도착하지 않았습니다 (파일: {original}, 내역서: {written})",
+      "fail_export": "{format}(으)로 내보내기: 항목 {ordinal}, {field}이(가) 온전히 나가지 않았습니다 (내역서: {original}, 파일: {written})",
+      "suggestion": "이 파일의 교환 보고서를 열고, 행 또는 원본을 수정한 다음 교환을 다시 실행하세요"
     }
   },
   "din276": {

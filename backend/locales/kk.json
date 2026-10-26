@@ -91,6 +91,44 @@
       "batch_progress": "{{total}}-ден {{current}} позиция",
       "toast_applied_one": "{{count}} нұсқа таңдалды",
       "toast_applied_other": "{{count}} нұсқа таңдалды"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Алмасу есебі"
+      },
+      "column": {
+        "severity": "Маңыздылығы",
+        "kind": "Жоғалту түрі",
+        "position": "Позиция",
+        "field": "Өріс",
+        "original": "Бастапқы мән",
+        "written": "Жазылған мән",
+        "count": "Саны",
+        "detail": "Мәлімет"
+      },
+      "severity": {
+        "error": "Күрделі",
+        "warning": "Ескерту",
+        "info": "Ескертпе"
+      },
+      "kind": {
+        "unsupported_element": "Элемент қолдау таппайды",
+        "truncated_text": "Мәтін қысқартылды",
+        "altered_text": "Мәтін өзгертілді",
+        "rounded_value": "Мән дөңгелектенді",
+        "value_out_of_range": "Мән ауқымнан тыс",
+        "dropped_attribute": "Атрибут тасталды",
+        "unmapped_unit": "Өлшем бірлігі сәйкестендірілмеді",
+        "lost_hierarchy": "Иерархия деңгейі жоғалды",
+        "markup_not_representable": "Үстемеақыны көрсету мүмкін емес",
+        "attachment_skipped": "Тіркеме өткізіп жіберілді",
+        "changed_identifier": "Идентификатор өзгертілді",
+        "exceeds_limit": "Сақтау шегінен асты",
+        "rejected_row": "Жол қабылданбады",
+        "skipped_row": "Жол өткізіп жіберілді",
+        "parser_warning": "Оқу құралының ескертуі",
+        "roundtrip_mismatch": "Айналма тексеру сәйкессіздігі"
+      }
     }
   },
   "costs": {

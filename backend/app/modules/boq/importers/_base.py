@@ -130,6 +130,12 @@ class ImportedBOQ:
     # its section, so persistence may write them in one batch instead of one
     # row at a time. Off by default: a flat sheet relies on the per-row path.
     document_order: bool = False
+    # What the reader saw in the file and did not carry over: elements it does
+    # not read, attachments, texts it cut. Each entry is an item of the
+    # exchange fidelity report (``exchange_fidelity.FidelityItem`` fields as a
+    # dict); the report adds the losses any reader shares (storage limits,
+    # units, rounding) itself.
+    fidelity: list[dict[str, Any]] = field(default_factory=list)
 
 
 @runtime_checkable

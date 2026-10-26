@@ -91,6 +91,44 @@
       "batch_progress": "Hạng mục {{current}} / {{total}}",
       "toast_applied_one": "Đã chọn {{count}} phương án",
       "toast_applied_other": "Đã chọn {{count}} phương án"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Báo cáo trao đổi"
+      },
+      "column": {
+        "severity": "Mức độ nghiêm trọng",
+        "kind": "Loại mất mát",
+        "position": "Hạng mục",
+        "field": "Trường",
+        "original": "Giá trị gốc",
+        "written": "Giá trị đã ghi",
+        "count": "Số lượng",
+        "detail": "Chi tiết"
+      },
+      "severity": {
+        "error": "Nghiêm trọng",
+        "warning": "Cảnh báo",
+        "info": "Ghi chú"
+      },
+      "kind": {
+        "unsupported_element": "Phần tử không được hỗ trợ",
+        "truncated_text": "Văn bản bị cắt",
+        "altered_text": "Văn bản bị thay đổi",
+        "rounded_value": "Giá trị bị làm tròn",
+        "value_out_of_range": "Giá trị ngoài phạm vi",
+        "dropped_attribute": "Thuộc tính bị bỏ",
+        "unmapped_unit": "Đơn vị chưa ánh xạ",
+        "lost_hierarchy": "Mất cấp phân cấp",
+        "markup_not_representable": "Phụ phí không thể biểu diễn",
+        "attachment_skipped": "Bỏ qua tệp đính kèm",
+        "changed_identifier": "Mã định danh bị đổi",
+        "exceeds_limit": "Vượt giới hạn lưu trữ",
+        "rejected_row": "Dòng bị từ chối",
+        "skipped_row": "Dòng bị bỏ qua",
+        "parser_warning": "Cảnh báo của trình đọc",
+        "roundtrip_mismatch": "Lệch khi khứ hồi"
+      }
     }
   },
   "costs": {

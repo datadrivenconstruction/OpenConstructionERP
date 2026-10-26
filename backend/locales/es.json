@@ -91,6 +91,44 @@
       "batch_progress": "Partida {{current}} de {{total}}",
       "toast_applied_one": "{{count}} variante elegida",
       "toast_applied_other": "{{count}} variantes elegidas"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Informe de intercambio"
+      },
+      "column": {
+        "severity": "Gravedad",
+        "kind": "Tipo de pérdida",
+        "position": "Partida",
+        "field": "Campo",
+        "original": "Valor original",
+        "written": "Valor escrito",
+        "count": "Recuento",
+        "detail": "Detalle"
+      },
+      "severity": {
+        "error": "Crítico",
+        "warning": "Advertencia",
+        "info": "Nota"
+      },
+      "kind": {
+        "unsupported_element": "Elemento no admitido",
+        "truncated_text": "Texto truncado",
+        "altered_text": "Texto alterado",
+        "rounded_value": "Valor redondeado",
+        "value_out_of_range": "Valor fuera de rango",
+        "dropped_attribute": "Atributo descartado",
+        "unmapped_unit": "Unidad sin correspondencia",
+        "lost_hierarchy": "Nivel de jerarquía perdido",
+        "markup_not_representable": "Recargo no representable",
+        "attachment_skipped": "Adjunto omitido",
+        "changed_identifier": "Identificador cambiado",
+        "exceeds_limit": "Supera el límite de almacenamiento",
+        "rejected_row": "Fila rechazada",
+        "skipped_row": "Fila omitida",
+        "parser_warning": "Advertencia del lector",
+        "roundtrip_mismatch": "Diferencia en la ida y vuelta"
+      }
     }
   },
   "costs": {

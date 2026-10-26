@@ -91,6 +91,44 @@
       "batch_progress": "Pozycja {{current}} z {{total}}",
       "toast_applied_one": "Wybrano {{count}} wariant",
       "toast_applied_other": "Wybrano {{count}} wariantów"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Raport wymiany"
+      },
+      "column": {
+        "severity": "Waga",
+        "kind": "Rodzaj straty",
+        "position": "Pozycja",
+        "field": "Pole",
+        "original": "Wartość pierwotna",
+        "written": "Zapisana wartość",
+        "count": "Liczba",
+        "detail": "Szczegóły"
+      },
+      "severity": {
+        "error": "Krytyczne",
+        "warning": "Ostrzeżenie",
+        "info": "Uwaga"
+      },
+      "kind": {
+        "unsupported_element": "Element nieobsługiwany",
+        "truncated_text": "Tekst skrócony",
+        "altered_text": "Tekst zmieniony",
+        "rounded_value": "Wartość zaokrąglona",
+        "value_out_of_range": "Wartość poza zakresem",
+        "dropped_attribute": "Atrybut odrzucony",
+        "unmapped_unit": "Jednostka nieprzypisana",
+        "lost_hierarchy": "Utracony poziom hierarchii",
+        "markup_not_representable": "Narzut niemożliwy do przedstawienia",
+        "attachment_skipped": "Załącznik pominięty",
+        "changed_identifier": "Identyfikator zmieniony",
+        "exceeds_limit": "Przekroczono limit przechowywania",
+        "rejected_row": "Wiersz odrzucony",
+        "skipped_row": "Wiersz pominięty",
+        "parser_warning": "Ostrzeżenie czytnika",
+        "roundtrip_mismatch": "Rozbieżność w teście w obie strony"
+      }
     }
   },
   "costs": {

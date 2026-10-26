@@ -91,6 +91,44 @@
       "batch_progress": "Post {{current}} van {{total}}",
       "toast_applied_one": "{{count}} variant gekozen",
       "toast_applied_other": "{{count}} varianten gekozen"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Uitwisselingsrapport"
+      },
+      "column": {
+        "severity": "Ernst",
+        "kind": "Soort verlies",
+        "position": "Post",
+        "field": "Veld",
+        "original": "Oorspronkelijke waarde",
+        "written": "Weggeschreven waarde",
+        "count": "Aantal",
+        "detail": "Details"
+      },
+      "severity": {
+        "error": "Kritiek",
+        "warning": "Waarschuwing",
+        "info": "Opmerking"
+      },
+      "kind": {
+        "unsupported_element": "Element niet ondersteund",
+        "truncated_text": "Tekst ingekort",
+        "altered_text": "Tekst gewijzigd",
+        "rounded_value": "Waarde afgerond",
+        "value_out_of_range": "Waarde buiten bereik",
+        "dropped_attribute": "Attribuut weggelaten",
+        "unmapped_unit": "Eenheid niet gekoppeld",
+        "lost_hierarchy": "Hiërarchieniveau verloren",
+        "markup_not_representable": "Opslag niet weer te geven",
+        "attachment_skipped": "Bijlage overgeslagen",
+        "changed_identifier": "Identificatie gewijzigd",
+        "exceeds_limit": "Opslaglimiet overschreden",
+        "rejected_row": "Rij geweigerd",
+        "skipped_row": "Rij overgeslagen",
+        "parser_warning": "Waarschuwing van de lezer",
+        "roundtrip_mismatch": "Afwijking bij round trip"
+      }
     }
   },
   "costs": {

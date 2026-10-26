@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Belastingdatum '{tax_date}' is geen geldige datum; daarom gebruikt de hoeveelhedenstaat het belastingtarief van vandaag in plaats van dat van de belastingdatum",
       "suggestion": "Geef de belastingdatum op als dag, maand, kwartaal of jaar ({shapes}), of maak het veld leeg om de basisdatum van de hoeveelhedenstaat te gebruiken"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import uit {format}: post {ordinal}, {field} is niet intact aangekomen (bestand: {original}, bestek: {written})",
+      "fail_export": "Export naar {format}: post {ordinal}, {field} is niet intact vertrokken (bestek: {original}, bestand: {written})",
+      "suggestion": "Open het uitwisselingsrapport van dit bestand, corrigeer de regel of de bron en herhaal de uitwisseling"
     }
   },
   "din276": {

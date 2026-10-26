@@ -91,6 +91,44 @@
       "batch_progress": "Artigo {{current}} de {{total}}",
       "toast_applied_one": "{{count}} variante escolhida",
       "toast_applied_other": "{{count}} variantes escolhidas"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Relatório de intercâmbio"
+      },
+      "column": {
+        "severity": "Gravidade",
+        "kind": "Tipo de perda",
+        "position": "Item",
+        "field": "Campo",
+        "original": "Valor original",
+        "written": "Valor gravado",
+        "count": "Contagem",
+        "detail": "Detalhe"
+      },
+      "severity": {
+        "error": "Crítico",
+        "warning": "Aviso",
+        "info": "Observação"
+      },
+      "kind": {
+        "unsupported_element": "Elemento não suportado",
+        "truncated_text": "Texto truncado",
+        "altered_text": "Texto alterado",
+        "rounded_value": "Valor arredondado",
+        "value_out_of_range": "Valor fora do intervalo",
+        "dropped_attribute": "Atributo descartado",
+        "unmapped_unit": "Unidade não mapeada",
+        "lost_hierarchy": "Nível de hierarquia perdido",
+        "markup_not_representable": "Acréscimo não representável",
+        "attachment_skipped": "Anexo ignorado",
+        "changed_identifier": "Identificador alterado",
+        "exceeds_limit": "Limite de armazenamento excedido",
+        "rejected_row": "Linha rejeitada",
+        "skipped_row": "Linha ignorada",
+        "parser_warning": "Aviso do leitor",
+        "roundtrip_mismatch": "Divergência na ida e volta"
+      }
     }
   },
   "costs": {

@@ -91,6 +91,44 @@
       "batch_progress": "मद {{current}} / {{total}}",
       "toast_applied_one": "{{count}} विकल्प चुना गया",
       "toast_applied_other": "{{count}} विकल्प चुने गए"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "आदान-प्रदान रिपोर्ट"
+      },
+      "column": {
+        "severity": "गंभीरता",
+        "kind": "हानि का प्रकार",
+        "position": "मद",
+        "field": "फ़ील्ड",
+        "original": "मूल मान",
+        "written": "लिखा गया मान",
+        "count": "संख्या",
+        "detail": "ब्योरा"
+      },
+      "severity": {
+        "error": "गंभीर",
+        "warning": "चेतावनी",
+        "info": "टिप्पणी"
+      },
+      "kind": {
+        "unsupported_element": "असमर्थित तत्व",
+        "truncated_text": "पाठ छोटा किया गया",
+        "altered_text": "पाठ बदला गया",
+        "rounded_value": "मान पूर्णांकित",
+        "value_out_of_range": "मान सीमा से बाहर",
+        "dropped_attribute": "गुण छोड़ा गया",
+        "unmapped_unit": "इकाई मैप नहीं हुई",
+        "lost_hierarchy": "पदानुक्रम स्तर खो गया",
+        "markup_not_representable": "मार्कअप दर्शाया नहीं जा सकता",
+        "attachment_skipped": "अनुलग्नक छोड़ा गया",
+        "changed_identifier": "पहचानकर्ता बदला",
+        "exceeds_limit": "भंडारण सीमा पार हुई",
+        "rejected_row": "पंक्ति अस्वीकृत",
+        "skipped_row": "पंक्ति छोड़ी गई",
+        "parser_warning": "रीडर चेतावनी",
+        "roundtrip_mismatch": "राउंड ट्रिप विचलन"
+      }
     }
   },
   "costs": {

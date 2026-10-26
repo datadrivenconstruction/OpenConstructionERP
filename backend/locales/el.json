@@ -91,6 +91,44 @@
       "batch_progress": "Είδος {{current}} από {{total}}",
       "toast_applied_one": "{{count}} παραλλαγή επιλέχθηκε",
       "toast_applied_other": "{{count}} παραλλαγές επιλέχθηκαν"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Αναφορά ανταλλαγής"
+      },
+      "column": {
+        "severity": "Σοβαρότητα",
+        "kind": "Είδος απώλειας",
+        "position": "Θέση",
+        "field": "Πεδίο",
+        "original": "Αρχική τιμή",
+        "written": "Τιμή που γράφτηκε",
+        "count": "Πλήθος",
+        "detail": "Λεπτομέρειες"
+      },
+      "severity": {
+        "error": "Κρίσιμο",
+        "warning": "Προειδοποίηση",
+        "info": "Σημείωση"
+      },
+      "kind": {
+        "unsupported_element": "Μη υποστηριζόμενο στοιχείο",
+        "truncated_text": "Κείμενο περικομμένο",
+        "altered_text": "Κείμενο τροποποιημένο",
+        "rounded_value": "Τιμή στρογγυλεμένη",
+        "value_out_of_range": "Τιμή εκτός εύρους",
+        "dropped_attribute": "Χαρακτηριστικό απορρίφθηκε",
+        "unmapped_unit": "Μονάδα χωρίς αντιστοίχιση",
+        "lost_hierarchy": "Χάθηκε επίπεδο ιεραρχίας",
+        "markup_not_representable": "Επιβάρυνση που δεν αποδίδεται",
+        "attachment_skipped": "Συνημμένο παραλείφθηκε",
+        "changed_identifier": "Αναγνωριστικό άλλαξε",
+        "exceeds_limit": "Υπέρβαση ορίου αποθήκευσης",
+        "rejected_row": "Γραμμή απορρίφθηκε",
+        "skipped_row": "Γραμμή παραλείφθηκε",
+        "parser_warning": "Προειδοποίηση αναγνώστη",
+        "roundtrip_mismatch": "Απόκλιση κύκλου εξαγωγής-εισαγωγής"
+      }
     }
   },
   "costs": {

@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Avgiftsdatoen '{tax_date}' er ikke en dato, så mengdefortegnelsen avgiftsberegnes etter dagens sats i stedet for satsen på dens egen dato",
       "suggestion": "Angi avgiftsdatoen som en dag, måned, et kvartal eller år ({shapes}), eller tøm feltet for å bruke mengdefortegnelsens basisdato"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import fra {format}: post {ordinal}, {field} kom ikke fram uskadd (fil: {original}, mengdebeskrivelse: {written})",
+      "fail_export": "Eksport til {format}: post {ordinal}, {field} gikk ikke ut uskadd (mengdebeskrivelse: {original}, fil: {written})",
+      "suggestion": "Åpne utvekslingsrapporten for denne filen, rett opp linjen eller kilden og gjenta utvekslingen"
     }
   },
   "din276": {

@@ -91,6 +91,44 @@
       "batch_progress": "Položka {{current}} z {{total}}",
       "toast_applied_one": "Vybrána {{count}} varianta",
       "toast_applied_other": "Vybráno {{count}} variant"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Zpráva o výměně dat"
+      },
+      "column": {
+        "severity": "Závažnost",
+        "kind": "Druh ztráty",
+        "position": "Položka",
+        "field": "Pole",
+        "original": "Původní hodnota",
+        "written": "Zapsaná hodnota",
+        "count": "Počet",
+        "detail": "Detail"
+      },
+      "severity": {
+        "error": "Kritické",
+        "warning": "Varování",
+        "info": "Poznámka"
+      },
+      "kind": {
+        "unsupported_element": "Nepodporovaný prvek",
+        "truncated_text": "Text zkrácen",
+        "altered_text": "Text změněn",
+        "rounded_value": "Hodnota zaokrouhlena",
+        "value_out_of_range": "Hodnota mimo rozsah",
+        "dropped_attribute": "Atribut zahozen",
+        "unmapped_unit": "Jednotka nepřiřazena",
+        "lost_hierarchy": "Úroveň hierarchie ztracena",
+        "markup_not_representable": "Přirážku nelze vyjádřit",
+        "attachment_skipped": "Příloha přeskočena",
+        "changed_identifier": "Identifikátor změněn",
+        "exceeds_limit": "Překročen limit úložiště",
+        "rejected_row": "Řádek odmítnut",
+        "skipped_row": "Řádek přeskočen",
+        "parser_warning": "Varování čtečky",
+        "roundtrip_mismatch": "Odchylka round tripu"
+      }
     }
   },
   "costs": {

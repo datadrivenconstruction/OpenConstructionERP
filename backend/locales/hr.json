@@ -77,7 +77,45 @@
     "unit": "Jedinica",
     "unit_rate": "Jedinična cijena",
     "validate": "Provjeri",
-    "vat": "PDV"
+    "vat": "PDV",
+    "fidelity": {
+      "sheet": {
+        "title": "Izvješće o razmjeni"
+      },
+      "column": {
+        "severity": "Ozbiljnost",
+        "kind": "Vrsta gubitka",
+        "position": "Pozicija",
+        "field": "Polje",
+        "original": "Izvorna vrijednost",
+        "written": "Upisana vrijednost",
+        "count": "Broj",
+        "detail": "Detalj"
+      },
+      "severity": {
+        "error": "Kritično",
+        "warning": "Upozorenje",
+        "info": "Napomena"
+      },
+      "kind": {
+        "unsupported_element": "Element nije podržan",
+        "truncated_text": "Tekst skraćen",
+        "altered_text": "Tekst izmijenjen",
+        "rounded_value": "Vrijednost zaokružena",
+        "value_out_of_range": "Vrijednost izvan raspona",
+        "dropped_attribute": "Svojstvo odbačeno",
+        "unmapped_unit": "Jedinica nije mapirana",
+        "lost_hierarchy": "Razina hijerarhije izgubljena",
+        "markup_not_representable": "Dodatak se ne može prikazati",
+        "attachment_skipped": "Prilog preskočen",
+        "changed_identifier": "Oznaka promijenjena",
+        "exceeds_limit": "Prekoračeno ograničenje pohrane",
+        "rejected_row": "Redak odbijen",
+        "skipped_row": "Redak preskočen",
+        "parser_warning": "Upozorenje čitača",
+        "roundtrip_mismatch": "Odstupanje povratnog testa"
+      }
+    }
   },
   "cad": {
     "converting": "Konverzija...",

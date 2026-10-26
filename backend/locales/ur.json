@@ -91,6 +91,44 @@
       "batch_progress": "آئٹم {{current}} از {{total}}",
       "toast_applied_one": "{{count}} ورژن منتخب ہوا",
       "toast_applied_other": "{{count}} ورژنز منتخب ہوئے"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "تبادلہ رپورٹ"
+      },
+      "column": {
+        "severity": "شدت",
+        "kind": "نقصان کی قسم",
+        "position": "آئٹم",
+        "field": "فیلڈ",
+        "original": "اصل قدر",
+        "written": "لکھی گئی قدر",
+        "count": "تعداد",
+        "detail": "تفصیل"
+      },
+      "severity": {
+        "error": "نازک",
+        "warning": "انتباہ",
+        "info": "نوٹ"
+      },
+      "kind": {
+        "unsupported_element": "عنصر معاون نہیں",
+        "truncated_text": "متن کاٹ دیا گیا",
+        "altered_text": "متن بدل دیا گیا",
+        "rounded_value": "قدر گول کی گئی",
+        "value_out_of_range": "قدر حد سے باہر",
+        "dropped_attribute": "خصوصیت چھوڑ دی گئی",
+        "unmapped_unit": "اکائی کی نقشہ بندی نہیں ہوئی",
+        "lost_hierarchy": "درجہ بندی کی سطح ضائع ہوئی",
+        "markup_not_representable": "اضافی چارج ظاہر نہیں ہو سکتا",
+        "attachment_skipped": "منسلکہ چھوڑ دیا گیا",
+        "changed_identifier": "شناخت کنندہ بدل گیا",
+        "exceeds_limit": "ذخیرہ کی حد سے تجاوز",
+        "rejected_row": "سطر مسترد",
+        "skipped_row": "سطر چھوڑ دی گئی",
+        "parser_warning": "ریڈر کا انتباہ",
+        "roundtrip_mismatch": "راؤنڈ ٹرپ میں فرق"
+      }
     }
   },
   "costs": {

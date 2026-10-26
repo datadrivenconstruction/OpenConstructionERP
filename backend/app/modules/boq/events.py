@@ -54,6 +54,7 @@ _EVENT_DESCRIPTIONS: dict[str, str] = {
     "boq.position.duplicated": "Duplicated position",
     "boq.positions.bulk_created": "Added {count} position(s)",
     "boq.positions.resource_propagated": "Propagated a resource definition to {count} position(s)",
+    "boq.positions.resources_scaled": "Scaled resource norms on {count} position(s)",
     "boq.quantity_link.created": "Linked a position quantity to a model",
     "boq.quantity_link.applied": "Updated {applied} position quantities from linked models",
     "boq.bim_quantity.applied": "Updated {applied} position quantities from a new BIM model version",

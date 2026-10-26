@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Verotusajankohta '{tax_date}' ei ole kelvollinen päivämäärä, joten määräluettelo verotetaan tämän päivän eikä oman ajankohtansa verokannalla",
       "suggestion": "Ilmoita verotusajankohta päivänä, kuukautena, vuosineljänneksenä tai vuotena ({shapes}) tai tyhjennä kenttä käyttääksesi määräluettelon perusajankohtaa"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Tuonti muodosta {format}: nimike {ordinal}, kenttä {field} ei saapunut ehjänä (tiedosto: {original}, määräluettelo: {written})",
+      "fail_export": "Vienti muotoon {format}: nimike {ordinal}, kenttä {field} ei tullut ulos ehjänä (määräluettelo: {original}, tiedosto: {written})",
+      "suggestion": "Avaa tämän tiedoston vaihtoraportti, korjaa rivi tai lähde ja toista vaihto"
     }
   },
   "din276": {

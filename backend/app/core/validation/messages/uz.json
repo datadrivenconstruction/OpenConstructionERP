@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "'{tax_date}' soliq sanasi yaroqli sana emas, shuning uchun qaydnomaga oʻz sanasidagi emas, bugungi soliq stavkasi qoʻllanadi",
       "suggestion": "Soliq sanasini kun, oy, chorak yoki yil sifatida koʻrsating ({shapes}) yoki qaydnomaning bazaviy sanasini qoʻllash uchun maydonni tozalang"
+    },
+    "exchange_fidelity": {
+      "fail_import": "{format} dan import: pozitsiya {ordinal}, {field} butun yetib kelmadi (fayl: {original}, vedomost: {written})",
+      "fail_export": "{format} ga eksport: pozitsiya {ordinal}, {field} butun chiqmadi (vedomost: {original}, fayl: {written})",
+      "suggestion": "Ushbu faylning almashinuv hisobotini oching, qator yoki manbani tuzating va almashinuvni takrorlang"
     }
   },
   "din276": {

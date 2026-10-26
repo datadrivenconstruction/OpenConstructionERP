@@ -91,6 +91,44 @@
       "batch_progress": "Poste {{current}} sur {{total}}",
       "toast_applied_one": "{{count}} variante choisie",
       "toast_applied_other": "{{count}} variantes choisies"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Rapport d'échange"
+      },
+      "column": {
+        "severity": "Gravité",
+        "kind": "Type de perte",
+        "position": "Poste",
+        "field": "Champ",
+        "original": "Valeur d'origine",
+        "written": "Valeur écrite",
+        "count": "Nombre",
+        "detail": "Détail"
+      },
+      "severity": {
+        "error": "Critique",
+        "warning": "Avertissement",
+        "info": "Remarque"
+      },
+      "kind": {
+        "unsupported_element": "Élément non pris en charge",
+        "truncated_text": "Texte tronqué",
+        "altered_text": "Texte modifié",
+        "rounded_value": "Valeur arrondie",
+        "value_out_of_range": "Valeur hors plage",
+        "dropped_attribute": "Attribut abandonné",
+        "unmapped_unit": "Unité non associée",
+        "lost_hierarchy": "Niveau hiérarchique perdu",
+        "markup_not_representable": "Majoration non représentable",
+        "attachment_skipped": "Pièce jointe ignorée",
+        "changed_identifier": "Identifiant modifié",
+        "exceeds_limit": "Limite de stockage dépassée",
+        "rejected_row": "Ligne rejetée",
+        "skipped_row": "Ligne ignorée",
+        "parser_warning": "Avertissement du lecteur",
+        "roundtrip_mismatch": "Écart à l'aller-retour"
+      }
     }
   },
   "costs": {

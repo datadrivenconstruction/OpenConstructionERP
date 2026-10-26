@@ -91,6 +91,44 @@
       "batch_progress": "{{current}}. tétel a(z) {{total}}-ból",
       "toast_applied_one": "{{count}} változat kiválasztva",
       "toast_applied_other": "{{count}} változat kiválasztva"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Adatcsere-jelentés"
+      },
+      "column": {
+        "severity": "Súlyosság",
+        "kind": "Veszteség típusa",
+        "position": "Tétel",
+        "field": "Mező",
+        "original": "Eredeti érték",
+        "written": "Kiírt érték",
+        "count": "Darab",
+        "detail": "Részlet"
+      },
+      "severity": {
+        "error": "Kritikus",
+        "warning": "Figyelmeztetés",
+        "info": "Megjegyzés"
+      },
+      "kind": {
+        "unsupported_element": "Nem támogatott elem",
+        "truncated_text": "Szöveg megcsonkítva",
+        "altered_text": "Szöveg módosítva",
+        "rounded_value": "Érték kerekítve",
+        "value_out_of_range": "Érték a tartományon kívül",
+        "dropped_attribute": "Attribútum elhagyva",
+        "unmapped_unit": "Mértékegység nincs hozzárendelve",
+        "lost_hierarchy": "Hierarchiaszint elveszett",
+        "markup_not_representable": "Felár nem ábrázolható",
+        "attachment_skipped": "Melléklet kihagyva",
+        "changed_identifier": "Azonosító megváltozott",
+        "exceeds_limit": "Tárolási korlát túllépve",
+        "rejected_row": "Sor elutasítva",
+        "skipped_row": "Sor kihagyva",
+        "parser_warning": "Olvasói figyelmeztetés",
+        "roundtrip_mismatch": "Körbeteszt-eltérés"
+      }
     }
   },
   "costs": {

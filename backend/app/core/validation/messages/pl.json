@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Data podatkowa „{tax_date}” nie jest prawidłową datą, więc kosztorys stosuje dzisiejszą stawkę podatku zamiast stawki ze swojej daty podatkowej",
       "suggestion": "Podaj datę podatkową jako dzień, miesiąc, kwartał lub rok ({shapes}) albo usuń ją, aby zastosować opodatkowanie według daty bazowej kosztorysu"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import z {format}: pozycja {ordinal}, pole {field} nie dotarło w całości (plik: {original}, przedmiar: {written})",
+      "fail_export": "Eksport do {format}: pozycja {ordinal}, pole {field} nie wyszło w całości (przedmiar: {original}, plik: {written})",
+      "suggestion": "Otwórz raport wymiany tego pliku, popraw wiersz lub źródło i powtórz wymianę"
     }
   },
   "din276": {

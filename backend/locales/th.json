@@ -91,6 +91,44 @@
       "batch_progress": "รายการที่ {{current}} จาก {{total}}",
       "toast_applied_one": "เลือกแล้ว {{count}} ตัวเลือก",
       "toast_applied_other": "เลือกแล้ว {{count}} ตัวเลือก"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "รายงานการแลกเปลี่ยนข้อมูล"
+      },
+      "column": {
+        "severity": "ระดับความรุนแรง",
+        "kind": "ประเภทของการสูญเสีย",
+        "position": "รายการงาน",
+        "field": "ฟิลด์",
+        "original": "ค่าต้นฉบับ",
+        "written": "ค่าที่เขียนลงไป",
+        "count": "จำนวน",
+        "detail": "รายละเอียด"
+      },
+      "severity": {
+        "error": "วิกฤต",
+        "warning": "คำเตือน",
+        "info": "หมายเหตุ"
+      },
+      "kind": {
+        "unsupported_element": "ไม่รองรับองค์ประกอบนี้",
+        "truncated_text": "ข้อความถูกตัด",
+        "altered_text": "ข้อความถูกเปลี่ยน",
+        "rounded_value": "ค่าถูกปัดเศษ",
+        "value_out_of_range": "ค่าอยู่นอกช่วง",
+        "dropped_attribute": "แอตทริบิวต์ถูกทิ้ง",
+        "unmapped_unit": "หน่วยไม่ได้แมป",
+        "lost_hierarchy": "ระดับลำดับชั้นสูญหาย",
+        "markup_not_representable": "แสดงส่วนบวกเพิ่มไม่ได้",
+        "attachment_skipped": "ข้ามไฟล์แนบ",
+        "changed_identifier": "รหัสระบุถูกเปลี่ยน",
+        "exceeds_limit": "เกินขีดจำกัดการจัดเก็บ",
+        "rejected_row": "ปฏิเสธแถว",
+        "skipped_row": "ข้ามแถว",
+        "parser_warning": "คำเตือนจากตัวอ่าน",
+        "roundtrip_mismatch": "ไม่ตรงกันเมื่อส่งออกแล้วนำเข้ากลับ"
+      }
     }
   },
   "costs": {

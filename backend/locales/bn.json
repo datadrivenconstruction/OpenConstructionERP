@@ -91,6 +91,44 @@
       "batch_progress": "{{total}}-এর মধ্যে আইটেম {{current}}",
       "toast_applied_one": "{{count}}টি ভ্যারিয়েন্ট নির্বাচিত হয়েছে",
       "toast_applied_other": "{{count}}টি ভ্যারিয়েন্ট নির্বাচিত হয়েছে"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "বিনিময় প্রতিবেদন"
+      },
+      "column": {
+        "severity": "তীব্রতা",
+        "kind": "ক্ষতির ধরন",
+        "position": "আইটেম",
+        "field": "ক্ষেত্র",
+        "original": "মূল মান",
+        "written": "লেখা মান",
+        "count": "সংখ্যা",
+        "detail": "বিস্তারিত"
+      },
+      "severity": {
+        "error": "জটিল",
+        "warning": "সতর্কতা",
+        "info": "নোট"
+      },
+      "kind": {
+        "unsupported_element": "অসমর্থিত উপাদান",
+        "truncated_text": "পাঠ্য ছাঁটা হয়েছে",
+        "altered_text": "পাঠ্য বদলেছে",
+        "rounded_value": "মান গোলাকৃত",
+        "value_out_of_range": "মান সীমার বাইরে",
+        "dropped_attribute": "অ্যাট্রিবিউট বাদ পড়েছে",
+        "unmapped_unit": "একক মেলেনি",
+        "lost_hierarchy": "স্তরবিন্যাস হারিয়েছে",
+        "markup_not_representable": "মার্কআপ দেখানো যায় না",
+        "attachment_skipped": "সংযুক্তি বাদ দেওয়া হয়েছে",
+        "changed_identifier": "শনাক্তকারী বদলেছে",
+        "exceeds_limit": "সংরক্ষণ সীমা ছাড়িয়েছে",
+        "rejected_row": "সারি প্রত্যাখ্যাত",
+        "skipped_row": "সারি বাদ দেওয়া হয়েছে",
+        "parser_warning": "রিডারের সতর্কতা",
+        "roundtrip_mismatch": "রাউন্ড ট্রিপ অসঙ্গতি"
+      }
     }
   },
   "costs": {

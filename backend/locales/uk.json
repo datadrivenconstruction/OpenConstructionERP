@@ -91,6 +91,44 @@
       "batch_progress": "Позиція {{current}} з {{total}}",
       "toast_applied_one": "Обрано {{count}} варіант",
       "toast_applied_other": "Обрано {{count}} варіантів"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Звіт обміну"
+      },
+      "column": {
+        "severity": "Серйозність",
+        "kind": "Вид втрати",
+        "position": "Позиція",
+        "field": "Поле",
+        "original": "Початкове значення",
+        "written": "Записане значення",
+        "count": "Кількість",
+        "detail": "Деталі"
+      },
+      "severity": {
+        "error": "Критична",
+        "warning": "Попередження",
+        "info": "Примітка"
+      },
+      "kind": {
+        "unsupported_element": "Елемент не підтримується",
+        "truncated_text": "Текст скорочено",
+        "altered_text": "Текст змінено",
+        "rounded_value": "Значення округлено",
+        "value_out_of_range": "Значення поза діапазоном",
+        "dropped_attribute": "Атрибут відкинуто",
+        "unmapped_unit": "Одиницю не зіставлено",
+        "lost_hierarchy": "Рівень ієрархії втрачено",
+        "markup_not_representable": "Надбавку не можна подати",
+        "attachment_skipped": "Вкладення пропущено",
+        "changed_identifier": "Ідентифікатор змінено",
+        "exceeds_limit": "Перевищено ліміт зберігання",
+        "rejected_row": "Рядок відхилено",
+        "skipped_row": "Рядок пропущено",
+        "parser_warning": "Попередження читача",
+        "roundtrip_mismatch": "Розбіжність при поверненні"
+      }
     }
   },
   "costs": {

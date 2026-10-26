@@ -225,6 +225,11 @@
     "tax_date_readable": {
       "fail": "Skattedatumet '{tax_date}' är inte ett datum, så mängdförteckningen beskattas enligt dagens skattesats i stället för den som gäller för dess datum",
       "suggestion": "Ange skattedatumet som dag, månad, kvartal eller år ({shapes}), eller rensa det för att använda mängdförteckningens basdatum"
+    },
+    "exchange_fidelity": {
+      "fail_import": "Import från {format}: post {ordinal}, {field} kom inte fram intakt (fil: {original}, kalkyl: {written})",
+      "fail_export": "Export till {format}: post {ordinal}, {field} lämnade inte kalkylen intakt (kalkyl: {original}, fil: {written})",
+      "suggestion": "Öppna utbytesrapporten för den här filen, rätta raden eller källan och upprepa utbytet"
     }
   },
   "din276": {

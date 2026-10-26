@@ -91,6 +91,44 @@
       "batch_progress": "Item {{current}} of {{total}}",
       "toast_applied_one": "{{count}} variant chosen",
       "toast_applied_other": "{{count}} variants chosen"
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Exchange report"
+      },
+      "column": {
+        "severity": "Severity",
+        "kind": "Kind of loss",
+        "position": "Position",
+        "field": "Field",
+        "original": "Original value",
+        "written": "Value written",
+        "count": "Count",
+        "detail": "Detail"
+      },
+      "severity": {
+        "error": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "kind": {
+        "unsupported_element": "Element not supported",
+        "truncated_text": "Text truncated",
+        "altered_text": "Text altered",
+        "rounded_value": "Value rounded",
+        "value_out_of_range": "Value out of range",
+        "dropped_attribute": "Attribute dropped",
+        "unmapped_unit": "Unit not mapped",
+        "lost_hierarchy": "Hierarchy level lost",
+        "markup_not_representable": "Markup not representable",
+        "attachment_skipped": "Attachment skipped",
+        "changed_identifier": "Identifier changed",
+        "exceeds_limit": "Exceeds storage limit",
+        "rejected_row": "Row rejected",
+        "skipped_row": "Row skipped",
+        "parser_warning": "Reader warning",
+        "roundtrip_mismatch": "Round-trip mismatch"
+      }
     }
   },
   "costs": {
