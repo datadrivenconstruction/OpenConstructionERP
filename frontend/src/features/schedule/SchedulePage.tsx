@@ -65,6 +65,9 @@ import { ScheduleDelayPanel } from './ScheduleDelayPanel';
 import { ScheduleCodesPanel } from './ScheduleCodesPanel';
 import { ScheduleResourcePanel } from './ScheduleResourcePanel';
 import { ScheduleRealtimePanel } from './ScheduleRealtimePanel';
+import { ProgressSheetDialog } from './ProgressSheetDialog';
+import { SchedulingProfilesPanel } from './SchedulingProfilesPanel';
+import { ImportSourcePanel } from './ImportSourcePanel';
 import { DependencyEditor } from './DependencyEditor';
 import { MilestoneClientToggle } from './MilestoneClientToggle';
 import { BoqLinkEditor } from './BoqLinkEditor';
@@ -1175,8 +1178,9 @@ export function ScheduleDetail({
   const canDeleteSchedule = useHasPermission('schedule.delete');
   const [zoomLevel, setZoomLevel] = useState<ZoomLevel>('week');
   const [viewMode, setViewMode] = useState<
-    'table' | 'gantt' | 'evm' | '4d' | 'quality' | 'risk' | 'compare' | 'progress' | 'delay' | 'codes' | 'calendars' | 'resources' | 'realtime' | 'interchange'
+    'table' | 'gantt' | 'evm' | '4d' | 'quality' | 'risk' | 'compare' | 'progress' | 'profiles' | 'delay' | 'codes' | 'calendars' | 'resources' | 'realtime' | 'interchange'
   >('gantt');
+  const [showProgressSheet, setShowProgressSheet] = useState(false);
   const [showAddActivity, setShowAddActivity] = useState(false);
   const [showBaseline, setShowBaseline] = useState(false);
   // #348: activity whose dependency editor is open (click a Gantt bar to edit).
@@ -1755,8 +1759,24 @@ export function ScheduleDetail({
           <div data-testid="schedule-calendar-notice" className="mt-2 max-w-3xl">
             <CalendarCoverageNotice schedule={{ ...schedule, ...scheduleRecord }} />
           </div>
+          <ImportSourcePanel
+            scheduleId={schedule.id}
+            canEdit={canEditSchedule}
+            compact
+            onOpen={() => setViewMode('interchange')}
+          />
         </div>
         <div className="flex flex-wrap items-center gap-2">
+          {hasActivities && (
+            <Button
+              variant="secondary"
+              icon={<FileSpreadsheet size={16} />}
+              onClick={() => setShowProgressSheet(true)}
+              data-testid="open-progress-sheet"
+            >
+              {t('schedule.progress_sheet.open', { defaultValue: 'Progress sheet' })}
+            </Button>
+          )}
           {canEditSchedule && (
             <Button
               variant="secondary"
@@ -1806,6 +1826,7 @@ export function ScheduleDetail({
                   { key: 'risk' as const, label: t('schedule.view_risk', { defaultValue: 'Risk' }) },
                   { key: 'compare' as const, label: t('schedule.view_compare', { defaultValue: 'Compare' }) },
                   { key: 'progress' as const, label: t('schedule.view_progress', { defaultValue: 'Progress' }) },
+                  { key: 'profiles' as const, label: t('schedule.view_profiles', { defaultValue: 'Scheduling' }) },
                   { key: 'delay' as const, label: t('schedule.view_delay', { defaultValue: 'Delay' }) },
                   { key: 'codes' as const, label: t('schedule.view_codes', { defaultValue: 'Codes' }) },
                   { key: 'calendars' as const, label: t('schedule.calendar.view', { defaultValue: 'Calendars' }) },
@@ -2124,6 +2145,7 @@ export function ScheduleDetail({
               />
             ) : viewMode === 'interchange' ? (
               <div className="space-y-4">
+                <ImportSourcePanel scheduleId={schedule.id} canEdit={canEditSchedule} />
                 <SpreadsheetImportEntry projectId={projectId} schedule={schedule} variant="card" />
                 <ScheduleInterchangePanel scheduleId={schedule.id} projectId={projectId} />
               </div>
@@ -2139,6 +2161,8 @@ export function ScheduleDetail({
                 currency={projectCurrency}
                 dataDate={schedule.start_date}
               />
+            ) : viewMode === 'profiles' ? (
+              <SchedulingProfilesPanel scheduleId={schedule.id} projectId={projectId} canEdit={canEditSchedule} />
             ) : viewMode === 'delay' ? (
               <ScheduleDelayPanel
                 scheduleId={schedule.id}
@@ -2747,6 +2771,15 @@ export function ScheduleDetail({
         onCancel={() => setDeleteTarget(null)}
         onDelete={(cascade) => deleteTarget && deleteActivity.mutate({ activityId: deleteTarget.id, cascade })}
       />
+      {showProgressSheet && (
+        <ProgressSheetDialog
+          open={showProgressSheet}
+          onClose={() => setShowProgressSheet(false)}
+          scheduleId={schedule.id}
+          activities={ganttData?.activities ?? []}
+          canEdit={canEditSchedule}
+        />
+      )}
       <ConfirmDialog {...confirmProps} />
     </div>
   );
