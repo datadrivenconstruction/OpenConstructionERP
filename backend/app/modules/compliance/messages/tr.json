@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Uygunluk DSL hatası",
+      "syntax_error": "Uygunluk DSL sözdizimi hatası: {detail}",
+      "type_error": "Uygunluk DSL tür hatası: {detail}",
+      "validation_failed": "Uygunluk DSL doğrulaması başarısız oldu: {detail}",
+      "not_found": "Uygunluk DSL kuralı bulunamadı",
+      "duplicate_rule_id": "'{rule_id}' kimliğine sahip bir kural zaten var",
+      "access_denied": "Bu işlemi yalnızca kuralın sahibi gerçekleştirebilir",
+      "compiled": "'{rule_id}' kuralı başarıyla derlendi ve kaydedildi",
+      "deleted": "'{rule_id}' kuralı silindi",
+      "evaluation_failed": "'{rule_id}' kuralı değerlendirilemedi: {detail}"
+    },
+    "nl": {
+      "title": "Doğal dil kural oluşturucu",
+      "subtitle": "Kuralınızı sade İngilizce, Almanca veya Rusça olarak açıklayın - oluşturucu geçerli bir DSL üretir.",
+      "input_placeholder": "ör. tüm duvarların yangın dayanım değeri olmalıdır",
+      "generate": "Oluştur",
+      "save_as_rule": "Uygunluk kuralı olarak kaydet",
+      "preview_title": "DSL önizleme",
+      "no_dsl_yet": "Bir cümle yazın ve DSL'yi görmek için Oluştur'a basın.",
+      "patterns_title": "Desteklenen kalıplar",
+      "method_pattern": "Kalıp eşleşti",
+      "method_ai": "Yapay zeka yedeği",
+      "method_fallback": "Eşleşme yok",
+      "use_ai": "Yapay zeka yedeğini kullan",
+      "ai_unavailable": "Yapay zeka yedeği atlandı - API anahtarı yapılandırılmamış.",
+      "input_empty": "Girdi boş.",
+      "input_too_long": "Girdi 2000 karakteri aşıyor.",
+      "no_match": "Girdiyle eşleşen bir kalıp bulunamadı. Sağdaki desteklenen ifadelerden birini deneyin.",
+      "low_confidence": "Düşük güven - kaydetmeden önce üretilen DSL'yi dikkatle inceleyin.",
+      "saved": "Kural başarıyla kaydedildi.",
+      "save_failed": "Kural kaydedilemedi: {detail}",
+      "pattern": {
+        "must_have": "Her <entity> öğesinin <field> alanı olmalıdır",
+        "must_not_have": "Hiçbir <entity> öğesi <field> = <value> olamaz",
+        "value_equals": "Her <entity> öğesinin <field> = <value> olmalıdır",
+        "value_greater_than": "Her <entity> öğesinin <field> > <N> olmalıdır",
+        "value_less_than": "Her <entity> öğesinin <field> < <N> olmalıdır",
+        "value_at_least": "Her <entity> öğesinin <field> >= <N> olmalıdır",
+        "count_at_least": "En az <N> adet <entity> olmalıdır",
+        "count_zero": "<entity> öğesine izin verilmez"
+      }
+    }
+  }
+}

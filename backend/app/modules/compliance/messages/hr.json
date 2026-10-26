@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Greška DSL-a za usklađenost",
+      "syntax_error": "Sintaktička greška DSL-a za usklađenost: {detail}",
+      "type_error": "Greška tipa u DSL-u za usklađenost: {detail}",
+      "validation_failed": "Provjera DSL-a za usklađenost nije uspjela: {detail}",
+      "not_found": "Pravilo DSL-a za usklađenost nije pronađeno",
+      "duplicate_rule_id": "Pravilo s identifikatorom '{rule_id}' već postoji",
+      "access_denied": "Samo vlasnik pravila može izvršiti ovu radnju",
+      "compiled": "Pravilo '{rule_id}' uspješno je prevedeno i registrirano",
+      "deleted": "Pravilo '{rule_id}' je obrisano",
+      "evaluation_failed": "Pravilo '{rule_id}' nije moguće procijeniti: {detail}"
+    },
+    "nl": {
+      "title": "Graditelj pravila na prirodnom jeziku",
+      "subtitle": "Opišite pravilo na jednostavnom engleskom, njemačkom ili ruskom - graditelj generira valjani DSL.",
+      "input_placeholder": "npr. svi zidovi moraju imati svojstvo vatrootpornosti",
+      "generate": "Generiraj",
+      "save_as_rule": "Spremi kao pravilo usklađenosti",
+      "preview_title": "Pregled DSL-a",
+      "no_dsl_yet": "Upišite rečenicu i pritisnite Generiraj da vidite DSL.",
+      "patterns_title": "Podržani obrasci",
+      "method_pattern": "Obrazac podudaran",
+      "method_ai": "Rezerva s UI-jem",
+      "method_fallback": "Nema podudaranja",
+      "use_ai": "Koristi rezervu s UI-jem",
+      "ai_unavailable": "Rezerva s UI-jem preskočena - nije konfiguriran API ključ.",
+      "input_empty": "Unos je prazan.",
+      "input_too_long": "Unos premašuje 2000 znakova.",
+      "no_match": "Nijedan obrazac ne odgovara unosu. Isprobajte jedan od podržanih izraza desno.",
+      "low_confidence": "Niska pouzdanost - pažljivo pregledajte generirani DSL prije spremanja.",
+      "saved": "Pravilo je uspješno spremljeno.",
+      "save_failed": "Pravilo nije moguće spremiti: {detail}",
+      "pattern": {
+        "must_have": "Svaki <entity> mora imati <field>",
+        "must_not_have": "Nijedan <entity> ne smije imati <field> = <value>",
+        "value_equals": "Svaki <entity> mora imati <field> = <value>",
+        "value_greater_than": "Svaki <entity> mora imati <field> > <N>",
+        "value_less_than": "Svaki <entity> mora imati <field> < <N>",
+        "value_at_least": "Svaki <entity> mora imati <field> >= <N>",
+        "count_at_least": "Mora postojati najmanje <N> <entity>",
+        "count_zero": "Nijedan <entity> nije dopušten"
+      }
+    }
+  }
+}

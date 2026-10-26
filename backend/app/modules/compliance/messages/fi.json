@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Vaatimustenmukaisuus-DSL-virhe",
+      "syntax_error": "Vaatimustenmukaisuus-DSL:n syntaksivirhe: {detail}",
+      "type_error": "Vaatimustenmukaisuus-DSL:n tyyppivirhe: {detail}",
+      "validation_failed": "Vaatimustenmukaisuus-DSL:n validointi epäonnistui: {detail}",
+      "not_found": "Vaatimustenmukaisuus-DSL-sääntöä ei löytynyt",
+      "duplicate_rule_id": "Tunnuksen '{rule_id}' sääntö on jo olemassa",
+      "access_denied": "Vain säännön omistaja voi suorittaa tämän toiminnon",
+      "compiled": "Sääntö '{rule_id}' käännettiin ja rekisteröitiin onnistuneesti",
+      "deleted": "Sääntö '{rule_id}' poistettiin",
+      "evaluation_failed": "Sääntöä '{rule_id}' ei voitu arvioida: {detail}"
+    },
+    "nl": {
+      "title": "Luonnollisen kielen sääntörakentaja",
+      "subtitle": "Kuvaa sääntö selkeällä englanniksi, saksaksi tai venäjäksi - rakentaja luo kelvollisen DSL:n.",
+      "input_placeholder": "esim. kaikilla seinillä on oltava palonkestävyysominaisuus",
+      "generate": "Luo",
+      "save_as_rule": "Tallenna vaatimustenmukaisuussääntönä",
+      "preview_title": "DSL-esikatselu",
+      "no_dsl_yet": "Kirjoita lause ja paina Luo nähdäksesi DSL:n.",
+      "patterns_title": "Tuetut mallit",
+      "method_pattern": "Malli täsmäsi",
+      "method_ai": "Tekoälyn varavaihtoehto",
+      "method_fallback": "Ei täsmäystä",
+      "use_ai": "Käytä tekoälyn varavaihtoehtoa",
+      "ai_unavailable": "Tekoälyn varavaihtoehto ohitettiin - API-avainta ei ole määritetty.",
+      "input_empty": "Syöte on tyhjä.",
+      "input_too_long": "Syöte ylittää 2000 merkkiä.",
+      "no_match": "Mikään malli ei täsmännyt syötteeseen. Kokeile jotakin oikealla olevista tuetuista muotoiluista.",
+      "low_confidence": "Matala luotettavuus - tarkista luotu DSL huolellisesti ennen tallentamista.",
+      "saved": "Sääntö tallennettiin onnistuneesti.",
+      "save_failed": "Sääntöä ei voitu tallentaa: {detail}",
+      "pattern": {
+        "must_have": "Jokaisella <entity>-kohteella on oltava <field>",
+        "must_not_have": "Millään <entity>-kohteella ei saa olla <field> = <value>",
+        "value_equals": "Jokaisella <entity>-kohteella on oltava <field> = <value>",
+        "value_greater_than": "Jokaisen <entity>-kohteen <field> on oltava > <N>",
+        "value_less_than": "Jokaisen <entity>-kohteen <field> on oltava < <N>",
+        "value_at_least": "Jokaisen <entity>-kohteen <field> on oltava >= <N>",
+        "count_at_least": "Kohteita <entity> on oltava vähintään <N>",
+        "count_zero": "<entity>-kohteet eivät ole sallittuja"
+      }
+    }
+  }
+}

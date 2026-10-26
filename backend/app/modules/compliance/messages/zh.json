@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "合规 DSL 错误",
+      "syntax_error": "合规 DSL 语法错误：{detail}",
+      "type_error": "合规 DSL 类型错误：{detail}",
+      "validation_failed": "合规 DSL 验证失败：{detail}",
+      "not_found": "未找到合规 DSL 规则",
+      "duplicate_rule_id": "ID 为 '{rule_id}' 的规则已存在",
+      "access_denied": "只有规则所有者可以执行此操作",
+      "compiled": "规则 '{rule_id}' 已成功编译并注册",
+      "deleted": "规则 '{rule_id}' 已删除",
+      "evaluation_failed": "无法评估规则 '{rule_id}'：{detail}"
+    },
+    "nl": {
+      "title": "自然语言规则构建器",
+      "subtitle": "请用简单的英语、德语或俄语描述您的规则，构建器将生成有效的 DSL。",
+      "input_placeholder": "例如：所有墙体都必须具有耐火等级属性",
+      "generate": "生成",
+      "save_as_rule": "保存为合规规则",
+      "preview_title": "DSL 预览",
+      "no_dsl_yet": "输入一句话并点击生成，即可查看 DSL。",
+      "patterns_title": "支持的句式",
+      "method_pattern": "匹配到模式",
+      "method_ai": "AI 备用",
+      "method_fallback": "未匹配",
+      "use_ai": "使用 AI 备用",
+      "ai_unavailable": "已跳过 AI 备用：未配置 API 密钥。",
+      "input_empty": "输入为空。",
+      "input_too_long": "输入超过 2000 个字符。",
+      "no_match": "没有模式与输入匹配。请尝试右侧支持的句式之一。",
+      "low_confidence": "置信度较低，保存前请仔细检查生成的 DSL。",
+      "saved": "规则已成功保存。",
+      "save_failed": "无法保存规则：{detail}",
+      "pattern": {
+        "must_have": "每个 <entity> 都必须具有 <field>",
+        "must_not_have": "任何 <entity> 都不得具有 <field> = <value>",
+        "value_equals": "每个 <entity> 的 <field> 必须等于 <value>",
+        "value_greater_than": "每个 <entity> 的 <field> 必须大于 <N>",
+        "value_less_than": "每个 <entity> 的 <field> 必须小于 <N>",
+        "value_at_least": "每个 <entity> 的 <field> 必须大于或等于 <N>",
+        "count_at_least": "至少必须有 <N> 个 <entity>",
+        "count_zero": "不允许存在 <entity>"
+      }
+    }
+  }
+}

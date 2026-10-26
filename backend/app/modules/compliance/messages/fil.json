@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Error sa compliance DSL",
+      "syntax_error": "Syntax error sa compliance DSL: {detail}",
+      "type_error": "Type error sa compliance DSL: {detail}",
+      "validation_failed": "Nabigo ang validation ng compliance DSL: {detail}",
+      "not_found": "Hindi nahanap ang compliance DSL rule",
+      "duplicate_rule_id": "May rule nang may ID na '{rule_id}'",
+      "access_denied": "Ang may-ari lamang ng rule ang puwedeng gumawa ng aksyong ito",
+      "compiled": "Matagumpay na na-compile at narehistro ang rule na '{rule_id}'",
+      "deleted": "Nabura ang rule na '{rule_id}'",
+      "evaluation_failed": "Hindi ma-evaluate ang rule na '{rule_id}': {detail}"
+    },
+    "nl": {
+      "title": "Rule Builder gamit ang Natural na Wika",
+      "subtitle": "Ilarawan ang iyong rule sa simpleng English, German o Russian - gagawa ang builder ng valid na DSL.",
+      "input_placeholder": "hal. dapat may fire-rating property ang lahat ng pader",
+      "generate": "I-generate",
+      "save_as_rule": "I-save bilang Compliance Rule",
+      "preview_title": "DSL Preview",
+      "no_dsl_yet": "Mag-type ng pangungusap at pindutin ang Generate para makita ang DSL.",
+      "patterns_title": "Mga sinusuportahang pattern",
+      "method_pattern": "Tumugma sa pattern",
+      "method_ai": "AI fallback",
+      "method_fallback": "Walang tugma",
+      "use_ai": "Gamitin ang AI fallback",
+      "ai_unavailable": "Nilaktawan ang AI fallback - walang naka-configure na API key.",
+      "input_empty": "Walang laman ang input.",
+      "input_too_long": "Lumampas ang input sa 2000 character.",
+      "no_match": "Walang pattern na tumugma sa input. Subukan ang isa sa mga sinusuportahang pagkakasulat sa kanan.",
+      "low_confidence": "Mababa ang confidence - maingat na suriin ang na-generate na DSL bago i-save.",
+      "saved": "Matagumpay na na-save ang rule.",
+      "save_failed": "Hindi ma-save ang rule: {detail}",
+      "pattern": {
+        "must_have": "Dapat may <field> ang lahat ng <entity>",
+        "must_not_have": "Walang <entity> ang puwedeng magkaroon ng <field> = <value>",
+        "value_equals": "Dapat may <field> = <value> ang bawat <entity>",
+        "value_greater_than": "Dapat may <field> > <N> ang bawat <entity>",
+        "value_less_than": "Dapat may <field> < <N> ang bawat <entity>",
+        "value_at_least": "Dapat may <field> >= <N> ang bawat <entity>",
+        "count_at_least": "Dapat may kahit <N> na <entity>",
+        "count_zero": "Hindi pinapayagan ang <entity>"
+      }
+    }
+  }
+}

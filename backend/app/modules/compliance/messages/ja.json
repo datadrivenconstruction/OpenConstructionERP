@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "コンプライアンス DSL エラー",
+      "syntax_error": "コンプライアンス DSL の構文エラー: {detail}",
+      "type_error": "コンプライアンス DSL の型エラー: {detail}",
+      "validation_failed": "コンプライアンス DSL の検証に失敗しました: {detail}",
+      "not_found": "コンプライアンス DSL ルールが見つかりません",
+      "duplicate_rule_id": "ID '{rule_id}' のルールは既に存在します",
+      "access_denied": "この操作はルールの所有者のみ実行できます",
+      "compiled": "ルール '{rule_id}' のコンパイルと登録が完了しました",
+      "deleted": "ルール '{rule_id}' を削除しました",
+      "evaluation_failed": "ルール '{rule_id}' を評価できませんでした: {detail}"
+    },
+    "nl": {
+      "title": "自然言語ルールビルダー",
+      "subtitle": "ルールを平易な英語、ドイツ語、ロシア語で記述してください。有効な DSL を生成します。",
+      "input_placeholder": "例: すべての壁に耐火等級のプロパティが必要",
+      "generate": "生成",
+      "save_as_rule": "コンプライアンスルールとして保存",
+      "preview_title": "DSL プレビュー",
+      "no_dsl_yet": "文を入力して「生成」を押すと DSL が表示されます。",
+      "patterns_title": "対応パターン",
+      "method_pattern": "パターン一致",
+      "method_ai": "AI による補完",
+      "method_fallback": "一致なし",
+      "use_ai": "AI による補完を使用",
+      "ai_unavailable": "AI による補完をスキップしました - API キーが設定されていません。",
+      "input_empty": "入力が空です。",
+      "input_too_long": "入力が 2000 文字を超えています。",
+      "no_match": "入力に一致するパターンがありません。右側の対応表現のいずれかをお試しください。",
+      "low_confidence": "信頼度が低いため、保存前に生成された DSL を慎重に確認してください。",
+      "saved": "ルールを保存しました。",
+      "save_failed": "ルールを保存できませんでした: {detail}",
+      "pattern": {
+        "must_have": "すべての <entity> に <field> が必要",
+        "must_not_have": "どの <entity> も <field> = <value> であってはならない",
+        "value_equals": "すべての <entity> は <field> = <value> である必要がある",
+        "value_greater_than": "すべての <entity> は <field> > <N> である必要がある",
+        "value_less_than": "すべての <entity> は <field> < <N> である必要がある",
+        "value_at_least": "すべての <entity> は <field> >= <N> である必要がある",
+        "count_at_least": "<entity> は少なくとも <N> 件必要",
+        "count_zero": "<entity> は許可されていません"
+      }
+    }
+  }
+}

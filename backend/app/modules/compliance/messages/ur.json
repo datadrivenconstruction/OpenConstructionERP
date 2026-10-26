@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "تعمیل DSL کی خرابی",
+      "syntax_error": "تعمیل DSL میں نحوی خرابی: {detail}",
+      "type_error": "تعمیل DSL میں قسم کی خرابی: {detail}",
+      "validation_failed": "تعمیل DSL کی توثیق ناکام ہوئی: {detail}",
+      "not_found": "تعمیل DSL کا قاعدہ نہیں ملا",
+      "duplicate_rule_id": "شناخت '{rule_id}' والا قاعدہ پہلے سے موجود ہے",
+      "access_denied": "یہ عمل صرف قاعدے کا مالک کر سکتا ہے",
+      "compiled": "قاعدہ '{rule_id}' کامیابی سے مرتب اور رجسٹر ہو گیا",
+      "deleted": "قاعدہ '{rule_id}' حذف کر دیا گیا",
+      "evaluation_failed": "قاعدہ '{rule_id}' کا جائزہ نہیں لیا جا سکا: {detail}"
+    },
+    "nl": {
+      "title": "قدرتی زبان کے قاعدے بنانے والا",
+      "subtitle": "اپنا قاعدہ سادہ انگریزی، جرمن یا روسی میں بیان کریں - یہ بنانے والا درست DSL تیار کرے گا۔",
+      "input_placeholder": "مثلاً تمام دیواروں میں آگ مزاحمت کی خصوصیت ہونی چاہیے",
+      "generate": "تیار کریں",
+      "save_as_rule": "تعمیل قاعدے کے طور پر محفوظ کریں",
+      "preview_title": "DSL پیش نظارہ",
+      "no_dsl_yet": "ایک جملہ لکھیں اور DSL دیکھنے کے لیے تیار کریں دبائیں۔",
+      "patterns_title": "معاون نمونے",
+      "method_pattern": "نمونہ مل گیا",
+      "method_ai": "AI متبادل",
+      "method_fallback": "کوئی مماثلت نہیں",
+      "use_ai": "AI متبادل استعمال کریں",
+      "ai_unavailable": "AI متبادل چھوڑ دیا گیا - کوئی API کلید ترتیب نہیں دی گئی۔",
+      "input_empty": "ان پٹ خالی ہے۔",
+      "input_too_long": "ان پٹ 2000 حروف سے زیادہ ہے۔",
+      "no_match": "ان پٹ سے کوئی نمونہ مماثل نہیں ہوا۔ دائیں جانب دیے گئے معاون الفاظ میں سے کوئی آزمائیں۔",
+      "low_confidence": "اعتماد کم ہے - محفوظ کرنے سے پہلے تیار کردہ DSL کا غور سے جائزہ لیں۔",
+      "saved": "قاعدہ کامیابی سے محفوظ ہو گیا۔",
+      "save_failed": "قاعدہ محفوظ نہیں ہو سکا: {detail}",
+      "pattern": {
+        "must_have": "ہر <entity> میں <field> ہونا چاہیے",
+        "must_not_have": "کسی <entity> میں <field> = <value> نہیں ہونا چاہیے",
+        "value_equals": "ہر <entity> میں <field> = <value> ہونا چاہیے",
+        "value_greater_than": "ہر <entity> میں <field> > <N> ہونا چاہیے",
+        "value_less_than": "ہر <entity> میں <field> < <N> ہونا چاہیے",
+        "value_at_least": "ہر <entity> میں <field> >= <N> ہونا چاہیے",
+        "count_at_least": "کم از کم <N> <entity> ہونے چاہئیں",
+        "count_zero": "کوئی <entity> جائز نہیں ہے"
+      }
+    }
+  }
+}

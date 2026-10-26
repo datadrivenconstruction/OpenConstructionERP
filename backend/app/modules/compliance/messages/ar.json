@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "خطأ في لغة قواعد الامتثال",
+      "syntax_error": "خطأ في بناء جملة لغة قواعد الامتثال: {detail}",
+      "type_error": "خطأ في نوع البيانات في لغة قواعد الامتثال: {detail}",
+      "validation_failed": "فشل التحقق من لغة قواعد الامتثال: {detail}",
+      "not_found": "قاعدة لغة الامتثال غير موجودة",
+      "duplicate_rule_id": "توجد قاعدة بالمعرف '{rule_id}' بالفعل",
+      "access_denied": "يمكن لمالك القاعدة فقط تنفيذ هذا الإجراء",
+      "compiled": "تم تجميع القاعدة '{rule_id}' وتسجيلها بنجاح",
+      "deleted": "تم حذف القاعدة '{rule_id}'",
+      "evaluation_failed": "تعذر تقييم القاعدة '{rule_id}': {detail}"
+    },
+    "nl": {
+      "title": "منشئ القواعد بلغة طبيعية",
+      "subtitle": "صف قاعدتك بلغة بسيطة بالإنجليزية أو الألمانية أو الروسية، وسيُنشئ المنشئ لغة DSL صالحة.",
+      "input_placeholder": "مثال: يجب أن يكون لكل جدار خاصية تصنيف الحريق",
+      "generate": "إنشاء",
+      "save_as_rule": "حفظ كقاعدة امتثال",
+      "preview_title": "معاينة لغة DSL",
+      "no_dsl_yet": "اكتب جملة واضغط على إنشاء لعرض لغة DSL.",
+      "patterns_title": "الأنماط المدعومة",
+      "method_pattern": "تطابق نمط",
+      "method_ai": "احتياطي الذكاء الاصطناعي",
+      "method_fallback": "لا يوجد تطابق",
+      "use_ai": "استخدام احتياطي الذكاء الاصطناعي",
+      "ai_unavailable": "تم تخطي احتياطي الذكاء الاصطناعي - لم يتم إعداد مفتاح واجهة برمجية.",
+      "input_empty": "المدخل فارغ.",
+      "input_too_long": "يتجاوز المدخل 2000 حرف.",
+      "no_match": "لم يتطابق أي نمط مع المدخل. جرّب إحدى الصيغ المدعومة على اليمين.",
+      "low_confidence": "ثقة منخفضة - راجع لغة DSL المُنشأة بعناية قبل الحفظ.",
+      "saved": "تم حفظ القاعدة بنجاح.",
+      "save_failed": "تعذر حفظ القاعدة: {detail}",
+      "pattern": {
+        "must_have": "يجب أن يحتوي كل <entity> على <field>",
+        "must_not_have": "لا يجوز أن يحتوي أي <entity> على <field> = <value>",
+        "value_equals": "يجب أن يحتوي كل <entity> على <field> = <value>",
+        "value_greater_than": "يجب أن يكون <field> لكل <entity> أكبر من <N>",
+        "value_less_than": "يجب أن يكون <field> لكل <entity> أصغر من <N>",
+        "value_at_least": "يجب أن يكون <field> لكل <entity> أكبر من أو يساوي <N>",
+        "count_at_least": "يجب أن يوجد <N> <entity> على الأقل",
+        "count_zero": "لا يُسمح بوجود <entity>"
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Chyba DSL pro shodu",
+      "syntax_error": "Syntaktická chyba DSL pro shodu: {detail}",
+      "type_error": "Chyba typu v DSL pro shodu: {detail}",
+      "validation_failed": "Ověření DSL pro shodu selhalo: {detail}",
+      "not_found": "Pravidlo DSL pro shodu nebylo nalezeno",
+      "duplicate_rule_id": "Pravidlo s ID '{rule_id}' již existuje",
+      "access_denied": "Tuto akci může provést pouze vlastník pravidla",
+      "compiled": "Pravidlo '{rule_id}' bylo úspěšně zkompilováno a zaregistrováno",
+      "deleted": "Pravidlo '{rule_id}' bylo smazáno",
+      "evaluation_failed": "Pravidlo '{rule_id}' nelze vyhodnotit: {detail}"
+    },
+    "nl": {
+      "title": "Tvorba pravidel v přirozeném jazyce",
+      "subtitle": "Popište pravidlo jednoduchou angličtinou, němčinou nebo ruštinou - nástroj vytvoří platný DSL.",
+      "input_placeholder": "např. všechny stěny musí mít vlastnost požární odolnosti",
+      "generate": "Vygenerovat",
+      "save_as_rule": "Uložit jako pravidlo shody",
+      "preview_title": "Náhled DSL",
+      "no_dsl_yet": "Zadejte větu a stiskněte Vygenerovat, zobrazí se DSL.",
+      "patterns_title": "Podporované vzory",
+      "method_pattern": "Nalezen vzor",
+      "method_ai": "Záložní AI",
+      "method_fallback": "Bez shody",
+      "use_ai": "Použít záložní AI",
+      "ai_unavailable": "Záložní AI přeskočena - není nakonfigurován API klíč.",
+      "input_empty": "Vstup je prázdný.",
+      "input_too_long": "Vstup přesahuje 2000 znaků.",
+      "no_match": "Vstupu neodpovídá žádný vzor. Zkuste jednu z podporovaných formulací vpravo.",
+      "low_confidence": "Nízká spolehlivost - před uložením pečlivě zkontrolujte vygenerovaný DSL.",
+      "saved": "Pravidlo bylo úspěšně uloženo.",
+      "save_failed": "Pravidlo nelze uložit: {detail}",
+      "pattern": {
+        "must_have": "Každý <entity> musí mít <field>",
+        "must_not_have": "Žádný <entity> nesmí mít <field> = <value>",
+        "value_equals": "Každý <entity> musí mít <field> = <value>",
+        "value_greater_than": "Každý <entity> musí mít <field> > <N>",
+        "value_less_than": "Každý <entity> musí mít <field> < <N>",
+        "value_at_least": "Každý <entity> musí mít <field> >= <N>",
+        "count_at_least": "Musí existovat alespoň <N> <entity>",
+        "count_zero": "<entity> nejsou povoleny"
+      }
+    }
+  }
+}

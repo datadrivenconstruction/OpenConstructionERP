@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Error del DSL de cumplimiento",
+      "syntax_error": "Error de sintaxis del DSL de cumplimiento: {detail}",
+      "type_error": "Error de tipo del DSL de cumplimiento: {detail}",
+      "validation_failed": "La validación del DSL de cumplimiento ha fallado: {detail}",
+      "not_found": "No se encontró la regla DSL de cumplimiento",
+      "duplicate_rule_id": "Ya existe una regla con el identificador '{rule_id}'",
+      "access_denied": "Solo el propietario de la regla puede realizar esta acción",
+      "compiled": "La regla '{rule_id}' se compiló y registró correctamente",
+      "deleted": "La regla '{rule_id}' se ha eliminado",
+      "evaluation_failed": "No se pudo evaluar la regla '{rule_id}': {detail}"
+    },
+    "nl": {
+      "title": "Constructor de reglas en lenguaje natural",
+      "subtitle": "Describa su regla en inglés, alemán o ruso sencillo: el constructor genera un DSL válido.",
+      "input_placeholder": "p. ej. todos los muros deben tener una propiedad de resistencia al fuego",
+      "generate": "Generar",
+      "save_as_rule": "Guardar como regla de cumplimiento",
+      "preview_title": "Vista previa del DSL",
+      "no_dsl_yet": "Escriba una frase y pulse Generar para ver el DSL.",
+      "patterns_title": "Patrones admitidos",
+      "method_pattern": "Patrón coincidente",
+      "method_ai": "Alternativa de IA",
+      "method_fallback": "Sin coincidencia",
+      "use_ai": "Usar alternativa de IA",
+      "ai_unavailable": "Alternativa de IA omitida: no hay ninguna clave de API configurada.",
+      "input_empty": "La entrada está vacía.",
+      "input_too_long": "La entrada supera los 2000 caracteres.",
+      "no_match": "Ningún patrón coincide con la entrada. Pruebe una de las formulaciones admitidas a la derecha.",
+      "low_confidence": "Confianza baja: revise con atención el DSL generado antes de guardarlo.",
+      "saved": "La regla se ha guardado correctamente.",
+      "save_failed": "No se pudo guardar la regla: {detail}",
+      "pattern": {
+        "must_have": "Todo <entity> debe tener <field>",
+        "must_not_have": "Ningún <entity> puede tener <field> = <value>",
+        "value_equals": "Todo <entity> debe tener <field> = <value>",
+        "value_greater_than": "Todo <entity> debe tener <field> > <N>",
+        "value_less_than": "Todo <entity> debe tener <field> < <N>",
+        "value_at_least": "Todo <entity> debe tener <field> >= <N>",
+        "count_at_least": "Debe haber al menos <N> <entity>",
+        "count_zero": "No se permite ningún <entity>"
+      }
+    }
+  }
+}

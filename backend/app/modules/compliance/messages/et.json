@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Vastavuse DSL-i viga",
+      "syntax_error": "Vastavuse DSL-i süntaksiviga: {detail}",
+      "type_error": "Vastavuse DSL-i tüübiviga: {detail}",
+      "validation_failed": "Vastavuse DSL-i valideerimine ebaõnnestus: {detail}",
+      "not_found": "Vastavuse DSL-i reeglit ei leitud",
+      "duplicate_rule_id": "Identifikaatoriga '{rule_id}' reegel on juba olemas",
+      "access_denied": "Seda toimingut saab teha ainult reegli omanik",
+      "compiled": "Reegel '{rule_id}' koostati ja registreeriti edukalt",
+      "deleted": "Reegel '{rule_id}' kustutati",
+      "evaluation_failed": "Reeglit '{rule_id}' ei õnnestunud hinnata: {detail}"
+    },
+    "nl": {
+      "title": "Loomuliku keele reeglikoostaja",
+      "subtitle": "Kirjeldage reeglit lihtsas inglise, saksa või vene keeles - koostaja genereerib kehtiva DSL-i.",
+      "input_placeholder": "nt kõigil seintel peab olema tulekindluse omadus",
+      "generate": "Genereeri",
+      "save_as_rule": "Salvesta vastavusreeglina",
+      "preview_title": "DSL-i eelvaade",
+      "no_dsl_yet": "Sisestage lause ja vajutage Genereeri, et näha DSL-i.",
+      "patterns_title": "Toetatud mustrid",
+      "method_pattern": "Muster sobis",
+      "method_ai": "AI-varuvariant",
+      "method_fallback": "Vastet ei leitud",
+      "use_ai": "Kasuta AI-varuvarianti",
+      "ai_unavailable": "AI-varuvariant jäeti vahele - API-võtit pole seadistatud.",
+      "input_empty": "Sisend on tühi.",
+      "input_too_long": "Sisend ületab 2000 märki.",
+      "no_match": "Ükski muster ei sobinud sisendiga. Proovige üht paremal olevat toetatud sõnastust.",
+      "low_confidence": "Madal usaldusväärsus - enne salvestamist kontrollige genereeritud DSL-i hoolikalt.",
+      "saved": "Reegel salvestati edukalt.",
+      "save_failed": "Reeglit ei õnnestunud salvestada: {detail}",
+      "pattern": {
+        "must_have": "Igal <entity>-l peab olema <field>",
+        "must_not_have": "Ühelgi <entity>-l ei tohi olla <field> = <value>",
+        "value_equals": "Igal <entity>-l peab olema <field> = <value>",
+        "value_greater_than": "Igal <entity>-l peab olema <field> > <N>",
+        "value_less_than": "Igal <entity>-l peab olema <field> < <N>",
+        "value_at_least": "Igal <entity>-l peab olema <field> >= <N>",
+        "count_at_least": "Peab olema vähemalt <N> <entity>",
+        "count_zero": "Ühtegi <entity>-t ei ole lubatud"
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Kesalahan DSL kepatuhan",
+      "syntax_error": "Kesalahan sintaksis DSL kepatuhan: {detail}",
+      "type_error": "Kesalahan tipe DSL kepatuhan: {detail}",
+      "validation_failed": "Validasi DSL kepatuhan gagal: {detail}",
+      "not_found": "Aturan DSL kepatuhan tidak ditemukan",
+      "duplicate_rule_id": "Aturan dengan ID '{rule_id}' sudah ada",
+      "access_denied": "Hanya pemilik aturan yang dapat melakukan tindakan ini",
+      "compiled": "Aturan '{rule_id}' berhasil dikompilasi dan didaftarkan",
+      "deleted": "Aturan '{rule_id}' telah dihapus",
+      "evaluation_failed": "Aturan '{rule_id}' tidak dapat dievaluasi: {detail}"
+    },
+    "nl": {
+      "title": "Pembuat Aturan Bahasa Alami",
+      "subtitle": "Jelaskan aturan Anda dalam bahasa Inggris, Jerman, atau Rusia yang sederhana - pembuat akan menghasilkan DSL yang valid.",
+      "input_placeholder": "mis. semua dinding harus memiliki properti tahan api",
+      "generate": "Buat",
+      "save_as_rule": "Simpan sebagai Aturan Kepatuhan",
+      "preview_title": "Pratinjau DSL",
+      "no_dsl_yet": "Ketik sebuah kalimat lalu tekan Buat untuk melihat DSL.",
+      "patterns_title": "Pola yang didukung",
+      "method_pattern": "Pola cocok",
+      "method_ai": "Cadangan AI",
+      "method_fallback": "Tidak cocok",
+      "use_ai": "Gunakan cadangan AI",
+      "ai_unavailable": "Cadangan AI dilewati - tidak ada kunci API yang dikonfigurasi.",
+      "input_empty": "Masukan kosong.",
+      "input_too_long": "Masukan melebihi 2000 karakter.",
+      "no_match": "Tidak ada pola yang cocok dengan masukan. Coba salah satu rumusan yang didukung di sebelah kanan.",
+      "low_confidence": "Tingkat keyakinan rendah - periksa DSL yang dihasilkan dengan cermat sebelum menyimpan.",
+      "saved": "Aturan berhasil disimpan.",
+      "save_failed": "Aturan tidak dapat disimpan: {detail}",
+      "pattern": {
+        "must_have": "Setiap <entity> harus memiliki <field>",
+        "must_not_have": "Tidak ada <entity> yang boleh memiliki <field> = <value>",
+        "value_equals": "Setiap <entity> harus memiliki <field> = <value>",
+        "value_greater_than": "Setiap <entity> harus memiliki <field> > <N>",
+        "value_less_than": "Setiap <entity> harus memiliki <field> < <N>",
+        "value_at_least": "Setiap <entity> harus memiliki <field> >= <N>",
+        "count_at_least": "Harus ada minimal <N> <entity>",
+        "count_zero": "Tidak ada <entity> yang diizinkan"
+      }
+    }
+  }
+}

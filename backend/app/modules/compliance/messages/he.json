@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "שגיאת DSL של ציות",
+      "syntax_error": "שגיאת תחביר ב-DSL של ציות: {detail}",
+      "type_error": "שגיאת טיפוס ב-DSL של ציות: {detail}",
+      "validation_failed": "אימות ה-DSL של ציות נכשל: {detail}",
+      "not_found": "כלל ה-DSL של ציות לא נמצא",
+      "duplicate_rule_id": "כלל בעל המזהה '{rule_id}' כבר קיים",
+      "access_denied": "רק בעל הכלל יכול לבצע פעולה זו",
+      "compiled": "הכלל '{rule_id}' קומפל ונרשם בהצלחה",
+      "deleted": "הכלל '{rule_id}' נמחק",
+      "evaluation_failed": "לא ניתן היה להעריך את הכלל '{rule_id}': {detail}"
+    },
+    "nl": {
+      "title": "בונה כללים בשפה טבעית",
+      "subtitle": "תארו את הכלל באנגלית, בגרמנית או ברוסית פשוטה - הבונה יוצר DSL תקין.",
+      "input_placeholder": "לדוגמה: לכל הקירות חייבת להיות תכונת עמידות לאש",
+      "generate": "יצירה",
+      "save_as_rule": "שמירה ככלל ציות",
+      "preview_title": "תצוגה מקדימה של DSL",
+      "no_dsl_yet": "הקלידו משפט ולחצו על יצירה כדי לראות את ה-DSL.",
+      "patterns_title": "תבניות נתמכות",
+      "method_pattern": "תבנית תאמה",
+      "method_ai": "גיבוי AI",
+      "method_fallback": "אין התאמה",
+      "use_ai": "שימוש בגיבוי AI",
+      "ai_unavailable": "גיבוי ה-AI דולג - לא הוגדר מפתח API.",
+      "input_empty": "הקלט ריק.",
+      "input_too_long": "הקלט חורג מ-2000 תווים.",
+      "no_match": "לא נמצאה תבנית שתואמת לקלט. נסו אחת מהניסוחים הנתמכים מימין.",
+      "low_confidence": "רמת ביטחון נמוכה - בדקו בעיון את ה-DSL שנוצר לפני השמירה.",
+      "saved": "הכלל נשמר בהצלחה.",
+      "save_failed": "לא ניתן לשמור את הכלל: {detail}",
+      "pattern": {
+        "must_have": "לכל <entity> חייב להיות <field>",
+        "must_not_have": "לאף <entity> לא יכול להיות <field> = <value>",
+        "value_equals": "לכל <entity> חייב להיות <field> = <value>",
+        "value_greater_than": "לכל <entity> חייב להיות <field> > <N>",
+        "value_less_than": "לכל <entity> חייב להיות <field> < <N>",
+        "value_at_least": "לכל <entity> חייב להיות <field> >= <N>",
+        "count_at_least": "חייבים להיות לפחות <N> <entity>",
+        "count_zero": "אין להתיר <entity>"
+      }
+    }
+  }
+}

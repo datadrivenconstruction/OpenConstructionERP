@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Lỗi DSL tuân thủ",
+      "syntax_error": "Lỗi cú pháp DSL tuân thủ: {detail}",
+      "type_error": "Lỗi kiểu dữ liệu DSL tuân thủ: {detail}",
+      "validation_failed": "Kiểm tra DSL tuân thủ thất bại: {detail}",
+      "not_found": "Không tìm thấy quy tắc DSL tuân thủ",
+      "duplicate_rule_id": "Đã tồn tại quy tắc có ID '{rule_id}'",
+      "access_denied": "Chỉ chủ sở hữu quy tắc mới có thể thực hiện thao tác này",
+      "compiled": "Đã biên dịch và đăng ký quy tắc '{rule_id}' thành công",
+      "deleted": "Đã xóa quy tắc '{rule_id}'",
+      "evaluation_failed": "Không thể đánh giá quy tắc '{rule_id}': {detail}"
+    },
+    "nl": {
+      "title": "Trình tạo quy tắc bằng ngôn ngữ tự nhiên",
+      "subtitle": "Mô tả quy tắc bằng tiếng Anh, tiếng Đức hoặc tiếng Nga đơn giản - trình tạo sẽ sinh ra DSL hợp lệ.",
+      "input_placeholder": "ví dụ: tất cả các bức tường phải có thuộc tính chịu lửa",
+      "generate": "Tạo",
+      "save_as_rule": "Lưu thành quy tắc tuân thủ",
+      "preview_title": "Xem trước DSL",
+      "no_dsl_yet": "Nhập một câu và nhấn Tạo để xem DSL.",
+      "patterns_title": "Mẫu được hỗ trợ",
+      "method_pattern": "Khớp mẫu",
+      "method_ai": "AI dự phòng",
+      "method_fallback": "Không khớp",
+      "use_ai": "Dùng AI dự phòng",
+      "ai_unavailable": "Đã bỏ qua AI dự phòng - chưa cấu hình khóa API.",
+      "input_empty": "Nội dung nhập đang trống.",
+      "input_too_long": "Nội dung nhập vượt quá 2000 ký tự.",
+      "no_match": "Không có mẫu nào khớp với nội dung nhập. Hãy thử một trong các cách diễn đạt được hỗ trợ bên phải.",
+      "low_confidence": "Độ tin cậy thấp - hãy xem kỹ DSL được tạo trước khi lưu.",
+      "saved": "Đã lưu quy tắc thành công.",
+      "save_failed": "Không thể lưu quy tắc: {detail}",
+      "pattern": {
+        "must_have": "Mọi <entity> phải có <field>",
+        "must_not_have": "Không <entity> nào được có <field> = <value>",
+        "value_equals": "Mọi <entity> phải có <field> = <value>",
+        "value_greater_than": "Mọi <entity> phải có <field> > <N>",
+        "value_less_than": "Mọi <entity> phải có <field> < <N>",
+        "value_at_least": "Mọi <entity> phải có <field> >= <N>",
+        "count_at_least": "Phải có ít nhất <N> <entity>",
+        "count_zero": "Không cho phép <entity>"
+      }
+    }
+  }
+}

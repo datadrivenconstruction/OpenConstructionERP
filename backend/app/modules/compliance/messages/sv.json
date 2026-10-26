@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Fel i compliance-DSL",
+      "syntax_error": "Syntaxfel i compliance-DSL: {detail}",
+      "type_error": "Typfel i compliance-DSL: {detail}",
+      "validation_failed": "Validering av compliance-DSL misslyckades: {detail}",
+      "not_found": "Compliance-DSL-regeln hittades inte",
+      "duplicate_rule_id": "En regel med ID '{rule_id}' finns redan",
+      "access_denied": "Endast regelns ägare kan utföra den här åtgärden",
+      "compiled": "Regeln '{rule_id}' kompilerades och registrerades",
+      "deleted": "Regeln '{rule_id}' togs bort",
+      "evaluation_failed": "Regeln '{rule_id}' kunde inte utvärderas: {detail}"
+    },
+    "nl": {
+      "title": "Regelbyggare med naturligt språk",
+      "subtitle": "Beskriv regeln på enkel engelska, tyska eller ryska - byggaren genererar giltig DSL.",
+      "input_placeholder": "t.ex. alla väggar måste ha en brandklassegenskap",
+      "generate": "Generera",
+      "save_as_rule": "Spara som compliance-regel",
+      "preview_title": "DSL-förhandsvisning",
+      "no_dsl_yet": "Skriv en mening och tryck på Generera för att se DSL:en.",
+      "patterns_title": "Stödda mönster",
+      "method_pattern": "Mönster matchade",
+      "method_ai": "AI-reserv",
+      "method_fallback": "Ingen matchning",
+      "use_ai": "Använd AI-reserv",
+      "ai_unavailable": "AI-reserven hoppades över - ingen API-nyckel är konfigurerad.",
+      "input_empty": "Indata är tom.",
+      "input_too_long": "Indata överskrider 2000 tecken.",
+      "no_match": "Inget mönster matchade indata. Prova någon av de stödda formuleringarna till höger.",
+      "low_confidence": "Låg säkerhet - granska den genererade DSL:en noggrant innan du sparar.",
+      "saved": "Regeln sparades.",
+      "save_failed": "Regeln kunde inte sparas: {detail}",
+      "pattern": {
+        "must_have": "Varje <entity> måste ha <field>",
+        "must_not_have": "Ingen <entity> får ha <field> = <value>",
+        "value_equals": "Varje <entity> måste ha <field> = <value>",
+        "value_greater_than": "Varje <entity> måste ha <field> > <N>",
+        "value_less_than": "Varje <entity> måste ha <field> < <N>",
+        "value_at_least": "Varje <entity> måste ha <field> >= <N>",
+        "count_at_least": "Det måste finnas minst <N> <entity>",
+        "count_zero": "Ingen <entity> är tillåten"
+      }
+    }
+  }
+}

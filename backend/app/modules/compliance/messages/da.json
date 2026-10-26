@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Compliance DSL-fejl",
+      "syntax_error": "Compliance DSL-syntaksfejl: {detail}",
+      "type_error": "Compliance DSL-typefejl: {detail}",
+      "validation_failed": "Compliance DSL-validering mislykkedes: {detail}",
+      "not_found": "Compliance DSL-regel blev ikke fundet",
+      "duplicate_rule_id": "En regel med ID '{rule_id}' findes allerede",
+      "access_denied": "Kun ejeren af reglen kan udføre denne handling",
+      "compiled": "Reglen '{rule_id}' blev kompileret og registreret",
+      "deleted": "Reglen '{rule_id}' blev slettet",
+      "evaluation_failed": "Reglen '{rule_id}' kunne ikke evalueres: {detail}"
+    },
+    "nl": {
+      "title": "Regelbygger med naturligt sprog",
+      "subtitle": "Beskriv din regel på almindeligt engelsk, tysk eller russisk - byggeren genererer gyldig DSL.",
+      "input_placeholder": "f.eks. alle vægge skal have en brandklassifikation",
+      "generate": "Generer",
+      "save_as_rule": "Gem som compliance-regel",
+      "preview_title": "DSL-forhåndsvisning",
+      "no_dsl_yet": "Skriv en sætning og tryk på Generer for at se DSL'en.",
+      "patterns_title": "Understøttede mønstre",
+      "method_pattern": "Mønster matchet",
+      "method_ai": "AI-reserve",
+      "method_fallback": "Ingen match",
+      "use_ai": "Brug AI-reserve",
+      "ai_unavailable": "AI-reserve sprunget over - ingen API-nøgle er konfigureret.",
+      "input_empty": "Inputtet er tomt.",
+      "input_too_long": "Inputtet overstiger 2000 tegn.",
+      "no_match": "Intet mønster matchede inputtet. Prøv en af de understøttede formuleringer til højre.",
+      "low_confidence": "Lav sikkerhed - gennemgå den genererede DSL grundigt, før du gemmer.",
+      "saved": "Reglen blev gemt.",
+      "save_failed": "Reglen kunne ikke gemmes: {detail}",
+      "pattern": {
+        "must_have": "Alle <entity> skal have <field>",
+        "must_not_have": "Ingen <entity> må have <field> = <value>",
+        "value_equals": "Alle <entity> skal have <field> = <value>",
+        "value_greater_than": "Alle <entity> skal have <field> > <N>",
+        "value_less_than": "Alle <entity> skal have <field> < <N>",
+        "value_at_least": "Alle <entity> skal have <field> >= <N>",
+        "count_at_least": "Der skal være mindst <N> <entity>",
+        "count_zero": "Ingen <entity> er tilladt"
+      }
+    }
+  }
+}

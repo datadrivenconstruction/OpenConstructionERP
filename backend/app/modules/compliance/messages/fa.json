@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "خطای DSL انطباق",
+      "syntax_error": "خطای نحوی DSL انطباق: {detail}",
+      "type_error": "خطای نوع در DSL انطباق: {detail}",
+      "validation_failed": "اعتبارسنجی DSL انطباق ناموفق بود: {detail}",
+      "not_found": "قانون DSL انطباق یافت نشد",
+      "duplicate_rule_id": "قانونی با شناسه '{rule_id}' از قبل وجود دارد",
+      "access_denied": "فقط مالک قانون می‌تواند این عملیات را انجام دهد",
+      "compiled": "قانون '{rule_id}' با موفقیت کامپایل و ثبت شد",
+      "deleted": "قانون '{rule_id}' حذف شد",
+      "evaluation_failed": "ارزیابی قانون '{rule_id}' ممکن نشد: {detail}"
+    },
+    "nl": {
+      "title": "سازنده قانون با زبان طبیعی",
+      "subtitle": "قانون خود را به زبان ساده انگلیسی، آلمانی یا روسی توصیف کنید - این ابزار DSL معتبر تولید می‌کند.",
+      "input_placeholder": "مثلاً همه دیوارها باید ویژگی مقاومت در برابر آتش داشته باشند",
+      "generate": "تولید",
+      "save_as_rule": "ذخیره به عنوان قانون انطباق",
+      "preview_title": "پیش‌نمایش DSL",
+      "no_dsl_yet": "یک جمله بنویسید و تولید را بزنید تا DSL نمایش داده شود.",
+      "patterns_title": "الگوهای پشتیبانی‌شده",
+      "method_pattern": "الگو تطبیق یافت",
+      "method_ai": "جایگزین هوش مصنوعی",
+      "method_fallback": "بدون تطابق",
+      "use_ai": "استفاده از جایگزین هوش مصنوعی",
+      "ai_unavailable": "جایگزین هوش مصنوعی رد شد - کلید API پیکربندی نشده است.",
+      "input_empty": "ورودی خالی است.",
+      "input_too_long": "ورودی از ۲۰۰۰ نویسه بیشتر است.",
+      "no_match": "هیچ الگویی با ورودی تطبیق نیافت. یکی از عبارات پشتیبانی‌شده سمت راست را امتحان کنید.",
+      "low_confidence": "اطمینان پایین - پیش از ذخیره، DSL تولیدشده را با دقت بررسی کنید.",
+      "saved": "قانون با موفقیت ذخیره شد.",
+      "save_failed": "ذخیره قانون ممکن نشد: {detail}",
+      "pattern": {
+        "must_have": "هر <entity> باید <field> داشته باشد",
+        "must_not_have": "هیچ <entity> نمی‌تواند <field> = <value> داشته باشد",
+        "value_equals": "هر <entity> باید <field> = <value> داشته باشد",
+        "value_greater_than": "هر <entity> باید <field> > <N> داشته باشد",
+        "value_less_than": "هر <entity> باید <field> < <N> داشته باشد",
+        "value_at_least": "هر <entity> باید <field> >= <N> داشته باشد",
+        "count_at_least": "حداقل <N> <entity> باید وجود داشته باشد",
+        "count_zero": "هیچ <entity> مجاز نیست"
+      }
+    }
+  }
+}

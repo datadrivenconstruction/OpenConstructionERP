@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Errore del DSL di conformità",
+      "syntax_error": "Errore di sintassi del DSL di conformità: {detail}",
+      "type_error": "Errore di tipo nel DSL di conformità: {detail}",
+      "validation_failed": "Convalida del DSL di conformità non riuscita: {detail}",
+      "not_found": "Regola DSL di conformità non trovata",
+      "duplicate_rule_id": "Esiste già una regola con ID '{rule_id}'",
+      "access_denied": "Solo il proprietario della regola può eseguire questa operazione",
+      "compiled": "Regola '{rule_id}' compilata e registrata con successo",
+      "deleted": "Regola '{rule_id}' eliminata",
+      "evaluation_failed": "Impossibile valutare la regola '{rule_id}': {detail}"
+    },
+    "nl": {
+      "title": "Generatore di regole in linguaggio naturale",
+      "subtitle": "Descrivi la regola in inglese, tedesco o russo semplice: il generatore produce un DSL valido.",
+      "input_placeholder": "es. tutte le pareti devono avere una proprietà di resistenza al fuoco",
+      "generate": "Genera",
+      "save_as_rule": "Salva come regola di conformità",
+      "preview_title": "Anteprima DSL",
+      "no_dsl_yet": "Digita una frase e premi Genera per vedere il DSL.",
+      "patterns_title": "Schemi supportati",
+      "method_pattern": "Schema riconosciuto",
+      "method_ai": "Alternativa IA",
+      "method_fallback": "Nessuna corrispondenza",
+      "use_ai": "Usa l'alternativa IA",
+      "ai_unavailable": "Alternativa IA saltata: nessuna chiave API configurata.",
+      "input_empty": "L'input è vuoto.",
+      "input_too_long": "L'input supera i 2000 caratteri.",
+      "no_match": "Nessuno schema corrisponde all'input. Prova una delle formulazioni supportate a destra.",
+      "low_confidence": "Affidabilità bassa - verifica attentamente il DSL generato prima di salvare.",
+      "saved": "Regola salvata con successo.",
+      "save_failed": "Impossibile salvare la regola: {detail}",
+      "pattern": {
+        "must_have": "Ogni <entity> deve avere <field>",
+        "must_not_have": "Nessun <entity> può avere <field> = <value>",
+        "value_equals": "Ogni <entity> deve avere <field> = <value>",
+        "value_greater_than": "Ogni <entity> deve avere <field> > <N>",
+        "value_less_than": "Ogni <entity> deve avere <field> < <N>",
+        "value_at_least": "Ogni <entity> deve avere <field> >= <N>",
+        "count_at_least": "Devono esserci almeno <N> <entity>",
+        "count_zero": "Nessun <entity> è consentito"
+      }
+    }
+  }
+}

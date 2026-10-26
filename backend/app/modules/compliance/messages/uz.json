@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Muvofiqlik DSL xatosi",
+      "syntax_error": "Muvofiqlik DSL sintaksis xatosi: {detail}",
+      "type_error": "Muvofiqlik DSL tur xatosi: {detail}",
+      "validation_failed": "Muvofiqlik DSL tekshiruvi muvaffaqiyatsiz tugadi: {detail}",
+      "not_found": "Muvofiqlik DSL qoidasi topilmadi",
+      "duplicate_rule_id": "'{rule_id}' identifikatorli qoida allaqachon mavjud",
+      "access_denied": "Bu amalni faqat qoida egasi bajara oladi",
+      "compiled": "'{rule_id}' qoidasi muvaffaqiyatli kompilyatsiya qilindi va ro'yxatga olindi",
+      "deleted": "'{rule_id}' qoidasi o'chirildi",
+      "evaluation_failed": "'{rule_id}' qoidasini baholab bo'lmadi: {detail}"
+    },
+    "nl": {
+      "title": "Tabiiy til qoidalar yaratuvchisi",
+      "subtitle": "Qoidani oddiy ingliz, nemis yoki rus tilida tavsiflang - yaratuvchi to'g'ri DSL hosil qiladi.",
+      "input_placeholder": "masalan, barcha devorlarda olovga chidamlilik xususiyati bo'lishi kerak",
+      "generate": "Yaratish",
+      "save_as_rule": "Muvofiqlik qoidasi sifatida saqlash",
+      "preview_title": "DSL oldindan ko'rish",
+      "no_dsl_yet": "Gap kiriting va DSL ni ko'rish uchun Yaratish tugmasini bosing.",
+      "patterns_title": "Qo'llab-quvvatlanadigan shablonlar",
+      "method_pattern": "Shablon mos keldi",
+      "method_ai": "AI zaxira varianti",
+      "method_fallback": "Mos kelmadi",
+      "use_ai": "AI zaxira variantidan foydalanish",
+      "ai_unavailable": "AI zaxira varianti o'tkazib yuborildi - API kaliti sozlanmagan.",
+      "input_empty": "Kiritma bo'sh.",
+      "input_too_long": "Kiritma 2000 belgidan oshdi.",
+      "no_match": "Kiritmaga mos shablon topilmadi. O'ngdagi qo'llab-quvvatlanadigan iboralardan birini sinab ko'ring.",
+      "low_confidence": "Ishonch past - saqlashdan oldin yaratilgan DSL ni diqqat bilan tekshiring.",
+      "saved": "Qoida muvaffaqiyatli saqlandi.",
+      "save_failed": "Qoidani saqlab bo'lmadi: {detail}",
+      "pattern": {
+        "must_have": "Har bir <entity> <field> xususiyatiga ega bo'lishi kerak",
+        "must_not_have": "Hech bir <entity> <field> = <value> bo'lishi mumkin emas",
+        "value_equals": "Har bir <entity> <field> = <value> bo'lishi kerak",
+        "value_greater_than": "Har bir <entity> <field> > <N> bo'lishi kerak",
+        "value_less_than": "Har bir <entity> <field> < <N> bo'lishi kerak",
+        "value_at_least": "Har bir <entity> <field> >= <N> bo'lishi kerak",
+        "count_at_least": "Kamida <N> ta <entity> bo'lishi kerak",
+        "count_zero": "<entity> ruxsat etilmaydi"
+      }
+    }
+  }
+}

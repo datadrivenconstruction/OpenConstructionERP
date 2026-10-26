@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "ข้อผิดพลาด DSL ของการปฏิบัติตามข้อกำหนด",
+      "syntax_error": "ข้อผิดพลาดด้านไวยากรณ์ของ DSL การปฏิบัติตามข้อกำหนด: {detail}",
+      "type_error": "ข้อผิดพลาดด้านชนิดข้อมูลของ DSL การปฏิบัติตามข้อกำหนด: {detail}",
+      "validation_failed": "การตรวจสอบ DSL การปฏิบัติตามข้อกำหนดล้มเหลว: {detail}",
+      "not_found": "ไม่พบกฎ DSL การปฏิบัติตามข้อกำหนด",
+      "duplicate_rule_id": "มีกฎที่ใช้รหัส '{rule_id}' อยู่แล้ว",
+      "access_denied": "เฉพาะเจ้าของกฎเท่านั้นที่ดำเนินการนี้ได้",
+      "compiled": "คอมไพล์และลงทะเบียนกฎ '{rule_id}' สำเร็จ",
+      "deleted": "ลบกฎ '{rule_id}' แล้ว",
+      "evaluation_failed": "ไม่สามารถประเมินกฎ '{rule_id}' ได้: {detail}"
+    },
+    "nl": {
+      "title": "ตัวสร้างกฎด้วยภาษาธรรมชาติ",
+      "subtitle": "อธิบายกฎของคุณเป็นภาษาอังกฤษ เยอรมัน หรือรัสเซียแบบง่าย ตัวสร้างจะสร้าง DSL ที่ถูกต้อง",
+      "input_placeholder": "เช่น ผนังทุกด้านต้องมีคุณสมบัติค่าทนไฟ",
+      "generate": "สร้าง",
+      "save_as_rule": "บันทึกเป็นกฎการปฏิบัติตามข้อกำหนด",
+      "preview_title": "ตัวอย่าง DSL",
+      "no_dsl_yet": "พิมพ์ประโยคแล้วกดสร้างเพื่อดู DSL",
+      "patterns_title": "รูปแบบที่รองรับ",
+      "method_pattern": "ตรงกับรูปแบบ",
+      "method_ai": "ทางเลือกสำรองด้วย AI",
+      "method_fallback": "ไม่ตรงกับรูปแบบใด",
+      "use_ai": "ใช้ทางเลือกสำรองด้วย AI",
+      "ai_unavailable": "ข้ามทางเลือกสำรองด้วย AI - ยังไม่ได้ตั้งค่าคีย์ API",
+      "input_empty": "ข้อมูลที่ป้อนว่างเปล่า",
+      "input_too_long": "ข้อมูลที่ป้อนเกิน 2000 อักขระ",
+      "no_match": "ไม่มีรูปแบบใดตรงกับข้อมูลที่ป้อน ลองใช้ถ้อยคำที่รองรับทางด้านขวา",
+      "low_confidence": "ความเชื่อมั่นต่ำ - ตรวจสอบ DSL ที่สร้างขึ้นอย่างรอบคอบก่อนบันทึก",
+      "saved": "บันทึกกฎเรียบร้อยแล้ว",
+      "save_failed": "ไม่สามารถบันทึกกฎได้: {detail}",
+      "pattern": {
+        "must_have": "ทุก <entity> ต้องมี <field>",
+        "must_not_have": "<entity> ใดๆ ต้องไม่มี <field> = <value>",
+        "value_equals": "ทุก <entity> ต้องมี <field> = <value>",
+        "value_greater_than": "ทุก <entity> ต้องมี <field> > <N>",
+        "value_less_than": "ทุก <entity> ต้องมี <field> < <N>",
+        "value_at_least": "ทุก <entity> ต้องมี <field> >= <N>",
+        "count_at_least": "ต้องมี <entity> อย่างน้อย <N> รายการ",
+        "count_zero": "ไม่อนุญาตให้มี <entity>"
+      }
+    }
+  }
+}

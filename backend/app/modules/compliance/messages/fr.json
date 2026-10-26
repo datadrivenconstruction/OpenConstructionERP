@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Erreur du DSL de conformité",
+      "syntax_error": "Erreur de syntaxe du DSL de conformité : {detail}",
+      "type_error": "Erreur de type du DSL de conformité : {detail}",
+      "validation_failed": "La validation du DSL de conformité a échoué : {detail}",
+      "not_found": "Règle DSL de conformité introuvable",
+      "duplicate_rule_id": "Une règle portant l'identifiant '{rule_id}' existe déjà",
+      "access_denied": "Seul le propriétaire de la règle peut effectuer cette action",
+      "compiled": "La règle '{rule_id}' a été compilée et enregistrée avec succès",
+      "deleted": "La règle '{rule_id}' a été supprimée",
+      "evaluation_failed": "La règle '{rule_id}' n'a pas pu être évaluée : {detail}"
+    },
+    "nl": {
+      "title": "Générateur de règles en langage naturel",
+      "subtitle": "Décrivez votre règle en anglais, allemand ou russe simple - le générateur produit un DSL valide.",
+      "input_placeholder": "ex. tous les murs doivent avoir une propriété de résistance au feu",
+      "generate": "Générer",
+      "save_as_rule": "Enregistrer comme règle de conformité",
+      "preview_title": "Aperçu du DSL",
+      "no_dsl_yet": "Saisissez une phrase et cliquez sur Générer pour voir le DSL.",
+      "patterns_title": "Formulations prises en charge",
+      "method_pattern": "Motif reconnu",
+      "method_ai": "Repli sur l'IA",
+      "method_fallback": "Aucune correspondance",
+      "use_ai": "Utiliser le repli sur l'IA",
+      "ai_unavailable": "Repli sur l'IA ignoré - aucune clé API n'est configurée.",
+      "input_empty": "La saisie est vide.",
+      "input_too_long": "La saisie dépasse 2 000 caractères.",
+      "no_match": "Aucun motif ne correspond à la saisie. Essayez l'une des formulations prises en charge à droite.",
+      "low_confidence": "Confiance faible - vérifiez attentivement le DSL généré avant l'enregistrement.",
+      "saved": "La règle a été enregistrée avec succès.",
+      "save_failed": "Impossible d'enregistrer la règle : {detail}",
+      "pattern": {
+        "must_have": "Tous les <entity> doivent avoir <field>",
+        "must_not_have": "Aucun <entity> ne peut avoir <field> = <value>",
+        "value_equals": "Tous les <entity> doivent avoir <field> = <value>",
+        "value_greater_than": "Tous les <entity> doivent avoir <field> > <N>",
+        "value_less_than": "Tous les <entity> doivent avoir <field> < <N>",
+        "value_at_least": "Tous les <entity> doivent avoir <field> >= <N>",
+        "count_at_least": "Il doit y avoir au moins <N> <entity>",
+        "count_zero": "Aucun <entity> n'est autorisé"
+      }
+    }
+  }
+}

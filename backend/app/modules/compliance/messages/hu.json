@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Megfelelőségi DSL-hiba",
+      "syntax_error": "Megfelelőségi DSL szintaktikai hiba: {detail}",
+      "type_error": "Megfelelőségi DSL típushiba: {detail}",
+      "validation_failed": "A megfelelőségi DSL érvényesítése sikertelen: {detail}",
+      "not_found": "A megfelelőségi DSL-szabály nem található",
+      "duplicate_rule_id": "A(z) '{rule_id}' azonosítójú szabály már létezik",
+      "access_denied": "Csak a szabály tulajdonosa végezheti el ezt a műveletet",
+      "compiled": "A(z) '{rule_id}' szabály sikeresen lefordítva és regisztrálva",
+      "deleted": "A(z) '{rule_id}' szabály törölve",
+      "evaluation_failed": "A(z) '{rule_id}' szabályt nem lehetett kiértékelni: {detail}"
+    },
+    "nl": {
+      "title": "Természetes nyelvi szabálykészítő",
+      "subtitle": "Írja le a szabályt egyszerű angol, német vagy orosz nyelven - a készítő érvényes DSL-t generál.",
+      "input_placeholder": "pl. minden falnak tűzállósági tulajdonsággal kell rendelkeznie",
+      "generate": "Generálás",
+      "save_as_rule": "Mentés megfelelőségi szabályként",
+      "preview_title": "DSL előnézet",
+      "no_dsl_yet": "Írjon be egy mondatot, és nyomja meg a Generálás gombot a DSL megjelenítéséhez.",
+      "patterns_title": "Támogatott minták",
+      "method_pattern": "Minta illeszkedett",
+      "method_ai": "MI-tartalék",
+      "method_fallback": "Nincs találat",
+      "use_ai": "MI-tartalék használata",
+      "ai_unavailable": "MI-tartalék kihagyva - nincs API-kulcs beállítva.",
+      "input_empty": "A bemenet üres.",
+      "input_too_long": "A bemenet meghaladja a 2000 karaktert.",
+      "no_match": "Egyetlen minta sem illeszkedik a bemenetre. Próbálja ki a jobb oldalon látható támogatott megfogalmazások egyikét.",
+      "low_confidence": "Alacsony megbízhatóság - mentés előtt gondosan ellenőrizze a generált DSL-t.",
+      "saved": "A szabály sikeresen mentve.",
+      "save_failed": "A szabályt nem sikerült menteni: {detail}",
+      "pattern": {
+        "must_have": "Minden <entity>-nek rendelkeznie kell <field> mezővel",
+        "must_not_have": "Egyetlen <entity> sem rendelkezhet <field> = <value> értékkel",
+        "value_equals": "Minden <entity>-nek <field> = <value> értékkel kell rendelkeznie",
+        "value_greater_than": "Minden <entity> <field> értéke legyen > <N>",
+        "value_less_than": "Minden <entity> <field> értéke legyen < <N>",
+        "value_at_least": "Minden <entity> <field> értéke legyen >= <N>",
+        "count_at_least": "Legalább <N> <entity> szükséges",
+        "count_zero": "<entity> nem engedélyezett"
+      }
+    }
+  }
+}

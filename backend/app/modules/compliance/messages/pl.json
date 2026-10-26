@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Błąd DSL zgodności",
+      "syntax_error": "Błąd składni DSL zgodności: {detail}",
+      "type_error": "Błąd typu w DSL zgodności: {detail}",
+      "validation_failed": "Walidacja DSL zgodności nie powiodła się: {detail}",
+      "not_found": "Nie znaleziono reguły DSL zgodności",
+      "duplicate_rule_id": "Reguła o identyfikatorze '{rule_id}' już istnieje",
+      "access_denied": "Tylko właściciel reguły może wykonać tę czynność",
+      "compiled": "Reguła '{rule_id}' została skompilowana i zarejestrowana",
+      "deleted": "Reguła '{rule_id}' została usunięta",
+      "evaluation_failed": "Nie udało się ocenić reguły '{rule_id}': {detail}"
+    },
+    "nl": {
+      "title": "Kreator reguł w języku naturalnym",
+      "subtitle": "Opisz regułę prostym angielskim, niemieckim lub rosyjskim - kreator wygeneruje poprawny DSL.",
+      "input_placeholder": "np. wszystkie ściany muszą mieć właściwość klasy odporności ogniowej",
+      "generate": "Generuj",
+      "save_as_rule": "Zapisz jako regułę zgodności",
+      "preview_title": "Podgląd DSL",
+      "no_dsl_yet": "Wpisz zdanie i kliknij Generuj, aby zobaczyć DSL.",
+      "patterns_title": "Obsługiwane wzorce",
+      "method_pattern": "Dopasowano wzorzec",
+      "method_ai": "Rezerwa AI",
+      "method_fallback": "Brak dopasowania",
+      "use_ai": "Użyj rezerwy AI",
+      "ai_unavailable": "Pominięto rezerwę AI - nie skonfigurowano klucza API.",
+      "input_empty": "Dane wejściowe są puste.",
+      "input_too_long": "Dane wejściowe przekraczają 2000 znaków.",
+      "no_match": "Żaden wzorzec nie pasuje do danych wejściowych. Spróbuj jednego z obsługiwanych sformułowań po prawej.",
+      "low_confidence": "Niska pewność - przed zapisaniem dokładnie sprawdź wygenerowany DSL.",
+      "saved": "Reguła została zapisana.",
+      "save_failed": "Nie udało się zapisać reguły: {detail}",
+      "pattern": {
+        "must_have": "Każdy <entity> musi mieć <field>",
+        "must_not_have": "Żaden <entity> nie może mieć <field> = <value>",
+        "value_equals": "Każdy <entity> musi mieć <field> = <value>",
+        "value_greater_than": "Każdy <entity> musi mieć <field> > <N>",
+        "value_less_than": "Każdy <entity> musi mieć <field> < <N>",
+        "value_at_least": "Każdy <entity> musi mieć <field> >= <N>",
+        "count_at_least": "Musi istnieć co najmniej <N> <entity>",
+        "count_zero": "Obiekty <entity> są niedozwolone"
+      }
+    }
+  }
+}

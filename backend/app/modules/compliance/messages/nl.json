@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Compliance-DSL-fout",
+      "syntax_error": "Compliance-DSL-syntaxisfout: {detail}",
+      "type_error": "Compliance-DSL-typefout: {detail}",
+      "validation_failed": "Validatie van Compliance-DSL mislukt: {detail}",
+      "not_found": "Compliance-DSL-regel niet gevonden",
+      "duplicate_rule_id": "Er bestaat al een regel met ID '{rule_id}'",
+      "access_denied": "Alleen de eigenaar van de regel kan deze actie uitvoeren",
+      "compiled": "Regel '{rule_id}' is succesvol gecompileerd en geregistreerd",
+      "deleted": "Regel '{rule_id}' is verwijderd",
+      "evaluation_failed": "Regel '{rule_id}' kon niet worden geëvalueerd: {detail}"
+    },
+    "nl": {
+      "title": "Regelbouwer met natuurlijke taal",
+      "subtitle": "Beschrijf uw regel in eenvoudig Engels, Duits of Russisch - de bouwer genereert geldige DSL.",
+      "input_placeholder": "bijv. alle wanden moeten een brandwerendheidseigenschap hebben",
+      "generate": "Genereren",
+      "save_as_rule": "Opslaan als compliance-regel",
+      "preview_title": "DSL-voorbeeld",
+      "no_dsl_yet": "Typ een zin en klik op Genereren om de DSL te zien.",
+      "patterns_title": "Ondersteunde patronen",
+      "method_pattern": "Patroon herkend",
+      "method_ai": "AI-terugvaloptie",
+      "method_fallback": "Geen overeenkomst",
+      "use_ai": "AI-terugvaloptie gebruiken",
+      "ai_unavailable": "AI-terugvaloptie overgeslagen - er is geen API-sleutel geconfigureerd.",
+      "input_empty": "De invoer is leeg.",
+      "input_too_long": "De invoer is langer dan 2000 tekens.",
+      "no_match": "Geen patroon komt overeen met de invoer. Probeer een van de ondersteunde formuleringen rechts.",
+      "low_confidence": "Lage betrouwbaarheid - controleer de gegenereerde DSL zorgvuldig voordat u opslaat.",
+      "saved": "Regel succesvol opgeslagen.",
+      "save_failed": "Regel kon niet worden opgeslagen: {detail}",
+      "pattern": {
+        "must_have": "Elke <entity> moet <field> hebben",
+        "must_not_have": "Geen <entity> mag <field> = <value> hebben",
+        "value_equals": "Elke <entity> moet <field> = <value> hebben",
+        "value_greater_than": "Elke <entity> moet <field> > <N> hebben",
+        "value_less_than": "Elke <entity> moet <field> < <N> hebben",
+        "value_at_least": "Elke <entity> moet <field> >= <N> hebben",
+        "count_at_least": "Er moeten minstens <N> <entity> zijn",
+        "count_zero": "Geen <entity> toegestaan"
+      }
+    }
+  }
+}

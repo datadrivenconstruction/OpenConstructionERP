@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "কমপ্লায়েন্স DSL ত্রুটি",
+      "syntax_error": "কমপ্লায়েন্স DSL সিনট্যাক্স ত্রুটি: {detail}",
+      "type_error": "কমপ্লায়েন্স DSL টাইপ ত্রুটি: {detail}",
+      "validation_failed": "কমপ্লায়েন্স DSL যাচাই ব্যর্থ হয়েছে: {detail}",
+      "not_found": "কমপ্লায়েন্স DSL নিয়ম পাওয়া যায়নি",
+      "duplicate_rule_id": "'{rule_id}' আইডি সহ একটি নিয়ম ইতিমধ্যে আছে",
+      "access_denied": "শুধুমাত্র নিয়মের মালিক এই কাজটি করতে পারবেন",
+      "compiled": "নিয়ম '{rule_id}' সফলভাবে কম্পাইল ও নিবন্ধিত হয়েছে",
+      "deleted": "নিয়ম '{rule_id}' মুছে ফেলা হয়েছে",
+      "evaluation_failed": "নিয়ম '{rule_id}' মূল্যায়ন করা যায়নি: {detail}"
+    },
+    "nl": {
+      "title": "প্রাকৃতিক ভাষার নিয়ম নির্মাতা",
+      "subtitle": "সহজ ইংরেজি, জার্মান বা রাশিয়ান ভাষায় আপনার নিয়ম বর্ণনা করুন - নির্মাতা বৈধ DSL তৈরি করবে।",
+      "input_placeholder": "যেমন: সব দেয়ালের একটি অগ্নি-রেটিং বৈশিষ্ট্য থাকতে হবে",
+      "generate": "তৈরি করুন",
+      "save_as_rule": "কমপ্লায়েন্স নিয়ম হিসেবে সংরক্ষণ করুন",
+      "preview_title": "DSL প্রিভিউ",
+      "no_dsl_yet": "একটি বাক্য লিখুন এবং তৈরি করুন চাপুন, DSL দেখতে।",
+      "patterns_title": "সমর্থিত প্যাটার্ন",
+      "method_pattern": "প্যাটার্ন মিলেছে",
+      "method_ai": "AI বিকল্প",
+      "method_fallback": "কোনো মিল নেই",
+      "use_ai": "AI বিকল্প ব্যবহার করুন",
+      "ai_unavailable": "AI বিকল্প এড়িয়ে যাওয়া হয়েছে - কোনো API কী কনফিগার করা নেই।",
+      "input_empty": "ইনপুট খালি।",
+      "input_too_long": "ইনপুট ২০০০ অক্ষর অতিক্রম করেছে।",
+      "no_match": "ইনপুটের সঙ্গে কোনো প্যাটার্ন মেলেনি। ডানদিকের একটি সমর্থিত বাক্যাংশ চেষ্টা করুন।",
+      "low_confidence": "কম আস্থা - সংরক্ষণের আগে তৈরি DSL সতর্কতার সঙ্গে পর্যালোচনা করুন।",
+      "saved": "নিয়ম সফলভাবে সংরক্ষিত হয়েছে।",
+      "save_failed": "নিয়ম সংরক্ষণ করা যায়নি: {detail}",
+      "pattern": {
+        "must_have": "প্রতিটি <entity>-এর <field> থাকতে হবে",
+        "must_not_have": "কোনো <entity>-এর <field> = <value> থাকতে পারবে না",
+        "value_equals": "প্রতিটি <entity>-এর <field> = <value> থাকতে হবে",
+        "value_greater_than": "প্রতিটি <entity>-এর <field> > <N> হতে হবে",
+        "value_less_than": "প্রতিটি <entity>-এর <field> < <N> হতে হবে",
+        "value_at_least": "প্রতিটি <entity>-এর <field> >= <N> হতে হবে",
+        "count_at_least": "কমপক্ষে <N> টি <entity> থাকতে হবে",
+        "count_zero": "কোনো <entity> অনুমোদিত নয়"
+      }
+    }
+  }
+}

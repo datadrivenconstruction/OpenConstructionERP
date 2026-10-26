@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "अनुपालन DSL त्रुटि",
+      "syntax_error": "अनुपालन DSL सिंटैक्स त्रुटि: {detail}",
+      "type_error": "अनुपालन DSL प्रकार त्रुटि: {detail}",
+      "validation_failed": "अनुपालन DSL सत्यापन विफल रहा: {detail}",
+      "not_found": "अनुपालन DSL नियम नहीं मिला",
+      "duplicate_rule_id": "आईडी '{rule_id}' वाला नियम पहले से मौजूद है",
+      "access_denied": "केवल नियम का स्वामी यह क्रिया कर सकता है",
+      "compiled": "नियम '{rule_id}' सफलतापूर्वक संकलित और पंजीकृत हो गया",
+      "deleted": "नियम '{rule_id}' हटा दिया गया",
+      "evaluation_failed": "नियम '{rule_id}' का मूल्यांकन नहीं हो सका: {detail}"
+    },
+    "nl": {
+      "title": "प्राकृतिक भाषा नियम निर्माता",
+      "subtitle": "अपना नियम सरल अंग्रेज़ी, जर्मन या रूसी में लिखें - निर्माता वैध DSL तैयार करेगा।",
+      "input_placeholder": "जैसे: सभी दीवारों में अग्निरोधी रेटिंग की विशेषता होनी चाहिए",
+      "generate": "बनाएँ",
+      "save_as_rule": "अनुपालन नियम के रूप में सहेजें",
+      "preview_title": "DSL पूर्वावलोकन",
+      "no_dsl_yet": "एक वाक्य लिखें और DSL देखने के लिए बनाएँ दबाएँ।",
+      "patterns_title": "समर्थित पैटर्न",
+      "method_pattern": "पैटर्न मेल खाया",
+      "method_ai": "AI फ़ॉलबैक",
+      "method_fallback": "कोई मेल नहीं",
+      "use_ai": "AI फ़ॉलबैक का उपयोग करें",
+      "ai_unavailable": "AI फ़ॉलबैक छोड़ा गया - कोई API कुंजी कॉन्फ़िगर नहीं है।",
+      "input_empty": "इनपुट खाली है।",
+      "input_too_long": "इनपुट 2000 अक्षरों से अधिक है।",
+      "no_match": "इनपुट से कोई पैटर्न मेल नहीं खाया। दाईं ओर दिए गए समर्थित वाक्यांशों में से कोई आज़माएँ।",
+      "low_confidence": "कम विश्वास - सहेजने से पहले उत्पन्न DSL की सावधानी से जाँच करें।",
+      "saved": "नियम सफलतापूर्वक सहेजा गया।",
+      "save_failed": "नियम सहेजा नहीं जा सका: {detail}",
+      "pattern": {
+        "must_have": "हर <entity> में <field> होना चाहिए",
+        "must_not_have": "किसी <entity> में <field> = <value> नहीं हो सकता",
+        "value_equals": "हर <entity> में <field> = <value> होना चाहिए",
+        "value_greater_than": "हर <entity> में <field> > <N> होना चाहिए",
+        "value_less_than": "हर <entity> में <field> < <N> होना चाहिए",
+        "value_at_least": "हर <entity> में <field> >= <N> होना चाहिए",
+        "count_at_least": "कम से कम <N> <entity> होने चाहिए",
+        "count_zero": "कोई <entity> अनुमत नहीं है"
+      }
+    }
+  }
+}

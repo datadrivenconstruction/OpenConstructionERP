@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Eroare DSL de conformitate",
+      "syntax_error": "Eroare de sintaxă DSL de conformitate: {detail}",
+      "type_error": "Eroare de tip în DSL-ul de conformitate: {detail}",
+      "validation_failed": "Validarea DSL-ului de conformitate a eșuat: {detail}",
+      "not_found": "Regula DSL de conformitate nu a fost găsită",
+      "duplicate_rule_id": "Există deja o regulă cu identificatorul '{rule_id}'",
+      "access_denied": "Doar proprietarul regulii poate efectua această acțiune",
+      "compiled": "Regula '{rule_id}' a fost compilată și înregistrată cu succes",
+      "deleted": "Regula '{rule_id}' a fost ștearsă",
+      "evaluation_failed": "Regula '{rule_id}' nu a putut fi evaluată: {detail}"
+    },
+    "nl": {
+      "title": "Generator de reguli în limbaj natural",
+      "subtitle": "Descrieți regula în engleză, germană sau rusă simplă - generatorul produce un DSL valid.",
+      "input_placeholder": "ex. toate pereții trebuie să aibă o proprietate de rezistență la foc",
+      "generate": "Generează",
+      "save_as_rule": "Salvează ca regulă de conformitate",
+      "preview_title": "Previzualizare DSL",
+      "no_dsl_yet": "Introduceți o propoziție și apăsați Generează pentru a vedea DSL-ul.",
+      "patterns_title": "Modele acceptate",
+      "method_pattern": "Model potrivit",
+      "method_ai": "Rezervă AI",
+      "method_fallback": "Nicio potrivire",
+      "use_ai": "Folosește rezerva AI",
+      "ai_unavailable": "Rezerva AI a fost omisă - nu este configurată nicio cheie API.",
+      "input_empty": "Intrarea este goală.",
+      "input_too_long": "Intrarea depășește 2000 de caractere.",
+      "no_match": "Niciun model nu se potrivește cu intrarea. Încercați una dintre formulările acceptate din dreapta.",
+      "low_confidence": "Încredere scăzută - verificați cu atenție DSL-ul generat înainte de salvare.",
+      "saved": "Regula a fost salvată cu succes.",
+      "save_failed": "Regula nu a putut fi salvată: {detail}",
+      "pattern": {
+        "must_have": "Fiecare <entity> trebuie să aibă <field>",
+        "must_not_have": "Niciun <entity> nu poate avea <field> = <value>",
+        "value_equals": "Fiecare <entity> trebuie să aibă <field> = <value>",
+        "value_greater_than": "Fiecare <entity> trebuie să aibă <field> > <N>",
+        "value_less_than": "Fiecare <entity> trebuie să aibă <field> < <N>",
+        "value_at_least": "Fiecare <entity> trebuie să aibă <field> >= <N>",
+        "count_at_least": "Trebuie să existe cel puțin <N> <entity>",
+        "count_zero": "Niciun <entity> nu este permis"
+      }
+    }
+  }
+}

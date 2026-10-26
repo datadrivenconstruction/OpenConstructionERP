@@ -1,0 +1,47 @@
+{
+  "compliance": {
+    "dsl": {
+      "error": "Compliance DSL-feil",
+      "syntax_error": "Compliance DSL-syntaksfeil: {detail}",
+      "type_error": "Compliance DSL-typefeil: {detail}",
+      "validation_failed": "Validering av compliance DSL mislyktes: {detail}",
+      "not_found": "Compliance DSL-regel ble ikke funnet",
+      "duplicate_rule_id": "Det finnes allerede en regel med ID '{rule_id}'",
+      "access_denied": "Bare eieren av regelen kan utføre denne handlingen",
+      "compiled": "Regelen '{rule_id}' ble kompilert og registrert",
+      "deleted": "Regelen '{rule_id}' ble slettet",
+      "evaluation_failed": "Regelen '{rule_id}' kunne ikke evalueres: {detail}"
+    },
+    "nl": {
+      "title": "Regelbygger med naturlig språk",
+      "subtitle": "Beskriv regelen din på enkel engelsk, tysk eller russisk - bygggeren lager gyldig DSL.",
+      "input_placeholder": "f.eks. alle vegger må ha en brannmotstandsegenskap",
+      "generate": "Generer",
+      "save_as_rule": "Lagre som compliance-regel",
+      "preview_title": "DSL-forhåndsvisning",
+      "no_dsl_yet": "Skriv en setning og trykk Generer for å se DSL-en.",
+      "patterns_title": "Støttede mønstre",
+      "method_pattern": "Mønster traff",
+      "method_ai": "KI-reserve",
+      "method_fallback": "Ingen treff",
+      "use_ai": "Bruk KI-reserve",
+      "ai_unavailable": "KI-reserve hoppet over - ingen API-nøkkel er konfigurert.",
+      "input_empty": "Inndata er tom.",
+      "input_too_long": "Inndata overstiger 2000 tegn.",
+      "no_match": "Ingen mønster traff inndataene. Prøv en av de støttede formuleringene til høyre.",
+      "low_confidence": "Lav sikkerhet - gå nøye gjennom den genererte DSL-en før du lagrer.",
+      "saved": "Regelen ble lagret.",
+      "save_failed": "Regelen kunne ikke lagres: {detail}",
+      "pattern": {
+        "must_have": "Alle <entity> må ha <field>",
+        "must_not_have": "Ingen <entity> kan ha <field> = <value>",
+        "value_equals": "Alle <entity> må ha <field> = <value>",
+        "value_greater_than": "Alle <entity> må ha <field> > <N>",
+        "value_less_than": "Alle <entity> må ha <field> < <N>",
+        "value_at_least": "Alle <entity> må ha <field> >= <N>",
+        "count_at_least": "Det må finnes minst <N> <entity>",
+        "count_zero": "Ingen <entity> er tillatt"
+      }
+    }
+  }
+}
