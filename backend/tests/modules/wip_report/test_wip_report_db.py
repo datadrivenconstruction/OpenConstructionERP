@@ -180,7 +180,7 @@ async def test_close_freezes_and_compares_with_previous(ctx) -> None:
     assert sep.estimated_cost == Decimal("900000.0000")
     assert sep.previous_gross_profit == Decimal("200000.0000")
     assert sep.fade == Decimal("-100000.0000")
-    found = {f["rule_id"] for f in await svc.findings(project.id, date(2026, 10, 31))}
+    found = {f["rule_id"] for f in await svc.findings(project.id, date(2026, 9, 30))}
     assert "wip_report.large_fade" in found
 
     with pytest.raises(HTTPException):
