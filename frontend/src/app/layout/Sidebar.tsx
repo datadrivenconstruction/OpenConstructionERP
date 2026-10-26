@@ -57,6 +57,7 @@ import { APP_VERSION } from '@/shared/lib/version';
 import { useSidebarBadges } from '@/shared/hooks/useSidebarBadges';
 import { useHiddenModules } from '@/shared/hooks/useHiddenModules';
 import { useFooterPrefs } from '@/shared/lib/footerPrefs';
+import { floatingPref } from '@/shared/lib/floatingPrefs';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { applyPackMenu, visibleHiddenRoutes } from './packMenu';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
@@ -3105,8 +3106,9 @@ export function FloatingRecentButton() {
   const { t } = useTranslation();
   const recentItems = useRecentStore((s) => s.items);
   const [open, setOpen] = useState(false);
+  const hiddenByChoice = floatingPref.use().recent;
 
-  if (recentItems.length === 0) return null;
+  if (recentItems.length === 0 || hiddenByChoice) return null;
   const displayed = recentItems.slice(0, 5);
 
   return (

@@ -33,6 +33,7 @@ import {
 } from './useFloatingChat';
 import { useChatActionStore } from './actions/useChatActions';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { floatingPref } from '@/shared/lib/floatingPrefs';
 
 export function FloatingChatButton() {
   const { t } = useTranslation();
@@ -50,6 +51,7 @@ export function FloatingChatButton() {
   );
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const accessToken = useAuthStore((s) => s.accessToken);
+  const hiddenByChoice = floatingPref.use().assistant;
 
   const hidden = useMemo(() => {
     // Require either explicit isAuthenticated OR the presence of a token in
@@ -60,7 +62,7 @@ export function FloatingChatButton() {
     return isFloatingChatHiddenOn(location.pathname);
   }, [location.pathname, isAuthenticated, accessToken]);
 
-  if (hidden) return null;
+  if (hidden || hiddenByChoice) return null;
 
   const label = t('chat.floating.open', { defaultValue: 'Ask AI about your data' });
   const identity = t('chat.panel.title_default', { defaultValue: 'AI assistant' });
