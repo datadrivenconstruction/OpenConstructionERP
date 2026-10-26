@@ -5540,6 +5540,7 @@ export function BOQEditorPage() {
           onAcceptAllAnomalies={anomalyMap.size > 0 ? handleAcceptAllAnomalies : undefined}
           onManageColumns={() => setCustomColumnsOpen(true)}
           customColumnCount={boqCustomColumns.length}
+          customColumnList={boqCustomColumns}
           resourceSplitMode={resourceSplitMode}
           onCycleResourceSplit={cycleResourceSplit}
           onManageVariables={() => setVariablesOpen(true)}
