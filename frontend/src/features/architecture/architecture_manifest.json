@@ -30468,7 +30468,11 @@
       "module_category": "business",
       "files": [
         "__init__.py",
+        "csrd.py",
         "lcc.py",
+        "lifecycle.py",
+        "lifecycle_router.py",
+        "lifecycle_service.py",
         "manifest.py",
         "models.py",
         "permissions.py",
@@ -30590,6 +30594,18 @@
               "nullable": true
             },
             {
+              "name": "supplier_catalog_item_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "epd_format",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "metadata_",
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
@@ -30646,6 +30662,18 @@
               "annotation": "Mapped[str]",
               "sql_type": "String",
               "nullable": false
+            },
+            {
+              "name": "factor_set",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "factor_set_year",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
             },
             {
               "name": "notes",
@@ -30808,6 +30836,12 @@
               "nullable": true
             },
             {
+              "name": "data_quality",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
               "name": "metadata_",
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
@@ -30876,6 +30910,12 @@
               "annotation": "Mapped[uuid.UUID | None]",
               "sql_type": "GUID",
               "nullable": true
+            },
+            {
+              "name": "data_quality",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
             },
             {
               "name": "notes",
@@ -30954,6 +30994,12 @@
               "nullable": true
             },
             {
+              "name": "data_quality",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
               "name": "notes",
               "annotation": "Mapped[str | None]",
               "sql_type": "Text",
@@ -31027,6 +31073,12 @@
               "name": "total_co2e_kg",
               "annotation": "Mapped[str]",
               "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "data_quality",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
               "nullable": false
             },
             {
@@ -31519,6 +31571,178 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "CarbonCompanyActivity",
+          "tablename": "oe_carbon_company_activity",
+          "docstring": "Company-level GHG activity not tied to one project (fleet, offices, purchases).\n\nFeeds the CSRD / ESRS E1 aggregate next to the project inventories.\n``scope`` is 1, 2 or 3 (GHG Protocol); ``scope3_category`` is 1-15.",
+          "columns": [
+            {
+              "name": "reporting_year",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "scope",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "scope3_category",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "category",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "activity_amount",
+              "annotation": "Mapped[str]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "activity_unit",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "emission_factor",
+              "annotation": "Mapped[str]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "factor_source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "co2e_kg",
+              "annotation": "Mapped[str]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "energy_kwh",
+              "annotation": "Mapped[str]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "renewable_share_pct",
+              "annotation": "Mapped[str]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "market_based_co2e_kg",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "data_quality",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_module",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_ref",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "CarbonCompanyReport",
+          "tablename": "oe_carbon_company_report",
+          "docstring": "A company-level climate report (ESRS E1, SECR, US state template).\n\n``datapoints`` holds the computed figures; ``audit`` lists, per data point,\nevery source record with its data-quality flag.",
+          "columns": [
+            {
+              "name": "reporting_year",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "template",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "company_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "net_revenue",
+              "annotation": "Mapped[str]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "datapoints",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "audit",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -31941,6 +32165,15 @@
           "docstring": "Create an EPD record.",
           "fields": [
             {
+              "name": "supplier_catalog_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "epd_format",
+              "type": "str | None"
+            },
+            {
               "name": "epd_id",
               "type": "str"
             },
@@ -32020,6 +32253,15 @@
           "docstring": "Partial update of an EPD record.",
           "fields": [
             {
+              "name": "supplier_catalog_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "epd_format",
+              "type": "str | None"
+            },
+            {
               "name": "source",
               "type": "str | None"
             },
@@ -32096,6 +32338,16 @@
           ],
           "docstring": "EPD record returned from the API.",
           "fields": [
+            {
+              "name": "supplier_catalog_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "epd_format",
+              "type": "str | None",
+              "default": "None"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -32190,6 +32442,14 @@
           "docstring": "Create a material carbon factor.",
           "fields": [
             {
+              "name": "factor_set",
+              "type": "str | None"
+            },
+            {
+              "name": "factor_set_year",
+              "type": "int | None"
+            },
+            {
               "name": "cost_item_id",
               "type": "UUID | None",
               "default": "None"
@@ -32239,6 +32499,14 @@
           ],
           "docstring": "Partial update of a material carbon factor.",
           "fields": [
+            {
+              "name": "factor_set",
+              "type": "str | None"
+            },
+            {
+              "name": "factor_set_year",
+              "type": "int | None"
+            },
             {
               "name": "cost_item_id",
               "type": "UUID | None",
@@ -32290,6 +32558,16 @@
           ],
           "docstring": "Material carbon factor returned from the API.",
           "fields": [
+            {
+              "name": "factor_set",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "factor_set_year",
+              "type": "int | None",
+              "default": "None"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -32488,6 +32766,10 @@
           "docstring": "Create an embodied-carbon entry.",
           "fields": [
             {
+              "name": "data_quality",
+              "type": "str"
+            },
+            {
               "name": "inventory_id",
               "type": "UUID"
             },
@@ -32551,6 +32833,10 @@
           "docstring": "Partial update of an embodied-carbon entry.",
           "fields": [
             {
+              "name": "data_quality",
+              "type": "str | None"
+            },
+            {
               "name": "element_ref",
               "type": "str | None"
             },
@@ -32613,6 +32899,11 @@
           ],
           "docstring": "Embodied entry returned from the API.",
           "fields": [
+            {
+              "name": "data_quality",
+              "type": "str",
+              "default": "'calculated'"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -32705,6 +32996,10 @@
           "docstring": "Create a scope-1 (direct) emission entry.",
           "fields": [
             {
+              "name": "data_quality",
+              "type": "str"
+            },
+            {
               "name": "inventory_id",
               "type": "UUID"
             },
@@ -32760,6 +33055,10 @@
           ],
           "docstring": "Partial update of a scope-1 entry.",
           "fields": [
+            {
+              "name": "data_quality",
+              "type": "str | None"
+            },
             {
               "name": "period_start",
               "type": "date | None",
@@ -32817,6 +33116,11 @@
           ],
           "docstring": "Scope-1 entry returned from the API.",
           "fields": [
+            {
+              "name": "data_quality",
+              "type": "str",
+              "default": "'calculated'"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -32885,6 +33189,10 @@
           "docstring": "Create a scope-2 (purchased-energy) emission entry.",
           "fields": [
             {
+              "name": "data_quality",
+              "type": "str"
+            },
+            {
               "name": "inventory_id",
               "type": "UUID"
             },
@@ -32939,6 +33247,10 @@
           ],
           "docstring": "Partial update of a scope-2 entry.",
           "fields": [
+            {
+              "name": "data_quality",
+              "type": "str | None"
+            },
             {
               "name": "period_start",
               "type": "date | None",
@@ -32995,6 +33307,11 @@
           ],
           "docstring": "Scope-2 entry returned from the API.",
           "fields": [
+            {
+              "name": "data_quality",
+              "type": "str",
+              "default": "'calculated'"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -33063,6 +33380,10 @@
           "docstring": "Create a scope-3 (other) emission entry.",
           "fields": [
             {
+              "name": "data_quality",
+              "type": "str"
+            },
+            {
               "name": "inventory_id",
               "type": "UUID"
             },
@@ -33112,6 +33433,10 @@
           ],
           "docstring": "Partial update of a scope-3 entry.",
           "fields": [
+            {
+              "name": "data_quality",
+              "type": "str | None"
+            },
             {
               "name": "period_start",
               "type": "date | None",
@@ -33163,6 +33488,11 @@
           ],
           "docstring": "Scope-3 entry returned from the API.",
           "fields": [
+            {
+              "name": "data_quality",
+              "type": "str",
+              "default": "'calculated'"
+            },
             {
               "name": "id",
               "type": "UUID"
@@ -34438,7 +34768,11 @@
         }
       ],
       "import_dependencies": [
-        "bim_hub"
+        "bim_hub",
+        "boq",
+        "equipment",
+        "projects",
+        "supplier_catalogs"
       ]
     },
     {
@@ -280816,10 +281150,10 @@
     },
     {
       "name": "carbon",
-      "ts_files": 7,
+      "ts_files": 11,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 7
+      "test_files": 2,
+      "total_files": 11
     },
     {
       "name": "cases",
@@ -282301,7 +282635,10 @@
     ],
     "carbon": [
       "bim_hub",
+      "boq",
+      "equipment",
       "projects",
+      "supplier_catalogs",
       "users"
     ],
     "cases": [
@@ -283742,14 +284079,14 @@
   "statistics": {
     "backend_modules": 216,
     "modules_with_manifests": 214,
-    "total_models": 803,
-    "total_columns": 9359,
+    "total_models": 805,
+    "total_columns": 9393,
     "total_relationships": 244,
     "total_routes": 4696,
     "total_schemas": 4177,
-    "total_python_files": 2853,
+    "total_python_files": 2857,
     "frontend_features": 211,
-    "frontend_ts_files": 3682,
+    "frontend_ts_files": 3686,
     "frontend_backend_mapped": 188
   },
   "frontend_backend_mapping": {

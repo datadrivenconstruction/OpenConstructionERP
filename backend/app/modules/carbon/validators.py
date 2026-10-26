@@ -171,6 +171,89 @@ class Carbon6DCoverageRule(ValidationRule):
         ]
 
 
+_LIFECYCLE_CHECKS: tuple[tuple[str, Severity, str, str], ...] = (
+    ("no_factor", Severity.WARNING, "{n} embodied line(s) have no emission factor.", "Link a material factor or EPD."),
+    (
+        "outdated_factor_set",
+        Severity.WARNING,
+        "{n} line(s) use a factor set older than five years.",
+        "Update the factor set to a current published edition.",
+    ),
+    ("expired_epd", Severity.WARNING, "{n} line(s) rely on an expired EPD.", "Replace the EPD with a valid one."),
+    (
+        "unit_mismatch",
+        Severity.ERROR,
+        "{n} line(s) have a quantity unit that cannot convert to the factor unit.",
+        "Fix the unit or add a density on the line.",
+    ),
+)
+
+
+class CarbonLifecycleRule(ValidationRule):
+    """Life-cycle carbon checks: missing or outdated factors, expired EPDs, units, budget.
+
+    Reads ``carbon_checks`` (the payload of ``GET /carbon/projects/{id}/checks``)
+    from the context data; silent when absent.
+    """
+
+    rule_id = "carbon.lifecycle_checks"
+    name = "Life-cycle carbon checks"
+    standard = "carbon_6d"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "Flags lines without a factor, outdated factor sets, expired EPDs, unit mismatches and budget overrun."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data if isinstance(context.data, dict) else {}
+        checks = data.get("carbon_checks")
+        if not isinstance(checks, dict):
+            return []
+        out: list[RuleResult] = []
+        for key, sev, msg, hint in _LIFECYCLE_CHECKS:
+            ids = checks.get(key) or []
+            if ids:
+                out.append(
+                    RuleResult(
+                        rule_id=f"{self.rule_id}.{key}",
+                        rule_name=self.name,
+                        severity=sev,
+                        category=self.category,
+                        passed=False,
+                        message=msg.format(n=len(ids)),
+                        details={"entry_ids": list(ids)},
+                        suggestion=hint,
+                    )
+                )
+        budget = checks.get("budget") or {}
+        if budget.get("over_budget"):
+            out.append(
+                RuleResult(
+                    rule_id=f"{self.rule_id}.over_budget",
+                    rule_name=self.name,
+                    severity=Severity.WARNING,
+                    category=self.category,
+                    passed=False,
+                    message=f"Carbon is {budget.get('used_pct')}% of the project budget.",
+                    details=budget,
+                    suggestion="Review hotspots and compare lower-carbon alternatives.",
+                )
+            )
+        if not out:
+            out.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=Severity.INFO,
+                    category=self.category,
+                    passed=True,
+                    message="Life-cycle carbon checks passed.",
+                )
+            )
+        return out
+
+
 def register_carbon_validation_rules() -> None:
     """Register the carbon module's validation rules with the global registry.
 
@@ -190,6 +273,7 @@ def register_carbon_validation_rules() -> None:
     concern.
     """
     rule_registry.register(Carbon6DCoverageRule(), ["carbon_6d"])
+    rule_registry.register(CarbonLifecycleRule(), ["carbon_6d"])
     logger.debug("Registered carbon validation rules")
 
 

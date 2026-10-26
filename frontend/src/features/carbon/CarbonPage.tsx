@@ -46,6 +46,7 @@ import { fetchBIMModels } from '@/features/bim/api';
 import { carbonGuide } from './carbonGuide';
 import { summarizeEnrich, sourceLabel, sourcePillVariant } from './sixd';
 import { WholeLifePanel } from './WholeLifePanel';
+import { CompanyReportPanel, LifecyclePanel } from './LifecyclePanels';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -112,7 +113,7 @@ import {
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
-type Tab = 'inventory' | 'wholelife' | 'epds' | 'targets' | 'reports';
+type Tab = 'inventory' | 'wholelife' | 'lifecycle' | 'epds' | 'targets' | 'reports' | 'company';
 
 interface Project {
   id: string;
@@ -377,6 +378,11 @@ export function CarbonPage() {
                 label: t('carbon.sixd.wl_tab', { defaultValue: 'Whole-life (6D)' }),
                 icon: Recycle,
               },
+              {
+                id: 'lifecycle',
+                label: t('carbon.lc.tab', { defaultValue: 'Budget and hotspots' }),
+                icon: Target,
+              },
               { id: 'epds', label: t('carbon.tab_epds', { defaultValue: 'EPDs' }), icon: Database },
               {
                 id: 'targets',
@@ -386,6 +392,11 @@ export function CarbonPage() {
               {
                 id: 'reports',
                 label: t('carbon.tab_reports', { defaultValue: 'Reports' }),
+                icon: FileText,
+              },
+              {
+                id: 'company',
+                label: t('carbon.lc.company_tab', { defaultValue: 'Company report' }),
                 icon: FileText,
               },
             ] as { id: Tab; label: string; icon: React.ElementType }[]
@@ -411,7 +422,7 @@ export function CarbonPage() {
         </nav>
       </div>
 
-      {!effectiveProjectId && tab !== 'epds' && (
+      {!effectiveProjectId && tab !== 'epds' && tab !== 'company' && (
         <EmptyState
           icon={<Leaf size={22} />}
           title={t('carbon.pick_project', { defaultValue: 'Pick a project' })}
@@ -434,7 +445,9 @@ export function CarbonPage() {
           currency={effectiveProject?.currency}
         />
       )}
+      {tab === 'lifecycle' && effectiveProjectId && <LifecyclePanel projectId={effectiveProjectId} />}
       {tab === 'epds' && <EPDsTab />}
+      {tab === 'company' && <CompanyReportPanel />}
       {tab === 'targets' && effectiveProjectId && (
         <TargetsTab projectId={effectiveProjectId} />
       )}

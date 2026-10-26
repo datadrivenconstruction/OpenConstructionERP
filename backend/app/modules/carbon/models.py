@@ -55,6 +55,9 @@ class EPDRecord(Base):
 
     validity_until: Mapped[str | None] = mapped_column(Date, nullable=True)
     document_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    # Supplier catalogue product this EPD declares (plain GUID, cross-module).
+    supplier_catalog_item_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    epd_format: Mapped[str | None] = mapped_column(String(16), nullable=True)
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -90,6 +93,9 @@ class MaterialCarbonFactor(Base):
     region: Mapped[str] = mapped_column(String(8), nullable=False, default="", index=True)
     last_reviewed_at: Mapped[str | None] = mapped_column(Date, nullable=True)
     confidence: Mapped[str] = mapped_column(String(16), nullable=False, default="medium")
+    # Published factor set this value comes from, and its year (outdated-set rule).
+    factor_set: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    factor_set_year: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
@@ -190,6 +196,9 @@ class EmbodiedCarbonEntry(Base):
     # Confidence band of the auto-matched carbon factor (high|medium|low).
     # NULL for manually entered rows.
     match_confidence: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    data_quality: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="calculated", server_default="calculated"
+    )
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -231,6 +240,9 @@ class Scope1Entry(Base):
         index=True,
     )
     source_ref: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    data_quality: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="calculated", server_default="calculated"
+    )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -277,6 +289,9 @@ class Scope2Entry(Base):
     )
     total_co2e_kg: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     supplier_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    data_quality: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="calculated", server_default="calculated"
+    )
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
@@ -315,6 +330,9 @@ class Scope3Entry(Base):
     activity_unit: Mapped[str] = mapped_column(String(40), nullable=False, default="tkm")
     emission_factor: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
     total_co2e_kg: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
+    data_quality: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="calculated", server_default="calculated"
+    )
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -616,3 +634,61 @@ class GridEmissionFactor(Base):
 
     def __repr__(self) -> str:
         return f"<GridEmissionFactor {self.country_code} {self.year} {self.factor_kg_co2e_per_kwh}>"
+
+
+class CarbonCompanyActivity(Base):
+    """Company-level GHG activity not tied to one project (fleet, offices, purchases).
+
+    Feeds the CSRD / ESRS E1 aggregate next to the project inventories.
+    ``scope`` is 1, 2 or 3 (GHG Protocol); ``scope3_category`` is 1-15.
+    """
+
+    __tablename__ = "oe_carbon_company_activity"
+
+    reporting_year: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    scope: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    scope3_category: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    category: Mapped[str] = mapped_column(String(40), nullable=False, default="office")
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    activity_amount: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
+    activity_unit: Mapped[str] = mapped_column(String(20), nullable=False, default="kWh")
+    emission_factor: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
+    factor_source: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    co2e_kg: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
+    energy_kwh: Mapped[str] = mapped_column(Numeric(18, 6), nullable=False, default=0)
+    renewable_share_pct: Mapped[str] = mapped_column(Numeric(7, 3), nullable=False, default=0)
+    market_based_co2e_kg: Mapped[str | None] = mapped_column(Numeric(18, 6), nullable=True)
+    data_quality: Mapped[str] = mapped_column(String(16), nullable=False, default="calculated")
+    source_module: Mapped[str] = mapped_column(String(40), nullable=False, default="manual")
+    source_ref: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+
+    def __repr__(self) -> str:
+        return f"<CarbonCompanyActivity {self.reporting_year} s{self.scope} {self.co2e_kg} kg>"
+
+
+class CarbonCompanyReport(Base):
+    """A company-level climate report (ESRS E1, SECR, US state template).
+
+    ``datapoints`` holds the computed figures; ``audit`` lists, per data point,
+    every source record with its data-quality flag.
+    """
+
+    __tablename__ = "oe_carbon_company_report"
+
+    reporting_year: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
+    template: Mapped[str] = mapped_column(String(32), nullable=False, default="esrs_e1", index=True)
+    company_name: Mapped[str] = mapped_column(String(255), nullable=False, default="")
+    net_revenue: Mapped[str] = mapped_column(Numeric(20, 2), nullable=False, default=0)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="")
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="draft")
+    datapoints: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}"
+    )
+    audit: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=dict, server_default="{}"
+    )
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+
+    def __repr__(self) -> str:
+        return f"<CarbonCompanyReport {self.template} {self.reporting_year}>"
