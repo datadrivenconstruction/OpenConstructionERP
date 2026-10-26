@@ -15,6 +15,7 @@ import {
   Layers,
   BookmarkPlus,
   Check,
+  Scale,
 } from 'lucide-react';
 import { boqApi, type ResourceSummaryItem, type ResourceSummaryResponse } from './api';
 import { apiPost } from '@/shared/lib/api';
@@ -24,6 +25,7 @@ import { getResourceTypeLabel } from './boqResourceTypes';
 import { VariantPicker } from '@/features/costs/VariantPicker';
 import type { CostVariant } from '@/features/costs/api';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
+import type { ResourceScalingScope } from './ResourceScalingDialog';
 
 /* ── Constants ──────────────────────────────────────────────────────── */
 
@@ -108,11 +110,14 @@ export function ResourceSummary({
   boqId,
   locale = 'de-DE',
   currency,
+  onScale,
 }: {
   boqId: string;
   locale?: string;
   /** The project's base currency - see `createRSMoneyFormatter`. */
   currency?: string;
+  /** Open proportional scaling for a resource type or one resource; omitted on a locked bill. */
+  onScale?: (scope: ResourceScalingScope) => void;
 }) {
   const { t } = useTranslation();
   const fmt = useMemo(() => createRSFormatter(locale), [locale]);
@@ -420,6 +425,18 @@ export function ResourceSummary({
                 ))}
             </div>
 
+            {onScale && typeFilter !== 'all' && (
+              <button
+                type="button"
+                onClick={() => onScale({ resourceType: typeFilter, label: typeFilterLabel(typeFilter) })}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-2xs font-medium text-oe-blue-text hover:bg-oe-blue-subtle/40"
+                data-testid="rs-scale-type"
+              >
+                <Scale size={12} />
+                {t('boq.scaling.scale_type', { defaultValue: 'Scale this group…' })}
+              </button>
+            )}
+
             {/* Search */}
             <div className="ml-auto relative">
               <Search size={13} className="absolute left-2 top-1/2 -translate-y-1/2 text-content-quaternary" />
@@ -559,6 +576,7 @@ export function ResourceSummary({
                               isSaved={savedResources.has(`${res.type}:${res.name}`)}
                               onRepickVariant={handleRepickVariant}
                               abcDividerAbove={showAbcDivider}
+                              onScale={onScale}
                             />
                           );
                         })}
@@ -651,6 +669,7 @@ function ResourceRow({
   isSaved,
   onRepickVariant,
   abcDividerAbove,
+  onScale,
 }: {
   resource: ResourceSummaryItem;
   /** Quantities. */
@@ -663,6 +682,7 @@ function ResourceRow({
   /** Issue #106 - when true, draw a thicker top border to visualise the
    *  A→B or B→C boundary in ABC sort mode. */
   abcDividerAbove?: boolean;
+  onScale?: (scope: ResourceScalingScope) => void;
 }) {
   const { t } = useTranslation();
   const badgeStyle = TYPE_BADGE_STYLES[resource.type] || TYPE_BADGE_STYLES.other;
@@ -866,6 +886,18 @@ function ResourceRow({
             className="inline-flex items-center justify-center h-6 w-6 rounded-md text-content-tertiary opacity-0 group-hover:opacity-100 hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-all"
           >
             <BookmarkPlus size={13} />
+          </button>
+        )}
+        {onScale && (
+          <button
+            type="button"
+            onClick={() => onScale({ resourceType: resource.type, resourceKey: resource.name, label: resource.name })}
+            title={t('boq.scaling.scale_resource', { defaultValue: 'Scale this resource to a target total' })}
+            aria-label={t('boq.scaling.scale_resource', { defaultValue: 'Scale this resource to a target total' })}
+            className="inline-flex items-center justify-center h-6 w-6 rounded-md text-content-tertiary opacity-0 group-hover:opacity-100 hover:text-oe-blue-text hover:bg-oe-blue-subtle/40 transition-all"
+            data-testid={`rs-scale-${resource.type}-${resource.name}`}
+          >
+            <Scale size={13} />
           </button>
         )}
       </td>

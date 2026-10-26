@@ -63,6 +63,7 @@ import {
   ListTree,
   ListCollapse,
   Ruler,
+  FileSearch,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -105,6 +106,8 @@ export interface BOQToolbarProps {
   onOpenGaebSiteExchange?: () => void;
   // Export
   onExport: (format: string) => void;
+  /** Opens the exchange report: what an export loses, with a round-trip check. Hidden when absent. */
+  onOpenExchangeReport?: () => void;
   /**
    * Open the embodied-carbon view for this BOQ. When provided, a "Carbon
    * footprint" action appears in the File group; the host wires it to
@@ -227,6 +230,7 @@ export function BOQToolbar({
   onImportInputChange,
   onOpenGaebSiteExchange,
   onExport,
+  onOpenExchangeReport,
   onCarbonFootprint,
   onValidate,
   isValidating,
@@ -549,10 +553,26 @@ export function BOQToolbar({
                     <FileText size={15} className="text-content-tertiary" />
                     {t('boq.export_format_gaeb_x84', { defaultValue: 'GAEB XML (.x84) - with prices' })}
                   </button>
-                  <button role="menuitem" onClick={() => handleExportItem('bc3')} className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors ${gaebExchangeEnabled ? '' : 'rounded-b-lg'}`}>
+                  <button role="menuitem" onClick={() => handleExportItem('bc3')} className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-sm text-content-primary hover:bg-surface-secondary transition-colors ${gaebExchangeEnabled || onOpenExchangeReport ? '' : 'rounded-b-lg'}`}>
                     <FileText size={15} className="text-content-tertiary" />
                     {t('boq.export_format_bc3', { defaultValue: 'FIEBDC-3 (.bc3)' })}
                   </button>
+                  {onOpenExchangeReport && (
+                    <>
+                      <div role="separator" className="border-t border-border-light" />
+                      <button
+                        role="menuitem"
+                        onClick={() => {
+                          setShowExportMenu(false);
+                          onOpenExchangeReport();
+                        }}
+                        className={`flex w-full items-center gap-2.5 px-3 py-2.5 text-left text-sm text-content-primary hover:bg-surface-secondary transition-colors ${gaebExchangeEnabled ? '' : 'rounded-b-lg'}`}
+                      >
+                        <FileSearch size={15} className="shrink-0 text-content-tertiary" />
+                        {t('boq.fidelity.menu_check', { defaultValue: 'Check what the file loses…' })}
+                      </button>
+                    </>
+                  )}
                   {/* The five entries above download a file straight away. This
                       one leaves the editor for the GAEB Exchange module, where
                       the exchange phase (X81 / X83 / X84) is an explicit choice

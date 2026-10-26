@@ -27,6 +27,9 @@ import {
   waitForImportJob,
   type ImportProgress,
 } from './importJob';
+import type { FidelityReport } from './exchangeFidelityApi';
+import { needsAttention } from './exchangeFidelityText';
+import { FidelityReportView } from './FidelityReportView';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -54,6 +57,8 @@ interface PreviewResponse {
   errors: PreviewError[];
   skipped: number;
   truncated: boolean;
+  /** What the import will not carry into the bill; null when the report failed. */
+  fidelity?: FidelityReport | null;
   metadata?: {
     original_columns?: string[];
     column_mapping?: Record<string, string>;
@@ -80,6 +85,8 @@ interface ImportPreviewDialogProps {
   onClose: () => void;
   boqId: string;
   onImported: () => void;
+  /** Open the stored exchange report of a finished import. */
+  onFidelityReport?: (reportId: string) => void;
 }
 
 type Step = 'upload' | 'preview' | 'confirm';
@@ -116,7 +123,8 @@ function fmtNumber(v: number | null | undefined): string {
 
 /* ── Component ──────────────────────────────────────────────────────── */
 
-export function ImportPreviewDialog({ open, onClose, boqId, onImported }: ImportPreviewDialogProps) {
+export function ImportPreviewDialog({ open, onClose, boqId, onImported, onFidelityReport }: ImportPreviewDialogProps) {
+  const [fidelityExpanded, setFidelityExpanded] = useState(false);
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -327,7 +335,16 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
         source_format?: string;
         currency?: string;
         warnings?: ImportIssue[];
+        fidelity?: FidelityReport | null;
       };
+      const fidelityId = result.fidelity?.id ?? null;
+      const fidelityAction =
+        fidelityId && onFidelityReport && needsAttention(result.fidelity?.summary)
+          ? {
+              label: t('boq.fidelity.view_report', { defaultValue: 'View report' }),
+              onClick: () => onFidelityReport(fidelityId),
+            }
+          : undefined;
 
       const imported = result.imported ?? ((result.created ?? 0) + (result.updated ?? 0));
       const unmapped = (result.warnings ?? []).filter((w) => w.code === 'column_mapping_not_applied');
@@ -338,6 +355,7 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
           count: imported,
         }),
         message: unmapped.length > 0 ? unmapped.map((w) => importIssueText(w, t, fmtNumber)).join('\n') : undefined,
+        action: fidelityAction,
       });
 
       onImported();
@@ -609,6 +627,32 @@ export function ImportPreviewDialog({ open, onClose, boqId, onImported }: Import
                         {parsing && <Loader2 size={10} className="animate-spin" />}
                         {t('boq.import_preview.apply_mapping', { defaultValue: 'Preview with this mapping' })}
                       </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* What the bill will not take from the file */}
+              {preview.fidelity && preview.fidelity.summary.total > 0 && (
+                <div className="rounded-lg border border-border-light overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setFidelityExpanded((v) => !v)}
+                    className="flex items-center gap-2 w-full px-3 py-2 text-xs text-content-primary font-medium"
+                    data-testid="import-fidelity-toggle"
+                  >
+                    {fidelityExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                    <AlertTriangle size={12} />
+                    {t('boq.fidelity.import_title', {
+                      defaultValue: 'Not carried into the bill: {{errors}} critical, {{warnings}} warnings, {{notes}} notes',
+                      errors: preview.fidelity.summary.by_severity.error ?? 0,
+                      warnings: preview.fidelity.summary.by_severity.warning ?? 0,
+                      notes: preview.fidelity.summary.by_severity.info ?? 0,
+                    })}
+                  </button>
+                  {fidelityExpanded && (
+                    <div className="px-3 pb-3">
+                      <FidelityReportView report={preview.fidelity} initialRows={50} />
                     </div>
                   )}
                 </div>

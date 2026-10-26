@@ -51,6 +51,9 @@ import {
   Activity,
   Ruler,
   ShoppingCart,
+  Scale,
+  Lock,
+  LockOpen,
 } from 'lucide-react';
 
 import {
@@ -478,6 +481,11 @@ export interface BOQGridProps {
    */
   onPriceAnalysis?: (positionId: string) => void;
   /**
+   * Open proportional scaling of the resource norms under this section.
+   * Optional: when omitted the context-menu item is hidden.
+   */
+  onScaleSection?: (sectionId: string) => void;
+  /**
    * Open the position actuals panel: what the estimate said against what has
    * since been budgeted, committed, contracted, installed and issued from the
    * store for this position. Optional, and hidden when omitted, same graceful
@@ -716,6 +724,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onOpenCatalogForPosition,
   onOpenAICopilot,
   onPriceAnalysis,
+  onScaleSection,
   onShowPositionActuals,
   onShowProcurementTrace,
   onShowMeasurement,
@@ -3310,6 +3319,23 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                     onClick={() => { onPriceAnalysis(d.id as string); closeContextMenu(); }}
                   />
                 )}
+                {/* A locked line keeps its norms when a section or resource group is scaled. */}
+                {!readOnly && hasResources && (
+                  <CtxItem icon={meta?.locked ? <LockOpen size={14}/> : <Lock size={14}/>}
+                    label={meta?.locked
+                      ? t('boq.scaling.unlock_line', { defaultValue: 'Unlock line for scaling' })
+                      : t('boq.scaling.lock_line', { defaultValue: 'Lock line against scaling' })}
+                    onClick={() => {
+                      const current = (meta ?? {}) as Record<string, unknown>;
+                      onUpdatePosition(
+                        d.id as string,
+                        { metadata: { ...current, locked: !current.locked } },
+                        { metadata: current },
+                      );
+                      closeContextMenu();
+                    }}
+                  />
+                )}
                 {/* What the site has actually recorded against this line since
                     it was estimated. No defaultValue on the label on purpose:
                     a key carrying one is invisible to every locale gate we
@@ -3573,6 +3599,12 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
                   <CtxItem icon={<Link2 size={14}/>}
                     label={t('boq.reuse_code_action', { defaultValue: 'Reuse Existing Code…' })}
                     onClick={() => { onReuseCode(d.id as string); closeContextMenu(); }}
+                  />
+                )}
+                {onScaleSection && (
+                  <CtxItem icon={<Scale size={14}/>}
+                    label={t('boq.scaling.scale_section', { defaultValue: 'Scale hours or cost…' })}
+                    onClick={() => { onScaleSection(d.id as string); closeContextMenu(); }}
                   />
                 )}
                 </>}

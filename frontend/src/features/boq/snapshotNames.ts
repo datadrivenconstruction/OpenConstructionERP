@@ -22,12 +22,19 @@ export const LOCK_SNAPSHOT_NAME = 'Contract quantities (captured at lock)';
 /** Stored name of the snapshot frozen from the quantity check. */
 export const FROZEN_SNAPSHOT_NAME = 'Quantity baseline';
 
+/** Stored name of the snapshot taken before a proportional scaling is applied
+ *  (`SCALING_SNAPSHOT_NAME` in backend/app/modules/boq/resource_scaling_service.py). */
+export const SCALING_SNAPSHOT_NAME = 'Before proportional scaling';
+
 export function snapshotDisplayName(name: string, t: Translate): string {
   if (name === LOCK_SNAPSHOT_NAME) {
     return t('boq.snapshot_name.captured_at_lock', { defaultValue: 'Contract quantities (captured at lock)' });
   }
   if (name === FROZEN_SNAPSHOT_NAME) {
     return t('boq.snapshot_name.quantity_baseline', { defaultValue: 'Quantity baseline' });
+  }
+  if (name === SCALING_SNAPSHOT_NAME) {
+    return t('boq.snapshot_name.before_scaling', { defaultValue: 'Before proportional scaling' });
   }
   return name;
 }

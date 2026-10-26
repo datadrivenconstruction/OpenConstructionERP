@@ -97,6 +97,10 @@ import { ScenarioDialog } from './ScenarioDialog';
 import { SendToTenderDialog } from './SendToTenderDialog';
 import { CostPlanDialog, offersCostPlan } from '@/features/cost-plan';
 import { ImportPreviewDialog } from './ImportPreviewDialog';
+import { ExchangeFidelityDialog } from './ExchangeFidelityDialog';
+import { ResourceScalingDialog, type ResourceScalingScope } from './ResourceScalingDialog';
+import { reportFromHeaders } from './exchangeFidelityApi';
+import type { ScaleMetric } from './resourceScalingApi';
 import { BOQFilterBar, type BoqFilterKind } from './BOQFilterBar';
 import { BOQOutline } from './BOQOutline';
 import type { TenderPackageRef } from './api';
@@ -2188,6 +2192,16 @@ export function BOQEditorPage() {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [exportWarning, setExportWarning] = useState<{ format: string; score: number } | null>(null);
   const [gaebPreviewOpen, setGaebPreviewOpen] = useState(false);
+  // Exchange report of the last export or import, or the check dialog (id null).
+  const [fidelityOpen, setFidelityOpen] = useState(false);
+  const [fidelityReportId, setFidelityReportId] = useState<string | null>(null);
+  const openFidelityReport = useCallback((reportId: string | null) => {
+    setFidelityReportId(reportId);
+    setFidelityOpen(true);
+  }, []);
+  // Proportional scaling of resource norms in a section or a resource group.
+  const [scalingScope, setScalingScope] = useState<ResourceScalingScope | null>(null);
+  const [scalingMetric, setScalingMetric] = useState<ScaleMetric>('hours');
   // Which GAEB phase the preview dialog is confirming. The dialog used to
   // export X83 whichever menu item opened it.
   const [gaebExportFormat, setGaebExportFormat] = useState<'gaeb' | 'gaeb_x84'>('gaeb');
@@ -3316,7 +3330,27 @@ export function BOQEditorPage() {
           excel: 'xlsx', csv: 'csv', pdf: 'pdf', gaeb: 'x83', gaeb_x84: 'x84', bc3: 'bc3',
         };
         triggerDownload(blob, `${boq?.name ?? 'boq'}.${extensions[format] ?? format}`);
-        addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
+        const fidelity = reportFromHeaders(r.headers);
+        if (fidelity && fidelity.errors + fidelity.warnings > 0) {
+          const reportId = fidelity.id;
+          addToast(
+            {
+              type: fidelity.errors > 0 ? 'warning' : 'info',
+              title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }),
+              message: t('boq.fidelity.export_toast', {
+                defaultValue: 'The file does not carry everything: {{errors}} critical, {{warnings}} warnings.',
+                errors: fidelity.errors,
+                warnings: fidelity.warnings,
+              }),
+              action: reportId
+                ? { label: t('boq.fidelity.view_report', { defaultValue: 'View report' }), onClick: () => openFidelityReport(reportId) }
+                : undefined,
+            },
+            { duration: 12000 },
+          );
+        } else {
+          addToast({ type: 'success', title: t('boq.file_downloaded', { defaultValue: 'File downloaded' }) });
+        }
       } else {
         let errorMsg = t('boq.export_failed', { defaultValue: 'Export failed' });
         try {
@@ -3334,7 +3368,7 @@ export function BOQEditorPage() {
     },
     /* Everything the body reads. The project and the money are not among them
      * any more: the server reads both for itself. */
-    [boqId, boq, addToast, t, measurementSystem],
+    [boqId, boq, addToast, t, measurementSystem, openFidelityReport],
   );
 
   /** Pre-export validation check: warn if quality < 60%, GAEB preview before export. */
@@ -5461,6 +5495,7 @@ export function BOQEditorPage() {
           }}
           onPasteFromExcel={() => setExcelPasteOpen(true)}
           onExport={handleExport}
+          onOpenExchangeReport={() => openFidelityReport(null)}
           onCarbonFootprint={() =>
             navigate(
               `/sustainability?project_id=${boq.project_id}&boq_id=${boq.id}`,
@@ -5588,6 +5623,14 @@ export function BOQEditorPage() {
           onFormulaApplied={handleGridFormulaApplied}
           onReorderPositions={handleReorderPositions}
           onReorderSections={handleReorderSections}
+          onScaleSection={(sectionId: string) => {
+            const section = boq.positions.find((p) => p.id === sectionId);
+            setScalingMetric('hours');
+            setScalingScope({
+              sectionId,
+              label: section ? `${section.ordinal} ${section.description}`.trim() : sectionId,
+            });
+          }}
           onDeleteSection={handleDeleteSection}
           collapsedSections={effectiveCollapsedSections}
           onToggleSection={toggleSection}
@@ -5719,7 +5762,15 @@ export function BOQEditorPage() {
       {boqId && hasPositions && <HistoricalRangePanel positions={historicalPositions} />}
 
       {/* ── Resource Summary ──────────────────────────────────────────── */}
-      {boqId && hasPositions && <div className="mt-6" data-testid="boq-resource-summary"><ResourceSummary boqId={boqId} locale={locale} currency={currencyCode} /></div>}
+      {boqId && hasPositions && <div className="mt-6" data-testid="boq-resource-summary"><ResourceSummary
+        boqId={boqId}
+        locale={locale}
+        currency={currencyCode}
+        onScale={boq.is_locked ? undefined : (scope) => {
+          setScalingMetric(scope.resourceKey ? 'quantity' : scope.resourceType === 'labor' ? 'hours' : 'cost');
+          setScalingScope(scope);
+        }}
+      /></div>}
 
       {/* ── Cost Breakdown Panel ─────────────────────────────────────── */}
       {boqId && hasPositions && <div className="mt-6"><CostBreakdownPanel boqId={boqId} locale={locale} /></div>}
@@ -6556,7 +6607,27 @@ export function BOQEditorPage() {
         onClose={() => setShowImportPreview(false)}
         boqId={boqId!}
         onImported={invalidateAll}
+        onFidelityReport={openFidelityReport}
       />
+      {boqId && (
+        <ExchangeFidelityDialog
+          open={fidelityOpen}
+          boqId={boqId}
+          reportId={fidelityReportId}
+          onClose={() => setFidelityOpen(false)}
+        />
+      )}
+      {boqId && (
+        <ResourceScalingDialog
+          open={scalingScope !== null}
+          boqId={boqId}
+          scope={scalingScope}
+          initialMetric={scalingMetric}
+          readOnly={Boolean(boq?.is_locked)}
+          onClose={() => setScalingScope(null)}
+          onApplied={invalidateAll}
+        />
+      )}
       {boqId && gaebSiteOpen && (
         <GaebSiteExchangeDialog
           open={gaebSiteOpen}
