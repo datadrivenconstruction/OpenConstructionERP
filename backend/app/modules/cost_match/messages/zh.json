@@ -1,0 +1,15 @@
+{
+  "common.ok": "确定",
+  "module.display_name": "成本匹配",
+  "match.semantic.not_installed": "语义匹配需要安装 `pip install openconstructionerp[semantic]`。当前仅显示精确匹配结果；如需模糊成本匹配，请安装该扩展。",
+  "match.reason.exact_match": "与规范化描述完全匹配。",
+  "match.reason.strong_overlap": "所有搜索词均在此成本项中找到。",
+  "match.reason.partial_overlap": "部分搜索词在此成本项中找到。",
+  "match.reason.weak_overlap": "与此成本项匹配的搜索词很少或没有。",
+  "match.reason.unit_match": "单位兼容。",
+  "match.reason.unit_mismatch": "单位不同，因此置信度降低。",
+  "match.reason.unit_unknown": "无法比较单位。",
+  "match.hint.empty_query": "请输入材料或工作描述，以搜索成本数据库。",
+  "match.hint.no_candidates": "该目录尚未加载任何成本项，请先加载区域成本基础数据。",
+  "match.hint.no_good_match": "未找到可靠的匹配。请尝试减少词语、仅输入材料名称，或使用其他语言描述。"
+}

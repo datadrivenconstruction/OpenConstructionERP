@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Xarajatlarni moslashtirish",
+  "match.semantic.not_installed": "Semantik moslashtirish uchun `pip install openconstructionerp[semantic]` kerak. Hozircha faqat aniq mos keladigan natijalar ko'rsatilmoqda; noaniq xarajatlarni moslashtirish uchun kengaytmani o'rnating.",
+  "match.reason.exact_match": "Normallashtirilgan tavsifga aniq mos keladi.",
+  "match.reason.strong_overlap": "Qidiruv so'zlarining barchasi bu xarajat bandida topildi.",
+  "match.reason.partial_overlap": "Qidiruv so'zlarining bir qismi bu xarajat bandida topildi.",
+  "match.reason.weak_overlap": "Bu xarajat bandiga juda kam yoki hech qanday qidiruv so'zi mos kelmadi.",
+  "match.reason.unit_match": "O'lchov birliklari mos keladi.",
+  "match.reason.unit_mismatch": "O'lchov birliklari farq qiladi, bu ishonchni pasaytiradi.",
+  "match.reason.unit_unknown": "O'lchov birligini solishtirib bo'lmadi.",
+  "match.hint.empty_query": "Xarajatlar bazasidan qidirish uchun material yoki ish tavsifini kiriting.",
+  "match.hint.no_candidates": "Bu katalog uchun hali xarajat bandlari yuklanmagan. Avval mintaqaviy xarajatlar bazasini yuklang.",
+  "match.hint.no_good_match": "Ishonchli moslik topilmadi. Kamroq so'z sinab ko'ring, faqat material nomini yozing yoki tavsifni boshqa tilda kiriting."
+}

@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Dopasowanie kosztów",
+  "match.semantic.not_installed": "Dopasowanie semantyczne wymaga polecenia `pip install openconstructionerp[semantic]`. Wyświetlane są tylko dokładne dopasowania; zainstaluj dodatek, aby korzystać z rozmytego dopasowania kosztów.",
+  "match.reason.exact_match": "Dokładne dopasowanie do znormalizowanego opisu.",
+  "match.reason.strong_overlap": "Wszystkie wyszukiwane słowa znaleziono w tej pozycji kosztowej.",
+  "match.reason.partial_overlap": "Niektóre wyszukiwane słowa znaleziono w tej pozycji kosztowej.",
+  "match.reason.weak_overlap": "Niewiele wyszukiwanych słów lub żadne nie pasuje do tej pozycji kosztowej.",
+  "match.reason.unit_match": "Jednostki są zgodne.",
+  "match.reason.unit_mismatch": "Jednostki się różnią, co obniża pewność.",
+  "match.reason.unit_unknown": "Nie można było porównać jednostek.",
+  "match.hint.empty_query": "Wpisz opis materiału lub robót, aby przeszukać bazę kosztów.",
+  "match.hint.no_candidates": "Dla tego katalogu nie załadowano jeszcze żadnych pozycji kosztowych. Najpierw załaduj regionalną bazę kosztów.",
+  "match.hint.no_good_match": "Nie znaleziono pewnego dopasowania. Spróbuj użyć mniej słów, samej nazwy materiału lub opisu w innym języku."
+}

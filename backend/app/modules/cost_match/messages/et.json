@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Kulude sobitamine",
+  "match.semantic.not_installed": "Semantiline sobitamine nõuab käsku `pip install openconstructionerp[semantic]`. Näidatakse ainult täpseid vasteid; hägusa kulude sobitamise jaoks installige lisa.",
+  "match.reason.exact_match": "Normaliseeritud kirjelduse täpne vaste.",
+  "match.reason.strong_overlap": "Kõik otsingusõnad leiti sellelt kulureralt.",
+  "match.reason.partial_overlap": "Osa otsingusõnu leiti sellelt kulureralt.",
+  "match.reason.weak_overlap": "Vähesed või ükski otsingusõna ei vastanud sellele kulureale.",
+  "match.reason.unit_match": "Ühikud on ühilduvad.",
+  "match.reason.unit_mismatch": "Ühikud erinevad, mis vähendab usaldusväärsust.",
+  "match.reason.unit_unknown": "Ühikut ei õnnestunud võrrelda.",
+  "match.hint.empty_query": "Sisestage materjali või töö kirjeldus, et otsida kulude andmebaasist.",
+  "match.hint.no_candidates": "Sellele kataloogile pole veel kulureaid laaditud. Laadige kõigepealt piirkondlik kulubaas.",
+  "match.hint.no_good_match": "Kindlat vastet ei leitud. Proovige vähem sõnu, ainult materjali nime või kirjeldust teises keeles."
+}

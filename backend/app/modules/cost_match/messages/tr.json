@@ -1,0 +1,15 @@
+{
+  "common.ok": "Tamam",
+  "module.display_name": "Maliyet Eşleştirme",
+  "match.semantic.not_installed": "Anlamsal eşleştirme için `pip install openconstructionerp[semantic]` gerekir. Şu anda yalnızca tam eşleşmeler gösteriliyor; bulanık maliyet eşleştirmesi için bu eklentiyi kurun.",
+  "match.reason.exact_match": "Normalleştirilmiş açıklamayla tam eşleşme.",
+  "match.reason.strong_overlap": "Arama terimlerinin tamamı bu maliyet kaleminde bulundu.",
+  "match.reason.partial_overlap": "Arama terimlerinin bir kısmı bu maliyet kaleminde bulundu.",
+  "match.reason.weak_overlap": "Bu maliyet kalemiyle çok az arama terimi eşleşti ya da hiçbiri eşleşmedi.",
+  "match.reason.unit_match": "Birimler uyumlu.",
+  "match.reason.unit_mismatch": "Birimler farklı, bu da güveni düşürür.",
+  "match.reason.unit_unknown": "Birim karşılaştırılamadı.",
+  "match.hint.empty_query": "Maliyet veritabanında aramak için bir malzeme veya iş açıklaması girin.",
+  "match.hint.no_candidates": "Bu katalog için henüz maliyet kalemi yüklenmedi. Önce bölgesel bir maliyet tabanı yükleyin.",
+  "match.hint.no_good_match": "Güvenilir bir eşleşme bulunamadı. Daha az kelime deneyin, yalnızca malzeme adını yazın ya da açıklamayı başka bir dilde girin."
+}

@@ -1,0 +1,15 @@
+{
+  "common.ok": "موافق",
+  "module.display_name": "مطابقة التكاليف",
+  "match.semantic.not_installed": "تتطلب المطابقة الدلالية الأمر `pip install openconstructionerp[semantic]`. تُعرض حاليا نتائج المطابقة التامة فقط؛ ثبّت الإضافة للمطابقة الضبابية للتكاليف.",
+  "match.reason.exact_match": "مطابقة تامة للوصف بعد التوحيد.",
+  "match.reason.strong_overlap": "وُجدت كل كلمات البحث في بند التكلفة هذا.",
+  "match.reason.partial_overlap": "وُجدت بعض كلمات البحث في بند التكلفة هذا.",
+  "match.reason.weak_overlap": "تطابقت كلمات قليلة أو لم تتطابق أي كلمة مع بند التكلفة هذا.",
+  "match.reason.unit_match": "الوحدات متوافقة.",
+  "match.reason.unit_mismatch": "الوحدات مختلفة، مما يخفض الثقة.",
+  "match.reason.unit_unknown": "تعذرت مقارنة الوحدة.",
+  "match.hint.empty_query": "أدخل وصفا للمادة أو للعمل للبحث في قاعدة بيانات التكاليف.",
+  "match.hint.no_candidates": "لا توجد بنود تكلفة محمّلة لهذا الكتالوج بعد. حمّل قاعدة تكاليف إقليمية أولا.",
+  "match.hint.no_good_match": "لم يُعثر على تطابق موثوق. جرّب كلمات أقل، أو اسم المادة وحده، أو الوصف بلغة أخرى."
+}

@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Költségillesztés",
+  "match.semantic.not_installed": "A szemantikus illesztéshez a `pip install openconstructionerp[semantic]` parancs szükséges. Jelenleg csak a pontos találatok jelennek meg; a pontatlan költségillesztéshez telepítse a bővítményt.",
+  "match.reason.exact_match": "Pontos egyezés a normalizált leírással.",
+  "match.reason.strong_overlap": "Minden keresőszó megtalálható ebben a költségtételben.",
+  "match.reason.partial_overlap": "Néhány keresőszó megtalálható ebben a költségtételben.",
+  "match.reason.weak_overlap": "Kevés vagy egyetlen keresőszó sem egyezik ezzel a költségtétellel.",
+  "match.reason.unit_match": "A mértékegységek kompatibilisek.",
+  "match.reason.unit_mismatch": "A mértékegységek eltérnek, ami csökkenti a megbízhatóságot.",
+  "match.reason.unit_unknown": "A mértékegység nem hasonlítható össze.",
+  "match.hint.empty_query": "Adjon meg egy anyag vagy munka leírását a költségadatbázisban való kereséshez.",
+  "match.hint.no_candidates": "Ehhez a katalógushoz még nincsenek költségtételek betöltve. Először töltsön be egy regionális költségalapot.",
+  "match.hint.no_good_match": "Nem található megbízható egyezés. Próbáljon kevesebb szót, csak az anyag nevét, vagy a leírást más nyelven."
+}

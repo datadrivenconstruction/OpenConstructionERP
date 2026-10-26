@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Cost Match",
+  "match.semantic.not_installed": "Kailangan ng semantic matching ang `pip install openconstructionerp[semantic]`. Ipinapakita muna ang eksaktong tugma; i-install ang extra para sa fuzzy cost matching.",
+  "match.reason.exact_match": "Eksaktong tugma sa normalisadong deskripsyon.",
+  "match.reason.strong_overlap": "Nahanap ang lahat ng search term sa cost item na ito.",
+  "match.reason.partial_overlap": "Nahanap ang ilang search term sa cost item na ito.",
+  "match.reason.weak_overlap": "Kakaunti o walang search term ang tumugma sa cost item na ito.",
+  "match.reason.unit_match": "Compatible ang mga unit.",
+  "match.reason.unit_mismatch": "Magkaiba ang mga unit, kaya bumababa ang kumpiyansa.",
+  "match.reason.unit_unknown": "Hindi maihambing ang unit.",
+  "match.hint.empty_query": "Maglagay ng deskripsyon ng materyal o gawain para maghanap sa cost database.",
+  "match.hint.no_candidates": "Wala pang cost item na nakakarga para sa catalogue na ito. Mag-load muna ng regional cost base.",
+  "match.hint.no_good_match": "Walang tiyak na tugmang nahanap. Subukan ang mas kaunting salita, ang pangalan lang ng materyal, o ang deskripsyon sa ibang wika."
+}

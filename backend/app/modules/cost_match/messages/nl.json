@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Kostenkoppeling",
+  "match.semantic.not_installed": "Semantisch koppelen vereist `pip install openconstructionerp[semantic]`. Er worden nu alleen exacte overeenkomsten getoond; installeer de extra voor fuzzy kostenkoppeling.",
+  "match.reason.exact_match": "Exacte overeenkomst met de genormaliseerde omschrijving.",
+  "match.reason.strong_overlap": "Alle zoektermen zijn in deze kostenpost gevonden.",
+  "match.reason.partial_overlap": "Enkele zoektermen zijn in deze kostenpost gevonden.",
+  "match.reason.weak_overlap": "Weinig of geen zoektermen kwamen overeen met deze kostenpost.",
+  "match.reason.unit_match": "De eenheden zijn compatibel.",
+  "match.reason.unit_mismatch": "De eenheden verschillen, wat de betrouwbaarheid verlaagt.",
+  "match.reason.unit_unknown": "De eenheid kon niet worden vergeleken.",
+  "match.hint.empty_query": "Voer een omschrijving van een materiaal of werk in om de kostendatabase te doorzoeken.",
+  "match.hint.no_candidates": "Er zijn nog geen kostenposten geladen voor deze catalogus. Laad eerst een regionale kostenbasis.",
+  "match.hint.no_good_match": "Geen betrouwbare overeenkomst gevonden. Probeer minder woorden, alleen de naam van het materiaal, of de omschrijving in een andere taal."
+}

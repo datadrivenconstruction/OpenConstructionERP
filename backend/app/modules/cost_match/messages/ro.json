@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Potrivire costuri",
+  "match.semantic.not_installed": "Potrivirea semantică necesită `pip install openconstructionerp[semantic]`. Se afișează doar potrivirile exacte; instalați extensia pentru potrivirea aproximativă a costurilor.",
+  "match.reason.exact_match": "Potrivire exactă cu descrierea normalizată.",
+  "match.reason.strong_overlap": "Toți termenii de căutare au fost găsiți în acest articol de cost.",
+  "match.reason.partial_overlap": "Unii termeni de căutare au fost găsiți în acest articol de cost.",
+  "match.reason.weak_overlap": "Puțini termeni de căutare sau niciunul nu au potrivit acest articol de cost.",
+  "match.reason.unit_match": "Unitățile sunt compatibile.",
+  "match.reason.unit_mismatch": "Unitățile diferă, ceea ce scade încrederea.",
+  "match.reason.unit_unknown": "Unitatea nu a putut fi comparată.",
+  "match.hint.empty_query": "Introduceți descrierea unui material sau a unei lucrări pentru a căuta în baza de date a costurilor.",
+  "match.hint.no_candidates": "Nu sunt încărcate încă articole de cost pentru acest catalog. Încărcați mai întâi o bază regională de costuri.",
+  "match.hint.no_good_match": "Nu s-a găsit o potrivire sigură. Încercați mai puține cuvinte, doar numele materialului sau descrierea într-o altă limbă."
+}

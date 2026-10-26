@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Kostnadsmatchning",
+  "match.semantic.not_installed": "Semantisk matchning kräver `pip install openconstructionerp[semantic]`. Endast exakta träffar visas; installera tillägget för oskarp kostnadsmatchning.",
+  "match.reason.exact_match": "Exakt träff på den normaliserade beskrivningen.",
+  "match.reason.strong_overlap": "Alla sökord hittades i denna kostnadspost.",
+  "match.reason.partial_overlap": "Några sökord hittades i denna kostnadspost.",
+  "match.reason.weak_overlap": "Få eller inga sökord matchade denna kostnadspost.",
+  "match.reason.unit_match": "Enheterna är kompatibla.",
+  "match.reason.unit_mismatch": "Enheterna skiljer sig åt, vilket sänker säkerheten.",
+  "match.reason.unit_unknown": "Enheten kunde inte jämföras.",
+  "match.hint.empty_query": "Ange en beskrivning av ett material eller arbete för att söka i kostnadsdatabasen.",
+  "match.hint.no_candidates": "Inga kostnadsposter är ännu inlästa för denna katalog. Läs in en regional kostnadsbas först.",
+  "match.hint.no_good_match": "Ingen säker matchning hittades. Prova färre ord, enbart materialets namn eller beskrivningen på ett annat språk."
+}

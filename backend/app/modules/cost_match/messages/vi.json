@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Đối chiếu chi phí",
+  "match.semantic.not_installed": "Đối chiếu ngữ nghĩa cần lệnh `pip install openconstructionerp[semantic]`. Hiện chỉ hiển thị kết quả khớp chính xác; hãy cài tiện ích mở rộng này để đối chiếu chi phí gần đúng.",
+  "match.reason.exact_match": "Khớp chính xác với mô tả đã chuẩn hóa.",
+  "match.reason.strong_overlap": "Tất cả từ khóa tìm kiếm đều có trong hạng mục chi phí này.",
+  "match.reason.partial_overlap": "Một số từ khóa tìm kiếm có trong hạng mục chi phí này.",
+  "match.reason.weak_overlap": "Rất ít hoặc không có từ khóa tìm kiếm nào khớp với hạng mục chi phí này.",
+  "match.reason.unit_match": "Đơn vị tương thích.",
+  "match.reason.unit_mismatch": "Đơn vị khác nhau, làm giảm độ tin cậy.",
+  "match.reason.unit_unknown": "Không thể so sánh đơn vị.",
+  "match.hint.empty_query": "Nhập mô tả vật liệu hoặc công việc để tìm trong cơ sở dữ liệu chi phí.",
+  "match.hint.no_candidates": "Chưa có hạng mục chi phí nào được tải cho danh mục này. Hãy tải cơ sở chi phí khu vực trước.",
+  "match.hint.no_good_match": "Không tìm thấy kết quả khớp đáng tin cậy. Hãy thử ít từ hơn, chỉ tên vật liệu, hoặc mô tả bằng ngôn ngữ khác."
+}

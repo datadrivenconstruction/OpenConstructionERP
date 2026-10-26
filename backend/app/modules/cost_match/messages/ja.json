@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "コスト照合",
+  "match.semantic.not_installed": "意味的照合には `pip install openconstructionerp[semantic]` が必要です。現在は完全一致の結果のみを表示しています。あいまいなコスト照合を行うには、この拡張機能をインストールしてください。",
+  "match.reason.exact_match": "正規化された説明と完全に一致しています。",
+  "match.reason.strong_overlap": "検索語がすべてこのコスト項目に含まれています。",
+  "match.reason.partial_overlap": "検索語の一部がこのコスト項目に含まれています。",
+  "match.reason.weak_overlap": "このコスト項目に一致した検索語はわずかか、まったくありません。",
+  "match.reason.unit_match": "単位は互換性があります。",
+  "match.reason.unit_mismatch": "単位が異なるため、信頼度が下がります。",
+  "match.reason.unit_unknown": "単位を比較できませんでした。",
+  "match.hint.empty_query": "コストデータベースを検索するため、材料または作業の説明を入力してください。",
+  "match.hint.no_candidates": "このカタログにはまだコスト項目が読み込まれていません。先に地域のコスト基準を読み込んでください。",
+  "match.hint.no_good_match": "確実な一致が見つかりませんでした。単語を減らす、材料名だけを入力する、または別の言語で説明してみてください。"
+}

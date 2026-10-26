@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Kustannusvastaavuus",
+  "match.semantic.not_installed": "Semanttinen vastaavuus vaatii komennon `pip install openconstructionerp[semantic]`. Näytetään vain tarkat osumat; asenna lisäosa sumeaa kustannusvastaavuutta varten.",
+  "match.reason.exact_match": "Tarkka osuma normalisoituun kuvaukseen.",
+  "match.reason.strong_overlap": "Kaikki hakusanat löytyivät tästä kustannuserästä.",
+  "match.reason.partial_overlap": "Osa hakusanoista löytyi tästä kustannuserästä.",
+  "match.reason.weak_overlap": "Vain harvat tai ei yhtään hakusanaa osui tähän kustannuserään.",
+  "match.reason.unit_match": "Yksiköt ovat yhteensopivia.",
+  "match.reason.unit_mismatch": "Yksiköt eroavat, mikä heikentää luotettavuutta.",
+  "match.reason.unit_unknown": "Yksikköä ei voitu verrata.",
+  "match.hint.empty_query": "Kirjoita materiaalin tai työn kuvaus hakeaksesi kustannustietokannasta.",
+  "match.hint.no_candidates": "Tälle luettelolle ei ole vielä ladattu kustannuseriä. Lataa ensin alueellinen kustannuspohja.",
+  "match.hint.no_good_match": "Luotettavaa osumaa ei löytynyt. Kokeile vähemmän sanoja, pelkkää materiaalin nimeä tai kuvausta toisella kielellä."
+}

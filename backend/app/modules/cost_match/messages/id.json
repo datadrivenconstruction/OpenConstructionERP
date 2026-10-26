@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Pencocokan Biaya",
+  "match.semantic.not_installed": "Pencocokan semantik memerlukan `pip install openconstructionerp[semantic]`. Saat ini hanya hasil yang cocok persis yang ditampilkan; pasang ekstensi ini untuk pencocokan biaya kabur.",
+  "match.reason.exact_match": "Cocok persis dengan deskripsi yang dinormalisasi.",
+  "match.reason.strong_overlap": "Semua kata pencarian ditemukan dalam item biaya ini.",
+  "match.reason.partial_overlap": "Sebagian kata pencarian ditemukan dalam item biaya ini.",
+  "match.reason.weak_overlap": "Hanya sedikit atau tidak ada kata pencarian yang cocok dengan item biaya ini.",
+  "match.reason.unit_match": "Satuan kompatibel.",
+  "match.reason.unit_mismatch": "Satuan berbeda, sehingga tingkat keyakinan menurun.",
+  "match.reason.unit_unknown": "Satuan tidak dapat dibandingkan.",
+  "match.hint.empty_query": "Masukkan deskripsi material atau pekerjaan untuk mencari di basis data biaya.",
+  "match.hint.no_candidates": "Belum ada item biaya yang dimuat untuk katalog ini. Muat basis biaya regional terlebih dahulu.",
+  "match.hint.no_good_match": "Tidak ditemukan kecocokan yang meyakinkan. Coba gunakan lebih sedikit kata, nama material saja, atau deskripsi dalam bahasa lain."
+}

@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Abbinamento costi",
+  "match.semantic.not_installed": "L'abbinamento semantico richiede `pip install openconstructionerp[semantic]`. Vengono mostrate solo le corrispondenze esatte; installate l'estensione per l'abbinamento approssimato dei costi.",
+  "match.reason.exact_match": "Corrispondenza esatta con la descrizione normalizzata.",
+  "match.reason.strong_overlap": "Tutti i termini di ricerca sono stati trovati in questa voce di costo.",
+  "match.reason.partial_overlap": "Alcuni termini di ricerca sono stati trovati in questa voce di costo.",
+  "match.reason.weak_overlap": "Pochi termini di ricerca o nessuno corrispondono a questa voce di costo.",
+  "match.reason.unit_match": "Le unità di misura sono compatibili.",
+  "match.reason.unit_mismatch": "Le unità di misura differiscono, il che riduce la affidabilità.",
+  "match.reason.unit_unknown": "Non è stato possibile confrontare l'unità di misura.",
+  "match.hint.empty_query": "Inserite la descrizione di un materiale o di una lavorazione per cercare nel database dei costi.",
+  "match.hint.no_candidates": "Per questo catalogo non sono ancora caricate voci di costo. Caricate prima una base dei costi regionale.",
+  "match.hint.no_good_match": "Nessuna corrispondenza affidabile trovata. Provate con meno parole, solo con il nome del materiale o con la descrizione in un'altra lingua."
+}

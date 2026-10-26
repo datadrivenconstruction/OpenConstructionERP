@@ -1,0 +1,15 @@
+{
+  "common.ok": "ठीक है",
+  "module.display_name": "लागत मिलान",
+  "match.semantic.not_installed": "सिमेंटिक मिलान के लिए `pip install openconstructionerp[semantic]` आवश्यक है। अभी केवल सटीक मिलान दिखाए जा रहे हैं; फ़ज़ी लागत मिलान के लिए यह एक्स्ट्रा इंस्टॉल करें।",
+  "match.reason.exact_match": "सामान्यीकृत विवरण पर सटीक मिलान।",
+  "match.reason.strong_overlap": "खोज के सभी शब्द इस लागत मद में मिल गए।",
+  "match.reason.partial_overlap": "खोज के कुछ शब्द इस लागत मद में मिल गए।",
+  "match.reason.weak_overlap": "इस लागत मद से बहुत कम या कोई खोज शब्द नहीं मिले।",
+  "match.reason.unit_match": "इकाइयाँ संगत हैं।",
+  "match.reason.unit_mismatch": "इकाइयाँ अलग हैं, जिससे भरोसा कम होता है।",
+  "match.reason.unit_unknown": "इकाई की तुलना नहीं की जा सकी।",
+  "match.hint.empty_query": "लागत डेटाबेस में खोजने के लिए सामग्री या कार्य का विवरण लिखें।",
+  "match.hint.no_candidates": "इस कैटलॉग के लिए अभी कोई लागत मद लोड नहीं है। पहले क्षेत्रीय लागत आधार लोड करें।",
+  "match.hint.no_good_match": "कोई भरोसेमंद मिलान नहीं मिला। कम शब्द आज़माएँ, केवल सामग्री का नाम लिखें, या विवरण किसी अन्य भाषा में लिखें।"
+}

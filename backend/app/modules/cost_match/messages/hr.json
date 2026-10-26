@@ -1,0 +1,15 @@
+{
+  "common.ok": "U redu",
+  "module.display_name": "Usklađivanje troškova",
+  "match.semantic.not_installed": "Semantičko usklađivanje zahtijeva `pip install openconstructionerp[semantic]`. Prikazuju se samo točna podudaranja; instalirajte proširenje za neodređeno usklađivanje troškova.",
+  "match.reason.exact_match": "Točno podudaranje s normaliziranim opisom.",
+  "match.reason.strong_overlap": "Svi pojmovi pretrage pronađeni su u ovoj stavci troška.",
+  "match.reason.partial_overlap": "Neki pojmovi pretrage pronađeni su u ovoj stavci troška.",
+  "match.reason.weak_overlap": "Malo ili nijedan pojam pretrage ne odgovara ovoj stavci troška.",
+  "match.reason.unit_match": "Jedinice su usklađene.",
+  "match.reason.unit_mismatch": "Jedinice se razlikuju, što smanjuje pouzdanost.",
+  "match.reason.unit_unknown": "Jedinica se nije mogla usporediti.",
+  "match.hint.empty_query": "Unesite opis materijala ili radova za pretraživanje baze troškova.",
+  "match.hint.no_candidates": "Za ovaj katalog još nisu učitane stavke troškova. Prvo učitajte regionalnu bazu troškova.",
+  "match.hint.no_good_match": "Nije pronađeno pouzdano podudaranje. Pokušajte s manje riječi, samo s nazivom materijala ili s opisom na drugom jeziku."
+}

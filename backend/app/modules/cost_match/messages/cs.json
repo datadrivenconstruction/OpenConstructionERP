@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Párování nákladů",
+  "match.semantic.not_installed": "Sémantické párování vyžaduje `pip install openconstructionerp[semantic]`. Zobrazují se pouze přesné shody; pro fuzzy párování nákladů nainstalujte tento doplněk.",
+  "match.reason.exact_match": "Přesná shoda normalizovaného popisu.",
+  "match.reason.strong_overlap": "Všechny hledané výrazy byly nalezeny v této nákladové položce.",
+  "match.reason.partial_overlap": "Některé hledané výrazy byly nalezeny v této nákladové položce.",
+  "match.reason.weak_overlap": "Shodovalo se jen málo hledaných výrazů nebo žádný.",
+  "match.reason.unit_match": "Jednotky jsou kompatibilní.",
+  "match.reason.unit_mismatch": "Jednotky se liší, což snižuje spolehlivost.",
+  "match.reason.unit_unknown": "Jednotku nelze porovnat.",
+  "match.hint.empty_query": "Zadejte popis materiálu nebo práce a prohledejte nákladovou databázi.",
+  "match.hint.no_candidates": "Pro tento katalog zatím nejsou načteny žádné nákladové položky. Nejprve načtěte regionální nákladovou základnu.",
+  "match.hint.no_good_match": "Nebyla nalezena spolehlivá shoda. Zkuste méně slov, samotný název materiálu nebo popis v jiném jazyce."
+}

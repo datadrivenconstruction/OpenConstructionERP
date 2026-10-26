@@ -1,0 +1,15 @@
+{
+  "common.ok": "OK",
+  "module.display_name": "Rapprochement de coûts",
+  "match.semantic.not_installed": "La correspondance sémantique nécessite `pip install openconstructionerp[semantic]`. Seules les correspondances exactes sont affichées ; installez l'extension pour le rapprochement flou des coûts.",
+  "match.reason.exact_match": "Correspondance exacte sur la description normalisée.",
+  "match.reason.strong_overlap": "Tous les termes de recherche ont été trouvés dans cet élément de coût.",
+  "match.reason.partial_overlap": "Certains termes de recherche ont été trouvés dans cet élément de coût.",
+  "match.reason.weak_overlap": "Peu de termes de recherche, voire aucun, correspondent à cet élément de coût.",
+  "match.reason.unit_match": "Les unités sont compatibles.",
+  "match.reason.unit_mismatch": "Les unités diffèrent, ce qui réduit la confiance.",
+  "match.reason.unit_unknown": "L'unité n'a pas pu être comparée.",
+  "match.hint.empty_query": "Saisissez la description d'un matériau ou d'un ouvrage pour interroger la base de coûts.",
+  "match.hint.no_candidates": "Aucun élément de coût n'est encore chargé pour ce catalogue. Chargez d'abord une base de coûts régionale.",
+  "match.hint.no_good_match": "Aucune correspondance fiable trouvée. Essayez moins de mots, le nom du matériau seul, ou la description dans une autre langue."
+}

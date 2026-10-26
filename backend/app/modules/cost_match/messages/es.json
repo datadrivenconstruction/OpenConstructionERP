@@ -1,0 +1,15 @@
+{
+  "common.ok": "Aceptar",
+  "module.display_name": "Correspondencia de costes",
+  "match.semantic.not_installed": "La correspondencia semántica requiere `pip install openconstructionerp[semantic]`. Se muestran solo coincidencias exactas; instale el complemento para la correspondencia aproximada de costes.",
+  "match.reason.exact_match": "Coincidencia exacta con la descripción normalizada.",
+  "match.reason.strong_overlap": "Se encontraron todos los términos de búsqueda en esta partida de coste.",
+  "match.reason.partial_overlap": "Se encontraron algunos términos de búsqueda en esta partida de coste.",
+  "match.reason.weak_overlap": "Pocos o ningún término de búsqueda coincidió con esta partida de coste.",
+  "match.reason.unit_match": "Las unidades son compatibles.",
+  "match.reason.unit_mismatch": "Las unidades difieren, lo que reduce la confianza.",
+  "match.reason.unit_unknown": "No se pudo comparar la unidad.",
+  "match.hint.empty_query": "Introduzca una descripción de material o de trabajo para buscar en la base de datos de costes.",
+  "match.hint.no_candidates": "Todavía no hay partidas de coste cargadas para este catálogo. Cargue primero una base de costes regional.",
+  "match.hint.no_good_match": "No se encontró una coincidencia fiable. Pruebe con menos palabras, solo con el nombre del material o con la descripción en otro idioma."
+}

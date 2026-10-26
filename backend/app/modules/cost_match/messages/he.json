@@ -1,0 +1,15 @@
+{
+  "common.ok": "אישור",
+  "module.display_name": "התאמת עלויות",
+  "match.semantic.not_installed": "התאמה סמנטית דורשת את הפקודה `pip install openconstructionerp[semantic]`. מוצגות כרגע רק התאמות מדויקות; התקינו את התוסף להתאמה מטושטשת של עלויות.",
+  "match.reason.exact_match": "התאמה מדויקת לתיאור המנורמל.",
+  "match.reason.strong_overlap": "כל מילות החיפוש נמצאו בסעיף העלות הזה.",
+  "match.reason.partial_overlap": "חלק ממילות החיפוש נמצאו בסעיף העלות הזה.",
+  "match.reason.weak_overlap": "מעט מילות חיפוש או אף אחת מהן לא התאימה לסעיף העלות הזה.",
+  "match.reason.unit_match": "היחידות תואמות.",
+  "match.reason.unit_mismatch": "היחידות שונות, מה שמפחית את רמת הביטחון.",
+  "match.reason.unit_unknown": "לא ניתן היה להשוות את היחידה.",
+  "match.hint.empty_query": "הזינו תיאור של חומר או עבודה כדי לחפש במאגר העלויות.",
+  "match.hint.no_candidates": "עדיין לא נטענו סעיפי עלות לקטלוג הזה. טענו קודם בסיס עלויות אזורי.",
+  "match.hint.no_good_match": "לא נמצאה התאמה מהימנה. נסו פחות מילים, רק את שם החומר, או את התיאור בשפה אחרת."
+}

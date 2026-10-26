@@ -1,0 +1,15 @@
+{
+  "common.ok": "ٹھیک ہے",
+  "module.display_name": "لاگت کی مماثلت",
+  "match.semantic.not_installed": "معنیاتی مماثلت کے لیے `pip install openconstructionerp[semantic]` درکار ہے۔ اس وقت صرف مکمل مطابقت کے نتائج دکھائے جا رہے ہیں؛ غیر واضح لاگت مماثلت کے لیے یہ ایکسٹرا انسٹال کریں۔",
+  "match.reason.exact_match": "معیاری تفصیل کے ساتھ مکمل مطابقت۔",
+  "match.reason.strong_overlap": "تلاش کے تمام الفاظ اس لاگت آئٹم میں مل گئے۔",
+  "match.reason.partial_overlap": "تلاش کے کچھ الفاظ اس لاگت آئٹم میں مل گئے۔",
+  "match.reason.weak_overlap": "اس لاگت آئٹم سے بہت کم یا کوئی تلاش لفظ نہیں ملا۔",
+  "match.reason.unit_match": "اکائیاں ہم آہنگ ہیں۔",
+  "match.reason.unit_mismatch": "اکائیاں مختلف ہیں، جس سے اعتماد کم ہوتا ہے۔",
+  "match.reason.unit_unknown": "اکائی کا موازنہ نہیں ہو سکا۔",
+  "match.hint.empty_query": "لاگت کے ڈیٹا بیس میں تلاش کے لیے مواد یا کام کی تفصیل درج کریں۔",
+  "match.hint.no_candidates": "اس کیٹلاگ کے لیے ابھی تک کوئی لاگت آئٹم لوڈ نہیں ہوا۔ پہلے علاقائی لاگت بیس لوڈ کریں۔",
+  "match.hint.no_good_match": "کوئی قابلِ اعتماد مماثلت نہیں ملی۔ کم الفاظ آزمائیں، صرف مواد کا نام لکھیں، یا تفصیل کسی اور زبان میں لکھیں۔"
+}
