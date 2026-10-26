@@ -618,5 +618,31 @@
       "draft": "Qoralama",
       "frozen": "Muzlatilgan"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Pul oqimi prognozi",
+      "portfolio_title": "Portfel bo'yicha pul oqimi prognozi",
+      "empty": "Ushbu tanlov uchun pul oqimi prognozi yo'q.",
+      "project": "Loyiha",
+      "as_of": "Sana holatiga",
+      "currency": "Valyuta",
+      "delay_days": "Tushumlar kechikishi (kun)",
+      "overrun_pct": "Xarajat oshishi (%)",
+      "closing_position": "Yakuniy qoldiq",
+      "peak_funding": "Eng yuqori moliyalashtirish ehtiyoji",
+      "peak_period": "Eng yuqori moliyalashtirish ehtiyoji oyi",
+      "col": {
+        "period": "Oy",
+        "planned_in": "Rejalashtirilgan tushum",
+        "actual_in": "Haqiqiy tushum",
+        "expected_in": "Kutilayotgan tushum",
+        "planned_out": "Rejalashtirilgan to'lov",
+        "actual_out": "Haqiqiy to'lov",
+        "expected_out": "Kutilayotgan to'lov",
+        "net": "Sof",
+        "cumulative": "Yig'ma qoldiq"
+      }
+    }
   }
 }

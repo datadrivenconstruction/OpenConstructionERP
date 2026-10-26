@@ -618,5 +618,31 @@
       "draft": "Nháp",
       "frozen": "Đã khóa"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Dự báo dòng tiền",
+      "portfolio_title": "Dự báo dòng tiền danh mục",
+      "empty": "Không có dự báo dòng tiền cho lựa chọn này.",
+      "project": "Dự án",
+      "as_of": "Tính đến",
+      "currency": "Tiền tệ",
+      "delay_days": "Thu tiền chậm (ngày)",
+      "overrun_pct": "Vượt chi phí (%)",
+      "closing_position": "Số dư cuối kỳ",
+      "peak_funding": "Nhu cầu vốn cao nhất",
+      "peak_period": "Tháng có nhu cầu vốn cao nhất",
+      "col": {
+        "period": "Tháng",
+        "planned_in": "Thu dự kiến theo kế hoạch",
+        "actual_in": "Thu thực tế",
+        "expected_in": "Thu dự kiến",
+        "planned_out": "Chi dự kiến theo kế hoạch",
+        "actual_out": "Chi thực tế",
+        "expected_out": "Chi dự kiến",
+        "net": "Ròng",
+        "cumulative": "Số dư lũy kế"
+      }
+    }
   }
 }

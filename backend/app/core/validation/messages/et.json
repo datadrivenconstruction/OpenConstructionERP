@@ -1341,5 +1341,19 @@
       "fail": "Positsioon {ordinal}: joonis {drawing} on sisestatud ilma revisjonita",
       "suggestion": "Lisage joonise revisjon, mille järgi kogus hinnastati"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Rahaseis langeb {period} kuus miinusesse {amount}, ületades rahastuspiiri {threshold}.",
+      "suggestion": "Tagage rahastus enne {period}, tooge laekumised varem sisse või lükake maksed edasi."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} tuli tasuda {due} ja see on endiselt tasumata ({days} päeva hilinemist).",
+      "suggestion": "Nõudke makset kliendilt või muutke prognoosis oodatavat kuupäeva."
+    },
+    "forecast_missing": {
+      "fail": "{project} on aktiivne, kuid sellel ei ole lepingut, arvet, tellimust, allhanget ega plaani, mille põhjal rahavoogu prognoosida.",
+      "suggestion": "Sisestage kliendileping koos maksegraafikuga või planeeritud rahavoog kulumudelis."
+    }
   }
 }

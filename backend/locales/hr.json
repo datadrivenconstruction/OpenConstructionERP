@@ -618,5 +618,31 @@
       "draft": "Nacrt",
       "frozen": "Zamrznut"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Prognoza novčanog toka",
+      "portfolio_title": "Prognoza novčanog toka portfelja",
+      "empty": "Za ovaj odabir nema prognoze novčanog toka.",
+      "project": "Projekt",
+      "as_of": "Na dan",
+      "currency": "Valuta",
+      "delay_days": "Naplate kasne (dana)",
+      "overrun_pct": "Prekoračenje troškova (%)",
+      "closing_position": "Završno stanje",
+      "peak_funding": "Najveća potreba za financiranjem",
+      "peak_period": "Mjesec najveće potrebe za financiranjem",
+      "col": {
+        "period": "Mjesec",
+        "planned_in": "Planirani priljevi",
+        "actual_in": "Stvarni priljevi",
+        "expected_in": "Očekivani priljevi",
+        "planned_out": "Planirani odljevi",
+        "actual_out": "Stvarni odljevi",
+        "expected_out": "Očekivani odljevi",
+        "net": "Neto",
+        "cumulative": "Kumulativni položaj"
+      }
+    }
   }
 }

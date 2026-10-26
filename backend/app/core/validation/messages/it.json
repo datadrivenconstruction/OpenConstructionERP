@@ -1341,5 +1341,19 @@
       "fail": "Voce {ordinal}: il disegno {drawing} è inserito senza revisione",
       "suggestion": "Aggiungere la revisione del disegno da cui è stata prezzata la quantità"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "La posizione di cassa scende a meno {amount} in {period}, oltre la soglia di finanziamento di {threshold}.",
+      "suggestion": "Assicurare il finanziamento prima di {period}, anticipare gli incassi o posticipare i pagamenti."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} era scaduto il {due} e risulta ancora aperto ({days} giorni di ritardo).",
+      "suggestion": "Sollecitare il pagamento al cliente o modificare la data prevista nella previsione."
+    },
+    "forecast_missing": {
+      "fail": "{project} è attivo ma non ha contratto, fattura, ordine, subappalto o piano da cui prevedere il cash flow.",
+      "suggestion": "Inserire il contratto con il cliente e il relativo piano dei pagamenti, oppure un cash flow pianificato nel modello dei costi."
+    }
   }
 }

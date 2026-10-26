@@ -618,5 +618,31 @@
       "draft": "Brouillon",
       "frozen": "Figé"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Prévision de trésorerie",
+      "portfolio_title": "Prévision de trésorerie du portefeuille",
+      "empty": "Aucune prévision de trésorerie pour cette sélection.",
+      "project": "Projet",
+      "as_of": "Au",
+      "currency": "Devise",
+      "delay_days": "Encaissements décalés de (jours)",
+      "overrun_pct": "Dépassement de coût (%)",
+      "closing_position": "Position de clôture",
+      "peak_funding": "Besoin de financement maximal",
+      "peak_period": "Mois du besoin de financement maximal",
+      "col": {
+        "period": "Mois",
+        "planned_in": "Encaissements prévus",
+        "actual_in": "Encaissements réels",
+        "expected_in": "Encaissements attendus",
+        "planned_out": "Décaissements prévus",
+        "actual_out": "Décaissements réels",
+        "expected_out": "Décaissements attendus",
+        "net": "Solde net",
+        "cumulative": "Position cumulée"
+      }
+    }
   }
 }

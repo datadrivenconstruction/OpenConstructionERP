@@ -789,5 +789,31 @@
       "draft": "טיוטה",
       "frozen": "מוקפאת"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "תחזית תזרים מזומנים",
+      "portfolio_title": "תחזית תזרים מזומנים לתיק הפרויקטים",
+      "empty": "אין תחזית תזרים מזומנים לבחירה זו.",
+      "project": "פרויקט",
+      "as_of": "נכון ל",
+      "currency": "מטבע",
+      "delay_days": "קבלות שנדחו בימים",
+      "overrun_pct": "חריגת עלויות (%)",
+      "closing_position": "יתרת סגירה",
+      "peak_funding": "צורך מירבי במימון",
+      "peak_period": "חודש שיא צורך במימון",
+      "col": {
+        "period": "חודש",
+        "planned_in": "הכנסות מתוכננות",
+        "actual_in": "הכנסות בפועל",
+        "expected_in": "הכנסות צפויות",
+        "planned_out": "הוצאות מתוכננות",
+        "actual_out": "הוצאות בפועל",
+        "expected_out": "הוצאות צפויות",
+        "net": "נטו",
+        "cumulative": "מצב מצטבר"
+      }
+    }
   }
 }

@@ -1341,5 +1341,19 @@
       "fail": "항목 {ordinal}: 도면 {drawing}이(가) 리비전 없이 입력되었습니다",
       "suggestion": "수량의 단가 근거가 된 도면의 리비전을 추가하십시오"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period}에 현금 잔액이 마이너스 {amount}로 떨어져 자금 조달 기준선 {threshold}을(를) 밑돕니다.",
+      "suggestion": "{period} 전에 자금을 확보하고, 수금을 앞당기거나 지출을 늦추십시오."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount}은(는) {due}에 지급 기한이었으나 아직 미수 상태입니다 ({days}일 연체).",
+      "suggestion": "고객에게 대금 회수를 독촉하거나 예측표의 예상 일자를 수정하십시오."
+    },
+    "forecast_missing": {
+      "fail": "{project}은(는) 진행 중이지만 현금흐름을 예측할 계약, 청구서, 발주서, 하도급 계약 또는 계획이 없습니다.",
+      "suggestion": "지급 일정이 포함된 고객 계약을 입력하거나 원가 모델에 계획 현금흐름을 입력하십시오."
+    }
   }
 }

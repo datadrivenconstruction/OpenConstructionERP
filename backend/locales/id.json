@@ -618,5 +618,31 @@
       "draft": "Draf",
       "frozen": "Beku"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Prakiraan arus kas",
+      "portfolio_title": "Prakiraan arus kas portofolio",
+      "empty": "Tidak ada prakiraan arus kas untuk pilihan ini.",
+      "project": "Proyek",
+      "as_of": "Per",
+      "currency": "Mata uang",
+      "delay_days": "Penerimaan tertunda (hari)",
+      "overrun_pct": "Kelebihan biaya (%)",
+      "closing_position": "Posisi akhir",
+      "peak_funding": "Kebutuhan pendanaan puncak",
+      "peak_period": "Bulan kebutuhan pendanaan puncak",
+      "col": {
+        "period": "Bulan",
+        "planned_in": "Penerimaan rencana",
+        "actual_in": "Penerimaan aktual",
+        "expected_in": "Penerimaan diharapkan",
+        "planned_out": "Pengeluaran rencana",
+        "actual_out": "Pengeluaran aktual",
+        "expected_out": "Pengeluaran diharapkan",
+        "net": "Bersih",
+        "cumulative": "Posisi kumulatif"
+      }
+    }
   }
 }

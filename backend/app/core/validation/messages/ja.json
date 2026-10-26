@@ -1341,5 +1341,19 @@
       "fail": "項目 {ordinal}: 図面 {drawing} がリビジョンなしで入力されています",
       "suggestion": "数量の単価根拠となった図面のリビジョンを追加してください"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period}に資金残高がマイナス{amount}となり、資金調達の基準{threshold}を下回ります。",
+      "suggestion": "{period}までに資金調達を手配するか、入金を前倒しし、支払いを後ろに回してください。"
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount}は{due}が支払期日でしたが、まだ未入金です（{days}日遅延）。",
+      "suggestion": "顧客に入金を催促するか、予測の見込日を修正してください。"
+    },
+    "forecast_missing": {
+      "fail": "{project}は進行中ですが、キャッシュフローを予測するための契約・請求書・発注書・下請契約・計画がありません。",
+      "suggestion": "支払計画を含む顧客契約を登録するか、原価モデルに予定キャッシュフローを入力してください。"
+    }
   }
 }

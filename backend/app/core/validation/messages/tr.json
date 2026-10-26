@@ -1341,5 +1341,19 @@
       "fail": "Kalem {ordinal}: {drawing} çizimi revizyonsuz girilmiş",
       "suggestion": "Miktarın birim fiyatlandığı çizimin revizyonunu ekleyin"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Nakit pozisyonu {period} ayında eksi {amount} seviyesine düşüyor; bu, {threshold} finansman eşiğinin altında.",
+      "suggestion": "{period} tarihinden önce finansmanı sağlayın, tahsilatları öne çekin veya ödemeleri erteleyin."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} tutarındaki ödeme {due} tarihinde vadesi gelmişti ve hâlâ açık ({days} gün gecikmiş).",
+      "suggestion": "Müşteriden ödemeyi takip edin veya tahmindeki beklenen tarihi değiştirin."
+    },
+    "forecast_missing": {
+      "fail": "{project} aktif, ancak nakit akışını tahmin edebileceğiniz bir sözleşme, fatura, sipariş, taşeron sözleşmesi veya plan yok.",
+      "suggestion": "Müşteri sözleşmesini ödeme planıyla birlikte girin veya maliyet modeline planlanmış bir nakit akışı ekleyin."
+    }
   }
 }

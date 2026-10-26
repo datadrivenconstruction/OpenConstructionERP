@@ -1341,5 +1341,19 @@
       "fail": "Post {ordinal}: ritning {drawing} är angiven utan revision",
       "suggestion": "Lägg till revisionen för ritningen som kvantiteten prissattes från"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Kassaställningen sjunker till minus {amount} i {period}, under finansieringsgränsen på {threshold}.",
+      "suggestion": "Säkra finansieringen före {period}, flytta fram inbetalningar eller skjut upp betalningar."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} skulle ha betalats {due} och är fortfarande obetalt ({days} dagar försenat).",
+      "suggestion": "Påminn kunden om betalningen eller ändra det förväntade datumet i prognosen."
+    },
+    "forecast_missing": {
+      "fail": "{project} är aktivt men saknar kontrakt, faktura, beställning, underentreprenadavtal eller plan att prognostisera kassaflödet från.",
+      "suggestion": "Ange kundkontraktet med betalningsplanen, eller ett planerat kassaflöde i kostnadsmodellen."
+    }
   }
 }

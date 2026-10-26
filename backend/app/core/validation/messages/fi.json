@@ -1341,5 +1341,19 @@
       "fail": "Kohta {ordinal}: piirustus {drawing} on syötetty ilman revisiota",
       "suggestion": "Lisää sen piirustuksen revisio, jonka mukaan määrä on hinnoiteltu"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Kassasaldo laskee kuussa {period} miinukselle {amount}, alle rahoitusrajan {threshold}.",
+      "suggestion": "Varmista rahoitus ennen kuukautta {period}, aikaista maksut tai siirrä menoja myöhemmäksi."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} oli eräännyt {due} eikä ole vielä maksettu ({days} päivää myöhässä).",
+      "suggestion": "Muistuta asiakasta maksusta tai muuta odotettua päivämäärää ennusteessa."
+    },
+    "forecast_missing": {
+      "fail": "{project} on aktiivinen, mutta siltä puuttuu sopimus, lasku, tilaus, alihankintasopimus tai suunnitelma, josta kassavirtaa voitaisiin ennustaa.",
+      "suggestion": "Syötä asiakkaan sopimus maksuaikatauluineen tai suunniteltu kassavirta kustannusmalliin."
+    }
   }
 }

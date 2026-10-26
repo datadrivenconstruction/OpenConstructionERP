@@ -618,5 +618,31 @@
       "draft": "Utkast",
       "frozen": "Frosset"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Likviditetsprognose",
+      "portfolio_title": "Porteføljens likviditetsprognose",
+      "empty": "Ingen likviditetsprognose for dette utvalget.",
+      "project": "Prosjekt",
+      "as_of": "Per",
+      "currency": "Valuta",
+      "delay_days": "Innbetalinger forsinket med (dager)",
+      "overrun_pct": "Kostnadsoverskridelse (%)",
+      "closing_position": "Sluttsaldo",
+      "peak_funding": "Størst finansieringsbehov",
+      "peak_period": "Måned med størst finansieringsbehov",
+      "col": {
+        "period": "Måned",
+        "planned_in": "Planlagte innbetalinger",
+        "actual_in": "Faktiske innbetalinger",
+        "expected_in": "Forventede innbetalinger",
+        "planned_out": "Planlagte utbetalinger",
+        "actual_out": "Faktiske utbetalinger",
+        "expected_out": "Forventede utbetalinger",
+        "net": "Netto",
+        "cumulative": "Akkumulert posisjon"
+      }
+    }
   }
 }

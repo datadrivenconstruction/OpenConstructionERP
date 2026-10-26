@@ -618,5 +618,31 @@
       "draft": "Wersja robocza",
       "frozen": "Zamrożony"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Prognoza przepływów pieniężnych",
+      "portfolio_title": "Prognoza przepływów pieniężnych portfela",
+      "empty": "Brak prognozy przepływów pieniężnych dla tego wyboru.",
+      "project": "Projekt",
+      "as_of": "Stan na",
+      "currency": "Waluta",
+      "delay_days": "Wpływy opóźnione o (dni)",
+      "overrun_pct": "Przekroczenie kosztów (%)",
+      "closing_position": "Saldo końcowe",
+      "peak_funding": "Szczytowe zapotrzebowanie na finansowanie",
+      "peak_period": "Miesiąc szczytowego zapotrzebowania na finansowanie",
+      "col": {
+        "period": "Miesiąc",
+        "planned_in": "Planowane wpływy",
+        "actual_in": "Rzeczywiste wpływy",
+        "expected_in": "Oczekiwane wpływy",
+        "planned_out": "Planowane wydatki",
+        "actual_out": "Rzeczywiste wydatki",
+        "expected_out": "Oczekiwane wydatki",
+        "net": "Netto",
+        "cumulative": "Saldo narastająco"
+      }
+    }
   }
 }

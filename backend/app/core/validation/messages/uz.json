@@ -1341,5 +1341,19 @@
       "fail": "{ordinal}-pozitsiya: {drawing} chizmasi revizasiyasiz kiritilgan",
       "suggestion": "Miqdor narxlangan chizmaning revizasiyasini qo'shing"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period} oyida pul qoldig'i minus {amount} gacha tushadi, bu {threshold} moliyalashtirish chegarasidan past.",
+      "suggestion": "{period} oyigacha moliyalashtirishni ta'minlang, tushumlarni oldinga suring yoki to'lovlarni keyinga suring."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} {due} sanasida to'lanishi kerak edi va hali ochiq ({days} kun kechikkan).",
+      "suggestion": "Mijozdan to'lovni talab qiling yoki prognozdagi kutilayotgan sanani o'zgartiring."
+    },
+    "forecast_missing": {
+      "fail": "{project} faol, lekin pul oqimini prognoz qilish uchun shartnoma, hisob-faktura, buyurtma, subpudrat yoki reja yo'q.",
+      "suggestion": "Mijoz shartnomasini to'lov jadvali bilan kiriting yoki xarajat modelida rejalashtirilgan pul oqimini qo'shing."
+    }
   }
 }

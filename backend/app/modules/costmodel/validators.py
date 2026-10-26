@@ -29,6 +29,7 @@ from app.core.validation.engine import (
     rule_registry,
 )
 from app.core.validation.messages import DEFAULT_LOCALE, translate
+from app.modules.costmodel.cashflow_forecast_rules import register_cashflow_forecast_rules
 from app.modules.costmodel.chain_rules import register_cost_chain_rules
 from app.modules.costmodel.cost_control import (
     FINDING_CERTIFIED_OVER_COMMITTED,
@@ -171,6 +172,7 @@ def register_costmodel_validation_rules() -> None:
     register_cost_structure_rules()
     register_cost_chain_rules()
     register_cost_forecast_rules()
+    register_cashflow_forecast_rules()
     logger.debug("Registered cost control validation rules")
 
 

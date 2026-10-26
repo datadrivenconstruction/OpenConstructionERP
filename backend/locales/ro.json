@@ -618,5 +618,31 @@
       "draft": "Ciornă",
       "frozen": "Înghețat"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Prognoza fluxului de numerar",
+      "portfolio_title": "Prognoza fluxului de numerar al portofoliului",
+      "empty": "Nu există prognoză de flux de numerar pentru această selecție.",
+      "project": "Proiect",
+      "as_of": "La data de",
+      "currency": "Monedă",
+      "delay_days": "Încasări întârziate cu (zile)",
+      "overrun_pct": "Depășire de cost (%)",
+      "closing_position": "Poziție de închidere",
+      "peak_funding": "Necesar maxim de finanțare",
+      "peak_period": "Luna necesarului maxim de finanțare",
+      "col": {
+        "period": "Luna",
+        "planned_in": "Încasări planificate",
+        "actual_in": "Încasări reale",
+        "expected_in": "Încasări așteptate",
+        "planned_out": "Plăți planificate",
+        "actual_out": "Plăți reale",
+        "expected_out": "Plăți așteptate",
+        "net": "Net",
+        "cumulative": "Poziție cumulată"
+      }
+    }
   }
 }

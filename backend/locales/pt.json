@@ -618,5 +618,31 @@
       "draft": "Rascunho",
       "frozen": "Congelado"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Previsão de fluxo de caixa",
+      "portfolio_title": "Previsão de fluxo de caixa do portfólio",
+      "empty": "Não há previsão de fluxo de caixa para esta seleção.",
+      "project": "Projeto",
+      "as_of": "Em",
+      "currency": "Moeda",
+      "delay_days": "Recebimentos atrasados em (dias)",
+      "overrun_pct": "Estouro de custo (%)",
+      "closing_position": "Posição final",
+      "peak_funding": "Necessidade máxima de financiamento",
+      "peak_period": "Mês de maior necessidade de financiamento",
+      "col": {
+        "period": "Mês",
+        "planned_in": "Recebimentos previstos",
+        "actual_in": "Recebimentos realizados",
+        "expected_in": "Recebimentos esperados",
+        "planned_out": "Pagamentos previstos",
+        "actual_out": "Pagamentos realizados",
+        "expected_out": "Pagamentos esperados",
+        "net": "Líquido",
+        "cumulative": "Posição acumulada"
+      }
+    }
   }
 }

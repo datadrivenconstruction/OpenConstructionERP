@@ -618,5 +618,31 @@
       "draft": "Mustand",
       "frozen": "Külmutatud"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Rahavoo prognoos",
+      "portfolio_title": "Portfelli rahavoo prognoos",
+      "empty": "Sellele valikule rahavoo prognoosi ei ole.",
+      "project": "Projekt",
+      "as_of": "Seisuga",
+      "currency": "Valuuta",
+      "delay_days": "Laekumised viivitatud (päeva)",
+      "overrun_pct": "Kulude ületamine (%)",
+      "closing_position": "Lõppsaldo",
+      "peak_funding": "Maksimaalne rahastusvajadus",
+      "peak_period": "Suurima rahastusvajaduse kuu",
+      "col": {
+        "period": "Kuu",
+        "planned_in": "Planeeritud laekumised",
+        "actual_in": "Tegelikud laekumised",
+        "expected_in": "Oodatavad laekumised",
+        "planned_out": "Planeeritud väljamaksed",
+        "actual_out": "Tegelikud väljamaksed",
+        "expected_out": "Oodatavad väljamaksed",
+        "net": "Netto",
+        "cumulative": "Kumulatiivne seis"
+      }
+    }
   }
 }

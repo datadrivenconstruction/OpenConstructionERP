@@ -1341,5 +1341,19 @@
       "fail": "Stavka {ordinal}: nacrt {drawing} unesen je bez revizije",
       "suggestion": "Dodajte reviziju nacrta na temelju kojeg je količina obračunata"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Novčana pozicija pada na minus {amount} u {period}, ispod praga financiranja od {threshold}.",
+      "suggestion": "Osigurajte financiranje prije {period}, naplatite ranije ili odgodite plaćanja."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} dospjelo je {due} i još je otvoreno ({days} dana kašnjenja).",
+      "suggestion": "Podsjetite klijenta na plaćanje ili promijenite očekivani datum u prognozi."
+    },
+    "forecast_missing": {
+      "fail": "{project} je aktivan, ali nema ugovor, račun, narudžbu, podugovor niti plan iz kojeg bi se mogao prognozirati novčani tok.",
+      "suggestion": "Unesite ugovor s klijentom s planom plaćanja ili planirani novčani tok u modelu troškova."
+    }
   }
 }

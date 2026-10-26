@@ -1341,5 +1341,19 @@
       "fail": "Post {ordinal}: tekening {drawing} is ingevoerd zonder revisie",
       "suggestion": "Voeg de revisie toe van de tekening waarop de hoeveelheid is geprijsd"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "De kaspositie daalt in {period} naar min {amount}, onder de financieringsdrempel van {threshold}.",
+      "suggestion": "Regel de financiering vóór {period}, zet ontvangsten naar voren of stel betalingen uit."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} was op {due} opeisbaar en staat nog open ({days} dagen te laat).",
+      "suggestion": "Vorder de betaling bij de opdrachtgever of pas de verwachte datum in de prognose aan."
+    },
+    "forecast_missing": {
+      "fail": "{project} is actief, maar heeft geen contract, factuur, bestelling, onderaannemerscontract of planning waarop de cashflow kan worden voorspeld.",
+      "suggestion": "Voer het opdrachtgeverscontract met betalingsschema in, of een geplande cashflow in het kostenmodel."
+    }
   }
 }

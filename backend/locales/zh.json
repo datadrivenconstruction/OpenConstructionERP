@@ -618,5 +618,31 @@
       "draft": "草稿",
       "frozen": "已冻结"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "现金流预测",
+      "portfolio_title": "投资组合现金流预测",
+      "empty": "此选择暂无现金流预测。",
+      "project": "项目",
+      "as_of": "截至",
+      "currency": "货币",
+      "delay_days": "回款延迟（天）",
+      "overrun_pct": "成本超支（%）",
+      "closing_position": "期末余额",
+      "peak_funding": "最大资金需求",
+      "peak_period": "资金需求峰值月份",
+      "col": {
+        "period": "月份",
+        "planned_in": "计划回款",
+        "actual_in": "实际回款",
+        "expected_in": "预计回款",
+        "planned_out": "计划付款",
+        "actual_out": "实际付款",
+        "expected_out": "预计付款",
+        "net": "净额",
+        "cumulative": "累计头寸"
+      }
+    }
   }
 }

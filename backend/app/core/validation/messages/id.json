@@ -1341,5 +1341,19 @@
       "fail": "Pos {ordinal}: gambar {drawing} dimasukkan tanpa revisi",
       "suggestion": "Tambahkan revisi gambar yang menjadi dasar harga kuantitas"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Posisi kas turun menjadi minus {amount} pada {period}, di bawah ambang pendanaan {threshold}.",
+      "suggestion": "Siapkan pendanaan sebelum {period}, majukan penerimaan, atau tunda pembayaran."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} jatuh tempo pada {due} dan masih terbuka ({days} hari terlambat).",
+      "suggestion": "Tagih pembayaran ke klien, atau ubah tanggal yang diharapkan dalam prakiraan."
+    },
+    "forecast_missing": {
+      "fail": "{project} aktif tetapi belum memiliki kontrak, faktur, pesanan, subkontrak, atau rencana untuk memprakirakan arus kas.",
+      "suggestion": "Masukkan kontrak klien beserta jadwal pembayarannya, atau arus kas rencana di model biaya."
+    }
   }
 }

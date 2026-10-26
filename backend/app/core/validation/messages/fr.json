@@ -1341,5 +1341,19 @@
       "fail": "Poste {ordinal} : le plan {drawing} est saisi sans indice",
       "suggestion": "Ajouter l'indice du plan à partir duquel la quantité a été chiffrée"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "La trésorerie tombe à moins {amount} en {period}, sous le seuil de financement de {threshold}.",
+      "suggestion": "Organiser le financement avant {period}, avancer les encaissements ou reporter les paiements."
+    },
+    "receipt_overdue": {
+      "fail": "{document} : {amount} était dû le {due} et reste impayé ({days} jours de retard).",
+      "suggestion": "Relancer le client pour le paiement, ou modifier la date prévue dans la prévision."
+    },
+    "forecast_missing": {
+      "fail": "{project} est actif mais n'a ni contrat, ni facture, ni commande, ni sous-traitance, ni planning à partir duquel prévoir la trésorerie.",
+      "suggestion": "Saisir le contrat client avec son échéancier de paiement, ou un flux de trésorerie prévu dans le modèle de coût."
+    }
   }
 }

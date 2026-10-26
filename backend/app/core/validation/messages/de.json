@@ -1341,5 +1341,19 @@
       "fail": "Position {ordinal}: Plan {drawing} ist ohne Planindex erfasst",
       "suggestion": "Den Planindex des Plans ergänzen, aus dem die Menge kalkuliert wurde"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Der Liquiditätsstand fällt in {period} auf minus {amount} und liegt damit unter der Finanzierungsgrenze von {threshold}.",
+      "suggestion": "Finanzierung vor {period} sicherstellen, Zahlungseingänge vorziehen oder Zahlungen später legen."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} war am {due} fällig und ist noch offen ({days} Tage überfällig).",
+      "suggestion": "Zahlung beim Auftraggeber anmahnen oder das erwartete Datum in der Prognose anpassen."
+    },
+    "forecast_missing": {
+      "fail": "{project} ist aktiv, hat aber keinen Vertrag, keine Rechnung, keine Bestellung, keinen Nachunternehmervertrag und keinen Plan, aus dem der Cashflow prognostiziert werden kann.",
+      "suggestion": "Vertrag mit Zahlungsplan erfassen oder einen geplanten Cashflow im Kostenmodell hinterlegen."
+    }
   }
 }

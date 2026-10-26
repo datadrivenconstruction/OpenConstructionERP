@@ -618,5 +618,31 @@
       "draft": "Utkast",
       "frozen": "Fryst"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Kassaflödesprognos",
+      "portfolio_title": "Portföljens kassaflödesprognos",
+      "empty": "Ingen kassaflödesprognos för detta urval.",
+      "project": "Projekt",
+      "as_of": "Per",
+      "currency": "Valuta",
+      "delay_days": "Inbetalningar försenade med (dagar)",
+      "overrun_pct": "Kostnadsöverskridande (%)",
+      "closing_position": "Slutsaldo",
+      "peak_funding": "Högsta finansieringsbehov",
+      "peak_period": "Månad med högsta finansieringsbehov",
+      "col": {
+        "period": "Månad",
+        "planned_in": "Planerade inbetalningar",
+        "actual_in": "Faktiska inbetalningar",
+        "expected_in": "Förväntade inbetalningar",
+        "planned_out": "Planerade utbetalningar",
+        "actual_out": "Faktiska utbetalningar",
+        "expected_out": "Förväntade utbetalningar",
+        "net": "Netto",
+        "cumulative": "Ackumulerad position"
+      }
+    }
   }
 }

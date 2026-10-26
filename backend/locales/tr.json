@@ -618,5 +618,31 @@
       "draft": "Taslak",
       "frozen": "Dondurulmuş"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Nakit akış tahmini",
+      "portfolio_title": "Portföy nakit akış tahmini",
+      "empty": "Bu seçim için nakit akış tahmini yok.",
+      "project": "Proje",
+      "as_of": "Tarih",
+      "currency": "Para birimi",
+      "delay_days": "Tahsilatlar ertelenen (gün)",
+      "overrun_pct": "Maliyet aşımı (%)",
+      "closing_position": "Kapanış durumu",
+      "peak_funding": "Azami finansman ihtiyacı",
+      "peak_period": "En yüksek finansman ihtiyacı ayı",
+      "col": {
+        "period": "Ay",
+        "planned_in": "Planlanan tahsilat",
+        "actual_in": "Gerçekleşen tahsilat",
+        "expected_in": "Beklenen tahsilat",
+        "planned_out": "Planlanan ödeme",
+        "actual_out": "Gerçekleşen ödeme",
+        "expected_out": "Beklenen ödeme",
+        "net": "Net",
+        "cumulative": "Birikimli durum"
+      }
+    }
   }
 }

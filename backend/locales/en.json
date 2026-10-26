@@ -789,5 +789,31 @@
       "draft": "Draft",
       "frozen": "Frozen"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Cash-flow forecast",
+      "portfolio_title": "Portfolio cash-flow forecast",
+      "empty": "No cash-flow forecast for this selection.",
+      "project": "Project",
+      "as_of": "As of",
+      "currency": "Currency",
+      "delay_days": "Receipts delayed by (days)",
+      "overrun_pct": "Cost overrun (%)",
+      "closing_position": "Closing position",
+      "peak_funding": "Peak funding requirement",
+      "peak_period": "Peak funding month",
+      "col": {
+        "period": "Month",
+        "planned_in": "Planned in",
+        "actual_in": "Actual in",
+        "expected_in": "Expected in",
+        "planned_out": "Planned out",
+        "actual_out": "Actual out",
+        "expected_out": "Expected out",
+        "net": "Net",
+        "cumulative": "Cumulative position"
+      }
+    }
   }
 }

@@ -618,5 +618,31 @@
       "draft": "Bozza",
       "frozen": "Congelato"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Previsione di cash flow",
+      "portfolio_title": "Previsione di cash flow del portafoglio",
+      "empty": "Nessuna previsione di cash flow per questa selezione.",
+      "project": "Progetto",
+      "as_of": "Al",
+      "currency": "Valuta",
+      "delay_days": "Incassi ritardati di (giorni)",
+      "overrun_pct": "Sforamento dei costi (%)",
+      "closing_position": "Posizione di chiusura",
+      "peak_funding": "Fabbisogno di finanziamento massimo",
+      "peak_period": "Mese del fabbisogno di finanziamento massimo",
+      "col": {
+        "period": "Mese",
+        "planned_in": "Incassi previsti",
+        "actual_in": "Incassi effettivi",
+        "expected_in": "Incassi attesi",
+        "planned_out": "Pagamenti previsti",
+        "actual_out": "Pagamenti effettivi",
+        "expected_out": "Pagamenti attesi",
+        "net": "Netto",
+        "cumulative": "Posizione cumulata"
+      }
+    }
   }
 }

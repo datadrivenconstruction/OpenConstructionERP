@@ -1341,5 +1341,19 @@
       "fail": "Partida {ordinal}: el plano {drawing} se ha introducido sin revisión",
       "suggestion": "Añadir la revisión del plano a partir del cual se calculó la cantidad"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "La posición de caja cae a menos {amount} en {period}, por debajo del umbral de financiación de {threshold}.",
+      "suggestion": "Asegure la financiación antes de {period}, adelante cobros o retrase pagos."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} vencía el {due} y sigue pendiente ({days} días de retraso).",
+      "suggestion": "Reclame el pago al cliente o cambie la fecha prevista en la previsión."
+    },
+    "forecast_missing": {
+      "fail": "{project} está activo pero no tiene contrato, factura, pedido, subcontrato ni plan a partir de los cuales prever el flujo de caja.",
+      "suggestion": "Registre el contrato con el cliente y su plan de pagos, o un flujo de caja planificado en el modelo de costes."
+    }
   }
 }

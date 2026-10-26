@@ -1341,5 +1341,19 @@
       "fail": "Post {ordinal}: tegning {drawing} er registrert uten revisjon",
       "suggestion": "Legg til revisjonen av tegningen mengden ble prissatt fra"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Likviditeten faller til minus {amount} i {period}, under finansieringsgrensen på {threshold}.",
+      "suggestion": "Sikre finansiering før {period}, flytt innbetalinger fremover eller utsett betalinger."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} forfalt {due} og er fortsatt åpen ({days} dager forfalt).",
+      "suggestion": "Purr kunden på betalingen, eller endre forventet dato i prognosen."
+    },
+    "forecast_missing": {
+      "fail": "{project} er aktivt, men har ingen kontrakt, faktura, bestilling, underentreprise eller plan å prognostisere likviditet fra.",
+      "suggestion": "Legg inn kundekontrakten med betalingsplanen, eller en planlagt kontantstrøm i kostnadsmodellen."
+    }
   }
 }

@@ -642,6 +642,21 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             except Exception:
                 logger.warning("certified payroll demo seed skipped for %s (non-fatal)", _pid, exc_info=True)
 
+        # Cash-flow forecast demo: a payment plan, a subcontract, an order and paid
+        # invoices per demo project; the first one dips negative mid-way. Marked rows,
+        # so a re-run is a no-op.
+        for _idx, _pid in enumerate(_demo_pids):
+            try:
+                from app.modules.costmodel.cashflow_forecast_demo import seed_cashflow_forecast_demo
+
+                async with async_session_factory() as _cs:
+                    _written = await seed_cashflow_forecast_demo(_cs, _pid, dip=_idx == 0)
+                    await _cs.commit()
+                    if _written:
+                        logger.info("cash-flow forecast demo seed: %s rows for %s", _written, _pid)
+            except Exception:
+                logger.warning("cash-flow forecast demo seed skipped for %s (non-fatal)", _pid, exc_info=True)
+
         # QMS seeds one project at a time and is not internally idempotent; loop
         # the projects, skipping any that already carry an ITP plan so a re-run
         # never duplicates.

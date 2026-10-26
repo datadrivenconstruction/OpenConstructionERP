@@ -1341,5 +1341,19 @@
       "fail": "Position {ordinal}: drawing {drawing} is entered without a revision",
       "suggestion": "Add the revision of the drawing the quantity was priced from"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "The cash position falls to minus {amount} in {period}, beyond the funding threshold of {threshold}.",
+      "suggestion": "Arrange funding before {period}, bring receipts forward or move payments later."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} was due on {due} and is still open ({days} days overdue).",
+      "suggestion": "Chase the payment with the client, or move the expected date in the forecast."
+    },
+    "forecast_missing": {
+      "fail": "{project} is active but has no contract, invoice, order, subcontract or plan to forecast cash from.",
+      "suggestion": "Enter the client contract with its payment plan, or a planned cash flow in the cost model."
+    }
   }
 }

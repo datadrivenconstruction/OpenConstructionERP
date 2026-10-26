@@ -1341,5 +1341,19 @@
       "fail": "Hạng mục {ordinal}: bản vẽ {drawing} được nhập mà không có bản sửa đổi",
       "suggestion": "Bổ sung bản sửa đổi của bản vẽ mà khối lượng đã được định giá theo"
     }
+  },
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Số dư tiền mặt sẽ xuống âm {amount} trong {period}, thấp hơn ngưỡng tài trợ {threshold}.",
+      "suggestion": "Bố trí nguồn vốn trước {period}, thu tiền sớm hơn hoặc lùi thời hạn thanh toán."
+    },
+    "receipt_overdue": {
+      "fail": "{document}: {amount} đến hạn ngày {due} nhưng vẫn chưa thu được ({days} ngày quá hạn).",
+      "suggestion": "Đôn đốc khách hàng thanh toán hoặc điều chỉnh ngày dự kiến trong dự báo."
+    },
+    "forecast_missing": {
+      "fail": "{project} đang hoạt động nhưng chưa có hợp đồng, hóa đơn, đơn đặt hàng, hợp đồng phụ hay kế hoạch nào để dự báo dòng tiền.",
+      "suggestion": "Nhập hợp đồng với khách hàng cùng lịch thanh toán, hoặc dòng tiền kế hoạch trong mô hình chi phí."
+    }
   }
 }
