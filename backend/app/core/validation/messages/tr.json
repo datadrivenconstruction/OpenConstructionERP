@@ -1327,5 +1327,15 @@
     "discount_basis": "İskonto yüzdesi veya sabit net fiyat girin (sabit net fiyat için kalem gerekir)",
     "attachment_not_found": "Ek bulunamadı",
     "price_missing": "\"{line}\" satırı için geçerli fiyat yok: birim fiyat girin veya tedarikçinin fiyat listesini içe aktarın"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Dal {days} gündür açık ve ana keşif, dal oluşturulduğundan beri {changes} pozda değişti",
+      "suggestion": "Ana keşfin değişikliklerini dala aktarın, dalı birleştirin veya arşivleyin"
+    },
+    "unresolved_conflicts": {
+      "fail": "{ordinal} nolu \"{description}\" pozu hem bu dalda hem de ana keşifte değiştirildi",
+      "suggestion": "Birleştirme penceresini açın ve pozun hangi sürümünün korunacağına karar verin"
+    }
   }
 }

@@ -184,6 +184,7 @@ async def build_portfolio_status(session: AsyncSession, user_id: str) -> Validat
             select(BOQ.id, BOQ.project_id, BOQ.name).where(
                 BOQ.project_id.in_(project_ids),
                 BOQ.variation_request_id.is_(None),
+                BOQ.branch_of_id.is_(None),
             )
         )
     ).all()
@@ -193,6 +194,7 @@ async def build_portfolio_status(session: AsyncSession, user_id: str) -> Validat
         register_ids = select(BOQ.id).where(
             BOQ.project_id.in_(project_ids),
             BOQ.variation_request_id.is_(None),
+            BOQ.branch_of_id.is_(None),
         )
         # The newest report per rule-set label: an older report under the same
         # label ran the same scope and is fully covered by the newer one, so it

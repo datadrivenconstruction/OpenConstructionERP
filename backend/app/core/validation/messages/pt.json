@@ -1327,5 +1327,15 @@
     "discount_basis": "Informe um percentual de desconto ou um preço líquido fixo (o preço líquido fixo exige um item)",
     "attachment_not_found": "Anexo não encontrado",
     "price_missing": "Não há preço vigente para a linha \"{line}\": informe um preço unitário ou importe a lista de preços do fornecedor"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Esta variante está aberta há {days} dias e o orçamento principal mudou em {changes} artigos desde a sua criação",
+      "suggestion": "Transporte as alterações do orçamento principal para a variante, funda a variante ou arquive-a"
+    },
+    "unresolved_conflicts": {
+      "fail": "O artigo {ordinal} \"{description}\" foi alterado nesta variante e no orçamento principal",
+      "suggestion": "Abra a janela de fusão e decida que versão do artigo manter"
+    }
   }
 }

@@ -1327,5 +1327,15 @@
     "discount_basis": "할인율 또는 고정 순단가 중 하나를 입력하세요(고정 순단가에는 품목이 필요합니다)",
     "attachment_not_found": "첨부 파일을 찾을 수 없습니다",
     "price_missing": "\"{line}\" 항목에 유효한 단가가 없습니다. 단가를 입력하거나 협력업체 단가표를 가져오세요"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "이 브랜치는 {days}일 동안 열려 있었고, 생성 이후 메인 견적의 {changes}개 항목이 변경되었습니다",
+      "suggestion": "메인 견적의 변경 사항을 브랜치로 가져오거나, 브랜치를 병합하거나, 보관하세요"
+    },
+    "unresolved_conflicts": {
+      "fail": "항목 {ordinal} \"{description}\"이(가) 이 브랜치와 메인 견적 모두에서 변경되었습니다",
+      "suggestion": "병합 대화상자를 열어 유지할 항목 버전을 결정하세요"
+    }
   }
 }

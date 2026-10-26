@@ -1327,5 +1327,15 @@
     "discount_basis": "Navedite postotak popusta ili fiksnu neto cijenu (fiksna neto cijena zahtijeva artikl)",
     "attachment_not_found": "Privitak nije pronađen",
     "price_missing": "Nema važeće cijene za stavku \"{line}\": unesite jediničnu cijenu ili uvezite cjenik dobavljača"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Grana je otvorena {days} dana, a glavni troškovnik se od njezina nastanka promijenio u {changes} stavki",
+      "suggestion": "Prenesite promjene glavnog troškovnika u granu, spojite granu ili je arhivirajte"
+    },
+    "unresolved_conflicts": {
+      "fail": "Stavka {ordinal} „{description}” promijenjena je i u ovoj grani i u glavnom troškovniku",
+      "suggestion": "Otvorite prozor za spajanje i odlučite koju verziju stavke zadržati"
+    }
   }
 }

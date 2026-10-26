@@ -1327,5 +1327,15 @@
     "discount_basis": "Indique un porcentaje de descuento o un precio neto fijo (el precio neto fijo requiere un artículo)",
     "attachment_not_found": "Adjunto no encontrado",
     "price_missing": "No hay precio vigente para la partida \"{line}\": introduzca un precio unitario o importe la lista de precios del proveedor"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Esta variante lleva {days} días abierta y el presupuesto principal ha cambiado en {changes} partidas desde que se creó",
+      "suggestion": "Traslade los cambios del presupuesto principal a la variante, fusione la variante o archívela"
+    },
+    "unresolved_conflicts": {
+      "fail": "La partida {ordinal} «{description}» se modificó tanto en esta variante como en el presupuesto principal",
+      "suggestion": "Abra el diálogo de fusión y decida qué versión de la partida conservar"
+    }
   }
 }

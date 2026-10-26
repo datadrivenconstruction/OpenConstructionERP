@@ -8,6 +8,7 @@ Tables:
     oe_boq_markup - markup/overhead lines applied to a BOQ
     oe_boq_activity_log - audit trail for BOQ mutations
     oe_boq_snapshot - point-in-time BOQ state for version history
+    oe_boq_branch - lifecycle of an estimate branch (variant) of a main BOQ
     oe_boq_quantity_link - live model→position quantity binding
 """
 
@@ -86,6 +87,16 @@ class BOQ(Base):
     # remove the one they started. NULL on every bill created before the column
     # and on bills seeded without a user; those keep the role rule only.
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    # The main estimate this bill is a branch (variant) of; NULL on every bill
+    # of the project at large. Like ``variation_request_id`` it keeps the
+    # variant out of the bill register and out of "which bill" resolution.
+    branch_of_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="CASCADE"),
+        nullable=True,
+        index=True,
+    )
 
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -541,6 +552,66 @@ class BOQSnapshot(Base):
 
     def __repr__(self) -> str:
         return f"<BOQSnapshot boq={self.boq_id} name={self.name}>"
+
+
+class BOQBranch(Base):
+    """Lifecycle of one estimate branch (variant) of a main estimate.
+
+    The branch itself is an ordinary bill (``boq_id``) with its own positions
+    and markups, so every editor, export and validation works on it unchanged.
+    This row adds what a plain copy cannot answer: which bill it forked from,
+    the state it forked from (``base_snapshot_id``, a :class:`BOQSnapshot` of
+    the branch taken at the fork, used as the common ancestor of a three-way
+    compare), and whether it has been merged back.
+
+    Columns:
+        boq_id - the branch bill (unique)
+        main_boq_id - the main estimate at the root of the branch tree
+        parent_boq_id - the bill it forked from (main or another branch)
+        base_snapshot_id - fork-point snapshot stored on the branch bill
+        source_snapshot_id - the snapshot of the parent it was created from, if any
+        status - ``open`` | ``merged`` | ``archived``
+        merged_at / merged_by - who merged it into main and when
+        merge_snapshot_id - the snapshot of main taken right before the merge
+        note - free text (why the variant exists)
+    """
+
+    __tablename__ = "oe_boq_branch"
+
+    boq_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="CASCADE"),
+        nullable=False,
+        unique=True,
+        index=True,
+    )
+    main_boq_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    parent_boq_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_boq.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    base_snapshot_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_boq_snapshot.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    source_snapshot_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open", server_default="open")
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    merged_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    merged_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    merge_snapshot_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<BOQBranch boq={self.boq_id} main={self.main_boq_id} ({self.status})>"
 
 
 class QuantityLink(Base):

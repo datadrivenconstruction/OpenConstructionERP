@@ -29,5 +29,7 @@ def register_boq_permissions() -> None:
             "boq.delete": Role.EDITOR,
             "boq.export": Role.VIEWER,
             "boq.import": Role.EDITOR,
+            # Writing a branch into the main estimate (merge or cherry-pick into main).
+            "boq.branch_merge": Role.MANAGER,
         },
     )

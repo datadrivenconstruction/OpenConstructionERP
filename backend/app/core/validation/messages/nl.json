@@ -1327,5 +1327,15 @@
     "discount_basis": "Geef een kortingspercentage of een vaste nettoprijs op (een vaste nettoprijs vereist een artikel)",
     "attachment_not_found": "Bijlage niet gevonden",
     "price_missing": "Geen actuele prijs voor regel \"{line}\": voer een eenheidsprijs in of importeer de prijslijst van de leverancier"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Deze variant staat al {days} dagen open en de hoofdraming is sinds het aanmaken in {changes} posten gewijzigd",
+      "suggestion": "Neem de wijzigingen van de hoofdraming over in de variant, voeg de variant samen of archiveer hem"
+    },
+    "unresolved_conflicts": {
+      "fail": "Post {ordinal} \"{description}\" is zowel in deze variant als in de hoofdraming gewijzigd",
+      "suggestion": "Open het samenvoegvenster en bepaal welke versie van de post blijft"
+    }
   }
 }

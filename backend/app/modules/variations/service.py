@@ -1912,6 +1912,7 @@ class VariationsService:
                         Position.id.in_(position_ids),
                         BOQ.project_id == project_id,
                         BOQ.variation_request_id.is_(None),
+                        BOQ.branch_of_id.is_(None),
                     )
                 )
             )

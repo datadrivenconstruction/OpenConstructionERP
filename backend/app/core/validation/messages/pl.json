@@ -1327,5 +1327,15 @@
     "discount_basis": "Podaj procent rabatu albo stałą cenę netto (stała cena netto wymaga wskazania pozycji)",
     "attachment_not_found": "Nie znaleziono załącznika",
     "price_missing": "Brak aktualnej ceny dla pozycji \"{line}\": wpisz cenę jednostkową lub zaimportuj cennik dostawcy"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Gałąź jest otwarta od {days} dni, a kosztorys główny zmienił się od jej utworzenia w {changes} pozycjach",
+      "suggestion": "Przenieś zmiany kosztorysu głównego do gałęzi, scal gałąź albo ją zarchiwizuj"
+    },
+    "unresolved_conflicts": {
+      "fail": "Pozycja {ordinal} „{description}” została zmieniona zarówno w tej gałęzi, jak i w kosztorysie głównym",
+      "suggestion": "Otwórz okno scalania i zdecyduj, którą wersję pozycji zachować"
+    }
   }
 }

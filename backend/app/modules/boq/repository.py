@@ -10,7 +10,7 @@ import json
 import uuid
 from collections.abc import Iterable, Sequence
 
-from sqlalchemy import Row, RowMapping, Text, any_, cast, delete, func, select, update
+from sqlalchemy import Row, RowMapping, Text, and_, any_, cast, delete, func, select, update
 from sqlalchemy.dialects.postgresql import array as pg_array
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import noload
@@ -131,12 +131,14 @@ BOQ_HEADER_COLUMNS = (
     BOQ.estimate_type,
     BOQ.parent_estimate_id,
     BOQ.variation_request_id,
+    BOQ.branch_of_id,
 )
 
 #: Which bills make up a project's bill register. See ``list_for_project`` for
-#: why a variation request's own bill is not one of them. Shared by the one
+#: why a variation request's own bill is not one of them; an estimate branch is
+#: left out for the same reason. Shared by the one
 #: project and the many projects listing, so the two cannot disagree about it.
-_IN_BILL_REGISTER = BOQ.variation_request_id.is_(None)
+_IN_BILL_REGISTER = and_(BOQ.variation_request_id.is_(None), BOQ.branch_of_id.is_(None))
 
 #: The order of a bill register, newest first. The id breaks a tie between two
 #: bills created in the same instant, which otherwise the database may order

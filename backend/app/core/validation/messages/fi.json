@@ -1327,5 +1327,15 @@
     "discount_basis": "Anna joko alennusprosentti tai kiinteä nettohinta (kiinteä nettohinta vaatii tuotteen)",
     "attachment_not_found": "Liitettä ei löytynyt",
     "price_missing": "Riville \"{line}\" ei ole voimassa olevaa hintaa: syötä yksikköhinta tai tuo toimittajan hinnasto"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Tämä variantti on ollut auki {days} päivää, ja pääarvio on muuttunut {changes} nimikkeessä sen luomisen jälkeen",
+      "suggestion": "Siirrä pääarvion muutokset varianttiin, yhdistä variantti tai arkistoi se"
+    },
+    "unresolved_conflicts": {
+      "fail": "Nimike {ordinal} \"{description}\" muutettiin sekä tässä variantissa että pääarviossa",
+      "suggestion": "Avaa yhdistämisikkuna ja päätä, kumpi nimikkeen versio säilytetään"
+    }
   }
 }

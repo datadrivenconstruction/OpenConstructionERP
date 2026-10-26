@@ -1327,5 +1327,15 @@
     "discount_basis": "Isi persentase diskon atau harga neto tetap (harga neto tetap memerlukan item)",
     "attachment_not_found": "Lampiran tidak ditemukan",
     "price_missing": "Tidak ada harga berlaku untuk baris \"{line}\": masukkan harga satuan atau impor daftar harga vendor"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Cabang ini sudah terbuka selama {days} hari dan estimasi utama berubah pada {changes} item sejak cabang dibuat",
+      "suggestion": "Bawa perubahan estimasi utama ke cabang, gabungkan cabang, atau arsipkan"
+    },
+    "unresolved_conflicts": {
+      "fail": "Item {ordinal} \"{description}\" diubah di cabang ini dan juga di estimasi utama",
+      "suggestion": "Buka dialog penggabungan dan putuskan versi item mana yang dipertahankan"
+    }
   }
 }

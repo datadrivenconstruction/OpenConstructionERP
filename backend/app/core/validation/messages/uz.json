@@ -1327,5 +1327,15 @@
     "discount_basis": "Chegirma foizini yoki qat'iy netto narxni ko'rsating (qat'iy netto narx uchun pozitsiya kerak)",
     "attachment_not_found": "Biriktirma topilmadi",
     "price_missing": "\"{line}\" qatori uchun amaldagi narx yo'q: birlik narxini kiriting yoki yetkazib beruvchining narxnomasini import qiling"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Tarmoq {days} kundan beri ochiq, asosiy smeta esa u yaratilganidan beri {changes} ta pozitsiyada o‘zgargan",
+      "suggestion": "Asosiy smeta o‘zgarishlarini tarmoqqa ko‘chiring, tarmoqni birlashtiring yoki arxivlang"
+    },
+    "unresolved_conflicts": {
+      "fail": "{ordinal}-pozitsiya «{description}» ham shu tarmoqda, ham asosiy smetada o‘zgartirilgan",
+      "suggestion": "Birlashtirish oynasini oching va pozitsiyaning qaysi versiyasini saqlashni hal qiling"
+    }
   }
 }

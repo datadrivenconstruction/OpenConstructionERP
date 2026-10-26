@@ -403,6 +403,8 @@ class BOQResponse(BaseModel):
     variation_request_id: UUID | None = None
     #: The user who started the bill; null for bills older than the column.
     created_by: UUID | None = None
+    #: The main estimate this bill is a branch (variant) of; null for every other bill.
+    branch_of_id: UUID | None = None
 
     # BUG-MATH04: defence-in-depth strip of any residual HTML on output.
     # Input validators only block the *dangerous* subset; legacy rows

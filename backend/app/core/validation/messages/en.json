@@ -1327,5 +1327,15 @@
     "discount_basis": "Give either a discount percentage or a fixed net price (fixed net needs an item)",
     "attachment_not_found": "Attachment not found",
     "price_missing": "No current price for line \"{line}\": enter a unit price or import the vendor's price list"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "This branch has been open for {days} days and the main estimate has changed in {changes} positions since it was created",
+      "suggestion": "Carry the main estimate's changes into the branch, merge the branch, or archive it"
+    },
+    "unresolved_conflicts": {
+      "fail": "Position {ordinal} \"{description}\" was changed both in this branch and in the main estimate",
+      "suggestion": "Open the merge dialog and decide which version of the position to keep"
+    }
   }
 }

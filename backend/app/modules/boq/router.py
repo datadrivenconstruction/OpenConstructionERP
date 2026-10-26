@@ -106,6 +106,7 @@ from app.dependencies import (
 )
 from app.modules.boq import cost_risk_engine as cre
 from app.modules.boq.ai_provenance import AI_MARK_TOKEN, ai_mark_text, ai_origin
+from app.modules.boq.branch_router import branch_router
 from app.modules.boq.change_review_router import change_review_router
 from app.modules.boq.copilot_schemas import (
     CopilotApplyRequest,
@@ -245,6 +246,7 @@ router.include_router(resource_review_router)
 router.include_router(supplier_suggestion_router)
 router.include_router(change_review_router)
 router.include_router(gaeb_exchange_router)
+router.include_router(branch_router)
 _log = logging.getLogger(__name__)
 
 
@@ -4031,6 +4033,12 @@ async def validate_boq(
     # The sale-rate export's rounding gap, for boq.export.embedding_rounding_gap.
     if embed_enabled(getattr(boq_data, "metadata", None)):
         markup_context["export_embedding"] = await service.get_embedding_preview(boq_id)
+    # Drift and open conflicts of an estimate branch, for the boq.branch.* rules.
+    from app.modules.boq.branch_service import BranchService
+
+    branch_block = await BranchService(session).divergence(boq_id)
+    if branch_block is not None:
+        markup_context["branch"] = branch_block
 
     # Determine rule sets from project config. Empty classification /
     # region means "no preference"; the rule registry resolves to a

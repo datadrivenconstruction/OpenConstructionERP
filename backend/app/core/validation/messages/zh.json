@@ -1327,5 +1327,15 @@
     "discount_basis": "请填写折扣百分比或固定净价（固定净价需要指定项目）",
     "attachment_not_found": "未找到附件",
     "price_missing": "清单行“{line}”没有当前有效价格：请输入单价或导入供应商价目表"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "此分支已开启 {days} 天，自创建以来主估算已有 {changes} 个清单项发生变更",
+      "suggestion": "将主估算的变更带入分支、合并该分支，或将其归档"
+    },
+    "unresolved_conflicts": {
+      "fail": "清单项 {ordinal}“{description}”在此分支和主估算中都被修改",
+      "suggestion": "打开合并对话框，决定保留该清单项的哪个版本"
+    }
   }
 }

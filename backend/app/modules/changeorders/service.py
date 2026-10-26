@@ -1987,7 +1987,7 @@ class ChangeOrderService:
         # its request, never to a change order, so it is not a candidate.
         # Mirrors ``app/core/boq_target.py::list_project_boqs``; the two copies
         # of this query still have to be kept in step by hand.
-        stmt = stmt.where(BOQ.variation_request_id.is_(None))
+        stmt = stmt.where(BOQ.variation_request_id.is_(None), BOQ.branch_of_id.is_(None))
         if writable:
             stmt = stmt.where(BOQ.is_locked.is_(False))
         return list((await self.session.execute(stmt.order_by(BOQ.created_at).limit(limit))).scalars().all())

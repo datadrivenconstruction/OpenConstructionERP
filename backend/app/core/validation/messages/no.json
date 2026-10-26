@@ -1327,5 +1327,15 @@
     "discount_basis": "Oppgi enten en rabattprosent eller en fast nettopris (fast nettopris krever en vare)",
     "attachment_not_found": "Vedlegget ble ikke funnet",
     "price_missing": "Ingen gjeldende pris for linjen \"{line}\": legg inn en enhetspris eller importer leverandørens prisliste"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Denne varianten har vært åpen i {days} dager, og hovedoverslaget er endret i {changes} poster siden den ble opprettet",
+      "suggestion": "Overfør hovedoverslagets endringer til varianten, slå varianten sammen eller arkiver den"
+    },
+    "unresolved_conflicts": {
+      "fail": "Post {ordinal} \"{description}\" er endret både i denne varianten og i hovedoverslaget",
+      "suggestion": "Åpne dialogen for sammenslåing og avgjør hvilken versjon av posten som beholdes"
+    }
   }
 }

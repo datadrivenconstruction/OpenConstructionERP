@@ -1983,6 +1983,9 @@ _LINK_INSTANCE_ONLY_META_KEYS: tuple[str, ...] = (
     "pdf_measurement_source",
     "dwg_annotation_source",
     "_link_src",
+    # Estimate-branch identity (``branch_diff.LINEAGE_KEY``): a copy inside one
+    # bill is a new line, not the same line twice.
+    "branch_lineage",
 )
 # Fields whose direct edit on an INSTANCE means "diverge from the master"
 # → unlink + warn. Quantity / ordinal / sort_order / version / validation
@@ -4440,6 +4443,11 @@ class BOQService:
         # Map 'metadata' key to the model's 'metadata_' column
         if "metadata" in fields:
             fields["metadata_"] = fields.pop("metadata")
+            # A client replacing the blob does not get to drop the line's
+            # estimate-branch identity, which it never sees.
+            _stored = position.metadata_ if isinstance(position.metadata_, dict) else {}
+            if isinstance(fields["metadata_"], dict) and "branch_lineage" in _stored:
+                fields["metadata_"] = {**fields["metadata_"], "branch_lineage": _stored["branch_lineage"]}
 
         # ── Unit provenance dies with the value it described ──────────────
         # A GAEB import records the source file's own <QU> in
@@ -9168,6 +9176,7 @@ class BOQService:
                     "source": p.source,
                     "metadata": p.metadata_,
                     "sort_order": p.sort_order,
+                    "reference_code": p.reference_code,
                 }
             )
             grand_total += _to_decimal(p.total)
@@ -9247,6 +9256,22 @@ class BOQService:
         snap = result.scalar_one_or_none()
         if not snap:
             raise HTTPException(status_code=404, detail="Snapshot not found")
+        # The fork point of an open branch is the common ancestor every
+        # cherry-pick and merge is decided against.
+        from app.core.i18n import t as i18n_t
+        from app.modules.boq.models import BOQBranch
+
+        in_use = await self.session.execute(
+            select(BOQBranch.id).where(BOQBranch.base_snapshot_id == snapshot_id, BOQBranch.status == "open")
+        )
+        if in_use.first() is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "branch_base_snapshot",
+                    "message": i18n_t("boq.branch.errors.base_snapshot_in_use", locale=get_locale()),
+                },
+            )
         await self.session.execute(sa_delete(BOQSnapshot).where(BOQSnapshot.id == snapshot_id))
         await self.session.flush()
 
@@ -9425,6 +9450,7 @@ class BOQService:
                 norm_work_key=_snap_norm_key,
                 metadata_=pdata.get("metadata", {}),
                 sort_order=pdata.get("sort_order", 0),
+                reference_code=pdata.get("reference_code"),
             )
             self.session.add(pos)
             old_id = pdata.get("id")

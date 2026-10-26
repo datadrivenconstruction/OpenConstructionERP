@@ -1327,5 +1327,15 @@
     "discount_basis": "Indicați fie un procent de discount, fie un preț net fix (prețul net fix necesită un articol)",
     "attachment_not_found": "Atașamentul nu a fost găsit",
     "price_missing": "Nu există preț curent pentru linia \"{line}\": introduceți un preț unitar sau importați lista de prețuri a furnizorului"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Ramura este deschisă de {days} zile, iar devizul principal s-a modificat de la crearea ei în {changes} articole",
+      "suggestion": "Transferați modificările devizului principal în ramură, îmbinați ramura sau arhivați-o"
+    },
+    "unresolved_conflicts": {
+      "fail": "Articolul {ordinal} „{description}” a fost modificat atât în această ramură, cât și în devizul principal",
+      "suggestion": "Deschideți fereastra de îmbinare și decideți ce versiune a articolului se păstrează"
+    }
   }
 }

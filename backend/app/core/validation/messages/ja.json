@@ -1327,5 +1327,15 @@
     "discount_basis": "値引率か固定ネット単価のどちらかを指定してください(固定ネット単価には品目が必要です)",
     "attachment_not_found": "添付ファイルが見つかりません",
     "price_missing": "明細「{line}」に有効な単価がありません。単価を入力するか、業者の価格表を取り込んでください"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "このブランチは{days}日間開いたままで、作成以降にメイン見積の{changes}件の項目が変更されました",
+      "suggestion": "メイン見積の変更をブランチに取り込むか、ブランチをマージするか、アーカイブしてください"
+    },
+    "unresolved_conflicts": {
+      "fail": "項目 {ordinal}「{description}」がこのブランチとメイン見積の両方で変更されました",
+      "suggestion": "マージダイアログを開き、残す項目の版を決定してください"
+    }
   }
 }

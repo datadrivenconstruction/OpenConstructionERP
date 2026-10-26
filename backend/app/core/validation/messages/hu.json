@@ -1327,5 +1327,15 @@
     "discount_basis": "Adjon meg kedvezményszázalékot vagy fix nettó árat (fix nettó árhoz tétel szükséges)",
     "attachment_not_found": "A melléklet nem található",
     "price_missing": "Nincs érvényes ár a(z) \"{line}\" sorhoz: adjon meg egységárat, vagy importálja a beszállító árlistáját"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Az ág {days} napja nyitott, és a fő költségvetés a létrehozása óta {changes} tételben megváltozott",
+      "suggestion": "Vigye át a fő költségvetés módosításait az ágba, egyesítse az ágat, vagy archiválja"
+    },
+    "unresolved_conflicts": {
+      "fail": "A(z) {ordinal} tétel („{description}”) az ágban és a fő költségvetésben is módosult",
+      "suggestion": "Nyissa meg az egyesítési ablakot, és döntse el, a tétel melyik verzióját tartja meg"
+    }
   }
 }

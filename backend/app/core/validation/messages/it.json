@@ -1327,5 +1327,15 @@
     "discount_basis": "Indica una percentuale di sconto oppure un prezzo netto fisso (il prezzo netto fisso richiede un articolo)",
     "attachment_not_found": "Allegato non trovato",
     "price_missing": "Nessun prezzo in vigore per la voce \"{line}\": inserisci un prezzo unitario o importa il listino del fornitore"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Questa variante è aperta da {days} giorni e il computo principale è cambiato in {changes} voci dalla sua creazione",
+      "suggestion": "Riporta le modifiche del computo principale nella variante, unisci la variante o archiviala"
+    },
+    "unresolved_conflicts": {
+      "fail": "La voce {ordinal} \"{description}\" è stata modificata sia in questa variante sia nel computo principale",
+      "suggestion": "Apri la finestra di unione e decidi quale versione della voce tenere"
+    }
   }
 }

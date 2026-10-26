@@ -1327,5 +1327,15 @@
     "discount_basis": "Geben Sie entweder einen Rabattprozentsatz oder einen festen Nettopreis an (fester Nettopreis erfordert einen Artikel)",
     "attachment_not_found": "Anhang nicht gefunden",
     "price_missing": "Kein aktueller Preis für Position \"{line}\": Einheitspreis eingeben oder die Preisliste des Lieferanten importieren"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Diese Variante ist seit {days} Tagen offen, und die Hauptkalkulation hat sich seit ihrer Anlage in {changes} Positionen geändert",
+      "suggestion": "Übernehmen Sie die Änderungen der Hauptkalkulation in die Variante, führen Sie die Variante zusammen oder archivieren Sie sie"
+    },
+    "unresolved_conflicts": {
+      "fail": "Position {ordinal} „{description}“ wurde sowohl in dieser Variante als auch in der Hauptkalkulation geändert",
+      "suggestion": "Öffnen Sie den Dialog zum Zusammenführen und entscheiden Sie, welche Fassung der Position gilt"
+    }
   }
 }

@@ -1327,5 +1327,15 @@
     "discount_basis": "Indiquez soit un pourcentage de remise, soit un prix net fixe (un prix net fixe nécessite un article)",
     "attachment_not_found": "Pièce jointe introuvable",
     "price_missing": "Aucun prix en vigueur pour la ligne « {line} » : saisissez un prix unitaire ou importez la liste de prix du fournisseur"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Cette variante est ouverte depuis {days} jours et l'estimatif principal a changé sur {changes} postes depuis sa création",
+      "suggestion": "Reportez les modifications de l'estimatif principal dans la variante, fusionnez la variante ou archivez-la"
+    },
+    "unresolved_conflicts": {
+      "fail": "Le poste {ordinal} « {description} » a été modifié à la fois dans cette variante et dans l'estimatif principal",
+      "suggestion": "Ouvrez la boîte de fusion et décidez quelle version du poste conserver"
+    }
   }
 }

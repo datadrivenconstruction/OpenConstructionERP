@@ -1327,5 +1327,15 @@
     "discount_basis": "Zadejte buď procento slevy, nebo pevnou čistou cenu (pevná čistá cena vyžaduje položku)",
     "attachment_not_found": "Příloha nebyla nalezena",
     "price_missing": "Pro řádek \"{line}\" není platná cena: zadejte jednotkovou cenu nebo importujte ceník dodavatele"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Větev je otevřená {days} dní a hlavní rozpočet se od jejího vytvoření změnil v {changes} položkách",
+      "suggestion": "Přeneste změny hlavního rozpočtu do větve, větev sloučte, nebo ji archivujte"
+    },
+    "unresolved_conflicts": {
+      "fail": "Položka {ordinal} „{description}“ byla změněna ve větvi i v hlavním rozpočtu",
+      "suggestion": "Otevřete dialog sloučení a rozhodněte, kterou verzi položky ponechat"
+    }
   }
 }

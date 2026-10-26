@@ -1327,5 +1327,15 @@
     "discount_basis": "Maglagay ng porsyento ng diskwento o nakapirming net na presyo (kailangan ng item ang nakapirming net na presyo)",
     "attachment_not_found": "Hindi nahanap ang attachment",
     "price_missing": "Walang umiiral na presyo para sa linyang \"{line}\": maglagay ng unit price o i-import ang listahan ng presyo ng vendor"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "{days} araw nang bukas ang branch na ito at {changes} item ang nabago sa pangunahing estimate mula nang likhain ito",
+      "suggestion": "Ilipat sa branch ang mga pagbabago ng pangunahing estimate, pagsamahin ang branch, o i-archive ito"
+    },
+    "unresolved_conflicts": {
+      "fail": "Ang item {ordinal} \"{description}\" ay binago sa branch na ito at sa pangunahing estimate",
+      "suggestion": "Buksan ang merge dialog at magpasya kung aling bersyon ng item ang itatago"
+    }
   }
 }

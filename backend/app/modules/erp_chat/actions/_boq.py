@@ -204,7 +204,7 @@ async def project_bills(ctx: ActionContext, project_id: uuid.UUID) -> list[BillR
 
     stmt = (
         select(*_bill_columns())
-        .where(BOQ.project_id == project_id, BOQ.variation_request_id.is_(None))
+        .where(BOQ.project_id == project_id, BOQ.variation_request_id.is_(None), BOQ.branch_of_id.is_(None))
         .order_by(BOQ.created_at)
     )
     return [_to_bill(row) for row in (await ctx.session.execute(stmt)).all()]

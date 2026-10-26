@@ -1327,5 +1327,15 @@
     "discount_basis": "Sisestage kas allahindluse protsent või kindel netohind (kindel netohind nõuab toodet)",
     "attachment_not_found": "Manust ei leitud",
     "price_missing": "Real \"{line}\" puudub kehtiv hind: sisestage ühikuhind või importige tarnija hinnakiri"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Haru on avatud {days} päeva ja põhieelarve on selle loomisest saadik muutunud {changes} positsioonis",
+      "suggestion": "Kandke põhieelarve muudatused harusse, ühendage haru või arhiveerige see"
+    },
+    "unresolved_conflicts": {
+      "fail": "Positsiooni {ordinal} „{description}” on muudetud nii selles harus kui ka põhieelarves",
+      "suggestion": "Avage ühendamise aken ja otsustage, millise positsiooni versiooni alles jätate"
+    }
   }
 }

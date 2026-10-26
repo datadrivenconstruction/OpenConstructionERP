@@ -18,7 +18,11 @@ async def on_startup() -> None:
     """
     from app.modules.boq import import_jobs
     from app.modules.boq.permissions import register_boq_permissions
-    from app.modules.boq.validators import register_boq_markup_rules, register_boq_resource_rules
+    from app.modules.boq.validators import (
+        register_boq_branch_rules,
+        register_boq_markup_rules,
+        register_boq_resource_rules,
+    )
 
     register_boq_permissions()
     import_jobs.register_boq_import_job_handler()
@@ -29,3 +33,4 @@ async def on_startup() -> None:
         logging.getLogger(__name__).warning("Sweeping stale import uploads failed", exc_info=True)
     register_boq_markup_rules()
     register_boq_resource_rules()
+    register_boq_branch_rules()

@@ -1327,5 +1327,15 @@
     "discount_basis": "Nhập tỷ lệ chiết khấu hoặc giá net cố định (giá net cố định cần có mặt hàng)",
     "attachment_not_found": "Không tìm thấy tệp đính kèm",
     "price_missing": "Không có giá hiện hành cho dòng \"{line}\": nhập đơn giá hoặc nhập bảng giá của nhà cung cấp"
+  },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Nhánh này đã mở {days} ngày và dự toán chính đã thay đổi {changes} hạng mục kể từ khi nhánh được tạo",
+      "suggestion": "Mang thay đổi của dự toán chính vào nhánh, hợp nhất nhánh, hoặc lưu trữ nó"
+    },
+    "unresolved_conflicts": {
+      "fail": "Hạng mục {ordinal} \"{description}\" bị thay đổi ở cả nhánh này và dự toán chính",
+      "suggestion": "Mở hộp thoại hợp nhất và quyết định giữ phiên bản nào của hạng mục"
+    }
   }
 }

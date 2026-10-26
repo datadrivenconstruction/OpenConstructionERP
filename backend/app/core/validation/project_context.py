@@ -107,7 +107,7 @@ async def _bills(session: AsyncSession, project_id: uuid.UUID) -> list[dict[str,
     stmt = (
         select(BOQ.id, BOQ.name, BOQ.status, BOQ.base_date, BOQ.metadata_, func.coalesce(counts.c.n, 0))
         .outerjoin(counts, counts.c.boq_id == BOQ.id)
-        .where(BOQ.project_id == project_id, BOQ.variation_request_id.is_(None))
+        .where(BOQ.project_id == project_id, BOQ.variation_request_id.is_(None), BOQ.branch_of_id.is_(None))
         .order_by(BOQ.name)
     )
     return [

@@ -516,6 +516,113 @@ _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
 )
 
 
+# ── Estimate branches ───────────────────────────────────────────────────────
+
+#: Days an open branch may run beside a main estimate that keeps changing
+#: before the drift is worth a warning.
+BRANCH_STALE_DAYS = 30
+
+#: Conflicting lines reported one by one; the rest are summed into the last.
+_MAX_CONFLICT_FINDINGS = 50
+
+
+def _branch(context: ValidationContext) -> dict[str, Any] | None:
+    """The ``branch`` block the validate endpoint adds for a bill that is a branch."""
+    data = context.data
+    if isinstance(data, dict) and isinstance(data.get("branch"), dict):
+        block = data["branch"]
+        if block.get("status") == "open":
+            return block
+    return None
+
+
+class BranchDivergedFromMain(ValidationRule):
+    """An open branch should not drift from a main estimate that keeps moving."""
+
+    rule_id = "boq.branch.diverged_from_main"
+    name = "Branch has not drifted too far from the main estimate"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A branch open for weeks while the main estimate changes is priced against a "
+        "baseline that no longer exists; carry main's changes over or merge it."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag an open branch older than the threshold whose main changed since the fork."""
+        block = _branch(context)
+        if block is None:
+            return []
+        days = int(block.get("days_open") or 0)
+        changes = int(block.get("main_changes") or 0)
+        limit = int(block.get("stale_days") or BRANCH_STALE_DAYS)
+        if days < limit or changes <= 0:
+            return []
+        locale = _locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate("boq_branch.diverged_from_main.fail", locale, days=days, changes=changes),
+                suggestion=translate("boq_branch.diverged_from_main.suggestion", locale),
+                details={"days_open": days, "main_changes": changes, "stale_days": limit},
+            )
+        ]
+
+
+class BranchConflictsUnresolved(ValidationRule):
+    """Lines changed both in the branch and in main since the fork must be decided before a merge."""
+
+    rule_id = "boq.branch.unresolved_conflicts"
+    name = "Branch has no unresolved merge conflicts"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A position changed differently in the branch and in the main estimate since the "
+        "fork cannot be merged until someone decides which version stands."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding per conflicting position, capped."""
+        block = _branch(context)
+        if block is None:
+            return []
+        conflicts = [c for c in block.get("conflicts") or [] if isinstance(c, dict)]
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for item in conflicts[:_MAX_CONFLICT_FINDINGS]:
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "boq_branch.unresolved_conflicts.fail",
+                        locale,
+                        ordinal=str(item.get("ordinal") or ""),
+                        description=str(item.get("description") or "")[:80],
+                    ),
+                    element_ref=str(item.get("ordinal") or "") or None,
+                    suggestion=translate("boq_branch.unresolved_conflicts.suggestion", locale),
+                    details={"key": item.get("key"), "total_conflicts": len(conflicts)},
+                )
+            )
+        return results
+
+
+_BOQ_BRANCH_RULES: tuple[ValidationRule, ...] = (
+    BranchDivergedFromMain(),
+    BranchConflictsUnresolved(),
+)
+
+
 def register_boq_markup_rules() -> None:
     """Register the markup rules with the core rule registry.
 
@@ -537,5 +644,13 @@ def register_boq_resource_rules() -> None:
     logger.debug("Registered %d boq resource validation rules", len(_BOQ_RESOURCE_RULES))
 
 
+def register_boq_branch_rules() -> None:
+    """Register the estimate-branch rules under the same universal set."""
+    for rule in _BOQ_BRANCH_RULES:
+        rule_registry.register(rule, [BOQ_MARKUP_RULE_SET])
+    logger.debug("Registered %d boq branch validation rules", len(_BOQ_BRANCH_RULES))
+
+
 register_boq_markup_rules()
 register_boq_resource_rules()
+register_boq_branch_rules()
