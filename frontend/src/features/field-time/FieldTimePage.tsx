@@ -8,9 +8,9 @@
  * running them through the submit / approve / reverse flow.
  */
 
-import { Fragment, useMemo, useState, type ReactNode } from 'react';
+import { Fragment, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -46,6 +46,12 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { TimesheetEditor } from './TimesheetEditor';
 import { OfflineDayRecorder } from './OfflineDayRecorder';
 import { WorkingTimeRecordPanel } from './WorkingTimeRecord';
+import { ClockPanel } from './ClockPanel';
+import { ClockApprovals } from './ClockApprovals';
+import { ClockEventsLog } from './ClockEventsLog';
+import { ClockSettingsCard } from './ClockSettingsCard';
+import { GeofenceEditor } from './GeofenceEditor';
+import { useClockStatus } from './clockApi';
 import {
   listTimesheets,
   fetchTimesheetSummary,
@@ -194,13 +200,104 @@ export function FieldTimePage() {
   );
 }
 
+type FieldTab = 'timesheets' | 'clock' | 'approvals' | 'geofences' | 'settings';
+const FIELD_TABS: FieldTab[] = ['timesheets', 'clock', 'approvals', 'geofences', 'settings'];
+
 function FieldTimeContent() {
+  const { t } = useTranslation();
+  const projectId = useActiveProjectId();
+  const [params, setParams] = useSearchParams();
+  const raw = params.get('tab');
+  const tab: FieldTab = FIELD_TABS.includes(raw as FieldTab) ? (raw as FieldTab) : 'timesheets';
+  // A timesheet built from the clock log opens in the timesheets tab's editor.
+  const [openId, setOpenId] = useState<string | null>(null);
+  const statusQ = useClockStatus(projectId);
+  const pending = statusQ.data?.pending_approvals ?? 0;
+
+  const goTab = (next: FieldTab) => {
+    const p = new URLSearchParams(params);
+    if (next === 'timesheets') p.delete('tab');
+    else p.set('tab', next);
+    setParams(p, { replace: true });
+  };
+
+  const labels: Record<FieldTab, string> = {
+    timesheets: t('field_clock.tab_timesheets', { defaultValue: 'Timesheets' }),
+    clock: t('field_clock.tab_clock', { defaultValue: 'Clock' }),
+    approvals: t('field_clock.tab_approvals', { defaultValue: 'Approvals' }),
+    geofences: t('field_clock.tab_geofences', { defaultValue: 'Geofences' }),
+    settings: t('field_clock.tab_settings', { defaultValue: 'Settings' }),
+  };
+
+  return (
+    <div className="space-y-5">
+      <div
+        role="tablist"
+        aria-label={t('field_clock.tabs_label', { defaultValue: 'Field time sections' })}
+        className="-mx-1 flex gap-1 overflow-x-auto border-b border-border-light px-1"
+      >
+        {FIELD_TABS.map((k) => (
+          <button
+            key={k}
+            type="button"
+            role="tab"
+            aria-selected={tab === k}
+            onClick={() => goTab(k)}
+            className={
+              'min-h-[44px] shrink-0 whitespace-nowrap border-b-2 px-4 text-sm font-medium transition-colors ' +
+              (tab === k
+                ? 'border-oe-blue text-oe-blue-text'
+                : 'border-transparent text-content-secondary hover:text-content-primary')
+            }
+          >
+            {labels[k]}
+            {k === 'approvals' && pending > 0 && (
+              <span className="ml-1.5 rounded-full bg-semantic-warning-bg px-1.5 py-0.5 text-2xs font-semibold text-semantic-warning">
+                {pending}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'timesheets' && (
+        <TimesheetsTab externalOpenId={openId} onExternalOpened={() => setOpenId(null)} />
+      )}
+      {tab === 'clock' && <ClockPanel projectId={projectId} />}
+      {tab === 'approvals' && (
+        <div className="space-y-6">
+          <ClockApprovals projectId={projectId} />
+          <ClockEventsLog
+            projectId={projectId}
+            onOpenTimesheet={(id) => {
+              setOpenId(id);
+              goTab('timesheets');
+            }}
+          />
+        </div>
+      )}
+      {tab === 'geofences' && <GeofenceEditor projectId={projectId} />}
+      {tab === 'settings' && <ClockSettingsCard projectId={projectId} />}
+    </div>
+  );
+}
+
+function TimesheetsTab({
+  externalOpenId,
+  onExternalOpened,
+}: {
+  externalOpenId: string | null;
+  onExternalOpened: () => void;
+}) {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const projectId = useActiveProjectId();
 
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(externalOpenId);
+  useEffect(() => {
+    if (externalOpenId) onExternalOpened();
+  }, [externalOpenId, onExternalOpened]);
   const [statusFilter, setStatusFilter] = useState<TimesheetStatus | ''>('');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');

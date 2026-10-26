@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Rad {line} registrerar arbete från {start} till {end} den {date}, inom middagsförbudet mot utomhusarbete från {ban_from} till {ban_to}",
       "suggestion": "Om arbetet utfördes utomhus i direkt sol, flytta det utanför förbudstiderna; inomhusarbete och undantagna sektorer påverkas inte"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} stämplade in kl. {time} på {distance} m utanför byggstaketet, och ingen arbetsledare har godkänt det",
+      "suggestion": "Be en arbetsledare att godkänna eller avvisa instämplingen med en motivering"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} har överlappande skift som börjar kl. {first} och {second}",
+      "suggestion": "Korrigera in- eller utstämplingstiderna så att skiften inte överlappar varandra"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} stämplade in kl. {time} och stämplade aldrig ut",
+      "suggestion": "Registrera utstämplingstiden eller lägg in skiftet manuellt i tidrapporten"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Post {ordinal}: ritning {drawing} är angiven utan revision",
       "suggestion": "Lägg till revisionen för ritningen som kvantiteten prissattes från"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Fältet '{field}' har ändrats både på enheten och på servern och saknar lösning",
+      "suggestion": "Välj ditt eget värde, serverns värde eller ett manuellt värde för fältet och skicka sammanfogningen igen"
     }
   }
 }

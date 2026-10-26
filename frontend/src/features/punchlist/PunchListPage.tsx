@@ -47,6 +47,11 @@ import {
 } from '@/shared/ui';
 import type { KpiBandItem } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { SyncStatusPill } from '@/features/field/SyncStatusPill';
+import { SavedOnDeviceBadge } from '@/features/field/OfflineRecordBits';
+import { createOrQueue } from '@/features/field/offlineWrite';
+import { overlayRecords } from '@/shared/lib/offline/recordSync';
+import { useOfflineRecords } from '@/shared/lib/offline/useOfflineSync';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildPunchlistInsights } from './punchlistInsights';
@@ -903,6 +908,7 @@ const PunchKanbanCard = React.memo(function PunchKanbanCard({
       )}>
         {item.title}
       </h4>
+      <SavedOnDeviceBadge flag={(item as { _offline?: 'new' | 'edited' })._offline} />
 
       {/* Description: truncated single line */}
       {item.description && (
@@ -1124,7 +1130,11 @@ export function PunchListPage() {
     enabled: !!projectId,
     refetchOnWindowFocus: true,
   });
-  const punchItems = punchPage?.items ?? EMPTY_ITEMS;
+  const punchRecords = useOfflineRecords('punch');
+  const punchItems = useMemo(
+    () => (punchPage ? overlayRecords(punchPage.items, punchRecords, { projectId }) : EMPTY_ITEMS),
+    [punchPage, punchRecords, projectId],
+  );
 
   const { data: summary } = useQuery({
     queryKey: ['punchlist-summary', projectId],
@@ -1244,13 +1254,51 @@ export function PunchListPage() {
 
   // Mutations
   const createMut = useMutation({
-    mutationFn: (data: CreatePunchPayload) => createPunchItem(data),
-    onSuccess: () => {
+    mutationFn: (data: CreatePunchPayload) =>
+      createOrQueue<PunchItem>({
+        kind: 'punch',
+        payload: data as unknown as Record<string, unknown>,
+        projectId: data.project_id,
+        send: (body) => createPunchItem(body as unknown as CreatePunchPayload),
+        optimistic: (localId) => ({
+          id: localId,
+          project_id: data.project_id,
+          contract_id: data.contract_id ?? null,
+          title: data.title,
+          description: data.description ?? '',
+          priority: data.priority ?? 'medium',
+          status: 'open',
+          category: data.category ?? null,
+          assigned_to: data.assigned_to ?? null,
+          assigned_to_name: null,
+          due_date: data.due_date ?? null,
+          document_id: data.document_id ?? null,
+          page: data.page ?? null,
+          location_x: data.location_x ?? null,
+          location_y: data.location_y ?? null,
+          photos: [],
+          trade: data.trade ?? null,
+          resolution_notes: null,
+          verified_by: null,
+          verified_by_name: null,
+          metadata: {},
+          created_by: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          resolved_at: null,
+          verified_at: null,
+          rework_cost: data.rework_cost ?? null,
+          rework_cost_currency: data.rework_cost_currency ?? 'USD',
+        }),
+      }),
+    onSuccess: (created) => {
       invalidateAll();
       setShowAddModal(false);
       addToast({
         type: 'success',
-        title: t('punch.item_created', { defaultValue: 'Punch item created' }),
+        title: created._offline
+          ? t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })
+          : t('punch.item_created', { defaultValue: 'Punch item created' }),
       });
     },
     onError: (e: Error) =>
@@ -1478,6 +1526,7 @@ export function PunchListPage() {
         })}
         actions={
           <>
+            <SyncStatusPill />
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
             <ModuleGuideButton content={punchlistGuide} />
             <IssueHubLink />
@@ -2079,6 +2128,7 @@ const PunchTableRow = React.memo(function PunchTableRow({
           >
             {item.title}
           </button>
+          <SavedOnDeviceBadge flag={(item as { _offline?: 'new' | 'edited' })._offline} />
         </div>
         {/* The pin's normalised sheet coordinates used to print here as raw
             floats. They are how the pin is stored, not something a foreman

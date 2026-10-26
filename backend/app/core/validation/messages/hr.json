@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Redak {line} bilježi rad od {start} do {end} dana {date}, unutar podnevne zabrane rada na otvorenom od {ban_from} do {ban_to}",
       "suggestion": "Ako se rad odvijao na otvorenom na izravnom suncu, premjestite ga izvan sati zabrane; rad u zatvorenom i izuzeti sektori nisu obuhvaćeni"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} prijavio se u {time} {distance} m izvan ograde gradilišta, a nijedan nadzornik to nije odobrio",
+      "suggestion": "Zamolite nadzornika da odobri ili odbije prijavu uz obrazloženje"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} ima preklapajuće smjene koje počinju u {first} i {second}",
+      "suggestion": "Ispravite vrijeme prijave ili odjave tako da se smjene ne preklapaju"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} prijavio se u {time} i nikada se nije odjavio",
+      "suggestion": "Upišite vrijeme odjave ili ručno unesite smjenu u evidenciju radnih sati"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Stavka {ordinal}: nacrt {drawing} unesen je bez revizije",
       "suggestion": "Dodajte reviziju nacrta na temelju kojeg je količina obračunata"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Polje '{field}' promijenjeno je i na uređaju i na poslužitelju i nema odabrano rješenje",
+      "suggestion": "Odaberite svoju, poslužiteljsku ili ručnu vrijednost za to polje i ponovno pošaljite spajanje"
     }
   }
 }

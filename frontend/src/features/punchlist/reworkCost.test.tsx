@@ -150,10 +150,10 @@ describe('the rework cost in the punch item drawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(api.updatePunchItem).toHaveBeenCalledTimes(1));
-    expect(api.updatePunchItem).toHaveBeenCalledWith('p-1', {
+    expect(vi.mocked(api.updatePunchItem).mock.calls[0]?.slice(0, 2)).toEqual(['p-1', {
       rework_cost: '1250.50',
       rework_cost_currency: 'EUR',
-    });
+    }]);
   });
 
   it('clears a price with an empty box, sending null and never a null currency', async () => {
@@ -165,10 +165,10 @@ describe('the rework cost in the punch item drawer', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => expect(api.updatePunchItem).toHaveBeenCalledTimes(1));
-    expect(api.updatePunchItem).toHaveBeenCalledWith('p-1', {
+    expect(vi.mocked(api.updatePunchItem).mock.calls[0]?.slice(0, 2)).toEqual(['p-1', {
       rework_cost: null,
       rework_cost_currency: 'EUR',
-    });
+    }]);
   });
 
   it('does not save an amount it cannot read', () => {

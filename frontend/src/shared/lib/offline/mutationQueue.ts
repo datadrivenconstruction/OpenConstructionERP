@@ -18,6 +18,13 @@
  *    queue with an incremented retry count; a 2xx/409 removes it (409 means the
  *    server already has it); a non-409 4xx marks it rejected and removes it so
  *    the client stops retrying a permanently-bad payload.
+ *  - Backoff (opt-in): with `backoff` set, a transient failure also stamps
+ *    `nextAttemptAt` (exponential, capped, jittered) and the drain skips ops that
+ *    are not yet due. Ops sharing a `meta.recordKey` keep their order: while one
+ *    is waiting or conflicted, later ones for the same record wait too.
+ *  - Version conflict: a 409 for a versioned update arrives as `merge_conflict`.
+ *    The op stays queued, flagged with the server's current object, and is not
+ *    replayed until the caller resolves it (`resolveMergeConflict`) or discards it.
  *
  * Storage is injected (`QueueStorage`) so the pure queue logic is unit-testable
  * in jsdom without a real IndexedDB. `createIndexedDbQueueStorage()` provides the
@@ -33,7 +40,23 @@ export type ReplayOutcome =
   | { kind: 'applied'; httpStatus: number; resultId?: string | null }
   | { kind: 'conflict'; httpStatus: number; detail?: string }
   | { kind: 'rejected'; httpStatus: number; detail?: string }
+  | {
+      kind: 'merge_conflict';
+      httpStatus: number;
+      detail?: string;
+      currentVersion?: number;
+      current?: unknown;
+    }
   | { kind: 'retry'; httpStatus?: number; detail?: string };
+
+/** The server's side of a version conflict, kept on the op until it is merged. */
+export interface MergeConflictInfo {
+  message?: string;
+  currentVersion?: number;
+  /** Full server object from the 409 body. */
+  current?: unknown;
+  detectedAt: number;
+}
 
 /** A mutation captured while offline, awaiting replay. */
 export interface QueuedOp {
@@ -53,13 +76,19 @@ export interface QueuedOp {
   queuedAt: number;
   /** How many replay attempts have failed transiently so far. */
   retries: number;
+  /** Epoch ms before which a backoff-enabled drain will not retry this op. */
+  nextAttemptAt?: number;
+  /** Set when the server answered a versioned write with a version conflict. */
+  conflict?: MergeConflictInfo;
+  /** Free-form routing data for the sender (record key, entity, photo id...). */
+  meta?: Record<string, unknown>;
 }
 
 /** What a drain run reports back to the caller per op. */
 export interface DrainResult {
   clientOpId: string;
   kind: string;
-  status: 'applied' | 'conflict' | 'rejected' | 'retry';
+  status: 'applied' | 'conflict' | 'rejected' | 'retry' | 'merge_conflict';
   httpStatus?: number;
   detail?: string;
   resultId?: string | null;
@@ -71,6 +100,8 @@ export interface DrainSummary {
   conflict: number;
   rejected: number;
   retry: number;
+  /** Versioned writes parked for a merge (still in the queue). */
+  merge_conflict: number;
   results: DrainResult[];
 }
 
@@ -91,6 +122,11 @@ export interface QueueStorage {
 }
 
 /* ── Pure helpers ──────────────────────────────────────────────────────── */
+
+function recordKeyOf(op: QueuedOp): string | null {
+  const k = op.meta?.recordKey;
+  return typeof k === 'string' && k ? k : null;
+}
 
 /** Sort ops into FIFO replay order without mutating the input. */
 export function sortByFifo(ops: readonly QueuedOp[]): QueuedOp[] {
@@ -242,9 +278,42 @@ export interface EnqueueInput {
   path: string;
   body?: unknown;
   kind: string;
+  meta?: Record<string, unknown>;
+}
+
+/** Exponential backoff with jitter for transient retries. */
+export interface BackoffOptions {
+  /** Delay after the first failure. Default 2000 ms. */
+  baseMs?: number;
+  /** Growth factor per further failure. Default 2. */
+  factor?: number;
+  /** Upper bound of the delay. Default 300000 ms (5 min). */
+  capMs?: number;
+}
+
+export const DEFAULT_BACKOFF: Required<BackoffOptions> = { baseMs: 2000, factor: 2, capMs: 300_000 };
+
+/**
+ * Delay before retry number `retries` (1 = after the first failure). The
+ * exponential value is capped, then jittered into [50%, 100%] of itself so a
+ * crowd of devices reconnecting together does not retry in lockstep.
+ */
+export function computeBackoffDelay(
+  retries: number,
+  opts: BackoffOptions = {},
+  random: () => number = Math.random,
+): number {
+  const { baseMs, factor, capMs } = { ...DEFAULT_BACKOFF, ...opts };
+  const raw = Math.min(capMs, baseMs * Math.pow(factor, Math.max(0, retries - 1)));
+  return Math.round(raw * (0.5 + random() * 0.5));
 }
 
 export interface MutationQueueOptions {
+  /** Enable exponential backoff for transient failures. Off by default. */
+  backoff?: boolean | BackoffOptions;
+  /** Clock and randomness seams for tests. */
+  now?: () => number;
+  random?: () => number;
   /** Max ops attempted per drain pass (bounds a huge backlog). Default 50. */
   maxPerDrain?: number;
   /** Max transient retries before an op is given up and removed. Default 8. */
@@ -260,6 +329,9 @@ export class MutationQueue {
   private readonly sender: OpSender;
   private readonly maxPerDrain: number;
   private readonly maxRetries: number;
+  private readonly backoff: Required<BackoffOptions> | null;
+  private readonly now: () => number;
+  private readonly random: () => number;
   private seqCounter = 0;
   private draining = false;
   private readonly changeListeners = new Set<() => void>();
@@ -269,6 +341,11 @@ export class MutationQueue {
     this.sender = sender;
     this.maxPerDrain = options.maxPerDrain ?? 50;
     this.maxRetries = options.maxRetries ?? 8;
+    this.backoff = options.backoff
+      ? { ...DEFAULT_BACKOFF, ...(options.backoff === true ? {} : options.backoff) }
+      : null;
+    this.now = options.now ?? Date.now;
+    this.random = options.random ?? Math.random;
   }
 
   /** Subscribe to queue-size changes (enqueue / drain). Returns unsubscribe. */
@@ -315,6 +392,7 @@ export class MutationQueue {
       kind: input.kind,
       queuedAt: Date.now(),
       retries: 0,
+      ...(input.meta ? { meta: input.meta } : {}),
     };
     await this.storage.put(op);
     this.notify();
@@ -326,30 +404,83 @@ export class MutationQueue {
    * progress short-circuits so two reconnect events cannot interleave (the
    * second returns an empty summary). Returns a per-op summary.
    */
-  async drain(): Promise<DrainSummary> {
+  async drain(opts: { ignoreBackoff?: boolean } = {}): Promise<DrainSummary> {
     const summary: DrainSummary = {
       applied: 0,
       conflict: 0,
       rejected: 0,
       retry: 0,
+      merge_conflict: 0,
       results: [],
     };
     if (this.draining) return summary;
     this.draining = true;
     try {
-      const ordered = sortByFifo(await this.storage.getAll()).slice(0, this.maxPerDrain);
-      for (const op of ordered) {
+      const all = sortByFifo(await this.storage.getAll());
+      const now = this.now();
+      const blocked = new Set<string>();
+      const due: QueuedOp[] = [];
+      for (const op of all) {
+        const key = recordKeyOf(op);
+        if (key && blocked.has(key)) continue;
+        if (op.conflict) {
+          if (key) blocked.add(key);
+          continue;
+        }
+        if (!opts.ignoreBackoff && op.nextAttemptAt !== undefined && op.nextAttemptAt > now) {
+          if (key) blocked.add(key);
+          continue;
+        }
+        due.push(op);
+      }
+      for (const op of due.slice(0, this.maxPerDrain)) {
+        const key = recordKeyOf(op);
+        if (key && blocked.has(key)) continue;
         const result = await this.replayOne(op);
         summary.results.push(result);
         summary[result.status] += 1;
+        // A failed or parked op holds back the later ops on the same record.
+        if (key && (result.status === 'retry' || result.status === 'merge_conflict')) {
+          blocked.add(key);
+        }
       }
     } finally {
       this.draining = false;
     }
-    if (summary.applied + summary.conflict + summary.rejected > 0) {
+    if (summary.applied + summary.conflict + summary.rejected + summary.merge_conflict > 0) {
       this.notify();
     }
     return summary;
+  }
+
+  /** Earliest `nextAttemptAt` among waiting ops, or null when none is waiting. */
+  async nextDueAt(): Promise<number | null> {
+    const times = (await this.storage.getAll())
+      .filter((o) => !o.conflict && o.nextAttemptAt !== undefined)
+      .map((o) => o.nextAttemptAt as number);
+    return times.length > 0 ? Math.min(...times) : null;
+  }
+
+  /** Ops parked on a version conflict, FIFO. */
+  async conflicts(): Promise<QueuedOp[]> {
+    return sortByFifo((await this.storage.getAll()).filter((o) => o.conflict));
+  }
+
+  /** Refresh the server copy on a parked op (the merge itself hit a newer version). */
+  async markConflict(clientOpId: string, info: Omit<MergeConflictInfo, 'detectedAt'>): Promise<void> {
+    const existing = await this.findByClientOpId(clientOpId);
+    if (!existing) return;
+    await this.storage.put({ ...existing, conflict: { ...info, detectedAt: this.now() } });
+    this.notify();
+  }
+
+  /**
+   * The merge was posted (or the user chose to keep the server copy): drop the
+   * parked op so the record's later ops can replay.
+   */
+  async resolveMergeConflict(clientOpId: string): Promise<void> {
+    await this.storage.remove(clientOpId);
+    this.notify();
   }
 
   private async replayOne(op: QueuedOp): Promise<DrainResult> {
@@ -385,6 +516,27 @@ export class MutationQueue {
       };
     }
 
+    if (outcome.kind === 'merge_conflict') {
+      // Versioned update lost the race. Keep the op and the server's copy so
+      // the merge can be done later (possibly across a reload); never drop.
+      await this.storage.put({
+        ...op,
+        conflict: {
+          message: outcome.detail,
+          currentVersion: outcome.currentVersion,
+          current: outcome.current,
+          detectedAt: this.now(),
+        },
+      });
+      return {
+        clientOpId: op.clientOpId,
+        kind: op.kind,
+        status: 'merge_conflict',
+        httpStatus: outcome.httpStatus,
+        detail: outcome.detail,
+      };
+    }
+
     if (outcome.kind === 'rejected') {
       // Permanently bad payload (validation): stop retrying, drop it.
       await this.storage.remove(op.clientOpId);
@@ -409,7 +561,13 @@ export class MutationQueue {
         detail: outcome.detail ?? 'gave up after max retries',
       };
     }
-    await this.storage.put({ ...op, retries });
+    await this.storage.put({
+      ...op,
+      retries,
+      ...(this.backoff
+        ? { nextAttemptAt: this.now() + computeBackoffDelay(retries, this.backoff, this.random) }
+        : {}),
+    });
     return {
       clientOpId: op.clientOpId,
       kind: op.kind,

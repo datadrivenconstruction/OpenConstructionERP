@@ -14,6 +14,7 @@ Endpoints (mounted at /api/v1/cvr):
       GET    /reports/{report_id}/summary/      - roll-up totals + margins
       GET    /reports/{report_id}/lines/        - list lines
       POST   /reports/{report_id}/lines/        - add a line
+      POST   /reports/{report_id}/lines/from-field-time/ - import approved field labour
 
     Lines
       GET    /lines/{line_id}                    - get line
@@ -274,6 +275,26 @@ async def create_line(
     report = await service.get_report(report_id)
     await verify_project_access(report.project_id, user_id, session)
     line = await service.create_line(report_id, data)
+    resp = CvrLineResponse.model_validate(line)
+    await session.commit()
+    return resp
+
+
+@router.post(
+    "/reports/{report_id}/lines/from-field-time/",
+    response_model=CvrLineResponse,
+    dependencies=[Depends(RequirePermission("cvr.write"))],
+)
+async def import_field_labour(
+    report_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    service: CvrService = Depends(_get_service),
+) -> CvrLineResponse:
+    """Add or refresh the labour cost head from approved field timesheets."""
+    report = await service.get_report(report_id)
+    await verify_project_access(report.project_id, user_id, session)
+    line = await service.import_field_labour(report_id)
     resp = CvrLineResponse.model_validate(line)
     await session.commit()
     return resp

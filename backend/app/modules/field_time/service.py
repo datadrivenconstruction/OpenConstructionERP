@@ -1234,6 +1234,12 @@ class FieldTimeService:
             # carries no offline block and those rules simply return nothing.
             "metadata": dict(getattr(timesheet, "metadata_", None) or {}),
         }
+        # A day built from the time clock carries its clock events, so the clock
+        # rules (outside the fence unapproved, overlaps, missing clock-out) gate it.
+        if (getattr(timesheet, "metadata_", None) or {}).get("source") == "clock":
+            from app.modules.field_time.clock_service import ClockService
+
+            payload.update(await ClockService(self.session).clock_payload(timesheet.project_id, timesheet.date))
         metadata: dict[str, Any] = {
             "locale": get_locale(),
             "operation": operation,

@@ -49,6 +49,8 @@ export interface DailyDiary {
   supervisor_signature_ref?: string | null;
   pdf_export_ref?: string | null;
   metadata: Record<string, unknown>;
+  /** Optimistic-lock counter; sent back as `If-Match` on update. */
+  version?: number;
   created_at: string;
   updated_at: string;
 }
@@ -85,6 +87,8 @@ export interface DiaryEntry {
   author_id?: string | null;
   photo_ids: string[];
   metadata: Record<string, unknown>;
+  /** Optimistic-lock counter; sent back as `If-Match` on update. */
+  version?: number;
   created_at: string;
   updated_at: string;
 }
@@ -240,6 +244,8 @@ export function createDiary(data: {
   notes?: string;
   labour_count?: number;
   equipment_count?: number;
+  /** Idempotency key: a replayed create returns the first row. */
+  client_op_id?: string;
 }): Promise<DailyDiary> {
   return apiPost<DailyDiary>('/v1/daily-diary/diaries/', data);
 }
@@ -259,8 +265,14 @@ export function deleteDiary(id: string): Promise<void> {
 export function updateDiary(
   id: string,
   data: { notes?: string; labour_count?: number; equipment_count?: number },
+  version?: number,
 ): Promise<DailyDiary> {
-  return apiPatch<DailyDiary>(`/v1/daily-diary/diaries/${id}`, data);
+  if (version === undefined) return apiPatch<DailyDiary>(`/v1/daily-diary/diaries/${id}`, data);
+  return apiPatch<DailyDiary>(
+    `/v1/daily-diary/diaries/${id}`,
+    { ...data, version },
+    { headers: { 'If-Match': String(version) } },
+  );
 }
 
 export function closeDiary(id: string): Promise<DailyDiary> {
@@ -418,8 +430,23 @@ export function createEntry(data: {
   // DiaryEntryCreate schema already accepts both fields.
   source_module?: string;
   source_ref?: string;
+  /** Idempotency key: a replayed create returns the first row. */
+  client_op_id?: string;
 }): Promise<DiaryEntry> {
   return apiPost<DiaryEntry>('/v1/daily-diary/diary-entries/', data);
+}
+
+export function updateEntry(
+  id: string,
+  data: { title?: string; description?: string },
+  version?: number,
+): Promise<DiaryEntry> {
+  if (version === undefined) return apiPatch<DiaryEntry>(`/v1/daily-diary/diary-entries/${id}`, data);
+  return apiPatch<DiaryEntry>(
+    `/v1/daily-diary/diary-entries/${id}`,
+    { ...data, version },
+    { headers: { 'If-Match': String(version) } },
+  );
 }
 
 export function deleteEntry(id: string): Promise<void> {

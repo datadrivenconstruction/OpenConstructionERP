@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Rivi {line} kirjaa työtä ajalle {start}-{end} päivänä {date}, mikä osuu keskipäivän ulkotyökiellon ({ban_from}-{ban_to}) sisälle",
       "suggestion": "Jos työ tehtiin ulkona suorassa auringonpaisteessa, siirrä se kieltoajan ulkopuolelle; sisätyöt ja vapautetut alat eivät kuulu rajoituksen piiriin"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} leimasi sisään klo {time} {distance} m päässä työmaan aidasta, eikä kukaan esimies ole hyväksynyt sitä",
+      "suggestion": "Pyydä esimiestä hyväksymään tai hylkäämään leimaus perusteluineen"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker}n vuorot menevät päällekkäin ja alkavat kello {first} ja {second}",
+      "suggestion": "Korjaa sisään- ja uloskirjautumisajat, jotta vuorot eivät mene päällekkäin"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} leimasi sisään klo {time} eikä koskaan leimannut ulos",
+      "suggestion": "Kirjaa uloskirjautumisaika tai merkitse vuoro käsin tuntilistaan"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Kohta {ordinal}: piirustus {drawing} on syötetty ilman revisiota",
       "suggestion": "Lisää sen piirustuksen revisio, jonka mukaan määrä on hinnoiteltu"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Kenttää '{field}' on muutettu sekä laitteella että palvelimella eikä ratkaisua ole valittu",
+      "suggestion": "Valitse kentälle oma, palvelimen tai käsin annettu arvo ja lähetä yhdistäminen uudelleen"
     }
   }
 }

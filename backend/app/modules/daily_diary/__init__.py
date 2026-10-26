@@ -21,3 +21,7 @@ async def on_startup() -> None:
 
     register_daily_diary_permissions()
     register_subscribers()
+
+    from app.modules.daily_diary.clock_headcount import register_clock_headcount
+
+    register_clock_headcount()

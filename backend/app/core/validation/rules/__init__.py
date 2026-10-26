@@ -9846,6 +9846,47 @@ class FieldTimeOfflineSyncDelay(ValidationRule):
         ]
 
 
+class OfflineSyncMergeComplete(ValidationRule):
+    """A merge request must settle every conflicted long-text or list field.
+
+    ERROR: applying a merge with a conflicted note or checklist and no choice
+    would silently overwrite one person's text with the other's. The merge
+    service (app.core.offline_merge) puts ``conflicts`` and ``resolutions`` in
+    the payload; a resolution counts when it is mine, theirs or manual.
+    """
+
+    rule_id = "offline_sync.merge_complete"
+    name = "Offline Sync Merge Complete"
+    standard = "offline_sync"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLETENESS
+    description = "Fails when a merge leaves a conflicted long-text or list field without a resolution."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        data = context.data if isinstance(context.data, dict) else {}
+        from app.core.optimistic_lock import unresolved_conflicts
+
+        resolutions = data.get("resolutions")
+        missing = unresolved_conflicts(
+            [str(name) for name in (data.get("conflicts") or [])],
+            resolutions if isinstance(resolutions, dict) else {},
+        )
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate("offline_sync.merge_complete.fail", locale=locale, field=name),
+                element_ref=name,
+                suggestion=translate("offline_sync.merge_complete.suggestion", locale=locale),
+            )
+            for name in missing
+        ]
+
+
 class FieldTimeOutdoorHeatBan(ValidationRule):
     """A line whose clock times touch a seasonal midday outdoor work ban.
 
@@ -11960,6 +12001,7 @@ def register_builtin_rules() -> None:
     # Imported here and not at the top of the file: the module reads its
     # locale, position and currency helpers from this package, so a top-level
     # import would run before those names exist.
+    from app.core.validation.rules.field_clock import FIELD_CLOCK_RULES
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
     from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
     from app.core.validation.rules.project_completeness import PROJECT_COMPLETENESS_RULES
@@ -12130,6 +12172,9 @@ def register_builtin_rules() -> None:
         (FieldTimeOfflineClockPlausible(), None),
         (FieldTimeOfflineSyncDelay(), None),
         (FieldTimeOutdoorHeatBan(), None),
+        # Offline sync (merge of a device edit against a newer server version)
+        (OfflineSyncMergeComplete(), ["offline_sync"]),
+        *((rule, None) for rule in FIELD_CLOCK_RULES),
         # Estimate Audit (curated cross-checks: wrong unit, near-duplicate,
         # missing companion, catalogue-benchmarked rate outlier)
         (WrongUnitOfMeasure(), ["estimate_audit"]),

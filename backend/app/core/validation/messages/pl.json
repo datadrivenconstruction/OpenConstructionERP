@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Wiersz {line} rejestruje pracę od {start} do {end} w dniu {date}, w czasie południowego zakazu pracy na zewnątrz od {ban_from} do {ban_to}",
       "suggestion": "Jeśli praca odbywała się na zewnątrz w pełnym słońcu, przesuń ją poza godziny zakazu; prace wewnątrz budynków i wyłączone sektory nie podlegają ograniczeniu"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} zarejestrował(a) wejście o {time} w odległości {distance} m poza ogrodzeniem placu budowy i żaden przełożony tego nie zatwierdził",
+      "suggestion": "Poproś przełożonego o zatwierdzenie lub odrzucenie wpisu z podaniem przyczyny"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} ma nakładające się zmiany rozpoczynające się o {first} i {second}",
+      "suggestion": "Popraw godziny wejścia lub wyjścia tak, aby zmiany się nie nakładały"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} zarejestrował(a) wejście o {time} i nigdy nie zarejestrował(a) wyjścia",
+      "suggestion": "Wpisz godzinę wyjścia lub ręcznie dodaj zmianę do karty czasu pracy"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Pozycja {ordinal}: rysunek {drawing} wpisano bez rewizji",
       "suggestion": "Dodaj rewizję rysunku, na podstawie którego wyceniono ilość"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Pole '{field}' zmieniono zarówno na urządzeniu, jak i na serwerze i nie wybrano rozwiązania",
+      "suggestion": "Wybierz dla tego pola własną wartość, wartość z serwera lub wartość ręczną i wyślij scalenie ponownie"
     }
   }
 }

@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "A(z) {line}. sor munkát rögzít {start} és {end} között, {date} napon, ami beleesik a déli, szabadtéri munkavégzési tilalomba ({ban_from} - {ban_to})",
       "suggestion": "Ha a munka szabadtéren, közvetlen napsütésben folyt, vigye a tiltási időszakon kívülre; a beltéri munkát és a mentesített ágazatokat ez nem érinti"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} {time}-kor, a munkaterület kerítésén kívül, {distance} méterre jelentkezett be, és ezt egy felügyelő sem hagyta jóvá",
+      "suggestion": "Kérjen meg egy felügyelőt, hogy indoklással hagyja jóvá vagy utasítsa el a bejelentkezést"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} műszakjai átfedésben vannak, {first} és {second} kezdettel",
+      "suggestion": "Javítsa a be- és kijelentkezési időket, hogy a műszakok ne fedjék egymást"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} {time}-kor jelentkezett be, és soha nem jelentkezett ki",
+      "suggestion": "Rögzítse a kijelentkezés idejét, vagy vigye fel kézzel a műszakot a munkaidő-nyilvántartásba"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "{ordinal}. tétel: a(z) {drawing} rajz revízió nélkül lett megadva",
       "suggestion": "Adja meg annak a rajznak a revízióját, amelyből a mennyiséget árazták"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "A(z) '{field}' mezőt az eszközön és a kiszolgálón is módosították, és nincs kiválasztott megoldás",
+      "suggestion": "Válassza a saját, a kiszolgálói vagy egy kézi értéket a mezőhöz, majd küldje el újra az egyesítést"
     }
   }
 }

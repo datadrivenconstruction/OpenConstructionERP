@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Real {line} on töö ajavahemikus {start}-{end} kuupäeval {date}, mis jääb keskpäevase välitööde keelu ({ban_from}-{ban_to}) sisse",
       "suggestion": "Kui töö tehti väljas otsese päikese käes, viige see keeluaegadest välja; sisetööd ja erandiga sektorid ei kuulu keelu alla"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} registreeris sisenemise kell {time} {distance} m väljaspool objekti piirdeaeda ja supervisor ei ole seda kinnitanud",
+      "suggestion": "Palu juhendajal kinnitada või tagasi lükata registreering koos põhjendusega"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} töövahetused kattuvad, algavad kell {first} ja {second}",
+      "suggestion": "Parandage sisse- või väljaregistreerimise ajad nii, et vahetused ei kattuks"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} registreeris sisenemise kell {time} ja ei registreerinud kunagi väljumist",
+      "suggestion": "Märkige väljumise aeg või kandke vahetus tööajalehele käsitsi"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Positsioon {ordinal}: joonis {drawing} on sisestatud ilma revisjonita",
       "suggestion": "Lisage joonise revisjon, mille järgi kogus hinnastati"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Välja '{field}' muudeti nii seadmes kui ka serveris ja lahendust pole valitud",
+      "suggestion": "Valige sellele väljale oma, serveri või käsitsi väärtus ja saatke liitmine uuesti"
     }
   }
 }

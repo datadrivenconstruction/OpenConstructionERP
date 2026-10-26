@@ -38,6 +38,12 @@ import {
 import { Button, Card, Badge, EmptyState, Breadcrumb, ConfirmDialog, RecoveryCard, SkeletonTable, IntroRichText, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { SyncStatusPill } from '@/features/field/SyncStatusPill';
+import { SavedOnDeviceBadge, MergeHistoryList } from '@/features/field/OfflineRecordBits';
+import { createOrQueue, updateOrQueue, type WithOfflineFlag } from '@/features/field/offlineWrite';
+import { overlayRecords } from '@/shared/lib/offline/recordSync';
+import { useOfflineRecords } from '@/shared/lib/offline/useOfflineSync';
+import { checklistWithIds, stripChecklistIds } from './offlineChecklist';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { SectionIntro } from '@/features/validation';
 import { useConfirm } from '@/shared/hooks/useConfirm';
@@ -847,6 +853,7 @@ const InspectionRow = React.memo(function InspectionRow({
         <span className="text-sm text-content-primary truncate flex-1 min-w-0">
           {inspection.title}
         </span>
+        <SavedOnDeviceBadge flag={(inspection as { _offline?: 'new' | 'edited' })._offline} />
 
         {/* Type badge */}
         <Badge variant={typeCfg} size="sm">
@@ -901,6 +908,7 @@ const InspectionRow = React.memo(function InspectionRow({
       {/* Expanded detail */}
       {expanded && (
         <div className="px-4 pb-4 pl-12 space-y-3 animate-fade-in">
+          <MergeHistoryList kind="inspection" id={inspection.id} />
           {/* Checklist */}
           {inspection.checklist && inspection.checklist.length > 0 && (
             <div className="rounded-lg bg-surface-secondary p-3">
@@ -1257,7 +1265,11 @@ export function InspectionsPage() {
   });
   // Memoised on the page rather than defaulted inline, so the identity only
   // changes when the data does and the dependent useMemos below stay stable.
-  const inspections = useMemo(() => page?.items ?? [], [page]);
+  const inspectionRecords = useOfflineRecords('inspection');
+  const inspections = useMemo(
+    () => overlayRecords(page?.items ?? [], inspectionRecords, { projectId }),
+    [page, inspectionRecords, projectId],
+  );
 
   // Client-side search
   const filtered = useMemo(() => {
@@ -1301,13 +1313,44 @@ export function InspectionsPage() {
 
   // Mutations
   const createMut = useMutation({
-    mutationFn: (data: CreateInspectionPayload) => createInspection(data),
-    onSuccess: () => {
+    mutationFn: (data: CreateInspectionPayload) =>
+      createOrQueue<Inspection>({
+        kind: 'inspection',
+        payload: data as unknown as Record<string, unknown>,
+        projectId: data.project_id,
+        send: (body) => createInspection(body as unknown as CreateInspectionPayload),
+        optimistic: (localId) => ({
+          id: localId,
+          project_id: data.project_id,
+          inspection_number: '',
+          title: data.title,
+          inspection_type: data.inspection_type,
+          inspector: data.inspector_id ?? '',
+          date: data.inspection_date ?? '',
+          location: data.location ?? '',
+          result: null,
+          status: 'scheduled',
+          checklist: (data.checklist_data ?? []).map((c, i) => ({
+            id: `item-${i}`,
+            description: c.question,
+            passed: c.passed ?? true,
+            critical: Boolean(c.critical),
+            notes: c.notes ?? '',
+          })),
+          notes: '',
+          created_by: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }),
+      }),
+    onSuccess: (created) => {
       invalidateAll();
       setShowCreateModal(false);
       addToast({
         type: 'success',
-        title: t('inspections.created', { defaultValue: 'Inspection created' }),
+        title: created._offline
+          ? t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })
+          : t('inspections.created', { defaultValue: 'Inspection created' }),
       });
     },
     onError: (e: Error) =>
@@ -1371,14 +1414,34 @@ export function InspectionsPage() {
   );
 
   const editMut = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: UpdateInspectionPayload }) =>
-      updateInspection(id, data),
-    onSuccess: () => {
+    mutationFn: ({ id, data }: { id: string; data: UpdateInspectionPayload }): Promise<WithOfflineFlag<Inspection>> => {
+      const current = inspections.find((i) => i.id === id) ?? editingInspection;
+      if (!current) return updateInspection(id, data);
+      const patch: Record<string, unknown> = { ...data };
+      if (data.checklist_data) {
+        patch.checklist_data = checklistWithIds(data.checklist_data, current.checklist);
+      }
+      return updateOrQueue<Inspection>({
+        kind: 'inspection',
+        base: {
+          id,
+          version: current.version ?? null,
+          snapshot: current as unknown as Record<string, unknown>,
+          projectId: current.project_id,
+        },
+        patch,
+        current,
+        send: (body, version) => updateInspection(id, stripChecklistIds(body), version),
+      });
+    },
+    onSuccess: (saved) => {
       invalidateAll();
       setEditingInspection(null);
       addToast({
         type: 'success',
-        title: t('inspections.updated', { defaultValue: 'Inspection updated' }),
+        title: saved?._offline
+          ? t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })
+          : t('inspections.updated', { defaultValue: 'Inspection updated' }),
       });
     },
     onError: (e: Error) =>
@@ -1546,7 +1609,22 @@ export function InspectionsPage() {
   // Walk a scheduled inspection into in_progress so the in_progress state is
   // actually reachable from the UI (the FSM allows scheduled -> in_progress).
   const startMut = useMutation({
-    mutationFn: (id: string) => updateInspection(id, { status: 'in_progress' }),
+    mutationFn: (id: string) => {
+      const current = inspections.find((i) => i.id === id);
+      if (!current) return updateInspection(id, { status: 'in_progress' });
+      return updateOrQueue<Inspection>({
+        kind: 'inspection',
+        base: {
+          id,
+          version: current.version ?? null,
+          snapshot: current as unknown as Record<string, unknown>,
+          projectId: current.project_id,
+        },
+        patch: { status: 'in_progress' },
+        current,
+        send: (body, version) => updateInspection(id, body, version),
+      });
+    },
     onSuccess: () => {
       invalidateAll();
       addToast({
@@ -1608,6 +1686,7 @@ export function InspectionsPage() {
         })}
         actions={
           <>
+            <SyncStatusPill />
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
             <ModuleGuideButton content={inspectionsGuide} />
             <Button

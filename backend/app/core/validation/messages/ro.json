@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Rândul {line} înregistrează lucru de la {start} până la {end} în data de {date}, în intervalul interdicției de la prânz pentru lucrul în aer liber, de la {ban_from} până la {ban_to}",
       "suggestion": "Dacă lucrarea s-a desfășurat în aer liber, în soare direct, mutați-o în afara orelor de interdicție; lucrările în spații închise și sectoarele exceptate nu sunt afectate"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} a pontat intrarea la {time}, la {distance} m în afara gardului șantierului, iar niciun supervizor nu a aprobat-o",
+      "suggestion": "Cereți unui supervizor să aprobe sau să respingă pontajul, cu un motiv"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} are ture suprapuse care încep la {first} și la {second}",
+      "suggestion": "Corectați orele de intrare sau de ieșire, astfel încât turele să nu se suprapună"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} a pontat intrarea la {time} și nu a pontat niciodată ieșirea",
+      "suggestion": "Înregistrați ora de ieșire sau introduceți tura manual în foaia de pontaj"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Poziția {ordinal}: planșa {drawing} este introdusă fără revizie",
       "suggestion": "Adăugați revizia planșei din care a fost prețuită cantitatea"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Câmpul '{field}' a fost modificat atât pe dispozitiv, cât și pe server și nu are o rezolvare",
+      "suggestion": "Alegeți valoarea proprie, pe cea de pe server sau o valoare manuală pentru acest câmp și trimiteți din nou îmbinarea"
     }
   }
 }

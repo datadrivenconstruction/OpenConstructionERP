@@ -28,6 +28,7 @@ import {
 import { useSwipeGesture, useEdgeSwipe } from '@/shared/hooks/useSwipeGesture';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
 import { useOfflineSync } from '@/shared/hooks/useOnlineStatus';
+import { useOfflineSyncLoop } from '@/shared/lib/offline/useOfflineSync';
 import { usePartnerPackLocale } from '@/shared/hooks/usePartnerPackLocale';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { useReviewPromptStore } from '@/stores/useReviewPromptStore';
@@ -97,6 +98,8 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
   // Auto-replay offline mutations when coming back online
   useOfflineSync();
+  // Drain diary, punch and inspection edits made offline, on any page.
+  useOfflineSyncLoop();
 
   // In RTL: swipe right on sidebar → close it; swipe left from right edge → open it
   const sidebarRef = useSwipeGesture<HTMLDivElement>({

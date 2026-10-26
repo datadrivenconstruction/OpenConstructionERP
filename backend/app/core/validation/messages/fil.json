@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Ang linya {line} ay may naitalang trabaho mula {start} hanggang {end} noong {date}, na pasok sa pagbabawal sa trabaho sa labas tuwing tanghali mula {ban_from} hanggang {ban_to}",
       "suggestion": "Kung ang trabahong ito ay isinagawa sa labas sa ilalim ng direktang araw, ilipat ito sa labas ng oras ng pagbabawal; hindi sakop ang trabaho sa loob ng gusali at ang mga sektor na exempted"
+    },
+    "clock_outside_unapproved": {
+      "fail": "Nag-clock in si {worker} nang {time} {distance} m sa labas ng bakod ng site at walang supervisor ang nag-apruba nito",
+      "suggestion": "Hilingin sa supervisor na aprubahan o tanggihan ang clock na may dahilan"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "May magkakapatong na shift si {worker} na nagsisimula sa {first} at {second}",
+      "suggestion": "Itama ang oras ng clock-in o clock-out upang hindi magkapatong ang mga shift"
+    },
+    "clock_missing_clock_out": {
+      "fail": "Nag-clock in si {worker} nang {time} at hindi kailanman nag-clock out",
+      "suggestion": "Itala ang oras ng clock-out o itala nang manu-mano ang shift sa timesheet"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Item {ordinal}: inilagay ang drowing {drawing} nang walang rebisyon",
       "suggestion": "Idagdag ang rebisyon ng drowing na pinagbatayan ng presyo ng dami"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Ang field na '{field}' ay binago sa device at sa server at walang napiling resolusyon",
+      "suggestion": "Pumili ng sarili mong halaga, ng server, o manu-manong halaga para sa field na ito, at ipadala muli ang merge"
     }
   }
 }

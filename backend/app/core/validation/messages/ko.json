@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "{line}행에 {date} {start}부터 {end}까지의 작업이 기록되어 있으며, 이는 {ban_from}부터 {ban_to}까지의 한낮 옥외 작업 금지 시간에 해당합니다",
       "suggestion": "직사광선 아래 옥외 작업이었다면 금지 시간대를 벗어나도록 조정하세요. 실내 작업과 적용 제외 업종은 해당되지 않습니다"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker}이(가) {time}에 현장 울타리에서 {distance}m 떨어진 곳에서 출근 기록을 남겼으며 승인한 관리자가 없습니다",
+      "suggestion": "관리자에게 사유와 함께 출근 기록의 승인 또는 반려를 요청하세요"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker}의 근무 시간이 겹칩니다. 시작 시각은 {first}과(와) {second}입니다",
+      "suggestion": "근무 시간이 겹치지 않도록 출근 또는 퇴근 시각을 수정하세요"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker}이(가) {time}에 출근했지만 퇴근 기록이 없습니다",
+      "suggestion": "퇴근 시각을 기록하거나 근무표에 해당 근무를 직접 입력하세요"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "항목 {ordinal}: 도면 {drawing}이(가) 리비전 없이 입력되었습니다",
       "suggestion": "수량의 단가 근거가 된 도면의 리비전을 추가하십시오"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "'{field}' 필드가 기기와 서버 양쪽에서 변경되었고 해결 방법이 선택되지 않았습니다",
+      "suggestion": "이 필드에 대해 내 값, 서버 값 또는 직접 입력한 값을 선택한 뒤 병합을 다시 보내세요"
     }
   }
 }

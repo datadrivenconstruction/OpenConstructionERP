@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "{line}-qatorda {date} kuni {start} dan {end} gacha bajarilgan ish qayd etilgan, bu {ban_from} dan {ban_to} gacha tushki paytda ochiq havoda ishlashni taqiqlash vaqtiga to'g'ri keladi",
       "suggestion": "Agar bu ish ochiq havoda to'g'ri quyosh ostida bajarilgan bo'lsa, uni taqiqlangan soatlardan tashqariga ko'chiring; bino ichidagi ishlar va istisno qilingan sohalarga bu taalluqli emas"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} {time} da qurilish maydoni to'sig'idan {distance} m tashqarida clock-in qildi va hech bir supervayzer tasdiqlamagan",
+      "suggestion": "Supervayzerdan sababini ko'rsatgan holda clock-ni tasdiqlash yoki rad etishni so'rang"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker}ning {first} va {second} da boshlanadigan smenalari bir-biriga ustma-ust tushadi",
+      "suggestion": "Smenalar ustma-ust tushmasligi uchun clock-in yoki clock-out vaqtini to'g'rilang"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} {time} da clock-in qildi, lekin hech qachon clock-out qilmadi",
+      "suggestion": "Clock-out vaqtini yozing yoki smenani tabelga qo'lda kiriting"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "{ordinal}-pozitsiya: {drawing} chizmasi revizasiyasiz kiritilgan",
       "suggestion": "Miqdor narxlangan chizmaning revizasiyasini qo'shing"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "'{field}' maydoni qurilmada ham, serverda ham o'zgartirilgan va yechim tanlanmagan",
+      "suggestion": "Bu maydon uchun o'z qiymatingizni, server qiymatini yoki qo'lda kiritilgan qiymatni tanlang va birlashtirishni qayta yuboring"
     }
   }
 }

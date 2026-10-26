@@ -20,5 +20,9 @@ def register_field_time_permissions() -> None:
             "field_time.update": Role.EDITOR,
             "field_time.delete": Role.MANAGER,
             "field_time.approve": Role.MANAGER,
+            # Time clock: a clock-in is a field write; drawing site fences,
+            # retention and approving flagged clocks are a supervisor's job.
+            "field_time.clock": Role.EDITOR,
+            "field_time.clock_admin": Role.MANAGER,
         },
     )

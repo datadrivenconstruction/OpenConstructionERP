@@ -11,6 +11,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from app.core.optimistic_lock import CLIENT_OP_ID_PATTERN
+
 
 def _validate_storage_url(value: str | None) -> str | None:
     """Reject non-http(s) URLs for stored asset references.
@@ -81,6 +83,7 @@ class DailyDiaryCreate(BaseModel):
     """Create a new daily diary."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    client_op_id: str | None = Field(default=None, pattern=CLIENT_OP_ID_PATTERN, exclude=True)
 
     project_id: UUID
     diary_date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
@@ -96,6 +99,7 @@ class DailyDiaryUpdate(BaseModel):
     """Partial update for a daily diary."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    version: int | None = Field(default=None, ge=1, exclude=True)
 
     site_supervisor_id: UUID | None = None
     weather_summary: dict[str, Any] | None = None
@@ -113,6 +117,7 @@ class DailyDiaryResponse(BaseModel):
     """Daily diary returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    version: int = 1
 
     id: UUID
     project_id: UUID
@@ -208,6 +213,7 @@ class DiaryEntryCreate(BaseModel):
     """Create a new diary entry."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    client_op_id: str | None = Field(default=None, pattern=CLIENT_OP_ID_PATTERN, exclude=True)
 
     diary_id: UUID
     entry_type: str = Field(..., pattern=_ENTRY_TYPE_RE)
@@ -241,6 +247,7 @@ class DiaryEntryUpdate(BaseModel):
     """Partial update for a diary entry."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    version: int | None = Field(default=None, ge=1, exclude=True)
 
     entry_type: str | None = Field(default=None, pattern=_ENTRY_TYPE_RE)
     entry_time: datetime | None = None
@@ -257,6 +264,7 @@ class DiaryEntryResponse(BaseModel):
     """Diary entry returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    version: int = 1
 
     id: UUID
     diary_id: UUID

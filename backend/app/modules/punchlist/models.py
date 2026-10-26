@@ -95,6 +95,9 @@ class PunchItem(Base):
     geo_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
     geo_lon: Mapped[float | None] = mapped_column(Float, nullable=True)
 
+    # Optimistic-lock counter for offline sync (see app.core.optimistic_lock).
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+
     def __repr__(self) -> str:
         return f"<PunchItem {self.title[:40]} ({self.status}/{self.priority})>"
 

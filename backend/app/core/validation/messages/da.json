@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Linje {line} registrerer arbejde fra {start} til {end} den {date}, inden for middagsforbuddet mod udendørs arbejde fra {ban_from} til {ban_to}",
       "suggestion": "Hvis arbejdet foregik udendørs i direkte sol, så flyt det uden for forbudstiden; indendørs arbejde og undtagne sektorer berøres ikke"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} stemplede ind kl. {time} {distance} m uden for byggepladsens hegn, og ingen leder har godkendt det",
+      "suggestion": "Bed en leder om at godkende eller afvise stemplingen med en begrundelse"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} har overlappende vagter, der starter kl. {first} og {second}",
+      "suggestion": "Ret stempletiderne for ind- og udstempling, så vagterne ikke overlapper"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} stemplede ind kl. {time} og stemplede aldrig ud",
+      "suggestion": "Registrer udstemplingstidspunktet eller før vagten manuelt i timeregistreringen"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Post {ordinal}: tegning {drawing} er indtastet uden revision",
       "suggestion": "Tilføj revisionen af den tegning, mængden blev prissat ud fra"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Feltet '{field}' er ændret både på enheden og på serveren og har ingen løsning",
+      "suggestion": "Vælg din egen, serverens eller en manuel værdi for feltet, og send sammenfletningen igen"
     }
   }
 }

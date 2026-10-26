@@ -8,7 +8,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, Float, ForeignKey, Index, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -75,6 +75,9 @@ class QualityInspection(Base):
         default=dict,
         server_default="{}",
     )
+
+    # Optimistic-lock counter for offline sync (see app.core.optimistic_lock).
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
 
     def __repr__(self) -> str:
         return f"<QualityInspection {self.inspection_number} ({self.inspection_type}/{self.status})>"

@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Baris {line} mencatat pekerjaan dari {start} sampai {end} pada {date}, yang masuk dalam larangan kerja di luar ruangan saat tengah hari dari {ban_from} sampai {ban_to}",
       "suggestion": "Jika pekerjaan ini dilakukan di luar ruangan di bawah sinar matahari langsung, pindahkan ke luar jam larangan; pekerjaan di dalam ruangan dan sektor yang dikecualikan tidak terpengaruh"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} melakukan clock-in pada {time} sejauh {distance} m di luar pagar lokasi dan belum ada supervisor yang menyetujuinya",
+      "suggestion": "Minta supervisor untuk menyetujui atau menolak clock dengan alasan"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} memiliki shift yang tumpang tindih, dimulai pada {first} dan {second}",
+      "suggestion": "Perbaiki waktu clock-in atau clock-out agar shift tidak tumpang tindih"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} melakukan clock-in pada {time} dan tidak pernah melakukan clock-out",
+      "suggestion": "Catat waktu clock-out atau masukkan shift ke timesheet secara manual"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Pos {ordinal}: gambar {drawing} dimasukkan tanpa revisi",
       "suggestion": "Tambahkan revisi gambar yang menjadi dasar harga kuantitas"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Kolom '{field}' diubah di perangkat dan di server dan belum ada resolusi",
+      "suggestion": "Pilih nilai Anda, nilai server, atau nilai manual untuk kolom ini, lalu kirim ulang penggabungan"
     }
   }
 }

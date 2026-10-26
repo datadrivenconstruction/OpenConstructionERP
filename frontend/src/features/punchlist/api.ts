@@ -85,6 +85,8 @@ export interface PunchItem {
   rework_cost: string | null;
   /** ISO code the cost is in. Rendered as stored, never relabelled. */
   rework_cost_currency: string;
+  /** Optimistic-lock counter; sent back as `If-Match` on update. */
+  version?: number;
 }
 
 export interface ReopenHistoryEntry {
@@ -157,6 +159,8 @@ export interface CreatePunchPayload {
   rework_cost?: string;
   /** Send the project's currency: the backend defaults to USD otherwise. */
   rework_cost_currency?: string;
+  /** Idempotency key: a replayed create returns the first row. */
+  client_op_id?: string;
 }
 
 export interface UpdatePunchPayload {
@@ -227,8 +231,17 @@ export async function createPunchItem(data: CreatePunchPayload): Promise<PunchIt
   return apiPost<PunchItem>('/v1/punchlist/items/', data);
 }
 
-export async function updatePunchItem(id: string, data: UpdatePunchPayload): Promise<PunchItem> {
-  return apiPatch<PunchItem>(`/v1/punchlist/items/${id}`, data);
+export async function updatePunchItem(
+  id: string,
+  data: UpdatePunchPayload,
+  version?: number,
+): Promise<PunchItem> {
+  if (version === undefined) return apiPatch<PunchItem>(`/v1/punchlist/items/${id}`, data);
+  return apiPatch<PunchItem>(
+    `/v1/punchlist/items/${id}`,
+    { ...data, version },
+    { headers: { 'If-Match': String(version) } },
+  );
 }
 
 export async function deletePunchItem(id: string): Promise<void> {

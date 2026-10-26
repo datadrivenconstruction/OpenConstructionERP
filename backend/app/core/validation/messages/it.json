@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "La riga {line} registra lavoro dalle {start} alle {end} del {date}, entro il divieto di lavoro all'aperto di mezzogiorno dalle {ban_from} alle {ban_to}",
       "suggestion": "Se il lavoro era all'aperto sotto il sole diretto, spostarlo fuori dalle ore di divieto; i lavori al chiuso e i settori esentati non sono interessati"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} ha timbrato alle {time} a {distance} m fuori dalla recinzione del cantiere e nessun supervisore lo ha approvato",
+      "suggestion": "Chiedi a un supervisore di approvare o respingere la timbratura, indicandone il motivo"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} ha turni sovrapposti che iniziano alle {first} e alle {second}",
+      "suggestion": "Correggi gli orari di entrata o uscita in modo che i turni non si sovrappongano"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} ha timbrato l'entrata alle {time} e non ha mai timbrato l'uscita",
+      "suggestion": "Registra l'orario di uscita o inserisci il turno a mano nel foglio ore"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Voce {ordinal}: il disegno {drawing} è inserito senza revisione",
       "suggestion": "Aggiungere la revisione del disegno da cui è stata prezzata la quantità"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Il campo '{field}' è stato modificato sia sul dispositivo sia sul server e non ha una risoluzione",
+      "suggestion": "Scegliere il proprio valore, quello del server o un valore manuale per questo campo, poi inviare di nuovo l'unione"
     }
   }
 }

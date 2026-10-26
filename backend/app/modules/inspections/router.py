@@ -17,14 +17,27 @@ import io
 import logging
 import uuid
 from collections.abc import Sequence
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.offline_merge import (
+    MergeAuditOut,
+    MergeSpec,
+    OfflineMergeRequest,
+    OfflineMergeResponse,
+    apply_merge,
+    find_by_client_op_id,
+    list_merge_audit,
+    stamp_client_op_id,
+)
+from app.core.optimistic_lock import bump, check_version, resolve_expected_version
 from app.core.party_names import resolve_party_names
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
+from app.modules.inspections.models import QualityInspection
 from app.modules.inspections.schemas import (
     InspectionCreate,
     InspectionListResponse,
@@ -45,6 +58,15 @@ class CompleteInspectionRequest(BaseModel):
 
 def _get_service(session: SessionDep) -> InspectionService:
     return InspectionService(session)
+
+
+_INSPECTION_MERGE = MergeSpec(
+    entity_type="quality_inspection",
+    module="inspections",
+    fields={"title": "str500", "description": "text", "location": "str500", "checklist_data": "list"},
+    long_text_fields=frozenset({"description"}),
+    list_fields=frozenset({"checklist_data"}),
+)
 
 
 async def _to_response_many(session: AsyncSession, items: Sequence[object]) -> list[InspectionResponse]:
@@ -80,6 +102,7 @@ def _to_response(item: object, names: dict[str, str] | None = None) -> Inspectio
         status=item.status,  # type: ignore[attr-defined]
         result=item.result,  # type: ignore[attr-defined]
         checklist_data=item.checklist_data or [],  # type: ignore[attr-defined]
+        version=getattr(item, "version", None) or 1,
         created_by=item.created_by,  # type: ignore[attr-defined]
         metadata=getattr(item, "metadata_", {}),
         created_at=item.created_at,  # type: ignore[attr-defined]
@@ -125,12 +148,20 @@ async def create_inspection(
     data: InspectionCreate,
     user_id: CurrentUserId,
     session: SessionDep,
+    response: Response,
     _perm: None = Depends(RequirePermission("inspections.create")),
     service: InspectionService = Depends(_get_service),
 ) -> InspectionResponse:
-    """Create a new quality inspection."""
+    """Create a new quality inspection. A repeated ``client_op_id`` returns the first one (200)."""
     await verify_project_access(data.project_id, user_id, session)
+    earlier = await find_by_client_op_id(
+        session, QualityInspection, data.client_op_id, QualityInspection.project_id == data.project_id
+    )
+    if earlier is not None:
+        response.status_code = 200
+        return (await _to_response_many(session, [earlier]))[0]
     inspection = await service.create_inspection(data, user_id=user_id)
+    await stamp_client_op_id(session, inspection, data.client_op_id)
     return (await _to_response_many(session, [inspection]))[0]
 
 
@@ -259,14 +290,66 @@ async def update_inspection(
     data: InspectionUpdate,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    if_match: Annotated[str | None, Header()] = None,
     _perm: None = Depends(RequirePermission("inspections.update")),
     service: InspectionService = Depends(_get_service),
 ) -> InspectionResponse:
-    """Update an inspection."""
+    """Update an inspection. A stale ``If-Match`` (or body ``version``) answers 409 with the current row."""
     existing = await service.get_inspection(inspection_id)
     await verify_project_access(existing.project_id, str(user_id), session)
+    check_version(
+        existing.version,
+        resolve_expected_version(if_match, data.version),
+        (await _to_response_many(session, [existing]))[0].model_dump(mode="json"),
+    )
     inspection = await service.update_inspection(inspection_id, data, user_id=str(user_id) if user_id else None)
+    bump(inspection)
+    await session.flush()
     return (await _to_response_many(session, [inspection]))[0]
+
+
+@router.post("/{inspection_id}/merge/", response_model=OfflineMergeResponse)
+async def merge_inspection(
+    inspection_id: uuid.UUID,
+    data: OfflineMergeRequest,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("inspections.update")),
+    service: InspectionService = Depends(_get_service),
+) -> OfflineMergeResponse:
+    """Apply a conflict resolution made on a device against the current version."""
+    inspection = await service.get_inspection(inspection_id)
+    await verify_project_access(inspection.project_id, str(user_id), session)
+    if inspection.status == "completed":
+        raise HTTPException(status_code=400, detail=f"Cannot edit an inspection with status '{inspection.status}'")
+    version, merged = await apply_merge(
+        session,
+        inspection,
+        _INSPECTION_MERGE,
+        data,
+        actor_id=str(user_id) if user_id else None,
+        project_id=inspection.project_id,
+        current_payload=(await _to_response_many(session, [inspection]))[0].model_dump(mode="json"),
+    )
+    return OfflineMergeResponse(
+        version=version,
+        merged=merged,
+        item=(await _to_response_many(session, [inspection]))[0].model_dump(mode="json"),
+    )
+
+
+@router.get("/{inspection_id}/merge-audit/", response_model=list[MergeAuditOut])
+async def inspection_merge_audit(
+    inspection_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("inspections.read")),
+    service: InspectionService = Depends(_get_service),
+) -> list[MergeAuditOut]:
+    """What offline merges changed on this inspection, field by field."""
+    inspection = await service.get_inspection(inspection_id)
+    await verify_project_access(inspection.project_id, str(user_id), session)
+    return await list_merge_audit(session, _INSPECTION_MERGE.entity_type, inspection_id)
 
 
 @router.delete("/{inspection_id}", status_code=204)
@@ -548,4 +631,6 @@ async def complete_inspection(
 
     result = body.result if body else "pass"
     inspection = await service.complete_inspection(inspection_id, result=result)
+    bump(inspection)
+    await session.flush()
     return (await _to_response_many(session, [inspection]))[0]

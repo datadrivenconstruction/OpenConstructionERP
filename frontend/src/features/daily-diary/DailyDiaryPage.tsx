@@ -61,6 +61,12 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { DIARY_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
 import { useToastStore } from '@/stores/useToastStore';
+import { SyncStatusPill } from '@/features/field/SyncStatusPill';
+import { SavedOnDeviceBadge } from '@/features/field/OfflineRecordBits';
+import { createOrQueue, updateOrQueue } from '@/features/field/offlineWrite';
+import { overlayRecords } from '@/shared/lib/offline/recordSync';
+import { getOfflineStore, isLocalId } from '@/shared/lib/offline/offlineStore';
+import { useOfflineRecords } from '@/shared/lib/offline/useOfflineSync';
 import { useActiveProjectId } from '@/shared/hooks/useActiveProjectId';
 import { apiGet, getErrorMessage, type Page } from '@/shared/lib/api';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
@@ -307,7 +313,13 @@ export function DailyDiaryPage() {
   // the clicked diary - the calendar's primary navigation was dead.
   const selectedDiaryQ = useQuery({
     queryKey: ['daily-diary', 'by-id', activeDiaryId],
-    queryFn: () => getDiary(activeDiaryId),
+    queryFn: async () => {
+      if (isLocalId(activeDiaryId)) {
+        const rec = await getOfflineStore().getRecord('diary', activeDiaryId);
+        if (rec) return rec.data as unknown as DailyDiary;
+      }
+      return getDiary(activeDiaryId);
+    },
     enabled: !!activeDiaryId && tab === 'today',
   });
 
@@ -323,9 +335,18 @@ export function DailyDiaryPage() {
     enabled: !!projectId && tab === 'today' && !activeDiaryId,
   });
 
-  const activeDiary: DailyDiary | undefined = activeDiaryId
+  const diaryRecords = useOfflineRecords('diary');
+  const diaryItems = useMemo(
+    () => overlayRecords(diariesQ.data?.items ?? [], diaryRecords, { projectId }),
+    [diariesQ.data, diaryRecords, projectId],
+  );
+  const activeDiaryRaw: DailyDiary | undefined = activeDiaryId
     ? selectedDiaryQ.data
     : todayDiariesQ.data?.items[0];
+  const activeDiary = useMemo(
+    () => (activeDiaryRaw ? overlayRecords([activeDiaryRaw], diaryRecords)[0] : undefined),
+    [activeDiaryRaw, diaryRecords],
+  );
   const activeLoading = activeDiaryId
     ? selectedDiaryQ.isLoading
     : todayDiariesQ.isLoading;
@@ -383,6 +404,7 @@ export function DailyDiaryPage() {
         })}
         actions={
           <>
+            <SyncStatusPill />
             {/* Insights toggle - shows or hides this module's visualization
                 panel. Leads the cluster so charts are one obvious click away. */}
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
@@ -547,7 +569,7 @@ export function DailyDiaryPage() {
           </Card>
         ) : (
           <DiariesCalendar
-            diaries={diariesQ.data?.items ?? []}
+            diaries={diaryItems}
             loading={diariesQ.isLoading}
             year={year}
             month={month}
@@ -1463,8 +1485,9 @@ function TodayTab({
               <dt className="text-xs uppercase tracking-wide text-content-tertiary">
                 {t('daily_diary.date', { defaultValue: 'Date' })}
               </dt>
-              <dd className="text-sm">
+              <dd className="flex flex-wrap items-center gap-2 text-sm">
                 <DateDisplay value={diary.diary_date} />
+                <SavedOnDeviceBadge flag={(diary as { _offline?: 'new' | 'edited' })._offline} />
               </dd>
             </div>
           </dl>
@@ -1605,16 +1628,26 @@ function EditDiaryModal({
   const submit = async () => {
     setBusy(true);
     try {
-      await updateDiary(diary.id, {
-        labour_count: labour,
-        equipment_count: equipment,
-        notes,
+      const patch = { labour_count: labour, equipment_count: equipment, notes };
+      const result = await updateOrQueue<DailyDiary>({
+        kind: 'diary',
+        base: {
+          id: diary.id,
+          version: (diary as { version?: number }).version ?? null,
+          snapshot: diary as unknown as Record<string, unknown>,
+          projectId: diary.project_id,
+        },
+        patch,
+        current: diary,
+        send: (body, version) => updateDiary(diary.id, body, version),
       });
       // Refresh the diary record, its by-id view and the calendar signals.
       qc.invalidateQueries({ queryKey: ['daily-diary'] });
       addToast({
         type: 'success',
-        title: t('daily_diary.updated', { defaultValue: 'Diary updated' }),
+        title: (result as { _offline?: string })._offline
+          ? t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })
+          : t('daily_diary.updated', { defaultValue: 'Diary updated' }),
       });
       onClose();
     } catch (err) {
@@ -1945,7 +1978,7 @@ function EntriesTimeline({
     if (!title.trim()) return;
     setBusy(true);
     try {
-      await createEntry({
+      const entryPayload = {
         diary_id: diaryId,
         entry_type: entryType,
         // Local ISO with offset (NOT toISOString(), which is UTC). The
@@ -1961,12 +1994,32 @@ function EntriesTimeline({
         // and the user picked one. source_ref is a UUID the backend validates.
         source_module: sourceModule && sourceRef ? sourceModule : undefined,
         source_ref: sourceModule && sourceRef ? sourceRef : undefined,
+      };
+      const created = await createOrQueue<DiaryEntry>({
+        kind: 'diary_entry',
+        payload: entryPayload,
+        projectId,
+        send: (body) => createEntry(body as typeof entryPayload),
+        optimistic: (localId) => ({
+          id: localId,
+          ...entryPayload,
+          title: entryPayload.title ?? '',
+          photo_ids: [],
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }),
       });
       setTitle('');
       setDescription('');
       setSourceRef('');
       void invalidateEntries();
-      addToast({ type: 'success', title: t('daily_diary.entry_created', { defaultValue: 'Entry added' }) });
+      addToast({
+        type: 'success',
+        title: (created as { _offline?: string })._offline
+          ? t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })
+          : t('daily_diary.entry_created', { defaultValue: 'Entry added' }),
+      });
     } catch (err) {
       addToast({ type: 'error', title: getErrorMessage(err) });
     } finally {
@@ -1983,7 +2036,11 @@ function EntriesTimeline({
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
 
-  const entries = entriesQ.data?.items ?? [];
+  const entryRecords = useOfflineRecords('diary_entry');
+  const entries = useMemo(
+    () => overlayRecords(entriesQ.data?.items ?? [], entryRecords).filter((e) => e.diary_id === diaryId),
+    [entriesQ.data, entryRecords, diaryId],
+  );
 
   return (
     <Card padding="md">
@@ -2127,7 +2184,7 @@ function EntriesTimeline({
         </p>
       ) : (
         <ul className="space-y-2">
-          {entries.map((e: DiaryEntry) => (
+          {entries.map((e) => (
             <li
               key={e.id}
               className="rounded-md border border-border-light bg-surface-secondary/40 p-2.5 text-sm"
@@ -2139,6 +2196,7 @@ function EntriesTimeline({
                       {entryTypeLabel(t, e.entry_type)}
                     </Badge>
                     <span className="font-medium truncate">{e.title || '—'}</span>
+                    <SavedOnDeviceBadge flag={e._offline} />
                   </div>
                   {e.description && (
                     <p className="mt-1 text-xs text-content-secondary whitespace-pre-wrap">
@@ -2597,15 +2655,35 @@ function CreateDiaryModal({
     }
     setBusy(true);
     try {
-      const created = await createDiary({
+      const payload = {
         project_id: projectId,
         diary_date: diaryDate,
         labour_count: labour,
         equipment_count: equipment,
         notes,
+      };
+      const created = await createOrQueue<DailyDiary>({
+        kind: 'diary',
+        payload,
+        projectId,
+        send: (body) => createDiary(body as typeof payload),
+        optimistic: (localId) => ({
+          id: localId,
+          ...payload,
+          weather_summary: {},
+          status: 'open',
+          metadata: {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }),
       });
       qc.invalidateQueries({ queryKey: ['daily-diary'] });
-      addToast({ type: 'success', title: t('daily_diary.created', { defaultValue: 'Diary created' }) });
+      addToast({
+        type: 'success',
+        title: (created as { _offline?: string })._offline
+          ? t('offline_sync.saved_on_device', { defaultValue: 'Saved on this device' })
+          : t('daily_diary.created', { defaultValue: 'Diary created' }),
+      });
       onCreated?.(created);
       onClose();
     } catch (err) {

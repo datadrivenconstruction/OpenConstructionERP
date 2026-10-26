@@ -13,7 +13,7 @@
  * had so the panel paints instantly.
  */
 
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Calendar, MapPin, Pencil, RotateCcw, Tag, User } from 'lucide-react';
@@ -31,6 +31,11 @@ import {
 import { PunchClosureStepper } from './PunchClosureStepper';
 import { PunchPhotoGallery } from './PunchPhotoGallery';
 import { PunchContractAssignment } from './PunchContractField';
+import { PunchDescriptionSection } from './PunchDescriptionSection';
+import { updateOrQueue } from '@/features/field/offlineWrite';
+import { isLocalId } from '@/shared/lib/offline/offlineStore';
+import { overlayRecords } from '@/shared/lib/offline/recordSync';
+import { useOfflineRecords } from '@/shared/lib/offline/useOfflineSync';
 import { AssigneeLabel } from './assignee';
 import {
   formatReworkCost,
@@ -131,7 +136,18 @@ function ReworkCostSection({
 
   const saveMut = useMutation({
     mutationFn: (value: string | null) =>
-      updatePunchItem(item.id, { rework_cost: value, rework_cost_currency: projectCurrency }),
+      updateOrQueue<PunchItem>({
+        kind: 'punch',
+        base: {
+          id: item.id,
+          version: item.version ?? null,
+          snapshot: item as unknown as Record<string, unknown>,
+          projectId: item.project_id,
+        },
+        patch: { rework_cost: value, rework_cost_currency: projectCurrency },
+        current: item,
+        send: (body, version) => updatePunchItem(item.id, body, version),
+      }),
     onSuccess: () => {
       setEditing(false);
       onSaved();
@@ -271,12 +287,18 @@ export function PunchDetailDrawer({
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
 
-  const { data: item } = useQuery({
+  const { data: fetched } = useQuery({
     queryKey: ['punchlist', 'item', itemId],
     queryFn: () => fetchPunchItem(itemId),
     initialData: initialItem,
-    enabled: Boolean(itemId),
+    // An item created offline has no server copy to fetch yet.
+    enabled: Boolean(itemId) && !isLocalId(itemId),
   });
+  const punchRecords = useOfflineRecords('punch');
+  const item = useMemo(
+    () => (fetched ? overlayRecords([fetched], punchRecords)[0] : undefined),
+    [fetched, punchRecords],
+  );
 
   const refresh = useCallback(
     () =>
@@ -392,14 +414,7 @@ export function PunchDetailDrawer({
         )}
 
         {/* ── Description ──────────────────────────────────────────────── */}
-        {item.description?.trim() && (
-          <section>
-            <h4 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-content-tertiary">
-              {t('punch.field_description', { defaultValue: 'Description' })}
-            </h4>
-            <p className="whitespace-pre-wrap text-sm text-content-secondary">{item.description}</p>
-          </section>
-        )}
+        <PunchDescriptionSection key={`desc-${item.id}`} item={item} onSaved={refresh} />
 
         {/* ── Resolution notes ────────────────────────────────────────── */}
         {item.resolution_notes?.trim() && (

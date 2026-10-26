@@ -23,6 +23,8 @@ Endpoints (mounted at ``/api/v1/field-time``):
     POST   /timesheets/{id}/reverse/             - Reverse an approved timesheet
     GET    /timesheets/{id}/validation/          - Validation report (read-only)
 
+Time clock routes (geofences, consent, clock events) are in ``clock_router``.
+
 Every endpoint enforces project access (IDOR-safe: 404 on both missing and
 forbidden) and the field_time RBAC permissions.
 """
@@ -638,3 +640,10 @@ async def get_validation(
     await _authorized_timesheet(service, session, timesheet_id, user_id)
     data = await service.validate_timesheet(timesheet_id)
     return ValidationReportOut(**data)
+
+
+# The time clock lives in its own file; its routes join this router so they
+# mount under the same /api/v1/field-time prefix and permissions.
+from app.modules.field_time.clock_router import clock_router  # noqa: E402
+
+router.include_router(clock_router)

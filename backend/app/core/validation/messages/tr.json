@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "{line}. satır, {date} tarihinde {start} - {end} arası çalışma kaydediyor; bu, {ban_from} - {ban_to} arasındaki öğle saatlerinde açık havada çalışma yasağı kapsamına giriyor",
       "suggestion": "Bu iş açık havada doğrudan güneş altında yapıldıysa yasak saatlerin dışına alın; kapalı alandaki işler ve muaf sektörler etkilenmez"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} saat {time} itibarıyla şantiye çitinin {distance} m dışından giriş yaptı ve hiçbir amir bunu onaylamadı",
+      "suggestion": "Bir amirden, gerekçesiyle birlikte giriş kaydını onaylamasını veya reddetmesini isteyin"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} için {first} ve {second} saatlerinde başlayan vardiyalar birbiriyle çakışıyor",
+      "suggestion": "Vardiyalar çakışmayacak şekilde giriş veya çıkış saatlerini düzeltin"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} saat {time} itibarıyla giriş yaptı ve hiç çıkış yapmadı",
+      "suggestion": "Çıkış saatini kaydedin veya vardiyayı puantaj kaydına elle girin"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Kalem {ordinal}: {drawing} çizimi revizyonsuz girilmiş",
       "suggestion": "Miktarın birim fiyatlandığı çizimin revizyonunu ekleyin"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "'{field}' alanı hem cihazda hem sunucuda değiştirildi ve bir çözüm seçilmedi",
+      "suggestion": "Bu alan için kendi değerinizi, sunucudaki değeri veya elle girilen bir değeri seçin ve birleştirmeyi yeniden gönderin"
     }
   }
 }

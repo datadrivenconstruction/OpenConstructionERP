@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "第 {line} 行记录了 {date} 从 {start} 到 {end} 的工作，落在 {ban_from} 至 {ban_to} 的正午户外作业禁止时段内",
       "suggestion": "如果该工作为烈日下的户外作业，请调整到禁止时段之外；室内作业和豁免行业不受影响"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} 于 {time} 打卡，位置距工地围栏 {distance} 米，且未经任何主管批准",
+      "suggestion": "请主管批准或驳回该打卡记录，并注明原因"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} 的班次时间重叠，分别始于 {first} 和 {second}",
+      "suggestion": "更正上班或下班打卡时间，使班次不再重叠"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} 于 {time} 上班打卡，但从未下班打卡",
+      "suggestion": "补录下班打卡时间，或在工时表中手动登记该班次"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "清单项 {ordinal}：图纸 {drawing} 录入时未填写修订版",
       "suggestion": "补充该工程量据以计价的图纸修订版"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "字段“{field}”在设备和服务器上都被修改过，且尚未选择处理方式",
+      "suggestion": "请为该字段选择我的值、服务器的值或手动输入的值，然后重新发送合并"
     }
   }
 }

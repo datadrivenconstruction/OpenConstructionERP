@@ -234,6 +234,65 @@ class CvrService:
         )
         return await self.line_repo.create(line)
 
+    async def import_field_labour(self, report_id: uuid.UUID) -> CvrLine:
+        """Put the period's approved field labour cost on the report as one cost head.
+
+        Reads approved field timesheets (desk-entered and built from the time
+        clock alike) for the report month, priced at each resource's rate. The
+        line is marked ``metadata.source = "field_time"`` and refreshed in place
+        on a second import, so importing twice never counts labour twice.
+        """
+        import calendar
+        from datetime import date
+
+        report = await self.get_report(report_id)
+        self._reject_if_final(report)
+        try:
+            from app.modules.field_time.clock_service import ClockService
+        except Exception as exc:  # pragma: no cover - module disabled
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Field time is not installed, so there is no field labour to import.",
+            ) from exc
+        year, month = (int(p) for p in report.period.split("-"))
+        first = date(year, month, 1)
+        last = date(year, month, calendar.monthrange(year, month)[1])
+        cost = await ClockService(self.session).labour_cost(report.project_id, first, last)
+        currency = str(cost.get("currency") or "")
+        if report.currency and currency and currency != report.currency:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=(
+                    f"Field labour is costed in {currency} but this report is in {report.currency}. "
+                    "Add the labour line by hand in the report currency."
+                ),
+            )
+        meta = {
+            "source": "field_time",
+            "labour_hours": cost["labour_hours"],
+            "from_clock_hours": cost["from_clock_hours"],
+            "timesheets": cost["timesheets"],
+        }
+        for line in await self.list_lines(report_id):
+            if (line.metadata_ or {}).get("source") == "field_time":
+                line.cost_to_date = _money(cost["labour_cost"])
+                line.metadata_ = {**(line.metadata_ or {}), **meta}
+                await self.session.flush()
+                return line
+        line = CvrLine(
+            report_id=report_id,
+            cost_code="LABOUR-FIELD",
+            description="Labour from approved field timesheets",
+            cost_to_date=_money(cost["labour_cost"]),
+            value_to_date=_money(0),
+            accruals=_money(0),
+            forecast_cost=_money(0),
+            forecast_value=_money(0),
+            sort_order=0,
+            metadata_=meta,
+        )
+        return await self.line_repo.create(line)
+
     async def get_line(self, line_id: uuid.UUID) -> CvrLine:
         """Get a line by ID. Raises 404 if not found."""
         line = await self.line_repo.get_by_id(line_id)

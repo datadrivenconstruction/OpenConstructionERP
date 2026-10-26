@@ -219,3 +219,149 @@ class FieldTimesheetLine(Base):
     def __repr__(self) -> str:
         kind = "labour" if self.resource_id else "plant"
         return f"<FieldTimesheetLine {kind} {self.hours}h {self.cost_code}>"
+
+
+# ── Geofenced time clock ─────────────────────────────────────────────────────
+#
+# A clock event stores the position at the moment of the tap and nothing else:
+# no track, no background sampling. The position is personal data under GDPR,
+# so it is captured only for a worker with recorded consent, and erased after
+# the project's retention window while the event itself (who, when, inside or
+# outside) stays as part of the working-time record.
+
+
+class FieldSiteGeofence(Base):
+    """A site boundary on one project: a circle or a polygon in WGS84."""
+
+    __tablename__ = "oe_field_time_geofence"
+    __table_args__ = (Index("ix_oe_field_time_geofence_project_active", "project_id", "active"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    name: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    shape: Mapped[str] = mapped_column(String(20), nullable=False, default="circle")
+    center_lat: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    center_lng: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    radius_m: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    # ``[[lat, lng], ...]`` for a polygon; empty for a circle.
+    polygon: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
+    # Metres outside the boundary still counted as inside (GPS noise at the gate).
+    tolerance_m: Mapped[Decimal] = mapped_column(
+        Numeric(10, 2), nullable=False, default=Decimal("0"), server_default="0"
+    )
+    # Who approves a clock flagged outside this fence (user ids); the project
+    # owner is always asked as well.
+    supervisor_user_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
+    # Cost code given to timesheet lines built from shifts clocked at this site.
+    default_cost_code: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata", JSON, nullable=False, default=dict, server_default="{}"
+    )
+
+    def __repr__(self) -> str:
+        return f"<FieldSiteGeofence {self.name} ({self.shape})>"
+
+
+class FieldClockSettings(Base):
+    """Per-project switches for the time clock: on/off, retention, break."""
+
+    __tablename__ = "oe_field_time_clock_settings"
+    __table_args__ = (UniqueConstraint("project_id", name="uq_oe_field_time_clock_settings_project"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    retention_days: Mapped[int] = mapped_column(Integer, nullable=False, default=90, server_default="90")
+    default_break_minutes: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    consent_text_version: Mapped[str] = mapped_column(String(20), nullable=False, default="1", server_default="1")
+
+
+class FieldClockConsent(Base):
+    """A worker's recorded consent to position capture at clock-in and clock-out."""
+
+    __tablename__ = "oe_field_time_clock_consent"
+    __table_args__ = (
+        UniqueConstraint("project_id", "resource_id", name="uq_oe_field_time_clock_consent_project_resource"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    resource_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_resources_resource.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    granted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="0")
+    granted_at: Mapped[datetime | None] = mapped_column(AwareDateTime(), nullable=True)
+    withdrawn_at: Mapped[datetime | None] = mapped_column(AwareDateTime(), nullable=True)
+    text_version: Mapped[str] = mapped_column(String(20), nullable=False, default="1", server_default="1")
+    recorded_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+
+class FieldClockEvent(Base):
+    """One clock-in or clock-out with the position at that moment only."""
+
+    __tablename__ = "oe_field_time_clock_event"
+    __table_args__ = (
+        Index("ix_oe_field_time_clock_event_project_time", "project_id", "occurred_at"),
+        Index("ix_oe_field_time_clock_event_resource_time", "resource_id", "occurred_at"),
+        Index("ix_oe_field_time_clock_event_approval", "project_id", "approval_status"),
+        UniqueConstraint("project_id", "client_op_id", name="uq_oe_field_time_clock_event_client_op"),
+    )
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    resource_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_resources_resource.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    kind: Mapped[str] = mapped_column(String(5), nullable=False)
+    occurred_at: Mapped[datetime] = mapped_column(AwareDateTime(), nullable=False)
+    # Erased (set NULL) once the retention window passes; ``position_purged_at``
+    # then records that it happened.
+    latitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    longitude: Mapped[Decimal | None] = mapped_column(Numeric(10, 7), nullable=True)
+    accuracy_m: Mapped[Decimal | None] = mapped_column(Numeric(10, 2), nullable=True)
+    position_purged_at: Mapped[datetime | None] = mapped_column(AwareDateTime(), nullable=True)
+    geofence_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_field_time_geofence.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    inside: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    distance_m: Mapped[Decimal | None] = mapped_column(Numeric(12, 1), nullable=True)
+    approval_status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="not_required", server_default="not_required"
+    )
+    approval_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(AwareDateTime(), nullable=True)
+    # The clock-in a clock-out closes (soft link, same table).
+    pair_event_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # The timesheet whose line this shift became (soft link).
+    timesheet_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    client_op_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    recorded_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    note: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<FieldClockEvent {self.kind} {self.occurred_at} ({self.approval_status})>"

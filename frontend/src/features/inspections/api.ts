@@ -55,6 +55,8 @@ export interface Inspection {
   checklist: ChecklistItem[];
   notes: string;
   created_by: string | null;
+  /** Optimistic-lock counter; sent back as `If-Match` on update. */
+  version?: number;
   created_at: string;
   updated_at: string;
 }
@@ -87,6 +89,8 @@ export interface CreateInspectionPayload {
   inspector_id?: string;
   location?: string;
   checklist_data?: ChecklistEntryPayload[];
+  /** Idempotency key: a replayed create returns the first row. */
+  client_op_id?: string;
 }
 
 export interface UpdateInspectionPayload {
@@ -211,8 +215,16 @@ export async function createNcrFromInspection(id: string): Promise<CreateNcrResu
 export async function updateInspection(
   id: string,
   data: UpdateInspectionPayload,
+  version?: number,
 ): Promise<Inspection> {
-  const row = await apiPatch<InspectionWire>(`/v1/inspections/${id}`, data);
+  const row =
+    version === undefined
+      ? await apiPatch<InspectionWire>(`/v1/inspections/${id}`, data)
+      : await apiPatch<InspectionWire>(
+          `/v1/inspections/${id}`,
+          { ...data, version },
+          { headers: { 'If-Match': String(version) } },
+        );
   return normaliseInspection(row);
 }
 

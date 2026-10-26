@@ -8,6 +8,8 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.core.optimistic_lock import CLIENT_OP_ID_PATTERN
+
 
 class ChecklistEntry(BaseModel):
     """A single checklist item within an inspection."""
@@ -25,6 +27,7 @@ class InspectionCreate(BaseModel):
     """Create a new quality inspection."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    client_op_id: str | None = Field(default=None, pattern=CLIENT_OP_ID_PATTERN, exclude=True)
 
     project_id: UUID
     inspection_type: str = Field(
@@ -53,6 +56,7 @@ class InspectionUpdate(BaseModel):
     """Partial update for a quality inspection."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    version: int | None = Field(default=None, ge=1, exclude=True)
 
     inspection_type: str | None = Field(
         default=None,
@@ -80,6 +84,7 @@ class InspectionResponse(BaseModel):
     """Inspection returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    version: int = 1
 
     id: UUID
     project_id: UUID

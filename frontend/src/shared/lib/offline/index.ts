@@ -8,6 +8,10 @@
  *   - mutationQueue       storage-agnostic, idempotent, ordered replay queue
  *   - fieldQueue          the concrete field queue + HTTP sender wiring
  *   - registerFieldSW     scoped service-worker registration helper
+ *   - offlineStore        device-side records + photo Blobs (IndexedDB / memory)
+ *   - threeWayMerge       pure merge of an offline edit against the server copy
+ *   - recordSync          sync engine for diaries, punch items and inspections
+ *   - useOfflineSync      React hook + store behind the sync status pill
  */
 
 export {
@@ -32,6 +36,10 @@ export {
   type EnqueueInput,
   type HttpMethod,
   type MutationQueueOptions,
+  type BackoffOptions,
+  type MergeConflictInfo,
+  computeBackoffDelay,
+  DEFAULT_BACKOFF,
 } from './mutationQueue';
 
 export {
@@ -41,6 +49,47 @@ export {
   resetFieldQueueForTests,
   type FieldHeadersProvider,
 } from './fieldQueue';
+
+export {
+  getOfflineStore,
+  createMemoryOfflineStore,
+  createIndexedDbOfflineStore,
+  newLocalId,
+  isLocalId,
+  type OfflineStore,
+  type OfflineEntityKind,
+  type LocalRecord,
+  type PhotoBlobRecord,
+} from './offlineStore';
+
+export {
+  computeThreeWayMerge,
+  applyDecisions,
+  type ThreeWayMergeResult,
+  type MergeConflict,
+  type ConflictDecisions,
+} from './threeWayMerge';
+
+export {
+  useOfflineSyncStore,
+  deriveSyncStatus,
+  type OfflineSyncStatus,
+  type OfflineSyncState,
+} from './offlineSyncStore';
+
+export {
+  createRecordSender,
+  classifyConflictBody,
+  isNetworkError,
+  queueCreate,
+  queueUpdate,
+  queuePhoto,
+  overlayRecords,
+  runSync,
+  getRecordQueue,
+} from './recordSync';
+
+export { useOfflineSync, useOfflineSyncLoop, useOfflineRecords } from './useOfflineSync';
 
 export {
   registerFieldServiceWorker,

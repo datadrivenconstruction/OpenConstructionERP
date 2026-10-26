@@ -15,6 +15,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.core.calendar_day import CalendarDay
+from app.core.optimistic_lock import CLIENT_OP_ID_PATTERN
 
 # Upper bound for money fields - far above any realistic rework cost yet within
 # Decimal's precision so quantize() below can never raise InvalidOperation on a
@@ -46,6 +47,7 @@ class PunchItemCreate(BaseModel):
     """Create a new punch list item."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    client_op_id: str | None = Field(default=None, pattern=CLIENT_OP_ID_PATTERN, exclude=True)
 
     project_id: UUID
     contract_id: UUID | None = None
@@ -108,6 +110,7 @@ class PunchItemUpdate(BaseModel):
     """Partial update for a punch list item."""
 
     model_config = ConfigDict(str_strip_whitespace=True)
+    version: int | None = Field(default=None, ge=1, exclude=True)
     contract_id: UUID | None = None
 
     title: str | None = Field(default=None, min_length=1, max_length=255)
@@ -161,6 +164,7 @@ class PunchItemResponse(BaseModel):
     """Punch list item returned from the API."""
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+    version: int = 1
 
     id: UUID
     project_id: UUID

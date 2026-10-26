@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Zeile {line} erfasst Arbeit von {start} bis {end} am {date}, innerhalb des mittäglichen Verbots für Arbeiten im Freien von {ban_from} bis {ban_to}",
       "suggestion": "Fand die Arbeit im Freien in direkter Sonne statt, außerhalb der Verbotszeiten verlegen; Arbeiten in Innenräumen und ausgenommene Branchen sind nicht betroffen"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} hat um {time} {distance} m außerhalb des Baustellenzauns eingestempelt, und kein Vorgesetzter hat dies genehmigt",
+      "suggestion": "Einen Vorgesetzten bitten, die Stempelung unter Angabe eines Grundes zu genehmigen oder abzulehnen"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} hat sich überschneidende Schichten, die um {first} und {second} beginnen",
+      "suggestion": "Ein- und Ausstempelzeiten so korrigieren, dass sich die Schichten nicht überschneiden"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} hat um {time} eingestempelt und nie ausgestempelt",
+      "suggestion": "Die Ausstempelzeit erfassen oder die Schicht von Hand im Stundenzettel eintragen"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Position {ordinal}: Plan {drawing} ist ohne Planindex erfasst",
       "suggestion": "Den Planindex des Plans ergänzen, aus dem die Menge kalkuliert wurde"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Das Feld '{field}' wurde auf dem Gerät und auf dem Server geändert und hat keine Auflösung",
+      "suggestion": "Für dieses Feld den eigenen, den Server- oder einen manuellen Wert wählen und den Abgleich erneut senden"
     }
   }
 }

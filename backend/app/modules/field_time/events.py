@@ -141,10 +141,31 @@ def publish_timesheet_reversed(
     )
 
 
+# Time clock facts. Payloads never carry the position: subscribers (daily
+# diary headcount, dashboards, notifications) need who, when and whether it
+# was inside the fence, not where the worker stood.
+CLOCK_IN = "field_time.clock_in"
+CLOCK_OUT = "field_time.clock_out"
+CLOCK_FLAGGED = "field_time.clock_flagged_outside"
+CLOCK_DECIDED = "field_time.clock_decided"
+CLOCK_TIMESHEET_BUILT = "field_time.clock_timesheet_built"
+
+
+def publish_clock_event(name: str, payload: dict[str, Any]) -> None:
+    """Publish one of the ``field_time.clock_*`` facts (detached, never raises)."""
+    _publish(name, payload)
+
+
 __all__ = [
+    "CLOCK_DECIDED",
+    "CLOCK_FLAGGED",
+    "CLOCK_IN",
+    "CLOCK_OUT",
+    "CLOCK_TIMESHEET_BUILT",
     "TIMESHEET_APPROVED",
     "TIMESHEET_REVERSED",
     "TIMESHEET_SUBMITTED",
+    "publish_clock_event",
     "publish_timesheet_approved",
     "publish_timesheet_reversed",
     "publish_timesheet_submitted",

@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Line {line} records work from {start} to {end} on {date}, inside the midday outdoor work ban from {ban_from} to {ban_to}",
       "suggestion": "If this work was outdoors in direct sun, move it out of the ban hours; indoor work and exempt sectors are not affected"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} clocked at {time} {distance} m outside the site fence and no supervisor has approved it",
+      "suggestion": "Ask a supervisor to approve or reject the clock with a reason"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} has overlapping shifts starting at {first} and {second}",
+      "suggestion": "Correct the clock-in or clock-out times so the shifts do not overlap"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} clocked in at {time} and never clocked out",
+      "suggestion": "Record the clock-out time or book the shift on the timesheet by hand"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Position {ordinal}: drawing {drawing} is entered without a revision",
       "suggestion": "Add the revision of the drawing the quantity was priced from"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Field '{field}' was changed on both the device and the server and has no resolution",
+      "suggestion": "Choose mine, theirs or a manual value for this field, then send the merge again"
     }
   }
 }

@@ -27,7 +27,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { Plus, Trash2, Lock, TrendingUp, TrendingDown, AlertTriangle, Pencil, Download } from 'lucide-react';
+import { Plus, Trash2, Lock, TrendingUp, TrendingDown, AlertTriangle, Pencil, Download, HardHat } from 'lucide-react';
 import {
   Button,
   Card,
@@ -54,6 +54,7 @@ import {
   fetchCvrSummary,
   fetchCvrLines,
   createCvrLine,
+  importFieldLabourLine,
   updateCvrLine,
   deleteCvrLine,
   fetchCashflowSeries,
@@ -572,6 +573,18 @@ export function CvrPage() {
       addToast({ type: 'error', title: t('cvr.delete_failed', { defaultValue: 'Could not delete report' }), message: getErrorMessage(err) }),
   });
 
+  // Approved field timesheets (desk-entered or built from the time clock) are
+  // the labour actuals; the server refreshes one marked line in place.
+  const importLabourMut = useMutation({
+    mutationFn: () => importFieldLabourLine(selectedReportId),
+    onSuccess: () => {
+      invalidateReport();
+      addToast({ type: 'success', title: t('cvr.field_labour_imported', { defaultValue: 'Field labour cost updated from approved timesheets' }) });
+    },
+    onError: (err) =>
+      addToast({ type: 'error', title: t('cvr.field_labour_import_failed', { defaultValue: 'Could not import field labour' }), message: getErrorMessage(err) }),
+  });
+
   const deleteLineMut = useMutation({
     mutationFn: (lineId: string) => deleteCvrLine(lineId),
     onSuccess: () => invalidateReport(),
@@ -803,15 +816,27 @@ export function CvrPage() {
               <h2 className="text-sm font-semibold text-content-primary">
                 {t('cvr.cost_heads', { defaultValue: 'Cost heads' })}
               </h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleExportCsv}
-                disabled={lines.length === 0}
-              >
-                <Download size={14} className="mr-1 shrink-0" />
-                {t('cvr.export_csv', { defaultValue: 'Export CSV' })}
-              </Button>
+              <div className="flex flex-wrap items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => importLabourMut.mutate()}
+                  disabled={!canEdit || !selectedReportId || importLabourMut.isPending}
+                  title={t('cvr.field_labour_hint', { defaultValue: 'Labour hours x rate from approved field timesheets of this month' })}
+                >
+                  <HardHat size={14} className="mr-1 shrink-0" />
+                  {t('cvr.import_field_labour', { defaultValue: 'Labour from field time' })}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleExportCsv}
+                  disabled={lines.length === 0}
+                >
+                  <Download size={14} className="mr-1 shrink-0" />
+                  {t('cvr.export_csv', { defaultValue: 'Export CSV' })}
+                </Button>
+              </div>
             </div>
             <LinesTable
               lines={lines}

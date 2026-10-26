@@ -30,6 +30,9 @@ import {
 import { Button } from '@/shared/ui';
 import { API_BASE, getAuthToken } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { isOnline } from '@/shared/lib/offline/connectivity';
+import { isLocalId } from '@/shared/lib/offline/offlineStore';
+import { isNetworkError, queuePhoto } from '@/shared/lib/offline/recordSync';
 import {
   deletePunchPhoto,
   fetchPunchPhotoDocuments,
@@ -285,7 +288,28 @@ export function PunchPhotoGallery({
   );
 
   const uploadMut = useMutation({
-    mutationFn: (file: File) => uploadPunchPhoto(item.id, file),
+    mutationFn: async (file: File) => {
+      // Offline (or an item that only exists on this device): keep the photo in
+      // IndexedDB; it uploads after the item is on the server.
+      const keepOnDevice = async () => {
+        await queuePhoto('punch', item.id, file);
+        addToast({
+          type: 'info',
+          title: t('offline_sync.photo_saved_on_device', { defaultValue: 'Photo saved on this device' }),
+          message: t('offline_sync.photo_uploads_later', {
+            defaultValue: 'It uploads when you are back online.',
+          }),
+        });
+        return item;
+      };
+      if (!isOnline() || isLocalId(item.id)) return keepOnDevice();
+      try {
+        return await uploadPunchPhoto(item.id, file);
+      } catch (err) {
+        if (isNetworkError(err)) return keepOnDevice();
+        throw err;
+      }
+    },
     onSuccess: () => {
       // A new photo cross-links a fresh Document; refresh the resolver map so
       // the thumbnail resolves instead of falling back to "preview unavailable".

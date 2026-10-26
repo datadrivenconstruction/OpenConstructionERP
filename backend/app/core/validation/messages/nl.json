@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Regel {line} registreert werk van {start} tot {end} op {date}, binnen het middagverbod op buitenwerk van {ban_from} tot {ban_to}",
       "suggestion": "Als dit werk buiten in de volle zon was, verplaats het dan buiten de verboden uren; binnenwerk en vrijgestelde sectoren worden niet geraakt"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} heeft om {time} ingeklokt op {distance} m buiten het hek van de bouwplaats, en geen supervisor heeft dit goedgekeurd",
+      "suggestion": "Vraag een supervisor de klok met reden goed te keuren of af te wijzen"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} heeft overlappende diensten die beginnen om {first} en {second}",
+      "suggestion": "Corrigeer de in- of uitkloktijden zodat de diensten niet overlappen"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} heeft om {time} ingeklokt en nooit uitgeklokt",
+      "suggestion": "Registreer de uitkloktijd of boek de dienst handmatig op de urenstaat"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Post {ordinal}: tekening {drawing} is ingevoerd zonder revisie",
       "suggestion": "Voeg de revisie toe van de tekening waarop de hoeveelheid is geprijsd"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Het veld '{field}' is zowel op het apparaat als op de server gewijzigd en heeft geen oplossing",
+      "suggestion": "Kies voor dit veld uw eigen waarde, die van de server of een handmatige waarde en verstuur de samenvoeging opnieuw"
     }
   }
 }

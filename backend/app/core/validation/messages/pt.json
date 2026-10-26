@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "A linha {line} regista trabalho das {start} às {end} em {date}, dentro da proibição de trabalho ao ar livre do meio-dia, das {ban_from} às {ban_to}",
       "suggestion": "Se o trabalho foi feito ao ar livre sob sol direto, mude-o para fora do horário de proibição; o trabalho em ambientes fechados e os setores isentos não são afetados"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} registrou entrada às {time} a {distance} m do cercado da obra e nenhum supervisor aprovou o registro",
+      "suggestion": "Peça a um supervisor que aprove ou rejeite o registro, informando o motivo"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} tem turnos sobrepostos que começam às {first} e às {second}",
+      "suggestion": "Corrija os horários de entrada ou saída para que os turnos não se sobreponham"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} registrou entrada às {time} e nunca registrou saída",
+      "suggestion": "Registre o horário de saída ou lance o turno manualmente na folha de ponto"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Item {ordinal}: o desenho {drawing} foi lançado sem revisão",
       "suggestion": "Incluir a revisão do desenho a partir do qual a quantidade foi orçada"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "O campo '{field}' foi alterado no dispositivo e no servidor e não tem resolução",
+      "suggestion": "Escolha o seu valor, o do servidor ou um valor manual para este campo e envie a fusão novamente"
     }
   }
 }

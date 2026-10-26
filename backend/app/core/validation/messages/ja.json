@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "行 {line} は {date} の {start} から {end} までの作業を記録しており、{ban_from} から {ban_to} までの日中の屋外作業禁止時間帯に含まれています",
       "suggestion": "この作業が直射日光下の屋外作業であった場合は、禁止時間帯の外に移してください。屋内作業および適用除外の業種は対象外です"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} が {time} に、現場の囲いから {distance} m 外で打刻しており、承認した監督者はいません",
+      "suggestion": "監督者に理由を添えて、この打刻の承認または却下を依頼してください"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} のシフトが重複しています（開始時刻: {first} と {second}）",
+      "suggestion": "シフトが重ならないよう、出勤または退勤の時刻を修正してください"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} は {time} に出勤打刻をしましたが、退勤打刻がありません",
+      "suggestion": "退勤時刻を記録するか、タイムシートにシフトを手入力してください"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "項目 {ordinal}: 図面 {drawing} がリビジョンなしで入力されています",
       "suggestion": "数量の単価根拠となった図面のリビジョンを追加してください"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "フィールド '{field}' は端末とサーバーの両方で変更されており、解決方法が選ばれていません",
+      "suggestion": "このフィールドについて、自分の値、サーバーの値、または手入力の値を選んでから、マージを再送信してください"
     }
   }
 }

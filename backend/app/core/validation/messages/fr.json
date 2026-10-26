@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "La ligne {line} enregistre du travail de {start} à {end} le {date}, pendant l'interdiction de travail en extérieur du midi, de {ban_from} à {ban_to}",
       "suggestion": "Si ce travail s'est fait en extérieur en plein soleil, déplacez-le hors des heures d'interdiction ; les travaux en intérieur et les secteurs exemptés ne sont pas concernés"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} a pointé à {time}, à {distance} m hors de la clôture du chantier, sans approbation d'un superviseur",
+      "suggestion": "Demandez à un superviseur d'approuver ou de rejeter le pointage en indiquant un motif"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} a des postes qui se chevauchent, commençant à {first} et à {second}",
+      "suggestion": "Corrigez les heures de pointage d'arrivée ou de départ pour que les postes ne se chevauchent plus"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} a pointé à {time} et n'a jamais pointé son départ",
+      "suggestion": "Saisissez l'heure de départ ou reportez le poste à la main sur la feuille de temps"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Poste {ordinal} : le plan {drawing} est saisi sans indice",
       "suggestion": "Ajouter l'indice du plan à partir duquel la quantité a été chiffrée"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Le champ '{field}' a été modifié à la fois sur l'appareil et sur le serveur et n'a pas de résolution",
+      "suggestion": "Choisissez votre valeur, celle du serveur ou une valeur manuelle pour ce champ, puis renvoyez la fusion"
     }
   }
 }

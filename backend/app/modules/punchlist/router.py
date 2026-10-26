@@ -18,8 +18,9 @@ import logging
 import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 
 from app.core.file_signature import (
@@ -31,8 +32,20 @@ from app.core.file_signature import (
 from app.core.file_signature import (
     require as require_signature,
 )
+from app.core.offline_merge import (
+    MergeAuditOut,
+    MergeSpec,
+    OfflineMergeRequest,
+    OfflineMergeResponse,
+    apply_merge,
+    find_by_client_op_id,
+    list_merge_audit,
+    stamp_client_op_id,
+)
+from app.core.optimistic_lock import bump, check_version, resolve_expected_version
 from app.core.storage import module_uploads_dir
 from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
+from app.modules.punchlist.models import PunchItem
 from app.modules.punchlist.schemas import (
     PinToSheetRequest,
     PunchBulkCloseRequest,
@@ -59,6 +72,22 @@ PHOTOS_DIR = module_uploads_dir("punchlist", "photos")
 
 def _get_service(session: SessionDep) -> PunchListService:
     return PunchListService(session)
+
+
+_PUNCH_MERGE = MergeSpec(
+    entity_type="punchlist_item",
+    module="punchlist",
+    fields={
+        "title": "str255",
+        "description": "text",
+        "resolution_notes": "text",
+        "category": "str100",
+        "trade": "str100",
+        "photos": "list",
+    },
+    long_text_fields=frozenset({"description", "resolution_notes"}),
+    list_fields=frozenset({"photos"}),
+)
 
 
 def _item_to_response(item: object, names: Mapping[str, str] | None = None) -> PunchItemResponse:
@@ -101,6 +130,7 @@ def _item_to_response(item: object, names: Mapping[str, str] | None = None) -> P
         created_by=item.created_by,  # type: ignore[attr-defined]
         metadata=getattr(item, "metadata_", {}),  # type: ignore[attr-defined]
         reopen_history=getattr(item, "reopen_history", None) or [],  # type: ignore[attr-defined]
+        version=getattr(item, "version", None) or 1,
         created_at=item.created_at,  # type: ignore[attr-defined]
         updated_at=item.updated_at,  # type: ignore[attr-defined]
     )
@@ -145,13 +175,21 @@ async def create_item(
     data: PunchItemCreate,
     user_id: CurrentUserId,
     session: SessionDep,
+    response: Response,
     _perm: None = Depends(RequirePermission("punchlist.create")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemResponse:
     """Create a new punch list item."""
     await verify_project_access(data.project_id, user_id, session)
     try:
+        earlier = await find_by_client_op_id(
+            session, PunchItem, data.client_op_id, PunchItem.project_id == data.project_id
+        )
+        if earlier is not None:
+            response.status_code = status.HTTP_200_OK
+            return await _item_response(service, earlier)
         item = await service.create_item(data, user_id=user_id)
+        await stamp_client_op_id(session, item, data.client_op_id)
         return await _item_response(service, item)
     except HTTPException:
         raise
@@ -253,13 +291,21 @@ async def create_item_root_alias(
     data: PunchItemCreate,
     user_id: CurrentUserId,
     session: SessionDep,
+    response: Response,
     _perm: None = Depends(RequirePermission("punchlist.create")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemResponse:
     """Alias for ``POST /items/`` - see that handler for full semantics."""
     await verify_project_access(data.project_id, user_id, session)
     try:
+        earlier = await find_by_client_op_id(
+            session, PunchItem, data.client_op_id, PunchItem.project_id == data.project_id
+        )
+        if earlier is not None:
+            response.status_code = status.HTTP_200_OK
+            return await _item_response(service, earlier)
         item = await service.create_item(data, user_id=user_id)
+        await stamp_client_op_id(session, item, data.client_op_id)
         return await _item_response(service, item)
     except HTTPException:
         raise
@@ -297,14 +343,64 @@ async def update_item(
     data: PunchItemUpdate,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    if_match: Annotated[str | None, Header()] = None,
     _perm: None = Depends(RequirePermission("punchlist.update")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemResponse:
-    """Update a punch item."""
+    """Update a punch item. A stale ``If-Match`` (or body ``version``) answers 409 with the current row."""
     existing = await service.get_item(item_id)
     await verify_project_access(existing.project_id, str(user_id), session)
+    check_version(
+        existing.version,
+        resolve_expected_version(if_match, data.version),
+        (await _item_response(service, existing)).model_dump(mode="json"),
+    )
     item = await service.update_item(item_id, data)
+    bump(item)
+    await session.flush()
     return await _item_response(service, item)
+
+
+@router.post("/items/{item_id}/merge/", response_model=OfflineMergeResponse)
+async def merge_item(
+    item_id: uuid.UUID,
+    data: OfflineMergeRequest,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("punchlist.update")),
+    service: PunchListService = Depends(_get_service),
+) -> OfflineMergeResponse:
+    """Apply a conflict resolution made on a device against the current version."""
+    item = await service.get_item(item_id)
+    await verify_project_access(item.project_id, str(user_id), session)
+    version, merged = await apply_merge(
+        session,
+        item,
+        _PUNCH_MERGE,
+        data,
+        actor_id=str(user_id) if user_id else None,
+        project_id=item.project_id,
+        current_payload=(await _item_response(service, item)).model_dump(mode="json"),
+    )
+    return OfflineMergeResponse(
+        version=version,
+        merged=merged,
+        item=(await _item_response(service, item)).model_dump(mode="json"),
+    )
+
+
+@router.get("/items/{item_id}/merge-audit/", response_model=list[MergeAuditOut])
+async def item_merge_audit(
+    item_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("punchlist.read")),
+    service: PunchListService = Depends(_get_service),
+) -> list[MergeAuditOut]:
+    """What offline merges changed on this punch item, field by field."""
+    item = await service.get_item(item_id)
+    await verify_project_access(item.project_id, str(user_id), session)
+    return await list_merge_audit(session, _PUNCH_MERGE.entity_type, item_id)
 
 
 # ── Delete ───────────────────────────────────────────────────────────────────
@@ -351,6 +447,8 @@ async def transition_status(
         await RequirePermission("punchlist.verify")(payload)
 
     item = await service.transition_status(item_id, data, user_id)
+    bump(item)
+    await session.flush()
     return await _item_response(service, item)
 
 

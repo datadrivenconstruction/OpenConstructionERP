@@ -14,7 +14,7 @@ import uuid
 from datetime import datetime
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Header, Query
+from fastapi import APIRouter, Depends, Header, Query, Response
 from fastapi.responses import StreamingResponse
 
 from app.core.content_disposition import attachment_disposition
@@ -27,6 +27,17 @@ from app.core.file_signature import (
     require as require_signature,
 )
 from app.core.i18n import get_locale
+from app.core.offline_merge import (
+    MergeAuditOut,
+    MergeSpec,
+    OfflineMergeRequest,
+    OfflineMergeResponse,
+    apply_merge,
+    find_by_client_op_id,
+    list_merge_audit,
+    stamp_client_op_id,
+)
+from app.core.optimistic_lock import bump, check_version, resolve_expected_version
 from app.core.validation.messages import translate
 from app.dependencies import (
     CurrentUserId,
@@ -34,6 +45,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.daily_diary.models import DailyDiary, DiaryEntry
 from app.modules.daily_diary.pdf_translations import diary_pdf_filename, resolve_pdf_locale
 from app.modules.daily_diary.schemas import (
     BeforeAfterResponse,
@@ -98,6 +110,21 @@ def _get_service(session: SessionDep) -> DailyDiaryService:
     return DailyDiaryService(session)
 
 
+_DIARY_MERGE = MergeSpec(
+    entity_type="daily_diary",
+    module="daily_diary",
+    fields={"notes": "text", "labour_count": "int", "equipment_count": "int", "weather_summary": "dict"},
+    long_text_fields=frozenset({"notes"}),
+)
+_ENTRY_MERGE = MergeSpec(
+    entity_type="daily_diary_entry",
+    module="daily_diary",
+    fields={"title": "str", "description": "text", "photo_ids": "list"},
+    long_text_fields=frozenset({"description"}),
+    list_fields=frozenset({"photo_ids"}),
+)
+
+
 # ── Diaries ──────────────────────────────────────────────────────────────
 
 
@@ -136,13 +163,24 @@ async def list_diaries(
 async def create_diary(
     data: DailyDiaryCreate,
     session: SessionDep,
+    response: Response,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("daily_diary.create")),
     service: DailyDiaryService = Depends(_get_service),
 ) -> DailyDiaryResponse:
-    """Create a new daily diary (one per project per date)."""
+    """Create a new daily diary (one per project per date).
+
+    A repeated ``client_op_id`` returns the diary created the first time (200).
+    """
     await verify_project_access(data.project_id, user_id, session)
+    earlier = await find_by_client_op_id(
+        session, DailyDiary, data.client_op_id, DailyDiary.project_id == data.project_id
+    )
+    if earlier is not None:
+        response.status_code = 200
+        return DailyDiaryResponse.model_validate(earlier)
     diary = await service.create_diary(data, user_id=user_id)
+    await stamp_client_op_id(session, diary, data.client_op_id)
     return DailyDiaryResponse.model_validate(diary)
 
 
@@ -165,13 +203,66 @@ async def update_diary(
     data: DailyDiaryUpdate,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    if_match: Annotated[str | None, Header()] = None,
     _perm: None = Depends(RequirePermission("daily_diary.update")),
     service: DailyDiaryService = Depends(_get_service),
 ) -> DailyDiaryResponse:
+    """Update a diary. A stale ``If-Match`` (or body ``version``) answers 409 with the current row."""
     existing = await service.get_diary(diary_id)
     await verify_project_access(existing.project_id, user_id, session)
+    check_version(
+        existing.version,
+        resolve_expected_version(if_match, data.version),
+        DailyDiaryResponse.model_validate(existing).model_dump(mode="json"),
+    )
     diary = await service.update_diary(diary_id, data)
+    bump(diary)
+    await session.flush()
     return DailyDiaryResponse.model_validate(diary)
+
+
+@router.post("/diaries/{diary_id}/merge/", response_model=OfflineMergeResponse)
+async def merge_diary(
+    diary_id: uuid.UUID,
+    data: OfflineMergeRequest,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("daily_diary.update")),
+    service: DailyDiaryService = Depends(_get_service),
+) -> OfflineMergeResponse:
+    """Apply a conflict resolution made on a device against the current version."""
+    diary = await service.get_diary(diary_id)
+    await verify_project_access(diary.project_id, user_id, session)
+    if diary.status in ("signed", "archived"):
+        await service.update_diary(diary_id, DailyDiaryUpdate())  # raises the signed-immutable 409
+    version, merged = await apply_merge(
+        session,
+        diary,
+        _DIARY_MERGE,
+        data,
+        actor_id=str(user_id) if user_id else None,
+        project_id=diary.project_id,
+        current_payload=DailyDiaryResponse.model_validate(diary).model_dump(mode="json"),
+    )
+    return OfflineMergeResponse(
+        version=version,
+        merged=merged,
+        item=DailyDiaryResponse.model_validate(diary).model_dump(mode="json"),
+    )
+
+
+@router.get("/diaries/{diary_id}/merge-audit/", response_model=list[MergeAuditOut])
+async def diary_merge_audit(
+    diary_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("daily_diary.read")),
+    service: DailyDiaryService = Depends(_get_service),
+) -> list[MergeAuditOut]:
+    """What offline merges changed on this diary, field by field."""
+    diary = await service.get_diary(diary_id)
+    await verify_project_access(diary.project_id, user_id, session)
+    return await list_merge_audit(session, _DIARY_MERGE.entity_type, diary_id)
 
 
 @router.delete("/diaries/{diary_id}", status_code=204)
@@ -443,13 +534,20 @@ async def delete_weather_record(
 async def create_entry(
     data: DiaryEntryCreate,
     session: SessionDep,
+    response: Response,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("daily_diary.create")),
     service: DailyDiaryService = Depends(_get_service),
 ) -> DiaryEntryResponse:
+    """Create an entry. A repeated ``client_op_id`` returns the first entry (200)."""
     diary = await service.get_diary(data.diary_id)
     await verify_project_access(diary.project_id, user_id, session)
+    earlier = await find_by_client_op_id(session, DiaryEntry, data.client_op_id, DiaryEntry.diary_id == data.diary_id)
+    if earlier is not None:
+        response.status_code = 200
+        return DiaryEntryResponse.model_validate(earlier)
     entry = await service.create_entry(data)
+    await stamp_client_op_id(session, entry, data.client_op_id)
     return DiaryEntryResponse.model_validate(entry)
 
 
@@ -538,14 +636,67 @@ async def update_entry(
     data: DiaryEntryUpdate,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
+    if_match: Annotated[str | None, Header()] = None,
     _perm: None = Depends(RequirePermission("daily_diary.update")),
     service: DailyDiaryService = Depends(_get_service),
 ) -> DiaryEntryResponse:
+    """Update an entry. A stale ``If-Match`` (or body ``version``) answers 409 with the current row."""
     existing = await service.get_entry(entry_id)
     diary = await service.get_diary(existing.diary_id)
     await verify_project_access(diary.project_id, user_id, session)
+    check_version(
+        existing.version,
+        resolve_expected_version(if_match, data.version),
+        DiaryEntryResponse.model_validate(existing).model_dump(mode="json"),
+    )
     entry = await service.update_entry(entry_id, data.model_dump(exclude_unset=True))
+    bump(entry)
+    await session.flush()
     return DiaryEntryResponse.model_validate(entry)
+
+
+@router.post("/diary-entries/{entry_id}/merge/", response_model=OfflineMergeResponse)
+async def merge_entry(
+    entry_id: uuid.UUID,
+    data: OfflineMergeRequest,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("daily_diary.update")),
+    service: DailyDiaryService = Depends(_get_service),
+) -> OfflineMergeResponse:
+    """Apply a conflict resolution made on a device against the current version."""
+    entry = await service.get_entry(entry_id)
+    diary = await service._assert_entry_diary_mutable(entry)  # noqa: SLF001
+    await verify_project_access(diary.project_id, user_id, session)
+    version, merged = await apply_merge(
+        session,
+        entry,
+        _ENTRY_MERGE,
+        data,
+        actor_id=str(user_id) if user_id else None,
+        project_id=diary.project_id,
+        current_payload=DiaryEntryResponse.model_validate(entry).model_dump(mode="json"),
+    )
+    return OfflineMergeResponse(
+        version=version,
+        merged=merged,
+        item=DiaryEntryResponse.model_validate(entry).model_dump(mode="json"),
+    )
+
+
+@router.get("/diary-entries/{entry_id}/merge-audit/", response_model=list[MergeAuditOut])
+async def entry_merge_audit(
+    entry_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("daily_diary.read")),
+    service: DailyDiaryService = Depends(_get_service),
+) -> list[MergeAuditOut]:
+    """What offline merges changed on this entry, field by field."""
+    entry = await service.get_entry(entry_id)
+    diary = await service.get_diary(entry.diary_id)
+    await verify_project_access(diary.project_id, user_id, session)
+    return await list_merge_audit(session, _ENTRY_MERGE.entity_type, entry_id)
 
 
 @router.delete("/diary-entries/{entry_id}", status_code=204)

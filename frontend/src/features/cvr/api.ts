@@ -234,6 +234,11 @@ export async function createCvrLine(
   return apiPost<CvrLine>(`${BASE}/reports/${reportId}/lines/`, data);
 }
 
+/** Add or refresh the labour cost head from the month's approved field timesheets. */
+export async function importFieldLabourLine(reportId: string): Promise<CvrLine> {
+  return apiPost<CvrLine>(`${BASE}/reports/${reportId}/lines/from-field-time/`, {});
+}
+
 export async function updateCvrLine(lineId: string, data: UpdateCvrLinePayload): Promise<CvrLine> {
   return apiPatch<CvrLine>(`${BASE}/lines/${lineId}`, data);
 }

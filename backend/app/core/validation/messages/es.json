@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "La línea {line} registra trabajo de {start} a {end} el {date}, dentro de la prohibición de trabajo al aire libre del mediodía, de {ban_from} a {ban_to}",
       "suggestion": "Si el trabajo se hizo al aire libre bajo el sol directo, muévalo fuera del horario de prohibición; el trabajo en interiores y los sectores exentos no se ven afectados"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} fichó a las {time} a {distance} m fuera del perímetro de la obra y ningún supervisor lo ha aprobado",
+      "suggestion": "Pida a un supervisor que apruebe o rechace el fichaje indicando el motivo"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} tiene turnos solapados que empiezan a las {first} y a las {second}",
+      "suggestion": "Corrija las horas de entrada o salida para que los turnos no se solapen"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} fichó a las {time} y nunca fichó la salida",
+      "suggestion": "Registre la hora de salida o introduzca el turno manualmente en la hoja de horas"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Partida {ordinal}: el plano {drawing} se ha introducido sin revisión",
       "suggestion": "Añadir la revisión del plano a partir del cual se calculó la cantidad"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "El campo '{field}' se cambió tanto en el dispositivo como en el servidor y no tiene resolución",
+      "suggestion": "Elija su valor, el del servidor o uno manual para este campo y vuelva a enviar la fusión"
     }
   }
 }

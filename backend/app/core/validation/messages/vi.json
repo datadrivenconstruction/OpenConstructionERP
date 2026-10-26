@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Dòng {line} ghi nhận công việc từ {start} đến {end} ngày {date}, nằm trong khung giờ cấm làm việc ngoài trời buổi trưa từ {ban_from} đến {ban_to}",
       "suggestion": "Nếu công việc này làm ngoài trời dưới nắng trực tiếp, hãy dời ra ngoài giờ cấm; công việc trong nhà và các ngành được miễn trừ không bị ảnh hưởng"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} chấm công lúc {time} tại vị trí cách hàng rào công trường {distance} m và không có giám sát viên nào phê duyệt",
+      "suggestion": "Yêu cầu giám sát viên phê duyệt hoặc từ chối bản chấm công kèm lý do"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} có các ca làm việc chồng chéo, bắt đầu lúc {first} và {second}",
+      "suggestion": "Điều chỉnh giờ vào hoặc giờ ra để các ca làm việc không chồng chéo"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} chấm công vào lúc {time} và chưa bao giờ chấm công ra",
+      "suggestion": "Ghi giờ ra hoặc nhập ca làm việc thủ công vào bảng chấm công"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Hạng mục {ordinal}: bản vẽ {drawing} được nhập mà không có bản sửa đổi",
       "suggestion": "Bổ sung bản sửa đổi của bản vẽ mà khối lượng đã được định giá theo"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Trường '{field}' đã bị thay đổi cả trên thiết bị lẫn trên máy chủ và chưa có cách giải quyết",
+      "suggestion": "Chọn giá trị của bạn, giá trị của máy chủ hoặc giá trị nhập tay cho trường này, rồi gửi lại bản hợp nhất"
     }
   }
 }

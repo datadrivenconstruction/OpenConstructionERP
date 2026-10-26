@@ -100,6 +100,9 @@ class DailyDiary(Base):
         server_default="{}",
     )
 
+    # Optimistic-lock counter for offline sync (see app.core.optimistic_lock).
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
+
     def __repr__(self) -> str:
         return f"<DailyDiary {self.diary_date} ({self.status})>"
 
@@ -195,6 +198,9 @@ class DiaryEntry(Base):
         default=dict,
         server_default="{}",
     )
+
+    # Optimistic-lock counter for offline sync (see app.core.optimistic_lock).
+    version: Mapped[int] = mapped_column(Integer, nullable=False, default=1, server_default="1")
 
     def __repr__(self) -> str:
         return f"<DiaryEntry {self.entry_type} {self.title[:40]!r}>"

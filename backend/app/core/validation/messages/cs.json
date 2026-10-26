@@ -135,6 +135,18 @@
     "outdoor_heat_ban": {
       "fail": "Řádek {line} eviduje práci od {start} do {end} dne {date}, tedy v rámci polední zákazu práce venku od {ban_from} do {ban_to}",
       "suggestion": "Pokud se práce konala venku na přímém slunci, přesuňte ji mimo hodiny zákazu; práce v interiéru a vyňaté sektory se to netýká"
+    },
+    "clock_outside_unapproved": {
+      "fail": "{worker} se přihlásil v {time} {distance} m mimo oplocení staveniště a žádný vedoucí to neschválil",
+      "suggestion": "Požádejte vedoucího, aby hodinový záznam schválil nebo zamítl s uvedením důvodu"
+    },
+    "clock_overlapping_shifts": {
+      "fail": "{worker} má překrývající se směny začínající v {first} a {second}",
+      "suggestion": "Opravte časy příchodu nebo odchodu tak, aby se směny nepřekrývaly"
+    },
+    "clock_missing_clock_out": {
+      "fail": "{worker} se přihlásil v {time} a nikdy se neodhlásil",
+      "suggestion": "Zaznamenejte čas odchodu nebo zadejte směnu do výkazu práce ručně"
     }
   },
   "ai_takeoff": {
@@ -1340,6 +1352,12 @@
     "manual_ref_without_revision": {
       "fail": "Položka {ordinal}: výkres {drawing} je zadán bez revize",
       "suggestion": "Doplňte revizi výkresu, ze kterého bylo množství oceněno"
+    }
+  },
+  "offline_sync": {
+    "merge_complete": {
+      "fail": "Pole '{field}' bylo změněno na zařízení i na serveru a nemá zvolené řešení",
+      "suggestion": "Vyberte pro toto pole svou, serverovou nebo ruční hodnotu a sloučení odešlete znovu"
     }
   }
 }
