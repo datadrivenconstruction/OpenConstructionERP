@@ -261,6 +261,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.value.seed import seed_value_demo
         from app.modules.variations.models import Notice
         from app.modules.variations.seed import seed_variations_demo, seed_variations_showcase_de
+        from app.modules.wip_report.demo import seed_wip_report_demo
 
         # Keep the flagship reference project first so seeders that cap at a
         # few projects (advanced scheduling, QMS, supplier catalog) always
@@ -446,6 +447,9 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # cost, and inventing one inside a live project is a data incident.
             # Self-guards per project on an existing report.
             ("cvr", None, lambda s: seed_cvr_demo(s, _demo_pids)),
+            # Month-end WIP closes, computed from the contracts, claims and cost reports
+            # above at each month end. Self-guards per project on an existing period.
+            ("wip_report", None, lambda s: seed_wip_report_demo(s, _demo_pids)),
             # The business case, cost frame and financing plan are cut from the bill
             # the estimate seeders wrote, so they run after them. Guards itself per project.
             # It builds the cost spine of a project that has none, and the commitment
