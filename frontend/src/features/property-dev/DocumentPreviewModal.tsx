@@ -18,16 +18,17 @@
 //   warranty_certificate  — structural + finishing warranty
 //   noc                   — No Objection Certificate for resale
 //
-// Six locales are exposed (en / de / ru / fr / ar / es) — these are
-// the locales shipped in
-// ``backend/app/modules/property_dev/data/document_locales``. Unknown
-// locales fall back to English on the server.
+// The languages offered are PROPERTY_DOCUMENT_LOCALES: every platform
+// language the PDF layer can draw. The server prints a language it has no
+// translation file for in English, key by key.
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, Loader2, Mail, Send, X } from 'lucide-react';
 
+import { PROPERTY_DOCUMENT_LOCALES, defaultDocumentLocale } from '@/shared/lib/documentExport';
 import { Button } from '@/shared/ui';
+import { DocumentLanguageSelect } from '@/shared/ui/DocumentLanguageSelect';
 import { WideModal } from '@/shared/ui/WideModal';
 import { useToastStore } from '@/stores/useToastStore';
 
@@ -42,18 +43,6 @@ import {
 // RFC 5322-lite — matches the backend guard; rejects obvious typos before
 // the request so the user gets instant inline feedback.
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-
-const SUPPORTED_LOCALES = ['en', 'de', 'ru', 'fr', 'ar', 'es'] as const;
-type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
-
-const LOCALE_LABELS: Record<SupportedLocale, string> = {
-  en: 'English',
-  de: 'Deutsch',
-  ru: 'Русский',
-  fr: 'Français',
-  ar: 'العربية',
-  es: 'Español',
-};
 
 const DOC_TITLES: Record<PropDevDocType, { key: string; defaultValue: string }> = {
   reservation_receipt: {
@@ -139,12 +128,12 @@ export function DocumentPreviewModal({
   const { t, i18n } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
 
-  const defaultLocale: SupportedLocale = useMemo(() => {
-    const base = (i18n.language || 'en').split('-')[0] as SupportedLocale;
-    return SUPPORTED_LOCALES.includes(base) ? base : 'en';
-  }, [i18n.language]);
+  const defaultLocale = useMemo(
+    () => defaultDocumentLocale(PROPERTY_DOCUMENT_LOCALES, i18n.language || null),
+    [i18n.language],
+  );
 
-  const [locale, setLocale] = useState<SupportedLocale>(defaultLocale);
+  const [locale, setLocale] = useState<string>(defaultLocale);
   const [preview, setPreview] = useState<PropDevDocPreview | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -343,24 +332,17 @@ export function DocumentPreviewModal({
       <div className="space-y-3">
         {/* Locale picker */}
         <div className="flex flex-wrap items-center gap-3">
-          <label className="text-sm font-medium text-content-secondary">
+          <label htmlFor="propdev-document-locale" className="text-sm font-medium text-content-secondary">
             {t('propdev.documents.locale', { defaultValue: 'Locale' })}
           </label>
-          <select
+          <DocumentLanguageSelect
+            id="propdev-document-locale"
             value={locale}
-            onChange={(e) => setLocale(e.target.value as SupportedLocale)}
-            className="h-9 rounded-lg border border-border bg-surface-primary px-3 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue"
+            onChange={setLocale}
+            locales={PROPERTY_DOCUMENT_LOCALES}
             disabled={loading}
-            aria-label={t('propdev.documents.locale', {
-              defaultValue: 'Locale',
-            })}
-          >
-            {SUPPORTED_LOCALES.map((code) => (
-              <option key={code} value={code}>
-                {LOCALE_LABELS[code]}
-              </option>
-            ))}
-          </select>
+            data-testid="propdev-document-locale-trigger"
+          />
           {loading && (
             <span className="flex items-center gap-1 text-sm text-content-tertiary">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />

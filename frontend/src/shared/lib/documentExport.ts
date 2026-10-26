@@ -36,6 +36,21 @@ export const REGISTER_DOCUMENT_LOCALES: readonly string[] = [
 export const DIARY_DOCUMENT_LOCALES: readonly string[] = REGISTER_DOCUMENT_LOCALES;
 
 /**
+ * Languages of the outgoing emails and workbooks (portal login mail, tender
+ * invitations and workbooks, schedule import templates): every language the
+ * backend runs in, Bengali included, because a message needs no PDF face.
+ */
+export const MESSAGE_DOCUMENT_LOCALES: readonly string[] = [...REGISTER_DOCUMENT_LOCALES, 'bn'];
+
+/**
+ * Languages of the property-development documents (reservation receipt, sales
+ * contract, handover certificate and the rest, `property_dev/document_templates.py`):
+ * the registers' languages plus Mongolian. A language without a translation file
+ * of its own prints in English, key by key.
+ */
+export const PROPERTY_DOCUMENT_LOCALES: readonly string[] = [...REGISTER_DOCUMENT_LOCALES, 'mn'];
+
+/**
  * Languages of the purchase order, goods receipt, invoice and payment forms
  * (`procurement` and `finance` in `document_forms_i18n.py`).
  */

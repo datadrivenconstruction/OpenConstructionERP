@@ -15,19 +15,14 @@
  * panel is portaled with fixed coordinates because it is mounted inside page
  * headers, drawers and expandable rows, several of which clip their overflow.
  */
-import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 import { ChevronDown, Download, FileDown, FileSpreadsheet, FileText, Loader2 } from 'lucide-react';
 
-import {
-  REGISTER_DOCUMENT_LOCALES,
-  defaultDocumentLocale,
-  documentLocaleEnglishName,
-  documentLocaleName,
-} from '@/shared/lib/documentExport';
-import { SearchableSelect } from '@/shared/ui/SearchableSelect';
+import { REGISTER_DOCUMENT_LOCALES, defaultDocumentLocale, documentLocaleName } from '@/shared/lib/documentExport';
+import { DocumentLanguageSelect } from '@/shared/ui/DocumentLanguageSelect';
 import { useToastStore } from '@/stores/useToastStore';
 
 export interface DocumentExportItem {
@@ -118,18 +113,6 @@ export function DocumentExportMenu({
     pickedLocale && locales.includes(pickedLocale)
       ? pickedLocale
       : defaultDocumentLocale(locales, i18n.language || null);
-
-  // Each language under its own name; the English name and the code are searchable too.
-  const localeOptions = useMemo(
-    () =>
-      locales.map((code) => ({
-        value: code,
-        label: documentLocaleName(code),
-        hint: code,
-        keywords: documentLocaleEnglishName(code),
-      })),
-    [locales],
-  );
 
   const moreRef = useRef<HTMLButtonElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -277,11 +260,10 @@ export function DocumentExportMenu({
                   {t('doc_export.language', { defaultValue: 'Document language' })}
                 </label>
                 {locales.length > RADIO_LOCALES_MAX ? (
-                  <SearchableSelect
+                  <DocumentLanguageSelect
                     value={locale}
                     onChange={setPickedLocale}
-                    options={localeOptions}
-                    searchThreshold={0}
+                    locales={locales}
                     id={languageSelectId}
                     data-testid={`${testId}-lang`}
                   />

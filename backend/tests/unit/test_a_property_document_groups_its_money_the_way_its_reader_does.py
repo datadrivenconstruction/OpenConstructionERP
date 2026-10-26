@@ -69,15 +69,23 @@ EXPECTED: dict[str, str] = {
     "da": CONTINENTAL,
     "de": CONTINENTAL,
     "en": WESTERN,
+    "el": CONTINENTAL,
     "es": CONTINENTAL,
+    "et": SPACED,
+    "fa": WESTERN,
     "fi": SPACED,
+    "fil": WESTERN,
     "fr": SPACED,
+    "he": WESTERN,
     "hi": INDIAN,
     "hr": CONTINENTAL,
+    "hu": SPACED,
     "id": CONTINENTAL,
     "it": CONTINENTAL,
     "ja": WESTERN,
+    "kk": SPACED,
     "ko": WESTERN,
+    "ky": SPACED,
     "mn": WESTERN,
     "nl": CONTINENTAL,
     "no": SPACED,
@@ -88,6 +96,9 @@ EXPECTED: dict[str, str] = {
     "sv": SPACED,
     "th": WESTERN,
     "tr": CONTINENTAL,
+    "uk": SPACED,
+    "ur": WESTERN,
+    "uz": SPACED,
     "vi": CONTINENTAL,
     "zh": WESTERN,
 }
@@ -157,7 +168,7 @@ def test_an_english_contract_is_still_grouped_by_threes() -> None:
     """The control, and the other direction of the same assertion.
 
     A fix that grouped every locale in lakh would satisfy the test above and
-    fail here. Twenty-six of the twenty-seven offered locales group by threes,
+    fail here. All but one of the offered locales group by threes,
     so this is the majority behaviour and not a special case.
     """
     written = _format_money(AMOUNT, "en", "EUR")

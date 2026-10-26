@@ -184,6 +184,8 @@ import { DevelopmentsGrid } from './tabs/DevelopmentsTab';
 import { PlotsTab } from './tabs/PlotsTab';
 import { HouseTypesTab } from './tabs/HouseTypesTab';
 import { fmtList, fmtFixed } from '@/shared/lib/formatters';
+import { PROPERTY_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
+import { DocumentLanguageSelect } from '@/shared/ui/DocumentLanguageSelect';
 
 // English fallbacks for the computed `propdev.development.sales_phase.*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -2989,15 +2991,11 @@ function ConvertReservationModal({
           />
         </WideModalField>
         <WideModalField label={t('propdev.language', { defaultValue: 'Contract language' })}>
-          <select
+          <DocumentLanguageSelect
             value={form.language}
-            onChange={(e) => setForm({ ...form, language: e.target.value })}
-            className={inputCls}
-          >
-            {['en', 'de', 'ru', 'fr', 'es', 'ar'].map((l) => (
-              <option key={l} value={l}>{l}</option>
-            ))}
-          </select>
+            onChange={(language) => setForm({ ...form, language })}
+            locales={PROPERTY_DOCUMENT_LOCALES}
+          />
         </WideModalField>
       </WideModalSection>
     </WideModal>

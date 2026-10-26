@@ -52,6 +52,8 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { getErrorMessage, triggerDownload, apiPost } from '@/shared/lib/api';
+import { PROPERTY_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
+import { DocumentLanguageSelect } from '@/shared/ui/DocumentLanguageSelect';
 
 const API_BASE = '/v1/property-dev';
 const MANAGER_PLUS = new Set(['admin', 'superuser', 'owner', 'manager']);
@@ -530,18 +532,7 @@ function DocumentsRegenerateSection() {
         </div>
         <div>
           <label className={labelCls}>{t('property_dev.bulk.locale_label', { defaultValue: 'Locale' })}</label>
-          <select
-            value={locale}
-            onChange={(e) => setLocale(e.target.value)}
-            className={inputCls}
-          >
-            <option value="en">en - English</option>
-            <option value="de">de - Deutsch</option>
-            <option value="ru">ru - Русский</option>
-            <option value="fr">fr - Français</option>
-            <option value="es">es - Español</option>
-            <option value="ar">ar - العربية</option>
-          </select>
+          <DocumentLanguageSelect value={locale} onChange={setLocale} locales={PROPERTY_DOCUMENT_LOCALES} />
         </div>
       </div>
       <PlotIdsInput

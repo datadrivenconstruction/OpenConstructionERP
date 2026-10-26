@@ -79,6 +79,8 @@ from reportlab.platypus import (
     TableStyle,
 )
 
+from app.core.document_forms_i18n import REGISTER_UNRENDERABLE
+from app.core.i18n import SUPPORTED_LOCALES as PLATFORM_LOCALES
 from app.core.money import minor_units, money_quantum
 from app.core.pdf_branding import branded_cover_brand, branded_doc_metadata
 from app.core.pdf_fonts import (
@@ -98,41 +100,15 @@ register_pdf_fonts()
 
 # ── Constants ───────────────────────────────────────────────────────────
 
-#: All locales offered in the document-templates UI picker. Locales
-#: without a dedicated translation JSON in ``data/document_locales/``
-#: fall back to ``en.json`` automatically (see ``_load_locale``); the
-#: list below stays in sync with the frontend's ``app/locales/*.ts``
-#: catalogue so every UI language has at least an English-content
-#: template option available rather than being silently dropped from
-#: the picker. Adding a new translation = drop a ``<code>.json`` file
-#: into ``data/document_locales/`` - no code change required.
+#: All locales offered in the document-templates UI picker: every platform
+#: language the PDF layer can draw (``REGISTER_UNRENDERABLE`` leaves out Bengali),
+#: plus Mongolian, which was offered before the platform carried it. Locales
+#: without a dedicated translation JSON in ``data/document_locales/`` fall back
+#: to ``en.json`` key by key (see ``_load_locale`` and ``_t``), so a language is
+#: never silently dropped from the picker. Adding a translation = drop a
+#: ``<code>.json`` file into ``data/document_locales/`` - no code change required.
 SUPPORTED_LOCALES: tuple[str, ...] = (
-    "en",
-    "de",
-    "ru",
-    "fr",
-    "ar",
-    "es",
-    "it",
-    "pt",
-    "pl",
-    "nl",
-    "tr",
-    "zh",
-    "ja",
-    "ko",
-    "cs",
-    "da",
-    "fi",
-    "no",
-    "sv",
-    "hi",
-    "vi",
-    "th",
-    "id",
-    "ro",
-    "bg",
-    "hr",
+    *(code for code in PLATFORM_LOCALES if code not in REGISTER_UNRENDERABLE),
     "mn",
 )
 
@@ -171,6 +147,17 @@ LOCALE_DISPLAY_NAMES: dict[str, tuple[str, str]] = {
     "bg": ("Български", "Bulgarian"),
     "hr": ("Hrvatski", "Croatian"),
     "mn": ("Монгол", "Mongolian"),
+    "hu": ("Magyar", "Hungarian"),
+    "uk": ("Українська", "Ukrainian"),
+    "uz": ("Oʻzbekcha", "Uzbek"),
+    "et": ("Eesti", "Estonian"),
+    "ky": ("Кыргызча", "Kyrgyz"),
+    "kk": ("Қазақша", "Kazakh"),
+    "fil": ("Filipino", "Filipino"),
+    "ur": ("اردو", "Urdu"),
+    "fa": ("فارسی", "Persian"),
+    "he": ("עברית", "Hebrew"),
+    "el": ("Ελληνικά", "Greek"),
 }
 
 
@@ -371,6 +358,11 @@ def _existing_override_locale_path(locale: str) -> Path | None:
     return find_existing_upload(Path(*_LOCALE_OVERRIDE_SUBPATH) / f"{locale}.json")
 
 
+def _has_translation(locale: str) -> bool:
+    """True iff a bundled file or a tenant override translates ``locale``."""
+    return (_LOCALE_DIR / f"{locale}.json").exists() or locale_override_exists(locale)
+
+
 def locale_override_exists(locale: str) -> bool:
     """True iff a writable override file shadows the bundled locale."""
     return _existing_override_locale_path(locale) is not None
@@ -526,9 +518,9 @@ def _base_language(locale: str) -> str:
 #: bundled Devanagari face and HarfBuzz shaping behind it - issued contracts
 #: written the way nobody in that market writes one.
 #:
-#: Only ``hi`` of the 27 offered locales reads this way. Bengali and Urdu do
-#: too and are not offered as document locales; each joins this set with its
-#: translation rather than ahead of it.
+#: Only ``hi`` of the offered locales reads this way. Bengali does too and is
+#: not offered as a document locale; it joins this set with its translation
+#: rather than ahead of it. CLDR groups Urdu in threes, so it does not join.
 _INDIAN_GROUPING: frozenset[str] = frozenset({"hi"})
 
 
@@ -574,16 +566,24 @@ _SEPARATORS: dict[str, tuple[str, str]] = {
     "cs": (" ", ","),
     "da": (".", ","),
     "de": (".", ","),
+    "el": (".", ","),
     "en": (",", "."),
     "es": (".", ","),
+    "et": (" ", ","),
+    "fa": (",", "."),
     "fi": (" ", ","),
+    "fil": (",", "."),
     "fr": (" ", ","),
+    "he": (",", "."),
     "hi": (",", "."),
     "hr": (".", ","),
+    "hu": (" ", ","),
     "id": (".", ","),
     "it": (".", ","),
     "ja": (",", "."),
+    "kk": (" ", ","),
     "ko": (",", "."),
+    "ky": (" ", ","),
     "mn": (",", "."),
     "nl": (".", ","),
     "no": (" ", ","),
@@ -594,6 +594,9 @@ _SEPARATORS: dict[str, tuple[str, str]] = {
     "sv": (" ", ","),
     "th": (",", "."),
     "tr": (".", ","),
+    "uk": (" ", ","),
+    "ur": (",", "."),
+    "uz": (" ", ","),
     "vi": (".", ","),
     "zh": (",", "."),
 }
@@ -637,7 +640,9 @@ def _styles(locale: str) -> dict[str, ParagraphStyle]:
     stands out from the paragraph under it.
     """
     _scale = _base_font_size() / 10.0
-    rtl = locale in RTL_LOCALES
+    # English prose in a right-to-left paragraph reads wrong, so a language
+    # without its own translation keeps the left-to-right layout.
+    rtl = locale in RTL_LOCALES and _has_translation(locale)
     base = getSampleStyleSheet()
     word_wrap = "RTL" if rtl else None
     align_body = TA_RIGHT if rtl else TA_LEFT
