@@ -132,7 +132,15 @@
     "missing_description": "La voce {position} non ha descrizione",
     "missing_classification": "La voce {position} necessita di un codice di classificazione",
     "duplicate_ordinal": "Numero d’ordine duplicato: {ordinal}",
-    "rate_anomaly": "Il prezzo unitario {rate} supera la soglia ({threshold})"
+    "rate_anomaly": "Il prezzo unitario {rate} supera la soglia ({threshold})",
+    "nl": {
+      "not_a_string": "L'input deve essere un testo.",
+      "empty": "L'input è vuoto.",
+      "too_long": "L'input supera i {max} caratteri.",
+      "ai_unparsable": "La risposta dell'IA non è stata interpretabile come documento DSL.",
+      "no_pattern": "Nessun modello corrisponde alla frase inserita.",
+      "try": "Provate con: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "Programma lavori 4D",
@@ -327,7 +335,16 @@
     "pass": "Conforme",
     "fail": "Non conforme",
     "partial": "Parziale",
-    "critical": "Critico"
+    "critical": "Critico",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Programmata",
+        "in_progress": "In corso",
+        "completed": "Completata",
+        "failed": "Non superata",
+        "cancelled": "Annullata"
+      }
+    }
   },
   "ncr": {
     "title": "Rapporti di non conformità",
@@ -347,7 +364,19 @@
     "submit": "Invia",
     "review": "Esamina",
     "approved_as_noted": "Approvato con osservazioni",
-    "revise_resubmit": "Rivedi e reinvia"
+    "revise_resubmit": "Rivedi e reinvia",
+    "intl": {
+      "status_labels": {
+        "draft": "Bozza",
+        "submitted": "Inviato",
+        "under_review": "In revisione",
+        "approved": "Approvato",
+        "approved_as_noted": "Approvato con osservazioni",
+        "revise_and_resubmit": "Da rivedere e reinviare",
+        "rejected": "Respinto",
+        "closed": "Chiuso"
+      }
+    }
   },
   "correspondence": {
     "title": "Corrispondenza",
@@ -372,7 +401,15 @@
     "promote": "Promuovi",
     "suitability": "Idoneità",
     "discipline": "Disciplina",
-    "revisions": "Revisioni"
+    "revisions": "Revisioni",
+    "intl": {
+      "state_labels": {
+        "wip": "In lavorazione",
+        "shared": "Condiviso",
+        "published": "Pubblicato",
+        "archived": "Archiviato"
+      }
+    }
   },
   "transmittals": {
     "title": "Lettere di trasmissione",
@@ -384,7 +421,14 @@
     "recipients": "Destinatari",
     "acknowledge": "Conferma ricezione",
     "locked": "Bloccata",
-    "issue_transmittal": "Emetti"
+    "issue_transmittal": "Emetti",
+    "intl": {
+      "status_words": {
+        "draft": "bozza",
+        "issued": "emesso",
+        "responded": "riscontrato"
+      }
+    }
   },
   "notifications": {
     "title": "Notifiche",
@@ -426,7 +470,101 @@
     "project_status": "Stato del progetto",
     "cost_report": "Report dei costi",
     "schedule_status": "Stato del cronoprogramma",
-    "safety_report": "Report sulla sicurezza"
+    "safety_report": "Report sulla sicurezza",
+    "doc": {
+      "meta_report": "Report",
+      "meta_project": "Progetto",
+      "meta_type": "Tipo",
+      "meta_generated": "Generato il",
+      "meta_currency": "Valuta",
+      "field_column": "Campo",
+      "value_column": "Valore",
+      "yes": "Sì",
+      "no": "No",
+      "no_data_heading": "Nessun dato disponibile",
+      "no_data_body": "Questo report è stato generato da uno snapshot di dati vuoto. Verificate che i moduli di origine (finanza, cronoprogramma, sicurezza ecc.) abbiano restituito dati per il progetto selezionato.",
+      "no_data_body_short": "Questo report è stato generato da uno snapshot di dati vuoto. Verificate che i moduli di origine abbiano restituito dati per il progetto selezionato.",
+      "footer_generated_by": "Generato da OpenConstructionERP il {timestamp}.",
+      "worksheet_name": "Report",
+      "pdf_subject": "Report di progetto",
+      "overall_progress": "Avanzamento complessivo",
+      "as_of": "Al",
+      "recorded_by": "Registrato da",
+      "period": "Periodo",
+      "entries_suffix": "({count} voci)",
+      "site_photo_alt": "Foto di cantiere",
+      "ai_summary_heading": "Sintesi",
+      "ai_badge": "Generato dall'IA",
+      "ai_note": "Generato dall'IA a partire dai dati di progetto riportati di seguito.",
+      "ai_note_confidence": "Generato dall'IA a partire dai dati di progetto riportati di seguito (affidabilità {confidence}).",
+      "ai_note_review": "Verificare prima di condividere con il cliente."
+    },
+    "section": {
+      "project_overview": "Panoramica del progetto",
+      "key_performance_indicators": "Indicatori chiave di prestazione",
+      "schedule_status": "Stato del cronoprogramma",
+      "risk_summary": "Sintesi dei rischi",
+      "open_issues": "Criticità aperte",
+      "cost_summary": "Sintesi dei costi",
+      "cost_breakdown": "Dettaglio dei costi",
+      "change_orders": "Varianti",
+      "cash_flow": "Flusso di cassa",
+      "schedule_overview": "Panoramica del cronoprogramma",
+      "milestone_status": "Stato delle milestone",
+      "critical_path": "Percorso critico",
+      "3_week_lookahead": "Programma delle 3 settimane",
+      "safety_kpis": "KPI di sicurezza",
+      "incident_log": "Registro degli incidenti",
+      "near_miss_reports": "Segnalazioni di quasi-incidenti",
+      "safety_training": "Formazione sulla sicurezza",
+      "inspection_summary": "Sintesi delle ispezioni",
+      "by_inspection_type": "Per tipo di ispezione",
+      "punch_list_status": "Stato della punch list",
+      "recent_inspections": "Ispezioni recenti",
+      "portfolio_overview": "Panoramica del portafoglio",
+      "project_statuses": "Stato dei progetti",
+      "kpi_comparison": "Confronto KPI",
+      "portfolio_risks": "Rischi del portafoglio",
+      "field_progress": "Avanzamento in cantiere",
+      "top_risks": "Rischi principali",
+      "site_photos": "Foto di cantiere",
+      "summary": "Sintesi"
+    },
+    "field": {
+      "name": "Nome",
+      "status": "Stato",
+      "phase": "Fase",
+      "planned_start": "Inizio pianificato",
+      "planned_end": "Fine pianificata",
+      "schedule_progress_pct": "Avanzamento cronoprogramma (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Budget consumato (%)",
+      "as_of": "Al",
+      "progress_pct": "Avanzamento (%)",
+      "risk_score_avg": "Punteggio di rischio medio",
+      "open_rfis": "RFI aperte",
+      "open_submittals": "Submittal aperti",
+      "open_defects": "Difetti aperti",
+      "open_observations": "Osservazioni aperte",
+      "budget": "Budget",
+      "committed": "Impegnato",
+      "actual": "Consuntivo",
+      "payable": "Da pagare",
+      "receivable": "Da incassare",
+      "net_cash_flow": "Flusso di cassa netto"
+    },
+    "explain": {
+      "report_total_one": "Totale del report: {money} (somma di {count} riga).",
+      "report_total_other": "Totale del report: {money} (somma di {count} righe).",
+      "percent_of_total": "{part} è il {percent} di {total} (percentuale sul totale).",
+      "percent_zero_total": "{part} di {total}: il totale è zero, quindi ogni quota è riportata come 0 per cento.",
+      "breakdown_empty": "Dettaglio dei costi: nessun dato.",
+      "breakdown_one": "Dettaglio dei costi: {count} gruppo, totale del report {money}.",
+      "breakdown_other": "Dettaglio dei costi: {count} gruppi, totale del report {money}.",
+      "top_n_one": "Primi {requested}: {shown} di {shown} riga.",
+      "top_n_other": "Primi {requested}: {shown} di {shown} righe."
+    }
   },
   "gantt": {
     "title": "Diagramma di Gantt",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Bozza",
       "frozen": "Congelato"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Valore di sviluppo lordo (GDV)",
+      "total_development_cost": "Costo totale di sviluppo",
+      "residual_land_value": "Valore residuo del terreno",
+      "developer_profit": "Utile dello sviluppatore",
+      "profit_on_cost": "Utile sul costo",
+      "profit_on_gdv": "Utile sul GDV",
+      "construction_cost": "Costo di costruzione",
+      "professional_fees": "Onorari professionali",
+      "contingency": "Imprevisti",
+      "finance_cost": "Costi finanziari",
+      "sales_costs": "Costi di vendita"
+    },
+    "status": {
+      "viable": "Fattibile",
+      "unviable": "Non fattibile",
+      "marginal": "Marginale",
+      "pending": "Non ancora valutato"
+    },
+    "figure": {
+      "gross_development_value": "Il valore di vendita complessivo di tutte le unità dell'intervento, tutto in un'unica valuta.",
+      "total_development_cost": "Tutti i costi di realizzazione dell'intervento tranne il terreno: costruzione, onorari, imprevisti, oneri finanziari e costi di vendita.",
+      "residual_land_value": "Quanto resta per il terreno dopo aver sottratto dal valore di sviluppo lordo il costo totale di sviluppo e l'utile obiettivo dello sviluppatore.",
+      "developer_profit": "L'utile che lo sviluppatore intende trattenere, espresso come rapporto obiettivo sul valore di sviluppo lordo.",
+      "profit_on_cost": "Utile dello sviluppatore diviso il costo totale di sviluppo, espresso come rapporto.",
+      "profit_on_gdv": "Utile dello sviluppatore diviso il valore di sviluppo lordo, espresso come rapporto."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "FATTURA",
+      "date": "Data: {value}",
+      "due": "Scadenza: {value}",
+      "from": "Da",
+      "bill_to": "Intestata a",
+      "vat_id": "P.IVA: {value}",
+      "ref": "Rif.: {value}",
+      "th_description": "Descrizione",
+      "th_qty": "Q.tà",
+      "th_unit": "U.M.",
+      "th_unit_price": "Prezzo unitario",
+      "th_net": "Imponibile ({currency})",
+      "net_total": "Totale imponibile",
+      "vat_total": "IVA",
+      "grand_total": "Totale fattura",
+      "retention_prepaid": "Ritenuta / anticipo",
+      "amount_due": "Importo dovuto",
+      "payment": "Pagamento",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Conto: {value}",
+      "bank_code": "Codice banca: {value}",
+      "account_holder": "Intestatario del conto: {value}",
+      "footer": "Questo PDF contiene una fattura elettronica EN 16931 incorporata (Factur-X / ZUGFeRD). Fa fede l'XML incorporato."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Campo base per lavoratori",
+        "rental": "Alloggio in affitto",
+        "hotel": "Albergo"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "In attesa",
+        "approved": "Approvato",
+        "rejected": "Respinto"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Soddisfatto",
+        "fail": "Non soddisfatto",
+        "not_applicable": "Non applicabile"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Disegno",
+        "contract": "Contratto",
+        "specification": "Capitolato",
+        "photo": "Foto",
+        "correspondence": "Corrispondenza",
+        "reality_capture": "Rilievo della realtà",
+        "other": "Altro"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "In attesa",
+        "approved": "Approvato",
+        "rejected": "Respinto",
+        "cancelled": "Annullato"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Bozza",
+        "submitted": "Inviato per approvazione",
+        "approved": "Approvato",
+        "posted": "Registrato a libro mastro"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Aperto",
+        "assigned": "Assegnato",
+        "in_progress": "In corso",
+        "resolved": "Risolto",
+        "verified": "Verificato",
+        "closed": "Chiuso"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "osservazione",
+        "minor": "minore",
+        "major": "maggiore",
+        "critical": "critica"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Persona",
+        "crew": "Squadra",
+        "equipment": "Attrezzatura",
+        "subcontractor": "Subappaltatore"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Il nome del modello IA è obsoleto o non disponibile. Aprite Impostazioni > IA e indicate un nome di modello valido per il vostro fornitore.",
+      "not_configured": "L'IA non è configurata. Configurate un fornitore IA in Impostazioni."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "verificato",
+      "bound": "allegato",
+      "empty": "mancante"
+    },
+    "package_status_labels": {
+      "draft": "bozza",
+      "in_progress": "in corso",
+      "ready": "pronto",
+      "issued": "emesso"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "bloccante",
+      "critical": "critico",
+      "warning": "avviso",
+      "suggestion": "suggerimento"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategia",
+      "brief": "Documento preliminare",
+      "concept": "Concept",
+      "design": "Progettazione",
+      "approval": "Autorizzazione",
+      "detail": "Progettazione esecutiva",
+      "tender": "Gara",
+      "award": "Aggiudicazione",
+      "construction": "Costruzione",
+      "handover": "Consegna",
+      "operation": "Esercizio"
     }
   }
 }

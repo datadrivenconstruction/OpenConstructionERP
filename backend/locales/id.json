@@ -132,7 +132,15 @@
     "missing_description": "Posisi {position} tidak memiliki deskripsi",
     "missing_classification": "Posisi {position} memerlukan kode klasifikasi",
     "duplicate_ordinal": "Nomor urut ganda: {ordinal}",
-    "rate_anomaly": "Harga satuan {rate} melampaui ambang batas ({threshold})"
+    "rate_anomaly": "Harga satuan {rate} melampaui ambang batas ({threshold})",
+    "nl": {
+      "not_a_string": "Input harus berupa teks.",
+      "empty": "Input kosong.",
+      "too_long": "Input melebihi {max} karakter.",
+      "ai_unparsable": "Respons AI tidak dapat diurai sebagai dokumen DSL.",
+      "no_pattern": "Tidak ada pola yang cocok dengan kalimat input.",
+      "try": "Coba: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "Jadwal 4D",
@@ -327,7 +335,16 @@
     "pass": "Lulus",
     "fail": "Gagal",
     "partial": "Parsial",
-    "critical": "Kritis"
+    "critical": "Kritis",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Terjadwal",
+        "in_progress": "Sedang berjalan",
+        "completed": "Selesai",
+        "failed": "Gagal",
+        "cancelled": "Dibatalkan"
+      }
+    }
   },
   "ncr": {
     "title": "Laporan ketidaksesuaian",
@@ -347,7 +364,19 @@
     "submit": "Kirim",
     "review": "Tinjau",
     "approved_as_noted": "Disetujui sesuai catatan",
-    "revise_resubmit": "Revisi & ajukan ulang"
+    "revise_resubmit": "Revisi & ajukan ulang",
+    "intl": {
+      "status_labels": {
+        "draft": "Draf",
+        "submitted": "Diajukan",
+        "under_review": "Sedang ditinjau",
+        "approved": "Disetujui",
+        "approved_as_noted": "Disetujui dengan catatan",
+        "revise_and_resubmit": "Revisi dan ajukan ulang",
+        "rejected": "Ditolak",
+        "closed": "Ditutup"
+      }
+    }
   },
   "correspondence": {
     "title": "Korespondensi",
@@ -372,7 +401,15 @@
     "promote": "Promosikan",
     "suitability": "Kesesuaian",
     "discipline": "Disiplin",
-    "revisions": "Revisi"
+    "revisions": "Revisi",
+    "intl": {
+      "state_labels": {
+        "wip": "Sedang dikerjakan",
+        "shared": "Dibagikan",
+        "published": "Dipublikasikan",
+        "archived": "Diarsipkan"
+      }
+    }
   },
   "transmittals": {
     "title": "Transmittal",
@@ -384,7 +421,14 @@
     "recipients": "Penerima",
     "acknowledge": "Terima",
     "locked": "Terkunci",
-    "issue_transmittal": "Terbitkan"
+    "issue_transmittal": "Terbitkan",
+    "intl": {
+      "status_words": {
+        "draft": "draf",
+        "issued": "dikirim",
+        "responded": "dibalas"
+      }
+    }
   },
   "notifications": {
     "title": "Notifikasi",
@@ -426,7 +470,101 @@
     "project_status": "Status proyek",
     "cost_report": "Laporan biaya",
     "schedule_status": "Status jadwal",
-    "safety_report": "Laporan keselamatan"
+    "safety_report": "Laporan keselamatan",
+    "doc": {
+      "meta_report": "Laporan",
+      "meta_project": "Proyek",
+      "meta_type": "Tipe",
+      "meta_generated": "Dibuat",
+      "meta_currency": "Mata uang",
+      "field_column": "Bidang",
+      "value_column": "Nilai",
+      "yes": "Ya",
+      "no": "Tidak",
+      "no_data_heading": "Tidak ada data tersedia",
+      "no_data_body": "Laporan ini dibuat dari snapshot data kosong. Pastikan modul sumber (keuangan, jadwal, keselamatan, dll.) mengembalikan data untuk proyek yang dipilih.",
+      "no_data_body_short": "Laporan ini dibuat dari snapshot data kosong. Pastikan modul sumber mengembalikan data untuk proyek yang dipilih.",
+      "footer_generated_by": "Dibuat oleh OpenConstructionERP pada {timestamp}.",
+      "worksheet_name": "Laporan",
+      "pdf_subject": "Laporan Proyek",
+      "overall_progress": "Progres Keseluruhan",
+      "as_of": "Per tanggal",
+      "recorded_by": "Dicatat oleh",
+      "period": "Periode",
+      "entries_suffix": "({count} entri)",
+      "site_photo_alt": "Foto lokasi proyek",
+      "ai_summary_heading": "Ringkasan",
+      "ai_badge": "Dibuat AI",
+      "ai_note": "Dibuat oleh AI dari data proyek di bawah ini.",
+      "ai_note_confidence": "Dibuat oleh AI dari data proyek di bawah ini (tingkat keyakinan {confidence}).",
+      "ai_note_review": "Tinjau sebelum dibagikan kepada klien."
+    },
+    "section": {
+      "project_overview": "Ringkasan Proyek",
+      "key_performance_indicators": "Indikator Kinerja Utama",
+      "schedule_status": "Status Jadwal",
+      "risk_summary": "Ringkasan Risiko",
+      "open_issues": "Isu Terbuka",
+      "cost_summary": "Ringkasan Biaya",
+      "cost_breakdown": "Rincian Biaya",
+      "change_orders": "Perintah Perubahan",
+      "cash_flow": "Arus Kas",
+      "schedule_overview": "Ringkasan Jadwal",
+      "milestone_status": "Status Milestone",
+      "critical_path": "Jalur Kritis",
+      "3_week_lookahead": "Prospek 3 Minggu",
+      "safety_kpis": "KPI Keselamatan",
+      "incident_log": "Catatan Insiden",
+      "near_miss_reports": "Laporan Hampir Celaka",
+      "safety_training": "Pelatihan Keselamatan",
+      "inspection_summary": "Ringkasan Inspeksi",
+      "by_inspection_type": "Berdasarkan Jenis Inspeksi",
+      "punch_list_status": "Status Daftar Pekerjaan Tersisa",
+      "recent_inspections": "Inspeksi Terbaru",
+      "portfolio_overview": "Ringkasan Portofolio",
+      "project_statuses": "Status Proyek",
+      "kpi_comparison": "Perbandingan KPI",
+      "portfolio_risks": "Risiko Portofolio",
+      "field_progress": "Progres Lapangan",
+      "top_risks": "Risiko Utama",
+      "site_photos": "Foto Lokasi Proyek",
+      "summary": "Ringkasan"
+    },
+    "field": {
+      "name": "Nama",
+      "status": "Status",
+      "phase": "Fase",
+      "planned_start": "Rencana Mulai",
+      "planned_end": "Rencana Selesai",
+      "schedule_progress_pct": "Progres Jadwal (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Anggaran Terpakai (%)",
+      "as_of": "Per tanggal",
+      "progress_pct": "Progres (%)",
+      "risk_score_avg": "Rata-rata Skor Risiko",
+      "open_rfis": "RFI Terbuka",
+      "open_submittals": "Pengajuan Terbuka",
+      "open_defects": "Cacat Terbuka",
+      "open_observations": "Observasi Terbuka",
+      "budget": "Anggaran",
+      "committed": "Komitmen",
+      "actual": "Realisasi",
+      "payable": "Hutang",
+      "receivable": "Piutang",
+      "net_cash_flow": "Arus Kas Bersih"
+    },
+    "explain": {
+      "report_total_one": "Total laporan: {money} (jumlah dari {count} baris).",
+      "report_total_other": "Total laporan: {money} (jumlah dari {count} baris).",
+      "percent_of_total": "{part} adalah {percent} dari {total} (persen dari total).",
+      "percent_zero_total": "{part} dari {total}: total nol, sehingga setiap bagian dilaporkan sebagai 0 persen.",
+      "breakdown_empty": "Rincian biaya: tidak ada data.",
+      "breakdown_one": "Rincian biaya: {count} kelompok, total laporan {money}.",
+      "breakdown_other": "Rincian biaya: {count} kelompok, total laporan {money}.",
+      "top_n_one": "{requested} teratas: {shown} dari {shown} baris.",
+      "top_n_other": "{requested} teratas: {shown} dari {shown} baris."
+    }
   },
   "gantt": {
     "title": "Diagram Gantt",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Draf",
       "frozen": "Beku"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Nilai Pengembangan Kotor (GDV)",
+      "total_development_cost": "Total Biaya Pengembangan",
+      "residual_land_value": "Nilai Sisa Tanah",
+      "developer_profit": "Laba Pengembang",
+      "profit_on_cost": "Laba atas Biaya",
+      "profit_on_gdv": "Laba atas GDV",
+      "construction_cost": "Biaya Konstruksi",
+      "professional_fees": "Biaya Profesional",
+      "contingency": "Dana Cadangan",
+      "finance_cost": "Biaya Pembiayaan",
+      "sales_costs": "Biaya Penjualan"
+    },
+    "status": {
+      "viable": "Layak",
+      "unviable": "Tidak Layak",
+      "marginal": "Marginal",
+      "pending": "Belum Dinilai"
+    },
+    "figure": {
+      "gross_development_value": "Total nilai penjualan seluruh unit dalam skema, semuanya dalam satu mata uang.",
+      "total_development_cost": "Seluruh biaya pelaksanaan skema kecuali tanahnya sendiri: konstruksi, jasa profesional, dana cadangan, pembiayaan, dan biaya penjualan.",
+      "residual_land_value": "Sisa nilai untuk tanah setelah total biaya pengembangan dan laba target pengembang dikurangkan dari nilai pengembangan kotor.",
+      "developer_profit": "Laba yang ingin dipertahankan pengembang, ditetapkan sebagai rasio target dari nilai pengembangan kotor.",
+      "profit_on_cost": "Laba pengembang dibagi total biaya pengembangan, dinyatakan sebagai rasio.",
+      "profit_on_gdv": "Laba pengembang dibagi nilai pengembangan kotor, dinyatakan sebagai rasio."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "FAKTUR",
+      "date": "Tanggal: {value}",
+      "due": "Jatuh tempo: {value}",
+      "from": "Dari",
+      "bill_to": "Tagihan kepada",
+      "vat_id": "NPWP/PPN: {value}",
+      "ref": "Ref: {value}",
+      "th_description": "Deskripsi",
+      "th_qty": "Jml",
+      "th_unit": "Satuan",
+      "th_unit_price": "Harga satuan",
+      "th_net": "Neto ({currency})",
+      "net_total": "Total neto",
+      "vat_total": "PPN",
+      "grand_total": "Total keseluruhan",
+      "retention_prepaid": "Retensi / uang muka",
+      "amount_due": "Jumlah yang harus dibayar",
+      "payment": "Pembayaran",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Nomor rekening: {value}",
+      "bank_code": "Kode bank: {value}",
+      "account_holder": "Pemilik rekening: {value}",
+      "footer": "PDF ini memuat e-invoice EN 16931 tertanam (Factur-X / ZUGFeRD). XML tertanam adalah dokumen yang berlaku."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Kamp pekerja",
+        "rental": "Hunian sewa",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Menunggu",
+        "approved": "Disetujui",
+        "rejected": "Ditolak"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Terpenuhi",
+        "fail": "Tidak terpenuhi",
+        "not_applicable": "Tidak berlaku"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Gambar",
+        "contract": "Kontrak",
+        "specification": "Spesifikasi",
+        "photo": "Foto",
+        "correspondence": "Korespondensi",
+        "reality_capture": "Pemindaian lapangan",
+        "other": "Lainnya"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Menunggu",
+        "approved": "Disetujui",
+        "rejected": "Ditolak",
+        "cancelled": "Dibatalkan"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Draf",
+        "submitted": "Diajukan untuk persetujuan",
+        "approved": "Disetujui",
+        "posted": "Dibukukan ke buku besar"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Terbuka",
+        "assigned": "Ditugaskan",
+        "in_progress": "Sedang berjalan",
+        "resolved": "Diselesaikan",
+        "verified": "Terverifikasi",
+        "closed": "Ditutup"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observasi",
+        "minor": "kecil",
+        "major": "besar",
+        "critical": "kritis"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Orang",
+        "crew": "Tim",
+        "equipment": "Peralatan",
+        "subcontractor": "Subkontraktor"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Nama model AI sudah usang atau tidak tersedia. Buka Pengaturan > AI dan atur nama model yang valid saat ini untuk penyedia Anda.",
+      "not_configured": "AI belum dikonfigurasi. Silakan atur penyedia AI di Pengaturan."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "terverifikasi",
+      "bound": "terlampir",
+      "empty": "belum ada"
+    },
+    "package_status_labels": {
+      "draft": "draf",
+      "in_progress": "sedang berjalan",
+      "ready": "siap",
+      "issued": "diterbitkan"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "penghambat",
+      "critical": "kritis",
+      "warning": "peringatan",
+      "suggestion": "saran"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategi",
+      "brief": "Brief",
+      "concept": "Konsep",
+      "design": "Desain",
+      "approval": "Perizinan",
+      "detail": "Desain detail",
+      "tender": "Tender",
+      "award": "Penunjukan",
+      "construction": "Konstruksi",
+      "handover": "Serah terima",
+      "operation": "Operasi"
     }
   }
 }

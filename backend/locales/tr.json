@@ -132,7 +132,15 @@
     "missing_description": "Pozisyon {position} tanımı yok",
     "missing_classification": "Pozisyon {position} sınıflandırma kodu gerekli",
     "duplicate_ordinal": "Yinelenen sıra numarası: {ordinal}",
-    "rate_anomaly": "Birim fiyat {rate} eşik değeri aşıyor ({threshold})"
+    "rate_anomaly": "Birim fiyat {rate} eşik değeri aşıyor ({threshold})",
+    "nl": {
+      "not_a_string": "Girdi metin olmalıdır.",
+      "empty": "Girdi boş.",
+      "too_long": "Girdi {max} karakteri aşıyor.",
+      "ai_unparsable": "YZ yanıtı bir DSL belgesi olarak ayrıştırılamadı.",
+      "no_pattern": "Girilen cümleyle eşleşen bir desen bulunamadı.",
+      "try": "Deneyin: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D İş Programı",
@@ -327,7 +335,16 @@
     "pass": "Uygun",
     "fail": "Uygun değil",
     "partial": "Kısmi",
-    "critical": "Kritik"
+    "critical": "Kritik",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Planlandı",
+        "in_progress": "Devam ediyor",
+        "completed": "Tamamlandı",
+        "failed": "Başarısız",
+        "cancelled": "İptal edildi"
+      }
+    }
   },
   "ncr": {
     "title": "Uygunsuzluk raporları",
@@ -347,7 +364,19 @@
     "submit": "Sun",
     "review": "İncele",
     "approved_as_noted": "Şerhli onaylandı",
-    "revise_resubmit": "Düzelt ve yeniden sun"
+    "revise_resubmit": "Düzelt ve yeniden sun",
+    "intl": {
+      "status_labels": {
+        "draft": "Taslak",
+        "submitted": "Sunuldu",
+        "under_review": "İnceleniyor",
+        "approved": "Onaylandı",
+        "approved_as_noted": "Notlarla onaylandı",
+        "revise_and_resubmit": "Düzeltip yeniden sunun",
+        "rejected": "Reddedildi",
+        "closed": "Kapatıldı"
+      }
+    }
   },
   "correspondence": {
     "title": "Yazışmalar",
@@ -372,7 +401,15 @@
     "promote": "İleri taşı",
     "suitability": "Uygunluk",
     "discipline": "Disiplin",
-    "revisions": "Revizyonlar"
+    "revisions": "Revizyonlar",
+    "intl": {
+      "state_labels": {
+        "wip": "Çalışma aşamasında",
+        "shared": "Paylaşıldı",
+        "published": "Yayımlandı",
+        "archived": "Arşivlendi"
+      }
+    }
   },
   "transmittals": {
     "title": "Teslim tutanakları",
@@ -384,7 +421,14 @@
     "recipients": "Alıcılar",
     "acknowledge": "Teslim aldığını bildir",
     "locked": "Kilitli",
-    "issue_transmittal": "Gönder"
+    "issue_transmittal": "Gönder",
+    "intl": {
+      "status_words": {
+        "draft": "taslak",
+        "issued": "gönderildi",
+        "responded": "yanıtlandı"
+      }
+    }
   },
   "notifications": {
     "title": "Bildirimler",
@@ -426,7 +470,101 @@
     "project_status": "Proje durumu",
     "cost_report": "Maliyet raporu",
     "schedule_status": "İş programı durumu",
-    "safety_report": "İş güvenliği raporu"
+    "safety_report": "İş güvenliği raporu",
+    "doc": {
+      "meta_report": "Rapor",
+      "meta_project": "Proje",
+      "meta_type": "Tür",
+      "meta_generated": "Oluşturulma",
+      "meta_currency": "Para birimi",
+      "field_column": "Alan",
+      "value_column": "Değer",
+      "yes": "Evet",
+      "no": "Hayır",
+      "no_data_heading": "Kullanılabilir veri yok",
+      "no_data_body": "Bu rapor boş bir veri anlık görüntüsünden oluşturuldu. Seçili proje için kaynak modüllerin (finans, program, iş güvenliği vb.) veri döndürdüğünü doğrulayın.",
+      "no_data_body_short": "Bu rapor boş bir veri anlık görüntüsünden oluşturuldu. Seçili proje için kaynak modüllerin veri döndürdüğünü doğrulayın.",
+      "footer_generated_by": "OpenConstructionERP tarafından {timestamp} tarihinde oluşturuldu.",
+      "worksheet_name": "Rapor",
+      "pdf_subject": "Proje Raporu",
+      "overall_progress": "Genel İlerleme",
+      "as_of": "Tarih itibarıyla",
+      "recorded_by": "Kaydeden",
+      "period": "Dönem",
+      "entries_suffix": "({count} kayıt)",
+      "site_photo_alt": "Şantiye fotoğrafı",
+      "ai_summary_heading": "Özet",
+      "ai_badge": "YZ tarafından oluşturuldu",
+      "ai_note": "Aşağıdaki proje verilerinden YZ tarafından oluşturuldu.",
+      "ai_note_confidence": "Aşağıdaki proje verilerinden YZ tarafından oluşturuldu (güven {confidence}).",
+      "ai_note_review": "Müşteriyle paylaşmadan önce gözden geçirin."
+    },
+    "section": {
+      "project_overview": "Proje Genel Bakışı",
+      "key_performance_indicators": "Temel Performans Göstergeleri",
+      "schedule_status": "Program Durumu",
+      "risk_summary": "Risk Özeti",
+      "open_issues": "Açık Sorunlar",
+      "cost_summary": "Maliyet Özeti",
+      "cost_breakdown": "Maliyet Dağılımı",
+      "change_orders": "Değişiklik Emirleri",
+      "cash_flow": "Nakit Akışı",
+      "schedule_overview": "Program Genel Bakışı",
+      "milestone_status": "Kilometre Taşı Durumu",
+      "critical_path": "Kritik Yol",
+      "3_week_lookahead": "3 Haftalık Öngörü",
+      "safety_kpis": "İş Güvenliği Göstergeleri",
+      "incident_log": "Olay Kaydı",
+      "near_miss_reports": "Ramak Kala Raporları",
+      "safety_training": "İş Güvenliği Eğitimi",
+      "inspection_summary": "Denetim Özeti",
+      "by_inspection_type": "Denetim Türüne Göre",
+      "punch_list_status": "Eksik İşler Listesi Durumu",
+      "recent_inspections": "Son Denetimler",
+      "portfolio_overview": "Portföy Genel Bakışı",
+      "project_statuses": "Proje Durumları",
+      "kpi_comparison": "KPI Karşılaştırması",
+      "portfolio_risks": "Portföy Riskleri",
+      "field_progress": "Saha İlerlemesi",
+      "top_risks": "Başlıca Riskler",
+      "site_photos": "Şantiye Fotoğrafları",
+      "summary": "Özet"
+    },
+    "field": {
+      "name": "Ad",
+      "status": "Durum",
+      "phase": "Aşama",
+      "planned_start": "Planlanan Başlangıç",
+      "planned_end": "Planlanan Bitiş",
+      "schedule_progress_pct": "Program İlerlemesi (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Harcanan Bütçe (%)",
+      "as_of": "Tarih itibarıyla",
+      "progress_pct": "İlerleme (%)",
+      "risk_score_avg": "Ortalama Risk Skoru",
+      "open_rfis": "Açık RFI'lar",
+      "open_submittals": "Açık Onay Belgeleri",
+      "open_defects": "Açık Kusurlar",
+      "open_observations": "Açık Gözlemler",
+      "budget": "Bütçe",
+      "committed": "Taahhüt Edilen",
+      "actual": "Gerçekleşen",
+      "payable": "Ödenecek",
+      "receivable": "Tahsil Edilecek",
+      "net_cash_flow": "Net Nakit Akışı"
+    },
+    "explain": {
+      "report_total_one": "Rapor toplamı: {money} ({count} satırın toplamı).",
+      "report_total_other": "Rapor toplamı: {money} ({count} satırın toplamı).",
+      "percent_of_total": "{part}, {total} toplamının %{percent} kadarıdır (toplama oranı).",
+      "percent_zero_total": "{part} / {total}: toplam sıfır olduğu için her pay %0 olarak raporlanır.",
+      "breakdown_empty": "Maliyet dağılımı: veri yok.",
+      "breakdown_one": "Maliyet dağılımı: {count} grup, rapor toplamı {money}.",
+      "breakdown_other": "Maliyet dağılımı: {count} grup, rapor toplamı {money}.",
+      "top_n_one": "İlk {requested}: {shown} / {shown} satır.",
+      "top_n_other": "İlk {requested}: {shown} / {shown} satır."
+    }
   },
   "gantt": {
     "title": "Gantt şeması",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Taslak",
       "frozen": "Dondurulmuş"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Brüt Geliştirme Değeri (GDV)",
+      "total_development_cost": "Toplam Geliştirme Maliyeti",
+      "residual_land_value": "Kalıntı Arsa Değeri",
+      "developer_profit": "Geliştirici Kârı",
+      "profit_on_cost": "Maliyet Üzerinden Kâr",
+      "profit_on_gdv": "GDV Üzerinden Kâr",
+      "construction_cost": "İnşaat Maliyeti",
+      "professional_fees": "Profesyonel Ücretler",
+      "contingency": "Öngörülmeyen Gider Payı",
+      "finance_cost": "Finansman Maliyeti",
+      "sales_costs": "Satış Maliyetleri"
+    },
+    "status": {
+      "viable": "Uygulanabilir",
+      "unviable": "Uygulanabilir Değil",
+      "marginal": "Sınırda",
+      "pending": "Henüz değerlendirilmedi"
+    },
+    "figure": {
+      "gross_development_value": "Projedeki tüm birimlerin toplam satış değeri, hepsi tek para biriminde.",
+      "total_development_cost": "Arsa hariç projenin gerçekleştirilmesine ilişkin tüm maliyetler: inşaat, profesyonel ücretler, öngörülmeyen gider payı, finansman ve satış maliyetleri.",
+      "residual_land_value": "Brüt geliştirme değerinden toplam geliştirme maliyeti ve hedef geliştirici kârı düşüldükten sonra arsaya kalan tutar.",
+      "developer_profit": "Geliştiricinin elde tutmayı hedeflediği kâr; brüt geliştirme değerine göre hedef oran olarak belirlenir.",
+      "profit_on_cost": "Geliştirici kârının toplam geliştirme maliyetine bölünmesiyle elde edilen oran.",
+      "profit_on_gdv": "Geliştirici kârının brüt geliştirme değerine bölünmesiyle elde edilen oran."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "FATURA",
+      "date": "Tarih: {value}",
+      "due": "Vade: {value}",
+      "from": "Gönderen",
+      "bill_to": "Fatura Edilen",
+      "vat_id": "VKN: {value}",
+      "ref": "Ref: {value}",
+      "th_description": "Açıklama",
+      "th_qty": "Miktar",
+      "th_unit": "Birim",
+      "th_unit_price": "Birim Fiyat",
+      "th_net": "Net ({currency})",
+      "net_total": "Ara Toplam",
+      "vat_total": "KDV",
+      "grand_total": "Genel Toplam",
+      "retention_prepaid": "Teminat / Avans",
+      "amount_due": "Ödenecek Tutar",
+      "payment": "Ödeme",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Hesap No: {value}",
+      "bank_code": "Banka Kodu: {value}",
+      "account_holder": "Hesap Sahibi: {value}",
+      "footer": "Bu PDF, gömülü bir EN 16931 e-fatura (Factur-X / ZUGFeRD) içerir. Geçerli belge gömülü XML'dir."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "İşçi kampı",
+        "rental": "Kiralık konut",
+        "hotel": "Otel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Beklemede",
+        "approved": "Onaylandı",
+        "rejected": "Reddedildi"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Karşılandı",
+        "fail": "Karşılanmadı",
+        "not_applicable": "Uygulanamaz"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Çizim",
+        "contract": "Sözleşme",
+        "specification": "Şartname",
+        "photo": "Fotoğraf",
+        "correspondence": "Yazışma",
+        "reality_capture": "Saha tarama verisi",
+        "other": "Diğer"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Beklemede",
+        "approved": "Onaylandı",
+        "rejected": "Reddedildi",
+        "cancelled": "İptal edildi"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Taslak",
+        "submitted": "Onaya gönderildi",
+        "approved": "Onaylandı",
+        "posted": "Deftere işlendi"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Açık",
+        "assigned": "Atandı",
+        "in_progress": "Devam ediyor",
+        "resolved": "Giderildi",
+        "verified": "Doğrulandı",
+        "closed": "Kapatıldı"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "gözlem",
+        "minor": "küçük",
+        "major": "büyük",
+        "critical": "kritik"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Kişi",
+        "crew": "Ekip",
+        "equipment": "Ekipman",
+        "subcontractor": "Taşeron"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "YZ model adı eski veya kullanılamıyor. Ayarlar > YZ bölümünü açın ve sağlayıcınız için geçerli bir model adı girin.",
+      "not_configured": "YZ yapılandırılmamış. Lütfen Ayarlar'dan bir YZ sağlayıcısı ayarlayın."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "doğrulandı",
+      "bound": "eklendi",
+      "empty": "eksik"
+    },
+    "package_status_labels": {
+      "draft": "taslak",
+      "in_progress": "devam ediyor",
+      "ready": "hazır",
+      "issued": "yayımlandı"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "engel",
+      "critical": "kritik",
+      "warning": "uyarı",
+      "suggestion": "öneri"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strateji",
+      "brief": "Proje Gereksinimleri",
+      "concept": "Konsept",
+      "design": "Tasarım",
+      "approval": "İzin",
+      "detail": "Uygulama Projesi",
+      "tender": "İhale",
+      "award": "Sözleşme",
+      "construction": "Yapım",
+      "handover": "Teslim",
+      "operation": "İşletme"
     }
   }
 }

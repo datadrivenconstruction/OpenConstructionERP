@@ -132,7 +132,15 @@
     "missing_description": "Post {position} mangler beskrivelse",
     "missing_classification": "Post {position} trenger en klassifiseringskode",
     "duplicate_ordinal": "Duplikat posisjonsnummer: {ordinal}",
-    "rate_anomaly": "Enhetspris {rate} overskrider terskel ({threshold})"
+    "rate_anomaly": "Enhetspris {rate} overskrider terskel ({threshold})",
+    "nl": {
+      "not_a_string": "Inndata må være tekst.",
+      "empty": "Inndata er tom.",
+      "too_long": "Inndata overstiger {max} tegn.",
+      "ai_unparsable": "KI-svaret kunne ikke tolkes som et DSL-dokument.",
+      "no_pattern": "Ingen mønster passet til den angitte setningen.",
+      "try": "Prøv: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D Fremdriftsplan",
@@ -327,7 +335,16 @@
     "pass": "Godkjent",
     "fail": "Ikke godkjent",
     "partial": "Delvis",
-    "critical": "Kritisk"
+    "critical": "Kritisk",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Planlagt",
+        "in_progress": "Pågår",
+        "completed": "Fullført",
+        "failed": "Ikke godkjent",
+        "cancelled": "Kansellert"
+      }
+    }
   },
   "ncr": {
     "title": "Avviksrapporter",
@@ -347,7 +364,19 @@
     "submit": "Send inn",
     "review": "Gjennomgå",
     "approved_as_noted": "Godkjent med merknader",
-    "revise_resubmit": "Revider og send inn på nytt"
+    "revise_resubmit": "Revider og send inn på nytt",
+    "intl": {
+      "status_labels": {
+        "draft": "Utkast",
+        "submitted": "Innsendt",
+        "under_review": "Under vurdering",
+        "approved": "Godkjent",
+        "approved_as_noted": "Godkjent med merknader",
+        "revise_and_resubmit": "Revider og send inn på nytt",
+        "rejected": "Avvist",
+        "closed": "Lukket"
+      }
+    }
   },
   "correspondence": {
     "title": "Korrespondanse",
@@ -372,7 +401,15 @@
     "promote": "Flytt videre",
     "suitability": "Egnethet",
     "discipline": "Fagområde",
-    "revisions": "Revisjoner"
+    "revisions": "Revisjoner",
+    "intl": {
+      "state_labels": {
+        "wip": "Under arbeid",
+        "shared": "Delt",
+        "published": "Publisert",
+        "archived": "Arkivert"
+      }
+    }
   },
   "transmittals": {
     "title": "Følgesedler",
@@ -384,7 +421,14 @@
     "recipients": "Mottakere",
     "acknowledge": "Bekreft mottak",
     "locked": "Låst",
-    "issue_transmittal": "Utsted"
+    "issue_transmittal": "Utsted",
+    "intl": {
+      "status_words": {
+        "draft": "utkast",
+        "issued": "utsendt",
+        "responded": "besvart"
+      }
+    }
   },
   "notifications": {
     "title": "Varsler",
@@ -426,7 +470,101 @@
     "project_status": "Prosjektstatus",
     "cost_report": "Kostnadsrapport",
     "schedule_status": "Fremdriftsstatus",
-    "safety_report": "Sikkerhetsrapport"
+    "safety_report": "Sikkerhetsrapport",
+    "doc": {
+      "meta_report": "Rapport",
+      "meta_project": "Prosjekt",
+      "meta_type": "Type",
+      "meta_generated": "Generert",
+      "meta_currency": "Valuta",
+      "field_column": "Felt",
+      "value_column": "Verdi",
+      "yes": "Ja",
+      "no": "Nei",
+      "no_data_heading": "Ingen data tilgjengelig",
+      "no_data_body": "Denne rapporten ble generert fra et tomt datautvalg. Kontroller at kildemodulene (økonomi, fremdrift, HMS osv.) returnerte data for valgt prosjekt.",
+      "no_data_body_short": "Denne rapporten ble generert fra et tomt datautvalg. Kontroller at kildemodulene returnerte data for valgt prosjekt.",
+      "footer_generated_by": "Generert av OpenConstructionERP {timestamp}.",
+      "worksheet_name": "Rapport",
+      "pdf_subject": "Prosjektrapport",
+      "overall_progress": "Samlet fremdrift",
+      "as_of": "Per",
+      "recorded_by": "Registrert av",
+      "period": "Periode",
+      "entries_suffix": "({count} poster)",
+      "site_photo_alt": "Bilde fra byggeplassen",
+      "ai_summary_heading": "Sammendrag",
+      "ai_badge": "KI-generert",
+      "ai_note": "Generert av KI fra prosjektdataene nedenfor.",
+      "ai_note_confidence": "Generert av KI fra prosjektdataene nedenfor (sikkerhet {confidence}).",
+      "ai_note_review": "Gjennomgå før deling med kunden."
+    },
+    "section": {
+      "project_overview": "Prosjektoversikt",
+      "key_performance_indicators": "Nøkkeltall",
+      "schedule_status": "Fremdriftsstatus",
+      "risk_summary": "Risikooversikt",
+      "open_issues": "Åpne saker",
+      "cost_summary": "Kostnadsoversikt",
+      "cost_breakdown": "Kostnadsfordeling",
+      "change_orders": "Endringsordrer",
+      "cash_flow": "Kontantstrøm",
+      "schedule_overview": "Fremdriftsoversikt",
+      "milestone_status": "Milepælsstatus",
+      "critical_path": "Kritisk linje",
+      "3_week_lookahead": "3-ukers planlegging",
+      "safety_kpis": "HMS-nøkkeltall",
+      "incident_log": "Hendelseslogg",
+      "near_miss_reports": "Nestenulykkerapporter",
+      "safety_training": "HMS-opplæring",
+      "inspection_summary": "Oppsummering av kontroller",
+      "by_inspection_type": "Etter kontrolltype",
+      "punch_list_status": "Status for punktliste",
+      "recent_inspections": "Nylige kontroller",
+      "portfolio_overview": "Porteføljeoversikt",
+      "project_statuses": "Prosjektstatus",
+      "kpi_comparison": "Sammenligning av nøkkeltall",
+      "portfolio_risks": "Porteføljerisiko",
+      "field_progress": "Fremdrift på byggeplass",
+      "top_risks": "Største risikoer",
+      "site_photos": "Bilder fra byggeplassen",
+      "summary": "Sammendrag"
+    },
+    "field": {
+      "name": "Navn",
+      "status": "Status",
+      "phase": "Fase",
+      "planned_start": "Planlagt start",
+      "planned_end": "Planlagt slutt",
+      "schedule_progress_pct": "Fremdrift (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Forbrukt budsjett (%)",
+      "as_of": "Per",
+      "progress_pct": "Fremdrift (%)",
+      "risk_score_avg": "Gjennomsnittlig risikoscore",
+      "open_rfis": "Åpne RFI-er",
+      "open_submittals": "Åpne innsendinger",
+      "open_defects": "Åpne feil",
+      "open_observations": "Åpne observasjoner",
+      "budget": "Budsjett",
+      "committed": "Bundet",
+      "actual": "Faktisk",
+      "payable": "Til betaling",
+      "receivable": "Til innbetaling",
+      "net_cash_flow": "Netto kontantstrøm"
+    },
+    "explain": {
+      "report_total_one": "Rapporttotal: {money} (sum av {count} linje).",
+      "report_total_other": "Rapporttotal: {money} (sum av {count} linjer).",
+      "percent_of_total": "{part} er {percent} av {total} (prosent av total).",
+      "percent_zero_total": "{part} av {total}: totalen er null, så hver andel vises som 0 prosent.",
+      "breakdown_empty": "Kostnadsfordeling: ingen data.",
+      "breakdown_one": "Kostnadsfordeling: {count} gruppe, rapporttotal {money}.",
+      "breakdown_other": "Kostnadsfordeling: {count} grupper, rapporttotal {money}.",
+      "top_n_one": "Topp {requested}: {shown} av {shown} linje.",
+      "top_n_other": "Topp {requested}: {shown} av {shown} linjer."
+    }
   },
   "gantt": {
     "title": "Gantt-diagram",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Utkast",
       "frozen": "Frosset"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Brutto utviklingsverdi (GDV)",
+      "total_development_cost": "Total utviklingskostnad",
+      "residual_land_value": "Residualverdi for tomt",
+      "developer_profit": "Utviklerfortjeneste",
+      "profit_on_cost": "Fortjeneste på kostnad",
+      "profit_on_gdv": "Fortjeneste på GDV",
+      "construction_cost": "Byggekostnad",
+      "professional_fees": "Honorarer",
+      "contingency": "Reserve",
+      "finance_cost": "Finanskostnad",
+      "sales_costs": "Salgskostnader"
+    },
+    "status": {
+      "viable": "Lønnsomt",
+      "unviable": "Ikke lønnsomt",
+      "marginal": "Marginalt",
+      "pending": "Ikke vurdert ennå"
+    },
+    "figure": {
+      "gross_development_value": "Samlet salgsverdi for alle enheter i prosjektet, alt i én valuta.",
+      "total_development_cost": "Alle kostnader for gjennomføring av prosjektet unntatt selve tomten: bygging, honorarer, reserve, finansiering og salgskostnader.",
+      "residual_land_value": "Det som gjenstår til tomten etter at total utviklingskostnad og målsatt utviklerfortjeneste er trukket fra brutto utviklingsverdi.",
+      "developer_profit": "Fortjenesten utvikleren sikter på å beholde, satt som et målforhold av brutto utviklingsverdi.",
+      "profit_on_cost": "Utviklerfortjeneste delt på total utviklingskostnad, oppgitt som et forhold.",
+      "profit_on_gdv": "Utviklerfortjeneste delt på brutto utviklingsverdi, oppgitt som et forhold."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "FAKTURA",
+      "date": "Dato: {value}",
+      "due": "Forfall: {value}",
+      "from": "Fra",
+      "bill_to": "Faktureres til",
+      "vat_id": "MVA-nr.: {value}",
+      "ref": "Ref.: {value}",
+      "th_description": "Beskrivelse",
+      "th_qty": "Antall",
+      "th_unit": "Enhet",
+      "th_unit_price": "Enhetspris",
+      "th_net": "Netto ({currency})",
+      "net_total": "Netto sum",
+      "vat_total": "MVA",
+      "grand_total": "Totalt å betale",
+      "retention_prepaid": "Sikkerhetstilbakeholdelse / forskuddsbetaling",
+      "amount_due": "Forfalt beløp",
+      "payment": "Betaling",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Kontonummer: {value}",
+      "bank_code": "Bankkode: {value}",
+      "account_holder": "Kontoinnehaver: {value}",
+      "footer": "Denne PDF-filen inneholder en innebygd EN 16931-e-faktura (Factur-X / ZUGFeRD). Den innebygde XML-filen er det gjeldende dokumentet."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Arbeidsbrakke",
+        "rental": "Leieboliger",
+        "hotel": "Hotell"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Venter",
+        "approved": "Godkjent",
+        "rejected": "Avvist"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Oppfylt",
+        "fail": "Ikke oppfylt",
+        "not_applicable": "Ikke aktuelt"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Tegning",
+        "contract": "Kontrakt",
+        "specification": "Spesifikasjon",
+        "photo": "Foto",
+        "correspondence": "Korrespondanse",
+        "reality_capture": "Virkelighetsfangst",
+        "other": "Annet"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Venter",
+        "approved": "Godkjent",
+        "rejected": "Avvist",
+        "cancelled": "Kansellert"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Utkast",
+        "submitted": "Sendt til godkjenning",
+        "approved": "Godkjent",
+        "posted": "Bokført"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Åpen",
+        "assigned": "Tildelt",
+        "in_progress": "Pågår",
+        "resolved": "Utbedret",
+        "verified": "Verifisert",
+        "closed": "Lukket"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observasjon",
+        "minor": "mindre",
+        "major": "alvorlig",
+        "critical": "kritisk"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Person",
+        "crew": "Mannskap",
+        "equipment": "Utstyr",
+        "subcontractor": "Underentreprenør"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Navnet på KI-modellen er utdatert eller utilgjengelig. Åpne Innstillinger > KI og angi et gjeldende gyldig modellnavn for leverandøren din.",
+      "not_configured": "KI er ikke konfigurert. Angi en KI-leverandør under Innstillinger."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "verifisert",
+      "bound": "vedlagt",
+      "empty": "mangler"
+    },
+    "package_status_labels": {
+      "draft": "utkast",
+      "in_progress": "pågår",
+      "ready": "klar",
+      "issued": "utstedt"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "hindring",
+      "critical": "kritisk",
+      "warning": "advarsel",
+      "suggestion": "forslag"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategi",
+      "brief": "Behovsbeskrivelse",
+      "concept": "Konsept",
+      "design": "Prosjektering",
+      "approval": "Tillatelse",
+      "detail": "Detaljprosjektering",
+      "tender": "Anbud",
+      "award": "Tildeling",
+      "construction": "Utførelse",
+      "handover": "Overlevering",
+      "operation": "Drift"
     }
   }
 }

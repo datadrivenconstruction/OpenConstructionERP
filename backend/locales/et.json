@@ -132,7 +132,15 @@
     "missing_description": "Positsioonil {position} puudub kirjeldus",
     "missing_classification": "Positsioon {position} vajab klassifikatsioonikoodi",
     "duplicate_ordinal": "Korduv järjekorranumber: {ordinal}",
-    "rate_anomaly": "Ühikuhind {rate} ületab piirmäära ({threshold})"
+    "rate_anomaly": "Ühikuhind {rate} ületab piirmäära ({threshold})",
+    "nl": {
+      "not_a_string": "Sisend peab olema tekst.",
+      "empty": "Sisend on tühi.",
+      "too_long": "Sisend ületab {max} tähemärki.",
+      "ai_unparsable": "AI vastust ei õnnestunud tõlgendada DSL-dokumendina.",
+      "no_pattern": "Sisestatud lausele ei vastanud ükski muster.",
+      "try": "Proovige: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D ajakava",
@@ -327,7 +335,16 @@
     "pass": "Läbitud",
     "fail": "Ebaõnnestunud",
     "partial": "Osaline",
-    "critical": "Kriitiline"
+    "critical": "Kriitiline",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Planeeritud",
+        "in_progress": "Pooleli",
+        "completed": "Lõpetatud",
+        "failed": "Ebaõnnestunud",
+        "cancelled": "Tühistatud"
+      }
+    }
   },
   "ncr": {
     "title": "Mittevastavuse aruanded",
@@ -347,7 +364,19 @@
     "submit": "Esita",
     "review": "Ülevaatus",
     "approved_as_noted": "Kinnitatud märkustega",
-    "revise_resubmit": "Paranda ja esita uuesti"
+    "revise_resubmit": "Paranda ja esita uuesti",
+    "intl": {
+      "status_labels": {
+        "draft": "Mustand",
+        "submitted": "Esitatud",
+        "under_review": "Läbivaatamisel",
+        "approved": "Kinnitatud",
+        "approved_as_noted": "Kinnitatud märkustega",
+        "revise_and_resubmit": "Paranda ja esita uuesti",
+        "rejected": "Tagasi lükatud",
+        "closed": "Suletud"
+      }
+    }
   },
   "correspondence": {
     "title": "Kirjavahetus",
@@ -372,7 +401,15 @@
     "promote": "Vii edasi",
     "suitability": "Sobivus",
     "discipline": "Eriala",
-    "revisions": "Versioonid"
+    "revisions": "Versioonid",
+    "intl": {
+      "state_labels": {
+        "wip": "Töös",
+        "shared": "Jagatud",
+        "published": "Avaldatud",
+        "archived": "Arhiveeritud"
+      }
+    }
   },
   "transmittals": {
     "title": "Saatelehed",
@@ -384,7 +421,14 @@
     "recipients": "Saajad",
     "acknowledge": "Kinnita teadmiseks",
     "locked": "Lukustatud",
-    "issue_transmittal": "Väljasta"
+    "issue_transmittal": "Väljasta",
+    "intl": {
+      "status_words": {
+        "draft": "mustand",
+        "issued": "saadetud",
+        "responded": "vastatud"
+      }
+    }
   },
   "notifications": {
     "title": "Teavitused",
@@ -426,7 +470,101 @@
     "project_status": "Projekti olek",
     "cost_report": "Kuluaruanne",
     "schedule_status": "Ajakava olek",
-    "safety_report": "Ohutusaruanne"
+    "safety_report": "Ohutusaruanne",
+    "doc": {
+      "meta_report": "Aruanne",
+      "meta_project": "Projekt",
+      "meta_type": "Tüüp",
+      "meta_generated": "Genereeritud",
+      "meta_currency": "Valuuta",
+      "field_column": "Väli",
+      "value_column": "Väärtus",
+      "yes": "Jah",
+      "no": "Ei",
+      "no_data_heading": "Andmed puuduvad",
+      "no_data_body": "See aruanne on genereeritud tühjast andmeseisust. Kontrollige, kas lähtemoodulid (finants, ajakava, ohutus jms) tagastasid valitud projekti kohta andmed.",
+      "no_data_body_short": "See aruanne on genereeritud tühjast andmeseisust. Kontrollige, kas lähtemoodulid tagastasid valitud projekti kohta andmed.",
+      "footer_generated_by": "Genereeris OpenConstructionERP kuupäeval {timestamp}.",
+      "worksheet_name": "Aruanne",
+      "pdf_subject": "Projekti aruanne",
+      "overall_progress": "Üldine edenemine",
+      "as_of": "Seisuga",
+      "recorded_by": "Salvestas",
+      "period": "Periood",
+      "entries_suffix": "({count} kirjet)",
+      "site_photo_alt": "Ehitusplatsi foto",
+      "ai_summary_heading": "Kokkuvõte",
+      "ai_badge": "AI genereeritud",
+      "ai_note": "AI genereeritud allpool toodud projektiandmete põhjal.",
+      "ai_note_confidence": "AI genereeritud allpool toodud projektiandmete põhjal (usaldusväärsus {confidence}).",
+      "ai_note_review": "Enne kliendiga jagamist kontrollige."
+    },
+    "section": {
+      "project_overview": "Projekti ülevaade",
+      "key_performance_indicators": "Peamised tulemusnäitajad",
+      "schedule_status": "Ajakava olek",
+      "risk_summary": "Riskide kokkuvõte",
+      "open_issues": "Lahtised küsimused",
+      "cost_summary": "Kulude kokkuvõte",
+      "cost_breakdown": "Kulude jaotus",
+      "change_orders": "Muudatustellimused",
+      "cash_flow": "Rahavoog",
+      "schedule_overview": "Ajakava ülevaade",
+      "milestone_status": "Vahe-eesmärkide olek",
+      "critical_path": "Kriitiline tee",
+      "3_week_lookahead": "3-nädalane lähivaade",
+      "safety_kpis": "Ohutuse tulemusnäitajad",
+      "incident_log": "Intsidentide logi",
+      "near_miss_reports": "Vahalt läinud juhtumite aruanded",
+      "safety_training": "Ohutuskoolitus",
+      "inspection_summary": "Kontrollide kokkuvõte",
+      "by_inspection_type": "Kontrolli liigi järgi",
+      "punch_list_status": "Puudujäägi nimekirja olek",
+      "recent_inspections": "Viimased kontrollid",
+      "portfolio_overview": "Portfelli ülevaade",
+      "project_statuses": "Projektide staatused",
+      "kpi_comparison": "Tulemusnäitajate võrdlus",
+      "portfolio_risks": "Portfelli riskid",
+      "field_progress": "Objekti edenemine",
+      "top_risks": "Peamised riskid",
+      "site_photos": "Ehitusplatsi fotod",
+      "summary": "Kokkuvõte"
+    },
+    "field": {
+      "name": "Nimi",
+      "status": "Olek",
+      "phase": "Faas",
+      "planned_start": "Planeeritud algus",
+      "planned_end": "Planeeritud lõpp",
+      "schedule_progress_pct": "Ajakava edenemine (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Eelarve kasutatud (%)",
+      "as_of": "Seisuga",
+      "progress_pct": "Edenemine (%)",
+      "risk_score_avg": "Keskmine riskiskoor",
+      "open_rfis": "Lahtised RFI-d",
+      "open_submittals": "Lahtised esitused",
+      "open_defects": "Lahtised defektid",
+      "open_observations": "Lahtised tähelepanekud",
+      "budget": "Eelarve",
+      "committed": "Kohustatud",
+      "actual": "Tegelik",
+      "payable": "Tasumisele kuuluv",
+      "receivable": "Laekuv",
+      "net_cash_flow": "Netorahavoog"
+    },
+    "explain": {
+      "report_total_one": "Aruande kokku: {money} ({count} rea summa).",
+      "report_total_other": "Aruande kokku: {money} ({count} rea summa).",
+      "percent_of_total": "{part} on {percent} väärtusest {total} (protsent kogusummast).",
+      "percent_zero_total": "{part} väärtusest {total}: kogusumma on null, seetõttu kuvatakse iga osa 0 protsendina.",
+      "breakdown_empty": "Kulude jaotus: andmed puuduvad.",
+      "breakdown_one": "Kulude jaotus: {count} grupp, aruande kokku {money}.",
+      "breakdown_other": "Kulude jaotus: {count} gruppi, aruande kokku {money}.",
+      "top_n_one": "Esimesed {requested}: {shown} / {shown} rida.",
+      "top_n_other": "Esimesed {requested}: {shown} / {shown} rida."
+    }
   },
   "gantt": {
     "title": "Gantti diagramm",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Mustand",
       "frozen": "Külmutatud"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Arendustulu brutoväärtus (GDV)",
+      "total_development_cost": "Arenduse kogukulu",
+      "residual_land_value": "Maa jääkväärtus",
+      "developer_profit": "Arendaja kasum",
+      "profit_on_cost": "Kasum kulust",
+      "profit_on_gdv": "Kasum GDV-st",
+      "construction_cost": "Ehituskulu",
+      "professional_fees": "Erialaste konsultatsioonide tasud",
+      "contingency": "Reserv ettenägematuteks kuludeks",
+      "finance_cost": "Finantseerimiskulu",
+      "sales_costs": "Müügikulud"
+    },
+    "status": {
+      "viable": "Elujõuline",
+      "unviable": "Ebaelujõuline",
+      "marginal": "Piirjuhtum",
+      "pending": "Pole veel hinnatud"
+    },
+    "figure": {
+      "gross_development_value": "Kõigi projekti üksuste müügiväärtuste summa, kõik ühes valuutas.",
+      "total_development_cost": "Kõik projekti teostamise kulud peale maa enda: ehitus, tasud, reserv, finantseerimine ja müügikulud.",
+      "residual_land_value": "See, mis maale jääb, kui brutoarendusväärtusest on maha arvatud arenduse kogukulu ja arendaja sihtkasum.",
+      "developer_profit": "Kasum, mida arendaja soovib alles jätta, määratud sihtmäärana brutoarendusväärtuse suhtes.",
+      "profit_on_cost": "Arendaja kasum jagatuna arenduse kogukuluga, esitatud suhtarvuna.",
+      "profit_on_gdv": "Arendaja kasum jagatuna brutoarendusväärtusega, esitatud suhtarvuna."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "ARVE",
+      "date": "Kuupäev: {value}",
+      "due": "Tähtaeg: {value}",
+      "from": "Saatja",
+      "bill_to": "Arve saaja",
+      "vat_id": "KMKR: {value}",
+      "ref": "Viide: {value}",
+      "th_description": "Kirjeldus",
+      "th_qty": "Kogus",
+      "th_unit": "Ühik",
+      "th_unit_price": "Ühikuhind",
+      "th_net": "Netosumma ({currency})",
+      "net_total": "Netosumma kokku",
+      "vat_total": "KM",
+      "grand_total": "Kokku",
+      "retention_prepaid": "Tagatisraha / ettemakse",
+      "amount_due": "Tasumisele kuuluv summa",
+      "payment": "Makse",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Konto: {value}",
+      "bank_code": "Pangakood: {value}",
+      "account_holder": "Konto omanik: {value}",
+      "footer": "See PDF sisaldab manustatud EN 16931 e-arvet (Factur-X / ZUGFeRD). Kehtiv dokument on manustatud XML."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Töölaager",
+        "rental": "Üürielamu",
+        "hotel": "Hotell"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Ootel",
+        "approved": "Kinnitatud",
+        "rejected": "Tagasi lükatud"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Täidetud",
+        "fail": "Täitmata",
+        "not_applicable": "Ei kohaldu"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Joonis",
+        "contract": "Leping",
+        "specification": "Spetsifikatsioon",
+        "photo": "Foto",
+        "correspondence": "Kirjavahetus",
+        "reality_capture": "Tegelikkuse jäädvustus",
+        "other": "Muu"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Ootel",
+        "approved": "Kinnitatud",
+        "rejected": "Tagasi lükatud",
+        "cancelled": "Tühistatud"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Mustand",
+        "submitted": "Esitatud kinnitamiseks",
+        "approved": "Kinnitatud",
+        "posted": "Kantud pearaamatusse"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Avatud",
+        "assigned": "Määratud",
+        "in_progress": "Pooleli",
+        "resolved": "Lahendatud",
+        "verified": "Kontrollitud",
+        "closed": "Suletud"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "tähelepanek",
+        "minor": "väike",
+        "major": "suur",
+        "critical": "kriitiline"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Isik",
+        "crew": "Brigaad",
+        "equipment": "Tehnika",
+        "subcontractor": "Alltöövõtja"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI mudeli nimi on aegunud või pole saadaval. Avage Seaded > AI ja määrake oma teenusepakkuja jaoks kehtiv mudeli nimi.",
+      "not_configured": "AI pole seadistatud. Seadistage seadetes AI teenusepakkuja."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "kontrollitud",
+      "bound": "lisatud",
+      "empty": "puudub"
+    },
+    "package_status_labels": {
+      "draft": "mustand",
+      "in_progress": "pooleli",
+      "ready": "valmis",
+      "issued": "välja antud"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "takistus",
+      "critical": "kriitiline",
+      "warning": "hoiatus",
+      "suggestion": "soovitus"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strateegia",
+      "brief": "Lähteülesanne",
+      "concept": "Kontseptsioon",
+      "design": "Projekteerimine",
+      "approval": "Luba",
+      "detail": "Detailprojekteerimine",
+      "tender": "Hange",
+      "award": "Hankeleping",
+      "construction": "Ehitus",
+      "handover": "Üleandmine",
+      "operation": "Kasutus"
     }
   }
 }

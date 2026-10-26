@@ -132,7 +132,15 @@
     "missing_description": "清单项 {position} 缺少描述",
     "missing_classification": "清单项 {position} 需要分类编码",
     "duplicate_ordinal": "序号重复：{ordinal}",
-    "rate_anomaly": "综合单价 {rate} 超出阈值 ({threshold})"
+    "rate_anomaly": "综合单价 {rate} 超出阈值 ({threshold})",
+    "nl": {
+      "not_a_string": "输入必须是文本。",
+      "empty": "输入为空。",
+      "too_long": "输入超过 {max} 个字符。",
+      "ai_unparsable": "无法将 AI 返回内容解析为 DSL 文档。",
+      "no_pattern": "没有任何模式与输入语句匹配。",
+      "try": "请尝试：'{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D 进度计划",
@@ -327,7 +335,16 @@
     "pass": "合格",
     "fail": "不合格",
     "partial": "部分合格",
-    "critical": "严重"
+    "critical": "严重",
+    "intl": {
+      "status_labels": {
+        "scheduled": "已安排",
+        "in_progress": "进行中",
+        "completed": "已完成",
+        "failed": "不合格",
+        "cancelled": "已取消"
+      }
+    }
   },
   "ncr": {
     "title": "不合格报告",
@@ -347,7 +364,19 @@
     "submit": "提交",
     "review": "审查",
     "approved_as_noted": "带意见通过",
-    "revise_resubmit": "修改后重报"
+    "revise_resubmit": "修改后重报",
+    "intl": {
+      "status_labels": {
+        "draft": "草稿",
+        "submitted": "已提交",
+        "under_review": "审核中",
+        "approved": "已批准",
+        "approved_as_noted": "批准（附意见）",
+        "revise_and_resubmit": "修改后重新提交",
+        "rejected": "已驳回",
+        "closed": "已关闭"
+      }
+    }
   },
   "correspondence": {
     "title": "往来函件",
@@ -372,7 +401,15 @@
     "promote": "提升状态",
     "suitability": "适用性",
     "discipline": "专业",
-    "revisions": "版本记录"
+    "revisions": "版本记录",
+    "intl": {
+      "state_labels": {
+        "wip": "工作中",
+        "shared": "已共享",
+        "published": "已发布",
+        "archived": "已归档"
+      }
+    }
   },
   "transmittals": {
     "title": "文件传递单",
@@ -384,7 +421,14 @@
     "recipients": "接收方",
     "acknowledge": "确认接收",
     "locked": "已锁定",
-    "issue_transmittal": "签发"
+    "issue_transmittal": "签发",
+    "intl": {
+      "status_words": {
+        "draft": "草稿",
+        "issued": "已发出",
+        "responded": "已回复"
+      }
+    }
   },
   "notifications": {
     "title": "通知",
@@ -426,7 +470,101 @@
     "project_status": "项目状态",
     "cost_report": "造价报表",
     "schedule_status": "进度状态",
-    "safety_report": "安全报表"
+    "safety_report": "安全报表",
+    "doc": {
+      "meta_report": "报告",
+      "meta_project": "项目",
+      "meta_type": "类型",
+      "meta_generated": "生成时间",
+      "meta_currency": "货币",
+      "field_column": "字段",
+      "value_column": "数值",
+      "yes": "是",
+      "no": "否",
+      "no_data_heading": "暂无数据",
+      "no_data_body": "该报告由空的数据快照生成。请检查所选项目的源模块（财务、进度、安全等）是否返回了数据。",
+      "no_data_body_short": "该报告由空的数据快照生成。请检查所选项目的源模块是否返回了数据。",
+      "footer_generated_by": "由 OpenConstructionERP 于 {timestamp} 生成。",
+      "worksheet_name": "报告",
+      "pdf_subject": "项目报告",
+      "overall_progress": "总体进度",
+      "as_of": "截至",
+      "recorded_by": "记录人",
+      "period": "期间",
+      "entries_suffix": "（{count} 条记录）",
+      "site_photo_alt": "现场照片",
+      "ai_summary_heading": "摘要",
+      "ai_badge": "AI 生成",
+      "ai_note": "基于下方项目数据由 AI 生成。",
+      "ai_note_confidence": "基于下方项目数据由 AI 生成（置信度 {confidence}）。",
+      "ai_note_review": "发送给客户前请先审核。"
+    },
+    "section": {
+      "project_overview": "项目概览",
+      "key_performance_indicators": "关键绩效指标",
+      "schedule_status": "进度状态",
+      "risk_summary": "风险摘要",
+      "open_issues": "未关闭问题",
+      "cost_summary": "成本摘要",
+      "cost_breakdown": "成本明细",
+      "change_orders": "变更单",
+      "cash_flow": "现金流",
+      "schedule_overview": "进度概览",
+      "milestone_status": "里程碑状态",
+      "critical_path": "关键路径",
+      "3_week_lookahead": "三周滚动计划",
+      "safety_kpis": "安全指标",
+      "incident_log": "事故记录",
+      "near_miss_reports": "未遂事件报告",
+      "safety_training": "安全培训",
+      "inspection_summary": "检查摘要",
+      "by_inspection_type": "按检查类型",
+      "punch_list_status": "整改清单状态",
+      "recent_inspections": "近期检查",
+      "portfolio_overview": "项目组合概览",
+      "project_statuses": "项目状态",
+      "kpi_comparison": "KPI 对比",
+      "portfolio_risks": "项目组合风险",
+      "field_progress": "现场进展",
+      "top_risks": "主要风险",
+      "site_photos": "现场照片",
+      "summary": "摘要"
+    },
+    "field": {
+      "name": "名称",
+      "status": "状态",
+      "phase": "阶段",
+      "planned_start": "计划开始",
+      "planned_end": "计划结束",
+      "schedule_progress_pct": "进度完成率（%）",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "预算消耗率（%）",
+      "as_of": "截至",
+      "progress_pct": "完成率（%）",
+      "risk_score_avg": "平均风险评分",
+      "open_rfis": "未关闭 RFI",
+      "open_submittals": "未审批的送审",
+      "open_defects": "未关闭缺陷",
+      "open_observations": "未关闭观察项",
+      "budget": "预算",
+      "committed": "已承诺",
+      "actual": "实际",
+      "payable": "应付",
+      "receivable": "应收",
+      "net_cash_flow": "净现金流"
+    },
+    "explain": {
+      "report_total_one": "报告合计：{money}（{count} 行之和）。",
+      "report_total_other": "报告合计：{money}（{count} 行之和）。",
+      "percent_of_total": "{part} 占 {total} 的 {percent}（占合计比例）。",
+      "percent_zero_total": "{part} / {total}：合计为零，因此各项占比均显示为 0%。",
+      "breakdown_empty": "成本明细：无数据。",
+      "breakdown_one": "成本明细：{count} 个分组，报告合计 {money}。",
+      "breakdown_other": "成本明细：{count} 个分组，报告合计 {money}。",
+      "top_n_one": "前 {requested} 项：共 {shown} 行中显示 {shown} 行。",
+      "top_n_other": "前 {requested} 项：共 {shown} 行中显示 {shown} 行。"
+    }
   },
   "gantt": {
     "title": "横道图",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "草稿",
       "frozen": "已冻结"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "开发总价值（GDV）",
+      "total_development_cost": "开发总成本",
+      "residual_land_value": "土地剩余价值",
+      "developer_profit": "开发商利润",
+      "profit_on_cost": "成本利润率",
+      "profit_on_gdv": "GDV 利润率",
+      "construction_cost": "建安成本",
+      "professional_fees": "专业费用",
+      "contingency": "预备费",
+      "finance_cost": "财务成本",
+      "sales_costs": "销售费用"
+    },
+    "status": {
+      "viable": "可行",
+      "unviable": "不可行",
+      "marginal": "临界",
+      "pending": "尚未评估"
+    },
+    "figure": {
+      "gross_development_value": "项目中所有房源的销售总额，均以同一货币计。",
+      "total_development_cost": "项目实施的全部成本（不含土地本身）：建安、专业费用、预备费、财务成本和销售费用。",
+      "residual_land_value": "从开发总价值中扣除开发总成本和目标开发商利润后，余下可用于土地的金额。",
+      "developer_profit": "开发商希望保留的利润，以占开发总价值的目标比例设定。",
+      "profit_on_cost": "开发商利润除以开发总成本，以比率表示。",
+      "profit_on_gdv": "开发商利润除以开发总价值，以比率表示。"
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "发票",
+      "date": "日期：{value}",
+      "due": "到期日：{value}",
+      "from": "开票方",
+      "bill_to": "购买方",
+      "vat_id": "税号：{value}",
+      "ref": "参考号：{value}",
+      "th_description": "项目",
+      "th_qty": "数量",
+      "th_unit": "单位",
+      "th_unit_price": "单价",
+      "th_net": "不含税金额（{currency}）",
+      "net_total": "不含税合计",
+      "vat_total": "税额",
+      "grand_total": "价税合计",
+      "retention_prepaid": "质保金 / 预付款",
+      "amount_due": "应付金额",
+      "payment": "付款信息",
+      "iban": "IBAN：{value}",
+      "bic": "BIC：{value}",
+      "account_number": "账号：{value}",
+      "bank_code": "银行代码：{value}",
+      "account_holder": "账户名称：{value}",
+      "footer": "本 PDF 内嵌符合 EN 16931 标准的电子发票（Factur-X / ZUGFeRD）。以内嵌 XML 为准。"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "工人宿舍",
+        "rental": "租赁住房",
+        "hotel": "酒店"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "待审批",
+        "approved": "已批准",
+        "rejected": "已驳回"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "符合",
+        "fail": "不符合",
+        "not_applicable": "不适用"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "图纸",
+        "contract": "合同",
+        "specification": "规范",
+        "photo": "照片",
+        "correspondence": "往来函件",
+        "reality_capture": "实景采集",
+        "other": "其他"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "待审批",
+        "approved": "已批准",
+        "rejected": "已驳回",
+        "cancelled": "已取消"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "草稿",
+        "submitted": "已提交审批",
+        "approved": "已批准",
+        "posted": "已过账至总账"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "待处理",
+        "assigned": "已指派",
+        "in_progress": "处理中",
+        "resolved": "已整改",
+        "verified": "已验证",
+        "closed": "已关闭"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "观察项",
+        "minor": "轻微",
+        "major": "严重",
+        "critical": "危急"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "人员",
+        "crew": "班组",
+        "equipment": "设备",
+        "subcontractor": "分包商"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI 模型名称已过期或不可用。请打开 设置 > AI，为您的服务商填写当前有效的模型名称。",
+      "not_configured": "尚未配置 AI。请在设置中配置 AI 服务商。"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "已验证",
+      "bound": "已附加",
+      "empty": "未提交"
+    },
+    "package_status_labels": {
+      "draft": "草稿",
+      "in_progress": "进行中",
+      "ready": "就绪",
+      "issued": "已发出"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "阻断",
+      "critical": "严重",
+      "warning": "警告",
+      "suggestion": "建议"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "策略",
+      "brief": "需求简报",
+      "concept": "概念",
+      "design": "方案设计",
+      "approval": "报批",
+      "detail": "施工图设计",
+      "tender": "招标",
+      "award": "中标",
+      "construction": "施工",
+      "handover": "交付",
+      "operation": "运营"
     }
   }
 }

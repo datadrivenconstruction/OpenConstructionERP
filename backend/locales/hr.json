@@ -106,7 +106,15 @@
     "shared": "Podijeljeno",
     "suitability": "Prikladnost",
     "title": "Zajedničko podatkovno okruženje",
-    "wip": "U izradi"
+    "wip": "U izradi",
+    "intl": {
+      "state_labels": {
+        "wip": "U izradi",
+        "shared": "Dijeljeno",
+        "published": "Objavljeno",
+        "archived": "Arhivirano"
+      }
+    }
   },
   "comments": {
     "delete": "Obriši",
@@ -239,7 +247,16 @@
     "new_inspection": "Novi pregled",
     "partial": "Djelomično",
     "pass": "Prošlo",
-    "title": "Pregledi kvalitete"
+    "title": "Pregledi kvalitete",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Zakazano",
+        "in_progress": "U tijeku",
+        "completed": "Završeno",
+        "failed": "Neuspjelo",
+        "cancelled": "Otkazano"
+      }
+    }
   },
   "meetings": {
     "absent": "Odsutan",
@@ -317,7 +334,101 @@
     "safety_report": "Izvještaj o sigurnosti",
     "schedule_status": "Status plana",
     "templates": "Predlošci",
-    "title": "Izvještaji i nadzorne ploče"
+    "title": "Izvještaji i nadzorne ploče",
+    "doc": {
+      "meta_report": "Izvješće",
+      "meta_project": "Projekt",
+      "meta_type": "Vrsta",
+      "meta_generated": "Generirano",
+      "meta_currency": "Valuta",
+      "field_column": "Polje",
+      "value_column": "Vrijednost",
+      "yes": "Da",
+      "no": "Ne",
+      "no_data_heading": "Nema dostupnih podataka",
+      "no_data_body": "Ovo izvješće generirano je iz praznog snimka podataka. Provjerite jesu li izvorni moduli (financije, raspored, sigurnost itd.) vratili podatke za odabrani projekt.",
+      "no_data_body_short": "Ovo izvješće generirano je iz praznog snimka podataka. Provjerite jesu li izvorni moduli vratili podatke za odabrani projekt.",
+      "footer_generated_by": "Generirao OpenConstructionERP dana {timestamp}.",
+      "worksheet_name": "Izvješće",
+      "pdf_subject": "Projektno izvješće",
+      "overall_progress": "Ukupni napredak",
+      "as_of": "Stanje na dan",
+      "recorded_by": "Zabilježio",
+      "period": "Razdoblje",
+      "entries_suffix": "({count} unosa)",
+      "site_photo_alt": "Fotografija gradilišta",
+      "ai_summary_heading": "Sažetak",
+      "ai_badge": "Generirano umjetnom inteligencijom",
+      "ai_note": "Generirano umjetnom inteligencijom iz projektnih podataka u nastavku.",
+      "ai_note_confidence": "Generirano umjetnom inteligencijom iz projektnih podataka u nastavku (pouzdanost {confidence}).",
+      "ai_note_review": "Provjerite prije dijeljenja s klijentom."
+    },
+    "section": {
+      "project_overview": "Pregled projekta",
+      "key_performance_indicators": "Ključni pokazatelji učinka",
+      "schedule_status": "Status rasporeda",
+      "risk_summary": "Sažetak rizika",
+      "open_issues": "Otvorena pitanja",
+      "cost_summary": "Sažetak troškova",
+      "cost_breakdown": "Raščlamba troškova",
+      "change_orders": "Naloge za izmjenu",
+      "cash_flow": "Novčani tok",
+      "schedule_overview": "Pregled rasporeda",
+      "milestone_status": "Status prekretnica",
+      "critical_path": "Kritični put",
+      "3_week_lookahead": "Pregled za 3 tjedna",
+      "safety_kpis": "Pokazatelji sigurnosti",
+      "incident_log": "Evidencija incidenata",
+      "near_miss_reports": "Izvješća o događajima bez ozljeda",
+      "safety_training": "Osposobljavanje za sigurnost",
+      "inspection_summary": "Sažetak inspekcija",
+      "by_inspection_type": "Po vrsti inspekcije",
+      "punch_list_status": "Status liste nedostataka",
+      "recent_inspections": "Nedavne inspekcije",
+      "portfolio_overview": "Pregled portfelja",
+      "project_statuses": "Statusi projekata",
+      "kpi_comparison": "Usporedba KPI-ja",
+      "portfolio_risks": "Rizici portfelja",
+      "field_progress": "Napredak na terenu",
+      "top_risks": "Najveći rizici",
+      "site_photos": "Fotografije gradilišta",
+      "summary": "Sažetak"
+    },
+    "field": {
+      "name": "Naziv",
+      "status": "Status",
+      "phase": "Faza",
+      "planned_start": "Planirani početak",
+      "planned_end": "Planirani završetak",
+      "schedule_progress_pct": "Napredak rasporeda (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Potrošeni proračun (%)",
+      "as_of": "Stanje na dan",
+      "progress_pct": "Napredak (%)",
+      "risk_score_avg": "Prosječna ocjena rizika",
+      "open_rfis": "Otvoreni RFI-ji",
+      "open_submittals": "Otvorena dostavljanja",
+      "open_defects": "Otvoreni nedostaci",
+      "open_observations": "Otvorena opažanja",
+      "budget": "Proračun",
+      "committed": "Obvezano",
+      "actual": "Stvarno",
+      "payable": "Obveze",
+      "receivable": "Potraživanja",
+      "net_cash_flow": "Neto novčani tok"
+    },
+    "explain": {
+      "report_total_one": "Ukupno u izvješću: {money} (zbroj {count} retka).",
+      "report_total_other": "Ukupno u izvješću: {money} (zbroj {count} redaka).",
+      "percent_of_total": "{part} je {percent} od {total} (postotak ukupnog).",
+      "percent_zero_total": "{part} od {total}: ukupno je nula, pa je svaki udio prikazan kao 0 posto.",
+      "breakdown_empty": "Raščlamba troškova: nema podataka.",
+      "breakdown_one": "Raščlamba troškova: {count} skupina, ukupno u izvješću {money}.",
+      "breakdown_other": "Raščlamba troškova: {count} skupina, ukupno u izvješću {money}.",
+      "top_n_one": "Prvih {requested}: {shown} od {shown} retka.",
+      "top_n_other": "Prvih {requested}: {shown} od {shown} redaka."
+    }
   },
   "rfi": {
     "ball_in_court": "Na potezu",
@@ -379,7 +490,19 @@
     "revision": "Revizija",
     "spec_section": "Stavka specifikacije",
     "submit": "Pošalji",
-    "title": "Podnesci"
+    "title": "Podnesci",
+    "intl": {
+      "status_labels": {
+        "draft": "Nacrt",
+        "submitted": "Dostavljeno",
+        "under_review": "Na pregledu",
+        "approved": "Odobreno",
+        "approved_as_noted": "Odobreno uz napomene",
+        "revise_and_resubmit": "Doraditi i ponovno dostaviti",
+        "rejected": "Odbijeno",
+        "closed": "Zatvoreno"
+      }
+    }
   },
   "takeoff": {
     "auto_detect": "Automatsko prepoznavanje",
@@ -422,7 +545,14 @@
     "new_transmittal": "Nova otpremnica",
     "purpose": "Svrha",
     "recipients": "Primatelji",
-    "title": "Otpremnice"
+    "title": "Otpremnice",
+    "intl": {
+      "status_words": {
+        "draft": "nacrt",
+        "issued": "poslano",
+        "responded": "odgovoreno"
+      }
+    }
   },
   "units": {
     "h": "h",
@@ -477,7 +607,15 @@
     "run_validation": "Pokreni provjeru",
     "score": "Ocjena kvalitete",
     "title": "Provjera",
-    "warnings": "Upozorenja"
+    "warnings": "Upozorenja",
+    "nl": {
+      "not_a_string": "Unos mora biti tekst.",
+      "empty": "Unos je prazan.",
+      "too_long": "Unos premašuje {max} znakova.",
+      "ai_unparsable": "Odgovor umjetne inteligencije nije se mogao raščlaniti kao DSL dokument.",
+      "no_pattern": "Nijedan obrazac ne odgovara unesenoj rečenici.",
+      "try": "Pokušajte: '{pattern}'"
+    }
   },
   "cost_control": {
     "errors": {
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Nacrt",
       "frozen": "Zamrznut"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Bruto vrijednost razvoja (GDV)",
+      "total_development_cost": "Ukupni trošak razvoja",
+      "residual_land_value": "Preostala vrijednost zemljišta",
+      "developer_profit": "Dobit investitora",
+      "profit_on_cost": "Dobit na trošak",
+      "profit_on_gdv": "Dobit na GDV",
+      "construction_cost": "Trošak gradnje",
+      "professional_fees": "Honorari stručnjaka",
+      "contingency": "Rezerva za nepredviđeno",
+      "finance_cost": "Trošak financiranja",
+      "sales_costs": "Troškovi prodaje"
+    },
+    "status": {
+      "viable": "Održivo",
+      "unviable": "Neodrživo",
+      "marginal": "Granično",
+      "pending": "Još nije procijenjeno"
+    },
+    "figure": {
+      "gross_development_value": "Ukupna prodajna vrijednost svih jedinica u shemi, sve u jednoj valuti.",
+      "total_development_cost": "Svi troškovi izvedbe sheme osim samog zemljišta: gradnja, honorari, rezerva, financiranje i troškovi prodaje.",
+      "residual_land_value": "Ono što ostaje za zemljište nakon što se od bruto vrijednosti razvoja oduzmu ukupni trošak razvoja i ciljana dobit investitora.",
+      "developer_profit": "Dobit koju investitor želi zadržati, zadana kao ciljani omjer bruto vrijednosti razvoja.",
+      "profit_on_cost": "Dobit investitora podijeljena ukupnim troškom razvoja, izražena kao omjer.",
+      "profit_on_gdv": "Dobit investitora podijeljena bruto vrijednošću razvoja, izražena kao omjer."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "RAČUN",
+      "date": "Datum: {value}",
+      "due": "Dospijeće: {value}",
+      "from": "Od",
+      "bill_to": "Račun za",
+      "vat_id": "OIB: {value}",
+      "ref": "Poziv na broj: {value}",
+      "th_description": "Opis",
+      "th_qty": "Kol.",
+      "th_unit": "Jed.",
+      "th_unit_price": "Jedinična cijena",
+      "th_net": "Neto ({currency})",
+      "net_total": "Ukupno neto",
+      "vat_total": "PDV",
+      "grand_total": "Ukupno za platiti",
+      "retention_prepaid": "Zadržavanje / predujam",
+      "amount_due": "Iznos za platiti",
+      "payment": "Plaćanje",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Broj računa: {value}",
+      "bank_code": "Šifra banke: {value}",
+      "account_holder": "Vlasnik računa: {value}",
+      "footer": "Ovaj PDF sadrži ugrađeni e-račun EN 16931 (Factur-X / ZUGFeRD). Mjerodavan je ugrađeni XML."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Radnički kamp",
+        "rental": "Najamni smještaj",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Na čekanju",
+        "approved": "Odobreno",
+        "rejected": "Odbijeno"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Zadovoljeno",
+        "fail": "Nije zadovoljeno",
+        "not_applicable": "Nije primjenjivo"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Nacrt",
+        "contract": "Ugovor",
+        "specification": "Specifikacija",
+        "photo": "Fotografija",
+        "correspondence": "Korespondencija",
+        "reality_capture": "Snimanje stvarnog stanja",
+        "other": "Ostalo"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Na čekanju",
+        "approved": "Odobreno",
+        "rejected": "Odbijeno",
+        "cancelled": "Otkazano"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Nacrt",
+        "submitted": "Poslano na odobrenje",
+        "approved": "Odobreno",
+        "posted": "Knjiženo u glavnoj knjizi"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Otvoreno",
+        "assigned": "Dodijeljeno",
+        "in_progress": "U tijeku",
+        "resolved": "Riješeno",
+        "verified": "Provjereno",
+        "closed": "Zatvoreno"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "opažanje",
+        "minor": "manji",
+        "major": "veći",
+        "critical": "kritičan"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Osoba",
+        "crew": "Ekipa",
+        "equipment": "Oprema",
+        "subcontractor": "Podizvođač"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Naziv AI modela je zastario ili nije dostupan. Otvorite Postavke > AI i unesite važeći naziv modela za svog pružatelja.",
+      "not_configured": "AI nije konfiguriran. Postavite AI pružatelja u Postavkama."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "provjereno",
+      "bound": "priloženo",
+      "empty": "nedostaje"
+    },
+    "package_status_labels": {
+      "draft": "nacrt",
+      "in_progress": "u tijeku",
+      "ready": "spremno",
+      "issued": "izdano"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "blokator",
+      "critical": "kritično",
+      "warning": "upozorenje",
+      "suggestion": "prijedlog"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategija",
+      "brief": "Projektni zadatak",
+      "concept": "Koncept",
+      "design": "Projektiranje",
+      "approval": "Dozvola",
+      "detail": "Glavni projekt",
+      "tender": "Natječaj",
+      "award": "Dodjela",
+      "construction": "Izgradnja",
+      "handover": "Predaja",
+      "operation": "Korištenje"
     }
   }
 }

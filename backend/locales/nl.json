@@ -132,7 +132,15 @@
     "missing_description": "Post {position} heeft geen omschrijving",
     "missing_classification": "Post {position} heeft een classificatiecode nodig",
     "duplicate_ordinal": "Dubbel volgnummer: {ordinal}",
-    "rate_anomaly": "Eenheidsprijs {rate} overschrijdt drempelwaarde ({threshold})"
+    "rate_anomaly": "Eenheidsprijs {rate} overschrijdt drempelwaarde ({threshold})",
+    "nl": {
+      "not_a_string": "De invoer moet tekst zijn.",
+      "empty": "De invoer is leeg.",
+      "too_long": "De invoer is langer dan {max} tekens.",
+      "ai_unparsable": "Het AI-antwoord kon niet als DSL-document worden gelezen.",
+      "no_pattern": "Geen patroon kwam overeen met de ingevoerde zin.",
+      "try": "Probeer: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D Planning",
@@ -327,7 +335,16 @@
     "pass": "Goedgekeurd",
     "fail": "Afgekeurd",
     "partial": "Gedeeltelijk",
-    "critical": "Kritiek"
+    "critical": "Kritiek",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Gepland",
+        "in_progress": "Bezig",
+        "completed": "Voltooid",
+        "failed": "Afgekeurd",
+        "cancelled": "Geannuleerd"
+      }
+    }
   },
   "ncr": {
     "title": "Afwijkingsrapporten",
@@ -347,7 +364,19 @@
     "submit": "Indienen",
     "review": "Beoordelen",
     "approved_as_noted": "Goedgekeurd met opmerkingen",
-    "revise_resubmit": "Herzien en opnieuw indienen"
+    "revise_resubmit": "Herzien en opnieuw indienen",
+    "intl": {
+      "status_labels": {
+        "draft": "Concept",
+        "submitted": "Ingediend",
+        "under_review": "In beoordeling",
+        "approved": "Goedgekeurd",
+        "approved_as_noted": "Goedgekeurd met opmerkingen",
+        "revise_and_resubmit": "Herzien en opnieuw indienen",
+        "rejected": "Afgewezen",
+        "closed": "Gesloten"
+      }
+    }
   },
   "correspondence": {
     "title": "Correspondentie",
@@ -372,7 +401,15 @@
     "promote": "Bevorderen",
     "suitability": "Geschiktheid",
     "discipline": "Discipline",
-    "revisions": "Revisies"
+    "revisions": "Revisies",
+    "intl": {
+      "state_labels": {
+        "wip": "In bewerking",
+        "shared": "Gedeeld",
+        "published": "Gepubliceerd",
+        "archived": "Gearchiveerd"
+      }
+    }
   },
   "transmittals": {
     "title": "Verzendlijsten",
@@ -384,7 +421,14 @@
     "recipients": "Ontvangers",
     "acknowledge": "Ontvangst bevestigen",
     "locked": "Vergrendeld",
-    "issue_transmittal": "Uitgeven"
+    "issue_transmittal": "Uitgeven",
+    "intl": {
+      "status_words": {
+        "draft": "concept",
+        "issued": "verzonden",
+        "responded": "beantwoord"
+      }
+    }
   },
   "notifications": {
     "title": "Meldingen",
@@ -426,7 +470,101 @@
     "project_status": "Projectstatus",
     "cost_report": "Kostenrapport",
     "schedule_status": "Planningsstatus",
-    "safety_report": "Veiligheidsrapport"
+    "safety_report": "Veiligheidsrapport",
+    "doc": {
+      "meta_report": "Rapport",
+      "meta_project": "Project",
+      "meta_type": "Type",
+      "meta_generated": "Gegenereerd",
+      "meta_currency": "Valuta",
+      "field_column": "Veld",
+      "value_column": "Waarde",
+      "yes": "Ja",
+      "no": "Nee",
+      "no_data_heading": "Geen gegevens beschikbaar",
+      "no_data_body": "Dit rapport is gegenereerd uit een lege gegevenssnapshot. Controleer of de brononderdelen (financiën, planning, veiligheid enz.) gegevens hebben geleverd voor het geselecteerde project.",
+      "no_data_body_short": "Dit rapport is gegenereerd uit een lege gegevenssnapshot. Controleer of de brononderdelen gegevens hebben geleverd voor het geselecteerde project.",
+      "footer_generated_by": "Gegenereerd door OpenConstructionERP op {timestamp}.",
+      "worksheet_name": "Rapport",
+      "pdf_subject": "Projectrapport",
+      "overall_progress": "Algehele voortgang",
+      "as_of": "Per",
+      "recorded_by": "Vastgelegd door",
+      "period": "Periode",
+      "entries_suffix": "({count} items)",
+      "site_photo_alt": "Foto van de bouwplaats",
+      "ai_summary_heading": "Samenvatting",
+      "ai_badge": "Door AI gegenereerd",
+      "ai_note": "Door AI gegenereerd op basis van onderstaande projectgegevens.",
+      "ai_note_confidence": "Door AI gegenereerd op basis van onderstaande projectgegevens (betrouwbaarheid {confidence}).",
+      "ai_note_review": "Controleer voordat u het met de opdrachtgever deelt."
+    },
+    "section": {
+      "project_overview": "Projectoverzicht",
+      "key_performance_indicators": "Kerncijfers",
+      "schedule_status": "Planningsstatus",
+      "risk_summary": "Risicooverzicht",
+      "open_issues": "Openstaande punten",
+      "cost_summary": "Kostenoverzicht",
+      "cost_breakdown": "Kostenspecificatie",
+      "change_orders": "Meerwerkopdrachten",
+      "cash_flow": "Kasstroom",
+      "schedule_overview": "Planningsoverzicht",
+      "milestone_status": "Status mijlpalen",
+      "critical_path": "Kritiek pad",
+      "3_week_lookahead": "3-weken vooruitblik",
+      "safety_kpis": "Veiligheidskengetallen",
+      "incident_log": "Incidentenregister",
+      "near_miss_reports": "Bijna-ongevalmeldingen",
+      "safety_training": "Veiligheidstraining",
+      "inspection_summary": "Inspectieoverzicht",
+      "by_inspection_type": "Per inspectietype",
+      "punch_list_status": "Status puntenlijst",
+      "recent_inspections": "Recente inspecties",
+      "portfolio_overview": "Portefeuilleoverzicht",
+      "project_statuses": "Projectstatussen",
+      "kpi_comparison": "KPI-vergelijking",
+      "portfolio_risks": "Portefeuillerisico's",
+      "field_progress": "Voortgang op de bouwplaats",
+      "top_risks": "Belangrijkste risico's",
+      "site_photos": "Foto's van de bouwplaats",
+      "summary": "Samenvatting"
+    },
+    "field": {
+      "name": "Naam",
+      "status": "Status",
+      "phase": "Fase",
+      "planned_start": "Geplande start",
+      "planned_end": "Geplande einde",
+      "schedule_progress_pct": "Planningsvoortgang (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Budget verbruikt (%)",
+      "as_of": "Per",
+      "progress_pct": "Voortgang (%)",
+      "risk_score_avg": "Gemiddelde risicoscore",
+      "open_rfis": "Open RFI's",
+      "open_submittals": "Open indieningen",
+      "open_defects": "Open gebreken",
+      "open_observations": "Open observaties",
+      "budget": "Budget",
+      "committed": "Gecommitteerd",
+      "actual": "Werkelijk",
+      "payable": "Te betalen",
+      "receivable": "Te ontvangen",
+      "net_cash_flow": "Netto kasstroom"
+    },
+    "explain": {
+      "report_total_one": "Totaal van het rapport: {money} (som van {count} regel).",
+      "report_total_other": "Totaal van het rapport: {money} (som van {count} regels).",
+      "percent_of_total": "{part} is {percent} van {total} (procent van het totaal).",
+      "percent_zero_total": "{part} van {total}: het totaal is nul, dus elk aandeel wordt als 0 procent weergegeven.",
+      "breakdown_empty": "Kostenspecificatie: geen gegevens.",
+      "breakdown_one": "Kostenspecificatie: {count} groep, totaal van het rapport {money}.",
+      "breakdown_other": "Kostenspecificatie: {count} groepen, totaal van het rapport {money}.",
+      "top_n_one": "Top {requested}: {shown} van {shown} regel.",
+      "top_n_other": "Top {requested}: {shown} van {shown} regels."
+    }
   },
   "gantt": {
     "title": "Gantt-diagram",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Concept",
       "frozen": "Bevroren"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Bruto ontwikkelwaarde (GDV)",
+      "total_development_cost": "Totale ontwikkelkosten",
+      "residual_land_value": "Residuele grondwaarde",
+      "developer_profit": "Ontwikkelaarswinst",
+      "profit_on_cost": "Winst op kosten",
+      "profit_on_gdv": "Winst op GDV",
+      "construction_cost": "Bouwkosten",
+      "professional_fees": "Honoraria",
+      "contingency": "Onvoorzien",
+      "finance_cost": "Financieringskosten",
+      "sales_costs": "Verkoopkosten"
+    },
+    "status": {
+      "viable": "Haalbaar",
+      "unviable": "Niet haalbaar",
+      "marginal": "Marginaal",
+      "pending": "Nog niet beoordeeld"
+    },
+    "figure": {
+      "gross_development_value": "De totale verkoopwaarde van alle eenheden in het plan, allemaal in één valuta.",
+      "total_development_cost": "Alle kosten van het realiseren van het plan behalve de grond zelf: bouw, honoraria, onvoorzien, financiering en verkoopkosten.",
+      "residual_land_value": "Wat na aftrek van de totale ontwikkelkosten en de beoogde ontwikkelaarswinst van de bruto ontwikkelwaarde overblijft voor de grond.",
+      "developer_profit": "De winst die de ontwikkelaar wil behouden, uitgedrukt als doelpercentage van de bruto ontwikkelwaarde.",
+      "profit_on_cost": "Ontwikkelaarswinst gedeeld door de totale ontwikkelkosten, uitgedrukt als verhouding.",
+      "profit_on_gdv": "Ontwikkelaarswinst gedeeld door de bruto ontwikkelwaarde, uitgedrukt als verhouding."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "FACTUUR",
+      "date": "Datum: {value}",
+      "due": "Vervaldatum: {value}",
+      "from": "Van",
+      "bill_to": "Factuuradres",
+      "vat_id": "BTW-nr.: {value}",
+      "ref": "Ref.: {value}",
+      "th_description": "Omschrijving",
+      "th_qty": "Aantal",
+      "th_unit": "Eenheid",
+      "th_unit_price": "Stukprijs",
+      "th_net": "Netto ({currency})",
+      "net_total": "Totaal excl. btw",
+      "vat_total": "btw",
+      "grand_total": "Totaal incl. btw",
+      "retention_prepaid": "Retentie / voorschot",
+      "amount_due": "Te betalen bedrag",
+      "payment": "Betaling",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Rekeningnummer: {value}",
+      "bank_code": "Bankcode: {value}",
+      "account_holder": "Rekeninghouder: {value}",
+      "footer": "Deze PDF bevat een ingesloten EN 16931-e-factuur (Factur-X / ZUGFeRD). De ingesloten XML is het geldende document."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Werkerskamp",
+        "rental": "Huurwoning",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "In behandeling",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Voldaan",
+        "fail": "Niet voldaan",
+        "not_applicable": "Niet van toepassing"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Tekening",
+        "contract": "Contract",
+        "specification": "Specificatie",
+        "photo": "Foto",
+        "correspondence": "Correspondentie",
+        "reality_capture": "Reality capture",
+        "other": "Overig"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "In behandeling",
+        "approved": "Goedgekeurd",
+        "rejected": "Afgewezen",
+        "cancelled": "Geannuleerd"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Concept",
+        "submitted": "Ingediend voor goedkeuring",
+        "approved": "Goedgekeurd",
+        "posted": "Geboekt in grootboek"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Open",
+        "assigned": "Toegewezen",
+        "in_progress": "Bezig",
+        "resolved": "Opgelost",
+        "verified": "Gecontroleerd",
+        "closed": "Gesloten"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observatie",
+        "minor": "klein",
+        "major": "groot",
+        "critical": "kritiek"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Persoon",
+        "crew": "Ploeg",
+        "equipment": "Materieel",
+        "subcontractor": "Onderaannemer"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "De naam van het AI-model is verouderd of niet beschikbaar. Open Instellingen > AI en stel een actueel geldige modelnaam in voor uw provider.",
+      "not_configured": "AI is niet ingesteld. Stel een AI-provider in via Instellingen."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "gecontroleerd",
+      "bound": "bijgevoegd",
+      "empty": "ontbreekt"
+    },
+    "package_status_labels": {
+      "draft": "concept",
+      "in_progress": "bezig",
+      "ready": "gereed",
+      "issued": "uitgegeven"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "blokkerend",
+      "critical": "kritiek",
+      "warning": "waarschuwing",
+      "suggestion": "suggestie"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategie",
+      "brief": "Programma van eisen",
+      "concept": "Concept",
+      "design": "Schetsontwerp",
+      "approval": "Vergunning",
+      "detail": "Definitief ontwerp",
+      "tender": "Aanbesteding",
+      "award": "Gunning",
+      "construction": "Uitvoering",
+      "handover": "Oplevering",
+      "operation": "Gebruik"
     }
   }
 }

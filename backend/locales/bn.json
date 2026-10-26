@@ -132,7 +132,15 @@
     "missing_description": "{position} পজিশনে কোনো বিবরণ নেই",
     "missing_classification": "{position} পজিশনের জন্য একটি শ্রেণীবিভাগ কোড প্রয়োজন",
     "duplicate_ordinal": "সদৃশ ক্রমিক নম্বর: {ordinal}",
-    "rate_anomaly": "একক রেট {rate} সীমা অতিক্রম করেছে ({threshold})"
+    "rate_anomaly": "একক রেট {rate} সীমা অতিক্রম করেছে ({threshold})",
+    "nl": {
+      "not_a_string": "ইনপুট অবশ্যই টেক্সট হতে হবে।",
+      "empty": "ইনপুট খালি।",
+      "too_long": "ইনপুট {max} অক্ষরের বেশি।",
+      "ai_unparsable": "এআই-এর উত্তর DSL ডকুমেন্ট হিসেবে পার্স করা যায়নি।",
+      "no_pattern": "ইনপুট বাক্যের সাথে কোনো প্যাটার্ন মেলেনি।",
+      "try": "চেষ্টা করুন: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D সময়সূচি",
@@ -327,7 +335,16 @@
     "pass": "উত্তীর্ণ",
     "fail": "ব্যর্থ",
     "partial": "আংশিক",
-    "critical": "সংকটজনক"
+    "critical": "সংকটজনক",
+    "intl": {
+      "status_labels": {
+        "scheduled": "নির্ধারিত",
+        "in_progress": "চলছে",
+        "completed": "সম্পন্ন",
+        "failed": "ব্যর্থ",
+        "cancelled": "বাতিল"
+      }
+    }
   },
   "ncr": {
     "title": "অ-অনুবর্তিতা রিপোর্ট",
@@ -347,7 +364,19 @@
     "submit": "জমা দিন",
     "review": "পর্যালোচনা করুন",
     "approved_as_noted": "নোটসহ অনুমোদিত",
-    "revise_resubmit": "সংশোধন ও পুনরায় জমা"
+    "revise_resubmit": "সংশোধন ও পুনরায় জমা",
+    "intl": {
+      "status_labels": {
+        "draft": "খসড়া",
+        "submitted": "জমা দেওয়া হয়েছে",
+        "under_review": "পর্যালোচনাধীন",
+        "approved": "অনুমোদিত",
+        "approved_as_noted": "মন্তব্যসহ অনুমোদিত",
+        "revise_and_resubmit": "সংশোধন করে পুনরায় জমা দিন",
+        "rejected": "প্রত্যাখ্যাত",
+        "closed": "বন্ধ"
+      }
+    }
   },
   "correspondence": {
     "title": "করেসপন্ডেন্স",
@@ -372,7 +401,15 @@
     "promote": "প্রোমোট করুন",
     "suitability": "উপযোগিতা",
     "discipline": "ডিসিপ্লিন",
-    "revisions": "সংশোধন"
+    "revisions": "সংশোধন",
+    "intl": {
+      "state_labels": {
+        "wip": "কাজ চলছে",
+        "shared": "শেয়ার করা",
+        "published": "প্রকাশিত",
+        "archived": "আর্কাইভড"
+      }
+    }
   },
   "transmittals": {
     "title": "ট্রান্সমিটাল",
@@ -384,7 +421,14 @@
     "recipients": "প্রাপক",
     "acknowledge": "স্বীকার করুন",
     "locked": "লক করা",
-    "issue_transmittal": "ইস্যু করুন"
+    "issue_transmittal": "ইস্যু করুন",
+    "intl": {
+      "status_words": {
+        "draft": "খসড়া",
+        "issued": "প্রেরিত",
+        "responded": "উত্তর দেওয়া হয়েছে"
+      }
+    }
   },
   "notifications": {
     "title": "বিজ্ঞপ্তি",
@@ -426,7 +470,101 @@
     "project_status": "প্রকল্পের স্ট্যাটাস",
     "cost_report": "কস্ট রিপোর্ট",
     "schedule_status": "সময়সূচির স্ট্যাটাস",
-    "safety_report": "নিরাপত্তা রিপোর্ট"
+    "safety_report": "নিরাপত্তা রিপোর্ট",
+    "doc": {
+      "meta_report": "প্রতিবেদন",
+      "meta_project": "প্রকল্প",
+      "meta_type": "ধরন",
+      "meta_generated": "তৈরির সময়",
+      "meta_currency": "মুদ্রা",
+      "field_column": "ক্ষেত্র",
+      "value_column": "মান",
+      "yes": "হ্যাঁ",
+      "no": "না",
+      "no_data_heading": "কোনো তথ্য পাওয়া যায়নি",
+      "no_data_body": "এই প্রতিবেদনটি একটি খালি ডেটা স্ন্যাপশট থেকে তৈরি হয়েছে। যাচাই করুন নির্বাচিত প্রকল্পের জন্য উৎস মডিউলগুলো (অর্থ, সময়সূচি, নিরাপত্তা ইত্যাদি) তথ্য ফেরত দিয়েছে কিনা।",
+      "no_data_body_short": "এই প্রতিবেদনটি একটি খালি ডেটা স্ন্যাপশট থেকে তৈরি হয়েছে। যাচাই করুন উৎস মডিউলগুলো নির্বাচিত প্রকল্পের জন্য তথ্য ফেরত দিয়েছে কিনা।",
+      "footer_generated_by": "OpenConstructionERP দ্বারা {timestamp} তারিখে তৈরি।",
+      "worksheet_name": "প্রতিবেদন",
+      "pdf_subject": "প্রকল্প প্রতিবেদন",
+      "overall_progress": "সামগ্রিক অগ্রগতি",
+      "as_of": "তারিখ অনুযায়ী",
+      "recorded_by": "রেকর্ডকারী",
+      "period": "সময়কাল",
+      "entries_suffix": "({count}টি এন্ট্রি)",
+      "site_photo_alt": "সাইটের ছবি",
+      "ai_summary_heading": "সারসংক্ষেপ",
+      "ai_badge": "এআই দ্বারা তৈরি",
+      "ai_note": "নিচের প্রকল্প তথ্য থেকে এআই দ্বারা তৈরি।",
+      "ai_note_confidence": "নিচের প্রকল্প তথ্য থেকে এআই দ্বারা তৈরি (আস্থার মাত্রা {confidence})।",
+      "ai_note_review": "ক্লায়েন্টের সাথে শেয়ার করার আগে পর্যালোচনা করুন।"
+    },
+    "section": {
+      "project_overview": "প্রকল্পের সংক্ষিপ্ত বিবরণ",
+      "key_performance_indicators": "মূল কর্মক্ষমতা সূচক",
+      "schedule_status": "সময়সূচির অবস্থা",
+      "risk_summary": "ঝুঁকির সারসংক্ষেপ",
+      "open_issues": "খোলা সমস্যা",
+      "cost_summary": "ব্যয়ের সারসংক্ষেপ",
+      "cost_breakdown": "ব্যয়ের বিভাজন",
+      "change_orders": "পরিবর্তন আদেশ",
+      "cash_flow": "নগদ প্রবাহ",
+      "schedule_overview": "সময়সূচির সংক্ষিপ্ত বিবরণ",
+      "milestone_status": "মাইলফলকের অবস্থা",
+      "critical_path": "সংকটপূর্ণ পথ",
+      "3_week_lookahead": "৩ সপ্তাহের পূর্বাভাস",
+      "safety_kpis": "নিরাপত্তা সূচক",
+      "incident_log": "ঘটনার লগ",
+      "near_miss_reports": "প্রায়-দুর্ঘটনা প্রতিবেদন",
+      "safety_training": "নিরাপত্তা প্রশিক্ষণ",
+      "inspection_summary": "পরিদর্শনের সারসংক্ষেপ",
+      "by_inspection_type": "পরিদর্শনের ধরন অনুযায়ী",
+      "punch_list_status": "পাঞ্চ তালিকার অবস্থা",
+      "recent_inspections": "সাম্প্রতিক পরিদর্শন",
+      "portfolio_overview": "পোর্টফোলিওর সংক্ষিপ্ত বিবরণ",
+      "project_statuses": "প্রকল্পের অবস্থা",
+      "kpi_comparison": "কেপিআই তুলনা",
+      "portfolio_risks": "পোর্টফোলিওর ঝুঁকি",
+      "field_progress": "সাইটের অগ্রগতি",
+      "top_risks": "শীর্ষ ঝুঁকি",
+      "site_photos": "সাইটের ছবি",
+      "summary": "সারসংক্ষেপ"
+    },
+    "field": {
+      "name": "নাম",
+      "status": "অবস্থা",
+      "phase": "পর্ব",
+      "planned_start": "পরিকল্পিত শুরু",
+      "planned_end": "পরিকল্পিত শেষ",
+      "schedule_progress_pct": "সময়সূচি অগ্রগতি (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "বাজেট ব্যয় (%)",
+      "as_of": "তারিখ অনুযায়ী",
+      "progress_pct": "অগ্রগতি (%)",
+      "risk_score_avg": "গড় ঝুঁকি স্কোর",
+      "open_rfis": "খোলা RFI",
+      "open_submittals": "খোলা জমাদান",
+      "open_defects": "খোলা ত্রুটি",
+      "open_observations": "খোলা পর্যবেক্ষণ",
+      "budget": "বাজেট",
+      "committed": "প্রতিশ্রুত",
+      "actual": "প্রকৃত",
+      "payable": "পরিশোধযোগ্য",
+      "receivable": "প্রাপ্য",
+      "net_cash_flow": "নিট নগদ প্রবাহ"
+    },
+    "explain": {
+      "report_total_one": "প্রতিবেদনের মোট: {money} ({count}টি সারির যোগফল)।",
+      "report_total_other": "প্রতিবেদনের মোট: {money} ({count}টি সারির যোগফল)।",
+      "percent_of_total": "{part}, {total}-এর {percent} (মোটের শতাংশ)।",
+      "percent_zero_total": "{part} / {total}: মোট শূন্য, তাই প্রতিটি অংশ 0 শতাংশ হিসেবে দেখানো হয়েছে।",
+      "breakdown_empty": "ব্যয়ের বিভাজন: কোনো তথ্য নেই।",
+      "breakdown_one": "ব্যয়ের বিভাজন: {count}টি গ্রুপ, প্রতিবেদনের মোট {money}।",
+      "breakdown_other": "ব্যয়ের বিভাজন: {count}টি গ্রুপ, প্রতিবেদনের মোট {money}।",
+      "top_n_one": "শীর্ষ {requested}: {shown}টির মধ্যে {shown}টি সারি।",
+      "top_n_other": "শীর্ষ {requested}: {shown}টির মধ্যে {shown}টি সারি।"
+    }
   },
   "gantt": {
     "title": "গ্যান্ট চার্ট",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "খসড়া",
       "frozen": "ফ্রিজ করা"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "মোট উন্নয়ন মূল্য (GDV)",
+      "total_development_cost": "মোট উন্নয়ন ব্যয়",
+      "residual_land_value": "অবশিষ্ট জমির মূল্য",
+      "developer_profit": "ডেভেলপারের মুনাফা",
+      "profit_on_cost": "ব্যয়ের উপর মুনাফা",
+      "profit_on_gdv": "GDV-এর উপর মুনাফা",
+      "construction_cost": "নির্মাণ ব্যয়",
+      "professional_fees": "পেশাদার ফি",
+      "contingency": "আকস্মিক ব্যয়",
+      "finance_cost": "অর্থায়ন ব্যয়",
+      "sales_costs": "বিক্রয় ব্যয়"
+    },
+    "status": {
+      "viable": "কার্যকর",
+      "unviable": "অকার্যকর",
+      "marginal": "প্রান্তিক",
+      "pending": "এখনও মূল্যায়ন হয়নি"
+    },
+    "figure": {
+      "gross_development_value": "স্কিমের সব ইউনিটের মোট বিক্রয় মূল্য, সবই একই মুদ্রায়।",
+      "total_development_cost": "জমি বাদে স্কিম বাস্তবায়নের সব ব্যয়: নির্মাণ, ফি, আকস্মিক ব্যয়, অর্থায়ন ও বিক্রয় ব্যয়।",
+      "residual_land_value": "মোট উন্নয়ন ব্যয় ও লক্ষ্য ডেভেলপার মুনাফা মোট উন্নয়ন মূল্য থেকে বাদ দেওয়ার পর জমির জন্য যা অবশিষ্ট থাকে।",
+      "developer_profit": "ডেভেলপার যে মুনাফা রাখতে চায়, যা মোট উন্নয়ন মূল্যের লক্ষ্য অনুপাত হিসেবে নির্ধারিত।",
+      "profit_on_cost": "ডেভেলপারের মুনাফাকে মোট উন্নয়ন ব্যয় দিয়ে ভাগ করে অনুপাত হিসেবে দেখানো হয়।",
+      "profit_on_gdv": "ডেভেলপারের মুনাফাকে মোট উন্নয়ন মূল্য দিয়ে ভাগ করে অনুপাত হিসেবে দেখানো হয়।"
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "চালান",
+      "date": "তারিখ: {value}",
+      "due": "পরিশোধের শেষ তারিখ: {value}",
+      "from": "প্রেরক",
+      "bill_to": "বিল প্রাপক",
+      "vat_id": "VAT: {value}",
+      "ref": "রেফারেন্স: {value}",
+      "th_description": "বিবরণ",
+      "th_qty": "পরিমাণ",
+      "th_unit": "একক",
+      "th_unit_price": "একক মূল্য",
+      "th_net": "নিট ({currency})",
+      "net_total": "নিট মোট",
+      "vat_total": "VAT",
+      "grand_total": "সর্বমোট",
+      "retention_prepaid": "রিটেনশন / অগ্রিম",
+      "amount_due": "প্রদেয় পরিমাণ",
+      "payment": "পরিশোধ",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "হিসাব নম্বর: {value}",
+      "bank_code": "ব্যাংক কোড: {value}",
+      "account_holder": "হিসাবধারী: {value}",
+      "footer": "এই PDF-এ একটি এম্বেডেড EN 16931 ই-ইনভয়েস (Factur-X / ZUGFeRD) রয়েছে। এমবেডেড XML-ই কার্যকর দলিল।"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "শ্রমিক ক্যাম্প",
+        "rental": "ভাড়ার আবাসন",
+        "hotel": "হোটেল"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "অপেক্ষমাণ",
+        "approved": "অনুমোদিত",
+        "rejected": "প্রত্যাখ্যাত"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "পূরণ হয়েছে",
+        "fail": "পূরণ হয়নি",
+        "not_applicable": "প্রযোজ্য নয়"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "নকশা",
+        "contract": "চুক্তি",
+        "specification": "স্পেসিফিকেশন",
+        "photo": "ছবি",
+        "correspondence": "যোগাযোগ",
+        "reality_capture": "বাস্তব অবস্থার ধারণ",
+        "other": "অন্যান্য"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "অপেক্ষমাণ",
+        "approved": "অনুমোদিত",
+        "rejected": "প্রত্যাখ্যাত",
+        "cancelled": "বাতিল"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "খসড়া",
+        "submitted": "অনুমোদনের জন্য জমা",
+        "approved": "অনুমোদিত",
+        "posted": "লেজারে পোস্ট করা হয়েছে"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "খোলা",
+        "assigned": "নিয়োগ করা",
+        "in_progress": "চলছে",
+        "resolved": "সমাধান হয়েছে",
+        "verified": "যাচাই করা",
+        "closed": "বন্ধ"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "পর্যবেক্ষণ",
+        "minor": "ছোট",
+        "major": "বড়",
+        "critical": "গুরুতর"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "ব্যক্তি",
+        "crew": "দল",
+        "equipment": "সরঞ্জাম",
+        "subcontractor": "উপ-ঠিকাদার"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "এআই মডেলের নাম পুরোনো বা অনুপলব্ধ। সেটিংস > AI খুলুন এবং আপনার প্রদানকারীর জন্য একটি বর্তমানে বৈধ মডেলের নাম সেট করুন।",
+      "not_configured": "এআই কনফিগার করা নেই। অনুগ্রহ করে সেটিংসে একটি এআই প্রদানকারী সেট করুন।"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "যাচাই করা",
+      "bound": "সংযুক্ত",
+      "empty": "বাকি"
+    },
+    "package_status_labels": {
+      "draft": "খসড়া",
+      "in_progress": "চলছে",
+      "ready": "প্রস্তুত",
+      "issued": "জারি করা হয়েছে"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "বাধা",
+      "critical": "গুরুতর",
+      "warning": "সতর্কতা",
+      "suggestion": "পরামর্শ"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "কৌশল",
+      "brief": "ব্রিফ",
+      "concept": "ধারণা",
+      "design": "নকশা",
+      "approval": "অনুমতি",
+      "detail": "বিস্তারিত নকশা",
+      "tender": "দরপত্র",
+      "award": "কার্যাদেশ",
+      "construction": "নির্মাণ",
+      "handover": "হস্তান্তর",
+      "operation": "পরিচালনা"
     }
   }
 }

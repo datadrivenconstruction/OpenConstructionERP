@@ -132,7 +132,15 @@
     "missing_description": "{position} позициясында сүрөттөлүшү жок",
     "missing_classification": "{position} позициясына классификация коду керек",
     "duplicate_ordinal": "Кайталанган тартип номери: {ordinal}",
-    "rate_anomaly": "Бирдик баасы {rate} чектен ашты ({threshold})"
+    "rate_anomaly": "Бирдик баасы {rate} чектен ашты ({threshold})",
+    "nl": {
+      "not_a_string": "Киргизүү текст болушу керек.",
+      "empty": "Киргизүү бош.",
+      "too_long": "Киргизүү {max} белгиден ашып кетти.",
+      "ai_unparsable": "ЖИ жообун DSL документи катары окуу мүмкүн болгон жок.",
+      "no_pattern": "Киргизилген сүйлөмгө дал келген үлгү табылган жок.",
+      "try": "Аракет кылыңыз: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D График",
@@ -327,7 +335,16 @@
     "pass": "Өттү",
     "fail": "Өтпөдү",
     "partial": "Жарым-жартылай",
-    "critical": "Критикалык"
+    "critical": "Критикалык",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Пландаштырылган",
+        "in_progress": "Жүрүп жатат",
+        "completed": "Аякталган",
+        "failed": "Ийгиликсиз",
+        "cancelled": "Жокко чыгарылган"
+      }
+    }
   },
   "ncr": {
     "title": "Дал келбөө боюнча отчеттор",
@@ -347,7 +364,19 @@
     "submit": "Тапшыруу",
     "review": "Кароо",
     "approved_as_noted": "Эскертүү менен бекитилди",
-    "revise_resubmit": "Кайра кароо жана кайра тапшыруу"
+    "revise_resubmit": "Кайра кароо жана кайра тапшыруу",
+    "intl": {
+      "status_labels": {
+        "draft": "Долбоор",
+        "submitted": "Тапшырылган",
+        "under_review": "Каралып жатат",
+        "approved": "Макулдашылган",
+        "approved_as_noted": "Эскертүүлөр менен макулдашылган",
+        "revise_and_resubmit": "Оңдоп, кайра тапшырыңыз",
+        "rejected": "Четке кагылган",
+        "closed": "Жабык"
+      }
+    }
   },
   "correspondence": {
     "title": "Кат-кабарлар",
@@ -372,7 +401,15 @@
     "promote": "Жогорулатуу",
     "suitability": "Ылайыктуулук",
     "discipline": "Тармак",
-    "revisions": "Ревизиялар"
+    "revisions": "Ревизиялар",
+    "intl": {
+      "state_labels": {
+        "wip": "Иште",
+        "shared": "Бөлүшүлгөн",
+        "published": "Жарыяланган",
+        "archived": "Архивделген"
+      }
+    }
   },
   "transmittals": {
     "title": "Өткөрмөлөр",
@@ -384,7 +421,14 @@
     "recipients": "Алуучулар",
     "acknowledge": "Тааныш болуу",
     "locked": "Кулпуланган",
-    "issue_transmittal": "Чыгаруу"
+    "issue_transmittal": "Чыгаруу",
+    "intl": {
+      "status_words": {
+        "draft": "долбоор",
+        "issued": "жөнөтүлгөн",
+        "responded": "жооп берилген"
+      }
+    }
   },
   "notifications": {
     "title": "Билдирүүлөр",
@@ -426,7 +470,101 @@
     "project_status": "Долбоордун абалы",
     "cost_report": "Нарк отчету",
     "schedule_status": "Графиктин абалы",
-    "safety_report": "Коопсуздук отчету"
+    "safety_report": "Коопсуздук отчету",
+    "doc": {
+      "meta_report": "Отчёт",
+      "meta_project": "Долбоор",
+      "meta_type": "Түрү",
+      "meta_generated": "Түзүлгөн",
+      "meta_currency": "Валюта",
+      "field_column": "Талаа",
+      "value_column": "Маани",
+      "yes": "Ооба",
+      "no": "Жок",
+      "no_data_heading": "Маалымат жок",
+      "no_data_body": "Бул отчёт бош маалымат снапшотунан түзүлгөн. Тандалган долбоор үчүн булак модулдары (финансы, график, коопсуздук ж.б.) маалымат кайтарганын текшериңиз.",
+      "no_data_body_short": "Бул отчёт бош маалымат снапшотунан түзүлгөн. Тандалган долбоор үчүн булак модулдары маалымат кайтарганын текшериңиз.",
+      "footer_generated_by": "OpenConstructionERP тарабынан {timestamp} түзүлгөн.",
+      "worksheet_name": "Отчёт",
+      "pdf_subject": "Долбоор отчёту",
+      "overall_progress": "Жалпы прогресс",
+      "as_of": "Дата боюнча",
+      "recorded_by": "Катталган",
+      "period": "Мезгил",
+      "entries_suffix": "({count} жазуу)",
+      "site_photo_alt": "Объекттин сүрөтү",
+      "ai_summary_heading": "Кыскача",
+      "ai_badge": "ЖИ түзгөн",
+      "ai_note": "Төмөндөгү долбоор маалыматынан ЖИ түзгөн.",
+      "ai_note_confidence": "Төмөндөгү долбоор маалыматынан ЖИ түзгөн (ишеним деңгээли {confidence}).",
+      "ai_note_review": "Кардарга жөнөтүүдөн мурун текшериңиз."
+    },
+    "section": {
+      "project_overview": "Долбоорго жалпы чолгоо",
+      "key_performance_indicators": "Негизги көрсөткүчтөр",
+      "schedule_status": "График абалы",
+      "risk_summary": "Тобокелдиктердин кыскача мазмуну",
+      "open_issues": "Ачык маселелер",
+      "cost_summary": "Чыгымдардын кыскача мазмуну",
+      "cost_breakdown": "Чыгымдардын бөлүштүрүлүшү",
+      "change_orders": "Өзгөртүү буйрутмалары",
+      "cash_flow": "Акча агымы",
+      "schedule_overview": "График боюнча жалпы чолгоо",
+      "milestone_status": "Этаптардын абалы",
+      "critical_path": "Критикалык жол",
+      "3_week_lookahead": "3 жумалык алдын ала план",
+      "safety_kpis": "Коопсуздуктун көрсөткүчтөрү",
+      "incident_log": "Окуялардын журналы",
+      "near_miss_reports": "Кыйла калган окуялар жөнүндө отчёттор",
+      "safety_training": "Коопсуздук боюнча окутуу",
+      "inspection_summary": "Текшерүүлөрдүн кыскача мазмуну",
+      "by_inspection_type": "Текшерүү түрү боюнча",
+      "punch_list_status": "Кемчиликтер тизмесинин абалы",
+      "recent_inspections": "Акыркы текшерүүлөр",
+      "portfolio_overview": "Портфель боюнча жалпы чолгоо",
+      "project_statuses": "Долбоорлордун абалы",
+      "kpi_comparison": "KPI салыштыруусу",
+      "portfolio_risks": "Портфелдин тобокелдиктери",
+      "field_progress": "Объекттеги прогресс",
+      "top_risks": "Негизги тобокелдиктер",
+      "site_photos": "Объекттин сүрөттөрү",
+      "summary": "Кыскача"
+    },
+    "field": {
+      "name": "Аталышы",
+      "status": "Абалы",
+      "phase": "Этап",
+      "planned_start": "Пландаштырылган башталышы",
+      "planned_end": "Пландаштырылган аякталышы",
+      "schedule_progress_pct": "График боюнча прогресс (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Бюджеттин жумшалышы (%)",
+      "as_of": "Дата боюнча",
+      "progress_pct": "Прогресс (%)",
+      "risk_score_avg": "Орточо тобокелдик упайы",
+      "open_rfis": "Ачык RFI",
+      "open_submittals": "Ачык тапшырмалар",
+      "open_defects": "Ачык кемчиликтер",
+      "open_observations": "Ачык эскертүүлөр",
+      "budget": "Бюджет",
+      "committed": "Милдеттенме",
+      "actual": "Фактылык",
+      "payable": "Төлөнүүчү",
+      "receivable": "Алынуучу",
+      "net_cash_flow": "Таза акча агымы"
+    },
+    "explain": {
+      "report_total_one": "Отчёттун жыйынтыгы: {money} ({count} сап суммасы).",
+      "report_total_other": "Отчёттун жыйынтыгы: {money} ({count} сап суммасы).",
+      "percent_of_total": "{part} — {total} маанисинин {percent} (жалпысынан пайыз).",
+      "percent_zero_total": "{part} / {total}: жыйынтык нөл, ошондуктан ар бир үлүш 0 пайыз деп көрсөтүлгөн.",
+      "breakdown_empty": "Чыгымдардын бөлүштүрүлүшү: маалымат жок.",
+      "breakdown_one": "Чыгымдардын бөлүштүрүлүшү: {count} топ, отчёттун жыйынтыгы {money}.",
+      "breakdown_other": "Чыгымдардын бөлүштүрүлүшү: {count} топ, отчёттун жыйынтыгы {money}.",
+      "top_n_one": "Алгачкы {requested}: {shown} / {shown} сап.",
+      "top_n_other": "Алгачкы {requested}: {shown} / {shown} сап."
+    }
   },
   "gantt": {
     "title": "Гантт диаграммасы",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Долбоор түрү",
       "frozen": "Тоңдурулган"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Өнүгүүнүн жалпы наркы (GDV)",
+      "total_development_cost": "Өнүгүүнүн жалпы чыгымы",
+      "residual_land_value": "Жердин калдык наркы",
+      "developer_profit": "Девелопер киреши",
+      "profit_on_cost": "Чыгымга карата киреше",
+      "profit_on_gdv": "GDV га карата киреше",
+      "construction_cost": "Курулуш наркы",
+      "professional_fees": "Кесиптик акы",
+      "contingency": "Күтүүсүз чыгымдар резерви",
+      "finance_cost": "Финансылоо чыгымы",
+      "sales_costs": "Сатуу чыгымы"
+    },
+    "status": {
+      "viable": "Ишке ашат",
+      "unviable": "Ишке ашпайт",
+      "marginal": "Чек арадагы",
+      "pending": "Али баа берилген эмес"
+    },
+    "figure": {
+      "gross_development_value": "Схемадагы бардык бирдиктердин сатуу наркынын жыйындысы, баары бир валютада.",
+      "total_development_cost": "Жерден башка схеманы ишке ашыруунун бардык чыгымдары: курулуш, акы, резерв, финансылоо жана сатуу чыгымы.",
+      "residual_land_value": "Өнүгүүнүн жалпы наркынан өнүгүүнүн жалпы чыгымын жана девелоперге максаттуу киреши алынгандан кийин жерге калган сумма.",
+      "developer_profit": "Девелопер сактап калууну көздөгөн киреше, өнүгүүнүн жалпы наркына карата максаттуу үлүш катарында белгиленет.",
+      "profit_on_cost": "Девелопер киреши өнүгүүнүн жалпы чыгымына бөлүнгөн катыш.",
+      "profit_on_gdv": "Девелопер киреши өнүгүүнүн жалпы наркына бөлүнгөн катыш."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "ЭСЕП-ФАКТУРА",
+      "date": "Күнү: {value}",
+      "due": "Төлөө мөөнөтү: {value}",
+      "from": "Жөнөтүүчү",
+      "bill_to": "Төлөөчү",
+      "vat_id": "КҚС номери: {value}",
+      "ref": "Шилтеме: {value}",
+      "th_description": "Сүрөттөмө",
+      "th_qty": "Саны",
+      "th_unit": "Бирдик",
+      "th_unit_price": "Бирдик баасы",
+      "th_net": "КҚСсиз ({currency})",
+      "net_total": "КҚСсиз жыйынтык",
+      "vat_total": "КҚС",
+      "grand_total": "Жалпы сумма",
+      "retention_prepaid": "Кармоо / алдын ала төлөм",
+      "amount_due": "Төлөнүүчү сумма",
+      "payment": "Төлөм",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Эсеп номери: {value}",
+      "bank_code": "Банк коду: {value}",
+      "account_holder": "Эсеп ээси: {value}",
+      "footer": "Бул PDF EN 16931 стандартындагы электрондук эсеп-фактураны камтыйт (Factur-X / ZUGFeRD). Негизги документ — ичине киргизилген XML."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Жумушчулар лагери",
+        "rental": "Ижарага берилүүчү турак жай",
+        "hotel": "Мейманкана"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Күтүүдө",
+        "approved": "Макулдашылган",
+        "rejected": "Четке кагылган"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Сакталган",
+        "fail": "Сакталган эмес",
+        "not_applicable": "Колдонулбайт"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Чийме",
+        "contract": "Келишим",
+        "specification": "Техникалык талаптар",
+        "photo": "Сүрөт",
+        "correspondence": "Кат алышуу",
+        "reality_capture": "Чыныгы абалды тиркөө",
+        "other": "Башка"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Күтүүдө",
+        "approved": "Макулдашылган",
+        "rejected": "Четке кагылган",
+        "cancelled": "Жокко чыгарылган"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Долбоор",
+        "submitted": "Макулдоого жөнөтүлгөн",
+        "approved": "Макулдашылган",
+        "posted": "Китепке киргизилген"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Ачык",
+        "assigned": "Дайындалган",
+        "in_progress": "Жүрүп жатат",
+        "resolved": "Оңдолгон",
+        "verified": "Текшерилген",
+        "closed": "Жабык"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "байкоо",
+        "minor": "кичине",
+        "major": "олуттуу",
+        "critical": "критикалык"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Адам",
+        "crew": "Бригада",
+        "equipment": "Техника",
+        "subcontractor": "Субмердигер"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "ЖИ моделинин аты эскирген же жеткиликсиз. Жөндөөлөр > ЖИ бөлүмүн ачып, провайдериңиз үчүн учурдагы жарактуу моделдин атын киргизиңиз.",
+      "not_configured": "ЖИ конфигурацияланган эмес. Жөндөөлөрдө ЖИ провайдерин орнатыңыз."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "текшерилген",
+      "bound": "тиркелген",
+      "empty": "жок"
+    },
+    "package_status_labels": {
+      "draft": "долбоор",
+      "in_progress": "жүрүп жатат",
+      "ready": "даяр",
+      "issued": "берилген"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "тоскоол",
+      "critical": "критикалык",
+      "warning": "эскертүү",
+      "suggestion": "сунуш"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегия",
+      "brief": "Техникалык тапшырма",
+      "concept": "Концепция",
+      "design": "Долбоорлоо",
+      "approval": "Уруксат алуу",
+      "detail": "Деталдуу долбоорлоо",
+      "tender": "Тендер",
+      "award": "Келишим түзүү",
+      "construction": "Курулуш",
+      "handover": "Тапшыруу",
+      "operation": "Иштетүү"
     }
   }
 }

@@ -132,7 +132,15 @@
     "missing_description": "A(z) {position} tételnél hiányzik a leírás",
     "missing_classification": "A(z) {position} tételhez osztályozási kód szükséges",
     "duplicate_ordinal": "Ismétlődő sorszám: {ordinal}",
-    "rate_anomaly": "Az egységár ({rate}) meghaladja a küszöbértéket ({threshold})"
+    "rate_anomaly": "Az egységár ({rate}) meghaladja a küszöbértéket ({threshold})",
+    "nl": {
+      "not_a_string": "A bemenetnek szövegnek kell lennie.",
+      "empty": "A bemenet üres.",
+      "too_long": "A bemenet meghaladja a {max} karaktert.",
+      "ai_unparsable": "Az MI válasza nem értelmezhető DSL-dokumentumként.",
+      "no_pattern": "A megadott mondathoz egyetlen minta sem illeszkedett.",
+      "try": "Próbálja ezt: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D ütemterv",
@@ -327,7 +335,16 @@
     "pass": "Megfelelt",
     "fail": "Nem felelt meg",
     "partial": "Részleges",
-    "critical": "Kritikus"
+    "critical": "Kritikus",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Ütemezve",
+        "in_progress": "Folyamatban",
+        "completed": "Befejezve",
+        "failed": "Sikertelen",
+        "cancelled": "Visszavonva"
+      }
+    }
   },
   "ncr": {
     "title": "Nem megfelelőségi jelentések",
@@ -347,7 +364,19 @@
     "submit": "Benyújtás",
     "review": "Felülvizsgálat",
     "approved_as_noted": "Jóváhagyva megjegyzésekkel",
-    "revise_resubmit": "Átdolgozás és újbóli benyújtás"
+    "revise_resubmit": "Átdolgozás és újbóli benyújtás",
+    "intl": {
+      "status_labels": {
+        "draft": "Tervezet",
+        "submitted": "Benyújtva",
+        "under_review": "Felülvizsgálat alatt",
+        "approved": "Jóváhagyva",
+        "approved_as_noted": "Megjegyzésekkel jóváhagyva",
+        "revise_and_resubmit": "Javítani és újra benyújtani",
+        "rejected": "Elutasítva",
+        "closed": "Lezárva"
+      }
+    }
   },
   "correspondence": {
     "title": "Levelezés",
@@ -372,7 +401,15 @@
     "promote": "Előléptetés",
     "suitability": "Alkalmassági szint",
     "discipline": "Szakág",
-    "revisions": "Revíziók"
+    "revisions": "Revíziók",
+    "intl": {
+      "state_labels": {
+        "wip": "Folyamatban",
+        "shared": "Megosztva",
+        "published": "Közzétéve",
+        "archived": "Archiválva"
+      }
+    }
   },
   "transmittals": {
     "title": "Dokumentumátadások",
@@ -384,7 +421,14 @@
     "recipients": "Címzettek",
     "acknowledge": "Nyugtázás",
     "locked": "Zárolva",
-    "issue_transmittal": "Kiadás"
+    "issue_transmittal": "Kiadás",
+    "intl": {
+      "status_words": {
+        "draft": "tervezet",
+        "issued": "kiadva",
+        "responded": "megválaszolva"
+      }
+    }
   },
   "notifications": {
     "title": "Értesítések",
@@ -426,7 +470,101 @@
     "project_status": "Projekt állapota",
     "cost_report": "Költségjelentés",
     "schedule_status": "Ütemterv állapota",
-    "safety_report": "Munkavédelmi jelentés"
+    "safety_report": "Munkavédelmi jelentés",
+    "doc": {
+      "meta_report": "Jelentés",
+      "meta_project": "Projekt",
+      "meta_type": "Típus",
+      "meta_generated": "Létrehozva",
+      "meta_currency": "Pénznem",
+      "field_column": "Mező",
+      "value_column": "Érték",
+      "yes": "Igen",
+      "no": "Nem",
+      "no_data_heading": "Nincs elérhető adat",
+      "no_data_body": "Ez a jelentés üres adatpillanatképből készült. Ellenőrizze, hogy a forrásmodulok (pénzügy, ütemterv, munkavédelem stb.) adatot szolgáltattak-e a kiválasztott projekthez.",
+      "no_data_body_short": "Ez a jelentés üres adatpillanatképből készült. Ellenőrizze, hogy a forrásmodulok adatot szolgáltattak-e a kiválasztott projekthez.",
+      "footer_generated_by": "Készítette az OpenConstructionERP, ekkor: {timestamp}.",
+      "worksheet_name": "Jelentés",
+      "pdf_subject": "Projektjelentés",
+      "overall_progress": "Összesített előrehaladás",
+      "as_of": "Dátum szerint",
+      "recorded_by": "Rögzítette",
+      "period": "Időszak",
+      "entries_suffix": "({count} bejegyzés)",
+      "site_photo_alt": "Helyszíni fénykép",
+      "ai_summary_heading": "Összefoglaló",
+      "ai_badge": "MI-vel készült",
+      "ai_note": "Az alábbi projektadatokból MI készítette.",
+      "ai_note_confidence": "Az alábbi projektadatokból MI készítette (megbízhatóság: {confidence}).",
+      "ai_note_review": "Az ügyfélnek való megosztás előtt ellenőrizze."
+    },
+    "section": {
+      "project_overview": "Projekt áttekintés",
+      "key_performance_indicators": "Kulcsfontosságú teljesítménymutatók",
+      "schedule_status": "Ütemterv állapota",
+      "risk_summary": "Kockázati összefoglaló",
+      "open_issues": "Nyitott kérdések",
+      "cost_summary": "Költségösszesítő",
+      "cost_breakdown": "Költségbontás",
+      "change_orders": "Módosítási megrendelések",
+      "cash_flow": "Pénzforgalom",
+      "schedule_overview": "Ütemterv áttekintés",
+      "milestone_status": "Mérföldkövek állapota",
+      "critical_path": "Kritikus út",
+      "3_week_lookahead": "3 hetes előretekintés",
+      "safety_kpis": "Munkavédelmi mutatók",
+      "incident_log": "Balesetnapló",
+      "near_miss_reports": "Majdnem-baleset jelentések",
+      "safety_training": "Munkavédelmi oktatás",
+      "inspection_summary": "Ellenőrzések összefoglalója",
+      "by_inspection_type": "Ellenőrzéstípus szerint",
+      "punch_list_status": "Hibalista állapota",
+      "recent_inspections": "Legutóbbi ellenőrzések",
+      "portfolio_overview": "Portfólió áttekintés",
+      "project_statuses": "Projektek állapota",
+      "kpi_comparison": "KPI összehasonlítás",
+      "portfolio_risks": "Portfólió kockázatai",
+      "field_progress": "Helyszíni előrehaladás",
+      "top_risks": "Fő kockázatok",
+      "site_photos": "Helyszíni fényképek",
+      "summary": "Összefoglaló"
+    },
+    "field": {
+      "name": "Név",
+      "status": "Állapot",
+      "phase": "Fázis",
+      "planned_start": "Tervezett kezdés",
+      "planned_end": "Tervezett befejezés",
+      "schedule_progress_pct": "Ütemterv-előrehaladás (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Felhasznált költségvetés (%)",
+      "as_of": "Dátum szerint",
+      "progress_pct": "Előrehaladás (%)",
+      "risk_score_avg": "Átlagos kockázati pontszám",
+      "open_rfis": "Nyitott RFI-k",
+      "open_submittals": "Nyitott benyújtások",
+      "open_defects": "Nyitott hibák",
+      "open_observations": "Nyitott megfigyelések",
+      "budget": "Költségvetés",
+      "committed": "Lekötött",
+      "actual": "Tény",
+      "payable": "Fizetendő",
+      "receivable": "Követelés",
+      "net_cash_flow": "Nettó pénzforgalom"
+    },
+    "explain": {
+      "report_total_one": "A jelentés összesen: {money} ({count} sor összege).",
+      "report_total_other": "A jelentés összesen: {money} ({count} sor összege).",
+      "percent_of_total": "{part} a(z) {total} {percent}-a (az összes százaléka).",
+      "percent_zero_total": "{part} / {total}: az összeg nulla, ezért minden részesedés 0 százalékként jelenik meg.",
+      "breakdown_empty": "Költségbontás: nincs adat.",
+      "breakdown_one": "Költségbontás: {count} csoport, a jelentés összesen {money}.",
+      "breakdown_other": "Költségbontás: {count} csoport, a jelentés összesen {money}.",
+      "top_n_one": "Első {requested}: {shown} / {shown} sor.",
+      "top_n_other": "Első {requested}: {shown} / {shown} sor."
+    }
   },
   "gantt": {
     "title": "Gantt-diagram",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Piszkozat",
       "frozen": "Lezárt"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Bruttó fejlesztési érték (GDV)",
+      "total_development_cost": "Teljes fejlesztési költség",
+      "residual_land_value": "Maradványérték (telek)",
+      "developer_profit": "Fejlesztői haszon",
+      "profit_on_cost": "Haszon a költségen",
+      "profit_on_gdv": "Haszon a GDV-n",
+      "construction_cost": "Építési költség",
+      "professional_fees": "Szakértői díjak",
+      "contingency": "Tartalék",
+      "finance_cost": "Finanszírozási költség",
+      "sales_costs": "Értékesítési költségek"
+    },
+    "status": {
+      "viable": "Megvalósítható",
+      "unviable": "Nem megvalósítható",
+      "marginal": "Határeset",
+      "pending": "Még nincs értékelve"
+    },
+    "figure": {
+      "gross_development_value": "A program összes egységének teljes eladási értéke, egy pénznemben.",
+      "total_development_cost": "A program megvalósításának minden költsége a telken kívül: építés, díjak, tartalék, finanszírozás és értékesítési költségek.",
+      "residual_land_value": "A telekre jutó rész a bruttó fejlesztési értékből levont teljes fejlesztési költség és a célzott fejlesztői haszon után.",
+      "developer_profit": "A fejlesztő által megtartani kívánt haszon, a bruttó fejlesztési érték céltényezőjeként meghatározva.",
+      "profit_on_cost": "A fejlesztői haszon osztva a teljes fejlesztési költséggel, arányként megadva.",
+      "profit_on_gdv": "A fejlesztői haszon osztva a bruttó fejlesztési értékkel, arányként megadva."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "SZÁMLA",
+      "date": "Dátum: {value}",
+      "due": "Fizetési határidő: {value}",
+      "from": "Kibocsátó",
+      "bill_to": "Számlázási cím",
+      "vat_id": "Adószám: {value}",
+      "ref": "Hivatkozás: {value}",
+      "th_description": "Megnevezés",
+      "th_qty": "Menny.",
+      "th_unit": "Egység",
+      "th_unit_price": "Egységár",
+      "th_net": "Nettó ({currency})",
+      "net_total": "Nettó összesen",
+      "vat_total": "ÁFA",
+      "grand_total": "Fizetendő összesen",
+      "retention_prepaid": "Visszatartás / előleg",
+      "amount_due": "Fizetendő összeg",
+      "payment": "Fizetés",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Számlaszám: {value}",
+      "bank_code": "Bankkód: {value}",
+      "account_holder": "Számlatulajdonos: {value}",
+      "footer": "Ez a PDF beágyazott EN 16931 elektronikus számlát tartalmaz (Factur-X / ZUGFeRD). A beágyazott XML az irányadó dokumentum."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Munkástábor",
+        "rental": "Bérlakás",
+        "hotel": "Szálloda"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Függőben",
+        "approved": "Jóváhagyva",
+        "rejected": "Elutasítva"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Teljesül",
+        "fail": "Nem teljesül",
+        "not_applicable": "Nem alkalmazandó"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Terv",
+        "contract": "Szerződés",
+        "specification": "Műszaki leírás",
+        "photo": "Fénykép",
+        "correspondence": "Levelezés",
+        "reality_capture": "Valóság-rögzítés",
+        "other": "Egyéb"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Függőben",
+        "approved": "Jóváhagyva",
+        "rejected": "Elutasítva",
+        "cancelled": "Visszavonva"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Tervezet",
+        "submitted": "Jóváhagyásra beküldve",
+        "approved": "Jóváhagyva",
+        "posted": "Könyvelve"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Nyitott",
+        "assigned": "Hozzárendelve",
+        "in_progress": "Folyamatban",
+        "resolved": "Megoldva",
+        "verified": "Ellenőrizve",
+        "closed": "Lezárva"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "megfigyelés",
+        "minor": "kisebb",
+        "major": "jelentős",
+        "critical": "kritikus"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Személy",
+        "crew": "Brigád",
+        "equipment": "Gép",
+        "subcontractor": "Alvállalkozó"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Az MI-modell neve elavult vagy nem elérhető. Nyissa meg a Beállítások > AI menüpontot, és adjon meg a szolgáltatójához érvényes modellnevet.",
+      "not_configured": "Az MI nincs beállítva. Kérjük, állítson be MI-szolgáltatót a Beállításokban."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "ellenőrizve",
+      "bound": "csatolva",
+      "empty": "hiányzik"
+    },
+    "package_status_labels": {
+      "draft": "tervezet",
+      "in_progress": "folyamatban",
+      "ready": "kész",
+      "issued": "kiadva"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "akadály",
+      "critical": "kritikus",
+      "warning": "figyelmeztetés",
+      "suggestion": "javaslat"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Stratégia",
+      "brief": "Követelményleírás",
+      "concept": "Koncepció",
+      "design": "Tervezés",
+      "approval": "Engedélyezés",
+      "detail": "Kiviteli tervezés",
+      "tender": "Közbeszerzés",
+      "award": "Odaítélés",
+      "construction": "Kivitelezés",
+      "handover": "Átadás",
+      "operation": "Üzemeltetés"
     }
   }
 }

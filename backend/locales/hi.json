@@ -132,7 +132,15 @@
     "missing_description": "मद {position} का विवरण गायब है",
     "missing_classification": "मद {position} को वर्गीकरण कोड चाहिए",
     "duplicate_ordinal": "डुप्लिकेट क्रम संख्या: {ordinal}",
-    "rate_anomaly": "इकाई दर {rate} सीमा ({threshold}) से अधिक है"
+    "rate_anomaly": "इकाई दर {rate} सीमा ({threshold}) से अधिक है",
+    "nl": {
+      "not_a_string": "इनपुट टेक्स्ट होना चाहिए।",
+      "empty": "इनपुट खाली है।",
+      "too_long": "इनपुट {max} अक्षरों से अधिक है।",
+      "ai_unparsable": "AI का उत्तर DSL दस्तावेज़ के रूप में पढ़ा नहीं जा सका।",
+      "no_pattern": "दिए गए वाक्य से कोई पैटर्न मेल नहीं खाया।",
+      "try": "कोशिश करें: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D अनुसूची",
@@ -327,7 +335,16 @@
     "pass": "पास",
     "fail": "विफल",
     "partial": "आंशिक",
-    "critical": "गंभीर"
+    "critical": "गंभीर",
+    "intl": {
+      "status_labels": {
+        "scheduled": "निर्धारित",
+        "in_progress": "जारी",
+        "completed": "पूर्ण",
+        "failed": "असफल",
+        "cancelled": "रद्द"
+      }
+    }
   },
   "ncr": {
     "title": "गैर-अनुरूपता रिपोर्ट",
@@ -347,7 +364,19 @@
     "submit": "जमा करें",
     "review": "समीक्षा",
     "approved_as_noted": "टिप्पणी के अनुसार स्वीकृत",
-    "revise_resubmit": "संशोधित करें और पुनः जमा करें"
+    "revise_resubmit": "संशोधित करें और पुनः जमा करें",
+    "intl": {
+      "status_labels": {
+        "draft": "ड्राफ़्ट",
+        "submitted": "सबमिट किया गया",
+        "under_review": "समीक्षाधीन",
+        "approved": "स्वीकृत",
+        "approved_as_noted": "टिप्पणियों सहित स्वीकृत",
+        "revise_and_resubmit": "संशोधित करके फिर से सबमिट करें",
+        "rejected": "अस्वीकृत",
+        "closed": "बंद"
+      }
+    }
   },
   "correspondence": {
     "title": "पत्राचार",
@@ -372,7 +401,15 @@
     "promote": "बढ़ावा दें",
     "suitability": "उपयुक्तता",
     "discipline": "विषय",
-    "revisions": "संशोधन"
+    "revisions": "संशोधन",
+    "intl": {
+      "state_labels": {
+        "wip": "कार्य जारी",
+        "shared": "साझा किया गया",
+        "published": "प्रकाशित",
+        "archived": "आर्काइव"
+      }
+    }
   },
   "transmittals": {
     "title": "ट्रांसमिटल",
@@ -384,7 +421,14 @@
     "recipients": "प्राप्तकर्ता",
     "acknowledge": "पावती दें",
     "locked": "लॉक",
-    "issue_transmittal": "जारी करें"
+    "issue_transmittal": "जारी करें",
+    "intl": {
+      "status_words": {
+        "draft": "ड्राफ़्ट",
+        "issued": "भेजा गया",
+        "responded": "उत्तर दिया गया"
+      }
+    }
   },
   "notifications": {
     "title": "सूचनाएँ",
@@ -426,7 +470,101 @@
     "project_status": "परियोजना स्थिति",
     "cost_report": "लागत रिपोर्ट",
     "schedule_status": "अनुसूची स्थिति",
-    "safety_report": "सुरक्षा रिपोर्ट"
+    "safety_report": "सुरक्षा रिपोर्ट",
+    "doc": {
+      "meta_report": "रिपोर्ट",
+      "meta_project": "प्रोजेक्ट",
+      "meta_type": "प्रकार",
+      "meta_generated": "जनरेट किया गया",
+      "meta_currency": "मुद्रा",
+      "field_column": "फ़ील्ड",
+      "value_column": "मान",
+      "yes": "हाँ",
+      "no": "नहीं",
+      "no_data_heading": "कोई डेटा उपलब्ध नहीं",
+      "no_data_body": "यह रिपोर्ट एक खाली डेटा स्नैपशॉट से जनरेट की गई थी। जाँचें कि चयनित प्रोजेक्ट के लिए स्रोत मॉड्यूल (फ़ाइनेंस, शेड्यूल, सेफ़्टी आदि) ने डेटा लौटाया है।",
+      "no_data_body_short": "यह रिपोर्ट एक खाली डेटा स्नैपशॉट से जनरेट की गई थी। जाँचें कि स्रोत मॉड्यूल ने चयनित प्रोजेक्ट के लिए डेटा लौटाया है।",
+      "footer_generated_by": "OpenConstructionERP द्वारा {timestamp} पर जनरेट किया गया।",
+      "worksheet_name": "रिपोर्ट",
+      "pdf_subject": "प्रोजेक्ट रिपोर्ट",
+      "overall_progress": "कुल प्रगति",
+      "as_of": "तिथि तक",
+      "recorded_by": "दर्ज करने वाला",
+      "period": "अवधि",
+      "entries_suffix": "({count} प्रविष्टियाँ)",
+      "site_photo_alt": "साइट की फ़ोटो",
+      "ai_summary_heading": "सारांश",
+      "ai_badge": "AI द्वारा जनरेट",
+      "ai_note": "नीचे दिए प्रोजेक्ट डेटा से AI द्वारा जनरेट।",
+      "ai_note_confidence": "नीचे दिए प्रोजेक्ट डेटा से AI द्वारा जनरेट (विश्वास स्तर {confidence})।",
+      "ai_note_review": "क्लाइंट के साथ साझा करने से पहले समीक्षा करें।"
+    },
+    "section": {
+      "project_overview": "प्रोजेक्ट का अवलोकन",
+      "key_performance_indicators": "मुख्य प्रदर्शन संकेतक",
+      "schedule_status": "शेड्यूल की स्थिति",
+      "risk_summary": "जोखिम सारांश",
+      "open_issues": "खुले मुद्दे",
+      "cost_summary": "लागत सारांश",
+      "cost_breakdown": "लागत विवरण",
+      "change_orders": "चेंज ऑर्डर",
+      "cash_flow": "नकदी प्रवाह",
+      "schedule_overview": "शेड्यूल का अवलोकन",
+      "milestone_status": "माइलस्टोन की स्थिति",
+      "critical_path": "क्रिटिकल पाथ",
+      "3_week_lookahead": "3-सप्ताह का लुकअहेड",
+      "safety_kpis": "सेफ़्टी KPI",
+      "incident_log": "घटना लॉग",
+      "near_miss_reports": "निअर-मिस रिपोर्ट",
+      "safety_training": "सेफ़्टी प्रशिक्षण",
+      "inspection_summary": "निरीक्षण सारांश",
+      "by_inspection_type": "निरीक्षण प्रकार के अनुसार",
+      "punch_list_status": "पंच लिस्ट की स्थिति",
+      "recent_inspections": "हाल के निरीक्षण",
+      "portfolio_overview": "पोर्टफ़ोलियो अवलोकन",
+      "project_statuses": "प्रोजेक्ट की स्थिति",
+      "kpi_comparison": "KPI तुलना",
+      "portfolio_risks": "पोर्टफ़ोलियो जोखिम",
+      "field_progress": "साइट पर प्रगति",
+      "top_risks": "प्रमुख जोखिम",
+      "site_photos": "साइट की फ़ोटो",
+      "summary": "सारांश"
+    },
+    "field": {
+      "name": "नाम",
+      "status": "स्थिति",
+      "phase": "चरण",
+      "planned_start": "नियोजित शुरुआत",
+      "planned_end": "नियोजित समाप्ति",
+      "schedule_progress_pct": "शेड्यूल प्रगति (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "बजट खर्च (%)",
+      "as_of": "तिथि तक",
+      "progress_pct": "प्रगति (%)",
+      "risk_score_avg": "औसत जोखिम स्कोर",
+      "open_rfis": "खुले RFI",
+      "open_submittals": "खुली सबमिटल",
+      "open_defects": "खुले दोष",
+      "open_observations": "खुली टिप्पणियाँ",
+      "budget": "बजट",
+      "committed": "प्रतिबद्ध",
+      "actual": "वास्तविक",
+      "payable": "देय",
+      "receivable": "प्राप्य",
+      "net_cash_flow": "शुद्ध नकदी प्रवाह"
+    },
+    "explain": {
+      "report_total_one": "रिपोर्ट का कुल: {money} ({count} पंक्ति का योग)।",
+      "report_total_other": "रिपोर्ट का कुल: {money} ({count} पंक्तियों का योग)।",
+      "percent_of_total": "{part} का {total} में {percent} है (कुल का प्रतिशत)।",
+      "percent_zero_total": "{part} / {total}: कुल शून्य है, इसलिए हर हिस्सा 0 प्रतिशत दिखाया गया है।",
+      "breakdown_empty": "लागत विवरण: कोई डेटा नहीं।",
+      "breakdown_one": "लागत विवरण: {count} समूह, रिपोर्ट का कुल {money}।",
+      "breakdown_other": "लागत विवरण: {count} समूह, रिपोर्ट का कुल {money}।",
+      "top_n_one": "शीर्ष {requested}: {shown} में से {shown} पंक्ति।",
+      "top_n_other": "शीर्ष {requested}: {shown} में से {shown} पंक्तियाँ।"
+    }
   },
   "gantt": {
     "title": "गैंट चार्ट",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "ड्राफ़्ट",
       "frozen": "फ़्रीज़ किया गया"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "ग्रॉस डेवलपमेंट वैल्यू (GDV)",
+      "total_development_cost": "कुल डेवलपमेंट लागत",
+      "residual_land_value": "अवशेष भूमि मूल्य",
+      "developer_profit": "डेवलपर लाभ",
+      "profit_on_cost": "लागत पर लाभ",
+      "profit_on_gdv": "GDV पर लाभ",
+      "construction_cost": "निर्माण लागत",
+      "professional_fees": "व्यावसायिक शुल्क",
+      "contingency": "आकस्मिक निधि",
+      "finance_cost": "वित्त लागत",
+      "sales_costs": "बिक्री लागत"
+    },
+    "status": {
+      "viable": "व्यवहार्य",
+      "unviable": "अव्यवहार्य",
+      "marginal": "सीमांत",
+      "pending": "अभी तक मूल्यांकन नहीं हुआ"
+    },
+    "figure": {
+      "gross_development_value": "योजना की सभी इकाइयों का कुल बिक्री मूल्य, सब एक ही मुद्रा में।",
+      "total_development_cost": "भूमि को छोड़कर योजना लागू करने की सारी लागत: निर्माण, शुल्क, आकस्मिक निधि, वित्त और बिक्री लागत।",
+      "residual_land_value": "ग्रॉस डेवलपमेंट वैल्यू से कुल डेवलपमेंट लागत और लक्षित डेवलपर लाभ घटाने के बाद भूमि के लिए बचा मूल्य।",
+      "developer_profit": "वह लाभ जिसे डेवलपर रखना चाहता है, जो ग्रॉस डेवलपमेंट वैल्यू के लक्ष्य अनुपात के रूप में तय होता है।",
+      "profit_on_cost": "डेवलपर लाभ को कुल डेवलपमेंट लागत से भाग देकर अनुपात के रूप में दिखाया गया।",
+      "profit_on_gdv": "डेवलपर लाभ को ग्रॉस डेवलपमेंट वैल्यू से भाग देकर अनुपात के रूप में दिखाया गया।"
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "चालान",
+      "date": "दिनांक: {value}",
+      "due": "देय तिथि: {value}",
+      "from": "से",
+      "bill_to": "बिल भेजें",
+      "vat_id": "VAT: {value}",
+      "ref": "संदर्भ: {value}",
+      "th_description": "विवरण",
+      "th_qty": "मात्रा",
+      "th_unit": "इकाई",
+      "th_unit_price": "इकाई मूल्य",
+      "th_net": "शुद्ध ({currency})",
+      "net_total": "शुद्ध कुल",
+      "vat_total": "VAT",
+      "grand_total": "कुल योग",
+      "retention_prepaid": "रिटेंशन / अग्रिम भुगतान",
+      "amount_due": "देय राशि",
+      "payment": "भुगतान",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "खाता संख्या: {value}",
+      "bank_code": "बैंक कोड: {value}",
+      "account_holder": "खाताधारक: {value}",
+      "footer": "इस PDF में एम्बेडेड EN 16931 ई-इनवॉइस (Factur-X / ZUGFeRD) है। एम्बेडेड XML ही प्रामाणिक दस्तावेज़ है।"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "मज़दूर शिविर",
+        "rental": "किराये का आवास",
+        "hotel": "होटल"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "लंबित",
+        "approved": "स्वीकृत",
+        "rejected": "अस्वीकृत"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "पूरा हुआ",
+        "fail": "पूरा नहीं हुआ",
+        "not_applicable": "लागू नहीं"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "ड्रॉइंग",
+        "contract": "अनुबंध",
+        "specification": "विनिर्देश",
+        "photo": "फ़ोटो",
+        "correspondence": "पत्राचार",
+        "reality_capture": "रियलिटी कैप्चर",
+        "other": "अन्य"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "लंबित",
+        "approved": "स्वीकृत",
+        "rejected": "अस्वीकृत",
+        "cancelled": "रद्द"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "ड्राफ़्ट",
+        "submitted": "स्वीकृति के लिए भेजा गया",
+        "approved": "स्वीकृत",
+        "posted": "लेजर में दर्ज"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "खुला",
+        "assigned": "सौंपा गया",
+        "in_progress": "जारी",
+        "resolved": "हल किया गया",
+        "verified": "सत्यापित",
+        "closed": "बंद"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "अवलोकन",
+        "minor": "मामूली",
+        "major": "बड़ा",
+        "critical": "गंभीर"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "व्यक्ति",
+        "crew": "टीम",
+        "equipment": "उपकरण",
+        "subcontractor": "उप-ठेकेदार"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI मॉडल का नाम पुराना है या उपलब्ध नहीं है। सेटिंग्स > AI खोलें और अपने प्रदाता के लिए वर्तमान में मान्य मॉडल नाम सेट करें।",
+      "not_configured": "AI कॉन्फ़िगर नहीं है। कृपया सेटिंग्स में AI प्रदाता सेट करें।"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "सत्यापित",
+      "bound": "संलग्न",
+      "empty": "बाकी"
+    },
+    "package_status_labels": {
+      "draft": "ड्राफ़्ट",
+      "in_progress": "जारी",
+      "ready": "तैयार",
+      "issued": "जारी किया गया"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "बाधा",
+      "critical": "गंभीर",
+      "warning": "चेतावनी",
+      "suggestion": "सुझाव"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "रणनीति",
+      "brief": "ब्रीफ़",
+      "concept": "अवधारणा",
+      "design": "डिज़ाइन",
+      "approval": "अनुमति",
+      "detail": "विस्तृत डिज़ाइन",
+      "tender": "निविदा",
+      "award": "आवंटन",
+      "construction": "निर्माण",
+      "handover": "हस्तांतरण",
+      "operation": "संचालन"
     }
   }
 }

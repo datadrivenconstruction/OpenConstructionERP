@@ -132,7 +132,15 @@
     "missing_description": "לפריט {position} חסר תיאור",
     "missing_classification": "פריט {position} דורש קוד סיווג",
     "duplicate_ordinal": "מספר סידורי כפול: {ordinal}",
-    "rate_anomaly": "תעריף היחידה {rate} חורג מהסף ({threshold})"
+    "rate_anomaly": "תעריף היחידה {rate} חורג מהסף ({threshold})",
+    "nl": {
+      "not_a_string": "הקלט חייב להיות טקסט.",
+      "empty": "הקלט ריק.",
+      "too_long": "הקלט חורג מ-{max} תווים.",
+      "ai_unparsable": "לא ניתן היה לפרש את תשובת ה-AI כמסמך DSL.",
+      "no_pattern": "לא נמצאה תבנית שתואמת את המשפט שהוזן.",
+      "try": "נסו: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "לוח זמנים 4D",
@@ -327,7 +335,16 @@
     "pass": "עבר",
     "fail": "נכשל",
     "partial": "חלקי",
-    "critical": "קריטי"
+    "critical": "קריטי",
+    "intl": {
+      "status_labels": {
+        "scheduled": "מתוכננת",
+        "in_progress": "בתהליך",
+        "completed": "הושלמה",
+        "failed": "נכשלה",
+        "cancelled": "בוטלה"
+      }
+    }
   },
   "ncr": {
     "title": "דוחות אי-התאמה",
@@ -347,7 +364,19 @@
     "submit": "הגש",
     "review": "סקירה",
     "approved_as_noted": "אושר עם הערות",
-    "revise_resubmit": "תיקון והגשה מחדש"
+    "revise_resubmit": "תיקון והגשה מחדש",
+    "intl": {
+      "status_labels": {
+        "draft": "טיוטה",
+        "submitted": "הוגש",
+        "under_review": "בבדיקה",
+        "approved": "אושר",
+        "approved_as_noted": "אושר בהערות",
+        "revise_and_resubmit": "לתיקון והגשה מחדש",
+        "rejected": "נדחה",
+        "closed": "סגור"
+      }
+    }
   },
   "correspondence": {
     "title": "התכתבות",
@@ -372,7 +401,15 @@
     "promote": "קידום",
     "suitability": "התאמה",
     "discipline": "תחום",
-    "revisions": "גרסאות"
+    "revisions": "גרסאות",
+    "intl": {
+      "state_labels": {
+        "wip": "בעבודה",
+        "shared": "משותף",
+        "published": "פורסם",
+        "archived": "בארכיון"
+      }
+    }
   },
   "transmittals": {
     "title": "העברות",
@@ -384,7 +421,14 @@
     "recipients": "נמענים",
     "acknowledge": "אשר קבלה",
     "locked": "נעול",
-    "issue_transmittal": "הנפקה"
+    "issue_transmittal": "הנפקה",
+    "intl": {
+      "status_words": {
+        "draft": "טיוטה",
+        "issued": "נשלח",
+        "responded": "נענה"
+      }
+    }
   },
   "notifications": {
     "title": "התראות",
@@ -426,7 +470,101 @@
     "project_status": "סטטוס הפרויקט",
     "cost_report": "דוח עלות",
     "schedule_status": "סטטוס לוח זמנים",
-    "safety_report": "דוח בטיחות"
+    "safety_report": "דוח בטיחות",
+    "doc": {
+      "meta_report": "דוח",
+      "meta_project": "פרויקט",
+      "meta_type": "סוג",
+      "meta_generated": "נוצר בתאריך",
+      "meta_currency": "מטבע",
+      "field_column": "שדה",
+      "value_column": "ערך",
+      "yes": "כן",
+      "no": "לא",
+      "no_data_heading": "אין נתונים זמינים",
+      "no_data_body": "דוח זה נוצר מתמונת נתונים ריקה. ודאו שמודולי המקור (כספים, לוח זמנים, בטיחות וכו') החזירו נתונים עבור הפרויקט שנבחר.",
+      "no_data_body_short": "דוח זה נוצר מתמונת נתונים ריקה. ודאו שמודולי המקור החזירו נתונים עבור הפרויקט שנבחר.",
+      "footer_generated_by": "נוצר על ידי OpenConstructionERP בתאריך {timestamp}.",
+      "worksheet_name": "דוח",
+      "pdf_subject": "דוח פרויקט",
+      "overall_progress": "התקדמות כללית",
+      "as_of": "נכון לתאריך",
+      "recorded_by": "נרשם על ידי",
+      "period": "תקופה",
+      "entries_suffix": "({count} רשומות)",
+      "site_photo_alt": "תמונה מהאתר",
+      "ai_summary_heading": "סיכום",
+      "ai_badge": "נוצר על ידי AI",
+      "ai_note": "נוצר על ידי AI מנתוני הפרויקט שלהלן.",
+      "ai_note_confidence": "נוצר על ידי AI מנתוני הפרויקט שלהלן (רמת ביטחון {confidence}).",
+      "ai_note_review": "יש לבדוק לפני שיתוף עם הלקוח."
+    },
+    "section": {
+      "project_overview": "סקירת הפרויקט",
+      "key_performance_indicators": "מדדי ביצוע מרכזיים",
+      "schedule_status": "סטטוס לוח זמנים",
+      "risk_summary": "סיכום סיכונים",
+      "open_issues": "נושאים פתוחים",
+      "cost_summary": "סיכום עלויות",
+      "cost_breakdown": "פירוט עלויות",
+      "change_orders": "הוראות שינוי",
+      "cash_flow": "תזרים מזומנים",
+      "schedule_overview": "סקירת לוח זמנים",
+      "milestone_status": "סטטוס אבני דרך",
+      "critical_path": "נתיב קריטי",
+      "3_week_lookahead": "מבט קדימה ל-3 שבועות",
+      "safety_kpis": "מדדי בטיחות",
+      "incident_log": "יומן אירועים",
+      "near_miss_reports": "דיווחי כמעט-תאונה",
+      "safety_training": "הדרכות בטיחות",
+      "inspection_summary": "סיכום בדיקות",
+      "by_inspection_type": "לפי סוג בדיקה",
+      "punch_list_status": "סטטוס רשימת ליקויים",
+      "recent_inspections": "בדיקות אחרונות",
+      "portfolio_overview": "סקירת תיק הפרויקטים",
+      "project_statuses": "סטטוס פרויקטים",
+      "kpi_comparison": "השוואת מדדי KPI",
+      "portfolio_risks": "סיכוני תיק הפרויקטים",
+      "field_progress": "התקדמות באתר",
+      "top_risks": "סיכונים מרכזיים",
+      "site_photos": "תמונות מהאתר",
+      "summary": "סיכום"
+    },
+    "field": {
+      "name": "שם",
+      "status": "סטטוס",
+      "phase": "שלב",
+      "planned_start": "התחלה מתוכננת",
+      "planned_end": "סיום מתוכנן",
+      "schedule_progress_pct": "התקדמות לוח זמנים (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "תקציב שנוצל (%)",
+      "as_of": "נכון לתאריך",
+      "progress_pct": "התקדמות (%)",
+      "risk_score_avg": "ציון סיכון ממוצע",
+      "open_rfis": "RFI פתוחים",
+      "open_submittals": "הגשות פתוחות",
+      "open_defects": "ליקויים פתוחים",
+      "open_observations": "הערות פתוחות",
+      "budget": "תקציב",
+      "committed": "מחויב",
+      "actual": "בפועל",
+      "payable": "לתשלום",
+      "receivable": "לגבייה",
+      "net_cash_flow": "תזרים מזומנים נטו"
+    },
+    "explain": {
+      "report_total_one": "סה\"כ הדוח: {money} (סכום של {count} שורה).",
+      "report_total_other": "סה\"כ הדוח: {money} (סכום של {count} שורות).",
+      "percent_of_total": "{part} הוא {percent} מתוך {total} (אחוז מהסה\"כ).",
+      "percent_zero_total": "{part} מתוך {total}: הסה\"כ אפס, ולכן כל חלק מדווח כ-0 אחוז.",
+      "breakdown_empty": "פירוט עלויות: אין נתונים.",
+      "breakdown_one": "פירוט עלויות: קבוצה אחת {count}, סה\"כ הדוח {money}.",
+      "breakdown_other": "פירוט עלויות: {count} קבוצות, סה\"כ הדוח {money}.",
+      "top_n_one": "{requested} הראשונות: {shown} מתוך {shown} שורה.",
+      "top_n_other": "{requested} הראשונות: {shown} מתוך {shown} שורות."
+    }
   },
   "gantt": {
     "title": "תרשים גאנט",
@@ -788,6 +926,197 @@
     "snapshot_status": {
       "draft": "טיוטה",
       "frozen": "מוקפאת"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "שווי פיתוח כולל (GDV)",
+      "total_development_cost": "עלות פיתוח כוללת",
+      "residual_land_value": "שווי קרקע שיורי",
+      "developer_profit": "רווח היזם",
+      "profit_on_cost": "רווח על העלות",
+      "profit_on_gdv": "רווח על GDV",
+      "construction_cost": "עלות בנייה",
+      "professional_fees": "שכר מקצועי",
+      "contingency": "עתודה לבלתי צפוי",
+      "finance_cost": "עלות מימון",
+      "sales_costs": "עלויות מכירה"
+    },
+    "status": {
+      "viable": "בר ביצוע",
+      "unviable": "לא בר ביצוע",
+      "marginal": "גבולי",
+      "pending": "טרם נבדק"
+    },
+    "figure": {
+      "gross_development_value": "סך שווי המכירה של כל היחידות בתכנית, הכול במטבע אחד.",
+      "total_development_cost": "כל עלויות הביצוע של התכנית מלבד הקרקע עצמה: בנייה, שכר מקצועי, עתודה, מימון ועלויות מכירה.",
+      "residual_land_value": "מה שנותר לקרקע לאחר שמפחיתים מהשווי הכולל את עלות הפיתוח הכוללת ואת רווח היזם הנדרש.",
+      "developer_profit": "הרווח שהיזם שואף להשאיר, מוגדר כיחס יעד מתוך השווי הכולל של הפיתוח.",
+      "profit_on_cost": "רווח היזם חלקי עלות הפיתוח הכוללת, מוצג כיחס.",
+      "profit_on_gdv": "רווח היזם חלקי השווי הכולל של הפיתוח, מוצג כיחס."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "חשבונית",
+      "date": "תאריך: {value}",
+      "due": "תאריך פירעון: {value}",
+      "from": "מאת",
+      "bill_to": "לחיוב",
+      "vat_id": "מספר עוסק מורשה: {value}",
+      "ref": "אסמכתא: {value}",
+      "th_description": "תיאור",
+      "th_qty": "כמות",
+      "th_unit": "יחידה",
+      "th_unit_price": "מחיר ליחידה",
+      "th_net": "נטו ({currency})",
+      "net_total": "סה\"כ נטו",
+      "vat_total": "מע\"מ",
+      "grand_total": "סה\"כ לתשלום",
+      "retention_prepaid": "עיכבון / מקדמה",
+      "amount_due": "סכום לתשלום",
+      "payment": "תשלום",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "מספר חשבון: {value}",
+      "bank_code": "קוד בנק: {value}",
+      "account_holder": "בעל החשבון: {value}",
+      "footer": "קובץ PDF זה כולל חשבונית אלקטרונית EN 16931 מוטמעת (Factur-X / ZUGFeRD). ה-XML המוטמע הוא המסמך המחייב."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "מחנה עובדים",
+        "rental": "דיור להשכרה",
+        "hotel": "מלון"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "ממתין",
+        "approved": "אושר",
+        "rejected": "נדחה"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "עומד בדרישה",
+        "fail": "לא עומד בדרישה",
+        "not_applicable": "לא רלוונטי"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "שרטוט",
+        "contract": "חוזה",
+        "specification": "מפרט",
+        "photo": "תמונה",
+        "correspondence": "התכתבות",
+        "reality_capture": "תיעוד מציאות",
+        "other": "אחר"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "ממתין",
+        "approved": "אושר",
+        "rejected": "נדחה",
+        "cancelled": "בוטל"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "טיוטה",
+        "submitted": "הוגש לאישור",
+        "approved": "אושר",
+        "posted": "נרשם בספר הראשי"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "פתוח",
+        "assigned": "הוקצה",
+        "in_progress": "בתהליך",
+        "resolved": "טופל",
+        "verified": "אומת",
+        "closed": "סגור"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "הערה",
+        "minor": "קל",
+        "major": "משמעותי",
+        "critical": "קריטי"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "אדם",
+        "crew": "צוות",
+        "equipment": "ציוד",
+        "subcontractor": "קבלן משנה"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "שם מודל ה-AI אינו מעודכן או אינו זמין. פתחו הגדרות > AI והגדירו שם מודל תקף לספק שלכם.",
+      "not_configured": "ה-AI אינו מוגדר. אנא הגדירו ספק AI בהגדרות."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "אומת",
+      "bound": "צורף",
+      "empty": "חסר"
+    },
+    "package_status_labels": {
+      "draft": "טיוטה",
+      "in_progress": "בתהליך",
+      "ready": "מוכן",
+      "issued": "הונפק"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "חוסם",
+      "critical": "קריטי",
+      "warning": "אזהרה",
+      "suggestion": "הצעה"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "אסטרטגיה",
+      "brief": "תוכנית דרישות",
+      "concept": "קונספט",
+      "design": "תכנון",
+      "approval": "היתר",
+      "detail": "תכנון מפורט",
+      "tender": "מכרז",
+      "award": "הזמנה",
+      "construction": "ביצוע",
+      "handover": "מסירה",
+      "operation": "תפעול"
     }
   }
 }

@@ -132,7 +132,15 @@
     "missing_description": "Η θέση {position} δεν έχει περιγραφή",
     "missing_classification": "Η θέση {position} χρειάζεται κωδικό ταξινόμησης",
     "duplicate_ordinal": "Διπλός τακτικός αριθμός: {ordinal}",
-    "rate_anomaly": "Η τιμή μονάδας {rate} υπερβαίνει το όριο ({threshold})"
+    "rate_anomaly": "Η τιμή μονάδας {rate} υπερβαίνει το όριο ({threshold})",
+    "nl": {
+      "not_a_string": "Η είσοδος πρέπει να είναι κείμενο.",
+      "empty": "Η είσοδος είναι κενή.",
+      "too_long": "Η είσοδος υπερβαίνει τους {max} χαρακτήρες.",
+      "ai_unparsable": "Η απάντηση της AI δεν μπόρεσε να αναλυθεί ως έγγραφο DSL.",
+      "no_pattern": "Κανένα μοτίβο δεν ταίριαξε με την πρόταση εισόδου.",
+      "try": "Δοκιμάστε: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "Χρονοδιάγραμμα 4D",
@@ -327,7 +335,16 @@
     "pass": "Επιτυχία",
     "fail": "Αποτυχία",
     "partial": "Μερικό",
-    "critical": "Κρίσιμη"
+    "critical": "Κρίσιμη",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Προγραμματισμένη",
+        "in_progress": "Σε εξέλιξη",
+        "completed": "Ολοκληρώθηκε",
+        "failed": "Αποτυχία",
+        "cancelled": "Ακυρώθηκε"
+      }
+    }
   },
   "ncr": {
     "title": "Αναφορές Μη Συμμόρφωσης",
@@ -347,7 +364,19 @@
     "submit": "Υποβολή",
     "review": "Έλεγχος",
     "approved_as_noted": "Εγκρίθηκε με Παρατηρήσεις",
-    "revise_resubmit": "Αναθεώρηση & Επανυποβολή"
+    "revise_resubmit": "Αναθεώρηση & Επανυποβολή",
+    "intl": {
+      "status_labels": {
+        "draft": "Πρόχειρο",
+        "submitted": "Υποβλήθηκε",
+        "under_review": "Υπό έλεγχο",
+        "approved": "Εγκρίθηκε",
+        "approved_as_noted": "Εγκρίθηκε με παρατηρήσεις",
+        "revise_and_resubmit": "Αναθεώρηση και νέα υποβολή",
+        "rejected": "Απορρίφθηκε",
+        "closed": "Κλειστό"
+      }
+    }
   },
   "correspondence": {
     "title": "Αλληλογραφία",
@@ -372,7 +401,15 @@
     "promote": "Προαγωγή",
     "suitability": "Καταλληλότητα",
     "discipline": "Ειδικότητα",
-    "revisions": "Εκδόσεις"
+    "revisions": "Εκδόσεις",
+    "intl": {
+      "state_labels": {
+        "wip": "Σε εξέλιξη",
+        "shared": "Κοινοποιημένο",
+        "published": "Δημοσιευμένο",
+        "archived": "Αρχειοθετημένο"
+      }
+    }
   },
   "transmittals": {
     "title": "Διαβιβαστικά",
@@ -384,7 +421,14 @@
     "recipients": "Παραλήπτες",
     "acknowledge": "Επιβεβαίωση",
     "locked": "Κλειδωμένο",
-    "issue_transmittal": "Ζήτημα"
+    "issue_transmittal": "Ζήτημα",
+    "intl": {
+      "status_words": {
+        "draft": "πρόχειρο",
+        "issued": "εκδόθηκε",
+        "responded": "απαντήθηκε"
+      }
+    }
   },
   "notifications": {
     "title": "Ειδοποιήσεις",
@@ -426,7 +470,101 @@
     "project_status": "Κατάσταση Έργου",
     "cost_report": "Αναφορά Κόστους",
     "schedule_status": "Κατάσταση Χρονοδιαγράμματος",
-    "safety_report": "Αναφορά Ασφαλείας"
+    "safety_report": "Αναφορά Ασφαλείας",
+    "doc": {
+      "meta_report": "Αναφορά",
+      "meta_project": "Έργο",
+      "meta_type": "Τύπος",
+      "meta_generated": "Δημιουργήθηκε",
+      "meta_currency": "Νόμισμα",
+      "field_column": "Πεδίο",
+      "value_column": "Τιμή",
+      "yes": "Ναι",
+      "no": "Όχι",
+      "no_data_heading": "Δεν υπάρχουν διαθέσιμα δεδομένα",
+      "no_data_body": "Αυτή η αναφορά δημιουργήθηκε από κενό στιγμιότυπο δεδομένων. Ελέγξτε ότι οι πηγαίες ενότητες (οικονομικά, χρονοδιάγραμμα, ασφάλεια κ.ά.) επέστρεψαν δεδομένα για το επιλεγμένο έργο.",
+      "no_data_body_short": "Αυτή η αναφορά δημιουργήθηκε από κενό στιγμιότυπο δεδομένων. Ελέγξτε ότι οι πηγαίες ενότητες επέστρεψαν δεδομένα για το επιλεγμένο έργο.",
+      "footer_generated_by": "Δημιουργήθηκε από το OpenConstructionERP στις {timestamp}.",
+      "worksheet_name": "Αναφορά",
+      "pdf_subject": "Αναφορά έργου",
+      "overall_progress": "Συνολική πρόοδος",
+      "as_of": "Κατά την",
+      "recorded_by": "Καταχωρήθηκε από",
+      "period": "Περίοδος",
+      "entries_suffix": "({count} εγγραφές)",
+      "site_photo_alt": "Φωτογραφία εργοταξίου",
+      "ai_summary_heading": "Σύνοψη",
+      "ai_badge": "Δημιουργήθηκε με AI",
+      "ai_note": "Δημιουργήθηκε με AI από τα δεδομένα του έργου παρακάτω.",
+      "ai_note_confidence": "Δημιουργήθηκε με AI από τα δεδομένα του έργου παρακάτω (βαθμός εμπιστοσύνης {confidence}).",
+      "ai_note_review": "Ελέγξτε πριν από την κοινοποίηση στον πελάτη."
+    },
+    "section": {
+      "project_overview": "Επισκόπηση έργου",
+      "key_performance_indicators": "Βασικοί δείκτες απόδοσης",
+      "schedule_status": "Κατάσταση χρονοδιαγράμματος",
+      "risk_summary": "Σύνοψη κινδύνων",
+      "open_issues": "Ανοιχτά θέματα",
+      "cost_summary": "Σύνοψη κόστους",
+      "cost_breakdown": "Ανάλυση κόστους",
+      "change_orders": "Εντολές αλλαγής",
+      "cash_flow": "Ταμειακές ροές",
+      "schedule_overview": "Επισκόπηση χρονοδιαγράμματος",
+      "milestone_status": "Κατάσταση ορόσημων",
+      "critical_path": "Κρίσιμο μονοπάτι",
+      "3_week_lookahead": "Πρόγραμμα 3 εβδομάδων",
+      "safety_kpis": "Δείκτες ασφάλειας",
+      "incident_log": "Αρχείο περιστατικών",
+      "near_miss_reports": "Αναφορές παρ' ολίγον ατυχημάτων",
+      "safety_training": "Εκπαίδευση ασφάλειας",
+      "inspection_summary": "Σύνοψη επιθεωρήσεων",
+      "by_inspection_type": "Ανά τύπο επιθεώρησης",
+      "punch_list_status": "Κατάσταση λίστας ελλείψεων",
+      "recent_inspections": "Πρόσφατες επιθεωρήσεις",
+      "portfolio_overview": "Επισκόπηση χαρτοφυλακίου",
+      "project_statuses": "Καταστάσεις έργων",
+      "kpi_comparison": "Σύγκριση δεικτών",
+      "portfolio_risks": "Κίνδυνοι χαρτοφυλακίου",
+      "field_progress": "Πρόοδος εργοταξίου",
+      "top_risks": "Κυριότεροι κίνδυνοι",
+      "site_photos": "Φωτογραφίες εργοταξίου",
+      "summary": "Σύνοψη"
+    },
+    "field": {
+      "name": "Όνομα",
+      "status": "Κατάσταση",
+      "phase": "Φάση",
+      "planned_start": "Προγραμματισμένη έναρξη",
+      "planned_end": "Προγραμματισμένη λήξη",
+      "schedule_progress_pct": "Πρόοδος χρονοδιαγράμματος (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Κατανάλωση προϋπολογισμού (%)",
+      "as_of": "Κατά την",
+      "progress_pct": "Πρόοδος (%)",
+      "risk_score_avg": "Μέση βαθμολογία κινδύνου",
+      "open_rfis": "Ανοιχτά RFI",
+      "open_submittals": "Ανοιχτές υποβολές",
+      "open_defects": "Ανοιχτά ελαττώματα",
+      "open_observations": "Ανοιχτές παρατηρήσεις",
+      "budget": "Προϋπολογισμός",
+      "committed": "Δεσμευμένα",
+      "actual": "Πραγματικό",
+      "payable": "Πληρωτέα",
+      "receivable": "Απαιτήσεις",
+      "net_cash_flow": "Καθαρή ταμειακή ροή"
+    },
+    "explain": {
+      "report_total_one": "Σύνολο αναφοράς: {money} (άθροισμα {count} γραμμής).",
+      "report_total_other": "Σύνολο αναφοράς: {money} (άθροισμα {count} γραμμών).",
+      "percent_of_total": "Το {part} είναι {percent} του {total} (ποσοστό του συνόλου).",
+      "percent_zero_total": "{part} από {total}: το σύνολο είναι μηδέν, οπότε κάθε μερίδιο αναφέρεται ως 0 τοις εκατό.",
+      "breakdown_empty": "Ανάλυση κόστους: δεν υπάρχουν δεδομένα.",
+      "breakdown_one": "Ανάλυση κόστους: {count} ομάδα, σύνολο αναφοράς {money}.",
+      "breakdown_other": "Ανάλυση κόστους: {count} ομάδες, σύνολο αναφοράς {money}.",
+      "top_n_one": "Πρώτα {requested}: {shown} από {shown} γραμμή.",
+      "top_n_other": "Πρώτα {requested}: {shown} από {shown} γραμμές."
+    }
   },
   "gantt": {
     "title": "Διάγραμμα Gantt",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Πρόχειρο",
       "frozen": "Παγωμένο"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Ακαθάριστη αξία ανάπτυξης (GDV)",
+      "total_development_cost": "Συνολικό κόστος ανάπτυξης",
+      "residual_land_value": "Υπολειμματική αξία γης",
+      "developer_profit": "Κέρδος επενδυτή-ανάπτυξης",
+      "profit_on_cost": "Κέρδος επί του κόστους",
+      "profit_on_gdv": "Κέρδος επί του GDV",
+      "construction_cost": "Κόστος κατασκευής",
+      "professional_fees": "Αμοιβές επαγγελματιών",
+      "contingency": "Απρόβλεπτα",
+      "finance_cost": "Χρηματοοικονομικό κόστος",
+      "sales_costs": "Έξοδα πωλήσεων"
+    },
+    "status": {
+      "viable": "Βιώσιμο",
+      "unviable": "Μη βιώσιμο",
+      "marginal": "Οριακό",
+      "pending": "Δεν έχει αξιολογηθεί ακόμη"
+    },
+    "figure": {
+      "gross_development_value": "Η συνολική αξία πώλησης όλων των μονάδων του σχεδίου, σε ένα νόμισμα.",
+      "total_development_cost": "Όλα τα κόστη υλοποίησης του σχεδίου εκτός από το ίδιο το οικόπεδο: κατασκευή, αμοιβές, απρόβλεπτα, χρηματοδότηση και έξοδα πωλήσεων.",
+      "residual_land_value": "Το υπόλοιπο για το οικόπεδο, αφού από την ακαθάριστη αξία ανάπτυξης αφαιρεθούν το συνολικό κόστος ανάπτυξης και το στόχος κέρδους του επενδυτή.",
+      "developer_profit": "Το κέρδος που στοχεύει να διατηρήσει ο επενδυτής, ορισμένο ως ποσοστιαίος στόχος της ακαθάριστης αξίας ανάπτυξης.",
+      "profit_on_cost": "Το κέρδος του επενδυτή διαιρεμένο με το συνολικό κόστος ανάπτυξης, εκφρασμένο ως λόγος.",
+      "profit_on_gdv": "Το κέρδος του επενδυτή διαιρεμένο με την ακαθάριστη αξία ανάπτυξης, εκφρασμένο ως λόγος."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "ΤΙΜΟΛΟΓΙΟ",
+      "date": "Ημερομηνία: {value}",
+      "due": "Λήξη: {value}",
+      "from": "Από",
+      "bill_to": "Τιμολόγηση σε",
+      "vat_id": "ΑΦΜ ΦΠΑ: {value}",
+      "ref": "Αρ. αναφοράς: {value}",
+      "th_description": "Περιγραφή",
+      "th_qty": "Ποσότητα",
+      "th_unit": "Μονάδα",
+      "th_unit_price": "Τιμή μονάδας",
+      "th_net": "Καθαρό ({currency})",
+      "net_total": "Καθαρή αξία",
+      "vat_total": "ΦΠΑ",
+      "grand_total": "Γενικό σύνολο",
+      "retention_prepaid": "Παρακράτηση / προκαταβολή",
+      "amount_due": "Ποσό προς πληρωμή",
+      "payment": "Πληρωμή",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Αριθμός λογαριασμού: {value}",
+      "bank_code": "Κωδικός τράπεζας: {value}",
+      "account_holder": "Δικαιούχος λογαριασμού: {value}",
+      "footer": "Αυτό το PDF περιέχει ενσωματωμένο ηλεκτρονικό τιμολόγιο EN 16931 (Factur-X / ZUGFeRD). Το ενσωματωμένο XML είναι το ισχύον έγγραφο."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Καταυλισμός εργατών",
+        "rental": "Ενοικιαζόμενη στέγη",
+        "hotel": "Ξενοδοχείο"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Σε εκκρεμότητα",
+        "approved": "Εγκρίθηκε",
+        "rejected": "Απορρίφθηκε"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Ικανοποιείται",
+        "fail": "Δεν ικανοποιείται",
+        "not_applicable": "Δεν ισχύει"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Σχέδιο",
+        "contract": "Σύμβαση",
+        "specification": "Προδιαγραφή",
+        "photo": "Φωτογραφία",
+        "correspondence": "Αλληλογραφία",
+        "reality_capture": "Καταγραφή πραγματικότητας",
+        "other": "Άλλο"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Σε εκκρεμότητα",
+        "approved": "Εγκρίθηκε",
+        "rejected": "Απορρίφθηκε",
+        "cancelled": "Ακυρώθηκε"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Πρόχειρο",
+        "submitted": "Υποβλήθηκε για έγκριση",
+        "approved": "Εγκρίθηκε",
+        "posted": "Καταχωρήθηκε στο καθολικό"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Ανοιχτό",
+        "assigned": "Ανατέθηκε",
+        "in_progress": "Σε εξέλιξη",
+        "resolved": "Επιλύθηκε",
+        "verified": "Επαληθεύτηκε",
+        "closed": "Κλειστό"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "παρατήρηση",
+        "minor": "μικρό",
+        "major": "σημαντικό",
+        "critical": "κρίσιμο"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Άτομο",
+        "crew": "Συνεργείο",
+        "equipment": "Εξοπλισμός",
+        "subcontractor": "Υπεργολάβος"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Το όνομα του μοντέλου AI είναι παρωχημένο ή μη διαθέσιμο. Ανοίξτε Ρυθμίσεις > AI και ορίστε ένα ισχύον όνομα μοντέλου για τον πάροχό σας.",
+      "not_configured": "Η AI δεν έχει ρυθμιστεί. Ορίστε έναν πάροχο AI στις Ρυθμίσεις."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "επαληθεύτηκε",
+      "bound": "επισυνάφθηκε",
+      "empty": "εκκρεμεί"
+    },
+    "package_status_labels": {
+      "draft": "πρόχειρο",
+      "in_progress": "σε εξέλιξη",
+      "ready": "έτοιμο",
+      "issued": "εκδόθηκε"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "κρίσιμο εμπόδιο",
+      "critical": "κρίσιμο",
+      "warning": "προειδοποίηση",
+      "suggestion": "πρόταση"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Στρατηγική",
+      "brief": "Σύνταξη απαιτήσεων",
+      "concept": "Σύλληψη ιδέας",
+      "design": "Σχεδιασμός",
+      "approval": "Άδεια",
+      "detail": "Λεπτομερής σχεδιασμός",
+      "tender": "Διαγωνισμός",
+      "award": "Ανάθεση",
+      "construction": "Κατασκευή",
+      "handover": "Παράδοση",
+      "operation": "Λειτουργία"
     }
   }
 }

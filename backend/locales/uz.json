@@ -132,7 +132,15 @@
     "missing_description": "{position} pozitsiyasida tavsif yoʻq",
     "missing_classification": "{position} pozitsiyasi tasniflash kodini talab qiladi",
     "duplicate_ordinal": "Takrorlangan tartib raqami: {ordinal}",
-    "rate_anomaly": "Birlik narxi {rate} chegaradan oshdi ({threshold})"
+    "rate_anomaly": "Birlik narxi {rate} chegaradan oshdi ({threshold})",
+    "nl": {
+      "not_a_string": "Kiritilgan ma'lumot matn bo'lishi kerak.",
+      "empty": "Kiritilgan ma'lumot bo'sh.",
+      "too_long": "Kiritilgan ma'lumot {max} ta belgidan oshib ketdi.",
+      "ai_unparsable": "AI javobini DSL hujjati sifatida tahlil qilib bo'lmadi.",
+      "no_pattern": "Kiritilgan gapga mos keladigan shablon topilmadi.",
+      "try": "Sinab ko'ring: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D jadval",
@@ -327,7 +335,16 @@
     "pass": "Oʻtdi",
     "fail": "Oʻtmadi",
     "partial": "Qisman",
-    "critical": "Jiddiy"
+    "critical": "Jiddiy",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Rejalashtirilgan",
+        "in_progress": "Jarayonda",
+        "completed": "Yakunlangan",
+        "failed": "Muvaffaqiyatsiz",
+        "cancelled": "Bekor qilingan"
+      }
+    }
   },
   "ncr": {
     "title": "Nomuvofiqlik dalolatnomalari",
@@ -347,7 +364,19 @@
     "submit": "Yuborish",
     "review": "Koʻrib chiqish",
     "approved_as_noted": "Izohlar bilan tasdiqlangan",
-    "revise_resubmit": "Tuzatib qayta yuboring"
+    "revise_resubmit": "Tuzatib qayta yuboring",
+    "intl": {
+      "status_labels": {
+        "draft": "Qoralama",
+        "submitted": "Taqdim etilgan",
+        "under_review": "Ko'rib chiqilmoqda",
+        "approved": "Tasdiqlangan",
+        "approved_as_noted": "Izohlar bilan tasdiqlangan",
+        "revise_and_resubmit": "Qayta ishlab, qayta topshirish",
+        "rejected": "Rad etilgan",
+        "closed": "Yopilgan"
+      }
+    }
   },
   "correspondence": {
     "title": "Yozishmalar",
@@ -372,7 +401,15 @@
     "promote": "Keyingi holatga oʻtkazish",
     "suitability": "Yaroqlilik",
     "discipline": "Boʻlim",
-    "revisions": "Tahrirlar"
+    "revisions": "Tahrirlar",
+    "intl": {
+      "state_labels": {
+        "wip": "Ishlanmoqda",
+        "shared": "Ulashilgan",
+        "published": "Nashr etilgan",
+        "archived": "Arxivlangan"
+      }
+    }
   },
   "transmittals": {
     "title": "Hamrohlik xatlari",
@@ -384,7 +421,14 @@
     "recipients": "Qabul qiluvchilar",
     "acknowledge": "Qabulni tasdiqlash",
     "locked": "Qulflangan",
-    "issue_transmittal": "Chiqarish"
+    "issue_transmittal": "Chiqarish",
+    "intl": {
+      "status_words": {
+        "draft": "qoralama",
+        "issued": "yuborilgan",
+        "responded": "javob berilgan"
+      }
+    }
   },
   "notifications": {
     "title": "Bildirishnomalar",
@@ -426,7 +470,101 @@
     "project_status": "Loyiha holati",
     "cost_report": "Xarajatlar hisoboti",
     "schedule_status": "Jadval holati",
-    "safety_report": "Mehnat muhofazasi hisoboti"
+    "safety_report": "Mehnat muhofazasi hisoboti",
+    "doc": {
+      "meta_report": "Hisobot",
+      "meta_project": "Loyiha",
+      "meta_type": "Turi",
+      "meta_generated": "Yaratilgan",
+      "meta_currency": "Valyuta",
+      "field_column": "Maydon",
+      "value_column": "Qiymat",
+      "yes": "Ha",
+      "no": "Yo'q",
+      "no_data_heading": "Ma'lumot mavjud emas",
+      "no_data_body": "Bu hisobot bo'sh ma'lumot snapshotidan yaratilgan. Tanlangan loyiha uchun manba modullari (moliya, jadval, xavfsizlik va h.k.) ma'lumot qaytarganini tekshiring.",
+      "no_data_body_short": "Bu hisobot bo'sh ma'lumot snapshotidan yaratilgan. Tanlangan loyiha uchun manba modullari ma'lumot qaytarganini tekshiring.",
+      "footer_generated_by": "OpenConstructionERP tomonidan {timestamp} da yaratilgan.",
+      "worksheet_name": "Hisobot",
+      "pdf_subject": "Loyiha hisoboti",
+      "overall_progress": "Umumiy progress",
+      "as_of": "Sana holatiga ko'ra",
+      "recorded_by": "Qayd etgan",
+      "period": "Davr",
+      "entries_suffix": "({count} ta yozuv)",
+      "site_photo_alt": "Qurilish maydoni fotosurati",
+      "ai_summary_heading": "Xulosa",
+      "ai_badge": "AI yaratgan",
+      "ai_note": "Quyidagi loyiha ma'lumotlari asosida AI tomonidan yaratilgan.",
+      "ai_note_confidence": "Quyidagi loyiha ma'lumotlari asosida AI tomonidan yaratilgan (ishonch darajasi {confidence}).",
+      "ai_note_review": "Mijoz bilan ulashishdan oldin ko'rib chiqing."
+    },
+    "section": {
+      "project_overview": "Loyiha umumiy ko'rinishi",
+      "key_performance_indicators": "Asosiy ko'rsatkichlar",
+      "schedule_status": "Jadval holati",
+      "risk_summary": "Xavflar xulosasi",
+      "open_issues": "Ochiq masalalar",
+      "cost_summary": "Xarajatlar xulosasi",
+      "cost_breakdown": "Xarajatlar tahlili",
+      "change_orders": "O'zgartirish buyruqlari",
+      "cash_flow": "Pul oqimi",
+      "schedule_overview": "Jadval umumiy ko'rinishi",
+      "milestone_status": "Bosqichlar holati",
+      "critical_path": "Muhim yo'l",
+      "3_week_lookahead": "3 haftalik prognoz",
+      "safety_kpis": "Xavfsizlik ko'rsatkichlari",
+      "incident_log": "Hodisalar jurnali",
+      "near_miss_reports": "Xavfli holat hisobotlari",
+      "safety_training": "Xavfsizlik bo'yicha o'qitish",
+      "inspection_summary": "Tekshiruvlar xulosasi",
+      "by_inspection_type": "Tekshiruv turi bo'yicha",
+      "punch_list_status": "Kamchiliklar ro'yxati holati",
+      "recent_inspections": "So'nggi tekshiruvlar",
+      "portfolio_overview": "Portfel umumiy ko'rinishi",
+      "project_statuses": "Loyihalar holati",
+      "kpi_comparison": "KPI taqqoslash",
+      "portfolio_risks": "Portfel xavflari",
+      "field_progress": "Dalada progress",
+      "top_risks": "Asosiy xavflar",
+      "site_photos": "Qurilish maydoni fotosuratlari",
+      "summary": "Xulosa"
+    },
+    "field": {
+      "name": "Nomi",
+      "status": "Holat",
+      "phase": "Bosqich",
+      "planned_start": "Rejalashtirilgan boshlanish",
+      "planned_end": "Rejalashtirilgan tugash",
+      "schedule_progress_pct": "Jadval progressi (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Byudjet sarflangan (%)",
+      "as_of": "Sana holatiga ko'ra",
+      "progress_pct": "Progress (%)",
+      "risk_score_avg": "O'rtacha xavf bahosi",
+      "open_rfis": "Ochiq RFI lar",
+      "open_submittals": "Ochiq taqdimotlar",
+      "open_defects": "Ochiq nuqsonlar",
+      "open_observations": "Ochiq kuzatuvlar",
+      "budget": "Byudjet",
+      "committed": "Majburiyat",
+      "actual": "Haqiqiy",
+      "payable": "To'lanadigan",
+      "receivable": "Olinadigan",
+      "net_cash_flow": "Sof pul oqimi"
+    },
+    "explain": {
+      "report_total_one": "Hisobot jami: {money} ({count} qator yig'indisi).",
+      "report_total_other": "Hisobot jami: {money} ({count} qator yig'indisi).",
+      "percent_of_total": "{part} — {total} ning {percent} qismi (jamiga nisbatan foiz).",
+      "percent_zero_total": "{part} / {total}: jami nolga teng, shuning uchun har bir ulush 0 foiz deb ko'rsatiladi.",
+      "breakdown_empty": "Xarajatlar tahlili: ma'lumot yo'q.",
+      "breakdown_one": "Xarajatlar tahlili: {count} guruh, hisobot jami {money}.",
+      "breakdown_other": "Xarajatlar tahlili: {count} guruh, hisobot jami {money}.",
+      "top_n_one": "Birinchi {requested}: {shown} tadan {shown} qator.",
+      "top_n_other": "Birinchi {requested}: {shown} tadan {shown} qator."
+    }
   },
   "gantt": {
     "title": "Gant diagrammasi",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Qoralama",
       "frozen": "Muzlatilgan"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Yalpi ishlab chiqish qiymati (GDV)",
+      "total_development_cost": "Ishlab chiqishning umumiy xarajati",
+      "residual_land_value": "Yer uchastkasining qoldiq qiymati",
+      "developer_profit": "Ishlab chiquvchi foydasi",
+      "profit_on_cost": "Xarajatga nisbatan foyda",
+      "profit_on_gdv": "GDV ga nisbatan foyda",
+      "construction_cost": "Qurilish xarajati",
+      "professional_fees": "Professional xizmat haqi",
+      "contingency": "Zaxira fond",
+      "finance_cost": "Moliyalashtirish xarajati",
+      "sales_costs": "Sotish xarajatlari"
+    },
+    "status": {
+      "viable": "Amalga oshirish mumkin",
+      "unviable": "Amalga oshirib bo'lmaydi",
+      "marginal": "Chegaraviy",
+      "pending": "Hali baholanmagan"
+    },
+    "figure": {
+      "gross_development_value": "Loyiha barcha obyektlarining umumiy sotuv qiymati, hammasi bir valyutada.",
+      "total_development_cost": "Yer uchastkasidan tashqari loyihani amalga oshirishning barcha xarajatlari: qurilish, xizmat haqi, zaxira fond, moliyalashtirish va sotish xarajatlari.",
+      "residual_land_value": "Yalpi ishlab chiqish qiymatidan umumiy ishlab chiqish xarajati va maqsadli foyda ayirilgandan keyin yer uchun qolgan qiymat.",
+      "developer_profit": "Ishlab chiquvchi saqlab qolishni maqsad qilgan foyda, yalpi ishlab chiqish qiymatiga nisbatan maqsadli koeffitsiyent sifatida belgilanadi.",
+      "profit_on_cost": "Ishlab chiquvchi foydasini umumiy ishlab chiqish xarajatiga bo'lingan nisbat.",
+      "profit_on_gdv": "Ishlab chiquvchi foydasini yalpi ishlab chiqish qiymatiga bo'lingan nisbat."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "HISOB-FAKTURA",
+      "date": "Sana: {value}",
+      "due": "To'lov muddati: {value}",
+      "from": "Kimdan",
+      "bill_to": "To'lovchi",
+      "vat_id": "QQS raqami: {value}",
+      "ref": "Ma'lumot: {value}",
+      "th_description": "Tavsif",
+      "th_qty": "Miqdor",
+      "th_unit": "Birlik",
+      "th_unit_price": "Birlik narxi",
+      "th_net": "Sof ({currency})",
+      "net_total": "Sof jami",
+      "vat_total": "QQS",
+      "grand_total": "Umumiy jami",
+      "retention_prepaid": "Ushlab qolish / oldindan to'lov",
+      "amount_due": "To'lanadigan summa",
+      "payment": "To'lov",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Hisob raqami: {value}",
+      "bank_code": "Bank kodi: {value}",
+      "account_holder": "Hisob egasi: {value}",
+      "footer": "Ushbu PDF tarkibida o'rnatilgan EN 16931 elektron hisob-faktura (Factur-X / ZUGFeRD) mavjud. Asosiy hujjat — o'rnatilgan XML."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Ishchilar lageri",
+        "rental": "Ijaraga beriladigan uy-joy",
+        "hotel": "Mehmonxona"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Kutilmoqda",
+        "approved": "Tasdiqlangan",
+        "rejected": "Rad etilgan"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Bajarilgan",
+        "fail": "Bajarilmagan",
+        "not_applicable": "Tegishli emas"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Chizma",
+        "contract": "Shartnoma",
+        "specification": "Spetsifikatsiya",
+        "photo": "Fotosurat",
+        "correspondence": "Yozishmalar",
+        "reality_capture": "Haqiqiy holatni suratga olish",
+        "other": "Boshqa"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Kutilmoqda",
+        "approved": "Tasdiqlangan",
+        "rejected": "Rad etilgan",
+        "cancelled": "Bekor qilingan"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Qoralama",
+        "submitted": "Tasdiqlash uchun yuborilgan",
+        "approved": "Tasdiqlangan",
+        "posted": "Buxgalteriya kitobiga o'tkazilgan"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Ochiq",
+        "assigned": "Biriktirilgan",
+        "in_progress": "Jarayonda",
+        "resolved": "Bartaraf etilgan",
+        "verified": "Tekshirilgan",
+        "closed": "Yopilgan"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "kuzatuv",
+        "minor": "kichik",
+        "major": "katta",
+        "critical": "jiddiy"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Shaxs",
+        "crew": "Brigada",
+        "equipment": "Texnika",
+        "subcontractor": "Subpudratchi"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI model nomi eskirgan yoki mavjud emas. Sozlamalar > AI ni oching va provayderingiz uchun joriy amaldagi model nomini kiriting.",
+      "not_configured": "AI sozlanmagan. Iltimos, Sozlamalarda AI provayderini belgilang."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "tekshirilgan",
+      "bound": "biriktirilgan",
+      "empty": "yo'q"
+    },
+    "package_status_labels": {
+      "draft": "qoralama",
+      "in_progress": "jarayonda",
+      "ready": "tayyor",
+      "issued": "berilgan"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "to'siq",
+      "critical": "jiddiy",
+      "warning": "ogohlantirish",
+      "suggestion": "taklif"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategiya",
+      "brief": "Topshiriq",
+      "concept": "Konsepsiya",
+      "design": "Loyihalash",
+      "approval": "Ruxsatnoma",
+      "detail": "Batafsil loyihalash",
+      "tender": "Tender",
+      "award": "Shartnoma berish",
+      "construction": "Qurilish",
+      "handover": "Topshirish",
+      "operation": "Ekspluatatsiya"
     }
   }
 }

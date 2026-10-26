@@ -132,7 +132,15 @@
     "missing_description": "項目 {position} に名称がありません",
     "missing_classification": "項目 {position} に分類コードが必要です",
     "duplicate_ordinal": "番号が重複しています: {ordinal}",
-    "rate_anomaly": "単価 {rate} がしきい値を超過 ({threshold})"
+    "rate_anomaly": "単価 {rate} がしきい値を超過 ({threshold})",
+    "nl": {
+      "not_a_string": "入力はテキストである必要があります。",
+      "empty": "入力が空です。",
+      "too_long": "入力が {max} 文字を超えています。",
+      "ai_unparsable": "AI の応答を DSL ドキュメントとして解析できませんでした。",
+      "no_pattern": "入力文に一致するパターンがありません。",
+      "try": "試してください: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D 工程表",
@@ -327,7 +335,16 @@
     "pass": "合格",
     "fail": "不合格",
     "partial": "一部合格",
-    "critical": "重大"
+    "critical": "重大",
+    "intl": {
+      "status_labels": {
+        "scheduled": "予定",
+        "in_progress": "実施中",
+        "completed": "完了",
+        "failed": "不合格",
+        "cancelled": "取消"
+      }
+    }
   },
   "ncr": {
     "title": "不適合報告書",
@@ -347,7 +364,19 @@
     "submit": "提出",
     "review": "審査",
     "approved_as_noted": "指摘事項付き承認",
-    "revise_resubmit": "修正のうえ再提出"
+    "revise_resubmit": "修正のうえ再提出",
+    "intl": {
+      "status_labels": {
+        "draft": "下書き",
+        "submitted": "提出済み",
+        "under_review": "審査中",
+        "approved": "承認",
+        "approved_as_noted": "条件付き承認",
+        "revise_and_resubmit": "修正して再提出",
+        "rejected": "不承認",
+        "closed": "完了"
+      }
+    }
   },
   "correspondence": {
     "title": "文書往来",
@@ -372,7 +401,15 @@
     "promote": "状態を進める",
     "suitability": "適合性",
     "discipline": "工種",
-    "revisions": "改訂履歴"
+    "revisions": "改訂履歴",
+    "intl": {
+      "state_labels": {
+        "wip": "作業中",
+        "shared": "共有済み",
+        "published": "発行済み",
+        "archived": "アーカイブ済み"
+      }
+    }
   },
   "transmittals": {
     "title": "書類送付状",
@@ -384,7 +421,14 @@
     "recipients": "送付先",
     "acknowledge": "受領を確認",
     "locked": "ロック済み",
-    "issue_transmittal": "発行"
+    "issue_transmittal": "発行",
+    "intl": {
+      "status_words": {
+        "draft": "下書き",
+        "issued": "発行済み",
+        "responded": "回答済み"
+      }
+    }
   },
   "notifications": {
     "title": "通知",
@@ -426,7 +470,101 @@
     "project_status": "プロジェクトの状況",
     "cost_report": "工事費レポート",
     "schedule_status": "工程の状況",
-    "safety_report": "安全レポート"
+    "safety_report": "安全レポート",
+    "doc": {
+      "meta_report": "レポート",
+      "meta_project": "プロジェクト",
+      "meta_type": "種別",
+      "meta_generated": "作成日時",
+      "meta_currency": "通貨",
+      "field_column": "項目",
+      "value_column": "値",
+      "yes": "はい",
+      "no": "いいえ",
+      "no_data_heading": "利用可能なデータがありません",
+      "no_data_body": "このレポートは空のデータスナップショットから作成されました。選択したプロジェクトについて、ソースモジュール（財務、工程、安全など）がデータを返しているか確認してください。",
+      "no_data_body_short": "このレポートは空のデータスナップショットから作成されました。選択したプロジェクトについて、ソースモジュールがデータを返しているか確認してください。",
+      "footer_generated_by": "OpenConstructionERP により {timestamp} に作成。",
+      "worksheet_name": "レポート",
+      "pdf_subject": "プロジェクトレポート",
+      "overall_progress": "全体進捗",
+      "as_of": "基準日",
+      "recorded_by": "記録者",
+      "period": "期間",
+      "entries_suffix": "（{count} 件）",
+      "site_photo_alt": "現場写真",
+      "ai_summary_heading": "サマリー",
+      "ai_badge": "AI 生成",
+      "ai_note": "以下のプロジェクトデータから AI が生成しました。",
+      "ai_note_confidence": "以下のプロジェクトデータから AI が生成しました（信頼度 {confidence}）。",
+      "ai_note_review": "顧客に共有する前に内容を確認してください。"
+    },
+    "section": {
+      "project_overview": "プロジェクト概要",
+      "key_performance_indicators": "主要業績評価指標（KPI）",
+      "schedule_status": "工程の状況",
+      "risk_summary": "リスク概要",
+      "open_issues": "未解決の課題",
+      "cost_summary": "コスト概要",
+      "cost_breakdown": "コスト内訳",
+      "change_orders": "変更指示",
+      "cash_flow": "キャッシュフロー",
+      "schedule_overview": "工程概要",
+      "milestone_status": "マイルストーンの状況",
+      "critical_path": "クリティカルパス",
+      "3_week_lookahead": "3週間ルックアヘッド",
+      "safety_kpis": "安全 KPI",
+      "incident_log": "事故記録",
+      "near_miss_reports": "ヒヤリハット報告",
+      "safety_training": "安全教育",
+      "inspection_summary": "検査の概要",
+      "by_inspection_type": "検査種別ごと",
+      "punch_list_status": "是正リストの状況",
+      "recent_inspections": "直近の検査",
+      "portfolio_overview": "ポートフォリオ概要",
+      "project_statuses": "プロジェクトの状況",
+      "kpi_comparison": "KPI 比較",
+      "portfolio_risks": "ポートフォリオのリスク",
+      "field_progress": "現場の進捗",
+      "top_risks": "主要リスク",
+      "site_photos": "現場写真",
+      "summary": "サマリー"
+    },
+    "field": {
+      "name": "名称",
+      "status": "ステータス",
+      "phase": "フェーズ",
+      "planned_start": "計画開始",
+      "planned_end": "計画終了",
+      "schedule_progress_pct": "工程進捗（%）",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "予算消化率（%）",
+      "as_of": "基準日",
+      "progress_pct": "進捗（%）",
+      "risk_score_avg": "平均リスクスコア",
+      "open_rfis": "未解決 RFI",
+      "open_submittals": "未承認の提出書類",
+      "open_defects": "未解決の不具合",
+      "open_observations": "未解決の指摘",
+      "budget": "予算",
+      "committed": "契約済み",
+      "actual": "実績",
+      "payable": "支払予定",
+      "receivable": "入金予定",
+      "net_cash_flow": "正味キャッシュフロー"
+    },
+    "explain": {
+      "report_total_one": "レポート合計: {money}（{count} 行の合計）。",
+      "report_total_other": "レポート合計: {money}（{count} 行の合計）。",
+      "percent_of_total": "{part} は {total} の {percent} です（合計に対する割合）。",
+      "percent_zero_total": "{part} / {total}: 合計がゼロのため、各割合は 0 パーセントと表示しています。",
+      "breakdown_empty": "コスト内訳: データがありません。",
+      "breakdown_one": "コスト内訳: {count} グループ、レポート合計 {money}。",
+      "breakdown_other": "コスト内訳: {count} グループ、レポート合計 {money}。",
+      "top_n_one": "上位 {requested}: {shown} 件中 {shown} 行。",
+      "top_n_other": "上位 {requested}: {shown} 件中 {shown} 行。"
+    }
   },
   "gantt": {
     "title": "ガントチャート",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "下書き",
       "frozen": "確定済み"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "開発総額（GDV）",
+      "total_development_cost": "開発総コスト",
+      "residual_land_value": "残余地価",
+      "developer_profit": "開発者利益",
+      "profit_on_cost": "コスト利益率",
+      "profit_on_gdv": "GDV 利益率",
+      "construction_cost": "建設費",
+      "professional_fees": "専門家報酬",
+      "contingency": "予備費",
+      "finance_cost": "金融費用",
+      "sales_costs": "販売費"
+    },
+    "status": {
+      "viable": "事業成立",
+      "unviable": "事業不成立",
+      "marginal": "境界域",
+      "pending": "未評価"
+    },
+    "figure": {
+      "gross_development_value": "計画内すべての住戸・区画の販売額の合計（単一通貨）。",
+      "total_development_cost": "土地を除く事業実施のすべての費用：建設費、専門家報酬、予備費、金融費用、販売費。",
+      "residual_land_value": "開発総額から開発総コストと目標開発者利益を差し引いた後に土地に残る金額。",
+      "developer_profit": "開発者が確保を目指す利益。開発総額に対する目標比率として設定します。",
+      "profit_on_cost": "開発者利益を開発総コストで割った比率。",
+      "profit_on_gdv": "開発者利益を開発総額（GDV）で割った比率。"
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "請求書",
+      "date": "発行日: {value}",
+      "due": "支払期日: {value}",
+      "from": "発行者",
+      "bill_to": "請求先",
+      "vat_id": "登録番号: {value}",
+      "ref": "参照: {value}",
+      "th_description": "内容",
+      "th_qty": "数量",
+      "th_unit": "単位",
+      "th_unit_price": "単価",
+      "th_net": "税抜金額（{currency}）",
+      "net_total": "税抜合計",
+      "vat_total": "消費税",
+      "grand_total": "合計",
+      "retention_prepaid": "保留金 / 前払金",
+      "amount_due": "請求金額",
+      "payment": "お支払い",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "口座番号: {value}",
+      "bank_code": "銀行コード: {value}",
+      "account_holder": "口座名義: {value}",
+      "footer": "本 PDF には EN 16931 準拠の電子インボイス（Factur-X / ZUGFeRD）が埋め込まれています。正本は埋め込まれた XML です。"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "作業員宿舎",
+        "rental": "賃貸住宅",
+        "hotel": "ホテル"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "承認待ち",
+        "approved": "承認済み",
+        "rejected": "却下"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "適合",
+        "fail": "不適合",
+        "not_applicable": "対象外"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "図面",
+        "contract": "契約書",
+        "specification": "仕様書",
+        "photo": "写真",
+        "correspondence": "関連書類",
+        "reality_capture": "現況計測データ",
+        "other": "その他"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "承認待ち",
+        "approved": "承認済み",
+        "rejected": "却下",
+        "cancelled": "取消"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "下書き",
+        "submitted": "承認申請中",
+        "approved": "承認済み",
+        "posted": "元帳に転記済み"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "未対応",
+        "assigned": "担当者割当済み",
+        "in_progress": "対応中",
+        "resolved": "是正済み",
+        "verified": "確認済み",
+        "closed": "完了"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "指摘",
+        "minor": "軽微",
+        "major": "重大",
+        "critical": "致命的"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "個人",
+        "crew": "班",
+        "equipment": "機械",
+        "subcontractor": "協力会社"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI モデル名が古いか、利用できません。「設定 > AI」を開き、プロバイダーで現在有効なモデル名を指定してください。",
+      "not_configured": "AI が設定されていません。設定で AI プロバイダーを設定してください。"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "確認済み",
+      "bound": "添付済み",
+      "empty": "未提出"
+    },
+    "package_status_labels": {
+      "draft": "下書き",
+      "in_progress": "作業中",
+      "ready": "準備完了",
+      "issued": "発行済み"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "阻害要因",
+      "critical": "重大",
+      "warning": "警告",
+      "suggestion": "提案"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "戦略",
+      "brief": "要件定義",
+      "concept": "基本構想",
+      "design": "基本設計",
+      "approval": "許認可",
+      "detail": "実施設計",
+      "tender": "入札",
+      "award": "契約",
+      "construction": "施工",
+      "handover": "引渡し",
+      "operation": "運用"
     }
   }
 }

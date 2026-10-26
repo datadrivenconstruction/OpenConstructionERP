@@ -132,7 +132,15 @@
     "missing_description": "ردیف {position} فاقد شرح است",
     "missing_classification": "ردیف {position} به کد طبقه‌بندی نیاز دارد",
     "duplicate_ordinal": "شماره ردیف تکراری: {ordinal}",
-    "rate_anomaly": "نرخ واحد {rate} از حد آستانه ({threshold}) فراتر رفته است"
+    "rate_anomaly": "نرخ واحد {rate} از حد آستانه ({threshold}) فراتر رفته است",
+    "nl": {
+      "not_a_string": "ورودی باید متن باشد.",
+      "empty": "ورودی خالی است.",
+      "too_long": "ورودی از {max} نویسه بیشتر است.",
+      "ai_unparsable": "پاسخ هوش مصنوعی را نمی‌توان به‌عنوان سند DSL تجزیه کرد.",
+      "no_pattern": "هیچ الگویی با جمله ورودی مطابقت نداشت.",
+      "try": "امتحان کنید: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "زمان‌بندی 4D",
@@ -327,7 +335,16 @@
     "pass": "قبول",
     "fail": "رد",
     "partial": "جزئی",
-    "critical": "بحرانی"
+    "critical": "بحرانی",
+    "intl": {
+      "status_labels": {
+        "scheduled": "برنامه‌ریزی شده",
+        "in_progress": "در حال انجام",
+        "completed": "تکمیل شده",
+        "failed": "ناموفق",
+        "cancelled": "لغو شده"
+      }
+    }
   },
   "ncr": {
     "title": "گزارش‌های عدم‌انطباق",
@@ -347,7 +364,19 @@
     "submit": "ارسال",
     "review": "بررسی",
     "approved_as_noted": "تأییدشده با یادداشت",
-    "revise_resubmit": "بازنگری و ارسال مجدد"
+    "revise_resubmit": "بازنگری و ارسال مجدد",
+    "intl": {
+      "status_labels": {
+        "draft": "پیش‌نویس",
+        "submitted": "ارسال شده",
+        "under_review": "در حال بررسی",
+        "approved": "تأیید شده",
+        "approved_as_noted": "تأیید با یادداشت",
+        "revise_and_resubmit": "اصلاح و ارسال مجدد",
+        "rejected": "رد شده",
+        "closed": "بسته شده"
+      }
+    }
   },
   "correspondence": {
     "title": "مکاتبات",
@@ -372,7 +401,15 @@
     "promote": "ارتقا",
     "suitability": "تناسب",
     "discipline": "رشته",
-    "revisions": "بازبینی‌ها"
+    "revisions": "بازبینی‌ها",
+    "intl": {
+      "state_labels": {
+        "wip": "در حال کار",
+        "shared": "به اشتراک گذاشته شده",
+        "published": "منتشر شده",
+        "archived": "بایگانی شده"
+      }
+    }
   },
   "transmittals": {
     "title": "ارسالی‌ها",
@@ -384,7 +421,14 @@
     "recipients": "گیرندگان",
     "acknowledge": "تأیید دریافت",
     "locked": "قفل‌شده",
-    "issue_transmittal": "صدور"
+    "issue_transmittal": "صدور",
+    "intl": {
+      "status_words": {
+        "draft": "پیش‌نویس",
+        "issued": "ارسال شده",
+        "responded": "پاسخ داده شده"
+      }
+    }
   },
   "notifications": {
     "title": "اعلان‌ها",
@@ -426,7 +470,101 @@
     "project_status": "وضعیت پروژه",
     "cost_report": "گزارش هزینه",
     "schedule_status": "وضعیت زمان‌بندی",
-    "safety_report": "گزارش ایمنی"
+    "safety_report": "گزارش ایمنی",
+    "doc": {
+      "meta_report": "گزارش",
+      "meta_project": "پروژه",
+      "meta_type": "نوع",
+      "meta_generated": "تولید شده در",
+      "meta_currency": "واحد پول",
+      "field_column": "فیلد",
+      "value_column": "مقدار",
+      "yes": "بله",
+      "no": "خیر",
+      "no_data_heading": "داده‌ای در دسترس نیست",
+      "no_data_body": "این گزارش از یک تصویر خالی داده تولید شده است. بررسی کنید که ماژول‌های منبع (مالی، زمان‌بندی، ایمنی و غیره) برای پروژه انتخاب‌شده داده برگردانده باشند.",
+      "no_data_body_short": "این گزارش از یک تصویر خالی داده تولید شده است. بررسی کنید که ماژول‌های منبع برای پروژه انتخاب‌شده داده برگردانده باشند.",
+      "footer_generated_by": "تولیدشده توسط OpenConstructionERP در {timestamp}.",
+      "worksheet_name": "گزارش",
+      "pdf_subject": "گزارش پروژه",
+      "overall_progress": "پیشرفت کلی",
+      "as_of": "تا تاریخ",
+      "recorded_by": "ثبت‌کننده",
+      "period": "دوره",
+      "entries_suffix": "({count} مورد)",
+      "site_photo_alt": "عکس کارگاه",
+      "ai_summary_heading": "خلاصه",
+      "ai_badge": "تولیدشده با هوش مصنوعی",
+      "ai_note": "با هوش مصنوعی از داده‌های پروژه زیر تولید شده است.",
+      "ai_note_confidence": "با هوش مصنوعی از داده‌های پروژه زیر تولید شده است (اطمینان {confidence}).",
+      "ai_note_review": "پیش از اشتراک‌گذاری با کارفرما بازبینی کنید."
+    },
+    "section": {
+      "project_overview": "نمای کلی پروژه",
+      "key_performance_indicators": "شاخص‌های کلیدی عملکرد",
+      "schedule_status": "وضعیت زمان‌بندی",
+      "risk_summary": "خلاصه ریسک‌ها",
+      "open_issues": "مسائل باز",
+      "cost_summary": "خلاصه هزینه‌ها",
+      "cost_breakdown": "تفکیک هزینه‌ها",
+      "change_orders": "دستورهای تغییر",
+      "cash_flow": "جریان نقدی",
+      "schedule_overview": "نمای کلی زمان‌بندی",
+      "milestone_status": "وضعیت نقاط عطف",
+      "critical_path": "مسیر بحرانی",
+      "3_week_lookahead": "چشم‌انداز ۳ هفته",
+      "safety_kpis": "شاخص‌های ایمنی",
+      "incident_log": "گزارش حوادث",
+      "near_miss_reports": "گزارش‌های نزدیک به حادثه",
+      "safety_training": "آموزش ایمنی",
+      "inspection_summary": "خلاصه بازرسی‌ها",
+      "by_inspection_type": "بر اساس نوع بازرسی",
+      "punch_list_status": "وضعیت فهرست نواقص",
+      "recent_inspections": "بازرسی‌های اخیر",
+      "portfolio_overview": "نمای کلی پورتفولیو",
+      "project_statuses": "وضعیت پروژه‌ها",
+      "kpi_comparison": "مقایسه شاخص‌ها",
+      "portfolio_risks": "ریسک‌های پورتفولیو",
+      "field_progress": "پیشرفت کارگاه",
+      "top_risks": "مهم‌ترین ریسک‌ها",
+      "site_photos": "عکس‌های کارگاه",
+      "summary": "خلاصه"
+    },
+    "field": {
+      "name": "نام",
+      "status": "وضعیت",
+      "phase": "فاز",
+      "planned_start": "شروع برنامه‌ریزی‌شده",
+      "planned_end": "پایان برنامه‌ریزی‌شده",
+      "schedule_progress_pct": "پیشرفت زمان‌بندی (٪)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "بودجه مصرف‌شده (٪)",
+      "as_of": "تا تاریخ",
+      "progress_pct": "پیشرفت (٪)",
+      "risk_score_avg": "میانگین امتیاز ریسک",
+      "open_rfis": "RFIهای باز",
+      "open_submittals": "ارسال‌های باز",
+      "open_defects": "عیوب باز",
+      "open_observations": "مشاهدات باز",
+      "budget": "بودجه",
+      "committed": "متعهدشده",
+      "actual": "واقعی",
+      "payable": "پرداختنی",
+      "receivable": "دریافتنی",
+      "net_cash_flow": "جریان نقدی خالص"
+    },
+    "explain": {
+      "report_total_one": "جمع گزارش: {money} (مجموع {count} ردیف).",
+      "report_total_other": "جمع گزارش: {money} (مجموع {count} ردیف).",
+      "percent_of_total": "{part} برابر {percent} از {total} است (درصد از کل).",
+      "percent_zero_total": "{part} از {total}: جمع کل صفر است، بنابراین هر سهم به‌صورت ۰ درصد گزارش می‌شود.",
+      "breakdown_empty": "تفکیک هزینه‌ها: داده‌ای وجود ندارد.",
+      "breakdown_one": "تفکیک هزینه‌ها: {count} گروه، جمع گزارش {money}.",
+      "breakdown_other": "تفکیک هزینه‌ها: {count} گروه، جمع گزارش {money}.",
+      "top_n_one": "{requested} مورد برتر: {shown} از {shown} ردیف.",
+      "top_n_other": "{requested} مورد برتر: {shown} از {shown} ردیف."
+    }
   },
   "gantt": {
     "title": "نمودار گانت",
@@ -788,6 +926,197 @@
     "snapshot_status": {
       "draft": "پیش‌نویس",
       "frozen": "قفل‌شده"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "ارزش ناخالص توسعه (GDV)",
+      "total_development_cost": "کل هزینه توسعه",
+      "residual_land_value": "ارزش باقی‌مانده زمین",
+      "developer_profit": "سود توسعه‌دهنده",
+      "profit_on_cost": "سود بر هزینه",
+      "profit_on_gdv": "سود بر GDV",
+      "construction_cost": "هزینه ساخت",
+      "professional_fees": "حق‌الزحمه‌های حرفه‌ای",
+      "contingency": "ذخیره احتمالی",
+      "finance_cost": "هزینه مالی",
+      "sales_costs": "هزینه‌های فروش"
+    },
+    "status": {
+      "viable": "قابل اجرا",
+      "unviable": "غیرقابل اجرا",
+      "marginal": "حاشیه‌ای",
+      "pending": "هنوز ارزیابی نشده"
+    },
+    "figure": {
+      "gross_development_value": "مجموع ارزش فروش همه واحدهای طرح، همه با یک واحد پول.",
+      "total_development_cost": "همه هزینه‌های اجرای طرح به جز خود زمین: ساخت، حق‌الزحمه، ذخیره، تأمین مالی و هزینه‌های فروش.",
+      "residual_land_value": "آنچه پس از کم کردن کل هزینه توسعه و سود هدف توسعه‌دهنده از ارزش ناخالص توسعه برای زمین باقی می‌ماند.",
+      "developer_profit": "سودی که توسعه‌دهنده قصد نگه داشتن آن را دارد، به‌عنوان نسبت هدف از ارزش ناخالص توسعه.",
+      "profit_on_cost": "سود توسعه‌دهنده تقسیم بر کل هزینه توسعه، به‌صورت نسبت.",
+      "profit_on_gdv": "سود توسعه‌دهنده تقسیم بر ارزش ناخالص توسعه، به‌صورت نسبت."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "فاکتور",
+      "date": "تاریخ: {value}",
+      "due": "سررسید: {value}",
+      "from": "از",
+      "bill_to": "صورتحساب برای",
+      "vat_id": "شناسه مالیاتی: {value}",
+      "ref": "شماره مرجع: {value}",
+      "th_description": "شرح",
+      "th_qty": "تعداد",
+      "th_unit": "واحد",
+      "th_unit_price": "قیمت واحد",
+      "th_net": "خالص ({currency})",
+      "net_total": "جمع خالص",
+      "vat_total": "مالیات بر ارزش افزوده",
+      "grand_total": "جمع کل",
+      "retention_prepaid": "کسورات / پیش‌پرداخت",
+      "amount_due": "مبلغ قابل پرداخت",
+      "payment": "پرداخت",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "شماره حساب: {value}",
+      "bank_code": "کد بانک: {value}",
+      "account_holder": "صاحب حساب: {value}",
+      "footer": "این PDF دارای فاکتور الکترونیکی جاسازی‌شده EN 16931 (Factur-X / ZUGFeRD) است. XML جاسازی‌شده سند معتبر است."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "کمپ کارگری",
+        "rental": "مسکن اجاره‌ای",
+        "hotel": "هتل"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "در انتظار",
+        "approved": "تأیید شده",
+        "rejected": "رد شده"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "برآورده شده",
+        "fail": "برآورده نشده",
+        "not_applicable": "نامرتبط"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "نقشه",
+        "contract": "قرارداد",
+        "specification": "مشخصات فنی",
+        "photo": "عکس",
+        "correspondence": "مکاتبات",
+        "reality_capture": "ثبت واقعیت",
+        "other": "سایر"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "در انتظار",
+        "approved": "تأیید شده",
+        "rejected": "رد شده",
+        "cancelled": "لغو شده"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "پیش‌نویس",
+        "submitted": "ارسال شده برای تأیید",
+        "approved": "تأیید شده",
+        "posted": "ثبت در دفتر کل"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "باز",
+        "assigned": "واگذار شده",
+        "in_progress": "در حال انجام",
+        "resolved": "رفع شده",
+        "verified": "تأیید شده",
+        "closed": "بسته شده"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "مشاهده",
+        "minor": "جزئی",
+        "major": "عمده",
+        "critical": "بحرانی"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "نفر",
+        "crew": "گروه کاری",
+        "equipment": "تجهیزات",
+        "subcontractor": "پیمانکار جزء"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "نام مدل هوش مصنوعی قدیمی یا در دسترس نیست. به تنظیمات > هوش مصنوعی بروید و نام مدل معتبر فعلی ارائه‌دهنده خود را وارد کنید.",
+      "not_configured": "هوش مصنوعی پیکربندی نشده است. لطفاً یک ارائه‌دهنده هوش مصنوعی را در تنظیمات تعیین کنید."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "تأیید شده",
+      "bound": "پیوست شده",
+      "empty": "باقی‌مانده"
+    },
+    "package_status_labels": {
+      "draft": "پیش‌نویس",
+      "in_progress": "در حال انجام",
+      "ready": "آماده",
+      "issued": "صادر شده"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "مانع",
+      "critical": "بحرانی",
+      "warning": "هشدار",
+      "suggestion": "پیشنهاد"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "راهبرد",
+      "brief": "شرح نیازها",
+      "concept": "مفهوم‌سازی",
+      "design": "طراحی",
+      "approval": "مجوز",
+      "detail": "طراحی تفصیلی",
+      "tender": "مناقصه",
+      "award": "واگذاری",
+      "construction": "اجرا",
+      "handover": "تحویل",
+      "operation": "بهره‌برداری"
     }
   }
 }

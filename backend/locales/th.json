@@ -132,7 +132,15 @@
     "missing_description": "รายการ {position} ไม่มีรายละเอียด",
     "missing_classification": "รายการ {position} ต้องการรหัสการจำแนกประเภท",
     "duplicate_ordinal": "หมายเลขลำดับซ้ำ: {ordinal}",
-    "rate_anomaly": "ราคาต่อหน่วย {rate} เกินเกณฑ์ ({threshold})"
+    "rate_anomaly": "ราคาต่อหน่วย {rate} เกินเกณฑ์ ({threshold})",
+    "nl": {
+      "not_a_string": "ข้อมูลที่ป้อนต้องเป็นข้อความ",
+      "empty": "ไม่มีข้อมูลที่ป้อน",
+      "too_long": "ข้อมูลที่ป้อนยาวเกิน {max} อักขระ",
+      "ai_unparsable": "ไม่สามารถแปลผลตอบกลับของ AI เป็นเอกสาร DSL ได้",
+      "no_pattern": "ไม่มีรูปแบบใดตรงกับประโยคที่ป้อน",
+      "try": "ลองใช้: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "กำหนดการ 4D",
@@ -327,7 +335,16 @@
     "pass": "ผ่าน",
     "fail": "ไม่ผ่าน",
     "partial": "บางส่วน",
-    "critical": "วิกฤต"
+    "critical": "วิกฤต",
+    "intl": {
+      "status_labels": {
+        "scheduled": "กำหนดไว้แล้ว",
+        "in_progress": "กำลังดำเนินการ",
+        "completed": "เสร็จสิ้น",
+        "failed": "ไม่ผ่าน",
+        "cancelled": "ยกเลิกแล้ว"
+      }
+    }
   },
   "ncr": {
     "title": "รายงานความไม่สอดคล้อง",
@@ -347,7 +364,19 @@
     "submit": "ส่ง",
     "review": "ตรวจสอบ",
     "approved_as_noted": "อนุมัติตามที่ระบุ",
-    "revise_resubmit": "แก้ไขและส่งใหม่"
+    "revise_resubmit": "แก้ไขและส่งใหม่",
+    "intl": {
+      "status_labels": {
+        "draft": "ฉบับร่าง",
+        "submitted": "ส่งแล้ว",
+        "under_review": "อยู่ระหว่างการตรวจสอบ",
+        "approved": "อนุมัติ",
+        "approved_as_noted": "อนุมัติพร้อมหมายเหตุ",
+        "revise_and_resubmit": "แก้ไขและส่งใหม่",
+        "rejected": "ไม่อนุมัติ",
+        "closed": "ปิดแล้ว"
+      }
+    }
   },
   "correspondence": {
     "title": "จดหมายโต้ตอบ",
@@ -372,7 +401,15 @@
     "promote": "เลื่อนระดับ",
     "suitability": "ความเหมาะสม",
     "discipline": "สาขา",
-    "revisions": "การแก้ไข"
+    "revisions": "การแก้ไข",
+    "intl": {
+      "state_labels": {
+        "wip": "กำลังดำเนินการ",
+        "shared": "แชร์แล้ว",
+        "published": "เผยแพร่แล้ว",
+        "archived": "จัดเก็บแล้ว"
+      }
+    }
   },
   "transmittals": {
     "title": "เอกสารนำส่ง",
@@ -384,7 +421,14 @@
     "recipients": "ผู้รับ",
     "acknowledge": "รับทราบ",
     "locked": "ล็อก",
-    "issue_transmittal": "ออก"
+    "issue_transmittal": "ออก",
+    "intl": {
+      "status_words": {
+        "draft": "ฉบับร่าง",
+        "issued": "ส่งแล้ว",
+        "responded": "ตอบกลับแล้ว"
+      }
+    }
   },
   "notifications": {
     "title": "การแจ้งเตือน",
@@ -426,7 +470,101 @@
     "project_status": "สถานะโครงการ",
     "cost_report": "รายงานต้นทุน",
     "schedule_status": "สถานะกำหนดการ",
-    "safety_report": "รายงานความปลอดภัย"
+    "safety_report": "รายงานความปลอดภัย",
+    "doc": {
+      "meta_report": "รายงาน",
+      "meta_project": "โครงการ",
+      "meta_type": "ประเภท",
+      "meta_generated": "สร้างเมื่อ",
+      "meta_currency": "สกุลเงิน",
+      "field_column": "ช่องข้อมูล",
+      "value_column": "ค่า",
+      "yes": "ใช่",
+      "no": "ไม่ใช่",
+      "no_data_heading": "ไม่มีข้อมูล",
+      "no_data_body": "รายงานนี้สร้างจากสแนปชอตข้อมูลที่ว่างเปล่า โปรดตรวจสอบว่าโมดูลต้นทาง (การเงิน กำหนดการ ความปลอดภัย ฯลฯ) ส่งข้อมูลของโครงการที่เลือกกลับมาหรือไม่",
+      "no_data_body_short": "รายงานนี้สร้างจากสแนปชอตข้อมูลที่ว่างเปล่า โปรดตรวจสอบว่าโมดูลต้นทางส่งข้อมูลของโครงการที่เลือกกลับมาหรือไม่",
+      "footer_generated_by": "สร้างโดย OpenConstructionERP เมื่อ {timestamp}",
+      "worksheet_name": "รายงาน",
+      "pdf_subject": "รายงานโครงการ",
+      "overall_progress": "ความคืบหน้าโดยรวม",
+      "as_of": "ณ วันที่",
+      "recorded_by": "บันทึกโดย",
+      "period": "ช่วงเวลา",
+      "entries_suffix": "({count} รายการ)",
+      "site_photo_alt": "รูปถ่ายหน้างาน",
+      "ai_summary_heading": "สรุป",
+      "ai_badge": "สร้างโดย AI",
+      "ai_note": "สร้างโดย AI จากข้อมูลโครงการด้านล่าง",
+      "ai_note_confidence": "สร้างโดย AI จากข้อมูลโครงการด้านล่าง (ระดับความเชื่อมั่น {confidence})",
+      "ai_note_review": "โปรดตรวจสอบก่อนแชร์ให้ลูกค้า"
+    },
+    "section": {
+      "project_overview": "ภาพรวมโครงการ",
+      "key_performance_indicators": "ตัวชี้วัดผลการดำเนินงานหลัก",
+      "schedule_status": "สถานะกำหนดการ",
+      "risk_summary": "สรุปความเสี่ยง",
+      "open_issues": "ประเด็นที่ยังเปิดอยู่",
+      "cost_summary": "สรุปต้นทุน",
+      "cost_breakdown": "รายละเอียดต้นทุน",
+      "change_orders": "คำสั่งเปลี่ยนแปลงงาน",
+      "cash_flow": "กระแสเงินสด",
+      "schedule_overview": "ภาพรวมกำหนดการ",
+      "milestone_status": "สถานะไมล์สโตน",
+      "critical_path": "เส้นทางวิกฤต",
+      "3_week_lookahead": "แผนล่วงหน้า 3 สัปดาห์",
+      "safety_kpis": "ตัวชี้วัดความปลอดภัย",
+      "incident_log": "บันทึกอุบัติเหตุ",
+      "near_miss_reports": "รายงานเหตุการณ์เกือบเกิดอุบัติเหตุ",
+      "safety_training": "การฝึกอบรมความปลอดภัย",
+      "inspection_summary": "สรุปการตรวจสอบ",
+      "by_inspection_type": "แยกตามประเภทการตรวจสอบ",
+      "punch_list_status": "สถานะรายการแก้ไขงาน",
+      "recent_inspections": "การตรวจสอบล่าสุด",
+      "portfolio_overview": "ภาพรวมพอร์ตโฟลิโอ",
+      "project_statuses": "สถานะโครงการ",
+      "kpi_comparison": "เปรียบเทียบ KPI",
+      "portfolio_risks": "ความเสี่ยงของพอร์ตโฟลิโอ",
+      "field_progress": "ความคืบหน้าหน้างาน",
+      "top_risks": "ความเสี่ยงสำคัญ",
+      "site_photos": "รูปถ่ายหน้างาน",
+      "summary": "สรุป"
+    },
+    "field": {
+      "name": "ชื่อ",
+      "status": "สถานะ",
+      "phase": "ระยะ",
+      "planned_start": "เริ่มตามแผน",
+      "planned_end": "สิ้นสุดตามแผน",
+      "schedule_progress_pct": "ความคืบหน้ากำหนดการ (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "งบประมาณที่ใช้ไป (%)",
+      "as_of": "ณ วันที่",
+      "progress_pct": "ความคืบหน้า (%)",
+      "risk_score_avg": "คะแนนความเสี่ยงเฉลี่ย",
+      "open_rfis": "RFI ที่ยังเปิดอยู่",
+      "open_submittals": "เอกสารส่งอนุมัติที่ยังเปิดอยู่",
+      "open_defects": "ข้อบกพร่องที่ยังเปิดอยู่",
+      "open_observations": "ข้อสังเกตที่ยังเปิดอยู่",
+      "budget": "งบประมาณ",
+      "committed": "ผูกพันแล้ว",
+      "actual": "ค่าจริง",
+      "payable": "เจ้าหนี้",
+      "receivable": "ลูกหนี้",
+      "net_cash_flow": "กระแสเงินสดสุทธิ"
+    },
+    "explain": {
+      "report_total_one": "ยอดรวมของรายงาน: {money} (ผลรวมของ {count} แถว)",
+      "report_total_other": "ยอดรวมของรายงาน: {money} (ผลรวมของ {count} แถว)",
+      "percent_of_total": "{part} คิดเป็น {percent} ของ {total} (ร้อยละของยอดรวม)",
+      "percent_zero_total": "{part} จาก {total}: ยอดรวมเป็นศูนย์ จึงแสดงทุกส่วนเป็นร้อยละ 0",
+      "breakdown_empty": "รายละเอียดต้นทุน: ไม่มีข้อมูล",
+      "breakdown_one": "รายละเอียดต้นทุน: {count} กลุ่ม ยอดรวมของรายงาน {money}",
+      "breakdown_other": "รายละเอียดต้นทุน: {count} กลุ่ม ยอดรวมของรายงาน {money}",
+      "top_n_one": "{requested} รายการแรก: แสดง {shown} จาก {shown} แถว",
+      "top_n_other": "{requested} รายการแรก: แสดง {shown} จาก {shown} แถว"
+    }
   },
   "gantt": {
     "title": "แผนภูมิแกนต์",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "ฉบับร่าง",
       "frozen": "ล็อกแล้ว"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "มูลค่าการพัฒนารวม (GDV)",
+      "total_development_cost": "ต้นทุนการพัฒนารวม",
+      "residual_land_value": "มูลค่าที่ดินคงเหลือ",
+      "developer_profit": "กำไรของผู้พัฒนา",
+      "profit_on_cost": "กำไรต่อต้นทุน",
+      "profit_on_gdv": "กำไรต่อ GDV",
+      "construction_cost": "ต้นทุนการก่อสร้าง",
+      "professional_fees": "ค่าวิชาชีพ",
+      "contingency": "เงินสำรองฉุกเฉิน",
+      "finance_cost": "ต้นทุนทางการเงิน",
+      "sales_costs": "ค่าใช้จ่ายในการขาย"
+    },
+    "status": {
+      "viable": "มีความเป็นไปได้",
+      "unviable": "ไม่มีความเป็นไปได้",
+      "marginal": "อยู่ในเกณฑ์ขอบ",
+      "pending": "ยังไม่ได้ประเมิน"
+    },
+    "figure": {
+      "gross_development_value": "มูลค่าการขายรวมของทุกยูนิตในโครงการ ทั้งหมดในสกุลเงินเดียว",
+      "total_development_cost": "ต้นทุนทั้งหมดในการดำเนินโครงการ ยกเว้นตัวที่ดินเอง: การก่อสร้าง ค่าวิชาชีพ เงินสำรอง ต้นทุนทางการเงิน และค่าใช้จ่ายในการขาย",
+      "residual_land_value": "มูลค่าที่เหลือสำหรับที่ดิน หลังหักต้นทุนการพัฒนารวมและกำไรเป้าหมายของผู้พัฒนาออกจากมูลค่าการพัฒนารวม",
+      "developer_profit": "กำไรที่ผู้พัฒนาตั้งเป้าจะเก็บไว้ กำหนดเป็นอัตราส่วนเป้าหมายของมูลค่าการพัฒนารวม",
+      "profit_on_cost": "กำไรของผู้พัฒนาหารด้วยต้นทุนการพัฒนารวม แสดงเป็นอัตราส่วน",
+      "profit_on_gdv": "กำไรของผู้พัฒนาหารด้วยมูลค่าการพัฒนารวม แสดงเป็นอัตราส่วน"
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "ใบแจ้งหนี้",
+      "date": "วันที่: {value}",
+      "due": "กำหนดชำระ: {value}",
+      "from": "จาก",
+      "bill_to": "เรียกเก็บเงินจาก",
+      "vat_id": "เลขผู้เสียภาษี: {value}",
+      "ref": "อ้างอิง: {value}",
+      "th_description": "รายการ",
+      "th_qty": "จำนวน",
+      "th_unit": "หน่วย",
+      "th_unit_price": "ราคาต่อหน่วย",
+      "th_net": "ยอดสุทธิ ({currency})",
+      "net_total": "ยอดรวมสุทธิ",
+      "vat_total": "ภาษีมูลค่าเพิ่ม",
+      "grand_total": "ยอดรวมทั้งสิ้น",
+      "retention_prepaid": "เงินประกันผลงาน / เงินล่วงหน้า",
+      "amount_due": "ยอดที่ต้องชำระ",
+      "payment": "การชำระเงิน",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "เลขที่บัญชี: {value}",
+      "bank_code": "รหัสธนาคาร: {value}",
+      "account_holder": "ชื่อบัญชี: {value}",
+      "footer": "PDF นี้มีใบแจ้งหนี้อิเล็กทรอนิกส์ EN 16931 ฝังอยู่ (Factur-X / ZUGFeRD) ไฟล์ XML ที่ฝังอยู่คือเอกสารที่มีผลตามกฎหมาย"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "แคมป์คนงาน",
+        "rental": "ที่พักให้เช่า",
+        "hotel": "โรงแรม"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "รอดำเนินการ",
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ไม่อนุมัติ"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "เป็นไปตามข้อกำหนด",
+        "fail": "ไม่เป็นไปตามข้อกำหนด",
+        "not_applicable": "ไม่เกี่ยวข้อง"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "แบบ",
+        "contract": "สัญญา",
+        "specification": "ข้อกำหนดทางเทคนิค",
+        "photo": "รูปภาพ",
+        "correspondence": "หนังสือโต้ตอบ",
+        "reality_capture": "การบันทึกสภาพจริงหน้างาน",
+        "other": "อื่น ๆ"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "รอดำเนินการ",
+        "approved": "อนุมัติแล้ว",
+        "rejected": "ไม่อนุมัติ",
+        "cancelled": "ยกเลิกแล้ว"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "ฉบับร่าง",
+        "submitted": "ส่งเพื่ออนุมัติ",
+        "approved": "อนุมัติแล้ว",
+        "posted": "บันทึกเข้าบัญชีแยกประเภทแล้ว"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "เปิด",
+        "assigned": "มอบหมายแล้ว",
+        "in_progress": "กำลังดำเนินการ",
+        "resolved": "แก้ไขแล้ว",
+        "verified": "ตรวจสอบแล้ว",
+        "closed": "ปิดแล้ว"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "ข้อสังเกต",
+        "minor": "เล็กน้อย",
+        "major": "สำคัญ",
+        "critical": "วิกฤต"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "บุคคล",
+        "crew": "ทีมงาน",
+        "equipment": "เครื่องจักร",
+        "subcontractor": "ผู้รับเหมาช่วง"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "ชื่อโมเดล AI ล้าสมัยหรือไม่พร้อมใช้งาน เปิดการตั้งค่า > AI แล้วระบุชื่อโมเดลที่ใช้งานได้จริงสำหรับผู้ให้บริการของคุณ",
+      "not_configured": "ยังไม่ได้ตั้งค่า AI โปรดตั้งค่าผู้ให้บริการ AI ในการตั้งค่า"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "ตรวจสอบแล้ว",
+      "bound": "แนบแล้ว",
+      "empty": "ยังไม่มี"
+    },
+    "package_status_labels": {
+      "draft": "ฉบับร่าง",
+      "in_progress": "กำลังดำเนินการ",
+      "ready": "พร้อม",
+      "issued": "ออกแล้ว"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "อุปสรรคสำคัญ",
+      "critical": "วิกฤต",
+      "warning": "คำเตือน",
+      "suggestion": "ข้อเสนอแนะ"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "กลยุทธ์",
+      "brief": "การกำหนดความต้องการ",
+      "concept": "แนวคิด",
+      "design": "ออกแบบ",
+      "approval": "การขออนุญาต",
+      "detail": "ออกแบบรายละเอียด",
+      "tender": "ประกวดราคา",
+      "award": "มอบงาน",
+      "construction": "ก่อสร้าง",
+      "handover": "ส่งมอบ",
+      "operation": "ดำเนินการ"
     }
   }
 }

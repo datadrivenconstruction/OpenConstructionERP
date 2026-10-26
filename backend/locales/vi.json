@@ -132,7 +132,15 @@
     "missing_description": "Hạng mục {position} thiếu mô tả",
     "missing_classification": "Hạng mục {position} cần mã phân loại",
     "duplicate_ordinal": "Số thứ tự trùng lặp: {ordinal}",
-    "rate_anomaly": "Đơn giá {rate} vượt ngưỡng ({threshold})"
+    "rate_anomaly": "Đơn giá {rate} vượt ngưỡng ({threshold})",
+    "nl": {
+      "not_a_string": "Dữ liệu nhập phải là văn bản.",
+      "empty": "Dữ liệu nhập đang trống.",
+      "too_long": "Dữ liệu nhập vượt quá {max} ký tự.",
+      "ai_unparsable": "Không thể phân tích phản hồi của AI thành tài liệu DSL.",
+      "no_pattern": "Không có mẫu nào khớp với câu đã nhập.",
+      "try": "Hãy thử: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "Tiến độ 4D",
@@ -327,7 +335,16 @@
     "pass": "Đạt",
     "fail": "Không đạt",
     "partial": "Một phần",
-    "critical": "Nghiêm trọng"
+    "critical": "Nghiêm trọng",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Đã lên lịch",
+        "in_progress": "Đang thực hiện",
+        "completed": "Hoàn thành",
+        "failed": "Không đạt",
+        "cancelled": "Đã hủy"
+      }
+    }
   },
   "ncr": {
     "title": "Báo cáo không phù hợp",
@@ -347,7 +364,19 @@
     "submit": "Gửi",
     "review": "Xem xét",
     "approved_as_noted": "Duyệt với ghi chú",
-    "revise_resubmit": "Sửa và gửi lại"
+    "revise_resubmit": "Sửa và gửi lại",
+    "intl": {
+      "status_labels": {
+        "draft": "Nháp",
+        "submitted": "Đã nộp",
+        "under_review": "Đang xem xét",
+        "approved": "Đã phê duyệt",
+        "approved_as_noted": "Phê duyệt có ghi chú",
+        "revise_and_resubmit": "Chỉnh sửa và nộp lại",
+        "rejected": "Đã từ chối",
+        "closed": "Đã đóng"
+      }
+    }
   },
   "correspondence": {
     "title": "Thư từ",
@@ -372,7 +401,15 @@
     "promote": "Nâng cấp",
     "suitability": "Tính phù hợp",
     "discipline": "Chuyên ngành",
-    "revisions": "Phiên bản"
+    "revisions": "Phiên bản",
+    "intl": {
+      "state_labels": {
+        "wip": "Đang thực hiện",
+        "shared": "Đã chia sẻ",
+        "published": "Đã phát hành",
+        "archived": "Đã lưu trữ"
+      }
+    }
   },
   "transmittals": {
     "title": "Phiếu chuyển giao",
@@ -384,7 +421,14 @@
     "recipients": "Người nhận",
     "acknowledge": "Xác nhận đã nhận",
     "locked": "Đã khóa",
-    "issue_transmittal": "Phát hành"
+    "issue_transmittal": "Phát hành",
+    "intl": {
+      "status_words": {
+        "draft": "nháp",
+        "issued": "đã gửi",
+        "responded": "đã phản hồi"
+      }
+    }
   },
   "notifications": {
     "title": "Thông báo",
@@ -426,7 +470,101 @@
     "project_status": "Trạng thái dự án",
     "cost_report": "Báo cáo chi phí",
     "schedule_status": "Trạng thái tiến độ",
-    "safety_report": "Báo cáo an toàn"
+    "safety_report": "Báo cáo an toàn",
+    "doc": {
+      "meta_report": "Báo cáo",
+      "meta_project": "Dự án",
+      "meta_type": "Loại",
+      "meta_generated": "Ngày tạo",
+      "meta_currency": "Tiền tệ",
+      "field_column": "Trường",
+      "value_column": "Giá trị",
+      "yes": "Có",
+      "no": "Không",
+      "no_data_heading": "Không có dữ liệu",
+      "no_data_body": "Báo cáo này được tạo từ ảnh chụp dữ liệu rỗng. Hãy kiểm tra xem các module nguồn (tài chính, tiến độ, an toàn, v.v.) đã trả về dữ liệu cho dự án được chọn hay chưa.",
+      "no_data_body_short": "Báo cáo này được tạo từ ảnh chụp dữ liệu rỗng. Hãy kiểm tra xem các module nguồn đã trả về dữ liệu cho dự án được chọn hay chưa.",
+      "footer_generated_by": "Được tạo bởi OpenConstructionERP lúc {timestamp}.",
+      "worksheet_name": "Báo cáo",
+      "pdf_subject": "Báo cáo dự án",
+      "overall_progress": "Tiến độ tổng thể",
+      "as_of": "Tính đến",
+      "recorded_by": "Người ghi nhận",
+      "period": "Kỳ",
+      "entries_suffix": "({count} mục)",
+      "site_photo_alt": "Ảnh công trường",
+      "ai_summary_heading": "Tóm tắt",
+      "ai_badge": "Do AI tạo",
+      "ai_note": "Do AI tạo từ dữ liệu dự án bên dưới.",
+      "ai_note_confidence": "Do AI tạo từ dữ liệu dự án bên dưới (độ tin cậy {confidence}).",
+      "ai_note_review": "Hãy xem lại trước khi chia sẻ với khách hàng."
+    },
+    "section": {
+      "project_overview": "Tổng quan dự án",
+      "key_performance_indicators": "Chỉ số hiệu suất chính",
+      "schedule_status": "Tình trạng tiến độ",
+      "risk_summary": "Tóm tắt rủi ro",
+      "open_issues": "Vấn đề còn mở",
+      "cost_summary": "Tóm tắt chi phí",
+      "cost_breakdown": "Chi tiết chi phí",
+      "change_orders": "Lệnh thay đổi",
+      "cash_flow": "Dòng tiền",
+      "schedule_overview": "Tổng quan tiến độ",
+      "milestone_status": "Tình trạng các mốc",
+      "critical_path": "Đường găng",
+      "3_week_lookahead": "Dự báo 3 tuần",
+      "safety_kpis": "Chỉ số an toàn",
+      "incident_log": "Nhật ký sự cố",
+      "near_miss_reports": "Báo cáo suýt xảy ra sự cố",
+      "safety_training": "Huấn luyện an toàn",
+      "inspection_summary": "Tóm tắt kiểm tra",
+      "by_inspection_type": "Theo loại kiểm tra",
+      "punch_list_status": "Tình trạng danh sách hạng mục tồn đọng",
+      "recent_inspections": "Kiểm tra gần đây",
+      "portfolio_overview": "Tổng quan danh mục",
+      "project_statuses": "Tình trạng dự án",
+      "kpi_comparison": "So sánh KPI",
+      "portfolio_risks": "Rủi ro danh mục",
+      "field_progress": "Tiến độ tại công trường",
+      "top_risks": "Rủi ro chính",
+      "site_photos": "Ảnh công trường",
+      "summary": "Tóm tắt"
+    },
+    "field": {
+      "name": "Tên",
+      "status": "Trạng thái",
+      "phase": "Giai đoạn",
+      "planned_start": "Bắt đầu theo kế hoạch",
+      "planned_end": "Kết thúc theo kế hoạch",
+      "schedule_progress_pct": "Tiến độ theo lịch (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Ngân sách đã dùng (%)",
+      "as_of": "Tính đến",
+      "progress_pct": "Tiến độ (%)",
+      "risk_score_avg": "Điểm rủi ro trung bình",
+      "open_rfis": "RFI còn mở",
+      "open_submittals": "Hồ sơ trình duyệt còn mở",
+      "open_defects": "Lỗi còn mở",
+      "open_observations": "Ghi nhận còn mở",
+      "budget": "Ngân sách",
+      "committed": "Đã cam kết",
+      "actual": "Thực tế",
+      "payable": "Phải trả",
+      "receivable": "Phải thu",
+      "net_cash_flow": "Dòng tiền ròng"
+    },
+    "explain": {
+      "report_total_one": "Tổng báo cáo: {money} (tổng của {count} dòng).",
+      "report_total_other": "Tổng báo cáo: {money} (tổng của {count} dòng).",
+      "percent_of_total": "{part} bằng {percent} của {total} (phần trăm trên tổng).",
+      "percent_zero_total": "{part} trên {total}: tổng bằng không, nên mọi tỷ trọng được báo cáo là 0 phần trăm.",
+      "breakdown_empty": "Chi tiết chi phí: không có dữ liệu.",
+      "breakdown_one": "Chi tiết chi phí: {count} nhóm, tổng báo cáo {money}.",
+      "breakdown_other": "Chi tiết chi phí: {count} nhóm, tổng báo cáo {money}.",
+      "top_n_one": "Top {requested}: {shown} trên {shown} dòng.",
+      "top_n_other": "Top {requested}: {shown} trên {shown} dòng."
+    }
   },
   "gantt": {
     "title": "Biểu đồ Gantt",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Nháp",
       "frozen": "Đã khóa"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Tổng giá trị phát triển (GDV)",
+      "total_development_cost": "Tổng chi phí phát triển",
+      "residual_land_value": "Giá trị đất còn lại",
+      "developer_profit": "Lợi nhuận chủ đầu tư",
+      "profit_on_cost": "Lợi nhuận trên chi phí",
+      "profit_on_gdv": "Lợi nhuận trên GDV",
+      "construction_cost": "Chi phí xây dựng",
+      "professional_fees": "Phí chuyên môn",
+      "contingency": "Dự phòng",
+      "finance_cost": "Chi phí tài chính",
+      "sales_costs": "Chi phí bán hàng"
+    },
+    "status": {
+      "viable": "Khả thi",
+      "unviable": "Không khả thi",
+      "marginal": "Ranh giới",
+      "pending": "Chưa thẩm định"
+    },
+    "figure": {
+      "gross_development_value": "Tổng giá trị bán của mọi căn trong dự án, quy đổi về cùng một tiền tệ.",
+      "total_development_cost": "Mọi chi phí thực hiện dự án ngoài tiền sử dụng đất: xây dựng, phí chuyên môn, dự phòng, chi phí tài chính và chi phí bán hàng.",
+      "residual_land_value": "Phần còn lại dành cho đất sau khi trừ tổng chi phí phát triển và lợi nhuận mục tiêu của chủ đầu tư khỏi tổng giá trị phát triển.",
+      "developer_profit": "Lợi nhuận chủ đầu tư muốn giữ lại, đặt làm tỷ lệ mục tiêu trên tổng giá trị phát triển.",
+      "profit_on_cost": "Lợi nhuận chủ đầu tư chia cho tổng chi phí phát triển, biểu thị dưới dạng tỷ lệ.",
+      "profit_on_gdv": "Lợi nhuận chủ đầu tư chia cho tổng giá trị phát triển, biểu thị dưới dạng tỷ lệ."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "HÓA ĐƠN",
+      "date": "Ngày: {value}",
+      "due": "Hạn thanh toán: {value}",
+      "from": "Từ",
+      "bill_to": "Người mua",
+      "vat_id": "Mã số thuế: {value}",
+      "ref": "Tham chiếu: {value}",
+      "th_description": "Diễn giải",
+      "th_qty": "Số lượng",
+      "th_unit": "Đơn vị",
+      "th_unit_price": "Đơn giá",
+      "th_net": "Thành tiền chưa thuế ({currency})",
+      "net_total": "Tổng chưa thuế",
+      "vat_total": "Thuế GTGT",
+      "grand_total": "Tổng cộng",
+      "retention_prepaid": "Giữ lại bảo hành / tạm ứng",
+      "amount_due": "Số tiền phải trả",
+      "payment": "Thanh toán",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Số tài khoản: {value}",
+      "bank_code": "Mã ngân hàng: {value}",
+      "account_holder": "Chủ tài khoản: {value}",
+      "footer": "PDF này có đính kèm hóa đơn điện tử EN 16931 (Factur-X / ZUGFeRD). Tệp XML đính kèm là chứng từ có giá trị."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Lán trại công nhân",
+        "rental": "Nhà ở cho thuê",
+        "hotel": "Khách sạn"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Đang chờ",
+        "approved": "Đã phê duyệt",
+        "rejected": "Đã từ chối"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Đạt",
+        "fail": "Không đạt",
+        "not_applicable": "Không áp dụng"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Bản vẽ",
+        "contract": "Hợp đồng",
+        "specification": "Chỉ dẫn kỹ thuật",
+        "photo": "Hình ảnh",
+        "correspondence": "Thư từ",
+        "reality_capture": "Thu thập hiện trạng",
+        "other": "Khác"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Đang chờ",
+        "approved": "Đã phê duyệt",
+        "rejected": "Đã từ chối",
+        "cancelled": "Đã hủy"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Nháp",
+        "submitted": "Đã gửi duyệt",
+        "approved": "Đã phê duyệt",
+        "posted": "Đã ghi sổ cái"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Mở",
+        "assigned": "Đã giao",
+        "in_progress": "Đang xử lý",
+        "resolved": "Đã khắc phục",
+        "verified": "Đã xác nhận",
+        "closed": "Đã đóng"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "quan sát",
+        "minor": "nhỏ",
+        "major": "lớn",
+        "critical": "nghiêm trọng"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Nhân sự",
+        "crew": "Tổ đội",
+        "equipment": "Thiết bị",
+        "subcontractor": "Nhà thầu phụ"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Tên mô hình AI đã cũ hoặc không khả dụng. Hãy mở Cài đặt > AI và nhập tên mô hình hợp lệ hiện tại của nhà cung cấp.",
+      "not_configured": "AI chưa được cấu hình. Vui lòng thiết lập nhà cung cấp AI trong Cài đặt."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "đã xác nhận",
+      "bound": "đã đính kèm",
+      "empty": "còn thiếu"
+    },
+    "package_status_labels": {
+      "draft": "nháp",
+      "in_progress": "đang thực hiện",
+      "ready": "sẵn sàng",
+      "issued": "đã phát hành"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "cản trở",
+      "critical": "nghiêm trọng",
+      "warning": "cảnh báo",
+      "suggestion": "gợi ý"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Chiến lược",
+      "brief": "Yêu cầu dự án",
+      "concept": "Ý tưởng",
+      "design": "Thiết kế",
+      "approval": "Cấp phép",
+      "detail": "Thiết kế chi tiết",
+      "tender": "Đấu thầu",
+      "award": "Trao thầu",
+      "construction": "Thi công",
+      "handover": "Bàn giao",
+      "operation": "Vận hành"
     }
   }
 }

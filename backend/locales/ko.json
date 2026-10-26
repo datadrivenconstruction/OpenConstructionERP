@@ -132,7 +132,15 @@
     "missing_description": "항목 {position}에 설명이 없습니다",
     "missing_classification": "항목 {position}에 분류 코드가 필요합니다",
     "duplicate_ordinal": "순번 중복: {ordinal}",
-    "rate_anomaly": "단가 {rate}이(가) 임계값을 초과 ({threshold})"
+    "rate_anomaly": "단가 {rate}이(가) 임계값을 초과 ({threshold})",
+    "nl": {
+      "not_a_string": "입력은 텍스트여야 합니다.",
+      "empty": "입력이 비어 있습니다.",
+      "too_long": "입력이 {max}자를 초과했습니다.",
+      "ai_unparsable": "AI 응답을 DSL 문서로 해석할 수 없습니다.",
+      "no_pattern": "입력 문장과 일치하는 패턴이 없습니다.",
+      "try": "시도해 보세요: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D 공정표",
@@ -327,7 +335,16 @@
     "pass": "합격",
     "fail": "불합격",
     "partial": "부분 합격",
-    "critical": "중대"
+    "critical": "중대",
+    "intl": {
+      "status_labels": {
+        "scheduled": "예정",
+        "in_progress": "진행 중",
+        "completed": "완료",
+        "failed": "불합격",
+        "cancelled": "취소"
+      }
+    }
   },
   "ncr": {
     "title": "부적합 보고서",
@@ -347,7 +364,19 @@
     "submit": "제출",
     "review": "검토",
     "approved_as_noted": "지적사항 반영 조건부 승인",
-    "revise_resubmit": "수정 후 재제출"
+    "revise_resubmit": "수정 후 재제출",
+    "intl": {
+      "status_labels": {
+        "draft": "초안",
+        "submitted": "제출됨",
+        "under_review": "검토 중",
+        "approved": "승인",
+        "approved_as_noted": "조건부 승인",
+        "revise_and_resubmit": "수정 후 재제출",
+        "rejected": "반려",
+        "closed": "종결"
+      }
+    }
   },
   "correspondence": {
     "title": "공문",
@@ -372,7 +401,15 @@
     "promote": "단계 올리기",
     "suitability": "적합성",
     "discipline": "공종",
-    "revisions": "개정 이력"
+    "revisions": "개정 이력",
+    "intl": {
+      "state_labels": {
+        "wip": "작업 중",
+        "shared": "공유됨",
+        "published": "발행됨",
+        "archived": "보관됨"
+      }
+    }
   },
   "transmittals": {
     "title": "문서 송부서",
@@ -384,7 +421,14 @@
     "recipients": "수신자",
     "acknowledge": "수령 확인",
     "locked": "잠김",
-    "issue_transmittal": "발행"
+    "issue_transmittal": "발행",
+    "intl": {
+      "status_words": {
+        "draft": "초안",
+        "issued": "발송됨",
+        "responded": "회신됨"
+      }
+    }
   },
   "notifications": {
     "title": "알림",
@@ -426,7 +470,101 @@
     "project_status": "프로젝트 현황",
     "cost_report": "공사비 보고서",
     "schedule_status": "공정 현황",
-    "safety_report": "안전 보고서"
+    "safety_report": "안전 보고서",
+    "doc": {
+      "meta_report": "보고서",
+      "meta_project": "프로젝트",
+      "meta_type": "유형",
+      "meta_generated": "생성일",
+      "meta_currency": "통화",
+      "field_column": "항목",
+      "value_column": "값",
+      "yes": "예",
+      "no": "아니요",
+      "no_data_heading": "사용 가능한 데이터가 없습니다",
+      "no_data_body": "이 보고서는 비어 있는 데이터 스냅샷으로 생성되었습니다. 선택한 프로젝트에 대해 원본 모듈(재무, 공정, 안전 등)이 데이터를 반환했는지 확인하세요.",
+      "no_data_body_short": "이 보고서는 비어 있는 데이터 스냅샷으로 생성되었습니다. 선택한 프로젝트에 대해 원본 모듈이 데이터를 반환했는지 확인하세요.",
+      "footer_generated_by": "OpenConstructionERP가 {timestamp}에 생성함.",
+      "worksheet_name": "보고서",
+      "pdf_subject": "프로젝트 보고서",
+      "overall_progress": "전체 진행률",
+      "as_of": "기준일",
+      "recorded_by": "기록자",
+      "period": "기간",
+      "entries_suffix": "({count}건)",
+      "site_photo_alt": "현장 사진",
+      "ai_summary_heading": "요약",
+      "ai_badge": "AI 생성",
+      "ai_note": "아래 프로젝트 데이터를 바탕으로 AI가 생성했습니다.",
+      "ai_note_confidence": "아래 프로젝트 데이터를 바탕으로 AI가 생성했습니다(신뢰도 {confidence}).",
+      "ai_note_review": "고객과 공유하기 전에 검토하세요."
+    },
+    "section": {
+      "project_overview": "프로젝트 개요",
+      "key_performance_indicators": "핵심 성과 지표",
+      "schedule_status": "공정 현황",
+      "risk_summary": "리스크 요약",
+      "open_issues": "미해결 이슈",
+      "cost_summary": "원가 요약",
+      "cost_breakdown": "원가 내역",
+      "change_orders": "설계변경 지시",
+      "cash_flow": "현금흐름",
+      "schedule_overview": "공정 개요",
+      "milestone_status": "마일스톤 현황",
+      "critical_path": "주공정(크리티컬 패스)",
+      "3_week_lookahead": "3주 단기 공정 계획",
+      "safety_kpis": "안전 지표",
+      "incident_log": "사고 기록",
+      "near_miss_reports": "아차사고 보고",
+      "safety_training": "안전 교육",
+      "inspection_summary": "검사 요약",
+      "by_inspection_type": "검사 유형별",
+      "punch_list_status": "하자 목록 현황",
+      "recent_inspections": "최근 검사",
+      "portfolio_overview": "포트폴리오 개요",
+      "project_statuses": "프로젝트 현황",
+      "kpi_comparison": "KPI 비교",
+      "portfolio_risks": "포트폴리오 리스크",
+      "field_progress": "현장 진행 상황",
+      "top_risks": "주요 리스크",
+      "site_photos": "현장 사진",
+      "summary": "요약"
+    },
+    "field": {
+      "name": "이름",
+      "status": "상태",
+      "phase": "단계",
+      "planned_start": "계획 시작일",
+      "planned_end": "계획 종료일",
+      "schedule_progress_pct": "공정 진행률(%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "예산 집행률(%)",
+      "as_of": "기준일",
+      "progress_pct": "진행률(%)",
+      "risk_score_avg": "평균 리스크 점수",
+      "open_rfis": "미해결 RFI",
+      "open_submittals": "미승인 제출물",
+      "open_defects": "미해결 하자",
+      "open_observations": "미해결 지적사항",
+      "budget": "예산",
+      "committed": "계약액",
+      "actual": "실행액",
+      "payable": "지급 예정",
+      "receivable": "수금 예정",
+      "net_cash_flow": "순현금흐름"
+    },
+    "explain": {
+      "report_total_one": "보고서 합계: {money} ({count}개 행의 합).",
+      "report_total_other": "보고서 합계: {money} ({count}개 행의 합).",
+      "percent_of_total": "{part}은(는) {total}의 {percent}입니다(전체 대비 비율).",
+      "percent_zero_total": "{part} / {total}: 합계가 0이므로 모든 비율을 0%로 표시합니다.",
+      "breakdown_empty": "원가 내역: 데이터가 없습니다.",
+      "breakdown_one": "원가 내역: {count}개 그룹, 보고서 합계 {money}.",
+      "breakdown_other": "원가 내역: {count}개 그룹, 보고서 합계 {money}.",
+      "top_n_one": "상위 {requested}: {shown}개 중 {shown}개 행.",
+      "top_n_other": "상위 {requested}: {shown}개 중 {shown}개 행."
+    }
   },
   "gantt": {
     "title": "간트 차트",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "작성 중",
       "frozen": "확정"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "총개발가치(GDV)",
+      "total_development_cost": "총개발비",
+      "residual_land_value": "잔여 토지가치",
+      "developer_profit": "개발 이익",
+      "profit_on_cost": "원가 대비 이익률",
+      "profit_on_gdv": "GDV 대비 이익률",
+      "construction_cost": "공사비",
+      "professional_fees": "전문가 용역비",
+      "contingency": "예비비",
+      "finance_cost": "금융비용",
+      "sales_costs": "분양 비용"
+    },
+    "status": {
+      "viable": "사업성 있음",
+      "unviable": "사업성 없음",
+      "marginal": "한계",
+      "pending": "아직 평가되지 않음"
+    },
+    "figure": {
+      "gross_development_value": "사업 내 모든 호실·세대의 분양가 합계입니다. 모두 같은 통화로 표시합니다.",
+      "total_development_cost": "토지비를 제외한 사업 시행의 모든 비용: 공사비, 용역비, 예비비, 금융비용, 분양 비용.",
+      "residual_land_value": "총개발가치에서 총개발비와 목표 개발 이익을 뺀 뒤 토지에 남는 금액.",
+      "developer_profit": "개발자가 확보하려는 이익으로, 총개발가치 대비 목표 비율로 설정합니다.",
+      "profit_on_cost": "개발 이익을 총개발비로 나눈 비율.",
+      "profit_on_gdv": "개발 이익을 총개발가치로 나눈 비율."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "청구서",
+      "date": "발행일: {value}",
+      "due": "지급기한: {value}",
+      "from": "발행인",
+      "bill_to": "청구처",
+      "vat_id": "사업자등록번호: {value}",
+      "ref": "참조: {value}",
+      "th_description": "품목",
+      "th_qty": "수량",
+      "th_unit": "단위",
+      "th_unit_price": "단가",
+      "th_net": "공급가액({currency})",
+      "net_total": "공급가액 합계",
+      "vat_total": "부가세",
+      "grand_total": "합계금액",
+      "retention_prepaid": "보류금 / 선급금",
+      "amount_due": "청구금액",
+      "payment": "지급 정보",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "계좌번호: {value}",
+      "bank_code": "은행 코드: {value}",
+      "account_holder": "예금주: {value}",
+      "footer": "이 PDF에는 EN 16931 전자세금계산서(Factur-X / ZUGFeRD)가 포함되어 있습니다. 내장된 XML이 원본 문서입니다."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "근로자 숙소",
+        "rental": "임대 주택",
+        "hotel": "호텔"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "대기",
+        "approved": "승인",
+        "rejected": "반려"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "충족",
+        "fail": "미충족",
+        "not_applicable": "해당 없음"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "도면",
+        "contract": "계약서",
+        "specification": "시방서",
+        "photo": "사진",
+        "correspondence": "공문",
+        "reality_capture": "현장 실측 자료",
+        "other": "기타"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "대기",
+        "approved": "승인",
+        "rejected": "반려",
+        "cancelled": "취소"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "초안",
+        "submitted": "승인 요청됨",
+        "approved": "승인됨",
+        "posted": "원장 전기 완료"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "열림",
+        "assigned": "담당자 지정",
+        "in_progress": "조치 중",
+        "resolved": "조치 완료",
+        "verified": "확인 완료",
+        "closed": "종결"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "관찰",
+        "minor": "경미",
+        "major": "중대",
+        "critical": "치명적"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "인력",
+        "crew": "작업조",
+        "equipment": "장비",
+        "subcontractor": "협력업체"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI 모델 이름이 오래되었거나 사용할 수 없습니다. 설정 > AI를 열고 제공업체에 맞는 현재 유효한 모델 이름을 입력하세요.",
+      "not_configured": "AI가 설정되지 않았습니다. 설정에서 AI 제공업체를 지정하세요."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "확인됨",
+      "bound": "첨부됨",
+      "empty": "미제출"
+    },
+    "package_status_labels": {
+      "draft": "초안",
+      "in_progress": "진행 중",
+      "ready": "준비 완료",
+      "issued": "발행됨"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "차단 요인",
+      "critical": "치명적",
+      "warning": "경고",
+      "suggestion": "제안"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "전략",
+      "brief": "사업 개요",
+      "concept": "컨셉",
+      "design": "기본설계",
+      "approval": "인허가",
+      "detail": "실시설계",
+      "tender": "입찰",
+      "award": "계약",
+      "construction": "시공",
+      "handover": "인수인계",
+      "operation": "운영"
     }
   }
 }

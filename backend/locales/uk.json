@@ -132,7 +132,15 @@
     "missing_description": "Позиція {position} не має опису",
     "missing_classification": "Позиція {position} потребує коду класифікації",
     "duplicate_ordinal": "Дубльований порядковий номер: {ordinal}",
-    "rate_anomaly": "Ціна за одиницю {rate} перевищує поріг ({threshold})"
+    "rate_anomaly": "Ціна за одиницю {rate} перевищує поріг ({threshold})",
+    "nl": {
+      "not_a_string": "Вхідні дані мають бути текстом.",
+      "empty": "Вхідні дані порожні.",
+      "too_long": "Вхідні дані перевищують {max} символів.",
+      "ai_unparsable": "Відповідь ШІ не вдалося розібрати як документ DSL.",
+      "no_pattern": "Жоден шаблон не відповідає введеному реченню.",
+      "try": "Спробуйте: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D календарний графік",
@@ -327,7 +335,16 @@
     "pass": "Прийнято",
     "fail": "Не прийнято",
     "partial": "Частково",
-    "critical": "Критично"
+    "critical": "Критично",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Заплановано",
+        "in_progress": "Виконується",
+        "completed": "Завершено",
+        "failed": "Не пройдено",
+        "cancelled": "Скасовано"
+      }
+    }
   },
   "ncr": {
     "title": "Акти невідповідності",
@@ -347,7 +364,19 @@
     "submit": "Подати",
     "review": "Розгляд",
     "approved_as_noted": "Погоджено із зауваженнями",
-    "revise_resubmit": "Виправити й подати повторно"
+    "revise_resubmit": "Виправити й подати повторно",
+    "intl": {
+      "status_labels": {
+        "draft": "Чернетка",
+        "submitted": "Подано",
+        "under_review": "На розгляді",
+        "approved": "Схвалено",
+        "approved_as_noted": "Схвалено із зауваженнями",
+        "revise_and_resubmit": "Доопрацювати та подати знову",
+        "rejected": "Відхилено",
+        "closed": "Закрито"
+      }
+    }
   },
   "correspondence": {
     "title": "Листування",
@@ -372,7 +401,15 @@
     "promote": "Перевести на наступний стан",
     "suitability": "Придатність",
     "discipline": "Розділ",
-    "revisions": "Редакції"
+    "revisions": "Редакції",
+    "intl": {
+      "state_labels": {
+        "wip": "В роботі",
+        "shared": "Надано доступ",
+        "published": "Опубліковано",
+        "archived": "В архіві"
+      }
+    }
   },
   "transmittals": {
     "title": "Супровідні відомості",
@@ -384,7 +421,14 @@
     "recipients": "Одержувачі",
     "acknowledge": "Підтвердити отримання",
     "locked": "Заблоковано",
-    "issue_transmittal": "Видати"
+    "issue_transmittal": "Видати",
+    "intl": {
+      "status_words": {
+        "draft": "чернетка",
+        "issued": "надіслано",
+        "responded": "відповідь надано"
+      }
+    }
   },
   "notifications": {
     "title": "Сповіщення",
@@ -426,7 +470,101 @@
     "project_status": "Стан проєкту",
     "cost_report": "Звіт про витрати",
     "schedule_status": "Стан графіка",
-    "safety_report": "Звіт з охорони праці"
+    "safety_report": "Звіт з охорони праці",
+    "doc": {
+      "meta_report": "Звіт",
+      "meta_project": "Проєкт",
+      "meta_type": "Тип",
+      "meta_generated": "Сформовано",
+      "meta_currency": "Валюта",
+      "field_column": "Поле",
+      "value_column": "Значення",
+      "yes": "Так",
+      "no": "Ні",
+      "no_data_heading": "Дані відсутні",
+      "no_data_body": "Цей звіт сформовано з порожнього знімка даних. Перевірте, чи повернули вихідні модулі (фінанси, графік, охорона праці тощо) дані для обраного проєкту.",
+      "no_data_body_short": "Цей звіт сформовано з порожнього знімка даних. Перевірте, чи повернули вихідні модулі дані для обраного проєкту.",
+      "footer_generated_by": "Сформовано OpenConstructionERP {timestamp}.",
+      "worksheet_name": "Звіт",
+      "pdf_subject": "Звіт проєкту",
+      "overall_progress": "Загальний прогрес",
+      "as_of": "Станом на",
+      "recorded_by": "Зафіксував",
+      "period": "Період",
+      "entries_suffix": "({count} записів)",
+      "site_photo_alt": "Фото з будмайданчика",
+      "ai_summary_heading": "Підсумок",
+      "ai_badge": "Згенеровано ШІ",
+      "ai_note": "Згенеровано ШІ на основі даних проєкту нижче.",
+      "ai_note_confidence": "Згенеровано ШІ на основі даних проєкту нижче (впевненість {confidence}).",
+      "ai_note_review": "Перевірте перед передачею замовнику."
+    },
+    "section": {
+      "project_overview": "Огляд проєкту",
+      "key_performance_indicators": "Ключові показники ефективності",
+      "schedule_status": "Стан графіка",
+      "risk_summary": "Зведення ризиків",
+      "open_issues": "Відкриті питання",
+      "cost_summary": "Зведення витрат",
+      "cost_breakdown": "Розбивка витрат",
+      "change_orders": "Змінні замовлення",
+      "cash_flow": "Грошовий потік",
+      "schedule_overview": "Огляд графіка",
+      "milestone_status": "Стан етапів",
+      "critical_path": "Критичний шлях",
+      "3_week_lookahead": "Прогноз на 3 тижні",
+      "safety_kpis": "Показники безпеки",
+      "incident_log": "Журнал інцидентів",
+      "near_miss_reports": "Звіти про події без травм",
+      "safety_training": "Навчання з безпеки",
+      "inspection_summary": "Зведення перевірок",
+      "by_inspection_type": "За типом перевірки",
+      "punch_list_status": "Стан списку недоліків",
+      "recent_inspections": "Останні перевірки",
+      "portfolio_overview": "Огляд портфеля",
+      "project_statuses": "Статуси проєктів",
+      "kpi_comparison": "Порівняння KPI",
+      "portfolio_risks": "Ризики портфеля",
+      "field_progress": "Прогрес на об'єкті",
+      "top_risks": "Основні ризики",
+      "site_photos": "Фото з будмайданчика",
+      "summary": "Підсумок"
+    },
+    "field": {
+      "name": "Назва",
+      "status": "Статус",
+      "phase": "Фаза",
+      "planned_start": "Плановий початок",
+      "planned_end": "Планове завершення",
+      "schedule_progress_pct": "Прогрес за графіком (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Використано бюджету (%)",
+      "as_of": "Станом на",
+      "progress_pct": "Прогрес (%)",
+      "risk_score_avg": "Середній бал ризику",
+      "open_rfis": "Відкриті RFI",
+      "open_submittals": "Відкриті подання",
+      "open_defects": "Відкриті дефекти",
+      "open_observations": "Відкриті зауваження",
+      "budget": "Бюджет",
+      "committed": "Зобов'язано",
+      "actual": "Фактично",
+      "payable": "До сплати",
+      "receivable": "До отримання",
+      "net_cash_flow": "Чистий грошовий потік"
+    },
+    "explain": {
+      "report_total_one": "Підсумок звіту: {money} (сума {count} рядка).",
+      "report_total_other": "Підсумок звіту: {money} (сума {count} рядків).",
+      "percent_of_total": "{part} становить {percent} від {total} (відсоток від підсумку).",
+      "percent_zero_total": "{part} від {total}: підсумок дорівнює нулю, тому кожна частка показана як 0 відсотків.",
+      "breakdown_empty": "Розбивка витрат: даних немає.",
+      "breakdown_one": "Розбивка витрат: {count} група, підсумок звіту {money}.",
+      "breakdown_other": "Розбивка витрат: {count} груп, підсумок звіту {money}.",
+      "top_n_one": "Перші {requested}: {shown} з {shown} рядка.",
+      "top_n_other": "Перші {requested}: {shown} з {shown} рядків."
+    }
   },
   "gantt": {
     "title": "Діаграма Ганта",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Чернетка",
       "frozen": "Заморожено"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Валова вартість розробки (GDV)",
+      "total_development_cost": "Загальна вартість розробки",
+      "residual_land_value": "Залишкова вартість землі",
+      "developer_profit": "Прибуток забудовника",
+      "profit_on_cost": "Прибуток до вартості",
+      "profit_on_gdv": "Прибуток до GDV",
+      "construction_cost": "Вартість будівництва",
+      "professional_fees": "Професійні гонорари",
+      "contingency": "Резерв на непередбачене",
+      "finance_cost": "Вартість фінансування",
+      "sales_costs": "Витрати на продаж"
+    },
+    "status": {
+      "viable": "Життєздатний",
+      "unviable": "Нежиттєздатний",
+      "marginal": "Граничний",
+      "pending": "Ще не оцінено"
+    },
+    "figure": {
+      "gross_development_value": "Загальна сума продажів усіх одиниць проєкту, в одній валюті.",
+      "total_development_cost": "Усі витрати на реалізацію проєкту, крім самої землі: будівництво, гонорари, резерв, фінансування та витрати на продаж.",
+      "residual_land_value": "Залишок для землі після віднімання від валової вартості розробки загальної вартості розробки та цільового прибутку забудовника.",
+      "developer_profit": "Прибуток, який забудовник прагне зберегти, задається як цільова частка валової вартості розробки.",
+      "profit_on_cost": "Прибуток забудовника, поділений на загальну вартість розробки, виражений як співвідношення.",
+      "profit_on_gdv": "Прибуток забудовника, поділений на валову вартість розробки, виражений як співвідношення."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "РАХУНОК-ФАКТУРА",
+      "date": "Дата: {value}",
+      "due": "Термін оплати: {value}",
+      "from": "Від",
+      "bill_to": "Платник",
+      "vat_id": "ІПН/ПДВ: {value}",
+      "ref": "Реф.: {value}",
+      "th_description": "Опис",
+      "th_qty": "Кількість",
+      "th_unit": "Од.",
+      "th_unit_price": "Ціна за одиницю",
+      "th_net": "Без ПДВ ({currency})",
+      "net_total": "Разом без ПДВ",
+      "vat_total": "ПДВ",
+      "grand_total": "Всього до сплати",
+      "retention_prepaid": "Гарантійне утримання / аванс",
+      "amount_due": "Сума до сплати",
+      "payment": "Оплата",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Рахунок: {value}",
+      "bank_code": "Код банку: {value}",
+      "account_holder": "Отримувач: {value}",
+      "footer": "Цей PDF містить вбудовану електронну накладну EN 16931 (Factur-X / ZUGFeRD). Юридично значущим є вбудований XML."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Табір для робітників",
+        "rental": "Орендоване житло",
+        "hotel": "Готель"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Очікує",
+        "approved": "Схвалено",
+        "rejected": "Відхилено"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Виконано",
+        "fail": "Не виконано",
+        "not_applicable": "Не застосовується"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Креслення",
+        "contract": "Договір",
+        "specification": "Специфікація",
+        "photo": "Фото",
+        "correspondence": "Листування",
+        "reality_capture": "Фіксація фактичного стану",
+        "other": "Інше"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Очікує",
+        "approved": "Схвалено",
+        "rejected": "Відхилено",
+        "cancelled": "Скасовано"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Чернетка",
+        "submitted": "Надіслано на погодження",
+        "approved": "Схвалено",
+        "posted": "Проведено в облік"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Відкрито",
+        "assigned": "Призначено",
+        "in_progress": "Виконується",
+        "resolved": "Усунено",
+        "verified": "Перевірено",
+        "closed": "Закрито"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "зауваження",
+        "minor": "незначна",
+        "major": "значна",
+        "critical": "критична"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Особа",
+        "crew": "Бригада",
+        "equipment": "Техніка",
+        "subcontractor": "Субпідрядник"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Назва моделі ШІ застаріла або недоступна. Відкрийте Налаштування > ШІ та вкажіть чинну назву моделі для вашого провайдера.",
+      "not_configured": "ШІ не налаштовано. Будь ласка, налаштуйте провайдера ШІ в Налаштуваннях."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "перевірено",
+      "bound": "прикріплено",
+      "empty": "відсутнє"
+    },
+    "package_status_labels": {
+      "draft": "чернетка",
+      "in_progress": "виконується",
+      "ready": "готово",
+      "issued": "видано"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "блокер",
+      "critical": "критично",
+      "warning": "попередження",
+      "suggestion": "пропозиція"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегія",
+      "brief": "Технічне завдання",
+      "concept": "Концепція",
+      "design": "Проєктування",
+      "approval": "Дозвіл",
+      "detail": "Робоче проєктування",
+      "tender": "Тендер",
+      "award": "Укладення договору",
+      "construction": "Будівництво",
+      "handover": "Передача",
+      "operation": "Експлуатація"
     }
   }
 }

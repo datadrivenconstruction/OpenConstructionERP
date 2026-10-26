@@ -132,7 +132,15 @@
     "missing_description": "البند {position} بدون وصف",
     "missing_classification": "البند {position} يحتاج رمز تصنيف",
     "duplicate_ordinal": "رقم تسلسل مكرر: {ordinal}",
-    "rate_anomaly": "سعر الوحدة {rate} يتجاوز الحد ({threshold})"
+    "rate_anomaly": "سعر الوحدة {rate} يتجاوز الحد ({threshold})",
+    "nl": {
+      "not_a_string": "يجب أن يكون الإدخال نصًا.",
+      "empty": "الإدخال فارغ.",
+      "too_long": "يتجاوز الإدخال {max} حرفًا.",
+      "ai_unparsable": "تعذّر تحليل رد الذكاء الاصطناعي كمستند DSL.",
+      "no_pattern": "لم يتطابق أي نمط مع الجملة المدخلة.",
+      "try": "جرّب: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "جدول زمني 4D",
@@ -327,7 +335,16 @@
     "pass": "مطابق",
     "fail": "غير مطابق",
     "partial": "جزئي",
-    "critical": "حرج"
+    "critical": "حرج",
+    "intl": {
+      "status_labels": {
+        "scheduled": "مجدول",
+        "in_progress": "قيد التنفيذ",
+        "completed": "مكتمل",
+        "failed": "فشل",
+        "cancelled": "ملغى"
+      }
+    }
   },
   "ncr": {
     "title": "تقارير عدم المطابقة",
@@ -347,7 +364,19 @@
     "submit": "تقديم",
     "review": "مراجعة",
     "approved_as_noted": "معتمد مع الملاحظات",
-    "revise_resubmit": "التعديل وإعادة التقديم"
+    "revise_resubmit": "التعديل وإعادة التقديم",
+    "intl": {
+      "status_labels": {
+        "draft": "مسودة",
+        "submitted": "مقدَّم",
+        "under_review": "قيد المراجعة",
+        "approved": "موافق عليه",
+        "approved_as_noted": "موافق عليه مع ملاحظات",
+        "revise_and_resubmit": "يُعدَّل ويُعاد تقديمه",
+        "rejected": "مرفوض",
+        "closed": "مغلق"
+      }
+    }
   },
   "correspondence": {
     "title": "المراسلات",
@@ -372,7 +401,15 @@
     "promote": "الترقية",
     "suitability": "الملاءمة",
     "discipline": "التخصص",
-    "revisions": "المراجعات"
+    "revisions": "المراجعات",
+    "intl": {
+      "state_labels": {
+        "wip": "قيد العمل",
+        "shared": "مشترك",
+        "published": "منشور",
+        "archived": "مؤرشف"
+      }
+    }
   },
   "transmittals": {
     "title": "إشعارات الإحالة",
@@ -384,7 +421,14 @@
     "recipients": "المستلمون",
     "acknowledge": "الإقرار بالاستلام",
     "locked": "مقفل",
-    "issue_transmittal": "إصدار"
+    "issue_transmittal": "إصدار",
+    "intl": {
+      "status_words": {
+        "draft": "مسودة",
+        "issued": "مُرسَل",
+        "responded": "تم الرد"
+      }
+    }
   },
   "notifications": {
     "title": "الإشعارات",
@@ -426,7 +470,101 @@
     "project_status": "حالة المشروع",
     "cost_report": "تقرير التكاليف",
     "schedule_status": "حالة البرنامج الزمني",
-    "safety_report": "تقرير السلامة"
+    "safety_report": "تقرير السلامة",
+    "doc": {
+      "meta_report": "تقرير",
+      "meta_project": "المشروع",
+      "meta_type": "النوع",
+      "meta_generated": "تاريخ الإنشاء",
+      "meta_currency": "العملة",
+      "field_column": "الحقل",
+      "value_column": "القيمة",
+      "yes": "نعم",
+      "no": "لا",
+      "no_data_heading": "لا توجد بيانات متاحة",
+      "no_data_body": "أُنشئ هذا التقرير من لقطة بيانات فارغة. تحقق من أن الوحدات المصدر (المالية والجدول الزمني والسلامة وغيرها) أعادت بيانات للمشروع المحدد.",
+      "no_data_body_short": "أُنشئ هذا التقرير من لقطة بيانات فارغة. تحقق من أن الوحدات المصدر أعادت بيانات للمشروع المحدد.",
+      "footer_generated_by": "أنشأه OpenConstructionERP في {timestamp}.",
+      "worksheet_name": "التقرير",
+      "pdf_subject": "تقرير المشروع",
+      "overall_progress": "التقدم الإجمالي",
+      "as_of": "حتى تاريخ",
+      "recorded_by": "سجّله",
+      "period": "الفترة",
+      "entries_suffix": "({count} بندًا)",
+      "site_photo_alt": "صورة للموقع",
+      "ai_summary_heading": "الملخص",
+      "ai_badge": "من إنشاء الذكاء الاصطناعي",
+      "ai_note": "أنشأه الذكاء الاصطناعي من بيانات المشروع أدناه.",
+      "ai_note_confidence": "أنشأه الذكاء الاصطناعي من بيانات المشروع أدناه (الثقة {confidence}).",
+      "ai_note_review": "راجعه قبل مشاركته مع العميل."
+    },
+    "section": {
+      "project_overview": "نظرة عامة على المشروع",
+      "key_performance_indicators": "مؤشرات الأداء الرئيسية",
+      "schedule_status": "حالة الجدول الزمني",
+      "risk_summary": "ملخص المخاطر",
+      "open_issues": "القضايا المفتوحة",
+      "cost_summary": "ملخص التكاليف",
+      "cost_breakdown": "تفصيل التكاليف",
+      "change_orders": "أوامر التغيير",
+      "cash_flow": "التدفق النقدي",
+      "schedule_overview": "نظرة عامة على الجدول الزمني",
+      "milestone_status": "حالة المعالم",
+      "critical_path": "المسار الحرج",
+      "3_week_lookahead": "توقعات الأسابيع الثلاثة",
+      "safety_kpis": "مؤشرات السلامة",
+      "incident_log": "سجل الحوادث",
+      "near_miss_reports": "تقارير الحوادث الوشيكة",
+      "safety_training": "تدريب السلامة",
+      "inspection_summary": "ملخص التفتيش",
+      "by_inspection_type": "حسب نوع التفتيش",
+      "punch_list_status": "حالة قائمة النواقص",
+      "recent_inspections": "عمليات التفتيش الأخيرة",
+      "portfolio_overview": "نظرة عامة على المحفظة",
+      "project_statuses": "حالات المشاريع",
+      "kpi_comparison": "مقارنة مؤشرات الأداء",
+      "portfolio_risks": "مخاطر المحفظة",
+      "field_progress": "تقدم الموقع",
+      "top_risks": "أبرز المخاطر",
+      "site_photos": "صور الموقع",
+      "summary": "الملخص"
+    },
+    "field": {
+      "name": "الاسم",
+      "status": "الحالة",
+      "phase": "المرحلة",
+      "planned_start": "البداية المخططة",
+      "planned_end": "النهاية المخططة",
+      "schedule_progress_pct": "نسبة تقدم الجدول",
+      "cpi": "مؤشر أداء التكلفة (CPI)",
+      "spi": "مؤشر أداء الجدول (SPI)",
+      "budget_consumed_pct": "نسبة استهلاك الميزانية",
+      "as_of": "حتى تاريخ",
+      "progress_pct": "نسبة التقدم",
+      "risk_score_avg": "متوسط درجة المخاطر",
+      "open_rfis": "طلبات المعلومات المفتوحة",
+      "open_submittals": "الوثائق المقدمة المفتوحة",
+      "open_defects": "العيوب المفتوحة",
+      "open_observations": "الملاحظات المفتوحة",
+      "budget": "الميزانية",
+      "committed": "الملتزم به",
+      "actual": "الفعلي",
+      "payable": "المستحق الدفع",
+      "receivable": "المستحق التحصيل",
+      "net_cash_flow": "صافي التدفق النقدي"
+    },
+    "explain": {
+      "report_total_one": "إجمالي التقرير: {money} (مجموع {count} بند).",
+      "report_total_other": "إجمالي التقرير: {money} (مجموع {count} بندًا).",
+      "percent_of_total": "{part} يمثل {percent} من {total} (نسبة من الإجمالي).",
+      "percent_zero_total": "{part} من {total}: الإجمالي صفر، لذلك يُعرض كل نصيب بنسبة 0 بالمئة.",
+      "breakdown_empty": "تفصيل التكاليف: لا توجد بيانات.",
+      "breakdown_one": "تفصيل التكاليف: مجموعة واحدة ({count})، إجمالي التقرير {money}.",
+      "breakdown_other": "تفصيل التكاليف: {count} مجموعة، إجمالي التقرير {money}.",
+      "top_n_one": "أعلى {requested}: {shown} من {shown} بند.",
+      "top_n_other": "أعلى {requested}: {shown} من {shown} بندًا."
+    }
   },
   "gantt": {
     "title": "مخطط جانت",
@@ -788,6 +926,197 @@
     "snapshot_status": {
       "draft": "مسودة",
       "frozen": "مجمّدة"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "القيمة الإجمالية للتطوير (GDV)",
+      "total_development_cost": "إجمالي تكلفة التطوير",
+      "residual_land_value": "القيمة المتبقية للأرض",
+      "developer_profit": "ربح المطور",
+      "profit_on_cost": "الربح على التكلفة",
+      "profit_on_gdv": "الربح على القيمة الإجمالية (GDV)",
+      "construction_cost": "تكلفة الإنشاء",
+      "professional_fees": "الأتعاب المهنية",
+      "contingency": "الاحتياطي الطارئ",
+      "finance_cost": "تكلفة التمويل",
+      "sales_costs": "تكاليف البيع"
+    },
+    "status": {
+      "viable": "قابل للتنفيذ",
+      "unviable": "غير قابل للتنفيذ",
+      "marginal": "هامشي",
+      "pending": "لم يُقيَّم بعد"
+    },
+    "figure": {
+      "gross_development_value": "إجمالي قيمة المبيعات لكل الوحدات في المخطط، كلها بعملة واحدة.",
+      "total_development_cost": "كل تكاليف تنفيذ المخطط باستثناء الأرض نفسها: الإنشاء والأتعاب والاحتياطي والتمويل وتكاليف البيع.",
+      "residual_land_value": "ما يتبقى للأرض بعد خصم إجمالي تكلفة التطوير وربح المطور المستهدف من القيمة الإجمالية للتطوير.",
+      "developer_profit": "الربح الذي يسعى المطور للاحتفاظ به، محددًا كنسبة مستهدفة من القيمة الإجمالية للتطوير.",
+      "profit_on_cost": "ربح المطور مقسومًا على إجمالي تكلفة التطوير، معروضًا كنسبة.",
+      "profit_on_gdv": "ربح المطور مقسومًا على القيمة الإجمالية للتطوير، معروضًا كنسبة."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "فاتورة",
+      "date": "التاريخ: {value}",
+      "due": "الاستحقاق: {value}",
+      "from": "من",
+      "bill_to": "فوترة إلى",
+      "vat_id": "الرقم الضريبي: {value}",
+      "ref": "المرجع: {value}",
+      "th_description": "الوصف",
+      "th_qty": "الكمية",
+      "th_unit": "الوحدة",
+      "th_unit_price": "سعر الوحدة",
+      "th_net": "الصافي ({currency})",
+      "net_total": "الإجمالي الصافي",
+      "vat_total": "ضريبة القيمة المضافة",
+      "grand_total": "الإجمالي الكلي",
+      "retention_prepaid": "الضمان المحتجز / الدفعة المقدمة",
+      "amount_due": "المبلغ المستحق",
+      "payment": "الدفع",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "رقم الحساب: {value}",
+      "bank_code": "رمز البنك: {value}",
+      "account_holder": "صاحب الحساب: {value}",
+      "footer": "يتضمن هذا الملف PDF فاتورة إلكترونية EN 16931 مدمجة (Factur-X / ZUGFeRD). الوثيقة المعتمدة هي ملف XML المدمج."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "مخيم عمال",
+        "rental": "سكن للإيجار",
+        "hotel": "فندق"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "قيد الانتظار",
+        "approved": "موافق عليه",
+        "rejected": "مرفوض"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "مستوفى",
+        "fail": "غير مستوفى",
+        "not_applicable": "لا ينطبق"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "مخطط",
+        "contract": "عقد",
+        "specification": "مواصفات",
+        "photo": "صورة",
+        "correspondence": "مراسلات",
+        "reality_capture": "التقاط الواقع",
+        "other": "أخرى"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "قيد الانتظار",
+        "approved": "موافق عليه",
+        "rejected": "مرفوض",
+        "cancelled": "ملغى"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "مسودة",
+        "submitted": "مرسل للموافقة",
+        "approved": "موافق عليه",
+        "posted": "مرحّل إلى دفتر الأستاذ"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "مفتوح",
+        "assigned": "مُسنَد",
+        "in_progress": "قيد التنفيذ",
+        "resolved": "تم الحل",
+        "verified": "تم التحقق",
+        "closed": "مغلق"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "ملاحظة",
+        "minor": "طفيف",
+        "major": "جسيم",
+        "critical": "حرج"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "شخص",
+        "crew": "طاقم",
+        "equipment": "معدات",
+        "subcontractor": "مقاول من الباطن"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "اسم نموذج الذكاء الاصطناعي قديم أو غير متاح. افتح الإعدادات > الذكاء الاصطناعي واختر اسم نموذج صالحًا حاليًا لمزودك.",
+      "not_configured": "الذكاء الاصطناعي غير مُعدّ. يرجى إعداد مزود للذكاء الاصطناعي في الإعدادات."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "تم التحقق",
+      "bound": "مرفق",
+      "empty": "مفقود"
+    },
+    "package_status_labels": {
+      "draft": "مسودة",
+      "in_progress": "قيد التنفيذ",
+      "ready": "جاهز",
+      "issued": "صادر"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "عائق",
+      "critical": "حرج",
+      "warning": "تحذير",
+      "suggestion": "اقتراح"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "الاستراتيجية",
+      "brief": "الموجز",
+      "concept": "المفهوم",
+      "design": "التصميم",
+      "approval": "التصريح",
+      "detail": "التصميم التفصيلي",
+      "tender": "المناقصة",
+      "award": "الترسية",
+      "construction": "التنفيذ",
+      "handover": "التسليم",
+      "operation": "التشغيل"
     }
   }
 }

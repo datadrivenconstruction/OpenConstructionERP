@@ -132,7 +132,15 @@
     "missing_description": "پوزیشن {position} میں تفصیل موجود نہیں",
     "missing_classification": "پوزیشن {position} کو درجہ بندی کوڈ درکار ہے",
     "duplicate_ordinal": "دہرا ترتیبی نمبر: {ordinal}",
-    "rate_anomaly": "یونٹ ریٹ {rate} حد ({threshold}) سے تجاوز کر گیا"
+    "rate_anomaly": "یونٹ ریٹ {rate} حد ({threshold}) سے تجاوز کر گیا",
+    "nl": {
+      "not_a_string": "ان پٹ متن ہونا چاہیے۔",
+      "empty": "ان پٹ خالی ہے۔",
+      "too_long": "ان پٹ {max} حروف سے زیادہ ہے۔",
+      "ai_unparsable": "AI کا جواب DSL دستاویز کے طور پر پارس نہیں ہو سکا۔",
+      "no_pattern": "درج کردہ جملے سے کوئی پیٹرن مطابقت نہیں رکھتا۔",
+      "try": "آزمائیں: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D شیڈول",
@@ -327,7 +335,16 @@
     "pass": "پاس",
     "fail": "ناکام",
     "partial": "جزوی",
-    "critical": "نازک"
+    "critical": "نازک",
+    "intl": {
+      "status_labels": {
+        "scheduled": "شیڈول شدہ",
+        "in_progress": "جاری",
+        "completed": "مکمل",
+        "failed": "ناکام",
+        "cancelled": "منسوخ"
+      }
+    }
   },
   "ncr": {
     "title": "نان-کنفارمنس رپورٹس",
@@ -347,7 +364,19 @@
     "submit": "جمع کریں",
     "review": "جائزہ لیں",
     "approved_as_noted": "نوٹ کے ساتھ منظور",
-    "revise_resubmit": "نظرثانی اور دوبارہ جمع کریں"
+    "revise_resubmit": "نظرثانی اور دوبارہ جمع کریں",
+    "intl": {
+      "status_labels": {
+        "draft": "مسودہ",
+        "submitted": "جمع شدہ",
+        "under_review": "زیرِ جائزہ",
+        "approved": "منظور شدہ",
+        "approved_as_noted": "نوٹس کے ساتھ منظور",
+        "revise_and_resubmit": "ترمیم کریں اور دوبارہ جمع کریں",
+        "rejected": "مسترد",
+        "closed": "بند"
+      }
+    }
   },
   "correspondence": {
     "title": "خط و کتابت",
@@ -372,7 +401,15 @@
     "promote": "Promote کریں",
     "suitability": "موزونیت",
     "discipline": "شعبہ",
-    "revisions": "نظرثانیاں"
+    "revisions": "نظرثانیاں",
+    "intl": {
+      "state_labels": {
+        "wip": "کام جاری",
+        "shared": "شیئر شدہ",
+        "published": "شائع شدہ",
+        "archived": "محفوظ شدہ"
+      }
+    }
   },
   "transmittals": {
     "title": "ٹرانسمٹلز",
@@ -384,7 +421,14 @@
     "recipients": "وصول کنندگان",
     "acknowledge": "تسلیم کریں",
     "locked": "مقفل",
-    "issue_transmittal": "جاری کریں"
+    "issue_transmittal": "جاری کریں",
+    "intl": {
+      "status_words": {
+        "draft": "مسودہ",
+        "issued": "بھیجا گیا",
+        "responded": "جواب دیا گیا"
+      }
+    }
   },
   "notifications": {
     "title": "اطلاعات",
@@ -426,7 +470,101 @@
     "project_status": "پراجیکٹ کی حالت",
     "cost_report": "لاگت رپورٹ",
     "schedule_status": "شیڈول اسٹیٹس",
-    "safety_report": "حفاظتی رپورٹ"
+    "safety_report": "حفاظتی رپورٹ",
+    "doc": {
+      "meta_report": "رپورٹ",
+      "meta_project": "پروجیکٹ",
+      "meta_type": "قسم",
+      "meta_generated": "تیار کردہ",
+      "meta_currency": "کرنسی",
+      "field_column": "فیلڈ",
+      "value_column": "قدر",
+      "yes": "ہاں",
+      "no": "نہیں",
+      "no_data_heading": "کوئی ڈیٹا دستیاب نہیں",
+      "no_data_body": "یہ رپورٹ خالی ڈیٹا اسنیپ شاٹ سے بنائی گئی تھی۔ تصدیق کریں کہ منتخب پروجیکٹ کے لیے ذرائع کے ماڈیولز (فنانس، شیڈول، سیفٹی وغیرہ) نے ڈیٹا واپس کیا ہے۔",
+      "no_data_body_short": "یہ رپورٹ خالی ڈیٹا اسنیپ شاٹ سے بنائی گئی تھی۔ تصدیق کریں کہ ذرائع کے ماڈیولز نے منتخب پروجیکٹ کے لیے ڈیٹا واپس کیا ہے۔",
+      "footer_generated_by": "OpenConstructionERP کے ذریعے {timestamp} پر تیار کیا گیا۔",
+      "worksheet_name": "رپورٹ",
+      "pdf_subject": "پروجیکٹ رپورٹ",
+      "overall_progress": "مجموعی پیش رفت",
+      "as_of": "بتاریخ",
+      "recorded_by": "ریکارڈ کنندہ",
+      "period": "مدت",
+      "entries_suffix": "({count} اندراجات)",
+      "site_photo_alt": "سائٹ کی تصویر",
+      "ai_summary_heading": "خلاصہ",
+      "ai_badge": "AI کے ذریعے تیار",
+      "ai_note": "نیچے دیے گئے پروجیکٹ ڈیٹا سے AI کے ذریعے تیار کیا گیا۔",
+      "ai_note_confidence": "نیچے دیے گئے پروجیکٹ ڈیٹا سے AI کے ذریعے تیار کیا گیا (اعتماد {confidence})۔",
+      "ai_note_review": "کلائنٹ کے ساتھ شیئر کرنے سے پہلے جائزہ لیں۔"
+    },
+    "section": {
+      "project_overview": "پروجیکٹ کا جائزہ",
+      "key_performance_indicators": "کلیدی کارکردگی اشاریے",
+      "schedule_status": "شیڈول کی حیثیت",
+      "risk_summary": "خطرات کا خلاصہ",
+      "open_issues": "کھلے مسائل",
+      "cost_summary": "لاگت کا خلاصہ",
+      "cost_breakdown": "لاگت کی تفصیل",
+      "change_orders": "تبدیلی کے احکامات",
+      "cash_flow": "نقد بہاؤ",
+      "schedule_overview": "شیڈول کا جائزہ",
+      "milestone_status": "سنگ میل کی حیثیت",
+      "critical_path": "کریٹیکل پاتھ",
+      "3_week_lookahead": "3 ہفتے کا لُک اہیڈ",
+      "safety_kpis": "سیفٹی KPIs",
+      "incident_log": "واقعات کا لاگ",
+      "near_miss_reports": "قریبی حادثے کی رپورٹس",
+      "safety_training": "سیفٹی کی تربیت",
+      "inspection_summary": "معائنے کا خلاصہ",
+      "by_inspection_type": "معائنے کی قسم کے مطابق",
+      "punch_list_status": "پنچ لسٹ کی حیثیت",
+      "recent_inspections": "حالیہ معائنے",
+      "portfolio_overview": "پورٹ فولیو کا جائزہ",
+      "project_statuses": "پروجیکٹس کی حیثیت",
+      "kpi_comparison": "KPI موازنہ",
+      "portfolio_risks": "پورٹ فولیو کے خطرات",
+      "field_progress": "سائٹ پر پیش رفت",
+      "top_risks": "اہم خطرات",
+      "site_photos": "سائٹ کی تصاویر",
+      "summary": "خلاصہ"
+    },
+    "field": {
+      "name": "نام",
+      "status": "حیثیت",
+      "phase": "مرحلہ",
+      "planned_start": "منصوبہ بند آغاز",
+      "planned_end": "منصوبہ بند اختتام",
+      "schedule_progress_pct": "شیڈول پیش رفت (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "بجٹ خرچ (%)",
+      "as_of": "بتاریخ",
+      "progress_pct": "پیش رفت (%)",
+      "risk_score_avg": "اوسط خطرے کا اسکور",
+      "open_rfis": "کھلی RFIs",
+      "open_submittals": "کھلی سبمیشنز",
+      "open_defects": "کھلے نقائص",
+      "open_observations": "کھلے مشاہدات",
+      "budget": "بجٹ",
+      "committed": "وعدہ شدہ",
+      "actual": "اصل",
+      "payable": "ادائیگی طلب",
+      "receivable": "وصولی طلب",
+      "net_cash_flow": "خالص نقد بہاؤ"
+    },
+    "explain": {
+      "report_total_one": "رپورٹ کا کل: {money} ({count} قطار کا مجموعہ)۔",
+      "report_total_other": "رپورٹ کا کل: {money} ({count} قطاروں کا مجموعہ)۔",
+      "percent_of_total": "{part}، {total} کا {percent} ہے (کل کا فیصد)۔",
+      "percent_zero_total": "{part} از {total}: کل صفر ہے، اس لیے ہر حصہ 0 فیصد دکھایا گیا ہے۔",
+      "breakdown_empty": "لاگت کی تفصیل: کوئی ڈیٹا نہیں۔",
+      "breakdown_one": "لاگت کی تفصیل: {count} گروپ، رپورٹ کا کل {money}۔",
+      "breakdown_other": "لاگت کی تفصیل: {count} گروپس، رپورٹ کا کل {money}۔",
+      "top_n_one": "پہلی {requested}: {shown} میں سے {shown} قطار۔",
+      "top_n_other": "پہلی {requested}: {shown} میں سے {shown} قطاریں۔"
+    }
   },
   "gantt": {
     "title": "گانٹ چارٹ",
@@ -788,6 +926,197 @@
     "snapshot_status": {
       "draft": "ڈرافٹ",
       "frozen": "منجمد"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "مجموعی ترقیاتی قدر (GDV)",
+      "total_development_cost": "کل ترقیاتی لاگت",
+      "residual_land_value": "باقی ماندہ زمین کی قدر",
+      "developer_profit": "ڈیولپر کا منافع",
+      "profit_on_cost": "لاگت پر منافع",
+      "profit_on_gdv": "GDV پر منافع",
+      "construction_cost": "تعمیراتی لاگت",
+      "professional_fees": "پیشہ ورانہ فیس",
+      "contingency": "ہنگامی رقم",
+      "finance_cost": "مالی لاگت",
+      "sales_costs": "فروخت کے اخراجات"
+    },
+    "status": {
+      "viable": "قابلِ عمل",
+      "unviable": "ناقابلِ عمل",
+      "marginal": "حد کے قریب",
+      "pending": "ابھی جانچ نہیں ہوئی"
+    },
+    "figure": {
+      "gross_development_value": "اسکیم کی تمام اکائیوں کی کل فروخت کی قدر، سب ایک ہی کرنسی میں۔",
+      "total_development_cost": "زمین کے علاوہ اسکیم کی تکمیل کے تمام اخراجات: تعمیر، فیس، ہنگامی رقم، مالی لاگت اور فروخت کے اخراجات۔",
+      "residual_land_value": "مجموعی ترقیاتی قدر سے کل ترقیاتی لاگت اور ہدف منافع نکالنے کے بعد زمین کے لیے جو باقی بچے۔",
+      "developer_profit": "وہ منافع جو ڈیولپر رکھنا چاہتا ہے، جو مجموعی ترقیاتی قدر کے ہدف تناسب کے طور پر طے ہوتا ہے۔",
+      "profit_on_cost": "ڈیولپر کا منافع کو کل ترقیاتی لاگت سے تقسیم کرکے، تناسب کے طور پر۔",
+      "profit_on_gdv": "ڈیولپر کا منافع کو مجموعی ترقیاتی قدر سے تقسیم کرکے، تناسب کے طور پر۔"
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "انوائس",
+      "date": "تاریخ: {value}",
+      "due": "واجب الادا: {value}",
+      "from": "از",
+      "bill_to": "بل بھیجا جائے",
+      "vat_id": "VAT: {value}",
+      "ref": "حوالہ: {value}",
+      "th_description": "تفصیل",
+      "th_qty": "مقدار",
+      "th_unit": "یونٹ",
+      "th_unit_price": "یونٹ قیمت",
+      "th_net": "خالص ({currency})",
+      "net_total": "خالص کل",
+      "vat_total": "VAT",
+      "grand_total": "مجموعی کل",
+      "retention_prepaid": "روک رکھی گئی رقم / پیشگی ادائیگی",
+      "amount_due": "واجب الادا رقم",
+      "payment": "ادائیگی",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "اکاؤنٹ: {value}",
+      "bank_code": "بینک کوڈ: {value}",
+      "account_holder": "اکاؤنٹ ہولڈر: {value}",
+      "footer": "اس PDF میں ایمبیڈڈ EN 16931 ای-انوائس (Factur-X / ZUGFeRD) شامل ہے۔ ایمبیڈڈ XML ہی مستند دستاویز ہے۔"
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "مزدوروں کا کیمپ",
+        "rental": "کرائے کی رہائش",
+        "hotel": "ہوٹل"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "زیرِ التوا",
+        "approved": "منظور شدہ",
+        "rejected": "مسترد"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "پورا ہوا",
+        "fail": "پورا نہیں ہوا",
+        "not_applicable": "لاگو نہیں"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "ڈرائنگ",
+        "contract": "معاہدہ",
+        "specification": "تفصیلات",
+        "photo": "تصویر",
+        "correspondence": "مراسلت",
+        "reality_capture": "سائٹ کی حقیقی پیمائش",
+        "other": "دیگر"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "زیرِ التوا",
+        "approved": "منظور شدہ",
+        "rejected": "مسترد",
+        "cancelled": "منسوخ"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "مسودہ",
+        "submitted": "منظوری کے لیے بھیجا گیا",
+        "approved": "منظور شدہ",
+        "posted": "لیجر میں درج"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "کھلا",
+        "assigned": "تفویض شدہ",
+        "in_progress": "جاری",
+        "resolved": "حل شدہ",
+        "verified": "تصدیق شدہ",
+        "closed": "بند"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "مشاہدہ",
+        "minor": "معمولی",
+        "major": "بڑا",
+        "critical": "سنگین"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "فرد",
+        "crew": "عملہ",
+        "equipment": "سامان",
+        "subcontractor": "ذیلی ٹھیکیدار"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "AI ماڈل کا نام پرانا ہے یا دستیاب نہیں۔ ترتیبات > AI کھولیں اور اپنے فراہم کنندہ کے لیے موجودہ درست ماڈل نام درج کریں۔",
+      "not_configured": "AI ترتیب نہیں دیا گیا۔ براہِ کرم ترتیبات میں AI فراہم کنندہ مقرر کریں۔"
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "تصدیق شدہ",
+      "bound": "منسلک",
+      "empty": "باقی"
+    },
+    "package_status_labels": {
+      "draft": "مسودہ",
+      "in_progress": "جاری",
+      "ready": "تیار",
+      "issued": "جاری کردہ"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "رکاوٹ",
+      "critical": "سنگین",
+      "warning": "انتباہ",
+      "suggestion": "تجویز"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "حکمتِ عملی",
+      "brief": "بریف",
+      "concept": "تصور",
+      "design": "ڈیزائن",
+      "approval": "اجازت نامہ",
+      "detail": "تفصیلی ڈیزائن",
+      "tender": "ٹینڈر",
+      "award": "ٹھیکہ دینا",
+      "construction": "تعمیر",
+      "handover": "حوالگی",
+      "operation": "آپریشن"
     }
   }
 }

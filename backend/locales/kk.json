@@ -132,7 +132,15 @@
     "missing_description": "{position} позициясында сипаттама жоқ",
     "missing_classification": "{position} позициясына жіктеу коды қажет",
     "duplicate_ordinal": "Қайталанған реттік нөмір: {ordinal}",
-    "rate_anomaly": "Бірлік бағасы {rate} шектен асты ({threshold})"
+    "rate_anomaly": "Бірлік бағасы {rate} шектен асты ({threshold})",
+    "nl": {
+      "not_a_string": "Енгізілген мәтін болуы керек.",
+      "empty": "Енгізу бос.",
+      "too_long": "Енгізу {max} таңбадан асып кетті.",
+      "ai_unparsable": "ЖИ жауабын DSL құжаты ретінде талдау мүмкін болмады.",
+      "no_pattern": "Енгізілген сөйлемге сәйкес келетін үлгі табылмады.",
+      "try": "Көріңіз: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D Кесте",
@@ -327,7 +335,16 @@
     "pass": "Өтті",
     "fail": "Өтпеді",
     "partial": "Ішінара",
-    "critical": "Сыни"
+    "critical": "Сыни",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Жоспарланған",
+        "in_progress": "Орындалуда",
+        "completed": "Аяқталған",
+        "failed": "Сәтсіз",
+        "cancelled": "Бас тартылған"
+      }
+    }
   },
   "ncr": {
     "title": "Сәйкессіздік Хаттамалары",
@@ -347,7 +364,19 @@
     "submit": "Тапсыру",
     "review": "Қарау",
     "approved_as_noted": "Ескертумен Бекітілді",
-    "revise_resubmit": "Түзету және Қайта Тапсыру"
+    "revise_resubmit": "Түзету және Қайта Тапсыру",
+    "intl": {
+      "status_labels": {
+        "draft": "Жоба",
+        "submitted": "Ұсынылған",
+        "under_review": "Қаралуда",
+        "approved": "Мақұлданған",
+        "approved_as_noted": "Ескертпелермен мақұлданған",
+        "revise_and_resubmit": "Түзетіп, қайта ұсыну",
+        "rejected": "Қабылданбаған",
+        "closed": "Жабық"
+      }
+    }
   },
   "correspondence": {
     "title": "Хат-хабар",
@@ -372,7 +401,15 @@
     "promote": "Жоғарылату",
     "suitability": "Жарамдылық",
     "discipline": "Сала",
-    "revisions": "Түзетулер"
+    "revisions": "Түзетулер",
+    "intl": {
+      "state_labels": {
+        "wip": "Жұмыс үстінде",
+        "shared": "Ортақ",
+        "published": "Жарияланған",
+        "archived": "Мұрағатталған"
+      }
+    }
   },
   "transmittals": {
     "title": "Тапсыру Хаттары",
@@ -384,7 +421,14 @@
     "recipients": "Алушылар",
     "acknowledge": "Растау",
     "locked": "Бұғатталған",
-    "issue_transmittal": "Шығару"
+    "issue_transmittal": "Шығару",
+    "intl": {
+      "status_words": {
+        "draft": "жоба",
+        "issued": "жіберілген",
+        "responded": "жауап берілген"
+      }
+    }
   },
   "notifications": {
     "title": "Хабарландырулар",
@@ -426,7 +470,101 @@
     "project_status": "Жоба Мәртебесі",
     "cost_report": "Шығын Есебі",
     "schedule_status": "Кесте Мәртебесі",
-    "safety_report": "Қауіпсіздік Есебі"
+    "safety_report": "Қауіпсіздік Есебі",
+    "doc": {
+      "meta_report": "Есеп",
+      "meta_project": "Жоба",
+      "meta_type": "Түрі",
+      "meta_generated": "Құрылған күні",
+      "meta_currency": "Валюта",
+      "field_column": "Өріс",
+      "value_column": "Мән",
+      "yes": "Иә",
+      "no": "Жоқ",
+      "no_data_heading": "Деректер қолжетімді емес",
+      "no_data_body": "Бұл есеп бос деректер суретінен құрылды. Таңдалған жоба үшін бастапқы модульдер (қаржы, кесте, еңбек қауіпсіздігі және т.б.) деректер қайтарғанын тексеріңіз.",
+      "no_data_body_short": "Бұл есеп бос деректер суретінен құрылды. Таңдалған жоба үшін бастапқы модульдер деректер қайтарғанын тексеріңіз.",
+      "footer_generated_by": "OpenConstructionERP құрған, уақыты: {timestamp}.",
+      "worksheet_name": "Есеп",
+      "pdf_subject": "Жоба есебі",
+      "overall_progress": "Жалпы орындалу",
+      "as_of": "Күніне дейін",
+      "recorded_by": "Жазған",
+      "period": "Кезең",
+      "entries_suffix": "({count} жазба)",
+      "site_photo_alt": "Нысан фотосуреті",
+      "ai_summary_heading": "Қорытынды",
+      "ai_badge": "ЖИ жасаған",
+      "ai_note": "Төмендегі жоба деректері негізінде ЖИ жасаған.",
+      "ai_note_confidence": "Төмендегі жоба деректері негізінде ЖИ жасаған (сенімділік {confidence}).",
+      "ai_note_review": "Клиентке жібермес бұрын тексеріңіз."
+    },
+    "section": {
+      "project_overview": "Жоба шолуы",
+      "key_performance_indicators": "Негізгі көрсеткіштер (KPI)",
+      "schedule_status": "Кесте күйі",
+      "risk_summary": "Тәуекелдер қорытындысы",
+      "open_issues": "Ашық мәселелер",
+      "cost_summary": "Шығын қорытындысы",
+      "cost_breakdown": "Шығын бөлінісі",
+      "change_orders": "Өзгерту тапсырыстары",
+      "cash_flow": "Ақша ағыны",
+      "schedule_overview": "Кесте шолуы",
+      "milestone_status": "Кезеңдер күйі",
+      "critical_path": "Сыни жол",
+      "3_week_lookahead": "3 апталық болжам",
+      "safety_kpis": "Қауіпсіздік көрсеткіштері",
+      "incident_log": "Оқиғалар журналы",
+      "near_miss_reports": "Апатқа жақын жағдайлар туралы есептер",
+      "safety_training": "Қауіпсіздік оқытуы",
+      "inspection_summary": "Тексерулер қорытындысы",
+      "by_inspection_type": "Тексеру түрі бойынша",
+      "punch_list_status": "Кемшіліктер тізімінің күйі",
+      "recent_inspections": "Соңғы тексерулер",
+      "portfolio_overview": "Портфель шолуы",
+      "project_statuses": "Жобалар күйі",
+      "kpi_comparison": "KPI салыстыруы",
+      "portfolio_risks": "Портфель тәуекелдері",
+      "field_progress": "Нысандағы орындалу",
+      "top_risks": "Негізгі тәуекелдер",
+      "site_photos": "Нысан фотосуреттері",
+      "summary": "Қорытынды"
+    },
+    "field": {
+      "name": "Атауы",
+      "status": "Күйі",
+      "phase": "Кезең",
+      "planned_start": "Жоспарланған басталуы",
+      "planned_end": "Жоспарланған аяқталуы",
+      "schedule_progress_pct": "Кесте бойынша орындалу (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Бюджеттің жұмсалуы (%)",
+      "as_of": "Күніне дейін",
+      "progress_pct": "Орындалу (%)",
+      "risk_score_avg": "Орташа тәуекел балы",
+      "open_rfis": "Ашық RFI",
+      "open_submittals": "Ашық ұсыныстар",
+      "open_defects": "Ашық ақаулар",
+      "open_observations": "Ашық ескертулер",
+      "budget": "Бюджет",
+      "committed": "Міндеттеме",
+      "actual": "Нақты",
+      "payable": "Төленетін",
+      "receivable": "Алынатын",
+      "net_cash_flow": "Таза ақша ағыны"
+    },
+    "explain": {
+      "report_total_one": "Есеп жиыны: {money} ({count} жол қосындысы).",
+      "report_total_other": "Есеп жиыны: {money} ({count} жол қосындысы).",
+      "percent_of_total": "{part} — {total} мәнінің {percent} (жиынтықтан пайызы).",
+      "percent_zero_total": "{part} / {total}: жиыны нөл, сондықтан әрбір үлес 0 пайыз деп көрсетілді.",
+      "breakdown_empty": "Шығын бөлінісі: деректер жоқ.",
+      "breakdown_one": "Шығын бөлінісі: {count} топ, есеп жиыны {money}.",
+      "breakdown_other": "Шығын бөлінісі: {count} топ, есеп жиыны {money}.",
+      "top_n_one": "Алғашқы {requested}: {shown} / {shown} жол.",
+      "top_n_other": "Алғашқы {requested}: {shown} / {shown} жол."
+    }
   },
   "gantt": {
     "title": "Гантт Диаграммасы",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Жоба нұсқасы",
       "frozen": "Қатырылған"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Дамытудың жалпы құны (GDV)",
+      "total_development_cost": "Дамытудың жалпы шығыны",
+      "residual_land_value": "Жердің қалдық құны",
+      "developer_profit": "Девелопер пайдасы",
+      "profit_on_cost": "Шығынға қатынасты пайда",
+      "profit_on_gdv": "GDV-ге қатынасты пайда",
+      "construction_cost": "Құрылыс құны",
+      "professional_fees": "Кәсіби сыйақылар",
+      "contingency": "Күтпеген шығыстар қоры",
+      "finance_cost": "Қаржыландыру шығыны",
+      "sales_costs": "Сату шығыны"
+    },
+    "status": {
+      "viable": "Орындалуы мүмкін",
+      "unviable": "Орындалуы мүмкін емес",
+      "marginal": "Шекаралық",
+      "pending": "Әлі бағаланбаған"
+    },
+    "figure": {
+      "gross_development_value": "Схемадағы барлық бірліктердің сатылым құнының жиыны, бәрі бір валютада.",
+      "total_development_cost": "Жерді қоспағанда схеманы іске асырудың барлық шығыны: құрылыс, сыйақылар, күтпеген шығыстар қоры, қаржыландыру және сату шығыны.",
+      "residual_land_value": "Дамытудың жалпы құнынан дамытудың жалпы шығыны мен девелоперге арналған мақсатты пайда алынғаннан кейін жерге қалатын құн.",
+      "developer_profit": "Девелопер сақтауды көздейтін пайда, дамытудың жалпы құнына қатысты мақсатты үлес ретінде белгіленеді.",
+      "profit_on_cost": "Девелопер пайдасын дамытудың жалпы шығынына бөлген қатынас.",
+      "profit_on_gdv": "Девелопер пайдасын дамытудың жалпы құнына бөлген қатынас."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "ШОТ-ФАКТУРА",
+      "date": "Күні: {value}",
+      "due": "Төлем мерзімі: {value}",
+      "from": "Жіберуші",
+      "bill_to": "Төлеушi",
+      "vat_id": "ҚҚС нөмірі: {value}",
+      "ref": "Анықтама: {value}",
+      "th_description": "Сипаттама",
+      "th_qty": "Саны",
+      "th_unit": "Бірлік",
+      "th_unit_price": "Бірлік бағасы",
+      "th_net": "ҚҚСсыз ({currency})",
+      "net_total": "ҚҚСсыз жиыны",
+      "vat_total": "ҚҚС",
+      "grand_total": "Жалпы жиыны",
+      "retention_prepaid": "Ұстап қалу / алдын ала төлем",
+      "amount_due": "Төленетін сома",
+      "payment": "Төлем",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Шот нөмірі: {value}",
+      "bank_code": "Банк коды: {value}",
+      "account_holder": "Шот иесі: {value}",
+      "footer": "Бұл PDF құрамында EN 16931 стандартындағы кірістірілген электрондық шот-фактура бар (Factur-X / ZUGFeRD). Негізгі құжат — кірістірілген XML."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Жұмысшылар лагері",
+        "rental": "Жалға берілетін тұрғын үй",
+        "hotel": "Қонақүй"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Күтуде",
+        "approved": "Мақұлданған",
+        "rejected": "Қабылданбаған"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Сай келеді",
+        "fail": "Сай келмейді",
+        "not_applicable": "Қолданылмайды"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Сызба",
+        "contract": "Шарт",
+        "specification": "Техникалық сипаттама",
+        "photo": "Фотосурет",
+        "correspondence": "Хат алмасу",
+        "reality_capture": "Нақты жағдайды түсіру",
+        "other": "Басқа"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Күтуде",
+        "approved": "Мақұлданған",
+        "rejected": "Қабылданбаған",
+        "cancelled": "Бас тартылған"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Жоба",
+        "submitted": "Мақұлдауға жіберілген",
+        "approved": "Мақұлданған",
+        "posted": "Кітапқа жазылған"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Ашық",
+        "assigned": "Тағайындалған",
+        "in_progress": "Орындалуда",
+        "resolved": "Түзетілген",
+        "verified": "Тексерілген",
+        "closed": "Жабық"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "ескерту",
+        "minor": "шағын",
+        "major": "маңызды",
+        "critical": "сыни"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Адам",
+        "crew": "Бригада",
+        "equipment": "Техника",
+        "subcontractor": "Субмердігер"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "ЖИ моделінің атауы ескірген немесе қолжетімді емес. Параметрлер > ЖИ бөліміне кіріп, провайдеріңіз үшін қазіргі жарамды модель атауын енгізіңіз.",
+      "not_configured": "ЖИ конфигурацияланбаған. Параметрлерде ЖИ провайдерін орнатыңыз."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "тексерілген",
+      "bound": "тіркелген",
+      "empty": "жоқ"
+    },
+    "package_status_labels": {
+      "draft": "жоба",
+      "in_progress": "орындалуда",
+      "ready": "дайын",
+      "issued": "берілген"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "кедергі",
+      "critical": "сыни",
+      "warning": "ескерту",
+      "suggestion": "ұсыныс"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегия",
+      "brief": "Техникалық тапсырма",
+      "concept": "Тұжырымдама",
+      "design": "Жобалау",
+      "approval": "Рұқсат алу",
+      "detail": "Егжей-тегжейлі жобалау",
+      "tender": "Тендер",
+      "award": "Келісімшарт беру",
+      "construction": "Құрылыс",
+      "handover": "Тапсыру",
+      "operation": "Пайдалану"
     }
   }
 }

@@ -132,7 +132,15 @@
     "missing_description": "Articolul {position} nu are descriere",
     "missing_classification": "Articolul {position} are nevoie de un cod de clasificare",
     "duplicate_ordinal": "Număr de ordine duplicat: {ordinal}",
-    "rate_anomaly": "Prețul unitar {rate} depășește pragul ({threshold})"
+    "rate_anomaly": "Prețul unitar {rate} depășește pragul ({threshold})",
+    "nl": {
+      "not_a_string": "Datele introduse trebuie să fie text.",
+      "empty": "Datele introduse sunt goale.",
+      "too_long": "Datele introduse depășesc {max} de caractere.",
+      "ai_unparsable": "Răspunsul AI nu a putut fi interpretat ca document DSL.",
+      "no_pattern": "Niciun model nu se potrivește cu propoziția introdusă.",
+      "try": "Încercați: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "Programare 4D",
@@ -327,7 +335,16 @@
     "pass": "Trecut",
     "fail": "Eșuat",
     "partial": "Parțial",
-    "critical": "Critic"
+    "critical": "Critic",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Programată",
+        "in_progress": "În desfășurare",
+        "completed": "Finalizată",
+        "failed": "Nereușită",
+        "cancelled": "Anulată"
+      }
+    }
   },
   "ncr": {
     "title": "Rapoarte de neconformitate",
@@ -347,7 +364,19 @@
     "submit": "Trimiteți",
     "review": "Revizuiți",
     "approved_as_noted": "Aprobat cu observații",
-    "revise_resubmit": "Revizuiți și retrimiteți"
+    "revise_resubmit": "Revizuiți și retrimiteți",
+    "intl": {
+      "status_labels": {
+        "draft": "Ciornă",
+        "submitted": "Trimis",
+        "under_review": "În verificare",
+        "approved": "Aprobat",
+        "approved_as_noted": "Aprobat cu observații",
+        "revise_and_resubmit": "De revizuit și retrimis",
+        "rejected": "Respins",
+        "closed": "Închis"
+      }
+    }
   },
   "correspondence": {
     "title": "Corespondență",
@@ -372,7 +401,15 @@
     "promote": "Promovați",
     "suitability": "Conformitate",
     "discipline": "Disciplină",
-    "revisions": "Revizii"
+    "revisions": "Revizii",
+    "intl": {
+      "state_labels": {
+        "wip": "În lucru",
+        "shared": "Partajat",
+        "published": "Publicat",
+        "archived": "Arhivat"
+      }
+    }
   },
   "transmittals": {
     "title": "Transmiteri",
@@ -384,7 +421,14 @@
     "recipients": "Destinatari",
     "acknowledge": "Confirmați primirea",
     "locked": "Blocat",
-    "issue_transmittal": "Emiteți"
+    "issue_transmittal": "Emiteți",
+    "intl": {
+      "status_words": {
+        "draft": "ciornă",
+        "issued": "emis",
+        "responded": "răspuns"
+      }
+    }
   },
   "notifications": {
     "title": "Notificări",
@@ -426,7 +470,101 @@
     "project_status": "Stare proiect",
     "cost_report": "Raport de costuri",
     "schedule_status": "Stare program",
-    "safety_report": "Raport de siguranță"
+    "safety_report": "Raport de siguranță",
+    "doc": {
+      "meta_report": "Raport",
+      "meta_project": "Proiect",
+      "meta_type": "Tip",
+      "meta_generated": "Generat la",
+      "meta_currency": "Monedă",
+      "field_column": "Câmp",
+      "value_column": "Valoare",
+      "yes": "Da",
+      "no": "Nu",
+      "no_data_heading": "Nu există date disponibile",
+      "no_data_body": "Acest raport a fost generat dintr-un instantaneu de date gol. Verificați dacă modulele sursă (financiar, grafic, siguranță etc.) au returnat date pentru proiectul selectat.",
+      "no_data_body_short": "Acest raport a fost generat dintr-un instantaneu de date gol. Verificați dacă modulele sursă au returnat date pentru proiectul selectat.",
+      "footer_generated_by": "Generat de OpenConstructionERP la {timestamp}.",
+      "worksheet_name": "Raport",
+      "pdf_subject": "Raport de proiect",
+      "overall_progress": "Progres general",
+      "as_of": "La data de",
+      "recorded_by": "Înregistrat de",
+      "period": "Perioadă",
+      "entries_suffix": "({count} înregistrări)",
+      "site_photo_alt": "Fotografie de șantier",
+      "ai_summary_heading": "Rezumat",
+      "ai_badge": "Generat de AI",
+      "ai_note": "Generat de AI din datele de proiect de mai jos.",
+      "ai_note_confidence": "Generat de AI din datele de proiect de mai jos (încredere {confidence}).",
+      "ai_note_review": "Verificați înainte de a le trimite clientului."
+    },
+    "section": {
+      "project_overview": "Prezentare generală a proiectului",
+      "key_performance_indicators": "Indicatori cheie de performanță",
+      "schedule_status": "Starea graficului",
+      "risk_summary": "Rezumatul riscurilor",
+      "open_issues": "Probleme deschise",
+      "cost_summary": "Rezumatul costurilor",
+      "cost_breakdown": "Defalcarea costurilor",
+      "change_orders": "Ordine de modificare",
+      "cash_flow": "Flux de numerar",
+      "schedule_overview": "Prezentare generală a graficului",
+      "milestone_status": "Starea etapelor",
+      "critical_path": "Drumul critic",
+      "3_week_lookahead": "Previziune pe 3 săptămâni",
+      "safety_kpis": "Indicatori de siguranță",
+      "incident_log": "Registrul incidentelor",
+      "near_miss_reports": "Rapoarte de cvasi-incidente",
+      "safety_training": "Instruire în domeniul siguranței",
+      "inspection_summary": "Rezumatul inspecțiilor",
+      "by_inspection_type": "Pe tip de inspecție",
+      "punch_list_status": "Starea listei de remedieri",
+      "recent_inspections": "Inspecții recente",
+      "portfolio_overview": "Prezentare generală a portofoliului",
+      "project_statuses": "Starea proiectelor",
+      "kpi_comparison": "Compararea indicatorilor KPI",
+      "portfolio_risks": "Riscurile portofoliului",
+      "field_progress": "Progresul pe șantier",
+      "top_risks": "Principalele riscuri",
+      "site_photos": "Fotografii de șantier",
+      "summary": "Rezumat"
+    },
+    "field": {
+      "name": "Nume",
+      "status": "Stare",
+      "phase": "Fază",
+      "planned_start": "Început planificat",
+      "planned_end": "Sfârșit planificat",
+      "schedule_progress_pct": "Progres grafic (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Buget consumat (%)",
+      "as_of": "La data de",
+      "progress_pct": "Progres (%)",
+      "risk_score_avg": "Scor mediu de risc",
+      "open_rfis": "RFI-uri deschise",
+      "open_submittals": "Documente trimise deschise",
+      "open_defects": "Defecte deschise",
+      "open_observations": "Observații deschise",
+      "budget": "Buget",
+      "committed": "Angajat",
+      "actual": "Real",
+      "payable": "De plătit",
+      "receivable": "De încasat",
+      "net_cash_flow": "Flux de numerar net"
+    },
+    "explain": {
+      "report_total_one": "Total raport: {money} (suma a {count} rând).",
+      "report_total_other": "Total raport: {money} (suma a {count} rânduri).",
+      "percent_of_total": "{part} reprezintă {percent} din {total} (procent din total).",
+      "percent_zero_total": "{part} din {total}: totalul este zero, deci fiecare pondere este raportată ca 0 la sută.",
+      "breakdown_empty": "Defalcarea costurilor: nu există date.",
+      "breakdown_one": "Defalcarea costurilor: {count} grup, total raport {money}.",
+      "breakdown_other": "Defalcarea costurilor: {count} grupuri, total raport {money}.",
+      "top_n_one": "Primele {requested}: {shown} din {shown} rând.",
+      "top_n_other": "Primele {requested}: {shown} din {shown} rânduri."
+    }
   },
   "gantt": {
     "title": "Diagramă Gantt",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Ciornă",
       "frozen": "Înghețat"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Valoarea brută de dezvoltare (GDV)",
+      "total_development_cost": "Costul total de dezvoltare",
+      "residual_land_value": "Valoarea reziduală a terenului",
+      "developer_profit": "Profitul dezvoltatorului",
+      "profit_on_cost": "Profit raportat la cost",
+      "profit_on_gdv": "Profit raportat la GDV",
+      "construction_cost": "Costul construcției",
+      "professional_fees": "Onorarii profesionale",
+      "contingency": "Rezervă pentru imprevizibil",
+      "finance_cost": "Costul finanțării",
+      "sales_costs": "Costuri de vânzare"
+    },
+    "status": {
+      "viable": "Viabil",
+      "unviable": "Neviabil",
+      "marginal": "Marginal",
+      "pending": "Încă neevaluat"
+    },
+    "figure": {
+      "gross_development_value": "Valoarea totală de vânzare a tuturor unităților din proiect, toate în aceeași monedă.",
+      "total_development_cost": "Toate costurile de realizare a proiectului, cu excepția terenului: construcție, onorarii, rezervă, finanțare și costuri de vânzare.",
+      "residual_land_value": "Ceea ce rămâne pentru teren după ce din valoarea brută de dezvoltare se scad costul total de dezvoltare și profitul țintă al dezvoltatorului.",
+      "developer_profit": "Profitul pe care dezvoltatorul intenționează să-l păstreze, stabilit ca raport țintă din valoarea brută de dezvoltare.",
+      "profit_on_cost": "Profitul dezvoltatorului împărțit la costul total de dezvoltare, exprimat ca raport.",
+      "profit_on_gdv": "Profitul dezvoltatorului împărțit la valoarea brută de dezvoltare, exprimat ca raport."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "FACTURĂ",
+      "date": "Data: {value}",
+      "due": "Scadență: {value}",
+      "from": "De la",
+      "bill_to": "Facturare către",
+      "vat_id": "CUI/CIF: {value}",
+      "ref": "Ref.: {value}",
+      "th_description": "Descriere",
+      "th_qty": "Cant.",
+      "th_unit": "U.M.",
+      "th_unit_price": "Preț unitar",
+      "th_net": "Net ({currency})",
+      "net_total": "Total net",
+      "vat_total": "TVA",
+      "grand_total": "Total de plată",
+      "retention_prepaid": "Garanție reținută / avans",
+      "amount_due": "Sumă de plată",
+      "payment": "Plată",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Cont: {value}",
+      "bank_code": "Cod bancar: {value}",
+      "account_holder": "Titular cont: {value}",
+      "footer": "Acest PDF include o factură electronică EN 16931 încorporată (Factur-X / ZUGFeRD). XML-ul încorporat este documentul de referință."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Tabără de muncitori",
+        "rental": "Locuință de închiriat",
+        "hotel": "Hotel"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "În așteptare",
+        "approved": "Aprobat",
+        "rejected": "Respins"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Îndeplinit",
+        "fail": "Neîndeplinit",
+        "not_applicable": "Nu se aplică"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Plan",
+        "contract": "Contract",
+        "specification": "Specificație",
+        "photo": "Fotografie",
+        "correspondence": "Corespondență",
+        "reality_capture": "Captură a realității",
+        "other": "Altele"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "În așteptare",
+        "approved": "Aprobat",
+        "rejected": "Respins",
+        "cancelled": "Anulat"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Ciornă",
+        "submitted": "Trimis spre aprobare",
+        "approved": "Aprobat",
+        "posted": "Contabilizat"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Deschisă",
+        "assigned": "Atribuită",
+        "in_progress": "În desfășurare",
+        "resolved": "Remediată",
+        "verified": "Verificată",
+        "closed": "Închisă"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "observație",
+        "minor": "minoră",
+        "major": "majoră",
+        "critical": "critică"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Persoană",
+        "crew": "Echipă",
+        "equipment": "Utilaj",
+        "subcontractor": "Subcontractant"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Numele modelului AI este învechit sau indisponibil. Deschideți Setări > AI și introduceți un nume de model valid pentru furnizorul dvs.",
+      "not_configured": "AI nu este configurat. Configurați un furnizor AI în Setări."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "verificat",
+      "bound": "atașat",
+      "empty": "lipsă"
+    },
+    "package_status_labels": {
+      "draft": "ciornă",
+      "in_progress": "în desfășurare",
+      "ready": "gata",
+      "issued": "emis"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "blocaj",
+      "critical": "critic",
+      "warning": "avertisment",
+      "suggestion": "sugestie"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Strategie",
+      "brief": "Temă de proiectare",
+      "concept": "Concept",
+      "design": "Proiectare",
+      "approval": "Autorizare",
+      "detail": "Proiectare detaliată",
+      "tender": "Licitație",
+      "award": "Atribuire",
+      "construction": "Execuție",
+      "handover": "Predare",
+      "operation": "Exploatare"
     }
   }
 }

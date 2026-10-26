@@ -132,7 +132,15 @@
     "missing_description": "Позиция {position} е без описание",
     "missing_classification": "Позиция {position} изисква класификационен код",
     "duplicate_ordinal": "Дублиран пореден номер: {ordinal}",
-    "rate_anomaly": "Единичната цена {rate} надхвърля прага ({threshold})"
+    "rate_anomaly": "Единичната цена {rate} надхвърля прага ({threshold})",
+    "nl": {
+      "not_a_string": "Входните данни трябва да са текст.",
+      "empty": "Входните данни са празни.",
+      "too_long": "Входните данни надвишават {max} знака.",
+      "ai_unparsable": "Отговорът на ИИ не може да бъде анализиран като DSL документ.",
+      "no_pattern": "Никой шаблон не съвпадна с въведеното изречение.",
+      "try": "Опитайте: '{pattern}'"
+    }
   },
   "schedule": {
     "title": "4D график",
@@ -327,7 +335,16 @@
     "pass": "Приет",
     "fail": "Отхвърлен",
     "partial": "Частично",
-    "critical": "Критично"
+    "critical": "Критично",
+    "intl": {
+      "status_labels": {
+        "scheduled": "Планирана",
+        "in_progress": "В процес",
+        "completed": "Завършена",
+        "failed": "Неуспешна",
+        "cancelled": "Отменена"
+      }
+    }
   },
   "ncr": {
     "title": "Протоколи за несъответствие",
@@ -347,7 +364,19 @@
     "submit": "Подаване",
     "review": "Преглед",
     "approved_as_noted": "Одобрено със забележки",
-    "revise_resubmit": "Коригиране и повторно подаване"
+    "revise_resubmit": "Коригиране и повторно подаване",
+    "intl": {
+      "status_labels": {
+        "draft": "Чернова",
+        "submitted": "Представен",
+        "under_review": "На преглед",
+        "approved": "Одобрен",
+        "approved_as_noted": "Одобрен с бележки",
+        "revise_and_resubmit": "За корекция и повторно представяне",
+        "rejected": "Отхвърлен",
+        "closed": "Затворен"
+      }
+    }
   },
   "correspondence": {
     "title": "Кореспонденция",
@@ -372,7 +401,15 @@
     "promote": "Преминаване към следващо състояние",
     "suitability": "Пригодност",
     "discipline": "Част",
-    "revisions": "Редакции"
+    "revisions": "Редакции",
+    "intl": {
+      "state_labels": {
+        "wip": "В процес на работа",
+        "shared": "Споделен",
+        "published": "Публикуван",
+        "archived": "Архивиран"
+      }
+    }
   },
   "transmittals": {
     "title": "Съпроводителни писма",
@@ -384,7 +421,14 @@
     "recipients": "Получатели",
     "acknowledge": "Потвърждаване на получаването",
     "locked": "Заключено",
-    "issue_transmittal": "Издаване"
+    "issue_transmittal": "Издаване",
+    "intl": {
+      "status_words": {
+        "draft": "чернова",
+        "issued": "изпратен",
+        "responded": "отговорено"
+      }
+    }
   },
   "notifications": {
     "title": "Известия",
@@ -426,7 +470,101 @@
     "project_status": "Състояние на проекта",
     "cost_report": "Отчет за разходите",
     "schedule_status": "Състояние на графика",
-    "safety_report": "Отчет за безопасността"
+    "safety_report": "Отчет за безопасността",
+    "doc": {
+      "meta_report": "Отчет",
+      "meta_project": "Проект",
+      "meta_type": "Тип",
+      "meta_generated": "Генериран на",
+      "meta_currency": "Валута",
+      "field_column": "Поле",
+      "value_column": "Стойност",
+      "yes": "Да",
+      "no": "Не",
+      "no_data_heading": "Няма налични данни",
+      "no_data_body": "Този отчет е генериран от празен снимка на данните. Проверете дали изходните модули (финанси, график, безопасност и др.) са върнали данни за избрания проект.",
+      "no_data_body_short": "Този отчет е генериран от празен снимка на данните. Проверете дали изходните модули са върнали данни за избрания проект.",
+      "footer_generated_by": "Генерирано от OpenConstructionERP на {timestamp}.",
+      "worksheet_name": "Отчет",
+      "pdf_subject": "Отчет за проект",
+      "overall_progress": "Общ напредък",
+      "as_of": "Към дата",
+      "recorded_by": "Записано от",
+      "period": "Период",
+      "entries_suffix": "({count} записа)",
+      "site_photo_alt": "Снимка от строежа",
+      "ai_summary_heading": "Резюме",
+      "ai_badge": "Генерирано с ИИ",
+      "ai_note": "Генерирано с ИИ от данните за проекта по-долу.",
+      "ai_note_confidence": "Генерирано с ИИ от данните за проекта по-долу (увереност {confidence}).",
+      "ai_note_review": "Прегледайте преди споделяне с клиента."
+    },
+    "section": {
+      "project_overview": "Общ преглед на проекта",
+      "key_performance_indicators": "Ключови показатели за ефективност",
+      "schedule_status": "Състояние на графика",
+      "risk_summary": "Обобщение на рисковете",
+      "open_issues": "Отворени въпроси",
+      "cost_summary": "Обобщение на разходите",
+      "cost_breakdown": "Разбивка на разходите",
+      "change_orders": "Поръчки за промяна",
+      "cash_flow": "Паричен поток",
+      "schedule_overview": "Общ преглед на графика",
+      "milestone_status": "Състояние на етапите",
+      "critical_path": "Критичен път",
+      "3_week_lookahead": "Прогноза за 3 седмици",
+      "safety_kpis": "Показатели за безопасност",
+      "incident_log": "Регистър на инцидентите",
+      "near_miss_reports": "Доклади за почти инциденти",
+      "safety_training": "Обучение по безопасност",
+      "inspection_summary": "Обобщение на проверките",
+      "by_inspection_type": "По вид проверка",
+      "punch_list_status": "Състояние на списъка с недостатъци",
+      "recent_inspections": "Последни проверки",
+      "portfolio_overview": "Общ преглед на портфейла",
+      "project_statuses": "Състояния на проектите",
+      "kpi_comparison": "Сравнение на показателите",
+      "portfolio_risks": "Рискове в портфейла",
+      "field_progress": "Напредък на строежа",
+      "top_risks": "Основни рискове",
+      "site_photos": "Снимки от строежа",
+      "summary": "Резюме"
+    },
+    "field": {
+      "name": "Име",
+      "status": "Състояние",
+      "phase": "Фаза",
+      "planned_start": "Планирано начало",
+      "planned_end": "Планиран край",
+      "schedule_progress_pct": "Напредък по график (%)",
+      "cpi": "CPI",
+      "spi": "SPI",
+      "budget_consumed_pct": "Изразходван бюджет (%)",
+      "as_of": "Към дата",
+      "progress_pct": "Напредък (%)",
+      "risk_score_avg": "Среден рисков резултат",
+      "open_rfis": "Отворени RFI",
+      "open_submittals": "Отворени документи за одобрение",
+      "open_defects": "Отворени дефекти",
+      "open_observations": "Отворени забележки",
+      "budget": "Бюджет",
+      "committed": "Ангажирано",
+      "actual": "Фактическо",
+      "payable": "Задължения",
+      "receivable": "Вземания",
+      "net_cash_flow": "Нетен паричен поток"
+    },
+    "explain": {
+      "report_total_one": "Общо в отчета: {money} (сума от {count} ред).",
+      "report_total_other": "Общо в отчета: {money} (сума от {count} реда).",
+      "percent_of_total": "{part} е {percent} от {total} (процент от общото).",
+      "percent_zero_total": "{part} от {total}: общото е нула, затова всеки дял е отчетен като 0 процента.",
+      "breakdown_empty": "Разбивка на разходите: няма данни.",
+      "breakdown_one": "Разбивка на разходите: {count} група, общо в отчета {money}.",
+      "breakdown_other": "Разбивка на разходите: {count} групи, общо в отчета {money}.",
+      "top_n_one": "Топ {requested}: {shown} от {shown} ред.",
+      "top_n_other": "Топ {requested}: {shown} от {shown} реда."
+    }
   },
   "gantt": {
     "title": "Диаграма на Гант",
@@ -617,6 +755,197 @@
     "snapshot_status": {
       "draft": "Чернова",
       "frozen": "Замразен"
+    }
+  },
+  "property_dev": {
+    "term": {
+      "gross_development_value": "Брутна стойност на развитието (GDV)",
+      "total_development_cost": "Общ разход за развитие",
+      "residual_land_value": "Остатъчна стойност на земята",
+      "developer_profit": "Печалба на разработчика",
+      "profit_on_cost": "Печалба върху разхода",
+      "profit_on_gdv": "Печалба върху GDV",
+      "construction_cost": "Строителна цена",
+      "professional_fees": "Професионални такси",
+      "contingency": "Непредвидени разходи",
+      "finance_cost": "Финансови разходи",
+      "sales_costs": "Разходи за продажба"
+    },
+    "status": {
+      "viable": "Жизнеспособен",
+      "unviable": "Нежизнеспособен",
+      "marginal": "Граничен",
+      "pending": "Все още не е оценен"
+    },
+    "figure": {
+      "gross_development_value": "Общата продажна стойност на всички единици в схемата, в една валута.",
+      "total_development_cost": "Всички разходи за реализиране на схемата без самата земя: строеж, такси, непредвидени разходи, финансиране и разходи за продажба.",
+      "residual_land_value": "Остатъкът за земята след като от брутната стойност на развитието се извадят общият разход за развитие и целевата печалба на разработчика.",
+      "developer_profit": "Печалбата, която разработчикът цели да запази, зададена като целево съотношение към брутната стойност на развитието.",
+      "profit_on_cost": "Печалбата на разработчика, разделена на общия разход за развитие, представена като съотношение.",
+      "profit_on_gdv": "Печалбата на разработчика, разделена на брутната стойност на развитието, представена като съотношение."
+    }
+  },
+  "einvoice": {
+    "pdf": {
+      "doc_title": "ФАКТУРА",
+      "date": "Дата: {value}",
+      "due": "Падеж: {value}",
+      "from": "От",
+      "bill_to": "Фактуриране до",
+      "vat_id": "ДДС номер: {value}",
+      "ref": "Реф.: {value}",
+      "th_description": "Описание",
+      "th_qty": "Кол.",
+      "th_unit": "Ед.",
+      "th_unit_price": "Единична цена",
+      "th_net": "Нето ({currency})",
+      "net_total": "Нетна сума",
+      "vat_total": "ДДС",
+      "grand_total": "Общо за плащане",
+      "retention_prepaid": "Гаранционна удръжка / авансово плащане",
+      "amount_due": "Дължима сума",
+      "payment": "Плащане",
+      "iban": "IBAN: {value}",
+      "bic": "BIC: {value}",
+      "account_number": "Сметка: {value}",
+      "bank_code": "Банков код: {value}",
+      "account_holder": "Титуляр на сметката: {value}",
+      "footer": "Този PDF съдържа вграден електронен фактура EN 16931 (Factur-X / ZUGFeRD). Меродавен е вграденият XML документ."
+    }
+  },
+  "accommodation": {
+    "intl": {
+      "kind_labels": {
+        "worker_camp": "Работнически лагер",
+        "rental": "Наемно жилище",
+        "hotel": "Хотел"
+      }
+    }
+  },
+  "approval_routes": {
+    "intl": {
+      "decision_labels": {
+        "pending": "Чака",
+        "approved": "Одобрен",
+        "rejected": "Отхвърлен"
+      }
+    }
+  },
+  "bim_requirements": {
+    "intl": {
+      "status_words": {
+        "pass": "Изпълнено",
+        "fail": "Неизпълнено",
+        "not_applicable": "Не е приложимо"
+      }
+    }
+  },
+  "documents": {
+    "intl": {
+      "category_labels": {
+        "drawing": "Чертеж",
+        "contract": "Договор",
+        "specification": "Спецификация",
+        "photo": "Снимка",
+        "correspondence": "Кореспонденция",
+        "reality_capture": "Заснемане на реалността",
+        "other": "Други"
+      }
+    }
+  },
+  "enterprise_workflows": {
+    "intl": {
+      "status_labels": {
+        "pending": "Чака",
+        "approved": "Одобрен",
+        "rejected": "Отхвърлен",
+        "cancelled": "Отменен"
+      }
+    }
+  },
+  "payroll": {
+    "intl": {
+      "batch_status_labels": {
+        "draft": "Чернова",
+        "submitted": "Изпратен за одобрение",
+        "approved": "Одобрен",
+        "posted": "Осчетоводен"
+      }
+    }
+  },
+  "punchlist": {
+    "intl": {
+      "status_labels": {
+        "open": "Отворен",
+        "assigned": "Възложен",
+        "in_progress": "В процес",
+        "resolved": "Отстранен",
+        "verified": "Проверен",
+        "closed": "Затворен"
+      }
+    }
+  },
+  "qms": {
+    "intl": {
+      "severity_words": {
+        "observation": "наблюдение",
+        "minor": "незначително",
+        "major": "значително",
+        "critical": "критично"
+      }
+    }
+  },
+  "resources": {
+    "intl": {
+      "resource_type_labels": {
+        "person": "Лице",
+        "crew": "Екип",
+        "equipment": "Техника",
+        "subcontractor": "Подизпълнител"
+      }
+    }
+  },
+  "ai": {
+    "advisor": {
+      "model_outdated": "Името на модела на ИИ е остаряло или недостъпно. Отворете Настройки > ИИ и задайте актуално валидно име на модел за вашия доставчик.",
+      "not_configured": "ИИ не е конфигуриран. Моля, настройте доставчик на ИИ в Настройки."
+    }
+  },
+  "closeout": {
+    "slot_status_labels": {
+      "verified": "проверен",
+      "bound": "прикачен",
+      "empty": "липсва"
+    },
+    "package_status_labels": {
+      "draft": "чернова",
+      "in_progress": "в процес",
+      "ready": "готов",
+      "issued": "издаден"
+    }
+  },
+  "project_intelligence": {
+    "severity_labels": {
+      "blocker": "блокер",
+      "critical": "критичен",
+      "warning": "предупреждение",
+      "suggestion": "предложение"
+    }
+  },
+  "requirements": {
+    "phase_labels": {
+      "strategy": "Стратегия",
+      "brief": "Задание",
+      "concept": "Концепция",
+      "design": "Проектиране",
+      "approval": "Разрешение",
+      "detail": "Детайлно проектиране",
+      "tender": "Търг",
+      "award": "Възлагане",
+      "construction": "Строеж",
+      "handover": "Предаване",
+      "operation": "Експлоатация"
     }
   }
 }
