@@ -46010,6 +46010,8 @@ const resource = {
     // --- Learn: videos and cases ---
     "nav.videos": "Video guides",
     "nav.packs": "Packs",
+    "nav.pinned_move_up": "Move {{item}} up",
+    "nav.pinned_move_down": "Move {{item}} down",
     "sidebar.group.learn": "Learn",
     "sidebar.learn.hide": "Hide video guides & use cases",
     "sidebar.learn.hide_short": "Hide",

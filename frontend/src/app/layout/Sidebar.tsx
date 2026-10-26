@@ -15,6 +15,7 @@ import {
   Settings,
   Info,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   Sparkles,
   X,
@@ -956,9 +957,20 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     });
   }, []);
 
+  const movePin = useCallback((route: string, delta: -1 | 1) => {
+    setPinned((prev) => {
+      const from = prev.indexOf(route);
+      const to = from + delta;
+      if (from < 0 || to < 0 || to >= prev.length) return prev;
+      const next = prev.slice();
+      [next[from], next[to]] = [next[to]!, next[from]!];
+      return next;
+    });
+  }, []);
+
   // ── Two-key navigation shortcuts (G then X) ──────────────────────────
   // Modern-SaaS-style. We listen at document level for the leading
-  // `G`, then within 1.5 s any single letter from KBD_BY_LETTER fires
+  // `G`, then within 1.5 s any single letter from `chordRoutes('menu')` fires
   // the matching navigation. Ignores all keystrokes that originate
   // from text fields so it doesn't conflict with form input.
   const firstKeyRef = useRef<string | null>(null);
@@ -1540,23 +1552,49 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
               {pinnedItems.map((item, i) => (
                 <li
                   key={item.to}
-                  className="oe-stagger"
+                  className={`oe-stagger ${editMode && !iconified ? 'flex items-center gap-0.5' : ''}`}
                   style={{ animationDelay: `${i * 18}ms` }}
                 >
-                  <SidebarItem
-                    item={item}
-                    label={t(item.labelKey, { defaultValue: item.defaultLabel })}
-                    onClick={onClose}
-                    badge={badgeMap[item.to]}
-                    isPinned={true}
-                    onTogglePin={togglePin}
-                    activeRoute={activeRoute}
-                    iconified={iconified}
-                    editMode={editMode}
-                    isItemHidden={editingHidden.includes(item.to)}
-                    onToggleHidden={toggleItemHidden}
-                    onRowMenu={openRowMenu}
-                  />
+                  <div className="min-w-0 flex-1">
+                    <SidebarItem
+                      item={item}
+                      label={t(item.labelKey, { defaultValue: item.defaultLabel })}
+                      onClick={onClose}
+                      badge={badgeMap[item.to]}
+                      isPinned={true}
+                      onTogglePin={togglePin}
+                      activeRoute={activeRoute}
+                      iconified={iconified}
+                      editMode={editMode}
+                      isItemHidden={editingHidden.includes(item.to)}
+                      onToggleHidden={toggleItemHidden}
+                      onRowMenu={openRowMenu}
+                    />
+                  </div>
+                  {editMode && !iconified && pinnedItems.length > 1 && (
+                    <div className="flex shrink-0 flex-col" data-testid="pinned-reorder">
+                      {([-1, 1] as const).map((delta) => {
+                        const label = t(delta < 0 ? 'nav.pinned_move_up' : 'nav.pinned_move_down', {
+                          defaultValue: delta < 0 ? 'Move {{item}} up' : 'Move {{item}} down',
+                          item: t(item.labelKey, { defaultValue: item.defaultLabel }),
+                        });
+                        const edge = delta < 0 ? i === 0 : i === pinnedItems.length - 1;
+                        return (
+                          <button
+                            key={delta}
+                            type="button"
+                            disabled={edge}
+                            onClick={() => movePin(item.to, delta)}
+                            aria-label={label}
+                            title={label}
+                            className="flex h-3.5 w-5 items-center justify-center rounded text-content-tertiary hover:bg-surface-secondary hover:text-content-primary disabled:opacity-30"
+                          >
+                            {delta < 0 ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

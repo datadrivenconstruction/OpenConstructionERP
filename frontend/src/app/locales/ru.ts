@@ -54943,6 +54943,8 @@ const resource = {
     // --- Learn: videos and cases ---
     "nav.videos": "Видео руководства",
     "nav.packs": "Пакеты",
+    "nav.pinned_move_up": "Поднять «{{item}}» выше",
+    "nav.pinned_move_down": "Опустить «{{item}}» ниже",
     "sidebar.group.learn": "Обучение",
     "sidebar.learn.hide": "Скрыть видео руководства и кейсы применения",
     "sidebar.learn.hide_short": "Скрыть",
