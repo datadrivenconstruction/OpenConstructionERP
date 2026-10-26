@@ -1369,6 +1369,16 @@
       "suggestion": "请为该字段选择我的值、服务器的值或手动输入的值，然后重新发送合并"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "此分支已开启 {days} 天，自创建以来主估算已有 {changes} 个清单项发生变更",
+      "suggestion": "将主估算的变更带入分支、合并该分支，或将其归档"
+    },
+    "unresolved_conflicts": {
+      "fail": "清单项 {ordinal}“{description}”在此分支和主估算中都被修改",
+      "suggestion": "打开合并对话框，决定保留该清单项的哪个版本"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "第 {row} 行：此进度计划中没有 ID 为 {ref} 的作业。",
@@ -1402,14 +1412,18 @@
       "suggestion": "应用之前请与现场核对此行。"
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "此分支已开启 {days} 天，自创建以来主估算已有 {changes} 个清单项发生变更",
-      "suggestion": "将主估算的变更带入分支、合并该分支，或将其归档"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period} 现金头寸将降至负 {amount}，低于 {threshold} 的资金阈值。",
+      "suggestion": "请在 {period} 前安排资金，提前回款或推迟付款。"
     },
-    "unresolved_conflicts": {
-      "fail": "清单项 {ordinal}“{description}”在此分支和主估算中都被修改",
-      "suggestion": "打开合并对话框，决定保留该清单项的哪个版本"
+    "receipt_overdue": {
+      "fail": "{document}：{amount} 应于 {due} 到期，目前仍未收回（逾期 {days} 天）。",
+      "suggestion": "向客户催收款项，或在预测中调整预计日期。"
+    },
+    "forecast_missing": {
+      "fail": "{project} 已启动，但没有合同、发票、采购订单、分包合同或计划，无法据此预测现金流。",
+      "suggestion": "录入客户合同及其付款计划，或在成本模型中录入计划现金流。"
     }
   }
 }

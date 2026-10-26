@@ -2503,5 +2503,31 @@
       "followed_up_missing": "Minarkahang may kaugnayan ang pagbabago {seq} pero walang komento, RFI, ulap, o marka ng muling pagsukat.",
       "followed_up_hint": "Magkomento sa pagbabago, gumawa ng RFI o ulap, o markahan ang mga dami sa loob nito para sukatin muli."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Pagtataya ng cash flow",
+      "portfolio_title": "Pagtataya ng cash flow ng portfolio",
+      "empty": "Walang pagtataya ng cash flow para sa pagpiling ito.",
+      "project": "Proyekto",
+      "as_of": "Hanggang",
+      "currency": "Pera",
+      "delay_days": "Naantala ang mga koleksyon ng (araw)",
+      "overrun_pct": "Pagtaas ng gastos (%)",
+      "closing_position": "Pangwakas na posisyon",
+      "peak_funding": "Pinakamataas na pangangailangan sa pondo",
+      "peak_period": "Buwan ng pinakamataas na pangangailangan sa pondo",
+      "col": {
+        "period": "Buwan",
+        "planned_in": "Plano na papasok",
+        "actual_in": "Aktuwal na pumasok",
+        "expected_in": "Inaasahang papasok",
+        "planned_out": "Plano na lalabas",
+        "actual_out": "Aktuwal na lumabas",
+        "expected_out": "Inaasahang lalabas",
+        "net": "Netong halaga",
+        "cumulative": "Pinagsamang posisyon"
+      }
+    }
   }
 }

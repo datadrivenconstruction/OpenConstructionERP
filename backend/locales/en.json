@@ -92,44 +92,6 @@
       "toast_applied_one": "{{count}} variant chosen",
       "toast_applied_other": "{{count}} variants chosen"
     },
-    "fidelity": {
-      "sheet": {
-        "title": "Exchange report"
-      },
-      "column": {
-        "severity": "Severity",
-        "kind": "Kind of loss",
-        "position": "Position",
-        "field": "Field",
-        "original": "Original value",
-        "written": "Value written",
-        "count": "Count",
-        "detail": "Detail"
-      },
-      "severity": {
-        "error": "Critical",
-        "warning": "Warning",
-        "info": "Note"
-      },
-      "kind": {
-        "unsupported_element": "Element not supported",
-        "truncated_text": "Text truncated",
-        "altered_text": "Text altered",
-        "rounded_value": "Value rounded",
-        "value_out_of_range": "Value out of range",
-        "dropped_attribute": "Attribute dropped",
-        "unmapped_unit": "Unit not mapped",
-        "lost_hierarchy": "Hierarchy level lost",
-        "markup_not_representable": "Markup not representable",
-        "attachment_skipped": "Attachment skipped",
-        "changed_identifier": "Identifier changed",
-        "exceeds_limit": "Exceeds storage limit",
-        "rejected_row": "Row rejected",
-        "skipped_row": "Row skipped",
-        "parser_warning": "Reader warning",
-        "roundtrip_mismatch": "Round-trip mismatch"
-      }
-    },
     "branch": {
       "base_snapshot": "Branch point",
       "base_snapshot_from": "Branch point (from snapshot \"{snapshot}\")",
@@ -179,6 +141,44 @@
         "ungrouped": "Not grouped",
         "empty": "The two estimates are identical.",
         "total": "Total"
+      }
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Exchange report"
+      },
+      "column": {
+        "severity": "Severity",
+        "kind": "Kind of loss",
+        "position": "Position",
+        "field": "Field",
+        "original": "Original value",
+        "written": "Value written",
+        "count": "Count",
+        "detail": "Detail"
+      },
+      "severity": {
+        "error": "Critical",
+        "warning": "Warning",
+        "info": "Note"
+      },
+      "kind": {
+        "unsupported_element": "Element not supported",
+        "truncated_text": "Text truncated",
+        "altered_text": "Text altered",
+        "rounded_value": "Value rounded",
+        "value_out_of_range": "Value out of range",
+        "dropped_attribute": "Attribute dropped",
+        "unmapped_unit": "Unit not mapped",
+        "lost_hierarchy": "Hierarchy level lost",
+        "markup_not_representable": "Markup not representable",
+        "attachment_skipped": "Attachment skipped",
+        "changed_identifier": "Identifier changed",
+        "exceeds_limit": "Exceeds storage limit",
+        "rejected_row": "Row rejected",
+        "skipped_row": "Row skipped",
+        "parser_warning": "Reader warning",
+        "roundtrip_mismatch": "Round-trip mismatch"
       }
     }
   },
@@ -437,29 +437,6 @@
     "present": "Present",
     "absent": "Absent",
     "excused": "Excused",
-    "actions": {
-      "status": {
-        "open": "Open",
-        "completed": "Completed",
-        "cancelled": "Cancelled"
-      },
-      "flag": {
-        "overdue": "Overdue",
-        "on_track": "On track"
-      },
-      "label": {
-        "action_item": "Action item",
-        "completion_rate": "Action completion rate",
-        "open_vs_done": "Open vs done",
-        "overdue": "Overdue actions"
-      },
-      "explain": {
-        "action_item": "An action item is a task agreed in a meeting, with an owner and a due date.",
-        "completion_rate": "Action completion rate is completed actions divided by total actions, from 0 to 1.",
-        "open_vs_done": "Open actions still need work. Done actions are completed and need no more work.",
-        "overdue": "An action is overdue when it is still open and its due date is before the reference date."
-      }
-    },
     "minutes_pdf": {
       "title": "Meeting Minutes",
       "issued": "ISSUED",
@@ -504,6 +481,29 @@
       "type_kickoff": "Kickoff",
       "type_closeout": "Closeout",
       "type_commercial": "Commercial"
+    },
+    "actions": {
+      "status": {
+        "open": "Open",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+      },
+      "flag": {
+        "overdue": "Overdue",
+        "on_track": "On track"
+      },
+      "label": {
+        "action_item": "Action item",
+        "completion_rate": "Action completion rate",
+        "open_vs_done": "Open vs done",
+        "overdue": "Overdue actions"
+      },
+      "explain": {
+        "action_item": "An action item is a task agreed in a meeting, with an owner and a due date.",
+        "completion_rate": "Action completion rate is completed actions divided by total actions, from 0 to 1.",
+        "open_vs_done": "Open actions still need work. Done actions are completed and need no more work.",
+        "overdue": "An action is overdue when it is still open and its due date is before the reference date."
+      }
     }
   },
   "inspections": {
@@ -1394,7 +1394,6 @@
     "boq_pdf": {
       "strings": {
         "ai_generated": "AI-generated",
-        "drawing": "Drawing",
         "cost_estimate": "COST ESTIMATE",
         "summary": "SUMMARY",
         "project": "Project:",
@@ -1431,7 +1430,8 @@
         "status_final": "Final",
         "status_archived": "Archived",
         "subject": "Bill of Quantities",
-        "tax_vat": "VAT"
+        "tax_vat": "VAT",
+        "drawing": "Drawing"
       }
     },
     "report": {
@@ -1691,6 +1691,139 @@
     "snapshot_status": {
       "draft": "Draft",
       "frozen": "Frozen"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "The job has no pieces to cut",
+        "suggestion": "Add pieces by hand, paste them, or import them from a bending schedule, takeoff, a BOQ line or a file."
+      },
+      "has_stock": {
+        "fail": "The job offers no stock to cut from",
+        "suggestion": "Add at least one stock length or sheet size, or reuse offcuts from site inventory."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} has no width",
+        "suggestion": "Give every sheet piece and sheet size both a length and a width."
+      },
+      "piece_fits_stock": {
+        "fail": "Piece {ref} ({size} mm) fits no stock entry",
+        "suggestion": "Add a longer or larger stock size, reduce the trim, or split the piece with a joint."
+      },
+      "grain_allows_fit": {
+        "fail": "Piece {ref} fits only when turned across the grain",
+        "suggestion": "Allow rotation for this piece or add a sheet size that fits it along the grain."
+      },
+      "kerf_set": {
+        "fail": "The saw kerf is zero",
+        "suggestion": "Enter the blade or cutting width, otherwise the yield of every bar with several cuts is overstated."
+      },
+      "min_offcut_set": {
+        "fail": "No minimum usable offcut is set",
+        "suggestion": "Set the shortest remnant worth keeping, so reusable offcuts are not counted as waste."
+      },
+      "stock_priced": {
+        "fail": "Stock {ref} has no unit cost",
+        "suggestion": "Enter a price per piece so the plan reports its cost and picks the cheapest stock."
+      },
+      "stock_sufficient": {
+        "fail": "Pieces not placed on the available stock: {count}",
+        "suggestion": "Raise the available quantity or add another stock size."
+      },
+      "yield_threshold": {
+        "fail": "Yield {actual} % is below the threshold of {threshold} %",
+        "suggestion": "Add another stock length or size, allow rotation, or review the threshold for this material."
+      }
+    }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, page {page}",
+    "text_change": "\"{old}\" changed to \"{new}\"",
+    "kind": {
+      "added": "Added",
+      "removed": "Removed",
+      "modified": "Modified",
+      "text": "Text changed"
+    },
+    "status": {
+      "open": "Open",
+      "relevant": "Relevant",
+      "not_relevant": "Not relevant"
+    },
+    "errors": {
+      "revision_not_found": "Drawing revision not found in this project.",
+      "revision_not_parsed": "The drawing has no processed version to compare yet.",
+      "comparison_not_found": "Comparison not found.",
+      "change_not_found": "Change not found.",
+      "same_revision": "Choose two different revisions or pages to compare.",
+      "manual_points": "Manual alignment needs two distinct points on each revision.",
+      "alignment_singular": "The alignment cannot be applied: it collapses the sheet.",
+      "region_empty": "Change {seq} has no size.",
+      "region_off_sheet": "Change {seq} lies outside the sheet.",
+      "module_missing": "The module needed for this action is not installed."
+    },
+    "rfi": {
+      "subject": "Drawing change {seq} on {sheet}",
+      "question": "Revision {new} of {sheet} differs from revision {old} in the marked area ({kind}). Please confirm the intent of the change and whether quantities are affected."
+    },
+    "markup": {
+      "text": "Revision change {seq}: {kind}"
+    },
+    "report": {
+      "title": "Drawing revision compare",
+      "project": "Project",
+      "name": "Comparison",
+      "old_revision": "Older revision",
+      "new_revision": "Newer revision",
+      "alignment": "Alignment",
+      "alignment_none": "Not aligned (same frame)",
+      "alignment_auto": "Automatic",
+      "alignment_manual": "Manual, two points",
+      "confidence": "confidence {value}",
+      "summary": "Changes",
+      "summary_counts": "{total} in total: {added} added, {removed} removed, {modified} modified, {text} text",
+      "generated_on": "Date generated",
+      "generated": "Generated {timestamp}",
+      "page_of": "Page {page} of {total}",
+      "no_changes": "No changes were found between the two revisions.",
+      "col_no": "No.",
+      "col_preview": "Preview",
+      "col_kind": "Change",
+      "col_location": "Location",
+      "col_detail": "Detail",
+      "col_status": "Status",
+      "col_comment": "Comment",
+      "col_follow_up": "Follow-up",
+      "page_at": "Page {page} at {coords}",
+      "layer": "Layer {layer}",
+      "entity_counts": "Entities: {added} added, {removed} removed, {modified} modified",
+      "rfi": "RFI {number}",
+      "markup": "Revision cloud",
+      "remeasure": "Re-measure: {items} quantities, {positions} BOQ positions"
+    },
+    "rules": {
+      "distinct_revisions_ok": "The two sides are different revisions.",
+      "distinct_revisions_fail": "The comparison compares a sheet with itself.",
+      "distinct_revisions_hint": "Pick the older and the newer revision of the drawing.",
+      "alignment_not_needed": "DWG revisions share drawing units; no alignment is needed.",
+      "alignment_missing_matrix": "The comparison has no alignment.",
+      "alignment_singular": "The alignment collapses the sheet and cannot be applied.",
+      "alignment_scale": "The alignment rescales the sheet by {scale}, more than revisions of one drawing differ.",
+      "alignment_low_confidence": "The automatic alignment is uncertain (confidence {confidence}).",
+      "alignment_manual_points": "A manual alignment needs two point pairs.",
+      "alignment_ok": "The sheet alignment is plausible.",
+      "alignment_hint": "Align the sheets by hand on two marks both revisions share, such as grid intersections.",
+      "region_empty": "Change {seq} has no size.",
+      "region_off_sheet": "Change {seq} lies outside the sheet.",
+      "regions_ok": "Every changed region lies on the sheet.",
+      "triaged_ok": "Every change has been reviewed.",
+      "triaged_open": "{count} changes are still open.",
+      "triaged_hint": "Mark each change as relevant or not relevant.",
+      "followed_up_ok": "Every relevant change is followed up.",
+      "followed_up_missing": "Change {seq} is marked relevant but has no comment, RFI, markup or re-measure flag.",
+      "followed_up_hint": "Comment on the change, raise an RFI or markup, or flag the quantities inside it for re-measure."
     }
   },
   "pdf_footer": {
@@ -2155,6 +2288,66 @@
       ]
     }
   },
+  "field_evidence": {
+    "punch_no_photo": "Punch item '{title}' is closed out without a photo",
+    "punch_no_photo_fix": "Add a photo of the completed work",
+    "photo_weak": "{count} photo(s) on '{title}' lack location or capture time",
+    "photo_weak_fix": "Retake the photo in the app with location enabled",
+    "defect_no_photo": "Defect '{reference}' is closed without a photo of the rectification",
+    "defect_no_photo_fix": "Attach a photo of the rectified work"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} more item(s) not listed",
+    "category_missing": "No evidence for the required category '{category}'",
+    "category_missing_fix": "Bind a document to a checklist item of this category, or add one",
+    "category_unverified": "Evidence for '{category}' is not verified yet",
+    "category_unverified_fix": "Have a manager review and verify the bound evidence",
+    "punch_open": "Punch item '{name}' is still open",
+    "punch_open_fix": "Resolve and close the item, or exclude it from this dossier's scope",
+    "punch_no_photo": "Resolved punch item '{name}' has no photo",
+    "punch_no_photo_fix": "Add a photo of the completed work",
+    "system_pending": "System '{name}' is not commissioned",
+    "system_pending_fix": "Complete the commissioning checklists and mark the system commissioned",
+    "critical_issues": "{count} critical commissioning issue(s) are still open",
+    "critical_issues_fix": "Close the critical issues before handover",
+    "acceptance_missing": "No acceptance certificate is bound",
+    "acceptance_missing_fix": "Bind the signed acceptance certificate to the acceptance checklist item",
+    "acceptance_unsigned": "The acceptance certificate is not fully signed (status: {status})",
+    "acceptance_unsigned_fix": "Collect the outstanding signatures in Signing",
+    "blocked": "The dossier fails its checklist. Fix the findings, or assemble it anyway as incomplete (manager sign-off).",
+    "delivery_title": "Handover dossier: {project}",
+    "delivery_body": "The handover dossier '{title}' ({scope}) is ready. The link below downloads it and is valid until {expires}.",
+    "pdf": {
+      "title": "Handover dossier",
+      "scope": "Scope",
+      "built": "Assembled",
+      "status_passed": "Checklist passed",
+      "status_warnings": "Checklist passed with warnings",
+      "status_errors": "Incomplete: checklist findings open",
+      "findings": "Open checklist findings",
+      "severity": "Severity",
+      "finding": "Finding",
+      "severity_error": "Error",
+      "severity_warning": "Warning",
+      "severity_info": "Info",
+      "contents": "Contents",
+      "file": "File",
+      "size": "Size",
+      "punch": "Resolved punch list",
+      "item": "Item",
+      "status": "Status",
+      "photos": "Photos",
+      "evidence": "Photo evidence"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Rating {rating} of '{name}' is not a level of scale '{scale}'",
+    "rule_poor_without_action": "'{name}' is rated {rating} but has no planned maintenance action",
+    "rule_poor_without_action_fix": "Derive the plan, or add an action for this element",
+    "rule_action_unpriced": "The action for '{name}' in {year} has no unit cost",
+    "rule_action_unpriced_fix": "Enter a unit cost so the plan totals include it",
+    "rule_defect_incomplete": "The rating of '{name}' calls for work but records no severity or extent"
+  },
   "property_dev": {
     "term": {
       "gross_development_value": "Gross development value",
@@ -2318,197 +2511,30 @@
       "operation": "Operation"
     }
   },
-  "cutting": {
-    "validation": {
-      "ok": "OK",
-      "has_pieces": {
-        "fail": "The job has no pieces to cut",
-        "suggestion": "Add pieces by hand, paste them, or import them from a bending schedule, takeoff, a BOQ line or a file."
-      },
-      "has_stock": {
-        "fail": "The job offers no stock to cut from",
-        "suggestion": "Add at least one stock length or sheet size, or reuse offcuts from site inventory."
-      },
-      "sheet_dimensions": {
-        "fail": "{ref} has no width",
-        "suggestion": "Give every sheet piece and sheet size both a length and a width."
-      },
-      "piece_fits_stock": {
-        "fail": "Piece {ref} ({size} mm) fits no stock entry",
-        "suggestion": "Add a longer or larger stock size, reduce the trim, or split the piece with a joint."
-      },
-      "grain_allows_fit": {
-        "fail": "Piece {ref} fits only when turned across the grain",
-        "suggestion": "Allow rotation for this piece or add a sheet size that fits it along the grain."
-      },
-      "kerf_set": {
-        "fail": "The saw kerf is zero",
-        "suggestion": "Enter the blade or cutting width, otherwise the yield of every bar with several cuts is overstated."
-      },
-      "min_offcut_set": {
-        "fail": "No minimum usable offcut is set",
-        "suggestion": "Set the shortest remnant worth keeping, so reusable offcuts are not counted as waste."
-      },
-      "stock_priced": {
-        "fail": "Stock {ref} has no unit cost",
-        "suggestion": "Enter a price per piece so the plan reports its cost and picks the cheapest stock."
-      },
-      "stock_sufficient": {
-        "fail": "Pieces not placed on the available stock: {count}",
-        "suggestion": "Raise the available quantity or add another stock size."
-      },
-      "yield_threshold": {
-        "fail": "Yield {actual} % is below the threshold of {threshold} %",
-        "suggestion": "Add another stock length or size, allow rotation, or review the threshold for this material."
-      }
-    }
-  },
-  "field_evidence": {
-    "punch_no_photo": "Punch item '{title}' is closed out without a photo",
-    "punch_no_photo_fix": "Add a photo of the completed work",
-    "photo_weak": "{count} photo(s) on '{title}' lack location or capture time",
-    "photo_weak_fix": "Retake the photo in the app with location enabled",
-    "defect_no_photo": "Defect '{reference}' is closed without a photo of the rectification",
-    "defect_no_photo_fix": "Attach a photo of the rectified work"
-  },
-  "closeout_dossier": {
-    "more_items": "{count} more item(s) not listed",
-    "category_missing": "No evidence for the required category '{category}'",
-    "category_missing_fix": "Bind a document to a checklist item of this category, or add one",
-    "category_unverified": "Evidence for '{category}' is not verified yet",
-    "category_unverified_fix": "Have a manager review and verify the bound evidence",
-    "punch_open": "Punch item '{name}' is still open",
-    "punch_open_fix": "Resolve and close the item, or exclude it from this dossier's scope",
-    "punch_no_photo": "Resolved punch item '{name}' has no photo",
-    "punch_no_photo_fix": "Add a photo of the completed work",
-    "system_pending": "System '{name}' is not commissioned",
-    "system_pending_fix": "Complete the commissioning checklists and mark the system commissioned",
-    "critical_issues": "{count} critical commissioning issue(s) are still open",
-    "critical_issues_fix": "Close the critical issues before handover",
-    "acceptance_missing": "No acceptance certificate is bound",
-    "acceptance_missing_fix": "Bind the signed acceptance certificate to the acceptance checklist item",
-    "acceptance_unsigned": "The acceptance certificate is not fully signed (status: {status})",
-    "acceptance_unsigned_fix": "Collect the outstanding signatures in Signing",
-    "blocked": "The dossier fails its checklist. Fix the findings, or assemble it anyway as incomplete (manager sign-off).",
-    "delivery_title": "Handover dossier: {project}",
-    "delivery_body": "The handover dossier '{title}' ({scope}) is ready. The link below downloads it and is valid until {expires}.",
-    "pdf": {
-      "title": "Handover dossier",
-      "scope": "Scope",
-      "built": "Assembled",
-      "status_passed": "Checklist passed",
-      "status_warnings": "Checklist passed with warnings",
-      "status_errors": "Incomplete: checklist findings open",
-      "findings": "Open checklist findings",
-      "severity": "Severity",
-      "finding": "Finding",
-      "severity_error": "Error",
-      "severity_warning": "Warning",
-      "severity_info": "Info",
-      "contents": "Contents",
-      "file": "File",
-      "size": "Size",
-      "punch": "Resolved punch list",
-      "item": "Item",
-      "status": "Status",
-      "photos": "Photos",
-      "evidence": "Photo evidence"
-    }
-  },
-  "condition": {
-    "rule_rating_off_scale": "Rating {rating} of '{name}' is not a level of scale '{scale}'",
-    "rule_poor_without_action": "'{name}' is rated {rating} but has no planned maintenance action",
-    "rule_poor_without_action_fix": "Derive the plan, or add an action for this element",
-    "rule_action_unpriced": "The action for '{name}' in {year} has no unit cost",
-    "rule_action_unpriced_fix": "Enter a unit cost so the plan totals include it",
-    "rule_defect_incomplete": "The rating of '{name}' calls for work but records no severity or extent"
-  },
-  "drawing_compare": {
-    "sheet_page": "{label}, page {page}",
-    "text_change": "\"{old}\" changed to \"{new}\"",
-    "kind": {
-      "added": "Added",
-      "removed": "Removed",
-      "modified": "Modified",
-      "text": "Text changed"
-    },
-    "status": {
-      "open": "Open",
-      "relevant": "Relevant",
-      "not_relevant": "Not relevant"
-    },
-    "errors": {
-      "revision_not_found": "Drawing revision not found in this project.",
-      "revision_not_parsed": "The drawing has no processed version to compare yet.",
-      "comparison_not_found": "Comparison not found.",
-      "change_not_found": "Change not found.",
-      "same_revision": "Choose two different revisions or pages to compare.",
-      "manual_points": "Manual alignment needs two distinct points on each revision.",
-      "alignment_singular": "The alignment cannot be applied: it collapses the sheet.",
-      "region_empty": "Change {seq} has no size.",
-      "region_off_sheet": "Change {seq} lies outside the sheet.",
-      "module_missing": "The module needed for this action is not installed."
-    },
-    "rfi": {
-      "subject": "Drawing change {seq} on {sheet}",
-      "question": "Revision {new} of {sheet} differs from revision {old} in the marked area ({kind}). Please confirm the intent of the change and whether quantities are affected."
-    },
-    "markup": {
-      "text": "Revision change {seq}: {kind}"
-    },
-    "report": {
-      "title": "Drawing revision compare",
+  "cashflow_forecast": {
+    "export": {
+      "title": "Cash-flow forecast",
+      "portfolio_title": "Portfolio cash-flow forecast",
+      "empty": "No cash-flow forecast for this selection.",
       "project": "Project",
-      "name": "Comparison",
-      "old_revision": "Older revision",
-      "new_revision": "Newer revision",
-      "alignment": "Alignment",
-      "alignment_none": "Not aligned (same frame)",
-      "alignment_auto": "Automatic",
-      "alignment_manual": "Manual, two points",
-      "confidence": "confidence {value}",
-      "summary": "Changes",
-      "summary_counts": "{total} in total: {added} added, {removed} removed, {modified} modified, {text} text",
-      "generated_on": "Date generated",
-      "generated": "Generated {timestamp}",
-      "page_of": "Page {page} of {total}",
-      "no_changes": "No changes were found between the two revisions.",
-      "col_no": "No.",
-      "col_preview": "Preview",
-      "col_kind": "Change",
-      "col_location": "Location",
-      "col_detail": "Detail",
-      "col_status": "Status",
-      "col_comment": "Comment",
-      "col_follow_up": "Follow-up",
-      "page_at": "Page {page} at {coords}",
-      "layer": "Layer {layer}",
-      "entity_counts": "Entities: {added} added, {removed} removed, {modified} modified",
-      "rfi": "RFI {number}",
-      "markup": "Revision cloud",
-      "remeasure": "Re-measure: {items} quantities, {positions} BOQ positions"
-    },
-    "rules": {
-      "distinct_revisions_ok": "The two sides are different revisions.",
-      "distinct_revisions_fail": "The comparison compares a sheet with itself.",
-      "distinct_revisions_hint": "Pick the older and the newer revision of the drawing.",
-      "alignment_not_needed": "DWG revisions share drawing units; no alignment is needed.",
-      "alignment_missing_matrix": "The comparison has no alignment.",
-      "alignment_singular": "The alignment collapses the sheet and cannot be applied.",
-      "alignment_scale": "The alignment rescales the sheet by {scale}, more than revisions of one drawing differ.",
-      "alignment_low_confidence": "The automatic alignment is uncertain (confidence {confidence}).",
-      "alignment_manual_points": "A manual alignment needs two point pairs.",
-      "alignment_ok": "The sheet alignment is plausible.",
-      "alignment_hint": "Align the sheets by hand on two marks both revisions share, such as grid intersections.",
-      "region_empty": "Change {seq} has no size.",
-      "region_off_sheet": "Change {seq} lies outside the sheet.",
-      "regions_ok": "Every changed region lies on the sheet.",
-      "triaged_ok": "Every change has been reviewed.",
-      "triaged_open": "{count} changes are still open.",
-      "triaged_hint": "Mark each change as relevant or not relevant.",
-      "followed_up_ok": "Every relevant change is followed up.",
-      "followed_up_missing": "Change {seq} is marked relevant but has no comment, RFI, markup or re-measure flag.",
-      "followed_up_hint": "Comment on the change, raise an RFI or markup, or flag the quantities inside it for re-measure."
+      "as_of": "As of",
+      "currency": "Currency",
+      "delay_days": "Receipts delayed by (days)",
+      "overrun_pct": "Cost overrun (%)",
+      "closing_position": "Closing position",
+      "peak_funding": "Peak funding requirement",
+      "peak_period": "Peak funding month",
+      "col": {
+        "period": "Month",
+        "planned_in": "Planned in",
+        "actual_in": "Actual in",
+        "expected_in": "Expected in",
+        "planned_out": "Planned out",
+        "actual_out": "Actual out",
+        "expected_out": "Expected out",
+        "net": "Net",
+        "cumulative": "Cumulative position"
+      }
     }
   }
 }

@@ -92,44 +92,6 @@
       "toast_applied_one": "{{count}} variante elegida",
       "toast_applied_other": "{{count}} variantes elegidas"
     },
-    "fidelity": {
-      "sheet": {
-        "title": "Informe de intercambio"
-      },
-      "column": {
-        "severity": "Gravedad",
-        "kind": "Tipo de pérdida",
-        "position": "Partida",
-        "field": "Campo",
-        "original": "Valor original",
-        "written": "Valor escrito",
-        "count": "Recuento",
-        "detail": "Detalle"
-      },
-      "severity": {
-        "error": "Crítico",
-        "warning": "Advertencia",
-        "info": "Nota"
-      },
-      "kind": {
-        "unsupported_element": "Elemento no admitido",
-        "truncated_text": "Texto truncado",
-        "altered_text": "Texto alterado",
-        "rounded_value": "Valor redondeado",
-        "value_out_of_range": "Valor fuera de rango",
-        "dropped_attribute": "Atributo descartado",
-        "unmapped_unit": "Unidad sin correspondencia",
-        "lost_hierarchy": "Nivel de jerarquía perdido",
-        "markup_not_representable": "Recargo no representable",
-        "attachment_skipped": "Adjunto omitido",
-        "changed_identifier": "Identificador cambiado",
-        "exceeds_limit": "Supera el límite de almacenamiento",
-        "rejected_row": "Fila rechazada",
-        "skipped_row": "Fila omitida",
-        "parser_warning": "Advertencia del lector",
-        "roundtrip_mismatch": "Diferencia en la ida y vuelta"
-      }
-    },
     "branch": {
       "base_snapshot": "Punto de bifurcación",
       "base_snapshot_from": "Punto de bifurcación (de la instantánea «{snapshot}»)",
@@ -179,6 +141,44 @@
         "ungrouped": "Sin agrupar",
         "empty": "Los dos presupuestos son idénticos.",
         "total": "Total"
+      }
+    },
+    "fidelity": {
+      "sheet": {
+        "title": "Informe de intercambio"
+      },
+      "column": {
+        "severity": "Gravedad",
+        "kind": "Tipo de pérdida",
+        "position": "Partida",
+        "field": "Campo",
+        "original": "Valor original",
+        "written": "Valor escrito",
+        "count": "Recuento",
+        "detail": "Detalle"
+      },
+      "severity": {
+        "error": "Crítico",
+        "warning": "Advertencia",
+        "info": "Nota"
+      },
+      "kind": {
+        "unsupported_element": "Elemento no admitido",
+        "truncated_text": "Texto truncado",
+        "altered_text": "Texto alterado",
+        "rounded_value": "Valor redondeado",
+        "value_out_of_range": "Valor fuera de rango",
+        "dropped_attribute": "Atributo descartado",
+        "unmapped_unit": "Unidad sin correspondencia",
+        "lost_hierarchy": "Nivel de jerarquía perdido",
+        "markup_not_representable": "Recargo no representable",
+        "attachment_skipped": "Adjunto omitido",
+        "changed_identifier": "Identificador cambiado",
+        "exceeds_limit": "Supera el límite de almacenamiento",
+        "rejected_row": "Fila rechazada",
+        "skipped_row": "Fila omitida",
+        "parser_warning": "Advertencia del lector",
+        "roundtrip_mismatch": "Diferencia en la ida y vuelta"
       }
     }
   },
@@ -437,29 +437,6 @@
     "present": "Presente",
     "absent": "Ausente",
     "excused": "Excusado",
-    "actions": {
-      "status": {
-        "open": "Abierta",
-        "completed": "Completada",
-        "cancelled": "Cancelada"
-      },
-      "flag": {
-        "overdue": "Vencida",
-        "on_track": "En plazo"
-      },
-      "label": {
-        "action_item": "Acción",
-        "completion_rate": "Tasa de cumplimiento de acciones",
-        "open_vs_done": "Abiertas frente a completadas",
-        "overdue": "Acciones vencidas"
-      },
-      "explain": {
-        "action_item": "Una acción es una tarea acordada en una reunión, con un responsable y una fecha límite.",
-        "completion_rate": "La tasa de cumplimiento de acciones es el número de acciones completadas dividido entre el total de acciones, de 0 a 1.",
-        "open_vs_done": "Las acciones abiertas aún requieren trabajo. Las acciones completadas están terminadas y no necesitan más trabajo.",
-        "overdue": "Una acción está vencida cuando sigue abierta y su fecha límite es anterior a la fecha de referencia."
-      }
-    },
     "minutes_pdf": {
       "title": "Acta de reunión",
       "issued": "EMITIDA",
@@ -504,6 +481,29 @@
       "type_kickoff": "Inicio",
       "type_closeout": "Cierre",
       "type_commercial": "Comercial"
+    },
+    "actions": {
+      "status": {
+        "open": "Abierta",
+        "completed": "Completada",
+        "cancelled": "Cancelada"
+      },
+      "flag": {
+        "overdue": "Vencida",
+        "on_track": "En plazo"
+      },
+      "label": {
+        "action_item": "Acción",
+        "completion_rate": "Tasa de cumplimiento de acciones",
+        "open_vs_done": "Abiertas frente a completadas",
+        "overdue": "Acciones vencidas"
+      },
+      "explain": {
+        "action_item": "Una acción es una tarea acordada en una reunión, con un responsable y una fecha límite.",
+        "completion_rate": "La tasa de cumplimiento de acciones es el número de acciones completadas dividido entre el total de acciones, de 0 a 1.",
+        "open_vs_done": "Las acciones abiertas aún requieren trabajo. Las acciones completadas están terminadas y no necesitan más trabajo.",
+        "overdue": "Una acción está vencida cuando sigue abierta y su fecha límite es anterior a la fecha de referencia."
+      }
     }
   },
   "inspections": {
@@ -851,6 +851,139 @@
     "snapshot_status": {
       "draft": "Borrador",
       "frozen": "Congelada"
+    }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "El trabajo no tiene piezas que cortar",
+        "suggestion": "Añada piezas a mano, péguelas o impórtelas desde una planilla de doblado, una medición, una partida del presupuesto o un archivo."
+      },
+      "has_stock": {
+        "fail": "El trabajo no ofrece stock del que cortar",
+        "suggestion": "Añada al menos una longitud de stock o un tamaño de tablero, o reutilice retales del inventario de obra."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} no tiene ancho",
+        "suggestion": "Indique longitud y ancho para cada pieza de tablero y cada tamaño de tablero."
+      },
+      "piece_fits_stock": {
+        "fail": "La pieza {ref} ({size} mm) no cabe en ningún stock",
+        "suggestion": "Añada un stock más largo o más grande, reduzca el recorte o divida la pieza con una junta."
+      },
+      "grain_allows_fit": {
+        "fail": "La pieza {ref} solo cabe girada contra la veta",
+        "suggestion": "Permita girar esta pieza o añada un tamaño de tablero donde quepa en el sentido de la veta."
+      },
+      "kerf_set": {
+        "fail": "El ancho de corte es cero",
+        "suggestion": "Introduzca el ancho de la hoja o del corte; de lo contrario el rendimiento de cada barra con varios cortes se sobreestima."
+      },
+      "min_offcut_set": {
+        "fail": "No se ha definido un retal útil mínimo",
+        "suggestion": "Defina el retal más corto que vale la pena conservar, para que los retales reutilizables no cuenten como desperdicio."
+      },
+      "stock_priced": {
+        "fail": "El stock {ref} no tiene coste unitario",
+        "suggestion": "Introduzca un precio por pieza para que el plan indique su coste y elija el stock más barato."
+      },
+      "stock_sufficient": {
+        "fail": "Piezas sin colocar en el stock disponible: {count}",
+        "suggestion": "Aumente la cantidad disponible o añada otro tamaño de stock."
+      },
+      "yield_threshold": {
+        "fail": "El rendimiento de {actual} % es inferior al umbral de {threshold} %",
+        "suggestion": "Añada otra longitud o tamaño de stock, permita girar o revise el umbral para este material."
+      }
+    }
+  },
+  "drawing_compare": {
+    "sheet_page": "{label}, página {page}",
+    "text_change": "«{old}» cambiado a «{new}»",
+    "kind": {
+      "added": "Añadido",
+      "removed": "Eliminado",
+      "modified": "Modificado",
+      "text": "Texto cambiado"
+    },
+    "status": {
+      "open": "Abierto",
+      "relevant": "Relevante",
+      "not_relevant": "No relevante"
+    },
+    "errors": {
+      "revision_not_found": "No se encontró la revisión del plano en este proyecto.",
+      "revision_not_parsed": "El plano aún no tiene una versión procesada para comparar.",
+      "comparison_not_found": "Comparación no encontrada.",
+      "change_not_found": "Cambio no encontrado.",
+      "same_revision": "Elija dos revisiones o páginas distintas para comparar.",
+      "manual_points": "La alineación manual necesita dos puntos distintos en cada revisión.",
+      "alignment_singular": "No se puede aplicar la alineación: colapsa la hoja.",
+      "region_empty": "El cambio {seq} no tiene tamaño.",
+      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
+      "module_missing": "El módulo necesario para esta acción no está instalado."
+    },
+    "rfi": {
+      "subject": "Cambio de plano {seq} en {sheet}",
+      "question": "La revisión {new} de {sheet} difiere de la revisión {old} en la zona marcada ({kind}). Confirme la intención del cambio y si afecta a las mediciones."
+    },
+    "markup": {
+      "text": "Cambio de revisión {seq}: {kind}"
+    },
+    "report": {
+      "title": "Comparación de revisiones de plano",
+      "project": "Proyecto",
+      "name": "Comparación",
+      "old_revision": "Revisión anterior",
+      "new_revision": "Revisión nueva",
+      "alignment": "Alineación",
+      "alignment_none": "Sin alinear (mismo marco)",
+      "alignment_auto": "Automática",
+      "alignment_manual": "Manual, dos puntos",
+      "confidence": "confianza {value}",
+      "summary": "Cambios",
+      "summary_counts": "{total} en total: {added} añadidos, {removed} eliminados, {modified} modificados, {text} de texto",
+      "generated_on": "Fecha de generación",
+      "generated": "Generado el {timestamp}",
+      "page_of": "Página {page} de {total}",
+      "no_changes": "No se encontraron cambios entre las dos revisiones.",
+      "col_no": "N.º",
+      "col_preview": "Vista previa",
+      "col_kind": "Cambio",
+      "col_location": "Ubicación",
+      "col_detail": "Detalle",
+      "col_status": "Estado",
+      "col_comment": "Comentario",
+      "col_follow_up": "Seguimiento",
+      "page_at": "Página {page} en {coords}",
+      "layer": "Capa {layer}",
+      "entity_counts": "Entidades: {added} añadidas, {removed} eliminadas, {modified} modificadas",
+      "rfi": "RFI {number}",
+      "markup": "Nube de revisión",
+      "remeasure": "Volver a medir: {items} mediciones, {positions} partidas del presupuesto"
+    },
+    "rules": {
+      "distinct_revisions_ok": "Ambos lados son revisiones distintas.",
+      "distinct_revisions_fail": "La comparación compara una hoja consigo misma.",
+      "distinct_revisions_hint": "Elija la revisión anterior y la nueva del plano.",
+      "alignment_not_needed": "Las revisiones DWG comparten unidades de dibujo; no hace falta alinear.",
+      "alignment_missing_matrix": "La comparación no tiene alineación.",
+      "alignment_singular": "La alineación colapsa la hoja y no se puede aplicar.",
+      "alignment_scale": "La alineación reescala la hoja en {scale}, más de lo que difieren las revisiones de un mismo plano.",
+      "alignment_low_confidence": "La alineación automática es incierta (confianza {confidence}).",
+      "alignment_manual_points": "Una alineación manual necesita dos pares de puntos.",
+      "alignment_ok": "La alineación de la hoja es verosímil.",
+      "alignment_hint": "Alinee las hojas a mano con dos marcas comunes a ambas revisiones, como intersecciones de ejes.",
+      "region_empty": "El cambio {seq} no tiene tamaño.",
+      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
+      "regions_ok": "Todas las zonas modificadas están dentro de la hoja.",
+      "triaged_ok": "Todos los cambios han sido revisados.",
+      "triaged_open": "Aún hay {count} cambios abiertos.",
+      "triaged_hint": "Marque cada cambio como relevante o no relevante.",
+      "followed_up_ok": "Todo cambio relevante tiene seguimiento.",
+      "followed_up_missing": "El cambio {seq} está marcado como relevante pero no tiene comentario, RFI, marca ni indicador de nueva medición.",
+      "followed_up_hint": "Comente el cambio, emita una RFI o una marca, o señale las mediciones afectadas para volver a medir."
     }
   },
   "document_forms": {
@@ -1389,7 +1522,6 @@
     "boq_pdf": {
       "strings": {
         "ai_generated": "Generado por IA",
-        "drawing": "Plano",
         "cost_estimate": "PRESUPUESTO",
         "summary": "RESUMEN",
         "project": "Proyecto:",
@@ -1426,7 +1558,8 @@
         "status_final": "Aprobado",
         "status_archived": "Archivado",
         "subject": "Presupuesto y mediciones",
-        "tax_vat": "IVA"
+        "tax_vat": "IVA",
+        "drawing": "Plano"
       }
     },
     "einvoice_pdf": {
@@ -2118,6 +2251,66 @@
       ]
     }
   },
+  "field_evidence": {
+    "punch_no_photo": "El elemento pendiente '{title}' está cerrado sin foto",
+    "punch_no_photo_fix": "Añada una foto del trabajo terminado",
+    "photo_weak": "{count} foto(s) de '{title}' sin ubicación u hora de captura",
+    "photo_weak_fix": "Repita la foto en la aplicación con la ubicación activada",
+    "defect_no_photo": "El defecto '{reference}' está cerrado sin foto de la subsanación",
+    "defect_no_photo_fix": "Adjunte una foto del trabajo subsanado"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} elemento(s) más no listados",
+    "category_missing": "Sin evidencia para la categoría requerida '{category}'",
+    "category_missing_fix": "Vincule un documento a un punto de la lista de verificación de esta categoría, o añada uno",
+    "category_unverified": "La evidencia de '{category}' aún no está verificada",
+    "category_unverified_fix": "Pida a un responsable que revise y verifique la evidencia vinculada",
+    "punch_open": "El elemento pendiente '{name}' sigue abierto",
+    "punch_open_fix": "Resuelva y cierre el elemento, o exclúyalo del alcance de este expediente",
+    "punch_no_photo": "El elemento pendiente resuelto '{name}' no tiene foto",
+    "punch_no_photo_fix": "Añada una foto del trabajo terminado",
+    "system_pending": "El sistema '{name}' no está puesto en marcha",
+    "system_pending_fix": "Complete las listas de verificación de puesta en marcha y marque el sistema como puesto en marcha",
+    "critical_issues": "{count} incidencia(s) crítica(s) de puesta en marcha siguen abiertas",
+    "critical_issues_fix": "Cierre las incidencias críticas antes de la entrega",
+    "acceptance_missing": "No hay ningún acta de recepción vinculada",
+    "acceptance_missing_fix": "Vincule el acta de recepción firmada al punto de recepción de la lista de verificación",
+    "acceptance_unsigned": "El acta de recepción no está totalmente firmada (estado: {status})",
+    "acceptance_unsigned_fix": "Recoja las firmas pendientes en Firma",
+    "blocked": "El expediente no cumple su lista de verificación. Corrija los hallazgos o prepárelo igualmente como incompleto (aprobación del responsable).",
+    "delivery_title": "Expediente de entrega: {project}",
+    "delivery_body": "El expediente de entrega '{title}' ({scope}) está listo. El enlace siguiente lo descarga y es válido hasta {expires}.",
+    "pdf": {
+      "title": "Expediente de entrega",
+      "scope": "Alcance",
+      "built": "Preparado",
+      "status_passed": "Lista de verificación superada",
+      "status_warnings": "Lista de verificación superada con advertencias",
+      "status_errors": "Incompleto: hallazgos de la lista de verificación abiertos",
+      "findings": "Hallazgos abiertos de la lista de verificación",
+      "severity": "Gravedad",
+      "finding": "Hallazgo",
+      "severity_error": "Error",
+      "severity_warning": "Advertencia",
+      "severity_info": "Info",
+      "contents": "Contenido",
+      "file": "Archivo",
+      "size": "Tamaño",
+      "punch": "Lista de pendientes resueltos",
+      "item": "Elemento",
+      "status": "Estado",
+      "photos": "Fotos",
+      "evidence": "Evidencia fotográfica"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "La valoración {rating} de '{name}' no es un nivel de la escala '{scale}'",
+    "rule_poor_without_action": "'{name}' está valorado {rating} pero no tiene ninguna acción de mantenimiento planificada",
+    "rule_poor_without_action_fix": "Derive el plan o añada una acción para este elemento",
+    "rule_action_unpriced": "La acción de '{name}' en {year} no tiene coste unitario",
+    "rule_action_unpriced_fix": "Introduzca un coste unitario para que los totales del plan lo incluyan",
+    "rule_defect_incomplete": "La valoración de '{name}' exige trabajos pero no registra gravedad ni extensión"
+  },
   "ai": {
     "advisor": {
       "model_outdated": "El nombre del modelo de IA está desactualizado o no disponible. Abra Configuración > IA e indique un nombre de modelo válido.",
@@ -2281,197 +2474,30 @@
       "operation": "Explotación"
     }
   },
-  "cutting": {
-    "validation": {
-      "ok": "OK",
-      "has_pieces": {
-        "fail": "El trabajo no tiene piezas que cortar",
-        "suggestion": "Añada piezas a mano, péguelas o impórtelas desde una planilla de doblado, una medición, una partida del presupuesto o un archivo."
-      },
-      "has_stock": {
-        "fail": "El trabajo no ofrece stock del que cortar",
-        "suggestion": "Añada al menos una longitud de stock o un tamaño de tablero, o reutilice retales del inventario de obra."
-      },
-      "sheet_dimensions": {
-        "fail": "{ref} no tiene ancho",
-        "suggestion": "Indique longitud y ancho para cada pieza de tablero y cada tamaño de tablero."
-      },
-      "piece_fits_stock": {
-        "fail": "La pieza {ref} ({size} mm) no cabe en ningún stock",
-        "suggestion": "Añada un stock más largo o más grande, reduzca el recorte o divida la pieza con una junta."
-      },
-      "grain_allows_fit": {
-        "fail": "La pieza {ref} solo cabe girada contra la veta",
-        "suggestion": "Permita girar esta pieza o añada un tamaño de tablero donde quepa en el sentido de la veta."
-      },
-      "kerf_set": {
-        "fail": "El ancho de corte es cero",
-        "suggestion": "Introduzca el ancho de la hoja o del corte; de lo contrario el rendimiento de cada barra con varios cortes se sobreestima."
-      },
-      "min_offcut_set": {
-        "fail": "No se ha definido un retal útil mínimo",
-        "suggestion": "Defina el retal más corto que vale la pena conservar, para que los retales reutilizables no cuenten como desperdicio."
-      },
-      "stock_priced": {
-        "fail": "El stock {ref} no tiene coste unitario",
-        "suggestion": "Introduzca un precio por pieza para que el plan indique su coste y elija el stock más barato."
-      },
-      "stock_sufficient": {
-        "fail": "Piezas sin colocar en el stock disponible: {count}",
-        "suggestion": "Aumente la cantidad disponible o añada otro tamaño de stock."
-      },
-      "yield_threshold": {
-        "fail": "El rendimiento de {actual} % es inferior al umbral de {threshold} %",
-        "suggestion": "Añada otra longitud o tamaño de stock, permita girar o revise el umbral para este material."
-      }
-    }
-  },
-  "field_evidence": {
-    "punch_no_photo": "El elemento pendiente '{title}' está cerrado sin foto",
-    "punch_no_photo_fix": "Añada una foto del trabajo terminado",
-    "photo_weak": "{count} foto(s) de '{title}' sin ubicación u hora de captura",
-    "photo_weak_fix": "Repita la foto en la aplicación con la ubicación activada",
-    "defect_no_photo": "El defecto '{reference}' está cerrado sin foto de la subsanación",
-    "defect_no_photo_fix": "Adjunte una foto del trabajo subsanado"
-  },
-  "closeout_dossier": {
-    "more_items": "{count} elemento(s) más no listados",
-    "category_missing": "Sin evidencia para la categoría requerida '{category}'",
-    "category_missing_fix": "Vincule un documento a un punto de la lista de verificación de esta categoría, o añada uno",
-    "category_unverified": "La evidencia de '{category}' aún no está verificada",
-    "category_unverified_fix": "Pida a un responsable que revise y verifique la evidencia vinculada",
-    "punch_open": "El elemento pendiente '{name}' sigue abierto",
-    "punch_open_fix": "Resuelva y cierre el elemento, o exclúyalo del alcance de este expediente",
-    "punch_no_photo": "El elemento pendiente resuelto '{name}' no tiene foto",
-    "punch_no_photo_fix": "Añada una foto del trabajo terminado",
-    "system_pending": "El sistema '{name}' no está puesto en marcha",
-    "system_pending_fix": "Complete las listas de verificación de puesta en marcha y marque el sistema como puesto en marcha",
-    "critical_issues": "{count} incidencia(s) crítica(s) de puesta en marcha siguen abiertas",
-    "critical_issues_fix": "Cierre las incidencias críticas antes de la entrega",
-    "acceptance_missing": "No hay ningún acta de recepción vinculada",
-    "acceptance_missing_fix": "Vincule el acta de recepción firmada al punto de recepción de la lista de verificación",
-    "acceptance_unsigned": "El acta de recepción no está totalmente firmada (estado: {status})",
-    "acceptance_unsigned_fix": "Recoja las firmas pendientes en Firma",
-    "blocked": "El expediente no cumple su lista de verificación. Corrija los hallazgos o prepárelo igualmente como incompleto (aprobación del responsable).",
-    "delivery_title": "Expediente de entrega: {project}",
-    "delivery_body": "El expediente de entrega '{title}' ({scope}) está listo. El enlace siguiente lo descarga y es válido hasta {expires}.",
-    "pdf": {
-      "title": "Expediente de entrega",
-      "scope": "Alcance",
-      "built": "Preparado",
-      "status_passed": "Lista de verificación superada",
-      "status_warnings": "Lista de verificación superada con advertencias",
-      "status_errors": "Incompleto: hallazgos de la lista de verificación abiertos",
-      "findings": "Hallazgos abiertos de la lista de verificación",
-      "severity": "Gravedad",
-      "finding": "Hallazgo",
-      "severity_error": "Error",
-      "severity_warning": "Advertencia",
-      "severity_info": "Info",
-      "contents": "Contenido",
-      "file": "Archivo",
-      "size": "Tamaño",
-      "punch": "Lista de pendientes resueltos",
-      "item": "Elemento",
-      "status": "Estado",
-      "photos": "Fotos",
-      "evidence": "Evidencia fotográfica"
-    }
-  },
-  "condition": {
-    "rule_rating_off_scale": "La valoración {rating} de '{name}' no es un nivel de la escala '{scale}'",
-    "rule_poor_without_action": "'{name}' está valorado {rating} pero no tiene ninguna acción de mantenimiento planificada",
-    "rule_poor_without_action_fix": "Derive el plan o añada una acción para este elemento",
-    "rule_action_unpriced": "La acción de '{name}' en {year} no tiene coste unitario",
-    "rule_action_unpriced_fix": "Introduzca un coste unitario para que los totales del plan lo incluyan",
-    "rule_defect_incomplete": "La valoración de '{name}' exige trabajos pero no registra gravedad ni extensión"
-  },
-  "drawing_compare": {
-    "sheet_page": "{label}, página {page}",
-    "text_change": "«{old}» cambiado a «{new}»",
-    "kind": {
-      "added": "Añadido",
-      "removed": "Eliminado",
-      "modified": "Modificado",
-      "text": "Texto cambiado"
-    },
-    "status": {
-      "open": "Abierto",
-      "relevant": "Relevante",
-      "not_relevant": "No relevante"
-    },
-    "errors": {
-      "revision_not_found": "No se encontró la revisión del plano en este proyecto.",
-      "revision_not_parsed": "El plano aún no tiene una versión procesada para comparar.",
-      "comparison_not_found": "Comparación no encontrada.",
-      "change_not_found": "Cambio no encontrado.",
-      "same_revision": "Elija dos revisiones o páginas distintas para comparar.",
-      "manual_points": "La alineación manual necesita dos puntos distintos en cada revisión.",
-      "alignment_singular": "No se puede aplicar la alineación: colapsa la hoja.",
-      "region_empty": "El cambio {seq} no tiene tamaño.",
-      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
-      "module_missing": "El módulo necesario para esta acción no está instalado."
-    },
-    "rfi": {
-      "subject": "Cambio de plano {seq} en {sheet}",
-      "question": "La revisión {new} de {sheet} difiere de la revisión {old} en la zona marcada ({kind}). Confirme la intención del cambio y si afecta a las mediciones."
-    },
-    "markup": {
-      "text": "Cambio de revisión {seq}: {kind}"
-    },
-    "report": {
-      "title": "Comparación de revisiones de plano",
+  "cashflow_forecast": {
+    "export": {
+      "title": "Previsión de flujo de caja",
+      "portfolio_title": "Previsión de flujo de caja de la cartera",
+      "empty": "No hay previsión de flujo de caja para esta selección.",
       "project": "Proyecto",
-      "name": "Comparación",
-      "old_revision": "Revisión anterior",
-      "new_revision": "Revisión nueva",
-      "alignment": "Alineación",
-      "alignment_none": "Sin alinear (mismo marco)",
-      "alignment_auto": "Automática",
-      "alignment_manual": "Manual, dos puntos",
-      "confidence": "confianza {value}",
-      "summary": "Cambios",
-      "summary_counts": "{total} en total: {added} añadidos, {removed} eliminados, {modified} modificados, {text} de texto",
-      "generated_on": "Fecha de generación",
-      "generated": "Generado el {timestamp}",
-      "page_of": "Página {page} de {total}",
-      "no_changes": "No se encontraron cambios entre las dos revisiones.",
-      "col_no": "N.º",
-      "col_preview": "Vista previa",
-      "col_kind": "Cambio",
-      "col_location": "Ubicación",
-      "col_detail": "Detalle",
-      "col_status": "Estado",
-      "col_comment": "Comentario",
-      "col_follow_up": "Seguimiento",
-      "page_at": "Página {page} en {coords}",
-      "layer": "Capa {layer}",
-      "entity_counts": "Entidades: {added} añadidas, {removed} eliminadas, {modified} modificadas",
-      "rfi": "RFI {number}",
-      "markup": "Nube de revisión",
-      "remeasure": "Volver a medir: {items} mediciones, {positions} partidas del presupuesto"
-    },
-    "rules": {
-      "distinct_revisions_ok": "Ambos lados son revisiones distintas.",
-      "distinct_revisions_fail": "La comparación compara una hoja consigo misma.",
-      "distinct_revisions_hint": "Elija la revisión anterior y la nueva del plano.",
-      "alignment_not_needed": "Las revisiones DWG comparten unidades de dibujo; no hace falta alinear.",
-      "alignment_missing_matrix": "La comparación no tiene alineación.",
-      "alignment_singular": "La alineación colapsa la hoja y no se puede aplicar.",
-      "alignment_scale": "La alineación reescala la hoja en {scale}, más de lo que difieren las revisiones de un mismo plano.",
-      "alignment_low_confidence": "La alineación automática es incierta (confianza {confidence}).",
-      "alignment_manual_points": "Una alineación manual necesita dos pares de puntos.",
-      "alignment_ok": "La alineación de la hoja es verosímil.",
-      "alignment_hint": "Alinee las hojas a mano con dos marcas comunes a ambas revisiones, como intersecciones de ejes.",
-      "region_empty": "El cambio {seq} no tiene tamaño.",
-      "region_off_sheet": "El cambio {seq} queda fuera de la hoja.",
-      "regions_ok": "Todas las zonas modificadas están dentro de la hoja.",
-      "triaged_ok": "Todos los cambios han sido revisados.",
-      "triaged_open": "Aún hay {count} cambios abiertos.",
-      "triaged_hint": "Marque cada cambio como relevante o no relevante.",
-      "followed_up_ok": "Todo cambio relevante tiene seguimiento.",
-      "followed_up_missing": "El cambio {seq} está marcado como relevante pero no tiene comentario, RFI, marca ni indicador de nueva medición.",
-      "followed_up_hint": "Comente el cambio, emita una RFI o una marca, o señale las mediciones afectadas para volver a medir."
+      "as_of": "A fecha",
+      "currency": "Moneda",
+      "delay_days": "Cobros retrasados (días)",
+      "overrun_pct": "Sobrecoste (%)",
+      "closing_position": "Posición de cierre",
+      "peak_funding": "Necesidad máxima de financiación",
+      "peak_period": "Mes de mayor necesidad de financiación",
+      "col": {
+        "period": "Mes",
+        "planned_in": "Cobros previstos",
+        "actual_in": "Cobros reales",
+        "expected_in": "Cobros esperados",
+        "planned_out": "Pagos previstos",
+        "actual_out": "Pagos reales",
+        "expected_out": "Pagos esperados",
+        "net": "Neto",
+        "cumulative": "Posición acumulada"
+      }
     }
   }
 }

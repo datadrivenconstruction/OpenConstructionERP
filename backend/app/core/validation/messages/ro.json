@@ -1369,6 +1369,16 @@
       "suggestion": "Alegeți valoarea proprie, pe cea de pe server sau o valoare manuală pentru acest câmp și trimiteți din nou îmbinarea"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Ramura este deschisă de {days} zile, iar devizul principal s-a modificat de la crearea ei în {changes} articole",
+      "suggestion": "Transferați modificările devizului principal în ramură, îmbinați ramura sau arhivați-o"
+    },
+    "unresolved_conflicts": {
+      "fail": "Articolul {ordinal} „{description}” a fost modificat atât în această ramură, cât și în devizul principal",
+      "suggestion": "Deschideți fereastra de îmbinare și decideți ce versiune a articolului se păstrează"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Rândul {row}: nicio activitate a acestei planificări nu are ID-ul {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Verificați rândul cu șantierul înainte de a-l aplica."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Ramura este deschisă de {days} zile, iar devizul principal s-a modificat de la crearea ei în {changes} articole",
-      "suggestion": "Transferați modificările devizului principal în ramură, îmbinați ramura sau arhivați-o"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Poziția de numerar scade la minus {amount} în {period}, sub pragul de finanțare de {threshold}.",
+      "suggestion": "Asigurați finanțarea înainte de {period}, aduceți încasările mai devreme sau amânați plățile."
     },
-    "unresolved_conflicts": {
-      "fail": "Articolul {ordinal} „{description}” a fost modificat atât în această ramură, cât și în devizul principal",
-      "suggestion": "Deschideți fereastra de îmbinare și decideți ce versiune a articolului se păstrează"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} era scadent la {due} și este încă deschis ({days} zile întârziere).",
+      "suggestion": "Urmăriți plata de la client sau modificați data estimată în prognoză."
+    },
+    "forecast_missing": {
+      "fail": "{project} este activ, dar nu are contract, factură, comandă, subcontract sau plan din care să se prognozeze fluxul de numerar.",
+      "suggestion": "Introduceți contractul cu clientul și planul său de plăți sau un flux de numerar planificat în modelul de costuri."
     }
   }
 }

@@ -1369,6 +1369,16 @@
       "suggestion": "이 필드에 대해 내 값, 서버 값 또는 직접 입력한 값을 선택한 뒤 병합을 다시 보내세요"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "이 브랜치는 {days}일 동안 열려 있었고, 생성 이후 메인 견적의 {changes}개 항목이 변경되었습니다",
+      "suggestion": "메인 견적의 변경 사항을 브랜치로 가져오거나, 브랜치를 병합하거나, 보관하세요"
+    },
+    "unresolved_conflicts": {
+      "fail": "항목 {ordinal} \"{description}\"이(가) 이 브랜치와 메인 견적 모두에서 변경되었습니다",
+      "suggestion": "병합 대화상자를 열어 유지할 항목 버전을 결정하세요"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "{row}행: 이 일정에는 ID가 {ref}인 작업이 없습니다.",
@@ -1402,14 +1412,18 @@
       "suggestion": "적용하기 전에 현장과 함께 이 행을 확인하세요."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "이 브랜치는 {days}일 동안 열려 있었고, 생성 이후 메인 견적의 {changes}개 항목이 변경되었습니다",
-      "suggestion": "메인 견적의 변경 사항을 브랜치로 가져오거나, 브랜치를 병합하거나, 보관하세요"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period}에 현금 잔액이 마이너스 {amount}로 떨어져 자금 조달 기준선 {threshold}을(를) 밑돕니다.",
+      "suggestion": "{period} 전에 자금을 확보하고, 수금을 앞당기거나 지출을 늦추십시오."
     },
-    "unresolved_conflicts": {
-      "fail": "항목 {ordinal} \"{description}\"이(가) 이 브랜치와 메인 견적 모두에서 변경되었습니다",
-      "suggestion": "병합 대화상자를 열어 유지할 항목 버전을 결정하세요"
+    "receipt_overdue": {
+      "fail": "{document}: {amount}은(는) {due}에 지급 기한이었으나 아직 미수 상태입니다 ({days}일 연체).",
+      "suggestion": "고객에게 대금 회수를 독촉하거나 예측표의 예상 일자를 수정하십시오."
+    },
+    "forecast_missing": {
+      "fail": "{project}은(는) 진행 중이지만 현금흐름을 예측할 계약, 청구서, 발주서, 하도급 계약 또는 계획이 없습니다.",
+      "suggestion": "지급 일정이 포함된 고객 계약을 입력하거나 원가 모델에 계획 현금흐름을 입력하십시오."
     }
   }
 }

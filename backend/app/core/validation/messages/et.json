@@ -1369,6 +1369,16 @@
       "suggestion": "Valige sellele väljale oma, serveri või käsitsi väärtus ja saatke liitmine uuesti"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Haru on avatud {days} päeva ja põhieelarve on selle loomisest saadik muutunud {changes} positsioonis",
+      "suggestion": "Kandke põhieelarve muudatused harusse, ühendage haru või arhiveerige see"
+    },
+    "unresolved_conflicts": {
+      "fail": "Positsiooni {ordinal} „{description}” on muudetud nii selles harus kui ka põhieelarves",
+      "suggestion": "Avage ühendamise aken ja otsustage, millise positsiooni versiooni alles jätate"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Rida {row}: ühelgi selle ajakava tegevusel ei ole ID-d {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Kontrolli rida enne rakendamist ehitusplatsiga."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Haru on avatud {days} päeva ja põhieelarve on selle loomisest saadik muutunud {changes} positsioonis",
-      "suggestion": "Kandke põhieelarve muudatused harusse, ühendage haru või arhiveerige see"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Rahaseis langeb {period} kuus miinusesse {amount}, ületades rahastuspiiri {threshold}.",
+      "suggestion": "Tagage rahastus enne {period}, tooge laekumised varem sisse või lükake maksed edasi."
     },
-    "unresolved_conflicts": {
-      "fail": "Positsiooni {ordinal} „{description}” on muudetud nii selles harus kui ka põhieelarves",
-      "suggestion": "Avage ühendamise aken ja otsustage, millise positsiooni versiooni alles jätate"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} tuli tasuda {due} ja see on endiselt tasumata ({days} päeva hilinemist).",
+      "suggestion": "Nõudke makset kliendilt või muutke prognoosis oodatavat kuupäeva."
+    },
+    "forecast_missing": {
+      "fail": "{project} on aktiivne, kuid sellel ei ole lepingut, arvet, tellimust, allhanget ega plaani, mille põhjal rahavoogu prognoosida.",
+      "suggestion": "Sisestage kliendileping koos maksegraafikuga või planeeritud rahavoog kulumudelis."
     }
   }
 }

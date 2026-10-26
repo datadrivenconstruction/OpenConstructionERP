@@ -1369,6 +1369,16 @@
       "suggestion": "Odaberite svoju, poslužiteljsku ili ručnu vrijednost za to polje i ponovno pošaljite spajanje"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Grana je otvorena {days} dana, a glavni troškovnik se od njezina nastanka promijenio u {changes} stavki",
+      "suggestion": "Prenesite promjene glavnog troškovnika u granu, spojite granu ili je arhivirajte"
+    },
+    "unresolved_conflicts": {
+      "fail": "Stavka {ordinal} „{description}” promijenjena je i u ovoj grani i u glavnom troškovniku",
+      "suggestion": "Otvorite prozor za spajanje i odlučite koju verziju stavke zadržati"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Redak {row}: nijedna aktivnost ovog plana nema ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Provjerite redak s gradilištem prije primjene."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Grana je otvorena {days} dana, a glavni troškovnik se od njezina nastanka promijenio u {changes} stavki",
-      "suggestion": "Prenesite promjene glavnog troškovnika u granu, spojite granu ili je arhivirajte"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Novčana pozicija pada na minus {amount} u {period}, ispod praga financiranja od {threshold}.",
+      "suggestion": "Osigurajte financiranje prije {period}, naplatite ranije ili odgodite plaćanja."
     },
-    "unresolved_conflicts": {
-      "fail": "Stavka {ordinal} „{description}” promijenjena je i u ovoj grani i u glavnom troškovniku",
-      "suggestion": "Otvorite prozor za spajanje i odlučite koju verziju stavke zadržati"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} dospjelo je {due} i još je otvoreno ({days} dana kašnjenja).",
+      "suggestion": "Podsjetite klijenta na plaćanje ili promijenite očekivani datum u prognozi."
+    },
+    "forecast_missing": {
+      "fail": "{project} je aktivan, ali nema ugovor, račun, narudžbu, podugovor niti plan iz kojeg bi se mogao prognozirati novčani tok.",
+      "suggestion": "Unesite ugovor s klijentom s planom plaćanja ili planirani novčani tok u modelu troškova."
     }
   }
 }

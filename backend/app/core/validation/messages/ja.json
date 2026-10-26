@@ -1369,6 +1369,16 @@
       "suggestion": "このフィールドについて、自分の値、サーバーの値、または手入力の値を選んでから、マージを再送信してください"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "このブランチは{days}日間開いたままで、作成以降にメイン見積の{changes}件の項目が変更されました",
+      "suggestion": "メイン見積の変更をブランチに取り込むか、ブランチをマージするか、アーカイブしてください"
+    },
+    "unresolved_conflicts": {
+      "fail": "項目 {ordinal}「{description}」がこのブランチとメイン見積の両方で変更されました",
+      "suggestion": "マージダイアログを開き、残す項目の版を決定してください"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "{row} 行目: このスケジュールに ID {ref} のアクティビティはありません。",
@@ -1402,14 +1412,18 @@
       "suggestion": "適用する前に現場とこの行を確認してください。"
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "このブランチは{days}日間開いたままで、作成以降にメイン見積の{changes}件の項目が変更されました",
-      "suggestion": "メイン見積の変更をブランチに取り込むか、ブランチをマージするか、アーカイブしてください"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period}に資金残高がマイナス{amount}となり、資金調達の基準{threshold}を下回ります。",
+      "suggestion": "{period}までに資金調達を手配するか、入金を前倒しし、支払いを後ろに回してください。"
     },
-    "unresolved_conflicts": {
-      "fail": "項目 {ordinal}「{description}」がこのブランチとメイン見積の両方で変更されました",
-      "suggestion": "マージダイアログを開き、残す項目の版を決定してください"
+    "receipt_overdue": {
+      "fail": "{document}: {amount}は{due}が支払期日でしたが、まだ未入金です（{days}日遅延）。",
+      "suggestion": "顧客に入金を催促するか、予測の見込日を修正してください。"
+    },
+    "forecast_missing": {
+      "fail": "{project}は進行中ですが、キャッシュフローを予測するための契約・請求書・発注書・下請契約・計画がありません。",
+      "suggestion": "支払計画を含む顧客契約を登録するか、原価モデルに予定キャッシュフローを入力してください。"
     }
   }
 }

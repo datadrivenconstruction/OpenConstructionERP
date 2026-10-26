@@ -1369,6 +1369,16 @@
       "suggestion": "Vyberte pro toto pole svou, serverovou nebo ruční hodnotu a sloučení odešlete znovu"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Větev je otevřená {days} dní a hlavní rozpočet se od jejího vytvoření změnil v {changes} položkách",
+      "suggestion": "Přeneste změny hlavního rozpočtu do větve, větev sloučte, nebo ji archivujte"
+    },
+    "unresolved_conflicts": {
+      "fail": "Položka {ordinal} „{description}“ byla změněna ve větvi i v hlavním rozpočtu",
+      "suggestion": "Otevřete dialog sloučení a rozhodněte, kterou verzi položky ponechat"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Řádek {row}: žádná činnost tohoto harmonogramu nemá ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Před použitím řádek ověřte na stavbě."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Větev je otevřená {days} dní a hlavní rozpočet se od jejího vytvoření změnil v {changes} položkách",
-      "suggestion": "Přeneste změny hlavního rozpočtu do větve, větev sloučte, nebo ji archivujte"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Zůstatek v {period} klesne na mínus {amount}, což překročí limit financování {threshold}.",
+      "suggestion": "Zajistěte financování před {period}, uhraďte příjmy dříve nebo odsuňte platby."
     },
-    "unresolved_conflicts": {
-      "fail": "Položka {ordinal} „{description}“ byla změněna ve větvi i v hlavním rozpočtu",
-      "suggestion": "Otevřete dialog sloučení a rozhodněte, kterou verzi položky ponechat"
+    "receipt_overdue": {
+      "fail": "{document}: částka {amount} byla splatná {due} a je stále nezaplacena (po splatnosti {days} dní).",
+      "suggestion": "Urgujte platbu u klienta nebo upravte očekávané datum v předpovědi."
+    },
+    "forecast_missing": {
+      "fail": "{project} je aktivní, ale nemá smlouvu, fakturu, objednávku, subdodávku ani plán, ze kterého by šly předpovídat peněžní toky.",
+      "suggestion": "Zadejte smlouvu s klientem včetně platebního kalendáře nebo plánovaný cash flow v nákladovém modelu."
     }
   }
 }

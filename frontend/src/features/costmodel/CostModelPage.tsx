@@ -48,6 +48,7 @@ import { CostBenchmark } from './CostBenchmark';
 import { CostSpinePanel } from './CostSpinePanel';
 import { CostStructurePanel } from './CostStructurePanel';
 import { ContractExposurePanel } from './ContractExposurePanel';
+import { CashFlowForecastPanel } from './CashFlowForecastPanel';
 import { costmodelGuide } from './costmodelGuide';
 import { BudgetLineThresholdEditor, parseThreshold } from './BudgetLineThresholdEditor';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
@@ -2631,6 +2632,9 @@ function FiveDDashboard({ project }: { project: Project }) {
           )}
         </CardContent>
       </Card>
+
+      {/* Cash-flow forecast (monthly receipts / payments, peak funding) */}
+      <CashFlowForecastPanel projectId={project.id} />
 
       {/* Contract Exposure (committed vs budget by cost group) */}
       <ContractExposurePanel projectId={project.id} currency={currency} />

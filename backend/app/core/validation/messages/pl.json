@@ -1369,6 +1369,16 @@
       "suggestion": "Wybierz dla tego pola własną wartość, wartość z serwera lub wartość ręczną i wyślij scalenie ponownie"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Gałąź jest otwarta od {days} dni, a kosztorys główny zmienił się od jej utworzenia w {changes} pozycjach",
+      "suggestion": "Przenieś zmiany kosztorysu głównego do gałęzi, scal gałąź albo ją zarchiwizuj"
+    },
+    "unresolved_conflicts": {
+      "fail": "Pozycja {ordinal} „{description}” została zmieniona zarówno w tej gałęzi, jak i w kosztorysie głównym",
+      "suggestion": "Otwórz okno scalania i zdecyduj, którą wersję pozycji zachować"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Wiersz {row}: żadna czynność tego harmonogramu nie ma ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Sprawdź wiersz z budową przed jego zastosowaniem."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Gałąź jest otwarta od {days} dni, a kosztorys główny zmienił się od jej utworzenia w {changes} pozycjach",
-      "suggestion": "Przenieś zmiany kosztorysu głównego do gałęzi, scal gałąź albo ją zarchiwizuj"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Pozycja gotówkowa spada w {period} do minus {amount}, poniżej progu finansowania {threshold}.",
+      "suggestion": "Zapewnij finansowanie przed {period}, przesuń wpływy wcześniej lub odrocz płatności."
     },
-    "unresolved_conflicts": {
-      "fail": "Pozycja {ordinal} „{description}” została zmieniona zarówno w tej gałęzi, jak i w kosztorysie głównym",
-      "suggestion": "Otwórz okno scalania i zdecyduj, którą wersję pozycji zachować"
+    "receipt_overdue": {
+      "fail": "{document}: kwota {amount} była wymagalna {due} i nadal jest nieopłacona (zaległość {days} dni).",
+      "suggestion": "Upomnij klienta o płatność lub zmień oczekiwaną datę w prognozie."
+    },
+    "forecast_missing": {
+      "fail": "{project} jest aktywny, ale nie ma umowy, faktury, zamówienia, umowy podwykonawczej ani planu, na podstawie których można prognozować przepływy.",
+      "suggestion": "Wprowadź umowę z klientem wraz z harmonogramem płatności lub planowany przepływ pieniężny w modelu kosztów."
     }
   }
 }

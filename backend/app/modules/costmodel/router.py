@@ -1874,3 +1874,10 @@ async def clear_position_allocation(
     project_id = await service.project_of_position(position_id)
     await verify_project_access(project_id, user_id, session)
     return await service.clear_allocation(position_id, str(user_id) if user_id else None)
+
+
+# ── Cash-flow forecast (project and portfolio) ───────────────────────────────
+
+from app.modules.costmodel.cashflow_forecast_router import router as _cashflow_forecast_router  # noqa: E402
+
+router.include_router(_cashflow_forecast_router)

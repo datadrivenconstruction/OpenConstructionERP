@@ -2468,5 +2468,31 @@
       "followed_up_missing": "Änderung {seq} ist als relevant markiert, hat aber keinen Kommentar, keine RFI, keine Markierung und kein Neuaufmaß-Kennzeichen.",
       "followed_up_hint": "Kommentieren Sie die Änderung, erstellen Sie eine RFI oder Markierung oder kennzeichnen Sie die darin enthaltenen Mengen zum Neuaufmessen."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Cashflow-Prognose",
+      "portfolio_title": "Portfolio-Cashflow-Prognose",
+      "empty": "Keine Cashflow-Prognose für diese Auswahl.",
+      "project": "Projekt",
+      "as_of": "Stand",
+      "currency": "Währung",
+      "delay_days": "Zahlungseingänge verzögert um (Tage)",
+      "overrun_pct": "Kostenüberschreitung (%)",
+      "closing_position": "Endsaldo",
+      "peak_funding": "Maximaler Finanzierungsbedarf",
+      "peak_period": "Monat des höchsten Finanzierungsbedarfs",
+      "col": {
+        "period": "Monat",
+        "planned_in": "Geplante Einnahmen",
+        "actual_in": "Tatsächliche Einnahmen",
+        "expected_in": "Erwartete Einnahmen",
+        "planned_out": "Geplante Ausgaben",
+        "actual_out": "Tatsächliche Ausgaben",
+        "expected_out": "Erwartete Ausgaben",
+        "net": "Saldo",
+        "cumulative": "Kumulierte Position"
+      }
+    }
   }
 }

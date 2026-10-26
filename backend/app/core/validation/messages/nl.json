@@ -1369,6 +1369,16 @@
       "suggestion": "Kies voor dit veld uw eigen waarde, die van de server of een handmatige waarde en verstuur de samenvoeging opnieuw"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Deze variant staat al {days} dagen open en de hoofdraming is sinds het aanmaken in {changes} posten gewijzigd",
+      "suggestion": "Neem de wijzigingen van de hoofdraming over in de variant, voeg de variant samen of archiveer hem"
+    },
+    "unresolved_conflicts": {
+      "fail": "Post {ordinal} \"{description}\" is zowel in deze variant als in de hoofdraming gewijzigd",
+      "suggestion": "Open het samenvoegvenster en bepaal welke versie van de post blijft"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Rij {row}: geen enkele activiteit van deze planning heeft de ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Controleer de rij met de bouwplaats voordat u hem toepast."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Deze variant staat al {days} dagen open en de hoofdraming is sinds het aanmaken in {changes} posten gewijzigd",
-      "suggestion": "Neem de wijzigingen van de hoofdraming over in de variant, voeg de variant samen of archiveer hem"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "De kaspositie daalt in {period} naar min {amount}, onder de financieringsdrempel van {threshold}.",
+      "suggestion": "Regel de financiering vóór {period}, zet ontvangsten naar voren of stel betalingen uit."
     },
-    "unresolved_conflicts": {
-      "fail": "Post {ordinal} \"{description}\" is zowel in deze variant als in de hoofdraming gewijzigd",
-      "suggestion": "Open het samenvoegvenster en bepaal welke versie van de post blijft"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} was op {due} opeisbaar en staat nog open ({days} dagen te laat).",
+      "suggestion": "Vorder de betaling bij de opdrachtgever of pas de verwachte datum in de prognose aan."
+    },
+    "forecast_missing": {
+      "fail": "{project} is actief, maar heeft geen contract, factuur, bestelling, onderaannemerscontract of planning waarop de cashflow kan worden voorspeld.",
+      "suggestion": "Voer het opdrachtgeverscontract met betalingsschema in, of een geplande cashflow in het kostenmodel."
     }
   }
 }

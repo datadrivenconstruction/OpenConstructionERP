@@ -1369,6 +1369,16 @@
       "suggestion": "Pilih nilai Anda, nilai server, atau nilai manual untuk kolom ini, lalu kirim ulang penggabungan"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Cabang ini sudah terbuka selama {days} hari dan estimasi utama berubah pada {changes} item sejak cabang dibuat",
+      "suggestion": "Bawa perubahan estimasi utama ke cabang, gabungkan cabang, atau arsipkan"
+    },
+    "unresolved_conflicts": {
+      "fail": "Item {ordinal} \"{description}\" diubah di cabang ini dan juga di estimasi utama",
+      "suggestion": "Buka dialog penggabungan dan putuskan versi item mana yang dipertahankan"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Baris {row}: tidak ada aktivitas jadwal ini dengan ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Periksa baris ini bersama tim lapangan sebelum menerapkannya."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Cabang ini sudah terbuka selama {days} hari dan estimasi utama berubah pada {changes} item sejak cabang dibuat",
-      "suggestion": "Bawa perubahan estimasi utama ke cabang, gabungkan cabang, atau arsipkan"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Posisi kas turun menjadi minus {amount} pada {period}, di bawah ambang pendanaan {threshold}.",
+      "suggestion": "Siapkan pendanaan sebelum {period}, majukan penerimaan, atau tunda pembayaran."
     },
-    "unresolved_conflicts": {
-      "fail": "Item {ordinal} \"{description}\" diubah di cabang ini dan juga di estimasi utama",
-      "suggestion": "Buka dialog penggabungan dan putuskan versi item mana yang dipertahankan"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} jatuh tempo pada {due} dan masih terbuka ({days} hari terlambat).",
+      "suggestion": "Tagih pembayaran ke klien, atau ubah tanggal yang diharapkan dalam prakiraan."
+    },
+    "forecast_missing": {
+      "fail": "{project} aktif tetapi belum memiliki kontrak, faktur, pesanan, subkontrak, atau rencana untuk memprakirakan arus kas.",
+      "suggestion": "Masukkan kontrak klien beserta jadwal pembayarannya, atau arus kas rencana di model biaya."
     }
   }
 }

@@ -1369,6 +1369,16 @@
       "suggestion": "Choose mine, theirs or a manual value for this field, then send the merge again"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "This branch has been open for {days} days and the main estimate has changed in {changes} positions since it was created",
+      "suggestion": "Carry the main estimate's changes into the branch, merge the branch, or archive it"
+    },
+    "unresolved_conflicts": {
+      "fail": "Position {ordinal} \"{description}\" was changed both in this branch and in the main estimate",
+      "suggestion": "Open the merge dialog and decide which version of the position to keep"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Row {row}: no activity of this schedule has the ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Check the row with the site before applying it."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "This branch has been open for {days} days and the main estimate has changed in {changes} positions since it was created",
-      "suggestion": "Carry the main estimate's changes into the branch, merge the branch, or archive it"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "The cash position falls to minus {amount} in {period}, beyond the funding threshold of {threshold}.",
+      "suggestion": "Arrange funding before {period}, bring receipts forward or move payments later."
     },
-    "unresolved_conflicts": {
-      "fail": "Position {ordinal} \"{description}\" was changed both in this branch and in the main estimate",
-      "suggestion": "Open the merge dialog and decide which version of the position to keep"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} was due on {due} and is still open ({days} days overdue).",
+      "suggestion": "Chase the payment with the client, or move the expected date in the forecast."
+    },
+    "forecast_missing": {
+      "fail": "{project} is active but has no contract, invoice, order, subcontract or plan to forecast cash from.",
+      "suggestion": "Enter the client contract with its payment plan, or a planned cash flow in the cost model."
     }
   }
 }

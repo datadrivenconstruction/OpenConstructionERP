@@ -2496,5 +2496,31 @@
       "followed_up_missing": "Změna {seq} je označena jako relevantní, ale nemá komentář, RFI, obláček ani příznak přeměření.",
       "followed_up_hint": "Okomentujte změnu, vystavte RFI nebo obláček, nebo označte výměry v ní k přeměření."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Předpověď peněžních toků",
+      "portfolio_title": "Předpověď peněžních toků portfolia",
+      "empty": "Pro tento výběr není žádná předpověď peněžních toků.",
+      "project": "Projekt",
+      "as_of": "K datu",
+      "currency": "Měna",
+      "delay_days": "Příjmy zpožděny o (dny)",
+      "overrun_pct": "Překročení nákladů (%)",
+      "closing_position": "Konečný zůstatek",
+      "peak_funding": "Maximální potřeba financování",
+      "peak_period": "Měsíc nejvyšší potřeby financování",
+      "col": {
+        "period": "Měsíc",
+        "planned_in": "Plánované příjmy",
+        "actual_in": "Skutečné příjmy",
+        "expected_in": "Očekávané příjmy",
+        "planned_out": "Plánované výdaje",
+        "actual_out": "Skutečné výdaje",
+        "expected_out": "Očekávané výdaje",
+        "net": "Čistý tok",
+        "cumulative": "Kumulativní pozice"
+      }
+    }
   }
 }

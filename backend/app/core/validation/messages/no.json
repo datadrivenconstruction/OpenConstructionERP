@@ -1369,6 +1369,16 @@
       "suggestion": "Velg din egen verdi, serverens verdi eller en manuell verdi for feltet, og send sammenslåingen på nytt"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Denne varianten har vært åpen i {days} dager, og hovedoverslaget er endret i {changes} poster siden den ble opprettet",
+      "suggestion": "Overfør hovedoverslagets endringer til varianten, slå varianten sammen eller arkiver den"
+    },
+    "unresolved_conflicts": {
+      "fail": "Post {ordinal} \"{description}\" er endret både i denne varianten og i hovedoverslaget",
+      "suggestion": "Åpne dialogen for sammenslåing og avgjør hvilken versjon av posten som beholdes"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Rad {row}: ingen aktivitet i denne tidsplanen har ID-en {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Kontroller raden med byggeplassen før du bruker den."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Denne varianten har vært åpen i {days} dager, og hovedoverslaget er endret i {changes} poster siden den ble opprettet",
-      "suggestion": "Overfør hovedoverslagets endringer til varianten, slå varianten sammen eller arkiver den"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Likviditeten faller til minus {amount} i {period}, under finansieringsgrensen på {threshold}.",
+      "suggestion": "Sikre finansiering før {period}, flytt innbetalinger fremover eller utsett betalinger."
     },
-    "unresolved_conflicts": {
-      "fail": "Post {ordinal} \"{description}\" er endret både i denne varianten og i hovedoverslaget",
-      "suggestion": "Åpne dialogen for sammenslåing og avgjør hvilken versjon av posten som beholdes"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} forfalt {due} og er fortsatt åpen ({days} dager forfalt).",
+      "suggestion": "Purr kunden på betalingen, eller endre forventet dato i prognosen."
+    },
+    "forecast_missing": {
+      "fail": "{project} er aktivt, men har ingen kontrakt, faktura, bestilling, underentreprise eller plan å prognostisere likviditet fra.",
+      "suggestion": "Legg inn kundekontrakten med betalingsplanen, eller en planlagt kontantstrøm i kostnadsmodellen."
     }
   }
 }

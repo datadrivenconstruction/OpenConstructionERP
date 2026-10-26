@@ -2491,5 +2491,31 @@
       "followed_up_missing": "A(z) {seq}. módosítás relevánsként van megjelölve, de nincs hozzá megjegyzés, RFI, felhő vagy újramérési jelölő.",
       "followed_up_hint": "Fűzzön megjegyzést a módosításhoz, hozzon létre RFI-t vagy felhőt, vagy jelölje meg a benne lévő mennyiségeket újramérésre."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Cash-flow előrejelzés",
+      "portfolio_title": "Portfólió cash-flow előrejelzés",
+      "empty": "Ehhez a kijelöléshez nincs cash-flow előrejelzés.",
+      "project": "Projekt",
+      "as_of": "Dátum szerint",
+      "currency": "Pénznem",
+      "delay_days": "Bevételek késése (nap)",
+      "overrun_pct": "Költségtúllépés (%)",
+      "closing_position": "Záró egyenleg",
+      "peak_funding": "Maximális finanszírozási igény",
+      "peak_period": "A legnagyobb finanszírozási igény hónapja",
+      "col": {
+        "period": "Hónap",
+        "planned_in": "Tervezett bevétel",
+        "actual_in": "Tényleges bevétel",
+        "expected_in": "Várható bevétel",
+        "planned_out": "Tervezett kiadás",
+        "actual_out": "Tényleges kiadás",
+        "expected_out": "Várható kiadás",
+        "net": "Nettó",
+        "cumulative": "Halmozott pozíció"
+      }
+    }
   }
 }

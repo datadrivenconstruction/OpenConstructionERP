@@ -50,6 +50,7 @@ import {
   FileText,
 } from 'lucide-react';
 
+import { PortfolioCashFlowWidget } from './PortfolioCashFlowWidget';
 import { Button, Card, Badge, EmptyState, RecoveryCard, SkeletonTable, CollapsibleSection } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { useToastStore } from '@/stores/useToastStore';
@@ -241,6 +242,10 @@ export function PortfolioPage() {
             'An enterprise schedule-of-schedules: organise projects into portfolios and programmes, then run one critical-path pass across every linked schedule under a node to see the cross-project critical path and finish date.',
         })}
       />
+
+      <div className="mt-4">
+        <PortfolioCashFlowWidget />
+      </div>
 
       {/* How this module works + what it connects to */}
       <HowPortfolioWorks />

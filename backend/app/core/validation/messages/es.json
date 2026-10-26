@@ -1369,6 +1369,16 @@
       "suggestion": "Elija su valor, el del servidor o uno manual para este campo y vuelva a enviar la fusión"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Esta variante lleva {days} días abierta y el presupuesto principal ha cambiado en {changes} partidas desde que se creó",
+      "suggestion": "Traslade los cambios del presupuesto principal a la variante, fusione la variante o archívela"
+    },
+    "unresolved_conflicts": {
+      "fail": "La partida {ordinal} «{description}» se modificó tanto en esta variante como en el presupuesto principal",
+      "suggestion": "Abra el diálogo de fusión y decida qué versión de la partida conservar"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Fila {row}: ninguna actividad de este cronograma tiene el ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Revise la fila con la obra antes de aplicarla."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Esta variante lleva {days} días abierta y el presupuesto principal ha cambiado en {changes} partidas desde que se creó",
-      "suggestion": "Traslade los cambios del presupuesto principal a la variante, fusione la variante o archívela"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "La posición de caja cae a menos {amount} en {period}, por debajo del umbral de financiación de {threshold}.",
+      "suggestion": "Asegure la financiación antes de {period}, adelante cobros o retrase pagos."
     },
-    "unresolved_conflicts": {
-      "fail": "La partida {ordinal} «{description}» se modificó tanto en esta variante como en el presupuesto principal",
-      "suggestion": "Abra el diálogo de fusión y decida qué versión de la partida conservar"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} vencía el {due} y sigue pendiente ({days} días de retraso).",
+      "suggestion": "Reclame el pago al cliente o cambie la fecha prevista en la previsión."
+    },
+    "forecast_missing": {
+      "fail": "{project} está activo pero no tiene contrato, factura, pedido, subcontrato ni plan a partir de los cuales prever el flujo de caja.",
+      "suggestion": "Registre el contrato con el cliente y su plan de pagos, o un flujo de caja planificado en el modelo de costes."
     }
   }
 }

@@ -2487,5 +2487,31 @@
       "followed_up_missing": "変更 {seq} は要対応ですが、コメント、RFI、改訂雲、再積算フラグがありません。",
       "followed_up_hint": "変更にコメントするか、RFI または改訂雲を作成するか、内部の数量に再積算のフラグを付けてください。"
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "キャッシュフロー予測",
+      "portfolio_title": "ポートフォリオのキャッシュフロー予測",
+      "empty": "この選択にはキャッシュフロー予測がありません。",
+      "project": "プロジェクト",
+      "as_of": "基準日",
+      "currency": "通貨",
+      "delay_days": "入金遅延（日）",
+      "overrun_pct": "コスト超過（%）",
+      "closing_position": "期末残高",
+      "peak_funding": "最大資金需要",
+      "peak_period": "資金需要のピーク月",
+      "col": {
+        "period": "月",
+        "planned_in": "予定入金",
+        "actual_in": "実績入金",
+        "expected_in": "見込入金",
+        "planned_out": "予定出金",
+        "actual_out": "実績出金",
+        "expected_out": "見込出金",
+        "net": "差引",
+        "cumulative": "累計残高"
+      }
+    }
   }
 }

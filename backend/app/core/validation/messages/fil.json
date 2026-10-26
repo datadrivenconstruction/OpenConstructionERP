@@ -1369,6 +1369,16 @@
       "suggestion": "Pumili ng sarili mong halaga, ng server, o manu-manong halaga para sa field na ito, at ipadala muli ang merge"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "{days} araw nang bukas ang branch na ito at {changes} item ang nabago sa pangunahing estimate mula nang likhain ito",
+      "suggestion": "Ilipat sa branch ang mga pagbabago ng pangunahing estimate, pagsamahin ang branch, o i-archive ito"
+    },
+    "unresolved_conflicts": {
+      "fail": "Ang item {ordinal} \"{description}\" ay binago sa branch na ito at sa pangunahing estimate",
+      "suggestion": "Buksan ang merge dialog at magpasya kung aling bersyon ng item ang itatago"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Hanay {row}: walang aktibidad ng iskedyul na ito na may ID na {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Suriin ang hanay kasama ang site bago ipatupad."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "{days} araw nang bukas ang branch na ito at {changes} item ang nabago sa pangunahing estimate mula nang likhain ito",
-      "suggestion": "Ilipat sa branch ang mga pagbabago ng pangunahing estimate, pagsamahin ang branch, o i-archive ito"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Bababa ang posisyon ng salapi sa minus {amount} sa {period}, lampas sa limitasyon ng pondo na {threshold}.",
+      "suggestion": "Siguraduhin ang pondo bago ang {period}, i-advance ang mga koleksyon o ipagpaliban ang mga bayad."
     },
-    "unresolved_conflicts": {
-      "fail": "Ang item {ordinal} \"{description}\" ay binago sa branch na ito at sa pangunahing estimate",
-      "suggestion": "Buksan ang merge dialog at magpasya kung aling bersyon ng item ang itatago"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} ay dapat bayaran noong {due} at bukas pa rin ({days} araw na huli).",
+      "suggestion": "Singilin ang kliyente para sa bayad, o baguhin ang inaasahang petsa sa pagtataya."
+    },
+    "forecast_missing": {
+      "fail": "Aktibo ang {project} pero walang kontrata, invoice, order, subcontract o plano para pagtayahan ang cash flow.",
+      "suggestion": "Ilagay ang kontrata ng kliyente kasama ang payment plan nito, o planong cash flow sa cost model."
     }
   }
 }

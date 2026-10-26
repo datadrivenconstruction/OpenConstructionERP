@@ -1369,6 +1369,16 @@
       "suggestion": "Valitse kentälle oma, palvelimen tai käsin annettu arvo ja lähetä yhdistäminen uudelleen"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Tämä variantti on ollut auki {days} päivää, ja pääarvio on muuttunut {changes} nimikkeessä sen luomisen jälkeen",
+      "suggestion": "Siirrä pääarvion muutokset varianttiin, yhdistä variantti tai arkistoi se"
+    },
+    "unresolved_conflicts": {
+      "fail": "Nimike {ordinal} \"{description}\" muutettiin sekä tässä variantissa että pääarviossa",
+      "suggestion": "Avaa yhdistämisikkuna ja päätä, kumpi nimikkeen versio säilytetään"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Rivi {row}: mikään tämän aikataulun tehtävä ei ole tunnukseltaan {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Tarkista rivi työmaalta ennen käyttöönottoa."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Tämä variantti on ollut auki {days} päivää, ja pääarvio on muuttunut {changes} nimikkeessä sen luomisen jälkeen",
-      "suggestion": "Siirrä pääarvion muutokset varianttiin, yhdistä variantti tai arkistoi se"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Kassasaldo laskee kuussa {period} miinukselle {amount}, alle rahoitusrajan {threshold}.",
+      "suggestion": "Varmista rahoitus ennen kuukautta {period}, aikaista maksut tai siirrä menoja myöhemmäksi."
     },
-    "unresolved_conflicts": {
-      "fail": "Nimike {ordinal} \"{description}\" muutettiin sekä tässä variantissa että pääarviossa",
-      "suggestion": "Avaa yhdistämisikkuna ja päätä, kumpi nimikkeen versio säilytetään"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} oli eräännyt {due} eikä ole vielä maksettu ({days} päivää myöhässä).",
+      "suggestion": "Muistuta asiakasta maksusta tai muuta odotettua päivämäärää ennusteessa."
+    },
+    "forecast_missing": {
+      "fail": "{project} on aktiivinen, mutta siltä puuttuu sopimus, lasku, tilaus, alihankintasopimus tai suunnitelma, josta kassavirtaa voitaisiin ennustaa.",
+      "suggestion": "Syötä asiakkaan sopimus maksuaikatauluineen tai suunniteltu kassavirta kustannusmalliin."
     }
   }
 }

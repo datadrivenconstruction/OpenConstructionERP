@@ -2492,5 +2492,31 @@
       "followed_up_missing": "변경 {seq}은(는) 관련 있음으로 표시되었지만 의견, RFI, 구름 표시, 재측정 플래그가 없습니다.",
       "followed_up_hint": "변경에 의견을 달거나, RFI 또는 구름 표시를 생성하거나, 그 안의 물량에 재측정 플래그를 지정하세요."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "현금흐름 예측",
+      "portfolio_title": "포트폴리오 현금흐름 예측",
+      "empty": "이 선택에 대한 현금흐름 예측이 없습니다.",
+      "project": "프로젝트",
+      "as_of": "기준일",
+      "currency": "통화",
+      "delay_days": "수금 지연 (일)",
+      "overrun_pct": "원가 초과 (%)",
+      "closing_position": "기말 잔액",
+      "peak_funding": "최대 자금 조달 필요액",
+      "peak_period": "자금 조달 필요 최고 월",
+      "col": {
+        "period": "월",
+        "planned_in": "계획 수금",
+        "actual_in": "실제 수금",
+        "expected_in": "예상 수금",
+        "planned_out": "계획 지출",
+        "actual_out": "실제 지출",
+        "expected_out": "예상 지출",
+        "net": "순현금흐름",
+        "cumulative": "누적 잔액"
+      }
+    }
   }
 }

@@ -1369,6 +1369,16 @@
       "suggestion": "Válassza a saját, a kiszolgálói vagy egy kézi értéket a mezőhöz, majd küldje el újra az egyesítést"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Az ág {days} napja nyitott, és a fő költségvetés a létrehozása óta {changes} tételben megváltozott",
+      "suggestion": "Vigye át a fő költségvetés módosításait az ágba, egyesítse az ágat, vagy archiválja"
+    },
+    "unresolved_conflicts": {
+      "fail": "A(z) {ordinal} tétel („{description}”) az ágban és a fő költségvetésben is módosult",
+      "suggestion": "Nyissa meg az egyesítési ablakot, és döntse el, a tétel melyik verzióját tartja meg"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "{row}. sor: ennek az ütemtervnek egyik tevékenységéhez sem tartozik a(z) {ref} azonosító.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Alkalmazás előtt egyeztesse a sort a helyszínnel."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Az ág {days} napja nyitott, és a fő költségvetés a létrehozása óta {changes} tételben megváltozott",
-      "suggestion": "Vigye át a fő költségvetés módosításait az ágba, egyesítse az ágat, vagy archiválja"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "A pénzügyi pozíció {period}-ben mínusz {amount}-ra csökken, a {threshold} finanszírozási küszöb alá.",
+      "suggestion": "Biztosítsa a finanszírozást {period} előtt, hozza előre a bevételeket vagy halassza el a kifizetéseket."
     },
-    "unresolved_conflicts": {
-      "fail": "A(z) {ordinal} tétel („{description}”) az ágban és a fő költségvetésben is módosult",
-      "suggestion": "Nyissa meg az egyesítési ablakot, és döntse el, a tétel melyik verzióját tartja meg"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} esedékes volt {due}-án, és még nyitott ({days} napja késik).",
+      "suggestion": "Sürgesse a fizetést az ügyfélnél, vagy módosítsa a várható dátumot az előrejelzésben."
+    },
+    "forecast_missing": {
+      "fail": "A {project} aktív, de nincs szerződése, számlája, megrendelése, alvállalkozói szerződése vagy terve, amelyből a cash flow előrejelezhető lenne.",
+      "suggestion": "Rögzítse az ügyfél szerződését a fizetési ütemezésével, vagy adjon meg tervezett cash flow-t a költségmodellben."
     }
   }
 }

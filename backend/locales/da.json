@@ -2492,5 +2492,31 @@
       "followed_up_missing": "Ændring {seq} er markeret som relevant, men har ingen kommentar, RFI, sky eller flag for omåling.",
       "followed_up_hint": "Kommentér ændringen, opret en RFI eller sky, eller markér mængderne i den til omåling."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Likviditetsprognose",
+      "portfolio_title": "Porteføljens likviditetsprognose",
+      "empty": "Ingen likviditetsprognose for denne udvælgelse.",
+      "project": "Projekt",
+      "as_of": "Pr.",
+      "currency": "Valuta",
+      "delay_days": "Indbetalinger forsinket med (dage)",
+      "overrun_pct": "Omkostningsoverskridelse (%)",
+      "closing_position": "Slutsaldo",
+      "peak_funding": "Maksimalt finansieringsbehov",
+      "peak_period": "Måned med størst finansieringsbehov",
+      "col": {
+        "period": "Måned",
+        "planned_in": "Planlagte indbetalinger",
+        "actual_in": "Faktiske indbetalinger",
+        "expected_in": "Forventede indbetalinger",
+        "planned_out": "Planlagte udbetalinger",
+        "actual_out": "Faktiske udbetalinger",
+        "expected_out": "Forventede udbetalinger",
+        "net": "Netto",
+        "cumulative": "Akkumuleret position"
+      }
+    }
   }
 }

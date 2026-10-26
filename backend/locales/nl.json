@@ -2466,5 +2466,31 @@
       "followed_up_missing": "Wijziging {seq} is als relevant gemarkeerd maar heeft geen opmerking, RFI, wolk of markering voor opnieuw opmeten.",
       "followed_up_hint": "Geef commentaar op de wijziging, maak een RFI of wolk, of markeer de hoeveelheden erin voor opnieuw opmeten."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Cashflowprognose",
+      "portfolio_title": "Cashflowprognose portefeuille",
+      "empty": "Geen cashflowprognose voor deze selectie.",
+      "project": "Project",
+      "as_of": "Per",
+      "currency": "Valuta",
+      "delay_days": "Ontvangsten vertraagd met (dagen)",
+      "overrun_pct": "Kostenoverschrijding (%)",
+      "closing_position": "Eindsaldo",
+      "peak_funding": "Maximale financieringsbehoefte",
+      "peak_period": "Maand met hoogste financieringsbehoefte",
+      "col": {
+        "period": "Maand",
+        "planned_in": "Geplande ontvangsten",
+        "actual_in": "Werkelijke ontvangsten",
+        "expected_in": "Verwachte ontvangsten",
+        "planned_out": "Geplande uitgaven",
+        "actual_out": "Werkelijke uitgaven",
+        "expected_out": "Verwachte uitgaven",
+        "net": "Netto",
+        "cumulative": "Cumulatieve positie"
+      }
+    }
   }
 }

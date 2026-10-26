@@ -1369,6 +1369,16 @@
       "suggestion": "Bu alan için kendi değerinizi, sunucudaki değeri veya elle girilen bir değeri seçin ve birleştirmeyi yeniden gönderin"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Dal {days} gündür açık ve ana keşif, dal oluşturulduğundan beri {changes} pozda değişti",
+      "suggestion": "Ana keşfin değişikliklerini dala aktarın, dalı birleştirin veya arşivleyin"
+    },
+    "unresolved_conflicts": {
+      "fail": "{ordinal} nolu \"{description}\" pozu hem bu dalda hem de ana keşifte değiştirildi",
+      "suggestion": "Birleştirme penceresini açın ve pozun hangi sürümünün korunacağına karar verin"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Satır {row}: bu programdaki hiçbir faaliyetin ID değeri {ref} değil.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Uygulamadan önce satırı şantiyeyle birlikte kontrol edin."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Dal {days} gündür açık ve ana keşif, dal oluşturulduğundan beri {changes} pozda değişti",
-      "suggestion": "Ana keşfin değişikliklerini dala aktarın, dalı birleştirin veya arşivleyin"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Nakit pozisyonu {period} ayında eksi {amount} seviyesine düşüyor; bu, {threshold} finansman eşiğinin altında.",
+      "suggestion": "{period} tarihinden önce finansmanı sağlayın, tahsilatları öne çekin veya ödemeleri erteleyin."
     },
-    "unresolved_conflicts": {
-      "fail": "{ordinal} nolu \"{description}\" pozu hem bu dalda hem de ana keşifte değiştirildi",
-      "suggestion": "Birleştirme penceresini açın ve pozun hangi sürümünün korunacağına karar verin"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} tutarındaki ödeme {due} tarihinde vadesi gelmişti ve hâlâ açık ({days} gün gecikmiş).",
+      "suggestion": "Müşteriden ödemeyi takip edin veya tahmindeki beklenen tarihi değiştirin."
+    },
+    "forecast_missing": {
+      "fail": "{project} aktif, ancak nakit akışını tahmin edebileceğiniz bir sözleşme, fatura, sipariş, taşeron sözleşmesi veya plan yok.",
+      "suggestion": "Müşteri sözleşmesini ödeme planıyla birlikte girin veya maliyet modeline planlanmış bir nakit akışı ekleyin."
     }
   }
 }

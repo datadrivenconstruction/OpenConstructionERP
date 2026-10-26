@@ -1369,6 +1369,16 @@
       "suggestion": "Välj ditt eget värde, serverns värde eller ett manuellt värde för fältet och skicka sammanfogningen igen"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Den här varianten har varit öppen i {days} dagar och huvudkalkylen har ändrats i {changes} poster sedan den skapades",
+      "suggestion": "För över huvudkalkylens ändringar till varianten, slå samman varianten eller arkivera den"
+    },
+    "unresolved_conflicts": {
+      "fail": "Post {ordinal} \"{description}\" har ändrats både i den här varianten och i huvudkalkylen",
+      "suggestion": "Öppna dialogen för sammanslagning och avgör vilken version av posten som ska behållas"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Rad {row}: ingen aktivitet i den här tidplanen har ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Kontrollera raden med arbetsplatsen innan du tillämpar den."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Den här varianten har varit öppen i {days} dagar och huvudkalkylen har ändrats i {changes} poster sedan den skapades",
-      "suggestion": "För över huvudkalkylens ändringar till varianten, slå samman varianten eller arkivera den"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Kassaställningen sjunker till minus {amount} i {period}, under finansieringsgränsen på {threshold}.",
+      "suggestion": "Säkra finansieringen före {period}, flytta fram inbetalningar eller skjut upp betalningar."
     },
-    "unresolved_conflicts": {
-      "fail": "Post {ordinal} \"{description}\" har ändrats både i den här varianten och i huvudkalkylen",
-      "suggestion": "Öppna dialogen för sammanslagning och avgör vilken version av posten som ska behållas"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} skulle ha betalats {due} och är fortfarande obetalt ({days} dagar försenat).",
+      "suggestion": "Påminn kunden om betalningen eller ändra det förväntade datumet i prognosen."
+    },
+    "forecast_missing": {
+      "fail": "{project} är aktivt men saknar kontrakt, faktura, beställning, underentreprenadavtal eller plan att prognostisera kassaflödet från.",
+      "suggestion": "Ange kundkontraktet med betalningsplanen, eller ett planerat kassaflöde i kostnadsmodellen."
     }
   }
 }

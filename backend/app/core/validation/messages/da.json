@@ -1369,6 +1369,16 @@
       "suggestion": "Vælg din egen, serverens eller en manuel værdi for feltet, og send sammenfletningen igen"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Denne variant har været åben i {days} dage, og hovedoverslaget er ændret i {changes} positioner, siden den blev oprettet",
+      "suggestion": "Overfør hovedoverslagets ændringer til varianten, flet varianten eller arkivér den"
+    },
+    "unresolved_conflicts": {
+      "fail": "Position {ordinal} \"{description}\" er ændret både i denne variant og i hovedoverslaget",
+      "suggestion": "Åbn dialogen til fletning og afgør, hvilken version af positionen der beholdes"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Række {row}: ingen aktivitet i denne tidsplan har ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Tjek rækken med pladsen, før den anvendes."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Denne variant har været åben i {days} dage, og hovedoverslaget er ændret i {changes} positioner, siden den blev oprettet",
-      "suggestion": "Overfør hovedoverslagets ændringer til varianten, flet varianten eller arkivér den"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Likviditeten falder til minus {amount} i {period}, under finansieringsgrænsen på {threshold}.",
+      "suggestion": "Sikr finansiering før {period}, flyt indbetalinger frem eller udskyd betalinger."
     },
-    "unresolved_conflicts": {
-      "fail": "Position {ordinal} \"{description}\" er ændret både i denne variant og i hovedoverslaget",
-      "suggestion": "Åbn dialogen til fletning og afgør, hvilken version af positionen der beholdes"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} skulle have været betalt den {due} og er stadig åben ({days} dage forfalden).",
+      "suggestion": "Purr kunden på betalingen, eller flyt den forventede dato i prognosen."
+    },
+    "forecast_missing": {
+      "fail": "{project} er aktiv, men har ingen kontrakt, faktura, ordre, underentreprise eller plan at prognosticere likviditet ud fra.",
+      "suggestion": "Indtast kundekontrakten med betalingsplanen, eller en planlagt cashflow i omkostningsmodellen."
     }
   }
 }

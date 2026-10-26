@@ -1369,6 +1369,16 @@
       "suggestion": "Choisissez votre valeur, celle du serveur ou une valeur manuelle pour ce champ, puis renvoyez la fusion"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Cette variante est ouverte depuis {days} jours et l'estimatif principal a changé sur {changes} postes depuis sa création",
+      "suggestion": "Reportez les modifications de l'estimatif principal dans la variante, fusionnez la variante ou archivez-la"
+    },
+    "unresolved_conflicts": {
+      "fail": "Le poste {ordinal} « {description} » a été modifié à la fois dans cette variante et dans l'estimatif principal",
+      "suggestion": "Ouvrez la boîte de fusion et décidez quelle version du poste conserver"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Ligne {row} : aucune activité de ce planning n'a l'ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Vérifiez la ligne avec le chantier avant de l'appliquer."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Cette variante est ouverte depuis {days} jours et l'estimatif principal a changé sur {changes} postes depuis sa création",
-      "suggestion": "Reportez les modifications de l'estimatif principal dans la variante, fusionnez la variante ou archivez-la"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "La trésorerie tombe à moins {amount} en {period}, sous le seuil de financement de {threshold}.",
+      "suggestion": "Organiser le financement avant {period}, avancer les encaissements ou reporter les paiements."
     },
-    "unresolved_conflicts": {
-      "fail": "Le poste {ordinal} « {description} » a été modifié à la fois dans cette variante et dans l'estimatif principal",
-      "suggestion": "Ouvrez la boîte de fusion et décidez quelle version du poste conserver"
+    "receipt_overdue": {
+      "fail": "{document} : {amount} était dû le {due} et reste impayé ({days} jours de retard).",
+      "suggestion": "Relancer le client pour le paiement, ou modifier la date prévue dans la prévision."
+    },
+    "forecast_missing": {
+      "fail": "{project} est actif mais n'a ni contrat, ni facture, ni commande, ni sous-traitance, ni planning à partir duquel prévoir la trésorerie.",
+      "suggestion": "Saisir le contrat client avec son échéancier de paiement, ou un flux de trésorerie prévu dans le modèle de coût."
     }
   }
 }

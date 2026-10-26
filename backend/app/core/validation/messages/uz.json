@@ -1369,6 +1369,16 @@
       "suggestion": "Bu maydon uchun o'z qiymatingizni, server qiymatini yoki qo'lda kiritilgan qiymatni tanlang va birlashtirishni qayta yuboring"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Tarmoq {days} kundan beri ochiq, asosiy smeta esa u yaratilganidan beri {changes} ta pozitsiyada o‘zgargan",
+      "suggestion": "Asosiy smeta o‘zgarishlarini tarmoqqa ko‘chiring, tarmoqni birlashtiring yoki arxivlang"
+    },
+    "unresolved_conflicts": {
+      "fail": "{ordinal}-pozitsiya «{description}» ham shu tarmoqda, ham asosiy smetada o‘zgartirilgan",
+      "suggestion": "Birlashtirish oynasini oching va pozitsiyaning qaysi versiyasini saqlashni hal qiling"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "{row}-qator: bu jadvalda {ref} ID li ish yoʻq.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Qoʻllashdan oldin qatorni obyekt bilan tekshiring."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Tarmoq {days} kundan beri ochiq, asosiy smeta esa u yaratilganidan beri {changes} ta pozitsiyada o‘zgargan",
-      "suggestion": "Asosiy smeta o‘zgarishlarini tarmoqqa ko‘chiring, tarmoqni birlashtiring yoki arxivlang"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "{period} oyida pul qoldig'i minus {amount} gacha tushadi, bu {threshold} moliyalashtirish chegarasidan past.",
+      "suggestion": "{period} oyigacha moliyalashtirishni ta'minlang, tushumlarni oldinga suring yoki to'lovlarni keyinga suring."
     },
-    "unresolved_conflicts": {
-      "fail": "{ordinal}-pozitsiya «{description}» ham shu tarmoqda, ham asosiy smetada o‘zgartirilgan",
-      "suggestion": "Birlashtirish oynasini oching va pozitsiyaning qaysi versiyasini saqlashni hal qiling"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} {due} sanasida to'lanishi kerak edi va hali ochiq ({days} kun kechikkan).",
+      "suggestion": "Mijozdan to'lovni talab qiling yoki prognozdagi kutilayotgan sanani o'zgartiring."
+    },
+    "forecast_missing": {
+      "fail": "{project} faol, lekin pul oqimini prognoz qilish uchun shartnoma, hisob-faktura, buyurtma, subpudrat yoki reja yo'q.",
+      "suggestion": "Mijoz shartnomasini to'lov jadvali bilan kiriting yoki xarajat modelida rejalashtirilgan pul oqimini qo'shing."
     }
   }
 }

@@ -1369,6 +1369,16 @@
       "suggestion": "Chọn giá trị của bạn, giá trị của máy chủ hoặc giá trị nhập tay cho trường này, rồi gửi lại bản hợp nhất"
     }
   },
+  "boq_branch": {
+    "diverged_from_main": {
+      "fail": "Nhánh này đã mở {days} ngày và dự toán chính đã thay đổi {changes} hạng mục kể từ khi nhánh được tạo",
+      "suggestion": "Mang thay đổi của dự toán chính vào nhánh, hợp nhất nhánh, hoặc lưu trữ nó"
+    },
+    "unresolved_conflicts": {
+      "fail": "Hạng mục {ordinal} \"{description}\" bị thay đổi ở cả nhánh này và dự toán chính",
+      "suggestion": "Mở hộp thoại hợp nhất và quyết định giữ phiên bản nào của hạng mục"
+    }
+  },
   "schedule_progress_sheet": {
     "known_activity": {
       "fail": "Dòng {row}: không có công việc nào của tiến độ này có ID {ref}.",
@@ -1402,14 +1412,18 @@
       "suggestion": "Hãy kiểm tra dòng này với công trường trước khi áp dụng."
     }
   },
-  "boq_branch": {
-    "diverged_from_main": {
-      "fail": "Nhánh này đã mở {days} ngày và dự toán chính đã thay đổi {changes} hạng mục kể từ khi nhánh được tạo",
-      "suggestion": "Mang thay đổi của dự toán chính vào nhánh, hợp nhất nhánh, hoặc lưu trữ nó"
+  "cashflow_forecast": {
+    "negative_position": {
+      "fail": "Số dư tiền mặt sẽ xuống âm {amount} trong {period}, thấp hơn ngưỡng tài trợ {threshold}.",
+      "suggestion": "Bố trí nguồn vốn trước {period}, thu tiền sớm hơn hoặc lùi thời hạn thanh toán."
     },
-    "unresolved_conflicts": {
-      "fail": "Hạng mục {ordinal} \"{description}\" bị thay đổi ở cả nhánh này và dự toán chính",
-      "suggestion": "Mở hộp thoại hợp nhất và quyết định giữ phiên bản nào của hạng mục"
+    "receipt_overdue": {
+      "fail": "{document}: {amount} đến hạn ngày {due} nhưng vẫn chưa thu được ({days} ngày quá hạn).",
+      "suggestion": "Đôn đốc khách hàng thanh toán hoặc điều chỉnh ngày dự kiến trong dự báo."
+    },
+    "forecast_missing": {
+      "fail": "{project} đang hoạt động nhưng chưa có hợp đồng, hóa đơn, đơn đặt hàng, hợp đồng phụ hay kế hoạch nào để dự báo dòng tiền.",
+      "suggestion": "Nhập hợp đồng với khách hàng cùng lịch thanh toán, hoặc dòng tiền kế hoạch trong mô hình chi phí."
     }
   }
 }

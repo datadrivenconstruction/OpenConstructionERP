@@ -2495,5 +2495,31 @@
       "followed_up_missing": "Muutos {seq} on merkitty olennaiseksi, mutta sillä ei ole kommenttia, RFI:tä, pilveä eikä uudelleenmittausmerkintää.",
       "followed_up_hint": "Kommentoi muutosta, luo RFI tai pilvi tai merkitse sen sisällä olevat määrät mitattavaksi uudelleen."
     }
+  },
+  "cashflow_forecast": {
+    "export": {
+      "title": "Kassavirtaennuste",
+      "portfolio_title": "Portfolion kassavirtaennuste",
+      "empty": "Tälle valinnalle ei ole kassavirtaennustetta.",
+      "project": "Projekti",
+      "as_of": "Päivänä",
+      "currency": "Valuutta",
+      "delay_days": "Maksujen viivästys (päivää)",
+      "overrun_pct": "Kustannusylitys (%)",
+      "closing_position": "Loppusaldo",
+      "peak_funding": "Suurin rahoitustarve",
+      "peak_period": "Suurimman rahoitustarpeen kuukausi",
+      "col": {
+        "period": "Kuukausi",
+        "planned_in": "Suunnitellut tulot",
+        "actual_in": "Toteutuneet tulot",
+        "expected_in": "Odotetut tulot",
+        "planned_out": "Suunnitellut menot",
+        "actual_out": "Toteutuneet menot",
+        "expected_out": "Odotetut menot",
+        "net": "Netto",
+        "cumulative": "Kertynyt asema"
+      }
+    }
   }
 }
