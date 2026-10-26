@@ -1151,6 +1151,48 @@
           "void": "Anulado"
         }
       }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Generado por IA",
+        "cost_estimate": "PRESUPUESTO",
+        "summary": "RESUMEN",
+        "project": "Proyecto:",
+        "boq": "Presupuesto:",
+        "date": "Fecha:",
+        "status": "Estado:",
+        "prepared_by": "Preparado por:",
+        "approved_by": "Aprobado por:",
+        "signature_hint": "Nombre / Firma / Fecha",
+        "contents": "Capítulos / Partidas:",
+        "pos": "Pos.",
+        "description": "Descripción",
+        "unit": "Unidad",
+        "qty": "Cant.",
+        "rate": "PU",
+        "total": "Total",
+        "subtotal": "Subtotal:",
+        "other_positions": "Otras partidas",
+        "direct_cost": "Coste directo:",
+        "markups": "Recargos (sin IVA):",
+        "net_total": "Total neto (sin IVA):",
+        "gross_total": "Total bruto",
+        "page": "Página",
+        "of": "de",
+        "generated": "Generado:",
+        "summary_report": "Informe resumido",
+        "positions_omitted": "{count} partidas (detalle omitido por rendimiento)",
+        "section": "Capítulo",
+        "items": "Partidas",
+        "cost_summary": "Resumen de costes",
+        "table_of_contents": "Índice",
+        "resources_omitted": "Desglose de recursos no impreso: este presupuesto tiene demasiadas líneas de recursos para un solo PDF.",
+        "status_draft": "Borrador",
+        "status_final": "Aprobado",
+        "status_archived": "Archivado",
+        "subject": "Presupuesto y mediciones",
+        "tax_vat": "IVA"
+      }
     }
   },
   "pdf_footer": {

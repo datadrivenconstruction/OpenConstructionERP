@@ -16,16 +16,16 @@ Design goals (worldwide, clear and simple):
   reference date is always a parameter, so the same code behaves the
   same in every timezone and office.
 - Plain language. Every metric has a one-line explainer that a site
-  engineer or estimator can read in a few seconds, localized in English,
-  German, and Russian with an English fallback.
+  engineer or estimator can read in a few seconds, localized in every
+  platform language with an English fallback.
 - Explainable rates. ``completion_rate`` is completed actions divided by
   total actions. The raw components (open, done, cancelled, overdue) are
   always exposed next to the rate so nothing is a black box.
 
 The three status words used across the meetings module are ``open``,
 ``completed``, and ``cancelled`` (see ``ActionItemEntry`` in
-``schemas.py``). The localization tables below cover exactly those plus
-the derived ``overdue`` flag.
+``schemas.py``). The ``meetings.actions`` locale group covers exactly those
+plus the derived ``overdue`` flag.
 """
 
 from __future__ import annotations
@@ -34,75 +34,14 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, timedelta
 from typing import Any
 
+from app.core.i18n import SUPPORTED_LOCALES, is_locale_loaded, load_translations, t
+
 # ==========================================================================
-# Localization tables (English, German, Russian) with English fallback.
-# Keys are stable dotted identifiers so a caller can translate a single
-# concept without pulling the whole table.
+# Localization: the platform's locale files, group ``meetings.actions``
 # ==========================================================================
 
 _DEFAULT_LANG = "en"
-
-_TRANSLATIONS: dict[str, dict[str, str]] = {
-    "en": {
-        "status.open": "Open",
-        "status.completed": "Completed",
-        "status.cancelled": "Cancelled",
-        "flag.overdue": "Overdue",
-        "flag.on_track": "On track",
-        "label.action_item": "Action item",
-        "label.completion_rate": "Action completion rate",
-        "label.open_vs_done": "Open vs done",
-        "label.overdue": "Overdue actions",
-        "explain.action_item": ("An action item is a task agreed in a meeting, with an owner and a due date."),
-        "explain.completion_rate": (
-            "Action completion rate is completed actions divided by total actions, from 0 to 1."
-        ),
-        "explain.open_vs_done": ("Open actions still need work. Done actions are completed and need no more work."),
-        "explain.overdue": (
-            "An action is overdue when it is still open and its due date is before the reference date."
-        ),
-    },
-    "de": {
-        "status.open": "Offen",
-        "status.completed": "Erledigt",
-        "status.cancelled": "Storniert",
-        "flag.overdue": "Ueberfaellig",
-        "flag.on_track": "Im Plan",
-        "label.action_item": "Massnahme",
-        "label.completion_rate": "Erledigungsquote der Massnahmen",
-        "label.open_vs_done": "Offen gegen erledigt",
-        "label.overdue": "Ueberfaellige Massnahmen",
-        "explain.action_item": (
-            "Eine Massnahme ist eine im Meeting vereinbarte Aufgabe mit "
-            "einem Verantwortlichen und einem Faelligkeitsdatum."
-        ),
-        "explain.completion_rate": (
-            "Die Erledigungsquote ist die Zahl der erledigten Massnahmen geteilt durch alle Massnahmen, von 0 bis 1."
-        ),
-        "explain.open_vs_done": ("Offene Massnahmen brauchen noch Arbeit. Erledigte Massnahmen sind fertig."),
-        "explain.overdue": (
-            "Eine Massnahme ist ueberfaellig, wenn sie noch offen ist und ihr Faelligkeitsdatum vor dem Stichtag liegt."
-        ),
-    },
-    "ru": {
-        "status.open": "Открыто",
-        "status.completed": "Выполнено",
-        "status.cancelled": "Отменено",
-        "flag.overdue": "Просрочено",
-        "flag.on_track": "В графике",
-        "label.action_item": "Поручение",
-        "label.completion_rate": "Доля выполненных поручений",
-        "label.open_vs_done": "Открытые и выполненные",
-        "label.overdue": "Просроченные поручения",
-        "explain.action_item": ("Поручение - это задача, согласованная на встрече, с ответственным и сроком."),
-        "explain.completion_rate": (
-            "Доля выполненных поручений - это число выполненных поручений, "
-            "делённое на общее число поручений, от 0 до 1."
-        ),
-        "explain.open_vs_done": ("Открытые поручения ещё в работе. Выполненные поручения завершены."),
-        "explain.overdue": ("Поручение просрочено, если оно ещё открыто и его срок наступил раньше отчётной даты."),
-    },
-}
+_GROUP = "meetings.actions"
 
 # The canonical action-item statuses used by the meetings module.
 KNOWN_STATUSES: tuple[str, ...] = ("open", "completed", "cancelled")
@@ -117,14 +56,23 @@ def normalize_lang(lang: str | None) -> str:
     """Return a supported language code, defaulting to English.
 
     Accepts loose input such as ``"de-DE"``, ``"DE"``, or ``"ru_RU"`` and
-    reduces it to the base language. Any unsupported or empty value falls
-    back to ``"en"`` so the caller never has to guard the return value.
+    reduces it to the base language. Any language the platform does not carry
+    or an empty value falls back to ``"en"`` so the caller never has to guard
+    the return value.
     """
     if not lang:
         return _DEFAULT_LANG
-    code = str(lang).strip().lower().replace("_", "-")
-    base = code.split("-", 1)[0]
-    return base if base in _TRANSLATIONS else _DEFAULT_LANG
+    base = str(lang).strip().lower().replace("_", "-").split("-", 1)[0]
+    return base if base in SUPPORTED_LOCALES else _DEFAULT_LANG
+
+
+def _lookup(key: str, lang: str | None) -> str | None:
+    """The text of ``key`` in ``lang``, English for a key the language lacks, ``None`` when unknown."""
+    if not is_locale_loaded(_DEFAULT_LANG):
+        load_translations()
+    full = f"{_GROUP}.{key}"
+    text = t(full, normalize_lang(lang))
+    return None if text == full else text
 
 
 def translate(key: str, lang: str | None = None) -> str:
@@ -138,10 +86,7 @@ def translate(key: str, lang: str | None = None) -> str:
         The localized string, or the English string if the requested
         language lacks the key, or the key itself if it is unknown.
     """
-    table = _TRANSLATIONS.get(normalize_lang(lang), {})
-    if key in table:
-        return table[key]
-    return _TRANSLATIONS[_DEFAULT_LANG].get(key, key)
+    return _lookup(key, lang) or key
 
 
 def localize_status(status_value: str | None, lang: str | None = None) -> str:
@@ -151,14 +96,7 @@ def localize_status(status_value: str | None, lang: str | None = None) -> str:
     raw key, so a future status value never leaks as ``"status.foo"``.
     """
     norm = (status_value or "open").strip().lower() or "open"
-    key = f"status.{norm}"
-    table = _TRANSLATIONS.get(normalize_lang(lang), {})
-    if key in table:
-        return table[key]
-    english = _TRANSLATIONS[_DEFAULT_LANG]
-    if key in english:
-        return english[key]
-    return str(status_value) if status_value else norm
+    return _lookup(f"status.{norm}", lang) or (str(status_value) if status_value else norm)
 
 
 def overdue_label(is_overdue_flag: bool, lang: str | None = None) -> str:

@@ -1127,6 +1127,48 @@
           "void": "Geçersiz"
         }
       }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Yapay zekâ ile üretildi",
+        "cost_estimate": "MALİYET TAHMİNİ",
+        "summary": "ÖZET",
+        "project": "Proje:",
+        "boq": "Metraj:",
+        "date": "Tarih:",
+        "status": "Durum:",
+        "prepared_by": "Hazırlayan:",
+        "approved_by": "Onaylayan:",
+        "signature_hint": "Ad Soyad / İmza / Tarih",
+        "contents": "Bölümler / Kalemler:",
+        "pos": "Poz.",
+        "description": "Tanım",
+        "unit": "Birim",
+        "qty": "Miktar",
+        "rate": "BF",
+        "total": "Toplam",
+        "subtotal": "Ara toplam:",
+        "other_positions": "Diğer kalemler",
+        "direct_cost": "Doğrudan maliyet:",
+        "markups": "Ek giderler (KDV hariç):",
+        "net_total": "Net toplam (KDV hariç):",
+        "gross_total": "Genel toplam",
+        "page": "Sayfa",
+        "of": "/",
+        "generated": "Oluşturulma:",
+        "summary_report": "Özet rapor",
+        "positions_omitted": "{count} kalem (performans için ayrıntı gösterilmedi)",
+        "section": "Bölüm",
+        "items": "Kalem",
+        "cost_summary": "Maliyet özeti",
+        "table_of_contents": "İçindekiler",
+        "resources_omitted": "Kaynak dökümü yazdırılmadı: bu keşifte tek bir PDF için çok fazla kaynak satırı var.",
+        "status_draft": "Taslak",
+        "status_final": "Onaylandı",
+        "status_archived": "Arşivlendi",
+        "subject": "Keşif ve metraj",
+        "tax_vat": "KDV"
+      }
     }
   },
   "pdf_footer": {

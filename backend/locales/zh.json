@@ -1151,6 +1151,32 @@
         "entries_empty": "本日志暂无记录条目。",
         "site_record": "现场记录"
       }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "AI 生成",
+        "cost_estimate": "COST ESTIMATE",
+        "summary": "SUMMARY",
+        "project": "Project:",
+        "boq": "BOQ:",
+        "date": "Date:",
+        "status": "Status:",
+        "prepared_by": "Prepared by:",
+        "pos": "Pos.",
+        "description": "Description",
+        "unit": "Unit",
+        "qty": "Qty",
+        "rate": "Rate",
+        "total": "Total",
+        "subtotal": "Subtotal:",
+        "other_positions": "Other",
+        "direct_cost": "Direct Cost:",
+        "net_total": "Net Total:",
+        "gross_total": "Gross Total",
+        "page": "Page",
+        "of": "of",
+        "generated": "Generated:"
+      }
     }
   },
   "pdf_footer": {

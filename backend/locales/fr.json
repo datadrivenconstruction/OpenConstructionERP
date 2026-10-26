@@ -1151,6 +1151,48 @@
           "void": "Annulé"
         }
       }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Généré par IA",
+        "cost_estimate": "ESTIMATION DES COÛTS",
+        "summary": "RÉSUMÉ",
+        "project": "Projet :",
+        "boq": "DQE :",
+        "date": "Date :",
+        "status": "Statut :",
+        "prepared_by": "Préparé par :",
+        "approved_by": "Approuvé par :",
+        "signature_hint": "Nom / Signature / Date",
+        "contents": "Lots / Postes :",
+        "pos": "Pos.",
+        "description": "Description",
+        "unit": "Unité",
+        "qty": "Qté",
+        "rate": "PU",
+        "total": "Total",
+        "subtotal": "Sous-total :",
+        "other_positions": "Autres postes",
+        "direct_cost": "Coût direct :",
+        "markups": "Majorations (HT) :",
+        "net_total": "Total HT :",
+        "gross_total": "Total TTC",
+        "page": "Page",
+        "of": "sur",
+        "generated": "Généré le :",
+        "summary_report": "Rapport de synthèse",
+        "positions_omitted": "{count} postes (détail omis pour des raisons de performance)",
+        "section": "Lot",
+        "items": "Postes",
+        "cost_summary": "Récapitulatif des coûts",
+        "table_of_contents": "Table des matières",
+        "resources_omitted": "Détail des ressources non imprimé : ce devis compte trop de lignes de ressources pour un seul PDF.",
+        "status_draft": "Brouillon",
+        "status_final": "Validé",
+        "status_archived": "Archivé",
+        "subject": "Détail quantitatif estimatif",
+        "tax_vat": "TVA"
+      }
     }
   },
   "pdf_footer": {

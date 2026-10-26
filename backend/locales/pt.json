@@ -1151,6 +1151,48 @@
           "void": "Anulado"
         }
       }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Gerado por IA",
+        "cost_estimate": "ORÇAMENTO",
+        "summary": "RESUMO",
+        "project": "Projeto:",
+        "boq": "Orçamento:",
+        "date": "Data:",
+        "status": "Estado:",
+        "prepared_by": "Preparado por:",
+        "approved_by": "Aprovado por:",
+        "signature_hint": "Nome / Assinatura / Data",
+        "contents": "Capítulos / Itens:",
+        "pos": "Pos.",
+        "description": "Descrição",
+        "unit": "Unid.",
+        "qty": "Qtd.",
+        "rate": "PU",
+        "total": "Total",
+        "subtotal": "Subtotal:",
+        "other_positions": "Outros itens",
+        "direct_cost": "Custo direto:",
+        "markups": "Encargos (s/ impostos):",
+        "net_total": "Total s/ impostos:",
+        "gross_total": "Total c/ impostos",
+        "page": "Página",
+        "of": "de",
+        "generated": "Gerado:",
+        "summary_report": "Relatório resumido",
+        "positions_omitted": "{count} itens (detalhe omitido por desempenho)",
+        "section": "Capítulo",
+        "items": "Itens",
+        "cost_summary": "Resumo de custos",
+        "table_of_contents": "Índice",
+        "resources_omitted": "Composição de recursos não impressa: este orçamento tem demasiadas linhas de recursos para um único PDF.",
+        "status_draft": "Rascunho",
+        "status_final": "Aprovado",
+        "status_archived": "Arquivado",
+        "subject": "Orçamento",
+        "tax_vat": "IVA"
+      }
     }
   },
   "pdf_footer": {

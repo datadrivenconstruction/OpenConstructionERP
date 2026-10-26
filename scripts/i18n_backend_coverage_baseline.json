@@ -1,153 +1,153 @@
 {
-  "english_keys": 1367,
+  "english_keys": 1522,
   "locales": {
     "ar": {
-      "missing": 0,
-      "digest": "e3b0c44298fc1c14"
+      "missing": 155,
+      "digest": "7ff09b73317faf01"
     },
     "bg": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "bn": {
-      "missing": 549,
-      "digest": "bf31bc23abc0b129"
+      "missing": 704,
+      "digest": "4bdc3dd1cd178a4d"
     },
     "cs": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "da": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "de": {
       "missing": 22,
       "digest": "8d5dda2c39c6d1a9"
     },
     "el": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "es": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 238,
+      "digest": "8569f4079df8d7b7"
     },
     "et": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "fa": {
-      "missing": 0,
-      "digest": "e3b0c44298fc1c14"
+      "missing": 155,
+      "digest": "7ff09b73317faf01"
     },
     "fi": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "fil": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "fr": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 238,
+      "digest": "8569f4079df8d7b7"
     },
     "he": {
-      "missing": 0,
-      "digest": "e3b0c44298fc1c14"
+      "missing": 155,
+      "digest": "7ff09b73317faf01"
     },
     "hi": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "hr": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "hu": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 238,
+      "digest": "8569f4079df8d7b7"
     },
     "id": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "it": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "ja": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "kk": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "ko": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "ky": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "nl": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "no": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "pl": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "pt": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 238,
+      "digest": "8569f4079df8d7b7"
     },
     "ro": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "ru": {
       "missing": 22,
       "digest": "8d5dda2c39c6d1a9"
     },
     "sv": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "th": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "tr": {
-      "missing": 143,
-      "digest": "b06adcceb126a3a4"
+      "missing": 260,
+      "digest": "397c96c5a1c5d6b7"
     },
     "uk": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 238,
+      "digest": "8569f4079df8d7b7"
     },
     "ur": {
-      "missing": 0,
-      "digest": "e3b0c44298fc1c14"
+      "missing": 155,
+      "digest": "7ff09b73317faf01"
     },
     "uz": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "vi": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 276,
+      "digest": "bd4855b450f4e378"
     },
     "zh": {
-      "missing": 121,
-      "digest": "023b206bdd77dfe8"
+      "missing": 254,
+      "digest": "65f029b9fb1a2f17"
     }
   }
 }

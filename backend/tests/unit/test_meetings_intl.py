@@ -42,7 +42,8 @@ from app.modules.meetings.intl import (
         ("de-DE", "de"),
         ("RU_ru", "ru"),
         ("  EN  ", "en"),
-        ("fr", "en"),  # unsupported -> English
+        ("fr", "fr"),
+        ("xx", "en"),  # not a platform language -> English
         ("", "en"),
         (None, "en"),
     ],
@@ -57,8 +58,8 @@ def test_translate_uses_requested_language() -> None:
 
 
 def test_translate_falls_back_to_english_then_key() -> None:
-    # Unknown language falls back to English.
-    assert translate("status.open", "fr") == "Open"
+    # A language the platform does not carry falls back to English.
+    assert translate("status.open", "xx") == "Open"
     # Unknown key echoes the key itself.
     assert translate("does.not.exist", "en") == "does.not.exist"
 
@@ -85,7 +86,23 @@ def test_explainers_all_present_and_localized() -> None:
     # German differs from English for the completion-rate explainer.
     assert de["completion_rate"] != en["completion_rate"]
     # Unknown locale falls back to English text.
-    assert explainers("fr")["overdue"] == en["overdue"]
+    assert explainers("xx")["overdue"] == en["overdue"]
+
+
+def test_every_summary_word_is_in_the_locale_files_for_en_de_ru() -> None:
+    import json
+
+    from app.core.i18n import LOCALES_DIR
+
+    def group(code: str) -> dict[str, dict[str, str]]:
+        return json.loads((LOCALES_DIR / f"{code}.json").read_text(encoding="utf-8"))["meetings"]["actions"]
+
+    english = group("en")
+    assert english["status"].keys() == {"open", "completed", "cancelled"}
+    for code in ("de", "ru"):
+        own = group(code)
+        assert {k: set(v) for k, v in own.items()} == {k: set(v) for k, v in english.items()}, code
+    assert translate("flag.overdue", "de") == "Überfällig"
 
 
 # ── Date parsing ───────────────────────────────────────────────────────────

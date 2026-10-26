@@ -9,8 +9,10 @@ decimal points are prescribed by the standard and read by machines - but the
 page exists precisely for the human who still opens invoices by eye, and that
 human reads it in their own conventions.
 
-* **Self-contained per-module bundle** - English (source of truth) plus
-  German, no global i18n catalog is touched.
+* **The platform's locale files** - the strings live in
+  ``backend/locales/<code>.json`` under ``document_forms.einvoice_pdf`` (English
+  is the source of truth), read through :mod:`app.core.document_forms_i18n`.
+  A language that translates none of them prints English.
 * **Shared resolution** from :mod:`app.core.document_locale` - an explicit
   ``?locale=`` query parameter wins, otherwise the first ``Accept-Language``
   tag whose primary subtag this table has, otherwise ``"en"``.
@@ -36,6 +38,7 @@ from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
+from app.core.document_forms_i18n import REGISTER_UNRENDERABLE, form_strings
 from app.core.document_locale import (
     normalize_document_locale,
     resolve_document_locale,
@@ -56,81 +59,17 @@ __all__ = [
 
 DEFAULT_PDF_LOCALE = "en"
 
-#: Languages the invoice page can actually render. Extend the table below when
-#: adding a language; anything else falls back to English.
-SUPPORTED_PDF_LOCALES: tuple[str, ...] = ("en", "de")
-
 # ── Catalog ──────────────────────────────────────────────────────────────
 # The English values are byte-for-byte the literals the renderer shipped
 # with, so an English export stays identical to the pre-i18n output. The
 # separators drive :func:`fmt_money` / :func:`fmt_number`, and the date
 # format drives :func:`fmt_date` - de-DE reads 1.234,56 and 15.04.2026.
 
-_STRINGS: dict[str, dict[str, str]] = {
-    "en": {
-        "doc_title": "INVOICE",
-        "date": "Date: {value}",
-        "due": "Due: {value}",
-        "from": "From",
-        "bill_to": "Bill to",
-        "vat_id": "VAT: {value}",
-        "ref": "Ref: {value}",
-        "th_description": "Description",
-        "th_qty": "Qty",
-        "th_unit": "Unit",
-        "th_unit_price": "Unit price",
-        "th_net": "Net ({currency})",
-        "net_total": "Net total",
-        "vat_total": "VAT",
-        "grand_total": "Grand total",
-        "retention_prepaid": "Retention / prepaid",
-        "amount_due": "Amount due",
-        "payment": "Payment",
-        "iban": "IBAN: {value}",
-        "bic": "BIC: {value}",
-        # BT-84 and BT-86 when the seller is not paid through an IBAN. Naming
-        # the wrong instrument on the page a person reads is how a transfer gets
-        # keyed into the wrong field of a banking app.
-        "account_number": "Account: {value}",
-        "bank_code": "Bank code: {value}",
-        "account_holder": "Account holder: {value}",
-        "footer": "This PDF carries an embedded EN 16931 e-invoice (Factur-X / ZUGFeRD). "
-        "The embedded XML is the operative document.",
-        "date_format": "%Y-%m-%d",
-        "decimal_separator": ".",
-        "group_separator": ",",
-    },
-    "de": {
-        "doc_title": "RECHNUNG",
-        "date": "Datum: {value}",
-        "due": "Fällig: {value}",
-        "from": "Von",
-        "bill_to": "Rechnung an",
-        "vat_id": "USt-IdNr.: {value}",
-        "ref": "Käuferreferenz: {value}",
-        "th_description": "Bezeichnung",
-        "th_qty": "Menge",
-        "th_unit": "Einheit",
-        "th_unit_price": "Einzelpreis",
-        "th_net": "Netto ({currency})",
-        "net_total": "Nettobetrag",
-        "vat_total": "USt.",
-        "grand_total": "Gesamtbetrag",
-        "retention_prepaid": "Einbehalt / geleistet",
-        "amount_due": "Zahlbetrag",
-        "payment": "Zahlung",
-        "iban": "IBAN: {value}",
-        "bic": "BIC: {value}",
-        "account_number": "Konto: {value}",
-        "bank_code": "Bankleitzahl: {value}",
-        "account_holder": "Kontoinhaber: {value}",
-        "footer": "Diese PDF-Datei enthält eine eingebettete E-Rechnung nach EN 16931 "
-        "(Factur-X / ZUGFeRD). Maßgeblich ist das eingebettete XML.",
-        "date_format": "%d.%m.%Y",
-        "decimal_separator": ",",
-        "group_separator": ".",
-    },
-}
+_STRINGS: dict[str, dict[str, str]] = form_strings("einvoice_pdf")
+
+#: Languages the invoice page can actually render: those whose locale file
+#: translates part of it, less the ones the PDF layer cannot draw.
+SUPPORTED_PDF_LOCALES: tuple[str, ...] = tuple(code for code in _STRINGS if code not in REGISTER_UNRENDERABLE)
 
 # ── Locale resolution ────────────────────────────────────────────────────
 

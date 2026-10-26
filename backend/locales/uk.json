@@ -1151,6 +1151,48 @@
           "void": "Анульовано"
         }
       }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "Створено ШІ",
+        "cost_estimate": "КОШТОРИСНИЙ РОЗРАХУНОК",
+        "summary": "ПІДСУМКИ",
+        "project": "Проєкт:",
+        "boq": "Кошторис:",
+        "date": "Дата:",
+        "status": "Статус:",
+        "prepared_by": "Склав:",
+        "approved_by": "Затвердив:",
+        "signature_hint": "ПІБ / Підпис / Дата",
+        "contents": "Розділи / Позиції:",
+        "pos": "№ з/п",
+        "description": "Найменування",
+        "unit": "Од. вим.",
+        "qty": "Кількість",
+        "rate": "Ціна",
+        "total": "Сума",
+        "subtotal": "Разом за розділом:",
+        "other_positions": "Інші позиції",
+        "direct_cost": "Прямі витрати:",
+        "markups": "Нарахування (без ПДВ):",
+        "net_total": "Разом без ПДВ:",
+        "gross_total": "Усього з ПДВ",
+        "page": "Стор.",
+        "of": "з",
+        "generated": "Складено:",
+        "summary_report": "Зведений звіт",
+        "positions_omitted": "Позицій: {count} (деталізацію пропущено для швидкодії)",
+        "section": "Розділ",
+        "items": "Позицій",
+        "cost_summary": "Зведення витрат",
+        "table_of_contents": "Зміст",
+        "resources_omitted": "Склад ресурсів не надруковано: у цьому кошторисі забагато рядків ресурсів для одного PDF.",
+        "status_draft": "Чернетка",
+        "status_final": "Затверджено",
+        "status_archived": "В архіві",
+        "subject": "Кошторис",
+        "tax_vat": "ПДВ"
+      }
     }
   },
   "pdf_footer": {

@@ -1151,6 +1151,48 @@
           "void": "Érvénytelen"
         }
       }
+    },
+    "boq_pdf": {
+      "strings": {
+        "ai_generated": "MI által generált",
+        "cost_estimate": "KÖLTSÉGBECSLÉS",
+        "summary": "ÖSSZESÍTÉS",
+        "project": "Projekt:",
+        "boq": "Költségvetés:",
+        "date": "Dátum:",
+        "status": "Állapot:",
+        "prepared_by": "Készítette:",
+        "approved_by": "Jóváhagyta:",
+        "signature_hint": "Név / Aláírás / Dátum",
+        "contents": "Fejezetek / Tételek:",
+        "pos": "Tétel",
+        "description": "Megnevezés",
+        "unit": "Egység",
+        "qty": "Mennyiség",
+        "rate": "Egységár",
+        "total": "Összeg",
+        "subtotal": "Részösszeg:",
+        "other_positions": "Egyéb tételek",
+        "direct_cost": "Közvetlen költség:",
+        "markups": "Pótlékok (ÁFA nélkül):",
+        "net_total": "Nettó összesen (ÁFA nélkül):",
+        "gross_total": "Bruttó összesen",
+        "page": "Oldal",
+        "of": "/",
+        "generated": "Készült:",
+        "summary_report": "Összesítő jelentés",
+        "positions_omitted": "Tételek száma: {count} (a részletezés teljesítményokokból elmarad)",
+        "section": "Fejezet",
+        "items": "Tételek",
+        "cost_summary": "Költségösszesítő",
+        "table_of_contents": "Tartalomjegyzék",
+        "resources_omitted": "Az erőforrás-bontás nincs kinyomtatva: ebben a költségvetésben túl sok erőforrássor van egy PDF-hez.",
+        "status_draft": "Piszkozat",
+        "status_final": "Jóváhagyva",
+        "status_archived": "Archiválva",
+        "subject": "Költségvetés",
+        "tax_vat": "ÁFA"
+      }
     }
   },
   "pdf_footer": {

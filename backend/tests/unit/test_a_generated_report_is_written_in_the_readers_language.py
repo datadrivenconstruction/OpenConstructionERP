@@ -212,11 +212,11 @@ def test_the_pdf_document_metadata_names_the_language_it_was_written_in() -> Non
 
 
 def test_a_language_the_catalogue_does_not_hold_falls_back_to_english() -> None:
-    """Japanese is a supported interface language and not a supported
-    report language, which is exactly why the routes must declare what
-    they produced rather than what was asked for."""
-    assert cat.resolve_report_locale("ja", None) == "en"
-    assert _html("ja") == _html("en")
+    """Bengali is a supported interface language and not a supported
+    report language (no bundled PDF face draws it), which is exactly why the
+    routes must declare what they produced rather than what was asked for."""
+    assert cat.resolve_report_locale("bn", None) == "en"
+    assert _html("bn") == _html("en")
 
 
 def test_a_regional_code_resolves_through_its_base_language() -> None:
@@ -227,7 +227,7 @@ def test_a_regional_code_resolves_through_its_base_language() -> None:
 def test_the_query_parameter_outranks_the_header() -> None:
     assert cat.resolve_report_locale("ru", "de,en;q=0.5") == "ru"
     assert cat.resolve_report_locale(None, "de,en;q=0.5") == "de"
-    assert cat.resolve_report_locale(None, "ja,ru;q=0.5") == "ru"
+    assert cat.resolve_report_locale(None, "bn,ru;q=0.5") == "ru"
 
 
 # ── Catalogue integrity ───────────────────────────────────────────────────
