@@ -623,44 +623,44 @@
     "validation": {
       "ok": "OK",
       "has_pieces": {
-        "fail": "Ishda kesiladigan detallar yo'q",
-        "suggestion": "Detallarni qo'lda qo'shing, qo'ying yoki bukish qaydnomasi, o'lchov, BOQ qatori yoxud fayldan import qiling."
+        "fail": "Ishda kesiladigan detallar yoʻq",
+        "suggestion": "Detallarni qoʻlda qoʻshing, qoʻying yoki bukish qaydnomasi, oʻlchov, BOQ qatori yoxud fayldan import qiling."
       },
       "has_stock": {
-        "fail": "Ishda kesish uchun zaxira yo'q",
-        "suggestion": "Kamida bitta zaxira uzunligi yoki list o'lchamini qo'shing yoki obyekt omboridagi qoldiqlardan qayta foydalaning."
+        "fail": "Ishda kesish uchun zaxira yoʻq",
+        "suggestion": "Kamida bitta zaxira uzunligi yoki list oʻlchamini qoʻshing yoki obyekt omboridagi qoldiqlardan qayta foydalaning."
       },
       "sheet_dimensions": {
-        "fail": "{ref} kengligi ko'rsatilmagan",
-        "suggestion": "Har bir list detali va har bir list o'lchami uchun uzunlik va kenglikni kiriting."
+        "fail": "{ref} kengligi koʻrsatilmagan",
+        "suggestion": "Har bir list detali va har bir list oʻlchami uchun uzunlik va kenglikni kiriting."
       },
       "piece_fits_stock": {
-        "fail": "{ref} detali ({size} mm) hech bir zaxira yozuviga sig'maydi",
-        "suggestion": "Uzunroq yoki kattaroq zaxira o'lchamini qo'shing, qirqimni kamaytiring yoki detalni tutashuv bilan bo'ling."
+        "fail": "{ref} detali ({size} mm) hech bir zaxira yozuviga sigʻmaydi",
+        "suggestion": "Uzunroq yoki kattaroq zaxira oʻlchamini qoʻshing, qirqimni kamaytiring yoki detalni tutashuv bilan boʻling."
       },
       "grain_allows_fit": {
-        "fail": "{ref} detali faqat tola yo'nalishiga ko'ndalang burilganda sig'adi",
-        "suggestion": "Bu detalni burishga ruxsat bering yoki tola yo'nalishida sig'adigan list o'lchamini qo'shing."
+        "fail": "{ref} detali faqat tola yoʻnalishiga koʻndalang burilganda sigʻadi",
+        "suggestion": "Bu detalni burishga ruxsat bering yoki tola yoʻnalishida sigʻadigan list oʻlchamini qoʻshing."
       },
       "kerf_set": {
         "fail": "Arra kesim kengligi nolga teng",
-        "suggestion": "Tig' yoki kesim kengligini kiriting, aks holda bir necha kesimli har bir sterjenning foydalanish darajasi oshirib ko'rsatiladi."
+        "suggestion": "Tigʻ yoki kesim kengligini kiriting, aks holda bir necha kesimli har bir sterjenning foydalanish darajasi oshirib koʻrsatiladi."
       },
       "min_offcut_set": {
         "fail": "Eng kichik yaroqli qoldiq belgilanmagan",
         "suggestion": "Saqlashga arziydigan eng qisqa qoldiqni belgilang, shunda qayta ishlatiladigan qoldiqlar chiqindi hisoblanmaydi."
       },
       "stock_priced": {
-        "fail": "{ref} zaxirasining birlik narxi yo'q",
-        "suggestion": "Reja narxni ko'rsatishi va eng arzon zaxirani tanlashi uchun dona narxini kiriting."
+        "fail": "{ref} zaxirasining birlik narxi yoʻq",
+        "suggestion": "Reja narxni koʻrsatishi va eng arzon zaxirani tanlashi uchun dona narxini kiriting."
       },
       "stock_sufficient": {
         "fail": "Mavjud zaxiraga joylashtirilmagan detallar: {count}",
-        "suggestion": "Mavjud miqdorni oshiring yoki yana bir zaxira o'lchamini qo'shing."
+        "suggestion": "Mavjud miqdorni oshiring yoki yana bir zaxira oʻlchamini qoʻshing."
       },
       "yield_threshold": {
         "fail": "Foydalanish darajasi {actual} % chegara {threshold} % dan past",
-        "suggestion": "Boshqa zaxira uzunligi yoki o'lchamini qo'shing, burishga ruxsat bering yoki bu material uchun chegarani qayta ko'rib chiqing."
+        "suggestion": "Boshqa zaxira uzunligi yoki oʻlchamini qoʻshing, burishga ruxsat bering yoki bu material uchun chegarani qayta koʻrib chiqing."
       }
     }
   }

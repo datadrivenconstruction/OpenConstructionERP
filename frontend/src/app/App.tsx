@@ -735,6 +735,9 @@ const FormworkPage = lazy(() => import('@/features/formwork'));
 const WasteFactorsPage = lazy(() =>
   import('@/features/waste-factors').then((m) => ({ default: m.WasteFactorsPage }))
 );
+const CuttingPage = lazy(() =>
+  import('@/features/cutting').then((m) => ({ default: m.CuttingPage }))
+);
 const NormExpansionPage = lazy(() =>
   import('@/features/norm-expansion').then((m) => ({ default: m.NormExpansionPage }))
 );
@@ -1370,6 +1373,8 @@ export default function App() {
         <Route path="/labor-rates" element={<P title="Labor Rates"><LaborRatesPage /></P>} />
         <Route path="/resource-summary" element={<P title="Resource Summary"><ResourceSummaryPage /></P>} />
         <Route path="/waste-factors" element={<P title="Waste Factors"><WasteFactorsPage /></P>} />
+        <Route path="/cutting" element={<P title="Cutting Optimisation"><CuttingPage /></P>} />
+        <Route path="/projects/:projectId/cutting" element={<P title="Cutting Optimisation"><CuttingPage /></P>} />
         <Route path="/norm-expansion" element={<P title="Production Norms"><NormExpansionPage /></P>} />
 
         <Route path="/assemblies" element={<P title="Assemblies"><AssembliesPage /></P>} />

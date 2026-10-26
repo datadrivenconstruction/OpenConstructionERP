@@ -624,7 +624,7 @@
       "ok": "OK",
       "has_pieces": {
         "fail": "Le travail ne contient aucune pièce à couper",
-        "suggestion": "Ajoutez des pièces à la main, collez-les ou importez-les depuis un plan de cintrage, un métré, une ligne du BOQ ou un fichier."
+        "suggestion": "Ajoutez des pièces à la main, collez-les ou importez-les depuis un plan de cintrage, un métré, une ligne du devis quantitatif ou un fichier."
       },
       "has_stock": {
         "fail": "Le travail n'a aucun stock à débiter",

@@ -18,6 +18,7 @@ const preloaders: Record<string, () => void> = {
   '/norm-expansion': () => void import('@/features/norm-expansion/NormExpansionPage'),
   '/labor-rates': () => void import('@/features/labor-rates/LaborRatesPage'),
   '/waste-factors': () => void import('@/features/waste-factors/WasteFactorsPage'),
+  '/cutting': () => void import('@/features/cutting/CuttingPage'),
   '/price-index': () => void import('@/features/price-index/PriceIndexPage'),
   '/resource-summary': () => void import('@/features/resource-summary/ResourceSummaryPage'),
   '/cost-match': () => void import('@/features/cost-match'),
