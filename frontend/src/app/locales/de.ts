@@ -53559,6 +53559,13 @@ const resource = {
     "settings.notify_title": "Benachrichtigungen",
     "settings.notify_subtitle": "Legen Sie für jede Ereignisart fest, ob sie in der App, per E-Mail oder über einen Webhook bei Ihnen ankommt.",
     "settings.notify_open": "Benachrichtigungskanäle festlegen",
+    "settings.chords_title": "Navigationskürzel",
+    "settings.chords_subtitle": "Drücken Sie G und dann die Taste, um zu einer Seite zu springen. Die Taste ist für jede Seite änderbar.",
+    "settings.chords_invalid": "Verwenden Sie einen Buchstaben, eine Ziffer oder ein Komma (nicht G).",
+    "settings.chords_taken": "{{key}} wird bereits für {{other}} verwendet.",
+    "settings.chords_key_for": "Taste nach G für {{page}}",
+    "settings.chords_reset_one": "{{page}} auf {{key}} zurücksetzen",
+    "settings.chords_reset_all": "Alle Kürzel zurücksetzen",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",

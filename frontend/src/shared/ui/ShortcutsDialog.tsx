@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
 import clsx from 'clsx';
+import { G_CHORDS, chordKey, gChordPref } from '@/shared/lib/gChords';
 
 interface ShortcutsDialogProps {
   open: boolean;
@@ -109,8 +110,16 @@ function Kbd({ children }: { children: string }) {
   );
 }
 
+/** A listed `g x` chord shows the key the person chose for it, if they remapped it. */
+function chordKeys(keys: string[], chosen: Record<string, string>): string[] {
+  if (keys.length !== 2 || keys[0] !== 'g') return keys;
+  const chord = G_CHORDS.find((c) => c.handlers.includes('global') && c.key === keys[1]);
+  return chord ? ['g', chordKey(chord, chosen)] : keys;
+}
+
 export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
   const { t } = useTranslation();
+  const chosen = gChordPref.use();
   const dialogRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape key
@@ -204,7 +213,8 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
                 {group.items.map((item) => {
                   // If the combo includes a modifier key, separate with "+";
                   // otherwise it's a sequence (e.g. "g d") — separate with "then".
-                  const hasModifier = item.keys.some((k) =>
+                  const keys = chordKeys(item.keys, chosen);
+                  const hasModifier = keys.some((k) =>
                     ['Ctrl', 'Shift', 'Alt', 'Cmd', 'Meta'].includes(k),
                   );
                   return (
@@ -218,7 +228,7 @@ export function ShortcutsDialog({ open, onClose }: ShortcutsDialogProps) {
                           : t(item.descriptionKey)}
                       </span>
                       <div className="flex items-center gap-1 ml-4 shrink-0">
-                        {item.keys.map((key, keyIdx) => (
+                        {keys.map((key, keyIdx) => (
                           <span key={keyIdx} className="flex items-center gap-1">
                             {keyIdx > 0 && (
                               <span className="text-xs text-content-tertiary mx-0.5">

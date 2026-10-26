@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { chordRoutes } from '@/shared/lib/gChords';
 
 /** How long (ms) to wait for the second key in a two-key sequence. */
 const SEQUENCE_TIMEOUT = 500;
@@ -78,24 +79,8 @@ export function useKeyboardShortcuts({
   }, []);
 
   useEffect(() => {
-    /** Two-key navigation map: first key -> second key -> path. */
+    /** Two-key navigation map: first key -> second key -> path. The G keys are remappable. */
     const sequences: Record<string, Record<string, string>> = {
-      g: {
-        d: '/',
-        p: '/projects',
-        b: '/boq',
-        c: '/costs',
-        a: '/assemblies',
-        v: '/validation',
-        s: '/schedule',
-        f: '/finance',
-        '5': '/5d',
-        r: '/reports',
-        t: '/tendering',
-        m: '/meetings',
-        i: '/rfi',
-        o: '/contacts',
-      },
       n: {
         p: '/projects/new',
         b: '/boq',
@@ -121,7 +106,7 @@ export function useKeyboardShortcuts({
         const firstKey = pendingKeyRef.current;
         clearPending();
 
-        const group = sequences[firstKey];
+        const group = firstKey === 'g' ? chordRoutes('global') : sequences[firstKey];
         const target = group?.[key];
         if (target) {
           e.preventDefault();
@@ -146,7 +131,7 @@ export function useKeyboardShortcuts({
       }
 
       // ── Start of a two-key sequence ───────────────────────────────────
-      if (key in sequences) {
+      if (key === 'g' || key in sequences) {
         e.preventDefault();
         pendingKeyRef.current = key;
         timerRef.current = setTimeout(() => {

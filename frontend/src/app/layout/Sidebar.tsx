@@ -82,6 +82,7 @@ import { suggestMenuChanges } from './menuUsage';
 import { NavItemBadge } from './NavItemBadge';
 import { MenuModeBar, MenuSuggestionCard, RailFlyoutGroup } from './MenuModeBar';
 import { MenuOrganizer } from './MenuOrganizer';
+import { chordForRoute, chordKey, chordRoutes, gChordPref } from '@/shared/lib/gChords';
 
 // The picker carries the curated icon catalogue; both load on first use.
 const MenuIconPicker = lazy(() => import('./MenuIconPicker'));
@@ -450,24 +451,7 @@ const PRODUCT_TOUR_NAV_TESTIDS: Record<string, string> = {
 // sequence is `G` then a single letter — the same convention modern
 // SaaS apps use, so muscle memory transfers. We surface the hint inline
 // next to the item so users can discover the shortcut without docs.
-const KBD_HINTS: Record<string, string> = {
-  '/': 'G D',
-  '/projects': 'G P',
-  '/boq': 'G B',
-  '/costs': 'G C',
-  '/bim': 'G M',
-  '/ai-estimate': 'G A',
-  '/settings': 'G ,',
-};
-const KBD_BY_LETTER: Record<string, string> = {
-  d: '/',
-  p: '/projects',
-  b: '/boq',
-  c: '/costs',
-  m: '/bim',
-  a: '/ai-estimate',
-  ',': '/settings',
-};
+// The keys come from `shared/lib/gChords.ts`, where a person can remap them.
 
 /** Addresses the router answers with a redirect, by the menu row they belong
  *  to. `/` redirects to `/dashboard`, so without this the Dashboard row
@@ -999,7 +983,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
       if (!key) return;
 
       if (firstKeyRef.current === 'g') {
-        const route = KBD_BY_LETTER[key];
+        const route = chordRoutes('menu')[key];
         if (route) {
           e.preventDefault();
           // The dashboard chord must reach the dashboard even on fresh
@@ -1007,7 +991,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           // until the wizard is finished, but a deliberate chord nav
           // means "show me the dashboard now". Sentinel is read+cleared
           // by DashboardPage's first-launch effect.
-          if (key === 'd') {
+          if (route === '/') {
             try {
               sessionStorage.setItem('oe_skip_onboarding_redirect', '1');
             } catch {
@@ -2640,7 +2624,9 @@ function SidebarItem({
     const target = { route: item.to, label, icon: item.icon };
     onRowMenu(target, keyboard ? r.left + 24 : e.clientX, keyboard ? r.bottom : e.clientY);
   };
-  const kbdHint = KBD_HINTS[item.to];
+  const chordChoices = gChordPref.use();
+  const chord = chordForRoute(item.to);
+  const kbdHint = chord ? `G ${chordKey(chord, chordChoices).toUpperCase()}` : undefined;
   const tourTestId = PRODUCT_TOUR_NAV_TESTIDS[item.to];
   // Hover tooltip: label, plus the "when to use this" one-liner when the
   // item defines one (procurement look-alikes, #280). Kept on one line.
