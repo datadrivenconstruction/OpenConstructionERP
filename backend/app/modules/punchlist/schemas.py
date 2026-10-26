@@ -66,6 +66,10 @@ class PunchItemCreate(BaseModel):
         pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing|hvac|exterior|landscaping|general)$",
     )
     trade: str | None = Field(default=None, max_length=100)
+    area: str | None = Field(default=None, max_length=255)
+    asset_kind: str | None = Field(default=None, pattern=r"^(bim_element|plant|tag)$")
+    asset_ref: str | None = Field(default=None, max_length=100)
+    asset_label: str | None = Field(default=None, max_length=255)
     # WGS84 world-space pin (companion to the sheet-pinned location_x/y).
     # Optional - punch items without a map pin still work end-to-end.
     geo_lat: float | None = Field(default=None, ge=-90, le=90)
@@ -127,6 +131,10 @@ class PunchItemUpdate(BaseModel):
         pattern=r"^(structural|mechanical|electrical|architectural|fire_safety|plumbing|finishing|hvac|exterior|landscaping|general)$",
     )
     trade: str | None = Field(default=None, max_length=100)
+    area: str | None = Field(default=None, max_length=255)
+    asset_kind: str | None = Field(default=None, pattern=r"^(bim_element|plant|tag)$")
+    asset_ref: str | None = Field(default=None, max_length=100)
+    asset_label: str | None = Field(default=None, max_length=255)
     resolution_notes: str | None = Field(default=None, max_length=5000)
     geo_lat: float | None = Field(default=None, ge=-90, le=90)
     geo_lon: float | None = Field(default=None, ge=-180, le=180)
@@ -181,6 +189,10 @@ class PunchItemResponse(BaseModel):
     due_date: CalendarDay | None = None
     category: str | None = None
     trade: str | None = None
+    area: str | None = None
+    asset_kind: str | None = None
+    asset_ref: str | None = None
+    asset_label: str | None = None
     photos: list[str] = Field(default_factory=list)
     #: Evidence record per entry of ``photos`` (same order): hash, capture
     #: location with accuracy and source, capture time, orientation, EXIF.

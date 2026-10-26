@@ -104,6 +104,10 @@ def _item_to_response(item: object, names: Mapping[str, str] | None = None) -> P
         due_date=item.due_date,  # type: ignore[attr-defined]
         category=item.category,  # type: ignore[attr-defined]
         trade=item.trade,  # type: ignore[attr-defined]
+        area=getattr(item, "area", None),
+        asset_kind=getattr(item, "asset_kind", None),
+        asset_ref=getattr(item, "asset_ref", None),
+        asset_label=getattr(item, "asset_label", None),
         photos=item.photos or [],  # type: ignore[attr-defined]
         photo_evidence=_photo_evidence(item),
         geo_lat=getattr(item, "geo_lat", None),
@@ -195,6 +199,8 @@ async def list_items(
     assigned_to: str | None = Query(default=None),
     category: str | None = Query(default=None),
     trade: str | None = Query(default=None),
+    area: str | None = Query(default=None, max_length=255),
+    asset_ref: str | None = Query(default=None, max_length=100),
     _perm: None = Depends(RequirePermission("punchlist.read")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemListResponse:
@@ -216,6 +222,8 @@ async def list_items(
         assigned_to=assigned_to,
         category_filter=category,
         trade_filter=trade,
+        area=area,
+        asset_ref=asset_ref,
     )
     return PunchItemListResponse(
         items=await _item_responses(service, items),
@@ -246,6 +254,8 @@ async def list_items_root_alias(
     assigned_to: str | None = Query(default=None),
     category: str | None = Query(default=None),
     trade: str | None = Query(default=None),
+    area: str | None = Query(default=None, max_length=255),
+    asset_ref: str | None = Query(default=None, max_length=100),
     _perm: None = Depends(RequirePermission("punchlist.read")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemListResponse:
@@ -261,6 +271,8 @@ async def list_items_root_alias(
         assigned_to=assigned_to,
         category=category,
         trade=trade,
+        area=area,
+        asset_ref=asset_ref,
         service=service,
     )
 

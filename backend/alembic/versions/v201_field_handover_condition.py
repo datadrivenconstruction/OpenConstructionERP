@@ -36,6 +36,13 @@ branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
 _DEFECT = "oe_dlp_defect"
+_PUNCH = "oe_punchlist_item"
+_PUNCH_COLUMNS = (
+    ("area", 255),
+    ("asset_kind", 20),
+    ("asset_ref", 100),
+    ("asset_label", 255),
+)
 _DOSSIER = "oe_closeout_dossier"
 _DELIVERY = "oe_closeout_delivery"
 _SCALE = "oe_condition_scale"
@@ -69,6 +76,16 @@ def upgrade() -> None:
             op.add_column(_DEFECT, sa.Column("geo_lat", sa.Float(), nullable=True))
         if "geo_lon" not in have:
             op.add_column(_DEFECT, sa.Column("geo_lon", sa.Float(), nullable=True))
+
+    if _PUNCH in tables:
+        have = {c["name"] for c in insp.get_columns(_PUNCH)}
+        for name, length in _PUNCH_COLUMNS:
+            if name not in have:
+                op.add_column(_PUNCH, sa.Column(name, sa.String(length), nullable=True))
+        indexed = {i["name"] for i in insp.get_indexes(_PUNCH)}
+        for name in ("area", "asset_ref"):
+            if f"ix_{_PUNCH}_{name}" not in indexed:
+                op.create_index(f"ix_{_PUNCH}_{name}", _PUNCH, [name])
 
     if _DOSSIER not in tables and "oe_closeout_package" in tables:
         op.create_table(
@@ -220,6 +237,15 @@ def downgrade() -> None:
     for table in (_ACTION, _ASSESSMENT, _SCALE, _DELIVERY, _DOSSIER):
         if table in tables:
             op.drop_table(table)
+    if _PUNCH in tables:
+        indexed = {i["name"] for i in insp.get_indexes(_PUNCH)}
+        for name in ("asset_ref", "area"):
+            if f"ix_{_PUNCH}_{name}" in indexed:
+                op.drop_index(f"ix_{_PUNCH}_{name}", table_name=_PUNCH)
+        have = {c["name"] for c in insp.get_columns(_PUNCH)}
+        for name, _length in reversed(_PUNCH_COLUMNS):
+            if name in have:
+                op.drop_column(_PUNCH, name)
     if _DEFECT in tables:
         have = {c["name"] for c in insp.get_columns(_DEFECT)}
         for column in ("geo_lon", "geo_lat", "photos"):

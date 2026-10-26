@@ -167,6 +167,32 @@ async def test_area_scope_takes_only_that_areas_punch_items(session, project_id)
     assert state == "errors"
 
 
+async def test_scope_reads_the_punch_items_own_area_and_asset_columns(session, project_id):
+    package, _doc = await _complete_package(session, project_id)
+    for status, area, ref in (("verified", "Block A", "el-7"), ("open", "Block B", "el-9"), ("open", None, None)):
+        session.add(
+            PunchItem(
+                project_id=project_id,
+                title=f"Snag {area}",
+                description="",
+                priority="medium",
+                status=status,
+                photos=[],
+                metadata_={},
+                reopen_history=[],
+                area=area,
+                asset_kind="bim_element" if ref else None,
+                asset_ref=ref,
+            )
+        )
+    await session.flush()
+    service = DossierService(session)
+    _state, _failed, ctx = await service.run_checks(package, {"kind": "area", "value": "Block A"}, "en")
+    assert ctx["punch"]["total"] == 1
+    _state, _failed, ctx = await service.run_checks(package, {"kind": "asset", "value": "el-9"}, "en")
+    assert ctx["punch"]["total"] == 1 and len(ctx["punch"]["open"]) == 1
+
+
 async def test_download_webhook_delivery_and_resend_are_logged(session, project_id, monkeypatch):
     package, _doc = await _complete_package(session, project_id)
     service = DossierService(session)

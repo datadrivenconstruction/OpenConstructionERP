@@ -35,6 +35,13 @@ class PunchItem(Base):
     page: Mapped[int | None] = mapped_column(Integer, nullable=True)
     location_x: Mapped[float | None] = mapped_column(Float, nullable=True)
     location_y: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Where the item is (zone, floor, room) and which asset it concerns. The asset
+    # is a soft reference like the condition module's: ``asset_kind`` names what
+    # ``asset_ref`` holds, ``asset_label`` keeps the readable name at link time.
+    area: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    asset_kind: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    asset_ref: Mapped[str | None] = mapped_column(String(100), nullable=True, index=True)
+    asset_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
     title: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[str] = mapped_column(Text, nullable=False, default="")
     priority: Mapped[str] = mapped_column(String(20), nullable=False, default="medium")

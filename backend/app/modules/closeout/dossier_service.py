@@ -130,8 +130,8 @@ class DossierService:
         out = []
         for it in rows:
             meta = it.metadata_ if isinstance(it.metadata_, dict) else {}
-            refs = (meta.get("asset_ref"), meta.get("plant_item_id"), meta.get("bim_element_id"))
-            if dz.matches_scope(scope, area=meta.get("area") or meta.get("location"), asset_refs=refs):
+            refs = (it.asset_ref, meta.get("asset_ref"), meta.get("plant_item_id"), meta.get("bim_element_id"))
+            if dz.matches_scope(scope, area=it.area or meta.get("area") or meta.get("location"), asset_refs=refs):
                 out.append(it)
         return out
 

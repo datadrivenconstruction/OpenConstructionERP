@@ -48,6 +48,8 @@ export type PunchCategory =
   | 'landscaping'
   | 'general';
 
+export type PunchAssetKind = 'bim_element' | 'plant' | 'tag';
+
 export interface PunchItem {
   id: string;
   project_id: string;
@@ -71,6 +73,13 @@ export interface PunchItem {
   geo_lat?: number | null;
   geo_lon?: number | null;
   trade: string | null;
+  /** Zone, floor or room the item is in. */
+  area?: string | null;
+  /** What `asset_ref` holds: a BIM register element, a plant item or a free tag. */
+  asset_kind?: PunchAssetKind | null;
+  asset_ref?: string | null;
+  /** Readable asset name as it was when the link was made. */
+  asset_label?: string | null;
   resolution_notes: string | null;
   verified_by: string | null;
   /** Name of the contact `verified_by` holds the id of, when it holds one. */
@@ -140,6 +149,8 @@ export interface PunchFilters {
   status?: PunchStatus | '';
   category?: PunchCategory | '';
   assigned_to?: string;
+  area?: string;
+  asset_ref?: string;
   /** Rows per page. Server default 50, hard cap 100. */
   limit?: number;
 }
@@ -159,6 +170,10 @@ export interface CreatePunchPayload {
   location_x?: number | null;
   location_y?: number | null;
   trade?: string;
+  area?: string;
+  asset_kind?: PunchAssetKind;
+  asset_ref?: string;
+  asset_label?: string;
   /** Decimal string with a dot, e.g. "1250.5". */
   rework_cost?: string;
   /** Send the project's currency: the backend defaults to USD otherwise. */
@@ -177,6 +192,12 @@ export interface UpdatePunchPayload {
   location_x?: number | null;
   location_y?: number | null;
   trade?: string | null;
+  /** Empty string or null clears. */
+  area?: string | null;
+  asset_kind?: PunchAssetKind | null;
+  /** Empty string or null unlinks the asset (kind and label go with it). */
+  asset_ref?: string | null;
+  asset_label?: string | null;
   resolution_notes?: string | null;
   /** null clears the price. */
   rework_cost?: string | null;
@@ -225,6 +246,8 @@ export async function fetchPunchItems(
   if (filters?.status) params.set('status', filters.status);
   if (filters?.category) params.set('category', filters.category);
   if (filters?.assigned_to) params.set('assigned_to', filters.assigned_to);
+  if (filters?.area) params.set('area', filters.area);
+  if (filters?.asset_ref) params.set('asset_ref', filters.asset_ref);
   if (filters?.limit != null) params.set('limit', String(filters.limit));
   return apiGet<Page<PunchItem>>(`/v1/punchlist/items/?${params.toString()}`);
 }

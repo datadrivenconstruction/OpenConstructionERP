@@ -227,6 +227,10 @@ class PunchListService:
             due_date=data.due_date,
             category=data.category,
             trade=data.trade,
+            area=data.area or None,
+            asset_kind=data.asset_kind if data.asset_ref else None,
+            asset_ref=data.asset_ref or None,
+            asset_label=data.asset_label if data.asset_ref else None,
             geo_lat=data.geo_lat,
             geo_lon=data.geo_lon,
             rework_cost=getattr(data, "rework_cost", None),
@@ -298,6 +302,8 @@ class PunchListService:
         assigned_to: str | None = None,
         category_filter: str | None = None,
         trade_filter: str | None = None,
+        area: str | None = None,
+        asset_ref: str | None = None,
     ) -> tuple[list[PunchItem], int]:
         """List punch items for a project."""
         return await self.repo.list_for_project(
@@ -309,6 +315,8 @@ class PunchListService:
             assigned_to=assigned_to,
             category=category_filter,
             trade=trade_filter,
+            area=area,
+            asset_ref=asset_ref,
         )
 
     # ── Update ────────────────────────────────────────────────────────────
@@ -341,6 +349,14 @@ class PunchListService:
                 if isinstance(_incoming, dict)
                 else _incoming
             )
+
+        for key in ("area", "asset_ref"):
+            if key in fields:
+                fields[key] = fields[key] or None
+        if "asset_ref" in fields and not fields["asset_ref"]:
+            # Unlinking the asset drops its kind and label with it.
+            fields["asset_kind"] = None
+            fields["asset_label"] = None
 
         if not fields:
             return item

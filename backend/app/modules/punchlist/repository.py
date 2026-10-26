@@ -42,6 +42,8 @@ class PunchListRepository:
         assigned_to: str | None = None,
         category: str | None = None,
         trade: str | None = None,
+        area: str | None = None,
+        asset_ref: str | None = None,
     ) -> tuple[list[PunchItem], int]:
         """List punch items for a project with pagination and filters."""
         base = select(PunchItem).where(PunchItem.project_id == project_id)
@@ -55,6 +57,10 @@ class PunchListRepository:
             base = base.where(PunchItem.category == category)
         if trade is not None:
             base = base.where(PunchItem.trade == trade)
+        if area is not None:
+            base = base.where(PunchItem.area == area)
+        if asset_ref is not None:
+            base = base.where(PunchItem.asset_ref == asset_ref)
 
         count_stmt = select(func.count()).select_from(base.subquery())
         total = (await self.session.execute(count_stmt)).scalar_one()
