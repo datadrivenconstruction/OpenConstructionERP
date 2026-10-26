@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Meeskonna {crew} kohustus nädalaks {week} on seotud tööga, millel on {count} avatud piirangut",
+      "suggestion": "Kõigepealt kõrvaldage piirangud või eemaldage töö selle nädala plaanist"
+    },
+    "week_ppc_recorded": {
+      "fail": "Nädalal {week} oli kohustusi, kuid PPC-d ei ole salvestatud",
+      "suggestion": "Sulgege nädalaplaan, et selle PPC arvutataks"
+    },
+    "missed_commitment_reason": {
+      "fail": "Meeskonna {crew} nädalal {week} täitmata jäänud kohustusel puudub kõrvalekalde põhjus",
+      "suggestion": "Salvestage põhjus, et see arvestataks põhjuste Pareto diagrammis"
+    },
+    "constraint_overdue": {
+      "fail": "Piirang \"{description}\" oleks pidanud olema kõrvaldatud hiljemalt {date} ja on endiselt avatud",
+      "suggestion": "Nõudke vastutajalt tulemust või nihutage sihtkuupäeva ja mõjutatud tööd"
+    },
+    "constraint_owner": {
+      "fail": "Piirangul \"{description}\" puudub vastutaja",
+      "suggestion": "Määrake isik, kes vastutab selle kõrvaldamise eest"
+    }
+  }
+}

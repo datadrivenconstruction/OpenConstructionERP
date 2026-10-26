@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Åtagandet från {crew} för veckan {week} gäller en uppgift med {count} öppna hinder",
+      "suggestion": "Undanröj hindren först, eller ta bort uppgiften från veckans plan"
+    },
+    "week_ppc_recorded": {
+      "fail": "Veckan {week} hade åtaganden, men inget PPC har registrerats",
+      "suggestion": "Stäng veckoplanen så att dess PPC beräknas"
+    },
+    "missed_commitment_reason": {
+      "fail": "Ett ej uppfyllt åtagande från {crew} under veckan {week} saknar orsak till avvikelsen",
+      "suggestion": "Registrera orsaken så att den räknas med i Paretodiagrammet över orsaker"
+    },
+    "constraint_overdue": {
+      "fail": "Hindret \"{description}\" skulle ha undanröjts senast {date} och är fortfarande öppet",
+      "suggestion": "Påminn ansvarig, eller flytta måldatumet och de berörda uppgifterna"
+    },
+    "constraint_owner": {
+      "fail": "Hindret \"{description}\" saknar ansvarig",
+      "suggestion": "Utse den person som ansvarar för att undanröja det"
+    }
+  }
+}

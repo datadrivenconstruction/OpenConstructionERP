@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Zobowiązanie ekipy {crew} na tydzień {week} dotyczy zadania z {count} otwartymi ograniczeniami",
+      "suggestion": "Najpierw usuń ograniczenia albo wyjmij zadanie z planu na ten tydzień"
+    },
+    "week_ppc_recorded": {
+      "fail": "Tydzień {week} miał zobowiązania, ale nie zarejestrowano PPC",
+      "suggestion": "Zamknij tygodniowy plan, aby obliczyć jego PPC"
+    },
+    "missed_commitment_reason": {
+      "fail": "Niezrealizowane zobowiązanie ekipy {crew} w tygodniu {week} nie ma podanej przyczyny odchylenia",
+      "suggestion": "Zapisz przyczynę, aby została uwzględniona w wykresie Pareto przyczyn"
+    },
+    "constraint_overdue": {
+      "fail": "Ograniczenie \"{description}\" miało zostać usunięte do {date} i nadal jest otwarte",
+      "suggestion": "Przypomnij odpowiedzialnemu albo przesuń termin docelowy i powiązane zadania"
+    },
+    "constraint_owner": {
+      "fail": "Ograniczenie \"{description}\" nie ma odpowiedzialnego",
+      "suggestion": "Wskaż osobę odpowiedzialną za jego usunięcie"
+    }
+  }
+}

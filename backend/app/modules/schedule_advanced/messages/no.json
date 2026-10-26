@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Forpliktelsen fra {crew} for uken {week} ligger på en oppgave med {count} åpne begrensning(er)",
+      "suggestion": "Fjern begrensningene først, eller ta oppgaven ut av denne ukens plan"
+    },
+    "week_ppc_recorded": {
+      "fail": "Uken {week} hadde forpliktelser, men ingen PPC er registrert",
+      "suggestion": "Lukk ukeplanen slik at PPC-en beregnes"
+    },
+    "missed_commitment_reason": {
+      "fail": "En uoppfylt forpliktelse fra {crew} i uken {week} har ingen årsak til avviket",
+      "suggestion": "Registrer årsaken, slik at den telles i Pareto-diagrammet over årsaker"
+    },
+    "constraint_overdue": {
+      "fail": "Begrensningen \"{description}\" skulle vært fjernet innen {date} og er fortsatt åpen",
+      "suggestion": "Følg opp ansvarlig, eller flytt måldatoen og de berørte oppgavene"
+    },
+    "constraint_owner": {
+      "fail": "Begrensningen \"{description}\" har ingen ansvarlig",
+      "suggestion": "Oppgi personen som har ansvaret for å fjerne den"
+    }
+  }
+}

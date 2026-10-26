@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "U redu"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Obveza ekipe {crew} za tjedan {week} vezana je uz zadatak s {count} otvorenih ograničenja",
+      "suggestion": "Prvo uklonite ograničenja ili zadatak izbacite iz plana ovog tjedna"
+    },
+    "week_ppc_recorded": {
+      "fail": "Tjedan {week} imao je obveze, ali nije zabilježen PPC",
+      "suggestion": "Zatvorite tjedni plan kako bi se izračunao njegov PPC"
+    },
+    "missed_commitment_reason": {
+      "fail": "Neispunjena obveza ekipe {crew} u tjednu {week} nema razlog odstupanja",
+      "suggestion": "Zabilježite razlog kako bi se uračunao u Paretov dijagram uzroka"
+    },
+    "constraint_overdue": {
+      "fail": "Ograničenje \"{description}\" trebalo je biti uklonjeno do {date} i još je otvoreno",
+      "suggestion": "Podsjetite odgovornu osobu ili pomaknite ciljani datum i zahvaćene zadatke"
+    },
+    "constraint_owner": {
+      "fail": "Ograničenje \"{description}\" nema odgovornu osobu",
+      "suggestion": "Navedite osobu odgovornu za njegovo uklanjanje"
+    }
+  }
+}

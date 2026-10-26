@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Cam kết của đội {crew} cho tuần {week} gắn với một công việc còn {count} ràng buộc chưa được giải quyết",
+      "suggestion": "Giải quyết các ràng buộc trước, hoặc đưa công việc ra khỏi kế hoạch tuần này"
+    },
+    "week_ppc_recorded": {
+      "fail": "Tuần {week} có cam kết nhưng chưa ghi nhận PPC",
+      "suggestion": "Chốt kế hoạch tuần để tính được PPC"
+    },
+    "missed_commitment_reason": {
+      "fail": "Cam kết không hoàn thành của đội {crew} trong tuần {week} chưa có lý do sai lệch",
+      "suggestion": "Ghi nhận lý do để tính vào biểu đồ Pareto các nguyên nhân"
+    },
+    "constraint_overdue": {
+      "fail": "Ràng buộc \"{description}\" lẽ ra phải được giải quyết trước {date} nhưng vẫn còn mở",
+      "suggestion": "Đôn đốc người phụ trách, hoặc dời ngày mục tiêu và các công việc bị ảnh hưởng"
+    },
+    "constraint_owner": {
+      "fail": "Ràng buộc \"{description}\" chưa có người phụ trách",
+      "suggestion": "Chỉ định người chịu trách nhiệm giải quyết"
+    }
+  }
+}

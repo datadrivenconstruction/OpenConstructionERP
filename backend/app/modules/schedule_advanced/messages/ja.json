@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "{week} 週の {crew} のコミットメントが、未解決の制約が {count} 件ある作業に紐づいています",
+      "suggestion": "先に制約を解消するか、その作業を今週の計画から外してください"
+    },
+    "week_ppc_recorded": {
+      "fail": "{week} 週にはコミットメントがありましたが、PPC が記録されていません",
+      "suggestion": "週間計画を締めて PPC を算出してください"
+    },
+    "missed_commitment_reason": {
+      "fail": "{week} 週の {crew} の未達成コミットメントに、乖離の理由が記録されていません",
+      "suggestion": "理由を記録すると、原因のパレート分析に含まれます"
+    },
+    "constraint_overdue": {
+      "fail": "制約「{description}」は {date} までに解消される予定でしたが、まだ未解決です",
+      "suggestion": "担当者に確認するか、目標日と影響する作業を変更してください"
+    },
+    "constraint_owner": {
+      "fail": "制約「{description}」に担当者が設定されていません",
+      "suggestion": "解消の責任者を指定してください"
+    }
+  }
+}

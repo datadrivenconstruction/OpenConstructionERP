@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "A(z) {crew} csapat vállalása a(z) {week} hétre olyan feladatra szól, amelyen {count} nyitott korlát van",
+      "suggestion": "Előbb szüntesse meg a korlátokat, vagy vegye ki a feladatot a heti tervből"
+    },
+    "week_ppc_recorded": {
+      "fail": "A(z) {week} hétre voltak vállalások, de nincs rögzített PPC",
+      "suggestion": "Zárja le a heti tervet, hogy kiszámítsa a PPC-jét"
+    },
+    "missed_commitment_reason": {
+      "fail": "A(z) {crew} csapat nem teljesített vállalásának a(z) {week} hétben nincs eltérési oka",
+      "suggestion": "Rögzítse az okot, hogy beszámítson az okok Pareto-diagramjába"
+    },
+    "constraint_overdue": {
+      "fail": "A(z) \"{description}\" korlátot {date} napig meg kellett volna szüntetni, és még mindig nyitott",
+      "suggestion": "Sürgesse a felelőst, vagy tolja el a célnapot és az érintett feladatokat"
+    },
+    "constraint_owner": {
+      "fail": "A(z) \"{description}\" korlátnak nincs felelőse",
+      "suggestion": "Nevezze meg azt a személyt, aki felel a megszüntetéséért"
+    }
+  }
+}

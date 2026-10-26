@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Angajamentul echipei {crew} pentru săptămâna {week} este legat de o activitate cu {count} restricții deschise",
+      "suggestion": "Eliminați mai întâi restricțiile sau scoateți activitatea din planul acestei săptămâni"
+    },
+    "week_ppc_recorded": {
+      "fail": "Săptămâna {week} a avut angajamente, dar nu a fost înregistrat niciun PPC",
+      "suggestion": "Închideți planul săptămânal pentru ca PPC-ul să fie calculat"
+    },
+    "missed_commitment_reason": {
+      "fail": "Un angajament neîndeplinit al echipei {crew} din săptămâna {week} nu are motiv de abatere",
+      "suggestion": "Înregistrați motivul, ca să fie inclus în diagrama Pareto a cauzelor"
+    },
+    "constraint_overdue": {
+      "fail": "Restricția \"{description}\" trebuia eliminată până la {date} și este încă deschisă",
+      "suggestion": "Urmăriți responsabilul sau mutați data-țintă și activitățile afectate"
+    },
+    "constraint_owner": {
+      "fail": "Restricția \"{description}\" nu are responsabil",
+      "suggestion": "Desemnați persoana responsabilă de eliminarea ei"
+    }
+  }
+}

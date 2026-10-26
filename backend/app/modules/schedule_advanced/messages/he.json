@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "אישור"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "ההתחייבות של הצוות {crew} לשבוע {week} מופנית למשימה עם {count} אילוצים פתוחים",
+      "suggestion": "הסירו קודם את האילוצים, או הוציאו את המשימה מתוכנית השבוע"
+    },
+    "week_ppc_recorded": {
+      "fail": "לשבוע {week} היו התחייבויות, אך לא נרשם לו PPC",
+      "suggestion": "סגרו את התוכנית השבועית כדי שה-PPC שלה יחושב"
+    },
+    "missed_commitment_reason": {
+      "fail": "להתחייבות שלא קוימה של הצוות {crew} בשבוע {week} אין סיבה לסטייה",
+      "suggestion": "רשמו את הסיבה, כדי שתיספר בתרשים פארטו של הסיבות"
+    },
+    "constraint_overdue": {
+      "fail": "האילוץ \"{description}\" היה אמור להיות מוסר עד {date} והוא עדיין פתוח",
+      "suggestion": "עקבו אחר האחראי, או הזיזו את תאריך היעד והמשימות המושפעות"
+    },
+    "constraint_owner": {
+      "fail": "לאילוץ \"{description}\" אין אחראי",
+      "suggestion": "מנו את האדם האחראי להסרתו"
+    }
+  }
+}

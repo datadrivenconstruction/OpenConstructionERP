@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Komitmen {crew} untuk minggu {week} berada pada tugas dengan {count} kendala terbuka",
+      "suggestion": "Selesaikan kendala terlebih dahulu, atau keluarkan tugas dari rencana minggu ini"
+    },
+    "week_ppc_recorded": {
+      "fail": "Minggu {week} memiliki komitmen, tetapi tidak ada PPC yang tercatat",
+      "suggestion": "Tutup rencana mingguan agar PPC-nya dihitung"
+    },
+    "missed_commitment_reason": {
+      "fail": "Komitmen {crew} yang tidak terpenuhi pada minggu {week} tidak memiliki alasan penyimpangan",
+      "suggestion": "Catat alasannya agar dihitung dalam Pareto penyebab"
+    },
+    "constraint_overdue": {
+      "fail": "Kendala \"{description}\" seharusnya sudah diselesaikan pada {date} dan masih terbuka",
+      "suggestion": "Tagih penanggung jawab, atau geser tanggal target dan tugas terkait"
+    },
+    "constraint_owner": {
+      "fail": "Kendala \"{description}\" tidak memiliki penanggung jawab",
+      "suggestion": "Tentukan orang yang bertanggung jawab menyelesaikannya"
+    }
+  }
+}

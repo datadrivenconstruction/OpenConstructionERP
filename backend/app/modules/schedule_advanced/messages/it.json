@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "L'impegno della squadra {crew} per la settimana {week} riguarda un'attività con {count} vincoli aperti",
+      "suggestion": "Rimuovete prima i vincoli, oppure togliete l'attività dal piano di questa settimana"
+    },
+    "week_ppc_recorded": {
+      "fail": "La settimana {week} aveva degli impegni, ma non è stato registrato alcun PPC",
+      "suggestion": "Chiudete il piano settimanale in modo che ne venga calcolato il PPC"
+    },
+    "missed_commitment_reason": {
+      "fail": "Un impegno non rispettato della squadra {crew} nella settimana {week} non ha una causa di scostamento",
+      "suggestion": "Registrate la causa, così viene conteggiata nel diagramma di Pareto delle cause"
+    },
+    "constraint_overdue": {
+      "fail": "Il vincolo \"{description}\" doveva essere rimosso entro il {date} ed è ancora aperto",
+      "suggestion": "Sollecitate il responsabile, oppure spostate la data obiettivo e le attività coinvolte"
+    },
+    "constraint_owner": {
+      "fail": "Il vincolo \"{description}\" non ha un responsabile",
+      "suggestion": "Indicate la persona incaricata di rimuoverlo"
+    }
+  }
+}

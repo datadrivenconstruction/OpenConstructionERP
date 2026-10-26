@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "De afspraak van {crew} voor de week van {week} hangt aan een taak met {count} open knelpunt(en)",
+      "suggestion": "Los eerst de knelpunten op, of haal de taak uit het plan van deze week"
+    },
+    "week_ppc_recorded": {
+      "fail": "De week van {week} had afspraken, maar er is geen PPC vastgelegd",
+      "suggestion": "Sluit het weekplan af zodat de PPC wordt berekend"
+    },
+    "missed_commitment_reason": {
+      "fail": "Een niet-nagekomen afspraak van {crew} in de week van {week} heeft geen reden voor de afwijking",
+      "suggestion": "Leg de reden vast, zodat die meetelt in de Pareto van oorzaken"
+    },
+    "constraint_overdue": {
+      "fail": "Knelpunt \"{description}\" moest vóór {date} zijn opgelost en is nog open",
+      "suggestion": "Volg de eigenaar op, of verschuif de streefdatum en de betrokken taken"
+    },
+    "constraint_owner": {
+      "fail": "Knelpunt \"{description}\" heeft geen eigenaar",
+      "suggestion": "Wijs de persoon aan die verantwoordelijk is voor het oplossen ervan"
+    }
+  }
+}

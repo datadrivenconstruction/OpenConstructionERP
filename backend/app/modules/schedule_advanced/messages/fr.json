@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "L'engagement de l'équipe {crew} pour la semaine du {week} porte sur une tâche avec {count} contrainte(s) ouverte(s)",
+      "suggestion": "Levez d'abord les contraintes, ou retirez la tâche du plan de cette semaine"
+    },
+    "week_ppc_recorded": {
+      "fail": "La semaine du {week} comportait des engagements, mais aucun PPC n'a été enregistré",
+      "suggestion": "Clôturez le plan hebdomadaire pour que son PPC soit calculé"
+    },
+    "missed_commitment_reason": {
+      "fail": "Un engagement non tenu de l'équipe {crew} pendant la semaine du {week} n'a pas de motif d'écart",
+      "suggestion": "Saisissez le motif pour qu'il entre dans le Pareto des causes"
+    },
+    "constraint_overdue": {
+      "fail": "La contrainte \"{description}\" devait être levée avant le {date} et reste ouverte",
+      "suggestion": "Relancez le responsable, ou décalez la date cible et les tâches concernées"
+    },
+    "constraint_owner": {
+      "fail": "La contrainte \"{description}\" n'a pas de responsable",
+      "suggestion": "Désignez la personne chargée de la lever"
+    }
+  }
+}

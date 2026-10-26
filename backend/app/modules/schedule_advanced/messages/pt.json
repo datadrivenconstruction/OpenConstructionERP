@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "O compromisso de {crew} para a semana de {week} está numa tarefa com {count} restrição(ões) em aberto",
+      "suggestion": "Resolva primeiro as restrições, ou retire a tarefa do plano desta semana"
+    },
+    "week_ppc_recorded": {
+      "fail": "A semana de {week} teve compromissos, mas não foi registado nenhum PPC",
+      "suggestion": "Feche o plano semanal para que o seu PPC seja calculado"
+    },
+    "missed_commitment_reason": {
+      "fail": "Um compromisso não cumprido de {crew} na semana de {week} não tem motivo de desvio",
+      "suggestion": "Registe o motivo para que conte no Pareto das causas"
+    },
+    "constraint_overdue": {
+      "fail": "A restrição \"{description}\" devia ter sido resolvida até {date} e continua em aberto",
+      "suggestion": "Cobre o responsável, ou adie a data-alvo e as tarefas afetadas"
+    },
+    "constraint_owner": {
+      "fail": "A restrição \"{description}\" não tem responsável",
+      "suggestion": "Indique a pessoa responsável por a resolver"
+    }
+  }
+}

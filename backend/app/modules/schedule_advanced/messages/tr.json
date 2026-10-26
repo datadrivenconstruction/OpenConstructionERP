@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "Tamam"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "{week} haftası için {crew} ekibinin taahhüdü, {count} açık kısıtı olan bir göreve bağlı",
+      "suggestion": "Önce kısıtları giderin ya da görevi bu haftanın planından çıkarın"
+    },
+    "week_ppc_recorded": {
+      "fail": "{week} haftasında taahhütler vardı, ancak PPC kaydedilmemiş",
+      "suggestion": "PPC'si hesaplansın diye haftalık planı kapatın"
+    },
+    "missed_commitment_reason": {
+      "fail": "{week} haftasında {crew} ekibinin yerine getirilmeyen taahhüdü için sapma nedeni yok",
+      "suggestion": "Nedeni kaydedin, böylece nedenlerin Pareto analizinde sayılır"
+    },
+    "constraint_overdue": {
+      "fail": "\"{description}\" kısıtının {date} tarihine kadar giderilmesi gerekiyordu ve hâlâ açık",
+      "suggestion": "Sorumluyu takip edin ya da hedef tarihi ve etkilenen görevleri erteleyin"
+    },
+    "constraint_owner": {
+      "fail": "\"{description}\" kısıtının sorumlusu yok",
+      "suggestion": "Giderilmesinden sorumlu kişiyi belirtin"
+    }
+  }
+}

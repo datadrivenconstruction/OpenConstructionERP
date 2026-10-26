@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "确定"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "{week} 周 {crew} 的承诺关联的任务仍有 {count} 项未解决的制约因素",
+      "suggestion": "请先消除制约因素，或将该任务移出本周计划"
+    },
+    "week_ppc_recorded": {
+      "fail": "{week} 周有承诺，但未记录 PPC",
+      "suggestion": "关闭周计划，以便计算其 PPC"
+    },
+    "missed_commitment_reason": {
+      "fail": "{week} 周 {crew} 未完成的承诺缺少偏差原因",
+      "suggestion": "记录原因，使其计入原因帕累托图"
+    },
+    "constraint_overdue": {
+      "fail": "制约因素\"{description}\"应于 {date} 前消除，但仍未解决",
+      "suggestion": "跟进责任人，或调整目标日期及受影响的任务"
+    },
+    "constraint_owner": {
+      "fail": "制约因素\"{description}\"没有责任人",
+      "suggestion": "指定负责消除该制约因素的人员"
+    }
+  }
+}

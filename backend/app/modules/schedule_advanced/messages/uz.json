@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "{week} haftasi uchun {crew} jamoasining majburiyati {count} ta ochiq cheklovi bo'lgan vazifaga bog'langan",
+      "suggestion": "Avval cheklovlarni bartaraf eting yoki vazifani shu haftaning rejasidan olib tashlang"
+    },
+    "week_ppc_recorded": {
+      "fail": "{week} haftasida majburiyatlar bor edi, ammo PPC qayd etilmagan",
+      "suggestion": "Haftalik rejani yoping, shunda uning PPC hisoblanadi"
+    },
+    "missed_commitment_reason": {
+      "fail": "{week} haftasida {crew} jamoasining bajarilmagan majburiyatida chetlanish sababi yo'q",
+      "suggestion": "Sababni qayd eting, shunda u sabablarning Pareto tahliliga kiradi"
+    },
+    "constraint_overdue": {
+      "fail": "\"{description}\" cheklovi {date} gacha bartaraf etilishi kerak edi, lekin hali ochiq",
+      "suggestion": "Mas'ul shaxsni eslatib qo'ying yoki maqsadli sana va ta'sirlangan vazifalarni ko'chiring"
+    },
+    "constraint_owner": {
+      "fail": "\"{description}\" cheklovining mas'uli yo'q",
+      "suggestion": "Uni bartaraf etish uchun mas'ul shaxsni belgilang"
+    }
+  }
+}

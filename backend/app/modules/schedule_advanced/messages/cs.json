@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Závazek party {crew} na týden {week} je navázán na úkol s {count} otevřenými omezeními",
+      "suggestion": "Nejprve omezení odstraňte, nebo úkol vyřaďte z plánu tohoto týdne"
+    },
+    "week_ppc_recorded": {
+      "fail": "Týden {week} měl závazky, ale není zaznamenáno žádné PPC",
+      "suggestion": "Uzavřete týdenní plán, aby se jeho PPC vypočítalo"
+    },
+    "missed_commitment_reason": {
+      "fail": "Nesplněný závazek party {crew} v týdnu {week} nemá důvod odchylky",
+      "suggestion": "Zaznamenejte důvod, aby se počítal do Paretovy analýzy příčin"
+    },
+    "constraint_overdue": {
+      "fail": "Omezení \"{description}\" mělo být odstraněno do {date} a je stále otevřené",
+      "suggestion": "Připomeňte odpovědnou osobu, nebo posuňte cílové datum a dotčené úkoly"
+    },
+    "constraint_owner": {
+      "fail": "Omezení \"{description}\" nemá odpovědnou osobu",
+      "suggestion": "Určete osobu odpovědnou za jeho odstranění"
+    }
+  }
+}

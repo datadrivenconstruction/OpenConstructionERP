@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "موافق"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "التزام الفريق {crew} لأسبوع {week} مرتبط بمهمة لديها {count} من القيود المفتوحة",
+      "suggestion": "أزل القيود أولا، أو احذف المهمة من خطة هذا الأسبوع"
+    },
+    "week_ppc_recorded": {
+      "fail": "كان لأسبوع {week} التزامات، لكن لم يُسجَّل له مؤشر PPC",
+      "suggestion": "أغلق الخطة الأسبوعية حتى يُحسب مؤشر PPC الخاص بها"
+    },
+    "missed_commitment_reason": {
+      "fail": "التزام الفريق {crew} الذي لم يُنفَّذ في أسبوع {week} ليس له سبب للانحراف",
+      "suggestion": "سجّل السبب ليُحتسب ضمن مخطط باريتو للأسباب"
+    },
+    "constraint_overdue": {
+      "fail": "كان يجب إزالة القيد \"{description}\" بحلول {date}، وما زال مفتوحا",
+      "suggestion": "تابع المسؤول، أو انقل التاريخ المستهدف والمهام المتأثرة"
+    },
+    "constraint_owner": {
+      "fail": "القيد \"{description}\" ليس له مسؤول",
+      "suggestion": "حدّد الشخص المسؤول عن إزالته"
+    }
+  }
+}

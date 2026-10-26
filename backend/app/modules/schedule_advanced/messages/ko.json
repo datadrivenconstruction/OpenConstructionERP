@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "확인"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "{week} 주차 {crew}의 약속이 미해결 제약 {count}건이 있는 작업에 걸려 있습니다",
+      "suggestion": "먼저 제약을 해소하거나, 해당 작업을 이번 주 계획에서 제외하세요"
+    },
+    "week_ppc_recorded": {
+      "fail": "{week} 주차에 약속이 있었지만 PPC가 기록되지 않았습니다",
+      "suggestion": "주간 계획을 마감하여 PPC가 계산되도록 하세요"
+    },
+    "missed_commitment_reason": {
+      "fail": "{week} 주차 {crew}의 미이행 약속에 편차 사유가 없습니다",
+      "suggestion": "사유를 기록하면 원인별 파레토 분석에 반영됩니다"
+    },
+    "constraint_overdue": {
+      "fail": "제약 \"{description}\"은(는) {date}까지 해소되어야 했으나 아직 미해결 상태입니다",
+      "suggestion": "담당자에게 확인하거나, 목표일과 영향을 받는 작업의 일정을 조정하세요"
+    },
+    "constraint_owner": {
+      "fail": "제약 \"{description}\"에 담당자가 없습니다",
+      "suggestion": "해소를 책임질 담당자를 지정하세요"
+    }
+  }
+}

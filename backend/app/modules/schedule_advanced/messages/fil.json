@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Ang pangako ng {crew} para sa linggo ng {week} ay nasa gawaing may {count} bukas na constraint",
+      "suggestion": "Alisin muna ang mga constraint, o alisin ang gawain sa plano ng linggong ito"
+    },
+    "week_ppc_recorded": {
+      "fail": "May mga pangako ang linggo ng {week}, ngunit walang nakatalang PPC",
+      "suggestion": "Isara ang lingguhang plano upang makalkula ang PPC nito"
+    },
+    "missed_commitment_reason": {
+      "fail": "Ang hindi natupad na pangako ng {crew} sa linggo ng {week} ay walang dahilan ng variance",
+      "suggestion": "Itala ang dahilan upang mabilang ito sa Pareto ng mga sanhi"
+    },
+    "constraint_overdue": {
+      "fail": "Dapat naalis na ang constraint na \"{description}\" bago ang {date}, at bukas pa rin ito",
+      "suggestion": "Habulin ang may-ari, o ilipat ang target na petsa at ang mga apektadong gawain"
+    },
+    "constraint_owner": {
+      "fail": "Walang may-ari ang constraint na \"{description}\"",
+      "suggestion": "Pangalanan ang taong responsable sa pag-alis nito"
+    }
+  }
+}

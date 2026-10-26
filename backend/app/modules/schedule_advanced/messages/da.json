@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Forpligtelsen fra {crew} for ugen {week} ligger på en aktivitet med {count} åbne begrænsning(er)",
+      "suggestion": "Ryd begrænsningerne først, eller tag aktiviteten ud af denne uges plan"
+    },
+    "week_ppc_recorded": {
+      "fail": "Ugen {week} havde forpligtelser, men der er ikke registreret en PPC",
+      "suggestion": "Luk den ugentlige plan, så dens PPC beregnes"
+    },
+    "missed_commitment_reason": {
+      "fail": "En ikke-opfyldt forpligtelse fra {crew} i ugen {week} har ingen årsag til afvigelsen",
+      "suggestion": "Registrér årsagen, så den tæller i årsagernes Pareto-diagram"
+    },
+    "constraint_overdue": {
+      "fail": "Begrænsningen \"{description}\" skulle være ryddet senest {date} og er stadig åben",
+      "suggestion": "Følg op hos ansvarlig, eller flyt måldatoen og de berørte aktiviteter"
+    },
+    "constraint_owner": {
+      "fail": "Begrænsningen \"{description}\" har ingen ansvarlig",
+      "suggestion": "Angiv den person, der har ansvaret for at rydde den"
+    }
+  }
+}

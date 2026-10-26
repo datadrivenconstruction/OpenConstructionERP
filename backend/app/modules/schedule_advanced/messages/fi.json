@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Ryhmän {crew} sitoumus viikolle {week} on tehtävässä, jossa on {count} avointa rajoitetta",
+      "suggestion": "Poista rajoitteet ensin tai poista tehtävä tämän viikon suunnitelmasta"
+    },
+    "week_ppc_recorded": {
+      "fail": "Viikolla {week} oli sitoumuksia, mutta PPC-lukua ei ole kirjattu",
+      "suggestion": "Sulje viikkosuunnitelma, jotta sen PPC lasketaan"
+    },
+    "missed_commitment_reason": {
+      "fail": "Ryhmän {crew} viikolla {week} täyttymätön sitoumus ei sisällä poikkeaman syytä",
+      "suggestion": "Kirjaa syy, jotta se lasketaan syiden Pareto-analyysiin"
+    },
+    "constraint_overdue": {
+      "fail": "Rajoitteen \"{description}\" piti olla poistettu {date} mennessä, ja se on yhä avoinna",
+      "suggestion": "Muistuta vastuuhenkilöä, tai siirrä tavoitepäivää ja siihen liittyviä tehtäviä"
+    },
+    "constraint_owner": {
+      "fail": "Rajoitteella \"{description}\" ei ole vastuuhenkilöä",
+      "suggestion": "Nimeä henkilö, joka vastaa sen poistamisesta"
+    }
+  }
+}
