@@ -87,6 +87,8 @@ import { ApprovalTargetBadge } from '@/features/approval-routes';
 import { CreateTaskFromSourceDialog } from '@/features/tasks';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildRFIInsights } from './rfiInsights';
+import { SaveDefaultFilter } from '@/shared/ui/SaveDefaultFilter';
+import { initialFilter } from '@/shared/lib/defaultFilters';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 
@@ -1961,10 +1963,13 @@ export function RFIPage() {
     const handle = setTimeout(() => setDebouncedSearch(searchQuery), 300);
     return () => clearTimeout(handle);
   }, [searchQuery]);
-  const [statusFilter, setStatusFilter] = useState<RFIStatus | ''>('');
-  const [priorityFilter, setPriorityFilter] = useState<RFIPriority | ''>('');
-  const [disciplineFilter, setDisciplineFilter] = useState<string>('');
-  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [savedFilter] = useState(() =>
+    initialFilter('rfi', { status: '', priority: '', discipline: '', type: '', view: 'all' }),
+  );
+  const [statusFilter, setStatusFilter] = useState<RFIStatus | ''>(savedFilter.status as RFIStatus | '');
+  const [priorityFilter, setPriorityFilter] = useState<RFIPriority | ''>(savedFilter.priority as RFIPriority | '');
+  const [disciplineFilter, setDisciplineFilter] = useState<string>(savedFilter.discipline);
+  const [typeFilter, setTypeFilter] = useState<string>(savedFilter.type);
   const [showTypesDialog, setShowTypesDialog] = useState(false);
   /**
    * Saved-view chip. ``all`` is the no-op baseline; the other three are
@@ -1978,7 +1983,9 @@ export function RFIPage() {
    * Chips are mutually exclusive with each other but cumulative with the
    * status / priority / discipline dropdowns above.
    */
-  const [quickView, setQuickView] = useState<'all' | 'mine' | 'awaiting' | 'overdue'>('all');
+  const [quickView, setQuickView] = useState<'all' | 'mine' | 'awaiting' | 'overdue'>(
+    (['mine', 'awaiting', 'overdue'] as const).find((v) => v === savedFilter.view) ?? 'all',
+  );
 
   // Decode JWT once per token rotation. Falls back to ``null`` for
   // anonymous viewers — quick-filter "Awaiting me" simply matches nothing
@@ -2597,6 +2604,17 @@ export function RFIPage() {
             </button>
           );
         })}
+        <SaveDefaultFilter
+          page="rfi"
+          current={{
+            status: statusFilter,
+            priority: priorityFilter,
+            discipline: disciplineFilter,
+            type: typeFilter,
+            view: quickView,
+          }}
+          neutral={{ status: '', priority: '', discipline: '', type: '', view: 'all' }}
+        />
       </div>
 
       {/* Toolbar */}

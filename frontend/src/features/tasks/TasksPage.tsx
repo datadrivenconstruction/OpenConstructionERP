@@ -60,6 +60,8 @@ import {
   type UpdateTaskPayload,
 } from './api';
 import { tasksGuide } from './tasksGuide';
+import { SaveDefaultFilter } from '@/shared/ui/SaveDefaultFilter';
+import { initialFilter } from '@/shared/lib/defaultFilters';
 import { VoiceEntry, getField } from '@/features/voice';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildTasksInsights } from './tasksInsights';
@@ -817,8 +819,9 @@ export function TasksPage() {
   const [importResult, setImportResult] = useState<{ imported: number; skipped: number; errors: { row: number; error: string; data: Record<string, string> }[]; total_rows: number } | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [typeFilter, setTypeFilter] = useState<TaskType | ''>('');
-  const [myTasksOnly, setMyTasksOnly] = useState(false);
+  const [savedFilter] = useState(() => initialFilter('tasks', { type: '', mine: false }));
+  const [typeFilter, setTypeFilter] = useState<TaskType | ''>(savedFilter.type as TaskType | '');
+  const [myTasksOnly, setMyTasksOnly] = useState(savedFilter.mine);
 
   // Drag-and-drop between columns
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
@@ -1586,6 +1589,13 @@ export function TasksPage() {
 
       {projectId || myTasksOnly ? (
       <>
+      <div className="flex justify-end empty:hidden">
+        <SaveDefaultFilter
+          page="tasks"
+          current={{ type: typeFilter, mine: myTasksOnly }}
+          neutral={{ type: '', mine: false }}
+        />
+      </div>
       {/* Type filter tabs */}
       <div className="flex items-center gap-1 overflow-x-auto pb-1">
         <button

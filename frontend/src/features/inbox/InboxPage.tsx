@@ -22,6 +22,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Bell, ClipboardCheck, Inbox as InboxIcon, Network, RefreshCw } from 'lucide-react';
 import { Button, Card } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { SaveDefaultFilter } from '@/shared/ui/SaveDefaultFilter';
+import { initialFilter } from '@/shared/lib/defaultFilters';
 import { InboxPanel } from './InboxPanel';
 import { useInboxQuery } from './useInbox';
 import { SegmentedControl, type SegmentOption } from './SegmentedControl';
@@ -106,7 +108,16 @@ function InboxIntro() {
 export function InboxPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
-  const [filter, setFilter] = useState<InboxFilter>(ALL_INBOX_FILTER);
+  const [filter, setFilter] = useState<InboxFilter>(() => {
+    const saved = initialFilter('inbox', { kind: 'all', severity: 'all' });
+    return {
+      ...ALL_INBOX_FILTER,
+      kind: ['approval', 'alert'].includes(saved.kind) ? (saved.kind as InboxKindFilter) : 'all',
+      severity: ['critical', 'warning', 'info'].includes(saved.severity)
+        ? (saved.severity as InboxSeverityFilter)
+        : 'all',
+    };
+  });
 
   // Same query the panel reads (deduped by React Query on the ['inbox', LIMIT]
   // key): the page uses the raw items to build the filter controls + counts.
@@ -237,6 +248,11 @@ export function InboxPage() {
                 ))}
               </select>
             )}
+            <SaveDefaultFilter
+              page="inbox"
+              current={{ kind: filter.kind, severity: filter.severity }}
+              neutral={{ kind: 'all', severity: 'all' }}
+            />
             {filtered && (
               <Button
                 variant="ghost"
