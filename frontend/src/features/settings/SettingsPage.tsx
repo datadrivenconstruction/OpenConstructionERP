@@ -21,6 +21,8 @@ import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
 import { SidebarFooterCard } from './SidebarFooterCard';
 import { FloatingButtonsCard } from './FloatingButtonsCard';
+import { NotificationChannelsCard } from './NotificationChannelsCard';
+import { FloatingButtonsCard } from './FloatingButtonsCard';
 import VectorStatusCard from './VectorStatusCard';
 import SemanticModelSettings from './SemanticModelSettings';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -1839,6 +1841,8 @@ export function SettingsPage() {
               <WorkspaceBrandCard />
               <WorkPrefsCard />
               <SidebarFooterCard />
+              <FloatingButtonsCard />
+              <NotificationChannelsCard />
               <FloatingButtonsCard />
             </>
           )}

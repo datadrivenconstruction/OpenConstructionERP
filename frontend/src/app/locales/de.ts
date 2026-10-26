@@ -53554,6 +53554,9 @@ const resource = {
     "settings.floating_assistant": "KI-Assistent",
     "settings.floating_show": "Schaltfläche „{{label}}“ anzeigen",
     "settings.floating_note": "Der Assistent öffnet sich weiterhin mit Alt+A und über die Befehlspalette.",
+    "settings.notify_title": "Benachrichtigungen",
+    "settings.notify_subtitle": "Legen Sie für jede Ereignisart fest, ob sie in der App, per E-Mail oder über einen Webhook bei Ihnen ankommt.",
+    "settings.notify_open": "Benachrichtigungskanäle festlegen",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",
