@@ -52537,6 +52537,8 @@ const resource = {
     "common.left": "Links",
     "common.center": "Mitte",
     "common.right": "Rechts",
+    "common.default_filter_save": "Als meinen Standard speichern",
+    "common.default_filter_clear": "Meinen Standard löschen",
     "commitment.abort.follow_up.cancel": "Diese Bestellung im Einkauf stornieren",
     "commitment.abort.follow_up.terminate": "Diesen Vertrag im Vertragsmodul kündigen",
     "commitment.abort.follow_up_title": "Noch von Hand zu erledigen. Der Abbruch der Position beendet keinen Vertrag und keine Bestellung von selbst:",

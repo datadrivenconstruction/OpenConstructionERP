@@ -52982,6 +52982,8 @@ const resource = {
     "common.left": "Слева",
     "common.center": "По центру",
     "common.right": "Справа",
+    "common.default_filter_save": "Сохранить как мой по умолчанию",
+    "common.default_filter_clear": "Сбросить мой по умолчанию",
     "commitment.abort.follow_up.cancel": "Отменить этот заказ в закупках",
     "commitment.abort.follow_up.terminate": "Расторгнуть этот договор в модуле договоров",
     "commitment.abort.follow_up_title": "Ещё предстоит сделать вручную. Остановка позиции сама не завершает ни договор, ни заказ:",
