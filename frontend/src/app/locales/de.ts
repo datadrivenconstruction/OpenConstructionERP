@@ -53548,6 +53548,12 @@ const resource = {
     "settings.work_start_tasks": "Aufgaben",
     "settings.work_start_schedule": "Terminplan",
     "settings.work_start_inbox": "Posteingang",
+    "settings.floating_title": "Schwebende Schaltflächen",
+    "settings.floating_subtitle": "Wählen Sie, welche runden Schaltflächen unten rechts erscheinen.",
+    "settings.floating_recent": "Zuletzt geöffnet",
+    "settings.floating_assistant": "KI-Assistent",
+    "settings.floating_show": "Schaltfläche „{{label}}“ anzeigen",
+    "settings.floating_note": "Der Assistent öffnet sich weiterhin mit Alt+A und über die Befehlspalette.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",

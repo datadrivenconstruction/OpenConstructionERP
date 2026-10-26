@@ -53997,6 +53997,12 @@ const resource = {
     "settings.work_start_tasks": "Задачи",
     "settings.work_start_schedule": "График",
     "settings.work_start_inbox": "Входящие",
+    "settings.floating_title": "Плавающие кнопки",
+    "settings.floating_subtitle": "Выберите, какие круглые кнопки показывать в правом нижнем углу.",
+    "settings.floating_recent": "Недавние страницы",
+    "settings.floating_assistant": "ИИ-ассистент",
+    "settings.floating_show": "Показывать кнопку «{{label}}»",
+    "settings.floating_note": "Ассистент по-прежнему открывается по Alt+A и из палитры команд.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",

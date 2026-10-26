@@ -45655,6 +45655,12 @@ const resource = {
     "settings.work_start_tasks": "Tasks",
     "settings.work_start_schedule": "Schedule",
     "settings.work_start_inbox": "Inbox",
+    "settings.floating_title": "Floating buttons",
+    "settings.floating_subtitle": "Choose which round buttons appear in the bottom-right corner.",
+    "settings.floating_recent": "Recent pages",
+    "settings.floating_assistant": "AI assistant",
+    "settings.floating_show": "Show the {{label}} button",
+    "settings.floating_note": "The assistant still opens with Alt+A and from the command palette.",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",
