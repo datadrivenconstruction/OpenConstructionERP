@@ -28,7 +28,9 @@ import {
   X,
 } from 'lucide-react';
 import { Button } from '@/shared/ui';
+import { EvidenceBadge } from '@/shared/ui/EvidenceBadge';
 import { API_BASE, getAuthToken } from '@/shared/lib/api';
+import { captureDeviceEvidence, type DeviceCapture, type PhotoEvidence } from '@/shared/lib/photoEvidence';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   deletePunchPhoto,
@@ -96,6 +98,7 @@ function useAuthedImageUrl(docId: string | undefined): AuthedImage {
 function PhotoThumb({
   docId,
   index,
+  evidence,
   resolving,
   onOpen,
   onDelete,
@@ -103,6 +106,7 @@ function PhotoThumb({
 }: {
   docId: string | undefined;
   index: number;
+  evidence: PhotoEvidence | null | undefined;
   /** True while the photo->document map is still loading. */
   resolving: boolean;
   onOpen: (url: string) => void;
@@ -155,6 +159,10 @@ function PhotoThumb({
         </div>
       )}
 
+      {!busy && evidence !== undefined && (
+        <EvidenceBadge evidence={evidence} compact className="pointer-events-none absolute bottom-1 left-1" />
+      )}
+
       {/* Delete control - inline two-step confirm so a mis-tap can't wipe a
           site photo. */}
       {confirming ? (
@@ -199,7 +207,15 @@ function PhotoThumb({
 
 /* ── Lightbox ─────────────────────────────────────────────────────────── */
 
-function Lightbox({ url, onClose }: { url: string; onClose: () => void }) {
+function Lightbox({
+  url,
+  evidence,
+  onClose,
+}: {
+  url: string;
+  evidence: PhotoEvidence | null | undefined;
+  onClose: () => void;
+}) {
   const { t } = useTranslation();
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -234,6 +250,14 @@ function Lightbox({ url, onClose }: { url: string; onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
         className="max-h-full max-w-full rounded-lg object-contain shadow-2xl"
       />
+      {evidence !== undefined && (
+        <div
+          className="absolute bottom-4 left-4 max-w-sm rounded-lg bg-surface-elevated/95 p-3 shadow-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <EvidenceBadge evidence={evidence} />
+        </div>
+      )}
     </div>
   );
 }
@@ -254,7 +278,14 @@ export function PunchPhotoGallery({
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const photos = useMemo(() => item.photos ?? [], [item.photos]);
-  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightbox, setLightbox] = useState<{ url: string; index: number } | null>(null);
+  // Started when the camera opens (inside the user gesture), awaited when the photo arrives.
+  const capturePromise = useRef<Promise<DeviceCapture> | null>(null);
+  const evidenceFor = useCallback(
+    (index: number): PhotoEvidence | null | undefined =>
+      item.photo_evidence ? (item.photo_evidence[index] ?? null) : undefined,
+    [item.photo_evidence],
+  );
   const [deletingIndex, setDeletingIndex] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
@@ -285,7 +316,8 @@ export function PunchPhotoGallery({
   );
 
   const uploadMut = useMutation({
-    mutationFn: (file: File) => uploadPunchPhoto(item.id, file),
+    mutationFn: ({ file, capture }: { file: File; capture: DeviceCapture | null }) =>
+      uploadPunchPhoto(item.id, file, capture),
     onSuccess: () => {
       // A new photo cross-links a fresh Document; refresh the resolver map so
       // the thumbnail resolves instead of falling back to "preview unavailable".
@@ -319,14 +351,19 @@ export function PunchPhotoGallery({
   });
 
   const handleFiles = useCallback(
-    async (files: FileList | null) => {
+    async (files: FileList | null, fromCamera = false) => {
+      // Only a photo taken now gets the device's position and clock; a library
+      // photo was taken elsewhere, so its evidence comes from the file's EXIF.
+      const pending = capturePromise.current;
+      capturePromise.current = null;
       if (!files || files.length === 0) return;
+      const capture = fromCamera && pending ? await pending : null;
       // Upload sequentially: the backend appends to the photos array, so
       // parallel writes could race on the same row.
       let uploaded = 0;
       for (const file of Array.from(files)) {
         try {
-          await uploadMut.mutateAsync(file);
+          await uploadMut.mutateAsync({ file, capture });
           uploaded += 1;
         } catch {
           // Per-file error already toasted by the mutation; keep going so one
@@ -354,6 +391,19 @@ export function PunchPhotoGallery({
     },
     [handleFiles],
   );
+
+  const onCameraChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      void handleFiles(e.target.files, true);
+      e.target.value = '';
+    },
+    [handleFiles],
+  );
+
+  const openCamera = useCallback(() => {
+    capturePromise.current = captureDeviceEvidence();
+    cameraInputRef.current?.click();
+  }, []);
 
   const handleDelete = useCallback(
     (index: number) => {
@@ -383,12 +433,12 @@ export function PunchPhotoGallery({
             accept="image/*"
             capture="environment"
             className="sr-only"
-            onChange={onFileChange}
+            onChange={onCameraChange}
           />
           <Button
             variant="secondary"
             size="sm"
-            onClick={() => cameraInputRef.current?.click()}
+            onClick={openCamera}
             disabled={uploading}
             icon={<Camera size={14} />}
           >
@@ -417,6 +467,13 @@ export function PunchPhotoGallery({
         </div>
       </div>
 
+      <p className="mb-2 text-2xs text-content-tertiary">
+        {t('field_evidence.camera_hint', {
+          defaultValue:
+            'Camera photos record your position (if you allow it), the time and the direction as evidence. Uploaded files keep the location and time stored by the camera.',
+        })}
+      </p>
+
       {photos.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border-light px-4 py-6 text-center">
           <Camera size={22} className="mx-auto mb-2 text-content-quaternary" strokeWidth={1.5} />
@@ -433,8 +490,9 @@ export function PunchPhotoGallery({
               key={`${path}-${index}`}
               docId={resolveDocId(path)}
               index={index}
+              evidence={evidenceFor(index)}
               resolving={docsLoading}
-              onOpen={(url) => setLightboxUrl(url)}
+              onOpen={(url) => setLightbox({ url, index })}
               onDelete={handleDelete}
               deleting={deletingIndex === index}
             />
@@ -442,7 +500,9 @@ export function PunchPhotoGallery({
         </div>
       )}
 
-      {lightboxUrl && <Lightbox url={lightboxUrl} onClose={() => setLightboxUrl(null)} />}
+      {lightbox && (
+        <Lightbox url={lightbox.url} evidence={evidenceFor(lightbox.index)} onClose={() => setLightbox(null)} />
+      )}
     </div>
   );
 }

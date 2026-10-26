@@ -109,6 +109,7 @@ const preloaders: Record<string, () => void> = {
   '/ncr': () => void import('@/features/ncr/NCRPage'),
   '/moc': () => void import('@/features/moc/MoCPage'),
   '/defects-liability': () => void import('@/features/defects-liability'),
+  '/condition': () => void import('@/features/condition'),
   '/commissioning': () => void import('@/features/commissioning/CommissioningPage'),
   '/closeout': () => void import('@/features/closeout/CloseoutPage'),
   '/site-logistics': () => void import('@/features/site-logistics'),

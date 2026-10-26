@@ -68,6 +68,9 @@ export const PERMISSION_MIN_ROLE = {
   'costmodel.manage': 'manager',
   'payment_release.write': 'editor',
   'payment_release.release': 'manager',
+  'closeout.verify': 'manager',
+  'condition.create': 'editor',
+  'condition.approve': 'manager',
 } as const satisfies Record<string, RankedRole>;
 
 export type GatedPermission = keyof typeof PERMISSION_MIN_ROLE;

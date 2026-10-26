@@ -28,6 +28,7 @@ import {
   UserCheck,
   FileDown,
   Loader2,
+  Globe2,
 } from 'lucide-react';
 import {
   Button,
@@ -84,6 +85,19 @@ import { formatReworkCost, parseReworkCostInput, projectCurrencyCode } from './r
 import { VoiceEntry, getField } from '@/features/voice';
 import { fmtDate } from '@/shared/lib/formatters';
 import { PunchContractField } from './PunchContractField';
+import { PunchBcfButtons } from './PunchBcfButtons';
+import { hasValidPin, type MapPin as FieldMapPin } from '@/shared/lib/photoEvidence';
+
+const FieldItemsMap = React.lazy(() =>
+  import('@/shared/ui/FieldItemsMap').then((m) => ({ default: m.FieldItemsMap })),
+);
+
+function punchPinTone(item: PunchItem): FieldMapPin['tone'] {
+  if (item.status === 'closed' || item.status === 'verified') return 'done';
+  if (item.priority === 'critical') return 'critical';
+  if (item.status === 'in_progress' || item.status === 'resolved') return 'progress';
+  return 'open';
+}
 import { isDateOnlyPast } from '@/shared/lib/dates';
 import { IssueHubLink } from '@/features/issues/IssueHubLink';
 
@@ -196,7 +210,7 @@ const inputCls =
 const textareaCls =
   'w-full rounded-lg border border-border bg-surface-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-none';
 
-type ViewMode = 'list' | 'kanban' | 'pins';
+type ViewMode = 'list' | 'kanban' | 'pins' | 'map';
 
 /* ── Source provenance badge ──────────────────────────────────────────── */
 
@@ -1444,6 +1458,19 @@ export function PunchListPage() {
 
   // Open the item detail drawer (from a list row, kanban card, or pin).
   const openDetail = useCallback((item: PunchItem) => setDetailItem(item), []);
+  const mapPins = useMemo<FieldMapPin[]>(
+    () =>
+      filteredItems
+        .filter((it) => hasValidPin(it.geo_lat, it.geo_lon))
+        .map((it) => ({
+          id: it.id,
+          lat: it.geo_lat as number,
+          lon: it.geo_lon as number,
+          label: it.title,
+          tone: punchPinTone(it),
+        })),
+    [filteredItems],
+  );
 
   // Jump from the detail drawer to the pin board focused on the item's sheet.
   const handleOpenPinBoard = useCallback((item: PunchItem) => {
@@ -1511,6 +1538,7 @@ export function PunchListPage() {
                 {t('rfi.export_pdf', { defaultValue: 'Export PDF' })}
               </Button>
             )}
+            {projectId && <PunchBcfButtons projectId={projectId} selectedIds={Array.from(selectedIds)} />}
             <VoiceEntry
               projectId={projectId}
               target="defect"
@@ -1681,6 +1709,23 @@ export function PunchListPage() {
                 {t('punch.view_pins', { defaultValue: 'Pins' })}
               </span>
             </button>
+            <button
+              onClick={() => setViewMode('map')}
+              className={clsx(
+                'flex items-center gap-1 px-3 py-2 text-sm transition-colors',
+                viewMode === 'map'
+                  ? 'bg-oe-blue text-white'
+                  : 'bg-surface-primary text-content-secondary hover:bg-surface-secondary',
+              )}
+              aria-label={t('punch.view_map', { defaultValue: 'Map view' })}
+              title={t('punch.view_map', { defaultValue: 'Map view' })}
+              data-testid="punchlist-view-map"
+            >
+              <Globe2 size={14} />
+              <span className="hidden sm:inline">
+                {t('punch.view_map_short', { defaultValue: 'Map' })}
+              </span>
+            </button>
           </div>
         </div>
       </div>
@@ -1808,6 +1853,18 @@ export function PunchListPage() {
               onPinned={invalidatePins}
               initialDocId={pinFocus.docId}
               initialPage={pinFocus.page}
+            />
+          </React.Suspense>
+        ) : viewMode === 'map' ? (
+          <React.Suspense fallback={<SkeletonTable rows={6} columns={5} />}>
+            <FieldItemsMap
+              pins={mapPins}
+              total={filteredItems.length}
+              onSelect={(id) => {
+                const hit = filteredItems.find((it) => it.id === id);
+                if (hit) openDetail(hit);
+              }}
+              selectedId={detailItem?.id ?? null}
             />
           </React.Suspense>
         ) : filteredItems.length === 0 ? (

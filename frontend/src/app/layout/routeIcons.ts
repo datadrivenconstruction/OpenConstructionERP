@@ -222,6 +222,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/deadlines': AlarmClock,
   '/issues': CircleDot,
   '/closeout': PackageCheck,
+  '/condition': Gauge,
   // ── 13. Safety & ESG ──────────────────────────────────────────────
   '/safety': HardHat,
   '/hse-advanced': Shield,

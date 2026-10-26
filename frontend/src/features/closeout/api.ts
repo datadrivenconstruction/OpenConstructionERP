@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { apiGet, apiPost, apiPatch, apiDelete, getAuthToken } from '@/shared/lib/api';
+import { API_BASE, apiGet, apiPost, apiPatch, apiPut, apiDelete, fetchWithAuth, getAuthToken } from '@/shared/lib/api';
 
 const BASE = '/v1/closeout';
 
@@ -245,4 +245,146 @@ export function triggerBlobDownload(blob: Blob, filename: string): void {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+}
+
+// ── Handover dossier ──────────────────────────────────────────────────────
+
+export type DossierScopeKind = 'project' | 'area' | 'asset';
+export type DossierChannel = 'download' | 'webhook' | 'connector' | 'email';
+
+export interface DossierConfig {
+  required_categories: string[];
+  require_punch_resolved: boolean;
+  require_punch_photos: boolean;
+  require_commissioning_complete: boolean;
+  require_signed_acceptance: boolean;
+  require_verified_evidence: boolean;
+  share_expires_in_days: number;
+}
+
+export interface DossierFinding {
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+  element_ref?: string | null;
+  suggestion?: string | null;
+}
+
+export interface DossierCheck {
+  check_status: 'passed' | 'warnings' | 'errors';
+  results: DossierFinding[];
+  scope: { kind: DossierScopeKind; value: string | null };
+  punch_total: number;
+  punch_open: number;
+  commissioning_systems: number;
+  acceptance_bound: boolean;
+  acceptance_signed: boolean;
+  categories: Record<string, { present: boolean; verified: boolean }>;
+}
+
+export interface DossierDeliveryTarget {
+  channel: DossierChannel;
+  target_id?: string;
+  recipient?: string;
+  message?: string;
+  expires_in_days?: number;
+  password?: string;
+}
+
+export interface DossierDelivery {
+  id: string;
+  dossier_id: string;
+  channel: DossierChannel;
+  target_id: string | null;
+  target_label: string | null;
+  recipient: string | null;
+  status: 'pending' | 'sent' | 'failed';
+  status_code: number | null;
+  detail: string | null;
+  share_url: string | null;
+  share_expires_at: string | null;
+  resend_of: string | null;
+  delivered_by: string | null;
+  delivered_at: string | null;
+  created_at: string;
+}
+
+export interface Dossier {
+  id: string;
+  package_id: string;
+  project_id: string;
+  status: 'queued' | 'built' | 'delivered' | 'failed';
+  scope: { kind: DossierScopeKind; value: string | null };
+  check_status: 'passed' | 'warnings' | 'errors' | null;
+  check_results: DossierFinding[];
+  job_id: string | null;
+  document_id: string | null;
+  file_name: string | null;
+  sha256: string | null;
+  size_bytes: number | null;
+  file_count: number | null;
+  built_at: string | null;
+  error: string | null;
+  created_at: string;
+  deliveries: DossierDelivery[];
+}
+
+export interface DossierTarget {
+  id: string;
+  channel: 'webhook' | 'connector';
+  name: string;
+  kind: string | null;
+}
+
+export function getDossierConfig(packageId: string): Promise<DossierConfig> {
+  return apiGet<DossierConfig>(`${BASE}/packages/${packageId}/dossier/config`);
+}
+
+export function putDossierConfig(packageId: string, config: Partial<DossierConfig>): Promise<DossierConfig> {
+  return apiPut<DossierConfig>(`${BASE}/packages/${packageId}/dossier/config`, config);
+}
+
+export function checkDossier(packageId: string, kind: DossierScopeKind, value: string): Promise<DossierCheck> {
+  const params = new URLSearchParams({ scope_kind: kind });
+  if (kind !== 'project' && value.trim()) params.set('scope_value', value.trim());
+  return apiGet<DossierCheck>(`${BASE}/packages/${packageId}/dossier/check?${params.toString()}`);
+}
+
+export function requestDossier(
+  packageId: string,
+  body: {
+    scope_kind: DossierScopeKind;
+    scope_value?: string | null;
+    allow_incomplete: boolean;
+    deliveries: DossierDeliveryTarget[];
+  },
+): Promise<Dossier> {
+  return apiPost<Dossier>(`${BASE}/packages/${packageId}/dossier`, body);
+}
+
+export function listDossiers(packageId: string): Promise<Dossier[]> {
+  return apiGet<Dossier[]>(`${BASE}/packages/${packageId}/dossiers`);
+}
+
+export function deliverDossier(dossierId: string, target: DossierDeliveryTarget): Promise<DossierDelivery> {
+  return apiPost<DossierDelivery>(`${BASE}/dossiers/${dossierId}/deliver`, target);
+}
+
+export function resendDelivery(deliveryId: string): Promise<DossierDelivery> {
+  return apiPost<DossierDelivery>(`${BASE}/deliveries/${deliveryId}/resend`, {});
+}
+
+export function listDossierTargets(projectId: string): Promise<DossierTarget[]> {
+  return apiGet<DossierTarget[]>(`${BASE}/projects/${projectId}/dossier-targets`);
+}
+
+export async function downloadDossier(dossier: Dossier): Promise<void> {
+  const res = await fetchWithAuth(`${API_BASE}${BASE}/dossiers/${dossier.id}/download`, {
+    headers: { Accept: 'application/zip' },
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => res.statusText);
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+  triggerBlobDownload(await res.blob(), dossier.file_name ?? `handover_dossier_${dossier.id}.zip`);
 }

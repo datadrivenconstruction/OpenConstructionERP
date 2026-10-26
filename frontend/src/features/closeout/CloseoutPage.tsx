@@ -53,6 +53,8 @@ import {
   type CloseoutProjectType,
 } from './api';
 import BindDocumentModal from './BindDocumentModal';
+import { DossierPanel } from './DossierPanel';
+import { useHasPermission } from '@/shared/lib/permissionGates';
 import { fmtDate } from '@/shared/lib/formatters';
 
 // English fallbacks for the computed `closeout.project_type.*` keys. The default used to be
@@ -107,6 +109,7 @@ export default function CloseoutPage() {
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const activeProjectId = useProjectContextStore((s) => s.activeProjectId);
+  const canSignOff = useHasPermission('closeout.verify');
 
   const [bindSlotTarget, setBindSlotTarget] = useState<CloseoutSlot | null>(null);
   const [suggestions, setSuggestions] = useState<BindingSuggestion[] | null>(null);
@@ -710,6 +713,13 @@ export default function CloseoutPage() {
             onUpdate={insights.updateCustom}
             onRemove={insights.removeCustom}
             onCollapse={() => insights.setOpen(false)}
+          />
+
+          <DossierPanel
+            packageId={pkg.id}
+            projectId={pkg.project_id}
+            categoryLabel={categoryLabel}
+            canSignOff={canSignOff}
           />
 
           {/* ── Checklist grouped by category ──────────────────────────── */}

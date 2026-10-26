@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
+import { lazy, Suspense, useState, useEffect, useMemo, useCallback, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -8,7 +8,7 @@ import { useParams } from 'react-router-dom';
 import clsx from 'clsx';
 import {
   ShieldCheck, ShieldAlert, Clock, AlertTriangle, CircleDollarSign, Plus, X,
-  Pencil, Trash2, ChevronDown, CalendarClock, Wrench, FileWarning, Building2, Scale,
+  Pencil, Trash2, ChevronDown, CalendarClock, Wrench, FileWarning, Building2, Scale, Camera, Globe2,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, ConfirmDialog } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -32,6 +32,10 @@ import {
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildDefectsLiabilityInsights } from './defectsLiabilityInsights';
 import { useSingleFlight } from '@/shared/hooks/useSingleFlight';
+import { hasValidPin, type MapPin as FieldMapPin } from '@/shared/lib/photoEvidence';
+import { DefectPhotosPanel } from './DefectPhotosPanel';
+
+const FieldItemsMap = lazy(() => import('@/shared/ui/FieldItemsMap').then((m) => ({ default: m.FieldItemsMap })));
 
 type BadgeVariant = 'neutral' | 'blue' | 'success' | 'warning' | 'error';
 
@@ -686,10 +690,12 @@ function IconBtn({ label, onClick, danger, children }: { label: string; onClick:
   );
 }
 
-function DefectRow({ defect, warrantyReference, overdue, onStatusChange }: {
+function DefectRow({ defect, warrantyReference, overdue, onStatusChange, photosOpen, onTogglePhotos }: {
   defect: Defect; warrantyReference: string; overdue: boolean; onStatusChange: (d: Defect, status: DefectStatus) => void;
+  photosOpen: boolean; onTogglePhotos: (d: Defect) => void;
 }) {
   const { t } = useTranslation();
+  const photoCount = defect.photos?.length ?? 0;
   return (
     <div className={clsx('flex items-center gap-3 border-b border-border-light px-4 py-3 last:border-b-0', overdue && 'bg-semantic-error-bg/40')}>
       <span className="w-16 shrink-0 font-mono text-sm font-semibold text-content-secondary">{defect.reference}</span>
@@ -703,6 +709,13 @@ function DefectRow({ defect, warrantyReference, overdue, onStatusChange }: {
       <div className="hidden w-24 shrink-0 text-xs text-content-tertiary lg:block"><DateDisplay value={defect.raised_date} /></div>
       <div className="hidden w-24 shrink-0 text-xs text-content-tertiary md:block"><DateDisplay value={defect.due_date} /></div>
       <div className="w-16 shrink-0 text-center">{overdue && <Badge variant="error" size="sm">{t('defects_liability.badge_overdue', { defaultValue: 'Overdue' })}</Badge>}</div>
+      <button type="button" onClick={() => onTogglePhotos(defect)} aria-expanded={photosOpen}
+        className={clsx('inline-flex h-8 shrink-0 items-center gap-1 rounded-md border px-2 text-xs', photosOpen ? 'border-oe-blue text-oe-blue' : 'border-border-light text-content-secondary hover:text-content-primary')}
+        title={t('defects_liability.photos_toggle', { defaultValue: 'Photo evidence' })}
+        data-testid={`defect-photos-toggle-${defect.id}`}>
+        <Camera size={13} />
+        <span className="tabular-nums">{photoCount}</span>
+      </button>
       <div className="w-36 shrink-0">
         <SelectShell>
           <select value={defect.status} onChange={(e) => onStatusChange(defect, e.target.value as DefectStatus)}
@@ -743,7 +756,8 @@ export function DefectsLiabilityPage() {
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
 
-  const [view, setView] = useState<'warranties' | 'defects'>('warranties');
+  const [view, setView] = useState<'warranties' | 'defects' | 'map'>('warranties');
+  const [photosOpenId, setPhotosOpenId] = useState<string | null>(null);
   const [warrantyStatusFilter, setWarrantyStatusFilter] = useState<WarrantyStatus | ''>('');
   const [defectStatusFilter, setDefectStatusFilter] = useState<DefectStatus | ''>('');
   const [warrantyModalOpen, setWarrantyModalOpen] = useState(false);
@@ -758,6 +772,19 @@ export function DefectsLiabilityPage() {
 
   const warranties = useMemo(() => warrantiesQ.data ?? [], [warrantiesQ.data]);
   const defects = useMemo(() => defectsQ.data ?? [], [defectsQ.data]);
+  const defectPins = useMemo<FieldMapPin[]>(
+    () =>
+      defects
+        .filter((d) => hasValidPin(d.geo_lat, d.geo_lon))
+        .map((d) => ({
+          id: d.id,
+          lat: d.geo_lat as number,
+          lon: d.geo_lon as number,
+          label: `${d.reference} ${d.description}`.slice(0, 120),
+          tone: (d.status === 'closed' || d.status === 'rectified' ? 'done' : d.severity === 'critical' ? 'critical' : d.status === 'rectifying' ? 'progress' : 'open') as FieldMapPin['tone'],
+        })),
+    [defects],
+  );
 
   // Whether anybody on this project has chosen a limitation regime. Measured
   // over the whole register rather than the filtered view, so the column does
@@ -896,12 +923,16 @@ export function DefectsLiabilityPage() {
           {/* Register switch + status filter */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="inline-flex rounded-lg border border-border bg-surface-secondary p-0.5">
-              {(['warranties', 'defects'] as const).map((v) => (
+              {(['warranties', 'defects', 'map'] as const).map((v) => (
                 <button key={v} onClick={() => setView(v)}
                   className={clsx('flex h-8 items-center gap-1.5 rounded-md px-3 text-sm font-medium transition-colors',
                     view === v ? 'bg-surface-elevated text-content-primary shadow-xs' : 'text-content-tertiary hover:text-content-primary')}>
-                  {v === 'warranties' ? <ShieldAlert size={14} /> : <Wrench size={14} />}
-                  {v === 'warranties' ? t('defects_liability.tab_warranties', { defaultValue: 'Warranties' }) : t('defects_liability.tab_defects', { defaultValue: 'Defect notices' })}
+                  {v === 'warranties' ? <ShieldAlert size={14} /> : v === 'defects' ? <Wrench size={14} /> : <Globe2 size={14} />}
+                  {v === 'warranties'
+                    ? t('defects_liability.tab_warranties', { defaultValue: 'Warranties' })
+                    : v === 'defects'
+                      ? t('defects_liability.tab_defects', { defaultValue: 'Defect notices' })
+                      : t('defects_liability.tab_map', { defaultValue: 'Map' })}
                 </button>
               ))}
             </div>
@@ -909,7 +940,7 @@ export function DefectsLiabilityPage() {
             {view === 'warranties' ? (
               <StatusFilter value={warrantyStatusFilter} onChange={(v) => setWarrantyStatusFilter(v)} options={WARRANTY_STATUSES}
                 labelFor={(s) => t(`defects_liability.warranty_status_${s}`, { defaultValue: humanize(s) })} />
-            ) : (
+            ) : view === 'map' ? null : (
               <div className="flex items-center gap-2">
                 <StatusFilter value={defectStatusFilter} onChange={(v) => setDefectStatusFilter(v)} options={DEFECT_STATUSES}
                   labelFor={(s) => t(`defects_liability.defect_status_${s}`, { defaultValue: humanize(s) })} />
@@ -961,13 +992,25 @@ export function DefectsLiabilityPage() {
                 <Card padding="none" className="overflow-x-auto">
                   <div className="min-w-[760px]">
                     {filteredDefects.map((d) => (
-                      <DefectRow key={d.id} defect={d} warrantyReference={warrantyRefById.get(d.warranty_id) ?? d.warranty_id.slice(0, 8)}
-                        overdue={isDefectOverdue(d, today)} onStatusChange={(defect, status) => updateDefectMut.mutate({ id: defect.id, status })} />
+                      <div key={d.id}>
+                        <DefectRow defect={d} warrantyReference={warrantyRefById.get(d.warranty_id) ?? d.warranty_id.slice(0, 8)}
+                          overdue={isDefectOverdue(d, today)} onStatusChange={(defect, status) => updateDefectMut.mutate({ id: defect.id, status })}
+                          photosOpen={photosOpenId === d.id}
+                          onTogglePhotos={(defect) => setPhotosOpenId((cur) => (cur === defect.id ? null : defect.id))} />
+                        {photosOpenId === d.id && <DefectPhotosPanel defect={d} projectId={projectId} onChanged={invalidate} />}
+                      </div>
                     ))}
                   </div>
                 </Card>
               </>
             )
+          )}
+          {/* Defects on the map */}
+          {view === 'map' && (
+            <Suspense fallback={<Card padding="lg" className="text-center text-sm text-content-tertiary">{t('defects_liability.loading', { defaultValue: 'Loading...' })}</Card>}>
+              <FieldItemsMap pins={defectPins} total={defects.length}
+                onSelect={(id) => { setView('defects'); setPhotosOpenId(id); }} />
+            </Suspense>
           )}
         </div>
       </RequiresProject>

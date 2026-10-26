@@ -13,11 +13,13 @@ import {
   apiPatch,
   apiDelete,
   downloadWithAuth,
+  fetchWithAuth,
   type Page,
 } from '@/shared/lib/api';
 import { listRoster, type RosterMember } from '@/features/teams/api';
 import { roleHasPermission } from '@/shared/lib/permissionGates';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { appendCaptureFields, type DeviceCapture, type PhotoEvidence } from '@/shared/lib/photoEvidence';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -64,6 +66,10 @@ export interface PunchItem {
   location_x: number | null;
   location_y: number | null;
   photos: string[];
+  /** Evidence record per entry of `photos` (same order); null for older photos. */
+  photo_evidence?: (PhotoEvidence | null)[];
+  geo_lat?: number | null;
+  geo_lon?: number | null;
   trade: string | null;
   resolution_notes: string | null;
   verified_by: string | null;
@@ -266,9 +272,14 @@ export async function bulkClose(
   });
 }
 
-export async function uploadPunchPhoto(id: string, file: File): Promise<PunchItem> {
+export async function uploadPunchPhoto(
+  id: string,
+  file: File,
+  capture?: DeviceCapture | null,
+): Promise<PunchItem> {
   const formData = new FormData();
   formData.append('file', file);
+  appendCaptureFields(formData, capture);
   const token = localStorage.getItem('oe_access_token');
   const res = await fetch(`/api/v1/punchlist/items/${id}/photos/`, {
     method: 'POST',
@@ -364,6 +375,36 @@ export async function downloadPunchListPdf(projectId: string): Promise<void> {
     `${API_BASE}/v1/punchlist/export/pdf/?project_id=${encodeURIComponent(projectId)}`,
     `punchlist_${projectId}.pdf`,
   );
+}
+
+/** Export punch items as BCF topics (topic GUID = punch item id), optionally a selection. */
+export async function downloadPunchBcf(projectId: string, itemIds?: string[], version: '2.1' | '3.0' = '2.1'): Promise<void> {
+  const params = new URLSearchParams({ project_id: projectId, version });
+  for (const id of itemIds ?? []) params.append('item_ids', id);
+  await downloadWithAuth(`${API_BASE}/v1/punchlist/export/bcf/?${params.toString()}`, `punchlist_${projectId}.bcfzip`);
+}
+
+export interface PunchBcfImportReport {
+  status: 'passed' | 'warnings' | 'errors';
+  created: number;
+  updated: number;
+  photos_added: number;
+  comments_added: number;
+  skipped: number;
+  item_ids: string[];
+  issues: { severity: string; code: string; message: string; guid: string }[];
+}
+
+/** Create or update punch items from a .bcfzip (matched by topic GUID). */
+export async function importPunchBcf(projectId: string, file: File): Promise<PunchBcfImportReport> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const res = await fetchWithAuth(
+    `${API_BASE}/v1/punchlist/import/bcf/?project_id=${encodeURIComponent(projectId)}`,
+    { method: 'POST', body: formData },
+  );
+  if (!res.ok) throw new Error(`BCF import failed: ${res.status} ${res.statusText}`);
+  return (await res.json()) as PunchBcfImportReport;
 }
 
 export async function fetchPunchSummary(projectId: string): Promise<PunchSummary> {

@@ -16,7 +16,8 @@
  * a full project fetch so the defect -> warranty reference map is always complete.
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { API_BASE, apiGet, apiPost, apiPatch, apiDelete, fetchWithAuth } from '@/shared/lib/api';
+import { appendCaptureFields, type DeviceCapture, type PhotoEvidence } from '@/shared/lib/photoEvidence';
 
 /* -- Vocabularies (in lock-step with backend register.py) ------------------ */
 
@@ -201,9 +202,21 @@ export interface Defect {
   responsible_party: string | null;
   punchlist_id: string | null;
   ncr_id: string | null;
+  /** Photo evidence: gallery photo id plus its evidence record. */
+  photos?: DefectPhoto[];
+  geo_lat?: number | null;
+  geo_lon?: number | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface DefectPhoto {
+  photo_id: string;
+  document_id?: string | null;
+  filename?: string;
+  caption?: string | null;
+  evidence?: PhotoEvidence | null;
 }
 
 /** DefectCreate payload. `reference` and `description` are required. */
@@ -409,6 +422,29 @@ export async function updateDefect(
     `${BASE}/projects/${projectId}/defects/${defectId}`,
     payload,
   );
+}
+
+/** Attach a photo with its capture evidence to a defect (stored in the photo gallery). */
+export async function uploadDefectPhoto(
+  projectId: string,
+  defectId: string,
+  file: File,
+  capture?: DeviceCapture | null,
+): Promise<Defect> {
+  const form = new FormData();
+  form.append('file', file);
+  appendCaptureFields(form, capture);
+  const res = await fetchWithAuth(`${API_BASE}${BASE}/projects/${projectId}/defects/${defectId}/photos`, {
+    method: 'POST',
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Upload failed: ${res.status} ${res.statusText}`);
+  return (await res.json()) as Defect;
+}
+
+/** Detach a photo from a defect (the gallery photo stays in Documents). */
+export async function removeDefectPhoto(projectId: string, defectId: string, index: number): Promise<Defect> {
+  return apiDelete<Defect>(`${BASE}/projects/${projectId}/defects/${defectId}/photos/${index}`);
 }
 
 /** Full defects-liability register rollup: counts, expiry, defect load, health. */
