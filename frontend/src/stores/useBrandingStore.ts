@@ -51,6 +51,19 @@ function sanitizeOptions(raw: unknown): BrandingOptions {
   };
 }
 
+/**
+ * The quick edit button beside the sidebar logo goes off once a logo first
+ * appears, so the menu shows a clean brand; Settings > General switches it
+ * back on, and a later replacement leaves that choice alone.
+ */
+export function logoEditAfterLogoChange(
+  previousLogo: string | null,
+  nextLogo: string | null,
+  showLogoEdit: boolean,
+): boolean {
+  return !previousLogo && nextLogo ? false : showLogoEdit;
+}
+
 function loadOptions(): BrandingOptions {
   try {
     return sanitizeOptions(JSON.parse(localStorage.getItem(OPTIONS_KEY) || 'null'));
@@ -232,7 +245,14 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
         companyName: current.companyName,
       };
       save(next);
-      set(next);
+      const showLogoEdit = logoEditAfterLogoChange(current.logoDataUrl, dataUrl, current.options.showLogoEdit);
+      if (showLogoEdit === current.options.showLogoEdit) {
+        set(next);
+        return;
+      }
+      const options = { ...current.options, showLogoEdit };
+      saveOptions(options);
+      set({ ...next, options });
     },
     setCompanyName: (name) => {
       const trimmed = name.trim().slice(0, 60);
@@ -288,6 +308,7 @@ export const useBrandingStore = create<BrandingState>((set, get) => {
           logo_data_url: s.logoDataUrl,
           logo_png_data_url: s.logoPngDataUrl,
           company_name: s.companyName,
+          show_logo_edit: s.options.showLogoEdit,
         });
         return true;
       } catch {

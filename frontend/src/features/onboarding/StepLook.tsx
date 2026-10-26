@@ -23,11 +23,13 @@ import {
 import { MENU_PRESETS, matchMenuPreset, type MenuLook } from '@/shared/lib/menuAppearance';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { useBrandingStore } from '@/stores/useBrandingStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { BrandDraftSection, type BrandDraft } from './BrandDraft';
 
 const RADIUS_PX: Record<Appearance['radius'], number> = { sharp: 2, standard: 6, round: 12 };
 
-const PRESET_NAME: Record<string, string> = {
+export const PRESET_NAME: Record<string, string> = {
   classic: 'Classic',
   studio: 'Studio',
   engineering: 'Engineering',
@@ -104,7 +106,17 @@ function MenuSchematic({ look, accent, k = 1, fill = false }: { look: MenuLook; 
 }
 
 /** The scaled app shell: sidebar, header and a card, in the draft's tokens. */
-function LookPreview({ style, menu, label }: { style: Appearance; menu: MenuLook; label: string }) {
+function LookPreview({
+  style,
+  menu,
+  label,
+  brand,
+}: {
+  style: Appearance;
+  menu: MenuLook;
+  label: string;
+  brand?: BrandDraft;
+}) {
   const { t } = useTranslation();
   const accent = ACCENT_SWATCH[style.accent];
   const r = RADIUS_PX[style.radius];
@@ -122,8 +134,25 @@ function LookPreview({ style, menu, label }: { style: Appearance; menu: MenuLook
       className="flex h-56 w-full overflow-hidden border border-border bg-surface-primary shadow-sm"
       style={{ borderRadius: r + 4, fontFamily: FONT_STACK[style.font] }}
     >
-      <div className="shrink-0" style={{ width: menu.view === 'rail' ? '14%' : menu.view === 'compact' ? '28%' : '34%' }}>
-        <MenuSchematic look={menu} accent={accent} k={1.5} fill />
+      <div
+        className="flex shrink-0 flex-col"
+        style={{ width: menu.view === 'rail' ? '14%' : menu.view === 'compact' ? '28%' : '34%' }}
+      >
+        {brand && (brand.logo || brand.name.trim()) && (
+          <div
+            data-testid="look-preview-brand"
+            className="flex h-8 shrink-0 items-center overflow-hidden border-b border-e border-border-light bg-surface-secondary px-1.5"
+          >
+            {brand.logo ? (
+              <img src={brand.logo} alt="" className="block max-h-5 w-auto max-w-full object-contain" draggable={false} />
+            ) : (
+              <span className="truncate text-[10px] font-extrabold text-content-primary">{brand.name.trim()}</span>
+            )}
+          </div>
+        )}
+        <div className="min-h-0 flex-1">
+          <MenuSchematic look={menu} accent={accent} k={1.5} fill />
+        </div>
       </div>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex h-8 items-center justify-between border-b border-border-light bg-surface-elevated px-2.5">
@@ -227,6 +256,13 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
   const [style, setStyle] = useState<Appearance>(() => useAppearanceStore.getState().effective);
   const [menu, setMenu] = useState<MenuLook>(() => useAppearanceStore.getState().menu);
   const [saving, setSaving] = useState(false);
+  // The brand is a workspace setting: only an admin sets it, as in Settings.
+  const [brandStart] = useState<BrandDraft>(() => {
+    const b = useBrandingStore.getState();
+    return { logo: b.logoDataUrl, png: b.logoPngDataUrl, name: b.companyName };
+  });
+  const [brand, setBrand] = useState<BrandDraft>(brandStart);
+  const brandChanged = isAdmin && (brand.logo !== brandStart.logo || brand.name.trim() !== brandStart.name.trim());
 
   useEffect(() => {
     ensureFontLoaded(style.font);
@@ -238,6 +274,19 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
     t(`settings.style_preset_${id}`, { defaultValue: PRESET_NAME[id] ?? id });
   const menuName = (id: string) =>
     t(`settings.menu_preset_${id}`, { defaultValue: PRESET_NAME[id] ?? id });
+
+  const applyBrand = async () => {
+    const b = useBrandingStore.getState();
+    // Name first: a name set beside a logo keeps the logo as the brand.
+    if (brand.name.trim() !== b.companyName) b.setCompanyName(brand.name);
+    if (brand.logo !== b.logoDataUrl) b.setLogo(brand.logo, brand.png);
+    if (!(await useBrandingStore.getState().persistToServer())) {
+      useToastStore.getState().addToast({
+        type: 'error',
+        title: t('settings.brand_failed', { defaultValue: 'Could not save the logo' }),
+      });
+    }
+  };
 
   const apply = async () => {
     const store = useAppearanceStore.getState();
@@ -254,9 +303,9 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
           type: 'error',
           title: t('settings.style_workspace_failed', { defaultValue: 'Could not save the workspace default' }),
         });
-      } finally {
-        setSaving(false);
       }
+      if (brandChanged) await applyBrand();
+      setSaving(false);
     }
     onNext();
   };
@@ -279,6 +328,8 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
 
       <div className="mt-5 grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)]">
         <div className="min-w-0 space-y-5">
+          {isAdmin && <BrandDraftSection draft={brand} onChange={setBrand} />}
+
           <section>
             <h3 className="mb-2 text-sm font-semibold text-content-primary">{stylesLabel}</h3>
             <RadioRow label={stylesLabel} className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
@@ -358,7 +409,7 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
 
         <div className="min-w-0">
           <h3 className="mb-2 text-sm font-semibold text-content-primary">{previewLabel}</h3>
-          <LookPreview style={style} menu={menu} label={previewLabel} />
+          <LookPreview style={style} menu={menu} label={previewLabel} brand={isAdmin ? brand : undefined} />
         </div>
       </div>
 

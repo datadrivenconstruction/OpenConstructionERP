@@ -218,6 +218,10 @@ beforeEach(() => {
 
 afterEach(() => cleanup());
 
+/** The Finish summary's profile row: the saved profile and its module count. */
+const summaryProfile = () =>
+  screen.getByTestId('setup-summary-profile').querySelector('.truncate')?.textContent ?? '';
+
 describe('the onboarding wizard, first screen to the app', () => {
   it('walks every step as a general contractor and saves exactly what was picked', async () => {
     const client = renderWizard();
@@ -256,8 +260,7 @@ describe('the onboarding wizard, first screen to the app', () => {
 
     await heading("You're All Set!");
     expect(stepLabel()).toBe('Step 7 of 7');
-    expect(screen.getByText('General Contractor')).toBeTruthy();
-    expect(screen.getByText(`${expected} modules`)).toBeTruthy();
+    expect(summaryProfile()).toBe(`General Contractor · ${expected} modules`);
     // Nothing is saved before the last click.
     expect(posts('/v1/users/me/onboarding/')).toHaveLength(0);
 
@@ -332,7 +335,7 @@ describe('the onboarding wizard, first screen to the app', () => {
     click('Continue');
     await heading('Your Modules');
     await fromModulesToSummary();
-    expect(screen.getByText('Planner / Scheduler')).toBeTruthy();
+    expect(summaryProfile()).toContain('Planner / Scheduler');
     await startWorking();
 
     const body = onboardingPost();
@@ -392,7 +395,7 @@ describe('the ways out of the wizard', () => {
     await heading("You're All Set!");
     // The summary names the profile that is about to be saved, although none
     // was picked on the way here.
-    expect(screen.getByText('Full Enterprise')).toBeTruthy();
+    expect(summaryProfile()).toContain('Full Enterprise');
     await startWorking();
     expect(onboardingPost().company_type).toBe('full_enterprise');
   });
@@ -460,7 +463,7 @@ describe('module choices the user makes by hand survive Finish', () => {
     fireEvent.click(moduleSwitch('payroll'));
 
     await fromModulesToSummary();
-    expect(screen.getByText(`${activeCount(GC_MODULES) - 1} modules`)).toBeTruthy();
+    expect(summaryProfile()).toContain(`${activeCount(GC_MODULES) - 1} modules`);
     await startWorking();
 
     const body = onboardingPost();

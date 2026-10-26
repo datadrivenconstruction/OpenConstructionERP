@@ -190,10 +190,11 @@ export function WorkspaceBrandCard() {
               void run(async () => {
                 const url = await readLogo(file);
                 const png = isSvgDataUrl(url) ? await rasteriseSvgToPng(url).catch(() => null) : null;
-                const previous = { logo: logoDataUrl };
+                const previous = { logo: logoDataUrl, options };
                 setLogo(url, png);
                 if (!(await persistToServer())) {
                   setLogo(previous.logo);
+                  setOptions(previous.options);
                   throw new Error(t('settings.brand_rejected', { defaultValue: 'The server did not accept this file.' }));
                 }
               })
@@ -264,9 +265,16 @@ export function WorkspaceBrandCard() {
               disabled={busy}
               onChange={(v) => void saveOptions({ show_logo_edit: v })}
               label={t('settings.brand_show_edit', { defaultValue: 'Edit button next to the logo' })}
-              hint={t('settings.brand_show_edit_hint', {
-                defaultValue: 'Quick access to change the logo from the menu. Only admins ever see it.',
-              })}
+              hint={
+                <>
+                  {t('settings.brand_show_edit_hint', {
+                    defaultValue: 'Quick access to change the logo from the menu. Only admins ever see it.',
+                  })}{' '}
+                  {t('settings.brand_show_edit_auto', {
+                    defaultValue: 'It switches off by itself when a logo is first uploaded, so the menu stays clean.',
+                  })}
+                </>
+              }
             />
             {(logoDataUrl || companyName) && (
               <div>
