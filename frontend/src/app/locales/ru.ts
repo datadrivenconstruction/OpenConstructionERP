@@ -54008,6 +54008,13 @@ const resource = {
     "settings.notify_title": "Уведомления",
     "settings.notify_subtitle": "Выберите для каждого типа события, придёт ли оно в приложении, по почте или через вебхук.",
     "settings.notify_open": "Настроить каналы уведомлений",
+    "settings.chords_title": "Клавиши быстрой навигации",
+    "settings.chords_subtitle": "Нажмите G, затем клавишу, чтобы перейти на страницу. Клавишу для любой страницы можно изменить.",
+    "settings.chords_invalid": "Используйте одну букву, цифру или запятую (кроме G).",
+    "settings.chords_taken": "{{key}} уже используется для раздела «{{other}}».",
+    "settings.chords_key_for": "Клавиша после G для раздела «{{page}}»",
+    "settings.chords_reset_one": "Вернуть для «{{page}}» клавишу {{key}}",
+    "settings.chords_reset_all": "Сбросить все клавиши",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",

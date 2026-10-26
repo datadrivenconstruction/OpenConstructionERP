@@ -45666,6 +45666,13 @@ const resource = {
     "settings.notify_title": "Notifications",
     "settings.notify_subtitle": "Choose, for each kind of event, whether it reaches you in the app, by email or through a webhook.",
     "settings.notify_open": "Set notification channels",
+    "settings.chords_title": "Navigation shortcuts",
+    "settings.chords_subtitle": "Press G, then the key, to jump to a page. Change the key for any page.",
+    "settings.chords_invalid": "Use one letter, digit or comma (not G).",
+    "settings.chords_taken": "{{key}} is already used for {{other}}.",
+    "settings.chords_key_for": "Key after G for {{page}}",
+    "settings.chords_reset_one": "Reset {{page}} to {{key}}",
+    "settings.chords_reset_all": "Reset all shortcuts",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",
