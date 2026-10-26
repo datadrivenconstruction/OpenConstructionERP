@@ -147,6 +147,28 @@
       "completion_milestone_description": "项目完工里程碑",
       "labour_resource": "人工",
       "machine_resource": "机械"
+    },
+    "progress_sheet": {
+      "sheet_title": "进度",
+      "title": "进度更新表",
+      "detail_schedule": "进度计划：{name}",
+      "detail_exported": "导出时间：{date}",
+      "instructions": "仅填写白色列。请勿更改灰色列、行顺序或隐藏列。",
+      "col": {
+        "activity_ref": "作业 ID",
+        "name": "作业",
+        "wbs_code": "WBS",
+        "responsible": "责任人",
+        "planned_start": "计划开始",
+        "planned_finish": "计划完成",
+        "percent_complete": "完成百分比",
+        "actual_start": "实际开始",
+        "actual_finish": "实际完成",
+        "remaining_duration": "剩余（工作日）",
+        "notes": "备注",
+        "row_key": "行标识",
+        "stamp": "标记"
+      }
     }
   },
   "cad": {

@@ -147,6 +147,28 @@
       "completion_milestone_description": "Jalon d'achèvement du projet",
       "labour_resource": "Main-d'œuvre",
       "machine_resource": "Matériel"
+    },
+    "progress_sheet": {
+      "sheet_title": "Avancement",
+      "title": "Feuille de mise à jour de l'avancement",
+      "detail_schedule": "Planning : {name}",
+      "detail_exported": "Exporté le : {date}",
+      "instructions": "Remplissez uniquement les colonnes blanches. Ne modifiez pas les colonnes grises, l'ordre des lignes ni les colonnes masquées.",
+      "col": {
+        "activity_ref": "ID d'activité",
+        "name": "Activité",
+        "wbs_code": "WBS",
+        "responsible": "Responsable",
+        "planned_start": "Début prévu",
+        "planned_finish": "Fin prévue",
+        "percent_complete": "% d'avancement",
+        "actual_start": "Début réel",
+        "actual_finish": "Fin réelle",
+        "remaining_duration": "Restant (jours ouvrés)",
+        "notes": "Notes",
+        "row_key": "Clé de ligne",
+        "stamp": "Empreinte"
+      }
     }
   },
   "cad": {

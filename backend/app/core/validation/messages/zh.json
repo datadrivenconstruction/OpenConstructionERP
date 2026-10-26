@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "活动“{activity}”存储的工期为 {stored} 个工作日，这是按周一至周五计算 {start} 至 {end} 的结果；按项目工作周 {calendar} 计算，这段日期应为 {expected} 个工作日。",
       "suggestion": "请重新保存活动日期，以按项目工作周重新计算工期，或明确手动填写工期。"
+    },
+    "dates_match_source": {
+      "fail": "{activity} 的完成日期与导入文件中的完成日期（{source}）相差 {days} 天。",
+      "suggestion": "将重新计算的日期与源文件进行对比，然后接受它们或恢复源文件日期。"
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "请填写折扣百分比或固定净价（固定净价需要指定项目）",
     "attachment_not_found": "未找到附件",
     "price_missing": "清单行“{line}”没有当前有效价格：请输入单价或导入供应商价目表"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "第 {row} 行：此进度计划中没有 ID 为 {ref} 的作业。",
+      "duplicate": "第 {row} 行：作业 {ref} 在表格中出现多次。",
+      "suggestion": "请导出新表格，不要添加、复制或重新排序行。"
+    },
+    "values_in_range": {
+      "percent_not_a_number": "第 {row} 行：完成百分比不是数字。",
+      "actual_start_not_a_date": "第 {row} 行：实际开始不是日期。",
+      "actual_finish_not_a_date": "第 {row} 行：实际完成不是日期。",
+      "remaining_not_a_whole_number": "第 {row} 行：剩余工期不是整数天。",
+      "percent_out_of_range": "第 {row} 行：完成百分比为 {value}，必须介于 0 和 100 之间。",
+      "remaining_negative": "第 {row} 行：剩余工期为 {value}，不能为负数。",
+      "suggestion": "请输入 0 到 100 的完成百分比，日期使用日期格式，剩余工期使用整数工作日。"
+    },
+    "date_logic": {
+      "finish_before_start": "第 {row} 行：实际完成 {finish} 早于实际开始 {start}。",
+      "finish_without_start": "第 {row} 行：填写了实际完成 {finish}，但没有实际开始。",
+      "after_status_date": "第 {row} 行：实际日期 {value} 晚于状态日期 {status_date}。",
+      "finish_needs_complete": "第 {row} 行：填写了实际完成，但作业仅完成 {percent}%。",
+      "suggestion": "实际日期必须按顺序，且不得晚于状态日期；有实际完成日期即表示已完成 100%。"
+    },
+    "unchanged_since_export": {
+      "fail": "第 {row} 行：{activity} 在表格导出后已在应用中被更改。",
+      "suggestion": "应用此行之前请检查当前值，或导出新表格。"
+    },
+    "plausibility": {
+      "progress_decreased": "第 {row} 行：进度从 {old}% 降至 {new}%。",
+      "complete_without_finish": "第 {row} 行：已完成 100% 但没有实际完成日期；将使用状态日期作为完成日期。",
+      "started_without_start": "第 {row} 行：填写了进度，但没有实际开始。",
+      "suggestion": "应用之前请与现场核对此行。"
+    }
   }
 }

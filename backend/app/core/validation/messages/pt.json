@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "A atividade «{activity}» está registrada com {stored} dias úteis, contados de segunda a sexta-feira entre {start} e {end}; na semana de trabalho do projeto, {calendar}, essas datas correspondem a {expected}",
       "suggestion": "Salve novamente as datas da atividade para recalcular a duração conforme a semana de trabalho do projeto ou informe a duração deliberadamente"
+    },
+    "dates_match_source": {
+      "fail": "{activity} termina a {days} dias do fim no ficheiro importado ({source}).",
+      "suggestion": "Compare as datas recalculadas com o ficheiro de origem e depois aceite-as ou reponha as datas da origem."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Informe um percentual de desconto ou um preço líquido fixo (o preço líquido fixo exige um item)",
     "attachment_not_found": "Anexo não encontrado",
     "price_missing": "Não há preço vigente para a linha \"{line}\": informe um preço unitário ou importe a lista de preços do fornecedor"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Linha {row}: nenhuma atividade deste cronograma tem o ID {ref}.",
+      "duplicate": "Linha {row}: a atividade {ref} aparece mais de uma vez na folha.",
+      "suggestion": "Exporte uma nova folha e não adicione, copie nem reordene linhas."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Linha {row}: % concluída não é um número.",
+      "actual_start_not_a_date": "Linha {row}: o início real não é uma data.",
+      "actual_finish_not_a_date": "Linha {row}: o fim real não é uma data.",
+      "remaining_not_a_whole_number": "Linha {row}: a duração restante não é um número inteiro de dias.",
+      "percent_out_of_range": "Linha {row}: % concluída é {value}, tem de estar entre 0 e 100.",
+      "remaining_negative": "Linha {row}: a duração restante é {value}, não pode ser negativa.",
+      "suggestion": "Introduza % concluída de 0 a 100, datas como datas e a duração restante em dias úteis inteiros."
+    },
+    "date_logic": {
+      "finish_before_start": "Linha {row}: o fim real {finish} é anterior ao início real {start}.",
+      "finish_without_start": "Linha {row}: foi indicado um fim real {finish} sem início real.",
+      "after_status_date": "Linha {row}: a data real {value} é posterior à data de estado {status_date}.",
+      "finish_needs_complete": "Linha {row}: foi indicado um fim real, mas a atividade está apenas {percent}% concluída.",
+      "suggestion": "As datas reais têm de estar em ordem, não posteriores à data de estado, e um fim real implica 100% concluída."
+    },
+    "unchanged_since_export": {
+      "fail": "Linha {row}: {activity} foi alterada na aplicação depois de a folha ser exportada.",
+      "suggestion": "Verifique os valores atuais antes de aplicar esta linha ou exporte uma nova folha."
+    },
+    "plausibility": {
+      "progress_decreased": "Linha {row}: o progresso desce de {old}% para {new}%.",
+      "complete_without_finish": "Linha {row}: 100% concluída sem fim real; a data de estado será usada como fim.",
+      "started_without_start": "Linha {row}: foi indicado progresso sem início real.",
+      "suggestion": "Verifique a linha com a obra antes de a aplicar."
+    }
   }
 }

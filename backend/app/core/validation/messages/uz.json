@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "'{activity}' faoliyati {start} dan {end} gacha dushanba–juma hisobida {stored} ish kuni sifatida saqlangan; loyihaning {calendar} ish haftasi boʻyicha shu sanalar {expected} beradi",
       "suggestion": "Davomiylik loyiha ish haftasi boʻyicha qayta sanalishi uchun faoliyat sanalarini qayta saqlang yoki davomiylikni ongli ravishda kiriting"
+    },
+    "dates_match_source": {
+      "fail": "{activity} tugashi import qilingan fayldagi tugashdan {days} kunga farq qiladi ({source}).",
+      "suggestion": "Qayta hisoblangan sanalarni manba fayl bilan solishtiring, soʻng ularni qabul qiling yoki manba sanalarini tiklang."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Chegirma foizini yoki qat'iy netto narxni ko'rsating (qat'iy netto narx uchun pozitsiya kerak)",
     "attachment_not_found": "Biriktirma topilmadi",
     "price_missing": "\"{line}\" qatori uchun amaldagi narx yo'q: birlik narxini kiriting yoki yetkazib beruvchining narxnomasini import qiling"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "{row}-qator: bu jadvalda {ref} ID li ish yoʻq.",
+      "duplicate": "{row}-qator: {ref} ishi varaqda bir martadan koʻp uchraydi.",
+      "suggestion": "Yangi varaq eksport qiling va qatorlarni qoʻshmang, nusxalamang yoki tartibini oʻzgartirmang."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "{row}-qator: % bajarilgan son emas.",
+      "actual_start_not_a_date": "{row}-qator: haqiqiy boshlanish sana emas.",
+      "actual_finish_not_a_date": "{row}-qator: haqiqiy tugash sana emas.",
+      "remaining_not_a_whole_number": "{row}-qator: qolgan davomiylik butun kunlar soni emas.",
+      "percent_out_of_range": "{row}-qator: % bajarilgan {value}, u 0 dan 100 gacha boʻlishi kerak.",
+      "remaining_negative": "{row}-qator: qolgan davomiylik {value}, u manfiy boʻlishi mumkin emas.",
+      "suggestion": "% bajarilganni 0 dan 100 gacha, sanalarni sana sifatida, qolgan davomiylikni butun ish kunlarida kiriting."
+    },
+    "date_logic": {
+      "finish_before_start": "{row}-qator: haqiqiy tugash {finish} haqiqiy boshlanish {start} dan oldin.",
+      "finish_without_start": "{row}-qator: haqiqiy boshlanishsiz haqiqiy tugash {finish} kiritilgan.",
+      "after_status_date": "{row}-qator: haqiqiy sana {value} holat sanasi {status_date} dan keyin.",
+      "finish_needs_complete": "{row}-qator: haqiqiy tugash kiritilgan, lekin ish faqat {percent}% bajarilgan.",
+      "suggestion": "Haqiqiy sanalar tartibda boʻlishi, holat sanasidan keyin boʻlmasligi kerak, haqiqiy tugash esa 100% bajarilgan degani."
+    },
+    "unchanged_since_export": {
+      "fail": "{row}-qator: {activity} varaq eksport qilingandan keyin ilovada oʻzgartirilgan.",
+      "suggestion": "Bu qatorni qoʻllashdan oldin joriy qiymatlarni tekshiring yoki yangi varaq eksport qiling."
+    },
+    "plausibility": {
+      "progress_decreased": "{row}-qator: progress {old}% dan {new}% ga tushadi.",
+      "complete_without_finish": "{row}-qator: haqiqiy tugashsiz 100% bajarilgan; holat sanasi tugash sifatida ishlatiladi.",
+      "started_without_start": "{row}-qator: haqiqiy boshlanishsiz progress kiritilgan.",
+      "suggestion": "Qoʻllashdan oldin qatorni obyekt bilan tekshiring."
+    }
   }
 }

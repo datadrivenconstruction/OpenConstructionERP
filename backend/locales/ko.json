@@ -147,6 +147,28 @@
       "completion_milestone_description": "프로젝트 완료 마일스톤",
       "labour_resource": "노무",
       "machine_resource": "장비"
+    },
+    "progress_sheet": {
+      "sheet_title": "진행",
+      "title": "진행 업데이트 시트",
+      "detail_schedule": "일정: {name}",
+      "detail_exported": "내보낸 날짜: {date}",
+      "instructions": "흰색 열만 입력하세요. 회색 열, 행 순서, 숨겨진 열은 변경하지 마세요.",
+      "col": {
+        "activity_ref": "작업 ID",
+        "name": "작업",
+        "wbs_code": "WBS",
+        "responsible": "담당자",
+        "planned_start": "계획 시작",
+        "planned_finish": "계획 종료",
+        "percent_complete": "완료율",
+        "actual_start": "실제 시작",
+        "actual_finish": "실제 종료",
+        "remaining_duration": "잔여 (작업일)",
+        "notes": "메모",
+        "row_key": "행 키",
+        "stamp": "스탬프"
+      }
     }
   },
   "cad": {

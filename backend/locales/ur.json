@@ -147,6 +147,28 @@
       "completion_milestone_description": "پروجیکٹ کی تکمیل کا سنگ میل",
       "labour_resource": "مزدور",
       "machine_resource": "مشینری"
+    },
+    "progress_sheet": {
+      "sheet_title": "پیش رفت",
+      "title": "پیش رفت کی تازہ کاری کی شیٹ",
+      "detail_schedule": "شیڈول: {name}",
+      "detail_exported": "برآمد کیا گیا: {date}",
+      "instructions": "صرف سفید کالم بھریں۔ سرمئی کالم، قطاروں کی ترتیب اور چھپے ہوئے کالم تبدیل نہ کریں۔",
+      "col": {
+        "activity_ref": "سرگرمی ID",
+        "name": "سرگرمی",
+        "wbs_code": "WBS",
+        "responsible": "ذمہ دار",
+        "planned_start": "منصوبہ بند آغاز",
+        "planned_finish": "منصوبہ بند اختتام",
+        "percent_complete": "% مکمل",
+        "actual_start": "اصل آغاز",
+        "actual_finish": "اصل اختتام",
+        "remaining_duration": "باقی (کام کے دن)",
+        "notes": "نوٹس",
+        "row_key": "قطار کی کلید",
+        "stamp": "مہر"
+      }
     }
   },
   "cad": {

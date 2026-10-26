@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Aktiviteten '{activity}' är lagrad som {stored} arbetsdagar, räknat måndag till fredag från {start} till {end}; enligt projektets arbetsvecka, {calendar}, omfattar dessa datum {expected}",
       "suggestion": "Spara aktivitetens datum igen för att räkna om varaktigheten enligt projektets arbetsvecka eller ange varaktigheten uttryckligen"
+    },
+    "dates_match_source": {
+      "fail": "{activity} slutar {days} dagar från slutdatumet i den importerade filen ({source}).",
+      "suggestion": "Jämför de omräknade datumen med källfilen och godkänn dem eller återställ källdatumen."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Ange antingen en rabattprocent eller ett fast nettopris (fast nettopris kräver en artikel)",
     "attachment_not_found": "Bilagan hittades inte",
     "price_missing": "Inget aktuellt pris för raden \"{line}\": ange ett á-pris eller importera leverantörens prislista"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Rad {row}: ingen aktivitet i den här tidplanen har ID {ref}.",
+      "duplicate": "Rad {row}: aktivitet {ref} förekommer mer än en gång i bladet.",
+      "suggestion": "Exportera ett nytt blad och lägg inte till, kopiera eller ordna om rader."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Rad {row}: % klart är inte ett tal.",
+      "actual_start_not_a_date": "Rad {row}: faktisk start är inte ett datum.",
+      "actual_finish_not_a_date": "Rad {row}: faktiskt slut är inte ett datum.",
+      "remaining_not_a_whole_number": "Rad {row}: återstående varaktighet är inte ett helt antal dagar.",
+      "percent_out_of_range": "Rad {row}: % klart är {value}, det måste vara mellan 0 och 100.",
+      "remaining_negative": "Rad {row}: återstående varaktighet är {value}, den kan inte vara negativ.",
+      "suggestion": "Ange % klart från 0 till 100, datum som datum och återstående varaktighet i hela arbetsdagar."
+    },
+    "date_logic": {
+      "finish_before_start": "Rad {row}: faktiskt slut {finish} ligger före faktisk start {start}.",
+      "finish_without_start": "Rad {row}: faktiskt slut {finish} är angivet utan faktisk start.",
+      "after_status_date": "Rad {row}: det faktiska datumet {value} ligger efter statusdatumet {status_date}.",
+      "finish_needs_complete": "Rad {row}: faktiskt slut är angivet men aktiviteten är endast {percent}% klar.",
+      "suggestion": "Faktiska datum måste vara i ordning, inte senare än statusdatumet, och ett faktiskt slut betyder 100% klart."
+    },
+    "unchanged_since_export": {
+      "fail": "Rad {row}: {activity} ändrades i appen efter att bladet exporterades.",
+      "suggestion": "Kontrollera de nuvarande värdena innan du tillämpar raden, eller exportera ett nytt blad."
+    },
+    "plausibility": {
+      "progress_decreased": "Rad {row}: framsteget minskar från {old}% till {new}%.",
+      "complete_without_finish": "Rad {row}: 100% klart utan faktiskt slut; statusdatumet används som slut.",
+      "started_without_start": "Rad {row}: framsteg är angivet utan faktisk start.",
+      "suggestion": "Kontrollera raden med arbetsplatsen innan du tillämpar den."
+    }
   }
 }

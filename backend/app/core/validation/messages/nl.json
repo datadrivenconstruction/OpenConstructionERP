@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Activiteit '{activity}' is opgeslagen met {stored} werkdagen, geteld van maandag tot vrijdag tussen {start} en {end}; volgens de projectwerkweek {calendar} bevatten die datums {expected} werkdagen",
       "suggestion": "Sla de datums opnieuw op om de duur volgens de projectwerkweek te berekenen, of voer de duur bewust handmatig in"
+    },
+    "dates_match_source": {
+      "fail": "{activity} eindigt {days} dagen verschoven van het einde in het geïmporteerde bestand ({source}).",
+      "suggestion": "Vergelijk de herberekende datums met het bronbestand en accepteer ze of herstel de brondatums."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Geef een kortingspercentage of een vaste nettoprijs op (een vaste nettoprijs vereist een artikel)",
     "attachment_not_found": "Bijlage niet gevonden",
     "price_missing": "Geen actuele prijs voor regel \"{line}\": voer een eenheidsprijs in of importeer de prijslijst van de leverancier"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Rij {row}: geen enkele activiteit van deze planning heeft de ID {ref}.",
+      "duplicate": "Rij {row}: activiteit {ref} komt meer dan eens voor in het blad.",
+      "suggestion": "Exporteer een nieuw blad en voeg geen rijen toe, kopieer ze niet en wijzig de volgorde niet."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Rij {row}: % voltooid is geen getal.",
+      "actual_start_not_a_date": "Rij {row}: de werkelijke start is geen datum.",
+      "actual_finish_not_a_date": "Rij {row}: het werkelijke einde is geen datum.",
+      "remaining_not_a_whole_number": "Rij {row}: de resterende duur is geen geheel aantal dagen.",
+      "percent_out_of_range": "Rij {row}: % voltooid is {value}, dit moet tussen 0 en 100 liggen.",
+      "remaining_negative": "Rij {row}: de resterende duur is {value}, dit mag niet negatief zijn.",
+      "suggestion": "Voer % voltooid in van 0 tot 100, datums als datums en de resterende duur in hele werkdagen."
+    },
+    "date_logic": {
+      "finish_before_start": "Rij {row}: het werkelijke einde {finish} ligt vóór de werkelijke start {start}.",
+      "finish_without_start": "Rij {row}: er is een werkelijk einde {finish} ingevuld zonder werkelijke start.",
+      "after_status_date": "Rij {row}: de werkelijke datum {value} ligt na de statusdatum {status_date}.",
+      "finish_needs_complete": "Rij {row}: er is een werkelijk einde ingevuld, maar de activiteit is pas {percent}% voltooid.",
+      "suggestion": "Werkelijke datums moeten in volgorde staan, niet later dan de statusdatum, en een werkelijk einde betekent 100% voltooid."
+    },
+    "unchanged_since_export": {
+      "fail": "Rij {row}: {activity} is in de app gewijzigd nadat het blad was geëxporteerd.",
+      "suggestion": "Controleer de huidige waarden voordat u deze rij toepast, of exporteer een nieuw blad."
+    },
+    "plausibility": {
+      "progress_decreased": "Rij {row}: de voortgang daalt van {old}% naar {new}%.",
+      "complete_without_finish": "Rij {row}: 100% voltooid zonder werkelijk einde; de statusdatum wordt als einde gebruikt.",
+      "started_without_start": "Rij {row}: er is voortgang ingevuld zonder werkelijke start.",
+      "suggestion": "Controleer de rij met de bouwplaats voordat u hem toepast."
+    }
   }
 }

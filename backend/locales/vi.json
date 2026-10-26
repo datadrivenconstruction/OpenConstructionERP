@@ -147,6 +147,28 @@
       "completion_milestone_description": "Mốc hoàn thành dự án",
       "labour_resource": "Nhân công",
       "machine_resource": "Máy thi công"
+    },
+    "progress_sheet": {
+      "sheet_title": "Tiến độ",
+      "title": "Bảng cập nhật tiến độ",
+      "detail_schedule": "Tiến độ: {name}",
+      "detail_exported": "Đã xuất: {date}",
+      "instructions": "Chỉ điền các cột màu trắng. Không thay đổi các cột màu xám, thứ tự dòng hoặc các cột ẩn.",
+      "col": {
+        "activity_ref": "ID công việc",
+        "name": "Công việc",
+        "wbs_code": "WBS",
+        "responsible": "Người phụ trách",
+        "planned_start": "Bắt đầu kế hoạch",
+        "planned_finish": "Kết thúc kế hoạch",
+        "percent_complete": "% hoàn thành",
+        "actual_start": "Bắt đầu thực tế",
+        "actual_finish": "Kết thúc thực tế",
+        "remaining_duration": "Còn lại (ngày làm việc)",
+        "notes": "Ghi chú",
+        "row_key": "Khóa dòng",
+        "stamp": "Dấu"
+      }
     }
   },
   "cad": {

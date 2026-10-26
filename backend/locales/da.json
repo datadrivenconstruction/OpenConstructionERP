@@ -147,6 +147,28 @@
       "completion_milestone_description": "Milepæl for projektafslutning",
       "labour_resource": "Arbejdskraft",
       "machine_resource": "Maskiner"
+    },
+    "progress_sheet": {
+      "sheet_title": "Fremdrift",
+      "title": "Ark til fremdriftsopdatering",
+      "detail_schedule": "Tidsplan: {name}",
+      "detail_exported": "Eksporteret: {date}",
+      "instructions": "Udfyld kun de hvide kolonner. Ret ikke de grå kolonner, rækkefølgen af rækker eller de skjulte kolonner.",
+      "col": {
+        "activity_ref": "Aktivitets-ID",
+        "name": "Aktivitet",
+        "wbs_code": "WBS",
+        "responsible": "Ansvarlig",
+        "planned_start": "Planlagt start",
+        "planned_finish": "Planlagt slut",
+        "percent_complete": "% færdig",
+        "actual_start": "Faktisk start",
+        "actual_finish": "Faktisk slut",
+        "remaining_duration": "Resterende (arbejdsdage)",
+        "notes": "Noter",
+        "row_key": "Rækkenøgle",
+        "stamp": "Stempel"
+      }
     }
   },
   "cad": {

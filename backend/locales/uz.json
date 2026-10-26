@@ -147,6 +147,28 @@
       "completion_milestone_description": "Loyihaning tugash bosqichi",
       "labour_resource": "Mehnat",
       "machine_resource": "Mashinalar"
+    },
+    "progress_sheet": {
+      "sheet_title": "Progress",
+      "title": "Progressni yangilash varaqi",
+      "detail_schedule": "Jadval: {name}",
+      "detail_exported": "Eksport qilingan: {date}",
+      "instructions": "Faqat oq ustunlarni toʻldiring. Kulrang ustunlarni, qatorlar tartibini va yashirin ustunlarni oʻzgartirmang.",
+      "col": {
+        "activity_ref": "Ish ID",
+        "name": "Ish",
+        "wbs_code": "WBS",
+        "responsible": "Masʼul",
+        "planned_start": "Reja boshlanishi",
+        "planned_finish": "Reja tugashi",
+        "percent_complete": "% bajarilgan",
+        "actual_start": "Haqiqiy boshlanish",
+        "actual_finish": "Haqiqiy tugash",
+        "remaining_duration": "Qoldi (ish kuni)",
+        "notes": "Izohlar",
+        "row_key": "Qator kaliti",
+        "stamp": "Muhr"
+      }
     }
   },
   "cad": {

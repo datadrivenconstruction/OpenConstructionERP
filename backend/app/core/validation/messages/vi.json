@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Công việc '{activity}' được lưu là {stored} ngày làm việc, tính theo thứ Hai đến thứ Sáu từ {start} đến {end}; theo tuần làm việc của dự án, {calendar}, khoảng này có {expected} ngày",
       "suggestion": "Lưu lại ngày của công việc để tính lại thời lượng theo tuần làm việc của dự án hoặc chủ động nhập thời lượng"
+    },
+    "dates_match_source": {
+      "fail": "{activity} kết thúc lệch {days} ngày so với ngày kết thúc trong tệp đã nhập ({source}).",
+      "suggestion": "So sánh các ngày đã tính lại với tệp nguồn, rồi chấp nhận chúng hoặc khôi phục ngày theo nguồn."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Nhập tỷ lệ chiết khấu hoặc giá net cố định (giá net cố định cần có mặt hàng)",
     "attachment_not_found": "Không tìm thấy tệp đính kèm",
     "price_missing": "Không có giá hiện hành cho dòng \"{line}\": nhập đơn giá hoặc nhập bảng giá của nhà cung cấp"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Dòng {row}: không có công việc nào của tiến độ này có ID {ref}.",
+      "duplicate": "Dòng {row}: công việc {ref} xuất hiện nhiều lần trong bảng.",
+      "suggestion": "Hãy xuất bảng mới và không thêm, sao chép hoặc sắp xếp lại các dòng."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Dòng {row}: % hoàn thành không phải là số.",
+      "actual_start_not_a_date": "Dòng {row}: ngày bắt đầu thực tế không phải là ngày.",
+      "actual_finish_not_a_date": "Dòng {row}: ngày kết thúc thực tế không phải là ngày.",
+      "remaining_not_a_whole_number": "Dòng {row}: thời lượng còn lại không phải là số ngày nguyên.",
+      "percent_out_of_range": "Dòng {row}: % hoàn thành là {value}, phải nằm trong khoảng từ 0 đến 100.",
+      "remaining_negative": "Dòng {row}: thời lượng còn lại là {value}, không thể âm.",
+      "suggestion": "Nhập % hoàn thành từ 0 đến 100, ngày ở dạng ngày và thời lượng còn lại theo số ngày làm việc nguyên."
+    },
+    "date_logic": {
+      "finish_before_start": "Dòng {row}: ngày kết thúc thực tế {finish} trước ngày bắt đầu thực tế {start}.",
+      "finish_without_start": "Dòng {row}: đã nhập ngày kết thúc thực tế {finish} nhưng không có ngày bắt đầu thực tế.",
+      "after_status_date": "Dòng {row}: ngày thực tế {value} sau ngày trạng thái {status_date}.",
+      "finish_needs_complete": "Dòng {row}: đã nhập ngày kết thúc thực tế nhưng công việc mới hoàn thành {percent}%.",
+      "suggestion": "Các ngày thực tế phải đúng thứ tự, không muộn hơn ngày trạng thái, và có ngày kết thúc thực tế nghĩa là hoàn thành 100%."
+    },
+    "unchanged_since_export": {
+      "fail": "Dòng {row}: {activity} đã bị thay đổi trong ứng dụng sau khi bảng được xuất.",
+      "suggestion": "Hãy kiểm tra các giá trị hiện tại trước khi áp dụng dòng này, hoặc xuất bảng mới."
+    },
+    "plausibility": {
+      "progress_decreased": "Dòng {row}: tiến độ giảm từ {old}% xuống {new}%.",
+      "complete_without_finish": "Dòng {row}: hoàn thành 100% nhưng không có ngày kết thúc thực tế; ngày trạng thái sẽ được dùng làm ngày kết thúc.",
+      "started_without_start": "Dòng {row}: đã nhập tiến độ nhưng không có ngày bắt đầu thực tế.",
+      "suggestion": "Hãy kiểm tra dòng này với công trường trước khi áp dụng."
+    }
   }
 }

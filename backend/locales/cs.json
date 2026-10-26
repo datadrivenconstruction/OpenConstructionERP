@@ -147,6 +147,28 @@
       "completion_milestone_description": "Milník dokončení projektu",
       "labour_resource": "Pracovníci",
       "machine_resource": "Stroje"
+    },
+    "progress_sheet": {
+      "sheet_title": "Postup",
+      "title": "List aktualizace postupu",
+      "detail_schedule": "Harmonogram: {name}",
+      "detail_exported": "Exportováno: {date}",
+      "instructions": "Vyplňujte jen bílé sloupce. Neměňte šedé sloupce, pořadí řádků ani skryté sloupce.",
+      "col": {
+        "activity_ref": "ID činnosti",
+        "name": "Činnost",
+        "wbs_code": "WBS",
+        "responsible": "Odpovědná osoba",
+        "planned_start": "Plánovaný začátek",
+        "planned_finish": "Plánovaný konec",
+        "percent_complete": "% dokončení",
+        "actual_start": "Skutečný začátek",
+        "actual_finish": "Skutečný konec",
+        "remaining_duration": "Zbývá (pracovní dny)",
+        "notes": "Poznámky",
+        "row_key": "Klíč řádku",
+        "stamp": "Razítko"
+      }
     }
   },
   "cad": {

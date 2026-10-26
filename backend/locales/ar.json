@@ -147,6 +147,28 @@
       "completion_milestone_description": "معلم اكتمال المشروع",
       "labour_resource": "العمالة",
       "machine_resource": "المعدات"
+    },
+    "progress_sheet": {
+      "sheet_title": "الإنجاز",
+      "title": "ورقة تحديث الإنجاز",
+      "detail_schedule": "الجدول الزمني: {name}",
+      "detail_exported": "تاريخ التصدير: {date}",
+      "instructions": "املأ الأعمدة البيضاء فقط. لا تغيّر الأعمدة الرمادية ولا ترتيب الصفوف ولا الأعمدة المخفية.",
+      "col": {
+        "activity_ref": "معرّف النشاط",
+        "name": "النشاط",
+        "wbs_code": "WBS",
+        "responsible": "المسؤول",
+        "planned_start": "البدء المخطط",
+        "planned_finish": "الانتهاء المخطط",
+        "percent_complete": "نسبة الإنجاز %",
+        "actual_start": "البدء الفعلي",
+        "actual_finish": "الانتهاء الفعلي",
+        "remaining_duration": "المتبقي (أيام عمل)",
+        "notes": "ملاحظات",
+        "row_key": "مفتاح الصف",
+        "stamp": "الختم"
+      }
     }
   },
   "cad": {

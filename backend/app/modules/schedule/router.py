@@ -54,6 +54,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.schedule.import_source import ImportSourceService, stable_export_uids
 from app.modules.schedule.schemas import (
     ActivityBimLinkRequest,
     ActivityCreate,
@@ -1991,6 +1992,7 @@ async def import_xer(
 
     # Map XER task_id -> our Activity UUID for relationship linking
     xer_id_to_uuid: dict[str, uuid.UUID] = {}
+    created_ids: list[uuid.UUID] = []
     activities_imported = 0
 
     # Get current max activity code for auto-gen
@@ -2078,6 +2080,7 @@ async def import_xer(
         session.add(activity)
         await session.flush()
         xer_id_to_uuid[xer_task_id] = activity.id
+        created_ids.append(activity.id)
         activities_imported += 1
 
     # ── Parse TASKPRED table (relationships) ──────────────────────────────
@@ -2135,11 +2138,15 @@ async def import_xer(
         meta["xer_calendars"] = calendars[:10]  # Limit stored data
         await service.schedule_repo.update_fields(schedule_id, metadata_=meta)
 
+    source = await ImportSourceService(session).record_import(
+        schedule_id, raw=raw, filename=file.filename or "", fmt="xer", user_id=_user_id, activity_ids=created_ids
+    )
     return ImportResult(
         activities_imported=activities_imported,
         relationships_imported=relationships_imported,
         calendars_imported=calendars_imported,
         warnings=warnings,
+        source_document_id=source["document_id"],
     )
 
 
@@ -2268,6 +2275,7 @@ async def import_msp_xml(
 
     # Map MSP UID -> our UUID
     msp_uid_to_uuid: dict[str, uuid.UUID] = {}
+    created_ids: list[uuid.UUID] = []
     activities_imported = 0
     max_seq = await service.activity_repo.get_max_activity_code_seq(schedule_id)
 
@@ -2364,6 +2372,7 @@ async def import_msp_xml(
         session.add(activity)
         await session.flush()
         msp_uid_to_uuid[uid] = activity.id
+        created_ids.append(activity.id)
         activities_imported += 1
 
     # ── Parse Links (predecessors) ────────────────────────────────────────
@@ -2418,11 +2427,15 @@ async def import_msp_xml(
 
     await session.flush()
 
+    source = await ImportSourceService(session).record_import(
+        schedule_id, raw=raw, filename=file.filename or "", fmt="msp_xml", user_id=_user_id, activity_ids=created_ids
+    )
     return ImportResult(
         activities_imported=activities_imported,
         relationships_imported=relationships_imported,
         calendars_imported=0,
         warnings=warnings,
+        source_document_id=source["document_id"],
     )
 
 
@@ -2619,14 +2632,14 @@ async def export_schedule_msp_xml(
     schedule = await service.get_schedule(schedule_id)
     activities, _ = await service.list_activities_for_schedule(schedule_id, limit=5000)
 
-    # Stable 1..N UID per activity, preserving the listed order.
-    uid_by_act: dict[str, int] = {}
+    # An imported activity keeps the UID its file gave it, so a re-export
+    # matches the original row for row; the rest are numbered after them.
+    uid_by_act: dict[str, int] = stable_export_uids(activities)
     mspdi_acts: list[MspdiActivity] = []
-    for idx, act in enumerate(activities, start=1):
-        uid_by_act[str(act.id)] = idx
+    for act in activities:
         mspdi_acts.append(
             MspdiActivity(
-                uid=idx,
+                uid=uid_by_act[str(act.id)],
                 name=act.name or "",
                 start_date=act.start_date or "",
                 end_date=act.end_date or "",
@@ -3158,3 +3171,21 @@ router.include_router(_evm_snapshot_router)
 from app.modules.schedule.tabular_import_router import tabular_import_router as _tabular_import_router  # noqa: E402
 
 router.include_router(_tabular_import_router)
+
+# Scheduling profiles: per-project CPM settings and recalculation that names
+# the setting behind every moved date. Same prefix.
+from app.modules.schedule.profile_router import profile_router as _profile_router  # noqa: E402
+
+router.include_router(_profile_router)
+
+# Source of an imported schedule: the stored file, source dates per activity
+# and the source-versus-current comparison until it is accepted. Same prefix.
+from app.modules.schedule.import_source_router import import_source_router as _import_source_router  # noqa: E402
+
+router.include_router(_import_source_router)
+
+# Progress round-trip through a spreadsheet: export the sheet, read it back
+# with a per-activity diff, apply on confirmation. Same prefix.
+from app.modules.schedule.progress_sheet_router import progress_sheet_router as _progress_sheet_router  # noqa: E402
+
+router.include_router(_progress_sheet_router)

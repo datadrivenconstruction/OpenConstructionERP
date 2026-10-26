@@ -147,6 +147,28 @@
       "completion_milestone_description": "Долбоордун аяктоо мезгили",
       "labour_resource": "Эмгек күчү",
       "machine_resource": "Машиналар"
+    },
+    "progress_sheet": {
+      "sheet_title": "Аткарылыш",
+      "title": "Аткарылышты жаңыртуу барагы",
+      "detail_schedule": "График: {name}",
+      "detail_exported": "Экспорттолгон күнү: {date}",
+      "instructions": "Ак мамычаларды гана толтуруңуз. Боз мамычаларды, саптардын иретин жана жашырылган мамычаларды өзгөртпөңүз.",
+      "col": {
+        "activity_ref": "Иш ID",
+        "name": "Иш",
+        "wbs_code": "WBS",
+        "responsible": "Жооптуу",
+        "planned_start": "Пландалган башталышы",
+        "planned_finish": "Пландалган бүтүшү",
+        "percent_complete": "% аткарылышы",
+        "actual_start": "Иш жүзүндөгү башталышы",
+        "actual_finish": "Иш жүзүндөгү бүтүшү",
+        "remaining_duration": "Калды (жумуш күнү)",
+        "notes": "Эскертүүлөр",
+        "row_key": "Сап ачкычы",
+        "stamp": "Мөөр"
+      }
     }
   },
   "cad": {

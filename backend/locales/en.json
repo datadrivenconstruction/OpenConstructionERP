@@ -147,6 +147,28 @@
       "completion_milestone_description": "Project completion milestone",
       "labour_resource": "Labour",
       "machine_resource": "Machines"
+    },
+    "progress_sheet": {
+      "sheet_title": "Progress",
+      "title": "Progress update sheet",
+      "detail_schedule": "Schedule: {name}",
+      "detail_exported": "Exported: {date}",
+      "instructions": "Fill in the white columns only. Do not change the grey columns, the order of the rows or the hidden columns.",
+      "col": {
+        "activity_ref": "Activity ID",
+        "name": "Activity",
+        "wbs_code": "WBS",
+        "responsible": "Responsible",
+        "planned_start": "Planned start",
+        "planned_finish": "Planned finish",
+        "percent_complete": "% complete",
+        "actual_start": "Actual start",
+        "actual_finish": "Actual finish",
+        "remaining_duration": "Remaining (working days)",
+        "notes": "Notes",
+        "row_key": "Row key",
+        "stamp": "Stamp"
+      }
     }
   },
   "cad": {

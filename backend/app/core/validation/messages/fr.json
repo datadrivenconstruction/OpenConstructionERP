@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "L'activité « {activity} » est enregistrée avec une durée de {stored} jours ouvrés, comptés du lundi au vendredi entre {start} et {end} ; selon la semaine du projet, {calendar}, ces dates représentent {expected}",
       "suggestion": "Enregistrez à nouveau les dates de l'activité pour recalculer sa durée selon la semaine de travail du projet, ou saisissez délibérément la durée"
+    },
+    "dates_match_source": {
+      "fail": "{activity} se termine à {days} jours d'écart de la fin du fichier importé ({source}).",
+      "suggestion": "Comparez les dates recalculées avec le fichier source, puis acceptez-les ou rétablissez les dates source."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Indiquez soit un pourcentage de remise, soit un prix net fixe (un prix net fixe nécessite un article)",
     "attachment_not_found": "Pièce jointe introuvable",
     "price_missing": "Aucun prix en vigueur pour la ligne « {line} » : saisissez un prix unitaire ou importez la liste de prix du fournisseur"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Ligne {row} : aucune activité de ce planning n'a l'ID {ref}.",
+      "duplicate": "Ligne {row} : l'activité {ref} apparaît plusieurs fois dans la feuille.",
+      "suggestion": "Exportez une nouvelle feuille et n'ajoutez, ne copiez ni ne réordonnez des lignes."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Ligne {row} : % d'avancement n'est pas un nombre.",
+      "actual_start_not_a_date": "Ligne {row} : le début réel n'est pas une date.",
+      "actual_finish_not_a_date": "Ligne {row} : la fin réelle n'est pas une date.",
+      "remaining_not_a_whole_number": "Ligne {row} : la durée restante n'est pas un nombre entier de jours.",
+      "percent_out_of_range": "Ligne {row} : % d'avancement vaut {value}, il doit être compris entre 0 et 100.",
+      "remaining_negative": "Ligne {row} : la durée restante est {value}, elle ne peut pas être négative.",
+      "suggestion": "Saisissez un % d'avancement de 0 à 100, des dates au format date et la durée restante en jours ouvrés entiers."
+    },
+    "date_logic": {
+      "finish_before_start": "Ligne {row} : la fin réelle {finish} précède le début réel {start}.",
+      "finish_without_start": "Ligne {row} : une fin réelle {finish} est saisie sans début réel.",
+      "after_status_date": "Ligne {row} : la date réelle {value} est postérieure à la date d'état {status_date}.",
+      "finish_needs_complete": "Ligne {row} : une fin réelle est saisie mais l'activité n'est avancée qu'à {percent} %.",
+      "suggestion": "Les dates réelles doivent être cohérentes, ne pas dépasser la date d'état, et une fin réelle implique 100 % d'avancement."
+    },
+    "unchanged_since_export": {
+      "fail": "Ligne {row} : {activity} a été modifiée dans l'application après l'export de la feuille.",
+      "suggestion": "Vérifiez les valeurs actuelles avant d'appliquer cette ligne, ou exportez une nouvelle feuille."
+    },
+    "plausibility": {
+      "progress_decreased": "Ligne {row} : l'avancement baisse de {old} % à {new} %.",
+      "complete_without_finish": "Ligne {row} : 100 % d'avancement sans fin réelle ; la date d'état sera utilisée comme fin.",
+      "started_without_start": "Ligne {row} : l'avancement est saisi sans début réel.",
+      "suggestion": "Vérifiez la ligne avec le chantier avant de l'appliquer."
+    }
   }
 }

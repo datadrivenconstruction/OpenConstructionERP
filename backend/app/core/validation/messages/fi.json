@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Tehtävä '{activity}' on tallennettu {stored} työpäivän pituisena maanantai–perjantai-laskennalla välillä {start}–{end}; hankkeen työviikolla {calendar} nämä päivämäärät antavat {expected}",
       "suggestion": "Tallenna tehtävän päivämäärät uudelleen, jotta kesto lasketaan hankkeen työviikolla, tai syötä kesto tarkoituksellisesti"
+    },
+    "dates_match_source": {
+      "fail": "{activity} päättyy {days} päivän päässä tuodun tiedoston lopusta ({source}).",
+      "suggestion": "Vertaa uudelleenlaskettuja päivämääriä lähdetiedostoon ja hyväksy ne tai palauta lähteen päivämäärät."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Anna joko alennusprosentti tai kiinteä nettohinta (kiinteä nettohinta vaatii tuotteen)",
     "attachment_not_found": "Liitettä ei löytynyt",
     "price_missing": "Riville \"{line}\" ei ole voimassa olevaa hintaa: syötä yksikköhinta tai tuo toimittajan hinnasto"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Rivi {row}: mikään tämän aikataulun tehtävä ei ole tunnukseltaan {ref}.",
+      "duplicate": "Rivi {row}: tehtävä {ref} esiintyy taulukossa useammin kuin kerran.",
+      "suggestion": "Vie uusi taulukko äläkä lisää, kopioi tai järjestele rivejä uudelleen."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Rivi {row}: valmis-% ei ole luku.",
+      "actual_start_not_a_date": "Rivi {row}: toteutunut alku ei ole päivämäärä.",
+      "actual_finish_not_a_date": "Rivi {row}: toteutunut loppu ei ole päivämäärä.",
+      "remaining_not_a_whole_number": "Rivi {row}: jäljellä oleva kesto ei ole kokonaisluku päiviä.",
+      "percent_out_of_range": "Rivi {row}: valmis-% on {value}, sen on oltava 0-100.",
+      "remaining_negative": "Rivi {row}: jäljellä oleva kesto on {value}, se ei voi olla negatiivinen.",
+      "suggestion": "Syötä valmis-% välillä 0-100, päivämäärät päivämäärinä ja jäljellä oleva kesto kokonaisina työpäivinä."
+    },
+    "date_logic": {
+      "finish_before_start": "Rivi {row}: toteutunut loppu {finish} on ennen toteutunutta alkua {start}.",
+      "finish_without_start": "Rivi {row}: toteutunut loppu {finish} on annettu ilman toteutunutta alkua.",
+      "after_status_date": "Rivi {row}: toteutunut päivämäärä {value} on tilapäivän {status_date} jälkeen.",
+      "finish_needs_complete": "Rivi {row}: toteutunut loppu on annettu, mutta tehtävä on vasta {percent} % valmis.",
+      "suggestion": "Toteutuneiden päivämäärien on oltava järjestyksessä eivätkä ne saa olla tilapäivän jälkeen, ja toteutunut loppu tarkoittaa 100 % valmista."
+    },
+    "unchanged_since_export": {
+      "fail": "Rivi {row}: {activity} muutettiin sovelluksessa taulukon viennin jälkeen.",
+      "suggestion": "Tarkista nykyiset arvot ennen tämän rivin käyttöönottoa tai vie uusi taulukko."
+    },
+    "plausibility": {
+      "progress_decreased": "Rivi {row}: edistyminen laskee {old} %:sta {new} %:iin.",
+      "complete_without_finish": "Rivi {row}: 100 % valmis ilman toteutunutta loppua; tilapäivää käytetään loppuna.",
+      "started_without_start": "Rivi {row}: edistyminen on annettu ilman toteutunutta alkua.",
+      "suggestion": "Tarkista rivi työmaalta ennen käyttöönottoa."
+    }
   }
 }

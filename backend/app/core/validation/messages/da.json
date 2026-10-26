@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Aktiviteten '{activity}' er gemt som {stored} arbejdsdage, talt mandag til fredag fra {start} til {end}; efter projektets arbejdsuge, {calendar}, omfatter datoerne {expected}",
       "suggestion": "Gem aktivitetens datoer igen for at genberegne varigheden efter projektets arbejdsuge, eller indtast varigheden bevidst"
+    },
+    "dates_match_source": {
+      "fail": "{activity} slutter {days} dage fra slutdatoen i den importerede fil ({source}).",
+      "suggestion": "Sammenlign de genberegnede datoer med kildefilen, og accepter dem eller gendan kildedatoerne."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Angiv enten en rabatprocent eller en fast nettopris (fast nettopris kræver en vare)",
     "attachment_not_found": "Bilaget blev ikke fundet",
     "price_missing": "Ingen gældende pris for linjen \"{line}\": indtast en enhedspris, eller importér leverandørens prisliste"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Række {row}: ingen aktivitet i denne tidsplan har ID {ref}.",
+      "duplicate": "Række {row}: aktivitet {ref} forekommer mere end én gang i arket.",
+      "suggestion": "Eksporter et nyt ark, og tilføj, kopier eller omsorter ikke rækker."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Række {row}: % færdig er ikke et tal.",
+      "actual_start_not_a_date": "Række {row}: den faktiske start er ikke en dato.",
+      "actual_finish_not_a_date": "Række {row}: den faktiske slut er ikke en dato.",
+      "remaining_not_a_whole_number": "Række {row}: den resterende varighed er ikke et helt antal dage.",
+      "percent_out_of_range": "Række {row}: % færdig er {value}, det skal være mellem 0 og 100.",
+      "remaining_negative": "Række {row}: den resterende varighed er {value}, den kan ikke være negativ.",
+      "suggestion": "Angiv % færdig fra 0 til 100, datoer som datoer og den resterende varighed i hele arbejdsdage."
+    },
+    "date_logic": {
+      "finish_before_start": "Række {row}: den faktiske slut {finish} ligger før den faktiske start {start}.",
+      "finish_without_start": "Række {row}: en faktisk slut {finish} er angivet uden faktisk start.",
+      "after_status_date": "Række {row}: den faktiske dato {value} ligger efter statusdatoen {status_date}.",
+      "finish_needs_complete": "Række {row}: en faktisk slut er angivet, men aktiviteten er kun {percent}% færdig.",
+      "suggestion": "Faktiske datoer skal være i orden og ikke senere end statusdatoen, og en faktisk slut betyder 100% færdig."
+    },
+    "unchanged_since_export": {
+      "fail": "Række {row}: {activity} blev ændret i appen, efter arket blev eksporteret.",
+      "suggestion": "Kontroller de nuværende værdier, før rækken anvendes, eller eksporter et nyt ark."
+    },
+    "plausibility": {
+      "progress_decreased": "Række {row}: fremdriften falder fra {old}% til {new}%.",
+      "complete_without_finish": "Række {row}: 100% færdig uden faktisk slut; statusdatoen bruges som slut.",
+      "started_without_start": "Række {row}: fremdrift er angivet uden faktisk start.",
+      "suggestion": "Tjek rækken med pladsen, før den anvendes."
+    }
   }
 }

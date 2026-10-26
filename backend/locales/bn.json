@@ -147,6 +147,28 @@
       "completion_milestone_description": "প্রকল্প সমাপ্তির মাইলফলক",
       "labour_resource": "শ্রমিক",
       "machine_resource": "যন্ত্রপাতি"
+    },
+    "progress_sheet": {
+      "sheet_title": "অগ্রগতি",
+      "title": "অগ্রগতি আপডেট শিট",
+      "detail_schedule": "সময়সূচি: {name}",
+      "detail_exported": "এক্সপোর্ট: {date}",
+      "instructions": "শুধু সাদা কলামগুলো পূরণ করুন। ধূসর কলাম, সারির ক্রম ও লুকানো কলাম বদলাবেন না।",
+      "col": {
+        "activity_ref": "কার্যক্রম আইডি",
+        "name": "কার্যক্রম",
+        "wbs_code": "WBS",
+        "responsible": "দায়িত্বপ্রাপ্ত",
+        "planned_start": "পরিকল্পিত শুরু",
+        "planned_finish": "পরিকল্পিত সমাপ্তি",
+        "percent_complete": "% সম্পন্ন",
+        "actual_start": "প্রকৃত শুরু",
+        "actual_finish": "প্রকৃত সমাপ্তি",
+        "remaining_duration": "অবশিষ্ট (কর্মদিবস)",
+        "notes": "নোট",
+        "row_key": "সারি কী",
+        "stamp": "স্ট্যাম্প"
+      }
     }
   },
   "cad": {

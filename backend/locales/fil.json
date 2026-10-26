@@ -147,6 +147,28 @@
       "completion_milestone_description": "Milestone ng pagkumpleto ng proyekto",
       "labour_resource": "Labor",
       "machine_resource": "Makinarya"
+    },
+    "progress_sheet": {
+      "sheet_title": "Progreso",
+      "title": "Sheet ng update sa progreso",
+      "detail_schedule": "Iskedyul: {name}",
+      "detail_exported": "Na-export: {date}",
+      "instructions": "Punan lang ang mga puting column. Huwag baguhin ang mga kulay-abong column, ang pagkakasunod ng mga hanay, o ang mga nakatagong column.",
+      "col": {
+        "activity_ref": "ID ng aktibidad",
+        "name": "Aktibidad",
+        "wbs_code": "WBS",
+        "responsible": "Responsable",
+        "planned_start": "Planadong simula",
+        "planned_finish": "Planadong pagtatapos",
+        "percent_complete": "% kumpleto",
+        "actual_start": "Aktwal na simula",
+        "actual_finish": "Aktwal na pagtatapos",
+        "remaining_duration": "Natitira (araw ng trabaho)",
+        "notes": "Mga tala",
+        "row_key": "Susi ng hanay",
+        "stamp": "Tatak"
+      }
     }
   },
   "cad": {

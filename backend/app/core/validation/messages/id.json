@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Aktivitas '{activity}' tersimpan sebagai {stored} hari kerja, dengan hitungan Senin–Jumat dari {start} hingga {end}; menurut minggu kerja proyek {calendar}, tanggal tersebut berisi {expected}",
       "suggestion": "Simpan ulang tanggal aktivitas agar durasi dihitung menurut minggu kerja proyek, atau masukkan durasinya secara sengaja"
+    },
+    "dates_match_source": {
+      "fail": "{activity} selesai dengan selisih {days} hari dari tanggal selesai di berkas impor ({source}).",
+      "suggestion": "Bandingkan tanggal hasil hitung ulang dengan berkas sumber, lalu terima atau pulihkan tanggal sumber."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Isi persentase diskon atau harga neto tetap (harga neto tetap memerlukan item)",
     "attachment_not_found": "Lampiran tidak ditemukan",
     "price_missing": "Tidak ada harga berlaku untuk baris \"{line}\": masukkan harga satuan atau impor daftar harga vendor"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Baris {row}: tidak ada aktivitas jadwal ini dengan ID {ref}.",
+      "duplicate": "Baris {row}: aktivitas {ref} muncul lebih dari sekali di lembar.",
+      "suggestion": "Ekspor lembar baru dan jangan menambah, menyalin, atau mengubah urutan baris."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Baris {row}: % selesai bukan angka.",
+      "actual_start_not_a_date": "Baris {row}: mulai aktual bukan tanggal.",
+      "actual_finish_not_a_date": "Baris {row}: selesai aktual bukan tanggal.",
+      "remaining_not_a_whole_number": "Baris {row}: sisa durasi bukan bilangan bulat hari.",
+      "percent_out_of_range": "Baris {row}: % selesai adalah {value}, harus antara 0 dan 100.",
+      "remaining_negative": "Baris {row}: sisa durasi adalah {value}, tidak boleh negatif.",
+      "suggestion": "Masukkan % selesai dari 0 sampai 100, tanggal sebagai tanggal, dan sisa durasi dalam hari kerja bulat."
+    },
+    "date_logic": {
+      "finish_before_start": "Baris {row}: selesai aktual {finish} sebelum mulai aktual {start}.",
+      "finish_without_start": "Baris {row}: selesai aktual {finish} diisi tanpa mulai aktual.",
+      "after_status_date": "Baris {row}: tanggal aktual {value} setelah tanggal status {status_date}.",
+      "finish_needs_complete": "Baris {row}: selesai aktual diisi tetapi aktivitas baru {percent}% selesai.",
+      "suggestion": "Tanggal aktual harus berurutan, tidak melewati tanggal status, dan selesai aktual berarti 100% selesai."
+    },
+    "unchanged_since_export": {
+      "fail": "Baris {row}: {activity} diubah di aplikasi setelah lembar diekspor.",
+      "suggestion": "Periksa nilai saat ini sebelum menerapkan baris ini, atau ekspor lembar baru."
+    },
+    "plausibility": {
+      "progress_decreased": "Baris {row}: progres turun dari {old}% ke {new}%.",
+      "complete_without_finish": "Baris {row}: 100% selesai tanpa selesai aktual; tanggal status akan dipakai sebagai tanggal selesai.",
+      "started_without_start": "Baris {row}: progres diisi tanpa mulai aktual.",
+      "suggestion": "Periksa baris ini bersama tim lapangan sebelum menerapkannya."
+    }
   }
 }

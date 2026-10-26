@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Tegevus '{activity}' on salvestatud kestusega {stored} tööpäeva, lugedes esmaspäevast reedeni ajavahemikus {start} kuni {end}; projekti töönädala {calendar} järgi annavad need kuupäevad {expected}",
       "suggestion": "Salvestage tegevuse kuupäevad uuesti, et kestus arvutataks projekti töönädala järgi, või sisestage kestus teadlikult"
+    },
+    "dates_match_source": {
+      "fail": "{activity} lõpeb {days} päeva kaugusel imporditud faili lõpust ({source}).",
+      "suggestion": "Võrdle ümberarvutatud kuupäevi lähtefailiga, seejärel nõustu nendega või taasta allika kuupäevad."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Sisestage kas allahindluse protsent või kindel netohind (kindel netohind nõuab toodet)",
     "attachment_not_found": "Manust ei leitud",
     "price_missing": "Real \"{line}\" puudub kehtiv hind: sisestage ühikuhind või importige tarnija hinnakiri"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Rida {row}: ühelgi selle ajakava tegevusel ei ole ID-d {ref}.",
+      "duplicate": "Rida {row}: tegevus {ref} esineb lehel mitu korda.",
+      "suggestion": "Ekspordi uus leht ning ära lisa, kopeeri ega järjesta ridu ümber."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Rida {row}: % valmis ei ole arv.",
+      "actual_start_not_a_date": "Rida {row}: tegelik algus ei ole kuupäev.",
+      "actual_finish_not_a_date": "Rida {row}: tegelik lõpp ei ole kuupäev.",
+      "remaining_not_a_whole_number": "Rida {row}: järelejäänud kestus ei ole täisarv päevi.",
+      "percent_out_of_range": "Rida {row}: % valmis on {value}, see peab olema vahemikus 0 kuni 100.",
+      "remaining_negative": "Rida {row}: järelejäänud kestus on {value}, see ei tohi olla negatiivne.",
+      "suggestion": "Sisesta % valmis vahemikus 0 kuni 100, kuupäevad kuupäevadena ja järelejäänud kestus täistööpäevades."
+    },
+    "date_logic": {
+      "finish_before_start": "Rida {row}: tegelik lõpp {finish} on enne tegelikku algust {start}.",
+      "finish_without_start": "Rida {row}: tegelik lõpp {finish} on sisestatud ilma tegeliku alguseta.",
+      "after_status_date": "Rida {row}: tegelik kuupäev {value} on pärast olekukuupäeva {status_date}.",
+      "finish_needs_complete": "Rida {row}: tegelik lõpp on sisestatud, kuid tegevus on valmis vaid {percent}%.",
+      "suggestion": "Tegelikud kuupäevad peavad olema järjekorras, mitte hilisemad kui olekukuupäev, ja tegelik lõpp tähendab 100% valmidust."
+    },
+    "unchanged_since_export": {
+      "fail": "Rida {row}: {activity} muudeti rakenduses pärast lehe eksporti.",
+      "suggestion": "Kontrolli praeguseid väärtusi enne selle rea rakendamist või ekspordi uus leht."
+    },
+    "plausibility": {
+      "progress_decreased": "Rida {row}: edenemine väheneb {old}%-lt {new}%-le.",
+      "complete_without_finish": "Rida {row}: 100% valmis ilma tegeliku lõputa; lõpuna kasutatakse olekukuupäeva.",
+      "started_without_start": "Rida {row}: edenemine on sisestatud ilma tegeliku alguseta.",
+      "suggestion": "Kontrolli rida enne rakendamist ehitusplatsiga."
+    }
   }
 }

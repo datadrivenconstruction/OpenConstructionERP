@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Činnost '{activity}' je uložena jako {stored} pracovních dní, spočítaných od pondělí do pátku mezi {start} a {end}; podle projektového týdne {calendar} tyto termíny zahrnují {expected}",
       "suggestion": "Znovu uložte termíny činnosti, aby se trvání přepočítalo podle pracovního týdne projektu, nebo trvání zadejte záměrně"
+    },
+    "dates_match_source": {
+      "fail": "Činnost {activity} končí o {days} dní jinak než konec v importovaném souboru ({source}).",
+      "suggestion": "Porovnejte přepočtená data se zdrojovým souborem a pak je přijměte, nebo obnovte data ze zdroje."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Zadejte buď procento slevy, nebo pevnou čistou cenu (pevná čistá cena vyžaduje položku)",
     "attachment_not_found": "Příloha nebyla nalezena",
     "price_missing": "Pro řádek \"{line}\" není platná cena: zadejte jednotkovou cenu nebo importujte ceník dodavatele"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Řádek {row}: žádná činnost tohoto harmonogramu nemá ID {ref}.",
+      "duplicate": "Řádek {row}: činnost {ref} se v listu vyskytuje více než jednou.",
+      "suggestion": "Exportujte nový list a nepřidávejte, nekopírujte ani nepřeřazujte řádky."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Řádek {row}: % dokončení není číslo.",
+      "actual_start_not_a_date": "Řádek {row}: skutečný začátek není datum.",
+      "actual_finish_not_a_date": "Řádek {row}: skutečný konec není datum.",
+      "remaining_not_a_whole_number": "Řádek {row}: zbývající trvání není celé číslo dnů.",
+      "percent_out_of_range": "Řádek {row}: % dokončení je {value}, musí být mezi 0 a 100.",
+      "remaining_negative": "Řádek {row}: zbývající trvání je {value}, nesmí být záporné.",
+      "suggestion": "Zadejte % dokončení od 0 do 100, data jako data a zbývající trvání v celých pracovních dnech."
+    },
+    "date_logic": {
+      "finish_before_start": "Řádek {row}: skutečný konec {finish} je před skutečným začátkem {start}.",
+      "finish_without_start": "Řádek {row}: je zadán skutečný konec {finish} bez skutečného začátku.",
+      "after_status_date": "Řádek {row}: skutečné datum {value} je po datu stavu {status_date}.",
+      "finish_needs_complete": "Řádek {row}: je zadán skutečný konec, ale činnost je dokončena jen z {percent}%.",
+      "suggestion": "Skutečná data musí být ve správném pořadí, ne později než datum stavu, a skutečný konec znamená 100% dokončení."
+    },
+    "unchanged_since_export": {
+      "fail": "Řádek {row}: {activity} byla po exportu listu změněna v aplikaci.",
+      "suggestion": "Před použitím tohoto řádku zkontrolujte aktuální hodnoty, nebo exportujte nový list."
+    },
+    "plausibility": {
+      "progress_decreased": "Řádek {row}: postup klesá z {old}% na {new}%.",
+      "complete_without_finish": "Řádek {row}: 100% dokončení bez skutečného konce; jako konec se použije datum stavu.",
+      "started_without_start": "Řádek {row}: je zadán postup bez skutečného začátku.",
+      "suggestion": "Před použitím řádek ověřte na stavbě."
+    }
   }
 }

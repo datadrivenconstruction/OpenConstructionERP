@@ -147,6 +147,28 @@
       "completion_milestone_description": "Projekti lõpetamise verstapost",
       "labour_resource": "Tööjõud",
       "machine_resource": "Masinad"
+    },
+    "progress_sheet": {
+      "sheet_title": "Edenemine",
+      "title": "Edenemise uuendamise leht",
+      "detail_schedule": "Ajakava: {name}",
+      "detail_exported": "Eksporditud: {date}",
+      "instructions": "Täida ainult valged veerud. Ära muuda halle veerge, ridade järjekorda ega peidetud veerge.",
+      "col": {
+        "activity_ref": "Tegevuse ID",
+        "name": "Tegevus",
+        "wbs_code": "WBS",
+        "responsible": "Vastutaja",
+        "planned_start": "Planeeritud algus",
+        "planned_finish": "Planeeritud lõpp",
+        "percent_complete": "% valmis",
+        "actual_start": "Tegelik algus",
+        "actual_finish": "Tegelik lõpp",
+        "remaining_duration": "Järele (tööpäeva)",
+        "notes": "Märkmed",
+        "row_key": "Rea võti",
+        "stamp": "Tempel"
+      }
     }
   },
   "cad": {

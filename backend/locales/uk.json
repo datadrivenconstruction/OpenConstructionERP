@@ -147,6 +147,28 @@
       "completion_milestone_description": "Контрольна точка завершення проєкту",
       "labour_resource": "Трудовитрати",
       "machine_resource": "Машини та механізми"
+    },
+    "progress_sheet": {
+      "sheet_title": "Прогрес",
+      "title": "Аркуш оновлення прогресу",
+      "detail_schedule": "Графік: {name}",
+      "detail_exported": "Експортовано: {date}",
+      "instructions": "Заповнюйте лише білі стовпці. Не змінюйте сірі стовпці, порядок рядків і приховані стовпці.",
+      "col": {
+        "activity_ref": "ID роботи",
+        "name": "Робота",
+        "wbs_code": "WBS",
+        "responsible": "Відповідальний",
+        "planned_start": "Плановий початок",
+        "planned_finish": "Планове закінчення",
+        "percent_complete": "% виконання",
+        "actual_start": "Фактичний початок",
+        "actual_finish": "Фактичне закінчення",
+        "remaining_duration": "Залишилось (робочих днів)",
+        "notes": "Примітки",
+        "row_key": "Ключ рядка",
+        "stamp": "Мітка"
+      }
     }
   },
   "cad": {

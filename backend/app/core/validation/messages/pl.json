@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Czynność „{activity}” ma zapisane {stored} dni roboczych, liczonych od poniedziałku do piątku między {start} a {end}; według tygodnia pracy projektu, {calendar}, ten przedział obejmuje {expected}",
       "suggestion": "Zapisz ponownie daty czynności, aby przeliczyć czas trwania według tygodnia pracy projektu, lub świadomie wprowadź czas trwania"
+    },
+    "dates_match_source": {
+      "fail": "Czynność {activity} kończy się {days} dni od zakończenia w zaimportowanym pliku ({source}).",
+      "suggestion": "Porównaj przeliczone daty z plikiem źródłowym, a następnie zatwierdź je lub przywróć daty ze źródła."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Podaj procent rabatu albo stałą cenę netto (stała cena netto wymaga wskazania pozycji)",
     "attachment_not_found": "Nie znaleziono załącznika",
     "price_missing": "Brak aktualnej ceny dla pozycji \"{line}\": wpisz cenę jednostkową lub zaimportuj cennik dostawcy"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Wiersz {row}: żadna czynność tego harmonogramu nie ma ID {ref}.",
+      "duplicate": "Wiersz {row}: czynność {ref} występuje w arkuszu więcej niż raz.",
+      "suggestion": "Wyeksportuj nowy arkusz i nie dodawaj, nie kopiuj ani nie zmieniaj kolejności wierszy."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Wiersz {row}: % ukończenia nie jest liczbą.",
+      "actual_start_not_a_date": "Wiersz {row}: rzeczywiste rozpoczęcie nie jest datą.",
+      "actual_finish_not_a_date": "Wiersz {row}: rzeczywiste zakończenie nie jest datą.",
+      "remaining_not_a_whole_number": "Wiersz {row}: czas pozostały nie jest całkowitą liczbą dni.",
+      "percent_out_of_range": "Wiersz {row}: % ukończenia wynosi {value}, a musi mieścić się w zakresie od 0 do 100.",
+      "remaining_negative": "Wiersz {row}: czas pozostały wynosi {value}, nie może być ujemny.",
+      "suggestion": "Wpisz % ukończenia od 0 do 100, daty jako daty, a czas pozostały w pełnych dniach roboczych."
+    },
+    "date_logic": {
+      "finish_before_start": "Wiersz {row}: rzeczywiste zakończenie {finish} jest przed rzeczywistym rozpoczęciem {start}.",
+      "finish_without_start": "Wiersz {row}: podano rzeczywiste zakończenie {finish} bez rzeczywistego rozpoczęcia.",
+      "after_status_date": "Wiersz {row}: data rzeczywista {value} jest po dacie statusu {status_date}.",
+      "finish_needs_complete": "Wiersz {row}: podano rzeczywiste zakończenie, ale czynność jest ukończona tylko w {percent}%.",
+      "suggestion": "Daty rzeczywiste muszą być w kolejności, nie późniejsze niż data statusu, a rzeczywiste zakończenie oznacza 100% ukończenia."
+    },
+    "unchanged_since_export": {
+      "fail": "Wiersz {row}: czynność {activity} zmieniono w aplikacji po wyeksportowaniu arkusza.",
+      "suggestion": "Sprawdź bieżące wartości przed zastosowaniem tego wiersza lub wyeksportuj nowy arkusz."
+    },
+    "plausibility": {
+      "progress_decreased": "Wiersz {row}: postęp spada z {old}% do {new}%.",
+      "complete_without_finish": "Wiersz {row}: 100% ukończenia bez rzeczywistego zakończenia; jako zakończenie zostanie użyta data statusu.",
+      "started_without_start": "Wiersz {row}: podano postęp bez rzeczywistego rozpoczęcia.",
+      "suggestion": "Sprawdź wiersz z budową przed jego zastosowaniem."
+    }
   }
 }

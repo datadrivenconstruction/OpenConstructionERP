@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "작업 '{activity}'에 {start}부터 {end}까지 월요일~금요일을 센 {stored}작업일이 저장되어 있습니다. 프로젝트의 주간 작업 기준 {calendar}에서는 이 기간이 {expected}입니다",
       "suggestion": "작업 날짜를 다시 저장하여 프로젝트의 주간 작업 기준으로 기간을 재계산하거나, 의도한 기간을 직접 입력하세요"
+    },
+    "dates_match_source": {
+      "fail": "{activity}의 종료일이 가져온 파일의 종료일({source})과 {days}일 차이 납니다.",
+      "suggestion": "재계산된 일정을 원본 파일과 비교한 뒤 수락하거나 원본 일정을 복원하세요."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "할인율 또는 고정 순단가 중 하나를 입력하세요(고정 순단가에는 품목이 필요합니다)",
     "attachment_not_found": "첨부 파일을 찾을 수 없습니다",
     "price_missing": "\"{line}\" 항목에 유효한 단가가 없습니다. 단가를 입력하거나 협력업체 단가표를 가져오세요"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "{row}행: 이 일정에는 ID가 {ref}인 작업이 없습니다.",
+      "duplicate": "{row}행: 작업 {ref}이(가) 시트에 두 번 이상 나타납니다.",
+      "suggestion": "새 시트를 내보내고 행을 추가, 복사하거나 순서를 바꾸지 마세요."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "{row}행: 완료율이 숫자가 아닙니다.",
+      "actual_start_not_a_date": "{row}행: 실제 시작이 날짜가 아닙니다.",
+      "actual_finish_not_a_date": "{row}행: 실제 종료가 날짜가 아닙니다.",
+      "remaining_not_a_whole_number": "{row}행: 잔여 기간이 정수 일수가 아닙니다.",
+      "percent_out_of_range": "{row}행: 완료율이 {value}입니다. 0에서 100 사이여야 합니다.",
+      "remaining_negative": "{row}행: 잔여 기간이 {value}입니다. 음수일 수 없습니다.",
+      "suggestion": "완료율은 0에서 100, 일자는 날짜 형식, 잔여 기간은 정수 작업일로 입력하세요."
+    },
+    "date_logic": {
+      "finish_before_start": "{row}행: 실제 종료 {finish}이(가) 실제 시작 {start}보다 앞섭니다.",
+      "finish_without_start": "{row}행: 실제 시작 없이 실제 종료 {finish}이(가) 입력되었습니다.",
+      "after_status_date": "{row}행: 실제 일자 {value}이(가) 상태 일자 {status_date}보다 뒤입니다.",
+      "finish_needs_complete": "{row}행: 실제 종료가 입력되었지만 작업은 {percent}%만 완료되었습니다.",
+      "suggestion": "실제 일자는 순서가 맞아야 하고 상태 일자를 넘지 않아야 하며, 실제 종료는 완료율 100%를 뜻합니다."
+    },
+    "unchanged_since_export": {
+      "fail": "{row}행: 시트를 내보낸 뒤 앱에서 {activity}이(가) 변경되었습니다.",
+      "suggestion": "이 행을 적용하기 전에 현재 값을 확인하거나 새 시트를 내보내세요."
+    },
+    "plausibility": {
+      "progress_decreased": "{row}행: 진행률이 {old}%에서 {new}%로 내려갑니다.",
+      "complete_without_finish": "{row}행: 실제 종료 없이 완료율 100%입니다. 상태 일자가 종료일로 사용됩니다.",
+      "started_without_start": "{row}행: 실제 시작 없이 진행률이 입력되었습니다.",
+      "suggestion": "적용하기 전에 현장과 함께 이 행을 확인하세요."
+    }
   }
 }

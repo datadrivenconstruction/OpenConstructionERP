@@ -147,6 +147,28 @@
       "completion_milestone_description": "Projektin valmistumisen virstanpylväs",
       "labour_resource": "Työvoima",
       "machine_resource": "Koneet"
+    },
+    "progress_sheet": {
+      "sheet_title": "Edistyminen",
+      "title": "Edistymisen päivitystaulukko",
+      "detail_schedule": "Aikataulu: {name}",
+      "detail_exported": "Viety: {date}",
+      "instructions": "Täytä vain valkoiset sarakkeet. Älä muuta harmaita sarakkeita, rivien järjestystä äläkä piilotettuja sarakkeita.",
+      "col": {
+        "activity_ref": "Tehtävän tunnus",
+        "name": "Tehtävä",
+        "wbs_code": "WBS",
+        "responsible": "Vastuuhenkilö",
+        "planned_start": "Suunniteltu alku",
+        "planned_finish": "Suunniteltu loppu",
+        "percent_complete": "Valmis-%",
+        "actual_start": "Toteutunut alku",
+        "actual_finish": "Toteutunut loppu",
+        "remaining_duration": "Jäljellä (työpäivää)",
+        "notes": "Huomautukset",
+        "row_key": "Rivin avain",
+        "stamp": "Leima"
+      }
     }
   },
   "cad": {

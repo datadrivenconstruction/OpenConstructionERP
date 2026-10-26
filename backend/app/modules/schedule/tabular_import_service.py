@@ -285,6 +285,11 @@ class ScheduleTabularImportService:
             )
             new_id, new_name, replaced = schedule.id, schedule.name, False
         await self.session.flush()
+        from app.modules.schedule.import_source import ImportSourceService
+
+        await ImportSourceService(self.session).record_import(
+            new_id, raw=data, filename=filename, fmt="spreadsheet", user_id=user_id
+        )
 
         # CPM ends in expire_all(): nothing below may read an ORM attribute,
         # so every value the response needs was copied out above.

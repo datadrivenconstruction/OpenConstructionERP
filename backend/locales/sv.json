@@ -147,6 +147,28 @@
       "completion_milestone_description": "Milstolpe för projektavslut",
       "labour_resource": "Arbetskraft",
       "machine_resource": "Maskiner"
+    },
+    "progress_sheet": {
+      "sheet_title": "Framsteg",
+      "title": "Blad för framstegsuppdatering",
+      "detail_schedule": "Tidplan: {name}",
+      "detail_exported": "Exporterad: {date}",
+      "instructions": "Fyll bara i de vita kolumnerna. Ändra inte de grå kolumnerna, radernas ordning eller de dolda kolumnerna.",
+      "col": {
+        "activity_ref": "Aktivitets-ID",
+        "name": "Aktivitet",
+        "wbs_code": "WBS",
+        "responsible": "Ansvarig",
+        "planned_start": "Planerad start",
+        "planned_finish": "Planerat slut",
+        "percent_complete": "% klart",
+        "actual_start": "Faktisk start",
+        "actual_finish": "Faktiskt slut",
+        "remaining_duration": "Återstående (arbetsdagar)",
+        "notes": "Anteckningar",
+        "row_key": "Radnyckel",
+        "stamp": "Stämpel"
+      }
     }
   },
   "cad": {

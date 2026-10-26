@@ -147,6 +147,28 @@
       "completion_milestone_description": "Proje tamamlanması kilometre taşı",
       "labour_resource": "İşçilik",
       "machine_resource": "Makineler"
+    },
+    "progress_sheet": {
+      "sheet_title": "İlerleme",
+      "title": "İlerleme güncelleme sayfası",
+      "detail_schedule": "Program: {name}",
+      "detail_exported": "Dışa aktarıldı: {date}",
+      "instructions": "Yalnızca beyaz sütunları doldurun. Gri sütunları, satır sırasını ve gizli sütunları değiştirmeyin.",
+      "col": {
+        "activity_ref": "Faaliyet ID",
+        "name": "Faaliyet",
+        "wbs_code": "WBS",
+        "responsible": "Sorumlu",
+        "planned_start": "Planlanan başlangıç",
+        "planned_finish": "Planlanan bitiş",
+        "percent_complete": "% tamamlanma",
+        "actual_start": "Gerçekleşen başlangıç",
+        "actual_finish": "Gerçekleşen bitiş",
+        "remaining_duration": "Kalan (iş günü)",
+        "notes": "Notlar",
+        "row_key": "Satır anahtarı",
+        "stamp": "Damga"
+      }
     }
   },
   "cad": {

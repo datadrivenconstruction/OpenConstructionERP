@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "La actividad '{activity}' está guardada con {stored} días laborables, el recuento de lunes a viernes de {start} a {end}; en la semana laboral del proyecto, {calendar}, esas fechas abarcan {expected}",
       "suggestion": "Guarde de nuevo las fechas de la actividad para que la duración se recalcule con la semana laboral del proyecto, o introduzca la duración de forma deliberada"
+    },
+    "dates_match_source": {
+      "fail": "{activity} termina {days} días desfasada respecto del fin del archivo importado ({source}).",
+      "suggestion": "Compare las fechas recalculadas con el archivo de origen y luego acéptelas o restaure las fechas del origen."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Indique un porcentaje de descuento o un precio neto fijo (el precio neto fijo requiere un artículo)",
     "attachment_not_found": "Adjunto no encontrado",
     "price_missing": "No hay precio vigente para la partida \"{line}\": introduzca un precio unitario o importe la lista de precios del proveedor"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Fila {row}: ninguna actividad de este cronograma tiene el ID {ref}.",
+      "duplicate": "Fila {row}: la actividad {ref} aparece más de una vez en la hoja.",
+      "suggestion": "Exporte una hoja nueva y no agregue, copie ni reordene filas."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Fila {row}: % completado no es un número.",
+      "actual_start_not_a_date": "Fila {row}: el inicio real no es una fecha.",
+      "actual_finish_not_a_date": "Fila {row}: el fin real no es una fecha.",
+      "remaining_not_a_whole_number": "Fila {row}: la duración restante no es un número entero de días.",
+      "percent_out_of_range": "Fila {row}: % completado es {value}, debe estar entre 0 y 100.",
+      "remaining_negative": "Fila {row}: la duración restante es {value}, no puede ser negativa.",
+      "suggestion": "Ingrese % completado de 0 a 100, las fechas como fechas y la duración restante en días laborables enteros."
+    },
+    "date_logic": {
+      "finish_before_start": "Fila {row}: el fin real {finish} es anterior al inicio real {start}.",
+      "finish_without_start": "Fila {row}: se ingresó un fin real {finish} sin inicio real.",
+      "after_status_date": "Fila {row}: la fecha real {value} es posterior a la fecha de corte {status_date}.",
+      "finish_needs_complete": "Fila {row}: se ingresó un fin real, pero la actividad solo está completada al {percent}%.",
+      "suggestion": "Las fechas reales deben estar en orden, no ser posteriores a la fecha de corte, y un fin real implica 100% completado."
+    },
+    "unchanged_since_export": {
+      "fail": "Fila {row}: {activity} se modificó en la aplicación después de exportar la hoja.",
+      "suggestion": "Revise los valores actuales antes de aplicar esta fila, o exporte una hoja nueva."
+    },
+    "plausibility": {
+      "progress_decreased": "Fila {row}: el avance baja de {old}% a {new}%.",
+      "complete_without_finish": "Fila {row}: 100% completado sin fin real; se usará la fecha de corte como fin.",
+      "started_without_start": "Fila {row}: se ingresó avance sin inicio real.",
+      "suggestion": "Revise la fila con la obra antes de aplicarla."
+    }
   }
 }

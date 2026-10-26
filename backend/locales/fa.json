@@ -147,6 +147,28 @@
       "completion_milestone_description": "نقطه عطف تکمیل پروژه",
       "labour_resource": "نیروی کار",
       "machine_resource": "ماشین‌آلات"
+    },
+    "progress_sheet": {
+      "sheet_title": "پیشرفت",
+      "title": "برگه به‌روزرسانی پیشرفت",
+      "detail_schedule": "زمان‌بندی: {name}",
+      "detail_exported": "زمان صدور: {date}",
+      "instructions": "فقط ستون‌های سفید را پر کنید. ستون‌های خاکستری، ترتیب ردیف‌ها و ستون‌های پنهان را تغییر ندهید.",
+      "col": {
+        "activity_ref": "شناسه فعالیت",
+        "name": "فعالیت",
+        "wbs_code": "WBS",
+        "responsible": "مسئول",
+        "planned_start": "شروع برنامه‌ریزی‌شده",
+        "planned_finish": "پایان برنامه‌ریزی‌شده",
+        "percent_complete": "% پیشرفت",
+        "actual_start": "شروع واقعی",
+        "actual_finish": "پایان واقعی",
+        "remaining_duration": "باقی‌مانده (روز کاری)",
+        "notes": "یادداشت‌ها",
+        "row_key": "کلید ردیف",
+        "stamp": "مهر"
+      }
     }
   },
   "cad": {

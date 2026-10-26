@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "הפעילות '{activity}' נשמרה כ-{stored} ימי עבודה, בספירה מיום שני עד יום שישי בין {start} ל-{end}; לפי שבוע העבודה של הפרויקט, {calendar}, בטווח זה יש {expected} ימים",
       "suggestion": "יש לשמור שוב את תאריכי הפעילות כדי שהמשך יחושב לפי שבוע העבודה של הפרויקט, או להזין את המשך במכוון"
+    },
+    "dates_match_source": {
+      "fail": "{activity} מסתיימת {days} ימים הרחק מהסיום בקובץ המיובא ({source}).",
+      "suggestion": "השוו את התאריכים המחושבים מחדש לקובץ המקור, ואז אשרו אותם או שחזרו את תאריכי המקור."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "ציינו אחוז הנחה או מחיר נטו קבוע (מחיר נטו קבוע דורש פריט)",
     "attachment_not_found": "הקובץ המצורף לא נמצא",
     "price_missing": "אין מחיר בתוקף לשורה \"{line}\": הזינו מחיר ליחידה או ייבאו את מחירון הספק"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "שורה {row}: אין פעילות בלוח זמנים זה עם המזהה {ref}.",
+      "duplicate": "שורה {row}: הפעילות {ref} מופיעה יותר מפעם אחת בגיליון.",
+      "suggestion": "יצאו גיליון חדש ואל תוסיפו, תעתיקו או תסדרו מחדש שורות."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "שורה {row}: % ביצוע אינו מספר.",
+      "actual_start_not_a_date": "שורה {row}: ההתחלה בפועל אינה תאריך.",
+      "actual_finish_not_a_date": "שורה {row}: הסיום בפועל אינו תאריך.",
+      "remaining_not_a_whole_number": "שורה {row}: המשך שנותר אינו מספר שלם של ימים.",
+      "percent_out_of_range": "שורה {row}: % ביצוע הוא {value}, והוא חייב להיות בין 0 ל-100.",
+      "remaining_negative": "שורה {row}: המשך שנותר הוא {value}, ואינו יכול להיות שלילי.",
+      "suggestion": "הזינו % ביצוע בין 0 ל-100, תאריכים כתאריכים ומשך שנותר בימי עבודה שלמים."
+    },
+    "date_logic": {
+      "finish_before_start": "שורה {row}: הסיום בפועל {finish} קודם להתחלה בפועל {start}.",
+      "finish_without_start": "שורה {row}: הוזן סיום בפועל {finish} ללא התחלה בפועל.",
+      "after_status_date": "שורה {row}: התאריך בפועל {value} מאוחר מתאריך הסטטוס {status_date}.",
+      "finish_needs_complete": "שורה {row}: הוזן סיום בפועל אך הפעילות הושלמה רק ב-{percent}%.",
+      "suggestion": "תאריכים בפועל חייבים להיות בסדר, לא אחרי תאריך הסטטוס, וסיום בפועל פירושו 100% ביצוע."
+    },
+    "unchanged_since_export": {
+      "fail": "שורה {row}: {activity} שונתה באפליקציה לאחר ייצוא הגיליון.",
+      "suggestion": "בדקו את הערכים הנוכחיים לפני החלת שורה זו, או יצאו גיליון חדש."
+    },
+    "plausibility": {
+      "progress_decreased": "שורה {row}: ההתקדמות יורדת מ-{old}% ל-{new}%.",
+      "complete_without_finish": "שורה {row}: 100% ביצוע ללא סיום בפועל; תאריך הסטטוס ישמש כסיום.",
+      "started_without_start": "שורה {row}: הוזנה התקדמות ללא התחלה בפועל.",
+      "suggestion": "בדקו את השורה מול האתר לפני החלתה."
+    }
   }
 }

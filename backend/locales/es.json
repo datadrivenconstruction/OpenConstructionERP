@@ -147,6 +147,28 @@
       "completion_milestone_description": "Hito de finalización del proyecto",
       "labour_resource": "Mano de obra",
       "machine_resource": "Maquinaria"
+    },
+    "progress_sheet": {
+      "sheet_title": "Avance",
+      "title": "Hoja de actualización de avance",
+      "detail_schedule": "Cronograma: {name}",
+      "detail_exported": "Exportado: {date}",
+      "instructions": "Complete solo las columnas blancas. No cambie las columnas grises, el orden de las filas ni las columnas ocultas.",
+      "col": {
+        "activity_ref": "ID de actividad",
+        "name": "Actividad",
+        "wbs_code": "EDT",
+        "responsible": "Responsable",
+        "planned_start": "Inicio planificado",
+        "planned_finish": "Fin planificado",
+        "percent_complete": "% completado",
+        "actual_start": "Inicio real",
+        "actual_finish": "Fin real",
+        "remaining_duration": "Restante (días laborables)",
+        "notes": "Notas",
+        "row_key": "Clave de fila",
+        "stamp": "Sello"
+      }
     }
   },
   "cad": {

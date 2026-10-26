@@ -147,6 +147,28 @@
       "completion_milestone_description": "Контрольная точка завершения проекта",
       "labour_resource": "Трудозатраты",
       "machine_resource": "Машины и механизмы"
+    },
+    "progress_sheet": {
+      "sheet_title": "Прогресс",
+      "title": "Лист обновления прогресса",
+      "detail_schedule": "График: {name}",
+      "detail_exported": "Выгружено: {date}",
+      "instructions": "Заполняйте только белые столбцы. Не меняйте серые столбцы, порядок строк и скрытые столбцы.",
+      "col": {
+        "activity_ref": "ID работы",
+        "name": "Работа",
+        "wbs_code": "WBS",
+        "responsible": "Ответственный",
+        "planned_start": "Плановое начало",
+        "planned_finish": "Плановое окончание",
+        "percent_complete": "% выполнения",
+        "actual_start": "Фактическое начало",
+        "actual_finish": "Фактическое окончание",
+        "remaining_duration": "Осталось (рабочих дней)",
+        "notes": "Примечания",
+        "row_key": "Ключ строки",
+        "stamp": "Метка"
+      }
     }
   },
   "cad": {

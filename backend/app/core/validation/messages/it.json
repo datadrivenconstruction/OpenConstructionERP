@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "L'attività '{activity}' è salvata con {stored} giorni lavorativi, il conteggio da lunedì a venerdì tra {start} e {end}; nella settimana lavorativa del progetto, {calendar}, quelle date comprendono {expected}",
       "suggestion": "Salvare di nuovo le date dell'attività affinché la durata venga ricalcolata sulla settimana lavorativa del progetto, oppure inserire la durata deliberatamente"
+    },
+    "dates_match_source": {
+      "fail": "{activity} termina con uno scostamento di {days} giorni rispetto alla fine nel file importato ({source}).",
+      "suggestion": "Confronta le date ricalcolate con il file di origine, poi accettale o ripristina le date originali."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Indica una percentuale di sconto oppure un prezzo netto fisso (il prezzo netto fisso richiede un articolo)",
     "attachment_not_found": "Allegato non trovato",
     "price_missing": "Nessun prezzo in vigore per la voce \"{line}\": inserisci un prezzo unitario o importa il listino del fornitore"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Riga {row}: nessuna attività di questo programma ha l'ID {ref}.",
+      "duplicate": "Riga {row}: l'attività {ref} compare più volte nel foglio.",
+      "suggestion": "Esporta un nuovo foglio e non aggiungere, copiare o riordinare le righe."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Riga {row}: % completamento non è un numero.",
+      "actual_start_not_a_date": "Riga {row}: l'inizio effettivo non è una data.",
+      "actual_finish_not_a_date": "Riga {row}: la fine effettiva non è una data.",
+      "remaining_not_a_whole_number": "Riga {row}: la durata residua non è un numero intero di giorni.",
+      "percent_out_of_range": "Riga {row}: % completamento è {value}, deve essere compreso tra 0 e 100.",
+      "remaining_negative": "Riga {row}: la durata residua è {value}, non può essere negativa.",
+      "suggestion": "Inserisci % completamento da 0 a 100, le date come date e la durata residua in giorni lavorativi interi."
+    },
+    "date_logic": {
+      "finish_before_start": "Riga {row}: la fine effettiva {finish} è precedente all'inizio effettivo {start}.",
+      "finish_without_start": "Riga {row}: è indicata una fine effettiva {finish} senza inizio effettivo.",
+      "after_status_date": "Riga {row}: la data effettiva {value} è successiva alla data di stato {status_date}.",
+      "finish_needs_complete": "Riga {row}: è indicata una fine effettiva ma l'attività è completa solo al {percent}%.",
+      "suggestion": "Le date effettive devono essere in ordine, non oltre la data di stato, e una fine effettiva significa 100% completato."
+    },
+    "unchanged_since_export": {
+      "fail": "Riga {row}: {activity} è stata modificata nell'app dopo l'esportazione del foglio.",
+      "suggestion": "Controlla i valori attuali prima di applicare questa riga, oppure esporta un nuovo foglio."
+    },
+    "plausibility": {
+      "progress_decreased": "Riga {row}: l'avanzamento scende da {old}% a {new}%.",
+      "complete_without_finish": "Riga {row}: 100% completato senza fine effettiva; la data di stato sarà usata come fine.",
+      "started_without_start": "Riga {row}: l'avanzamento è indicato senza inizio effettivo.",
+      "suggestion": "Verifica la riga con il cantiere prima di applicarla."
+    }
   }
 }

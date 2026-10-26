@@ -147,6 +147,28 @@
       "completion_milestone_description": "Milestone di fine lavori",
       "labour_resource": "Manodopera",
       "machine_resource": "Mezzi d'opera"
+    },
+    "progress_sheet": {
+      "sheet_title": "Avanzamento",
+      "title": "Foglio di aggiornamento avanzamento",
+      "detail_schedule": "Programma: {name}",
+      "detail_exported": "Esportato il: {date}",
+      "instructions": "Compila solo le colonne bianche. Non modificare le colonne grigie, l'ordine delle righe né le colonne nascoste.",
+      "col": {
+        "activity_ref": "ID attività",
+        "name": "Attività",
+        "wbs_code": "WBS",
+        "responsible": "Responsabile",
+        "planned_start": "Inizio pianificato",
+        "planned_finish": "Fine pianificata",
+        "percent_complete": "% completamento",
+        "actual_start": "Inizio effettivo",
+        "actual_finish": "Fine effettiva",
+        "remaining_duration": "Residuo (giorni lavorativi)",
+        "notes": "Note",
+        "row_key": "Chiave riga",
+        "stamp": "Impronta"
+      }
     }
   },
   "cad": {

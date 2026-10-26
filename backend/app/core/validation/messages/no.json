@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Aktiviteten '{activity}' er lagret som {stored} arbeidsdager, talt mandag til fredag fra {start} til {end}; etter prosjektets arbeidsuke, {calendar}, omfatter disse datoene {expected}",
       "suggestion": "Lagre aktivitetens datoer på nytt slik at varigheten telles etter prosjektets arbeidsuke, eller angi varigheten bevisst"
+    },
+    "dates_match_source": {
+      "fail": "{activity} slutter {days} dager fra sluttdatoen i den importerte filen ({source}).",
+      "suggestion": "Sammenlign de omberegnede datoene med kildefilen, og godta dem eller gjenopprett kildedatoene."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Oppgi enten en rabattprosent eller en fast nettopris (fast nettopris krever en vare)",
     "attachment_not_found": "Vedlegget ble ikke funnet",
     "price_missing": "Ingen gjeldende pris for linjen \"{line}\": legg inn en enhetspris eller importer leverandørens prisliste"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Rad {row}: ingen aktivitet i denne tidsplanen har ID-en {ref}.",
+      "duplicate": "Rad {row}: aktivitet {ref} forekommer mer enn én gang i arket.",
+      "suggestion": "Eksporter et nytt ark, og ikke legg til, kopier eller omorganiser rader."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Rad {row}: % ferdig er ikke et tall.",
+      "actual_start_not_a_date": "Rad {row}: faktisk start er ikke en dato.",
+      "actual_finish_not_a_date": "Rad {row}: faktisk slutt er ikke en dato.",
+      "remaining_not_a_whole_number": "Rad {row}: gjenstående varighet er ikke et helt antall dager.",
+      "percent_out_of_range": "Rad {row}: % ferdig er {value}, det må være mellom 0 og 100.",
+      "remaining_negative": "Rad {row}: gjenstående varighet er {value}, den kan ikke være negativ.",
+      "suggestion": "Skriv inn % ferdig fra 0 til 100, datoer som datoer og gjenstående varighet i hele arbeidsdager."
+    },
+    "date_logic": {
+      "finish_before_start": "Rad {row}: faktisk slutt {finish} er før faktisk start {start}.",
+      "finish_without_start": "Rad {row}: faktisk slutt {finish} er oppgitt uten faktisk start.",
+      "after_status_date": "Rad {row}: den faktiske datoen {value} er etter statusdatoen {status_date}.",
+      "finish_needs_complete": "Rad {row}: faktisk slutt er oppgitt, men aktiviteten er bare {percent}% ferdig.",
+      "suggestion": "Faktiske datoer må være i riktig rekkefølge, ikke senere enn statusdatoen, og en faktisk slutt betyr 100% ferdig."
+    },
+    "unchanged_since_export": {
+      "fail": "Rad {row}: {activity} ble endret i appen etter at arket ble eksportert.",
+      "suggestion": "Kontroller de nåværende verdiene før du bruker denne raden, eller eksporter et nytt ark."
+    },
+    "plausibility": {
+      "progress_decreased": "Rad {row}: fremdriften går ned fra {old}% til {new}%.",
+      "complete_without_finish": "Rad {row}: 100% ferdig uten faktisk slutt; statusdatoen brukes som slutt.",
+      "started_without_start": "Rad {row}: fremdrift er oppgitt uten faktisk start.",
+      "suggestion": "Kontroller raden med byggeplassen før du bruker den."
+    }
   }
 }

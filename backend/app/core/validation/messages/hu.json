@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "A(z) „{activity}” tevékenység tárolt időtartama {stored} munkanap, ami a(z) {start}–{end} közötti hétfő–péntek napok száma; a projekt {calendar} munkahét-rendje szerint ugyanezen dátumok {expected} munkanapot jelentenek",
       "suggestion": "Mentse újra a tevékenység dátumait, hogy az időtartam a projekt munkahete szerint újraszámítódjon, vagy adja meg tudatosan az időtartamot"
+    },
+    "dates_match_source": {
+      "fail": "{activity} befejezése {days} nappal tér el az importált fájlban szereplő befejezéstől ({source}).",
+      "suggestion": "Hasonlítsa össze az újraszámolt dátumokat a forrásfájllal, majd fogadja el őket, vagy állítsa vissza a forrásdátumokat."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Adjon meg kedvezményszázalékot vagy fix nettó árat (fix nettó árhoz tétel szükséges)",
     "attachment_not_found": "A melléklet nem található",
     "price_missing": "Nincs érvényes ár a(z) \"{line}\" sorhoz: adjon meg egységárat, vagy importálja a beszállító árlistáját"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "{row}. sor: ennek az ütemtervnek egyik tevékenységéhez sem tartozik a(z) {ref} azonosító.",
+      "duplicate": "{row}. sor: a(z) {ref} tevékenység többször szerepel a lapon.",
+      "suggestion": "Exportáljon új lapot, és ne adjon hozzá, ne másoljon és ne rendezzen át sorokat."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "{row}. sor: a % készültség nem szám.",
+      "actual_start_not_a_date": "{row}. sor: a tényleges kezdés nem dátum.",
+      "actual_finish_not_a_date": "{row}. sor: a tényleges befejezés nem dátum.",
+      "remaining_not_a_whole_number": "{row}. sor: a hátralévő időtartam nem egész számú nap.",
+      "percent_out_of_range": "{row}. sor: a % készültség értéke {value}, 0 és 100 között kell lennie.",
+      "remaining_negative": "{row}. sor: a hátralévő időtartam {value}, nem lehet negatív.",
+      "suggestion": "A % készültséget 0 és 100 között adja meg, a dátumokat dátumként, a hátralévő időtartamot egész munkanapban."
+    },
+    "date_logic": {
+      "finish_before_start": "{row}. sor: a tényleges befejezés ({finish}) a tényleges kezdés ({start}) előtt van.",
+      "finish_without_start": "{row}. sor: tényleges befejezés ({finish}) van megadva tényleges kezdés nélkül.",
+      "after_status_date": "{row}. sor: a tényleges dátum ({value}) az állapotdátum ({status_date}) után van.",
+      "finish_needs_complete": "{row}. sor: tényleges befejezés van megadva, de a tevékenység csak {percent}%-ban kész.",
+      "suggestion": "A tényleges dátumoknak sorrendben kell lenniük, nem lehetnek az állapotdátum után, és a tényleges befejezés 100% készültséget jelent."
+    },
+    "unchanged_since_export": {
+      "fail": "{row}. sor: a(z) {activity} tevékenységet az alkalmazásban módosították a lap exportálása után.",
+      "suggestion": "A sor alkalmazása előtt ellenőrizze a jelenlegi értékeket, vagy exportáljon új lapot."
+    },
+    "plausibility": {
+      "progress_decreased": "{row}. sor: az előrehaladás {old}%-ról {new}%-ra csökken.",
+      "complete_without_finish": "{row}. sor: 100% készültség tényleges befejezés nélkül; az állapotdátum lesz a befejezés.",
+      "started_without_start": "{row}. sor: előrehaladás van megadva tényleges kezdés nélkül.",
+      "suggestion": "Alkalmazás előtt egyeztesse a sort a helyszínnel."
+    }
   }
 }

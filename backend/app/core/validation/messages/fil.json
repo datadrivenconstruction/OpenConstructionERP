@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Nakatala ang activity na '{activity}' bilang {stored} working days, bilang ng Lunes hanggang Biyernes mula {start} hanggang {end}; sa linggo ng proyekto na {calendar}, may {expected} araw sa mga petsang iyon",
       "suggestion": "I-save muli ang mga petsa ng activity upang mabilang ang tagal ayon sa working week ng proyekto o sadyang ilagay ang tagal"
+    },
+    "dates_match_source": {
+      "fail": "Ang {activity} ay nagtatapos nang {days} araw ang layo sa pagtatapos sa inangkat na file ({source}).",
+      "suggestion": "Ihambing ang muling kinuwentang petsa sa source file, saka tanggapin ang mga ito o ibalik ang mga petsa ng pinagmulan."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Maglagay ng porsyento ng diskwento o nakapirming net na presyo (kailangan ng item ang nakapirming net na presyo)",
     "attachment_not_found": "Hindi nahanap ang attachment",
     "price_missing": "Walang umiiral na presyo para sa linyang \"{line}\": maglagay ng unit price o i-import ang listahan ng presyo ng vendor"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Hanay {row}: walang aktibidad ng iskedyul na ito na may ID na {ref}.",
+      "duplicate": "Hanay {row}: ang aktibidad na {ref} ay lumalabas nang higit sa isang beses sa sheet.",
+      "suggestion": "Mag-export ng bagong sheet at huwag magdagdag, mag-kopya, o mag-ayos muli ng mga hanay."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Hanay {row}: hindi numero ang % kumpleto.",
+      "actual_start_not_a_date": "Hanay {row}: hindi petsa ang aktwal na simula.",
+      "actual_finish_not_a_date": "Hanay {row}: hindi petsa ang aktwal na pagtatapos.",
+      "remaining_not_a_whole_number": "Hanay {row}: hindi buong bilang ng araw ang natitirang tagal.",
+      "percent_out_of_range": "Hanay {row}: ang % kumpleto ay {value}, dapat nasa pagitan ng 0 at 100.",
+      "remaining_negative": "Hanay {row}: ang natitirang tagal ay {value}, hindi ito maaaring negatibo.",
+      "suggestion": "Maglagay ng % kumpleto mula 0 hanggang 100, mga petsa bilang petsa, at natitirang tagal sa buong araw ng trabaho."
+    },
+    "date_logic": {
+      "finish_before_start": "Hanay {row}: ang aktwal na pagtatapos na {finish} ay bago ang aktwal na simula na {start}.",
+      "finish_without_start": "Hanay {row}: may aktwal na pagtatapos na {finish} pero walang aktwal na simula.",
+      "after_status_date": "Hanay {row}: ang aktwal na petsa na {value} ay pagkatapos ng status date na {status_date}.",
+      "finish_needs_complete": "Hanay {row}: may aktwal na pagtatapos pero {percent}% pa lang kumpleto ang aktibidad.",
+      "suggestion": "Dapat nasa pagkakasunod-sunod ang mga aktwal na petsa, hindi lalampas sa status date, at ang aktwal na pagtatapos ay nangangahulugang 100% kumpleto."
+    },
+    "unchanged_since_export": {
+      "fail": "Hanay {row}: nabago ang {activity} sa app matapos i-export ang sheet.",
+      "suggestion": "Suriin ang mga kasalukuyang halaga bago ipatupad ang hanay na ito, o mag-export ng bagong sheet."
+    },
+    "plausibility": {
+      "progress_decreased": "Hanay {row}: bumababa ang progreso mula {old}% patungong {new}%.",
+      "complete_without_finish": "Hanay {row}: 100% kumpleto pero walang aktwal na pagtatapos; gagamitin ang status date bilang pagtatapos.",
+      "started_without_start": "Hanay {row}: may progreso pero walang aktwal na simula.",
+      "suggestion": "Suriin ang hanay kasama ang site bago ipatupad."
+    }
   }
 }

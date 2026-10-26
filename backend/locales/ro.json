@@ -147,6 +147,28 @@
       "completion_milestone_description": "Reper de finalizare al proiectului",
       "labour_resource": "Manoperă",
       "machine_resource": "Utilaje"
+    },
+    "progress_sheet": {
+      "sheet_title": "Progres",
+      "title": "Foaie de actualizare a progresului",
+      "detail_schedule": "Planificare: {name}",
+      "detail_exported": "Exportat: {date}",
+      "instructions": "Completați doar coloanele albe. Nu modificați coloanele gri, ordinea rândurilor sau coloanele ascunse.",
+      "col": {
+        "activity_ref": "ID activitate",
+        "name": "Activitate",
+        "wbs_code": "WBS",
+        "responsible": "Responsabil",
+        "planned_start": "Început planificat",
+        "planned_finish": "Sfârșit planificat",
+        "percent_complete": "% finalizat",
+        "actual_start": "Început real",
+        "actual_finish": "Sfârșit real",
+        "remaining_duration": "Rămas (zile lucrătoare)",
+        "notes": "Note",
+        "row_key": "Cheie rând",
+        "stamp": "Ștampilă"
+      }
     }
   },
   "cad": {

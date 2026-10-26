@@ -225,9 +225,232 @@ class DurationCountedOnProjectWeek(ValidationRule):
         return results
 
 
+class DatesMatchImportSource(ValidationRule):
+    """Flags an imported activity whose dates moved away from its source file.
+
+    Reads ``source_dates`` (``{"start", "finish"}``) from each activity row, or
+    from its ``metadata``, and fails where the current finish differs from the
+    source finish. Rows without source dates, and a payload whose
+    ``import_source_status`` is ``accepted``, are not judged.
+    """
+
+    rule_id = "schedule_quality.dates_match_source"
+    name = "Dates match the imported source"
+    standard = SCHEDULE_RULE_SET
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags an imported activity whose recalculated finish differs from the finish in its source file."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = context.data
+        if isinstance(data, dict) and data.get("import_source_status") == "accepted":
+            return []
+        from app.modules.schedule.import_source import deviation_days
+
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for activity in _activities(context):
+            source = activity.get("source_dates")
+            if not isinstance(source, dict):
+                meta = activity.get("metadata")
+                source = meta.get("source_dates") if isinstance(meta, dict) else None
+            if not isinstance(source, dict) or not source.get("finish"):
+                continue
+            days = deviation_days(source.get("finish"), activity.get("end_date"))
+            if days is None:
+                continue
+            passed = days == 0
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=translate("common.ok", locale=locale)
+                    if passed
+                    else translate(
+                        f"{self.rule_id}.fail",
+                        locale=locale,
+                        activity=_label(activity),
+                        days=days,
+                        source=str(source.get("finish"))[:10],
+                    ),
+                    element_ref=str(activity.get("id")) if activity.get("id") else None,
+                    details={"finish_deviation_days": days},
+                    suggestion=None if passed else translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
+# ── Progress sheet rules ────────────────────────────────────────────────────
+# An uploaded progress sheet is validated through the engine before anything
+# is applied. Payload ``{"rows": [...]}``, one dict per sheet row (built in
+# ``progress_sheet_service``); a failing row is one result whose
+# ``element_ref`` is the sheet row number and ``details["code"]`` the problem.
+
+PROGRESS_SHEET_RULE_SET = "schedule_progress_sheet"
+
+
+def _sheet_rows(context: ValidationContext) -> list[dict[str, Any]]:
+    data = context.data
+    rows = data.get("rows") if isinstance(data, dict) else None
+    return [r for r in rows if isinstance(r, dict)] if isinstance(rows, list) else []
+
+
+class _SheetRule(ValidationRule):
+    standard = PROGRESS_SHEET_RULE_SET
+    category = RuleCategory.CONSISTENCY
+
+    def _fail(self, context: ValidationContext, row: dict[str, Any], code: str, **params: object) -> RuleResult:
+        locale = _locale(context)
+        return RuleResult(
+            rule_id=self.rule_id,
+            rule_name=self.name,
+            severity=self.severity,
+            category=self.category,
+            passed=False,
+            message=translate(f"{self.rule_id}.{code}", locale=locale, row=row.get("row_number"), **params),
+            element_ref=str(row.get("row_number")),
+            details={"code": code, "row_number": row.get("row_number"), **{k: str(v) for k, v in params.items()}},
+            suggestion=translate(f"{self.rule_id}.suggestion", locale=locale),
+        )
+
+    def _pass(self, context: ValidationContext, row: dict[str, Any]) -> RuleResult:
+        return RuleResult(
+            rule_id=self.rule_id,
+            rule_name=self.name,
+            severity=self.severity,
+            category=self.category,
+            passed=True,
+            message=translate("common.ok", locale=_locale(context)),
+            element_ref=str(row.get("row_number")),
+        )
+
+    def check(self, context: ValidationContext, row: dict[str, Any]) -> list[RuleResult]:
+        raise NotImplementedError
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        results: list[RuleResult] = []
+        for row in _sheet_rows(context):
+            found = self.check(context, row)
+            results.extend(found or [self._pass(context, row)])
+        return results
+
+
+class ProgressSheetKnownActivity(_SheetRule):
+    """Every row names one activity of the schedule, once."""
+
+    rule_id = "schedule_progress_sheet.known_activity"
+    name = "Row names an activity of the schedule"
+    severity = Severity.ERROR
+    description = "A progress sheet row whose activity is not in the schedule, or that repeats another row."
+
+    def check(self, context: ValidationContext, row: dict[str, Any]) -> list[RuleResult]:
+        if not row.get("activity_id"):
+            return [self._fail(context, row, "fail", ref=row.get("activity_ref") or row.get("row_key") or "?")]
+        if row.get("duplicate"):
+            return [self._fail(context, row, "duplicate", ref=row.get("activity_ref") or "?")]
+        return []
+
+
+class ProgressSheetValuesInRange(_SheetRule):
+    """Percent 0..100, real dates, a whole non-negative remaining duration."""
+
+    rule_id = "schedule_progress_sheet.values_in_range"
+    name = "Progress values are in range"
+    severity = Severity.ERROR
+    description = "Percent complete outside 0-100, a date that is not a date, or a negative remaining duration."
+
+    def check(self, context: ValidationContext, row: dict[str, Any]) -> list[RuleResult]:
+        out = [self._fail(context, row, code) for code in row.get("parse_errors") or []]
+        pct = row.get("percent_complete")
+        if isinstance(pct, (int, float)) and not 0.0 <= float(pct) <= 100.0:
+            out.append(self._fail(context, row, "percent_out_of_range", value=pct))
+        remaining = row.get("remaining_duration")
+        if isinstance(remaining, int) and remaining < 0:
+            out.append(self._fail(context, row, "remaining_negative", value=remaining))
+        return out
+
+
+class ProgressSheetDateLogic(_SheetRule):
+    """Actual dates in order, not after the status date, a finish only at 100%."""
+
+    rule_id = "schedule_progress_sheet.date_logic"
+    name = "Actual dates are consistent"
+    severity = Severity.ERROR
+    description = "An actual finish before the start, an actual date after the status date, or a finish below 100%."
+
+    def check(self, context: ValidationContext, row: dict[str, Any]) -> list[RuleResult]:
+        out: list[RuleResult] = []
+        start = row.get("actual_start") or row.get("recorded_actual_start")
+        finish = row.get("actual_finish")
+        status_date = row.get("status_date")
+        if start and finish and str(finish) < str(start):
+            out.append(self._fail(context, row, "finish_before_start", start=start, finish=finish))
+        if finish and not start:
+            out.append(self._fail(context, row, "finish_without_start", finish=finish))
+        for value in (row.get("actual_start"), finish):
+            if value and status_date and str(value) > str(status_date):
+                out.append(self._fail(context, row, "after_status_date", value=value, status_date=status_date))
+        pct = row.get("percent_complete")
+        if pct is None:
+            pct = row.get("current_percent")
+        if finish and isinstance(pct, (int, float)) and float(pct) < 100.0:
+            out.append(self._fail(context, row, "finish_needs_complete", percent=round(float(pct), 1)))
+        return out
+
+
+class ProgressSheetUnchangedSinceExport(_SheetRule):
+    """The activity was not changed in the app after the sheet was exported."""
+
+    rule_id = "schedule_progress_sheet.unchanged_since_export"
+    name = "Activity unchanged since export"
+    severity = Severity.WARNING
+    description = "The activity's dates or progress were changed in the app after the sheet was exported."
+
+    def check(self, context: ValidationContext, row: dict[str, Any]) -> list[RuleResult]:
+        if row.get("activity_id") and row.get("stale"):
+            return [self._fail(context, row, "fail", activity=row.get("activity_ref") or row.get("name") or "?")]
+        return []
+
+
+class ProgressSheetPlausibility(_SheetRule):
+    """Progress that goes backwards or lacks the dates that should come with it."""
+
+    rule_id = "schedule_progress_sheet.plausibility"
+    name = "Progress is plausible"
+    severity = Severity.WARNING
+    description = "Progress that decreases, 100% without an actual finish, or progress without an actual start."
+
+    def check(self, context: ValidationContext, row: dict[str, Any]) -> list[RuleResult]:
+        out: list[RuleResult] = []
+        pct = row.get("percent_complete")
+        current = row.get("current_percent")
+        if not isinstance(pct, (int, float)) or not row.get("activity_id"):
+            return out
+        if isinstance(current, (int, float)) and float(pct) < float(current):
+            out.append(
+                self._fail(context, row, "progress_decreased", old=round(float(current), 1), new=round(float(pct), 1))
+            )
+        if float(pct) >= 100.0 and not row.get("actual_finish") and not row.get("recorded_actual_finish"):
+            out.append(self._fail(context, row, "complete_without_finish"))
+        if float(pct) > 0.0 and not row.get("actual_start") and not row.get("recorded_actual_start"):
+            out.append(self._fail(context, row, "started_without_start"))
+        return out
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
-_SCHEDULE_RULES: tuple[ValidationRule, ...] = (DurationCountedOnProjectWeek(),)
+_SCHEDULE_RULES: tuple[ValidationRule, ...] = (DurationCountedOnProjectWeek(), DatesMatchImportSource())
+_PROGRESS_SHEET_RULES: tuple[ValidationRule, ...] = (
+    ProgressSheetKnownActivity(),
+    ProgressSheetValuesInRange(),
+    ProgressSheetDateLogic(),
+    ProgressSheetUnchangedSinceExport(),
+    ProgressSheetPlausibility(),
+)
 
 
 def register_schedule_rules() -> None:
@@ -240,7 +463,9 @@ def register_schedule_rules() -> None:
     """
     for rule in _SCHEDULE_RULES:
         rule_registry.register(rule, [SCHEDULE_RULE_SET])
-    logger.debug("Registered %d schedule validation rules", len(_SCHEDULE_RULES))
+    for rule in _PROGRESS_SHEET_RULES:
+        rule_registry.register(rule, [PROGRESS_SHEET_RULE_SET])
+    logger.debug("Registered %d schedule validation rules", len(_SCHEDULE_RULES) + len(_PROGRESS_SHEET_RULES))
 
 
 register_schedule_rules()

@@ -147,6 +147,28 @@
       "completion_milestone_description": "אבן דרך להשלמת הפרויקט",
       "labour_resource": "כוח אדם",
       "machine_resource": "ציוד מכני"
+    },
+    "progress_sheet": {
+      "sheet_title": "התקדמות",
+      "title": "גיליון עדכון התקדמות",
+      "detail_schedule": "לוח זמנים: {name}",
+      "detail_exported": "יוצא ב: {date}",
+      "instructions": "מלאו רק את העמודות הלבנות. אל תשנו את העמודות האפורות, את סדר השורות או את העמודות המוסתרות.",
+      "col": {
+        "activity_ref": "מזהה פעילות",
+        "name": "פעילות",
+        "wbs_code": "WBS",
+        "responsible": "אחראי",
+        "planned_start": "התחלה מתוכננת",
+        "planned_finish": "סיום מתוכנן",
+        "percent_complete": "% ביצוע",
+        "actual_start": "התחלה בפועל",
+        "actual_finish": "סיום בפועל",
+        "remaining_duration": "נותר (ימי עבודה)",
+        "notes": "הערות",
+        "row_key": "מפתח שורה",
+        "stamp": "חותמת"
+      }
     }
   },
   "cad": {

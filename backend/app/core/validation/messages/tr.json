@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "'{activity}' faaliyeti, {start} ile {end} arasındaki Pazartesi-Cuma sayımıyla {stored} iş günü olarak kayıtlı; proje haftası {calendar} esas alındığında bu tarihler {expected} gün içeriyor",
       "suggestion": "Sürenin projenin çalışma haftasına göre yeniden sayılması için faaliyet tarihlerini tekrar kaydedin veya süreyi bilinçli olarak girin"
+    },
+    "dates_match_source": {
+      "fail": "{activity}, içe aktarılan dosyadaki bitişten {days} gün farkla bitiyor ({source}).",
+      "suggestion": "Yeniden hesaplanan tarihleri kaynak dosyayla karşılaştırın, ardından kabul edin veya kaynak tarihlerini geri yükleyin."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "İskonto yüzdesi veya sabit net fiyat girin (sabit net fiyat için kalem gerekir)",
     "attachment_not_found": "Ek bulunamadı",
     "price_missing": "\"{line}\" satırı için geçerli fiyat yok: birim fiyat girin veya tedarikçinin fiyat listesini içe aktarın"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Satır {row}: bu programdaki hiçbir faaliyetin ID değeri {ref} değil.",
+      "duplicate": "Satır {row}: {ref} faaliyeti sayfada birden fazla kez geçiyor.",
+      "suggestion": "Yeni bir sayfa dışa aktarın; satır eklemeyin, kopyalamayın veya yeniden sıralamayın."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Satır {row}: % tamamlanma bir sayı değil.",
+      "actual_start_not_a_date": "Satır {row}: gerçekleşen başlangıç bir tarih değil.",
+      "actual_finish_not_a_date": "Satır {row}: gerçekleşen bitiş bir tarih değil.",
+      "remaining_not_a_whole_number": "Satır {row}: kalan süre tam sayı gün değil.",
+      "percent_out_of_range": "Satır {row}: % tamamlanma {value}, 0 ile 100 arasında olmalı.",
+      "remaining_negative": "Satır {row}: kalan süre {value}, negatif olamaz.",
+      "suggestion": "% tamamlanmayı 0 ile 100 arasında, tarihleri tarih olarak ve kalan süreyi tam iş günü olarak girin."
+    },
+    "date_logic": {
+      "finish_before_start": "Satır {row}: gerçekleşen bitiş {finish}, gerçekleşen başlangıç {start} tarihinden önce.",
+      "finish_without_start": "Satır {row}: gerçekleşen başlangıç olmadan gerçekleşen bitiş {finish} girilmiş.",
+      "after_status_date": "Satır {row}: gerçekleşen tarih {value}, durum tarihi {status_date} tarihinden sonra.",
+      "finish_needs_complete": "Satır {row}: gerçekleşen bitiş girilmiş ancak faaliyet yalnızca %{percent} tamamlanmış.",
+      "suggestion": "Gerçekleşen tarihler sıralı olmalı, durum tarihinden sonra olmamalı ve gerçekleşen bitiş %100 tamamlanma demektir."
+    },
+    "unchanged_since_export": {
+      "fail": "Satır {row}: {activity}, sayfa dışa aktarıldıktan sonra uygulamada değiştirildi.",
+      "suggestion": "Bu satırı uygulamadan önce mevcut değerleri kontrol edin veya yeni bir sayfa dışa aktarın."
+    },
+    "plausibility": {
+      "progress_decreased": "Satır {row}: ilerleme %{old} değerinden %{new} değerine düşüyor.",
+      "complete_without_finish": "Satır {row}: gerçekleşen bitiş olmadan %100 tamamlanma; durum tarihi bitiş olarak kullanılacak.",
+      "started_without_start": "Satır {row}: gerçekleşen başlangıç olmadan ilerleme girilmiş.",
+      "suggestion": "Uygulamadan önce satırı şantiyeyle birlikte kontrol edin."
+    }
   }
 }

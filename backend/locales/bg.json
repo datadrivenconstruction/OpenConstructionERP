@@ -147,6 +147,28 @@
       "completion_milestone_description": "Крайъгълен камък за завършване на проекта",
       "labour_resource": "Труд",
       "machine_resource": "Машини"
+    },
+    "progress_sheet": {
+      "sheet_title": "Напредък",
+      "title": "Лист за актуализация на напредъка",
+      "detail_schedule": "График: {name}",
+      "detail_exported": "Експортиран: {date}",
+      "instructions": "Попълвайте само белите колони. Не променяйте сивите колони, реда на редовете и скритите колони.",
+      "col": {
+        "activity_ref": "ИД на дейността",
+        "name": "Дейност",
+        "wbs_code": "WBS",
+        "responsible": "Отговорник",
+        "planned_start": "Планирано начало",
+        "planned_finish": "Планиран край",
+        "percent_complete": "% завършеност",
+        "actual_start": "Фактическо начало",
+        "actual_finish": "Фактически край",
+        "remaining_duration": "Оставащо (работни дни)",
+        "notes": "Бележки",
+        "row_key": "Ключ на реда",
+        "stamp": "Печат"
+      }
     }
   },
   "cad": {

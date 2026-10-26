@@ -358,6 +358,28 @@
       "completion_milestone_description": "Prekretnica dovršetka projekta",
       "labour_resource": "Radna snaga",
       "machine_resource": "Strojevi"
+    },
+    "progress_sheet": {
+      "sheet_title": "Napredak",
+      "title": "List za ažuriranje napretka",
+      "detail_schedule": "Plan: {name}",
+      "detail_exported": "Izvezeno: {date}",
+      "instructions": "Ispunite samo bijele stupce. Ne mijenjajte sive stupce, redoslijed redaka ni skrivene stupce.",
+      "col": {
+        "activity_ref": "ID aktivnosti",
+        "name": "Aktivnost",
+        "wbs_code": "WBS",
+        "responsible": "Odgovorna osoba",
+        "planned_start": "Planirani početak",
+        "planned_finish": "Planirani završetak",
+        "percent_complete": "% dovršenosti",
+        "actual_start": "Stvarni početak",
+        "actual_finish": "Stvarni završetak",
+        "remaining_duration": "Preostalo (radni dani)",
+        "notes": "Bilješke",
+        "row_key": "Ključ retka",
+        "stamp": "Pečat"
+      }
     }
   },
   "settings": {

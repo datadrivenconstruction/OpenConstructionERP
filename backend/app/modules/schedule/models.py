@@ -608,6 +608,10 @@ from app.modules.schedule.codes_models import (  # noqa: E402,F401
 # ``oe_schedule_evm_snapshot`` table on ``Base.metadata``.
 from app.modules.schedule.evm_snapshot_models import ScheduleEvmSnapshot  # noqa: E402,F401
 
+# Scheduling profiles. Imported for the side effect of registering the
+# ``oe_schedule_scheduling_profile`` table on ``Base.metadata``.
+from app.modules.schedule.profile_models import SchedulingProfile  # noqa: E402,F401
+
 # Progress-rigor steps (T3.2). Imported for the side effect of registering the
 # ``oe_schedule_activity_step`` table on ``Base.metadata``.
 from app.modules.schedule.progress_models import ProgressStep  # noqa: E402,F401

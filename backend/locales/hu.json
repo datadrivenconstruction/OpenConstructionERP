@@ -147,6 +147,28 @@
       "completion_milestone_description": "A projekt befejezésének mérföldköve",
       "labour_resource": "Munkaerő",
       "machine_resource": "Gépek"
+    },
+    "progress_sheet": {
+      "sheet_title": "Előrehaladás",
+      "title": "Előrehaladás-frissítő lap",
+      "detail_schedule": "Ütemterv: {name}",
+      "detail_exported": "Exportálva: {date}",
+      "instructions": "Csak a fehér oszlopokat töltse ki. Ne módosítsa a szürke oszlopokat, a sorok sorrendjét és a rejtett oszlopokat.",
+      "col": {
+        "activity_ref": "Tevékenység azonosító",
+        "name": "Tevékenység",
+        "wbs_code": "WBS",
+        "responsible": "Felelős",
+        "planned_start": "Tervezett kezdés",
+        "planned_finish": "Tervezett befejezés",
+        "percent_complete": "% készültség",
+        "actual_start": "Tényleges kezdés",
+        "actual_finish": "Tényleges befejezés",
+        "remaining_duration": "Hátralévő (munkanap)",
+        "notes": "Megjegyzések",
+        "row_key": "Sorkulcs",
+        "stamp": "Bélyeg"
+      }
     }
   },
   "cad": {

@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Vorgang '{activity}' ist mit {stored} Arbeitstagen gespeichert, der Zählung von Montag bis Freitag für {start} bis {end}; in der Arbeitswoche des Projekts, {calendar}, umfassen diese Termine {expected}",
       "suggestion": "Die Termine des Vorgangs erneut speichern, damit die Dauer in der Arbeitswoche des Projekts neu gezählt wird, oder die Dauer bewusst eingeben"
+    },
+    "dates_match_source": {
+      "fail": "{activity} endet {days} Tage vom Ende in der importierten Datei ({source}) entfernt.",
+      "suggestion": "Neu berechnete Termine mit der Quelldatei vergleichen, dann übernehmen oder die Quelltermine wiederherstellen."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Geben Sie entweder einen Rabattprozentsatz oder einen festen Nettopreis an (fester Nettopreis erfordert einen Artikel)",
     "attachment_not_found": "Anhang nicht gefunden",
     "price_missing": "Kein aktueller Preis für Position \"{line}\": Einheitspreis eingeben oder die Preisliste des Lieferanten importieren"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Zeile {row}: Kein Vorgang dieses Terminplans hat die ID {ref}.",
+      "duplicate": "Zeile {row}: Vorgang {ref} kommt mehrfach in der Liste vor.",
+      "suggestion": "Eine neue Liste exportieren und keine Zeilen hinzufügen, kopieren oder umsortieren."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Zeile {row}: % abgeschlossen ist keine Zahl.",
+      "actual_start_not_a_date": "Zeile {row}: Der Ist-Beginn ist kein Datum.",
+      "actual_finish_not_a_date": "Zeile {row}: Das Ist-Ende ist kein Datum.",
+      "remaining_not_a_whole_number": "Zeile {row}: Die Restdauer ist keine ganze Zahl von Tagen.",
+      "percent_out_of_range": "Zeile {row}: % abgeschlossen ist {value}, erlaubt sind 0 bis 100.",
+      "remaining_negative": "Zeile {row}: Die Restdauer ist {value} und darf nicht negativ sein.",
+      "suggestion": "% abgeschlossen von 0 bis 100, Termine als Datum und die Restdauer in ganzen Arbeitstagen eingeben."
+    },
+    "date_logic": {
+      "finish_before_start": "Zeile {row}: Das Ist-Ende {finish} liegt vor dem Ist-Beginn {start}.",
+      "finish_without_start": "Zeile {row}: Ein Ist-Ende {finish} ist ohne Ist-Beginn eingetragen.",
+      "after_status_date": "Zeile {row}: Der Ist-Termin {value} liegt nach dem Stichtag {status_date}.",
+      "finish_needs_complete": "Zeile {row}: Ein Ist-Ende ist eingetragen, der Vorgang ist aber erst zu {percent}% abgeschlossen.",
+      "suggestion": "Ist-Termine müssen in der richtigen Reihenfolge und nicht nach dem Stichtag liegen; ein Ist-Ende bedeutet 100% abgeschlossen."
+    },
+    "unchanged_since_export": {
+      "fail": "Zeile {row}: {activity} wurde nach dem Export der Liste in der App geändert.",
+      "suggestion": "Die aktuellen Werte prüfen, bevor die Zeile übernommen wird, oder eine neue Liste exportieren."
+    },
+    "plausibility": {
+      "progress_decreased": "Zeile {row}: Der Fortschritt sinkt von {old}% auf {new}%.",
+      "complete_without_finish": "Zeile {row}: 100% abgeschlossen ohne Ist-Ende; der Stichtag wird als Ende verwendet.",
+      "started_without_start": "Zeile {row}: Fortschritt ist ohne Ist-Beginn eingetragen.",
+      "suggestion": "Die Zeile vor dem Übernehmen mit der Baustelle abstimmen."
+    }
   }
 }

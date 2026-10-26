@@ -147,6 +147,28 @@
       "completion_milestone_description": "Tonggak penyelesaian proyek",
       "labour_resource": "Tenaga kerja",
       "machine_resource": "Alat berat"
+    },
+    "progress_sheet": {
+      "sheet_title": "Progres",
+      "title": "Lembar pembaruan progres",
+      "detail_schedule": "Jadwal: {name}",
+      "detail_exported": "Diekspor: {date}",
+      "instructions": "Isi hanya kolom putih. Jangan ubah kolom abu-abu, urutan baris, atau kolom tersembunyi.",
+      "col": {
+        "activity_ref": "ID aktivitas",
+        "name": "Aktivitas",
+        "wbs_code": "WBS",
+        "responsible": "Penanggung jawab",
+        "planned_start": "Mulai rencana",
+        "planned_finish": "Selesai rencana",
+        "percent_complete": "% selesai",
+        "actual_start": "Mulai aktual",
+        "actual_finish": "Selesai aktual",
+        "remaining_duration": "Sisa (hari kerja)",
+        "notes": "Catatan",
+        "row_key": "Kunci baris",
+        "stamp": "Stempel"
+      }
     }
   },
   "cad": {

@@ -147,6 +147,28 @@
       "completion_milestone_description": "プロジェクト完了マイルストーン",
       "labour_resource": "労務",
       "machine_resource": "建設機械"
+    },
+    "progress_sheet": {
+      "sheet_title": "進捗",
+      "title": "進捗更新シート",
+      "detail_schedule": "スケジュール: {name}",
+      "detail_exported": "書き出し日: {date}",
+      "instructions": "白い列のみ記入してください。灰色の列、行の順序、非表示の列は変更しないでください。",
+      "col": {
+        "activity_ref": "アクティビティ ID",
+        "name": "アクティビティ",
+        "wbs_code": "WBS",
+        "responsible": "担当者",
+        "planned_start": "計画開始",
+        "planned_finish": "計画完了",
+        "percent_complete": "進捗率",
+        "actual_start": "実績開始",
+        "actual_finish": "実績完了",
+        "remaining_duration": "残り (稼働日)",
+        "notes": "メモ",
+        "row_key": "行キー",
+        "stamp": "スタンプ"
+      }
     }
   },
   "cad": {

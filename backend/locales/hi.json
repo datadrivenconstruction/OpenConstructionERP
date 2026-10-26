@@ -147,6 +147,28 @@
       "completion_milestone_description": "प्रोजेक्ट समाप्ति की माइलस्टोन",
       "labour_resource": "श्रम",
       "machine_resource": "मशीनें"
+    },
+    "progress_sheet": {
+      "sheet_title": "प्रगति",
+      "title": "प्रगति अपडेट शीट",
+      "detail_schedule": "शेड्यूल: {name}",
+      "detail_exported": "निर्यात: {date}",
+      "instructions": "केवल सफ़ेद कॉलम भरें। धूसर कॉलम, पंक्तियों का क्रम या छिपे कॉलम न बदलें।",
+      "col": {
+        "activity_ref": "गतिविधि ID",
+        "name": "गतिविधि",
+        "wbs_code": "WBS",
+        "responsible": "ज़िम्मेदार",
+        "planned_start": "नियोजित प्रारंभ",
+        "planned_finish": "नियोजित समाप्ति",
+        "percent_complete": "% पूर्ण",
+        "actual_start": "वास्तविक प्रारंभ",
+        "actual_finish": "वास्तविक समाप्ति",
+        "remaining_duration": "शेष (कार्य दिवस)",
+        "notes": "टिप्पणियाँ",
+        "row_key": "पंक्ति कुंजी",
+        "stamp": "मुहर"
+      }
     }
   },
   "cad": {

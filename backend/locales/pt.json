@@ -147,6 +147,28 @@
       "completion_milestone_description": "Marco de conclusão do projeto",
       "labour_resource": "Mão de obra",
       "machine_resource": "Equipamentos"
+    },
+    "progress_sheet": {
+      "sheet_title": "Progresso",
+      "title": "Folha de atualização de progresso",
+      "detail_schedule": "Cronograma: {name}",
+      "detail_exported": "Exportado: {date}",
+      "instructions": "Preencha apenas as colunas brancas. Não altere as colunas cinzentas, a ordem das linhas nem as colunas ocultas.",
+      "col": {
+        "activity_ref": "ID da atividade",
+        "name": "Atividade",
+        "wbs_code": "WBS",
+        "responsible": "Responsável",
+        "planned_start": "Início planeado",
+        "planned_finish": "Fim planeado",
+        "percent_complete": "% concluída",
+        "actual_start": "Início real",
+        "actual_finish": "Fim real",
+        "remaining_duration": "Restante (dias úteis)",
+        "notes": "Notas",
+        "row_key": "Chave da linha",
+        "stamp": "Carimbo"
+      }
     }
   },
   "cad": {

@@ -147,6 +147,28 @@
       "completion_milestone_description": "Kamień milowy zakończenia projektu",
       "labour_resource": "Robocizna",
       "machine_resource": "Sprzęt"
+    },
+    "progress_sheet": {
+      "sheet_title": "Postęp",
+      "title": "Arkusz aktualizacji postępu",
+      "detail_schedule": "Harmonogram: {name}",
+      "detail_exported": "Wyeksportowano: {date}",
+      "instructions": "Wypełnij tylko białe kolumny. Nie zmieniaj szarych kolumn, kolejności wierszy ani ukrytych kolumn.",
+      "col": {
+        "activity_ref": "ID czynności",
+        "name": "Czynność",
+        "wbs_code": "WBS",
+        "responsible": "Odpowiedzialny",
+        "planned_start": "Planowane rozpoczęcie",
+        "planned_finish": "Planowane zakończenie",
+        "percent_complete": "% ukończenia",
+        "actual_start": "Rzeczywiste rozpoczęcie",
+        "actual_finish": "Rzeczywiste zakończenie",
+        "remaining_duration": "Pozostało (dni robocze)",
+        "notes": "Uwagi",
+        "row_key": "Klucz wiersza",
+        "stamp": "Znacznik"
+      }
     }
   },
   "cad": {

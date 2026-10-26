@@ -147,6 +147,28 @@
       "completion_milestone_description": "Жобаның аяқталу кезеңі",
       "labour_resource": "Жұмыс күші",
       "machine_resource": "Машиналар"
+    },
+    "progress_sheet": {
+      "sheet_title": "Орындалу",
+      "title": "Орындалуды жаңарту парағы",
+      "detail_schedule": "Кесте: {name}",
+      "detail_exported": "Экспорттаған күні: {date}",
+      "instructions": "Тек ақ бағандарды толтырыңыз. Сұр бағандарды, жолдардың ретін және жасырын бағандарды өзгертпеңіз.",
+      "col": {
+        "activity_ref": "Жұмыс ID",
+        "name": "Жұмыс",
+        "wbs_code": "WBS",
+        "responsible": "Жауапты",
+        "planned_start": "Жоспарлы басталуы",
+        "planned_finish": "Жоспарлы аяқталуы",
+        "percent_complete": "% орындалуы",
+        "actual_start": "Нақты басталуы",
+        "actual_finish": "Нақты аяқталуы",
+        "remaining_duration": "Қалды (жұмыс күні)",
+        "notes": "Ескертпелер",
+        "row_key": "Жол кілті",
+        "stamp": "Мөр"
+      }
     }
   },
   "cad": {

@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Aktivnost '{activity}' spremljena je s {stored} radnih dana, brojanjem od ponedjeljka do petka između {start} i {end}; prema projektnom tjednu {calendar} isti datumi daju {expected}",
       "suggestion": "Ponovno spremite datume aktivnosti kako bi se trajanje izračunalo prema radnom tjednu projekta ili trajanje unesite namjerno"
+    },
+    "dates_match_source": {
+      "fail": "{activity} završava s odstupanjem od {days} dana u odnosu na završetak u uvezenoj datoteci ({source}).",
+      "suggestion": "Usporedite ponovno izračunane datume s izvornom datotekom, zatim ih prihvatite ili vratite izvorne datume."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Navedite postotak popusta ili fiksnu neto cijenu (fiksna neto cijena zahtijeva artikl)",
     "attachment_not_found": "Privitak nije pronađen",
     "price_missing": "Nema važeće cijene za stavku \"{line}\": unesite jediničnu cijenu ili uvezite cjenik dobavljača"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Redak {row}: nijedna aktivnost ovog plana nema ID {ref}.",
+      "duplicate": "Redak {row}: aktivnost {ref} pojavljuje se više puta u listu.",
+      "suggestion": "Izvezite novi list i nemojte dodavati, kopirati ni preslagati retke."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Redak {row}: % dovršenosti nije broj.",
+      "actual_start_not_a_date": "Redak {row}: stvarni početak nije datum.",
+      "actual_finish_not_a_date": "Redak {row}: stvarni završetak nije datum.",
+      "remaining_not_a_whole_number": "Redak {row}: preostalo trajanje nije cijeli broj dana.",
+      "percent_out_of_range": "Redak {row}: % dovršenosti je {value}, mora biti između 0 i 100.",
+      "remaining_negative": "Redak {row}: preostalo trajanje je {value}, ne može biti negativno.",
+      "suggestion": "Unesite % dovršenosti od 0 do 100, datume kao datume i preostalo trajanje u cijelim radnim danima."
+    },
+    "date_logic": {
+      "finish_before_start": "Redak {row}: stvarni završetak {finish} je prije stvarnog početka {start}.",
+      "finish_without_start": "Redak {row}: unesen je stvarni završetak {finish} bez stvarnog početka.",
+      "after_status_date": "Redak {row}: stvarni datum {value} je nakon datuma statusa {status_date}.",
+      "finish_needs_complete": "Redak {row}: unesen je stvarni završetak, ali je aktivnost dovršena tek {percent}%.",
+      "suggestion": "Stvarni datumi moraju biti u redoslijedu, ne kasniji od datuma statusa, a stvarni završetak znači 100% dovršenosti."
+    },
+    "unchanged_since_export": {
+      "fail": "Redak {row}: {activity} promijenjena je u aplikaciji nakon izvoza lista.",
+      "suggestion": "Provjerite trenutne vrijednosti prije primjene ovog retka ili izvezite novi list."
+    },
+    "plausibility": {
+      "progress_decreased": "Redak {row}: napredak pada s {old}% na {new}%.",
+      "complete_without_finish": "Redak {row}: 100% dovršenosti bez stvarnog završetka; datum statusa bit će korišten kao završetak.",
+      "started_without_start": "Redak {row}: unesen je napredak bez stvarnog početka.",
+      "suggestion": "Provjerite redak s gradilištem prije primjene."
+    }
   }
 }

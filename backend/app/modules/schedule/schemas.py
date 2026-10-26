@@ -930,6 +930,9 @@ class ImportResult(BaseModel):
     relationships_imported: int = 0
     calendars_imported: int = 0
     warnings: list[str] = Field(default_factory=list)
+    source_document_id: str | None = Field(
+        default=None, description="The stored original file in the project's documents"
+    )
 
 
 # ── Schedule Relationship schemas (Phase 13) ──────────────────────────────

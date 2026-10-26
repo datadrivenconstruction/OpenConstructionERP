@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Activity '{activity}' is stored as {stored} working days, the Monday-to-Friday count of {start} to {end}; on the project's week, {calendar}, those dates hold {expected}",
       "suggestion": "Save the activity's dates again so the duration is recounted on the project's working week, or enter the duration deliberately"
+    },
+    "dates_match_source": {
+      "fail": "{activity} finishes {days} days away from the finish in the imported file ({source}).",
+      "suggestion": "Compare the recalculated dates with the source file, then accept them or restore the source dates."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Give either a discount percentage or a fixed net price (fixed net needs an item)",
     "attachment_not_found": "Attachment not found",
     "price_missing": "No current price for line \"{line}\": enter a unit price or import the vendor's price list"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Row {row}: no activity of this schedule has the ID {ref}.",
+      "duplicate": "Row {row}: activity {ref} appears more than once in the sheet.",
+      "suggestion": "Export a new sheet and do not add, copy or reorder rows."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Row {row}: % complete is not a number.",
+      "actual_start_not_a_date": "Row {row}: the actual start is not a date.",
+      "actual_finish_not_a_date": "Row {row}: the actual finish is not a date.",
+      "remaining_not_a_whole_number": "Row {row}: the remaining duration is not a whole number of days.",
+      "percent_out_of_range": "Row {row}: % complete is {value}, it must be between 0 and 100.",
+      "remaining_negative": "Row {row}: the remaining duration is {value}, it cannot be negative.",
+      "suggestion": "Enter % complete from 0 to 100, dates as dates and the remaining duration in whole working days."
+    },
+    "date_logic": {
+      "finish_before_start": "Row {row}: the actual finish {finish} is before the actual start {start}.",
+      "finish_without_start": "Row {row}: an actual finish {finish} is entered without an actual start.",
+      "after_status_date": "Row {row}: the actual date {value} is after the status date {status_date}.",
+      "finish_needs_complete": "Row {row}: an actual finish is entered but the activity is only {percent}% complete.",
+      "suggestion": "Actual dates must be in order, not later than the status date, and an actual finish means 100% complete."
+    },
+    "unchanged_since_export": {
+      "fail": "Row {row}: {activity} was changed in the app after the sheet was exported.",
+      "suggestion": "Check the current values before applying this row, or export a new sheet."
+    },
+    "plausibility": {
+      "progress_decreased": "Row {row}: progress goes down from {old}% to {new}%.",
+      "complete_without_finish": "Row {row}: 100% complete without an actual finish; the status date will be used as the finish.",
+      "started_without_start": "Row {row}: progress is entered without an actual start.",
+      "suggestion": "Check the row with the site before applying it."
+    }
   }
 }

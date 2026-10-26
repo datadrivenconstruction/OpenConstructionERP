@@ -147,6 +147,28 @@
       "completion_milestone_description": "หลักไมล์การเสร็จสิ้นโครงการ",
       "labour_resource": "แรงงาน",
       "machine_resource": "เครื่องจักร"
+    },
+    "progress_sheet": {
+      "sheet_title": "ความคืบหน้า",
+      "title": "ชีตอัปเดตความคืบหน้า",
+      "detail_schedule": "ตารางงาน: {name}",
+      "detail_exported": "ส่งออกเมื่อ: {date}",
+      "instructions": "กรอกเฉพาะคอลัมน์สีขาว ห้ามเปลี่ยนคอลัมน์สีเทา ลำดับแถว หรือคอลัมน์ที่ซ่อนอยู่",
+      "col": {
+        "activity_ref": "ID กิจกรรม",
+        "name": "กิจกรรม",
+        "wbs_code": "WBS",
+        "responsible": "ผู้รับผิดชอบ",
+        "planned_start": "วันเริ่มตามแผน",
+        "planned_finish": "วันสิ้นสุดตามแผน",
+        "percent_complete": "% เสร็จ",
+        "actual_start": "วันเริ่มจริง",
+        "actual_finish": "วันสิ้นสุดจริง",
+        "remaining_duration": "คงเหลือ (วันทำงาน)",
+        "notes": "หมายเหตุ",
+        "row_key": "คีย์แถว",
+        "stamp": "ตราประทับ"
+      }
     }
   },
   "cad": {

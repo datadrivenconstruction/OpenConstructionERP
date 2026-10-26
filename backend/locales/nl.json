@@ -147,6 +147,28 @@
       "completion_milestone_description": "Mijlpaal voor projectafronding",
       "labour_resource": "Arbeid",
       "machine_resource": "Materieel"
+    },
+    "progress_sheet": {
+      "sheet_title": "Voortgang",
+      "title": "Blad voor voortgangsupdate",
+      "detail_schedule": "Planning: {name}",
+      "detail_exported": "Geëxporteerd: {date}",
+      "instructions": "Vul alleen de witte kolommen in. Wijzig de grijze kolommen, de volgorde van de rijen en de verborgen kolommen niet.",
+      "col": {
+        "activity_ref": "Activiteit-ID",
+        "name": "Activiteit",
+        "wbs_code": "WBS",
+        "responsible": "Verantwoordelijke",
+        "planned_start": "Geplande start",
+        "planned_finish": "Gepland einde",
+        "percent_complete": "% voltooid",
+        "actual_start": "Werkelijke start",
+        "actual_finish": "Werkelijk einde",
+        "remaining_duration": "Resterend (werkdagen)",
+        "notes": "Notities",
+        "row_key": "Rijsleutel",
+        "stamp": "Stempel"
+      }
     }
   },
   "cad": {

@@ -147,6 +147,28 @@
       "completion_milestone_description": "Ορόσημο ολοκλήρωσης έργου",
       "labour_resource": "Εργατικά",
       "machine_resource": "Μηχανήματα"
+    },
+    "progress_sheet": {
+      "sheet_title": "Πρόοδος",
+      "title": "Φύλλο ενημέρωσης προόδου",
+      "detail_schedule": "Χρονοδιάγραμμα: {name}",
+      "detail_exported": "Εξαγωγή: {date}",
+      "instructions": "Συμπληρώστε μόνο τις λευκές στήλες. Μην αλλάξετε τις γκρι στήλες, τη σειρά των γραμμών ή τις κρυφές στήλες.",
+      "col": {
+        "activity_ref": "Κωδ. δραστηριότητας",
+        "name": "Δραστηριότητα",
+        "wbs_code": "WBS",
+        "responsible": "Υπεύθυνος",
+        "planned_start": "Προγρ. έναρξη",
+        "planned_finish": "Προγρ. λήξη",
+        "percent_complete": "% ολοκλήρωσης",
+        "actual_start": "Πραγματική έναρξη",
+        "actual_finish": "Πραγματική λήξη",
+        "remaining_duration": "Υπολειπόμενο (εργάσιμες ημέρες)",
+        "notes": "Σημειώσεις",
+        "row_key": "Κλειδί γραμμής",
+        "stamp": "Σφραγίδα"
+      }
     }
   },
   "cad": {

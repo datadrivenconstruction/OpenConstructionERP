@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "作業「{activity}」には、{start} から {end} までの月曜～金曜を数えた {stored} 稼働日が保存されています。プロジェクトの稼働週 {calendar} では、この期間は {expected} です",
       "suggestion": "作業の日付を再保存し、プロジェクトの稼働週に従って期間を再計算するか、意図する期間を直接入力してください"
+    },
+    "dates_match_source": {
+      "fail": "{activity} の完了日は、インポートしたファイルの完了日 ({source}) と {days} 日ずれています。",
+      "suggestion": "再計算した日付をソースファイルと比較し、承認するかソースの日付に戻してください。"
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "値引率か固定ネット単価のどちらかを指定してください(固定ネット単価には品目が必要です)",
     "attachment_not_found": "添付ファイルが見つかりません",
     "price_missing": "明細「{line}」に有効な単価がありません。単価を入力するか、業者の価格表を取り込んでください"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "{row} 行目: このスケジュールに ID {ref} のアクティビティはありません。",
+      "duplicate": "{row} 行目: アクティビティ {ref} がシート内に複数あります。",
+      "suggestion": "新しいシートを書き出し、行の追加、コピー、並べ替えはしないでください。"
+    },
+    "values_in_range": {
+      "percent_not_a_number": "{row} 行目: 進捗率が数値ではありません。",
+      "actual_start_not_a_date": "{row} 行目: 実績開始が日付ではありません。",
+      "actual_finish_not_a_date": "{row} 行目: 実績完了が日付ではありません。",
+      "remaining_not_a_whole_number": "{row} 行目: 残り期間が整数の日数ではありません。",
+      "percent_out_of_range": "{row} 行目: 進捗率が {value} です。0 から 100 の間にしてください。",
+      "remaining_negative": "{row} 行目: 残り期間が {value} です。負の値にはできません。",
+      "suggestion": "進捗率は 0 から 100、日付は日付形式、残り期間は整数の稼働日で入力してください。"
+    },
+    "date_logic": {
+      "finish_before_start": "{row} 行目: 実績完了 {finish} が実績開始 {start} より前です。",
+      "finish_without_start": "{row} 行目: 実績開始がないまま実績完了 {finish} が入力されています。",
+      "after_status_date": "{row} 行目: 実績日 {value} がステータス日 {status_date} より後です。",
+      "finish_needs_complete": "{row} 行目: 実績完了が入力されていますが、アクティビティの進捗率は {percent}% です。",
+      "suggestion": "実績日は順序どおりで、ステータス日より後にならないようにしてください。実績完了は進捗率 100% を意味します。"
+    },
+    "unchanged_since_export": {
+      "fail": "{row} 行目: シートの書き出し後に {activity} がアプリで変更されました。",
+      "suggestion": "この行を適用する前に現在の値を確認するか、新しいシートを書き出してください。"
+    },
+    "plausibility": {
+      "progress_decreased": "{row} 行目: 進捗が {old}% から {new}% に下がっています。",
+      "complete_without_finish": "{row} 行目: 実績完了がないまま進捗率 100% です。ステータス日が完了日として使われます。",
+      "started_without_start": "{row} 行目: 実績開始がないまま進捗が入力されています。",
+      "suggestion": "適用する前に現場とこの行を確認してください。"
+    }
   }
 }

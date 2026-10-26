@@ -646,6 +646,10 @@
     "duration_on_project_week": {
       "fail": "Activitatea '{activity}' este stocată cu {stored} zile lucrătoare, numărate de luni până vineri între {start} și {end}; în săptămâna proiectului, {calendar}, acele date cuprind {expected}",
       "suggestion": "Salvați din nou datele activității pentru a recalcula durata după săptămâna de lucru a proiectului sau introduceți durata în mod deliberat"
+    },
+    "dates_match_source": {
+      "fail": "{activity} se termină la {days} zile față de sfârșitul din fișierul importat ({source}).",
+      "suggestion": "Comparați datele recalculate cu fișierul sursă, apoi acceptați-le sau restabiliți datele din sursă."
     }
   },
   "sheet_completeness": {
@@ -1327,5 +1331,38 @@
     "discount_basis": "Indicați fie un procent de discount, fie un preț net fix (prețul net fix necesită un articol)",
     "attachment_not_found": "Atașamentul nu a fost găsit",
     "price_missing": "Nu există preț curent pentru linia \"{line}\": introduceți un preț unitar sau importați lista de prețuri a furnizorului"
+  },
+  "schedule_progress_sheet": {
+    "known_activity": {
+      "fail": "Rândul {row}: nicio activitate a acestei planificări nu are ID-ul {ref}.",
+      "duplicate": "Rândul {row}: activitatea {ref} apare de mai multe ori în foaie.",
+      "suggestion": "Exportați o foaie nouă și nu adăugați, copiați sau reordonați rânduri."
+    },
+    "values_in_range": {
+      "percent_not_a_number": "Rândul {row}: % finalizat nu este un număr.",
+      "actual_start_not_a_date": "Rândul {row}: începutul real nu este o dată.",
+      "actual_finish_not_a_date": "Rândul {row}: sfârșitul real nu este o dată.",
+      "remaining_not_a_whole_number": "Rândul {row}: durata rămasă nu este un număr întreg de zile.",
+      "percent_out_of_range": "Rândul {row}: % finalizat este {value}, trebuie să fie între 0 și 100.",
+      "remaining_negative": "Rândul {row}: durata rămasă este {value}, nu poate fi negativă.",
+      "suggestion": "Introduceți % finalizat de la 0 la 100, datele ca date și durata rămasă în zile lucrătoare întregi."
+    },
+    "date_logic": {
+      "finish_before_start": "Rândul {row}: sfârșitul real {finish} este înainte de începutul real {start}.",
+      "finish_without_start": "Rândul {row}: sfârșitul real {finish} este introdus fără început real.",
+      "after_status_date": "Rândul {row}: data reală {value} este după data de stare {status_date}.",
+      "finish_needs_complete": "Rândul {row}: sfârșitul real este introdus, dar activitatea este finalizată doar în proporție de {percent}%.",
+      "suggestion": "Datele reale trebuie să fie în ordine, nu după data de stare, iar un sfârșit real înseamnă 100% finalizat."
+    },
+    "unchanged_since_export": {
+      "fail": "Rândul {row}: {activity} a fost modificată în aplicație după exportul foii.",
+      "suggestion": "Verificați valorile curente înainte de a aplica acest rând sau exportați o foaie nouă."
+    },
+    "plausibility": {
+      "progress_decreased": "Rândul {row}: progresul scade de la {old}% la {new}%.",
+      "complete_without_finish": "Rândul {row}: 100% finalizat fără sfârșit real; data de stare va fi folosită ca sfârșit.",
+      "started_without_start": "Rândul {row}: progresul este introdus fără început real.",
+      "suggestion": "Verificați rândul cu șantierul înainte de a-l aplica."
+    }
   }
 }
