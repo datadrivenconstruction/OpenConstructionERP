@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Rivi {line}: tietueen tarkistussummalohko ilmoittaa {declared}, mikä ei vastaa tietueen merkkejä",
+      "suggestion": "Vie tiedosto uudelleen CAD-järjestelmästä; tarkistussumman poikkeama tarkoittaa, että rivi on muuttunut tai katkaistu siirrossa"
+    },
+    "header_field_order": {
+      "fail": "Rivi {line}: otsikkolohko ei ole standardin mukainen - {problem}",
+      "suggestion": "Kirjoita kaikki yläryhmän vaatimat otsikkokentät standardin määräämässä järjestyksessä, tunniste mukaan lukien vaikka arvo olisi tyhjä",
+      "missing": "puuttuvat kentät: {fields}",
+      "missing_block": "tietueessa ei ole otsikkolohkoa",
+      "order": "kentät eivät ole standardin määräämässä järjestyksessä",
+      "unknown": "tuntemattomat kentät: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Rivi {line}: tietueessa on sekä geometrialohko että välikelohko, joita ei voi olla samalla rivillä",
+      "suggestion": "Jaa muoto kahteen tietueeseen: yhteen geometrialla ja yhteen välikkeiden paikoilla"
+    },
+    "ascii_only": {
+      "fail": "Rivi {line}: tietue sisältää ASCII-merkistön ulkopuolisia merkkejä ({characters})",
+      "suggestion": "Korvaa ääkköset vapaan tekstin kentissä; ABS on ASCII-muoto, ja mikä tahansa muu tavu rikkoo tarkistussumman"
+    },
+    "record_within_length_budget": {
+      "fail": "Rivi {line}: tietue on {length} merkkiä pitkä, mikä ylittää standardin rajan {budget} taivutettua muotoa kohden",
+      "suggestion": "Jaa muoto, tai siirrä projektin sisäiset tiedot pois yksityisestä lohkosta"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Rivi {line}: haarat {legs} eivät sisällä taivutuskulmaa",
+      "suggestion": "Anna jokaisen haaran perässä sen kulma, ja sulje suoraan päättyvä tanko eksplisiittisellä w0:lla, jotta kone erottaa ”ei taivutusta” ja ”kulmaa ei ilmoitettu”"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Rivi {line}: haarojen {legs} säde on pienempi tai yhtä suuri kuin puolet taivutusrullan halkaisijasta ({limit} mm)",
+      "suggestion": "Nosta säde yli otsikossa ilmoitetun rullan halkaisijan puolikkaan, tai ilmoita suurempi rulla"
+    },
+    "developed_length_matches_header": {
+      "fail": "Rivi {line}: geometria kehittyy pituudeksi {developed} mm, mutta otsikko ilmoittaa {stated} mm, ero {gap} mm",
+      "suggestion": "Korjaa haarojen pituudet tai otsikon kokonaissumma; kone seuraa geometriaa, joten tulostettu luettelo ja leikattu tanko eroaisivat toisistaan"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Rivi {line}: verkossa on negatiivisia tankojen koordinaatteja ({coordinates})",
+      "suggestion": "Siirrä verkon origo niin, että pienin x ja pienin y ovat nolla"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

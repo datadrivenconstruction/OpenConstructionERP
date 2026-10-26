@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Linia {line}: blocul de sumă de control al înregistrării indică {declared}, ceea ce nu corespunde caracterelor înregistrării",
+      "suggestion": "Exportați din nou fișierul din sistemul CAD; o sumă de control nepotrivită înseamnă că linia a fost modificată sau trunchiată la transfer"
+    },
+    "header_field_order": {
+      "fail": "Linia {line}: blocul de antet nu este conform - {problem}",
+      "suggestion": "Completați fiecare câmp de antet cerut de supergrup, în ordinea stabilită de standard, cu identificatorul prezent chiar dacă valoarea este goală",
+      "missing": "câmpuri lipsă: {fields}",
+      "missing_block": "înregistrarea nu conține niciun bloc de antet",
+      "order": "câmpurile nu sunt în ordinea stabilită de standard",
+      "unknown": "câmpuri necunoscute: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Linia {line}: înregistrarea conține atât un bloc de geometrie, cât și un bloc de distanțiere, care nu pot apărea pe aceeași linie",
+      "suggestion": "Împărțiți forma într-o înregistrare cu geometria și una cu pozițiile distanțierelor"
+    },
+    "ascii_only": {
+      "fail": "Linia {line}: înregistrarea conține caractere din afara ASCII ({characters})",
+      "suggestion": "Înlocuiți caracterele cu diacritice din câmpurile de text liber; ABS este un format ASCII, iar orice alt octet strică suma de control"
+    },
+    "record_within_length_budget": {
+      "fail": "Linia {line}: înregistrarea are {length} caractere, peste bugetul standardului de {budget} pe forma îndoită",
+      "suggestion": "Împărțiți forma sau mutați datele interne proiectului din blocul privat"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Linia {line}: lungimile {legs} nu au unghi de îndoire",
+      "suggestion": "Indicați unghiul după fiecare lungime și închideți o bară care se termină drept cu un w0 explicit, pentru ca mașina să distingă „fără îndoire” de „unghi nespecificat”"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Linia {line}: lungimile {legs} au o rază mai mică sau egală cu jumătate din diametrul rolei de îndoire ({limit} mm)",
+      "suggestion": "Măriți raza peste jumătate din diametrul rolei indicat în antet sau specificați o rolă mai mare"
+    },
+    "developed_length_matches_header": {
+      "fail": "Linia {line}: geometria se desfășoară la {developed} mm, dar antetul indică {stated} mm, o diferență de {gap} mm",
+      "suggestion": "Corectați lungimile laturilor sau totalul din antet; mașina urmează geometria, deci lista tipărită și bara tăiată ar diferi"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Linia {line}: plasa are coordonate negative ale barelor ({coordinates})",
+      "suggestion": "Mutați originea plasei astfel încât cel mai mic x și cel mai mic y să fie zero"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

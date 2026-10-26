@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Linje {line}: postens kontrollsumblokk sier {declared}, som ikke stemmer med postens tegn",
+      "suggestion": "Eksporter filen på nytt fra CAD-systemet; en kontrollsum som ikke stemmer betyr at linjen er endret eller kuttet under overføringen"
+    },
+    "header_field_order": {
+      "fail": "Linje {line}: toppteksblokken er ikke i samsvar - {problem}",
+      "suggestion": "Skriv inn alle toppfeltene som supergruppen krever, i rekkefølgen standarden fastsetter, med identifikatoren til stede selv når verdien er tom",
+      "missing": "manglende felt: {fields}",
+      "missing_block": "posten har ingen toppteksblokk",
+      "order": "feltene står ikke i rekkefølgen standarden fastsetter",
+      "unknown": "ukjente felt: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Linje {line}: posten inneholder både en geometriblokk og en avstandsblokk, som ikke kan stå på samme linje",
+      "suggestion": "Del formen i én post med geometrien og én post med plasseringen av avstandsholderne"
+    },
+    "ascii_only": {
+      "fail": "Linje {line}: posten inneholder tegn utenfor ASCII ({characters})",
+      "suggestion": "Erstatt tegn med aksenter i frie tekstfelt; ABS er et ASCII-format, og enhver annen byte ødelegger kontrollsummen"
+    },
+    "record_within_length_budget": {
+      "fail": "Linje {line}: posten er {length} tegn, over standardens budsjett på {budget} per bøyd form",
+      "suggestion": "Del formen, eller flytt prosjektinterne data ut av den private blokken"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Linje {line}: beina {legs} har ingen bøyevinkel",
+      "suggestion": "Oppgi vinkelen etter hvert bein, og avslutt en stav som ender rett med en eksplisitt w0, slik at maskinen kan skille «ingen bøy» fra «vinkel ikke oppgitt»"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Linje {line}: beina {legs} har en radius som er mindre enn eller lik halvparten av diameteren på bøyerullen ({limit} mm)",
+      "suggestion": "Øk radiusen over halvparten av rulldiameteren som står i toppteksten, eller oppgi en større rulle"
+    },
+    "developed_length_matches_header": {
+      "fail": "Linje {line}: geometrien utvikles til {developed} mm, men toppteksten oppgir {stated} mm, en forskjell på {gap} mm",
+      "suggestion": "Korriger beinlengdene eller totalen i toppteksten; maskinen følger geometrien, så den utskrevne listen og den kuttede staven ville avvike"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Linje {line}: nettet har negative staavkoordinater ({coordinates})",
+      "suggestion": "Flytt nettets origo slik at den minste x-verdien og den minste y-verdien er null"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

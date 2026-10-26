@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "{line}-qator: yozuvning nazorat yig'indisi bloki {declared} deb ko'rsatadi, bu esa yozuv belgilariga mos kelmaydi",
+      "suggestion": "Faylni CAD tizimidan qayta eksport qiling; nazorat yig'indisi mos kelmasa, qator uzatish vaqtida o'zgargan yoki kesilgan"
+    },
+    "header_field_order": {
+      "fail": "{line}-qator: sarlavha bloki me'yorga mos emas - {problem}",
+      "suggestion": "Yuqori guruh talab qilgan barcha sarlavha maydonlarini standart belgilagan tartibda yozing, qiymat bo'sh bo'lsa ham identifikator bo'lsin",
+      "missing": "yetishmayotgan maydonlar: {fields}",
+      "missing_block": "yozuvda sarlavha bloki yo'q",
+      "order": "maydonlar standart belgilagan tartibda emas",
+      "unknown": "noma'lum maydonlar: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "{line}-qator: yozuvda geometriya bloki va oraliq bloki bor, ular bitta qatorda bo'lishi mumkin emas",
+      "suggestion": "Shaklni bir yozuvga geometriya bilan, ikkinchi yozuvga esa oraliq qistirmalar joylashuvi bilan ajrating"
+    },
+    "ascii_only": {
+      "fail": "{line}-qator: yozuvda ASCII dan tashqari belgilar bor ({characters})",
+      "suggestion": "Erkin matn maydonlaridagi urg'uli harflarni almashtiring; ABS - ASCII formati, boshqa har qanday bayt nazorat yig'indisini buzadi"
+    },
+    "record_within_length_budget": {
+      "fail": "{line}-qator: yozuv {length} belgidan iborat, bu standartning har bir egilgan shakl uchun belgilangan {budget} chegarasidan oshadi",
+      "suggestion": "Shaklni bo'lib tashlang yoki loyiha ichki ma'lumotlarini shaxsiy bloktan tashqariga chiqaring"
+    },
+    "geometry_angle_terminated": {
+      "fail": "{line}-qator: {legs} qanotlarida egilish burchagi ko'rsatilmagan",
+      "suggestion": "Har bir qanotdan keyin uning burchagini yozing, to'g'ri tugaydigan sterjenni esa aniq w0 bilan yoping, shunda mashina \"egilishsiz\" va \"burchak ko'rsatilmagan\" holatlarni farqlay oladi"
+    },
+    "bend_radius_over_roller": {
+      "fail": "{line}-qator: {legs} qanotlarining radiusi egish roligi diametrining yarmiga teng yoki undan kichik ({limit} mm)",
+      "suggestion": "Radiusni sarlavhada ko'rsatilgan rolik diametrining yarmidan katta qiling yoki kattaroq rolik ko'rsating"
+    },
+    "developed_length_matches_header": {
+      "fail": "{line}-qator: geometriya {developed} mm gacha yoziladi, ammo sarlavhada {stated} mm ko'rsatilgan, farq {gap} mm",
+      "suggestion": "Qanot uzunliklarini yoki sarlavhadagi umumiy yig'indini tuzating; mashina geometriyaga amal qiladi, shuning uchun chop etilgan ro'yxat va kesilgan sterjen farq qiladi"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "{line}-qator: to'rda sterjenlarning manfiy koordinatalari bor ({coordinates})",
+      "suggestion": "To'r boshlang'ich nuqtasini shunday siljiting, eng kichik x va eng kichik y nolga teng bo'lsin"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

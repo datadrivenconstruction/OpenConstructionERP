@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Ligne {line} : le bloc de somme de contrôle de l'enregistrement indique {declared}, ce qui ne correspond pas aux caractères de l'enregistrement",
+      "suggestion": "Réexportez le fichier depuis le logiciel CAO ; une somme de contrôle incorrecte signifie que la ligne a été modifiée ou tronquée pendant le transfert"
+    },
+    "header_field_order": {
+      "fail": "Ligne {line} : le bloc d'en-tête n'est pas conforme - {problem}",
+      "suggestion": "Renseignez chaque champ d'en-tête exigé par le super-groupe, dans l'ordre fixé par la norme, l'identifiant étant présent même si la valeur est vide",
+      "missing": "champs manquants : {fields}",
+      "missing_block": "l'enregistrement ne comporte aucun bloc d'en-tête",
+      "order": "les champs ne sont pas dans l'ordre fixé par la norme",
+      "unknown": "champs inconnus : {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Ligne {line} : l'enregistrement comporte à la fois un bloc de géométrie et un bloc d'entretoises, qui ne peuvent pas figurer sur une même ligne",
+      "suggestion": "Scindez la forme en un enregistrement portant la géométrie et un enregistrement portant les positions des entretoises"
+    },
+    "ascii_only": {
+      "fail": "Ligne {line} : l'enregistrement contient des caractères hors ASCII ({characters})",
+      "suggestion": "Remplacez les caractères accentués dans les champs texte libres ; ABS est un format ASCII et tout autre octet casse la somme de contrôle"
+    },
+    "record_within_length_budget": {
+      "fail": "Ligne {line} : l'enregistrement fait {length} caractères, au-delà du budget de la norme de {budget} par forme pliée",
+      "suggestion": "Scindez la forme, ou sortez les données internes au projet du bloc privé"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Ligne {line} : les branches {legs} n'ont pas d'angle de pliage",
+      "suggestion": "Faites suivre chaque branche de son angle, et terminez une barre qui finit droite par un w0 explicite pour que la machine distingue « pas de pliage » de « angle non indiqué »"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Ligne {line} : les branches {legs} ont un rayon inférieur ou égal à la moitié du diamètre du rouleau de cintrage ({limit} mm)",
+      "suggestion": "Augmentez le rayon au-delà de la moitié du diamètre du rouleau indiqué dans l'en-tête, ou indiquez un rouleau plus grand"
+    },
+    "developed_length_matches_header": {
+      "fail": "Ligne {line} : la géométrie se développe à {developed} mm, alors que l'en-tête indique {stated} mm, soit un écart de {gap} mm",
+      "suggestion": "Corrigez les longueurs des branches ou le total de l'en-tête ; la machine suit la géométrie, donc le planning imprimé et la barre coupée divergeraient"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Ligne {line} : le treillis a des coordonnées de barres négatives ({coordinates})",
+      "suggestion": "Déplacez l'origine du treillis pour que le plus petit x et le plus petit y soient nuls"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

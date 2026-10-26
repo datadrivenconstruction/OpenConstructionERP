@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "{line}. sor: a rekord ellenőrzőösszeg-blokkja {declared} értéket tartalmaz, ami nem egyezik a rekord karaktereivel",
+      "suggestion": "Exportálja újra a fájlt a CAD-rendszerből; az ellenőrzőösszeg eltérése azt jelenti, hogy a sort átvitel közben módosították vagy csonkolták"
+    },
+    "header_field_order": {
+      "fail": "{line}. sor: a fejléc blokkja nem megfelelő - {problem}",
+      "suggestion": "Írja be a szupercsoport által megkövetelt összes fejlécmezőt a szabvány által rögzített sorrendben, az azonosító akkor is szerepeljen, ha az érték üres",
+      "missing": "hiányzó mezők: {fields}",
+      "missing_block": "a rekord nem tartalmaz fejléc blokkot",
+      "order": "a mezők nincsenek a szabvány által rögzített sorrendben",
+      "unknown": "ismeretlen mezők: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "{line}. sor: a rekord geometriai és távtartó blokkot is tartalmaz, amelyek nem szerepelhetnek ugyanazon a soron",
+      "suggestion": "Bontsa az alakot két rekordra: az egyik a geometriát, a másik a távtartók helyzetét tartalmazza"
+    },
+    "ascii_only": {
+      "fail": "{line}. sor: a rekord ASCII-n kívüli karaktereket tartalmaz ({characters})",
+      "suggestion": "Cserélje le a szabad szöveges mezők ékezetes karaktereit; az ABS ASCII formátum, és bármely más bájt megtöri az ellenőrzőösszeget"
+    },
+    "record_within_length_budget": {
+      "fail": "{line}. sor: a rekord {length} karakter hosszú, meghaladja a szabvány szerinti {budget} karakteres keretet hajlított alakonként",
+      "suggestion": "Bontsa fel az alakot, vagy vigye ki a projekten belüli adatokat a privát blokkból"
+    },
+    "geometry_angle_terminated": {
+      "fail": "{line}. sor: a(z) {legs} szárnak nincs hajlítási szöge",
+      "suggestion": "Adja meg minden szár után a szögét, a egyenesen végződő rudat pedig explicit w0 értékkel zárja le, hogy a gép meg tudja különböztetni a „nincs hajlítás” és a „szög nincs megadva” eseteket"
+    },
+    "bend_radius_over_roller": {
+      "fail": "{line}. sor: a(z) {legs} szárak sugara kisebb vagy egyenlő a hajlítóhenger átmérőjének felénél ({limit} mm)",
+      "suggestion": "Emelje a sugarat a fejlécben megadott hengerátmérő fele fölé, vagy adjon meg nagyobb hengert"
+    },
+    "developed_length_matches_header": {
+      "fail": "{line}. sor: a geometria {developed} mm-re fejlődik ki, a fejléc viszont {stated} mm-t ír, a különbség {gap} mm",
+      "suggestion": "Javítsa a szárhosszakat vagy a fejléc összesítőjét; a gép a geometriát követi, ezért a kinyomtatott lista és a levágott rúd eltérne egymástól"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "{line}. sor: a hálónak negatív rúdkoordinátái vannak ({coordinates})",
+      "suggestion": "Mozgassa a háló kezdőpontját úgy, hogy a legkisebb x és a legkisebb y nulla legyen"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

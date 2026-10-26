@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Dòng {line}: khối tổng kiểm tra của bản ghi ghi {declared}, không khớp với các ký tự của bản ghi",
+      "suggestion": "Xuất lại tệp từ hệ thống CAD; tổng kiểm tra không khớp nghĩa là dòng đã bị sửa đổi hoặc cắt cụt khi truyền"
+    },
+    "header_field_order": {
+      "fail": "Dòng {line}: khối tiêu đề không đúng quy định - {problem}",
+      "suggestion": "Điền mọi trường tiêu đề mà nhóm cấp trên yêu cầu, theo thứ tự tiêu chuẩn quy định, và giữ trường định danh ngay cả khi giá trị để trống",
+      "missing": "thiếu các trường: {fields}",
+      "missing_block": "bản ghi không có khối tiêu đề",
+      "order": "các trường không theo thứ tự tiêu chuẩn quy định",
+      "unknown": "các trường không xác định: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Dòng {line}: bản ghi có cả khối hình học và khối thanh chèn, hai khối này không thể nằm trên cùng một dòng",
+      "suggestion": "Tách hình dạng thành một bản ghi chứa hình học và một bản ghi chứa vị trí các thanh chèn"
+    },
+    "ascii_only": {
+      "fail": "Dòng {line}: bản ghi chứa ký tự ngoài ASCII ({characters})",
+      "suggestion": "Thay các ký tự có dấu trong trường văn bản tự do; ABS là định dạng ASCII, mọi byte khác sẽ làm hỏng tổng kiểm tra"
+    },
+    "record_within_length_budget": {
+      "fail": "Dòng {line}: bản ghi dài {length} ký tự, vượt giới hạn {budget} của tiêu chuẩn cho mỗi hình uốn",
+      "suggestion": "Tách hình dạng, hoặc chuyển dữ liệu nội bộ của dự án ra khỏi khối riêng tư"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Dòng {line}: các cạnh {legs} không có góc uốn",
+      "suggestion": "Ghi góc sau mỗi cạnh, và kết thúc thanh thẳng bằng w0 tường minh để máy phân biệt được \"không uốn\" với \"chưa ghi góc\""
+    },
+    "bend_radius_over_roller": {
+      "fail": "Dòng {line}: các cạnh {legs} có bán kính nhỏ hơn hoặc bằng một nửa đường kính con lăn uốn ({limit} mm)",
+      "suggestion": "Tăng bán kính lên trên một nửa đường kính con lăn ghi trong tiêu đề, hoặc ghi một con lăn lớn hơn"
+    },
+    "developed_length_matches_header": {
+      "fail": "Dòng {line}: hình học khai triển thành {developed} mm, nhưng tiêu đề ghi {stated} mm, chênh lệch {gap} mm",
+      "suggestion": "Sửa chiều dài các cạnh hoặc tổng trong tiêu đề; máy chạy theo hình học nên bảng in và thanh đã cắt sẽ không khớp nhau"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Dòng {line}: lưới có tọa độ thanh âm ({coordinates})",
+      "suggestion": "Dịch chuyển gốc lưới sao cho x nhỏ nhất và y nhỏ nhất đều bằng không"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

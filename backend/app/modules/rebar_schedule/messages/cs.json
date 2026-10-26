@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Řádek {line}: blok kontrolního součtu záznamu uvádí {declared}, což neodpovídá znakům záznamu",
+      "suggestion": "Soubor znovu exportujte z CAD systému; nesouhlasný kontrolní součet znamená, že řádek byl při přenosu změněn nebo zkrácen"
+    },
+    "header_field_order": {
+      "fail": "Řádek {line}: blok hlavičky neodpovídá normě - {problem}",
+      "suggestion": "Vyplňte každé pole hlavičky, které nadskupina vyžaduje, v pořadí daném normou, s identifikátorem i tehdy, když je hodnota prázdná",
+      "missing": "chybějící pole: {fields}",
+      "missing_block": "záznam neobsahuje blok hlavičky",
+      "order": "pole nejsou v pořadí, které stanoví norma",
+      "unknown": "neznámá pole: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Řádek {line}: záznam obsahuje blok geometrie i blok distanční podložky, které nemohou být na jednom řádku společně",
+      "suggestion": "Rozdělte tvar na jeden záznam s geometrií a jeden se polohami distančních podložek"
+    },
+    "ascii_only": {
+      "fail": "Řádek {line}: záznam obsahuje znaky mimo ASCII ({characters})",
+      "suggestion": "Nahraďte znaky s diakritikou ve volných textových polích; ABS je formát ASCII a každý jiný bajt rozbije kontrolní součet"
+    },
+    "record_within_length_budget": {
+      "fail": "Řádek {line}: záznam má {length} znaků, což překračuje limit normy {budget} na jeden ohýbaný tvar",
+      "suggestion": "Rozdělte tvar, nebo přesuňte data interní pro projekt mimo soukromý blok"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Řádek {line}: ramena {legs} nemají úhel ohybu",
+      "suggestion": "Za každé rameno uveďte jeho úhel a prut, který končí přímo, ukončete výslovným w0, aby stroj rozeznal „bez ohybu“ od „úhel neuveden“"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Řádek {line}: ramena {legs} mají poloměr menší nebo roven polovině průměru ohýbacího válce ({limit} mm)",
+      "suggestion": "Zvyšte poloměr nad polovinu průměru válce uvedeného v hlavičce, nebo uveďte větší válec"
+    },
+    "developed_length_matches_header": {
+      "fail": "Řádek {line}: geometrie se rozvine na {developed} mm, ale hlavička uvádí {stated} mm, rozdíl {gap} mm",
+      "suggestion": "Opravte délky ramen nebo celkový součet v hlavičce; stroj se řídí geometrií, takže vytištěný výkaz a odříznutý prut by se lišily"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Řádek {line}: síť má záporné souřadnice prutů ({coordinates})",
+      "suggestion": "Posuňte počátek sítě tak, aby nejmenší x i nejmenší y byly nulové"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

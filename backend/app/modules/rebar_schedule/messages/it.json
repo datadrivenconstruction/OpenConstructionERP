@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Riga {line}: il blocco di controllo del record indica {declared}, che non corrisponde ai caratteri del record",
+      "suggestion": "Esportate di nuovo il file dal sistema CAD; un checksum non corrispondente significa che la riga è stata alterata o troncata durante il trasferimento"
+    },
+    "header_field_order": {
+      "fail": "Riga {line}: il blocco di intestazione non è conforme - {problem}",
+      "suggestion": "Compilate ogni campo di intestazione richiesto dal supergruppo, nell'ordine fissato dalla norma, con l'identificatore presente anche se il valore è vuoto",
+      "missing": "campi mancanti: {fields}",
+      "missing_block": "il record non contiene un blocco di intestazione",
+      "order": "i campi non sono nell'ordine fissato dalla norma",
+      "unknown": "campi sconosciuti: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Riga {line}: il record contiene sia un blocco di geometria sia un blocco di distanziatori, che non possono comparire sulla stessa riga",
+      "suggestion": "Suddividete la forma in un record con la geometria e uno con le posizioni dei distanziatori"
+    },
+    "ascii_only": {
+      "fail": "Riga {line}: il record contiene caratteri fuori dall'ASCII ({characters})",
+      "suggestion": "Sostituite i caratteri accentati nei campi di testo libero; ABS è un formato ASCII e qualsiasi altro byte rompe il checksum"
+    },
+    "record_within_length_budget": {
+      "fail": "Riga {line}: il record è lungo {length} caratteri, oltre il limite della norma di {budget} per forma piegata",
+      "suggestion": "Suddividete la forma, o spostate i dati interni al progetto fuori dal blocco privato"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Riga {line}: i lati {legs} non hanno un angolo di piegatura",
+      "suggestion": "Indicate l'angolo dopo ogni lato e chiudete una barra che termina dritta con un w0 esplicito, così la macchina distingue «nessuna piegatura» da «angolo non indicato»"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Riga {line}: i lati {legs} hanno un raggio pari o inferiore alla metà del diametro del rullo di piegatura ({limit} mm)",
+      "suggestion": "Portate il raggio oltre la metà del diametro del rullo indicato nell'intestazione, oppure indicate un rullo più grande"
+    },
+    "developed_length_matches_header": {
+      "fail": "Riga {line}: la geometria si sviluppa a {developed} mm, ma l'intestazione dichiara {stated} mm, con una differenza di {gap} mm",
+      "suggestion": "Correggete le lunghezze dei lati o il totale nell'intestazione; la macchina segue la geometria, quindi la distinta stampata e la barra tagliata non coinciderebbero"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Riga {line}: la maglia ha coordinate negative delle barre ({coordinates})",
+      "suggestion": "Spostate l'origine della maglia in modo che la x minima e la y minima siano zero"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

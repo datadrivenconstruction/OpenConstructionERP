@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Baris {line}: blok checksum rekaman menyatakan {declared}, yang tidak sesuai dengan karakter rekaman",
+      "suggestion": "Ekspor ulang berkas dari sistem CAD; checksum yang tidak cocok berarti baris diubah atau terpotong selama pengiriman"
+    },
+    "header_field_order": {
+      "fail": "Baris {line}: blok header tidak sesuai - {problem}",
+      "suggestion": "Tulis setiap field header yang diminta super-group, sesuai urutan yang ditetapkan standar, dengan identifier tetap ada meskipun nilainya kosong",
+      "missing": "field yang hilang: {fields}",
+      "missing_block": "rekaman tidak memiliki blok header",
+      "order": "field tidak berada dalam urutan yang ditetapkan standar",
+      "unknown": "field tidak dikenal: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Baris {line}: rekaman memuat blok geometri dan blok spacer, yang tidak boleh muncul bersamaan dalam satu baris",
+      "suggestion": "Pisahkan bentuk menjadi satu rekaman berisi geometri dan satu rekaman berisi posisi spacer"
+    },
+    "ascii_only": {
+      "fail": "Baris {line}: rekaman memuat karakter di luar ASCII ({characters})",
+      "suggestion": "Ganti karakter beraksen pada field teks bebas; ABS adalah format ASCII dan byte lain akan merusak checksum"
+    },
+    "record_within_length_budget": {
+      "fail": "Baris {line}: rekaman sepanjang {length} karakter, melebihi batas standar {budget} per bentuk tekukan",
+      "suggestion": "Pisahkan bentuk, atau pindahkan data internal proyek dari blok privat"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Baris {line}: kaki {legs} tidak memiliki sudut tekukan",
+      "suggestion": "Cantumkan sudut setelah setiap kaki, dan akhiri batang yang berujung lurus dengan w0 eksplisit agar mesin dapat membedakan 'tanpa tekukan' dan 'sudut tidak dinyatakan'"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Baris {line}: kaki {legs} memiliki radius yang kurang dari atau sama dengan setengah diameter roller tekuk ({limit} mm)",
+      "suggestion": "Naikkan radius melebihi setengah diameter roller yang tercantum di header, atau nyatakan roller yang lebih besar"
+    },
+    "developed_length_matches_header": {
+      "fail": "Baris {line}: geometri berkembang menjadi {developed} mm, sedangkan header menyatakan {stated} mm, selisih {gap} mm",
+      "suggestion": "Perbaiki panjang kaki atau total di header; mesin mengikuti geometri, sehingga jadwal cetak dan batang yang dipotong akan berbeda"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Baris {line}: mesh memiliki koordinat batang negatif ({coordinates})",
+      "suggestion": "Pindahkan titik asal mesh sehingga x terkecil dan y terkecil bernilai nol"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

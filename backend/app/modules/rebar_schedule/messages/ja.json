@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "{line} 行目: レコードのチェックサムブロックは {declared} を示していますが、レコードの文字と一致しません",
+      "suggestion": "CAD システムからファイルを再出力してください。チェックサムが一致しない場合、転送中に行が変更されたか切り詰められています"
+    },
+    "header_field_order": {
+      "fail": "{line} 行目: ヘッダーブロックが規格に適合していません - {problem}",
+      "suggestion": "スーパーグループが要求するすべてのヘッダー項目を、規格で定められた順序で記入してください。値が空でも識別子は残してください",
+      "missing": "不足している項目: {fields}",
+      "missing_block": "レコードにヘッダーブロックがありません",
+      "order": "項目が規格で定められた順序になっていません",
+      "unknown": "不明な項目: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "{line} 行目: レコードに形状ブロックとスペーサーブロックが両方含まれていますが、同じ行に併記することはできません",
+      "suggestion": "形状を、形状を持つレコードとスペーサー位置を持つレコードの 2 つに分けてください"
+    },
+    "ascii_only": {
+      "fail": "{line} 行目: レコードに ASCII 以外の文字が含まれています ({characters})",
+      "suggestion": "自由記述欄のアクセント付き文字を置き換えてください。ABS は ASCII 形式であり、他のバイトがあるとチェックサムが壊れます"
+    },
+    "record_within_length_budget": {
+      "fail": "{line} 行目: レコードが {length} 文字で、曲げ形状 1 つあたりの規格上限 {budget} を超えています",
+      "suggestion": "形状を分割するか、プロジェクト固有のデータをプライベートブロックから外に移してください"
+    },
+    "geometry_angle_terminated": {
+      "fail": "{line} 行目: 辺 {legs} に曲げ角度がありません",
+      "suggestion": "各辺の後に角度を記載し、直線で終わる鉄筋は明示的な w0 で閉じてください。そうすることで機械が「曲げなし」と「角度未指定」を区別できます"
+    },
+    "bend_radius_over_roller": {
+      "fail": "{line} 行目: 辺 {legs} の半径が曲げローラー直径の半分 ({limit} mm) 以下です",
+      "suggestion": "半径をヘッダーに記載されたローラー直径の半分より大きくするか、より大きいローラーを指定してください"
+    },
+    "developed_length_matches_header": {
+      "fail": "{line} 行目: 形状の展開長は {developed} mm ですが、ヘッダーには {stated} mm と記載されており、差は {gap} mm です",
+      "suggestion": "辺の長さまたはヘッダーの合計を修正してください。機械は形状に従って加工するため、印刷された加工表と切断された鉄筋が食い違います"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "{line} 行目: 鉄筋メッシュに負の座標があります ({coordinates})",
+      "suggestion": "メッシュの原点を移動し、x と y の最小値がどちらも 0 になるようにしてください"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

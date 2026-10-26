@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "第 {line} 行：记录的校验和块显示为 {declared}，与记录字符不匹配",
+      "suggestion": "请从 CAD 系统重新导出文件；校验和不匹配说明该行在传输中被改动或截断"
+    },
+    "header_field_order": {
+      "fail": "第 {line} 行：表头块不符合规范 - {problem}",
+      "suggestion": "按规范规定的顺序填写超级组要求的每个表头字段，即使值为空也要保留标识符",
+      "missing": "缺少字段：{fields}",
+      "missing_block": "记录中没有表头块",
+      "order": "字段顺序不符合规范规定",
+      "unknown": "未知字段：{fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "第 {line} 行：记录同时包含几何块和垫块块，二者不能出现在同一行",
+      "suggestion": "将形状拆分为一条包含几何信息的记录和一条包含垫块位置的记录"
+    },
+    "ascii_only": {
+      "fail": "第 {line} 行：记录包含 ASCII 以外的字符（{characters}）",
+      "suggestion": "替换自由文本字段中的带重音字符；ABS 是 ASCII 格式，任何其他字节都会破坏校验和"
+    },
+    "record_within_length_budget": {
+      "fail": "第 {line} 行：记录长 {length} 个字符，超出规范规定的每个弯折形状 {budget} 个字符的上限",
+      "suggestion": "拆分形状，或将项目内部数据移出私有块"
+    },
+    "geometry_angle_terminated": {
+      "fail": "第 {line} 行：边 {legs} 没有弯折角度",
+      "suggestion": "在每条边后标注其角度；直线结束的钢筋应以明确的 w0 结束，使机器能区分“无弯折”与“未给出角度”"
+    },
+    "bend_radius_over_roller": {
+      "fail": "第 {line} 行：边 {legs} 的半径小于或等于弯曲辊直径的一半（{limit} mm）",
+      "suggestion": "将半径增大到表头中给出的辊直径一半以上，或指定更大的辊"
+    },
+    "developed_length_matches_header": {
+      "fail": "第 {line} 行：几何展开长度为 {developed} mm，但表头标注为 {stated} mm，相差 {gap} mm",
+      "suggestion": "修正边长或表头总长；机器按几何加工，因此打印的清单与切割的钢筋会不一致"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "第 {line} 行：钢筋网片存在负的钢筋坐标（{coordinates}）",
+      "suggestion": "移动网片原点，使最小的 x 和最小的 y 都为零"
+    }
+  },
+  "common": {
+    "ok": "确定"
+  }
+}

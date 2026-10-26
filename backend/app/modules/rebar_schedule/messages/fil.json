@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Linya {line}: ipinapakita ng checksum block ng record ang {declared}, na hindi tugma sa mga karakter ng record",
+      "suggestion": "I-export muli ang file mula sa CAD system; ang hindi pagtugma ng checksum ay nangangahulugang nabago o naputol ang linya habang inililipat"
+    },
+    "header_field_order": {
+      "fail": "Linya {line}: hindi sumusunod sa pamantayan ang header block - {problem}",
+      "suggestion": "Isulat ang bawat header field na hinihingi ng super-group, ayon sa pagkakasunod na itinakda ng pamantayan, at nakalagay ang identifier kahit walang laman ang halaga",
+      "missing": "kulang na field: {fields}",
+      "missing_block": "walang header block ang record",
+      "order": "hindi nasa pagkakasunod na itinakda ng pamantayan ang mga field",
+      "unknown": "hindi kilalang field: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Linya {line}: may geometry block at spacer block ang record, na hindi maaaring magkasama sa iisang linya",
+      "suggestion": "Hatiin ang hugis sa dalawang record: isa para sa geometry at isa para sa posisyon ng mga spacer"
+    },
+    "ascii_only": {
+      "fail": "Linya {line}: may mga karakter sa labas ng ASCII ang record ({characters})",
+      "suggestion": "Palitan ang mga may tuldok o accent na karakter sa mga free-text field; ang ABS ay format na ASCII lamang, at anumang ibang byte ay sisira sa checksum"
+    },
+    "record_within_length_budget": {
+      "fail": "Linya {line}: ang record ay {length} karakter, lampas sa budget ng pamantayan na {budget} bawat baluktot na hugis",
+      "suggestion": "Hatiin ang hugis, o ilipat ang datos na panloob sa proyekto sa labas ng pribadong block"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Linya {line}: walang anggulo ng baluktot ang mga binti {legs}",
+      "suggestion": "Sundan ang bawat binti ng anggulo nito, at tapusin ang baras na tuwid ang dulo gamit ang tahasang w0 para malaman ng makina ang pagkakaiba ng 'walang baluktot' at 'hindi tinukoy ang anggulo'"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Linya {line}: ang mga binti {legs} ay may radius na mas maliit o katumbas ng kalahati ng diameter ng bending roller ({limit} mm)",
+      "suggestion": "Itaas ang radius nang lampas sa kalahati ng diameter ng roller na nakasaad sa header, o tukuyin ang mas malaking roller"
+    },
+    "developed_length_matches_header": {
+      "fail": "Linya {line}: ang geometry ay lumalabas na {developed} mm, ngunit nakasaad sa header na {stated} mm, may pagkakaiba na {gap} mm",
+      "suggestion": "Itama ang haba ng mga binti o ang kabuuan sa header; sinusunod ng makina ang geometry, kaya magkakaiba ang na-print na iskedyul at ang pinutol na baras"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Linya {line}: may negatibong coordinate ng baras ang mesh ({coordinates})",
+      "suggestion": "Ilipat ang origin ng mesh para maging zero ang pinakamaliit na x at pinakamaliit na y"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

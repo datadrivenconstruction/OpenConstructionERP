@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Satır {line}: kaydın sağlama toplamı bloğu {declared} değerini gösteriyor, bu da kaydın karakterleriyle eşleşmiyor",
+      "suggestion": "Dosyayı CAD sisteminden yeniden dışa aktarın; eşleşmeyen sağlama toplamı, satırın aktarım sırasında değiştirildiği veya kesildiği anlamına gelir"
+    },
+    "header_field_order": {
+      "fail": "Satır {line}: başlık bloğu standarda uygun değil - {problem}",
+      "suggestion": "Üst grubun istediği her başlık alanını standardın belirlediği sırayla yazın; değer boş olsa bile tanımlayıcı bulunsun",
+      "missing": "eksik alanlar: {fields}",
+      "missing_block": "kayıtta başlık bloğu yok",
+      "order": "alanlar standardın belirlediği sırada değil",
+      "unknown": "bilinmeyen alanlar: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Satır {line}: kayıt hem geometri bloğu hem de ara parça bloğu içeriyor; bunlar aynı satırda bulunamaz",
+      "suggestion": "Şekli, geometriyi taşıyan bir kayda ve ara parça konumlarını taşıyan başka bir kayda bölün"
+    },
+    "ascii_only": {
+      "fail": "Satır {line}: kayıt ASCII dışı karakterler içeriyor ({characters})",
+      "suggestion": "Serbest metin alanlarındaki aksanlı karakterleri değiştirin; ABS bir ASCII biçimidir ve başka her bayt sağlama toplamını bozar"
+    },
+    "record_within_length_budget": {
+      "fail": "Satır {line}: kayıt {length} karakter, standardın bükülmüş şekil başına belirlediği {budget} sınırını aşıyor",
+      "suggestion": "Şekli bölün ya da projeye özgü verileri özel bloğun dışına taşıyın"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Satır {line}: {legs} kollarının büküm açısı yok",
+      "suggestion": "Her kolun ardına açısını yazın ve düz biten çubuğu açık bir w0 ile kapatın; böylece makine \"bükümsüz\" ile \"açı belirtilmemiş\" durumunu ayırt edebilir"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Satır {line}: {legs} kollarının yarıçapı, büküm silindirinin çapının yarısına eşit veya ondan küçük ({limit} mm)",
+      "suggestion": "Yarıçapı başlıkta verilen silindir çapının yarısının üzerine çıkarın ya da daha büyük bir silindir belirtin"
+    },
+    "developed_length_matches_header": {
+      "fail": "Satır {line}: geometri {developed} mm'ye açılıyor, ancak başlık {stated} mm belirtiyor; fark {gap} mm",
+      "suggestion": "Kol uzunluklarını ya da başlıktaki toplamı düzeltin; makine geometriyi izler, bu yüzden basılı liste ile kesilen çubuk birbirinden farklı olur"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Satır {line}: ağda negatif çubuk koordinatları var ({coordinates})",
+      "suggestion": "Ağın başlangıç noktasını, en küçük x ve en küçük y sıfır olacak şekilde kaydırın"
+    }
+  },
+  "common": {
+    "ok": "Tamam"
+  }
+}

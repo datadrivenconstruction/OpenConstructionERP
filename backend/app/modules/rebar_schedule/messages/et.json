@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Rida {line}: kirje kontrollsumma plokk ütleb {declared}, mis ei vasta kirje märkidele",
+      "suggestion": "Ekspordige fail CAD-süsteemist uuesti; kontrollsumma mittevastavus tähendab, et rida muudeti või kärbiti edastamisel"
+    },
+    "header_field_order": {
+      "fail": "Rida {line}: päisplokk ei vasta nõuetele - {problem}",
+      "suggestion": "Kirjutage kõik päisevälja, mida ülerühm nõuab, standardis määratud järjekorras, identifikaator olemas ka siis, kui väärtus on tühi",
+      "missing": "puuduvad väljad: {fields}",
+      "missing_block": "kirjes puudub päisplokk",
+      "order": "väljad ei ole standardis määratud järjekorras",
+      "unknown": "tundmatud väljad: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Rida {line}: kirjes on nii geomeetriaplokk kui ka vahetükiplokk, mis ei saa samal real esineda",
+      "suggestion": "Jagage kuju kaheks kirjeks: üks geomeetriaga ja teine vahetükkide asukohtadega"
+    },
+    "ascii_only": {
+      "fail": "Rida {line}: kirjes on ASCII-st väljapoole jäävaid märke ({characters})",
+      "suggestion": "Asendage vabade tekstiväljade täpitähed; ABS on ASCII-formaat ja iga muu bait rikub kontrollsumma"
+    },
+    "record_within_length_budget": {
+      "fail": "Rida {line}: kirje on {length} märki pikk, ületades standardi lubatud {budget} painutatud kuju kohta",
+      "suggestion": "Jagage kuju või viige projektisisesed andmed privaatplokist välja"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Rida {line}: harudel {legs} puudub painutusnurk",
+      "suggestion": "Märkige iga haru järele selle nurk ja lõpetage sirgelt lõppev varras selge w0-ga, et masin eristaks „painutust pole“ ja „nurka pole märgitud“"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Rida {line}: harudel {legs} on raadius, mis on väiksem või võrdne painutusrulli poole läbimõõduga ({limit} mm)",
+      "suggestion": "Suurendage raadiust päises toodud rulli läbimõõdu poolest suuremaks või märkige suurem rull"
+    },
+    "developed_length_matches_header": {
+      "fail": "Rida {line}: geomeetria arendub {developed} mm-ks, kuid päis ütleb {stated} mm, vahe {gap} mm",
+      "suggestion": "Parandage harude pikkused või päise kogusumma; masin järgib geomeetriat, seega trükitud nimekiri ja lõigatud varras erineksid"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Rida {line}: võrgus on negatiivsed vardade koordinaadid ({coordinates})",
+      "suggestion": "Nihutage võrgu lähtepunkti nii, et väikseim x ja väikseim y oleksid nullid"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

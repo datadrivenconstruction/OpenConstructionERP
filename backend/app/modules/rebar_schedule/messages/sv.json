@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Rad {line}: postens kontrollsummeblock anger {declared}, vilket inte stämmer med postens tecken",
+      "suggestion": "Exportera filen på nytt från CAD-systemet; en kontrollsumma som inte stämmer betyder att raden ändrats eller kapats under överföringen"
+    },
+    "header_field_order": {
+      "fail": "Rad {line}: huvudblocket följer inte standarden - {problem}",
+      "suggestion": "Skriv varje huvudfält som supergruppen kräver, i den ordning standarden anger, med identifieraren närvarande även när värdet är tomt",
+      "missing": "saknade fält: {fields}",
+      "missing_block": "posten saknar huvudblock",
+      "order": "fälten står inte i den ordning standarden anger",
+      "unknown": "okända fält: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Rad {line}: posten innehåller både ett geometriblock och ett distansblock, som inte kan finnas på samma rad",
+      "suggestion": "Dela upp formen i en post med geometrin och en post med distansernas lägen"
+    },
+    "ascii_only": {
+      "fail": "Rad {line}: posten innehåller tecken utanför ASCII ({characters})",
+      "suggestion": "Ersätt tecken med accenter i fria textfält; ABS är ett ASCII-format och varje annan byte bryter kontrollsumman"
+    },
+    "record_within_length_budget": {
+      "fail": "Rad {line}: posten är {length} tecken lång, över standardens budget på {budget} per böjd form",
+      "suggestion": "Dela upp formen, eller flytta projektinterna data från det privata blocket"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Rad {line}: benen {legs} har ingen böjvinkel",
+      "suggestion": "Ange vinkeln efter varje ben, och avsluta en stång som slutar rakt med ett explicit w0 så att maskinen kan skilja \"ingen böj\" från \"vinkel ej angiven\""
+    },
+    "bend_radius_over_roller": {
+      "fail": "Rad {line}: benen {legs} har en radie som är mindre än eller lika med hälften av böjrullens diameter ({limit} mm)",
+      "suggestion": "Öka radien över hälften av rulldiametern som anges i huvudet, eller ange en större rulle"
+    },
+    "developed_length_matches_header": {
+      "fail": "Rad {line}: geometrin utvecklas till {developed} mm, men huvudet anger {stated} mm, en skillnad på {gap} mm",
+      "suggestion": "Rätta benlängderna eller totalen i huvudet; maskinen följer geometrin, så den utskrivna listan och den kapade stången skulle skilja sig åt"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Rad {line}: nätet har negativa stångkoordinater ({coordinates})",
+      "suggestion": "Flytta nätets origo så att minsta x och minsta y blir noll"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

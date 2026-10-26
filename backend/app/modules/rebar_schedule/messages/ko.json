@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "{line}행: 레코드의 체크섬 블록은 {declared}을(를) 나타내지만 레코드의 문자와 일치하지 않습니다",
+      "suggestion": "CAD 시스템에서 파일을 다시 내보내세요. 체크섬이 맞지 않으면 전송 중에 해당 행이 변경되었거나 잘린 것입니다"
+    },
+    "header_field_order": {
+      "fail": "{line}행: 헤더 블록이 규격에 맞지 않습니다 - {problem}",
+      "suggestion": "슈퍼그룹이 요구하는 모든 헤더 필드를 규격이 정한 순서대로 작성하고, 값이 비어 있어도 식별자는 넣으세요",
+      "missing": "누락된 필드: {fields}",
+      "missing_block": "레코드에 헤더 블록이 없습니다",
+      "order": "필드가 규격이 정한 순서가 아닙니다",
+      "unknown": "알 수 없는 필드: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "{line}행: 레코드에 형상 블록과 스페이서 블록이 함께 있는데, 두 블록은 같은 행에 올 수 없습니다",
+      "suggestion": "형상을 형상 정보를 담은 레코드 하나와 스페이서 위치를 담은 레코드 하나로 나누세요"
+    },
+    "ascii_only": {
+      "fail": "{line}행: 레코드에 ASCII 범위를 벗어난 문자가 있습니다 ({characters})",
+      "suggestion": "자유 텍스트 필드의 악센트 문자를 바꾸세요. ABS는 ASCII 형식이므로 다른 바이트는 체크섬을 깨뜨립니다"
+    },
+    "record_within_length_budget": {
+      "fail": "{line}행: 레코드 길이가 {length}자로, 굽힘 형상당 규격 한도 {budget}자를 넘습니다",
+      "suggestion": "형상을 나누거나, 프로젝트 내부 데이터를 비공개 블록 밖으로 옮기세요"
+    },
+    "geometry_angle_terminated": {
+      "fail": "{line}행: 변 {legs}에 굽힘 각도가 없습니다",
+      "suggestion": "각 변 뒤에 각도를 적고, 직선으로 끝나는 철근은 명시적인 w0로 닫으세요. 그래야 기계가 '굽힘 없음'과 '각도 미지정'을 구분할 수 있습니다"
+    },
+    "bend_radius_over_roller": {
+      "fail": "{line}행: 변 {legs}의 반경이 굽힘 롤러 지름의 절반({limit} mm) 이하입니다",
+      "suggestion": "반경을 헤더에 적힌 롤러 지름의 절반보다 크게 하거나, 더 큰 롤러를 지정하세요"
+    },
+    "developed_length_matches_header": {
+      "fail": "{line}행: 형상을 펼치면 {developed} mm인데 헤더에는 {stated} mm로 적혀 있으며, 차이는 {gap} mm입니다",
+      "suggestion": "변의 길이 또는 헤더의 합계를 고치세요. 기계는 형상을 따르므로 인쇄된 일정표와 절단된 철근이 서로 달라집니다"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "{line}행: 메시에 음수 철근 좌표가 있습니다 ({coordinates})",
+      "suggestion": "메시 원점을 옮겨 가장 작은 x와 가장 작은 y가 모두 0이 되도록 하세요"
+    }
+  },
+  "common": {
+    "ok": "확인"
+  }
+}

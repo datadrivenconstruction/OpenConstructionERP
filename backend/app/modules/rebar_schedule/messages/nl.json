@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Regel {line}: het controlesomblok van de record geeft {declared} aan, wat niet overeenkomt met de tekens van de record",
+      "suggestion": "Exporteer het bestand opnieuw vanuit het CAD-systeem; een niet-kloppende controlesom betekent dat de regel tijdens het transport is gewijzigd of afgekapt"
+    },
+    "header_field_order": {
+      "fail": "Regel {line}: het kopblok voldoet niet - {problem}",
+      "suggestion": "Vul elk kopveld in dat de supergroep vereist, in de volgorde die de norm voorschrijft, met het identificatieveld aanwezig ook als de waarde leeg is",
+      "missing": "ontbrekende velden: {fields}",
+      "missing_block": "de record bevat geen kopblok",
+      "order": "de velden staan niet in de volgorde die de norm voorschrijft",
+      "unknown": "onbekende velden: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Regel {line}: de record bevat zowel een geometrieblok als een afstandhouderblok, die niet op dezelfde regel kunnen staan",
+      "suggestion": "Splits de vorm in één record met de geometrie en één record met de posities van de afstandhouders"
+    },
+    "ascii_only": {
+      "fail": "Regel {line}: de record bevat tekens buiten ASCII ({characters})",
+      "suggestion": "Vervang tekens met accenten in vrije tekstvelden; ABS is een ASCII-formaat en elk ander byte breekt de controlesom"
+    },
+    "record_within_length_budget": {
+      "fail": "Regel {line}: de record is {length} tekens lang, boven het budget van de norm van {budget} per gebogen vorm",
+      "suggestion": "Splits de vorm, of verplaats projectinterne gegevens uit het privéblok"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Regel {line}: de benen {legs} hebben geen buighoek",
+      "suggestion": "Geef na elk been de hoek op, en sluit een staaf die recht eindigt af met een expliciete w0, zodat een machine «geen buiging» kan onderscheiden van «hoek niet opgegeven»"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Regel {line}: de benen {legs} hebben een straal die kleiner is dan of gelijk is aan de helft van de diameter van de buigrol ({limit} mm)",
+      "suggestion": "Verhoog de straal boven de helft van de rolldiameter die in de kop staat, of geef een grotere rol op"
+    },
+    "developed_length_matches_header": {
+      "fail": "Regel {line}: de geometrie ontwikkelt zich tot {developed} mm, maar de kop vermeldt {stated} mm, een verschil van {gap} mm",
+      "suggestion": "Corrigeer de beenlengtes of het totaal in de kop; de machine volgt de geometrie, dus de afgedrukte staat en de gesneden staaf zouden verschillen"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Regel {line}: het wapeningsnet heeft negatieve staafcoördinaten ({coordinates})",
+      "suggestion": "Verschuif de oorsprong van het net zodat de kleinste x en de kleinste y nul zijn"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

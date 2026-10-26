@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Redak {line}: blok kontrolnog zbroja zapisa navodi {declared}, što ne odgovara znakovima zapisa",
+      "suggestion": "Ponovno izvezite datoteku iz CAD sustava; neslaganje kontrolnog zbroja znači da je redak promijenjen ili skraćen u prijenosu"
+    },
+    "header_field_order": {
+      "fail": "Redak {line}: blok zaglavlja nije u skladu s normom - {problem}",
+      "suggestion": "Upišite svako polje zaglavlja koje nadskupina traži, redoslijedom koji norma određuje, s identifikatorom prisutnim i kad je vrijednost prazna",
+      "missing": "nedostajuća polja: {fields}",
+      "missing_block": "zapis ne sadrži blok zaglavlja",
+      "order": "polja nisu u redoslijedu koji norma određuje",
+      "unknown": "nepoznata polja: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Redak {line}: zapis sadrži i blok geometrije i blok distancera, a ne mogu biti u istom retku",
+      "suggestion": "Podijelite oblik na jedan zapis s geometrijom i jedan zapis s položajima distancera"
+    },
+    "ascii_only": {
+      "fail": "Redak {line}: zapis sadrži znakove izvan ASCII-ja ({characters})",
+      "suggestion": "Zamijenite znakove s dijakritikom u slobodnim tekstualnim poljima; ABS je ASCII format i svaki drugi bajt razbija kontrolni zbroj"
+    },
+    "record_within_length_budget": {
+      "fail": "Redak {line}: zapis ima {length} znakova, što premašuje normom određenih {budget} po savijenom obliku",
+      "suggestion": "Podijelite oblik ili premjestite interne podatke projekta izvan privatnog bloka"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Redak {line}: krakovi {legs} nemaju kut savijanja",
+      "suggestion": "Navedite kut uz svaki krak, a šipku koja završava ravno zatvorite eksplicitnim w0 kako bi stroj razlikovao „bez savijanja” i „kut nije naveden”"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Redak {line}: krakovi {legs} imaju polumjer manji ili jednak polovini promjera valjka za savijanje ({limit} mm)",
+      "suggestion": "Povećajte polumjer iznad polovine promjera valjka navedenog u zaglavlju ili navedite veći valjak"
+    },
+    "developed_length_matches_header": {
+      "fail": "Redak {line}: geometrija se razvija na {developed} mm, a zaglavlje navodi {stated} mm, razlika od {gap} mm",
+      "suggestion": "Ispravite duljine krakova ili ukupni zbroj u zaglavlju; stroj slijedi geometriju, pa bi se ispisani popis i izrezana šipka razlikovali"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Redak {line}: mreža ima negativne koordinate šipki ({coordinates})",
+      "suggestion": "Pomaknite ishodište mreže tako da najmanji x i najmanji y budu nula"
+    }
+  },
+  "common": {
+    "ok": "U redu"
+  }
+}

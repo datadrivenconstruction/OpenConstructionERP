@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Linha {line}: o bloco de soma de verificação do registo indica {declared}, que não corresponde aos caracteres do registo",
+      "suggestion": "Exporte novamente o ficheiro a partir do sistema CAD; uma soma de verificação que não corresponde significa que a linha foi alterada ou truncada na transmissão"
+    },
+    "header_field_order": {
+      "fail": "Linha {line}: o bloco de cabeçalho não está conforme - {problem}",
+      "suggestion": "Escreva todos os campos de cabeçalho que o supergrupo exige, na ordem fixada pela norma, com o identificador presente mesmo quando o valor está vazio",
+      "missing": "campos em falta: {fields}",
+      "missing_block": "o registo não tem bloco de cabeçalho",
+      "order": "os campos não estão na ordem fixada pela norma",
+      "unknown": "campos desconhecidos: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Linha {line}: o registo tem um bloco de geometria e um bloco de espaçadores, que não podem surgir na mesma linha",
+      "suggestion": "Divida a forma num registo com a geometria e noutro com as posições dos espaçadores"
+    },
+    "ascii_only": {
+      "fail": "Linha {line}: o registo contém caracteres fora do ASCII ({characters})",
+      "suggestion": "Substitua os caracteres acentuados nos campos de texto livre; o ABS é um formato ASCII e qualquer outro byte quebra a soma de verificação"
+    },
+    "record_within_length_budget": {
+      "fail": "Linha {line}: o registo tem {length} caracteres, acima do limite da norma de {budget} por forma dobrada",
+      "suggestion": "Divida a forma, ou retire os dados internos do projeto do bloco privado"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Linha {line}: as pernas {legs} não têm ângulo de dobragem",
+      "suggestion": "Indique o ângulo a seguir a cada perna, e feche uma barra que termina em reto com um w0 explícito para que a máquina distinga \"sem dobra\" de \"ângulo não indicado\""
+    },
+    "bend_radius_over_roller": {
+      "fail": "Linha {line}: as pernas {legs} têm um raio igual ou inferior a metade do diâmetro do rolo de dobragem ({limit} mm)",
+      "suggestion": "Aumente o raio acima de metade do diâmetro do rolo indicado no cabeçalho, ou indique um rolo maior"
+    },
+    "developed_length_matches_header": {
+      "fail": "Linha {line}: a geometria desenvolve-se para {developed} mm, mas o cabeçalho indica {stated} mm, uma diferença de {gap} mm",
+      "suggestion": "Corrija os comprimentos das pernas ou o total do cabeçalho; a máquina segue a geometria, pelo que a lista impressa e a barra cortada não coincidiriam"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Linha {line}: a malha tem coordenadas negativas de barras ({coordinates})",
+      "suggestion": "Mova a origem da malha para que o menor x e o menor y sejam zero"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

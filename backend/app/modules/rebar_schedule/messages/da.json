@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Linje {line}: postens checksum-blok angiver {declared}, hvilket ikke passer til postens tegn",
+      "suggestion": "Eksportér filen igen fra CAD-systemet; en checksum, der ikke passer, betyder at linjen er ændret eller afkortet under overførslen"
+    },
+    "header_field_order": {
+      "fail": "Linje {line}: headerblokken er ikke i overensstemmelse - {problem}",
+      "suggestion": "Skriv alle headerfelter som supergruppen kræver, i den rækkefølge standarden fastlægger, med identifikatoren til stede også når værdien er tom",
+      "missing": "manglende felter: {fields}",
+      "missing_block": "posten indeholder ingen headerblok",
+      "order": "felterne er ikke i den rækkefølge standarden fastlægger",
+      "unknown": "ukendte felter: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Linje {line}: posten indeholder både en geometriblok og en afstandsblok, som ikke kan stå på samme linje",
+      "suggestion": "Del formen op i én post med geometrien og én med afstandsstykkernes positioner"
+    },
+    "ascii_only": {
+      "fail": "Linje {line}: posten indeholder tegn uden for ASCII ({characters})",
+      "suggestion": "Erstat tegn med accenter i frie tekstfelter; ABS er et ASCII-format, og enhver anden byte ødelægger checksummen"
+    },
+    "record_within_length_budget": {
+      "fail": "Linje {line}: posten er {length} tegn, over standardens budget på {budget} pr. bøjet form",
+      "suggestion": "Del formen op, eller flyt projektinterne data ud af den private blok"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Linje {line}: benene {legs} har ingen bøjevinkel",
+      "suggestion": "Angiv vinklen efter hvert ben, og afslut en stang, der ender lige ud, med en eksplicit w0, så en maskine kan skelne mellem »ingen bøjning« og »vinkel ikke angivet«"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Linje {line}: benene {legs} har en radius, der er mindre end eller lig med halvdelen af bøjevalsens diameter ({limit} mm)",
+      "suggestion": "Hæv radius til over halvdelen af valsens diameter, som er angivet i headeren, eller angiv en større valse"
+    },
+    "developed_length_matches_header": {
+      "fail": "Linje {line}: geometrien udfoldes til {developed} mm, men headeren angiver {stated} mm, en forskel på {gap} mm",
+      "suggestion": "Ret benlængderne eller headerens samlede længde; maskinen følger geometrien, så den udskrevne liste og den skårne stang ville afvige"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Linje {line}: nettet har negative stangkoordinater ({coordinates})",
+      "suggestion": "Flyt nettets nulpunkt, så den mindste x- og den mindste y-værdi er nul"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}

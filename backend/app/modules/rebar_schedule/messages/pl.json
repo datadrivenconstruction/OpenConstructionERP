@@ -1,0 +1,47 @@
+{
+  "bvbs_abs": {
+    "checksum_valid": {
+      "fail": "Wiersz {line}: blok sumy kontrolnej rekordu podaje {declared}, co nie zgadza się ze znakami rekordu",
+      "suggestion": "Wyeksportuj plik ponownie z systemu CAD; niezgodna suma kontrolna oznacza, że wiersz został zmieniony lub obcięty podczas przesyłania"
+    },
+    "header_field_order": {
+      "fail": "Wiersz {line}: blok nagłówka jest niezgodny - {problem}",
+      "suggestion": "Wpisz wszystkie pola nagłówka wymagane przez supergrupę, w kolejności ustalonej przez normę, z identyfikatorem obecnym nawet przy pustej wartości",
+      "missing": "brakujące pola: {fields}",
+      "missing_block": "rekord nie zawiera bloku nagłówka",
+      "order": "pola nie są w kolejności ustalonej przez normę",
+      "unknown": "nieznane pola: {fields}"
+    },
+    "geometry_excludes_spacer": {
+      "fail": "Wiersz {line}: rekord zawiera blok geometrii i blok przekładek, które nie mogą występować razem w jednym wierszu",
+      "suggestion": "Podziel kształt na jeden rekord z geometrią i jeden z położeniami przekładek"
+    },
+    "ascii_only": {
+      "fail": "Wiersz {line}: rekord zawiera znaki spoza ASCII ({characters})",
+      "suggestion": "Zamień znaki diakrytyczne w swobodnych polach tekstowych; ABS jest formatem ASCII, a każdy inny bajt psuje sumę kontrolną"
+    },
+    "record_within_length_budget": {
+      "fail": "Wiersz {line}: rekord ma {length} znaków, co przekracza limit normy wynoszący {budget} na jeden gięty kształt",
+      "suggestion": "Podziel kształt albo przenieś dane wewnętrzne projektu poza blok prywatny"
+    },
+    "geometry_angle_terminated": {
+      "fail": "Wiersz {line}: ramiona {legs} nie mają kąta gięcia",
+      "suggestion": "Podaj kąt za każdym ramieniem, a pręt kończący się prosto zamknij jawnym w0, aby maszyna odróżniała „brak gięcia” od „kąt nieokreślony”"
+    },
+    "bend_radius_over_roller": {
+      "fail": "Wiersz {line}: ramiona {legs} mają promień mniejszy lub równy połowie średnicy wałka gnącego ({limit} mm)",
+      "suggestion": "Zwiększ promień powyżej połowy średnicy wałka podanej w nagłówku albo podaj większy wałek"
+    },
+    "developed_length_matches_header": {
+      "fail": "Wiersz {line}: geometria po rozwinięciu wynosi {developed} mm, a nagłówek podaje {stated} mm, różnica {gap} mm",
+      "suggestion": "Popraw długości ramion lub sumę w nagłówku; maszyna wykonuje geometrię, więc wydrukowany wykaz i przecięty pręt będą się różnić"
+    },
+    "mesh_coordinates_non_negative": {
+      "fail": "Wiersz {line}: siatka ma ujemne współrzędne prętów ({coordinates})",
+      "suggestion": "Przesuń początek siatki tak, aby najmniejsze x i najmniejsze y wynosiły zero"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  }
+}
