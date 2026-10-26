@@ -80,6 +80,7 @@ def _bill() -> tuple[SimpleNamespace, SimpleNamespace]:
     project_id = uuid.uuid4()
     flat = SimpleNamespace(name="Tower A", project_id=project_id, positions=[section_row, position])
     structured = SimpleNamespace(
+        id=uuid.uuid4(),
         name="Tower A",
         project_id=project_id,
         sections=[
@@ -93,6 +94,7 @@ def _bill() -> tuple[SimpleNamespace, SimpleNamespace]:
         ],
         positions=[],
         markups=[],
+        metadata={},
         direct_cost=Decimal("2312.50"),
         net_total=Decimal("2312.50"),
         grand_total=Decimal("2312.50"),
@@ -112,6 +114,7 @@ def _service() -> Any:
 
 @pytest.fixture
 def no_owner_check(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.modules.boq import drawing_refs
     from app.modules.projects import repository as projects_repository
 
     project = SimpleNamespace(name="Riverside", currency="EUR", classification_standard="din276", region="DACH")
@@ -120,6 +123,7 @@ def no_owner_check(monkeypatch: pytest.MonkeyPatch) -> None:
         def __init__(self, _session: Any) -> None:
             self.get_by_id = AsyncMock(return_value=project)
 
+    monkeypatch.setattr(drawing_refs, "drawing_refs_for_boq", AsyncMock(return_value={}))
     monkeypatch.setattr(router, "_verify_boq_owner", AsyncMock(return_value=None))
     monkeypatch.setattr(projects_repository, "ProjectRepository", _Projects)
 
@@ -162,7 +166,7 @@ async def test_the_workbook_is_written_off_the_loop(monkeypatch: pytest.MonkeyPa
     seen: list[int] = []
     monkeypatch.setattr(router, "neutralise_formula", _recording(seen, router.neutralise_formula))
 
-    body = await _call(router.export_boq_excel)
+    body = await _call(router.export_boq_excel, embed_markups=None)
 
     assert body[:2] == b"PK"
     values = [cell for row in load_workbook(io.BytesIO(body)).active.iter_rows(values_only=True) for cell in row]
