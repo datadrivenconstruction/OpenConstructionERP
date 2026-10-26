@@ -690,7 +690,9 @@ class ContractSecurity(Base):
     Covers performance / payment / advance-payment / retention bonds, parent
     company and bank guarantees, and the standard insurance lines. The optional
     ``document_id`` is a plain UUID to the documents module (resolved at the
-    service layer, no ORM ForeignKey).
+    service layer, no ORM ForeignKey). A bond or guarantee row with
+    ``guarantee_id`` set is a projection of the guarantees register: the register
+    writes it and the contract API refuses edits to the projected fields.
     """
 
     __tablename__ = "oe_contracts_security"
@@ -740,6 +742,9 @@ class ContractSecurity(Base):
     # Plain UUID to oe_documents_document (no ORM ForeignKey, resolved at runtime).
     document_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Plain UUID to oe_guarantees_guarantee. When set, the guarantees register is
+    # the source of truth and writes type, amount, dates and status of this row.
+    guarantee_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,

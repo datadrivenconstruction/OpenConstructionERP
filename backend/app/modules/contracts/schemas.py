@@ -1337,6 +1337,7 @@ class ContractSecurityResponse(BaseModel):
     status: str
     document_id: UUID | None = None
     notes: str | None = None
+    guarantee_id: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime

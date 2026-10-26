@@ -38,7 +38,7 @@ Impact vocabulary
 ``strands``
     The column is NOT NULL, so the row cannot even record that the document
     went away. It is left pointing at nothing and no repair short of deleting
-    the row can fix it. Six columns are in this state.
+    the row can fix it. Seven columns are in this state.
 ``unlinks``
     The column is nullable, or the id sits in a JSON array an element can be
     dropped from. The row survives and loses its attachment.
@@ -185,6 +185,7 @@ DOCUMENT_REFERENCES: tuple[DocumentReference, ...] = (
     DocumentReference(
         "engineering_brief", "SpecificationIssue", "oe_engbrief_issue", "document_id", "scalar", "unlinks"
     ),
+    DocumentReference("guarantees", "GuaranteeDocument", "oe_guarantees_document", "document_id", "scalar", "strands"),
     DocumentReference("hse_frame", "HseFrame", "oe_hsef_frame", "plan_document_id", "scalar", "unlinks"),
     DocumentReference("hse_frame", "HseRole", "oe_hsef_role", "appointment_document_id", "scalar", "unlinks"),
     DocumentReference("markups", "Markup", "oe_markups_markup", "document_id", "scalar", "unlinks"),

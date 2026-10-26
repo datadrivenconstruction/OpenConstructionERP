@@ -629,6 +629,29 @@ RELEASE_ROW_EVENTS = frozenset({*CANONICAL_RELEASE_EVENTS, *OTHER_RELEASE_EVENTS
 
 #: Bonds whose surety has to consent before retention is paid back.
 RETAINAGE_BOND_TYPES = ("performance_bond", "payment_bond")
+# Contract security types held in the guarantees register, mapped to its types.
+GUARANTEE_REGISTER_TYPES: dict[str, str] = {
+    "performance_bond": "performance_bond",
+    "payment_bond": "performance_bond",
+    "advance_payment_bond": "advance_payment",
+    "retention_bond": "retention_bond",
+    "parent_company_guarantee": "parent_company",
+    "bank_guarantee": "performance_bond",
+}
+# Fields of a register-managed security row that only the register writes.
+GUARANTEE_PROJECTED_FIELDS = frozenset(
+    {
+        "security_type",
+        "reference",
+        "provider_name",
+        "amount",
+        "currency",
+        "percent_of_contract",
+        "valid_from",
+        "valid_to",
+        "status",
+    }
+)
 
 #: Where the release rule a preview used came from.
 RELEASE_RULE_FROM_SCHEDULE = "retention_schedule"
@@ -4193,6 +4216,7 @@ class ContractsService:
             await self._refuse_going_out_behind_a_later_claim(claim)
             await self._record_retention_basis(claim)
             await self.enforce_claim_rules(claim)
+            await self._require_performance_bond_for_first_claim(claim)
 
         fields: dict[str, Any] = {"status": target_status}
         if claim.status == "draft":
@@ -5899,6 +5923,37 @@ class ContractsService:
         except HTTPException:
             return contract_retention_cap(contract)
 
+    async def _require_performance_bond_for_first_claim(self, claim: ProgressClaim) -> None:
+        """Refuse the first claim while a required performance bond is not issued (FIDIC 14.6, 4.2)."""
+        earlier = await self.claim_repo.prior_claims(claim.contract_id, before_claim_id=claim.id)
+        if earlier:
+            return
+        try:
+            from app.modules.guarantees.service import first_payment_gate
+        except ImportError:  # pragma: no cover - guarantees module not installed
+            return
+        await first_payment_gate(self.session, claim.contract_id)
+
+    async def _cash_retention_replaced_by_bond(self, contract: Contract) -> bool:
+        """True when a live retention bond on the register stands in for cash retention."""
+        try:
+            from sqlalchemy import func
+
+            from app.modules.guarantees.models import Guarantee
+        except ImportError:  # pragma: no cover - guarantees module not installed
+            return False
+        result = await self.session.execute(
+            sa_select(func.count())
+            .select_from(Guarantee)
+            .where(
+                Guarantee.contract_id == contract.id,
+                Guarantee.guarantee_type == "retention_bond",
+                Guarantee.replaces_cash_retention.is_(True),
+                Guarantee.status.in_(("issued", "extended", "reduced")),
+            )
+        )
+        return int(result.scalar_one() or 0) > 0
+
     async def flat_claim_retention(self, contract: Contract, claim: Any, gross: Decimal) -> Decimal:
         """Retention a flat-rate claim holds on ``gross``: the contract's rate, never past its ceiling.
 
@@ -5922,6 +5977,8 @@ class ContractsService:
         gross, so ``gross`` here is the net and :meth:`retention_basis` adds
         the VAT.
         """
+        if await self._cash_retention_replaced_by_bond(contract):
+            return DEC_ZERO
         rate = Decimal(str(getattr(contract, "retention_percent", 0) or 0))
         basis = await self.retention_basis(contract)
         cap_percent = await self._flat_retention_cap(contract)
@@ -7891,17 +7948,74 @@ class ContractsService:
     # ── Securities (CRUD + coverage) ─────────────────────────────────────
 
     async def create_security(self, data: Any) -> ContractSecurity:
-        await self.get_contract(data.contract_id)
+        contract = await self.get_contract(data.contract_id)
+        register_type = GUARANTEE_REGISTER_TYPES.get(data.security_type)
+        if register_type is not None:
+            # Bonds and bank guarantees live in the guarantees register; the
+            # contract row is the projection it writes, never a second record.
+            return await self._create_security_through_register(contract, data, register_type)
         obj = ContractSecurity(**self._create_kwargs(data))
         return await self.security_repo.create(obj)
+
+    async def _create_security_through_register(
+        self, contract: Contract, data: Any, register_type: str
+    ) -> ContractSecurity:
+        from app.modules.guarantees.schemas import GuaranteeCreate
+        from app.modules.guarantees.service import GuaranteesService
+
+        register_status = {"active": "issued", "received": "issued"}.get(data.status, "draft")
+        guarantee = await GuaranteesService(self.session).create(
+            contract.project_id,
+            GuaranteeCreate(
+                guarantee_type=register_type,
+                reference=data.reference or None,
+                issuer_bank=data.provider_name or "",
+                amount=data.amount,
+                currency=data.currency or contract.currency or "",
+                percent_of_contract=data.percent_of_contract,
+                issue_date=data.valid_from,
+                expiry_date=data.valid_to,
+                contract_id=contract.id,
+                status=register_status,
+                notes=data.notes,
+                metadata=dict(data.metadata or {}),
+            ),
+        )
+        obj = await self.security_repo.get_by_id(guarantee.contract_security_id)
+        if data.document_id is not None:
+            obj.document_id = data.document_id
+            await self.session.flush()
+        return obj
 
     async def update_security(self, security_id: uuid.UUID, data: Any) -> ContractSecurity:
         obj = await self.security_repo.get_by_id(security_id)
         if obj is None:
             raise HTTPException(status_code=404, detail="Contract security not found")
+        if obj.guarantee_id is not None:
+            touched = set(data.model_dump(exclude_unset=True)) & GUARANTEE_PROJECTED_FIELDS
+            if touched:
+                raise HTTPException(
+                    status_code=status.HTTP_409_CONFLICT,
+                    detail={
+                        "error": "managed_by_guarantees_register",
+                        "message": "This bond is managed on the guarantees register; change it there.",
+                        "guarantee_id": str(obj.guarantee_id),
+                        "fields": sorted(touched),
+                    },
+                )
         return await self._apply_update(self.security_repo, obj, data)
 
     async def delete_security(self, security_id: uuid.UUID) -> None:
+        obj = await self.security_repo.get_by_id(security_id)
+        if obj is not None and obj.guarantee_id is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "error": "managed_by_guarantees_register",
+                    "message": "This bond is managed on the guarantees register; release or delete it there.",
+                    "guarantee_id": str(obj.guarantee_id),
+                },
+            )
         await self.security_repo.delete(security_id)
 
     async def security_coverage(self, contract_id: uuid.UUID) -> dict[str, Any]:

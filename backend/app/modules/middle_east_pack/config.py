@@ -104,6 +104,48 @@ PACK_CONFIG: dict[str, Any] = {
             "use_case": "Consultant appointments",
         },
     ],
+    # ── Guarantee defaults ───────────────────────────────────────────────────
+    # Read by app.modules.guarantees.defaults.defaults_for, laid over the FIDIC
+    # 2017 figures per country. GCC practice: unconditional on-demand bank
+    # guarantees from a locally licensed bank. Figures are usual entries, not
+    # law, and were not checked against each published procurement text.
+    "guarantee_defaults": {
+        "AE": {
+            "origin": "FIDIC 2017 with UAE practice",
+            "types": {
+                "bid_bond": {"percent_of_contract": "2", "form_code": "AE-BID-ONDEMAND"},
+                "performance_bond": {
+                    "percent_of_contract": "10",
+                    "defects_period_months": 12,
+                    "form_code": "AE-PB-ONDEMAND",
+                    "note": "Unconditional on-demand form from a bank licensed by the UAE Central Bank.",
+                },
+                "advance_payment": {"percent_of_advance": "100", "form_code": "AE-APG-ONDEMAND"},
+                "retention_bond": {"percent_of_contract": "5", "replaces_cash_retention": True},
+            },
+        },
+        "SA": {
+            "origin": "FIDIC 2017 with Saudi public procurement practice",
+            "types": {
+                "bid_bond": {
+                    "percent_of_contract": "1",
+                    "form_code": "SA-INITIAL-GUARANTEE",
+                    "note": "Initial guarantee under the Government Tenders and Procurement Law (usual range 1 to 2 percent).",
+                },
+                "performance_bond": {
+                    "percent_of_contract": "5",
+                    "defects_period_months": 12,
+                    "form_code": "SA-FINAL-GUARANTEE",
+                    "note": "Final guarantee under the Government Tenders and Procurement Law.",
+                },
+                "advance_payment": {"percent_of_advance": "100", "form_code": "SA-APG"},
+            },
+        },
+        "QA": {"origin": "FIDIC 2017 with GCC practice", "types": {"performance_bond": {"percent_of_contract": "10"}}},
+        "KW": {"origin": "FIDIC 2017 with GCC practice", "types": {"performance_bond": {"percent_of_contract": "10"}}},
+        "BH": {"origin": "FIDIC 2017 with GCC practice", "types": {"performance_bond": {"percent_of_contract": "10"}}},
+        "OM": {"origin": "FIDIC 2017 with GCC practice", "types": {"performance_bond": {"percent_of_contract": "10"}}},
+    },
     # ── Progress billing ─────────────────────────────────────────────────────
     # Read through ``app.core.regional_packs.resolve_progress_billing``. Keyed
     # per country, as in dach_pack: this pack claims eight countries and an

@@ -24834,6 +24834,7 @@
         "copilot_service.py",
         "cost_risk_engine.py",
         "ddc_runner.py",
+        "drawing_refs.py",
         "dxf_native.py",
         "embedding.py",
         "epd_materials.py",
@@ -58145,7 +58146,7 @@
         {
           "class_name": "ContractSecurity",
           "tablename": "oe_contracts_security",
-          "docstring": "Financial security held against a contract.\n\nCovers performance / payment / advance-payment / retention bonds, parent\ncompany and bank guarantees, and the standard insurance lines. The optional\n``document_id`` is a plain UUID to the documents module (resolved at the\nservice layer, no ORM ForeignKey).",
+          "docstring": "Financial security held against a contract.\n\nCovers performance / payment / advance-payment / retention bonds, parent\ncompany and bank guarantees, and the standard insurance lines. The optional\n``document_id`` is a plain UUID to the documents module (resolved at the\nservice layer, no ORM ForeignKey). A bond or guarantee row with\n``guarantee_id`` set is a projection of the guarantees register: the register\nwrites it and the contract API refuses edits to the projected fields.",
           "columns": [
             {
               "name": "contract_id",
@@ -58219,6 +58220,12 @@
               "name": "notes",
               "annotation": "Mapped[str | None]",
               "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "guarantee_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
               "nullable": true
             },
             {
@@ -63204,6 +63211,11 @@
               "default": "None"
             },
             {
+              "name": "guarantee_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             },
@@ -64719,6 +64731,7 @@
         "contacts",
         "costmodel",
         "finance",
+        "guarantees",
         "i18n_foundation",
         "price_index",
         "progress",
@@ -133385,6 +133398,1552 @@
       "schemas": [],
       "import_dependencies": [
         "users"
+      ]
+    },
+    {
+      "module_id": "guarantees",
+      "module_label": "Guarantees and Bonds",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "defaults.py",
+        "demo.py",
+        "events.py",
+        "jobs.py",
+        "logic.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_guarantees",
+        "version": "1.0.0",
+        "display_name": "Guarantees and Bonds",
+        "description": "Register of bank guarantees and bonds: bid bonds, performance bonds, advance payment and retention guarantees, warranty bonds and parent company guarantees, given to clients or received from subcontractors. Tracks issuer, beneficiary, amount, expiry, auto-extension and claim period through a status lifecycle with a full audit history, reduces the advance guarantee as interim payments recover the advance, gates the first payment on the performance bond, alerts 60, 30 and 14 days before expiry and shows company exposure by bank, by type and against bank credit lines.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_projects"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "Guarantee",
+          "tablename": "oe_guarantees_guarantee",
+          "docstring": "One bank guarantee or bond.\n\n``amount`` is the current face value; ``original_amount`` is what the bank first\nissued, so a reduced advance guarantee still shows where it started.\n``advance_amount`` and ``advance_recovered`` only mean something on an advance\npayment guarantee: the register reduces ``amount`` to the advance still\noutstanding as interim payments recover it.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "reference",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "guarantee_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "direction",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "issuer_bank",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "bank_reference",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "beneficiary",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "applicant",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "original_amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "percent_of_contract",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "contract_value",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "issue_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "SafeDate",
+              "nullable": true
+            },
+            {
+              "name": "expiry_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "SafeDate",
+              "nullable": true
+            },
+            {
+              "name": "auto_extend",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "extension_months",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "claim_period_days",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "defects_period_months",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "advance_amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "advance_recovered",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "advance_recovery_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "replaces_cash_retention",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "commission_rate_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "form_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "contract_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "contract_security_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "subcontractor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "tender_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "bid_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "facility_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "last_alert_band",
+              "annotation": "Mapped[int | None]",
+              "sql_type": "Integer",
+              "nullable": true
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "events",
+              "type": "one-to-many",
+              "annotation": "Mapped[list['GuaranteeEvent']]",
+              "back_populates": "guarantee"
+            },
+            {
+              "name": "documents",
+              "type": "one-to-many",
+              "annotation": "Mapped[list['GuaranteeDocument']]",
+              "back_populates": "guarantee"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeEvent",
+          "tablename": "oe_guarantees_event",
+          "docstring": "One audit entry: who changed what on a guarantee, with the values before and after.",
+          "columns": [
+            {
+              "name": "guarantee_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_guarantees_guarantee.id"
+            },
+            {
+              "name": "action",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "from_status",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "to_status",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "amount_before",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "amount_after",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "changes",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "source_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "actor_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": [
+            {
+              "name": "guarantee",
+              "type": "many-to-one",
+              "annotation": "Mapped[Guarantee]",
+              "target_model": "Guarantee",
+              "back_populates": "events"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeDocument",
+          "tablename": "oe_guarantees_document",
+          "docstring": "A guarantee PDF, amendment or release letter kept in the documents module.",
+          "columns": [
+            {
+              "name": "guarantee_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_guarantees_guarantee.id"
+            },
+            {
+              "name": "document_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "title",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "guarantee",
+              "type": "many-to-one",
+              "annotation": "Mapped[Guarantee]",
+              "target_model": "Guarantee",
+              "back_populates": "documents"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeFacility",
+          "tablename": "oe_guarantees_facility",
+          "docstring": "A bank credit line for guarantees, at company level.",
+          "columns": [
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "bank_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "limit_amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "expiry_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "SafeDate",
+              "nullable": true
+            },
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/exposure",
+          "handler": "company_exposure",
+          "response_model": "ExposureResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/defaults",
+          "handler": "guarantee_defaults"
+        },
+        {
+          "method": "GET",
+          "path": "/facilities",
+          "handler": "list_facilities",
+          "response_model": "list[FacilityResponse]"
+        },
+        {
+          "method": "POST",
+          "path": "/facilities",
+          "handler": "create_facility",
+          "response_model": "FacilityResponse",
+          "request_schema": "FacilityCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/facilities/{facility_id}",
+          "handler": "update_facility",
+          "response_model": "FacilityResponse",
+          "request_schema": "FacilityUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/facilities/{facility_id}",
+          "handler": "delete_facility"
+        },
+        {
+          "method": "POST",
+          "path": "/alerts/run",
+          "handler": "run_alerts",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/portfolio",
+          "handler": "portfolio",
+          "response_model": "list[SummaryResponse]"
+        },
+        {
+          "method": "GET",
+          "path": "/subcontractors/{subcontractor_id}/guarantees",
+          "handler": "subcontractor_guarantees",
+          "response_model": "list[GuaranteeResponse]"
+        },
+        {
+          "method": "GET",
+          "path": "/contracts/{contract_id}/payment-gate",
+          "handler": "payment_gate",
+          "response_model": "PaymentGateResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/guarantees",
+          "handler": "list_guarantees",
+          "response_model": "list[GuaranteeResponse]",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/guarantees",
+          "handler": "create_guarantee",
+          "response_model": "GuaranteeResponse",
+          "request_schema": "GuaranteeCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/exposure",
+          "handler": "project_exposure",
+          "response_model": "ExposureResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/summary",
+          "handler": "project_summary",
+          "response_model": "SummaryResponse"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/validation",
+          "handler": "project_validation"
+        },
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}",
+          "handler": "get_guarantee",
+          "response_model": "GuaranteeDetailResponse"
+        },
+        {
+          "method": "PATCH",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}",
+          "handler": "update_guarantee",
+          "response_model": "GuaranteeResponse",
+          "request_schema": "GuaranteeUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}",
+          "handler": "delete_guarantee"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}/transition",
+          "handler": "transition_guarantee",
+          "response_model": "GuaranteeResponse",
+          "request_schema": "TransitionRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}/advance-recovery",
+          "handler": "advance_recovery",
+          "response_model": "GuaranteeResponse",
+          "request_schema": "AdvanceRecoveryRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}/commission",
+          "handler": "post_commission",
+          "request_schema": "date"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}/documents",
+          "handler": "link_document",
+          "response_model": "GuaranteeDocumentResponse",
+          "request_schema": "DocumentLinkRequest"
+        },
+        {
+          "method": "DELETE",
+          "path": "/projects/{project_id}/guarantees/{guarantee_id}/documents/{document_id}",
+          "handler": "unlink_document"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "GuaranteeBase",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "guarantee_type",
+              "type": "GuaranteeTypeLiteral"
+            },
+            {
+              "name": "direction",
+              "type": "DirectionLiteral",
+              "default": "'given'"
+            },
+            {
+              "name": "issuer_bank",
+              "type": "str"
+            },
+            {
+              "name": "bank_reference",
+              "type": "str | None"
+            },
+            {
+              "name": "beneficiary",
+              "type": "str"
+            },
+            {
+              "name": "applicant",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "percent_of_contract",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "contract_value",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "issue_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "expiry_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "auto_extend",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "extension_months",
+              "type": "int | None"
+            },
+            {
+              "name": "claim_period_days",
+              "type": "int | None"
+            },
+            {
+              "name": "defects_period_months",
+              "type": "int | None"
+            },
+            {
+              "name": "advance_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "advance_recovery_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "replaces_cash_retention",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "commission_rate_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "form_code",
+              "type": "str | None"
+            },
+            {
+              "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "tender_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bid_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "facility_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeCreate",
+          "bases": [
+            "GuaranteeBase"
+          ],
+          "docstring": "Create a guarantee; it starts in ``draft`` unless ``status`` says otherwise.",
+          "fields": [
+            {
+              "name": "reference",
+              "type": "str | None"
+            },
+            {
+              "name": "status",
+              "type": "Literal['draft', 'requested', 'issued']",
+              "default": "'draft'"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Edit the descriptive fields. Status moves go through the transition endpoint.",
+          "fields": [
+            {
+              "name": "reference",
+              "type": "str | None"
+            },
+            {
+              "name": "issuer_bank",
+              "type": "str | None"
+            },
+            {
+              "name": "bank_reference",
+              "type": "str | None"
+            },
+            {
+              "name": "beneficiary",
+              "type": "str | None"
+            },
+            {
+              "name": "applicant",
+              "type": "str | None"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
+            },
+            {
+              "name": "percent_of_contract",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "contract_value",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "issue_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "expiry_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "auto_extend",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "extension_months",
+              "type": "int | None"
+            },
+            {
+              "name": "claim_period_days",
+              "type": "int | None"
+            },
+            {
+              "name": "defects_period_months",
+              "type": "int | None"
+            },
+            {
+              "name": "advance_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "advance_recovery_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "replaces_cash_retention",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "commission_rate_pct",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "form_code",
+              "type": "str | None"
+            },
+            {
+              "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "tender_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bid_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "facility_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "TransitionRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Move a guarantee to a new status, optionally with a new expiry or amount.",
+          "fields": [
+            {
+              "name": "status",
+              "type": "StatusLiteral"
+            },
+            {
+              "name": "new_expiry_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "new_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "AdvanceRecoveryRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Advance recovered through one interim payment (reduces the advance guarantee).",
+          "fields": [
+            {
+              "name": "recovered_amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "source",
+              "type": "str | None"
+            },
+            {
+              "name": "source_id",
+              "type": "str | None"
+            },
+            {
+              "name": "note",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "DocumentLinkRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "document_id",
+              "type": "UUID"
+            },
+            {
+              "name": "kind",
+              "type": "DocumentKindLiteral",
+              "default": "'original'"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeDocumentResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "document_id",
+              "type": "UUID"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "title",
+              "type": "str"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeEventResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "action",
+              "type": "str"
+            },
+            {
+              "name": "from_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "to_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "amount_before",
+              "type": "MoneyOpt",
+              "default": "None"
+            },
+            {
+              "name": "amount_after",
+              "type": "MoneyOpt",
+              "default": "None"
+            },
+            {
+              "name": "changes",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "source",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "source_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "note",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "actor_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "reference",
+              "type": "str"
+            },
+            {
+              "name": "guarantee_type",
+              "type": "str"
+            },
+            {
+              "name": "direction",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "issuer_bank",
+              "type": "str"
+            },
+            {
+              "name": "bank_reference",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "beneficiary",
+              "type": "str"
+            },
+            {
+              "name": "applicant",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Money"
+            },
+            {
+              "name": "original_amount",
+              "type": "Money"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "percent_of_contract",
+              "type": "MoneyOpt",
+              "default": "None"
+            },
+            {
+              "name": "contract_value",
+              "type": "MoneyOpt",
+              "default": "None"
+            },
+            {
+              "name": "issue_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "expiry_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "auto_extend",
+              "type": "bool"
+            },
+            {
+              "name": "extension_months",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "claim_period_days",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "defects_period_months",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "advance_amount",
+              "type": "MoneyOpt",
+              "default": "None"
+            },
+            {
+              "name": "advance_recovered",
+              "type": "Money"
+            },
+            {
+              "name": "advance_recovery_pct",
+              "type": "MoneyOpt",
+              "default": "None"
+            },
+            {
+              "name": "replaces_cash_retention",
+              "type": "bool"
+            },
+            {
+              "name": "commission_rate_pct",
+              "type": "MoneyOpt",
+              "default": "None"
+            },
+            {
+              "name": "form_code",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "contract_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contract_security_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "subcontractor_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "tender_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "bid_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "facility_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "metadata",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "documents",
+              "type": "list[GuaranteeDocumentResponse]"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            },
+            {
+              "name": "days_to_expiry",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "alert_band",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "outstanding_advance",
+              "type": "MoneyOpt",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "GuaranteeDetailResponse",
+          "bases": [
+            "GuaranteeResponse"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "events",
+              "type": "list[GuaranteeEventResponse]"
+            },
+            {
+              "name": "findings",
+              "type": "list[dict[str, Any]]"
+            }
+          ]
+        },
+        {
+          "class_name": "FacilityCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "bank_name",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "limit_amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "expiry_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "FacilityUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "bank_name",
+              "type": "str | None"
+            },
+            {
+              "name": "limit_amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "expiry_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "FacilityResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "bank_name",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "limit_amount",
+              "type": "Money"
+            },
+            {
+              "name": "expiry_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "AmountByKey",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Money"
+            },
+            {
+              "name": "bank",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "guarantee_type",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CreditLineUse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "facility_id",
+              "type": "str"
+            },
+            {
+              "name": "bank_name",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "limit_amount",
+              "type": "Money"
+            },
+            {
+              "name": "used_amount",
+              "type": "Money"
+            },
+            {
+              "name": "available_amount",
+              "type": "Money"
+            },
+            {
+              "name": "utilisation_pct",
+              "type": "MoneyOpt",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ExposureResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "live_count",
+              "type": "int"
+            },
+            {
+              "name": "totals",
+              "type": "list[AmountByKey]"
+            },
+            {
+              "name": "by_bank",
+              "type": "list[AmountByKey]"
+            },
+            {
+              "name": "by_type",
+              "type": "list[AmountByKey]"
+            },
+            {
+              "name": "held",
+              "type": "list[AmountByKey]"
+            },
+            {
+              "name": "credit_lines",
+              "type": "list[CreditLineUse]"
+            },
+            {
+              "name": "expiring",
+              "type": "list[GuaranteeResponse]"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "PaymentGateResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Whether a contract may receive its first interim payment.",
+          "fields": [
+            {
+              "name": "contract_id",
+              "type": "UUID"
+            },
+            {
+              "name": "allowed",
+              "type": "bool"
+            },
+            {
+              "name": "reason",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "performance_bond_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "SummaryResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Compact per-project figures for the dashboard widget and the portfolio view.",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "live_count",
+              "type": "int"
+            },
+            {
+              "name": "expiring_count",
+              "type": "int"
+            },
+            {
+              "name": "expired_count",
+              "type": "int"
+            },
+            {
+              "name": "totals",
+              "type": "list[AmountByKey]"
+            },
+            {
+              "name": "next_expiry",
+              "type": "date | None",
+              "default": "None"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "contracts",
+        "documents",
+        "finance",
+        "notifications",
+        "projects",
+        "tendering"
       ]
     },
     {
@@ -254287,7 +255846,7 @@
           "method": "GET",
           "path": "/vendors/{vendor_id}/price-lists",
           "handler": "list_vendor_price_lists",
-          "response_model": "list[PriceListResponse]",
+          "response_model": "PriceListListResponse",
           "request_schema": "SupplierCatalogsService"
         },
         {
@@ -254307,7 +255866,7 @@
           "method": "GET",
           "path": "/vendors/{vendor_id}/discounts",
           "handler": "list_vendor_discounts",
-          "response_model": "list[DiscountAgreementResponse]",
+          "response_model": "DiscountAgreementListResponse",
           "request_schema": "SupplierCatalogsService"
         },
         {
@@ -254334,7 +255893,7 @@
           "method": "GET",
           "path": "/catalog-items/{item_id}/attachments",
           "handler": "list_item_attachments",
-          "response_model": "list[ItemAttachmentResponse]",
+          "response_model": "ItemAttachmentListResponse",
           "request_schema": "SupplierCatalogsService"
         },
         {
@@ -257439,6 +258998,87 @@
               "default": "None"
             }
           ]
+        },
+        {
+          "class_name": "PriceListListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of a vendor's price lists; ``total`` counts every list of the vendor.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[PriceListResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
+          "class_name": "DiscountAgreementListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of a vendor's discount agreements; ``total`` counts every agreement of the vendor.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[DiscountAgreementResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
+        },
+        {
+          "class_name": "ItemAttachmentListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One page of the attachments the caller may open; ``total`` counts the visible ones.",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[ItemAttachmentResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "limit",
+              "type": "int",
+              "default": "200"
+            }
+          ]
         }
       ],
       "import_dependencies": [
@@ -257785,6 +259425,36 @@
             },
             {
               "name": "linked_boq_position_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "drawing_document_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "drawing_sheet_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "drawing_number",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "drawing_title",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "drawing_revision",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -258193,6 +259863,17 @@
           "path": "/documents/{doc_id}",
           "handler": "delete_document",
           "request_schema": "TakeoffService"
+        },
+        {
+          "method": "GET",
+          "path": "/boq/{boq_id}/drawing-refs/",
+          "handler": "boq_drawing_refs"
+        },
+        {
+          "method": "PUT",
+          "path": "/boq/{boq_id}/positions/{position_id}/drawing-ref/",
+          "handler": "set_position_drawing_ref",
+          "request_schema": "ManualDrawingRefRequest"
         },
         {
           "method": "POST",
@@ -259037,6 +260718,31 @@
             },
             {
               "name": "linked_boq_position_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "drawing_document_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "drawing_sheet_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "drawing_number",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "drawing_title",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "drawing_revision",
               "type": "str | None",
               "default": "None"
             },
@@ -277658,10 +279364,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 210,
+      "ts_files": 214,
       "css_files": 0,
-      "test_files": 112,
-      "total_files": 210
+      "test_files": 113,
+      "total_files": 214
     },
     {
       "name": "buyer-portal",
@@ -278217,6 +279923,13 @@
       "total_files": 4
     },
     {
+      "name": "guarantees",
+      "ts_files": 12,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 12
+    },
+    {
       "name": "help",
       "ts_files": 28,
       "css_files": 0,
@@ -278750,10 +280463,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 42,
+      "ts_files": 44,
       "css_files": 0,
-      "test_files": 15,
-      "total_files": 42
+      "test_files": 16,
+      "total_files": 44
     },
     {
       "name": "setup",
@@ -279355,6 +281068,7 @@
       "contacts",
       "costmodel",
       "finance",
+      "guarantees",
       "i18n_foundation",
       "price_index",
       "progress",
@@ -279782,6 +281496,14 @@
     ],
     "global_presence": [
       "users"
+    ],
+    "guarantees": [
+      "contracts",
+      "documents",
+      "finance",
+      "notifications",
+      "projects",
+      "tendering"
     ],
     "hse_advanced": [
       "projects",
@@ -280574,17 +282296,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 215,
-    "modules_with_manifests": 213,
-    "total_models": 794,
-    "total_columns": 9231,
-    "total_relationships": 240,
-    "total_routes": 4653,
-    "total_schemas": 4139,
-    "total_python_files": 2823,
-    "frontend_features": 210,
-    "frontend_ts_files": 3630,
-    "frontend_backend_mapped": 187
+    "backend_modules": 216,
+    "modules_with_manifests": 214,
+    "total_models": 798,
+    "total_columns": 9295,
+    "total_relationships": 244,
+    "total_routes": 4678,
+    "total_schemas": 4160,
+    "total_python_files": 2838,
+    "frontend_features": 211,
+    "frontend_ts_files": 3648,
+    "frontend_backend_mapped": 188
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -280688,6 +282410,7 @@
     "geo-hub": "geo_hub",
     "global_presence": "global_presence",
     "governance": "project_governance",
+    "guarantees": "guarantees",
     "help": null,
     "hse-advanced": "hse_advanced",
     "hse_frame": "hse_frame",

@@ -301,6 +301,21 @@ const DefectsLiabilityPage = lazy(() =>
     default: m.DefectsLiabilityPage,
   }))
 );
+const GuaranteesPage = lazy(() =>
+  import('@/features/guarantees/GuaranteesPage').then((m) => ({
+    default: m.GuaranteesPage,
+  }))
+);
+const GuaranteeDetailPage = lazy(() =>
+  import('@/features/guarantees/GuaranteeDetailPage').then((m) => ({
+    default: m.GuaranteeDetailPage,
+  }))
+);
+const GuaranteesExposurePage = lazy(() =>
+  import('@/features/guarantees/GuaranteesExposurePage').then((m) => ({
+    default: m.GuaranteesExposurePage,
+  }))
+);
 const MoCPage = lazy(() =>
   import('@/features/moc/MoCPage').then((m) => ({ default: m.MoCPage }))
 );
@@ -1542,6 +1557,10 @@ export default function App() {
         <Route path="/interface-management" element={<P title="Interface Register"><InterfaceManagementPage /></P>} />
         <Route path="/projects/:projectId/defects-liability" element={<P title="Defects Liability"><DefectsLiabilityPage /></P>} />
         <Route path="/defects-liability" element={<P title="Defects Liability"><DefectsLiabilityPage /></P>} />
+        <Route path="/projects/:projectId/guarantees" element={<P title="Guarantees"><GuaranteesPage /></P>} />
+        <Route path="/projects/:projectId/guarantees/:guaranteeId" element={<P title="Guarantee"><GuaranteeDetailPage /></P>} />
+        <Route path="/portfolio/guarantees/register" element={<P title="Guarantees"><GuaranteesPage /></P>} />
+        <Route path="/portfolio/guarantees" element={<P title="Guarantee exposure"><GuaranteesExposurePage /></P>} />
         <Route path="/projects/:projectId/moc" element={<P title="Management of Change"><MoCPage /></P>} />
         <Route path="/moc" element={<P title="Management of Change"><MoCPage /></P>} />
         {/* Construction Control (QA/QC) - acceptance criteria, inspections,

@@ -12285,6 +12285,29 @@ async def _seed_module_data(
     except Exception:
         logger.debug("Site logistics module not loaded, skipping demo deliveries", exc_info=True)
 
+    # ── Guarantees and bonds register ──────────────────────────────────
+    # After contracts and tendering, because the bonds link to the main
+    # contract and the bid bonds to the tender bidders. Shows an advance
+    # guarantee already reduced over three payments, a retention bond that
+    # expires within the month and the losing bid bonds released at award.
+    try:
+        from app.modules.guarantees.demo import seed_demo_guarantees
+
+        guarantee_count = await seed_demo_guarantees(
+            session,
+            project_id=project_id,
+            currency=template.currency,
+            client_name=str((template.project_metadata or {}).get("client") or template.project_name),
+            contractor_name=str((template.project_metadata or {}).get("contractor") or "General contractor"),
+            bidders=[name for name, _email in _firms_list],
+            total_months=template.total_months,
+            created_by=owner_str,
+        )
+        if guarantee_count:
+            results["guarantees"] = guarantee_count
+    except Exception:
+        logger.debug("Guarantees module not loaded, skipping demo guarantees", exc_info=True)
+
     # ── Formwork (catalogue + this project's priced assignments) ────────
     # Nothing seeded the formwork catalogue before, so the system chooser had
     # no systems in it on any demo project - including the one whose own header
