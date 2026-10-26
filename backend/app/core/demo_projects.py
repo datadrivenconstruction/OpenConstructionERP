@@ -14393,6 +14393,23 @@ async def install_demo_project(
         except Exception:
             logger.warning("Demo requisitions not seeded for %s", demo_id, exc_info=True)
 
+    # ── 13b. Last Planner board and subcontractor insurance file ──────────
+    # Savepoints, so a module missing on a slim install drops only its own rows.
+    try:
+        from app.modules.schedule_advanced.demo_lps import seed_lps_demo
+
+        async with session.begin_nested():
+            module_data.update(await seed_lps_demo(session, project.id, owner_id, demo_id))
+    except Exception:
+        logger.warning("Demo Last Planner data not seeded for %s", demo_id, exc_info=True)
+    try:
+        from app.modules.subcontractors.demo_insurance import seed_insurance_demo
+
+        async with session.begin_nested():
+            module_data.update(await seed_insurance_demo(session, demo_id, template.currency))
+    except Exception:
+        logger.warning("Demo insurance certificates not seeded for %s", demo_id, exc_info=True)
+
     # ── 14. Real BIM geometry + downloadable PDF (baked assets, no convert) ─
     # Attach a real BIM model with real geometry and a real plan-set PDF from
     # the committed flagship assets so /bim, /takeoff and /documents are never

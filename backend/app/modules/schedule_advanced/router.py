@@ -78,7 +78,11 @@ from app.modules.schedule_advanced.schemas import (
     LookAheadCreate,
     LookAheadResponse,
     LookAheadUpdate,
+    LpsBoardResponse,
+    LpsConstraintRow,
     LPSDashboardResponse,
+    LpsPpcHistoryResponse,
+    LpsValidationResponse,
     MasterScheduleCreate,
     MasterScheduleResponse,
     MasterScheduleUpdate,
@@ -2821,3 +2825,67 @@ async def raise_eot_claim(
         delay_analysis_id=analysis.id,
         requested_days=analysis.total_entitlement_days,
     )
+
+
+# ── Last Planner board / PPC history / validation ─────────────────────────
+
+
+@router.get("/look-aheads/{la_id}/board", response_model=LpsBoardResponse)
+async def look_ahead_board(
+    la_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    service: ScheduleAdvancedService = Depends(_get_service),
+) -> LpsBoardResponse:
+    """Look-ahead board: schedule activities in the window, by week, with readiness."""
+    from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+    project_id = await _project_id_for_look_ahead(la_id, service)
+    await verify_project_access(project_id, user_id, session)
+    return LpsBoardResponse.model_validate(await LastPlannerService(session).board(la_id))
+
+
+@router.get("/master-schedules/{master_id}/constraints-log", response_model=list[LpsConstraintRow])
+async def master_constraints_log(
+    master_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    service: ScheduleAdvancedService = Depends(_get_service),
+) -> list[LpsConstraintRow]:
+    """Every constraint of the master schedule, open first, with the record that clears it."""
+    from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+    project_id = await _project_id_for_master(master_id, service)
+    await verify_project_access(project_id, user_id, session)
+    return [LpsConstraintRow.model_validate(r) for r in await LastPlannerService(session).constraints_log(master_id)]
+
+
+@router.get("/master-schedules/{master_id}/ppc-history", response_model=LpsPpcHistoryResponse)
+async def master_ppc_history(
+    master_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    service: ScheduleAdvancedService = Depends(_get_service),
+) -> LpsPpcHistoryResponse:
+    """PPC per week (oldest first) and the Pareto of reasons for variance."""
+    from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+    project_id = await _project_id_for_master(master_id, service)
+    await verify_project_access(project_id, user_id, session)
+    return LpsPpcHistoryResponse.model_validate(await LastPlannerService(session).ppc_history(master_id))
+
+
+@router.get("/master-schedules/{master_id}/lps-validation", response_model=LpsValidationResponse)
+async def master_lps_validation(
+    master_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    locale: str = "en",
+    service: ScheduleAdvancedService = Depends(_get_service),
+) -> LpsValidationResponse:
+    """Run the ``last_planner`` validation rules over one master schedule."""
+    from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+    project_id = await _project_id_for_master(master_id, service)
+    await verify_project_access(project_id, user_id, session)
+    return LpsValidationResponse.model_validate(await LastPlannerService(session).validate(master_id, locale=locale))

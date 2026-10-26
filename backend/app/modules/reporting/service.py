@@ -1290,6 +1290,28 @@ class ReportingService:
                 exc_info=True,
             )
 
+        # Last Planner reliability goes into the schedule section of the report.
+        try:
+            from app.modules.dashboard.service import compute_project_lps_ppc  # noqa: PLC0415
+            from app.modules.projects.models import Project  # noqa: PLC0415
+
+            project = await self.session.get(Project, project_id)
+            lps = await compute_project_lps_ppc(self.session, [project]) if project else {"items": []}
+            if lps["items"]:
+                row = lps["items"][0]
+                closed = [w for w in row["weeks"] if w.get("ppc_percent") is not None]
+                lps_block: dict[str, Any] = {}
+                if closed:
+                    lps_block["ppc_last_week"] = f"{closed[-1]['ppc_percent']}%"
+                if row.get("average_ppc") is not None:
+                    lps_block["ppc_average"] = f"{row['average_ppc']}%"
+                if lps.get("pareto"):
+                    lps_block["top_variance_reason"] = lps["pareto"][0]["category"]
+                if lps_block:
+                    snapshot["schedule"] = {**snapshot.get("schedule", {}), **lps_block}
+        except Exception:
+            logger.debug("reporting._build_default_snapshot: LPS data unavailable for %s", project_id, exc_info=True)
+
     # ── KPI Auto-Recalculation ───────────────────────────────────────────
 
     async def auto_recalculate_kpis(self) -> dict:

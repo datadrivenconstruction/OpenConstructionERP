@@ -206,6 +206,11 @@ class Certificate(Base):
     )
     revoked: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # A mandatory certificate that has lapsed blocks payment until renewed or overridden.
+    is_mandatory: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    policy_number: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    coverage_amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    coverage_currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
         JSON,
@@ -677,3 +682,33 @@ async def ocr_extract_certificate_hook(  # pragma: no cover - stub
         Empty dict - real implementation populates issuer / dates / numbers.
     """
     return {}
+
+
+class PaymentComplianceOverride(Base):
+    """A manager's recorded decision to pay despite lapsed mandatory insurance.
+
+    Append-only audit row: who overrode, why, and which lapsed certificates the
+    decision covered. A certificate that lapses after the override is not covered.
+    """
+
+    __tablename__ = "oe_subcontractors_payment_compliance_override"
+
+    payment_application_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_subcontractors_payment_application.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    subcontractor_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    reason: Mapped[str] = mapped_column(Text, nullable=False)
+    covered_reasons: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    overridden_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    overridden_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    def __repr__(self) -> str:
+        return f"<PaymentComplianceOverride pay_app={self.payment_application_id}>"

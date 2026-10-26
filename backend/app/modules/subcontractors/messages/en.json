@@ -67,5 +67,32 @@
         "unknown": "Without it, the payment may be subject to tax withholding."
       }
     }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "The mandatory {document} certificate is not valid (expiry {date}), so payments to this subcontractor are blocked",
+      "suggestion": "Record the renewed certificate, or ask a manager to override the block with a reason"
+    },
+    "certificate_expiring": {
+      "fail": "The {document} certificate expires on {date}, in {days} day(s)",
+      "suggestion": "Request the renewal from the subcontractor before the certificate lapses"
+    },
+    "policy_details_recorded": {
+      "fail": "The mandatory {document} certificate has no policy number or cover amount",
+      "suggestion": "Add the policy number and the insured amount from the certificate"
+    },
+    "cert_types": {
+      "public_liability": "Public liability",
+      "employers_liability": "Employer's liability",
+      "professional_indemnity": "Professional indemnity",
+      "contractors_all_risk": "Contractor's all risk",
+      "workers_compensation": "Workers' compensation",
+      "motor_vehicle": "Motor vehicle",
+      "product_liability": "Product liability",
+      "plant_equipment": "Plant and equipment",
+      "environmental_liability": "Environmental liability",
+      "cyber_liability": "Cyber liability",
+      "insurance": "Insurance"
+    }
   }
 }

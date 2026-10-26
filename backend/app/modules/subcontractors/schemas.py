@@ -388,7 +388,9 @@ class PrequalificationResponse(BaseModel):
 # locales while the stored value stays the same everywhere.
 _CERT_TYPE_PATTERN = (
     r"^(insurance|license|iso|safety|bond|wsl_clearance|wsib_clearance|wcb_clearance|attestation_revenu_quebec"
-    r"|construction_tax_exemption|social_security_clearance|employers_liability_clearance)$"
+    r"|construction_tax_exemption|social_security_clearance|employers_liability_clearance"
+    r"|public_liability|employers_liability|professional_indemnity|contractors_all_risk|workers_compensation"
+    r"|motor_vehicle|product_liability|plant_equipment|environmental_liability|cyber_liability)$"
 )
 
 
@@ -407,6 +409,10 @@ class CertificateCreate(BaseModel):
     valid_until: date | None = None
     document_url: str | None = Field(default=None, max_length=1000)
     notes: str | None = None
+    is_mandatory: bool = False
+    policy_number: str | None = Field(default=None, max_length=120)
+    coverage_amount: Decimal | None = Field(default=None, ge=0)
+    coverage_currency: str | None = Field(default=None, min_length=3, max_length=3)
 
     @field_validator("document_url")
     @classmethod
@@ -445,6 +451,10 @@ class CertificateUpdate(BaseModel):
     document_url: str | None = Field(default=None, max_length=1000)
     revoked: bool | None = None
     notes: str | None = None
+    is_mandatory: bool | None = None
+    policy_number: str | None = Field(default=None, max_length=120)
+    coverage_amount: Decimal | None = Field(default=None, ge=0)
+    coverage_currency: str | None = Field(default=None, min_length=3, max_length=3)
 
     @field_validator("document_url")
     @classmethod
@@ -474,6 +484,10 @@ class CertificateResponse(BaseModel):
     status: str = "valid"
     revoked: bool = False
     notes: str | None = None
+    is_mandatory: bool = False
+    policy_number: str | None = None
+    coverage_amount: Decimal | None = None
+    coverage_currency: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -968,6 +982,10 @@ class PaymentBlockResult(BaseModel):
     blocked: bool
     reasons: list[str] = Field(default_factory=list)
     details: list[ComplianceDetail] = Field(default_factory=list)
+    insurance_status: str | None = Field(
+        default=None,
+        description="compliant / expiring / non_compliant from the insurance register; shown to bid evaluators",
+    )
 
 
 class PaymentReleaseCheck(BaseModel):
@@ -1467,3 +1485,114 @@ class SuggestedClaimLinesResponse(BaseModel):
     retention: Decimal = Decimal("0")
     prior_claims_total: Decimal = Decimal("0")
     net_due: Decimal = Decimal("0")
+
+
+# ── Insurance compliance ────────────────────────────────────────────────
+
+
+class InsuranceCertificateView(BaseModel):
+    """A certificate as the insurance views show it, with its alert bucket."""
+
+    id: str
+    subcontractor_id: str
+    cert_type: str
+    is_mandatory: bool = False
+    valid_until: str | None = None
+    issue_date: str | None = None
+    revoked: bool = False
+    policy_number: str | None = None
+    coverage_amount: str | None = None
+    coverage_currency: str | None = None
+    issued_by: str | None = None
+    bucket: str = Field(description="valid / due_30 / due_14 / due_0 / expired / revoked")
+    days_to_expiry: int | None = None
+
+
+class InsuranceFinding(BaseModel):
+    """One failed insurance rule."""
+
+    rule_id: str
+    severity: str
+    message: str
+    element_ref: str | None = None
+
+
+class InsuranceOverrideView(BaseModel):
+    """A recorded manager override of the insurance payment gate."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    reason: str
+    covered_reasons: list[str] = Field(default_factory=list)
+    overridden_by: str | None = None
+    overridden_at: datetime
+
+
+class SubcontractorInsuranceStatus(BaseModel):
+    """Insurance status of one subcontractor: card, prequalification and gate."""
+
+    subcontractor_id: UUID
+    as_of: date
+    status: str = Field(description="compliant / expiring / non_compliant")
+    payment_blocked: bool
+    reasons: list[str] = Field(default_factory=list)
+    certificates: list[InsuranceCertificateView] = Field(default_factory=list)
+    findings: list[InsuranceFinding] = Field(default_factory=list)
+
+
+class PaymentInsuranceStatus(BaseModel):
+    """Insurance gate verdict for one pay application."""
+
+    payment_application_id: UUID
+    subcontractor_id: UUID
+    blocked: bool
+    reasons: list[str] = Field(default_factory=list)
+    overridden: bool = False
+    override: InsuranceOverrideView | None = None
+    certificates: list[InsuranceCertificateView] = Field(default_factory=list)
+
+
+class InsuranceOverrideRequest(BaseModel):
+    """The reason a manager gives for paying despite lapsed mandatory insurance."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    reason: str = Field(..., min_length=10, max_length=2000)
+
+
+class ProjectInsuranceSubRow(BaseModel):
+    """One subcontractor on the project compliance dashboard."""
+
+    subcontractor_id: UUID
+    name: str
+    status: str
+    payment_blocked: bool
+    reasons: list[str] = Field(default_factory=list)
+    certificates: list[InsuranceCertificateView] = Field(default_factory=list)
+
+
+class ProjectInsurancePaymentRow(BaseModel):
+    """A pay application the insurance gate holds or held."""
+
+    payment_application_id: UUID
+    application_number: str
+    subcontractor_id: UUID
+    status: str
+    net_amount: str
+    currency: str
+    blocked: bool
+    overridden: bool
+    reasons: list[str] = Field(default_factory=list)
+    override: InsuranceOverrideView | None = None
+
+
+class ProjectInsuranceDashboard(BaseModel):
+    """Insurance compliance of every subcontractor on one project."""
+
+    project_id: UUID
+    as_of: date
+    counts: dict[str, int]
+    certificate_buckets: dict[str, int]
+    subcontractors: list[ProjectInsuranceSubRow] = Field(default_factory=list)
+    gated_payments: list[ProjectInsurancePaymentRow] = Field(default_factory=list)

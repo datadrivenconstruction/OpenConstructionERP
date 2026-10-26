@@ -19,3 +19,6 @@ async def on_startup() -> None:
     # And the rollup those checks read is handed to contracts from here,
     # because contracts must not import a module an install may not have.
     register_sub_rollup_context()
+    from app.modules.subcontractors.insurance_rules import register_insurance_rules
+
+    register_insurance_rules()

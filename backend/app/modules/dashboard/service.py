@@ -59,6 +59,8 @@ KNOWN_WIDGETS: frozenset[str] = frozenset(
         "project_quality_ncr",
         "project_compliance_summary",
         "project_budget_burn",
+        "project_lps_ppc",
+        "project_sub_insurance",
     }
 )
 
@@ -1608,6 +1610,68 @@ async def compute_project_budget_burn(
 # ─── Dispatch ───────────────────────────────────────────────────────────────
 
 
+async def compute_project_lps_ppc(
+    session: AsyncSession,
+    projects: list[Project],
+) -> dict[str, Any]:
+    """Last Planner PPC per week (last 12) and top reasons for variance, across the projects.
+
+    Reads ``schedule_advanced``; an install without it drops the widget in
+    :func:`compute_rollup`.
+    """
+    from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+    from app.modules.schedule_advanced.models import MasterSchedule  # noqa: PLC0415
+
+    project_ids = [p.id for p in projects]
+    if not project_ids:
+        return {"weeks": [], "average_ppc": None, "pareto": [], "items": []}
+    masters = (
+        await session.execute(select(MasterSchedule).where(MasterSchedule.project_id.in_(project_ids)))
+    ).scalars()
+    svc = LastPlannerService(session)
+    items: list[dict[str, Any]] = []
+    pareto: dict[str, int] = {}
+    for m in masters:
+        hist = await svc.ppc_history(m.id, limit=12)
+        for row in hist["pareto"]:
+            pareto[row["category"]] = pareto.get(row["category"], 0) + row["count"]
+        items.append(
+            {
+                "project_id": str(m.project_id),
+                "master_schedule_id": str(m.id),
+                "name": m.name,
+                "average_ppc": str(hist["average_ppc"]) if hist["average_ppc"] is not None else None,
+                "weeks": [
+                    {
+                        "week_start_date": w["week_start_date"].isoformat(),
+                        "ppc_percent": str(w["ppc_percent"]) if w["ppc_percent"] is not None else None,
+                    }
+                    for w in hist["weeks"]
+                ],
+            }
+        )
+    top = sorted(pareto.items(), key=lambda kv: (-kv[1], kv[0]))[:5]
+    return {"items": items, "pareto": [{"category": k, "count": v} for k, v in top]}
+
+
+async def compute_project_sub_insurance(
+    session: AsyncSession,
+    projects: list[Project],
+) -> dict[str, Any]:
+    """Subcontractor insurance status counts and gated payments, across the projects."""
+    from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
+
+    svc = InsuranceComplianceService(session)
+    counts = {"compliant": 0, "expiring": 0, "non_compliant": 0}
+    blocked = 0
+    for p in projects:
+        dash = await svc.project_dashboard(p.id)
+        for k, v in dash["counts"].items():
+            counts[k] = counts.get(k, 0) + v
+        blocked += sum(1 for pay in dash["gated_payments"] if pay["blocked"])
+    return {**counts, "blocked_payments": blocked}
+
+
 _COMPUTE_MAP: dict[str, Any] = {
     "boq_summary": compute_boq_summary,
     "validation_score": compute_validation_score,
@@ -1628,6 +1692,8 @@ _COMPUTE_MAP: dict[str, Any] = {
     "project_quality_ncr": compute_project_quality_ncr,
     "project_compliance_summary": compute_project_compliance_summary,
     "project_budget_burn": compute_project_budget_burn,
+    "project_lps_ppc": compute_project_lps_ppc,
+    "project_sub_insurance": compute_project_sub_insurance,
 }
 
 

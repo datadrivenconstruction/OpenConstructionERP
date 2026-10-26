@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Die Zusage von {crew} für die Woche ab {week} betrifft einen Vorgang mit {count} offenen Hindernis(sen)",
+      "suggestion": "Räumen Sie zuerst die Hindernisse aus oder nehmen Sie den Vorgang aus dem Wochenplan"
+    },
+    "week_ppc_recorded": {
+      "fail": "Die Woche ab {week} hatte Zusagen, aber es wurde kein PPC erfasst",
+      "suggestion": "Schließen Sie den Wochenplan ab, damit der PPC berechnet wird"
+    },
+    "missed_commitment_reason": {
+      "fail": "Eine nicht eingehaltene Zusage von {crew} in der Woche ab {week} hat keinen Abweichungsgrund",
+      "suggestion": "Erfassen Sie den Grund, damit er in die Pareto-Analyse eingeht"
+    },
+    "constraint_overdue": {
+      "fail": "Das Hindernis \"{description}\" sollte bis {date} ausgeräumt sein und ist noch offen",
+      "suggestion": "Fragen Sie beim Verantwortlichen nach oder verschieben Sie Zieltermin und betroffene Vorgänge"
+    },
+    "constraint_owner": {
+      "fail": "Das Hindernis \"{description}\" hat keinen Verantwortlichen",
+      "suggestion": "Benennen Sie die Person, die es ausräumt"
+    }
+  }
+}

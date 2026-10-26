@@ -21,3 +21,6 @@ async def on_startup() -> None:
     from app.modules.schedule_advanced.permissions import register_schedule_advanced_permissions
 
     register_schedule_advanced_permissions()
+    from app.modules.schedule_advanced.lps_rules import register_lps_rules
+
+    register_lps_rules()

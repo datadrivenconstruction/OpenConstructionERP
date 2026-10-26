@@ -441,6 +441,22 @@ def _apply_insurance_backstop(
     return replaced
 
 
+def _with_insurance_status(
+    verdict: PaymentBlockResult, certs: Sequence[Certificate], as_at: date | None
+) -> PaymentBlockResult:
+    """Attach the insurance register status so tender evaluators see it next to the award verdict."""
+    from app.modules.subcontractors.insurance import (  # noqa: PLC0415
+        certificate_payload,
+        lapsed_mandatory_reasons,
+        overall_status,
+    )
+
+    ref = as_at or date.today()
+    payloads = [certificate_payload(c, ref) for c in certs]
+    verdict.insurance_status = overall_status(payloads, blocked=bool(lapsed_mandatory_reasons(certs, ref)))
+    return verdict
+
+
 def subcontractor_award_block(
     subcontractor: object,
     *,
@@ -1190,6 +1206,10 @@ class SubcontractorService:
             status=status_value,
             revoked=False,
             notes=data.notes,
+            is_mandatory=data.is_mandatory,
+            policy_number=data.policy_number,
+            coverage_amount=data.coverage_amount,
+            coverage_currency=data.coverage_currency,
         )
         await self.certs.create(entity)
         return entity
@@ -1687,7 +1707,9 @@ class SubcontractorService:
         if sub is None:
             raise HTTPException(status_code=404, detail="Subcontractor not found")
         certs = await self.certs.list_by_subcontractor(subcontractor_id)
-        return subcontractor_award_block(sub, certificates=certs, as_at=as_at or date.today())
+        return _with_insurance_status(
+            subcontractor_award_block(sub, certificates=certs, as_at=as_at or date.today()), certs, as_at
+        )
 
     async def award_eligibility_for_contact(
         self,
@@ -1708,7 +1730,8 @@ class SubcontractorService:
         if sub is None:
             return None
         certs = await self.certs.list_by_subcontractor(sub.id)
-        return sub, subcontractor_award_block(sub, certificates=certs, as_at=as_at or date.today())
+        verdict = subcontractor_award_block(sub, certificates=certs, as_at=as_at or date.today())
+        return sub, _with_insurance_status(verdict, certs, as_at)
 
     async def _assert_subcontractor_awardable(
         self,
@@ -2064,6 +2087,7 @@ class SubcontractorService:
             422 when a named line is not on this pay application, is named
             twice, or is approved above its claim.
         """
+        await self._assert_insurance_ok(payment_id)
         await self._assert_lien_waiver_ok(payment_id)
         entity = await self.payments.get_by_id(payment_id)
         if entity is None:
@@ -2265,6 +2289,7 @@ class SubcontractorService:
         its payable here.
         """
         await self._assert_lien_waiver_ok(payment_id)
+        await self._assert_insurance_ok(payment_id)
         paid = await self._transition_payment(
             payment_id,
             "paid",
@@ -2293,6 +2318,22 @@ class SubcontractorService:
         required = bool(getattr(agreement, "requires_lien_waiver", False))
         waivers = await self.lien_waivers.list_for_payment_app(payment_id) if required else []
         return required, lien_waiver_blocked(payment.net_amount, waivers, required=required)
+
+    async def _assert_insurance_ok(self, payment_id: uuid.UUID) -> None:
+        """Raise 409 while a mandatory insurance certificate has lapsed and no manager override covers it."""
+        from app.modules.subcontractors.insurance import (  # noqa: PLC0415
+            InsuranceComplianceService,
+            lapsed_mandatory_reasons,
+        )
+
+        payment = await self.payments.get_by_id(payment_id)
+        agreement = await self.agreements.get_by_id(payment.agreement_id) if payment is not None else None
+        if agreement is None:
+            return  # the transition itself reports the missing record
+        certs = await self.certs.list_by_subcontractor(agreement.subcontractor_id)
+        # Only a lapse needs the rule set and the override log; the common path stays one query.
+        if lapsed_mandatory_reasons(certs, date.today()):
+            await InsuranceComplianceService(self.session).assert_payment_allowed(payment_id)
 
     async def _assert_lien_waiver_ok(self, payment_id: uuid.UUID) -> None:
         """Raise 409 if the agreement requires a lien waiver that is not on file.

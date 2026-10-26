@@ -209,6 +209,8 @@ class ConstraintCreate(BaseModel):
     owner_user_id: UUID | None = None
     target_clear_date: date | None = None
     status: str = Field(default="open", pattern=_CONSTRAINT_STATUS)
+    linked_type: str | None = Field(default=None, pattern=r"^(rfi|submittal|purchase_order|goods_receipt)$")
+    linked_id: UUID | None = None
 
 
 class ConstraintUpdate(BaseModel):
@@ -224,6 +226,8 @@ class ConstraintUpdate(BaseModel):
     cleared_at: datetime | None = None
     cleared_by: UUID | None = None
     status: str | None = Field(default=None, pattern=_CONSTRAINT_STATUS)
+    linked_type: str | None = Field(default=None, pattern=r"^(rfi|submittal|purchase_order|goods_receipt)$")
+    linked_id: UUID | None = None
 
 
 class ConstraintResponse(BaseModel):
@@ -241,6 +245,9 @@ class ConstraintResponse(BaseModel):
     cleared_at: datetime | None = None
     cleared_by: UUID | None = None
     status: str = "open"
+    linked_type: str | None = None
+    linked_id: UUID | None = None
+    link_resolved_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -309,6 +316,8 @@ class CommitmentCreate(BaseModel):
     status: str = Field(default="planned", pattern=_COMMITMENT_STATUS)
     made_by_user_id: UUID | None = None
     made_at: datetime | None = None
+    subcontractor_id: UUID | None = None
+    target_progress_pct: Decimal | None = Field(default=None, ge=0, le=100)
 
 
 class CommitmentUpdate(BaseModel):
@@ -324,6 +333,8 @@ class CommitmentUpdate(BaseModel):
     status: str | None = Field(default=None, pattern=_COMMITMENT_STATUS)
     actual_qty: Decimal | None = None
     completed_at: datetime | None = None
+    subcontractor_id: UUID | None = None
+    target_progress_pct: Decimal | None = Field(default=None, ge=0, le=100)
 
 
 class CommitmentResponse(BaseModel):
@@ -344,6 +355,8 @@ class CommitmentResponse(BaseModel):
     made_at: datetime | None = None
     completed_at: datetime | None = None
     actual_qty: Decimal | None = None
+    subcontractor_id: UUID | None = None
+    target_progress_pct: Decimal | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -1440,3 +1453,105 @@ class RaiseEotClaimResponse(BaseModel):
     eot_claim_id: UUID
     delay_analysis_id: UUID
     requested_days: int
+
+
+# ── Last Planner board / PPC history / validation ─────────────────────────
+
+
+class LpsConstraintRow(BaseModel):
+    """A constraint as the board and the constraints log show it."""
+
+    id: UUID
+    task_ref: UUID
+    task_name: str = ""
+    constraint_type: str
+    description: str = ""
+    owner_user_id: UUID | None = None
+    target_clear_date: date | None = None
+    status: str
+    cleared_at: datetime | None = None
+    linked_type: str | None = None
+    linked_id: UUID | None = None
+    linked_label: str | None = None
+    linked_status: str | None = None
+    link_resolved_at: datetime | None = None
+
+
+class LpsBoardTask(BaseModel):
+    """One schedule activity on the look-ahead board."""
+
+    task_ref: UUID
+    name: str
+    wbs_code: str = ""
+    start_date: date
+    end_date: date
+    week_start: date
+    progress_pct: Decimal
+    is_ready: bool
+    open_constraints: int
+    committed: bool
+    constraints: list[LpsConstraintRow] = Field(default_factory=list)
+
+
+class LpsBoardResponse(BaseModel):
+    """The look-ahead board: activities pulled from the schedule, by week."""
+
+    look_ahead_id: UUID
+    master_schedule_id: UUID
+    project_id: UUID
+    period_start: date
+    period_end: date
+    weeks: list[date]
+    tasks: list[LpsBoardTask]
+    ready_count: int
+    blocked_count: int
+
+
+class LpsPpcWeek(BaseModel):
+    """PPC of one weekly work plan."""
+
+    week_plan_id: UUID
+    week_start_date: date
+    status: str
+    committed: int
+    completed: int
+    ppc_percent: Decimal | None = None
+
+
+class LpsParetoRow(BaseModel):
+    """One reason for variance on the Pareto chart."""
+
+    category: str
+    count: int
+    percent: Decimal
+    cumulative_percent: Decimal
+
+
+class LpsPpcHistoryResponse(BaseModel):
+    """PPC per week and the Pareto of reasons for variance."""
+
+    master_schedule_id: UUID
+    weeks: list[LpsPpcWeek]
+    average_ppc: Decimal | None = None
+    pareto: list[LpsParetoRow]
+
+
+class LpsValidationResult(BaseModel):
+    """One ``last_planner`` rule result."""
+
+    rule_id: str
+    severity: str
+    passed: bool
+    message: str
+    element_ref: str | None = None
+    suggestion: str | None = None
+
+
+class LpsValidationResponse(BaseModel):
+    """The ``last_planner`` rule set run over one master schedule."""
+
+    master_schedule_id: UUID
+    status: str
+    errors: int
+    warnings: int
+    results: list[LpsValidationResult]

@@ -67,6 +67,8 @@ from app.modules.subcontractors.schemas import (
     ExpiryAlert,
     IncludePaymentApplicationsRequest,
     InsuranceExpiryEntry,
+    InsuranceOverrideRequest,
+    InsuranceOverrideView,
     LienWaiverFormFields,
     LienWaiverResponse,
     MonthlyRatingComputeRequest,
@@ -77,12 +79,14 @@ from app.modules.subcontractors.schemas import (
     PaymentApplicationLineUpdate,
     PaymentApplicationResponse,
     PaymentApplicationUpdate,
+    PaymentInsuranceStatus,
     PaymentReleaseCheck,
     PrequalificationCreate,
     PrequalificationResponse,
     PrequalificationUpdate,
     PrequalRequest,
     PrequalView,
+    ProjectInsuranceDashboard,
     RatingCreate,
     RatingResponse,
     RetentionLedgerEntryResponse,
@@ -93,6 +97,7 @@ from app.modules.subcontractors.schemas import (
     SubcontractorContactUpdate,
     SubcontractorCreate,
     SubcontractorDashboard,
+    SubcontractorInsuranceStatus,
     SubcontractorListResponse,
     SubcontractorResponse,
     SubcontractorUpdate,
@@ -1786,3 +1791,91 @@ async def delete_lien_waiver(
         )
     await svc.lien_waivers.delete(waiver_id)
     await session.commit()
+
+
+# ── Insurance compliance ────────────────────────────────────────────────
+
+
+@router.get(
+    "/subcontractors/{subcontractor_id}/insurance-status",
+    response_model=SubcontractorInsuranceStatus,
+)
+async def subcontractor_insurance_status(
+    subcontractor_id: uuid.UUID,
+    session: SessionDep,
+    _user: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> SubcontractorInsuranceStatus:
+    """Insurance status of one subcontractor (card, bidder prequalification)."""
+    from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
+
+    return SubcontractorInsuranceStatus.model_validate(
+        await InsuranceComplianceService(session).subcontractor_status(subcontractor_id)
+    )
+
+
+@router.get(
+    "/payment-applications/{payment_id}/insurance-check",
+    response_model=PaymentInsuranceStatus,
+)
+async def payment_insurance_check(
+    payment_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> PaymentInsuranceStatus:
+    """Whether lapsed mandatory insurance blocks this pay application."""
+    from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
+
+    await _verify_payment_application_project(payment_id, user_id, session, SubcontractorService(session))
+    return PaymentInsuranceStatus.model_validate(await InsuranceComplianceService(session).payment_status(payment_id))
+
+
+@router.post(
+    "/payment-applications/{payment_id}/insurance-override",
+    response_model=InsuranceOverrideView,
+    status_code=201,
+)
+async def payment_insurance_override(
+    payment_id: uuid.UUID,
+    data: InsuranceOverrideRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.override_insurance")),
+) -> InsuranceOverrideView:
+    """Manager override of the insurance gate, with a recorded reason (audit trail)."""
+    from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
+
+    await _verify_payment_application_project(payment_id, user_id, session, SubcontractorService(session))
+    row = await InsuranceComplianceService(session).override(payment_id, reason=data.reason, user_id=user_id)
+    return InsuranceOverrideView.model_validate(row)
+
+
+@router.get(
+    "/insurance/project/{project_id}",
+    response_model=ProjectInsuranceDashboard,
+)
+async def project_insurance_dashboard(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> ProjectInsuranceDashboard:
+    """Insurance compliance dashboard for one project."""
+    from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
+
+    await verify_project_access(project_id, user_id, session)
+    data = await InsuranceComplianceService(session).project_dashboard(project_id)
+    return ProjectInsuranceDashboard.model_validate(data)
+
+
+@router.post("/insurance/alerts/run")
+async def run_insurance_alerts(
+    session: SessionDep,
+    _user: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.override_insurance")),
+) -> dict[str, int]:
+    """Send the 30 / 14 / 0-day and expired certificate alerts not yet sent."""
+    from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
+
+    return {"sent": await InsuranceComplianceService(session).run_expiry_alerts()}

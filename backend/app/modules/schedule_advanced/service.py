@@ -26,6 +26,7 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.cpm import readable_exception_dates
@@ -1212,11 +1213,46 @@ class ScheduleAdvancedService:
             {
                 "constraint_id": str(cid),
                 "task_ref": str(c.task_ref),
+                "project_id": str(await self._constraint_project_id(c) or "") or None,
+                "description": c.description,
+                "constraint_type": c.constraint_type,
                 "user_id": user_id,
             },
             source_module="schedule_advanced",
         )
         return c
+
+    async def _constraint_project_id(self, c: Constraint) -> uuid.UUID | None:
+        """Project of a constraint via its look-ahead, else via its schedule activity."""
+        if c.look_ahead_id is not None:
+            pid = (
+                (
+                    await self.session.execute(
+                        select(MasterSchedule.project_id)
+                        .join(LookAheadPlan, LookAheadPlan.master_schedule_id == MasterSchedule.id)
+                        .where(LookAheadPlan.id == c.look_ahead_id)
+                    )
+                )
+                .scalars()
+                .first()
+            )
+            if pid is not None:
+                return pid
+        try:
+            from app.modules.schedule.models import Activity, Schedule  # noqa: PLC0415
+        except ImportError:  # pragma: no cover - schedule module absent
+            return None
+        return (
+            (
+                await self.session.execute(
+                    select(Schedule.project_id)
+                    .join(Activity, Activity.schedule_id == Schedule.id)
+                    .where(Activity.id == c.task_ref)
+                )
+            )
+            .scalars()
+            .first()
+        )
 
     async def escalate_constraint(self, cid: uuid.UUID) -> Constraint:
         c = await self.get_constraint(cid)
@@ -1351,9 +1387,15 @@ class ScheduleAdvancedService:
             after_state={"status": "closed", "ppc_percent": str(ppc)},
         )
 
+        from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+        closed_project_id = await LastPlannerService(self.session).project_id_for_week_plan(wp_id)
         event_bus.publish_detached(
             "schedule_advanced.weekly_plan.closed",
             {
+                "project_id": str(closed_project_id) if closed_project_id else None,
+                "week_start_date": w.week_start_date.isoformat(),
+                "commitment_count": len(commitments),
                 "week_plan_id": str(wp_id),
                 "master_schedule_id": str(w.master_schedule_id),
                 "ppc_percent": str(ppc),
@@ -1415,6 +1457,9 @@ class ScheduleAdvancedService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Commitment cannot transition to committed from {c.status}",
             )
+        from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+        await LastPlannerService(self.session).assert_commitment_ready(c)
         made_by_uuid = None
         if user_id is not None:
             try:
@@ -1462,6 +1507,24 @@ class ScheduleAdvancedService:
             actual_qty=actual_qty,
         )
         await self.session.refresh(c)
+        from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+        lps = LastPlannerService(self.session)
+        progressed = await lps.apply_commitment_progress(c)
+        project_id = await lps.project_id_for_week_plan(c.week_plan_id)
+        event_bus.publish_detached(
+            "schedule_advanced.commitment.completed",
+            {
+                "commitment_id": str(cid),
+                "week_plan_id": str(c.week_plan_id),
+                "task_ref": str(c.task_ref),
+                "project_id": str(project_id) if project_id else None,
+                "subcontractor_id": str(c.subcontractor_id) if getattr(c, "subcontractor_id", None) else None,
+                "worker_or_crew": c.worker_or_crew,
+                "schedule_progress_updated": progressed,
+            },
+            source_module="schedule_advanced",
+        )
         return c
 
     async def mark_commitment_missed(
@@ -1516,6 +1579,23 @@ class ScheduleAdvancedService:
             root_cause_notes=payload.get("root_cause_notes", ""),
         )
         rnc = await self.rnc_repo.create(rnc)
+        from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
+
+        project_id = await LastPlannerService(self.session).project_id_for_week_plan(c.week_plan_id)
+        event_bus.publish_detached(
+            "schedule_advanced.commitment.missed",
+            {
+                "commitment_id": str(cid),
+                "week_plan_id": str(c.week_plan_id),
+                "task_ref": str(c.task_ref),
+                "project_id": str(project_id) if project_id else None,
+                "subcontractor_id": str(c.subcontractor_id) if getattr(c, "subcontractor_id", None) else None,
+                "worker_or_crew": c.worker_or_crew,
+                "category": rnc.category,
+                "description": rnc.description,
+            },
+            source_module="schedule_advanced",
+        )
         return c, rnc
 
     # ── RNC ────────────────────────────────────────────────────────────

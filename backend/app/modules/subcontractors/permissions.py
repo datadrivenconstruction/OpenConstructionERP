@@ -27,5 +27,7 @@ def register_subcontractors_permissions() -> None:
             # ── R5 - dedicated gates for tamper-sensitive actions ──
             "subcontractors.rate": Role.MANAGER,
             "subcontractors.block": Role.MANAGER,
+            # Paying despite lapsed mandatory insurance, with a recorded reason.
+            "subcontractors.override_insurance": Role.MANAGER,
         },
     )

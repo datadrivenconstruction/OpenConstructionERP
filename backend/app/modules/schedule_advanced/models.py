@@ -216,6 +216,12 @@ class Constraint(Base):
         server_default="open",
         index=True,
     )
+    # What clears this constraint elsewhere on the platform: an RFI, submittal,
+    # purchase order or goods receipt. Plain UUID, the row lives in another module.
+    linked_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    linked_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Set when the linked record resolved; the owner still confirms the clear.
+    link_resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
         return f"<Constraint {self.constraint_type} task={self.task_ref} {self.status}>"
@@ -325,6 +331,10 @@ class Commitment(Base):
         Numeric(15, 3),
         nullable=True,
     )
+    # The trade that promised the work (oe_subcontractors_subcontractor, plain UUID).
+    subcontractor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    # Progress the schedule activity reaches when this commitment is completed.
+    target_progress_pct: Mapped[Decimal | None] = mapped_column(Numeric(5, 2), nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
         return f"<Commitment task={self.task_ref} {self.status}>"

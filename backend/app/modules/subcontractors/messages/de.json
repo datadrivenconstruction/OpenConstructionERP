@@ -67,5 +67,32 @@
         "unknown": "Ohne sie kann für die Zahlung ein Steuerabzug fällig sein."
       }
     }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Der verpflichtende Nachweis {document} ist nicht gültig (Ablauf {date}), daher sind Zahlungen an diesen Nachunternehmer gesperrt",
+      "suggestion": "Erfassen Sie den erneuerten Nachweis oder lassen Sie die Sperre durch einen Manager mit Begründung aufheben"
+    },
+    "certificate_expiring": {
+      "fail": "Der Nachweis {document} läuft am {date} ab, in {days} Tag(en)",
+      "suggestion": "Fordern Sie die Verlängerung beim Nachunternehmer an, bevor der Nachweis abläuft"
+    },
+    "policy_details_recorded": {
+      "fail": "Beim verpflichtenden Nachweis {document} fehlen Policennummer oder Deckungssumme",
+      "suggestion": "Tragen Sie Policennummer und Deckungssumme aus dem Nachweis ein"
+    },
+    "cert_types": {
+      "public_liability": "Betriebshaftpflicht",
+      "employers_liability": "Arbeitgeberhaftpflicht",
+      "professional_indemnity": "Berufshaftpflicht",
+      "contractors_all_risk": "Bauleistungsversicherung",
+      "workers_compensation": "Unfallversicherung der Beschäftigten",
+      "motor_vehicle": "Kfz-Versicherung",
+      "product_liability": "Produkthaftpflicht",
+      "plant_equipment": "Maschinen- und Geräteversicherung",
+      "environmental_liability": "Umwelthaftpflicht",
+      "cyber_liability": "Cyberversicherung",
+      "insurance": "Versicherung"
+    }
   }
 }

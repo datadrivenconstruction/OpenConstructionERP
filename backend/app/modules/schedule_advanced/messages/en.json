@@ -1,0 +1,27 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "last_planner": {
+    "commitment_constraints_open": {
+      "fail": "Commitment of {crew} for the week of {week} is on a task with {count} open constraint(s)",
+      "suggestion": "Clear the constraints first, or take the task out of this week's plan"
+    },
+    "week_ppc_recorded": {
+      "fail": "The week of {week} had commitments but no PPC was recorded",
+      "suggestion": "Close the weekly plan so its PPC is computed"
+    },
+    "missed_commitment_reason": {
+      "fail": "A missed commitment of {crew} in the week of {week} has no reason for variance",
+      "suggestion": "Record the reason, so it counts in the Pareto of causes"
+    },
+    "constraint_overdue": {
+      "fail": "Constraint \"{description}\" was due to be cleared by {date} and is still open",
+      "suggestion": "Chase the owner, or move the target date and the affected tasks"
+    },
+    "constraint_owner": {
+      "fail": "Constraint \"{description}\" has no owner",
+      "suggestion": "Name the person responsible for clearing it"
+    }
+  }
+}
