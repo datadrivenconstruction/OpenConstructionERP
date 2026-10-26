@@ -146,6 +146,8 @@ export interface ChatAction {
   /** English text of `revert_hint_key`. */
   revert_hint: string | null;
   batch_id: string | null;
+  /** `chat` for the in-app assistant, `mcp` for an external AI client. */
+  source: string;
   created_at: string;
   updated_at: string;
 }
@@ -172,6 +174,7 @@ export interface ChatActionListFilters {
   status?: ActionStatus | readonly ActionStatus[];
   session_id?: string;
   batch_id?: string;
+  source?: 'chat' | 'mcp';
   limit?: number;
   offset?: number;
 }
@@ -356,6 +359,7 @@ export function normalizeChatAction(raw: ChatAction | Record<string, unknown>): 
     revert_hint_key: str(r.revert_hint_key),
     revert_hint: str(r.revert_hint),
     batch_id: str(r.batch_id),
+    source: str(r.source) ?? 'chat',
     created_at: str(r.created_at) ?? new Date(0).toISOString(),
     updated_at: str(r.updated_at) ?? str(r.created_at) ?? new Date(0).toISOString(),
   };

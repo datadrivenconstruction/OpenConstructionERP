@@ -158,6 +158,11 @@ interface FloatingChatState {
   seedPrompt: (prompt: string) => void;
   /** Clear the staged prompt (called by the panel once it has consumed it). */
   clearPendingPrompt: () => void;
+  /** Set by `openChanges`; the panel switches to the Changes tab and clears it. */
+  changesRequested: boolean;
+  /** Open the panel on its Changes tab (proposals waiting for review). */
+  openChanges: () => void;
+  clearChangesRequest: () => void;
 }
 
 function readPersisted(): PersistedState {
@@ -309,6 +314,18 @@ export const useFloatingChatStore = create<FloatingChatState>((set, get) => ({
 
   clearPendingPrompt: () => {
     if (get().pendingPrompt !== null) set({ pendingPrompt: null });
+  },
+
+  changesRequested: false,
+
+  openChanges: () => {
+    const now = new Date().toISOString();
+    set({ changesRequested: true, isOpen: true, lastReadAt: now, unreadCount: 0 });
+    writePersisted({ activeSessionId: get().activeSessionId, lastReadAt: now });
+  },
+
+  clearChangesRequest: () => {
+    if (get().changesRequested) set({ changesRequested: false });
   },
 }));
 

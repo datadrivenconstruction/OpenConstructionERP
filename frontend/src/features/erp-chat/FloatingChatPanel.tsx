@@ -1473,6 +1473,8 @@ export function FloatingChatPanel() {
   );
   const pendingPrompt = useFloatingChatStore((s) => s.pendingPrompt);
   const clearPendingPrompt = useFloatingChatStore((s) => s.clearPendingPrompt);
+  const changesRequested = useFloatingChatStore((s) => s.changesRequested);
+  const clearChangesRequest = useFloatingChatStore((s) => s.clearChangesRequest);
   const openDock = useFloatingChatStore((s) => s.open);
   // The full-page chat (/chat) is the same conversation surface, so the dock
   // stays closed there. `isOpen` is left alone: leave /chat and the dock is
@@ -1563,6 +1565,13 @@ export function FloatingChatPanel() {
     setActiveTab(tab);
     if (tab === 'changes') setChangesMounted(true);
   }, []);
+
+  // Another page asked to show the proposals waiting for review (openChanges).
+  useEffect(() => {
+    if (!changesRequested) return;
+    selectTab('changes');
+    clearChangesRequest();
+  }, [changesRequested, selectTab, clearChangesRequest]);
 
   // The proposals of this conversation, as the transcript delivered them.
   // Same array while none arrives or changes, so the store sync below and the

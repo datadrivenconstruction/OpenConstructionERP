@@ -41,6 +41,7 @@ export function buildActionListQuery(filters: ChatActionListFilters): string {
     ['status', status],
     ['session_id', filters.session_id],
     ['batch_id', filters.batch_id],
+    ['source', filters.source],
     ['limit', filters.limit],
     ['offset', filters.offset],
   ];

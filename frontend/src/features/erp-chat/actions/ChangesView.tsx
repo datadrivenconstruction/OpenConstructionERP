@@ -158,6 +158,9 @@ export function actionMetaLine(action: ChatAction, t: TFunction): string {
   const parts: string[] = [];
   const asker = action.requested_by?.name;
   if (asker) parts.push(String(t('erp_chat.changes.asked_by', { defaultValue: 'Asked by {{name}}', name: asker })));
+  if (action.source === 'mcp') {
+    parts.push(String(t('erp_chat.changes.via_mcp', { defaultValue: 'via external AI client' })));
+  }
   const decider = action.decided_by?.name;
   if (decider && action.status === 'applied') {
     parts.push(String(t('erp_chat.changes.approved_by', { defaultValue: 'approved by {{name}}', name: decider })));
