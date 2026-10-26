@@ -429,6 +429,7 @@ async def seed_carbon_demo(
     target_count = 0
     report_count = 0
 
+    project_ids = list(project_ids)
     for project_id in project_ids:
         # 3 inventories per project.
         first_inventory_id: uuid.UUID | None = None
@@ -460,7 +461,10 @@ async def seed_carbon_demo(
 
         await session.flush()
 
+    lifecycle_counts = await seed_lifecycle_demo(session, project_ids)
+
     return {
+        **lifecycle_counts,
         "epd_records": len(epds),
         "material_factors": len(factors),
         "inventories": inv_count,
@@ -471,3 +475,181 @@ async def seed_carbon_demo(
         "targets": target_count,
         "reports": report_count,
     }
+
+
+DEMO_EPD_IDS = ("DEMO-EPD-C30-CEM-I", "DEMO-EPD-C30-CEM-III")
+DEMO_COMPANY = "Demo Construction Group"
+
+
+async def seed_lifecycle_demo(session: AsyncSession, project_ids: list[uuid.UUID]) -> dict[str, int]:
+    """Two EPDs with factors, a budget overrun, one cheaper-in-CO2 alternative and one E1 report.
+
+    Idempotent: keyed on the demo EPD ids and the demo company name.
+    """
+    from app.modules.carbon.lifecycle_service import BUDGET_TARGET_TYPE, CarbonLifecycleService
+    from app.modules.carbon.models import CarbonCompanyActivity
+
+    if not project_ids:
+        return {"lifecycle_epds": 0}
+    stored = (await session.execute(select(EPDRecord).where(EPDRecord.epd_id.in_(DEMO_EPD_IDS)))).scalars().all()
+    if stored:
+        return {"lifecycle_epds": 0}
+
+    catalog_item_id = None
+    try:
+        from app.modules.supplier_catalogs.models import CatalogItem
+
+        catalog_item_id = (await session.execute(select(CatalogItem.id).limit(1))).scalar()
+    except Exception:  # supplier catalogues not installed
+        catalog_item_id = None
+
+    cem1 = EPDRecord(
+        epd_id=DEMO_EPD_IDS[0],
+        source="custom",
+        material_class="concrete",
+        product_name="Ready-mix concrete C30/37, CEM I",
+        manufacturer="Demo Ready-Mix",
+        region="EU",
+        declared_unit="m3",
+        gwp_a1a3=Decimal("310"),
+        gwp_a4=Decimal("6.5"),
+        gwp_c_total=Decimal("12"),
+        gwp_d_credits=Decimal("-8"),
+        validity_until=date(2030, 6, 30),
+        epd_format="ilcd_xml",
+        supplier_catalog_item_id=catalog_item_id,
+    )
+    cem3 = EPDRecord(
+        epd_id=DEMO_EPD_IDS[1],
+        source="custom",
+        material_class="concrete",
+        product_name="Ready-mix concrete C30/37, CEM III/A slag cement",
+        manufacturer="Demo Ready-Mix",
+        region="EU",
+        declared_unit="m3",
+        gwp_a1a3=Decimal("205"),
+        gwp_a4=Decimal("6.5"),
+        gwp_c_total=Decimal("12"),
+        gwp_d_credits=Decimal("-8"),
+        validity_until=date(2031, 3, 31),
+        epd_format="csv",
+    )
+    session.add_all([cem1, cem3])
+    await session.flush()
+    f1, f3 = (
+        MaterialCarbonFactor(
+            epd_id=e.id,
+            unit_for_factor="m3",
+            region="EU",
+            confidence="high",
+            factor_set="Demo EPD set",
+            factor_set_year=2025,
+            notes=f"lifecycle demo {e.epd_id}",
+        )
+        for e in (cem1, cem3)
+    )
+    session.add_all([f1, f3])
+    await session.flush()
+
+    first = project_ids[0]
+    inv = (
+        (
+            await session.execute(
+                select(CarbonInventory).where(CarbonInventory.project_id == first).order_by(CarbonInventory.created_at)
+            )
+        )
+        .scalars()
+        .first()
+    )
+    if inv is None:
+        inv = CarbonInventory(project_id=first, name="Baseline inventory", as_of_date=date(2026, 6, 30))
+        session.add(inv)
+        await session.flush()
+    qty = Decimal("120")
+    entry = EmbodiedCarbonEntry(
+        inventory_id=inv.id,
+        description="Foundation slab concrete C30/37 (CEM I)",
+        quantity=qty,
+        unit="m3",
+        factor_id=f1.id,
+        factor_value_used=Decimal("310"),
+        carbon_kg=qty * Decimal("310"),
+        stage="a1a3",
+        source="manual",
+        data_quality="calculated",
+    )
+    entry.metadata_ = {
+        "demo_alternative": {
+            "factor_id": str(f3.id),
+            "current_unit_rate": "145.00",
+            "alternative_unit_rate": "152.00",
+        }
+    }
+    session.add(entry)
+    await session.flush()
+
+    svc = CarbonLifecycleService(session)
+    actuals = []
+    for pid_inv in (
+        await session.execute(select(CarbonInventory.id).where(CarbonInventory.project_id == first))
+    ).scalars():
+        totals = await svc.base.compute_inventory_totals_fresh(pid_inv)
+        actuals.append(sum(Decimal(str(totals.get(k, 0))) for k in ("embodied_a1a5", "embodied_b", "embodied_c")))
+    budget_kg = (min(actuals) * Decimal("0.8")).quantize(Decimal("1")) if actuals else Decimal("1")
+    session.add(
+        CarbonTarget(
+            project_id=first,
+            name="Project carbon budget",
+            target_type=BUDGET_TARGET_TYPE,
+            baseline_value=budget_kg,
+            target_value=budget_kg,
+            baseline_year=2026,
+            target_year=2026,
+            scope_set=["a1a3", "a4", "a5", "b", "c"],
+        )
+    )
+    session.add_all(
+        [
+            CarbonCompanyActivity(
+                reporting_year=2026,
+                scope=2,
+                category="office",
+                description="Head office electricity",
+                activity_amount=Decimal("185000"),
+                activity_unit="kWh",
+                emission_factor=Decimal("0.38"),
+                factor_source="National grid average",
+                co2e_kg=Decimal("70300"),
+                energy_kwh=Decimal("185000"),
+                renewable_share_pct=Decimal("35"),
+                market_based_co2e_kg=Decimal("45695"),
+                data_quality="measured",
+            ),
+            CarbonCompanyActivity(
+                reporting_year=2026,
+                scope=1,
+                category="fleet_fuel",
+                description="Company cars diesel",
+                activity_amount=Decimal("42000"),
+                activity_unit="L",
+                emission_factor=Decimal("2.66"),
+                factor_source="Generic combustion defaults (2023)",
+                co2e_kg=Decimal("111720"),
+                energy_kwh=Decimal("420000"),
+                data_quality="measured",
+                source_module="equipment",
+            ),
+        ]
+    )
+    await session.flush()
+    await svc.generate_company_report(
+        year=2026,
+        template="esrs_e1",
+        net_revenue=Decimal("84000000"),
+        currency="EUR",
+        company_name=DEMO_COMPANY,
+        project_ids=set(project_ids),
+        user_id=None,
+        admin=True,
+    )
+    return {"lifecycle_epds": 2, "lifecycle_reports": 1}

@@ -19,6 +19,8 @@ class EPDRecordCreate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
+    supplier_catalog_item_id: UUID | None = None
+    epd_format: str | None = Field(default=None, max_length=16)
     epd_id: str = Field(..., min_length=1, max_length=120)
     source: str = Field(
         default="custom",
@@ -45,6 +47,8 @@ class EPDRecordUpdate(BaseModel):
 
     model_config = ConfigDict(str_strip_whitespace=True)
 
+    supplier_catalog_item_id: UUID | None = None
+    epd_format: str | None = Field(default=None, max_length=16)
     source: str | None = Field(
         default=None,
         pattern=r"^(oekobaudat|ice|ec3|epd_international|custom)$",
@@ -70,6 +74,8 @@ class EPDRecordResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
+    supplier_catalog_item_id: UUID | None = None
+    epd_format: str | None = None
     id: UUID
     epd_id: str
     source: str
@@ -97,6 +103,8 @@ class EPDRecordResponse(BaseModel):
 class MaterialCarbonFactorCreate(BaseModel):
     """Create a material carbon factor."""
 
+    factor_set: str | None = Field(default=None, max_length=80)
+    factor_set_year: int | None = Field(default=None, ge=1990, le=2100)
     cost_item_id: UUID | None = None
     epd_id: UUID | None = None
     manual_override_factor: Decimal | None = None
@@ -111,6 +119,8 @@ class MaterialCarbonFactorCreate(BaseModel):
 class MaterialCarbonFactorUpdate(BaseModel):
     """Partial update of a material carbon factor."""
 
+    factor_set: str | None = Field(default=None, max_length=80)
+    factor_set_year: int | None = Field(default=None, ge=1990, le=2100)
     cost_item_id: UUID | None = None
     epd_id: UUID | None = None
     manual_override_factor: Decimal | None = None
@@ -127,6 +137,8 @@ class MaterialCarbonFactorResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
+    factor_set: str | None = None
+    factor_set_year: int | None = None
     id: UUID
     cost_item_id: UUID | None = None
     epd_id: UUID | None = None
@@ -206,6 +218,7 @@ class CarbonInventoryResponse(BaseModel):
 class EmbodiedCarbonEntryCreate(BaseModel):
     """Create an embodied-carbon entry."""
 
+    data_quality: str = Field(default="calculated", pattern=r"^(measured|calculated|estimated)$")
     inventory_id: UUID
     element_ref: str | None = Field(default=None, max_length=255)
     element_id: UUID | None = None
@@ -224,6 +237,7 @@ class EmbodiedCarbonEntryCreate(BaseModel):
 class EmbodiedCarbonEntryUpdate(BaseModel):
     """Partial update of an embodied-carbon entry."""
 
+    data_quality: str | None = Field(default=None, pattern=r"^(measured|calculated|estimated)$")
     element_ref: str | None = Field(default=None, max_length=255)
     element_id: UUID | None = None
     description: str | None = Field(default=None, max_length=10000)
@@ -243,6 +257,7 @@ class EmbodiedCarbonEntryResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
+    data_quality: str = "calculated"
     id: UUID
     inventory_id: UUID
     element_ref: str | None = None
@@ -273,6 +288,7 @@ class EmbodiedBulkCreate(BaseModel):
 class Scope1EntryCreate(BaseModel):
     """Create a scope-1 (direct) emission entry."""
 
+    data_quality: str = Field(default="calculated", pattern=r"^(measured|calculated|estimated)$")
     inventory_id: UUID
     period_start: date
     period_end: date
@@ -295,6 +311,7 @@ class Scope1EntryCreate(BaseModel):
 class Scope1EntryUpdate(BaseModel):
     """Partial update of a scope-1 entry."""
 
+    data_quality: str | None = Field(default=None, pattern=r"^(measured|calculated|estimated)$")
     period_start: date | None = None
     period_end: date | None = None
     fuel_type: str | None = Field(
@@ -318,6 +335,7 @@ class Scope1EntryResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
+    data_quality: str = "calculated"
     id: UUID
     inventory_id: UUID
     period_start: date
@@ -337,6 +355,7 @@ class Scope1EntryResponse(BaseModel):
 class Scope2EntryCreate(BaseModel):
     """Create a scope-2 (purchased-energy) emission entry."""
 
+    data_quality: str = Field(default="calculated", pattern=r"^(measured|calculated|estimated)$")
     inventory_id: UUID
     period_start: date
     period_end: date
@@ -356,6 +375,7 @@ class Scope2EntryCreate(BaseModel):
 class Scope2EntryUpdate(BaseModel):
     """Partial update of a scope-2 entry."""
 
+    data_quality: str | None = Field(default=None, pattern=r"^(measured|calculated|estimated)$")
     period_start: date | None = None
     period_end: date | None = None
     energy_type: str | None = Field(
@@ -376,6 +396,7 @@ class Scope2EntryResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
+    data_quality: str = "calculated"
     id: UUID
     inventory_id: UUID
     period_start: date
@@ -395,6 +416,7 @@ class Scope2EntryResponse(BaseModel):
 class Scope3EntryCreate(BaseModel):
     """Create a scope-3 (other) emission entry."""
 
+    data_quality: str = Field(default="calculated", pattern=r"^(measured|calculated|estimated)$")
     inventory_id: UUID
     period_start: date
     period_end: date
@@ -413,6 +435,7 @@ class Scope3EntryCreate(BaseModel):
 class Scope3EntryUpdate(BaseModel):
     """Partial update of a scope-3 entry."""
 
+    data_quality: str | None = Field(default=None, pattern=r"^(measured|calculated|estimated)$")
     period_start: date | None = None
     period_end: date | None = None
     category: str | None = Field(
@@ -432,6 +455,7 @@ class Scope3EntryResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, populate_by_name=True)
 
+    data_quality: str = "calculated"
     id: UUID
     inventory_id: UUID
     period_start: date

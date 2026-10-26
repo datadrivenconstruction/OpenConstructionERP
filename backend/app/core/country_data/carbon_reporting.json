@@ -1,0 +1,67 @@
+{
+  "_comment": "Country​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ data for the carbon module, read by app/modules/carbon/csrd.py. Embodied-carbon limit values are published national figures with their source and period; review_status needs_expert_review marks figures we could not confirm against two sources. Report templates are optional and list the data points each one asks for.",
+  "embodied_limits": {
+    "DK": {
+      "regulation": "Bygningsreglementet BR18 section 297 (life-cycle assessment)",
+      "metric": "kgCO2e_per_m2_per_year",
+      "study_period_years": 50,
+      "values": [
+        {"building_type": "new_building_over_150m2", "valid_from": "2023-01-01", "valid_to": "2024-12-31", "limit": "12.0"},
+        {"building_type": "new_building_over_150m2", "valid_from": "2025-01-01", "valid_to": null, "limit": "7.1"}
+      ],
+      "review_status": "needs_expert_review"
+    },
+    "FR": {
+      "regulation": "RE2020, indicateur Ic construction",
+      "metric": "kgCO2e_per_m2",
+      "study_period_years": 50,
+      "values": [
+        {"building_type": "single_family_house", "valid_from": "2022-01-01", "valid_to": "2024-12-31", "limit": "640"},
+        {"building_type": "single_family_house", "valid_from": "2025-01-01", "valid_to": "2027-12-31", "limit": "530"},
+        {"building_type": "single_family_house", "valid_from": "2028-01-01", "valid_to": "2030-12-31", "limit": "475"},
+        {"building_type": "single_family_house", "valid_from": "2031-01-01", "valid_to": null, "limit": "415"},
+        {"building_type": "multi_family_housing", "valid_from": "2022-01-01", "valid_to": "2024-12-31", "limit": "740"},
+        {"building_type": "multi_family_housing", "valid_from": "2025-01-01", "valid_to": "2027-12-31", "limit": "650"},
+        {"building_type": "multi_family_housing", "valid_from": "2028-01-01", "valid_to": "2030-12-31", "limit": "580"},
+        {"building_type": "multi_family_housing", "valid_from": "2031-01-01", "valid_to": null, "limit": "490"}
+      ],
+      "review_status": "confirmed"
+    },
+    "NL": {
+      "regulation": "Bouwbesluit / Besluit bouwwerken leefomgeving, MilieuPrestatie Gebouwen (MPG)",
+      "metric": "shadow_cost_eur_per_m2_per_year",
+      "study_period_years": 75,
+      "values": [
+        {"building_type": "residential", "valid_from": "2021-07-01", "valid_to": null, "limit": "0.8"},
+        {"building_type": "office_over_100m2", "valid_from": "2018-01-01", "valid_to": null, "limit": "1.0"}
+      ],
+      "note": "MPG is a weighted shadow cost over many impact categories, not kgCO2e. Compared only when the project reports an MPG score.",
+      "review_status": "needs_expert_review"
+    },
+    "FI": {
+      "regulation": "Rakentamislaki (Building Act) carbon footprint limits",
+      "metric": "kgCO2e_per_m2_per_year",
+      "study_period_years": 50,
+      "values": [],
+      "note": "Limit values per building type were not confirmed from a published source; enter the project target manually.",
+      "review_status": "needs_expert_review"
+    }
+  },
+  "report_templates": {
+    "esrs_e1": {
+      "label": "CSRD / ESRS E1 Climate change",
+      "region": "EU",
+      "datapoints": ["E1-5_energy_total", "E1-5_energy_fossil", "E1-5_energy_renewable", "E1-6_scope1", "E1-6_scope2_location", "E1-6_scope2_market", "E1-6_scope3", "E1-6_total_location", "E1-6_total_market", "E1-6_intensity_location", "E1-4_targets"]
+    },
+    "uk_secr": {
+      "label": "UK Streamlined Energy and Carbon Reporting",
+      "region": "GB",
+      "datapoints": ["E1-5_energy_total", "E1-6_scope1", "E1-6_scope2_location", "E1-6_total_location", "E1-6_intensity_location"]
+    },
+    "us_state": {
+      "label": "US state climate disclosure (scope 1, 2 and 3)",
+      "region": "US",
+      "datapoints": ["E1-6_scope1", "E1-6_scope2_location", "E1-6_scope2_market", "E1-6_scope3", "E1-6_total_location"]
+    }
+  }
+}

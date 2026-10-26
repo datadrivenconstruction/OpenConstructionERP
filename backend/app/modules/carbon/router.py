@@ -1254,3 +1254,9 @@ async def whole_life(
         carbon_price_per_tonne=carbon_price_per_tonne,
     )
     return WholeLifeResponse(**payload)
+
+
+# Life-cycle stages, budget, checks and company E1 reporting.
+from app.modules.carbon.lifecycle_router import router as _lifecycle_router  # noqa: E402
+
+router.include_router(_lifecycle_router)
