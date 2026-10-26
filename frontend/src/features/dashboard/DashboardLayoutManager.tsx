@@ -38,6 +38,7 @@ import {
   DASHBOARD_WIDGET_IDS,
   DASHBOARD_WIDGET_BY_ID,
 } from './widgetRegistry';
+import { DASHBOARD_SETS, dashboardSetLayout } from './dashboardSets';
 
 interface RowProps {
   id: string;
@@ -242,6 +243,22 @@ export function DashboardLayoutManager({ onClose, className }: ManagerProps) {
             {t('common.done', { defaultValue: 'Done' })}
           </Button>
         )}
+      </div>
+
+      <div className="mb-3 flex flex-wrap items-center gap-2" data-testid="dash-sets">
+        <span className="text-xs font-medium text-content-secondary">
+          {t('dashboard.layout.sets', { defaultValue: 'Ready-made sets' })}
+        </span>
+        {DASHBOARD_SETS.map((set) => (
+          <Button
+            key={set.id}
+            variant="secondary"
+            size="sm"
+            onClick={() => useDashboardLayoutStore.setState(dashboardSetLayout(set, DASHBOARD_WIDGET_IDS))}
+          >
+            {t(set.labelKey, { defaultValue: set.labelDefault })}
+          </Button>
+        ))}
       </div>
 
       <DndContext
