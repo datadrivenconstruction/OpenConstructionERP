@@ -28,6 +28,8 @@ export interface BOQ {
    * that existed before variation bills did.
    */
   variation_request_id?: string | null;
+  /** Set when this bill is a branch (variant) of a main estimate. */
+  branch_of_id?: string | null;
   /** Price level reference (a day, month, quarter or year), or null. */
   base_date?: string | null;
   /**

@@ -94,6 +94,7 @@ import type { BOQGridHandle } from './BOQGrid';
 import { allResourcesExpanded, type ResourceExpansionState } from './resourceExpansion';
 import { BatchActionBar } from './BatchActionBar';
 import { ScenarioDialog } from './ScenarioDialog';
+import { BranchControls } from './branches/BranchControls';
 import { SendToTenderDialog } from './SendToTenderDialog';
 import { CostPlanDialog, offersCostPlan } from '@/features/cost-plan';
 import { ImportPreviewDialog } from './ImportPreviewDialog';
@@ -5328,6 +5329,15 @@ export function BOQEditorPage() {
                 <Percent size={14} className="mr-1" />
                 {t('boq.resource_index_btn', { defaultValue: 'Resource-index' })}
               </Button>
+            )}
+            {boqId && (
+              <BranchControls
+                boqId={boqId}
+                boqName={boq.name}
+                branchOfId={boq.branch_of_id}
+                onNavigate={(id) => navigate(`/boq/${id}`)}
+                onChanged={() => invalidateAll()}
+              />
             )}
             <Button
               variant="ghost"
