@@ -18,7 +18,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { checkAccent, customAccentCss, contrastRatio } from '@/shared/lib/customAccent';
-import { landingPath, weekStartOverride } from '@/shared/lib/workPrefs';
+import { landingPath, readWorkPrefs, weekStartOverride } from '@/shared/lib/workPrefs';
 import { getWeekStartsOn } from '@/shared/lib/weekStart';
 import { WorkspaceBrandCard } from './WorkspaceBrandCard';
 import { WorkPrefsCard } from './WorkPrefsCard';
@@ -82,5 +82,14 @@ describe('<WorkPrefsCard>', () => {
     expect(landingPath()).toBe('/projects');
     expect(weekStartOverride()).toBe(6);
     expect(getWeekStartsOn()).toBe(6);
+  });
+
+  it('chooses a start page for a project role and clears it back to the project page', () => {
+    render(<WorkPrefsCard />);
+    const select = screen.getByRole('combobox', { name: 'Start page for Subcontractor' });
+    fireEvent.change(select, { target: { value: 'tasks' } });
+    expect(readWorkPrefs().projectStart).toEqual({ subcontractor: 'tasks' });
+    fireEvent.change(select, { target: { value: 'overview' } });
+    expect(readWorkPrefs().projectStart).toEqual({});
   });
 });
