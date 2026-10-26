@@ -23,8 +23,45 @@ if TYPE_CHECKING:
 #: The grey both minutes renderers draw their running head and footer in.
 _FURNITURE_GREY = "#999999"
 
+#: Languages the minutes PDF never prints in: the font ladder draws right-to-left
+#: scripts unshaped and has no Bengali face, so those documents stay English.
+_UNPRINTABLE_LANGUAGES = frozenset({"ar", "fa", "he", "ur", "bn"})
+_PDF_KEY = "meetings.minutes_pdf."
 
-def draw_minutes_footer(canvas_obj: Any, doc: Any, appearance: dict[str, Any], *, margin: float) -> None:
+
+def minutes_pdf_languages() -> list[str]:
+    """Languages the minutes PDF can be printed in (backend catalogue minus unprintable)."""
+    from app.core.i18n import SUPPORTED_LOCALES, is_locale_loaded
+
+    return sorted(
+        code
+        for code in SUPPORTED_LOCALES
+        if "-" not in code and code not in _UNPRINTABLE_LANGUAGES and is_locale_loaded(code)
+    )
+
+
+def resolve_minutes_locale(requested: str | None, content: dict[str, Any] | None = None) -> str:
+    """Pick the document language: explicit request, else the meeting language, else English."""
+    from app.core.document_locale import normalize_document_locale
+
+    supported = set(minutes_pdf_languages()) | {"en"}
+    for candidate in (requested, (content or {}).get("language")):
+        code = normalize_document_locale(candidate, supported, "")
+        if code:
+            return code
+    return "en"
+
+
+def minutes_label(locale: str, key: str, **params: Any) -> str:
+    """One fixed string of the minutes document in ``locale``."""
+    from app.core.i18n import t
+
+    return t(_PDF_KEY + key, locale, **params)
+
+
+def draw_minutes_footer(
+    canvas_obj: Any, doc: Any, appearance: dict[str, Any], *, margin: float, locale: str = "en"
+) -> None:
     """Draw the minutes footer: the page number, and a saved footer line.
 
     Shared by :func:`build_minutes_pdf` and the export in
@@ -44,6 +81,7 @@ def draw_minutes_footer(canvas_obj: Any, doc: Any, appearance: dict[str, Any], *
         doc: The document being built, for the page size and number.
         appearance: The document appearance, read once for the whole document.
         margin: The side margin both renderers lay the page out with.
+        locale: Language of the page number label.
     """
     from reportlab.lib import colors
     from reportlab.lib.styles import ParagraphStyle
@@ -58,7 +96,8 @@ def draw_minutes_footer(canvas_obj: Any, doc: Any, appearance: dict[str, Any], *
     colour = appearance.get("footer_color") or _FURNITURE_GREY
     if colour != _FURNITURE_GREY:
         canvas_obj.setFillColor(colors.HexColor(colour))
-    page_text = f"Page {doc.page}" if appearance.get("show_page_numbers", True) is not False else ""
+    show = appearance.get("show_page_numbers", True) is not False
+    page_text = minutes_label(locale, "page", page=doc.page) if show else ""
     if page_text:
         canvas_obj.setFont(BODY_FONT, 7)
         canvas_obj.drawRightString(page_width - margin, 10 * mm, page_text)
@@ -84,7 +123,7 @@ def minutes_pdf_filename(meeting: Meeting, content: dict) -> str:
     return f"minutes_{meeting.meeting_number}_{safe_title}.pdf"
 
 
-def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: str) -> bytes:
+def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: str, locale: str | None = None) -> bytes:
     """Render the confirmed meeting minutes to PDF bytes.
 
     Args:
@@ -93,6 +132,8 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
             source of truth for the rendered document, with the meeting row as
             fallback for a few header fields).
         project_name: display name of the owning project for the header.
+        locale: document language; defaults to the meeting language stored in
+            the minutes content, then English (see :func:`resolve_minutes_locale`).
 
     Returns:
         The rendered PDF as bytes.
@@ -130,6 +171,10 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
     register_pdf_fonts()
 
     content: dict = minutes.content if isinstance(minutes.content, dict) else {}
+    lang = resolve_minutes_locale(locale, content)
+
+    def L(key: str, **params: Any) -> str:  # noqa: N802 - short on purpose, used on every line
+        return minutes_label(lang, key, **params)
 
     PAGE_WIDTH, PAGE_HEIGHT = A4
     MARGIN = 20 * mm
@@ -208,21 +253,26 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
     letterhead = branded_letterhead(USABLE_WIDTH - 12, doc_type="meeting_minutes")
     if letterhead is not None:
         elements.append(letterhead)
-    elements.append(Paragraph("Meeting Minutes", style_title))
-    status_tag = "ISSUED" if minutes.status == "issued" else "DRAFT"
+    elements.append(Paragraph(escape(L("title")), pdf_style_for_text(style_title, L("title"))))
+    status_tag = escape(L("issued") if minutes.status == "issued" else L("draft"))
     elements.append(
         Paragraph(f"{escape(project_name)} &middot; {status_tag}", pdf_style_for_text(style_subtitle, project_name))
     )
     meeting_title = str(content.get("title") or meeting.title)
     elements.append(Paragraph(escape(meeting_title), pdf_style_for_text(style_heading, meeting_title)))
 
+    na = L("not_available")
+    raw_type = str(content.get("meeting_type") or "")
+    type_label = minutes_label(lang, f"type_{raw_type}") if raw_type else ""
+    if type_label.startswith(_PDF_KEY):
+        type_label = raw_type.replace("_", " ").title()
     info_data = [
-        ["Date:", str(content.get("meeting_date") or meeting.meeting_date or "N/A")],
-        ["Location:", str(content.get("location") or "N/A") or "N/A"],
-        ["Type:", str(content.get("meeting_type") or "").replace("_", " ").title()],
-        ["Meeting #:", str(content.get("meeting_number") or meeting.meeting_number)],
-        ["Chairperson:", str(content.get("chairperson") or "N/A") or "N/A"],
-        ["Next meeting:", str(content.get("next_meeting_date") or "Not scheduled")],
+        [L("date"), str(content.get("meeting_date") or meeting.meeting_date or na)],
+        [L("location"), str(content.get("location") or na) or na],
+        [L("type"), type_label],
+        [L("number"), str(content.get("meeting_number") or meeting.meeting_number)],
+        [L("chairperson"), str(content.get("chairperson") or na) or na],
+        [L("next_meeting"), str(content.get("next_meeting_date") or L("not_scheduled"))],
     ]
     # Paragraph cells rather than bare strings. A bare cell is drawn through
     # canvas.drawString, which neither wraps nor shapes: a site address longer
@@ -248,57 +298,81 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
     present = content.get("attendees_present") or []
     absent = content.get("attendees_absent") or []
     if present or absent:
-        elements.append(Paragraph("Attendance", style_heading))
+        elements.append(Paragraph(escape(L("attendance")), pdf_style_for_text(style_heading, L("attendance"))))
         if present:
             names = ", ".join(escape(str(a.get("name") or "")) for a in present if isinstance(a, dict))
-            elements.append(Paragraph(f"<b>Present:</b> {names}", pdf_style_for_text(style_body, names)))
+            label = escape(L("present"))
+            elements.append(Paragraph(f"<b>{label}</b> {names}", pdf_style_for_text(style_body, label + names)))
         if absent:
             names = ", ".join(escape(str(a.get("name") or "")) for a in absent if isinstance(a, dict))
-            elements.append(Paragraph(f"<b>Absent / excused:</b> {names}", pdf_style_for_text(style_body, names)))
+            label = escape(L("absent"))
+            elements.append(Paragraph(f"<b>{label}</b> {names}", pdf_style_for_text(style_body, label + names)))
 
     # Agenda with discussion + decision
     agenda = content.get("agenda") or []
     if agenda:
-        elements.append(Paragraph("Agenda, discussion and decisions", style_heading))
+        elements.append(Paragraph(escape(L("agenda")), pdf_style_for_text(style_heading, L("agenda"))))
         for idx, item in enumerate(agenda, 1):
             if not isinstance(item, dict):
                 continue
             topic = escape(str(item.get("topic") or ""))
             num = escape(str(item.get("number") or idx))
-            req = " <font color='#b45309'>(required)</font>" if item.get("required") else ""
-            elements.append(Paragraph(f"<b>{num}. {topic}</b>{req}", pdf_style_for_text(style_body, topic)))
+            req = f" <font color='#b45309'>{escape(L('required'))}</font>" if item.get("required") else ""
+            elements.append(Paragraph(f"<b>{num}. {topic}</b>{req}", pdf_style_for_text(style_body, topic + req)))
             if item.get("discussion"):
                 discussion = str(item["discussion"])
                 elements.append(
                     Paragraph(
-                        f"&nbsp;&nbsp;<b>Discussion:</b> {escape(discussion)}",
-                        pdf_style_for_text(style_small, discussion),
+                        f"&nbsp;&nbsp;<b>{escape(L('discussion'))}</b> {escape(discussion)}",
+                        pdf_style_for_text(style_small, L("discussion") + discussion),
                     )
                 )
             if item.get("decision"):
                 decision = str(item["decision"])
                 elements.append(
                     Paragraph(
-                        f"&nbsp;&nbsp;<b>Decision:</b> {escape(decision)}",
-                        pdf_style_for_text(style_small, decision),
+                        f"&nbsp;&nbsp;<b>{escape(L('decision'))}</b> {escape(decision)}",
+                        pdf_style_for_text(style_small, L("decision") + decision),
                     )
                 )
             elements.append(Spacer(1, 1.5 * mm))
 
+    # Decisions taken outside an agenda line (e.g. confirmed from a recording)
+    agenda_decisions = {str(a.get("decision") or "").strip() for a in agenda if isinstance(a, dict)}
+    extra_decisions = [
+        str(d).strip()
+        for d in content.get("decisions") or []
+        if str(d).strip() and str(d).strip() not in agenda_decisions
+    ]
+    if extra_decisions:
+        elements.append(Paragraph(escape(L("decisions")), pdf_style_for_text(style_heading, L("decisions"))))
+        for dec in extra_decisions:
+            elements.append(Paragraph(f"&bull; {escape(dec)}", pdf_style_for_text(style_body, dec)))
+
+    questions = [str(q).strip() for q in content.get("open_questions") or [] if str(q).strip()]
+    if questions:
+        heading = L("open_questions")
+        elements.append(Paragraph(escape(heading), pdf_style_for_text(style_heading, heading)))
+        for question in questions:
+            elements.append(Paragraph(f"&bull; {escape(question)}", pdf_style_for_text(style_body, question)))
+
     # Action items
     actions = content.get("action_items") or []
     if actions:
-        elements.append(Paragraph("Action items", style_heading))
-        act_data = [["#", "Action", "Owner", "Due", "Status"]]
+        elements.append(Paragraph(escape(L("actions")), pdf_style_for_text(style_heading, L("actions"))))
+        act_data = [[L("col_number"), L("col_action"), L("col_owner"), L("col_due"), L("col_status")]]
         for idx, ai in enumerate(actions, 1):
             if not isinstance(ai, dict):
                 continue
             desc = str(ai.get("description") or "")
             if ai.get("brought_forward"):
-                desc = f"[Brought forward] {desc}"
-            status_str = str(ai.get("status") or "open").replace("_", " ").title()
+                desc = f"{L('brought_forward')} {desc}"
+            raw_status = str(ai.get("status") or "open")
+            status_str = minutes_label(lang, f"status_{raw_status}")
+            if status_str.startswith(_PDF_KEY):
+                status_str = raw_status.replace("_", " ").title()
             if ai.get("overdue"):
-                status_str += " (overdue)"
+                status_str += f" {L('overdue')}"
             act_data.append([str(idx), desc, str(ai.get("owner") or ""), str(ai.get("due_date") or ""), status_str])
         # Paragraph cells for the reason given at the info table above. The
         # description is the column this matters most in: it is a sentence in
@@ -339,15 +413,16 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
     # Summary
     if content.get("summary"):
         summary = str(content["summary"])
-        elements.append(Paragraph("Summary", style_heading))
+        elements.append(Paragraph(escape(L("summary")), pdf_style_for_text(style_heading, L("summary"))))
         elements.append(Paragraph(escape(summary).replace("\n", "<br/>"), pdf_style_for_text(style_body, summary)))
 
     elements.append(Spacer(1, 8 * mm))
     stamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     issued_note = ""
     if minutes.status == "issued" and minutes.issued_at:
-        issued_note = f" &middot; Issued {minutes.issued_at.strftime('%Y-%m-%d %H:%M UTC')}"
-    elements.append(Paragraph(f"Generated: {stamp}{issued_note}", style_small))
+        issued_note = " &middot; " + escape(L("issued_at", stamp=minutes.issued_at.strftime("%Y-%m-%d %H:%M UTC")))
+    generated = escape(L("generated", stamp=stamp)) + issued_note
+    elements.append(Paragraph(generated, pdf_style_for_text(style_small, generated)))
 
     buf = io.BytesIO()
     look = branded_appearance(doc_type="meeting_minutes")
@@ -359,10 +434,10 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
         canvas_obj.saveState()
         canvas_obj.setFillColor(colors.HexColor(_FURNITURE_GREY))
         if not under_letterhead:
-            running_head = f"{project_name} - Minutes"
+            running_head = L("running_head", project=project_name)
             canvas_obj.setFont(pdf_font_for_text(running_head), 7)
             canvas_obj.drawString(MARGIN, PAGE_HEIGHT - 12 * mm, running_head)
-        draw_minutes_footer(canvas_obj, doc, look, margin=MARGIN)
+        draw_minutes_footer(canvas_obj, doc, look, margin=MARGIN, locale=lang)
         canvas_obj.restoreState()
         if not under_letterhead:
             branded_header_logo(canvas_obj, doc)

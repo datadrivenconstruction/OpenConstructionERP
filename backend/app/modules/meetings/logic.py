@@ -378,6 +378,11 @@ def build_minutes_content(
             text = str(dec or "").strip()
         if text:
             decisions.append(text)
+    open_questions: list[str] = []
+    for item in meta.get("open_questions") or []:
+        text = str(item.get("question") or "").strip() if isinstance(item, dict) else str(item or "").strip()
+        if text:
+            open_questions.append(text)
 
     return {
         "title": str(meeting.get("title") or "").strip(),
@@ -391,7 +396,9 @@ def build_minutes_content(
         "agenda": agenda,
         "action_items": action_items,
         "decisions": decisions,
+        "open_questions": open_questions,
         "next_meeting_date": next_meeting_date,
         "summary": str(meeting.get("minutes") or "").strip(),
+        "language": str(meta.get("language") or "").strip() or None,
         "generated_at": generated_at,
     }

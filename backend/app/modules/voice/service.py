@@ -43,17 +43,20 @@ async def transcribe(
 ) -> phonelog_transcription.TranscriptionResult:
     """Transcribe a recording, degrading to an unavailable result with no provider.
 
-    Reuses the phone-log transcription path (same provider, same 25 MB / format
-    guardrails applied by the router). Never raises: without a key it returns an
-    unavailable result so the caller can fall back to the typed-transcript path.
+    Goes through the pluggable provider layer in :mod:`app.modules.voice.speech`
+    (same 25 MB / format guardrails applied by the router). Never raises: with no
+    provider it returns an unavailable result so the caller can fall back to the
+    typed-transcript path.
     """
-    api_key = await phonelog_transcription.resolve_openai_key(session, user_id)
-    if not api_key:
+    from app.modules.voice.speech import resolve_speech_provider
+
+    provider = await resolve_speech_provider(session, user_id)
+    if provider is None:
         return phonelog_transcription.TranscriptionResult(
             available=False,
             error="no transcription provider configured",
         )
-    return await phonelog_transcription.transcribe_audio(content, filename, api_key=api_key)
+    return await provider.transcribe(content, filename)
 
 
 async def build_draft(

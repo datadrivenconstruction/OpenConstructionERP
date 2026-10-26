@@ -45,6 +45,8 @@ import {
   type MinutesContent,
 } from './api';
 import { PublishRecordModal } from '@/features/record-publishing/PublishRecordModal';
+import { fetchMinutesPdfLanguages } from './audioApi';
+import { languageLabel } from './audioLogic';
 
 interface MinutesDialogProps {
   meetingId: string;
@@ -58,9 +60,10 @@ const inputCls =
 const textareaCls =
   'w-full rounded-md border border-border bg-surface-primary px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-oe-blue/30 focus:border-oe-blue resize-vertical';
 
-async function downloadMinutesPdf(meetingId: string): Promise<void> {
+async function downloadMinutesPdf(meetingId: string, locale: string): Promise<void> {
   const token = useAuthStore.getState().accessToken;
-  const res = await fetch(getMinutesPdfUrl(meetingId), {
+  const url = getMinutesPdfUrl(meetingId);
+  const res = await fetch(locale ? `${url}?locale=${encodeURIComponent(locale)}` : url, {
     method: 'GET',
     headers: { Accept: 'application/pdf', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
   });
@@ -72,7 +75,7 @@ async function downloadMinutesPdf(meetingId: string): Promise<void> {
 }
 
 export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: MinutesDialogProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const qc = useQueryClient();
   const [publishOpen, setPublishOpen] = useState(false);
   const addToast = useToastStore((s) => s.addToast);
@@ -85,6 +88,13 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
 
   const minutes = minutesQ.data ?? null;
   const issued = minutes?.status === 'issued';
+  // Empty means the meeting language the minutes carry; the server falls back to English.
+  const [pdfLocale, setPdfLocale] = useState('');
+  const pdfLanguagesQ = useQuery({
+    queryKey: ['minutes-pdf-languages'],
+    queryFn: fetchMinutesPdfLanguages,
+    staleTime: 5 * 60_000,
+  });
 
   // Local editable copy of the draft content.
   const [agenda, setAgenda] = useState<MinutesAgendaLine[]>([]);
@@ -214,7 +224,7 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
         });
         setMinutesData(saved);
       }
-      return downloadMinutesPdf(meetingId);
+      return downloadMinutesPdf(meetingId, pdfLocale);
     },
     onError: (e: Error) =>
       addToast({
@@ -255,6 +265,29 @@ export function MinutesDialog({ meetingId, projectId, meetingTitle, onClose }: M
             )}
             {t('meetings.export_pdf', { defaultValue: 'Export PDF' })}
           </Button>
+        )}
+        {minutes && (pdfLanguagesQ.data?.length ?? 0) > 0 && (
+          <select
+            className="h-8 rounded-md border border-border bg-surface-primary px-2 text-xs"
+            value={pdfLocale}
+            onChange={(e) => setPdfLocale(e.target.value)}
+            aria-label={t('meetings.audio.pdf_language', { defaultValue: 'PDF language' })}
+            data-testid="minutes-pdf-language"
+          >
+            <option value="">
+              {minutes.content.language
+                ? t('meetings.audio.pdf_language_meeting_named', {
+                    defaultValue: 'Meeting language ({{language}})',
+                    language: languageLabel(minutes.content.language, i18n.language),
+                  })
+                : t('meetings.audio.language_auto', { defaultValue: 'Meeting language' })}
+            </option>
+            {(pdfLanguagesQ.data ?? []).map((code) => (
+              <option key={code} value={code}>
+                {languageLabel(code, i18n.language)}
+              </option>
+            ))}
+          </select>
         )}
         {minutes && issued && (
           <Button

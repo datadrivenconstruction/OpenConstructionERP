@@ -117,6 +117,16 @@ async def phonelog_tick() -> None:
         await session.commit()
 
 
+async def meetings_audio_tick() -> None:
+    """Delete meeting audio past its retention date; transcripts and minutes stay."""
+    from app.database import async_session_factory
+    from app.modules.meetings.audio_service import prune_expired_meeting_audio
+
+    async with async_session_factory() as session:
+        await prune_expired_meeting_audio(session)
+        await session.commit()
+
+
 async def sla_tick() -> None:
     from app.modules.approval_routes.sla_monitor import _run_once
 
@@ -326,6 +336,13 @@ def register_builtin_processes(
             ["phonelog"],
             category="maintenance",
             logger_names=["app.modules.phonelog.retention"],
+        ),
+        _spec(
+            "meetings_audio_retention",
+            _loop(DAY_S, meetings_audio_tick, SETTLE_S),
+            ["meetings"],
+            category="maintenance",
+            logger_names=["app.modules.meetings.audio_service"],
         ),
         _spec(
             "file_trash_purge",

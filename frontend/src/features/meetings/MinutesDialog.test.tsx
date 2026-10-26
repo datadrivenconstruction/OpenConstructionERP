@@ -42,6 +42,8 @@ vi.mock('@/stores/useToastStore', () => ({
   useToastStore: (sel: (s: { addToast: () => void }) => unknown) => sel({ addToast: vi.fn() }),
 }));
 
+vi.mock('./audioApi', () => ({ fetchMinutesPdfLanguages: vi.fn().mockResolvedValue([]) }));
+
 // Not part of what is being asserted, and it drags in the whole publishing
 // feature if left real.
 vi.mock('@/features/record-publishing/PublishRecordModal', () => ({

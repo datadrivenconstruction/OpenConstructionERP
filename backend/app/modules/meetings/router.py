@@ -28,6 +28,7 @@ from fastapi.responses import Response, StreamingResponse
 from app.core.content_disposition import attachment_disposition
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.meetings import ics as ics_builder
+from app.modules.meetings.audio_router import router as audio_router
 from app.modules.meetings.schemas import (
     MEETING_TYPES,
     ActionItemEntry,
@@ -58,6 +59,8 @@ from app.modules.meetings.schemas import (
 from app.modules.meetings.service import MeetingService
 
 router = APIRouter(tags=["meetings"])
+# Minutes-from-audio routes go first: their fixed segments must win over /{meeting_id}.
+router.include_router(audio_router)
 logger = logging.getLogger(__name__)
 
 
@@ -2104,16 +2107,18 @@ async def export_minutes_pdf(
     session: SessionDep = None,  # type: ignore[assignment]
     _user: CurrentUserId = None,  # type: ignore[assignment]
     service: MeetingService = Depends(_get_service),
+    locale: str | None = Query(default=None, max_length=10, description="Document language; default the meeting's"),
 ) -> StreamingResponse:
     """Export the confirmed meeting minutes as a structured PDF.
 
     Renders the human-confirmed minutes document (present/absent, per-agenda
     discussion and decision, action items with brought-forward and overdue
-    markers, next meeting date, summary) - not the raw meeting record.
+    markers, next meeting date, summary) - not the raw meeting record. The
+    fixed labels print in ``locale``, else in the meeting language.
     """
     from sqlalchemy import select
 
-    from app.modules.meetings.pdf import build_minutes_pdf, minutes_pdf_filename
+    from app.modules.meetings.pdf import build_minutes_pdf, minutes_pdf_filename, resolve_minutes_locale
     from app.modules.projects.models import Project
 
     meeting = await service.get_meeting(meeting_id)
@@ -2138,14 +2143,17 @@ async def export_minutes_pdf(
         status=minutes.status,
         issued_at=minutes.issued_at,
     )
-    pdf_bytes = await asyncio.to_thread(build_minutes_pdf, meeting_snapshot, minutes_snapshot, project_name)
+    # Minutes drafted before the meeting had a language still print in it.
+    meeting_language = content.get("language") or (meeting.metadata_ or {}).get("language")
+    doc_locale = resolve_minutes_locale(locale, {"language": meeting_language})
+    pdf_bytes = await asyncio.to_thread(build_minutes_pdf, meeting_snapshot, minutes_snapshot, project_name, doc_locale)
     filename = minutes_pdf_filename(meeting, content)
     return StreamingResponse(
         io.BytesIO(pdf_bytes),
         media_type="application/pdf",
         headers={
             "Content-Disposition": attachment_disposition(filename),
-            # English for the reason given on the meeting export above.
-            "Content-Language": "en",
+            # The language the labels were actually printed in.
+            "Content-Language": doc_locale,
         },
     )

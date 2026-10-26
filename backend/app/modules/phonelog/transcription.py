@@ -33,7 +33,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 import httpx
@@ -99,6 +99,8 @@ class TranscriptionResult:
     duration_seconds: int | None = None
     available: bool = False
     error: str | None = None
+    # Timed segments ``{start, end, text, speaker}`` when the provider returns them.
+    segments: list[dict[str, Any]] = field(default_factory=list)
 
 
 def audio_extension(filename: str) -> str:
@@ -337,21 +339,36 @@ async def resolve_openai_key(session: Any, user_id: str | None) -> str | None:
     return None
 
 
-async def transcribe_audio(content: bytes, filename: str, *, api_key: str) -> TranscriptionResult:
+async def transcribe_audio(
+    content: bytes,
+    filename: str,
+    *,
+    api_key: str,
+    prompt: str | None = None,
+    language: str | None = None,
+    url: str | None = None,
+    model: str | None = None,
+) -> TranscriptionResult:
     """Transcribe recording bytes through the speech-to-text provider.
 
-    Never raises: any transport, HTTP, or parsing failure is caught and returned
-    as an unavailable :class:`TranscriptionResult` with a short reason, so the
-    ingestion path can carry on and store the recording regardless.
+    ``prompt`` carries vocabulary hints (names, terms) and ``language`` an ISO
+    639-1 code; ``url``/``model`` point at any endpoint speaking the same
+    multipart protocol. Never raises: any transport, HTTP, or parsing failure is
+    caught and returned as an unavailable :class:`TranscriptionResult` with a
+    short reason, so the ingestion path can carry on and store the recording.
     """
     files = {"file": (filename or "recording", content, mime_for(filename))}
-    data = {"model": TRANSCRIBE_MODEL, "response_format": "verbose_json"}
-    headers = {"Authorization": f"Bearer {api_key}"}
+    data = {"model": model or TRANSCRIBE_MODEL, "response_format": "verbose_json"}
+    if prompt and prompt.strip():
+        data["prompt"] = prompt.strip()
+    if language and language.strip():
+        data["language"] = language.strip().lower().split("-")[0]
+    headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                _TRANSCRIBE_URL,
+                url or _TRANSCRIBE_URL,
                 headers=headers,
                 files=files,
                 data=data,
@@ -373,7 +390,37 @@ async def transcribe_audio(content: bytes, filename: str, *, api_key: str) -> Tr
     duration_raw = payload.get("duration")
     duration = int(round(duration_raw)) if isinstance(duration_raw, (int, float)) else None
     language = payload.get("language") if isinstance(payload.get("language"), str) else None
-    return TranscriptionResult(text=text, language=language, duration_seconds=duration, available=True)
+    return TranscriptionResult(
+        text=text,
+        language=language,
+        duration_seconds=duration,
+        available=True,
+        segments=_clean_segments(payload.get("segments")),
+    )
+
+
+def _clean_segments(value: Any, *, limit: int = 5000) -> list[dict[str, Any]]:
+    """Keep the timed segments a verbose transcription returns, dropping malformed ones."""
+    if not isinstance(value, list):
+        return []
+    result: list[dict[str, Any]] = []
+    for raw in value[:limit]:
+        if not isinstance(raw, dict):
+            continue
+        text = str(raw.get("text") or "").strip()
+        if not text:
+            continue
+        start = raw.get("start")
+        end = raw.get("end")
+        result.append(
+            {
+                "start": float(start) if isinstance(start, (int, float)) and not isinstance(start, bool) else None,
+                "end": float(end) if isinstance(end, (int, float)) and not isinstance(end, bool) else None,
+                "text": text[:4000],
+                "speaker": str(raw.get("speaker") or "").strip()[:100],
+            }
+        )
+    return result
 
 
 async def extract_protocol(transcript: str, session: Any, user_id: str | None) -> dict[str, Any] | None:

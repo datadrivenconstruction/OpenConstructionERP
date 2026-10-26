@@ -623,8 +623,12 @@ export interface MinutesContent {
   agenda: MinutesAgendaLine[];
   action_items: MinutesActionLine[];
   decisions: string[];
+  /** Questions left open, confirmed from a recording. */
+  open_questions?: string[];
   next_meeting_date: string | null;
   summary: string;
+  /** ISO 639-1 language of the meeting; the PDF prints its labels in it. */
+  language?: string | null;
   generated_at: string | null;
 }
 

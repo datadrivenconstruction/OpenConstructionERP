@@ -93,6 +93,7 @@ import {
 import { AttendanceSection } from './AttendanceSection';
 import { ActionRegisterPanel } from './ActionRegisterPanel';
 import { MinutesDialog } from './MinutesDialog';
+import { MeetingRecordingPanel } from './MeetingRecordingPanel';
 import { RecurringSeriesDialog } from './RecurringSeriesDialog';
 import { meetingsGuide } from './meetingsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
@@ -1853,6 +1854,13 @@ const MeetingRow = React.memo(function MeetingRow({
 
           {/* Tracked actions with carry-over across a recurring series */}
           <ActionRegisterPanel meetingId={meeting.id} seriesId={meeting.series_id ?? null} />
+
+          {/* Minutes from audio: consent, record or upload, transcript, AI proposals */}
+          <MeetingRecordingPanel
+            meetingId={meeting.id}
+            projectId={meeting.project_id}
+            attendees={meeting.attendees ?? []}
+          />
 
           {/* Linked Tasks */}
           {meeting.action_items && meeting.action_items.length > 0 && meeting.status === 'completed' && (
