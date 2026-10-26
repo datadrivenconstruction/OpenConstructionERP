@@ -29,6 +29,7 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { ExportEmbeddingPanel } from './ExportEmbeddingPanel';
+import { BOQColumnPicker } from './BOQColumnPicker';
 import {
   Plus,
   Download,
@@ -134,6 +135,8 @@ export interface BOQToolbarProps {
   onPasteFromExcel?: () => void;
   // Custom columns
   onManageColumns?: () => void;
+  /** Custom columns offered in the personal column picker. */
+  customColumnList?: { name: string; display_name: string }[];
   customColumnCount?: number;
   // Resource cost-driver split (Material/Labor/Equipment) display: one button
   // cycles pill -> columns -> off so it can be removed entirely.
@@ -246,6 +249,7 @@ export function BOQToolbar({
   onToggleSmartPanel,
   onPasteFromExcel,
   onManageColumns,
+  customColumnList,
   resourceSplitMode,
   onCycleResourceSplit,
   customColumnCount,
@@ -619,6 +623,7 @@ export function BOQToolbar({
               testId="boq-manage-columns-button"
             />
           )}
+          {onManageColumns && <BOQColumnPicker customColumns={customColumnList} />}
           {onManageVariables && (
             <IconBtn
               icon={<VariableIcon size={15} />}

@@ -68,6 +68,7 @@ import {
   type CollabLock,
 } from '@/features/collab_locks';
 import { getColumnDefs, getCustomColumnDefs } from './grid/columnDefs';
+import { applyColumnPrefs, boqColumnPref, isMovableColumn } from './grid/columnPrefs';
 import { auditRowTooltip } from './grid/auditMarkers';
 import type { FormulaVariable } from './grid/formula';
 import {
@@ -1518,6 +1519,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   // keep rebuilding on a data change. Without custom columns there is
   // nothing to rebuild, and a stable empty list keeps the memo quiet.
   const customColumnPositions = customColumns && customColumns.length > 0 ? positions : NO_POSITIONS;
+  const columnPrefs = boqColumnPref.use();
   const columnDefs = useMemo(() => {
     const defs = getColumnDefs({ currencySymbol, currencyCode, locale, fmt, t: tRef.current, displayCurrency: displayCurrency ?? null, showResourceSplit, showCostAllocation, showDrawingRefs, displayQuantity, maxOrdinalChars });
     // Override ordinal column with custom renderer
@@ -1556,10 +1558,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         defs.push(...customDefs);
       }
     }
+    const placed = applyColumnPrefs(defs, columnPrefs);
     // A locked bill: no column opens an editor and no row drags.
-    if (readOnly) return defs.map((c) => ({ ...c, editable: false, rowDrag: false }));
-    return defs;
-  }, [currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, showCostAllocation, showDrawingRefs, displayQuantity, maxOrdinalChars, readOnly]);
+    if (readOnly) return placed.map((c) => ({ ...c, editable: false, rowDrag: false }));
+    return placed;
+  }, [columnPrefs, currencySymbol, currencyCode, locale, fmt, i18n.language, customColumns, customColumnPositions, boqVariablesMap, displayCurrency, showResourceSplit, showCostAllocation, showDrawingRefs, displayQuantity, maxOrdinalChars, readOnly]);
 
   /* ── Calculated-column refresh on positions change ──────────────────
    * AG Grid re-runs `valueGetter` on every refresh; for cross-position
@@ -1594,6 +1597,21 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       });
     }
   }, [customColumns]);
+
+  /* The person's column choice: AG Grid keeps runtime visibility and order
+   * across columnDefs updates, so push both through the API as well. Columns
+   * driven by their own toolbar switch keep the state they have. */
+  useEffect(() => {
+    const api = gridApiRef.current;
+    if (!api) return;
+    const current = new Map(api.getColumnState().map((c) => [c.colId, c]));
+    const state = columnDefs.flatMap((c) => {
+      const colId = c.colId ?? (c.field as string | undefined);
+      if (!colId || !current.has(colId)) return [];
+      return [{ colId, hide: isMovableColumn(colId) ? !!c.hide : current.get(colId)!.hide }];
+    });
+    api.applyColumnState({ state, applyOrder: true });
+  }, [columnDefs]);
 
   /* ── Resource-split columns: drive visibility from the toolbar toggle ─
    * AG Grid keeps each column's runtime visibility across columnDefs
