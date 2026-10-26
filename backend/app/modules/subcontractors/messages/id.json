@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Pengajuan pembayaran subkontraktor {pay_app} dimasukkan dalam klaim ini padahal berstatus {status}, sehingga jumlah yang ditagihkan ke pemilik belum disetujui untuk dibayar",
+      "suggestion": "Setujui pengajuan pembayaran, atau keluarkan dari klaim ini sampai disetujui",
+      "statuses": {
+        "submitted": "diajukan dan belum ditinjau",
+        "rejected": "ditolak"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Pengajuan pembayaran subkontraktor {pay_app} bernilai neto {net}, tetapi surat pelepasan hak gadai (lien waiver) yang tersimpan hanya mencakup {covered}",
+      "fail_through_date": "Surat pelepasan hak gadai untuk pengajuan pembayaran subkontraktor {pay_app} berlaku hingga {through_date}, yaitu sebelum akhir periode pengajuan pembayaran pada {period_end}",
+      "suggestion": "Dapatkan surat pelepasan hak gadai yang mencakup seluruh jumlah neto hingga akhir periode, atau keluarkan pengajuan pembayaran dari klaim ini"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Pengajuan pembayaran subkontraktor {pay_app} telah dibayar pada klaim sebelumnya, tetapi tidak ada surat pelepasan hak gadai tanpa syarat yang tersimpan dan berlaku hingga akhir periodenya, yaitu {period_end}",
+      "suggestion": "Dapatkan surat pelepasan hak gadai tanpa syarat untuk pembayaran yang sudah dilakukan dan catat tanggal berlakunya"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Satu baris pengajuan pembayaran subkontraktor {pay_app} untuk paket pekerjaan {package}, yang disetujui sebesar {amount}, tidak terhubung ke baris mana pun dalam daftar kuantitas dan harga kontrak ini",
+      "fail_foreign_line": "Satu baris pengajuan pembayaran subkontraktor {pay_app} untuk paket pekerjaan {package}, yang disetujui sebesar {amount}, terhubung ke baris kontrak lain",
+      "fail_parent_line": "Satu baris pengajuan pembayaran subkontraktor {pay_app} untuk paket pekerjaan {package}, yang disetujui sebesar {amount}, terhubung ke baris pengelompokan, yang tidak ditagih langsung",
+      "suggestion": "Hubungkan paket pekerjaan, atau baris pengajuan pembayaran ini, ke baris yang dapat ditagih dalam daftar kuantitas dan harga kontrak ini"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Jumlah subkontrak yang disetujui sampai saat ini pada baris {line} totalnya {approved}, di atas nilai terjadwalnya sebesar {scheduled}",
+      "suggestion": "Periksa persetujuan subkontrak pada baris ini, atau tambahkan perintah perubahan yang menaikkan nilai terjadwalnya"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} tidak memiliki {document} yang tersimpan per {as_of}, akhir periode klaim ini",
+      "fail_expired": "{document} milik {subcontractor} sudah tidak berlaku pada {as_of}, akhir periode klaim ini",
+      "fail_revoked": "{document} milik {subcontractor} telah dicabut dan tidak berlaku pada {as_of}, akhir periode klaim ini",
+      "suggestion": "Minta sertifikat terbaru dari subkontraktor, atau keluarkan pengajuan pembayarannya dari klaim ini",
+      "documents": {
+        "insurance": "sertifikat asuransi",
+        "license": "izin usaha",
+        "iso": "sertifikat ISO",
+        "safety": "sertifikat keselamatan",
+        "bond": "jaminan",
+        "wsl_clearance": "surat keterangan keselamatan pekerja",
+        "wsib_clearance": "sertifikat clearance WSIB",
+        "wcb_clearance": "surat clearance WCB",
+        "attestation_revenu_quebec": "attestation Revenu Québec",
+        "construction_tax_exemption": "sertifikat pembebasan pajak konstruksi",
+        "social_security_clearance": "sertifikat clearance jaminan sosial",
+        "employers_liability_clearance": "sertifikat clearance tanggung jawab pemberi kerja"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} dibayar pada {paid_on} untuk pengajuan pembayaran {pay_app} tanpa ada {document} yang tersimpan. {withholding}",
+      "fail_expired": "{subcontractor} dibayar pada {paid_on} untuk pengajuan pembayaran {pay_app}, tetapi {document} miliknya telah berakhir pada {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} dibayar pada {paid_on} untuk pengajuan pembayaran {pay_app}, tetapi {document} miliknya telah dicabut. {withholding}",
+      "fail_undated": "Pengajuan pembayaran {pay_app} milik {subcontractor} ditandai telah dibayar tetapi tidak memiliki tanggal pembayaran, sehingga tidak dapat diperiksa apakah {document} mencakup pembayaran tersebut. {withholding}",
+      "fail_pending": "Pengajuan pembayaran {pay_app} milik {subcontractor} belum dibayar. {document} dihitung pada hari pembayaran, bukan pada akhir periode, dan yang tersimpan berlaku hingga {valid_until}. {withholding}",
+      "fail_pending_open": "Pengajuan pembayaran {pay_app} milik {subcontractor} belum dibayar. {document} dihitung pada hari pembayaran, bukan pada akhir periode; yang tersimpan tidak memiliki tanggal berakhir. {withholding}",
+      "fail_pending_invalid": "Pengajuan pembayaran {pay_app} milik {subcontractor} belum dibayar, dan tidak ada {document} berlaku yang tersimpan untuk mencakup pembayaran setelah akhir periode. {withholding}",
+      "suggestion": "Pastikan sertifikat berlaku pada hari pembayaran, dan jika tidak, minta yang terbaru dari subkontraktor. Pajak tidak dipotong di sini: bila pembayaran jatuh di luar sertifikat yang berlaku, pemotongan dan pelaporannya menjadi tanggung jawab Anda.",
+      "withholding": {
+        "gross_limit": "Tanpa dokumen tersebut, {rate}% dari pembayaran, termasuk PPN, harus dipotong dan disetor ke kantor pajak, kecuali seluruh pembayaran kepada subkontraktor ini dalam tahun kalender tidak melebihi {limit} ({reference}).",
+        "gross": "Tanpa dokumen tersebut, {rate}% dari pembayaran, termasuk PPN, harus dipotong dan disetor ke kantor pajak ({reference}).",
+        "net_limit": "Tanpa dokumen tersebut, {rate}% dari pembayaran, tidak termasuk PPN, harus dipotong dan disetor ke kantor pajak, kecuali seluruh pembayaran kepada subkontraktor ini dalam tahun kalender tidak melebihi {limit} ({reference}).",
+        "net": "Tanpa dokumen tersebut, {rate}% dari pembayaran, tidak termasuk PPN, harus dipotong dan disetor ke kantor pajak ({reference}).",
+        "unknown": "Tanpa dokumen tersebut, pembayaran dapat dikenai pemotongan pajak."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Sertifikat {document} yang wajib tidak berlaku (kedaluwarsa {date}), sehingga pembayaran kepada subkontraktor ini diblokir",
+      "suggestion": "Catat sertifikat yang telah diperpanjang, atau minta manajer mengesampingkan pemblokiran dengan menyertakan alasan"
+    },
+    "certificate_expiring": {
+      "fail": "Sertifikat {document} kedaluwarsa pada {date}, dalam {days} hari",
+      "suggestion": "Minta perpanjangan dari subkontraktor sebelum sertifikat berakhir"
+    },
+    "policy_details_recorded": {
+      "fail": "Sertifikat {document} yang wajib tidak memiliki nomor polis atau nilai pertanggungan",
+      "suggestion": "Tambahkan nomor polis dan nilai pertanggungan dari sertifikat"
+    },
+    "cert_types": {
+      "public_liability": "Tanggung gugat publik",
+      "employers_liability": "Tanggung gugat pemberi kerja",
+      "professional_indemnity": "Ganti rugi profesional",
+      "contractors_all_risk": "Asuransi semua risiko kontraktor",
+      "workers_compensation": "Kompensasi pekerja",
+      "motor_vehicle": "Kendaraan bermotor",
+      "product_liability": "Tanggung gugat produk",
+      "plant_equipment": "Peralatan dan mesin",
+      "environmental_liability": "Tanggung gugat lingkungan",
+      "cyber_liability": "Tanggung gugat siber",
+      "insurance": "Asuransi"
+    }
+  }
+}

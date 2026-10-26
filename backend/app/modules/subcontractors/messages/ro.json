@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Cererea de plată a subcontractorului {pay_app} este inclusă în această solicitare deși are starea „{status}”, deci suma facturată beneficiarului nu este aprobată pentru plată",
+      "suggestion": "Aprobați cererea de plată sau excludeți-o din această solicitare până la aprobare",
+      "statuses": {
+        "submitted": "depusă și încă neverificată",
+        "rejected": "respinsă"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Cererea de plată a subcontractorului {pay_app} însumează {net} net, dar renunțările la privilegiu (lien waivers) din dosar acoperă doar {covered}",
+      "fail_through_date": "Renunțarea la privilegiu pentru cererea de plată a subcontractorului {pay_app} este valabilă până la {through_date}, adică înainte de sfârșitul perioadei cererii de plată, {period_end}",
+      "suggestion": "Obțineți o renunțare care să acopere întreaga sumă netă până la sfârșitul perioadei sau excludeți cererea de plată din această solicitare"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Cererea de plată a subcontractorului {pay_app} a fost plătită într-o solicitare anterioară, dar în dosar nu există o renunțare necondiționată la privilegiu valabilă până la sfârșitul perioadei sale, {period_end}",
+      "suggestion": "Obțineți renunțarea necondiționată pentru plata deja efectuată și înregistrați data până la care este valabilă"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "O linie din cererea de plată a subcontractorului {pay_app} pentru pachetul de lucrări {package}, aprobată la {amount}, nu este legată de nicio linie din devizul contractului",
+      "fail_foreign_line": "O linie din cererea de plată a subcontractorului {pay_app} pentru pachetul de lucrări {package}, aprobată la {amount}, este legată de o linie a altui contract",
+      "fail_parent_line": "O linie din cererea de plată a subcontractorului {pay_app} pentru pachetul de lucrări {package}, aprobată la {amount}, este legată de o linie de grupare, care nu se facturează direct",
+      "suggestion": "Legați pachetul de lucrări sau această linie a cererii de plată de o linie facturabilă din devizul contractului"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Sumele de subcontractare aprobate până acum pe linia {line} totalizează {approved}, peste valoarea sa programată de {scheduled}",
+      "suggestion": "Verificați aprobările de subcontractare de pe această linie sau adăugați un ordin de modificare care să-i mărească valoarea programată"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} nu are în dosar niciun document „{document}” la data de {as_of}, sfârșitul perioadei acestei solicitări",
+      "fail_expired": "Documentul „{document}” al lui {subcontractor} nu mai era valabil la {as_of}, sfârșitul perioadei acestei solicitări",
+      "fail_revoked": "Documentul „{document}” al lui {subcontractor} fusese revocat și nu era valabil la {as_of}, sfârșitul perioadei acestei solicitări",
+      "suggestion": "Obțineți un certificat actual de la subcontractor sau excludeți cererile sale de plată din această solicitare",
+      "documents": {
+        "insurance": "certificat de asigurare",
+        "license": "licență",
+        "iso": "certificat ISO",
+        "safety": "certificat de securitate",
+        "bond": "garanție",
+        "wsl_clearance": "adeverință de conformitate privind siguranța lucrătorilor",
+        "wsib_clearance": "certificat de conformitate WSIB",
+        "wcb_clearance": "adeverință de conformitate WCB",
+        "attestation_revenu_quebec": "attestation Revenu Québec",
+        "construction_tax_exemption": "certificat de scutire de taxa de construcție",
+        "social_security_clearance": "certificat de atestare fiscală privind asigurările sociale",
+        "employers_liability_clearance": "certificat de conformitate privind răspunderea angajatorului"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} a fost plătit la {paid_on} pentru cererea de plată {pay_app} fără ca în dosar să existe documentul „{document}”. {withholding}",
+      "fail_expired": "{subcontractor} a fost plătit la {paid_on} pentru cererea de plată {pay_app}, dar documentul „{document}” expirase la {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} a fost plătit la {paid_on} pentru cererea de plată {pay_app}, dar documentul „{document}” fusese revocat. {withholding}",
+      "fail_undated": "Cererea de plată {pay_app} a lui {subcontractor} este marcată ca plătită, dar nu are data plății, deci nu se poate verifica dacă documentul „{document}” acoperea plata. {withholding}",
+      "fail_pending": "Cererea de plată {pay_app} a lui {subcontractor} nu este încă plătită. Documentul „{document}” contează în ziua plății, nu la sfârșitul perioadei, iar cel din dosar este valabil până la {valid_until}. {withholding}",
+      "fail_pending_open": "Cererea de plată {pay_app} a lui {subcontractor} nu este încă plătită. Documentul „{document}” contează în ziua plății, nu la sfârșitul perioadei; cel din dosar nu are dată de încheiere. {withholding}",
+      "fail_pending_invalid": "Cererea de plată {pay_app} a lui {subcontractor} nu este încă plătită, iar în dosar nu există un document „{document}” valabil în care să se încadreze o plată de după sfârșitul perioadei. {withholding}",
+      "suggestion": "Verificați că certificatul este valabil în ziua plății și, dacă nu este, obțineți unul actual de la subcontractor. Impozitul nu se reține aici: când o plată cade în afara unui certificat valabil, efectuarea și declararea reținerii vă revin dumneavoastră.",
+      "withholding": {
+        "gross_limit": "Fără el, {rate}% din plată, TVA inclus, trebuie reținut și virat la organul fiscal, cu excepția cazului în care tot ce s-a plătit acestui subcontractor în anul calendaristic rămâne în limita de {limit} ({reference}).",
+        "gross": "Fără el, {rate}% din plată, TVA inclus, trebuie reținut și virat la organul fiscal ({reference}).",
+        "net_limit": "Fără el, {rate}% din plată, fără TVA, trebuie reținut și virat la organul fiscal, cu excepția cazului în care tot ce s-a plătit acestui subcontractor în anul calendaristic rămâne în limita de {limit} ({reference}).",
+        "net": "Fără el, {rate}% din plată, fără TVA, trebuie reținut și virat la organul fiscal ({reference}).",
+        "unknown": "Fără el, plata poate fi supusă reținerii la sursă."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Certificatul obligatoriu „{document}” nu este valabil (expiră la {date}), deci plățile către acest subcontractor sunt blocate",
+      "suggestion": "Înregistrați certificatul reînnoit sau cereți unui manager să ridice blocarea, indicând un motiv"
+    },
+    "certificate_expiring": {
+      "fail": "Certificatul „{document}” expiră la {date}, în {days} zi(le)",
+      "suggestion": "Cereți reînnoirea de la subcontractor înainte ca certificatul să expire"
+    },
+    "policy_details_recorded": {
+      "fail": "Certificatul obligatoriu „{document}” nu are număr de poliță sau sumă acoperită",
+      "suggestion": "Adăugați numărul poliței și suma asigurată din certificat"
+    },
+    "cert_types": {
+      "public_liability": "Răspundere civilă generală",
+      "employers_liability": "Răspunderea angajatorului",
+      "professional_indemnity": "Răspundere civilă profesională",
+      "contractors_all_risk": "Asigurare CAR (toate riscurile constructorului)",
+      "workers_compensation": "Accidente de muncă",
+      "motor_vehicle": "Autovehicule",
+      "product_liability": "Răspundere pentru produs",
+      "plant_equipment": "Utilaje și echipamente",
+      "environmental_liability": "Răspundere pentru mediu",
+      "cyber_liability": "Răspundere cibernetică",
+      "insurance": "Asigurare"
+    }
+  }
+}

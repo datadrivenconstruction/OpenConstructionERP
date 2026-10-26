@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "La certificación de pago del subcontratista {pay_app} está incluida en esta reclamación mientras está {status}, por lo que el importe facturado al propietario no ha sido aprobado para pago",
+      "suggestion": "Apruebe la certificación de pago o exclúyala de esta reclamación hasta que sea aprobada",
+      "statuses": {
+        "submitted": "presentada y aún no revisada",
+        "rejected": "rechazada"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "La certificación de pago del subcontratista {pay_app} tiene un neto de {net}, pero las renuncias a gravamen (lien waivers) archivadas solo cubren {covered}",
+      "fail_through_date": "La renuncia a gravamen de la certificación de pago del subcontratista {pay_app} llega hasta el {through_date}, anterior al cierre del periodo de la certificación, el {period_end}",
+      "suggestion": "Obtenga una renuncia a gravamen que cubra el importe neto completo hasta el final del periodo, o excluya la certificación de pago de esta reclamación"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "La certificación de pago del subcontratista {pay_app} se pagó en una reclamación anterior, pero no hay una renuncia a gravamen incondicional archivada que llegue hasta el cierre de su periodo, el {period_end}",
+      "suggestion": "Obtenga la renuncia a gravamen incondicional del pago ya realizado y registre la fecha hasta la que llega"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Una línea de la certificación de pago del subcontratista {pay_app} para el paquete de trabajo {package}, aprobada por {amount}, no está vinculada a ninguna línea del cuadro de precios del contrato",
+      "fail_foreign_line": "Una línea de la certificación de pago del subcontratista {pay_app} para el paquete de trabajo {package}, aprobada por {amount}, está vinculada a una línea de otro contrato",
+      "fail_parent_line": "Una línea de la certificación de pago del subcontratista {pay_app} para el paquete de trabajo {package}, aprobada por {amount}, está vinculada a una línea de agrupación, que no se factura directamente",
+      "suggestion": "Vincule el paquete de trabajo, o esta línea de la certificación, a una línea facturable del cuadro de precios del contrato"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Los importes de subcontrato aprobados hasta la fecha en la línea {line} suman {approved}, por encima de su valor programado de {scheduled}",
+      "suggestion": "Revise las aprobaciones de subcontrato de esta línea o añada una orden de cambio que aumente su valor programado"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} no tiene archivado ningún documento de tipo «{document}» a fecha {as_of}, el cierre del periodo de esta reclamación",
+      "fail_expired": "El documento «{document}» de {subcontractor} ya no estaba vigente el {as_of}, el cierre del periodo de esta reclamación",
+      "fail_revoked": "El documento «{document}» de {subcontractor} fue revocado y no estaba vigente el {as_of}, el cierre del periodo de esta reclamación",
+      "suggestion": "Solicite al subcontratista un certificado vigente o excluya sus certificaciones de pago de esta reclamación",
+      "documents": {
+        "insurance": "certificado de seguro",
+        "license": "licencia",
+        "iso": "certificado ISO",
+        "safety": "certificado de seguridad",
+        "bond": "fianza",
+        "wsl_clearance": "carta de conformidad de seguridad laboral",
+        "wsib_clearance": "certificado de conformidad WSIB",
+        "wcb_clearance": "carta de conformidad WCB",
+        "attestation_revenu_quebec": "attestation de Revenu Québec",
+        "construction_tax_exemption": "certificado de exención del impuesto de construcción",
+        "social_security_clearance": "certificado de estar al corriente con la seguridad social",
+        "employers_liability_clearance": "certificado de conformidad de responsabilidad del empleador"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "Se pagó a {subcontractor} el {paid_on} la certificación de pago {pay_app} sin tener archivado ningún documento de tipo «{document}». {withholding}",
+      "fail_expired": "Se pagó a {subcontractor} el {paid_on} la certificación de pago {pay_app}, pero su documento «{document}» había caducado el {lapsed_on}. {withholding}",
+      "fail_revoked": "Se pagó a {subcontractor} el {paid_on} la certificación de pago {pay_app}, pero su documento «{document}» había sido revocado. {withholding}",
+      "fail_undated": "La certificación de pago {pay_app} de {subcontractor} está marcada como pagada pero no tiene fecha de pago, por lo que no se puede comprobar si el documento «{document}» cubría el pago. {withholding}",
+      "fail_pending": "La certificación de pago {pay_app} de {subcontractor} aún no está pagada. El documento «{document}» cuenta el día en que se paga, no al cierre del periodo, y el archivado es válido hasta el {valid_until}. {withholding}",
+      "fail_pending_open": "La certificación de pago {pay_app} de {subcontractor} aún no está pagada. El documento «{document}» cuenta el día en que se paga, no al cierre del periodo; el archivado no tiene fecha de fin. {withholding}",
+      "fail_pending_invalid": "La certificación de pago {pay_app} de {subcontractor} aún no está pagada y no hay archivado ningún documento «{document}» válido en el que pueda caer un pago posterior al cierre del periodo. {withholding}",
+      "suggestion": "Compruebe que el certificado es válido el día del pago y, si no lo es, solicite uno vigente al subcontratista. El impuesto no se deduce aquí: cuando un pago queda fuera de un certificado válido, practicar y declarar la retención corresponde a usted.",
+      "withholding": {
+        "gross_limit": "Sin él, debe retenerse el {rate}% del pago, IVA incluido, e ingresarse en la administración tributaria, salvo que todo lo pagado a este subcontratista en el año natural no supere {limit} ({reference}).",
+        "gross": "Sin él, debe retenerse el {rate}% del pago, IVA incluido, e ingresarse en la administración tributaria ({reference}).",
+        "net_limit": "Sin él, debe retenerse el {rate}% del pago, IVA excluido, e ingresarse en la administración tributaria, salvo que todo lo pagado a este subcontratista en el año natural no supere {limit} ({reference}).",
+        "net": "Sin él, debe retenerse el {rate}% del pago, IVA excluido, e ingresarse en la administración tributaria ({reference}).",
+        "unknown": "Sin él, el pago puede estar sujeto a retención fiscal."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "El certificado obligatorio de {document} no es válido (vencimiento {date}), por lo que los pagos a este subcontratista están bloqueados",
+      "suggestion": "Registre el certificado renovado o pida a un responsable que levante el bloqueo indicando un motivo"
+    },
+    "certificate_expiring": {
+      "fail": "El certificado de {document} vence el {date}, dentro de {days} día(s)",
+      "suggestion": "Solicite la renovación al subcontratista antes de que caduque el certificado"
+    },
+    "policy_details_recorded": {
+      "fail": "El certificado obligatorio de {document} no tiene número de póliza ni importe de cobertura",
+      "suggestion": "Añada el número de póliza y la suma asegurada que figuran en el certificado"
+    },
+    "cert_types": {
+      "public_liability": "Responsabilidad civil general",
+      "employers_liability": "Responsabilidad civil del empleador",
+      "professional_indemnity": "Responsabilidad civil profesional",
+      "contractors_all_risk": "Todo riesgo construcción",
+      "workers_compensation": "Accidentes de trabajo",
+      "motor_vehicle": "Vehículos a motor",
+      "product_liability": "Responsabilidad por productos",
+      "plant_equipment": "Maquinaria y equipos",
+      "environmental_liability": "Responsabilidad medioambiental",
+      "cyber_liability": "Responsabilidad cibernética",
+      "insurance": "Seguro"
+    }
+  }
+}

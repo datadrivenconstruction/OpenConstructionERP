@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "U redu"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Situacija podizvođača {pay_app} uključena je u ovaj zahtjev iako je u statusu „{status}“, pa iznos fakturiran investitoru nije odobren za plaćanje",
+      "suggestion": "Odobrite situaciju ili je isključite iz ovog zahtjeva dok ne bude odobrena",
+      "statuses": {
+        "submitted": "predana i još nepregledana",
+        "rejected": "odbijena"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Neto iznos situacije podizvođača {pay_app} je {net}, ali izjave o odricanju od založnog prava (lien waiver) u spisu pokrivaju samo {covered}",
+      "fail_through_date": "Izjava o odricanju od založnog prava za situaciju podizvođača {pay_app} vrijedi do {through_date}, što je prije kraja razdoblja situacije, {period_end}",
+      "suggestion": "Pribavite izjavu koja pokriva cijeli neto iznos do kraja razdoblja ili isključite situaciju iz ovog zahtjeva"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Situacija podizvođača {pay_app} plaćena je u ranijem zahtjevu, ali u spisu nema bezuvjetne izjave o odricanju od založnog prava koja vrijedi do kraja njezina razdoblja, {period_end}",
+      "suggestion": "Pribavite bezuvjetnu izjavu za već izvršeno plaćanje i evidentirajte datum do kojeg vrijedi"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Stavka situacije podizvođača {pay_app} za paket radova {package}, odobrena u iznosu {amount}, nije povezana ni s jednom stavkom troškovnika ovog ugovora",
+      "fail_foreign_line": "Stavka situacije podizvođača {pay_app} za paket radova {package}, odobrena u iznosu {amount}, povezana je sa stavkom drugog ugovora",
+      "fail_parent_line": "Stavka situacije podizvođača {pay_app} za paket radova {package}, odobrena u iznosu {amount}, povezana je sa skupnom stavkom, koja se ne fakturira izravno",
+      "suggestion": "Povežite paket radova ili ovu stavku situacije sa stavkom troškovnika ovog ugovora koja se može fakturirati"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Iznosi podugovora odobreni do danas na stavci {line} ukupno iznose {approved}, što je iznad njezine planirane vrijednosti od {scheduled}",
+      "suggestion": "Provjerite odobrenja podugovora na ovoj stavci ili dodajte izmjenu ugovora koja povećava njezinu planiranu vrijednost"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} nema u spisu dokument „{document}“ na dan {as_of}, kraj razdoblja ovog zahtjeva",
+      "fail_expired": "Dokument „{document}“ podizvođača {subcontractor} više nije vrijedio na dan {as_of}, kraj razdoblja ovog zahtjeva",
+      "fail_revoked": "Dokument „{document}“ podizvođača {subcontractor} bio je opozvan i nije vrijedio na dan {as_of}, kraj razdoblja ovog zahtjeva",
+      "suggestion": "Zatražite od podizvođača važeću potvrdu ili isključite njegove situacije iz ovog zahtjeva",
+      "documents": {
+        "insurance": "potvrda o osiguranju",
+        "license": "licenca",
+        "iso": "ISO certifikat",
+        "safety": "potvrda o zaštiti na radu",
+        "bond": "jamstvo",
+        "wsl_clearance": "potvrda o sigurnosti radnika",
+        "wsib_clearance": "WSIB potvrda o podmirenju",
+        "wcb_clearance": "WCB potvrda o podmirenju",
+        "attestation_revenu_quebec": "potvrda Revenu Québeca",
+        "construction_tax_exemption": "potvrda o izuzeću od građevinskog poreza",
+        "social_security_clearance": "potvrda o podmirenim doprinosima socijalnog osiguranja",
+        "employers_liability_clearance": "potvrda o podmirenju odgovornosti poslodavca"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "Podizvođaču {subcontractor} plaćeno je {paid_on} po situaciji {pay_app} bez dokumenta „{document}“ u spisu. {withholding}",
+      "fail_expired": "Podizvođaču {subcontractor} plaćeno je {paid_on} po situaciji {pay_app}, ali mu je dokument „{document}“ istekao {lapsed_on}. {withholding}",
+      "fail_revoked": "Podizvođaču {subcontractor} plaćeno je {paid_on} po situaciji {pay_app}, ali mu je dokument „{document}“ bio opozvan. {withholding}",
+      "fail_undated": "Situacija {pay_app} podizvođača {subcontractor} označena je kao plaćena, ali nema datum plaćanja, pa se ne može provjeriti je li dokument „{document}“ pokrivao plaćanje. {withholding}",
+      "fail_pending": "Situacija {pay_app} podizvođača {subcontractor} još nije plaćena. Dokument „{document}“ vrijedi na dan plaćanja, a ne na kraju razdoblja, a onaj u spisu vrijedi do {valid_until}. {withholding}",
+      "fail_pending_open": "Situacija {pay_app} podizvođača {subcontractor} još nije plaćena. Dokument „{document}“ vrijedi na dan plaćanja, a ne na kraju razdoblja; onaj u spisu nema datum isteka. {withholding}",
+      "fail_pending_invalid": "Situacija {pay_app} podizvođača {subcontractor} još nije plaćena, a u spisu nema važećeg dokumenta „{document}“ unutar kojeg bi mogla pasti isplata nakon kraja razdoblja. {withholding}",
+      "suggestion": "Provjerite vrijedi li potvrda na dan plaćanja, a ako ne vrijedi, zatražite važeću od podizvođača. Porez se ovdje ne obustavlja: ako plaćanje padne izvan važeće potvrde, obustava i prijava poreza vaša su obveza.",
+      "withholding": {
+        "gross_limit": "Bez njega treba obustaviti {rate} % plaćanja, uključujući PDV, i uplatiti ga poreznoj upravi, osim ako sve plaćeno ovom podizvođaču u kalendarskoj godini ostane unutar {limit} ({reference}).",
+        "gross": "Bez njega treba obustaviti {rate} % plaćanja, uključujući PDV, i uplatiti ga poreznoj upravi ({reference}).",
+        "net_limit": "Bez njega treba obustaviti {rate} % plaćanja, bez PDV-a, i uplatiti ga poreznoj upravi, osim ako sve plaćeno ovom podizvođaču u kalendarskoj godini ostane unutar {limit} ({reference}).",
+        "net": "Bez njega treba obustaviti {rate} % plaćanja, bez PDV-a, i uplatiti ga poreznoj upravi ({reference}).",
+        "unknown": "Bez njega plaćanje može podlijegati obustavi poreza."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Obvezna potvrda „{document}“ nije važeća (istek {date}), pa su plaćanja ovom podizvođaču blokirana",
+      "suggestion": "Evidentirajte obnovljenu potvrdu ili zatražite od voditelja da uz obrazloženje ukine blokadu"
+    },
+    "certificate_expiring": {
+      "fail": "Potvrda „{document}“ istječe {date}, za {days} dan(a)",
+      "suggestion": "Zatražite obnovu od podizvođača prije isteka potvrde"
+    },
+    "policy_details_recorded": {
+      "fail": "Obvezna potvrda „{document}“ nema broj police ni iznos pokrića",
+      "suggestion": "Dodajte broj police i osigurani iznos iz potvrde"
+    },
+    "cert_types": {
+      "public_liability": "Odgovornost prema trećim osobama",
+      "employers_liability": "Odgovornost poslodavca",
+      "professional_indemnity": "Profesionalna odgovornost",
+      "contractors_all_risk": "Osiguranje svih rizika izvođača",
+      "workers_compensation": "Osiguranje radnika od nezgode",
+      "motor_vehicle": "Motorna vozila",
+      "product_liability": "Odgovornost za proizvod",
+      "plant_equipment": "Strojevi i oprema",
+      "environmental_liability": "Odgovornost za okoliš",
+      "cyber_liability": "Kibernetička odgovornost",
+      "insurance": "Osiguranje"
+    }
+  }
+}

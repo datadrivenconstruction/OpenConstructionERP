@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Đề nghị thanh toán của nhà thầu phụ {pay_app} được đưa vào yêu cầu thanh toán này trong khi đang ở trạng thái \"{status}\", nên số tiền lập hóa đơn cho chủ đầu tư chưa được duyệt chi",
+      "suggestion": "Duyệt đề nghị thanh toán, hoặc loại nó khỏi yêu cầu thanh toán này cho đến khi được duyệt",
+      "statuses": {
+        "submitted": "đã nộp và chưa được xem xét",
+        "rejected": "bị từ chối"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Đề nghị thanh toán của nhà thầu phụ {pay_app} có giá trị ròng {net}, nhưng các văn bản từ bỏ quyền cầm giữ (lien waiver) đang lưu chỉ bao phủ {covered}",
+      "fail_through_date": "Văn bản từ bỏ quyền cầm giữ của đề nghị thanh toán nhà thầu phụ {pay_app} có hiệu lực đến {through_date}, tức trước ngày kết thúc kỳ của đề nghị thanh toán là {period_end}",
+      "suggestion": "Thu thập văn bản từ bỏ bao phủ toàn bộ giá trị ròng đến hết kỳ, hoặc loại đề nghị thanh toán khỏi yêu cầu thanh toán này"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Đề nghị thanh toán của nhà thầu phụ {pay_app} đã được thanh toán ở yêu cầu trước, nhưng hồ sơ không có văn bản từ bỏ quyền cầm giữ vô điều kiện có hiệu lực đến hết kỳ của nó, {period_end}",
+      "suggestion": "Thu thập văn bản từ bỏ vô điều kiện cho khoản đã thanh toán và ghi lại ngày có hiệu lực đến"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Một dòng của đề nghị thanh toán nhà thầu phụ {pay_app} cho gói công việc {package}, được duyệt {amount}, không liên kết với dòng nào trong bảng khối lượng của hợp đồng này",
+      "fail_foreign_line": "Một dòng của đề nghị thanh toán nhà thầu phụ {pay_app} cho gói công việc {package}, được duyệt {amount}, liên kết với một dòng của hợp đồng khác",
+      "fail_parent_line": "Một dòng của đề nghị thanh toán nhà thầu phụ {pay_app} cho gói công việc {package}, được duyệt {amount}, liên kết với một dòng nhóm, vốn không được lập hóa đơn trực tiếp",
+      "suggestion": "Liên kết gói công việc, hoặc dòng này của đề nghị thanh toán, với một dòng có thể lập hóa đơn trong bảng khối lượng của hợp đồng này"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Tổng các khoản thầu phụ đã duyệt đến nay ở dòng {line} là {approved}, vượt giá trị theo kế hoạch của dòng này là {scheduled}",
+      "suggestion": "Kiểm tra các lần duyệt thầu phụ ở dòng này, hoặc thêm lệnh thay đổi để tăng giá trị theo kế hoạch của dòng"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} không có {document} nào được lưu tại thời điểm {as_of}, ngày kết thúc kỳ của yêu cầu thanh toán này",
+      "fail_expired": "{document} của {subcontractor} đã hết hiệu lực vào ngày {as_of}, ngày kết thúc kỳ của yêu cầu thanh toán này",
+      "fail_revoked": "{document} của {subcontractor} đã bị thu hồi và không có hiệu lực vào ngày {as_of}, ngày kết thúc kỳ của yêu cầu thanh toán này",
+      "suggestion": "Yêu cầu nhà thầu phụ cung cấp chứng nhận còn hiệu lực, hoặc loại các đề nghị thanh toán của họ khỏi yêu cầu thanh toán này",
+      "documents": {
+        "insurance": "chứng nhận bảo hiểm",
+        "license": "giấy phép",
+        "iso": "chứng chỉ ISO",
+        "safety": "chứng nhận an toàn",
+        "bond": "bảo lãnh",
+        "wsl_clearance": "thư xác nhận an toàn lao động",
+        "wsib_clearance": "giấy xác nhận hoàn tất nghĩa vụ WSIB",
+        "wcb_clearance": "thư xác nhận hoàn tất nghĩa vụ WCB",
+        "attestation_revenu_quebec": "giấy xác nhận của Revenu Québec",
+        "construction_tax_exemption": "giấy chứng nhận miễn thuế xây dựng",
+        "social_security_clearance": "giấy xác nhận hoàn tất nghĩa vụ bảo hiểm xã hội",
+        "employers_liability_clearance": "giấy xác nhận hoàn tất trách nhiệm của người sử dụng lao động"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} đã được thanh toán vào {paid_on} cho đề nghị thanh toán {pay_app} khi chưa lưu {document} nào. {withholding}",
+      "fail_expired": "{subcontractor} đã được thanh toán vào {paid_on} cho đề nghị thanh toán {pay_app}, nhưng {document} của họ đã hết hạn vào {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} đã được thanh toán vào {paid_on} cho đề nghị thanh toán {pay_app}, nhưng {document} của họ đã bị thu hồi. {withholding}",
+      "fail_undated": "Đề nghị thanh toán {pay_app} của {subcontractor} được đánh dấu đã thanh toán nhưng không có ngày thanh toán, nên không thể kiểm tra liệu {document} có bao phủ khoản thanh toán hay không. {withholding}",
+      "fail_pending": "Đề nghị thanh toán {pay_app} của {subcontractor} chưa được thanh toán. {document} được tính vào ngày thanh toán, không phải cuối kỳ, và bản đang lưu có hiệu lực đến {valid_until}. {withholding}",
+      "fail_pending_open": "Đề nghị thanh toán {pay_app} của {subcontractor} chưa được thanh toán. {document} được tính vào ngày thanh toán, không phải cuối kỳ; bản đang lưu không có ngày kết thúc. {withholding}",
+      "fail_pending_invalid": "Đề nghị thanh toán {pay_app} của {subcontractor} chưa được thanh toán, và không có {document} còn hiệu lực nào được lưu để bao phủ một khoản thanh toán sau ngày kết thúc kỳ. {withholding}",
+      "suggestion": "Kiểm tra chứng nhận còn hiệu lực vào ngày thanh toán, nếu không thì yêu cầu nhà thầu phụ cung cấp bản mới. Thuế không được khấu trừ tại đây: khi khoản thanh toán nằm ngoài thời hạn hiệu lực của chứng nhận, việc khấu trừ và kê khai thuộc về bạn.",
+      "withholding": {
+        "gross_limit": "Nếu không có, {rate}% khoản thanh toán, đã gồm VAT, phải được khấu trừ và nộp cho cơ quan thuế, trừ khi tổng số tiền đã trả cho nhà thầu phụ này trong năm dương lịch không vượt quá {limit} ({reference}).",
+        "gross": "Nếu không có, {rate}% khoản thanh toán, đã gồm VAT, phải được khấu trừ và nộp cho cơ quan thuế ({reference}).",
+        "net_limit": "Nếu không có, {rate}% khoản thanh toán, chưa gồm VAT, phải được khấu trừ và nộp cho cơ quan thuế, trừ khi tổng số tiền đã trả cho nhà thầu phụ này trong năm dương lịch không vượt quá {limit} ({reference}).",
+        "net": "Nếu không có, {rate}% khoản thanh toán, chưa gồm VAT, phải được khấu trừ và nộp cho cơ quan thuế ({reference}).",
+        "unknown": "Nếu không có, khoản thanh toán có thể bị khấu trừ thuế."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Chứng nhận {document} bắt buộc không còn hiệu lực (hết hạn {date}), nên các khoản thanh toán cho nhà thầu phụ này bị chặn",
+      "suggestion": "Ghi nhận chứng nhận đã gia hạn, hoặc nhờ quản lý bỏ chặn kèm lý do"
+    },
+    "certificate_expiring": {
+      "fail": "Chứng nhận {document} hết hạn vào {date}, còn {days} ngày",
+      "suggestion": "Yêu cầu nhà thầu phụ gia hạn trước khi chứng nhận hết hiệu lực"
+    },
+    "policy_details_recorded": {
+      "fail": "Chứng nhận {document} bắt buộc không có số hợp đồng bảo hiểm hoặc mức bảo hiểm",
+      "suggestion": "Bổ sung số hợp đồng bảo hiểm và số tiền được bảo hiểm từ chứng nhận"
+    },
+    "cert_types": {
+      "public_liability": "Trách nhiệm công cộng",
+      "employers_liability": "Trách nhiệm của người sử dụng lao động",
+      "professional_indemnity": "Trách nhiệm nghề nghiệp",
+      "contractors_all_risk": "Bảo hiểm mọi rủi ro của nhà thầu",
+      "workers_compensation": "Bồi thường cho người lao động",
+      "motor_vehicle": "Phương tiện cơ giới",
+      "product_liability": "Trách nhiệm sản phẩm",
+      "plant_equipment": "Máy móc và thiết bị",
+      "environmental_liability": "Trách nhiệm môi trường",
+      "cyber_liability": "Trách nhiệm an ninh mạng",
+      "insurance": "Bảo hiểm"
+    }
+  }
+}

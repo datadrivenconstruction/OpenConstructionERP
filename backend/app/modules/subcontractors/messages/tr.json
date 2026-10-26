@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "Tamam"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Alt yüklenicinin {pay_app} hakediş talebi \"{status}\" durumundayken bu talebe dahil edilmiş, bu nedenle işverene faturalanan tutar ödeme için onaylanmamıştır",
+      "suggestion": "Hakediş talebini onaylayın veya onaylanana kadar bu talepten çıkarın",
+      "statuses": {
+        "submitted": "gönderildi ve henüz incelenmedi",
+        "rejected": "reddedildi"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Alt yüklenicinin {pay_app} hakediş talebinin net tutarı {net}, ancak dosyadaki rehin hakkından feragat belgeleri (lien waiver) yalnızca {covered} tutarını kapsıyor",
+      "fail_through_date": "Alt yüklenicinin {pay_app} hakediş talebine ait rehin hakkından feragat belgesi {through_date} tarihine kadar geçerli; bu tarih hakediş döneminin bitişinden ({period_end}) öncedir",
+      "suggestion": "Dönem sonuna kadar net tutarın tamamını kapsayan bir feragat belgesi alın veya hakediş talebini bu talepten çıkarın"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Alt yüklenicinin {pay_app} hakediş talebi önceki bir talepte ödenmiş, ancak dosyada dönem bitişi olan {period_end} tarihine kadar geçerli koşulsuz bir feragat belgesi yok",
+      "suggestion": "Yapılmış ödeme için koşulsuz feragat belgesini alın ve geçerli olduğu tarihi kaydedin"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Alt yüklenicinin {pay_app} hakediş talebinin {package} iş paketine ait, {amount} tutarında onaylanmış bir kalemi, bu sözleşmenin keşif özetindeki hiçbir kaleme bağlı değil",
+      "fail_foreign_line": "Alt yüklenicinin {pay_app} hakediş talebinin {package} iş paketine ait, {amount} tutarında onaylanmış bir kalemi, başka bir sözleşmenin kalemine bağlı",
+      "fail_parent_line": "Alt yüklenicinin {pay_app} hakediş talebinin {package} iş paketine ait, {amount} tutarında onaylanmış bir kalemi, doğrudan faturalanmayan bir gruplama kalemine bağlı",
+      "suggestion": "İş paketini veya hakediş talebinin bu kalemini, bu sözleşmenin keşif özetindeki faturalanabilir bir kaleme bağlayın"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "{line} kaleminde bugüne kadar onaylanan alt yüklenici tutarları toplamı {approved}; planlanan değeri olan {scheduled} tutarını aşıyor",
+      "suggestion": "Bu kalemdeki alt yüklenici onaylarını kontrol edin veya planlanan değerini artıran bir değişiklik emri ekleyin"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} için bu talebin dönem sonu olan {as_of} tarihi itibarıyla dosyada \"{document}\" yok",
+      "fail_expired": "{subcontractor} firmasının \"{document}\" belgesi, bu talebin dönem sonu olan {as_of} tarihinde artık geçerli değildi",
+      "fail_revoked": "{subcontractor} firmasının \"{document}\" belgesi iptal edilmişti ve bu talebin dönem sonu olan {as_of} tarihinde geçerli değildi",
+      "suggestion": "Alt yüklenicisinden güncel bir belge alın veya hakediş taleplerini bu talepten çıkarın",
+      "documents": {
+        "insurance": "sigorta belgesi",
+        "license": "lisans",
+        "iso": "ISO belgesi",
+        "safety": "iş güvenliği belgesi",
+        "bond": "teminat",
+        "wsl_clearance": "işçi güvenliği uygunluk yazısı",
+        "wsib_clearance": "WSIB uygunluk belgesi",
+        "wcb_clearance": "WCB uygunluk yazısı",
+        "attestation_revenu_quebec": "Revenu Québec belgesi",
+        "construction_tax_exemption": "inşaat vergisi muafiyet belgesi",
+        "social_security_clearance": "sosyal güvenlik prim borcu yoktur belgesi",
+        "employers_liability_clearance": "işveren sorumluluğu uygunluk belgesi"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} firmasına {pay_app} hakediş talebi için {paid_on} tarihinde ödeme yapıldı, ancak dosyada \"{document}\" yoktu. {withholding}",
+      "fail_expired": "{subcontractor} firmasına {pay_app} hakediş talebi için {paid_on} tarihinde ödeme yapıldı, ancak \"{document}\" belgesinin süresi {lapsed_on} tarihinde dolmuştu. {withholding}",
+      "fail_revoked": "{subcontractor} firmasına {pay_app} hakediş talebi için {paid_on} tarihinde ödeme yapıldı, ancak \"{document}\" belgesi iptal edilmişti. {withholding}",
+      "fail_undated": "{subcontractor} firmasının {pay_app} hakediş talebi ödendi olarak işaretlenmiş ancak ödeme tarihi yok; bu nedenle \"{document}\" belgesinin ödemeyi kapsayıp kapsamadığı kontrol edilemiyor. {withholding}",
+      "fail_pending": "{subcontractor} firmasının {pay_app} hakediş talebi henüz ödenmedi. \"{document}\" belgesi dönem sonunda değil, ödeme gününde geçerli sayılır; dosyadaki belge {valid_until} tarihine kadar geçerli. {withholding}",
+      "fail_pending_open": "{subcontractor} firmasının {pay_app} hakediş talebi henüz ödenmedi. \"{document}\" belgesi dönem sonunda değil, ödeme gününde geçerli sayılır; dosyadaki belgenin bitiş tarihi yok. {withholding}",
+      "fail_pending_invalid": "{subcontractor} firmasının {pay_app} hakediş talebi henüz ödenmedi ve dönem sonundan sonraki bir ödemenin kapsanabileceği geçerli bir \"{document}\" dosyada yok. {withholding}",
+      "suggestion": "Belgenin ödeme gününde geçerli olduğunu kontrol edin; değilse alt yüklenicisinden güncel bir belge alın. Vergi burada kesilmez: ödeme geçerli bir belgenin dışında kalıyorsa kesintiyi yapmak ve bildirmek size aittir.",
+      "withholding": {
+        "gross_limit": "Bu belge olmadan ödemenin %{rate} oranındaki kısmı, KDV dahil, kesilip vergi dairesine yatırılmalıdır; ancak takvim yılında bu alt yükleniciye yapılan tüm ödemeler {limit} sınırı içinde kalıyorsa gerekmez ({reference}).",
+        "gross": "Bu belge olmadan ödemenin %{rate} oranındaki kısmı, KDV dahil, kesilip vergi dairesine yatırılmalıdır ({reference}).",
+        "net_limit": "Bu belge olmadan ödemenin %{rate} oranındaki kısmı, KDV hariç, kesilip vergi dairesine yatırılmalıdır; ancak takvim yılında bu alt yükleniciye yapılan tüm ödemeler {limit} sınırı içinde kalıyorsa gerekmez ({reference}).",
+        "net": "Bu belge olmadan ödemenin %{rate} oranındaki kısmı, KDV hariç, kesilip vergi dairesine yatırılmalıdır ({reference}).",
+        "unknown": "Bu belge olmadan ödeme vergi kesintisine tabi olabilir."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Zorunlu \"{document}\" belgesi geçerli değil (bitiş {date}); bu nedenle bu alt yükleniciye yapılacak ödemeler engellendi",
+      "suggestion": "Yenilenmiş belgeyi kaydedin veya bir yöneticiden nedenini belirterek engeli kaldırmasını isteyin"
+    },
+    "certificate_expiring": {
+      "fail": "\"{document}\" belgesi {date} tarihinde, yani {days} gün içinde sona erecek",
+      "suggestion": "Belge sona ermeden önce alt yükleniciden yenileme isteyin"
+    },
+    "policy_details_recorded": {
+      "fail": "Zorunlu \"{document}\" belgesinde poliçe numarası veya teminat tutarı yok",
+      "suggestion": "Belgedeki poliçe numarasını ve sigorta bedelini ekleyin"
+    },
+    "cert_types": {
+      "public_liability": "Üçüncü şahıs mali sorumluluk",
+      "employers_liability": "İşveren sorumluluk",
+      "professional_indemnity": "Mesleki sorumluluk",
+      "contractors_all_risk": "İnşaat all risk",
+      "workers_compensation": "İşçi tazminatı",
+      "motor_vehicle": "Motorlu taşıt",
+      "product_liability": "Ürün sorumluluk",
+      "plant_equipment": "Makine ve ekipman",
+      "environmental_liability": "Çevre sorumluluk",
+      "cyber_liability": "Siber sorumluluk",
+      "insurance": "Sigorta"
+    }
+  }
+}

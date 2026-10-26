@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Underentreprenørens betalingsanmodning {pay_app} er tatt med i dette kravet mens den har status «{status}», så beløpet som er fakturert byggherren er ikke godkjent for utbetaling",
+      "suggestion": "Godkjenn betalingsanmodningen, eller utelat den fra dette kravet til den er godkjent",
+      "statuses": {
+        "submitted": "innsendt og ennå ikke gjennomgått",
+        "rejected": "avvist"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Underentreprenørens betalingsanmodning {pay_app} er på {net} netto, men fraskrivelsene av panterett (lien waivers) i arkivet dekker bare {covered}",
+      "fail_through_date": "Fraskrivelsen av panterett for underentreprenørens betalingsanmodning {pay_app} gjelder til {through_date}, som er før slutten av betalingsanmodningens periode, {period_end}",
+      "suggestion": "Innhent en fraskrivelse som dekker hele nettobeløpet til slutten av perioden, eller utelat betalingsanmodningen fra dette kravet"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Underentreprenørens betalingsanmodning {pay_app} ble betalt i et tidligere krav, men det finnes ingen ubetinget fraskrivelse av panterett i arkivet som gjelder til slutten av perioden, {period_end}",
+      "suggestion": "Innhent den ubetingede fraskrivelsen for betalingen som allerede er gjort, og registrer datoen den gjelder til"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "En linje i underentreprenørens betalingsanmodning {pay_app} for arbeidspakke {package}, godkjent med {amount}, er ikke knyttet til noen linje i kontraktens prisskjema",
+      "fail_foreign_line": "En linje i underentreprenørens betalingsanmodning {pay_app} for arbeidspakke {package}, godkjent med {amount}, er knyttet til en linje i en annen kontrakt",
+      "fail_parent_line": "En linje i underentreprenørens betalingsanmodning {pay_app} for arbeidspakke {package}, godkjent med {amount}, er knyttet til en grupperingslinje, som ikke faktureres direkte",
+      "suggestion": "Knytt arbeidspakken, eller denne linjen i betalingsanmodningen, til en fakturerbar linje i kontraktens prisskjema"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Underentreprisebeløp godkjent hittil på linje {line} utgjør til sammen {approved}, over den planlagte verdien på {scheduled}",
+      "suggestion": "Kontroller godkjenningene av underentreprise på denne linjen, eller legg til en endringsordre som øker den planlagte verdien"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} har ingen «{document}» i arkivet per {as_of}, slutten av dette kravets periode",
+      "fail_expired": "«{document}» for {subcontractor} var ikke lenger gyldig {as_of}, slutten av dette kravets periode",
+      "fail_revoked": "«{document}» for {subcontractor} var trukket tilbake og var ikke gyldig {as_of}, slutten av dette kravets periode",
+      "suggestion": "Innhent et gyldig sertifikat fra underentreprenøren, eller utelat vedkommendes betalingsanmodninger fra dette kravet",
+      "documents": {
+        "insurance": "forsikringsbevis",
+        "license": "lisens",
+        "iso": "ISO-sertifikat",
+        "safety": "sikkerhetssertifikat",
+        "bond": "garanti",
+        "wsl_clearance": "bekreftelse på arbeidstakersikkerhet",
+        "wsib_clearance": "WSIB-clearancesertifikat",
+        "wcb_clearance": "WCB-clearancebrev",
+        "attestation_revenu_quebec": "attestation fra Revenu Québec",
+        "construction_tax_exemption": "fritaksbevis for byggeavgift",
+        "social_security_clearance": "bekreftelse på at trygdeavgift er oppgjort",
+        "employers_liability_clearance": "clearancesertifikat for arbeidsgiveransvar"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} ble betalt {paid_on} for betalingsanmodning {pay_app} uten at «{document}» lå i arkivet. {withholding}",
+      "fail_expired": "{subcontractor} ble betalt {paid_on} for betalingsanmodning {pay_app}, men «{document}» hadde gått ut {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} ble betalt {paid_on} for betalingsanmodning {pay_app}, men «{document}» var trukket tilbake. {withholding}",
+      "fail_undated": "Betalingsanmodning {pay_app} fra {subcontractor} er merket som betalt, men har ingen betalingsdato, så det kan ikke kontrolleres om «{document}» dekket betalingen. {withholding}",
+      "fail_pending": "Betalingsanmodning {pay_app} fra {subcontractor} er ikke betalt ennå. «{document}» gjelder på betalingsdagen, ikke ved slutten av perioden, og den i arkivet er gyldig til {valid_until}. {withholding}",
+      "fail_pending_open": "Betalingsanmodning {pay_app} fra {subcontractor} er ikke betalt ennå. «{document}» gjelder på betalingsdagen, ikke ved slutten av perioden; den i arkivet har ingen sluttdato. {withholding}",
+      "fail_pending_invalid": "Betalingsanmodning {pay_app} fra {subcontractor} er ikke betalt ennå, og det finnes ingen gyldig «{document}» i arkivet som en betaling etter periodens slutt kan falle inn under. {withholding}",
+      "suggestion": "Kontroller at sertifikatet er gyldig på betalingsdagen, og innhent et gyldig fra underentreprenøren hvis det ikke er det. Skatten trekkes ikke her: der en betaling faller utenfor et gyldig sertifikat, er det ditt ansvar å foreta og rapportere trekket.",
+      "withholding": {
+        "gross_limit": "Uten det må {rate} % av betalingen, inkludert mva., holdes tilbake og betales til skattemyndighetene, med mindre alt som er betalt til denne underentreprenøren i kalenderåret holder seg innenfor {limit} ({reference}).",
+        "gross": "Uten det må {rate} % av betalingen, inkludert mva., holdes tilbake og betales til skattemyndighetene ({reference}).",
+        "net_limit": "Uten det må {rate} % av betalingen, eksklusive mva., holdes tilbake og betales til skattemyndighetene, med mindre alt som er betalt til denne underentreprenøren i kalenderåret holder seg innenfor {limit} ({reference}).",
+        "net": "Uten det må {rate} % av betalingen, eksklusive mva., holdes tilbake og betales til skattemyndighetene ({reference}).",
+        "unknown": "Uten det kan betalingen være gjenstand for skattetrekk."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Det obligatoriske sertifikatet «{document}» er ikke gyldig (utløper {date}), så utbetalinger til denne underentreprenøren er sperret",
+      "suggestion": "Registrer det fornyede sertifikatet, eller be en leder oppheve sperren med en begrunnelse"
+    },
+    "certificate_expiring": {
+      "fail": "Sertifikatet «{document}» utløper {date}, om {days} dag(er)",
+      "suggestion": "Be underentreprenøren om fornyelse før sertifikatet utløper"
+    },
+    "policy_details_recorded": {
+      "fail": "Det obligatoriske sertifikatet «{document}» mangler polisenummer eller dekningsbeløp",
+      "suggestion": "Legg til polisenummeret og forsikringsbeløpet fra sertifikatet"
+    },
+    "cert_types": {
+      "public_liability": "Allmenn ansvarsforsikring",
+      "employers_liability": "Arbeidsgiveransvar",
+      "professional_indemnity": "Yrkesansvarsforsikring",
+      "contractors_all_risk": "Entreprenørens all risk-forsikring",
+      "workers_compensation": "Yrkesskadeforsikring",
+      "motor_vehicle": "Motorvogn",
+      "product_liability": "Produktansvar",
+      "plant_equipment": "Maskiner og utstyr",
+      "environmental_liability": "Miljøansvar",
+      "cyber_liability": "Cyberansvar",
+      "insurance": "Forsikring"
+    }
+  }
+}

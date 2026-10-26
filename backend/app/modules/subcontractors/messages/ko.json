@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "확인"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "하도급업체 기성 청구 {pay_app}이(가) \"{status}\" 상태로 이 청구에 포함되어 있어, 발주처에 청구된 금액이 지급 승인되지 않았습니다",
+      "suggestion": "기성 청구를 승인하거나, 승인될 때까지 이 청구에서 제외하세요",
+      "statuses": {
+        "submitted": "제출됨, 아직 검토되지 않음",
+        "rejected": "반려됨"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "하도급업체 기성 청구 {pay_app}의 순액은 {net}이지만, 보관 중인 유치권 포기 확인서(lien waiver)는 {covered}만 포함합니다",
+      "fail_through_date": "하도급업체 기성 청구 {pay_app}의 유치권 포기 확인서는 {through_date}까지 유효하며, 이는 기성 청구 기간 종료일 {period_end}보다 앞납니다",
+      "suggestion": "기간 종료일까지 순액 전체를 포함하는 포기 확인서를 받거나, 기성 청구를 이 청구에서 제외하세요"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "하도급업체 기성 청구 {pay_app}은(는) 이전 청구에서 지급되었으나, 해당 기간 종료일 {period_end}까지 유효한 무조건 유치권 포기 확인서가 보관되어 있지 않습니다",
+      "suggestion": "이미 지급된 금액에 대한 무조건 포기 확인서를 받고 유효 기한 날짜를 기록하세요"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "하도급업체 기성 청구 {pay_app}의 작업 패키지 {package} 항목(승인 금액 {amount})이 이 계약의 내역서 어떤 항목에도 연결되어 있지 않습니다",
+      "fail_foreign_line": "하도급업체 기성 청구 {pay_app}의 작업 패키지 {package} 항목(승인 금액 {amount})이 다른 계약의 항목에 연결되어 있습니다",
+      "fail_parent_line": "하도급업체 기성 청구 {pay_app}의 작업 패키지 {package} 항목(승인 금액 {amount})이 직접 청구되지 않는 그룹 항목에 연결되어 있습니다",
+      "suggestion": "작업 패키지 또는 이 기성 청구 항목을 이 계약 내역서의 청구 가능한 항목에 연결하세요"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "항목 {line}에서 지금까지 승인된 하도급 금액의 합계는 {approved}로, 예정 금액 {scheduled}을(를) 초과합니다",
+      "suggestion": "이 항목의 하도급 승인 내역을 확인하거나, 예정 금액을 늘리는 변경 지시를 추가하세요"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor}은(는) 이 청구의 기간 종료일인 {as_of} 기준으로 보관 중인 {document}이(가) 없습니다",
+      "fail_expired": "{subcontractor}의 {document}은(는) 이 청구의 기간 종료일인 {as_of}에 이미 유효하지 않았습니다",
+      "fail_revoked": "{subcontractor}의 {document}은(는) 취소되어 이 청구의 기간 종료일인 {as_of}에 유효하지 않았습니다",
+      "suggestion": "하도급업체로부터 유효한 증명서를 받거나, 해당 업체의 기성 청구를 이 청구에서 제외하세요",
+      "documents": {
+        "insurance": "보험 증권",
+        "license": "면허",
+        "iso": "ISO 인증서",
+        "safety": "안전 인증서",
+        "bond": "보증서",
+        "wsl_clearance": "근로자 안전 적합 확인서",
+        "wsib_clearance": "WSIB 적합 증명서",
+        "wcb_clearance": "WCB 적합 확인서",
+        "attestation_revenu_quebec": "Revenu Québec 증명서",
+        "construction_tax_exemption": "건설세 면제 증명서",
+        "social_security_clearance": "사회보험료 완납 증명서",
+        "employers_liability_clearance": "사용자 책임 적합 증명서"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor}에게 기성 청구 {pay_app}이(가) {paid_on}에 지급되었으나 보관 중인 {document}이(가) 없었습니다. {withholding}",
+      "fail_expired": "{subcontractor}에게 기성 청구 {pay_app}이(가) {paid_on}에 지급되었으나 해당 업체의 {document}은(는) {lapsed_on}에 만료되었습니다. {withholding}",
+      "fail_revoked": "{subcontractor}에게 기성 청구 {pay_app}이(가) {paid_on}에 지급되었으나 해당 업체의 {document}은(는) 취소된 상태였습니다. {withholding}",
+      "fail_undated": "{subcontractor}의 기성 청구 {pay_app}은(는) 지급 완료로 표시되어 있으나 지급일이 없어, {document}이(가) 지급을 포괄했는지 확인할 수 없습니다. {withholding}",
+      "fail_pending": "{subcontractor}의 기성 청구 {pay_app}은(는) 아직 지급되지 않았습니다. {document}은(는) 기간 종료일이 아니라 지급일 기준으로 판단하며, 보관 중인 것은 {valid_until}까지 유효합니다. {withholding}",
+      "fail_pending_open": "{subcontractor}의 기성 청구 {pay_app}은(는) 아직 지급되지 않았습니다. {document}은(는) 기간 종료일이 아니라 지급일 기준으로 판단하며, 보관 중인 것에는 종료일이 없습니다. {withholding}",
+      "fail_pending_invalid": "{subcontractor}의 기성 청구 {pay_app}은(는) 아직 지급되지 않았으며, 기간 종료일 이후 지급을 포괄할 수 있는 유효한 {document}이(가) 보관되어 있지 않습니다. {withholding}",
+      "suggestion": "지급일에 증명서가 유효한지 확인하고, 그렇지 않으면 하도급업체로부터 유효한 증명서를 받으세요. 세금은 여기서 공제되지 않습니다. 유효한 증명서 범위를 벗어난 지급의 경우 공제와 신고는 사용자의 몫입니다.",
+      "withholding": {
+        "gross_limit": "이것이 없으면 지급액의 {rate}%(VAT 포함)를 원천징수하여 세무당국에 납부해야 합니다. 단, 해당 연도에 이 하도급업체에 지급한 총액이 {limit} 이내이면 예외입니다({reference}).",
+        "gross": "이것이 없으면 지급액의 {rate}%(VAT 포함)를 원천징수하여 세무당국에 납부해야 합니다({reference}).",
+        "net_limit": "이것이 없으면 지급액의 {rate}%(VAT 제외)를 원천징수하여 세무당국에 납부해야 합니다. 단, 해당 연도에 이 하도급업체에 지급한 총액이 {limit} 이내이면 예외입니다({reference}).",
+        "net": "이것이 없으면 지급액의 {rate}%(VAT 제외)를 원천징수하여 세무당국에 납부해야 합니다({reference}).",
+        "unknown": "이것이 없으면 지급액에 세금 원천징수가 적용될 수 있습니다."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "필수 {document} 증명서가 유효하지 않아(만료일 {date}) 이 하도급업체에 대한 지급이 차단되었습니다",
+      "suggestion": "갱신된 증명서를 등록하거나, 관리자에게 사유를 적어 차단 해제를 요청하세요"
+    },
+    "certificate_expiring": {
+      "fail": "{document} 증명서가 {date}에 만료됩니다({days}일 남음)",
+      "suggestion": "증명서가 만료되기 전에 하도급업체에 갱신을 요청하세요"
+    },
+    "policy_details_recorded": {
+      "fail": "필수 {document} 증명서에 증권 번호 또는 보장 금액이 없습니다",
+      "suggestion": "증명서에 기재된 증권 번호와 보험 가입 금액을 추가하세요"
+    },
+    "cert_types": {
+      "public_liability": "공공 배상 책임",
+      "employers_liability": "사용자 배상 책임",
+      "professional_indemnity": "전문인 배상 책임",
+      "contractors_all_risk": "건설공사 종합보험",
+      "workers_compensation": "산재 보상",
+      "motor_vehicle": "자동차",
+      "product_liability": "생산물 배상 책임",
+      "plant_equipment": "건설 기계 및 장비",
+      "environmental_liability": "환경 배상 책임",
+      "cyber_liability": "사이버 배상 책임",
+      "insurance": "보험"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "La demande de paiement du sous-traitant {pay_app} est incluse dans cette réclamation alors qu'elle est {status}, de sorte que le montant facturé au maître d'ouvrage n'a pas été approuvé pour paiement",
+      "suggestion": "Approuvez la demande de paiement ou excluez-la de cette réclamation jusqu'à son approbation",
+      "statuses": {
+        "submitted": "soumise et pas encore examinée",
+        "rejected": "rejetée"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "La demande de paiement du sous-traitant {pay_app} s'élève à {net} net, mais les renonciations à privilège (lien waivers) au dossier ne couvrent que {covered}",
+      "fail_through_date": "La renonciation à privilège relative à la demande de paiement du sous-traitant {pay_app} court jusqu'au {through_date}, soit avant la fin de période de la demande de paiement, le {period_end}",
+      "suggestion": "Obtenez une renonciation à privilège couvrant la totalité du montant net jusqu'à la fin de la période, ou excluez la demande de paiement de cette réclamation"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "La demande de paiement du sous-traitant {pay_app} a été payée dans une réclamation antérieure, mais aucune renonciation à privilège inconditionnelle au dossier ne court jusqu'à la fin de sa période, le {period_end}",
+      "suggestion": "Obtenez la renonciation à privilège inconditionnelle pour le paiement déjà effectué et enregistrez la date jusqu'à laquelle elle court"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Une ligne de la demande de paiement du sous-traitant {pay_app} pour le lot de travaux {package}, approuvée à hauteur de {amount}, n'est liée à aucune ligne du bordereau des prix de ce contrat",
+      "fail_foreign_line": "Une ligne de la demande de paiement du sous-traitant {pay_app} pour le lot de travaux {package}, approuvée à hauteur de {amount}, est liée à une ligne d'un autre contrat",
+      "fail_parent_line": "Une ligne de la demande de paiement du sous-traitant {pay_app} pour le lot de travaux {package}, approuvée à hauteur de {amount}, est liée à une ligne de regroupement, qui n'est pas facturée directement",
+      "suggestion": "Liez le lot de travaux, ou cette ligne de la demande de paiement, à une ligne facturable du bordereau des prix de ce contrat"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Les montants de sous-traitance approuvés à ce jour sur la ligne {line} totalisent {approved}, au-delà de sa valeur planifiée de {scheduled}",
+      "suggestion": "Vérifiez les approbations de sous-traitance sur cette ligne, ou ajoutez un ordre de modification qui augmente sa valeur planifiée"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} n'a aucun document « {document} » au dossier au {as_of}, la fin de la période de cette réclamation",
+      "fail_expired": "Le document « {document} » de {subcontractor} n'était plus valide le {as_of}, la fin de la période de cette réclamation",
+      "fail_revoked": "Le document « {document} » de {subcontractor} avait été révoqué et n'était pas valide le {as_of}, la fin de la période de cette réclamation",
+      "suggestion": "Obtenez un certificat à jour auprès du sous-traitant, ou excluez ses demandes de paiement de cette réclamation",
+      "documents": {
+        "insurance": "attestation d'assurance",
+        "license": "licence",
+        "iso": "certificat ISO",
+        "safety": "certificat de sécurité",
+        "bond": "cautionnement",
+        "wsl_clearance": "lettre de conformité en sécurité des travailleurs",
+        "wsib_clearance": "certificat de décharge WSIB",
+        "wcb_clearance": "lettre de décharge WCB",
+        "attestation_revenu_quebec": "attestation de Revenu Québec",
+        "construction_tax_exemption": "certificat d'exonération de la taxe de construction",
+        "social_security_clearance": "attestation de régularité de situation en matière de sécurité sociale",
+        "employers_liability_clearance": "attestation de conformité en responsabilité de l'employeur"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} a été payé le {paid_on} pour la demande de paiement {pay_app} sans qu'aucun document « {document} » soit au dossier. {withholding}",
+      "fail_expired": "{subcontractor} a été payé le {paid_on} pour la demande de paiement {pay_app}, mais son document « {document} » avait expiré le {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} a été payé le {paid_on} pour la demande de paiement {pay_app}, mais son document « {document} » avait été révoqué. {withholding}",
+      "fail_undated": "La demande de paiement {pay_app} de {subcontractor} est marquée comme payée mais ne porte aucune date de paiement, de sorte qu'on ne peut vérifier si le document « {document} » couvrait le paiement. {withholding}",
+      "fail_pending": "La demande de paiement {pay_app} de {subcontractor} n'est pas encore payée. Le document « {document} » compte le jour du paiement, et non à la fin de la période, et celui au dossier est valide jusqu'au {valid_until}. {withholding}",
+      "fail_pending_open": "La demande de paiement {pay_app} de {subcontractor} n'est pas encore payée. Le document « {document} » compte le jour du paiement, et non à la fin de la période ; celui au dossier n'a pas de date de fin. {withholding}",
+      "fail_pending_invalid": "La demande de paiement {pay_app} de {subcontractor} n'est pas encore payée, et aucun document « {document} » valide n'est au dossier pour couvrir un paiement postérieur à la fin de la période. {withholding}",
+      "suggestion": "Vérifiez que le certificat est valide le jour du paiement et, s'il ne l'est pas, obtenez-en un à jour auprès du sous-traitant. La taxe n'est pas déduite ici : lorsqu'un paiement tombe hors d'un certificat valide, il vous revient d'opérer et de déclarer la retenue.",
+      "withholding": {
+        "gross_limit": "À défaut, {rate} % du paiement, TVA comprise, doit être retenu et versé à l'administration fiscale, sauf si l'ensemble des sommes payées à ce sous-traitant dans l'année civile reste dans la limite de {limit} ({reference}).",
+        "gross": "À défaut, {rate} % du paiement, TVA comprise, doit être retenu et versé à l'administration fiscale ({reference}).",
+        "net_limit": "À défaut, {rate} % du paiement, hors TVA, doit être retenu et versé à l'administration fiscale, sauf si l'ensemble des sommes payées à ce sous-traitant dans l'année civile reste dans la limite de {limit} ({reference}).",
+        "net": "À défaut, {rate} % du paiement, hors TVA, doit être retenu et versé à l'administration fiscale ({reference}).",
+        "unknown": "À défaut, le paiement peut être soumis à une retenue fiscale."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "L'attestation obligatoire « {document} » n'est pas valide (expiration {date}), les paiements à ce sous-traitant sont donc bloqués",
+      "suggestion": "Enregistrez l'attestation renouvelée, ou demandez à un responsable de lever le blocage en indiquant un motif"
+    },
+    "certificate_expiring": {
+      "fail": "L'attestation « {document} » expire le {date}, dans {days} jour(s)",
+      "suggestion": "Demandez le renouvellement au sous-traitant avant l'expiration de l'attestation"
+    },
+    "policy_details_recorded": {
+      "fail": "L'attestation obligatoire « {document} » n'indique ni numéro de police ni montant de garantie",
+      "suggestion": "Ajoutez le numéro de police et le capital assuré figurant sur l'attestation"
+    },
+    "cert_types": {
+      "public_liability": "Responsabilité civile générale",
+      "employers_liability": "Responsabilité civile de l'employeur",
+      "professional_indemnity": "Responsabilité civile professionnelle",
+      "contractors_all_risk": "Tous risques chantier",
+      "workers_compensation": "Accidents du travail",
+      "motor_vehicle": "Véhicules à moteur",
+      "product_liability": "Responsabilité du fait des produits",
+      "plant_equipment": "Matériel et équipements",
+      "environmental_liability": "Responsabilité environnementale",
+      "cyber_liability": "Responsabilité cyber",
+      "insurance": "Assurance"
+    }
+  }
+}

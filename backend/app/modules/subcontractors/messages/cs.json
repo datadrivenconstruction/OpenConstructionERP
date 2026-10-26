@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Žádost o platbu subdodavatele {pay_app} je zahrnuta v této žádosti, ale její stav je {status}, takže částka fakturovaná investorovi nebyla schválena k úhradě",
+      "suggestion": "Schvalte žádost o platbu, nebo ji z této žádosti vyřaďte, dokud nebude schválena",
+      "statuses": {
+        "submitted": "podána a dosud neprojednána",
+        "rejected": "zamítnuta"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Žádost o platbu subdodavatele {pay_app} činí po odečtení {net}, ale založená potvrzení o vzdání se zástavního práva k ní kryjí pouze {covered}",
+      "fail_through_date": "Potvrzení o vzdání se zástavního práva pro žádost o platbu subdodavatele {pay_app} platí do {through_date}, což je dříve než konec období žádosti {period_end}",
+      "suggestion": "Získejte potvrzení o vzdání se zástavního práva kryjící celou částku po odečtení až do konce období, nebo žádost o platbu z této žádosti vyřaďte"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Žádost o platbu subdodavatele {pay_app} byla uhrazena v dřívější žádosti, ale založené bezpodmínečné potvrzení o vzdání se zástavního práva nepokrývá konec jejího období {period_end}",
+      "suggestion": "Získejte bezpodmínečné potvrzení o vzdání se zástavního práva k již provedené platbě a zaznamenejte datum, do kterého platí"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Položka žádosti o platbu subdodavatele {pay_app} pro pracovní balík {package}, schválená ve výši {amount}, není propojena s žádnou položkou rozpočtu hodnot této smlouvy",
+      "fail_foreign_line": "Položka žádosti o platbu subdodavatele {pay_app} pro pracovní balík {package}, schválená ve výši {amount}, je propojena s položkou jiné smlouvy",
+      "fail_parent_line": "Položka žádosti o platbu subdodavatele {pay_app} pro pracovní balík {package}, schválená ve výši {amount}, je propojena se souhrnnou položkou, která se nefakturuje přímo",
+      "suggestion": "Propojte pracovní balík nebo tuto položku žádosti o platbu s fakturovatelnou položkou rozpočtu hodnot této smlouvy"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Subdodavatelské částky schválené dosud u položky {line} činí celkem {approved}, což je více než její plánovaná hodnota {scheduled}",
+      "suggestion": "Zkontrolujte schválení subdodavatelských částek u této položky, nebo přidejte změnový příkaz, který zvýší její plánovanou hodnotu"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} nemá k datu {as_of}, tedy ke konci období této žádosti, založený dokument {document}",
+      "fail_expired": "Dokument {document} subdodavatele {subcontractor} k datu {as_of}, tedy ke konci období této žádosti, již nebyl platný",
+      "fail_revoked": "Dokument {document} subdodavatele {subcontractor} byl odvolán a k datu {as_of}, tedy ke konci období této žádosti, nebyl platný",
+      "suggestion": "Získejte od subdodavatele aktuální osvědčení, nebo jeho žádosti o platbu z této žádosti vyřaďte",
+      "documents": {
+        "insurance": "pojistné osvědčení",
+        "license": "licence",
+        "iso": "certifikát ISO",
+        "safety": "osvědčení o bezpečnosti",
+        "bond": "garance",
+        "wsl_clearance": "potvrzení o bezpečnosti pracovníků",
+        "wsib_clearance": "potvrzení WSIB",
+        "wcb_clearance": "potvrzení WCB",
+        "attestation_revenu_quebec": "potvrzení Revenu Québec",
+        "construction_tax_exemption": "osvědčení o osvobození od daně ze stavebních prací",
+        "social_security_clearance": "potvrzení o sociálním zabezpečení",
+        "employers_liability_clearance": "potvrzení o odpovědnosti zaměstnavatele"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "Subdodavatel {subcontractor} byl dne {paid_on} vyplacen k žádosti o platbu {pay_app}, aniž by byl založen dokument {document}. {withholding}",
+      "fail_expired": "Subdodavatel {subcontractor} byl dne {paid_on} vyplacen k žádosti o platbu {pay_app}, ale jeho dokument {document} vypršel dne {lapsed_on}. {withholding}",
+      "fail_revoked": "Subdodavatel {subcontractor} byl dne {paid_on} vyplacen k žádosti o platbu {pay_app}, ale jeho dokument {document} byl odvolán. {withholding}",
+      "fail_undated": "Žádost o platbu {pay_app} subdodavatele {subcontractor} je označena jako uhrazená, ale nemá datum platby, takže nelze ověřit, zda dokument {document} platbu kryl. {withholding}",
+      "fail_pending": "Žádost o platbu {pay_app} subdodavatele {subcontractor} zatím není uhrazena. Dokument {document} se posuzuje v den platby, nikoli ke konci období, a založený dokument je platný do {valid_until}. {withholding}",
+      "fail_pending_open": "Žádost o platbu {pay_app} subdodavatele {subcontractor} zatím není uhrazena. Dokument {document} se posuzuje v den platby, nikoli ke konci období; založený dokument nemá datum konce platnosti. {withholding}",
+      "fail_pending_invalid": "Žádost o platbu {pay_app} subdodavatele {subcontractor} zatím není uhrazena a není založen žádný platný dokument {document}, do jehož platnosti by mohla spadat platba po konci období. {withholding}",
+      "suggestion": "Ověřte, že osvědčení platí v den úhrady, a pokud ne, vyžádejte si od subdodavatele aktuální. Daň se zde nestrhává: pokud platba spadne mimo platné osvědčení, je na vás, zda srážku provedete a nahlásíte.",
+      "withholding": {
+        "gross_limit": "Bez něj je nutné srazit {rate} % platby včetně DPH a odvést ji správci daně, pokud celková částka vyplacená tomuto subdodavateli v kalendářním roce nezůstane v rámci {limit} ({reference}).",
+        "gross": "Bez něj je nutné srazit {rate} % platby včetně DPH a odvést ji správci daně ({reference}).",
+        "net_limit": "Bez něj je nutné srazit {rate} % platby bez DPH a odvést ji správci daně, pokud celková částka vyplacená tomuto subdodavateli v kalendářním roce nezůstane v rámci {limit} ({reference}).",
+        "net": "Bez něj je nutné srazit {rate} % platby bez DPH a odvést ji správci daně ({reference}).",
+        "unknown": "Bez něj může na platbu dopadat srážková daň."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Povinné osvědčení {document} není platné (vyprší {date}), proto jsou platby tomuto subdodavateli zablokovány",
+      "suggestion": "Zaznamenejte obnovené osvědčení, nebo požádejte vedoucího, aby blokaci s uvedením důvodu přepsal"
+    },
+    "certificate_expiring": {
+      "fail": "Osvědčení {document} vyprší {date}, tedy za {days} den/dny",
+      "suggestion": "Požádejte subdodavatele o obnovu dříve, než osvědčení vyprší"
+    },
+    "policy_details_recorded": {
+      "fail": "Povinné osvědčení {document} neuvádí číslo pojistky ani pojistnou částku",
+      "suggestion": "Doplňte číslo pojistky a pojištěnou částku z osvědčení"
+    },
+    "cert_types": {
+      "public_liability": "Odpovědnost za škodu třetím osobám",
+      "employers_liability": "Odpovědnost zaměstnavatele",
+      "professional_indemnity": "Pojištění profesní odpovědnosti",
+      "contractors_all_risk": "Pojištění stavby proti všem rizikům",
+      "workers_compensation": "Pojištění odpovědnosti za úrazy zaměstnanců",
+      "motor_vehicle": "Pojištění motorových vozidel",
+      "product_liability": "Odpovědnost za výrobek",
+      "plant_equipment": "Pojištění strojů a zařízení",
+      "environmental_liability": "Odpovědnost za životní prostředí",
+      "cyber_liability": "Kybernetická odpovědnost",
+      "insurance": "Pojištění"
+    }
+  }
+}

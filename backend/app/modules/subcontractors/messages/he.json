@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "אישור"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "דרישת התשלום של קבלן המשנה {pay_app} כלולה בתביעה זו בעוד שהיא במצב \"{status}\", ולכן הסכום שחויב מהבעלים לא אושר לתשלום",
+      "suggestion": "אשרו את דרישת התשלום או הוציאו אותה מהתביעה עד לאישורה",
+      "statuses": {
+        "submitted": "הוגשה וטרם נבדקה",
+        "rejected": "נדחתה"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "הסכום נטו של דרישת התשלום של קבלן המשנה {pay_app} הוא {net}, אך כתבי הוויתור על שעבוד (lien waivers) שבתיק מכסים רק {covered}",
+      "fail_through_date": "כתב הוויתור על שעבוד לדרישת התשלום של קבלן המשנה {pay_app} בתוקף עד {through_date}, כלומר לפני סוף תקופת דרישת התשלום ב-{period_end}",
+      "suggestion": "השיגו כתב ויתור המכסה את מלוא הסכום נטו עד סוף התקופה, או הוציאו את דרישת התשלום מהתביעה"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "דרישת התשלום של קבלן המשנה {pay_app} שולמה בתביעה קודמת, אך אין בתיק כתב ויתור על שעבוד ללא תנאי שבתוקף עד סוף התקופה שלה, {period_end}",
+      "suggestion": "השיגו כתב ויתור ללא תנאי עבור התשלום שכבר בוצע ורשמו את התאריך שעד אליו הוא בתוקף"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "שורה בדרישת התשלום של קבלן המשנה {pay_app} עבור חבילת העבודה {package}, שאושרה בסך {amount}, אינה מקושרת לאף שורה בכתב הכמויות של החוזה",
+      "fail_foreign_line": "שורה בדרישת התשלום של קבלן המשנה {pay_app} עבור חבילת העבודה {package}, שאושרה בסך {amount}, מקושרת לשורה של חוזה אחר",
+      "fail_parent_line": "שורה בדרישת התשלום של קבלן המשנה {pay_app} עבור חבילת העבודה {package}, שאושרה בסך {amount}, מקושרת לשורת קיבוץ, שאינה מחויבת ישירות",
+      "suggestion": "קשרו את חבילת העבודה, או את שורת דרישת התשלום הזו, לשורה ברת חיוב בכתב הכמויות של החוזה"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "סכומי קבלנות המשנה שאושרו עד כה בשורה {line} מסתכמים ב-{approved}, מעל הערך המתוזמן שלה, {scheduled}",
+      "suggestion": "בדקו את אישורי קבלנות המשנה בשורה זו, או הוסיפו צו שינויים המעלה את הערך המתוזמן שלה"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "לקבלן המשנה {subcontractor} אין בתיק {document} נכון ל-{as_of}, סוף תקופת התביעה הזו",
+      "fail_expired": "{document} של {subcontractor} כבר לא היה בתוקף ב-{as_of}, סוף תקופת התביעה הזו",
+      "fail_revoked": "{document} של {subcontractor} בוטל ולא היה בתוקף ב-{as_of}, סוף תקופת התביעה הזו",
+      "suggestion": "השיגו מקבלן המשנה אישור בתוקף, או הוציאו את דרישות התשלום שלו מהתביעה",
+      "documents": {
+        "insurance": "אישור ביטוח",
+        "license": "רישיון",
+        "iso": "תעודת ISO",
+        "safety": "תעודת בטיחות",
+        "bond": "ערבות",
+        "wsl_clearance": "מכתב אישור בטיחות עובדים",
+        "wsib_clearance": "אישור סילוק של WSIB",
+        "wcb_clearance": "מכתב סילוק של WCB",
+        "attestation_revenu_quebec": "אישור של Revenu Québec",
+        "construction_tax_exemption": "אישור פטור ממס בנייה",
+        "social_security_clearance": "אישור היעדר חובות לביטוח הלאומי",
+        "employers_liability_clearance": "אישור סילוק אחריות מעבידים"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} קיבל תשלום ב-{paid_on} עבור דרישת התשלום {pay_app} ללא {document} בתיק. {withholding}",
+      "fail_expired": "{subcontractor} קיבל תשלום ב-{paid_on} עבור דרישת התשלום {pay_app}, אך ה{document} שלו פג ב-{lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} קיבל תשלום ב-{paid_on} עבור דרישת התשלום {pay_app}, אך ה{document} שלו בוטל. {withholding}",
+      "fail_undated": "דרישת התשלום {pay_app} של {subcontractor} מסומנת כשולמה אך אין בה תאריך תשלום, ולכן לא ניתן לבדוק אם ה{document} כיסה את התשלום. {withholding}",
+      "fail_pending": "דרישת התשלום {pay_app} של {subcontractor} טרם שולמה. ה{document} נבחן ביום התשלום ולא בסוף התקופה, וזה שבתיק בתוקף עד {valid_until}. {withholding}",
+      "fail_pending_open": "דרישת התשלום {pay_app} של {subcontractor} טרם שולמה. ה{document} נבחן ביום התשלום ולא בסוף התקופה; לזה שבתיק אין תאריך סיום. {withholding}",
+      "fail_pending_invalid": "דרישת התשלום {pay_app} של {subcontractor} טרם שולמה, ואין בתיק {document} בתוקף שתשלום לאחר סוף התקופה יוכל להימצא בטווחו. {withholding}",
+      "suggestion": "ודאו שהאישור בתוקף ביום התשלום, ואם לא, השיגו אישור עדכני מקבלן המשנה. המס אינו מנוכה כאן: כאשר תשלום חורג מתוקף אישור, ביצוע הניכוי והדיווח עליו הם באחריותכם.",
+      "withholding": {
+        "gross_limit": "בלעדיו, יש לנכות {rate}% מהתשלום, כולל מע\"מ, ולהעבירם לרשות המסים, אלא אם כל מה ששולם לקבלן משנה זה בשנה הקלנדרית נשאר בתוך {limit} ({reference}).",
+        "gross": "בלעדיו, יש לנכות {rate}% מהתשלום, כולל מע\"מ, ולהעבירם לרשות המסים ({reference}).",
+        "net_limit": "בלעדיו, יש לנכות {rate}% מהתשלום, לא כולל מע\"מ, ולהעבירם לרשות המסים, אלא אם כל מה ששולם לקבלן משנה זה בשנה הקלנדרית נשאר בתוך {limit} ({reference}).",
+        "net": "בלעדיו, יש לנכות {rate}% מהתשלום, לא כולל מע\"מ, ולהעבירם לרשות המסים ({reference}).",
+        "unknown": "בלעדיו, התשלום עשוי להיות כפוף לניכוי מס במקור."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "אישור {document} הנדרש אינו בתוקף (תפוגה {date}), ולכן התשלומים לקבלן משנה זה חסומים",
+      "suggestion": "תעדו את האישור המחודש, או בקשו ממנהל לעקוף את החסימה עם ציון סיבה"
+    },
+    "certificate_expiring": {
+      "fail": "אישור {document} יפוג ב-{date}, בעוד {days} ימים",
+      "suggestion": "בקשו מקבלן המשנה חידוש לפני שהאישור יפוג"
+    },
+    "policy_details_recorded": {
+      "fail": "באישור {document} הנדרש אין מספר פוליסה או סכום כיסוי",
+      "suggestion": "הוסיפו את מספר הפוליסה ואת סכום הביטוח מהאישור"
+    },
+    "cert_types": {
+      "public_liability": "אחריות כלפי צד שלישי",
+      "employers_liability": "חבות מעבידים",
+      "professional_indemnity": "אחריות מקצועית",
+      "contractors_all_risk": "ביטוח קבלנים לכל הסיכונים",
+      "workers_compensation": "פיצויים לעובדים",
+      "motor_vehicle": "רכב מנועי",
+      "product_liability": "אחריות מוצר",
+      "plant_equipment": "צמ\"ה וציוד",
+      "environmental_liability": "אחריות סביבתית",
+      "cyber_liability": "אחריות סייבר",
+      "insurance": "ביטוח"
+    }
+  }
+}

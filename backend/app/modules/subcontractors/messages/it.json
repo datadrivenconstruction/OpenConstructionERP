@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "La richiesta di pagamento del subappaltatore {pay_app} è inclusa in questa richiesta mentre è {status}, quindi l'importo fatturato al committente non è stato approvato per il pagamento",
+      "suggestion": "Approvare la richiesta di pagamento oppure escluderla da questa richiesta finché non viene approvata",
+      "statuses": {
+        "submitted": "presentata e non ancora esaminata",
+        "rejected": "respinta"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "La richiesta di pagamento del subappaltatore {pay_app} ammonta a {net} netti, ma le rinunce al privilegio (lien waiver) agli atti coprono solo {covered}",
+      "fail_through_date": "La rinuncia al privilegio relativa alla richiesta di pagamento del subappaltatore {pay_app} copre fino al {through_date}, data precedente alla fine del periodo della richiesta, il {period_end}",
+      "suggestion": "Ottenere una rinuncia al privilegio che copra l'intero importo netto fino alla fine del periodo, oppure escludere la richiesta di pagamento da questa richiesta"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "La richiesta di pagamento del subappaltatore {pay_app} è stata pagata in una richiesta precedente, ma agli atti non c'è alcuna rinuncia incondizionata al privilegio che copra fino alla fine del suo periodo, il {period_end}",
+      "suggestion": "Ottenere la rinuncia incondizionata per il pagamento già effettuato e registrare la data fino alla quale è valida"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Una voce della richiesta di pagamento del subappaltatore {pay_app} per il pacchetto di lavori {package}, approvata per {amount}, non è collegata ad alcuna voce del computo del contratto",
+      "fail_foreign_line": "Una voce della richiesta di pagamento del subappaltatore {pay_app} per il pacchetto di lavori {package}, approvata per {amount}, è collegata a una voce di un altro contratto",
+      "fail_parent_line": "Una voce della richiesta di pagamento del subappaltatore {pay_app} per il pacchetto di lavori {package}, approvata per {amount}, è collegata a una voce di raggruppamento, che non viene fatturata direttamente",
+      "suggestion": "Collegare il pacchetto di lavori, o questa voce della richiesta di pagamento, a una voce fatturabile del computo del contratto"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Gli importi di subappalto approvati finora sulla voce {line} totalizzano {approved}, oltre il suo valore programmato di {scheduled}",
+      "suggestion": "Verificare le approvazioni di subappalto su questa voce, oppure aggiungere un ordine di variazione che ne aumenti il valore programmato"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} non ha agli atti alcun documento «{document}» alla data {as_of}, fine del periodo di questa richiesta",
+      "fail_expired": "Il documento «{document}» di {subcontractor} non era più valido il {as_of}, fine del periodo di questa richiesta",
+      "fail_revoked": "Il documento «{document}» di {subcontractor} era stato revocato e non era valido il {as_of}, fine del periodo di questa richiesta",
+      "suggestion": "Ottenere un certificato aggiornato dal subappaltatore oppure escludere le sue richieste di pagamento da questa richiesta",
+      "documents": {
+        "insurance": "certificato assicurativo",
+        "license": "licenza",
+        "iso": "certificato ISO",
+        "safety": "certificato di sicurezza",
+        "bond": "fideiussione",
+        "wsl_clearance": "lettera di conformità sulla sicurezza dei lavoratori",
+        "wsib_clearance": "certificato di regolarità WSIB",
+        "wcb_clearance": "lettera di regolarità WCB",
+        "attestation_revenu_quebec": "attestation di Revenu Québec",
+        "construction_tax_exemption": "certificato di esenzione dall'imposta sulle costruzioni",
+        "social_security_clearance": "documento unico di regolarità contributiva",
+        "employers_liability_clearance": "certificato di regolarità sulla responsabilità del datore di lavoro"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} è stato pagato il {paid_on} per la richiesta di pagamento {pay_app} senza alcun documento «{document}» agli atti. {withholding}",
+      "fail_expired": "{subcontractor} è stato pagato il {paid_on} per la richiesta di pagamento {pay_app}, ma il suo documento «{document}» era scaduto il {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} è stato pagato il {paid_on} per la richiesta di pagamento {pay_app}, ma il suo documento «{document}» era stato revocato. {withholding}",
+      "fail_undated": "La richiesta di pagamento {pay_app} di {subcontractor} è contrassegnata come pagata ma non riporta la data di pagamento, quindi non si può verificare se il documento «{document}» coprisse il pagamento. {withholding}",
+      "fail_pending": "La richiesta di pagamento {pay_app} di {subcontractor} non è ancora pagata. Il documento «{document}» vale nel giorno del pagamento, non a fine periodo, e quello agli atti è valido fino al {valid_until}. {withholding}",
+      "fail_pending_open": "La richiesta di pagamento {pay_app} di {subcontractor} non è ancora pagata. Il documento «{document}» vale nel giorno del pagamento, non a fine periodo; quello agli atti non ha data di fine. {withholding}",
+      "fail_pending_invalid": "La richiesta di pagamento {pay_app} di {subcontractor} non è ancora pagata e agli atti non c'è alcun documento «{document}» valido entro cui possa ricadere un pagamento successivo alla fine del periodo. {withholding}",
+      "suggestion": "Verificare che il certificato sia valido nel giorno del pagamento e, se non lo è, ottenerne uno aggiornato dal subappaltatore. L'imposta non viene trattenuta qui: se un pagamento cade fuori da un certificato valido, effettuare e dichiarare la ritenuta spetta a voi.",
+      "withholding": {
+        "gross_limit": "In mancanza, il {rate}% del pagamento, IVA inclusa, deve essere trattenuto e versato all'erario, salvo che tutto quanto pagato a questo subappaltatore nell'anno solare resti entro {limit} ({reference}).",
+        "gross": "In mancanza, il {rate}% del pagamento, IVA inclusa, deve essere trattenuto e versato all'erario ({reference}).",
+        "net_limit": "In mancanza, il {rate}% del pagamento, IVA esclusa, deve essere trattenuto e versato all'erario, salvo che tutto quanto pagato a questo subappaltatore nell'anno solare resti entro {limit} ({reference}).",
+        "net": "In mancanza, il {rate}% del pagamento, IVA esclusa, deve essere trattenuto e versato all'erario ({reference}).",
+        "unknown": "In mancanza, il pagamento può essere soggetto a ritenuta fiscale."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Il certificato obbligatorio «{document}» non è valido (scadenza {date}), quindi i pagamenti a questo subappaltatore sono bloccati",
+      "suggestion": "Registrare il certificato rinnovato, oppure chiedere a un responsabile di sbloccare indicando un motivo"
+    },
+    "certificate_expiring": {
+      "fail": "Il certificato «{document}» scade il {date}, tra {days} giorno/i",
+      "suggestion": "Richiedere il rinnovo al subappaltatore prima della scadenza del certificato"
+    },
+    "policy_details_recorded": {
+      "fail": "Il certificato obbligatorio «{document}» non riporta il numero di polizza né il massimale",
+      "suggestion": "Aggiungere il numero di polizza e il capitale assicurato indicati nel certificato"
+    },
+    "cert_types": {
+      "public_liability": "Responsabilità civile verso terzi",
+      "employers_liability": "Responsabilità civile verso prestatori di lavoro",
+      "professional_indemnity": "Responsabilità civile professionale",
+      "contractors_all_risk": "Polizza CAR (tutti i rischi del costruttore)",
+      "workers_compensation": "Infortuni sul lavoro",
+      "motor_vehicle": "Veicoli a motore",
+      "product_liability": "Responsabilità civile da prodotto",
+      "plant_equipment": "Macchinari e attrezzature",
+      "environmental_liability": "Responsabilità ambientale",
+      "cyber_liability": "Responsabilità informatica",
+      "insurance": "Assicurazione"
+    }
+  }
+}

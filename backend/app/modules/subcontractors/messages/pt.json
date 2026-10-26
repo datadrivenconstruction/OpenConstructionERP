@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "O pedido de pagamento do subempreiteiro {pay_app} está incluído nesta reivindicação enquanto está {status}, pelo que o valor faturado ao dono da obra não foi aprovado para pagamento",
+      "suggestion": "Aprove o pedido de pagamento ou exclua-o desta reivindicação até ser aprovado",
+      "statuses": {
+        "submitted": "submetido e ainda não revisto",
+        "rejected": "rejeitado"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "O pedido de pagamento do subempreiteiro {pay_app} tem um valor líquido de {net}, mas as renúncias ao privilégio (lien waivers) arquivadas cobrem apenas {covered}",
+      "fail_through_date": "A renúncia ao privilégio do pedido de pagamento do subempreiteiro {pay_app} vai até {through_date}, anterior ao fim do período do pedido de pagamento, em {period_end}",
+      "suggestion": "Obtenha uma renúncia ao privilégio que cubra todo o valor líquido até ao fim do período ou exclua o pedido de pagamento desta reivindicação"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "O pedido de pagamento do subempreiteiro {pay_app} foi pago numa reivindicação anterior, mas não há renúncia incondicional ao privilégio arquivada que vá até ao fim do seu período, em {period_end}",
+      "suggestion": "Obtenha a renúncia incondicional para o pagamento já efetuado e registe a data até à qual é válida"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Uma linha do pedido de pagamento do subempreiteiro {pay_app} para o pacote de trabalho {package}, aprovada por {amount}, não está associada a nenhuma linha do mapa de quantidades deste contrato",
+      "fail_foreign_line": "Uma linha do pedido de pagamento do subempreiteiro {pay_app} para o pacote de trabalho {package}, aprovada por {amount}, está associada a uma linha de outro contrato",
+      "fail_parent_line": "Uma linha do pedido de pagamento do subempreiteiro {pay_app} para o pacote de trabalho {package}, aprovada por {amount}, está associada a uma linha de agrupamento, que não é faturada diretamente",
+      "suggestion": "Associe o pacote de trabalho, ou esta linha do pedido de pagamento, a uma linha faturável do mapa de quantidades deste contrato"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Os valores de subempreitada aprovados até à data na linha {line} totalizam {approved}, acima do seu valor programado de {scheduled}",
+      "suggestion": "Verifique as aprovações de subempreitada nesta linha ou adicione uma ordem de alteração que aumente o seu valor programado"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} não tem arquivado nenhum documento «{document}» a {as_of}, o fim do período desta reivindicação",
+      "fail_expired": "O documento «{document}» de {subcontractor} já não era válido em {as_of}, o fim do período desta reivindicação",
+      "fail_revoked": "O documento «{document}» de {subcontractor} tinha sido revogado e não era válido em {as_of}, o fim do período desta reivindicação",
+      "suggestion": "Obtenha um certificado atualizado do subempreiteiro ou exclua os seus pedidos de pagamento desta reivindicação",
+      "documents": {
+        "insurance": "certificado de seguro",
+        "license": "licença",
+        "iso": "certificado ISO",
+        "safety": "certificado de segurança",
+        "bond": "garantia",
+        "wsl_clearance": "carta de conformidade de segurança dos trabalhadores",
+        "wsib_clearance": "certificado de regularidade WSIB",
+        "wcb_clearance": "carta de regularidade WCB",
+        "attestation_revenu_quebec": "attestation da Revenu Québec",
+        "construction_tax_exemption": "certificado de isenção do imposto de construção",
+        "social_security_clearance": "certidão de situação contributiva da segurança social",
+        "employers_liability_clearance": "certificado de regularidade da responsabilidade do empregador"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} foi pago em {paid_on} pelo pedido de pagamento {pay_app} sem qualquer documento «{document}» arquivado. {withholding}",
+      "fail_expired": "{subcontractor} foi pago em {paid_on} pelo pedido de pagamento {pay_app}, mas o seu documento «{document}» tinha expirado em {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} foi pago em {paid_on} pelo pedido de pagamento {pay_app}, mas o seu documento «{document}» tinha sido revogado. {withholding}",
+      "fail_undated": "O pedido de pagamento {pay_app} de {subcontractor} está marcado como pago mas não tem data de pagamento, pelo que não é possível verificar se o documento «{document}» cobria o pagamento. {withholding}",
+      "fail_pending": "O pedido de pagamento {pay_app} de {subcontractor} ainda não foi pago. O documento «{document}» conta no dia do pagamento, e não no fim do período, e o arquivado é válido até {valid_until}. {withholding}",
+      "fail_pending_open": "O pedido de pagamento {pay_app} de {subcontractor} ainda não foi pago. O documento «{document}» conta no dia do pagamento, e não no fim do período; o arquivado não tem data de fim. {withholding}",
+      "fail_pending_invalid": "O pedido de pagamento {pay_app} de {subcontractor} ainda não foi pago e não há documento «{document}» válido arquivado em que um pagamento posterior ao fim do período possa enquadrar-se. {withholding}",
+      "suggestion": "Verifique se o certificado é válido no dia do pagamento e, se não for, obtenha um atualizado do subempreiteiro. O imposto não é deduzido aqui: quando um pagamento fica fora de um certificado válido, efetuar e declarar a retenção cabe a si.",
+      "withholding": {
+        "gross_limit": "Sem ele, {rate}% do pagamento, IVA incluído, tem de ser retido e entregue à administração fiscal, salvo se tudo o que for pago a este subempreiteiro no ano civil ficar dentro de {limit} ({reference}).",
+        "gross": "Sem ele, {rate}% do pagamento, IVA incluído, tem de ser retido e entregue à administração fiscal ({reference}).",
+        "net_limit": "Sem ele, {rate}% do pagamento, IVA excluído, tem de ser retido e entregue à administração fiscal, salvo se tudo o que for pago a este subempreiteiro no ano civil ficar dentro de {limit} ({reference}).",
+        "net": "Sem ele, {rate}% do pagamento, IVA excluído, tem de ser retido e entregue à administração fiscal ({reference}).",
+        "unknown": "Sem ele, o pagamento pode estar sujeito a retenção de imposto."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "O certificado obrigatório «{document}» não é válido (expira em {date}), pelo que os pagamentos a este subempreiteiro estão bloqueados",
+      "suggestion": "Registe o certificado renovado ou peça a um gestor que levante o bloqueio indicando um motivo"
+    },
+    "certificate_expiring": {
+      "fail": "O certificado «{document}» expira em {date}, dentro de {days} dia(s)",
+      "suggestion": "Peça a renovação ao subempreiteiro antes de o certificado expirar"
+    },
+    "policy_details_recorded": {
+      "fail": "O certificado obrigatório «{document}» não tem número de apólice nem valor de cobertura",
+      "suggestion": "Adicione o número da apólice e o capital segurado constantes do certificado"
+    },
+    "cert_types": {
+      "public_liability": "Responsabilidade civil geral",
+      "employers_liability": "Responsabilidade civil do empregador",
+      "professional_indemnity": "Responsabilidade civil profissional",
+      "contractors_all_risk": "Seguro de todos os riscos da construção",
+      "workers_compensation": "Acidentes de trabalho",
+      "motor_vehicle": "Veículos automóveis",
+      "product_liability": "Responsabilidade civil de produtos",
+      "plant_equipment": "Máquinas e equipamentos",
+      "environmental_liability": "Responsabilidade ambiental",
+      "cyber_liability": "Responsabilidade cibernética",
+      "insurance": "Seguro"
+    }
+  }
+}

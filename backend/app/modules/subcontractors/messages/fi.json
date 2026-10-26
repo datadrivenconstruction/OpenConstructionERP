@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Aliurakoitsijan maksuhakemus {pay_app} sisältyy tähän laskutukseen tilassa ”{status}”, joten tilaajalta laskutettua summaa ei ole hyväksytty maksettavaksi",
+      "suggestion": "Hyväksy maksuhakemus tai jätä se pois tästä laskutuksesta, kunnes se on hyväksytty",
+      "statuses": {
+        "submitted": "toimitettu eikä vielä tarkastettu",
+        "rejected": "hylätty"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Aliurakoitsijan maksuhakemuksen {pay_app} nettosumma on {net}, mutta sille arkistoidut pantti- ja pidätysoikeudesta luopumisilmoitukset (lien waiver) kattavat vain {covered}",
+      "fail_through_date": "Aliurakoitsijan maksuhakemuksen {pay_app} luopumisilmoitus on voimassa {through_date} asti, mikä on ennen maksuhakemuksen jakson päättymistä {period_end}",
+      "suggestion": "Hanki luopumisilmoitus, joka kattaa koko nettosumman jakson loppuun asti, tai jätä maksuhakemus pois tästä laskutuksesta"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Aliurakoitsijan maksuhakemus {pay_app} maksettiin aiemmassa laskutuksessa, mutta arkistossa ei ole ehdotonta luopumisilmoitusta, joka olisi voimassa sen jakson päättymiseen {period_end} asti",
+      "suggestion": "Hanki ehdoton luopumisilmoitus jo tehdylle maksulle ja kirjaa päivä, johon asti se on voimassa"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Aliurakoitsijan maksuhakemuksen {pay_app} rivi työpaketille {package}, hyväksytty summalla {amount}, ei ole linkitetty mihinkään tämän sopimuksen määräluettelon riviin",
+      "fail_foreign_line": "Aliurakoitsijan maksuhakemuksen {pay_app} rivi työpaketille {package}, hyväksytty summalla {amount}, on linkitetty toisen sopimuksen riviin",
+      "fail_parent_line": "Aliurakoitsijan maksuhakemuksen {pay_app} rivi työpaketille {package}, hyväksytty summalla {amount}, on linkitetty ryhmittelyriviin, jota ei laskuteta suoraan",
+      "suggestion": "Linkitä työpaketti tai tämä maksuhakemuksen rivi tämän sopimuksen määräluettelon laskutettavaan riviin"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Rivillä {line} tähän mennessä hyväksytyt aliurakkasummat ovat yhteensä {approved}, mikä ylittää rivin aikataulutetun arvon {scheduled}",
+      "suggestion": "Tarkista tämän rivin aliurakkahyväksynnät tai lisää muutostyö, joka korottaa rivin aikataulutettua arvoa"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "Aliurakoitsijalla {subcontractor} ei ole arkistoitua asiakirjaa ”{document}” tilanteessa {as_of}, tämän laskutuksen jakson lopussa",
+      "fail_expired": "Aliurakoitsijan {subcontractor} asiakirja ”{document}” ei ollut enää voimassa {as_of}, tämän laskutuksen jakson lopussa",
+      "fail_revoked": "Aliurakoitsijan {subcontractor} asiakirja ”{document}” oli peruutettu eikä ollut voimassa {as_of}, tämän laskutuksen jakson lopussa",
+      "suggestion": "Pyydä aliurakoitsijalta voimassa oleva todistus tai jätä sen maksuhakemukset pois tästä laskutuksesta",
+      "documents": {
+        "insurance": "vakuutustodistus",
+        "license": "lupa",
+        "iso": "ISO-sertifikaatti",
+        "safety": "turvallisuustodistus",
+        "bond": "takaus",
+        "wsl_clearance": "työturvallisuuden selvityskirje",
+        "wsib_clearance": "WSIB-selvitystodistus",
+        "wcb_clearance": "WCB-selvityskirje",
+        "attestation_revenu_quebec": "Revenu Québecin todistus",
+        "construction_tax_exemption": "rakennusveron vapautustodistus",
+        "social_security_clearance": "sosiaaliturvamaksujen selvitystodistus",
+        "employers_liability_clearance": "työnantajan vastuun selvitystodistus"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "Aliurakoitsijalle {subcontractor} maksettiin {paid_on} maksuhakemuksesta {pay_app} ilman arkistoitua asiakirjaa ”{document}”. {withholding}",
+      "fail_expired": "Aliurakoitsijalle {subcontractor} maksettiin {paid_on} maksuhakemuksesta {pay_app}, mutta sen asiakirja ”{document}” oli päättynyt {lapsed_on}. {withholding}",
+      "fail_revoked": "Aliurakoitsijalle {subcontractor} maksettiin {paid_on} maksuhakemuksesta {pay_app}, mutta sen asiakirja ”{document}” oli peruutettu. {withholding}",
+      "fail_undated": "Aliurakoitsijan {subcontractor} maksuhakemus {pay_app} on merkitty maksetuksi, mutta siinä ei ole maksupäivää, joten ei voida tarkistaa, kattoiko asiakirja ”{document}” maksun. {withholding}",
+      "fail_pending": "Aliurakoitsijan {subcontractor} maksuhakemusta {pay_app} ei ole vielä maksettu. Asiakirja ”{document}” otetaan huomioon maksupäivänä, ei jakson lopussa, ja arkistoitu on voimassa {valid_until} asti. {withholding}",
+      "fail_pending_open": "Aliurakoitsijan {subcontractor} maksuhakemusta {pay_app} ei ole vielä maksettu. Asiakirja ”{document}” otetaan huomioon maksupäivänä, ei jakson lopussa; arkistoidulla ei ole päättymispäivää. {withholding}",
+      "fail_pending_invalid": "Aliurakoitsijan {subcontractor} maksuhakemusta {pay_app} ei ole vielä maksettu, eikä arkistossa ole voimassa olevaa asiakirjaa ”{document}”, jonka piiriin jakson päättymisen jälkeinen maksu voisi kuulua. {withholding}",
+      "suggestion": "Tarkista, että todistus on voimassa maksupäivänä, ja pyydä aliurakoitsijalta voimassa oleva, jos se ei ole. Veroa ei pidätetä tässä: jos maksu jää voimassa olevan todistuksen ulkopuolelle, pidätyksen tekeminen ja ilmoittaminen on sinun vastuullasi.",
+      "withholding": {
+        "gross_limit": "Ilman sitä {rate} % maksusta, arvonlisävero mukaan lukien, on pidätettävä ja tilitettävä veroviranomaiselle, ellei kaikki tälle aliurakoitsijalle kalenterivuoden aikana maksettu pysy rajan {limit} sisällä ({reference}).",
+        "gross": "Ilman sitä {rate} % maksusta, arvonlisävero mukaan lukien, on pidätettävä ja tilitettävä veroviranomaiselle ({reference}).",
+        "net_limit": "Ilman sitä {rate} % maksusta, arvonlisäveroa lukuun ottamatta, on pidätettävä ja tilitettävä veroviranomaiselle, ellei kaikki tälle aliurakoitsijalle kalenterivuoden aikana maksettu pysy rajan {limit} sisällä ({reference}).",
+        "net": "Ilman sitä {rate} % maksusta, arvonlisäveroa lukuun ottamatta, on pidätettävä ja tilitettävä veroviranomaiselle ({reference}).",
+        "unknown": "Ilman sitä maksuun voi kohdistua veronpidätys."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Pakollinen todistus ”{document}” ei ole voimassa (päättyy {date}), joten maksut tälle aliurakoitsijalle on estetty",
+      "suggestion": "Kirjaa uusittu todistus tai pyydä esihenkilöä ohittamaan esto perustelun kera"
+    },
+    "certificate_expiring": {
+      "fail": "Todistus ”{document}” päättyy {date}, {days} päivän kuluttua",
+      "suggestion": "Pyydä aliurakoitsijalta uusimista ennen kuin todistus raukeaa"
+    },
+    "policy_details_recorded": {
+      "fail": "Pakollisella todistuksella ”{document}” ei ole vakuutuskirjan numeroa tai vakuutussummaa",
+      "suggestion": "Lisää vakuutuskirjan numero ja vakuutussumma todistuksesta"
+    },
+    "cert_types": {
+      "public_liability": "Yleinen vastuuvakuutus",
+      "employers_liability": "Työnantajan vastuuvakuutus",
+      "professional_indemnity": "Ammatillinen vastuuvakuutus",
+      "contractors_all_risk": "Urakoitsijan kaikki riskit -vakuutus",
+      "workers_compensation": "Työtapaturmavakuutus",
+      "motor_vehicle": "Moottoriajoneuvovakuutus",
+      "product_liability": "Tuotevastuuvakuutus",
+      "plant_equipment": "Koneet ja kalusto",
+      "environmental_liability": "Ympäristövastuuvakuutus",
+      "cyber_liability": "Kybervastuuvakuutus",
+      "insurance": "Vakuutus"
+    }
+  }
+}

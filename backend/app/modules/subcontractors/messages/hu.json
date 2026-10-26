@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Az alvállalkozói kifizetési igény ({pay_app}) szerepel ebben a követelésben, miközben állapota: {status}, így a megrendelőnek számlázott összeg nincs jóváhagyva kifizetésre",
+      "suggestion": "Hagyja jóvá a kifizetési igényt, vagy zárja ki ebből a követelésből a jóváhagyásig",
+      "statuses": {
+        "submitted": "benyújtva, de még nincs felülvizsgálva",
+        "rejected": "elutasítva"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Az alvállalkozói kifizetési igény ({pay_app}) nettó összege {net}, de az irattárban lévő zálogjogról lemondó nyilatkozatok (lien waiver) csak {covered} összeget fednek le",
+      "fail_through_date": "Az alvállalkozói kifizetési igényhez ({pay_app}) tartozó zálogjogról lemondó nyilatkozat {through_date} napjáig érvényes, ami a kifizetési igény időszakának vége ({period_end}) előtt van",
+      "suggestion": "Szerezzen be az időszak végéig a teljes nettó összeget lefedő nyilatkozatot, vagy zárja ki a kifizetési igényt ebből a követelésből"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Az alvállalkozói kifizetési igényt ({pay_app}) egy korábbi követelésben már kifizették, de az irattárban nincs olyan feltétel nélküli lemondó nyilatkozat, amely az időszak végéig ({period_end}) érvényes",
+      "suggestion": "Szerezze be a már teljesített kifizetéshez tartozó feltétel nélküli nyilatkozatot, és rögzítse a dátumot, amelyig érvényes"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Az alvállalkozói kifizetési igény ({pay_app}) egy tétele a(z) {package} munkacsomaghoz, {amount} összegben jóváhagyva, nincs hozzákapcsolva a szerződés költségvetési táblázatának egyetlen tételéhez sem",
+      "fail_foreign_line": "Az alvállalkozói kifizetési igény ({pay_app}) egy tétele a(z) {package} munkacsomaghoz, {amount} összegben jóváhagyva, egy másik szerződés tételéhez van kapcsolva",
+      "fail_parent_line": "Az alvállalkozói kifizetési igény ({pay_app}) egy tétele a(z) {package} munkacsomaghoz, {amount} összegben jóváhagyva, egy csoportosító tételhez van kapcsolva, amelyre közvetlenül nem számláznak",
+      "suggestion": "Kapcsolja a munkacsomagot, vagy a kifizetési igény ezen tételét a szerződés költségvetési táblázatának számlázható tételéhez"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "A(z) {line} tételen eddig jóváhagyott alvállalkozói összegek összesen {approved}, ami meghaladja a tétel ütemezett értékét ({scheduled})",
+      "suggestion": "Ellenőrizze a tétel alvállalkozói jóváhagyásait, vagy vegyen fel módosítást, amely megemeli az ütemezett értéket"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} alvállalkozónak nincs irattárban lévő „{document}” dokumentuma {as_of} napján, e követelés időszakának végén",
+      "fail_expired": "{subcontractor} „{document}” dokumentuma {as_of} napján, e követelés időszakának végén már nem volt érvényes",
+      "fail_revoked": "{subcontractor} „{document}” dokumentumát visszavonták, és {as_of} napján, e követelés időszakának végén nem volt érvényes",
+      "suggestion": "Kérjen az alvállalkozótól érvényes igazolást, vagy zárja ki a kifizetési igényeit ebből a követelésből",
+      "documents": {
+        "insurance": "biztosítási igazolás",
+        "license": "engedély",
+        "iso": "ISO tanúsítvány",
+        "safety": "munkavédelmi igazolás",
+        "bond": "garancia",
+        "wsl_clearance": "munkavédelmi megfelelőségi igazolás",
+        "wsib_clearance": "WSIB megfelelőségi igazolás",
+        "wcb_clearance": "WCB megfelelőségi igazolás",
+        "attestation_revenu_quebec": "Revenu Québec igazolás",
+        "construction_tax_exemption": "építési adó alóli mentességi igazolás",
+        "social_security_clearance": "társadalombiztosítási tartozásmentességi igazolás",
+        "employers_liability_clearance": "munkáltatói felelősségi megfelelőségi igazolás"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} részére {paid_on} napján kifizették a(z) {pay_app} kifizetési igényt, miközben nem volt irattárban „{document}” dokumentum. {withholding}",
+      "fail_expired": "{subcontractor} részére {paid_on} napján kifizették a(z) {pay_app} kifizetési igényt, de „{document}” dokumentuma {lapsed_on} napján lejárt. {withholding}",
+      "fail_revoked": "{subcontractor} részére {paid_on} napján kifizették a(z) {pay_app} kifizetési igényt, de „{document}” dokumentumát visszavonták. {withholding}",
+      "fail_undated": "{subcontractor} kifizetési igénye ({pay_app}) kifizetettként van megjelölve, de nincs fizetési dátuma, ezért nem ellenőrizhető, hogy a „{document}” dokumentum fedezte-e a kifizetést. {withholding}",
+      "fail_pending": "{subcontractor} kifizetési igénye ({pay_app}) még nincs kifizetve. A „{document}” dokumentum a fizetés napján számít, nem az időszak végén, és az irattárban lévő {valid_until} napjáig érvényes. {withholding}",
+      "fail_pending_open": "{subcontractor} kifizetési igénye ({pay_app}) még nincs kifizetve. A „{document}” dokumentum a fizetés napján számít, nem az időszak végén; az irattárban lévőnek nincs lejárati dátuma. {withholding}",
+      "fail_pending_invalid": "{subcontractor} kifizetési igénye ({pay_app}) még nincs kifizetve, és nincs irattárban érvényes „{document}” dokumentum, amelynek hatálya alá az időszak vége utáni kifizetés eshetne. {withholding}",
+      "suggestion": "Ellenőrizze, hogy az igazolás a fizetés napján érvényes-e, és ha nem, kérjen érvényeset az alvállalkozótól. Az adót itt nem vonjuk le: ha a kifizetés érvényes igazoláson kívül esik, a levonás és annak bevallása az Ön feladata.",
+      "withholding": {
+        "gross_limit": "Enélkül a kifizetés {rate}%-át, áfával együtt, le kell vonni és be kell fizetni az adóhatóságnak, kivéve ha az alvállalkozónak a naptári évben kifizetett teljes összeg a(z) {limit} határon belül marad ({reference}).",
+        "gross": "Enélkül a kifizetés {rate}%-át, áfával együtt, le kell vonni és be kell fizetni az adóhatóságnak ({reference}).",
+        "net_limit": "Enélkül a kifizetés {rate}%-át, áfa nélkül, le kell vonni és be kell fizetni az adóhatóságnak, kivéve ha az alvállalkozónak a naptári évben kifizetett teljes összeg a(z) {limit} határon belül marad ({reference}).",
+        "net": "Enélkül a kifizetés {rate}%-át, áfa nélkül, le kell vonni és be kell fizetni az adóhatóságnak ({reference}).",
+        "unknown": "Enélkül a kifizetésre adólevonás vonatkozhat."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "A kötelező „{document}” igazolás nem érvényes (lejárat: {date}), ezért az alvállalkozónak szóló kifizetések le vannak tiltva",
+      "suggestion": "Rögzítse a megújított igazolást, vagy kérjen egy vezetőt, hogy indoklással oldja fel a tiltást"
+    },
+    "certificate_expiring": {
+      "fail": "A „{document}” igazolás {date} napján, {days} nap múlva lejár",
+      "suggestion": "Kérje az alvállalkozótól a megújítást az igazolás lejárta előtt"
+    },
+    "policy_details_recorded": {
+      "fail": "A kötelező „{document}” igazoláson nincs kötvényszám vagy fedezeti összeg",
+      "suggestion": "Adja hozzá az igazolásról a kötvényszámot és a biztosított összeget"
+    },
+    "cert_types": {
+      "public_liability": "Általános felelősségbiztosítás",
+      "employers_liability": "Munkáltatói felelősségbiztosítás",
+      "professional_indemnity": "Szakmai felelősségbiztosítás",
+      "contractors_all_risk": "Építési-szerelési all risk biztosítás",
+      "workers_compensation": "Munkavállalói balesetbiztosítás",
+      "motor_vehicle": "Gépjármű-biztosítás",
+      "product_liability": "Termékfelelősség-biztosítás",
+      "plant_equipment": "Gépek és berendezések",
+      "environmental_liability": "Környezeti felelősségbiztosítás",
+      "cyber_liability": "Kiberfelelősség-biztosítás",
+      "insurance": "Biztosítás"
+    }
+  }
+}

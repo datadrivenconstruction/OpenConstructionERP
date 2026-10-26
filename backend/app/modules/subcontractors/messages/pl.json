@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Wniosek o płatność podwykonawcy {pay_app} został ujęty w tym roszczeniu, choć ma status „{status}”, więc kwota zafakturowana inwestorowi nie została zatwierdzona do zapłaty",
+      "suggestion": "Zatwierdź wniosek o płatność albo wyłącz go z tego roszczenia do czasu zatwierdzenia",
+      "statuses": {
+        "submitted": "złożony i jeszcze niezweryfikowany",
+        "rejected": "odrzucony"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Wniosek o płatność podwykonawcy {pay_app} opiewa na {net} netto, ale oświadczenia o zrzeczeniu się prawa zastawu (lien waiver) w aktach obejmują tylko {covered}",
+      "fail_through_date": "Oświadczenie o zrzeczeniu się prawa zastawu do wniosku o płatność podwykonawcy {pay_app} obejmuje okres do {through_date}, czyli przed końcem okresu wniosku o płatność, tj. {period_end}",
+      "suggestion": "Uzyskaj oświadczenie obejmujące pełną kwotę netto do końca okresu albo wyłącz wniosek o płatność z tego roszczenia"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Wniosek o płatność podwykonawcy {pay_app} został zapłacony we wcześniejszym roszczeniu, ale w aktach brak bezwarunkowego oświadczenia o zrzeczeniu się prawa zastawu obejmującego okres do jego końca, tj. {period_end}",
+      "suggestion": "Uzyskaj bezwarunkowe oświadczenie dla dokonanej już płatności i zapisz datę, do której obowiązuje"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Pozycja wniosku o płatność podwykonawcy {pay_app} dla pakietu robót {package}, zatwierdzona na {amount}, nie jest powiązana z żadną pozycją przedmiaru tej umowy",
+      "fail_foreign_line": "Pozycja wniosku o płatność podwykonawcy {pay_app} dla pakietu robót {package}, zatwierdzona na {amount}, jest powiązana z pozycją innej umowy",
+      "fail_parent_line": "Pozycja wniosku o płatność podwykonawcy {pay_app} dla pakietu robót {package}, zatwierdzona na {amount}, jest powiązana z pozycją grupującą, która nie jest fakturowana bezpośrednio",
+      "suggestion": "Powiąż pakiet robót lub tę pozycję wniosku o płatność z fakturowalną pozycją przedmiaru tej umowy"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Zatwierdzone dotąd kwoty podwykonawcze na pozycji {line} wynoszą łącznie {approved}, powyżej jej wartości zaplanowanej {scheduled}",
+      "suggestion": "Sprawdź zatwierdzenia podwykonawcze na tej pozycji albo dodaj zlecenie zmiany, które podnosi jej wartość zaplanowaną"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} nie ma w aktach dokumentu „{document}” na dzień {as_of}, koniec okresu tego roszczenia",
+      "fail_expired": "Dokument „{document}” podwykonawcy {subcontractor} nie był już ważny w dniu {as_of}, na koniec okresu tego roszczenia",
+      "fail_revoked": "Dokument „{document}” podwykonawcy {subcontractor} został cofnięty i nie był ważny w dniu {as_of}, na koniec okresu tego roszczenia",
+      "suggestion": "Uzyskaj od podwykonawcy aktualny dokument albo wyłącz jego wnioski o płatność z tego roszczenia",
+      "documents": {
+        "insurance": "polisa ubezpieczeniowa",
+        "license": "licencja",
+        "iso": "certyfikat ISO",
+        "safety": "certyfikat bezpieczeństwa",
+        "bond": "gwarancja",
+        "wsl_clearance": "zaświadczenie o bezpieczeństwie pracowników",
+        "wsib_clearance": "zaświadczenie o niezaleganiu WSIB",
+        "wcb_clearance": "zaświadczenie o niezaleganiu WCB",
+        "attestation_revenu_quebec": "zaświadczenie Revenu Québec",
+        "construction_tax_exemption": "zaświadczenie o zwolnieniu z podatku budowlanego",
+        "social_security_clearance": "zaświadczenie o niezaleganiu w składkach na ubezpieczenia społeczne",
+        "employers_liability_clearance": "zaświadczenie o rozliczeniu odpowiedzialności pracodawcy"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} otrzymał zapłatę {paid_on} za wniosek o płatność {pay_app}, choć w aktach nie było dokumentu „{document}”. {withholding}",
+      "fail_expired": "{subcontractor} otrzymał zapłatę {paid_on} za wniosek o płatność {pay_app}, ale jego dokument „{document}” wygasł {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} otrzymał zapłatę {paid_on} za wniosek o płatność {pay_app}, ale jego dokument „{document}” został cofnięty. {withholding}",
+      "fail_undated": "Wniosek o płatność {pay_app} podwykonawcy {subcontractor} jest oznaczony jako zapłacony, ale nie ma daty płatności, więc nie można sprawdzić, czy dokument „{document}” obejmował płatność. {withholding}",
+      "fail_pending": "Wniosek o płatność {pay_app} podwykonawcy {subcontractor} nie został jeszcze zapłacony. Dokument „{document}” liczy się w dniu płatności, a nie na koniec okresu, a ten w aktach jest ważny do {valid_until}. {withholding}",
+      "fail_pending_open": "Wniosek o płatność {pay_app} podwykonawcy {subcontractor} nie został jeszcze zapłacony. Dokument „{document}” liczy się w dniu płatności, a nie na koniec okresu; ten w aktach nie ma daty końcowej. {withholding}",
+      "fail_pending_invalid": "Wniosek o płatność {pay_app} podwykonawcy {subcontractor} nie został jeszcze zapłacony, a w aktach nie ma ważnego dokumentu „{document}”, którym objęta mogłaby być płatność po końcu okresu. {withholding}",
+      "suggestion": "Sprawdź, czy dokument jest ważny w dniu płatności, a jeśli nie, uzyskaj aktualny od podwykonawcy. Podatek nie jest tu potrącany: gdy płatność wypada poza ważnym dokumentem, potrącenie i jego rozliczenie należy do Ciebie.",
+      "withholding": {
+        "gross_limit": "Bez niego {rate}% płatności, wraz z VAT, trzeba potrącić i odprowadzić do urzędu skarbowego, chyba że wszystko, co w roku kalendarzowym zapłacono temu podwykonawcy, mieści się w limicie {limit} ({reference}).",
+        "gross": "Bez niego {rate}% płatności, wraz z VAT, trzeba potrącić i odprowadzić do urzędu skarbowego ({reference}).",
+        "net_limit": "Bez niego {rate}% płatności, bez VAT, trzeba potrącić i odprowadzić do urzędu skarbowego, chyba że wszystko, co w roku kalendarzowym zapłacono temu podwykonawcy, mieści się w limicie {limit} ({reference}).",
+        "net": "Bez niego {rate}% płatności, bez VAT, trzeba potrącić i odprowadzić do urzędu skarbowego ({reference}).",
+        "unknown": "Bez niego płatność może podlegać poborowi podatku u źródła."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Obowiązkowy dokument „{document}” nie jest ważny (wygasa {date}), więc płatności na rzecz tego podwykonawcy są zablokowane",
+      "suggestion": "Zarejestruj odnowiony dokument albo poproś kierownika o zdjęcie blokady z podaniem powodu"
+    },
+    "certificate_expiring": {
+      "fail": "Dokument „{document}” wygasa {date}, za {days} dni",
+      "suggestion": "Poproś podwykonawcę o odnowienie, zanim dokument straci ważność"
+    },
+    "policy_details_recorded": {
+      "fail": "Obowiązkowy dokument „{document}” nie zawiera numeru polisy ani sumy ubezpieczenia",
+      "suggestion": "Dodaj numer polisy i sumę ubezpieczenia z dokumentu"
+    },
+    "cert_types": {
+      "public_liability": "OC ogólne",
+      "employers_liability": "OC pracodawcy",
+      "professional_indemnity": "OC zawodowe",
+      "contractors_all_risk": "Ubezpieczenie CAR (wszystkie ryzyka budowlane)",
+      "workers_compensation": "Ubezpieczenie od wypadków przy pracy",
+      "motor_vehicle": "Pojazdy mechaniczne",
+      "product_liability": "OC za produkt",
+      "plant_equipment": "Maszyny i sprzęt",
+      "environmental_liability": "OC za szkody w środowisku",
+      "cyber_liability": "OC cybernetyczne",
+      "insurance": "Ubezpieczenie"
+    }
+  }
+}

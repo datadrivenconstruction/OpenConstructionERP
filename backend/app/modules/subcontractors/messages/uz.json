@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "Xo'p"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Pudratchining {pay_app} to'lov so'rovi \"{status}\" holatida bo'lsa-da, ushbu talabga kiritilgan, shuning uchun buyurtmachiga hisoblangan summa to'lov uchun tasdiqlanmagan",
+      "suggestion": "To'lov so'rovini tasdiqlang yoki u tasdiqlanguncha ushbu talabdan chiqarib qo'ying",
+      "statuses": {
+        "submitted": "topshirilgan va hali ko'rib chiqilmagan",
+        "rejected": "rad etilgan"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Pudratchining {pay_app} to'lov so'rovi bo'yicha sof summa {net}, lekin hujjatlar jildidagi garov huquqidan voz kechish xatlari (lien waiver) faqat {covered} summani qoplaydi",
+      "fail_through_date": "Pudratchining {pay_app} to'lov so'rovi uchun garov huquqidan voz kechish xati {through_date} sanasigacha amal qiladi, bu to'lov so'rovi davrining tugashidan ({period_end}) oldin",
+      "suggestion": "Davr oxirigacha butun sof summani qoplaydigan voz kechish xatini oling yoki to'lov so'rovini ushbu talabdan chiqarib qo'ying"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Pudratchining {pay_app} to'lov so'rovi oldingi talabda to'langan, lekin hujjatlar jildida uning davri tugashigacha ({period_end}) amal qiladigan shartsiz voz kechish xati yo'q",
+      "suggestion": "Amalga oshirilgan to'lov uchun shartsiz voz kechish xatini oling va u amal qiladigan sanani qayd qiling"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Pudratchining {pay_app} to'lov so'rovidagi {package} ish paketiga oid, {amount} summaga tasdiqlangan qator ushbu shartnoma hajmlar qaydnomasining birorta qatoriga bog'lanmagan",
+      "fail_foreign_line": "Pudratchining {pay_app} to'lov so'rovidagi {package} ish paketiga oid, {amount} summaga tasdiqlangan qator boshqa shartnomaning qatoriga bog'langan",
+      "fail_parent_line": "Pudratchining {pay_app} to'lov so'rovidagi {package} ish paketiga oid, {amount} summaga tasdiqlangan qator to'g'ridan-to'g'ri hisob-faktura qilinmaydigan guruhlovchi qatorga bog'langan",
+      "suggestion": "Ish paketini yoki to'lov so'rovining ushbu qatorini shartnoma hajmlar qaydnomasining hisob-faktura qilinadigan qatoriga bog'lang"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "{line} qatori bo'yicha hozirgacha tasdiqlangan pudrat summalari jami {approved} bo'lib, uning rejalashtirilgan qiymatidan ({scheduled}) oshib ketgan",
+      "suggestion": "Ushbu qator bo'yicha pudrat tasdiqlarini tekshiring yoki uning rejalashtirilgan qiymatini oshiradigan o'zgartirish buyrug'ini qo'shing"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} da ushbu talab davrining oxirida, ya'ni {as_of} sanasida, hujjatlar jildida \"{document}\" yo'q",
+      "fail_expired": "{subcontractor} ning \"{document}\" hujjati ushbu talab davrining oxirida, ya'ni {as_of} sanasida, endi amal qilmagan",
+      "fail_revoked": "{subcontractor} ning \"{document}\" hujjati bekor qilingan edi va ushbu talab davrining oxirida, ya'ni {as_of} sanasida, amal qilmagan",
+      "suggestion": "Pudratchidan amaldagi sertifikatni oling yoki uning to'lov so'rovlarini ushbu talabdan chiqarib qo'ying",
+      "documents": {
+        "insurance": "sug'urta sertifikati",
+        "license": "litsenziya",
+        "iso": "ISO sertifikati",
+        "safety": "xavfsizlik sertifikati",
+        "bond": "kafolat",
+        "wsl_clearance": "ishchilar xavfsizligi bo'yicha muvofiqlik xati",
+        "wsib_clearance": "WSIB hisob-kitob sertifikati",
+        "wcb_clearance": "WCB hisob-kitob xati",
+        "attestation_revenu_quebec": "Revenu Québec ma'lumotnomasi",
+        "construction_tax_exemption": "qurilish solig'idan ozod etish sertifikati",
+        "social_security_clearance": "ijtimoiy sug'urta bo'yicha qarzdorlik yo'qligi to'g'risidagi ma'lumotnoma",
+        "employers_liability_clearance": "ish beruvchi javobgarligi bo'yicha muvofiqlik sertifikati"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} ga {pay_app} to'lov so'rovi bo'yicha {paid_on} sanasida to'lov qilindi, lekin hujjatlar jildida \"{document}\" yo'q edi. {withholding}",
+      "fail_expired": "{subcontractor} ga {pay_app} to'lov so'rovi bo'yicha {paid_on} sanasida to'lov qilindi, lekin uning \"{document}\" hujjati {lapsed_on} sanasida tugagan edi. {withholding}",
+      "fail_revoked": "{subcontractor} ga {pay_app} to'lov so'rovi bo'yicha {paid_on} sanasida to'lov qilindi, lekin uning \"{document}\" hujjati bekor qilingan edi. {withholding}",
+      "fail_undated": "{subcontractor} ning {pay_app} to'lov so'rovi to'langan deb belgilangan, lekin to'lov sanasi yo'q, shuning uchun \"{document}\" to'lovni qoplaganini tekshirib bo'lmaydi. {withholding}",
+      "fail_pending": "{subcontractor} ning {pay_app} to'lov so'rovi hali to'lanmagan. \"{document}\" davr oxirida emas, to'lov kuni hisobga olinadi va hujjatlar jildidagisi {valid_until} sanasigacha amal qiladi. {withholding}",
+      "fail_pending_open": "{subcontractor} ning {pay_app} to'lov so'rovi hali to'lanmagan. \"{document}\" davr oxirida emas, to'lov kuni hisobga olinadi; hujjatlar jildidagisining tugash sanasi yo'q. {withholding}",
+      "fail_pending_invalid": "{subcontractor} ning {pay_app} to'lov so'rovi hali to'lanmagan va davr tugagandan keyingi to'lov uning doirasiga tushishi mumkin bo'lgan amaldagi \"{document}\" hujjatlar jildida yo'q. {withholding}",
+      "suggestion": "Sertifikat to'lov kunida amal qilishini tekshiring, aks holda pudratchidan amaldagisini oling. Soliq bu yerda ushlab qolinmaydi: to'lov amaldagi sertifikatdan tashqarida qolsa, ushlab qolish va uni hisobot qilish sizning zimmangizda.",
+      "withholding": {
+        "gross_limit": "Usiz to'lovning {rate}%, QQS bilan birga, ushlab qolinib, soliq organiga o'tkazilishi kerak, agar kalendar yilida ushbu pudratchiga to'langan barcha summa {limit} chegarasida qolmasa ({reference}).",
+        "gross": "Usiz to'lovning {rate}%, QQS bilan birga, ushlab qolinib, soliq organiga o'tkazilishi kerak ({reference}).",
+        "net_limit": "Usiz to'lovning {rate}%, QQSsiz, ushlab qolinib, soliq organiga o'tkazilishi kerak, agar kalendar yilida ushbu pudratchiga to'langan barcha summa {limit} chegarasida qolmasa ({reference}).",
+        "net": "Usiz to'lovning {rate}%, QQSsiz, ushlab qolinib, soliq organiga o'tkazilishi kerak ({reference}).",
+        "unknown": "Usiz to'lovdan soliq ushlab qolinishi mumkin."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Majburiy \"{document}\" sertifikati amal qilmaydi (muddati {date} da tugaydi), shuning uchun ushbu pudratchiga to'lovlar bloklangan",
+      "suggestion": "Yangilangan sertifikatni qayd qiling yoki rahbardan sababni ko'rsatib blokni olib tashlashni so'rang"
+    },
+    "certificate_expiring": {
+      "fail": "\"{document}\" sertifikatining muddati {date} sanasida, ya'ni {days} kundan keyin tugaydi",
+      "suggestion": "Sertifikat muddati tugamasidan oldin pudratchidan uni yangilashni so'rang"
+    },
+    "policy_details_recorded": {
+      "fail": "Majburiy \"{document}\" sertifikatida polis raqami yoki qoplash summasi yo'q",
+      "suggestion": "Sertifikatdan polis raqami va sug'urta summasini qo'shing"
+    },
+    "cert_types": {
+      "public_liability": "Uchinchi shaxslar oldidagi javobgarlik",
+      "employers_liability": "Ish beruvchining javobgarligi",
+      "professional_indemnity": "Kasbiy javobgarlik",
+      "contractors_all_risk": "Pudratchining barcha xatarlari sug'urtasi",
+      "workers_compensation": "Ishchilar kompensatsiyasi",
+      "motor_vehicle": "Avtotransport",
+      "product_liability": "Mahsulot javobgarligi",
+      "plant_equipment": "Texnika va uskunalar",
+      "environmental_liability": "Ekologik javobgarlik",
+      "cyber_liability": "Kiber javobgarlik",
+      "insurance": "Sug'urta"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Betalingsaanvraag {pay_app} van de onderaannemer is opgenomen in deze claim terwijl de status \"{status}\" is, dus het aan de opdrachtgever gefactureerde bedrag is niet goedgekeurd voor betaling",
+      "suggestion": "Keur de betalingsaanvraag goed, of sluit hem uit van deze claim totdat hij is goedgekeurd",
+      "statuses": {
+        "submitted": "ingediend en nog niet beoordeeld",
+        "rejected": "afgewezen"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Betalingsaanvraag {pay_app} van de onderaannemer bedraagt netto {net}, maar de vastgelegde afstandsverklaringen van retentierecht (lien waivers) dekken slechts {covered}",
+      "fail_through_date": "De afstandsverklaring van retentierecht voor betalingsaanvraag {pay_app} van de onderaannemer loopt tot {through_date}, dat is vóór het einde van de periode van de betalingsaanvraag op {period_end}",
+      "suggestion": "Verzamel een afstandsverklaring die het volledige nettobedrag tot het einde van de periode dekt, of sluit de betalingsaanvraag uit van deze claim"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Betalingsaanvraag {pay_app} van de onderaannemer is op een eerdere claim betaald, maar er is geen onvoorwaardelijke afstandsverklaring vastgelegd die loopt tot het einde van de periode, {period_end}",
+      "suggestion": "Verzamel de onvoorwaardelijke afstandsverklaring voor de reeds gedane betaling en leg de datum vast tot wanneer deze loopt"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Een regel van betalingsaanvraag {pay_app} van de onderaannemer voor werkpakket {package}, goedgekeurd voor {amount}, is niet gekoppeld aan een regel van de bestekstaat van dit contract",
+      "fail_foreign_line": "Een regel van betalingsaanvraag {pay_app} van de onderaannemer voor werkpakket {package}, goedgekeurd voor {amount}, is gekoppeld aan een regel van een ander contract",
+      "fail_parent_line": "Een regel van betalingsaanvraag {pay_app} van de onderaannemer voor werkpakket {package}, goedgekeurd voor {amount}, is gekoppeld aan een groepsregel, die niet rechtstreeks wordt gefactureerd",
+      "suggestion": "Koppel het werkpakket, of deze regel van de betalingsaanvraag, aan een factureerbare regel van de bestekstaat van dit contract"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "De tot nu toe goedgekeurde onderaannemingsbedragen op regel {line} bedragen samen {approved}, boven de geplande waarde van {scheduled}",
+      "suggestion": "Controleer de goedkeuringen van onderaanneming op deze regel, of voeg een wijzigingsopdracht toe die de geplande waarde verhoogt"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} heeft per {as_of}, het einde van de periode van deze claim, geen \"{document}\" vastgelegd",
+      "fail_expired": "De \"{document}\" van {subcontractor} was op {as_of}, het einde van de periode van deze claim, niet meer geldig",
+      "fail_revoked": "De \"{document}\" van {subcontractor} was ingetrokken en was op {as_of}, het einde van de periode van deze claim, niet geldig",
+      "suggestion": "Vraag de onderaannemer om een actueel certificaat, of sluit zijn betalingsaanvragen uit van deze claim",
+      "documents": {
+        "insurance": "verzekeringscertificaat",
+        "license": "vergunning",
+        "iso": "ISO-certificaat",
+        "safety": "veiligheidscertificaat",
+        "bond": "bankgarantie",
+        "wsl_clearance": "verklaring van veiligheid voor werknemers",
+        "wsib_clearance": "WSIB-clearancecertificaat",
+        "wcb_clearance": "WCB-clearancebrief",
+        "attestation_revenu_quebec": "attestation van Revenu Québec",
+        "construction_tax_exemption": "vrijstellingscertificaat voor bouwbelasting",
+        "social_security_clearance": "verklaring betalingsgedrag sociale zekerheid",
+        "employers_liability_clearance": "clearancecertificaat werkgeversaansprakelijkheid"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} is op {paid_on} betaald voor betalingsaanvraag {pay_app} zonder dat er een \"{document}\" is vastgelegd. {withholding}",
+      "fail_expired": "{subcontractor} is op {paid_on} betaald voor betalingsaanvraag {pay_app}, maar de \"{document}\" was op {lapsed_on} verlopen. {withholding}",
+      "fail_revoked": "{subcontractor} is op {paid_on} betaald voor betalingsaanvraag {pay_app}, maar de \"{document}\" was ingetrokken. {withholding}",
+      "fail_undated": "Betalingsaanvraag {pay_app} van {subcontractor} is als betaald gemarkeerd maar heeft geen betaaldatum, dus er kan niet worden gecontroleerd of de \"{document}\" de betaling dekte. {withholding}",
+      "fail_pending": "Betalingsaanvraag {pay_app} van {subcontractor} is nog niet betaald. De \"{document}\" telt op de dag van betaling, niet aan het einde van de periode, en de vastgelegde is geldig tot {valid_until}. {withholding}",
+      "fail_pending_open": "Betalingsaanvraag {pay_app} van {subcontractor} is nog niet betaald. De \"{document}\" telt op de dag van betaling, niet aan het einde van de periode; de vastgelegde heeft geen einddatum. {withholding}",
+      "fail_pending_invalid": "Betalingsaanvraag {pay_app} van {subcontractor} is nog niet betaald, en er is geen geldige \"{document}\" vastgelegd waarbinnen een betaling na het einde van de periode kan vallen. {withholding}",
+      "suggestion": "Controleer of het certificaat op de dag van betaling geldig is en vraag anders een actueel certificaat aan de onderaannemer. De belasting wordt hier niet ingehouden: als een betaling buiten een geldig certificaat valt, is het inhouden en afdragen aan u.",
+      "withholding": {
+        "gross_limit": "Zonder dit moet {rate}% van de betaling, inclusief btw, worden ingehouden en afgedragen aan de belastingdienst, tenzij alles wat in het kalenderjaar aan deze onderaannemer is betaald binnen {limit} blijft ({reference}).",
+        "gross": "Zonder dit moet {rate}% van de betaling, inclusief btw, worden ingehouden en afgedragen aan de belastingdienst ({reference}).",
+        "net_limit": "Zonder dit moet {rate}% van de betaling, exclusief btw, worden ingehouden en afgedragen aan de belastingdienst, tenzij alles wat in het kalenderjaar aan deze onderaannemer is betaald binnen {limit} blijft ({reference}).",
+        "net": "Zonder dit moet {rate}% van de betaling, exclusief btw, worden ingehouden en afgedragen aan de belastingdienst ({reference}).",
+        "unknown": "Zonder dit kan de betaling onderworpen zijn aan belastinginhouding."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Het verplichte certificaat \"{document}\" is niet geldig (verloopt {date}), dus betalingen aan deze onderaannemer zijn geblokkeerd",
+      "suggestion": "Leg het vernieuwde certificaat vast, of vraag een manager de blokkade met een reden op te heffen"
+    },
+    "certificate_expiring": {
+      "fail": "Het certificaat \"{document}\" verloopt op {date}, over {days} dag(en)",
+      "suggestion": "Vraag de onderaannemer om verlenging voordat het certificaat verloopt"
+    },
+    "policy_details_recorded": {
+      "fail": "Het verplichte certificaat \"{document}\" heeft geen polisnummer of dekkingsbedrag",
+      "suggestion": "Voeg het polisnummer en het verzekerde bedrag van het certificaat toe"
+    },
+    "cert_types": {
+      "public_liability": "Algemene aansprakelijkheid",
+      "employers_liability": "Werkgeversaansprakelijkheid",
+      "professional_indemnity": "Beroepsaansprakelijkheid",
+      "contractors_all_risk": "Construction all risk (CAR)",
+      "workers_compensation": "Werknemersongevallen",
+      "motor_vehicle": "Motorvoertuigen",
+      "product_liability": "Productaansprakelijkheid",
+      "plant_equipment": "Materieel en machines",
+      "environmental_liability": "Milieuaansprakelijkheid",
+      "cyber_liability": "Cyberaansprakelijkheid",
+      "insurance": "Verzekering"
+    }
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Alltöövõtja maksetaotlus {pay_app} on selles nõudes sisse arvatud, kuigi see on staatuses „{status}“, seega pole tellijale esitatud summat maksmiseks kinnitatud",
+      "suggestion": "Kinnitage maksetaotlus või jätke see sellest nõudest välja, kuni see on kinnitatud",
+      "statuses": {
+        "submitted": "esitatud ja veel läbi vaatamata",
+        "rejected": "tagasi lükatud"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Alltöövõtja maksetaotluse {pay_app} netosumma on {net}, kuid sellele kehtivad pandiõigusest loobumise avaldused (lien waiver) katavad vaid {covered}",
+      "fail_through_date": "Alltöövõtja maksetaotluse {pay_app} pandiõigusest loobumise avaldus kehtib kuni {through_date}, mis on enne maksetaotluse perioodi lõppu {period_end}",
+      "suggestion": "Hankige avaldus, mis katab kogu netosumma kuni perioodi lõpuni, või jätke maksetaotlus sellest nõudest välja"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Alltöövõtja maksetaotlus {pay_app} tasuti varasema nõude alusel, kuid puudub tingimusteta pandiõigusest loobumise avaldus, mis kehtiks kuni selle perioodi lõpuni {period_end}",
+      "suggestion": "Hankige juba tehtud makse kohta tingimusteta avaldus ja salvestage kuupäev, milleni see kehtib"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Alltöövõtja maksetaotluse {pay_app} rida tööpaketi {package} kohta, kinnitatud summas {amount}, ei ole seotud ühegi selle lepingu mahtude loendi reaga",
+      "fail_foreign_line": "Alltöövõtja maksetaotluse {pay_app} rida tööpaketi {package} kohta, kinnitatud summas {amount}, on seotud teise lepingu reaga",
+      "fail_parent_line": "Alltöövõtja maksetaotluse {pay_app} rida tööpaketi {package} kohta, kinnitatud summas {amount}, on seotud grupeeriva reaga, mille eest otse arvet ei esitata",
+      "suggestion": "Siduge tööpakett või see maksetaotluse rida selle lepingu mahtude loendi arveldatava reaga"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Real {line} seni kinnitatud alltööde summad kokku on {approved}, mis ületab selle ajakava järgset väärtust {scheduled}",
+      "suggestion": "Kontrollige selle rea alltööde kinnitusi või lisage muudatuskorraldus, mis suurendab selle ajakava järgset väärtust"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "Alltöövõtjal {subcontractor} puudub seisuga {as_of}, selle nõude perioodi lõpuks, dokument „{document}“",
+      "fail_expired": "Alltöövõtja {subcontractor} dokument „{document}“ ei kehtinud enam kuupäeval {as_of}, selle nõude perioodi lõpul",
+      "fail_revoked": "Alltöövõtja {subcontractor} dokument „{document}“ oli tühistatud ega kehtinud kuupäeval {as_of}, selle nõude perioodi lõpul",
+      "suggestion": "Küsige alltöövõtjalt kehtiv tõend või jätke tema maksetaotlused sellest nõudest välja",
+      "documents": {
+        "insurance": "kindlustustõend",
+        "license": "litsents",
+        "iso": "ISO sertifikaat",
+        "safety": "ohutussertifikaat",
+        "bond": "tagatis",
+        "wsl_clearance": "töötajate ohutuse nõuetele vastavuse kiri",
+        "wsib_clearance": "WSIB nõuetele vastavuse tõend",
+        "wcb_clearance": "WCB nõuetele vastavuse kiri",
+        "attestation_revenu_quebec": "Revenu Québec tõend",
+        "construction_tax_exemption": "ehitusmaksu vabastuse tõend",
+        "social_security_clearance": "sotsiaalkindlustuse võlgnevuse puudumise tõend",
+        "employers_liability_clearance": "tööandja vastutuse nõuetele vastavuse tõend"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "Alltöövõtjale {subcontractor} maksti {paid_on} maksetaotluse {pay_app} eest, kuigi dokument „{document}“ puudus. {withholding}",
+      "fail_expired": "Alltöövõtjale {subcontractor} maksti {paid_on} maksetaotluse {pay_app} eest, kuid tema dokument „{document}“ oli aegunud {lapsed_on}. {withholding}",
+      "fail_revoked": "Alltöövõtjale {subcontractor} maksti {paid_on} maksetaotluse {pay_app} eest, kuid tema dokument „{document}“ oli tühistatud. {withholding}",
+      "fail_undated": "Alltöövõtja {subcontractor} maksetaotlus {pay_app} on märgitud tasutuks, kuid maksekuupäev puudub, mistõttu ei saa kontrollida, kas dokument „{document}“ makse katab. {withholding}",
+      "fail_pending": "Alltöövõtja {subcontractor} maksetaotlus {pay_app} on veel tasumata. Dokument „{document}“ loeb makse päeval, mitte perioodi lõpus, ja olemasolev kehtib kuni {valid_until}. {withholding}",
+      "fail_pending_open": "Alltöövõtja {subcontractor} maksetaotlus {pay_app} on veel tasumata. Dokument „{document}“ loeb makse päeval, mitte perioodi lõpus; olemasoleval puudub lõppkuupäev. {withholding}",
+      "fail_pending_invalid": "Alltöövõtja {subcontractor} maksetaotlus {pay_app} on veel tasumata ning kehtivat dokumenti „{document}“, millesse perioodi lõpu järel tehtav makse võiks jääda, ei ole. {withholding}",
+      "suggestion": "Kontrollige, et tõend kehtib makse päeval, ning küsige alltöövõtjalt vajaduse korral kehtiv tõend. Maksu siin ei kinnitata: kui makse jääb kehtiva tõendi alt välja, on kinnipidamine ja selle deklareerimine teie ülesanne.",
+      "withholding": {
+        "gross_limit": "Ilma selleta tuleb maksest kinni pidada {rate}%, käibemaks kaasa arvatud, ja kanda see maksuametile, välja arvatud juhul, kui kõik sellele alltöövõtjale kalendriaasta jooksul tehtud maksed jäävad piiri {limit} sisse ({reference}).",
+        "gross": "Ilma selleta tuleb maksest kinni pidada {rate}%, käibemaks kaasa arvatud, ja kanda see maksuametile ({reference}).",
+        "net_limit": "Ilma selleta tuleb maksest kinni pidada {rate}%, käibemaksuta, ja kanda see maksuametile, välja arvatud juhul, kui kõik sellele alltöövõtjale kalendriaasta jooksul tehtud maksed jäävad piiri {limit} sisse ({reference}).",
+        "net": "Ilma selleta tuleb maksest kinni pidada {rate}%, käibemaksuta, ja kanda see maksuametile ({reference}).",
+        "unknown": "Ilma selleta võib makse kuuluda maksu kinnipidamisele."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Kohustuslik tõend „{document}“ ei kehti (aegub {date}), seega on maksed sellele alltöövõtjale blokeeritud",
+      "suggestion": "Salvestage uuendatud tõend või paluge juhil blokeering põhjendusega tühistada"
+    },
+    "certificate_expiring": {
+      "fail": "Tõend „{document}“ aegub {date}, {days} päeva pärast",
+      "suggestion": "Küsige alltöövõtjalt uuendust enne tõendi aegumist"
+    },
+    "policy_details_recorded": {
+      "fail": "Kohustuslikul tõendil „{document}“ puudub poliisi number või kindlustussumma",
+      "suggestion": "Lisage tõendilt poliisi number ja kindlustatud summa"
+    },
+    "cert_types": {
+      "public_liability": "Üldine vastutuskindlustus",
+      "employers_liability": "Tööandja vastutuskindlustus",
+      "professional_indemnity": "Kutsealane vastutuskindlustus",
+      "contractors_all_risk": "Ehitus-montaažiriskide kindlustus",
+      "workers_compensation": "Töötajate õnnetusjuhtumikindlustus",
+      "motor_vehicle": "Sõidukikindlustus",
+      "product_liability": "Tootevastutuse kindlustus",
+      "plant_equipment": "Masinad ja seadmed",
+      "environmental_liability": "Keskkonnavastutuse kindlustus",
+      "cyber_liability": "Küberriskide kindlustus",
+      "insurance": "Kindlustus"
+    }
+  }
+}

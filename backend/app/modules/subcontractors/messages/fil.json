@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Kasama sa claim na ito ang pay application ng subcontractor na {pay_app} habang ito ay {status}, kaya ang halagang sinisingil sa may-ari ay hindi pa aprubado para bayaran",
+      "suggestion": "Aprubahan ang pay application, o alisin ito sa claim na ito hanggang maaprubahan",
+      "statuses": {
+        "submitted": "naisumite at hindi pa nasusuri",
+        "rejected": "tinanggihan"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Ang net ng pay application ng subcontractor na {pay_app} ay {net}, ngunit ang mga lien waiver na nasa file para dito ay sumasaklaw lamang sa {covered}",
+      "fail_through_date": "Ang lien waiver para sa pay application ng subcontractor na {pay_app} ay hanggang {through_date} lamang, na mas maaga sa katapusan ng panahon ng pay application na {period_end}",
+      "suggestion": "Kumuha ng lien waiver na sumasaklaw sa buong net na halaga hanggang sa katapusan ng panahon, o alisin ang pay application sa claim na ito"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Nabayaran na ang pay application ng subcontractor na {pay_app} sa naunang claim, ngunit walang unconditional na lien waiver na nasa file na umaabot hanggang sa katapusan ng panahon nito na {period_end}",
+      "suggestion": "Kumuha ng unconditional na lien waiver para sa bayad na naibigay na at itala ang petsa kung hanggang kailan ito umaabot"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "Ang isang linya ng pay application ng subcontractor na {pay_app} para sa work package na {package}, na inaprubahan sa halagang {amount}, ay hindi naka-link sa anumang linya ng schedule of values ng kontratang ito",
+      "fail_foreign_line": "Ang isang linya ng pay application ng subcontractor na {pay_app} para sa work package na {package}, na inaprubahan sa halagang {amount}, ay naka-link sa linya ng ibang kontrata",
+      "fail_parent_line": "Ang isang linya ng pay application ng subcontractor na {pay_app} para sa work package na {package}, na inaprubahan sa halagang {amount}, ay naka-link sa isang grouping line, na hindi direktang sinisingil",
+      "suggestion": "I-link ang work package, o ang linyang ito ng pay application, sa isang masisingil na linya ng schedule of values ng kontratang ito"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Ang kabuuan ng mga halaga ng subcontract na naaprubahan na sa linya {line} ay {approved}, na higit sa nakatakdang halaga nitong {scheduled}",
+      "suggestion": "Suriin ang mga pag-apruba ng subcontract sa linyang ito, o magdagdag ng change order na magtataas sa nakatakdang halaga nito"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "Walang {document} na nasa file ang {subcontractor} noong {as_of}, ang katapusan ng panahon ng claim na ito",
+      "fail_expired": "Hindi na balido ang {document} ni {subcontractor} noong {as_of}, ang katapusan ng panahon ng claim na ito",
+      "fail_revoked": "Binawi ang {document} ni {subcontractor} at hindi balido noong {as_of}, ang katapusan ng panahon ng claim na ito",
+      "suggestion": "Kumuha ng kasalukuyang sertipiko mula sa subcontractor, o alisin ang kanilang mga pay application sa claim na ito",
+      "documents": {
+        "insurance": "sertipiko ng insurance",
+        "license": "lisensya",
+        "iso": "sertipiko ng ISO",
+        "safety": "sertipiko ng kaligtasan",
+        "bond": "bond",
+        "wsl_clearance": "liham ng clearance sa kaligtasan ng mga manggagawa",
+        "wsib_clearance": "sertipiko ng clearance ng WSIB",
+        "wcb_clearance": "liham ng clearance ng WCB",
+        "attestation_revenu_quebec": "attestation ng Revenu Québec",
+        "construction_tax_exemption": "sertipiko ng exemption sa buwis sa konstruksyon",
+        "social_security_clearance": "sertipiko ng clearance sa social security",
+        "employers_liability_clearance": "sertipiko ng clearance sa employers' liability"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "Binayaran si {subcontractor} noong {paid_on} para sa pay application na {pay_app} nang walang {document} na nasa file. {withholding}",
+      "fail_expired": "Binayaran si {subcontractor} noong {paid_on} para sa pay application na {pay_app}, ngunit nag-expire na ang {document} nila noong {lapsed_on}. {withholding}",
+      "fail_revoked": "Binayaran si {subcontractor} noong {paid_on} para sa pay application na {pay_app}, ngunit binawi na ang {document} nila. {withholding}",
+      "fail_undated": "Minarkahang bayad na ang pay application na {pay_app} ni {subcontractor} ngunit walang petsa ng pagbabayad, kaya hindi masusuri kung sakop ng {document} ang bayad. {withholding}",
+      "fail_pending": "Hindi pa bayad ang pay application na {pay_app} ni {subcontractor}. Ang {document} ay binibilang sa araw ng pagbabayad, hindi sa katapusan ng panahon, at ang nasa file ay balido hanggang {valid_until}. {withholding}",
+      "fail_pending_open": "Hindi pa bayad ang pay application na {pay_app} ni {subcontractor}. Ang {document} ay binibilang sa araw ng pagbabayad, hindi sa katapusan ng panahon; ang nasa file ay walang petsa ng pagtatapos. {withholding}",
+      "fail_pending_invalid": "Hindi pa bayad ang pay application na {pay_app} ni {subcontractor}, at walang balidong {document} na nasa file na sasaklaw sa bayad pagkatapos ng katapusan ng panahon. {withholding}",
+      "suggestion": "Tiyaking balido ang sertipiko sa araw ng pagbabayad, at kumuha ng kasalukuyan mula sa subcontractor kung hindi. Hindi ibinabawas dito ang buwis: kapag lumampas ang bayad sa saklaw ng balidong sertipiko, ikaw ang bahala sa pagbabawas at pag-uulat nito.",
+      "withholding": {
+        "gross_limit": "Kung wala nito, {rate}% ng bayad, kasama ang VAT, ay dapat pigilan at ibayad sa tanggapan ng buwis, maliban kung ang lahat ng binayaran sa subcontractor na ito sa loob ng taon ng kalendaryo ay hindi lalampas sa {limit} ({reference}).",
+        "gross": "Kung wala nito, {rate}% ng bayad, kasama ang VAT, ay dapat pigilan at ibayad sa tanggapan ng buwis ({reference}).",
+        "net_limit": "Kung wala nito, {rate}% ng bayad, hindi kasama ang VAT, ay dapat pigilan at ibayad sa tanggapan ng buwis, maliban kung ang lahat ng binayaran sa subcontractor na ito sa loob ng taon ng kalendaryo ay hindi lalampas sa {limit} ({reference}).",
+        "net": "Kung wala nito, {rate}% ng bayad, hindi kasama ang VAT, ay dapat pigilan at ibayad sa tanggapan ng buwis ({reference}).",
+        "unknown": "Kung wala nito, maaaring sumailalim ang bayad sa pagpigil ng buwis."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Hindi balido ang sapilitang sertipiko ng {document} (mag-e-expire sa {date}), kaya naka-block ang mga bayad sa subcontractor na ito",
+      "suggestion": "Itala ang na-renew na sertipiko, o hilingin sa isang manager na i-override ang block na may kasamang dahilan"
+    },
+    "certificate_expiring": {
+      "fail": "Mag-e-expire ang sertipiko ng {document} sa {date}, sa loob ng {days} araw",
+      "suggestion": "Hilingin sa subcontractor ang renewal bago mag-expire ang sertipiko"
+    },
+    "policy_details_recorded": {
+      "fail": "Walang numero ng polisiya o halaga ng saklaw ang sapilitang sertipiko ng {document}",
+      "suggestion": "Idagdag ang numero ng polisiya at ang halagang nakaseguro mula sa sertipiko"
+    },
+    "cert_types": {
+      "public_liability": "Public liability",
+      "employers_liability": "Employer's liability",
+      "professional_indemnity": "Professional indemnity",
+      "contractors_all_risk": "Contractor's all risk",
+      "workers_compensation": "Workers' compensation",
+      "motor_vehicle": "Sasakyan",
+      "product_liability": "Product liability",
+      "plant_equipment": "Plant at kagamitan",
+      "environmental_liability": "Environmental liability",
+      "cyber_liability": "Cyber liability",
+      "insurance": "Insurance"
+    }
+  }
+}

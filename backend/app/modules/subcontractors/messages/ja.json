@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "下請業者の支払申請 {pay_app} は「{status}」の状態でこの請求に含まれているため、発注者に請求する金額は支払承認されていません",
+      "suggestion": "支払申請を承認するか、承認されるまでこの請求から除外してください",
+      "statuses": {
+        "submitted": "提出済みで未審査",
+        "rejected": "却下"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "下請業者の支払申請 {pay_app} の正味額は {net} ですが、保管されている先取特権放棄書(lien waiver)がカバーしているのは {covered} のみです",
+      "fail_through_date": "下請業者の支払申請 {pay_app} の先取特権放棄書は {through_date} までを対象としており、支払申請の期間末日 {period_end} より前です",
+      "suggestion": "期間末日までの正味額全体をカバーする放棄書を入手するか、この支払申請をこの請求から除外してください"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "下請業者の支払申請 {pay_app} は以前の請求で支払済みですが、その期間末日 {period_end} までを対象とする無条件の先取特権放棄書が保管されていません",
+      "suggestion": "支払済み分の無条件放棄書を入手し、その対象日を記録してください"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "下請業者の支払申請 {pay_app} の作業パッケージ {package} の明細(承認額 {amount})が、この契約の内訳明細書のどの行にも紐付けられていません",
+      "fail_foreign_line": "下請業者の支払申請 {pay_app} の作業パッケージ {package} の明細(承認額 {amount})が、別の契約の行に紐付けられています",
+      "fail_parent_line": "下請業者の支払申請 {pay_app} の作業パッケージ {package} の明細(承認額 {amount})が、直接請求されないグループ行に紐付けられています",
+      "suggestion": "作業パッケージまたはこの支払申請の明細を、この契約の内訳明細書の請求可能な行に紐付けてください"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "行 {line} でこれまでに承認された下請金額の合計は {approved} で、予定価額 {scheduled} を超えています",
+      "suggestion": "この行の下請承認を確認するか、予定価額を引き上げる変更指示を追加してください"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} には、この請求の期間末日である {as_of} 時点で有効な「{document}」が保管されていません",
+      "fail_expired": "{subcontractor} の「{document}」は、この請求の期間末日である {as_of} には有効期限が切れていました",
+      "fail_revoked": "{subcontractor} の「{document}」は取り消されており、この請求の期間末日である {as_of} には無効でした",
+      "suggestion": "下請業者から最新の証明書を入手するか、その支払申請をこの請求から除外してください",
+      "documents": {
+        "insurance": "保険証券",
+        "license": "許可証",
+        "iso": "ISO 認証書",
+        "safety": "安全証明書",
+        "bond": "保証証券",
+        "wsl_clearance": "労働者安全適合証明書",
+        "wsib_clearance": "WSIB 適合証明書",
+        "wcb_clearance": "WCB 適合証明書",
+        "attestation_revenu_quebec": "Revenu Québec 証明書",
+        "construction_tax_exemption": "建設税免除証明書",
+        "social_security_clearance": "社会保険料納付証明書",
+        "employers_liability_clearance": "使用者責任適合証明書"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} に支払申請 {pay_app} の支払が {paid_on} に行われましたが、「{document}」が保管されていませんでした。{withholding}",
+      "fail_expired": "{subcontractor} に支払申請 {pay_app} の支払が {paid_on} に行われましたが、「{document}」は {lapsed_on} に期限切れでした。{withholding}",
+      "fail_revoked": "{subcontractor} に支払申請 {pay_app} の支払が {paid_on} に行われましたが、「{document}」は取り消されていました。{withholding}",
+      "fail_undated": "{subcontractor} の支払申請 {pay_app} は支払済みとされていますが支払日がないため、「{document}」が支払をカバーしていたか確認できません。{withholding}",
+      "fail_pending": "{subcontractor} の支払申請 {pay_app} は未払いです。「{document}」は期間末日ではなく支払日で判定され、保管中のものは {valid_until} まで有効です。{withholding}",
+      "fail_pending_open": "{subcontractor} の支払申請 {pay_app} は未払いです。「{document}」は期間末日ではなく支払日で判定され、保管中のものには終了日がありません。{withholding}",
+      "fail_pending_invalid": "{subcontractor} の支払申請 {pay_app} は未払いで、期間末日より後の支払が対象となる有効な「{document}」も保管されていません。{withholding}",
+      "suggestion": "支払日に証明書が有効であることを確認し、無効な場合は下請業者から最新のものを入手してください。ここでは税は控除されません。有効な証明書の対象外となる支払については、控除と申告はお客様の責任で行ってください。",
+      "withholding": {
+        "gross_limit": "これがない場合、支払額の {rate}%(VAT 込み)を源泉徴収して税務当局に納付する必要があります。ただし、暦年内にこの下請業者へ支払った総額が {limit} 以内であれば不要です({reference})。",
+        "gross": "これがない場合、支払額の {rate}%(VAT 込み)を源泉徴収して税務当局に納付する必要があります({reference})。",
+        "net_limit": "これがない場合、支払額の {rate}%(VAT 別)を源泉徴収して税務当局に納付する必要があります。ただし、暦年内にこの下請業者へ支払った総額が {limit} 以内であれば不要です({reference})。",
+        "net": "これがない場合、支払額の {rate}%(VAT 別)を源泉徴収して税務当局に納付する必要があります({reference})。",
+        "unknown": "これがない場合、支払は源泉徴収の対象となる可能性があります。"
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "必須の{document}証明書が有効ではありません(有効期限 {date})。このため、この下請業者への支払はブロックされています",
+      "suggestion": "更新された証明書を登録するか、管理者に理由を添えてブロックの解除を依頼してください"
+    },
+    "certificate_expiring": {
+      "fail": "{document}証明書は {date} に期限切れとなります(残り {days} 日)",
+      "suggestion": "証明書が失効する前に、下請業者へ更新を依頼してください"
+    },
+    "policy_details_recorded": {
+      "fail": "必須の{document}証明書に、証券番号または補償額がありません",
+      "suggestion": "証明書から証券番号と保険金額を追加してください"
+    },
+    "cert_types": {
+      "public_liability": "第三者賠償責任",
+      "employers_liability": "使用者賠償責任",
+      "professional_indemnity": "専門職業賠償責任",
+      "contractors_all_risk": "建設工事保険(オール・リスク)",
+      "workers_compensation": "労働災害補償",
+      "motor_vehicle": "自動車",
+      "product_liability": "製造物賠償責任",
+      "plant_equipment": "建設機械・設備",
+      "environmental_liability": "環境賠償責任",
+      "cyber_liability": "サイバー賠償責任",
+      "insurance": "保険"
+    }
+  }
+}

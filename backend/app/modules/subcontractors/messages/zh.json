@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "确定"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "分包商付款申请 {pay_app} 处于“{status}”状态却被纳入本次索款,因此向业主开票的金额尚未获批付款",
+      "suggestion": "请批准该付款申请,或在其获批前将其从本次索款中剔除",
+      "statuses": {
+        "submitted": "已提交,尚未审核",
+        "rejected": "已被驳回"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "分包商付款申请 {pay_app} 的净额为 {net},但已存档的留置权放弃书(lien waiver)仅覆盖 {covered}",
+      "fail_through_date": "分包商付款申请 {pay_app} 的留置权放弃书有效期至 {through_date},早于该付款申请的期间截止日 {period_end}",
+      "suggestion": "请取得覆盖截至期间末全部净额的放弃书,或将该付款申请从本次索款中剔除"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "分包商付款申请 {pay_app} 已在先前的索款中付款,但已存档的无条件留置权放弃书未覆盖至其期间截止日 {period_end}",
+      "suggestion": "请就已付款项取得无条件放弃书,并记录其有效截止日期"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "分包商付款申请 {pay_app} 中工作包 {package} 的一行(批准金额 {amount})未关联到本合同工程量清单的任何行",
+      "fail_foreign_line": "分包商付款申请 {pay_app} 中工作包 {package} 的一行(批准金额 {amount})关联到了另一份合同的行",
+      "fail_parent_line": "分包商付款申请 {pay_app} 中工作包 {package} 的一行(批准金额 {amount})关联到了不直接开票的分组行",
+      "suggestion": "请将该工作包或此付款申请行关联到本合同工程量清单中可开票的行"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "第 {line} 行迄今已批准的分包金额合计 {approved},超过其计划价值 {scheduled}",
+      "suggestion": "请核查该行的分包批准记录,或添加变更单以提高其计划价值"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "截至 {as_of}(本次索款的期间截止日),{subcontractor} 没有存档的{document}",
+      "fail_expired": "{subcontractor} 的{document}在 {as_of}(本次索款的期间截止日)已失效",
+      "fail_revoked": "{subcontractor} 的{document}已被撤销,在 {as_of}(本次索款的期间截止日)无效",
+      "suggestion": "请向分包商取得有效证书,或将其付款申请从本次索款中剔除",
+      "documents": {
+        "insurance": "保险证书",
+        "license": "执照",
+        "iso": "ISO 认证证书",
+        "safety": "安全证书",
+        "bond": "保函",
+        "wsl_clearance": "工人安全合规函",
+        "wsib_clearance": "WSIB 合规证明",
+        "wcb_clearance": "WCB 合规函",
+        "attestation_revenu_quebec": "Revenu Québec 证明",
+        "construction_tax_exemption": "建筑税免税证明",
+        "social_security_clearance": "社保缴纳无欠费证明",
+        "employers_liability_clearance": "雇主责任合规证明"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "已于 {paid_on} 就付款申请 {pay_app} 向 {subcontractor} 付款,但当时没有存档的{document}。{withholding}",
+      "fail_expired": "已于 {paid_on} 就付款申请 {pay_app} 向 {subcontractor} 付款,但其{document}已于 {lapsed_on} 失效。{withholding}",
+      "fail_revoked": "已于 {paid_on} 就付款申请 {pay_app} 向 {subcontractor} 付款,但其{document}已被撤销。{withholding}",
+      "fail_undated": "{subcontractor} 的付款申请 {pay_app} 已标记为已付款,但没有付款日期,因此无法核查{document}是否覆盖该笔付款。{withholding}",
+      "fail_pending": "{subcontractor} 的付款申请 {pay_app} 尚未付款。{document}以付款当日为准,而非期间末,已存档的有效期至 {valid_until}。{withholding}",
+      "fail_pending_open": "{subcontractor} 的付款申请 {pay_app} 尚未付款。{document}以付款当日为准,而非期间末;已存档的没有截止日期。{withholding}",
+      "fail_pending_invalid": "{subcontractor} 的付款申请 {pay_app} 尚未付款,且没有存档的有效{document}可覆盖期间截止日之后的付款。{withholding}",
+      "suggestion": "请确认证书在付款当日有效,否则向分包商取得最新证书。此处不会扣税:付款若超出有效证书的覆盖范围,扣缴及申报由您负责。",
+      "withholding": {
+        "gross_limit": "若无此证书,须扣缴付款额的 {rate}%(含增值税)并缴纳给税务机关,除非该日历年内支付给此分包商的款项总额不超过 {limit}({reference})。",
+        "gross": "若无此证书,须扣缴付款额的 {rate}%(含增值税)并缴纳给税务机关({reference})。",
+        "net_limit": "若无此证书,须扣缴付款额的 {rate}%(不含增值税)并缴纳给税务机关,除非该日历年内支付给此分包商的款项总额不超过 {limit}({reference})。",
+        "net": "若无此证书,须扣缴付款额的 {rate}%(不含增值税)并缴纳给税务机关({reference})。",
+        "unknown": "若无此证书,该笔付款可能需要代扣税款。"
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "必需的{document}证书无效(到期日 {date}),因此对该分包商的付款已被拦截",
+      "suggestion": "请登记已续期的证书,或请经理注明原因后解除拦截"
+    },
+    "certificate_expiring": {
+      "fail": "{document}证书将于 {date} 到期,还剩 {days} 天",
+      "suggestion": "请在证书失效前向分包商索取续期"
+    },
+    "policy_details_recorded": {
+      "fail": "必需的{document}证书缺少保单号或保额",
+      "suggestion": "请从证书上补充保单号和投保金额"
+    },
+    "cert_types": {
+      "public_liability": "公众责任险",
+      "employers_liability": "雇主责任险",
+      "professional_indemnity": "职业责任险",
+      "contractors_all_risk": "建筑工程一切险",
+      "workers_compensation": "工伤保险",
+      "motor_vehicle": "机动车险",
+      "product_liability": "产品责任险",
+      "plant_equipment": "机械设备险",
+      "environmental_liability": "环境责任险",
+      "cyber_liability": "网络责任险",
+      "insurance": "保险"
+    }
+  }
+}

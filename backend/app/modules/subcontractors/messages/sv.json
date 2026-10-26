@@ -1,0 +1,98 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "sub_unapproved_included": {
+      "fail": "Underentreprenörens betalningsansökan {pay_app} ingår i detta krav medan den har status ”{status}”, så beloppet som faktureras beställaren är inte godkänt för betalning",
+      "suggestion": "Godkänn betalningsansökan, eller undanta den från detta krav tills den är godkänd",
+      "statuses": {
+        "submitted": "inlämnad och ännu inte granskad",
+        "rejected": "avvisad"
+      }
+    },
+    "sub_waiver_missing": {
+      "fail_amount": "Underentreprenörens betalningsansökan {pay_app} uppgår till {net} netto, men de avståenden från panträtt (lien waivers) som finns i arkivet täcker bara {covered}",
+      "fail_through_date": "Avståendet från panträtt för underentreprenörens betalningsansökan {pay_app} gäller till och med {through_date}, vilket är före betalningsansökans periodslut, {period_end}",
+      "suggestion": "Inhämta ett avstående som täcker hela nettobeloppet till periodens slut, eller undanta betalningsansökan från detta krav"
+    },
+    "sub_prior_unconditional_missing": {
+      "fail": "Underentreprenörens betalningsansökan {pay_app} betalades i ett tidigare krav, men inget ovillkorligt avstående från panträtt finns i arkivet som gäller till och med periodens slut, {period_end}",
+      "suggestion": "Inhämta det ovillkorliga avståendet för den redan gjorda betalningen och registrera datumet det gäller till"
+    },
+    "sub_line_unmapped": {
+      "fail_none": "En rad i underentreprenörens betalningsansökan {pay_app} för arbetspaket {package}, godkänd med {amount}, är inte kopplad till någon rad i kontraktets mängdförteckning",
+      "fail_foreign_line": "En rad i underentreprenörens betalningsansökan {pay_app} för arbetspaket {package}, godkänd med {amount}, är kopplad till en rad i ett annat kontrakt",
+      "fail_parent_line": "En rad i underentreprenörens betalningsansökan {pay_app} för arbetspaket {package}, godkänd med {amount}, är kopplad till en grupprad, som inte faktureras direkt",
+      "suggestion": "Koppla arbetspaketet, eller denna rad i betalningsansökan, till en fakturerbar rad i kontraktets mängdförteckning"
+    },
+    "sub_exceeds_gc_line": {
+      "fail": "Hittills godkända underentreprenadbelopp på rad {line} uppgår sammanlagt till {approved}, över det planerade värdet på {scheduled}",
+      "suggestion": "Kontrollera godkännandena av underentreprenad på denna rad, eller lägg till en ändringsorder som höjer det planerade värdet"
+    },
+    "sub_certificate_lapsed": {
+      "fail_missing": "{subcontractor} har inget ”{document}” i arkivet per {as_of}, slutet av detta kravs period",
+      "fail_expired": "{subcontractor}s ”{document}” var inte längre giltigt {as_of}, slutet av detta kravs period",
+      "fail_revoked": "{subcontractor}s ”{document}” hade återkallats och var inte giltigt {as_of}, slutet av detta kravs period",
+      "suggestion": "Inhämta ett gällande intyg från underentreprenören, eller undanta dennes betalningsansökningar från detta krav",
+      "documents": {
+        "insurance": "försäkringsbevis",
+        "license": "licens",
+        "iso": "ISO-certifikat",
+        "safety": "säkerhetscertifikat",
+        "bond": "garanti",
+        "wsl_clearance": "intyg om arbetstagares säkerhet",
+        "wsib_clearance": "WSIB-clearancecertifikat",
+        "wcb_clearance": "WCB-clearancebrev",
+        "attestation_revenu_quebec": "attestation från Revenu Québec",
+        "construction_tax_exemption": "intyg om befrielse från byggskatt",
+        "social_security_clearance": "intyg om reglerade socialavgifter",
+        "employers_liability_clearance": "clearancecertifikat för arbetsgivaransvar"
+      }
+    },
+    "sub_certificate_payment_date": {
+      "fail_missing": "{subcontractor} fick betalt {paid_on} för betalningsansökan {pay_app} utan att något ”{document}” fanns i arkivet. {withholding}",
+      "fail_expired": "{subcontractor} fick betalt {paid_on} för betalningsansökan {pay_app}, men dennes ”{document}” hade gått ut {lapsed_on}. {withholding}",
+      "fail_revoked": "{subcontractor} fick betalt {paid_on} för betalningsansökan {pay_app}, men dennes ”{document}” hade återkallats. {withholding}",
+      "fail_undated": "Betalningsansökan {pay_app} från {subcontractor} är markerad som betald men saknar betalningsdatum, så det går inte att kontrollera om ”{document}” täckte betalningen. {withholding}",
+      "fail_pending": "Betalningsansökan {pay_app} från {subcontractor} är inte betald än. ”{document}” räknas på betalningsdagen, inte vid periodens slut, och den i arkivet gäller till {valid_until}. {withholding}",
+      "fail_pending_open": "Betalningsansökan {pay_app} från {subcontractor} är inte betald än. ”{document}” räknas på betalningsdagen, inte vid periodens slut; den i arkivet saknar slutdatum. {withholding}",
+      "fail_pending_invalid": "Betalningsansökan {pay_app} från {subcontractor} är inte betald än, och det finns inget giltigt ”{document}” i arkivet som en betalning efter periodens slut kan falla inom. {withholding}",
+      "suggestion": "Kontrollera att intyget är giltigt på betalningsdagen och inhämta ett gällande från underentreprenören om det inte är det. Skatten dras inte här: när en betalning hamnar utanför ett giltigt intyg är det ditt ansvar att göra och redovisa avdraget.",
+      "withholding": {
+        "gross_limit": "Utan det ska {rate} % av betalningen, inklusive moms, hållas inne och betalas till skattemyndigheten, om inte allt som betalats till denne underentreprenör under kalenderåret håller sig inom {limit} ({reference}).",
+        "gross": "Utan det ska {rate} % av betalningen, inklusive moms, hållas inne och betalas till skattemyndigheten ({reference}).",
+        "net_limit": "Utan det ska {rate} % av betalningen, exklusive moms, hållas inne och betalas till skattemyndigheten, om inte allt som betalats till denne underentreprenör under kalenderåret håller sig inom {limit} ({reference}).",
+        "net": "Utan det ska {rate} % av betalningen, exklusive moms, hållas inne och betalas till skattemyndigheten ({reference}).",
+        "unknown": "Utan det kan betalningen vara föremål för skatteavdrag."
+      }
+    }
+  },
+  "subcontractor_insurance": {
+    "mandatory_certificate_valid": {
+      "fail": "Det obligatoriska intyget ”{document}” är inte giltigt (går ut {date}), så betalningar till denna underentreprenör är spärrade",
+      "suggestion": "Registrera det förnyade intyget, eller be en chef häva spärren med en motivering"
+    },
+    "certificate_expiring": {
+      "fail": "Intyget ”{document}” går ut {date}, om {days} dag(ar)",
+      "suggestion": "Be underentreprenören om förnyelse innan intyget går ut"
+    },
+    "policy_details_recorded": {
+      "fail": "Det obligatoriska intyget ”{document}” saknar försäkringsnummer eller försäkringsbelopp",
+      "suggestion": "Lägg till försäkringsnumret och försäkringsbeloppet från intyget"
+    },
+    "cert_types": {
+      "public_liability": "Allmän ansvarsförsäkring",
+      "employers_liability": "Arbetsgivaransvar",
+      "professional_indemnity": "Konsultansvarsförsäkring",
+      "contractors_all_risk": "Entreprenörens allriskförsäkring",
+      "workers_compensation": "Arbetsskadeförsäkring",
+      "motor_vehicle": "Motorfordon",
+      "product_liability": "Produktansvar",
+      "plant_equipment": "Maskiner och utrustning",
+      "environmental_liability": "Miljöansvar",
+      "cyber_liability": "Cyberansvar",
+      "insurance": "Försäkring"
+    }
+  }
+}
