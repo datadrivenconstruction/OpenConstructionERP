@@ -19,7 +19,22 @@ export type PaymentApplicationStatus =
   | 'finance_approved'
   | 'paid'
   | 'rejected';
-export type CertType = 'insurance' | 'license' | 'iso' | 'safety' | 'bond';
+export type CertType =
+  | 'insurance'
+  | 'license'
+  | 'iso'
+  | 'safety'
+  | 'bond'
+  | 'public_liability'
+  | 'employers_liability'
+  | 'professional_indemnity'
+  | 'contractors_all_risk'
+  | 'workers_compensation'
+  | 'motor_vehicle'
+  | 'product_liability'
+  | 'plant_equipment'
+  | 'environmental_liability'
+  | 'cyber_liability';
 export type PrequalApplicationStatus =
   | 'draft'
   | 'submitted'
@@ -102,6 +117,11 @@ export interface Certificate {
   status: string;
   revoked: boolean;
   notes?: string | null;
+  is_mandatory?: boolean;
+  policy_number?: string | null;
+  /** Decimal-as-string. */
+  coverage_amount?: string | null;
+  coverage_currency?: string | null;
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -487,6 +507,24 @@ export function rejectPaymentApplication(paymentId: string, reason: string): Pro
 
 /* ── Certificates ──────────────────────────────────────────────────────── */
 
+export interface CreateCertificatePayload {
+  subcontractor_id: string;
+  cert_type: CertType;
+  issued_by?: string;
+  issue_date?: string;
+  valid_until?: string;
+  document_url?: string;
+  notes?: string;
+  is_mandatory?: boolean;
+  policy_number?: string;
+  coverage_amount?: string;
+  coverage_currency?: string;
+}
+
+export function createCertificate(data: CreateCertificatePayload): Promise<Certificate> {
+  return apiPost<Certificate>('/v1/subcontractors/certificates/', data);
+}
+
 export function listCertificates(subcontractorId: string): Promise<Certificate[]> {
   const qs = new URLSearchParams({ subcontractor_id: subcontractorId });
   return apiGet<Certificate[]>(`/v1/subcontractors/certificates/?${qs.toString()}`);
@@ -523,6 +561,8 @@ export interface AwardEligibility {
   subcontractor_id: string;
   awardable: boolean;
   reasons: string[];
+  /** Insurance register verdict; null when the register has nothing on file. */
+  insurance_status?: InsuranceStatus | null;
 }
 
 export function getAwardEligibility(subId: string): Promise<AwardEligibility> {
@@ -835,4 +875,123 @@ export function updatePaymentApplicationLine(
     `/v1/subcontractors/payment-application-lines/${lineId}`,
     data,
   );
+}
+
+/* ── Insurance compliance ──────────────────────────────────────────────── */
+
+export type InsuranceStatus = 'compliant' | 'expiring' | 'non_compliant';
+export type InsuranceBucket = 'valid' | 'due_30' | 'due_14' | 'due_0' | 'expired' | 'revoked';
+
+export interface InsuranceCertificateView {
+  id: string;
+  subcontractor_id: string;
+  cert_type: string;
+  is_mandatory: boolean;
+  valid_until?: string | null;
+  issue_date?: string | null;
+  revoked: boolean;
+  policy_number?: string | null;
+  coverage_amount?: string | null;
+  coverage_currency?: string | null;
+  issued_by?: string | null;
+  bucket: InsuranceBucket;
+  days_to_expiry?: number | null;
+}
+
+export interface InsuranceFinding {
+  rule_id: string;
+  severity: string;
+  message: string;
+  element_ref?: string | null;
+}
+
+export interface InsuranceOverrideView {
+  id: string;
+  reason: string;
+  covered_reasons: string[];
+  overridden_by?: string | null;
+  overridden_at: string;
+}
+
+export interface SubcontractorInsuranceStatus {
+  subcontractor_id: string;
+  as_of: string;
+  status: InsuranceStatus;
+  payment_blocked: boolean;
+  reasons: string[];
+  certificates: InsuranceCertificateView[];
+  findings: InsuranceFinding[];
+}
+
+export interface PaymentInsuranceStatus {
+  payment_application_id: string;
+  subcontractor_id: string;
+  blocked: boolean;
+  reasons: string[];
+  overridden: boolean;
+  override?: InsuranceOverrideView | null;
+  certificates: InsuranceCertificateView[];
+}
+
+export interface ProjectInsuranceSubRow {
+  subcontractor_id: string;
+  name: string;
+  status: InsuranceStatus;
+  payment_blocked: boolean;
+  reasons: string[];
+  certificates: InsuranceCertificateView[];
+}
+
+export interface ProjectInsurancePaymentRow {
+  payment_application_id: string;
+  application_number: string;
+  subcontractor_id: string;
+  status: string;
+  /** Decimal-as-string. */
+  net_amount: string;
+  currency: string;
+  blocked: boolean;
+  overridden: boolean;
+  reasons: string[];
+  override?: InsuranceOverrideView | null;
+}
+
+export interface ProjectInsuranceDashboard {
+  project_id: string;
+  as_of: string;
+  counts: Record<string, number>;
+  certificate_buckets: Record<string, number>;
+  subcontractors: ProjectInsuranceSubRow[];
+  gated_payments: ProjectInsurancePaymentRow[];
+}
+
+export function getSubcontractorInsuranceStatus(subId: string): Promise<SubcontractorInsuranceStatus> {
+  return apiGet<SubcontractorInsuranceStatus>(
+    `/v1/subcontractors/subcontractors/${subId}/insurance-status`,
+  );
+}
+
+export function getPaymentInsuranceCheck(paymentId: string): Promise<PaymentInsuranceStatus> {
+  return apiGet<PaymentInsuranceStatus>(
+    `/v1/subcontractors/payment-applications/${paymentId}/insurance-check`,
+  );
+}
+
+/** Manager only; the backend answers 403 to any other role. */
+export function overridePaymentInsurance(
+  paymentId: string,
+  reason: string,
+): Promise<InsuranceOverrideView> {
+  return apiPost<InsuranceOverrideView>(
+    `/v1/subcontractors/payment-applications/${paymentId}/insurance-override`,
+    { reason },
+  );
+}
+
+export function getProjectInsurance(projectId: string): Promise<ProjectInsuranceDashboard> {
+  return apiGet<ProjectInsuranceDashboard>(`/v1/subcontractors/insurance/project/${projectId}`);
+}
+
+export function runInsuranceAlerts(): Promise<{ sent: number }> {
+  return apiPost<{ sent: number }>('/v1/subcontractors/insurance/alerts/run', {});
 }

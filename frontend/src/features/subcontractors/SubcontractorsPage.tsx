@@ -57,6 +57,9 @@ import { RatingStars } from './RatingStars';
 import { ScorecardTile } from './ScorecardTile';
 import { LienWaiverPanel } from './LienWaiverPanel';
 import { AwardEligibilityBanner } from './AwardEligibilityBanner';
+import { InsuranceStatusPanel } from './InsuranceStatusPanel';
+import { PaymentRowActions } from './PaymentInsuranceGate';
+import { ProjectInsuranceDashboard } from './ProjectInsuranceDashboard';
 import { subcontractorsGuide } from './subcontractorsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildSubcontractorsInsights } from './subcontractorsInsights';
@@ -93,7 +96,7 @@ import { WorkPackageSovPicker } from './WorkPackageSovPicker';
 import { certTypeLabel, describeComplianceReasons } from './complianceReasons';
 import { AgreementFormModal, PaymentApplicationFormModal, SignAgreementButton } from './AgreementForms';
 import { UnlinkedTwinBanner } from './UnlinkedTwinBanner';
-import { PayAppAmount, PaymentApprovalActions } from './PaymentApprovalActions';
+import { PayAppAmount } from './PaymentApprovalActions';
 import {
   agreementMayHaveHakedis,
   getHakedis,
@@ -591,6 +594,8 @@ export function SubcontractorsPage() {
           worth stating is how much of the register that page was. */}
       {subsQ.data && <TruncationNotice page={subsQ.data} className="mt-2" />}
 
+      <ProjectInsuranceDashboard />
+
       {drawerId && (
         <DetailDrawer key={drawerId} id={drawerId} onClose={closeDrawer} />
       )}
@@ -1084,6 +1089,10 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
                 isBlocked={!!sub.is_blocked}
                 blockedReason={sub.blocked_reason}
               />
+            </div>
+
+            <div className="border-b border-border-light px-5 py-3">
+              <InsuranceStatusPanel subcontractorId={sub.id} />
             </div>
 
             <div className="flex flex-wrap items-center gap-2 px-5 py-3 text-xs border-b border-border-light">
@@ -1666,7 +1675,7 @@ function PaymentList({
                 </div>
               </td>
               <td className="px-3 py-2">
-                <PaymentApprovalActions
+                <PaymentRowActions
                   payment={p}
                   requiresWaiver={requiresWaiver}
                   retentionPercent={retentionPercent}

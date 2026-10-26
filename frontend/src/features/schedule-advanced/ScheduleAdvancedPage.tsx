@@ -107,10 +107,20 @@ import {
   type Baseline,
   type BaselineDeltaEntry,
   type ConstraintType,
+  type ConstraintLinkedType,
   currentTasksForMaster,
 } from './api';
 import { fetchTasks, type Task } from '@/features/tasks/api';
 import { scheduleAdvancedGuide } from './scheduleAdvancedGuide';
+import { LookaheadBoard } from './LookaheadBoard';
+import { ConstraintsLog } from './ConstraintsLog';
+import { PpcPanel } from './PpcCharts';
+import {
+  CommitmentExtraFields,
+  ConstraintLinkFields,
+  commitErrorMessage,
+  isValidLink,
+} from './LpsFormFields';
 import {
   masterStatusLabel,
   lookAheadStatusLabel,
@@ -833,16 +843,20 @@ export function ScheduleAdvancedPage() {
           masterId={masterId}
         />
       ) : tab === 'look_ahead' ? (
-        <LookAheadTab
-          lookAheads={lookAheadsQ.data ?? []}
-          loading={lookAheadsQ.isLoading}
-          isError={lookAheadsQ.isError}
-          onRetry={() => lookAheadsQ.refetch()}
-          lookAheadId={lookAheadId}
-          onSelect={setLookAheadId}
-          onCreate={() => setCreateLA(true)}
-        />
+        <div className="space-y-4">
+          <LookAheadTab
+            lookAheads={lookAheadsQ.data ?? []}
+            loading={lookAheadsQ.isLoading}
+            isError={lookAheadsQ.isError}
+            onRetry={() => lookAheadsQ.refetch()}
+            lookAheadId={lookAheadId}
+            onSelect={setLookAheadId}
+            onCreate={() => setCreateLA(true)}
+          />
+          {lookAheadId && <LookaheadBoard lookAheadId={lookAheadId} />}
+        </div>
       ) : tab === 'weekly' ? (
+        <div className="space-y-4">
         <WeeklyTab
           projectId={projectId}
           plans={weeklyQ.data ?? []}
@@ -858,7 +872,10 @@ export function ScheduleAdvancedPage() {
           currentWeek={currentWeek}
           onCreate={() => setCreateWeek(true)}
         />
+        <PpcPanel masterId={masterId} />
+        </div>
       ) : tab === 'constraints' ? (
+        <div className="space-y-4">
         <ConstraintsTab
           projectId={projectId}
           lookAheads={lookAheadsQ.data ?? []}
@@ -871,6 +888,8 @@ export function ScheduleAdvancedPage() {
           filter={constraintFilter}
           onFilter={setConstraintFilter}
         />
+        <ConstraintsLog masterId={masterId} />
+        </div>
       ) : (
         <BaselinesTab
           masterId={masterId}
@@ -2795,7 +2814,7 @@ function WeeklyTab({
       qc.invalidateQueries({ queryKey: ['schedule-advanced', 'weekly'] });
       addToast({ type: 'success', title: t('schedule_advanced.week_committed', { defaultValue: 'Week committed' }) });
     },
-    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+    onError: (err) => addToast({ type: 'error', title: commitErrorMessage(err, t) }),
   });
   const closeMut = useMutation({
     mutationFn: (id: string) => closeWeeklyPlan(id),
@@ -2820,7 +2839,7 @@ function WeeklyTab({
       invalidateCommitments();
       addToast({ type: 'success', title: t('schedule_advanced.commitment_made', { defaultValue: 'Commitment made' }) });
     },
-    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+    onError: (err) => addToast({ type: 'error', title: commitErrorMessage(err, t) }),
   });
   const completeCommitmentMut = useMutation({
     mutationFn: (id: string) => completeCommitment(id),
@@ -3170,6 +3189,8 @@ function AddCommitmentModal({
   const [crew, setCrew] = useState('');
   const [qty, setQty] = useState('');
   const [unit, setUnit] = useState('');
+  const [subId, setSubId] = useState('');
+  const [targetPct, setTargetPct] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -3186,6 +3207,8 @@ function AddCommitmentModal({
     setBusy(true);
     try {
       await createCommitment({
+        subcontractor_id: subId || undefined,
+        target_progress_pct: targetPct.trim() || undefined,
         week_plan_id: weekPlanId,
         task_ref: taskRef.trim(),
         worker_or_crew: crew || undefined,
@@ -3258,6 +3281,12 @@ function AddCommitmentModal({
           />
         </div>
       </div>
+      <CommitmentExtraFields
+        subcontractorId={subId}
+        targetPct={targetPct}
+        onSubcontractor={setSubId}
+        onTargetPct={setTargetPct}
+      />
     </ModalShell>
   );
 }
@@ -3594,6 +3623,8 @@ function NewConstraintModal({
   const [constraintType, setConstraintType] = useState<ConstraintType>('material');
   const [description, setDescription] = useState('');
   const [targetClear, setTargetClear] = useState('');
+  const [linkType, setLinkType] = useState<ConstraintLinkedType | ''>('');
+  const [linkId, setLinkId] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -3615,6 +3646,8 @@ function NewConstraintModal({
         constraint_type: constraintType,
         description: description.trim() || undefined,
         target_clear_date: targetClear || undefined,
+        linked_type: linkType || undefined,
+        linked_id: linkType ? linkId.trim() : undefined,
       });
       addToast({
         type: 'success',
@@ -3639,7 +3672,7 @@ function NewConstraintModal({
       onClose={onClose}
       onSubmit={submit}
       busy={busy}
-      disabled={!taskRef.trim()}
+      disabled={!taskRef.trim() || !isValidLink(linkType, linkId)}
     >
       {error && (
         <div className="rounded-md border border-semantic-error/30 bg-semantic-error-bg/40 px-3 py-2 text-sm text-semantic-error">
@@ -3693,6 +3726,7 @@ function NewConstraintModal({
           })}
         />
       </div>
+      <ConstraintLinkFields type={linkType} id={linkId} onType={setLinkType} onId={setLinkId} />
     </ModalShell>
   );
 }

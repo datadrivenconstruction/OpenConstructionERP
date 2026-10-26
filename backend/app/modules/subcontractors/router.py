@@ -326,6 +326,7 @@ async def subcontractor_award_eligibility(
         awardable=not result.blocked,
         reasons=result.reasons,
         details=result.details,
+        insurance_status=result.insurance_status,
     )
 
 
@@ -365,6 +366,7 @@ async def vendor_eligibility_by_contact(
         rating_score=str(sub.rating_score) if sub.rating_score is not None else None,
         reasons=block.reasons,
         details=block.details,
+        insurance_status=block.insurance_status,
     )
 
 

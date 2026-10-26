@@ -23,6 +23,7 @@ import clsx from 'clsx';
 import { CheckCircle2, ShieldAlert, Ban, Clock } from 'lucide-react';
 import { getAwardEligibility, type PrequalStatus } from './api';
 import { describeComplianceReasons } from './complianceReasons';
+import { InsuranceStatusBadge } from './InsuranceStatusPanel';
 
 interface AwardEligibilityBannerProps {
   subcontractorId: string;
@@ -133,6 +134,11 @@ export function AwardEligibilityBanner({
       <div className="min-w-0 flex-1 space-y-0.5">
         <p className="font-semibold">{title}</p>
         {desc && <p className="opacity-90">{desc}</p>}
+        {q.data?.insurance_status && (
+          <p className="pt-0.5">
+            <InsuranceStatusBadge status={q.data.insurance_status} />
+          </p>
+        )}
       </div>
     </div>
   );

@@ -164,6 +164,27 @@ export interface ProjectBudgetBurnPayload {
   series: Array<{ date?: string; planned?: number | string; actual?: number | string }>;
 }
 
+export interface ProjectLpsPpcItem {
+  project_id: string;
+  master_schedule_id: string;
+  name: string;
+  /** Decimal-as-string, null when no week was ever committed. */
+  average_ppc: string | null;
+  weeks: Array<{ week_start_date: string; ppc_percent: string | null }>;
+}
+
+export interface ProjectLpsPpcPayload {
+  items?: ProjectLpsPpcItem[];
+  pareto?: Array<{ category: string; count: number }>;
+}
+
+export interface ProjectSubInsurancePayload {
+  compliant: number;
+  expiring: number;
+  non_compliant: number;
+  blocked_payments: number;
+}
+
 /** Canonical project-detail widget id list. */
 export const PROJECT_DETAIL_WIDGET_IDS = [
   'project_rfi_inbox',
@@ -174,6 +195,8 @@ export const PROJECT_DETAIL_WIDGET_IDS = [
   'project_quality_ncr',
   'project_compliance_summary',
   'project_budget_burn',
+  'project_lps_ppc',
+  'project_sub_insurance',
 ] as const;
 
 export type ProjectDetailWidgetId = (typeof PROJECT_DETAIL_WIDGET_IDS)[number];
@@ -193,6 +216,8 @@ export interface ProjectDetailPayloadMap {
   project_quality_ncr: ProjectQualityNCRPayload;
   project_compliance_summary: ProjectComplianceSummaryPayload;
   project_budget_burn: ProjectBudgetBurnPayload;
+  project_lps_ppc: ProjectLpsPpcPayload;
+  project_sub_insurance: ProjectSubInsurancePayload;
 }
 
 /**
@@ -222,6 +247,8 @@ export interface DashboardRollupResponse {
   project_quality_ncr?: ProjectQualityNCRPayload;
   project_compliance_summary?: ProjectComplianceSummaryPayload;
   project_budget_burn?: ProjectBudgetBurnPayload;
+  project_lps_ppc?: ProjectLpsPpcPayload;
+  project_sub_insurance?: ProjectSubInsurancePayload;
 
   // Envelope metadata.
   generated_at?: string;

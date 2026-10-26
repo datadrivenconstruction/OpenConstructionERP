@@ -7,6 +7,7 @@
  * backend/app/modules/schedule_advanced/router.py
  */
 
+import { useQuery } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPatch, apiDelete, type Page } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -90,7 +91,11 @@ export interface LookAheadPlan {
   updated_at: string;
 }
 
+export type ConstraintLinkedType = 'rfi' | 'submittal' | 'purchase_order' | 'goods_receipt';
+
 export interface Constraint {
+  linked_type?: ConstraintLinkedType | null;
+  linked_id?: string | null;
   id: string;
   look_ahead_id?: string | null;
   task_ref: string;
@@ -124,6 +129,8 @@ export interface Commitment {
   week_plan_id: string;
   task_ref: string;
   worker_or_crew: string;
+  subcontractor_id?: string | null;
+  target_progress_pct?: string | number | null;
   promised_qty: string | number;
   unit: string;
   planned_start?: string | null;
@@ -514,6 +521,8 @@ export function createConstraint(data: {
   constraint_type: ConstraintType;
   description?: string;
   target_clear_date?: string;
+  linked_type?: ConstraintLinkedType;
+  linked_id?: string;
 }): Promise<Constraint> {
   return apiPost<Constraint>('/v1/schedule-advanced/constraints/', data);
 }
@@ -588,6 +597,8 @@ export function createCommitment(data: {
   worker_or_crew?: string;
   promised_qty?: string;
   unit?: string;
+  subcontractor_id?: string;
+  target_progress_pct?: string;
 }): Promise<Commitment> {
   return apiPost<Commitment>('/v1/schedule-advanced/commitments/', data);
 }
@@ -1592,4 +1603,145 @@ export function levelApply(
     `/v1/schedule-advanced/${encodeURIComponent(scheduleId)}/level-apply`,
     body,
   );
+}
+
+/* ── Last Planner board, constraints log, PPC history, validation ─────── */
+
+export interface LpsConstraintRow {
+  id: string;
+  task_ref: string;
+  task_name: string;
+  constraint_type: ConstraintType;
+  description: string;
+  owner_user_id?: string | null;
+  target_clear_date?: string | null;
+  status: ConstraintStatus;
+  cleared_at?: string | null;
+  linked_type?: ConstraintLinkedType | null;
+  linked_id?: string | null;
+  linked_label?: string | null;
+  linked_status?: string | null;
+  link_resolved_at?: string | null;
+}
+
+export interface LpsBoardTask {
+  task_ref: string;
+  name: string;
+  wbs_code: string;
+  start_date: string;
+  end_date: string;
+  week_start: string;
+  /** Decimal-as-string. */
+  progress_pct: string;
+  is_ready: boolean;
+  open_constraints: number;
+  committed: boolean;
+  constraints: LpsConstraintRow[];
+}
+
+export interface LpsBoard {
+  look_ahead_id: string;
+  master_schedule_id: string;
+  project_id: string;
+  period_start: string;
+  period_end: string;
+  weeks: string[];
+  tasks: LpsBoardTask[];
+  ready_count: number;
+  blocked_count: number;
+}
+
+export interface LpsPpcWeek {
+  week_plan_id: string;
+  week_start_date: string;
+  status: string;
+  committed: number;
+  completed: number;
+  /** Decimal-as-string, null when nothing was committed. */
+  ppc_percent: string | null;
+}
+
+export interface LpsParetoRow {
+  category: string;
+  count: number;
+  percent: string;
+  cumulative_percent: string;
+}
+
+export interface LpsPpcHistory {
+  master_schedule_id: string;
+  weeks: LpsPpcWeek[];
+  average_ppc: string | null;
+  pareto: LpsParetoRow[];
+}
+
+export interface LpsValidationResult {
+  rule_id: string;
+  severity: string;
+  passed: boolean;
+  message: string;
+  element_ref?: string | null;
+  suggestion?: string | null;
+}
+
+export interface LpsValidation {
+  master_schedule_id: string;
+  status: string;
+  errors: number;
+  warnings: number;
+  results: LpsValidationResult[];
+}
+
+export function getLookAheadBoard(lookAheadId: string): Promise<LpsBoard> {
+  return apiGet<LpsBoard>(`/v1/schedule-advanced/look-aheads/${encodeURIComponent(lookAheadId)}/board`);
+}
+
+export function getConstraintsLog(masterId: string): Promise<LpsConstraintRow[]> {
+  return apiGet<LpsConstraintRow[]>(
+    `/v1/schedule-advanced/master-schedules/${encodeURIComponent(masterId)}/constraints-log`,
+  );
+}
+
+export function getPpcHistory(masterId: string): Promise<LpsPpcHistory> {
+  return apiGet<LpsPpcHistory>(
+    `/v1/schedule-advanced/master-schedules/${encodeURIComponent(masterId)}/ppc-history`,
+  );
+}
+
+export function getLpsValidation(masterId: string, locale = 'en'): Promise<LpsValidation> {
+  return apiGet<LpsValidation>(
+    `/v1/schedule-advanced/master-schedules/${encodeURIComponent(masterId)}/lps-validation?locale=${encodeURIComponent(locale)}`,
+  );
+}
+
+export function useLookAheadBoard(lookAheadId: string) {
+  return useQuery({
+    queryKey: ['schedule-advanced', 'board', lookAheadId],
+    queryFn: () => getLookAheadBoard(lookAheadId),
+    enabled: !!lookAheadId,
+  });
+}
+
+export function useConstraintsLog(masterId: string) {
+  return useQuery({
+    queryKey: ['schedule-advanced', 'constraints-log', masterId],
+    queryFn: () => getConstraintsLog(masterId),
+    enabled: !!masterId,
+  });
+}
+
+export function usePpcHistory(masterId: string) {
+  return useQuery({
+    queryKey: ['schedule-advanced', 'ppc-history', masterId],
+    queryFn: () => getPpcHistory(masterId),
+    enabled: !!masterId,
+  });
+}
+
+export function useLpsValidation(masterId: string, locale = 'en') {
+  return useQuery({
+    queryKey: ['schedule-advanced', 'lps-validation', masterId, locale],
+    queryFn: () => getLpsValidation(masterId, locale),
+    enabled: !!masterId,
+  });
 }

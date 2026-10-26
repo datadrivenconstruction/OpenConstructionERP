@@ -72,6 +72,8 @@ import {
   ActivityFeedWidget,
   QualityNCRWidget,
   BudgetBurnWidget,
+  LpsPpcWidget,
+  SubInsuranceWidget,
   ComplianceSummaryWidget,
   ScheduleStripWidget,
   ProjectWidgetsRollupProvider,
@@ -2306,6 +2308,9 @@ export function ProjectDetailPage() {
           {!isWidgetHidden('compliance-summary') && (
             <ComplianceSummaryWidget projectId={projectId!} />
           )}
+          {!isWidgetHidden('sub-insurance') && (
+            <SubInsuranceWidget projectId={projectId!} />
+          )}
         </WidgetSection>
 
         {/* Planning and cost: schedule progress + budget burn, side by
@@ -2324,6 +2329,7 @@ export function ProjectDetailPage() {
           {!isWidgetHidden('budget-burn') && (
             <BudgetBurnWidget projectId={projectId!} currency={currency ?? ''} />
           )}
+          {!isWidgetHidden('lps-ppc') && <LpsPpcWidget projectId={projectId!} />}
         </WidgetSection>
 
         {/* Activity, files and AI: the cross-module event stream gets the

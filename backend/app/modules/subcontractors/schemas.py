@@ -1013,6 +1013,7 @@ class AwardEligibility(BaseModel):
     awardable: bool
     reasons: list[str] = Field(default_factory=list)
     details: list[ComplianceDetail] = Field(default_factory=list)
+    insurance_status: str | None = None
 
 
 class VendorEligibility(BaseModel):
@@ -1036,6 +1037,7 @@ class VendorEligibility(BaseModel):
     rating_score: str | None = None
     reasons: list[str] = Field(default_factory=list)
     details: list[ComplianceDetail] = Field(default_factory=list)
+    insurance_status: str | None = None
 
 
 class CurrencyAmount(BaseModel):

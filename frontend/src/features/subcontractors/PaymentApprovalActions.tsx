@@ -42,6 +42,7 @@ import {
   type PaymentApplication,
 } from './api';
 import { PayAppLinesDialog } from './PayAppLinesDialog';
+import { describeComplianceReasons } from './complianceReasons';
 import {
   HakedisDialog,
   hakedisBaseKey,
@@ -71,11 +72,18 @@ function rankOf(role: string | null | undefined): number {
 function refusalMessage(err: unknown, t: TFunction): string {
   const detail =
     err instanceof ApiError && err.body && typeof err.body === 'object'
-      ? (err.body as { detail?: { code?: string } }).detail
+      ? (err.body as { detail?: { code?: string; reasons?: unknown } }).detail
       : undefined;
   if (detail?.code === 'missing_waiver' || detail?.code === 'waiver_amount_mismatch') {
     return t('subcontractors.pay_app_waiver_blocks', {
       defaultValue: 'A signed lien waiver covering the net amount must be on file first.',
+    });
+  }
+  if (detail?.code === 'insurance_compliance_blocked') {
+    const reasons = (detail as { reasons?: unknown }).reasons;
+    return t('subcontractors.insurance.blocked_toast', {
+      defaultValue: 'Payment is held: a mandatory insurance certificate has lapsed. {{reasons}}',
+      reasons: Array.isArray(reasons) ? describeComplianceReasons(reasons as string[], t) : '',
     });
   }
   if (detail?.code === 'approved_above_claimed') {
@@ -98,6 +106,8 @@ export interface PaymentApprovalActionsProps {
   retentionPercent?: number | string;
   /** The agreement's contract has a payment certificate layout, so the row offers the certificate. */
   hakedisAvailable?: boolean;
+  /** Mandatory insurance has lapsed and no override is on file: finance approval and mark-paid are held. */
+  insuranceBlocked?: boolean;
 }
 
 export function PaymentApprovalActions({
@@ -105,6 +115,7 @@ export function PaymentApprovalActions({
   requiresWaiver,
   retentionPercent,
   hakedisAvailable = false,
+  insuranceBlocked = false,
 }: PaymentApprovalActionsProps) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -125,6 +136,7 @@ export function PaymentApprovalActions({
     enabled: requiresWaiver && waiverGated && may('approve_finance'),
   });
   const waiverBlocked = !!checkQ.data?.blocked;
+  const financeHeld = waiverBlocked || insuranceBlocked;
 
   const stepMut = useMutation({
     mutationFn: ({ step, lines }: { step: Step; lines?: ApprovedLineAmount[] }) => {
@@ -234,7 +246,11 @@ export function PaymentApprovalActions({
     ? t('subcontractors.pay_app_waiver_blocks', {
         defaultValue: 'A signed lien waiver covering the net amount must be on file first.',
       })
-    : undefined;
+    : insuranceBlocked
+      ? t('subcontractors.insurance.button_blocked', {
+          defaultValue: 'Held: a mandatory insurance certificate has lapsed. A manager can override with a reason.',
+        })
+      : undefined;
 
   if (rejecting) {
     return (
@@ -298,7 +314,7 @@ export function PaymentApprovalActions({
           variant="primary"
           size="sm"
           icon={<CheckCheck size={12} />}
-          disabled={busy || waiverBlocked}
+          disabled={busy || financeHeld}
           // The amounts are confirmed in the dialog, which makes the call.
           onClick={() => setDialog('approve')}
           title={
@@ -318,7 +334,7 @@ export function PaymentApprovalActions({
           size="sm"
           icon={<Banknote size={12} />}
           loading={pending('mark_paid')}
-          disabled={busy || waiverBlocked}
+          disabled={busy || financeHeld}
           onClick={() => stepMut.mutate({ step: 'mark_paid' })}
           title={waiverTitle}
           data-testid="pay-app-mark-paid"

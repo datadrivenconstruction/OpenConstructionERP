@@ -60,8 +60,10 @@ import type {
   ProjectComplianceSummaryPayload,
   ProjectDailyDiaryPayload,
   ProjectHSEIncidentsPayload,
+  ProjectLpsPpcPayload,
   ProjectQualityNCRPayload,
   ProjectRFIInboxPayload,
+  ProjectSubInsurancePayload,
   ProjectVariationsPayload,
 } from '@/shared/api/dashboardRollup';
 import { fmtFixed } from '@/shared/lib/formatters';
@@ -80,6 +82,8 @@ interface ProjectWidgetsRollupContextValue {
     project_quality_ncr?: ProjectQualityNCRPayload;
     project_compliance_summary?: ProjectComplianceSummaryPayload;
     project_budget_burn?: ProjectBudgetBurnPayload;
+    project_lps_ppc?: ProjectLpsPpcPayload;
+    project_sub_insurance?: ProjectSubInsurancePayload;
   } | null;
 }
 
@@ -113,6 +117,8 @@ export function ProjectWidgetsRollupProvider({
             project_quality_ncr: data.project_quality_ncr,
             project_compliance_summary: data.project_compliance_summary,
             project_budget_burn: data.project_budget_burn,
+            project_lps_ppc: data.project_lps_ppc,
+            project_sub_insurance: data.project_sub_insurance,
           }
         : null,
     }),
@@ -1373,6 +1379,125 @@ export function BudgetBurnWidget({
                 defaultValue: 'Spend history will appear here over time.',
               })}
             </div>
+          )}
+        </div>
+      )}
+    </WidgetShell>
+  );
+}
+
+/* ── Last Planner PPC ────────────────────────────────────────────────── */
+
+export function LpsPpcWidget({ projectId }: { projectId: string }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const rollup = useRollupSlice('project_lps_ppc');
+  // The rollup spans the projects it was asked for; keep this project's schedules.
+  const items = (rollup.data?.items ?? []).filter((i) => i.project_id === projectId);
+  const withPpc = items.filter((i) => i.average_ppc != null);
+  const average =
+    withPpc.length > 0
+      ? withPpc.reduce((sum, i) => sum + Number(i.average_ppc), 0) / withPpc.length
+      : null;
+  const latest = items
+    .flatMap((i) => i.weeks)
+    .filter((w) => w.ppc_percent != null)
+    .sort((a, b) => a.week_start_date.localeCompare(b.week_start_date))
+    .slice(-12);
+  const top = rollup.data?.pareto ?? [];
+  return (
+    <WidgetShell
+      icon={<CalendarClock size={16} />}
+      title={t('project.widget.lps-ppc.title', { defaultValue: 'Plan reliability (PPC)' })}
+      subtitle={t('project.widget.lps-ppc.card_subtitle', { defaultValue: 'Percent plan complete per week' })}
+      cta={{
+        label: t('project.widget.view_all', { defaultValue: 'View all' }),
+        onClick: () => navigate('/schedule-advanced'),
+      }}
+    >
+      {rollup.isLoadingFromRollup ? (
+        <WidgetSkeleton rows={2} />
+      ) : average == null ? (
+        <WidgetEmpty
+          message={t('project.widget.lps-ppc.empty', {
+            defaultValue: 'PPC appears once a weekly plan is closed.',
+          })}
+        />
+      ) : (
+        <div className="space-y-2">
+          <span className="text-xl font-semibold tabular-nums text-content-primary">
+            {average.toFixed(0)}%
+          </span>
+          <div className="flex h-10 items-end gap-0.5" data-testid="lps-ppc-bars">
+            {latest.map((w, i) => (
+              <div
+                key={`${w.week_start_date}-${i}`}
+                className="flex-1 rounded-sm bg-oe-blue"
+                style={{ height: `${Math.min(Math.max(Number(w.ppc_percent), 4), 100)}%` }}
+                title={`${w.week_start_date}: ${Number(w.ppc_percent).toFixed(0)}%`}
+              />
+            ))}
+          </div>
+          {top.length > 0 && (
+            <p className="text-2xs text-content-tertiary">
+              {t('project.widget.lps-ppc.top_reasons', {
+                defaultValue: 'Top reasons: {{reasons}}',
+                reasons: top.map((r) => `${r.category} (${r.count})`).join(', '),
+              })}
+            </p>
+          )}
+        </div>
+      )}
+    </WidgetShell>
+  );
+}
+
+/* ── Subcontractor insurance ─────────────────────────────────────────── */
+
+export function SubInsuranceWidget({ projectId: _projectId }: { projectId: string }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const rollup = useRollupSlice('project_sub_insurance');
+  const data = rollup.data;
+  const total = data ? data.compliant + data.expiring + data.non_compliant : 0;
+  return (
+    <WidgetShell
+      icon={<ShieldCheck size={16} />}
+      title={t('project.widget.sub-insurance.title', { defaultValue: 'Subcontractor insurance' })}
+      subtitle={t('project.widget.sub-insurance.card_subtitle', { defaultValue: 'Certificate compliance and held payments' })}
+      cta={{
+        label: t('project.widget.view_all', { defaultValue: 'View all' }),
+        onClick: () => navigate('/subcontractors'),
+      }}
+    >
+      {rollup.isLoadingFromRollup ? (
+        <WidgetSkeleton rows={2} />
+      ) : !data || total === 0 ? (
+        <WidgetEmpty
+          message={t('project.widget.sub-insurance.empty', {
+            defaultValue: 'No subcontractors with insurance on record.',
+          })}
+        />
+      ) : (
+        <div className="space-y-2">
+          <div className="flex flex-wrap gap-3 text-xs">
+            <Badge variant="success">
+              {t('project.widget.sub-insurance.compliant', { defaultValue: '{{count}} compliant', count: data.compliant })}
+            </Badge>
+            <Badge variant="warning">
+              {t('project.widget.sub-insurance.expiring', { defaultValue: '{{count}} expiring', count: data.expiring })}
+            </Badge>
+            <Badge variant="error">
+              {t('project.widget.sub-insurance.non_compliant', { defaultValue: '{{count}} non-compliant', count: data.non_compliant })}
+            </Badge>
+          </div>
+          {data.blocked_payments > 0 && (
+            <p className="text-2xs text-semantic-error">
+              {t('project.widget.sub-insurance.blocked_payments', {
+                defaultValue: '{{count}} payments held by the insurance gate',
+                count: data.blocked_payments,
+              })}
+            </p>
           )}
         </div>
       )}
