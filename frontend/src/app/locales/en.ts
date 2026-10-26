@@ -45661,6 +45661,9 @@ const resource = {
     "settings.floating_assistant": "AI assistant",
     "settings.floating_show": "Show the {{label}} button",
     "settings.floating_note": "The assistant still opens with Alt+A and from the command palette.",
+    "settings.notify_title": "Notifications",
+    "settings.notify_subtitle": "Choose, for each kind of event, whether it reaches you in the app, by email or through a webhook.",
+    "settings.notify_open": "Set notification channels",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

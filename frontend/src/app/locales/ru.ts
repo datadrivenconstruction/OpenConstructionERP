@@ -54003,6 +54003,9 @@ const resource = {
     "settings.floating_assistant": "ИИ-ассистент",
     "settings.floating_show": "Показывать кнопку «{{label}}»",
     "settings.floating_note": "Ассистент по-прежнему открывается по Alt+A и из палитры команд.",
+    "settings.notify_title": "Уведомления",
+    "settings.notify_subtitle": "Выберите для каждого типа события, придёт ли оно в приложении, по почте или через вебхук.",
+    "settings.notify_open": "Настроить каналы уведомлений",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",
