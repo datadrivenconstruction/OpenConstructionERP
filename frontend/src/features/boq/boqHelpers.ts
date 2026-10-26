@@ -952,3 +952,8 @@ export function nextTopLevelSectionOrdinal(ordinals: Iterable<string | null | un
   }
   return candidate;
 }
+
+/** Row or header height under the interface density: compact trims 4px, comfortable keeps `base`. */
+export function densityRowHeight(base: number, compact: boolean): number {
+  return compact ? base - 4 : base;
+}

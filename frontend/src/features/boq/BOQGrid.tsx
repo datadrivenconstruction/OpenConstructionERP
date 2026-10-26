@@ -68,6 +68,7 @@ import {
   type CollabLock,
 } from '@/features/collab_locks';
 import { getColumnDefs, getCustomColumnDefs } from './grid/columnDefs';
+import { useAppearanceStore } from '@/stores/useAppearanceStore';
 import { applyColumnPrefs, boqColumnPref, isMovableColumn } from './grid/columnPrefs';
 import { auditRowTooltip } from './grid/auditMarkers';
 import type { FormulaVariable } from './grid/formula';
@@ -98,6 +99,7 @@ import { CostAllocationCellRenderer } from './grid/CostAllocationCell';
 import { DrawingRefCellRenderer } from './grid/DrawingRefCell';
 import {
   convertToBase,
+  densityRowHeight,
   fmtWithCurrency,
   getUnitsForLocale,
   isResourceDrivenRate,
@@ -807,12 +809,16 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   const descDensity = useBoqDescDensityStore((s) => s.density);
   const descDensityRef = useRef(descDensity);
   descDensityRef.current = descDensity;
+  // The interface density (Settings > General > Style) also trims the position rows.
+  const tightRows = useAppearanceStore((s) => s.effective.density === 'compact');
+  const tightRowsRef = useRef(tightRows);
+  tightRowsRef.current = tightRows;
   useEffect(() => {
     const api = gridApiRef.current;
     if (!api) return;
     api.resetRowHeights();
     api.refreshCells({ columns: ['description'], force: true });
-  }, [descDensity]);
+  }, [descDensity, tightRows]);
 
   // Issue #435: the trace chip on the ordinal cell reads the map through the
   // grid context, and AG Grid does not repaint a cell because the context
@@ -2233,10 +2239,11 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
     if (params.data?._isAddResource) return 30;
     if (params.data?._isVariantHeader) return 36;
     if (params.data?._isCopilot) return BOQ_COPILOT_ROW_HEIGHT;
-    if (params.data?._isFooter) return 32;
+    const compact = tightRowsRef.current;
+    if (params.data?._isFooter) return densityRowHeight(32, compact);
     // Position rows grow with the description-density preference so a long
     // Langtext is readable inline; compact keeps the historical 32px row.
-    return BOQ_DESC_ROW_HEIGHT[descDensityRef.current] ?? 32;
+    return densityRowHeight(BOQ_DESC_ROW_HEIGHT[descDensityRef.current] ?? 32, compact);
   }, []);
 
   /* ── Editing started: acquire the collaboration row lock ─────── */
@@ -3271,7 +3278,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
           tabToNextCell={tabToNextCell}
           stopEditingWhenCellsLoseFocus
           suppressContextMenu
-          headerHeight={36}
+          headerHeight={densityRowHeight(36, tightRows)}
           rowHeight={32}
           domLayout="normal"
           enableCellTextSelection
