@@ -290,7 +290,6 @@
       "generated": "Izrađeno: {stamp}",
       "issued_at": "Izdano {stamp}",
       "running_head": "{project} - Zapisnik",
-      "page": "Stranica {page}",
       "type_progress": "Napredak radova",
       "type_design": "Projektiranje",
       "type_safety": "Sigurnost",

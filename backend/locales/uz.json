@@ -355,7 +355,6 @@
       "generated": "Yaratilgan vaqt: {stamp}",
       "issued_at": "Chiqarilgan vaqt {stamp}",
       "running_head": "{project} - Bayonnoma",
-      "page": "{page}-bet",
       "type_progress": "Ish borishi",
       "type_design": "Loyihalash",
       "type_safety": "Xavfsizlik",

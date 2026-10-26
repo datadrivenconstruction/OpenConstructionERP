@@ -355,7 +355,6 @@
       "generated": "Gerado em: {stamp}",
       "issued_at": "Emitida em {stamp}",
       "running_head": "{project} - Ata",
-      "page": "Página {page}",
       "type_progress": "Acompanhamento da obra",
       "type_design": "Projeto",
       "type_safety": "Segurança",

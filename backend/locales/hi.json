@@ -355,7 +355,6 @@
       "generated": "तैयार किया गया: {stamp}",
       "issued_at": "जारी किया गया {stamp}",
       "running_head": "{project} - कार्यवृत्त",
-      "page": "पृष्ठ {page}",
       "type_progress": "प्रगति",
       "type_design": "डिज़ाइन",
       "type_safety": "सुरक्षा",

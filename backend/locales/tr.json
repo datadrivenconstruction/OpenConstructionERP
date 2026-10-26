@@ -355,7 +355,6 @@
       "generated": "Oluşturulma: {stamp}",
       "issued_at": "Yayın tarihi {stamp}",
       "running_head": "{project} - Tutanak",
-      "page": "Sayfa {page}",
       "type_progress": "İlerleme",
       "type_design": "Tasarım",
       "type_safety": "İş güvenliği",

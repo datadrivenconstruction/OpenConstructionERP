@@ -355,7 +355,6 @@
       "generated": "Generated: {stamp}",
       "issued_at": "Issued {stamp}",
       "running_head": "{project} - Minutes",
-      "page": "Page {page}",
       "type_progress": "Progress",
       "type_design": "Design",
       "type_safety": "Safety",

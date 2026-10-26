@@ -355,7 +355,6 @@
       "generated": "Generat: {stamp}",
       "issued_at": "Emis la {stamp}",
       "running_head": "{project} - Proces-verbal",
-      "page": "Pagina {page}",
       "type_progress": "Progres",
       "type_design": "Proiectare",
       "type_safety": "Siguranță",

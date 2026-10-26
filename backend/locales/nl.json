@@ -355,7 +355,6 @@
       "generated": "Gegenereerd: {stamp}",
       "issued_at": "Uitgegeven {stamp}",
       "running_head": "{project} - Verslag",
-      "page": "Pagina {page}",
       "type_progress": "Voortgang",
       "type_design": "Ontwerp",
       "type_safety": "Veiligheid",

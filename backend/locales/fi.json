@@ -355,7 +355,6 @@
       "generated": "Luotu: {stamp}",
       "issued_at": "Julkaistu {stamp}",
       "running_head": "{project} - Pöytäkirja",
-      "page": "Sivu {page}",
       "type_progress": "Työmaakokous",
       "type_design": "Suunnittelu",
       "type_safety": "Työturvallisuus",

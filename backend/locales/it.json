@@ -355,7 +355,6 @@
       "generated": "Generato il: {stamp}",
       "issued_at": "Emesso il {stamp}",
       "running_head": "{project} - Verbale",
-      "page": "Pagina {page}",
       "type_progress": "Avanzamento lavori",
       "type_design": "Progettazione",
       "type_safety": "Sicurezza",

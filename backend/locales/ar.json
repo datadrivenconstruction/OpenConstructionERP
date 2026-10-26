@@ -355,7 +355,6 @@
       "generated": "تاريخ الإنشاء: {stamp}",
       "issued_at": "تاريخ الإصدار {stamp}",
       "running_head": "{project} - المحضر",
-      "page": "صفحة {page}",
       "type_progress": "متابعة التقدم",
       "type_design": "التصميم",
       "type_safety": "السلامة",

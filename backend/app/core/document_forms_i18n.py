@@ -70,6 +70,14 @@ def _furniture_for(code: str, default: str) -> dict[str, str]:
     return {key: (english[key] if key in _DATE_KEYS else own.get(key, english[key])) for key in english}
 
 
+def page_footer_template(code: str, default: str = "en") -> str:
+    """The "Page {page} of {total}" template in ``code``, English when the language has none."""
+    for table in (FURNITURE.get(code), FORM_FURNITURE.get(code), _text_map(load_document_forms(code).get("furniture"))):
+        if table and table.get("footer_page"):
+            return table["footer_page"]
+    return FURNITURE[default]["footer_page"]
+
+
 def document_form_catalogue(form: str, *, default: str = "en") -> DocumentCatalogue:
     """Build the catalogue of one printed form from the locale files.
 

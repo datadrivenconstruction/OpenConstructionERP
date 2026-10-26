@@ -355,7 +355,6 @@
       "generated": "Generado: {stamp}",
       "issued_at": "Emitida {stamp}",
       "running_head": "{project} - Acta",
-      "page": "Página {page}",
       "type_progress": "Seguimiento de obra",
       "type_design": "Diseño",
       "type_safety": "Seguridad",

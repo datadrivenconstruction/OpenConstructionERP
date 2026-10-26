@@ -355,7 +355,6 @@
       "generated": "Oprettet: {stamp}",
       "issued_at": "Udstedt {stamp}",
       "running_head": "{project} - Referat",
-      "page": "Side {page}",
       "type_progress": "Byggemøde",
       "type_design": "Projektering",
       "type_safety": "Sikkerhed",

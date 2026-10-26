@@ -355,7 +355,6 @@
       "generated": "তৈরির সময়: {stamp}",
       "issued_at": "জারির সময় {stamp}",
       "running_head": "{project} - কার্যবিবরণী",
-      "page": "পৃষ্ঠা {page}",
       "type_progress": "অগ্রগতি",
       "type_design": "নকশা",
       "type_safety": "নিরাপত্তা",

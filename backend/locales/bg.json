@@ -355,7 +355,6 @@
       "generated": "Генерирано: {stamp}",
       "issued_at": "Издаден на {stamp}",
       "running_head": "{project} - Протокол",
-      "page": "Страница {page}",
       "type_progress": "Напредък",
       "type_design": "Проектиране",
       "type_safety": "Безопасност",

@@ -355,7 +355,6 @@
       "generated": "Koostatud: {stamp}",
       "issued_at": "Välja antud {stamp}",
       "running_head": "{project} - Protokoll",
-      "page": "Lk {page}",
       "type_progress": "Edenemine",
       "type_design": "Projekteerimine",
       "type_safety": "Ohutus",

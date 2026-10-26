@@ -355,7 +355,6 @@
       "generated": "作成日時：{stamp}",
       "issued_at": "発行日時：{stamp}",
       "running_head": "{project} - 議事録",
-      "page": "{page}ページ",
       "type_progress": "工程",
       "type_design": "設計",
       "type_safety": "安全",

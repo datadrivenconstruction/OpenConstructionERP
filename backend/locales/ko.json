@@ -355,7 +355,6 @@
       "generated": "생성일시: {stamp}",
       "issued_at": "발행일시 {stamp}",
       "running_head": "{project} - 회의록",
-      "page": "{page}쪽",
       "type_progress": "공정",
       "type_design": "설계",
       "type_safety": "안전",

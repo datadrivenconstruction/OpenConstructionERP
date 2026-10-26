@@ -355,7 +355,6 @@
       "generated": "تاریخ تولید: {stamp}",
       "issued_at": "تاریخ صدور {stamp}",
       "running_head": "{project} - صورت‌جلسه",
-      "page": "صفحه {page}",
       "type_progress": "پیشرفت",
       "type_design": "طراحی",
       "type_safety": "ایمنی",

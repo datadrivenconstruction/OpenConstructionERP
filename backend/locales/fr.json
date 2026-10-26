@@ -355,7 +355,6 @@
       "generated": "Généré le : {stamp}",
       "issued_at": "Émis le {stamp}",
       "running_head": "{project} - Compte rendu",
-      "page": "Page {page}",
       "type_progress": "Avancement",
       "type_design": "Conception",
       "type_safety": "Sécurité",

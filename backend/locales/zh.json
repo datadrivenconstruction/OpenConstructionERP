@@ -355,7 +355,6 @@
       "generated": "生成时间：{stamp}",
       "issued_at": "发布时间：{stamp}",
       "running_head": "{project} - 会议纪要",
-      "page": "第 {page} 页",
       "type_progress": "进度",
       "type_design": "设计",
       "type_safety": "安全",

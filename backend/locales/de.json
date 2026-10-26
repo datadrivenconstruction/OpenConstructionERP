@@ -355,7 +355,6 @@
       "generated": "Erstellt: {stamp}",
       "issued_at": "Ausgestellt am {stamp}",
       "running_head": "{project} - Protokoll",
-      "page": "Seite {page}",
       "type_progress": "Baufortschritt",
       "type_design": "Planung",
       "type_safety": "Arbeitssicherheit",

@@ -355,7 +355,6 @@
       "generated": "Skapat: {stamp}",
       "issued_at": "Utfärdat {stamp}",
       "running_head": "{project} - Protokoll",
-      "page": "Sida {page}",
       "type_progress": "Byggmöte",
       "type_design": "Projektering",
       "type_safety": "Arbetsmiljö",

@@ -355,7 +355,6 @@
       "generated": "Түзүлгөн убактысы: {stamp}",
       "issued_at": "Чыгарылган убактысы {stamp}",
       "running_head": "{project} - Протокол",
-      "page": "{page}-бет",
       "type_progress": "Жүрүшү",
       "type_design": "Долбоорлоо",
       "type_safety": "Коопсуздук",

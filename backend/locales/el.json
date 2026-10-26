@@ -355,7 +355,6 @@
       "generated": "Δημιουργήθηκε: {stamp}",
       "issued_at": "Εκδόθηκε {stamp}",
       "running_head": "{project} - Πρακτικά",
-      "page": "Σελίδα {page}",
       "type_progress": "Πρόοδος",
       "type_design": "Μελέτη",
       "type_safety": "Ασφάλεια",

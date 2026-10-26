@@ -355,7 +355,6 @@
       "generated": "Жасалған уақыты: {stamp}",
       "issued_at": "Шығарылған уақыты {stamp}",
       "running_head": "{project} - Хаттама",
-      "page": "{page}-бет",
       "type_progress": "Барысы",
       "type_design": "Жобалау",
       "type_safety": "Қауіпсіздік",

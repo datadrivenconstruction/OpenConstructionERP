@@ -355,7 +355,6 @@
       "generated": "تیار کردہ: {stamp}",
       "issued_at": "اجرا کی تاریخ {stamp}",
       "running_head": "{project} - کارروائی",
-      "page": "صفحہ {page}",
       "type_progress": "پیش رفت",
       "type_design": "ڈیزائن",
       "type_safety": "حفاظت",

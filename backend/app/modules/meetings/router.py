@@ -1771,7 +1771,7 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
         pdf_table_paragraph_rows,
         register_pdf_fonts,
     )
-    from app.modules.meetings.pdf import draw_minutes_footer
+    from app.modules.meetings.pdf import build_counted, draw_minutes_footer
 
     register_pdf_fonts()
 
@@ -2004,6 +2004,7 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
 
     # Build document
     buf = io.BytesIO()
+    page_total = [0]
     look = branded_appearance(doc_type="meeting_minutes")
 
     def _header_footer(canvas_obj, doc):  # type: ignore[no-untyped-def]
@@ -2016,7 +2017,7 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
             running_head = f"{project_name} - {meeting.title}"
             canvas_obj.setFont(pdf_font_for_text(running_head), 7)
             canvas_obj.drawString(MARGIN, PAGE_HEIGHT - 12 * mm, running_head)
-        draw_minutes_footer(canvas_obj, doc, look, margin=MARGIN)
+        draw_minutes_footer(canvas_obj, doc, look, margin=MARGIN, total=page_total[0])
         canvas_obj.restoreState()
         if not under_letterhead:
             branded_header_logo(canvas_obj, doc)
@@ -2034,7 +2035,7 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
         **branded_doc_metadata(),
     )
     doc.addPageTemplates([PageTemplate(id="main", frames=[frame], onPage=_header_footer)])
-    doc.build(elements)
+    build_counted(doc, buf, elements, page_total)
     return buf.getvalue()
 
 

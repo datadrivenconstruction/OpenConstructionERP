@@ -355,7 +355,6 @@
       "generated": "Készült: {stamp}",
       "issued_at": "Kiadva: {stamp}",
       "running_head": "{project} - Jegyzőkönyv",
-      "page": "{page}. oldal",
       "type_progress": "Haladás",
       "type_design": "Tervezés",
       "type_safety": "Munkavédelem",

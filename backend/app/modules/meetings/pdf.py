@@ -59,8 +59,36 @@ def minutes_label(locale: str, key: str, **params: Any) -> str:
     return t(_PDF_KEY + key, locale, **params)
 
 
+def minutes_page_text(locale: str, page: int, total: int) -> str:
+    """The "Page x of y" line, from the page furniture every other document PDF prints."""
+    from app.core.document_forms_i18n import page_footer_template
+
+    return page_footer_template(locale).format(page=page, total=max(total, page))
+
+
+def build_counted(doc: Any, buf: Any, elements: list[Any], total: list[int]) -> None:
+    """Build ``elements`` twice so the footer can print the real page total.
+
+    The first pass runs on a copy and only counts pages; ``total[0]`` is read by
+    the footer callback of the second pass. If the story cannot be copied the
+    footer falls back to the current page number.
+    """
+    import copy
+
+    try:
+        probe = copy.deepcopy(elements)
+    except Exception:
+        probe = None
+    if probe is not None:
+        doc.build(probe)
+        total[0] = doc.page
+        buf.seek(0)
+        buf.truncate()
+    doc.build(elements)
+
+
 def draw_minutes_footer(
-    canvas_obj: Any, doc: Any, appearance: dict[str, Any], *, margin: float, locale: str = "en"
+    canvas_obj: Any, doc: Any, appearance: dict[str, Any], *, margin: float, locale: str = "en", total: int = 0
 ) -> None:
     """Draw the minutes footer: the page number, and a saved footer line.
 
@@ -82,6 +110,7 @@ def draw_minutes_footer(
         appearance: The document appearance, read once for the whole document.
         margin: The side margin both renderers lay the page out with.
         locale: Language of the page number label.
+        total: Page count from the counting pass; 0 prints the current page as total.
     """
     from reportlab.lib import colors
     from reportlab.lib.styles import ParagraphStyle
@@ -97,7 +126,7 @@ def draw_minutes_footer(
     if colour != _FURNITURE_GREY:
         canvas_obj.setFillColor(colors.HexColor(colour))
     show = appearance.get("show_page_numbers", True) is not False
-    page_text = minutes_label(locale, "page", page=doc.page) if show else ""
+    page_text = minutes_page_text(locale, doc.page, total) if show else ""
     if page_text:
         canvas_obj.setFont(BODY_FONT, 7)
         canvas_obj.drawRightString(page_width - margin, 10 * mm, page_text)
@@ -425,6 +454,7 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
     elements.append(Paragraph(generated, pdf_style_for_text(style_small, generated)))
 
     buf = io.BytesIO()
+    page_total = [0]
     look = branded_appearance(doc_type="meeting_minutes")
 
     def _header_footer(canvas_obj, doc):  # type: ignore[no-untyped-def]
@@ -437,7 +467,7 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
             running_head = L("running_head", project=project_name)
             canvas_obj.setFont(pdf_font_for_text(running_head), 7)
             canvas_obj.drawString(MARGIN, PAGE_HEIGHT - 12 * mm, running_head)
-        draw_minutes_footer(canvas_obj, doc, look, margin=MARGIN, locale=lang)
+        draw_minutes_footer(canvas_obj, doc, look, margin=MARGIN, locale=lang, total=page_total[0])
         canvas_obj.restoreState()
         if not under_letterhead:
             branded_header_logo(canvas_obj, doc)
@@ -455,6 +485,6 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
         **branded_doc_metadata(),
     )
     doc.addPageTemplates([PageTemplate(id="main", frames=[frame], onPage=_header_footer)])
-    doc.build(elements)
+    build_counted(doc, buf, elements, page_total)
 
     return buf.getvalue()

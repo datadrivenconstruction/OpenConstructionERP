@@ -355,7 +355,6 @@
       "generated": "Dibuat: {stamp}",
       "issued_at": "Diterbitkan {stamp}",
       "running_head": "{project} - Notulen",
-      "page": "Halaman {page}",
       "type_progress": "Progres",
       "type_design": "Desain",
       "type_safety": "Keselamatan",

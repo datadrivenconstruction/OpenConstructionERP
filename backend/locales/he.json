@@ -355,7 +355,6 @@
       "generated": "נוצר: {stamp}",
       "issued_at": "הופץ ב-{stamp}",
       "running_head": "{project} - פרוטוקול",
-      "page": "עמוד {page}",
       "type_progress": "התקדמות",
       "type_design": "תכנון",
       "type_safety": "בטיחות",

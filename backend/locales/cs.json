@@ -355,7 +355,6 @@
       "generated": "Vytvořeno: {stamp}",
       "issued_at": "Vydáno {stamp}",
       "running_head": "{project} - Zápis",
-      "page": "Strana {page}",
       "type_progress": "Průběh stavby",
       "type_design": "Projektové",
       "type_safety": "Bezpečnost",

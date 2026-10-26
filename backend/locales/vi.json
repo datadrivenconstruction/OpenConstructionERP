@@ -355,7 +355,6 @@
       "generated": "Tạo lúc: {stamp}",
       "issued_at": "Ban hành lúc {stamp}",
       "running_head": "{project} - Biên bản",
-      "page": "Trang {page}",
       "type_progress": "Tiến độ",
       "type_design": "Thiết kế",
       "type_safety": "An toàn",

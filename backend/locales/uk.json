@@ -355,7 +355,6 @@
       "generated": "Сформовано: {stamp}",
       "issued_at": "Видано {stamp}",
       "running_head": "{project} - Протокол",
-      "page": "Стор. {page}",
       "type_progress": "Хід робіт",
       "type_design": "Проєктна",
       "type_safety": "Охорона праці",

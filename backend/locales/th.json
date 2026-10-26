@@ -355,7 +355,6 @@
       "generated": "สร้างเมื่อ: {stamp}",
       "issued_at": "ออกเอกสารเมื่อ {stamp}",
       "running_head": "{project} - รายงานการประชุม",
-      "page": "หน้า {page}",
       "type_progress": "ความก้าวหน้า",
       "type_design": "การออกแบบ",
       "type_safety": "ความปลอดภัย",
