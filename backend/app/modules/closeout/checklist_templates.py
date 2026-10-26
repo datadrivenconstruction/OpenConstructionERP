@@ -46,6 +46,7 @@ CATEGORY_PUNCH = "punch_closure"
 CATEGORY_INSPECTION = "inspection"
 CATEGORY_HS = "hs_file"
 CATEGORY_COMMISSIONING = "commissioning"
+CATEGORY_ACCEPTANCE = "acceptance"
 CATEGORY_OTHER = "other"
 
 
@@ -108,6 +109,12 @@ _COMMISSIONING = _slot(
     discipline="mechanical",
     ordinal=80,
 )
+_ACCEPTANCE = _slot(
+    "signed_acceptance",
+    "Signed acceptance certificate",
+    CATEGORY_ACCEPTANCE,
+    ordinal=95,
+)
 
 
 # Slots no template seeds by default; a project's quality concept adds them to its
@@ -130,6 +137,7 @@ CHECKLIST_TEMPLATES: dict[str, list[SlotDef]] = {
         _FINAL_INSPECTION,
         _HS_FILE,
         _COMMISSIONING,
+        _ACCEPTANCE,
     ],
     "residential": [
         _AS_BUILT,
@@ -138,6 +146,7 @@ CHECKLIST_TEMPLATES: dict[str, list[SlotDef]] = {
         _PUNCH,
         _FINAL_INSPECTION,
         _HS_FILE,
+        _ACCEPTANCE,
         _slot(
             "epc_certificate",
             "Energy performance certificate",
@@ -155,6 +164,7 @@ CHECKLIST_TEMPLATES: dict[str, list[SlotDef]] = {
         _FINAL_INSPECTION,
         _HS_FILE,
         _COMMISSIONING,
+        _ACCEPTANCE,
         _slot(
             "geotechnical_records",
             "Geotechnical and survey records",
@@ -172,6 +182,7 @@ CHECKLIST_TEMPLATES: dict[str, list[SlotDef]] = {
         _FINAL_INSPECTION,
         _HS_FILE,
         _COMMISSIONING,
+        _ACCEPTANCE,
     ],
     # A custom project gets a minimal spine the user extends with add-slot.
     "custom": [
@@ -206,6 +217,7 @@ CATEGORY_LABELS: dict[str, str] = {
     CATEGORY_INSPECTION: "Inspection certificates",
     CATEGORY_HS: "Health & safety file",
     CATEGORY_COMMISSIONING: "Commissioning",
+    CATEGORY_ACCEPTANCE: "Acceptance",
     CATEGORY_OTHER: "Other",
 }
 

@@ -206,6 +206,18 @@ class PartnerPackManifest(BaseModel):
             "replaces one. Read by :mod:`app.core.code_lists`."
         ),
     )
+    condition_scales: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Paths inside the pack package to condition-scale JSON files "
+            "(``{kind: condition_scale, key, name, action_threshold, levels: "
+            "[{level, label, color, action}]}``), for a national condition "
+            "grading and the maintenance action each grade calls for. Offered "
+            "next to the shipped neutral scale while the pack is active; a key "
+            "that names a shipped scale is ignored. Read by "
+            ":mod:`app.modules.condition.scales`."
+        ),
+    )
 
     # Module presets
     default_modules: list[str] = Field(
@@ -532,6 +544,7 @@ class PartnerPackManifest(BaseModel):
             "validation_rule_packs": self.validation_rule_packs,
             "validation_rule_sets": self.validation_rule_sets,
             "code_lists": self.code_lists,
+            "condition_scales": self.condition_scales,
             "demo_template_ids": self.demo_template_ids,
             "default_modules": self.default_modules,
             "recommended_modules": self.recommended_modules,

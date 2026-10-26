@@ -314,6 +314,47 @@ _DEFECTS_LIABILITY_RULES: tuple[ValidationRule, ...] = (
 )
 
 
+#: Rule set of the photo evidence rule. Kept apart from the limitation set,
+#: which runs per warranty snapshot and must not see defect lists.
+DEFECT_EVIDENCE_RULE_SET = "defects_liability_evidence"
+
+#: Defect statuses at which the rectification is claimed done.
+_RECTIFIED_STATUSES = frozenset({"closed"})
+
+
+class RectifiedDefectHasPhoto(ValidationRule):
+    """A defect closed as rectified should show the rectification with a photo."""
+
+    rule_id = "defects_liability.rectified_defect_has_photo"
+    name = "Rectified defects have photo evidence"
+    standard = "defects_liability"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Defects closed as rectified should carry at least one photo with evidence"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.core.i18n import t
+
+        data = context.data if isinstance(context.data, dict) else {}
+        locale = (context.metadata or {}).get("locale")
+        results: list[RuleResult] = []
+        for defect in data.get("defects") or []:
+            if not isinstance(defect, dict) or _text(defect.get("status")) not in _RECTIFIED_STATUSES:
+                continue
+            passed = bool(defect.get("photos"))
+            ref = _text(defect.get("reference")) or _text(defect.get("id"))
+            results.append(
+                _result(
+                    self,
+                    passed,
+                    "OK" if passed else t("field_evidence.defect_no_photo", locale, reference=ref),
+                    element_ref=_text(defect.get("id")),
+                    suggestion=None if passed else t("field_evidence.defect_no_photo_fix", locale),
+                )
+            )
+        return results
+
+
 def register_defects_liability_rules() -> None:
     """Register the module's validation rules with the core rule registry.
 
@@ -323,6 +364,7 @@ def register_defects_liability_rules() -> None:
     """
     for rule in _DEFECTS_LIABILITY_RULES:
         rule_registry.register(rule, [DEFECTS_LIABILITY_RULE_SET])
+    rule_registry.register(RectifiedDefectHasPhoto(), [DEFECT_EVIDENCE_RULE_SET])
     logger.debug("Registered %d defects-liability validation rules", len(_DEFECTS_LIABILITY_RULES))
 
 

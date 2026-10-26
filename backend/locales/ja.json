@@ -618,5 +618,65 @@
       "draft": "下書き",
       "frozen": "確定済み"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "手直し項目「{title}」が写真なしで完了されています",
+    "punch_no_photo_fix": "完了した作業の写真を追加してください",
+    "photo_weak": "「{title}」の写真{count}枚に位置または撮影時刻がありません",
+    "photo_weak_fix": "位置情報をオンにしてアプリで撮り直してください",
+    "defect_no_photo": "不具合「{reference}」が是正写真なしで完了されています",
+    "defect_no_photo_fix": "是正した作業の写真を添付してください"
+  },
+  "closeout_dossier": {
+    "more_items": "ほか{count}件は表示していません",
+    "category_missing": "必須カテゴリ「{category}」の証跡がありません",
+    "category_missing_fix": "このカテゴリのチェックリスト項目に書類を紐付けるか、追加してください",
+    "category_unverified": "「{category}」の証跡はまだ確認されていません",
+    "category_unverified_fix": "管理者に紐付けた証跡の確認と承認を依頼してください",
+    "punch_open": "手直し項目「{name}」はまだ未完了です",
+    "punch_open_fix": "項目を解決して完了するか、この引渡しファイルの対象範囲から除外してください",
+    "punch_no_photo": "是正済みの手直し項目「{name}」に写真がありません",
+    "punch_no_photo_fix": "完了した作業の写真を追加してください",
+    "system_pending": "システム「{name}」は試運転されていません",
+    "system_pending_fix": "試運転チェックリストを完了し、システムを試運転済みにしてください",
+    "critical_issues": "重大な試運転の課題が{count}件、まだ未解決です",
+    "critical_issues_fix": "引渡しの前に重大な課題を解決してください",
+    "acceptance_missing": "受入れ証明書が紐付けられていません",
+    "acceptance_missing_fix": "署名済みの受入れ証明書を、受入れチェックリスト項目に紐付けてください",
+    "acceptance_unsigned": "受入れ証明書の署名が揃っていません(状態: {status})",
+    "acceptance_unsigned_fix": "署名機能で未署名の分を集めてください",
+    "blocked": "引渡しファイルがチェックリストを満たしていません。指摘事項を修正するか、不完全として作成してください(管理者の承認)。",
+    "delivery_title": "引渡しファイル: {project}",
+    "delivery_body": "引渡しファイル「{title}」({scope})の準備ができました。下のリンクからダウンロードできます。有効期限は{expires}です。",
+    "pdf": {
+      "title": "引渡しファイル",
+      "scope": "対象範囲",
+      "built": "作成日時",
+      "status_passed": "チェックリストに合格しました",
+      "status_warnings": "チェックリストに警告付きで合格しました",
+      "status_errors": "不完全: チェックリストの指摘事項が未解決です",
+      "findings": "未解決のチェックリスト指摘事項",
+      "severity": "重大度",
+      "finding": "指摘事項",
+      "severity_error": "エラー",
+      "severity_warning": "警告",
+      "severity_info": "情報",
+      "contents": "目次",
+      "file": "ファイル",
+      "size": "サイズ",
+      "punch": "是正済み手直しリスト",
+      "item": "項目",
+      "status": "状態",
+      "photos": "写真",
+      "evidence": "写真の証跡"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "「{name}」の評価{rating}は、尺度「{scale}」のレベルではありません",
+    "rule_poor_without_action": "「{name}」は{rating}と評価されていますが、計画された保守対応がありません",
+    "rule_poor_without_action_fix": "計画を導出するか、この要素に対応を追加してください",
+    "rule_action_unpriced": "{year}年の「{name}」の対応に単価がありません",
+    "rule_action_unpriced_fix": "計画の合計に含めるため、単価を入力してください",
+    "rule_defect_incomplete": "「{name}」の評価は作業を要しますが、重大度や範囲が記録されていません"
   }
 }

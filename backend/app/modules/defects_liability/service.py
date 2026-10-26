@@ -22,7 +22,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import UTC, date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import select
@@ -306,6 +306,9 @@ class DefectsLiabilityService:
             responsible_party=payload.responsible_party,
             punchlist_id=payload.punchlist_id,
             ncr_id=payload.ncr_id,
+            geo_lat=payload.geo_lat,
+            geo_lon=payload.geo_lon,
+            photos=[],
             created_by=_as_optional_uuid(created_by),
         )
         self.session.add(defect)
@@ -368,6 +371,44 @@ class DefectsLiabilityService:
             setattr(defect, key, value)
         await self.session.flush()
         return defect
+
+    # -- Photo evidence -----------------------------------------------------
+
+    async def add_photo(
+        self,
+        project_id: uuid.UUID,
+        defect_id: uuid.UUID,
+        entry: dict[str, Any],
+    ) -> DlpDefect:
+        """Append a photo entry (gallery photo id + evidence record) to a defect.
+
+        A located photo pins a defect that has no map pin yet; an existing pin
+        is never moved by a photo.
+        """
+        defect = await self.require_defect(project_id, defect_id)
+        photos = list(defect.photos or [])
+        photos.append(entry)
+        defect.photos = photos
+        location = (entry.get("evidence") or {}).get("location") or {}
+        if defect.geo_lat is None and defect.geo_lon is None and location.get("lat") is not None:
+            defect.geo_lat = location["lat"]
+            defect.geo_lon = location["lon"]
+        await self.session.flush()
+        return defect
+
+    async def remove_photo(self, project_id: uuid.UUID, defect_id: uuid.UUID, index: int) -> dict[str, Any]:
+        """Detach the photo at ``index`` and return its entry (404/422 on a bad index)."""
+        defect = await self.require_defect(project_id, defect_id)
+        photos = list(defect.photos or [])
+        if index < 0 or index >= len(photos):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail=f"Photo index {index} out of range",
+            )
+        removed = photos.pop(index)
+        defect.photos = photos
+        await self.session.flush()
+        return removed if isinstance(removed, dict) else {}
 
     # -- Derived register (DB loaders + pure core) --------------------------
 

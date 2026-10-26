@@ -618,5 +618,65 @@
       "draft": "Taslak",
       "frozen": "Dondurulmuş"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "'{title}' eksik kalemi fotoğrafsız kapatılmış",
+    "punch_no_photo_fix": "Tamamlanan işin fotoğrafını ekleyin",
+    "photo_weak": "'{title}' üzerindeki {count} fotoğrafta konum veya çekim zamanı yok",
+    "photo_weak_fix": "Fotoğrafı uygulamada konum açıkken yeniden çekin",
+    "defect_no_photo": "'{reference}' kusuru giderme fotoğrafı olmadan kapatılmış",
+    "defect_no_photo_fix": "Giderilen işin fotoğrafını ekleyin"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} kalem daha listelenmedi",
+    "category_missing": "Gerekli '{category}' kategorisi için kanıt yok",
+    "category_missing_fix": "Bu kategorideki bir kontrol listesi kalemine belge bağlayın veya bir belge ekleyin",
+    "category_unverified": "'{category}' kanıtı henüz doğrulanmadı",
+    "category_unverified_fix": "Bir yöneticiden bağlı kanıtı incelemesini ve doğrulamasını isteyin",
+    "punch_open": "'{name}' eksik kalemi hâlâ açık",
+    "punch_open_fix": "Kalemi çözüp kapatın veya bu dosyanın kapsamı dışında bırakın",
+    "punch_no_photo": "Çözülen '{name}' eksik kaleminde fotoğraf yok",
+    "punch_no_photo_fix": "Tamamlanan işin fotoğrafını ekleyin",
+    "system_pending": "'{name}' sistemi devreye alınmadı",
+    "system_pending_fix": "Devreye alma kontrol listelerini tamamlayın ve sistemi devreye alındı olarak işaretleyin",
+    "critical_issues": "{count} kritik devreye alma sorunu hâlâ açık",
+    "critical_issues_fix": "Teslimden önce kritik sorunları kapatın",
+    "acceptance_missing": "Bağlı bir kabul belgesi yok",
+    "acceptance_missing_fix": "İmzalı kabul belgesini kabul kontrol listesi kalemine bağlayın",
+    "acceptance_unsigned": "Kabul belgesi tamamen imzalanmadı (durum: {status})",
+    "acceptance_unsigned_fix": "Eksik imzaları İmzalama bölümünden toplayın",
+    "blocked": "Dosya kontrol listesini geçemedi. Bulguları düzeltin veya yine de eksik olarak derleyin (yönetici onayı).",
+    "delivery_title": "Teslim dosyası: {project}",
+    "delivery_body": "'{title}' ({scope}) teslim dosyası hazır. Aşağıdaki bağlantı onu indirir ve {expires} tarihine kadar geçerlidir.",
+    "pdf": {
+      "title": "Teslim dosyası",
+      "scope": "Kapsam",
+      "built": "Derlenme",
+      "status_passed": "Kontrol listesi geçti",
+      "status_warnings": "Kontrol listesi uyarılarla geçti",
+      "status_errors": "Eksik: kontrol listesi bulguları açık",
+      "findings": "Açık kontrol listesi bulguları",
+      "severity": "Önem",
+      "finding": "Bulgu",
+      "severity_error": "Hata",
+      "severity_warning": "Uyarı",
+      "severity_info": "Bilgi",
+      "contents": "İçindekiler",
+      "file": "Dosya",
+      "size": "Boyut",
+      "punch": "Kapatılmış eksik listesi",
+      "item": "Kalem",
+      "status": "Durum",
+      "photos": "Fotoğraflar",
+      "evidence": "Fotoğraf kanıtı"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "'{name}' için {rating} derecelendirmesi '{scale}' ölçeğinin bir düzeyi değil",
+    "rule_poor_without_action": "'{name}' {rating} olarak derecelendirilmiş ancak planlanmış bakım eylemi yok",
+    "rule_poor_without_action_fix": "Planı türetin veya bu eleman için bir eylem ekleyin",
+    "rule_action_unpriced": "'{name}' için {year} yılındaki eylemin birim maliyeti yok",
+    "rule_action_unpriced_fix": "Plan toplamlarına girmesi için birim maliyet girin",
+    "rule_defect_incomplete": "'{name}' derecelendirmesi iş gerektiriyor ancak şiddet veya kapsam kaydı yok"
   }
 }

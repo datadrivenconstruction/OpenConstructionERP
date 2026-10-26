@@ -789,5 +789,65 @@
       "draft": "ڈرافٹ",
       "frozen": "منجمد"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "پنچ آئٹم '{title}' بغیر تصویر کے بند ہے",
+    "punch_no_photo_fix": "مکمل شدہ کام کی تصویر شامل کریں",
+    "photo_weak": "'{title}' پر {count} تصاویر میں مقام یا کیپچر کا وقت نہیں",
+    "photo_weak_fix": "ایپ میں مقام آن کر کے تصویر دوبارہ لیں",
+    "defect_no_photo": "نقص '{reference}' درستی کی تصویر کے بغیر بند ہے",
+    "defect_no_photo_fix": "درست شدہ کام کی تصویر منسلک کریں"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} مزید آئٹمز درج نہیں",
+    "category_missing": "مطلوبہ زمرے '{category}' کا کوئی ثبوت نہیں",
+    "category_missing_fix": "اس زمرے کے چیک لسٹ آئٹم سے کوئی دستاویز جوڑیں، یا نئی شامل کریں",
+    "category_unverified": "'{category}' کے ثبوت کی ابھی تصدیق نہیں ہوئی",
+    "category_unverified_fix": "مینیجر سے منسلک ثبوت کا جائزہ اور تصدیق کروائیں",
+    "punch_open": "پنچ آئٹم '{name}' ابھی کھلا ہے",
+    "punch_open_fix": "آئٹم حل کر کے بند کریں، یا اسے اس ڈوزیئر کے دائرہ کار سے نکال دیں",
+    "punch_no_photo": "حل شدہ پنچ آئٹم '{name}' کی تصویر نہیں",
+    "punch_no_photo_fix": "مکمل شدہ کام کی تصویر شامل کریں",
+    "system_pending": "سسٹم '{name}' کمیشن نہیں ہوا",
+    "system_pending_fix": "کمیشننگ چیک لسٹس مکمل کریں اور سسٹم کو کمیشنڈ نشان زد کریں",
+    "critical_issues": "{count} نازک کمیشننگ مسائل ابھی کھلے ہیں",
+    "critical_issues_fix": "حوالگی سے پہلے نازک مسائل بند کریں",
+    "acceptance_missing": "قبولیت کا کوئی سرٹیفکیٹ منسلک نہیں",
+    "acceptance_missing_fix": "دستخط شدہ قبولیت سرٹیفکیٹ کو قبولیت کے چیک لسٹ آئٹم سے جوڑیں",
+    "acceptance_unsigned": "قبولیت کا سرٹیفکیٹ مکمل دستخط شدہ نہیں (حالت: {status})",
+    "acceptance_unsigned_fix": "دستخط کے حصے میں باقی دستخط حاصل کریں",
+    "blocked": "ڈوزیئر اپنی چیک لسٹ میں ناکام ہے۔ نتائج درست کریں، یا اسے نامکمل کے طور پر پھر بھی تیار کریں (مینیجر کی منظوری)۔",
+    "delivery_title": "حوالگی ڈوزیئر: {project}",
+    "delivery_body": "حوالگی ڈوزیئر '{title}' ({scope}) تیار ہے۔ نیچے دیا گیا لنک اسے ڈاؤن لوڈ کرتا ہے اور {expires} تک کارآمد ہے۔",
+    "pdf": {
+      "title": "حوالگی ڈوزیئر",
+      "scope": "دائرہ کار",
+      "built": "تیار کیا گیا",
+      "status_passed": "چیک لسٹ پاس ہو گئی",
+      "status_warnings": "چیک لسٹ انتباہات کے ساتھ پاس ہوئی",
+      "status_errors": "نامکمل: چیک لسٹ کے نتائج کھلے ہیں",
+      "findings": "چیک لسٹ کے کھلے نتائج",
+      "severity": "شدت",
+      "finding": "نتیجہ",
+      "severity_error": "خرابی",
+      "severity_warning": "انتباہ",
+      "severity_info": "معلومات",
+      "contents": "مندرجات",
+      "file": "فائل",
+      "size": "حجم",
+      "punch": "حل شدہ پنچ لسٹ",
+      "item": "آئٹم",
+      "status": "حالت",
+      "photos": "تصاویر",
+      "evidence": "تصویری ثبوت"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "'{name}' کی درجہ بندی {rating} پیمانے '{scale}' کا کوئی درجہ نہیں",
+    "rule_poor_without_action": "'{name}' کی درجہ بندی {rating} ہے لیکن دیکھ بھال کی کوئی منصوبہ بند کارروائی نہیں",
+    "rule_poor_without_action_fix": "منصوبہ اخذ کریں، یا اس عنصر کے لیے کارروائی شامل کریں",
+    "rule_action_unpriced": "{year} میں '{name}' کی کارروائی کی فی اکائی لاگت نہیں",
+    "rule_action_unpriced_fix": "فی اکائی لاگت درج کریں تاکہ منصوبے کے کل میں شامل ہو",
+    "rule_defect_incomplete": "'{name}' کی درجہ بندی کام کا تقاضا کرتی ہے مگر شدت یا حد درج نہیں"
   }
 }

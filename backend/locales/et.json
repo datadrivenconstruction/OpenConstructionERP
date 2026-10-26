@@ -618,5 +618,65 @@
       "draft": "Mustand",
       "frozen": "Külmutatud"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Puuduste nimekirja kanne '{title}' on suletud ilma fotota",
+    "punch_no_photo_fix": "Lisage foto valminud tööst",
+    "photo_weak": "Kirjel '{title}' on {count} fotol asukoht või tegemisaeg puudu",
+    "photo_weak_fix": "Tehke foto rakenduses uuesti, asukoht sisse lülitatud",
+    "defect_no_photo": "Puudus '{reference}' on suletud ilma kõrvaldamise fotota",
+    "defect_no_photo_fix": "Lisage foto kõrvaldatud tööst"
+  },
+  "closeout_dossier": {
+    "more_items": "Veel {count} kannet pole loetletud",
+    "category_missing": "Nõutava kategooria '{category}' kohta puudub tõend",
+    "category_missing_fix": "Siduge dokument selle kategooria kontrollnimekirja punktiga või lisage uus",
+    "category_unverified": "Kategooria '{category}' tõend pole veel kontrollitud",
+    "category_unverified_fix": "Paluge juhil seotud tõend üle vaadata ja kinnitada",
+    "punch_open": "Puuduste nimekirja kanne '{name}' on endiselt avatud",
+    "punch_open_fix": "Lahendage ja sulgege kanne või jätke see selle dokumentatsiooni ulatusest välja",
+    "punch_no_photo": "Lahendatud puuduste nimekirja kandel '{name}' pole fotot",
+    "punch_no_photo_fix": "Lisage foto valminud tööst",
+    "system_pending": "Süsteem '{name}' pole kasutusele võetud",
+    "system_pending_fix": "Lõpetage kasutuselevõtu kontrollnimekirjad ja märkige süsteem kasutusele võetuks",
+    "critical_issues": "{count} kriitilist kasutuselevõtu probleemi on veel avatud",
+    "critical_issues_fix": "Sulgege kriitilised probleemid enne üleandmist",
+    "acceptance_missing": "Vastuvõtuakti pole seotud",
+    "acceptance_missing_fix": "Siduge allkirjastatud vastuvõtuakt kontrollnimekirja vastuvõtupunktiga",
+    "acceptance_unsigned": "Vastuvõtuakt pole täielikult allkirjastatud (olek: {status})",
+    "acceptance_unsigned_fix": "Koguge puuduolevad allkirjad jaotises Allkirjastamine",
+    "blocked": "Dokumentatsioon ei vasta oma kontrollnimekirjale. Parandage tähelepanekud või koostage see ikkagi mittetäielikuna (juhi kinnitus).",
+    "delivery_title": "Üleandmisdokumentatsioon: {project}",
+    "delivery_body": "Üleandmisdokumentatsioon '{title}' ({scope}) on valmis. Allolev link laadib selle alla ja kehtib kuni {expires}.",
+    "pdf": {
+      "title": "Üleandmisdokumentatsioon",
+      "scope": "Ulatus",
+      "built": "Koostatud",
+      "status_passed": "Kontrollnimekiri läbitud",
+      "status_warnings": "Kontrollnimekiri läbitud hoiatustega",
+      "status_errors": "Mittetäielik: kontrollnimekirja tähelepanekud avatud",
+      "findings": "Kontrollnimekirja avatud tähelepanekud",
+      "severity": "Tõsidus",
+      "finding": "Tähelepanek",
+      "severity_error": "Viga",
+      "severity_warning": "Hoiatus",
+      "severity_info": "Info",
+      "contents": "Sisu",
+      "file": "Fail",
+      "size": "Suurus",
+      "punch": "Lahendatud puuduste nimekiri",
+      "item": "Kanne",
+      "status": "Olek",
+      "photos": "Fotod",
+      "evidence": "Fototõendid"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Elemendi '{name}' hinnang {rating} ei ole skaala '{scale}' tase",
+    "rule_poor_without_action": "Elemendi '{name}' hinnang on {rating}, kuid sellel pole planeeritud hooldustegevust",
+    "rule_poor_without_action_fix": "Tuletage kava või lisage sellele elemendile tegevus",
+    "rule_action_unpriced": "Elemendi '{name}' tegevusel aastal {year} pole ühikuhinda",
+    "rule_action_unpriced_fix": "Sisestage ühikuhind, et kava kokkuvõtted seda sisaldaksid",
+    "rule_defect_incomplete": "Elemendi '{name}' hinnang nõuab töid, kuid tõsidust ega ulatust pole salvestatud"
   }
 }

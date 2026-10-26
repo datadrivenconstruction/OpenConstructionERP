@@ -618,5 +618,65 @@
       "draft": "Concept",
       "frozen": "Bevroren"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Restpunt '{title}' is zonder foto afgehandeld",
+    "punch_no_photo_fix": "Voeg een foto van het voltooide werk toe",
+    "photo_weak": "{count} foto('s) bij '{title}' missen locatie of opnametijd",
+    "photo_weak_fix": "Maak de foto opnieuw in de app met locatie ingeschakeld",
+    "defect_no_photo": "Gebrek '{reference}' is gesloten zonder foto van het herstel",
+    "defect_no_photo_fix": "Voeg een foto van het herstelde werk toe"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} extra item(s) niet weergegeven",
+    "category_missing": "Geen bewijs voor de vereiste categorie '{category}'",
+    "category_missing_fix": "Koppel een document aan een checklistpunt van deze categorie of voeg er een toe",
+    "category_unverified": "Bewijs voor '{category}' is nog niet geverifieerd",
+    "category_unverified_fix": "Laat een manager het gekoppelde bewijs beoordelen en verifiëren",
+    "punch_open": "Restpunt '{name}' staat nog open",
+    "punch_open_fix": "Los het item op en sluit het, of sluit het uit van de scope van dit dossier",
+    "punch_no_photo": "Afgehandeld restpunt '{name}' heeft geen foto",
+    "punch_no_photo_fix": "Voeg een foto van het voltooide werk toe",
+    "system_pending": "Systeem '{name}' is niet in bedrijf gesteld",
+    "system_pending_fix": "Rond de inbedrijfstellingschecklists af en markeer het systeem als in bedrijf gesteld",
+    "critical_issues": "{count} kritieke inbedrijfstellingsproblemen staan nog open",
+    "critical_issues_fix": "Sluit de kritieke problemen vóór de oplevering",
+    "acceptance_missing": "Er is geen opleveringscertificaat gekoppeld",
+    "acceptance_missing_fix": "Koppel het ondertekende opleveringscertificaat aan het opleveringspunt van de checklist",
+    "acceptance_unsigned": "Het opleveringscertificaat is niet volledig ondertekend (status: {status})",
+    "acceptance_unsigned_fix": "Verzamel de openstaande handtekeningen bij Ondertekenen",
+    "blocked": "Het dossier voldoet niet aan zijn checklist. Los de bevindingen op of stel het toch samen als onvolledig (akkoord van de manager).",
+    "delivery_title": "Opleveringsdossier: {project}",
+    "delivery_body": "Het opleveringsdossier '{title}' ({scope}) is klaar. Via de onderstaande link kunt u het downloaden; de link is geldig tot {expires}.",
+    "pdf": {
+      "title": "Opleveringsdossier",
+      "scope": "Scope",
+      "built": "Samengesteld",
+      "status_passed": "Checklist doorstaan",
+      "status_warnings": "Checklist doorstaan met waarschuwingen",
+      "status_errors": "Onvolledig: bevindingen van de checklist open",
+      "findings": "Openstaande bevindingen van de checklist",
+      "severity": "Ernst",
+      "finding": "Bevinding",
+      "severity_error": "Fout",
+      "severity_warning": "Waarschuwing",
+      "severity_info": "Info",
+      "contents": "Inhoud",
+      "file": "Bestand",
+      "size": "Grootte",
+      "punch": "Afgehandelde restpuntenlijst",
+      "item": "Item",
+      "status": "Status",
+      "photos": "Foto's",
+      "evidence": "Fotobewijs"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Beoordeling {rating} van '{name}' is geen niveau van schaal '{scale}'",
+    "rule_poor_without_action": "'{name}' is beoordeeld met {rating} maar heeft geen geplande onderhoudsactie",
+    "rule_poor_without_action_fix": "Leid het plan af of voeg een actie voor dit element toe",
+    "rule_action_unpriced": "De actie voor '{name}' in {year} heeft geen eenheidsprijs",
+    "rule_action_unpriced_fix": "Voer een eenheidsprijs in zodat de plantotalen die meenemen",
+    "rule_defect_incomplete": "De beoordeling van '{name}' vraagt om werk maar legt geen ernst of omvang vast"
   }
 }

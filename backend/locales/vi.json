@@ -618,5 +618,65 @@
       "draft": "Nháp",
       "frozen": "Đã khóa"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Hạng mục punch list '{title}' được đóng mà không có ảnh",
+    "punch_no_photo_fix": "Thêm ảnh công việc đã hoàn thành",
+    "photo_weak": "{count} ảnh trên '{title}' thiếu vị trí hoặc thời gian chụp",
+    "photo_weak_fix": "Chụp lại ảnh trong ứng dụng khi bật định vị",
+    "defect_no_photo": "Lỗi '{reference}' được đóng mà không có ảnh khắc phục",
+    "defect_no_photo_fix": "Đính kèm ảnh công việc đã khắc phục"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} hạng mục khác không được liệt kê",
+    "category_missing": "Không có bằng chứng cho nhóm bắt buộc '{category}'",
+    "category_missing_fix": "Liên kết một tài liệu với hạng mục danh mục kiểm tra thuộc nhóm này, hoặc thêm mới",
+    "category_unverified": "Bằng chứng cho '{category}' chưa được xác minh",
+    "category_unverified_fix": "Nhờ quản lý xem xét và xác minh bằng chứng đã đính kèm",
+    "punch_open": "Hạng mục punch list '{name}' vẫn đang mở",
+    "punch_open_fix": "Xử lý và đóng hạng mục, hoặc loại khỏi phạm vi hồ sơ này",
+    "punch_no_photo": "Hạng mục punch list '{name}' đã xử lý nhưng không có ảnh",
+    "punch_no_photo_fix": "Thêm ảnh công việc đã hoàn thành",
+    "system_pending": "Hệ thống '{name}' chưa được chạy thử",
+    "system_pending_fix": "Hoàn tất danh mục kiểm tra chạy thử và đánh dấu hệ thống đã chạy thử",
+    "critical_issues": "{count} vấn đề chạy thử nghiêm trọng vẫn đang mở",
+    "critical_issues_fix": "Đóng các vấn đề nghiêm trọng trước khi bàn giao",
+    "acceptance_missing": "Chưa liên kết biên bản nghiệm thu",
+    "acceptance_missing_fix": "Liên kết biên bản nghiệm thu đã ký với hạng mục danh mục kiểm tra nghiệm thu",
+    "acceptance_unsigned": "Biên bản nghiệm thu chưa được ký đầy đủ (trạng thái: {status})",
+    "acceptance_unsigned_fix": "Thu thập các chữ ký còn thiếu trong mục Ký",
+    "blocked": "Hồ sơ không đạt danh mục kiểm tra. Hãy sửa các phát hiện, hoặc vẫn tập hợp và đánh dấu chưa đầy đủ (quản lý phê duyệt).",
+    "delivery_title": "Hồ sơ bàn giao: {project}",
+    "delivery_body": "Hồ sơ bàn giao '{title}' ({scope}) đã sẵn sàng. Liên kết bên dưới tải hồ sơ xuống và có hiệu lực đến {expires}.",
+    "pdf": {
+      "title": "Hồ sơ bàn giao",
+      "scope": "Phạm vi",
+      "built": "Thời điểm tập hợp",
+      "status_passed": "Danh mục kiểm tra đạt",
+      "status_warnings": "Danh mục kiểm tra đạt kèm cảnh báo",
+      "status_errors": "Chưa đầy đủ: còn phát hiện của danh mục kiểm tra chưa xử lý",
+      "findings": "Phát hiện đang mở của danh mục kiểm tra",
+      "severity": "Mức độ",
+      "finding": "Phát hiện",
+      "severity_error": "Lỗi",
+      "severity_warning": "Cảnh báo",
+      "severity_info": "Thông tin",
+      "contents": "Mục lục",
+      "file": "Tệp",
+      "size": "Kích thước",
+      "punch": "Punch list đã xử lý",
+      "item": "Hạng mục",
+      "status": "Trạng thái",
+      "photos": "Ảnh",
+      "evidence": "Bằng chứng ảnh"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Đánh giá {rating} của '{name}' không phải một mức của thang '{scale}'",
+    "rule_poor_without_action": "'{name}' được đánh giá {rating} nhưng chưa có hành động bảo trì nào được lên kế hoạch",
+    "rule_poor_without_action_fix": "Hãy suy ra kế hoạch, hoặc thêm hành động cho cấu kiện này",
+    "rule_action_unpriced": "Hành động cho '{name}' năm {year} chưa có đơn giá",
+    "rule_action_unpriced_fix": "Nhập đơn giá để tổng của kế hoạch bao gồm hành động này",
+    "rule_defect_incomplete": "Đánh giá của '{name}' đòi hỏi công việc nhưng không ghi mức độ nghiêm trọng hoặc phạm vi"
   }
 }

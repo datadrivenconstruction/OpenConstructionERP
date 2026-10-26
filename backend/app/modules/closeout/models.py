@@ -6,6 +6,8 @@ Tables:
     oe_closeout_package - one closeout package per project (configurable checklist)
     oe_closeout_slot    - a single checklist requirement (as-built set, O&M, warranty, ...)
     oe_closeout_binding - links a slot to a CDE document / generated artifact / external URL
+    oe_closeout_dossier - one assembled handover dossier (scope, checks, archive)
+    oe_closeout_delivery - delivery log of a dossier (download, webhook, connector, email)
 """
 
 from __future__ import annotations
@@ -14,16 +16,19 @@ import uuid
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     Boolean,
     ForeignKey,
+    Index,
     Integer,
     String,
+    Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
 
-__all__ = ["CloseoutBinding", "CloseoutPackage", "CloseoutSlot"]
+__all__ = ["CloseoutBinding", "CloseoutDelivery", "CloseoutDossier", "CloseoutPackage", "CloseoutSlot"]
 
 
 class CloseoutPackage(Base):
@@ -202,3 +207,101 @@ class CloseoutBinding(Base):
 
     def __repr__(self) -> str:
         return f"<CloseoutBinding slot={self.slot_id} doc={self.document_id} verified={self.is_verified}>"
+
+
+class CloseoutDossier(Base):
+    """One assembled handover dossier of a package.
+
+    A dossier is the package frozen for a recipient: a scope (whole project, one
+    area or one asset), the completeness checks it was assembled against, and
+    the archive it produced (index PDF + ZIP). The archive is filed as a
+    document (``document_id``), so it shows in the documents hub and a share
+    link can be minted for it; ``file_path`` is that document's file.
+    ``status`` walks queued -> built -> delivered, or failed.
+    """
+
+    __tablename__ = "oe_closeout_dossier"
+    __table_args__ = (Index("ix_closeout_dossier_package_created", "package_id", "created_at"),)
+
+    package_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_closeout_package.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="queued", server_default="queued")
+    # {"kind": "project" | "area" | "asset", "value": str | None}
+    scope: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")  # type: ignore[assignment]
+    check_status: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    check_results: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]"
+    )
+    # The deliveries asked for when the dossier was requested, run after the build.
+    delivery_request: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON, nullable=False, default=list, server_default="[]"
+    )
+    job_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    document_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    file_path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    file_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    size_bytes: Mapped[int | None] = mapped_column(BigInteger, nullable=True)
+    file_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    built_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    requested_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return f"<CloseoutDossier package={self.package_id} {self.status}>"
+
+
+class CloseoutDelivery(Base):
+    """One delivery attempt of a dossier: who it went to, how, and what came back.
+
+    ``channel`` is download | webhook | connector | email. ``target_id`` names
+    the integrations webhook endpoint or connector config used, ``recipient``
+    an email address. ``resend_of`` links a resend to the attempt it repeats,
+    so the log reads as a history rather than a set of unrelated rows.
+    """
+
+    __tablename__ = "oe_closeout_delivery"
+    __table_args__ = (Index("ix_closeout_delivery_dossier_created", "dossier_id", "created_at"),)
+
+    dossier_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_closeout_dossier.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    channel: Mapped[str] = mapped_column(String(20), nullable=False)
+    target_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    target_label: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    recipient: Mapped[str | None] = mapped_column(String(320), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", server_default="pending")
+    status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+    share_link_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    share_url: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    share_expires_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    resend_of: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    delivered_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    delivered_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return f"<CloseoutDelivery {self.channel} {self.status}>"

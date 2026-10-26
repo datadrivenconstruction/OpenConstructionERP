@@ -134,6 +134,19 @@ class WebhookService:
 
         return len(matched)
 
+    async def deliver_to(
+        self,
+        webhook: WebhookEndpoint,
+        event_type: str,
+        payload: dict[str, Any],
+    ) -> WebhookDelivery:
+        """Send one payload to one endpoint now, logged like any other delivery.
+
+        For callers that address a specific endpoint (a handover dossier sent to
+        the client's system) rather than broadcasting an event to subscribers.
+        """
+        return await self._deliver(webhook, event_type, payload)
+
     async def send_test(self, webhook: WebhookEndpoint) -> WebhookDelivery:
         """Send a test payload to the webhook and return the delivery record."""
         test_payload = {

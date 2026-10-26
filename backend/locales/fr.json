@@ -618,5 +618,65 @@
       "draft": "Brouillon",
       "frozen": "Figé"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "La réserve '{title}' est levée sans photo",
+    "punch_no_photo_fix": "Ajoutez une photo des travaux terminés",
+    "photo_weak": "{count} photo(s) de '{title}' sans localisation ou heure de prise de vue",
+    "photo_weak_fix": "Reprenez la photo dans l'application avec la localisation activée",
+    "defect_no_photo": "Le désordre '{reference}' est clos sans photo de la réparation",
+    "defect_no_photo_fix": "Joignez une photo des travaux réparés"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} autre(s) élément(s) non listé(s)",
+    "category_missing": "Aucune preuve pour la catégorie requise '{category}'",
+    "category_missing_fix": "Liez un document à un point de la liste de contrôle de cette catégorie, ou ajoutez-en un",
+    "category_unverified": "La preuve pour '{category}' n'est pas encore vérifiée",
+    "category_unverified_fix": "Faites examiner et vérifier la preuve liée par un responsable",
+    "punch_open": "La réserve '{name}' est encore ouverte",
+    "punch_open_fix": "Résolvez et clôturez l'élément, ou excluez-le du périmètre de ce dossier",
+    "punch_no_photo": "La réserve levée '{name}' n'a pas de photo",
+    "punch_no_photo_fix": "Ajoutez une photo des travaux terminés",
+    "system_pending": "Le système '{name}' n'est pas mis en service",
+    "system_pending_fix": "Terminez les listes de contrôle de mise en service et marquez le système comme mis en service",
+    "critical_issues": "{count} problème(s) critique(s) de mise en service sont encore ouverts",
+    "critical_issues_fix": "Clôturez les problèmes critiques avant la remise",
+    "acceptance_missing": "Aucun procès-verbal de réception n'est lié",
+    "acceptance_missing_fix": "Liez le procès-verbal de réception signé au point de réception de la liste de contrôle",
+    "acceptance_unsigned": "Le procès-verbal de réception n'est pas entièrement signé (statut : {status})",
+    "acceptance_unsigned_fix": "Recueillez les signatures manquantes dans Signature",
+    "blocked": "Le dossier ne satisfait pas sa liste de contrôle. Corrigez les constats, ou constituez-le quand même comme incomplet (validation du responsable).",
+    "delivery_title": "Dossier de remise : {project}",
+    "delivery_body": "Le dossier de remise '{title}' ({scope}) est prêt. Le lien ci-dessous le télécharge et reste valide jusqu'au {expires}.",
+    "pdf": {
+      "title": "Dossier de remise",
+      "scope": "Périmètre",
+      "built": "Constitué",
+      "status_passed": "Liste de contrôle validée",
+      "status_warnings": "Liste de contrôle validée avec avertissements",
+      "status_errors": "Incomplet : constats de la liste de contrôle ouverts",
+      "findings": "Constats ouverts de la liste de contrôle",
+      "severity": "Gravité",
+      "finding": "Constat",
+      "severity_error": "Erreur",
+      "severity_warning": "Avertissement",
+      "severity_info": "Info",
+      "contents": "Contenu",
+      "file": "Fichier",
+      "size": "Taille",
+      "punch": "Liste des réserves levées",
+      "item": "Élément",
+      "status": "Statut",
+      "photos": "Photos",
+      "evidence": "Preuves photo"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "La cotation {rating} de '{name}' n'est pas un niveau de l'échelle '{scale}'",
+    "rule_poor_without_action": "'{name}' est coté {rating} mais n'a aucune action de maintenance planifiée",
+    "rule_poor_without_action_fix": "Établissez le plan, ou ajoutez une action pour cet élément",
+    "rule_action_unpriced": "L'action pour '{name}' en {year} n'a pas de coût unitaire",
+    "rule_action_unpriced_fix": "Saisissez un coût unitaire pour qu'il figure dans les totaux du plan",
+    "rule_defect_incomplete": "La cotation de '{name}' appelle des travaux mais n'indique ni gravité ni étendue"
   }
 }

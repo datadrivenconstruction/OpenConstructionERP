@@ -618,5 +618,65 @@
       "draft": "Nacrt",
       "frozen": "Zamrznut"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Stavka popisa nedostataka '{title}' zatvorena je bez fotografije",
+    "punch_no_photo_fix": "Dodajte fotografiju dovršenog rada",
+    "photo_weak": "Fotografija bez lokacije ili vremena snimanja kod '{title}': {count}",
+    "photo_weak_fix": "Snimite fotografiju ponovno u aplikaciji s uključenom lokacijom",
+    "defect_no_photo": "Nedostatak '{reference}' zatvoren je bez fotografije otklanjanja",
+    "defect_no_photo_fix": "Priložite fotografiju otklonjenog nedostatka"
+  },
+  "closeout_dossier": {
+    "more_items": "Dodatnih stavki koje nisu navedene: {count}",
+    "category_missing": "Nema dokaza za obveznu kategoriju '{category}'",
+    "category_missing_fix": "Povežite dokument sa stavkom kontrolnog popisa ove kategorije ili dodajte novi",
+    "category_unverified": "Dokaz za '{category}' još nije provjeren",
+    "category_unverified_fix": "Zatražite od voditelja da pregleda i provjeri povezani dokaz",
+    "punch_open": "Stavka popisa nedostataka '{name}' još je otvorena",
+    "punch_open_fix": "Riješite i zatvorite stavku ili je izuzmite iz opsega ove dokumentacije",
+    "punch_no_photo": "Riješena stavka popisa nedostataka '{name}' nema fotografiju",
+    "punch_no_photo_fix": "Dodajte fotografiju dovršenog rada",
+    "system_pending": "Sustav '{name}' nije pušten u rad",
+    "system_pending_fix": "Dovršite kontrolne popise puštanja u rad i označite sustav kao pušten u rad",
+    "critical_issues": "Otvorenih kritičnih problema pri puštanju u rad: {count}",
+    "critical_issues_fix": "Zatvorite kritične probleme prije primopredaje",
+    "acceptance_missing": "Nije povezan nijedan zapisnik o primopredaji",
+    "acceptance_missing_fix": "Povežite potpisani zapisnik o primopredaji sa stavkom primopredaje na kontrolnom popisu",
+    "acceptance_unsigned": "Zapisnik o primopredaji nije u potpunosti potpisan (status: {status})",
+    "acceptance_unsigned_fix": "Prikupite nedostajuće potpise u Potpisivanju",
+    "blocked": "Dokumentacija ne zadovoljava svoj kontrolni popis. Ispravite nalaze ili je svejedno sastavite kao nepotpunu (odobrenje voditelja).",
+    "delivery_title": "Primopredajna dokumentacija: {project}",
+    "delivery_body": "Primopredajna dokumentacija '{title}' ({scope}) je spremna. Poveznica u nastavku preuzima je i vrijedi do {expires}.",
+    "pdf": {
+      "title": "Primopredajna dokumentacija",
+      "scope": "Opseg",
+      "built": "Sastavljeno",
+      "status_passed": "Kontrolni popis zadovoljen",
+      "status_warnings": "Kontrolni popis zadovoljen s upozorenjima",
+      "status_errors": "Nepotpuno: otvoreni nalazi kontrolnog popisa",
+      "findings": "Otvoreni nalazi kontrolnog popisa",
+      "severity": "Ozbiljnost",
+      "finding": "Nalaz",
+      "severity_error": "Pogreška",
+      "severity_warning": "Upozorenje",
+      "severity_info": "Info",
+      "contents": "Sadržaj",
+      "file": "Datoteka",
+      "size": "Veličina",
+      "punch": "Riješeni popis nedostataka",
+      "item": "Stavka",
+      "status": "Status",
+      "photos": "Fotografije",
+      "evidence": "Fotodokaz"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Ocjena {rating} za '{name}' nije razina ljestvice '{scale}'",
+    "rule_poor_without_action": "'{name}' je ocijenjen s {rating}, ali nema planiranu radnju održavanja",
+    "rule_poor_without_action_fix": "Izvedite plan ili dodajte radnju za ovaj element",
+    "rule_action_unpriced": "Radnja za '{name}' u {year}. nema jediničnu cijenu",
+    "rule_action_unpriced_fix": "Unesite jediničnu cijenu kako bi je zbrojevi plana uključili",
+    "rule_defect_incomplete": "Ocjena za '{name}' zahtijeva radove, ali ne bilježi ozbiljnost ni opseg"
   }
 }

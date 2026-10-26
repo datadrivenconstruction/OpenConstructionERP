@@ -182,6 +182,10 @@ class PunchItemResponse(BaseModel):
     category: str | None = None
     trade: str | None = None
     photos: list[str] = Field(default_factory=list)
+    #: Evidence record per entry of ``photos`` (same order): hash, capture
+    #: location with accuracy and source, capture time, orientation, EXIF.
+    #: ``None`` for a photo uploaded before evidence was recorded.
+    photo_evidence: list[dict[str, Any] | None] = Field(default_factory=list)
     geo_lat: float | None = None
     geo_lon: float | None = None
     rework_cost: str | None = None

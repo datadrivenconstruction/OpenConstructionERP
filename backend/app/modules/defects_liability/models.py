@@ -36,6 +36,8 @@ import uuid
 from datetime import date
 
 from sqlalchemy import (
+    JSON,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -204,6 +206,17 @@ class DlpDefect(Base):
     punchlist_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     ncr_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
     created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # Photo evidence: one dict per photo, each the gallery photo id plus its
+    # evidence record (hash, capture location with accuracy, time, orientation).
+    photos: Mapped[list] = mapped_column(  # type: ignore[assignment]
+        JSON,
+        nullable=False,
+        default=list,
+        server_default="[]",
+    )
+    # WGS84 map pin; absent means "no pin", not (0, 0).
+    geo_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    geo_lon: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     warranty: Mapped["DlpWarranty"] = relationship(
         "app.modules.defects_liability.models.DlpWarranty",

@@ -789,5 +789,65 @@
       "draft": "טיוטה",
       "frozen": "מוקפאת"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "פריט הליקויים '{title}' נסגר ללא תמונה",
+    "punch_no_photo_fix": "הוסיפו תמונה של העבודה שהושלמה",
+    "photo_weak": "ב-'{title}' יש {count} תמונות ללא מיקום או זמן צילום",
+    "photo_weak_fix": "צלמו שוב את התמונה באפליקציה כשהמיקום מופעל",
+    "defect_no_photo": "הליקוי '{reference}' נסגר ללא תמונה של התיקון",
+    "defect_no_photo_fix": "צרפו תמונה של העבודה המתוקנת"
+  },
+  "closeout_dossier": {
+    "more_items": "עוד {count} פריטים שאינם מוצגים",
+    "category_missing": "אין ראיה לקטגוריה הנדרשת '{category}'",
+    "category_missing_fix": "קשרו מסמך לפריט ברשימת הבדיקה מקטגוריה זו, או הוסיפו אחד",
+    "category_unverified": "הראיה לקטגוריה '{category}' טרם אומתה",
+    "category_unverified_fix": "בקשו ממנהל לבדוק ולאמת את הראיה המצורפת",
+    "punch_open": "פריט הליקויים '{name}' עדיין פתוח",
+    "punch_open_fix": "טפלו בפריט וסגרו אותו, או הוציאו אותו מהיקף התיק",
+    "punch_no_photo": "לפריט הליקויים שטופל '{name}' אין תמונה",
+    "punch_no_photo_fix": "הוסיפו תמונה של העבודה שהושלמה",
+    "system_pending": "המערכת '{name}' לא הורצה",
+    "system_pending_fix": "השלימו את רשימות הבדיקה של ההרצה וסמנו את המערכת כמורצת",
+    "critical_issues": "{count} בעיות הרצה קריטיות עדיין פתוחות",
+    "critical_issues_fix": "סגרו את הבעיות הקריטיות לפני המסירה",
+    "acceptance_missing": "לא מצורפת תעודת קבלה",
+    "acceptance_missing_fix": "צרפו את תעודת הקבלה החתומה לפריט הקבלה ברשימת הבדיקה",
+    "acceptance_unsigned": "תעודת הקבלה אינה חתומה במלואה (סטטוס: {status})",
+    "acceptance_unsigned_fix": "אספו את החתימות החסרות במודול החתימות",
+    "blocked": "התיק נכשל ברשימת הבדיקה. תקנו את הממצאים, או הרכיבו אותו בכל זאת כחלקי (באישור מנהל).",
+    "delivery_title": "תיק מסירה: {project}",
+    "delivery_body": "תיק המסירה '{title}' ({scope}) מוכן. הקישור שלהלן מוריד אותו ותקף עד {expires}.",
+    "pdf": {
+      "title": "תיק מסירה",
+      "scope": "היקף",
+      "built": "הורכב",
+      "status_passed": "רשימת הבדיקה עברה",
+      "status_warnings": "רשימת הבדיקה עברה עם אזהרות",
+      "status_errors": "חלקי: ממצאים פתוחים ברשימת הבדיקה",
+      "findings": "ממצאים פתוחים ברשימת הבדיקה",
+      "severity": "חומרה",
+      "finding": "ממצא",
+      "severity_error": "שגיאה",
+      "severity_warning": "אזהרה",
+      "severity_info": "מידע",
+      "contents": "תוכן עניינים",
+      "file": "קובץ",
+      "size": "גודל",
+      "punch": "רשימת ליקויים שטופלה",
+      "item": "פריט",
+      "status": "סטטוס",
+      "photos": "תמונות",
+      "evidence": "ראיות צילום"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "דירוג {rating} של '{name}' אינו רמה בסולם '{scale}'",
+    "rule_poor_without_action": "'{name}' מדורג {rating} אך אין לו פעולת תחזוקה מתוכננת",
+    "rule_poor_without_action_fix": "גזרו את התוכנית, או הוסיפו פעולה לאלמנט זה",
+    "rule_action_unpriced": "לפעולה של '{name}' בשנת {year} אין עלות יחידה",
+    "rule_action_unpriced_fix": "הזינו עלות יחידה כדי שסכומי התוכנית יכללו אותה",
+    "rule_defect_incomplete": "דירוג '{name}' מחייב עבודה אך לא נרשמו חומרה או היקף"
   }
 }

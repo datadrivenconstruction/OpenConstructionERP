@@ -209,6 +209,20 @@ async def _send_to_connector(
         return False
 
 
+async def send_connector_message(
+    config: IntegrationConfig,
+    title: str,
+    message: str,
+    action_url: str | None = None,
+) -> bool:
+    """Send one message through one chat connector; True when it was accepted.
+
+    Public entry for modules that address a chosen connector directly (a
+    handover dossier link sent to a project channel). Never raises.
+    """
+    return await _send_to_connector(config, title, message, action_url)
+
+
 async def _on_notification_created(event: Event) -> None:
     """``notifications.notification.created`` -> fan out to chat connectors.
 

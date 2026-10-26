@@ -765,5 +765,65 @@
       "draft": "Entwurf",
       "frozen": "Eingefroren"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Restpunkt '{title}' ist ohne Foto abgeschlossen",
+    "punch_no_photo_fix": "Fügen Sie ein Foto der fertigen Arbeit hinzu",
+    "photo_weak": "{count} Foto(s) zu '{title}' haben keinen Ort oder Aufnahmezeitpunkt",
+    "photo_weak_fix": "Foto in der App mit aktiviertem Standort neu aufnehmen",
+    "defect_no_photo": "Mangel '{reference}' ist ohne Foto der Beseitigung geschlossen",
+    "defect_no_photo_fix": "Fügen Sie ein Foto der beseitigten Mängel hinzu"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} weitere Einträge nicht aufgelistet",
+    "category_missing": "Kein Nachweis für die erforderliche Kategorie '{category}'",
+    "category_missing_fix": "Ordnen Sie ein Dokument einem Checklistenpunkt dieser Kategorie zu oder fügen Sie eines hinzu",
+    "category_unverified": "Der Nachweis für '{category}' ist noch nicht geprüft",
+    "category_unverified_fix": "Lassen Sie den zugeordneten Nachweis von einer Führungskraft prüfen und bestätigen",
+    "punch_open": "Restpunkt '{name}' ist noch offen",
+    "punch_open_fix": "Erledigen und schließen Sie den Eintrag oder nehmen Sie ihn aus dem Umfang dieser Dokumentation heraus",
+    "punch_no_photo": "Erledigter Restpunkt '{name}' hat kein Foto",
+    "punch_no_photo_fix": "Fügen Sie ein Foto der fertigen Arbeit hinzu",
+    "system_pending": "Anlage '{name}' ist nicht in Betrieb genommen",
+    "system_pending_fix": "Schließen Sie die Inbetriebnahme-Checklisten ab und markieren Sie die Anlage als in Betrieb genommen",
+    "critical_issues": "{count} kritische Inbetriebnahme-Probleme sind noch offen",
+    "critical_issues_fix": "Schließen Sie die kritischen Probleme vor der Übergabe",
+    "acceptance_missing": "Es ist kein Abnahmeprotokoll zugeordnet",
+    "acceptance_missing_fix": "Ordnen Sie das unterschriebene Abnahmeprotokoll dem Checklistenpunkt Abnahme zu",
+    "acceptance_unsigned": "Das Abnahmeprotokoll ist nicht vollständig unterschrieben (Status: {status})",
+    "acceptance_unsigned_fix": "Holen Sie die ausstehenden Unterschriften unter Unterschriften ein",
+    "blocked": "Die Dokumentation erfüllt ihre Checkliste nicht. Beheben Sie die Befunde oder stellen Sie sie trotzdem als unvollständig zusammen (Freigabe durch die Führungskraft).",
+    "delivery_title": "Übergabedokumentation: {project}",
+    "delivery_body": "Die Übergabedokumentation '{title}' ({scope}) ist bereit. Über den folgenden Link können Sie sie herunterladen; er ist gültig bis {expires}.",
+    "pdf": {
+      "title": "Übergabedokumentation",
+      "scope": "Umfang",
+      "built": "Zusammengestellt",
+      "status_passed": "Checkliste bestanden",
+      "status_warnings": "Checkliste mit Warnungen bestanden",
+      "status_errors": "Unvollständig: Befunde der Checkliste offen",
+      "findings": "Offene Befunde der Checkliste",
+      "severity": "Schweregrad",
+      "finding": "Befund",
+      "severity_error": "Fehler",
+      "severity_warning": "Warnung",
+      "severity_info": "Info",
+      "contents": "Inhalt",
+      "file": "Datei",
+      "size": "Größe",
+      "punch": "Erledigte Restpunktliste",
+      "item": "Eintrag",
+      "status": "Status",
+      "photos": "Fotos",
+      "evidence": "Fotonachweis"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Bewertung {rating} von '{name}' ist keine Stufe der Skala '{scale}'",
+    "rule_poor_without_action": "'{name}' ist mit {rating} bewertet, hat aber keine geplante Instandhaltungsmaßnahme",
+    "rule_poor_without_action_fix": "Plan ableiten oder eine Maßnahme für dieses Bauteil hinzufügen",
+    "rule_action_unpriced": "Die Maßnahme für '{name}' im Jahr {year} hat keinen Einheitspreis",
+    "rule_action_unpriced_fix": "Einheitspreis eingeben, damit die Plansummen ihn enthalten",
+    "rule_defect_incomplete": "Die Bewertung von '{name}' erfordert Arbeiten, enthält aber weder Schweregrad noch Umfang"
   }
 }

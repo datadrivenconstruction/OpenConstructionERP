@@ -618,5 +618,65 @@
       "draft": "Utkast",
       "frozen": "Frosset"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Mangelpunktet '{title}' er lukket uten bilde",
+    "punch_no_photo_fix": "Legg til et bilde av det utførte arbeidet",
+    "photo_weak": "{count} bilde(r) på '{title}' mangler sted eller opptakstidspunkt",
+    "photo_weak_fix": "Ta bildet på nytt i appen med posisjon slått på",
+    "defect_no_photo": "Avviket '{reference}' er lukket uten bilde av utbedringen",
+    "defect_no_photo_fix": "Legg ved et bilde av det utbedrede arbeidet"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} flere post(er) er ikke vist",
+    "category_missing": "Ingen dokumentasjon for den påkrevde kategorien '{category}'",
+    "category_missing_fix": "Knytt et dokument til et sjekklistepunkt i denne kategorien, eller legg til et",
+    "category_unverified": "Dokumentasjonen for '{category}' er ikke verifisert ennå",
+    "category_unverified_fix": "La en leder gjennomgå og verifisere den tilknyttede dokumentasjonen",
+    "punch_open": "Mangelpunktet '{name}' er fortsatt åpent",
+    "punch_open_fix": "Løs og lukk punktet, eller utelat det fra omfanget til denne dokumentasjonen",
+    "punch_no_photo": "Det løste mangelpunktet '{name}' har ikke bilde",
+    "punch_no_photo_fix": "Legg til et bilde av det utførte arbeidet",
+    "system_pending": "Systemet '{name}' er ikke satt i drift",
+    "system_pending_fix": "Fullfør sjekklistene for igangkjøring, og merk systemet som satt i drift",
+    "critical_issues": "{count} kritiske igangkjøringsproblemer er fortsatt åpne",
+    "critical_issues_fix": "Lukk de kritiske problemene før overleveringen",
+    "acceptance_missing": "Ingen overtakelsesprotokoll er knyttet til",
+    "acceptance_missing_fix": "Knytt den signerte overtakelsesprotokollen til overtakelsespunktet i sjekklisten",
+    "acceptance_unsigned": "Overtakelsesprotokollen er ikke fullt signert (status: {status})",
+    "acceptance_unsigned_fix": "Hent inn de manglende signaturene under Signering",
+    "blocked": "Dokumentasjonen oppfyller ikke sjekklisten sin. Rett funnene, eller sett den sammen likevel som ufullstendig (lederens godkjenning).",
+    "delivery_title": "Overleveringsdokumentasjon: {project}",
+    "delivery_body": "Overleveringsdokumentasjonen '{title}' ({scope}) er klar. Lenken nedenfor laster den ned og er gyldig til {expires}.",
+    "pdf": {
+      "title": "Overleveringsdokumentasjon",
+      "scope": "Omfang",
+      "built": "Satt sammen",
+      "status_passed": "Sjekklisten er bestått",
+      "status_warnings": "Sjekklisten er bestått med advarsler",
+      "status_errors": "Ufullstendig: åpne funn i sjekklisten",
+      "findings": "Åpne funn i sjekklisten",
+      "severity": "Alvorlighetsgrad",
+      "finding": "Funn",
+      "severity_error": "Feil",
+      "severity_warning": "Advarsel",
+      "severity_info": "Info",
+      "contents": "Innhold",
+      "file": "Fil",
+      "size": "Størrelse",
+      "punch": "Lukket mangelliste",
+      "item": "Post",
+      "status": "Status",
+      "photos": "Bilder",
+      "evidence": "Bildedokumentasjon"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Vurdering {rating} av '{name}' er ikke et nivå på skalaen '{scale}'",
+    "rule_poor_without_action": "'{name}' er vurdert til {rating}, men har ikke noe planlagt vedlikeholdstiltak",
+    "rule_poor_without_action_fix": "Utled planen, eller legg til et tiltak for dette elementet",
+    "rule_action_unpriced": "Tiltaket for '{name}' i {year} har ingen enhetspris",
+    "rule_action_unpriced_fix": "Oppgi en enhetspris slik at plansummene tar den med",
+    "rule_defect_incomplete": "Vurderingen av '{name}' krever arbeid, men registrerer verken alvorlighetsgrad eller omfang"
   }
 }

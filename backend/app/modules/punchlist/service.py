@@ -12,6 +12,7 @@ Stateless service layer. Handles:
 """
 
 import asyncio
+import html
 import logging
 import uuid
 from collections.abc import Iterable, Mapping
@@ -104,6 +105,9 @@ _ACTIVE_STATUSES: frozenset[str] = frozenset({"open", "in_progress"})
 # probes the working-directory-relative tree earlier releases wrote to, so a
 # PDF export still embeds photos captured before the roots were anchored.
 _PHOTOS_BASE = module_uploads_dir()
+
+#: ``metadata`` key holding the evidence record of each photo, keyed by its path.
+PHOTO_EVIDENCE_KEY = "photo_evidence"
 
 
 async def _safe_publish(name: str, data: dict, source_module: str = "oe_punchlist") -> None:
@@ -728,12 +732,34 @@ class PunchListService:
 
     # ── Photos ────────────────────────────────────────────────────────────
 
-    async def add_photo(self, item_id: uuid.UUID, photo_path: str) -> PunchItem:
-        """Add a photo path to the punch item's photos list."""
+    async def add_photo(
+        self,
+        item_id: uuid.UUID,
+        photo_path: str,
+        evidence: dict[str, Any] | None = None,
+    ) -> PunchItem:
+        """Add a photo path to the punch item's photos list.
+
+        ``evidence`` is the record from :func:`app.core.photo_evidence.build_evidence_record`.
+        It is kept in ``metadata.photo_evidence`` keyed by the photo path, and a
+        located photo pins an item that has no map pin yet (never moves one).
+        """
         item = await self.get_item(item_id)
         photos = list(item.photos or [])
         photos.append(photo_path)
-        await self.repo.update_fields(item_id, photos=photos)
+        fields: dict[str, Any] = {"photos": photos}
+        if evidence:
+            meta = dict(item.metadata_ or {})
+            records = dict(meta.get(PHOTO_EVIDENCE_KEY) or {})
+            records[photo_path] = evidence
+            meta[PHOTO_EVIDENCE_KEY] = records
+            location = evidence.get("location") or {}
+            if item.geo_lat is None and item.geo_lon is None and location.get("lat") is not None:
+                fields["geo_lat"] = location["lat"]
+                fields["geo_lon"] = location["lon"]
+                meta["geo_source"] = f"photo:{location.get('source') or 'unknown'}"
+            fields["metadata_"] = meta
+        await self.repo.update_fields(item_id, **fields)
         await self.session.refresh(item)
         logger.info("Photo added to punch item %s: %s", item_id, photo_path)
         return item
@@ -756,7 +782,14 @@ class PunchListService:
             )
 
         removed = photos.pop(index)
-        await self.repo.update_fields(item_id, photos=photos)
+        fields: dict[str, Any] = {"photos": photos}
+        meta = dict(item.metadata_ or {})
+        records = dict(meta.get(PHOTO_EVIDENCE_KEY) or {})
+        if removed in records and removed not in photos:
+            records.pop(removed)
+            meta[PHOTO_EVIDENCE_KEY] = records
+            fields["metadata_"] = meta
+        await self.repo.update_fields(item_id, **fields)
         await self.session.refresh(item)
         logger.info("Photo removed from punch item %s: %s", item_id, removed)
         return item
@@ -1067,6 +1100,27 @@ def _render_punchlist_text(
     return "\n".join(lines)
 
 
+def evidence_caption(record: Mapping[str, Any]) -> str:
+    """One printable line of a photo evidence record (location, time, heading, hash)."""
+    parts: list[str] = []
+    location = record.get("location") or {}
+    if location.get("lat") is not None and location.get("lon") is not None:
+        text = f"GPS {float(location['lat']):.6f}, {float(location['lon']):.6f}"
+        if location.get("accuracy_m") is not None:
+            text += f" +/-{float(location['accuracy_m']):.0f} m"
+        text += f" ({location.get('source') or '-'})"
+        parts.append(text)
+    captured = record.get("captured_at") or {}
+    if captured.get("value"):
+        parts.append(f"taken {str(captured['value'])[:19].replace('T', ' ')} ({captured.get('source') or '-'})")
+    orientation = record.get("orientation") or {}
+    if orientation.get("heading_deg") is not None:
+        parts.append(f"heading {float(orientation['heading_deg']):.0f} deg")
+    if record.get("sha256"):
+        parts.append(f"sha256 {str(record['sha256'])[:16]}")
+    return " | ".join(parts)
+
+
 def _resolve_photo_path(rel_or_abs: str) -> Path | None:
     """Resolve a stored photo path to a readable file or return None.
 
@@ -1325,6 +1379,12 @@ def _build_reportlab_pdf(
             except Exception:  # noqa: BLE001 - defensive
                 # If reportlab can't decode the image we silently skip it.
                 story.append(Paragraph(f"[photo {disk_path.name} could not be embedded]", small))
+        records = (item.metadata_ or {}).get(PHOTO_EVIDENCE_KEY) if isinstance(item.metadata_, dict) else None
+        for raw in photos:
+            record = records.get(raw) if isinstance(records, dict) else None
+            line = evidence_caption(record) if isinstance(record, dict) else ""
+            if line:
+                story.append(Paragraph(html.escape(line), small))
 
         if item.resolution_notes:
             story.append(Spacer(1, 1 * mm))

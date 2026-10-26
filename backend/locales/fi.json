@@ -618,5 +618,65 @@
       "draft": "Luonnos",
       "frozen": "Lukittu"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Vikalistan kohta '{title}' on suljettu ilman valokuvaa",
+    "punch_no_photo_fix": "Lisää valokuva valmistuneesta työstä",
+    "photo_weak": "{count} kuvasta kohteessa '{title}' puuttuu sijainti tai kuvausaika",
+    "photo_weak_fix": "Ota kuva uudelleen sovelluksessa sijainti päällä",
+    "defect_no_photo": "Virhe '{reference}' on suljettu ilman valokuvaa korjauksesta",
+    "defect_no_photo_fix": "Liitä valokuva korjatusta työstä"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} muuta kohtaa ei ole listattu",
+    "category_missing": "Vaaditulle luokalle '{category}' ei ole todistetta",
+    "category_missing_fix": "Liitä asiakirja tämän luokan tarkistuslistan kohtaan tai lisää uusi",
+    "category_unverified": "Luokan '{category}' todistetta ei ole vielä tarkastettu",
+    "category_unverified_fix": "Pyydä esimiestä tarkastamaan ja vahvistamaan liitetty todiste",
+    "punch_open": "Vikalistan kohta '{name}' on edelleen avoin",
+    "punch_open_fix": "Ratkaise ja sulje kohta tai jätä se pois tämän aineiston laajuudesta",
+    "punch_no_photo": "Selvitetyllä vikalistan kohdalla '{name}' ei ole valokuvaa",
+    "punch_no_photo_fix": "Lisää valokuva valmistuneesta työstä",
+    "system_pending": "Järjestelmää '{name}' ei ole otettu käyttöön",
+    "system_pending_fix": "Täydennä käyttöönoton tarkistuslistat ja merkitse järjestelmä käyttöönotetuksi",
+    "critical_issues": "{count} kriittistä käyttöönoton ongelmaa on edelleen avoinna",
+    "critical_issues_fix": "Sulje kriittiset ongelmat ennen luovutusta",
+    "acceptance_missing": "Vastaanottotodistusta ei ole liitetty",
+    "acceptance_missing_fix": "Liitä allekirjoitettu vastaanottotodistus tarkistuslistan vastaanottokohtaan",
+    "acceptance_unsigned": "Vastaanottotodistusta ei ole täysin allekirjoitettu (tila: {status})",
+    "acceptance_unsigned_fix": "Kerää puuttuvat allekirjoitukset Allekirjoitus-osiossa",
+    "blocked": "Aineisto ei täytä tarkistuslistaansa. Korjaa havainnot tai kokoa se silti keskeneräisenä (esimiehen hyväksyntä).",
+    "delivery_title": "Luovutusaineisto: {project}",
+    "delivery_body": "Luovutusaineisto '{title}' ({scope}) on valmis. Alla oleva linkki lataa sen ja on voimassa {expires} asti.",
+    "pdf": {
+      "title": "Luovutusaineisto",
+      "scope": "Laajuus",
+      "built": "Koottu",
+      "status_passed": "Tarkistuslista läpäisty",
+      "status_warnings": "Tarkistuslista läpäisty varoituksin",
+      "status_errors": "Keskeneräinen: tarkistuslistan havaintoja avoinna",
+      "findings": "Tarkistuslistan avoimet havainnot",
+      "severity": "Vakavuus",
+      "finding": "Havainto",
+      "severity_error": "Virhe",
+      "severity_warning": "Varoitus",
+      "severity_info": "Tieto",
+      "contents": "Sisältö",
+      "file": "Tiedosto",
+      "size": "Koko",
+      "punch": "Selvitetty vikalista",
+      "item": "Kohta",
+      "status": "Tila",
+      "photos": "Kuvat",
+      "evidence": "Valokuvatodiste"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Kohteen '{name}' arvio {rating} ei ole asteikon '{scale}' taso",
+    "rule_poor_without_action": "Kohteen '{name}' arvio on {rating}, mutta sille ei ole suunniteltu huoltotoimenpidettä",
+    "rule_poor_without_action_fix": "Johda suunnitelma tai lisää toimenpide tälle elementille",
+    "rule_action_unpriced": "Kohteen '{name}' toimenpiteellä vuodelle {year} ei ole yksikköhintaa",
+    "rule_action_unpriced_fix": "Syötä yksikköhinta, jotta suunnitelman summat sisältävät sen",
+    "rule_defect_incomplete": "Kohteen '{name}' arvio edellyttää työtä, mutta vakavuutta tai laajuutta ei ole kirjattu"
   }
 }

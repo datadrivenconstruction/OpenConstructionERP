@@ -618,5 +618,65 @@
       "draft": "草稿",
       "frozen": "已冻结"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "销项清单事项“{title}”未附照片即已关闭",
+    "punch_no_photo_fix": "请添加已完成工作的照片",
+    "photo_weak": "“{title}”上有 {count} 张照片缺少位置或拍摄时间",
+    "photo_weak_fix": "请开启定位后在应用中重新拍照",
+    "defect_no_photo": "缺陷“{reference}”未附整改照片即已关闭",
+    "defect_no_photo_fix": "请附上整改后工作的照片"
+  },
+  "closeout_dossier": {
+    "more_items": "另有 {count} 项未列出",
+    "category_missing": "必备类别“{category}”没有凭证",
+    "category_missing_fix": "请把文件关联到该类别的检查清单项，或新增一项",
+    "category_unverified": "“{category}”的凭证尚未核实",
+    "category_unverified_fix": "请经理审核并核实已关联的凭证",
+    "punch_open": "销项清单事项“{name}”仍未关闭",
+    "punch_open_fix": "请处理并关闭该事项，或将其排除在本档案范围之外",
+    "punch_no_photo": "已处理的销项清单事项“{name}”没有照片",
+    "punch_no_photo_fix": "请添加已完成工作的照片",
+    "system_pending": "系统“{name}”尚未调试",
+    "system_pending_fix": "请完成调试检查清单，并将系统标记为已调试",
+    "critical_issues": "仍有 {count} 个关键调试问题未关闭",
+    "critical_issues_fix": "移交前请关闭关键问题",
+    "acceptance_missing": "未关联验收证书",
+    "acceptance_missing_fix": "请把已签署的验收证书关联到验收检查清单项",
+    "acceptance_unsigned": "验收证书尚未全部签署（状态：{status}）",
+    "acceptance_unsigned_fix": "请在“签署”中收齐尚缺的签名",
+    "blocked": "档案未通过检查清单。请修正发现的问题，或仍然汇编并标记为不完整（需经理签批）。",
+    "delivery_title": "移交档案：{project}",
+    "delivery_body": "移交档案“{title}”（{scope}）已就绪。下方链接可下载，有效期至 {expires}。",
+    "pdf": {
+      "title": "移交档案",
+      "scope": "范围",
+      "built": "汇编时间",
+      "status_passed": "检查清单已通过",
+      "status_warnings": "检查清单已通过，但有警告",
+      "status_errors": "不完整：检查清单仍有未处理的发现",
+      "findings": "未处理的检查清单发现",
+      "severity": "严重程度",
+      "finding": "发现",
+      "severity_error": "错误",
+      "severity_warning": "警告",
+      "severity_info": "信息",
+      "contents": "目录",
+      "file": "文件",
+      "size": "大小",
+      "punch": "已处理的销项清单",
+      "item": "事项",
+      "status": "状态",
+      "photos": "照片",
+      "evidence": "照片凭证"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "“{name}”的评级 {rating} 不是量表“{scale}”的等级",
+    "rule_poor_without_action": "“{name}”被评为 {rating}，但没有计划的维护措施",
+    "rule_poor_without_action_fix": "请生成计划，或为该构件添加措施",
+    "rule_action_unpriced": "“{name}”在 {year} 年的措施没有单价",
+    "rule_action_unpriced_fix": "请输入单价，使其计入计划合计",
+    "rule_defect_incomplete": "“{name}”的评级要求施工，但未记录严重程度或范围"
   }
 }

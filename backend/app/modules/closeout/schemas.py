@@ -198,3 +198,118 @@ class SuggestBindingsResponse(BaseModel):
     """Suggestions only - the human confirms each binding explicitly."""
 
     suggestions: list[BindingSuggestion] = Field(default_factory=list)
+
+
+# ── Handover dossier ─────────────────────────────────────────────────────────
+
+
+class DossierConfig(BaseModel):
+    """The dossier checklist of a package (every field optional on update)."""
+
+    required_categories: list[str] | None = None
+    require_punch_resolved: bool | None = None
+    require_punch_photos: bool | None = None
+    require_commissioning_complete: bool | None = None
+    require_signed_acceptance: bool | None = None
+    require_verified_evidence: bool | None = None
+    share_expires_in_days: int | None = Field(default=None, ge=1, le=365)
+
+
+class DossierFinding(BaseModel):
+    """One failed checklist rule."""
+
+    rule_id: str
+    severity: str
+    message: str
+    element_ref: str | None = None
+    suggestion: str | None = None
+
+
+class DossierCheckResponse(BaseModel):
+    """Result of checking a dossier against its checklist, before assembling it."""
+
+    check_status: str
+    results: list[DossierFinding] = Field(default_factory=list)
+    scope: dict[str, Any] = Field(default_factory=dict)
+    punch_total: int = 0
+    punch_open: int = 0
+    commissioning_systems: int = 0
+    acceptance_bound: bool = False
+    acceptance_signed: bool = False
+    categories: dict[str, dict[str, Any]] = Field(default_factory=dict)
+
+
+class DossierDeliveryTarget(BaseModel):
+    """Where to send a built dossier."""
+
+    channel: str = Field(..., pattern=r"^(download|webhook|connector|email)$")
+    target_id: uuid.UUID | None = None
+    recipient: str | None = Field(default=None, max_length=320)
+    message: str | None = Field(default=None, max_length=2000)
+    expires_in_days: int | None = Field(default=None, ge=1, le=365)
+    password: str | None = Field(default=None, max_length=128)
+
+
+class DossierRequest(BaseModel):
+    """Assemble (and optionally deliver) a handover dossier in one action."""
+
+    scope_kind: str = Field(default="project", pattern=r"^(project|area|asset)$")
+    scope_value: str | None = Field(default=None, max_length=255)
+    allow_incomplete: bool = False
+    deliveries: list[DossierDeliveryTarget] = Field(default_factory=list, max_length=10)
+
+
+class DossierDeliveryResponse(BaseModel):
+    """One delivery log row."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    dossier_id: uuid.UUID
+    channel: str
+    target_id: str | None = None
+    target_label: str | None = None
+    recipient: str | None = None
+    status: str
+    status_code: int | None = None
+    detail: str | None = None
+    share_url: str | None = None
+    share_expires_at: str | None = None
+    resend_of: uuid.UUID | None = None
+    delivered_by: str | None = None
+    delivered_at: str | None = None
+    created_at: datetime
+
+
+class DossierResponse(BaseModel):
+    """A handover dossier with its delivery log."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    package_id: uuid.UUID
+    project_id: uuid.UUID
+    status: str
+    scope: dict[str, Any] = Field(default_factory=dict)
+    check_status: str | None = None
+    check_results: list[dict[str, Any]] = Field(default_factory=list)
+    job_id: uuid.UUID | None = None
+    document_id: uuid.UUID | None = None
+    file_name: str | None = None
+    sha256: str | None = None
+    size_bytes: int | None = None
+    file_count: int | None = None
+    built_at: str | None = None
+    requested_by: str | None = None
+    error: str | None = None
+    created_at: datetime
+    deliveries: list[DossierDeliveryResponse] = Field(default_factory=list)
+
+
+class DossierTarget(BaseModel):
+    """A webhook endpoint or chat connector a dossier can be sent to."""
+
+    id: uuid.UUID
+    channel: str
+    name: str
+    kind: str | None = None

@@ -618,5 +618,65 @@
       "draft": "Ciornă",
       "frozen": "Înghețat"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Remedierea '{title}' este închisă fără fotografie",
+    "punch_no_photo_fix": "Adăugați o fotografie a lucrării finalizate",
+    "photo_weak": "{count} fotografie(i) la '{title}' fără locație sau oră de captură",
+    "photo_weak_fix": "Refaceți fotografia în aplicație cu localizarea activată",
+    "defect_no_photo": "Defectul '{reference}' este închis fără fotografie a remedierii",
+    "defect_no_photo_fix": "Atașați o fotografie a lucrării remediate"
+  },
+  "closeout_dossier": {
+    "more_items": "Încă {count} element(e) nelistate",
+    "category_missing": "Nicio dovadă pentru categoria obligatorie '{category}'",
+    "category_missing_fix": "Asociați un document unui punct din lista de verificare a acestei categorii sau adăugați unul",
+    "category_unverified": "Dovada pentru '{category}' nu este încă verificată",
+    "category_unverified_fix": "Cereți unui responsabil să examineze și să verifice dovada asociată",
+    "punch_open": "Remedierea '{name}' este încă deschisă",
+    "punch_open_fix": "Rezolvați și închideți elementul sau excludeți-l din domeniul acestui dosar",
+    "punch_no_photo": "Remedierea rezolvată '{name}' nu are fotografie",
+    "punch_no_photo_fix": "Adăugați o fotografie a lucrării finalizate",
+    "system_pending": "Sistemul '{name}' nu este pus în funcțiune",
+    "system_pending_fix": "Finalizați listele de verificare ale punerii în funcțiune și marcați sistemul ca pus în funcțiune",
+    "critical_issues": "{count} probleme critice de punere în funcțiune sunt încă deschise",
+    "critical_issues_fix": "Închideți problemele critice înainte de predare",
+    "acceptance_missing": "Niciun proces-verbal de recepție nu este asociat",
+    "acceptance_missing_fix": "Asociați procesul-verbal de recepție semnat punctului de recepție din lista de verificare",
+    "acceptance_unsigned": "Procesul-verbal de recepție nu este semnat complet (stare: {status})",
+    "acceptance_unsigned_fix": "Strângeți semnăturile lipsă în Semnare",
+    "blocked": "Dosarul nu respectă lista sa de verificare. Remediați constatările sau compilați-l oricum ca incomplet (aprobarea responsabilului).",
+    "delivery_title": "Dosar de predare: {project}",
+    "delivery_body": "Dosarul de predare '{title}' ({scope}) este gata. Linkul de mai jos îl descarcă și este valabil până la {expires}.",
+    "pdf": {
+      "title": "Dosar de predare",
+      "scope": "Domeniu",
+      "built": "Compilat",
+      "status_passed": "Lista de verificare a fost trecută",
+      "status_warnings": "Lista de verificare a fost trecută cu avertismente",
+      "status_errors": "Incomplet: constatări deschise în lista de verificare",
+      "findings": "Constatări deschise în lista de verificare",
+      "severity": "Gravitate",
+      "finding": "Constatare",
+      "severity_error": "Eroare",
+      "severity_warning": "Avertisment",
+      "severity_info": "Info",
+      "contents": "Cuprins",
+      "file": "Fișier",
+      "size": "Dimensiune",
+      "punch": "Lista de remedieri rezolvate",
+      "item": "Element",
+      "status": "Stare",
+      "photos": "Fotografii",
+      "evidence": "Dovezi foto"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Evaluarea {rating} a elementului '{name}' nu este un nivel al scalei '{scale}'",
+    "rule_poor_without_action": "'{name}' este evaluat cu {rating}, dar nu are nicio acțiune de întreținere planificată",
+    "rule_poor_without_action_fix": "Derivați planul sau adăugați o acțiune pentru acest element",
+    "rule_action_unpriced": "Acțiunea pentru '{name}' din {year} nu are cost unitar",
+    "rule_action_unpriced_fix": "Introduceți un cost unitar pentru ca totalurile planului să îl includă",
+    "rule_defect_incomplete": "Evaluarea elementului '{name}' cere lucrări, dar nu înregistrează gravitatea sau extinderea"
   }
 }

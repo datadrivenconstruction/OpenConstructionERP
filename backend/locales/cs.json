@@ -618,5 +618,65 @@
       "draft": "Rozpracovaný",
       "frozen": "Zmrazený"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Položka soupisu vad '{title}' je uzavřena bez fotografie",
+    "punch_no_photo_fix": "Přidejte fotografii dokončené práce",
+    "photo_weak": "Fotografií bez polohy nebo času pořízení u '{title}': {count}",
+    "photo_weak_fix": "Pořiďte fotografii znovu v aplikaci se zapnutou polohou",
+    "defect_no_photo": "Vada '{reference}' je uzavřena bez fotografie odstranění",
+    "defect_no_photo_fix": "Přiložte fotografii odstraněné vady"
+  },
+  "closeout_dossier": {
+    "more_items": "Další neuvedené položky: {count}",
+    "category_missing": "Chybí důkaz pro požadovanou kategorii '{category}'",
+    "category_missing_fix": "Navažte dokument na bod kontrolního seznamu této kategorie nebo jej přidejte",
+    "category_unverified": "Důkaz pro '{category}' dosud není ověřen",
+    "category_unverified_fix": "Požádejte vedoucího, aby navázaný důkaz zkontroloval a ověřil",
+    "punch_open": "Položka soupisu vad '{name}' je stále otevřená",
+    "punch_open_fix": "Vyřešte a uzavřete položku nebo ji vyjměte z rozsahu této dokumentace",
+    "punch_no_photo": "Vyřešená položka soupisu vad '{name}' nemá fotografii",
+    "punch_no_photo_fix": "Přidejte fotografii dokončené práce",
+    "system_pending": "Systém '{name}' není uveden do provozu",
+    "system_pending_fix": "Dokončete kontrolní seznamy uvedení do provozu a označte systém jako uvedený do provozu",
+    "critical_issues": "Otevřených kritických problémů uvedení do provozu: {count}",
+    "critical_issues_fix": "Uzavřete kritické problémy před předáním",
+    "acceptance_missing": "Není navázán žádný protokol o převzetí",
+    "acceptance_missing_fix": "Navažte podepsaný protokol o převzetí na bod převzetí v kontrolním seznamu",
+    "acceptance_unsigned": "Protokol o převzetí není plně podepsán (stav: {status})",
+    "acceptance_unsigned_fix": "Získejte chybějící podpisy v modulu Podepisování",
+    "blocked": "Dokumentace nesplňuje svůj kontrolní seznam. Opravte zjištění, nebo ji přesto sestavte jako neúplnou (schválení vedoucím).",
+    "delivery_title": "Předávací dokumentace: {project}",
+    "delivery_body": "Předávací dokumentace '{title}' ({scope}) je připravena. Odkaz níže ji stáhne a platí do {expires}.",
+    "pdf": {
+      "title": "Předávací dokumentace",
+      "scope": "Rozsah",
+      "built": "Sestaveno",
+      "status_passed": "Kontrolní seznam splněn",
+      "status_warnings": "Kontrolní seznam splněn s upozorněními",
+      "status_errors": "Neúplné: otevřená zjištění kontrolního seznamu",
+      "findings": "Otevřená zjištění kontrolního seznamu",
+      "severity": "Závažnost",
+      "finding": "Zjištění",
+      "severity_error": "Chyba",
+      "severity_warning": "Upozornění",
+      "severity_info": "Info",
+      "contents": "Obsah",
+      "file": "Soubor",
+      "size": "Velikost",
+      "punch": "Vyřešený soupis vad",
+      "item": "Položka",
+      "status": "Stav",
+      "photos": "Fotografie",
+      "evidence": "Fotodokumentace"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Hodnocení {rating} u '{name}' není úrovní stupnice '{scale}'",
+    "rule_poor_without_action": "'{name}' je hodnoceno {rating}, ale nemá naplánovanou žádnou akci údržby",
+    "rule_poor_without_action_fix": "Odvoďte plán, nebo pro tento prvek přidejte akci",
+    "rule_action_unpriced": "Akce pro '{name}' v roce {year} nemá jednotkovou cenu",
+    "rule_action_unpriced_fix": "Zadejte jednotkovou cenu, aby ji součty plánu zahrnuly",
+    "rule_defect_incomplete": "Hodnocení '{name}' vyžaduje práce, ale nezaznamenává závažnost ani rozsah"
   }
 }

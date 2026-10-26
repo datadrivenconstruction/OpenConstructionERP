@@ -618,5 +618,65 @@
       "draft": "Piszkozat",
       "frozen": "Lezárt"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "A(z) '{title}' hibalistatétel fotó nélkül van lezárva",
+    "punch_no_photo_fix": "Adjon hozzá fotót az elkészült munkáról",
+    "photo_weak": "A(z) '{title}' tételhez {count} fotóból hiányzik a helyszín vagy a rögzítés ideje",
+    "photo_weak_fix": "Készítse el újra a fotót az alkalmazásban bekapcsolt helymeghatározással",
+    "defect_no_photo": "A(z) '{reference}' hiba a javítás fotója nélkül van lezárva",
+    "defect_no_photo_fix": "Csatoljon fotót a kijavított munkáról"
+  },
+  "closeout_dossier": {
+    "more_items": "Még {count} tétel nincs felsorolva",
+    "category_missing": "Nincs bizonyíték a kötelező '{category}' kategóriához",
+    "category_missing_fix": "Csatoljon dokumentumot az ehhez a kategóriához tartozó ellenőrzőlista-ponthoz, vagy adjon hozzá újat",
+    "category_unverified": "A(z) '{category}' bizonyítéka még nincs ellenőrizve",
+    "category_unverified_fix": "Kérje meg a vezetőt, hogy nézze át és ellenőrizze a csatolt bizonyítékot",
+    "punch_open": "A(z) '{name}' hibalistatétel még nyitott",
+    "punch_open_fix": "Oldja meg és zárja le a tételt, vagy vegye ki a dokumentáció köréből",
+    "punch_no_photo": "A megoldott '{name}' hibalistatételhez nincs fotó",
+    "punch_no_photo_fix": "Adjon hozzá fotót az elkészült munkáról",
+    "system_pending": "A(z) '{name}' rendszer nincs üzembe helyezve",
+    "system_pending_fix": "Fejezze be az üzembe helyezési ellenőrzőlistákat, és jelölje meg a rendszert üzembe helyezettként",
+    "critical_issues": "{count} kritikus üzembe helyezési probléma még nyitott",
+    "critical_issues_fix": "Zárja le a kritikus problémákat az átadás előtt",
+    "acceptance_missing": "Nincs csatolt átvételi jegyzőkönyv",
+    "acceptance_missing_fix": "Csatolja az aláírt átvételi jegyzőkönyvet az ellenőrzőlista átvételi pontjához",
+    "acceptance_unsigned": "Az átvételi jegyzőkönyv nincs teljesen aláírva (állapot: {status})",
+    "acceptance_unsigned_fix": "Gyűjtse be a hiányzó aláírásokat az Aláírás modulban",
+    "blocked": "A dokumentáció nem felel meg az ellenőrzőlistájának. Javítsa a megállapításokat, vagy állítsa össze mégis hiányosként (vezetői jóváhagyás).",
+    "delivery_title": "Átadási dokumentáció: {project}",
+    "delivery_body": "A(z) '{title}' ({scope}) átadási dokumentáció elkészült. Az alábbi hivatkozás letölti, és eddig érvényes: {expires}.",
+    "pdf": {
+      "title": "Átadási dokumentáció",
+      "scope": "Kör",
+      "built": "Összeállítva",
+      "status_passed": "Az ellenőrzőlista megfelelt",
+      "status_warnings": "Az ellenőrzőlista figyelmeztetésekkel megfelelt",
+      "status_errors": "Hiányos: nyitott ellenőrzőlista-megállapítások",
+      "findings": "Nyitott ellenőrzőlista-megállapítások",
+      "severity": "Súlyosság",
+      "finding": "Megállapítás",
+      "severity_error": "Hiba",
+      "severity_warning": "Figyelmeztetés",
+      "severity_info": "Info",
+      "contents": "Tartalom",
+      "file": "Fájl",
+      "size": "Méret",
+      "punch": "Megoldott hibalista",
+      "item": "Tétel",
+      "status": "Állapot",
+      "photos": "Fotók",
+      "evidence": "Fotós bizonyíték"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "A(z) '{name}' {rating} értékelése nem szintje a(z) '{scale}' skálának",
+    "rule_poor_without_action": "A(z) '{name}' értékelése {rating}, de nincs tervezett karbantartási intézkedése",
+    "rule_poor_without_action_fix": "Vezesse le a tervet, vagy adjon hozzá intézkedést ehhez az elemhez",
+    "rule_action_unpriced": "A(z) '{name}' intézkedésének {year}. évi tételéhez nincs egységár",
+    "rule_action_unpriced_fix": "Adjon meg egységárat, hogy a terv összesenei tartalmazzák",
+    "rule_defect_incomplete": "A(z) '{name}' értékelése munkát igényel, de nem rögzít súlyosságot vagy kiterjedést"
   }
 }

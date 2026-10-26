@@ -618,5 +618,65 @@
       "draft": "Draf",
       "frozen": "Beku"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Item punch list '{title}' ditutup tanpa foto",
+    "punch_no_photo_fix": "Tambahkan foto pekerjaan yang selesai",
+    "photo_weak": "{count} foto pada '{title}' tidak memiliki lokasi atau waktu pengambilan",
+    "photo_weak_fix": "Ambil ulang foto di aplikasi dengan lokasi aktif",
+    "defect_no_photo": "Cacat '{reference}' ditutup tanpa foto perbaikan",
+    "defect_no_photo_fix": "Lampirkan foto pekerjaan yang sudah diperbaiki"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} item lagi tidak ditampilkan",
+    "category_missing": "Tidak ada bukti untuk kategori wajib '{category}'",
+    "category_missing_fix": "Kaitkan dokumen ke item daftar periksa kategori ini, atau tambahkan satu",
+    "category_unverified": "Bukti untuk '{category}' belum diverifikasi",
+    "category_unverified_fix": "Minta manajer meninjau dan memverifikasi bukti terikat",
+    "punch_open": "Item punch list '{name}' masih terbuka",
+    "punch_open_fix": "Selesaikan dan tutup item, atau keluarkan dari lingkup dosir ini",
+    "punch_no_photo": "Item punch list '{name}' yang sudah diselesaikan tidak memiliki foto",
+    "punch_no_photo_fix": "Tambahkan foto pekerjaan yang selesai",
+    "system_pending": "Sistem '{name}' belum dikomisioning",
+    "system_pending_fix": "Selesaikan daftar periksa komisioning dan tandai sistem sebagai sudah dikomisioning",
+    "critical_issues": "{count} masalah komisioning kritis masih terbuka",
+    "critical_issues_fix": "Tutup masalah kritis sebelum serah terima",
+    "acceptance_missing": "Tidak ada sertifikat serah terima yang dikaitkan",
+    "acceptance_missing_fix": "Kaitkan sertifikat serah terima yang sudah ditandatangani ke item daftar periksa serah terima",
+    "acceptance_unsigned": "Sertifikat serah terima belum ditandatangani lengkap (status: {status})",
+    "acceptance_unsigned_fix": "Kumpulkan tanda tangan yang masih kurang di Penandatanganan",
+    "blocked": "Dosir tidak lulus daftar periksanya. Perbaiki temuan, atau susun tetap sebagai tidak lengkap (persetujuan manajer).",
+    "delivery_title": "Dosir serah terima: {project}",
+    "delivery_body": "Dosir serah terima '{title}' ({scope}) sudah siap. Tautan di bawah mengunduhnya dan berlaku hingga {expires}.",
+    "pdf": {
+      "title": "Dosir serah terima",
+      "scope": "Lingkup",
+      "built": "Disusun",
+      "status_passed": "Daftar periksa lulus",
+      "status_warnings": "Daftar periksa lulus dengan peringatan",
+      "status_errors": "Tidak lengkap: temuan daftar periksa masih terbuka",
+      "findings": "Temuan daftar periksa yang terbuka",
+      "severity": "Tingkat keparahan",
+      "finding": "Temuan",
+      "severity_error": "Kesalahan",
+      "severity_warning": "Peringatan",
+      "severity_info": "Info",
+      "contents": "Daftar isi",
+      "file": "File",
+      "size": "Ukuran",
+      "punch": "Punch list yang sudah diselesaikan",
+      "item": "Item",
+      "status": "Status",
+      "photos": "Foto",
+      "evidence": "Bukti foto"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Penilaian {rating} untuk '{name}' bukan tingkat dari skala '{scale}'",
+    "rule_poor_without_action": "'{name}' dinilai {rating} tetapi tidak memiliki tindakan pemeliharaan terencana",
+    "rule_poor_without_action_fix": "Turunkan rencana, atau tambahkan tindakan untuk elemen ini",
+    "rule_action_unpriced": "Tindakan untuk '{name}' pada {year} tidak memiliki biaya satuan",
+    "rule_action_unpriced_fix": "Masukkan biaya satuan agar masuk dalam total rencana",
+    "rule_defect_incomplete": "Penilaian '{name}' menuntut pekerjaan tetapi tidak mencatat keparahan atau cakupan"
   }
 }

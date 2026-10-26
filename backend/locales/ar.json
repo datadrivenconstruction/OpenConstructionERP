@@ -789,5 +789,65 @@
       "draft": "مسودة",
       "frozen": "مجمّدة"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "البند '{title}' في قائمة الملاحظات مغلق دون صورة",
+    "punch_no_photo_fix": "أضف صورة للأعمال المنجزة",
+    "photo_weak": "{count} صورة في '{title}' تفتقر إلى الموقع أو وقت الالتقاط",
+    "photo_weak_fix": "أعد التقاط الصورة في التطبيق مع تفعيل الموقع",
+    "defect_no_photo": "العيب '{reference}' مغلق دون صورة للإصلاح",
+    "defect_no_photo_fix": "أرفق صورة للأعمال المُصلَحة"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} بند آخر غير مدرج",
+    "category_missing": "لا يوجد دليل للفئة المطلوبة '{category}'",
+    "category_missing_fix": "اربط مستنداً ببند قائمة تحقق من هذه الفئة، أو أضف مستنداً",
+    "category_unverified": "الدليل الخاص بـ '{category}' لم يُوثَّق بعد",
+    "category_unverified_fix": "اطلب من مدير مراجعة الدليل المرتبط وتوثيقه",
+    "punch_open": "البند '{name}' في قائمة الملاحظات ما زال مفتوحاً",
+    "punch_open_fix": "عالج البند وأغلقه، أو استثنه من نطاق هذا الملف",
+    "punch_no_photo": "البند المنجز '{name}' في قائمة الملاحظات بلا صورة",
+    "punch_no_photo_fix": "أضف صورة للأعمال المنجزة",
+    "system_pending": "النظام '{name}' لم يُشغَّل تجريبياً",
+    "system_pending_fix": "أكمل قوائم تحقق التشغيل التجريبي ثم علّم النظام كمُشغَّل",
+    "critical_issues": "{count} مشكلة حرجة في التشغيل التجريبي ما زالت مفتوحة",
+    "critical_issues_fix": "أغلق المشكلات الحرجة قبل التسليم",
+    "acceptance_missing": "لم تُربط شهادة قبول",
+    "acceptance_missing_fix": "اربط شهادة القبول الموقَّعة ببند قائمة تحقق القبول",
+    "acceptance_unsigned": "شهادة القبول غير موقَّعة بالكامل (الحالة: {status})",
+    "acceptance_unsigned_fix": "اجمع التواقيع المتبقية في التوقيع",
+    "blocked": "الملف لا يجتاز قائمة التحقق. عالج الملاحظات، أو جمّعه على أي حال كغير مكتمل (باعتماد مدير).",
+    "delivery_title": "ملف التسليم: {project}",
+    "delivery_body": "ملف التسليم '{title}' ({scope}) جاهز. الرابط أدناه ينزّله وهو صالح حتى {expires}.",
+    "pdf": {
+      "title": "ملف التسليم",
+      "scope": "النطاق",
+      "built": "تاريخ التجميع",
+      "status_passed": "اجتازت قائمة التحقق",
+      "status_warnings": "اجتازت قائمة التحقق مع تحذيرات",
+      "status_errors": "غير مكتمل: ملاحظات قائمة التحقق مفتوحة",
+      "findings": "ملاحظات قائمة التحقق المفتوحة",
+      "severity": "الشدة",
+      "finding": "الملاحظة",
+      "severity_error": "خطأ",
+      "severity_warning": "تحذير",
+      "severity_info": "معلومة",
+      "contents": "المحتويات",
+      "file": "الملف",
+      "size": "الحجم",
+      "punch": "قائمة الملاحظات المنجزة",
+      "item": "البند",
+      "status": "الحالة",
+      "photos": "الصور",
+      "evidence": "الأدلة المصوّرة"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "التقييم {rating} للعنصر '{name}' ليس مستوى في المقياس '{scale}'",
+    "rule_poor_without_action": "'{name}' مقيَّم {rating} ولكن لا يوجد له إجراء صيانة مخطط",
+    "rule_poor_without_action_fix": "استخلص الخطة، أو أضف إجراءً لهذا العنصر",
+    "rule_action_unpriced": "الإجراء الخاص بـ '{name}' في {year} بلا تكلفة وحدة",
+    "rule_action_unpriced_fix": "أدخل تكلفة وحدة كي تشملها إجماليات الخطة",
+    "rule_defect_incomplete": "تقييم '{name}' يستدعي أعمالاً لكنه لا يسجّل شدة ولا مدى"
   }
 }

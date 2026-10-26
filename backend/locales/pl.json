@@ -618,5 +618,65 @@
       "draft": "Wersja robocza",
       "frozen": "Zamrożony"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Pozycja listy usterek '{title}' jest zamknięta bez zdjęcia",
+    "punch_no_photo_fix": "Dodaj zdjęcie wykonanych robót",
+    "photo_weak": "Zdjęcia bez lokalizacji lub czasu wykonania przy '{title}': {count}",
+    "photo_weak_fix": "Zrób zdjęcie ponownie w aplikacji z włączoną lokalizacją",
+    "defect_no_photo": "Usterka '{reference}' jest zamknięta bez zdjęcia usunięcia",
+    "defect_no_photo_fix": "Dołącz zdjęcie naprawionych robót"
+  },
+  "closeout_dossier": {
+    "more_items": "Nieuwzględnione pozycje: {count}",
+    "category_missing": "Brak dowodu dla wymaganej kategorii '{category}'",
+    "category_missing_fix": "Powiąż dokument z punktem listy kontrolnej tej kategorii lub dodaj nowy",
+    "category_unverified": "Dowód dla '{category}' nie został jeszcze zweryfikowany",
+    "category_unverified_fix": "Poproś kierownika o sprawdzenie i weryfikację powiązanego dowodu",
+    "punch_open": "Pozycja listy usterek '{name}' jest nadal otwarta",
+    "punch_open_fix": "Rozwiąż i zamknij pozycję lub wyłącz ją z zakresu tej teczki",
+    "punch_no_photo": "Rozliczona pozycja listy usterek '{name}' nie ma zdjęcia",
+    "punch_no_photo_fix": "Dodaj zdjęcie wykonanych robót",
+    "system_pending": "System '{name}' nie przeszedł rozruchu",
+    "system_pending_fix": "Zakończ listy kontrolne rozruchu i oznacz system jako uruchomiony",
+    "critical_issues": "Otwarte krytyczne problemy rozruchu: {count}",
+    "critical_issues_fix": "Zamknij krytyczne problemy przed przekazaniem",
+    "acceptance_missing": "Nie powiązano protokołu odbioru",
+    "acceptance_missing_fix": "Powiąż podpisany protokół odbioru z punktem odbioru na liście kontrolnej",
+    "acceptance_unsigned": "Protokół odbioru nie jest w pełni podpisany (status: {status})",
+    "acceptance_unsigned_fix": "Zbierz brakujące podpisy w module Podpisy",
+    "blocked": "Teczka nie spełnia swojej listy kontrolnej. Usuń uwagi albo skompletuj ją mimo to jako niekompletną (zatwierdzenie kierownika).",
+    "delivery_title": "Teczka przekazania: {project}",
+    "delivery_body": "Teczka przekazania '{title}' ({scope}) jest gotowa. Poniższy link ją pobiera i jest ważny do {expires}.",
+    "pdf": {
+      "title": "Teczka przekazania",
+      "scope": "Zakres",
+      "built": "Skompletowano",
+      "status_passed": "Lista kontrolna zaliczona",
+      "status_warnings": "Lista kontrolna zaliczona z ostrzeżeniami",
+      "status_errors": "Niekompletna: otwarte uwagi z listy kontrolnej",
+      "findings": "Otwarte uwagi z listy kontrolnej",
+      "severity": "Waga",
+      "finding": "Uwaga",
+      "severity_error": "Błąd",
+      "severity_warning": "Ostrzeżenie",
+      "severity_info": "Informacja",
+      "contents": "Spis treści",
+      "file": "Plik",
+      "size": "Rozmiar",
+      "punch": "Rozliczona lista usterek",
+      "item": "Pozycja",
+      "status": "Status",
+      "photos": "Zdjęcia",
+      "evidence": "Dokumentacja zdjęciowa"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Ocena {rating} dla '{name}' nie jest poziomem skali '{scale}'",
+    "rule_poor_without_action": "'{name}' ma ocenę {rating}, ale brak zaplanowanego działania konserwacyjnego",
+    "rule_poor_without_action_fix": "Wyprowadź plan lub dodaj działanie dla tego elementu",
+    "rule_action_unpriced": "Działanie dla '{name}' w roku {year} nie ma kosztu jednostkowego",
+    "rule_action_unpriced_fix": "Wprowadź koszt jednostkowy, aby sumy planu go uwzględniały",
+    "rule_defect_incomplete": "Ocena '{name}' wymaga robót, ale nie zapisano wagi ani zakresu"
   }
 }

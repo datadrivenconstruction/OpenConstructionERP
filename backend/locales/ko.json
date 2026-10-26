@@ -618,5 +618,65 @@
       "draft": "작성 중",
       "frozen": "확정"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "펀치 항목 '{title}'이(가) 사진 없이 종결되었습니다",
+    "punch_no_photo_fix": "완료된 작업의 사진을 추가하세요",
+    "photo_weak": "'{title}'의 사진 {count}장에 위치 또는 촬영 시간이 없습니다",
+    "photo_weak_fix": "위치를 켠 상태로 앱에서 사진을 다시 촬영하세요",
+    "defect_no_photo": "하자 '{reference}'이(가) 보수 사진 없이 종결되었습니다",
+    "defect_no_photo_fix": "보수한 작업의 사진을 첨부하세요"
+  },
+  "closeout_dossier": {
+    "more_items": "항목 {count}건이 더 있으나 표시하지 않았습니다",
+    "category_missing": "필수 분류 '{category}'에 대한 증빙이 없습니다",
+    "category_missing_fix": "이 분류의 체크리스트 항목에 문서를 연결하거나 새로 추가하세요",
+    "category_unverified": "'{category}' 증빙이 아직 확인되지 않았습니다",
+    "category_unverified_fix": "관리자에게 연결된 증빙의 검토와 확인을 요청하세요",
+    "punch_open": "펀치 항목 '{name}'이(가) 아직 미결입니다",
+    "punch_open_fix": "항목을 처리해 종결하거나 이 문서철의 범위에서 제외하세요",
+    "punch_no_photo": "처리 완료된 펀치 항목 '{name}'에 사진이 없습니다",
+    "punch_no_photo_fix": "완료된 작업의 사진을 추가하세요",
+    "system_pending": "시스템 '{name}'이(가) 시운전되지 않았습니다",
+    "system_pending_fix": "시운전 체크리스트를 완료하고 시스템을 시운전 완료로 표시하세요",
+    "critical_issues": "중대한 시운전 이슈 {count}건이 아직 미결입니다",
+    "critical_issues_fix": "인계 전에 중대한 이슈를 종결하세요",
+    "acceptance_missing": "연결된 인수 확인서가 없습니다",
+    "acceptance_missing_fix": "서명된 인수 확인서를 인수 체크리스트 항목에 연결하세요",
+    "acceptance_unsigned": "인수 확인서의 서명이 모두 완료되지 않았습니다(상태: {status})",
+    "acceptance_unsigned_fix": "서명 기능에서 남은 서명을 받으세요",
+    "blocked": "문서철이 체크리스트를 통과하지 못했습니다. 지적 사항을 수정하거나 불완전으로 표시하고 구성하세요(관리자 승인).",
+    "delivery_title": "인계 문서철: {project}",
+    "delivery_body": "인계 문서철 '{title}'({scope})이(가) 준비되었습니다. 아래 링크로 다운로드할 수 있으며 {expires}까지 유효합니다.",
+    "pdf": {
+      "title": "인계 문서철",
+      "scope": "범위",
+      "built": "구성 일시",
+      "status_passed": "체크리스트 통과",
+      "status_warnings": "체크리스트 경고와 함께 통과",
+      "status_errors": "불완전: 체크리스트 지적 사항이 미결입니다",
+      "findings": "미결 체크리스트 지적 사항",
+      "severity": "심각도",
+      "finding": "지적 사항",
+      "severity_error": "오류",
+      "severity_warning": "경고",
+      "severity_info": "정보",
+      "contents": "목차",
+      "file": "파일",
+      "size": "크기",
+      "punch": "처리 완료된 펀치 리스트",
+      "item": "항목",
+      "status": "상태",
+      "photos": "사진",
+      "evidence": "사진 증빙"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "'{name}'의 등급 {rating}은(는) 척도 '{scale}'의 수준이 아닙니다",
+    "rule_poor_without_action": "'{name}'은(는) {rating}으로 평가되었지만 계획된 유지보수 조치가 없습니다",
+    "rule_poor_without_action_fix": "계획을 도출하거나 이 요소에 조치를 추가하세요",
+    "rule_action_unpriced": "{year}년 '{name}' 조치에 단가가 없습니다",
+    "rule_action_unpriced_fix": "계획 합계에 포함되도록 단가를 입력하세요",
+    "rule_defect_incomplete": "'{name}'의 등급은 작업이 필요하지만 심각도나 범위가 기록되지 않았습니다"
   }
 }

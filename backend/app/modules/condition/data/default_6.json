@@ -1,0 +1,20 @@
+{
+  "kind": "condition_scale",
+  "key": "default_6",
+  "name": "Condition scale, 6 levels",
+  "description": "Neutral six-level scale: 1 is the best condition, 6 the worst. Each level carries the maintenance action it calls for.",
+  "action_threshold": 4,
+  "levels": [
+    {"level": 1, "label": "Excellent", "label_key": "condition.level_default_6_1", "color": "#15803d", "action": null},
+    {"level": 2, "label": "Good", "label_key": "condition.level_default_6_2", "color": "#65a30d",
+     "action": {"type": "maintain", "label": "Routine maintenance", "within_years": 3, "interval_years": 5, "priority": 4}},
+    {"level": 3, "label": "Satisfactory", "label_key": "condition.level_default_6_3", "color": "#ca8a04",
+     "action": {"type": "maintain", "label": "Preventive maintenance", "within_years": 2, "interval_years": 3, "priority": 3}},
+    {"level": 4, "label": "Deficient", "label_key": "condition.level_default_6_4", "color": "#ea580c",
+     "action": {"type": "repair", "label": "Repair", "within_years": 2, "priority": 3}},
+    {"level": 5, "label": "Poor", "label_key": "condition.level_default_6_5", "color": "#dc2626",
+     "action": {"type": "repair", "label": "Major repair", "within_years": 1, "priority": 2}},
+    {"level": 6, "label": "Very poor", "label_key": "condition.level_default_6_6", "color": "#7f1d1d",
+     "action": {"type": "replace", "label": "Replace or renew", "within_years": 0, "priority": 1}}
+  ]
+}

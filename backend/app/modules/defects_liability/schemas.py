@@ -22,7 +22,7 @@ from __future__ import annotations
 
 from datetime import date, datetime
 from decimal import Decimal, InvalidOperation
-from typing import Literal
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, computed_field, field_serializer
@@ -242,6 +242,8 @@ class DefectCreate(BaseModel):
     responsible_party: str | None = Field(default=None, max_length=255)
     punchlist_id: str | None = Field(default=None, max_length=36)
     ncr_id: str | None = Field(default=None, max_length=36)
+    geo_lat: float | None = Field(default=None, ge=-90, le=90)
+    geo_lon: float | None = Field(default=None, ge=-180, le=180)
 
 
 class DefectUpdate(BaseModel):
@@ -259,6 +261,8 @@ class DefectUpdate(BaseModel):
     responsible_party: str | None = Field(default=None, max_length=255)
     punchlist_id: str | None = Field(default=None, max_length=36)
     ncr_id: str | None = Field(default=None, max_length=36)
+    geo_lat: float | None = Field(default=None, ge=-90, le=90)
+    geo_lon: float | None = Field(default=None, ge=-180, le=180)
 
 
 class DefectResponse(BaseModel):
@@ -279,6 +283,11 @@ class DefectResponse(BaseModel):
     responsible_party: str | None = None
     punchlist_id: str | None = None
     ncr_id: str | None = None
+    #: One entry per photo: ``photo_id`` (documents gallery), ``document_id``
+    #: and ``evidence`` (hash, capture location and accuracy, time, orientation).
+    photos: list[dict[str, Any]] = Field(default_factory=list)
+    geo_lat: float | None = None
+    geo_lon: float | None = None
     created_by: UUID | None = None
     created_at: datetime
     updated_at: datetime

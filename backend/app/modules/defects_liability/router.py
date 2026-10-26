@@ -22,7 +22,7 @@ from __future__ import annotations
 import uuid
 from datetime import date
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 
 from app.dependencies import (
     CurrentUserId,
@@ -50,6 +50,9 @@ from app.modules.defects_liability.schemas import (
 from app.modules.defects_liability.service import DefectsLiabilityService
 
 router = APIRouter(tags=["defects-liability"])
+
+#: Same cap as the documents photo gallery the file is handed to.
+_MAX_DEFECT_PHOTO_BYTES = 50 * 1024 * 1024
 
 _READ = Depends(RequirePermission("defects_liability.read"))
 _WRITE = Depends(RequirePermission("defects_liability.write"))
@@ -312,3 +315,166 @@ async def get_limitation_review(
     await verify_project_access(project_id, user_id, session)
     service = _get_service(session)
     return await service.review_limitation_periods(project_id)  # type: ignore[return-value]
+
+
+# -- Photo evidence ---------------------------------------------------------
+
+
+@router.post(
+    "/projects/{project_id}/defects/{defect_id}/photos",
+    response_model=DefectResponse,
+    dependencies=[_WRITE],
+)
+async def upload_defect_photo(
+    project_id: uuid.UUID,
+    defect_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    file: UploadFile = File(...),
+    caption: str | None = Form(default=None),
+    capture_lat: float | None = Form(default=None),
+    capture_lon: float | None = Form(default=None),
+    capture_accuracy_m: float | None = Form(default=None),
+    capture_altitude_m: float | None = Form(default=None),
+    captured_at: str | None = Form(default=None),
+    capture_heading_deg: float | None = Form(default=None),
+    capture_pitch_deg: float | None = Form(default=None),
+    capture_roll_deg: float | None = Form(default=None),
+) -> DefectResponse:
+    """Attach a photo with capture evidence to a defect.
+
+    The file goes through the documents photo gallery (category ``defect``),
+    which owns the size and pixel caps, the magic-byte check, thumbnails and
+    the GPS privacy default. The defect keeps the gallery photo id and an
+    evidence record: SHA-256 of the stored file, the browser's location fix
+    with its accuracy, capture time and device orientation, and the EXIF read
+    from the original upload.
+    """
+    from app.core.photo_evidence import (
+        build_evidence_record,
+        parse_device_capture,
+        read_exif_evidence,
+        sha256_hex,
+    )
+    from app.modules.documents.service import PhotoService
+
+    await verify_project_access(project_id, user_id, session)
+    service = _get_service(session)
+    defect = await service.require_defect(project_id, defect_id)
+
+    original = await file.read(_MAX_DEFECT_PHOTO_BYTES + 1)
+    if len(original) > _MAX_DEFECT_PHOTO_BYTES:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Photo too large")
+    await file.seek(0)
+    exif = read_exif_evidence(original)
+    device = parse_device_capture(
+        lat=capture_lat,
+        lon=capture_lon,
+        accuracy_m=capture_accuracy_m,
+        altitude_m=capture_altitude_m,
+        captured_at=captured_at,
+        heading_deg=capture_heading_deg,
+        pitch_deg=capture_pitch_deg,
+        roll_deg=capture_roll_deg,
+    )
+    located = device is not None and device.location_valid()
+    photo = await PhotoService(session).upload_photo(
+        project_id=project_id,
+        file=file,
+        category="defect",
+        user_id=str(user_id),
+        caption=caption or defect.reference,
+        gps_lat=device.lat if located and device else None,
+        gps_lon=device.lon if located and device else None,
+        tags=["defects_liability", defect.reference],
+        taken_at=device.captured_at if device else None,
+    )
+    stored = await _read_stored_photo(photo.file_path)
+    original_sha = sha256_hex(original)
+    evidence = build_evidence_record(
+        stored if stored is not None else original,
+        path=f"photo:{photo.id}",
+        device=device,
+        exif=exif,
+        uploaded_by=str(user_id),
+        original_sha256=original_sha,
+    )
+    photo.metadata_ = {**(photo.metadata_ or {}), "evidence": evidence, "defect_id": str(defect_id)}
+    entry = {
+        "photo_id": str(photo.id),
+        "document_id": photo.document_id,
+        "filename": photo.filename,
+        "caption": photo.caption,
+        "evidence": evidence,
+    }
+    return await service.add_photo(project_id, defect_id, entry)  # type: ignore[return-value]
+
+
+@router.delete(
+    "/projects/{project_id}/defects/{defect_id}/photos/{index}",
+    response_model=DefectResponse,
+    dependencies=[_WRITE],
+)
+async def remove_defect_photo(
+    project_id: uuid.UUID,
+    defect_id: uuid.UUID,
+    index: int,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> DefectResponse:
+    """Detach a photo from a defect. The gallery photo itself stays in Documents."""
+    await verify_project_access(project_id, user_id, session)
+    service = _get_service(session)
+    await service.remove_photo(project_id, defect_id, index)
+    return await service.require_defect(project_id, defect_id)  # type: ignore[return-value]
+
+
+async def _read_stored_photo(file_path: str | None) -> bytes | None:
+    """Bytes of the stored gallery file, for the evidence hash (``None`` if unreadable)."""
+    import asyncio
+    from pathlib import Path
+
+    if not file_path:
+        return None
+    try:
+        return await asyncio.to_thread(Path(file_path).read_bytes)
+    except OSError:
+        return None
+
+
+@router.get("/projects/{project_id}/defects-evidence-check", dependencies=[_READ])
+async def defects_evidence_check(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> dict:
+    """Run the defect photo-evidence rule set over the project's defects."""
+    from app.core.i18n import get_locale
+    from app.core.validation.engine import validation_engine
+    from app.modules.defects_liability.validators import DEFECT_EVIDENCE_RULE_SET
+
+    await verify_project_access(project_id, user_id, session)
+    defects = await _get_service(session).list_defects(project_id)
+    data = {
+        "defects": [
+            {"id": str(d.id), "reference": d.reference, "status": d.status, "photos": list(d.photos or [])}
+            for d in defects
+        ]
+    }
+    report = await validation_engine.validate(
+        data=data,
+        rule_sets=[DEFECT_EVIDENCE_RULE_SET],
+        target_type="defects_liability",
+        target_id=str(project_id),
+        project_id=str(project_id),
+        metadata={"locale": get_locale()},
+    )
+    failed = [r for r in report.results if not r.passed]
+    return {
+        "status": "errors" if report.errors else "warnings" if report.warnings else "passed",
+        "checked": len(report.results),
+        "results": [
+            {"rule_id": r.rule_id, "severity": str(r.severity), "message": r.message, "element_ref": r.element_ref}
+            for r in failed
+        ],
+    }

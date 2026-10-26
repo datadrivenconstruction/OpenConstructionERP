@@ -15,6 +15,14 @@ Endpoints (all RequirePermission + per-project access check):
     POST   /packages/{id}/suggest-bindings         AI suggest (never auto-binds)
     POST   /packages/{id}/build                    submit build job (poll /jobs)
     GET    /packages/{id}/download                 stream the built ZIP (409 if never built)
+    GET|PUT /packages/{id}/dossier/config          handover dossier checklist
+    GET    /packages/{id}/dossier/check            check a scope against the checklist
+    POST   /packages/{id}/dossier                  assemble + deliver in one action (job)
+    GET    /packages/{id}/dossiers                 dossiers with their delivery log
+    GET    /dossiers/{id}[/download]               one dossier / its ZIP (download is logged)
+    POST   /dossiers/{id}/deliver                  send through one more channel
+    POST   /deliveries/{id}/resend                 repeat a delivery
+    GET    /projects/{id}/dossier-targets          webhook endpoints + connectors to send to
 """
 
 from __future__ import annotations
@@ -23,12 +31,14 @@ import io
 import logging
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.responses import StreamingResponse
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import FileResponse, StreamingResponse
 
 from app.core.content_disposition import attachment_disposition
-from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
-from app.modules.closeout.models import CloseoutBinding, CloseoutPackage, CloseoutSlot
+from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
+from app.modules.closeout.dossier import normalise_scope
+from app.modules.closeout.dossier_service import DossierService
+from app.modules.closeout.models import CloseoutBinding, CloseoutDossier, CloseoutPackage, CloseoutSlot
 from app.modules.closeout.schemas import (
     BindingSuggestion,
     BindSlotRequest,
@@ -38,6 +48,14 @@ from app.modules.closeout.schemas import (
     CloseoutSlotResponse,
     CreatePackageRequest,
     CreateSlotRequest,
+    DossierCheckResponse,
+    DossierConfig,
+    DossierDeliveryResponse,
+    DossierDeliveryTarget,
+    DossierFinding,
+    DossierRequest,
+    DossierResponse,
+    DossierTarget,
     OutstandingWork,
     SlotStatus,
     SuggestBindingsResponse,
@@ -408,3 +426,216 @@ async def download_package(
             "Content-Length": str(len(data)),
         },
     )
+
+
+# ── Handover dossier ─────────────────────────────────────────────────────────
+
+
+def _dossier_service(session: SessionDep) -> DossierService:
+    return DossierService(session)
+
+
+async def _dossier_response(service: DossierService, dossier: CloseoutDossier) -> DossierResponse:
+    deliveries = await service.list_deliveries([dossier.id])
+    resp = DossierResponse.model_validate(dossier)
+    resp.deliveries = [DossierDeliveryResponse.model_validate(d) for d in deliveries]
+    return resp
+
+
+async def _require_signoff(payload: dict) -> None:
+    """Sending a dossier out, or assembling one that fails its checklist, is a sign-off act."""
+    await RequirePermission("closeout.verify")(payload)
+
+
+async def _load_dossier_and_verify(
+    service: DossierService, dossier_id: uuid.UUID, user_id: str | None
+) -> CloseoutDossier:
+    dossier = await service.get_dossier_or_404(dossier_id)
+    await verify_project_access(dossier.project_id, user_id or "", service.session)
+    return dossier
+
+
+@router.get("/packages/{package_id}/dossier/config", response_model=DossierConfig)
+async def get_dossier_config(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.read")),
+    service: DossierService = Depends(_dossier_service),
+) -> DossierConfig:
+    """The dossier checklist of a package (defaults filled in)."""
+    package = await _load_package_and_verify(service.closeout, package_id, user_id)
+    return DossierConfig(**service.get_config(package))
+
+
+@router.put("/packages/{package_id}/dossier/config", response_model=DossierConfig)
+async def put_dossier_config(
+    package_id: uuid.UUID,
+    body: DossierConfig,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.update")),
+    service: DossierService = Depends(_dossier_service),
+) -> DossierConfig:
+    """Edit the dossier checklist (only the fields sent change)."""
+    package = await _load_package_and_verify(service.closeout, package_id, user_id)
+    cfg = await service.set_config(package, body.model_dump(exclude_none=True))
+    return DossierConfig(**cfg)
+
+
+@router.get("/packages/{package_id}/dossier/check", response_model=DossierCheckResponse)
+async def check_dossier(
+    package_id: uuid.UUID,
+    scope_kind: str = Query(default="project", pattern=r"^(project|area|asset)$"),
+    scope_value: str | None = Query(default=None, max_length=255),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.read")),
+    service: DossierService = Depends(_dossier_service),
+) -> DossierCheckResponse:
+    """Check a dossier scope against the checklist without assembling anything."""
+    package = await _load_package_and_verify(service.closeout, package_id, user_id)
+    scope = normalise_scope(scope_kind, scope_value)
+    state, failed, ctx = await service.run_checks(package, scope)
+    return DossierCheckResponse(
+        check_status=state,
+        results=[DossierFinding(**f) for f in failed],
+        scope=scope,
+        punch_total=ctx["punch"]["total"],
+        punch_open=len(ctx["punch"]["open"]),
+        commissioning_systems=ctx["commissioning"]["systems"],
+        acceptance_bound=bool(ctx["acceptance"]["bound"]),
+        acceptance_signed=bool(ctx["acceptance"]["signed"]),
+        categories={k: {"present": v["present"], "verified": v["verified"]} for k, v in ctx["categories"].items()},
+    )
+
+
+@router.post("/packages/{package_id}/dossier", response_model=DossierResponse, status_code=202)
+async def request_dossier(
+    package_id: uuid.UUID,
+    body: DossierRequest,
+    session: SessionDep,
+    payload: CurrentUserPayload,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.build")),
+    service: DossierService = Depends(_dossier_service),
+) -> DossierResponse:
+    """Check, assemble and deliver a handover dossier in one action (runs as a job)."""
+    from app.core.job_runner import submit_job
+    from app.modules.closeout.dossier_service import JOB_KIND as DOSSIER_JOB_KIND
+
+    package = await _load_package_and_verify(service.closeout, package_id, user_id)
+    outbound = [d for d in body.deliveries if d.channel != "download"]
+    if outbound or body.allow_incomplete:
+        await _require_signoff(payload)
+    dossier = await service.request(
+        package,
+        scope=normalise_scope(body.scope_kind, body.scope_value),
+        deliveries=[d.model_dump(mode="json", exclude_none=True) for d in body.deliveries],
+        allow_incomplete=body.allow_incomplete,
+        requested_by=str(user_id) if user_id else None,
+    )
+    await session.commit()
+    job = await submit_job(DOSSIER_JOB_KIND, {"dossier_id": str(dossier.id)})
+    dossier.job_id = job.id
+    await session.commit()
+    return await _dossier_response(service, dossier)
+
+
+@router.get("/packages/{package_id}/dossiers", response_model=list[DossierResponse])
+async def list_dossiers(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.read")),
+    service: DossierService = Depends(_dossier_service),
+) -> list[DossierResponse]:
+    """Dossiers of a package, newest first, each with its delivery log."""
+    package = await _load_package_and_verify(service.closeout, package_id, user_id)
+    dossiers = await service.list_dossiers(package.id)
+    deliveries = await service.list_deliveries([d.id for d in dossiers])
+    by_dossier: dict[uuid.UUID, list[DossierDeliveryResponse]] = {}
+    for d in deliveries:
+        by_dossier.setdefault(d.dossier_id, []).append(DossierDeliveryResponse.model_validate(d))
+    out = []
+    for dossier in dossiers:
+        resp = DossierResponse.model_validate(dossier)
+        resp.deliveries = by_dossier.get(dossier.id, [])
+        out.append(resp)
+    return out
+
+
+@router.get("/dossiers/{dossier_id}", response_model=DossierResponse)
+async def get_dossier(
+    dossier_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.read")),
+    service: DossierService = Depends(_dossier_service),
+) -> DossierResponse:
+    """One dossier with its delivery log (poll while it is queued)."""
+    dossier = await _load_dossier_and_verify(service, dossier_id, user_id)
+    return await _dossier_response(service, dossier)
+
+
+@router.get("/dossiers/{dossier_id}/download")
+async def download_dossier(
+    dossier_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.read")),
+    service: DossierService = Depends(_dossier_service),
+) -> FileResponse:
+    """Download the dossier ZIP; the download is logged as a delivery."""
+    from pathlib import Path
+
+    dossier = await _load_dossier_and_verify(service, dossier_id, user_id)
+    if not dossier.file_path or not Path(dossier.file_path).is_file():
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Dossier archive is not available")
+    await service.deliver(dossier, {"channel": "download"}, delivered_by=str(user_id) if user_id else None)
+    await service.session.commit()
+    return FileResponse(
+        dossier.file_path,
+        media_type="application/zip",
+        headers={"Content-Disposition": attachment_disposition(dossier.file_name or "handover_dossier.zip")},
+    )
+
+
+@router.post("/dossiers/{dossier_id}/deliver", response_model=DossierDeliveryResponse)
+async def deliver_dossier(
+    dossier_id: uuid.UUID,
+    body: DossierDeliveryTarget,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.verify")),
+    service: DossierService = Depends(_dossier_service),
+) -> DossierDeliveryResponse:
+    """Send a built dossier through one more channel."""
+    dossier = await _load_dossier_and_verify(service, dossier_id, user_id)
+    entry = body.model_dump(mode="json", exclude_none=True)
+    await service.validate_target(dossier.project_id, entry, str(user_id) if user_id else None)
+    delivery = await service.deliver(dossier, entry, delivered_by=str(user_id) if user_id else None)
+    await service.session.commit()
+    return DossierDeliveryResponse.model_validate(delivery)
+
+
+@router.post("/deliveries/{delivery_id}/resend", response_model=DossierDeliveryResponse)
+async def resend_delivery(
+    delivery_id: uuid.UUID,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.verify")),
+    service: DossierService = Depends(_dossier_service),
+) -> DossierDeliveryResponse:
+    """Repeat a delivery against the same archive (new share link, new log row)."""
+    delivery = await service.get_delivery_or_404(delivery_id)
+    await verify_project_access(delivery.project_id, user_id or "", service.session)
+    resent = await service.resend(delivery, delivered_by=str(user_id) if user_id else None)
+    await service.session.commit()
+    return DossierDeliveryResponse.model_validate(resent)
+
+
+@router.get("/projects/{project_id}/dossier-targets", response_model=list[DossierTarget])
+async def list_dossier_targets(
+    project_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("closeout.read")),
+) -> list[DossierTarget]:
+    """Webhook endpoints and chat connectors a dossier of this project can go to."""
+    from app.modules.closeout.dossier_service import list_delivery_targets
+
+    await verify_project_access(project_id, user_id or "", session)
+    return [DossierTarget(**row) for row in await list_delivery_targets(session, project_id, user_id)]

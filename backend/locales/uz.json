@@ -618,5 +618,65 @@
       "draft": "Qoralama",
       "frozen": "Muzlatilgan"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "ʼ{title}ʼ nuqsonlar roʻyxati bandi suratsiz yopilgan",
+    "punch_no_photo_fix": "Bajarilgan ishning suratini qoʻshing",
+    "photo_weak": "ʼ{title}ʼ boʻyicha {count} ta suratda joylashuv yoki olingan vaqt yoʻq",
+    "photo_weak_fix": "Suratni ilovada joylashuvni yoqib, qayta oling",
+    "defect_no_photo": "ʼ{reference}ʼ nuqsoni bartaraf etish suratisiz yopilgan",
+    "defect_no_photo_fix": "Tuzatilgan ishning suratini biriktiring"
+  },
+  "closeout_dossier": {
+    "more_items": "Yana {count} ta band koʻrsatilmagan",
+    "category_missing": "Talab qilinadigan ʼ{category}ʼ toifasi boʻyicha dalil yoʻq",
+    "category_missing_fix": "Ushbu toifadagi nazorat roʻyxati bandiga hujjat bogʻlang yoki bittasini qoʻshing",
+    "category_unverified": "ʼ{category}ʼ dalili hali tasdiqlanmagan",
+    "category_unverified_fix": "Menejerdan biriktirilgan dalilni koʻrib chiqish va tasdiqlashni soʻrang",
+    "punch_open": "ʼ{name}ʼ nuqsonlar roʻyxati bandi hali ochiq",
+    "punch_open_fix": "Bandni hal qilib yoping yoki uni ushbu dosye qamrovidan chiqaring",
+    "punch_no_photo": "Hal qilingan ʼ{name}ʼ nuqsonlar bandida surat yoʻq",
+    "punch_no_photo_fix": "Bajarilgan ishning suratini qoʻshing",
+    "system_pending": "ʼ{name}ʼ tizimi ishga tushirilmagan",
+    "system_pending_fix": "Sozlash-ishga tushirish nazorat roʻyxatlarini yakunlang va tizimni ishga tushirilgan deb belgilang",
+    "critical_issues": "{count} ta kritik sozlash-ishga tushirish muammosi hali ochiq",
+    "critical_issues_fix": "Topshirishdan oldin kritik muammolarni yoping",
+    "acceptance_missing": "Qabul qilish sertifikati biriktirilmagan",
+    "acceptance_missing_fix": "Imzolangan qabul qilish sertifikatini qabul qilish nazorat roʻyxati bandiga bogʻlang",
+    "acceptance_unsigned": "Qabul qilish sertifikati toʻliq imzolanmagan (holati: {status})",
+    "acceptance_unsigned_fix": "Qolgan imzolarni Imzolash boʻlimida yigʻing",
+    "blocked": "Dosye nazorat roʻyxatidan oʻtmadi. Topilmalarni tuzating yoki baribir toʻliq emas deb yigʻing (menejer tasdigʻi bilan).",
+    "delivery_title": "Topshirish dosyesi: {project}",
+    "delivery_body": "ʼ{title}ʼ ({scope}) topshirish dosyesi tayyor. Quyidagi havola uni yuklab oladi va {expires} gacha amal qiladi.",
+    "pdf": {
+      "title": "Topshirish dosyesi",
+      "scope": "Qamrov",
+      "built": "Yigʻilgan vaqt",
+      "status_passed": "Nazorat roʻyxati muvaffaqiyatli oʻtdi",
+      "status_warnings": "Nazorat roʻyxati ogohlantirishlar bilan oʻtdi",
+      "status_errors": "Toʻliq emas: nazorat roʻyxatining ochiq topilmalari",
+      "findings": "Nazorat roʻyxatining ochiq topilmalari",
+      "severity": "Muhimlik",
+      "finding": "Topilma",
+      "severity_error": "Xato",
+      "severity_warning": "Ogohlantirish",
+      "severity_info": "Maʼlumot",
+      "contents": "Mundarija",
+      "file": "Fayl",
+      "size": "Hajmi",
+      "punch": "Hal qilingan nuqsonlar roʻyxati",
+      "item": "Band",
+      "status": "Holati",
+      "photos": "Suratlar",
+      "evidence": "Surat dalillari"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "ʼ{name}ʼ uchun {rating} bahosi ʼ{scale}ʼ shkalasining darajasi emas",
+    "rule_poor_without_action": "ʼ{name}ʼ {rating} deb baholangan, lekin rejalashtirilgan xizmat koʻrsatish amali yoʻq",
+    "rule_poor_without_action_fix": "Rejani chiqaring yoki ushbu element uchun amal qoʻshing",
+    "rule_action_unpriced": "{year} yilda ʼ{name}ʼ amalining birlik narxi yoʻq",
+    "rule_action_unpriced_fix": "Reja jamiga kirishi uchun birlik narxini kiriting",
+    "rule_defect_incomplete": "ʼ{name}ʼ bahosi ish talab qiladi, lekin jiddiylik yoki hajm yozilmagan"
   }
 }

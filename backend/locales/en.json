@@ -789,5 +789,65 @@
       "draft": "Draft",
       "frozen": "Frozen"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Punch item '{title}' is closed out without a photo",
+    "punch_no_photo_fix": "Add a photo of the completed work",
+    "photo_weak": "{count} photo(s) on '{title}' lack location or capture time",
+    "photo_weak_fix": "Retake the photo in the app with location enabled",
+    "defect_no_photo": "Defect '{reference}' is closed without a photo of the rectification",
+    "defect_no_photo_fix": "Attach a photo of the rectified work"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} more item(s) not listed",
+    "category_missing": "No evidence for the required category '{category}'",
+    "category_missing_fix": "Bind a document to a checklist item of this category, or add one",
+    "category_unverified": "Evidence for '{category}' is not verified yet",
+    "category_unverified_fix": "Have a manager review and verify the bound evidence",
+    "punch_open": "Punch item '{name}' is still open",
+    "punch_open_fix": "Resolve and close the item, or exclude it from this dossier's scope",
+    "punch_no_photo": "Resolved punch item '{name}' has no photo",
+    "punch_no_photo_fix": "Add a photo of the completed work",
+    "system_pending": "System '{name}' is not commissioned",
+    "system_pending_fix": "Complete the commissioning checklists and mark the system commissioned",
+    "critical_issues": "{count} critical commissioning issue(s) are still open",
+    "critical_issues_fix": "Close the critical issues before handover",
+    "acceptance_missing": "No acceptance certificate is bound",
+    "acceptance_missing_fix": "Bind the signed acceptance certificate to the acceptance checklist item",
+    "acceptance_unsigned": "The acceptance certificate is not fully signed (status: {status})",
+    "acceptance_unsigned_fix": "Collect the outstanding signatures in Signing",
+    "blocked": "The dossier fails its checklist. Fix the findings, or assemble it anyway as incomplete (manager sign-off).",
+    "delivery_title": "Handover dossier: {project}",
+    "delivery_body": "The handover dossier '{title}' ({scope}) is ready. The link below downloads it and is valid until {expires}.",
+    "pdf": {
+      "title": "Handover dossier",
+      "scope": "Scope",
+      "built": "Assembled",
+      "status_passed": "Checklist passed",
+      "status_warnings": "Checklist passed with warnings",
+      "status_errors": "Incomplete: checklist findings open",
+      "findings": "Open checklist findings",
+      "severity": "Severity",
+      "finding": "Finding",
+      "severity_error": "Error",
+      "severity_warning": "Warning",
+      "severity_info": "Info",
+      "contents": "Contents",
+      "file": "File",
+      "size": "Size",
+      "punch": "Resolved punch list",
+      "item": "Item",
+      "status": "Status",
+      "photos": "Photos",
+      "evidence": "Photo evidence"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Rating {rating} of '{name}' is not a level of scale '{scale}'",
+    "rule_poor_without_action": "'{name}' is rated {rating} but has no planned maintenance action",
+    "rule_poor_without_action_fix": "Derive the plan, or add an action for this element",
+    "rule_action_unpriced": "The action for '{name}' in {year} has no unit cost",
+    "rule_action_unpriced_fix": "Enter a unit cost so the plan totals include it",
+    "rule_defect_incomplete": "The rating of '{name}' calls for work but records no severity or extent"
   }
 }

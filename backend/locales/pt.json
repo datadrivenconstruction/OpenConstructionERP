@@ -618,5 +618,65 @@
       "draft": "Rascunho",
       "frozen": "Congelado"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "O item pendente '{title}' foi encerrado sem foto",
+    "punch_no_photo_fix": "Adicione uma foto do trabalho concluído",
+    "photo_weak": "{count} foto(s) de '{title}' sem local ou hora de captura",
+    "photo_weak_fix": "Volte a tirar a foto na aplicação com a localização ativada",
+    "defect_no_photo": "O defeito '{reference}' foi encerrado sem foto da correção",
+    "defect_no_photo_fix": "Anexe uma foto do trabalho corrigido"
+  },
+  "closeout_dossier": {
+    "more_items": "Mais {count} item(ns) não listado(s)",
+    "category_missing": "Sem evidência para a categoria obrigatória '{category}'",
+    "category_missing_fix": "Associe um documento a um ponto da lista de verificação desta categoria, ou adicione um",
+    "category_unverified": "A evidência de '{category}' ainda não está verificada",
+    "category_unverified_fix": "Peça a um responsável que reveja e verifique a evidência associada",
+    "punch_open": "O item pendente '{name}' ainda está aberto",
+    "punch_open_fix": "Resolva e encerre o item, ou exclua-o do âmbito deste dossiê",
+    "punch_no_photo": "O item pendente resolvido '{name}' não tem foto",
+    "punch_no_photo_fix": "Adicione uma foto do trabalho concluído",
+    "system_pending": "O sistema '{name}' não está comissionado",
+    "system_pending_fix": "Conclua as listas de verificação de comissionamento e marque o sistema como comissionado",
+    "critical_issues": "{count} problema(s) crítico(s) de comissionamento ainda estão abertos",
+    "critical_issues_fix": "Encerre os problemas críticos antes da entrega",
+    "acceptance_missing": "Nenhum auto de aceitação está associado",
+    "acceptance_missing_fix": "Associe o auto de aceitação assinado ao ponto de aceitação da lista de verificação",
+    "acceptance_unsigned": "O auto de aceitação não está totalmente assinado (estado: {status})",
+    "acceptance_unsigned_fix": "Recolha as assinaturas em falta em Assinatura",
+    "blocked": "O dossiê não cumpre a sua lista de verificação. Corrija as constatações ou monte-o mesmo assim como incompleto (aprovação do responsável).",
+    "delivery_title": "Dossiê de entrega: {project}",
+    "delivery_body": "O dossiê de entrega '{title}' ({scope}) está pronto. A ligação abaixo transfere-o e é válida até {expires}.",
+    "pdf": {
+      "title": "Dossiê de entrega",
+      "scope": "Âmbito",
+      "built": "Montado",
+      "status_passed": "Lista de verificação aprovada",
+      "status_warnings": "Lista de verificação aprovada com avisos",
+      "status_errors": "Incompleto: constatações da lista de verificação em aberto",
+      "findings": "Constatações em aberto da lista de verificação",
+      "severity": "Gravidade",
+      "finding": "Constatação",
+      "severity_error": "Erro",
+      "severity_warning": "Aviso",
+      "severity_info": "Info",
+      "contents": "Conteúdo",
+      "file": "Ficheiro",
+      "size": "Tamanho",
+      "punch": "Lista de pendências resolvidas",
+      "item": "Item",
+      "status": "Estado",
+      "photos": "Fotos",
+      "evidence": "Evidência fotográfica"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "A classificação {rating} de '{name}' não é um nível da escala '{scale}'",
+    "rule_poor_without_action": "'{name}' está classificado como {rating} mas não tem nenhuma ação de manutenção planeada",
+    "rule_poor_without_action_fix": "Derive o plano ou adicione uma ação para este elemento",
+    "rule_action_unpriced": "A ação de '{name}' em {year} não tem custo unitário",
+    "rule_action_unpriced_fix": "Introduza um custo unitário para que os totais do plano o incluam",
+    "rule_defect_incomplete": "A classificação de '{name}' exige trabalhos mas não regista gravidade nem extensão"
   }
 }

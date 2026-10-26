@@ -734,6 +734,95 @@ class CloseoutService:
         Degrades gracefully: missing files / a model-less project / a render
         failure are recorded in the manifest and never abort the export.
         """
+        parts = await self._collect_package(package)
+        documents = parts["documents"]
+        generated = parts["generated"]
+        slot_summaries = parts["slot_summaries"]
+        notes = parts["notes"]
+        project_name = parts["project_name"]
+        date_iso = parts["date_iso"]
+        required_count = parts["required_count"]
+        delivered_count = parts["delivered_count"]
+        completeness_pct = parts["completeness_pct"]
+        gaps = parts["gaps"]
+        ready = parts["ready"]
+        index: list[dict[str, Any]] = []
+
+        # ── Cover PDF ────────────────────────────────────────────────────
+        cover_summary = {
+            "project_name": project_name,
+            "project_type": package.project_type,
+            "title": package.title,
+            "completeness_pct": completeness_pct,
+            "required_slot_count": required_count,
+            "delivered_slot_count": delivered_count,
+            "ready": ready,
+            "gaps": gaps,
+            "slots": slot_summaries,
+            "built_at": date_iso,
+        }
+        cover_pdf: bytes | None = None
+        try:
+            cover_pdf = await asyncio.to_thread(render_cover_pdf, cover_summary)
+        except Exception as exc:  # noqa: BLE001 - never abort the export
+            logger.warning("closeout: cover PDF render failed for package %s: %s", package.id, exc)
+            notes.append(f"cover.pdf not generated ({exc.__class__.__name__})")
+
+        # ── Machine-readable manifest ────────────────────────────────────
+        manifest_obj = {
+            "format_version": "1.0",
+            "kind": "construction_closeout_package",
+            "package_id": str(package.id),
+            "project_id": str(package.project_id),
+            "project_name": project_name,
+            "project_type": package.project_type,
+            "generated": date_iso,
+            "completeness": {
+                "required_slot_count": required_count,
+                "delivered_slot_count": delivered_count,
+                "completeness_pct": completeness_pct,
+                "ready": ready,
+                "gaps": gaps,
+            },
+            "slots": slot_summaries,
+            "contents": {
+                "documents": [arc for arc, _ in documents],
+                "generated": [arc for arc, _ in generated],
+                "cover": "cover.pdf" if cover_pdf is not None else None,
+            },
+            "notes": notes,
+        }
+
+        # ── Assemble the ZIP (bundle_export.py pattern) ──────────────────
+        # Hashing and deflating every bound document is CPU work that grows
+        # with the package, so it runs in a worker thread. This build runs
+        # as an in-process job on the same event loop as the requests, which
+        # is why it matters even though no request waits on it.
+        readme = self._readme_md(project_name, package, completeness_pct, ready, gaps)
+        zip_bytes, total_bytes = await asyncio.to_thread(
+            self._assemble_zip, cover_pdf, documents + generated, index, manifest_obj, readme
+        )
+
+        build_summary = {
+            "size_bytes": total_bytes,
+            "completeness_pct": completeness_pct,
+            "ready": ready,
+            "document_count": len(documents),
+            "generated_count": len(generated),
+            "notes": notes,
+        }
+        return zip_bytes, build_summary
+
+    async def _collect_package(self, package: CloseoutPackage) -> dict[str, Any]:
+        """Gather the package's bound documents, generated artifacts and counts.
+
+        Shared by the package build and the handover dossier, which adds its
+        own members on top. Returns a plain dict: ``documents`` and
+        ``generated`` (lists of ``(arc_path, bytes)``), ``slot_summaries``,
+        ``notes``, ``project_name``, ``date_iso`` and the build-basis counts
+        ``required_count``, ``delivered_count``, ``completeness_pct``,
+        ``gaps``, ``ready``.
+        """
         slots = await self.repo.list_slots(package.id)
         bindings = await self.repo.list_bindings_for_package(package.id)
         project_name = await self._project_name(package.project_id)
@@ -742,7 +831,6 @@ class CloseoutService:
 
         documents: list[tuple[str, bytes]] = []
         generated: list[tuple[str, bytes]] = []
-        index: list[dict[str, Any]] = []
         slot_summaries: list[dict[str, Any]] = []
         notes: list[str] = []
 
@@ -815,70 +903,19 @@ class CloseoutService:
         gaps = await self.gaps(package, treat_built=True)
         ready = len(gaps) == 0 and required_count > 0
 
-        # ── Cover PDF ────────────────────────────────────────────────────
-        cover_summary = {
+        return {
+            "documents": documents,
+            "generated": generated,
+            "slot_summaries": slot_summaries,
+            "notes": notes,
             "project_name": project_name,
-            "project_type": package.project_type,
-            "title": package.title,
+            "date_iso": date_iso,
+            "required_count": required_count,
+            "delivered_count": delivered_count,
             "completeness_pct": completeness_pct,
-            "required_slot_count": required_count,
-            "delivered_slot_count": delivered_count,
-            "ready": ready,
             "gaps": gaps,
-            "slots": slot_summaries,
-            "built_at": date_iso,
-        }
-        cover_pdf: bytes | None = None
-        try:
-            cover_pdf = await asyncio.to_thread(render_cover_pdf, cover_summary)
-        except Exception as exc:  # noqa: BLE001 - never abort the export
-            logger.warning("closeout: cover PDF render failed for package %s: %s", package.id, exc)
-            notes.append(f"cover.pdf not generated ({exc.__class__.__name__})")
-
-        # ── Machine-readable manifest ────────────────────────────────────
-        manifest_obj = {
-            "format_version": "1.0",
-            "kind": "construction_closeout_package",
-            "package_id": str(package.id),
-            "project_id": str(package.project_id),
-            "project_name": project_name,
-            "project_type": package.project_type,
-            "generated": date_iso,
-            "completeness": {
-                "required_slot_count": required_count,
-                "delivered_slot_count": delivered_count,
-                "completeness_pct": completeness_pct,
-                "ready": ready,
-                "gaps": gaps,
-            },
-            "slots": slot_summaries,
-            "contents": {
-                "documents": [arc for arc, _ in documents],
-                "generated": [arc for arc, _ in generated],
-                "cover": "cover.pdf" if cover_pdf is not None else None,
-            },
-            "notes": notes,
-        }
-
-        # ── Assemble the ZIP (bundle_export.py pattern) ──────────────────
-        # Hashing and deflating every bound document is CPU work that grows
-        # with the package, so it runs in a worker thread. This build runs
-        # as an in-process job on the same event loop as the requests, which
-        # is why it matters even though no request waits on it.
-        readme = self._readme_md(project_name, package, completeness_pct, ready, gaps)
-        zip_bytes, total_bytes = await asyncio.to_thread(
-            self._assemble_zip, cover_pdf, documents + generated, index, manifest_obj, readme
-        )
-
-        build_summary = {
-            "size_bytes": total_bytes,
-            "completeness_pct": completeness_pct,
             "ready": ready,
-            "document_count": len(documents),
-            "generated_count": len(generated),
-            "notes": notes,
         }
-        return zip_bytes, build_summary
 
     @classmethod
     def _assemble_zip(
@@ -888,6 +925,7 @@ class CloseoutService:
         index: list[dict[str, Any]],
         manifest_obj: dict[str, Any],
         readme: str,
+        cover_name: str = "cover.pdf",
     ) -> tuple[bytes, int]:
         """Write the package ZIP and return ``(zip_bytes, total_member_bytes)``.
 
@@ -898,8 +936,8 @@ class CloseoutService:
         total_bytes = 0
         with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
             if cover_pdf is not None:
-                zf.writestr("cover.pdf", cover_pdf)
-                index.append(cls._index_entry("cover.pdf", cover_pdf))
+                zf.writestr(cover_name, cover_pdf)
+                index.append(cls._index_entry(cover_name, cover_pdf))
                 total_bytes += len(cover_pdf)
             for arc, data in members:
                 zf.writestr(arc, data)

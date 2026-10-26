@@ -618,5 +618,65 @@
       "draft": "Utkast",
       "frozen": "Fryst"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Anmärkningen '{title}' är avslutad utan foto",
+    "punch_no_photo_fix": "Lägg till ett foto av det utförda arbetet",
+    "photo_weak": "{count} foto på '{title}' saknar plats eller tagningstid",
+    "photo_weak_fix": "Ta om fotot i appen med platsinformation aktiverad",
+    "defect_no_photo": "Felet '{reference}' är avslutat utan foto av åtgärden",
+    "defect_no_photo_fix": "Bifoga ett foto av det åtgärdade arbetet"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} fler poster visas inte",
+    "category_missing": "Inget bevis för den obligatoriska kategorin '{category}'",
+    "category_missing_fix": "Koppla ett dokument till en checklistepunkt i denna kategori, eller lägg till ett",
+    "category_unverified": "Beviset för '{category}' är inte verifierat ännu",
+    "category_unverified_fix": "Låt en chef granska och verifiera det kopplade beviset",
+    "punch_open": "Anmärkningen '{name}' är fortfarande öppen",
+    "punch_open_fix": "Åtgärda och avsluta posten, eller undanta den från denna dokumentations omfattning",
+    "punch_no_photo": "Den åtgärdade anmärkningen '{name}' saknar foto",
+    "punch_no_photo_fix": "Lägg till ett foto av det utförda arbetet",
+    "system_pending": "Systemet '{name}' är inte driftsatt",
+    "system_pending_fix": "Slutför driftsättningens checklistor och markera systemet som driftsatt",
+    "critical_issues": "{count} kritiska driftsättningsproblem är fortfarande öppna",
+    "critical_issues_fix": "Avsluta de kritiska problemen före överlämnandet",
+    "acceptance_missing": "Inget godkännandeintyg är kopplat",
+    "acceptance_missing_fix": "Koppla det signerade godkännandeintyget till godkännandepunkten i checklistan",
+    "acceptance_unsigned": "Godkännandeintyget är inte fullständigt signerat (status: {status})",
+    "acceptance_unsigned_fix": "Samla in de saknade signaturerna i Signering",
+    "blocked": "Dokumentationen uppfyller inte sin checklista. Åtgärda noteringarna, eller sammanställ den ändå som ofullständig (chefens godkännande).",
+    "delivery_title": "Överlämnandedokumentation: {project}",
+    "delivery_body": "Överlämnandedokumentationen '{title}' ({scope}) är klar. Länken nedan laddar ned den och är giltig till {expires}.",
+    "pdf": {
+      "title": "Överlämnandedokumentation",
+      "scope": "Omfattning",
+      "built": "Sammanställd",
+      "status_passed": "Checklistan godkänd",
+      "status_warnings": "Checklistan godkänd med varningar",
+      "status_errors": "Ofullständig: öppna noteringar i checklistan",
+      "findings": "Öppna noteringar i checklistan",
+      "severity": "Allvarlighetsgrad",
+      "finding": "Notering",
+      "severity_error": "Fel",
+      "severity_warning": "Varning",
+      "severity_info": "Info",
+      "contents": "Innehåll",
+      "file": "Fil",
+      "size": "Storlek",
+      "punch": "Åtgärdad anmärkningslista",
+      "item": "Post",
+      "status": "Status",
+      "photos": "Foton",
+      "evidence": "Fotobevis"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Bedömningen {rating} för '{name}' är inte en nivå på skalan '{scale}'",
+    "rule_poor_without_action": "'{name}' är bedömd {rating} men har ingen planerad underhållsåtgärd",
+    "rule_poor_without_action_fix": "Ta fram planen eller lägg till en åtgärd för detta element",
+    "rule_action_unpriced": "Åtgärden för '{name}' år {year} saknar enhetskostnad",
+    "rule_action_unpriced_fix": "Ange en enhetskostnad så att plansummorna inkluderar den",
+    "rule_defect_incomplete": "Bedömningen av '{name}' kräver arbete men registrerar varken allvarlighetsgrad eller omfattning"
   }
 }

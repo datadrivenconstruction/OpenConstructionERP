@@ -19,7 +19,7 @@ import uuid
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
 
 from app.core.file_signature import (
@@ -31,6 +31,7 @@ from app.core.file_signature import (
 from app.core.file_signature import (
     require as require_signature,
 )
+from app.core.photo_evidence import build_evidence_record, parse_device_capture, prepare_stored_photo
 from app.core.storage import module_uploads_dir
 from app.dependencies import CurrentUserId, CurrentUserPayload, RequirePermission, SessionDep, verify_project_access
 from app.modules.punchlist.schemas import (
@@ -44,7 +45,7 @@ from app.modules.punchlist.schemas import (
     PunchListSummary,
     PunchStatusTransition,
 )
-from app.modules.punchlist.service import PunchListService
+from app.modules.punchlist.service import PHOTO_EVIDENCE_KEY, PunchListService
 
 router = APIRouter(tags=["punchlist"])
 logger = logging.getLogger(__name__)
@@ -56,9 +57,24 @@ logger = logging.getLogger(__name__)
 # under Program Files.
 PHOTOS_DIR = module_uploads_dir("punchlist", "photos")
 
+#: Upper bound for an uploaded BCF archive (photos travel inside as snapshots).
+_MAX_BCF_IMPORT_BYTES = 200 * 1024 * 1024
+
 
 def _get_service(session: SessionDep) -> PunchListService:
     return PunchListService(session)
+
+
+def _photo_evidence(item: object) -> list[dict | None]:
+    """Evidence records aligned with ``photos`` (``None`` for a photo without one)."""
+    meta = getattr(item, "metadata_", None) or {}
+    records = meta.get(PHOTO_EVIDENCE_KEY) if isinstance(meta, dict) else None
+    if not isinstance(records, dict):
+        records = {}
+    return [
+        records.get(path) if isinstance(records.get(path), dict) else None
+        for path in (getattr(item, "photos", None) or [])
+    ]
 
 
 def _item_to_response(item: object, names: Mapping[str, str] | None = None) -> PunchItemResponse:
@@ -89,6 +105,7 @@ def _item_to_response(item: object, names: Mapping[str, str] | None = None) -> P
         category=item.category,  # type: ignore[attr-defined]
         trade=item.trade,  # type: ignore[attr-defined]
         photos=item.photos or [],  # type: ignore[attr-defined]
+        photo_evidence=_photo_evidence(item),
         geo_lat=getattr(item, "geo_lat", None),
         geo_lon=getattr(item, "geo_lon", None),
         rework_cost=getattr(item, "rework_cost", None),
@@ -398,15 +415,28 @@ async def upload_photo(
     item_id: uuid.UUID,
     session: SessionDep,
     file: UploadFile = File(...),
+    capture_lat: float | None = Form(default=None),
+    capture_lon: float | None = Form(default=None),
+    capture_accuracy_m: float | None = Form(default=None),
+    capture_altitude_m: float | None = Form(default=None),
+    captured_at: str | None = Form(default=None),
+    capture_heading_deg: float | None = Form(default=None),
+    capture_pitch_deg: float | None = Form(default=None),
+    capture_roll_deg: float | None = Form(default=None),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("punchlist.update")),
     service: PunchListService = Depends(_get_service),
 ) -> PunchItemResponse:
-    """Upload a photo for a punch item.
+    """Upload a photo for a punch item, with its capture evidence.
 
     Content-type headers are attacker-controlled, so we validate the raw
     magic bytes against :data:`ALLOWED_PHOTO_TYPES` (jpeg, png, gif, webp,
     heic, heif, tiff). SVG and any other format are rejected with 415.
+
+    The optional ``capture_*`` form fields carry what the browser measured
+    when the photo was taken (geolocation with accuracy, clock, orientation).
+    EXIF is read from the file; both land in an evidence record with the
+    SHA-256 of the stored file.
     """
     existing = await service.get_item(item_id)
     await verify_project_access(existing.project_id, str(user_id), session)
@@ -437,6 +467,20 @@ async def upload_photo(
         )
     safe_mime = mime_for_signature(detected)
 
+    # Read EXIF first, then apply the platform GPS privacy default to the file.
+    original_size = len(content)
+    content, exif_tags, original_sha256 = prepare_stored_photo(content)
+    device = parse_device_capture(
+        lat=capture_lat,
+        lon=capture_lon,
+        accuracy_m=capture_accuracy_m,
+        altitude_m=capture_altitude_m,
+        captured_at=captured_at,
+        heading_deg=capture_heading_deg,
+        pitch_deg=capture_pitch_deg,
+        roll_deg=capture_roll_deg,
+    )
+
     # Now that we've accepted the body, prepare the destination.
     ext = Path(file.filename or "photo.jpg").suffix or ".jpg"
     filename = f"{item_id}_{uuid.uuid4().hex[:8]}{ext}"
@@ -457,7 +501,16 @@ async def upload_photo(
 
     # Store relative path in the database
     photo_path = f"punchlist/photos/{filename}"
-    item = await service.add_photo(item_id, photo_path)
+    evidence = build_evidence_record(
+        content,
+        path=photo_path,
+        device=device,
+        exif=exif_tags,
+        uploaded_by=str(user_id) if user_id else None,
+        original_sha256=original_sha256,
+    )
+    evidence["original_size_bytes"] = original_size
+    item = await service.add_photo(item_id, photo_path, evidence)
 
     # Cross-link: create Document record so punch photos appear in
     # Documents hub.  Uses the ORM model directly (NOT raw SQL) so
@@ -590,3 +643,115 @@ async def export_excel(
         media_type=media_type,
         headers={"Content-Disposition": f"attachment; filename=punchlist_{project_id}.{ext}"},
     )
+
+
+# ── BCF round-trip ───────────────────────────────────────────────────────────
+
+
+@router.get("/export/bcf/")
+async def export_bcf(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    item_ids: list[uuid.UUID] | None = Query(default=None),
+    version: str = Query(default="2.1", pattern=r"^(2\.1|3\.0)$"),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("punchlist.read")),
+) -> Response:
+    """Export punch items as BCF topics (topic GUID = punch item id)."""
+    await verify_project_access(project_id, user_id, session)
+    try:
+        from app.modules.punchlist.bcf_bridge import export_punch_bcf
+
+        archive, count = await export_punch_bcf(
+            session, project_id, item_ids=item_ids, version=version, author=str(user_id or "")
+        )
+    except ImportError as exc:
+        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="BCF module is not installed") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+    return Response(
+        content=archive,
+        media_type="application/octet-stream",
+        headers={
+            "Content-Disposition": f"attachment; filename=punchlist_{project_id}.bcfzip",
+            "X-Topic-Count": str(count),
+        },
+    )
+
+
+@router.post("/import/bcf/")
+async def import_bcf(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    only_labelled: bool = Query(default=False),
+    file: UploadFile = File(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("punchlist.update")),
+) -> dict:
+    """Create or update punch items from a ``.bcfzip`` (matched by topic GUID)."""
+    await verify_project_access(project_id, user_id, session)
+    data = await file.read()
+    if len(data) > _MAX_BCF_IMPORT_BYTES:
+        raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="BCF archive too large")
+    try:
+        from app.modules.punchlist.bcf_bridge import import_punch_bcf
+    except ImportError as exc:
+        raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED, detail="BCF module is not installed") from exc
+    report = await import_punch_bcf(
+        session, project_id, data, user_id=str(user_id) if user_id else None, only_labelled=only_labelled
+    )
+    return report.to_dict()
+
+
+# ── Validation ───────────────────────────────────────────────────────────────
+
+
+@router.get("/validate/")
+async def validate_punchlist(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("punchlist.read")),
+    service: PunchListService = Depends(_get_service),
+) -> dict:
+    """Run the punch list rule set (closure photos, photo evidence) for a project."""
+    from app.core.i18n import get_locale
+    from app.core.validation.engine import validation_engine
+
+    await verify_project_access(project_id, user_id, session)
+    items = await service.repo.all_for_project(project_id)
+    data = {
+        "items": [
+            {
+                "id": str(it.id),
+                "title": it.title,
+                "status": it.status,
+                "photos": list(it.photos or []),
+                "photo_evidence": _photo_evidence(it),
+            }
+            for it in items
+        ]
+    }
+    report = await validation_engine.validate(
+        data=data,
+        rule_sets=["punchlist"],
+        target_type="punchlist",
+        target_id=str(project_id),
+        project_id=str(project_id),
+        metadata={"locale": get_locale()},
+    )
+    failed = [r for r in report.results if not r.passed]
+    return {
+        "status": "errors" if report.errors else "warnings" if report.warnings else "passed",
+        "checked": len(report.results),
+        "results": [
+            {
+                "rule_id": r.rule_id,
+                "severity": str(r.severity),
+                "message": r.message,
+                "element_ref": r.element_ref,
+                "suggestion": r.suggestion,
+            }
+            for r in failed
+        ],
+    }

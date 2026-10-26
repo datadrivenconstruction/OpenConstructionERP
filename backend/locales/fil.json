@@ -618,5 +618,65 @@
       "draft": "Draft",
       "frozen": "Naka-lock"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Nasarhan ang punch item na '{title}' nang walang larawan",
+    "punch_no_photo_fix": "Magdagdag ng larawan ng natapos na gawain",
+    "photo_weak": "{count} larawan sa '{title}' ang walang lokasyon o oras ng pagkuha",
+    "photo_weak_fix": "Kunan muli ang larawan sa app na naka-on ang lokasyon",
+    "defect_no_photo": "Nasarhan ang depektong '{reference}' nang walang larawan ng pagwawasto",
+    "defect_no_photo_fix": "Maglakip ng larawan ng naitamang gawain"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} pang item ang hindi nakalista",
+    "category_missing": "Walang ebidensya para sa kinakailangang kategoryang '{category}'",
+    "category_missing_fix": "Iugnay ang isang dokumento sa item ng checklist ng kategoryang ito, o magdagdag ng isa",
+    "category_unverified": "Hindi pa na-verify ang ebidensya para sa '{category}'",
+    "category_unverified_fix": "Ipasuri at ipa-verify sa isang manager ang nakakabit na ebidensya",
+    "punch_open": "Bukas pa rin ang punch item na '{name}'",
+    "punch_open_fix": "Lutasin at isara ang item, o alisin ito sa saklaw ng dosyer na ito",
+    "punch_no_photo": "Walang larawan ang naresolbang punch item na '{name}'",
+    "punch_no_photo_fix": "Magdagdag ng larawan ng natapos na gawain",
+    "system_pending": "Hindi pa na-commission ang sistemang '{name}'",
+    "system_pending_fix": "Kumpletuhin ang mga checklist ng commissioning at markahang na-commission ang sistema",
+    "critical_issues": "{count} kritikal na isyu sa commissioning ang bukas pa rin",
+    "critical_issues_fix": "Isara ang mga kritikal na isyu bago ang turnover",
+    "acceptance_missing": "Walang nakakabit na sertipiko ng pagtanggap",
+    "acceptance_missing_fix": "Iugnay ang pirmadong sertipiko ng pagtanggap sa item ng checklist ng pagtanggap",
+    "acceptance_unsigned": "Hindi buong pirmado ang sertipiko ng pagtanggap (katayuan: {status})",
+    "acceptance_unsigned_fix": "Kolektahin ang mga kulang na pirma sa Pagpirma",
+    "blocked": "Hindi pumasa ang dosyer sa checklist nito. Ayusin ang mga natuklasan, o buuin pa rin bilang hindi kumpleto (pag-apruba ng manager).",
+    "delivery_title": "Dosyer ng turnover: {project}",
+    "delivery_body": "Handa na ang dosyer ng turnover na '{title}' ({scope}). Dina-download ito ng link sa ibaba at balido hanggang {expires}.",
+    "pdf": {
+      "title": "Dosyer ng turnover",
+      "scope": "Saklaw",
+      "built": "Binuo noong",
+      "status_passed": "Pumasa ang checklist",
+      "status_warnings": "Pumasa ang checklist na may mga babala",
+      "status_errors": "Hindi kumpleto: bukas pa ang mga natuklasan sa checklist",
+      "findings": "Mga bukas na natuklasan sa checklist",
+      "severity": "Kalubhaan",
+      "finding": "Natuklasan",
+      "severity_error": "Error",
+      "severity_warning": "Babala",
+      "severity_info": "Impormasyon",
+      "contents": "Nilalaman",
+      "file": "File",
+      "size": "Laki",
+      "punch": "Naresolbang punch list",
+      "item": "Item",
+      "status": "Katayuan",
+      "photos": "Mga larawan",
+      "evidence": "Ebidensyang larawan"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Ang rating na {rating} ng '{name}' ay hindi antas ng sukatang '{scale}'",
+    "rule_poor_without_action": "Ang '{name}' ay may rating na {rating} ngunit walang nakaplanong aksyon sa maintenance",
+    "rule_poor_without_action_fix": "Hanguin ang plano, o magdagdag ng aksyon para sa elementong ito",
+    "rule_action_unpriced": "Walang gastos kada yunit ang aksyon para sa '{name}' sa {year}",
+    "rule_action_unpriced_fix": "Maglagay ng gastos kada yunit para mapasama ito sa mga kabuuan ng plano",
+    "rule_defect_incomplete": "Ang rating ng '{name}' ay nangangailangan ng gawain ngunit walang naitalang kalubhaan o saklaw"
   }
 }

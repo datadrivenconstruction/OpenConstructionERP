@@ -789,5 +789,65 @@
       "draft": "پیش‌نویس",
       "frozen": "قفل‌شده"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "مورد فهرست نواقص '{title}' بدون عکس بسته شده است",
+    "punch_no_photo_fix": "عکسی از کار انجام‌شده اضافه کنید",
+    "photo_weak": "{count} عکس در '{title}' موقعیت یا زمان ثبت ندارد",
+    "photo_weak_fix": "عکس را در برنامه با فعال بودن موقعیت‌یابی دوباره بگیرید",
+    "defect_no_photo": "عیب '{reference}' بدون عکس رفع عیب بسته شده است",
+    "defect_no_photo_fix": "عکسی از کار اصلاح‌شده پیوست کنید"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} مورد دیگر فهرست نشده است",
+    "category_missing": "برای دسته الزامی '{category}' مدرکی وجود ندارد",
+    "category_missing_fix": "سندی را به یکی از موارد فهرست بررسی این دسته پیوند دهید یا سندی اضافه کنید",
+    "category_unverified": "مدرک '{category}' هنوز تأیید نشده است",
+    "category_unverified_fix": "از یک مدیر بخواهید مدرک پیوست‌شده را بررسی و تأیید کند",
+    "punch_open": "مورد فهرست نواقص '{name}' هنوز باز است",
+    "punch_open_fix": "مورد را رفع و ببندید یا از محدوده این پرونده خارج کنید",
+    "punch_no_photo": "مورد رفع‌شده فهرست نواقص '{name}' عکس ندارد",
+    "punch_no_photo_fix": "عکسی از کار انجام‌شده اضافه کنید",
+    "system_pending": "سامانه '{name}' راه‌اندازی نشده است",
+    "system_pending_fix": "فهرست‌های بررسی راه‌اندازی را کامل کنید و سامانه را راه‌اندازی‌شده علامت بزنید",
+    "critical_issues": "{count} مشکل بحرانی راه‌اندازی هنوز باز است",
+    "critical_issues_fix": "پیش از تحویل، مشکلات بحرانی را ببندید",
+    "acceptance_missing": "گواهی پذیرش پیوست نشده است",
+    "acceptance_missing_fix": "گواهی پذیرش امضاشده را به مورد پذیرش در فهرست بررسی پیوند دهید",
+    "acceptance_unsigned": "گواهی پذیرش کاملاً امضا نشده است (وضعیت: {status})",
+    "acceptance_unsigned_fix": "امضاهای باقی‌مانده را در بخش امضا جمع‌آوری کنید",
+    "blocked": "پرونده از فهرست بررسی نمی‌گذرد. موارد را رفع کنید یا به‌صورت ناقص تهیه کنید (با تأیید مدیر).",
+    "delivery_title": "پرونده تحویل: {project}",
+    "delivery_body": "پرونده تحویل '{title}' ({scope}) آماده است. پیوند زیر آن را دانلود می‌کند و تا {expires} معتبر است.",
+    "pdf": {
+      "title": "پرونده تحویل",
+      "scope": "محدوده",
+      "built": "زمان تهیه",
+      "status_passed": "فهرست بررسی قبول شد",
+      "status_warnings": "فهرست بررسی با هشدار قبول شد",
+      "status_errors": "ناقص: یافته‌های فهرست بررسی باز است",
+      "findings": "یافته‌های باز فهرست بررسی",
+      "severity": "شدت",
+      "finding": "یافته",
+      "severity_error": "خطا",
+      "severity_warning": "هشدار",
+      "severity_info": "اطلاعات",
+      "contents": "فهرست مطالب",
+      "file": "فایل",
+      "size": "اندازه",
+      "punch": "فهرست نواقص رفع‌شده",
+      "item": "مورد",
+      "status": "وضعیت",
+      "photos": "عکس‌ها",
+      "evidence": "مدارک تصویری"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "ارزیابی {rating} برای '{name}' سطحی از مقیاس '{scale}' نیست",
+    "rule_poor_without_action": "'{name}' ارزیابی {rating} دارد اما اقدام نگهداری برنامه‌ریزی‌شده ندارد",
+    "rule_poor_without_action_fix": "برنامه را استخراج کنید یا برای این عنصر اقدامی اضافه کنید",
+    "rule_action_unpriced": "اقدام '{name}' در سال {year} بهای واحد ندارد",
+    "rule_action_unpriced_fix": "بهای واحد را وارد کنید تا در جمع‌های برنامه بیاید",
+    "rule_defect_incomplete": "ارزیابی '{name}' به کار نیاز دارد اما شدت یا وسعتی ثبت نکرده است"
   }
 }

@@ -618,5 +618,65 @@
       "draft": "Kladde",
       "frozen": "Frosset"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "Mangelpunktet '{title}' er lukket uden foto",
+    "punch_no_photo_fix": "Tilføj et foto af det udførte arbejde",
+    "photo_weak": "{count} foto(s) på '{title}' mangler sted eller optagelsestidspunkt",
+    "photo_weak_fix": "Tag fotoet igen i appen med placering slået til",
+    "defect_no_photo": "Manglen '{reference}' er lukket uden foto af udbedringen",
+    "defect_no_photo_fix": "Vedhæft et foto af det udbedrede arbejde"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} yderligere post(er) er ikke vist",
+    "category_missing": "Ingen dokumentation for den påkrævede kategori '{category}'",
+    "category_missing_fix": "Knyt et dokument til et tjeklistepunkt i denne kategori, eller tilføj et",
+    "category_unverified": "Dokumentationen for '{category}' er endnu ikke verificeret",
+    "category_unverified_fix": "Lad en leder gennemgå og verificere den tilknyttede dokumentation",
+    "punch_open": "Mangelpunktet '{name}' er stadig åbent",
+    "punch_open_fix": "Løs og luk punktet, eller udelad det fra denne dokumentations omfang",
+    "punch_no_photo": "Det løste mangelpunkt '{name}' har intet foto",
+    "punch_no_photo_fix": "Tilføj et foto af det udførte arbejde",
+    "system_pending": "Systemet '{name}' er ikke idriftsat",
+    "system_pending_fix": "Afslut tjeklisterne for idriftsættelse, og markér systemet som idriftsat",
+    "critical_issues": "{count} kritiske problemer ved idriftsættelsen er stadig åbne",
+    "critical_issues_fix": "Luk de kritiske problemer før afleveringen",
+    "acceptance_missing": "Ingen afleveringsprotokol er tilknyttet",
+    "acceptance_missing_fix": "Knyt den underskrevne afleveringsprotokol til afleveringspunktet i tjeklisten",
+    "acceptance_unsigned": "Afleveringsprotokollen er ikke fuldt underskrevet (status: {status})",
+    "acceptance_unsigned_fix": "Indhent de manglende underskrifter under Signering",
+    "blocked": "Dokumentationen opfylder ikke sin tjekliste. Ret bemærkningerne, eller saml den alligevel som ufuldstændig (lederens godkendelse).",
+    "delivery_title": "Afleveringsdokumentation: {project}",
+    "delivery_body": "Afleveringsdokumentationen '{title}' ({scope}) er klar. Linket nedenfor henter den og er gyldigt til {expires}.",
+    "pdf": {
+      "title": "Afleveringsdokumentation",
+      "scope": "Omfang",
+      "built": "Samlet",
+      "status_passed": "Tjekliste bestået",
+      "status_warnings": "Tjekliste bestået med advarsler",
+      "status_errors": "Ufuldstændig: åbne bemærkninger i tjeklisten",
+      "findings": "Åbne bemærkninger i tjeklisten",
+      "severity": "Alvorlighed",
+      "finding": "Bemærkning",
+      "severity_error": "Fejl",
+      "severity_warning": "Advarsel",
+      "severity_info": "Info",
+      "contents": "Indhold",
+      "file": "Fil",
+      "size": "Størrelse",
+      "punch": "Løst mangelliste",
+      "item": "Post",
+      "status": "Status",
+      "photos": "Fotos",
+      "evidence": "Fotodokumentation"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "Vurdering {rating} af '{name}' er ikke et niveau på skalaen '{scale}'",
+    "rule_poor_without_action": "'{name}' er vurderet {rating}, men har ingen planlagt vedligeholdelseshandling",
+    "rule_poor_without_action_fix": "Udled planen, eller tilføj en handling for dette element",
+    "rule_action_unpriced": "Handlingen for '{name}' i {year} har ingen enhedspris",
+    "rule_action_unpriced_fix": "Angiv en enhedspris, så plantotalerne medtager den",
+    "rule_defect_incomplete": "Vurderingen af '{name}' kræver arbejde, men registrerer hverken alvorlighed eller omfang"
   }
 }

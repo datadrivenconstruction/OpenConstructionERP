@@ -618,5 +618,65 @@
       "draft": "Bozza",
       "frozen": "Congelato"
     }
+  },
+  "field_evidence": {
+    "punch_no_photo": "La voce di punch list '{title}' è chiusa senza foto",
+    "punch_no_photo_fix": "Aggiungi una foto del lavoro completato",
+    "photo_weak": "{count} foto di '{title}' senza posizione o ora di scatto",
+    "photo_weak_fix": "Rifai la foto nell'app con la localizzazione attiva",
+    "defect_no_photo": "Il difetto '{reference}' è chiuso senza foto dell'eliminazione",
+    "defect_no_photo_fix": "Allega una foto del lavoro corretto"
+  },
+  "closeout_dossier": {
+    "more_items": "{count} altre voci non elencate",
+    "category_missing": "Nessuna prova per la categoria richiesta '{category}'",
+    "category_missing_fix": "Collega un documento a una voce della checklist di questa categoria, oppure aggiungine uno",
+    "category_unverified": "La prova per '{category}' non è ancora verificata",
+    "category_unverified_fix": "Fai esaminare e verificare la prova collegata da un responsabile",
+    "punch_open": "La voce di punch list '{name}' è ancora aperta",
+    "punch_open_fix": "Risolvi e chiudi la voce, oppure escludila dall'ambito di questo fascicolo",
+    "punch_no_photo": "La voce di punch list risolta '{name}' non ha foto",
+    "punch_no_photo_fix": "Aggiungi una foto del lavoro completato",
+    "system_pending": "Il sistema '{name}' non è collaudato",
+    "system_pending_fix": "Completa le checklist di collaudo e segna il sistema come collaudato",
+    "critical_issues": "{count} problemi critici di collaudo sono ancora aperti",
+    "critical_issues_fix": "Chiudi i problemi critici prima della consegna",
+    "acceptance_missing": "Nessun verbale di accettazione collegato",
+    "acceptance_missing_fix": "Collega il verbale di accettazione firmato alla voce di accettazione della checklist",
+    "acceptance_unsigned": "Il verbale di accettazione non è firmato da tutti (stato: {status})",
+    "acceptance_unsigned_fix": "Raccogli le firme mancanti in Firma",
+    "blocked": "Il fascicolo non supera la sua checklist. Correggi i rilievi oppure preparalo comunque come incompleto (approvazione del responsabile).",
+    "delivery_title": "Fascicolo di consegna: {project}",
+    "delivery_body": "Il fascicolo di consegna '{title}' ({scope}) è pronto. Il link seguente lo scarica ed è valido fino al {expires}.",
+    "pdf": {
+      "title": "Fascicolo di consegna",
+      "scope": "Ambito",
+      "built": "Preparato",
+      "status_passed": "Checklist superata",
+      "status_warnings": "Checklist superata con avvisi",
+      "status_errors": "Incompleto: rilievi della checklist aperti",
+      "findings": "Rilievi aperti della checklist",
+      "severity": "Gravità",
+      "finding": "Rilievo",
+      "severity_error": "Errore",
+      "severity_warning": "Avviso",
+      "severity_info": "Info",
+      "contents": "Contenuto",
+      "file": "File",
+      "size": "Dimensione",
+      "punch": "Punch list risolta",
+      "item": "Voce",
+      "status": "Stato",
+      "photos": "Foto",
+      "evidence": "Prova fotografica"
+    }
+  },
+  "condition": {
+    "rule_rating_off_scale": "La valutazione {rating} di '{name}' non è un livello della scala '{scale}'",
+    "rule_poor_without_action": "'{name}' è valutato {rating} ma non ha alcuna azione di manutenzione pianificata",
+    "rule_poor_without_action_fix": "Ricava il piano oppure aggiungi un'azione per questo elemento",
+    "rule_action_unpriced": "L'azione per '{name}' nel {year} non ha un costo unitario",
+    "rule_action_unpriced_fix": "Inserisci un costo unitario affinché i totali del piano lo includano",
+    "rule_defect_incomplete": "La valutazione di '{name}' richiede lavori ma non registra né gravità né estensione"
   }
 }
