@@ -172,6 +172,7 @@ class ChatActionService:
         batch_id: str | None = None,
         message_id: str | uuid.UUID | None = None,
         summary: str | None = None,
+        source: str = "chat",
     ) -> ChatAction:
         """Validate a tool call through its spec and store it as ``proposed``. No domain write.
 
@@ -184,6 +185,7 @@ class ChatActionService:
             batch_id: One id per assistant turn, shared by that turn's proposals.
             message_id: The assistant message, when it is already persisted.
             summary: One line describing the change, if the caller has one.
+            source: ``chat`` for the in-app assistant, ``mcp`` for an external client.
 
         Raises:
             ActionError: Validation, access or state problems, for the model to act on.
@@ -217,6 +219,7 @@ class ChatActionService:
             target_entity_id=draft.target.entity_id if draft.target else None,
             before_state=copy.deepcopy(draft.before_state) if draft.before_state is not None else None,
             batch_id=_short_text(batch_id, 64),
+            source=_short_text(source, 16) or "chat",
         )
         self.session.add(action)
         await self.session.flush()
@@ -263,6 +266,7 @@ class ChatActionService:
         statuses: list[str] | None = None,
         session_id: uuid.UUID | None = None,
         batch_id: str | None = None,
+        source: str | None = None,
         limit: int = 50,
         offset: int = 0,
     ) -> tuple[list[ChatAction], int, ChatActionCounts]:
@@ -274,6 +278,8 @@ class ChatActionService:
             filters.append(ChatAction.session_id == session_id)
         if batch_id:
             filters.append(ChatAction.batch_id == batch_id)
+        if source:
+            filters.append(ChatAction.source == source)
 
         count_rows = (
             await self.session.execute(
@@ -604,6 +610,7 @@ class ChatActionService:
             "confidence": action.confidence,
             "session_id": str(action.session_id) if action.session_id else None,
             "edited_by_human": edited,
+            "source": action.source or "chat",
         }
         if url and url.startswith("/") and not url.startswith("//"):
             metadata["url"] = url
@@ -734,6 +741,7 @@ class ChatActionService:
             revert_hint_key=hint_key,
             revert_hint=hint_text,
             batch_id=action.batch_id,
+            source=action.source or "chat",
             created_at=action.created_at,
             updated_at=action.updated_at,
         )
@@ -753,6 +761,7 @@ async def propose_action(
     batch_id: str | None = None,
     message_id: str | uuid.UUID | None = None,
     summary: str | None = None,
+    source: str = "chat",
 ) -> ChatActionResponse:
     """Store a proposal for a ``propose_*`` tool call and return its DTO. Flushes, never commits.
 
@@ -769,6 +778,7 @@ async def propose_action(
         batch_id=batch_id,
         message_id=message_id,
         summary=summary,
+        source=source,
     )
     viewer = await service.viewer(user_id)
     return (await service.to_dtos([action], viewer))[0]
@@ -809,6 +819,7 @@ async def propose_tool_result(
     batch_id: str | None = None,
     message_id: str | uuid.UUID | None = None,
     summary: str | None = None,
+    source: str = "chat",
 ) -> dict[str, Any]:
     """The tool result for a ``propose_*`` call, in the chat's renderer shape. Flushes, never commits.
 
@@ -829,6 +840,7 @@ async def propose_tool_result(
                 batch_id=batch_id,
                 message_id=message_id,
                 summary=summary,
+                source=source,
             )
     except ActionError as exc:
         return exc.to_tool_result()

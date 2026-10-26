@@ -190,6 +190,8 @@ X-API-Key: <your_api_key>
 
 A key acts as its owner, and the `permissions` list you give when you create it can only narrow that: the request is allowed when the owner's role grants the permission and the list either is empty or contains it. The calendar feed is stricter and needs the permission listed explicitly. For everything else, sign in and use a bearer token as shown below.
 
+MCP tokens are API keys scoped to the MCP endpoint only; see [Connecting an AI client over MCP](./mcp.md).
+
 Webhook lead capture configured with `api_key` auth also reads an `X-Api-Key` header, but that is the secret of that one webhook, not a user API key.
 
 ## Two worked examples with curl

@@ -342,6 +342,7 @@ class ChatActionResponse(BaseModel):
     revert_hint_key: str | None = None
     revert_hint: str | None = None
     batch_id: str | None = None
+    source: str = "chat"
     created_at: datetime
     updated_at: datetime
 

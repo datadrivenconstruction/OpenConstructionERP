@@ -73,6 +73,7 @@ async def list_actions(
     status: str | None = Query(default=None, description="One status or a comma-separated list."),
     session_id: uuid.UUID | None = Query(default=None),
     batch_id: str | None = Query(default=None, max_length=64),
+    source: str | None = Query(default=None, max_length=16, description="chat or mcp"),
     limit: int = Query(default=50, ge=1, le=200),
     offset: int = Query(default=0, ge=0),
 ) -> ChatActionListResponse:
@@ -86,6 +87,7 @@ async def list_actions(
         statuses=statuses,
         session_id=session_id,
         batch_id=batch_id,
+        source=source,
         limit=limit,
         offset=offset,
     )

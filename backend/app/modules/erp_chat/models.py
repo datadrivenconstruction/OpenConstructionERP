@@ -229,6 +229,8 @@ class ChatAction(Base):
     reverted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     revert_note: Mapped[str | None] = mapped_column(Text, nullable=True)
     batch_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # Where the proposal came from: ``chat`` (the in-app assistant) or ``mcp`` (an external client).
+    source: Mapped[str] = mapped_column(String(16), nullable=False, default="chat", server_default="chat", index=True)
 
     def __repr__(self) -> str:
         return f"<ChatAction {self.id} {self.action_type} {self.status}>"
