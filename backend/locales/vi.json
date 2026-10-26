@@ -618,5 +618,50 @@
       "draft": "Nháp",
       "frozen": "Đã khóa"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Công việc chưa có chi tiết nào để cắt",
+        "suggestion": "Thêm chi tiết thủ công, dán vào hoặc nhập từ bảng thống kê uốn thép, bóc tách, một dòng tiên lượng hoặc một tệp."
+      },
+      "has_stock": {
+        "fail": "Công việc chưa có phôi để cắt",
+        "suggestion": "Thêm ít nhất một chiều dài phôi hoặc kích thước tấm, hoặc tái sử dụng phần thừa trong kho công trường."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} chưa có chiều rộng",
+        "suggestion": "Nhập cả chiều dài và chiều rộng cho mọi chi tiết dạng tấm và mọi kích thước tấm."
+      },
+      "piece_fits_stock": {
+        "fail": "Chi tiết {ref} ({size} mm) không vừa mục phôi nào",
+        "suggestion": "Thêm kích thước phôi dài hơn hoặc lớn hơn, giảm phần cắt bỏ hoặc chia chi tiết bằng một mối nối."
+      },
+      "grain_allows_fit": {
+        "fail": "Chi tiết {ref} chỉ vừa khi xoay ngang thớ",
+        "suggestion": "Cho phép xoay chi tiết này hoặc thêm kích thước tấm mà chi tiết vừa theo chiều thớ."
+      },
+      "kerf_set": {
+        "fail": "Bề rộng mạch cưa bằng không",
+        "suggestion": "Nhập bề dày lưỡi cưa hoặc bề rộng nhát cắt, nếu không tỷ lệ sử dụng của mỗi thanh có nhiều nhát cắt sẽ bị tính cao hơn thực tế."
+      },
+      "min_offcut_set": {
+        "fail": "Chưa đặt phần thừa tối thiểu dùng được",
+        "suggestion": "Đặt phần thừa ngắn nhất đáng giữ lại, để phần thừa tái sử dụng không bị tính là hao hụt."
+      },
+      "stock_priced": {
+        "fail": "Phôi {ref} chưa có đơn giá",
+        "suggestion": "Nhập giá mỗi chiếc để phương án báo chi phí và chọn phôi rẻ nhất."
+      },
+      "stock_sufficient": {
+        "fail": "Số chi tiết chưa xếp được trên phôi hiện có: {count}",
+        "suggestion": "Tăng số lượng hiện có hoặc thêm một kích thước phôi khác."
+      },
+      "yield_threshold": {
+        "fail": "Tỷ lệ sử dụng {actual} % thấp hơn ngưỡng {threshold} %",
+        "suggestion": "Thêm chiều dài hoặc kích thước phôi khác, cho phép xoay hoặc xem lại ngưỡng cho vật liệu này."
+      }
+    }
   }
 }

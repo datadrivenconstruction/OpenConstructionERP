@@ -618,5 +618,50 @@
       "draft": "Utkast",
       "frozen": "Fryst"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Jobbet har inga delar att kapa",
+        "suggestion": "Lägg till delar för hand, klistra in dem eller importera dem från en bockningslista, en mängdavtagning, en mängdrad eller en fil."
+      },
+      "has_stock": {
+        "fail": "Jobbet har inget lager att kapa från",
+        "suggestion": "Lägg till minst en lagerlängd eller skivstorlek, eller återanvänd restbitar från platslagret."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} saknar bredd",
+        "suggestion": "Ange både längd och bredd för varje skivdel och varje skivstorlek."
+      },
+      "piece_fits_stock": {
+        "fail": "Del {ref} ({size} mm) passar inte i någon lagerpost",
+        "suggestion": "Lägg till en längre eller större lagerdimension, minska kapningen eller dela delen med en skarv."
+      },
+      "grain_allows_fit": {
+        "fail": "Del {ref} passar bara när den vrids tvärs fiberriktningen",
+        "suggestion": "Tillåt vridning av den här delen eller lägg till en skivstorlek där den passar längs fiberriktningen."
+      },
+      "kerf_set": {
+        "fail": "Sågsnittet är noll",
+        "suggestion": "Ange bladets eller snittets bredd, annars överskattas utbytet för varje stång med flera snitt."
+      },
+      "min_offcut_set": {
+        "fail": "Ingen minsta användbar restbit är angiven",
+        "suggestion": "Ange den kortaste rest som är värd att spara, så att återanvändbara restbitar inte räknas som spill."
+      },
+      "stock_priced": {
+        "fail": "Lagerpost {ref} saknar enhetspris",
+        "suggestion": "Ange ett pris per styck så att planen visar kostnaden och väljer det billigaste lagret."
+      },
+      "stock_sufficient": {
+        "fail": "Delar som inte placerats på tillgängligt lager: {count}",
+        "suggestion": "Öka den tillgängliga mängden eller lägg till en annan lagerdimension."
+      },
+      "yield_threshold": {
+        "fail": "Utbytet {actual} % ligger under gränsen på {threshold} %",
+        "suggestion": "Lägg till en annan lagerlängd eller dimension, tillåt vridning eller se över gränsen för det här materialet."
+      }
+    }
   }
 }

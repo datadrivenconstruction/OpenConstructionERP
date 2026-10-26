@@ -618,5 +618,50 @@
       "draft": "Qoralama",
       "frozen": "Muzlatilgan"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Ishda kesiladigan detallar yo'q",
+        "suggestion": "Detallarni qo'lda qo'shing, qo'ying yoki bukish qaydnomasi, o'lchov, BOQ qatori yoxud fayldan import qiling."
+      },
+      "has_stock": {
+        "fail": "Ishda kesish uchun zaxira yo'q",
+        "suggestion": "Kamida bitta zaxira uzunligi yoki list o'lchamini qo'shing yoki obyekt omboridagi qoldiqlardan qayta foydalaning."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} kengligi ko'rsatilmagan",
+        "suggestion": "Har bir list detali va har bir list o'lchami uchun uzunlik va kenglikni kiriting."
+      },
+      "piece_fits_stock": {
+        "fail": "{ref} detali ({size} mm) hech bir zaxira yozuviga sig'maydi",
+        "suggestion": "Uzunroq yoki kattaroq zaxira o'lchamini qo'shing, qirqimni kamaytiring yoki detalni tutashuv bilan bo'ling."
+      },
+      "grain_allows_fit": {
+        "fail": "{ref} detali faqat tola yo'nalishiga ko'ndalang burilganda sig'adi",
+        "suggestion": "Bu detalni burishga ruxsat bering yoki tola yo'nalishida sig'adigan list o'lchamini qo'shing."
+      },
+      "kerf_set": {
+        "fail": "Arra kesim kengligi nolga teng",
+        "suggestion": "Tig' yoki kesim kengligini kiriting, aks holda bir necha kesimli har bir sterjenning foydalanish darajasi oshirib ko'rsatiladi."
+      },
+      "min_offcut_set": {
+        "fail": "Eng kichik yaroqli qoldiq belgilanmagan",
+        "suggestion": "Saqlashga arziydigan eng qisqa qoldiqni belgilang, shunda qayta ishlatiladigan qoldiqlar chiqindi hisoblanmaydi."
+      },
+      "stock_priced": {
+        "fail": "{ref} zaxirasining birlik narxi yo'q",
+        "suggestion": "Reja narxni ko'rsatishi va eng arzon zaxirani tanlashi uchun dona narxini kiriting."
+      },
+      "stock_sufficient": {
+        "fail": "Mavjud zaxiraga joylashtirilmagan detallar: {count}",
+        "suggestion": "Mavjud miqdorni oshiring yoki yana bir zaxira o'lchamini qo'shing."
+      },
+      "yield_threshold": {
+        "fail": "Foydalanish darajasi {actual} % chegara {threshold} % dan past",
+        "suggestion": "Boshqa zaxira uzunligi yoki o'lchamini qo'shing, burishga ruxsat bering yoki bu material uchun chegarani qayta ko'rib chiqing."
+      }
+    }
   }
 }

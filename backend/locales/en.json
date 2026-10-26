@@ -789,5 +789,50 @@
       "draft": "Draft",
       "frozen": "Frozen"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "The job has no pieces to cut",
+        "suggestion": "Add pieces by hand, paste them, or import them from a bending schedule, takeoff, a BOQ line or a file."
+      },
+      "has_stock": {
+        "fail": "The job offers no stock to cut from",
+        "suggestion": "Add at least one stock length or sheet size, or reuse offcuts from site inventory."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} has no width",
+        "suggestion": "Give every sheet piece and sheet size both a length and a width."
+      },
+      "piece_fits_stock": {
+        "fail": "Piece {ref} ({size} mm) fits no stock entry",
+        "suggestion": "Add a longer or larger stock size, reduce the trim, or split the piece with a joint."
+      },
+      "grain_allows_fit": {
+        "fail": "Piece {ref} fits only when turned across the grain",
+        "suggestion": "Allow rotation for this piece or add a sheet size that fits it along the grain."
+      },
+      "kerf_set": {
+        "fail": "The saw kerf is zero",
+        "suggestion": "Enter the blade or cutting width, otherwise the yield of every bar with several cuts is overstated."
+      },
+      "min_offcut_set": {
+        "fail": "No minimum usable offcut is set",
+        "suggestion": "Set the shortest remnant worth keeping, so reusable offcuts are not counted as waste."
+      },
+      "stock_priced": {
+        "fail": "Stock {ref} has no unit cost",
+        "suggestion": "Enter a price per piece so the plan reports its cost and picks the cheapest stock."
+      },
+      "stock_sufficient": {
+        "fail": "Pieces not placed on the available stock: {count}",
+        "suggestion": "Raise the available quantity or add another stock size."
+      },
+      "yield_threshold": {
+        "fail": "Yield {actual} % is below the threshold of {threshold} %",
+        "suggestion": "Add another stock length or size, allow rotation, or review the threshold for this material."
+      }
+    }
   }
 }

@@ -618,5 +618,50 @@
       "draft": "Taslak",
       "frozen": "Dondurulmuş"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "İşte kesilecek parça yok",
+        "suggestion": "Parçaları elle ekleyin, yapıştırın veya bükme listesinden, metrajdan, bir metraj kaleminden ya da dosyadan içe aktarın."
+      },
+      "has_stock": {
+        "fail": "İşte kesim yapılacak stok yok",
+        "suggestion": "En az bir stok boyu veya levha ölçüsü ekleyin ya da şantiye deposundaki artıkları yeniden kullanın."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} için genişlik yok",
+        "suggestion": "Her levha parçasına ve her levha ölçüsüne hem uzunluk hem genişlik girin."
+      },
+      "piece_fits_stock": {
+        "fail": "{ref} parçası ({size} mm) hiçbir stok kaydına sığmıyor",
+        "suggestion": "Daha uzun veya büyük bir stok ölçüsü ekleyin, payı azaltın ya da parçayı bir ek ile bölün."
+      },
+      "grain_allows_fit": {
+        "fail": "{ref} parçası yalnızca lif yönüne dik çevrildiğinde sığıyor",
+        "suggestion": "Bu parça için döndürmeye izin verin veya lif yönünde sığacağı bir levha ölçüsü ekleyin."
+      },
+      "kerf_set": {
+        "fail": "Testere payı sıfır",
+        "suggestion": "Bıçak veya kesim genişliğini girin, aksi halde birden çok kesimli her çubuğun verimi olduğundan yüksek görünür."
+      },
+      "min_offcut_set": {
+        "fail": "Asgari kullanılabilir artık ayarlanmamış",
+        "suggestion": "Saklamaya değer en kısa artığı ayarlayın; böylece yeniden kullanılabilir artıklar fire sayılmaz."
+      },
+      "stock_priced": {
+        "fail": "{ref} stokunun birim maliyeti yok",
+        "suggestion": "Plan maliyeti göstersin ve en ucuz stoku seçsin diye parça başı fiyat girin."
+      },
+      "stock_sufficient": {
+        "fail": "Mevcut stoka yerleştirilemeyen parçalar: {count}",
+        "suggestion": "Mevcut miktarı artırın veya başka bir stok ölçüsü ekleyin."
+      },
+      "yield_threshold": {
+        "fail": "%{actual} verim, %{threshold} eşiğinin altında",
+        "suggestion": "Başka bir stok boyu veya ölçüsü ekleyin, döndürmeye izin verin ya da bu malzeme için eşiği gözden geçirin."
+      }
+    }
   }
 }

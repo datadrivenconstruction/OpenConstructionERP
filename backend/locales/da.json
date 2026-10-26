@@ -618,5 +618,50 @@
       "draft": "Kladde",
       "frozen": "Frosset"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Jobbet har ingen emner at skære til",
+        "suggestion": "Tilføj emner manuelt, indsæt dem eller importér dem fra en bukkeliste, opmåling, en tilbudslinje eller en fil."
+      },
+      "has_stock": {
+        "fail": "Jobbet har intet lager at skære fra",
+        "suggestion": "Tilføj mindst én lagerlængde eller pladestørrelse, eller genbrug afskær fra byggepladslageret."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} har ingen bredde",
+        "suggestion": "Angiv både længde og bredde for hvert pladeemne og hver pladestørrelse."
+      },
+      "piece_fits_stock": {
+        "fail": "Emne {ref} ({size} mm) passer ikke til nogen lagerstørrelse",
+        "suggestion": "Tilføj en længere eller større lagerstørrelse, reducér beskæringen, eller del emnet med en samling."
+      },
+      "grain_allows_fit": {
+        "fail": "Emne {ref} passer kun, når det drejes på tværs af fiberretningen",
+        "suggestion": "Tillad drejning af emnet, eller tilføj en pladestørrelse, hvor det passer langs fiberretningen."
+      },
+      "kerf_set": {
+        "fail": "Snitbredden er nul",
+        "suggestion": "Angiv klinge- eller snitbredden, ellers bliver udbyttet for hver stang med flere snit overvurderet."
+      },
+      "min_offcut_set": {
+        "fail": "Der er ikke angivet mindste brugbare afskær",
+        "suggestion": "Angiv det korteste afskær, der er værd at gemme, så genbrugelige afskær ikke tælles som spild."
+      },
+      "stock_priced": {
+        "fail": "Lager {ref} har ingen enhedspris",
+        "suggestion": "Angiv en pris pr. stk., så planen viser sin pris og vælger det billigste lager."
+      },
+      "stock_sufficient": {
+        "fail": "Emner der ikke er placeret på det tilgængelige lager: {count}",
+        "suggestion": "Forøg den tilgængelige mængde, eller tilføj en ekstra lagerstørrelse."
+      },
+      "yield_threshold": {
+        "fail": "Udbyttet på {actual} % er under grænsen på {threshold} %",
+        "suggestion": "Tilføj en ekstra lagerlængde eller -størrelse, tillad drejning, eller gennemgå grænsen for dette materiale."
+      }
+    }
   }
 }

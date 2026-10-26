@@ -618,5 +618,50 @@
       "draft": "Luonnos",
       "frozen": "Lukittu"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Työssä ei ole sahattavia kappaleita",
+        "suggestion": "Lisää kappaleet käsin, liitä ne tai tuo ne taivutusluettelosta, mittauksesta, määräluettelon riviltä tai tiedostosta."
+      },
+      "has_stock": {
+        "fail": "Työssä ei ole varastoa, josta sahata",
+        "suggestion": "Lisää vähintään yksi varastopituus tai levykoko tai käytä uudelleen työmaan varaston jäännöspaloja."
+      },
+      "sheet_dimensions": {
+        "fail": "Kohteella {ref} ei ole leveyttä",
+        "suggestion": "Anna sekä pituus että leveys jokaiselle levykappaleelle ja levykoolle."
+      },
+      "piece_fits_stock": {
+        "fail": "Kappale {ref} ({size} mm) ei mahdu mihinkään varastokokoon",
+        "suggestion": "Lisää pidempi tai suurempi varastokoko, pienennä tasausta tai jaa kappale jatkoksella."
+      },
+      "grain_allows_fit": {
+        "fail": "Kappale {ref} mahtuu vain käännettynä syitä vasten",
+        "suggestion": "Salli tämän kappaleen kierto tai lisää levykoko, johon se mahtuu syiden suuntaisesti."
+      },
+      "kerf_set": {
+        "fail": "Sahauksen leikkuuleveys on nolla",
+        "suggestion": "Anna terän tai leikkauksen leveys, muuten useita leikkauksia sisältävien tankojen saanto näyttää todellista paremmalta."
+      },
+      "min_offcut_set": {
+        "fail": "Pienintä käyttökelpoista jäännöspalaa ei ole asetettu",
+        "suggestion": "Aseta lyhin säilyttämisen arvoinen jäännöspala, jotta uudelleenkäytettäviä jäännöspaloja ei lasketa hukaksi."
+      },
+      "stock_priced": {
+        "fail": "Varastokappaleella {ref} ei ole yksikköhintaa",
+        "suggestion": "Anna kappalehinta, jotta suunnitelma ilmoittaa kustannuksensa ja valitsee halvimman varaston."
+      },
+      "stock_sufficient": {
+        "fail": "Käytettävissä olevaan varastoon sijoittamattomat kappaleet: {count}",
+        "suggestion": "Lisää saatavilla olevaa määrää tai lisää uusi varastokoko."
+      },
+      "yield_threshold": {
+        "fail": "Saanto {actual} % on alle rajan {threshold} %",
+        "suggestion": "Lisää uusi varastopituus tai -koko, salli kierto tai tarkista tämän materiaalin raja."
+      }
+    }
   }
 }

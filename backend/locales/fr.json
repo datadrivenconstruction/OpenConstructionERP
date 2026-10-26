@@ -618,5 +618,50 @@
       "draft": "Brouillon",
       "frozen": "Figé"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Le travail ne contient aucune pièce à couper",
+        "suggestion": "Ajoutez des pièces à la main, collez-les ou importez-les depuis un plan de cintrage, un métré, une ligne du BOQ ou un fichier."
+      },
+      "has_stock": {
+        "fail": "Le travail n'a aucun stock à débiter",
+        "suggestion": "Ajoutez au moins une longueur de stock ou un format de panneau, ou réutilisez des chutes du stock du chantier."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} n'a pas de largeur",
+        "suggestion": "Indiquez une longueur et une largeur pour chaque pièce et chaque format de panneau."
+      },
+      "piece_fits_stock": {
+        "fail": "La pièce {ref} ({size} mm) ne rentre dans aucun stock",
+        "suggestion": "Ajoutez un stock plus long ou plus grand, réduisez le parage ou scindez la pièce avec un joint."
+      },
+      "grain_allows_fit": {
+        "fail": "La pièce {ref} ne rentre qu'en travers du fil",
+        "suggestion": "Autorisez la rotation de cette pièce ou ajoutez un format de panneau où elle rentre dans le sens du fil."
+      },
+      "kerf_set": {
+        "fail": "Le trait de scie est nul",
+        "suggestion": "Saisissez la largeur de la lame ou de coupe, sinon le rendement de chaque barre à plusieurs coupes est surestimé."
+      },
+      "min_offcut_set": {
+        "fail": "Aucune chute minimale réutilisable n'est définie",
+        "suggestion": "Définissez la plus petite chute à conserver, afin que les chutes réutilisables ne soient pas comptées comme perte."
+      },
+      "stock_priced": {
+        "fail": "Le stock {ref} n'a pas de coût unitaire",
+        "suggestion": "Saisissez un prix par pièce pour que le plan indique son coût et choisisse le stock le moins cher."
+      },
+      "stock_sufficient": {
+        "fail": "Pièces non placées sur le stock disponible : {count}",
+        "suggestion": "Augmentez la quantité disponible ou ajoutez un autre format de stock."
+      },
+      "yield_threshold": {
+        "fail": "Le rendement de {actual} % est inférieur au seuil de {threshold} %",
+        "suggestion": "Ajoutez une autre longueur ou un autre format de stock, autorisez la rotation ou revoyez le seuil pour ce matériau."
+      }
+    }
   }
 }

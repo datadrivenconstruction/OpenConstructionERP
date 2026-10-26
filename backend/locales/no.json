@@ -618,5 +618,50 @@
       "draft": "Utkast",
       "frozen": "Frosset"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Jobben har ingen deler å kappe",
+        "suggestion": "Legg til deler for hånd, lim dem inn, eller importer dem fra en bøyeliste, et opptak, en mengdelinje eller en fil."
+      },
+      "has_stock": {
+        "fail": "Jobben har ikke noe lager å kappe fra",
+        "suggestion": "Legg til minst én lagerlengde eller platestørrelse, eller gjenbruk restbiter fra byggeplasslageret."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} mangler bredde",
+        "suggestion": "Gi hver platedel og hver platestørrelse både lengde og bredde."
+      },
+      "piece_fits_stock": {
+        "fail": "Del {ref} ({size} mm) passer i ingen lagerpost",
+        "suggestion": "Legg til en lengre eller større lagerstørrelse, reduser kantkappen, eller del delen med en skjøt."
+      },
+      "grain_allows_fit": {
+        "fail": "Del {ref} passer bare når den vris på tvers av fiberretningen",
+        "suggestion": "Tillat rotasjon for denne delen, eller legg til en platestørrelse som passer langs fiberretningen."
+      },
+      "kerf_set": {
+        "fail": "Sagsnittet er null",
+        "suggestion": "Angi bladets eller snittets bredde, ellers blir utnyttelsen overvurdert for hver stang med flere kutt."
+      },
+      "min_offcut_set": {
+        "fail": "Ingen minste brukbare restbit er angitt",
+        "suggestion": "Angi den korteste resten det er verdt å beholde, slik at gjenbrukbare restbiter ikke regnes som svinn."
+      },
+      "stock_priced": {
+        "fail": "Lager {ref} har ingen enhetspris",
+        "suggestion": "Angi en pris per stykk slik at planen viser kostnaden og velger billigste lager."
+      },
+      "stock_sufficient": {
+        "fail": "Deler som ikke er plassert på tilgjengelig lager: {count}",
+        "suggestion": "Øk tilgjengelig antall eller legg til en ny lagerstørrelse."
+      },
+      "yield_threshold": {
+        "fail": "Utnyttelsen {actual} % er under grensen på {threshold} %",
+        "suggestion": "Legg til en ny lagerlengde eller størrelse, tillat rotasjon, eller vurder grensen for dette materialet."
+      }
+    }
   }
 }

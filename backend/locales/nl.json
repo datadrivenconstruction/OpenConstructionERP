@@ -618,5 +618,50 @@
       "draft": "Concept",
       "frozen": "Bevroren"
     }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "Stuk {ref} ({size} mm) past in geen enkele voorraadmaat",
+        "suggestion": "Voeg een langere of grotere voorraadmaat toe, verklein de afkorting, of splits het stuk met een las of stootvoeg."
+      },
+      "has_stock": {
+        "suggestion": "Voeg minstens één voorraadlengte of plaatmaat toe, of gebruik reststukken uit de bouwplaatsvoorraad opnieuw.",
+        "fail": "De opdracht biedt geen voorraad om uit te zagen"
+      },
+      "yield_threshold": {
+        "suggestion": "Voeg nog een voorraadlengte of -maat toe, sta draaien toe, of herzie de drempel voor dit materiaal.",
+        "fail": "Rendement {actual} % ligt onder de drempel van {threshold} %"
+      },
+      "ok": "OK",
+      "kerf_set": {
+        "fail": "De zaagbreedte is nul",
+        "suggestion": "Voer de bladdikte of snijbreedte in, anders is het rendement van elke staaf met meerdere zaagsneden te hoog."
+      },
+      "grain_allows_fit": {
+        "fail": "Stuk {ref} past alleen als het dwars op de vezelrichting wordt gedraaid",
+        "suggestion": "Sta draaien toe voor dit stuk of voeg een plaatmaat toe waarin het in de vezelrichting past."
+      },
+      "has_pieces": {
+        "fail": "De opdracht heeft geen stukken om te zagen",
+        "suggestion": "Voeg stukken handmatig toe, plak ze, of importeer ze uit een buigstaat, meetstaat, begrotingsregel of bestand."
+      },
+      "min_offcut_set": {
+        "fail": "Er is geen minimaal bruikbaar reststuk ingesteld",
+        "suggestion": "Stel het kortste reststuk in dat het bewaren waard is, zodat herbruikbare reststukken niet als afval meetellen."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Geef elk plaatstuk en elke plaatmaat zowel een lengte als een breedte.",
+        "fail": "{ref} heeft geen breedte"
+      },
+      "stock_priced": {
+        "fail": "Voorraad {ref} heeft geen eenheidsprijs",
+        "suggestion": "Voer een prijs per stuk in, zodat het plan de kosten toont en de goedkoopste voorraad kiest."
+      },
+      "stock_sufficient": {
+        "suggestion": "Verhoog de beschikbare hoeveelheid of voeg nog een voorraadmaat toe.",
+        "fail": "Stukken die niet op de beschikbare voorraad zijn geplaatst: {count}"
+      }
+    }
   }
 }

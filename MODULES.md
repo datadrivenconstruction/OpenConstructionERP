@@ -6,7 +6,7 @@ map of every module that ships in the box.
 OpenConstructionERP is modular by design: every business feature (BOQ, BIM,
 takeoff, schedule, CDE, regional BOQ packs and more) is a self-contained
 module that can be enabled, disabled, installed, or replaced without touching
-the core. The current build loads 193 modules. You enable only the parts you
+the core. The current build loads 194 modules. You enable only the parts you
 need.
 
 This file is the single entry point. Deeper material lives alongside the code
@@ -16,7 +16,7 @@ it describes, and the links point there.
 
 ## 1. The module catalog
 
-All 193 modules that load in the current build, grouped by what they do for a
+All 194 modules that load in the current build, grouped by what they do for a
 construction team. The bold name is the module's display name; the code label
 is its backend folder under `backend/app/modules/`. The count is every directory
 under `backend/app/modules/` carrying a `manifest.py`, which is exactly what the
@@ -64,6 +64,7 @@ Build and price the bill of quantities.
 - **Preliminaries** `preliminaries` - prices general conditions as time-related and fixed one-off items.
 - **Formwork** `formwork` - formwork catalogue and per-BOQ assignments with reuse-aware unit cost.
 - **Waste Factors** `waste_factors` - net-to-gross quantity adjustment with waste, lap and coverage factors.
+- **Cutting Optimisation** `cutting` - cutting plans for bars and sheets from a known cut list, with measured yield, waste and cost, offcut reuse and a confirmed update of the BOQ and requisition quantities.
 - **Production-Norm Expansion** `norm_expansion` - expands a work item into labour, plant and material demand from norm coefficients.
 - **Labor & Crew Rates** `labor_rates` - all-in labour rate build-up and composite crew rates.
 - **Resource Summary** `resource_summary` - rolls resource splits across the estimate into a procurement-ready statement.

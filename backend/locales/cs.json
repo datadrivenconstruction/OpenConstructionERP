@@ -618,5 +618,50 @@
       "draft": "Rozpracovaný",
       "frozen": "Zmrazený"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Úloha neobsahuje žádné kusy k řezání",
+        "suggestion": "Přidejte kusy ručně, vložte je nebo je naimportujte z výkazu ohýbání, výkazu výměr, položky rozpočtu nebo souboru."
+      },
+      "has_stock": {
+        "fail": "Úloha nenabízí žádný sklad, ze kterého by se řezalo",
+        "suggestion": "Přidejte alespoň jednu skladovou délku nebo rozměr desky, nebo použijte zbytky ze skladu stavby."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} nemá šířku",
+        "suggestion": "Zadejte délku i šířku pro každý kus desky a každý rozměr desky."
+      },
+      "piece_fits_stock": {
+        "fail": "Kus {ref} ({size} mm) se nevejde na žádný sklad",
+        "suggestion": "Přidejte delší nebo větší skladový rozměr, zmenšete ořez nebo kus rozdělte spojem."
+      },
+      "grain_allows_fit": {
+        "fail": "Kus {ref} se vejde jen po otočení napříč vlákny",
+        "suggestion": "Povolte otáčení tohoto kusu nebo přidejte rozměr desky, na který se vejde po směru vláken."
+      },
+      "kerf_set": {
+        "fail": "Šířka řezu je nulová",
+        "suggestion": "Zadejte šířku kotouče nebo řezu, jinak je využití každé tyče s více řezy nadhodnoceno."
+      },
+      "min_offcut_set": {
+        "fail": "Není nastaven minimální využitelný zbytek",
+        "suggestion": "Nastavte nejkratší zbytek, který stojí za uchování, aby se využitelné zbytky nepočítaly jako odpad."
+      },
+      "stock_priced": {
+        "fail": "Sklad {ref} nemá jednotkovou cenu",
+        "suggestion": "Zadejte cenu za kus, aby plán uvedl své náklady a vybral nejlevnější sklad."
+      },
+      "stock_sufficient": {
+        "fail": "Kusy neumístěné na dostupném skladu: {count}",
+        "suggestion": "Zvyšte dostupné množství nebo přidejte další skladový rozměr."
+      },
+      "yield_threshold": {
+        "fail": "Využití {actual} % je pod prahem {threshold} %",
+        "suggestion": "Přidejte další skladovou délku nebo rozměr, povolte otáčení nebo zkontrolujte práh pro tento materiál."
+      }
+    }
   }
 }

@@ -618,5 +618,50 @@
       "draft": "Draf",
       "frozen": "Beku"
     }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "Potongan {ref} ({size} mm) tidak muat di ukuran stok mana pun",
+        "suggestion": "Tambahkan ukuran stok yang lebih panjang atau besar, kurangi pangkasan, atau sambung potongan dengan sambungan."
+      },
+      "has_stock": {
+        "suggestion": "Tambahkan minimal satu panjang stok atau ukuran lembaran, atau pakai ulang sisa potong dari inventaris lapangan.",
+        "fail": "Pekerjaan ini tidak punya stok untuk dipotong"
+      },
+      "yield_threshold": {
+        "suggestion": "Tambahkan panjang atau ukuran stok lain, izinkan rotasi, atau tinjau ambang untuk material ini.",
+        "fail": "Rendemen {actual} % di bawah ambang {threshold} %"
+      },
+      "ok": "OK",
+      "kerf_set": {
+        "fail": "Kerf gergaji bernilai nol",
+        "suggestion": "Isi lebar mata gergaji atau lebar potong, jika tidak rendemen setiap batang dengan beberapa potongan akan terlalu tinggi."
+      },
+      "grain_allows_fit": {
+        "fail": "Potongan {ref} hanya muat jika diputar melintang serat",
+        "suggestion": "Izinkan rotasi untuk potongan ini atau tambahkan ukuran lembaran yang muat searah serat."
+      },
+      "has_pieces": {
+        "fail": "Pekerjaan ini tidak punya potongan untuk dipotong",
+        "suggestion": "Tambahkan potongan secara manual, tempel, atau impor dari jadwal pembengkokan, takeoff, baris RAB, atau file."
+      },
+      "min_offcut_set": {
+        "fail": "Sisa potong minimum yang berguna belum diatur",
+        "suggestion": "Atur sisa terpendek yang layak disimpan, agar sisa potong pakai ulang tidak dihitung sebagai limbah."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Isi panjang dan lebar untuk setiap potongan lembaran dan ukuran lembaran.",
+        "fail": "{ref} tidak punya lebar"
+      },
+      "stock_priced": {
+        "fail": "Stok {ref} belum punya harga satuan",
+        "suggestion": "Isi harga per buah agar rencana melaporkan biayanya dan memilih stok termurah."
+      },
+      "stock_sufficient": {
+        "suggestion": "Tambah jumlah yang tersedia atau tambahkan ukuran stok lain.",
+        "fail": "Potongan yang belum ditempatkan pada stok tersedia: {count}"
+      }
+    }
   }
 }

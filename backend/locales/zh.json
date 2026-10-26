@@ -618,5 +618,50 @@
       "draft": "草稿",
       "frozen": "已冻结"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "该任务没有需要切割的零件",
+        "suggestion": "手工添加零件、粘贴，或从钢筋弯曲明细表、算量、工程量清单行或文件导入。"
+      },
+      "has_stock": {
+        "fail": "该任务没有可供切割的库存",
+        "suggestion": "至少添加一个库存长度或板材规格，或复用现场库存中的余料。"
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} 没有宽度",
+        "suggestion": "为每个板材零件和每个板材规格同时填写长度和宽度。"
+      },
+      "piece_fits_stock": {
+        "fail": "零件 {ref}（{size} mm）放不进任何库存规格",
+        "suggestion": "添加更长或更大的库存规格，减小修边，或用接头将零件拆分。"
+      },
+      "grain_allows_fit": {
+        "fail": "零件 {ref} 只有旋转到与纹理垂直时才放得下",
+        "suggestion": "允许该零件旋转，或添加可沿纹理方向放下它的板材规格。"
+      },
+      "kerf_set": {
+        "fail": "锯缝宽度为零",
+        "suggestion": "请输入锯片或切割宽度，否则每根多次切割的棒材的利用率会被高估。"
+      },
+      "min_offcut_set": {
+        "fail": "未设置最小可用余料",
+        "suggestion": "设置值得保留的最短余料，这样可复用余料就不会被算作损耗。"
+      },
+      "stock_priced": {
+        "fail": "库存 {ref} 没有单价",
+        "suggestion": "填写单件价格，方案才能给出成本并选择最便宜的库存。"
+      },
+      "stock_sufficient": {
+        "fail": "可用库存上未排入的零件数：{count}",
+        "suggestion": "增加可用数量或添加另一个库存规格。"
+      },
+      "yield_threshold": {
+        "fail": "利用率 {actual} % 低于阈值 {threshold} %",
+        "suggestion": "添加其他库存长度或规格，允许旋转，或重新检查该材料的阈值。"
+      }
+    }
   }
 }

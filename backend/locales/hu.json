@@ -618,5 +618,50 @@
       "draft": "Piszkozat",
       "frozen": "Lezárt"
     }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "A(z) {ref} darab ({size} mm) egyik alapanyagmérethez sem fér",
+        "suggestion": "Adjon hozzá hosszabb vagy nagyobb alapanyagot, csökkentse a lenyesést, vagy toldással ossza fel a darabot."
+      },
+      "has_stock": {
+        "suggestion": "Adjon meg legalább egy alapanyaghosszt vagy táblaméretet, vagy használja újra a helyszíni készlet maradékait.",
+        "fail": "A munkához nincs alapanyag, amelyből vágni lehetne"
+      },
+      "yield_threshold": {
+        "suggestion": "Adjon hozzá újabb alapanyaghosszt vagy -méretet, engedélyezze a forgatást, vagy vizsgálja felül a küszöböt ehhez az anyaghoz.",
+        "fail": "A {actual} % kihasználtság a {threshold} % küszöb alatt van"
+      },
+      "ok": "Rendben",
+      "kerf_set": {
+        "fail": "A fűrészvágat szélessége nulla",
+        "suggestion": "Adja meg a penge vagy a vágás szélességét, különben a több vágású szálak kihasználtsága felülbecsült."
+      },
+      "grain_allows_fit": {
+        "fail": "A(z) {ref} darab csak a szálirányra merőlegesen elforgatva fér el",
+        "suggestion": "Engedélyezze a forgatást ehhez a darabhoz, vagy adjon meg olyan táblaméretet, amelyben szálirányban elfér."
+      },
+      "has_pieces": {
+        "fail": "A munkában nincs vágandó darab",
+        "suggestion": "Adja hozzá a darabokat kézzel, illessze be őket, vagy importálja vasszerelési listából, mennyiségkimutatásból, költségvetési tételből vagy fájlból."
+      },
+      "min_offcut_set": {
+        "fail": "Nincs megadva legkisebb felhasználható maradék",
+        "suggestion": "Adja meg a legrövidebb megtartásra érdemes maradékot, hogy az újrahasznosítható maradék ne számítson hulladéknak."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Adjon meg hosszt és szélességet is minden táblás darabhoz és táblamérethez.",
+        "fail": "A(z) {ref} jelű darabnak nincs szélessége"
+      },
+      "stock_priced": {
+        "fail": "A(z) {ref} alapanyagnak nincs egységára",
+        "suggestion": "Adjon meg darabárat, hogy a terv ki tudja mutatni a költséget és a legolcsóbb alapanyagot válassza."
+      },
+      "stock_sufficient": {
+        "suggestion": "Növelje a rendelkezésre álló mennyiséget, vagy adjon hozzá újabb alapanyagméretet.",
+        "fail": "El nem helyezett darabok a rendelkezésre álló alapanyagon: {count}"
+      }
+    }
   }
 }

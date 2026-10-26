@@ -618,5 +618,50 @@
       "draft": "Borrador",
       "frozen": "Congelada"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "El trabajo no tiene piezas que cortar",
+        "suggestion": "Añada piezas a mano, péguelas o impórtelas desde una planilla de doblado, una medición, una partida del presupuesto o un archivo."
+      },
+      "has_stock": {
+        "fail": "El trabajo no ofrece stock del que cortar",
+        "suggestion": "Añada al menos una longitud de stock o un tamaño de tablero, o reutilice retales del inventario de obra."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} no tiene ancho",
+        "suggestion": "Indique longitud y ancho para cada pieza de tablero y cada tamaño de tablero."
+      },
+      "piece_fits_stock": {
+        "fail": "La pieza {ref} ({size} mm) no cabe en ningún stock",
+        "suggestion": "Añada un stock más largo o más grande, reduzca el recorte o divida la pieza con una junta."
+      },
+      "grain_allows_fit": {
+        "fail": "La pieza {ref} solo cabe girada contra la veta",
+        "suggestion": "Permita girar esta pieza o añada un tamaño de tablero donde quepa en el sentido de la veta."
+      },
+      "kerf_set": {
+        "fail": "El ancho de corte es cero",
+        "suggestion": "Introduzca el ancho de la hoja o del corte; de lo contrario el rendimiento de cada barra con varios cortes se sobreestima."
+      },
+      "min_offcut_set": {
+        "fail": "No se ha definido un retal útil mínimo",
+        "suggestion": "Defina el retal más corto que vale la pena conservar, para que los retales reutilizables no cuenten como desperdicio."
+      },
+      "stock_priced": {
+        "fail": "El stock {ref} no tiene coste unitario",
+        "suggestion": "Introduzca un precio por pieza para que el plan indique su coste y elija el stock más barato."
+      },
+      "stock_sufficient": {
+        "fail": "Piezas sin colocar en el stock disponible: {count}",
+        "suggestion": "Aumente la cantidad disponible o añada otro tamaño de stock."
+      },
+      "yield_threshold": {
+        "fail": "El rendimiento de {actual} % es inferior al umbral de {threshold} %",
+        "suggestion": "Añada otra longitud o tamaño de stock, permita girar o revise el umbral para este material."
+      }
+    }
   }
 }

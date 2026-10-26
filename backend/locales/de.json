@@ -765,5 +765,50 @@
       "draft": "Entwurf",
       "frozen": "Eingefroren"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Der Auftrag enthält keine zuzuschneidenden Teile",
+        "suggestion": "Fügen Sie Teile von Hand oder per Einfügen hinzu oder importieren Sie sie aus einer Biegeliste, einem Aufmaß, einer LV-Position oder einer Datei."
+      },
+      "has_stock": {
+        "fail": "Der Auftrag bietet keinen Lagerbestand zum Zuschneiden",
+        "suggestion": "Fügen Sie mindestens eine Lagerlänge oder Plattengröße hinzu oder verwenden Sie Reststücke aus dem Baustellenlager."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} hat keine Breite",
+        "suggestion": "Geben Sie für jedes Plattenteil und jede Plattengröße Länge und Breite an."
+      },
+      "piece_fits_stock": {
+        "fail": "Teil {ref} ({size} mm) passt in keine Lagergröße",
+        "suggestion": "Fügen Sie eine längere oder größere Lagergröße hinzu, verringern Sie die Zugabe oder teilen Sie das Teil mit einem Stoß."
+      },
+      "grain_allows_fit": {
+        "fail": "Teil {ref} passt nur quer zur Faser",
+        "suggestion": "Erlauben Sie das Drehen dieses Teils oder fügen Sie eine Plattengröße hinzu, in die es längs zur Faser passt."
+      },
+      "kerf_set": {
+        "fail": "Die Schnittfuge ist null",
+        "suggestion": "Geben Sie die Sägeblatt- bzw. Schnittbreite ein, sonst ist die Ausbeute jedes Stabs mit mehreren Schnitten zu hoch ausgewiesen."
+      },
+      "min_offcut_set": {
+        "fail": "Keine Mindestlänge für Reststücke festgelegt",
+        "suggestion": "Legen Sie das kürzeste aufbewahrungswürdige Reststück fest, damit wiederverwendbare Reststücke nicht als Verschnitt zählen."
+      },
+      "stock_priced": {
+        "fail": "Lagerstück {ref} hat keine Stückkosten",
+        "suggestion": "Geben Sie einen Preis je Stück ein, damit der Plan seine Kosten ausweist und das günstigste Lagerstück wählt."
+      },
+      "stock_sufficient": {
+        "fail": "Auf dem verfügbaren Lager nicht platzierte Teile: {count}",
+        "suggestion": "Erhöhen Sie die verfügbare Menge oder fügen Sie eine weitere Lagergröße hinzu."
+      },
+      "yield_threshold": {
+        "fail": "Die Ausbeute von {actual} % liegt unter dem Grenzwert von {threshold} %",
+        "suggestion": "Fügen Sie eine weitere Lagerlänge oder -größe hinzu, erlauben Sie das Drehen oder prüfen Sie den Grenzwert für dieses Material."
+      }
+    }
   }
 }

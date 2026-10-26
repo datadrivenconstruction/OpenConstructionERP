@@ -618,5 +618,50 @@
       "draft": "Rascunho",
       "frozen": "Congelado"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "O trabalho não tem peças para cortar",
+        "suggestion": "Adicione peças manualmente, cole-as ou importe-as de um mapa de dobragem, de uma medição, de uma linha do mapa de quantidades ou de um ficheiro."
+      },
+      "has_stock": {
+        "fail": "O trabalho não tem stock de onde cortar",
+        "suggestion": "Adicione pelo menos um comprimento de stock ou dimensão de placa, ou reutilize sobras do inventário de obra."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} não tem largura",
+        "suggestion": "Indique comprimento e largura para cada peça de placa e cada dimensão de placa."
+      },
+      "piece_fits_stock": {
+        "fail": "A peça {ref} ({size} mm) não cabe em nenhuma entrada de stock",
+        "suggestion": "Adicione uma dimensão de stock maior ou mais comprida, reduza o aparo ou divida a peça com uma junta."
+      },
+      "grain_allows_fit": {
+        "fail": "A peça {ref} só cabe se rodada na transversal ao fio",
+        "suggestion": "Permita a rotação desta peça ou adicione uma dimensão de placa onde caiba no sentido do fio."
+      },
+      "kerf_set": {
+        "fail": "A largura de corte é zero",
+        "suggestion": "Introduza a espessura da lâmina ou do corte, caso contrário o aproveitamento de cada barra com vários cortes fica sobrestimado."
+      },
+      "min_offcut_set": {
+        "fail": "Não está definida a sobra útil mínima",
+        "suggestion": "Defina a sobra mais curta que vale a pena guardar, para que as sobras reutilizáveis não contem como desperdício."
+      },
+      "stock_priced": {
+        "fail": "O stock {ref} não tem custo unitário",
+        "suggestion": "Introduza um preço por peça para que o plano indique o custo e escolha o stock mais barato."
+      },
+      "stock_sufficient": {
+        "fail": "Peças não colocadas no stock disponível: {count}",
+        "suggestion": "Aumente a quantidade disponível ou adicione outra dimensão de stock."
+      },
+      "yield_threshold": {
+        "fail": "O aproveitamento de {actual} % está abaixo do limite de {threshold} %",
+        "suggestion": "Adicione outro comprimento ou dimensão de stock, permita a rotação ou reveja o limite para este material."
+      }
+    }
   }
 }

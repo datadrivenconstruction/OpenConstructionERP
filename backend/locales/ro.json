@@ -618,5 +618,50 @@
       "draft": "Ciornă",
       "frozen": "Înghețat"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Lucrarea nu are piese de tăiat",
+        "suggestion": "Adăugați piese manual, lipiți-le sau importați-le dintr-un tabel de fasonare, o măsurătoare, o linie de deviz sau un fișier."
+      },
+      "has_stock": {
+        "fail": "Lucrarea nu are stoc din care să se taie",
+        "suggestion": "Adăugați cel puțin o lungime de stoc sau o dimensiune de placă, sau refolosiți resturi din inventarul de șantier."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} nu are lățime",
+        "suggestion": "Indicați lungimea și lățimea pentru fiecare piesă de placă și fiecare dimensiune de placă."
+      },
+      "piece_fits_stock": {
+        "fail": "Piesa {ref} ({size} mm) nu încape în nicio poziție de stoc",
+        "suggestion": "Adăugați o dimensiune de stoc mai lungă sau mai mare, reduceți adaosul sau împărțiți piesa printr-o îmbinare."
+      },
+      "grain_allows_fit": {
+        "fail": "Piesa {ref} încape doar dacă este rotită perpendicular pe fibră",
+        "suggestion": "Permiteți rotirea acestei piese sau adăugați o dimensiune de placă în care încape pe direcția fibrei."
+      },
+      "kerf_set": {
+        "fail": "Lățimea tăieturii este zero",
+        "suggestion": "Introduceți grosimea lamei sau a tăieturii, altfel randamentul fiecărei bare cu mai multe tăieturi este supraestimat."
+      },
+      "min_offcut_set": {
+        "fail": "Nu este setat restul minim utilizabil",
+        "suggestion": "Setați cel mai scurt rest care merită păstrat, astfel încât resturile reutilizabile să nu fie numărate ca pierderi."
+      },
+      "stock_priced": {
+        "fail": "Stocul {ref} nu are cost unitar",
+        "suggestion": "Introduceți un preț pe bucată, ca planul să raporteze costul și să aleagă stocul cel mai ieftin."
+      },
+      "stock_sufficient": {
+        "fail": "Piese neplasate pe stocul disponibil: {count}",
+        "suggestion": "Măriți cantitatea disponibilă sau adăugați o altă dimensiune de stoc."
+      },
+      "yield_threshold": {
+        "fail": "Randamentul de {actual} % este sub pragul de {threshold} %",
+        "suggestion": "Adăugați o altă lungime sau dimensiune de stoc, permiteți rotirea sau revizuiți pragul pentru acest material."
+      }
+    }
   }
 }

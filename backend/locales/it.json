@@ -618,5 +618,50 @@
       "draft": "Bozza",
       "frozen": "Congelato"
     }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "Il pezzo {ref} ({size} mm) non entra in nessuna misura di magazzino",
+        "suggestion": "Aggiungi una misura più lunga o più grande, riduci la rifilatura oppure dividi il pezzo con un giunto."
+      },
+      "has_stock": {
+        "suggestion": "Aggiungi almeno una lunghezza di magazzino o una misura di lastra, oppure riutilizza gli sfridi del magazzino di cantiere.",
+        "fail": "La commessa non offre materiale da cui tagliare"
+      },
+      "yield_threshold": {
+        "suggestion": "Aggiungi un'altra lunghezza o misura di magazzino, consenti la rotazione oppure rivedi la soglia per questo materiale.",
+        "fail": "La resa {actual} % è sotto la soglia di {threshold} %"
+      },
+      "ok": "OK",
+      "kerf_set": {
+        "fail": "La larghezza del taglio (sega) è zero",
+        "suggestion": "Inserisci lo spessore della lama o del taglio, altrimenti la resa di ogni barra con più tagli risulta sovrastimata."
+      },
+      "grain_allows_fit": {
+        "fail": "Il pezzo {ref} entra solo se ruotato trasversalmente alla venatura",
+        "suggestion": "Consenti la rotazione per questo pezzo oppure aggiungi una misura di lastra in cui entri lungo la venatura."
+      },
+      "has_pieces": {
+        "fail": "La commessa non ha pezzi da tagliare",
+        "suggestion": "Aggiungi i pezzi a mano, incollali oppure importali da una distinta di piegatura, dal computo, da una voce di computo o da un file."
+      },
+      "min_offcut_set": {
+        "fail": "Non è impostato lo sfrido minimo riutilizzabile",
+        "suggestion": "Imposta il resto più corto che vale la pena tenere, così gli sfridi riutilizzabili non sono contati come scarto."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Indica sia la lunghezza sia la larghezza di ogni pezzo e di ogni misura di lastra.",
+        "fail": "{ref} non ha larghezza"
+      },
+      "stock_priced": {
+        "fail": "Il materiale {ref} non ha costo unitario",
+        "suggestion": "Inserisci un prezzo per pezzo, così il piano riporta il costo e sceglie il materiale più economico."
+      },
+      "stock_sufficient": {
+        "suggestion": "Aumenta la quantità disponibile o aggiungi un'altra misura di magazzino.",
+        "fail": "Pezzi non posizionati sul materiale disponibile: {count}"
+      }
+    }
   }
 }

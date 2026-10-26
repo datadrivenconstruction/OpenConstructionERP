@@ -618,5 +618,50 @@
       "draft": "Draft",
       "frozen": "Naka-lock"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Walang piraso ang trabaho na puputulin",
+        "suggestion": "Magdagdag ng mga piraso nang manu-mano, i-paste, o i-import mula sa bending schedule, takeoff, linya ng BOQ o file."
+      },
+      "has_stock": {
+        "fail": "Walang inaalok na stock ang trabaho na mapuputulan",
+        "suggestion": "Magdagdag ng kahit isang haba ng stock o sukat ng sheet, o gamitin muli ang mga tira sa inventory ng site."
+      },
+      "sheet_dimensions": {
+        "fail": "Walang lapad ang {ref}",
+        "suggestion": "Ibigay ang haba at lapad ng bawat pirasong sheet at bawat sukat ng sheet."
+      },
+      "piece_fits_stock": {
+        "fail": "Ang piraso {ref} ({size} mm) ay hindi kasya sa anumang stock",
+        "suggestion": "Magdagdag ng mas mahaba o mas malaking sukat ng stock, bawasan ang trim, o hatiin ang piraso gamit ang dugtungan."
+      },
+      "grain_allows_fit": {
+        "fail": "Ang piraso {ref} ay kasya lamang kapag ipinihit nang pahalang sa hibla",
+        "suggestion": "Payagan ang pag-ikot ng piraso o magdagdag ng sukat ng sheet na kasya ito kasunod ng hibla."
+      },
+      "kerf_set": {
+        "fail": "Zero ang lapad ng lagari",
+        "suggestion": "Ilagay ang lapad ng talim o putol, kung hindi ay sobra ang pagpapakita ng yield ng bawat bar na maraming putol."
+      },
+      "min_offcut_set": {
+        "fail": "Walang itinakdang pinakamaliit na magagamit na tira",
+        "suggestion": "Itakda ang pinakamaikling tirang sulit itabi, para hindi mabilang na sayang ang mga tirang magagamit muli."
+      },
+      "stock_priced": {
+        "fail": "Walang halaga bawat piraso ang stock {ref}",
+        "suggestion": "Maglagay ng presyo bawat piraso para maiulat ng plano ang halaga nito at mapili ang pinakamurang stock."
+      },
+      "stock_sufficient": {
+        "fail": "Mga pirasong hindi nailagay sa magagamit na stock: {count}",
+        "suggestion": "Taasan ang magagamit na dami o magdagdag ng isa pang sukat ng stock."
+      },
+      "yield_threshold": {
+        "fail": "Ang yield na {actual} % ay mas mababa sa hangganang {threshold} %",
+        "suggestion": "Magdagdag ng isa pang haba o sukat ng stock, payagan ang pag-ikot, o repasuhin ang hangganan para sa materyal na ito."
+      }
+    }
   }
 }

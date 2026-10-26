@@ -618,5 +618,50 @@
       "draft": "Nacrt",
       "frozen": "Zamrznut"
     }
+  },
+  "cutting": {
+    "validation": {
+      "piece_fits_stock": {
+        "fail": "Komad {ref} ({size} mm) ne stane ni u jednu stavku zalihe",
+        "suggestion": "Dodajte dulju ili veću dimenziju zalihe, smanjite obrezivanje ili podijelite komad spojem."
+      },
+      "has_stock": {
+        "suggestion": "Dodajte barem jednu duljinu zalihe ili dimenziju ploče, ili ponovno upotrijebite ostatke iz skladišta gradilišta.",
+        "fail": "Posao nema zalihe iz koje bi se rezalo"
+      },
+      "yield_threshold": {
+        "suggestion": "Dodajte još jednu duljinu ili dimenziju zalihe, dopustite rotaciju ili preispitajte prag za ovaj materijal.",
+        "fail": "Iskorištenje {actual} % ispod je praga od {threshold} %"
+      },
+      "ok": "U redu",
+      "kerf_set": {
+        "fail": "Širina reza pile je nula",
+        "suggestion": "Unesite širinu lista ili reza, inače je iskorištenje svake šipke s više rezova precijenjeno."
+      },
+      "grain_allows_fit": {
+        "fail": "Komad {ref} stane samo kad se okrene poprijeko na žilu",
+        "suggestion": "Dopustite rotaciju za ovaj komad ili dodajte dimenziju ploče u koju stane uzduž žile."
+      },
+      "has_pieces": {
+        "fail": "Posao nema komada za rezanje",
+        "suggestion": "Dodajte komade ručno, zalijepite ih ili ih uvezite iz plana savijanja, predmjera, stavke troškovnika ili datoteke."
+      },
+      "min_offcut_set": {
+        "fail": "Nije postavljen najmanji upotrebljivi ostatak",
+        "suggestion": "Postavite najkraći ostatak koji vrijedi zadržati, kako se ostaci za ponovnu uporabu ne bi računali kao otpad."
+      },
+      "sheet_dimensions": {
+        "suggestion": "Zadajte i duljinu i širinu za svaki komad ploče i svaku dimenziju ploče.",
+        "fail": "{ref} nema širinu"
+      },
+      "stock_priced": {
+        "fail": "Zaliha {ref} nema jediničnu cijenu",
+        "suggestion": "Unesite cijenu po komadu kako bi plan prikazao trošak i odabrao najjeftiniju zalihu."
+      },
+      "stock_sufficient": {
+        "suggestion": "Povećajte dostupnu količinu ili dodajte još jednu dimenziju zalihe.",
+        "fail": "Komadi koji nisu raspoređeni na dostupnu zalihu: {count}"
+      }
+    }
   }
 }

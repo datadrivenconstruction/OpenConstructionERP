@@ -618,5 +618,50 @@
       "draft": "Mustand",
       "frozen": "Külmutatud"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Tööl pole lõigatavaid detaile",
+        "suggestion": "Lisa detailid käsitsi, kleebi need või impordi painutusnimekirjast, mõõdistusest, mahutabeli realt või failist."
+      },
+      "has_stock": {
+        "fail": "Tööl pole ladu, millest lõigata",
+        "suggestion": "Lisa vähemalt üks laopikkus või plaadi suurus või kasuta taas ehitusplatsi lao jääke."
+      },
+      "sheet_dimensions": {
+        "fail": "Kirjel {ref} puudub laius",
+        "suggestion": "Sisesta iga plaadidetaili ja plaadi suuruse pikkus ja laius."
+      },
+      "piece_fits_stock": {
+        "fail": "Detail {ref} ({size} mm) ei mahu ühegi laosuuruse peale",
+        "suggestion": "Lisa pikem või suurem laosuurus, vähenda tasandust või jaga detail ühendusega."
+      },
+      "grain_allows_fit": {
+        "fail": "Detail {ref} mahub ainult risti kiudu pööratult",
+        "suggestion": "Luba selle detaili pööramine või lisa plaadi suurus, kuhu see mahub piki kiudu."
+      },
+      "kerf_set": {
+        "fail": "Saelõike laius on null",
+        "suggestion": "Sisesta saeketta või lõike laius, vastasel juhul on mitme lõikega varraste saagis ülehinnatud."
+      },
+      "min_offcut_set": {
+        "fail": "Väikseimat kasutatavat jääki pole määratud",
+        "suggestion": "Määra lühim hoidmist väärt jääk, et taaskasutatavaid jääke ei loetaks raiskamiseks."
+      },
+      "stock_priced": {
+        "fail": "Laovarul {ref} puudub ühikuhind",
+        "suggestion": "Sisesta detaili hind, et plaan näitaks oma maksumust ja valiks odavaima laovaru."
+      },
+      "stock_sufficient": {
+        "fail": "Saadaolevale lattu paigutamata detaile: {count}",
+        "suggestion": "Suurenda saadaolevat kogust või lisa veel üks laosuurus."
+      },
+      "yield_threshold": {
+        "fail": "Saagis {actual} % on alla läve {threshold} %",
+        "suggestion": "Lisa veel üks laopikkus või -suurus, luba pööramine või vaata selle materjali lävi üle."
+      }
+    }
   }
 }

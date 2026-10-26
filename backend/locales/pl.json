@@ -618,5 +618,50 @@
       "draft": "Wersja robocza",
       "frozen": "Zamrożony"
     }
+  },
+  "cutting": {
+    "validation": {
+      "ok": "OK",
+      "has_pieces": {
+        "fail": "Zadanie nie ma elementów do cięcia",
+        "suggestion": "Dodaj elementy ręcznie, wklej je lub zaimportuj z zestawienia gięcia, obmiaru, pozycji przedmiaru albo pliku."
+      },
+      "has_stock": {
+        "fail": "Zadanie nie ma materiału do cięcia",
+        "suggestion": "Dodaj co najmniej jedną długość materiału lub rozmiar arkusza albo użyj odpadów z magazynu budowy."
+      },
+      "sheet_dimensions": {
+        "fail": "{ref} nie ma szerokości",
+        "suggestion": "Podaj długość i szerokość dla każdego elementu arkuszowego i każdego rozmiaru arkusza."
+      },
+      "piece_fits_stock": {
+        "fail": "Element {ref} ({size} mm) nie mieści się w żadnym materiale",
+        "suggestion": "Dodaj dłuższy lub większy rozmiar materiału, zmniejsz obcięcie albo podziel element złączem."
+      },
+      "grain_allows_fit": {
+        "fail": "Element {ref} mieści się tylko po obróceniu w poprzek włókien",
+        "suggestion": "Zezwól na obrót tego elementu lub dodaj rozmiar arkusza, w który wejdzie wzdłuż włókien."
+      },
+      "kerf_set": {
+        "fail": "Szerokość cięcia wynosi zero",
+        "suggestion": "Wpisz grubość piły lub szerokość cięcia, w przeciwnym razie wykorzystanie każdego pręta z kilkoma cięciami jest zawyżone."
+      },
+      "min_offcut_set": {
+        "fail": "Nie ustawiono minimalnego przydatnego odpadu",
+        "suggestion": "Ustaw najkrótszy odpad wart zachowania, aby odpady do ponownego użycia nie były liczone jako strata."
+      },
+      "stock_priced": {
+        "fail": "Materiał {ref} nie ma ceny jednostkowej",
+        "suggestion": "Wpisz cenę za sztukę, aby plan podawał koszt i wybierał najtańszy materiał."
+      },
+      "stock_sufficient": {
+        "fail": "Elementy nierozmieszczone na dostępnym materiale: {count}",
+        "suggestion": "Zwiększ dostępną ilość lub dodaj kolejny rozmiar materiału."
+      },
+      "yield_threshold": {
+        "fail": "Wykorzystanie {actual} % jest poniżej progu {threshold} %",
+        "suggestion": "Dodaj kolejną długość lub rozmiar materiału, zezwól na obrót albo sprawdź próg dla tego materiału."
+      }
+    }
   }
 }
