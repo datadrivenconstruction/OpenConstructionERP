@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "ไม่พบหัวข้อ",
+    "comment_not_found": "ไม่พบความคิดเห็น",
+    "viewpoint_not_found": "ไม่พบมุมมอง",
+    "snapshot_not_found": "ไม่พบภาพสแนปชอต",
+    "version_unsupported": "ไม่รองรับเวอร์ชัน BCF '{version}' รองรับ: {supported}",
+    "selection_empty": "ไม่มีหัวข้อที่เลือกรายการใดอยู่ในโครงการนี้",
+    "upload_read_failed": "ไม่สามารถอ่านไฟล์ที่อัปโหลดได้",
+    "upload_empty": "ไฟล์ที่อัปโหลดว่างเปล่า",
+    "upload_too_large": "ไฟล์เก็บถาวรที่อัปโหลดมีขนาดใหญ่เกินไป",
+    "archive_invalid": "ไฟล์ที่อัปโหลดไม่ใช่ไฟล์ .bcfzip ที่ถูกต้อง",
+    "import_passed": "นำเข้าข้อมูลสำเร็จ",
+    "import_warnings": "นำเข้าข้อมูลสำเร็จพร้อมคำเตือน",
+    "import_errors": "นำเข้าข้อมูลไม่สำเร็จ - ดูรายละเอียดในรายการปัญหา"
+  }
+}

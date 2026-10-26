@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Hindi nahanap ang topic",
+    "comment_not_found": "Hindi nahanap ang komento",
+    "viewpoint_not_found": "Hindi nahanap ang viewpoint",
+    "snapshot_not_found": "Hindi nahanap ang snapshot",
+    "version_unsupported": "Hindi suportadong bersyon ng BCF '{version}'. Suportado: {supported}.",
+    "selection_empty": "Wala sa mga napiling topic ang umiiral sa proyektong ito",
+    "upload_read_failed": "Hindi mabasa ang na-upload na file",
+    "upload_empty": "Walang laman ang na-upload na file",
+    "upload_too_large": "Masyadong malaki ang na-upload na archive",
+    "archive_invalid": "Hindi wastong .bcfzip archive ang na-upload na file",
+    "import_passed": "Matagumpay na nakumpleto ang import",
+    "import_warnings": "Nakumpleto ang import na may mga babala",
+    "import_errors": "Nabigo ang import - tingnan ang mga isyu para sa detalye"
+  }
+}

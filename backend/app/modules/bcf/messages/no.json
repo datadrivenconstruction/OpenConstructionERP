@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Emnet ble ikke funnet",
+    "comment_not_found": "Kommentaren ble ikke funnet",
+    "viewpoint_not_found": "Synspunktet ble ikke funnet",
+    "snapshot_not_found": "Øyeblikksbildet ble ikke funnet",
+    "version_unsupported": "BCF-versjonen '{version}' støttes ikke. Støttede: {supported}.",
+    "selection_empty": "Ingen av de valgte emnene finnes i dette prosjektet",
+    "upload_read_failed": "Den opplastede filen kunne ikke leses",
+    "upload_empty": "Den opplastede filen er tom",
+    "upload_too_large": "Det opplastede arkivet er for stort",
+    "archive_invalid": "Den opplastede filen er ikke et gyldig .bcfzip-arkiv",
+    "import_passed": "Importen ble fullført",
+    "import_warnings": "Importen ble fullført med advarsler",
+    "import_errors": "Importen mislyktes - se problemene for detaljer"
+  }
+}

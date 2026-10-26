@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "موضوع پیدا نشد",
+    "comment_not_found": "نظر پیدا نشد",
+    "viewpoint_not_found": "نمای دوربین پیدا نشد",
+    "snapshot_not_found": "تصویر لحظه‌ای پیدا نشد",
+    "version_unsupported": "نسخه BCF پشتیبانی‌نشده '{version}'. نسخه‌های پشتیبانی‌شده: {supported}.",
+    "selection_empty": "هیچ‌یک از موضوعات انتخاب‌شده در این پروژه وجود ندارد",
+    "upload_read_failed": "فایل بارگذاری‌شده خوانده نشد",
+    "upload_empty": "فایل بارگذاری‌شده خالی است",
+    "upload_too_large": "آرشیو بارگذاری‌شده بیش از حد بزرگ است",
+    "archive_invalid": "فایل بارگذاری‌شده یک آرشیو معتبر .bcfzip نیست",
+    "import_passed": "وارد کردن با موفقیت انجام شد",
+    "import_warnings": "وارد کردن با هشدار انجام شد",
+    "import_errors": "وارد کردن ناموفق بود - برای جزئیات مشکلات را ببینید"
+  }
+}

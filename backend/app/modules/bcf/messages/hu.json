@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "A téma nem található",
+    "comment_not_found": "A megjegyzés nem található",
+    "viewpoint_not_found": "A nézőpont nem található",
+    "snapshot_not_found": "A pillanatkép nem található",
+    "version_unsupported": "Nem támogatott BCF-verzió: '{version}'. Támogatott: {supported}.",
+    "selection_empty": "A kiválasztott témák egyike sem létezik ebben a projektben",
+    "upload_read_failed": "A feltöltött fájl nem olvasható",
+    "upload_empty": "A feltöltött fájl üres",
+    "upload_too_large": "A feltöltött archívum túl nagy",
+    "archive_invalid": "A feltöltött fájl nem érvényes .bcfzip archívum",
+    "import_passed": "Az importálás sikeresen befejeződött",
+    "import_warnings": "Az importálás figyelmeztetésekkel fejeződött be",
+    "import_errors": "Az importálás sikertelen - a részletekért lásd a problémákat"
+  }
+}

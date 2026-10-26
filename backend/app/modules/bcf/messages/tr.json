@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Konu bulunamadı",
+    "comment_not_found": "Yorum bulunamadı",
+    "viewpoint_not_found": "Görünüm noktası bulunamadı",
+    "snapshot_not_found": "Anlık görüntü bulunamadı",
+    "version_unsupported": "Desteklenmeyen BCF sürümü '{version}'. Desteklenenler: {supported}.",
+    "selection_empty": "Seçilen konulardan hiçbiri bu projede mevcut değil",
+    "upload_read_failed": "Yüklenen dosya okunamadı",
+    "upload_empty": "Yüklenen dosya boş",
+    "upload_too_large": "Yüklenen arşiv çok büyük",
+    "archive_invalid": "Yüklenen dosya geçerli bir .bcfzip arşivi değil",
+    "import_passed": "İçe aktarma başarıyla tamamlandı",
+    "import_warnings": "İçe aktarma uyarılarla tamamlandı",
+    "import_errors": "İçe aktarma başarısız oldu - ayrıntılar için sorunlara bakın"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Subiectul nu a fost găsit",
+    "comment_not_found": "Comentariul nu a fost găsit",
+    "viewpoint_not_found": "Punctul de vedere nu a fost găsit",
+    "snapshot_not_found": "Instantaneul nu a fost găsit",
+    "version_unsupported": "Versiune BCF nesuportată '{version}'. Suportate: {supported}.",
+    "selection_empty": "Niciunul dintre subiectele selectate nu există în acest proiect",
+    "upload_read_failed": "Fișierul încărcat nu a putut fi citit",
+    "upload_empty": "Fișierul încărcat este gol",
+    "upload_too_large": "Arhiva încărcată este prea mare",
+    "archive_invalid": "Fișierul încărcat nu este o arhivă .bcfzip validă",
+    "import_passed": "Importul a fost finalizat cu succes",
+    "import_warnings": "Importul a fost finalizat cu avertismente",
+    "import_errors": "Importul a eșuat - consultați problemele pentru detalii"
+  }
+}

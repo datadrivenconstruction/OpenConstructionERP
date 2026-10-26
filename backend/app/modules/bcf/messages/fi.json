@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Aihetta ei löytynyt",
+    "comment_not_found": "Kommenttia ei löytynyt",
+    "viewpoint_not_found": "Näkymää ei löytynyt",
+    "snapshot_not_found": "Kuvakaappausta ei löytynyt",
+    "version_unsupported": "Tukematon BCF-versio '{version}'. Tuetut: {supported}.",
+    "selection_empty": "Yhtään valituista aiheista ei ole tässä projektissa",
+    "upload_read_failed": "Ladattua tiedostoa ei voitu lukea",
+    "upload_empty": "Ladattu tiedosto on tyhjä",
+    "upload_too_large": "Ladattu arkisto on liian suuri",
+    "archive_invalid": "Ladattu tiedosto ei ole kelvollinen .bcfzip-arkisto",
+    "import_passed": "Tuonti onnistui",
+    "import_warnings": "Tuonti valmistui varoituksin",
+    "import_errors": "Tuonti epäonnistui - katso lisätiedot ongelmista"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "未找到主题",
+    "comment_not_found": "未找到评论",
+    "viewpoint_not_found": "未找到视点",
+    "snapshot_not_found": "未找到快照",
+    "version_unsupported": "不支持的 BCF 版本 '{version}'。支持的版本：{supported}。",
+    "selection_empty": "所选主题在此项目中均不存在",
+    "upload_read_failed": "无法读取上传的文件",
+    "upload_empty": "上传的文件为空",
+    "upload_too_large": "上传的压缩包过大",
+    "archive_invalid": "上传的文件不是有效的 .bcfzip 压缩包",
+    "import_passed": "导入成功完成",
+    "import_warnings": "导入已完成，但有警告",
+    "import_errors": "导入失败，请查看问题列表了解详情"
+  }
+}

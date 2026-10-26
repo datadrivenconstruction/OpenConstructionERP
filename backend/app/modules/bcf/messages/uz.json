@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Mavzu topilmadi",
+    "comment_not_found": "Izoh topilmadi",
+    "viewpoint_not_found": "Ko'rinish nuqtasi topilmadi",
+    "snapshot_not_found": "Surat topilmadi",
+    "version_unsupported": "Qo'llab-quvvatlanmaydigan BCF versiyasi '{version}'. Qo'llab-quvvatlanadigan: {supported}.",
+    "selection_empty": "Tanlangan mavzulardan hech biri bu loyihada mavjud emas",
+    "upload_read_failed": "Yuklangan faylni o'qib bo'lmadi",
+    "upload_empty": "Yuklangan fayl bo'sh",
+    "upload_too_large": "Yuklangan arxiv juda katta",
+    "archive_invalid": "Yuklangan fayl yaroqli .bcfzip arxiv emas",
+    "import_passed": "Import muvaffaqiyatli yakunlandi",
+    "import_warnings": "Import ogohlantirishlar bilan yakunlandi",
+    "import_errors": "Import amalga oshmadi - batafsil ma'lumot uchun muammolarni ko'ring"
+  }
+}

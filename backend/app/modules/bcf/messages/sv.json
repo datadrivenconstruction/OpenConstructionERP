@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Ärendet hittades inte",
+    "comment_not_found": "Kommentaren hittades inte",
+    "viewpoint_not_found": "Vyn hittades inte",
+    "snapshot_not_found": "Ögonblicksbilden hittades inte",
+    "version_unsupported": "BCF-versionen '{version}' stöds inte. Stödda: {supported}.",
+    "selection_empty": "Inget av de valda ärendena finns i det här projektet",
+    "upload_read_failed": "Den uppladdade filen kunde inte läsas",
+    "upload_empty": "Den uppladdade filen är tom",
+    "upload_too_large": "Det uppladdade arkivet är för stort",
+    "archive_invalid": "Den uppladdade filen är inte ett giltigt .bcfzip-arkiv",
+    "import_passed": "Importen slutfördes",
+    "import_warnings": "Importen slutfördes med varningar",
+    "import_errors": "Importen misslyckades - se problemen för detaljer"
+  }
+}

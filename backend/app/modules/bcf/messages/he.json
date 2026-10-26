@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "הנושא לא נמצא",
+    "comment_not_found": "התגובה לא נמצאה",
+    "viewpoint_not_found": "נקודת המבט לא נמצאה",
+    "snapshot_not_found": "התמונה לא נמצאה",
+    "version_unsupported": "גרסת BCF לא נתמכת '{version}'. נתמכות: {supported}.",
+    "selection_empty": "אף אחד מהנושאים שנבחרו אינו קיים בפרויקט זה",
+    "upload_read_failed": "לא ניתן לקרוא את הקובץ שהועלה",
+    "upload_empty": "הקובץ שהועלה ריק",
+    "upload_too_large": "הארכיון שהועלה גדול מדי",
+    "archive_invalid": "הקובץ שהועלה אינו ארכיון .bcfzip תקין",
+    "import_passed": "הייבוא הושלם בהצלחה",
+    "import_warnings": "הייבוא הושלם עם אזהרות",
+    "import_errors": "הייבוא נכשל - לפרטים ראו את הבעיות"
+  }
+}

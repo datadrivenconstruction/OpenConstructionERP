@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Topik tidak ditemukan",
+    "comment_not_found": "Komentar tidak ditemukan",
+    "viewpoint_not_found": "Viewpoint tidak ditemukan",
+    "snapshot_not_found": "Snapshot tidak ditemukan",
+    "version_unsupported": "Versi BCF '{version}' tidak didukung. Yang didukung: {supported}.",
+    "selection_empty": "Tidak ada topik yang dipilih yang ada di proyek ini",
+    "upload_read_failed": "Berkas yang diunggah tidak dapat dibaca",
+    "upload_empty": "Berkas yang diunggah kosong",
+    "upload_too_large": "Arsip yang diunggah terlalu besar",
+    "archive_invalid": "Berkas yang diunggah bukan arsip .bcfzip yang valid",
+    "import_passed": "Impor berhasil diselesaikan",
+    "import_warnings": "Impor selesai dengan peringatan",
+    "import_errors": "Impor gagal - lihat isu untuk detailnya"
+  }
+}

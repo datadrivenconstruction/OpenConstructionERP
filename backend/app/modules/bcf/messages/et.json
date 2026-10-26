@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Teemat ei leitud",
+    "comment_not_found": "Kommentaari ei leitud",
+    "viewpoint_not_found": "Vaadet ei leitud",
+    "snapshot_not_found": "Hetkepilti ei leitud",
+    "version_unsupported": "BCF-i versioon '{version}' ei ole toetatud. Toetatud: {supported}.",
+    "selection_empty": "Ükski valitud teema ei eksisteeri selles projektis",
+    "upload_read_failed": "Üleslaaditud faili ei õnnestunud lugeda",
+    "upload_empty": "Üleslaaditud fail on tühi",
+    "upload_too_large": "Üleslaaditud arhiiv on liiga suur",
+    "archive_invalid": "Üleslaaditud fail ei ole kehtiv .bcfzip-arhiiv",
+    "import_passed": "Import lõpetati edukalt",
+    "import_warnings": "Import lõpetati hoiatustega",
+    "import_errors": "Import ebaõnnestus - üksikasjade nägemiseks vaadake probleeme"
+  }
+}

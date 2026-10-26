@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Tópico não encontrado",
+    "comment_not_found": "Comentário não encontrado",
+    "viewpoint_not_found": "Ponto de vista não encontrado",
+    "snapshot_not_found": "Instantâneo não encontrado",
+    "version_unsupported": "Versão BCF '{version}' não suportada. Suportadas: {supported}.",
+    "selection_empty": "Nenhum dos tópicos selecionados existe neste projeto",
+    "upload_read_failed": "Não foi possível ler o ficheiro carregado",
+    "upload_empty": "O ficheiro carregado está vazio",
+    "upload_too_large": "O arquivo carregado é demasiado grande",
+    "archive_invalid": "O ficheiro carregado não é um arquivo .bcfzip válido",
+    "import_passed": "Importação concluída com sucesso",
+    "import_warnings": "Importação concluída com avisos",
+    "import_errors": "A importação falhou - consulte os problemas para ver os detalhes"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Onderwerp niet gevonden",
+    "comment_not_found": "Opmerking niet gevonden",
+    "viewpoint_not_found": "Aanzicht niet gevonden",
+    "snapshot_not_found": "Snapshot niet gevonden",
+    "version_unsupported": "Niet-ondersteunde BCF-versie '{version}'. Ondersteund: {supported}.",
+    "selection_empty": "Geen van de geselecteerde onderwerpen bestaat in dit project",
+    "upload_read_failed": "Het geüploade bestand kon niet worden gelezen",
+    "upload_empty": "Het geüploade bestand is leeg",
+    "upload_too_large": "Het geüploade archief is te groot",
+    "archive_invalid": "Het geüploade bestand is geen geldig .bcfzip-archief",
+    "import_passed": "Import succesvol voltooid",
+    "import_warnings": "Import voltooid met waarschuwingen",
+    "import_errors": "Import mislukt - zie de problemen voor details"
+  }
+}

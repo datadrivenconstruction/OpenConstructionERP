@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "토픽을 찾을 수 없습니다",
+    "comment_not_found": "댓글을 찾을 수 없습니다",
+    "viewpoint_not_found": "뷰포인트를 찾을 수 없습니다",
+    "snapshot_not_found": "스냅샷을 찾을 수 없습니다",
+    "version_unsupported": "지원되지 않는 BCF 버전 '{version}'입니다. 지원 버전: {supported}.",
+    "selection_empty": "선택한 토픽이 이 프로젝트에 하나도 없습니다",
+    "upload_read_failed": "업로드한 파일을 읽을 수 없습니다",
+    "upload_empty": "업로드한 파일이 비어 있습니다",
+    "upload_too_large": "업로드한 아카이브가 너무 큽니다",
+    "archive_invalid": "업로드한 파일이 올바른 .bcfzip 아카이브가 아닙니다",
+    "import_passed": "가져오기가 성공적으로 완료되었습니다",
+    "import_warnings": "경고와 함께 가져오기가 완료되었습니다",
+    "import_errors": "가져오기에 실패했습니다 - 자세한 내용은 문제 목록을 확인하세요"
+  }
+}

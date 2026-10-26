@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Không tìm thấy chủ đề",
+    "comment_not_found": "Không tìm thấy bình luận",
+    "viewpoint_not_found": "Không tìm thấy góc nhìn",
+    "snapshot_not_found": "Không tìm thấy ảnh chụp",
+    "version_unsupported": "Phiên bản BCF '{version}' không được hỗ trợ. Các phiên bản được hỗ trợ: {supported}.",
+    "selection_empty": "Không có chủ đề nào được chọn tồn tại trong dự án này",
+    "upload_read_failed": "Không thể đọc tệp đã tải lên",
+    "upload_empty": "Tệp đã tải lên trống",
+    "upload_too_large": "Tệp nén đã tải lên quá lớn",
+    "archive_invalid": "Tệp đã tải lên không phải là tệp nén .bcfzip hợp lệ",
+    "import_passed": "Nhập dữ liệu hoàn tất thành công",
+    "import_warnings": "Nhập dữ liệu hoàn tất có cảnh báo",
+    "import_errors": "Nhập dữ liệu thất bại - xem các vấn đề để biết chi tiết"
+  }
+}

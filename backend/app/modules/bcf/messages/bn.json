@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "টপিক পাওয়া যায়নি",
+    "comment_not_found": "মন্তব্য পাওয়া যায়নি",
+    "viewpoint_not_found": "ভিউপয়েন্ট পাওয়া যায়নি",
+    "snapshot_not_found": "স্ন্যাপশট পাওয়া যায়নি",
+    "version_unsupported": "অসমর্থিত BCF সংস্করণ '{version}'। সমর্থিত: {supported}।",
+    "selection_empty": "নির্বাচিত টপিকগুলোর একটিও এই প্রকল্পে নেই",
+    "upload_read_failed": "আপলোড করা ফাইলটি পড়া যায়নি",
+    "upload_empty": "আপলোড করা ফাইলটি খালি",
+    "upload_too_large": "আপলোড করা আর্কাইভটি অনেক বড়",
+    "archive_invalid": "আপলোড করা ফাইলটি বৈধ .bcfzip আর্কাইভ নয়",
+    "import_passed": "আমদানি সফলভাবে সম্পন্ন হয়েছে",
+    "import_warnings": "আমদানি সতর্কতাসহ সম্পন্ন হয়েছে",
+    "import_errors": "আমদানি ব্যর্থ হয়েছে - বিস্তারিত দেখতে সমস্যাগুলো দেখুন"
+  }
+}

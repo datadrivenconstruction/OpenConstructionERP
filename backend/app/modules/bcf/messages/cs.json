@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Téma nebyla nalezena",
+    "comment_not_found": "Komentář nebyl nalezen",
+    "viewpoint_not_found": "Pohled nebyl nalezen",
+    "snapshot_not_found": "Snímek nebyl nalezen",
+    "version_unsupported": "Nepodporovaná verze BCF '{version}'. Podporované: {supported}.",
+    "selection_empty": "Žádná z vybraných témat v tomto projektu neexistuje",
+    "upload_read_failed": "Nahraný soubor nelze přečíst",
+    "upload_empty": "Nahraný soubor je prázdný",
+    "upload_too_large": "Nahraný archiv je příliš velký",
+    "archive_invalid": "Nahraný soubor není platný archiv .bcfzip",
+    "import_passed": "Import byl úspěšně dokončen",
+    "import_warnings": "Import byl dokončen s varováními",
+    "import_errors": "Import selhal - podrobnosti najdete v problémech"
+  }
+}

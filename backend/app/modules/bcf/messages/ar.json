@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "المهمة غير موجودة",
+    "comment_not_found": "التعليق غير موجود",
+    "viewpoint_not_found": "وجهة النظر غير موجودة",
+    "snapshot_not_found": "اللقطة غير موجودة",
+    "version_unsupported": "إصدار BCF غير مدعوم '{version}'. الإصدارات المدعومة: {supported}.",
+    "selection_empty": "لا توجد أي من المهام المحددة في هذا المشروع",
+    "upload_read_failed": "تعذّرت قراءة الملف المرفوع",
+    "upload_empty": "الملف المرفوع فارغ",
+    "upload_too_large": "الأرشيف المرفوع كبير جدا",
+    "archive_invalid": "الملف المرفوع ليس أرشيف .bcfzip صالحا",
+    "import_passed": "اكتمل الاستيراد بنجاح",
+    "import_warnings": "اكتمل الاستيراد مع تحذيرات",
+    "import_errors": "فشل الاستيراد - راجع المشكلات للتفاصيل"
+  }
+}

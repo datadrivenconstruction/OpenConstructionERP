@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "Tema nije pronađena",
+    "comment_not_found": "Komentar nije pronađen",
+    "viewpoint_not_found": "Pogled nije pronađen",
+    "snapshot_not_found": "Snimka nije pronađena",
+    "version_unsupported": "Nepodržana verzija BCF-a '{version}'. Podržane: {supported}.",
+    "selection_empty": "Nijedna od odabranih tema ne postoji u ovom projektu",
+    "upload_read_failed": "Učitanu datoteku nije bilo moguće pročitati",
+    "upload_empty": "Učitana datoteka je prazna",
+    "upload_too_large": "Učitani arhiv je prevelik",
+    "archive_invalid": "Učitana datoteka nije valjani .bcfzip arhiv",
+    "import_passed": "Uvoz je uspješno završen",
+    "import_warnings": "Uvoz je završen uz upozorenja",
+    "import_errors": "Uvoz nije uspio - pogledajte probleme za pojedinosti"
+  }
+}

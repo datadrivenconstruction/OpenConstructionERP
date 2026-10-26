@@ -1,0 +1,17 @@
+{
+  "bcf": {
+    "topic_not_found": "トピックが見つかりません",
+    "comment_not_found": "コメントが見つかりません",
+    "viewpoint_not_found": "ビューポイントが見つかりません",
+    "snapshot_not_found": "スナップショットが見つかりません",
+    "version_unsupported": "サポートされていない BCF バージョン '{version}' です。サポート対象: {supported}。",
+    "selection_empty": "選択したトピックはいずれもこのプロジェクトに存在しません",
+    "upload_read_failed": "アップロードされたファイルを読み取れませんでした",
+    "upload_empty": "アップロードされたファイルが空です",
+    "upload_too_large": "アップロードされたアーカイブが大きすぎます",
+    "archive_invalid": "アップロードされたファイルは有効な .bcfzip アーカイブではありません",
+    "import_passed": "インポートが完了しました",
+    "import_warnings": "警告付きでインポートが完了しました",
+    "import_errors": "インポートに失敗しました - 詳細は問題をご確認ください"
+  }
+}
