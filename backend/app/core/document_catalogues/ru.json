@@ -161,5 +161,21 @@
   "notifications.portal.user_invited.body": "Приглашение отправлено: {portal_user_email}, роль: {portal_role}.",
   "notifications.portal.message_received.title": "Новое сообщение в портале",
   "notifications.portal.message_received.body": "{buyer_name} отправил(а) сообщение."
+ },
+ "tender_addendum": {
+  "addendum_subject": "Дополнение {number} к закупке {package}",
+  "addendum_heading": "Дополнение к закупке",
+  "greeting": "Уважаемые коллеги из {company},",
+  "greeting_generic": "Уважаемые господа,",
+  "addendum_intro": "Опубликовано дополнение {number} к пакету закупки {package}: {title}.",
+  "addendum_deadline": "Срок подачи заявок перенесён с {old} на {new}.",
+  "addendum_boq": "Ведомость объёмов работ изменена (ревизия {revision}). Просим оценить актуальную ревизию.",
+  "addendum_documents": "Опубликованные документы: {documents}",
+  "addendum_ack": "Просим подтвердить получение настоящего дополнения. Заявка, в которой не подтверждены все дополнения, может быть признана не соответствующей требованиям.",
+  "answer_subject": "Разъяснение {number} к закупке {package}",
+  "answer_heading": "Разъяснение по закупке",
+  "answer_intro": "Дан ответ на вопрос по пакету закупки {package}. Ответ применяется ко всем участникам.",
+  "question_label": "Вопрос",
+  "answer_label": "Ответ"
  }
 }

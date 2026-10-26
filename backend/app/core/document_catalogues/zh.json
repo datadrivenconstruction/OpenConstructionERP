@@ -27,6 +27,22 @@
   "cta": "打开清单并填写报价",
   "no_link": "请查阅标段详情，并在上述截止时间前回复贵单位的报价。"
  },
+ "tender_addendum": {
+  "addendum_subject": "{package} 招标补遗 {number}",
+  "addendum_heading": "招标补遗",
+  "greeting": "{company} 尊敬的贵司：",
+  "greeting_generic": "尊敬的投标人：",
+  "addendum_intro": "招标包 {package} 补遗 {number} 已发布：{title}。",
+  "addendum_deadline": "投标截止时间已由 {old} 调整为 {new}。",
+  "addendum_boq": "工程量清单已修订（修订版 {revision}），请按现行版本报价。",
+  "addendum_documents": "已发布文件：{documents}",
+  "addendum_ack": "请确认已收到本补遗。未确认全部补遗的投标文件可能被视为不符合要求。",
+  "answer_subject": "招标 {package} 澄清 {number}",
+  "answer_heading": "招标澄清",
+  "answer_intro": "招标包 {package} 的一项提问已作答，答复适用于所有投标人。",
+  "question_label": "问题",
+  "answer_label": "答复"
+ },
  "notification_email": {
   "greeting": "{name}，您好：",
   "greeting_generic": "您好：",

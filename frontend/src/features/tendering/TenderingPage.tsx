@@ -52,6 +52,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { BidComparisonChart } from './BidComparisonChart';
 import { AddendumList } from './AddendumList';
+import { ClarificationsPanel } from './ClarificationsPanel';
+import { bidComplianceChips } from './bidCompliance';
 import { AwardRecordPanel } from './AwardRecordPanel';
 import { BidLinkCell, InvitationSummary, bidInvitationsQueryKey } from './BidLinkCell';
 import { BidPortalMarks } from './BidPortalMarks';
@@ -200,7 +202,38 @@ interface BidComparison {
     /** Lines this bid priced, of ``total_lines`` (section headers not counted). */
     matched_lines?: number;
     total_lines?: number;
+    /** Addenda compliance, reported by the backend once addenda exist. */
+    boq_revision_no?: number | null;
+    current_boq_revision?: number | null;
+    revision_current?: boolean;
+    missing_addenda?: number[];
+    compliant?: boolean;
   }[];
+  current_boq_revision?: number;
+  published_addenda?: number;
+}
+
+/** Revision and missing-addendum chips under a bid total. */
+function ComplianceChips({ bid }: { bid: Parameters<typeof bidComplianceChips>[0] }) {
+  const { t } = useTranslation();
+  const chips = bidComplianceChips(bid);
+  if (chips.length === 0) return null;
+  return (
+    <span className="mt-1 flex flex-wrap justify-end gap-1" data-testid="bid-compliance">
+      {chips.map((c) => (
+        <Badge key={c.kind} variant={c.tone} size="sm">
+          {c.kind === 'revision_stale'
+            ? t('tendering.compliance.rev_stale', { defaultValue: 'Rev {{n}}', n: c.revision })
+            : c.kind === 'missing_addenda'
+              ? t('tendering.compliance.missing_addenda', {
+                  defaultValue: 'Missing addendum {{list}}',
+                  list: (c.missing ?? []).join(', '),
+                })
+              : t('tendering.compliance.compliant', { defaultValue: 'Compliant' })}
+        </Badge>
+      ))}
+    </span>
+  );
 }
 
 /* ── Helpers ───────────────────────────────────────────────────────────── */
@@ -1013,6 +1046,7 @@ export function BidComparisonTable({
                   <span className="ml-1.5">
                     <DeviationBadge pct={bt.deviation_pct} />
                   </span>
+                  <ComplianceChips bid={bt} />
                   {/* A total that leaves lines out is cheaper by what it
                       left out, so it says so under the figure. */}
                   {unpricedLineCount(bt) > 0 && (
@@ -1423,7 +1457,7 @@ function PackageDetail({
   // only loads when its tab is opened, so a package nobody keeps a record for
   // costs no request and stores nothing.
   const [activeTab, setActiveTab] = useState<
-    'bids' | 'distribution' | 'addenda' | 'leveling' | 'award-record'
+    'bids' | 'distribution' | 'addenda' | 'clarifications' | 'leveling' | 'award-record'
   >('bids');
 
   // Fetch package with bids
@@ -2001,6 +2035,7 @@ function PackageDetail({
           { id: 'bids' as const, label: t('tendering.tab_bids', 'Bids & Comparison') },
           { id: 'distribution' as const, label: t('tendering.tab_distribution', { defaultValue: 'Distribution' }) },
           { id: 'addenda' as const, label: t('tendering.tab_addenda', 'Addenda') },
+          { id: 'clarifications' as const, label: t('tendering.tab_clarifications', { defaultValue: 'Questions' }) },
           { id: 'leveling' as const, label: t('tendering.tab_leveling', 'Leveling') },
           {
             id: 'award-record' as const,
@@ -2209,6 +2244,9 @@ function PackageDetail({
 
       {/* Addenda sub-tab */}
       {activeTab === 'addenda' && <AddendumList packageId={packageId} />}
+
+      {/* Clarifications sub-tab */}
+      {activeTab === 'clarifications' && <ClarificationsPanel packageId={packageId} />}
 
       {/* Leveling matrix sub-tab */}
       {activeTab === 'leveling' && (

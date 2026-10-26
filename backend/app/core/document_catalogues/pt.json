@@ -204,5 +204,21 @@
   "notifications.portal.user_invited.body": "{portal_user_email} convidado com a função {portal_role}.",
   "notifications.portal.message_received.title": "Nova mensagem no portal",
   "notifications.portal.message_received.body": "{buyer_name} enviou uma mensagem."
+ },
+ "tender_addendum": {
+  "addendum_subject": "Adenda {number} ao concurso {package}",
+  "addendum_heading": "Adenda ao concurso",
+  "greeting": "Exmos. Srs. da {company},",
+  "greeting_generic": "Exmos. Senhores,",
+  "addendum_intro": "Foi emitida a adenda {number} ao lote de concurso {package}: {title}.",
+  "addendum_deadline": "O prazo de entrega das propostas foi alterado de {old} para {new}.",
+  "addendum_boq": "O mapa de quantidades foi alterado (revisão {revision}). Por favor, oriente a precificação pela revisão em vigor.",
+  "addendum_documents": "Documentos emitidos: {documents}",
+  "addendum_ack": "Solicitamos a confirmação de receção desta adenda. Uma proposta que não confirme todas as adendas poderá ser considerada não conforme.",
+  "answer_subject": "Esclarecimento {number} ao concurso {package}",
+  "answer_heading": "Esclarecimento do concurso",
+  "answer_intro": "Uma questão sobre o lote de concurso {package} foi respondida. A resposta aplica-se a todos os concorrentes.",
+  "question_label": "Questão",
+  "answer_label": "Resposta"
  }
 }

@@ -204,5 +204,21 @@
   "notifications.portal.user_invited.body": "{portal_user_email} uitgenodigd met de rol {portal_role}.",
   "notifications.portal.message_received.title": "Nieuw bericht in het portaal",
   "notifications.portal.message_received.body": "{buyer_name} heeft een bericht gestuurd."
+ },
+ "tender_addendum": {
+  "addendum_subject": "Addendum {number} bij de aanbesteding {package}",
+  "addendum_heading": "Addendum bij de aanbesteding",
+  "greeting": "Geachte {company},",
+  "greeting_generic": "Geachte heer/mevrouw,",
+  "addendum_intro": "Addendum {number} bij het aanbestedingspakket {package} is uitgebracht: {title}.",
+  "addendum_deadline": "De deadline voor indiening is verschoven van {old} naar {new}.",
+  "addendum_boq": "De hoeveelhedenstaat is gewijzigd (revisie {revision}). Gelieve de huidige revisie te prijzen.",
+  "addendum_documents": "Uitgebrachte documenten: {documents}",
+  "addendum_ack": "Bevestig a.u.b. de ontvangst van dit addendum. Een inschrijving die niet alle addenda bevestigt, kan als niet-conform worden beschouwd.",
+  "answer_subject": "Verduidelijking {number} bij de aanbesteding {package}",
+  "answer_heading": "Verduidelijking aanbesteding",
+  "answer_intro": "Een vraag over aanbestedingspakket {package} is beantwoord. Het antwoord geldt voor alle inschrijvers.",
+  "question_label": "Vraag",
+  "answer_label": "Antwoord"
  }
 }

@@ -27,6 +27,22 @@
   "cta": "Avaa määräluettelo ja syötä hinnat",
   "no_link": "Tutustukaa paketin tietoihin ja lähettäkää tarjouksenne ennen yllä mainittua määräaikaa."
  },
+ "tender_addendum": {
+  "addendum_subject": "Tarjouskilpailun {package} lisäys {number}",
+  "addendum_heading": "Tarjouskilpailun lisäys",
+  "greeting": "Hyvä {company},",
+  "greeting_generic": "Hyvä vastaanottaja,",
+  "addendum_intro": "Tarjouspaketin {package} lisäys {number} on julkaistu: {title}.",
+  "addendum_deadline": "Jättöaikaa on siirretty päivästä {old} päivään {new}.",
+  "addendum_boq": "Määräluetteloa on muutettu (revisio {revision}). Hinnoittele voimassa oleva revisio.",
+  "addendum_documents": "Julkaistut asiakirjat: {documents}",
+  "addendum_ack": "Vahvistakaa tämän lisäyksen vastaanotto. Tarjous, joka ei vahvista kaikkia lisäyksiä, voidaan katsoa vaatimukset täyttämättömäksi.",
+  "answer_subject": "Tarjouskilpailun {package} täsmennys {number}",
+  "answer_heading": "Tarjouskilpailun täsmennys",
+  "answer_intro": "Tarjouspakettia {package} koskevaan kysymykseen on vastattu. Vastaus koskee kaikkia tarjoajia.",
+  "question_label": "Kysymys",
+  "answer_label": "Vastaus"
+ },
  "notification_email": {
   "greeting": "Hei {name},",
   "greeting_generic": "Hei,",

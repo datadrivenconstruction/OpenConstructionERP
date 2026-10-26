@@ -27,6 +27,22 @@
   "cta": "Otvori troškovnik i unesi cijene",
   "no_link": "Molimo pregledajte podatke o paketu i dostavite svoju ponudu prije gore navedenog roka."
  },
+ "tender_addendum": {
+  "addendum_subject": "Dodatak {number} natječaju {package}",
+  "addendum_heading": "Dodatak natječaju",
+  "greeting": "Poštovani {company},",
+  "greeting_generic": "Poštovani,",
+  "addendum_intro": "Izdan je dodatak {number} natječajnom paketu {package}: {title}.",
+  "addendum_deadline": "Rok za predaju ponuda pomaknut je s {old} na {new}.",
+  "addendum_boq": "Troškovnik je izmijenjen (revizija {revision}). Molimo ocijenite važeću reviziju.",
+  "addendum_documents": "Izdani dokumenti: {documents}",
+  "addendum_ack": "Molimo potvrdite primitak ovog dodatka. Ponuda koja ne potvrdi sve dodatke može se smatrati neusklađenom.",
+  "answer_subject": "Pojašnjenje {number} natječaja {package}",
+  "answer_heading": "Pojašnjenje natječaja",
+  "answer_intro": "Odgovoreno je na pitanje o natječajnom paketu {package}. Odgovor vrijedi za sve ponuditelje.",
+  "question_label": "Pitanje",
+  "answer_label": "Odgovor"
+ },
  "notification_email": {
   "greeting": "Poštovani, {name},",
   "greeting_generic": "Poštovani,",

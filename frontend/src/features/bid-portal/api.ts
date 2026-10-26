@@ -116,7 +116,7 @@ async function toError(res: Response): Promise<BidPortalError> {
   return new BidPortalError('unknown', res.status);
 }
 
-async function call(token: string, path: string, init?: RequestInit): Promise<BidPortalView> {
+async function callJson<T>(token: string, path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`/api/v1/tendering/bid-portal/${encodeURIComponent(token)}/${path}`, {
     ...init,
     headers: { Accept: 'application/json', ...(init?.body ? { 'Content-Type': 'application/json' } : {}) },
@@ -124,7 +124,11 @@ async function call(token: string, path: string, init?: RequestInit): Promise<Bi
     referrerPolicy: 'no-referrer',
   });
   if (!res.ok) throw await toError(res);
-  return (await res.json()) as BidPortalView;
+  return (await res.json()) as T;
+}
+
+function call(token: string, path: string, init?: RequestInit): Promise<BidPortalView> {
+  return callJson<BidPortalView>(token, path, init);
 }
 
 export function fetchBidPortal(token: string): Promise<BidPortalView> {
@@ -137,4 +141,49 @@ export function saveBidDraft(token: string, body: BidPortalPricesBody): Promise<
 
 export function submitBid(token: string, body: BidPortalPricesBody): Promise<BidPortalView> {
   return call(token, 'submit/', { method: 'POST', body: JSON.stringify(body) });
+}
+
+export interface TenderInfoAddendum {
+  id: string;
+  revision_no: number;
+  title: string;
+  body: string | null;
+  published_at: string | null;
+  new_deadline: string | null;
+  boq_revision_no: number | null;
+  document_changes: Array<{
+    drawing_number?: string;
+    title: string;
+    revision?: string;
+    note?: string;
+    superseded?: boolean;
+  }>;
+  acknowledged: boolean;
+}
+
+/** A published answer. The asker is never part of it. */
+export interface TenderInfoClarification {
+  number: number;
+  question: string;
+  answer: string | null;
+  published_at: string | null;
+}
+
+export interface TenderInfo {
+  deadline: string | null;
+  current_boq_revision: number;
+  addenda: TenderInfoAddendum[];
+  clarifications: TenderInfoClarification[];
+}
+
+export function fetchTenderInfo(token: string): Promise<TenderInfo> {
+  return callJson<TenderInfo>(token, 'tender-info/');
+}
+
+export function askQuestion(token: string, question: string): Promise<{ number: number; status: string }> {
+  return callJson(token, 'questions/', { method: 'POST', body: JSON.stringify({ question }) });
+}
+
+export function acknowledgeAddendumAsBidder(token: string, addendumId: string): Promise<unknown> {
+  return callJson(token, `addenda/${encodeURIComponent(addendumId)}/acknowledge/`, { method: 'POST' });
 }

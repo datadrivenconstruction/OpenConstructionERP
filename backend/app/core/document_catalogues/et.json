@@ -27,6 +27,22 @@
   "cta": "Ava mahtude loend ja sisesta hinnad",
   "no_link": "Palun tutvuge paketi andmetega ja esitage oma pakkumine enne ülaltoodud tähtaega."
  },
+ "tender_addendum": {
+  "addendum_subject": "Hanke {package} lisa {number}",
+  "addendum_heading": "Hanke lisa",
+  "greeting": "Austatud {company},",
+  "greeting_generic": "Austatud härra või proua,",
+  "addendum_intro": "Hankepaketile {package} on välja antud lisa {number}: {title}.",
+  "addendum_deadline": "Pakkumuste esitamise tähtaeg on nihkunud kuupäevalt {old} kuupäevale {new}.",
+  "addendum_boq": "Koguste loetelu on muutunud (versioon {revision}). Palun hinnake kehtiv versioon.",
+  "addendum_documents": "Välja antud dokumendid: {documents}",
+  "addendum_ack": "Palun kinnitage selle lisa kättesaamine. Pakkumus, mis ei kinnita kõiki lisasid, võidakse lugeda nõuetele mittevastavaks.",
+  "answer_subject": "Hanke {package} selgitus {number}",
+  "answer_heading": "Hanke selgitus",
+  "answer_intro": "Hankepaketi {package} kohta esitatud küsimusele on vastatud. Vastus kehtib kõigile pakkujatele.",
+  "question_label": "Küsimus",
+  "answer_label": "Vastus"
+ },
  "notification_email": {
   "greeting": "Tere, {name}!",
   "greeting_generic": "Tere!",

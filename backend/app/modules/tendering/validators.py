@@ -168,3 +168,133 @@ def register_tendering_validation_rules() -> None:
         SealedDualOpeningDistinct(),
     ):
         rule_registry.register(rule, [SEALED_RULE_SET])
+    register_tendering_addenda_rules()
+
+
+# ── Addenda, revisions, questions and bid bonds ─────────────────────────────
+# Read the payload built by ``addenda.validation_payload``. Day thresholds come
+# from the payload's ``rules`` (country data plus package overrides).
+
+ADDENDA_RULE_SET = "tendering_addenda"
+
+
+class _AddendaRule(_SealedRule):
+    category = RuleCategory.COMPLIANCE
+
+
+class AddendumAcknowledgedAtClosing(_AddendaRule):
+    rule_id = "tendering_addenda.acknowledged_at_closing"
+    name = "Every invited firm acknowledged every addendum at closing"
+    description = "At closing, each published addendum is acknowledged by every firm it was issued to."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        if not data.get("closed"):
+            return []
+        return [
+            self._result(
+                not a.get("pending_recipient_ids"),
+                str(a.get("id", "")),
+                f"Addendum {a.get('revision_no')} not acknowledged by {len(a.get('pending_recipient_ids') or [])} firm(s)",
+                "Obtain the acknowledgement or treat the bid as non-compliant",
+            )
+            for a in data.get("addenda") or []
+        ]
+
+
+class BidPricedCurrentRevision(_AddendaRule):
+    rule_id = "tendering_addenda.bid_on_current_revision"
+    name = "Bid priced on the current BOQ revision"
+    description = "A bid priced on a superseded tender BOQ revision does not cover the changed lines."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        return [
+            self._result(
+                bool(b.get("revision_current")),
+                str(b.get("bid_id", "")),
+                f"Bid priced BOQ revision {b.get('boq_revision_no')}, current is {b.get('current_boq_revision')}",
+                "Ask the bidder to reprice the changed lines on the current revision",
+            )
+            for b in _bids(context)
+        ]
+
+
+class QuestionAnsweredInTime(_AddendaRule):
+    rule_id = "tendering_addenda.question_answered_in_time"
+    name = "Bidder questions answered in time"
+    description = "A question is answered no later than the configured number of days before closing."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        need = int((data.get("rules") or {}).get("answer_min_days_before_closing") or 0)
+        out = []
+        for q in data.get("questions") or []:
+            left = q.get("days_left")
+            if left is None:
+                continue
+            late = left < need
+            out.append(
+                self._result(
+                    not late,
+                    str(q.get("id", "")),
+                    f"Question {q.get('number')} {'answered' if q.get('answered') else 'unanswered'} "
+                    f"{left} day(s) before closing, {need} required",
+                    "Answer and publish now, or extend the deadline by addendum",
+                )
+            )
+        return out
+
+
+class AddendumNotTooLate(_AddendaRule):
+    rule_id = "tendering_addenda.addendum_not_too_late"
+    name = "Addendum issued early enough before closing"
+    description = "An addendum issued closer to closing than the configured minimum leaves bidders too little time."
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        need = int((data.get("rules") or {}).get("addendum_min_days_before_closing") or 0)
+        return [
+            self._result(
+                a.get("days_before_closing") is None or int(a["days_before_closing"]) >= need,
+                str(a.get("id", "")),
+                f"Addendum {a.get('revision_no')} issued {a.get('days_before_closing')} day(s) before closing, "
+                f"{need} recommended",
+                "Extend the deadline in the same or a further addendum",
+            )
+            for a in data.get("addenda") or []
+        ]
+
+
+class BidBondCoversValidity(_AddendaRule):
+    rule_id = "tendering_addenda.bid_bond_covers_validity"
+    name = "Bid bond runs past the bid validity"
+    description = "A bid bond must not expire before the bid validity period ends, also after a deadline extension."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        data = _data(context)
+        until = data.get("bid_validity_until")
+        if not until:
+            return []
+        return [
+            self._result(
+                bool(b.get("expiry_date")) and str(b["expiry_date"]) >= str(until),
+                str(b.get("guarantee_id", "")),
+                f"Bid bond {b.get('reference')} expires {b.get('expiry_date') or 'never set'}, "
+                f"bid validity runs to {until}",
+                "Ask the bidder for an extension of the bid bond",
+            )
+            for b in data.get("bonds") or []
+        ]
+
+
+def register_tendering_addenda_rules() -> None:
+    """Register the addenda rules with the platform rule registry."""
+    for rule in (
+        AddendumAcknowledgedAtClosing(),
+        BidPricedCurrentRevision(),
+        QuestionAnsweredInTime(),
+        AddendumNotTooLate(),
+        BidBondCoversValidity(),
+    ):
+        rule_registry.register(rule, [ADDENDA_RULE_SET])

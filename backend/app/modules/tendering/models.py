@@ -8,12 +8,13 @@ Tables:
     oe_tendering_bid_invitation - per-recipient price-entry links (token hashed)
     oe_tendering_sealing - the sealed submission mode of a package and its opening
     oe_tendering_bid_receipt - time stamp and SHA-256 of each sealed submission
+    oe_tendering_clarification - bidder questions and the answers published to all bidders
 """
 
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -196,3 +197,36 @@ class TenderBidReceipt(Base):
     invitation_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
     content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class TenderClarification(Base):
+    """One bidder question on a package and the answer given to every bidder.
+
+    The asking firm (``recipient_id``, ``asked_by_email``) is kept for the buyer
+    only; what bidders see is the question and answer without who asked.
+    ``status``: ``open`` -> ``answered`` -> ``published``. ``addendum_id`` is set
+    once the answer was promoted into an addendum.
+    """
+
+    __tablename__ = "oe_tendering_clarification"
+
+    package_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_tendering_package.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    number: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    recipient_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    asked_by_email: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    question: Mapped[str] = mapped_column(Text, nullable=False)
+    asked_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    answer: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    answered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    answered_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open", server_default="open")
+    addendum_id: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<TenderClarification #{self.number} package={self.package_id} {self.status}>"

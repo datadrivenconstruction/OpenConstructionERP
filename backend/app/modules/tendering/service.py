@@ -11,7 +11,7 @@ Stateless service layer. Handles:
 import asyncio
 import logging
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal, InvalidOperation
 from typing import Any
 
@@ -235,6 +235,7 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
         _logger_ev.debug("Event publish skipped: %s", name)
 
 
+from app.modules.tendering import addenda as addenda_logic
 from app.modules.tendering.models import TenderBid, TenderPackage
 from app.modules.tendering.repository import TenderingRepository
 from app.modules.tendering.schemas import (
@@ -660,7 +661,11 @@ class TenderingService:
             status=data.status,
             notes=data.notes,
             line_items=line_items_raw,
-            metadata_=data.metadata,
+            # The tender BOQ revision this bid priced, unless the caller states one.
+            metadata_={
+                "boq_revision_no": addenda_logic.current_boq_revision(package.metadata_),
+                **(data.metadata or {}),
+            },
         )
         bid = await self.repo.create_bid(bid)
 
@@ -927,6 +932,7 @@ class TenderingService:
                 )
             )
 
+        compliance = addenda_logic.bid_compliance(package.metadata_, bids)
         # Build bid totals - never compute a deviation against the budget for
         # a bid quoted in a different currency (mixed-currency comparison is a
         # data error, not a 0% match).
@@ -952,6 +958,7 @@ class TenderingService:
                     "status": bid.status,
                     "matched_lines": priced_lines[str(bid.id)],
                     "total_lines": line_count,
+                    **compliance.get(str(bid.id), {}),
                 }
             )
 
@@ -963,6 +970,8 @@ class TenderingService:
             budget_total=_round2(budget_total),
             rows=rows,
             bid_totals=bid_totals,
+            current_boq_revision=addenda_logic.current_boq_revision(package.metadata_),
+            published_addenda=len(addenda_logic.published_addenda(package.metadata_)),
         )
 
     async def apply_winner(
@@ -1831,7 +1840,7 @@ class TenderingService:
     #    created_at, updated_at}
 
     @staticmethod
-    def _addendum_to_response(package_id: uuid.UUID, raw: dict) -> AddendumResponse:
+    def _addendum_to_response(package_id: uuid.UUID, raw: dict, meta: dict | None = None) -> AddendumResponse:
         acks = [
             AddendumAckEntry(
                 bidder_id=str(a.get("bidder_id", "")),
@@ -1852,6 +1861,14 @@ class TenderingService:
             acknowledged_by=acks,
             created_at=str(raw.get("created_at", "")),
             updated_at=str(raw.get("updated_at", "")),
+            document_changes=list(raw.get("document_changes") or []),
+            boq_changes=list(raw.get("boq_changes") or []),
+            boq_revision_no=raw.get("boq_revision_no"),
+            previous_deadline=raw.get("previous_deadline"),
+            new_deadline=raw.get("new_deadline"),
+            source_clarification_id=raw.get("source_clarification_id"),
+            notified=list(raw.get("notified") or []),
+            pending_recipient_ids=addenda_logic.pending_recipients(meta, raw),
         )
 
     @staticmethod
@@ -1863,7 +1880,24 @@ class TenderingService:
         """List a package's addenda, oldest revision first."""
         package = await self.get_package(package_id)
         addenda = sorted(self._read_addenda(package), key=lambda a: int(a.get("revision_no", 0)))
-        return [self._addendum_to_response(package_id, a) for a in addenda]
+        # A document an addendum issued that the register has since replaced is flagged on read.
+        doc_ids = {
+            str(d["document_id"]) for a in addenda for d in a.get("document_changes") or [] if d.get("document_id")
+        }
+        if doc_ids:
+            from app.modules.boq.drawing_refs import superseded_documents
+
+            replaced = await superseded_documents(self.session, doc_ids)
+            for a in addenda:
+                a["document_changes"] = [
+                    {
+                        **d,
+                        "superseded": str(d.get("document_id")) in replaced,
+                        "current_document_id": replaced.get(str(d.get("document_id"))),
+                    }
+                    for d in a.get("document_changes") or []
+                ]
+        return [self._addendum_to_response(package_id, a, package.metadata_) for a in addenda]
 
     async def create_addendum(self, package_id: uuid.UUID, data: AddendumCreate) -> AddendumResponse:
         """Append a new draft addendum to a package."""
@@ -1881,7 +1915,13 @@ class TenderingService:
             "acknowledged_by": [],
             "created_at": now,
             "updated_at": now,
+            "document_changes": [d.model_dump(mode="json") for d in data.document_changes],
+            "boq_changes": [c.model_dump(mode="json") for c in data.boq_changes],
+            "new_deadline": data.new_deadline or None,
+            "source_clarification_id": str(data.source_clarification_id) if data.source_clarification_id else None,
         }
+        if data.new_deadline and addenda_logic.closing_date(data.new_deadline) is None:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="new_deadline is not a date")
         meta = dict(package.metadata_ or {})
         meta["addenda"] = [*addenda, entry]
         await self.repo.update_package_fields(package_id, metadata_=meta)
@@ -1892,7 +1932,7 @@ class TenderingService:
             source_module="oe_tendering",
         )
         logger.info("Addendum created: package=%s rev=%s", package_id, next_rev)
-        return self._addendum_to_response(package_id, entry)
+        return self._addendum_to_response(package_id, entry, meta)
 
     async def find_addendum_package(
         self,
@@ -1950,18 +1990,61 @@ class TenderingService:
         entry["published_at"] = now
         entry["published_by_user_id"] = str(user_id) if user_id else None
         entry["updated_at"] = now
-        addenda[target_idx] = entry
         meta = dict(package.metadata_ or {})
+        fields: dict[str, Any] = {}
+        if entry.get("boq_changes"):
+            meta = addenda_logic.next_boq_revision(meta, entry, now)
+            meta = addenda_logic.apply_boq_changes_to_scope(meta, entry["boq_changes"])
+        if entry.get("new_deadline"):
+            entry["previous_deadline"] = package.deadline
+            fields["deadline"] = entry["new_deadline"]
+        addenda[target_idx] = entry
+        meta["addenda"] = addenda
+        await self.repo.update_package_fields(package.id, metadata_=meta, **fields)
+        package.metadata_ = meta
+        if fields:
+            package.deadline = fields["deadline"]
+
+        side = addenda_logic.AddendaService(self.session)
+        entry["notified"] = await side.after_publish(package, entry, user_id)
+        addenda[target_idx] = entry
+        meta = dict(meta)
         meta["addenda"] = addenda
         await self.repo.update_package_fields(package.id, metadata_=meta)
+        package.metadata_ = meta
 
         await _safe_publish(
             "tendering.addendum.published",
-            {"package_id": str(package.id), "addendum_id": addendum_id},
+            {
+                "package_id": str(package.id),
+                "addendum_id": addendum_id,
+                "revision_no": entry.get("revision_no"),
+                "boq_revision_no": entry.get("boq_revision_no"),
+            },
             source_module="oe_tendering",
         )
+        if entry.get("boq_revision_no"):
+            await _safe_publish(
+                "tendering.boq.revised",
+                {"package_id": str(package.id), "boq_revision_no": entry["boq_revision_no"]},
+                source_module="oe_tendering",
+            )
+        if entry.get("new_deadline"):
+            rules = await side.rules(package)
+            close = addenda_logic.closing_date(entry["new_deadline"])
+            validity = close + timedelta(days=rules.bid_validity_days) if close else None
+            await _safe_publish(
+                "tendering.deadline.extended",
+                {
+                    "package_id": str(package.id),
+                    "previous_deadline": entry.get("previous_deadline"),
+                    "new_deadline": entry["new_deadline"],
+                    "bid_validity_until": validity.isoformat() if validity else None,
+                },
+                source_module="oe_tendering",
+            )
         logger.info("Addendum published: package=%s addendum=%s", package.id, addendum_id)
-        return self._addendum_to_response(package.id, entry)
+        return self._addendum_to_response(package.id, entry, package.metadata_)
 
     async def acknowledge_addendum(
         self, package: TenderPackage, addendum_id: str, bidder_id: str, user_id: str | None
@@ -2001,7 +2084,11 @@ class TenderingService:
             addendum_id,
             bidder_id,
         )
-        return self._addendum_to_response(package.id, entry)
+        package.metadata_ = meta
+        await addenda_logic.AddendaService(self.session).audit(
+            user_id, package, "addendum_acknowledged", {"addendum_id": addendum_id, "bidder_id": str(bidder_id)}
+        )
+        return self._addendum_to_response(package.id, entry, meta)
 
     # ── Award record (Vergabevermerk) ──────────────────────────────────────
     # The written record of an award procedure that German public procurement

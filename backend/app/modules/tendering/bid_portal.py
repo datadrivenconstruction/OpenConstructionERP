@@ -58,6 +58,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.core.rate_limiter import RateLimiter, client_identifier
+from app.modules.tendering.addenda import current_boq_revision
 from app.modules.tendering.intl import _parse_deadline
 from app.modules.tendering.models import TenderBidInvitation, TenderPackage
 from app.modules.tendering.schemas import (
@@ -568,6 +569,10 @@ class BidPortalService:
             raise HTTPException(status_code=status.HTTP_410_GONE, detail=LINK_EXPIRED)
         return invitation
 
+    async def resolve_live(self, token: str) -> TenderBidInvitation:
+        """The live link behind a token (404 / 410 otherwise), for the addenda and Q&A routes."""
+        return await self._resolve(token)
+
     async def _context(self, invitation: TenderBidInvitation) -> tuple[TenderPackage, str, str, list[dict], dict]:
         """(package, project name, currency, lines, priceable) for a link."""
         package = await self.tendering.get_package(invitation.package_id)
@@ -793,6 +798,7 @@ class BidPortalService:
             "unpriced_count": len(unpriced),
             "bidder_note": body.notes,
             "late": due is not None and now > due,
+            "boq_revision_no": current_boq_revision(package.metadata_),
         }
 
         existing = await self._existing_bid(invitation, package.id)

@@ -204,5 +204,21 @@
   "notifications.portal.user_invited.body": "Zaproszono {portal_user_email}, rola: {portal_role}.",
   "notifications.portal.message_received.title": "Nowa wiadomość w portalu",
   "notifications.portal.message_received.body": "Nadawca wiadomości: {buyer_name}."
+ },
+ "tender_addendum": {
+  "addendum_subject": "Aneks {number} do przetargu {package}",
+  "addendum_heading": "Aneks do przetargu",
+  "greeting": "Szanowni Państwo z firmy {company},",
+  "greeting_generic": "Szanowni Państwo,",
+  "addendum_intro": "Wydano aneks {number} do pakietu przetargowego {package}: {title}.",
+  "addendum_deadline": "Termin składania ofert został przesunięty z {old} na {new}.",
+  "addendum_boq": "Przedmiar został zmieniony (rewizja {revision}). Prosimy o wycenę aktualnej rewizji.",
+  "addendum_documents": "Wydane dokumenty: {documents}",
+  "addendum_ack": "Prosimy o potwierdzenie otrzymania niniejszego aneksu. Oferta, która nie potwierdza wszystkich aneksów, może zostać uznana za niezgodną z warunkami.",
+  "answer_subject": "Wyjaśnienie {number} do przetargu {package}",
+  "answer_heading": "Wyjaśnienie do przetargu",
+  "answer_intro": "Odpowiedziano na pytanie dotyczące pakietu przetargowego {package}. Odpowiedź dotyczy wszystkich oferentów.",
+  "question_label": "Pytanie",
+  "answer_label": "Odpowiedź"
  }
 }

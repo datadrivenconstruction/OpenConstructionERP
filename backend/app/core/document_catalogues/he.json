@@ -27,6 +27,22 @@
   "cta": "פתיחת כתב הכמויות והזנת מחירים",
   "no_link": "נא לעיין בפרטי החבילה ולשלוח את הצעתכם לפני המועד האחרון שצוין לעיל."
  },
+ "tender_addendum": {
+  "addendum_subject": "תוספת {number} למכרז {package}",
+  "addendum_heading": "תוספת למכרז",
+  "greeting": "לכבוד {company},",
+  "greeting_generic": "לכבוד המציעים,",
+  "addendum_intro": "תוספת {number} לחבילת המכרז {package} פורסמה: {title}.",
+  "addendum_deadline": "מועד הגשת ההצעות הוזז מ-{old} ל-{new}.",
+  "addendum_boq": "כתב הכמויות השתנה (גרסה {revision}). נא לתמחר את הגרסה העדכנית.",
+  "addendum_documents": "מסמכים שפורסמו: {documents}",
+  "addendum_ack": "נא לאשר קבלה של תוספת זו. הצעה שאינה מאשרת את כל התוספות עשויה להיחשב כלא תואמת.",
+  "answer_subject": "הבהרה {number} למכרז {package}",
+  "answer_heading": "הבהרה למכרז",
+  "answer_intro": "נענתה שאלה בנוגע לחבילת המכרז {package}. התשובה חלה על כל המציעים.",
+  "question_label": "שאלה",
+  "answer_label": "תשובה"
+ },
  "notification_email": {
   "greeting": "שלום {name},",
   "greeting_generic": "שלום רב,",

@@ -27,6 +27,22 @@
   "cta": "Roʻyxatni ochish va narxlarni kiritish",
   "no_link": "Iltimos, paket maʼlumotlarini koʻrib chiqing va yuqorida koʻrsatilgan muddatdan oldin oʻz taklifingizni yuboring."
  },
+ "tender_addendum": {
+  "addendum_subject": "{package} tenderi boʼyicha Qoʼshimcha {number}",
+  "addendum_heading": "Tender qoʼshimchasi",
+  "greeting": "Hurmatli {company},",
+  "greeting_generic": "Hurmatli masʼul shaxs,",
+  "addendum_intro": "{package} tender paketi boʼyicha Qoʼshimcha {number} eʼlon qilindi: {title}.",
+  "addendum_deadline": "Takliflarni topshirish muddati {old} dan {new} ga oʼzgartirildi.",
+  "addendum_boq": "Hajmlar roʼyxati oʼzgardi (revizisiya {revision}). Amaldagi revizisiyaga narx qoʼying.",
+  "addendum_documents": "Chiqarilgan hujjatlar: {documents}",
+  "addendum_ack": "Iltimos, ushbu qoʼshimcha qabul qilinganini tasdiqlang. Barcha qoʼshimchalarni tasdiqlamagan taklif talablarga mos kelmagan deb topilishi mumkin.",
+  "answer_subject": "{package} tenderi boʼyicha aniqlik {number}",
+  "answer_heading": "Tender boʼyicha aniqlik",
+  "answer_intro": "{package} tender paketi boʼyicha savolga javob berildi. Javob barcha ishtirokchilarga taalluqli.",
+  "question_label": "Savol",
+  "answer_label": "Javob"
+ },
  "notification_email": {
   "greeting": "Hurmatli {name},",
   "greeting_generic": "Assalomu alaykum,",

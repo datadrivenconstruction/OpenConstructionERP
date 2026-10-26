@@ -1,0 +1,49 @@
+{
+  "_comment": "Tender addenda and clarification defaults per country. Read by app/core/tender_rules.py. DEFAULT is neutral practice for any market; a country row overrides only the keys it names. Every figure carries its source and a confidence (H official or two reliable sources agree, M one reliable secondary source or settled practice). A package can override any value in its own metadata.",
+  "DEFAULT": {
+    "label": "Neutral practice",
+    "addendum_min_days_before_closing": 7,
+    "answer_min_days_before_closing": 5,
+    "questions_close_days_before_closing": 10,
+    "bid_validity_days": 90,
+    "extend_deadline_if_late_addendum": false,
+    "acknowledgement": "per_addendum",
+    "public_notice_of_changes": false,
+    "source": "Settled tendering practice; no statute fixes these figures for private works.",
+    "statute_reference": null,
+    "confidence": "M",
+    "review_status": "needs_expert_review"
+  },
+  "countries": {
+    "DE": {
+      "label": "Germany (VgV / VOB/A)",
+      "addendum_min_days_before_closing": 6,
+      "answer_min_days_before_closing": 6,
+      "questions_close_days_before_closing": 10,
+      "bid_validity_days": 30,
+      "extend_deadline_if_late_addendum": true,
+      "acknowledgement": "listed_in_bid_form",
+      "public_notice_of_changes": true,
+      "source": "Additional information must reach bidders no later than six days before the time limit, otherwise the time limit is extended; the bid validity period should normally not exceed 30 calendar days.",
+      "statute_reference": "VgV section 20(3); VOB/A section 10(4); Directive 2014/24/EU art. 47(3)",
+      "source_url": "https://www.gesetze-im-internet.de/vgv_2016/__20.html",
+      "confidence": "M",
+      "review_status": "needs_expert_review"
+    },
+    "FR": {
+      "label": "France (Code de la commande publique)",
+      "addendum_min_days_before_closing": 6,
+      "answer_min_days_before_closing": 6,
+      "questions_close_days_before_closing": 10,
+      "bid_validity_days": 120,
+      "extend_deadline_if_late_addendum": true,
+      "acknowledgement": "per_addendum",
+      "public_notice_of_changes": true,
+      "source": "EU rule on additional information six days before the time limit, as transposed; 120 days of offer validity is common practice in tender rules (reglement de la consultation).",
+      "statute_reference": "Directive 2014/24/EU art. 47(3), transposed in the Code de la commande publique",
+      "source_url": "https://eur-lex.europa.eu/eli/dir/2014/24/oj",
+      "confidence": "M",
+      "review_status": "needs_expert_review"
+    }
+  }
+}
