@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useOpenProject } from './useOpenProject';
 import {
   FolderPlus, FolderOpen, ArrowRight, MoreHorizontal, Copy, Trash2, Archive, ArchiveRestore, ExternalLink,
   Search, ChevronDown, ArrowUpDown, Star, Map as MapIcon, CloudSun,
@@ -1158,6 +1159,7 @@ export function ProjectCard({
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const openProject = useOpenProject();
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -1346,7 +1348,7 @@ export function ProjectCard({
       style={style}
       // An archived (deleted) project has no page to open: the project route
       // answers 404 for it. Its card offers Restore instead.
-      onClick={isArchived ? undefined : () => navigate(`/projects/${project.id}`)}
+      onClick={isArchived ? undefined : () => void openProject(project.id, project.name)}
     >
       {mapEnabled && !isArchived && (
         <div className="relative" onClick={(e) => e.stopPropagation()}>
@@ -1430,7 +1432,7 @@ export function ProjectCard({
             {!isArchived && (
               <button
                 onClick={() => {
-                  navigate(`/projects/${project.id}`);
+                  void openProject(project.id, project.name);
                   setMenuOpen(false);
                 }}
                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
