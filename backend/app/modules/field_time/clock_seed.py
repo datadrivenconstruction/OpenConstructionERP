@@ -81,7 +81,7 @@ async def _cost_code(session: AsyncSession, project_id: uuid.UUID) -> str:
 
         codes = await _project_cost_codes(session, project_id)
         if codes:
-            return str(codes[0])
+            return str(codes[0][0])[:100]
     except Exception:
         logger.debug("Cost code lookup unavailable for project=%s", project_id)
     return ""

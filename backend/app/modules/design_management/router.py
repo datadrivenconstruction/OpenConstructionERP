@@ -1223,7 +1223,7 @@ async def _export_rows(svc: DesignService, project_id: uuid.UUID, register: str,
                 ", ".join(r.form_codes or []),
                 ", ".join(r.phase_codes or []),
                 r.min_suitability or "",
-                t(f"design.purpose.{r.purpose}"),
+                t(f"design.purpose.{r.purpose}") if r.purpose else "",
                 r.format,
                 r.copies_paper,
             ]

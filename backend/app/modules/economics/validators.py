@@ -87,7 +87,7 @@ class _EconomicsRule(ValidationRule):
     def _result(self, locale: str, passed: bool, ref: str, severity: Severity, **params: Any) -> RuleResult:
         base = f"economics.rules.{self.code}"
         shown = ref
-        if self.code == "process_not_set_up":
+        if self.code == "process_not_set_up" and not passed:
             area_key = f"economics.process_area.{ref}"
             area = translate(area_key, locale=locale)
             shown = area if area != area_key else ref
