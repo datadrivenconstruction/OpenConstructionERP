@@ -260,6 +260,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Construction Control': 'construction_control.title',
   // Field & site
   'Field Time': 'nav.field_time',
+  'Site Sensors': 'nav.site_sensors',
   'Labor Rates': 'nav.labor_rates',
   'Payroll': 'nav.payroll',
   'Certified Payroll': 'nav.certified_payroll',
@@ -1382,6 +1383,7 @@ const ROUTE_COMPONENT_MAP: ReadonlyArray<readonly [string, string]> = [
   ['/service', 'Service & Maintenance'],
   ['/equipment', 'Equipment & Fleet'],
   ['/daily-diary', 'Daily Diary'],
+  ['/site-sensors', 'Site Sensors'],
   ['/portal', 'Client & Partner Portal'],
   ['/resources', 'Resources & Crew'],
   ['/contracts', 'Contracts'],

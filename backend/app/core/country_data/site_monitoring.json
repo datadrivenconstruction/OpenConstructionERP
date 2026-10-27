@@ -1,0 +1,53 @@
+{
+  "_comment": "Site monitoring limits per country: construction noise, dust (PM10), vibration (PPV), permitted working hours, engine emission classes for non-road machinery and statutory inspection intervals for plant. Read by app/core/site_monitoring.py. Each figure carries its source and a confidence (H official text, M one reliable secondary source or settled practice). A country or metric not listed has no known limit and the engine says so; a device can always carry its own limit.",
+  "fuel_co2_kg_per_l": {
+    "diesel": {"value": "2.68", "source": "Tank-to-wheel combustion factor for road and non-road diesel, IPCC 2006 Guidelines vol. 2 ch. 3 default carbon content", "confidence": "M"},
+    "petrol": {"value": "2.31", "source": "IPCC 2006 Guidelines vol. 2 ch. 3 default carbon content for motor gasoline", "confidence": "M"},
+    "hvo": {"value": "0.0", "source": "Biogenic CO2 reported as zero at the tailpipe under the GHG Protocol; lifecycle emissions are reported separately", "confidence": "M"}
+  },
+  "countries": {
+    "DE": {
+      "noise_dba_day": {"value": "70", "source": "AVV Baulaerm 3.1.1 (a): areas with only commercial or industrial use, daytime 07:00-20:00", "confidence": "H"},
+      "noise_dba_night": {"value": "70", "source": "AVV Baulaerm 3.1.1 (a), night 20:00-07:00", "confidence": "H"},
+      "dust_pm10_ugm3_24h": {"value": "50", "source": "39. BImSchV para 4 (Directive 2008/50/EC annex XI), 24 hour mean", "confidence": "H"},
+      "vibration_ppv_mms": {"value": "5", "source": "DIN 4150-3 table 1 line 2, residential buildings, foundation, below 10 Hz", "confidence": "H"},
+      "working_hours": {"value": "07:00-20:00", "source": "AVV Baulaerm 3.1.2, daytime", "confidence": "H"},
+      "emission_class_min": {"value": "eu_stage_v", "source": "Regulation (EU) 2016/1628, Stage V for engines placed on the market from 2019/2020", "confidence": "H"},
+      "crane_inspection_days": {"value": "365", "source": "DGUV Vorschrift 52 para 26 (2), yearly inspection by an expert", "confidence": "H"}
+    },
+    "AT": {
+      "dust_pm10_ugm3_24h": {"value": "50", "source": "IG-L annex 1a (Directive 2008/50/EC), 24 hour mean", "confidence": "H"},
+      "emission_class_min": {"value": "eu_stage_v", "source": "Regulation (EU) 2016/1628", "confidence": "H"}
+    },
+    "FR": {
+      "dust_pm10_ugm3_24h": {"value": "50", "source": "Code de l'environnement R221-1 (Directive 2008/50/EC), 24 hour mean", "confidence": "H"},
+      "emission_class_min": {"value": "eu_stage_v", "source": "Regulation (EU) 2016/1628", "confidence": "H"}
+    },
+    "GB": {
+      "noise_dba_day": {"value": "75", "source": "BS 5228-1 annex E.3.2 ABC method, category C threshold for daytime in urban areas", "confidence": "M"},
+      "dust_pm10_ugm3_24h": {"value": "50", "source": "Air Quality Standards Regulations 2010 schedule 2, 24 hour mean", "confidence": "H"},
+      "vibration_ppv_mms": {"value": "15", "source": "BS 5228-2 table B.2, residential, cosmetic damage at 4 Hz", "confidence": "H"},
+      "working_hours": {"value": "08:00-18:00", "source": "Usual Control of Pollution Act 1974 s.61 consent hours, local authority sets the actual hours", "confidence": "M"},
+      "emission_class_min": {"value": "eu_stage_v", "source": "Non-Road Mobile Machinery (Type-Approval and Emission of Gaseous and Particulate Pollutants) Regulations 2018", "confidence": "H"},
+      "crane_inspection_days": {"value": "365", "source": "LOLER 1998 reg. 9, thorough examination every 12 months (6 months when lifting persons)", "confidence": "H"}
+    },
+    "US": {
+      "noise_dba_day": {"value": "90", "source": "FTA Transit Noise and Vibration Impact Assessment Manual (2018) table 7-2, residential, daytime 1 hour Leq", "confidence": "M"},
+      "dust_pm10_ugm3_24h": {"value": "150", "source": "40 CFR 50.6, NAAQS PM10 24 hour", "confidence": "H"},
+      "vibration_ppv_mms": {"value": "12.7", "source": "FTA manual (2018) table 7-5, reinforced concrete, steel or timber, 0.5 in/s", "confidence": "M"},
+      "working_hours": {"value": "07:00-19:00", "source": "Typical municipal noise ordinance; the local ordinance sets the hours", "confidence": "M"},
+      "emission_class_min": {"value": "us_epa_tier_4f", "source": "40 CFR 1039, Tier 4 final for nonroad compression-ignition engines", "confidence": "H"},
+      "crane_inspection_days": {"value": "365", "source": "29 CFR 1926.1412 (f), annual comprehensive inspection", "confidence": "H"}
+    },
+    "CA": {
+      "emission_class_min": {"value": "us_epa_tier_4f", "source": "Off-Road Compression-Ignition (Mobile and Stationary) and Large Spark-Ignition Engine Emission Regulations SOR/2020-258, aligned with US Tier 4", "confidence": "H"}
+    },
+    "CN": {
+      "noise_dba_day": {"value": "70", "source": "GB 12523-2011, construction site boundary, daytime", "confidence": "H"},
+      "noise_dba_night": {"value": "55", "source": "GB 12523-2011, construction site boundary, night", "confidence": "H"},
+      "working_hours": {"value": "06:00-22:00", "source": "GB 12523-2011 3.3, daytime is 06:00-22:00 unless the local government sets otherwise", "confidence": "H"},
+      "dust_pm10_ugm3_24h": {"value": "150", "source": "GB 3095-2012 grade II, 24 hour mean", "confidence": "H"},
+      "emission_class_min": {"value": "cn_stage_iv", "source": "GB 20891-2014 amended, China IV for non-road diesel from 2022-12-01", "confidence": "H"}
+    }
+  }
+}

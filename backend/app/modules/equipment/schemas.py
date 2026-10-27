@@ -111,6 +111,8 @@ class EquipmentCreate(BaseModel):
     residual_value: Decimal | None = None
     currency: str = Field(default="", max_length=3)
     notes: str | None = None
+    cost_code: str = Field(default="", max_length=100)
+    emission_class: str | None = Field(default=None, max_length=30)
 
 
 class EquipmentUpdate(BaseModel):
@@ -140,6 +142,8 @@ class EquipmentUpdate(BaseModel):
     residual_value: Decimal | None = None
     currency: str | None = Field(default=None, max_length=3)
     notes: str | None = None
+    cost_code: str | None = Field(default=None, max_length=100)
+    emission_class: str | None = Field(default=None, max_length=30)
 
 
 class EquipmentResponse(BaseModel):
@@ -169,6 +173,8 @@ class EquipmentResponse(BaseModel):
     residual_value: Decimal | None = None
     currency: str = ""
     notes: str | None = None
+    cost_code: str = ""
+    emission_class: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
@@ -211,6 +217,10 @@ class TelemetryReadingCreate(BaseModel):
     lat: float | None = Field(default=None, ge=-90, le=90)
     lng: float | None = Field(default=None, ge=-180, le=180)
     engine_status: str | None = Field(default=None, max_length=30)
+    idle_hours: Decimal | None = None
+    fuel_used_l: Decimal | None = None
+    fault_codes: list[str] = Field(default_factory=list)
+    source: str = Field(default="manual", max_length=20)
     raw_payload: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -228,6 +238,10 @@ class TelemetryReadingResponse(BaseModel):
     lat: float | None = None
     lng: float | None = None
     engine_status: str | None = None
+    idle_hours: Decimal | None = None
+    fuel_used_l: Decimal | None = None
+    fault_codes: list[str] = Field(default_factory=list)
+    source: str = "manual"
     raw_payload: dict[str, Any] = Field(default_factory=dict)
 
 

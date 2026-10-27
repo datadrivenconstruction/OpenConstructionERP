@@ -13,17 +13,20 @@ Tables:
     oe_equipment_fuel_log               - Fuel fills with cost
     oe_equipment_parts_log              - Replaced parts records
     oe_equipment_damage_report          - Damage reports with auto WO
+    oe_equipment_telematics_device      - Per-device ingest tokens
+    oe_equipment_utilisation_day        - Daily worked/idle/off hours and hire allocation
 """
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
     JSON,
     Boolean,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -32,6 +35,7 @@ from sqlalchemy import (
     Numeric,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -128,6 +132,10 @@ class Equipment(Base):
         server_default="",
     )
 
+    # Cost code the plant-hire allocation books against; engine class for the country minimum.
+    cost_code: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    emission_class: Mapped[str | None] = mapped_column(String(30), nullable=True)
+
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",
@@ -170,6 +178,11 @@ class TelemetryReading(Base):
     lat: Mapped[float | None] = mapped_column(Float, nullable=True)
     lng: Mapped[float | None] = mapped_column(Float, nullable=True)
     engine_status: Mapped[str | None] = mapped_column(String(30), nullable=True)
+    # Cumulative counters as telematics reports them (ISO 15143-3).
+    idle_hours: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    fuel_used_l: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    fault_codes: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
+    source: Mapped[str] = mapped_column(String(20), nullable=False, default="manual", server_default="manual")
     raw_payload: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
@@ -476,3 +489,64 @@ class DamageReport(Base):
 
     def __repr__(self) -> str:
         return f"<DamageReport equipment={self.equipment_id} {self.severity}/{self.status}>"
+
+
+class TelematicsDevice(Base):
+    """A telematics unit on a machine, authenticated by its own API token.
+
+    Only the SHA-256 of the token is stored; the token is shown once on creation.
+    """
+
+    __tablename__ = "oe_equipment_telematics_device"
+
+    equipment_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_equipment_equipment.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    label: Mapped[str] = mapped_column(String(200), nullable=False, default="")
+    token_hash: Mapped[str] = mapped_column(String(64), nullable=False, unique=True, index=True)
+    token_prefix: Mapped[str] = mapped_column(String(12), nullable=False, default="")
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    last_seen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<TelematicsDevice {self.token_prefix} equipment={self.equipment_id}>"
+
+
+class UtilisationDay(Base):
+    """One machine's day: worked, idle and off hours, fuel, CO2 and its hire allocation."""
+
+    __tablename__ = "oe_equipment_utilisation_day"
+    __table_args__ = (
+        UniqueConstraint("equipment_id", "day", name="uq_oe_equipment_utilisation_day"),
+        Index("ix_oe_equipment_utilisation_day_project_day", "project_id", "day"),
+    )
+
+    equipment_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_equipment_equipment.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    day: Mapped[date] = mapped_column(Date, nullable=False)
+    worked_hours: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False, default=Decimal("0"))
+    idle_hours: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False, default=Decimal("0"))
+    off_hours: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False, default=Decimal("24"))
+    fuel_l: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    co2_kg: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    engine_hours_end: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    outside_geofence_m: Mapped[Decimal | None] = mapped_column(Numeric(12, 1), nullable=True)
+    cost_code: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    hire_cost: Mapped[Decimal | None] = mapped_column(Numeric(18, 4), nullable=True)
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="", server_default="")
+    allocated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<UtilisationDay equipment={self.equipment_id} {self.day}>"

@@ -643,6 +643,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.daily_diary', to: '/daily-diary', icon: BookOpen },
       { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList, advancedOnly: true },
       { labelKey: 'nav.field_time', to: '/field-time', icon: Timer, advancedOnly: true },
+      { labelKey: 'nav.site_sensors', to: '/site-sensors', icon: Gauge, advancedOnly: true },
     ],
   },
   // ── 11b. ON SITE ───────────────────────────────────────────────────

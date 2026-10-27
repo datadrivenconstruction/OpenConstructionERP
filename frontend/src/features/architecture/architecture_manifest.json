@@ -104195,7 +104195,12 @@
         "router.py",
         "schemas.py",
         "seed.py",
-        "service.py"
+        "service.py",
+        "telematics.py",
+        "telematics_router.py",
+        "telematics_seed.py",
+        "telematics_service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_equipment",
@@ -104388,6 +104393,18 @@
               "nullable": false
             },
             {
+              "name": "cost_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "emission_class",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "notes",
               "annotation": "Mapped[str | None]",
               "sql_type": "Text",
@@ -104456,6 +104473,30 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "idle_hours",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "fuel_used_l",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "fault_codes",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
             },
             {
               "name": "raw_payload",
@@ -104930,6 +104971,148 @@
               "nullable": true,
               "is_fk": true,
               "fk_target": "oe_equipment_work_order.id"
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TelematicsDevice",
+          "tablename": "oe_equipment_telematics_device",
+          "docstring": "A telematics unit on a machine, authenticated by its own API token.\n\nOnly the SHA-256 of the token is stored; the token is shown once on creation.",
+          "columns": [
+            {
+              "name": "equipment_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_equipment_equipment.id"
+            },
+            {
+              "name": "label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "token_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "token_prefix",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "last_seen_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "UtilisationDay",
+          "tablename": "oe_equipment_utilisation_day",
+          "docstring": "One machine's day: worked, idle and off hours, fuel, CO2 and its hire allocation.",
+          "columns": [
+            {
+              "name": "equipment_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_equipment_equipment.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "day",
+              "annotation": "Mapped[date]",
+              "sql_type": "Date",
+              "nullable": false
+            },
+            {
+              "name": "worked_hours",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "idle_hours",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "off_hours",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "fuel_l",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "co2_kg",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "engine_hours_end",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "outside_geofence_m",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "cost_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "hire_cost",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "allocated_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -105502,6 +105685,14 @@
               "name": "notes",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "cost_code",
+              "type": "str"
+            },
+            {
+              "name": "emission_class",
+              "type": "str | None"
             }
           ]
         },
@@ -105592,6 +105783,14 @@
               "name": "notes",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "cost_code",
+              "type": "str | None"
+            },
+            {
+              "name": "emission_class",
+              "type": "str | None"
             }
           ]
         },
@@ -105705,6 +105904,16 @@
               "default": "None"
             },
             {
+              "name": "cost_code",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "emission_class",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "metadata",
               "type": "dict[str, Any]"
             },
@@ -105784,6 +105993,24 @@
               "type": "str | None"
             },
             {
+              "name": "idle_hours",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "fuel_used_l",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "fault_codes",
+              "type": "list[str]"
+            },
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
               "name": "raw_payload",
               "type": "dict[str, Any]"
             }
@@ -105837,6 +106064,25 @@
               "name": "engine_status",
               "type": "str | None",
               "default": "None"
+            },
+            {
+              "name": "idle_hours",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "fuel_used_l",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "fault_codes",
+              "type": "list[str]"
+            },
+            {
+              "name": "source",
+              "type": "str",
+              "default": "'manual'"
             },
             {
               "name": "raw_payload",
@@ -107240,7 +107486,9 @@
       ],
       "import_dependencies": [
         "costmodel",
-        "field_time"
+        "field_time",
+        "notifications",
+        "projects"
       ]
     },
     {
@@ -244099,6 +244347,1106 @@
       ]
     },
     {
+      "module_id": "site_sensors",
+      "module_label": "Site sensors",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "events.py",
+        "manifest.py",
+        "maturity.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "seed.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_site_sensors",
+        "version": "0.1.0",
+        "display_name": "Site sensors",
+        "description": "Concrete maturity and strength, noise, dust, vibration, weather and water level on site: devices, a compact time series, limits from country data, alerts with acknowledgement, formwork strikes",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_users",
+          "oe_projects",
+          "oe_notifications"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "SensorDevice",
+          "tablename": "oe_site_sensors_device",
+          "docstring": "One sensor on one project, authenticated for ingest by its own token.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "unit",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "limit_value",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "country_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "offline_after_minutes",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "token_hash",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "token_prefix",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "last_seen_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "last_value",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "lat",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "lng",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "mix_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_site_sensors_mix.id"
+            },
+            {
+              "name": "pour_ref",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "cast_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "schedule_activity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "ConcreteMix",
+          "tablename": "oe_site_sensors_mix",
+          "docstring": "A mix's strength-maturity relationship: ``S = a + b * log10(M)``, M in degC-hours.\n\n``datum_temp_c`` is the Nurse-Saul datum temperature of ASTM C1074 (-10 degC\nunless the mix was calibrated with another). The curve comes from the\nmix's own calibration cubes; the platform ships no default curve.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "datum_temp_c",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "curve_a",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "curve_b",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "strip_strength_mpa",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SensorAlert",
+          "tablename": "oe_site_sensors_alert",
+          "docstring": "An event a person has to see: a limit exceeded, a sensor silent, a strength reached.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "device_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_site_sensors_device.id"
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "raised_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "value",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "limit_value",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
+              "name": "limit_source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "acknowledged_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "acknowledged_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "diary_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "inspection_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "punch_item_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "FormworkStrip",
+          "tablename": "oe_site_sensors_strip",
+          "docstring": "A planned formwork strike on a pour, linked to its schedule activity.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "device_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_site_sensors_device.id"
+            },
+            {
+              "name": "element",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "schedule_activity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "target_strength_mpa",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "planned_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "released_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "struck_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "strength_at_strike_mpa",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/devices/",
+          "handler": "list_devices",
+          "response_model": "list[DeviceResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/devices/",
+          "handler": "create_device",
+          "response_model": "DeviceResponse",
+          "request_schema": "DeviceCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/devices/{device_id}",
+          "handler": "update_device",
+          "response_model": "DeviceResponse",
+          "request_schema": "DeviceUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/devices/{device_id}/token",
+          "handler": "issue_token",
+          "response_model": "TokenResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/devices/{device_id}/readings",
+          "handler": "add_readings",
+          "request_schema": "ReadingsIn"
+        },
+        {
+          "method": "GET",
+          "path": "/devices/{device_id}/readings",
+          "handler": "get_readings",
+          "request_schema": "datetime | None"
+        },
+        {
+          "method": "GET",
+          "path": "/devices/{device_id}/maturity",
+          "handler": "get_maturity",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/ingest/",
+          "handler": "device_ingest",
+          "request_schema": "ReadingsIn"
+        },
+        {
+          "method": "GET",
+          "path": "/mixes/",
+          "handler": "list_mixes",
+          "response_model": "list[MixResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/mixes/",
+          "handler": "create_mix",
+          "response_model": "MixResponse",
+          "request_schema": "MixCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/alerts/",
+          "handler": "list_alerts",
+          "response_model": "list[AlertResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/alerts/{alert_id}/acknowledge",
+          "handler": "acknowledge",
+          "response_model": "AlertResponse",
+          "request_schema": "AcknowledgeIn"
+        },
+        {
+          "method": "POST",
+          "path": "/alerts/{alert_id}/links",
+          "handler": "link_alert",
+          "response_model": "AlertResponse",
+          "request_schema": "AlertLinksIn"
+        },
+        {
+          "method": "GET",
+          "path": "/strips/",
+          "handler": "list_strips",
+          "response_model": "list[StripResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/strips/",
+          "handler": "create_strip",
+          "response_model": "StripResponse",
+          "request_schema": "StripCreate"
+        },
+        {
+          "method": "POST",
+          "path": "/strips/{strip_id}/strike",
+          "handler": "strike",
+          "response_model": "StripResponse",
+          "request_schema": "StrikeIn"
+        },
+        {
+          "method": "GET",
+          "path": "/summary/",
+          "handler": "summary",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/validation/",
+          "handler": "validation",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/maintenance/downsample",
+          "handler": "downsample",
+          "request_schema": "None"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "DeviceCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "SensorKind"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "limit_value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "offline_after_minutes",
+              "type": "int"
+            },
+            {
+              "name": "lat",
+              "type": "float | None"
+            },
+            {
+              "name": "lng",
+              "type": "float | None"
+            },
+            {
+              "name": "mix_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "pour_ref",
+              "type": "str"
+            },
+            {
+              "name": "cast_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "DeviceUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "limit_value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "offline_after_minutes",
+              "type": "int | None"
+            },
+            {
+              "name": "active",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "mix_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "pour_ref",
+              "type": "str | None"
+            },
+            {
+              "name": "cast_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "DeviceResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "unit",
+              "type": "str"
+            },
+            {
+              "name": "limit_value",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "country_code",
+              "type": "str"
+            },
+            {
+              "name": "offline_after_minutes",
+              "type": "int"
+            },
+            {
+              "name": "token_prefix",
+              "type": "str"
+            },
+            {
+              "name": "active",
+              "type": "bool"
+            },
+            {
+              "name": "last_seen_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "last_value",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "lat",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "lng",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "mix_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "pour_ref",
+              "type": "str"
+            },
+            {
+              "name": "cast_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "TokenResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "device_id",
+              "type": "UUID"
+            },
+            {
+              "name": "token",
+              "type": "str"
+            },
+            {
+              "name": "token_prefix",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadingIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "recorded_at",
+              "type": "datetime"
+            },
+            {
+              "name": "value",
+              "type": "float"
+            }
+          ]
+        },
+        {
+          "class_name": "ReadingsIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "readings",
+              "type": "list[ReadingIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "MixCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "datum_temp_c",
+              "type": "Decimal"
+            },
+            {
+              "name": "curve_a",
+              "type": "Decimal"
+            },
+            {
+              "name": "curve_b",
+              "type": "Decimal"
+            },
+            {
+              "name": "strip_strength_mpa",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "MixResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "datum_temp_c",
+              "type": "Decimal"
+            },
+            {
+              "name": "curve_a",
+              "type": "Decimal"
+            },
+            {
+              "name": "curve_b",
+              "type": "Decimal"
+            },
+            {
+              "name": "strip_strength_mpa",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "AlertResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "device_id",
+              "type": "UUID"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "raised_at",
+              "type": "datetime"
+            },
+            {
+              "name": "value",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "limit_value",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "limit_source",
+              "type": "str"
+            },
+            {
+              "name": "acknowledged_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "acknowledged_by",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "note",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "diary_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "inspection_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "punch_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "AcknowledgeIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "note",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "AlertLinksIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "diary_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "inspection_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "punch_item_id",
+              "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "StripCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "device_id",
+              "type": "UUID"
+            },
+            {
+              "name": "element",
+              "type": "str"
+            },
+            {
+              "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "target_strength_mpa",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "planned_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "StrikeIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "struck_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "StripResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "UUID"
+            },
+            {
+              "name": "device_id",
+              "type": "UUID"
+            },
+            {
+              "name": "element",
+              "type": "str"
+            },
+            {
+              "name": "schedule_activity_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "target_strength_mpa",
+              "type": "Decimal"
+            },
+            {
+              "name": "planned_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "released_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "struck_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "strength_at_strike_mpa",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "notifications",
+        "projects",
+        "schedule"
+      ]
+    },
+    {
       "module_id": "site_supervision",
       "module_label": "Site Supervision",
       "module_category": "core",
@@ -281040,10 +282388,10 @@
     },
     {
       "name": "dashboard",
-      "ts_files": 49,
+      "ts_files": 51,
       "css_files": 0,
       "test_files": 14,
-      "total_files": 49
+      "total_files": 51
     },
     {
       "name": "dashboards",
@@ -281152,10 +282500,10 @@
     },
     {
       "name": "equipment",
-      "ts_files": 13,
+      "ts_files": 19,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 13
+      "test_files": 2,
+      "total_files": 19
     },
     {
       "name": "erp-chat",
@@ -281940,6 +283288,13 @@
       "css_files": 0,
       "test_files": 0,
       "total_files": 4
+    },
+    {
+      "name": "site_sensors",
+      "ts_files": 9,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 9
     },
     {
       "name": "smart_views",
@@ -282758,6 +284113,7 @@
     "equipment": [
       "costmodel",
       "field_time",
+      "notifications",
       "projects",
       "users"
     ],
@@ -283581,6 +284937,12 @@
     "site_prep": [
       "projects"
     ],
+    "site_sensors": [
+      "notifications",
+      "projects",
+      "schedule",
+      "users"
+    ],
     "site_supervision": [
       "projects",
       "users"
@@ -283740,17 +285102,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 216,
-    "modules_with_manifests": 214,
-    "total_models": 803,
-    "total_columns": 9359,
+    "backend_modules": 217,
+    "modules_with_manifests": 215,
+    "total_models": 809,
+    "total_columns": 9437,
     "total_relationships": 244,
-    "total_routes": 4696,
-    "total_schemas": 4177,
-    "total_python_files": 2853,
-    "frontend_features": 211,
-    "frontend_ts_files": 3682,
-    "frontend_backend_mapped": 188
+    "total_routes": 4715,
+    "total_schemas": 4191,
+    "total_python_files": 2870,
+    "frontend_features": 212,
+    "frontend_ts_files": 3699,
+    "frontend_backend_mapped": 189
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -283938,6 +285300,7 @@
     "site-logistics": "site_logistics",
     "site-prep": "site_prep",
     "site-supervision": "site_supervision",
+    "site_sensors": "site_sensors",
     "smart_views": "smart_views",
     "source-data": "source_data",
     "staffing": "staffing",

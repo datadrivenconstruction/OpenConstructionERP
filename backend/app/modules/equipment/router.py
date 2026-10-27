@@ -892,3 +892,9 @@ async def fleet_optimization(
         target_utilization_pct=target_utilization,
         window_days=window_days,
     )
+
+
+# Telematics: device ingest, ISO 15143-3 / CSV import, utilisation, hire allocation, rules.
+from app.modules.equipment.telematics_router import router as _telematics_router  # noqa: E402
+
+router.include_router(_telematics_router)

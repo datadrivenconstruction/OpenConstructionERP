@@ -223,6 +223,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.economics.seed import seed_economics_demo
         from app.modules.einvoice_clearance.seed import seed_einvoice_clearance_demo
         from app.modules.engineering_brief.seed import seed_engineering_brief_demo
+        from app.modules.equipment.telematics_seed import seed_telematics_demo
         from app.modules.estimate_basis.seed import seed_estimate_basis_demo
         from app.modules.field_time.clock_seed import seed_field_clock_demo
         from app.modules.field_time.seed import seed_field_time_demo
@@ -251,6 +252,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.site_inventory.seed import seed_site_inventory_demo
         from app.modules.site_logistics.demo import seed_site_logistics_demo
         from app.modules.site_prep.seed import seed_site_prep_demo
+        from app.modules.site_sensors.seed import seed_site_sensors_demo
         from app.modules.staffing.seed import seed_staffing_demo
         from app.modules.stakeholders.seed import seed_stakeholders_demo
         from app.modules.supplier_catalogs.seed import seed_supplier_catalogs
@@ -362,6 +364,9 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # timesheets exist and the clock adds drafts only. Self-guards per
             # project on an existing geofence.
             ("field_clock", None, lambda s: seed_field_clock_demo(s, _demo_pids)),
+            # After the clock, so the machines and the fence check use the site fence it drew.
+            ("telematics", None, lambda s: seed_telematics_demo(s, _focus_pids or _demo_pids)),
+            ("site_sensors", None, lambda s: seed_site_sensors_demo(s, _focus_pids or _demo_pids)),
             # Offline capture and a resolved sync conflict (diary entry, punch
             # items, merge audit). Idempotent on fixed client_op_id values.
             ("offline_conflict", None, lambda s: _offline_conflict_counts(s, _first_pid)),

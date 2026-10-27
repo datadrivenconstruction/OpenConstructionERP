@@ -300,6 +300,7 @@ const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
   '/daily-diary': 'oe_daily_diary',
   '/field-reports': 'oe_fieldreports',
   '/field-time': 'oe_field_time',
+  '/site-sensors': 'oe_site_sensors',
   '/equipment': 'oe_equipment',
   '/resources': 'oe_resources',
   '/payroll': 'oe_payroll',

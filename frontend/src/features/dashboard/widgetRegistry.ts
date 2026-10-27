@@ -48,6 +48,9 @@ import {
   ShieldCheck,
   // Geofenced time clock
   Users,
+  // Fleet telematics and site sensors
+  Truck,
+  Gauge,
 } from 'lucide-react';
 
 export interface DashboardWidgetMeta {
@@ -339,6 +342,24 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descDefault: 'People clocked in, clock taps awaiting approval and missing clock-outs',
     icon: Users,
     defaultSpan: 2,
+  },
+  {
+    id: 'fleet_utilisation',
+    labelKey: 'dashboard.layout.w_fleet_utilisation',
+    labelDefault: 'Fleet utilisation',
+    descKey: 'dashboard.layout.w_fleet_utilisation_desc',
+    descDefault: 'Worked, idle and off hours of the fleet over 14 days, with CO2',
+    icon: Truck,
+    defaultSpan: 3,
+  },
+  {
+    id: 'sensor_alerts',
+    labelKey: 'dashboard.layout.w_sensor_alerts',
+    labelDefault: 'Sensor alerts',
+    descKey: 'dashboard.layout.w_sensor_alerts_desc',
+    descDefault: 'Open site sensor alerts, sensors online and concrete strength against target',
+    icon: Gauge,
+    defaultSpan: 3,
   },
 
   // ── Field ──────────────────────────────────────────────────────────────
