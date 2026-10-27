@@ -64254,6 +64254,10 @@ const resource = {
     "packages.switch_off_all": "Отключить все",
     "packages.cancel": "Отмена",
     "packages.needed_by": "Нужен для: {{modules}}",
+    "packages.remove": "Удалить",
+    "packages.remove_warning": "Удаление {{name}} скроет эти модули: {{modules}}. Их данные сохранятся и вернутся, когда вы снова добавите пакет.",
+    "packages.remove_none": "Удаление {{name}} не скрывает ни одного модуля, потому что они всё ещё нужны другим пакетам.",
+    "packages.remove_confirm": "Удалить пакет",
   }
 } as { translation: Record<string, string> };
 

@@ -60712,6 +60712,10 @@ const resource = {
     "packages.switch_off_all": "Бүгдийг унтраах",
     "packages.cancel": "Болих",
     "packages.needed_by": "Шаардлагатай: {{modules}}",
+    "packages.remove": "Устгах",
+    "packages.remove_warning": "{{name}}-г устгавал эдгээр модулиуд нуугдана: {{modules}}. Тэдгээрийн өгөгдөл хадгалагдаж, багцыг дахин нэмэхэд буцаж ирнэ.",
+    "packages.remove_none": "{{name}}-г устгахад бусад багц эдгээрт хэрэгтэй хэвээр байгаа тул ямар ч модуль нуугдахгүй.",
+    "packages.remove_confirm": "Багцыг устгах",
   }
 } as { translation: Record<string, string> };
 

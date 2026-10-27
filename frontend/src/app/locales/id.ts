@@ -60783,6 +60783,10 @@ const resource = {
     "packages.switch_off_all": "Matikan semua",
     "packages.cancel": "Batal",
     "packages.needed_by": "Dibutuhkan oleh: {{modules}}",
+    "packages.remove": "Hapus",
+    "packages.remove_warning": "Menghapus {{name}} akan menyembunyikan modul ini: {{modules}}. Datanya tetap ada dan kembali saat paket ditambahkan lagi.",
+    "packages.remove_none": "Menghapus {{name}} tidak menyembunyikan modul apa pun, karena paket lain masih membutuhkannya.",
+    "packages.remove_confirm": "Hapus paket",
   }
 } as { translation: Record<string, string> };
 

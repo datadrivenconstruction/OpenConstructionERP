@@ -61000,6 +61000,10 @@ const resource = {
     "packages.switch_off_all": "سب بند کریں",
     "packages.cancel": "منسوخ کریں",
     "packages.needed_by": "یہ ماڈیول درکار ہیں: {{modules}}",
+    "packages.remove": "ہٹائیں",
+    "packages.remove_warning": "{{name}} ہٹانے سے یہ ماڈیول چھپ جائیں گے: {{modules}}۔ ان کا ڈیٹا محفوظ رہے گا اور پیکیج دوبارہ شامل کرنے پر واپس آ جائے گا۔",
+    "packages.remove_none": "{{name}} ہٹانے سے کوئی ماڈیول نہیں چھپے گا، کیونکہ دوسرے پیکیجز کو اب بھی ان کی ضرورت ہے۔",
+    "packages.remove_confirm": "پیکیج ہٹائیں",
   }
 } as { translation: Record<string, string> };
 

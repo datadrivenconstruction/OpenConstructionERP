@@ -61331,6 +61331,10 @@ const resource = {
     "packages.switch_off_all": "כיבוי הכול",
     "packages.cancel": "ביטול",
     "packages.needed_by": "נדרש על ידי: {{modules}}",
+    "packages.remove": "הסרה",
+    "packages.remove_warning": "הסרת {{name}} תסתיר את המודולים האלה: {{modules}}. הנתונים שלהם נשמרים וחוזרים כשמוסיפים את החבילה שוב.",
+    "packages.remove_none": "הסרת {{name}} לא תסתיר אף מודול, כי חבילות אחרות עדיין צריכות אותם.",
+    "packages.remove_confirm": "הסרת החבילה",
   }
 } as { translation: Record<string, string> };
 

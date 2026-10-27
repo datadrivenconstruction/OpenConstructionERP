@@ -55230,6 +55230,10 @@ const resource = {
     "packages.switch_off_all": "Switch all off",
     "packages.cancel": "Cancel",
     "packages.needed_by": "Needed by: {{modules}}",
+    "packages.remove": "Remove",
+    "packages.remove_warning": "Removing {{name}} hides these modules: {{modules}}. Their data stays and comes back when you add the package again.",
+    "packages.remove_none": "Removing {{name}} hides no module, because other packages still need them.",
+    "packages.remove_confirm": "Remove package",
   }
 } as { translation: Record<string, string> };
 

@@ -61966,6 +61966,10 @@ const resource = {
     "packages.switch_off_all": "Hammasini o'chirish",
     "packages.cancel": "Bekor qilish",
     "packages.needed_by": "Kerak bo'ladi: {{modules}}",
+    "packages.remove": "Olib tashlash",
+    "packages.remove_warning": "{{name}} ni olib tashlash quyidagi modullarni yashiradi: {{modules}}. Ularning ma'lumotlari saqlanadi va paketni qayta qo'shganda qaytadi.",
+    "packages.remove_none": "{{name}} ni olib tashlash hech qanday modulni yashirmaydi, chunki boshqa paketlar ularga hali ham muhtoj.",
+    "packages.remove_confirm": "Paketni olib tashlash",
   }
 } as { translation: Record<string, string> };
 

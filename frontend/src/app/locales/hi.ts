@@ -61037,6 +61037,10 @@ const resource = {
     "packages.switch_off_all": "सब बंद करें",
     "packages.cancel": "रद्द करें",
     "packages.needed_by": "इन्हें चाहिए: {{modules}}",
+    "packages.remove": "हटाएँ",
+    "packages.remove_warning": "{{name}} हटाने से ये मॉड्यूल छिप जाएँगे: {{modules}}। उनका डेटा बना रहेगा और पैकेज दोबारा जोड़ने पर वापस आ जाएगा।",
+    "packages.remove_none": "{{name}} हटाने से कोई मॉड्यूल नहीं छिपेगा, क्योंकि दूसरे पैकेज अब भी उन्हें चाहते हैं।",
+    "packages.remove_confirm": "पैकेज हटाएँ",
   }
 } as { translation: Record<string, string> };
 

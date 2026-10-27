@@ -61034,6 +61034,10 @@ const resource = {
     "packages.switch_off_all": "Slå alle fra",
     "packages.cancel": "Annuller",
     "packages.needed_by": "Bruges af: {{modules}}",
+    "packages.remove": "Fjern",
+    "packages.remove_warning": "Fjerner du {{name}}, skjules disse moduler: {{modules}}. Deres data bliver, og de kommer tilbage, når du tilføjer pakken igen.",
+    "packages.remove_none": "Fjerner du {{name}}, skjules ingen moduler, fordi andre pakker stadig har brug for dem.",
+    "packages.remove_confirm": "Fjern pakke",
   }
 } as { translation: Record<string, string> };
 

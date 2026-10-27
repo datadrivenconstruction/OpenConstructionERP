@@ -60992,6 +60992,10 @@ const resource = {
     "packages.switch_off_all": "I-off lahat",
     "packages.cancel": "Kanselahin",
     "packages.needed_by": "Kailangan ng: {{modules}}",
+    "packages.remove": "Alisin",
+    "packages.remove_warning": "Ang pag-alis ng {{name}} ay magtatago sa mga module na ito: {{modules}}. Mananatili ang data nila at babalik kapag idinagdag mo ulit ang package.",
+    "packages.remove_none": "Walang module na matatago sa pag-alis ng {{name}}, dahil kailangan pa ito ng ibang package.",
+    "packages.remove_confirm": "Alisin ang package",
   }
 } as { translation: Record<string, string> };
 

@@ -61915,6 +61915,10 @@ const resource = {
     "packages.switch_off_all": "Alles uitschakelen",
     "packages.cancel": "Annuleren",
     "packages.needed_by": "Nodig voor: {{modules}}",
+    "packages.remove": "Verwijderen",
+    "packages.remove_warning": "Het verwijderen van {{name}} verbergt deze modules: {{modules}}. Hun gegevens blijven bewaard en komen terug als u het pakket weer toevoegt.",
+    "packages.remove_none": "Het verwijderen van {{name}} verbergt geen module, omdat andere pakketten ze nog nodig hebben.",
+    "packages.remove_confirm": "Pakket verwijderen",
   }
 } as { translation: Record<string, string> };
 

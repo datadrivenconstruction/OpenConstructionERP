@@ -60984,6 +60984,10 @@ const resource = {
     "packages.switch_off_all": "Lülita kõik välja",
     "packages.cancel": "Tühista",
     "packages.needed_by": "Vajab: {{modules}}",
+    "packages.remove": "Eemalda",
+    "packages.remove_warning": "{{name}} eemaldamine peidab need moodulid: {{modules}}. Nende andmed jäävad alles ja naasevad, kui paketi uuesti lisad.",
+    "packages.remove_none": "{{name}} eemaldamine ei peida ühtegi moodulit, sest teised paketid vajavad neid veel.",
+    "packages.remove_confirm": "Eemalda pakett",
   }
 } as { translation: Record<string, string> };
 

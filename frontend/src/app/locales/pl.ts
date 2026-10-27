@@ -62586,6 +62586,10 @@ const resource = {
     "packages.switch_off_all": "Wyłącz wszystkie",
     "packages.cancel": "Anuluj",
     "packages.needed_by": "Wymagany przez: {{modules}}",
+    "packages.remove": "Usuń",
+    "packages.remove_warning": "Usunięcie pakietu {{name}} ukryje te moduły: {{modules}}. Ich dane zostaną i wrócą po ponownym dodaniu pakietu.",
+    "packages.remove_none": "Usunięcie pakietu {{name}} nie ukryje żadnego modułu, bo inne pakiety nadal ich potrzebują.",
+    "packages.remove_confirm": "Usuń pakiet",
   }
 } as { translation: Record<string, string> };
 

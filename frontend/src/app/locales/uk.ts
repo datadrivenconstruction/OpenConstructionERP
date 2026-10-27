@@ -63133,6 +63133,10 @@ const resource = {
     "packages.switch_off_all": "Вимкнути всі",
     "packages.cancel": "Скасувати",
     "packages.needed_by": "Потрібно для: {{modules}}",
+    "packages.remove": "Видалити",
+    "packages.remove_warning": "Видалення {{name}} приховає ці модулі: {{modules}}. Їхні дані зберігаються і повертаються, коли ви знову додасте пакет.",
+    "packages.remove_none": "Видалення {{name}} не приховує жодного модуля, бо їм ще потрібні інші пакети.",
+    "packages.remove_confirm": "Видалити пакет",
   }
 } as { translation: Record<string, string> };
 

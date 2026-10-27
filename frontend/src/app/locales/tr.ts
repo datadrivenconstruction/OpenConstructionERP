@@ -61915,6 +61915,10 @@ const resource = {
     "packages.switch_off_all": "Tümünü kapat",
     "packages.cancel": "İptal",
     "packages.needed_by": "Gerekli olduğu yerler: {{modules}}",
+    "packages.remove": "Kaldır",
+    "packages.remove_warning": "{{name}} paketini kaldırmak şu modülleri gizler: {{modules}}. Verileri korunur ve paketi yeniden eklediğinizde geri gelir.",
+    "packages.remove_none": "{{name}} paketini kaldırmak hiçbir modülü gizlemez, çünkü diğer paketler hâlâ bunlara ihtiyaç duyuyor.",
+    "packages.remove_confirm": "Paketi kaldır",
   }
 } as { translation: Record<string, string> };
 

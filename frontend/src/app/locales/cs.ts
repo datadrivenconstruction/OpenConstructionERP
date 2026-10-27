@@ -62325,6 +62325,10 @@ const resource = {
     "packages.switch_off_all": "Vypnout vše",
     "packages.cancel": "Zrušit",
     "packages.needed_by": "Potřebuje: {{modules}}",
+    "packages.remove": "Odebrat",
+    "packages.remove_warning": "Odebráním {{name}} se skryjí tyto moduly: {{modules}}. Jejich data zůstanou a vrátí se, až balíček znovu přidáte.",
+    "packages.remove_none": "Odebráním {{name}} se neskryje žádný modul, protože ho stále potřebují jiné balíčky.",
+    "packages.remove_confirm": "Odebrat balíček",
   }
 } as { translation: Record<string, string> };
 

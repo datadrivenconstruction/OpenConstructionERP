@@ -63253,6 +63253,10 @@ const resource = {
     "packages.switch_off_all": "全部关闭",
     "packages.cancel": "取消",
     "packages.needed_by": "被以下模块需要：{{modules}}",
+    "packages.remove": "移除",
+    "packages.remove_warning": "移除 {{name}} 会隐藏以下模块：{{modules}}。其数据会保留，重新添加该方案包后即可恢复。",
+    "packages.remove_none": "移除 {{name}} 不会隐藏任何模块，因为其他方案包仍需要它们。",
+    "packages.remove_confirm": "移除方案包",
   }
 } as { translation: Record<string, string> };
 

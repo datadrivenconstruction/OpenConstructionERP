@@ -61038,6 +61038,10 @@ const resource = {
     "packages.switch_off_all": "Poista kaikki käytöstä",
     "packages.cancel": "Peruuta",
     "packages.needed_by": "Tarvitsevat: {{modules}}",
+    "packages.remove": "Poista",
+    "packages.remove_warning": "{{name}}-paketin poistaminen piilottaa nämä moduulit: {{modules}}. Niiden tiedot säilyvät ja palaavat, kun lisäät paketin uudelleen.",
+    "packages.remove_none": "{{name}}-paketin poistaminen ei piilota yhtään moduulia, koska muut paketit tarvitsevat niitä edelleen.",
+    "packages.remove_confirm": "Poista paketti",
   }
 } as { translation: Record<string, string> };
 

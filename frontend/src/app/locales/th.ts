@@ -60784,6 +60784,10 @@ const resource = {
     "packages.switch_off_all": "ปิดทั้งหมด",
     "packages.cancel": "ยกเลิก",
     "packages.needed_by": "โมดูลที่ต้องใช้: {{modules}}",
+    "packages.remove": "ลบ",
+    "packages.remove_warning": "การลบ {{name}} จะซ่อนโมดูลเหล่านี้: {{modules}} ข้อมูลยังคงอยู่และจะกลับมาเมื่อเพิ่มแพ็กเกจอีกครั้ง",
+    "packages.remove_none": "การลบ {{name}} ไม่ซ่อนโมดูลใด เพราะแพ็กเกจอื่นยังต้องใช้อยู่",
+    "packages.remove_confirm": "ลบแพ็กเกจ",
   }
 } as { translation: Record<string, string> };
 

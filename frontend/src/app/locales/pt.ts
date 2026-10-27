@@ -63948,6 +63948,10 @@ const resource = {
     "packages.switch_off_all": "Desativar todos",
     "packages.cancel": "Cancelar",
     "packages.needed_by": "Necessário para: {{modules}}",
+    "packages.remove": "Remover",
+    "packages.remove_warning": "Remover {{name}} oculta estes módulos: {{modules}}. Os dados mantêm-se e voltam quando adicionar o pacote novamente.",
+    "packages.remove_none": "Remover {{name}} não oculta nenhum módulo, porque outros pacotes ainda precisam deles.",
+    "packages.remove_confirm": "Remover pacote",
   }
 } as { translation: Record<string, string> };
 
