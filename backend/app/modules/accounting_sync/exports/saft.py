@@ -41,15 +41,17 @@ def build(
     period: tuple[date, date],
     tax_rows: list[dict[str, str]],
     software_version: str = "",
+    namespace: str = NS,
+    audit_file_version: str = "2.00",
 ) -> bytes:
-    """Encode a SAF-T AuditFile as UTF-8 XML."""
-    ET.register_namespace("", NS)
-    root = ET.Element(f"{{{NS}}}AuditFile")
-    q = lambda t: f"{{{NS}}}{t}"  # noqa: E731
+    """Encode a SAF-T AuditFile as UTF-8 XML in the given variant's namespace."""
+    ET.register_namespace("", namespace)
+    root = ET.Element(f"{{{namespace}}}AuditFile")
+    q = lambda t: f"{{{namespace}}}{t}"  # noqa: E731
 
     header = ET.SubElement(root, q("Header"))
     for tag, val in (
-        ("AuditFileVersion", "2.00"),
+        ("AuditFileVersion", audit_file_version),
         ("AuditFileCountry", country_code or "XX"),
         ("AuditFileDateCreated", datetime.now(UTC).date().isoformat()),
         ("SoftwareCompanyName", "DataDrivenConstruction"),

@@ -61,6 +61,16 @@ def file_format(key: str) -> dict[str, Any]:
     return _charts()["file_formats"][key]
 
 
+def saft_variant(country_code: str | None) -> dict[str, Any]:
+    """SAF-T flavour for a country: its national variant, else the OECD base."""
+    variants = {k: v for k, v in _charts()["saft_variants"].items() if not k.startswith("_")}
+    cc = (country_code or "").upper()
+    for key, row in variants.items():
+        if cc and cc in row.get("countries", []):
+            return {"key": key, **row}
+    return {"key": "oecd", **variants["oecd"]}
+
+
 def tax_codes(country_code: str | None, on: date | None = None) -> list[dict[str, Any]]:
     """Tax codes in force for a country on a day, from the dated tax seed.
 
