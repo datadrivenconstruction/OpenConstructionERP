@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Clock events log - the last two weeks, day by day and worker by worker​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠. A
+ * Clock events log - the last two weeks, day by day and worker by worker. A
  * shift with no clock-out is highlighted. "Build timesheet for this day" turns
  * the day's clock shifts into a draft timesheet, shows the validation result
  * and opens the draft in the timesheet editor.

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Clock panel - the phone screen of the geofenced time clock​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
+ * Clock panel - the phone screen of the geofenced time clock.
  *
  * One big Clock in / Clock out button. The position is read ONCE, inside the
  * tap handler, with getCurrentPosition; nothing here watches or tracks. An

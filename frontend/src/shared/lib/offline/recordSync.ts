@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Offline-first sync engine for diaries, diary entries, punch items and​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * Offline-first sync engine for diaries, diary entries, punch items and
  * inspections (desktop session, JWT auth).
  *
  * The field-session queue (`fieldQueue.ts`) is a separate instance and stays as

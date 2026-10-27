@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * React side of the record sync engine​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
+ * React side of the record sync engine.
  *
  * `useOfflineSync()` is safe to call from several components at once: a
  * reference count keeps a single sync loop alive (reconnect, interval, tab

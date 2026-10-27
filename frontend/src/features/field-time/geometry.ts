@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Pure geometry for the geofenced time clock​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: what the map draws and the
+ * Pure geometry for the geofenced time clock: what the map draws and the
  * editor's "would this point be inside" preview. The server decides the real
  * inside/outside verdict; nothing here is authoritative.
  */

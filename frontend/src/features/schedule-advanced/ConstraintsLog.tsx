@@ -1,4 +1,4 @@
-// Constraints log​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+// Constraints log
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Every constraint of a master schedule, open first, with the record (RFI,

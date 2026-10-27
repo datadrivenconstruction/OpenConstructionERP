@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * OnSiteNowCard - dashboard widget for the geofenced time clock​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: how many
+ * OnSiteNowCard - dashboard widget for the geofenced time clock: how many
  * people are clocked in right now, taps waiting for a supervisor, and shifts
  * with no clock-out. Self-hides when there is no project or the clock is off.
  */

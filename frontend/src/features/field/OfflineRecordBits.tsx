@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Two small pieces shared by the offline-capable registers​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠:
+ * Two small pieces shared by the offline-capable registers:
  *  - `SavedOnDeviceBadge`  the per-row "saved on this device" marker
  *  - `MergeHistoryList`    who merged what, from GET .../merge-audit/
  */

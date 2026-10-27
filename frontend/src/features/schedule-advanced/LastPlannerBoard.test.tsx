@@ -1,4 +1,4 @@
-// Last Planner board tests​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+// Last Planner board tests
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // Pins the look-ahead board (ready / blocked cards), the constraints log

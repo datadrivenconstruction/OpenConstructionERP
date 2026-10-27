@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * The sync status pill for the desktop registers that work offline (daily​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * The sync status pill for the desktop registers that work offline (daily
  * diary, punch list, inspections). One glance answers "is my work safe":
  * synced, offline, syncing, N waiting, a problem, or a conflict that needs a
  * merge. Tapping it syncs now, or opens the merge dialog on a conflict.
