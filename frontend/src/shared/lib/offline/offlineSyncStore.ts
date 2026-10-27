@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Zustand store behind the sync pill​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: one status for the whole device, plus the
+ * Zustand store behind the sync pill‌‍‌‍‌‍‌‍: one status for the whole device, plus the
  * counts that explain it. The sync engine (`recordSync.ts`) writes to it; React
  * only reads.
  */

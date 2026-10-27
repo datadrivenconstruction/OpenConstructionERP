@@ -1,4 +1,4 @@
-// Subcontractor insurance tests​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+// Subcontractor insurance tests‌‍‌‍‌‍‌‍
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // Pins the insurance gate on a pay application (banner, manager-only override

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Punch description in the detail drawer​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: read, edit in place, and (when merges
+ * Punch description in the detail drawer‌‍‌‍‌‍‌‍: read, edit in place, and (when merges
  * exist) the merge history. The edit goes through `updateOrQueue`, so it works
  * offline and sends `If-Match` online.
  */

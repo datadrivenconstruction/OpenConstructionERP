@@ -1,4 +1,4 @@
-// Last Planner form fields​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+// Last Planner form fields‌‍‌‍‌‍‌‍
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Optional fields added to the constraint and commitment forms: the record

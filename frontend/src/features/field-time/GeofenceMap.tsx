@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Small MapLibre map for geofences​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: draws every fence as a filled outline, the
+ * Small MapLibre map for geofences‌‍‌‍‌‍‌‍: draws every fence as a filled outline, the
  * fence being edited as a highlighted draft, and optional pins (clock-in
  * positions). Click events are handed to the parent, which owns the drawing
  * state. Loaded lazily (maplibre is heavy); see GeofenceEditor.

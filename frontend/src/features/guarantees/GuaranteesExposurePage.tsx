@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction‌‍‌‍‌‍‌‍ · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** Company-wide guarantee exposure: totals, by bank and type, credit-line headroom, expiries and the credit-line editor. */
 import { useMemo, useState } from 'react';

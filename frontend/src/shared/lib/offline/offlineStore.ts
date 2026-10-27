@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Device-side store for records written offline​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: diaries, diary entries, punch
+ * Device-side store for records written offline‌‍‌‍‌‍‌‍: diaries, diary entries, punch
  * items and inspections, plus the photos taken for them.
  *
  * Two jobs the mutation queue cannot do on its own:

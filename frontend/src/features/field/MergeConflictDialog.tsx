@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Side-by-side resolution of the edits a version conflict could not settle by​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * Side-by-side resolution of the edits a version conflict could not settle by‌‍‌‍‌‍‌‍
  * itself: a long text both sides changed, and checklist items both sides
  * changed differently. Simple fields never reach this dialog (the local edit,
  * being the last writer, already won).

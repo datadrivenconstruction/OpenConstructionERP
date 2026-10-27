@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Write-through helpers for the registers that work offline​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
+ * Write-through helpers for the registers that work offline‌‍‌‍‌‍‌‍.
  *
  * Online, the request goes out as before. Offline, or when it fails without an
  * HTTP answer, the write is kept on the device and queued, and the caller gets

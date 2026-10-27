@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Clock approvals - the supervisor's list of taps that landed outside every​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * Clock approvals - the supervisor's list of taps that landed outside every‌‍‌‍‌‍‌‍
  * site area. Each shows how far out it was and, on request, a map pin. Approve
  * and Reject both need a written reason: the decision goes on the record.
  */

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Checklist rows carry no id in the edit payload, but a three-way merge pairs​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * Checklist rows carry no id in the edit payload, but a three-way merge pairs‌‍‌‍‌‍‌‍
  * items by id. Before an inspection edit is queued offline, each row is given
  * the id of the stored item with the same question, so the merge sees "this
  * item changed" rather than "one removed, one added". A row whose question was

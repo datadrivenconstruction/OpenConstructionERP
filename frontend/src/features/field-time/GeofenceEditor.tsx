@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Geofence editor - a manager draws the site area the time clock checks​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * Geofence editor - a manager draws the site area the time clock checks‌‍‌‍‌‍‌‍
  * against: a circle (click the centre, then a point on its edge, or type the
  * radius) or a polygon (click the vertices, then close it). When the map
  * cannot load (offline, no WebGL) a plain latitude / longitude form does the

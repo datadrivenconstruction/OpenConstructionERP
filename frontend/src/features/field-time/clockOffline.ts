@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Clock events captured with no signal​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠. They ride the field-time queue (same
+ * Clock events captured with no signal‌‍‌‍‌‍‌‍. They ride the field-time queue (same
  * IndexedDB, same JWT sender); `client_op_id` doubles as the server's
  * idempotency key and `occurred_at` is the device time of the tap, so a replay
  * an hour later still books the shift at the right moment.

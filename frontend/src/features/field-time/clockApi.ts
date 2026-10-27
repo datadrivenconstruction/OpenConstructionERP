@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * API client and React Query hooks for the geofenced time clock, mounted at​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * API client and React Query hooks for the geofenced time clock, mounted at‌‍‌‍‌‍‌‍
  * /api/v1/field-time/ (geofences/ and clock/). Hours are decimal strings.
  * Every path keeps its trailing slash (redirect_slashes is disabled).
  */

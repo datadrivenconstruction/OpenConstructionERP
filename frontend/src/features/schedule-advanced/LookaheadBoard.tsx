@@ -1,4 +1,4 @@
-// Look-ahead board​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+// Look-ahead board‌‍‌‍‌‍‌‍
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Last Planner look-ahead board: weeks as columns, schedule activities pulled

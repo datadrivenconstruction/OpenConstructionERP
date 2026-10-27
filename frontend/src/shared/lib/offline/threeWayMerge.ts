@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Pure three-way merge for a record edited offline​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
+ * Pure three-way merge for a record edited offline‌‍‌‍‌‍‌‍.
  *
  *   base    the server copy the edit started from (kept on the device)
  *   mine    the fields this device changed (a patch; absent keys were not edited)

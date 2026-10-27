@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction‌‍‌‍‌‍‌‍ · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** Project register of bank guarantees and bonds. */
 import { useMemo, useState } from 'react';
