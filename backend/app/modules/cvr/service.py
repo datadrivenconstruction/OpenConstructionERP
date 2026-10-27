@@ -276,7 +276,7 @@ class CvrService:
         for line in await self.list_lines(report_id):
             if (line.metadata_ or {}).get("source") == "field_time":
                 line.cost_to_date = _money(cost["labour_cost"])
-                line.metadata_ = {**(line.metadata_ or {}), **meta}
+                line.metadata_ = merge_metadata(line.metadata_, meta)
                 await self.session.flush()
                 return line
         line = CvrLine(
