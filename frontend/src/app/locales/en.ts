@@ -46322,6 +46322,18 @@ const resource = {
     "settings.theme_schedule_from": "from",
     "settings.theme_schedule_to": "until",
     "settings.style_custom_mix_hint": "Your own mix",
+    "settings.avatar_alt": "Your profile photo",
+    "settings.avatar_upload": "Upload photo",
+    "settings.avatar_change": "Change photo",
+    "settings.avatar_remove": "Remove photo",
+    "settings.avatar_save": "Save photo",
+    "settings.avatar_hint": "PNG, JPEG or WebP, up to 2 MB. Cropped to a square.",
+    "settings.avatar_err_type": "Choose a PNG, JPEG or WebP image.",
+    "settings.avatar_err_size": "The photo is larger than 2 MB.",
+    "settings.avatar_err_content": "That file is not a readable image.",
+    "settings.avatar_saved": "Profile photo updated",
+    "settings.avatar_removed": "Profile photo removed",
+    "settings.avatar_failed": "Could not save the photo",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

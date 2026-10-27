@@ -16,6 +16,7 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import { ActivePackChip, CountryFlag, ModuleInfoButton, PartnerLogoBadge } from '@/shared/ui';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
+import { UserAvatar } from '@/shared/ui/UserAvatar';
 import { LearnTopBarButton } from './LearnTopBarButton';
 import { ProcessesButton } from '@/features/processes/ProcessesButton';
 import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
@@ -24,7 +25,7 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { projectColor } from '@/shared/lib/projectColor';
 import { useActiveProjectColor } from '@/shared/hooks/useActiveProjectColor';
 import { copyToClipboard } from '@/shared/lib/browser';
-import { triggerDownload } from '@/shared/lib/api';
+import { apiGet, triggerDownload } from '@/shared/lib/api';
 import {
   exportErrorReport,
   getErrorCount,
@@ -1578,6 +1579,14 @@ function UserMenu() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const userInitial = userEmail ? userEmail.charAt(0).toUpperCase() : 'U';
+  // Same ['me'] cache the Profile card reads, so a new photo shows here at once.
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => apiGet<{ avatar_url?: string | null }>('/v1/users/me/'),
+    enabled: !!userEmail,
+    retry: false,
+    staleTime: 5 * 60_000,
+  });
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -1612,7 +1621,13 @@ function UserMenu() {
         title={userEmail ?? undefined}
         aria-label={t('auth.account', { defaultValue: 'Account menu' })}
       >
-        {userInitial}
+        {me?.avatar_url ? (
+          <span className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-full">
+            <UserAvatar src={me.avatar_url} initials={userInitial} />
+          </span>
+        ) : (
+          userInitial
+        )}
         {/* Online status dot — bottom-right of the avatar. Matches the
             UserBadge in the sidebar so the two surfaces feel coherent.
             `overflow-hidden` clips the `animate-ping` ring to this badge's

@@ -1229,6 +1229,60 @@ class UserService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
         return user
 
+    @staticmethod
+    async def _delete_avatar_file(key: str | None) -> None:
+        """Remove a stored photo; a missing file or backend error is not fatal."""
+        if not key:
+            return
+        from app.core.storage import get_storage_backend
+
+        try:
+            await get_storage_backend().delete(key)
+        except Exception:  # noqa: BLE001
+            logger.warning("avatar file %s could not be deleted", key)
+
+    async def set_avatar(self, user_id: uuid.UUID, data: bytes, declared_type: str | None) -> User:
+        """Validate, normalise and store a new profile photo, replacing any old one.
+
+        Raises:
+            AvatarValidationError: when the upload fails a rule in ``AVATAR_RULES``.
+        """
+        from app.core.storage import get_storage_backend
+        from app.modules.users.avatar import process_avatar
+
+        png = process_avatar(data, declared_type)
+        prior = await self.user_repo.get_by_id(user_id)
+        if prior is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        old_key = prior.avatar_key
+        key = f"users/avatars/{user_id}/{secrets.token_hex(8)}.png"
+        await get_storage_backend().put(key, png)
+        user = await self.update_profile(user_id, avatar_key=key)
+        await self._delete_avatar_file(old_key)
+        return user
+
+    async def remove_avatar(self, user_id: uuid.UUID) -> User:
+        """Drop the profile photo so the UI falls back to initials."""
+        prior = await self.user_repo.get_by_id(user_id)
+        if prior is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        old_key = prior.avatar_key
+        user = await self.update_profile(user_id, avatar_key=None)
+        await self._delete_avatar_file(old_key)
+        return user
+
+    async def read_avatar(self, user_id: uuid.UUID) -> bytes:
+        """Return the stored photo bytes, or 404 when there is none."""
+        from app.core.storage import get_storage_backend
+
+        user = await self.user_repo.get_by_id(user_id)
+        if user is None or not user.avatar_key:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No profile photo")
+        try:
+            return await get_storage_backend().get(user.avatar_key)
+        except FileNotFoundError as exc:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No profile photo") from exc
+
     async def update_profile(self, user_id: uuid.UUID, **fields: object) -> User:
         """Update user profile fields.
 
@@ -1477,6 +1531,8 @@ class UserService:
         """
         placeholder_email = f"deleted+{uuid.uuid4().hex}@deleted.invalid"
         now = datetime.now(UTC)
+        prior = await self.user_repo.get_by_id(user_id)
+        old_avatar_key = prior.avatar_key if prior is not None else None
         await self.user_repo.update_fields(
             user_id,
             email=placeholder_email,
@@ -1496,7 +1552,9 @@ class UserService:
             # registration ip / user-agent / referrer, avatar, phone, etc.).
             metadata_={"erased": True},
             locale="en",
+            avatar_key=None,
         )
+        await self._delete_avatar_file(old_avatar_key)
         # Revoke every API key the user owns so no programmatic session survives.
         await self.api_key_repo.deactivate_all_for_user(user_uuid)
 
