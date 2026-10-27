@@ -12333,6 +12333,18 @@ async def _seed_module_data(
     except Exception:
         logger.debug("Guarantees module not loaded, skipping demo guarantees", exc_info=True)
 
+    # ── Captured supplier quotes (quote capture and levelling) ─────────
+    # After tendering, because the quotes sit on the first tender package: one
+    # excludes scaffolding, one leaves an item out, one has an escalation clause.
+    try:
+        from app.modules.quote_capture.demo import seed_demo_quotes
+
+        quote_count = await seed_demo_quotes(session, project_id=project_id, created_by=owner_str)
+        if quote_count:
+            results["captured_quotes"] = quote_count
+    except Exception:
+        logger.debug("Quote capture module not loaded, skipping demo quotes", exc_info=True)
+
     # ── Formwork (catalogue + this project's priced assignments) ────────
     # Nothing seeded the formwork catalogue before, so the system chooser had
     # no systems in it on any demo project - including the one whose own header
