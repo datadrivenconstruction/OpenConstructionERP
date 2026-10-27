@@ -52604,6 +52604,12 @@ const resource = {
     "settings.secondary_calendar_none": "Žádný",
     "settings.secondary_calendar_umalqura": "Hidžra (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Zobrazuje datum podle hidžry vedle gregoriánského data u každého data v aplikaci.",
+    "settings.style_look": "Vzhled rozhraní",
+    "settings.style_look_standard": "Standardní",
+    "settings.style_look_classic": "Klasický",
+    "settings.style_look_hint": "Klasický: neutrální barvy, jeden zvýrazňující odstín pro akce a stavy, tenké oddělovače, bez přechodů a skleněného efektu.",
+    "settings.style_preset_standard": "Standardní",
+    "settings.style_density_normal": "Normální",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Změnový příkaz",
     "approvalRoutes.kind_contract": "Smlouva",

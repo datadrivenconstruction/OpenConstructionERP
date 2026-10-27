@@ -51396,6 +51396,12 @@ const resource = {
     "settings.secondary_calendar_none": "Κανένα",
     "settings.secondary_calendar_umalqura": "Χιζρί (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Εμφανίζει την ημερομηνία Χιζρί δίπλα στη γρηγοριανή ημερομηνία σε κάθε ημερομηνία της εφαρμογής.",
+    "settings.style_look": "Στυλ διεπαφής",
+    "settings.style_look_standard": "Τυπικό",
+    "settings.style_look_classic": "Κλασικό",
+    "settings.style_look_hint": "Κλασικό: ουδέτερα χρώματα, ένα χρώμα έμφασης για ενέργειες και καταστάσεις, λεπτοί διαχωριστικοί, χωρίς διαβαθμίσεις ή εφέ γυαλιού.",
+    "settings.style_preset_standard": "Τυπικό",
+    "settings.style_density_normal": "Κανονική",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Εντολή αλλαγής",
     "approvalRoutes.kind_contract": "Σύμβαση",

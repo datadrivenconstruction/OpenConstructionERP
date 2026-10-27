@@ -51720,6 +51720,12 @@ const resource = {
     "settings.secondary_calendar_none": "Ništa",
     "settings.secondary_calendar_umalqura": "Hidžra (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Prikazuje hidžretski datum uz gregorijanski datum na svim datumima u aplikaciji.",
+    "settings.style_look": "Stil sučelja",
+    "settings.style_look_standard": "Standardni",
+    "settings.style_look_classic": "Klasični",
+    "settings.style_look_hint": "Klasični: neutralne boje, jedna akcentna boja za radnje i statuse, tanke razdjelnice, bez gradijenata i staklenog efekta.",
+    "settings.style_preset_standard": "Standardni",
+    "settings.style_density_normal": "Normalna",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Nalog za izmjenu",
     "approvalRoutes.kind_contract": "Ugovor",

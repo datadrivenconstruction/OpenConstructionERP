@@ -53886,6 +53886,12 @@ const resource = {
     "settings.secondary_calendar_none": "Keiner",
     "settings.secondary_calendar_umalqura": "Hidschri (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Zeigt bei jedem Datum in der App das Hidschri-Datum neben dem gregorianischen Datum an.",
+    "settings.style_look": "Oberflächenstil",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Klassisch",
+    "settings.style_look_hint": "Klassisch: neutrale Farben, eine Akzentfarbe für Aktionen und Status, dünne Trennlinien, keine Verläufe oder Glaseffekte.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",

@@ -95,11 +95,12 @@
         var allowed = {
           accent: ['blue', 'teal', 'violet', 'emerald', 'amber', 'graphite', 'crimson'],
           font: ['system', 'inter', 'ibm-plex-sans', 'source-sans-3'],
-          density: ['comfortable', 'compact'],
+          density: ['comfortable', 'normal', 'compact'],
           radius: ['standard', 'sharp', 'round'],
+          look: ['standard', 'classic'],
           text: ['small', 'default', 'large', 'larger', 'largest']
         };
-        var value = { accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', text: 'default' };
+        var value = { accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', look: 'standard', text: 'default' };
         var customAccent = false;
         function layer(key) {
           try {

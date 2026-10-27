@@ -51800,6 +51800,12 @@ const resource = {
     "settings.secondary_calendar_none": "없음",
     "settings.secondary_calendar_umalqura": "히즈라력 (움 알쿠라)",
     "settings.secondary_calendar_hint": "앱의 모든 날짜에서 그레고리력 날짜 옆에 히즈라력 날짜를 표시합니다.",
+    "settings.style_look": "인터페이스 스타일",
+    "settings.style_look_standard": "표준",
+    "settings.style_look_classic": "클래식",
+    "settings.style_look_hint": "클래식: 중립 색상, 작업과 상태에만 쓰는 강조색 하나, 얇은 구분선, 그라데이션과 유리 효과 없음.",
+    "settings.style_preset_standard": "표준",
+    "settings.style_density_normal": "보통",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "변경 지시",
     "approvalRoutes.kind_contract": "계약",

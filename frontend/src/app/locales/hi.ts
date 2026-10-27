@@ -51447,6 +51447,12 @@ const resource = {
     "settings.secondary_calendar_none": "कोई नहीं",
     "settings.secondary_calendar_umalqura": "हिजरी (उम्म अल-क़ुरा)",
     "settings.secondary_calendar_hint": "ऐप की हर तारीख पर ग्रेगोरियन तारीख के साथ हिजरी तारीख दिखाता है।",
+    "settings.style_look": "इंटरफ़ेस शैली",
+    "settings.style_look_standard": "मानक",
+    "settings.style_look_classic": "क्लासिक",
+    "settings.style_look_hint": "क्लासिक: तटस्थ रंग, क्रियाओं और स्थितियों के लिए एक ही हाइलाइट रंग, पतली विभाजक रेखाएँ, कोई ग्रेडिएंट या ग्लास प्रभाव नहीं।",
+    "settings.style_preset_standard": "मानक",
+    "settings.style_density_normal": "सामान्य",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "परिवर्तन आदेश",
     "approvalRoutes.kind_contract": "अनुबंध",

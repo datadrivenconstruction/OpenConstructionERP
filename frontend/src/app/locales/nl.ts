@@ -52323,6 +52323,12 @@ const resource = {
     "settings.secondary_calendar_none": "Geen",
     "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Toont de hijri-datum naast de gregoriaanse datum bij elke datum in de app.",
+    "settings.style_look": "Interfacestijl",
+    "settings.style_look_standard": "Standaard",
+    "settings.style_look_classic": "Klassiek",
+    "settings.style_look_hint": "Klassiek: neutrale kleuren, één accentkleur voor acties en statussen, dunne scheidingslijnen, geen verlopen of glaseffect.",
+    "settings.style_preset_standard": "Standaard",
+    "settings.style_density_normal": "Normaal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Wijzigingsopdracht",
     "approvalRoutes.kind_contract": "Contract",

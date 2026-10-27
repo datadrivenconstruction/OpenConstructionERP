@@ -51083,6 +51083,12 @@ const resource = {
     "settings.secondary_calendar_none": "Байхгүй",
     "settings.secondary_calendar_umalqura": "Хижра (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Програмын бүх огнооны григорийн огнооны хажууд хижра огноогоор харуулна.",
+    "settings.style_look": "Интерфейсийн загвар",
+    "settings.style_look_standard": "Стандарт",
+    "settings.style_look_classic": "Сонгодог",
+    "settings.style_look_hint": "Сонгодог: саармаг өнгө, үйлдэл болон төлөвт зориулсан нэг онцлох өнгө, нимгэн зураас, градиент болон шилэн эффектгүй.",
+    "settings.style_preset_standard": "Стандарт",
+    "settings.style_density_normal": "Энгийн",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өөрчлөлтийн тушаал",
     "approvalRoutes.kind_contract": "Гэрээ",

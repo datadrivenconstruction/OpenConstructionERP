@@ -54335,6 +54335,12 @@ const resource = {
     "settings.secondary_calendar_none": "Нет",
     "settings.secondary_calendar_umalqura": "Хиджра (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Показывает дату по хиджре рядом с григорианской датой для всех дат в приложении.",
+    "settings.style_look": "Стиль интерфейса",
+    "settings.style_look_standard": "Стандартный",
+    "settings.style_look_classic": "Классический",
+    "settings.style_look_hint": "Классический: нейтральные цвета, один акцентный цвет для действий и статусов, тонкие разделители, без градиентов и эффекта стекла.",
+    "settings.style_preset_standard": "Стандартный",
+    "settings.style_density_normal": "Обычная",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",

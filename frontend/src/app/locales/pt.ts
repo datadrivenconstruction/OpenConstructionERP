@@ -54287,6 +54287,12 @@ const resource = {
     "settings.secondary_calendar_none": "Nenhum",
     "settings.secondary_calendar_umalqura": "Hégira (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Mostra a data hégira ao lado da data gregoriana em todas as datas do aplicativo.",
+    "settings.style_look": "Estilo da interface",
+    "settings.style_look_standard": "Padrão",
+    "settings.style_look_classic": "Clássico",
+    "settings.style_look_hint": "Clássico: cores neutras, uma única cor de destaque para ações e estados, separadores finos, sem gradientes nem efeito de vidro.",
+    "settings.style_preset_standard": "Padrão",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordem de alteração",
     "approvalRoutes.kind_contract": "Contrato",

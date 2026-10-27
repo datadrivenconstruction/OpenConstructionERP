@@ -51553,6 +51553,12 @@ const resource = {
     "settings.secondary_calendar_none": "Жок",
     "settings.secondary_calendar_umalqura": "Хижра (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Колдонмодогу ар бир датанын жанында григориан датасы менен бирге хижра датасын көрсөтөт.",
+    "settings.style_look": "Интерфейс стили",
+    "settings.style_look_standard": "Стандарттык",
+    "settings.style_look_classic": "Классикалык",
+    "settings.style_look_hint": "Классикалык: нейтралдуу түстөр, аракеттер жана абалдар үчүн бир акцент түсү, жука бөлгүчтөр, градиенттер жана айнек эффектиси жок.",
+    "settings.style_preset_standard": "Стандарттык",
+    "settings.style_density_normal": "Кадимки",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгөртүү буйругу",
     "approvalRoutes.kind_contract": "Келишим",

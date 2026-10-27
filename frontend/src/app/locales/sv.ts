@@ -52057,6 +52057,12 @@ const resource = {
     "settings.secondary_calendar_none": "Ingen",
     "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Visar hijri-datumet bredvid det gregorianska datumet för alla datum i appen.",
+    "settings.style_look": "Gränssnittsstil",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Klassisk",
+    "settings.style_look_hint": "Klassisk: neutrala färger, en accentfärg för åtgärder och statusar, tunna avdelare, inga gradienter eller glaseffekt.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ändringsorder",
     "approvalRoutes.kind_contract": "Kontrakt",

@@ -53075,6 +53075,12 @@ const resource = {
     "settings.secondary_calendar_none": "Yoʻq",
     "settings.secondary_calendar_umalqura": "Hijriy (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Ilovadagi har bir sananing yonida milodiy sanaga qoʻshib hijriy sanani koʻrsatadi.",
+    "settings.style_look": "Interfeys uslubi",
+    "settings.style_look_standard": "Standart",
+    "settings.style_look_classic": "Klassik",
+    "settings.style_look_hint": "Klassik: neytral ranglar, amallar va holatlar uchun bitta urg'u rangi, ingichka ajratgichlar, gradiyent va shisha effekti yo'q.",
+    "settings.style_preset_standard": "Standart",
+    "settings.style_density_normal": "Oddiy",
     // --- /Settings → Company & documents ---
     "boq.import_preview.back": "Orqaga",
     "boq.import_preview.cancel": "Bekor qilish",
