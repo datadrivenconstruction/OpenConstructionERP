@@ -41725,7 +41725,7 @@ const resource = {
     "tendering.addendum.op_delete": "删除",
     "tendering.addendum.deadline_moved": "截止日期已调整：从 {{from}} 改为 {{to}}",
     "tendering.addendum.boq_changes": "工程量清单（BOQ）变更",
-    "tendering.addendum.boq_revision": "BOQ 修订版 {{n}}",
+    "tendering.addendum.boq_revision": "工程量清单修订版 {{n}}",
     "tendering.addendum.superseded": "已替代",
     "tendering.addendum.new_deadline": "新截止日期（可选）",
     "tendering.addendum.op": "变更类型",
