@@ -11,6 +11,7 @@
  */
 import type { LucideIcon } from 'lucide-react';
 import {
+  Leaf,
   Sparkles,
   AlertTriangle,
   TrendingUp,
@@ -333,6 +334,15 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descKey: 'dashboard.layout.w_guarantees_summary_desc',
     descDefault: 'Live bank guarantees, expiries and total exposure',
     icon: Landmark,
+    defaultSpan: 2,
+  },
+  {
+    id: 'carbon_budget',
+    labelKey: 'dashboard.layout.w_carbon_budget',
+    labelDefault: 'Carbon budget',
+    descKey: 'dashboard.layout.w_carbon_budget_desc',
+    descDefault: 'Project carbon against its budget and the top hotspot by cost group',
+    icon: Leaf,
     defaultSpan: 2,
   },
   {

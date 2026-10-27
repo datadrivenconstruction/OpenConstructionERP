@@ -11,6 +11,7 @@ Endpoints (under ``/api/v1/carbon``):
     POST /inventories/{id}/a5-waste           - A5 waste line
     GET  /inventories/{id}/hotspots           - Carbon by DIN 276 / NRM / MasterFormat group
     GET  /projects/{id}/budget                - Carbon budget vs latest inventory
+    GET  /projects/{id}/widget                - Dashboard card (budget, top hotspot)
     GET  /projects/{id}/checks                - Carbon checks behind the validation rule
     GET  /embodied/{id}/swap                  - CO2 and cost delta of a material swap
     POST /bid-carbon                          - Carbon per bid line (tender comparison)
@@ -94,6 +95,7 @@ class WasteIn(BaseModel):
 class BidLine(BaseModel):
     ref: str = Field(..., max_length=120)
     cost_item_id: uuid.UUID | None = None
+    position_id: uuid.UUID | None = None
     quantity: Decimal = Field(default=Decimal("0"), ge=0)
     unit: str | None = Field(default=None, max_length=20)
 
@@ -274,6 +276,18 @@ async def budget(
 ) -> dict[str, Any]:
     await verify_project_access(project_id, user_id, session)
     return await svc.budget(project_id)
+
+
+@router.get("/projects/{project_id}/widget")
+async def widget(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    svc: CarbonLifecycleService = Depends(_svc),
+) -> dict[str, Any]:
+    """Dashboard widget payload: carbon budget against target and the top hotspot."""
+    await verify_project_access(project_id, user_id, session)
+    return await svc.dashboard_widget(project_id)
 
 
 @router.get("/projects/{project_id}/checks")

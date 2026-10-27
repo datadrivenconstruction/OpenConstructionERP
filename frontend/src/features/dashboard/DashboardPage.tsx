@@ -124,6 +124,9 @@ const RfiTurnaroundCard = lazy(() =>
 const SubmittalsPendingCard = lazy(() =>
   import('./SubmittalsPendingCard').then((m) => ({ default: m.SubmittalsPendingCard })),
 );
+const CarbonBudgetCard = lazy(() =>
+  import('@/features/carbon/CarbonBudgetCard').then((m) => ({ default: m.CarbonBudgetCard })),
+);
 const GuaranteesSummaryCard = lazy(() =>
   import('@/features/guarantees/GuaranteesSummaryCard').then((m) => ({ default: m.GuaranteesSummaryCard })),
 );
@@ -176,6 +179,7 @@ const WIDGET_NULL_FALLBACK = new Set<string>([
   'inspections_quality',
   'punch_quality',
   'guarantees_summary',
+  'carbon_budget',
   'on_site_now',
   'wip_summary',
   'weather_site',
@@ -2702,6 +2706,7 @@ function DashboardPageInner() {
     inspections_quality: <InspectionsQualityCard />,
     punch_quality: <PunchListQualityCard />,
     guarantees_summary: <GuaranteesSummaryCard />,
+    carbon_budget: <CarbonBudgetCard />,
     on_site_now: <OnSiteNowCard />,
     wip_summary: <WipSummaryCard />,
     fleet_utilisation: <FleetUtilisationCard />,

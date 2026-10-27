@@ -51,6 +51,8 @@ import { fetchProjectList } from '@/shared/lib/projectList';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { BidComparisonChart } from './BidComparisonChart';
+import { getBidCarbon } from '@/features/carbon/lifecycleApi';
+import { kgToTonnes } from '@/features/carbon/lifecycle';
 import { AddendumList } from './AddendumList';
 import { ClarificationsPanel } from './ClarificationsPanel';
 import { bidComplianceChips } from './bidCompliance';
@@ -862,6 +864,36 @@ export function BidComparisonTable({
   const { t, i18n } = useTranslation();
   const [hideLowVariance, setHideLowVariance] = useState(false);
   const [varianceThreshold, setVarianceThreshold] = useState(5);
+  // Optional carbon column: tCO2e per line from the carbon factor of its BOQ position.
+  const [showCarbon, setShowCarbon] = useState(false);
+  // Plain effect, not React Query: the grid also renders outside a QueryClient.
+  const [carbon, setCarbon] = useState<Awaited<ReturnType<typeof getBidCarbon>> | null>(null);
+  useEffect(() => {
+    if (!showCarbon || comparison.rows.length === 0) return;
+    let alive = true;
+    getBidCarbon(
+      comparison.rows.map((row, idx) => ({
+        ref: row.position_id ?? `row-${idx}`,
+        position_id: row.position_id,
+        quantity: row.budget_quantity,
+        unit: row.unit,
+      })),
+    )
+      .then((res) => {
+        if (alive) setCarbon(res);
+      })
+      .catch(() => {
+        if (alive) setCarbon(null);
+      });
+    return () => {
+      alive = false;
+    };
+  }, [showCarbon, comparison.rows]);
+  const carbonByRef = useMemo(() => {
+    const m = new Map<string, string | null>();
+    for (const line of carbon?.lines ?? []) m.set(line.ref, line.status === 'ok' ? line.carbon_kg : null);
+    return m;
+  }, [carbon]);
 
   const visibleRows = useMemo(() => {
     if (!hideLowVariance) return comparison.rows;
@@ -897,6 +929,15 @@ export function BidComparisonTable({
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-end gap-3 text-xs">
+        <label className="inline-flex items-center gap-2 text-content-secondary cursor-pointer select-none">
+          <input
+            type="checkbox"
+            checked={showCarbon}
+            onChange={(e) => setShowCarbon(e.target.checked)}
+            className="h-3.5 w-3.5 rounded border-border text-oe-blue focus:ring-oe-blue/30"
+          />
+          {t('tendering.compare.showCarbon', 'Show CO2 column')}
+        </label>
         <label className="inline-flex items-center gap-2 text-content-secondary cursor-pointer select-none">
           <input
             type="checkbox"
@@ -943,6 +984,16 @@ export function BidComparisonTable({
               <th className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary">
                 {t('tendering.budget', 'Budget')}
               </th>
+              {showCarbon && (
+                <th
+                  className="whitespace-nowrap px-3 py-2.5 text-right font-semibold text-content-primary"
+                  title={t('tendering.compare.carbonHint', {
+                    defaultValue: 'Embodied carbon A1-A3 of the budget quantity, from the carbon factor of the BOQ position',
+                  })}
+                >
+                  {t('tendering.compare.carbonCol', 'CO2, t')}
+                </th>
+              )}
               {comparison.bid_totals.map((bt) => (
                 <th
                   key={bt.bid_id}
@@ -971,6 +1022,14 @@ export function BidComparisonTable({
                 <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-content-secondary">
                   {formatNumber(row.budget_rate)}
                 </td>
+                {showCarbon && (
+                  <td className="whitespace-nowrap px-3 py-2.5 text-right tabular-nums text-content-secondary" data-testid="bid-carbon-cell">
+                    {(() => {
+                      const kg = carbonByRef.get(row.position_id ?? `row-${idx}`);
+                      return kg == null ? '-' : kgToTonnes(kg, getNumberLocale());
+                    })()}
+                  </td>
+                )}
                 {row.bids.map((bid) => {
                   // A missing price is not a price: it is never flagged, never
                   // the low end of the line and never shown as 0.
@@ -1035,6 +1094,11 @@ export function BidComparisonTable({
               <td className="whitespace-nowrap px-3 py-3 text-right font-bold tabular-nums text-content-primary">
                 {formatCurrency(comparison.budget_total, currency)}
               </td>
+              {showCarbon && (
+                <td className="whitespace-nowrap px-3 py-3 text-right font-bold tabular-nums text-content-primary">
+                  {carbon ? kgToTonnes(carbon.total_kg, getNumberLocale()) : '-'}
+                </td>
+              )}
               {comparison.bid_totals.map((bt) => (
                 <td
                   key={`total-${bt.bid_id}`}
