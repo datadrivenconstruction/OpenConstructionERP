@@ -156,10 +156,5 @@ def test_the_translated_messages_keep_the_placeholders_the_source_fills() -> Non
             assert actual == expected, f"{locale} on {key}: expected {sorted(expected)}, got {sorted(actual)}"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="The contracts findings ship in English, German and Russian until the billing rule keys settle; "
-    "the other languages land in one pass and this test is then switched on.",
-)
 def test_the_bundle_answers_every_language_a_request_can_resolve_to() -> None:
     assert set(SHIPPED_LOCALES) == set(SUPPORTED_LOCALES)
