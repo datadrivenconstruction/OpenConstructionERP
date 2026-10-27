@@ -58,6 +58,7 @@ vi.mock('@/features/projects/useProjectProfile', () => ({
 
 import { Sidebar } from './Sidebar';
 import { packMarker } from './packMenu';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const SLUG = 'eleven-areas-framework';
 
@@ -85,6 +86,8 @@ function renderSidebar() {
 const settle = () => new Promise((resolve) => setTimeout(resolve, 30));
 
 beforeEach(() => {
+  // usePartnerPack only asks once a session exists.
+  useAuthStore.setState({ isAuthenticated: true });
   hidden.list = [];
   hidden.loading = false;
   hidden.set.mockReset();
