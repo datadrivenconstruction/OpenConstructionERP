@@ -60935,6 +60935,13 @@ const resource = {
     "cost_benchmarks.no_completed": "Все още няма завършени проекти",
     "cost_benchmarks.no_completed_desc": "Добавете завършен проект към историята, за да изградите собствени ценови диапазони.",
     "cost_benchmarks.estimates_title": "Сметки",
+    "accountingSync.sync.push_selected": "Публикуване на {{count}} проверени",
+    "accountingSync.sync.push_hint_review": "Отбележете документите, които сте проверили, и ги публикувайте. Плащанията, записани във вашите книги, се връщат.",
+    "accountingSync.docs.review_all": "Маркирай всички като проверени",
+    "accountingSync.docs.review_one": "Проверен {{number}}",
+    "accountingSync.doc_source.payroll": "Заплати",
+    "accountingSync.category.payroll_cost": "Разход за заплати",
+    "accountingSync.category.payroll_liability": "Задължения за заплати",
   }
 } as { translation: Record<string, string> };
 

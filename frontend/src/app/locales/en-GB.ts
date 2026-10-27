@@ -488,6 +488,13 @@ const resource = {
     "punch.description_saved": "Description saved",
     "punch.no_description": "No description yet.",
     "punch.edit_description": "Edit description",
+    "accountingSync.sync.push_selected": "Post {{count}} reviewed",
+    "accountingSync.sync.push_hint_review": "Tick the documents you reviewed below, then post them. Payments recorded in your books come back.",
+    "accountingSync.docs.review_all": "Mark all as reviewed",
+    "accountingSync.docs.review_one": "Reviewed {{number}}",
+    "accountingSync.doc_source.payroll": "Payroll",
+    "accountingSync.category.payroll_cost": "Payroll cost",
+    "accountingSync.category.payroll_liability": "Wages payable",
   }
 } as { translation: Record<string, string> };
 
