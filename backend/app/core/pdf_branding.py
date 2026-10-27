@@ -1469,7 +1469,7 @@ def render_sample_pdf(doc_type: str | None = None, *, paper: tuple[float, float]
             PageTemplate(id="later", frames=[_frame("later")], onPage=later_pages),
         ]
     )
-    doc.build(story)
+    build_with_page_count(doc, story)
     return buffer.getvalue()
 
 
@@ -1489,3 +1489,29 @@ __all__ = [
     "page_number_text",
     "render_sample_pdf",
 ]
+
+
+def build_with_page_count(doc: Any, story: list[Any], **build_kwargs: Any) -> None:
+    """Build ``doc`` so the branded footer reads "Page x of y".
+
+    The footer only knows the total once the document has been laid out, so
+    the story is laid out once into a scratch buffer to count pages, then for
+    real. A story that cannot be copied is built once with plain page numbers.
+    """
+    import copy
+    import io
+
+    try:
+        draft_story = copy.deepcopy(story)
+    except Exception:  # noqa: BLE001 - an uncopyable flowable only costs the total
+        doc.build(story, **build_kwargs)
+        return
+    target = doc.filename
+    doc.filename = io.BytesIO()
+    try:
+        doc.build(draft_story, **build_kwargs)
+        total = int(getattr(doc, "page", 0) or 0)
+    finally:
+        doc.filename = target
+    doc.page_count = total
+    doc.build(story, **build_kwargs)
