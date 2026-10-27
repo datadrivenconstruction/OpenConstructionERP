@@ -1696,10 +1696,11 @@ export function getLookAheadBoard(lookAheadId: string): Promise<LpsBoard> {
   return apiGet<LpsBoard>(`/v1/schedule-advanced/look-aheads/${encodeURIComponent(lookAheadId)}/board`);
 }
 
-export function getConstraintsLog(masterId: string): Promise<LpsConstraintRow[]> {
-  return apiGet<LpsConstraintRow[]>(
-    `/v1/schedule-advanced/master-schedules/${encodeURIComponent(masterId)}/constraints-log`,
+export async function getConstraintsLog(masterId: string): Promise<LpsConstraintRow[]> {
+  const page = await apiGet<{ items: LpsConstraintRow[] }>(
+    `/v1/schedule-advanced/master-schedules/${encodeURIComponent(masterId)}/constraints-log?limit=2000`,
   );
+  return page.items;
 }
 
 export function getPpcHistory(masterId: string): Promise<LpsPpcHistory> {

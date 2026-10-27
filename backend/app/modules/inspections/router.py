@@ -25,13 +25,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.offline_merge import (
-    MergeAuditOut,
+    MergeAuditListResponse,
     MergeSpec,
     OfflineMergeRequest,
     OfflineMergeResponse,
     apply_merge,
     find_by_client_op_id,
-    list_merge_audit,
+    merge_audit_page,
     stamp_client_op_id,
 )
 from app.core.optimistic_lock import bump, check_version, resolve_expected_version
@@ -338,18 +338,20 @@ async def merge_inspection(
     )
 
 
-@router.get("/{inspection_id}/merge-audit/", response_model=list[MergeAuditOut])
+@router.get("/{inspection_id}/merge-audit/", response_model=MergeAuditListResponse)
 async def inspection_merge_audit(
     inspection_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("inspections.read")),
     service: InspectionService = Depends(_get_service),
-) -> list[MergeAuditOut]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=1000),
+) -> MergeAuditListResponse:
     """What offline merges changed on this inspection, field by field."""
     inspection = await service.get_inspection(inspection_id)
     await verify_project_access(inspection.project_id, str(user_id), session)
-    return await list_merge_audit(session, _INSPECTION_MERGE.entity_type, inspection_id)
+    return await merge_audit_page(session, _INSPECTION_MERGE.entity_type, inspection_id, offset=offset, limit=limit)
 
 
 @router.delete("/{inspection_id}", status_code=204)

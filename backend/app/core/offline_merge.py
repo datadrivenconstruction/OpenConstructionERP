@@ -22,10 +22,10 @@ from typing import Any
 
 from fastapi import HTTPException, status
 from pydantic import BaseModel, Field
-from sqlalchemy import String, cast, select
+from sqlalchemy import String, cast, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.audit_log import get_activity_for_entity, log_activity
+from app.core.audit_log import ActivityLog, get_activity_for_entity, log_activity
 from app.core.events import event_bus
 from app.core.i18n import get_locale
 from app.core.optimistic_lock import CLIENT_OP_ID_PATTERN, bump, check_version, three_way_merge, unresolved_conflicts
@@ -107,6 +107,15 @@ class MergeAuditOut(BaseModel):
     device_id: str | None = None
     base_version: int | None = None
     version: int | None = None
+
+
+class MergeAuditListResponse(BaseModel):
+    """A page of merge audit rows; ``total`` counts every merge row of the entity."""
+
+    items: list[MergeAuditOut]
+    total: int
+    offset: int = 0
+    limit: int = 1000
 
 
 # -- client_op_id --------------------------------------------------------------
@@ -339,3 +348,25 @@ async def list_merge_audit(session: AsyncSession, entity_type: str, entity_id: u
     """Merge audit rows for one entity, oldest first."""
     rows = await get_activity_for_entity(session, entity_type=entity_type, entity_id=entity_id, limit=1000)
     return [_audit_out(r) for r in rows if r.action == MERGE_ACTION]
+
+
+async def merge_audit_page(
+    session: AsyncSession, entity_type: str, entity_id: uuid.UUID | str, *, offset: int = 0, limit: int = 1000
+) -> MergeAuditListResponse:
+    """One page of merge audit rows for an entity, oldest first, with the full count."""
+    where = (
+        ActivityLog.entity_type == entity_type,
+        ActivityLog.entity_id == str(entity_id),
+        ActivityLog.action == MERGE_ACTION,
+    )
+    total = (await session.execute(select(func.count()).select_from(ActivityLog).where(*where))).scalar_one()
+    rows = (
+        (
+            await session.execute(
+                select(ActivityLog).where(*where).order_by(ActivityLog.created_at.asc()).offset(offset).limit(limit)
+            )
+        )
+        .scalars()
+        .all()
+    )
+    return MergeAuditListResponse(items=[_audit_out(r) for r in rows], total=int(total), offset=offset, limit=limit)

@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * API helpers and React Query hooks for the Guarantees module: the register of
@@ -364,15 +364,17 @@ function qs(params: Record<string, string | undefined>): string {
   return s ? `?${s}` : '';
 }
 
-export function fetchGuarantees(projectId: string, filters: GuaranteeFilters = {}): Promise<Guarantee[]> {
-  return apiGet<Guarantee[]>(
+export async function fetchGuarantees(projectId: string, filters: GuaranteeFilters = {}): Promise<Guarantee[]> {
+  const page = await apiGet<{ items: Guarantee[] }>(
     `${BASE}/projects/${projectId}/guarantees${qs({
       guarantee_type: filters.guarantee_type || undefined,
       status: filters.status || undefined,
       direction: filters.direction || undefined,
       contract_id: filters.contract_id,
+      limit: '2000',
     })}`,
   );
+  return page.items;
 }
 
 export function fetchGuarantee(projectId: string, id: string): Promise<GuaranteeDetail> {
@@ -433,16 +435,18 @@ export function fetchSummary(projectId: string): Promise<GuaranteeSummary> {
   return apiGet<GuaranteeSummary>(`${BASE}/projects/${projectId}/summary`);
 }
 
-export function fetchPortfolio(): Promise<GuaranteeSummary[]> {
-  return apiGet<GuaranteeSummary[]>(`${BASE}/portfolio`);
+export async function fetchPortfolio(): Promise<GuaranteeSummary[]> {
+  const page = await apiGet<{ items: GuaranteeSummary[] }>(`${BASE}/portfolio?limit=2000`);
+  return page.items;
 }
 
 export function fetchValidation(projectId: string): Promise<{ findings: GuaranteeFinding[] }> {
   return apiGet<{ findings: GuaranteeFinding[] }>(`${BASE}/projects/${projectId}/validation`);
 }
 
-export function fetchFacilities(): Promise<Facility[]> {
-  return apiGet<Facility[]>(`${BASE}/facilities`);
+export async function fetchFacilities(): Promise<Facility[]> {
+  const page = await apiGet<{ items: Facility[] }>(`${BASE}/facilities?limit=2000`);
+  return page.items;
 }
 
 export function createFacility(body: FacilityInput): Promise<Facility> {

@@ -85,7 +85,7 @@ class _Diary:
         return await diary_router.merge_diary(oid, body, self.s, USER, None, self.svc)
 
     async def audit(self, oid: uuid.UUID) -> Any:
-        return await diary_router.diary_merge_audit(oid, self.s, USER, None, self.svc)
+        return (await diary_router.diary_merge_audit(oid, self.s, USER, None, self.svc, 0, 1000)).items
 
     async def count(self) -> int:
         _, total = await self.svc.list_diaries(self.pid)
@@ -122,7 +122,7 @@ class _Entry(_Diary):
         return await diary_router.merge_entry(oid, body, self.s, USER, None, self.svc)
 
     async def audit(self, oid: uuid.UUID) -> Any:
-        return await diary_router.entry_merge_audit(oid, self.s, USER, None, self.svc)
+        return (await diary_router.entry_merge_audit(oid, self.s, USER, None, self.svc, 0, 1000)).items
 
     async def count(self) -> int:
         return len(await self.svc.list_entries(await self._diary_id()))
@@ -148,7 +148,7 @@ class _Punch(_Diary):
         return await punch_router.merge_item(oid, body, self.s, USER, None, self.svc)
 
     async def audit(self, oid: uuid.UUID) -> Any:
-        return await punch_router.item_merge_audit(oid, self.s, USER, None, self.svc)
+        return (await punch_router.item_merge_audit(oid, self.s, USER, None, self.svc, 0, 1000)).items
 
     async def count(self) -> int:
         _, total = await self.svc.list_items(self.pid)
@@ -177,7 +177,7 @@ class _Inspection(_Diary):
         return await insp_router.merge_inspection(oid, body, self.s, USER, None, self.svc)
 
     async def audit(self, oid: uuid.UUID) -> Any:
-        return await insp_router.inspection_merge_audit(oid, self.s, USER, None, self.svc)
+        return (await insp_router.inspection_merge_audit(oid, self.s, USER, None, self.svc, 0, 1000)).items
 
     async def count(self) -> int:
         _, total = await self.svc.list_inspections(self.pid)
@@ -344,7 +344,7 @@ async def test_merge_without_server_change_needs_no_resolution(ad: _Diary) -> No
 
 
 async def test_demo_seed_is_idempotent_and_shows_a_resolved_conflict(session: AsyncSession) -> None:
-    from app.core.offline_merge import list_merge_audit
+    from app.core.offline_merge import list_merge_audit, merge_audit_page
     from app.modules.daily_diary.offline_demo import seed_offline_conflict_demo
     from app.modules.punchlist.models import PunchItem
 
@@ -359,3 +359,6 @@ async def test_demo_seed_is_idempotent_and_shows_a_resolved_conflict(session: As
     audit = await list_merge_audit(session, "punchlist_item", conflict.id)
     assert len(audit) == 1
     assert audit[0].side == "manual"
+    page = await merge_audit_page(session, "punchlist_item", conflict.id)
+    assert (page.total, len(page.items), page.offset) == (1, 1, 0)
+    assert (await merge_audit_page(session, "punchlist_item", conflict.id, offset=1)).items == []

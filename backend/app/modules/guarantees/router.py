@@ -23,15 +23,18 @@ from app.modules.guarantees.schemas import (
     DocumentLinkRequest,
     ExposureResponse,
     FacilityCreate,
+    FacilityListResponse,
     FacilityResponse,
     FacilityUpdate,
     GuaranteeCreate,
     GuaranteeDetailResponse,
     GuaranteeDocumentResponse,
     GuaranteeEventResponse,
+    GuaranteeListResponse,
     GuaranteeResponse,
     GuaranteeUpdate,
     PaymentGateResponse,
+    PortfolioResponse,
     SummaryResponse,
     TransitionRequest,
 )
@@ -73,10 +76,17 @@ async def guarantee_defaults(country: str | None = None) -> dict:
     return defaults_for(country)
 
 
-@router.get("/facilities", response_model=list[FacilityResponse], dependencies=[_READ])
-async def list_facilities(session: SessionDep) -> list[FacilityResponse]:
+@router.get("/facilities", response_model=FacilityListResponse, dependencies=[_READ])
+async def list_facilities(
+    session: SessionDep, offset: int = Query(0, ge=0), limit: int = Query(500, ge=1, le=2000)
+) -> FacilityListResponse:
     rows = await GuaranteesService(session).repo.facilities()
-    return [FacilityResponse.model_validate(r) for r in rows]
+    return FacilityListResponse(
+        items=[FacilityResponse.model_validate(r) for r in rows[offset : offset + limit]],
+        total=len(rows),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.post("/facilities", response_model=FacilityResponse, status_code=201, dependencies=[_WRITE])
@@ -103,29 +113,42 @@ async def run_alerts(session: SessionDep, as_of: date | None = None) -> dict[str
     return counts
 
 
-@router.get("/portfolio", response_model=list[SummaryResponse], dependencies=[_READ])
-async def portfolio(session: SessionDep, user_id: CurrentUserId) -> list[SummaryResponse]:
+@router.get("/portfolio", response_model=PortfolioResponse, dependencies=[_READ])
+async def portfolio(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=2000),
+) -> PortfolioResponse:
     """Per-project guarantee figures for the portfolio view (projects the caller can open)."""
     from sqlalchemy import distinct, select
 
     service = GuaranteesService(session)
     ids = (await session.execute(select(distinct(Guarantee.project_id)))).scalars().all()
-    out: list[SummaryResponse] = []
+    allowed: list[uuid.UUID] = []
     for pid in ids:
         try:
             await verify_project_access(pid, user_id, session)
         except HTTPException:
             continue
-        out.append(SummaryResponse.model_validate(await service.summary(pid)))
-    return out
+        allowed.append(pid)
+    page = allowed[offset : offset + limit]
+    return PortfolioResponse(
+        items=[SummaryResponse.model_validate(await service.summary(pid)) for pid in page],
+        total=len(allowed),
+        offset=offset,
+        limit=limit,
+    )
 
 
-@router.get(
-    "/subcontractors/{subcontractor_id}/guarantees", response_model=list[GuaranteeResponse], dependencies=[_READ]
-)
+@router.get("/subcontractors/{subcontractor_id}/guarantees", response_model=GuaranteeListResponse, dependencies=[_READ])
 async def subcontractor_guarantees(
-    subcontractor_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId
-) -> list[GuaranteeResponse]:
+    subcontractor_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=2000),
+) -> GuaranteeListResponse:
     """Bonds received from one subcontractor, across the projects the caller can open."""
     rows = await GuaranteesService(session).repo.list(subcontractor_id=subcontractor_id)
     out: list[GuaranteeResponse] = []
@@ -139,7 +162,7 @@ async def subcontractor_guarantees(
                 allowed[row.project_id] = False
         if allowed[row.project_id]:
             out.append(_out(row))
-    return out
+    return GuaranteeListResponse(items=out[offset : offset + limit], total=len(out), offset=offset, limit=limit)
 
 
 @router.get("/contracts/{contract_id}/payment-gate", response_model=PaymentGateResponse, dependencies=[_READ])
@@ -157,7 +180,7 @@ async def payment_gate(contract_id: uuid.UUID, session: SessionDep, user_id: Cur
 # -- project register ------------------------------------------------------
 
 
-@router.get("/projects/{project_id}/guarantees", response_model=list[GuaranteeResponse], dependencies=[_READ])
+@router.get("/projects/{project_id}/guarantees", response_model=GuaranteeListResponse, dependencies=[_READ])
 async def list_guarantees(
     project_id: uuid.UUID,
     session: SessionDep,
@@ -167,7 +190,9 @@ async def list_guarantees(
     direction: str | None = Query(default=None),
     contract_id: uuid.UUID | None = Query(default=None),
     as_of: date | None = None,
-) -> list[GuaranteeResponse]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=2000),
+) -> GuaranteeListResponse:
     await verify_project_access(project_id, user_id, session)
     rows = await GuaranteesService(session).list(
         project_id,
@@ -176,7 +201,9 @@ async def list_guarantees(
         direction=_check(direction, logic.DIRECTIONS, "direction"),
         contract_id=contract_id,
     )
-    return [_out(r, as_of) for r in rows]
+    return GuaranteeListResponse(
+        items=[_out(r, as_of) for r in rows[offset : offset + limit]], total=len(rows), offset=offset, limit=limit
+    )
 
 
 @router.post(

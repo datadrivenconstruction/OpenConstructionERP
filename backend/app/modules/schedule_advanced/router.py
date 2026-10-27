@@ -79,6 +79,7 @@ from app.modules.schedule_advanced.schemas import (
     LookAheadResponse,
     LookAheadUpdate,
     LpsBoardResponse,
+    LpsConstraintListResponse,
     LpsConstraintRow,
     LPSDashboardResponse,
     LpsPpcHistoryResponse,
@@ -2845,19 +2846,27 @@ async def look_ahead_board(
     return LpsBoardResponse.model_validate(await LastPlannerService(session).board(la_id))
 
 
-@router.get("/master-schedules/{master_id}/constraints-log", response_model=list[LpsConstraintRow])
+@router.get("/master-schedules/{master_id}/constraints-log", response_model=LpsConstraintListResponse)
 async def master_constraints_log(
     master_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId,
+    offset: int = Query(0, ge=0),
+    limit: int = Query(500, ge=1, le=2000),
     service: ScheduleAdvancedService = Depends(_get_service),
-) -> list[LpsConstraintRow]:
+) -> LpsConstraintListResponse:
     """Every constraint of the master schedule, open first, with the record that clears it."""
     from app.modules.schedule_advanced.lps import LastPlannerService  # noqa: PLC0415
 
     project_id = await _project_id_for_master(master_id, service)
     await verify_project_access(project_id, user_id, session)
-    return [LpsConstraintRow.model_validate(r) for r in await LastPlannerService(session).constraints_log(master_id)]
+    rows = await LastPlannerService(session).constraints_log(master_id)
+    return LpsConstraintListResponse(
+        items=[LpsConstraintRow.model_validate(r) for r in rows[offset : offset + limit]],
+        total=len(rows),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.get("/master-schedules/{master_id}/ppc-history", response_model=LpsPpcHistoryResponse)

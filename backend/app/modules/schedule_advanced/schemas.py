@@ -1477,6 +1477,15 @@ class LpsConstraintRow(BaseModel):
     link_resolved_at: datetime | None = None
 
 
+class LpsConstraintListResponse(BaseModel):
+    """A page of the constraints log, open constraints first."""
+
+    items: list[LpsConstraintRow]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
 class LpsBoardTask(BaseModel):
     """One schedule activity on the look-ahead board."""
 

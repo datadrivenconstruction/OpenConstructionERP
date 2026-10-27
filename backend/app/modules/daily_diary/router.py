@@ -28,13 +28,13 @@ from app.core.file_signature import (
 )
 from app.core.i18n import get_locale
 from app.core.offline_merge import (
-    MergeAuditOut,
+    MergeAuditListResponse,
     MergeSpec,
     OfflineMergeRequest,
     OfflineMergeResponse,
     apply_merge,
     find_by_client_op_id,
-    list_merge_audit,
+    merge_audit_page,
     stamp_client_op_id,
 )
 from app.core.optimistic_lock import bump, check_version, resolve_expected_version
@@ -251,18 +251,20 @@ async def merge_diary(
     )
 
 
-@router.get("/diaries/{diary_id}/merge-audit/", response_model=list[MergeAuditOut])
+@router.get("/diaries/{diary_id}/merge-audit/", response_model=MergeAuditListResponse)
 async def diary_merge_audit(
     diary_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("daily_diary.read")),
     service: DailyDiaryService = Depends(_get_service),
-) -> list[MergeAuditOut]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=1000),
+) -> MergeAuditListResponse:
     """What offline merges changed on this diary, field by field."""
     diary = await service.get_diary(diary_id)
     await verify_project_access(diary.project_id, user_id, session)
-    return await list_merge_audit(session, _DIARY_MERGE.entity_type, diary_id)
+    return await merge_audit_page(session, _DIARY_MERGE.entity_type, diary_id, offset=offset, limit=limit)
 
 
 @router.delete("/diaries/{diary_id}", status_code=204)
@@ -684,19 +686,21 @@ async def merge_entry(
     )
 
 
-@router.get("/diary-entries/{entry_id}/merge-audit/", response_model=list[MergeAuditOut])
+@router.get("/diary-entries/{entry_id}/merge-audit/", response_model=MergeAuditListResponse)
 async def entry_merge_audit(
     entry_id: uuid.UUID,
     session: SessionDep,
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("daily_diary.read")),
     service: DailyDiaryService = Depends(_get_service),
-) -> list[MergeAuditOut]:
+    offset: int = Query(0, ge=0),
+    limit: int = Query(1000, ge=1, le=1000),
+) -> MergeAuditListResponse:
     """What offline merges changed on this entry, field by field."""
     entry = await service.get_entry(entry_id)
     diary = await service.get_diary(entry.diary_id)
     await verify_project_access(diary.project_id, user_id, session)
-    return await list_merge_audit(session, _ENTRY_MERGE.entity_type, entry_id)
+    return await merge_audit_page(session, _ENTRY_MERGE.entity_type, entry_id, offset=offset, limit=limit)
 
 
 @router.delete("/diary-entries/{entry_id}", status_code=204)

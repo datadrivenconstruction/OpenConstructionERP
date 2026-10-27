@@ -47,6 +47,7 @@ from app.modules.field_time.clock_schemas import (
     ClockStatusResponse,
     CrewClockResponse,
     GeofenceCreate,
+    GeofenceListResponse,
     GeofenceResponse,
     GeofenceUpdate,
     PurgeResult,
@@ -120,17 +121,21 @@ async def _events_out(service: ClockService, events: list[FieldClockEvent]) -> l
 # ── Geofences ────────────────────────────────────────────────────────────────
 
 
-@clock_router.get("/geofences/", response_model=list[GeofenceResponse])
+@clock_router.get("/geofences/", response_model=GeofenceListResponse)
 async def list_geofences(
     session: SessionDep,
     project_id: uuid.UUID = Query(...),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=500),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("field_time.read")),
     service: ClockService = Depends(_service),
-) -> list[GeofenceResponse]:
+) -> GeofenceListResponse:
     """Site fences of a project."""
     await verify_project_access(project_id, user_id, session)
-    return [_fence_out(f) for f in await service.list_geofences(project_id)]
+    fences = await service.list_geofences(project_id)
+    page = fences[offset : offset + limit]
+    return GeofenceListResponse(items=[_fence_out(f) for f in page], total=len(fences), offset=offset, limit=limit)
 
 
 @clock_router.post("/geofences/", response_model=GeofenceResponse, status_code=status.HTTP_201_CREATED)

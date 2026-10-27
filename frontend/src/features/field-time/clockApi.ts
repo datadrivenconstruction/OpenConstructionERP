@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * API client and React Query hooks for the geofenced time clock, mounted at​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+ * API client and React Query hooks for the geofenced time clock, mounted at
  * /api/v1/field-time/ (geofences/ and clock/). Hours are decimal strings.
  * Every path keeps its trailing slash (redirect_slashes is disabled).
  */
@@ -122,8 +122,11 @@ const qs = (o: Record<string, string | undefined>): string => {
   return p.toString();
 };
 
-export function listGeofences(projectId: string): Promise<Geofence[]> {
-  return apiGet<Geofence[]>(`/v1/field-time/geofences/?${qs({ project_id: projectId })}`);
+export async function listGeofences(projectId: string): Promise<Geofence[]> {
+  const page = await apiGet<{ items: Geofence[] }>(
+    `/v1/field-time/geofences/?${qs({ project_id: projectId, limit: '500' })}`,
+  );
+  return page.items;
 }
 export function createGeofence(data: GeofencePayload): Promise<Geofence> {
   return apiPost<Geofence, GeofencePayload>('/v1/field-time/geofences/', data);

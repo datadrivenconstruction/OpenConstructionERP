@@ -64,6 +64,15 @@ class GeofenceResponse(GeofenceBase):
     updated_at: datetime
 
 
+class GeofenceListResponse(BaseModel):
+    """A page of the site fences of a project."""
+
+    items: list[GeofenceResponse]
+    total: int
+    offset: int = 0
+    limit: int = 100
+
+
 class ClockSettingsIn(BaseModel):
     """Per-project time clock settings."""
 

@@ -289,3 +289,30 @@ class SummaryResponse(BaseModel):
     expired_count: int
     totals: list[AmountByKey]
     next_expiry: date | None = None
+
+
+class GuaranteeListResponse(BaseModel):
+    """A page of guarantees; ``total`` counts every row the filters matched."""
+
+    items: list[GuaranteeResponse]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
+class FacilityListResponse(BaseModel):
+    """A page of bank credit lines."""
+
+    items: list[FacilityResponse]
+    total: int
+    offset: int = 0
+    limit: int = 500
+
+
+class PortfolioResponse(BaseModel):
+    """Per-project figures for the projects the caller can open."""
+
+    items: list[SummaryResponse]
+    total: int
+    offset: int = 0
+    limit: int = 500
