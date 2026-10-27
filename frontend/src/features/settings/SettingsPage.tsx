@@ -19,6 +19,7 @@ import { McpSettingsPanel } from '@/features/mcp';
 import { DesktopServerCard } from './DesktopServerCard';
 import { TextSizeSetting } from './TextSizeSetting';
 import { AppearanceStyleCard } from './AppearanceStyleCard';
+import { TableOptionsCard } from './TableOptionsCard';
 import { WorkspaceBrandCard } from './WorkspaceBrandCard';
 import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
@@ -1848,6 +1849,7 @@ export function SettingsPage() {
               <MenuAppearanceCard />
               <WorkspaceBrandCard />
               <WorkPrefsCard />
+              <TableOptionsCard />
               <SidebarFooterCard />
               <FloatingButtonsCard />
               <NotificationChannelsCard />

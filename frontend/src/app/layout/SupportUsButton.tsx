@@ -622,7 +622,7 @@ function SupportUsModal({ onClose, copied, setCopied }: ModalProps) {
           <p className="text-xs text-content-secondary leading-relaxed">
             {t('support.thanks', {
               defaultValue:
-                'Thank you. Every star and every share genuinely keeps this project alive - built with ❤️ for the construction community.',
+                'Thank you. Every star and every share genuinely keeps this project alive - built for the construction community.',
             })}
           </p>
           <button
