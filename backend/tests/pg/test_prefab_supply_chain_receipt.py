@@ -11,12 +11,12 @@ import pytest_asyncio
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests._pg import transactional_session
 
 from app.core.solution_package_demos import load_rebar_cage_scenario, seed_rebar_cage_demo
 from app.modules.prefab.guard import STAGE_ORDER, UNIT_TYPES, receipt_allowed
 from app.modules.prefab.schemas import AdvanceStageRequest, PrefabUnitCreate, ReceiveByQrRequest
 from app.modules.prefab.service import PrefabService
+from tests._pg import transactional_session
 
 
 def test_only_a_dispatched_unit_can_be_received() -> None:

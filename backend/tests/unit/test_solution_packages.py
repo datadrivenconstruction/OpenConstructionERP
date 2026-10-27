@@ -16,7 +16,7 @@ from app.core import module_guard
 from app.core import solution_packages as sp
 from app.core.onboarding_presets import _CORE_MODULES
 from app.core.solution_packages_router import router
-from app.dependencies import get_current_user_id
+from app.dependencies import get_current_user_id, get_current_user_payload
 from app.modules.users.router import _get_service
 
 USER_ID = str(uuid.UUID("00000000-0000-4000-8000-0000000000b1"))
@@ -123,10 +123,11 @@ class _Service:
         self.metadata = dict(fields["metadata_"])
 
 
-def _client(service: _Service) -> httpx.AsyncClient:
+def _client(service: _Service, payload: dict[str, Any] | None = None) -> httpx.AsyncClient:
     app = FastAPI()
     app.include_router(router)
     app.dependency_overrides[get_current_user_id] = lambda: USER_ID
+    app.dependency_overrides[get_current_user_payload] = lambda: payload or {"sub": USER_ID, "role": "admin"}
     app.dependency_overrides[_get_service] = lambda: service
     return httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test")
 
@@ -180,3 +181,60 @@ async def test_guard_answers_403_for_hidden_module(monkeypatch: pytest.MonkeyPat
         blocked = await client.get("/api/v1/prefab/units/")
         assert blocked.status_code == 403 and blocked.json()["detail"] == "module_disabled"
         assert (await client.get("/api/v1/takeoff/x/")).status_code == 200
+
+
+def test_remove_hides_only_modules_no_other_package_needs() -> None:
+    meta, _ = sp.install({}, ["takeoff", "bim_model"])
+    after, hidden = sp.remove(meta, "takeoff")
+    assert "dwg_takeoff" in hidden and "takeoff" in hidden
+    assert "boq" not in hidden and "cad" not in hidden  # bim_model still needs them
+    assert sp.read_state(after)["installed"] == ["bim_model"]
+    assert not sp.is_blocked(after, "bim_hub") and sp.is_blocked(after, "dwg_takeoff")
+    with pytest.raises(ValueError):
+        sp.remove(after, "takeoff")
+
+
+def test_remove_takes_dependent_packages_with_it() -> None:
+    meta, _ = sp.install({}, ["tender_procurement"])
+    after, _hidden = sp.remove(meta, "estimate_quote")
+    assert sp.read_state(after)["installed"] == []
+
+
+@pytest.mark.parametrize(
+    ("payload", "allowed"),
+    [
+        ({"sub": USER_ID, "role": "admin"}, True),
+        ({"sub": USER_ID, "role": "editor", "tenant_id": USER_ID}, True),
+        ({"sub": USER_ID, "role": "manager"}, False),
+        ({"sub": USER_ID, "role": "editor", "tenant_id": "someone-else"}, False),
+        ({"sub": USER_ID, "role": "viewer"}, False),
+    ],
+)
+@pytest.mark.asyncio
+async def test_only_admin_or_owner_may_change_packages(payload: dict[str, Any], allowed: bool) -> None:
+    service = _Service()
+    async with _client(service, payload) as client:
+        calls = [
+            client.post("/api/v1/solution-packages/install/", json={"package_ids": ["takeoff"]}),
+            client.put("/api/v1/solution-packages/modules/prefab/", json={"enabled": True}),
+            client.post("/api/v1/solution-packages/takeoff/remove/", json={"confirm": False}),
+        ]
+        codes = [(await c).status_code for c in calls]
+        assert (codes[0] == 200) is allowed and (codes[1] == 200) is allowed
+        if not allowed:
+            assert codes == [403, 403, 403] and service.metadata == {}
+        assert (await client.get("/api/v1/solution-packages/")).status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_http_remove_previews_then_confirms() -> None:
+    service = _Service()
+    async with _client(service) as client:
+        await client.post("/api/v1/solution-packages/install/", json={"package_ids": ["takeoff", "supply_chain"]})
+        preview = (await client.post("/api/v1/solution-packages/supply_chain/remove/", json={})).json()
+        assert "prefab" in preview["hidden"] and preview["removed"] is False
+        assert "supply_chain" in sp.read_state(service.metadata)["installed"]
+        done = (await client.post("/api/v1/solution-packages/supply_chain/remove/", json={"confirm": True})).json()
+        assert done["removed"] is True and done["modules"]["prefab"] is False
+        missing = await client.post("/api/v1/solution-packages/supply_chain/remove/", json={"confirm": True})
+        assert missing.status_code == 404
