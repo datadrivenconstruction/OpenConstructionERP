@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { ReceiveByQr } from './ReceiveByQr';
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -139,6 +140,7 @@ const UNIT_TYPE_LABELS: Record<PrefabUnitType, string> = {
   module: 'Module',
   skid: 'Skid',
   volumetric: 'Volumetric',
+  rebar_cage: 'Rebar cage',
   other: 'Other',
 };
 
@@ -875,6 +877,26 @@ function UnitDetailDrawer({
               </p>
               <p className="text-content-primary truncate">{unit.drawing_ref || '-'}</p>
             </div>
+            <div>
+              <p className="text-2xs uppercase tracking-wide text-content-tertiary">
+                {t('prefab.field_element_ref', { defaultValue: 'Installed into' })}
+              </p>
+              <p className="text-content-primary truncate">{unit.element_ref || '-'}</p>
+            </div>
+            <div>
+              <p className="text-2xs uppercase tracking-wide text-content-tertiary">
+                {t('prefab.field_delivery_note', { defaultValue: 'Delivery note' })}
+              </p>
+              <p className="text-content-primary truncate">{unit.delivery_note_ref || '-'}</p>
+            </div>
+            {unit.qr_token && (
+              <div className="col-span-2">
+                <p className="text-2xs uppercase tracking-wide text-content-tertiary">
+                  {t('prefab.field_qr_token', { defaultValue: 'QR label code' })}
+                </p>
+                <p className="font-mono text-xs text-content-primary break-all">{unit.qr_token}</p>
+              </div>
+            )}
           </div>
           {unit.notes && (
             <div>
@@ -1398,6 +1420,8 @@ export function PrefabPage() {
           ))}
         </div>
       )}
+
+      {projectId && total > 0 && <ReceiveByQr onReceived={invalidate} />}
 
       {/* Risk strip: overdue / due-soon / at-risk tallies that double as
           one-click board filters. Counts come from the full register. */}

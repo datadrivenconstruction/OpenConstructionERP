@@ -27,6 +27,7 @@ export type PrefabUnitType =
   | 'module'
   | 'skid'
   | 'volumetric'
+  | 'rebar_cage'
   | 'other';
 
 export interface PrefabUnit {
@@ -40,6 +41,11 @@ export interface PrefabUnit {
   bim_element_ids: string[] | null;
   notes: string | null;
   created_by: string | null;
+  /** Token printed as the unit's QR label and scanned on arrival. */
+  qr_token?: string | null;
+  delivery_note_ref?: string | null;
+  /** Element the unit goes into, e.g. a pile mark. */
+  element_ref?: string | null;
   created_at: string;
   updated_at: string;
   /* ── Spine 4: cost link + derived cost view ─────────────────────────── */
@@ -187,6 +193,14 @@ export async function advancePrefabUnit(
   data: AdvanceStagePayload,
 ): Promise<PrefabUnit> {
   return apiPost<PrefabUnit>(`/v1/prefab/units/${id}/advance/`, data);
+}
+
+export async function receivePrefabUnitByQr(data: {
+  qr_token: string;
+  delivery_note_ref: string;
+  note?: string;
+}): Promise<PrefabUnit> {
+  return apiPost<PrefabUnit>('/v1/prefab/units/receive/', data);
 }
 
 export async function linkPrefabUnit(
