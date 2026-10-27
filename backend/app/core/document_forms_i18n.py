@@ -206,6 +206,4 @@ def _locales_of(form: str, default: str) -> tuple[str, ...]:
     if form in _PLAIN_FORMS:
         left_out = {*REGISTER_UNRENDERABLE, *_PLAIN_FORMS[form]}
         return tuple(code for code in form_strings(form, default=default) if code not in left_out)
-    if form in ("procurement", "finance"):
-        return document_form_catalogue(form, default=default).supported
     return document_form_catalogue(form, default=default, skip=REGISTER_UNRENDERABLE).supported

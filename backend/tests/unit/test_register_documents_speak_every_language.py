@@ -34,7 +34,6 @@ import pytest
 
 from app.core.document_forms_i18n import (
     REGISTER_UNRENDERABLE,
-    document_form_catalogue,
     document_form_locales,
     load_document_forms,
     register_form_catalogue,
@@ -247,8 +246,11 @@ def test_the_web_client_offers_exactly_the_languages_the_server_renders() -> Non
     assert "DIARY_DOCUMENT_LOCALES: readonly string[] = REGISTER_DOCUMENT_LOCALES" in source
     assert set(register) == set(register_form_catalogue("daily_diary").supported)
     purchasing = _ts_list("PURCHASING_DOCUMENT_LOCALES")
-    assert set(purchasing) == set(document_form_catalogue("procurement").supported)
-    assert set(purchasing) == set(document_form_catalogue("finance").supported)
+    from app.modules.finance import pdf_translations as finance
+    from app.modules.procurement import pdf_translations as procurement
+
+    assert set(purchasing) == set(procurement.SUPPORTED_PDF_LOCALES)
+    assert set(purchasing) == set(finance.SUPPORTED_PDF_LOCALES)
 
 
 def _walk(value: object, path: str = ""):

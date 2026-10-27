@@ -37,7 +37,8 @@ describe('document languages', () => {
   });
 
   it('keeps the purchasing forms to the languages their catalogues hold', () => {
-    expect([...PURCHASING_DOCUMENT_LOCALES].sort()).toEqual(['ar', 'de', 'en', 'fa', 'he', 'ru', 'ur']);
+    expect([...PURCHASING_DOCUMENT_LOCALES].sort()).toEqual([...REGISTER_DOCUMENT_LOCALES].sort());
+    expect(PURCHASING_DOCUMENT_LOCALES).not.toContain('bn');
   });
 
   it('names every language under its own name, never by its code', () => {
@@ -72,7 +73,8 @@ describe('document languages', () => {
     expect(defaultDocumentLocale(REGISTER_DOCUMENT_LOCALES, 'bn')).toBe('en');
     expect(defaultDocumentLocale(REGISTER_DOCUMENT_LOCALES, 'sw')).toBe('en');
     expect(defaultDocumentLocale(REGISTER_DOCUMENT_LOCALES, null)).toBe('en');
-    expect(defaultDocumentLocale(PURCHASING_DOCUMENT_LOCALES, 'ja')).toBe('en');
+    expect(defaultDocumentLocale(PURCHASING_DOCUMENT_LOCALES, 'ja')).toBe('ja');
+    expect(defaultDocumentLocale(PURCHASING_DOCUMENT_LOCALES, 'bn')).toBe('en');
     expect(defaultDocumentLocale(PURCHASING_DOCUMENT_LOCALES, 'ar-EG')).toBe('ar');
   });
 });

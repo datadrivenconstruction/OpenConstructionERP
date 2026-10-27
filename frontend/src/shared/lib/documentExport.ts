@@ -54,7 +54,10 @@ export const PROPERTY_DOCUMENT_LOCALES: readonly string[] = [...REGISTER_DOCUMEN
  * Languages of the purchase order, goods receipt, invoice and payment forms
  * (`procurement` and `finance` in `document_forms_i18n.py`).
  */
-export const PURCHASING_DOCUMENT_LOCALES: readonly string[] = ['en', 'de', 'ru', 'ar', 'ur', 'fa', 'he'];
+export const PURCHASING_DOCUMENT_LOCALES: readonly string[] = [
+  'en', 'de', 'ru', 'fr', 'es', 'pt', 'it', 'nl', 'pl', 'cs', 'hu', 'tr', 'ar', 'ur', 'zh', 'ja', 'ko', 'hi', 'sv', 'no',
+  'da', 'fi', 'bg', 'hr', 'id', 'ro', 'th', 'vi', 'uk', 'uz', 'et', 'ky', 'kk', 'fil', 'fa', 'he', 'el',
+];
 
 /**
  * A language under its own name, which is how a reader looks for it in a

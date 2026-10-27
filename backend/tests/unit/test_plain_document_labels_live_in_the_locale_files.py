@@ -89,8 +89,8 @@ def test_the_languages_the_bill_had_are_still_there_with_their_own_words() -> No
 
 
 def test_a_language_the_files_do_not_translate_prints_english() -> None:
-    assert pdf_export._get_pdf_labels("ja") == pdf_export._PDF_LABELS["en"]
-    assert pdf_export.pdf_language("ja") == "en"
+    assert pdf_export._get_pdf_labels("zz") == pdf_export._PDF_LABELS["en"]
+    assert pdf_export.pdf_language("zz") == "en"
 
 
 def test_a_three_letter_language_is_not_cut_to_another_language() -> None:

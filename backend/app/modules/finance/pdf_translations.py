@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from app.core.document_forms_i18n import document_form_catalogue
+from app.core.document_forms_i18n import REGISTER_UNRENDERABLE, document_form_catalogue
 from app.core.register_export import export_filename
 
 __all__ = [
@@ -32,7 +32,7 @@ __all__ = [
 
 DEFAULT_PDF_LOCALE = "en"
 
-CATALOGUE = document_form_catalogue("finance", default=DEFAULT_PDF_LOCALE)
+CATALOGUE = document_form_catalogue("finance", default=DEFAULT_PDF_LOCALE, skip=REGISTER_UNRENDERABLE)
 
 #: Languages the finance documents can render; anything else is English.
 SUPPORTED_PDF_LOCALES: tuple[str, ...] = CATALOGUE.supported
