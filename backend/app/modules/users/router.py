@@ -10,6 +10,7 @@ Endpoints:
     POST /auth/reset-password   - Reset password with token
     GET  /me                    - Current user profile
     PATCH /me                   - Update own profile
+    POST/GET/DELETE /me/avatar  - Upload, serve and remove own profile photo
     DELETE /me                  - Erase own account (GDPR Art. 17)
     POST /me/change-password    - Change own password
     GET  /me/sessions           - List own login sessions
@@ -37,7 +38,8 @@ Endpoints:
 import uuid
 from typing import Any, Literal
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, File, HTTPException, Query, Request, UploadFile, status
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from app.core.demo_accounts import DEMO_ACCOUNT_EMAILS
@@ -744,6 +746,51 @@ async def update_me(
         fields["metadata_"] = merged
 
     user = await service.update_profile(uuid.UUID(user_id), **fields)
+    return UserResponse.model_validate(user)
+
+
+@router.post("/me/avatar/", response_model=UserResponse)
+@router.put("/me/avatar/", response_model=UserResponse, include_in_schema=False)
+async def upload_my_avatar(
+    user_id: CurrentUserId,
+    file: UploadFile = File(...),
+    service: UserService = Depends(_get_service),
+) -> UserResponse:
+    """Upload or replace the caller's profile photo (PNG, JPEG or WebP, max 2 MB)."""
+    from app.modules.users.avatar import MAX_AVATAR_BYTES, AvatarValidationError
+
+    data = await file.read(MAX_AVATAR_BYTES + 1)
+    try:
+        user = await service.set_avatar(uuid.UUID(user_id), data, file.content_type)
+    except AvatarValidationError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail={"rule": exc.rule, "message": exc.message},
+        ) from exc
+    return UserResponse.model_validate(user)
+
+
+@router.get("/me/avatar/")
+async def get_my_avatar(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> Response:
+    """Serve the caller's profile photo as a 256 px PNG."""
+    data = await service.read_avatar(uuid.UUID(user_id))
+    return Response(
+        content=data,
+        media_type="image/png",
+        headers={"Cache-Control": "private, max-age=86400", "X-Content-Type-Options": "nosniff"},
+    )
+
+
+@router.delete("/me/avatar/", response_model=UserResponse)
+async def delete_my_avatar(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> UserResponse:
+    """Remove the caller's profile photo."""
+    user = await service.remove_avatar(uuid.UUID(user_id))
     return UserResponse.model_validate(user)
 
 

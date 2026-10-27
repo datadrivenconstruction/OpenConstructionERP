@@ -45635,6 +45635,18 @@ const resource = {
     "settings.footer_subtitle": "Choose which buttons appear at the bottom of the left menu.",
     "settings.footer_show": "Show {{label}} in the sidebar footer",
     "settings.footer_note": "Settings stays available from the profile menu at the top right, even when its button is hidden.",
+    "settings.avatar_alt": "Your profile photo",
+    "settings.avatar_upload": "Upload photo",
+    "settings.avatar_change": "Change photo",
+    "settings.avatar_remove": "Remove photo",
+    "settings.avatar_save": "Save photo",
+    "settings.avatar_hint": "PNG, JPEG or WebP, up to 2 MB. Cropped to a square.",
+    "settings.avatar_err_type": "Choose a PNG, JPEG or WebP image.",
+    "settings.avatar_err_size": "The photo is larger than 2 MB.",
+    "settings.avatar_err_content": "That file is not a readable image.",
+    "settings.avatar_saved": "Profile photo updated",
+    "settings.avatar_removed": "Profile photo removed",
+    "settings.avatar_failed": "Could not save the photo",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

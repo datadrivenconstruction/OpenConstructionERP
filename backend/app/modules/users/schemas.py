@@ -347,6 +347,7 @@ class UserResponse(BaseModel):
     number_format: str
     date_format: str
     currency_code: str
+    avatar_url: str | None = None
     created_at: datetime
     updated_at: datetime
 
