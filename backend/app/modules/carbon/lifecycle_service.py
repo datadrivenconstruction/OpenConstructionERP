@@ -359,6 +359,20 @@ class CarbonLifecycleService:
             event_bus.publish_detached("carbon.budget.exceeded", result, source_module="carbon")
         return result
 
+    async def dashboard_widget(self, project_id: uuid.UUID) -> dict[str, Any]:
+        """Dashboard card: budget against target plus the top hotspot of the latest inventory."""
+        from app.modules.projects.models import Project
+
+        budget = await self.budget(project_id)
+        proj = await self.session.get(Project, project_id)
+        std = (getattr(proj, "classification_standard", "") or "din276").lower()
+        system = std if std in lifecycle.CLASSIFICATION_SYSTEMS else "din276"
+        top = None
+        if budget["inventory_id"]:
+            rows = await self.hotspots(uuid.UUID(budget["inventory_id"]), system)
+            top = next((r for r in rows if r["group"] != "unclassified"), rows[0] if rows else None)
+        return {"budget": budget, "system": system, "top_hotspot": top}
+
     async def swap(
         self,
         entry_id: uuid.UUID,
@@ -396,12 +410,35 @@ class CarbonLifecycleService:
             )
             for f in rows.scalars():
                 factors.setdefault(str(f.cost_item_id), f)
+        # BOQ positions priced in a tender carry their carbon through the embodied line assigned to them.
+        refs = [f"boq:{line['position_id']}" for line in lines if line.get("position_id")]
+        per_unit: dict[str, tuple[Decimal, str]] = {}
+        if refs:
+            rows = await self.session.execute(
+                select(EmbodiedCarbonEntry).where(
+                    EmbodiedCarbonEntry.element_ref.in_(refs), EmbodiedCarbonEntry.stage == "a1a3"
+                )
+            )
+            for e in rows.scalars():
+                qty = Decimal(str(e.quantity or 0))
+                if qty > 0 and e.element_ref not in per_unit:
+                    per_unit[e.element_ref] = (Decimal(str(e.carbon_kg or 0)) / qty, e.unit)
         out: list[dict[str, Any]] = []
         total = Decimal("0")
         for line in lines:
             f = factors.get(str(line.get("cost_item_id")))
             row: dict[str, Any] = {"ref": line.get("ref"), "carbon_kg": None, "status": "no_factor"}
-            if f is not None:
+            hit = per_unit.get(f"boq:{line.get('position_id')}") if f is None else None
+            if hit is not None:
+                try:
+                    kg = compute_embodied_entry_carbon(
+                        line.get("quantity", 0), line.get("unit") or hit[1], hit[0], hit[1]
+                    )
+                    row.update({"carbon_kg": str(kg), "status": "ok"})
+                    total += kg
+                except (UnitMismatchError, ValueError):
+                    row["status"] = "unit_mismatch"
+            elif f is not None:
                 try:
                     kg = compute_embodied_entry_carbon(
                         line.get("quantity", 0),

@@ -80,6 +80,9 @@ async def test_demo_seed_gives_overrun_alternative_and_traceable_e1(pg_session) 
     for item in report.audit["E1-6_scope1"]:
         assert item["source_id"] and item["data_quality"] in {"measured", "calculated", "estimated"}
 
+    widget = await svc.dashboard_widget(pids[0])
+    assert widget["budget"]["over_budget"] is True and widget["system"] == "din276"
+
     # A second run is a no-op for the life-cycle demo.
     again = await seed_carbon_demo(pg_session, pids)
     assert again["lifecycle_epds"] == 0
@@ -101,5 +104,15 @@ async def test_ilcd_import_stage_lines_and_checks(pg_session) -> None:
 
     pg_session.add(EmbodiedCarbonEntry(inventory_id=inv.id, description="no factor", quantity=1, unit="m3"))
     await pg_session.flush()
+    pos = uuid.uuid4()
+    pg_session.add(
+        EmbodiedCarbonEntry(
+            inventory_id=inv.id, element_ref=f"boq:{pos}", quantity=10, unit="m3", factor_value_used=100, carbon_kg=1000
+        )
+    )
+    await pg_session.flush()
+    bid = await svc.bid_carbon([{"ref": "1", "position_id": pos, "quantity": Decimal("4"), "unit": "m3"}])
+    assert bid["lines"][0]["status"] == "ok" and Decimal(bid["total_kg"]) == Decimal("400")
+
     checks = await svc.checks(pids[0])
     assert len(checks["no_factor"]) == 1

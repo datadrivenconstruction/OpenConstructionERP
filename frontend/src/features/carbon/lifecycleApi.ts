@@ -122,3 +122,25 @@ export function exportCompanyReport(report: CompanyReport, fmt: ExportFormat): P
     `${report.template}_${report.reporting_year}.${ext}`,
   );
 }
+
+export interface BidCarbonLine {
+  ref: string;
+  carbon_kg: string | null;
+  status: 'ok' | 'no_factor' | 'unit_mismatch';
+}
+
+export function getBidCarbon(
+  lines: Array<{ ref: string; position_id?: string | null; quantity: number; unit?: string }>,
+): Promise<{ lines: BidCarbonLine[]; total_kg: string }> {
+  return apiPost('/v1/carbon/bid-carbon', { lines });
+}
+
+export interface CarbonWidget {
+  budget: CarbonBudget;
+  system: ClassificationSystem;
+  top_hotspot: Hotspot | null;
+}
+
+export function getCarbonWidget(projectId: string): Promise<CarbonWidget> {
+  return apiGet<CarbonWidget>(`/v1/carbon/projects/${projectId}/widget`);
+}
