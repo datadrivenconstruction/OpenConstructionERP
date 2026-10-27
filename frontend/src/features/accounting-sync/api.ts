@@ -25,7 +25,7 @@ export type ExportKind = 'datev_postings' | 'datev_master' | 'journal_csv' | 'jo
 export type LogStatus = 'success' | 'failed' | 'skipped';
 export type LogAction = 'push' | 'pull' | 'export' | 'connect';
 export type DocumentRecordType = 'ar_invoice' | 'ap_bill';
-export type DocumentSource = 'invoice' | 'interim_payment' | 'subcontractor' | 'procurement' | 'guarantee_fee';
+export type DocumentSource = 'invoice' | 'interim_payment' | 'subcontractor' | 'procurement' | 'guarantee_fee' | 'payroll';
 export type TaxDirection = 'sales' | 'purchase';
 
 export const RULE_IDS = [

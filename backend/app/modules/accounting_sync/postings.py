@@ -69,7 +69,7 @@ class SyncDocument:
     contact: SyncContact
     currency: str
     lines: list[SyncLine]
-    source: str = "invoice"  # invoice | interim_payment | subcontractor | procurement | guarantee_fee
+    source: str = "invoice"  # invoice | interim_payment | subcontractor | procurement | guarantee_fee | payroll
     project_id: str = ""
     project_code: str = ""
     project_name: str = ""
@@ -155,6 +155,8 @@ def build_journal(doc: SyncDocument, mapping: Mapping, entry_no: int = 1) -> lis
     """
     lines: list[JournalLine] = []
     control_cat = "ar_control" if doc.is_sales else "ap_control"
+    if doc.source == "payroll":
+        control_cat = "payroll_liability"
     tax_cat = "output_tax" if doc.is_sales else "input_tax"
     common = {
         "entry_no": entry_no,
