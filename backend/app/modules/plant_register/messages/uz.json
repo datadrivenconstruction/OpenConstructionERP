@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Havo qayta ishlash qurilmasi",
+        "battery_storage": "Akkumulyator saqlagich",
+        "bms_controls": "Binoni avtomatlashtirish",
+        "boiler": "Qozon",
+        "chiller": "Sovutish mashinasi",
+        "cooling_tower": "Sovutish minorasi",
+        "crane_permanent": "Doimiy kran",
+        "distribution_transformer": "Taqsimlovchi transformator",
+        "escalator": "Eskalator",
+        "facade_unit": "Fasad elementlari",
+        "generator": "Generator agregati",
+        "heat_pump": "Issiqlik nasosi",
+        "it_core_network": "AT asosiy tarmog'i",
+        "kitchen_equipment": "Oshxona jihozlari",
+        "lift": "Lift",
+        "lv_switchboard": "Past kuchlanishli taqsimlash shiti",
+        "medical_equipment": "Tibbiy jihozlar",
+        "mv_switchgear": "O'rta kuchlanishli kommutatsiya jihozi",
+        "power_transformer": "Quvvat transformatori",
+        "process_unit": "Texnologik qurilma",
+        "sprinkler_pump": "Sprinkler nasos agregati",
+        "structural_steel_package": "Metall konstruksiyalar to'plami",
+        "ups": "Uzluksiz quvvat manbai"
+      },
+      "it_service": {
+        "access_control": "Kirishni nazorat qilish",
+        "cctv": "Videokuzatuv",
+        "cde_access": "CDE kirishi",
+        "drone_survey": "Dron orqali tekshiruv",
+        "site_network": "Qurilish maydoni tarmog'i",
+        "telecom": "Telekommunikatsiya",
+        "time_recording": "Ish vaqtini qayd etish"
+      },
+      "maintenance": {
+        "condition_based": "Holatga qarab texnik xizmat",
+        "preventive_interval": "Davriy profilaktik texnik xizmat",
+        "run_to_failure": "Ishdan chiqqunicha ishlatish",
+        "vendor_service_contract": "Yetkazib beruvchi xizmat shartnomasi"
+      },
+      "name": "Neytral jihozlar katalogi",
+      "party": {
+        "contractor": "Pudratchi",
+        "installer": "O'rnatuvchi",
+        "operator": "Ekspluatatsiya qiluvchi",
+        "owner": "Buyurtmachi",
+        "supplier": "Yetkazib beruvchi",
+        "user": "Foydalanuvchi"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Ikkita to'liq mustaqil tizim",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Ikkita mustaqil tizim va bitta zaxira birlik",
+        "n": "N",
+        "n_desc": "Faqat kerakli quvvat, zaxira birlik yo'q",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Kerakli quvvatdan tashqari bitta zaxira birlik",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Kerakli quvvatdan tashqari ikkita zaxira birlik"
+      },
+      "route": {
+        "contractor_furnished_installed": "Pudratchi ta'minlaydi, pudratchi o'rnatadi",
+        "owner_furnished_contractor_installed": "Buyurtmachi ta'minlaydi, pudratchi o'rnatadi",
+        "owner_furnished_owner_installed": "Buyurtmachi ta'minlaydi, buyurtmachi o'rnatadi",
+        "owner_procured_novated": "Buyurtmachi xarid qiladi, buyurtma pudratchiga o'tkaziladi"
+      },
+      "site_plant": {
+        "concrete_plant": "Beton zavodi",
+        "hoist": "Yuk ko'targich",
+        "mobile_crane_pad": "Mobil kran uchun maydoncha",
+        "site_office": "Qurilish maydoni ofisi",
+        "storage": "Omborxona",
+        "temporary_power": "Vaqtinchalik elektr ta'minoti",
+        "temporary_water": "Vaqtinchalik suv ta'minoti",
+        "tower_crane": "Minorali kran",
+        "welfare": "Ijtimoiy xizmat binolari",
+        "wheel_wash": "G'ildirak yuvish joyi"
+      },
+      "source": {
+        "catalogue_default": "Katalog bo'yicha standart qiymat",
+        "expert_estimate": "Ekspert bahosi",
+        "framework_agreement": "Ramka shartnomasi",
+        "historic_order": "Oldingi buyurtma",
+        "market_sounding": "Bozorni o'rganish",
+        "none": "Yetkazib berish muddatisiz",
+        "supplier_catalogue": "Yetkazib beruvchi katalogi",
+        "supplier_quote": "Yetkazib beruvchi taklifi"
+      },
+      "spare": {
+        "commissioning_spares": "Ishga tushirish ehtiyot qismlari",
+        "operating_consumables": "Ekspluatatsiya sarf materiallari",
+        "special_tools": "Maxsus asboblar",
+        "strategic_spares": "Strategik ehtiyot qismlar"
+      },
+      "step": {
+        "accept": "Qabul qilish",
+        "commission": "Ishga tushirish",
+        "connect": "Ulash",
+        "deliver_to_site": "Qurilish maydoniga yetkazish",
+        "document": "Hujjatlashtirish",
+        "offload": "Tushirish",
+        "set_in_place": "Joyiga o'rnatish",
+        "supply": "Ta'minlash",
+        "test": "Sinov",
+        "train": "O'qitish"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Asosiy yetkazib berish muddati bo'yicha taklif talab etiladi.",
+      "catalogue_entry_required": "Yetkazib beruvchi katalogi bo'yicha yetkazib berish muddatiga katalog yozuvi kerak.",
+      "catalogue_lead_mismatch": "Yetkazib berish muddati ko'rsatilgan yetkazib beruvchi katalog yozuviga mos kelmaydi.",
+      "catalogue_retired": "Bu katalog eskirgan va uni biriktirib bo'lmaydi.",
+      "classification_frozen": "Xarid yo'nalishi belgilangandan keyin muhim va uzoq muddatli yetkazib beriladigan jihozlar tasnifini o'zgartirib bo'lmaydi.",
+      "commitment_currency_mismatch": "Band qilish to'lovi va chiqarilgan majburiyat turli valyutalarda.",
+      "commitment_for_other_item": "Bog'langan majburiyat bandi boshqa jihozga tegishli.",
+      "commitment_not_found": "Bog'langan majburiyat bandi bu loyihaga tegishli emas.",
+      "commitment_not_released": "Bog'langan majburiyat bandi hali chiqarilmagan.",
+      "commitment_release_below_fee": "Chiqarilgan summa band qilish to'lovidan kam.",
+      "commitment_release_failed": "Majburiyat chiqarilishini o'qib bo'lmadi; qayta urinib ko'ring yoki administratorga murojaat qiling.",
+      "commitment_release_unavailable": "Majburiyat chiqarilishini o'qib bo'lmaydi, shuning uchun band qilish to'lovini bog'lab bo'lmaydi.",
+      "concurrent_basis_change": "Boshqa foydalanuvchi asosiy taklifni bir vaqtda o'zgartirdi; sahifani yangilab, qayta urinib ko'ring.",
+      "cost_needs_currency": "Variant narxi valyutani ko'rsatishi kerak.",
+      "critical_override_needs_reason": "Muhimlik darajasini o'zgartirish uchun sabab ko'rsatilishi kerak.",
+      "critical_without_decision": "Muhim jihoz uchun yetkazib berish yo'nalishi belgilanishidan oldin tasdiqlangan qaror hujjati kerak.",
+      "critical_without_market_evidence": "Muhim jihoz uchun bozordan olingan yetkazib berish muddati kerak, katalog standarti yoki taxmin emas.",
+      "critical_without_strategic_spares": "Muhim jihoz uchun strategik ehtiyot qism kerak yoki nima uchun kerak emasligi ko'rsatilishi lozim.",
+      "decision_paper_needs_two_options": "Qaror hujjatida kamida ikkita variant bo'lishi kerak, jihoz yagona manbadan olinadigan bo'lsa bundan mustasno.",
+      "decision_route_refused": "Tasdiqlash yo'nalishi bu bosqichni rad etdi.",
+      "delivery_limit_gap": "Har bir yetkazib berish bosqichi uchun mas'ul tomon belgilanmagan.",
+      "edit_permission_required": "Sizda jihozlar reestrini o'zgartirish huquqi yo'q.",
+      "enquiry_date_in_future": "So'rov sanasi kelajakda bo'lishi mumkin emas.",
+      "fee_needs_currency": "Band qilish to'lovi valyutani ko'rsatishi kerak.",
+      "fee_negative": "Band qilish to'lovi manfiy bo'lishi mumkin emas.",
+      "handover_needs_commissioned": "Faqat ishga tushirilgan jihoz topshirilishi mumkin.",
+      "handover_needs_confirmation": "Topshirish tasdiqlanishi kerak.",
+      "handover_needs_service_asset": "Aktiv uchun xizmat shartnomasini ko'rsating yoki jihoz nima uchun shartnomasiz topshirilayotganini bayon qiling.",
+      "invalid_transition": "Joriy holatdan bu holat o'zgarishi mumkin emas.",
+      "it_cde_not_linked": "CDE kirishi uchun bog'langan CDE konteyner kerak.",
+      "it_service_not_found": "AT xizmati topilmadi.",
+      "it_service_range_invalid": "Xizmat boshlanishidan oldin tugaydi.",
+      "it_service_retired": "Eskirgan AT xizmatini o'zgartirib bo'lmaydi.",
+      "item_already_ordered": "Jihoz allaqachon buyurtma qilingan.",
+      "item_closed": "Jihoz topshirilgan yoki bekor qilingan.",
+      "item_code_taken": "Loyihada bu kodli jihoz allaqachon mavjud.",
+      "item_not_found": "Jihoz topilmadi.",
+      "item_required": "Jihozni tanlang.",
+      "laydown_zone_not_found": "Bu loyihada bunday joylashtirish zonasi yo'q.",
+      "lead_time_owned_by_plant_item": "Bu taqdimotning yetkazib berish muddati o'z jihozida saqlanadi.",
+      "lead_time_stale": "Asosiy yetkazib berish muddati bo'yicha taklif ushbu toifa uchun ruxsat etilgan muddatdan eskiroq.",
+      "lead_time_without_enquiry_date": "Yetkazib berish muddati so'rov sanasini talab qiladi.",
+      "lead_weeks_range_invalid": "Yetkazib berish muddatining minimali maksimaldan oshmasligi kerak.",
+      "limit_needs_party": "Yetkazib berish bosqichi uchun tomon yoki paket kerak.",
+      "link_not_found": "Bog'langan yozuv bu loyihaga tegishli emas.",
+      "long_lead_override_needs_reason": "Uzoq muddatli yetkazib beriladigan jihoz tasnifini o'zgartirish uchun sabab kerak.",
+      "manage_required": "Buni faqat jihozlarni boshqarish huquqiga ega shaxs o'zgartirishi mumkin.",
+      "neutral_spec_names_vendor": "Texnik talab neytral, lekin unda yetkazib beruvchi nomi ko'rsatilgan.",
+      "no_decision_route": "Loyihada qaror hujjatlari uchun tasdiqlash yo'nalishi yo'q.",
+      "not_equipment_owner": "Jihozlar reestrini faqat menejer yoki jihozlar maydoni egasi o'zgartirishi mumkin.",
+      "null_not_allowed": "Bu maydon bo'sh bo'lishi mumkin emas.",
+      "package_not_found": "Shartnoma paketi loyihaning paketlar rejasiga kiritilmagan.",
+      "package_plan_failed": "Yetkazib berish modelini o'qib bo'lmadi; qayta urinib ko'ring yoki administratorga murojaat qiling.",
+      "package_plan_unavailable": "Loyihaning paketlar rejasini o'qib bo'lmaydi, shuning uchun yo'nalishni tekshirib bo'lmaydi.",
+      "paper_needs_rationale": "Hujjatda asoslash bo'lishi kerak.",
+      "paper_needs_recommendation": "Hujjatda tavsiya bo'lishi kerak.",
+      "paper_not_draft": "Faqat qoralama holatdagi hujjatni o'zgartirish yoki yuborish mumkin.",
+      "paper_not_found": "Qaror hujjati topilmadi.",
+      "paper_not_submitted": "Faqat yuborilgan hujjatni qaytarib olish mumkin.",
+      "paper_open": "Jihozda allaqachon ochiq qaror hujjati bor.",
+      "paper_option_codes_invalid": "Har bir variantning noyob kodi bo'lishi kerak.",
+      "paper_recommendation_unknown": "Tavsiya variantlardan birini ko'rsatishi kerak.",
+      "paper_scores_invalid": "Ballar va og'irliklar o'nlik sonlar bo'lishi kerak.",
+      "paper_submitter_is_approver": "Hujjatni yuboruvchi shaxs o'sha yo'nalishning tasdiqlovchisi bo'la olmaydi.",
+      "position_date_invalid": "Bu sana emas.",
+      "position_incomplete": "Pozitsiya uchun turi va qurilish maydoni rejasidagi nuqtasi kerak.",
+      "position_not_found": "Bu loyihada bunday jihoz pozitsiyasi yo'q.",
+      "position_number_invalid": "Bu raqamni saqlab bo'lmaydi: o'nlik kasr va kattalikni tekshiring.",
+      "position_range_invalid": "Pozitsiya boshlanishidan oldin tugaydi.",
+      "position_text_invalid": "Matn bo'sh yoki juda uzun.",
+      "quantity_not_positive": "Miqdor noldan katta bo'lishi kerak.",
+      "quote_not_found": "Yetkazib berish muddati bo'yicha taklif topilmadi.",
+      "response_before_enquiry": "Javob sanasi so'rov sanasidan oldin bo'lishi mumkin emas.",
+      "route_frozen": "Jihoz buyurtma qilingandan keyin yetkazib berish yo'nalishini o'zgartirib bo'lmaydi.",
+      "route_inconsistent_with_package_plan": "Xarid yo'nalishi paketlar rejasiga mos kelmaydi.",
+      "route_missing": "Xarid yo'nalishi belgilanmagan.",
+      "slot_closed": "Band qilish yopilgan.",
+      "slot_exists": "Jihozda allaqachon ochiq sig'im bron qilish bor.",
+      "slot_fee_needs_commitment": "Band qilish to'lovi faqat majburiyat chiqarilishi orqali mablag' bilan bog'lanadi; majburiyat bandini bog'lang.",
+      "slot_not_found": "Sig'im bron qilish topilmadi.",
+      "slot_range_invalid": "Vaqt oralig'i boshlanishidan oldin tugaydi.",
+      "slot_terms_incomplete": "Ushlab turilgan bron uchun to'lov, qaytarish shartlari va konvertatsiya muddati kerak.",
+      "spare_closed": "Ehtiyot qism qatori yopilgan.",
+      "spare_not_deletable": "Faqat hali talab qilinadigan ehtiyot qism qatorini o'chirish mumkin.",
+      "spare_not_found": "Ehtiyot qism qatori topilmadi.",
+      "spares_not_handed_over": "Avval har bir ehtiyot qism topshirilishi yoki undan voz kechilishi kerak.",
+      "specification_frozen": "Xarid yo'nalishi belgilangandan keyin texnik talabni o'zgartirib bo'lmaydi.",
+      "stage_not_found": "Bu loyihada bunday kengaytirish bosqichi yo'q.",
+      "stage_unavailable": "Kengaytirish bosqichlarini o'qib bo'lmaydi, shuning uchun pozitsiyani bosqichga joylab bo'lmaydi.",
+      "state_read_from_source": "Bu holat buyurtma, buyurtmachi ta'minlagan jihoz yoki ishga tushirishdan olinadi, qo'lda belgilanmaydi.",
+      "transition_blocked": "Holat o'zgarishi bir nechta qoida bilan to'xtatilgan.",
+      "two_parties_on_one_step": "Yetkazib berish bosqichida faqat bitta mas'ul tomon bo'lishi mumkin.",
+      "unknown_catalogue": "Noma'lum jihozlar katalogi.",
+      "unknown_component_class": "Noma'lum komponent toifasi.",
+      "unknown_fee_refundable": "Qaytarish shartlari yo'q, qisman yoki to'liq bo'lishi kerak.",
+      "unknown_it_service_kind": "Noma'lum AT xizmati.",
+      "unknown_lead_basis": "Noma'lum yetkazib berish muddati asosi.",
+      "unknown_lead_time_source": "Noma'lum yetkazib berish muddati manbai.",
+      "unknown_maintenance_strategy": "Noma'lum texnik xizmat strategiyasi.",
+      "unknown_party": "Noma'lum tomon.",
+      "unknown_redundancy_scheme": "Noma'lum zaxiralash sxemasi.",
+      "unknown_route": "Noma'lum xarid yo'nalishi.",
+      "unknown_site_plant_kind": "Bu turdagi qurilish maydoni jihozi loyihaning jihozlar katalogida yo'q.",
+      "unknown_spare_category": "Noma'lum ehtiyot qism toifasi.",
+      "unknown_step": "Noma'lum yetkazib berish bosqichi.",
+      "unknown_vendor_bound_reason": "Sabab standartlashtirish, mavjud obyekt, kafolat yoki yagona manba bo'lishi kerak.",
+      "unknown_vendor_policy": "Yetkazib beruvchi siyosati neytral yoki bog'langan bo'lishi kerak.",
+      "vendor_bound_needs_reason": "Yetkazib beruvchiga bog'langan texnik talab uchun sabab kerak.",
+      "waiver_needs_reason": "Ehtiyot qismdan voz kechish uchun sabab kerak."
+    },
+    "evidence": {
+      "critical_route_set": "Har bir muhim jihozning yo'nalishi tasdiqlangan qaror hujjati bilan belgilangan",
+      "frame_document_attached": "Jihozlar ramka hujjati CDE ga biriktirilgan",
+      "frame_document_missing": "Loyihada hali jihozlar ramka hujjati yo'q, shuning uchun biriktirilganini tekshirib bo'lmaydi",
+      "host_unresolved": "Boshqaruv modeli jihozlar reestri qaysi maydon va bosqichga hisobot berishini ko'rsatmaydi",
+      "long_lead_secured": "Har bir uzoq muddatli jihoz uchun yangi asosiy taklif bor va u buyurtma qilingan yoki buyurtma muddati ichida",
+      "no_area_hosts_plant": "Bosqichlar modelida jihoz joylashgan maydon ko'rsatilmagan, shuning uchun jihozlar reestri bosqichga hisobot bera olmaydi",
+      "no_error_findings": "Jihozlar reestrida xato darajasidagi topilmalar yo'q",
+      "no_phase_enables_construction_start": "Bosqichlar modelida qurilish boshlanishini ta'minlaydigan bosqich ko'rsatilmagan, shuning uchun jihozlar reestrining hisobot bosqichi yo'q"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Toifa",
+      "col_class": "Sinf",
+      "col_code": "Jihoz",
+      "col_cost": "Narx",
+      "col_critical": "Muhim",
+      "col_description": "Tavsif",
+      "col_enquiry_date": "So'rov sanasi",
+      "col_float": "Zaxira (kun)",
+      "col_from": "Dan",
+      "col_latest_order": "Oxirgi buyurtma",
+      "col_lead_source": "Muddat manbai",
+      "col_lead_weeks": "Muddat (hafta)",
+      "col_need_date": "Kerak bo'lgan sana",
+      "col_option": "Variant",
+      "col_quantity": "Miqdor",
+      "col_recommended": "Tavsiya etilgan",
+      "col_route": "Xarid yo'nalishi",
+      "col_score": "Og'irlikli ball",
+      "col_section": "Bo'lim",
+      "col_state": "Holat",
+      "col_supply_by": "Ta'minlovchi",
+      "col_title": "Sarlavha",
+      "col_to": "Gacha",
+      "col_unit": "Birlik",
+      "critical_count": "Muhim jihozlar",
+      "empty": "Yozuvlar yo'q.",
+      "frame_title": "Jihozlar ramkasi xulosasi",
+      "item_count": "Jihozlar",
+      "limits_title": "Yetkazib berish chegaralari matritsasi",
+      "long_lead_count": "Uzoq muddatli jihozlar",
+      "overdue_count": "Muddati o'tgan buyurtmalar",
+      "paper_title": "Qaror hujjati",
+      "project": "Loyiha",
+      "question": "Savol",
+      "rationale": "Asoslash",
+      "register_title": "Uzoq muddatli jihozlar reestri",
+      "section_it": "AT xizmati",
+      "section_long_lead": "Uzoq muddatli jihoz",
+      "section_site_plant": "Qurilish maydoni jihozi",
+      "spares_title": "Ehtiyot qismlar ro'yxati",
+      "yes": "ha"
+    },
+    "paper_state": {
+      "approved": "Tasdiqlangan",
+      "draft": "Qoralama",
+      "rejected": "Rad etilgan",
+      "submitted": "Yuborilgan"
+    },
+    "reasons": {
+      "currency": "band qilish to'lovida valyuta ko'rsatilmagan",
+      "installer_mismatch": "buyurtmachi ta'minlagan jihozda boshqa o'rnatuvchi paketi ko'rsatilgan",
+      "owner_furnished_item_required": "buyurtmachi ta'minlaydigan yo'nalish uchun buyurtmachi ta'minlagan jihoz kerak",
+      "owner_installs": "buyurtmachi o'rnatadi, shuning uchun o'rnatuvchi sifatida hech qanday shartnoma paketi ko'rsatilmasligi kerak",
+      "package_does_not_supply": "shartnoma paketi jihoz yetkazib bermaydi",
+      "package_not_in_plan": "shartnoma paketi paketlar rejasiga kiritilmagan",
+      "package_required": "bu yo'nalish uchun shartnoma paketi kerak",
+      "single_package_form": "yetkazib berish shaklida bitta shartnoma paketi bor, jihoz esa boshqa paketda"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "{item} muhim jihozi uchun tasdiqlangan qaror hujjati yo'q.",
+        "suggestion": "Variantlar hujjatini tayyorlab, tasdiqlashga yuboring."
+      },
+      "critical_has_market_evidence": {
+        "fail": "{item} muhim jihozi katalog standarti yoki taxminga tayanadi.",
+        "suggestion": "Yetkazib beruvchi taklifi, ramka shartnoma yoki oldingi buyurtmani oling."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "{item} muhim jihozi uchun strategik ehtiyot qism yo'q.",
+        "suggestion": "Strategik ehtiyot qism qo'shing yoki kerak emasligini bayon qiling."
+      },
+      "delivery_limits_complete": {
+        "fail": "{item} uchun yetkazib berish chegaralarida quyidagilar uchun tomon yo'q: {steps}.",
+        "suggestion": "Har bir yetkazib berish bosqichiga tomon belgilang."
+      },
+      "it_cde_linked": {
+        "fail": "Ijro darvozasidan oldin CDE kirishi kerak, lekin CDE konteyner bog'lanmagan.",
+        "suggestion": "Tomonlar ishlaydigan CDE konteynerni bog'lang."
+      },
+      "lead_time_fresh": {
+        "fail": "{item} ning asosiy yetkazib berish muddati eskirgan.",
+        "suggestion": "Yetkazib beruvchidan qayta so'rang va yangi javobni yozib qo'ying."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Uzoq muddatli jihoz {item} uchun so'rov sanasi bor yetkazib berish muddati taklifi yo'q.",
+        "suggestion": "Sanali taklifni qayd eting: qachon so'ralgan va kim javob bergan."
+      },
+      "order_not_overdue": {
+        "fail": "{item} ni {date} gacha buyurtma qilish kerak.",
+        "suggestion": "Hozir buyurtma qiling yoki jadval mas'uli bilan kerakli sanani ko'chiring."
+      },
+      "redundancy_quantity": {
+        "fail": "{item} miqdori uning zaxiralash sxemasiga mos emas.",
+        "suggestion": "Miqdorni sxema bo'yicha tekshiring (N+1 uchun kamida ikkita birlik kerak)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "{item} ning xarid yo'nalishi paketlar rejasiga mos emas: {reason}.",
+        "suggestion": "Yo'nalishni shartnoma paketlari va buyurtmachi ta'minlagan jihozlarga moslang."
+      },
+      "single_basis_quote": {
+        "fail": "{item} uchun aniq bitta asosiy taklif yo'q.",
+        "suggestion": "Bitta taklifni asosiy deb belgilang."
+      },
+      "slot_after_order_date": {
+        "fail": "{item} ning sig'im bron qilishi oxirgi buyurtma sanasidan o'tib ketadi.",
+        "suggestion": "Buyurtmani oldinroq imzolang yoki oldinroq slot bo'yicha kelishing."
+      },
+      "slot_not_expired": {
+        "fail": "{item} ning sig'im bron qilishi konvertatsiya muddatidan o'tib ketdi.",
+        "suggestion": "Uni buyurtmaga aylantiring yoki bo'shating."
+      },
+      "slot_terms_complete": {
+        "fail": "{item} ning sig'im bron qilishi shartlari to'liq emas.",
+        "suggestion": "To'lov, qaytarish shartlari, konvertatsiya muddati va majburiyat bog'lanishini qayd eting."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "{item} ning yetkazib beruvchi siyosati nomuvofiq.",
+        "suggestion": "Yetkazib beruvchiga bog'langan talabga sabab kerak; neytral talabda yetkazib beruvchi nomi bo'lmaydi."
+      }
+    },
+    "spare_state": {
+      "delivered": "Yetkazilgan",
+      "handed_over": "Topshirilgan",
+      "required": "Talab qilinadi",
+      "specified": "Belgilangan",
+      "waived": "Voz kechilgan"
+    },
+    "state": {
+      "cancelled": "Bekor qilingan",
+      "commissioned": "Ishga tushirilgan",
+      "delivered": "Yetkazilgan",
+      "enquired": "So'ralgan",
+      "handed_over": "Topshirilgan",
+      "identified": "Aniqlangan",
+      "installed": "O'rnatilgan",
+      "manufactured": "Ishlab chiqarilgan",
+      "ordered": "Buyurtma qilingan",
+      "route_set": "Yo'nalish belgilangan",
+      "specified": "Belgilangan"
+    }
+  }
+}

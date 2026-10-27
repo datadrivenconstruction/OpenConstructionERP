@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Luftbehandlingsaggregat",
+        "battery_storage": "Batterilager",
+        "bms_controls": "Bygningsautomation",
+        "boiler": "Kedel",
+        "chiller": "Kølemaskine",
+        "cooling_tower": "Køletårn",
+        "crane_permanent": "Fast kran",
+        "distribution_transformer": "Fordelingstransformer",
+        "escalator": "Rulletrappe",
+        "facade_unit": "Facadeelementer",
+        "generator": "Generatoranlæg",
+        "heat_pump": "Varmepumpe",
+        "it_core_network": "IT-kernenetværk",
+        "kitchen_equipment": "Køkkenudstyr",
+        "lift": "Elevator",
+        "lv_switchboard": "Lavspændingstavle",
+        "medical_equipment": "Medicinsk udstyr",
+        "mv_switchgear": "Mellemspændingsanlæg",
+        "power_transformer": "Effekttransformer",
+        "process_unit": "Procesenhed",
+        "sprinkler_pump": "Sprinklerpumpeanlæg",
+        "structural_steel_package": "Stålkonstruktionspakke",
+        "ups": "Nødstrømsanlæg (UPS)"
+      },
+      "it_service": {
+        "access_control": "Adgangskontrol",
+        "cctv": "Videoovervågning",
+        "cde_access": "CDE-adgang",
+        "drone_survey": "Droneopmåling",
+        "site_network": "Byggepladsnetværk",
+        "telecom": "Telekommunikation",
+        "time_recording": "Tidsregistrering"
+      },
+      "maintenance": {
+        "condition_based": "Tilstandsbaseret",
+        "preventive_interval": "Forebyggende, efter interval",
+        "run_to_failure": "Kørsel til svigt",
+        "vendor_service_contract": "Leverandørs serviceaftale"
+      },
+      "name": "Neutral anlægskatalog",
+      "party": {
+        "contractor": "Entreprenør",
+        "installer": "Installatør",
+        "operator": "Driftsansvarlig",
+        "owner": "Bygherre",
+        "supplier": "Leverandør",
+        "user": "Bruger"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "To fuldt uafhængige systemer",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "To uafhængige systemer plus én reserveenhed",
+        "n": "N",
+        "n_desc": "Præcis den nødvendige kapacitet, ingen reserveenhed",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Én reserveenhed ud over den nødvendige kapacitet",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "To reserveenheder ud over den nødvendige kapacitet"
+      },
+      "route": {
+        "contractor_furnished_installed": "Leveret og installeret af entreprenør",
+        "owner_furnished_contractor_installed": "Leveret af bygherre, installeret af entreprenør",
+        "owner_furnished_owner_installed": "Leveret og installeret af bygherre",
+        "owner_procured_novated": "Indkøbt af bygherre, ordre overdraget til entreprenør"
+      },
+      "site_plant": {
+        "concrete_plant": "Betonanlæg",
+        "hoist": "Lift til materialer",
+        "mobile_crane_pad": "Fundament til mobilkran",
+        "site_office": "Byggeplads-kontor",
+        "storage": "Oplag",
+        "temporary_power": "Midlertidig strøm",
+        "temporary_water": "Midlertidigt vand",
+        "tower_crane": "Tårnkran",
+        "welfare": "Sociale faciliteter",
+        "wheel_wash": "Hjulvask"
+      },
+      "source": {
+        "catalogue_default": "Katalogstandard",
+        "expert_estimate": "Ekspertvurdering",
+        "framework_agreement": "Rammeaftale",
+        "historic_order": "Historisk ordre",
+        "market_sounding": "Markedsundersøgelse",
+        "none": "Ingen leveringstid",
+        "supplier_catalogue": "Leverandørkatalog",
+        "supplier_quote": "Leverandørtilbud"
+      },
+      "spare": {
+        "commissioning_spares": "Reservedele til idriftsættelse",
+        "operating_consumables": "Driftsforbrugsvarer",
+        "special_tools": "Specialværktøj",
+        "strategic_spares": "Strategiske reservedele"
+      },
+      "step": {
+        "accept": "Godkendelse",
+        "commission": "Idriftsættelse",
+        "connect": "Tilslutning",
+        "deliver_to_site": "Levering til byggeplads",
+        "document": "Dokumentation",
+        "offload": "Aflæsning",
+        "set_in_place": "Placering",
+        "supply": "Levering",
+        "test": "Test",
+        "train": "Oplæring"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Der kræves et grundlæggende leveringstidstilbud.",
+      "catalogue_entry_required": "En leveringstid fra leverandørkataloget kræver katalogposten.",
+      "catalogue_lead_mismatch": "Leveringstiden stemmer ikke overens med den leverandørkatalogpost, den henviser til.",
+      "catalogue_retired": "Dette katalog er udgået og kan ikke fastsættes.",
+      "classification_frozen": "Kritisk- og langtidsleveringsklassificeringen er låst, når indkøbsrute er fastsat.",
+      "commitment_currency_mismatch": "Reservationsgebyret og den frigivne forpligtelse er i forskellige valutaer.",
+      "commitment_for_other_item": "Den tilknyttede forpligtelsespost hører til en anden anlægspost.",
+      "commitment_not_found": "Den tilknyttede forpligtelsespost indgår ikke i dette projekt.",
+      "commitment_not_released": "Den tilknyttede forpligtelsespost er endnu ikke frigivet.",
+      "commitment_release_below_fee": "Det frigivne beløb er lavere end reservationsgebyret.",
+      "commitment_release_failed": "Forpligtelsesfrigivelsen kunne ikke læses; prøv igen eller kontakt administratoren.",
+      "commitment_release_unavailable": "Forpligtelsesfrigivelsen kan ikke læses, så et reservationsgebyr kan ikke bindes.",
+      "concurrent_basis_change": "En anden bruger ændrede grundtilbuddet samtidig; genindlæs og prøv igen.",
+      "cost_needs_currency": "En indstillings omkostning kræver en valuta.",
+      "critical_override_needs_reason": "Ændring af kritikalitet kræver en begrundelse.",
+      "critical_without_decision": "En kritisk post kræver et godkendt beslutningsnotat, før dens rute fastsættes.",
+      "critical_without_market_evidence": "En kritisk post kræver en leveringstid fra markedet, ikke en katalogstandard eller et skøn.",
+      "critical_without_strategic_spares": "En kritisk post kræver en strategisk reservedel eller en angivet begrundelse for, hvorfor ikke.",
+      "decision_paper_needs_two_options": "Et beslutningsnotat kræver mindst to muligheder, medmindre posten er enekilde.",
+      "decision_route_refused": "Godkendelsesforløbet afviste dette trin.",
+      "delivery_limit_gap": "Ikke alle leveringstrin har en ansvarlig part.",
+      "edit_permission_required": "Du har ikke tilladelse til at ændre anlægsregistret.",
+      "enquiry_date_in_future": "Forespørgselsdatoen kan ikke ligge i fremtiden.",
+      "fee_needs_currency": "Et reservationsgebyr kræver sin valuta.",
+      "fee_negative": "Reservationsgebyret kan ikke være negativt.",
+      "handover_needs_commissioned": "Kun en idriftsat post kan overdrages.",
+      "handover_needs_confirmation": "Overdragelsen skal bekræftes.",
+      "handover_needs_service_asset": "Angiv serviceaftalen for aktivet, eller angiv hvorfor posten overdrages uden en.",
+      "invalid_transition": "Denne statusændring er ikke mulig fra den nuværende status.",
+      "it_cde_not_linked": "CDE-adgang kræver en tilknyttet CDE-container.",
+      "it_service_not_found": "IT-tjenesten blev ikke fundet.",
+      "it_service_range_invalid": "Tjenesten slutter, før den begynder.",
+      "it_service_retired": "En udgået IT-tjeneste kan ikke ændres.",
+      "item_already_ordered": "Posten er allerede bestilt.",
+      "item_closed": "Posten er overdraget eller annulleret.",
+      "item_code_taken": "En post med denne kode findes allerede i projektet.",
+      "item_not_found": "Anlægspost ikke fundet.",
+      "item_required": "Vælg en post.",
+      "laydown_zone_not_found": "Denne oplagszone findes ikke i dette projekt.",
+      "lead_time_owned_by_plant_item": "Leveringstiden for denne indsendelse ligger på dens anlægspost.",
+      "lead_time_stale": "Grundtilbuddet om leveringstid er ældre, end klassen tillader.",
+      "lead_time_without_enquiry_date": "En leveringstid kræver datoen for forespørgslen.",
+      "lead_weeks_range_invalid": "Minimum for leveringstid må ikke overstige maksimum.",
+      "limit_needs_party": "Et leveringstrin kræver en part eller en pakke.",
+      "link_not_found": "Den tilknyttede post indgår ikke i dette projekt.",
+      "manage_required": "Kun en indehaver af tilladelsen til anlægsstyring må ændre dette.",
+      "long_lead_override_needs_reason": "Ændring af klassificeringen som langtidslevering kræver en begrundelse.",
+      "neutral_spec_names_vendor": "Specifikationen er leverandørneutral, men nævner en leverandør.",
+      "no_decision_route": "Projektet har ingen godkendelsesrute for beslutningsnotater.",
+      "not_equipment_owner": "Kun en leder eller ejeren af udstyrsområdet må ændre anlægsregistret.",
+      "null_not_allowed": "Dette felt må ikke være tomt.",
+      "package_not_found": "Entreprisepakken indgår ikke i dette projekts pakkeplan.",
+      "package_plan_failed": "Leveringsmodellen kunne ikke læses; prøv igen eller kontakt administratoren.",
+      "package_plan_unavailable": "Projektets pakkeplan kan ikke læses, så ruten kan ikke kontrolleres.",
+      "paper_needs_rationale": "Notatet kræver en begrundelse.",
+      "paper_needs_recommendation": "Notatet kræver en anbefaling.",
+      "paper_not_draft": "Kun et udkast til notat kan ændres eller indsendes.",
+      "paper_not_found": "Beslutningsnotat ikke fundet.",
+      "paper_not_submitted": "Kun et indsendt notat kan trækkes tilbage.",
+      "paper_open": "Posten har allerede et åbent beslutningsnotat.",
+      "paper_option_codes_invalid": "Hver mulighed kræver en unik kode.",
+      "paper_recommendation_unknown": "Anbefalingen skal pege på en af mulighederne.",
+      "paper_scores_invalid": "Scorer og vægte skal være decimaltal.",
+      "paper_submitter_is_approver": "Den person, der indsender notatet, kan ikke være godkender i dets forløb.",
+      "position_date_invalid": "Dette er ikke en dato.",
+      "position_incomplete": "En position kræver sin type og sit punkt på byggepladsplanen.",
+      "position_not_found": "Denne anlægsposition findes ikke i dette projekt.",
+      "position_number_invalid": "Dette tal kan ikke gemmes: kontroller decimalerne og størrelsen.",
+      "position_range_invalid": "Positionen slutter, før den begynder.",
+      "position_text_invalid": "Teksten er tom eller for lang.",
+      "quantity_not_positive": "Mængden skal være større end nul.",
+      "quote_not_found": "Tilbud om leveringstid ikke fundet.",
+      "response_before_enquiry": "Svardatoen kan ikke ligge før forespørgselsdatoen.",
+      "route_frozen": "Ruten kan ikke ændres, når posten er bestilt.",
+      "route_inconsistent_with_package_plan": "Indkøbsruten stemmer ikke overens med pakkeplanen.",
+      "route_missing": "Der er ingen indkøbsrute fastsat.",
+      "slot_closed": "Reservationen er lukket.",
+      "slot_exists": "Posten har allerede en åben kapacitetsreservation.",
+      "slot_fee_needs_commitment": "Et reservationsgebyr binder kun penge gennem en forpligtelsesfrigivelse; tilknyt forpligtelsesposten.",
+      "slot_not_found": "Kapacitetsreservation ikke fundet.",
+      "slot_range_invalid": "Tidsrummet slutter, før det begynder.",
+      "slot_terms_incomplete": "En reservation i venteposition kræver gebyr, refusionsvilkår og frist for konvertering.",
+      "spare_closed": "Reservedelslinjen er lukket.",
+      "spare_not_deletable": "Kun en reservedelslinje, der stadig er påkrævet, kan slettes.",
+      "spare_not_found": "Reservedelslinje ikke fundet.",
+      "spares_not_handed_over": "Alle reservedele skal først overdrages eller frafaldes.",
+      "specification_frozen": "Specifikationen er låst, når indkøbsruten er fastsat.",
+      "stage_not_found": "Denne udvidelsesetape findes ikke i dette projekt.",
+      "stage_unavailable": "Udvidelsesetaper kan ikke læses, så en position kan ikke placeres på en etape.",
+      "state_read_from_source": "Denne status læses fra bestillingen, bygherreleveret post eller idriftsættelsen og sættes ikke manuelt.",
+      "transition_blocked": "Statusændringen blokeres af flere regler.",
+      "two_parties_on_one_step": "Et leveringstrin kan kun have én part.",
+      "unknown_catalogue": "Ukendt anlægskatalog.",
+      "unknown_component_class": "Ukendt komponentklasse.",
+      "unknown_fee_refundable": "Refusionsvilkår skal være ingen, delvis eller fuld.",
+      "unknown_it_service_kind": "Ukendt IT-tjeneste.",
+      "unknown_lead_basis": "Ukendt grundlag for leveringstid.",
+      "unknown_lead_time_source": "Ukendt kilde til leveringstid.",
+      "unknown_maintenance_strategy": "Ukendt vedligeholdelsesstrategi.",
+      "unknown_party": "Ukendt part.",
+      "unknown_redundancy_scheme": "Ukendt redundansordning.",
+      "unknown_route": "Ukendt indkøbsrute.",
+      "unknown_site_plant_kind": "Denne type byggepladsanlæg findes ikke i projektets anlægskatalog.",
+      "unknown_spare_category": "Ukendt reservedelskategori.",
+      "unknown_step": "Ukendt leveringstrin.",
+      "unknown_vendor_bound_reason": "Begrundelsen skal være standardisering, eksisterende anlæg, garanti eller enekilde.",
+      "unknown_vendor_policy": "Leverandørpolitikken skal være neutral eller bundet.",
+      "vendor_bound_needs_reason": "En leverandørbunden specifikation kræver en begrundelse.",
+      "waiver_needs_reason": "Frafald af en reservedel kræver en begrundelse."
+    },
+    "evidence": {
+      "critical_route_set": "Hver kritisk post har sin rute fastsat med et godkendt beslutningsnotat",
+      "frame_document_attached": "Udstyrsrammedokument vedhæftet CDE",
+      "frame_document_missing": "Projektet har endnu ikke et udstyrsrammedokument, så vedhæftningen kan ikke kontrolleres",
+      "host_unresolved": "Styringsmodellen angiver ikke, hvilket område og hvilken gate anlægsregistret rapporterer til",
+      "long_lead_secured": "Hver langtidsleveringspost har et aktuelt grundtilbud og er bestilt eller inden for sin bestillingsdato",
+      "no_area_hosts_plant": "Fasemodellen angiver intet område, der huser anlæg, så anlægsregistret ikke kan rapportere til en gate",
+      "no_error_findings": "Ingen fund på fejlniveau i anlægsregistret",
+      "no_phase_enables_construction_start": "Fasemodellen angiver ingen fase, der giver adgang til byggestart, så anlægsregistret har ingen gate at rapportere til"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Kategori",
+      "col_class": "Klasse",
+      "col_code": "Post",
+      "col_cost": "Omkostning",
+      "col_critical": "Kritisk",
+      "col_description": "Beskrivelse",
+      "col_enquiry_date": "Forespurgt",
+      "col_float": "Svømmetid (dage)",
+      "col_from": "Fra",
+      "col_latest_order": "Seneste bestilling",
+      "col_lead_source": "Kilde til leveringstid",
+      "col_lead_weeks": "Leveringstid (uger)",
+      "col_need_date": "Behovsdato",
+      "col_option": "Mulighed",
+      "col_quantity": "Mængde",
+      "col_recommended": "Anbefalet",
+      "col_route": "Rute",
+      "col_score": "Vægtet score",
+      "col_section": "Afsnit",
+      "col_state": "Status",
+      "col_supply_by": "Leveret af",
+      "col_title": "Titel",
+      "col_to": "Til",
+      "col_unit": "Enhed",
+      "critical_count": "Kritiske poster",
+      "empty": "Ingen poster.",
+      "frame_title": "Oversigt over udstyrsramme",
+      "item_count": "Poster",
+      "limits_title": "Matrix for leveringsgrænser",
+      "long_lead_count": "Langtidsleveringsposter",
+      "overdue_count": "Forfaldne bestillinger",
+      "paper_title": "Beslutningsnotat",
+      "project": "Projekt",
+      "question": "Spørgsmål",
+      "rationale": "Begrundelse",
+      "register_title": "Register over langtidsleveringer",
+      "section_it": "IT-tjeneste",
+      "section_long_lead": "Langtidsleveringspost",
+      "section_site_plant": "Byggepladsanlæg",
+      "spares_title": "Liste over reservedele",
+      "yes": "ja"
+    },
+    "paper_state": {
+      "approved": "Godkendt",
+      "draft": "Udkast",
+      "rejected": "Afvist",
+      "submitted": "Indsendt"
+    },
+    "reasons": {
+      "currency": "reservationsgebyret har ingen valuta",
+      "installer_mismatch": "den bygherreleverede post angiver en anden installerende pakke",
+      "owner_furnished_item_required": "en bygherreleveret rute kræver sin bygherreleverede post",
+      "owner_installs": "bygherren installerer, så ingen entreprisepakke må angives som installatør",
+      "package_does_not_supply": "entreprisepakken leverer ikke anlæg",
+      "package_not_in_plan": "entreprisepakken indgår ikke i pakkeplanen",
+      "package_required": "denne rute kræver en entreprisepakke",
+      "single_package_form": "leveringsformen har én entreprisepakke, og posten hører til en anden"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kritisk post {item} har ikke et godkendt beslutningsnotat.",
+        "suggestion": "Udarbejd mulighedsnotatet og indsend det til godkendelse."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kritisk post {item} bygger på en katalogstandard eller et skøn.",
+        "suggestion": "Indhent et leverandørtilbud, en rammeaftale eller en historisk ordre."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kritisk post {item} har ingen strategisk reservedel.",
+        "suggestion": "Tilføj en strategisk reservedel, eller angiv hvorfor ingen er nødvendig."
+      },
+      "delivery_limits_complete": {
+        "fail": "Leveringsgrænserne for {item} mangler en part for: {steps}.",
+        "suggestion": "Tildel en part til hvert leveringstrin."
+      },
+      "it_cde_linked": {
+        "fail": "CDE-adgang er påkrævet, før udførelsesgaten har en CDE-container.",
+        "suggestion": "Tilknyt den CDE-container, parterne skal arbejde i."
+      },
+      "lead_time_fresh": {
+        "fail": "Grundlaget for leveringstiden for {item} er forældet.",
+        "suggestion": "Spørg leverandøren igen, og registrer det nye svar."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Langtidsleveringspost {item} har ikke et leveringstidstilbud med en forespørgselsdato.",
+        "suggestion": "Registrer et dateret tilbud: hvornår du spurgte, og hvem der svarede."
+      },
+      "order_not_overdue": {
+        "fail": "{item} skal bestilles senest {date}.",
+        "suggestion": "Bestil nu, eller flyt behovsdatoen i samråd med tidsplanansvarlig."
+      },
+      "redundancy_quantity": {
+        "fail": "Mængden af {item} passer ikke til dens redundansordning.",
+        "suggestion": "Kontroller mængden mod ordningen (N+1 kræver mindst to enheder)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Indkøbsruten for {item} stemmer ikke overens med pakkeplanen: {reason}.",
+        "suggestion": "Tilpas ruten til entreprisepakkerne og de bygherreleverede poster."
+      },
+      "single_basis_quote": {
+        "fail": "{item} har ikke præcis ét grundtilbud.",
+        "suggestion": "Markér ét tilbud som grundlag."
+      },
+      "slot_after_order_date": {
+        "fail": "Kapacitetsreservationen for {item} løber ud over den seneste bestillingsdato.",
+        "suggestion": "Underskriv bestillingen tidligere, eller forhandl et tidligere tidsrum."
+      },
+      "slot_not_expired": {
+        "fail": "Kapacitetsreservationen for {item} har overskredet sin frist for konvertering.",
+        "suggestion": "Konverter den til en bestilling, eller frigiv den."
+      },
+      "slot_terms_complete": {
+        "fail": "Kapacitetsreservationen for {item} har ufuldstændige vilkår.",
+        "suggestion": "Registrer gebyr, refusionsvilkår, frist for konvertering og forpligtelseslinket."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Leverandørpolitikken for {item} er inkonsistent.",
+        "suggestion": "En bundet specifikation kræver en begrundelse; en neutral nævner ingen leverandør."
+      }
+    },
+    "spare_state": {
+      "delivered": "Leveret",
+      "handed_over": "Overdraget",
+      "required": "Påkrævet",
+      "specified": "Specificeret",
+      "waived": "Frafaldet"
+    },
+    "state": {
+      "cancelled": "Annulleret",
+      "commissioned": "Idriftsat",
+      "delivered": "Leveret",
+      "enquired": "Forespurgt",
+      "handed_over": "Overdraget",
+      "identified": "Identificeret",
+      "installed": "Installeret",
+      "manufactured": "Fremstillet",
+      "ordered": "Bestilt",
+      "route_set": "Rute fastsat",
+      "specified": "Specificeret"
+    }
+  }
+}

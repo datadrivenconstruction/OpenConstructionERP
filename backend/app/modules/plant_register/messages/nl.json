@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Luchtbehandelingskast",
+        "battery_storage": "Batterijopslag",
+        "bms_controls": "Gebouwautomatisering",
+        "boiler": "Ketel",
+        "chiller": "Koelmachine",
+        "cooling_tower": "Koeltoren",
+        "crane_permanent": "Vaste kraan",
+        "distribution_transformer": "Distributietransformator",
+        "escalator": "Roltrap",
+        "facade_unit": "Gevelelementen",
+        "generator": "Generatorset",
+        "heat_pump": "Warmtepomp",
+        "it_core_network": "IT-kernnetwerk",
+        "kitchen_equipment": "Keukenapparatuur",
+        "lift": "Lift",
+        "lv_switchboard": "Laagspanningsverdeelbord",
+        "medical_equipment": "Medische apparatuur",
+        "mv_switchgear": "Middenspanningsschakelinstallatie",
+        "power_transformer": "Vermogenstransformator",
+        "process_unit": "Procesinstallatie",
+        "sprinkler_pump": "Sprinklerpompset",
+        "structural_steel_package": "Constructiestaalpakket",
+        "ups": "Noodstroomvoeding (UPS)"
+      },
+      "it_service": {
+        "access_control": "Toegangscontrole",
+        "cctv": "Videobewaking",
+        "cde_access": "CDE-toegang",
+        "drone_survey": "Dronemeting",
+        "site_network": "Bouwplaatsnetwerk",
+        "telecom": "Telecom",
+        "time_recording": "Tijdregistratie"
+      },
+      "maintenance": {
+        "condition_based": "Conditiegebaseerd",
+        "preventive_interval": "Preventief, op interval",
+        "run_to_failure": "Run-to-failure",
+        "vendor_service_contract": "Onderhoudscontract met leverancier"
+      },
+      "name": "Neutrale installatiecatalogus",
+      "party": {
+        "contractor": "Aannemer",
+        "installer": "Installateur",
+        "operator": "Exploitant",
+        "owner": "Opdrachtgever",
+        "supplier": "Leverancier",
+        "user": "Gebruiker"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Twee volledig onafhankelijke systemen",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Twee onafhankelijke systemen plus één reserve-eenheid",
+        "n": "N",
+        "n_desc": "Precies de benodigde capaciteit, geen reserve-eenheid",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Eén reserve-eenheid bovenop de benodigde capaciteit",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Twee reserve-eenheden bovenop de benodigde capaciteit"
+      },
+      "route": {
+        "contractor_furnished_installed": "Door aannemer geleverd, door aannemer geïnstalleerd",
+        "owner_furnished_contractor_installed": "Door opdrachtgever beschikbaar gesteld, door aannemer geïnstalleerd",
+        "owner_furnished_owner_installed": "Door opdrachtgever beschikbaar gesteld, door opdrachtgever geïnstalleerd",
+        "owner_procured_novated": "Door opdrachtgever besteld, order overgedragen aan aannemer"
+      },
+      "site_plant": {
+        "concrete_plant": "Betonmortelcentrale",
+        "hoist": "Bouwlift",
+        "mobile_crane_pad": "Opstelplaats mobiele kraan",
+        "site_office": "Bouwkeet",
+        "storage": "Opslag",
+        "temporary_power": "Bouwstroom",
+        "temporary_water": "Bouwwater",
+        "tower_crane": "Torenkraan",
+        "welfare": "Welzijnsvoorzieningen",
+        "wheel_wash": "Wielwasinstallatie"
+      },
+      "source": {
+        "catalogue_default": "Catalogusstandaard",
+        "expert_estimate": "Deskundigenschatting",
+        "framework_agreement": "Raamovereenkomst",
+        "historic_order": "Eerdere bestelling",
+        "market_sounding": "Marktverkenning",
+        "none": "Geen levertijd",
+        "supplier_catalogue": "Leverancierscatalogus",
+        "supplier_quote": "Leveranciersofferte"
+      },
+      "spare": {
+        "commissioning_spares": "Inbedrijfstellingsreserveonderdelen",
+        "operating_consumables": "Verbruiksmaterialen voor bedrijf",
+        "special_tools": "Speciaal gereedschap",
+        "strategic_spares": "Strategische reserveonderdelen"
+      },
+      "step": {
+        "accept": "Accepteren",
+        "commission": "In bedrijf stellen",
+        "connect": "Aansluiten",
+        "deliver_to_site": "Transport naar bouwplaats",
+        "document": "Documenteren",
+        "offload": "Lossen",
+        "set_in_place": "Op positie plaatsen",
+        "supply": "Leveren",
+        "test": "Testen",
+        "train": "Instructie"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Een basisofferte voor de levertijd is verplicht.",
+      "catalogue_entry_required": "Een levertijd uit de leverancierscatalogus vereist de catalogusregel.",
+      "catalogue_lead_mismatch": "De levertijd komt niet overeen met de leverancierscatalogusregel waarnaar wordt verwezen.",
+      "catalogue_retired": "Deze catalogus is buiten gebruik gesteld en kan niet worden vastgezet.",
+      "classification_frozen": "Overschrijvingen van kritiek en lange levertijd zijn vergrendeld zodra de inkooproute is vastgesteld.",
+      "commitment_currency_mismatch": "De reserveringskosten en de vrijgegeven verplichting staan in verschillende valuta.",
+      "commitment_for_other_item": "De gekoppelde verplichtingsregel hoort bij een ander installatie-item.",
+      "commitment_not_found": "De gekoppelde verplichtingsregel maakt geen deel uit van dit project.",
+      "commitment_not_released": "De gekoppelde verplichtingsregel is nog niet vrijgegeven.",
+      "commitment_release_below_fee": "Het vrijgegeven bedrag is lager dan de reserveringskosten.",
+      "commitment_release_failed": "De vrijgave van de verplichting kon niet worden gelezen; probeer het opnieuw of neem contact op met de beheerder.",
+      "commitment_release_unavailable": "De vrijgave van de verplichting kan niet worden gelezen, daardoor kunnen reserveringskosten niet worden vastgelegd.",
+      "concurrent_basis_change": "Een andere gebruiker heeft tegelijkertijd de basisofferte gewijzigd; laad opnieuw en probeer het opnieuw.",
+      "cost_needs_currency": "De kosten van een optie vereisen een valuta.",
+      "critical_override_needs_reason": "Het overschrijven van de kritieke classificatie vereist een reden.",
+      "critical_without_decision": "Een kritiek item heeft een goedgekeurd besluitdocument nodig voordat de inkooproute wordt vastgesteld.",
+      "critical_without_market_evidence": "Een kritiek item heeft een levertijd uit de markt nodig, geen catalogusstandaard of schatting.",
+      "critical_without_strategic_spares": "Een kritiek item heeft een strategisch reserveonderdeel nodig of een opgegeven reden waarom niet.",
+      "decision_paper_needs_two_options": "Een besluitdocument heeft minimaal twee opties nodig, tenzij het item enkelvoudig wordt geleverd.",
+      "decision_route_refused": "De goedkeuringsroute heeft deze stap geweigerd.",
+      "delivery_limit_gap": "Niet elke leveringsstap heeft een verantwoordelijke partij.",
+      "edit_permission_required": "U heeft geen toestemming om het installatieregister te wijzigen.",
+      "enquiry_date_in_future": "De datum van de aanvraag kan niet in de toekomst liggen.",
+      "fee_needs_currency": "Reserveringskosten vereisen een valuta.",
+      "fee_negative": "De reserveringskosten kunnen niet negatief zijn.",
+      "handover_needs_commissioned": "Alleen een item dat in bedrijf is gesteld, kan worden overgedragen.",
+      "handover_needs_confirmation": "De overdracht moet worden bevestigd.",
+      "handover_needs_service_asset": "Benoem het onderhoudscontract voor het asset, of geef aan waarom het item zonder contract wordt overgedragen.",
+      "invalid_transition": "Deze statuswijziging is vanuit de huidige status niet mogelijk.",
+      "it_cde_not_linked": "CDE-toegang vereist een gekoppelde CDE-container.",
+      "it_service_not_found": "IT-dienst niet gevonden.",
+      "it_service_range_invalid": "De dienst eindigt voordat hij begint.",
+      "it_service_retired": "Een buiten gebruik gestelde IT-dienst kan niet worden gewijzigd.",
+      "item_already_ordered": "Het item is al besteld.",
+      "item_closed": "Het item is overgedragen of geannuleerd.",
+      "item_code_taken": "Er bestaat al een item met deze code in het project.",
+      "item_not_found": "Installatie-item niet gevonden.",
+      "item_required": "Kies een item.",
+      "laydown_zone_not_found": "Deze opslagzone bestaat niet in dit project.",
+      "lead_time_owned_by_plant_item": "De levertijd van dit document wordt bijgehouden bij het installatie-item.",
+      "lead_time_stale": "De basisofferte voor de levertijd is ouder dan de klasse toestaat.",
+      "lead_time_without_enquiry_date": "Een levertijd vereist de datum waarop er is nagevraagd.",
+      "lead_weeks_range_invalid": "De minimale levertijd mag de maximale niet overschrijden.",
+      "limit_needs_party": "Een leveringsstap vereist een partij of een pakket.",
+      "link_not_found": "Het gekoppelde record maakt geen deel uit van dit project.",
+      "long_lead_override_needs_reason": "Het overschrijven van de classificatie lange levertijd vereist een reden.",
+      "manage_required": "Alleen een houder van de machtiging voor installatiebeheer mag dit wijzigen.",
+      "neutral_spec_names_vendor": "De specificatie is leveranciersneutraal, maar noemt een leverancier.",
+      "no_decision_route": "Het project heeft geen goedkeuringsroute voor besluitdocumenten.",
+      "not_equipment_owner": "Alleen een manager of de eigenaar van het installatiegebied mag het installatieregister wijzigen.",
+      "null_not_allowed": "Dit veld mag niet leeg zijn.",
+      "package_not_found": "Het contractpakket maakt geen deel uit van het pakketplan van dit project.",
+      "package_plan_failed": "Het leveringsmodel kon niet worden gelezen; probeer het opnieuw of neem contact op met de beheerder.",
+      "package_plan_unavailable": "Het pakketplan van het project kan niet worden gelezen, daardoor kan de route niet worden gecontroleerd.",
+      "paper_needs_rationale": "Het document heeft een onderbouwing nodig.",
+      "paper_needs_recommendation": "Het document heeft een aanbeveling nodig.",
+      "paper_not_draft": "Alleen een concept-document kan worden gewijzigd of ingediend.",
+      "paper_not_found": "Besluitdocument niet gevonden.",
+      "paper_not_submitted": "Alleen een ingediend document kan worden ingetrokken.",
+      "paper_open": "Het item heeft al een open besluitdocument.",
+      "paper_option_codes_invalid": "Elke optie heeft een unieke code nodig.",
+      "paper_recommendation_unknown": "De aanbeveling moet een van de opties noemen.",
+      "paper_scores_invalid": "Scores en gewichten moeten decimale getallen zijn.",
+      "paper_submitter_is_approver": "De persoon die het document indient, kan geen goedkeurder van de route zijn.",
+      "position_date_invalid": "Dit is geen datum.",
+      "position_incomplete": "Een positie heeft een soort en een punt op het bouwplaatsplan nodig.",
+      "position_not_found": "Deze installatiepositie bestaat niet in dit project.",
+      "position_number_invalid": "Dit getal kan niet worden opgeslagen: controleer de decimalen en de grootte.",
+      "position_range_invalid": "De positie eindigt voordat hij begint.",
+      "position_text_invalid": "Deze tekst is leeg of te lang.",
+      "quantity_not_positive": "De hoeveelheid moet groter zijn dan nul.",
+      "quote_not_found": "Offerte voor levertijd niet gevonden.",
+      "response_before_enquiry": "De datum van de reactie kan niet vóór de datum van de aanvraag liggen.",
+      "route_frozen": "De route kan niet worden gewijzigd zodra het item is besteld.",
+      "route_inconsistent_with_package_plan": "De inkooproute komt niet overeen met het pakketplan.",
+      "route_missing": "Er is geen inkooproute ingesteld.",
+      "slot_closed": "De reservering is gesloten.",
+      "slot_exists": "Het item heeft al een open capaciteitsreservering.",
+      "slot_fee_needs_commitment": "Een reserveringskosten legt alleen geld vast via een vrijgave van de verplichting; koppel de verplichtingsregel.",
+      "slot_not_found": "Capaciteitsreservering niet gevonden.",
+      "slot_range_invalid": "Het tijdslot eindigt voordat het begint.",
+      "slot_terms_incomplete": "Een vastgehouden reservering vereist kosten, terugbetalingsvoorwaarden en de omzettingsdeadline.",
+      "spare_closed": "De reserveonderdeelregel is gesloten.",
+      "spare_not_deletable": "Alleen een reserveonderdeelregel die nog nodig is, kan worden verwijderd.",
+      "spare_not_found": "Regel reserveonderdeel niet gevonden.",
+      "spares_not_handed_over": "Elk reserveonderdeel moet eerst worden overgedragen of worden afgezien.",
+      "specification_frozen": "De specificatie is vergrendeld zodra de inkooproute is vastgesteld.",
+      "stage_not_found": "Deze uitbreidingsfase bestaat niet in dit project.",
+      "stage_unavailable": "Uitbreidingsfasen kunnen niet worden gelezen, daardoor kan een positie niet aan een fase worden gekoppeld.",
+      "state_read_from_source": "Deze status wordt gelezen uit de order, het door de opdrachtgever geleverde item of de inbedrijfstelling, en niet handmatig ingesteld.",
+      "transition_blocked": "De statuswijziging wordt door meerdere regels geblokkeerd.",
+      "two_parties_on_one_step": "Een leveringsstap kan maar één partij hebben.",
+      "unknown_catalogue": "Onbekende installatiecatalogus.",
+      "unknown_component_class": "Onbekende componentklasse.",
+      "unknown_fee_refundable": "Terugbetalingsvoorwaarden moeten geen, gedeeltelijk of volledig zijn.",
+      "unknown_it_service_kind": "Onbekende IT-dienst.",
+      "unknown_lead_basis": "Onbekende basis voor de levertijd.",
+      "unknown_lead_time_source": "Onbekende bron van de levertijd.",
+      "unknown_maintenance_strategy": "Onbekende onderhoudsstrategie.",
+      "unknown_party": "Onbekende partij.",
+      "unknown_redundancy_scheme": "Onbekend redundantieschema.",
+      "unknown_route": "Onbekende inkooproute.",
+      "unknown_site_plant_kind": "Dit soort bouwplaatsinstallatie staat niet in de installatiecatalogus van het project.",
+      "unknown_spare_category": "Onbekende categorie reserveonderdelen.",
+      "unknown_step": "Onbekende leveringsstap.",
+      "unknown_vendor_bound_reason": "De reden moet standaardisatie, bestaand bezit, garantie of enkelvoudige levering zijn.",
+      "unknown_vendor_policy": "Het leveranciersbeleid moet neutraal of gebonden zijn.",
+      "vendor_bound_needs_reason": "Een leveranciersgebonden specificatie vereist een reden.",
+      "waiver_needs_reason": "Het afzien van een reserveonderdeel vereist een reden."
+    },
+    "evidence": {
+      "critical_route_set": "Elk kritiek item heeft zijn route vastgesteld met een goedgekeurd besluitdocument",
+      "frame_document_attached": "Kaderdocument installaties gekoppeld aan de CDE",
+      "frame_document_missing": "Het project heeft nog geen kaderdocument installaties, dus de koppeling kan niet worden gecontroleerd",
+      "host_unresolved": "Het governancemodel bepaalt niet aan welk gebied en welke gate het installatieregister rapporteert",
+      "long_lead_secured": "Elk item met lange levertijd heeft een actuele basisofferte en is besteld of valt binnen de besteldatum",
+      "no_area_hosts_plant": "Het fasemodel noemt geen gebied dat installaties huisvest, dus het installatieregister kan niet aan een gate rapporteren",
+      "no_error_findings": "Geen bevindingen op foutniveau in het installatieregister",
+      "no_phase_enables_construction_start": "Het fasemodel noemt geen fase die de start van de bouw mogelijk maakt, dus het installatieregister heeft geen gate om aan te rapporteren"
+    },
+    "export": {
+      "catalogue": "Catalogus",
+      "col_category": "Categorie",
+      "col_class": "Klasse",
+      "col_code": "Item",
+      "col_cost": "Kosten",
+      "col_critical": "Kritiek",
+      "col_description": "Omschrijving",
+      "col_enquiry_date": "Aangevraagd",
+      "col_float": "Speling (dagen)",
+      "col_from": "Van",
+      "col_latest_order": "Laatste bestelling",
+      "col_lead_source": "Bron levertijd",
+      "col_lead_weeks": "Levertijd (weken)",
+      "col_need_date": "Benodigd op",
+      "col_option": "Optie",
+      "col_quantity": "Hoeveelheid",
+      "col_recommended": "Aanbevolen",
+      "col_route": "Route",
+      "col_score": "Gewogen score",
+      "col_section": "Onderdeel",
+      "col_state": "Status",
+      "col_supply_by": "Geleverd door",
+      "col_title": "Titel",
+      "col_to": "Tot",
+      "col_unit": "Eenheid",
+      "critical_count": "Kritieke items",
+      "empty": "Geen items.",
+      "frame_title": "Samenvatting kaderdocument installaties",
+      "item_count": "Items",
+      "limits_title": "Matrix leveringsgrenzen",
+      "long_lead_count": "Items met lange levertijd",
+      "overdue_count": "Verlopen bestellingen",
+      "paper_title": "Besluitdocument",
+      "project": "Project",
+      "question": "Vraag",
+      "rationale": "Onderbouwing",
+      "register_title": "Register lange levertijd",
+      "section_it": "IT-dienst",
+      "section_long_lead": "Item met lange levertijd",
+      "section_site_plant": "Bouwplaatsinstallatie",
+      "spares_title": "Lijst reserveonderdelen",
+      "yes": "ja"
+    },
+    "paper_state": {
+      "approved": "Goedgekeurd",
+      "draft": "Concept",
+      "rejected": "Afgewezen",
+      "submitted": "Ingediend"
+    },
+    "reasons": {
+      "currency": "de reserveringskosten hebben geen valuta",
+      "installer_mismatch": "het door de opdrachtgever beschikbaar gestelde item noemt een ander installerend pakket",
+      "owner_furnished_item_required": "een route met door de opdrachtgever beschikbaar gesteld materieel vereist het bijbehorende item",
+      "owner_installs": "de opdrachtgever installeert zelf, dus er mag geen contractpakket als installateur worden genoemd",
+      "package_does_not_supply": "het contractpakket levert geen installaties",
+      "package_not_in_plan": "het contractpakket staat niet in het pakketplan",
+      "package_required": "deze route vereist een contractpakket",
+      "single_package_form": "de leveringsvorm heeft één contractpakket en het item hoort bij een ander pakket"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kritiek item {item} heeft geen goedgekeurd besluitdocument.",
+        "suggestion": "Stel het optiedocument op en dien het ter goedkeuring in."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kritiek item {item} steunt op een catalogusstandaard of een schatting.",
+        "suggestion": "Verkrijg een leveranciersofferte, raamovereenkomst of eerdere bestelling."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kritiek item {item} heeft geen strategisch reserveonderdeel.",
+        "suggestion": "Voeg een strategisch reserveonderdeel toe of geef aan waarom dat niet nodig is."
+      },
+      "delivery_limits_complete": {
+        "fail": "Leveringsgrenzen van {item} hebben geen partij voor: {steps}.",
+        "suggestion": "Wijs aan elke leveringsstap een partij toe."
+      },
+      "it_cde_linked": {
+        "fail": "CDE-toegang vereist vóór de uitvoeringsgate een CDE-container, en die ontbreekt.",
+        "suggestion": "Koppel de CDE-container waarin de partijen gaan werken."
+      },
+      "lead_time_fresh": {
+        "fail": "De basisofferte voor de levertijd van {item} is verouderd.",
+        "suggestion": "Vraag de leverancier opnieuw en leg het nieuwe antwoord vast."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Item met lange levertijd {item} heeft geen levertijdofferte met een aanvraagdatum.",
+        "suggestion": "Leg een gedateerde offerte vast: wanneer er is nagevraagd en wie heeft geantwoord."
+      },
+      "order_not_overdue": {
+        "fail": "{item} moet uiterlijk op {date} worden besteld.",
+        "suggestion": "Bestel nu of verschuif de benodigde datum samen met de planningsverantwoordelijke."
+      },
+      "redundancy_quantity": {
+        "fail": "De hoeveelheid van {item} past niet bij het redundantieschema.",
+        "suggestion": "Controleer de hoeveelheid tegen het schema (N+1 vereist minimaal twee eenheden)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "De inkooproute van {item} komt niet overeen met het pakketplan: {reason}.",
+        "suggestion": "Stem de route af op de contractpakketten en door de opdrachtgever beschikbaar gestelde items."
+      },
+      "single_basis_quote": {
+        "fail": "{item} heeft niet precies één basisofferte.",
+        "suggestion": "Markeer één offerte als basis."
+      },
+      "slot_after_order_date": {
+        "fail": "De capaciteitsreservering van {item} loopt door voorbij de laatste besteldatum.",
+        "suggestion": "Teken de order eerder of onderhandel over een eerder tijdslot."
+      },
+      "slot_not_expired": {
+        "fail": "De capaciteitsreservering van {item} heeft de omzettingsdeadline overschreden.",
+        "suggestion": "Zet hem om in een bestelling of geef hem vrij."
+      },
+      "slot_terms_complete": {
+        "fail": "De capaciteitsreservering van {item} heeft onvolledige voorwaarden.",
+        "suggestion": "Leg kosten, terugbetalingsvoorwaarden, omzettingsdeadline en de koppeling met de verplichting vast."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Het leveranciersbeleid van {item} is inconsistent.",
+        "suggestion": "Een gebonden specificatie heeft een reden nodig; een neutrale noemt geen leverancier."
+      }
+    },
+    "spare_state": {
+      "delivered": "Geleverd",
+      "handed_over": "Overgedragen",
+      "required": "Vereist",
+      "specified": "Gespecificeerd",
+      "waived": "Afgezien"
+    },
+    "state": {
+      "cancelled": "Geannuleerd",
+      "commissioned": "In bedrijf gesteld",
+      "delivered": "Geleverd",
+      "enquired": "Aangevraagd",
+      "handed_over": "Overgedragen",
+      "identified": "Geïdentificeerd",
+      "installed": "Geïnstalleerd",
+      "manufactured": "Vervaardigd",
+      "ordered": "Besteld",
+      "route_set": "Route vastgesteld",
+      "specified": "Gespecificeerd"
+    }
+  }
+}

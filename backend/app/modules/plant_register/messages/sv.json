@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Luftbehandlingsaggregat",
+        "battery_storage": "Batterilager",
+        "bms_controls": "Byggnadsautomation",
+        "boiler": "Panna",
+        "chiller": "Kylmaskin",
+        "cooling_tower": "Kyltorn",
+        "crane_permanent": "Permanent kran",
+        "distribution_transformer": "Distributionstransformator",
+        "escalator": "Rulltrappa",
+        "facade_unit": "Fasadelement",
+        "generator": "Generatoraggregat",
+        "heat_pump": "Värmepump",
+        "it_core_network": "IT-kärnnät",
+        "kitchen_equipment": "Köksutrustning",
+        "lift": "Hiss",
+        "lv_switchboard": "Lågspänningsfördelning",
+        "medical_equipment": "Medicinteknisk utrustning",
+        "mv_switchgear": "Mellanspänningsanläggning",
+        "power_transformer": "Kraftransformator",
+        "process_unit": "Processenhet",
+        "sprinkler_pump": "Sprinklerpumpaggregat",
+        "structural_steel_package": "Stålkonstruktionspaket",
+        "ups": "Avbrottsfri strömförsörjning"
+      },
+      "it_service": {
+        "access_control": "Passageresystem",
+        "cctv": "Videoövervakning",
+        "cde_access": "CDE-åtkomst",
+        "drone_survey": "Drönarmätning",
+        "site_network": "Byggarbetsplatsnät",
+        "telecom": "Telekommunikation",
+        "time_recording": "Tidsregistrering"
+      },
+      "maintenance": {
+        "condition_based": "Tillståndsbaserat",
+        "preventive_interval": "Förebyggande, med intervall",
+        "run_to_failure": "Drift till fel",
+        "vendor_service_contract": "Leverantörens serviceavtal"
+      },
+      "name": "Neutral anläggningskatalog",
+      "party": {
+        "contractor": "Entreprenör",
+        "installer": "Installatör",
+        "operator": "Driftansvarig",
+        "owner": "Byggherre",
+        "supplier": "Leverantör",
+        "user": "Användare"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Två helt oberoende system",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Två oberoende system plus en reservenhet",
+        "n": "N",
+        "n_desc": "Exakt den kapacitet som behövs, ingen reservenhet",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "En reservenhet utöver den kapacitet som behövs",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Två reservenheter utöver den kapacitet som behövs"
+      },
+      "route": {
+        "contractor_furnished_installed": "Entreprenören levererar, entreprenören installerar",
+        "owner_furnished_contractor_installed": "Byggherren levererar, entreprenören installerar",
+        "owner_furnished_owner_installed": "Byggherren levererar, byggherren installerar",
+        "owner_procured_novated": "Byggherren upphandlar, beställningen överlåts till entreprenören"
+      },
+      "site_plant": {
+        "concrete_plant": "Betongverk",
+        "hoist": "Byggvinsch",
+        "mobile_crane_pad": "Underlag för mobilkran",
+        "site_office": "Byggbod",
+        "storage": "Förråd",
+        "temporary_power": "Tillfällig el",
+        "temporary_water": "Tillfälligt vatten",
+        "tower_crane": "Tornkran",
+        "welfare": "Sociala utrymmen",
+        "wheel_wash": "Hjultvätt"
+      },
+      "source": {
+        "catalogue_default": "Katalogstandard",
+        "expert_estimate": "Expertbedömning",
+        "framework_agreement": "Ramavtal",
+        "historic_order": "Tidigare beställning",
+        "market_sounding": "Marknadsförfrågan",
+        "none": "Ingen leveranstid",
+        "supplier_catalogue": "Leverantörskatalog",
+        "supplier_quote": "Leverantörsofferta"
+      },
+      "spare": {
+        "commissioning_spares": "Reservdelar för driftsättning",
+        "operating_consumables": "Förbrukningsmaterial för drift",
+        "special_tools": "Specialverktyg",
+        "strategic_spares": "Strategiska reservdelar"
+      },
+      "step": {
+        "accept": "Godkänna",
+        "commission": "Driftsätta",
+        "connect": "Ansluta",
+        "deliver_to_site": "Leverera till byggarbetsplatsen",
+        "document": "Dokumentera",
+        "offload": "Lossa",
+        "set_in_place": "Placera på plats",
+        "supply": "Leverera",
+        "test": "Provköra",
+        "train": "Utbilda"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "En grundofferta för leveranstid krävs.",
+      "catalogue_entry_required": "En leveranstid från leverantörskatalogen kräver katalogposten.",
+      "catalogue_lead_mismatch": "Leveranstiden stämmer inte med den leverantörskatalogpost som anges.",
+      "catalogue_retired": "Den här katalogen är utfasad och kan inte fästas.",
+      "classification_frozen": "Överskrivningar för kritisk och långledad klassificering är låsta när upphandlingsvägen är satt.",
+      "commitment_currency_mismatch": "Reservationsavgiften och den frigjorda bindningen är i olika valutor.",
+      "commitment_for_other_item": "Den kopplade bindningsposten tillhör en annan anläggningspost.",
+      "commitment_not_found": "Den kopplade bindningsposten ingår inte i det här projektet.",
+      "commitment_not_released": "Den kopplade bindningsposten är ännu inte frigjord.",
+      "commitment_release_below_fee": "Det frigjorda beloppet är lägre än reservationsavgiften.",
+      "commitment_release_failed": "Frigörandet av bindningen kunde inte läsas; försök igen eller kontakta administratören.",
+      "commitment_release_unavailable": "Frigörandet av bindningen kan inte läsas, så en reservationsavgift kan inte kopplas.",
+      "concurrent_basis_change": "En annan användare ändrade grundofferten samtidigt; ladda om och försök igen.",
+      "cost_needs_currency": "Kostnaden för ett alternativ kräver en valuta.",
+      "critical_override_needs_reason": "En överskrivning av kritikalitet kräver en motivering.",
+      "critical_without_decision": "En kritisk post kräver ett godkänt beslutsunderlag innan dess väg sätts.",
+      "critical_without_market_evidence": "En kritisk post kräver en leveranstid från marknaden, inte en katalogstandard eller en bedömning.",
+      "critical_without_strategic_spares": "En kritisk post kräver en strategisk reservdel eller en angiven anledning till att det inte behövs.",
+      "decision_paper_needs_two_options": "Ett beslutsunderlag kräver minst två alternativ, om inte posten har endast en källa.",
+      "decision_route_refused": "Godkännandevägen avslog det här steget.",
+      "delivery_limit_gap": "Inte alla leveranssteg har en ansvarig part.",
+      "edit_permission_required": "Du har inte behörighet att ändra anläggningsregistret.",
+      "enquiry_date_in_future": "Förfrågningsdatumet kan inte ligga i framtiden.",
+      "fee_needs_currency": "En reservationsavgift kräver sin valuta.",
+      "fee_negative": "Reservationsavgiften kan inte vara negativ.",
+      "handover_needs_commissioned": "Endast en driftsatt post kan överlämnas.",
+      "handover_needs_confirmation": "Överlämnandet måste bekräftas.",
+      "handover_needs_service_asset": "Ange serviceavtalet för tillgången, eller ange varför posten överlämnas utan ett sådant.",
+      "invalid_transition": "Den här statusändringen är inte möjlig från nuvarande status.",
+      "it_cde_not_linked": "CDE-åtkomst kräver en kopplad CDE-container.",
+      "it_service_not_found": "IT-tjänsten hittades inte.",
+      "it_service_range_invalid": "Tjänsten slutar innan den börjar.",
+      "it_service_retired": "En utfasad IT-tjänst kan inte ändras.",
+      "item_already_ordered": "Posten är redan beställd.",
+      "item_closed": "Posten är överlämnad eller avbruten.",
+      "item_code_taken": "En post med den här koden finns redan i projektet.",
+      "item_not_found": "Anläggningsposten hittades inte.",
+      "item_required": "Välj en post.",
+      "laydown_zone_not_found": "Den här upplagszonen finns inte i det här projektet.",
+      "lead_time_owned_by_plant_item": "Leveranstiden för den här inlämningen ligger kvar på dess anläggningspost.",
+      "lead_time_stale": "Grundofferten för leveranstid är äldre än vad klassen tillåter.",
+      "lead_time_without_enquiry_date": "En leveranstid kräver det datum då den begärdes.",
+      "lead_weeks_range_invalid": "Den minsta leveranstiden får inte överstiga den största.",
+      "limit_needs_party": "Ett leveranssteg kräver en part eller ett paket.",
+      "link_not_found": "Den kopplade posten ingår inte i det här projektet.",
+      "long_lead_override_needs_reason": "En överskrivning av klassificeringen långledad kräver en motivering.",
+      "manage_required": "Endast den som har behörighet för anläggningsledning kan ändra detta.",
+      "neutral_spec_names_vendor": "Specifikationen är leverantörsneutral men anger en leverantör.",
+      "no_decision_route": "Projektet har ingen godkännandeväg för beslutsunderlag.",
+      "not_equipment_owner": "Endast en chef eller ägaren av utrustningsområdet kan ändra anläggningsregistret.",
+      "null_not_allowed": "Det här fältet kan inte vara tomt.",
+      "package_not_found": "Entreprenadpaketet ingår inte i projektets paketplan.",
+      "package_plan_failed": "Leveransmodellen kunde inte läsas; försök igen eller kontakta administratören.",
+      "package_plan_unavailable": "Projektets paketplan kan inte läsas, så vägen kan inte kontrolleras.",
+      "paper_needs_rationale": "Underlaget kräver en motivering.",
+      "paper_needs_recommendation": "Underlaget kräver en rekommendation.",
+      "paper_not_draft": "Endast ett utkast kan ändras eller skickas in.",
+      "paper_not_found": "Beslutsunderlaget hittades inte.",
+      "paper_not_submitted": "Endast ett inskickat underlag kan dras tillbaka.",
+      "paper_open": "Posten har redan ett öppet beslutsunderlag.",
+      "paper_option_codes_invalid": "Varje alternativ behöver en unik kod.",
+      "paper_recommendation_unknown": "Rekommendationen måste ange ett av alternativen.",
+      "paper_scores_invalid": "Poäng och vikter måste vara decimaltal.",
+      "paper_submitter_is_approver": "Den som skickar in underlaget kan inte vara godkännare i dess väg.",
+      "position_date_invalid": "Det här är inte ett datum.",
+      "position_incomplete": "En position kräver sin typ och sin punkt på platsplanen.",
+      "position_not_found": "Den här anläggningspositionen finns inte i det här projektet.",
+      "position_number_invalid": "Det här talet kan inte sparas: kontrollera decimalerna och storleken.",
+      "position_range_invalid": "Positionen slutar innan den börjar.",
+      "position_text_invalid": "Texten är tom eller för lång.",
+      "quantity_not_positive": "Kvantiteten måste vara större än noll.",
+      "quote_not_found": "Offerten för leveranstid hittades inte.",
+      "response_before_enquiry": "Svarsdatumet kan inte infalla före förfrågningsdatumet.",
+      "route_frozen": "Vägen kan inte ändras när posten är beställd.",
+      "route_inconsistent_with_package_plan": "Upphandlingsvägen stämmer inte med paketplanen.",
+      "route_missing": "Ingen upphandlingsväg är satt.",
+      "slot_closed": "Reservationen är stängd.",
+      "slot_exists": "Posten har redan en öppen kapacitetsreservation.",
+      "slot_fee_needs_commitment": "En reservationsavgift binder pengar endast via frigörande av en bindning; koppla bindningsposten.",
+      "slot_not_found": "Kapacitetsreservationen hittades inte.",
+      "slot_range_invalid": "Tidsfönstret slutar innan det börjar.",
+      "slot_terms_incomplete": "En reserverad plats kräver avgift, återbetalningsvillkor och sista datum för omvandling.",
+      "spare_closed": "Reservdelsraden är stängd.",
+      "spare_not_deletable": "Endast en reservdelsrad som fortfarande behövs kan tas bort.",
+      "spare_not_found": "Reservdelsraden hittades inte.",
+      "spares_not_handed_over": "Varje reservdel måste först överlämnas eller avstås.",
+      "specification_frozen": "Specifikationen är låst när upphandlingsvägen är satt.",
+      "stage_not_found": "Den här utbyggnadsetappen finns inte i det här projektet.",
+      "stage_unavailable": "Utbyggnadsetapper kan inte läsas, så en position kan inte kopplas till en etapp.",
+      "state_read_from_source": "Den här statusen läses från beställningen, den byggherrelevererade posten eller driftsättningen och sätts inte för hand.",
+      "transition_blocked": "Statusändringen blockeras av flera regler.",
+      "two_parties_on_one_step": "Ett leveranssteg kan bara ha en part.",
+      "unknown_catalogue": "Okänd anläggningskatalog.",
+      "unknown_component_class": "Okänd komponentklass.",
+      "unknown_fee_refundable": "Återbetalningsvillkoren måste vara ingen, delvis eller full.",
+      "unknown_it_service_kind": "Okänd IT-tjänst.",
+      "unknown_lead_basis": "Okänd grund för leveranstid.",
+      "unknown_lead_time_source": "Okänd källa för leveranstid.",
+      "unknown_maintenance_strategy": "Okänd underhållsstrategi.",
+      "unknown_party": "Okänd part.",
+      "unknown_redundancy_scheme": "Okänt redundansschema.",
+      "unknown_route": "Okänd upphandlingsväg.",
+      "unknown_site_plant_kind": "Den här typen av byggarbetsplatsanläggning finns inte i projektets anläggningskatalog.",
+      "unknown_spare_category": "Okänd kategori för reservdelar.",
+      "unknown_step": "Okänt leveranssteg.",
+      "unknown_vendor_bound_reason": "Skälet måste vara standardisering, befintligt bestånd, garanti eller enda källa.",
+      "unknown_vendor_policy": "Leverantörspolicyn måste vara neutral eller bunden.",
+      "vendor_bound_needs_reason": "En leverantörsbunden specifikation kräver en motivering.",
+      "waiver_needs_reason": "Att avstå från en reservdel kräver en motivering."
+    },
+    "evidence": {
+      "critical_route_set": "Varje kritisk post har sin väg satt med ett godkänt beslutsunderlag",
+      "frame_document_attached": "Ramdokument för utrustning bifogat till CDE",
+      "frame_document_missing": "Projektet har ännu inget ramdokument för utrustning, så dess bifogande kan inte kontrolleras",
+      "host_unresolved": "Styrningsmodellen anger inte vilket område och vilken grind anläggningsregistret rapporterar till",
+      "long_lead_secured": "Varje långledad post har en aktuell grundoffert och är beställd eller inom sitt beställningsdatum",
+      "no_area_hosts_plant": "Fasmodellen anger inget område som är värd för anläggningar, så anläggningsregistret kan inte rapportera till en grind",
+      "no_error_findings": "Inga fel på felnivå i anläggningsregistret",
+      "no_phase_enables_construction_start": "Fasmodellen anger ingen fas som möjliggör byggstart, så anläggningsregistret saknar en grind att rapportera till"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Kategori",
+      "col_class": "Klass",
+      "col_code": "Post",
+      "col_cost": "Kostnad",
+      "col_critical": "Kritisk",
+      "col_description": "Beskrivning",
+      "col_enquiry_date": "Förfrågad",
+      "col_float": "Buffert (dagar)",
+      "col_from": "Från",
+      "col_latest_order": "Senaste beställning",
+      "col_lead_source": "Källa för leveranstid",
+      "col_lead_weeks": "Leveranstid (veckor)",
+      "col_need_date": "Behovsdatum",
+      "col_option": "Alternativ",
+      "col_quantity": "Antal",
+      "col_recommended": "Rekommenderad",
+      "col_route": "Väg",
+      "col_score": "Viktad poäng",
+      "col_section": "Avsnitt",
+      "col_state": "Status",
+      "col_supply_by": "Levereras av",
+      "col_title": "Titel",
+      "col_to": "Till",
+      "col_unit": "Enhet",
+      "critical_count": "Kritiska poster",
+      "empty": "Inga poster.",
+      "frame_title": "Sammanfattning av utrustningsramen",
+      "item_count": "Poster",
+      "limits_title": "Matris för leveransgränser",
+      "long_lead_count": "Långledade poster",
+      "overdue_count": "Försenade beställningar",
+      "paper_title": "Beslutsunderlag",
+      "project": "Projekt",
+      "question": "Fråga",
+      "rationale": "Motivering",
+      "register_title": "Register över långledade poster",
+      "section_it": "IT-tjänst",
+      "section_long_lead": "Långledad post",
+      "section_site_plant": "Byggarbetsplatsanläggning",
+      "spares_title": "Förteckning över reservdelar",
+      "yes": "ja"
+    },
+    "paper_state": {
+      "approved": "Godkänt",
+      "draft": "Utkast",
+      "rejected": "Avslaget",
+      "submitted": "Inskickat"
+    },
+    "reasons": {
+      "currency": "reservationsavgiften saknar valuta",
+      "installer_mismatch": "den byggherrelevererade posten anger ett annat installerande paket",
+      "owner_furnished_item_required": "en väg med byggherreleverans kräver dess byggherrelevererade post",
+      "owner_installs": "byggherren installerar, så inget entreprenadpaket får anges som installatör",
+      "package_does_not_supply": "entreprenadpaketet levererar inte anläggningar",
+      "package_not_in_plan": "entreprenadpaketet finns inte i paketplanen",
+      "package_required": "den här vägen kräver ett entreprenadpaket",
+      "single_package_form": "leveransformen har ett entreprenadpaket och posten ligger i ett annat"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kritisk post {item} har inget godkänt beslutsunderlag.",
+        "suggestion": "Ta fram alternativunderlaget och skicka in det för godkännande."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kritisk post {item} bygger på en katalogstandard eller en bedömning.",
+        "suggestion": "Inhämta en leverantörsofferta, ett ramavtal eller en tidigare beställning."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kritisk post {item} har ingen strategisk reservdel.",
+        "suggestion": "Lägg till en strategisk reservdel eller ange varför ingen behövs."
+      },
+      "delivery_limits_complete": {
+        "fail": "Leveransgränserna för {item} saknar part för: {steps}.",
+        "suggestion": "Tilldela en part till varje leveranssteg."
+      },
+      "it_cde_linked": {
+        "fail": "CDE-åtkomst behövs innan genomförandegrinden saknar en CDE-container.",
+        "suggestion": "Koppla den CDE-container som parterna ska arbeta i."
+      },
+      "lead_time_fresh": {
+        "fail": "Grundofferten för leveranstiden för {item} är inaktuell.",
+        "suggestion": "Fråga leverantören igen och registrera det nya svaret."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Långledad post {item} har ingen offert för leveranstid med förfrågningsdatum.",
+        "suggestion": "Registrera en daterad offert: när du frågade och vem som svarade."
+      },
+      "order_not_overdue": {
+        "fail": "{item} måste beställas senast {date}.",
+        "suggestion": "Beställ nu eller flytta behovsdatumet tillsammans med tidplanens ansvarige."
+      },
+      "redundancy_quantity": {
+        "fail": "Antalet för {item} passar inte dess redundansschema.",
+        "suggestion": "Kontrollera antalet mot schemat (N+1 kräver minst två enheter)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Upphandlingsvägen för {item} stämmer inte med paketplanen: {reason}.",
+        "suggestion": "Anpassa vägen till entreprenadpaketen och de byggherrelevererade posterna."
+      },
+      "single_basis_quote": {
+        "fail": "{item} har inte exakt en grundofferta.",
+        "suggestion": "Markera en offert som grundofferta."
+      },
+      "slot_after_order_date": {
+        "fail": "Kapacitetsreservationen för {item} sträcker sig längre än senaste beställningsdatum.",
+        "suggestion": "Skriv under beställningen tidigare eller förhandla fram en tidigare plats."
+      },
+      "slot_not_expired": {
+        "fail": "Kapacitetsreservationen för {item} har passerat sitt sista datum för omvandling.",
+        "suggestion": "Omvandla den till en beställning eller släpp den."
+      },
+      "slot_terms_complete": {
+        "fail": "Kapacitetsreservationen för {item} har ofullständiga villkor.",
+        "suggestion": "Registrera avgift, återbetalningsvillkor, sista datum för omvandling och kopplingen till bindningen."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Leverantörspolicyn för {item} är inkonsekvent.",
+        "suggestion": "En bunden specifikation kräver en motivering; en neutral anger ingen leverantör."
+      }
+    },
+    "spare_state": {
+      "delivered": "Levererad",
+      "handed_over": "Överlämnad",
+      "required": "Behövs",
+      "specified": "Specificerad",
+      "waived": "Avstådd"
+    },
+    "state": {
+      "cancelled": "Avbruten",
+      "commissioned": "Driftsatt",
+      "delivered": "Levererad",
+      "enquired": "Förfrågad",
+      "handed_over": "Överlämnad",
+      "identified": "Identifierad",
+      "installed": "Installerad",
+      "manufactured": "Tillverkad",
+      "ordered": "Beställd",
+      "route_set": "Väg satt",
+      "specified": "Specificerad"
+    }
+  }
+}

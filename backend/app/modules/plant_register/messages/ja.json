@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "空調機器（AHU）",
+        "battery_storage": "蓄電池設備",
+        "bms_controls": "ビル自動制御",
+        "boiler": "ボイラー",
+        "chiller": "冷凍機",
+        "cooling_tower": "冷却塔",
+        "crane_permanent": "固定式クレーン",
+        "distribution_transformer": "配電用変圧器",
+        "escalator": "エスカレーター",
+        "facade_unit": "ファサードユニット",
+        "generator": "発電機セット",
+        "heat_pump": "ヒートポンプ",
+        "it_core_network": "IT基幹ネットワーク",
+        "kitchen_equipment": "厨房設備",
+        "lift": "エレベーター",
+        "lv_switchboard": "低圧配電盤",
+        "medical_equipment": "医療機器",
+        "mv_switchgear": "高圧開閉装置",
+        "power_transformer": "電力用変圧器",
+        "process_unit": "プロセスユニット",
+        "sprinkler_pump": "スプリンクラー加圧ポンプセット",
+        "structural_steel_package": "鉄骨構造パッケージ",
+        "ups": "無停電電源装置（UPS）"
+      },
+      "it_service": {
+        "access_control": "入退室管理",
+        "cctv": "映像監視",
+        "cde_access": "CDEアクセス",
+        "drone_survey": "ドローン測量",
+        "site_network": "現場ネットワーク",
+        "telecom": "通信設備",
+        "time_recording": "勤怠管理"
+      },
+      "maintenance": {
+        "condition_based": "状態基準保全",
+        "preventive_interval": "予防保全（周期基準）",
+        "run_to_failure": "事後保全",
+        "vendor_service_contract": "メーカー保守契約"
+      },
+      "name": "中立的な設備カタログ",
+      "party": {
+        "contractor": "施工者",
+        "installer": "据付業者",
+        "operator": "運転管理者",
+        "owner": "発注者",
+        "supplier": "供給者",
+        "user": "利用者"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "完全に独立した2系統",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "独立した2系統に予備1台を加えた構成",
+        "n": "N",
+        "n_desc": "必要容量のみで予備機なし",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "必要容量に加えて予備1台",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "必要容量に加えて予備2台"
+      },
+      "route": {
+        "contractor_furnished_installed": "施工者支給・施工者据付",
+        "owner_furnished_contractor_installed": "発注者支給・施工者据付",
+        "owner_furnished_owner_installed": "発注者支給・発注者据付",
+        "owner_procured_novated": "発注者調達・発注を施工者へ承継"
+      },
+      "site_plant": {
+        "concrete_plant": "コンクリートプラント",
+        "hoist": "資材用ホイスト",
+        "mobile_crane_pad": "移動式クレーン設置盤",
+        "site_office": "現場事務所",
+        "storage": "保管ヤード",
+        "temporary_power": "仮設電力",
+        "temporary_water": "仮設給水",
+        "tower_crane": "タワークレーン",
+        "welfare": "福利厚生施設",
+        "wheel_wash": "タイヤ洗浄設備"
+      },
+      "source": {
+        "catalogue_default": "カタログ既定値",
+        "expert_estimate": "専門家による見積り",
+        "framework_agreement": "基本契約",
+        "historic_order": "過去の発注実績",
+        "market_sounding": "市場調査",
+        "none": "リードタイムなし",
+        "supplier_catalogue": "供給者カタログ",
+        "supplier_quote": "供給者見積書"
+      },
+      "spare": {
+        "commissioning_spares": "試運転用予備品",
+        "operating_consumables": "運転用消耗品",
+        "special_tools": "専用工具",
+        "strategic_spares": "戦略予備品"
+      },
+      "step": {
+        "accept": "検収",
+        "commission": "試運転",
+        "connect": "接続",
+        "deliver_to_site": "現場搬入",
+        "document": "書類整備",
+        "offload": "荷下ろし",
+        "set_in_place": "据付位置への設置",
+        "supply": "供給",
+        "test": "試験",
+        "train": "研修"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "基準となるリードタイムの見積書が必要です。",
+      "catalogue_entry_required": "供給者カタログのリードタイムには、カタログ項目の指定が必要です。",
+      "catalogue_lead_mismatch": "リードタイムが、指定された供給者カタログ項目と一致しません。",
+      "catalogue_retired": "このカタログは廃止されており、指定できません。",
+      "classification_frozen": "調達ルートを設定すると、重要度および長納期の区分は変更できません。",
+      "commitment_currency_mismatch": "予約料と解放された契約金額の通貨が異なります。",
+      "commitment_for_other_item": "リンクされた契約項目は別の設備項目に属しています。",
+      "commitment_not_found": "リンクされた契約項目はこのプロジェクトに含まれていません。",
+      "commitment_not_released": "リンクされた契約項目はまだ解放されていません。",
+      "commitment_release_below_fee": "解放された金額が予約料を下回っています。",
+      "commitment_release_failed": "契約の解放内容を読み取れませんでした。再試行するか、管理者に連絡してください。",
+      "commitment_release_unavailable": "契約の解放内容を読み取れないため、予約料を紐付けできません。",
+      "concurrent_basis_change": "他のユーザーが同時に基準見積書を変更しました。再読み込みして再試行してください。",
+      "cost_needs_currency": "オプションの費用には通貨の指定が必要です。",
+      "critical_override_needs_reason": "重要度の変更には理由が必要です。",
+      "critical_without_decision": "重要項目は、調達ルートを設定する前に承認済みの意思決定書が必要です。",
+      "critical_without_market_evidence": "重要項目には、カタログ既定値や見積りではなく、市場から得たリードタイムが必要です。",
+      "critical_without_strategic_spares": "重要項目には戦略予備品が必要か、または不要とする理由の記載が必要です。",
+      "decision_paper_needs_two_options": "単一供給者項目でない限り、意思決定書には少なくとも2つの選択肢が必要です。",
+      "decision_route_refused": "承認ルートがこの手順を却下しました。",
+      "delivery_limit_gap": "すべての納入工程に責任者が設定されているわけではありません。",
+      "edit_permission_required": "設備台帳を変更する権限がありません。",
+      "enquiry_date_in_future": "照会日を未来の日付にすることはできません。",
+      "fee_needs_currency": "予約料には通貨の指定が必要です。",
+      "fee_negative": "予約料を負の値にすることはできません。",
+      "handover_needs_commissioned": "引渡しができるのは試運転済みの項目のみです。",
+      "handover_needs_confirmation": "引渡しの確認が必要です。",
+      "handover_needs_service_asset": "資産の保守契約を指定するか、保守契約なしで引き渡す理由を記載してください。",
+      "invalid_transition": "現在の状態からこの状態変更はできません。",
+      "it_cde_not_linked": "CDEアクセスには、リンクされたCDEコンテナが必要です。",
+      "it_service_not_found": "ITサービスが見つかりません。",
+      "it_service_range_invalid": "サービスの終了日が開始日より前になっています。",
+      "it_service_retired": "廃止されたITサービスは変更できません。",
+      "item_already_ordered": "この項目はすでに発注済みです。",
+      "item_closed": "この項目は引渡し済みまたは取消し済みです。",
+      "item_code_taken": "このコードの項目はプロジェクト内にすでに存在します。",
+      "item_not_found": "設備項目が見つかりません。",
+      "item_required": "項目を選択してください。",
+      "laydown_zone_not_found": "この仮置きゾーンはこのプロジェクトに存在しません。",
+      "lead_time_owned_by_plant_item": "この提出物のリードタイムは、対応する設備項目で管理されています。",
+      "lead_time_stale": "基準リードタイムの見積書が、区分で許容される期間より古くなっています。",
+      "lead_time_without_enquiry_date": "リードタイムには照会を行った日付が必要です。",
+      "lead_weeks_range_invalid": "リードタイムの最小値は最大値を超えられません。",
+      "limit_needs_party": "納入工程には当事者またはパッケージの指定が必要です。",
+      "link_not_found": "リンクされた記録はこのプロジェクトに含まれていません。",
+      "long_lead_override_needs_reason": "長納期区分の変更には理由が必要です。",
+      "manage_required": "これを変更できるのは、設備管理の権限を持つ担当者のみです。",
+      "neutral_spec_names_vendor": "仕様はメーカー中立ですが、特定のメーカーが記載されています。",
+      "no_decision_route": "このプロジェクトには意思決定書の承認ルートが設定されていません。",
+      "not_equipment_owner": "設備台帳を変更できるのは、管理者または設備エリアの担当者のみです。",
+      "null_not_allowed": "この項目は空欄にできません。",
+      "package_not_found": "この工事パッケージは、プロジェクトのパッケージ計画に含まれていません。",
+      "package_plan_failed": "納入モデルを読み取れませんでした。再試行するか、管理者に連絡してください。",
+      "package_plan_unavailable": "プロジェクトのパッケージ計画を読み取れないため、ルートを確認できません。",
+      "paper_needs_rationale": "意思決定書には根拠の記載が必要です。",
+      "paper_needs_recommendation": "意思決定書には推奨案の記載が必要です。",
+      "paper_not_draft": "変更や提出ができるのは下書きの意思決定書のみです。",
+      "paper_not_found": "意思決定書が見つかりません。",
+      "paper_not_submitted": "取下げができるのは提出済みの意思決定書のみです。",
+      "paper_open": "この項目にはすでに未完了の意思決定書があります。",
+      "paper_option_codes_invalid": "各選択肢には固有のコードが必要です。",
+      "paper_recommendation_unknown": "推奨案は、いずれかの選択肢を指定する必要があります。",
+      "paper_scores_invalid": "評価点と重みは小数で入力してください。",
+      "paper_submitter_is_approver": "意思決定書を提出する人は、そのルートの承認者になれません。",
+      "position_date_invalid": "日付として認識できません。",
+      "position_incomplete": "配置には種類と配置図上の位置が必要です。",
+      "position_not_found": "この設備配置はこのプロジェクトに存在しません。",
+      "position_number_invalid": "この数値は保存できません。小数点の桁数と大きさを確認してください。",
+      "position_range_invalid": "配置の終了日が開始日より前になっています。",
+      "position_text_invalid": "このテキストは空か、長すぎます。",
+      "quantity_not_positive": "数量は0より大きい値を入力してください。",
+      "quote_not_found": "リードタイムの見積書が見つかりません。",
+      "response_before_enquiry": "回答日は照会日より前にできません。",
+      "route_frozen": "項目が発注された後は、調達ルートを変更できません。",
+      "route_inconsistent_with_package_plan": "調達ルートがパッケージ計画と整合していません。",
+      "route_missing": "調達ルートが設定されていません。",
+      "slot_closed": "この予約は締め切られています。",
+      "slot_exists": "この項目にはすでに未完了の容量予約があります。",
+      "slot_fee_needs_commitment": "予約料は契約の解放を通じてのみ金額を確定できます。契約項目をリンクしてください。",
+      "slot_not_found": "容量予約が見つかりません。",
+      "slot_range_invalid": "枠の終了日が開始日より前になっています。",
+      "slot_terms_incomplete": "保留中の予約には、予約料、返金条件、転換期限が必要です。",
+      "spare_closed": "この予備品の行は締め切られています。",
+      "spare_not_deletable": "削除できるのは、まだ必要とされている予備品の行のみです。",
+      "spare_not_found": "予備品の行が見つかりません。",
+      "spares_not_handed_over": "先に、すべての予備品を引き渡すか免除する必要があります。",
+      "specification_frozen": "調達ルートを設定すると、仕様は変更できません。",
+      "stage_not_found": "この拡張段階はこのプロジェクトに存在しません。",
+      "stage_unavailable": "拡張段階を読み取れないため、配置を割り当てることができません。",
+      "state_read_from_source": "この状態は手入力ではなく、発注、発注者支給項目、または試運転の情報から読み取られます。",
+      "transition_blocked": "複数のルールにより、この状態変更はブロックされています。",
+      "two_parties_on_one_step": "納入工程に設定できる当事者は1つだけです。",
+      "unknown_catalogue": "不明な設備カタログです。",
+      "unknown_component_class": "不明な構成機器の区分です。",
+      "unknown_fee_refundable": "返金条件は、なし、一部、全額のいずれかである必要があります。",
+      "unknown_it_service_kind": "不明なITサービスです。",
+      "unknown_lead_basis": "不明なリードタイムの基準です。",
+      "unknown_lead_time_source": "不明なリードタイムの出典です。",
+      "unknown_maintenance_strategy": "不明な保全方式です。",
+      "unknown_party": "不明な当事者です。",
+      "unknown_redundancy_scheme": "不明な冗長構成です。",
+      "unknown_route": "不明な調達ルートです。",
+      "unknown_site_plant_kind": "この種類の仮設設備は、プロジェクトの設備カタログにありません。",
+      "unknown_spare_category": "不明な予備品の区分です。",
+      "unknown_step": "不明な納入工程です。",
+      "unknown_vendor_bound_reason": "理由は、標準化、既存設備、保証、または単一供給者のいずれかである必要があります。",
+      "unknown_vendor_policy": "メーカー方針は、中立または指定のいずれかである必要があります。",
+      "vendor_bound_needs_reason": "特定メーカー指定の仕様には理由が必要です。",
+      "waiver_needs_reason": "予備品を免除するには理由が必要です。"
+    },
+    "evidence": {
+      "critical_route_set": "すべての重要項目について、承認済みの意思決定書とともに調達ルートが設定されている",
+      "frame_document_attached": "設備枠組み文書がCDEに添付されている",
+      "frame_document_missing": "プロジェクトにまだ設備枠組み文書がないため、添付を確認できません",
+      "host_unresolved": "ガバナンスモデルで、設備台帳がどのエリアとゲートに報告するかが定義されていません",
+      "long_lead_secured": "すべての長納期項目について、有効な基準見積書があり、発注済みまたは発注日の範囲内である",
+      "no_area_hosts_plant": "フェーズモデルに設備を配置するエリアが定義されていないため、設備台帳はゲートに報告できません",
+      "no_error_findings": "設備台帳にエラーレベルの指摘事項はありません",
+      "no_phase_enables_construction_start": "フェーズモデルに工事着手を可能にするフェーズが定義されていないため、設備台帳に報告先のゲートがありません"
+    },
+    "export": {
+      "catalogue": "カタログ",
+      "col_category": "分類",
+      "col_class": "区分",
+      "col_code": "項目",
+      "col_cost": "費用",
+      "col_critical": "重要",
+      "col_description": "内容",
+      "col_enquiry_date": "照会日",
+      "col_float": "余裕日数（日）",
+      "col_from": "開始",
+      "col_latest_order": "最終発注日",
+      "col_lead_source": "リードタイムの出典",
+      "col_lead_weeks": "リードタイム（週）",
+      "col_need_date": "必要日",
+      "col_option": "選択肢",
+      "col_quantity": "数量",
+      "col_recommended": "推奨",
+      "col_route": "ルート",
+      "col_score": "加重評価点",
+      "col_section": "区分",
+      "col_state": "状態",
+      "col_supply_by": "供給者",
+      "col_title": "件名",
+      "col_to": "終了",
+      "col_unit": "単位",
+      "critical_count": "重要項目数",
+      "empty": "該当する記録はありません。",
+      "frame_title": "設備枠組みの概要",
+      "item_count": "項目数",
+      "limits_title": "納入範囲のマトリクス",
+      "long_lead_count": "長納期項目数",
+      "overdue_count": "発注遅延",
+      "paper_title": "意思決定書",
+      "project": "プロジェクト",
+      "question": "質問",
+      "rationale": "根拠",
+      "register_title": "長納期項目台帳",
+      "section_it": "ITサービス",
+      "section_long_lead": "長納期項目",
+      "section_site_plant": "仮設設備",
+      "spares_title": "予備品リスト",
+      "yes": "はい"
+    },
+    "paper_state": {
+      "approved": "承認済み",
+      "draft": "下書き",
+      "rejected": "却下",
+      "submitted": "提出済み"
+    },
+    "reasons": {
+      "currency": "予約料に通貨が設定されていません",
+      "installer_mismatch": "発注者支給項目に、別の据付工事パッケージが指定されています",
+      "owner_furnished_item_required": "発注者支給ルートには、発注者支給項目が必要です",
+      "owner_installs": "発注者が据付を行うため、据付業者として工事パッケージを指定できません",
+      "package_does_not_supply": "この工事パッケージは設備を供給しません",
+      "package_not_in_plan": "この工事パッケージはパッケージ計画に含まれていません",
+      "package_required": "このルートには工事パッケージが必要です",
+      "single_package_form": "納入形態は1つの工事パッケージで構成されていますが、項目は別のパッケージに属しています"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "重要項目 {item} に、承認済みの意思決定書がありません。",
+        "suggestion": "選択肢の書類を作成し、承認のために提出してください。"
+      },
+      "critical_has_market_evidence": {
+        "fail": "重要項目 {item} は、カタログ既定値または見積りに依存しています。",
+        "suggestion": "供給者見積書、基本契約、または過去の発注実績を入手してください。"
+      },
+      "critical_has_strategic_spares": {
+        "fail": "重要項目 {item} に戦略予備品がありません。",
+        "suggestion": "戦略予備品を追加するか、不要な理由を記載してください。"
+      },
+      "delivery_limits_complete": {
+        "fail": "{item} の納入範囲に、次の工程の当事者が設定されていません: {steps}。",
+        "suggestion": "すべての納入工程に当事者を割り当ててください。"
+      },
+      "it_cde_linked": {
+        "fail": "実行ゲートの前にCDEアクセスが必要ですが、CDEコンテナがありません。",
+        "suggestion": "関係者が作業するCDEコンテナをリンクしてください。"
+      },
+      "lead_time_fresh": {
+        "fail": "{item} の基準リードタイムが古くなっています。",
+        "suggestion": "供給者に再照会し、新しい回答を記録してください。"
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "長納期項目 {item} には、照会日付きのリードタイム見積書がありません。",
+        "suggestion": "日付付きの見積書を記録してください: いつ照会し、誰が回答したか。"
+      },
+      "order_not_overdue": {
+        "fail": "{item} は {date} までに発注する必要があります。",
+        "suggestion": "今すぐ発注するか、工程の担当者と必要日を調整してください。"
+      },
+      "redundancy_quantity": {
+        "fail": "{item} の数量が冗長構成に合っていません。",
+        "suggestion": "構成に照らして数量を確認してください（N+1には少なくとも2台が必要です）。"
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "{item} の調達ルートがパッケージ計画と一致していません: {reason}。",
+        "suggestion": "ルートを工事パッケージおよび発注者支給項目に合わせてください。"
+      },
+      "single_basis_quote": {
+        "fail": "{item} の基準見積書が1件に限定されていません。",
+        "suggestion": "1件の見積書を基準として指定してください。"
+      },
+      "slot_after_order_date": {
+        "fail": "{item} の容量予約が最終発注日を過ぎています。",
+        "suggestion": "発注を前倒しするか、より早い枠を交渉してください。"
+      },
+      "slot_not_expired": {
+        "fail": "{item} の容量予約が転換期限を過ぎています。",
+        "suggestion": "発注に転換するか、予約を解放してください。"
+      },
+      "slot_terms_complete": {
+        "fail": "{item} の容量予約の条件が不完全です。",
+        "suggestion": "予約料、返金条件、転換期限、および契約のリンクを記録してください。"
+      },
+      "vendor_bound_has_reason": {
+        "fail": "{item} のメーカー方針に矛盾があります。",
+        "suggestion": "メーカー指定の仕様には理由が必要です。中立の仕様はメーカー名を記載しません。"
+      }
+    },
+    "spare_state": {
+      "delivered": "納入済み",
+      "handed_over": "引渡し済み",
+      "required": "必要",
+      "specified": "仕様決定済み",
+      "waived": "免除"
+    },
+    "state": {
+      "cancelled": "取消し",
+      "commissioned": "試運転済み",
+      "delivered": "納入済み",
+      "enquired": "照会済み",
+      "handed_over": "引渡し済み",
+      "identified": "特定済み",
+      "installed": "据付済み",
+      "manufactured": "製造済み",
+      "ordered": "発注済み",
+      "route_set": "ルート設定済み",
+      "specified": "仕様決定済み"
+    }
+  }
+}

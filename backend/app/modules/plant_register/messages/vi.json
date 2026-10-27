@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Tổ máy xử lý không khí",
+        "battery_storage": "Hệ thống lưu trữ pin",
+        "bms_controls": "Hệ thống tự động hóa tòa nhà",
+        "boiler": "Nồi hơi",
+        "chiller": "Máy làm lạnh nước",
+        "cooling_tower": "Tháp giải nhiệt",
+        "crane_permanent": "Cần trục cố định",
+        "distribution_transformer": "Máy biến áp phân phối",
+        "escalator": "Thang cuốn",
+        "facade_unit": "Cấu kiện mặt dựng",
+        "generator": "Tổ máy phát điện",
+        "heat_pump": "Bơm nhiệt",
+        "it_core_network": "Mạng lõi CNTT",
+        "kitchen_equipment": "Thiết bị nhà bếp",
+        "lift": "Thang máy",
+        "lv_switchboard": "Tủ phân phối hạ áp",
+        "medical_equipment": "Thiết bị y tế",
+        "mv_switchgear": "Tủ đóng cắt trung áp",
+        "power_transformer": "Máy biến áp lực",
+        "process_unit": "Thiết bị công nghệ",
+        "sprinkler_pump": "Bộ bơm chữa cháy sprinkler",
+        "structural_steel_package": "Gói kết cấu thép",
+        "ups": "Bộ lưu điện UPS"
+      },
+      "it_service": {
+        "access_control": "Kiểm soát ra vào",
+        "cctv": "Giám sát camera",
+        "cde_access": "Truy cập CDE",
+        "drone_survey": "Khảo sát bằng flycam",
+        "site_network": "Mạng công trường",
+        "telecom": "Viễn thông",
+        "time_recording": "Ghi nhận thời gian"
+      },
+      "maintenance": {
+        "condition_based": "Bảo trì theo tình trạng",
+        "preventive_interval": "Bảo trì phòng ngừa theo chu kỳ",
+        "run_to_failure": "Vận hành đến khi hỏng",
+        "vendor_service_contract": "Hợp đồng dịch vụ với nhà cung cấp"
+      },
+      "name": "Danh mục thiết bị trung lập",
+      "party": {
+        "contractor": "Nhà thầu",
+        "installer": "Đơn vị lắp đặt",
+        "operator": "Đơn vị vận hành",
+        "owner": "Chủ đầu tư",
+        "supplier": "Nhà cung cấp",
+        "user": "Người sử dụng"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Hai hệ thống hoàn toàn độc lập",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Hai hệ thống độc lập và thêm một thiết bị dự phòng",
+        "n": "N",
+        "n_desc": "Đúng công suất cần thiết, không có thiết bị dự phòng",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Thêm một thiết bị dự phòng ngoài công suất cần thiết",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Thêm hai thiết bị dự phòng ngoài công suất cần thiết"
+      },
+      "route": {
+        "contractor_furnished_installed": "Nhà thầu cung cấp, nhà thầu lắp đặt",
+        "owner_furnished_contractor_installed": "Chủ đầu tư cung cấp, nhà thầu lắp đặt",
+        "owner_furnished_owner_installed": "Chủ đầu tư cung cấp, chủ đầu tư lắp đặt",
+        "owner_procured_novated": "Chủ đầu tư mua sắm, chuyển giao đơn hàng cho nhà thầu"
+      },
+      "site_plant": {
+        "concrete_plant": "Trạm trộn bê tông",
+        "hoist": "Thang nâng vật liệu",
+        "mobile_crane_pad": "Nền đặt cần trục di động",
+        "site_office": "Văn phòng công trường",
+        "storage": "Kho bãi",
+        "temporary_power": "Cấp điện tạm",
+        "temporary_water": "Cấp nước tạm",
+        "tower_crane": "Cần trục tháp",
+        "welfare": "Khu phúc lợi",
+        "wheel_wash": "Hố rửa bánh xe"
+      },
+      "source": {
+        "catalogue_default": "Mặc định theo danh mục",
+        "expert_estimate": "Ước tính của chuyên gia",
+        "framework_agreement": "Thỏa thuận khung",
+        "historic_order": "Đơn hàng trước đây",
+        "market_sounding": "Khảo sát thị trường",
+        "none": "Không có thời gian giao hàng",
+        "supplier_catalogue": "Danh mục của nhà cung cấp",
+        "supplier_quote": "Báo giá của nhà cung cấp"
+      },
+      "spare": {
+        "commissioning_spares": "Phụ tùng vận hành thử",
+        "operating_consumables": "Vật tư tiêu hao vận hành",
+        "special_tools": "Dụng cụ chuyên dụng",
+        "strategic_spares": "Phụ tùng chiến lược"
+      },
+      "step": {
+        "accept": "Nghiệm thu",
+        "commission": "Vận hành thử",
+        "connect": "Đấu nối",
+        "deliver_to_site": "Giao đến công trường",
+        "document": "Hồ sơ tài liệu",
+        "offload": "Dỡ hàng",
+        "set_in_place": "Lắp đặt vào vị trí",
+        "supply": "Cung cấp",
+        "test": "Thí nghiệm",
+        "train": "Đào tạo"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Cần có báo giá thời gian giao hàng cơ sở.",
+      "catalogue_entry_required": "Thời gian giao hàng theo danh mục nhà cung cấp cần có mục danh mục tương ứng.",
+      "catalogue_lead_mismatch": "Thời gian giao hàng không khớp với mục danh mục nhà cung cấp đã nêu.",
+      "catalogue_retired": "Danh mục này đã ngừng sử dụng nên không thể ghim.",
+      "classification_frozen": "Khi đã thiết lập tuyến mua sắm, không thể thay đổi phân loại quan trọng và thời gian giao hàng dài.",
+      "commitment_currency_mismatch": "Phí giữ chỗ và cam kết đã giải phóng dùng hai loại tiền tệ khác nhau.",
+      "commitment_for_other_item": "Hạng mục cam kết được liên kết thuộc về một thiết bị khác.",
+      "commitment_not_found": "Hạng mục cam kết được liên kết không thuộc dự án này.",
+      "commitment_not_released": "Hạng mục cam kết được liên kết chưa được giải phóng.",
+      "commitment_release_below_fee": "Số tiền giải phóng thấp hơn phí giữ chỗ.",
+      "commitment_release_failed": "Không đọc được thông tin giải phóng cam kết; vui lòng thử lại hoặc liên hệ quản trị viên.",
+      "commitment_release_unavailable": "Không đọc được thông tin giải phóng cam kết nên không thể gắn phí giữ chỗ.",
+      "concurrent_basis_change": "Có người dùng khác vừa thay đổi báo giá cơ sở; vui lòng tải lại và thử lại.",
+      "cost_needs_currency": "Chi phí của phương án cần có loại tiền tệ.",
+      "critical_override_needs_reason": "Thay đổi mức độ quan trọng cần nêu lý do.",
+      "critical_without_decision": "Hạng mục quan trọng cần có hồ sơ quyết định đã phê duyệt trước khi thiết lập tuyến mua sắm.",
+      "critical_without_market_evidence": "Hạng mục quan trọng cần thời gian giao hàng lấy từ thị trường, không dùng mặc định theo danh mục hoặc ước tính.",
+      "critical_without_strategic_spares": "Hạng mục quan trọng cần có phụ tùng chiến lược hoặc nêu lý do không cần.",
+      "decision_paper_needs_two_options": "Hồ sơ quyết định cần ít nhất hai phương án, trừ trường hợp chỉ có một nguồn cung cấp.",
+      "decision_route_refused": "Quy trình phê duyệt đã từ chối bước này.",
+      "delivery_limit_gap": "Chưa phải mọi bước giao hàng đều có bên chịu trách nhiệm.",
+      "edit_permission_required": "Bạn không có quyền thay đổi sổ đăng ký thiết bị.",
+      "enquiry_date_in_future": "Ngày hỏi giá không thể ở tương lai.",
+      "fee_needs_currency": "Phí giữ chỗ cần có loại tiền tệ.",
+      "fee_negative": "Phí giữ chỗ không thể là số âm.",
+      "handover_needs_commissioned": "Chỉ thiết bị đã vận hành thử mới được bàn giao.",
+      "handover_needs_confirmation": "Bàn giao phải được xác nhận.",
+      "handover_needs_service_asset": "Nêu hợp đồng dịch vụ của tài sản, hoặc nêu lý do bàn giao thiết bị không có hợp đồng dịch vụ.",
+      "invalid_transition": "Không thể chuyển trạng thái này từ trạng thái hiện tại.",
+      "it_cde_not_linked": "Truy cập CDE cần liên kết với một vùng CDE.",
+      "it_service_not_found": "Không tìm thấy dịch vụ CNTT.",
+      "it_service_range_invalid": "Dịch vụ kết thúc trước khi bắt đầu.",
+      "it_service_retired": "Dịch vụ CNTT đã ngừng sử dụng không thể thay đổi.",
+      "item_already_ordered": "Thiết bị này đã được đặt hàng.",
+      "item_closed": "Thiết bị đã được bàn giao hoặc đã hủy.",
+      "item_code_taken": "Đã có thiết bị với mã này trong dự án.",
+      "item_not_found": "Không tìm thấy thiết bị.",
+      "item_required": "Hãy chọn một thiết bị.",
+      "laydown_zone_not_found": "Khu vực tập kết này không tồn tại trong dự án.",
+      "lead_time_owned_by_plant_item": "Thời gian giao hàng của hồ sơ trình duyệt này được lưu trên thiết bị tương ứng.",
+      "lead_time_stale": "Báo giá thời gian giao hàng cơ sở đã cũ hơn mức cho phép của loại thiết bị.",
+      "lead_time_without_enquiry_date": "Thời gian giao hàng cần có ngày hỏi giá.",
+      "lead_weeks_range_invalid": "Thời gian giao hàng tối thiểu không được vượt quá tối đa.",
+      "limit_needs_party": "Bước giao hàng cần có một bên hoặc một gói thầu.",
+      "link_not_found": "Bản ghi được liên kết không thuộc dự án này.",
+      "long_lead_override_needs_reason": "Thay đổi phân loại thời gian giao hàng dài cần nêu lý do.",
+      "manage_required": "Chỉ người có quyền quản lý thiết bị mới được thay đổi nội dung này.",
+      "neutral_spec_names_vendor": "Quy cách kỹ thuật là trung lập nhưng lại nêu tên nhà cung cấp.",
+      "no_decision_route": "Dự án chưa có quy trình phê duyệt cho hồ sơ quyết định.",
+      "not_equipment_owner": "Chỉ quản lý hoặc người phụ trách khu vực thiết bị mới được thay đổi sổ đăng ký thiết bị.",
+      "null_not_allowed": "Trường này không được để trống.",
+      "package_not_found": "Gói thầu không nằm trong kế hoạch gói thầu của dự án.",
+      "package_plan_failed": "Không đọc được mô hình giao hàng; vui lòng thử lại hoặc liên hệ quản trị viên.",
+      "package_plan_unavailable": "Không đọc được kế hoạch gói thầu của dự án nên không thể kiểm tra tuyến mua sắm.",
+      "paper_needs_rationale": "Hồ sơ cần có căn cứ lập luận.",
+      "paper_needs_recommendation": "Hồ sơ cần có kiến nghị.",
+      "paper_not_draft": "Chỉ hồ sơ ở trạng thái nháp mới được sửa hoặc gửi.",
+      "paper_not_found": "Không tìm thấy hồ sơ quyết định.",
+      "paper_not_submitted": "Chỉ hồ sơ đã gửi mới được rút lại.",
+      "paper_open": "Thiết bị này đã có hồ sơ quyết định đang mở.",
+      "paper_option_codes_invalid": "Mỗi phương án cần có một mã riêng biệt.",
+      "paper_recommendation_unknown": "Kiến nghị phải nêu một trong các phương án.",
+      "paper_scores_invalid": "Điểm và trọng số phải là số thập phân.",
+      "paper_submitter_is_approver": "Người gửi hồ sơ không thể đồng thời là người phê duyệt trong quy trình của hồ sơ đó.",
+      "position_date_invalid": "Đây không phải là một ngày hợp lệ.",
+      "position_incomplete": "Vị trí cần có loại và điểm đặt trên mặt bằng công trường.",
+      "position_not_found": "Vị trí thiết bị này không tồn tại trong dự án.",
+      "position_number_invalid": "Không thể lưu số này: hãy kiểm tra phần thập phân và độ lớn.",
+      "position_range_invalid": "Vị trí kết thúc trước khi bắt đầu.",
+      "position_text_invalid": "Nội dung này trống hoặc quá dài.",
+      "quantity_not_positive": "Số lượng phải lớn hơn không.",
+      "quote_not_found": "Không tìm thấy báo giá thời gian giao hàng.",
+      "response_before_enquiry": "Ngày phản hồi không thể trước ngày hỏi giá.",
+      "route_frozen": "Tuyến mua sắm không thể thay đổi sau khi thiết bị đã được đặt hàng.",
+      "route_inconsistent_with_package_plan": "Tuyến mua sắm không khớp với kế hoạch gói thầu.",
+      "route_missing": "Chưa thiết lập tuyến mua sắm.",
+      "slot_closed": "Việc giữ chỗ đã đóng.",
+      "slot_exists": "Thiết bị này đã có một đặt chỗ công suất đang mở.",
+      "slot_fee_needs_commitment": "Phí giữ chỗ chỉ được ràng buộc tiền thông qua việc giải phóng cam kết; hãy liên kết hạng mục cam kết.",
+      "slot_not_found": "Không tìm thấy đặt chỗ công suất.",
+      "slot_range_invalid": "Khung thời gian kết thúc trước khi bắt đầu.",
+      "slot_terms_incomplete": "Đặt chỗ đang giữ cần có phí, điều kiện hoàn phí và hạn chót chuyển đổi.",
+      "spare_closed": "Dòng phụ tùng này đã đóng.",
+      "spare_not_deletable": "Chỉ có thể xóa dòng phụ tùng vẫn đang ở trạng thái cần thiết.",
+      "spare_not_found": "Không tìm thấy dòng phụ tùng.",
+      "spares_not_handed_over": "Mọi phụ tùng phải được bàn giao hoặc miễn trừ trước.",
+      "specification_frozen": "Quy cách kỹ thuật được khóa sau khi đã thiết lập tuyến mua sắm.",
+      "stage_not_found": "Giai đoạn mở rộng này không tồn tại trong dự án.",
+      "stage_unavailable": "Không đọc được các giai đoạn mở rộng nên không thể gán vị trí vào giai đoạn.",
+      "state_read_from_source": "Trạng thái này được lấy từ đơn hàng, thiết bị do chủ đầu tư cung cấp hoặc việc vận hành thử, không đặt bằng tay.",
+      "transition_blocked": "Việc chuyển trạng thái bị chặn bởi nhiều quy tắc.",
+      "two_parties_on_one_step": "Một bước giao hàng chỉ được có một bên chịu trách nhiệm.",
+      "unknown_catalogue": "Danh mục thiết bị không xác định.",
+      "unknown_component_class": "Loại cấu kiện không xác định.",
+      "unknown_fee_refundable": "Điều kiện hoàn phí phải là không hoàn, hoàn một phần hoặc hoàn toàn.",
+      "unknown_it_service_kind": "Dịch vụ CNTT không xác định.",
+      "unknown_lead_basis": "Cơ sở thời gian giao hàng không xác định.",
+      "unknown_lead_time_source": "Nguồn thời gian giao hàng không xác định.",
+      "unknown_maintenance_strategy": "Chiến lược bảo trì không xác định.",
+      "unknown_party": "Bên liên quan không xác định.",
+      "unknown_redundancy_scheme": "Phương án dự phòng không xác định.",
+      "unknown_route": "Tuyến mua sắm không xác định.",
+      "unknown_site_plant_kind": "Loại thiết bị công trường này không có trong danh mục thiết bị của dự án.",
+      "unknown_spare_category": "Nhóm phụ tùng không xác định.",
+      "unknown_step": "Bước giao hàng không xác định.",
+      "unknown_vendor_bound_reason": "Lý do phải là tiêu chuẩn hóa, tài sản hiện hữu, bảo hành hoặc nguồn cung cấp duy nhất.",
+      "unknown_vendor_policy": "Chính sách nhà cung cấp phải là trung lập hoặc chỉ định.",
+      "vendor_bound_needs_reason": "Quy cách chỉ định nhà cung cấp cần nêu lý do.",
+      "waiver_needs_reason": "Miễn trừ phụ tùng cần nêu lý do."
+    },
+    "evidence": {
+      "critical_route_set": "Mọi hạng mục quan trọng đã thiết lập tuyến mua sắm kèm hồ sơ quyết định đã phê duyệt",
+      "frame_document_attached": "Tài liệu khung thiết bị đã được đính kèm vào CDE",
+      "frame_document_missing": "Dự án chưa có tài liệu khung thiết bị nên chưa thể kiểm tra việc đính kèm",
+      "host_unresolved": "Mô hình quản trị chưa xác định sổ đăng ký thiết bị báo cáo cho khu vực và cổng nào",
+      "long_lead_secured": "Mọi hạng mục thời gian giao hàng dài đều có báo giá cơ sở còn hiệu lực và đã đặt hàng hoặc còn trong hạn đặt hàng",
+      "no_area_hosts_plant": "Mô hình giai đoạn không có khu vực nào chứa thiết bị nên sổ đăng ký không thể báo cáo tới cổng",
+      "no_error_findings": "Sổ đăng ký thiết bị không có phát hiện ở mức lỗi",
+      "no_phase_enables_construction_start": "Mô hình giai đoạn không có giai đoạn nào cho phép bắt đầu thi công nên sổ đăng ký thiết bị không có cổng để báo cáo"
+    },
+    "export": {
+      "catalogue": "Danh mục",
+      "col_category": "Hạng mục",
+      "col_class": "Loại",
+      "col_code": "Thiết bị",
+      "col_cost": "Chi phí",
+      "col_critical": "Quan trọng",
+      "col_description": "Mô tả",
+      "col_enquiry_date": "Ngày hỏi giá",
+      "col_float": "Thời gian dư (ngày)",
+      "col_from": "Từ",
+      "col_latest_order": "Hạn đặt hàng muộn nhất",
+      "col_lead_source": "Nguồn thời gian giao hàng",
+      "col_lead_weeks": "Thời gian giao hàng (tuần)",
+      "col_need_date": "Ngày cần",
+      "col_option": "Phương án",
+      "col_quantity": "Số lượng",
+      "col_recommended": "Được đề xuất",
+      "col_route": "Tuyến mua sắm",
+      "col_score": "Điểm có trọng số",
+      "col_section": "Mục",
+      "col_state": "Trạng thái",
+      "col_supply_by": "Cung cấp bởi",
+      "col_title": "Tiêu đề",
+      "col_to": "Đến",
+      "col_unit": "Đơn vị",
+      "critical_count": "Số hạng mục quan trọng",
+      "empty": "Không có mục nào.",
+      "frame_title": "Tóm tắt khung thiết bị",
+      "item_count": "Số thiết bị",
+      "limits_title": "Ma trận giới hạn giao hàng",
+      "long_lead_count": "Số thiết bị thời gian giao hàng dài",
+      "overdue_count": "Đơn hàng quá hạn",
+      "paper_title": "Hồ sơ quyết định",
+      "project": "Dự án",
+      "question": "Câu hỏi",
+      "rationale": "Căn cứ lập luận",
+      "register_title": "Sổ đăng ký thiết bị thời gian giao hàng dài",
+      "section_it": "Dịch vụ CNTT",
+      "section_long_lead": "Thiết bị thời gian giao hàng dài",
+      "section_site_plant": "Thiết bị công trường",
+      "spares_title": "Danh mục phụ tùng",
+      "yes": "có"
+    },
+    "paper_state": {
+      "approved": "Đã phê duyệt",
+      "draft": "Nháp",
+      "rejected": "Bị từ chối",
+      "submitted": "Đã gửi"
+    },
+    "reasons": {
+      "currency": "phí giữ chỗ chưa có loại tiền tệ",
+      "installer_mismatch": "thiết bị do chủ đầu tư cung cấp ghi tên một gói thầu lắp đặt khác",
+      "owner_furnished_item_required": "tuyến do chủ đầu tư cung cấp cần có thiết bị do chủ đầu tư cung cấp",
+      "owner_installs": "chủ đầu tư tự lắp đặt nên không được ghi gói thầu nào làm đơn vị lắp đặt",
+      "package_does_not_supply": "gói thầu không cung cấp thiết bị",
+      "package_not_in_plan": "gói thầu không có trong kế hoạch gói thầu",
+      "package_required": "tuyến này cần có một gói thầu",
+      "single_package_form": "hình thức giao hàng chỉ có một gói thầu nhưng thiết bị thuộc gói khác"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Hạng mục quan trọng {item} chưa có hồ sơ quyết định đã phê duyệt.",
+        "suggestion": "Chuẩn bị hồ sơ phương án và gửi phê duyệt."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Hạng mục quan trọng {item} đang dựa vào mặc định theo danh mục hoặc ước tính.",
+        "suggestion": "Lấy báo giá của nhà cung cấp, thỏa thuận khung hoặc đơn hàng trước đây."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Hạng mục quan trọng {item} chưa có phụ tùng chiến lược.",
+        "suggestion": "Bổ sung phụ tùng chiến lược hoặc nêu lý do không cần."
+      },
+      "delivery_limits_complete": {
+        "fail": "Giới hạn giao hàng của {item} chưa có bên chịu trách nhiệm cho: {steps}.",
+        "suggestion": "Phân công bên chịu trách nhiệm cho mọi bước giao hàng."
+      },
+      "it_cde_linked": {
+        "fail": "Cần truy cập CDE trước cổng thực hiện nhưng chưa có vùng CDE nào.",
+        "suggestion": "Liên kết vùng CDE mà các bên sẽ làm việc trong đó."
+      },
+      "lead_time_fresh": {
+        "fail": "Thời gian giao hàng cơ sở của {item} đã lỗi thời.",
+        "suggestion": "Hỏi lại nhà cung cấp và ghi nhận câu trả lời mới."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Thiết bị thời gian giao hàng dài {item} chưa có báo giá thời gian giao hàng kèm ngày hỏi giá.",
+        "suggestion": "Ghi nhận báo giá có ngày: thời điểm hỏi và người trả lời."
+      },
+      "order_not_overdue": {
+        "fail": "{item} phải được đặt hàng trước ngày {date}.",
+        "suggestion": "Đặt hàng ngay hoặc thỏa thuận với người phụ trách tiến độ để dời ngày cần."
+      },
+      "redundancy_quantity": {
+        "fail": "Số lượng của {item} không phù hợp với phương án dự phòng.",
+        "suggestion": "Đối chiếu số lượng với phương án (N+1 cần ít nhất hai thiết bị)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Tuyến mua sắm của {item} không khớp với kế hoạch gói thầu: {reason}.",
+        "suggestion": "Điều chỉnh tuyến mua sắm cho khớp với gói thầu và thiết bị do chủ đầu tư cung cấp."
+      },
+      "single_basis_quote": {
+        "fail": "{item} không có đúng một báo giá cơ sở.",
+        "suggestion": "Đánh dấu một báo giá làm báo giá cơ sở."
+      },
+      "slot_after_order_date": {
+        "fail": "Đặt chỗ công suất của {item} kéo dài quá hạn đặt hàng muộn nhất.",
+        "suggestion": "Ký đơn hàng sớm hơn hoặc thương lượng khung thời gian sớm hơn."
+      },
+      "slot_not_expired": {
+        "fail": "Đặt chỗ công suất của {item} đã quá hạn chuyển đổi.",
+        "suggestion": "Chuyển thành đơn hàng hoặc giải phóng đặt chỗ."
+      },
+      "slot_terms_complete": {
+        "fail": "Điều kiện đặt chỗ công suất của {item} chưa đầy đủ.",
+        "suggestion": "Ghi nhận phí, điều kiện hoàn phí, hạn chuyển đổi và liên kết cam kết."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Chính sách nhà cung cấp của {item} không nhất quán.",
+        "suggestion": "Quy cách chỉ định nhà cung cấp cần có lý do; quy cách trung lập không nêu tên nhà cung cấp nào."
+      }
+    },
+    "spare_state": {
+      "delivered": "Đã giao",
+      "handed_over": "Đã bàn giao",
+      "required": "Cần thiết",
+      "specified": "Đã xác định",
+      "waived": "Đã miễn trừ"
+    },
+    "state": {
+      "cancelled": "Đã hủy",
+      "commissioned": "Đã vận hành thử",
+      "delivered": "Đã giao",
+      "enquired": "Đã hỏi giá",
+      "handed_over": "Đã bàn giao",
+      "identified": "Đã xác định",
+      "installed": "Đã lắp đặt",
+      "manufactured": "Đã sản xuất",
+      "ordered": "Đã đặt hàng",
+      "route_set": "Đã thiết lập tuyến",
+      "specified": "Đã quy định"
+    }
+  }
+}

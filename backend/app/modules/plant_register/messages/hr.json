@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Klima jedinica",
+        "battery_storage": "Baterijski spremnik energije",
+        "bms_controls": "Automatizacija zgrade",
+        "boiler": "Kotao",
+        "chiller": "Rashladni agregat",
+        "cooling_tower": "Rashladni toranj",
+        "crane_permanent": "Stalna dizalica",
+        "distribution_transformer": "Distribucijski transformator",
+        "escalator": "Pokretne stube",
+        "facade_unit": "Elementi fasade",
+        "generator": "Agregat",
+        "heat_pump": "Toplinska pumpa",
+        "it_core_network": "IT osnovna mreža",
+        "kitchen_equipment": "Kuhinjska oprema",
+        "lift": "Dizalo",
+        "lv_switchboard": "Niskonaponski glavni razvodni ormar",
+        "medical_equipment": "Medicinska oprema",
+        "mv_switchgear": "Srednjenaponska sklopna oprema",
+        "power_transformer": "Energetski transformator",
+        "process_unit": "Procesna jedinica",
+        "sprinkler_pump": "Sprinkler crpni agregat",
+        "structural_steel_package": "Paket čelične konstrukcije",
+        "ups": "Neprekidno napajanje"
+      },
+      "it_service": {
+        "access_control": "Kontrola pristupa",
+        "cctv": "Video nadzor",
+        "cde_access": "Pristup CDE-u",
+        "drone_survey": "Snimanje dronom",
+        "site_network": "Mreža gradilišta",
+        "telecom": "Telekomunikacije",
+        "time_recording": "Evidencija radnog vremena"
+      },
+      "maintenance": {
+        "condition_based": "Prema stanju",
+        "preventive_interval": "Preventivno, prema intervalu",
+        "run_to_failure": "Rad do kvara",
+        "vendor_service_contract": "Ugovor o servisu s proizvođačem"
+      },
+      "name": "Neutralni katalog postrojenja",
+      "party": {
+        "contractor": "Izvođač",
+        "installer": "Monter",
+        "operator": "Operater",
+        "owner": "Investitor",
+        "supplier": "Dobavljač",
+        "user": "Korisnik"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Dva potpuno neovisna sustava",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Dva neovisna sustava plus jedna rezervna jedinica",
+        "n": "N",
+        "n_desc": "Točno potreban kapacitet, bez rezervne jedinice",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Jedna rezervna jedinica iznad potrebnog kapaciteta",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Dvije rezervne jedinice iznad potrebnog kapaciteta"
+      },
+      "route": {
+        "contractor_furnished_installed": "Izvođač nabavlja, izvođač montira",
+        "owner_furnished_contractor_installed": "Investitor nabavlja, izvođač montira",
+        "owner_furnished_owner_installed": "Investitor nabavlja, investitor montira",
+        "owner_procured_novated": "Investitor nabavlja, narudžba prenesena na izvođača"
+      },
+      "site_plant": {
+        "concrete_plant": "Betonara",
+        "hoist": "Građevinski dizalica za materijal",
+        "mobile_crane_pad": "Podloga za pokretnu dizalicu",
+        "site_office": "Gradilišni ured",
+        "storage": "Skladište",
+        "temporary_power": "Privremeno napajanje električnom energijom",
+        "temporary_water": "Privremeno napajanje vodom",
+        "tower_crane": "Tornjasta dizalica",
+        "welfare": "Sanitarni i socijalni prostori",
+        "wheel_wash": "Pranje kotača"
+      },
+      "source": {
+        "catalogue_default": "Zadana vrijednost iz kataloga",
+        "expert_estimate": "Procjena stručnjaka",
+        "framework_agreement": "Okvirni sporazum",
+        "historic_order": "Ranija narudžba",
+        "market_sounding": "Istraživanje tržišta",
+        "none": "Bez roka isporuke",
+        "supplier_catalogue": "Katalog dobavljača",
+        "supplier_quote": "Ponuda dobavljača"
+      },
+      "spare": {
+        "commissioning_spares": "Rezervni dijelovi za puštanje u rad",
+        "operating_consumables": "Potrošni materijal za rad",
+        "special_tools": "Specijalni alati",
+        "strategic_spares": "Strateški rezervni dijelovi"
+      },
+      "step": {
+        "accept": "Preuzimanje",
+        "commission": "Puštanje u rad",
+        "connect": "Priključenje",
+        "deliver_to_site": "Isporuka na gradilište",
+        "document": "Dokumentiranje",
+        "offload": "Istovar",
+        "set_in_place": "Postavljanje na mjesto",
+        "supply": "Nabava",
+        "test": "Ispitivanje",
+        "train": "Obuka"
+      }
+    },
+    "common": {
+      "ok": "U redu"
+    },
+    "errors": {
+      "basis_quote_required": "Potrebna je osnovna ponuda za rok isporuke.",
+      "catalogue_entry_required": "Rok isporuke prema katalogu dobavljača zahtijeva stavku kataloga.",
+      "catalogue_lead_mismatch": "Rok isporuke ne odgovara stavci kataloga dobavljača koja je navedena.",
+      "catalogue_retired": "Ovaj katalog je povučen i ne može se koristiti.",
+      "classification_frozen": "Promjene kritične i dugoročne klasifikacije zamrznute su nakon što je postavljen put nabave.",
+      "commitment_currency_mismatch": "Naknada za rezervaciju i oslobođena obveza su u različitim valutama.",
+      "commitment_for_other_item": "Povezana stavka obveze pripada drugoj stavci postrojenja.",
+      "commitment_not_found": "Povezana stavka obveze nije dio ovog projekta.",
+      "commitment_not_released": "Povezana stavka obveze još nije oslobođena.",
+      "commitment_release_below_fee": "Oslobođeni iznos manji je od naknade za rezervaciju.",
+      "commitment_release_failed": "Oslobođenje obveze nije bilo moguće očitati; pokušajte ponovno ili se obratite administratoru.",
+      "commitment_release_unavailable": "Oslobođenje obveze nije moguće očitati, pa se naknada za rezervaciju ne može vezati.",
+      "concurrent_basis_change": "Drugi korisnik je istodobno promijenio osnovnu ponudu; ponovno učitajte stranicu i pokušajte ponovno.",
+      "cost_needs_currency": "Trošak opcije mora imati valutu.",
+      "critical_override_needs_reason": "Promjena kritičnosti zahtijeva obrazloženje.",
+      "critical_without_decision": "Kritična stavka zahtijeva odobreni dokument o odluci prije postavljanja puta nabave.",
+      "critical_without_market_evidence": "Kritična stavka zahtijeva rok isporuke s tržišta, a ne zadanu vrijednost iz kataloga ili procjenu.",
+      "critical_without_strategic_spares": "Kritična stavka zahtijeva strateški rezervni dio ili navedeni razlog zašto ga nema.",
+      "decision_paper_needs_two_options": "Dokument o odluci mora sadržavati najmanje dvije opcije, osim ako je stavka iz jednog izvora.",
+      "decision_route_refused": "Put odobravanja odbio je ovaj korak.",
+      "delivery_limit_gap": "Nemaju svi koraci isporuke odgovornu stranu.",
+      "edit_permission_required": "Nemate ovlasti za izmjenu registra postrojenja.",
+      "enquiry_date_in_future": "Datum upita ne može biti u budućnosti.",
+      "fee_needs_currency": "Naknada za rezervaciju mora imati valutu.",
+      "fee_negative": "Naknada za rezervaciju ne može biti negativna.",
+      "handover_needs_commissioned": "Predati se može samo puštena u rad stavka.",
+      "handover_needs_confirmation": "Predaja mora biti potvrđena.",
+      "handover_needs_service_asset": "Navedite ugovor o servisu za imovinu ili navedite zašto se stavka predaje bez njega.",
+      "invalid_transition": "Ova promjena stanja nije moguća iz trenutnog stanja.",
+      "it_cde_not_linked": "Pristup CDE-u zahtijeva povezani CDE spremnik.",
+      "it_service_not_found": "IT usluga nije pronađena.",
+      "it_service_range_invalid": "Usluga završava prije početka.",
+      "it_service_retired": "Povučena IT usluga ne može se mijenjati.",
+      "item_already_ordered": "Stavka je već naručena.",
+      "item_closed": "Stavka je predana ili otkazana.",
+      "item_code_taken": "Stavka s ovom oznakom već postoji u projektu.",
+      "item_not_found": "Stavka postrojenja nije pronađena.",
+      "item_required": "Odaberite stavku.",
+      "laydown_zone_not_found": "Ova zona za odlaganje ne postoji u ovom projektu.",
+      "lead_time_owned_by_plant_item": "Rok isporuke ovog podneska vodi se uz stavku postrojenja.",
+      "lead_time_stale": "Osnovna ponuda za rok isporuke starija je od dopuštene prema klasi.",
+      "lead_time_without_enquiry_date": "Rok isporuke zahtijeva datum upita.",
+      "lead_weeks_range_invalid": "Minimalni rok isporuke ne smije biti veći od maksimalnog.",
+      "limit_needs_party": "Korak isporuke zahtijeva sudionika ili paket.",
+      "link_not_found": "Povezani zapis nije dio ovog projekta.",
+      "long_lead_override_needs_reason": "Promjena klasifikacije dugog roka isporuke zahtijeva obrazloženje.",
+      "manage_required": "Ovo može promijeniti samo nositelj ovlasti za upravljanje postrojenjima.",
+      "neutral_spec_names_vendor": "Specifikacija je neutralna prema proizvođaču, ali navodi proizvođača.",
+      "no_decision_route": "Projekt nema put odobravanja za dokumente o odluci.",
+      "not_equipment_owner": "Registar postrojenja mogu mijenjati samo voditelj ili nositelj područja opreme.",
+      "null_not_allowed": "Ovo polje ne smije biti prazno.",
+      "package_not_found": "Ugovorni paket nije dio plana paketa ovog projekta.",
+      "package_plan_failed": "Model isporuke nije bilo moguće očitati; pokušajte ponovno ili se obratite administratoru.",
+      "package_plan_unavailable": "Plan paketa projekta nije moguće očitati, pa put nabave ne može biti provjeren.",
+      "paper_needs_rationale": "Dokument zahtijeva obrazloženje.",
+      "paper_needs_recommendation": "Dokument zahtijeva preporuku.",
+      "paper_not_draft": "Mijenjati ili podnijeti se može samo dokument u nacrtu.",
+      "paper_not_found": "Dokument o odluci nije pronađen.",
+      "paper_not_submitted": "Povući se može samo podneseni dokument.",
+      "paper_open": "Stavka već ima otvoreni dokument o odluci.",
+      "paper_option_codes_invalid": "Svaka opcija mora imati jedinstvenu oznaku.",
+      "paper_recommendation_unknown": "Preporuka mora navesti jednu od opcija.",
+      "paper_scores_invalid": "Bodovi i težine moraju biti decimalni brojevi.",
+      "paper_submitter_is_approver": "Osoba koja podnosi dokument ne može biti odobravatelj njegova puta.",
+      "position_date_invalid": "Ovo nije datum.",
+      "position_incomplete": "Pozicija zahtijeva vrstu i točku na situacijskom planu.",
+      "position_not_found": "Ova pozicija postrojenja ne postoji u ovom projektu.",
+      "position_number_invalid": "Ovaj broj se ne može spremiti: provjerite decimale i veličinu.",
+      "position_range_invalid": "Pozicija završava prije početka.",
+      "position_text_invalid": "Ovaj tekst je prazan ili predugačak.",
+      "quantity_not_positive": "Količina mora biti veća od nule.",
+      "quote_not_found": "Ponuda za rok isporuke nije pronađena.",
+      "response_before_enquiry": "Datum odgovora ne može biti prije datuma upita.",
+      "route_frozen": "Put nabave ne može se mijenjati nakon što je stavka naručena.",
+      "route_inconsistent_with_package_plan": "Put nabave ne odgovara planu paketa.",
+      "route_missing": "Put nabave nije postavljen.",
+      "slot_closed": "Rezervacija je zatvorena.",
+      "slot_exists": "Stavka već ima otvorenu rezervaciju kapaciteta.",
+      "slot_fee_needs_commitment": "Naknada za rezervaciju veže novac samo kroz oslobođenje obveze; povežite stavku obveze.",
+      "slot_not_found": "Rezervacija kapaciteta nije pronađena.",
+      "slot_range_invalid": "Termin završava prije početka.",
+      "slot_terms_incomplete": "Zadržana rezervacija zahtijeva naknadu, uvjete povrata i rok za pretvorbu.",
+      "spare_closed": "Stavka rezervnog dijela je zatvorena.",
+      "spare_not_deletable": "Može se obrisati samo stavka rezervnog dijela koja je još potrebna.",
+      "spare_not_found": "Stavka rezervnog dijela nije pronađena.",
+      "spares_not_handed_over": "Svaki rezervni dio mora prvo biti predan ili odbačen.",
+      "specification_frozen": "Specifikacija je zamrznuta nakon što je postavljen put nabave.",
+      "stage_not_found": "Ova faza proširenja ne postoji u ovom projektu.",
+      "stage_unavailable": "Faze proširenja nije moguće očitati, pa se pozicija ne može na nju postaviti.",
+      "state_read_from_source": "Ovo stanje očitava se iz narudžbe, stavke koju nabavlja investitor ili puštanja u rad, a ne postavlja se ručno.",
+      "transition_blocked": "Promjenu stanja blokira više pravila.",
+      "two_parties_on_one_step": "Korak isporuke može imati samo jednog sudionika.",
+      "unknown_catalogue": "Nepoznat katalog postrojenja.",
+      "unknown_component_class": "Nepoznata klasa komponente.",
+      "unknown_fee_refundable": "Uvjeti povrata moraju biti: nijedan, djelomični ili puni.",
+      "unknown_it_service_kind": "Nepoznata IT usluga.",
+      "unknown_lead_basis": "Nepoznata osnova roka isporuke.",
+      "unknown_lead_time_source": "Nepoznat izvor roka isporuke.",
+      "unknown_maintenance_strategy": "Nepoznata strategija održavanja.",
+      "unknown_party": "Nepoznat sudionik.",
+      "unknown_redundancy_scheme": "Nepoznata shema redundancije.",
+      "unknown_route": "Nepoznat put nabave.",
+      "unknown_site_plant_kind": "Ova vrsta gradilišnog postrojenja nije u katalogu postrojenja projekta.",
+      "unknown_spare_category": "Nepoznata kategorija rezervnih dijelova.",
+      "unknown_step": "Nepoznat korak isporuke.",
+      "unknown_vendor_bound_reason": "Razlog mora biti standardizacija, postojeći fond, jamstvo ili jedinstveni izvor.",
+      "unknown_vendor_policy": "Politika proizvođača mora biti neutralna ili vezana.",
+      "vendor_bound_needs_reason": "Specifikacija vezana uz proizvođača zahtijeva razlog.",
+      "waiver_needs_reason": "Odricanje od rezervnog dijela zahtijeva razlog."
+    },
+    "evidence": {
+      "critical_route_set": "Svaka kritična stavka ima postavljen put nabave s odobrenim dokumentom o odluci",
+      "frame_document_attached": "Okvirni dokument opreme priložen je u CDE",
+      "frame_document_missing": "Projekt još nema okvirni dokument opreme, pa se njegov prilog ne može provjeriti",
+      "host_unresolved": "Model upravljanja ne navodi kojem području i kojoj kontrolnoj točki registar postrojenja izvještava",
+      "long_lead_secured": "Svaka stavka dugog roka isporuke ima svježu osnovnu ponudu i naručena je ili je unutar roka za narudžbu",
+      "no_area_hosts_plant": "Model faza ne navodi područje koje smješta postrojenja, pa registar postrojenja ne može izvještavati kontrolnu točku",
+      "no_error_findings": "Nema nalaza greške u registru postrojenja",
+      "no_phase_enables_construction_start": "Model faza ne navodi fazu koja omogućuje početak građenja, pa registar postrojenja nema kontrolnu točku za izvještavanje"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Kategorija",
+      "col_class": "Klasa",
+      "col_code": "Stavka",
+      "col_cost": "Trošak",
+      "col_critical": "Kritično",
+      "col_description": "Opis",
+      "col_enquiry_date": "Upit",
+      "col_float": "Rezerva (dani)",
+      "col_from": "Od",
+      "col_latest_order": "Zadnji rok narudžbe",
+      "col_lead_source": "Izvor roka",
+      "col_lead_weeks": "Rok (tjedni)",
+      "col_need_date": "Datum potrebe",
+      "col_option": "Opcija",
+      "col_quantity": "Količina",
+      "col_recommended": "Preporučeno",
+      "col_route": "Put",
+      "col_score": "Ponderirani bodovi",
+      "col_section": "Odjeljak",
+      "col_state": "Stanje",
+      "col_supply_by": "Nabavlja",
+      "col_title": "Naslov",
+      "col_to": "Do",
+      "col_unit": "Jedinica",
+      "critical_count": "Kritične stavke",
+      "empty": "Nema unosa.",
+      "frame_title": "Sažetak okvira opreme",
+      "item_count": "Stavke",
+      "limits_title": "Matrica granica isporuke",
+      "long_lead_count": "Stavke dugog roka isporuke",
+      "overdue_count": "Narudžbe s prekoračenim rokom",
+      "paper_title": "Dokument o odluci",
+      "project": "Projekt",
+      "question": "Pitanje",
+      "rationale": "Obrazloženje",
+      "register_title": "Registar dugih rokova isporuke",
+      "section_it": "IT usluga",
+      "section_long_lead": "Stavka dugog roka isporuke",
+      "section_site_plant": "Gradilišno postrojenje",
+      "spares_title": "Popis rezervnih dijelova",
+      "yes": "da"
+    },
+    "paper_state": {
+      "approved": "Odobreno",
+      "draft": "Nacrt",
+      "rejected": "Odbijeno",
+      "submitted": "Podneseno"
+    },
+    "reasons": {
+      "currency": "naknada za rezervaciju nema valutu",
+      "installer_mismatch": "stavka koju nabavlja investitor navodi drugi paket montaže",
+      "owner_furnished_item_required": "put nabave od strane investitora zahtijeva stavku koju nabavlja investitor",
+      "owner_installs": "investitor montira, pa se nijedan ugovorni paket ne smije navesti kao montažer",
+      "package_does_not_supply": "ugovorni paket ne isporučuje postrojenja",
+      "package_not_in_plan": "ugovorni paket nije u planu paketa",
+      "package_required": "ovaj put zahtijeva ugovorni paket",
+      "single_package_form": "oblik isporuke ima jedan ugovorni paket, a stavka je u drugom"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kritična stavka {item} nema odobreni dokument o odluci.",
+        "suggestion": "Pripremite dokument s opcijama i podnesite ga na odobrenje."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kritična stavka {item} oslanja se na zadanu vrijednost iz kataloga ili na procjenu.",
+        "suggestion": "Pribavite ponudu dobavljača, okvirni sporazum ili ranije narudžbu."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kritična stavka {item} nema strateški rezervni dio.",
+        "suggestion": "Dodajte strateški rezervni dio ili navedite zašto nije potreban."
+      },
+      "delivery_limits_complete": {
+        "fail": "Granice isporuke za {item} nemaju sudionika za: {steps}.",
+        "suggestion": "Dodijelite sudionika svakom koraku isporuke."
+      },
+      "it_cde_linked": {
+        "fail": "Pristup CDE-u potreban prije izvršne kontrolne točke nema CDE spremnik.",
+        "suggestion": "Povežite CDE spremnik u kojem će sudionici raditi."
+      },
+      "lead_time_fresh": {
+        "fail": "Osnovni rok isporuke za {item} je zastario.",
+        "suggestion": "Ponovno pitajte dobavljača i zabilježite novi odgovor."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Stavka dugog roka isporuke {item} nema ponudu za rok isporuke s datumom upita.",
+        "suggestion": "Zabilježite datiranu ponudu: kada ste pitali i tko je odgovorio."
+      },
+      "order_not_overdue": {
+        "fail": "Stavku {item} treba naručiti do {date}.",
+        "suggestion": "Naručite odmah ili s odgovornim za raspored dogovorite pomak datuma potrebe."
+      },
+      "redundancy_quantity": {
+        "fail": "Količina za {item} ne odgovara njezinoj shemi redundancije.",
+        "suggestion": "Provjerite količinu prema shemi (N+1 zahtijeva najmanje dvije jedinice)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Put nabave za {item} ne odgovara planu paketa: {reason}.",
+        "suggestion": "Uskladite put s ugovornim paketima i stavkama koje nabavlja investitor."
+      },
+      "single_basis_quote": {
+        "fail": "{item} nema točno jednu osnovnu ponudu.",
+        "suggestion": "Označite jednu ponudu kao osnovnu."
+      },
+      "slot_after_order_date": {
+        "fail": "Rezervacija kapaciteta za {item} traje dulje od zadnjeg datuma narudžbe.",
+        "suggestion": "Potpišite narudžbu ranije ili pregovarajte o ranijem terminu."
+      },
+      "slot_not_expired": {
+        "fail": "Rezervacija kapaciteta za {item} prošla je rok za pretvorbu.",
+        "suggestion": "Pretvorite je u narudžbu ili je oslobodite."
+      },
+      "slot_terms_complete": {
+        "fail": "Uvjeti rezervacije kapaciteta za {item} nisu potpuni.",
+        "suggestion": "Zabilježite naknadu, uvjete povrata, rok za pretvorbu i vezu s obvezom."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Politika proizvođača za {item} nije dosljedna.",
+        "suggestion": "Specifikacija vezana uz proizvođača zahtijeva razlog; neutralna ne navodi proizvođača."
+      }
+    },
+    "spare_state": {
+      "delivered": "Isporučeno",
+      "handed_over": "Predano",
+      "required": "Potrebno",
+      "specified": "Specificirano",
+      "waived": "Odbačeno"
+    },
+    "state": {
+      "cancelled": "Otkazano",
+      "commissioned": "Pušteno u rad",
+      "delivered": "Isporučeno",
+      "enquired": "Upit poslan",
+      "handed_over": "Predano",
+      "identified": "Utvrđeno",
+      "installed": "Ugrađeno",
+      "manufactured": "Proizvedeno",
+      "ordered": "Naručeno",
+      "route_set": "Put postavljen",
+      "specified": "Specificirano"
+    }
+  }
+}

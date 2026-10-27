@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Hava işleme ünitesi",
+        "battery_storage": "Batarya depolama",
+        "bms_controls": "Bina otomasyonu",
+        "boiler": "Kazan",
+        "chiller": "Soğutma grubu",
+        "cooling_tower": "Soğutma kulesi",
+        "crane_permanent": "Sabit vinç",
+        "distribution_transformer": "Dağıtım transformatörü",
+        "escalator": "Yürüyen merdiven",
+        "facade_unit": "Cephe elemanları",
+        "generator": "Jeneratör seti",
+        "heat_pump": "Isı pompası",
+        "it_core_network": "BT çekirdek ağı",
+        "kitchen_equipment": "Mutfak ekipmanı",
+        "lift": "Asansör",
+        "lv_switchboard": "Alçak gerilim pano",
+        "medical_equipment": "Tıbbi cihaz",
+        "mv_switchgear": "Orta gerilim şalt tesisi",
+        "power_transformer": "Güç transformatörü",
+        "process_unit": "Proses ünitesi",
+        "sprinkler_pump": "Sprinkler pompa seti",
+        "structural_steel_package": "Çelik yapı paketi",
+        "ups": "Kesintisiz güç kaynağı"
+      },
+      "it_service": {
+        "access_control": "Geçiş kontrol",
+        "cctv": "Görüntülü gözetim",
+        "cde_access": "CDE erişimi",
+        "drone_survey": "Dron ölçümü",
+        "site_network": "Şantiye ağı",
+        "telecom": "Telekomünikasyon",
+        "time_recording": "Zaman kaydı"
+      },
+      "maintenance": {
+        "condition_based": "Duruma dayalı",
+        "preventive_interval": "Periyodik, zaman aralıklı",
+        "run_to_failure": "Arızaya kadar çalıştır",
+        "vendor_service_contract": "Tedarikçi servis sözleşmesi"
+      },
+      "name": "Tarafsız tesis kataloğu",
+      "party": {
+        "contractor": "Yüklenici",
+        "installer": "Montajcı",
+        "operator": "İşletmeci",
+        "owner": "İşveren",
+        "supplier": "Tedarikçi",
+        "user": "Kullanıcı"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "İki tamamen bağımsız sistem",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "İki bağımsız sistem artı bir yedek ünite",
+        "n": "N",
+        "n_desc": "Tam gerekli kapasite, yedek ünite yok",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Gerekli kapasitenin üzerinde bir yedek ünite",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Gerekli kapasitenin üzerinde iki yedek ünite"
+      },
+      "route": {
+        "contractor_furnished_installed": "Yüklenici temin eder, yüklenici monte eder",
+        "owner_furnished_contractor_installed": "İşveren temin eder, yüklenici monte eder",
+        "owner_furnished_owner_installed": "İşveren temin eder, işveren monte eder",
+        "owner_procured_novated": "İşveren satın alır, sipariş yükleniciye devredilir"
+      },
+      "site_plant": {
+        "concrete_plant": "Beton santrali",
+        "hoist": "Vinç (asansör tipi)",
+        "mobile_crane_pad": "Mobil vinç zemini",
+        "site_office": "Şantiye ofisi",
+        "storage": "Depo",
+        "temporary_power": "Geçici elektrik",
+        "temporary_water": "Geçici su",
+        "tower_crane": "Kule vinç",
+        "welfare": "Sosyal tesisler",
+        "wheel_wash": "Tekerlek yıkama"
+      },
+      "source": {
+        "catalogue_default": "Katalog varsayılanı",
+        "expert_estimate": "Uzman tahmini",
+        "framework_agreement": "Çerçeve anlaşma",
+        "historic_order": "Geçmiş sipariş",
+        "market_sounding": "Piyasa araştırması",
+        "none": "Tedarik süresi yok",
+        "supplier_catalogue": "Tedarikçi kataloğu",
+        "supplier_quote": "Tedarikçi teklifi"
+      },
+      "spare": {
+        "commissioning_spares": "Devreye alma yedek parçaları",
+        "operating_consumables": "İşletme sarf malzemeleri",
+        "special_tools": "Özel aletler",
+        "strategic_spares": "Stratejik yedek parçalar"
+      },
+      "step": {
+        "accept": "Kabul",
+        "commission": "Devreye alma",
+        "connect": "Bağlantı",
+        "deliver_to_site": "Şantiyeye teslim",
+        "document": "Dokümantasyon",
+        "offload": "Boşaltma",
+        "set_in_place": "Yerine yerleştirme",
+        "supply": "Tedarik",
+        "test": "Test",
+        "train": "Eğitim"
+      }
+    },
+    "common": {
+      "ok": "Tamam"
+    },
+    "errors": {
+      "basis_quote_required": "Esas alınacak bir tedarik süresi teklifi gereklidir.",
+      "catalogue_entry_required": "Tedarikçi kataloğundan gelen bir tedarik süresi, katalog kaydını gerektirir.",
+      "catalogue_lead_mismatch": "Tedarik süresi, belirtilen tedarikçi katalog kaydıyla eşleşmiyor.",
+      "catalogue_retired": "Bu katalog kullanımdan kaldırıldı ve sabitlenemez.",
+      "classification_frozen": "Tedarik yolu belirlendiğinde kritik ve uzun süreli tedarik sınıflandırma geçersiz kılmaları dondurulur.",
+      "commitment_currency_mismatch": "Rezervasyon ücreti ile serbest bırakılan taahhüt farklı para birimlerinde.",
+      "commitment_for_other_item": "Bağlı taahhüt kalemi başka bir tesis kalemine ait.",
+      "commitment_not_found": "Bağlı taahhüt kalemi bu projenin parçası değil.",
+      "commitment_not_released": "Bağlı taahhüt kalemi henüz serbest bırakılmadı.",
+      "commitment_release_below_fee": "Serbest bırakılan tutar rezervasyon ücretinden düşük.",
+      "commitment_release_failed": "Taahhüt serbest bırakma bilgisi okunamadı; tekrar deneyin veya yöneticiyle iletişime geçin.",
+      "commitment_release_unavailable": "Taahhüt serbest bırakma bilgisi okunamıyor, bu nedenle rezervasyon ücreti bağlanamaz.",
+      "concurrent_basis_change": "Başka bir kullanıcı esas teklifi aynı anda değiştirdi; yeniden yükleyip tekrar deneyin.",
+      "cost_needs_currency": "Bir seçeneğin maliyeti para birimini gerektirir.",
+      "critical_override_needs_reason": "Kritiklik geçersiz kılma bir gerekçe gerektirir.",
+      "critical_without_decision": "Kritik bir kalemin tedarik yolu ayarlanmadan önce onaylı bir karar belgesi gerekir.",
+      "critical_without_market_evidence": "Kritik bir kalem, katalog varsayılanı veya tahmin değil, piyasadan alınmış bir tedarik süresi gerektirir.",
+      "critical_without_strategic_spares": "Kritik bir kalem için bir stratejik yedek parça veya neden gerekmediğine dair gerekçe gerekir.",
+      "decision_paper_needs_two_options": "Kalem tek kaynaklı değilse bir karar belgesi en az iki seçenek gerektirir.",
+      "decision_route_refused": "Onay yolu bu adımı reddetti.",
+      "delivery_limit_gap": "Her teslimat adımında sorumlu taraf yok.",
+      "edit_permission_required": "Tesis kaydını değiştirme yetkiniz yok.",
+      "enquiry_date_in_future": "Talep tarihi gelecekte olamaz.",
+      "fee_needs_currency": "Bir rezervasyon ücreti para birimini gerektirir.",
+      "fee_negative": "Rezervasyon ücreti negatif olamaz.",
+      "handover_needs_commissioned": "Yalnızca devreye alınmış bir kalem teslim edilebilir.",
+      "handover_needs_confirmation": "Teslimin onaylanması gerekir.",
+      "handover_needs_service_asset": "Varlık için servis sözleşmesini belirtin veya kalemin neden sözleşmesiz teslim edildiğini açıklayın.",
+      "invalid_transition": "Bu durum değişikliği mevcut durumdan yapılamaz.",
+      "it_cde_not_linked": "CDE erişimi için bağlı bir CDE konteyneri gerekir.",
+      "it_service_not_found": "BT hizmeti bulunamadı.",
+      "it_service_range_invalid": "Hizmet başlamadan bitiyor.",
+      "it_service_retired": "Kullanımdan kaldırılmış bir BT hizmeti değiştirilemez.",
+      "item_already_ordered": "Kalem zaten sipariş edildi.",
+      "item_closed": "Kalem teslim edildi veya iptal edildi.",
+      "item_code_taken": "Bu koda sahip bir kalem projede zaten var.",
+      "item_not_found": "Tesis kalemi bulunamadı.",
+      "item_required": "Bir kalem seçin.",
+      "laydown_zone_not_found": "Bu istifleme alanı bu projede yok.",
+      "lead_time_owned_by_plant_item": "Bu sunumun tedarik süresi kendi tesis kaleminde tutulur.",
+      "lead_time_stale": "Esas tedarik süresi teklifi sınıfın izin verdiğinden daha eski.",
+      "lead_time_without_enquiry_date": "Bir tedarik süresi, sorulduğu tarihi gerektirir.",
+      "lead_weeks_range_invalid": "Tedarik süresi minimumu maksimumu aşamaz.",
+      "limit_needs_party": "Bir teslimat adımı bir taraf veya paket gerektirir.",
+      "link_not_found": "Bağlı kayıt bu projenin parçası değil.",
+      "long_lead_override_needs_reason": "Uzun süreli tedarik sınıflandırmasının geçersiz kılınması bir gerekçe gerektirir.",
+      "manage_required": "Bunu yalnızca tesis yönetimi yetkisine sahip biri değiştirebilir.",
+      "neutral_spec_names_vendor": "Şartname tedarikçiden bağımsız olmasına rağmen bir tedarikçi adı veriyor.",
+      "no_decision_route": "Proje için karar belgeleri için bir onay yolu tanımlı değil.",
+      "not_equipment_owner": "Tesis kaydını yalnızca bir yönetici veya ekipman alanının sahibi değiştirebilir.",
+      "null_not_allowed": "Bu alan boş olamaz.",
+      "package_not_found": "Sözleşme paketi bu projenin paket planında yer almıyor.",
+      "package_plan_failed": "Teslimat modeli okunamadı; tekrar deneyin veya yöneticiyle iletişime geçin.",
+      "package_plan_unavailable": "Projenin paket planı okunamıyor, bu nedenle tedarik yolu kontrol edilemiyor.",
+      "paper_needs_rationale": "Belgenin bir gerekçesi olmalı.",
+      "paper_needs_recommendation": "Belgenin bir önerisi olmalı.",
+      "paper_not_draft": "Yalnızca taslak bir belge değiştirilebilir veya gönderilebilir.",
+      "paper_not_found": "Karar belgesi bulunamadı.",
+      "paper_not_submitted": "Yalnızca gönderilmiş bir belge geri çekilebilir.",
+      "paper_open": "Kalemin zaten açık bir karar belgesi var.",
+      "paper_option_codes_invalid": "Her seçeneğin benzersiz bir kodu olmalı.",
+      "paper_recommendation_unknown": "Öneri seçeneklerden birini belirtmeli.",
+      "paper_scores_invalid": "Puanlar ve ağırlıklar ondalık sayı olmalı.",
+      "paper_submitter_is_approver": "Belgeyi gönderen kişi, o yolun onaylayıcısı olamaz.",
+      "position_date_invalid": "Bu bir tarih değil.",
+      "position_incomplete": "Bir konum, türünü ve saha planındaki noktasını gerektirir.",
+      "position_not_found": "Bu tesis konumu bu projede yok.",
+      "position_number_invalid": "Bu sayı kaydedilemez: ondalık basamakları ve büyüklüğü kontrol edin.",
+      "position_range_invalid": "Konum başlamadan bitiyor.",
+      "position_text_invalid": "Bu metin boş veya çok uzun.",
+      "quantity_not_positive": "Miktar sıfırdan büyük olmalı.",
+      "quote_not_found": "Tedarik süresi teklifi bulunamadı.",
+      "response_before_enquiry": "Yanıt tarihi talep tarihinden önce olamaz.",
+      "route_frozen": "Kalem sipariş edildikten sonra tedarik yolu değiştirilemez.",
+      "route_inconsistent_with_package_plan": "Tedarik yolu paket planıyla uyuşmuyor.",
+      "route_missing": "Bir tedarik yolu ayarlanmamış.",
+      "slot_closed": "Rezervasyon kapatıldı.",
+      "slot_exists": "Kalemin zaten açık bir kapasite rezervasyonu var.",
+      "slot_fee_needs_commitment": "Bir rezervasyon ücreti yalnızca bir taahhüt serbest bırakma yoluyla para bağlar; taahhüt kalemini bağlayın.",
+      "slot_not_found": "Kapasite rezervasyonu bulunamadı.",
+      "slot_range_invalid": "Zaman dilimi başlamadan bitiyor.",
+      "slot_terms_incomplete": "Tutulan bir rezervasyon ücret, iade koşulları ve dönüşüm son tarihini gerektirir.",
+      "spare_closed": "Yedek parça satırı kapatıldı.",
+      "spare_not_deletable": "Yalnızca hâlâ gerekli olan bir yedek parça satırı silinebilir.",
+      "spare_not_found": "Yedek parça satırı bulunamadı.",
+      "spares_not_handed_over": "Her yedek parça önce teslim edilmeli veya feragat edilmeli.",
+      "specification_frozen": "Tedarik yolu ayarlandıktan sonra şartname dondurulur.",
+      "stage_not_found": "Bu genişleme aşaması bu projede yok.",
+      "stage_unavailable": "Genişleme aşamaları okunamıyor, bu nedenle bir konum bir aşamaya atanamaz.",
+      "state_read_from_source": "Bu durum siparişten, işveren temini kalemden veya devreye almadan okunur; elle ayarlanmaz.",
+      "transition_blocked": "Durum değişikliği birkaç kural tarafından engelleniyor.",
+      "two_parties_on_one_step": "Bir teslimat adımında yalnızca bir taraf olabilir.",
+      "unknown_catalogue": "Bilinmeyen tesis kataloğu.",
+      "unknown_component_class": "Bilinmeyen bileşen sınıfı.",
+      "unknown_fee_refundable": "İade koşulları yok, kısmi veya tam olmalı.",
+      "unknown_it_service_kind": "Bilinmeyen BT hizmeti.",
+      "unknown_lead_basis": "Bilinmeyen tedarik süresi esası.",
+      "unknown_lead_time_source": "Bilinmeyen tedarik süresi kaynağı.",
+      "unknown_maintenance_strategy": "Bilinmeyen bakım stratejisi.",
+      "unknown_party": "Bilinmeyen taraf.",
+      "unknown_redundancy_scheme": "Bilinmeyen yedekleme şeması.",
+      "unknown_route": "Bilinmeyen tedarik yolu.",
+      "unknown_site_plant_kind": "Bu şantiye tesisi türü projenin tesis kataloğunda yok.",
+      "unknown_spare_category": "Bilinmeyen yedek parça kategorisi.",
+      "unknown_step": "Bilinmeyen teslimat adımı.",
+      "unknown_vendor_bound_reason": "Gerekçe standardizasyon, mevcut tesis, garanti veya tek kaynak olmalı.",
+      "unknown_vendor_policy": "Tedarikçi politikası tarafsız veya bağlı olmalı.",
+      "vendor_bound_needs_reason": "Tedarikçiye bağlı bir şartname bir gerekçe gerektirir.",
+      "waiver_needs_reason": "Bir yedek parçadan feragat etmek bir gerekçe gerektirir."
+    },
+    "evidence": {
+      "critical_route_set": "Her kritik kalemin tedarik yolu onaylı bir karar belgesiyle ayarlanmış",
+      "frame_document_attached": "Ekipman çerçeve belgesi CDE'ye eklenmiş",
+      "frame_document_missing": "Projede henüz bir ekipman çerçeve belgesi yok, bu nedenle eklenmesi kontrol edilemiyor",
+      "host_unresolved": "Yönetişim modeli, tesis kaydının hangi alana ve hangi kapıya raporladığını belirtmiyor",
+      "long_lead_secured": "Her uzun süreli kalemin güncel bir esas teklifi var ve sipariş edilmiş veya sipariş tarihi içinde",
+      "no_area_hosts_plant": "Faz modeli tesis barındıran bir alan belirtmiyor, bu nedenle tesis kaydı bir kapıya raporlayamaz",
+      "no_error_findings": "Tesis kaydında hata düzeyinde bulgu yok",
+      "no_phase_enables_construction_start": "Faz modeli inşaat başlangıcını sağlayan bir faz belirtmiyor, bu nedenle tesis kaydının raporlayacağı bir kapı yok"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Kategori",
+      "col_class": "Sınıf",
+      "col_code": "Kalem",
+      "col_cost": "Maliyet",
+      "col_critical": "Kritik",
+      "col_description": "Açıklama",
+      "col_enquiry_date": "Talep tarihi",
+      "col_float": "Serbestlik (gün)",
+      "col_from": "Başlangıç",
+      "col_latest_order": "Son sipariş",
+      "col_lead_source": "Tedarik kaynağı",
+      "col_lead_weeks": "Tedarik (hafta)",
+      "col_need_date": "İhtiyaç tarihi",
+      "col_option": "Seçenek",
+      "col_quantity": "Miktar",
+      "col_recommended": "Önerilen",
+      "col_route": "Yol",
+      "col_score": "Ağırlıklı puan",
+      "col_section": "Bölüm",
+      "col_state": "Durum",
+      "col_supply_by": "Tedarik eden",
+      "col_title": "Başlık",
+      "col_to": "Bitiş",
+      "col_unit": "Birim",
+      "critical_count": "Kritik kalemler",
+      "empty": "Kayıt yok.",
+      "frame_title": "Ekipman çerçevesi özeti",
+      "item_count": "Kalemler",
+      "limits_title": "Teslimat sınırı matrisi",
+      "long_lead_count": "Uzun süreli kalemler",
+      "overdue_count": "Gecikmiş siparişler",
+      "paper_title": "Karar belgesi",
+      "project": "Proje",
+      "question": "Soru",
+      "rationale": "Gerekçe",
+      "register_title": "Uzun süreli tedarik kaydı",
+      "section_it": "BT hizmeti",
+      "section_long_lead": "Uzun süreli kalem",
+      "section_site_plant": "Şantiye tesisi",
+      "spares_title": "Yedek parça listesi",
+      "yes": "evet"
+    },
+    "paper_state": {
+      "approved": "Onaylandı",
+      "draft": "Taslak",
+      "rejected": "Reddedildi",
+      "submitted": "Gönderildi"
+    },
+    "reasons": {
+      "currency": "rezervasyon ücretinin para birimi yok",
+      "installer_mismatch": "işveren temini kalem başka bir montaj paketi belirtiyor",
+      "owner_furnished_item_required": "işveren temini bir yol, işveren temini kalemini gerektirir",
+      "owner_installs": "işveren monte ediyor, bu nedenle montajcı olarak hiçbir sözleşme paketi belirtilemez",
+      "package_does_not_supply": "sözleşme paketi tesis tedarik etmiyor",
+      "package_not_in_plan": "sözleşme paketi paket planında yok",
+      "package_required": "bu yol bir sözleşme paketi gerektirir",
+      "single_package_form": "teslimat biçiminde bir sözleşme paketi var ve kalem başka pakette"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kritik {item} kaleminin onaylı bir karar belgesi yok.",
+        "suggestion": "Seçenek belgesini hazırlayın ve onay için gönderin."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kritik {item} kalemi bir katalog varsayılanına veya tahmine dayanıyor.",
+        "suggestion": "Tedarikçi teklifi, çerçeve anlaşma veya geçmiş sipariş temin edin."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kritik {item} kaleminin stratejik yedek parçası yok.",
+        "suggestion": "Bir stratejik yedek parça ekleyin veya neden gerekmediğini belirtin."
+      },
+      "delivery_limits_complete": {
+        "fail": "{item} kaleminin teslimat sınırlarında şu adımlar için taraf yok: {steps}.",
+        "suggestion": "Her teslimat adımına bir taraf atayın."
+      },
+      "it_cde_linked": {
+        "fail": "Yürütme kapısından önce gereken CDE erişiminde CDE konteyneri yok.",
+        "suggestion": "Tarafların çalışacağı CDE konteynerini bağlayın."
+      },
+      "lead_time_fresh": {
+        "fail": "{item} kaleminin esas tedarik süresi güncel değil.",
+        "suggestion": "Tedarikçiye yeniden sorun ve yeni yanıtı kaydedin."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Uzun süreli {item} kaleminin talep tarihli bir tedarik süresi teklifi yok.",
+        "suggestion": "Tarihli bir teklif kaydedin: ne zaman sorduğunuzu ve kimin yanıtladığını."
+      },
+      "order_not_overdue": {
+        "fail": "{item} kalemi {date} tarihine kadar sipariş edilmeli.",
+        "suggestion": "Şimdi sipariş verin veya ihtiyaç tarihini program sorumlusuyla birlikte değiştirin."
+      },
+      "redundancy_quantity": {
+        "fail": "{item} kaleminin miktarı yedekleme şemasına uymuyor.",
+        "suggestion": "Miktarı şemaya göre kontrol edin (N+1 en az iki ünite gerektirir)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "{item} kaleminin tedarik yolu paket planıyla uyuşmuyor: {reason}.",
+        "suggestion": "Yolu sözleşme paketleri ve işveren temini kalemlerle hizalayın."
+      },
+      "single_basis_quote": {
+        "fail": "{item} kaleminin tam olarak bir esas teklifi yok.",
+        "suggestion": "Bir teklifi esas olarak işaretleyin."
+      },
+      "slot_after_order_date": {
+        "fail": "{item} kaleminin kapasite rezervasyonu son sipariş tarihini aşıyor.",
+        "suggestion": "Siparişi daha erken imzalayın veya daha erken bir zaman dilimi müzakere edin."
+      },
+      "slot_not_expired": {
+        "fail": "{item} kaleminin kapasite rezervasyonu dönüşüm son tarihini geçti.",
+        "suggestion": "Bir siparişe dönüştürün veya serbest bırakın."
+      },
+      "slot_terms_complete": {
+        "fail": "{item} kaleminin kapasite rezervasyonu koşulları eksik.",
+        "suggestion": "Ücreti, iade koşullarını, dönüşüm son tarihini ve taahhüt bağlantısını kaydedin."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "{item} kaleminin tedarikçi politikası tutarsız.",
+        "suggestion": "Bağlı bir şartname bir gerekçe gerektirir; tarafsız bir şartname tedarikçi adı vermez."
+      }
+    },
+    "spare_state": {
+      "delivered": "Teslim edildi",
+      "handed_over": "Teslim edildi (devir)",
+      "required": "Gerekli",
+      "specified": "Belirlendi",
+      "waived": "Feragat edildi"
+    },
+    "state": {
+      "cancelled": "İptal edildi",
+      "commissioned": "Devreye alındı",
+      "delivered": "Teslim edildi",
+      "enquired": "Talep edildi",
+      "handed_over": "Teslim edildi (devir)",
+      "identified": "Belirlendi",
+      "installed": "Monte edildi",
+      "manufactured": "Üretildi",
+      "ordered": "Sipariş edildi",
+      "route_set": "Yol belirlendi",
+      "specified": "Şartnamelendi"
+    }
+  }
+}

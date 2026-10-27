@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Ilmanvaihtokone",
+        "battery_storage": "Akkuvarasto",
+        "bms_controls": "Rakennusautomaatio",
+        "boiler": "Lämmityskattila",
+        "chiller": "Kylmäkone",
+        "cooling_tower": "Jäähdytystorni",
+        "crane_permanent": "Kiinteä nosturi",
+        "distribution_transformer": "Jakelumuuntaja",
+        "escalator": "Liukuportaat",
+        "facade_unit": "Julkisivuelementit",
+        "generator": "Generaattori",
+        "heat_pump": "Lämpöpumppu",
+        "it_core_network": "IT-ydinverkko",
+        "kitchen_equipment": "Keittiölaitteet",
+        "lift": "Hissi",
+        "lv_switchboard": "Pienjännitejakokeskus",
+        "medical_equipment": "Lääkinnälliset laitteet",
+        "mv_switchgear": "Keskijänniteanlaitteisto",
+        "power_transformer": "Voimansiirtomuuntaja",
+        "process_unit": "Prosessiyksikkö",
+        "sprinkler_pump": "Sprinklerpumppuasema",
+        "structural_steel_package": "Teräsrakenteiden urakka-alue",
+        "ups": "Katkeamaton virtalähde"
+      },
+      "it_service": {
+        "access_control": "Kulunvalvonta",
+        "cctv": "Videovalvonta",
+        "cde_access": "CDE-käyttöoikeus",
+        "drone_survey": "Drone-mittaus",
+        "site_network": "Työmaaverkko",
+        "telecom": "Teleliikenne",
+        "time_recording": "Työaikakirjaus"
+      },
+      "maintenance": {
+        "condition_based": "Kuntoon perustuva",
+        "preventive_interval": "Ennakoiva, väliajoin",
+        "run_to_failure": "Korjaus rikkoutumisen jälkeen",
+        "vendor_service_contract": "Toimittajan huoltosopimus"
+      },
+      "name": "Neutraali laitekatalogi",
+      "party": {
+        "contractor": "Urakoitsija",
+        "installer": "Asentaja",
+        "operator": "Käyttäjä",
+        "owner": "Tilaaja",
+        "supplier": "Toimittaja",
+        "user": "Loppukäyttäjä"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Kaksi täysin erillistä järjestelmää",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Kaksi erillistä järjestelmää ja yksi varayksikkö",
+        "n": "N",
+        "n_desc": "Tarvittava kapasiteetti tarkalleen, ei varayksikköä",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Yksi varayksikkö tarvittavan kapasiteetin lisäksi",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Kaksi varayksikköä tarvittavan kapasiteetin lisäksi"
+      },
+      "route": {
+        "contractor_furnished_installed": "Urakoitsijan toimittama ja asentama",
+        "owner_furnished_contractor_installed": "Tilaajan toimittama, urakoitsijan asentama",
+        "owner_furnished_owner_installed": "Tilaajan toimittama ja asentama",
+        "owner_procured_novated": "Tilaajan hankkima, tilaus siirretty urakoitsijalle"
+      },
+      "site_plant": {
+        "concrete_plant": "Betoniasema",
+        "hoist": "Rakennushissi",
+        "mobile_crane_pad": "Liikkuvan nosturin alusta",
+        "site_office": "Työmaatoimisto",
+        "storage": "Varasto",
+        "temporary_power": "Tilapäinen sähkönsyöttö",
+        "temporary_water": "Tilapäinen vesihuolto",
+        "tower_crane": "Torninosturi",
+        "welfare": "Sosiaalitilat",
+        "wheel_wash": "Pyörien pesu"
+      },
+      "source": {
+        "catalogue_default": "Katalogin oletusarvo",
+        "expert_estimate": "Asiantuntija-arvio",
+        "framework_agreement": "Puitesopimus",
+        "historic_order": "Aiempi tilaus",
+        "market_sounding": "Markkinakartoitus",
+        "none": "Ei toimitusaikaa",
+        "supplier_catalogue": "Toimittajan katalogi",
+        "supplier_quote": "Toimittajan tarjous"
+      },
+      "spare": {
+        "commissioning_spares": "Käyttöönottovaraosat",
+        "operating_consumables": "Käyttökulutustarvikkeet",
+        "special_tools": "Erikoistyökalut",
+        "strategic_spares": "Strategiset varaosat"
+      },
+      "step": {
+        "accept": "Hyväksyntä",
+        "commission": "Käyttöönotto",
+        "connect": "Liittäminen",
+        "deliver_to_site": "Toimitus työmaalle",
+        "document": "Dokumentointi",
+        "offload": "Purku",
+        "set_in_place": "Asennus paikoilleen",
+        "supply": "Toimitus",
+        "test": "Testaus",
+        "train": "Koulutus"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Toimitusajan perustarjous vaaditaan.",
+      "catalogue_entry_required": "Toimittajan katalogin toimitusaika vaatii katalogimerkinnän.",
+      "catalogue_lead_mismatch": "Toimitusaika ei vastaa nimettyä toimittajan katalogimerkintää.",
+      "catalogue_retired": "Tämä katalogi on poistettu käytöstä eikä sitä voi valita.",
+      "classification_frozen": "Kriittisyyden ja pitkän toimitusajan ohitukset lukittuvat, kun hankintareitti on asetettu.",
+      "commitment_currency_mismatch": "Varausmaksu ja vapautettu sitoumus ovat eri valuutoissa.",
+      "commitment_for_other_item": "Linkitetty sitoumusrivi kuuluu toiseen laitteeseen.",
+      "commitment_not_found": "Linkitetty sitoumusrivi ei kuulu tähän projektiin.",
+      "commitment_not_released": "Linkitettyä sitoumusriviä ei ole vielä vapautettu.",
+      "commitment_release_below_fee": "Vapautettu summa on pienempi kuin varausmaksu.",
+      "commitment_release_failed": "Sitoumuksen vapautusta ei voitu lukea. Yritä uudelleen tai ota yhteyttä ylläpitäjään.",
+      "commitment_release_unavailable": "Sitoumuksen vapautusta ei voi lukea, joten varausmaksua ei voida sitoa.",
+      "concurrent_basis_change": "Toinen käyttäjä muutti perustarjousta samaan aikaan. Lataa sivu uudelleen ja yritä uudelleen.",
+      "cost_needs_currency": "Vaihtoehdon kustannukselle tarvitaan valuutta.",
+      "critical_override_needs_reason": "Kriittisyyden ohittaminen vaatii perustelun.",
+      "critical_without_decision": "Kriittinen kohde vaatii hyväksytyn päätösesityksen ennen kuin sen hankintareitti asetetaan.",
+      "critical_without_market_evidence": "Kriittinen kohde vaatii toimitusajan markkinatiedosta, ei katalogin oletusarvoa tai arviota.",
+      "critical_without_strategic_spares": "Kriittinen kohde vaatii strategisen varaosan tai perustellun syyn, miksi sitä ei tarvita.",
+      "decision_paper_needs_two_options": "Päätösesitys vaatii vähintään kaksi vaihtoehtoa, ellei kohde ole yksittäislähde.",
+      "decision_route_refused": "Hyväksyntäreitti hylkäsi tämän vaiheen.",
+      "delivery_limit_gap": "Kaikilla toimitusvaiheilla ei ole vastuullista osapuolta.",
+      "edit_permission_required": "Sinulla ei ole oikeutta muuttaa laiterekisteriä.",
+      "enquiry_date_in_future": "Tiedustelupäivä ei voi olla tulevaisuudessa.",
+      "fee_needs_currency": "Varausmaksu vaatii valuutan.",
+      "fee_negative": "Varausmaksu ei voi olla negatiivinen.",
+      "handover_needs_commissioned": "Vain käyttöön otettu kohde voidaan luovuttaa.",
+      "handover_needs_confirmation": "Luovutus on vahvistettava.",
+      "handover_needs_service_asset": "Nimeä kohteen huoltosopimus tai perustele, miksi kohde luovutetaan ilman sitä.",
+      "invalid_transition": "Tämä tilamuutos ei ole mahdollinen nykyisestä tilasta.",
+      "it_cde_not_linked": "CDE-käyttö vaatii linkitetyn CDE-säilön.",
+      "it_service_not_found": "IT-palvelua ei löydy.",
+      "it_service_range_invalid": "Palvelu päättyy ennen aloitusta.",
+      "it_service_retired": "Käytöstä poistettua IT-palvelua ei voi muuttaa.",
+      "item_already_ordered": "Kohde on jo tilattu.",
+      "item_closed": "Kohde on luovutettu tai peruttu.",
+      "item_code_taken": "Projektissa on jo kohde tällä koodilla.",
+      "item_not_found": "Laitekohdetta ei löydy.",
+      "item_required": "Valitse kohde.",
+      "laydown_zone_not_found": "Tätä varastoalueen vyöhykettä ei ole tässä projektissa.",
+      "lead_time_owned_by_plant_item": "Tämän hyväksyttäväksi lähetettävän dokumentin toimitusaika on tallennettu laitekohteeseen.",
+      "lead_time_stale": "Perustarjouksen toimitusaika on vanhempi kuin luokka sallii.",
+      "lead_time_without_enquiry_date": "Toimitusaika vaatii tiedustelupäivän.",
+      "lead_weeks_range_invalid": "Toimitusajan vähimmäisarvo ei saa ylittää enimmäisarvoa.",
+      "limit_needs_party": "Toimitusvaihe vaatii osapuolen tai urakkapaketin.",
+      "link_not_found": "Linkitettyä tietuetta ei ole tässä projektissa.",
+      "long_lead_override_needs_reason": "Pitkän toimitusajan luokituksen ohittaminen vaatii perustelun.",
+      "manage_required": "Vain laitehallinnan oikeuden haltija voi muuttaa tätä.",
+      "neutral_spec_names_vendor": "Speksi on valmistajasta riippumaton, mutta nimeää valmistajan.",
+      "no_decision_route": "Projektilla ei ole hyväksyntäreittiä päätösesityksille.",
+      "not_equipment_owner": "Vain esimies tai laitealueen omistaja voi muuttaa laiterekisteriä.",
+      "null_not_allowed": "Tämä kenttä ei voi olla tyhjä.",
+      "package_not_found": "Urakkapaketti ei kuulu tämän projektin pakettisuunnitelmaan.",
+      "package_plan_failed": "Toimitusmallia ei voitu lukea. Yritä uudelleen tai ota yhteyttä ylläpitäjään.",
+      "package_plan_unavailable": "Projektin pakettisuunnitelmaa ei voi lukea, joten hankintareittiä ei voida tarkistaa.",
+      "paper_needs_rationale": "Esitys vaatii perustelun.",
+      "paper_needs_recommendation": "Esitys vaatii suosituksen.",
+      "paper_not_draft": "Vain luonnosvaiheessa oleva esitys voidaan muuttaa tai lähettää.",
+      "paper_not_found": "Päätösesitystä ei löydy.",
+      "paper_not_submitted": "Vain lähetetty esitys voidaan peruuttaa.",
+      "paper_open": "Kohteella on jo avoin päätösesitys.",
+      "paper_option_codes_invalid": "Jokaisella vaihtoehdolla on oltava yksilöllinen koodi.",
+      "paper_recommendation_unknown": "Suosituksen on nimettävä yksi vaihtoehdoista.",
+      "paper_scores_invalid": "Pisteiden ja painokertoimien on oltava desimaalilukuja.",
+      "paper_submitter_is_approver": "Esityksen lähettäjä ei voi olla sen reitin hyväksyjä.",
+      "position_date_invalid": "Tämä ei ole päivämäärä.",
+      "position_incomplete": "Sijainnille on määritettävä tyyppi ja paikka työmaasuunnitelmalla.",
+      "position_not_found": "Tätä laitesijaintia ei ole tässä projektissa.",
+      "position_number_invalid": "Tätä lukua ei voida tallentaa. Tarkista desimaalit ja koko.",
+      "position_range_invalid": "Sijainti päättyy ennen aloitusta.",
+      "position_text_invalid": "Teksti on tyhjä tai liian pitkä.",
+      "quantity_not_positive": "Määrän on oltava suurempi kuin nolla.",
+      "quote_not_found": "Toimitusajan tarjousta ei löydy.",
+      "response_before_enquiry": "Vastauspäivä ei voi olla ennen tiedustelupäivää.",
+      "route_frozen": "Hankintareittiä ei voi muuttaa, kun kohde on tilattu.",
+      "route_inconsistent_with_package_plan": "Hankintareitti ei vastaa pakettisuunnitelmaa.",
+      "route_missing": "Hankintareittiä ei ole asetettu.",
+      "slot_closed": "Varaus on suljettu.",
+      "slot_exists": "Kohteella on jo avoin kapasiteettivaraus.",
+      "slot_fee_needs_commitment": "Varausmaksu sitoo rahaa vain sitoumuksen vapautuksen kautta. Linkitä sitoumusrivi.",
+      "slot_not_found": "Kapasiteettivarausta ei löydy.",
+      "slot_range_invalid": "Aikaikkuna päättyy ennen aloitusta.",
+      "slot_terms_incomplete": "Pidätetty varaus vaatii maksun, palautusehdot ja muuntamisen määräajan.",
+      "spare_closed": "Varaosarivi on suljettu.",
+      "spare_not_deletable": "Vain yhä tarvittava varaosarivi voidaan poistaa.",
+      "spare_not_found": "Varaosariviä ei löydy.",
+      "spares_not_handed_over": "Jokainen varaosa on ensin luovutettava tai jätettävä pois.",
+      "specification_frozen": "Speksi lukittuu, kun hankintareitti on asetettu.",
+      "stage_not_found": "Tätä laajennusvaihetta ei ole tässä projektissa.",
+      "stage_unavailable": "Laajennusvaiheita ei voi lukea, joten sijaintia ei voida liittää vaiheeseen.",
+      "state_read_from_source": "Tämä tila luetaan tilauksesta, omistajan toimittamasta kohteesta tai käyttöönotosta, eikä sitä aseteta käsin.",
+      "transition_blocked": "Tilamuutosta estävät useat säännöt.",
+      "two_parties_on_one_step": "Toimitusvaiheella voi olla vain yksi osapuoli.",
+      "unknown_catalogue": "Tuntematon laitekatalogi.",
+      "unknown_component_class": "Tuntematon komponenttiluokka.",
+      "unknown_fee_refundable": "Palautusehtojen on oltava ei mitään, osittainen tai täysi.",
+      "unknown_it_service_kind": "Tuntematon IT-palvelu.",
+      "unknown_lead_basis": "Tuntematon toimitusajan perusta.",
+      "unknown_lead_time_source": "Tuntematon toimitusajan lähde.",
+      "unknown_maintenance_strategy": "Tuntematon kunnossapitostrategia.",
+      "unknown_party": "Tuntematon osapuoli.",
+      "unknown_redundancy_scheme": "Tuntematon varmennusjärjestelmä.",
+      "unknown_route": "Tuntematon hankintareitti.",
+      "unknown_site_plant_kind": "Tämä työmaalaitteen tyyppi ei ole projektin laitekatalogissa.",
+      "unknown_spare_category": "Tuntematon varaosaluokka.",
+      "unknown_step": "Tuntematon toimitusvaihe.",
+      "unknown_vendor_bound_reason": "Perusteen on oltava standardointi, olemassa oleva kanta, takuu tai yksittäislähde.",
+      "unknown_vendor_policy": "Toimittajakäytännön on oltava neutraali tai sidottu.",
+      "vendor_bound_needs_reason": "Toimittajaan sidottu speksi vaatii perustelun.",
+      "waiver_needs_reason": "Varaosasta luopuminen vaatii perustelun."
+    },
+    "evidence": {
+      "critical_route_set": "Jokaisen kriittisen kohteen hankintareitti on asetettu hyväksytyllä päätösesityksellä",
+      "frame_document_attached": "Laitteiden runkoasiakirja liitetty CDE:hen",
+      "frame_document_missing": "Projektilla ei ole vielä laitteiden runkoasiakirjaa, joten sen liitettä ei voida tarkistaa",
+      "host_unresolved": "Hallintomalli ei kerro, mille alueelle ja portille laiterekisteri raportoi",
+      "long_lead_secured": "Jokaisella pitkän toimitusajan kohteella on tuore perustarjous ja se on tilattu tai tilausajankohdan sisällä",
+      "no_area_hosts_plant": "Vaihemallissa ei ole aluetta, johon laitteet kuuluvat, joten laiterekisteri ei voi raportoida portille",
+      "no_error_findings": "Laiterekisterissä ei ole virhetason havaintoja",
+      "no_phase_enables_construction_start": "Vaihemallissa ei ole vaihetta, joka mahdollistaa rakentamisen aloituksen, joten laiterekisterillä ei ole porttia, jolle raportoida"
+    },
+    "export": {
+      "catalogue": "Katalogi",
+      "col_category": "Kategoria",
+      "col_class": "Luokka",
+      "col_code": "Kohde",
+      "col_cost": "Kustannus",
+      "col_critical": "Kriittinen",
+      "col_description": "Kuvaus",
+      "col_enquiry_date": "Tiedusteltu",
+      "col_float": "Varavara (päivää)",
+      "col_from": "Alkaen",
+      "col_latest_order": "Viimeinen tilauspäivä",
+      "col_lead_source": "Toimitusajan lähde",
+      "col_lead_weeks": "Toimitusaika (viikkoa)",
+      "col_need_date": "Tarvepäivä",
+      "col_option": "Vaihtoehto",
+      "col_quantity": "Määrä",
+      "col_recommended": "Suositeltu",
+      "col_route": "Hankintareitti",
+      "col_score": "Painotettu pistemäärä",
+      "col_section": "Osio",
+      "col_state": "Tila",
+      "col_supply_by": "Toimittaja",
+      "col_title": "Otsikko",
+      "col_to": "Asti",
+      "col_unit": "Yksikkö",
+      "critical_count": "Kriittiset kohteet",
+      "empty": "Ei merkintöjä.",
+      "frame_title": "Laitteiden runkoasiakirjan yhteenveto",
+      "item_count": "Kohteet",
+      "limits_title": "Toimitusrajojen matriisi",
+      "long_lead_count": "Pitkän toimitusajan kohteet",
+      "overdue_count": "Myöhässä olevat tilaukset",
+      "paper_title": "Päätösesitys",
+      "project": "Projekti",
+      "question": "Kysymys",
+      "rationale": "Perustelu",
+      "register_title": "Pitkän toimitusajan rekisteri",
+      "section_it": "IT-palvelu",
+      "section_long_lead": "Pitkän toimitusajan kohde",
+      "section_site_plant": "Työmaalaite",
+      "spares_title": "Varaosaluettelo",
+      "yes": "kyllä"
+    },
+    "paper_state": {
+      "approved": "Hyväksytty",
+      "draft": "Luonnos",
+      "rejected": "Hylätty",
+      "submitted": "Lähetetty"
+    },
+    "reasons": {
+      "currency": "varausmaksulla ei ole valuuttaa",
+      "installer_mismatch": "tilaajan toimittama kohde nimeää toisen asennuspaketin",
+      "owner_furnished_item_required": "tilaajan toimittama reitti vaatii tilaajan toimittaman kohteen",
+      "owner_installs": "tilaaja asentaa, joten urakkapakettia ei voi nimetä asentajaksi",
+      "package_does_not_supply": "urakkapaketti ei toimita laitteita",
+      "package_not_in_plan": "urakkapaketti ei kuulu pakettisuunnitelmaan",
+      "package_required": "tämä reitti vaatii urakkapaketin",
+      "single_package_form": "toimitusmuodossa on yksi urakkapaketti, ja kohde kuuluu toiseen"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kriittisellä kohteella {item} ei ole hyväksyttyä päätösesitystä.",
+        "suggestion": "Laadi vaihtoehtoesitys ja lähetä se hyväksyttäväksi."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kriittinen kohde {item} perustuu katalogin oletusarvoon tai arvioon.",
+        "suggestion": "Hanki toimittajan tarjous, puitesopimus tai aiempi tilaus."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kriittisellä kohteella {item} ei ole strategista varaosaa.",
+        "suggestion": "Lisää strateginen varaosa tai perustele, miksi sitä ei tarvita."
+      },
+      "delivery_limits_complete": {
+        "fail": "Kohteen {item} toimitusrajoilla ei ole osapuolta seuraaville: {steps}.",
+        "suggestion": "Nimeä osapuoli jokaiselle toimitusvaiheelle."
+      },
+      "it_cde_linked": {
+        "fail": "CDE-käyttö vaaditaan ennen toteutusporttia, mutta CDE-säilöä ei ole linkitetty.",
+        "suggestion": "Linkitä CDE-säilö, jossa osapuolet työskentelevät."
+      },
+      "lead_time_fresh": {
+        "fail": "Kohteen {item} toimitusajan perusta on vanhentunut.",
+        "suggestion": "Pyydä toimittajalta uusi vastaus ja kirjaa se."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Pitkän toimitusajan kohteella {item} ei ole toimitusajan tarjousta tiedustelupäivämäärällä.",
+        "suggestion": "Kirjaa päivätty tarjous: milloin kysyit ja kuka vastasi."
+      },
+      "order_not_overdue": {
+        "fail": "Kohde {item} on tilattava viimeistään {date}.",
+        "suggestion": "Tilaa nyt tai siirrä tarvepäivää aikataulun vastuuhenkilön kanssa."
+      },
+      "redundancy_quantity": {
+        "fail": "Kohteen {item} määrä ei sovi sen varmennusjärjestelmään.",
+        "suggestion": "Tarkista määrä järjestelmää vasten (N+1 vaatii vähintään kaksi yksikköä)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Kohteen {item} hankintareitti ei vastaa pakettisuunnitelmaa: {reason}.",
+        "suggestion": "Yhdenmukaista reitti urakkapakettien ja tilaajan toimittamien kohteiden kanssa."
+      },
+      "single_basis_quote": {
+        "fail": "Kohteella {item} ei ole tasan yhtä perustarjousta.",
+        "suggestion": "Merkitse yksi tarjous perustarjoukseksi."
+      },
+      "slot_after_order_date": {
+        "fail": "Kohteen {item} kapasiteettivaraus ulottuu viimeisen tilauspäivän yli.",
+        "suggestion": "Tee tilaus aiemmin tai neuvottele aikaisempi varauspaikka."
+      },
+      "slot_not_expired": {
+        "fail": "Kohteen {item} kapasiteettivaraus on ylittänyt muuntamisen määräajan.",
+        "suggestion": "Muunna se tilaukseksi tai vapauta se."
+      },
+      "slot_terms_complete": {
+        "fail": "Kohteen {item} kapasiteettivarauksen ehdot ovat puutteelliset.",
+        "suggestion": "Kirjaa maksu, palautusehdot, muuntamisen määräaika ja sitoumuslinkki."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Kohteen {item} toimittajakäytäntö on ristiriitainen.",
+        "suggestion": "Toimittajaan sidottu speksi vaatii perustelun. Neutraali speksi ei nimeä toimittajaa."
+      }
+    },
+    "spare_state": {
+      "delivered": "Toimitettu",
+      "handed_over": "Luovutettu",
+      "required": "Tarvittava",
+      "specified": "Määritelty",
+      "waived": "Jätetty pois"
+    },
+    "state": {
+      "cancelled": "Peruttu",
+      "commissioned": "Käyttöönotettu",
+      "delivered": "Toimitettu",
+      "enquired": "Tiedusteltu",
+      "handed_over": "Luovutettu",
+      "identified": "Tunnistettu",
+      "installed": "Asennettu",
+      "manufactured": "Valmistettu",
+      "ordered": "Tilattu",
+      "route_set": "Reitti asetettu",
+      "specified": "Määritelty"
+    }
+  }
+}

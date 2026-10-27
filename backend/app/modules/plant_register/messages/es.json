@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Unidad de tratamiento de aire",
+        "battery_storage": "Almacenamiento en baterías",
+        "bms_controls": "Automatización del edificio",
+        "boiler": "Caldera",
+        "chiller": "Enfriadora",
+        "cooling_tower": "Torre de refrigeración",
+        "crane_permanent": "Grúa permanente",
+        "distribution_transformer": "Transformador de distribución",
+        "escalator": "Escalera mecánica",
+        "facade_unit": "Elementos de fachada",
+        "generator": "Grupo electrógeno",
+        "heat_pump": "Bomba de calor",
+        "it_core_network": "Red troncal de informática",
+        "kitchen_equipment": "Equipamiento de cocina",
+        "lift": "Ascensor",
+        "lv_switchboard": "Cuadro de baja tensión",
+        "medical_equipment": "Equipamiento médico",
+        "mv_switchgear": "Aparamenta de media tensión",
+        "power_transformer": "Transformador de potencia",
+        "process_unit": "Unidad de proceso",
+        "sprinkler_pump": "Grupo de bombeo de rociadores",
+        "structural_steel_package": "Paquete de estructura de acero",
+        "ups": "Sistema de alimentación ininterrumpida (SAI)"
+      },
+      "it_service": {
+        "access_control": "Control de accesos",
+        "cctv": "Videovigilancia",
+        "cde_access": "Acceso al CDE",
+        "drone_survey": "Levantamiento con dron",
+        "site_network": "Red de obra",
+        "telecom": "Telecomunicaciones",
+        "time_recording": "Registro de jornada"
+      },
+      "maintenance": {
+        "condition_based": "Basado en el estado",
+        "preventive_interval": "Preventivo, por intervalos",
+        "run_to_failure": "Funcionamiento hasta avería",
+        "vendor_service_contract": "Contrato de mantenimiento del proveedor"
+      },
+      "name": "Catálogo neutro de instalaciones",
+      "party": {
+        "contractor": "Contratista",
+        "installer": "Instalador",
+        "operator": "Operador",
+        "owner": "Propietario",
+        "supplier": "Suministrador",
+        "user": "Usuario"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Dos sistemas totalmente independientes",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Dos sistemas independientes más una unidad de reserva",
+        "n": "N",
+        "n_desc": "Exactamente la capacidad necesaria, sin unidad de reserva",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Una unidad de reserva además de la capacidad necesaria",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Dos unidades de reserva además de la capacidad necesaria"
+      },
+      "route": {
+        "contractor_furnished_installed": "Suministrado y montado por el contratista",
+        "owner_furnished_contractor_installed": "Suministrado por el propietario, montado por el contratista",
+        "owner_furnished_owner_installed": "Suministrado y montado por el propietario",
+        "owner_procured_novated": "Adquirido por el propietario, pedido cedido al contratista"
+      },
+      "site_plant": {
+        "concrete_plant": "Central de hormigón",
+        "hoist": "Montacargas de obra",
+        "mobile_crane_pad": "Plataforma para grúa móvil",
+        "site_office": "Oficina de obra",
+        "storage": "Almacén",
+        "temporary_power": "Energía provisional",
+        "temporary_water": "Agua provisional",
+        "tower_crane": "Grúa torre",
+        "welfare": "Instalaciones de bienestar",
+        "wheel_wash": "Lavaruedas"
+      },
+      "source": {
+        "catalogue_default": "Valor por defecto del catálogo",
+        "expert_estimate": "Estimación de experto",
+        "framework_agreement": "Acuerdo marco",
+        "historic_order": "Pedido histórico",
+        "market_sounding": "Consulta de mercado",
+        "none": "Sin plazo de entrega",
+        "supplier_catalogue": "Catálogo del proveedor",
+        "supplier_quote": "Oferta del proveedor"
+      },
+      "spare": {
+        "commissioning_spares": "Repuestos de puesta en marcha",
+        "operating_consumables": "Consumibles de explotación",
+        "special_tools": "Herramientas especiales",
+        "strategic_spares": "Repuestos estratégicos"
+      },
+      "step": {
+        "accept": "Aceptación",
+        "commission": "Puesta en marcha",
+        "connect": "Conexión",
+        "deliver_to_site": "Entrega en obra",
+        "document": "Documentación",
+        "offload": "Descarga",
+        "set_in_place": "Colocación",
+        "supply": "Suministro",
+        "test": "Ensayo",
+        "train": "Formación"
+      }
+    },
+    "common": {
+      "ok": "Aceptar"
+    },
+    "errors": {
+      "basis_quote_required": "Se requiere una oferta de plazo de entrega de referencia.",
+      "catalogue_entry_required": "Un plazo de entrega del catálogo del proveedor requiere la entrada del catálogo.",
+      "catalogue_lead_mismatch": "El plazo de entrega no coincide con la entrada del catálogo del proveedor que indica.",
+      "catalogue_retired": "Este catálogo está retirado y no puede fijarse.",
+      "classification_frozen": "Las excepciones de criticidad y de largo plazo quedan bloqueadas una vez establecida la ruta de compra.",
+      "commitment_currency_mismatch": "La tasa de reserva y el compromiso liberado están en monedas distintas.",
+      "commitment_for_other_item": "La partida de compromiso vinculada pertenece a otro elemento de la instalación.",
+      "commitment_not_found": "La partida de compromiso vinculada no forma parte de este proyecto.",
+      "commitment_not_released": "La partida de compromiso vinculada aún no está liberada.",
+      "commitment_release_below_fee": "El importe liberado es inferior a la tasa de reserva.",
+      "commitment_release_failed": "No se pudo leer la liberación del compromiso; inténtelo de nuevo o contacte con el administrador.",
+      "commitment_release_unavailable": "No se puede leer la liberación del compromiso, por lo que no se puede vincular una tasa de reserva.",
+      "concurrent_basis_change": "Otro usuario modificó la oferta de referencia al mismo tiempo; recargue e inténtelo de nuevo.",
+      "cost_needs_currency": "El coste de una opción necesita su moneda.",
+      "critical_override_needs_reason": "Cambiar la criticidad requiere una justificación.",
+      "critical_without_decision": "Un elemento crítico necesita un documento de decisión aprobado antes de fijar su ruta.",
+      "critical_without_market_evidence": "Un elemento crítico necesita un plazo de entrega obtenido del mercado, no un valor por defecto del catálogo ni una estimación.",
+      "critical_without_strategic_spares": "Un elemento crítico necesita un repuesto estratégico o una justificación de por qué no.",
+      "decision_paper_needs_two_options": "Un documento de decisión necesita al menos dos opciones, salvo que el elemento sea de fuente única.",
+      "decision_route_refused": "La ruta de aprobación rechazó este paso.",
+      "delivery_limit_gap": "No todos los pasos de entrega tienen una parte responsable.",
+      "edit_permission_required": "No tiene permiso para modificar el registro de instalaciones.",
+      "enquiry_date_in_future": "La fecha de consulta no puede ser futura.",
+      "fee_needs_currency": "La tasa de reserva necesita su moneda.",
+      "fee_negative": "La tasa de reserva no puede ser negativa.",
+      "handover_needs_commissioned": "Solo un elemento puesto en marcha puede entregarse.",
+      "handover_needs_confirmation": "La entrega debe confirmarse.",
+      "handover_needs_service_asset": "Indique el contrato de mantenimiento del activo o justifique por qué el elemento se entrega sin él.",
+      "invalid_transition": "Este cambio de estado no es posible desde el estado actual.",
+      "it_cde_not_linked": "El acceso al CDE requiere un contenedor CDE vinculado.",
+      "it_service_not_found": "No se encontró el servicio informático.",
+      "it_service_range_invalid": "El servicio termina antes de empezar.",
+      "it_service_retired": "Un servicio informático retirado no puede modificarse.",
+      "item_already_ordered": "El elemento ya está pedido.",
+      "item_closed": "El elemento está entregado o cancelado.",
+      "item_code_taken": "Ya existe un elemento con este código en el proyecto.",
+      "item_not_found": "No se encontró el elemento de instalación.",
+      "item_required": "Seleccione un elemento.",
+      "laydown_zone_not_found": "Esta zona de acopio no existe en este proyecto.",
+      "lead_time_owned_by_plant_item": "El plazo de entrega de esta documentación se gestiona en su elemento de instalación.",
+      "lead_time_stale": "La oferta de plazo de referencia es más antigua de lo que permite la clase.",
+      "lead_time_without_enquiry_date": "Un plazo de entrega requiere la fecha en que se consultó.",
+      "lead_weeks_range_invalid": "El plazo mínimo no puede superar el máximo.",
+      "limit_needs_party": "Un paso de entrega requiere una parte o un paquete.",
+      "link_not_found": "El registro vinculado no forma parte de este proyecto.",
+      "long_lead_override_needs_reason": "Cambiar la clasificación de largo plazo requiere una justificación.",
+      "manage_required": "Solo un titular del permiso de gestión de instalaciones puede modificar esto.",
+      "neutral_spec_names_vendor": "La especificación es neutra respecto al fabricante, pero nombra un fabricante.",
+      "no_decision_route": "El proyecto no tiene una ruta de aprobación para documentos de decisión.",
+      "not_equipment_owner": "Solo un responsable o el propietario de la zona de equipos puede modificar el registro de instalaciones.",
+      "null_not_allowed": "Este campo no puede estar vacío.",
+      "package_not_found": "El paquete de contrato no forma parte del plan de paquetes del proyecto.",
+      "package_plan_failed": "No se pudo leer el modelo de entrega; inténtelo de nuevo o contacte con el administrador.",
+      "package_plan_unavailable": "No se puede leer el plan de paquetes del proyecto, por lo que la ruta no puede comprobarse.",
+      "paper_needs_rationale": "El documento necesita una justificación.",
+      "paper_needs_recommendation": "El documento necesita una recomendación.",
+      "paper_not_draft": "Solo un documento en borrador puede modificarse o enviarse.",
+      "paper_not_found": "No se encontró el documento de decisión.",
+      "paper_not_submitted": "Solo un documento enviado puede retirarse.",
+      "paper_open": "El elemento ya tiene un documento de decisión abierto.",
+      "paper_option_codes_invalid": "Cada opción necesita un código único.",
+      "paper_recommendation_unknown": "La recomendación debe indicar una de las opciones.",
+      "paper_scores_invalid": "Las puntuaciones y los pesos deben ser números decimales.",
+      "paper_submitter_is_approver": "La persona que envía el documento no puede ser aprobadora de su ruta.",
+      "position_date_invalid": "Esto no es una fecha.",
+      "position_incomplete": "Una posición necesita su tipo y su punto en el plano de obra.",
+      "position_not_found": "Esta posición de instalación no existe en este proyecto.",
+      "position_number_invalid": "Este número no puede guardarse: revise los decimales y el tamaño.",
+      "position_range_invalid": "La posición termina antes de empezar.",
+      "position_text_invalid": "Este texto está vacío o es demasiado largo.",
+      "quantity_not_positive": "La cantidad debe ser mayor que cero.",
+      "quote_not_found": "No se encontró la oferta de plazo de entrega.",
+      "response_before_enquiry": "La fecha de respuesta no puede ser anterior a la fecha de consulta.",
+      "route_frozen": "La ruta no puede cambiar una vez pedido el elemento.",
+      "route_inconsistent_with_package_plan": "La ruta de compra no coincide con el plan de paquetes.",
+      "route_missing": "No se ha establecido ninguna ruta de compra.",
+      "slot_closed": "La reserva está cerrada.",
+      "slot_exists": "El elemento ya tiene una reserva de capacidad abierta.",
+      "slot_fee_needs_commitment": "Una tasa de reserva solo compromete dinero mediante la liberación de un compromiso; vincule la partida de compromiso.",
+      "slot_not_found": "No se encontró la reserva de capacidad.",
+      "slot_range_invalid": "El intervalo termina antes de empezar.",
+      "slot_terms_incomplete": "Una reserva retenida requiere tasa, condiciones de reembolso y fecha límite de conversión.",
+      "spare_closed": "La línea de repuestos está cerrada.",
+      "spare_not_deletable": "Solo puede eliminarse una línea de repuestos que todavía sea necesaria.",
+      "spare_not_found": "No se encontró la línea de repuestos.",
+      "spares_not_handed_over": "Cada repuesto debe entregarse o descartarse antes.",
+      "specification_frozen": "La especificación queda bloqueada una vez establecida la ruta de compra.",
+      "stage_not_found": "Esta fase de ampliación no existe en este proyecto.",
+      "stage_unavailable": "Las fases de ampliación no pueden leerse, por lo que una posición no puede asignarse a una fase.",
+      "state_read_from_source": "Este estado se obtiene del pedido, del elemento suministrado por el propietario o de la puesta en marcha, y no se establece a mano.",
+      "transition_blocked": "El cambio de estado está bloqueado por varias reglas.",
+      "two_parties_on_one_step": "Un paso de entrega solo puede tener una parte.",
+      "unknown_catalogue": "Catálogo de instalaciones desconocido.",
+      "unknown_component_class": "Clase de componente desconocida.",
+      "unknown_fee_refundable": "Las condiciones de reembolso deben ser ninguno, parcial o total.",
+      "unknown_it_service_kind": "Servicio informático desconocido.",
+      "unknown_lead_basis": "Base de plazo de entrega desconocida.",
+      "unknown_lead_time_source": "Origen del plazo de entrega desconocido.",
+      "unknown_maintenance_strategy": "Estrategia de mantenimiento desconocida.",
+      "unknown_party": "Parte desconocida.",
+      "unknown_redundancy_scheme": "Esquema de redundancia desconocido.",
+      "unknown_route": "Ruta de compra desconocida.",
+      "unknown_site_plant_kind": "Este tipo de instalación de obra no existe en el catálogo de instalaciones del proyecto.",
+      "unknown_spare_category": "Categoría de repuesto desconocida.",
+      "unknown_step": "Paso de entrega desconocido.",
+      "unknown_vendor_bound_reason": "La justificación debe ser estandarización, parque existente, garantía o fuente única.",
+      "unknown_vendor_policy": "La política de fabricante debe ser neutra o vinculada.",
+      "vendor_bound_needs_reason": "Una especificación vinculada a un fabricante requiere una justificación.",
+      "waiver_needs_reason": "Renunciar a un repuesto requiere una justificación."
+    },
+    "evidence": {
+      "critical_route_set": "Cada elemento crítico tiene su ruta establecida con un documento de decisión aprobado",
+      "frame_document_attached": "Documento marco de equipos adjunto al CDE",
+      "frame_document_missing": "El proyecto aún no tiene documento marco de equipos, por lo que no puede comprobarse su adjunto",
+      "host_unresolved": "El modelo de gobernanza no indica a qué área y hito informa el registro de instalaciones",
+      "long_lead_secured": "Cada elemento de largo plazo tiene una oferta de referencia vigente y está pedido o dentro de su fecha de pedido",
+      "no_area_hosts_plant": "El modelo de fases no nombra ninguna área que aloje instalaciones, por lo que el registro no puede informar a un hito",
+      "no_error_findings": "No hay hallazgos de nivel error en el registro de instalaciones",
+      "no_phase_enables_construction_start": "El modelo de fases no nombra ninguna fase que habilite el inicio de la obra, por lo que el registro de instalaciones no tiene hito al que informar"
+    },
+    "export": {
+      "catalogue": "Catálogo",
+      "col_category": "Categoría",
+      "col_class": "Clase",
+      "col_code": "Elemento",
+      "col_cost": "Coste",
+      "col_critical": "Crítico",
+      "col_description": "Descripción",
+      "col_enquiry_date": "Consultado",
+      "col_float": "Holgura (días)",
+      "col_from": "Desde",
+      "col_latest_order": "Último pedido",
+      "col_lead_source": "Origen del plazo",
+      "col_lead_weeks": "Plazo (semanas)",
+      "col_need_date": "Fecha de necesidad",
+      "col_option": "Opción",
+      "col_quantity": "Cantidad",
+      "col_recommended": "Recomendada",
+      "col_route": "Ruta",
+      "col_score": "Puntuación ponderada",
+      "col_section": "Sección",
+      "col_state": "Estado",
+      "col_supply_by": "Suministrado por",
+      "col_title": "Título",
+      "col_to": "Hasta",
+      "col_unit": "Unidad",
+      "critical_count": "Elementos críticos",
+      "empty": "Sin entradas.",
+      "frame_title": "Resumen del marco de equipos",
+      "item_count": "Elementos",
+      "limits_title": "Matriz de límites de entrega",
+      "long_lead_count": "Elementos de largo plazo",
+      "overdue_count": "Pedidos vencidos",
+      "paper_title": "Documento de decisión",
+      "project": "Proyecto",
+      "question": "Pregunta",
+      "rationale": "Justificación",
+      "register_title": "Registro de largo plazo",
+      "section_it": "Servicio informático",
+      "section_long_lead": "Elemento de largo plazo",
+      "section_site_plant": "Instalación de obra",
+      "spares_title": "Lista de repuestos",
+      "yes": "sí"
+    },
+    "paper_state": {
+      "approved": "Aprobado",
+      "draft": "Borrador",
+      "rejected": "Rechazado",
+      "submitted": "Enviado"
+    },
+    "reasons": {
+      "currency": "la tasa de reserva no tiene moneda",
+      "installer_mismatch": "el elemento suministrado por el propietario nombra otro paquete instalador",
+      "owner_furnished_item_required": "una ruta con suministro del propietario requiere su elemento suministrado por el propietario",
+      "owner_installs": "el propietario instala, por lo que ningún paquete de contrato puede nombrarse como instalador",
+      "package_does_not_supply": "el paquete de contrato no suministra instalaciones",
+      "package_not_in_plan": "el paquete de contrato no está en el plan de paquetes",
+      "package_required": "esta ruta requiere un paquete de contrato",
+      "single_package_form": "la forma de entrega tiene un paquete de contrato y el elemento está en otro"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "El elemento crítico {item} no tiene un documento de decisión aprobado.",
+        "suggestion": "Prepare el documento de opciones y envíelo para aprobación."
+      },
+      "critical_has_market_evidence": {
+        "fail": "El elemento crítico {item} se basa en un valor por defecto del catálogo o en una estimación.",
+        "suggestion": "Obtenga una oferta del proveedor, un acuerdo marco o un pedido histórico."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "El elemento crítico {item} no tiene repuesto estratégico.",
+        "suggestion": "Añada un repuesto estratégico o indique por qué no es necesario."
+      },
+      "delivery_limits_complete": {
+        "fail": "Los límites de entrega de {item} no tienen parte para: {steps}.",
+        "suggestion": "Asigne una parte a cada paso de entrega."
+      },
+      "it_cde_linked": {
+        "fail": "Se necesita acceso al CDE antes de que la puerta de ejecución tenga un contenedor CDE.",
+        "suggestion": "Vincule el contenedor CDE en el que trabajarán las partes."
+      },
+      "lead_time_fresh": {
+        "fail": "El plazo de entrega de referencia de {item} está desactualizado.",
+        "suggestion": "Consulte de nuevo al proveedor y registre la nueva respuesta."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "El elemento de largo plazo {item} no tiene una oferta de plazo con fecha de consulta.",
+        "suggestion": "Registre una oferta fechada: cuándo consultó y quién respondió."
+      },
+      "order_not_overdue": {
+        "fail": "{item} debe pedirse antes del {date}.",
+        "suggestion": "Pida ya el elemento o desplace la fecha de necesidad con el responsable del calendario."
+      },
+      "redundancy_quantity": {
+        "fail": "La cantidad de {item} no encaja en su esquema de redundancia.",
+        "suggestion": "Revise la cantidad según el esquema (N+1 requiere al menos dos unidades)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "La ruta de compra de {item} no coincide con el plan de paquetes: {reason}.",
+        "suggestion": "Alinee la ruta con los paquetes de contrato y los elementos suministrados por el propietario."
+      },
+      "single_basis_quote": {
+        "fail": "{item} no tiene exactamente una oferta de referencia.",
+        "suggestion": "Marque una oferta como referencia."
+      },
+      "slot_after_order_date": {
+        "fail": "La reserva de capacidad de {item} se extiende más allá de la última fecha de pedido.",
+        "suggestion": "Firme el pedido antes o negocie una franja anterior."
+      },
+      "slot_not_expired": {
+        "fail": "La reserva de capacidad de {item} superó su fecha límite de conversión.",
+        "suggestion": "Conviértala en pedido o libérela."
+      },
+      "slot_terms_complete": {
+        "fail": "La reserva de capacidad de {item} tiene condiciones incompletas.",
+        "suggestion": "Registre tasa, condiciones de reembolso, fecha límite de conversión y el vínculo con el compromiso."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "La política de fabricante de {item} es incoherente.",
+        "suggestion": "Una especificación vinculada requiere una justificación; una neutra no nombra ningún fabricante."
+      }
+    },
+    "spare_state": {
+      "delivered": "Entregado",
+      "handed_over": "Entregado al propietario",
+      "required": "Necesario",
+      "specified": "Especificado",
+      "waived": "Descartado"
+    },
+    "state": {
+      "cancelled": "Cancelado",
+      "commissioned": "Puesto en marcha",
+      "delivered": "Entregado",
+      "enquired": "Consultado",
+      "handed_over": "Entregado",
+      "identified": "Identificado",
+      "installed": "Instalado",
+      "manufactured": "Fabricado",
+      "ordered": "Pedido",
+      "route_set": "Ruta establecida",
+      "specified": "Especificado"
+    }
+  }
+}

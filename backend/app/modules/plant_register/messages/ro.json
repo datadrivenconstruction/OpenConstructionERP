@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Centrală de tratare a aerului",
+        "battery_storage": "Stocare cu baterii",
+        "bms_controls": "Automatizarea clădirii",
+        "boiler": "Cazan",
+        "chiller": "Groupe de răcire cu apă",
+        "cooling_tower": "Turn de răcire",
+        "crane_permanent": "Macara permanentă",
+        "distribution_transformer": "Transformator de distribuție",
+        "escalator": "Scară rulantă",
+        "facade_unit": "Elemente de fațadă",
+        "generator": "Grup electrogen",
+        "heat_pump": "Pompă de căldură",
+        "it_core_network": "Rețeaua IT principală",
+        "kitchen_equipment": "Echipamente de bucătărie",
+        "lift": "Lift",
+        "lv_switchboard": "Tablou de joasă tensiune",
+        "medical_equipment": "Echipamente medicale",
+        "mv_switchgear": "Aparataj de medie tensiune",
+        "power_transformer": "Transformator de putere",
+        "process_unit": "Instalație de proces",
+        "sprinkler_pump": "Grup de pompare pentru sprinklere",
+        "structural_steel_package": "Pachet de structură metalică",
+        "ups": "Sursă neîntreruptibilă de alimentare"
+      },
+      "it_service": {
+        "access_control": "Control al accesului",
+        "cctv": "Supraveghere video",
+        "cde_access": "Acces la CDE",
+        "drone_survey": "Releveu cu drona",
+        "site_network": "Rețea de șantier",
+        "telecom": "Telecomunicații",
+        "time_recording": "Pontaj"
+      },
+      "maintenance": {
+        "condition_based": "Pe bază de stare",
+        "preventive_interval": "Preventivă, pe intervale",
+        "run_to_failure": "Funcționare până la defectare",
+        "vendor_service_contract": "Contract de service cu furnizorul"
+      },
+      "name": "Catalog neutru de instalații",
+      "party": {
+        "contractor": "Antreprenor",
+        "installer": "Montator",
+        "operator": "Operator",
+        "owner": "Beneficiar",
+        "supplier": "Furnizor",
+        "user": "Utilizator"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Două sisteme complet independente",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Două sisteme independente plus o unitate de rezervă",
+        "n": "N",
+        "n_desc": "Exact capacitatea necesară, fără unitate de rezervă",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "O unitate de rezervă peste capacitatea necesară",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Două unități de rezervă peste capacitatea necesară"
+      },
+      "route": {
+        "contractor_furnished_installed": "Livrat și montat de antreprenor",
+        "owner_furnished_contractor_installed": "Livrat de beneficiar, montat de antreprenor",
+        "owner_furnished_owner_installed": "Livrat și montat de beneficiar",
+        "owner_procured_novated": "Achiziționat de beneficiar, comanda cedată antreprenorului"
+      },
+      "site_plant": {
+        "concrete_plant": "Stație de betoane",
+        "hoist": "Troliu de ridicare",
+        "mobile_crane_pad": "Fundație pentru macara mobilă",
+        "site_office": "Birou de șantier",
+        "storage": "Depozit",
+        "temporary_power": "Alimentare cu energie provizorie",
+        "temporary_water": "Apă provizorie",
+        "tower_crane": "Macara turn",
+        "welfare": "Facilități sociale",
+        "wheel_wash": "Spălător de roți"
+      },
+      "source": {
+        "catalogue_default": "Valoare implicită din catalog",
+        "expert_estimate": "Estimare de specialist",
+        "framework_agreement": "Acord-cadru",
+        "historic_order": "Comandă istorică",
+        "market_sounding": "Sondaj de piață",
+        "none": "Fără termen de livrare",
+        "supplier_catalogue": "Catalog al furnizorului",
+        "supplier_quote": "Ofertă de la furnizor"
+      },
+      "spare": {
+        "commissioning_spares": "Piese pentru punere în funcțiune",
+        "operating_consumables": "Consumabile de exploatare",
+        "special_tools": "Scule speciale",
+        "strategic_spares": "Piese de schimb strategice"
+      },
+      "step": {
+        "accept": "Recepție",
+        "commission": "Punere în funcțiune",
+        "connect": "Racordare",
+        "deliver_to_site": "Livrare pe șantier",
+        "document": "Documentare",
+        "offload": "Descărcare",
+        "set_in_place": "Montare la locul final",
+        "supply": "Aprovizionare",
+        "test": "Încercări",
+        "train": "Instruire"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Este necesară o ofertă de bază cu termenul de livrare.",
+      "catalogue_entry_required": "Un termen de livrare din catalogul furnizorului necesită poziția din catalog.",
+      "catalogue_lead_mismatch": "Termenul de livrare nu corespunde poziției din catalogul furnizorului indicate.",
+      "catalogue_retired": "Acest catalog a fost retras și nu poate fi fixat.",
+      "classification_frozen": "Modificările de criticitate și de termen lung sunt blocate odată ce ruta de achiziție este stabilită.",
+      "commitment_currency_mismatch": "Taxa de rezervare și angajamentul eliberat sunt în monede diferite.",
+      "commitment_for_other_item": "Poziția de angajament legată aparține unei alte poziții de instalație.",
+      "commitment_not_found": "Poziția de angajament legată nu face parte din acest proiect.",
+      "commitment_not_released": "Poziția de angajament legată nu a fost eliberată încă.",
+      "commitment_release_below_fee": "Suma eliberată este mai mică decât taxa de rezervare.",
+      "commitment_release_failed": "Eliberarea angajamentului nu a putut fi citită; încercați din nou sau contactați administratorul.",
+      "commitment_release_unavailable": "Eliberarea angajamentului nu poate fi citită, astfel încât taxa de rezervare nu poate fi legată.",
+      "concurrent_basis_change": "Un alt utilizator a modificat oferta de bază în același timp; reîncărcați pagina și reîncercați.",
+      "cost_needs_currency": "Costul unei opțiuni necesită moneda sa.",
+      "critical_override_needs_reason": "Modificarea criticității necesită un motiv.",
+      "critical_without_decision": "O poziție critică necesită un document de decizie aprobat înainte de stabilirea rutei sale.",
+      "critical_without_market_evidence": "O poziție critică necesită un termen de livrare obținut de pe piață, nu o valoare implicită din catalog sau o estimare.",
+      "critical_without_strategic_spares": "O poziție critică necesită o piesă de schimb strategică sau un motiv declarat pentru lipsa ei.",
+      "decision_paper_needs_two_options": "Un document de decizie necesită cel puțin două opțiuni, dacă poziția nu are sursă unică.",
+      "decision_route_refused": "Traseul de aprobare a respins acest pas.",
+      "delivery_limit_gap": "Nu fiecare pas de livrare are o parte responsabilă.",
+      "edit_permission_required": "Nu aveți permisiunea de a modifica registrul de instalații.",
+      "enquiry_date_in_future": "Data solicitării nu poate fi în viitor.",
+      "fee_needs_currency": "Taxa de rezervare necesită moneda sa.",
+      "fee_negative": "Taxa de rezervare nu poate fi negativă.",
+      "handover_needs_commissioned": "Doar o poziție pusă în funcțiune poate fi predată.",
+      "handover_needs_confirmation": "Predarea trebuie confirmată.",
+      "handover_needs_service_asset": "Indicați contractul de service pentru activ sau justificați de ce poziția este predată fără unul.",
+      "invalid_transition": "Această schimbare de stare nu este posibilă din starea curentă.",
+      "it_cde_not_linked": "Accesul la CDE necesită un container CDE legat.",
+      "it_service_not_found": "Serviciul IT nu a fost găsit.",
+      "it_service_range_invalid": "Serviciul se termină înainte de a începe.",
+      "it_service_retired": "Un serviciu IT retras nu poate fi modificat.",
+      "item_already_ordered": "Poziția este deja comandată.",
+      "item_closed": "Poziția este predată sau anulată.",
+      "item_code_taken": "Există deja o poziție cu acest cod în proiect.",
+      "item_not_found": "Poziția de instalație nu a fost găsită.",
+      "item_required": "Alegeți o poziție.",
+      "laydown_zone_not_found": "Această zonă de depozitare nu există în acest proiect.",
+      "lead_time_owned_by_plant_item": "Termenul de livrare al acestei documentații este păstrat la poziția de instalație.",
+      "lead_time_stale": "Oferta de bază cu termenul de livrare este mai veche decât permite clasa.",
+      "lead_time_without_enquiry_date": "Un termen de livrare necesită data la care a fost solicitat.",
+      "lead_weeks_range_invalid": "Termenul minim de livrare nu poate depăși maximul.",
+      "limit_needs_party": "Un pas de livrare necesită o parte sau un pachet.",
+      "link_not_found": "Înregistrarea legată nu face parte din acest proiect.",
+      "long_lead_override_needs_reason": "Modificarea clasificării de termen lung necesită un motiv.",
+      "manage_required": "Doar un titular al permisiunii de gestionare a instalațiilor poate modifica acest lucru.",
+      "neutral_spec_names_vendor": "Specificația este neutră față de producători, dar numește un producător.",
+      "no_decision_route": "Proiectul nu are un traseu de aprobare pentru documentele de decizie.",
+      "not_equipment_owner": "Doar un manager sau proprietarul zonei de echipamente poate modifica registrul de instalații.",
+      "null_not_allowed": "Acest câmp nu poate fi gol.",
+      "package_not_found": "Pachetul contractual nu face parte din planul de pachete al acestui proiect.",
+      "package_plan_failed": "Modelul de livrare nu a putut fi citit; încercați din nou sau contactați administratorul.",
+      "package_plan_unavailable": "Planul de pachete al proiectului nu poate fi citit, astfel încât ruta nu poate fi verificată.",
+      "paper_needs_rationale": "Documentul necesită o justificare.",
+      "paper_needs_recommendation": "Documentul necesită o recomandare.",
+      "paper_not_draft": "Doar un document ciornă poate fi modificat sau trimis.",
+      "paper_not_found": "Documentul de decizie nu a fost găsit.",
+      "paper_not_submitted": "Doar un document trimis poate fi retras.",
+      "paper_open": "Poziția are deja un document de decizie deschis.",
+      "paper_option_codes_invalid": "Fiecare opțiune necesită un cod unic.",
+      "paper_recommendation_unknown": "Recomandarea trebuie să indice una dintre opțiuni.",
+      "paper_scores_invalid": "Punctajele și ponderile trebuie să fie numere zecimale.",
+      "paper_submitter_is_approver": "Persoana care trimite documentul nu poate fi aprobatorul traseului său.",
+      "position_date_invalid": "Aceasta nu este o dată.",
+      "position_incomplete": "O poziție necesită tipul său și punctul pe planul de situație.",
+      "position_not_found": "Această poziție de instalație nu există în acest proiect.",
+      "position_number_invalid": "Acest număr nu poate fi salvat: verificați zecimalele și dimensiunea.",
+      "position_range_invalid": "Poziția se termină înainte de a începe.",
+      "position_text_invalid": "Acest text este gol sau prea lung.",
+      "quantity_not_positive": "Cantitatea trebuie să fie mai mare decât zero.",
+      "quote_not_found": "Oferta cu termen de livrare nu a fost găsită.",
+      "response_before_enquiry": "Data răspunsului nu poate fi anterioară datei solicitării.",
+      "route_frozen": "Ruta nu poate fi modificată după ce poziția a fost comandată.",
+      "route_inconsistent_with_package_plan": "Ruta de achiziție nu corespunde planului de pachete.",
+      "route_missing": "Nu este stabilită nicio rută de achiziție.",
+      "slot_closed": "Rezervarea este închisă.",
+      "slot_exists": "Poziția are deja o rezervare de capacitate deschisă.",
+      "slot_fee_needs_commitment": "Taxa de rezervare leagă bani doar prin eliberarea unui angajament; legați poziția de angajament.",
+      "slot_not_found": "Rezervarea de capacitate nu a fost găsită.",
+      "slot_range_invalid": "Intervalul se termină înainte de a începe.",
+      "slot_terms_incomplete": "O rezervare reținută necesită taxa, condițiile de restituire și termenul de conversie.",
+      "spare_closed": "Linia de piese de schimb este închisă.",
+      "spare_not_deletable": "Doar o linie de piese de schimb încă necesară poate fi ștearsă.",
+      "spare_not_found": "Linia de piese de schimb nu a fost găsită.",
+      "spares_not_handed_over": "Fiecare piesă de schimb trebuie mai întâi predată sau renunțată.",
+      "specification_frozen": "Specificația este blocată odată ce ruta de achiziție este stabilită.",
+      "stage_not_found": "Această etapă de extindere nu există în acest proiect.",
+      "stage_unavailable": "Etapele de extindere nu pot fi citite, astfel încât o poziție nu poate fi atribuită uneia dintre ele.",
+      "state_read_from_source": "Această stare este citită din comandă, din poziția furnizată de beneficiar sau din punerea în funcțiune, nu se setează manual.",
+      "transition_blocked": "Schimbarea de stare este blocată de mai multe reguli.",
+      "two_parties_on_one_step": "Un pas de livrare poate avea o singură parte.",
+      "unknown_catalogue": "Catalog de instalații necunoscut.",
+      "unknown_component_class": "Clasă de componentă necunoscută.",
+      "unknown_fee_refundable": "Condițiile de restituire trebuie să fie: niciuna, parțială sau integrală.",
+      "unknown_it_service_kind": "Serviciu IT necunoscut.",
+      "unknown_lead_basis": "Bază de termen de livrare necunoscută.",
+      "unknown_lead_time_source": "Sursă de termen de livrare necunoscută.",
+      "unknown_maintenance_strategy": "Strategie de întreținere necunoscută.",
+      "unknown_party": "Parte necunoscută.",
+      "unknown_redundancy_scheme": "Schemă de redundanță necunoscută.",
+      "unknown_route": "Rută de achiziție necunoscută.",
+      "unknown_site_plant_kind": "Acest tip de instalație de șantier nu există în catalogul de instalații al proiectului.",
+      "unknown_spare_category": "Categorie de piese de schimb necunoscută.",
+      "unknown_step": "Pas de livrare necunoscut.",
+      "unknown_vendor_bound_reason": "Motivul trebuie să fie standardizare, parc existent, garanție sau sursă unică.",
+      "unknown_vendor_policy": "Politica față de producători trebuie să fie neutră sau legată.",
+      "vendor_bound_needs_reason": "O specificație legată de un producător necesită un motiv.",
+      "waiver_needs_reason": "Renunțarea la o piesă de schimb necesită un motiv."
+    },
+    "evidence": {
+      "critical_route_set": "Fiecare poziție critică are ruta stabilită cu un document de decizie aprobat",
+      "frame_document_attached": "Documentul-cadru al echipamentelor este atașat la CDE",
+      "frame_document_missing": "Proiectul nu are încă un document-cadru al echipamentelor, astfel încât atașarea nu poate fi verificată",
+      "host_unresolved": "Modelul de guvernanță nu indică la ce zonă și la ce poartă raportează registrul de instalații",
+      "long_lead_secured": "Fiecare poziție cu termen lung are o ofertă de bază actualizată și este comandată sau se încadrează în data de comandă",
+      "no_area_hosts_plant": "Modelul de faze nu numește nicio zonă care găzduiește instalații, astfel încât registrul nu poate raporta la o poartă",
+      "no_error_findings": "Nicio constatare de nivel eroare în registrul de instalații",
+      "no_phase_enables_construction_start": "Modelul de faze nu numește nicio fază care permite începerea lucrărilor, astfel încât registrul de instalații nu are o poartă la care să raporteze"
+    },
+    "export": {
+      "catalogue": "Catalog",
+      "col_category": "Categorie",
+      "col_class": "Clasă",
+      "col_code": "Poziție",
+      "col_cost": "Cost",
+      "col_critical": "Critică",
+      "col_description": "Descriere",
+      "col_enquiry_date": "Solicitat la",
+      "col_float": "Rezervă (zile)",
+      "col_from": "De la",
+      "col_latest_order": "Ultima comandă",
+      "col_lead_source": "Sursa termenului",
+      "col_lead_weeks": "Termen (săpt.)",
+      "col_need_date": "Data necesară",
+      "col_option": "Opțiune",
+      "col_quantity": "Cantitate",
+      "col_recommended": "Recomandată",
+      "col_route": "Rută",
+      "col_score": "Punctaj ponderat",
+      "col_section": "Secțiune",
+      "col_state": "Stare",
+      "col_supply_by": "Furnizată de",
+      "col_title": "Titlu",
+      "col_to": "Până la",
+      "col_unit": "Unitate",
+      "critical_count": "Poziții critice",
+      "empty": "Nicio intrare.",
+      "frame_title": "Rezumat echipamente-cadru",
+      "item_count": "Poziții",
+      "limits_title": "Matricea limitelor de livrare",
+      "long_lead_count": "Poziții cu termen lung",
+      "overdue_count": "Comenzi restante",
+      "paper_title": "Document de decizie",
+      "project": "Proiect",
+      "question": "Întrebare",
+      "rationale": "Justificare",
+      "register_title": "Registrul pozițiilor cu termen lung",
+      "section_it": "Serviciu IT",
+      "section_long_lead": "Poziție cu termen lung",
+      "section_site_plant": "Instalație de șantier",
+      "spares_title": "Lista pieselor de schimb",
+      "yes": "da"
+    },
+    "paper_state": {
+      "approved": "Aprobat",
+      "draft": "Ciornă",
+      "rejected": "Respins",
+      "submitted": "Trimis"
+    },
+    "reasons": {
+      "currency": "taxa de rezervare nu are monedă",
+      "installer_mismatch": "poziția furnizată de beneficiar indică un alt pachet de montaj",
+      "owner_furnished_item_required": "o rută furnizată de beneficiar necesită poziția sa furnizată de beneficiar",
+      "owner_installs": "montajul este realizat de beneficiar, deci niciun pachet contractual nu poate fi numit montator",
+      "package_does_not_supply": "pachetul contractual nu furnizează instalații",
+      "package_not_in_plan": "pachetul contractual nu se află în planul de pachete",
+      "package_required": "această rută necesită un pachet contractual",
+      "single_package_form": "forma de livrare are un singur pachet contractual, iar poziția aparține altuia"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Poziția critică {item} nu are un document de decizie aprobat.",
+        "suggestion": "Pregătiți documentul cu opțiuni și trimiteți-l spre aprobare."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Poziția critică {item} se bazează pe o valoare implicită din catalog sau pe o estimare.",
+        "suggestion": "Obțineți o ofertă de la furnizor, un acord-cadru sau o comandă istorică."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Poziția critică {item} nu are o piesă de schimb strategică.",
+        "suggestion": "Adăugați o piesă de schimb strategică sau justificați de ce nu este necesară."
+      },
+      "delivery_limits_complete": {
+        "fail": "Limitele de livrare ale {item} nu au o parte responsabilă pentru: {steps}.",
+        "suggestion": "Atribuiți o parte responsabilă pentru fiecare pas de livrare."
+      },
+      "it_cde_linked": {
+        "fail": "Accesul la CDE este necesar înainte de poarta de execuție, dar nu există container CDE.",
+        "suggestion": "Legați containerul CDE în care vor lucra părțile."
+      },
+      "lead_time_fresh": {
+        "fail": "Termenul de livrare de bază al {item} este depășit.",
+        "suggestion": "Solicitați din nou furnizorului și înregistrați noul răspuns."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Poziția cu termen lung {item} nu are o ofertă cu termen de livrare și data solicitării.",
+        "suggestion": "Înregistrați o ofertă datată: când ați solicitat și cine a răspuns."
+      },
+      "order_not_overdue": {
+        "fail": "{item} trebuie comandată până la {date}.",
+        "suggestion": "Comandați acum sau modificați data necesară împreună cu responsabilul graficului."
+      },
+      "redundancy_quantity": {
+        "fail": "Cantitatea pentru {item} nu se potrivește schemei sale de redundanță.",
+        "suggestion": "Verificați cantitatea față de schemă (N+1 necesită cel puțin două unități)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Ruta de achiziție a {item} nu corespunde planului de pachete: {reason}.",
+        "suggestion": "Aliniați ruta cu pachetele contractuale și cu pozițiile furnizate de beneficiar."
+      },
+      "single_basis_quote": {
+        "fail": "{item} nu are exact o ofertă de bază.",
+        "suggestion": "Marcați o ofertă ca fiind de bază."
+      },
+      "slot_after_order_date": {
+        "fail": "Rezervarea de capacitate pentru {item} depășește ultima dată de comandă.",
+        "suggestion": "Semnați comanda mai devreme sau negociați un interval mai devreme."
+      },
+      "slot_not_expired": {
+        "fail": "Rezervarea de capacitate pentru {item} a depășit termenul de conversie.",
+        "suggestion": "Convertiți-o într-o comandă sau eliberați-o."
+      },
+      "slot_terms_complete": {
+        "fail": "Condițiile rezervării de capacitate pentru {item} sunt incomplete.",
+        "suggestion": "Înregistrați taxa, condițiile de restituire, termenul de conversie și legătura cu angajamentul."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Politica față de producător pentru {item} este inconsecventă.",
+        "suggestion": "O specificație legată de un producător necesită un motiv; una neutră nu numește niciun producător."
+      }
+    },
+    "spare_state": {
+      "delivered": "Livrată",
+      "handed_over": "Predată",
+      "required": "Necesară",
+      "specified": "Specificată",
+      "waived": "Renunțată"
+    },
+    "state": {
+      "cancelled": "Anulată",
+      "commissioned": "Pusă în funcțiune",
+      "delivered": "Livrată",
+      "enquired": "Solicitată",
+      "handed_over": "Predată",
+      "identified": "Identificată",
+      "installed": "Montată",
+      "manufactured": "Fabricată",
+      "ordered": "Comandată",
+      "route_set": "Rută stabilită",
+      "specified": "Specificată"
+    }
+  }
+}

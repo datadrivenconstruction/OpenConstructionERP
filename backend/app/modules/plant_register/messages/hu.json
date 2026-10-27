@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Légkezelő egység",
+        "battery_storage": "Akkumulátoros energiatároló",
+        "bms_controls": "Épületautomatika",
+        "boiler": "Kazán",
+        "chiller": "Hűtőgép",
+        "cooling_tower": "Hűtőtorony",
+        "crane_permanent": "Állandó daru",
+        "distribution_transformer": "Elosztó transzformátor",
+        "escalator": "Mozgólépcső",
+        "facade_unit": "Homlokzati elemek",
+        "generator": "Áramfejlesztő agregát",
+        "heat_pump": "Hőszivattyú",
+        "it_core_network": "IT gerinchálózat",
+        "kitchen_equipment": "Konyhatechnika",
+        "lift": "Személyfelvonó",
+        "lv_switchboard": "Kisfeszültségű főelosztó",
+        "medical_equipment": "Orvostechnikai berendezés",
+        "mv_switchgear": "Középfeszültségű kapcsolóberendezés",
+        "power_transformer": "Teljesítménytranszformátor",
+        "process_unit": "Technológiai egység",
+        "sprinkler_pump": "Sprinklerszivattyú-egység",
+        "structural_steel_package": "Acélszerkezeti csomag",
+        "ups": "Szünetmentes tápegység"
+      },
+      "it_service": {
+        "access_control": "Beléptetőrendszer",
+        "cctv": "Videómegfigyelés",
+        "cde_access": "CDE-hozzáférés",
+        "drone_survey": "Drónos felmérés",
+        "site_network": "Építkezési hálózat",
+        "telecom": "Távközlés",
+        "time_recording": "Munkaidő-nyilvántartás"
+      },
+      "maintenance": {
+        "condition_based": "Állapotalapú",
+        "preventive_interval": "Megelőző, időszakos",
+        "run_to_failure": "Meghibásodásig üzemeltetés",
+        "vendor_service_contract": "Gyártói szervizszerződés"
+      },
+      "name": "Semleges berendezéskatalógus",
+      "party": {
+        "contractor": "Kivitelező",
+        "installer": "Szerelő",
+        "operator": "Üzemeltető",
+        "owner": "Megrendelő",
+        "supplier": "Szállító",
+        "user": "Felhasználó"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Két teljesen független rendszer",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Két független rendszer plusz egy tartalék egység",
+        "n": "N",
+        "n_desc": "Pontosan a szükséges kapacitás, tartalék egység nélkül",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Egy tartalék egység a szükséges kapacitáson felül",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Két tartalék egység a szükséges kapacitáson felül"
+      },
+      "route": {
+        "contractor_furnished_installed": "Kivitelező szállítja, kivitelező szereli",
+        "owner_furnished_contractor_installed": "Megrendelő szállítja, kivitelező szereli",
+        "owner_furnished_owner_installed": "Megrendelő szállítja, megrendelő szereli",
+        "owner_procured_novated": "Megrendelő rendeli, a megrendelés a kivitelezőre száll át"
+      },
+      "site_plant": {
+        "concrete_plant": "Betongyár",
+        "hoist": "Építési felvonó",
+        "mobile_crane_pad": "Mobildaru-alap",
+        "site_office": "Építésvezetési iroda",
+        "storage": "Raktár",
+        "temporary_power": "Ideiglenes áramellátás",
+        "temporary_water": "Ideiglenes vízellátás",
+        "tower_crane": "Toronydaru",
+        "welfare": "Szociális létesítmények",
+        "wheel_wash": "Kerékmosó"
+      },
+      "source": {
+        "catalogue_default": "Katalógusos alapérték",
+        "expert_estimate": "Szakértői becslés",
+        "framework_agreement": "Keretszerződés",
+        "historic_order": "Korábbi megrendelés",
+        "market_sounding": "Piaci megkérdezés",
+        "none": "Nincs szállítási idő",
+        "supplier_catalogue": "Szállítói katalógus",
+        "supplier_quote": "Szállítói ajánlat"
+      },
+      "spare": {
+        "commissioning_spares": "Üzembe helyezési pótalkatrészek",
+        "operating_consumables": "Üzemeltetési fogyóanyagok",
+        "special_tools": "Speciális szerszámok",
+        "strategic_spares": "Stratégiai pótalkatrészek"
+      },
+      "step": {
+        "accept": "Átvétel",
+        "commission": "Üzembe helyezés",
+        "connect": "Csatlakoztatás",
+        "deliver_to_site": "Szállítás a helyszínre",
+        "document": "Dokumentálás",
+        "offload": "Lerakodás",
+        "set_in_place": "Helyre emelés",
+        "supply": "Szállítás",
+        "test": "Próba",
+        "train": "Betanítás"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Alapul szolgáló szállítási idő ajánlata szükséges.",
+      "catalogue_entry_required": "A szállítói katalógus szerinti szállítási időhöz meg kell adni a katalógusbejegyzést.",
+      "catalogue_lead_mismatch": "A szállítási idő nem egyezik a megnevezett szállítói katalógusbejegyzéssel.",
+      "catalogue_retired": "Ez a katalógus ki van vonva, nem rögzíthető.",
+      "classification_frozen": "A kritikus és hosszú szállítási idejű besorolás módosítása zárolt, miután a beszerzési út be van állítva.",
+      "commitment_currency_mismatch": "A foglalási díj és a felszabadított kötelezettség különböző pénznemben van.",
+      "commitment_for_other_item": "A kapcsolt kötelezettségtétel egy másik berendezéshez tartozik.",
+      "commitment_not_found": "A kapcsolt kötelezettségtétel nem tartozik ehhez a projekthez.",
+      "commitment_not_released": "A kapcsolt kötelezettségtétel még nincs felszabadítva.",
+      "commitment_release_below_fee": "A felszabadított összeg kisebb, mint a foglalási díj.",
+      "commitment_release_failed": "A kötelezettség felszabadítása nem olvasható; próbálja újra, vagy forduljon a rendszergazdához.",
+      "commitment_release_unavailable": "A kötelezettség felszabadítása nem olvasható, ezért foglalási díj nem köthető hozzá.",
+      "concurrent_basis_change": "Másik felhasználó ugyanebben az időben módosította az alapul szolgáló ajánlatot; töltse újra, és próbálja meg újra.",
+      "cost_needs_currency": "Az opció költségéhez pénznem szükséges.",
+      "critical_override_needs_reason": "A kritikussági besorolás felülírásához indoklás szükséges.",
+      "critical_without_decision": "A kritikus tételhez jóváhagyott döntési anyag kell, mielőtt beszerzési útja beállítható.",
+      "critical_without_market_evidence": "A kritikus tételhez piaci forrásból származó szállítási idő kell, nem katalógusos alapérték vagy becslés.",
+      "critical_without_strategic_spares": "A kritikus tételhez stratégiai pótalkatrész vagy annak indoklása kell, miért nincs.",
+      "decision_paper_needs_two_options": "A döntési anyaghoz legalább két opció kell, kivéve, ha a tétel egyedi forrásból származik.",
+      "decision_route_refused": "A jóváhagyási út elutasította ezt a lépést.",
+      "delivery_limit_gap": "Nem minden szállítási lépésnél van felelős fél.",
+      "edit_permission_required": "Nincs jogosultsága a berendezésnyilvántartás módosításához.",
+      "enquiry_date_in_future": "Az árdeklődés dátuma nem lehet jövőbeli.",
+      "fee_needs_currency": "A foglalási díjhoz pénznem szükséges.",
+      "fee_negative": "A foglalási díj nem lehet negatív.",
+      "handover_needs_commissioned": "Csak üzembe helyezett tétel adható át.",
+      "handover_needs_confirmation": "Az átadást meg kell erősíteni.",
+      "handover_needs_service_asset": "Nevezze meg az eszköz szervizszerződését, vagy indokolja, miért adják át szerződés nélkül.",
+      "invalid_transition": "Ez az állapotváltás a jelenlegi állapotból nem lehetséges.",
+      "it_cde_not_linked": "A CDE-hozzáféréshez kapcsolt CDE-tárolóra van szükség.",
+      "it_service_not_found": "Az IT-szolgáltatás nem található.",
+      "it_service_range_invalid": "A szolgáltatás a kezdése előtt ér véget.",
+      "it_service_retired": "A kivont IT-szolgáltatás nem módosítható.",
+      "item_already_ordered": "A tétel már meg van rendelve.",
+      "item_closed": "A tétel át lett adva vagy le lett mondva.",
+      "item_code_taken": "A projektben már létezik ilyen kódú tétel.",
+      "item_not_found": "A berendezés nem található.",
+      "item_required": "Válasszon tételt.",
+      "laydown_zone_not_found": "Ez a lerakási zóna nem létezik ebben a projektben.",
+      "lead_time_owned_by_plant_item": "Ennek a beadványnak a szállítási idejét a berendezéstétel tartalmazza.",
+      "lead_time_stale": "Az alapul szolgáló szállítási idő ajánlata régebbi, mint amennyit a besorolás megenged.",
+      "lead_time_without_enquiry_date": "A szállítási időhöz az árdeklődés dátuma szükséges.",
+      "lead_weeks_range_invalid": "A szállítási idő minimuma nem lehet nagyobb a maximumnál.",
+      "limit_needs_party": "A szállítási lépéshez fél vagy csomag szükséges.",
+      "link_not_found": "A kapcsolt rekord nem tartozik ehhez a projekthez.",
+      "long_lead_override_needs_reason": "A hosszú szállítási idejű besorolás felülírásához indoklás szükséges.",
+      "manage_required": "Ezt csak a berendezésmenedzsment jogosultsággal rendelkező személy módosíthatja.",
+      "neutral_spec_names_vendor": "A műszaki leírás gyártófüggetlen, de gyártót nevez meg.",
+      "no_decision_route": "A projektnek nincs jóváhagyási útja a döntési anyagokhoz.",
+      "not_equipment_owner": "A berendezésnyilvántartást csak a vezető vagy a berendezési terület felelőse módosíthatja.",
+      "null_not_allowed": "Ez a mező nem maradhat üresen.",
+      "package_not_found": "A szerződéses csomag nincs benne ennek a projektnek a csomagtervében.",
+      "package_plan_failed": "A szállítási modell nem olvasható; próbálja újra, vagy forduljon a rendszergazdához.",
+      "package_plan_unavailable": "A projekt csomagterve nem olvasható, ezért a beszerzési út nem ellenőrizhető.",
+      "paper_needs_rationale": "A dokumentumhoz indoklás szükséges.",
+      "paper_needs_recommendation": "A dokumentumhoz javaslat szükséges.",
+      "paper_not_draft": "Csak tervezet állapotú dokumentum módosítható vagy küldhető be.",
+      "paper_not_found": "A döntési anyag nem található.",
+      "paper_not_submitted": "Csak benyújtott dokumentum vonható vissza.",
+      "paper_open": "A tételhez már van nyitott döntési anyag.",
+      "paper_option_codes_invalid": "Minden opciónak egyedi kódot kell kapnia.",
+      "paper_recommendation_unknown": "A javaslatnak az egyik opciót kell megneveznie.",
+      "paper_scores_invalid": "A pontszámok és súlyok tizedes számok legyenek.",
+      "paper_submitter_is_approver": "A dokumentumot benyújtó személy nem lehet az útvonal jóváhagyója.",
+      "position_date_invalid": "Ez nem dátum.",
+      "position_incomplete": "A pozícióhoz meg kell adni a típusát és a helyszínrajzi pontját.",
+      "position_not_found": "Ez a berendezési pozíció nem létezik ebben a projektben.",
+      "position_number_invalid": "Ez a szám nem menthető: ellenőrizze a tizedesjegyeket és a méretet.",
+      "position_range_invalid": "A pozíció a kezdése előtt ér véget.",
+      "position_text_invalid": "Ez a szöveg üres vagy túl hosszú.",
+      "quantity_not_positive": "A mennyiségnek nullánál nagyobbnak kell lennie.",
+      "quote_not_found": "A szállítási idő ajánlata nem található.",
+      "response_before_enquiry": "A válasz dátuma nem lehet korábbi az árdeklődés dátumánál.",
+      "route_frozen": "A beszerzési út nem módosítható, miután a tételt megrendelték.",
+      "route_inconsistent_with_package_plan": "A beszerzési út nem egyezik a csomagtervvel.",
+      "route_missing": "Nincs beállítva beszerzési út.",
+      "slot_closed": "A foglalás lezárult.",
+      "slot_exists": "A tételhez már van nyitott kapacitásfoglalás.",
+      "slot_fee_needs_commitment": "A foglalási díj csak kötelezettség-felszabadításon keresztül köt le pénzt; kapcsolja hozzá a kötelezettségtételt.",
+      "slot_not_found": "A kapacitásfoglalás nem található.",
+      "slot_range_invalid": "A időszak a kezdése előtt ér véget.",
+      "slot_terms_incomplete": "A tartott foglaláshoz meg kell adni a díjat, a visszatérítési feltételeket és az átalakítási határidőt.",
+      "spare_closed": "A pótalkatrész-tétel le van zárva.",
+      "spare_not_deletable": "Csak még igényelt pótalkatrész-tétel törölhető.",
+      "spare_not_found": "A pótalkatrész-tétel nem található.",
+      "spares_not_handed_over": "Minden pótalkatrészt előbb át kell adni vagy le kell mondani róla.",
+      "specification_frozen": "A műszaki leírás zárolt, miután a beszerzési út be van állítva.",
+      "stage_not_found": "Ez a bővítési szakasz nem létezik ebben a projektben.",
+      "stage_unavailable": "A bővítési szakaszok nem olvashatók, ezért a pozíció nem rendelhető hozzájuk.",
+      "state_read_from_source": "Ez az állapot a megrendelésből, a megrendelő által szállított tételből vagy az üzembe helyezésből olvasható, nem kézzel állítható be.",
+      "transition_blocked": "Az állapotváltást több szabály is blokkolja.",
+      "two_parties_on_one_step": "Egy szállítási lépéshez csak egy fél rendelhető.",
+      "unknown_catalogue": "Ismeretlen berendezéskatalógus.",
+      "unknown_component_class": "Ismeretlen alkatrészosztály.",
+      "unknown_fee_refundable": "A visszatérítési feltételnek nincs, részleges vagy teljes értékűnek kell lennie.",
+      "unknown_it_service_kind": "Ismeretlen IT-szolgáltatás.",
+      "unknown_lead_basis": "Ismeretlen szállítási idő alapja.",
+      "unknown_lead_time_source": "Ismeretlen szállítási idő forrása.",
+      "unknown_maintenance_strategy": "Ismeretlen karbantartási stratégia.",
+      "unknown_party": "Ismeretlen fél.",
+      "unknown_redundancy_scheme": "Ismeretlen redundanciaséma.",
+      "unknown_route": "Ismeretlen beszerzési út.",
+      "unknown_site_plant_kind": "Ez a típusú építési berendezés nincs a projekt berendezéskatalógusában.",
+      "unknown_spare_category": "Ismeretlen pótalkatrész-kategória.",
+      "unknown_step": "Ismeretlen szállítási lépés.",
+      "unknown_vendor_bound_reason": "Az indoklásnak szabványosítás, meglévő állomány, garancia vagy egyedi forrás egyikének kell lennie.",
+      "unknown_vendor_policy": "A gyártói szabályzatnak semleges vagy kötött típusúnak kell lennie.",
+      "vendor_bound_needs_reason": "A gyártóhoz kötött műszaki leíráshoz indoklás szükséges.",
+      "waiver_needs_reason": "Pótalkatrész lemondásához indoklás szükséges."
+    },
+    "evidence": {
+      "critical_route_set": "Minden kritikus tételnek jóváhagyott döntési anyaggal beállított beszerzési útja van",
+      "frame_document_attached": "A berendezési keretdokumentum csatolva van a CDE-hez",
+      "frame_document_missing": "A projektnek még nincs berendezési keretdokumentuma, ezért a csatolás nem ellenőrizhető",
+      "host_unresolved": "A kormányzási modell nem határozza meg, melyik területnek és kapunak jelentsen a berendezésnyilvántartás",
+      "long_lead_secured": "Minden hosszú szállítási idejű tételnek friss alapul szolgáló ajánlata van, és megrendelték, vagy a megrendelési határidőn belül van",
+      "no_area_hosts_plant": "A fázismodell nem nevez meg berendezéseket befogadó területet, ezért a berendezésnyilvántartás nem jelenthet kapunak",
+      "no_error_findings": "A berendezésnyilvántartásban nincs hibaszintű megállapítás",
+      "no_phase_enables_construction_start": "A fázismodell nem nevez meg olyan fázist, amely az építkezés kezdetét engedélyezi, ezért a berendezésnyilvántartásnak nincs kapuja, amelynek jelenthetne"
+    },
+    "export": {
+      "catalogue": "Katalógus",
+      "col_category": "Kategória",
+      "col_class": "Osztály",
+      "col_code": "Tétel",
+      "col_cost": "Költség",
+      "col_critical": "Kritikus",
+      "col_description": "Leírás",
+      "col_enquiry_date": "Árdeklődés",
+      "col_float": "Tartalék (nap)",
+      "col_from": "Mettől",
+      "col_latest_order": "Legkésőbbi megrendelés",
+      "col_lead_source": "Szállítási idő forrása",
+      "col_lead_weeks": "Szállítási idő (hét)",
+      "col_need_date": "Igény dátuma",
+      "col_option": "Opció",
+      "col_quantity": "Mennyiség",
+      "col_recommended": "Javasolt",
+      "col_route": "Út",
+      "col_score": "Súlyozott pontszám",
+      "col_section": "Szakasz",
+      "col_state": "Állapot",
+      "col_supply_by": "Szállító",
+      "col_title": "Cím",
+      "col_to": "Meddig",
+      "col_unit": "Egység",
+      "critical_count": "Kritikus tételek",
+      "empty": "Nincs bejegyzés.",
+      "frame_title": "Berendezési keretösszesítő",
+      "item_count": "Tételek",
+      "limits_title": "Szállítási határok mátrixa",
+      "long_lead_count": "Hosszú szállítási idejű tételek",
+      "overdue_count": "Lejárt megrendelések",
+      "paper_title": "Döntési anyag",
+      "project": "Projekt",
+      "question": "Kérdés",
+      "rationale": "Indoklás",
+      "register_title": "Hosszú szállítási idejű nyilvántartás",
+      "section_it": "IT-szolgáltatás",
+      "section_long_lead": "Hosszú szállítási idejű tétel",
+      "section_site_plant": "Építési berendezés",
+      "spares_title": "Pótalkatrész-jegyzék",
+      "yes": "igen"
+    },
+    "paper_state": {
+      "approved": "Jóváhagyva",
+      "draft": "Tervezet",
+      "rejected": "Elutasítva",
+      "submitted": "Benyújtva"
+    },
+    "reasons": {
+      "currency": "a foglalási díjhoz nincs pénznem",
+      "installer_mismatch": "a megrendelő által szállított tétel másik szerelő csomagot nevez meg",
+      "owner_furnished_item_required": "a megrendelő által szállított úthoz a megrendelő által szállított tétel szükséges",
+      "owner_installs": "a megrendelő szerel, ezért szerelőként nem nevezhető meg szerződéses csomag",
+      "package_does_not_supply": "a szerződéses csomag nem szállít berendezést",
+      "package_not_in_plan": "a szerződéses csomag nincs a csomagtervben",
+      "package_required": "ehhez az úthoz szerződéses csomag szükséges",
+      "single_package_form": "a szállítási forma egy szerződéses csomagot ír elő, a tétel viszont egy másikban van"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "A(z) {item} kritikus tételhez nincs jóváhagyott döntési anyag.",
+        "suggestion": "Készítse el az opciós anyagot, és küldje be jóváhagyásra."
+      },
+      "critical_has_market_evidence": {
+        "fail": "A(z) {item} kritikus tétel katalógusos alapértéken vagy becslésen alapul.",
+        "suggestion": "Szerezzen szállítói ajánlatot, keretszerződést vagy korábbi megrendelést."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "A(z) {item} kritikus tételhez nincs stratégiai pótalkatrész.",
+        "suggestion": "Adjon hozzá stratégiai pótalkatrészt, vagy indokolja, miért nincs rá szükség."
+      },
+      "delivery_limits_complete": {
+        "fail": "A(z) {item} szállítási határaihoz nincs fél megadva ehhez: {steps}.",
+        "suggestion": "Rendeljen felelős felet minden szállítási lépéshez."
+      },
+      "it_cde_linked": {
+        "fail": "A kivitelezési kapu előtt szükséges CDE-hozzáféréshez nincs CDE-tároló.",
+        "suggestion": "Kapcsolja hozzá azt a CDE-tárolót, amelyben a felek dolgozni fognak."
+      },
+      "lead_time_fresh": {
+        "fail": "A(z) {item} alapul szolgáló szállítási ideje elavult.",
+        "suggestion": "Kérdezze meg újra a szállítót, és rögzítse az új választ."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "A(z) {item} hosszú szállítási idejű tételhez nincs árdeklődés dátumával rendelkező szállítási ajánlat.",
+        "suggestion": "Rögzítsen dátumozott ajánlatot: mikor kérdezett, és ki válaszolt."
+      },
+      "order_not_overdue": {
+        "fail": "A(z) {item} tételt eddig kell megrendelni: {date}.",
+        "suggestion": "Rendelje meg most, vagy egyeztessen az ütemterv felelősével az igény dátumának módosításáról."
+      },
+      "redundancy_quantity": {
+        "fail": "A(z) {item} mennyisége nem illeszkedik a redundanciasémájához.",
+        "suggestion": "Ellenőrizze a mennyiséget a sémával (N+1-hez legalább két egység kell)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "A(z) {item} beszerzési útja nem egyezik a csomagtervvel: {reason}.",
+        "suggestion": "Igazítsa az utat a szerződéses csomagokhoz és a megrendelő által szállított tételekhez."
+      },
+      "single_basis_quote": {
+        "fail": "A(z) {item} tételhez nincs pontosan egy alapul szolgáló ajánlat.",
+        "suggestion": "Jelöljön meg egy ajánlatot alapként."
+      },
+      "slot_after_order_date": {
+        "fail": "A(z) {item} kapacitásfoglalása túlnyúlik a legkésőbbi megrendelési dátumon.",
+        "suggestion": "Írja alá a megrendelést korábban, vagy tárgyaljon korábbi foglalási időpontról."
+      },
+      "slot_not_expired": {
+        "fail": "A(z) {item} kapacitásfoglalása lejárt az átalakítási határidővel.",
+        "suggestion": "Alakítsa át megrendeléssé, vagy szabadítsa fel."
+      },
+      "slot_terms_complete": {
+        "fail": "A(z) {item} kapacitásfoglalásának feltételei hiányosak.",
+        "suggestion": "Rögzítse a díjat, a visszatérítési feltételeket, az átalakítási határidőt és a kötelezettséghez kapcsolást."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "A(z) {item} gyártói szabályzata ellentmondásos.",
+        "suggestion": "A gyártóhoz kötött műszaki leírásnak indoklás kell; a semlegesben nem szerepel gyártó."
+      }
+    },
+    "spare_state": {
+      "delivered": "Szállítva",
+      "handed_over": "Átadva",
+      "required": "Igényelt",
+      "specified": "Meghatározva",
+      "waived": "Lemondva"
+    },
+    "state": {
+      "cancelled": "Visszavonva",
+      "commissioned": "Üzembe helyezve",
+      "delivered": "Szállítva",
+      "enquired": "Érdeklődve",
+      "handed_over": "Átadva",
+      "identified": "Azonosítva",
+      "installed": "Beépítve",
+      "manufactured": "Gyártva",
+      "ordered": "Megrendelve",
+      "route_set": "Út beállítva",
+      "specified": "Meghatározva"
+    }
+  }
+}

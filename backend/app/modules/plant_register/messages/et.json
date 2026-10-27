@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Õhutöötlusseade",
+        "battery_storage": "Akusalvestus",
+        "bms_controls": "Hoone automaatika",
+        "boiler": "Katel",
+        "chiller": "Külmamasin",
+        "cooling_tower": "Jahutustorn",
+        "crane_permanent": "Püsikraana",
+        "distribution_transformer": "Jaotustrafo",
+        "escalator": "Eskalaator",
+        "facade_unit": "Fassaadielemendid",
+        "generator": "Generaatorjaam",
+        "heat_pump": "Soojuspump",
+        "it_core_network": "IT tuumvõrk",
+        "kitchen_equipment": "Köögiseadmed",
+        "lift": "Lift",
+        "lv_switchboard": "Madalpinge jaotuskilp",
+        "medical_equipment": "Meditsiiniseadmed",
+        "mv_switchgear": "Keskpinge lülitusseade",
+        "power_transformer": "Võimsustrafo",
+        "process_unit": "Tehnoloogiaseade",
+        "sprinkler_pump": "Sprinklerpumbajaam",
+        "structural_steel_package": "Terastala konstruktsioonipakett",
+        "ups": "Katkematu toiteseade (UPS)"
+      },
+      "it_service": {
+        "access_control": "Juurdepääsukontroll",
+        "cctv": "Videovalve",
+        "cde_access": "CDE juurdepääs",
+        "drone_survey": "Droonimõõdistus",
+        "site_network": "Ehitusplatsi võrk",
+        "telecom": "Side",
+        "time_recording": "Tööaja arvestus"
+      },
+      "maintenance": {
+        "condition_based": "Seisukorrapõhine",
+        "preventive_interval": "Ennetav, intervallide kaupa",
+        "run_to_failure": "Rikkeni töötamine",
+        "vendor_service_contract": "Tarnija hooldusleping"
+      },
+      "name": "Neutraalne seadmete kataloog",
+      "party": {
+        "contractor": "Töövõtja",
+        "installer": "Paigaldaja",
+        "operator": "Operaator",
+        "owner": "Tellija",
+        "supplier": "Tarnija",
+        "user": "Kasutaja"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Kaks täiesti sõltumatut süsteemi",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Kaks sõltumatut süsteemi ja üks reservseade",
+        "n": "N",
+        "n_desc": "Täpselt vajalik võimsus, reservseadet ei ole",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Üks reservseade vajalikule võimsusele lisaks",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Kaks reservseadet vajalikule võimsusele lisaks"
+      },
+      "route": {
+        "contractor_furnished_installed": "Töövõtja tarnitud ja paigaldatud",
+        "owner_furnished_contractor_installed": "Tellija tarnitud, töövõtja paigaldatud",
+        "owner_furnished_owner_installed": "Tellija tarnitud ja paigaldatud",
+        "owner_procured_novated": "Tellija hangitud, tellimus üle antud töövõtjale"
+      },
+      "site_plant": {
+        "concrete_plant": "Betoonitehas",
+        "hoist": "Ehitustõstuk",
+        "mobile_crane_pad": "Mobiilkraana alus",
+        "site_office": "Ehitusplatsi kontor",
+        "storage": "Ladu",
+        "temporary_power": "Ajutine elektrivarustus",
+        "temporary_water": "Ajutine veevarustus",
+        "tower_crane": "Torukraana",
+        "welfare": "Sotsiaalruumid",
+        "wheel_wash": "Rataspesu"
+      },
+      "source": {
+        "catalogue_default": "Kataloogi vaikeväärtus",
+        "expert_estimate": "Eksperdi hinnang",
+        "framework_agreement": "Raamleping",
+        "historic_order": "Varasem tellimus",
+        "market_sounding": "Turu-uuring",
+        "none": "Tarneaega ei ole",
+        "supplier_catalogue": "Tarnija kataloog",
+        "supplier_quote": "Tarnija pakkumine"
+      },
+      "spare": {
+        "commissioning_spares": "Käivitamise varuosad",
+        "operating_consumables": "Kasutusmaterjalid",
+        "special_tools": "Erivahendid",
+        "strategic_spares": "Strateegilised varuosad"
+      },
+      "step": {
+        "accept": "Vastuvõtt",
+        "commission": "Käivitamine",
+        "connect": "Ühendamine",
+        "deliver_to_site": "Tarne ehitusplatsile",
+        "document": "Dokumentatsioon",
+        "offload": "Mahalaadimine",
+        "set_in_place": "Paigaldamine kohale",
+        "supply": "Tarne",
+        "test": "Katsetamine",
+        "train": "Koolitus"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Nõutav on tarneaja lähtepakkumine.",
+      "catalogue_entry_required": "Tarnija kataloogi tarneaeg nõuab kataloogikirjet.",
+      "catalogue_lead_mismatch": "Tarneaeg ei vasta kataloogikirjele, millele see viitab.",
+      "catalogue_retired": "See kataloog on kasutusest kõrvaldatud ega saa olla kinnitatud.",
+      "classification_frozen": "Kriitilisuse ja pika tarneajaga klassifikatsiooni muutmine on lukustatud, kui hankeviis on määratud.",
+      "commitment_currency_mismatch": "Broneerimistasu ja vabastatud kohustus on erinevates valuutades.",
+      "commitment_for_other_item": "Seotud kohustuse rida kuulub teisele seadmekirjele.",
+      "commitment_not_found": "Seotud kohustuse rida ei kuulu sellesse projekti.",
+      "commitment_not_released": "Seotud kohustuse rida ei ole veel vabastatud.",
+      "commitment_release_below_fee": "Vabastatud summa on väiksem kui broneerimistasu.",
+      "commitment_release_failed": "Kohustuse vabastamist ei õnnestunud lugeda; proovige uuesti või võtke ühendust administraatoriga.",
+      "commitment_release_unavailable": "Kohustuse vabastamist ei saa lugeda, seega ei saa broneerimistasu siduda.",
+      "concurrent_basis_change": "Keegi teine muutis samal ajal lähtepakkumist; laadige leht uuesti ja proovige uuesti.",
+      "cost_needs_currency": "Variandi maksumuse juures peab olema valuuta.",
+      "critical_override_needs_reason": "Kriitilisuse muutmiseks on vaja põhjendust.",
+      "critical_without_decision": "Kriitiline seade vajab enne hankeviisi määramist kinnitatud otsusedokumenti.",
+      "critical_without_market_evidence": "Kriitiline seade vajab turult saadud tarneaega, mitte kataloogi vaikeväärtust ega hinnangut.",
+      "critical_without_strategic_spares": "Kriitiline seade vajab strateegilist varuosa või põhjendust, miks seda ei ole.",
+      "decision_paper_needs_two_options": "Otsusedokument vajab vähemalt kahte varianti, välja arvatud juhul, kui seade on ainutarnija.",
+      "decision_route_refused": "Kinnitusprotsess lükkas selle sammu tagasi.",
+      "delivery_limit_gap": "Kõigil tarnesammudel ei ole vastutavat osapoolt.",
+      "edit_permission_required": "Teil ei ole õigust seadmeregistrit muuta.",
+      "enquiry_date_in_future": "Päring ei saa olla tulevikus.",
+      "fee_needs_currency": "Broneerimistasu juures peab olema valuuta.",
+      "fee_negative": "Broneerimistasu ei saa olla negatiivne.",
+      "handover_needs_commissioned": "Üle anda saab ainult käivitatud seadme.",
+      "handover_needs_confirmation": "Üleandmine tuleb kinnitada.",
+      "handover_needs_service_asset": "Nimetage varale hooldusleping või põhjendage, miks seade antakse üle ilma selleta.",
+      "invalid_transition": "Praeguses olekus ei ole see olekumuudatus võimalik.",
+      "it_cde_not_linked": "CDE juurdepääs nõuab seotud CDE konteinerit.",
+      "it_service_not_found": "IT teenust ei leitud.",
+      "it_service_range_invalid": "Teenus lõpeb enne alguskuupäeva.",
+      "it_service_retired": "Kasutusest kõrvaldatud IT teenust ei saa muuta.",
+      "item_already_ordered": "Seade on juba tellitud.",
+      "item_closed": "Seade on üle antud või tühistatud.",
+      "item_code_taken": "Selle koodiga seade on projektis juba olemas.",
+      "item_not_found": "Seadet ei leitud.",
+      "item_required": "Valige seade.",
+      "laydown_zone_not_found": "Seda ladustusala ei ole selles projektis.",
+      "lead_time_owned_by_plant_item": "Selle esitatud dokumendi tarneaega hoitakse seadmekirjel.",
+      "lead_time_stale": "Lähtepakkumine tarneaja kohta on vanem, kui klass lubab.",
+      "lead_time_without_enquiry_date": "Tarneajal peab olema päringu kuupäev.",
+      "lead_weeks_range_invalid": "Tarneaja miinimum ei tohi ületada maksimumi.",
+      "limit_needs_party": "Tarnesamm nõuab osapoolt või paketti.",
+      "link_not_found": "Seotud kirje ei kuulu sellesse projekti.",
+      "long_lead_override_needs_reason": "Pika tarneajaga klassifikatsiooni muutmiseks on vaja põhjendust.",
+      "manage_required": "Seda võib muuta ainult seadmete haldamise õigusega isik.",
+      "neutral_spec_names_vendor": "Spetsifikatsioon on tarnijast sõltumatu, kuid nimetab tarnija.",
+      "no_decision_route": "Projektil ei ole otsusedokumentide kinnitusprotsessi.",
+      "not_equipment_owner": "Seadmeregistrit võivad muuta ainult juht või seadmeala omanik.",
+      "null_not_allowed": "See väli ei tohi olla tühi.",
+      "package_not_found": "Ehitusleping ei kuulu selle projekti paketiplaani.",
+      "package_plan_failed": "Tarnemudelit ei õnnestunud lugeda; proovige uuesti või võtke ühendust administraatoriga.",
+      "package_plan_unavailable": "Projekti paketiplaani ei saa lugeda, seega ei saa hankeviisi kontrollida.",
+      "paper_needs_rationale": "Dokument vajab põhjendust.",
+      "paper_needs_recommendation": "Dokument vajab soovitust.",
+      "paper_not_draft": "Muuta või esitada saab ainult mustandi.",
+      "paper_not_found": "Otsusedokumenti ei leitud.",
+      "paper_not_submitted": "Tagasi võtta saab ainult esitatud dokumendi.",
+      "paper_open": "Seadmel on juba avatud otsusedokument.",
+      "paper_option_codes_invalid": "Igal variandil peab olema kordumatu kood.",
+      "paper_recommendation_unknown": "Soovitus peab nimetama ühe variantidest.",
+      "paper_scores_invalid": "Hinded ja kaalud peavad olema kümnendarvud.",
+      "paper_submitter_is_approver": "Dokumendi esitaja ei saa olla selle kinnitusprotsessi kinnitaja.",
+      "position_date_invalid": "See ei ole kuupäev.",
+      "position_incomplete": "Asukohal peavad olema liik ja punkt tegevusplaanil.",
+      "position_not_found": "Seda seadme asukohta ei ole selles projektis.",
+      "position_number_invalid": "Seda numbrit ei saa salvestada: kontrollige kümnendkohti ja suurust.",
+      "position_range_invalid": "Asukoht lõpeb enne alguskuupäeva.",
+      "position_text_invalid": "See tekst on tühi või liiga pikk.",
+      "quantity_not_positive": "Kogus peab olema suurem kui null.",
+      "quote_not_found": "Tarneaja pakkumist ei leitud.",
+      "response_before_enquiry": "Vastuse kuupäev ei saa olla enne päringu kuupäeva.",
+      "route_frozen": "Hankeviisi ei saa muuta, kui seade on tellitud.",
+      "route_inconsistent_with_package_plan": "Hankeviis ei vasta paketiplaanile.",
+      "route_missing": "Hankeviisi ei ole määratud.",
+      "slot_closed": "Broneering on suletud.",
+      "slot_exists": "Seadmel on juba avatud mahubroneering.",
+      "slot_fee_needs_commitment": "Broneerimistasu seob raha ainult kohustuse vabastamise kaudu; siduge kohustuse rida.",
+      "slot_not_found": "Mahubroneeringut ei leitud.",
+      "slot_range_invalid": "Aeg lõpeb enne alguskuupäeva.",
+      "slot_terms_incomplete": "Hoitud broneering vajab tasu, tagasimaksetingimusi ja muutmise tähtaega.",
+      "spare_closed": "Varuosa rida on suletud.",
+      "spare_not_deletable": "Kustutada saab ainult varuosa rea, mis on veel nõutav.",
+      "spare_not_found": "Varuosa rida ei leitud.",
+      "spares_not_handed_over": "Iga varuosa tuleb enne üle anda või sellest loobuda.",
+      "specification_frozen": "Spetsifikatsioon on lukustatud, kui hankeviis on määratud.",
+      "stage_not_found": "Seda laienduse etappi ei ole selles projektis.",
+      "stage_unavailable": "Laienduse etappe ei saa lugeda, seega ei saa asukohta etapile määrata.",
+      "state_read_from_source": "See olek tuleneb tellimusest, tellija tarnitud seadmest või käivitamisest ega määrata käsitsi.",
+      "transition_blocked": "Olekumuudatust blokeerivad mitmed reeglid.",
+      "two_parties_on_one_step": "Tarnesammul võib olla ainult üks osapool.",
+      "unknown_catalogue": "Tundmatu seadmete kataloog.",
+      "unknown_component_class": "Tundmatu komponendiklass.",
+      "unknown_fee_refundable": "Tagasimaksetingimused peavad olema puudub, osaline või täielik.",
+      "unknown_it_service_kind": "Tundmatu IT teenus.",
+      "unknown_lead_basis": "Tundmatu tarneaja alus.",
+      "unknown_lead_time_source": "Tundmatu tarneaja allikas.",
+      "unknown_maintenance_strategy": "Tundmatu hooldusstrateegia.",
+      "unknown_party": "Tundmatu osapool.",
+      "unknown_redundancy_scheme": "Tundmatu reservskeem.",
+      "unknown_route": "Tundmatu hankeviis.",
+      "unknown_site_plant_kind": "Seda tüüpi ehitusplatsi seadet ei ole projekti seadmete kataloogis.",
+      "unknown_spare_category": "Tundmatu varuosa kategooria.",
+      "unknown_step": "Tundmatu tarnesamm.",
+      "unknown_vendor_bound_reason": "Põhjus peab olema standardimine, olemasolev varustus, garantii või ainutarnija.",
+      "unknown_vendor_policy": "Tarnijapoliitika peab olema neutraalne või seotud.",
+      "vendor_bound_needs_reason": "Tarnijaga seotud spetsifikatsioon vajab põhjendust.",
+      "waiver_needs_reason": "Varuosast loobumiseks on vaja põhjendust."
+    },
+    "evidence": {
+      "critical_route_set": "Igal kriitilisel seadmel on hankeviis määratud kinnitatud otsusedokumendiga",
+      "frame_document_attached": "Seadmete raamdokument on CDE-sse lisatud",
+      "frame_document_missing": "Projektil ei ole veel seadmete raamdokumenti, seega ei saa selle lisamist kontrollida",
+      "host_unresolved": "Juhtimismudel ei näita, millisele alale ja väravale seadmeregister aruandeid esitab",
+      "long_lead_secured": "Igal pika tarneajaga seadmel on kehtiv lähtepakkumine ning see on tellitud või jääb tellimise kuupäeva sisse",
+      "no_area_hosts_plant": "Faasimudel ei nimeta ühtegi seadmeid majutavat ala, seega ei saa seadmeregister väravale aru anda",
+      "no_error_findings": "Seadmeregistris ei ole veataseme leide",
+      "no_phase_enables_construction_start": "Faasimudel ei nimeta ühtegi faasi, mis lubab ehituse alustamist, seega ei ole seadmeregistril väravat, millele aru anda"
+    },
+    "export": {
+      "catalogue": "Kataloog",
+      "col_category": "Kategooria",
+      "col_class": "Klass",
+      "col_code": "Seade",
+      "col_cost": "Maksumus",
+      "col_critical": "Kriitiline",
+      "col_description": "Kirjeldus",
+      "col_enquiry_date": "Päritud",
+      "col_float": "Varu (päevad)",
+      "col_from": "Alates",
+      "col_latest_order": "Viimane tellimine",
+      "col_lead_source": "Tarneaja allikas",
+      "col_lead_weeks": "Tarneaeg (nädalat)",
+      "col_need_date": "Vajaduse kuupäev",
+      "col_option": "Variant",
+      "col_quantity": "Kogus",
+      "col_recommended": "Soovitatud",
+      "col_route": "Hankeviis",
+      "col_score": "Kaalutud hinne",
+      "col_section": "Jaotis",
+      "col_state": "Olek",
+      "col_supply_by": "Tarnib",
+      "col_title": "Pealkiri",
+      "col_to": "Kuni",
+      "col_unit": "Ühik",
+      "critical_count": "Kriitilised seadmed",
+      "empty": "Kirjeid ei ole.",
+      "frame_title": "Seadmete raamistiku kokkuvõte",
+      "item_count": "Seadmed",
+      "limits_title": "Tarnepiiride maatriks",
+      "long_lead_count": "Pika tarneajaga seadmed",
+      "overdue_count": "Hilinenud tellimused",
+      "paper_title": "Otsusedokument",
+      "project": "Projekt",
+      "question": "Küsimus",
+      "rationale": "Põhjendus",
+      "register_title": "Pika tarneajaga seadmete register",
+      "section_it": "IT teenus",
+      "section_long_lead": "Pika tarneajaga seade",
+      "section_site_plant": "Ehitusplatsi seade",
+      "spares_title": "Varuosade nimekiri",
+      "yes": "jah"
+    },
+    "paper_state": {
+      "approved": "Kinnitatud",
+      "draft": "Mustand",
+      "rejected": "Tagasi lükatud",
+      "submitted": "Esitatud"
+    },
+    "reasons": {
+      "currency": "broneerimistasul puudub valuuta",
+      "installer_mismatch": "tellija tarnitud seade nimetab teise paigaldava paketi",
+      "owner_furnished_item_required": "tellija tarnitud hankeviis nõuab oma tellija tarnitud seadet",
+      "owner_installs": "paigaldab tellija, seega ei tohi paigaldajana nimetada ühtegi ehituslepingu paketti",
+      "package_does_not_supply": "ehitusleping ei tarni seadmeid",
+      "package_not_in_plan": "ehitusleping ei ole paketiplaanis",
+      "package_required": "see hankeviis nõuab ehituslepingu paketti",
+      "single_package_form": "tarnevormis on üks ehitusleping, aga seade kuulub teise"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kriitilisel seadmel {item} puudub kinnitatud otsusedokument.",
+        "suggestion": "Koostage variantide dokument ja esitage see kinnitamiseks."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kriitiline seade {item} põhineb kataloogi vaikeväärtusel või hinnangul.",
+        "suggestion": "Hankige tarnija pakkumine, raamleping või varasem tellimus."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kriitilisel seadmel {item} puudub strateegiline varuosa.",
+        "suggestion": "Lisage strateegiline varuosa või põhjendage, miks see ei ole vajalik."
+      },
+      "delivery_limits_complete": {
+        "fail": "Seadme {item} tarnepiiridel puudub osapool: {steps}.",
+        "suggestion": "Määrake igale tarnesammule osapool."
+      },
+      "it_cde_linked": {
+        "fail": "Enne teostusetappi on vaja CDE juurdepääsu, kuid CDE konteiner puudub.",
+        "suggestion": "Siduge CDE konteiner, milles osapooled töötavad."
+      },
+      "lead_time_fresh": {
+        "fail": "Seadme {item} lähtetarneaeg on aegunud.",
+        "suggestion": "Küsige tarnijalt uuesti ja salvestage uus vastus."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Pika tarneajaga seadmel {item} puudub tarneaja pakkumine päringu kuupäevaga.",
+        "suggestion": "Salvestage kuupäevastatud pakkumine: millal küsisite ja kes vastas."
+      },
+      "order_not_overdue": {
+        "fail": "Seade {item} tuleb tellida hiljemalt {date}.",
+        "suggestion": "Tellige kohe või nihutage vajaduse kuupäeva koos graafiku vastutajaga."
+      },
+      "redundancy_quantity": {
+        "fail": "Seadme {item} kogus ei vasta selle reservskeemile.",
+        "suggestion": "Kontrollige kogust skeemi järgi (N+1 nõuab vähemalt kahte ühikut)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Seadme {item} hankeviis ei vasta paketiplaanile: {reason}.",
+        "suggestion": "Viige hankeviis kooskõlla ehitusleppe pakettide ja tellija tarnitud seadmetega."
+      },
+      "single_basis_quote": {
+        "fail": "Seadmel {item} ei ole täpselt ühte lähtepakkumist.",
+        "suggestion": "Märkige üks pakkumine lähtepakkumiseks."
+      },
+      "slot_after_order_date": {
+        "fail": "Seadme {item} mahubroneering ulatub üle viimase tellimise kuupäeva.",
+        "suggestion": "Sõlmige tellimus varem või kokkuleppel valige varasem aeg."
+      },
+      "slot_not_expired": {
+        "fail": "Seadme {item} mahubroneering on ületanud muutmise tähtaja.",
+        "suggestion": "Muutke see tellimuseks või vabastage see."
+      },
+      "slot_terms_complete": {
+        "fail": "Seadme {item} mahubroneeringu tingimused on puudulikud.",
+        "suggestion": "Salvestage tasu, tagasimaksetingimused, muutmise tähtaeg ja kohustuse seos."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Seadme {item} tarnijapoliitika on vastuoluline.",
+        "suggestion": "Tarnijaga seotud spetsifikatsioon vajab põhjendust; neutraalne ei nimeta tarnijat."
+      }
+    },
+    "spare_state": {
+      "delivered": "Tarnitud",
+      "handed_over": "Üle antud",
+      "required": "Nõutav",
+      "specified": "Määratud",
+      "waived": "Loobutud"
+    },
+    "state": {
+      "cancelled": "Tühistatud",
+      "commissioned": "Käivitatud",
+      "delivered": "Tarnitud",
+      "enquired": "Päritud",
+      "handed_over": "Üle antud",
+      "identified": "Tuvastatud",
+      "installed": "Paigaldatud",
+      "manufactured": "Valmistatud",
+      "ordered": "Tellitud",
+      "route_set": "Hankeviis määratud",
+      "specified": "Määratud"
+    }
+  }
+}

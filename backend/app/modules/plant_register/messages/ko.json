@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "공조기",
+        "battery_storage": "배터리 저장장치",
+        "bms_controls": "건물 자동제어",
+        "boiler": "보일러",
+        "chiller": "냉동기",
+        "cooling_tower": "냉각탑",
+        "crane_permanent": "고정식 크레인",
+        "distribution_transformer": "배전 변압기",
+        "escalator": "에스컬레이터",
+        "facade_unit": "외벽 유닛",
+        "generator": "발전기 세트",
+        "heat_pump": "열펌프",
+        "it_core_network": "IT 코어 네트워크",
+        "kitchen_equipment": "주방 설비",
+        "lift": "승강기",
+        "lv_switchboard": "저압 배전반",
+        "medical_equipment": "의료 설비",
+        "mv_switchgear": "중압 개폐기반",
+        "power_transformer": "전력 변압기",
+        "process_unit": "공정 설비",
+        "sprinkler_pump": "스프링클러 펌프 세트",
+        "structural_steel_package": "철골 구조 패키지",
+        "ups": "무정전 전원장치"
+      },
+      "it_service": {
+        "access_control": "출입통제",
+        "cctv": "영상감시",
+        "cde_access": "CDE 접근",
+        "drone_survey": "드론 측량",
+        "site_network": "현장 네트워크",
+        "telecom": "통신",
+        "time_recording": "근태 기록"
+      },
+      "maintenance": {
+        "condition_based": "상태 기반",
+        "preventive_interval": "예방 정비(주기별)",
+        "run_to_failure": "사후 정비",
+        "vendor_service_contract": "제조사 유지보수 계약"
+      },
+      "name": "중립 설비 카탈로그",
+      "party": {
+        "contractor": "시공사",
+        "installer": "설치업체",
+        "operator": "운영자",
+        "owner": "발주자",
+        "supplier": "공급사",
+        "user": "사용자"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "완전히 독립된 두 개의 시스템",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "독립된 두 개의 시스템과 예비 유닛 1기",
+        "n": "N",
+        "n_desc": "필요 용량만큼만, 예비 유닛 없음",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "필요 용량을 넘는 예비 유닛 1기",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "필요 용량을 넘는 예비 유닛 2기"
+      },
+      "route": {
+        "contractor_furnished_installed": "시공사 조달, 시공사 설치",
+        "owner_furnished_contractor_installed": "발주자 지급(支給), 시공사 설치",
+        "owner_furnished_owner_installed": "발주자 지급, 발주자 설치",
+        "owner_procured_novated": "발주자 발주, 주문 시공사 이관"
+      },
+      "site_plant": {
+        "concrete_plant": "레미콘 플랜트",
+        "hoist": "건설용 리프트",
+        "mobile_crane_pad": "이동식 크레인 설치면",
+        "site_office": "현장 사무소",
+        "storage": "자재 보관장",
+        "temporary_power": "가설 전력",
+        "temporary_water": "가설 용수",
+        "tower_crane": "타워크레인",
+        "welfare": "복지시설",
+        "wheel_wash": "세륜 시설"
+      },
+      "source": {
+        "catalogue_default": "카탈로그 기본값",
+        "expert_estimate": "전문가 추정",
+        "framework_agreement": "기본계약(프레임워크)",
+        "historic_order": "과거 발주 실적",
+        "market_sounding": "시장 조사",
+        "none": "리드타임 없음",
+        "supplier_catalogue": "공급사 카탈로그",
+        "supplier_quote": "공급사 견적"
+      },
+      "spare": {
+        "commissioning_spares": "시운전 예비품",
+        "operating_consumables": "운전 소모품",
+        "special_tools": "전용 공구",
+        "strategic_spares": "전략 예비품"
+      },
+      "step": {
+        "accept": "인수 검사",
+        "commission": "시운전",
+        "connect": "접속",
+        "deliver_to_site": "현장 운송",
+        "document": "문서화",
+        "offload": "하역",
+        "set_in_place": "설치 위치 배치",
+        "supply": "공급",
+        "test": "시험",
+        "train": "교육"
+      }
+    },
+    "common": {
+      "ok": "확인"
+    },
+    "errors": {
+      "basis_quote_required": "기준 리드타임 견적이 필요합니다.",
+      "catalogue_entry_required": "공급사 카탈로그 리드타임에는 카탈로그 항목이 필요합니다.",
+      "catalogue_lead_mismatch": "리드타임이 지정된 공급사 카탈로그 항목과 일치하지 않습니다.",
+      "catalogue_retired": "이 카탈로그는 사용 중지되어 고정할 수 없습니다.",
+      "classification_frozen": "조달 경로가 설정되면 중요 및 장납기 분류 재지정은 잠깁니다.",
+      "commitment_currency_mismatch": "예약 수수료와 출금된 약정금액의 통화가 다릅니다.",
+      "commitment_for_other_item": "연결된 약정 항목이 다른 설비 항목에 속해 있습니다.",
+      "commitment_not_found": "연결된 약정 항목이 이 프로젝트에 속해 있지 않습니다.",
+      "commitment_not_released": "연결된 약정 항목이 아직 출금되지 않았습니다.",
+      "commitment_release_below_fee": "출금된 금액이 예약 수수료보다 적습니다.",
+      "commitment_release_failed": "약정 출금 내역을 읽을 수 없습니다. 다시 시도하거나 관리자에게 문의하십시오.",
+      "commitment_release_unavailable": "약정 출금 내역을 읽을 수 없어 예약 수수료를 확정할 수 없습니다.",
+      "concurrent_basis_change": "다른 사용자가 같은 시점에 기준 견적을 변경했습니다. 새로 고친 후 다시 시도하십시오.",
+      "cost_needs_currency": "옵션의 비용에는 통화가 필요합니다.",
+      "critical_override_needs_reason": "중요도를 변경하려면 사유가 필요합니다.",
+      "critical_without_decision": "중요 항목은 경로를 설정하기 전에 승인된 의사결정 보고서가 필요합니다.",
+      "critical_without_market_evidence": "중요 항목은 카탈로그 기본값이나 추정치가 아닌 시장에서 확인한 리드타임이 필요합니다.",
+      "critical_without_strategic_spares": "중요 항목은 전략 예비품을 지정하거나 지정하지 않는 사유를 밝혀야 합니다.",
+      "decision_paper_needs_two_options": "단일 공급자 항목이 아닌 한, 의사결정 보고서에는 최소 두 개의 옵션이 필요합니다.",
+      "decision_route_refused": "승인 경로가 이 단계를 거부했습니다.",
+      "delivery_limit_gap": "모든 인도 단계에 책임 당사자가 지정되어 있지 않습니다.",
+      "edit_permission_required": "설비 등록부를 변경할 권한이 없습니다.",
+      "enquiry_date_in_future": "문의일은 미래 날짜일 수 없습니다.",
+      "fee_needs_currency": "예약 수수료에는 통화가 필요합니다.",
+      "fee_negative": "예약 수수료는 음수일 수 없습니다.",
+      "handover_needs_commissioned": "시운전이 완료된 항목만 인계할 수 있습니다.",
+      "handover_needs_confirmation": "인계를 확인해야 합니다.",
+      "handover_needs_service_asset": "자산에 대한 유지보수 계약을 지정하거나, 계약 없이 인계하는 사유를 밝히십시오.",
+      "invalid_transition": "현재 상태에서는 이 상태 변경이 불가능합니다.",
+      "it_cde_not_linked": "CDE 접근에는 연결된 CDE 컨테이너가 필요합니다.",
+      "it_service_not_found": "IT 서비스를 찾을 수 없습니다.",
+      "it_service_range_invalid": "서비스 종료일이 시작일보다 앞섭니다.",
+      "it_service_retired": "사용 중지된 IT 서비스는 변경할 수 없습니다.",
+      "item_already_ordered": "이미 발주된 항목입니다.",
+      "item_closed": "해당 항목은 인계되었거나 취소되었습니다.",
+      "item_code_taken": "이 코드를 가진 항목이 프로젝트에 이미 있습니다.",
+      "item_not_found": "설비 항목을 찾을 수 없습니다.",
+      "item_required": "항목을 선택하십시오.",
+      "laydown_zone_not_found": "이 프로젝트에는 해당 자재 적치 구역이 없습니다.",
+      "lead_time_owned_by_plant_item": "이 제출물의 리드타임은 해당 설비 항목에서 관리됩니다.",
+      "lead_time_stale": "기준 리드타임 견적이 분류에서 허용하는 기간보다 오래되었습니다.",
+      "lead_time_without_enquiry_date": "리드타임에는 문의한 날짜가 필요합니다.",
+      "lead_weeks_range_invalid": "최소 리드타임은 최대 리드타임을 넘을 수 없습니다.",
+      "limit_needs_party": "인도 단계에는 당사자 또는 패키지가 필요합니다.",
+      "link_not_found": "연결된 기록이 이 프로젝트에 속해 있지 않습니다.",
+      "long_lead_override_needs_reason": "장납기 분류를 변경하려면 사유가 필요합니다.",
+      "manage_required": "설비 관리 권한이 있는 사용자만 이것을 변경할 수 있습니다.",
+      "neutral_spec_names_vendor": "사양은 제조사 중립이어야 하지만 제조사명이 적혀 있습니다.",
+      "no_decision_route": "이 프로젝트에는 의사결정 보고서용 승인 경로가 없습니다.",
+      "not_equipment_owner": "설비 등록부는 관리자 또는 해당 설비 구역의 담당자만 변경할 수 있습니다.",
+      "null_not_allowed": "이 항목은 비워 둘 수 없습니다.",
+      "package_not_found": "이 공사 패키지는 프로젝트의 패키지 계획에 포함되어 있지 않습니다.",
+      "package_plan_failed": "조달 모델을 읽을 수 없습니다. 다시 시도하거나 관리자에게 문의하십시오.",
+      "package_plan_unavailable": "프로젝트의 패키지 계획을 읽을 수 없어 조달 경로를 검증할 수 없습니다.",
+      "paper_needs_rationale": "보고서에는 근거가 필요합니다.",
+      "paper_needs_recommendation": "보고서에는 권고안이 필요합니다.",
+      "paper_not_draft": "초안 상태의 보고서만 수정하거나 제출할 수 있습니다.",
+      "paper_not_found": "의사결정 보고서를 찾을 수 없습니다.",
+      "paper_not_submitted": "제출된 보고서만 철회할 수 있습니다.",
+      "paper_open": "이 항목에는 이미 진행 중인 의사결정 보고서가 있습니다.",
+      "paper_option_codes_invalid": "모든 옵션에는 고유한 코드가 필요합니다.",
+      "paper_recommendation_unknown": "권고안은 옵션 중 하나를 지정해야 합니다.",
+      "paper_scores_invalid": "점수와 가중치는 소수점 숫자여야 합니다.",
+      "paper_submitter_is_approver": "보고서를 제출한 사람은 해당 승인 경로의 승인자가 될 수 없습니다.",
+      "position_date_invalid": "올바른 날짜가 아닙니다.",
+      "position_incomplete": "위치에는 종류와 현장 배치도상의 지점이 필요합니다.",
+      "position_not_found": "이 프로젝트에 해당 설비 위치가 없습니다.",
+      "position_number_invalid": "이 숫자는 저장할 수 없습니다. 소수점 자릿수와 크기를 확인하십시오.",
+      "position_range_invalid": "위치의 종료일이 시작일보다 앞섭니다.",
+      "position_text_invalid": "이 텍스트는 비어 있거나 너무 깁니다.",
+      "quantity_not_positive": "수량은 0보다 커야 합니다.",
+      "quote_not_found": "리드타임 견적을 찾을 수 없습니다.",
+      "response_before_enquiry": "회신일은 문의일보다 빠를 수 없습니다.",
+      "route_frozen": "항목이 발주된 후에는 조달 경로를 변경할 수 없습니다.",
+      "route_inconsistent_with_package_plan": "조달 경로가 패키지 계획과 일치하지 않습니다.",
+      "route_missing": "조달 경로가 설정되지 않았습니다.",
+      "slot_closed": "예약이 마감되었습니다.",
+      "slot_exists": "이 항목에는 이미 진행 중인 용량 예약이 있습니다.",
+      "slot_fee_needs_commitment": "예약 수수료는 약정 출금을 통해서만 금액이 확정됩니다. 약정 항목을 연결하십시오.",
+      "slot_not_found": "용량 예약을 찾을 수 없습니다.",
+      "slot_range_invalid": "슬롯의 종료일이 시작일보다 앞섭니다.",
+      "slot_terms_incomplete": "보류 중인 예약에는 수수료, 환불 조건, 전환 기한이 필요합니다.",
+      "spare_closed": "예비품 항목이 마감되었습니다.",
+      "spare_not_deletable": "아직 필요 상태인 예비품 항목만 삭제할 수 있습니다.",
+      "spare_not_found": "예비품 항목을 찾을 수 없습니다.",
+      "spares_not_handed_over": "모든 예비품은 먼저 인계되거나 면제되어야 합니다.",
+      "specification_frozen": "조달 경로가 설정되면 사양은 잠깁니다.",
+      "stage_not_found": "이 프로젝트에는 해당 확장 단계가 없습니다.",
+      "stage_unavailable": "확장 단계를 읽을 수 없어 설비 위치를 단계에 배치할 수 없습니다.",
+      "state_read_from_source": "이 상태는 직접 설정하지 않고 발주, 발주자 지급 항목 또는 시운전에서 읽어옵니다.",
+      "transition_blocked": "여러 규칙에 의해 상태 변경이 차단되었습니다.",
+      "two_parties_on_one_step": "인도 단계에는 하나의 당사자만 지정할 수 있습니다.",
+      "unknown_catalogue": "알 수 없는 설비 카탈로그입니다.",
+      "unknown_component_class": "알 수 없는 구성품 분류입니다.",
+      "unknown_fee_refundable": "환불 조건은 없음, 일부, 전액 중 하나여야 합니다.",
+      "unknown_it_service_kind": "알 수 없는 IT 서비스입니다.",
+      "unknown_lead_basis": "알 수 없는 리드타임 기준입니다.",
+      "unknown_lead_time_source": "알 수 없는 리드타임 출처입니다.",
+      "unknown_maintenance_strategy": "알 수 없는 유지보수 전략입니다.",
+      "unknown_party": "알 수 없는 당사자입니다.",
+      "unknown_redundancy_scheme": "알 수 없는 이중화 방식입니다.",
+      "unknown_route": "알 수 없는 조달 경로입니다.",
+      "unknown_site_plant_kind": "이 종류의 현장 설비는 프로젝트의 설비 카탈로그에 없습니다.",
+      "unknown_spare_category": "알 수 없는 예비품 분류입니다.",
+      "unknown_step": "알 수 없는 인도 단계입니다.",
+      "unknown_vendor_bound_reason": "사유는 표준화, 기존 설비, 보증 또는 단일 공급자 중 하나여야 합니다.",
+      "unknown_vendor_policy": "제조사 정책은 중립 또는 지정이어야 합니다.",
+      "vendor_bound_needs_reason": "제조사 지정 사양에는 사유가 필요합니다.",
+      "waiver_needs_reason": "예비품을 면제하려면 사유가 필요합니다."
+    },
+    "evidence": {
+      "critical_route_set": "모든 중요 항목에 승인된 의사결정 보고서와 함께 조달 경로가 설정되어 있음",
+      "frame_document_attached": "설비 프레임 문서가 CDE에 첨부되어 있음",
+      "frame_document_missing": "프로젝트에 아직 설비 프레임 문서가 없어 첨부 여부를 확인할 수 없음",
+      "host_unresolved": "거버넌스 모델이 설비 등록부를 보고할 구역과 게이트를 지정하지 않음",
+      "long_lead_secured": "모든 장납기 항목에 최신 기준 견적이 있으며 발주되었거나 발주 기한 내에 있음",
+      "no_area_hosts_plant": "단계 모델에 설비를 담당하는 구역이 지정되어 있지 않아 설비 등록부가 게이트에 보고할 수 없음",
+      "no_error_findings": "설비 등록부에 오류 수준의 지적 사항이 없음",
+      "no_phase_enables_construction_start": "단계 모델에 공사 착수를 허용하는 단계가 지정되어 있지 않아 설비 등록부에 보고할 게이트가 없음"
+    },
+    "export": {
+      "catalogue": "카탈로그",
+      "col_category": "범주",
+      "col_class": "분류",
+      "col_code": "항목",
+      "col_cost": "비용",
+      "col_critical": "중요",
+      "col_description": "설명",
+      "col_enquiry_date": "문의일",
+      "col_float": "여유(일)",
+      "col_from": "시작",
+      "col_latest_order": "최종 발주일",
+      "col_lead_source": "리드타임 출처",
+      "col_lead_weeks": "리드타임(주)",
+      "col_need_date": "필요일",
+      "col_option": "옵션",
+      "col_quantity": "수량",
+      "col_recommended": "권장",
+      "col_route": "경로",
+      "col_score": "가중 점수",
+      "col_section": "구분",
+      "col_state": "상태",
+      "col_supply_by": "공급사",
+      "col_title": "제목",
+      "col_to": "종료",
+      "col_unit": "단위",
+      "critical_count": "중요 항목",
+      "empty": "항목이 없습니다.",
+      "frame_title": "설비 프레임 요약",
+      "item_count": "항목 수",
+      "limits_title": "인도 범위 매트릭스",
+      "long_lead_count": "장납기 항목",
+      "overdue_count": "기한 초과 발주",
+      "paper_title": "의사결정 보고서",
+      "project": "프로젝트",
+      "question": "검토 사항",
+      "rationale": "근거",
+      "register_title": "장납기 등록부",
+      "section_it": "IT 서비스",
+      "section_long_lead": "장납기 항목",
+      "section_site_plant": "현장 설비",
+      "spares_title": "예비품 목록",
+      "yes": "예"
+    },
+    "paper_state": {
+      "approved": "승인됨",
+      "draft": "초안",
+      "rejected": "반려됨",
+      "submitted": "제출됨"
+    },
+    "reasons": {
+      "currency": "예약 수수료에 통화가 지정되지 않음",
+      "installer_mismatch": "발주자 지급 항목이 다른 설치 패키지를 지정함",
+      "owner_furnished_item_required": "발주자 지급 경로에는 발주자 지급 항목이 필요함",
+      "owner_installs": "발주자가 직접 설치하므로 설치 주체로 공사 패키지를 지정할 수 없음",
+      "package_does_not_supply": "공사 패키지가 설비를 공급하지 않음",
+      "package_not_in_plan": "공사 패키지가 패키지 계획에 없음",
+      "package_required": "이 조달 경로에는 공사 패키지가 필요함",
+      "single_package_form": "인도 방식에는 공사 패키지가 하나뿐인데 항목은 다른 패키지에 속함"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "중요 항목 {item}에 승인된 의사결정 보고서가 없습니다.",
+        "suggestion": "옵션 보고서를 작성하여 승인을 요청하십시오."
+      },
+      "critical_has_market_evidence": {
+        "fail": "중요 항목 {item}이(가) 카탈로그 기본값 또는 추정치에 의존하고 있습니다.",
+        "suggestion": "공급사 견적, 기본계약 또는 과거 발주 실적을 확보하십시오."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "중요 항목 {item}에 전략 예비품이 없습니다.",
+        "suggestion": "전략 예비품을 추가하거나 필요 없는 사유를 밝히십시오."
+      },
+      "delivery_limits_complete": {
+        "fail": "{item}의 인도 범위에 다음 단계의 당사자가 없습니다: {steps}.",
+        "suggestion": "모든 인도 단계에 당사자를 지정하십시오."
+      },
+      "it_cde_linked": {
+        "fail": "실행 게이트 전에 필요한 CDE 접근에 CDE 컨테이너가 없습니다.",
+        "suggestion": "당사자들이 작업할 CDE 컨테이너를 연결하십시오."
+      },
+      "lead_time_fresh": {
+        "fail": "{item}의 기준 리드타임이 최신이 아닙니다.",
+        "suggestion": "공급사에 다시 문의하고 새 회신을 기록하십시오."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "장납기 항목 {item}에 문의일이 기재된 리드타임 견적이 없습니다.",
+        "suggestion": "날짜가 기재된 견적을 기록하십시오: 언제 문의했고 누가 회신했는지."
+      },
+      "order_not_overdue": {
+        "fail": "{item}은(는) {date}까지 발주해야 합니다.",
+        "suggestion": "지금 발주하거나 공정 담당자와 필요일을 조정하십시오."
+      },
+      "redundancy_quantity": {
+        "fail": "{item}의 수량이 이중화 방식에 맞지 않습니다.",
+        "suggestion": "방식에 맞춰 수량을 확인하십시오(N+1은 최소 2개 유닛이 필요합니다)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "{item}의 조달 경로가 패키지 계획과 맞지 않습니다: {reason}.",
+        "suggestion": "조달 경로를 공사 패키지 및 발주자 지급 항목과 맞추십시오."
+      },
+      "single_basis_quote": {
+        "fail": "{item}에 기준 견적이 정확히 하나가 아닙니다.",
+        "suggestion": "견적 하나를 기준으로 표시하십시오."
+      },
+      "slot_after_order_date": {
+        "fail": "{item}의 용량 예약이 최종 발주일을 넘어섭니다.",
+        "suggestion": "발주를 앞당기거나 더 이른 슬롯을 협의하십시오."
+      },
+      "slot_not_expired": {
+        "fail": "{item}의 용량 예약이 전환 기한을 넘겼습니다.",
+        "suggestion": "발주로 전환하거나 예약을 해제하십시오."
+      },
+      "slot_terms_complete": {
+        "fail": "{item}의 용량 예약 조건이 불완전합니다.",
+        "suggestion": "수수료, 환불 조건, 전환 기한 및 약정 연결을 기록하십시오."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "{item}의 제조사 정책이 일관되지 않습니다.",
+        "suggestion": "제조사 지정 사양에는 사유가 필요하며, 중립 사양은 제조사를 지정하지 않습니다."
+      }
+    },
+    "spare_state": {
+      "delivered": "납품됨",
+      "handed_over": "인계됨",
+      "required": "필요",
+      "specified": "사양 정의됨",
+      "waived": "면제됨"
+    },
+    "state": {
+      "cancelled": "취소됨",
+      "commissioned": "시운전 완료",
+      "delivered": "납품됨",
+      "enquired": "문의됨",
+      "handed_over": "인계됨",
+      "identified": "식별됨",
+      "installed": "설치 완료",
+      "manufactured": "제작 완료",
+      "ordered": "발주됨",
+      "route_set": "경로 설정됨",
+      "specified": "사양 정의됨"
+    }
+  }
+}

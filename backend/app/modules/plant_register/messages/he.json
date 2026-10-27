@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "מטפל אוויר",
+        "battery_storage": "אגירת סוללות",
+        "bms_controls": "אוטומציה של המבנה",
+        "boiler": "דוד",
+        "chiller": "מכונת קירור",
+        "cooling_tower": "מגדל קירור",
+        "crane_permanent": "מנוף קבוע",
+        "distribution_transformer": "שנאי הפצה",
+        "escalator": "מדרגות נעות",
+        "facade_unit": "יחידות חזית",
+        "generator": "גנרטור",
+        "heat_pump": "משאבת חום",
+        "it_core_network": "רשת ליבה של טכנולוגיית המידע",
+        "kitchen_equipment": "ציוד מטבח",
+        "lift": "מעלית",
+        "lv_switchboard": "לוח מיתוג מתח נמוך",
+        "medical_equipment": "ציוד רפואי",
+        "mv_switchgear": "מתקן מיתוג מתח בינוני",
+        "power_transformer": "שנאי הספק",
+        "process_unit": "יחידת תהליך",
+        "sprinkler_pump": "משאבת ספרינקלרים",
+        "structural_steel_package": "חבילת מבנה פלדה",
+        "ups": "ספק כוח רציף"
+      },
+      "it_service": {
+        "access_control": "בקרת כניסה",
+        "cctv": "מעקב וידאו",
+        "cde_access": "גישה ל-CDE",
+        "drone_survey": "מדידה בטיסת רחפן",
+        "site_network": "רשת האתר",
+        "telecom": "תקשורת",
+        "time_recording": "רישום שעות"
+      },
+      "maintenance": {
+        "condition_based": "מבוסס מצב",
+        "preventive_interval": "מניעתי, לפי מרווח זמן",
+        "run_to_failure": "הפעלה עד לתקלה",
+        "vendor_service_contract": "הסכם שירות עם הספק"
+      },
+      "name": "קטלוג מתקנים ניטרלי",
+      "party": {
+        "contractor": "קבלן",
+        "installer": "מתקין",
+        "operator": "מפעיל",
+        "owner": "מזמין",
+        "supplier": "ספק",
+        "user": "משתמש"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "שתי מערכות עצמאיות לחלוטין",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "שתי מערכות עצמאיות ויחידה רזרבית אחת",
+        "n": "N",
+        "n_desc": "בדיוק הקיבולת הנדרשת, ללא יחידה רזרבית",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "יחידה רזרבית אחת מעבר לקיבולת הנדרשת",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "שתי יחידות רזרביותיות מעבר לקיבולת הנדרשת"
+      },
+      "route": {
+        "contractor_furnished_installed": "מסופק על ידי הקבלן, מותקן על ידי הקבלן",
+        "owner_furnished_contractor_installed": "מסופק על ידי המזמין, מותקן על ידי הקבלן",
+        "owner_furnished_owner_installed": "מסופק על ידי המזמין, מותקן על ידי המזמין",
+        "owner_procured_novated": "נרכש על ידי המזמין, ההזמנה הועברה לקבלן"
+      },
+      "site_plant": {
+        "concrete_plant": "מפעל בטון",
+        "hoist": "מנוף הרמה",
+        "mobile_crane_pad": "בסיס לעגורן נייד",
+        "site_office": "משרד אתר",
+        "storage": "אחסון",
+        "temporary_power": "חשמל זמני",
+        "temporary_water": "מים זמניים",
+        "tower_crane": "עגורן צריח",
+        "welfare": "מתקני רווחה",
+        "wheel_wash": "שטיפת גלגלים"
+      },
+      "source": {
+        "catalogue_default": "ברירת מחדל מהקטלוג",
+        "expert_estimate": "אומדן מומחה",
+        "framework_agreement": "הסכם מסגרת",
+        "historic_order": "הזמנה קודמת",
+        "market_sounding": "בדיקת שוק",
+        "none": "ללא זמן אספקה",
+        "supplier_catalogue": "קטלוג ספק",
+        "supplier_quote": "הצעת מחיר של ספק"
+      },
+      "spare": {
+        "commissioning_spares": "חלפי הפעלה",
+        "operating_consumables": "מתכלים תפעוליים",
+        "special_tools": "כלים מיוחדים",
+        "strategic_spares": "חלפים אסטרטגיים"
+      },
+      "step": {
+        "accept": "קבלה",
+        "commission": "הפעלה",
+        "connect": "חיבור",
+        "deliver_to_site": "משלוח לאתר",
+        "document": "תיעוד",
+        "offload": "פריקה",
+        "set_in_place": "הצבה במקום",
+        "supply": "אספקה",
+        "test": "בדיקה",
+        "train": "הדרכה"
+      }
+    },
+    "common": {
+      "ok": "אישור"
+    },
+    "errors": {
+      "basis_quote_required": "נדרשת הצעת מחיר בסיסית לזמן אספקה.",
+      "catalogue_entry_required": "זמן אספקה לפי קטלוג ספק דורש את פריט הקטלוג.",
+      "catalogue_lead_mismatch": "זמן האספקה אינו תואם לפריט הקטלוג של הספק שצוין.",
+      "catalogue_retired": "קטלוג זה הוצא משימוש ואי אפשר לקבע אותו.",
+      "classification_frozen": "סיווג קריטי וארוך אספקה נעול לאחר שנקבע מסלול הרכש.",
+      "commitment_currency_mismatch": "דמי השריון ומחויבות השחרור הם במטבעות שונים.",
+      "commitment_for_other_item": "פריט המחויבות המקושר שייך לפריט מתקן אחר.",
+      "commitment_not_found": "פריט המחויבות המקושר אינו חלק מפרויקט זה.",
+      "commitment_not_released": "פריט המחויבות המקושר טרם שוחרר.",
+      "commitment_release_below_fee": "הסכום המשוחרר נמוך מדמי השריון.",
+      "commitment_release_failed": "לא ניתן היה לקרוא את שחרור המחויבות; נסו שוב או פנו למנהל המערכת.",
+      "commitment_release_unavailable": "לא ניתן לקרוא את שחרור המחויבות, ולכן לא ניתן לקשור דמי שריון.",
+      "concurrent_basis_change": "משתמש אחר שינה את הצעת הבסיס בו-זמנית; טענו מחדש ונסו שוב.",
+      "cost_needs_currency": "לעלות האפשרות נדרש מטבע.",
+      "critical_override_needs_reason": "שינוי הקריטיות דורש נימוק.",
+      "critical_without_decision": "פריט קריטי דורש מסמך החלטה מאושר לפני קביעת מסלולו.",
+      "critical_without_market_evidence": "פריט קריטי דורש זמן אספקה מהשוק, ולא ברירת מחדל מקטלוג או אומדן.",
+      "critical_without_strategic_spares": "פריט קריטי דורש חלף אסטרטגי או נימוק מדוע אין.",
+      "decision_paper_needs_two_options": "מסמך החלטה דורש לפחות שתי אפשרויות, אלא אם הפריט הוא ממקור יחיד.",
+      "decision_route_refused": "מסלול האישור דחה את השלב.",
+      "delivery_limit_gap": "לא לכל שלבי המשלוח יש גורם אחראי.",
+      "edit_permission_required": "אין לך הרשאה לשנות את רשימת המתקנים.",
+      "enquiry_date_in_future": "תאריך הפנייה לא יכול להיות בעתיד.",
+      "fee_needs_currency": "דמי השריון דורשים מטבע.",
+      "fee_negative": "דמי השריון לא יכולים להיות שליליים.",
+      "handover_needs_commissioned": "רק פריט שהופעל ניתן למסירה.",
+      "handover_needs_confirmation": "יש לאשר את המסירה.",
+      "handover_needs_service_asset": "ציינו את הסכם השירות לנכס, או נמקו מדוע הפריט נמסר ללא הסכם.",
+      "invalid_transition": "שינוי מצב זה אינו אפשרי מהמצב הנוכחי.",
+      "it_cde_not_linked": "גישה ל-CDE דורשת מיכל CDE מקושר.",
+      "it_service_not_found": "שירות טכנולוגיית המידע לא נמצא.",
+      "it_service_range_invalid": "השירות מסתיים לפני שהתחיל.",
+      "it_service_retired": "שירות טכנולוגיית מידע שהוצא משימוש אינו ניתן לשינוי.",
+      "item_already_ordered": "הפריט כבר הוזמן.",
+      "item_closed": "הפריט נמסר או בוטל.",
+      "item_code_taken": "פריט עם קוד זה כבר קיים בפרויקט.",
+      "item_not_found": "פריט המתקן לא נמצא.",
+      "item_required": "בחרו פריט.",
+      "laydown_zone_not_found": "אזור האחסון הזה לא קיים בפרויקט זה.",
+      "lead_time_owned_by_plant_item": "זמן האספקה של הגשה זו נשמר בפריט המתקן.",
+      "lead_time_stale": "הצעת הבסיס לזמן האספקה ישנה מהמותר לפי הסיווג.",
+      "lead_time_without_enquiry_date": "זמן אספקה דורש את תאריך הפנייה.",
+      "lead_weeks_range_invalid": "המינימום לזמן האספקה לא יכול לעלות על המקסימום.",
+      "limit_needs_party": "שלב משלוח דורש גורם או חבילה.",
+      "link_not_found": "הרשומה המקושרת אינה חלק מפרויקט זה.",
+      "long_lead_override_needs_reason": "שינוי סיווג ארוך אספקה דורש נימוק.",
+      "manage_required": "רק בעל הרשאת ניהול מתקנים רשאי לשנות זאת.",
+      "neutral_spec_names_vendor": "המפרט אמור להיות ניטרלי מבחינת ספק, אך מציין ספק.",
+      "no_decision_route": "לפרויקט אין מסלול אישור למסמכי החלטה.",
+      "not_equipment_owner": "רק מנהל או בעל אזור הציוד רשאי לשנות את רשימת המתקנים.",
+      "null_not_allowed": "שדה זה לא יכול להישאר ריק.",
+      "package_not_found": "חבילת החוזה אינה חלק מתכנית החבילות של פרויקט זה.",
+      "package_plan_failed": "לא ניתן היה לקרוא את מודל האספקה; נסו שוב או פנו למנהל המערכת.",
+      "package_plan_unavailable": "תכנית החבילות של הפרויקט אינה נקראת, ולכן לא ניתן לבדוק את המסלול.",
+      "paper_needs_rationale": "המסמך דורש נימוק.",
+      "paper_needs_recommendation": "המסמך דורש המלצה.",
+      "paper_not_draft": "ניתן לשנות או להגיש רק מסמך בטיוטה.",
+      "paper_not_found": "מסמך ההחלטה לא נמצא.",
+      "paper_not_submitted": "ניתן למשוך רק מסמך שהוגש.",
+      "paper_open": "לפריט כבר יש מסמך החלטה פתוח.",
+      "paper_option_codes_invalid": "לכל אפשרות נדרש קוד ייחודי.",
+      "paper_recommendation_unknown": "ההמלצה חייבת לציין אחת מהאפשרויות.",
+      "paper_scores_invalid": "ציונים ומשקלים חייבים להיות מספרים עשרוניים.",
+      "paper_submitter_is_approver": "מי שמגיש את המסמך לא יכול להיות מאשר במסלול שלו.",
+      "position_date_invalid": "זה אינו תאריך.",
+      "position_incomplete": "מיקום דורש את סוגו ואת נקודתו בתכנית האתר.",
+      "position_not_found": "מיקום מתקן זה אינו קיים בפרויקט זה.",
+      "position_number_invalid": "מספר זה לא ניתן לשמירה: בדקו את הספרות העשרוניות ואת הגודל.",
+      "position_range_invalid": "המיקום מסתיים לפני שהתחיל.",
+      "position_text_invalid": "טקסט זה ריק או ארוך מדי.",
+      "quantity_not_positive": "הכמות חייבת להיות גדולה מאפס.",
+      "quote_not_found": "הצעת זמן האספקה לא נמצאה.",
+      "response_before_enquiry": "תאריך התשובה לא יכול להיות לפני תאריך הפנייה.",
+      "route_frozen": "מסלול לא ניתן לשינוי לאחר שהפריט הוזמן.",
+      "route_inconsistent_with_package_plan": "מסלול הרכש אינו תואם את תכנית החבילות.",
+      "route_missing": "לא נקבע מסלול רכש.",
+      "slot_closed": "השריון סגור.",
+      "slot_exists": "לפריט כבר יש שריון קיבולת פתוח.",
+      "slot_fee_needs_commitment": "דמי שריון מחייבים כסף רק דרך שחרור מחויבות; קשרו את פריט המחויבות.",
+      "slot_not_found": "שריון הקיבולת לא נמצא.",
+      "slot_range_invalid": "החלון מסתיים לפני שהתחיל.",
+      "slot_terms_incomplete": "שריון מוחזק דורש דמי שריון, תנאי החזר ומועד להמרה.",
+      "spare_closed": "שורת החלף סגורה.",
+      "spare_not_deletable": "ניתן למחוק רק שורת חלף שעדיין נדרשת.",
+      "spare_not_found": "שורת החלף לא נמצאה.",
+      "spares_not_handed_over": "כל חלף חייב להימסר או להיות מופנה קודם.",
+      "specification_frozen": "המפרט נעול לאחר שנקבע מסלול הרכש.",
+      "stage_not_found": "שלב ההרחבה הזה אינו קיים בפרויקט זה.",
+      "stage_unavailable": "שלבי ההרחבה אינם נקראים, ולכן לא ניתן לשייך מיקום לשלב.",
+      "state_read_from_source": "מצב זה נקרא מההזמנה, מהפריט שסופק על ידי המזמין או מההפעלה, ואינו נקבע ידנית.",
+      "transition_blocked": "שינוי המצב חסום על ידי כמה כללים.",
+      "two_parties_on_one_step": "לשלב משלוח יכול להיות רק גורם אחד.",
+      "unknown_catalogue": "קטלוג מתקנים לא מוכר.",
+      "unknown_component_class": "סוג רכיב לא מוכר.",
+      "unknown_fee_refundable": "תנאי ההחזר חייבים להיות: ללא, חלקי או מלא.",
+      "unknown_it_service_kind": "שירות טכנולוגיית מידע לא מוכר.",
+      "unknown_lead_basis": "בסיס זמן אספקה לא מוכר.",
+      "unknown_lead_time_source": "מקור זמן אספקה לא מוכר.",
+      "unknown_maintenance_strategy": "אסטרטגיית תחזוקה לא מוכרת.",
+      "unknown_party": "גורם לא מוכר.",
+      "unknown_redundancy_scheme": "סכמת יתירות לא מוכרת.",
+      "unknown_route": "מסלול רכש לא מוכר.",
+      "unknown_site_plant_kind": "סוג מתקן אתר זה אינו נמצא בקטלוג המתקנים של הפרויקט.",
+      "unknown_spare_category": "קטגוריית חלפים לא מוכרת.",
+      "unknown_step": "שלב משלוח לא מוכר.",
+      "unknown_vendor_bound_reason": "הנימוק חייב להיות סטנדרטיזציה, נכסים קיימים, אחריות או ספק יחיד.",
+      "unknown_vendor_policy": "מדיניות הספק חייבת להיות ניטרלית או מחייבת.",
+      "vendor_bound_needs_reason": "מפרט הקשור לספק דורש נימוק.",
+      "waiver_needs_reason": "ויתור על חלף דורש נימוק."
+    },
+    "evidence": {
+      "critical_route_set": "לכל פריט קריטי מוגדר מסלול עם מסמך החלטה מאושר",
+      "frame_document_attached": "מסמך מסגרת הציוד מצורף ל-CDE",
+      "frame_document_missing": "לפרויקט אין עדיין מסמך מסגרת ציוד, ולכן לא ניתן לבדוק את צירופו",
+      "host_unresolved": "מודל הממשל אינו מציין לאיזה אזור ולאיזה שער רשימת המתקנים מדווחת",
+      "long_lead_secured": "לכל פריט ארוך אספקה יש הצעת בסיס עדכנית, והוא הוזמן או נמצא בתוך מועד ההזמנה",
+      "no_area_hosts_plant": "מודל השלבים אינו מציין אזור המארח מתקנים, ולכן רשימת המתקנים לא יכולה לדווח לשער",
+      "no_error_findings": "אין ממצאים ברמת שגיאה ברשימת המתקנים",
+      "no_phase_enables_construction_start": "מודל השלבים אינו מציין שלב המאפשר תחילת בנייה, ולכן לרשימת המתקנים אין שער לדיווח"
+    },
+    "export": {
+      "catalogue": "קטלוג",
+      "col_category": "קטגוריה",
+      "col_class": "סיווג",
+      "col_code": "פריט",
+      "col_cost": "עלות",
+      "col_critical": "קריטי",
+      "col_description": "תיאור",
+      "col_enquiry_date": "פנייה",
+      "col_float": "מרווח (ימים)",
+      "col_from": "מ-",
+      "col_latest_order": "הזמנה אחרונה",
+      "col_lead_source": "מקור זמן אספקה",
+      "col_lead_weeks": "זמן אספקה (שבועות)",
+      "col_need_date": "תאריך נדרש",
+      "col_option": "אפשרות",
+      "col_quantity": "כמות",
+      "col_recommended": "מומלץ",
+      "col_route": "מסלול",
+      "col_score": "ציון משוקלל",
+      "col_section": "סעיף",
+      "col_state": "מצב",
+      "col_supply_by": "סופק על ידי",
+      "col_title": "כותרת",
+      "col_to": "עד",
+      "col_unit": "יחידה",
+      "critical_count": "פריטים קריטיים",
+      "empty": "אין רשומות.",
+      "frame_title": "סיכום מסגרת ציוד",
+      "item_count": "פריטים",
+      "limits_title": "מטריצת גבולות משלוח",
+      "long_lead_count": "פריטים ארוכי אספקה",
+      "overdue_count": "הזמנות שחלף מועדן",
+      "paper_title": "מסמך החלטה",
+      "project": "פרויקט",
+      "question": "שאלה",
+      "rationale": "נימוק",
+      "register_title": "רישום ארוכי אספקה",
+      "section_it": "שירות טכנולוגיית מידע",
+      "section_long_lead": "פריט ארוך אספקה",
+      "section_site_plant": "מתקן אתר",
+      "spares_title": "רשימת חלפים",
+      "yes": "כן"
+    },
+    "paper_state": {
+      "approved": "אושר",
+      "draft": "טיוטה",
+      "rejected": "נדחה",
+      "submitted": "הוגש"
+    },
+    "reasons": {
+      "currency": "לדמי השריון אין מטבע",
+      "installer_mismatch": "הפריט שסופק על ידי המזמין מציין חבילת התקנה אחרת",
+      "owner_furnished_item_required": "מסלול שסופק על ידי המזמין דורש את הפריט שסופק על ידי המזמין",
+      "owner_installs": "המזמין מתקין, ולכן לא ניתן לציין חבילת חוזה כמתקין",
+      "package_does_not_supply": "חבילת החוזה אינה מספקת מתקנים",
+      "package_not_in_plan": "חבילת החוזה אינה נמצאת בתכנית החבילות",
+      "package_required": "מסלול זה דורש חבילת חוזה",
+      "single_package_form": "צורת המשלוח כוללת חבילת חוזה אחת, והפריט נמצא בחבילה אחרת"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "לפריט הקריטי {item} אין מסמך החלטה מאושר.",
+        "suggestion": "הכינו את מסמך האפשרויות והגישו אותו לאישור."
+      },
+      "critical_has_market_evidence": {
+        "fail": "הפריט הקריטי {item} מסתמך על ברירת מחדל מקטלוג או על אומדן.",
+        "suggestion": "הביאו הצעת מחיר מספק, הסכם מסגרת או הזמנה קודמת."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "לפריט הקריטי {item} אין חלף אסטרטגי.",
+        "suggestion": "הוסיפו חלף אסטרטגי או ציינו מדוע אינו נדרש."
+      },
+      "delivery_limits_complete": {
+        "fail": "לגבולות המשלוח של {item} אין גורם עבור: {steps}.",
+        "suggestion": "הקצו גורם לכל שלב משלוח."
+      },
+      "it_cde_linked": {
+        "fail": "נדרשת גישה ל-CDE לפני שער הביצוע, אך אין מיכל CDE.",
+        "suggestion": "קשרו את מיכל ה-CDE שבו הגורמים יעבדו."
+      },
+      "lead_time_fresh": {
+        "fail": "זמן האספקה הבסיסי של {item} אינו עדכני.",
+        "suggestion": "שאלו את הספק שוב ותעדו את התשובה החדשה."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "לפריט הארוך אספקה {item} אין הצעת זמן אספקה עם תאריך פנייה.",
+        "suggestion": "תעדו הצעה מתוארכת: מתי שאלתם ומי ענה."
+      },
+      "order_not_overdue": {
+        "fail": "יש להזמין את {item} עד {date}.",
+        "suggestion": "הזמינו עכשיו או תאמו עם אחראי לוח הזמנים הזזה של תאריך הצורך."
+      },
+      "redundancy_quantity": {
+        "fail": "הכמות של {item} אינה מתאימה לסכמת היתירות שלו.",
+        "suggestion": "בדקו את הכמות מול הסכמה (N+1 דורש לפחות שתי יחידות)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "מסלול הרכש של {item} אינו תואם את תכנית החבילות: {reason}.",
+        "suggestion": "יישרו את המסלול לחבילות החוזה ולפריטים שסופקו על ידי המזמין."
+      },
+      "single_basis_quote": {
+        "fail": "ל-{item} אין בדיוק הצעת בסיס אחת.",
+        "suggestion": "סמנו הצעה אחת כבסיס."
+      },
+      "slot_after_order_date": {
+        "fail": "שריון הקיבולת של {item} חורג מתאריך ההזמנה האחרון.",
+        "suggestion": "חתמו על ההזמנה מוקדם יותר או נהלו משא ומתן על חלון מוקדם יותר."
+      },
+      "slot_not_expired": {
+        "fail": "שריון הקיבולת של {item} עבר את מועד ההמרה שלו.",
+        "suggestion": "המירו אותו להזמנה או שחררו אותו."
+      },
+      "slot_terms_complete": {
+        "fail": "תנאי שריון הקיבולת של {item} אינם מלאים.",
+        "suggestion": "תעדו את דמי השריון, תנאי ההחזר, מועד ההמרה והקישור למחויבות."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "מדיניות הספק של {item} אינה עקבית.",
+        "suggestion": "מפרט הקשור לספק דורש נימוק; מפרט ניטרלי אינו מציין ספק."
+      }
+    },
+    "spare_state": {
+      "delivered": "סופק",
+      "handed_over": "נמסר",
+      "required": "נדרש",
+      "specified": "הוגדר",
+      "waived": "הופנה"
+    },
+    "state": {
+      "cancelled": "בוטל",
+      "commissioned": "הופעל",
+      "delivered": "סופק",
+      "enquired": "נשאל",
+      "handed_over": "נמסר",
+      "identified": "זוהה",
+      "installed": "הותקן",
+      "manufactured": "יוצר",
+      "ordered": "הוזמן",
+      "route_set": "מסלול נקבע",
+      "specified": "הוגדר"
+    }
+  }
+}

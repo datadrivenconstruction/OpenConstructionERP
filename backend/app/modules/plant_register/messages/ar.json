@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "وحدة معالجة الهواء",
+        "battery_storage": "تخزين بالبطاريات",
+        "bms_controls": "أتمتة المباني",
+        "boiler": "غلاية",
+        "chiller": "وحدة تبريد (مبرّدة)",
+        "cooling_tower": "برج تبريد",
+        "crane_permanent": "رافعة دائمة",
+        "distribution_transformer": "محوّل توزيع",
+        "escalator": "سلم متحرك",
+        "facade_unit": "وحدات الواجهات",
+        "generator": "مجموعة توليد الكهرباء",
+        "heat_pump": "مضخة حرارية",
+        "it_core_network": "الشبكة الأساسية لتقنية المعلومات",
+        "kitchen_equipment": "معدات المطبخ",
+        "lift": "مصعد",
+        "lv_switchboard": "لوحة توزيع الجهد المنخفض",
+        "medical_equipment": "المعدات الطبية",
+        "mv_switchgear": "مفتاح كهربائي متوسط الجهد",
+        "power_transformer": "محوّل قدرة",
+        "process_unit": "وحدة عملية صناعية",
+        "sprinkler_pump": "مجموعة مضخة الرشاشات",
+        "structural_steel_package": "حزمة الهياكل الفولاذية",
+        "ups": "مزود طاقة غير منقطع"
+      },
+      "it_service": {
+        "access_control": "التحكم في الدخول",
+        "cctv": "المراقبة بالفيديو",
+        "cde_access": "الوصول إلى بيئة البيانات المشتركة (CDE)",
+        "drone_survey": "المسح بالطائرات المسيّرة",
+        "site_network": "شبكة الموقع",
+        "telecom": "الاتصالات",
+        "time_recording": "تسجيل الوقت"
+      },
+      "maintenance": {
+        "condition_based": "حسب الحالة",
+        "preventive_interval": "وقائية وفق الفترات الزمنية",
+        "run_to_failure": "التشغيل حتى العطل",
+        "vendor_service_contract": "عقد صيانة مع المورّد"
+      },
+      "name": "كتالوج المعدات المحايد",
+      "party": {
+        "contractor": "المقاول",
+        "installer": "جهة التركيب",
+        "operator": "المشغّل",
+        "owner": "المالك",
+        "supplier": "المورّد",
+        "user": "المستخدم"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "نظامان مستقلان بالكامل",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "نظامان مستقلان مع وحدة احتياطية إضافية",
+        "n": "N",
+        "n_desc": "السعة المطلوبة بالضبط دون وحدة احتياطية",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "وحدة احتياطية واحدة فوق السعة المطلوبة",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "وحدتان احتياطيتان فوق السعة المطلوبة"
+      },
+      "route": {
+        "contractor_furnished_installed": "يوفّره المقاول ويركّبه المقاول",
+        "owner_furnished_contractor_installed": "يوفّره المالك ويركّبه المقاول",
+        "owner_furnished_owner_installed": "يوفّره المالك ويركّبه المالك",
+        "owner_procured_novated": "يشتريه المالك وتُسنَد الطلبية إلى المقاول"
+      },
+      "site_plant": {
+        "concrete_plant": "محطة خرسانة",
+        "hoist": "رافعة بكرة (ونش)",
+        "mobile_crane_pad": "قاعدة الرافعة المتنقلة",
+        "site_office": "مكتب الموقع",
+        "storage": "تخزين",
+        "temporary_power": "كهرباء مؤقتة",
+        "temporary_water": "مياه مؤقتة",
+        "tower_crane": "رافعة برجية",
+        "welfare": "مرافق الرعاية والخدمات",
+        "wheel_wash": "غسيل العجلات"
+      },
+      "source": {
+        "catalogue_default": "القيمة الافتراضية في الكتالوج",
+        "expert_estimate": "تقدير خبير",
+        "framework_agreement": "اتفاقية إطارية",
+        "historic_order": "طلبية سابقة",
+        "market_sounding": "استطلاع السوق",
+        "none": "بدون مدة توريد",
+        "supplier_catalogue": "كتالوج المورّد",
+        "supplier_quote": "عرض سعر من المورّد"
+      },
+      "spare": {
+        "commissioning_spares": "قطع غيار التشغيل التجريبي",
+        "operating_consumables": "مستهلكات التشغيل",
+        "special_tools": "أدوات خاصة",
+        "strategic_spares": "قطع غيار استراتيجية"
+      },
+      "step": {
+        "accept": "القبول",
+        "commission": "التشغيل التجريبي",
+        "connect": "التوصيل",
+        "deliver_to_site": "التسليم إلى الموقع",
+        "document": "التوثيق",
+        "offload": "إنزال الحمولة",
+        "set_in_place": "التثبيت في الموضع",
+        "supply": "التوريد",
+        "test": "الاختبار",
+        "train": "التدريب"
+      }
+    },
+    "common": {
+      "ok": "موافق"
+    },
+    "errors": {
+      "basis_quote_required": "مطلوب عرض سعر أساسي لمدة التوريد.",
+      "catalogue_entry_required": "تحتاج مدة التوريد من كتالوج المورّد إلى بند الكتالوج.",
+      "catalogue_lead_mismatch": "مدة التوريد لا تطابق بند كتالوج المورّد المذكور.",
+      "catalogue_retired": "هذا الكتالوج متقاعد ولا يمكن تثبيته.",
+      "classification_frozen": "تُجمَّد التجاوزات الحرجة وطويلة التوريد بمجرد تحديد مسار الشراء.",
+      "commitment_currency_mismatch": "رسوم الحجز والالتزام المُفرَج عنه بعملتين مختلفتين.",
+      "commitment_for_other_item": "بند الالتزام المرتبط يخص بندًا آخر من المعدات.",
+      "commitment_not_found": "بند الالتزام المرتبط ليس ضمن هذا المشروع.",
+      "commitment_not_released": "بند الالتزام المرتبط لم يُفرَج عنه بعد.",
+      "commitment_release_below_fee": "المبلغ المُفرَج عنه أقل من رسوم الحجز.",
+      "commitment_release_failed": "تعذّرت قراءة الإفراج عن الالتزام؛ حاول مرة أخرى أو تواصل مع المسؤول.",
+      "commitment_release_unavailable": "لا يمكن قراءة الإفراج عن الالتزام، لذلك لا يمكن ربط رسوم الحجز.",
+      "concurrent_basis_change": "غيّر مستخدم آخر عرض السعر الأساسي في الوقت نفسه؛ أعد التحميل ثم حاول مجددًا.",
+      "cost_needs_currency": "تكلفة الخيار تحتاج إلى عملتها.",
+      "critical_override_needs_reason": "تجاوز تصنيف الحرجية يحتاج إلى سبب.",
+      "critical_without_decision": "يحتاج البند الحرج إلى ورقة قرار معتمدة قبل تحديد مساره.",
+      "critical_without_market_evidence": "يحتاج البند الحرج إلى مدة توريد من السوق، وليس قيمة افتراضية من الكتالوج أو تقديرًا.",
+      "critical_without_strategic_spares": "يحتاج البند الحرج إلى قطعة غيار استراتيجية أو بيان بسبب عدم وجودها.",
+      "decision_paper_needs_two_options": "تحتاج ورقة القرار إلى خيارين على الأقل ما لم يكن البند مصدرًا وحيدًا.",
+      "decision_route_refused": "رفض مسار الاعتماد هذه الخطوة.",
+      "delivery_limit_gap": "ليست لكل خطوة تسليم جهة مسؤولة.",
+      "edit_permission_required": "ليست لديك صلاحية لتغيير سجل المعدات.",
+      "enquiry_date_in_future": "لا يمكن أن يكون تاريخ الاستفسار في المستقبل.",
+      "fee_needs_currency": "رسوم الحجز تحتاج إلى عملتها.",
+      "fee_negative": "لا يمكن أن تكون رسوم الحجز سالبة.",
+      "handover_needs_commissioned": "لا يمكن تسليم إلا البند الذي تم تشغيله تجريبيًا.",
+      "handover_needs_confirmation": "يجب تأكيد التسليم.",
+      "handover_needs_service_asset": "حدّد عقد الصيانة الخاص بالأصل، أو اذكر سبب تسليم البند بدونه.",
+      "invalid_transition": "تغيير الحالة هذا غير ممكن من الحالة الحالية.",
+      "it_cde_not_linked": "يحتاج الوصول إلى بيئة البيانات المشتركة إلى حاوية مرتبطة بها.",
+      "it_service_not_found": "خدمة تقنية المعلومات غير موجودة.",
+      "it_service_range_invalid": "تنتهي الخدمة قبل أن تبدأ.",
+      "it_service_retired": "لا يمكن تغيير خدمة تقنية معلومات متقاعدة.",
+      "item_already_ordered": "البند مطلوب بالفعل.",
+      "item_closed": "البند مُسلَّم أو مُلغى.",
+      "item_code_taken": "يوجد بالفعل بند بهذا الرمز في المشروع.",
+      "item_not_found": "بند المعدات غير موجود.",
+      "item_required": "اختر بندًا.",
+      "laydown_zone_not_found": "منطقة التخزين المؤقت هذه غير موجودة في هذا المشروع.",
+      "lead_time_owned_by_plant_item": "مدة التوريد لوثيقة التقديم هذه محفوظة في بند المعدات الخاص بها.",
+      "lead_time_stale": "عرض سعر مدة التوريد الأساسي أقدم مما يسمح به التصنيف.",
+      "lead_time_without_enquiry_date": "تحتاج مدة التوريد إلى تاريخ الاستفسار عنها.",
+      "lead_weeks_range_invalid": "يجب ألا تتجاوز الحد الأدنى لمدة التوريد الحد الأقصى.",
+      "limit_needs_party": "تحتاج خطوة التسليم إلى جهة أو حزمة.",
+      "link_not_found": "السجل المرتبط ليس ضمن هذا المشروع.",
+      "long_lead_override_needs_reason": "تجاوز تصنيف طويل التوريد يحتاج إلى سبب.",
+      "manage_required": "لا يُسمح بتغيير هذا إلا لحامل صلاحية إدارة المعدات.",
+      "neutral_spec_names_vendor": "المواصفة محايدة تجاه المورّدين لكنها تسمّي موردًا.",
+      "no_decision_route": "ليس لدى المشروع مسار اعتماد لأوراق القرار.",
+      "not_equipment_owner": "لا يمكن تغيير سجل المعدات إلا من قبل المدير أو مالك منطقة المعدات.",
+      "null_not_allowed": "لا يمكن أن يكون هذا الحقل فارغًا.",
+      "package_not_found": "حزمة العقد ليست ضمن خطة حزم هذا المشروع.",
+      "package_plan_failed": "تعذّرت قراءة نموذج التسليم؛ حاول مرة أخرى أو تواصل مع المسؤول.",
+      "package_plan_unavailable": "لا يمكن قراءة خطة حزم المشروع، لذلك لا يمكن التحقق من المسار.",
+      "paper_needs_rationale": "تحتاج الورقة إلى مبرر.",
+      "paper_needs_recommendation": "تحتاج الورقة إلى توصية.",
+      "paper_not_draft": "لا يمكن تغيير أو تقديم إلا ورقة في وضع المسودة.",
+      "paper_not_found": "ورقة القرار غير موجودة.",
+      "paper_not_submitted": "لا يمكن سحب إلا ورقة مقدَّمة.",
+      "paper_open": "للبند بالفعل ورقة قرار مفتوحة.",
+      "paper_option_codes_invalid": "يحتاج كل خيار إلى رمز فريد.",
+      "paper_recommendation_unknown": "يجب أن تحدد التوصية أحد الخيارات.",
+      "paper_scores_invalid": "يجب أن تكون الدرجات والأوزان أعدادًا عشرية.",
+      "paper_submitter_is_approver": "لا يمكن أن يكون مقدّم الورقة أحد معتمدي مسارها.",
+      "position_date_invalid": "هذا ليس تاريخًا.",
+      "position_incomplete": "يحتاج الموقع إلى نوعه ونقطته على مخطط الموقع.",
+      "position_not_found": "موقع المعدات هذا غير موجود في هذا المشروع.",
+      "position_number_invalid": "لا يمكن حفظ هذا الرقم: تحقق من الكسور والحجم.",
+      "position_range_invalid": "ينتهي الموقع قبل أن يبدأ.",
+      "position_text_invalid": "هذا النص فارغ أو طويل جدًا.",
+      "quantity_not_positive": "يجب أن تكون الكمية أكبر من صفر.",
+      "quote_not_found": "عرض سعر مدة التوريد غير موجود.",
+      "response_before_enquiry": "لا يمكن أن يسبق تاريخ الرد تاريخ الاستفسار.",
+      "route_frozen": "لا يمكن تغيير المسار بعد طلب البند.",
+      "route_inconsistent_with_package_plan": "مسار الشراء لا يطابق خطة الحزم.",
+      "route_missing": "لم يُحدَّد مسار شراء.",
+      "slot_closed": "الحجز مغلق.",
+      "slot_exists": "للبند بالفعل حجز سعة مفتوح.",
+      "slot_fee_needs_commitment": "لا تُلزم رسوم الحجز بالمال إلا من خلال الإفراج عن الالتزام؛ اربط بند الالتزام.",
+      "slot_not_found": "حجز السعة غير موجود.",
+      "slot_range_invalid": "تنتهي الفترة قبل أن تبدأ.",
+      "slot_terms_incomplete": "يحتاج الحجز المعلّق إلى الرسوم وشروط الاسترداد وموعد التحويل.",
+      "spare_closed": "بند قطع الغيار مغلق.",
+      "spare_not_deletable": "لا يمكن حذف إلا بند قطع غيار ما زال مطلوبًا.",
+      "spare_not_found": "بند قطع الغيار غير موجود.",
+      "spares_not_handed_over": "يجب تسليم كل قطعة غيار أو التنازل عنها أولًا.",
+      "specification_frozen": "تُجمَّد المواصفة بمجرد تحديد مسار الشراء.",
+      "stage_not_found": "مرحلة التوسعة هذه غير موجودة في هذا المشروع.",
+      "stage_unavailable": "لا يمكن قراءة مراحل التوسعة، لذلك لا يمكن ربط الموقع بمرحلة.",
+      "state_read_from_source": "تُقرأ هذه الحالة من الطلبية أو البند المقدَّم من المالك أو التشغيل التجريبي، ولا تُحدَّد يدويًا.",
+      "transition_blocked": "يحجب تغيير الحالة عدة قواعد.",
+      "two_parties_on_one_step": "يمكن أن تحتوي خطوة التسليم على جهة واحدة فقط.",
+      "unknown_catalogue": "كتالوج معدات غير معروف.",
+      "unknown_component_class": "فئة مكوّن غير معروفة.",
+      "unknown_fee_refundable": "يجب أن تكون شروط الاسترداد: بدون، أو جزئي، أو كامل.",
+      "unknown_it_service_kind": "خدمة تقنية معلومات غير معروفة.",
+      "unknown_lead_basis": "أساس مدة توريد غير معروف.",
+      "unknown_lead_time_source": "مصدر مدة توريد غير معروف.",
+      "unknown_maintenance_strategy": "استراتيجية صيانة غير معروفة.",
+      "unknown_party": "جهة غير معروفة.",
+      "unknown_redundancy_scheme": "مخطط احتياطية غير معروف.",
+      "unknown_route": "مسار شراء غير معروف.",
+      "unknown_site_plant_kind": "هذا النوع من معدات الموقع غير موجود في كتالوج معدات المشروع.",
+      "unknown_spare_category": "فئة قطع غيار غير معروفة.",
+      "unknown_step": "خطوة تسليم غير معروفة.",
+      "unknown_vendor_bound_reason": "يجب أن يكون السبب: توحيد المعايير، أو أصول قائمة، أو ضمان، أو مصدر وحيد.",
+      "unknown_vendor_policy": "يجب أن تكون سياسة المورّد محايدة أو مقيّدة.",
+      "vendor_bound_needs_reason": "تحتاج المواصفة المقيّدة بمورّد إلى سبب.",
+      "waiver_needs_reason": "يحتاج التنازل عن قطعة غيار إلى سبب."
+    },
+    "evidence": {
+      "critical_route_set": "لكل بند حرج مسار محدد بورقة قرار معتمدة",
+      "frame_document_attached": "مستند الإطار للمعدات مرفق ببيئة البيانات المشتركة",
+      "frame_document_missing": "لا يوجد بعد مستند إطار للمعدات في المشروع، لذلك لا يمكن التحقق من إرفاقه",
+      "host_unresolved": "نموذج الحوكمة لا يحدد المنطقة والبوابة التي يرفع إليها سجل المعدات تقاريره",
+      "long_lead_secured": "لكل بند طويل التوريد عرض سعر أساسي حديث ومطلوب أو ضمن موعد طلبه",
+      "no_area_hosts_plant": "نموذج المراحل لا يسمي منطقة تستضيف المعدات، لذلك لا يمكن لسجل المعدات الرفع إلى بوابة",
+      "no_error_findings": "لا توجد ملاحظات على مستوى الخطأ في سجل المعدات",
+      "no_phase_enables_construction_start": "نموذج المراحل لا يسمي مرحلة تتيح بدء الإنشاء، لذلك لا توجد بوابة يرفع إليها سجل المعدات تقاريره"
+    },
+    "export": {
+      "catalogue": "الكتالوج",
+      "col_category": "الفئة",
+      "col_class": "الصنف",
+      "col_code": "البند",
+      "col_cost": "التكلفة",
+      "col_critical": "حرج",
+      "col_description": "الوصف",
+      "col_enquiry_date": "تاريخ الاستفسار",
+      "col_float": "المرونة (أيام)",
+      "col_from": "من",
+      "col_latest_order": "آخر موعد للطلب",
+      "col_lead_source": "مصدر مدة التوريد",
+      "col_lead_weeks": "مدة التوريد (أسابيع)",
+      "col_need_date": "تاريخ الحاجة",
+      "col_option": "الخيار",
+      "col_quantity": "الكمية",
+      "col_recommended": "موصى به",
+      "col_route": "المسار",
+      "col_score": "الدرجة المرجّحة",
+      "col_section": "القسم",
+      "col_state": "الحالة",
+      "col_supply_by": "يوفّره",
+      "col_title": "العنوان",
+      "col_to": "إلى",
+      "col_unit": "الوحدة",
+      "critical_count": "البنود الحرجة",
+      "empty": "لا توجد إدخالات.",
+      "frame_title": "ملخص إطار المعدات",
+      "item_count": "البنود",
+      "limits_title": "مصفوفة حدود التسليم",
+      "long_lead_count": "بنود طويلة التوريد",
+      "overdue_count": "طلبيات متأخرة",
+      "paper_title": "ورقة القرار",
+      "project": "المشروع",
+      "question": "السؤال",
+      "rationale": "المبرر",
+      "register_title": "سجل البنود طويلة التوريد",
+      "section_it": "خدمة تقنية المعلومات",
+      "section_long_lead": "بند طويل التوريد",
+      "section_site_plant": "معدات الموقع",
+      "spares_title": "قائمة قطع الغيار",
+      "yes": "نعم"
+    },
+    "paper_state": {
+      "approved": "معتمدة",
+      "draft": "مسودة",
+      "rejected": "مرفوضة",
+      "submitted": "مقدَّمة"
+    },
+    "reasons": {
+      "currency": "رسوم الحجز ليس لها عملة",
+      "installer_mismatch": "البند المقدَّم من المالك يسمّي حزمة تركيب أخرى",
+      "owner_furnished_item_required": "يحتاج مسار التوريد من المالك إلى البند الذي يوفّره المالك",
+      "owner_installs": "المالك يقوم بالتركيب، لذلك لا يجوز تسمية أي حزمة عقد كجهة تركيب",
+      "package_does_not_supply": "حزمة العقد لا توفّر معدات",
+      "package_not_in_plan": "حزمة العقد ليست في خطة الحزم",
+      "package_required": "يحتاج هذا المسار إلى حزمة عقد",
+      "single_package_form": "نموذج التسليم يحتوي على حزمة عقد واحدة والبند في حزمة أخرى"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "البند الحرج {item} ليس له ورقة قرار معتمدة.",
+        "suggestion": "أعدّ ورقة الخيارات وقدّمها للاعتماد."
+      },
+      "critical_has_market_evidence": {
+        "fail": "البند الحرج {item} يعتمد على قيمة افتراضية من الكتالوج أو على تقدير.",
+        "suggestion": "احصل على عرض سعر من المورّد أو اتفاقية إطارية أو طلبية سابقة."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "البند الحرج {item} ليس له قطعة غيار استراتيجية.",
+        "suggestion": "أضف قطعة غيار استراتيجية أو بيّن سبب عدم الحاجة إليها."
+      },
+      "delivery_limits_complete": {
+        "fail": "حدود تسليم {item} ليس لها جهة مسؤولة عن: {steps}.",
+        "suggestion": "عيّن جهة مسؤولة لكل خطوة تسليم."
+      },
+      "it_cde_linked": {
+        "fail": "الوصول إلى بيئة البيانات المشتركة مطلوب قبل بوابة التنفيذ ولا توجد حاوية مرتبطة بها.",
+        "suggestion": "اربط حاوية بيئة البيانات المشتركة التي ستعمل فيها الجهات."
+      },
+      "lead_time_fresh": {
+        "fail": "مدة التوريد الأساسية لـ {item} قديمة.",
+        "suggestion": "اسأل المورّد مرة أخرى وسجّل الرد الجديد."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "البند طويل التوريد {item} ليس له عرض سعر لمدة التوريد مؤرخ بتاريخ استفسار.",
+        "suggestion": "سجّل عرض سعر مؤرخًا: متى سألت ومن أجاب."
+      },
+      "order_not_overdue": {
+        "fail": "يجب طلب {item} بحلول {date}.",
+        "suggestion": "اطلب الآن أو عدّل تاريخ الحاجة مع مسؤول الجدول الزمني."
+      },
+      "redundancy_quantity": {
+        "fail": "كمية {item} لا تتوافق مع مخطط الاحتياطية الخاص به.",
+        "suggestion": "تحقق من الكمية مقابل المخطط (N+1 تحتاج وحدتين على الأقل)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "مسار شراء {item} لا يطابق خطة الحزم: {reason}.",
+        "suggestion": "وافق بين المسار وحزم العقود والبنود التي يوفّرها المالك."
+      },
+      "single_basis_quote": {
+        "fail": "ليس لـ {item} عرض سعر أساسي واحد بالضبط.",
+        "suggestion": "حدّد عرض سعر واحدًا كأساس."
+      },
+      "slot_after_order_date": {
+        "fail": "حجز السعة لـ {item} يتجاوز آخر موعد للطلب.",
+        "suggestion": "وقّع الطلبية أبكر أو تفاوض على فترة أبكر."
+      },
+      "slot_not_expired": {
+        "fail": "حجز السعة لـ {item} تجاوز موعد تحويله.",
+        "suggestion": "حوّله إلى طلبية أو أفرج عنه."
+      },
+      "slot_terms_complete": {
+        "fail": "شروط حجز السعة لـ {item} غير مكتملة.",
+        "suggestion": "سجّل الرسوم وشروط الاسترداد وموعد التحويل وربط الالتزام."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "سياسة المورّد لـ {item} غير متسقة.",
+        "suggestion": "المواصفة المقيّدة تحتاج إلى سبب؛ والمواصفة المحايدة لا تسمّي موردًا."
+      }
+    },
+    "spare_state": {
+      "delivered": "مُسلَّمة",
+      "handed_over": "مُسلَّمة للتشغيل",
+      "required": "مطلوبة",
+      "specified": "محددة",
+      "waived": "متنازَل عنها"
+    },
+    "state": {
+      "cancelled": "ملغى",
+      "commissioned": "تم التشغيل التجريبي",
+      "delivered": "مُسلَّم",
+      "enquired": "تم الاستفسار",
+      "handed_over": "مُسلَّم للتشغيل",
+      "identified": "محدد",
+      "installed": "مركّب",
+      "manufactured": "مُصنَّع",
+      "ordered": "مطلوب",
+      "route_set": "تم تحديد المسار",
+      "specified": "مواصف"
+    }
+  }
+}

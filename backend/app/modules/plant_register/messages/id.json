@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Unit penanganan udara",
+        "battery_storage": "Penyimpanan baterai",
+        "bms_controls": "Otomasi gedung",
+        "boiler": "Ketel uap",
+        "chiller": "Chiller",
+        "cooling_tower": "Menara pendingin",
+        "crane_permanent": "Crane permanen",
+        "distribution_transformer": "Transformator distribusi",
+        "escalator": "Eskalator",
+        "facade_unit": "Unit fasad",
+        "generator": "Set generator",
+        "heat_pump": "Pompa kalor",
+        "it_core_network": "Jaringan inti TI",
+        "kitchen_equipment": "Peralatan dapur",
+        "lift": "Lift",
+        "lv_switchboard": "Papan distribusi tegangan rendah",
+        "medical_equipment": "Peralatan medis",
+        "mv_switchgear": "Pemutus tegangan menengah",
+        "power_transformer": "Transformator daya",
+        "process_unit": "Unit proses",
+        "sprinkler_pump": "Set pompa sprinkler",
+        "structural_steel_package": "Paket baja struktural",
+        "ups": "Catu daya tak terputus"
+      },
+      "it_service": {
+        "access_control": "Kontrol akses",
+        "cctv": "Pengawasan video",
+        "cde_access": "Akses CDE",
+        "drone_survey": "Survei drone",
+        "site_network": "Jaringan lokasi proyek",
+        "telecom": "Telekomunikasi",
+        "time_recording": "Pencatatan waktu"
+      },
+      "maintenance": {
+        "condition_based": "Berbasis kondisi",
+        "preventive_interval": "Preventif, berdasarkan interval",
+        "run_to_failure": "Dijalankan hingga rusak",
+        "vendor_service_contract": "Kontrak servis vendor"
+      },
+      "name": "Katalog peralatan netral",
+      "party": {
+        "contractor": "Kontraktor",
+        "installer": "Pemasang",
+        "operator": "Operator",
+        "owner": "Pemilik",
+        "supplier": "Pemasok",
+        "user": "Pengguna"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Dua sistem yang sepenuhnya independen",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Dua sistem independen ditambah satu unit cadangan",
+        "n": "N",
+        "n_desc": "Kapasitas yang dibutuhkan persis, tanpa unit cadangan",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Satu unit cadangan di atas kapasitas yang dibutuhkan",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Dua unit cadangan di atas kapasitas yang dibutuhkan"
+      },
+      "route": {
+        "contractor_furnished_installed": "Disediakan kontraktor, dipasang kontraktor",
+        "owner_furnished_contractor_installed": "Disediakan pemilik, dipasang kontraktor",
+        "owner_furnished_owner_installed": "Disediakan pemilik, dipasang pemilik",
+        "owner_procured_novated": "Diadakan pemilik, pesanan dialihkan ke kontraktor"
+      },
+      "site_plant": {
+        "concrete_plant": "Batching plant beton",
+        "hoist": "Hoist",
+        "mobile_crane_pad": "Landasan crane mobile",
+        "site_office": "Kantor lokasi",
+        "storage": "Gudang penyimpanan",
+        "temporary_power": "Daya sementara",
+        "temporary_water": "Air sementara",
+        "tower_crane": "Tower crane",
+        "welfare": "Fasilitas kesejahteraan pekerja",
+        "wheel_wash": "Pencuci roda"
+      },
+      "source": {
+        "catalogue_default": "Default katalog",
+        "expert_estimate": "Estimasi ahli",
+        "framework_agreement": "Perjanjian kerangka",
+        "historic_order": "Pesanan historis",
+        "market_sounding": "Penjajakan pasar",
+        "none": "Tanpa waktu tunggu",
+        "supplier_catalogue": "Katalog pemasok",
+        "supplier_quote": "Penawaran pemasok"
+      },
+      "spare": {
+        "commissioning_spares": "Suku cadang komisioning",
+        "operating_consumables": "Bahan habis pakai operasional",
+        "special_tools": "Peralatan khusus",
+        "strategic_spares": "Suku cadang strategis"
+      },
+      "step": {
+        "accept": "Serah terima",
+        "commission": "Komisioning",
+        "connect": "Sambungkan",
+        "deliver_to_site": "Kirim ke lokasi",
+        "document": "Dokumentasi",
+        "offload": "Bongkar",
+        "set_in_place": "Pasang di posisi",
+        "supply": "Pasok",
+        "test": "Uji",
+        "train": "Pelatihan"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Penawaran waktu tunggu dasar diperlukan.",
+      "catalogue_entry_required": "Waktu tunggu katalog pemasok memerlukan entri katalog.",
+      "catalogue_lead_mismatch": "Waktu tunggu tidak sesuai dengan entri katalog pemasok yang disebutkan.",
+      "catalogue_retired": "Katalog ini sudah dihentikan dan tidak dapat dipilih.",
+      "classification_frozen": "Penggantian kritikalitas dan waktu tunggu panjang dikunci setelah rute pengadaan ditetapkan.",
+      "commitment_currency_mismatch": "Biaya reservasi dan komitmen yang dilepas menggunakan mata uang berbeda.",
+      "commitment_for_other_item": "Item komitmen yang ditautkan milik item peralatan lain.",
+      "commitment_not_found": "Item komitmen yang ditautkan bukan bagian dari proyek ini.",
+      "commitment_not_released": "Item komitmen yang ditautkan belum dilepas.",
+      "commitment_release_below_fee": "Jumlah yang dilepas lebih rendah dari biaya reservasi.",
+      "commitment_release_failed": "Pelepasan komitmen tidak dapat dibaca; coba lagi atau hubungi administrator.",
+      "commitment_release_unavailable": "Pelepasan komitmen tidak dapat dibaca, sehingga biaya reservasi tidak dapat dikaitkan.",
+      "concurrent_basis_change": "Pengguna lain mengubah penawaran dasar pada waktu yang sama; muat ulang dan coba lagi.",
+      "cost_needs_currency": "Biaya opsi memerlukan mata uangnya.",
+      "critical_override_needs_reason": "Penggantian kritikalitas memerlukan alasan.",
+      "critical_without_decision": "Item kritis memerlukan dokumen keputusan yang disetujui sebelum rutenya ditetapkan.",
+      "critical_without_market_evidence": "Item kritis memerlukan waktu tunggu dari pasar, bukan default katalog atau estimasi.",
+      "critical_without_strategic_spares": "Item kritis memerlukan suku cadang strategis atau alasan mengapa tidak ada.",
+      "decision_paper_needs_two_options": "Dokumen keputusan memerlukan minimal dua opsi kecuali item bersumber tunggal.",
+      "decision_route_refused": "Rute persetujuan menolak langkah ini.",
+      "delivery_limit_gap": "Tidak semua langkah pengiriman memiliki pihak yang bertanggung jawab.",
+      "edit_permission_required": "Anda tidak memiliki izin untuk mengubah register peralatan.",
+      "enquiry_date_in_future": "Tanggal permintaan tidak boleh di masa depan.",
+      "fee_needs_currency": "Biaya reservasi memerlukan mata uangnya.",
+      "fee_negative": "Biaya reservasi tidak boleh negatif.",
+      "handover_needs_commissioned": "Hanya item yang sudah dikomisioning yang dapat diserahterimakan.",
+      "handover_needs_confirmation": "Serah terima harus dikonfirmasi.",
+      "handover_needs_service_asset": "Sebutkan kontrak servis untuk aset, atau nyatakan alasan item diserahterimakan tanpa kontrak.",
+      "invalid_transition": "Perubahan status ini tidak mungkin dari status saat ini.",
+      "it_cde_not_linked": "Akses CDE memerlukan kontainer CDE yang tertaut.",
+      "it_service_not_found": "Layanan TI tidak ditemukan.",
+      "it_service_range_invalid": "Layanan berakhir sebelum dimulai.",
+      "it_service_retired": "Layanan TI yang sudah dihentikan tidak dapat diubah.",
+      "item_already_ordered": "Item sudah dipesan.",
+      "item_closed": "Item sudah diserahterimakan atau dibatalkan.",
+      "item_code_taken": "Item dengan kode ini sudah ada di proyek.",
+      "item_not_found": "Item peralatan tidak ditemukan.",
+      "item_required": "Pilih item.",
+      "laydown_zone_not_found": "Zona penumpukan ini tidak ada di proyek ini.",
+      "lead_time_owned_by_plant_item": "Waktu tunggu pengajuan ini disimpan pada item peralatannya.",
+      "lead_time_stale": "Penawaran waktu tunggu dasar lebih lama dari yang diizinkan kelas ini.",
+      "lead_time_without_enquiry_date": "Waktu tunggu memerlukan tanggal saat permintaan diajukan.",
+      "lead_weeks_range_invalid": "Minimum waktu tunggu tidak boleh melebihi maksimum.",
+      "limit_needs_party": "Langkah pengiriman memerlukan pihak atau paket.",
+      "link_not_found": "Catatan yang ditautkan bukan bagian dari proyek ini.",
+      "long_lead_override_needs_reason": "Penggantian klasifikasi waktu tunggu panjang memerlukan alasan.",
+      "manage_required": "Hanya pemegang izin pengelolaan peralatan yang dapat mengubah ini.",
+      "neutral_spec_names_vendor": "Spesifikasi bersifat netral vendor tetapi menyebut vendor.",
+      "no_decision_route": "Proyek tidak memiliki rute persetujuan untuk dokumen keputusan.",
+      "not_equipment_owner": "Hanya manajer atau pemilik area peralatan yang dapat mengubah register peralatan.",
+      "null_not_allowed": "Kolom ini tidak boleh kosong.",
+      "package_not_found": "Paket kontrak bukan bagian dari rencana paket proyek ini.",
+      "package_plan_failed": "Model pengiriman tidak dapat dibaca; coba lagi atau hubungi administrator.",
+      "package_plan_unavailable": "Rencana paket proyek tidak dapat dibaca, sehingga rute tidak dapat diperiksa.",
+      "paper_needs_rationale": "Dokumen memerlukan dasar pertimbangan.",
+      "paper_needs_recommendation": "Dokumen memerlukan rekomendasi.",
+      "paper_not_draft": "Hanya dokumen draf yang dapat diubah atau diajukan.",
+      "paper_not_found": "Dokumen keputusan tidak ditemukan.",
+      "paper_not_submitted": "Hanya dokumen yang sudah diajukan yang dapat ditarik kembali.",
+      "paper_open": "Item sudah memiliki dokumen keputusan yang masih terbuka.",
+      "paper_option_codes_invalid": "Setiap opsi memerlukan kode yang unik.",
+      "paper_recommendation_unknown": "Rekomendasi harus menyebut salah satu opsi.",
+      "paper_scores_invalid": "Skor dan bobot harus berupa bilangan desimal.",
+      "paper_submitter_is_approver": "Pihak yang mengajukan dokumen tidak boleh menjadi penyetuju pada rutenya.",
+      "position_date_invalid": "Ini bukan tanggal.",
+      "position_incomplete": "Posisi memerlukan jenis dan titiknya pada denah lokasi.",
+      "position_not_found": "Posisi peralatan ini tidak ada di proyek ini.",
+      "position_number_invalid": "Angka ini tidak dapat disimpan: periksa desimal dan ukurannya.",
+      "position_range_invalid": "Posisi berakhir sebelum dimulai.",
+      "position_text_invalid": "Teks ini kosong atau terlalu panjang.",
+      "quantity_not_positive": "Jumlah harus lebih besar dari nol.",
+      "quote_not_found": "Penawaran waktu tunggu tidak ditemukan.",
+      "response_before_enquiry": "Tanggal tanggapan tidak boleh sebelum tanggal permintaan.",
+      "route_frozen": "Rute tidak dapat diubah setelah item dipesan.",
+      "route_inconsistent_with_package_plan": "Rute pengadaan tidak sesuai dengan rencana paket.",
+      "route_missing": "Belum ada rute pengadaan yang ditetapkan.",
+      "slot_closed": "Reservasi sudah ditutup.",
+      "slot_exists": "Item sudah memiliki reservasi kapasitas yang masih terbuka.",
+      "slot_fee_needs_commitment": "Biaya reservasi hanya mengikat dana melalui pelepasan komitmen; tautkan item komitmen.",
+      "slot_not_found": "Reservasi kapasitas tidak ditemukan.",
+      "slot_range_invalid": "Slot berakhir sebelum dimulai.",
+      "slot_terms_incomplete": "Reservasi yang ditahan memerlukan biaya, ketentuan pengembalian dana, dan batas waktu konversi.",
+      "spare_closed": "Baris suku cadang sudah ditutup.",
+      "spare_not_deletable": "Hanya baris suku cadang yang masih dibutuhkan yang dapat dihapus.",
+      "spare_not_found": "Baris suku cadang tidak ditemukan.",
+      "spares_not_handed_over": "Setiap suku cadang harus diserahterimakan atau dibebaskan terlebih dahulu.",
+      "specification_frozen": "Spesifikasi dikunci setelah rute pengadaan ditetapkan.",
+      "stage_not_found": "Tahap ekspansi ini tidak ada di proyek ini.",
+      "stage_unavailable": "Tahap ekspansi tidak dapat dibaca, sehingga posisi peralatan tidak dapat ditempatkan padanya.",
+      "state_read_from_source": "Status ini dibaca dari pesanan, item yang disediakan pemilik, atau komisioning, bukan diatur secara manual.",
+      "transition_blocked": "Perubahan status diblokir oleh beberapa aturan.",
+      "two_parties_on_one_step": "Langkah pengiriman hanya boleh memiliki satu pihak.",
+      "unknown_catalogue": "Katalog peralatan tidak dikenal.",
+      "unknown_component_class": "Kelas komponen tidak dikenal.",
+      "unknown_fee_refundable": "Ketentuan pengembalian dana harus berupa tidak ada, sebagian, atau penuh.",
+      "unknown_it_service_kind": "Layanan TI tidak dikenal.",
+      "unknown_lead_basis": "Dasar waktu tunggu tidak dikenal.",
+      "unknown_lead_time_source": "Sumber waktu tunggu tidak dikenal.",
+      "unknown_maintenance_strategy": "Strategi pemeliharaan tidak dikenal.",
+      "unknown_party": "Pihak tidak dikenal.",
+      "unknown_redundancy_scheme": "Skema redundansi tidak dikenal.",
+      "unknown_route": "Rute pengadaan tidak dikenal.",
+      "unknown_site_plant_kind": "Jenis peralatan lokasi ini tidak ada di katalog peralatan proyek.",
+      "unknown_spare_category": "Kategori suku cadang tidak dikenal.",
+      "unknown_step": "Langkah pengiriman tidak dikenal.",
+      "unknown_vendor_bound_reason": "Alasan harus berupa standardisasi, aset yang sudah ada, garansi, atau sumber tunggal.",
+      "unknown_vendor_policy": "Kebijakan vendor harus netral atau terikat.",
+      "vendor_bound_needs_reason": "Spesifikasi yang terikat vendor memerlukan alasan.",
+      "waiver_needs_reason": "Pembebasan suku cadang memerlukan alasan."
+    },
+    "evidence": {
+      "critical_route_set": "Setiap item kritis sudah memiliki rute yang ditetapkan dengan dokumen keputusan yang disetujui",
+      "frame_document_attached": "Dokumen kerangka peralatan sudah dilampirkan ke CDE",
+      "frame_document_missing": "Proyek belum memiliki dokumen kerangka peralatan, sehingga lampirannya tidak dapat diperiksa",
+      "host_unresolved": "Model tata kelola tidak menyebutkan area dan gerbang tempat register peralatan melapor",
+      "long_lead_secured": "Setiap item waktu tunggu panjang memiliki penawaran dasar yang masih baru dan sudah dipesan atau berada dalam tanggal pesanannya",
+      "no_area_hosts_plant": "Model fase tidak menyebutkan area yang menampung peralatan, sehingga register peralatan tidak dapat melapor ke gerbang",
+      "no_error_findings": "Tidak ada temuan tingkat kesalahan di register peralatan",
+      "no_phase_enables_construction_start": "Model fase tidak menyebutkan fase yang memungkinkan dimulainya konstruksi, sehingga register peralatan tidak memiliki gerbang untuk melapor"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Kategori",
+      "col_class": "Kelas",
+      "col_code": "Item",
+      "col_cost": "Biaya",
+      "col_critical": "Kritis",
+      "col_description": "Deskripsi",
+      "col_enquiry_date": "Diminta",
+      "col_float": "Float (hari)",
+      "col_from": "Dari",
+      "col_latest_order": "Pesanan terakhir",
+      "col_lead_source": "Sumber waktu tunggu",
+      "col_lead_weeks": "Waktu tunggu (minggu)",
+      "col_need_date": "Tanggal kebutuhan",
+      "col_option": "Opsi",
+      "col_quantity": "Jumlah",
+      "col_recommended": "Direkomendasikan",
+      "col_route": "Rute",
+      "col_score": "Skor tertimbang",
+      "col_section": "Bagian",
+      "col_state": "Status",
+      "col_supply_by": "Dipasok oleh",
+      "col_title": "Judul",
+      "col_to": "Sampai",
+      "col_unit": "Satuan",
+      "critical_count": "Item kritis",
+      "empty": "Tidak ada entri.",
+      "frame_title": "Ringkasan kerangka peralatan",
+      "item_count": "Item",
+      "limits_title": "Matriks batas pengiriman",
+      "long_lead_count": "Item waktu tunggu panjang",
+      "overdue_count": "Pesanan terlambat",
+      "paper_title": "Dokumen keputusan",
+      "project": "Proyek",
+      "question": "Pertanyaan",
+      "rationale": "Dasar pertimbangan",
+      "register_title": "Register waktu tunggu panjang",
+      "section_it": "Layanan TI",
+      "section_long_lead": "Item waktu tunggu panjang",
+      "section_site_plant": "Peralatan lokasi",
+      "spares_title": "Daftar suku cadang",
+      "yes": "ya"
+    },
+    "paper_state": {
+      "approved": "Disetujui",
+      "draft": "Draf",
+      "rejected": "Ditolak",
+      "submitted": "Diajukan"
+    },
+    "reasons": {
+      "currency": "biaya reservasi tidak memiliki mata uang",
+      "installer_mismatch": "item yang disediakan pemilik menyebut paket pemasangan lain",
+      "owner_furnished_item_required": "rute yang disediakan pemilik memerlukan item yang disediakan pemilik",
+      "owner_installs": "pemilik yang memasang, sehingga tidak ada paket kontrak yang boleh disebut sebagai pemasang",
+      "package_does_not_supply": "paket kontrak tidak memasok peralatan",
+      "package_not_in_plan": "paket kontrak tidak ada di rencana paket",
+      "package_required": "rute ini memerlukan paket kontrak",
+      "single_package_form": "bentuk pengiriman memiliki satu paket kontrak dan item berada di paket lain"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Item kritis {item} belum memiliki dokumen keputusan yang disetujui.",
+        "suggestion": "Siapkan dokumen opsi dan ajukan untuk persetujuan."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Item kritis {item} bergantung pada default katalog atau estimasi.",
+        "suggestion": "Dapatkan penawaran pemasok, perjanjian kerangka, atau pesanan historis."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Item kritis {item} belum memiliki suku cadang strategis.",
+        "suggestion": "Tambahkan suku cadang strategis atau nyatakan mengapa tidak diperlukan."
+      },
+      "delivery_limits_complete": {
+        "fail": "Batas pengiriman {item} belum memiliki pihak untuk: {steps}.",
+        "suggestion": "Tetapkan pihak untuk setiap langkah pengiriman."
+      },
+      "it_cde_linked": {
+        "fail": "Akses CDE diperlukan sebelum gerbang eksekusi, tetapi belum ada kontainer CDE.",
+        "suggestion": "Tautkan kontainer CDE tempat para pihak akan bekerja."
+      },
+      "lead_time_fresh": {
+        "fail": "Waktu tunggu dasar {item} sudah tidak berlaku.",
+        "suggestion": "Tanyakan kembali ke pemasok dan catat jawaban barunya."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Item waktu tunggu panjang {item} tidak memiliki penawaran waktu tunggu dengan tanggal permintaan.",
+        "suggestion": "Catat penawaran yang bertanggal: kapan diminta dan siapa yang menjawab."
+      },
+      "order_not_overdue": {
+        "fail": "{item} harus dipesan paling lambat {date}.",
+        "suggestion": "Pesan sekarang atau ubah tanggal kebutuhan bersama pemilik jadwal."
+      },
+      "redundancy_quantity": {
+        "fail": "Jumlah {item} tidak sesuai dengan skema redundansinya.",
+        "suggestion": "Periksa jumlah terhadap skema (N+1 memerlukan minimal dua unit)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Rute pengadaan {item} tidak sesuai dengan rencana paket: {reason}.",
+        "suggestion": "Selaraskan rute dengan paket kontrak dan item yang disediakan pemilik."
+      },
+      "single_basis_quote": {
+        "fail": "{item} tidak memiliki tepat satu penawaran dasar.",
+        "suggestion": "Tandai satu penawaran sebagai dasar."
+      },
+      "slot_after_order_date": {
+        "fail": "Reservasi kapasitas {item} melewati tanggal pesanan terakhir.",
+        "suggestion": "Tandatangani pesanan lebih awal atau negosiasikan slot yang lebih awal."
+      },
+      "slot_not_expired": {
+        "fail": "Reservasi kapasitas {item} telah melewati batas waktu konversinya.",
+        "suggestion": "Konversi menjadi pesanan atau lepaskan reservasi."
+      },
+      "slot_terms_complete": {
+        "fail": "Ketentuan reservasi kapasitas {item} belum lengkap.",
+        "suggestion": "Catat biaya, ketentuan pengembalian dana, batas waktu konversi, dan tautan komitmen."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Kebijakan vendor {item} tidak konsisten.",
+        "suggestion": "Spesifikasi yang terikat memerlukan alasan; spesifikasi netral tidak menyebut vendor."
+      }
+    },
+    "spare_state": {
+      "delivered": "Dikirim",
+      "handed_over": "Diserahterimakan",
+      "required": "Dibutuhkan",
+      "specified": "Ditetapkan",
+      "waived": "Dibebaskan"
+    },
+    "state": {
+      "cancelled": "Dibatalkan",
+      "commissioned": "Dikomisioning",
+      "delivered": "Dikirim",
+      "enquired": "Diminta",
+      "handed_over": "Diserahterimakan",
+      "identified": "Diidentifikasi",
+      "installed": "Dipasang",
+      "manufactured": "Diproduksi",
+      "ordered": "Dipesan",
+      "route_set": "Rute ditetapkan",
+      "specified": "Ditetapkan spesifikasi"
+    }
+  }
+}

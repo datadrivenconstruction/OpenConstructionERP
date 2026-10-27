@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Vzduchotechnická jednotka",
+        "battery_storage": "Bateriové úložiště",
+        "bms_controls": "Automatizace budov",
+        "boiler": "Kotel",
+        "chiller": "Chladicí jednotka",
+        "cooling_tower": "Chladicí věž",
+        "crane_permanent": "Stacionární jeřáb",
+        "distribution_transformer": "Distribuční transformátor",
+        "escalator": "Eskalátor",
+        "facade_unit": "Prvky fasády",
+        "generator": "Agregát",
+        "heat_pump": "Tepelné čerpadlo",
+        "it_core_network": "Páteřní IT síť",
+        "kitchen_equipment": "Kuchyňské vybavení",
+        "lift": "Výtah",
+        "lv_switchboard": "Hlavní rozvaděč nízkého napětí",
+        "medical_equipment": "Zdravotnická technika",
+        "mv_switchgear": "Rozvodna středního napětí",
+        "power_transformer": "Výkonový transformátor",
+        "process_unit": "Technologická jednotka",
+        "sprinkler_pump": "Čerpací souprava sprinklerů",
+        "structural_steel_package": "Balíček ocelových konstrukcí",
+        "ups": "Záložní zdroj (UPS)"
+      },
+      "it_service": {
+        "access_control": "Řízení přístupu",
+        "cctv": "Kamerový systém",
+        "cde_access": "Přístup do CDE",
+        "drone_survey": "Dronové zaměření",
+        "site_network": "Staveništní síť",
+        "telecom": "Telekomunikace",
+        "time_recording": "Evidence docházky"
+      },
+      "maintenance": {
+        "condition_based": "Podle stavu",
+        "preventive_interval": "Preventivní, v intervalech",
+        "run_to_failure": "Provoz do poruchy",
+        "vendor_service_contract": "Servisní smlouva s dodavatelem"
+      },
+      "name": "Neutrální katalog zařízení",
+      "party": {
+        "contractor": "Zhotovitel",
+        "installer": "Montážní firma",
+        "operator": "Provozovatel",
+        "owner": "Investor",
+        "supplier": "Dodavatel",
+        "user": "Uživatel"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Dva zcela nezávislé systémy",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Dva nezávislé systémy plus jedna záložní jednotka",
+        "n": "N",
+        "n_desc": "Přesně potřebná kapacita, bez záložní jednotky",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Jedna záložní jednotka nad potřebnou kapacitu",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Dvě záložní jednotky nad potřebnou kapacitu"
+      },
+      "route": {
+        "contractor_furnished_installed": "Dodá zhotovitel, montuje zhotovitel",
+        "owner_furnished_contractor_installed": "Dodá investor, montuje zhotovitel",
+        "owner_furnished_owner_installed": "Dodá investor, montuje investor",
+        "owner_procured_novated": "Zajistí investor, objednávka převedena na zhotovitele"
+      },
+      "site_plant": {
+        "concrete_plant": "Betonárna",
+        "hoist": "Stavební výtah",
+        "mobile_crane_pad": "Stanoviště pojízdného jeřábu",
+        "site_office": "Stavební buňka",
+        "storage": "Skladování",
+        "temporary_power": "Dočasná elektřina",
+        "temporary_water": "Dočasná voda",
+        "tower_crane": "Věžový jeřáb",
+        "welfare": "Zařízení zázemí",
+        "wheel_wash": "Mycí zařízení kol"
+      },
+      "source": {
+        "catalogue_default": "Výchozí hodnota z katalogu",
+        "expert_estimate": "Odborný odhad",
+        "framework_agreement": "Rámcová dohoda",
+        "historic_order": "Historická objednávka",
+        "market_sounding": "Průzkum trhu",
+        "none": "Bez dodací lhůty",
+        "supplier_catalogue": "Katalog dodavatele",
+        "supplier_quote": "Nabídka dodavatele"
+      },
+      "spare": {
+        "commissioning_spares": "Náhradní díly pro uvedení do provozu",
+        "operating_consumables": "Provozní spotřební materiál",
+        "special_tools": "Speciální nářadí",
+        "strategic_spares": "Strategické náhradní díly"
+      },
+      "step": {
+        "accept": "Převzetí",
+        "commission": "Uvedení do provozu",
+        "connect": "Připojení",
+        "deliver_to_site": "Dodání na staveniště",
+        "document": "Dokumentace",
+        "offload": "Vyložení",
+        "set_in_place": "Osazení na místo",
+        "supply": "Dodávka",
+        "test": "Zkoušky",
+        "train": "Zaškolení"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Je vyžadována základní nabídka dodací lhůty.",
+      "catalogue_entry_required": "Dodací lhůta z katalogu dodavatele vyžaduje položku katalogu.",
+      "catalogue_lead_mismatch": "Dodací lhůta neodpovídá položce katalogu dodavatele, na kterou odkazuje.",
+      "catalogue_retired": "Tento katalog je vyřazen a nelze ho připnout.",
+      "classification_frozen": "Kritické a dlouhé dodací lhůty se po nastavení postupu nákupu zamknou.",
+      "commitment_currency_mismatch": "Rezervační poplatek a uvolněný závazek jsou v různých měnách.",
+      "commitment_for_other_item": "Propojená položka závazku patří jinému zařízení.",
+      "commitment_not_found": "Propojená položka závazku není součástí tohoto projektu.",
+      "commitment_not_released": "Propojená položka závazku ještě nebyla uvolněna.",
+      "commitment_release_below_fee": "Uvolněná částka je nižší než rezervační poplatek.",
+      "commitment_release_failed": "Uvolnění závazku se nepodařilo načíst; zkuste to znovu nebo kontaktujte správce.",
+      "commitment_release_unavailable": "Uvolnění závazku nelze načíst, proto nelze navázat rezervační poplatek.",
+      "concurrent_basis_change": "Jiný uživatel změnil základní nabídku ve stejnou dobu; načtěte stránku znovu a zkuste to znovu.",
+      "cost_needs_currency": "Náklady varianty potřebují uvedenou měnu.",
+      "critical_override_needs_reason": "Změna kritičnosti vyžaduje odůvodnění.",
+      "critical_without_decision": "Kritická položka potřebuje schválený podklad pro rozhodnutí, než se nastaví její postup.",
+      "critical_without_market_evidence": "Kritická položka potřebuje dodací lhůtu z trhu, nikoli výchozí hodnotu z katalogu nebo odhad.",
+      "critical_without_strategic_spares": "Kritická položka potřebuje strategický náhradní díl nebo uvedený důvod, proč žádný není.",
+      "decision_paper_needs_two_options": "Podklad pro rozhodnutí potřebuje alespoň dvě varianty, pokud položka nemá jediného dodavatele.",
+      "decision_route_refused": "Schvalovací postup tento krok zamítl.",
+      "delivery_limit_gap": "Ne každý krok dodávky má odpovědnou stranu.",
+      "edit_permission_required": "Nemáte oprávnění měnit registr zařízení.",
+      "enquiry_date_in_future": "Datum poptávky nemůže být v budoucnosti.",
+      "fee_needs_currency": "Rezervační poplatek potřebuje uvedenou měnu.",
+      "fee_negative": "Rezervační poplatek nemůže být záporný.",
+      "handover_needs_commissioned": "Předat lze pouze položku uvedenou do provozu.",
+      "handover_needs_confirmation": "Předání musí být potvrzeno.",
+      "handover_needs_service_asset": "Uveďte servisní smlouvu k zařízení, nebo uveďte, proč je položka předána bez ní.",
+      "invalid_transition": "Z aktuálního stavu tuto změnu stavu provést nelze.",
+      "it_cde_not_linked": "Přístup do CDE vyžaduje propojený kontejner CDE.",
+      "it_service_not_found": "IT služba nebyla nalezena.",
+      "it_service_range_invalid": "Služba končí dříve, než začíná.",
+      "it_service_retired": "Vyřazenou IT službu nelze měnit.",
+      "item_already_ordered": "Položka je již objednána.",
+      "item_closed": "Položka je předána nebo zrušena.",
+      "item_code_taken": "Položka s tímto kódem již v projektu existuje.",
+      "item_not_found": "Položka zařízení nebyla nalezena.",
+      "item_required": "Vyberte položku.",
+      "laydown_zone_not_found": "Tato zóna pro dočasné skladování v tomto projektu neexistuje.",
+      "lead_time_owned_by_plant_item": "Dodací lhůta tohoto podkladu se vede u jeho položky zařízení.",
+      "lead_time_stale": "Základní nabídka dodací lhůty je starší, než dovoluje třída.",
+      "lead_time_without_enquiry_date": "Dodací lhůta potřebuje datum, kdy byla poptána.",
+      "lead_weeks_range_invalid": "Minimální dodací lhůta nesmí překročit maximum.",
+      "limit_needs_party": "Krok dodávky potřebuje stranu nebo balíček.",
+      "link_not_found": "Propojený záznam není součástí tohoto projektu.",
+      "long_lead_override_needs_reason": "Změna klasifikace dlouhé dodací lhůty vyžaduje odůvodnění.",
+      "manage_required": "Tuto změnu může provést pouze držitel oprávnění pro správu zařízení.",
+      "neutral_spec_names_vendor": "Specifikace je neutrální vůči výrobcům, ale uvádí konkrétního výrobce.",
+      "no_decision_route": "Projekt nemá schvalovací postup pro podklady k rozhodnutí.",
+      "not_equipment_owner": "Registr zařízení může měnit pouze manažer nebo vlastník oblasti zařízení.",
+      "null_not_allowed": "Toto pole nesmí zůstat prázdné.",
+      "package_not_found": "Smluvní balíček není součástí plánu balíčků tohoto projektu.",
+      "package_plan_failed": "Model dodávky se nepodařilo načíst; zkuste to znovu nebo kontaktujte správce.",
+      "package_plan_unavailable": "Plán balíčků projektu nelze načíst, postup proto nelze ověřit.",
+      "paper_needs_rationale": "Podklad potřebuje odůvodnění.",
+      "paper_needs_recommendation": "Podklad potřebuje doporučení.",
+      "paper_not_draft": "Měnit nebo odeslat lze pouze podklad ve stavu koncept.",
+      "paper_not_found": "Podklad k rozhodnutí nebyl nalezen.",
+      "paper_not_submitted": "Stáhnout lze pouze odeslaný podklad.",
+      "paper_open": "Položka již má otevřený podklad k rozhodnutí.",
+      "paper_option_codes_invalid": "Každá varianta potřebuje jedinečný kód.",
+      "paper_recommendation_unknown": "Doporučení musí uvádět jednu z variant.",
+      "paper_scores_invalid": "Bodová hodnocení a váhy musí být desetinná čísla.",
+      "paper_submitter_is_approver": "Osoba, která podklad odesílá, nemůže být schvalovatelem jeho postupu.",
+      "position_date_invalid": "Toto není datum.",
+      "position_incomplete": "Umístění potřebuje svůj druh a bod v situačním plánu.",
+      "position_not_found": "Toto umístění zařízení v tomto projektu neexistuje.",
+      "position_number_invalid": "Toto číslo nelze uložit: zkontrolujte desetinná místa a velikost.",
+      "position_range_invalid": "Umístění končí dříve, než začíná.",
+      "position_text_invalid": "Tento text je prázdný nebo příliš dlouhý.",
+      "quantity_not_positive": "Množství musí být větší než nula.",
+      "quote_not_found": "Nabídka dodací lhůty nebyla nalezena.",
+      "response_before_enquiry": "Datum odpovědi nemůže předcházet datu poptávky.",
+      "route_frozen": "Postup nelze změnit, jakmile je položka objednána.",
+      "route_inconsistent_with_package_plan": "Postup nákupu neodpovídá plánu balíčků.",
+      "route_missing": "Není nastaven žádný postup nákupu.",
+      "slot_closed": "Rezervace je uzavřena.",
+      "slot_exists": "Položka již má otevřenou rezervaci kapacity.",
+      "slot_fee_needs_commitment": "Rezervační poplatek váže peníze pouze přes uvolnění závazku; propojte položku závazku.",
+      "slot_not_found": "Rezervace kapacity nebyla nalezena.",
+      "slot_range_invalid": "Termín končí dříve, než začíná.",
+      "slot_terms_incomplete": "Držená rezervace potřebuje poplatek, podmínky vrácení a termín pro převod.",
+      "spare_closed": "Řádek náhradního dílu je uzavřen.",
+      "spare_not_deletable": "Smazat lze pouze řádek náhradního dílu, který je stále požadován.",
+      "spare_not_found": "Řádek náhradního dílu nebyl nalezen.",
+      "spares_not_handed_over": "Každý náhradní díl musí být nejprve předán nebo odepsán.",
+      "specification_frozen": "Specifikace se zamkne, jakmile je nastaven postup nákupu.",
+      "stage_not_found": "Tato etapa rozšíření v tomto projektu neexistuje.",
+      "stage_unavailable": "Etapy rozšíření nelze načíst, proto nelze umístění zařadit do etapy.",
+      "state_read_from_source": "Tento stav se čte z objednávky, položky dodávané investorem nebo uvedení do provozu, nenastavuje se ručně.",
+      "transition_blocked": "Změnu stavu blokuje několik pravidel.",
+      "two_parties_on_one_step": "Krok dodávky může mít pouze jednu stranu.",
+      "unknown_catalogue": "Neznámý katalog zařízení.",
+      "unknown_component_class": "Neznámá třída komponenty.",
+      "unknown_fee_refundable": "Podmínky vrácení musí být: žádné, částečné nebo úplné.",
+      "unknown_it_service_kind": "Neznámá IT služba.",
+      "unknown_lead_basis": "Neznámý základ dodací lhůty.",
+      "unknown_lead_time_source": "Neznámý zdroj dodací lhůty.",
+      "unknown_maintenance_strategy": "Neznámá strategie údržby.",
+      "unknown_party": "Neznámá strana.",
+      "unknown_redundancy_scheme": "Neznámé schéma redundance.",
+      "unknown_route": "Neznámý postup nákupu.",
+      "unknown_site_plant_kind": "Tento druh staveništní techniky není v katalogu zařízení projektu.",
+      "unknown_spare_category": "Neznámá kategorie náhradních dílů.",
+      "unknown_step": "Neznámý krok dodávky.",
+      "unknown_vendor_bound_reason": "Důvodem musí být standardizace, stávající majetek, záruka nebo jediný dodavatel.",
+      "unknown_vendor_policy": "Politika dodavatele musí být neutrální nebo vázaná.",
+      "vendor_bound_needs_reason": "Specifikace vázaná na výrobce potřebuje odůvodnění.",
+      "waiver_needs_reason": "Odepsání náhradního dílu potřebuje odůvodnění."
+    },
+    "evidence": {
+      "critical_route_set": "Každá kritická položka má nastavený postup se schváleným podkladem k rozhodnutí",
+      "frame_document_attached": "Rámcový dokument zařízení je připojen k CDE",
+      "frame_document_missing": "Projekt zatím nemá rámcový dokument zařízení, takže jeho připojení nelze ověřit",
+      "host_unresolved": "Model řízení neuvádí, které oblasti a bráně registr zařízení hlásí",
+      "long_lead_secured": "Každá položka s dlouhou dodací lhůtou má aktuální základní nabídku a je objednána nebo je v termínu objednání",
+      "no_area_hosts_plant": "Model fází neuvádí žádnou oblast, která by zařízení hostila, takže registr zařízení nemůže hlásit bráně",
+      "no_error_findings": "Registr zařízení neobsahuje nálezy na úrovni chyby",
+      "no_phase_enables_construction_start": "Model fází neuvádí žádnou fázi, která umožňuje zahájení výstavby, takže registr zařízení nemá bránu, do které by hlásil"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Kategorie",
+      "col_class": "Třída",
+      "col_code": "Položka",
+      "col_cost": "Náklady",
+      "col_critical": "Kritická",
+      "col_description": "Popis",
+      "col_enquiry_date": "Poptáno",
+      "col_float": "Volná rezerva (dny)",
+      "col_from": "Od",
+      "col_latest_order": "Poslední termín objednání",
+      "col_lead_source": "Zdroj dodací lhůty",
+      "col_lead_weeks": "Dodací lhůta (týdny)",
+      "col_need_date": "Termín potřeby",
+      "col_option": "Varianta",
+      "col_quantity": "Množství",
+      "col_recommended": "Doporučeno",
+      "col_route": "Postup",
+      "col_score": "Vážené hodnocení",
+      "col_section": "Oddíl",
+      "col_state": "Stav",
+      "col_supply_by": "Dodá",
+      "col_title": "Název",
+      "col_to": "Do",
+      "col_unit": "Jednotka",
+      "critical_count": "Kritické položky",
+      "empty": "Žádné záznamy.",
+      "frame_title": "Souhrn rámce zařízení",
+      "item_count": "Položky",
+      "limits_title": "Matice mezí dodávek",
+      "long_lead_count": "Položky s dlouhou dodací lhůtou",
+      "overdue_count": "Opožděné objednávky",
+      "paper_title": "Podklad k rozhodnutí",
+      "project": "Projekt",
+      "question": "Otázka",
+      "rationale": "Odůvodnění",
+      "register_title": "Registr dlouhých dodacích lhůt",
+      "section_it": "IT služba",
+      "section_long_lead": "Položka s dlouhou dodací lhůtou",
+      "section_site_plant": "Staveništní technika",
+      "spares_title": "Seznam náhradních dílů",
+      "yes": "ano"
+    },
+    "paper_state": {
+      "approved": "Schváleno",
+      "draft": "Koncept",
+      "rejected": "Zamítnuto",
+      "submitted": "Odesláno"
+    },
+    "reasons": {
+      "currency": "rezervační poplatek nemá uvedenou měnu",
+      "installer_mismatch": "položka dodávaná investorem uvádí jiný montážní balíček",
+      "owner_furnished_item_required": "postup s dodávkou investora potřebuje položku dodávanou investorem",
+      "owner_installs": "montáž provádí investor, proto nelze jako montážní firmu uvést žádný smluvní balíček",
+      "package_does_not_supply": "smluvní balíček nedodává zařízení",
+      "package_not_in_plan": "smluvní balíček není v plánu balíčků",
+      "package_required": "tento postup vyžaduje smluvní balíček",
+      "single_package_form": "forma dodávky má jeden smluvní balíček a položka je v jiném"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Kritická položka {item} nemá schválený podklad k rozhodnutí.",
+        "suggestion": "Připravte podklad s variantami a odešlete ho ke schválení."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Kritická položka {item} vychází z výchozí hodnoty z katalogu nebo z odhadu.",
+        "suggestion": "Získejte nabídku dodavatele, rámcovou dohodu nebo historickou objednávku."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Kritická položka {item} nemá strategický náhradní díl.",
+        "suggestion": "Přidejte strategický náhradní díl nebo uveďte, proč není potřeba."
+      },
+      "delivery_limits_complete": {
+        "fail": "Meze dodávek položky {item} nemají stranu pro: {steps}.",
+        "suggestion": "Přiřaďte stranu ke každému kroku dodávky."
+      },
+      "it_cde_linked": {
+        "fail": "Přístup do CDE je potřeba před bránou realizace, ale chybí kontejner CDE.",
+        "suggestion": "Propojte kontejner CDE, ve kterém budou strany pracovat."
+      },
+      "lead_time_fresh": {
+        "fail": "Základní dodací lhůta položky {item} je zastaralá.",
+        "suggestion": "Znovu se zeptejte dodavatele a zaznamenejte novou odpověď."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Položka s dlouhou dodací lhůtou {item} nemá nabídku dodací lhůty s datem poptávky.",
+        "suggestion": "Zaznamenejte datovanou nabídku: kdy jste se ptali a kdo odpověděl."
+      },
+      "order_not_overdue": {
+        "fail": "Položku {item} je nutné objednat do {date}.",
+        "suggestion": "Objednejte nyní, nebo posuňte termín potřeby s odpovědnou osobou za harmonogram."
+      },
+      "redundancy_quantity": {
+        "fail": "Množství položky {item} neodpovídá jejímu schématu redundance.",
+        "suggestion": "Zkontrolujte množství podle schématu (N+1 vyžaduje alespoň dvě jednotky)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Postup nákupu položky {item} neodpovídá plánu balíčků: {reason}.",
+        "suggestion": "Sjednoťte postup se smluvními balíčky a položkami dodávanými investorem."
+      },
+      "single_basis_quote": {
+        "fail": "Položka {item} nemá právě jednu základní nabídku.",
+        "suggestion": "Označte jednu nabídku jako základní."
+      },
+      "slot_after_order_date": {
+        "fail": "Rezervace kapacity položky {item} přesahuje poslední termín objednání.",
+        "suggestion": "Objednávku podepište dříve, nebo vyjednejte dřívější termín."
+      },
+      "slot_not_expired": {
+        "fail": "Rezervace kapacity položky {item} překročila termín pro převod.",
+        "suggestion": "Převeďte ji na objednávku, nebo ji uvolněte."
+      },
+      "slot_terms_complete": {
+        "fail": "Podmínky rezervace kapacity položky {item} jsou neúplné.",
+        "suggestion": "Zaznamenejte poplatek, podmínky vrácení, termín pro převod a propojení se závazkem."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Politika dodavatele položky {item} je nekonzistentní.",
+        "suggestion": "Specifikace vázaná na výrobce potřebuje odůvodnění; neutrální specifikace žádného výrobce neuvádí."
+      }
+    },
+    "spare_state": {
+      "delivered": "Dodáno",
+      "handed_over": "Předáno",
+      "required": "Požadováno",
+      "specified": "Specifikováno",
+      "waived": "Odepsáno"
+    },
+    "state": {
+      "cancelled": "Zrušeno",
+      "commissioned": "Uvedeno do provozu",
+      "delivered": "Dodáno",
+      "enquired": "Poptáno",
+      "handed_over": "Předáno",
+      "identified": "Identifikováno",
+      "installed": "Nainstalováno",
+      "manufactured": "Vyrobeno",
+      "ordered": "Objednáno",
+      "route_set": "Postup nastaven",
+      "specified": "Specifikováno"
+    }
+  }
+}

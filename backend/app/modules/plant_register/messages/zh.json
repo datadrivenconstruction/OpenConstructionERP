@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "空气处理机组",
+        "battery_storage": "电池储能",
+        "bms_controls": "楼宇自动化",
+        "boiler": "锅炉",
+        "chiller": "冷水机组",
+        "cooling_tower": "冷却塔",
+        "crane_permanent": "固定式起重机",
+        "distribution_transformer": "配电变压器",
+        "escalator": "自动扶梯",
+        "facade_unit": "幕墙单元",
+        "generator": "发电机组",
+        "heat_pump": "热泵",
+        "it_core_network": "IT核心网络",
+        "kitchen_equipment": "厨房设备",
+        "lift": "电梯",
+        "lv_switchboard": "低压配电柜",
+        "medical_equipment": "医疗设备",
+        "mv_switchgear": "中压开关设备",
+        "power_transformer": "电力变压器",
+        "process_unit": "工艺装置",
+        "sprinkler_pump": "喷淋泵组",
+        "structural_steel_package": "钢结构工程包",
+        "ups": "不间断电源"
+      },
+      "it_service": {
+        "access_control": "门禁控制",
+        "cctv": "视频监控",
+        "cde_access": "CDE访问",
+        "drone_survey": "无人机勘测",
+        "site_network": "工地网络",
+        "telecom": "电信",
+        "time_recording": "考勤记录"
+      },
+      "maintenance": {
+        "condition_based": "状态检修",
+        "preventive_interval": "定期预防性维护",
+        "run_to_failure": "事后维修",
+        "vendor_service_contract": "供应商服务合同"
+      },
+      "name": "中立设备目录",
+      "party": {
+        "contractor": "承包商",
+        "installer": "安装方",
+        "operator": "运营方",
+        "owner": "业主",
+        "supplier": "供应商",
+        "user": "使用方"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "两套完全独立的系统",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "两套独立系统外加一台备用设备",
+        "n": "N",
+        "n_desc": "仅满足所需容量，无备用设备",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "在所需容量之外增加一台备用设备",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "在所需容量之外增加两台备用设备"
+      },
+      "route": {
+        "contractor_furnished_installed": "承包商供货，承包商安装",
+        "owner_furnished_contractor_installed": "业主供货，承包商安装",
+        "owner_furnished_owner_installed": "业主供货，业主安装",
+        "owner_procured_novated": "业主采购，订单转由承包商承接"
+      },
+      "site_plant": {
+        "concrete_plant": "混凝土搅拌站",
+        "hoist": "施工升降机",
+        "mobile_crane_pad": "汽车起重机场地",
+        "site_office": "工地办公室",
+        "storage": "堆放场",
+        "temporary_power": "临时供电",
+        "temporary_water": "临时供水",
+        "tower_crane": "塔式起重机",
+        "welfare": "生活福利设施",
+        "wheel_wash": "车辆冲洗台"
+      },
+      "source": {
+        "catalogue_default": "目录默认值",
+        "expert_estimate": "专家估算",
+        "framework_agreement": "框架协议",
+        "historic_order": "历史订单",
+        "market_sounding": "市场询价",
+        "none": "无交货周期",
+        "supplier_catalogue": "供应商目录",
+        "supplier_quote": "供应商报价"
+      },
+      "spare": {
+        "commissioning_spares": "调试备件",
+        "operating_consumables": "运行耗材",
+        "special_tools": "专用工具",
+        "strategic_spares": "战略备件"
+      },
+      "step": {
+        "accept": "验收",
+        "commission": "调试",
+        "connect": "接驳",
+        "deliver_to_site": "运至现场",
+        "document": "文件资料",
+        "offload": "卸货",
+        "set_in_place": "就位安装",
+        "supply": "供货",
+        "test": "测试",
+        "train": "培训"
+      }
+    },
+    "common": {
+      "ok": "确定"
+    },
+    "errors": {
+      "basis_quote_required": "需要提供基准交货周期报价。",
+      "catalogue_entry_required": "采用供应商目录交货周期时，必须填写目录条目。",
+      "catalogue_lead_mismatch": "交货周期与所引用的供应商目录条目不一致。",
+      "catalogue_retired": "该目录已停用，无法固定使用。",
+      "classification_frozen": "采购路径设定后，关键项和长周期项的覆盖设置即被锁定。",
+      "commitment_currency_mismatch": "预订费与已释放的承诺金额币种不一致。",
+      "commitment_for_other_item": "所关联的承诺条目属于另一设备项。",
+      "commitment_not_found": "所关联的承诺条目不属于本项目。",
+      "commitment_not_released": "所关联的承诺条目尚未释放。",
+      "commitment_release_below_fee": "释放金额低于预订费。",
+      "commitment_release_failed": "无法读取承诺释放信息，请重试或联系管理员。",
+      "commitment_release_unavailable": "无法读取承诺释放信息，因此无法绑定预订费。",
+      "concurrent_basis_change": "其他用户同时修改了基准报价，请刷新后重试。",
+      "cost_needs_currency": "选项成本需要指定币种。",
+      "critical_override_needs_reason": "修改关键性等级需要说明原因。",
+      "critical_without_decision": "关键项在设定采购路径前，需要已批准的决策文件。",
+      "critical_without_market_evidence": "关键项需要来自市场的交货周期，不能使用目录默认值或估算值。",
+      "critical_without_strategic_spares": "关键项需要配备战略备件，或说明不需要的理由。",
+      "decision_paper_needs_two_options": "除非为唯一来源，决策文件至少需要两个方案。",
+      "decision_route_refused": "审批流程未通过此步骤。",
+      "delivery_limit_gap": "并非每个交付步骤都指定了责任方。",
+      "edit_permission_required": "您没有修改设备登记册的权限。",
+      "enquiry_date_in_future": "询价日期不能晚于今天。",
+      "fee_needs_currency": "预订费需要指定币种。",
+      "fee_negative": "预订费不能为负数。",
+      "handover_needs_commissioned": "只有已调试的设备才能移交。",
+      "handover_needs_confirmation": "移交必须经过确认。",
+      "handover_needs_service_asset": "请填写该资产的服务合同名称，或说明为何移交时没有服务合同。",
+      "invalid_transition": "当前状态不允许进行此状态变更。",
+      "it_cde_not_linked": "CDE访问需要关联一个CDE容器。",
+      "it_service_not_found": "未找到IT服务。",
+      "it_service_range_invalid": "服务结束时间早于开始时间。",
+      "it_service_retired": "已停用的IT服务无法修改。",
+      "item_already_ordered": "该设备项已下单。",
+      "item_closed": "该设备项已移交或已取消。",
+      "item_code_taken": "本项目中已存在相同编码的设备项。",
+      "item_not_found": "未找到设备项。",
+      "item_required": "请选择设备项。",
+      "laydown_zone_not_found": "本项目中不存在该堆放区。",
+      "lead_time_owned_by_plant_item": "该送审的交货周期保存在其所属设备项上。",
+      "lead_time_stale": "基准交货周期报价已超过该类别允许的有效期。",
+      "lead_time_without_enquiry_date": "交货周期需要注明询价日期。",
+      "lead_weeks_range_invalid": "交货周期最小值不得超过最大值。",
+      "limit_needs_party": "交付步骤需要指定责任方或工程包。",
+      "link_not_found": "所关联的记录不属于本项目。",
+      "long_lead_override_needs_reason": "修改长周期分类需要说明原因。",
+      "manage_required": "只有具备设备管理权限的人员才能进行此修改。",
+      "neutral_spec_names_vendor": "技术规格为中立规格，但指定了供应商。",
+      "no_decision_route": "本项目未设定决策文件的审批流程。",
+      "not_equipment_owner": "只有经理或设备区域负责人才能修改设备登记册。",
+      "null_not_allowed": "该字段不能为空。",
+      "package_not_found": "该合同工程包不在本项目的工程包计划之内。",
+      "package_plan_failed": "无法读取交付模式，请重试或联系管理员。",
+      "package_plan_unavailable": "无法读取项目的工程包计划，因此无法检查采购路径。",
+      "paper_needs_rationale": "决策文件需要填写理由。",
+      "paper_needs_recommendation": "决策文件需要填写推荐意见。",
+      "paper_not_draft": "只有草稿状态的文件才能修改或提交。",
+      "paper_not_found": "未找到决策文件。",
+      "paper_not_submitted": "只有已提交的文件才能撤回。",
+      "paper_open": "该设备项已有未完成的决策文件。",
+      "paper_option_codes_invalid": "每个方案都需要唯一的编码。",
+      "paper_recommendation_unknown": "推荐意见必须指向其中一个方案。",
+      "paper_scores_invalid": "评分和权重必须为十进制数字。",
+      "paper_submitter_is_approver": "提交文件的人员不能同时是该审批流程的审批人。",
+      "position_date_invalid": "这不是有效日期。",
+      "position_incomplete": "设备位置需要填写类型及其在现场平面图上的位置点。",
+      "position_not_found": "本项目中不存在该设备位置。",
+      "position_number_invalid": "该数值无法保存，请检查小数位数和数值大小。",
+      "position_range_invalid": "位置的结束时间早于开始时间。",
+      "position_text_invalid": "该文本为空或过长。",
+      "quantity_not_positive": "数量必须大于零。",
+      "quote_not_found": "未找到交货周期报价。",
+      "response_before_enquiry": "答复日期不能早于询价日期。",
+      "route_frozen": "设备下单后，采购路径不得更改。",
+      "route_inconsistent_with_package_plan": "采购路径与工程包计划不一致。",
+      "route_missing": "尚未设定采购路径。",
+      "slot_closed": "该预留已关闭。",
+      "slot_exists": "该设备项已有未关闭的产能预留。",
+      "slot_fee_needs_commitment": "预订费只能通过承诺释放来绑定资金，请关联承诺条目。",
+      "slot_not_found": "未找到产能预留。",
+      "slot_range_invalid": "时段的结束时间早于开始时间。",
+      "slot_terms_incomplete": "已持有的预留需要填写费用、退款条款和转换截止日期。",
+      "spare_closed": "该备件行已关闭。",
+      "spare_not_deletable": "只有仍处于需求状态的备件行才能删除。",
+      "spare_not_found": "未找到备件行。",
+      "spares_not_handed_over": "所有备件必须先移交或豁免。",
+      "specification_frozen": "设定采购路径后，技术规格即被锁定。",
+      "stage_not_found": "本项目中不存在该扩建阶段。",
+      "stage_unavailable": "无法读取扩建阶段，因此无法将设备位置分配到某一阶段。",
+      "state_read_from_source": "该状态由订单、业主供货设备或调试结果决定，不能手动设置。",
+      "transition_blocked": "该状态变更受到多项规则限制。",
+      "two_parties_on_one_step": "一个交付步骤只能指定一个责任方。",
+      "unknown_catalogue": "未知的设备目录。",
+      "unknown_component_class": "未知的部件类别。",
+      "unknown_fee_refundable": "退款条款必须为无、部分或全额。",
+      "unknown_it_service_kind": "未知的IT服务。",
+      "unknown_lead_basis": "未知的交货周期依据。",
+      "unknown_lead_time_source": "未知的交货周期来源。",
+      "unknown_maintenance_strategy": "未知的维护策略。",
+      "unknown_party": "未知的责任方。",
+      "unknown_redundancy_scheme": "未知的冗余方案。",
+      "unknown_route": "未知的采购路径。",
+      "unknown_site_plant_kind": "项目设备目录中没有这一类现场设备。",
+      "unknown_spare_category": "未知的备件类别。",
+      "unknown_step": "未知的交付步骤。",
+      "unknown_vendor_bound_reason": "原因必须为标准化、现有资产、质保或唯一来源。",
+      "unknown_vendor_policy": "供应商政策必须为中立或指定。",
+      "vendor_bound_needs_reason": "指定供应商的技术规格需要说明原因。",
+      "waiver_needs_reason": "豁免备件需要说明原因。"
+    },
+    "evidence": {
+      "critical_route_set": "每个关键项均已设定采购路径，并附有已批准的决策文件",
+      "frame_document_attached": "设备框架文件已附加到CDE",
+      "frame_document_missing": "项目尚无设备框架文件，因此无法检查其附加情况",
+      "host_unresolved": "治理模型未说明设备登记册向哪个区域和关口汇报",
+      "long_lead_secured": "每个长周期项均有有效的基准报价，并已下单或处于下单期限之内",
+      "no_area_hosts_plant": "阶段模型中没有任何区域承载设备，因此设备登记册无法向关口汇报",
+      "no_error_findings": "设备登记册中没有错误级别的问题",
+      "no_phase_enables_construction_start": "阶段模型中没有能够启动施工的阶段，因此设备登记册没有可汇报的关口"
+    },
+    "export": {
+      "catalogue": "目录",
+      "col_category": "类别",
+      "col_class": "类别",
+      "col_code": "设备项",
+      "col_cost": "成本",
+      "col_critical": "关键项",
+      "col_description": "描述",
+      "col_enquiry_date": "询价日期",
+      "col_float": "浮动时差（天）",
+      "col_from": "起",
+      "col_latest_order": "最晚下单日期",
+      "col_lead_source": "交货周期来源",
+      "col_lead_weeks": "交货周期（周）",
+      "col_need_date": "需用日期",
+      "col_option": "方案",
+      "col_quantity": "数量",
+      "col_recommended": "推荐",
+      "col_route": "采购路径",
+      "col_score": "加权得分",
+      "col_section": "章节",
+      "col_state": "状态",
+      "col_supply_by": "供货方",
+      "col_title": "标题",
+      "col_to": "止",
+      "col_unit": "单位",
+      "critical_count": "关键项数量",
+      "empty": "暂无条目。",
+      "frame_title": "设备框架汇总",
+      "item_count": "设备项数量",
+      "limits_title": "交付界限矩阵",
+      "long_lead_count": "长周期项数量",
+      "overdue_count": "逾期订单",
+      "paper_title": "决策文件",
+      "project": "项目",
+      "question": "问题",
+      "rationale": "理由",
+      "register_title": "长周期设备登记册",
+      "section_it": "IT服务",
+      "section_long_lead": "长周期设备项",
+      "section_site_plant": "现场设备",
+      "spares_title": "备件清单",
+      "yes": "是"
+    },
+    "paper_state": {
+      "approved": "已批准",
+      "draft": "草稿",
+      "rejected": "已驳回",
+      "submitted": "已提交"
+    },
+    "reasons": {
+      "currency": "预订费未指定币种",
+      "installer_mismatch": "业主供货设备指定的安装工程包不一致",
+      "owner_furnished_item_required": "业主供货路径需要对应的业主供货设备项",
+      "owner_installs": "由业主安装，因此不得指定任何合同工程包为安装方",
+      "package_does_not_supply": "该合同工程包不供应设备",
+      "package_not_in_plan": "该合同工程包不在工程包计划之内",
+      "package_required": "该路径需要指定合同工程包",
+      "single_package_form": "交付形式只有一个合同工程包，而该设备项属于另一个工程包"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "关键项 {item} 没有已批准的决策文件。",
+        "suggestion": "编制方案文件并提交审批。"
+      },
+      "critical_has_market_evidence": {
+        "fail": "关键项 {item} 依赖目录默认值或估算值。",
+        "suggestion": "获取供应商报价、框架协议或历史订单。"
+      },
+      "critical_has_strategic_spares": {
+        "fail": "关键项 {item} 没有战略备件。",
+        "suggestion": "增加战略备件，或说明无需配备的理由。"
+      },
+      "delivery_limits_complete": {
+        "fail": "{item} 的交付界限中，以下步骤没有责任方：{steps}。",
+        "suggestion": "为每个交付步骤指定责任方。"
+      },
+      "it_cde_linked": {
+        "fail": "执行关口前需要CDE访问，但尚未关联CDE容器。",
+        "suggestion": "关联各方将要使用的CDE容器。"
+      },
+      "lead_time_fresh": {
+        "fail": "{item} 的基准交货周期已过期。",
+        "suggestion": "再次向供应商询价，并记录新的答复。"
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "长周期项 {item} 没有带询价日期的交货周期报价。",
+        "suggestion": "记录带日期的报价：何时询价、由谁答复。"
+      },
+      "order_not_overdue": {
+        "fail": "{item} 必须在 {date} 前下单。",
+        "suggestion": "立即下单，或与进度计划负责人协商调整需用日期。"
+      },
+      "redundancy_quantity": {
+        "fail": "{item} 的数量与其冗余方案不符。",
+        "suggestion": "对照方案检查数量（N+1 至少需要两台）。"
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "{item} 的采购路径与工程包计划不符：{reason}。",
+        "suggestion": "使采购路径与合同工程包及业主供货设备保持一致。"
+      },
+      "single_basis_quote": {
+        "fail": "{item} 的基准报价不是唯一的。",
+        "suggestion": "将一份报价标记为基准报价。"
+      },
+      "slot_after_order_date": {
+        "fail": "{item} 的产能预留超出了最晚下单日期。",
+        "suggestion": "提前签订订单，或协商更早的时段。"
+      },
+      "slot_not_expired": {
+        "fail": "{item} 的产能预留已超过转换截止日期。",
+        "suggestion": "将其转为订单，或予以释放。"
+      },
+      "slot_terms_complete": {
+        "fail": "{item} 的产能预留条款不完整。",
+        "suggestion": "记录费用、退款条款、转换截止日期及承诺关联信息。"
+      },
+      "vendor_bound_has_reason": {
+        "fail": "{item} 的供应商政策不一致。",
+        "suggestion": "指定供应商的规格需要说明原因；中立规格不指定任何供应商。"
+      }
+    },
+    "spare_state": {
+      "delivered": "已交付",
+      "handed_over": "已移交",
+      "required": "需要",
+      "specified": "已规定",
+      "waived": "已豁免"
+    },
+    "state": {
+      "cancelled": "已取消",
+      "commissioned": "已调试",
+      "delivered": "已交付",
+      "enquired": "已询价",
+      "handed_over": "已移交",
+      "identified": "已识别",
+      "installed": "已安装",
+      "manufactured": "已制造",
+      "ordered": "已下单",
+      "route_set": "已设定路径",
+      "specified": "已规定"
+    }
+  }
+}

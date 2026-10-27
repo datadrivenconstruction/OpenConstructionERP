@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Centrala wentylacyjna",
+        "battery_storage": "Magazyn energii bateryjnej",
+        "bms_controls": "Automatyka budynkowa",
+        "boiler": "Kocioł",
+        "chiller": "Agregat wody lodowej",
+        "cooling_tower": "Wieża chłodnicza",
+        "crane_permanent": "Suwnica stała",
+        "distribution_transformer": "Transformator rozdzielczy",
+        "escalator": "Schody ruchome",
+        "facade_unit": "Elementy elewacji",
+        "generator": "Agregat prądotwórczy",
+        "heat_pump": "Pompa ciepła",
+        "it_core_network": "Główna sieć IT",
+        "kitchen_equipment": "Wyposażenie kuchni",
+        "lift": "Dźwig osobowy",
+        "lv_switchboard": "Rozdzielnica niskiego napięcia",
+        "medical_equipment": "Sprzęt medyczny",
+        "mv_switchgear": "Rozdzielnica średniego napięcia",
+        "power_transformer": "Transformator mocy",
+        "process_unit": "Instalacja procesowa",
+        "sprinkler_pump": "Zespół pompowy sprinklerowy",
+        "structural_steel_package": "Pakiet konstrukcji stalowej",
+        "ups": "Zasilacz bezprzerwowy"
+      },
+      "it_service": {
+        "access_control": "Kontrola dostępu",
+        "cctv": "Monitoring wizyjny",
+        "cde_access": "Dostęp do CDE",
+        "drone_survey": "Pomiar dronem",
+        "site_network": "Sieć na budowie",
+        "telecom": "Telekomunikacja",
+        "time_recording": "Ewidencja czasu pracy"
+      },
+      "maintenance": {
+        "condition_based": "Według stanu technicznego",
+        "preventive_interval": "Prewencyjna, według interwałów",
+        "run_to_failure": "Eksploatacja do awarii",
+        "vendor_service_contract": "Umowa serwisowa z dostawcą"
+      },
+      "name": "Neutralny katalog instalacji",
+      "party": {
+        "contractor": "Wykonawca",
+        "installer": "Montażysta",
+        "operator": "Operator",
+        "owner": "Inwestor",
+        "supplier": "Dostawca",
+        "user": "Użytkownik"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Dwa w pełni niezależne układy",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Dwa niezależne układy plus jedna jednostka rezerwowa",
+        "n": "N",
+        "n_desc": "Dokładnie wymagana wydajność, bez jednostki rezerwowej",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Jedna jednostka rezerwowa ponad wymaganą wydajność",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Dwie jednostki rezerwowe ponad wymaganą wydajność"
+      },
+      "route": {
+        "contractor_furnished_installed": "Dostarczone i zamontowane przez wykonawcę",
+        "owner_furnished_contractor_installed": "Dostarczone przez inwestora, zamontowane przez wykonawcę",
+        "owner_furnished_owner_installed": "Dostarczone i zamontowane przez inwestora",
+        "owner_procured_novated": "Zakupione przez inwestora, zamówienie przekazane wykonawcy"
+      },
+      "site_plant": {
+        "concrete_plant": "Węzeł betoniarski",
+        "hoist": "Wciągarka budowlana",
+        "mobile_crane_pad": "Podest pod dźwig samojezdny",
+        "site_office": "Biuro budowy",
+        "storage": "Magazyn",
+        "temporary_power": "Zasilanie tymczasowe",
+        "temporary_water": "Woda tymczasowa",
+        "tower_crane": "Dźwig wieżowy",
+        "welfare": "Zaplecze socjalne",
+        "wheel_wash": "Myjnia kół"
+      },
+      "source": {
+        "catalogue_default": "Wartość katalogowa",
+        "expert_estimate": "Szacunek eksperta",
+        "framework_agreement": "Umowa ramowa",
+        "historic_order": "Zamówienie historyczne",
+        "market_sounding": "Rozeznanie rynku",
+        "none": "Brak czasu dostawy",
+        "supplier_catalogue": "Katalog dostawcy",
+        "supplier_quote": "Oferta dostawcy"
+      },
+      "spare": {
+        "commissioning_spares": "Części do rozruchu",
+        "operating_consumables": "Materiały eksploatacyjne",
+        "special_tools": "Narzędzia specjalistyczne",
+        "strategic_spares": "Części strategiczne"
+      },
+      "step": {
+        "accept": "Odbiór",
+        "commission": "Rozruch",
+        "connect": "Podłączenie",
+        "deliver_to_site": "Dostawa na budowę",
+        "document": "Dokumentacja",
+        "offload": "Rozładunek",
+        "set_in_place": "Ustawienie na miejscu",
+        "supply": "Dostawa",
+        "test": "Badania",
+        "train": "Szkolenie"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Wymagana jest oferta bazowa z czasem dostawy.",
+      "catalogue_entry_required": "Czas dostawy z katalogu dostawcy wymaga pozycji katalogowej.",
+      "catalogue_lead_mismatch": "Czas dostawy nie zgadza się z wskazaną pozycją katalogu dostawcy.",
+      "catalogue_retired": "Ten katalog został wycofany i nie może być przypisany.",
+      "classification_frozen": "Po ustaleniu ścieżki zakupu nie można zmieniać nadpisań krytyczności i długiego czasu dostawy.",
+      "commitment_currency_mismatch": "Opłata rezerwacyjna i zwolnione zobowiązanie są w różnych walutach.",
+      "commitment_for_other_item": "Powiązana pozycja zobowiązania należy do innej pozycji instalacji.",
+      "commitment_not_found": "Powiązana pozycja zobowiązania nie należy do tego projektu.",
+      "commitment_not_released": "Powiązana pozycja zobowiązania nie została jeszcze zwolniona.",
+      "commitment_release_below_fee": "Zwolniona kwota jest niższa niż opłata rezerwacyjna.",
+      "commitment_release_failed": "Nie udało się odczytać zwolnienia zobowiązania; spróbuj ponownie lub skontaktuj się z administratorem.",
+      "commitment_release_unavailable": "Zwolnienie zobowiązania nie może zostać odczytane, dlatego nie można powiązać opłaty rezerwacyjnej.",
+      "concurrent_basis_change": "Inny użytkownik zmienił ofertę bazową w tym samym czasie; odśwież stronę i spróbuj ponownie.",
+      "cost_needs_currency": "Koszt opcji wymaga podania waluty.",
+      "critical_override_needs_reason": "Zmiana krytyczności wymaga podania powodu.",
+      "critical_without_decision": "Pozycja krytyczna wymaga zatwierdzonego opracowania decyzyjnego, zanim zostanie ustalona ścieżka zakupu.",
+      "critical_without_market_evidence": "Pozycja krytyczna wymaga czasu dostawy z rynku, a nie wartości katalogowej ani szacunku.",
+      "critical_without_strategic_spares": "Pozycja krytyczna wymaga części strategicznej lub uzasadnienia, dlaczego jej nie ma.",
+      "decision_paper_needs_two_options": "Opracowanie decyzyjne wymaga co najmniej dwóch opcji, chyba że pozycja ma jedno źródło.",
+      "decision_route_refused": "Ścieżka zatwierdzania odrzuciła ten krok.",
+      "delivery_limit_gap": "Nie każdy krok dostawy ma wskazaną odpowiedzialną stronę.",
+      "edit_permission_required": "Nie masz uprawnień do zmiany rejestru instalacji.",
+      "enquiry_date_in_future": "Data zapytania nie może być w przyszłości.",
+      "fee_needs_currency": "Opłata rezerwacyjna wymaga podania waluty.",
+      "fee_negative": "Opłata rezerwacyjna nie może być ujemna.",
+      "handover_needs_commissioned": "Przekazać można tylko pozycję po rozruchu.",
+      "handover_needs_confirmation": "Przekazanie wymaga potwierdzenia.",
+      "handover_needs_service_asset": "Podaj umowę serwisową dla obiektu albo uzasadnij, dlaczego pozycja jest przekazywana bez niej.",
+      "invalid_transition": "Ta zmiana stanu nie jest możliwa z obecnego stanu.",
+      "it_cde_not_linked": "Dostęp do CDE wymaga powiązanego kontenera CDE.",
+      "it_service_not_found": "Nie znaleziono usługi IT.",
+      "it_service_range_invalid": "Usługa kończy się wcześniej, niż się zaczyna.",
+      "it_service_retired": "Wycofanej usługi IT nie można zmieniać.",
+      "item_already_ordered": "Pozycja jest już zamówiona.",
+      "item_closed": "Pozycja jest przekazana lub anulowana.",
+      "item_code_taken": "Pozycja o tym kodzie już istnieje w projekcie.",
+      "item_not_found": "Nie znaleziono pozycji instalacji.",
+      "item_required": "Wybierz pozycję.",
+      "laydown_zone_not_found": "Ta strefa składowania nie istnieje w tym projekcie.",
+      "lead_time_owned_by_plant_item": "Czas dostawy tej dokumentacji jest przechowywany przy pozycji instalacji.",
+      "lead_time_stale": "Oferta bazowa z czasem dostawy jest starsza, niż dopuszcza klasa.",
+      "lead_time_without_enquiry_date": "Czas dostawy wymaga daty, w której zapytano o niego.",
+      "lead_weeks_range_invalid": "Minimalny czas dostawy nie może przekraczać maksymalnego.",
+      "limit_needs_party": "Krok dostawy wymaga strony lub pakietu.",
+      "link_not_found": "Powiązany rekord nie należy do tego projektu.",
+      "long_lead_override_needs_reason": "Zmiana klasyfikacji długiego czasu dostawy wymaga podania powodu.",
+      "manage_required": "Tylko osoba z uprawnieniem do zarządzania instalacjami może to zmienić.",
+      "neutral_spec_names_vendor": "Specyfikacja ma być neutralna względem producenta, ale wskazuje producenta.",
+      "no_decision_route": "Projekt nie ma ścieżki zatwierdzania opracowań decyzyjnych.",
+      "not_equipment_owner": "Tylko kierownik lub właściciel obszaru wyposażenia może zmieniać rejestr instalacji.",
+      "null_not_allowed": "To pole nie może być puste.",
+      "package_not_found": "Pakiet kontraktowy nie należy do planu pakietów tego projektu.",
+      "package_plan_failed": "Nie udało się odczytać modelu dostaw; spróbuj ponownie lub skontaktuj się z administratorem.",
+      "package_plan_unavailable": "Plan pakietów projektu nie może zostać odczytany, dlatego nie można sprawdzić ścieżki.",
+      "paper_needs_rationale": "Opracowanie wymaga uzasadnienia.",
+      "paper_needs_recommendation": "Opracowanie wymaga rekomendacji.",
+      "paper_not_draft": "Zmienić lub przesłać można tylko roboczą wersję opracowania.",
+      "paper_not_found": "Nie znaleziono opracowania decyzyjnego.",
+      "paper_not_submitted": "Wycofać można tylko przesłane opracowanie.",
+      "paper_open": "Pozycja ma już otwarte opracowanie decyzyjne.",
+      "paper_option_codes_invalid": "Każda opcja wymaga unikalnego kodu.",
+      "paper_recommendation_unknown": "Rekomendacja musi wskazywać jedną z opcji.",
+      "paper_scores_invalid": "Oceny i wagi muszą być liczbami dziesiętnymi.",
+      "paper_submitter_is_approver": "Osoba przesyłająca opracowanie nie może być zatwierdzającym na jego ścieżce.",
+      "position_date_invalid": "To nie jest data.",
+      "position_incomplete": "Pozycja wymaga podania rodzaju i punktu na planie zagospodarowania.",
+      "position_not_found": "Ta pozycja instalacji nie istnieje w tym projekcie.",
+      "position_number_invalid": "Tej liczby nie można zapisać: sprawdź miejsca dziesiętne i wielkość.",
+      "position_range_invalid": "Pozycja kończy się wcześniej, niż się zaczyna.",
+      "position_text_invalid": "Tekst jest pusty lub zbyt długi.",
+      "quantity_not_positive": "Ilość musi być większa od zera.",
+      "quote_not_found": "Nie znaleziono oferty z czasem dostawy.",
+      "response_before_enquiry": "Data odpowiedzi nie może być wcześniejsza niż data zapytania.",
+      "route_frozen": "Ścieżka nie może się zmienić po zamówieniu pozycji.",
+      "route_inconsistent_with_package_plan": "Ścieżka zakupu nie zgadza się z planem pakietów.",
+      "route_missing": "Nie ustalono ścieżki zakupu.",
+      "slot_closed": "Rezerwacja jest zamknięta.",
+      "slot_exists": "Pozycja ma już otwartą rezerwację mocy.",
+      "slot_fee_needs_commitment": "Opłata rezerwacyjna wiąże pieniądze tylko przez zwolnienie zobowiązania; powiąż pozycję zobowiązania.",
+      "slot_not_found": "Nie znaleziono rezerwacji mocy.",
+      "slot_range_invalid": "Slot kończy się wcześniej, niż się zaczyna.",
+      "slot_terms_incomplete": "Wstrzymana rezerwacja wymaga opłaty, warunków zwrotu i terminu konwersji.",
+      "spare_closed": "Pozycja części zamiennych jest zamknięta.",
+      "spare_not_deletable": "Usunąć można tylko pozycję części, która nadal jest wymagana.",
+      "spare_not_found": "Nie znaleziono pozycji części zamiennych.",
+      "spares_not_handed_over": "Każda część zamienna musi najpierw zostać przekazana lub zwolniona z wymogu.",
+      "specification_frozen": "Specyfikacja jest zablokowana po ustaleniu ścieżki zakupu.",
+      "stage_not_found": "Ten etap rozbudowy nie istnieje w tym projekcie.",
+      "stage_unavailable": "Etapów rozbudowy nie można odczytać, dlatego nie można przypisać do nich pozycji.",
+      "state_read_from_source": "Ten stan wynika ze zamówienia, pozycji dostarczonej przez inwestora lub rozruchu, nie jest ustawiany ręcznie.",
+      "transition_blocked": "Zmianę stanu blokuje kilka reguł.",
+      "two_parties_on_one_step": "Krok dostawy może mieć tylko jedną stronę.",
+      "unknown_catalogue": "Nieznany katalog instalacji.",
+      "unknown_component_class": "Nieznana klasa komponentu.",
+      "unknown_fee_refundable": "Warunki zwrotu muszą być: brak, częściowy lub pełny.",
+      "unknown_it_service_kind": "Nieznana usługa IT.",
+      "unknown_lead_basis": "Nieznana podstawa czasu dostawy.",
+      "unknown_lead_time_source": "Nieznane źródło czasu dostawy.",
+      "unknown_maintenance_strategy": "Nieznana strategia utrzymania ruchu.",
+      "unknown_party": "Nieznana strona.",
+      "unknown_redundancy_scheme": "Nieznany schemat rezerwowania.",
+      "unknown_route": "Nieznana ścieżka zakupu.",
+      "unknown_site_plant_kind": "Tego rodzaju urządzenie placowe nie figuruje w katalogu instalacji projektu.",
+      "unknown_spare_category": "Nieznana kategoria części zamiennych.",
+      "unknown_step": "Nieznany krok dostawy.",
+      "unknown_vendor_bound_reason": "Powodem musi być standaryzacja, istniejący park maszynowy, gwarancja lub jedno źródło.",
+      "unknown_vendor_policy": "Polityka producenta musi być neutralna lub wiązana.",
+      "vendor_bound_needs_reason": "Specyfikacja wiązana z producentem wymaga podania powodu.",
+      "waiver_needs_reason": "Zwolnienie części zamiennej z wymogu wymaga podania powodu."
+    },
+    "evidence": {
+      "critical_route_set": "Każda pozycja krytyczna ma ustaloną ścieżkę zakupu z zatwierdzonym opracowaniem decyzyjnym",
+      "frame_document_attached": "Dokument ramowy wyposażenia dołączony do CDE",
+      "frame_document_missing": "Projekt nie ma jeszcze dokumentu ramowego wyposażenia, więc nie można sprawdzić jego załączenia",
+      "host_unresolved": "Model zarządzania nie wskazuje, do którego obszaru i etapu rejestr instalacji raportuje",
+      "long_lead_secured": "Każda pozycja o długim czasie dostawy ma aktualną ofertę bazową i jest zamówiona lub mieści się w terminie zamówienia",
+      "no_area_hosts_plant": "Model faz nie wskazuje obszaru, w którym znajdują się instalacje, więc rejestr nie może raportować do bramki",
+      "no_error_findings": "Brak ustaleń na poziomie błędu w rejestrze instalacji",
+      "no_phase_enables_construction_start": "Model faz nie wskazuje fazy, która otwiera rozpoczęcie budowy, więc rejestr instalacji nie ma bramki do raportowania"
+    },
+    "export": {
+      "catalogue": "Katalog",
+      "col_category": "Kategoria",
+      "col_class": "Klasa",
+      "col_code": "Pozycja",
+      "col_cost": "Koszt",
+      "col_critical": "Krytyczna",
+      "col_description": "Opis",
+      "col_enquiry_date": "Data zapytania",
+      "col_float": "Zapas (dni)",
+      "col_from": "Od",
+      "col_latest_order": "Ostatni termin zamówienia",
+      "col_lead_source": "Źródło czasu dostawy",
+      "col_lead_weeks": "Dostawa (tyg.)",
+      "col_need_date": "Termin potrzeby",
+      "col_option": "Opcja",
+      "col_quantity": "Ilość",
+      "col_recommended": "Rekomendowana",
+      "col_route": "Ścieżka",
+      "col_score": "Ocena ważona",
+      "col_section": "Sekcja",
+      "col_state": "Stan",
+      "col_supply_by": "Dostarcza",
+      "col_title": "Tytuł",
+      "col_to": "Do",
+      "col_unit": "Jednostka",
+      "critical_count": "Pozycje krytyczne",
+      "empty": "Brak wpisów.",
+      "frame_title": "Podsumowanie wyposażenia ramowego",
+      "item_count": "Pozycje",
+      "limits_title": "Macierz granic dostaw",
+      "long_lead_count": "Pozycje o długim czasie dostawy",
+      "overdue_count": "Zamówienia po terminie",
+      "paper_title": "Opracowanie decyzyjne",
+      "project": "Projekt",
+      "question": "Pytanie",
+      "rationale": "Uzasadnienie",
+      "register_title": "Rejestr pozycji o długim czasie dostawy",
+      "section_it": "Usługa IT",
+      "section_long_lead": "Pozycja o długim czasie dostawy",
+      "section_site_plant": "Urządzenie placowe",
+      "spares_title": "Lista części zamiennych",
+      "yes": "tak"
+    },
+    "paper_state": {
+      "approved": "Zatwierdzone",
+      "draft": "Wersja robocza",
+      "rejected": "Odrzucone",
+      "submitted": "Przesłane"
+    },
+    "reasons": {
+      "currency": "opłata rezerwacyjna nie ma waluty",
+      "installer_mismatch": "pozycja dostarczana przez inwestora wskazuje inny pakiet montażowy",
+      "owner_furnished_item_required": "ścieżka dostawy przez inwestora wymaga pozycji dostarczanej przez inwestora",
+      "owner_installs": "montaż wykonuje inwestor, więc żaden pakiet kontraktowy nie może być wskazany jako montażysta",
+      "package_does_not_supply": "pakiet kontraktowy nie dostarcza instalacji",
+      "package_not_in_plan": "pakiet kontraktowy nie znajduje się w planie pakietów",
+      "package_required": "ta ścieżka wymaga pakietu kontraktowego",
+      "single_package_form": "forma dostawy obejmuje jeden pakiet kontraktowy, a pozycja należy do innego"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Pozycja krytyczna {item} nie ma zatwierdzonego opracowania decyzyjnego.",
+        "suggestion": "Przygotuj opracowanie opcji i prześlij je do zatwierdzenia."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Pozycja krytyczna {item} opiera się na wartości katalogowej lub szacunku.",
+        "suggestion": "Uzyskaj ofertę dostawcy, umowę ramową lub historyczne zamówienie."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Pozycja krytyczna {item} nie ma części strategicznej.",
+        "suggestion": "Dodaj część strategiczną lub podaj, dlaczego nie jest potrzebna."
+      },
+      "delivery_limits_complete": {
+        "fail": "Granice dostaw pozycji {item} nie mają strony dla: {steps}.",
+        "suggestion": "Przypisz stronę do każdego kroku dostawy."
+      },
+      "it_cde_linked": {
+        "fail": "Dostęp do CDE jest wymagany przed bramką realizacji, a nie ma kontenera CDE.",
+        "suggestion": "Powiąż kontener CDE, w którym będą pracować strony."
+      },
+      "lead_time_fresh": {
+        "fail": "Podstawowy czas dostawy pozycji {item} jest nieaktualny.",
+        "suggestion": "Zapytaj dostawcę ponownie i zapisz nową odpowiedź."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Pozycja o długim czasie dostawy {item} nie ma oferty z datą zapytania.",
+        "suggestion": "Zapisz datowaną ofertę: kiedy pytano i kto odpowiedział."
+      },
+      "order_not_overdue": {
+        "fail": "Pozycję {item} trzeba zamówić do {date}.",
+        "suggestion": "Zamów od razu lub przesuń termin potrzeby razem z właścicielem harmonogramu."
+      },
+      "redundancy_quantity": {
+        "fail": "Ilość pozycji {item} nie pasuje do jej schematu rezerwowania.",
+        "suggestion": "Sprawdź ilość względem schematu (N+1 wymaga co najmniej dwóch jednostek)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Ścieżka zakupu pozycji {item} nie zgadza się z planem pakietów: {reason}.",
+        "suggestion": "Uzgodnij ścieżkę z pakietami kontraktowymi i pozycjami dostarczanymi przez inwestora."
+      },
+      "single_basis_quote": {
+        "fail": "Pozycja {item} nie ma dokładnie jednej oferty bazowej.",
+        "suggestion": "Oznacz jedną ofertę jako bazową."
+      },
+      "slot_after_order_date": {
+        "fail": "Rezerwacja mocy dla {item} wykracza poza ostatni termin zamówienia.",
+        "suggestion": "Podpisz zamówienie wcześniej lub wynegocjuj wcześniejszy termin."
+      },
+      "slot_not_expired": {
+        "fail": "Rezerwacja mocy dla {item} przekroczyła termin konwersji.",
+        "suggestion": "Zamień ją na zamówienie albo ją zwolnij."
+      },
+      "slot_terms_complete": {
+        "fail": "Warunki rezerwacji mocy dla {item} są niekompletne.",
+        "suggestion": "Zapisz opłatę, warunki zwrotu, termin konwersji i powiązanie z zobowiązaniem."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Polityka producenta dla {item} jest niespójna.",
+        "suggestion": "Specyfikacja wiązana wymaga powodu; neutralna nie wskazuje producenta."
+      }
+    },
+    "spare_state": {
+      "delivered": "Dostarczona",
+      "handed_over": "Przekazana",
+      "required": "Wymagana",
+      "specified": "Określona",
+      "waived": "Zwolniona z wymogu"
+    },
+    "state": {
+      "cancelled": "Anulowana",
+      "commissioned": "Uruchomiona",
+      "delivered": "Dostarczona",
+      "enquired": "Zapytano",
+      "handed_over": "Przekazana",
+      "identified": "Zidentyfikowana",
+      "installed": "Zamontowana",
+      "manufactured": "Wyprodukowana",
+      "ordered": "Zamówiona",
+      "route_set": "Ścieżka ustalona",
+      "specified": "Określona"
+    }
+  }
+}

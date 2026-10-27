@@ -1,0 +1,379 @@
+{
+  "plant": {
+    "catalogue": {
+      "class": {
+        "ahu": "Air handling unit",
+        "battery_storage": "Imbakan ng baterya",
+        "bms_controls": "Building automation",
+        "boiler": "Boiler",
+        "chiller": "Chiller",
+        "cooling_tower": "Cooling tower",
+        "crane_permanent": "Permanenteng crane",
+        "distribution_transformer": "Distribution transformer",
+        "escalator": "Escalator",
+        "facade_unit": "Mga yunit ng facade",
+        "generator": "Generator set",
+        "heat_pump": "Heat pump",
+        "it_core_network": "Pangunahing IT network",
+        "kitchen_equipment": "Kagamitan sa kusina",
+        "lift": "Elevator",
+        "lv_switchboard": "Low voltage switchboard",
+        "medical_equipment": "Kagamitang medikal",
+        "mv_switchgear": "Medium voltage switchgear",
+        "power_transformer": "Power transformer",
+        "process_unit": "Yunit ng proseso",
+        "sprinkler_pump": "Sprinkler pump set",
+        "structural_steel_package": "Pakete ng structural steel",
+        "ups": "Uninterruptible power supply"
+      },
+      "it_service": {
+        "access_control": "Access control",
+        "cctv": "CCTV",
+        "cde_access": "Access sa CDE",
+        "drone_survey": "Drone survey",
+        "site_network": "Network ng site",
+        "telecom": "Telecom",
+        "time_recording": "Pagtatala ng oras"
+      },
+      "maintenance": {
+        "condition_based": "Batay sa kondisyon",
+        "preventive_interval": "Preventive, ayon sa interval",
+        "run_to_failure": "Takbo hanggang masira",
+        "vendor_service_contract": "Kontrata ng serbisyo ng vendor"
+      },
+      "name": "Neutral na katalogo ng plant",
+      "party": {
+        "contractor": "Kontraktor",
+        "installer": "Installer",
+        "operator": "Operator",
+        "owner": "May-ari",
+        "supplier": "Supplier",
+        "user": "Gumagamit"
+      },
+      "redundancy": {
+        "2n": "2N",
+        "2n_desc": "Dalawang ganap na independiyenteng sistema",
+        "2n_plus_1": "2N+1",
+        "2n_plus_1_desc": "Dalawang independiyenteng sistema at isang dagdag na yunit",
+        "n": "N",
+        "n_desc": "Eksaktong kapasidad na kailangan, walang dagdag na yunit",
+        "n_plus_1": "N+1",
+        "n_plus_1_desc": "Isang dagdag na yunit lampas sa kapasidad na kailangan",
+        "n_plus_2": "N+2",
+        "n_plus_2_desc": "Dalawang dagdag na yunit lampas sa kapasidad na kailangan"
+      },
+      "route": {
+        "contractor_furnished_installed": "Ibinigay at inilagay ng kontraktor",
+        "owner_furnished_contractor_installed": "Ibinigay ng may-ari, inilagay ng kontraktor",
+        "owner_furnished_owner_installed": "Ibinigay at inilagay ng may-ari",
+        "owner_procured_novated": "Binili ng may-ari, ipinasa ang order sa kontraktor"
+      },
+      "site_plant": {
+        "concrete_plant": "Concrete plant",
+        "hoist": "Hoist",
+        "mobile_crane_pad": "Pundasyon ng mobile crane",
+        "site_office": "Opisina sa site",
+        "storage": "Imbakan",
+        "temporary_power": "Pansamantalang kuryente",
+        "temporary_water": "Pansamantalang tubig",
+        "tower_crane": "Tower crane",
+        "welfare": "Mga pasilidad para sa manggagawa",
+        "wheel_wash": "Wheel wash"
+      },
+      "source": {
+        "catalogue_default": "Default ng katalogo",
+        "expert_estimate": "Estimate ng eksperto",
+        "framework_agreement": "Framework agreement",
+        "historic_order": "Dating order",
+        "market_sounding": "Market sounding",
+        "none": "Walang lead time",
+        "supplier_catalogue": "Katalogo ng supplier",
+        "supplier_quote": "Quote ng supplier"
+      },
+      "spare": {
+        "commissioning_spares": "Mga spare sa commissioning",
+        "operating_consumables": "Mga consumable sa operasyon",
+        "special_tools": "Espesyal na kasangkapan",
+        "strategic_spares": "Mga strategic spare"
+      },
+      "step": {
+        "accept": "Tanggapin",
+        "commission": "I-commission",
+        "connect": "Ikonekta",
+        "deliver_to_site": "Ihatid sa site",
+        "document": "Dokumentuhan",
+        "offload": "Ibaba",
+        "set_in_place": "Ilagay sa lugar",
+        "supply": "Ibigay",
+        "test": "Subukan",
+        "train": "Sanayin"
+      }
+    },
+    "common": {
+      "ok": "OK"
+    },
+    "errors": {
+      "basis_quote_required": "Kailangan ang basis quote para sa lead time.",
+      "catalogue_entry_required": "Ang lead time ng supplier catalogue ay nangangailangan ng entry sa katalogo.",
+      "catalogue_lead_mismatch": "Hindi tugma ang lead time sa supplier catalogue entry na binanggit.",
+      "catalogue_retired": "Retirado na ang katalogong ito at hindi na maaaring piliin.",
+      "classification_frozen": "Naka-freeze ang mga override ng kritikalidad at long-lead kapag naitakda na ang procurement route.",
+      "commitment_currency_mismatch": "Magkaiba ang currency ng reservation fee at ng inilabas na commitment.",
+      "commitment_for_other_item": "Ang naka-link na commitment item ay kabilang sa ibang plant item.",
+      "commitment_not_found": "Ang naka-link na commitment item ay hindi bahagi ng proyektong ito.",
+      "commitment_not_released": "Hindi pa nailalabas ang naka-link na commitment item.",
+      "commitment_release_below_fee": "Mas mababa ang inilabas na halaga kaysa sa reservation fee.",
+      "commitment_release_failed": "Hindi mabasa ang paglabas ng commitment. Subukan muli o makipag-ugnayan sa administrator.",
+      "commitment_release_unavailable": "Hindi mabasa ang paglabas ng commitment, kaya hindi maitatali ang reservation fee.",
+      "concurrent_basis_change": "May ibang user na nagbago ng basis quote nang sabay. I-reload at subukan muli.",
+      "cost_needs_currency": "Kailangan ng currency ang gastos ng isang opsyon.",
+      "critical_override_needs_reason": "Kailangan ng dahilan para i-override ang kritikalidad.",
+      "critical_without_decision": "Kailangan ng kritikal na item ng naaprubahang decision paper bago itakda ang route nito.",
+      "critical_without_market_evidence": "Kailangan ng kritikal na item ng lead time mula sa merkado, hindi default ng katalogo o estimate.",
+      "critical_without_strategic_spares": "Kailangan ng kritikal na item ng strategic spare o nakasaad na dahilan kung bakit wala.",
+      "decision_paper_needs_two_options": "Kailangan ng decision paper ng hindi bababa sa dalawang opsyon maliban kung sole source ang item.",
+      "decision_route_refused": "Tinanggihan ng approval route ang hakbang na ito.",
+      "delivery_limit_gap": "Hindi lahat ng delivery step ay may responsableng partido.",
+      "edit_permission_required": "Wala kang pahintulot na baguhin ang plant register.",
+      "enquiry_date_in_future": "Hindi maaaring nasa hinaharap ang petsa ng enquiry.",
+      "fee_needs_currency": "Kailangan ng currency ang reservation fee.",
+      "fee_negative": "Hindi maaaring negatibo ang reservation fee.",
+      "handover_needs_commissioned": "Ang na-commission na item lamang ang maaaring i-handover.",
+      "handover_needs_confirmation": "Kailangang kumpirmahin ang handover.",
+      "handover_needs_service_asset": "Pangalanan ang service contract ng asset, o sabihin kung bakit ina-handover ang item nang wala nito.",
+      "invalid_transition": "Hindi posible ang pagbabago ng estado mula sa kasalukuyang estado.",
+      "it_cde_not_linked": "Kailangan ng naka-link na CDE container ang CDE access.",
+      "it_service_not_found": "Hindi mahanap ang IT service.",
+      "it_service_range_invalid": "Natatapos ang serbisyo bago ito magsimula.",
+      "it_service_retired": "Hindi na maaaring baguhin ang retiradong IT service.",
+      "item_already_ordered": "Naka-order na ang item.",
+      "item_closed": "Na-handover o kinansela ang item.",
+      "item_code_taken": "May item na may ganitong code na sa proyekto.",
+      "item_not_found": "Hindi mahanap ang plant item.",
+      "item_required": "Pumili ng item.",
+      "laydown_zone_not_found": "Wala sa proyektong ito ang laydown zone na ito.",
+      "lead_time_owned_by_plant_item": "Nakalagay sa plant item nito ang lead time ng submittal na ito.",
+      "lead_time_stale": "Mas luma na ang basis lead time quote kaysa pinapayagan ng klase.",
+      "lead_time_without_enquiry_date": "Kailangan ng petsa ng enquiry ang lead time.",
+      "lead_weeks_range_invalid": "Hindi maaaring lumampas sa maximum ang minimum ng lead time.",
+      "limit_needs_party": "Kailangan ng partido o package ang delivery step.",
+      "link_not_found": "Wala sa proyektong ito ang naka-link na record.",
+      "long_lead_override_needs_reason": "Kailangan ng dahilan para i-override ang long-lead classification.",
+      "manage_required": "Ang may hawak lamang ng plant management permission ang maaaring magbago nito.",
+      "neutral_spec_names_vendor": "Vendor-neutral ang spec pero may binanggit na vendor.",
+      "no_decision_route": "Walang approval route para sa decision paper ang proyekto.",
+      "not_equipment_owner": "Ang manager o may-ari ng equipment area lamang ang maaaring magbago ng plant register.",
+      "null_not_allowed": "Hindi maaaring walang laman ang field na ito.",
+      "package_not_found": "Wala sa package plan ng proyektong ito ang contract package.",
+      "package_plan_failed": "Hindi mabasa ang delivery model. Subukan muli o makipag-ugnayan sa administrator.",
+      "package_plan_unavailable": "Hindi mabasa ang package plan ng proyekto, kaya hindi masuri ang route.",
+      "paper_needs_rationale": "Kailangan ng rationale ang paper.",
+      "paper_needs_recommendation": "Kailangan ng rekomendasyon ang paper.",
+      "paper_not_draft": "Draft na paper lamang ang maaaring baguhin o isumite.",
+      "paper_not_found": "Hindi mahanap ang decision paper.",
+      "paper_not_submitted": "Naisumiteng paper lamang ang maaaring bawiin.",
+      "paper_open": "May bukas nang decision paper ang item.",
+      "paper_option_codes_invalid": "Kailangan ng natatanging code ang bawat opsyon.",
+      "paper_recommendation_unknown": "Dapat pangalanan ng rekomendasyon ang isa sa mga opsyon.",
+      "paper_scores_invalid": "Dapat decimal number ang mga score at weight.",
+      "paper_submitter_is_approver": "Hindi maaaring maging approver ng route ang nagsumite ng paper.",
+      "position_date_invalid": "Hindi ito petsa.",
+      "position_incomplete": "Kailangan ng posisyon ang uri nito at ang punto nito sa site plan.",
+      "position_not_found": "Wala sa proyektong ito ang plant position na ito.",
+      "position_number_invalid": "Hindi maitatago ang numerong ito. Suriin ang decimal at laki.",
+      "position_range_invalid": "Natatapos ang posisyon bago ito magsimula.",
+      "position_text_invalid": "Walang laman o masyadong mahaba ang tekstong ito.",
+      "quantity_not_positive": "Dapat mas malaki sa zero ang dami.",
+      "quote_not_found": "Hindi mahanap ang lead time quote.",
+      "response_before_enquiry": "Hindi maaaring mauna ang petsa ng sagot sa petsa ng enquiry.",
+      "route_frozen": "Hindi maaaring magbago ang route kapag naka-order na ang item.",
+      "route_inconsistent_with_package_plan": "Hindi tugma ang procurement route sa package plan.",
+      "route_missing": "Walang nakatakdang procurement route.",
+      "slot_closed": "Sarado na ang reservation.",
+      "slot_exists": "May bukas nang capacity reservation ang item.",
+      "slot_fee_needs_commitment": "Nagbibigkis lamang ng pera ang reservation fee sa pamamagitan ng paglabas ng commitment. I-link ang commitment item.",
+      "slot_not_found": "Hindi mahanap ang capacity reservation.",
+      "slot_range_invalid": "Natatapos ang slot bago ito magsimula.",
+      "slot_terms_incomplete": "Kailangan ng fee, refund terms, at deadline ng conversion ang held reservation.",
+      "spare_closed": "Sarado na ang linya ng spare part.",
+      "spare_not_deletable": "Ang linya lamang ng spare na kailangan pa ang maaaring burahin.",
+      "spare_not_found": "Hindi mahanap ang linya ng spare part.",
+      "spares_not_handed_over": "Bawat spare part ay dapat na munang i-handover o waive.",
+      "specification_frozen": "Naka-freeze ang specification kapag naitakda na ang procurement route.",
+      "stage_not_found": "Wala sa proyektong ito ang expansion stage na ito.",
+      "stage_unavailable": "Hindi mabasa ang expansion stages, kaya hindi mailalagay ang posisyon dito.",
+      "state_read_from_source": "Binabasa ang estadong ito mula sa order, owner-furnished item, o commissioning, hindi itinatakda nang manu-mano.",
+      "transition_blocked": "Hinaharangan ng ilang patakaran ang pagbabago ng estado.",
+      "two_parties_on_one_step": "Iisang partido lamang ang maaaring nasa isang delivery step.",
+      "unknown_catalogue": "Hindi kilalang plant catalogue.",
+      "unknown_component_class": "Hindi kilalang klase ng component.",
+      "unknown_fee_refundable": "Dapat na none, partial, o full ang refund terms.",
+      "unknown_it_service_kind": "Hindi kilalang IT service.",
+      "unknown_lead_basis": "Hindi kilalang basis ng lead time.",
+      "unknown_lead_time_source": "Hindi kilalang pinagmulan ng lead time.",
+      "unknown_maintenance_strategy": "Hindi kilalang maintenance strategy.",
+      "unknown_party": "Hindi kilalang partido.",
+      "unknown_redundancy_scheme": "Hindi kilalang redundancy scheme.",
+      "unknown_route": "Hindi kilalang procurement route.",
+      "unknown_site_plant_kind": "Wala sa plant catalogue ng proyekto ang ganitong uri ng site plant.",
+      "unknown_spare_category": "Hindi kilalang kategorya ng spare part.",
+      "unknown_step": "Hindi kilalang delivery step.",
+      "unknown_vendor_bound_reason": "Dapat ay standardisation, umiiral na estate, warranty, o sole source ang dahilan.",
+      "unknown_vendor_policy": "Dapat neutral o bound ang vendor policy.",
+      "vendor_bound_needs_reason": "Kailangan ng dahilan ang specification na nakatali sa vendor.",
+      "waiver_needs_reason": "Kailangan ng dahilan ang pag-waive ng spare part."
+    },
+    "evidence": {
+      "critical_route_set": "Bawat kritikal na item ay may route na nakatakda sa naaprubahang decision paper",
+      "frame_document_attached": "Nakakabit sa CDE ang equipment frame document",
+      "frame_document_missing": "Wala pang equipment frame document ang proyekto, kaya hindi masuri ang attachment nito",
+      "host_unresolved": "Hindi sinasabi ng governance model kung aling area at gate ang iniuulat ng plant register",
+      "long_lead_secured": "Bawat long-lead item ay may sariwang basis quote at nakaorder na o nasa loob ng order date nito",
+      "no_area_hosts_plant": "Walang area na naglalaman ng plant sa phase model, kaya hindi makapag-ulat ang plant register sa gate",
+      "no_error_findings": "Walang findings na antas-error sa plant register",
+      "no_phase_enables_construction_start": "Walang phase sa phase model na nagbubukas ng simula ng konstruksyon, kaya walang gate ang plant register na pag-uulatan"
+    },
+    "export": {
+      "catalogue": "Katalogo",
+      "col_category": "Kategorya",
+      "col_class": "Klase",
+      "col_code": "Item",
+      "col_cost": "Gastos",
+      "col_critical": "Kritikal",
+      "col_description": "Paglalarawan",
+      "col_enquiry_date": "Na-enquire",
+      "col_float": "Float (araw)",
+      "col_from": "Mula",
+      "col_latest_order": "Huling order",
+      "col_lead_source": "Pinagmulan ng lead",
+      "col_lead_weeks": "Lead (linggo)",
+      "col_need_date": "Petsa ng pangangailangan",
+      "col_option": "Opsyon",
+      "col_quantity": "Dami",
+      "col_recommended": "Inirerekomenda",
+      "col_route": "Route",
+      "col_score": "Weighted score",
+      "col_section": "Seksyon",
+      "col_state": "Estado",
+      "col_supply_by": "Ibinibigay ng",
+      "col_title": "Pamagat",
+      "col_to": "Hanggang",
+      "col_unit": "Yunit",
+      "critical_count": "Mga kritikal na item",
+      "empty": "Walang entry.",
+      "frame_title": "Buod ng equipment frame",
+      "item_count": "Mga item",
+      "limits_title": "Matrix ng delivery limit",
+      "long_lead_count": "Mga long-lead item",
+      "overdue_count": "Mga lampas na sa deadline na order",
+      "paper_title": "Decision paper",
+      "project": "Proyekto",
+      "question": "Tanong",
+      "rationale": "Rationale",
+      "register_title": "Long-lead register",
+      "section_it": "IT service",
+      "section_long_lead": "Long-lead item",
+      "section_site_plant": "Site plant",
+      "spares_title": "Listahan ng spare parts",
+      "yes": "oo"
+    },
+    "paper_state": {
+      "approved": "Naaprubahan",
+      "draft": "Draft",
+      "rejected": "Tinanggihan",
+      "submitted": "Naisumite"
+    },
+    "reasons": {
+      "currency": "walang currency ang reservation fee",
+      "installer_mismatch": "ibang installing package ang binanggit ng owner-furnished item",
+      "owner_furnished_item_required": "kailangan ng owner-furnished route ang owner-furnished item nito",
+      "owner_installs": "ang may-ari ang nag-iinstall, kaya walang contract package na maaaring itakdang installer",
+      "package_does_not_supply": "hindi nagbibigay ng plant ang contract package",
+      "package_not_in_plan": "wala sa package plan ang contract package",
+      "package_required": "kailangan ng contract package ang route na ito",
+      "single_package_form": "iisa ang contract package ng delivery form at nasa iba ang item"
+    },
+    "rules": {
+      "critical_has_decision_paper": {
+        "fail": "Walang naaprubahang decision paper ang kritikal na item na {item}.",
+        "suggestion": "Ihanda ang option paper at isumite para sa approval."
+      },
+      "critical_has_market_evidence": {
+        "fail": "Umaasa ang kritikal na item na {item} sa default ng katalogo o estimate.",
+        "suggestion": "Kumuha ng supplier quote, framework, o dating order."
+      },
+      "critical_has_strategic_spares": {
+        "fail": "Walang strategic spare ang kritikal na item na {item}.",
+        "suggestion": "Magdagdag ng strategic spare o sabihin kung bakit hindi ito kailangan."
+      },
+      "delivery_limits_complete": {
+        "fail": "Walang partido ang delivery limits ng {item} para sa: {steps}.",
+        "suggestion": "Magtalaga ng partido sa bawat delivery step."
+      },
+      "it_cde_linked": {
+        "fail": "Kailangan ang CDE access bago ang execution gate pero walang naka-link na CDE container.",
+        "suggestion": "I-link ang CDE container na pagtatrabahuhan ng mga partido."
+      },
+      "lead_time_fresh": {
+        "fail": "Lipas na ang basis lead time ng {item}.",
+        "suggestion": "Tanungin muli ang supplier at itala ang bagong sagot."
+      },
+      "lead_time_has_enquiry_date": {
+        "fail": "Ang long-lead item na {item} ay walang lead time quote na may petsa ng enquiry.",
+        "suggestion": "Magtala ng may petsang quote: kailan ka nagtanong at sino ang sumagot."
+      },
+      "order_not_overdue": {
+        "fail": "Dapat na naiorder ang {item} bago ang {date}.",
+        "suggestion": "Umorder na ngayon o ilipat ang need date kasama ang schedule owner."
+      },
+      "redundancy_quantity": {
+        "fail": "Hindi tugma sa redundancy scheme nito ang dami ng {item}.",
+        "suggestion": "Suriin ang dami laban sa scheme (kailangan ng N+1 ng hindi bababa sa dalawang yunit)."
+      },
+      "route_consistent_with_package_plan": {
+        "fail": "Hindi tugma sa package plan ang procurement route ng {item}: {reason}.",
+        "suggestion": "I-align ang route sa mga contract package at owner-furnished item."
+      },
+      "single_basis_quote": {
+        "fail": "Hindi eksaktong isa ang basis quote ng {item}.",
+        "suggestion": "Markahan ang isang quote bilang basis."
+      },
+      "slot_after_order_date": {
+        "fail": "Lumalampas sa huling order date ang capacity reservation ng {item}.",
+        "suggestion": "Pirmahan nang mas maaga ang order o makipag-negosasyon para sa mas maagang slot."
+      },
+      "slot_not_expired": {
+        "fail": "Lumampas na sa conversion deadline ang capacity reservation ng {item}.",
+        "suggestion": "I-convert ito sa order o bitawan."
+      },
+      "slot_terms_complete": {
+        "fail": "Hindi kumpleto ang terms ng capacity reservation ng {item}.",
+        "suggestion": "Itala ang fee, refund terms, conversion deadline, at commitment link."
+      },
+      "vendor_bound_has_reason": {
+        "fail": "Hindi tugma ang vendor policy ng {item}.",
+        "suggestion": "Kailangan ng dahilan ang bound na specification. Walang binanggit na vendor ang neutral."
+      }
+    },
+    "spare_state": {
+      "delivered": "Naihatid",
+      "handed_over": "Na-handover",
+      "required": "Kailangan",
+      "specified": "Tinukoy",
+      "waived": "Na-waive"
+    },
+    "state": {
+      "cancelled": "Kinansela",
+      "commissioned": "Na-commission",
+      "delivered": "Naihatid",
+      "enquired": "Na-enquire",
+      "handed_over": "Na-handover",
+      "identified": "Natukoy",
+      "installed": "Nainstall",
+      "manufactured": "Ginawa",
+      "ordered": "Naka-order",
+      "route_set": "Nakatakda ang route",
+      "specified": "Tinukoy"
+    }
+  }
+}
