@@ -2056,6 +2056,7 @@ export function ContractDetailDrawer({
       <div className="absolute inset-0 bg-black/30" onClick={onClose} />
       <div
         role="dialog"
+        data-check-ref={contract.id}
         aria-modal="true"
         aria-labelledby="contract-drawer-title"
         className="relative h-full w-full max-w-2xl overflow-y-auto bg-surface-elevated shadow-xl"
