@@ -310,6 +310,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Route Classifier': 'project_route.title',
   'Post-calculation': 'postcalc.title',
   'Public Funding': 'funding.title',
+  'Accounting sync': 'accountingSync.title',
   'Commitments and releases': 'commitment.page.title',
   'Delivery model': 'delivery_model.ui.title',
   'Economics': 'economics.ui.title',

@@ -363,6 +363,7 @@ const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
   '/defects-liability': 'oe_defects_liability',
   '/portfolio/guarantees': 'oe_guarantees',
   '/condition': 'oe_condition',
+  '/accounting-sync': 'oe_accounting_sync',
   // International delivery / authority modules (frontends added this wave).
   '/authority-submissions': 'oe_authority_submission',
   '/review-authority': 'oe_review_authority',

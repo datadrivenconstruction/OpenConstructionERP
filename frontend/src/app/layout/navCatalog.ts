@@ -895,6 +895,7 @@ export const navGroups: NavGroup[] = [
         defaultHelp:
           'Grants and subsidies: what was awarded, what has been drawn, and every deadline that follows.',
       },
+      { labelKey: 'accountingSync.title', to: '/accounting-sync', icon: BookOpen, advancedOnly: true },
       { labelKey: 'nav.analytics', to: '/analytics', icon: LineChart, advancedOnly: true },
       { labelKey: 'nav.reports', to: '/reports', icon: FileBarChart, advancedOnly: true },
       { labelKey: 'nav.reporting_dashboards', to: '/reporting', icon: BarChart3, advancedOnly: true },

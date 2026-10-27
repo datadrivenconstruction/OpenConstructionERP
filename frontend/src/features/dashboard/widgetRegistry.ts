@@ -53,6 +53,7 @@ import {
   // Fleet telematics and site sensors
   Truck,
   Gauge,
+  BookOpen,
 } from 'lucide-react';
 
 export interface DashboardWidgetMeta {
@@ -193,6 +194,16 @@ export const DASHBOARD_WIDGETS: readonly DashboardWidgetMeta[] = [
     descDefault: 'Latest validation of every estimate in all your projects, worst first',
     icon: ShieldCheck,
     defaultSpan: 3,
+  },
+  // Accounting connections and the records that failed to sync. Hides itself
+  // when nothing is connected, so a workspace without the module never sees it.
+  {
+    id: 'accounting_sync',
+    labelKey: 'accountingSync.card_title',
+    labelDefault: 'Accounting sync',
+    descKey: 'dashboard.layout.w_accounting_sync_desc',
+    descDefault: 'Accounting connections and records that failed to sync',
+    icon: BookOpen,
   },
   {
     id: 'map',
