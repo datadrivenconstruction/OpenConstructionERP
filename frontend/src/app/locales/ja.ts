@@ -52792,6 +52792,12 @@ const resource = {
     "settings.secondary_calendar_hint": "アプリ内のすべての日付で、西暦の横にヒジュラ暦の日付を表示します。",
     "settings.tab_market": "市場と規格",
     "settings.tab_market_desc": "国、パック、規格、単位",
+    "settings.style_look": "インターフェースのスタイル",
+    "settings.style_look_standard": "スタンダード",
+    "settings.style_look_classic": "クラシック",
+    "settings.style_look_hint": "クラシック: 無彩色を基調とし、操作と状態の表示にだけアクセント色を使います。区切り線は細く、グラデーションや半透明のガラス効果はありません。",
+    "settings.style_preset_standard": "スタンダード",
+    "settings.style_density_normal": "標準",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "変更指示",
     "approvalRoutes.kind_contract": "契約",

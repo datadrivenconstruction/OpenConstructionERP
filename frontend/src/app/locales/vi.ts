@@ -51268,6 +51268,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Hiển thị ngày Hồi lịch bên cạnh ngày dương lịch ở mọi ngày trong ứng dụng.",
     "settings.tab_market": "Thị trường và tiêu chuẩn",
     "settings.tab_market_desc": "Quốc gia, gói, tiêu chuẩn và đơn vị",
+    "settings.style_look": "Kiểu giao diện",
+    "settings.style_look_standard": "Tiêu chuẩn",
+    "settings.style_look_classic": "Cổ điển",
+    "settings.style_look_hint": "Cổ điển: màu trung tính, một màu nhấn duy nhất cho thao tác và trạng thái, đường phân cách mỏng, không chuyển màu hay hiệu ứng kính.",
+    "settings.style_preset_standard": "Tiêu chuẩn",
+    "settings.style_density_normal": "Thông thường",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Lệnh thay đổi",
     "approvalRoutes.kind_contract": "Hợp đồng",

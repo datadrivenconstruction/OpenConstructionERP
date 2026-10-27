@@ -52676,6 +52676,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Mostra la data islamica (egira) accanto alla data gregoriana in ogni data dell'app.",
     "settings.tab_market": "Mercato e norme",
     "settings.tab_market_desc": "Paese, pacchetti, norme e unità",
+    "settings.style_look": "Stile dell'interfaccia",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classico",
+    "settings.style_look_hint": "Classico: colori neutri, un solo colore di accento per azioni e stati, separatori sottili, senza sfumature né effetto vetro.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normale",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordine di modifica",
     "approvalRoutes.kind_contract": "Contratto",

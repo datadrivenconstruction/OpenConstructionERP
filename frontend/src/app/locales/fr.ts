@@ -54375,6 +54375,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Affiche la date hégirienne à côté de la date grégorienne pour chaque date de l'application.",
     "settings.tab_market": "Marché et normes",
     "settings.tab_market_desc": "Pays, packs, normes et unités",
+    "settings.style_look": "Style de l'interface",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classique",
+    "settings.style_look_hint": "Classique : couleurs neutres, une seule couleur d'accent pour les actions et les statuts, filets fins, sans dégradés ni effet verre.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordre de modification",
     "approvalRoutes.kind_contract": "Contrat",

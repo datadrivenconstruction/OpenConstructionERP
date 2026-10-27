@@ -51474,6 +51474,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Қолданбадағы барлық күндердің жанында григориан күнімен бірге хижра күнін көрсетеді.",
     "settings.tab_market": "Нарық және стандарттар",
     "settings.tab_market_desc": "Ел, пакеттер, стандарттар және бірліктер",
+    "settings.style_look": "Интерфейс стилі",
+    "settings.style_look_standard": "Стандартты",
+    "settings.style_look_classic": "Классикалық",
+    "settings.style_look_hint": "Классикалық: бейтарап түстер, әрекеттер мен күйлер үшін бір акцент түсі, жіңішке бөлгіштер, градиенттер мен шыны эффектісі жоқ.",
+    "settings.style_preset_standard": "Стандартты",
+    "settings.style_density_normal": "Қалыпты",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгеріс бұйрығы",
     "approvalRoutes.kind_contract": "Келісімшарт",

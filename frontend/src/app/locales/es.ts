@@ -54374,6 +54374,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Muestra la fecha hiyrí junto a la fecha gregoriana en todas las fechas de la aplicación.",
     "settings.tab_market": "Mercado y normas",
     "settings.tab_market_desc": "País, paquetes, normas y unidades",
+    "settings.style_look": "Estilo de interfaz",
+    "settings.style_look_standard": "Estándar",
+    "settings.style_look_classic": "Clásico",
+    "settings.style_look_hint": "Clásico: colores neutros, un solo color de acento para acciones y estados, separadores finos, sin degradados ni efecto cristal.",
+    "settings.style_preset_standard": "Estándar",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Orden de cambio",
     "approvalRoutes.kind_contract": "Contrato",

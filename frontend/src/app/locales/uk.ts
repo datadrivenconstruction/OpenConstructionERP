@@ -53483,6 +53483,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Показує дату за хіджрі поруч із григоріанською датою для всіх дат у застосунку.",
     "settings.tab_market": "Ринок і стандарти",
     "settings.tab_market_desc": "Країна, пакети, стандарти й одиниці",
+    "settings.style_look": "Стиль інтерфейсу",
+    "settings.style_look_standard": "Стандартний",
+    "settings.style_look_classic": "Класичний",
+    "settings.style_look_hint": "Класичний: нейтральні кольори, один акцентний колір для дій і статусів, тонкі роздільники, без градієнтів і ефекту скла.",
+    "settings.style_preset_standard": "Стандартний",
+    "settings.style_density_normal": "Звичайна",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Розпорядження про зміни",
     "approvalRoutes.kind_contract": "Договір",

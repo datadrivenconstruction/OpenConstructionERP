@@ -51758,6 +51758,12 @@ const resource = {
     "settings.secondary_calendar_hint": "অ্যাপের প্রতিটি তারিখে গ্রেগরিয়ান তারিখের পাশে হিজরি তারিখ দেখায়।",
     "settings.tab_market": "বাজার ও মানদণ্ড",
     "settings.tab_market_desc": "দেশ, প্যাক, মানদণ্ড ও একক",
+    "settings.style_look": "ইন্টারফেসের স্টাইল",
+    "settings.style_look_standard": "স্ট্যান্ডার্ড",
+    "settings.style_look_classic": "ক্লাসিক",
+    "settings.style_look_hint": "ক্লাসিক: নিরপেক্ষ রং, কাজ ও অবস্থার জন্য একটিমাত্র উচ্চারণ রং, পাতলা বিভাজক, কোনো গ্রেডিয়েন্ট বা কাচের প্রভাব নেই।",
+    "settings.style_preset_standard": "স্ট্যান্ডার্ড",
+    "settings.style_density_normal": "স্বাভাবিক",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "পরিবর্তন আদেশ",
     "approvalRoutes.kind_contract": "চুক্তি",

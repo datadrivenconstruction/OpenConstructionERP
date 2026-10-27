@@ -52400,6 +52400,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Toont de hijri-datum naast de gregoriaanse datum bij elke datum in de app.",
     "settings.tab_market": "Markt en normen",
     "settings.tab_market_desc": "Land, pakketten, normen en eenheden",
+    "settings.style_look": "Interfacestijl",
+    "settings.style_look_standard": "Standaard",
+    "settings.style_look_classic": "Klassiek",
+    "settings.style_look_hint": "Klassiek: neutrale kleuren, één accentkleur voor acties en statussen, dunne scheidingslijnen, geen verlopen of glaseffect.",
+    "settings.style_preset_standard": "Standaard",
+    "settings.style_density_normal": "Normaal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Wijzigingsopdracht",
     "approvalRoutes.kind_contract": "Contract",

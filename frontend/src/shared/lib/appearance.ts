@@ -17,8 +17,10 @@ import { applyCustomAccent, normalizeHex } from './customAccent';
 
 export const ACCENTS = ['blue', 'teal', 'violet', 'emerald', 'amber', 'graphite', 'crimson'] as const;
 export const FONTS = ['system', 'inter', 'ibm-plex-sans', 'source-sans-3'] as const;
-export const DENSITIES = ['comfortable', 'compact'] as const;
+export const DENSITIES = ['comfortable', 'normal', 'compact'] as const;
 export const RADII = ['standard', 'sharp', 'round'] as const;
+/** Interface look: `classic` is the calm, neutral business style (index.css). */
+export const LOOKS = ['standard', 'classic'] as const;
 export const TEXT_SIZES = ['small', 'default', 'large', 'larger', 'largest'] as const;
 
 /** Root font-size multiplier per step; index.css carries the same factors. */
@@ -35,12 +37,15 @@ export type FontChoice = (typeof FONTS)[number];
 export type Density = (typeof DENSITIES)[number];
 export type Radius = (typeof RADII)[number];
 export type TextSize = (typeof TEXT_SIZES)[number];
+export type Look = (typeof LOOKS)[number];
 
 export interface Appearance {
   accent: Accent;
   font: FontChoice;
   density: Density;
   radius: Radius;
+  /** Overall look; `classic` drops gradients, glass and glow and tightens shapes. */
+  look: Look;
   /** Root text size; scales every rem-based size. Personal choice. */
   text: TextSize;
   /** Free company colour (#rrggbb); wins over `accent` while set. */
@@ -54,6 +59,7 @@ export const AXIS_VALUES: { [K in AppearanceAxis]: readonly Appearance[K][] } = 
   font: FONTS,
   density: DENSITIES,
   radius: RADII,
+  look: LOOKS,
   text: TEXT_SIZES,
 };
 
@@ -62,6 +68,7 @@ export const PLATFORM_APPEARANCE: Appearance = {
   font: 'system',
   density: 'comfortable',
   radius: 'standard',
+  look: 'standard',
   text: 'default',
 };
 
@@ -97,16 +104,17 @@ export const FONT_STACK: Record<FontChoice, string> = {
 };
 
 export interface AppearancePreset {
-  id: 'classic' | 'studio' | 'engineering' | 'warm' | 'executive';
+  id: 'standard' | 'classic' | 'studio' | 'engineering' | 'warm' | 'executive';
   value: Appearance;
 }
 
 export const APPEARANCE_PRESETS: readonly AppearancePreset[] = [
-  { id: 'classic', value: PLATFORM_APPEARANCE },
-  { id: 'studio', value: { accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round', text: 'default' } },
-  { id: 'engineering', value: { accent: 'teal', font: 'ibm-plex-sans', density: 'compact', radius: 'sharp', text: 'default' } },
-  { id: 'warm', value: { accent: 'amber', font: 'source-sans-3', density: 'comfortable', radius: 'round', text: 'default' } },
-  { id: 'executive', value: { accent: 'graphite', font: 'inter', density: 'comfortable', radius: 'standard', text: 'default' } },
+  { id: 'standard', value: PLATFORM_APPEARANCE },
+  { id: 'classic', value: { accent: 'blue', font: 'system', density: 'normal', radius: 'sharp', look: 'classic', text: 'default' } },
+  { id: 'studio', value: { accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round', look: 'standard', text: 'default' } },
+  { id: 'engineering', value: { accent: 'teal', font: 'ibm-plex-sans', density: 'compact', radius: 'sharp', look: 'standard', text: 'default' } },
+  { id: 'warm', value: { accent: 'amber', font: 'source-sans-3', density: 'comfortable', radius: 'round', look: 'standard', text: 'default' } },
+  { id: 'executive', value: { accent: 'graphite', font: 'inter', density: 'comfortable', radius: 'standard', look: 'standard', text: 'default' } },
 ];
 
 /** The preset an appearance matches exactly, or null for a custom mix. */
@@ -193,6 +201,7 @@ export function applyAppearance(a: Appearance, root: HTMLElement = document.docu
   root.dataset.font = a.font;
   root.dataset.density = a.density;
   root.dataset.radius = a.radius;
+  root.dataset.look = a.look;
   root.dataset.text = a.text;
   ensureFontLoaded(a.font);
 }
