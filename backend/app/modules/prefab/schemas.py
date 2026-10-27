@@ -30,6 +30,7 @@ class PrefabUnitCreate(BaseModel):
     target_install_date: date | None = None
     drawing_ref: str | None = Field(default=None, max_length=255)
     bim_element_ids: list[str] | None = None
+    element_ref: str | None = Field(default=None, max_length=120)
     notes: str | None = None
 
 
@@ -52,6 +53,7 @@ class PrefabUnitUpdate(BaseModel):
     target_install_date: date | None = None
     drawing_ref: str | None = Field(default=None, max_length=255)
     bim_element_ids: list[str] | None = None
+    element_ref: str | None = Field(default=None, max_length=120)
     notes: str | None = None
 
 
@@ -79,6 +81,9 @@ class PrefabUnitResponse(BaseModel):
     bim_element_ids: list[str] | None = None
     notes: str | None = None
     created_by: str | None = None
+    qr_token: str | None = None
+    delivery_note_ref: str | None = None
+    element_ref: str | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -114,6 +119,16 @@ class PrefabUnitLinkRequest(BaseModel):
 
 
 # ── Advance Stage ─────────────────────────────────────────────────────────
+
+
+class ReceiveByQrRequest(BaseModel):
+    """A unit scanned on arrival: its QR token and the delivery note it came with."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    qr_token: str = Field(..., min_length=8, max_length=64)
+    delivery_note_ref: str = Field(..., min_length=1, max_length=120)
+    note: str | None = None
 
 
 class AdvanceStageRequest(BaseModel):

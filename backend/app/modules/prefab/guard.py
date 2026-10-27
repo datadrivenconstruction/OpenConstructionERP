@@ -41,6 +41,7 @@ class PrefabUnitType(StrEnum):
     PANEL = "panel"
     MODULE = "module"
     SKID = "skid"
+    REBAR_CAGE = "rebar_cage"
     VOLUMETRIC = "volumetric"
     OTHER = "other"
 
@@ -175,3 +176,14 @@ class PrefabStageMachine:
 
     def __repr__(self) -> str:
         return "PrefabStageMachine(design -> ... -> qa -[gate]-> dispatched -> delivered -> installed)"
+
+
+def receipt_allowed(current_stage: str) -> tuple[bool, str]:
+    """Whether a unit at ``current_stage`` may be booked in on site by its QR code.
+
+    Only a dispatched unit is on its way; anything earlier has not left the
+    yard (or has not passed QA), anything later was already received.
+    """
+    if current_stage == PrefabStage.DISPATCHED.value:
+        return True, ""
+    return False, f"Only a dispatched unit can be received; this one is '{current_stage}'"

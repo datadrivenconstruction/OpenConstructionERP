@@ -12,6 +12,7 @@ Stateless service layer. Handles:
 """
 
 import logging
+import secrets
 import uuid
 from typing import Any
 
@@ -27,6 +28,7 @@ from app.modules.prefab.guard import (
     PrefabStage,
     PrefabStageMachine,
     next_stage,
+    receipt_allowed,
 )
 from app.modules.prefab.models import PrefabUnit, ProductionEvent
 from app.modules.prefab.repository import (
@@ -42,6 +44,7 @@ from app.modules.prefab.schemas import (
     PrefabUnitLinkRequest,
     PrefabUnitResponse,
     PrefabUnitUpdate,
+    ReceiveByQrRequest,
 )
 
 logger = logging.getLogger(__name__)
@@ -88,8 +91,10 @@ class PrefabService:
             target_install_date=data.target_install_date,
             drawing_ref=data.drawing_ref,
             bim_element_ids=data.bim_element_ids,
+            element_ref=data.element_ref,
             notes=data.notes,
             created_by=user_id,
+            qr_token=secrets.token_urlsafe(18),
         )
         unit = await self.unit_repo.create(unit)
 
@@ -433,6 +438,26 @@ class PrefabService:
             )
 
         return unit
+
+    async def receive_by_qr(self, data: ReceiveByQrRequest, user_id: str | None = None) -> PrefabUnit:
+        """Book a dispatched unit as delivered from its scanned QR token.
+
+        Only a dispatched unit can be received; the delivery note is stored on
+        the unit and the stage advance leaves the usual audit row.
+        """
+        unit = await self.unit_repo.get_by_qr_token(data.qr_token)
+        if unit is None:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No unit carries this QR code")
+        allowed, reason = receipt_allowed(unit.status)
+        if not allowed:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=reason)
+        await self.unit_repo.update_fields(unit.id, delivery_note_ref=data.delivery_note_ref)
+        note = data.note or f"Received on delivery note {data.delivery_note_ref}"
+        return await self.advance_stage(
+            unit.id,
+            AdvanceStageRequest(target_status=PrefabStage.DELIVERED.value, note=note),
+            user_id=user_id,
+        )
 
     async def get_unit_events(self, unit_id: uuid.UUID) -> list[ProductionEvent]:
         """Return the production-event timeline for a unit, newest first."""

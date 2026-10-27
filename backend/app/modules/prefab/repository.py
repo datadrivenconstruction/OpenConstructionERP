@@ -40,6 +40,11 @@ class PrefabUnitRepository:
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_qr_token(self, qr_token: str) -> PrefabUnit | None:
+        """Get the unit whose QR label carries ``qr_token``."""
+        result = await self.session.execute(select(PrefabUnit).where(PrefabUnit.qr_token == qr_token))
+        return result.scalar_one_or_none()
+
     async def list_for_project(
         self,
         project_id: uuid.UUID,

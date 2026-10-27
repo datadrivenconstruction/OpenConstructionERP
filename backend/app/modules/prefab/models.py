@@ -61,6 +61,12 @@ class PrefabUnit(Base):
     assembly_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # Supply-chain tracking: the token printed as a QR label on the unit, the
+    # delivery note it arrived with, and the element it is installed into
+    # (e.g. a pile mark) when no BIM element id exists.
+    qr_token: Mapped[str | None] = mapped_column(String(64), nullable=True, unique=True, index=True)
+    delivery_note_ref: Mapped[str | None] = mapped_column(String(120), nullable=True)
+    element_ref: Mapped[str | None] = mapped_column(String(120), nullable=True)
 
     def __repr__(self) -> str:
         return f"<PrefabUnit {self.ref} ({self.status})>"
