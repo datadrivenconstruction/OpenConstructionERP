@@ -7,12 +7,15 @@
  */
 import { useTranslation } from 'react-i18next';
 import { Card, Skeleton } from '@/shared/ui';
+import { fmtFixed } from '@/shared/lib/formatters';
 import { usePpcHistory, type LpsParetoRow, type LpsPpcWeek } from './api';
 import { LpsValidationPanel } from './LpsValidationPanel';
 
 const W = 320;
 const H = 140;
 const PAD = { l: 28, r: 28, t: 8, b: 20 };
+// SVG coordinates are machine text and must keep a dot decimal in every language.
+const round1 = (n: number) => Math.round(n * 10) / 10;
 
 function num(v: string | null | undefined): number {
   const n = Number(v ?? 0);
@@ -45,7 +48,7 @@ export function PpcTrendChart({ weeks, average }: { weeks: LpsPpcWeek[]; average
         </h4>
         {average != null && (
           <span className="text-xs text-content-secondary" data-testid="ppc-average">
-            {t('schedule_advanced.ppc_average', { defaultValue: 'Average {{value}}%', value: num(average).toFixed(0) })}
+            {t('schedule_advanced.ppc_average', { defaultValue: 'Average {{value}}%', value: fmtFixed(num(average), 0) })}
           </span>
         )}
       </div>
@@ -79,7 +82,7 @@ export function PpcTrendChart({ weeks, average }: { weeks: LpsPpcWeek[]; average
                   className="text-oe-blue"
                   rx="1"
                 >
-                  <title>{`${w.week_start_date}: ${v.toFixed(0)}%`}</title>
+                  <title>{`${w.week_start_date}: ${fmtFixed(v, 0)}%`}</title>
                 </rect>
               )}
               <text x={x + slot * 0.35} y={H - 6} textAnchor="middle" fontSize="7" fill="currentColor" className="text-content-tertiary">
@@ -114,7 +117,7 @@ export function VariancePareto({ rows }: { rows: LpsParetoRow[] }) {
   const yc = (c: number) => PAD.t + plotH - (c / max) * plotH;
   const yp = (p: number) => PAD.t + plotH - (Math.min(Math.max(p, 0), 100) / 100) * plotH;
   const points = rows
-    .map((r, i) => `${(PAD.l + i * slot + slot / 2).toFixed(1)},${yp(num(r.cumulative_percent)).toFixed(1)}`)
+    .map((r, i) => `${round1(PAD.l + i * slot + slot / 2)},${round1(yp(num(r.cumulative_percent)))}`)
     .join(' ');
   const catLabel = (c: string) => t(`schedule_advanced.rnc.${c}`, { defaultValue: RNC_EN[c] ?? c });
   return (
@@ -172,8 +175,8 @@ export function VariancePareto({ rows }: { rows: LpsParetoRow[] }) {
                   defaultValue: '{{category}}: {{count}} ({{percent}}%, cumulative {{cumulative}}%)',
                   category: catLabel(r.category),
                   count: r.count,
-                  percent: num(r.percent).toFixed(0),
-                  cumulative: num(r.cumulative_percent).toFixed(0),
+                  percent: fmtFixed(num(r.percent), 0),
+                  cumulative: fmtFixed(num(r.cumulative_percent), 0),
                 })}
               </li>
             ))}

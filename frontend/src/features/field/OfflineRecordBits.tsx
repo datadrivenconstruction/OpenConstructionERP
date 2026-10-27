@@ -11,6 +11,7 @@ import { useTranslation } from 'react-i18next';
 import { GitMerge, HardDrive } from 'lucide-react';
 import { fetchMergeAudit } from '@/shared/lib/offline/recordSync';
 import { isLocalId, type OfflineEntityKind } from '@/shared/lib/offline/offlineStore';
+import { fmtList, getIntlLocale } from '@/shared/lib/formatters';
 
 export function SavedOnDeviceBadge({ flag }: { flag?: 'new' | 'edited' | null }) {
   const { t } = useTranslation();
@@ -55,7 +56,7 @@ export function MergeHistoryList({ kind, id }: { kind: OfflineEntityKind; id: st
               className="rounded bg-surface-secondary px-2 py-1.5 text-xs text-content-secondary"
             >
               <span className="font-medium text-content-primary">
-                {row.created_at ? new Date(row.created_at).toLocaleString() : ''}
+                {row.created_at ? new Date(row.created_at).toLocaleString(getIntlLocale()) : ''}
               </span>
               {row.base_version != null && row.against_version != null && (
                 <span className="ml-2">
@@ -66,7 +67,7 @@ export function MergeHistoryList({ kind, id }: { kind: OfflineEntityKind; id: st
                   })}
                 </span>
               )}
-              {fields.length > 0 && <span className="ml-2">{fields.join(', ')}</span>}
+              {fields.length > 0 && <span className="ml-2">{fmtList(fields)}</span>}
             </li>
           );
         })}

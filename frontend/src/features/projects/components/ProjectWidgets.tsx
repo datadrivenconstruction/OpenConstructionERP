@@ -66,7 +66,7 @@ import type {
   ProjectSubInsurancePayload,
   ProjectVariationsPayload,
 } from '@/shared/api/dashboardRollup';
-import { fmtFixed } from '@/shared/lib/formatters';
+import { fmtFixed, fmtList } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
 /* ── Rollup provider ──────────────────────────────────────────────────── */
@@ -1426,7 +1426,7 @@ export function LpsPpcWidget({ projectId }: { projectId: string }) {
       ) : (
         <div className="space-y-2">
           <span className="text-xl font-semibold tabular-nums text-content-primary">
-            {average.toFixed(0)}%
+            {fmtFixed(average, 0)}%
           </span>
           <div className="flex h-10 items-end gap-0.5" data-testid="lps-ppc-bars">
             {latest.map((w, i) => (
@@ -1434,7 +1434,7 @@ export function LpsPpcWidget({ projectId }: { projectId: string }) {
                 key={`${w.week_start_date}-${i}`}
                 className="flex-1 rounded-sm bg-oe-blue"
                 style={{ height: `${Math.min(Math.max(Number(w.ppc_percent), 4), 100)}%` }}
-                title={`${w.week_start_date}: ${Number(w.ppc_percent).toFixed(0)}%`}
+                title={`${w.week_start_date}: ${fmtFixed(Number(w.ppc_percent), 0)}%`}
               />
             ))}
           </div>
@@ -1442,7 +1442,7 @@ export function LpsPpcWidget({ projectId }: { projectId: string }) {
             <p className="text-2xs text-content-tertiary">
               {t('project.widget.lps-ppc.top_reasons', {
                 defaultValue: 'Top reasons: {{reasons}}',
-                reasons: top.map((r) => `${r.category} (${r.count})`).join(', '),
+                reasons: fmtList(top.map((r) => `${r.category} (${r.count})`)),
               })}
             </p>
           )}

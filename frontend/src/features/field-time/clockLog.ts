@@ -2,6 +2,7 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** Grouping of clock events into day -> worker rows for the log, with missing clock-outs marked‌‍‌‍‌‍‌‍. */
 
+import { compareNames } from '@/shared/lib/collator';
 import { todayLocalISO } from '@/shared/lib/dates';
 import type { ClockEvent } from './clockApi';
 
@@ -45,7 +46,7 @@ export function groupClockEvents(events: ClockEvent[], today: string = todayLoca
     .map(([date, workers]) => {
       const rows: WorkerDay[] = [...workers.entries()]
         .map(([resourceId, list]) => {
-          const sorted = [...list].sort((x, y) => x.occurred_at.localeCompare(y.occurred_at));
+          const sorted = [...list].sort((x, y) => (x.occurred_at < y.occurred_at ? -1 : x.occurred_at > y.occurred_at ? 1 : 0));
           const unpaired = sorted.some((e) => e.kind === 'in' && !e.pair_event_id);
           return {
             resourceId,
@@ -56,7 +57,7 @@ export function groupClockEvents(events: ClockEvent[], today: string = todayLoca
             pending: sorted.filter((e) => e.approval_status === 'pending').length,
           };
         })
-        .sort((a, b) => a.resourceName.localeCompare(b.resourceName));
+        .sort((a, b) => compareNames(a.resourceName, b.resourceName));
       return {
         date,
         workers: rows,

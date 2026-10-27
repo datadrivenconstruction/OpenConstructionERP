@@ -19,6 +19,7 @@ import {
   resolveConflict,
   type ConflictView,
 } from '@/shared/lib/offline/recordSync';
+import { getIntlLocale } from '@/shared/lib/formatters';
 import type { OfflineSyncStatus } from '@/shared/lib/offline/offlineSyncStore';
 import { MergeConflictDialog } from './MergeConflictDialog';
 
@@ -96,7 +97,7 @@ export function SyncStatusPill({ className = '' }: SyncStatusPillProps) {
 
   const lastSync = lastSyncAt
     ? t('offline_sync.last_sync', {
-        time: new Date(lastSyncAt).toLocaleTimeString(),
+        time: new Date(lastSyncAt).toLocaleTimeString(getIntlLocale()),
         defaultValue: 'Last sync {{time}}',
       })
     : t('offline_sync.never_synced', { defaultValue: 'Not synced yet in this session' });
