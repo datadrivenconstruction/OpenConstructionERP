@@ -22,6 +22,7 @@ import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from '@/shared/lib/honeycomb';
 import { APP_VERSION } from '@/shared/lib/version';
 import { loginFailureKindFromResponse } from './loginError';
 import { AuthBackground } from './AuthBackground';
+import { ClassicAuthAside, ClassicAuthFooter } from './ClassicAuth';
 import {
   shouldAttemptDesktopBootstrap,
   shouldQueryFirstRun,
@@ -396,8 +397,9 @@ export function LoginPage() {
   }
 
   return (
-    <div className="relative grid h-screen grid-cols-1 lg:grid-cols-2 bg-surface-secondary overflow-hidden">
+    <div className="oe-auth relative grid h-screen grid-cols-1 lg:grid-cols-2 bg-surface-secondary overflow-hidden">
       <AuthBackground />
+      <ClassicAuthAside />
 
       {/* Local style block - premium glass variant + drifting orb keyframes
           scoped to the login page. Pattern mirrors LoginPageNext.tsx. */}
@@ -516,7 +518,7 @@ export function LoginPage() {
       {/* ── Right column on lg+: marketing & benefits.
           Order swap (lg:order-2) puts the form on the left so it's the
           first thing the eye lands on - primary action priority. */}
-      <div className="hidden lg:flex relative z-10 lg:order-2 flex-col justify-center pl-14 xl:pl-20 pr-12 xl:pr-16 py-6 overflow-hidden">
+      <div className="oe-auth-standard-only hidden lg:flex relative z-10 lg:order-2 flex-col justify-center pl-14 xl:pl-20 pr-12 xl:pr-16 py-6 overflow-hidden">
         {/* Marketing column showcase - color lives here. Sky/cyan mesh +
             slow-drifting orbs + faint noise grain. The form column on the
             left stays a clean white field; this column carries the visual
@@ -726,7 +728,7 @@ export function LoginPage() {
       {/* Center column removed - tags moved to left panel footer */}
 
       {/* ── Left column on lg+: logo + form (primary action). ── */}
-      <div className="relative flex items-center justify-center p-4 sm:p-6 z-10 lg:order-1 overflow-hidden">
+      <div className="oe-auth-form-col relative flex items-center justify-center p-4 sm:p-6 z-10 lg:order-1 overflow-hidden">
         {/* Form column backdrop - clean near-white field on lg+ so the
             glass card reads against a calm canvas. The decorative show
             (orbs / mesh) lives on the marketing column on the right. */}
@@ -814,7 +816,7 @@ export function LoginPage() {
           </div>
 
           {/* Open-source banner (mobile) */}
-          <div className="lg:hidden mb-4 animate-stagger-in" style={{ animationDelay: '100ms' }}>
+          <div className="oe-auth-standard-only lg:hidden mb-4 animate-stagger-in" style={{ animationDelay: '100ms' }}>
             <div className="rounded-xl bg-gradient-to-r from-oe-blue/10 via-violet-500/10 to-emerald-500/10 border border-oe-blue/20 px-4 py-3 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <span className="relative flex h-2 w-2">
@@ -1032,7 +1034,8 @@ export function LoginPage() {
               link). Premium two-line cards with a tinted icon badge:
               graphite for the source repo, oe-blue gradient for the
               community hub. Mirrors the page's login-glass-pro language. */}
-          <div className="mt-4 grid grid-cols-2 gap-3 animate-stagger-in" style={{ animationDelay: '520ms' }}>
+          <ClassicAuthFooter />
+          <div className="oe-auth-standard-only mt-4 grid grid-cols-2 gap-3 animate-stagger-in" style={{ animationDelay: '520ms' }}>
             <a
               href="https://github.com/datadrivenconstruction/OpenConstructionERP"
               target="_blank"
