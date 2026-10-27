@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "확인"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "아니오",
+        "yes": "예"
+      },
+      "direction": {
+        "export": "수출",
+        "import": "수입",
+        "inbound": "입고",
+        "outbound": "출고"
+      },
+      "group": {
+        "built": "시공",
+        "external": "외부",
+        "logistics": "물류",
+        "reserve": "예비"
+      },
+      "is_heavy": {
+        "no": "아니오",
+        "yes": "예"
+      },
+      "section": {
+        "balance": "면적 균형",
+        "concept": "개념",
+        "neighbourhood": "인접 지역",
+        "readiness": "준비 상태"
+      },
+      "short": {
+        "no": "아니오",
+        "yes": "예"
+      },
+      "state": {
+        "acknowledged": "확인됨",
+        "action_taken": "조치 완료",
+        "active": "진행 중",
+        "applied": "신청됨",
+        "arrived": "도착",
+        "authority": "관할 기관",
+        "cancelled": "취소됨",
+        "cleared": "통관 완료",
+        "closed": "종료",
+        "connected": "연결됨",
+        "contracted": "계약 확보",
+        "declared": "신고됨",
+        "disconnected": "연결 해제",
+        "documents_complete": "서류 완비",
+        "draft": "초안",
+        "expired": "만료됨",
+        "granted": "승인됨",
+        "held": "보류됨",
+        "identified": "식별됨",
+        "in_transit": "운송 중",
+        "missing": "누락",
+        "municipality": "지자체",
+        "neighbours": "인접 주민",
+        "offered": "제안됨",
+        "open": "미처리",
+        "other": "기타",
+        "permit_pending": "허가 대기",
+        "planned": "계획됨",
+        "police": "경찰",
+        "received": "접수됨",
+        "refused": "거부됨",
+        "requested": "요청됨",
+        "scheduled": "일정 확정",
+        "utility": "공급사",
+        "verified": "검증됨"
+      },
+      "type": {
+        "complaint": "민원",
+        "coordination": "협의"
+      }
+    },
+    "errors": {
+      "activity_not_found": "이 프로젝트에서 공정 활동을 찾을 수 없습니다.",
+      "allocation_exceeds_area": "배분 면적이 구역 면적보다 큽니다.",
+      "allocation_negative": "배분 면적은 음수일 수 없습니다.",
+      "allocations_changed": "다른 사용자가 배분을 변경했습니다. 새로고침 후 다시 시도하십시오.",
+      "area_not_found": "현장 구역을 찾을 수 없습니다.",
+      "authority_permit_not_found": "이 프로젝트에서 관할 기관 허가를 찾을 수 없습니다.",
+      "buffer_days_negative": "버퍼 일수는 음수일 수 없습니다.",
+      "catalogue_invalid": "고정된 물류 카탈로그를 해석할 수 없습니다.",
+      "catalogue_retired": "이 카탈로그 버전은 사용이 중지되었습니다.",
+      "code_required": "코드를 입력해야 합니다.",
+      "code_taken": "이 코드는 프로젝트에서 이미 사용 중입니다.",
+      "commodity_code_not_found": "품목 코드를 찾을 수 없습니다.",
+      "complaint_closed": "종료된 민원은 변경할 수 없습니다.",
+      "complaint_not_found": "민원을 찾을 수 없습니다.",
+      "connection_point_invalid": "연결 지점이 올바른 좌표가 아닙니다.",
+      "contracted_capacity_required": "먼저 계약 용량을 입력하십시오.",
+      "correspondence_not_found": "이 프로젝트에서 서신을 찾을 수 없습니다.",
+      "correspondence_thread_not_found": "이 프로젝트에서 서신을 찾을 수 없습니다.",
+      "country_invalid": "ISO 국가 코드 두 글자를 사용하십시오.",
+      "currency_invalid": "ISO 통화 코드 세 글자를 사용하십시오.",
+      "currency_required": "금액에는 통화를 지정해야 합니다.",
+      "customs_case_not_found": "통관 건을 찾을 수 없습니다.",
+      "customs_closed": "통관 완료 또는 종료된 건은 변경할 수 없습니다.",
+      "customs_declared": "신고된 통관 건은 삭제할 수 없습니다.",
+      "customs_not_found": "통관 건을 찾을 수 없습니다.",
+      "customs_without_lines": "먼저 품목 행을 한 개 이상 추가하십시오.",
+      "declarant_invalid": "신고인은 구매자 또는 판매자가 될 수 없습니다.",
+      "delivery_already_on_site": "이 납품은 이미 도착했으며 다시 결정할 수 없습니다.",
+      "delivery_not_found": "이 프로젝트에서 납품을 찾을 수 없습니다.",
+      "delivery_rate_exceeded": "이 시간대에는 공정 계획이 허용하는 납품 건수가 이미 찼습니다.",
+      "delivery_refused": "현재 상태로는 이 납품을 승인할 수 없습니다.",
+      "demand_not_found": "수요를 찾을 수 없습니다.",
+      "demand_owned_by_plant_position": "이 수요는 장비 항목에서 발생했으므로 해당 항목에서 변경하십시오.",
+      "direction_invalid": "알 수 없는 방향입니다.",
+      "document_exists": "이 서류는 이미 체크리스트에 있습니다.",
+      "document_not_found": "서류를 찾을 수 없습니다.",
+      "document_ref_required": "서류를 접수 처리하기 전에 문서를 연결하십시오.",
+      "duplicate_stage": "각 단계는 구역별로 한 번만 배분할 수 있습니다.",
+      "entry_not_found": "기록 항목을 찾을 수 없습니다.",
+      "field_required": "이 항목은 비워 둘 수 없습니다.",
+      "flow_code_invalid": "각 자재 흐름에는 고유한 코드가 필요합니다.",
+      "flow_code_unknown": "물류 개념에 이 코드의 자재 흐름이 없습니다.",
+      "flow_mode_invalid": "알 수 없는 자재 흐름 방식입니다.",
+      "frame_invalid": "알 수 없는 좌표계입니다.",
+      "gate_hours_unchecked": "현장 시간대가 설정되기 전에는 운영 시간을 확인할 수 없습니다.",
+      "gate_load_exceeded": "하중이 현장 출입구의 한도를 초과합니다.",
+      "gate_not_found": "이 프로젝트에서 현장 출입구를 찾을 수 없습니다.",
+      "geo_overlay_not_found": "이 프로젝트에서 현장 배치도 오버레이를 찾을 수 없습니다.",
+      "geometry_invalid": "구역 윤곽이 올바른 다각형이 아닙니다.",
+      "goods_receipt_missing": "이 발주서에 대해 확인된 입고 기록이 아직 없습니다.",
+      "heavy_without_permit": "중량물 운송은 허가가 승인된 뒤에야 일정을 잡을 수 있습니다.",
+      "hours_invalid": "올바른 시간을 입력하십시오. 종료 시각은 시작 시각 이후여야 합니다.",
+      "hs_code_invalid": "HS 코드는 숫자만 사용하며 최소 자릿수 이상이어야 합니다.",
+      "incoterm_unknown": "이 인코텀즈는 고정된 버전에 없습니다.",
+      "invalid_transition": "이 상태 변경은 허용되지 않습니다.",
+      "jit_without_takt": "적시 납품 흐름에는 택트 일정이 필요합니다.",
+      "last_stage": "프로젝트에는 최소 한 개의 확장 단계가 있어야 합니다.",
+      "line_not_found": "통관 품목 행을 찾을 수 없습니다.",
+      "link_target_unavailable": "연결 대상 모듈이 설치되어 있지 않아 이 링크를 아직 확인할 수 없습니다.",
+      "media_not_found": "공급 연결을 찾을 수 없습니다.",
+      "money_not_decimal": "금액을 소수점 숫자로 입력하십시오.",
+      "money_out_of_range": "소수점 이하 두 자리까지 금액을 입력하십시오.",
+      "noise_limit_needs_project_value": "이 관할권은 고정 기준값을 정하지 않습니다. 프로젝트에서 합의된 값을 입력하십시오.",
+      "not_found": "찾을 수 없습니다.",
+      "outside_gate_hours": "이 시간대는 출입구 운영 시간을 벗어납니다.",
+      "owner_not_member": "담당자는 이 프로젝트의 구성원이어야 합니다.",
+      "pack_catalogue_invalid": "팩의 카탈로그를 불러올 수 없습니다.",
+      "permission_denied": "이 작업에 대한 권한이 없습니다.",
+      "permit_frozen": "승인, 거부 또는 만료된 허가는 유효 기간, 시간대 및 운송 기록을 그대로 유지합니다.",
+      "permit_not_found": "허가를 찾을 수 없습니다.",
+      "plan_calibration_without_image": "배치도의 축척을 설정하기 전에 배치도 이미지를 선택하십시오.",
+      "plan_document_not_found": "이 프로젝트에서 현장 배치도 문서를 찾을 수 없습니다.",
+      "plan_origin_invalid": "배치도의 원점은 픽셀 단위 x, y 두 숫자여야 합니다.",
+      "plan_scale_invalid": "배치도의 축척은 0보다 커야 합니다.",
+      "plant_item_not_found": "이 프로젝트에서 장비 항목을 찾을 수 없습니다.",
+      "plant_position_not_found": "이 프로젝트에서 장비 항목 위치를 찾을 수 없습니다.",
+      "plant_position_required": "장비 항목 위치를 지정해야 합니다.",
+      "po_not_found": "이 프로젝트에서 발주서를 찾을 수 없습니다.",
+      "project_not_found": "프로젝트를 찾을 수 없습니다.",
+      "quiet_hours_conflict": "이 시간대는 정숙 시간에 해당하며 야간 작업 허가가 없습니다.",
+      "required_document_missing": "필수 서류가 아직 누락되어 있습니다.",
+      "response_required": "먼저 답변을 작성하십시오.",
+      "route_invalid": "경로가 올바른 선이 아닙니다.",
+      "simultaneity_factor_range": "동시사용계수는 0에서 1 사이여야 합니다.",
+      "site_timezone_missing": "먼저 현장 시간대를 설정하십시오. 시각은 현장 시계 기준으로 확인합니다.",
+      "slot_taken": "다른 승인된 납품이 이 출입구의 이 시간대를 점유하고 있습니다.",
+      "stage_active": "진행 중인 단계는 삭제할 수 없습니다. 먼저 종료하십시오.",
+      "stage_not_found": "확장 단계를 찾을 수 없습니다.",
+      "takt_location_not_found": "이 프로젝트에서 택트 구역을 찾을 수 없습니다.",
+      "takt_schedule_not_found": "이 프로젝트에서 택트 일정을 찾을 수 없습니다.",
+      "timezone_invalid": "알 수 없는 시간대입니다. Europe/Berlin과 같은 이름을 사용하십시오.",
+      "transport_closed": "종료되었거나 취소된 운송은 변경할 수 없습니다.",
+      "transport_mode_invalid": "알 수 없는 운송 방식입니다.",
+      "transport_not_found": "운송 건을 찾을 수 없습니다.",
+      "transport_under_way": "운송 중인 건은 삭제할 수 없습니다.",
+      "unknown_area_kind": "알 수 없는 구역 유형입니다.",
+      "unknown_catalogue": "알 수 없는 카탈로그입니다.",
+      "unknown_document_kind": "알 수 없는 서류 유형입니다.",
+      "unknown_issue_kind": "알 수 없는 민원 유형입니다.",
+      "unknown_link_kind": "이 유형의 링크에 대한 목록이 없습니다.",
+      "unknown_load_class": "알 수 없는 하중 등급입니다.",
+      "unknown_media_kind": "알 수 없는 공급 설비입니다.",
+      "unknown_noise_limit": "알 수 없는 소음 기준 항목입니다.",
+      "unknown_permit_kind": "알 수 없는 허가 유형입니다.",
+      "unknown_transport_kind": "알 수 없는 운송 유형입니다.",
+      "validity_invalid": "허가 종료일이 시작일보다 앞섭니다.",
+      "validity_required": "승인하기 전에 유효 기간을 입력하십시오.",
+      "vendor_not_found": "공급사를 찾을 수 없습니다.",
+      "window_invalid": "시간대가 올바르지 않습니다.",
+      "window_outside_permit": "운송 시간대가 허가 유효 기간 또는 허용 시간을 벗어납니다.",
+      "zone_not_found": "이 프로젝트에서 자재 적치 구역을 찾을 수 없습니다.",
+      "zone_type_invalid": "알 수 없는 구역 유형입니다."
+    },
+    "evidence": {
+      "balance_closed": "모든 진행 중 단계의 구역 면적 균형이 맞음",
+      "concept_saved_and_exported": "물류 개념이 저장되고 보관됨",
+      "first_stage_media_contracted": "첫 단계의 공급 설비 계약 완료",
+      "gate_loads_admitted": "모든 하중이 출입구 허용 범위 내이거나 특수 중량 허가로 보장됨",
+      "heavy_transports_permitted": "모든 중량물 운송에 허가 승인됨",
+      "neighbourhood_limit_source": "소음 기준 출처가 설정됨",
+      "no_errors": "미처리 물류 오류 없음",
+      "unresolved": "물류 계획을 거버넌스 모델에 반영할 수 없음"
+    },
+    "export": {
+      "as_of": "기준일",
+      "col_area_kind": "구역 유형",
+      "col_closed": "종료",
+      "col_contracted": "계약",
+      "col_date": "날짜",
+      "col_direction": "방향",
+      "col_documents": "필수 서류",
+      "col_due": "기한",
+      "col_group": "그룹",
+      "col_heavy": "중량물",
+      "col_hs_codes": "HS 코드",
+      "col_incoterm": "인코텀즈",
+      "col_item": "항목",
+      "col_m2": "m2",
+      "col_media_kind": "공급 설비",
+      "col_named_place": "지정 장소",
+      "col_pct": "%",
+      "col_permits": "허가",
+      "col_required": "필요",
+      "col_section": "구분",
+      "col_short": "단기",
+      "col_stage": "단계",
+      "col_state": "상태",
+      "col_title": "제목",
+      "col_topic": "주제",
+      "col_transport_kind": "종류",
+      "col_type": "유형",
+      "col_unit": "단위",
+      "col_value": "값",
+      "col_window": "시간대",
+      "empty": "항목이 없습니다.",
+      "project": "프로젝트",
+      "title_balance": "구역 면적 균형",
+      "title_customs": "통관 건 색인",
+      "title_frame": "물류 체계 요약",
+      "title_media": "공급 설비 균형",
+      "title_neighbourhood": "인접 지역 기록부",
+      "title_transports": "운송 및 허가"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "단계 {stage}: 배분 면적이 해당 구역 면적을 초과합니다.",
+        "suggestion": "배분 면적을 줄이십시오."
+      },
+      "area_balance_not_closed": {
+        "fail": "단계 {stage}: 구역 면적 균형이 맞지 않습니다 (차이 {difference_m2} m2).",
+        "suggestion": "남은 면적을 배분하거나 현장 총면적을 수정하십시오."
+      },
+      "area_overlap": {
+        "fail": "단계 {stage}: 서로 다른 유형의 두 구역이 겹칩니다.",
+        "suggestion": "윤곽을 조정하십시오."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "신고인이 인코텀즈상 수입 통관 책임자와 일치하지 않습니다.",
+        "suggestion": "신고인 또는 인코텀즈를 확인하십시오."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{hour}시부터 시작하는 시간대에 승인된 납품이 {count}건입니다. 공정 계획은 {limit}건까지 허용합니다.",
+        "suggestion": "납품을 다른 시간대로 옮기거나 개념에서 한도를 올리십시오."
+      },
+      "gate_hours_unchecked": {
+        "fail": "현장에 시간대가 없어 납품 일정을 출입구 운영 시간과 비교하지 않았습니다.",
+        "suggestion": "물류 개념에서 현장 시간대를 설정하십시오."
+      },
+      "gate_limits_unknown": {
+        "fail": "현장 출입구 {gate}에 하중 한도가 기재되어 있지 않습니다.",
+        "suggestion": "중량 및 치수 한도를 입력하십시오."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: 하중이 현장 출입구의 한도를 초과합니다.",
+        "suggestion": "다른 출입구를 사용하거나 하중을 나누십시오."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: 승인된 허가 없이 중량물 운송이 계획되어 있습니다.",
+        "suggestion": "허가를 신청하십시오."
+      },
+      "hs_code_invalid": {
+        "fail": "HS 코드 {hs_code}는 올바르지 않습니다.",
+        "suggestion": "숫자만 사용하고 최소 자릿수 이상으로 입력하십시오."
+      },
+      "incoterm_sea_only": {
+        "fail": "인코텀즈 {incoterm}는 해상 운송 전용입니다.",
+        "suggestion": "다른 운송 방식에는 FCA, CPT 또는 CIP를 사용하십시오."
+      },
+      "incoterm_unknown": {
+        "fail": "인코텀즈 {incoterm}는 고정된 버전에 없습니다.",
+        "suggestion": "고정된 버전에 있는 조건을 선택하십시오."
+      },
+      "jit_late": {
+        "fail": "{title}: 적시 납품이 택트 시작 시점 이후에 있습니다.",
+        "suggestion": "납품 일정을 앞당기십시오."
+      },
+      "jit_too_early": {
+        "fail": "{title}: 적시 납품이 버퍼가 허용하는 시점보다 이릅니다.",
+        "suggestion": "택트 시작 시점에 더 가깝게 옮기십시오."
+      },
+      "jit_without_location": {
+        "fail": "{title}: 흐름 {flow}의 적시 납품에 택트 구역이 지정되어 있지 않습니다.",
+        "suggestion": "납품 대상 택트 구역을 선택하십시오."
+      },
+      "media_capacity_short": {
+        "fail": "단계 {stage}: {media}에 {required}이(가) 필요하지만 계약 용량은 {contracted}입니다.",
+        "suggestion": "계약 용량을 늘리거나 수요를 줄이십시오."
+      },
+      "media_late": {
+        "fail": "단계 {stage}: {media} 연결 약속일이 단계 시작 이후입니다.",
+        "suggestion": "더 이른 날짜나 임시 공급에 합의하십시오."
+      },
+      "media_unsourced": {
+        "fail": "{media} 수요에 연결 설비가 없습니다.",
+        "suggestion": "연결 설비를 지정하십시오."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "민원의 답변 기한이 {due}이었습니다.",
+        "suggestion": "민원을 접수 확인하고 답변하십시오."
+      },
+      "permit_expired": {
+        "fail": "운송이 남아 있는데 허가 {reference}의 유효 기간이 만료되었습니다.",
+        "suggestion": "새 허가를 신청하십시오."
+      },
+      "permit_expiring": {
+        "fail": "운송이 남아 있는데 허가 {reference}의 유효 기간이 곧 끝납니다.",
+        "suggestion": "허가를 연장하십시오."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: 이 시간대는 정숙 시간에 해당합니다.",
+        "suggestion": "정숙 시간 밖으로 옮기거나 야간 작업 허가를 받으십시오."
+      },
+      "required_document_missing": {
+        "fail": "필수 서류 {kind}이(가) 누락되어 있습니다.",
+        "suggestion": "서류를 확보하고 연결하십시오."
+      },
+      "site_timezone_missing": {
+        "fail": "현장에 시간대가 없어 시간대별 규칙을 확인하지 않았습니다.",
+        "suggestion": "물류 개념에서 현장 시간대를 설정하십시오."
+      },
+      "stage_without_site_setup": {
+        "fail": "단계 {stage}에 현장 설비 구역(사무실 및 복지시설)이 없습니다.",
+        "suggestion": "사무실 및 복지시설용 구역을 배분하십시오."
+      },
+      "stage_without_storage": {
+        "fail": "단계 {stage}에 보관 또는 자재 적치 구역이 없습니다.",
+        "suggestion": "보관 또는 자재 적치 구역을 배분하십시오."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: 시간대가 허가 범위를 벗어납니다.",
+        "suggestion": "시간대를 옮기거나 허가를 연장하십시오."
+      },
+      "zone_not_mapped": {
+        "fail": "자재 적치 구역 {zone}이(가) 현장 구역과 연결되어 있지 않습니다.",
+        "suggestion": "계획된 구역과 연결하십시오."
+      }
+    }
+  }
+}

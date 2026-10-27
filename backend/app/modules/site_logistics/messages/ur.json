@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "ٹھیک ہے"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "نہیں",
+        "yes": "ہاں"
+      },
+      "direction": {
+        "export": "برآمد",
+        "import": "درآمد",
+        "inbound": "آمدی",
+        "outbound": "روانگی"
+      },
+      "group": {
+        "built": "تعمیر شدہ",
+        "external": "بیرونی",
+        "logistics": "لاجسٹکس",
+        "reserve": "ریزرو"
+      },
+      "is_heavy": {
+        "no": "نہیں",
+        "yes": "ہاں"
+      },
+      "section": {
+        "balance": "توازن",
+        "concept": "تصور",
+        "neighbourhood": "گردونواح",
+        "readiness": "تیاری"
+      },
+      "short": {
+        "no": "نہیں",
+        "yes": "ہاں"
+      },
+      "state": {
+        "acknowledged": "تسلیم شدہ",
+        "action_taken": "کارروائی کی گئی",
+        "active": "فعال",
+        "applied": "درخواست دی گئی",
+        "arrived": "پہنچ گیا",
+        "authority": "اتھارٹی",
+        "cancelled": "منسوخ",
+        "cleared": "کلیئر ہو گیا",
+        "closed": "بند",
+        "connected": "منسلک",
+        "contracted": "معاہدہ شدہ",
+        "declared": "ڈکلیئر کیا گیا",
+        "disconnected": "منقطع",
+        "documents_complete": "دستاویزات مکمل",
+        "draft": "مسودہ",
+        "expired": "میعاد ختم",
+        "granted": "منظور شدہ",
+        "held": "روکا گیا",
+        "identified": "شناخت شدہ",
+        "in_transit": "راستے میں",
+        "missing": "غائب",
+        "municipality": "میونسپلٹی",
+        "neighbours": "پڑوسی",
+        "offered": "پیش کیا گیا",
+        "open": "کھلا",
+        "other": "دیگر",
+        "permit_pending": "اجازت نامہ زیر التوا",
+        "planned": "منصوبہ بند",
+        "police": "پولیس",
+        "received": "موصول",
+        "refused": "مسترد",
+        "requested": "درخواست کی گئی",
+        "scheduled": "شیڈول شدہ",
+        "utility": "یوٹیلیٹی",
+        "verified": "تصدیق شدہ"
+      },
+      "type": {
+        "complaint": "شکایت",
+        "coordination": "ہم آہنگی"
+      }
+    },
+    "errors": {
+      "activity_not_found": "اس منصوبے میں شیڈول کی سرگرمی نہیں ملی۔",
+      "allocation_exceeds_area": "مختص رقبہ علاقے سے بڑا ہے۔",
+      "allocation_negative": "مختص رقبہ منفی نہیں ہو سکتا۔",
+      "allocations_changed": "مختص کیے گئے رقبے کسی اور نے تبدیل کر دیے ہیں۔ دوبارہ لوڈ کر کے کوشش کریں۔",
+      "area_not_found": "سائٹ کا علاقہ نہیں ملا۔",
+      "authority_permit_not_found": "اس منصوبے میں اتھارٹی کا اجازت نامہ نہیں ملا۔",
+      "buffer_days_negative": "بفر دن منفی نہیں ہو سکتے۔",
+      "catalogue_invalid": "طے شدہ لاجسٹکس کیٹلاگ حل نہیں ہو سکتا۔",
+      "catalogue_retired": "کیٹلاگ کا یہ ورژن ختم کیا جا چکا ہے۔",
+      "code_required": "کوڈ درکار ہے۔",
+      "code_taken": "یہ کوڈ منصوبے میں پہلے ہی استعمال ہو رہا ہے۔",
+      "commodity_code_not_found": "اجناس کا کوڈ نہیں ملا۔",
+      "complaint_closed": "بند شدہ شکایت میں تبدیلی نہیں ہو سکتی۔",
+      "complaint_not_found": "شکایت نہیں ملی۔",
+      "connection_point_invalid": "کنکشن پوائنٹ درست پوائنٹ نہیں ہے۔",
+      "contracted_capacity_required": "پہلے معاہدہ شدہ گنجائش درج کریں۔",
+      "correspondence_not_found": "اس منصوبے میں خط و کتابت نہیں ملی۔",
+      "correspondence_thread_not_found": "اس منصوبے میں خط و کتابت نہیں ملی۔",
+      "country_invalid": "دو حروف کا ISO ملک کوڈ استعمال کریں۔",
+      "currency_invalid": "تین حروف کا ISO کرنسی کوڈ استعمال کریں۔",
+      "currency_required": "رقم کے ساتھ کرنسی درکار ہے۔",
+      "customs_case_not_found": "کسٹمز کیس نہیں ملا۔",
+      "customs_closed": "کلیئر یا بند شدہ کیس میں تبدیلی نہیں ہو سکتی۔",
+      "customs_declared": "ڈکلیئر شدہ کیس حذف نہیں ہو سکتا۔",
+      "customs_not_found": "کسٹمز کیس نہیں ملا۔",
+      "customs_without_lines": "پہلے کم از کم ایک سامان کی لائن شامل کریں۔",
+      "declarant_invalid": "ڈکلیئرنٹ خریدار یا فروخت کنندہ نہیں ہو سکتا۔",
+      "delivery_already_on_site": "یہ ترسیل پہنچ چکی ہے اور اس کا دوبارہ فیصلہ نہیں ہوتا۔",
+      "delivery_not_found": "اس منصوبے میں ترسیل نہیں ملی۔",
+      "delivery_rate_exceeded": "اس گھنٹے میں کنسیپٹ کی اجازت کے مطابق ترسیلیں پہلے ہی موجود ہیں۔",
+      "delivery_refused": "یہ ترسیل جیسی ہے ویسی منظور نہیں ہو سکتی۔",
+      "demand_not_found": "ضرورت نہیں ملی۔",
+      "demand_owned_by_plant_position": "یہ ضرورت پلانٹ پوزیشن سے آتی ہے؛ اسے وہیں تبدیل کریں۔",
+      "direction_invalid": "نامعلوم سمت۔",
+      "document_exists": "یہ دستاویز پہلے ہی چیک لسٹ میں ہے۔",
+      "document_not_found": "دستاویز نہیں ملی۔",
+      "document_ref_required": "وصول شدہ نشان لگانے سے پہلے دستاویز منسلک کریں۔",
+      "duplicate_stage": "ہر مرحلے کو فی علاقہ ایک بار ہی مختص کیا جا سکتا ہے۔",
+      "entry_not_found": "لاگ اندراج نہیں ملا۔",
+      "field_required": "یہ خانہ خالی نہیں چھوڑا جا سکتا۔",
+      "flow_code_invalid": "ہر مادی بہاؤ کا اپنا کوڈ ہونا چاہیے۔",
+      "flow_code_unknown": "لاجسٹکس کنسیپٹ میں اس کوڈ کا کوئی مادی بہاؤ نہیں ہے۔",
+      "flow_mode_invalid": "نامعلوم مادی بہاؤ کا طریقہ۔",
+      "frame_invalid": "نامعلوم کوآرڈینیٹ فریم۔",
+      "gate_hours_unchecked": "جب تک سائٹ کا ٹائم زون مقرر نہ ہو، کھلنے کے اوقات کی جانچ نہیں ہوتی۔",
+      "gate_load_exceeded": "بوجھ سائٹ کے داخلی دروازے کی حدوں سے زیادہ ہے۔",
+      "gate_not_found": "اس منصوبے میں سائٹ کا داخلی دروازہ نہیں ملا۔",
+      "geo_overlay_not_found": "اس منصوبے میں سائٹ پلان کی تہہ نہیں ملی۔",
+      "geometry_invalid": "علاقے کا خاکہ درست پولی گون نہیں ہے۔",
+      "goods_receipt_missing": "اس خریداری آرڈر کے لیے ابھی تک تصدیق شدہ سامان کی وصولی نہیں ہوئی۔",
+      "heavy_without_permit": "بھاری ترسیل کے لیے شیڈول سے پہلے منظور شدہ اجازت نامہ درکار ہے۔",
+      "hours_invalid": "درست اوقات درج کریں، اختتام آغاز کے بعد ہو۔",
+      "hs_code_invalid": "HS کوڈ صرف ہندسوں پر مشتمل ہونا چاہیے اور کافی لمبا ہو۔",
+      "incoterm_unknown": "یہ انکوٹرم طے شدہ ورژن میں موجود نہیں ہے۔",
+      "invalid_transition": "اسٹیٹس کی یہ تبدیلی اجازت یافتہ نہیں ہے۔",
+      "jit_without_takt": "جسٹ اِن ٹائم بہاؤ کے لیے ٹیکٹ شیڈول درکار ہے۔",
+      "last_stage": "منصوبے میں کم از کم ایک توسیعی مرحلہ ضرور رہتا ہے۔",
+      "line_not_found": "کسٹمز لائن نہیں ملی۔",
+      "link_target_unavailable": "یہ لنک ابھی جانچا نہیں جا سکتا، جس ماڈیول کی طرف یہ اشارہ کرتا ہے وہ انسٹال نہیں ہے۔",
+      "media_not_found": "یوٹیلیٹی کنکشن نہیں ملا۔",
+      "money_not_decimal": "رقم اعشاری عدد کے طور پر درج کریں۔",
+      "money_out_of_range": "رقم زیادہ سے زیادہ دو اعشاری ہندسوں تک درج کریں۔",
+      "noise_limit_needs_project_value": "اس دائرہ اختیار میں مقررہ قدریں نہیں ہیں؛ منصوبے کی منظور شدہ قدریں درج کریں۔",
+      "not_found": "نہیں ملا۔",
+      "outside_gate_hours": "یہ وقت کی کھڑکی داخلی دروازے کے کھلنے کے اوقات سے باہر ہے۔",
+      "owner_not_member": "مالک اس منصوبے کا رکن ہونا چاہیے۔",
+      "pack_catalogue_invalid": "پیک کا کیٹلاگ لوڈ نہیں ہو رہا۔",
+      "permission_denied": "آپ کو اس کی اجازت نہیں ہے۔",
+      "permit_frozen": "جو اجازت نامہ منظور، مسترد یا میعاد ختم شدہ ہو، وہ اپنی مدت، اوقات اور ترسیلیں برقرار رکھتا ہے۔",
+      "permit_not_found": "اجازت نامہ نہیں ملا۔",
+      "plan_calibration_without_image": "پیمانہ مقرر کرنے سے پہلے سائٹ پلان کی تصویر منتخب کریں۔",
+      "plan_document_not_found": "اس منصوبے میں سائٹ پلان کی دستاویز نہیں ملی۔",
+      "plan_origin_invalid": "سائٹ پلان کا نقطۂ آغاز پکسلز میں دو اعداد، x اور y، پر مشتمل ہے۔",
+      "plan_scale_invalid": "سائٹ پلان کا پیمانہ صفر سے بڑا ہونا چاہیے۔",
+      "plant_item_not_found": "اس منصوبے میں پلانٹ آئٹم نہیں ملا۔",
+      "plant_position_not_found": "اس منصوبے میں پلانٹ پوزیشن نہیں ملی۔",
+      "plant_position_required": "پلانٹ پوزیشن درکار ہے۔",
+      "po_not_found": "اس منصوبے میں خریداری آرڈر نہیں ملا۔",
+      "project_not_found": "منصوبہ نہیں ملا۔",
+      "quiet_hours_conflict": "یہ وقت خاموشی کے اوقات میں آتا ہے اور کوئی رات کے کام کا اجازت نامہ اسے کور نہیں کرتا۔",
+      "required_document_missing": "مطلوبہ دستاویز ابھی تک غائب ہے۔",
+      "response_required": "پہلے جواب لکھیں۔",
+      "route_invalid": "راستہ درست لائن نہیں ہے۔",
+      "simultaneity_factor_range": "ہم وقتی عنصر 0 اور 1 کے درمیان ہونا چاہیے۔",
+      "site_timezone_missing": "پہلے سائٹ کا ٹائم زون مقرر کریں؛ اوقات سائٹ کی گھڑی کے مطابق جانچے جاتے ہیں۔",
+      "slot_taken": "ایک اور منظور شدہ ترسیل اس داخلی دروازے پر یہ وقت کی کھڑکی لے چکی ہے۔",
+      "stage_active": "فعال مرحلہ حذف نہیں ہو سکتا۔ پہلے اسے بند کریں۔",
+      "stage_not_found": "توسیعی مرحلہ نہیں ملا۔",
+      "takt_location_not_found": "اس منصوبے میں ٹیکٹ علاقہ نہیں ملا۔",
+      "takt_schedule_not_found": "اس منصوبے میں ٹیکٹ شیڈول نہیں ملا۔",
+      "timezone_invalid": "نامعلوم ٹائم زون۔ Europe/Berlin جیسا نام استعمال کریں۔",
+      "transport_closed": "بند یا منسوخ شدہ ٹرانسپورٹ میں تبدیلی نہیں ہو سکتی۔",
+      "transport_mode_invalid": "نامعلوم ٹرانسپورٹ کا طریقہ۔",
+      "transport_not_found": "ٹرانسپورٹ نہیں ملی۔",
+      "transport_under_way": "راستے میں موجود ٹرانسپورٹ حذف نہیں ہو سکتی۔",
+      "unknown_area_kind": "نامعلوم علاقے کی قسم۔",
+      "unknown_catalogue": "نامعلوم کیٹلاگ۔",
+      "unknown_document_kind": "نامعلوم دستاویز کی قسم۔",
+      "unknown_issue_kind": "نامعلوم شکایت کی قسم۔",
+      "unknown_link_kind": "اس قسم کے لنک کے لیے کوئی فہرست نہیں ہے۔",
+      "unknown_load_class": "نامعلوم بوجھ کی کلاس۔",
+      "unknown_media_kind": "نامعلوم یوٹیلیٹی۔",
+      "unknown_noise_limit": "نامعلوم شور کی حد کا اندراج۔",
+      "unknown_permit_kind": "نامعلوم اجازت نامے کی قسم۔",
+      "unknown_transport_kind": "نامعلوم ٹرانسپورٹ کی قسم۔",
+      "validity_invalid": "اجازت نامہ شروع ہونے سے پہلے ختم ہو جاتا ہے۔",
+      "validity_required": "منظوری سے پہلے میعاد کی تاریخیں درج کریں۔",
+      "vendor_not_found": "سپلائر نہیں ملا۔",
+      "window_invalid": "وقت کی کھڑکی درست نہیں ہے۔",
+      "window_outside_permit": "ٹرانسپورٹ کی وقت کی کھڑکی اجازت نامے کی میعاد یا اس کے مجاز اوقات سے باہر ہے۔",
+      "zone_not_found": "اس منصوبے میں اسٹوریج زون نہیں ملا۔",
+      "zone_type_invalid": "نامعلوم زون کی قسم۔"
+    },
+    "evidence": {
+      "balance_closed": "ہر کھلے مرحلے کے لیے علاقے کا توازن مکمل",
+      "concept_saved_and_exported": "لاجسٹکس کنسیپٹ محفوظ اور فائل ہو گیا",
+      "first_stage_media_contracted": "پہلے مرحلے کی یوٹیلیٹیز کا معاہدہ ہو گیا",
+      "gate_loads_admitted": "ہر بوجھ اپنے داخلی دروازے سے منظور ہے یا اوور سائز اجازت نامے سے کور ہے",
+      "heavy_transports_permitted": "ہر بھاری ترسیل کے لیے اجازت نامہ منظور",
+      "neighbourhood_limit_source": "شور کی حد کا ماخذ مقرر ہو گیا",
+      "no_errors": "کوئی کھلی لاجسٹکس خرابی نہیں",
+      "unresolved": "لاجسٹکس پلان گورننس ماڈل میں جگہ نہیں پا سکا"
+    },
+    "export": {
+      "as_of": "بتاریخ",
+      "col_area_kind": "علاقے کی قسم",
+      "col_closed": "بند",
+      "col_contracted": "معاہدہ شدہ",
+      "col_date": "تاریخ",
+      "col_direction": "سمت",
+      "col_documents": "مطلوبہ دستاویزات",
+      "col_due": "واجب",
+      "col_group": "گروپ",
+      "col_heavy": "بھاری",
+      "col_hs_codes": "HS کوڈز",
+      "col_incoterm": "انکوٹرم",
+      "col_item": "آئٹم",
+      "col_m2": "m2",
+      "col_media_kind": "یوٹیلیٹی",
+      "col_named_place": "مقررہ مقام",
+      "col_pct": "%",
+      "col_permits": "اجازت نامے",
+      "col_required": "مطلوب",
+      "col_section": "حصہ",
+      "col_short": "مختصر",
+      "col_stage": "مرحلہ",
+      "col_state": "حیثیت",
+      "col_title": "عنوان",
+      "col_topic": "موضوع",
+      "col_transport_kind": "قسم",
+      "col_type": "قسم",
+      "col_unit": "اکائی",
+      "col_value": "قدر",
+      "col_window": "وقت کی کھڑکی",
+      "empty": "کوئی اندراج نہیں۔",
+      "project": "منصوبہ",
+      "title_balance": "علاقے کا توازن",
+      "title_customs": "کسٹمز کیس فائل انڈیکس",
+      "title_frame": "لاجسٹکس فریم کا خلاصہ",
+      "title_media": "یوٹیلیٹی توازن",
+      "title_neighbourhood": "گردونواح کا لاگ",
+      "title_transports": "ٹرانسپورٹ اور اجازت نامے"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "مرحلہ {stage}: ایک مختص رقبہ اپنے علاقے سے بڑا ہے۔",
+        "suggestion": "مختص رقبہ کم کریں۔"
+      },
+      "area_balance_not_closed": {
+        "fail": "مرحلہ {stage}: علاقے کا توازن مکمل نہیں ہوتا ({difference_m2} m2 فرق)۔",
+        "suggestion": "باقی رقبہ مختص کریں یا سائٹ کا کل رقبہ درست کریں۔"
+      },
+      "area_overlap": {
+        "fail": "مرحلہ {stage}: مختلف اقسام کے دو علاقے آپس میں ملتے ہیں۔",
+        "suggestion": "خاکے ایڈجسٹ کریں۔"
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "ڈکلیئرنٹ اس فریق سے مختلف ہے جو انکوٹرم کے تحت درآمدی کلیئرنس کرتا ہے۔",
+        "suggestion": "ڈکلیئرنٹ یا انکوٹرم کی جانچ کریں۔"
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{hour} سے شروع ہونے والے گھنٹے میں {count} منظور شدہ ترسیلیں شروع ہوتی ہیں، کنسیپٹ {limit} کی اجازت دیتا ہے۔",
+        "suggestion": "ترسیلیں کسی اور گھنٹے میں منتقل کریں یا کنسیپٹ میں حد بڑھائیں۔"
+      },
+      "gate_hours_unchecked": {
+        "fail": "سائٹ کا ٹائم زون نہیں ہے، اس لیے ترسیلوں کا موازنہ کھلنے کے اوقات سے نہیں کیا گیا۔",
+        "suggestion": "لاجسٹکس کنسیپٹ میں سائٹ کا ٹائم زون مقرر کریں۔"
+      },
+      "gate_limits_unknown": {
+        "fail": "سائٹ کا داخلی دروازہ {gate} کوئی بوجھ کی حد درج نہیں کرتا۔",
+        "suggestion": "وزن اور جسامت کی حدیں درج کریں۔"
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: بوجھ سائٹ کے داخلی دروازے کی حدوں سے زیادہ ہے۔",
+        "suggestion": "کوئی اور دروازہ استعمال کریں یا بوجھ تقسیم کریں۔"
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: منظور شدہ اجازت نامے کے بغیر بھاری ترسیل۔",
+        "suggestion": "اجازت نامے کے لیے درخواست دیں۔"
+      },
+      "hs_code_invalid": {
+        "fail": "HS کوڈ {hs_code} درست نہیں ہے۔",
+        "suggestion": "صرف ہندسے استعمال کریں، کم از کم مطلوبہ لمبائی کے ساتھ۔"
+      },
+      "incoterm_sea_only": {
+        "fail": "انکوٹرم {incoterm} صرف سمندری ٹرانسپورٹ کے لیے ہے۔",
+        "suggestion": "دیگر طریقوں کے لیے FCA، CPT یا CIP استعمال کریں۔"
+      },
+      "incoterm_unknown": {
+        "fail": "انکوٹرم {incoterm} طے شدہ ورژن میں موجود نہیں ہے۔",
+        "suggestion": "طے شدہ ورژن کی کوئی شرط منتخب کریں۔"
+      },
+      "jit_late": {
+        "fail": "{title}: جسٹ اِن ٹائم ترسیل ٹیکٹ کے آغاز کے بعد آتی ہے۔",
+        "suggestion": "ترسیل کو پہلے لائیں۔"
+      },
+      "jit_too_early": {
+        "fail": "{title}: جسٹ اِن ٹائم ترسیل اپنے بفر کی اجازت سے پہلے آتی ہے۔",
+        "suggestion": "اسے ٹیکٹ کے آغاز کے قریب کریں۔"
+      },
+      "jit_without_location": {
+        "fail": "{title}: بہاؤ {flow} کی جسٹ اِن ٹائم ترسیل کوئی ٹیکٹ علاقہ نہیں بتاتی۔",
+        "suggestion": "وہ ٹیکٹ علاقہ منتخب کریں جس کے لیے ترسیل ہے۔"
+      },
+      "media_capacity_short": {
+        "fail": "مرحلہ {stage}: {media} کو {required} چاہیے، معاہدہ شدہ {contracted}۔",
+        "suggestion": "معاہدہ شدہ گنجائش بڑھائیں یا ضرورت کم کریں۔"
+      },
+      "media_late": {
+        "fail": "مرحلہ {stage}: {media} کنکشن مرحلے کے آغاز کے بعد کا وعدہ ہے۔",
+        "suggestion": "کوئی پہلے کی تاریخ یا عارضی فراہمی طے کریں۔"
+      },
+      "media_unsourced": {
+        "fail": "{media} کی ایک ضرورت کا کوئی کنکشن نہیں ہے۔",
+        "suggestion": "کنکشن تفویض کریں۔"
+      },
+      "neighbour_issue_overdue": {
+        "fail": "ایک شکایت کا جواب {due} کو دینا تھا۔",
+        "suggestion": "شکایت کی تصدیق کریں اور جواب دیں۔"
+      },
+      "permit_expired": {
+        "fail": "اجازت نامہ {reference} کی میعاد ختم ہو گئی جبکہ ترسیلیں باقی ہیں۔",
+        "suggestion": "نئے اجازت نامے کے لیے درخواست دیں۔"
+      },
+      "permit_expiring": {
+        "fail": "اجازت نامہ {reference} جلد ختم ہونے والا ہے جبکہ ترسیلیں باقی ہیں۔",
+        "suggestion": "اجازت نامے کی مدت بڑھائیں۔"
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: وقت کی کھڑکی خاموشی کے اوقات میں آتی ہے۔",
+        "suggestion": "اسے خاموشی کے اوقات سے باہر منتقل کریں یا رات کے کام کا اجازت نامہ حاصل کریں۔"
+      },
+      "required_document_missing": {
+        "fail": "مطلوبہ دستاویز {kind} غائب ہے۔",
+        "suggestion": "دستاویز حاصل کریں اور منسلک کریں۔"
+      },
+      "site_timezone_missing": {
+        "fail": "سائٹ کا ٹائم زون نہیں ہے، اس لیے دن کے اوقات کے قواعد کی جانچ نہیں ہوئی۔",
+        "suggestion": "لاجسٹکس کنسیپٹ میں سائٹ کا ٹائم زون مقرر کریں۔"
+      },
+      "stage_without_site_setup": {
+        "fail": "مرحلہ {stage} کے لیے سائٹ سیٹ اپ کا کوئی علاقہ نہیں ہے۔",
+        "suggestion": "دفاتر اور رفاہی سہولیات کے لیے علاقہ مختص کریں۔"
+      },
+      "stage_without_storage": {
+        "fail": "مرحلہ {stage} کے لیے اسٹوریج یا لے ڈاؤن علاقہ نہیں ہے۔",
+        "suggestion": "اسٹوریج یا لے ڈاؤن علاقہ مختص کریں۔"
+      },
+      "window_outside_permit": {
+        "fail": "{title}: وقت کی کھڑکی اجازت نامے سے باہر ہے۔",
+        "suggestion": "کھڑکی منتقل کریں یا اجازت نامے کی مدت بڑھائیں۔"
+      },
+      "zone_not_mapped": {
+        "fail": "لے ڈاؤن زون {zone} کسی سائٹ علاقے سے منسلک نہیں ہے۔",
+        "suggestion": "اسے اس کے منصوبہ بند علاقے سے منسلک کریں۔"
+      }
+    }
+  }
+}

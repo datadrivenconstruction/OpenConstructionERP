@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Nej",
+        "yes": "Ja"
+      },
+      "direction": {
+        "export": "Export",
+        "import": "Import",
+        "inbound": "Inleverans",
+        "outbound": "Utleverans"
+      },
+      "group": {
+        "built": "Byggt",
+        "external": "Externt",
+        "logistics": "Logistik",
+        "reserve": "Reserv"
+      },
+      "is_heavy": {
+        "no": "Nej",
+        "yes": "Ja"
+      },
+      "section": {
+        "balance": "Balans",
+        "concept": "Koncept",
+        "neighbourhood": "Närområde",
+        "readiness": "Beredskap"
+      },
+      "short": {
+        "no": "Nej",
+        "yes": "Ja"
+      },
+      "state": {
+        "acknowledged": "Bekräftad",
+        "action_taken": "Åtgärd vidtagen",
+        "active": "Aktiv",
+        "applied": "Ansökt",
+        "arrived": "Ankommen",
+        "authority": "Myndighet",
+        "cancelled": "Avbokad",
+        "cleared": "Tullklarerad",
+        "closed": "Stängd",
+        "connected": "Ansluten",
+        "contracted": "Avtalad",
+        "declared": "Deklarerad",
+        "disconnected": "Frånkopplad",
+        "documents_complete": "Handlingar kompletta",
+        "draft": "Utkast",
+        "expired": "Utgången",
+        "granted": "Beviljad",
+        "held": "Kvarhållen",
+        "identified": "Identifierad",
+        "in_transit": "Under transport",
+        "missing": "Saknas",
+        "municipality": "Kommun",
+        "neighbours": "Grannar",
+        "offered": "Erbjuden",
+        "open": "Öppen",
+        "other": "Övrigt",
+        "permit_pending": "Tillstånd under handläggning",
+        "planned": "Planerad",
+        "police": "Polis",
+        "received": "Mottagen",
+        "refused": "Avslagen",
+        "requested": "Begärd",
+        "scheduled": "Schemalagd",
+        "utility": "Ledningsägare",
+        "verified": "Verifierad"
+      },
+      "type": {
+        "complaint": "Klagomål",
+        "coordination": "Samordning"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Tidplansaktiviteten hittades inte i det här projektet.",
+      "allocation_exceeds_area": "Fördelningen är större än ytan.",
+      "allocation_negative": "En fördelning kan inte vara negativ.",
+      "allocations_changed": "Fördelningarna har ändrats av någon annan. Ladda om och försök igen.",
+      "area_not_found": "Arbetsområdet hittades inte.",
+      "authority_permit_not_found": "Myndighetstillståndet hittades inte i det här projektet.",
+      "buffer_days_negative": "Buffertdagarna kan inte vara negativa.",
+      "catalogue_invalid": "Den fastlagda logistikkatalogen kan inte tolkas.",
+      "catalogue_retired": "Den här katalogversionen är utfasad.",
+      "code_required": "En kod krävs.",
+      "code_taken": "Den här koden används redan i projektet.",
+      "commodity_code_not_found": "Varukoden hittades inte.",
+      "complaint_closed": "Ett stängt klagomål kan inte ändras.",
+      "complaint_not_found": "Klagomålet hittades inte.",
+      "connection_point_invalid": "Anslutningspunkten är inte en giltig punkt.",
+      "contracted_capacity_required": "Ange först den avtalade kapaciteten.",
+      "correspondence_not_found": "Korrespondensen hittades inte i det här projektet.",
+      "correspondence_thread_not_found": "Korrespondensen hittades inte i det här projektet.",
+      "country_invalid": "Använd en tvåbokstavskod för land enligt ISO.",
+      "currency_invalid": "Använd en tre bokstäver lång valutakod enligt ISO.",
+      "currency_required": "Ett belopp måste ha en valuta.",
+      "customs_case_not_found": "Tullärendet hittades inte.",
+      "customs_closed": "Ett klarerat eller stängt ärende kan inte ändras.",
+      "customs_declared": "Ett deklarerat ärende kan inte raderas.",
+      "customs_not_found": "Tullärendet hittades inte.",
+      "customs_without_lines": "Lägg först till minst en varurad.",
+      "declarant_invalid": "Deklaranten är köparen eller säljaren.",
+      "delivery_already_on_site": "Den här leveransen har redan anlänt och beslutas inte på nytt.",
+      "delivery_not_found": "Leveransen hittades inte i det här projektet.",
+      "delivery_rate_exceeded": "Den här timmen innehåller redan så många leveranser som konceptet tillåter.",
+      "delivery_refused": "Den här leveransen kan inte godkännas i nuvarande skick.",
+      "demand_not_found": "Behovet hittades inte.",
+      "demand_owned_by_plant_position": "Det här behovet kommer från en maskinpost; ändra det där.",
+      "direction_invalid": "Okänd riktning.",
+      "document_exists": "Dokumentet finns redan på checklistan.",
+      "document_not_found": "Dokumentet hittades inte.",
+      "document_ref_required": "Koppla dokumentet innan du markerar det som mottaget.",
+      "duplicate_stage": "Varje etapp kan bara fördelas en gång per område.",
+      "entry_not_found": "Loggposten hittades inte.",
+      "field_required": "Fältet får inte vara tomt.",
+      "flow_code_invalid": "Varje materialflöde måste ha en egen kod.",
+      "flow_code_unknown": "Logistikkonceptet har inget materialflöde med den här koden.",
+      "flow_mode_invalid": "Okänt läge för materialflöde.",
+      "frame_invalid": "Okänt koordinatsystem.",
+      "gate_hours_unchecked": "Öppettiderna kontrolleras inte förrän arbetsplatsens tidszon är angiven.",
+      "gate_load_exceeded": "Lasten överskrider gränserna för arbetsplatsens infart.",
+      "gate_not_found": "Infarten till arbetsplatsen hittades inte i det här projektet.",
+      "geo_overlay_not_found": "Planöverlägget för arbetsplatsen hittades inte i det här projektet.",
+      "geometry_invalid": "Områdets kontur är inte en giltig polygon.",
+      "goods_receipt_missing": "Det finns ännu ingen bekräftad varumottagning för den här inköpsordern.",
+      "heavy_without_permit": "En tung transport kräver ett beviljat tillstånd innan den schemaläggs.",
+      "hours_invalid": "Ange giltiga timmar, med slut efter start.",
+      "hs_code_invalid": "HS-koden får bara innehålla siffror och måste vara tillräckligt lång.",
+      "incoterm_unknown": "Den här incoterm finns inte i den fastlagda versionen.",
+      "invalid_transition": "Den här statusändringen är inte tillåten.",
+      "jit_without_takt": "Ett just-in-time-flöde kräver ett takt-schema.",
+      "last_stage": "Ett projekt behåller minst en utbyggnadsetapp.",
+      "line_not_found": "Tullraden hittades inte.",
+      "link_target_unavailable": "Den här länken kan inte kontrolleras ännu, eftersom modulen den pekar på inte är installerad.",
+      "media_not_found": "Ledningsanslutningen hittades inte.",
+      "money_not_decimal": "Ange beloppet som ett decimaltal.",
+      "money_out_of_range": "Ange ett belopp med högst två decimaler.",
+      "noise_limit_needs_project_value": "Den här jurisdiktionen anger inga fasta värden; ange projektets överenskomna värden.",
+      "not_found": "Hittades inte.",
+      "outside_gate_hours": "Tidsfönstret ligger utanför infartens öppettider.",
+      "owner_not_member": "Ägaren måste vara medlem i det här projektet.",
+      "pack_catalogue_invalid": "Paketets katalog kan inte läsas in.",
+      "permission_denied": "Du har inte behörighet till detta.",
+      "permit_frozen": "Ett beviljat, avslaget eller utgånget tillstånd behåller sin giltighet, sina tidsfönster och sina transporter.",
+      "permit_not_found": "Tillståndet hittades inte.",
+      "plan_calibration_without_image": "Välj bilden till arbetsplatsplanen innan du anger dess skala.",
+      "plan_document_not_found": "Arbetsplatsplanen hittades inte i det här projektet.",
+      "plan_origin_invalid": "Arbetsplatsplanens origo består av två tal, x och y, i pixlar.",
+      "plan_scale_invalid": "Skalan för arbetsplatsplanen måste vara större än noll.",
+      "plant_item_not_found": "Maskinposten hittades inte i det här projektet.",
+      "plant_position_not_found": "Maskinposten hittades inte i det här projektet.",
+      "plant_position_required": "En maskinpost krävs.",
+      "po_not_found": "Inköpsordern hittades inte i det här projektet.",
+      "project_not_found": "Projektet hittades inte.",
+      "quiet_hours_conflict": "Tidsfönstret infaller under tyst tid, och inget nattarbetstillstånd täcker det.",
+      "required_document_missing": "Ett obligatoriskt dokument saknas fortfarande.",
+      "response_required": "Skriv svaret först.",
+      "route_invalid": "Rutten är inte en giltig linje.",
+      "simultaneity_factor_range": "Samtidighetsfaktorn ligger mellan 0 och 1.",
+      "site_timezone_missing": "Ange arbetsplatsens tidszon först; tider kontrolleras mot arbetsplatsens klocka.",
+      "slot_taken": "En annan godkänd leverans har redan det här tidsfönstret vid infarten.",
+      "stage_active": "En aktiv etapp kan inte raderas. Stäng den först.",
+      "stage_not_found": "Utbyggnadsetappen hittades inte.",
+      "takt_location_not_found": "Taktområdet hittades inte i det här projektet.",
+      "takt_schedule_not_found": "Taktschemat hittades inte i det här projektet.",
+      "timezone_invalid": "Okänd tidszon. Använd ett namn som Europe/Stockholm.",
+      "transport_closed": "En stängd eller avbokad transport kan inte ändras.",
+      "transport_mode_invalid": "Okänt transportsätt.",
+      "transport_not_found": "Transporten hittades inte.",
+      "transport_under_way": "En transport som är på väg kan inte raderas.",
+      "unknown_area_kind": "Okänd områdestyp.",
+      "unknown_catalogue": "Okänd katalog.",
+      "unknown_document_kind": "Okänd dokumenttyp.",
+      "unknown_issue_kind": "Okänd typ av klagomål.",
+      "unknown_link_kind": "Det finns ingen lista för den här typen av länk.",
+      "unknown_load_class": "Okänd lastklass.",
+      "unknown_media_kind": "Okänd ledning.",
+      "unknown_noise_limit": "Okänd post för bullergräns.",
+      "unknown_permit_kind": "Okänd tillståndstyp.",
+      "unknown_transport_kind": "Okänd transporttyp.",
+      "validity_invalid": "Tillståndet upphör innan det börjar gälla.",
+      "validity_required": "Ange giltighetsdatum innan du beviljar.",
+      "vendor_not_found": "Leverantören hittades inte.",
+      "window_invalid": "Tidsfönstret är inte giltigt.",
+      "window_outside_permit": "Transportfönstret ligger utanför tillståndets giltighet eller de tillåtna tiderna.",
+      "zone_not_found": "Upplagsytan hittades inte i det här projektet.",
+      "zone_type_invalid": "Okänd zontyp."
+    },
+    "evidence": {
+      "balance_closed": "Områdesbalansen är stängd för varje öppen etapp",
+      "concept_saved_and_exported": "Logistikkonceptet är sparat och arkiverat",
+      "first_stage_media_contracted": "Ledningarna för första etappen är avtalade",
+      "gate_loads_admitted": "Varje last är godkänd av sin infart eller täckt av ett tillstånd för överdimensionerad last",
+      "heavy_transports_permitted": "Tillstånd beviljat för varje tung transport",
+      "neighbourhood_limit_source": "Källa för bullergränsen är angiven",
+      "no_errors": "Inga öppna logistikfel",
+      "unresolved": "Logistikplanen kunde inte placeras i styrmodellen"
+    },
+    "export": {
+      "as_of": "Per",
+      "col_area_kind": "Områdestyp",
+      "col_closed": "Stängd",
+      "col_contracted": "Avtalad",
+      "col_date": "Datum",
+      "col_direction": "Riktning",
+      "col_documents": "Obligatoriska dokument",
+      "col_due": "Förfaller",
+      "col_group": "Grupp",
+      "col_heavy": "Tung",
+      "col_hs_codes": "HS-koder",
+      "col_incoterm": "Incoterm",
+      "col_item": "Post",
+      "col_m2": "m2",
+      "col_media_kind": "Ledning",
+      "col_named_place": "Angiven plats",
+      "col_pct": "%",
+      "col_permits": "Tillstånd",
+      "col_required": "Krävs",
+      "col_section": "Avsnitt",
+      "col_short": "Kort",
+      "col_stage": "Etapp",
+      "col_state": "Status",
+      "col_title": "Titel",
+      "col_topic": "Ämne",
+      "col_transport_kind": "Typ",
+      "col_type": "Typ",
+      "col_unit": "Enhet",
+      "col_value": "Värde",
+      "col_window": "Tidsfönster",
+      "empty": "Inga poster.",
+      "project": "Projekt",
+      "title_balance": "Områdesbalans",
+      "title_customs": "Register över tullärenden",
+      "title_frame": "Sammanfattning av logistikramen",
+      "title_media": "Ledningsbalans",
+      "title_neighbourhood": "Grannlogg",
+      "title_transports": "Transporter och tillstånd"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Etapp {stage}: en fördelning är större än sin yta.",
+        "suggestion": "Minska fördelningen."
+      },
+      "area_balance_not_closed": {
+        "fail": "Etapp {stage}: områdesbalansen går inte ihop (skillnad på {difference_m2} m2).",
+        "suggestion": "Fördela den återstående ytan eller korrigera arbetsplatsens totalyta."
+      },
+      "area_overlap": {
+        "fail": "Etapp {stage}: två områden av olika typ överlappar varandra.",
+        "suggestion": "Justera konturerna."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Deklaranten stämmer inte överens med den part som enligt incoterm ansvarar för importtullklarering.",
+        "suggestion": "Kontrollera deklaranten eller incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} godkända leveranser startar under timmen från {hour}; konceptet tillåter {limit}.",
+        "suggestion": "Flytta leveranserna till en annan timme eller höj gränsen i konceptet."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Arbetsplatsen saknar tidszon, så leveranserna har inte jämförts med öppettiderna.",
+        "suggestion": "Ange arbetsplatsens tidszon i logistikkonceptet."
+      },
+      "gate_limits_unknown": {
+        "fail": "Infarten {gate} till arbetsplatsen anger inga lastgränser.",
+        "suggestion": "Ange vikt- och dimensionsgränser."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: lasten överskrider gränserna för arbetsplatsens infart.",
+        "suggestion": "Använd en annan infart eller dela upp lasten."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: tung transport utan beviljat tillstånd.",
+        "suggestion": "Ansök om tillståndet."
+      },
+      "hs_code_invalid": {
+        "fail": "HS-koden {hs_code} är inte giltig.",
+        "suggestion": "Använd endast siffror, minst den angivna längden."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} gäller endast sjötransport.",
+        "suggestion": "Använd FCA, CPT eller CIP för andra transportsätt."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} finns inte i den fastlagda versionen.",
+        "suggestion": "Välj en term i den fastlagda versionen."
+      },
+      "jit_late": {
+        "fail": "{title}: just-in-time-leveransen kommer efter takt-starten.",
+        "suggestion": "Flytta fram leveransen."
+      },
+      "jit_too_early": {
+        "fail": "{title}: just-in-time-leveransen kommer tidigare än bufferten tillåter.",
+        "suggestion": "Flytta den närmare takt-starten."
+      },
+      "jit_without_location": {
+        "fail": "{title}: en just-in-time-leverans för flödet {flow} anger inget taktområde.",
+        "suggestion": "Välj det taktområde som leveransen är avsedd för."
+      },
+      "media_capacity_short": {
+        "fail": "Etapp {stage}: {media} kräver {required}, avtalat {contracted}.",
+        "suggestion": "Höj den avtalade kapaciteten eller minska behovet."
+      },
+      "media_late": {
+        "fail": "Etapp {stage}: anslutningen för {media} är utlovad efter etappstart.",
+        "suggestion": "Avtala ett tidigare datum eller en tillfällig försörjning."
+      },
+      "media_unsourced": {
+        "fail": "Ett behov av {media} saknar anslutning.",
+        "suggestion": "Tilldela en anslutning."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Ett klagomål skulle ha fått svar senast {due}.",
+        "suggestion": "Bekräfta och besvara det."
+      },
+      "permit_expired": {
+        "fail": "Tillstånd {reference} har gått ut medan transporter återstår.",
+        "suggestion": "Ansök om ett nytt tillstånd."
+      },
+      "permit_expiring": {
+        "fail": "Tillstånd {reference} löper snart ut medan transporter återstår.",
+        "suggestion": "Förläng tillståndet."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: tidsfönstret infaller under tyst tid.",
+        "suggestion": "Flytta det utanför tyst tid eller skaffa ett nattarbetstillstånd."
+      },
+      "required_document_missing": {
+        "fail": "Det obligatoriska dokumentet {kind} saknas.",
+        "suggestion": "Skaffa dokumentet och koppla det."
+      },
+      "site_timezone_missing": {
+        "fail": "Arbetsplatsen saknar tidszon, så reglerna för tid på dygnet har inte kontrollerats.",
+        "suggestion": "Ange arbetsplatsens tidszon i logistikkonceptet."
+      },
+      "stage_without_site_setup": {
+        "fail": "Etapp {stage} saknar yta för arbetsplatsetablering.",
+        "suggestion": "Avsätt en yta för kontor och personalutrymmen."
+      },
+      "stage_without_storage": {
+        "fail": "Etapp {stage} saknar lager- eller upplagsyta.",
+        "suggestion": "Avsätt en lager- eller upplagsyta."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: tidsfönstret ligger utanför tillståndet.",
+        "suggestion": "Flytta tidsfönstret eller förläng tillståndet."
+      },
+      "zone_not_mapped": {
+        "fail": "Upplagsytan {zone} är inte kopplad till ett område på arbetsplatsen.",
+        "suggestion": "Koppla den till dess planerade område."
+      }
+    }
+  }
+}

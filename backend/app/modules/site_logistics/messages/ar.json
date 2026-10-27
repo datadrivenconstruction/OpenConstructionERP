@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "موافق"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "لا",
+        "yes": "نعم"
+      },
+      "direction": {
+        "export": "تصدير",
+        "import": "استيراد",
+        "inbound": "وارد",
+        "outbound": "صادر"
+      },
+      "group": {
+        "built": "مبني",
+        "external": "خارجي",
+        "logistics": "اللوجستيات",
+        "reserve": "احتياطي"
+      },
+      "is_heavy": {
+        "no": "لا",
+        "yes": "نعم"
+      },
+      "section": {
+        "balance": "الموازنة",
+        "concept": "المفهوم",
+        "neighbourhood": "الجوار",
+        "readiness": "الجاهزية"
+      },
+      "short": {
+        "no": "لا",
+        "yes": "نعم"
+      },
+      "state": {
+        "acknowledged": "تم الإقرار",
+        "action_taken": "تم اتخاذ إجراء",
+        "active": "نشط",
+        "applied": "مُقدَّم",
+        "arrived": "وصل",
+        "authority": "الجهة الرسمية",
+        "cancelled": "ملغى",
+        "cleared": "مُفرج عنه",
+        "closed": "مغلق",
+        "connected": "متصل",
+        "contracted": "متعاقد عليه",
+        "declared": "مُصرَّح به",
+        "disconnected": "مفصول",
+        "documents_complete": "المستندات مكتملة",
+        "draft": "مسودة",
+        "expired": "منتهي الصلاحية",
+        "granted": "ممنوح",
+        "held": "موقوف",
+        "identified": "محدَّد",
+        "in_transit": "في الطريق",
+        "missing": "مفقود",
+        "municipality": "البلدية",
+        "neighbours": "الجيران",
+        "offered": "مقدَّم كعرض",
+        "open": "مفتوح",
+        "other": "أخرى",
+        "permit_pending": "التصريح قيد الانتظار",
+        "planned": "مخطط",
+        "police": "الشرطة",
+        "received": "مستلم",
+        "refused": "مرفوض",
+        "requested": "مطلوب",
+        "scheduled": "مجدول",
+        "utility": "المرفق الخدمي",
+        "verified": "مُتحقَّق منه"
+      },
+      "type": {
+        "complaint": "شكوى",
+        "coordination": "تنسيق"
+      }
+    },
+    "errors": {
+      "activity_not_found": "لم يتم العثور على نشاط الجدول الزمني في هذا المشروع.",
+      "allocation_exceeds_area": "التخصيص أكبر من المساحة.",
+      "allocation_negative": "لا يمكن أن يكون التخصيص سالبا.",
+      "allocations_changed": "تم تغيير التخصيصات من قبل شخص آخر. أعد التحميل وحاول مرة أخرى.",
+      "area_not_found": "لم يتم العثور على منطقة الموقع.",
+      "authority_permit_not_found": "لم يتم العثور على تصريح الجهة الرسمية في هذا المشروع.",
+      "buffer_days_negative": "لا يمكن أن تكون أيام الاحتياط سالبة.",
+      "catalogue_invalid": "تعذر تحديد كتالوج اللوجستيات المثبت.",
+      "catalogue_retired": "نسخة الكتالوج هذه متقاعدة.",
+      "code_required": "الرمز مطلوب.",
+      "code_taken": "هذا الرمز مستخدم بالفعل في المشروع.",
+      "commodity_code_not_found": "لم يتم العثور على رمز السلعة.",
+      "complaint_closed": "لا يمكن تغيير شكوى مغلقة.",
+      "complaint_not_found": "لم يتم العثور على الشكوى.",
+      "connection_point_invalid": "نقطة التوصيل ليست نقطة صالحة.",
+      "contracted_capacity_required": "أدخل السعة المتعاقد عليها أولا.",
+      "correspondence_not_found": "لم يتم العثور على المراسلات في هذا المشروع.",
+      "correspondence_thread_not_found": "لم يتم العثور على المراسلات في هذا المشروع.",
+      "country_invalid": "استخدم رمز الدولة ISO المكون من حرفين.",
+      "currency_invalid": "استخدم رمز العملة ISO المكون من ثلاثة أحرف.",
+      "currency_required": "يجب تحديد عملة المبلغ.",
+      "customs_case_not_found": "لم يتم العثور على ملف الجمارك.",
+      "customs_closed": "لا يمكن تغيير ملف جمركي مفرج عنه أو مغلق.",
+      "customs_declared": "لا يمكن حذف ملف جمركي تم التصريح عنه.",
+      "customs_not_found": "لم يتم العثور على ملف الجمارك.",
+      "customs_without_lines": "أضف بندا واحدا على الأقل من البضائع أولا.",
+      "declarant_invalid": "المُصرِّح هو المشتري أو البائع.",
+      "delivery_already_on_site": "وصلت هذه التوريدة بالفعل ولا يُعاد البت فيها.",
+      "delivery_not_found": "لم يتم العثور على التوريد في هذا المشروع.",
+      "delivery_rate_exceeded": "هذه الساعة تضم بالفعل عدد التوريدات الذي يسمح به المفهوم.",
+      "delivery_refused": "لا يمكن الموافقة على هذه التوريدة بصيغتها الحالية.",
+      "demand_not_found": "لم يتم العثور على الاحتياج.",
+      "demand_owned_by_plant_position": "هذا الاحتياج ناتج عن بند معدات؛ غيّره من هناك.",
+      "direction_invalid": "اتجاه غير معروف.",
+      "document_exists": "هذه الوثيقة موجودة بالفعل في قائمة التحقق.",
+      "document_not_found": "لم يتم العثور على الوثيقة.",
+      "document_ref_required": "اربط الوثيقة قبل تعليمها كمستلمة.",
+      "duplicate_stage": "يمكن تخصيص كل مرحلة مرة واحدة لكل منطقة.",
+      "entry_not_found": "لم يتم العثور على سجل اليومية.",
+      "field_required": "لا يمكن ترك هذا الحقل فارغا.",
+      "flow_code_invalid": "يحتاج كل تدفق مادي إلى رمز خاص به.",
+      "flow_code_unknown": "ليس لمفهوم اللوجستيات تدفق مادي بهذا الرمز.",
+      "flow_mode_invalid": "نمط تدفق مادي غير معروف.",
+      "frame_invalid": "إطار إحداثيات غير معروف.",
+      "gate_hours_unchecked": "لا يتم التحقق من ساعات العمل قبل تحديد المنطقة الزمنية للموقع.",
+      "gate_load_exceeded": "الحمولة تتجاوز حدود مدخل الموقع.",
+      "gate_not_found": "لم يتم العثور على مدخل الموقع في هذا المشروع.",
+      "geo_overlay_not_found": "لم يتم العثور على طبقة مخطط الموقع في هذا المشروع.",
+      "geometry_invalid": "مخطط حدود المنطقة ليس مضلعا صالحا.",
+      "goods_receipt_missing": "لا يوجد استلام بضائع مؤكد لأمر الشراء هذا حتى الآن.",
+      "heavy_without_permit": "يحتاج النقل الثقيل إلى تصريح ممنوح قبل جدولته.",
+      "hours_invalid": "أدخل ساعات صالحة، على أن تكون النهاية بعد البداية.",
+      "hs_code_invalid": "يجب أن يتكون رمز النظام المنسق HS من أرقام فقط وأن يكون طويلا بما يكفي.",
+      "incoterm_unknown": "هذا الشرط التجاري غير موجود في النسخة المثبتة.",
+      "invalid_transition": "تغيير الحالة هذا غير مسموح.",
+      "jit_without_takt": "يحتاج تدفق التوريد في اللحظة المناسبة إلى جدول تاكت.",
+      "last_stage": "يحتفظ المشروع بمرحلة توسعة واحدة على الأقل.",
+      "line_not_found": "لم يتم العثور على بند الجمارك.",
+      "link_target_unavailable": "لا يمكن التحقق من هذا الرابط الآن، فالوحدة التي يشير إليها غير مثبتة.",
+      "media_not_found": "لم يتم العثور على توصيل المرفق.",
+      "money_not_decimal": "أدخل المبلغ كعدد عشري.",
+      "money_out_of_range": "أدخل مبلغا بمنزلتين عشريتين كحد أقصى.",
+      "noise_limit_needs_project_value": "لا تحدد هذه الولاية قيما ثابتة؛ أدخل القيم المعتمدة للمشروع.",
+      "not_found": "غير موجود.",
+      "outside_gate_hours": "نافذة الزمن تقع خارج ساعات عمل البوابة.",
+      "owner_not_member": "يجب أن يكون المالك عضوا في هذا المشروع.",
+      "pack_catalogue_invalid": "لا يمكن تحميل كتالوج الحزمة.",
+      "permission_denied": "ليست لديك صلاحية لهذا الإجراء.",
+      "permit_frozen": "يحتفظ التصريح الممنوح أو المرفوض أو المنتهي بصلاحيته ونوافذه ونقلاته.",
+      "permit_not_found": "لم يتم العثور على التصريح.",
+      "plan_calibration_without_image": "اختر صورة مخطط الموقع قبل تحديد مقياسها.",
+      "plan_document_not_found": "لم يتم العثور على مستند مخطط الموقع في هذا المشروع.",
+      "plan_origin_invalid": "نقطة أصل مخطط الموقع تتكون من رقمين، س و ص، بالبكسل.",
+      "plan_scale_invalid": "يجب أن يكون مقياس مخطط الموقع أكبر من الصفر.",
+      "plant_item_not_found": "لم يتم العثور على بند المعدات في هذا المشروع.",
+      "plant_position_not_found": "لم يتم العثور على بند المعدات في هذا المشروع.",
+      "plant_position_required": "بند المعدات مطلوب.",
+      "po_not_found": "لم يتم العثور على أمر الشراء في هذا المشروع.",
+      "project_not_found": "لم يتم العثور على المشروع.",
+      "quiet_hours_conflict": "النافذة تقع في ساعات الهدوء ولا يغطيها تصريح للعمل ليلا.",
+      "required_document_missing": "ما زالت وثيقة مطلوبة مفقودة.",
+      "response_required": "اكتب الرد أولا.",
+      "route_invalid": "المسار ليس خطا صالحا.",
+      "simultaneity_factor_range": "معامل التزامن يقع بين 0 و 1.",
+      "site_timezone_missing": "حدد المنطقة الزمنية للموقع أولا؛ تُفحص الأوقات وفق ساعة الموقع.",
+      "slot_taken": "توجد توريدة معتمدة أخرى تحجز هذه النافذة عند البوابة.",
+      "stage_active": "لا يمكن حذف مرحلة نشطة. أغلقها أولا.",
+      "stage_not_found": "لم يتم العثور على مرحلة التوسعة.",
+      "takt_location_not_found": "لم يتم العثور على منطقة التاكت في هذا المشروع.",
+      "takt_schedule_not_found": "لم يتم العثور على جدول التاكت في هذا المشروع.",
+      "timezone_invalid": "منطقة زمنية غير معروفة. استخدم اسما مثل Europe/Berlin.",
+      "transport_closed": "لا يمكن تغيير نقل مغلق أو ملغى.",
+      "transport_mode_invalid": "وسيلة نقل غير معروفة.",
+      "transport_not_found": "لم يتم العثور على النقل.",
+      "transport_under_way": "لا يمكن حذف نقل جار تنفيذه.",
+      "unknown_area_kind": "نوع منطقة غير معروف.",
+      "unknown_catalogue": "كتالوج غير معروف.",
+      "unknown_document_kind": "نوع وثيقة غير معروف.",
+      "unknown_issue_kind": "نوع شكوى غير معروف.",
+      "unknown_link_kind": "لا توجد قائمة لهذا النوع من الروابط.",
+      "unknown_load_class": "فئة حمولة غير معروفة.",
+      "unknown_media_kind": "مرفق خدمي غير معروف.",
+      "unknown_noise_limit": "بند حد ضوضاء غير معروف.",
+      "unknown_permit_kind": "نوع تصريح غير معروف.",
+      "unknown_transport_kind": "نوع نقل غير معروف.",
+      "validity_invalid": "ينتهي التصريح قبل أن يبدأ.",
+      "validity_required": "أدخل تواريخ الصلاحية قبل المنح.",
+      "vendor_not_found": "لم يتم العثور على المورد.",
+      "window_invalid": "نافذة الزمن غير صالحة.",
+      "window_outside_permit": "نافذة النقل تقع خارج صلاحية التصريح أو خارج أوقاته المسموح بها.",
+      "zone_not_found": "لم يتم العثور على منطقة التخزين في هذا المشروع.",
+      "zone_type_invalid": "نوع منطقة غير معروف."
+    },
+    "evidence": {
+      "balance_closed": "أغلقت موازنة المناطق لكل مرحلة مفتوحة",
+      "concept_saved_and_exported": "تم حفظ مفهوم اللوجستيات وأرشفته",
+      "first_stage_media_contracted": "تم التعاقد على المرافق الخدمية للمرحلة الأولى",
+      "gate_loads_admitted": "كل حمولة مسموح بها عند بوابتها أو مغطاة بتصريح للحمولات الزائدة",
+      "heavy_transports_permitted": "تصريح ممنوح لكل نقل ثقيل",
+      "neighbourhood_limit_source": "تم تحديد مصدر حد الضوضاء",
+      "no_errors": "لا توجد أخطاء لوجستية مفتوحة",
+      "unresolved": "تعذر إدراج خطة اللوجستيات في نموذج الحوكمة"
+    },
+    "export": {
+      "as_of": "حتى تاريخ",
+      "col_area_kind": "نوع المنطقة",
+      "col_closed": "مغلق",
+      "col_contracted": "متعاقد عليه",
+      "col_date": "التاريخ",
+      "col_direction": "الاتجاه",
+      "col_documents": "المستندات المطلوبة",
+      "col_due": "الاستحقاق",
+      "col_group": "المجموعة",
+      "col_heavy": "ثقيل",
+      "col_hs_codes": "رموز HS",
+      "col_incoterm": "الشرط التجاري",
+      "col_item": "البند",
+      "col_m2": "م²",
+      "col_media_kind": "المرفق الخدمي",
+      "col_named_place": "المكان المسمى",
+      "col_pct": "%",
+      "col_permits": "التصاريح",
+      "col_required": "مطلوب",
+      "col_section": "القسم",
+      "col_short": "قصير",
+      "col_stage": "المرحلة",
+      "col_state": "الحالة",
+      "col_title": "العنوان",
+      "col_topic": "الموضوع",
+      "col_transport_kind": "النوع",
+      "col_type": "النوع",
+      "col_unit": "الوحدة",
+      "col_value": "القيمة",
+      "col_window": "النافذة",
+      "empty": "لا توجد مدخلات.",
+      "project": "المشروع",
+      "title_balance": "موازنة المناطق",
+      "title_customs": "فهرس ملفات الجمارك",
+      "title_frame": "ملخص إطار اللوجستيات",
+      "title_media": "موازنة المرافق الخدمية",
+      "title_neighbourhood": "سجل الجوار",
+      "title_transports": "النقل والتصاريح"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "المرحلة {stage}: أحد التخصيصات أكبر من مساحته.",
+        "suggestion": "قلّل التخصيص."
+      },
+      "area_balance_not_closed": {
+        "fail": "المرحلة {stage}: موازنة المناطق لا تغلق (فرق {difference_m2} م²).",
+        "suggestion": "خصص المساحة المتبقية أو صحح إجمالي الموقع."
+      },
+      "area_overlap": {
+        "fail": "المرحلة {stage}: منطقتان من نوعين مختلفين تتداخلان.",
+        "suggestion": "عدّل المخططات الخارجية."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "المُصرِّح لا يطابق الطرف الذي يخلّص الاستيراد بموجب الشرط التجاري.",
+        "suggestion": "تحقق من المُصرِّح أو من الشرط التجاري."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "تبدأ {count} توريدات معتمدة في الساعة التي تبدأ من {hour}، والمفهوم يسمح بـ {limit}.",
+        "suggestion": "انقل التوريدات إلى ساعة أخرى أو ارفع الحد في المفهوم."
+      },
+      "gate_hours_unchecked": {
+        "fail": "ليس للموقع منطقة زمنية، لذلك لم تُقارن التوريدات بساعات العمل.",
+        "suggestion": "حدد المنطقة الزمنية للموقع في مفهوم اللوجستيات."
+      },
+      "gate_limits_unknown": {
+        "fail": "مدخل الموقع {gate} لا يحدد حدود أي حمولة.",
+        "suggestion": "أدخل حدود الوزن والأبعاد."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: الحمولة تتجاوز حدود مدخل الموقع.",
+        "suggestion": "استخدم مدخلا آخر أو قسّم الحمولة."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: نقل ثقيل بلا تصريح ممنوح.",
+        "suggestion": "تقدم بطلب الحصول على التصريح."
+      },
+      "hs_code_invalid": {
+        "fail": "رمز HS {hs_code} غير صالح.",
+        "suggestion": "استخدم الأرقام فقط، وبطول لا يقل عن الحد الأدنى."
+      },
+      "incoterm_sea_only": {
+        "fail": "الشرط التجاري {incoterm} مخصص للنقل البحري فقط.",
+        "suggestion": "استخدم FCA أو CPT أو CIP لوسائل النقل الأخرى."
+      },
+      "incoterm_unknown": {
+        "fail": "الشرط التجاري {incoterm} غير موجود في النسخة المثبتة.",
+        "suggestion": "اختر شرطا من النسخة المثبتة."
+      },
+      "jit_late": {
+        "fail": "{title}: توريد التاكت في اللحظة المناسبة يأتي بعد بداية التاكت.",
+        "suggestion": "قدّم موعد التوريد."
+      },
+      "jit_too_early": {
+        "fail": "{title}: توريد التاكت في اللحظة المناسبة يأتي قبل الموعد الذي يسمح به الاحتياط.",
+        "suggestion": "انقله إلى موعد أقرب من بداية التاكت."
+      },
+      "jit_without_location": {
+        "fail": "{title}: توريد في اللحظة المناسبة للتدفق {flow} لا يحدد منطقة تاكت.",
+        "suggestion": "اختر منطقة التاكت التي يخدمها التوريد."
+      },
+      "media_capacity_short": {
+        "fail": "المرحلة {stage}: {media} يحتاج إلى {required}، والمتعاقد عليه {contracted}.",
+        "suggestion": "ارفع السعة المتعاقد عليها أو قلّل الاحتياج."
+      },
+      "media_late": {
+        "fail": "المرحلة {stage}: توصيل {media} موعود بعد بدء المرحلة.",
+        "suggestion": "اتفق على موعد أبكر أو على إمداد مؤقت."
+      },
+      "media_unsourced": {
+        "fail": "احتياج {media} ليس له توصيل.",
+        "suggestion": "خصص توصيلا."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "كان ينبغي الرد على شكوى بحلول {due}.",
+        "suggestion": "أقر بالشكوى وأجب عنها."
+      },
+      "permit_expired": {
+        "fail": "انتهت صلاحية التصريح {reference} بينما ما زالت هناك نقلات.",
+        "suggestion": "تقدم بطلب تصريح جديد."
+      },
+      "permit_expiring": {
+        "fail": "ينتهي التصريح {reference} قريبا بينما ما زالت هناك نقلات.",
+        "suggestion": "مدد التصريح."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: النافذة تقع في ساعات الهدوء.",
+        "suggestion": "انقلها خارج ساعات الهدوء أو احصل على تصريح للعمل ليلا."
+      },
+      "required_document_missing": {
+        "fail": "الوثيقة المطلوبة {kind} مفقودة.",
+        "suggestion": "احصل على الوثيقة واربطها."
+      },
+      "site_timezone_missing": {
+        "fail": "ليس للموقع منطقة زمنية، لذلك لم تُفحص قواعد الوقت في اليوم.",
+        "suggestion": "حدد المنطقة الزمنية للموقع في مفهوم اللوجستيات."
+      },
+      "stage_without_site_setup": {
+        "fail": "المرحلة {stage} ليس لها منطقة تجهيز للموقع.",
+        "suggestion": "خصص منطقة للمكاتب والخدمات."
+      },
+      "stage_without_storage": {
+        "fail": "المرحلة {stage} ليس لها منطقة تخزين أو تفريغ.",
+        "suggestion": "خصص منطقة للتخزين أو التفريغ."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: النافذة خارج التصريح.",
+        "suggestion": "انقل النافذة أو مدد التصريح."
+      },
+      "zone_not_mapped": {
+        "fail": "منطقة التخزين {zone} غير مرتبطة بمنطقة في الموقع.",
+        "suggestion": "اربطها بالمنطقة المخططة لها."
+      }
+    }
+  }
+}

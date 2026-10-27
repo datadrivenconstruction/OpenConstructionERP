@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "تأیید"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "خیر",
+        "yes": "بله"
+      },
+      "direction": {
+        "export": "صادرات",
+        "import": "واردات",
+        "inbound": "ورودی",
+        "outbound": "خروجی"
+      },
+      "group": {
+        "built": "ساخته‌شده",
+        "external": "بیرونی",
+        "logistics": "لجستیک",
+        "reserve": "ذخیره"
+      },
+      "is_heavy": {
+        "no": "خیر",
+        "yes": "بله"
+      },
+      "section": {
+        "balance": "تراز",
+        "concept": "مفهوم",
+        "neighbourhood": "همسایگی",
+        "readiness": "آمادگی"
+      },
+      "short": {
+        "no": "خیر",
+        "yes": "بله"
+      },
+      "state": {
+        "acknowledged": "تأیید شده",
+        "action_taken": "اقدام انجام شده",
+        "active": "فعال",
+        "applied": "درخواست شده",
+        "arrived": "رسیده",
+        "authority": "مرجع",
+        "cancelled": "لغو شده",
+        "cleared": "ترخیص شده",
+        "closed": "بسته‌شده",
+        "connected": "متصل",
+        "contracted": "قراردادی",
+        "declared": "اظهار شده",
+        "disconnected": "قطع‌شده",
+        "documents_complete": "مدارک کامل",
+        "draft": "پیش‌نویس",
+        "expired": "منقضی شده",
+        "granted": "صادر شده",
+        "held": "متوقف شده",
+        "identified": "شناسایی شده",
+        "in_transit": "در راه",
+        "missing": "ناموجود",
+        "municipality": "شهرداری",
+        "neighbours": "همسایگان",
+        "offered": "پیشنهاد شده",
+        "open": "باز",
+        "other": "سایر",
+        "permit_pending": "مجوز در انتظار",
+        "planned": "برنامه‌ریزی شده",
+        "police": "پلیس",
+        "received": "دریافت شده",
+        "refused": "رد شده",
+        "requested": "درخواست شده",
+        "scheduled": "زمان‌بندی شده",
+        "utility": "شرکت خدماتی",
+        "verified": "تأیید صحت شده"
+      },
+      "type": {
+        "complaint": "شکایت",
+        "coordination": "هماهنگی"
+      }
+    },
+    "errors": {
+      "activity_not_found": "فعالیت برنامه زمانی در این پروژه یافت نشد.",
+      "allocation_exceeds_area": "تخصیص بزرگ‌تر از مساحت است.",
+      "allocation_negative": "تخصیص نمی‌تواند منفی باشد.",
+      "allocations_changed": "تخصیص‌ها توسط شخص دیگری تغییر کرده‌اند. دوباره بارگذاری کرده و تلاش کنید.",
+      "area_not_found": "محدوده کارگاه یافت نشد.",
+      "authority_permit_not_found": "مجوز مرجع در این پروژه یافت نشد.",
+      "buffer_days_negative": "روزهای حاشیه نمی‌تواند منفی باشد.",
+      "catalogue_invalid": "کاتالوگ لجستیکی ثبت‌شده قابل پردازش نیست.",
+      "catalogue_retired": "این نسخه از کاتالوگ منسوخ شده است.",
+      "code_required": "کد الزامی است.",
+      "code_taken": "این کد قبلاً در پروژه استفاده شده است.",
+      "commodity_code_not_found": "کد کالا یافت نشد.",
+      "complaint_closed": "شکایت بسته‌شده قابل تغییر نیست.",
+      "complaint_not_found": "شکایت یافت نشد.",
+      "connection_point_invalid": "نقطه اتصال، نقطه معتبری نیست.",
+      "contracted_capacity_required": "ابتدا ظرفیت قراردادی را وارد کنید.",
+      "correspondence_not_found": "مکاتبه در این پروژه یافت نشد.",
+      "correspondence_thread_not_found": "مکاتبه در این پروژه یافت نشد.",
+      "country_invalid": "از کد دو حرفی کشور ISO استفاده کنید.",
+      "currency_invalid": "از کد سه حرفی ارز ISO استفاده کنید.",
+      "currency_required": "برای مبلغ باید ارز مشخص شود.",
+      "customs_case_not_found": "پرونده گمرکی یافت نشد.",
+      "customs_closed": "پرونده ترخیص‌شده یا بسته‌شده قابل تغییر نیست.",
+      "customs_declared": "پرونده اظهارشده قابل حذف نیست.",
+      "customs_not_found": "پرونده گمرکی یافت نشد.",
+      "customs_without_lines": "ابتدا حداقل یک ردیف کالا اضافه کنید.",
+      "declarant_invalid": "اظهارکننده، خریدار یا فروشنده است.",
+      "delivery_already_on_site": "این تحویل قبلاً رسیده و دوباره تصمیم‌گیری نمی‌شود.",
+      "delivery_not_found": "تحویل در این پروژه یافت نشد.",
+      "delivery_rate_exceeded": "این ساعت قبلاً به تعداد تحویلی رسیده که مفهوم مجاز می‌داند.",
+      "delivery_refused": "این تحویل در وضعیت فعلی قابل تأیید نیست.",
+      "demand_not_found": "نیاز یافت نشد.",
+      "demand_owned_by_plant_position": "این نیاز از یک ردیف ماشین‌آلات آمده است؛ آن را همان‌جا تغییر دهید.",
+      "direction_invalid": "جهت ناشناخته است.",
+      "document_exists": "این مدرک قبلاً در چک‌لیست وجود دارد.",
+      "document_not_found": "مدرک یافت نشد.",
+      "document_ref_required": "پیش از ثبت دریافت مدرک، آن را پیوند دهید.",
+      "duplicate_stage": "هر مرحله در هر محدوده فقط یک بار قابل تخصیص است.",
+      "entry_not_found": "ورودی گزارش یافت نشد.",
+      "field_required": "این فیلد نمی‌تواند خالی باشد.",
+      "flow_code_invalid": "هر جریان مصالح به کد جداگانه نیاز دارد.",
+      "flow_code_unknown": "مفهوم لجستیکی جریان مصالحی با این کد ندارد.",
+      "flow_mode_invalid": "حالت جریان مصالح ناشناخته است.",
+      "frame_invalid": "چارچوب مختصات ناشناخته است.",
+      "gate_hours_unchecked": "ساعات بازگشایی تا تعیین منطقه زمانی کارگاه بررسی نمی‌شود.",
+      "gate_load_exceeded": "بار از حدود ورودی کارگاه بیشتر است.",
+      "gate_not_found": "ورودی کارگاه در این پروژه یافت نشد.",
+      "geo_overlay_not_found": "لایه نقشه کارگاه در این پروژه یافت نشد.",
+      "geometry_invalid": "خط محیط محدوده، چندضلعی معتبری نیست.",
+      "goods_receipt_missing": "هنوز رسید کالای تأییدشده‌ای برای این سفارش خرید ثبت نشده است.",
+      "heavy_without_permit": "حمل سنگین پیش از زمان‌بندی به مجوز صادرشده نیاز دارد.",
+      "hours_invalid": "ساعت معتبر وارد کنید؛ پایان باید بعد از شروع باشد.",
+      "hs_code_invalid": "کد HS فقط باید عدد باشد و طول کافی داشته باشد.",
+      "incoterm_unknown": "این اینکوترم در نسخه ثبت‌شده وجود ندارد.",
+      "invalid_transition": "این تغییر وضعیت مجاز نیست.",
+      "jit_without_takt": "جریان به‌موقع (JIT) به برنامه takt نیاز دارد.",
+      "last_stage": "یک پروژه حداقل یک مرحله توسعه را نگه می‌دارد.",
+      "line_not_found": "ردیف گمرکی یافت نشد.",
+      "link_target_unavailable": "این پیوند هنوز قابل بررسی نیست، زیرا ماژول مقصد نصب نشده است.",
+      "media_not_found": "اتصال خدماتی یافت نشد.",
+      "money_not_decimal": "مبلغ را به صورت عدد اعشاری وارد کنید.",
+      "money_out_of_range": "مبلغی با حداکثر دو رقم اعشار وارد کنید.",
+      "noise_limit_needs_project_value": "این حوزه قضایی مقدار ثابت تعیین نکرده است؛ مقادیر موردتوافق پروژه را وارد کنید.",
+      "not_found": "یافت نشد.",
+      "outside_gate_hours": "بازه زمانی خارج از ساعات بازگشایی ورودی است.",
+      "owner_not_member": "مسئول باید عضو این پروژه باشد.",
+      "pack_catalogue_invalid": "کاتالوگ بسته بارگذاری نمی‌شود.",
+      "permission_denied": "برای این کار دسترسی ندارید.",
+      "permit_frozen": "مجوزی که صادر، رد یا منقضی شده، اعتبار، بازه‌ها و حمل‌های خود را حفظ می‌کند.",
+      "permit_not_found": "مجوز یافت نشد.",
+      "plan_calibration_without_image": "پیش از تعیین مقیاس، تصویر نقشه کارگاه را انتخاب کنید.",
+      "plan_document_not_found": "سند نقشه کارگاه در این پروژه یافت نشد.",
+      "plan_origin_invalid": "مبدأ نقشه کارگاه دو عدد، x و y بر حسب پیکسل، است.",
+      "plan_scale_invalid": "مقیاس نقشه کارگاه باید بزرگ‌تر از صفر باشد.",
+      "plant_item_not_found": "قلم ماشین‌آلات در این پروژه یافت نشد.",
+      "plant_position_not_found": "ردیف ماشین‌آلات در این پروژه یافت نشد.",
+      "plant_position_required": "ردیف ماشین‌آلات الزامی است.",
+      "po_not_found": "سفارش خرید در این پروژه یافت نشد.",
+      "project_not_found": "پروژه یافت نشد.",
+      "quiet_hours_conflict": "بازه در ساعات سکوت قرار دارد و مجوز کار شبانه آن را پوشش نمی‌دهد.",
+      "required_document_missing": "هنوز یک مدرک الزامی ناموجود است.",
+      "response_required": "ابتدا پاسخ را بنویسید.",
+      "route_invalid": "مسیر، خط معتبری نیست.",
+      "simultaneity_factor_range": "ضریب همزمانی باید بین ۰ و ۱ باشد.",
+      "site_timezone_missing": "ابتدا منطقه زمانی کارگاه را تعیین کنید؛ زمان‌ها با ساعت کارگاه بررسی می‌شوند.",
+      "slot_taken": "تحویل تأییدشده دیگری این بازه را در ورودی گرفته است.",
+      "stage_active": "مرحله فعال قابل حذف نیست. ابتدا آن را ببندید.",
+      "stage_not_found": "مرحله توسعه یافت نشد.",
+      "takt_location_not_found": "محدوده takt در این پروژه یافت نشد.",
+      "takt_schedule_not_found": "برنامه takt در این پروژه یافت نشد.",
+      "timezone_invalid": "منطقه زمانی ناشناخته است. نامی مانند Europe/Berlin استفاده کنید.",
+      "transport_closed": "حمل بسته یا لغوشده قابل تغییر نیست.",
+      "transport_mode_invalid": "نوع حمل‌ونقل ناشناخته است.",
+      "transport_not_found": "حمل‌ونقل یافت نشد.",
+      "transport_under_way": "حمل‌ونقل در جریان قابل حذف نیست.",
+      "unknown_area_kind": "نوع محدوده ناشناخته است.",
+      "unknown_catalogue": "کاتالوگ ناشناخته است.",
+      "unknown_document_kind": "نوع مدرک ناشناخته است.",
+      "unknown_issue_kind": "نوع شکایت ناشناخته است.",
+      "unknown_link_kind": "برای این نوع پیوند فهرستی وجود ندارد.",
+      "unknown_load_class": "کلاس بار ناشناخته است.",
+      "unknown_media_kind": "خدمات ناشناخته است.",
+      "unknown_noise_limit": "ردیف حد صدا ناشناخته است.",
+      "unknown_permit_kind": "نوع مجوز ناشناخته است.",
+      "unknown_transport_kind": "نوع حمل‌ونقل ناشناخته است.",
+      "validity_invalid": "مجوز پیش از شروعش به پایان می‌رسد.",
+      "validity_required": "پیش از صدور، تاریخ‌های اعتبار را وارد کنید.",
+      "vendor_not_found": "تأمین‌کننده یافت نشد.",
+      "window_invalid": "بازه زمانی معتبر نیست.",
+      "window_outside_permit": "بازه حمل‌ونقل خارج از اعتبار مجوز یا ساعات مجاز آن است.",
+      "zone_not_found": "منطقه انبارش در این پروژه یافت نشد.",
+      "zone_type_invalid": "نوع منطقه ناشناخته است."
+    },
+    "evidence": {
+      "balance_closed": "تراز محدوده برای هر مرحله باز بسته شده است",
+      "concept_saved_and_exported": "مفهوم لجستیکی ذخیره و بایگانی شده است",
+      "first_stage_media_contracted": "خدمات مرحله اول قراردادی شده است",
+      "gate_loads_admitted": "هر بار توسط ورودی خود پذیرفته شده یا مجوز ابعاد بزرگ آن را پوشش می‌دهد",
+      "heavy_transports_permitted": "مجوز هر حمل سنگین صادر شده است",
+      "neighbourhood_limit_source": "منبع حد صدا تعیین شده است",
+      "no_errors": "خطای لجستیکی باز وجود ندارد",
+      "unresolved": "برنامه لجستیکی در مدل حاکمیتی جای نگرفت"
+    },
+    "export": {
+      "as_of": "تا تاریخ",
+      "col_area_kind": "نوع محدوده",
+      "col_closed": "بسته",
+      "col_contracted": "قراردادی",
+      "col_date": "تاریخ",
+      "col_direction": "جهت",
+      "col_documents": "مدارک الزامی",
+      "col_due": "موعد",
+      "col_group": "گروه",
+      "col_heavy": "سنگین",
+      "col_hs_codes": "کدهای HS",
+      "col_incoterm": "اینکوترم",
+      "col_item": "قلم",
+      "col_m2": "متر مربع",
+      "col_media_kind": "خدمات",
+      "col_named_place": "مکان تعیین‌شده",
+      "col_pct": "٪",
+      "col_permits": "مجوزها",
+      "col_required": "الزامی",
+      "col_section": "بخش",
+      "col_short": "کوتاه",
+      "col_stage": "مرحله",
+      "col_state": "وضعیت",
+      "col_title": "عنوان",
+      "col_topic": "موضوع",
+      "col_transport_kind": "نوع",
+      "col_type": "نوع",
+      "col_unit": "واحد",
+      "col_value": "مقدار",
+      "col_window": "بازه",
+      "empty": "ورودی وجود ندارد.",
+      "project": "پروژه",
+      "title_balance": "تراز محدوده",
+      "title_customs": "فهرست پرونده‌های گمرکی",
+      "title_frame": "خلاصه چارچوب لجستیکی",
+      "title_media": "تراز خدمات",
+      "title_neighbourhood": "گزارش همسایگی",
+      "title_transports": "حمل‌ونقل و مجوزها"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "مرحله {stage}: یک تخصیص بزرگ‌تر از محدوده آن است.",
+        "suggestion": "تخصیص را کاهش دهید."
+      },
+      "area_balance_not_closed": {
+        "fail": "مرحله {stage}: تراز محدوده بسته نمی‌شود (اختلاف {difference_m2} متر مربع).",
+        "suggestion": "باقی‌مانده محدوده را تخصیص دهید یا مجموع مساحت کارگاه را اصلاح کنید."
+      },
+      "area_overlap": {
+        "fail": "مرحله {stage}: دو محدوده با انواع متفاوت روی هم افتاده‌اند.",
+        "suggestion": "خطوط محیط را تنظیم کنید."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "اظهارکننده با کسی که بر اساس اینکوترم ترخیص واردات را انجام می‌دهد مطابقت ندارد.",
+        "suggestion": "اظهارکننده یا اینکوترم را بررسی کنید."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} تحویل تأییدشده از ساعت {hour} آغاز می‌شوند، در حالی که مفهوم {limit} مورد را مجاز می‌داند.",
+        "suggestion": "تحویل‌ها را به ساعت دیگری ببرید یا حد مجاز را در مفهوم افزایش دهید."
+      },
+      "gate_hours_unchecked": {
+        "fail": "کارگاه منطقه زمانی ندارد، بنابراین تحویل‌ها با ساعات بازگشایی مقایسه نشدند.",
+        "suggestion": "منطقه زمانی کارگاه را در مفهوم لجستیکی تعیین کنید."
+      },
+      "gate_limits_unknown": {
+        "fail": "ورودی کارگاه {gate} هیچ حد باری اعلام نکرده است.",
+        "suggestion": "حدود وزن و ابعاد را وارد کنید."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: بار از حدود ورودی کارگاه بیشتر است.",
+        "suggestion": "از ورودی دیگری استفاده کنید یا بار را تقسیم کنید."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: حمل سنگین بدون مجوز صادرشده.",
+        "suggestion": "برای مجوز درخواست دهید."
+      },
+      "hs_code_invalid": {
+        "fail": "کد HS {hs_code} معتبر نیست.",
+        "suggestion": "فقط از عدد استفاده کنید و حداقل طول لازم را رعایت کنید."
+      },
+      "incoterm_sea_only": {
+        "fail": "اینکوترم {incoterm} فقط برای حمل دریایی است.",
+        "suggestion": "برای سایر روش‌ها از FCA، CPT یا CIP استفاده کنید."
+      },
+      "incoterm_unknown": {
+        "fail": "اینکوترم {incoterm} در نسخه ثبت‌شده وجود ندارد.",
+        "suggestion": "یکی از شرایط نسخه ثبت‌شده را انتخاب کنید."
+      },
+      "jit_late": {
+        "fail": "{title}: تحویل به‌موقع (JIT) بعد از شروع takt می‌رسد.",
+        "suggestion": "تحویل را جلو بیندازید."
+      },
+      "jit_too_early": {
+        "fail": "{title}: تحویل به‌موقع (JIT) زودتر از حاشیه مجازش می‌رسد.",
+        "suggestion": "آن را به شروع takt نزدیک‌تر کنید."
+      },
+      "jit_without_location": {
+        "fail": "{title}: تحویل به‌موقع جریان {flow} محدوده takt را مشخص نکرده است.",
+        "suggestion": "محدوده takt مقصد تحویل را انتخاب کنید."
+      },
+      "media_capacity_short": {
+        "fail": "مرحله {stage}: {media} به {required} نیاز دارد، اما {contracted} قراردادی شده است.",
+        "suggestion": "ظرفیت قراردادی را افزایش دهید یا نیاز را کاهش دهید."
+      },
+      "media_late": {
+        "fail": "مرحله {stage}: اتصال {media} بعد از شروع مرحله وعده داده شده است.",
+        "suggestion": "تاریخ زودتر یا تأمین موقت توافق کنید."
+      },
+      "media_unsourced": {
+        "fail": "یک نیاز {media} اتصال ندارد.",
+        "suggestion": "یک اتصال تخصیص دهید."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "پاسخ یک شکایت تا تاریخ {due} لازم بود.",
+        "suggestion": "دریافت آن را تأیید کنید و پاسخ دهید."
+      },
+      "permit_expired": {
+        "fail": "مجوز {reference} منقضی شده، در حالی که حمل‌ونقل باقی مانده است.",
+        "suggestion": "برای مجوز جدید درخواست دهید."
+      },
+      "permit_expiring": {
+        "fail": "مجوز {reference} به زودی منقضی می‌شود، در حالی که حمل‌ونقل باقی مانده است.",
+        "suggestion": "مجوز را تمدید کنید."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: بازه در ساعات سکوت قرار دارد.",
+        "suggestion": "آن را از ساعات سکوت خارج کنید یا مجوز کار شبانه بگیرید."
+      },
+      "required_document_missing": {
+        "fail": "مدرک الزامی {kind} ناموجود است.",
+        "suggestion": "مدرک را تهیه و پیوند دهید."
+      },
+      "site_timezone_missing": {
+        "fail": "کارگاه منطقه زمانی ندارد، بنابراین قواعد زمان روز بررسی نشدند.",
+        "suggestion": "منطقه زمانی کارگاه را در مفهوم لجستیکی تعیین کنید."
+      },
+      "stage_without_site_setup": {
+        "fail": "مرحله {stage} محدوده تأسیسات کارگاه ندارد.",
+        "suggestion": "محدوده‌ای برای دفاتر و امکانات رفاهی تخصیص دهید."
+      },
+      "stage_without_storage": {
+        "fail": "مرحله {stage} محدوده انبارش یا تخلیه ندارد.",
+        "suggestion": "محدوده انبارش یا تخلیه تخصیص دهید."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: بازه خارج از مجوز است.",
+        "suggestion": "بازه را جابه‌جا کنید یا مجوز را تمدید کنید."
+      },
+      "zone_not_mapped": {
+        "fail": "منطقه انبارش {zone} به یک محدوده کارگاه متصل نیست.",
+        "suggestion": "آن را به محدوده برنامه‌ریزی‌شده‌اش متصل کنید."
+      }
+    }
+  }
+}

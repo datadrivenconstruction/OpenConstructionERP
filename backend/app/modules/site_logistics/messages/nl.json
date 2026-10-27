@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Nee",
+        "yes": "Ja"
+      },
+      "direction": {
+        "export": "Export",
+        "import": "Import",
+        "inbound": "Inkomend",
+        "outbound": "Uitgaand"
+      },
+      "group": {
+        "built": "Gebouwd",
+        "external": "Extern",
+        "logistics": "Logistiek",
+        "reserve": "Reserve"
+      },
+      "is_heavy": {
+        "no": "Nee",
+        "yes": "Ja"
+      },
+      "section": {
+        "balance": "Oppervlaktebalans",
+        "concept": "Concept",
+        "neighbourhood": "Omgeving",
+        "readiness": "Gereedheid"
+      },
+      "short": {
+        "no": "Nee",
+        "yes": "Ja"
+      },
+      "state": {
+        "acknowledged": "Bevestigd",
+        "action_taken": "Actie ondernomen",
+        "active": "Actief",
+        "applied": "Aangevraagd",
+        "arrived": "Aangekomen",
+        "authority": "Overheid",
+        "cancelled": "Geannuleerd",
+        "cleared": "Afgehandeld",
+        "closed": "Gesloten",
+        "connected": "Aangesloten",
+        "contracted": "Gecontracteerd",
+        "declared": "Aangegeven",
+        "disconnected": "Afgekoppeld",
+        "documents_complete": "Documenten compleet",
+        "draft": "Concept",
+        "expired": "Verlopen",
+        "granted": "Verleend",
+        "held": "Vastgehouden",
+        "identified": "Geïdentificeerd",
+        "in_transit": "Onderweg",
+        "missing": "Ontbreekt",
+        "municipality": "Gemeente",
+        "neighbours": "Omwonenden",
+        "offered": "Aangeboden",
+        "open": "Open",
+        "other": "Overig",
+        "permit_pending": "Vergunning in behandeling",
+        "planned": "Gepland",
+        "police": "Politie",
+        "received": "Ontvangen",
+        "refused": "Geweigerd",
+        "requested": "Aangevraagd",
+        "scheduled": "Ingepland",
+        "utility": "Nutsbedrijf",
+        "verified": "Geverifieerd"
+      },
+      "type": {
+        "complaint": "Klacht",
+        "coordination": "Afstemming"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Planningsactiviteit niet gevonden in dit project.",
+      "allocation_exceeds_area": "De toewijzing is groter dan het gebied.",
+      "allocation_negative": "Een toewijzing kan niet negatief zijn.",
+      "allocations_changed": "De toewijzingen zijn door iemand anders gewijzigd. Laad opnieuw en probeer het nog eens.",
+      "area_not_found": "Bouwterreingebied niet gevonden.",
+      "authority_permit_not_found": "Vergunning van de overheid niet gevonden in dit project.",
+      "buffer_days_negative": "Bufferdagen kunnen niet negatief zijn.",
+      "catalogue_invalid": "De vastgezette logistieke catalogus kan niet worden verwerkt.",
+      "catalogue_retired": "Deze versie van de catalogus is buiten gebruik gesteld.",
+      "code_required": "Er is een code vereist.",
+      "code_taken": "Deze code wordt al in het project gebruikt.",
+      "commodity_code_not_found": "Goederencode niet gevonden.",
+      "complaint_closed": "Een gesloten klacht kan niet worden gewijzigd.",
+      "complaint_not_found": "Klacht niet gevonden.",
+      "connection_point_invalid": "Het aansluitpunt is geen geldig punt.",
+      "contracted_capacity_required": "Voer eerst de gecontracteerde capaciteit in.",
+      "correspondence_not_found": "Correspondentie niet gevonden in dit project.",
+      "correspondence_thread_not_found": "Correspondentie niet gevonden in dit project.",
+      "country_invalid": "Gebruik een ISO-landcode van twee letters.",
+      "currency_invalid": "Gebruik een ISO-valutacode van drie letters.",
+      "currency_required": "Een bedrag heeft een valuta nodig.",
+      "customs_case_not_found": "Douanedossier niet gevonden.",
+      "customs_closed": "Een afgehandeld of gesloten dossier kan niet worden gewijzigd.",
+      "customs_declared": "Een aangegeven douanedossier kan niet worden verwijderd.",
+      "customs_not_found": "Douanedossier niet gevonden.",
+      "customs_without_lines": "Voeg eerst minimaal één goederenregel toe.",
+      "declarant_invalid": "De aangever is de koper of de verkoper.",
+      "delivery_already_on_site": "Deze levering is al aangekomen en wordt niet opnieuw beslist.",
+      "delivery_not_found": "Levering niet gevonden in dit project.",
+      "delivery_rate_exceeded": "In dit uur zijn al zoveel leveringen ingepland als het concept toestaat.",
+      "delivery_refused": "Deze levering kan in de huidige vorm niet worden goedgekeurd.",
+      "demand_not_found": "Behoefte niet gevonden.",
+      "demand_owned_by_plant_position": "Deze behoefte komt van een materieelpositie; wijzig hem daar.",
+      "direction_invalid": "Onbekende richting.",
+      "document_exists": "Dit document staat al op de checklist.",
+      "document_not_found": "Document niet gevonden.",
+      "document_ref_required": "Koppel het document voordat u het als ontvangen markeert.",
+      "duplicate_stage": "Elke fase kan per gebied één keer worden toegewezen.",
+      "entry_not_found": "Logboekregel niet gevonden.",
+      "field_required": "Dit veld mag niet leeg zijn.",
+      "flow_code_invalid": "Elke materiaalstroom heeft een eigen code nodig.",
+      "flow_code_unknown": "Het logistieke concept heeft geen materiaalstroom met deze code.",
+      "flow_mode_invalid": "Onbekende modus van de materiaalstroom.",
+      "frame_invalid": "Onbekend coördinatenstelsel.",
+      "gate_hours_unchecked": "Openingstijden worden pas gecontroleerd nadat de tijdzone van de bouwplaats is ingesteld.",
+      "gate_load_exceeded": "De belasting overschrijdt de grenzen van de toegang van de bouwplaats.",
+      "gate_not_found": "Toegang van de bouwplaats niet gevonden in dit project.",
+      "geo_overlay_not_found": "Overlay van het terreinplan niet gevonden in dit project.",
+      "geometry_invalid": "De gebiedsomtrek is geen geldige veelhoek.",
+      "goods_receipt_missing": "Voor dit inkooporder is nog geen bevestigde goederenontvangst.",
+      "heavy_without_permit": "Zwaar transport heeft een verleende vergunning nodig voordat het wordt ingepland.",
+      "hours_invalid": "Voer geldige uren in; het eindtijdstip moet na het begintijdstip liggen.",
+      "hs_code_invalid": "De HS-code mag alleen cijfers bevatten en moet lang genoeg zijn.",
+      "incoterm_unknown": "Deze incoterm staat niet in de vastgezette versie.",
+      "invalid_transition": "Deze statuswijziging is niet toegestaan.",
+      "jit_without_takt": "Een just-in-time stroom heeft een takt-planning nodig.",
+      "last_stage": "Een project behoudt minimaal één uitbreidingsfase.",
+      "line_not_found": "Douaneregel niet gevonden.",
+      "link_target_unavailable": "Deze koppeling kan nog niet worden gecontroleerd, omdat de module waarnaar hij verwijst niet is geïnstalleerd.",
+      "media_not_found": "Nutsaansluiting niet gevonden.",
+      "money_not_decimal": "Voer het bedrag in als decimaal getal.",
+      "money_out_of_range": "Voer een bedrag in met maximaal twee decimalen.",
+      "noise_limit_needs_project_value": "Deze jurisdictie stelt geen vaste waarden vast; voer de met het project afgesproken waarden in.",
+      "not_found": "Niet gevonden.",
+      "outside_gate_hours": "Het tijdvak valt buiten de openingstijden van de toegang.",
+      "owner_not_member": "De eigenaar moet lid zijn van dit project.",
+      "pack_catalogue_invalid": "De catalogus van het pakket kan niet worden geladen.",
+      "permission_denied": "U heeft hier geen toestemming voor.",
+      "permit_frozen": "Een verleende, geweigerde of verlopen vergunning behoudt zijn geldigheid, tijdvakken en transporten.",
+      "permit_not_found": "Vergunning niet gevonden.",
+      "plan_calibration_without_image": "Kies de afbeelding van het terreinplan voordat u de schaal instelt.",
+      "plan_document_not_found": "Document van het terreinplan niet gevonden in dit project.",
+      "plan_origin_invalid": "De oorsprong van het terreinplan bestaat uit twee getallen, x en y in pixels.",
+      "plan_scale_invalid": "De schaal van het terreinplan moet groter zijn dan nul.",
+      "plant_item_not_found": "Materieelitem niet gevonden in dit project.",
+      "plant_position_not_found": "Materieelpositie niet gevonden in dit project.",
+      "plant_position_required": "Een materieelpositie is vereist.",
+      "po_not_found": "Inkooporder niet gevonden in dit project.",
+      "project_not_found": "Project niet gevonden.",
+      "quiet_hours_conflict": "Het tijdvak valt in de rustperiode en er is geen vergunning voor nachtwerk.",
+      "required_document_missing": "Een vereist document ontbreekt nog.",
+      "response_required": "Schrijf eerst de reactie.",
+      "route_invalid": "De route is geen geldige lijn.",
+      "simultaneity_factor_range": "De gelijktijdigheidsfactor ligt tussen 0 en 1.",
+      "site_timezone_missing": "Stel eerst de tijdzone van de bouwplaats in; tijden worden gecontroleerd op de klok van de bouwplaats.",
+      "slot_taken": "Een andere goedgekeurde levering bezet dit tijdvak bij de toegang.",
+      "stage_active": "Een actieve fase kan niet worden verwijderd. Sluit hem eerst af.",
+      "stage_not_found": "Uitbreidingsfase niet gevonden.",
+      "takt_location_not_found": "Takt-gebied niet gevonden in dit project.",
+      "takt_schedule_not_found": "Takt-planning niet gevonden in dit project.",
+      "timezone_invalid": "Onbekende tijdzone. Gebruik een naam zoals Europe/Berlin.",
+      "transport_closed": "Een gesloten of geannuleerd transport kan niet worden gewijzigd.",
+      "transport_mode_invalid": "Onbekende transportwijze.",
+      "transport_not_found": "Transport niet gevonden.",
+      "transport_under_way": "Een transport dat onderweg is, kan niet worden verwijderd.",
+      "unknown_area_kind": "Onbekend type gebied.",
+      "unknown_catalogue": "Onbekende catalogus.",
+      "unknown_document_kind": "Onbekend documenttype.",
+      "unknown_issue_kind": "Onbekend type klacht.",
+      "unknown_link_kind": "Er is geen lijst voor dit type koppeling.",
+      "unknown_load_class": "Onbekende belastingklasse.",
+      "unknown_media_kind": "Onbekende nutsvoorziening.",
+      "unknown_noise_limit": "Onbekend geluidsgrenswaarde-item.",
+      "unknown_permit_kind": "Onbekend type vergunning.",
+      "unknown_transport_kind": "Onbekend type transport.",
+      "validity_invalid": "De vergunning eindigt voordat zij ingaat.",
+      "validity_required": "Voer de geldigheidsdata in voordat u verleent.",
+      "vendor_not_found": "Leverancier niet gevonden.",
+      "window_invalid": "Het tijdvak is niet geldig.",
+      "window_outside_permit": "Het transporttijdvak valt buiten de geldigheid van de vergunning of de toegestane tijden.",
+      "zone_not_found": "Opslagzone niet gevonden in dit project.",
+      "zone_type_invalid": "Onbekend type zone."
+    },
+    "evidence": {
+      "balance_closed": "Oppervlaktebalans gesloten voor elke open fase",
+      "concept_saved_and_exported": "Logistiek concept opgeslagen en gearchiveerd",
+      "first_stage_media_contracted": "Nutsvoorzieningen voor de eerste fase gecontracteerd",
+      "gate_loads_admitted": "Elke belasting is toegelaten door de toegang of gedekt door een ontheffing voor overmaat",
+      "heavy_transports_permitted": "Vergunning verleend voor elk zwaar transport",
+      "neighbourhood_limit_source": "Bron van de geluidsgrenswaarde ingesteld",
+      "no_errors": "Geen openstaande logistieke fouten",
+      "unresolved": "Logistiek plan kon niet worden ingepast in het governancemodel"
+    },
+    "export": {
+      "as_of": "Per",
+      "col_area_kind": "Type gebied",
+      "col_closed": "Gesloten",
+      "col_contracted": "Gecontracteerd",
+      "col_date": "Datum",
+      "col_direction": "Richting",
+      "col_documents": "Vereiste documenten",
+      "col_due": "Uiterlijk",
+      "col_group": "Groep",
+      "col_heavy": "Zwaar",
+      "col_hs_codes": "HS-codes",
+      "col_incoterm": "Incoterm",
+      "col_item": "Item",
+      "col_m2": "m2",
+      "col_media_kind": "Nutsvoorziening",
+      "col_named_place": "Genoemde plaats",
+      "col_pct": "%",
+      "col_permits": "Vergunningen",
+      "col_required": "Vereist",
+      "col_section": "Onderdeel",
+      "col_short": "Kort",
+      "col_stage": "Fase",
+      "col_state": "Status",
+      "col_title": "Titel",
+      "col_topic": "Onderwerp",
+      "col_transport_kind": "Soort",
+      "col_type": "Type",
+      "col_unit": "Eenheid",
+      "col_value": "Waarde",
+      "col_window": "Tijdvak",
+      "empty": "Geen items.",
+      "project": "Project",
+      "title_balance": "Oppervlaktebalans",
+      "title_customs": "Index van douanedossiers",
+      "title_frame": "Samenvatting logistiek kader",
+      "title_media": "Balans nutsvoorzieningen",
+      "title_neighbourhood": "Logboek omgeving",
+      "title_transports": "Transporten en vergunningen"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Fase {stage}: een toewijzing is groter dan het bijbehorende gebied.",
+        "suggestion": "Verlaag de toewijzing."
+      },
+      "area_balance_not_closed": {
+        "fail": "Fase {stage}: de oppervlaktebalans gaat niet op (verschil van {difference_m2} m2).",
+        "suggestion": "Wijs de resterende oppervlakte toe of corrigeer het totaal van de bouwplaats."
+      },
+      "area_overlap": {
+        "fail": "Fase {stage}: twee gebieden van verschillend type overlappen elkaar.",
+        "suggestion": "Pas de contouren aan."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "De aangever komt niet overeen met de partij die volgens de incoterm de invoer afhandelt.",
+        "suggestion": "Controleer de aangever of de incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} goedgekeurde leveringen starten in het uur vanaf {hour}; het concept staat {limit} toe.",
+        "suggestion": "Verplaats leveringen naar een ander uur of verhoog de limiet in het concept."
+      },
+      "gate_hours_unchecked": {
+        "fail": "De bouwplaats heeft geen tijdzone, daarom zijn leveringen niet vergeleken met de openingstijden.",
+        "suggestion": "Stel de tijdzone van de bouwplaats in het logistieke concept in."
+      },
+      "gate_limits_unknown": {
+        "fail": "Toegang {gate} van de bouwplaats vermeldt geen belastingslimieten.",
+        "suggestion": "Voer de gewichts- en afmetingslimieten in."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: de belasting overschrijdt de grenzen van de toegang van de bouwplaats.",
+        "suggestion": "Gebruik een andere toegang of splits de lading."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: zwaar transport zonder verleende vergunning.",
+        "suggestion": "Vraag de vergunning aan."
+      },
+      "hs_code_invalid": {
+        "fail": "HS-code {hs_code} is niet geldig.",
+        "suggestion": "Gebruik alleen cijfers, minimaal de vereiste lengte."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} geldt alleen voor zeevracht.",
+        "suggestion": "Gebruik FCA, CPT of CIP voor andere vervoerswijzen."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} staat niet in de vastgezette versie.",
+        "suggestion": "Kies een term uit de vastgezette versie."
+      },
+      "jit_late": {
+        "fail": "{title}: de just-in-time levering komt na de start van de takt.",
+        "suggestion": "Verplaats de levering naar voren."
+      },
+      "jit_too_early": {
+        "fail": "{title}: de just-in-time levering komt eerder dan de buffer toestaat.",
+        "suggestion": "Verplaats de levering dichter bij de start van de takt."
+      },
+      "jit_without_location": {
+        "fail": "{title}: een just-in-time levering van stroom {flow} noemt geen takt-gebied.",
+        "suggestion": "Kies het takt-gebied waarvoor de levering bestemd is."
+      },
+      "media_capacity_short": {
+        "fail": "Fase {stage}: {media} vraagt {required}, gecontracteerd is {contracted}.",
+        "suggestion": "Verhoog de gecontracteerde capaciteit of verlaag de vraag."
+      },
+      "media_late": {
+        "fail": "Fase {stage}: de aansluiting op {media} is toegezegd na de start van de fase.",
+        "suggestion": "Spreek een eerdere datum of een tijdelijke voorziening af."
+      },
+      "media_unsourced": {
+        "fail": "Een vraag naar {media} heeft geen aansluiting.",
+        "suggestion": "Wijs een aansluiting toe."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Voor een klacht gold een reactietermijn tot {due}.",
+        "suggestion": "Bevestig de ontvangst en reageer op de klacht."
+      },
+      "permit_expired": {
+        "fail": "Vergunning {reference} is verlopen terwijl er nog transporten gepland staan.",
+        "suggestion": "Vraag een nieuwe vergunning aan."
+      },
+      "permit_expiring": {
+        "fail": "Vergunning {reference} loopt binnenkort af terwijl er nog transporten gepland staan.",
+        "suggestion": "Verleng de vergunning."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: het tijdvak valt in de rustperiode.",
+        "suggestion": "Verplaats het buiten de rustperiode of vraag een vergunning voor nachtwerk aan."
+      },
+      "required_document_missing": {
+        "fail": "Vereist document {kind} ontbreekt.",
+        "suggestion": "Verkrijg het document en koppel het."
+      },
+      "site_timezone_missing": {
+        "fail": "De bouwplaats heeft geen tijdzone, daarom zijn de regels voor het tijdstip van de dag niet gecontroleerd.",
+        "suggestion": "Stel de tijdzone van de bouwplaats in het logistieke concept in."
+      },
+      "stage_without_site_setup": {
+        "fail": "Fase {stage} heeft geen gebied voor de bouwplaatsinrichting.",
+        "suggestion": "Wijs een gebied toe voor kantoren en voorzieningen."
+      },
+      "stage_without_storage": {
+        "fail": "Fase {stage} heeft geen opslag- of stapelgebied.",
+        "suggestion": "Wijs een opslag- of stapelgebied toe."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: het tijdvak valt buiten de vergunning.",
+        "suggestion": "Verplaats het tijdvak of verleng de vergunning."
+      },
+      "zone_not_mapped": {
+        "fail": "Opslagzone {zone} is niet gekoppeld aan een gebied op de bouwplaats.",
+        "suggestion": "Koppel de zone aan het geplande gebied."
+      }
+    }
+  }
+}

@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Ei",
+        "yes": "Kyllä"
+      },
+      "direction": {
+        "export": "Vienti",
+        "import": "Tuonti",
+        "inbound": "Saapuva",
+        "outbound": "Lähtevä"
+      },
+      "group": {
+        "built": "Rakennettu",
+        "external": "Ulkoinen",
+        "logistics": "Logistiikka",
+        "reserve": "Varaus"
+      },
+      "is_heavy": {
+        "no": "Ei",
+        "yes": "Kyllä"
+      },
+      "section": {
+        "balance": "Tasapaino",
+        "concept": "Konsepti",
+        "neighbourhood": "Lähiympäristö",
+        "readiness": "Valmius"
+      },
+      "short": {
+        "no": "Ei",
+        "yes": "Kyllä"
+      },
+      "state": {
+        "acknowledged": "Kuitattu",
+        "action_taken": "Toimenpide tehty",
+        "active": "Aktiivinen",
+        "applied": "Haettu",
+        "arrived": "Saapunut",
+        "authority": "Viranomainen",
+        "cancelled": "Peruttu",
+        "cleared": "Tullattu",
+        "closed": "Suljettu",
+        "connected": "Liitetty",
+        "contracted": "Sopimuksen mukainen",
+        "declared": "Ilmoitettu",
+        "disconnected": "Irrotettu",
+        "documents_complete": "Asiakirjat täydellisiä",
+        "draft": "Luonnos",
+        "expired": "Vanhentunut",
+        "granted": "Myönnetty",
+        "held": "Pidätetty",
+        "identified": "Tunnistettu",
+        "in_transit": "Matkalla",
+        "missing": "Puuttuu",
+        "municipality": "Kunta",
+        "neighbours": "Naapurit",
+        "offered": "Tarjottu",
+        "open": "Avoin",
+        "other": "Muu",
+        "permit_pending": "Lupa käsittelyssä",
+        "planned": "Suunniteltu",
+        "police": "Poliisi",
+        "received": "Vastaanotettu",
+        "refused": "Hylätty",
+        "requested": "Pyydetty",
+        "scheduled": "Aikataulutettu",
+        "utility": "Verkkoyhtiö",
+        "verified": "Vahvistettu"
+      },
+      "type": {
+        "complaint": "Valitus",
+        "coordination": "Koordinointi"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Aikataulun tehtävää ei löydy tästä projektista.",
+      "allocation_exceeds_area": "Allokaatio on suurempi kuin alue.",
+      "allocation_negative": "Allokaatio ei voi olla negatiivinen.",
+      "allocations_changed": "Joku muu muutti allokaatioita. Lataa sivu uudelleen ja yritä uudelleen.",
+      "area_not_found": "Työmaa-aluetta ei löydy.",
+      "authority_permit_not_found": "Viranomaisen lupaa ei löydy tästä projektista.",
+      "buffer_days_negative": "Varapäivät eivät voi olla negatiivisia.",
+      "catalogue_invalid": "Kiinnitettyä logistiikkaluetteloa ei voi ratkaista.",
+      "catalogue_retired": "Tämä luetteloversio on poistettu käytöstä.",
+      "code_required": "Koodi vaaditaan.",
+      "code_taken": "Tämä koodi on jo käytössä projektissa.",
+      "commodity_code_not_found": "Tavaraluokitusta ei löydy.",
+      "complaint_closed": "Suljettua valitusta ei voi muuttaa.",
+      "complaint_not_found": "Valitusta ei löydy.",
+      "connection_point_invalid": "Liitäntäpiste ei ole kelvollinen piste.",
+      "contracted_capacity_required": "Anna ensin sopimuksen mukainen kapasiteetti.",
+      "correspondence_not_found": "Kirjeenvaihtoa ei löydy tästä projektista.",
+      "correspondence_thread_not_found": "Kirjeenvaihtoa ei löydy tästä projektista.",
+      "country_invalid": "Käytä kaksikirjaimista ISO-maakoodia.",
+      "currency_invalid": "Käytä kolmikirjaimista ISO-valuuttakoodia.",
+      "currency_required": "Summalle on määritettävä valuutta.",
+      "customs_case_not_found": "Tulliasiaa ei löydy.",
+      "customs_closed": "Tullattua tai suljettua asiaa ei voi muuttaa.",
+      "customs_declared": "Ilmoitettua asiaa ei voi poistaa.",
+      "customs_not_found": "Tulliasiaa ei löydy.",
+      "customs_without_lines": "Lisää ensin vähintään yksi tavararivi.",
+      "declarant_invalid": "Ilmoittaja on ostaja tai myyjä.",
+      "delivery_already_on_site": "Tämä toimitus on jo saapunut, eikä sitä päätetä uudelleen.",
+      "delivery_not_found": "Toimitusta ei löydy tästä projektista.",
+      "delivery_rate_exceeded": "Tälle tunnille on jo kirjattu konseptin sallima määrä toimituksia.",
+      "delivery_refused": "Tätä toimitusta ei voi hyväksyä sellaisenaan.",
+      "demand_not_found": "Tarvetta ei löydy.",
+      "demand_owned_by_plant_position": "Tämä tarve tulee koneistorivilta; muuta sitä siellä.",
+      "direction_invalid": "Tuntematon suunta.",
+      "document_exists": "Tämä asiakirja on jo tarkistuslistalla.",
+      "document_not_found": "Asiakirjaa ei löydy.",
+      "document_ref_required": "Liitä asiakirja ennen kuin merkitset sen vastaanotetuksi.",
+      "duplicate_stage": "Jokainen vaihe voidaan allokoida alueelle kerran.",
+      "entry_not_found": "Lokimerkintää ei löydy.",
+      "field_required": "Tämä kenttä ei voi olla tyhjä.",
+      "flow_code_invalid": "Jokaisella materiaalivirralla on oltava oma koodinsa.",
+      "flow_code_unknown": "Logistiikkakonseptissa ei ole materiaalivirtaa tällä koodilla.",
+      "flow_mode_invalid": "Tuntematon materiaalivirran tapa.",
+      "frame_invalid": "Tuntematon koordinaattijärjestelmä.",
+      "gate_hours_unchecked": "Aukioloaikoja ei tarkisteta, ennen kuin työmaan aikavyöhyke on asetettu.",
+      "gate_load_exceeded": "Kuorma ylittää työmaan sisäänkäynnin rajat.",
+      "gate_not_found": "Työmaan sisäänkäyntiä ei löydy tästä projektista.",
+      "geo_overlay_not_found": "Työmaasuunnitelman peittokuvaa ei löydy tästä projektista.",
+      "geometry_invalid": "Alueen ääriviiva ei ole kelvollinen monikulmio.",
+      "goods_receipt_missing": "Tälle ostotilaukselle ei ole vielä vahvistettua tavaran vastaanottoa.",
+      "heavy_without_permit": "Raskas kuljetus tarvitsee myönnetyn luvan ennen aikataulutusta.",
+      "hours_invalid": "Anna kelvolliset tunnit, päättymisen jälkeen alkamisen.",
+      "hs_code_invalid": "HS-koodin on oltava pelkkiä numeroita ja riittävän pitkä.",
+      "incoterm_unknown": "Tämä Incoterm ei kuulu kiinnitettyyn versioon.",
+      "invalid_transition": "Tämä tilamuutos ei ole sallittu.",
+      "jit_without_takt": "Juuri-ajoissa-virta tarvitsee takt-aikataulun.",
+      "last_stage": "Projektissa on oltava vähintään yksi laajennusvaihe.",
+      "line_not_found": "Tullirivia ei löydy.",
+      "link_target_unavailable": "Tätä linkkiä ei voi vielä tarkistaa, koska sen kohdemoduuli ei ole asennettu.",
+      "media_not_found": "Yhteyttä ei löydy.",
+      "money_not_decimal": "Anna summa desimaalilukuna.",
+      "money_out_of_range": "Anna summa, jossa on enintään kaksi desimaalia.",
+      "noise_limit_needs_project_value": "Tämä toimivalta ei aseta kiinteitä arvoja; anna projektin sovitut arvot.",
+      "not_found": "Ei löytynyt.",
+      "outside_gate_hours": "Aikaikkuna on sisäänkäynnin aukioloaikojen ulkopuolella.",
+      "owner_not_member": "Vastuuhenkilön on oltava tämän projektin jäsen.",
+      "pack_catalogue_invalid": "Paketin luetteloa ei voi ladata.",
+      "permission_denied": "Sinulla ei ole oikeutta tähän.",
+      "permit_frozen": "Myönnetty, hylätty tai vanhentunut lupa säilyttää voimassaolonsa, aikaikkunansa ja kuljetuksensa.",
+      "permit_not_found": "Lupaa ei löydy.",
+      "plan_calibration_without_image": "Valitse työmaasuunnitelman kuva ennen mittakaavan asettamista.",
+      "plan_document_not_found": "Työmaasuunnitelman asiakirjaa ei löydy tästä projektista.",
+      "plan_origin_invalid": "Työmaasuunnitelman lähtöpiste on kaksi lukua, x ja y pikseleinä.",
+      "plan_scale_invalid": "Työmaasuunnitelman mittakaavan on oltava suurempi kuin nolla.",
+      "plant_item_not_found": "Koneistokohdetta ei löydy tästä projektista.",
+      "plant_position_not_found": "Koneistorivia ei löydy tästä projektista.",
+      "plant_position_required": "Koneistorivi vaaditaan.",
+      "po_not_found": "Ostotilausta ei löydy tästä projektista.",
+      "project_not_found": "Projektia ei löydy.",
+      "quiet_hours_conflict": "Aikaikkuna osuu hiljaisiin aikoihin, eikä yölupa kata sitä.",
+      "required_document_missing": "Vaadittava asiakirja puuttuu yhä.",
+      "response_required": "Kirjoita ensin vastaus.",
+      "route_invalid": "Reitti ei ole kelvollinen viiva.",
+      "simultaneity_factor_range": "Samanaikaisuuskertoimen on oltava välillä 0–1.",
+      "site_timezone_missing": "Aseta ensin työmaan aikavyöhyke; kellonajat tarkistetaan työmaan kellon mukaan.",
+      "slot_taken": "Toinen hyväksytty toimitus on varannut tämän ajan sisäänkäynnille.",
+      "stage_active": "Aktiivista vaihetta ei voi poistaa. Sulje se ensin.",
+      "stage_not_found": "Laajennusvaihetta ei löydy.",
+      "takt_location_not_found": "Takt-aluetta ei löydy tästä projektista.",
+      "takt_schedule_not_found": "Takt-aikataulua ei löydy tästä projektista.",
+      "timezone_invalid": "Tuntematon aikavyöhyke. Käytä nimeä, kuten Europe/Helsinki.",
+      "transport_closed": "Suljettua tai peruttua kuljetusta ei voi muuttaa.",
+      "transport_mode_invalid": "Tuntematon kuljetustapa.",
+      "transport_not_found": "Kuljetusta ei löydy.",
+      "transport_under_way": "Matkalla olevaa kuljetusta ei voi poistaa.",
+      "unknown_area_kind": "Tuntematon alueen laji.",
+      "unknown_catalogue": "Tuntematon luettelo.",
+      "unknown_document_kind": "Tuntematon asiakirjalaji.",
+      "unknown_issue_kind": "Tuntematon valituksen laji.",
+      "unknown_link_kind": "Tälle linkin lajille ei ole luetteloa.",
+      "unknown_load_class": "Tuntematon kuormaluokka.",
+      "unknown_media_kind": "Tuntematon palvelu.",
+      "unknown_noise_limit": "Tuntematon melurajan merkintä.",
+      "unknown_permit_kind": "Tuntematon luvan laji.",
+      "unknown_transport_kind": "Tuntematon kuljetuksen laji.",
+      "validity_invalid": "Lupa päättyy ennen alkamistaan.",
+      "validity_required": "Anna voimassaolon päivämäärät ennen myöntämistä.",
+      "vendor_not_found": "Toimittajaa ei löydy.",
+      "window_invalid": "Aikaikkuna ei ole kelvollinen.",
+      "window_outside_permit": "Kuljetuksen aikaikkuna on luvan voimassaolon tai sallittujen aikojen ulkopuolella.",
+      "zone_not_found": "Varastoalaa ei löydy tästä projektista.",
+      "zone_type_invalid": "Tuntematon alueen tyyppi."
+    },
+    "evidence": {
+      "balance_closed": "Alueiden tasapaino on suljettu jokaiselle avoimelle vaiheelle",
+      "concept_saved_and_exported": "Logistiikkakonsepti on tallennettu ja arkistoitu",
+      "first_stage_media_contracted": "Ensimmäisen vaiheen palvelut on sopimuksessa",
+      "gate_loads_admitted": "Jokaisen kuorman sisäänkäynti on hyväksynyt tai sen kattaa ylileveyslupa",
+      "heavy_transports_permitted": "Jokaiselle raskaalle kuljetukselle on myönnetty lupa",
+      "neighbourhood_limit_source": "Melurajan lähde on asetettu",
+      "no_errors": "Avoimia logistiikkavirheitä ei ole",
+      "unresolved": "Logistiikkasuunnitelmaa ei voitu sijoittaa hallintomalliin"
+    },
+    "export": {
+      "as_of": "Tilanne",
+      "col_area_kind": "Alueen laji",
+      "col_closed": "Suljettu",
+      "col_contracted": "Sopimuksen mukainen",
+      "col_date": "Päivämäärä",
+      "col_direction": "Suunta",
+      "col_documents": "Vaaditut asiakirjat",
+      "col_due": "Määräaika",
+      "col_group": "Ryhmä",
+      "col_heavy": "Raskas",
+      "col_hs_codes": "HS-koodit",
+      "col_incoterm": "Incoterm",
+      "col_item": "Kohde",
+      "col_m2": "m2",
+      "col_media_kind": "Palvelu",
+      "col_named_place": "Nimetty paikka",
+      "col_pct": "%",
+      "col_permits": "Luvat",
+      "col_required": "Vaadittu",
+      "col_section": "Osio",
+      "col_short": "Lyhyt",
+      "col_stage": "Vaihe",
+      "col_state": "Tila",
+      "col_title": "Otsikko",
+      "col_topic": "Aihe",
+      "col_transport_kind": "Laji",
+      "col_type": "Tyyppi",
+      "col_unit": "Yksikkö",
+      "col_value": "Arvo",
+      "col_window": "Aikaikkuna",
+      "empty": "Ei merkintöjä.",
+      "project": "Projekti",
+      "title_balance": "Alueiden tasapaino",
+      "title_customs": "Tulliasioiden hakemisto",
+      "title_frame": "Logistiikkakehyksen yhteenveto",
+      "title_media": "Palveluiden tasapaino",
+      "title_neighbourhood": "Lähiympäristön loki",
+      "title_transports": "Kuljetukset ja luvat"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Vaihe {stage}: allokaatio on suurempi kuin sen alue.",
+        "suggestion": "Pienennä allokaatiota."
+      },
+      "area_balance_not_closed": {
+        "fail": "Vaihe {stage}: alueiden tasapaino ei täsmää (ero {difference_m2} m2).",
+        "suggestion": "Allokoi jäljellä oleva alue tai korjaa työmaan kokonaisala."
+      },
+      "area_overlap": {
+        "fail": "Vaihe {stage}: kaksi eri lajin aluetta menevät päällekkäin.",
+        "suggestion": "Säädä ääriviivoja."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Ilmoittaja ei vastaa sitä, joka Incotermin mukaan hoitaa tuonnin tullauksen.",
+        "suggestion": "Tarkista ilmoittaja tai Incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} hyväksyttyä toimitusta alkaa tunnilla alkaen {hour}, konsepti sallii {limit}.",
+        "suggestion": "Siirrä toimituksia toiselle tunnille tai nosta raja konseptissa."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Työmaalla ei ole aikavyöhykettä, joten toimituksia ei verrattu aukioloaikoihin.",
+        "suggestion": "Aseta työmaan aikavyöhyke logistiikkakonseptissa."
+      },
+      "gate_limits_unknown": {
+        "fail": "Työmaan sisäänkäynti {gate} ei ilmoita kuormarajoja.",
+        "suggestion": "Anna paino- ja mittarajat."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: kuorma ylittää työmaan sisäänkäynnin rajat.",
+        "suggestion": "Käytä toista sisäänkäyntiä tai jaa kuorma."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: raskas kuljetus ilman myönnettyä lupaa.",
+        "suggestion": "Hae lupa."
+      },
+      "hs_code_invalid": {
+        "fail": "HS-koodi {hs_code} ei ole kelvollinen.",
+        "suggestion": "Käytä pelkkiä numeroita, vähintään vaadittu pituus."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} on tarkoitettu vain merikuljetukseen.",
+        "suggestion": "Muille kuljetustavoille käytä FCA:ta, CPT:tä tai CIP:tä."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} ei kuulu kiinnitettyyn versioon.",
+        "suggestion": "Valitse kiinnitetyn version ehto."
+      },
+      "jit_late": {
+        "fail": "{title}: juuri-ajoissa-toimitus tulee takt-aikataulun alun jälkeen.",
+        "suggestion": "Aikaistan toimitusta."
+      },
+      "jit_too_early": {
+        "fail": "{title}: juuri-ajoissa-toimitus tulee aikaisemmin kuin sen varasto sallii.",
+        "suggestion": "Siirrä se lähemmäs takt-aikataulun alkua."
+      },
+      "jit_without_location": {
+        "fail": "{title}: virran {flow} juuri-ajoissa-toimitus ei nimeä takt-aluetta.",
+        "suggestion": "Valitse takt-alue, jolle toimitus on tarkoitettu."
+      },
+      "media_capacity_short": {
+        "fail": "Vaihe {stage}: {media} tarvitsee {required}, sopimuksessa on {contracted}.",
+        "suggestion": "Nosta sopimuksen mukaista kapasiteettia tai pienennä tarvetta."
+      },
+      "media_late": {
+        "fail": "Vaihe {stage}: {media}-liitäntä on luvattu vaiheen alkamisen jälkeen.",
+        "suggestion": "Sovi aikaisempi päivä tai tilapäinen syöttö."
+      },
+      "media_unsourced": {
+        "fail": "{media}-tarpeella ei ole liitäntää.",
+        "suggestion": "Määritä liitäntä."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Valitukseen oli vastattava päivään {due} mennessä.",
+        "suggestion": "Kuittaa valitus ja vastaa siihen."
+      },
+      "permit_expired": {
+        "fail": "Lupa {reference} on vanhentunut, vaikka kuljetuksia on vielä jäljellä.",
+        "suggestion": "Hae uusi lupa."
+      },
+      "permit_expiring": {
+        "fail": "Lupa {reference} umpeutuu pian, vaikka kuljetuksia on vielä jäljellä.",
+        "suggestion": "Jatka lupaa."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: aikaikkuna osuu hiljaisiin aikoihin.",
+        "suggestion": "Siirrä se hiljaisten aikojen ulkopuolelle tai hanki yölupa."
+      },
+      "required_document_missing": {
+        "fail": "Vaadittu asiakirja {kind} puuttuu.",
+        "suggestion": "Hanki asiakirja ja liitä se."
+      },
+      "site_timezone_missing": {
+        "fail": "Työmaalla ei ole aikavyöhykettä, joten vuorokaudenajan sääntöjä ei tarkistettu.",
+        "suggestion": "Aseta työmaan aikavyöhyke logistiikkakonseptissa."
+      },
+      "stage_without_site_setup": {
+        "fail": "Vaiheella {stage} ei ole työmaan perustamisalaa.",
+        "suggestion": "Allokoi alue toimistoille ja sosiaalitiloille."
+      },
+      "stage_without_storage": {
+        "fail": "Vaiheella {stage} ei ole varastointi- tai välivarastointialuetta.",
+        "suggestion": "Allokoi varastointi- tai välivarastointialue."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: aikaikkuna on luvan ulkopuolella.",
+        "suggestion": "Siirrä aikaikkunaa tai jatka lupaa."
+      },
+      "zone_not_mapped": {
+        "fail": "Välivarastoalue {zone} ei ole linkitetty työmaan alueeseen.",
+        "suggestion": "Linkitä se suunniteltuun alueeseensa."
+      }
+    }
+  }
+}

@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "No",
+        "yes": "Sì"
+      },
+      "direction": {
+        "export": "Esportazione",
+        "import": "Importazione",
+        "inbound": "In entrata",
+        "outbound": "In uscita"
+      },
+      "group": {
+        "built": "Costruito",
+        "external": "Esterno",
+        "logistics": "Logistica",
+        "reserve": "Riserva"
+      },
+      "is_heavy": {
+        "no": "No",
+        "yes": "Sì"
+      },
+      "section": {
+        "balance": "Bilancio",
+        "concept": "Concetto",
+        "neighbourhood": "Vicinato",
+        "readiness": "Prontezza"
+      },
+      "short": {
+        "no": "No",
+        "yes": "Sì"
+      },
+      "state": {
+        "acknowledged": "Presa visione",
+        "action_taken": "Azione intrapresa",
+        "active": "Attivo",
+        "applied": "Richiesto",
+        "arrived": "Arrivato",
+        "authority": "Ente",
+        "cancelled": "Annullato",
+        "cleared": "Sdoganato",
+        "closed": "Chiuso",
+        "connected": "Allacciato",
+        "contracted": "Contrattualizzato",
+        "declared": "Dichiarato",
+        "disconnected": "Disallacciato",
+        "documents_complete": "Documenti completi",
+        "draft": "Bozza",
+        "expired": "Scaduto",
+        "granted": "Rilasciato",
+        "held": "Trattenuto",
+        "identified": "Individuato",
+        "in_transit": "In transito",
+        "missing": "Mancante",
+        "municipality": "Comune",
+        "neighbours": "Vicini",
+        "offered": "Offerto",
+        "open": "Aperto",
+        "other": "Altro",
+        "permit_pending": "Autorizzazione in attesa",
+        "planned": "Pianificato",
+        "police": "Polizia",
+        "received": "Ricevuto",
+        "refused": "Negato",
+        "requested": "Richiesto",
+        "scheduled": "Programmato",
+        "utility": "Gestore servizi",
+        "verified": "Verificato"
+      },
+      "type": {
+        "complaint": "Reclamo",
+        "coordination": "Coordinamento"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Attività di programma non trovata in questo progetto.",
+      "allocation_exceeds_area": "L'allocazione è superiore all'area.",
+      "allocation_negative": "Un'allocazione non può essere negativa.",
+      "allocations_changed": "Le allocazioni sono state modificate da un altro utente. Ricarica e riprova.",
+      "area_not_found": "Area di cantiere non trovata.",
+      "authority_permit_not_found": "Autorizzazione dell'ente non trovata in questo progetto.",
+      "buffer_days_negative": "I giorni di tolleranza non possono essere negativi.",
+      "catalogue_invalid": "Il catalogo logistico fissato non può essere risolto.",
+      "catalogue_retired": "Questa versione del catalogo è ritirata.",
+      "code_required": "È richiesto un codice.",
+      "code_taken": "Questo codice è già utilizzato nel progetto.",
+      "commodity_code_not_found": "Codice merceologico non trovato.",
+      "complaint_closed": "Un reclamo chiuso non può essere modificato.",
+      "complaint_not_found": "Reclamo non trovato.",
+      "connection_point_invalid": "Il punto di allacciamento non è un punto valido.",
+      "contracted_capacity_required": "Inserire prima la potenza contrattuale.",
+      "correspondence_not_found": "Corrispondenza non trovata in questo progetto.",
+      "correspondence_thread_not_found": "Corrispondenza non trovata in questo progetto.",
+      "country_invalid": "Usare un codice paese ISO a due lettere.",
+      "currency_invalid": "Usare un codice valuta ISO a tre lettere.",
+      "currency_required": "Un importo richiede la sua valuta.",
+      "customs_case_not_found": "Pratica doganale non trovata.",
+      "customs_closed": "Una pratica sdoganata o chiusa non può essere modificata.",
+      "customs_declared": "Una pratica dichiarata non può essere eliminata.",
+      "customs_not_found": "Pratica doganale non trovata.",
+      "customs_without_lines": "Aggiungere prima almeno una riga di merce.",
+      "declarant_invalid": "Il dichiarante è l'acquirente o il venditore.",
+      "delivery_already_on_site": "Questa consegna è già arrivata e non può essere decisa di nuovo.",
+      "delivery_not_found": "Consegna non trovata in questo progetto.",
+      "delivery_rate_exceeded": "Questa ora ospita già il numero di consegne consentito dal concetto.",
+      "delivery_refused": "Questa consegna non può essere approvata nello stato attuale.",
+      "demand_not_found": "Fabbisogno non trovato.",
+      "demand_owned_by_plant_position": "Questo fabbisogno deriva da una voce di impianto; modificarlo lì.",
+      "direction_invalid": "Direzione sconosciuta.",
+      "document_exists": "Questo documento è già nella checklist.",
+      "document_not_found": "Documento non trovato.",
+      "document_ref_required": "Collegare il documento prima di segnarlo come ricevuto.",
+      "duplicate_stage": "Ogni fase può essere assegnata una sola volta per area.",
+      "entry_not_found": "Voce di registro non trovata.",
+      "field_required": "Questo campo non può essere vuoto.",
+      "flow_code_invalid": "Ogni flusso di materiali richiede un proprio codice.",
+      "flow_code_unknown": "Il concetto logistico non contiene un flusso di materiali con questo codice.",
+      "flow_mode_invalid": "Modalità di flusso dei materiali sconosciuta.",
+      "frame_invalid": "Sistema di coordinate sconosciuto.",
+      "gate_hours_unchecked": "Gli orari di apertura non vengono verificati finché non viene impostato il fuso orario del cantiere.",
+      "gate_load_exceeded": "Il carico supera i limiti dell'accesso al cantiere.",
+      "gate_not_found": "Accesso al cantiere non trovato in questo progetto.",
+      "geo_overlay_not_found": "Livello della planimetria di cantiere non trovato in questo progetto.",
+      "geometry_invalid": "Il perimetro dell'area non è un poligono valido.",
+      "goods_receipt_missing": "Nessun ricevimento merci confermato per questo ordine di acquisto.",
+      "heavy_without_permit": "Un trasporto pesante richiede un'autorizzazione rilasciata prima della programmazione.",
+      "hours_invalid": "Inserire ore valide, con la fine successiva all'inizio.",
+      "hs_code_invalid": "Il codice HS deve contenere solo cifre ed essere sufficientemente lungo.",
+      "incoterm_unknown": "Questo incoterm non è presente nella versione fissata.",
+      "invalid_transition": "Questo cambio di stato non è consentito.",
+      "jit_without_takt": "Un flusso just-in-time richiede un programma takt.",
+      "last_stage": "Un progetto deve mantenere almeno una fase di espansione.",
+      "line_not_found": "Riga doganale non trovata.",
+      "link_target_unavailable": "Questo collegamento non può ancora essere verificato, perché il modulo a cui punta non è installato.",
+      "media_not_found": "Allacciamento utenza non trovato.",
+      "money_not_decimal": "Inserire l'importo come numero decimale.",
+      "money_out_of_range": "Inserire un importo con al massimo due decimali.",
+      "noise_limit_needs_project_value": "Questa giurisdizione non fissa valori; inserire i valori del progetto concordati.",
+      "not_found": "Non trovato.",
+      "outside_gate_hours": "La finestra temporale cade al di fuori degli orari di apertura dell'accesso.",
+      "owner_not_member": "Il responsabile deve essere un membro di questo progetto.",
+      "pack_catalogue_invalid": "Il catalogo del pacchetto non si carica.",
+      "permission_denied": "Non si dispone dell'autorizzazione necessaria.",
+      "permit_frozen": "Un'autorizzazione rilasciata, negata o scaduta mantiene la sua validità, le sue finestre e i suoi trasporti.",
+      "permit_not_found": "Autorizzazione non trovata.",
+      "plan_calibration_without_image": "Scegliere l'immagine della planimetria prima di impostarne la scala.",
+      "plan_document_not_found": "Documento della planimetria non trovato in questo progetto.",
+      "plan_origin_invalid": "L'origine della planimetria è composta da due numeri, x e y in pixel.",
+      "plan_scale_invalid": "La scala della planimetria deve essere maggiore di zero.",
+      "plant_item_not_found": "Voce di impianto non trovata in questo progetto.",
+      "plant_position_not_found": "Posizione di impianto non trovata in questo progetto.",
+      "plant_position_required": "È richiesta una posizione di impianto.",
+      "po_not_found": "Ordine di acquisto non trovato in questo progetto.",
+      "project_not_found": "Progetto non trovato.",
+      "quiet_hours_conflict": "La finestra cade nelle ore di silenzio e nessuna autorizzazione per lavoro notturno la copre.",
+      "required_document_missing": "Manca ancora un documento obbligatorio.",
+      "response_required": "Scrivere prima la risposta.",
+      "route_invalid": "Il percorso non è una linea valida.",
+      "simultaneity_factor_range": "Il fattore di contemporaneità deve essere compreso tra 0 e 1.",
+      "site_timezone_missing": "Impostare prima il fuso orario del cantiere; gli orari vengono verificati sull'orologio di cantiere.",
+      "slot_taken": "Un'altra consegna approvata occupa già questa finestra all'accesso.",
+      "stage_active": "Una fase attiva non può essere eliminata. Chiuderla prima.",
+      "stage_not_found": "Fase di espansione non trovata.",
+      "takt_location_not_found": "Area takt non trovata in questo progetto.",
+      "takt_schedule_not_found": "Programma takt non trovato in questo progetto.",
+      "timezone_invalid": "Fuso orario sconosciuto. Usare un nome come Europe/Rome.",
+      "transport_closed": "Un trasporto chiuso o annullato non può essere modificato.",
+      "transport_mode_invalid": "Modalità di trasporto sconosciuta.",
+      "transport_not_found": "Trasporto non trovato.",
+      "transport_under_way": "Un trasporto in corso non può essere eliminato.",
+      "unknown_area_kind": "Tipo di area sconosciuto.",
+      "unknown_catalogue": "Catalogo sconosciuto.",
+      "unknown_document_kind": "Tipo di documento sconosciuto.",
+      "unknown_issue_kind": "Tipo di reclamo sconosciuto.",
+      "unknown_link_kind": "Non esiste un elenco per questo tipo di collegamento.",
+      "unknown_load_class": "Classe di carico sconosciuta.",
+      "unknown_media_kind": "Utenza sconosciuta.",
+      "unknown_noise_limit": "Voce del limite di rumore sconosciuta.",
+      "unknown_permit_kind": "Tipo di autorizzazione sconosciuto.",
+      "unknown_transport_kind": "Tipo di trasporto sconosciuto.",
+      "validity_invalid": "L'autorizzazione termina prima di iniziare.",
+      "validity_required": "Inserire le date di validità prima del rilascio.",
+      "vendor_not_found": "Fornitore non trovato.",
+      "window_invalid": "La finestra temporale non è valida.",
+      "window_outside_permit": "La finestra del trasporto è al di fuori della validità dell'autorizzazione o degli orari consentiti.",
+      "zone_not_found": "Area di stoccaggio non trovata in questo progetto.",
+      "zone_type_invalid": "Tipo di zona sconosciuto."
+    },
+    "evidence": {
+      "balance_closed": "Bilancio delle aree chiuso per ogni fase aperta",
+      "concept_saved_and_exported": "Concetto logistico salvato e archiviato",
+      "first_stage_media_contracted": "Utenze per la prima fase contrattualizzate",
+      "gate_loads_admitted": "Ogni carico ammesso dal proprio accesso o coperto da un permesso per trasporto eccezionale",
+      "heavy_transports_permitted": "Autorizzazione rilasciata per ogni trasporto pesante",
+      "neighbourhood_limit_source": "Fonte del limite di rumore impostata",
+      "no_errors": "Nessun errore logistico aperto",
+      "unresolved": "Il piano logistico non può essere collocato nel modello di governance"
+    },
+    "export": {
+      "as_of": "Al",
+      "col_area_kind": "Tipo di area",
+      "col_closed": "Chiuso",
+      "col_contracted": "Contrattualizzato",
+      "col_date": "Data",
+      "col_direction": "Direzione",
+      "col_documents": "Documenti richiesti",
+      "col_due": "Scadenza",
+      "col_group": "Gruppo",
+      "col_heavy": "Pesante",
+      "col_hs_codes": "Codici HS",
+      "col_incoterm": "Incoterm",
+      "col_item": "Voce",
+      "col_m2": "m2",
+      "col_media_kind": "Utenza",
+      "col_named_place": "Luogo indicato",
+      "col_pct": "%",
+      "col_permits": "Autorizzazioni",
+      "col_required": "Richiesto",
+      "col_section": "Sezione",
+      "col_short": "Breve",
+      "col_stage": "Fase",
+      "col_state": "Stato",
+      "col_title": "Titolo",
+      "col_topic": "Argomento",
+      "col_transport_kind": "Tipo",
+      "col_type": "Tipo",
+      "col_unit": "Unità",
+      "col_value": "Valore",
+      "col_window": "Finestra",
+      "empty": "Nessuna voce.",
+      "project": "Progetto",
+      "title_balance": "Bilancio delle aree",
+      "title_customs": "Indice del fascicolo delle pratiche doganali",
+      "title_frame": "Riepilogo del quadro logistico",
+      "title_media": "Bilancio delle utenze",
+      "title_neighbourhood": "Registro del vicinato",
+      "title_transports": "Trasporti e autorizzazioni"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Fase {stage}: un'allocazione è superiore alla sua area.",
+        "suggestion": "Ridurre l'allocazione."
+      },
+      "area_balance_not_closed": {
+        "fail": "Fase {stage}: il bilancio delle aree non quadra (differenza di {difference_m2} m2).",
+        "suggestion": "Allocare l'area residua o correggere il totale del cantiere."
+      },
+      "area_overlap": {
+        "fail": "Fase {stage}: due aree di tipo diverso si sovrappongono.",
+        "suggestion": "Correggere i perimetri."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Il dichiarante non corrisponde a chi espleta lo sdoganamento all'importazione secondo l'incoterm.",
+        "suggestion": "Verificare il dichiarante o l'incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} consegne approvate iniziano nell'ora a partire dalle {hour}; il concetto ne consente {limit}.",
+        "suggestion": "Spostare le consegne in un'altra ora o aumentare il limite nel concetto."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Il cantiere non ha un fuso orario, quindi le consegne non sono state confrontate con gli orari di apertura.",
+        "suggestion": "Impostare il fuso orario del cantiere nel concetto logistico."
+      },
+      "gate_limits_unknown": {
+        "fail": "L'accesso al cantiere {gate} non indica limiti di carico.",
+        "suggestion": "Inserire i limiti di peso e di dimensione."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: il carico supera i limiti dell'accesso al cantiere.",
+        "suggestion": "Usare un altro accesso o suddividere il carico."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: trasporto pesante senza un'autorizzazione rilasciata.",
+        "suggestion": "Richiedere l'autorizzazione."
+      },
+      "hs_code_invalid": {
+        "fail": "Il codice HS {hs_code} non è valido.",
+        "suggestion": "Usare solo cifre, con almeno la lunghezza minima."
+      },
+      "incoterm_sea_only": {
+        "fail": "L'incoterm {incoterm} è previsto solo per il trasporto marittimo.",
+        "suggestion": "Usare FCA, CPT o CIP per le altre modalità."
+      },
+      "incoterm_unknown": {
+        "fail": "L'incoterm {incoterm} non è presente nella versione fissata.",
+        "suggestion": "Scegliere un termine della versione fissata."
+      },
+      "jit_late": {
+        "fail": "{title}: la consegna just-in-time arriva dopo l'avvio del takt.",
+        "suggestion": "Anticipare la consegna."
+      },
+      "jit_too_early": {
+        "fail": "{title}: la consegna just-in-time arriva prima di quanto consenta la sua tolleranza.",
+        "suggestion": "Avvicinarla all'avvio del takt."
+      },
+      "jit_without_location": {
+        "fail": "{title}: una consegna just-in-time del flusso {flow} non indica un'area takt.",
+        "suggestion": "Scegliere l'area takt a cui è destinata la consegna."
+      },
+      "media_capacity_short": {
+        "fail": "Fase {stage}: {media} richiede {required}, contrattualizzati {contracted}.",
+        "suggestion": "Aumentare la potenza contrattuale o ridurre il fabbisogno."
+      },
+      "media_late": {
+        "fail": "Fase {stage}: l'allacciamento {media} è previsto dopo l'avvio della fase.",
+        "suggestion": "Concordare una data anticipata o una fornitura provvisoria."
+      },
+      "media_unsourced": {
+        "fail": "Un fabbisogno di {media} non ha un allacciamento.",
+        "suggestion": "Assegnare un allacciamento."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Per un reclamo la risposta era dovuta entro il {due}.",
+        "suggestion": "Prendere atto del reclamo e rispondere."
+      },
+      "permit_expired": {
+        "fail": "L'autorizzazione {reference} è scaduta mentre restano trasporti da effettuare.",
+        "suggestion": "Richiedere una nuova autorizzazione."
+      },
+      "permit_expiring": {
+        "fail": "L'autorizzazione {reference} scade a breve mentre restano trasporti da effettuare.",
+        "suggestion": "Prorogare l'autorizzazione."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: la finestra cade nelle ore di silenzio.",
+        "suggestion": "Spostarla fuori dalle ore di silenzio o ottenere un permesso per lavoro notturno."
+      },
+      "required_document_missing": {
+        "fail": "Manca il documento obbligatorio {kind}.",
+        "suggestion": "Ottenere e collegare il documento."
+      },
+      "site_timezone_missing": {
+        "fail": "Il cantiere non ha un fuso orario, quindi le regole sugli orari non sono state verificate.",
+        "suggestion": "Impostare il fuso orario del cantiere nel concetto logistico."
+      },
+      "stage_without_site_setup": {
+        "fail": "La fase {stage} non ha un'area di allestimento del cantiere.",
+        "suggestion": "Assegnare un'area per uffici e servizi per il personale."
+      },
+      "stage_without_storage": {
+        "fail": "La fase {stage} non ha un'area di stoccaggio o di deposito.",
+        "suggestion": "Assegnare un'area di stoccaggio o di deposito."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: la finestra è al di fuori dell'autorizzazione.",
+        "suggestion": "Spostare la finestra o prorogare l'autorizzazione."
+      },
+      "zone_not_mapped": {
+        "fail": "L'area di stoccaggio {zone} non è collegata a un'area di cantiere.",
+        "suggestion": "Collegarla all'area prevista."
+      }
+    }
+  }
+}

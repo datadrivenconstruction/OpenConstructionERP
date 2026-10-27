@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "确定"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "否",
+        "yes": "是"
+      },
+      "direction": {
+        "export": "出口",
+        "import": "进口",
+        "inbound": "进场",
+        "outbound": "出场"
+      },
+      "group": {
+        "built": "已建",
+        "external": "外部",
+        "logistics": "物流",
+        "reserve": "备用"
+      },
+      "is_heavy": {
+        "no": "否",
+        "yes": "是"
+      },
+      "section": {
+        "balance": "平衡",
+        "concept": "方案",
+        "neighbourhood": "周边环境",
+        "readiness": "就绪度"
+      },
+      "short": {
+        "no": "否",
+        "yes": "是"
+      },
+      "state": {
+        "acknowledged": "已确认",
+        "action_taken": "已采取措施",
+        "active": "进行中",
+        "applied": "已申请",
+        "arrived": "已到场",
+        "authority": "主管机关",
+        "cancelled": "已取消",
+        "cleared": "已放行",
+        "closed": "已关闭",
+        "connected": "已接入",
+        "contracted": "已签约",
+        "declared": "已申报",
+        "disconnected": "已断开",
+        "documents_complete": "文件齐备",
+        "draft": "草稿",
+        "expired": "已过期",
+        "granted": "已批准",
+        "held": "已暂停",
+        "identified": "已识别",
+        "in_transit": "运输中",
+        "missing": "缺失",
+        "municipality": "市政部门",
+        "neighbours": "周边居民",
+        "offered": "已报价",
+        "open": "待处理",
+        "other": "其他",
+        "permit_pending": "许可待批",
+        "planned": "已计划",
+        "police": "警方",
+        "received": "已收到",
+        "refused": "已拒绝",
+        "requested": "已申请",
+        "scheduled": "已排程",
+        "utility": "公用事业单位",
+        "verified": "已核实"
+      },
+      "type": {
+        "complaint": "投诉",
+        "coordination": "协调"
+      }
+    },
+    "errors": {
+      "activity_not_found": "本项目中未找到该进度活动。",
+      "allocation_exceeds_area": "分配量大于场地面积。",
+      "allocation_negative": "分配量不能为负数。",
+      "allocations_changed": "分配数据已被他人修改，请重新加载后再试。",
+      "area_not_found": "未找到场地区域。",
+      "authority_permit_not_found": "本项目中未找到该主管机关许可。",
+      "buffer_days_negative": "缓冲天数不能为负数。",
+      "catalogue_invalid": "已固定的物流目录无法解析。",
+      "catalogue_retired": "该目录版本已停用。",
+      "code_required": "必须填写编码。",
+      "code_taken": "该编码已在本项目中使用。",
+      "commodity_code_not_found": "未找到商品编码。",
+      "complaint_closed": "已关闭的投诉不能修改。",
+      "complaint_not_found": "未找到投诉记录。",
+      "connection_point_invalid": "接入点不是有效的点位。",
+      "contracted_capacity_required": "请先填写签约容量。",
+      "correspondence_not_found": "本项目中未找到该往来函件。",
+      "correspondence_thread_not_found": "本项目中未找到该往来函件。",
+      "country_invalid": "请使用两位 ISO 国家代码。",
+      "currency_invalid": "请使用三位 ISO 货币代码。",
+      "currency_required": "金额必须注明货币。",
+      "customs_case_not_found": "未找到海关案件。",
+      "customs_closed": "已放行或已关闭的案件不能修改。",
+      "customs_declared": "已申报的案件不能删除。",
+      "customs_not_found": "未找到海关案件。",
+      "customs_without_lines": "请先添加至少一条货物明细。",
+      "declarant_invalid": "申报人不能是买方或卖方之外的第三方。",
+      "delivery_already_on_site": "该送货已到场，不能再次决定。",
+      "delivery_not_found": "本项目中未找到该送货。",
+      "delivery_rate_exceeded": "该小时内的送货数量已达到方案允许的上限。",
+      "delivery_refused": "该送货按当前状态无法批准。",
+      "demand_not_found": "未找到需求记录。",
+      "demand_owned_by_plant_position": "该需求来自机械设备条目，请在该条目中修改。",
+      "direction_invalid": "未知的方向。",
+      "document_exists": "该文件已在检查清单中。",
+      "document_not_found": "未找到文件。",
+      "document_ref_required": "标记为已收到前，请先关联文件。",
+      "duplicate_stage": "每个阶段在每个区域中只能分配一次。",
+      "entry_not_found": "未找到日志记录。",
+      "field_required": "该字段不能为空。",
+      "flow_code_invalid": "每条物料流需要有各自的编码。",
+      "flow_code_unknown": "物流方案中没有该编码的物料流。",
+      "flow_mode_invalid": "未知的物料流模式。",
+      "frame_invalid": "未知的坐标系。",
+      "gate_hours_unchecked": "在设定现场时区之前，无法核对开放时间。",
+      "gate_load_exceeded": "荷载超出现场出入口的限制。",
+      "gate_not_found": "本项目中未找到该现场出入口。",
+      "geo_overlay_not_found": "本项目中未找到该场地平面图叠加层。",
+      "geometry_invalid": "区域轮廓不是有效的多边形。",
+      "goods_receipt_missing": "该采购订单尚无已确认的收货记录。",
+      "heavy_without_permit": "重型运输必须先获得批准的许可，才能排程。",
+      "hours_invalid": "请输入有效时间，结束时间须晚于开始时间。",
+      "hs_code_invalid": "HS 编码只能为数字，且长度须足够。",
+      "incoterm_unknown": "该国际贸易术语不在已固定的版本中。",
+      "invalid_transition": "不允许此状态变更。",
+      "jit_without_takt": "准时制物料流需要节拍计划。",
+      "last_stage": "项目至少须保留一个扩建阶段。",
+      "line_not_found": "未找到海关明细行。",
+      "link_target_unavailable": "暂时无法检查该链接，其指向的模块尚未安装。",
+      "media_not_found": "未找到公用设施接入记录。",
+      "money_not_decimal": "请以十进制数字输入金额。",
+      "money_out_of_range": "金额最多保留两位小数。",
+      "noise_limit_needs_project_value": "该辖区未设定固定值，请输入项目获批的数值。",
+      "not_found": "未找到。",
+      "outside_gate_hours": "该时段超出出入口的开放时间。",
+      "owner_not_member": "负责人必须是本项目成员。",
+      "pack_catalogue_invalid": "国家数据包中的目录无法加载。",
+      "permission_denied": "您没有此操作的权限。",
+      "permit_frozen": "已批准、已拒绝或已过期的许可将保留其有效期、时段和运输记录。",
+      "permit_not_found": "未找到许可。",
+      "plan_calibration_without_image": "设定比例尺前，请先选择场地平面图图像。",
+      "plan_document_not_found": "本项目中未找到场地平面图文件。",
+      "plan_origin_invalid": "场地平面图的原点由两个数值组成，即像素单位的 x 和 y。",
+      "plan_scale_invalid": "场地平面图的比例必须大于零。",
+      "plant_item_not_found": "本项目中未找到该机械设备。",
+      "plant_position_not_found": "本项目中未找到该机械设备条目。",
+      "plant_position_required": "必须填写机械设备条目。",
+      "po_not_found": "本项目中未找到该采购订单。",
+      "project_not_found": "未找到项目。",
+      "quiet_hours_conflict": "该时段处于静音时段内，且没有夜间施工许可覆盖。",
+      "required_document_missing": "仍缺少必需的文件。",
+      "response_required": "请先填写回复内容。",
+      "route_invalid": "运输路线不是有效的线段。",
+      "simultaneity_factor_range": "同时使用系数须介于 0 与 1 之间。",
+      "site_timezone_missing": "请先设定现场时区，时间将按现场时钟核对。",
+      "slot_taken": "该出入口的此时段已被另一份已批准的送货占用。",
+      "stage_active": "进行中的阶段不能删除，请先关闭。",
+      "stage_not_found": "未找到扩建阶段。",
+      "takt_location_not_found": "本项目中未找到该节拍区域。",
+      "takt_schedule_not_found": "本项目中未找到该节拍计划。",
+      "timezone_invalid": "未知的时区，请使用如 Europe/Berlin 之类的名称。",
+      "transport_closed": "已关闭或已取消的运输不能修改。",
+      "transport_mode_invalid": "未知的运输方式。",
+      "transport_not_found": "未找到运输记录。",
+      "transport_under_way": "运输途中的记录不能删除。",
+      "unknown_area_kind": "未知的区域类型。",
+      "unknown_catalogue": "未知的目录。",
+      "unknown_document_kind": "未知的文件类型。",
+      "unknown_issue_kind": "未知的投诉类型。",
+      "unknown_link_kind": "没有此类链接的列表。",
+      "unknown_load_class": "未知的荷载等级。",
+      "unknown_media_kind": "未知的公用设施类型。",
+      "unknown_noise_limit": "未知的噪声限值条目。",
+      "unknown_permit_kind": "未知的许可类型。",
+      "unknown_transport_kind": "未知的运输类型。",
+      "validity_invalid": "许可在开始前已结束。",
+      "validity_required": "批准前请填写有效期日期。",
+      "vendor_not_found": "未找到供应商。",
+      "window_invalid": "时间窗口无效。",
+      "window_outside_permit": "运输时间窗口超出许可有效期或允许时段。",
+      "zone_not_found": "本项目中未找到该堆场区域。",
+      "zone_type_invalid": "未知的区域类型。"
+    },
+    "evidence": {
+      "balance_closed": "所有未关闭阶段的区域平衡已闭合",
+      "concept_saved_and_exported": "物流方案已保存并归档",
+      "first_stage_media_contracted": "首个阶段的公用设施已签约",
+      "gate_loads_admitted": "每项荷载均已通过出入口核准，或已由超限许可覆盖",
+      "heavy_transports_permitted": "每项重型运输均已获得许可",
+      "neighbourhood_limit_source": "噪声限值依据已设定",
+      "no_errors": "无未解决的物流错误",
+      "unresolved": "物流计划无法纳入治理模型"
+    },
+    "export": {
+      "as_of": "截至",
+      "col_area_kind": "区域类型",
+      "col_closed": "已关闭",
+      "col_contracted": "已签约",
+      "col_date": "日期",
+      "col_direction": "方向",
+      "col_documents": "所需文件",
+      "col_due": "到期",
+      "col_group": "分组",
+      "col_heavy": "重型",
+      "col_hs_codes": "HS 编码",
+      "col_incoterm": "贸易术语",
+      "col_item": "项目",
+      "col_m2": "m²",
+      "col_media_kind": "公用设施",
+      "col_named_place": "指定地点",
+      "col_pct": "%",
+      "col_permits": "许可",
+      "col_required": "需求",
+      "col_section": "章节",
+      "col_short": "简称",
+      "col_stage": "阶段",
+      "col_state": "状态",
+      "col_title": "标题",
+      "col_topic": "主题",
+      "col_transport_kind": "类型",
+      "col_type": "类型",
+      "col_unit": "单位",
+      "col_value": "数值",
+      "col_window": "时间窗口",
+      "empty": "暂无记录。",
+      "project": "项目",
+      "title_balance": "区域平衡表",
+      "title_customs": "海关案件档案索引",
+      "title_frame": "物流框架摘要",
+      "title_media": "公用设施平衡表",
+      "title_neighbourhood": "周边环境日志",
+      "title_transports": "运输与许可"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "阶段 {stage}：某项分配量大于其区域面积。",
+        "suggestion": "请减少分配量。"
+      },
+      "area_balance_not_closed": {
+        "fail": "阶段 {stage}：区域平衡未闭合（差额 {difference_m2} m²）。",
+        "suggestion": "请分配剩余面积，或修正场地总面积。"
+      },
+      "area_overlap": {
+        "fail": "阶段 {stage}：两个不同类型的区域发生重叠。",
+        "suggestion": "请调整轮廓线。"
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "申报人与该贸易术语下负责进口清关的一方不一致。",
+        "suggestion": "请核对申报人或贸易术语。"
+      },
+      "delivery_rate_exceeded": {
+        "fail": "从 {hour} 起的一小时内有 {count} 份已批准的送货开始，方案允许的上限为 {limit}。",
+        "suggestion": "请将送货调整到其他时段，或在方案中提高上限。"
+      },
+      "gate_hours_unchecked": {
+        "fail": "现场未设定时区，因此未将送货与开放时间进行比对。",
+        "suggestion": "请在物流方案中设定现场时区。"
+      },
+      "gate_limits_unknown": {
+        "fail": "现场出入口 {gate} 未注明荷载限制。",
+        "suggestion": "请填写重量和尺寸限制。"
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}：荷载超出现场出入口的限制。",
+        "suggestion": "请改用其他出入口，或将荷载拆分。"
+      },
+      "heavy_without_permit": {
+        "fail": "{title}：重型运输未获得批准的许可。",
+        "suggestion": "请申请许可。"
+      },
+      "hs_code_invalid": {
+        "fail": "HS 编码 {hs_code} 无效。",
+        "suggestion": "只能使用数字，且长度不少于最低要求。"
+      },
+      "incoterm_sea_only": {
+        "fail": "贸易术语 {incoterm} 仅适用于海运。",
+        "suggestion": "其他运输方式请使用 FCA、CPT 或 CIP。"
+      },
+      "incoterm_unknown": {
+        "fail": "贸易术语 {incoterm} 不在已固定的版本中。",
+        "suggestion": "请选择已固定版本中的术语。"
+      },
+      "jit_late": {
+        "fail": "{title}：准时制送货晚于节拍开始时间。",
+        "suggestion": "请将送货提前。"
+      },
+      "jit_too_early": {
+        "fail": "{title}：准时制送货早于缓冲时间允许的范围。",
+        "suggestion": "请将其调整到更接近节拍开始时间。"
+      },
+      "jit_without_location": {
+        "fail": "{title}：物料流 {flow} 的准时制送货未指定节拍区域。",
+        "suggestion": "请选择该送货对应的节拍区域。"
+      },
+      "media_capacity_short": {
+        "fail": "阶段 {stage}：{media} 需求为 {required}，已签约 {contracted}。",
+        "suggestion": "请提高签约容量或减少需求。"
+      },
+      "media_late": {
+        "fail": "阶段 {stage}：{media} 接入承诺时间晚于阶段开始时间。",
+        "suggestion": "请约定更早的日期，或安排临时供应。"
+      },
+      "media_unsourced": {
+        "fail": "{media} 需求没有对应的接入点。",
+        "suggestion": "请指定接入点。"
+      },
+      "neighbour_issue_overdue": {
+        "fail": "某项投诉的答复期限为 {due}。",
+        "suggestion": "请确认收到并予以答复。"
+      },
+      "permit_expired": {
+        "fail": "许可 {reference} 已过期，但仍有未完成的运输。",
+        "suggestion": "请申请新的许可。"
+      },
+      "permit_expiring": {
+        "fail": "许可 {reference} 即将到期，但仍有未完成的运输。",
+        "suggestion": "请延长许可期限。"
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}：该时间窗口落在静音时段内。",
+        "suggestion": "请将其移出静音时段，或取得夜间施工许可。"
+      },
+      "required_document_missing": {
+        "fail": "缺少必需文件 {kind}。",
+        "suggestion": "请取得该文件并予以关联。"
+      },
+      "site_timezone_missing": {
+        "fail": "现场未设定时区，因此未核对时段规则。",
+        "suggestion": "请在物流方案中设定现场时区。"
+      },
+      "stage_without_site_setup": {
+        "fail": "阶段 {stage} 没有现场设施区域。",
+        "suggestion": "请为办公和生活设施分配区域。"
+      },
+      "stage_without_storage": {
+        "fail": "阶段 {stage} 没有仓储或堆放区域。",
+        "suggestion": "请分配仓储或堆放区域。"
+      },
+      "window_outside_permit": {
+        "fail": "{title}：该时间窗口超出许可范围。",
+        "suggestion": "请调整时间窗口，或延长许可。"
+      },
+      "zone_not_mapped": {
+        "fail": "堆场区域 {zone} 未关联到任何场地区域。",
+        "suggestion": "请将其关联到对应的规划区域。"
+      }
+    }
+  }
+}

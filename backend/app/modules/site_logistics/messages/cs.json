@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Ne",
+        "yes": "Ano"
+      },
+      "direction": {
+        "export": "Vývoz",
+        "import": "Dovoz",
+        "inbound": "Příjem",
+        "outbound": "Odesílání"
+      },
+      "group": {
+        "built": "Zastavěné",
+        "external": "Externí",
+        "logistics": "Logistika",
+        "reserve": "Rezerva"
+      },
+      "is_heavy": {
+        "no": "Ne",
+        "yes": "Ano"
+      },
+      "section": {
+        "balance": "Bilance",
+        "concept": "Koncept",
+        "neighbourhood": "Okolí",
+        "readiness": "Připravenost"
+      },
+      "short": {
+        "no": "Ne",
+        "yes": "Ano"
+      },
+      "state": {
+        "acknowledged": "Potvrzeno",
+        "action_taken": "Opatření přijato",
+        "active": "Aktivní",
+        "applied": "Podáno",
+        "arrived": "Dorazilo",
+        "authority": "Úřad",
+        "cancelled": "Zrušeno",
+        "cleared": "Odbaveno",
+        "closed": "Uzavřeno",
+        "connected": "Připojeno",
+        "contracted": "Smluvně zajištěno",
+        "declared": "Nahlášeno",
+        "disconnected": "Odpojeno",
+        "documents_complete": "Doklady kompletní",
+        "draft": "Koncept",
+        "expired": "Propadlé",
+        "granted": "Uděleno",
+        "held": "Zadrženo",
+        "identified": "Zjištěno",
+        "in_transit": "Na cestě",
+        "missing": "Chybí",
+        "municipality": "Obec",
+        "neighbours": "Sousedé",
+        "offered": "Nabídnuto",
+        "open": "Otevřeno",
+        "other": "Jiné",
+        "permit_pending": "Povolení čeká na vyřízení",
+        "planned": "Plánováno",
+        "police": "Policie",
+        "received": "Přijato",
+        "refused": "Zamítnuto",
+        "requested": "Vyžádáno",
+        "scheduled": "Naplánováno",
+        "utility": "Správce sítě",
+        "verified": "Ověřeno"
+      },
+      "type": {
+        "complaint": "Stížnost",
+        "coordination": "Koordinace"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Činnost harmonogramu nebyla v tomto projektu nalezena.",
+      "allocation_exceeds_area": "Alokace je větší než plocha.",
+      "allocation_negative": "Alokace nemůže být záporná.",
+      "allocations_changed": "Alokace změnil někdo jiný. Načtěte stránku znovu a zkuste to znovu.",
+      "area_not_found": "Plocha staveniště nebyla nalezena.",
+      "authority_permit_not_found": "Povolení úřadu nebylo v tomto projektu nalezeno.",
+      "buffer_days_negative": "Rezervní dny nemohou být záporné.",
+      "catalogue_invalid": "Připnutý logistický katalog nelze načíst.",
+      "catalogue_retired": "Tato verze katalogu je vyřazena.",
+      "code_required": "Je nutné zadat kód.",
+      "code_taken": "Tento kód je v projektu již použit.",
+      "commodity_code_not_found": "Kód komodity nebyl nalezen.",
+      "complaint_closed": "Uzavřenou stížnost nelze měnit.",
+      "complaint_not_found": "Stížnost nebyla nalezena.",
+      "connection_point_invalid": "Připojovací bod není platný bod.",
+      "contracted_capacity_required": "Nejprve zadejte smluvně zajištěnou kapacitu.",
+      "correspondence_not_found": "Korespondence nebyla v tomto projektu nalezena.",
+      "correspondence_thread_not_found": "Korespondence nebyla v tomto projektu nalezena.",
+      "country_invalid": "Použijte dvoupísmenný kód země podle ISO.",
+      "currency_invalid": "Použijte tříznakový kód měny podle ISO.",
+      "currency_required": "Částka musí mít uvedenou měnu.",
+      "customs_case_not_found": "Celní spis nebyl nalezen.",
+      "customs_closed": "Odbavený nebo uzavřený spis nelze měnit.",
+      "customs_declared": "Nahlášený spis nelze smazat.",
+      "customs_not_found": "Celní spis nebyl nalezen.",
+      "customs_without_lines": "Nejprve přidejte alespoň jednu položku zboží.",
+      "declarant_invalid": "Deklarantem je kupující nebo prodávající.",
+      "delivery_already_on_site": "Tato dodávka již dorazila a nelze o ní znovu rozhodnout.",
+      "delivery_not_found": "Dodávka nebyla v tomto projektu nalezena.",
+      "delivery_rate_exceeded": "Tato hodina již obsahuje počet dodávek, který koncept povoluje.",
+      "delivery_refused": "Tuto dodávku nelze v dnešní podobě schválit.",
+      "demand_not_found": "Požadavek nebyl nalezen.",
+      "demand_owned_by_plant_position": "Tento požadavek pochází z pozice strojů; změňte jej tam.",
+      "direction_invalid": "Neznámý směr.",
+      "document_exists": "Tento doklad je již na kontrolním seznamu.",
+      "document_not_found": "Doklad nebyl nalezen.",
+      "document_ref_required": "Před označením dokladu jako přijatého jej připojte.",
+      "duplicate_stage": "Každá etapa může být pro danou plochu alokována jen jednou.",
+      "entry_not_found": "Záznam deníku nebyl nalezen.",
+      "field_required": "Toto pole nesmí zůstat prázdné.",
+      "flow_code_invalid": "Každý materiálový tok potřebuje vlastní kód.",
+      "flow_code_unknown": "Logistický koncept nemá materiálový tok s tímto kódem.",
+      "flow_mode_invalid": "Neznámý režim materiálového toku.",
+      "frame_invalid": "Neznámý souřadnicový systém.",
+      "gate_hours_unchecked": "Otevírací doba se neověřuje, dokud není nastaveno časové pásmo staveniště.",
+      "gate_load_exceeded": "Zatížení překračuje limity vjezdu na staveniště.",
+      "gate_not_found": "Vjezd na staveniště nebyl v tomto projektu nalezen.",
+      "geo_overlay_not_found": "Vrstva situačního plánu nebyla v tomto projektu nalezena.",
+      "geometry_invalid": "Obrys plochy není platný mnohoúhelník.",
+      "goods_receipt_missing": "Pro tuto objednávku zatím neexistuje potvrzený příjem zboží.",
+      "heavy_without_permit": "Těžká doprava vyžaduje před naplánováním udělené povolení.",
+      "hours_invalid": "Zadejte platné hodiny, konec musí být po začátku.",
+      "hs_code_invalid": "Kód HS smí obsahovat pouze číslice a musí mít dostatečnou délku.",
+      "incoterm_unknown": "Tato doložka Incoterms není v připnuté verzi.",
+      "invalid_transition": "Tato změna stavu není povolena.",
+      "jit_without_takt": "Tok just-in-time vyžaduje harmonogram taktu.",
+      "last_stage": "Projekt musí mít alespoň jednu etapu rozšíření.",
+      "line_not_found": "Položka celního řízení nebyla nalezena.",
+      "link_target_unavailable": "Tento odkaz zatím nelze ověřit, protože modul, na který ukazuje, není nainstalován.",
+      "media_not_found": "Připojení sítě nebylo nalezeno.",
+      "money_not_decimal": "Zadejte částku jako desetinné číslo.",
+      "money_out_of_range": "Zadejte částku s nejvýše dvěma desetinnými místy.",
+      "noise_limit_needs_project_value": "Tato jurisdikce nestanovuje pevné hodnoty; zadejte hodnoty projektu odsouhlasené s úřady.",
+      "not_found": "Nenalezeno.",
+      "outside_gate_hours": "Časové okno je mimo otevírací dobu vjezdu.",
+      "owner_not_member": "Vlastník musí být členem tohoto projektu.",
+      "pack_catalogue_invalid": "Katalog balíčku se nepodařilo načíst.",
+      "permission_denied": "Na tuto akci nemáte oprávnění.",
+      "permit_frozen": "Udělené, zamítnuté nebo propadlé povolení si zachovává platnost, okna a přepravy.",
+      "permit_not_found": "Povolení nebylo nalezeno.",
+      "plan_calibration_without_image": "Před nastavením měřítka vyberte obrázek situačního plánu.",
+      "plan_document_not_found": "Dokument situačního plánu nebyl v tomto projektu nalezen.",
+      "plan_origin_invalid": "Počátek situačního plánu tvoří dvě čísla, x a y, v pixelech.",
+      "plan_scale_invalid": "Měřítko situačního plánu musí být větší než nula.",
+      "plant_item_not_found": "Položka strojů nebyla v tomto projektu nalezena.",
+      "plant_position_not_found": "Pozice strojů nebyla v tomto projektu nalezena.",
+      "plant_position_required": "Je nutné zadat pozici strojů.",
+      "po_not_found": "Objednávka nebyla v tomto projektu nalezena.",
+      "project_not_found": "Projekt nebyl nalezen.",
+      "quiet_hours_conflict": "Okno spadá do klidové doby a žádné povolení práce v noci ho nepokrývá.",
+      "required_document_missing": "Požadovaný doklad stále chybí.",
+      "response_required": "Nejprve napište odpověď.",
+      "route_invalid": "Trasa není platná čára.",
+      "simultaneity_factor_range": "Součinitel současnosti musí být mezi 0 a 1.",
+      "site_timezone_missing": "Nejprve nastavte časové pásmo staveniště; časy se kontrolují podle místních hodin.",
+      "slot_taken": "Jiná schválená dodávka tento čas na vjezdu již obsazuje.",
+      "stage_active": "Aktivní etapu nelze smazat. Nejprve ji uzavřete.",
+      "stage_not_found": "Etapa rozšíření nebyla nalezena.",
+      "takt_location_not_found": "Taktová plocha nebyla v tomto projektu nalezena.",
+      "takt_schedule_not_found": "Taktový harmonogram nebyl v tomto projektu nalezen.",
+      "timezone_invalid": "Neznámé časové pásmo. Použijte název, například Europe/Berlin.",
+      "transport_closed": "Uzavřenou nebo zrušenou přepravu nelze měnit.",
+      "transport_mode_invalid": "Neznámý způsob dopravy.",
+      "transport_not_found": "Přeprava nebyla nalezena.",
+      "transport_under_way": "Probíhající přepravu nelze smazat.",
+      "unknown_area_kind": "Neznámý druh plochy.",
+      "unknown_catalogue": "Neznámý katalog.",
+      "unknown_document_kind": "Neznámý druh dokladu.",
+      "unknown_issue_kind": "Neznámý druh stížnosti.",
+      "unknown_link_kind": "Pro tento druh odkazu neexistuje seznam.",
+      "unknown_load_class": "Neznámá třída zatížení.",
+      "unknown_media_kind": "Neznámý druh sítě.",
+      "unknown_noise_limit": "Neznámý záznam limitu hluku.",
+      "unknown_permit_kind": "Neznámý druh povolení.",
+      "unknown_transport_kind": "Neznámý druh přepravy.",
+      "validity_invalid": "Povolení končí dříve, než začne.",
+      "validity_required": "Před udělením zadejte dny platnosti.",
+      "vendor_not_found": "Dodavatel nebyl nalezen.",
+      "window_invalid": "Časové okno není platné.",
+      "window_outside_permit": "Časové okno přepravy je mimo platnost povolení nebo mimo povolené časy.",
+      "zone_not_found": "Skladová zóna nebyla v tomto projektu nalezena.",
+      "zone_type_invalid": "Neznámý typ zóny."
+    },
+    "evidence": {
+      "balance_closed": "Bilance ploch uzavřena pro každou otevřenou etapu",
+      "concept_saved_and_exported": "Logistický koncept uložen a založen",
+      "first_stage_media_contracted": "Sítě pro první etapu smluvně zajištěny",
+      "gate_loads_admitted": "Každé zatížení je povoleno vjezdem nebo kryto povolením k nadrozměrné dopravě",
+      "heavy_transports_permitted": "Pro každou těžkou přepravu je uděleno povolení",
+      "neighbourhood_limit_source": "Zdroj limitu hluku je nastaven",
+      "no_errors": "Žádné otevřené logistické chyby",
+      "unresolved": "Logistický plán nebylo možné zařadit do modelu řízení"
+    },
+    "export": {
+      "as_of": "Stav k",
+      "col_area_kind": "Druh plochy",
+      "col_closed": "Uzavřeno",
+      "col_contracted": "Smluvně zajištěno",
+      "col_date": "Datum",
+      "col_direction": "Směr",
+      "col_documents": "Požadované doklady",
+      "col_due": "Termín",
+      "col_group": "Skupina",
+      "col_heavy": "Těžké",
+      "col_hs_codes": "Kódy HS",
+      "col_incoterm": "Incoterm",
+      "col_item": "Položka",
+      "col_m2": "m²",
+      "col_media_kind": "Síť",
+      "col_named_place": "Pojmenované místo",
+      "col_pct": "%",
+      "col_permits": "Povolení",
+      "col_required": "Požadováno",
+      "col_section": "Oddíl",
+      "col_short": "Krátké",
+      "col_stage": "Etapa",
+      "col_state": "Stav",
+      "col_title": "Název",
+      "col_topic": "Téma",
+      "col_transport_kind": "Druh",
+      "col_type": "Typ",
+      "col_unit": "Jednotka",
+      "col_value": "Hodnota",
+      "col_window": "Okno",
+      "empty": "Žádné záznamy.",
+      "project": "Projekt",
+      "title_balance": "Bilance ploch",
+      "title_customs": "Rejstřík celních spisů",
+      "title_frame": "Souhrn logistického rámce",
+      "title_media": "Bilance sítí",
+      "title_neighbourhood": "Deník okolí",
+      "title_transports": "Přepravy a povolení"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Etapa {stage}: alokace je větší než její plocha.",
+        "suggestion": "Snižte alokaci."
+      },
+      "area_balance_not_closed": {
+        "fail": "Etapa {stage}: bilance ploch nevychází (rozdíl {difference_m2} m²).",
+        "suggestion": "Alokujte zbývající plochu nebo opravte celkovou plochu staveniště."
+      },
+      "area_overlap": {
+        "fail": "Etapa {stage}: dvě plochy různých druhů se překrývají.",
+        "suggestion": "Upravte obrysy."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Deklarant neodpovídá tomu, kdo podle incotermu zajišťuje celní odbavení dovozu.",
+        "suggestion": "Zkontrolujte deklaranta nebo incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "V hodině od {hour} začíná {count} schválených dodávek, koncept jich povoluje {limit}.",
+        "suggestion": "Přesuňte dodávky do jiné hodiny nebo zvyšte limit v konceptu."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Staveniště nemá časové pásmo, dodávky proto nebyly porovnány s otevírací dobou.",
+        "suggestion": "Nastavte časové pásmo staveniště v logistickém konceptu."
+      },
+      "gate_limits_unknown": {
+        "fail": "Vjezd na staveniště {gate} neuvádí žádné limity zatížení.",
+        "suggestion": "Zadejte limity hmotnosti a rozměrů."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: zatížení překračuje limity vjezdu na staveniště.",
+        "suggestion": "Použijte jiný vjezd nebo náklad rozdělte."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: těžká doprava bez uděleného povolení.",
+        "suggestion": "Požádejte o povolení."
+      },
+      "hs_code_invalid": {
+        "fail": "Kód HS {hs_code} není platný.",
+        "suggestion": "Použijte pouze číslice, alespoň minimální délku."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} je určen pouze pro námořní dopravu.",
+        "suggestion": "Pro jiné způsoby použijte FCA, CPT nebo CIP."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} není v připnuté verzi.",
+        "suggestion": "Vyberte podmínku z připnuté verze."
+      },
+      "jit_late": {
+        "fail": "{title}: dodávka just-in-time přichází až po začátku taktu.",
+        "suggestion": "Dodávku přesuňte dříve."
+      },
+      "jit_too_early": {
+        "fail": "{title}: dodávka just-in-time přichází dříve, než dovoluje její rezerva.",
+        "suggestion": "Přesuňte ji blíže začátku taktu."
+      },
+      "jit_without_location": {
+        "fail": "{title}: dodávka just-in-time toku {flow} neuvádí taktovou plochu.",
+        "suggestion": "Vyberte taktovou plochu, pro kterou je dodávka určena."
+      },
+      "media_capacity_short": {
+        "fail": "Etapa {stage}: {media} potřebuje {required}, smluvně zajištěno {contracted}.",
+        "suggestion": "Zvyšte smluvně zajištěnou kapacitu nebo snižte požadavek."
+      },
+      "media_late": {
+        "fail": "Etapa {stage}: připojení na {media} je slíbeno až po zahájení etapy.",
+        "suggestion": "Domluvte dřívější termín nebo dočasné napájení."
+      },
+      "media_unsourced": {
+        "fail": "Požadavek na {media} nemá připojení.",
+        "suggestion": "Přiřaďte připojení."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Na stížnost mělo být odpovězeno do {due}.",
+        "suggestion": "Stížnost potvrďte a zodpovězte."
+      },
+      "permit_expired": {
+        "fail": "Povolení {reference} propadlo, přitom zbývají přepravy.",
+        "suggestion": "Požádejte o nové povolení."
+      },
+      "permit_expiring": {
+        "fail": "Povolení {reference} brzy skončí, přitom zbývají přepravy.",
+        "suggestion": "Prodlužte povolení."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: okno spadá do klidové doby.",
+        "suggestion": "Přesuňte je mimo klidovou dobu nebo získejte povolení práce v noci."
+      },
+      "required_document_missing": {
+        "fail": "Požadovaný doklad {kind} chybí.",
+        "suggestion": "Obstarejte doklad a připojte jej."
+      },
+      "site_timezone_missing": {
+        "fail": "Staveniště nemá časové pásmo, pravidla denní doby proto nebyla zkontrolována.",
+        "suggestion": "Nastavte časové pásmo staveniště v logistickém konceptu."
+      },
+      "stage_without_site_setup": {
+        "fail": "Etapa {stage} nemá plochu pro zařízení staveniště.",
+        "suggestion": "Alokujte plochu pro kanceláře a zázemí."
+      },
+      "stage_without_storage": {
+        "fail": "Etapa {stage} nemá skladovou ani odkladovou plochu.",
+        "suggestion": "Alokujte skladovou nebo odkladovou plochu."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: okno je mimo povolení.",
+        "suggestion": "Přesuňte okno nebo prodlužte povolení."
+      },
+      "zone_not_mapped": {
+        "fail": "Skladová zóna {zone} není propojena s plochou staveniště.",
+        "suggestion": "Propojte ji s plánovanou plochou."
+      }
+    }
+  }
+}

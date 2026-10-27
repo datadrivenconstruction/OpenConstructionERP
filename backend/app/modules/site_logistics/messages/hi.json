@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "ठीक है"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "नहीं",
+        "yes": "हाँ"
+      },
+      "direction": {
+        "export": "निर्यात",
+        "import": "आयात",
+        "inbound": "आवक",
+        "outbound": "जावक"
+      },
+      "group": {
+        "built": "निर्मित",
+        "external": "बाहरी",
+        "logistics": "लॉजिस्टिक्स",
+        "reserve": "आरक्षित"
+      },
+      "is_heavy": {
+        "no": "नहीं",
+        "yes": "हाँ"
+      },
+      "section": {
+        "balance": "संतुलन",
+        "concept": "अवधारणा",
+        "neighbourhood": "आसपास का क्षेत्र",
+        "readiness": "तैयारी"
+      },
+      "short": {
+        "no": "नहीं",
+        "yes": "हाँ"
+      },
+      "state": {
+        "acknowledged": "प्राप्ति स्वीकृत",
+        "action_taken": "कार्रवाई की गई",
+        "active": "सक्रिय",
+        "applied": "आवेदन किया गया",
+        "arrived": "पहुँच गया",
+        "authority": "प्राधिकरण",
+        "cancelled": "रद्द",
+        "cleared": "सीमा शुल्क पास",
+        "closed": "बंद",
+        "connected": "जुड़ा हुआ",
+        "contracted": "अनुबंधित",
+        "declared": "घोषित",
+        "disconnected": "अलग किया गया",
+        "documents_complete": "दस्तावेज़ पूरे",
+        "draft": "प्रारूप",
+        "expired": "समाप्त",
+        "granted": "स्वीकृत",
+        "held": "रोका गया",
+        "identified": "पहचाना गया",
+        "in_transit": "मार्ग में",
+        "missing": "अनुपलब्ध",
+        "municipality": "नगरपालिका",
+        "neighbours": "पड़ोसी",
+        "offered": "प्रस्तावित",
+        "open": "खुला",
+        "other": "अन्य",
+        "permit_pending": "अनुमति लंबित",
+        "planned": "नियोजित",
+        "police": "पुलिस",
+        "received": "प्राप्त",
+        "refused": "अस्वीकृत",
+        "requested": "अनुरोध किया गया",
+        "scheduled": "निर्धारित",
+        "utility": "उपयोगिता",
+        "verified": "सत्यापित"
+      },
+      "type": {
+        "complaint": "शिकायत",
+        "coordination": "समन्वय"
+      }
+    },
+    "errors": {
+      "activity_not_found": "इस परियोजना में अनुसूची गतिविधि नहीं मिली।",
+      "allocation_exceeds_area": "आवंटन क्षेत्रफल से बड़ा है।",
+      "allocation_negative": "आवंटन ऋणात्मक नहीं हो सकता।",
+      "allocations_changed": "आवंटन किसी और ने बदल दिए हैं। पुनः लोड करके फिर प्रयास करें।",
+      "area_not_found": "साइट क्षेत्र नहीं मिला।",
+      "authority_permit_not_found": "इस परियोजना में प्राधिकरण अनुमति नहीं मिली।",
+      "buffer_days_negative": "बफर दिन ऋणात्मक नहीं हो सकते।",
+      "catalogue_invalid": "पिन किए गए लॉजिस्टिक्स कैटलॉग का समाधान नहीं हो सकता।",
+      "catalogue_retired": "यह कैटलॉग संस्करण अब उपयोग में नहीं है।",
+      "code_required": "कोड आवश्यक है।",
+      "code_taken": "यह कोड परियोजना में पहले से उपयोग में है।",
+      "commodity_code_not_found": "वस्तु कोड नहीं मिला।",
+      "complaint_closed": "बंद शिकायत में बदलाव नहीं किया जा सकता।",
+      "complaint_not_found": "शिकायत नहीं मिली।",
+      "connection_point_invalid": "कनेक्शन बिंदु मान्य बिंदु नहीं है।",
+      "contracted_capacity_required": "पहले अनुबंधित क्षमता दर्ज करें।",
+      "correspondence_not_found": "इस परियोजना में पत्राचार नहीं मिला।",
+      "correspondence_thread_not_found": "इस परियोजना में पत्राचार नहीं मिला।",
+      "country_invalid": "दो अक्षरों वाला ISO देश कोड उपयोग करें।",
+      "currency_invalid": "तीन अक्षरों वाला ISO मुद्रा कोड उपयोग करें।",
+      "currency_required": "राशि के साथ मुद्रा आवश्यक है।",
+      "customs_case_not_found": "सीमा शुल्क मामला नहीं मिला।",
+      "customs_closed": "पास या बंद किए गए मामले में बदलाव नहीं किया जा सकता।",
+      "customs_declared": "घोषित मामला हटाया नहीं जा सकता।",
+      "customs_not_found": "सीमा शुल्क मामला नहीं मिला।",
+      "customs_without_lines": "पहले कम से कम एक माल की पंक्ति जोड़ें।",
+      "declarant_invalid": "घोषणाकर्ता खरीदार या विक्रेता है।",
+      "delivery_already_on_site": "यह डिलीवरी पहले ही पहुँच चुकी है और इस पर दोबारा निर्णय नहीं होगा।",
+      "delivery_not_found": "इस परियोजना में डिलीवरी नहीं मिली।",
+      "delivery_rate_exceeded": "इस घंटे में अवधारणा द्वारा अनुमत डिलीवरी की संख्या पहले ही पूरी हो चुकी है।",
+      "delivery_refused": "यह डिलीवरी मौजूदा रूप में स्वीकृत नहीं हो सकती।",
+      "demand_not_found": "माँग नहीं मिली।",
+      "demand_owned_by_plant_position": "यह माँग प्लांट पद से आती है; इसे वहीं बदलें।",
+      "direction_invalid": "अज्ञात दिशा।",
+      "document_exists": "यह दस्तावेज़ पहले से चेकलिस्ट में है।",
+      "document_not_found": "दस्तावेज़ नहीं मिला।",
+      "document_ref_required": "प्राप्त चिह्नित करने से पहले दस्तावेज़ को लिंक करें।",
+      "duplicate_stage": "हर विस्तार चरण को प्रति क्षेत्र एक ही बार आवंटित किया जा सकता है।",
+      "entry_not_found": "लॉग प्रविष्टि नहीं मिली।",
+      "field_required": "यह फ़ील्ड खाली नहीं हो सकता।",
+      "flow_code_invalid": "हर सामग्री प्रवाह का अपना कोड होना चाहिए।",
+      "flow_code_unknown": "लॉजिस्टिक्स अवधारणा में इस कोड का कोई सामग्री प्रवाह नहीं है।",
+      "flow_mode_invalid": "अज्ञात सामग्री प्रवाह मोड।",
+      "frame_invalid": "अज्ञात निर्देशांक फ़्रेम।",
+      "gate_hours_unchecked": "साइट का समय क्षेत्र सेट होने तक खुलने के समय की जाँच नहीं होगी।",
+      "gate_load_exceeded": "भार साइट प्रवेश द्वार की सीमा से अधिक है।",
+      "gate_not_found": "इस परियोजना में साइट प्रवेश द्वार नहीं मिला।",
+      "geo_overlay_not_found": "इस परियोजना में साइट योजना ओवरले नहीं मिला।",
+      "geometry_invalid": "क्षेत्र की रूपरेखा मान्य बहुभुज नहीं है।",
+      "goods_receipt_missing": "इस क्रय आदेश के लिए अभी तक कोई पुष्ट माल प्राप्ति नहीं है।",
+      "heavy_without_permit": "भारी परिवहन के लिए निर्धारित करने से पहले स्वीकृत अनुमति चाहिए।",
+      "hours_invalid": "मान्य समय दर्ज करें, समाप्ति प्रारंभ के बाद हो।",
+      "hs_code_invalid": "HS कोड में केवल अंक होने चाहिए और वह पर्याप्त लंबा होना चाहिए।",
+      "incoterm_unknown": "यह इनकोटर्म पिन किए गए संस्करण में नहीं है।",
+      "invalid_transition": "स्थिति का यह बदलाव अनुमत नहीं है।",
+      "jit_without_takt": "जस्ट-इन-टाइम प्रवाह के लिए टैक्ट अनुसूची चाहिए।",
+      "last_stage": "परियोजना में कम से कम एक विस्तार चरण बना रहता है।",
+      "line_not_found": "सीमा शुल्क पंक्ति नहीं मिली।",
+      "link_target_unavailable": "यह लिंक अभी जाँचा नहीं जा सकता, जिस मॉड्यूल की ओर यह इशारा करता है वह स्थापित नहीं है।",
+      "media_not_found": "उपयोगिता कनेक्शन नहीं मिला।",
+      "money_not_decimal": "राशि को दशमलव संख्या के रूप में दर्ज करें।",
+      "money_out_of_range": "अधिकतम दो दशमलव वाली राशि दर्ज करें।",
+      "noise_limit_needs_project_value": "इस क्षेत्राधिकार में निश्चित मान नहीं हैं; परियोजना के स्वीकृत मान दर्ज करें।",
+      "not_found": "नहीं मिला।",
+      "outside_gate_hours": "यह समय-सीमा प्रवेश द्वार के खुलने के घंटों से बाहर है।",
+      "owner_not_member": "स्वामी इस परियोजना का सदस्य होना चाहिए।",
+      "pack_catalogue_invalid": "पैक का कैटलॉग लोड नहीं हो रहा है।",
+      "permission_denied": "इसके लिए आपके पास अनुमति नहीं है।",
+      "permit_frozen": "जो अनुमति स्वीकृत, अस्वीकृत या समाप्त हो चुकी है, वह अपनी वैधता, समय-सीमाएँ और परिवहन बनाए रखती है।",
+      "permit_not_found": "अनुमति नहीं मिली।",
+      "plan_calibration_without_image": "पैमाना सेट करने से पहले साइट योजना की छवि चुनें।",
+      "plan_document_not_found": "इस परियोजना में साइट योजना दस्तावेज़ नहीं मिला।",
+      "plan_origin_invalid": "साइट योजना का मूल बिंदु दो संख्याएँ है, पिक्सेल में x और y।",
+      "plan_scale_invalid": "साइट योजना का पैमाना शून्य से अधिक होना चाहिए।",
+      "plant_item_not_found": "इस परियोजना में प्लांट मद नहीं मिली।",
+      "plant_position_not_found": "इस परियोजना में प्लांट पद नहीं मिला।",
+      "plant_position_required": "प्लांट पद आवश्यक है।",
+      "po_not_found": "इस परियोजना में क्रय आदेश नहीं मिला।",
+      "project_not_found": "परियोजना नहीं मिली।",
+      "quiet_hours_conflict": "समय-सीमा शांत घंटों में पड़ती है और उसे कवर करने वाली रात्रि-कार्य अनुमति नहीं है।",
+      "required_document_missing": "एक आवश्यक दस्तावेज़ अभी भी अनुपलब्ध है।",
+      "response_required": "पहले उत्तर लिखें।",
+      "route_invalid": "मार्ग मान्य रेखा नहीं है।",
+      "simultaneity_factor_range": "समकालिकता कारक 0 और 1 के बीच होना चाहिए।",
+      "site_timezone_missing": "पहले साइट का समय क्षेत्र सेट करें; समय साइट की घड़ी के अनुसार जाँचा जाता है।",
+      "slot_taken": "प्रवेश द्वार पर यह समय-सीमा एक अन्य स्वीकृत डिलीवरी ने ले रखी है।",
+      "stage_active": "सक्रिय चरण हटाया नहीं जा सकता। पहले उसे बंद करें।",
+      "stage_not_found": "विस्तार चरण नहीं मिला।",
+      "takt_location_not_found": "इस परियोजना में टैक्ट क्षेत्र नहीं मिला।",
+      "takt_schedule_not_found": "इस परियोजना में टैक्ट अनुसूची नहीं मिली।",
+      "timezone_invalid": "अज्ञात समय क्षेत्र। Asia/Kolkata जैसा नाम उपयोग करें।",
+      "transport_closed": "बंद या रद्द परिवहन में बदलाव नहीं किया जा सकता।",
+      "transport_mode_invalid": "अज्ञात परिवहन माध्यम।",
+      "transport_not_found": "परिवहन नहीं मिला।",
+      "transport_under_way": "मार्ग में चल रहा परिवहन हटाया नहीं जा सकता।",
+      "unknown_area_kind": "अज्ञात क्षेत्र प्रकार।",
+      "unknown_catalogue": "अज्ञात कैटलॉग।",
+      "unknown_document_kind": "अज्ञात दस्तावेज़ प्रकार।",
+      "unknown_issue_kind": "अज्ञात शिकायत प्रकार।",
+      "unknown_link_kind": "इस प्रकार के लिंक की कोई सूची नहीं है।",
+      "unknown_load_class": "अज्ञात भार वर्ग।",
+      "unknown_media_kind": "अज्ञात उपयोगिता।",
+      "unknown_noise_limit": "अज्ञात शोर सीमा प्रविष्टि।",
+      "unknown_permit_kind": "अज्ञात अनुमति प्रकार।",
+      "unknown_transport_kind": "अज्ञात परिवहन प्रकार।",
+      "validity_invalid": "अनुमति प्रारंभ होने से पहले समाप्त हो जाती है।",
+      "validity_required": "स्वीकृत करने से पहले वैधता तिथियाँ दर्ज करें।",
+      "vendor_not_found": "आपूर्तिकर्ता नहीं मिला।",
+      "window_invalid": "समय-सीमा मान्य नहीं है।",
+      "window_outside_permit": "परिवहन समय-सीमा अनुमति की वैधता या उसके अनुमत समय से बाहर है।",
+      "zone_not_found": "इस परियोजना में भंडारण क्षेत्र नहीं मिला।",
+      "zone_type_invalid": "अज्ञात क्षेत्र प्रकार।"
+    },
+    "evidence": {
+      "balance_closed": "हर खुले चरण के लिए क्षेत्र संतुलन बंद",
+      "concept_saved_and_exported": "लॉजिस्टिक्स अवधारणा सहेजी और फ़ाइल की गई",
+      "first_stage_media_contracted": "पहले चरण की उपयोगिताएँ अनुबंधित",
+      "gate_loads_admitted": "हर भार अपने प्रवेश द्वार से स्वीकृत या ओवरसाइज़ अनुमति से कवर",
+      "heavy_transports_permitted": "हर भारी परिवहन के लिए अनुमति स्वीकृत",
+      "neighbourhood_limit_source": "शोर सीमा का स्रोत सेट",
+      "no_errors": "कोई खुली लॉजिस्टिक्स त्रुटि नहीं",
+      "unresolved": "लॉजिस्टिक्स योजना को शासन मॉडल में स्थान नहीं दिया जा सका"
+    },
+    "export": {
+      "as_of": "तिथि तक",
+      "col_area_kind": "क्षेत्र प्रकार",
+      "col_closed": "बंद",
+      "col_contracted": "अनुबंधित",
+      "col_date": "तिथि",
+      "col_direction": "दिशा",
+      "col_documents": "आवश्यक दस्तावेज़",
+      "col_due": "देय",
+      "col_group": "समूह",
+      "col_heavy": "भारी",
+      "col_hs_codes": "HS कोड",
+      "col_incoterm": "इनकोटर्म",
+      "col_item": "मद",
+      "col_m2": "m2",
+      "col_media_kind": "उपयोगिता",
+      "col_named_place": "नामित स्थान",
+      "col_pct": "%",
+      "col_permits": "अनुमतियाँ",
+      "col_required": "आवश्यक",
+      "col_section": "खंड",
+      "col_short": "कमी",
+      "col_stage": "चरण",
+      "col_state": "स्थिति",
+      "col_title": "शीर्षक",
+      "col_topic": "विषय",
+      "col_transport_kind": "प्रकार",
+      "col_type": "प्रकार",
+      "col_unit": "इकाई",
+      "col_value": "मान",
+      "col_window": "समय-सीमा",
+      "empty": "कोई प्रविष्टि नहीं।",
+      "project": "परियोजना",
+      "title_balance": "क्षेत्र संतुलन",
+      "title_customs": "सीमा शुल्क मामला फ़ाइल सूची",
+      "title_frame": "लॉजिस्टिक्स फ़्रेम सारांश",
+      "title_media": "उपयोगिता संतुलन",
+      "title_neighbourhood": "आसपास के क्षेत्र का लॉग",
+      "title_transports": "परिवहन और अनुमतियाँ"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "चरण {stage}: एक आवंटन उसके क्षेत्र से बड़ा है।",
+        "suggestion": "आवंटन घटाएँ।"
+      },
+      "area_balance_not_closed": {
+        "fail": "चरण {stage}: क्षेत्र संतुलन नहीं मिल रहा ({difference_m2} m2 का अंतर)।",
+        "suggestion": "शेष क्षेत्र आवंटित करें या साइट का कुल क्षेत्र सुधारें।"
+      },
+      "area_overlap": {
+        "fail": "चरण {stage}: दो अलग प्रकार के क्षेत्र आपस में मिल रहे हैं।",
+        "suggestion": "रूपरेखा समायोजित करें।"
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "घोषणाकर्ता इनकोटर्म के अनुसार आयात निकासी करने वाले पक्ष से मेल नहीं खाता।",
+        "suggestion": "घोषणाकर्ता या इनकोटर्म जाँचें।"
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{hour} से शुरू होने वाले घंटे में {count} स्वीकृत डिलीवरी हैं, अवधारणा {limit} की अनुमति देती है।",
+        "suggestion": "डिलीवरी दूसरे घंटे में ले जाएँ या अवधारणा में सीमा बढ़ाएँ।"
+      },
+      "gate_hours_unchecked": {
+        "fail": "साइट का कोई समय क्षेत्र नहीं है, इसलिए डिलीवरी की तुलना खुलने के घंटों से नहीं की गई।",
+        "suggestion": "लॉजिस्टिक्स अवधारणा में साइट का समय क्षेत्र सेट करें।"
+      },
+      "gate_limits_unknown": {
+        "fail": "साइट प्रवेश द्वार {gate} पर कोई भार सीमा नहीं बताई गई है।",
+        "suggestion": "वज़न और आयाम की सीमाएँ दर्ज करें।"
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: भार साइट प्रवेश द्वार की सीमा से अधिक है।",
+        "suggestion": "दूसरा प्रवेश द्वार उपयोग करें या भार बाँटें।"
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: स्वीकृत अनुमति के बिना भारी परिवहन।",
+        "suggestion": "अनुमति के लिए आवेदन करें।"
+      },
+      "hs_code_invalid": {
+        "fail": "HS कोड {hs_code} मान्य नहीं है।",
+        "suggestion": "केवल अंक उपयोग करें, कम से कम न्यूनतम लंबाई के।"
+      },
+      "incoterm_sea_only": {
+        "fail": "इनकोटर्म {incoterm} केवल समुद्री परिवहन के लिए है।",
+        "suggestion": "अन्य माध्यमों के लिए FCA, CPT या CIP उपयोग करें।"
+      },
+      "incoterm_unknown": {
+        "fail": "इनकोटर्म {incoterm} पिन किए गए संस्करण में नहीं है।",
+        "suggestion": "पिन किए गए संस्करण का कोई शब्द चुनें।"
+      },
+      "jit_late": {
+        "fail": "{title}: जस्ट-इन-टाइम डिलीवरी टैक्ट प्रारंभ के बाद आती है।",
+        "suggestion": "डिलीवरी को पहले ले आएँ।"
+      },
+      "jit_too_early": {
+        "fail": "{title}: जस्ट-इन-टाइम डिलीवरी उसके बफर की अनुमति से पहले आ रही है।",
+        "suggestion": "इसे टैक्ट प्रारंभ के करीब ले जाएँ।"
+      },
+      "jit_without_location": {
+        "fail": "{title}: प्रवाह {flow} की जस्ट-इन-टाइम डिलीवरी कोई टैक्ट क्षेत्र नहीं बताती।",
+        "suggestion": "वह टैक्ट क्षेत्र चुनें जिसके लिए डिलीवरी है।"
+      },
+      "media_capacity_short": {
+        "fail": "चरण {stage}: {media} को {required} चाहिए, अनुबंधित {contracted} है।",
+        "suggestion": "अनुबंधित क्षमता बढ़ाएँ या माँग घटाएँ।"
+      },
+      "media_late": {
+        "fail": "चरण {stage}: {media} कनेक्शन चरण शुरू होने के बाद का वादा किया गया है।",
+        "suggestion": "पहले की तिथि या अस्थायी आपूर्ति पर सहमति लें।"
+      },
+      "media_unsourced": {
+        "fail": "{media} की एक माँग का कोई कनेक्शन नहीं है।",
+        "suggestion": "कनेक्शन निर्धारित करें।"
+      },
+      "neighbour_issue_overdue": {
+        "fail": "एक शिकायत का उत्तर {due} तक देना था।",
+        "suggestion": "उसे स्वीकार करें और उत्तर दें।"
+      },
+      "permit_expired": {
+        "fail": "अनुमति {reference} समाप्त हो चुकी है जबकि परिवहन शेष हैं।",
+        "suggestion": "नई अनुमति के लिए आवेदन करें।"
+      },
+      "permit_expiring": {
+        "fail": "अनुमति {reference} जल्द समाप्त होने वाली है जबकि परिवहन शेष हैं।",
+        "suggestion": "अनुमति बढ़ाएँ।"
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: समय-सीमा शांत घंटों में पड़ती है।",
+        "suggestion": "उसे शांत घंटों से बाहर ले जाएँ या रात्रि-कार्य अनुमति लें।"
+      },
+      "required_document_missing": {
+        "fail": "आवश्यक दस्तावेज़ {kind} अनुपलब्ध है।",
+        "suggestion": "दस्तावेज़ प्राप्त करें और उसे लिंक करें।"
+      },
+      "site_timezone_missing": {
+        "fail": "साइट का कोई समय क्षेत्र नहीं है, इसलिए दिन के समय के नियम नहीं जाँचे गए।",
+        "suggestion": "लॉजिस्टिक्स अवधारणा में साइट का समय क्षेत्र सेट करें।"
+      },
+      "stage_without_site_setup": {
+        "fail": "चरण {stage} में साइट सेटअप क्षेत्र नहीं है।",
+        "suggestion": "कार्यालयों और कल्याण सुविधाओं के लिए क्षेत्र आवंटित करें।"
+      },
+      "stage_without_storage": {
+        "fail": "चरण {stage} में भंडारण या लेडाउन क्षेत्र नहीं है।",
+        "suggestion": "भंडारण या लेडाउन क्षेत्र आवंटित करें।"
+      },
+      "window_outside_permit": {
+        "fail": "{title}: समय-सीमा अनुमति से बाहर है।",
+        "suggestion": "समय-सीमा बदलें या अनुमति बढ़ाएँ।"
+      },
+      "zone_not_mapped": {
+        "fail": "लेडाउन क्षेत्र {zone} किसी साइट क्षेत्र से जुड़ा नहीं है।",
+        "suggestion": "उसे उसके नियोजित क्षेत्र से जोड़ें।"
+      }
+    }
+  }
+}

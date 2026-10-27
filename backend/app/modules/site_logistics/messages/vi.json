@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Không",
+        "yes": "Có"
+      },
+      "direction": {
+        "export": "Xuất khẩu",
+        "import": "Nhập khẩu",
+        "inbound": "Nhập kho",
+        "outbound": "Xuất kho"
+      },
+      "group": {
+        "built": "Đã xây dựng",
+        "external": "Bên ngoài",
+        "logistics": "Hậu cần",
+        "reserve": "Dự phòng"
+      },
+      "is_heavy": {
+        "no": "Không",
+        "yes": "Có"
+      },
+      "section": {
+        "balance": "Cân đối",
+        "concept": "Phương án",
+        "neighbourhood": "Khu vực lân cận",
+        "readiness": "Sẵn sàng"
+      },
+      "short": {
+        "no": "Không",
+        "yes": "Có"
+      },
+      "state": {
+        "acknowledged": "Đã xác nhận",
+        "action_taken": "Đã xử lý",
+        "active": "Đang hoạt động",
+        "applied": "Đã nộp đơn",
+        "arrived": "Đã đến",
+        "authority": "Cơ quan có thẩm quyền",
+        "cancelled": "Đã hủy",
+        "cleared": "Đã thông quan",
+        "closed": "Đã đóng",
+        "connected": "Đã kết nối",
+        "contracted": "Đã ký hợp đồng",
+        "declared": "Đã khai báo",
+        "disconnected": "Đã ngắt kết nối",
+        "documents_complete": "Đủ hồ sơ",
+        "draft": "Bản nháp",
+        "expired": "Đã hết hạn",
+        "granted": "Đã cấp",
+        "held": "Đang giữ",
+        "identified": "Đã xác định",
+        "in_transit": "Đang vận chuyển",
+        "missing": "Thiếu",
+        "municipality": "Chính quyền địa phương",
+        "neighbours": "Hàng xóm",
+        "offered": "Đã chào",
+        "open": "Mở",
+        "other": "Khác",
+        "permit_pending": "Đang chờ giấy phép",
+        "planned": "Đã lên kế hoạch",
+        "police": "Công an",
+        "received": "Đã nhận",
+        "refused": "Bị từ chối",
+        "requested": "Đã yêu cầu",
+        "scheduled": "Đã lên lịch",
+        "utility": "Đơn vị hạ tầng",
+        "verified": "Đã xác minh"
+      },
+      "type": {
+        "complaint": "Khiếu nại",
+        "coordination": "Điều phối"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Không tìm thấy hoạt động tiến độ trong dự án này.",
+      "allocation_exceeds_area": "Phần phân bổ lớn hơn diện tích.",
+      "allocation_negative": "Phần phân bổ không được là số âm.",
+      "allocations_changed": "Phần phân bổ đã được người khác thay đổi. Hãy tải lại và thử lần nữa.",
+      "area_not_found": "Không tìm thấy khu vực công trường.",
+      "authority_permit_not_found": "Không tìm thấy giấy phép của cơ quan có thẩm quyền trong dự án này.",
+      "buffer_days_negative": "Số ngày dự phòng không được là số âm.",
+      "catalogue_invalid": "Không thể xác định danh mục hậu cần đã ghim.",
+      "catalogue_retired": "Phiên bản danh mục này đã ngừng sử dụng.",
+      "code_required": "Cần nhập mã.",
+      "code_taken": "Mã này đã được dùng trong dự án.",
+      "commodity_code_not_found": "Không tìm thấy mã hàng hóa.",
+      "complaint_closed": "Không thể thay đổi khiếu nại đã đóng.",
+      "complaint_not_found": "Không tìm thấy khiếu nại.",
+      "connection_point_invalid": "Điểm kết nối không phải là một điểm hợp lệ.",
+      "contracted_capacity_required": "Hãy nhập công suất theo hợp đồng trước.",
+      "correspondence_not_found": "Không tìm thấy thư từ trong dự án này.",
+      "correspondence_thread_not_found": "Không tìm thấy thư từ trong dự án này.",
+      "country_invalid": "Hãy dùng mã quốc gia ISO gồm hai chữ cái.",
+      "currency_invalid": "Hãy dùng mã tiền tệ ISO gồm ba chữ cái.",
+      "currency_required": "Số tiền cần có loại tiền tệ.",
+      "customs_case_not_found": "Không tìm thấy hồ sơ hải quan.",
+      "customs_closed": "Không thể thay đổi hồ sơ đã thông quan hoặc đã đóng.",
+      "customs_declared": "Không thể xóa hồ sơ đã khai báo.",
+      "customs_not_found": "Không tìm thấy hồ sơ hải quan.",
+      "customs_without_lines": "Hãy thêm ít nhất một dòng hàng hóa trước.",
+      "declarant_invalid": "Người khai báo không thể là người mua hoặc người bán.",
+      "delivery_already_on_site": "Chuyến giao hàng này đã đến và không được quyết định lại.",
+      "delivery_not_found": "Không tìm thấy chuyến giao hàng trong dự án này.",
+      "delivery_rate_exceeded": "Giờ này đã đạt số chuyến giao hàng mà phương án cho phép.",
+      "delivery_refused": "Chuyến giao hàng này không thể được duyệt ở trạng thái hiện tại.",
+      "demand_not_found": "Không tìm thấy nhu cầu.",
+      "demand_owned_by_plant_position": "Nhu cầu này đến từ một vị trí máy móc; hãy thay đổi tại đó.",
+      "direction_invalid": "Hướng không xác định.",
+      "document_exists": "Tài liệu này đã có trong danh sách kiểm tra.",
+      "document_not_found": "Không tìm thấy tài liệu.",
+      "document_ref_required": "Hãy liên kết tài liệu trước khi đánh dấu là đã nhận.",
+      "duplicate_stage": "Mỗi giai đoạn chỉ được phân bổ một lần cho mỗi khu vực.",
+      "entry_not_found": "Không tìm thấy mục nhật ký.",
+      "field_required": "Trường này không được để trống.",
+      "flow_code_invalid": "Mỗi luồng vật tư cần có mã riêng.",
+      "flow_code_unknown": "Phương án hậu cần không có luồng vật tư nào với mã này.",
+      "flow_mode_invalid": "Chế độ luồng vật tư không xác định.",
+      "frame_invalid": "Hệ tọa độ không xác định.",
+      "gate_hours_unchecked": "Giờ mở cổng chưa được kiểm tra cho đến khi đặt múi giờ công trường.",
+      "gate_load_exceeded": "Tải trọng vượt giới hạn của cổng công trường.",
+      "gate_not_found": "Không tìm thấy cổng công trường trong dự án này.",
+      "geo_overlay_not_found": "Không tìm thấy lớp bản đồ mặt bằng công trường trong dự án này.",
+      "geometry_invalid": "Đường biên khu vực không phải là đa giác hợp lệ.",
+      "goods_receipt_missing": "Đơn đặt hàng này chưa có phiếu nhận hàng nào được xác nhận.",
+      "heavy_without_permit": "Vận chuyển hàng nặng cần giấy phép đã được cấp trước khi lên lịch.",
+      "hours_invalid": "Hãy nhập khoảng giờ hợp lệ, giờ kết thúc phải sau giờ bắt đầu.",
+      "hs_code_invalid": "Mã HS chỉ được gồm chữ số và phải đủ độ dài.",
+      "incoterm_unknown": "Incoterm này không có trong phiên bản đã ghim.",
+      "invalid_transition": "Không được phép thay đổi trạng thái như vậy.",
+      "jit_without_takt": "Luồng đúng lúc (JIT) cần có lịch takt.",
+      "last_stage": "Dự án phải có ít nhất một giai đoạn mở rộng.",
+      "line_not_found": "Không tìm thấy dòng hải quan.",
+      "link_target_unavailable": "Không thể kiểm tra liên kết này lúc này vì module mà nó trỏ tới chưa được cài đặt.",
+      "media_not_found": "Không tìm thấy kết nối hạ tầng.",
+      "money_not_decimal": "Hãy nhập số tiền dưới dạng số thập phân.",
+      "money_out_of_range": "Hãy nhập số tiền với tối đa hai chữ số thập phân.",
+      "noise_limit_needs_project_value": "Khu vực pháp lý này không quy định giá trị cố định; hãy nhập giá trị đã được chấp thuận cho dự án.",
+      "not_found": "Không tìm thấy.",
+      "outside_gate_hours": "Khoảng thời gian nằm ngoài giờ mở cổng.",
+      "owner_not_member": "Người phụ trách phải là thành viên của dự án này.",
+      "pack_catalogue_invalid": "Không tải được danh mục của gói.",
+      "permission_denied": "Bạn không có quyền thực hiện thao tác này.",
+      "permit_frozen": "Giấy phép đã được cấp, bị từ chối hoặc hết hạn vẫn giữ nguyên hiệu lực, khoảng thời gian và các chuyến vận chuyển.",
+      "permit_not_found": "Không tìm thấy giấy phép.",
+      "plan_calibration_without_image": "Hãy chọn hình ảnh mặt bằng công trường trước khi đặt tỷ lệ.",
+      "plan_document_not_found": "Không tìm thấy tài liệu mặt bằng công trường trong dự án này.",
+      "plan_origin_invalid": "Gốc của mặt bằng công trường gồm hai số, x và y, tính bằng pixel.",
+      "plan_scale_invalid": "Tỷ lệ của mặt bằng công trường phải lớn hơn không.",
+      "plant_item_not_found": "Không tìm thấy hạng mục máy móc trong dự án này.",
+      "plant_position_not_found": "Không tìm thấy vị trí máy móc trong dự án này.",
+      "plant_position_required": "Cần có vị trí máy móc.",
+      "po_not_found": "Không tìm thấy đơn đặt hàng trong dự án này.",
+      "project_not_found": "Không tìm thấy dự án.",
+      "quiet_hours_conflict": "Khoảng thời gian rơi vào giờ yên tĩnh và không có giấy phép thi công ban đêm nào bao phủ.",
+      "required_document_missing": "Vẫn còn thiếu một tài liệu bắt buộc.",
+      "response_required": "Hãy viết nội dung phản hồi trước.",
+      "route_invalid": "Tuyến đường không phải là đường thẳng hợp lệ.",
+      "simultaneity_factor_range": "Hệ số đồng thời phải nằm trong khoảng từ 0 đến 1.",
+      "site_timezone_missing": "Hãy đặt múi giờ công trường trước; thời gian được kiểm tra theo đồng hồ công trường.",
+      "slot_taken": "Một chuyến giao hàng đã duyệt khác đang giữ khoảng thời gian này tại cổng.",
+      "stage_active": "Không thể xóa giai đoạn đang hoạt động. Hãy đóng nó trước.",
+      "stage_not_found": "Không tìm thấy giai đoạn mở rộng.",
+      "takt_location_not_found": "Không tìm thấy khu vực takt trong dự án này.",
+      "takt_schedule_not_found": "Không tìm thấy lịch takt trong dự án này.",
+      "timezone_invalid": "Múi giờ không xác định. Hãy dùng tên như Europe/Berlin.",
+      "transport_closed": "Không thể thay đổi chuyến vận chuyển đã đóng hoặc đã hủy.",
+      "transport_mode_invalid": "Phương thức vận chuyển không xác định.",
+      "transport_not_found": "Không tìm thấy chuyến vận chuyển.",
+      "transport_under_way": "Không thể xóa chuyến vận chuyển đang di chuyển.",
+      "unknown_area_kind": "Loại khu vực không xác định.",
+      "unknown_catalogue": "Danh mục không xác định.",
+      "unknown_document_kind": "Loại tài liệu không xác định.",
+      "unknown_issue_kind": "Loại khiếu nại không xác định.",
+      "unknown_link_kind": "Không có danh sách cho loại liên kết này.",
+      "unknown_load_class": "Cấp tải trọng không xác định.",
+      "unknown_media_kind": "Hạ tầng không xác định.",
+      "unknown_noise_limit": "Mục giới hạn tiếng ồn không xác định.",
+      "unknown_permit_kind": "Loại giấy phép không xác định.",
+      "unknown_transport_kind": "Loại vận chuyển không xác định.",
+      "validity_invalid": "Giấy phép kết thúc trước khi bắt đầu.",
+      "validity_required": "Hãy nhập ngày hiệu lực trước khi cấp.",
+      "vendor_not_found": "Không tìm thấy nhà cung cấp.",
+      "window_invalid": "Khoảng thời gian không hợp lệ.",
+      "window_outside_permit": "Khoảng thời gian vận chuyển nằm ngoài hiệu lực hoặc giờ được phép của giấy phép.",
+      "zone_not_found": "Không tìm thấy khu vực tập kết vật tư trong dự án này.",
+      "zone_type_invalid": "Loại khu vực không xác định."
+    },
+    "evidence": {
+      "balance_closed": "Cân đối diện tích đã khép kín cho mọi giai đoạn đang mở",
+      "concept_saved_and_exported": "Phương án hậu cần đã được lưu và lưu hồ sơ",
+      "first_stage_media_contracted": "Hạ tầng cho giai đoạn đầu đã được ký hợp đồng",
+      "gate_loads_admitted": "Mọi tải trọng đều được cổng cho phép hoặc được giấy phép quá khổ bao phủ",
+      "heavy_transports_permitted": "Mọi chuyến vận chuyển hàng nặng đều đã có giấy phép",
+      "neighbourhood_limit_source": "Đã xác định nguồn giới hạn tiếng ồn",
+      "no_errors": "Không còn lỗi hậu cần đang mở",
+      "unresolved": "Không thể đưa kế hoạch hậu cần vào mô hình quản trị"
+    },
+    "export": {
+      "as_of": "Tính đến",
+      "col_area_kind": "Loại khu vực",
+      "col_closed": "Đã đóng",
+      "col_contracted": "Đã ký hợp đồng",
+      "col_date": "Ngày",
+      "col_direction": "Hướng",
+      "col_documents": "Tài liệu bắt buộc",
+      "col_due": "Hạn",
+      "col_group": "Nhóm",
+      "col_heavy": "Hàng nặng",
+      "col_hs_codes": "Mã HS",
+      "col_incoterm": "Incoterm",
+      "col_item": "Hạng mục",
+      "col_m2": "m2",
+      "col_media_kind": "Hạ tầng",
+      "col_named_place": "Địa điểm chỉ định",
+      "col_pct": "%",
+      "col_permits": "Giấy phép",
+      "col_required": "Bắt buộc",
+      "col_section": "Phần",
+      "col_short": "Ngắn",
+      "col_stage": "Giai đoạn",
+      "col_state": "Trạng thái",
+      "col_title": "Tiêu đề",
+      "col_topic": "Chủ đề",
+      "col_transport_kind": "Loại",
+      "col_type": "Loại",
+      "col_unit": "Đơn vị",
+      "col_value": "Giá trị",
+      "col_window": "Khoảng thời gian",
+      "empty": "Không có mục nào.",
+      "project": "Dự án",
+      "title_balance": "Cân đối diện tích",
+      "title_customs": "Chỉ mục hồ sơ hải quan",
+      "title_frame": "Tóm tắt khung hậu cần",
+      "title_media": "Cân đối hạ tầng",
+      "title_neighbourhood": "Nhật ký khu vực lân cận",
+      "title_transports": "Vận chuyển và giấy phép"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Giai đoạn {stage}: có phần phân bổ lớn hơn diện tích của nó.",
+        "suggestion": "Giảm phần phân bổ."
+      },
+      "area_balance_not_closed": {
+        "fail": "Giai đoạn {stage}: cân đối diện tích không khép kín (chênh lệch {difference_m2} m2).",
+        "suggestion": "Phân bổ phần diện tích còn lại hoặc sửa tổng diện tích công trường."
+      },
+      "area_overlap": {
+        "fail": "Giai đoạn {stage}: hai khu vực khác loại bị chồng lấn.",
+        "suggestion": "Điều chỉnh các đường biên."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Người khai báo không khớp với bên thực hiện thông quan nhập khẩu theo incoterm.",
+        "suggestion": "Kiểm tra người khai báo hoặc incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} chuyến giao hàng đã duyệt bắt đầu trong giờ từ {hour}, phương án cho phép {limit}.",
+        "suggestion": "Chuyển các chuyến giao hàng sang giờ khác hoặc tăng giới hạn trong phương án."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Công trường chưa có múi giờ, nên các chuyến giao hàng chưa được đối chiếu với giờ mở cổng.",
+        "suggestion": "Đặt múi giờ công trường trong phương án hậu cần."
+      },
+      "gate_limits_unknown": {
+        "fail": "Cổng công trường {gate} chưa ghi giới hạn tải trọng.",
+        "suggestion": "Nhập giới hạn trọng lượng và kích thước."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: tải trọng vượt giới hạn của cổng công trường.",
+        "suggestion": "Dùng cổng khác hoặc chia nhỏ tải trọng."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: vận chuyển hàng nặng nhưng chưa có giấy phép được cấp.",
+        "suggestion": "Nộp đơn xin giấy phép."
+      },
+      "hs_code_invalid": {
+        "fail": "Mã HS {hs_code} không hợp lệ.",
+        "suggestion": "Chỉ dùng chữ số và đảm bảo độ dài tối thiểu."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} chỉ dành cho vận tải đường biển.",
+        "suggestion": "Với các phương thức khác, hãy dùng FCA, CPT hoặc CIP."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} không có trong phiên bản đã ghim.",
+        "suggestion": "Chọn điều khoản thuộc phiên bản đã ghim."
+      },
+      "jit_late": {
+        "fail": "{title}: chuyến giao hàng đúng lúc đến sau khi takt bắt đầu.",
+        "suggestion": "Đưa chuyến giao hàng lên sớm hơn."
+      },
+      "jit_too_early": {
+        "fail": "{title}: chuyến giao hàng đúng lúc đến sớm hơn mức cho phép của thời gian dự phòng.",
+        "suggestion": "Dời lại gần thời điểm bắt đầu takt hơn."
+      },
+      "jit_without_location": {
+        "fail": "{title}: chuyến giao hàng đúng lúc của luồng {flow} không chỉ định khu vực takt nào.",
+        "suggestion": "Chọn khu vực takt mà chuyến giao hàng phục vụ."
+      },
+      "media_capacity_short": {
+        "fail": "Giai đoạn {stage}: {media} cần {required}, đã ký hợp đồng {contracted}.",
+        "suggestion": "Tăng công suất theo hợp đồng hoặc giảm nhu cầu."
+      },
+      "media_late": {
+        "fail": "Giai đoạn {stage}: kết nối {media} được hẹn sau khi giai đoạn bắt đầu.",
+        "suggestion": "Thống nhất ngày sớm hơn hoặc nguồn cung tạm thời."
+      },
+      "media_unsourced": {
+        "fail": "Nhu cầu {media} chưa có kết nối.",
+        "suggestion": "Gán một kết nối."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Một khiếu nại đến hạn phản hồi vào {due}.",
+        "suggestion": "Xác nhận và trả lời khiếu nại."
+      },
+      "permit_expired": {
+        "fail": "Giấy phép {reference} đã hết hạn trong khi vẫn còn chuyến vận chuyển.",
+        "suggestion": "Nộp đơn xin giấy phép mới."
+      },
+      "permit_expiring": {
+        "fail": "Giấy phép {reference} sắp hết hạn trong khi vẫn còn chuyến vận chuyển.",
+        "suggestion": "Gia hạn giấy phép."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: khoảng thời gian rơi vào giờ yên tĩnh.",
+        "suggestion": "Dời ra ngoài giờ yên tĩnh hoặc xin giấy phép thi công ban đêm."
+      },
+      "required_document_missing": {
+        "fail": "Thiếu tài liệu bắt buộc {kind}.",
+        "suggestion": "Lấy tài liệu và liên kết vào hồ sơ."
+      },
+      "site_timezone_missing": {
+        "fail": "Công trường chưa có múi giờ, nên các quy tắc về giờ trong ngày chưa được kiểm tra.",
+        "suggestion": "Đặt múi giờ công trường trong phương án hậu cần."
+      },
+      "stage_without_site_setup": {
+        "fail": "Giai đoạn {stage} chưa có khu vực bố trí công trường.",
+        "suggestion": "Phân bổ khu vực cho văn phòng và nhà tạm phúc lợi."
+      },
+      "stage_without_storage": {
+        "fail": "Giai đoạn {stage} chưa có khu vực kho bãi hoặc tập kết vật tư.",
+        "suggestion": "Phân bổ khu vực kho bãi hoặc tập kết vật tư."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: khoảng thời gian nằm ngoài giấy phép.",
+        "suggestion": "Dời khoảng thời gian hoặc gia hạn giấy phép."
+      },
+      "zone_not_mapped": {
+        "fail": "Khu vực tập kết {zone} chưa được liên kết với khu vực công trường nào.",
+        "suggestion": "Liên kết khu vực này với khu vực đã lên kế hoạch."
+      }
+    }
+  }
+}

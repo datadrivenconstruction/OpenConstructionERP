@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "U redu"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Ne",
+        "yes": "Da"
+      },
+      "direction": {
+        "export": "Izvoz",
+        "import": "Uvoz",
+        "inbound": "Dolazno",
+        "outbound": "Odlazno"
+      },
+      "group": {
+        "built": "Izgrađeno",
+        "external": "Vanjsko",
+        "logistics": "Logistika",
+        "reserve": "Rezerva"
+      },
+      "is_heavy": {
+        "no": "Ne",
+        "yes": "Da"
+      },
+      "section": {
+        "balance": "Bilanca",
+        "concept": "Koncept",
+        "neighbourhood": "Susjedstvo",
+        "readiness": "Spremnost"
+      },
+      "short": {
+        "no": "Ne",
+        "yes": "Da"
+      },
+      "state": {
+        "acknowledged": "Potvrđeno",
+        "action_taken": "Poduzeta mjera",
+        "active": "Aktivno",
+        "applied": "Podneseno",
+        "arrived": "Stiglo",
+        "authority": "Nadležno tijelo",
+        "cancelled": "Otkazano",
+        "cleared": "Carinjeno",
+        "closed": "Zatvoreno",
+        "connected": "Priključeno",
+        "contracted": "Ugovoreno",
+        "declared": "Prijavljeno",
+        "disconnected": "Isključeno",
+        "documents_complete": "Dokumentacija potpuna",
+        "draft": "Nacrt",
+        "expired": "Isteklo",
+        "granted": "Odobreno",
+        "held": "Zadržano",
+        "identified": "Utvrđeno",
+        "in_transit": "U tranzitu",
+        "missing": "Nedostaje",
+        "municipality": "Općina",
+        "neighbours": "Susjedi",
+        "offered": "Ponuđeno",
+        "open": "Otvoreno",
+        "other": "Ostalo",
+        "permit_pending": "Dozvola u tijeku",
+        "planned": "Planirano",
+        "police": "Policija",
+        "received": "Zaprimljeno",
+        "refused": "Odbijeno",
+        "requested": "Zatraženo",
+        "scheduled": "Raspoređeno",
+        "utility": "Komunalno poduzeće",
+        "verified": "Provjereno"
+      },
+      "type": {
+        "complaint": "Pritužba",
+        "coordination": "Koordinacija"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Aktivnost rasporeda nije pronađena u ovom projektu.",
+      "allocation_exceeds_area": "Alokacija je veća od površine.",
+      "allocation_negative": "Alokacija ne može biti negativna.",
+      "allocations_changed": "Alokacije je promijenio netko drugi. Ponovno učitajte i pokušajte ponovo.",
+      "area_not_found": "Gradilišna površina nije pronađena.",
+      "authority_permit_not_found": "Dozvola nadležnog tijela nije pronađena u ovom projektu.",
+      "buffer_days_negative": "Rezervni dani ne mogu biti negativni.",
+      "catalogue_invalid": "Pripnuti logistički katalog nije moguće razriješiti.",
+      "catalogue_retired": "Ova verzija kataloga je povučena.",
+      "code_required": "Šifra je obavezna.",
+      "code_taken": "Ova šifra se već koristi u projektu.",
+      "commodity_code_not_found": "Šifra robe nije pronađena.",
+      "complaint_closed": "Zatvorena pritužba ne može se mijenjati.",
+      "complaint_not_found": "Pritužba nije pronađena.",
+      "connection_point_invalid": "Priključna točka nije valjana točka.",
+      "contracted_capacity_required": "Najprije unesite ugovoreni kapacitet.",
+      "correspondence_not_found": "Dopisivanje nije pronađeno u ovom projektu.",
+      "correspondence_thread_not_found": "Dopisivanje nije pronađeno u ovom projektu.",
+      "country_invalid": "Upotrijebite dvoslovnu ISO oznaku države.",
+      "currency_invalid": "Upotrijebite troslovnu ISO oznaku valute.",
+      "currency_required": "Iznos mora imati valutu.",
+      "customs_case_not_found": "Carinski predmet nije pronađen.",
+      "customs_closed": "Carinjeni ili zatvoreni predmet ne može se mijenjati.",
+      "customs_declared": "Prijavljeni predmet ne može se obrisati.",
+      "customs_not_found": "Carinski predmet nije pronađen.",
+      "customs_without_lines": "Najprije dodajte barem jednu stavku robe.",
+      "declarant_invalid": "Prijavitelj je kupac ili prodavatelj.",
+      "delivery_already_on_site": "Ova isporuka je već stigla i više se ne odlučuje o njoj.",
+      "delivery_not_found": "Isporuka nije pronađena u ovom projektu.",
+      "delivery_rate_exceeded": "Ovaj sat već sadrži broj isporuka koji koncept dopušta.",
+      "delivery_refused": "Ova isporuka u ovom obliku ne može biti odobrena.",
+      "demand_not_found": "Potreba nije pronađena.",
+      "demand_owned_by_plant_position": "Ova potreba dolazi iz pozicije strojeva; promijenite je tamo.",
+      "direction_invalid": "Nepoznat smjer.",
+      "document_exists": "Ovaj dokument je već na kontrolnom popisu.",
+      "document_not_found": "Dokument nije pronađen.",
+      "document_ref_required": "Povežite dokument prije označavanja kao zaprimljen.",
+      "duplicate_stage": "Svaka faza proširenja može se alocirati jednom po površini.",
+      "entry_not_found": "Unos u dnevniku nije pronađen.",
+      "field_required": "Ovo polje ne smije biti prazno.",
+      "flow_code_invalid": "Svaki materijalni tok mora imati vlastitu šifru.",
+      "flow_code_unknown": "Logistički koncept nema materijalni tok s ovom šifrom.",
+      "flow_mode_invalid": "Nepoznat način materijalnog toka.",
+      "frame_invalid": "Nepoznat koordinatni sustav.",
+      "gate_hours_unchecked": "Radno vrijeme ulaza neće se provjeravati dok se ne postavi vremenska zona gradilišta.",
+      "gate_load_exceeded": "Opterećenje premašuje ograničenja gradilišnog ulaza.",
+      "gate_not_found": "Gradilišni ulaz nije pronađen u ovom projektu.",
+      "geo_overlay_not_found": "Sloj situacijskog plana nije pronađen u ovom projektu.",
+      "geometry_invalid": "Obris površine nije valjan poligon.",
+      "goods_receipt_missing": "Za ovu narudžbenicu još nema potvrđenog primitka robe.",
+      "heavy_without_permit": "Teški prijevoz zahtijeva odobrenu dozvolu prije rasporeda.",
+      "hours_invalid": "Unesite valjane sate, završetak nakon početka.",
+      "hs_code_invalid": "HS šifra smije sadržavati samo znamenke i mora biti dovoljno duga.",
+      "incoterm_unknown": "Ovaj incoterm nije u pripnutoj verziji.",
+      "invalid_transition": "Ova promjena statusa nije dopuštena.",
+      "jit_without_takt": "Tok just-in-time zahtijeva raspored takta.",
+      "last_stage": "Projekt zadržava barem jednu fazu proširenja.",
+      "line_not_found": "Carinska stavka nije pronađena.",
+      "link_target_unavailable": "Ovu poveznicu još nije moguće provjeriti jer modul na koji upućuje nije instaliran.",
+      "media_not_found": "Priključak komunalne infrastrukture nije pronađen.",
+      "money_not_decimal": "Unesite iznos kao decimalni broj.",
+      "money_out_of_range": "Unesite iznos s najviše dvije decimale.",
+      "noise_limit_needs_project_value": "Ova nadležnost ne određuje fiksne vrijednosti; unesite odobrene vrijednosti projekta.",
+      "not_found": "Nije pronađeno.",
+      "outside_gate_hours": "Vremenski prozor je izvan radnog vremena ulaza.",
+      "owner_not_member": "Vlasnik mora biti član ovog projekta.",
+      "pack_catalogue_invalid": "Katalog paketa se ne može učitati.",
+      "permission_denied": "Nemate ovlaštenje za ovo.",
+      "permit_frozen": "Dozvola koja je odobrena, odbijena ili istekla zadržava svoju valjanost, prozore i prijevoze.",
+      "permit_not_found": "Dozvola nije pronađena.",
+      "plan_calibration_without_image": "Najprije odaberite sliku situacijskog plana, a zatim postavite mjerilo.",
+      "plan_document_not_found": "Dokument situacijskog plana nije pronađen u ovom projektu.",
+      "plan_origin_invalid": "Ishodište situacijskog plana čine dva broja, x i y u pikselima.",
+      "plan_scale_invalid": "Mjerilo situacijskog plana mora biti veće od nule.",
+      "plant_item_not_found": "Stavka strojeva nije pronađena u ovom projektu.",
+      "plant_position_not_found": "Pozicija strojeva nije pronađena u ovom projektu.",
+      "plant_position_required": "Potrebna je pozicija strojeva.",
+      "po_not_found": "Narudžbenica nije pronađena u ovom projektu.",
+      "project_not_found": "Projekt nije pronađen.",
+      "quiet_hours_conflict": "Prozor pada u razdoblje mirovanja i nijedna dozvola za noćni rad ga ne pokriva.",
+      "required_document_missing": "Obavezni dokument još nedostaje.",
+      "response_required": "Najprije napišite odgovor.",
+      "route_invalid": "Trasa nije valjana linija.",
+      "simultaneity_factor_range": "Faktor istovremenosti mora biti između 0 i 1.",
+      "site_timezone_missing": "Najprije postavite vremensku zonu gradilišta; vremena se provjeravaju prema gradilišnom satu.",
+      "slot_taken": "Drugu odobrenu isporuku zauzima ovaj termin na ulazu.",
+      "stage_active": "Aktivna faza ne može se obrisati. Najprije je zatvorite.",
+      "stage_not_found": "Faza proširenja nije pronađena.",
+      "takt_location_not_found": "Takt područje nije pronađeno u ovom projektu.",
+      "takt_schedule_not_found": "Takt raspored nije pronađen u ovom projektu.",
+      "timezone_invalid": "Nepoznata vremenska zona. Upotrijebite naziv poput Europe/Zagreb.",
+      "transport_closed": "Zatvoreni ili otkazani prijevoz ne može se mijenjati.",
+      "transport_mode_invalid": "Nepoznat način prijevoza.",
+      "transport_not_found": "Prijevoz nije pronađen.",
+      "transport_under_way": "Prijevoz u tijeku ne može se obrisati.",
+      "unknown_area_kind": "Nepoznata vrsta površine.",
+      "unknown_catalogue": "Nepoznat katalog.",
+      "unknown_document_kind": "Nepoznata vrsta dokumenta.",
+      "unknown_issue_kind": "Nepoznata vrsta pritužbe.",
+      "unknown_link_kind": "Za ovu vrstu poveznice ne postoji popis.",
+      "unknown_load_class": "Nepoznata klasa opterećenja.",
+      "unknown_media_kind": "Nepoznata komunalna usluga.",
+      "unknown_noise_limit": "Nepoznat unos granične vrijednosti buke.",
+      "unknown_permit_kind": "Nepoznata vrsta dozvole.",
+      "unknown_transport_kind": "Nepoznata vrsta prijevoza.",
+      "validity_invalid": "Dozvola završava prije početka.",
+      "validity_required": "Prije odobrenja unesite datume valjanosti.",
+      "vendor_not_found": "Dobavljač nije pronađen.",
+      "window_invalid": "Vremenski prozor nije valjan.",
+      "window_outside_permit": "Vremenski prozor prijevoza izvan je valjanosti dozvole ili njezinih dopuštenih termina.",
+      "zone_not_found": "Skladišna površina nije pronađena u ovom projektu.",
+      "zone_type_invalid": "Nepoznata vrsta zone."
+    },
+    "evidence": {
+      "balance_closed": "Bilanca površina zatvorena za svaku otvorenu fazu",
+      "concept_saved_and_exported": "Logistički koncept spremljen i arhiviran",
+      "first_stage_media_contracted": "Komunalne usluge za prvu fazu ugovorene",
+      "gate_loads_admitted": "Svako opterećenje dopušteno na svom ulazu ili pokriveno dozvolom za prekomjerne dimenzije",
+      "heavy_transports_permitted": "Dozvola odobrena za svaki teški prijevoz",
+      "neighbourhood_limit_source": "Izvor graničnih vrijednosti buke postavljen",
+      "no_errors": "Nema otvorenih logističkih pogrešaka",
+      "unresolved": "Logistički plan nije mogao biti smješten u model upravljanja"
+    },
+    "export": {
+      "as_of": "Stanje na dan",
+      "col_area_kind": "Vrsta površine",
+      "col_closed": "Zatvoreno",
+      "col_contracted": "Ugovoreno",
+      "col_date": "Datum",
+      "col_direction": "Smjer",
+      "col_documents": "Potrebna dokumentacija",
+      "col_due": "Rok",
+      "col_group": "Skupina",
+      "col_heavy": "Teško",
+      "col_hs_codes": "HS šifre",
+      "col_incoterm": "Incoterm",
+      "col_item": "Stavka",
+      "col_m2": "m2",
+      "col_media_kind": "Komunalna usluga",
+      "col_named_place": "Imenovano mjesto",
+      "col_pct": "%",
+      "col_permits": "Dozvole",
+      "col_required": "Potrebno",
+      "col_section": "Odjeljak",
+      "col_short": "Manjak",
+      "col_stage": "Faza",
+      "col_state": "Status",
+      "col_title": "Naziv",
+      "col_topic": "Tema",
+      "col_transport_kind": "Vrsta",
+      "col_type": "Tip",
+      "col_unit": "Jedinica",
+      "col_value": "Vrijednost",
+      "col_window": "Prozor",
+      "empty": "Nema unosa.",
+      "project": "Projekt",
+      "title_balance": "Bilanca površina",
+      "title_customs": "Kazalo carinskih predmeta",
+      "title_frame": "Sažetak logističkog okvira",
+      "title_media": "Bilanca komunalnih usluga",
+      "title_neighbourhood": "Dnevnik susjedstva",
+      "title_transports": "Prijevozi i dozvole"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Faza {stage}: jedna alokacija je veća od svoje površine.",
+        "suggestion": "Smanjite alokaciju."
+      },
+      "area_balance_not_closed": {
+        "fail": "Faza {stage}: bilanca površina ne sastaje se (razlika {difference_m2} m2).",
+        "suggestion": "Alocirajte preostalu površinu ili ispravite ukupnu površinu gradilišta."
+      },
+      "area_overlap": {
+        "fail": "Faza {stage}: dvije površine različitih vrsta se preklapaju.",
+        "suggestion": "Prilagodite obrise."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Prijavitelj ne odgovara onome tko prema incotermu obavlja carinjenje uvoza.",
+        "suggestion": "Provjerite prijavitelja ili incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} odobrenih isporuka počinje u satu od {hour}, koncept dopušta {limit}.",
+        "suggestion": "Premjestite isporuke na drugi sat ili povećajte ograničenje u konceptu."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Gradilište nema vremensku zonu, pa isporuke nisu uspoređene s radnim vremenom ulaza.",
+        "suggestion": "Postavite vremensku zonu gradilišta u logističkom konceptu."
+      },
+      "gate_limits_unknown": {
+        "fail": "Gradilišni ulaz {gate} ne navodi nikakva ograničenja opterećenja.",
+        "suggestion": "Unesite ograničenja težine i dimenzija."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: opterećenje premašuje ograničenja gradilišnog ulaza.",
+        "suggestion": "Koristite drugi ulaz ili podijelite teret."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: teški prijevoz bez odobrene dozvole.",
+        "suggestion": "Podnesite zahtjev za dozvolu."
+      },
+      "hs_code_invalid": {
+        "fail": "HS šifra {hs_code} nije valjana.",
+        "suggestion": "Koristite samo znamenke, najmanje u propisanoj duljini."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} vrijedi samo za pomorski prijevoz.",
+        "suggestion": "Za ostale načine prijevoza koristite FCA, CPT ili CIP."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} nije u pripnutoj verziji.",
+        "suggestion": "Odaberite uvjet iz pripnute verzije."
+      },
+      "jit_late": {
+        "fail": "{title}: isporuka just-in-time stiže nakon početka takta.",
+        "suggestion": "Premjestite isporuku ranije."
+      },
+      "jit_too_early": {
+        "fail": "{title}: isporuka just-in-time stiže ranije nego što to dopušta njezina rezerva.",
+        "suggestion": "Približite je početku takta."
+      },
+      "jit_without_location": {
+        "fail": "{title}: isporuka just-in-time toka {flow} ne navodi takt područje.",
+        "suggestion": "Odaberite takt područje za koje je isporuka namijenjena."
+      },
+      "media_capacity_short": {
+        "fail": "Faza {stage}: {media} treba {required}, ugovoreno je {contracted}.",
+        "suggestion": "Povećajte ugovoreni kapacitet ili smanjite potrebu."
+      },
+      "media_late": {
+        "fail": "Faza {stage}: priključak {media} obećan je nakon početka faze.",
+        "suggestion": "Dogovorite raniji datum ili privremenu opskrbu."
+      },
+      "media_unsourced": {
+        "fail": "Potreba za {media} nema priključak.",
+        "suggestion": "Dodijelite priključak."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Na pritužbu je trebalo odgovoriti do {due}.",
+        "suggestion": "Potvrdite primitak i odgovorite."
+      },
+      "permit_expired": {
+        "fail": "Dozvola {reference} je istekla, a prijevozi su još preostali.",
+        "suggestion": "Podnesite zahtjev za novu dozvolu."
+      },
+      "permit_expiring": {
+        "fail": "Dozvola {reference} uskoro ističe, a prijevozi su još preostali.",
+        "suggestion": "Produljite dozvolu."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: prozor pada u razdoblje mirovanja.",
+        "suggestion": "Premjestite ga izvan razdoblja mirovanja ili ishodite dozvolu za noćni rad."
+      },
+      "required_document_missing": {
+        "fail": "Nedostaje obavezni dokument {kind}.",
+        "suggestion": "Pribavite dokument i povežite ga."
+      },
+      "site_timezone_missing": {
+        "fail": "Gradilište nema vremensku zonu, pa pravila o dobu dana nisu provjerena.",
+        "suggestion": "Postavite vremensku zonu gradilišta u logističkom konceptu."
+      },
+      "stage_without_site_setup": {
+        "fail": "Faza {stage} nema površinu za uređenje gradilišta.",
+        "suggestion": "Alocirajte površinu za urede i sanitarne prostorije."
+      },
+      "stage_without_storage": {
+        "fail": "Faza {stage} nema skladišnu ili odlagališnu površinu.",
+        "suggestion": "Alocirajte skladišnu ili odlagališnu površinu."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: prozor je izvan dozvole.",
+        "suggestion": "Premjestite prozor ili produljite dozvolu."
+      },
+      "zone_not_mapped": {
+        "fail": "Skladišna zona {zone} nije povezana s gradilišnom površinom.",
+        "suggestion": "Povežite je s planiranom površinom."
+      }
+    }
+  }
+}

@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Ei",
+        "yes": "Jah"
+      },
+      "direction": {
+        "export": "Eksport",
+        "import": "Import",
+        "inbound": "Sissevedu",
+        "outbound": "Väljavedu"
+      },
+      "group": {
+        "built": "Ehitatud",
+        "external": "Väline",
+        "logistics": "Logistika",
+        "reserve": "Reserv"
+      },
+      "is_heavy": {
+        "no": "Ei",
+        "yes": "Jah"
+      },
+      "section": {
+        "balance": "Bilanss",
+        "concept": "Kontseptsioon",
+        "neighbourhood": "Naabruskond",
+        "readiness": "Valmisolek"
+      },
+      "short": {
+        "no": "Ei",
+        "yes": "Jah"
+      },
+      "state": {
+        "acknowledged": "Kinnitatud",
+        "action_taken": "Meede võetud",
+        "active": "Aktiivne",
+        "applied": "Taotletud",
+        "arrived": "Saabunud",
+        "authority": "Ametkond",
+        "cancelled": "Tühistatud",
+        "cleared": "Vormistatud",
+        "closed": "Suletud",
+        "connected": "Ühendatud",
+        "contracted": "Lepingus",
+        "declared": "Deklareeritud",
+        "disconnected": "Lahti ühendatud",
+        "documents_complete": "Dokumendid täielikud",
+        "draft": "Mustand",
+        "expired": "Aegunud",
+        "granted": "Välja antud",
+        "held": "Peatatud",
+        "identified": "Tuvastatud",
+        "in_transit": "Teel",
+        "missing": "Puudub",
+        "municipality": "Omavalitsus",
+        "neighbours": "Naabrid",
+        "offered": "Pakutud",
+        "open": "Avatud",
+        "other": "Muu",
+        "permit_pending": "Luba menetluses",
+        "planned": "Planeeritud",
+        "police": "Politsei",
+        "received": "Saadud",
+        "refused": "Keeldutud",
+        "requested": "Taotletud",
+        "scheduled": "Ajastatud",
+        "utility": "Võrguettevõtja",
+        "verified": "Kontrollitud"
+      },
+      "type": {
+        "complaint": "Kaebus",
+        "coordination": "Koordineerimine"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Graafiku tegevust ei leitud sellest projektist.",
+      "allocation_exceeds_area": "Jaotus on suurem kui ala.",
+      "allocation_negative": "Jaotus ei saa olla negatiivne.",
+      "allocations_changed": "Keegi teine muutis jaotusi. Laadige leht uuesti ja proovige uuesti.",
+      "area_not_found": "Ehitusala ei leitud.",
+      "authority_permit_not_found": "Ametkonna luba ei leitud sellest projektist.",
+      "buffer_days_negative": "Varupäevad ei saa olla negatiivsed.",
+      "catalogue_invalid": "Kinnitatud logistikakataloogi ei õnnestu lahendada.",
+      "catalogue_retired": "See kataloogiversioon on kasutusest kõrvaldatud.",
+      "code_required": "Kood on kohustuslik.",
+      "code_taken": "See kood on projektis juba kasutusel.",
+      "commodity_code_not_found": "Kaubakoodi ei leitud.",
+      "complaint_closed": "Suletud kaebust ei saa muuta.",
+      "complaint_not_found": "Kaebust ei leitud.",
+      "connection_point_invalid": "Ühenduspunkt ei ole kehtiv punkt.",
+      "contracted_capacity_required": "Sisestage kõigepealt lepinguline võimsus.",
+      "correspondence_not_found": "Kirjavahetust ei leitud sellest projektist.",
+      "correspondence_thread_not_found": "Kirjavahetust ei leitud sellest projektist.",
+      "country_invalid": "Kasutage kahetähelist ISO riigikoodi.",
+      "currency_invalid": "Kasutage kolmetähelist ISO valuutakoodi.",
+      "currency_required": "Summa vajab valuutat.",
+      "customs_case_not_found": "Tollitoimingut ei leitud.",
+      "customs_closed": "Vormistatud või suletud toimingut ei saa muuta.",
+      "customs_declared": "Deklareeritud toimingut ei saa kustutada.",
+      "customs_not_found": "Tollitoimingut ei leitud.",
+      "customs_without_lines": "Lisage kõigepealt vähemalt üks kaubarida.",
+      "declarant_invalid": "Deklarant on ostja või müüja.",
+      "delivery_already_on_site": "See tarne on juba saabunud ja seda ei otsustata uuesti.",
+      "delivery_not_found": "Tarnet ei leitud sellest projektist.",
+      "delivery_rate_exceeded": "Sellel tunnil on juba kontseptsiooniga lubatud arv tarneid.",
+      "delivery_refused": "Seda tarnet ei saa sellisel kujul kinnitada.",
+      "demand_not_found": "Vajadust ei leitud.",
+      "demand_owned_by_plant_position": "See vajadus tuleneb masinapositsioonist; muutke seda seal.",
+      "direction_invalid": "Tundmatu suund.",
+      "document_exists": "See dokument on juba kontrollnimekirjas.",
+      "document_not_found": "Dokumenti ei leitud.",
+      "document_ref_required": "Enne saadud märkimist siduge dokument.",
+      "duplicate_stage": "Iga etapi saab ala kohta jaotada üks kord.",
+      "entry_not_found": "Logikirjet ei leitud.",
+      "field_required": "See väli ei tohi olla tühi.",
+      "flow_code_invalid": "Igal materjalivool peab olema oma kood.",
+      "flow_code_unknown": "Logistikakontseptsioonis ei ole sellise koodiga materjalivoogu.",
+      "flow_mode_invalid": "Tundmatu materjalivoo režiim.",
+      "frame_invalid": "Tundmatu koordinaatsüsteem.",
+      "gate_hours_unchecked": "Avamisaegu ei kontrollita enne, kui ehitusplatsi ajavöönd on määratud.",
+      "gate_load_exceeded": "Koormus ületab ehitusplatsi sissepääsu piirmäärad.",
+      "gate_not_found": "Ehitusplatsi sissepääsu ei leitud sellest projektist.",
+      "geo_overlay_not_found": "Ehitusplaani kattekihti ei leitud sellest projektist.",
+      "geometry_invalid": "Ala piirjoon ei ole kehtiv hulknurk.",
+      "goods_receipt_missing": "Sellele ostutellimusele ei ole veel kinnitatud kaubasaadetise vastuvõttu.",
+      "heavy_without_permit": "Raskeveok vajab enne ajastamist välja antud luba.",
+      "hours_invalid": "Sisestage kehtivad kellaajad, lõpp pärast algust.",
+      "hs_code_invalid": "HS-kood peab koosnema ainult numbritest ja olema piisavalt pikk.",
+      "incoterm_unknown": "See Incoterm ei ole kinnitatud versioonis.",
+      "invalid_transition": "Seda staatuse muutmist ei lubata.",
+      "jit_without_takt": "Täpselt õigeks ajaks tarne vajab takti-graafikut.",
+      "last_stage": "Projektis peab jääma vähemalt üks laiendusetapp.",
+      "line_not_found": "Tollirida ei leitud.",
+      "link_target_unavailable": "Seda linki ei saa veel kontrollida, sest moodul, millele see viitab, ei ole paigaldatud.",
+      "media_not_found": "Kommunaalühendust ei leitud.",
+      "money_not_decimal": "Sisestage summa kümnendarvuna.",
+      "money_out_of_range": "Sisestage summa, millel on kõige rohkem kaks kümnendkohta.",
+      "noise_limit_needs_project_value": "See jurisdiktsioon ei sea kindlaid väärtusi; sisestage projekti kokkulepitud väärtused.",
+      "not_found": "Ei leitud.",
+      "outside_gate_hours": "Aken jääb väravaga tööaja välisele ajale.",
+      "owner_not_member": "Omanik peab olema selle projekti liige.",
+      "pack_catalogue_invalid": "Paketi kataloogi ei õnnestu laadida.",
+      "permission_denied": "Teil ei ole selleks õigust.",
+      "permit_frozen": "Välja antud, keeldutud või aegunud luba säilitab oma kehtivuse, aknad ja veod.",
+      "permit_not_found": "Luba ei leitud.",
+      "plan_calibration_without_image": "Enne mõõtkava määramist valige ehitusplaani pilt.",
+      "plan_document_not_found": "Ehitusplaani dokumenti ei leitud sellest projektist.",
+      "plan_origin_invalid": "Ehitusplaani alguspunkt on kaks arvu, x ja y pikslites.",
+      "plan_scale_invalid": "Ehitusplaani mõõtkava peab olema suurem kui null.",
+      "plant_item_not_found": "Masinaüksust ei leitud sellest projektist.",
+      "plant_position_not_found": "Masinapositsiooni ei leitud sellest projektist.",
+      "plant_position_required": "Vajalik on masinapositsioon.",
+      "po_not_found": "Ostutellimust ei leitud sellest projektist.",
+      "project_not_found": "Projekti ei leitud.",
+      "quiet_hours_conflict": "Aken jääb vaikse aja sisse ja seda ei kata öötöö luba.",
+      "required_document_missing": "Nõutav dokument on veel puudu.",
+      "response_required": "Kirjutage kõigepealt vastus.",
+      "route_invalid": "Marsruut ei ole kehtiv joon.",
+      "simultaneity_factor_range": "Samaaegsustegur on vahemikus 0 kuni 1.",
+      "site_timezone_missing": "Määrake kõigepealt ehitusplatsi ajavöönd; kellaaegu kontrollitakse platsi kella järgi.",
+      "slot_taken": "Värava selle akna on hõivanud teine kinnitatud tarne.",
+      "stage_active": "Aktiivset etappi ei saa kustutada. Sulgege see kõigepealt.",
+      "stage_not_found": "Laiendusetappi ei leitud.",
+      "takt_location_not_found": "Takti-ala ei leitud sellest projektist.",
+      "takt_schedule_not_found": "Takti-graafikut ei leitud sellest projektist.",
+      "timezone_invalid": "Tundmatu ajavöönd. Kasutage nime, näiteks Europe/Tallinn.",
+      "transport_closed": "Suletud või tühistatud veodet ei saa muuta.",
+      "transport_mode_invalid": "Tundmatu transpordiviis.",
+      "transport_not_found": "Veodet ei leitud.",
+      "transport_under_way": "Teel olevat veodet ei saa kustutada.",
+      "unknown_area_kind": "Tundmatu ala liik.",
+      "unknown_catalogue": "Tundmatu kataloog.",
+      "unknown_document_kind": "Tundmatu dokumendi liik.",
+      "unknown_issue_kind": "Tundmatu kaebuse liik.",
+      "unknown_link_kind": "Sellist linki liiki nimekiri ei sisalda.",
+      "unknown_load_class": "Tundmatu koormusklass.",
+      "unknown_media_kind": "Tundmatu kommunaalteenus.",
+      "unknown_noise_limit": "Tundmatu mürapiirangu kirje.",
+      "unknown_permit_kind": "Tundmatu loa liik.",
+      "unknown_transport_kind": "Tundmatu veo liik.",
+      "validity_invalid": "Luba lõpeb enne alguskuupäeva.",
+      "validity_required": "Enne väljaandmist sisestage kehtivuskuupäevad.",
+      "vendor_not_found": "Tarnijat ei leitud.",
+      "window_invalid": "Ajaaken ei ole kehtiv.",
+      "window_outside_permit": "Veoaken jääb väljaspool loa kehtivust või lubatud aegu.",
+      "zone_not_found": "Ladustamisala ei leitud sellest projektist.",
+      "zone_type_invalid": "Tundmatu ala tüüp."
+    },
+    "evidence": {
+      "balance_closed": "Alabilanss on suletud iga avatud etapi jaoks",
+      "concept_saved_and_exported": "Logistikakontseptsioon on salvestatud ja arhiveeritud",
+      "first_stage_media_contracted": "Esimese etapi kommunaalteenused on lepingus",
+      "gate_loads_admitted": "Iga koormus on sissepääsu poolt lubatud või kaetud ülegabariidiloaga",
+      "heavy_transports_permitted": "Iga raskeveo jaoks on luba välja antud",
+      "neighbourhood_limit_source": "Mürapiirangu allikas on määratud",
+      "no_errors": "Logistikaveasid ei ole avatud",
+      "unresolved": "Logistikaplaani ei õnnestunud paigutada juhtimismudelisse"
+    },
+    "export": {
+      "as_of": "Seisuga",
+      "col_area_kind": "Ala liik",
+      "col_closed": "Suletud",
+      "col_contracted": "Lepingus",
+      "col_date": "Kuupäev",
+      "col_direction": "Suund",
+      "col_documents": "Nõutavad dokumendid",
+      "col_due": "Tähtaeg",
+      "col_group": "Grupp",
+      "col_heavy": "Raske",
+      "col_hs_codes": "HS-koodid",
+      "col_incoterm": "Incoterm",
+      "col_item": "Üksus",
+      "col_m2": "m2",
+      "col_media_kind": "Kommunaalteenus",
+      "col_named_place": "Nimetatud koht",
+      "col_pct": "%",
+      "col_permits": "Load",
+      "col_required": "Nõutud",
+      "col_section": "Jaotis",
+      "col_short": "Lühike",
+      "col_stage": "Etapp",
+      "col_state": "Staatus",
+      "col_title": "Pealkiri",
+      "col_topic": "Teema",
+      "col_transport_kind": "Liik",
+      "col_type": "Tüüp",
+      "col_unit": "Ühik",
+      "col_value": "Väärtus",
+      "col_window": "Aken",
+      "empty": "Kirjeid ei ole.",
+      "project": "Projekt",
+      "title_balance": "Alabilanss",
+      "title_customs": "Tollitoimingute registri loend",
+      "title_frame": "Logistikaraamistiku kokkuvõte",
+      "title_media": "Kommunaalteenuste bilanss",
+      "title_neighbourhood": "Naabruskonna logi",
+      "title_transports": "Veod ja load"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Etapp {stage}: jaotus on suurem kui selle ala.",
+        "suggestion": "Vähendage jaotust."
+      },
+      "area_balance_not_closed": {
+        "fail": "Etapp {stage}: alabilanss ei klapi (erinevus {difference_m2} m2).",
+        "suggestion": "Jaotage ülejäänud ala või parandage ehitusplatsi kogupindala."
+      },
+      "area_overlap": {
+        "fail": "Etapp {stage}: kaks erinevat liiki ala kattuvad.",
+        "suggestion": "Reguleerige piirjooni."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Deklarant ei vasta sellele, kes Incoterm'i järgi impordi tollivormistust teeb.",
+        "suggestion": "Kontrollige deklaranti või Incoterm'i."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} kinnitatud tarnet algavad tunnis alates kell {hour}, kontseptsioon lubab {limit}.",
+        "suggestion": "Viige tarned teisele tunnile või tõstke limiiti kontseptsioonis."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Ehitusplatsil ei ole ajavööndit, seetõttu ei võrreldud tarneid avamisaegadega.",
+        "suggestion": "Määrake ehitusplatsi ajavöönd logistikakontseptsioonis."
+      },
+      "gate_limits_unknown": {
+        "fail": "Ehitusplatsi sissepääs {gate} ei näita koormuspiiranguid.",
+        "suggestion": "Sisestage kaalu- ja mõõtmepiirangud."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: koormus ületab ehitusplatsi sissepääsu piirmäärad.",
+        "suggestion": "Kasutage teist sissepääsu või jagage koormus."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: raskeveok ilma välja antud looata.",
+        "suggestion": "Taotlege luba."
+      },
+      "hs_code_invalid": {
+        "fail": "HS-kood {hs_code} ei ole kehtiv.",
+        "suggestion": "Kasutage ainult numbreid, vähemalt minimaalse pikkusega."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} on ette nähtud ainult merevedudeks.",
+        "suggestion": "Muude transpordiviiside korral kasutage FCA, CPT või CIP."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} ei ole kinnitatud versioonis.",
+        "suggestion": "Valige kinnitatud versiooni termin."
+      },
+      "jit_late": {
+        "fail": "{title}: täpselt õigeks ajaks tarne saabub pärast takti algust.",
+        "suggestion": "Viige tarne varasemaks."
+      },
+      "jit_too_early": {
+        "fail": "{title}: täpselt õigeks ajaks tarne saabub varem, kui tema varu lubab.",
+        "suggestion": "Viige see takti algusele lähemale."
+      },
+      "jit_without_location": {
+        "fail": "{title}: voo {flow} täpselt õigeks ajaks tarne ei nimeta takti-ala.",
+        "suggestion": "Valige takti-ala, kellele tarne on mõeldud."
+      },
+      "media_capacity_short": {
+        "fail": "Etapp {stage}: {media} vajab {required}, lepingus on {contracted}.",
+        "suggestion": "Suurendage lepingulist võimsust või vähendage vajadust."
+      },
+      "media_late": {
+        "fail": "Etapp {stage}: {media} ühendus on lubatud pärast etapi algust.",
+        "suggestion": "Leppige kokku varasem tähtaeg või ajutine varustus."
+      },
+      "media_unsourced": {
+        "fail": "Vajadusel {media} puudub ühendus.",
+        "suggestion": "Määrake ühendus."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Kaebusele pidi vastus olema {due}.",
+        "suggestion": "Kinnitage kaebuse saamine ja vastake sellele."
+      },
+      "permit_expired": {
+        "fail": "Luba {reference} on aegunud, kuid veod on veel tegemata.",
+        "suggestion": "Taotlege uus luba."
+      },
+      "permit_expiring": {
+        "fail": "Luba {reference} aegub peagi, kuid veod on veel tegemata.",
+        "suggestion": "Pikendage luba."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: aken jääb vaikse aja sisse.",
+        "suggestion": "Viige see vaikse aja välisele ajale või hankige öötöö luba."
+      },
+      "required_document_missing": {
+        "fail": "Nõutav dokument {kind} puudub.",
+        "suggestion": "Hankige dokument ja siduge see."
+      },
+      "site_timezone_missing": {
+        "fail": "Ehitusplatsil ei ole ajavööndit, seetõttu ei kontrollitud päevaajareegleid.",
+        "suggestion": "Määrake ehitusplatsi ajavöönd logistikakontseptsioonis."
+      },
+      "stage_without_site_setup": {
+        "fail": "Etapil {stage} puudub ehitusplatsi rajatiste ala.",
+        "suggestion": "Jaotage ala kontorite ja sotsiaalruumide jaoks."
+      },
+      "stage_without_storage": {
+        "fail": "Etapil {stage} puudub ladustus- või ajutise ladustusala.",
+        "suggestion": "Jaotage ladustus- või ajutise ladustusala."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: aken jääb väljapool luba.",
+        "suggestion": "Viige aken teisele ajale või pikendage luba."
+      },
+      "zone_not_mapped": {
+        "fail": "Ajutise ladustusala {zone} ei ole seotud ehitusplatsi alaga.",
+        "suggestion": "Siduge see kavandatud alaga."
+      }
+    }
+  }
+}

@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "אישור"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "לא",
+        "yes": "כן"
+      },
+      "direction": {
+        "export": "יצוא",
+        "import": "יבוא",
+        "inbound": "הגעה",
+        "outbound": "יציאה"
+      },
+      "group": {
+        "built": "בנוי",
+        "external": "חיצוני",
+        "logistics": "לוגיסטיקה",
+        "reserve": "שמור"
+      },
+      "is_heavy": {
+        "no": "לא",
+        "yes": "כן"
+      },
+      "section": {
+        "balance": "מאזן",
+        "concept": "קונספט",
+        "neighbourhood": "סביבה",
+        "readiness": "מוכנות"
+      },
+      "short": {
+        "no": "לא",
+        "yes": "כן"
+      },
+      "state": {
+        "acknowledged": "אושר קבלה",
+        "action_taken": "בוצעה פעולה",
+        "active": "פעיל",
+        "applied": "הוגשה בקשה",
+        "arrived": "הגיע",
+        "authority": "רשות",
+        "cancelled": "בוטל",
+        "cleared": "שוחרר מהמכס",
+        "closed": "סגור",
+        "connected": "מחובר",
+        "contracted": "מובטח בחוזה",
+        "declared": "הוצהר",
+        "disconnected": "מנותק",
+        "documents_complete": "המסמכים שלמים",
+        "draft": "טיוטה",
+        "expired": "פג תוקף",
+        "granted": "אושר",
+        "held": "נעצר",
+        "identified": "זוהה",
+        "in_transit": "בדרך",
+        "missing": "חסר",
+        "municipality": "עירייה",
+        "neighbours": "שכנים",
+        "offered": "הוצע",
+        "open": "פתוח",
+        "other": "אחר",
+        "permit_pending": "היתר בהמתנה",
+        "planned": "מתוכנן",
+        "police": "משטרה",
+        "received": "התקבל",
+        "refused": "נדחה",
+        "requested": "התבקש",
+        "scheduled": "מתוזמן",
+        "utility": "תשתית",
+        "verified": "אומת"
+      },
+      "type": {
+        "complaint": "תלונה",
+        "coordination": "תיאום"
+      }
+    },
+    "errors": {
+      "activity_not_found": "פעילות הלוח לא נמצאה בפרויקט זה.",
+      "allocation_exceeds_area": "ההקצאה גדולה משטח האזור.",
+      "allocation_negative": "הקצאה לא יכולה להיות שלילית.",
+      "allocations_changed": "ההקצאות שונו על ידי משתמש אחר. יש לטעון מחדש ולנסות שוב.",
+      "area_not_found": "אזור האתר לא נמצא.",
+      "authority_permit_not_found": "היתר הרשות לא נמצא בפרויקט זה.",
+      "buffer_days_negative": "ימי מרווח לא יכולים להיות שליליים.",
+      "catalogue_invalid": "לא ניתן לפענח את קטלוג הלוגיסטיקה המוצמד.",
+      "catalogue_retired": "גרסת קטלוג זו הוצאה משימוש.",
+      "code_required": "נדרש קוד.",
+      "code_taken": "קוד זה כבר בשימוש בפרויקט.",
+      "commodity_code_not_found": "קוד הסחורה לא נמצא.",
+      "complaint_closed": "לא ניתן לשנות תלונה סגורה.",
+      "complaint_not_found": "התלונה לא נמצאה.",
+      "connection_point_invalid": "נקודת החיבור אינה נקודה תקינה.",
+      "contracted_capacity_required": "יש להזין תחילה את הקיבולת המובטחת בחוזה.",
+      "correspondence_not_found": "הכתבה לא נמצאה בפרויקט זה.",
+      "correspondence_thread_not_found": "הכתבה לא נמצאה בפרויקט זה.",
+      "country_invalid": "יש להשתמש בקוד מדינה ISO בן שתי אותיות.",
+      "currency_invalid": "יש להשתמש בקוד מטבע ISO בן שלוש אותיות.",
+      "currency_required": "לסכום נדרש מטבע.",
+      "customs_case_not_found": "תיק המכס לא נמצא.",
+      "customs_closed": "לא ניתן לשנות תיק ששוחרר או נסגר.",
+      "customs_declared": "לא ניתן למחוק תיק שהוצהר.",
+      "customs_not_found": "תיק המכס לא נמצא.",
+      "customs_without_lines": "יש להוסיף תחילה לפחות שורת סחורה אחת.",
+      "declarant_invalid": "המצהיר הוא הקונה או המוכר.",
+      "delivery_already_on_site": "המשלוח כבר הגיע ואינו מוחלט מחדש.",
+      "delivery_not_found": "המשלוח לא נמצא בפרויקט זה.",
+      "delivery_rate_exceeded": "בשעה זו כבר מתוכנן מספר המשלוחים שהקונספט מתיר.",
+      "delivery_refused": "לא ניתן לאשר משלוח זה במצבו הנוכחי.",
+      "demand_not_found": "הביקוש לא נמצא.",
+      "demand_owned_by_plant_position": "הביקוש הזה נובע מפריט ציוד; יש לשנות אותו שם.",
+      "direction_invalid": "כיוון לא ידוע.",
+      "document_exists": "המסמך כבר נמצא ברשימת הבדיקה.",
+      "document_not_found": "המסמך לא נמצא.",
+      "document_ref_required": "יש לקשר את המסמך לפני סימונו כמתקבל.",
+      "duplicate_stage": "כל שלב הרחבה ניתן להקצאה פעם אחת בלבד לכל אזור.",
+      "entry_not_found": "רשומת היומן לא נמצאה.",
+      "field_required": "שדה זה לא יכול להיות ריק.",
+      "flow_code_invalid": "לכל זרם חומרים נדרש קוד משלו.",
+      "flow_code_unknown": "לקונספט הלוגיסטי אין זרם חומרים עם קוד זה.",
+      "flow_mode_invalid": "מצב זרם חומרים לא ידוע.",
+      "frame_invalid": "מערכת קואורדינטות לא ידועה.",
+      "gate_hours_unchecked": "שעות הפתיחה לא ייבדקו עד שאזור הזמן של האתר יוגדר.",
+      "gate_load_exceeded": "המטען חורג מהמגבלות של שער האתר.",
+      "gate_not_found": "שער האתר לא נמצא בפרויקט זה.",
+      "geo_overlay_not_found": "שכבת תוכנית האתר לא נמצאה בפרויקט זה.",
+      "geometry_invalid": "קו המתאר של האזור אינו מצולע תקין.",
+      "goods_receipt_missing": "עדיין אין קבלת סחורה מאושרת להזמנת רכש זו.",
+      "heavy_without_permit": "הובלה כבדה דורשת היתר שאושר לפני תזמונה.",
+      "hours_invalid": "יש להזין שעות תקינות, כאשר הסיום אחרי ההתחלה.",
+      "hs_code_invalid": "קוד HS חייב להכיל ספרות בלבד ולהיות ארוך מספיק.",
+      "incoterm_unknown": "תנאי מסחר בינלאומי זה אינו נמצא בגרסה המוצמדת.",
+      "invalid_transition": "שינוי סטטוס זה אינו מותר.",
+      "jit_without_takt": "זרם בזמן-אמת דורש לוח טאקט.",
+      "last_stage": "בפרויקט נשמר לפחות שלב הרחבה אחד.",
+      "line_not_found": "שורת המכס לא נמצאה.",
+      "link_target_unavailable": "לא ניתן לבדוק קישור זה עדיין, המודול שאליו הוא מפנה אינו מותקן.",
+      "media_not_found": "חיבור התשתית לא נמצא.",
+      "money_not_decimal": "יש להזין את הסכום כמספר עשרוני.",
+      "money_out_of_range": "יש להזין סכום עם עד שתי ספרות אחרי הנקודה העשרונית.",
+      "noise_limit_needs_project_value": "תחום שיפוט זה אינו קובע ערכים קבועים; יש להזין את הערכים שאושרו לפרויקט.",
+      "not_found": "לא נמצא.",
+      "outside_gate_hours": "חלון הזמן נמצא מחוץ לשעות הפתיחה של השער.",
+      "owner_not_member": "האחראי חייב להיות חבר בפרויקט זה.",
+      "pack_catalogue_invalid": "קטלוג החבילה אינו נטען.",
+      "permission_denied": "אין לך הרשאה לכך.",
+      "permit_frozen": "היתר שאושר, נדחה או פג תוקפו שומר על תוקפו, על חלונות הזמן ועל ההובלות שלו.",
+      "permit_not_found": "ההיתר לא נמצא.",
+      "plan_calibration_without_image": "יש לבחור תחילה את תמונת תוכנית האתר לפני קביעת קנה המידה שלה.",
+      "plan_document_not_found": "מסמך תוכנית האתר לא נמצא בפרויקט זה.",
+      "plan_origin_invalid": "ראשית הצירים של תוכנית האתר היא שני מספרים, x ו-y בפיקסלים.",
+      "plan_scale_invalid": "קנה המידה של תוכנית האתר חייב להיות גדול מאפס.",
+      "plant_item_not_found": "פריט הציוד לא נמצא בפרויקט זה.",
+      "plant_position_not_found": "פריט הציוד בפרויקט זה לא נמצא.",
+      "plant_position_required": "נדרש פריט ציוד.",
+      "po_not_found": "הזמנת הרכש לא נמצאה בפרויקט זה.",
+      "project_not_found": "הפרויקט לא נמצא.",
+      "quiet_hours_conflict": "חלון הזמן נופל בשעות השקט ואין היתר עבודת לילה שמכסה אותו.",
+      "required_document_missing": "מסמך נדרש עדיין חסר.",
+      "response_required": "יש לכתוב תחילה את התשובה.",
+      "route_invalid": "המסלול אינו קו תקין.",
+      "simultaneity_factor_range": "מקדם הסימולטניות חייב להיות בין 0 ל-1.",
+      "site_timezone_missing": "יש להגדיר תחילה את אזור הזמן של האתר; השעות נבדקות לפי שעון האתר.",
+      "slot_taken": "משלוח מאושר אחר תופס חלון זמן זה בשער.",
+      "stage_active": "לא ניתן למחוק שלב הרחבה פעיל. יש לסגור אותו תחילה.",
+      "stage_not_found": "שלב ההרחבה לא נמצא.",
+      "takt_location_not_found": "אזור הטאקט לא נמצא בפרויקט זה.",
+      "takt_schedule_not_found": "לוח הטאקט לא נמצא בפרויקט זה.",
+      "timezone_invalid": "אזור זמן לא ידוע. יש להשתמש בשם כמו Asia/Jerusalem.",
+      "transport_closed": "לא ניתן לשנות הובלה שנסגרה או בוטלה.",
+      "transport_mode_invalid": "אמצעי הובלה לא ידוע.",
+      "transport_not_found": "ההובלה לא נמצאה.",
+      "transport_under_way": "לא ניתן למחוק הובלה שנמצאת בדרך.",
+      "unknown_area_kind": "סוג אזור לא ידוע.",
+      "unknown_catalogue": "קטלוג לא ידוע.",
+      "unknown_document_kind": "סוג מסמך לא ידוע.",
+      "unknown_issue_kind": "סוג תלונה לא ידוע.",
+      "unknown_link_kind": "אין רשימה לסוג קישור זה.",
+      "unknown_load_class": "מחלקת עומס לא ידועה.",
+      "unknown_media_kind": "תשתית לא ידועה.",
+      "unknown_noise_limit": "רשומת מגבלת רעש לא ידועה.",
+      "unknown_permit_kind": "סוג היתר לא ידוע.",
+      "unknown_transport_kind": "סוג הובלה לא ידוע.",
+      "validity_invalid": "ההיתר מסתיים לפני שהתחיל.",
+      "validity_required": "יש להזין תאריכי תוקף לפני האישור.",
+      "vendor_not_found": "הספק לא נמצא.",
+      "window_invalid": "חלון הזמן אינו תקין.",
+      "window_outside_permit": "חלון ההובלה נמצא מחוץ לתוקף ההיתר או לשעות המותרות לו.",
+      "zone_not_found": "אזור האחסון לא נמצא בפרויקט זה.",
+      "zone_type_invalid": "סוג אזור לא ידוע."
+    },
+    "evidence": {
+      "balance_closed": "מאזן השטחים נסגר לכל שלב פתוח",
+      "concept_saved_and_exported": "קונספט הלוגיסטיקה נשמר והועבר לתיוק",
+      "first_stage_media_contracted": "התשתיות לשלב הראשון מובטחות בחוזה",
+      "gate_loads_admitted": "כל מטען אושר על ידי השער שלו או מכוסה בהיתר מידות חריגות",
+      "heavy_transports_permitted": "היתר אושר לכל הובלה כבדה",
+      "neighbourhood_limit_source": "מקור מגבלת הרעש הוגדר",
+      "no_errors": "אין שגיאות לוגיסטיקה פתוחות",
+      "unresolved": "תוכנית הלוגיסטיקה לא הצליחה להשתלב במודל הניהול"
+    },
+    "export": {
+      "as_of": "נכון ל",
+      "col_area_kind": "סוג אזור",
+      "col_closed": "סגור",
+      "col_contracted": "מובטח",
+      "col_date": "תאריך",
+      "col_direction": "כיוון",
+      "col_documents": "מסמכים נדרשים",
+      "col_due": "תאריך יעד",
+      "col_group": "קבוצה",
+      "col_heavy": "כבד",
+      "col_hs_codes": "קודי HS",
+      "col_incoterm": "תנאי מסחר",
+      "col_item": "פריט",
+      "col_m2": "מ״ר",
+      "col_media_kind": "תשתית",
+      "col_named_place": "מקום מזוהה",
+      "col_pct": "%",
+      "col_permits": "היתרים",
+      "col_required": "נדרש",
+      "col_section": "סעיף",
+      "col_short": "חוסר",
+      "col_stage": "שלב",
+      "col_state": "סטטוס",
+      "col_title": "כותרת",
+      "col_topic": "נושא",
+      "col_transport_kind": "סוג",
+      "col_type": "סוג",
+      "col_unit": "יחידה",
+      "col_value": "ערך",
+      "col_window": "חלון זמן",
+      "empty": "אין רשומות.",
+      "project": "פרויקט",
+      "title_balance": "מאזן שטחים",
+      "title_customs": "אינדקס תיקי מכס",
+      "title_frame": "סיכום מסגרת הלוגיסטיקה",
+      "title_media": "מאזן תשתיות",
+      "title_neighbourhood": "יומן סביבה",
+      "title_transports": "הובלות והיתרים"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "שלב {stage}: הקצאה אחת גדולה משטחה.",
+        "suggestion": "יש להקטין את ההקצאה."
+      },
+      "area_balance_not_closed": {
+        "fail": "שלב {stage}: מאזן השטחים אינו נסגר (הפרש של {difference_m2} מ״ר).",
+        "suggestion": "יש להקצות את השטח שנותר או לתקן את סך השטח של האתר."
+      },
+      "area_overlap": {
+        "fail": "שלב {stage}: שני אזורים מסוגים שונים חופפים.",
+        "suggestion": "יש לכוונן את קווי המתאר."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "המצהיר אינו תואם את מי שמשחרר את היבוא לפי תנאי המסחר.",
+        "suggestion": "יש לבדוק את המצהיר או את תנאי המסחר."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} משלוחים מאושרים מתחילים בשעה שמתחילה ב-{hour}, הקונספט מתיר {limit}.",
+        "suggestion": "יש להעביר משלוחים לשעה אחרת או להעלות את המגבלה בקונספט."
+      },
+      "gate_hours_unchecked": {
+        "fail": "לאתר אין אזור זמן, ולכן המשלוחים לא הושוו לשעות הפתיחה.",
+        "suggestion": "יש להגדיר את אזור הזמן של האתר בקונספט הלוגיסטיקה."
+      },
+      "gate_limits_unknown": {
+        "fail": "לשער האתר {gate} אין מגבלות עומס מוגדרות.",
+        "suggestion": "יש להזין את מגבלות המשקל והמידות."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: המטען חורג מהמגבלות של שער האתר.",
+        "suggestion": "יש להשתמש בשער אחר או לפצל את המטען."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: הובלה כבדה ללא היתר שאושר.",
+        "suggestion": "יש להגיש בקשה להיתר."
+      },
+      "hs_code_invalid": {
+        "fail": "קוד HS {hs_code} אינו תקין.",
+        "suggestion": "יש להשתמש בספרות בלבד, באורך המינימלי לפחות."
+      },
+      "incoterm_sea_only": {
+        "fail": "תנאי המסחר {incoterm} מיועד להובלה ימית בלבד.",
+        "suggestion": "לאמצעי הובלה אחרים יש להשתמש ב-FCA, CPT או CIP."
+      },
+      "incoterm_unknown": {
+        "fail": "תנאי המסחר {incoterm} אינו נמצא בגרסה המוצמדת.",
+        "suggestion": "יש לבחור תנאי מהגרסה המוצמדת."
+      },
+      "jit_late": {
+        "fail": "{title}: משלוח בזמן-אמת מגיע אחרי תחילת הטאקט.",
+        "suggestion": "יש להקדים את המשלוח."
+      },
+      "jit_too_early": {
+        "fail": "{title}: משלוח בזמן-אמת מגיע מוקדם יותר ממה שהמרווח מאפשר.",
+        "suggestion": "יש לקרב אותו לתחילת הטאקט."
+      },
+      "jit_without_location": {
+        "fail": "{title}: משלוח בזמן-אמת של הזרם {flow} אינו מציין אזור טאקט.",
+        "suggestion": "יש לבחור את אזור הטאקט שאליו מיועד המשלוח."
+      },
+      "media_capacity_short": {
+        "fail": "שלב {stage}: {media} דורש {required}, מובטחים {contracted}.",
+        "suggestion": "יש להעלות את הקיבולת המובטחת או להפחית את הביקוש."
+      },
+      "media_late": {
+        "fail": "שלב {stage}: חיבור {media} מובטח לאחר תחילת השלב.",
+        "suggestion": "יש להסכים על מועד מוקדם יותר או על אספקה זמנית."
+      },
+      "media_unsourced": {
+        "fail": "לביקוש ל-{media} אין חיבור.",
+        "suggestion": "יש לשייך חיבור."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "תלונה נדרשה לתשובה עד {due}.",
+        "suggestion": "יש לאשר קבלה ולענות."
+      },
+      "permit_expired": {
+        "fail": "ההיתר {reference} פג תוקף בזמן שנותרו הובלות.",
+        "suggestion": "יש להגיש בקשה להיתר חדש."
+      },
+      "permit_expiring": {
+        "fail": "ההיתר {reference} עומד לפוג בקרוב בזמן שנותרו הובלות.",
+        "suggestion": "יש להאריך את ההיתר."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: חלון הזמן נופל בשעות השקט.",
+        "suggestion": "יש להעביר אותו מחוץ לשעות השקט או לקבל היתר עבודת לילה."
+      },
+      "required_document_missing": {
+        "fail": "המסמך הנדרש {kind} חסר.",
+        "suggestion": "יש להשיג את המסמך ולקשר אותו."
+      },
+      "site_timezone_missing": {
+        "fail": "לאתר אין אזור זמן, ולכן כללי שעות היום לא נבדקו.",
+        "suggestion": "יש להגדיר את אזור הזמן של האתר בקונספט הלוגיסטיקה."
+      },
+      "stage_without_site_setup": {
+        "fail": "לשלב {stage} אין שטח הקמת אתר.",
+        "suggestion": "יש להקצות שטח למשרדים ולמתקני רווחה."
+      },
+      "stage_without_storage": {
+        "fail": "לשלב {stage} אין שטח אחסון או פריקה.",
+        "suggestion": "יש להקצות שטח אחסון או פריקה."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: חלון הזמן נמצא מחוץ להיתר.",
+        "suggestion": "יש להזיז את חלון הזמן או להאריך את ההיתר."
+      },
+      "zone_not_mapped": {
+        "fail": "אזור האחסון {zone} אינו מקושר לשטח אתר.",
+        "suggestion": "יש לקשר אותו לשטח המתוכנן שלו."
+      }
+    }
+  }
+}

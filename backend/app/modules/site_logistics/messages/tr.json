@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "Tamam"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Hayır",
+        "yes": "Evet"
+      },
+      "direction": {
+        "export": "İhracat",
+        "import": "İthalat",
+        "inbound": "Gelen",
+        "outbound": "Giden"
+      },
+      "group": {
+        "built": "İnşa edilmiş",
+        "external": "Dış",
+        "logistics": "Lojistik",
+        "reserve": "Yedek"
+      },
+      "is_heavy": {
+        "no": "Hayır",
+        "yes": "Evet"
+      },
+      "section": {
+        "balance": "Denge",
+        "concept": "Konsept",
+        "neighbourhood": "Çevre",
+        "readiness": "Hazırlık"
+      },
+      "short": {
+        "no": "Hayır",
+        "yes": "Evet"
+      },
+      "state": {
+        "acknowledged": "Onaylandı",
+        "action_taken": "Önlem alındı",
+        "active": "Aktif",
+        "applied": "Başvuruldu",
+        "arrived": "Ulaştı",
+        "authority": "Yetkili makam",
+        "cancelled": "İptal edildi",
+        "cleared": "Gümrükten çıktı",
+        "closed": "Kapatıldı",
+        "connected": "Bağlandı",
+        "contracted": "Sözleşmeye bağlandı",
+        "declared": "Beyan edildi",
+        "disconnected": "Bağlantı kesildi",
+        "documents_complete": "Belgeler tamam",
+        "draft": "Taslak",
+        "expired": "Süresi doldu",
+        "granted": "Verildi",
+        "held": "Beklemede",
+        "identified": "Belirlendi",
+        "in_transit": "Yolda",
+        "missing": "Eksik",
+        "municipality": "Belediye",
+        "neighbours": "Komşular",
+        "offered": "Teklif edildi",
+        "open": "Açık",
+        "other": "Diğer",
+        "permit_pending": "İzin beklemede",
+        "planned": "Planlandı",
+        "police": "Polis",
+        "received": "Teslim alındı",
+        "refused": "Reddedildi",
+        "requested": "Talep edildi",
+        "scheduled": "Programlandı",
+        "utility": "Altyapı kurumu",
+        "verified": "Doğrulandı"
+      },
+      "type": {
+        "complaint": "Şikâyet",
+        "coordination": "Koordinasyon"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Bu projede iş programı faaliyeti bulunamadı.",
+      "allocation_exceeds_area": "Tahsis, alandan daha büyük.",
+      "allocation_negative": "Tahsis negatif olamaz.",
+      "allocations_changed": "Tahsisler başka biri tarafından değiştirildi. Yeniden yükleyip tekrar deneyin.",
+      "area_not_found": "Saha alanı bulunamadı.",
+      "authority_permit_not_found": "Bu projede yetkili makam izni bulunamadı.",
+      "buffer_days_negative": "Tampon günleri negatif olamaz.",
+      "catalogue_invalid": "Sabitlenmiş lojistik kataloğu çözümlenemiyor.",
+      "catalogue_retired": "Bu katalog sürümü kullanımdan kaldırıldı.",
+      "code_required": "Bir kod gereklidir.",
+      "code_taken": "Bu kod projede zaten kullanılıyor.",
+      "commodity_code_not_found": "Emtia kodu bulunamadı.",
+      "complaint_closed": "Kapatılmış bir şikâyet değiştirilemez.",
+      "complaint_not_found": "Şikâyet bulunamadı.",
+      "connection_point_invalid": "Bağlantı noktası geçerli bir nokta değil.",
+      "contracted_capacity_required": "Önce sözleşmeli kapasiteyi girin.",
+      "correspondence_not_found": "Bu projede yazışma bulunamadı.",
+      "correspondence_thread_not_found": "Bu projede yazışma bulunamadı.",
+      "country_invalid": "İki harfli ISO ülke kodunu kullanın.",
+      "currency_invalid": "Üç harfli ISO para birimi kodunu kullanın.",
+      "currency_required": "Bir tutarın para birimi olmalıdır.",
+      "customs_case_not_found": "Gümrük dosyası bulunamadı.",
+      "customs_closed": "Gümrükten çıkmış veya kapatılmış bir dosya değiştirilemez.",
+      "customs_declared": "Beyan edilmiş bir dosya silinemez.",
+      "customs_not_found": "Gümrük dosyası bulunamadı.",
+      "customs_without_lines": "Önce en az bir mal kalemi ekleyin.",
+      "declarant_invalid": "Beyan sahibi alıcı veya satıcı olamaz.",
+      "delivery_already_on_site": "Bu teslimat zaten ulaştı ve yeniden karara bağlanmaz.",
+      "delivery_not_found": "Bu projede teslimat bulunamadı.",
+      "delivery_rate_exceeded": "Bu saat, konseptin izin verdiği teslimat sayısına zaten ulaştı.",
+      "delivery_refused": "Bu teslimat mevcut haliyle onaylanamaz.",
+      "demand_not_found": "Talep bulunamadı.",
+      "demand_owned_by_plant_position": "Bu talep bir ekipman kaleminden geliyor; değişikliği orada yapın.",
+      "direction_invalid": "Bilinmeyen yön.",
+      "document_exists": "Bu belge zaten kontrol listesinde.",
+      "document_not_found": "Belge bulunamadı.",
+      "document_ref_required": "Belgeyi teslim alındı olarak işaretlemeden önce bağlayın.",
+      "duplicate_stage": "Her aşama, alan başına yalnızca bir kez tahsis edilebilir.",
+      "entry_not_found": "Kayıt girdisi bulunamadı.",
+      "field_required": "Bu alan boş bırakılamaz.",
+      "flow_code_invalid": "Her malzeme akışının kendi kodu olmalı.",
+      "flow_code_unknown": "Lojistik konseptinde bu kodla bir malzeme akışı yok.",
+      "flow_mode_invalid": "Bilinmeyen malzeme akışı modu.",
+      "frame_invalid": "Bilinmeyen koordinat çerçevesi.",
+      "gate_hours_unchecked": "Saha saat dilimi ayarlanana kadar çalışma saatleri kontrol edilmez.",
+      "gate_load_exceeded": "Yük, saha girişinin sınırlarını aşıyor.",
+      "gate_not_found": "Bu projede saha girişi bulunamadı.",
+      "geo_overlay_not_found": "Bu projede saha planı katmanı bulunamadı.",
+      "geometry_invalid": "Alan sınırı geçerli bir çokgen değil.",
+      "goods_receipt_missing": "Bu satın alma siparişi için henüz onaylı mal kabulü yok.",
+      "heavy_without_permit": "Ağır taşıma, planlanmadan önce verilmiş bir izin gerektirir.",
+      "hours_invalid": "Geçerli saatler girin; bitiş, başlangıçtan sonra olmalı.",
+      "hs_code_invalid": "GTİP kodu yalnızca rakamlardan oluşmalı ve yeterince uzun olmalı.",
+      "incoterm_unknown": "Bu incoterm sabitlenmiş sürümde yok.",
+      "invalid_transition": "Bu durum değişikliğine izin verilmiyor.",
+      "jit_without_takt": "Tam zamanında akış için bir takt programı gerekir.",
+      "last_stage": "Bir proje en az bir genişleme aşamasını korur.",
+      "line_not_found": "Gümrük kalemi bulunamadı.",
+      "link_target_unavailable": "Bu bağlantı henüz kontrol edilemiyor, işaret ettiği modül kurulu değil.",
+      "media_not_found": "Altyapı bağlantısı bulunamadı.",
+      "money_not_decimal": "Tutarı ondalıklı sayı olarak girin.",
+      "money_out_of_range": "Tutarı en fazla iki ondalık basamakla girin.",
+      "noise_limit_needs_project_value": "Bu yargı alanı sabit değer belirlemiyor; projenin onaylı değerlerini girin.",
+      "not_found": "Bulunamadı.",
+      "outside_gate_hours": "Zaman aralığı girişin çalışma saatleri dışında.",
+      "owner_not_member": "Sorumlu kişi bu projenin üyesi olmalı.",
+      "pack_catalogue_invalid": "Paketin kataloğu yüklenemiyor.",
+      "permission_denied": "Bunun için yetkiniz yok.",
+      "permit_frozen": "Verilmiş, reddedilmiş veya süresi dolmuş bir izin geçerliliğini, zaman aralıklarını ve taşımalarını korur.",
+      "permit_not_found": "İzin bulunamadı.",
+      "plan_calibration_without_image": "Ölçeğini ayarlamadan önce saha planı görselini seçin.",
+      "plan_document_not_found": "Bu projede saha planı belgesi bulunamadı.",
+      "plan_origin_invalid": "Saha planının başlangıç noktası, piksel cinsinden x ve y olmak üzere iki sayıdır.",
+      "plan_scale_invalid": "Saha planının ölçeği sıfırdan büyük olmalı.",
+      "plant_item_not_found": "Bu projede ekipman kalemi bulunamadı.",
+      "plant_position_not_found": "Bu projede ekipman pozisyonu bulunamadı.",
+      "plant_position_required": "Bir ekipman pozisyonu gereklidir.",
+      "po_not_found": "Bu projede satın alma siparişi bulunamadı.",
+      "project_not_found": "Proje bulunamadı.",
+      "quiet_hours_conflict": "Zaman aralığı sessiz saatlere denk geliyor ve bunu kapsayan bir gece çalışma izni yok.",
+      "required_document_missing": "Gerekli bir belge hâlâ eksik.",
+      "response_required": "Önce yanıtı yazın.",
+      "route_invalid": "Güzergâh geçerli bir çizgi değil.",
+      "simultaneity_factor_range": "Eşzamanlılık katsayısı 0 ile 1 arasında olmalı.",
+      "site_timezone_missing": "Önce saha saat dilimini ayarlayın; saatler saha saatine göre kontrol edilir.",
+      "slot_taken": "Başka onaylı bir teslimat bu girişteki zaman aralığını tutuyor.",
+      "stage_active": "Aktif bir aşama silinemez. Önce kapatın.",
+      "stage_not_found": "Genişleme aşaması bulunamadı.",
+      "takt_location_not_found": "Bu projede takt alanı bulunamadı.",
+      "takt_schedule_not_found": "Bu projede takt programı bulunamadı.",
+      "timezone_invalid": "Bilinmeyen saat dilimi. Europe/Berlin gibi bir ad kullanın.",
+      "transport_closed": "Kapatılmış veya iptal edilmiş bir taşıma değiştirilemez.",
+      "transport_mode_invalid": "Bilinmeyen taşıma türü.",
+      "transport_not_found": "Taşıma bulunamadı.",
+      "transport_under_way": "Yolda olan bir taşıma silinemez.",
+      "unknown_area_kind": "Bilinmeyen alan türü.",
+      "unknown_catalogue": "Bilinmeyen katalog.",
+      "unknown_document_kind": "Bilinmeyen belge türü.",
+      "unknown_issue_kind": "Bilinmeyen şikâyet türü.",
+      "unknown_link_kind": "Bu bağlantı türü için bir liste yok.",
+      "unknown_load_class": "Bilinmeyen yük sınıfı.",
+      "unknown_media_kind": "Bilinmeyen altyapı.",
+      "unknown_noise_limit": "Bilinmeyen gürültü sınırı kaydı.",
+      "unknown_permit_kind": "Bilinmeyen izin türü.",
+      "unknown_transport_kind": "Bilinmeyen taşıma türü.",
+      "validity_invalid": "İzin, başlamadan önce sona eriyor.",
+      "validity_required": "Vermeden önce geçerlilik tarihlerini girin.",
+      "vendor_not_found": "Tedarikçi bulunamadı.",
+      "window_invalid": "Zaman aralığı geçerli değil.",
+      "window_outside_permit": "Taşıma zaman aralığı izin geçerliliğinin veya izinli saatlerin dışında.",
+      "zone_not_found": "Bu projede depolama sahası bulunamadı.",
+      "zone_type_invalid": "Bilinmeyen saha türü."
+    },
+    "evidence": {
+      "balance_closed": "Her açık aşama için alan dengesi kapatıldı",
+      "concept_saved_and_exported": "Lojistik konsepti kaydedildi ve dosyalandı",
+      "first_stage_media_contracted": "İlk aşama için altyapılar sözleşmeye bağlandı",
+      "gate_loads_admitted": "Her yük, girişi tarafından kabul edildi veya büyük yük izniyle kapsandı",
+      "heavy_transports_permitted": "Her ağır taşıma için izin verildi",
+      "neighbourhood_limit_source": "Gürültü sınırı kaynağı belirlendi",
+      "no_errors": "Açık lojistik hatası yok",
+      "unresolved": "Lojistik planı yönetişim modeline yerleştirilemedi"
+    },
+    "export": {
+      "as_of": "Tarih",
+      "col_area_kind": "Alan türü",
+      "col_closed": "Kapalı",
+      "col_contracted": "Sözleşmeli",
+      "col_date": "Tarih",
+      "col_direction": "Yön",
+      "col_documents": "Gerekli belgeler",
+      "col_due": "Son tarih",
+      "col_group": "Grup",
+      "col_heavy": "Ağır",
+      "col_hs_codes": "GTİP kodları",
+      "col_incoterm": "Incoterm",
+      "col_item": "Kalem",
+      "col_m2": "m2",
+      "col_media_kind": "Altyapı",
+      "col_named_place": "Belirtilen yer",
+      "col_pct": "%",
+      "col_permits": "İzinler",
+      "col_required": "Gerekli",
+      "col_section": "Bölüm",
+      "col_short": "Kısa",
+      "col_stage": "Aşama",
+      "col_state": "Durum",
+      "col_title": "Başlık",
+      "col_topic": "Konu",
+      "col_transport_kind": "Tür",
+      "col_type": "Tür",
+      "col_unit": "Birim",
+      "col_value": "Değer",
+      "col_window": "Zaman aralığı",
+      "empty": "Kayıt yok.",
+      "project": "Proje",
+      "title_balance": "Alan dengesi",
+      "title_customs": "Gümrük dosyası dizini",
+      "title_frame": "Lojistik çerçeve özeti",
+      "title_media": "Altyapı dengesi",
+      "title_neighbourhood": "Çevre günlüğü",
+      "title_transports": "Taşımalar ve izinler"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Aşama {stage}: bir tahsis, alanından daha büyük.",
+        "suggestion": "Tahsisi azaltın."
+      },
+      "area_balance_not_closed": {
+        "fail": "Aşama {stage}: alan dengesi kapanmıyor (fark {difference_m2} m2).",
+        "suggestion": "Kalan alanı tahsis edin veya saha toplamını düzeltin."
+      },
+      "area_overlap": {
+        "fail": "Aşama {stage}: farklı türdeki iki alan üst üste biniyor.",
+        "suggestion": "Sınırları düzenleyin."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Beyan sahibi, incoterm kapsamında ithalat gümrüklemesini yapan tarafla eşleşmiyor.",
+        "suggestion": "Beyan sahibini veya incoterm'i kontrol edin."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{hour} saatinden itibaren aynı saatte {count} onaylı teslimat başlıyor; konsept {limit} izin veriyor.",
+        "suggestion": "Teslimatları başka bir saate taşıyın veya konseptte sınırı artırın."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Sahanın saat dilimi yok, bu nedenle teslimatlar çalışma saatleriyle karşılaştırılmadı.",
+        "suggestion": "Lojistik konseptinde saha saat dilimini ayarlayın."
+      },
+      "gate_limits_unknown": {
+        "fail": "Saha girişi {gate} için yük sınırı belirtilmemiş.",
+        "suggestion": "Ağırlık ve boyut sınırlarını girin."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: yük, saha girişinin sınırlarını aşıyor.",
+        "suggestion": "Başka bir giriş kullanın veya yükü bölün."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: verilmiş izni olmayan ağır taşıma.",
+        "suggestion": "İzin için başvurun."
+      },
+      "hs_code_invalid": {
+        "fail": "GTİP kodu {hs_code} geçerli değil.",
+        "suggestion": "Yalnızca rakam kullanın ve asgari uzunluğu sağlayın."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} yalnızca deniz taşımacılığı içindir.",
+        "suggestion": "Diğer taşıma türleri için FCA, CPT veya CIP kullanın."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} sabitlenmiş sürümde yok.",
+        "suggestion": "Sabitlenmiş sürümdeki bir terimi seçin."
+      },
+      "jit_late": {
+        "fail": "{title}: tam zamanında teslimat, takt başlangıcından sonra geliyor.",
+        "suggestion": "Teslimatı öne alın."
+      },
+      "jit_too_early": {
+        "fail": "{title}: tam zamanında teslimat, tampon süresinin izin verdiğinden daha erken geliyor.",
+        "suggestion": "Takt başlangıcına daha yakın bir tarihe taşıyın."
+      },
+      "jit_without_location": {
+        "fail": "{title}: {flow} akışının tam zamanında teslimatı bir takt alanı belirtmiyor.",
+        "suggestion": "Teslimatın hangi takt alanı için olduğunu seçin."
+      },
+      "media_capacity_short": {
+        "fail": "Aşama {stage}: {media} için {required} gerekli, sözleşmeli {contracted}.",
+        "suggestion": "Sözleşmeli kapasiteyi artırın veya talebi azaltın."
+      },
+      "media_late": {
+        "fail": "Aşama {stage}: {media} bağlantısı, aşama başladıktan sonra söz verilmiş.",
+        "suggestion": "Daha erken bir tarih veya geçici bir besleme üzerinde anlaşın."
+      },
+      "media_unsourced": {
+        "fail": "Bir {media} talebinin bağlantısı yok.",
+        "suggestion": "Bir bağlantı atayın."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Bir şikâyetin {due} tarihinde yanıtlanması gerekiyordu.",
+        "suggestion": "Şikâyeti onaylayın ve yanıtlayın."
+      },
+      "permit_expired": {
+        "fail": "{reference} numaralı izin, taşımalar sürerken sona erdi.",
+        "suggestion": "Yeni bir izin için başvurun."
+      },
+      "permit_expiring": {
+        "fail": "{reference} numaralı izin yakında sona eriyor, taşımalar sürüyor.",
+        "suggestion": "İzni uzatın."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: zaman aralığı sessiz saatlere denk geliyor.",
+        "suggestion": "Sessiz saatlerin dışına taşıyın veya gece çalışma izni alın."
+      },
+      "required_document_missing": {
+        "fail": "Gerekli {kind} belgesi eksik.",
+        "suggestion": "Belgeyi temin edip bağlayın."
+      },
+      "site_timezone_missing": {
+        "fail": "Sahanın saat dilimi yok, bu nedenle günün saatine ilişkin kurallar kontrol edilmedi.",
+        "suggestion": "Lojistik konseptinde saha saat dilimini ayarlayın."
+      },
+      "stage_without_site_setup": {
+        "fail": "Aşama {stage} için saha kurulum alanı yok.",
+        "suggestion": "Ofisler ve sosyal tesisler için bir alan tahsis edin."
+      },
+      "stage_without_storage": {
+        "fail": "Aşama {stage} için depolama veya malzeme sahası yok.",
+        "suggestion": "Bir depolama veya malzeme sahası tahsis edin."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: zaman aralığı iznin dışında.",
+        "suggestion": "Zaman aralığını taşıyın veya izni uzatın."
+      },
+      "zone_not_mapped": {
+        "fail": "Depolama sahası {zone} bir saha alanına bağlı değil.",
+        "suggestion": "Planlanan alanına bağlayın."
+      }
+    }
+  }
+}

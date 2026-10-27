@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Yo‘q",
+        "yes": "Ha"
+      },
+      "direction": {
+        "export": "Eksport",
+        "import": "Import",
+        "inbound": "Kirish",
+        "outbound": "Chiqish"
+      },
+      "group": {
+        "built": "Qurilgan",
+        "external": "Tashqi",
+        "logistics": "Logistika",
+        "reserve": "Zaxira"
+      },
+      "is_heavy": {
+        "no": "Yo‘q",
+        "yes": "Ha"
+      },
+      "section": {
+        "balance": "Balans",
+        "concept": "Konsepsiya",
+        "neighbourhood": "Atrof-muhit",
+        "readiness": "Tayyorlik"
+      },
+      "short": {
+        "no": "Yo‘q",
+        "yes": "Ha"
+      },
+      "state": {
+        "acknowledged": "Tasdiqlangan",
+        "action_taken": "Choralar ko‘rilgan",
+        "active": "Faol",
+        "applied": "Ariza berilgan",
+        "arrived": "Yetib kelgan",
+        "authority": "Vakolatli organ",
+        "cancelled": "Bekor qilingan",
+        "cleared": "Bojxonadan o‘tgan",
+        "closed": "Yopilgan",
+        "connected": "Ulangan",
+        "contracted": "Shartnomalashtirilgan",
+        "declared": "Deklaratsiya qilingan",
+        "disconnected": "Uzilgan",
+        "documents_complete": "Hujjatlar to‘liq",
+        "draft": "Qoralama",
+        "expired": "Muddati tugagan",
+        "granted": "Berilgan",
+        "held": "Ushlab turilgan",
+        "identified": "Aniqlangan",
+        "in_transit": "Yo‘lda",
+        "missing": "Yo‘q",
+        "municipality": "Shahar hokimligi",
+        "neighbours": "Qo‘shnilar",
+        "offered": "Taklif qilingan",
+        "open": "Ochiq",
+        "other": "Boshqa",
+        "permit_pending": "Ruxsatnoma kutilmoqda",
+        "planned": "Rejalashtirilgan",
+        "police": "Politsiya",
+        "received": "Qabul qilingan",
+        "refused": "Rad etilgan",
+        "requested": "So‘ralgan",
+        "scheduled": "Jadvalga kiritilgan",
+        "utility": "Kommunal xizmat",
+        "verified": "Tekshirilgan"
+      },
+      "type": {
+        "complaint": "Shikoyat",
+        "coordination": "Muvofiqlashtirish"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Bu loyihada jadval faoliyati topilmadi.",
+      "allocation_exceeds_area": "Ajratma maydondan katta.",
+      "allocation_negative": "Ajratma manfiy bo‘lishi mumkin emas.",
+      "allocations_changed": "Ajratmalar boshqa foydalanuvchi tomonidan o‘zgartirildi. Qayta yuklab, yana urinib ko‘ring.",
+      "area_not_found": "Maydon topilmadi.",
+      "authority_permit_not_found": "Bu loyihada vakolatli organ ruxsatnomasi topilmadi.",
+      "buffer_days_negative": "Zaxira kunlari manfiy bo‘lishi mumkin emas.",
+      "catalogue_invalid": "Mahkamlangan logistika katalogini aniqlab bo‘lmadi.",
+      "catalogue_retired": "Katalogning bu versiyasi eskirgan.",
+      "code_required": "Kod kiritilishi shart.",
+      "code_taken": "Bu kod loyihada allaqachon ishlatilgan.",
+      "commodity_code_not_found": "Tovar kodi topilmadi.",
+      "complaint_closed": "Yopilgan shikoyatni o‘zgartirib bo‘lmaydi.",
+      "complaint_not_found": "Shikoyat topilmadi.",
+      "connection_point_invalid": "Ulanish nuqtasi to‘g‘ri nuqta emas.",
+      "contracted_capacity_required": "Avval shartnomaviy quvvatni kiriting.",
+      "correspondence_not_found": "Bu loyihada yozishma topilmadi.",
+      "correspondence_thread_not_found": "Bu loyihada yozishma topilmadi.",
+      "country_invalid": "Ikki harfli ISO mamlakat kodidan foydalaning.",
+      "currency_invalid": "Uch harfli ISO valyuta kodidan foydalaning.",
+      "currency_required": "Summa uchun valyuta kerak.",
+      "customs_case_not_found": "Bojxona ishi topilmadi.",
+      "customs_closed": "Bojxonadan o‘tgan yoki yopilgan ishni o‘zgartirib bo‘lmaydi.",
+      "customs_declared": "Deklaratsiya qilingan ishni o‘chirib bo‘lmaydi.",
+      "customs_not_found": "Bojxona ishi topilmadi.",
+      "customs_without_lines": "Avval kamida bitta tovar qatorini qo‘shing.",
+      "declarant_invalid": "Deklarant xaridor yoki sotuvchi bo‘la olmaydi.",
+      "delivery_already_on_site": "Bu yetkazib berish allaqachon yetib kelgan va qayta ko‘rib chiqilmaydi.",
+      "delivery_not_found": "Bu loyihada yetkazib berish topilmadi.",
+      "delivery_rate_exceeded": "Bu soatda konsepsiya ruxsat bergan yetkazib berishlar soni allaqachon to‘ldi.",
+      "delivery_refused": "Bu yetkazib berishni hozirgi holatida tasdiqlab bo‘lmaydi.",
+      "demand_not_found": "Ehtiyoj topilmadi.",
+      "demand_owned_by_plant_position": "Bu ehtiyoj texnika pozitsiyasidan kelib chiqqan; uni o‘sha yerda o‘zgartiring.",
+      "direction_invalid": "Noma’lum yo‘nalish.",
+      "document_exists": "Bu hujjat allaqachon tekshirish ro‘yxatida.",
+      "document_not_found": "Hujjat topilmadi.",
+      "document_ref_required": "Hujjatni qabul qilingan deb belgilashdan oldin uni bog‘lang.",
+      "duplicate_stage": "Har bir bosqich maydonga bir marta ajratilishi mumkin.",
+      "entry_not_found": "Jurnal yozuvi topilmadi.",
+      "field_required": "Bu maydon bo‘sh qolishi mumkin emas.",
+      "flow_code_invalid": "Har bir material oqimining o‘z kodi bo‘lishi kerak.",
+      "flow_code_unknown": "Logistika konsepsiyasida bu kodli material oqimi yo‘q.",
+      "flow_mode_invalid": "Noma’lum material oqimi rejimi.",
+      "frame_invalid": "Noma’lum koordinatalar tizimi.",
+      "gate_hours_unchecked": "Sayt vaqt mintaqasi belgilanmaguncha ish vaqti tekshirilmaydi.",
+      "gate_load_exceeded": "Yuk saytga kirish joyining chegaralaridan oshib ketgan.",
+      "gate_not_found": "Bu loyihada saytga kirish joyi topilmadi.",
+      "geo_overlay_not_found": "Bu loyihada sayt rejasi qatlami topilmadi.",
+      "geometry_invalid": "Maydon konturi to‘g‘ri ko‘pburchak emas.",
+      "goods_receipt_missing": "Bu xarid buyurtmasi uchun hali tasdiqlangan tovar qabul qilish yo‘q.",
+      "heavy_without_permit": "Og‘ir tashish rejalashtirilishidan oldin berilgan ruxsatnomani talab qiladi.",
+      "hours_invalid": "To‘g‘ri vaqt kiriting: tugash boshlanishdan keyin bo‘lsin.",
+      "hs_code_invalid": "TIF kodi faqat raqamlardan iborat bo‘lishi va yetarlicha uzun bo‘lishi kerak.",
+      "incoterm_unknown": "Bu incoterm mahkamlangan versiyada yo‘q.",
+      "invalid_transition": "Bu holat o‘zgarishiga ruxsat berilmaydi.",
+      "jit_without_takt": "Aynan vaqtida oqim uchun takt jadvali kerak.",
+      "last_stage": "Loyihada kamida bitta kengaytirish bosqichi qolishi kerak.",
+      "line_not_found": "Bojxona qatori topilmadi.",
+      "link_target_unavailable": "Bu havolani hozircha tekshirib bo‘lmaydi, u ko‘rsatayotgan modul o‘rnatilmagan.",
+      "media_not_found": "Kommunal ulanish topilmadi.",
+      "money_not_decimal": "Summani o‘nlik son ko‘rinishida kiriting.",
+      "money_out_of_range": "Summani ko‘pi bilan ikki kasr xonasi bilan kiriting.",
+      "noise_limit_needs_project_value": "Bu yurisdiktsiya qat’iy qiymatlarni belgilamaydi; loyihaning kelishilgan qiymatlarini kiriting.",
+      "not_found": "Topilmadi.",
+      "outside_gate_hours": "Vaqt oralig‘i kirish joyining ish vaqtidan tashqarida.",
+      "owner_not_member": "Mas’ul shaxs bu loyihaning a’zosi bo‘lishi kerak.",
+      "pack_catalogue_invalid": "Paket katalogi yuklanmayapti.",
+      "permission_denied": "Sizda buning uchun ruxsat yo‘q.",
+      "permit_frozen": "Berilgan, rad etilgan yoki muddati tugagan ruxsatnoma o‘z amal qilish muddati, oraliqlari va tashishlarini saqlab qoladi.",
+      "permit_not_found": "Ruxsatnoma topilmadi.",
+      "plan_calibration_without_image": "Masshtabni belgilashdan oldin sayt rejasi tasvirini tanlang.",
+      "plan_document_not_found": "Bu loyihada sayt rejasi hujjati topilmadi.",
+      "plan_origin_invalid": "Sayt rejasining boshlang‘ich nuqtasi piksellarda ikkita son: x va y.",
+      "plan_scale_invalid": "Sayt rejasining masshtabi noldan katta bo‘lishi kerak.",
+      "plant_item_not_found": "Bu loyihada texnika elementi topilmadi.",
+      "plant_position_not_found": "Bu loyihada texnika pozitsiyasi topilmadi.",
+      "plant_position_required": "Texnika pozitsiyasi kerak.",
+      "po_not_found": "Bu loyihada xarid buyurtmasi topilmadi.",
+      "project_not_found": "Loyiha topilmadi.",
+      "quiet_hours_conflict": "Vaqt oralig‘i tinch soatlarga to‘g‘ri keladi va uni hech qanday tungi ish ruxsatnomasi qamrab olmaydi.",
+      "required_document_missing": "Talab qilingan hujjat hali ham yo‘q.",
+      "response_required": "Avval javobni yozing.",
+      "route_invalid": "Yo‘nalish to‘g‘ri chiziq emas.",
+      "simultaneity_factor_range": "Bir vaqtlilik koeffitsienti 0 va 1 orasida bo‘lishi kerak.",
+      "site_timezone_missing": "Avval sayt vaqt mintaqasini belgilang; vaqt sayt soati bo‘yicha tekshiriladi.",
+      "slot_taken": "Boshqa tasdiqlangan yetkazib berish bu kirish joyidagi vaqt oralig‘ini band qilgan.",
+      "stage_active": "Faol bosqichni o‘chirib bo‘lmaydi. Avval uni yoping.",
+      "stage_not_found": "Kengaytirish bosqichi topilmadi.",
+      "takt_location_not_found": "Bu loyihada takt maydoni topilmadi.",
+      "takt_schedule_not_found": "Bu loyihada takt jadvali topilmadi.",
+      "timezone_invalid": "Noma’lum vaqt mintaqasi. Europe/Berlin kabi nomdan foydalaning.",
+      "transport_closed": "Yopilgan yoki bekor qilingan tashishni o‘zgartirib bo‘lmaydi.",
+      "transport_mode_invalid": "Noma’lum transport turi.",
+      "transport_not_found": "Tashish topilmadi.",
+      "transport_under_way": "Yo‘lda bo‘lgan tashishni o‘chirib bo‘lmaydi.",
+      "unknown_area_kind": "Noma’lum maydon turi.",
+      "unknown_catalogue": "Noma’lum katalog.",
+      "unknown_document_kind": "Noma’lum hujjat turi.",
+      "unknown_issue_kind": "Noma’lum shikoyat turi.",
+      "unknown_link_kind": "Bu turdagi havola uchun ro‘yxat yo‘q.",
+      "unknown_load_class": "Noma’lum yuk sinfi.",
+      "unknown_media_kind": "Noma’lum kommunal xizmat.",
+      "unknown_noise_limit": "Noma’lum shovqin chegarasi yozuvi.",
+      "unknown_permit_kind": "Noma’lum ruxsatnoma turi.",
+      "unknown_transport_kind": "Noma’lum tashish turi.",
+      "validity_invalid": "Ruxsatnoma boshlanishidan oldin tugaydi.",
+      "validity_required": "Berishdan oldin amal qilish sanalarini kiriting.",
+      "vendor_not_found": "Yetkazib beruvchi topilmadi.",
+      "window_invalid": "Vaqt oralig‘i noto‘g‘ri.",
+      "window_outside_permit": "Tashish vaqt oralig‘i ruxsatnoma muddatidan yoki ruxsat etilgan vaqtdan tashqarida.",
+      "zone_not_found": "Bu loyihada saqlash zonasi topilmadi.",
+      "zone_type_invalid": "Noma’lum zona turi."
+    },
+    "evidence": {
+      "balance_closed": "Har bir ochiq bosqich uchun maydon balansi yopilgan",
+      "concept_saved_and_exported": "Logistika konsepsiyasi saqlangan va arxivlangan",
+      "first_stage_media_contracted": "Birinchi bosqich uchun kommunal xizmatlar shartnomalashtirilgan",
+      "gate_loads_admitted": "Har bir yuk o‘z kirish joyi tomonidan qabul qilingan yoki o‘lchami katta ruxsatnoma bilan qoplangan",
+      "heavy_transports_permitted": "Har bir og‘ir tashish uchun ruxsatnoma berilgan",
+      "neighbourhood_limit_source": "Shovqin chegarasi manbai belgilangan",
+      "no_errors": "Ochiq logistika xatolari yo‘q",
+      "unresolved": "Logistika rejasini boshqaruv modeliga joylashtirib bo‘lmadi"
+    },
+    "export": {
+      "as_of": "Sana",
+      "col_area_kind": "Maydon turi",
+      "col_closed": "Yopilgan",
+      "col_contracted": "Shartnomalashtirilgan",
+      "col_date": "Sana",
+      "col_direction": "Yo‘nalish",
+      "col_documents": "Talab qilinadigan hujjatlar",
+      "col_due": "Muddati",
+      "col_group": "Guruh",
+      "col_heavy": "Og‘ir",
+      "col_hs_codes": "TIF kodlari",
+      "col_incoterm": "Incoterm",
+      "col_item": "Element",
+      "col_m2": "m2",
+      "col_media_kind": "Kommunal xizmat",
+      "col_named_place": "Nomlangan joy",
+      "col_pct": "%",
+      "col_permits": "Ruxsatnomalar",
+      "col_required": "Talab",
+      "col_section": "Bo‘lim",
+      "col_short": "Qisqa",
+      "col_stage": "Bosqich",
+      "col_state": "Holat",
+      "col_title": "Sarlavha",
+      "col_topic": "Mavzu",
+      "col_transport_kind": "Turi",
+      "col_type": "Turi",
+      "col_unit": "Birlik",
+      "col_value": "Qiymat",
+      "col_window": "Vaqt oralig‘i",
+      "empty": "Yozuvlar yo‘q.",
+      "project": "Loyiha",
+      "title_balance": "Maydon balansi",
+      "title_customs": "Bojxona ishlari fayl ko‘rsatkichi",
+      "title_frame": "Logistika doirasi xulosasi",
+      "title_media": "Kommunal xizmatlar balansi",
+      "title_neighbourhood": "Atrof-muhit jurnali",
+      "title_transports": "Tashishlar va ruxsatnomalar"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "{stage} bosqich: ajratma o‘z maydonidan katta.",
+        "suggestion": "Ajratmani kamaytiring."
+      },
+      "area_balance_not_closed": {
+        "fail": "{stage} bosqich: maydon balansi yopilmaydi (farq {difference_m2} m2).",
+        "suggestion": "Qolgan maydonni ajrating yoki saytning umumiy maydonini tuzating."
+      },
+      "area_overlap": {
+        "fail": "{stage} bosqich: turli turdagi ikki maydon bir-biriga kesishadi.",
+        "suggestion": "Konturlarni moslang."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Deklarant incoterm bo‘yicha importni bojxonadan o‘tkazuvchi tomonga mos kelmaydi.",
+        "suggestion": "Deklarantni yoki incotermni tekshiring."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{hour} dan boshlab bir soat ichida {count} ta tasdiqlangan yetkazib berish boshlanadi, konsepsiya {limit} tasiga ruxsat beradi.",
+        "suggestion": "Yetkazib berishlarni boshqa soatga o‘tkazing yoki konsepsiyada chegarani oshiring."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Saytda vaqt mintaqasi yo‘q, shuning uchun yetkazib berishlar ish vaqti bilan solishtirilmadi.",
+        "suggestion": "Logistika konsepsiyasida sayt vaqt mintaqasini belgilang."
+      },
+      "gate_limits_unknown": {
+        "fail": "{gate} saytga kirish joyi yuk chegaralarini ko‘rsatmagan.",
+        "suggestion": "Og‘irlik va o‘lcham chegaralarini kiriting."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: yuk saytga kirish joyining chegaralaridan oshib ketgan.",
+        "suggestion": "Boshqa kirish joyidan foydalaning yoki yukni bo‘lib tashing."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: tasdiqlangan ruxsatnomasiz og‘ir tashish.",
+        "suggestion": "Ruxsatnoma uchun ariza bering."
+      },
+      "hs_code_invalid": {
+        "fail": "TIF kodi {hs_code} yaroqsiz.",
+        "suggestion": "Faqat raqamlardan foydalaning, eng kam uzunlikda."
+      },
+      "incoterm_sea_only": {
+        "fail": "{incoterm} incoterm faqat dengiz transporti uchun.",
+        "suggestion": "Boshqa turlar uchun FCA, CPT yoki CIP dan foydalaning."
+      },
+      "incoterm_unknown": {
+        "fail": "{incoterm} incoterm mahkamlangan versiyada yo‘q.",
+        "suggestion": "Mahkamlangan versiyadagi shartni tanlang."
+      },
+      "jit_late": {
+        "fail": "{title}: aynan vaqtida yetkazib berish takt boshlanganidan keyin kelmoqda.",
+        "suggestion": "Yetkazib berishni oldinroq qo‘ying."
+      },
+      "jit_too_early": {
+        "fail": "{title}: aynan vaqtida yetkazib berish zaxira ruxsat berganidan oldinroq kelmoqda.",
+        "suggestion": "Uni takt boshlanishiga yaqinroq qo‘ying."
+      },
+      "jit_without_location": {
+        "fail": "{title}: {flow} oqimining aynan vaqtida yetkazib berishida takt maydoni ko‘rsatilmagan.",
+        "suggestion": "Yetkazib berish qaysi takt maydoni uchunligini tanlang."
+      },
+      "media_capacity_short": {
+        "fail": "{stage} bosqich: {media} uchun {required} kerak, shartnomalashtirilgan {contracted}.",
+        "suggestion": "Shartnomaviy quvvatni oshiring yoki talabni kamaytiring."
+      },
+      "media_late": {
+        "fail": "{stage} bosqich: {media} ulanishi bosqich boshlanganidan keyin va’da qilingan.",
+        "suggestion": "Oldinroq sana yoki vaqtinchalik ta’minot bo‘yicha kelishing."
+      },
+      "media_unsourced": {
+        "fail": "{media} ehtiyojining ulanishi yo‘q.",
+        "suggestion": "Ulanish biriktiring."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Shikoyatga {due} sanasida javob berilishi kerak edi.",
+        "suggestion": "Shikoyatni tasdiqlang va javob bering."
+      },
+      "permit_expired": {
+        "fail": "{reference} ruxsatnomasi muddati tugagan, tashishlar esa qolmoqda.",
+        "suggestion": "Yangi ruxsatnoma uchun ariza bering."
+      },
+      "permit_expiring": {
+        "fail": "{reference} ruxsatnomasi tez orada tugaydi, tashishlar esa qolmoqda.",
+        "suggestion": "Ruxsatnomani uzaytiring."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: vaqt oralig‘i tinch soatlarga to‘g‘ri keladi.",
+        "suggestion": "Uni tinch soatlardan tashqariga suring yoki tungi ish ruxsatnomasini oling."
+      },
+      "required_document_missing": {
+        "fail": "Talab qilinadigan {kind} hujjati yo‘q.",
+        "suggestion": "Hujjatni oling va biriktiring."
+      },
+      "site_timezone_missing": {
+        "fail": "Saytda vaqt mintaqasi yo‘q, shuning uchun kun vaqti qoidalari tekshirilmadi.",
+        "suggestion": "Logistika konsepsiyasida sayt vaqt mintaqasini belgilang."
+      },
+      "stage_without_site_setup": {
+        "fail": "{stage} bosqich uchun sayt jihozlash maydoni yo‘q.",
+        "suggestion": "Ofislar va sanitariya-maishiy xizmatlar uchun maydon ajrating."
+      },
+      "stage_without_storage": {
+        "fail": "{stage} bosqich uchun saqlash yoki joylashtirish maydoni yo‘q.",
+        "suggestion": "Saqlash yoki joylashtirish maydonini ajrating."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: vaqt oralig‘i ruxsatnomadan tashqarida.",
+        "suggestion": "Oralig‘ni suring yoki ruxsatnomani uzaytiring."
+      },
+      "zone_not_mapped": {
+        "fail": "{zone} joylashtirish zonasi sayt maydoniga bog‘lanmagan.",
+        "suggestion": "Uni rejalashtirilgan maydoniga bog‘lang."
+      }
+    }
+  }
+}

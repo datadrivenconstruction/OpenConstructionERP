@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Nu",
+        "yes": "Da"
+      },
+      "direction": {
+        "export": "Export",
+        "import": "Import",
+        "inbound": "Intrare",
+        "outbound": "Ieșire"
+      },
+      "group": {
+        "built": "Construit",
+        "external": "Extern",
+        "logistics": "Logistică",
+        "reserve": "Rezervă"
+      },
+      "is_heavy": {
+        "no": "Nu",
+        "yes": "Da"
+      },
+      "section": {
+        "balance": "Bilanț",
+        "concept": "Concept",
+        "neighbourhood": "Vecinătate",
+        "readiness": "Pregătire"
+      },
+      "short": {
+        "no": "Nu",
+        "yes": "Da"
+      },
+      "state": {
+        "acknowledged": "Confirmat",
+        "action_taken": "Măsură luată",
+        "active": "Activ",
+        "applied": "Solicitat",
+        "arrived": "Sosit",
+        "authority": "Autoritate",
+        "cancelled": "Anulat",
+        "cleared": "Vămuit",
+        "closed": "Închis",
+        "connected": "Conectat",
+        "contracted": "Contractat",
+        "declared": "Declarat",
+        "disconnected": "Deconectat",
+        "documents_complete": "Documente complete",
+        "draft": "Ciornă",
+        "expired": "Expirat",
+        "granted": "Acordat",
+        "held": "Reținut",
+        "identified": "Identificat",
+        "in_transit": "În tranzit",
+        "missing": "Lipsă",
+        "municipality": "Primărie",
+        "neighbours": "Vecini",
+        "offered": "Oferit",
+        "open": "Deschis",
+        "other": "Altele",
+        "permit_pending": "Autorizație în așteptare",
+        "planned": "Planificat",
+        "police": "Poliție",
+        "received": "Primit",
+        "refused": "Refuzat",
+        "requested": "Solicitat",
+        "scheduled": "Programat",
+        "utility": "Furnizor utilități",
+        "verified": "Verificat"
+      },
+      "type": {
+        "complaint": "Reclamație",
+        "coordination": "Coordonare"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Activitatea din grafic nu a fost găsită în acest proiect.",
+      "allocation_exceeds_area": "Alocarea este mai mare decât suprafața.",
+      "allocation_negative": "O alocare nu poate fi negativă.",
+      "allocations_changed": "Alocările au fost modificate de altcineva. Reîncărcați și încercați din nou.",
+      "area_not_found": "Zona de șantier nu a fost găsită.",
+      "authority_permit_not_found": "Autorizația autorității nu a fost găsită în acest proiect.",
+      "buffer_days_negative": "Zilele de rezervă nu pot fi negative.",
+      "catalogue_invalid": "Catalogul logistic fixat nu poate fi rezolvat.",
+      "catalogue_retired": "Această versiune de catalog a fost retrasă.",
+      "code_required": "Este necesar un cod.",
+      "code_taken": "Acest cod este deja folosit în proiect.",
+      "commodity_code_not_found": "Codul mărfii nu a fost găsit.",
+      "complaint_closed": "O reclamație închisă nu poate fi modificată.",
+      "complaint_not_found": "Reclamația nu a fost găsită.",
+      "connection_point_invalid": "Punctul de racordare nu este un punct valid.",
+      "contracted_capacity_required": "Introduceți mai întâi capacitatea contractată.",
+      "correspondence_not_found": "Corespondența nu a fost găsită în acest proiect.",
+      "correspondence_thread_not_found": "Corespondența nu a fost găsită în acest proiect.",
+      "country_invalid": "Folosiți un cod ISO de țară din două litere.",
+      "currency_invalid": "Folosiți un cod ISO de monedă din trei litere.",
+      "currency_required": "O sumă trebuie să aibă moneda ei.",
+      "customs_case_not_found": "Dosarul vamal nu a fost găsit.",
+      "customs_closed": "Un dosar vămuit sau închis nu poate fi modificat.",
+      "customs_declared": "Un dosar declarat nu poate fi șters.",
+      "customs_not_found": "Dosarul vamal nu a fost găsit.",
+      "customs_without_lines": "Adăugați mai întâi cel puțin un rând de mărfuri.",
+      "declarant_invalid": "Declarantul este cumpărătorul sau vânzătorul.",
+      "delivery_already_on_site": "Această livrare a sosit deja și nu mai este decisă din nou.",
+      "delivery_not_found": "Livrarea nu a fost găsită în acest proiect.",
+      "delivery_rate_exceeded": "Această oră conține deja numărul de livrări permis de concept.",
+      "delivery_refused": "Această livrare nu poate fi aprobată în forma actuală.",
+      "demand_not_found": "Necesarul nu a fost găsit.",
+      "demand_owned_by_plant_position": "Acest necesar provine dintr-o poziție de utilaj; modificați-l acolo.",
+      "direction_invalid": "Sens necunoscut.",
+      "document_exists": "Acest document este deja pe lista de verificare.",
+      "document_not_found": "Documentul nu a fost găsit.",
+      "document_ref_required": "Legați documentul înainte de a-l marca drept primit.",
+      "duplicate_stage": "Fiecare etapă poate fi alocată o singură dată pe zonă.",
+      "entry_not_found": "Înregistrarea nu a fost găsită.",
+      "field_required": "Acest câmp nu poate fi gol.",
+      "flow_code_invalid": "Fiecare flux de materiale trebuie să aibă propriul cod.",
+      "flow_code_unknown": "Conceptul logistic nu are niciun flux de materiale cu acest cod.",
+      "flow_mode_invalid": "Mod de flux de materiale necunoscut.",
+      "frame_invalid": "Sistem de coordonate necunoscut.",
+      "gate_hours_unchecked": "Programul de funcționare nu este verificat până la setarea fusului orar al șantierului.",
+      "gate_load_exceeded": "Sarcina depășește limitele accesului pe șantier.",
+      "gate_not_found": "Accesul pe șantier nu a fost găsit în acest proiect.",
+      "geo_overlay_not_found": "Suprapunerea planului de șantier nu a fost găsită în acest proiect.",
+      "geometry_invalid": "Conturul zonei nu este un poligon valid.",
+      "goods_receipt_missing": "Nu există încă o recepție de marfă confirmată pentru această comandă.",
+      "heavy_without_permit": "Un transport greu necesită o autorizație acordată înainte de programare.",
+      "hours_invalid": "Introduceți ore valide, cu sfârșitul după început.",
+      "hs_code_invalid": "Codul HS trebuie să conțină doar cifre și să aibă lungimea minimă.",
+      "incoterm_unknown": "Acest Incoterm nu se află în versiunea fixată.",
+      "invalid_transition": "Această schimbare de stare nu este permisă.",
+      "jit_without_takt": "Un flux just-in-time necesită un grafic takt.",
+      "last_stage": "Un proiect păstrează cel puțin o etapă de extindere.",
+      "line_not_found": "Rândul vamal nu a fost găsit.",
+      "link_target_unavailable": "Această legătură nu poate fi verificată încă, deoarece modulul la care trimite nu este instalat.",
+      "media_not_found": "Racordul de utilități nu a fost găsit.",
+      "money_not_decimal": "Introduceți suma ca număr zecimal.",
+      "money_out_of_range": "Introduceți o sumă cu cel mult două zecimale.",
+      "noise_limit_needs_project_value": "Această jurisdicție nu stabilește valori fixe; introduceți valorile agreate pentru proiect.",
+      "not_found": "Nu a fost găsit.",
+      "outside_gate_hours": "Intervalul se află în afara programului de funcționare al accesului.",
+      "owner_not_member": "Responsabilul trebuie să fie membru al acestui proiect.",
+      "pack_catalogue_invalid": "Catalogul pachetului nu poate fi încărcat.",
+      "permission_denied": "Nu aveți permisiunea pentru această acțiune.",
+      "permit_frozen": "O autorizație acordată, refuzată sau expirată își păstrează valabilitatea, intervalele și transporturile.",
+      "permit_not_found": "Autorizația nu a fost găsită.",
+      "plan_calibration_without_image": "Alegeți imaginea planului de șantier înainte de a-i seta scara.",
+      "plan_document_not_found": "Documentul planului de șantier nu a fost găsit în acest proiect.",
+      "plan_origin_invalid": "Originea planului de șantier este formată din două numere, x și y, în pixeli.",
+      "plan_scale_invalid": "Scara planului de șantier trebuie să fie mai mare decât zero.",
+      "plant_item_not_found": "Utilajul nu a fost găsit în acest proiect.",
+      "plant_position_not_found": "Poziția de utilaj nu a fost găsită în acest proiect.",
+      "plant_position_required": "Este necesară o poziție de utilaj.",
+      "po_not_found": "Comanda de achiziție nu a fost găsită în acest proiect.",
+      "project_not_found": "Proiectul nu a fost găsit.",
+      "quiet_hours_conflict": "Intervalul cade în orele de liniște, iar nicio autorizație de lucru de noapte nu îl acoperă.",
+      "required_document_missing": "Lipsește încă un document obligatoriu.",
+      "response_required": "Scrieți mai întâi răspunsul.",
+      "route_invalid": "Traseul nu este o linie validă.",
+      "simultaneity_factor_range": "Factorul de simultaneitate este între 0 și 1.",
+      "site_timezone_missing": "Setați mai întâi fusul orar al șantierului; orele se verifică după ceasul șantierului.",
+      "slot_taken": "Altă livrare aprobată ocupă deja acest interval la acces.",
+      "stage_active": "O etapă activă nu poate fi ștearsă. Închideți-o mai întâi.",
+      "stage_not_found": "Etapa de extindere nu a fost găsită.",
+      "takt_location_not_found": "Zona takt nu a fost găsită în acest proiect.",
+      "takt_schedule_not_found": "Graficul takt nu a fost găsit în acest proiect.",
+      "timezone_invalid": "Fus orar necunoscut. Folosiți un nume precum Europe/Bucharest.",
+      "transport_closed": "Un transport închis sau anulat nu poate fi modificat.",
+      "transport_mode_invalid": "Mod de transport necunoscut.",
+      "transport_not_found": "Transportul nu a fost găsit.",
+      "transport_under_way": "Un transport în desfășurare nu poate fi șters.",
+      "unknown_area_kind": "Tip de zonă necunoscut.",
+      "unknown_catalogue": "Catalog necunoscut.",
+      "unknown_document_kind": "Tip de document necunoscut.",
+      "unknown_issue_kind": "Tip de reclamație necunoscut.",
+      "unknown_link_kind": "Nu există listă pentru acest tip de legătură.",
+      "unknown_load_class": "Clasă de sarcină necunoscută.",
+      "unknown_media_kind": "Utilitate necunoscută.",
+      "unknown_noise_limit": "Intrare de limită de zgomot necunoscută.",
+      "unknown_permit_kind": "Tip de autorizație necunoscut.",
+      "unknown_transport_kind": "Tip de transport necunoscut.",
+      "validity_invalid": "Autorizația se termină înainte să înceapă.",
+      "validity_required": "Introduceți datele de valabilitate înainte de acordare.",
+      "vendor_not_found": "Furnizorul nu a fost găsit.",
+      "window_invalid": "Intervalul orar nu este valid.",
+      "window_outside_permit": "Intervalul de transport se află în afara valabilității autorizației sau a orelor permise.",
+      "zone_not_found": "Zona de depozitare nu a fost găsită în acest proiect.",
+      "zone_type_invalid": "Tip de zonă necunoscut."
+    },
+    "evidence": {
+      "balance_closed": "Bilanțul zonelor închis pentru fiecare etapă deschisă",
+      "concept_saved_and_exported": "Concept logistic salvat și arhivat",
+      "first_stage_media_contracted": "Utilitățile pentru prima etapă contractate",
+      "gate_loads_admitted": "Fiecare sarcină admisă de accesul său sau acoperită de o autorizație de gabarit",
+      "heavy_transports_permitted": "Autorizație acordată pentru fiecare transport greu",
+      "neighbourhood_limit_source": "Sursa limitei de zgomot stabilită",
+      "no_errors": "Nicio eroare logistică deschisă",
+      "unresolved": "Planul logistic nu a putut fi încadrat în modelul de guvernanță"
+    },
+    "export": {
+      "as_of": "La data de",
+      "col_area_kind": "Tip de zonă",
+      "col_closed": "Închis",
+      "col_contracted": "Contractat",
+      "col_date": "Data",
+      "col_direction": "Sens",
+      "col_documents": "Documente obligatorii",
+      "col_due": "Termen",
+      "col_group": "Grup",
+      "col_heavy": "Greu",
+      "col_hs_codes": "Coduri HS",
+      "col_incoterm": "Incoterm",
+      "col_item": "Articol",
+      "col_m2": "m2",
+      "col_media_kind": "Utilitate",
+      "col_named_place": "Loc numit",
+      "col_pct": "%",
+      "col_permits": "Autorizații",
+      "col_required": "Necesar",
+      "col_section": "Secțiune",
+      "col_short": "Scurt",
+      "col_stage": "Etapă",
+      "col_state": "Stare",
+      "col_title": "Titlu",
+      "col_topic": "Subiect",
+      "col_transport_kind": "Tip",
+      "col_type": "Tip",
+      "col_unit": "Unitate",
+      "col_value": "Valoare",
+      "col_window": "Interval",
+      "empty": "Nicio intrare.",
+      "project": "Proiect",
+      "title_balance": "Bilanțul zonelor",
+      "title_customs": "Indexul dosarelor vamale",
+      "title_frame": "Sinteza cadrului logistic",
+      "title_media": "Bilanțul utilităților",
+      "title_neighbourhood": "Registrul vecinătății",
+      "title_transports": "Transporturi și autorizații"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Etapa {stage}: o alocare este mai mare decât suprafața sa.",
+        "suggestion": "Reduceți alocarea."
+      },
+      "area_balance_not_closed": {
+        "fail": "Etapa {stage}: bilanțul zonelor nu se închide (diferență de {difference_m2} m2).",
+        "suggestion": "Alocați suprafața rămasă sau corectați totalul șantierului."
+      },
+      "area_overlap": {
+        "fail": "Etapa {stage}: două zone de tipuri diferite se suprapun.",
+        "suggestion": "Ajustați conturele."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Declarantul nu corespunde celui care asigură vămuirea la import conform Incoterm-ului.",
+        "suggestion": "Verificați declarantul sau Incoterm-ul."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} livrări aprobate încep în ora de la {hour}; conceptul permite {limit}.",
+        "suggestion": "Mutați livrările într-o altă oră sau măriți limita din concept."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Șantierul nu are fus orar, așa că livrările nu au fost comparate cu programul de funcționare.",
+        "suggestion": "Setați fusul orar al șantierului în conceptul logistic."
+      },
+      "gate_limits_unknown": {
+        "fail": "Accesul pe șantier {gate} nu indică limite de sarcină.",
+        "suggestion": "Introduceți limitele de greutate și de dimensiuni."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: sarcina depășește limitele accesului pe șantier.",
+        "suggestion": "Folosiți alt acces sau împărțiți sarcina."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: transport greu fără autorizație acordată.",
+        "suggestion": "Solicitați autorizația."
+      },
+      "hs_code_invalid": {
+        "fail": "Codul HS {hs_code} nu este valid.",
+        "suggestion": "Folosiți doar cifre, în lungimea minimă cerută."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm-ul {incoterm} este destinat exclusiv transportului maritim.",
+        "suggestion": "Folosiți FCA, CPT sau CIP pentru celelalte moduri."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm-ul {incoterm} nu se află în versiunea fixată.",
+        "suggestion": "Alegeți un termen din versiunea fixată."
+      },
+      "jit_late": {
+        "fail": "{title}: livrarea just-in-time are loc după începerea taktului.",
+        "suggestion": "Aduceți livrarea mai devreme."
+      },
+      "jit_too_early": {
+        "fail": "{title}: livrarea just-in-time are loc mai devreme decât permite rezerva.",
+        "suggestion": "Mutați-o mai aproape de începerea taktului."
+      },
+      "jit_without_location": {
+        "fail": "{title}: o livrare just-in-time a fluxului {flow} nu indică o zonă takt.",
+        "suggestion": "Alegeți zona takt pentru care este livrarea."
+      },
+      "media_capacity_short": {
+        "fail": "Etapa {stage}: {media} necesită {required}, contractat {contracted}.",
+        "suggestion": "Măriți capacitatea contractată sau reduceți necesarul."
+      },
+      "media_late": {
+        "fail": "Etapa {stage}: racordul la {media} este promis după începerea etapei.",
+        "suggestion": "Agreați o dată mai devreme sau o alimentare temporară."
+      },
+      "media_unsourced": {
+        "fail": "Un necesar de {media} nu are racord.",
+        "suggestion": "Atribuiți un racord."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "O reclamație trebuia să primească răspuns până la {due}.",
+        "suggestion": "Confirmați primirea și răspundeți."
+      },
+      "permit_expired": {
+        "fail": "Autorizația {reference} a expirat, deși mai există transporturi.",
+        "suggestion": "Solicitați o autorizație nouă."
+      },
+      "permit_expiring": {
+        "fail": "Autorizația {reference} expiră curând, deși mai există transporturi.",
+        "suggestion": "Prelungiți autorizația."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: intervalul cade în orele de liniște.",
+        "suggestion": "Mutați-l în afara orelor de liniște sau obțineți o autorizație de lucru de noapte."
+      },
+      "required_document_missing": {
+        "fail": "Documentul obligatoriu {kind} lipsește.",
+        "suggestion": "Obțineți și legați documentul."
+      },
+      "site_timezone_missing": {
+        "fail": "Șantierul nu are fus orar, așa că regulile privind ora din zi nu au fost verificate.",
+        "suggestion": "Setați fusul orar al șantierului în conceptul logistic."
+      },
+      "stage_without_site_setup": {
+        "fail": "Etapa {stage} nu are zonă pentru instalațiile de șantier.",
+        "suggestion": "Alocați o zonă pentru birouri și vestiare."
+      },
+      "stage_without_storage": {
+        "fail": "Etapa {stage} nu are zonă de depozitare sau de stocare.",
+        "suggestion": "Alocați o zonă de depozitare sau de stocare."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: intervalul se află în afara autorizației.",
+        "suggestion": "Mutați intervalul sau prelungiți autorizația."
+      },
+      "zone_not_mapped": {
+        "fail": "Zona de depozitare {zone} nu este legată de o zonă de șantier.",
+        "suggestion": "Legați-o de zona planificată."
+      }
+    }
+  }
+}

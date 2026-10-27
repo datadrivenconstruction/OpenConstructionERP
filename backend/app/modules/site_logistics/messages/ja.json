@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "いいえ",
+        "yes": "はい"
+      },
+      "direction": {
+        "export": "輸出",
+        "import": "輸入",
+        "inbound": "搬入",
+        "outbound": "搬出"
+      },
+      "group": {
+        "built": "施工",
+        "external": "外部",
+        "logistics": "物流",
+        "reserve": "予備"
+      },
+      "is_heavy": {
+        "no": "いいえ",
+        "yes": "はい"
+      },
+      "section": {
+        "balance": "収支",
+        "concept": "コンセプト",
+        "neighbourhood": "近隣",
+        "readiness": "準備状況"
+      },
+      "short": {
+        "no": "いいえ",
+        "yes": "はい"
+      },
+      "state": {
+        "acknowledged": "確認済み",
+        "action_taken": "対応済み",
+        "active": "有効",
+        "applied": "申請済み",
+        "arrived": "到着済み",
+        "authority": "行政機関",
+        "cancelled": "取消",
+        "cleared": "通関済み",
+        "closed": "完了",
+        "connected": "接続済み",
+        "contracted": "契約済み",
+        "declared": "申告済み",
+        "disconnected": "切断済み",
+        "documents_complete": "書類完備",
+        "draft": "下書き",
+        "expired": "期限切れ",
+        "granted": "許可済み",
+        "held": "保留",
+        "identified": "特定済み",
+        "in_transit": "輸送中",
+        "missing": "未提出",
+        "municipality": "自治体",
+        "neighbours": "近隣住民",
+        "offered": "提示済み",
+        "open": "未完了",
+        "other": "その他",
+        "permit_pending": "許可申請中",
+        "planned": "計画済み",
+        "police": "警察",
+        "received": "受領済み",
+        "refused": "不許可",
+        "requested": "依頼済み",
+        "scheduled": "予定済み",
+        "utility": "インフラ事業者",
+        "verified": "検証済み"
+      },
+      "type": {
+        "complaint": "苦情",
+        "coordination": "調整"
+      }
+    },
+    "errors": {
+      "activity_not_found": "このプロジェクトに工程のアクティビティが見つかりません。",
+      "allocation_exceeds_area": "割当量が面積を超えています。",
+      "allocation_negative": "割当量は負の値にできません。",
+      "allocations_changed": "割当が他のユーザーによって変更されました。再読み込みしてやり直してください。",
+      "area_not_found": "現場エリアが見つかりません。",
+      "authority_permit_not_found": "このプロジェクトに行政許可が見つかりません。",
+      "buffer_days_negative": "バッファ日数は負の値にできません。",
+      "catalogue_invalid": "固定されたロジスティクスカタログを解決できません。",
+      "catalogue_retired": "このカタログ版は廃止されています。",
+      "code_required": "コードを入力してください。",
+      "code_taken": "このコードはプロジェクト内で既に使用されています。",
+      "commodity_code_not_found": "品目コードが見つかりません。",
+      "complaint_closed": "完了した苦情は変更できません。",
+      "complaint_not_found": "苦情が見つかりません。",
+      "connection_point_invalid": "接続点が有効な地点ではありません。",
+      "contracted_capacity_required": "先に契約容量を入力してください。",
+      "correspondence_not_found": "このプロジェクトに該当する書類やり取りが見つかりません。",
+      "correspondence_thread_not_found": "このプロジェクトに該当する書類やり取りが見つかりません。",
+      "country_invalid": "2文字のISO国コードを使用してください。",
+      "currency_invalid": "3文字のISO通貨コードを使用してください。",
+      "currency_required": "金額には通貨の指定が必要です。",
+      "customs_case_not_found": "通関案件が見つかりません。",
+      "customs_closed": "通関済みまたは完了した案件は変更できません。",
+      "customs_declared": "申告済みの案件は削除できません。",
+      "customs_not_found": "通関案件が見つかりません。",
+      "customs_without_lines": "先に品目を少なくとも1行追加してください。",
+      "declarant_invalid": "申告者は買主または売主です。",
+      "delivery_already_on_site": "この搬入は既に到着済みのため、再度判定できません。",
+      "delivery_not_found": "このプロジェクトに搬入が見つかりません。",
+      "delivery_rate_exceeded": "この時間帯は、コンセプトで許容される搬入台数に既に達しています。",
+      "delivery_refused": "この搬入は現状のままでは承認できません。",
+      "demand_not_found": "需要が見つかりません。",
+      "demand_owned_by_plant_position": "この需要は機械設備の項目に由来します。そちらで変更してください。",
+      "direction_invalid": "不明な方向です。",
+      "document_exists": "この書類は既にチェックリストにあります。",
+      "document_not_found": "書類が見つかりません。",
+      "document_ref_required": "受領済みにする前に書類を関連付けてください。",
+      "duplicate_stage": "各工程は、エリアごとに1回のみ割り当てできます。",
+      "entry_not_found": "記録が見つかりません。",
+      "field_required": "この項目は空欄にできません。",
+      "flow_code_invalid": "各資材フローには個別のコードが必要です。",
+      "flow_code_unknown": "このロジスティクスコンセプトには、このコードの資材フローがありません。",
+      "flow_mode_invalid": "不明な資材フローの方式です。",
+      "frame_invalid": "不明な座標系です。",
+      "gate_hours_unchecked": "現場のタイムゾーンが設定されるまで、営業時間は確認されません。",
+      "gate_load_exceeded": "積載量が現場出入口の制限を超えています。",
+      "gate_not_found": "このプロジェクトに現場出入口が見つかりません。",
+      "geo_overlay_not_found": "このプロジェクトに現場配置図のオーバーレイが見つかりません。",
+      "geometry_invalid": "エリアの輪郭が有効なポリゴンではありません。",
+      "goods_receipt_missing": "この発注書に対して、まだ確定した入荷記録がありません。",
+      "heavy_without_permit": "重量物輸送は、許可が下りてから手配してください。",
+      "hours_invalid": "有効な時間を入力してください。終了時刻は開始時刻より後である必要があります。",
+      "hs_code_invalid": "HSコードは数字のみで、必要な桁数が必要です。",
+      "incoterm_unknown": "このインコタームズは固定された版に含まれていません。",
+      "invalid_transition": "この状態変更は許可されていません。",
+      "jit_without_takt": "ジャストインタイムの資材フローには、タクト工程表が必要です。",
+      "last_stage": "プロジェクトには少なくとも1つの拡張工程が必要です。",
+      "line_not_found": "通関の品目行が見つかりません。",
+      "link_target_unavailable": "リンク先のモジュールがインストールされていないため、このリンクはまだ確認できません。",
+      "media_not_found": "ユーティリティの接続が見つかりません。",
+      "money_not_decimal": "金額は小数で入力してください。",
+      "money_out_of_range": "金額は小数点以下2桁までで入力してください。",
+      "noise_limit_needs_project_value": "この管轄区域では固定値が定められていません。プロジェクトで合意した値を入力してください。",
+      "not_found": "見つかりません。",
+      "outside_gate_hours": "作業時間帯が出入口の営業時間外です。",
+      "owner_not_member": "担当者はこのプロジェクトのメンバーである必要があります。",
+      "pack_catalogue_invalid": "パックのカタログを読み込めません。",
+      "permission_denied": "この操作の権限がありません。",
+      "permit_frozen": "許可・不許可・期限切れとなった許可は、その有効期間、時間枠、輸送の内容を維持します。",
+      "permit_not_found": "許可が見つかりません。",
+      "plan_calibration_without_image": "縮尺を設定する前に、現場配置図の画像を選択してください。",
+      "plan_document_not_found": "このプロジェクトに現場配置図の書類が見つかりません。",
+      "plan_origin_invalid": "現場配置図の原点は、ピクセル単位のxとyの2つの数値で指定します。",
+      "plan_scale_invalid": "現場配置図の縮尺は0より大きい値である必要があります。",
+      "plant_item_not_found": "このプロジェクトに機械設備の項目が見つかりません。",
+      "plant_position_not_found": "このプロジェクトに機械設備の配置が見つかりません。",
+      "plant_position_required": "機械設備の配置を指定してください。",
+      "po_not_found": "このプロジェクトに発注書が見つかりません。",
+      "project_not_found": "プロジェクトが見つかりません。",
+      "quiet_hours_conflict": "作業時間帯が静穏時間に該当し、それをカバーする夜間作業許可がありません。",
+      "required_document_missing": "必要な書類がまだ不足しています。",
+      "response_required": "先に回答を作成してください。",
+      "route_invalid": "経路が有効な線ではありません。",
+      "simultaneity_factor_range": "同時使用率は0から1の間で指定してください。",
+      "site_timezone_missing": "先に現場のタイムゾーンを設定してください。時刻は現場の時計で確認されます。",
+      "slot_taken": "この出入口のこの時間帯は、別の承認済み搬入が既に確保しています。",
+      "stage_active": "有効な工程は削除できません。先に完了させてください。",
+      "stage_not_found": "拡張工程が見つかりません。",
+      "takt_location_not_found": "このプロジェクトにタクトエリアが見つかりません。",
+      "takt_schedule_not_found": "このプロジェクトにタクト工程表が見つかりません。",
+      "timezone_invalid": "不明なタイムゾーンです。Asia/Tokyo のような名前を使用してください。",
+      "transport_closed": "完了または取消された輸送は変更できません。",
+      "transport_mode_invalid": "不明な輸送方法です。",
+      "transport_not_found": "輸送が見つかりません。",
+      "transport_under_way": "輸送中の案件は削除できません。",
+      "unknown_area_kind": "不明なエリア種別です。",
+      "unknown_catalogue": "不明なカタログです。",
+      "unknown_document_kind": "不明な書類種別です。",
+      "unknown_issue_kind": "不明な苦情の種別です。",
+      "unknown_link_kind": "この種類のリンクに対応する一覧がありません。",
+      "unknown_load_class": "不明な荷重区分です。",
+      "unknown_media_kind": "不明なユーティリティです。",
+      "unknown_noise_limit": "不明な騒音規制の項目です。",
+      "unknown_permit_kind": "不明な許可の種別です。",
+      "unknown_transport_kind": "不明な輸送の種別です。",
+      "validity_invalid": "許可の終了日が開始日より前になっています。",
+      "validity_required": "許可する前に有効期間の日付を入力してください。",
+      "vendor_not_found": "取引先が見つかりません。",
+      "window_invalid": "時間枠が有効ではありません。",
+      "window_outside_permit": "輸送の時間枠が、許可の有効期間または許可された時間の外にあります。",
+      "zone_not_found": "このプロジェクトに仮置きゾーンが見つかりません。",
+      "zone_type_invalid": "不明なゾーン種別です。"
+    },
+    "evidence": {
+      "balance_closed": "未完了の各工程について、エリア収支が締められています",
+      "concept_saved_and_exported": "ロジスティクスコンセプトが保存され、提出されています",
+      "first_stage_media_contracted": "第1工程のユーティリティが契約されています",
+      "gate_loads_admitted": "すべての積載が出入口で許可されているか、過積載許可の対象です",
+      "heavy_transports_permitted": "すべての重量物輸送について許可が下りています",
+      "neighbourhood_limit_source": "騒音規制の根拠が設定されています",
+      "no_errors": "未解決のロジスティクス上のエラーはありません",
+      "unresolved": "ロジスティクス計画をガバナンスモデルに位置付けられませんでした"
+    },
+    "export": {
+      "as_of": "基準日",
+      "col_area_kind": "エリア種別",
+      "col_closed": "完了",
+      "col_contracted": "契約済み",
+      "col_date": "日付",
+      "col_direction": "方向",
+      "col_documents": "必要書類",
+      "col_due": "期限",
+      "col_group": "区分",
+      "col_heavy": "重量物",
+      "col_hs_codes": "HSコード",
+      "col_incoterm": "インコタームズ",
+      "col_item": "項目",
+      "col_m2": "m2",
+      "col_media_kind": "ユーティリティ",
+      "col_named_place": "指定地",
+      "col_pct": "%",
+      "col_permits": "許可",
+      "col_required": "必要",
+      "col_section": "セクション",
+      "col_short": "短期",
+      "col_stage": "工程",
+      "col_state": "状態",
+      "col_title": "件名",
+      "col_topic": "項目名",
+      "col_transport_kind": "種別",
+      "col_type": "種類",
+      "col_unit": "単位",
+      "col_value": "値",
+      "col_window": "時間枠",
+      "empty": "該当する記録はありません。",
+      "project": "プロジェクト",
+      "title_balance": "エリア収支",
+      "title_customs": "通関案件ファイル一覧",
+      "title_frame": "ロジスティクス枠組みの概要",
+      "title_media": "ユーティリティ収支",
+      "title_neighbourhood": "近隣対応記録",
+      "title_transports": "輸送と許可"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "工程 {stage}: 割当が、そのエリアの面積を超えています。",
+        "suggestion": "割当量を減らしてください。"
+      },
+      "area_balance_not_closed": {
+        "fail": "工程 {stage}: エリア収支が合っていません（差 {difference_m2} m2）。",
+        "suggestion": "残りの面積を割り当てるか、現場全体の面積を修正してください。"
+      },
+      "area_overlap": {
+        "fail": "工程 {stage}: 種別の異なる2つのエリアが重なっています。",
+        "suggestion": "輪郭を調整してください。"
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "申告者が、インコタームズ上で輸入通関を行う当事者と一致しません。",
+        "suggestion": "申告者またはインコタームズを確認してください。"
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{hour} 時台に承認済みの搬入が {count} 件あります。コンセプトでは {limit} 件までです。",
+        "suggestion": "搬入を別の時間帯に移すか、コンセプトで上限を引き上げてください。"
+      },
+      "gate_hours_unchecked": {
+        "fail": "現場にタイムゾーンが設定されていないため、搬入は営業時間と照合されていません。",
+        "suggestion": "ロジスティクスコンセプトで現場のタイムゾーンを設定してください。"
+      },
+      "gate_limits_unknown": {
+        "fail": "現場出入口 {gate} に積載制限が記載されていません。",
+        "suggestion": "重量と寸法の制限値を入力してください。"
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: 積載量が現場出入口の制限を超えています。",
+        "suggestion": "別の出入口を使うか、積載を分割してください。"
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: 許可が下りていない重量物輸送です。",
+        "suggestion": "許可を申請してください。"
+      },
+      "hs_code_invalid": {
+        "fail": "HSコード {hs_code} は有効ではありません。",
+        "suggestion": "数字のみを使用し、最低桁数以上にしてください。"
+      },
+      "incoterm_sea_only": {
+        "fail": "インコタームズ {incoterm} は海上輸送専用です。",
+        "suggestion": "他の輸送方法では FCA、CPT、CIP を使用してください。"
+      },
+      "incoterm_unknown": {
+        "fail": "インコタームズ {incoterm} は固定された版に含まれていません。",
+        "suggestion": "固定された版の条件から選択してください。"
+      },
+      "jit_late": {
+        "fail": "{title}: ジャストインタイムの搬入が、タクト開始より後になっています。",
+        "suggestion": "搬入を前倒ししてください。"
+      },
+      "jit_too_early": {
+        "fail": "{title}: ジャストインタイムの搬入が、バッファで許容される時期より早くなっています。",
+        "suggestion": "タクト開始に近い時期に移してください。"
+      },
+      "jit_without_location": {
+        "fail": "{title}: 資材フロー {flow} のジャストインタイム搬入に、タクトエリアが指定されていません。",
+        "suggestion": "搬入先となるタクトエリアを選択してください。"
+      },
+      "media_capacity_short": {
+        "fail": "工程 {stage}: {media} は {required} が必要ですが、契約済みは {contracted} です。",
+        "suggestion": "契約容量を増やすか、需要を減らしてください。"
+      },
+      "media_late": {
+        "fail": "工程 {stage}: {media} の接続が工程開始後に予定されています。",
+        "suggestion": "より早い日付か、仮設供給を合意してください。"
+      },
+      "media_unsourced": {
+        "fail": "{media} の需要に接続先がありません。",
+        "suggestion": "接続先を割り当ててください。"
+      },
+      "neighbour_issue_overdue": {
+        "fail": "苦情への回答期限が {due} でした。",
+        "suggestion": "受付を確認し、回答してください。"
+      },
+      "permit_expired": {
+        "fail": "許可 {reference} が期限切れになりましたが、輸送がまだ残っています。",
+        "suggestion": "新しい許可を申請してください。"
+      },
+      "permit_expiring": {
+        "fail": "許可 {reference} はまもなく期限切れになりますが、輸送がまだ残っています。",
+        "suggestion": "許可を延長してください。"
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: 時間枠が静穏時間に入っています。",
+        "suggestion": "静穏時間の外に移すか、夜間作業の許可を取得してください。"
+      },
+      "required_document_missing": {
+        "fail": "必要書類 {kind} が不足しています。",
+        "suggestion": "書類を入手して関連付けてください。"
+      },
+      "site_timezone_missing": {
+        "fail": "現場にタイムゾーンが設定されていないため、時刻に関する規則は確認されていません。",
+        "suggestion": "ロジスティクスコンセプトで現場のタイムゾーンを設定してください。"
+      },
+      "stage_without_site_setup": {
+        "fail": "工程 {stage} に現場設備エリアがありません。",
+        "suggestion": "事務所と仮設福利施設用のエリアを割り当ててください。"
+      },
+      "stage_without_storage": {
+        "fail": "工程 {stage} に保管エリアまたは仮置きエリアがありません。",
+        "suggestion": "保管エリアまたは仮置きエリアを割り当ててください。"
+      },
+      "window_outside_permit": {
+        "fail": "{title}: 時間枠が許可の範囲外です。",
+        "suggestion": "時間枠を移すか、許可を延長してください。"
+      },
+      "zone_not_mapped": {
+        "fail": "仮置きゾーン {zone} が現場エリアに関連付けられていません。",
+        "suggestion": "計画されたエリアに関連付けてください。"
+      }
+    }
+  }
+}

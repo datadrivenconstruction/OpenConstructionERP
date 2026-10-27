@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Nem",
+        "yes": "Igen"
+      },
+      "direction": {
+        "export": "Kivitel",
+        "import": "Behozatal",
+        "inbound": "Beérkező",
+        "outbound": "Kimenő"
+      },
+      "group": {
+        "built": "Beépített",
+        "external": "Külső",
+        "logistics": "Logisztika",
+        "reserve": "Tartalék"
+      },
+      "is_heavy": {
+        "no": "Nem",
+        "yes": "Igen"
+      },
+      "section": {
+        "balance": "Mérleg",
+        "concept": "Koncepció",
+        "neighbourhood": "Környezet",
+        "readiness": "Készültség"
+      },
+      "short": {
+        "no": "Nem",
+        "yes": "Igen"
+      },
+      "state": {
+        "acknowledged": "Tudomásul véve",
+        "action_taken": "Intézkedés megtéve",
+        "active": "Aktív",
+        "applied": "Benyújtva",
+        "arrived": "Megérkezett",
+        "authority": "Hatóság",
+        "cancelled": "Visszavonva",
+        "cleared": "Vámkezelve",
+        "closed": "Lezárva",
+        "connected": "Csatlakoztatva",
+        "contracted": "Szerződött",
+        "declared": "Bejelentve",
+        "disconnected": "Leválasztva",
+        "documents_complete": "Dokumentumok teljesek",
+        "draft": "Tervezet",
+        "expired": "Lejárt",
+        "granted": "Megadva",
+        "held": "Visszatartva",
+        "identified": "Azonosítva",
+        "in_transit": "Úton",
+        "missing": "Hiányzik",
+        "municipality": "Önkormányzat",
+        "neighbours": "Szomszédok",
+        "offered": "Ajánlva",
+        "open": "Nyitott",
+        "other": "Egyéb",
+        "permit_pending": "Engedély folyamatban",
+        "planned": "Tervezett",
+        "police": "Rendőrség",
+        "received": "Beérkezett",
+        "refused": "Elutasítva",
+        "requested": "Igényelve",
+        "scheduled": "Ütemezve",
+        "utility": "Közmű",
+        "verified": "Ellenőrizve"
+      },
+      "type": {
+        "complaint": "Panasz",
+        "coordination": "Koordináció"
+      }
+    },
+    "errors": {
+      "activity_not_found": "A tevékenység nem található a projektben.",
+      "allocation_exceeds_area": "A hozzárendelés nagyobb, mint a terület.",
+      "allocation_negative": "A hozzárendelés nem lehet negatív.",
+      "allocations_changed": "A hozzárendeléseket más módosította. Töltse újra az oldalt, és próbálja újra.",
+      "area_not_found": "A telephely-terület nem található.",
+      "authority_permit_not_found": "A hatósági engedély nem található a projektben.",
+      "buffer_days_negative": "A tartalék napok nem lehetnek negatívak.",
+      "catalogue_invalid": "A rögzített logisztikai katalógus nem oldható fel.",
+      "catalogue_retired": "Ez a katalógusverzió ki van vonva.",
+      "code_required": "Kód megadása kötelező.",
+      "code_taken": "Ez a kód már használatban van a projektben.",
+      "commodity_code_not_found": "Az árucikkszám nem található.",
+      "complaint_closed": "A lezárt panasz nem módosítható.",
+      "complaint_not_found": "A panasz nem található.",
+      "connection_point_invalid": "A csatlakozási pont nem érvényes pont.",
+      "contracted_capacity_required": "Előbb adja meg a szerződött kapacitást.",
+      "correspondence_not_found": "A levelezés nem található a projektben.",
+      "correspondence_thread_not_found": "A levelezés nem található a projektben.",
+      "country_invalid": "Használjon kétbetűs ISO országkódot.",
+      "currency_invalid": "Használjon hárombetűs ISO pénznemkódot.",
+      "currency_required": "Az összeghez pénznem szükséges.",
+      "customs_case_not_found": "A vámügy nem található.",
+      "customs_closed": "A vámkezelt vagy lezárt ügy nem módosítható.",
+      "customs_declared": "A bejelentett vámügy nem törölhető.",
+      "customs_not_found": "A vámügy nem található.",
+      "customs_without_lines": "Előbb adjon hozzá legalább egy árutételt.",
+      "declarant_invalid": "A vámáru-bejelentő a vevő vagy az eladó.",
+      "delivery_already_on_site": "Ez a szállítmány már megérkezett, nem lehet újra döntést hozni róla.",
+      "delivery_not_found": "A szállítmány nem található a projektben.",
+      "delivery_rate_exceeded": "Ez az óra már elérte a koncepció által megengedett szállítmányszámot.",
+      "delivery_refused": "Ez a szállítmány így nem hagyható jóvá.",
+      "demand_not_found": "Az igény nem található.",
+      "demand_owned_by_plant_position": "Ez az igény egy gépészeti tételből származik; ott módosítsa.",
+      "direction_invalid": "Ismeretlen irány.",
+      "document_exists": "Ez a dokumentum már szerepel az ellenőrzőlistán.",
+      "document_not_found": "A dokumentum nem található.",
+      "document_ref_required": "Kapcsolja hozzá a dokumentumot, mielőtt beérkezettnek jelöli.",
+      "duplicate_stage": "Minden szakasz területenként csak egyszer rendelhető hozzá.",
+      "entry_not_found": "A naplóbejegyzés nem található.",
+      "field_required": "Ez a mező nem lehet üres.",
+      "flow_code_invalid": "Minden anyagáramnak saját kódja kell legyen.",
+      "flow_code_unknown": "A logisztikai koncepcióban nincs ilyen kódú anyagáram.",
+      "flow_mode_invalid": "Ismeretlen anyagáram-mód.",
+      "frame_invalid": "Ismeretlen koordinátarendszer.",
+      "gate_hours_unchecked": "A nyitvatartás nem ellenőrizhető, amíg nincs beállítva a telephely időzónája.",
+      "gate_load_exceeded": "A terhelés meghaladja a telephelybejárat korlátait.",
+      "gate_not_found": "A telephelybejárat nem található a projektben.",
+      "geo_overlay_not_found": "A telephelyterv-réteg nem található a projektben.",
+      "geometry_invalid": "A terület körvonala nem érvényes sokszög.",
+      "goods_receipt_missing": "Ehhez a megrendeléshez még nincs megerősített áruátvétel.",
+      "heavy_without_permit": "A nehéz szállítmány ütemezése előtt megadott engedély szükséges.",
+      "hours_invalid": "Adjon meg érvényes órákat, a befejezés a kezdés után legyen.",
+      "hs_code_invalid": "A HS-kód csak számjegyeket tartalmazhat, és elég hosszúnak kell lennie.",
+      "incoterm_unknown": "Ez az incoterm nincs benne a rögzített verzióban.",
+      "invalid_transition": "Ez az állapotváltás nem engedélyezett.",
+      "jit_without_takt": "A just-in-time anyagáramhoz taktütemezés szükséges.",
+      "last_stage": "A projektben legalább egy bővítési szakasznak maradnia kell.",
+      "line_not_found": "A vámtétel nem található.",
+      "link_target_unavailable": "Ez a hivatkozás még nem ellenőrizhető, mert a célmodul nincs telepítve.",
+      "media_not_found": "A közmű-csatlakozás nem található.",
+      "money_not_decimal": "Az összeget tizedes számként adja meg.",
+      "money_out_of_range": "Az összeg legfeljebb két tizedesjegyet tartalmazhat.",
+      "noise_limit_needs_project_value": "Ez az illetékesség nem ad meg rögzített értékeket; adja meg a projekt hozzájárulással engedélyezett értékeit.",
+      "not_found": "Nem található.",
+      "outside_gate_hours": "Az időablak a bejárat nyitvatartásán kívül esik.",
+      "owner_not_member": "A felelősnek a projekt tagjának kell lennie.",
+      "pack_catalogue_invalid": "A csomag katalógusa nem tölthető be.",
+      "permission_denied": "Ehhez nincs jogosultsága.",
+      "permit_frozen": "A megadott, elutasított vagy lejárt engedély megtartja érvényességét, időablakait és szállításait.",
+      "permit_not_found": "Az engedély nem található.",
+      "plan_calibration_without_image": "A léptékezés előtt válassza ki a telephelyterv képét.",
+      "plan_document_not_found": "A telephelyterv dokumentuma nem található a projektben.",
+      "plan_origin_invalid": "A telephelyterv origója két szám, x és y pixelben.",
+      "plan_scale_invalid": "A telephelyterv léptékének nagyobbnak kell lennie nullánál.",
+      "plant_item_not_found": "A gépészeti tétel nem található a projektben.",
+      "plant_position_not_found": "A gépészeti tétel nem található a projektben.",
+      "plant_position_required": "Gépészeti tétel megadása kötelező.",
+      "po_not_found": "A megrendelés nem található a projektben.",
+      "project_not_found": "A projekt nem található.",
+      "quiet_hours_conflict": "Az időablak csendes órákba esik, és nincs rá éjszakai munkavégzési engedély.",
+      "required_document_missing": "Egy kötelező dokumentum még hiányzik.",
+      "response_required": "Előbb írja meg a választ.",
+      "route_invalid": "Az útvonal nem érvényes vonal.",
+      "simultaneity_factor_range": "Az egyidejűségi tényező 0 és 1 közé esik.",
+      "site_timezone_missing": "Előbb állítsa be a telephely időzónáját; az időpontokat a helyi óra szerint ellenőrizzük.",
+      "slot_taken": "Egy másik jóváhagyott szállítmány már lefoglalta ezt az időablakot a bejáratnál.",
+      "stage_active": "Aktív szakasz nem törölhető. Előbb zárja le.",
+      "stage_not_found": "A bővítési szakasz nem található.",
+      "takt_location_not_found": "A takt-terület nem található a projektben.",
+      "takt_schedule_not_found": "A taktütemezés nem található a projektben.",
+      "timezone_invalid": "Ismeretlen időzóna. Használjon nevet, például Europe/Budapest.",
+      "transport_closed": "A lezárt vagy visszavont szállítás nem módosítható.",
+      "transport_mode_invalid": "Ismeretlen szállítási mód.",
+      "transport_not_found": "A szállítás nem található.",
+      "transport_under_way": "Úton lévő szállítás nem törölhető.",
+      "unknown_area_kind": "Ismeretlen területtípus.",
+      "unknown_catalogue": "Ismeretlen katalógus.",
+      "unknown_document_kind": "Ismeretlen dokumentumtípus.",
+      "unknown_issue_kind": "Ismeretlen panasztípus.",
+      "unknown_link_kind": "Ehhez a hivatkozástípushoz nincs lista.",
+      "unknown_load_class": "Ismeretlen terhelési osztály.",
+      "unknown_media_kind": "Ismeretlen közmű.",
+      "unknown_noise_limit": "Ismeretlen zajkorlát-bejegyzés.",
+      "unknown_permit_kind": "Ismeretlen engedélytípus.",
+      "unknown_transport_kind": "Ismeretlen szállítástípus.",
+      "validity_invalid": "Az engedély a kezdete előtt jár le.",
+      "validity_required": "A megadás előtt adja meg az érvényességi dátumokat.",
+      "vendor_not_found": "A szállító nem található.",
+      "window_invalid": "Az időablak nem érvényes.",
+      "window_outside_permit": "A szállítási időablak kívül esik az engedély érvényességén vagy az engedélyezett időkön.",
+      "zone_not_found": "A raktározási zóna nem található a projektben.",
+      "zone_type_invalid": "Ismeretlen zónatípus."
+    },
+    "evidence": {
+      "balance_closed": "A területmérleg minden nyitott szakaszra lezárva",
+      "concept_saved_and_exported": "A logisztikai koncepció mentve és iktatva",
+      "first_stage_media_contracted": "Az első szakasz közművei szerződve",
+      "gate_loads_admitted": "Minden terhelés engedélyezve a bejáratán, vagy fedezi túlméretes engedély",
+      "heavy_transports_permitted": "Minden nehéz szállításhoz megadott engedély",
+      "neighbourhood_limit_source": "Zajkorlát-forrás beállítva",
+      "no_errors": "Nincs nyitott logisztikai hiba",
+      "unresolved": "A logisztikai terv nem helyezhető el az irányítási modellben"
+    },
+    "export": {
+      "as_of": "Időpont",
+      "col_area_kind": "Területtípus",
+      "col_closed": "Lezárva",
+      "col_contracted": "Szerződött",
+      "col_date": "Dátum",
+      "col_direction": "Irány",
+      "col_documents": "Szükséges dokumentumok",
+      "col_due": "Határidő",
+      "col_group": "Csoport",
+      "col_heavy": "Nehéz",
+      "col_hs_codes": "HS-kódok",
+      "col_incoterm": "Incoterm",
+      "col_item": "Tétel",
+      "col_m2": "m2",
+      "col_media_kind": "Közmű",
+      "col_named_place": "Megnevezett hely",
+      "col_pct": "%",
+      "col_permits": "Engedélyek",
+      "col_required": "Szükséges",
+      "col_section": "Szakasz",
+      "col_short": "Rövid",
+      "col_stage": "Szakasz",
+      "col_state": "Állapot",
+      "col_title": "Megnevezés",
+      "col_topic": "Téma",
+      "col_transport_kind": "Típus",
+      "col_type": "Típus",
+      "col_unit": "Egység",
+      "col_value": "Érték",
+      "col_window": "Időablak",
+      "empty": "Nincs bejegyzés.",
+      "project": "Projekt",
+      "title_balance": "Területmérleg",
+      "title_customs": "Vámügyi aktajegyzék",
+      "title_frame": "Logisztikai keret összefoglaló",
+      "title_media": "Közmű-mérleg",
+      "title_neighbourhood": "Környezeti napló",
+      "title_transports": "Szállítások és engedélyek"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "{stage} szakasz: egy hozzárendelés nagyobb, mint a területe.",
+        "suggestion": "Csökkentse a hozzárendelést."
+      },
+      "area_balance_not_closed": {
+        "fail": "{stage} szakasz: a területmérleg nem zár ({difference_m2} m2 eltérés).",
+        "suggestion": "Rendelje hozzá a fennmaradó területet, vagy javítsa a telephely összterületét."
+      },
+      "area_overlap": {
+        "fail": "{stage} szakasz: két, eltérő típusú terület átfedésben van.",
+        "suggestion": "Igazítsa a körvonalakat."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "A vámáru-bejelentő nem egyezik azzal, aki az incoterm szerint a behozatali vámkezelést végzi.",
+        "suggestion": "Ellenőrizze a bejelentőt vagy az incotermet."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} jóváhagyott szállítmány indul a {hour} órától kezdődő órában, a koncepció ennyit enged meg: {limit}.",
+        "suggestion": "Helyezze át a szállítmányokat másik órára, vagy emelje meg a limitet a koncepcióban."
+      },
+      "gate_hours_unchecked": {
+        "fail": "A telephelynek nincs időzónája, ezért a szállításokat nem vetettük össze a nyitvatartással.",
+        "suggestion": "Állítsa be a telephely időzónáját a logisztikai koncepcióban."
+      },
+      "gate_limits_unknown": {
+        "fail": "A(z) {gate} telephelybejárathoz nincs terhelési korlát megadva.",
+        "suggestion": "Adja meg a súly- és méretkorlátokat."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: a terhelés meghaladja a telephelybejárat korlátait.",
+        "suggestion": "Használjon másik bejáratot, vagy ossza fel a terhelést."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: nehéz szállítás megadott engedély nélkül.",
+        "suggestion": "Igényeljen engedélyt."
+      },
+      "hs_code_invalid": {
+        "fail": "A(z) {hs_code} HS-kód nem érvényes.",
+        "suggestion": "Csak számjegyeket használjon, legalább a minimális hosszban."
+      },
+      "incoterm_sea_only": {
+        "fail": "A(z) {incoterm} incoterm csak tengeri szállításra vonatkozik.",
+        "suggestion": "Más szállítási módnál használja a FCA, CPT vagy CIP kifejezést."
+      },
+      "incoterm_unknown": {
+        "fail": "A(z) {incoterm} incoterm nincs benne a rögzített verzióban.",
+        "suggestion": "Válasszon a rögzített verzió kifejezései közül."
+      },
+      "jit_late": {
+        "fail": "{title}: a just-in-time szállítmány a takt-kezdés után érkezik.",
+        "suggestion": "Hozza előbbre a szállítmányt."
+      },
+      "jit_too_early": {
+        "fail": "{title}: a just-in-time szállítmány a tartalékidő által megengedettnél korábban érkezik.",
+        "suggestion": "Helyezze közelebb a takt-kezdéshez."
+      },
+      "jit_without_location": {
+        "fail": "{title}: a(z) {flow} anyagáram just-in-time szállítmánya nem nevez meg takt-területet.",
+        "suggestion": "Válassza ki azt a takt-területet, amelyhez a szállítmány tartozik."
+      },
+      "media_capacity_short": {
+        "fail": "{stage} szakasz: a(z) {media} igénye {required}, szerződött mennyiség {contracted}.",
+        "suggestion": "Növelje a szerződött kapacitást, vagy csökkentse az igényt."
+      },
+      "media_late": {
+        "fail": "{stage} szakasz: a(z) {media} csatlakozás a szakasz kezdete után esedékes.",
+        "suggestion": "Állapodjon meg korábbi határidőben vagy ideiglenes ellátásban."
+      },
+      "media_unsourced": {
+        "fail": "A(z) {media} igénynek nincs csatlakozása.",
+        "suggestion": "Rendeljen hozzá csatlakozást."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Egy panaszra a választ {due} napjáig kellett volna megadni.",
+        "suggestion": "Nyugtázza és válaszoljon rá."
+      },
+      "permit_expired": {
+        "fail": "A(z) {reference} engedély lejárt, miközben szállítások még hátravannak.",
+        "suggestion": "Igényeljen új engedélyt."
+      },
+      "permit_expiring": {
+        "fail": "A(z) {reference} engedély hamarosan lejár, miközben szállítások még hátravannak.",
+        "suggestion": "Hosszabbítsa meg az engedélyt."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: az időablak a csendes órákba esik.",
+        "suggestion": "Helyezze a csendes órákon kívülre, vagy szerezzen éjszakai munkavégzési engedélyt."
+      },
+      "required_document_missing": {
+        "fail": "A(z) {kind} kötelező dokumentum hiányzik.",
+        "suggestion": "Szerezze be és kapcsolja hozzá a dokumentumot."
+      },
+      "site_timezone_missing": {
+        "fail": "A telephelynek nincs időzónája, ezért a napszakhoz kötött szabályokat nem ellenőriztük.",
+        "suggestion": "Állítsa be a telephely időzónáját a logisztikai koncepcióban."
+      },
+      "stage_without_site_setup": {
+        "fail": "A(z) {stage} szakaszhoz nincs telephely-berendezési terület.",
+        "suggestion": "Rendeljen területet irodáknak és szociális helyiségeknek."
+      },
+      "stage_without_storage": {
+        "fail": "A(z) {stage} szakaszhoz nincs tároló- vagy lerakóterület.",
+        "suggestion": "Rendeljen tároló- vagy lerakóterületet."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: az időablak az engedélyen kívül esik.",
+        "suggestion": "Helyezze át az időablakot, vagy hosszabbítsa meg az engedélyt."
+      },
+      "zone_not_mapped": {
+        "fail": "A(z) {zone} lerakózóna nincs telephelyterülethez kapcsolva.",
+        "suggestion": "Kapcsolja a tervezett területhez."
+      }
+    }
+  }
+}

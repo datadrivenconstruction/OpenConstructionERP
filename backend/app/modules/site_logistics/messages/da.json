@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Nej",
+        "yes": "Ja"
+      },
+      "direction": {
+        "export": "Eksport",
+        "import": "Import",
+        "inbound": "Indgående",
+        "outbound": "Udgående"
+      },
+      "group": {
+        "built": "Bebygget",
+        "external": "Ekstern",
+        "logistics": "Logistik",
+        "reserve": "Reserve"
+      },
+      "is_heavy": {
+        "no": "Nej",
+        "yes": "Ja"
+      },
+      "section": {
+        "balance": "Balance",
+        "concept": "Koncept",
+        "neighbourhood": "Naboforhold",
+        "readiness": "Klargøring"
+      },
+      "short": {
+        "no": "Nej",
+        "yes": "Ja"
+      },
+      "state": {
+        "acknowledged": "Kvitteret",
+        "action_taken": "Foranstaltning iværksat",
+        "active": "Aktiv",
+        "applied": "Ansøgt",
+        "arrived": "Ankommet",
+        "authority": "Myndighed",
+        "cancelled": "Annulleret",
+        "cleared": "Frigivet",
+        "closed": "Lukket",
+        "connected": "Tilsluttet",
+        "contracted": "Kontrakteret",
+        "declared": "Angivet",
+        "disconnected": "Afbrudt",
+        "documents_complete": "Dokumenter komplette",
+        "draft": "Kladde",
+        "expired": "Udløbet",
+        "granted": "Givet",
+        "held": "Tilbageholdt",
+        "identified": "Identificeret",
+        "in_transit": "Under transport",
+        "missing": "Mangler",
+        "municipality": "Kommune",
+        "neighbours": "Naboer",
+        "offered": "Tilbudt",
+        "open": "Åben",
+        "other": "Andet",
+        "permit_pending": "Tilladelse afventer",
+        "planned": "Planlagt",
+        "police": "Politi",
+        "received": "Modtaget",
+        "refused": "Afslået",
+        "requested": "Anmodet",
+        "scheduled": "Planlagt tidspunkt",
+        "utility": "Forsyningsselskab",
+        "verified": "Verificeret"
+      },
+      "type": {
+        "complaint": "Klage",
+        "coordination": "Koordinering"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Planlagt aktivitet blev ikke fundet i dette projekt.",
+      "allocation_exceeds_area": "Allokeringen er større end arealet.",
+      "allocation_negative": "En allokering kan ikke være negativ.",
+      "allocations_changed": "Allokeringerne er ændret af en anden. Genindlæs og prøv igen.",
+      "area_not_found": "Byggepladsens areal blev ikke fundet.",
+      "authority_permit_not_found": "Myndighedstilladelsen blev ikke fundet i dette projekt.",
+      "buffer_days_negative": "Bufferdage kan ikke være negative.",
+      "catalogue_invalid": "Den fastlåste logistikkatalog kan ikke indlæses.",
+      "catalogue_retired": "Denne katalogversion er udgået.",
+      "code_required": "Der kræves en kode.",
+      "code_taken": "Denne kode er allerede brugt i projektet.",
+      "commodity_code_not_found": "Varekoden blev ikke fundet.",
+      "complaint_closed": "En lukket klage kan ikke ændres.",
+      "complaint_not_found": "Klagen blev ikke fundet.",
+      "connection_point_invalid": "Tilslutningspunktet er ikke et gyldigt punkt.",
+      "contracted_capacity_required": "Angiv først den kontraherede kapacitet.",
+      "correspondence_not_found": "Korrespondancen blev ikke fundet i dette projekt.",
+      "correspondence_thread_not_found": "Korrespondancen blev ikke fundet i dette projekt.",
+      "country_invalid": "Brug en tobogstavs ISO-landekode.",
+      "currency_invalid": "Brug en ISO-valutakode med tre bogstaver.",
+      "currency_required": "Et beløb skal have en valuta.",
+      "customs_case_not_found": "Toldsagen blev ikke fundet.",
+      "customs_closed": "En frigivet eller lukket sag kan ikke ændres.",
+      "customs_declared": "En angivet sag kan ikke slettes.",
+      "customs_not_found": "Toldsagen blev ikke fundet.",
+      "customs_without_lines": "Tilføj først mindst én varelinje.",
+      "declarant_invalid": "Angiveren er køberen eller sælgeren.",
+      "delivery_already_on_site": "Denne leverance er allerede ankommet og træffes ikke igen.",
+      "delivery_not_found": "Leverancen blev ikke fundet i dette projekt.",
+      "delivery_rate_exceeded": "Denne time rummer allerede det antal leverancer, konceptet tillader.",
+      "delivery_refused": "Denne leverance kan ikke godkendes i sin nuværende form.",
+      "demand_not_found": "Behovet blev ikke fundet.",
+      "demand_owned_by_plant_position": "Dette behov stammer fra en maskinpost; ændr det der.",
+      "direction_invalid": "Ukendt retning.",
+      "document_exists": "Dette dokument er allerede på tjeklisten.",
+      "document_not_found": "Dokumentet blev ikke fundet.",
+      "document_ref_required": "Knyt dokumentet, før det markeres som modtaget.",
+      "duplicate_stage": "Hver etape kan kun allokeres én gang pr. areal.",
+      "entry_not_found": "Logposten blev ikke fundet.",
+      "field_required": "Feltet må ikke være tomt.",
+      "flow_code_invalid": "Hvert materialeflow skal have sin egen kode.",
+      "flow_code_unknown": "Logistikkonceptet har ikke et materialeflow med denne kode.",
+      "flow_mode_invalid": "Ukendt materialeflowtilstand.",
+      "frame_invalid": "Ukendt koordinatsystem.",
+      "gate_hours_unchecked": "Åbningstiderne kontrolleres ikke, før byggepladsens tidszone er angivet.",
+      "gate_load_exceeded": "Lasten overskrider grænserne for byggepladsens indkørsel.",
+      "gate_not_found": "Byggepladsens indkørsel blev ikke fundet i dette projekt.",
+      "geo_overlay_not_found": "Situationsplanens overlay blev ikke fundet i dette projekt.",
+      "geometry_invalid": "Områdets afgrænsning er ikke en gyldig polygon.",
+      "goods_receipt_missing": "Der er endnu ingen bekræftet varemodtagelse for denne indkøbsordre.",
+      "heavy_without_permit": "Tung transport kræver en givet tilladelse, før den planlægges.",
+      "hours_invalid": "Angiv gyldige timer, med slut efter start.",
+      "hs_code_invalid": "HS-koden må kun indeholde cifre og skal være lang nok.",
+      "incoterm_unknown": "Denne incoterm findes ikke i den fastlåste version.",
+      "invalid_transition": "Denne statusændring er ikke tilladt.",
+      "jit_without_takt": "Et just-in-time-flow kræver en takt-plan.",
+      "last_stage": "Et projekt skal have mindst én udvidelsesetape.",
+      "line_not_found": "Toldlinjen blev ikke fundet.",
+      "link_target_unavailable": "Dette link kan ikke kontrolleres endnu, fordi modulet, det peger på, ikke er installeret.",
+      "media_not_found": "Forsyningstilslutningen blev ikke fundet.",
+      "money_not_decimal": "Angiv beløbet som et decimaltal.",
+      "money_out_of_range": "Angiv et beløb med højst to decimaler.",
+      "noise_limit_needs_project_value": "Denne jurisdiktion fastsætter ingen faste værdier; angiv projektets godkendte værdier.",
+      "not_found": "Ikke fundet.",
+      "outside_gate_hours": "Tidsvinduet ligger uden for indkørslens åbningstider.",
+      "owner_not_member": "Ejeren skal være medlem af dette projekt.",
+      "pack_catalogue_invalid": "Pakkens katalog kan ikke indlæses.",
+      "permission_denied": "Du har ikke tilladelse til dette.",
+      "permit_frozen": "En tilladelse, der er givet, afslået eller udløbet, beholder sin gyldighed, sine vinduer og sine transporter.",
+      "permit_not_found": "Tilladelsen blev ikke fundet.",
+      "plan_calibration_without_image": "Vælg billedet af situationsplanen, før du angiver dens skala.",
+      "plan_document_not_found": "Situationsplanens dokument blev ikke fundet i dette projekt.",
+      "plan_origin_invalid": "Situationsplanens udgangspunkt er to tal, x og y, i pixels.",
+      "plan_scale_invalid": "Situationsplanens skala skal være større end nul.",
+      "plant_item_not_found": "Maskinposten blev ikke fundet i dette projekt.",
+      "plant_position_not_found": "Maskinpositionen blev ikke fundet i dette projekt.",
+      "plant_position_required": "En maskinposition er påkrævet.",
+      "po_not_found": "Indkøbsordren blev ikke fundet i dette projekt.",
+      "project_not_found": "Projektet blev ikke fundet.",
+      "quiet_hours_conflict": "Tidsvinduet falder i stilletiden, og ingen tilladelse til natarbejde dækker det.",
+      "required_document_missing": "Et påkrævet dokument mangler stadig.",
+      "response_required": "Skriv svaret først.",
+      "route_invalid": "Ruten er ikke en gyldig linje.",
+      "simultaneity_factor_range": "Samtidighedsfaktoren skal ligge mellem 0 og 1.",
+      "site_timezone_missing": "Angiv først byggepladsens tidszone; tider kontrolleres efter pladsens ur.",
+      "slot_taken": "En anden godkendt leverance har allerede dette tidsvindue ved indkørslen.",
+      "stage_active": "En aktiv etape kan ikke slettes. Luk den først.",
+      "stage_not_found": "Udvidelsesetapen blev ikke fundet.",
+      "takt_location_not_found": "Taktområdet blev ikke fundet i dette projekt.",
+      "takt_schedule_not_found": "Taktplanen blev ikke fundet i dette projekt.",
+      "timezone_invalid": "Ukendt tidszone. Brug et navn som Europe/Berlin.",
+      "transport_closed": "En lukket eller annulleret transport kan ikke ændres.",
+      "transport_mode_invalid": "Ukendt transportform.",
+      "transport_not_found": "Transporten blev ikke fundet.",
+      "transport_under_way": "En transport, der er undervejs, kan ikke slettes.",
+      "unknown_area_kind": "Ukendt områdetype.",
+      "unknown_catalogue": "Ukendt katalog.",
+      "unknown_document_kind": "Ukendt dokumenttype.",
+      "unknown_issue_kind": "Ukendt klagetype.",
+      "unknown_link_kind": "Der findes ingen liste for denne type link.",
+      "unknown_load_class": "Ukendt lastklasse.",
+      "unknown_media_kind": "Ukendt forsyning.",
+      "unknown_noise_limit": "Ukendt støjgrænseangivelse.",
+      "unknown_permit_kind": "Ukendt tilladelsestype.",
+      "unknown_transport_kind": "Ukendt transporttype.",
+      "validity_invalid": "Tilladelsen udløber, før den starter.",
+      "validity_required": "Angiv gyldighedsdatoerne, før tilladelsen gives.",
+      "vendor_not_found": "Leverandøren blev ikke fundet.",
+      "window_invalid": "Tidsvinduet er ikke gyldigt.",
+      "window_outside_permit": "Transportvinduet ligger uden for tilladelsens gyldighed eller dens tilladte tider.",
+      "zone_not_found": "Oplagsområdet blev ikke fundet i dette projekt.",
+      "zone_type_invalid": "Ukendt zonetype."
+    },
+    "evidence": {
+      "balance_closed": "Arealbalancen er lukket for hver åben etape",
+      "concept_saved_and_exported": "Logistikkonceptet er gemt og arkiveret",
+      "first_stage_media_contracted": "Forsyninger til første etape er kontraheret",
+      "gate_loads_admitted": "Hver last er godkendt af sin indkørsel eller dækket af en tilladelse til overdimensioneret transport",
+      "heavy_transports_permitted": "Tilladelse er givet til hver tung transport",
+      "neighbourhood_limit_source": "Støjgrænsens kilde er angivet",
+      "no_errors": "Ingen åbne logistikfejl",
+      "unresolved": "Logistikplanen kunne ikke placeres i styringsmodellen"
+    },
+    "export": {
+      "as_of": "Pr.",
+      "col_area_kind": "Områdetype",
+      "col_closed": "Lukket",
+      "col_contracted": "Kontraheret",
+      "col_date": "Dato",
+      "col_direction": "Retning",
+      "col_documents": "Påkrævede dokumenter",
+      "col_due": "Forfald",
+      "col_group": "Gruppe",
+      "col_heavy": "Tung",
+      "col_hs_codes": "HS-koder",
+      "col_incoterm": "Incoterm",
+      "col_item": "Post",
+      "col_m2": "m²",
+      "col_media_kind": "Forsyning",
+      "col_named_place": "Navngivet sted",
+      "col_pct": "%",
+      "col_permits": "Tilladelser",
+      "col_required": "Påkrævet",
+      "col_section": "Afsnit",
+      "col_short": "Kort",
+      "col_stage": "Etape",
+      "col_state": "Status",
+      "col_title": "Titel",
+      "col_topic": "Emne",
+      "col_transport_kind": "Type",
+      "col_type": "Type",
+      "col_unit": "Enhed",
+      "col_value": "Værdi",
+      "col_window": "Tidsvindue",
+      "empty": "Ingen poster.",
+      "project": "Projekt",
+      "title_balance": "Arealbalance",
+      "title_customs": "Indeks over toldsager",
+      "title_frame": "Oversigt over logistikrammen",
+      "title_media": "Forsyningsbalance",
+      "title_neighbourhood": "Naboforholdslog",
+      "title_transports": "Transporter og tilladelser"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Etape {stage}: en allokering er større end sit areal.",
+        "suggestion": "Reducer allokeringen."
+      },
+      "area_balance_not_closed": {
+        "fail": "Etape {stage}: arealbalancen går ikke op (differens på {difference_m2} m²).",
+        "suggestion": "Allokér det resterende areal eller ret pladsens samlede areal."
+      },
+      "area_overlap": {
+        "fail": "Etape {stage}: to områder af forskellig type overlapper.",
+        "suggestion": "Justér afgrænsningerne."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Angiveren stemmer ikke med, hvem der under incoterm'et foretager importtoldekspeditionen.",
+        "suggestion": "Kontrollér angiveren eller incoterm'et."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} godkendte leverancer starter i timen fra kl. {hour}, mens konceptet tillader {limit}.",
+        "suggestion": "Flyt leverancer til en anden time, eller hæv grænsen i konceptet."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Pladsen har ingen tidszone, så leverancerne er ikke sammenholdt med åbningstiderne.",
+        "suggestion": "Angiv pladsens tidszone i logistikkonceptet."
+      },
+      "gate_limits_unknown": {
+        "fail": "Byggepladsens indkørsel {gate} angiver ingen belastningsgrænser.",
+        "suggestion": "Angiv vægt- og dimensionsgrænserne."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: lasten overskrider byggepladsens indkørsels grænser.",
+        "suggestion": "Brug en anden indkørsel, eller del lasten op."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: tung transport uden en given tilladelse.",
+        "suggestion": "Ansøg om tilladelsen."
+      },
+      "hs_code_invalid": {
+        "fail": "HS-koden {hs_code} er ikke gyldig.",
+        "suggestion": "Brug kun cifre, mindst den krævede længde."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} gælder kun for søtransport.",
+        "suggestion": "Brug FCA, CPT eller CIP til andre transportformer."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} findes ikke i den fastlåste version.",
+        "suggestion": "Vælg et udtryk fra den fastlåste version."
+      },
+      "jit_late": {
+        "fail": "{title}: just-in-time-leveringen kommer efter taktens start.",
+        "suggestion": "Flyt leveringen tidligere."
+      },
+      "jit_too_early": {
+        "fail": "{title}: just-in-time-leveringen kommer tidligere, end bufferen tillader.",
+        "suggestion": "Flyt den tættere på taktens start."
+      },
+      "jit_without_location": {
+        "fail": "{title}: en just-in-time-levering af flow {flow} angiver ikke et taktområde.",
+        "suggestion": "Vælg det taktområde, leveringen er til."
+      },
+      "media_capacity_short": {
+        "fail": "Etape {stage}: {media} kræver {required}, kontraheret {contracted}.",
+        "suggestion": "Forøg den kontraherede kapacitet eller reducer behovet."
+      },
+      "media_late": {
+        "fail": "Etape {stage}: tilslutningen til {media} er lovet efter etapens start.",
+        "suggestion": "Aftal en tidligere dato eller en midlertidig forsyning."
+      },
+      "media_unsourced": {
+        "fail": "Et behov for {media} har ingen tilslutning.",
+        "suggestion": "Tildel en tilslutning."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "En klage skulle have været besvaret senest {due}.",
+        "suggestion": "Kvittér for klagen og besvar den."
+      },
+      "permit_expired": {
+        "fail": "Tilladelse {reference} er udløbet, mens transporter stadig er tilbage.",
+        "suggestion": "Ansøg om en ny tilladelse."
+      },
+      "permit_expiring": {
+        "fail": "Tilladelse {reference} udløber snart, mens transporter stadig er tilbage.",
+        "suggestion": "Forlæng tilladelsen."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: tidsvinduet falder i stilletiden.",
+        "suggestion": "Flyt det uden for stilletiden, eller skaf en tilladelse til natarbejde."
+      },
+      "required_document_missing": {
+        "fail": "Det påkrævede dokument {kind} mangler.",
+        "suggestion": "Skaf dokumentet, og tilknyt det."
+      },
+      "site_timezone_missing": {
+        "fail": "Pladsen har ingen tidszone, så reglerne for tidspunkter på dagen er ikke kontrolleret.",
+        "suggestion": "Angiv pladsens tidszone i logistikkonceptet."
+      },
+      "stage_without_site_setup": {
+        "fail": "Etape {stage} har intet areal til pladsindretning.",
+        "suggestion": "Allokér et areal til kontor og velfærd."
+      },
+      "stage_without_storage": {
+        "fail": "Etape {stage} har intet lager- eller oplagsareal.",
+        "suggestion": "Allokér et lager- eller oplagsareal."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: tidsvinduet ligger uden for tilladelsen.",
+        "suggestion": "Flyt tidsvinduet, eller forlæng tilladelsen."
+      },
+      "zone_not_mapped": {
+        "fail": "Oplagsområde {zone} er ikke knyttet til et pladsareal.",
+        "suggestion": "Knyt det til dets planlagte areal."
+      }
+    }
+  }
+}

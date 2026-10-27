@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Hindi",
+        "yes": "Oo"
+      },
+      "direction": {
+        "export": "Eksport",
+        "import": "Import",
+        "inbound": "Papasok",
+        "outbound": "Palabas"
+      },
+      "group": {
+        "built": "Nakatayo na",
+        "external": "Panlabas",
+        "logistics": "Logistika",
+        "reserve": "Reserba"
+      },
+      "is_heavy": {
+        "no": "Hindi",
+        "yes": "Oo"
+      },
+      "section": {
+        "balance": "Balanse",
+        "concept": "Konsepto",
+        "neighbourhood": "Kapitbahayan",
+        "readiness": "Kahandaan"
+      },
+      "short": {
+        "no": "Hindi",
+        "yes": "Oo"
+      },
+      "state": {
+        "acknowledged": "Kinilala",
+        "action_taken": "Naisagawa na ang aksyon",
+        "active": "Aktibo",
+        "applied": "Nag-apply",
+        "arrived": "Dumating na",
+        "authority": "Awtoridad",
+        "cancelled": "Kinansela",
+        "cleared": "Nalinis na sa customs",
+        "closed": "Sarado",
+        "connected": "Nakakonekta",
+        "contracted": "Nakontrata",
+        "declared": "Nideklara",
+        "disconnected": "Hindi nakakonekta",
+        "documents_complete": "Kumpleto na ang dokumento",
+        "draft": "Draft",
+        "expired": "Nag-expire",
+        "granted": "Ipinagkaloob",
+        "held": "Pinigilan",
+        "identified": "Natukoy",
+        "in_transit": "Nasa biyahe",
+        "missing": "Nawawala",
+        "municipality": "Munisipyo",
+        "neighbours": "Mga kapitbahay",
+        "offered": "Inialok",
+        "open": "Bukas",
+        "other": "Iba pa",
+        "permit_pending": "Nakabinbin ang permit",
+        "planned": "Nakaplano",
+        "police": "Pulisya",
+        "received": "Natanggap",
+        "refused": "Tinanggihan",
+        "requested": "Hiniling",
+        "scheduled": "Naka-iskedyul",
+        "utility": "Utility",
+        "verified": "Na-verify"
+      },
+      "type": {
+        "complaint": "Reklamo",
+        "coordination": "Koordinasyon"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Hindi nakita ang gawain sa iskedyul sa proyektong ito.",
+      "allocation_exceeds_area": "Mas malaki ang alokasyon kaysa sa lugar.",
+      "allocation_negative": "Hindi maaaring negatibo ang alokasyon.",
+      "allocations_changed": "Binago ng iba ang mga alokasyon. I-reload at subukan muli.",
+      "area_not_found": "Hindi nakita ang lugar ng site.",
+      "authority_permit_not_found": "Hindi nakita ang permit ng awtoridad sa proyektong ito.",
+      "buffer_days_negative": "Hindi maaaring negatibo ang buffer days.",
+      "catalogue_invalid": "Hindi maresolba ang naka-pin na logistics catalogue.",
+      "catalogue_retired": "Retirado na ang bersyon ng catalogue na ito.",
+      "code_required": "Kailangan ng code.",
+      "code_taken": "Ginamit na sa proyekto ang code na ito.",
+      "commodity_code_not_found": "Hindi nakita ang commodity code.",
+      "complaint_closed": "Hindi na mababago ang sarado nang reklamo.",
+      "complaint_not_found": "Hindi nakita ang reklamo.",
+      "connection_point_invalid": "Hindi wastong punto ang connection point.",
+      "contracted_capacity_required": "Ilagay muna ang nakontratang kapasidad.",
+      "correspondence_not_found": "Hindi nakita ang sulat sa proyektong ito.",
+      "correspondence_thread_not_found": "Hindi nakita ang sulat sa proyektong ito.",
+      "country_invalid": "Gumamit ng dalawang-letrang ISO country code.",
+      "currency_invalid": "Gumamit ng tatlong-letrang ISO currency code.",
+      "currency_required": "Kailangan ng currency ang halaga.",
+      "customs_case_not_found": "Hindi nakita ang customs case.",
+      "customs_closed": "Hindi na mababago ang na-clear o sarado nang case.",
+      "customs_declared": "Hindi na maaaring burahin ang nadeklarang case.",
+      "customs_not_found": "Hindi nakita ang customs case.",
+      "customs_without_lines": "Magdagdag muna ng kahit isang linya ng kalakal.",
+      "declarant_invalid": "Ang deklarante ay ang mamimili o ang nagbebenta.",
+      "delivery_already_on_site": "Dumating na ang delivery na ito at hindi na muling pagdedesisyunan.",
+      "delivery_not_found": "Hindi nakita ang delivery sa proyektong ito.",
+      "delivery_rate_exceeded": "Puno na ang oras na ito ayon sa bilang ng delivery na pinapayagan ng konsepto.",
+      "delivery_refused": "Hindi maaaprubahan ang delivery na ito sa kasalukuyang anyo.",
+      "demand_not_found": "Hindi nakita ang pangangailangan.",
+      "demand_owned_by_plant_position": "Galing ang pangangailangang ito sa plant position; baguhin ito doon.",
+      "direction_invalid": "Hindi kilalang direksyon.",
+      "document_exists": "Nasa checklist na ang dokumentong ito.",
+      "document_not_found": "Hindi nakita ang dokumento.",
+      "document_ref_required": "I-link muna ang dokumento bago markahang natanggap.",
+      "duplicate_stage": "Maaaring ilaan nang isang beses lang ang bawat yugto sa bawat lugar.",
+      "entry_not_found": "Hindi nakita ang log entry.",
+      "field_required": "Hindi maaaring walang laman ang field na ito.",
+      "flow_code_invalid": "Kailangan ng sariling code ng bawat material flow.",
+      "flow_code_unknown": "Walang material flow na may ganitong code ang logistics concept.",
+      "flow_mode_invalid": "Hindi kilalang mode ng material flow.",
+      "frame_invalid": "Hindi kilalang coordinate frame.",
+      "gate_hours_unchecked": "Hindi pa natitingnan ang oras ng pagbubukas hangga't walang timezone ang site.",
+      "gate_load_exceeded": "Lampas sa limitasyon ng pasukan ng site ang karga.",
+      "gate_not_found": "Hindi nakita ang pasukan ng site sa proyektong ito.",
+      "geo_overlay_not_found": "Hindi nakita ang overlay ng site plan sa proyektong ito.",
+      "geometry_invalid": "Hindi wastong polygon ang balangkas ng lugar.",
+      "goods_receipt_missing": "Wala pang nakumpirmang goods receipt para sa purchase order na ito.",
+      "heavy_without_permit": "Kailangan ng naipagkaloob na permit bago iskedyulin ang heavy transport.",
+      "hours_invalid": "Maglagay ng wastong oras, dapat mas huli ang dulo kaysa simula.",
+      "hs_code_invalid": "Mga digit lamang ang HS code at dapat sapat ang haba nito.",
+      "incoterm_unknown": "Wala sa naka-pin na bersyon ang incoterm na ito.",
+      "invalid_transition": "Hindi pinapayagan ang pagbabago ng status na ito.",
+      "jit_without_takt": "Kailangan ng takt schedule ang just-in-time flow.",
+      "last_stage": "Kailangan ng proyekto ng kahit isang yugto ng pagpapalawak.",
+      "line_not_found": "Hindi nakita ang linya ng customs.",
+      "link_target_unavailable": "Hindi pa ito matitingnan dahil hindi naka-install ang module na tinuturo nito.",
+      "media_not_found": "Hindi nakita ang koneksyon ng utility.",
+      "money_not_decimal": "Ilagay ang halaga bilang decimal na numero.",
+      "money_out_of_range": "Ilagay ang halaga na may hanggang dalawang decimal.",
+      "noise_limit_needs_project_value": "Walang nakatakdang fixed na halaga ang hurisdiksyong ito; ilagay ang mga halagang inaprubahan para sa proyekto.",
+      "not_found": "Hindi nakita.",
+      "outside_gate_hours": "Nasa labas ng oras ng pagbubukas ng gate ang window.",
+      "owner_not_member": "Dapat miyembro ng proyektong ito ang may-ari.",
+      "pack_catalogue_invalid": "Hindi mai-load ang catalogue ng pack.",
+      "permission_denied": "Wala kang pahintulot para dito.",
+      "permit_frozen": "Pinapanatili ng permit na naipagkaloob, tinanggihan o nag-expire ang bisa, mga window, at mga transport nito.",
+      "permit_not_found": "Hindi nakita ang permit.",
+      "plan_calibration_without_image": "Piliin muna ang larawan ng site plan bago itakda ang scale nito.",
+      "plan_document_not_found": "Hindi nakita ang site plan document sa proyektong ito.",
+      "plan_origin_invalid": "Dalawang numero, x at y sa pixels, ang origin ng site plan.",
+      "plan_scale_invalid": "Dapat mas malaki sa zero ang scale ng site plan.",
+      "plant_item_not_found": "Hindi nakita ang plant item sa proyektong ito.",
+      "plant_position_not_found": "Hindi nakita ang plant position sa proyektong ito.",
+      "plant_position_required": "Kailangan ng plant position.",
+      "po_not_found": "Hindi nakita ang purchase order sa proyektong ito.",
+      "project_not_found": "Hindi nakita ang proyekto.",
+      "quiet_hours_conflict": "Nasa quiet hours ang window at walang night-work permit na sumasaklaw dito.",
+      "required_document_missing": "Kulang pa rin ang isang kinakailangang dokumento.",
+      "response_required": "Isulat muna ang tugon.",
+      "route_invalid": "Hindi wastong linya ang ruta.",
+      "simultaneity_factor_range": "Nasa pagitan ng 0 at 1 ang simultaneity factor.",
+      "site_timezone_missing": "Itakda muna ang timezone ng site; sinusuri ang mga oras ayon sa orasan ng site.",
+      "slot_taken": "May ibang inaprubahang delivery na sumasakop sa window na ito sa gate.",
+      "stage_active": "Hindi maaaring burahin ang aktibong yugto. Isara muna ito.",
+      "stage_not_found": "Hindi nakita ang yugto ng pagpapalawak.",
+      "takt_location_not_found": "Hindi nakita ang takt area sa proyektong ito.",
+      "takt_schedule_not_found": "Hindi nakita ang takt schedule sa proyektong ito.",
+      "timezone_invalid": "Hindi kilalang timezone. Gumamit ng pangalan gaya ng Asia/Manila.",
+      "transport_closed": "Hindi na mababago ang sarado o kinanselang transport.",
+      "transport_mode_invalid": "Hindi kilalang mode ng transportasyon.",
+      "transport_not_found": "Hindi nakita ang transport.",
+      "transport_under_way": "Hindi maaaring burahin ang transport na nasa biyahe.",
+      "unknown_area_kind": "Hindi kilalang uri ng lugar.",
+      "unknown_catalogue": "Hindi kilalang catalogue.",
+      "unknown_document_kind": "Hindi kilalang uri ng dokumento.",
+      "unknown_issue_kind": "Hindi kilalang uri ng reklamo.",
+      "unknown_link_kind": "Walang listahan para sa ganitong uri ng link.",
+      "unknown_load_class": "Hindi kilalang load class.",
+      "unknown_media_kind": "Hindi kilalang utility.",
+      "unknown_noise_limit": "Hindi kilalang entry ng noise limit.",
+      "unknown_permit_kind": "Hindi kilalang uri ng permit.",
+      "unknown_transport_kind": "Hindi kilalang uri ng transport.",
+      "validity_invalid": "Nagtatapos ang permit bago ito magsimula.",
+      "validity_required": "Maglagay ng petsa ng bisa bago ipagkaloob.",
+      "vendor_not_found": "Hindi nakita ang supplier.",
+      "window_invalid": "Hindi wasto ang time window.",
+      "window_outside_permit": "Nasa labas ng bisa ng permit o ng pinapayagang oras nito ang transport window.",
+      "zone_not_found": "Hindi nakita ang laydown zone sa proyektong ito.",
+      "zone_type_invalid": "Hindi kilalang uri ng zone."
+    },
+    "evidence": {
+      "balance_closed": "Sarado na ang balanse ng lugar para sa bawat bukas na yugto",
+      "concept_saved_and_exported": "Naitala at naisumite na ang logistics concept",
+      "first_stage_media_contracted": "Nakontrata na ang utilities para sa unang yugto",
+      "gate_loads_admitted": "Bawat karga ay pinapasok ng gate nito o sakop ng oversize permit",
+      "heavy_transports_permitted": "May naipagkaloob na permit para sa bawat heavy transport",
+      "neighbourhood_limit_source": "Naitakda na ang pinagmulan ng noise limit",
+      "no_errors": "Walang bukas na logistics error",
+      "unresolved": "Hindi mailagay ang logistics plan sa governance model"
+    },
+    "export": {
+      "as_of": "Hanggang",
+      "col_area_kind": "Uri ng lugar",
+      "col_closed": "Sarado",
+      "col_contracted": "Nakontrata",
+      "col_date": "Petsa",
+      "col_direction": "Direksyon",
+      "col_documents": "Kinakailangang dokumento",
+      "col_due": "Takdang petsa",
+      "col_group": "Grupo",
+      "col_heavy": "Mabigat",
+      "col_hs_codes": "HS codes",
+      "col_incoterm": "Incoterm",
+      "col_item": "Item",
+      "col_m2": "m2",
+      "col_media_kind": "Utility",
+      "col_named_place": "Pangalan ng lugar",
+      "col_pct": "%",
+      "col_permits": "Mga permit",
+      "col_required": "Kailangan",
+      "col_section": "Seksyon",
+      "col_short": "Kulang",
+      "col_stage": "Yugto",
+      "col_state": "Status",
+      "col_title": "Pamagat",
+      "col_topic": "Paksa",
+      "col_transport_kind": "Uri",
+      "col_type": "Uri",
+      "col_unit": "Yunit",
+      "col_value": "Halaga",
+      "col_window": "Window",
+      "empty": "Walang entry.",
+      "project": "Proyekto",
+      "title_balance": "Balanse ng lugar",
+      "title_customs": "Index ng customs case file",
+      "title_frame": "Buod ng logistics frame",
+      "title_media": "Balanse ng utilities",
+      "title_neighbourhood": "Log ng kapitbahayan",
+      "title_transports": "Mga transport at permit"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Yugto {stage}: may alokasyong mas malaki kaysa sa lugar nito.",
+        "suggestion": "Bawasan ang alokasyon."
+      },
+      "area_balance_not_closed": {
+        "fail": "Yugto {stage}: hindi nagbabalanse ang balanse ng lugar (may pagkakaibang {difference_m2} m2).",
+        "suggestion": "Ilaan ang natitirang lugar o itama ang kabuuang lugar ng site."
+      },
+      "area_overlap": {
+        "fail": "Yugto {stage}: nagsasapawan ang dalawang lugar ng magkaibang uri.",
+        "suggestion": "Ayusin ang mga balangkas."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Hindi tumutugma ang deklarante sa nagkaklir ng import ayon sa incoterm.",
+        "suggestion": "Suriin ang deklarante o ang incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} naaprubahang delivery ang nagsisimula sa oras mula {hour}, pinapayagan ng konsepto ang {limit}.",
+        "suggestion": "Ilipat ang mga delivery sa ibang oras o itaas ang limitasyon sa konsepto."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Walang timezone ang site, kaya hindi ikinumpara ang mga delivery sa oras ng pagbubukas.",
+        "suggestion": "Itakda ang timezone ng site sa logistics concept."
+      },
+      "gate_limits_unknown": {
+        "fail": "Walang nakasaad na load limit ang pasukan ng site na {gate}.",
+        "suggestion": "Ilagay ang limitasyon sa timbang at sukat."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: lampas sa limitasyon ng pasukan ng site ang karga.",
+        "suggestion": "Gumamit ng ibang pasukan o hatiin ang karga."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: heavy transport na walang naipagkaloob na permit.",
+        "suggestion": "Mag-apply para sa permit."
+      },
+      "hs_code_invalid": {
+        "fail": "Hindi wasto ang HS code {hs_code}.",
+        "suggestion": "Mga digit lamang, at dapat umabot sa pinakamababang haba."
+      },
+      "incoterm_sea_only": {
+        "fail": "Para sa sea transport lamang ang incoterm {incoterm}.",
+        "suggestion": "Gamitin ang FCA, CPT o CIP para sa ibang mode."
+      },
+      "incoterm_unknown": {
+        "fail": "Wala sa naka-pin na bersyon ang incoterm {incoterm}.",
+        "suggestion": "Pumili ng termino mula sa naka-pin na bersyon."
+      },
+      "jit_late": {
+        "fail": "{title}: ang just-in-time delivery ay dumarating pagkatapos ng takt start.",
+        "suggestion": "Pauna-hin ang delivery."
+      },
+      "jit_too_early": {
+        "fail": "{title}: ang just-in-time delivery ay dumarating nang mas maaga kaysa pinapayagan ng buffer nito.",
+        "suggestion": "Ilapit ito sa takt start."
+      },
+      "jit_without_location": {
+        "fail": "{title}: ang just-in-time delivery ng flow na {flow} ay walang tinukoy na takt area.",
+        "suggestion": "Piliin ang takt area kung saan ang delivery."
+      },
+      "media_capacity_short": {
+        "fail": "Yugto {stage}: kailangan ng {media} ang {required}, {contracted} lamang ang nakontrata.",
+        "suggestion": "Dagdagan ang nakontratang kapasidad o bawasan ang pangangailangan."
+      },
+      "media_late": {
+        "fail": "Yugto {stage}: ang koneksyon ng {media} ay ipinangako pagkatapos magsimula ang yugto.",
+        "suggestion": "Sumang-ayon sa mas maagang petsa o pansamantalang supply."
+      },
+      "media_unsourced": {
+        "fail": "Walang koneksyon ang pangangailangan sa {media}.",
+        "suggestion": "Magtalaga ng koneksyon."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Dapat sinagot ang isang reklamo noong {due}.",
+        "suggestion": "Kilalanin at sagutin ito."
+      },
+      "permit_expired": {
+        "fail": "Nag-expire na ang permit na {reference} habang may natitirang transport.",
+        "suggestion": "Mag-apply para sa bagong permit."
+      },
+      "permit_expiring": {
+        "fail": "Malapit nang mag-expire ang permit na {reference} habang may natitirang transport.",
+        "suggestion": "Palawigin ang permit."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: nahuhulog ang window sa quiet hours.",
+        "suggestion": "Ilipat ito sa labas ng quiet hours o kumuha ng night-work permit."
+      },
+      "required_document_missing": {
+        "fail": "Nawawala ang kinakailangang dokumento na {kind}.",
+        "suggestion": "Kumuha ng dokumento at i-link ito."
+      },
+      "site_timezone_missing": {
+        "fail": "Walang timezone ang site, kaya hindi nasuri ang mga patakaran sa oras ng araw.",
+        "suggestion": "Itakda ang timezone ng site sa logistics concept."
+      },
+      "stage_without_site_setup": {
+        "fail": "Walang lugar para sa site setup ang yugto {stage}.",
+        "suggestion": "Maglaan ng lugar para sa opisina at welfare."
+      },
+      "stage_without_storage": {
+        "fail": "Walang storage o laydown area ang yugto {stage}.",
+        "suggestion": "Maglaan ng storage o laydown area."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: nasa labas ng permit ang window.",
+        "suggestion": "Ilipat ang window o palawigin ang permit."
+      },
+      "zone_not_mapped": {
+        "fail": "Hindi naka-link sa anumang lugar ng site ang laydown zone na {zone}.",
+        "suggestion": "I-link ito sa nakaplanong lugar nito."
+      }
+    }
+  }
+}

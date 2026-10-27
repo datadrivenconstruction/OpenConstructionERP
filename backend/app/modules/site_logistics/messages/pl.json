@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Nie",
+        "yes": "Tak"
+      },
+      "direction": {
+        "export": "Eksport",
+        "import": "Import",
+        "inbound": "Dostawa",
+        "outbound": "Wywóz"
+      },
+      "group": {
+        "built": "Zrealizowane",
+        "external": "Zewnętrzne",
+        "logistics": "Logistyka",
+        "reserve": "Rezerwa"
+      },
+      "is_heavy": {
+        "no": "Nie",
+        "yes": "Tak"
+      },
+      "section": {
+        "balance": "Bilans powierzchni",
+        "concept": "Koncepcja",
+        "neighbourhood": "Otoczenie",
+        "readiness": "Gotowość"
+      },
+      "short": {
+        "no": "Nie",
+        "yes": "Tak"
+      },
+      "state": {
+        "acknowledged": "Potwierdzone",
+        "action_taken": "Podjęto działania",
+        "active": "Aktywne",
+        "applied": "Złożono wniosek",
+        "arrived": "Dotarło",
+        "authority": "Urząd",
+        "cancelled": "Anulowane",
+        "cleared": "Odprawione",
+        "closed": "Zamknięte",
+        "connected": "Podłączone",
+        "contracted": "Zakontraktowane",
+        "declared": "Zgłoszone",
+        "disconnected": "Odłączone",
+        "documents_complete": "Dokumenty kompletne",
+        "draft": "Szkic",
+        "expired": "Wygasłe",
+        "granted": "Wydane",
+        "held": "Wstrzymane",
+        "identified": "Zidentyfikowane",
+        "in_transit": "W drodze",
+        "missing": "Brak",
+        "municipality": "Gmina",
+        "neighbours": "Sąsiedzi",
+        "offered": "Oferta złożona",
+        "open": "Otwarte",
+        "other": "Inne",
+        "permit_pending": "Pozwolenie w toku",
+        "planned": "Zaplanowane",
+        "police": "Policja",
+        "received": "Otrzymane",
+        "refused": "Odmowa",
+        "requested": "Zamówiono",
+        "scheduled": "Zaplanowano termin",
+        "utility": "Dostawca mediów",
+        "verified": "Zweryfikowane"
+      },
+      "type": {
+        "complaint": "Skarga",
+        "coordination": "Koordynacja"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Nie znaleziono czynności harmonogramu w tym projekcie.",
+      "allocation_exceeds_area": "Przydział jest większy niż powierzchnia.",
+      "allocation_negative": "Przydział nie może być ujemny.",
+      "allocations_changed": "Przydziały zostały zmienione przez innego użytkownika. Odśwież stronę i spróbuj ponownie.",
+      "area_not_found": "Nie znaleziono strefy placu budowy.",
+      "authority_permit_not_found": "Nie znaleziono pozwolenia urzędowego w tym projekcie.",
+      "buffer_days_negative": "Dni rezerwy nie mogą być ujemne.",
+      "catalogue_invalid": "Przypięty katalog logistyczny nie może zostać odczytany.",
+      "catalogue_retired": "Ta wersja katalogu została wycofana.",
+      "code_required": "Wymagany jest kod.",
+      "code_taken": "Ten kod jest już używany w projekcie.",
+      "commodity_code_not_found": "Nie znaleziono kodu towaru.",
+      "complaint_closed": "Zamkniętej skargi nie można zmieniać.",
+      "complaint_not_found": "Nie znaleziono skargi.",
+      "connection_point_invalid": "Punkt przyłączenia nie jest prawidłowym punktem.",
+      "contracted_capacity_required": "Najpierw podaj zakontraktowaną moc.",
+      "correspondence_not_found": "Nie znaleziono korespondencji w tym projekcie.",
+      "correspondence_thread_not_found": "Nie znaleziono korespondencji w tym projekcie.",
+      "country_invalid": "Użyj dwuliterowego kodu kraju ISO.",
+      "currency_invalid": "Użyj trzyliterowego kodu waluty ISO.",
+      "currency_required": "Kwota wymaga podania waluty.",
+      "customs_case_not_found": "Nie znaleziono sprawy celnej.",
+      "customs_closed": "Sprawy odprawionej lub zamkniętej nie można zmieniać.",
+      "customs_declared": "Zgłoszonej sprawy celnej nie można usunąć.",
+      "customs_not_found": "Nie znaleziono sprawy celnej.",
+      "customs_without_lines": "Najpierw dodaj co najmniej jedną pozycję towarową.",
+      "declarant_invalid": "Deklarantem jest kupujący lub sprzedający.",
+      "delivery_already_on_site": "Ta dostawa już dotarła i nie podlega ponownej decyzji.",
+      "delivery_not_found": "Nie znaleziono dostawy w tym projekcie.",
+      "delivery_rate_exceeded": "W tej godzinie zaplanowano już tyle dostaw, ile dopuszcza koncepcja.",
+      "delivery_refused": "Tej dostawy nie można zatwierdzić w obecnym kształcie.",
+      "demand_not_found": "Nie znaleziono zapotrzebowania.",
+      "demand_owned_by_plant_position": "To zapotrzebowanie wynika z pozycji sprzętu; zmień je w tej pozycji.",
+      "direction_invalid": "Nieznany kierunek.",
+      "document_exists": "Ten dokument jest już na liście kontrolnej.",
+      "document_not_found": "Nie znaleziono dokumentu.",
+      "document_ref_required": "Połącz dokument, zanim oznaczysz go jako otrzymany.",
+      "duplicate_stage": "Każdy etap można przydzielić tylko raz na strefę.",
+      "entry_not_found": "Nie znaleziono wpisu w dzienniku.",
+      "field_required": "To pole nie może być puste.",
+      "flow_code_invalid": "Każdy przepływ materiałów musi mieć własny kod.",
+      "flow_code_unknown": "Koncepcja logistyczna nie zawiera przepływu materiałów o tym kodzie.",
+      "flow_mode_invalid": "Nieznany tryb przepływu materiałów.",
+      "frame_invalid": "Nieznany układ współrzędnych.",
+      "gate_hours_unchecked": "Godziny otwarcia nie są sprawdzane, dopóki nie ustawiono strefy czasowej placu budowy.",
+      "gate_load_exceeded": "Obciążenie przekracza dopuszczalne parametry wjazdu na plac budowy.",
+      "gate_not_found": "Nie znaleziono wjazdu na plac budowy w tym projekcie.",
+      "geo_overlay_not_found": "Nie znaleziono nakładki planu zagospodarowania placu w tym projekcie.",
+      "geometry_invalid": "Obrys strefy nie jest prawidłowym wielokątem.",
+      "goods_receipt_missing": "Dla tego zamówienia zakupu nie ma jeszcze potwierdzonego przyjęcia towaru.",
+      "heavy_without_permit": "Transport ciężki wymaga wydanego pozwolenia, zanim zostanie zaplanowany.",
+      "hours_invalid": "Podaj prawidłowe godziny; koniec musi być później niż początek.",
+      "hs_code_invalid": "Kod HS może zawierać wyłącznie cyfry i musi mieć odpowiednią długość.",
+      "incoterm_unknown": "Ten incoterm nie występuje w przypiętej wersji.",
+      "invalid_transition": "Ta zmiana statusu jest niedozwolona.",
+      "jit_without_takt": "Przepływ just-in-time wymaga harmonogramu taktowania.",
+      "last_stage": "Projekt musi zawierać co najmniej jeden etap rozbudowy.",
+      "line_not_found": "Nie znaleziono pozycji celnej.",
+      "link_target_unavailable": "Tego powiązania nie można jeszcze sprawdzić, ponieważ moduł, do którego prowadzi, nie jest zainstalowany.",
+      "media_not_found": "Nie znaleziono przyłącza mediów.",
+      "money_not_decimal": "Podaj kwotę jako liczbę dziesiętną.",
+      "money_out_of_range": "Podaj kwotę z co najwyżej dwoma miejscami po przecinku.",
+      "noise_limit_needs_project_value": "Ta jurysdykcja nie ustala stałych wartości; wpisz wartości uzgodnione dla projektu.",
+      "not_found": "Nie znaleziono.",
+      "outside_gate_hours": "Okno czasowe przypada poza godzinami otwarcia wjazdu.",
+      "owner_not_member": "Właściciel musi być członkiem tego projektu.",
+      "pack_catalogue_invalid": "Katalog pakietu nie może zostać wczytany.",
+      "permission_denied": "Nie masz uprawnień do wykonania tej czynności.",
+      "permit_frozen": "Wydane, odmówione lub wygasłe pozwolenie zachowuje swoją ważność, okna czasowe i transporty.",
+      "permit_not_found": "Nie znaleziono pozwolenia.",
+      "plan_calibration_without_image": "Wybierz obraz planu placu budowy, zanim ustawisz jego skalę.",
+      "plan_document_not_found": "Nie znaleziono dokumentu planu placu budowy w tym projekcie.",
+      "plan_origin_invalid": "Początek układu planu placu budowy to dwie liczby, x i y, w pikselach.",
+      "plan_scale_invalid": "Skala planu placu budowy musi być większa od zera.",
+      "plant_item_not_found": "Nie znaleziono pozycji sprzętu w tym projekcie.",
+      "plant_position_not_found": "Nie znaleziono pozycji sprzętu w tym projekcie.",
+      "plant_position_required": "Wymagana jest pozycja sprzętu.",
+      "po_not_found": "Nie znaleziono zamówienia zakupu w tym projekcie.",
+      "project_not_found": "Nie znaleziono projektu.",
+      "quiet_hours_conflict": "Okno czasowe przypada w godzinach ciszy, a nie obejmuje go zezwolenie na pracę nocną.",
+      "required_document_missing": "Brakuje jeszcze wymaganego dokumentu.",
+      "response_required": "Najpierw napisz odpowiedź.",
+      "route_invalid": "Trasa nie jest prawidłową linią.",
+      "simultaneity_factor_range": "Współczynnik jednoczesności musi mieścić się w przedziale od 0 do 1.",
+      "site_timezone_missing": "Najpierw ustaw strefę czasową placu budowy; godziny są sprawdzane według zegara na placu.",
+      "slot_taken": "Inna zatwierdzona dostawa zajmuje to okno czasowe przy wjeździe.",
+      "stage_active": "Aktywnego etapu nie można usunąć. Najpierw go zamknij.",
+      "stage_not_found": "Nie znaleziono etapu rozbudowy.",
+      "takt_location_not_found": "Nie znaleziono strefy taktowania w tym projekcie.",
+      "takt_schedule_not_found": "Nie znaleziono harmonogramu taktowania w tym projekcie.",
+      "timezone_invalid": "Nieznana strefa czasowa. Użyj nazwy w rodzaju Europe/Berlin.",
+      "transport_closed": "Zamkniętego lub anulowanego transportu nie można zmieniać.",
+      "transport_mode_invalid": "Nieznany rodzaj transportu.",
+      "transport_not_found": "Nie znaleziono transportu.",
+      "transport_under_way": "Transportu w trakcie realizacji nie można usunąć.",
+      "unknown_area_kind": "Nieznany rodzaj strefy.",
+      "unknown_catalogue": "Nieznany katalog.",
+      "unknown_document_kind": "Nieznany rodzaj dokumentu.",
+      "unknown_issue_kind": "Nieznany rodzaj skargi.",
+      "unknown_link_kind": "Brak listy dla tego rodzaju powiązania.",
+      "unknown_load_class": "Nieznana klasa obciążenia.",
+      "unknown_media_kind": "Nieznana instalacja mediów.",
+      "unknown_noise_limit": "Nieznana pozycja limitu hałasu.",
+      "unknown_permit_kind": "Nieznany rodzaj pozwolenia.",
+      "unknown_transport_kind": "Nieznany rodzaj transportu.",
+      "validity_invalid": "Pozwolenie kończy się przed rozpoczęciem.",
+      "validity_required": "Przed wydaniem podaj daty ważności.",
+      "vendor_not_found": "Nie znaleziono dostawcy.",
+      "window_invalid": "Okno czasowe jest nieprawidłowe.",
+      "window_outside_permit": "Okno transportu wykracza poza ważność pozwolenia lub dozwolone godziny.",
+      "zone_not_found": "Nie znaleziono strefy składowania w tym projekcie.",
+      "zone_type_invalid": "Nieznany typ strefy."
+    },
+    "evidence": {
+      "balance_closed": "Bilans powierzchni zamknięty dla każdego otwartego etapu",
+      "concept_saved_and_exported": "Koncepcja logistyczna zapisana i zarchiwizowana",
+      "first_stage_media_contracted": "Media dla pierwszego etapu zakontraktowane",
+      "gate_loads_admitted": "Każdy ładunek dopuszczony przez wjazd lub objęty pozwoleniem na przejazd ponadnormatywny",
+      "heavy_transports_permitted": "Pozwolenie wydane dla każdego transportu ciężkiego",
+      "neighbourhood_limit_source": "Ustalono źródło limitu hałasu",
+      "no_errors": "Brak otwartych błędów logistycznych",
+      "unresolved": "Plan logistyczny nie mógł zostać ujęty w modelu nadzoru"
+    },
+    "export": {
+      "as_of": "Stan na",
+      "col_area_kind": "Rodzaj strefy",
+      "col_closed": "Zamknięte",
+      "col_contracted": "Zakontraktowane",
+      "col_date": "Data",
+      "col_direction": "Kierunek",
+      "col_documents": "Wymagane dokumenty",
+      "col_due": "Termin",
+      "col_group": "Grupa",
+      "col_heavy": "Ciężki",
+      "col_hs_codes": "Kody HS",
+      "col_incoterm": "Incoterm",
+      "col_item": "Pozycja",
+      "col_m2": "m2",
+      "col_media_kind": "Media",
+      "col_named_place": "Wskazane miejsce",
+      "col_pct": "%",
+      "col_permits": "Pozwolenia",
+      "col_required": "Wymagane",
+      "col_section": "Dział",
+      "col_short": "Krótki",
+      "col_stage": "Etap",
+      "col_state": "Status",
+      "col_title": "Tytuł",
+      "col_topic": "Temat",
+      "col_transport_kind": "Rodzaj",
+      "col_type": "Typ",
+      "col_unit": "Jednostka",
+      "col_value": "Wartość",
+      "col_window": "Okno czasowe",
+      "empty": "Brak wpisów.",
+      "project": "Projekt",
+      "title_balance": "Bilans powierzchni",
+      "title_customs": "Indeks spraw celnych",
+      "title_frame": "Podsumowanie ram logistycznych",
+      "title_media": "Bilans mediów",
+      "title_neighbourhood": "Dziennik otoczenia",
+      "title_transports": "Transporty i pozwolenia"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Etap {stage}: przydział jest większy niż jego strefa.",
+        "suggestion": "Zmniejsz przydział."
+      },
+      "area_balance_not_closed": {
+        "fail": "Etap {stage}: bilans powierzchni się nie zgadza (różnica {difference_m2} m2).",
+        "suggestion": "Przydziel pozostałą powierzchnię lub popraw sumę powierzchni placu budowy."
+      },
+      "area_overlap": {
+        "fail": "Etap {stage}: dwie strefy różnych rodzajów nakładają się.",
+        "suggestion": "Skoryguj obrysy."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Deklarant nie odpowiada podmiotowi odpowiedzialnemu za odprawę importową zgodnie z incotermem.",
+        "suggestion": "Sprawdź deklaranta lub incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} zatwierdzonych dostaw rozpoczyna się w godzinie od {hour}; koncepcja dopuszcza {limit}.",
+        "suggestion": "Przenieś dostawy na inną godzinę lub zwiększ limit w koncepcji."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Plac budowy nie ma strefy czasowej, dlatego dostawy nie zostały porównane z godzinami otwarcia.",
+        "suggestion": "Ustaw strefę czasową placu budowy w koncepcji logistycznej."
+      },
+      "gate_limits_unknown": {
+        "fail": "Wjazd na plac budowy {gate} nie podaje limitów obciążenia.",
+        "suggestion": "Wpisz limity masy i wymiarów."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: obciążenie przekracza parametry wjazdu na plac budowy.",
+        "suggestion": "Użyj innego wjazdu lub podziel ładunek."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: transport ciężki bez wydanego pozwolenia.",
+        "suggestion": "Złóż wniosek o pozwolenie."
+      },
+      "hs_code_invalid": {
+        "fail": "Kod HS {hs_code} jest nieprawidłowy.",
+        "suggestion": "Użyj wyłącznie cyfr, o co najmniej minimalnej długości."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} dotyczy wyłącznie transportu morskiego.",
+        "suggestion": "Dla innych rodzajów transportu użyj FCA, CPT lub CIP."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} nie występuje w przypiętej wersji.",
+        "suggestion": "Wybierz warunek z przypiętej wersji."
+      },
+      "jit_late": {
+        "fail": "{title}: dostawa just-in-time przypada po rozpoczęciu taktu.",
+        "suggestion": "Przesuń dostawę wcześniej."
+      },
+      "jit_too_early": {
+        "fail": "{title}: dostawa just-in-time przypada wcześniej, niż pozwala bufor.",
+        "suggestion": "Przesuń ją bliżej rozpoczęcia taktu."
+      },
+      "jit_without_location": {
+        "fail": "{title}: dostawa just-in-time przepływu {flow} nie wskazuje strefy taktowania.",
+        "suggestion": "Wybierz strefę taktowania, dla której jest dostawa."
+      },
+      "media_capacity_short": {
+        "fail": "Etap {stage}: {media} wymaga {required}, zakontraktowano {contracted}.",
+        "suggestion": "Zwiększ zakontraktowaną moc lub zmniejsz zapotrzebowanie."
+      },
+      "media_late": {
+        "fail": "Etap {stage}: przyłącze {media} obiecano po rozpoczęciu etapu.",
+        "suggestion": "Uzgodnij wcześniejszy termin lub tymczasowe zasilanie."
+      },
+      "media_unsourced": {
+        "fail": "Zapotrzebowanie na {media} nie ma przyłącza.",
+        "suggestion": "Przypisz przyłącze."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Termin odpowiedzi na skargę upłynął {due}.",
+        "suggestion": "Potwierdź przyjęcie skargi i na nią odpowiedz."
+      },
+      "permit_expired": {
+        "fail": "Pozwolenie {reference} wygasło, a transporty jeszcze pozostały.",
+        "suggestion": "Złóż wniosek o nowe pozwolenie."
+      },
+      "permit_expiring": {
+        "fail": "Pozwolenie {reference} wkrótce wygasa, a transporty jeszcze pozostały.",
+        "suggestion": "Przedłuż pozwolenie."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: okno czasowe przypada w godzinach ciszy.",
+        "suggestion": "Przesuń je poza godziny ciszy lub uzyskaj zezwolenie na pracę nocną."
+      },
+      "required_document_missing": {
+        "fail": "Brakuje wymaganego dokumentu {kind}.",
+        "suggestion": "Uzyskaj dokument i go połącz."
+      },
+      "site_timezone_missing": {
+        "fail": "Plac budowy nie ma strefy czasowej, dlatego reguły pory dnia nie zostały sprawdzone.",
+        "suggestion": "Ustaw strefę czasową placu budowy w koncepcji logistycznej."
+      },
+      "stage_without_site_setup": {
+        "fail": "Etap {stage} nie ma strefy zaplecza budowy.",
+        "suggestion": "Przydziel strefę na biura i zaplecze socjalne."
+      },
+      "stage_without_storage": {
+        "fail": "Etap {stage} nie ma strefy magazynowania ani składowania.",
+        "suggestion": "Przydziel strefę magazynowania lub składowania."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: okno czasowe wykracza poza pozwolenie.",
+        "suggestion": "Przesuń okno lub przedłuż pozwolenie."
+      },
+      "zone_not_mapped": {
+        "fail": "Strefa składowania {zone} nie jest powiązana z żadną strefą placu budowy.",
+        "suggestion": "Powiąż ją z zaplanowaną strefą."
+      }
+    }
+  }
+}

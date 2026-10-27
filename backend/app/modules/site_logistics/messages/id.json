@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "Tidak",
+        "yes": "Ya"
+      },
+      "direction": {
+        "export": "Ekspor",
+        "import": "Impor",
+        "inbound": "Masuk",
+        "outbound": "Keluar"
+      },
+      "group": {
+        "built": "Terbangun",
+        "external": "Eksternal",
+        "logistics": "Logistik",
+        "reserve": "Cadangan"
+      },
+      "is_heavy": {
+        "no": "Tidak",
+        "yes": "Ya"
+      },
+      "section": {
+        "balance": "Neraca",
+        "concept": "Konsep",
+        "neighbourhood": "Lingkungan sekitar",
+        "readiness": "Kesiapan"
+      },
+      "short": {
+        "no": "Tidak",
+        "yes": "Ya"
+      },
+      "state": {
+        "acknowledged": "Diakui",
+        "action_taken": "Tindakan diambil",
+        "active": "Aktif",
+        "applied": "Diajukan",
+        "arrived": "Tiba",
+        "authority": "Otoritas",
+        "cancelled": "Dibatalkan",
+        "cleared": "Telah dibebaskan",
+        "closed": "Ditutup",
+        "connected": "Terhubung",
+        "contracted": "Dikontrakkan",
+        "declared": "Dinyatakan",
+        "disconnected": "Terputus",
+        "documents_complete": "Dokumen lengkap",
+        "draft": "Draf",
+        "expired": "Kedaluwarsa",
+        "granted": "Disetujui",
+        "held": "Ditahan",
+        "identified": "Teridentifikasi",
+        "in_transit": "Dalam perjalanan",
+        "missing": "Hilang",
+        "municipality": "Pemerintah kota",
+        "neighbours": "Tetangga",
+        "offered": "Ditawarkan",
+        "open": "Terbuka",
+        "other": "Lainnya",
+        "permit_pending": "Izin menunggu",
+        "planned": "Direncanakan",
+        "police": "Kepolisian",
+        "received": "Diterima",
+        "refused": "Ditolak",
+        "requested": "Diminta",
+        "scheduled": "Dijadwalkan",
+        "utility": "Utilitas",
+        "verified": "Terverifikasi"
+      },
+      "type": {
+        "complaint": "Keluhan",
+        "coordination": "Koordinasi"
+      }
+    },
+    "errors": {
+      "activity_not_found": "Aktivitas jadwal tidak ditemukan dalam proyek ini.",
+      "allocation_exceeds_area": "Alokasi lebih besar dari luas area.",
+      "allocation_negative": "Alokasi tidak boleh bernilai negatif.",
+      "allocations_changed": "Alokasi telah diubah oleh orang lain. Muat ulang dan coba lagi.",
+      "area_not_found": "Area lokasi proyek tidak ditemukan.",
+      "authority_permit_not_found": "Izin otoritas tidak ditemukan dalam proyek ini.",
+      "buffer_days_negative": "Hari cadangan tidak boleh negatif.",
+      "catalogue_invalid": "Katalog logistik yang dipasang tidak dapat diproses.",
+      "catalogue_retired": "Versi katalog ini sudah tidak digunakan.",
+      "code_required": "Kode wajib diisi.",
+      "code_taken": "Kode ini sudah digunakan dalam proyek.",
+      "commodity_code_not_found": "Kode komoditas tidak ditemukan.",
+      "complaint_closed": "Keluhan yang sudah ditutup tidak dapat diubah.",
+      "complaint_not_found": "Keluhan tidak ditemukan.",
+      "connection_point_invalid": "Titik sambungan bukan titik yang valid.",
+      "contracted_capacity_required": "Masukkan kapasitas kontrak terlebih dahulu.",
+      "correspondence_not_found": "Korespondensi tidak ditemukan dalam proyek ini.",
+      "correspondence_thread_not_found": "Korespondensi tidak ditemukan dalam proyek ini.",
+      "country_invalid": "Gunakan kode negara ISO dua huruf.",
+      "currency_invalid": "Gunakan kode mata uang ISO tiga huruf.",
+      "currency_required": "Jumlah harus disertai mata uangnya.",
+      "customs_case_not_found": "Kasus kepabeanan tidak ditemukan.",
+      "customs_closed": "Kasus yang sudah dibebaskan atau ditutup tidak dapat diubah.",
+      "customs_declared": "Kasus yang sudah dinyatakan tidak dapat dihapus.",
+      "customs_not_found": "Kasus kepabeanan tidak ditemukan.",
+      "customs_without_lines": "Tambahkan minimal satu baris barang terlebih dahulu.",
+      "declarant_invalid": "Pihak pelapor adalah pembeli atau penjual.",
+      "delivery_already_on_site": "Pengiriman ini sudah tiba dan tidak dapat diputuskan ulang.",
+      "delivery_not_found": "Pengiriman tidak ditemukan dalam proyek ini.",
+      "delivery_rate_exceeded": "Jam ini sudah memuat jumlah pengiriman yang diizinkan konsep.",
+      "delivery_refused": "Pengiriman ini tidak dapat disetujui dalam kondisi saat ini.",
+      "demand_not_found": "Kebutuhan tidak ditemukan.",
+      "demand_owned_by_plant_position": "Kebutuhan ini berasal dari posisi peralatan; ubah di sana.",
+      "direction_invalid": "Arah tidak dikenal.",
+      "document_exists": "Dokumen ini sudah ada dalam daftar periksa.",
+      "document_not_found": "Dokumen tidak ditemukan.",
+      "document_ref_required": "Tautkan dokumen sebelum menandainya sebagai diterima.",
+      "duplicate_stage": "Setiap tahap hanya dapat dialokasikan sekali per area.",
+      "entry_not_found": "Entri log tidak ditemukan.",
+      "field_required": "Kolom ini tidak boleh kosong.",
+      "flow_code_invalid": "Setiap aliran material memerlukan kode sendiri.",
+      "flow_code_unknown": "Konsep logistik tidak memiliki aliran material dengan kode ini.",
+      "flow_mode_invalid": "Mode aliran material tidak dikenal.",
+      "frame_invalid": "Kerangka koordinat tidak dikenal.",
+      "gate_hours_unchecked": "Jam operasional belum diperiksa sebelum zona waktu lokasi ditetapkan.",
+      "gate_load_exceeded": "Beban melebihi batas gerbang lokasi.",
+      "gate_not_found": "Gerbang lokasi tidak ditemukan dalam proyek ini.",
+      "geo_overlay_not_found": "Lapisan denah lokasi tidak ditemukan dalam proyek ini.",
+      "geometry_invalid": "Garis batas area bukan poligon yang valid.",
+      "goods_receipt_missing": "Belum ada penerimaan barang terkonfirmasi untuk pesanan pembelian ini.",
+      "heavy_without_permit": "Angkutan berat memerlukan izin yang telah disetujui sebelum dijadwalkan.",
+      "hours_invalid": "Masukkan jam yang valid, dengan jam selesai setelah jam mulai.",
+      "hs_code_invalid": "Kode HS hanya boleh berisi angka dan harus cukup panjang.",
+      "incoterm_unknown": "Incoterm ini tidak ada dalam versi yang dipasang.",
+      "invalid_transition": "Perubahan status ini tidak diizinkan.",
+      "jit_without_takt": "Aliran material just-in-time memerlukan jadwal takt.",
+      "last_stage": "Proyek harus memiliki minimal satu tahap ekspansi.",
+      "line_not_found": "Baris kepabeanan tidak ditemukan.",
+      "link_target_unavailable": "Tautan ini belum dapat diperiksa karena modul tujuannya belum terpasang.",
+      "media_not_found": "Sambungan utilitas tidak ditemukan.",
+      "money_not_decimal": "Masukkan jumlah dalam bilangan desimal.",
+      "money_out_of_range": "Masukkan jumlah dengan paling banyak dua desimal.",
+      "noise_limit_needs_project_value": "Yurisdiksi ini tidak menetapkan nilai tetap; masukkan nilai yang disetujui untuk proyek.",
+      "not_found": "Tidak ditemukan.",
+      "outside_gate_hours": "Jendela waktu berada di luar jam operasional gerbang.",
+      "owner_not_member": "Penanggung jawab harus merupakan anggota proyek ini.",
+      "pack_catalogue_invalid": "Katalog paket tidak dapat dimuat.",
+      "permission_denied": "Anda tidak memiliki izin untuk ini.",
+      "permit_frozen": "Izin yang telah disetujui, ditolak, atau kedaluwarsa tetap mempertahankan masa berlaku, jendela waktu, dan angkutannya.",
+      "permit_not_found": "Izin tidak ditemukan.",
+      "plan_calibration_without_image": "Pilih gambar denah lokasi sebelum menetapkan skalanya.",
+      "plan_document_not_found": "Dokumen denah lokasi tidak ditemukan dalam proyek ini.",
+      "plan_origin_invalid": "Titik asal denah lokasi berupa dua angka, x dan y dalam piksel.",
+      "plan_scale_invalid": "Skala denah lokasi harus lebih besar dari nol.",
+      "plant_item_not_found": "Item peralatan tidak ditemukan dalam proyek ini.",
+      "plant_position_not_found": "Posisi peralatan tidak ditemukan dalam proyek ini.",
+      "plant_position_required": "Posisi peralatan wajib diisi.",
+      "po_not_found": "Pesanan pembelian tidak ditemukan dalam proyek ini.",
+      "project_not_found": "Proyek tidak ditemukan.",
+      "quiet_hours_conflict": "Jendela waktu jatuh pada jam tenang dan tidak ada izin kerja malam yang mencakupnya.",
+      "required_document_missing": "Dokumen wajib masih belum tersedia.",
+      "response_required": "Tulis tanggapan terlebih dahulu.",
+      "route_invalid": "Rute bukan garis yang valid.",
+      "simultaneity_factor_range": "Faktor simultanitas harus antara 0 dan 1.",
+      "site_timezone_missing": "Tetapkan zona waktu lokasi terlebih dahulu; waktu diperiksa menurut jam lokasi.",
+      "slot_taken": "Pengiriman lain yang telah disetujui sudah menempati jendela waktu ini di gerbang.",
+      "stage_active": "Tahap yang aktif tidak dapat dihapus. Tutup terlebih dahulu.",
+      "stage_not_found": "Tahap ekspansi tidak ditemukan.",
+      "takt_location_not_found": "Area takt tidak ditemukan dalam proyek ini.",
+      "takt_schedule_not_found": "Jadwal takt tidak ditemukan dalam proyek ini.",
+      "timezone_invalid": "Zona waktu tidak dikenal. Gunakan nama seperti Europe/Berlin.",
+      "transport_closed": "Angkutan yang sudah ditutup atau dibatalkan tidak dapat diubah.",
+      "transport_mode_invalid": "Moda angkutan tidak dikenal.",
+      "transport_not_found": "Angkutan tidak ditemukan.",
+      "transport_under_way": "Angkutan yang sedang berjalan tidak dapat dihapus.",
+      "unknown_area_kind": "Jenis area tidak dikenal.",
+      "unknown_catalogue": "Katalog tidak dikenal.",
+      "unknown_document_kind": "Jenis dokumen tidak dikenal.",
+      "unknown_issue_kind": "Jenis keluhan tidak dikenal.",
+      "unknown_link_kind": "Tidak ada daftar untuk jenis tautan ini.",
+      "unknown_load_class": "Kelas beban tidak dikenal.",
+      "unknown_media_kind": "Utilitas tidak dikenal.",
+      "unknown_noise_limit": "Entri batas kebisingan tidak dikenal.",
+      "unknown_permit_kind": "Jenis izin tidak dikenal.",
+      "unknown_transport_kind": "Jenis angkutan tidak dikenal.",
+      "validity_invalid": "Izin berakhir sebelum dimulai.",
+      "validity_required": "Masukkan tanggal berlaku sebelum menyetujui.",
+      "vendor_not_found": "Pemasok tidak ditemukan.",
+      "window_invalid": "Jendela waktu tidak valid.",
+      "window_outside_permit": "Jendela waktu angkutan berada di luar masa berlaku izin atau jam yang diizinkan.",
+      "zone_not_found": "Zona penumpukan tidak ditemukan dalam proyek ini.",
+      "zone_type_invalid": "Jenis zona tidak dikenal."
+    },
+    "evidence": {
+      "balance_closed": "Neraca area tertutup untuk setiap tahap yang terbuka",
+      "concept_saved_and_exported": "Konsep logistik disimpan dan diarsipkan",
+      "first_stage_media_contracted": "Utilitas untuk tahap pertama telah dikontrakkan",
+      "gate_loads_admitted": "Setiap beban diizinkan oleh gerbangnya atau tercakup izin ukuran berlebih",
+      "heavy_transports_permitted": "Izin disetujui untuk setiap angkutan berat",
+      "neighbourhood_limit_source": "Sumber batas kebisingan telah ditetapkan",
+      "no_errors": "Tidak ada kesalahan logistik yang terbuka",
+      "unresolved": "Rencana logistik tidak dapat ditempatkan dalam model tata kelola"
+    },
+    "export": {
+      "as_of": "Per tanggal",
+      "col_area_kind": "Jenis area",
+      "col_closed": "Ditutup",
+      "col_contracted": "Dikontrakkan",
+      "col_date": "Tanggal",
+      "col_direction": "Arah",
+      "col_documents": "Dokumen yang diperlukan",
+      "col_due": "Batas waktu",
+      "col_group": "Kelompok",
+      "col_heavy": "Berat",
+      "col_hs_codes": "Kode HS",
+      "col_incoterm": "Incoterm",
+      "col_item": "Item",
+      "col_m2": "m2",
+      "col_media_kind": "Utilitas",
+      "col_named_place": "Tempat yang disebutkan",
+      "col_pct": "%",
+      "col_permits": "Izin",
+      "col_required": "Diperlukan",
+      "col_section": "Bagian",
+      "col_short": "Singkat",
+      "col_stage": "Tahap",
+      "col_state": "Status",
+      "col_title": "Judul",
+      "col_topic": "Topik",
+      "col_transport_kind": "Jenis",
+      "col_type": "Tipe",
+      "col_unit": "Satuan",
+      "col_value": "Nilai",
+      "col_window": "Jendela waktu",
+      "empty": "Tidak ada entri.",
+      "project": "Proyek",
+      "title_balance": "Neraca area",
+      "title_customs": "Indeks berkas kasus kepabeanan",
+      "title_frame": "Ringkasan kerangka logistik",
+      "title_media": "Neraca utilitas",
+      "title_neighbourhood": "Log lingkungan sekitar",
+      "title_transports": "Angkutan dan izin"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Tahap {stage}: alokasi lebih besar dari luas areanya.",
+        "suggestion": "Kurangi alokasinya."
+      },
+      "area_balance_not_closed": {
+        "fail": "Tahap {stage}: neraca area belum seimbang (selisih {difference_m2} m2).",
+        "suggestion": "Alokasikan sisa area atau koreksi total luas lokasi."
+      },
+      "area_overlap": {
+        "fail": "Tahap {stage}: dua area dengan jenis berbeda saling tumpang tindih.",
+        "suggestion": "Sesuaikan garis batasnya."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "Pihak pelapor tidak sesuai dengan pihak yang mengurus impor kepabeanan menurut incoterm.",
+        "suggestion": "Periksa pihak pelapor atau incotermnya."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} pengiriman yang disetujui dimulai pada jam dari pukul {hour}, konsep mengizinkan {limit}.",
+        "suggestion": "Pindahkan pengiriman ke jam lain atau naikkan batas dalam konsep."
+      },
+      "gate_hours_unchecked": {
+        "fail": "Lokasi tidak memiliki zona waktu, sehingga pengiriman tidak dibandingkan dengan jam operasional.",
+        "suggestion": "Tetapkan zona waktu lokasi dalam konsep logistik."
+      },
+      "gate_limits_unknown": {
+        "fail": "Gerbang lokasi {gate} tidak mencantumkan batas beban.",
+        "suggestion": "Masukkan batas berat dan dimensi."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: beban melebihi batas gerbang lokasi.",
+        "suggestion": "Gunakan gerbang lain atau pecah beban."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: angkutan berat tanpa izin yang telah disetujui.",
+        "suggestion": "Ajukan izin."
+      },
+      "hs_code_invalid": {
+        "fail": "Kode HS {hs_code} tidak valid.",
+        "suggestion": "Gunakan angka saja, dengan panjang minimum yang disyaratkan."
+      },
+      "incoterm_sea_only": {
+        "fail": "Incoterm {incoterm} hanya untuk angkutan laut.",
+        "suggestion": "Gunakan FCA, CPT, atau CIP untuk moda lainnya."
+      },
+      "incoterm_unknown": {
+        "fail": "Incoterm {incoterm} tidak ada dalam versi yang dipasang.",
+        "suggestion": "Pilih istilah dari versi yang dipasang."
+      },
+      "jit_late": {
+        "fail": "{title}: pengiriman just-in-time tiba setelah awal takt.",
+        "suggestion": "Majukan pengiriman."
+      },
+      "jit_too_early": {
+        "fail": "{title}: pengiriman just-in-time tiba lebih awal daripada yang diizinkan oleh cadangannya.",
+        "suggestion": "Pindahkan lebih dekat ke awal takt."
+      },
+      "jit_without_location": {
+        "fail": "{title}: pengiriman just-in-time untuk aliran {flow} tidak menyebutkan area takt.",
+        "suggestion": "Pilih area takt yang dituju pengiriman ini."
+      },
+      "media_capacity_short": {
+        "fail": "Tahap {stage}: {media} membutuhkan {required}, kontrak {contracted}.",
+        "suggestion": "Tingkatkan kapasitas kontrak atau kurangi kebutuhan."
+      },
+      "media_late": {
+        "fail": "Tahap {stage}: sambungan {media} dijanjikan setelah tahap dimulai.",
+        "suggestion": "Sepakati tanggal lebih awal atau pasokan sementara."
+      },
+      "media_unsourced": {
+        "fail": "Kebutuhan {media} belum memiliki sambungan.",
+        "suggestion": "Tetapkan sambungan."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Sebuah keluhan seharusnya ditanggapi pada {due}.",
+        "suggestion": "Akui dan tanggapi keluhan tersebut."
+      },
+      "permit_expired": {
+        "fail": "Izin {reference} telah kedaluwarsa, padahal angkutan masih tersisa.",
+        "suggestion": "Ajukan izin baru."
+      },
+      "permit_expiring": {
+        "fail": "Izin {reference} akan segera habis, padahal angkutan masih tersisa.",
+        "suggestion": "Perpanjang izin."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: jendela waktu jatuh pada jam tenang.",
+        "suggestion": "Pindahkan di luar jam tenang atau dapatkan izin kerja malam."
+      },
+      "required_document_missing": {
+        "fail": "Dokumen wajib {kind} belum tersedia.",
+        "suggestion": "Dapatkan dokumen dan tautkan."
+      },
+      "site_timezone_missing": {
+        "fail": "Lokasi tidak memiliki zona waktu, sehingga aturan waktu harian tidak diperiksa.",
+        "suggestion": "Tetapkan zona waktu lokasi dalam konsep logistik."
+      },
+      "stage_without_site_setup": {
+        "fail": "Tahap {stage} tidak memiliki area persiapan lokasi.",
+        "suggestion": "Alokasikan area untuk kantor dan fasilitas kesejahteraan."
+      },
+      "stage_without_storage": {
+        "fail": "Tahap {stage} tidak memiliki area penyimpanan atau penumpukan.",
+        "suggestion": "Alokasikan area penyimpanan atau penumpukan."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: jendela waktu berada di luar izin.",
+        "suggestion": "Pindahkan jendela waktu atau perpanjang izin."
+      },
+      "zone_not_mapped": {
+        "fail": "Zona penumpukan {zone} belum ditautkan ke area lokasi.",
+        "suggestion": "Tautkan ke area yang direncanakan."
+      }
+    }
+  }
+}

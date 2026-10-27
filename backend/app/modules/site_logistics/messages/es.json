@@ -1,0 +1,358 @@
+{
+  "common": {
+    "ok": "Aceptar"
+  },
+  "site_logistics": {
+    "enum": {
+      "closed": {
+        "no": "No",
+        "yes": "Sí"
+      },
+      "direction": {
+        "export": "Exportación",
+        "import": "Importación",
+        "inbound": "Entrada",
+        "outbound": "Salida"
+      },
+      "group": {
+        "built": "Construido",
+        "external": "Externo",
+        "logistics": "Logística",
+        "reserve": "Reserva"
+      },
+      "is_heavy": {
+        "no": "No",
+        "yes": "Sí"
+      },
+      "section": {
+        "balance": "Balance",
+        "concept": "Concepto",
+        "neighbourhood": "Entorno",
+        "readiness": "Preparación"
+      },
+      "short": {
+        "no": "No",
+        "yes": "Sí"
+      },
+      "state": {
+        "acknowledged": "Confirmado",
+        "action_taken": "Acción realizada",
+        "active": "Activo",
+        "applied": "Solicitado",
+        "arrived": "Llegado",
+        "authority": "Autoridad",
+        "cancelled": "Cancelado",
+        "cleared": "Despachado",
+        "closed": "Cerrado",
+        "connected": "Conectado",
+        "contracted": "Contratado",
+        "declared": "Declarado",
+        "disconnected": "Desconectado",
+        "documents_complete": "Documentación completa",
+        "draft": "Borrador",
+        "expired": "Caducado",
+        "granted": "Concedido",
+        "held": "Retenido",
+        "identified": "Identificado",
+        "in_transit": "En tránsito",
+        "missing": "Pendiente",
+        "municipality": "Ayuntamiento",
+        "neighbours": "Vecinos",
+        "offered": "Ofertado",
+        "open": "Abierto",
+        "other": "Otro",
+        "permit_pending": "Permiso pendiente",
+        "planned": "Planificado",
+        "police": "Policía",
+        "received": "Recibido",
+        "refused": "Denegado",
+        "requested": "Solicitado",
+        "scheduled": "Programado",
+        "utility": "Compañía suministradora",
+        "verified": "Verificado"
+      },
+      "type": {
+        "complaint": "Reclamación",
+        "coordination": "Coordinación"
+      }
+    },
+    "errors": {
+      "activity_not_found": "La actividad del cronograma no se encuentra en este proyecto.",
+      "allocation_exceeds_area": "La asignación es mayor que la superficie.",
+      "allocation_negative": "Una asignación no puede ser negativa.",
+      "allocations_changed": "Otra persona ha modificado las asignaciones. Recargue e inténtelo de nuevo.",
+      "area_not_found": "No se encuentra la superficie de obra.",
+      "authority_permit_not_found": "El permiso de la autoridad no se encuentra en este proyecto.",
+      "buffer_days_negative": "Los días de holgura no pueden ser negativos.",
+      "catalogue_invalid": "No se puede resolver el catálogo de logística fijado.",
+      "catalogue_retired": "Esta versión del catálogo está retirada.",
+      "code_required": "Se requiere un código.",
+      "code_taken": "Este código ya se usa en el proyecto.",
+      "commodity_code_not_found": "No se encuentra el código de mercancía.",
+      "complaint_closed": "Una reclamación cerrada no puede modificarse.",
+      "complaint_not_found": "No se encuentra la reclamación.",
+      "connection_point_invalid": "El punto de conexión no es un punto válido.",
+      "contracted_capacity_required": "Introduzca primero la capacidad contratada.",
+      "correspondence_not_found": "La correspondencia no se encuentra en este proyecto.",
+      "correspondence_thread_not_found": "La correspondencia no se encuentra en este proyecto.",
+      "country_invalid": "Use un código de país ISO de dos letras.",
+      "currency_invalid": "Use un código de moneda ISO de tres letras.",
+      "currency_required": "Un importe necesita su moneda.",
+      "customs_case_not_found": "No se encuentra el expediente aduanero.",
+      "customs_closed": "Un expediente despachado o cerrado no puede modificarse.",
+      "customs_declared": "Un expediente declarado no puede eliminarse.",
+      "customs_not_found": "No se encuentra el expediente aduanero.",
+      "customs_without_lines": "Añada primero al menos una línea de mercancías.",
+      "declarant_invalid": "El declarante es el comprador o el vendedor.",
+      "delivery_already_on_site": "Este suministro ya ha llegado y no se vuelve a decidir.",
+      "delivery_not_found": "El suministro no se encuentra en este proyecto.",
+      "delivery_rate_exceeded": "Esta hora ya tiene el número de suministros que permite el concepto.",
+      "delivery_refused": "Este suministro no se puede aprobar tal como está.",
+      "demand_not_found": "No se encuentra la necesidad.",
+      "demand_owned_by_plant_position": "Esta necesidad procede de una posición de maquinaria; modifíquela allí.",
+      "direction_invalid": "Dirección desconocida.",
+      "document_exists": "Este documento ya está en la lista de comprobación.",
+      "document_not_found": "No se encuentra el documento.",
+      "document_ref_required": "Vincule el documento antes de marcarlo como recibido.",
+      "duplicate_stage": "Cada fase puede asignarse una vez por superficie.",
+      "entry_not_found": "No se encuentra la entrada del registro.",
+      "field_required": "Este campo no puede estar vacío.",
+      "flow_code_invalid": "Cada flujo de materiales necesita su propio código.",
+      "flow_code_unknown": "El concepto logístico no tiene ningún flujo de materiales con este código.",
+      "flow_mode_invalid": "Modo de flujo de materiales desconocido.",
+      "frame_invalid": "Sistema de coordenadas desconocido.",
+      "gate_hours_unchecked": "Los horarios de apertura no se comprueban hasta que se defina la zona horaria de la obra.",
+      "gate_load_exceeded": "La carga supera los límites del acceso a la obra.",
+      "gate_not_found": "El acceso a la obra no se encuentra en este proyecto.",
+      "geo_overlay_not_found": "La superposición del plano de obra no se encuentra en este proyecto.",
+      "geometry_invalid": "El contorno de la superficie no es un polígono válido.",
+      "goods_receipt_missing": "Todavía no hay una recepción de mercancías confirmada para este pedido de compra.",
+      "heavy_without_permit": "Un transporte pesado necesita un permiso concedido antes de programarse.",
+      "hours_invalid": "Introduzca horas válidas, con el fin posterior al inicio.",
+      "hs_code_invalid": "El código HS debe contener solo dígitos y tener la longitud suficiente.",
+      "incoterm_unknown": "Este Incoterm no figura en la versión fijada.",
+      "invalid_transition": "Este cambio de estado no está permitido.",
+      "jit_without_takt": "Un flujo justo a tiempo necesita un cronograma takt.",
+      "last_stage": "Un proyecto conserva al menos una fase de ampliación.",
+      "line_not_found": "No se encuentra la línea aduanera.",
+      "link_target_unavailable": "Este enlace todavía no se puede comprobar porque el módulo al que apunta no está instalado.",
+      "media_not_found": "No se encuentra la acometida de suministro.",
+      "money_not_decimal": "Introduzca el importe como número decimal.",
+      "money_out_of_range": "Introduzca un importe con dos decimales como máximo.",
+      "noise_limit_needs_project_value": "Esta jurisdicción no fija valores; introduzca los valores acordados para el proyecto.",
+      "not_found": "No encontrado.",
+      "outside_gate_hours": "La ventana horaria queda fuera del horario de apertura de la puerta.",
+      "owner_not_member": "El responsable debe ser miembro de este proyecto.",
+      "pack_catalogue_invalid": "No se puede cargar el catálogo del paquete.",
+      "permission_denied": "No tiene permiso para esta acción.",
+      "permit_frozen": "Un permiso concedido, denegado o caducado conserva su validez, sus ventanas y sus transportes.",
+      "permit_not_found": "No se encuentra el permiso.",
+      "plan_calibration_without_image": "Elija la imagen del plano de obra antes de fijar su escala.",
+      "plan_document_not_found": "El documento del plano de obra no se encuentra en este proyecto.",
+      "plan_origin_invalid": "El origen del plano de obra son dos números, x e y en píxeles.",
+      "plan_scale_invalid": "La escala del plano de obra debe ser mayor que cero.",
+      "plant_item_not_found": "El elemento de maquinaria no se encuentra en este proyecto.",
+      "plant_position_not_found": "La posición de maquinaria no se encuentra en este proyecto.",
+      "plant_position_required": "Se requiere una posición de maquinaria.",
+      "po_not_found": "El pedido de compra no se encuentra en este proyecto.",
+      "project_not_found": "No se encuentra el proyecto.",
+      "quiet_hours_conflict": "La ventana cae en horas de silencio y ningún permiso de trabajo nocturno la cubre.",
+      "required_document_missing": "Todavía falta un documento obligatorio.",
+      "response_required": "Redacte primero la respuesta.",
+      "route_invalid": "La ruta no es una línea válida.",
+      "simultaneity_factor_range": "El factor de simultaneidad está entre 0 y 1.",
+      "site_timezone_missing": "Defina primero la zona horaria de la obra; los horarios se comprueban con el reloj de la obra.",
+      "slot_taken": "Otro suministro aprobado ocupa esta ventana en el acceso.",
+      "stage_active": "No se puede eliminar una fase activa. Ciérrela primero.",
+      "stage_not_found": "No se encuentra la fase de ampliación.",
+      "takt_location_not_found": "La zona takt no se encuentra en este proyecto.",
+      "takt_schedule_not_found": "El cronograma takt no se encuentra en este proyecto.",
+      "timezone_invalid": "Zona horaria desconocida. Use un nombre como Europe/Madrid.",
+      "transport_closed": "Un transporte cerrado o cancelado no puede modificarse.",
+      "transport_mode_invalid": "Modo de transporte desconocido.",
+      "transport_not_found": "No se encuentra el transporte.",
+      "transport_under_way": "No se puede eliminar un transporte en curso.",
+      "unknown_area_kind": "Tipo de superficie desconocido.",
+      "unknown_catalogue": "Catálogo desconocido.",
+      "unknown_document_kind": "Tipo de documento desconocido.",
+      "unknown_issue_kind": "Tipo de reclamación desconocido.",
+      "unknown_link_kind": "No existe una lista para este tipo de enlace.",
+      "unknown_load_class": "Clase de carga desconocida.",
+      "unknown_media_kind": "Suministro desconocido.",
+      "unknown_noise_limit": "Entrada de límite de ruido desconocida.",
+      "unknown_permit_kind": "Tipo de permiso desconocido.",
+      "unknown_transport_kind": "Tipo de transporte desconocido.",
+      "validity_invalid": "El permiso termina antes de empezar.",
+      "validity_required": "Introduzca las fechas de validez antes de conceder el permiso.",
+      "vendor_not_found": "No se encuentra el proveedor.",
+      "window_invalid": "La ventana horaria no es válida.",
+      "window_outside_permit": "La ventana de transporte queda fuera de la validez del permiso o de sus horarios permitidos.",
+      "zone_not_found": "La zona de acopio no se encuentra en este proyecto.",
+      "zone_type_invalid": "Tipo de zona desconocido."
+    },
+    "evidence": {
+      "balance_closed": "Balance de superficies cerrado para cada fase abierta",
+      "concept_saved_and_exported": "Concepto logístico guardado y archivado",
+      "first_stage_media_contracted": "Suministros de la primera fase contratados",
+      "gate_loads_admitted": "Cada carga admitida por su acceso o cubierta por un permiso de carga especial",
+      "heavy_transports_permitted": "Permiso concedido para cada transporte pesado",
+      "neighbourhood_limit_source": "Fuente del límite de ruido definida",
+      "no_errors": "Sin errores logísticos abiertos",
+      "unresolved": "El plan logístico no pudo integrarse en el modelo de gobernanza"
+    },
+    "export": {
+      "as_of": "A fecha de",
+      "col_area_kind": "Tipo de superficie",
+      "col_closed": "Cerrado",
+      "col_contracted": "Contratado",
+      "col_date": "Fecha",
+      "col_direction": "Dirección",
+      "col_documents": "Documentos requeridos",
+      "col_due": "Vencimiento",
+      "col_group": "Grupo",
+      "col_heavy": "Pesado",
+      "col_hs_codes": "Códigos HS",
+      "col_incoterm": "Incoterm",
+      "col_item": "Elemento",
+      "col_m2": "m2",
+      "col_media_kind": "Suministro",
+      "col_named_place": "Lugar designado",
+      "col_pct": "%",
+      "col_permits": "Permisos",
+      "col_required": "Requerido",
+      "col_section": "Sección",
+      "col_short": "Corto",
+      "col_stage": "Fase",
+      "col_state": "Estado",
+      "col_title": "Título",
+      "col_topic": "Asunto",
+      "col_transport_kind": "Tipo",
+      "col_type": "Tipo",
+      "col_unit": "Unidad",
+      "col_value": "Valor",
+      "col_window": "Ventana",
+      "empty": "No hay entradas.",
+      "project": "Proyecto",
+      "title_balance": "Balance de superficies",
+      "title_customs": "Índice de expedientes aduaneros",
+      "title_frame": "Resumen del marco logístico",
+      "title_media": "Balance de suministros",
+      "title_neighbourhood": "Registro del entorno",
+      "title_transports": "Transportes y permisos"
+    },
+    "findings": {
+      "allocation_exceeds_area": {
+        "fail": "Fase {stage}: una asignación es mayor que su superficie.",
+        "suggestion": "Reduzca la asignación."
+      },
+      "area_balance_not_closed": {
+        "fail": "Fase {stage}: el balance de superficies no cuadra (diferencia de {difference_m2} m2).",
+        "suggestion": "Asigne la superficie restante o corrija la superficie total de la obra."
+      },
+      "area_overlap": {
+        "fail": "Fase {stage}: dos superficies de distinto tipo se solapan.",
+        "suggestion": "Ajuste los contornos."
+      },
+      "declarant_mismatch_incoterm": {
+        "fail": "El declarante no coincide con quien despacha la importación según el Incoterm.",
+        "suggestion": "Revise el declarante o el Incoterm."
+      },
+      "delivery_rate_exceeded": {
+        "fail": "{count} suministros aprobados empiezan en la hora de las {hour}; el concepto permite {limit}.",
+        "suggestion": "Traslade los suministros a otra hora o aumente el límite en el concepto."
+      },
+      "gate_hours_unchecked": {
+        "fail": "La obra no tiene zona horaria, por lo que los suministros no se compararon con los horarios de apertura.",
+        "suggestion": "Defina la zona horaria de la obra en el concepto logístico."
+      },
+      "gate_limits_unknown": {
+        "fail": "El acceso {gate} no indica límites de carga.",
+        "suggestion": "Introduzca los límites de peso y dimensiones."
+      },
+      "gate_load_exceeded": {
+        "fail": "{title}: la carga supera los límites del acceso a la obra.",
+        "suggestion": "Use otro acceso o divida la carga."
+      },
+      "heavy_without_permit": {
+        "fail": "{title}: transporte pesado sin permiso concedido.",
+        "suggestion": "Solicite el permiso."
+      },
+      "hs_code_invalid": {
+        "fail": "El código HS {hs_code} no es válido.",
+        "suggestion": "Use solo dígitos, con al menos la longitud mínima."
+      },
+      "incoterm_sea_only": {
+        "fail": "El Incoterm {incoterm} es solo para transporte marítimo.",
+        "suggestion": "Para otros modos use FCA, CPT o CIP."
+      },
+      "incoterm_unknown": {
+        "fail": "El Incoterm {incoterm} no figura en la versión fijada.",
+        "suggestion": "Elija un término de la versión fijada."
+      },
+      "jit_late": {
+        "fail": "{title}: el suministro justo a tiempo llega después del inicio del takt.",
+        "suggestion": "Adelante el suministro."
+      },
+      "jit_too_early": {
+        "fail": "{title}: el suministro justo a tiempo llega antes de lo que permite su holgura.",
+        "suggestion": "Acérquelo al inicio del takt."
+      },
+      "jit_without_location": {
+        "fail": "{title}: un suministro justo a tiempo del flujo {flow} no indica zona takt.",
+        "suggestion": "Elija la zona takt a la que va destinado el suministro."
+      },
+      "media_capacity_short": {
+        "fail": "Fase {stage}: {media} necesita {required}, contratado {contracted}.",
+        "suggestion": "Aumente la capacidad contratada o reduzca la demanda."
+      },
+      "media_late": {
+        "fail": "Fase {stage}: la acometida de {media} se prevé después del inicio de la fase.",
+        "suggestion": "Acuerde una fecha anterior o un suministro provisional."
+      },
+      "media_unsourced": {
+        "fail": "Una necesidad de {media} no tiene acometida.",
+        "suggestion": "Asigne una acometida."
+      },
+      "neighbour_issue_overdue": {
+        "fail": "Una reclamación debía tener respuesta el {due}.",
+        "suggestion": "Confirme la recepción y responda."
+      },
+      "permit_expired": {
+        "fail": "El permiso {reference} ha caducado y quedan transportes pendientes.",
+        "suggestion": "Solicite un nuevo permiso."
+      },
+      "permit_expiring": {
+        "fail": "El permiso {reference} caduca pronto y quedan transportes pendientes.",
+        "suggestion": "Prorrogue el permiso."
+      },
+      "quiet_hours_conflict": {
+        "fail": "{title}: la ventana cae en horas de silencio.",
+        "suggestion": "Muévala fuera de las horas de silencio o obtenga un permiso de trabajo nocturno."
+      },
+      "required_document_missing": {
+        "fail": "Falta el documento obligatorio {kind}.",
+        "suggestion": "Obtenga el documento y vincúlelo."
+      },
+      "site_timezone_missing": {
+        "fail": "La obra no tiene zona horaria, por lo que no se comprobaron las reglas de horario del día.",
+        "suggestion": "Defina la zona horaria de la obra en el concepto logístico."
+      },
+      "stage_without_site_setup": {
+        "fail": "La fase {stage} no tiene superficie de instalaciones de obra.",
+        "suggestion": "Asigne una superficie para oficinas y servicios para el personal."
+      },
+      "stage_without_storage": {
+        "fail": "La fase {stage} no tiene superficie de almacenamiento o acopio.",
+        "suggestion": "Asigne una superficie de almacenamiento o acopio."
+      },
+      "window_outside_permit": {
+        "fail": "{title}: la ventana queda fuera del permiso.",
+        "suggestion": "Mueva la ventana o prorrogue el permiso."
+      },
+      "zone_not_mapped": {
+        "fail": "La zona de acopio {zone} no está vinculada a una superficie de obra.",
+        "suggestion": "Vincúlela a su superficie prevista."
+      }
+    }
+  }
+}
