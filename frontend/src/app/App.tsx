@@ -301,6 +301,11 @@ const DefectsLiabilityPage = lazy(() =>
     default: m.DefectsLiabilityPage,
   }))
 );
+const QuoteCapturePage = lazy(() =>
+  import('@/features/quote-capture/QuoteCapturePage').then((m) => ({
+    default: m.QuoteCapturePage,
+  }))
+);
 const GuaranteesPage = lazy(() =>
   import('@/features/guarantees/GuaranteesPage').then((m) => ({
     default: m.GuaranteesPage,
@@ -1558,6 +1563,8 @@ export default function App() {
         <Route path="/projects/:projectId/defects-liability" element={<P title="Defects Liability"><DefectsLiabilityPage /></P>} />
         <Route path="/defects-liability" element={<P title="Defects Liability"><DefectsLiabilityPage /></P>} />
         <Route path="/projects/:projectId/guarantees" element={<P title="Guarantees"><GuaranteesPage /></P>} />
+        <Route path="/projects/:projectId/quotes" element={<P title="Quote capture"><QuoteCapturePage /></P>} />
+        <Route path="/quotes" element={<P title="Quote capture"><QuoteCapturePage /></P>} />
         <Route path="/projects/:projectId/guarantees/:guaranteeId" element={<P title="Guarantee"><GuaranteeDetailPage /></P>} />
         <Route path="/portfolio/guarantees/register" element={<P title="Guarantees"><GuaranteesPage /></P>} />
         <Route path="/portfolio/guarantees" element={<P title="Guarantee exposure"><GuaranteesExposurePage /></P>} />

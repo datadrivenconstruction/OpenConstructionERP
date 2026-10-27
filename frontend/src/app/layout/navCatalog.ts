@@ -544,6 +544,16 @@ export const navGroups: NavGroup[] = [
           'Priced from a bill of quantities; writes the winning rates back into the BOQ.',
       },
       {
+        labelKey: 'nav.quote_capture',
+        defaultLabel: 'Quote capture',
+        to: '/quotes',
+        icon: FileText,
+        moduleKey: 'quote_capture',
+        advancedOnly: true,
+        helpKey: 'sidebar.help.quote_capture',
+        defaultHelp: 'Read supplier quotes, check them against the document, level and confirm.',
+      },
+      {
         labelKey: 'nav.supplier_catalogs',
         to: '/supplier-catalogs',
         icon: ShoppingCart,

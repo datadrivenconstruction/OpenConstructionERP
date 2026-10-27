@@ -279,6 +279,7 @@ const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
   '/subcontractors': 'oe_subcontractors',
   '/bid-management': 'oe_bid_management',
   '/tendering': 'oe_tendering',
+  '/quotes': 'oe_quote_capture',
   '/variations': 'oe_variations',
   '/moc': 'oe_moc',
   '/supplier-catalogs': 'oe_supplier_catalogs',
