@@ -305,8 +305,7 @@ export function DashboardMarketCasesCard() {
             <ArrowRight
               size={13}
               className="transition-transform group-hover:translate-x-0.5"
-              aria-hidden="true"
-            />
+              aria-hidden="true" />
           </button>
         </div>
 
@@ -334,7 +333,7 @@ export function DashboardMarketCasesCard() {
                     : 'bg-oe-blue/10 text-oe-blue-text ring-oe-blue/20',
                 )}
               >
-                {offer.applied ? <Check size={11} aria-hidden="true" /> : <Package size={11} aria-hidden="true" />}
+                {offer.applied ? <Check size={11} aria-hidden="true" /> : <Package size={11} aria-hidden="true" data-decorative-icon />}
                 {offer.applied
                   ? t('cases.regional_pack_in_use', { defaultValue: 'Regional pack in use: {{name}}', name: offer.name })
                   : t('cases.regional_pack_needed', { defaultValue: 'Needs {{name}}', name: offer.name })}
@@ -413,8 +412,7 @@ export function DashboardMarketCasesCard() {
                       <ArrowRight
                         size={12}
                         className="transition-transform group-hover:translate-x-0.5"
-                        aria-hidden="true"
-                      />
+                        aria-hidden="true" />
                     </span>
                   </span>
                 </div>

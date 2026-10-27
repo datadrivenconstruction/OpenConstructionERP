@@ -189,8 +189,7 @@ function EstimateRow({ projectId, estimate }: { projectId: string; estimate: Por
         <ArrowRight
           size={12}
           aria-hidden="true"
-          className="shrink-0 text-content-quaternary group-hover:text-oe-blue"
-        />
+          className="shrink-0 text-content-quaternary group-hover:text-oe-blue" />
       </Link>
     </li>
   );
