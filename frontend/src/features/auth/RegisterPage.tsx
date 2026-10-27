@@ -13,6 +13,7 @@ import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { readRememberChoice, useAuthStore } from '@/stores/useAuthStore';
 import { AuthBackground } from './AuthBackground';
+import { ClassicAuthFooter } from './ClassicAuth';
 import { meetsPasswordPolicy } from './passwordPolicy';
 
 export function RegisterPage() {
@@ -143,8 +144,9 @@ export function RegisterPage() {
   ];
 
   return (
-    <div className="relative flex h-screen bg-surface-secondary overflow-hidden">
+    <div className="oe-auth relative flex h-screen bg-surface-secondary overflow-hidden">
       <AuthBackground />
+      <ClassicAuthFooter />
 
       {/* Language — top right */}
       <div className="absolute top-3 end-3 z-30" ref={langRef}>

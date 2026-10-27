@@ -2683,3 +2683,165 @@ textarea[data-oe-check='error'] {
 html {
   scrollbar-gutter: stable;
 }
+
+/* Classic auth: sign-in, register, forgot and reset pages without effects.
+   Standard keeps its look; these rules apply only under data-look=classic. */
+.oe-auth-classic-only {
+  display: none;
+}
+html[data-look='classic'] .oe-auth-classic-only {
+  display: block;
+}
+html[data-look='classic'] .oe-auth-standard-only,
+html[data-look='classic'] .oe-auth .oce-bg-table-wrap,
+html[data-look='classic'] .oe-auth [class*='blur-['],
+html[data-look='classic'] .oe-auth .animate-ping,
+html[data-look='classic'] .oe-auth-form-col > div[aria-hidden] {
+  display: none !important;
+}
+html[data-look='classic'] .oe-auth {
+  background: var(--oe-bg-secondary);
+}
+html[data-look='classic'] .oe-auth *,
+html[data-look='classic'] .oe-auth *::before,
+html[data-look='classic'] .oe-auth *::after {
+  animation: none !important;
+  transition-duration: 0s !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+html[data-look='classic'] .oe-auth [class*='bg-gradient-'] {
+  background-image: none !important;
+}
+html[data-look='classic'] .oe-auth .bg-clip-text {
+  background: none !important;
+  color: var(--oe-text-primary) !important;
+  -webkit-text-fill-color: currentColor;
+}
+html[data-look='classic'] .oe-auth .login-glass-pro {
+  background: var(--oe-bg-elevated);
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-md);
+  box-shadow: none;
+}
+html[data-look='classic'] .oe-auth .login-glass-pro::after,
+html[data-look='classic'] .oe-auth .btn-shimmer::after,
+html[data-look='classic'] .oe-auth .btn-shimmer::before {
+  display: none;
+}
+html[data-look='classic'] .oe-auth input:not([type='checkbox']):not([type='radio']) {
+  height: 2.5rem;
+}
+html[data-look='classic'] .oe-auth button[type='submit'] {
+  height: 2.5rem;
+}
+@media (min-width: 1024px) {
+  html[data-look='classic'] .oe-auth .oe-auth-aside {
+    display: flex;
+    order: 1;
+    align-items: center;
+    padding: 3rem 4rem;
+    border-inline-end: 1px solid var(--oe-border);
+    background: var(--oe-bg-primary);
+  }
+  html[data-look='classic'] .oe-auth .oe-auth-form-col {
+    order: 2;
+  }
+}
+@media (max-width: 1023px) {
+  html[data-look='classic'] .oe-auth .oe-auth-aside {
+    display: none;
+  }
+}
+.oe-auth-aside-inner {
+  max-width: 28rem;
+}
+html[data-look='classic'] .oe-auth-footer {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.75rem;
+  color: var(--oe-text-secondary);
+}
+html[data-look='classic'] .oe-auth-footer a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+html[data-look='classic'] .oe-auth-footer a:hover {
+  color: var(--oe-text-primary);
+}
+
+/* Classic shell: header, menu, buttons and cards without effects. */
+html[data-look='classic'] .oe-app-header {
+  height: 3rem;
+  background: var(--oe-bg-primary);
+  border-bottom: 1px solid var(--oe-border-light);
+}
+html[data-look='classic'] .oe-sidebar {
+  box-shadow: none !important;
+  border-inline-end: 1px solid var(--oe-border-light);
+}
+html[data-look='classic'] .oe-sidebar svg.lucide {
+  width: 16px;
+  height: 16px;
+  stroke-width: 1.5;
+}
+html[data-look='classic'] .oe-sidebar [aria-current='page'] {
+  background: transparent !important;
+  box-shadow: inset 2px 0 0 var(--oe-blue) !important;
+  border-radius: 0 !important;
+  font-weight: 600;
+  color: var(--oe-text-primary) !important;
+}
+html[dir='rtl'][data-look='classic'] .oe-sidebar [aria-current='page'] {
+  box-shadow: inset -2px 0 0 var(--oe-blue) !important;
+}
+html[data-look='classic'] [data-oe-button] {
+  box-shadow: none !important;
+  transform: none !important;
+  border-radius: var(--oe-radius-sm);
+}
+html[data-look='classic'] [data-oe-button]:focus-visible {
+  outline: 2px solid var(--oe-blue);
+  outline-offset: 2px;
+}
+html[data-look='classic'] .oe-card {
+  box-shadow: none !important;
+  transform: none !important;
+  border-radius: var(--oe-radius-md);
+}
+html[data-look='classic'] .oe-card:hover {
+  box-shadow: none !important;
+}
+html[data-look='classic'] [class*='animate-fade-in'],
+html[data-look='classic'] [class*='animate-stagger-in'],
+html[data-look='classic'] [class*='animate-slide-'],
+html[data-look='classic'] [class*='animate-form-scale-in'] {
+  animation: none !important;
+}
+html[data-look='classic'] {
+  scrollbar-width: thin;
+}
+html[data-look='classic'] ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+html[data-look='classic'] ::-webkit-scrollbar-thumb {
+  background: var(--oe-border);
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  html[data-look='classic'] *,
+  html[data-look='classic'] *::before,
+  html[data-look='classic'] *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

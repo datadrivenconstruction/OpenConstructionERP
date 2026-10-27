@@ -70,6 +70,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+        data-oe-button={variant}
         disabled={isDisabled}
         aria-busy={loading || undefined}
         className={clsx(
