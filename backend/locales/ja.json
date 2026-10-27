@@ -663,5 +663,10 @@
       "draft": "下書き",
       "frozen": "確定済み"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "{page} / {total} ページ"
+    }
   }
 }

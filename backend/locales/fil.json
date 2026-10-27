@@ -663,5 +663,10 @@
       "draft": "Draft",
       "frozen": "Naka-lock"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Pahina {page} ng {total}"
+    }
   }
 }

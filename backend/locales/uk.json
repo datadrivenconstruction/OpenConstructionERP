@@ -663,5 +663,10 @@
       "draft": "Чернетка",
       "frozen": "Заморожено"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Сторінка {page} з {total}"
+    }
   }
 }

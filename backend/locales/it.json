@@ -663,5 +663,10 @@
       "draft": "Bozza",
       "frozen": "Congelato"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Pagina {page} di {total}"
+    }
   }
 }

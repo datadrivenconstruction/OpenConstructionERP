@@ -663,5 +663,10 @@
       "draft": "Долбоор түрү",
       "frozen": "Тоңдурулган"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "{page} / {total} бет"
+    }
   }
 }

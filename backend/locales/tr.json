@@ -663,5 +663,10 @@
       "draft": "Taslak",
       "frozen": "Dondurulmuş"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Sayfa {page} / {total}"
+    }
   }
 }

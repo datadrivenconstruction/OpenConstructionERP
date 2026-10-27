@@ -663,5 +663,10 @@
       "draft": "Luonnos",
       "frozen": "Lukittu"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Sivu {page} / {total}"
+    }
   }
 }

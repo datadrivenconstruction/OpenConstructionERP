@@ -663,5 +663,10 @@
       "draft": "খসড়া",
       "frozen": "ফ্রিজ করা"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "পৃষ্ঠা {page} / {total}"
+    }
   }
 }

@@ -669,6 +669,9 @@
           "refunded": "Возвращён"
         }
       }
+    },
+    "furniture": {
+      "footer_page": "Страница {page} из {total}"
     }
   },
   "cost_control": {

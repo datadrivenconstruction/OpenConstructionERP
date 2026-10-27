@@ -663,5 +663,10 @@
       "draft": "Чернова",
       "frozen": "Замразен"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Страница {page} от {total}"
+    }
   }
 }

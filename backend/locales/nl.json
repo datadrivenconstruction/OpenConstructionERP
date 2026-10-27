@@ -663,5 +663,10 @@
       "draft": "Concept",
       "frozen": "Bevroren"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Pagina {page} van {total}"
+    }
   }
 }

@@ -663,5 +663,10 @@
       "draft": "Piszkozat",
       "frozen": "Lezárt"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "{page}. oldal / összesen {total}"
+    }
   }
 }

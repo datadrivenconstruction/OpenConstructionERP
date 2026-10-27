@@ -663,5 +663,10 @@
       "draft": "草稿",
       "frozen": "已冻结"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "第 {page} 页，共 {total} 页"
+    }
   }
 }

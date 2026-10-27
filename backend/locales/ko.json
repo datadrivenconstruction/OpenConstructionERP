@@ -663,5 +663,10 @@
       "draft": "작성 중",
       "frozen": "확정"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "{page} / {total} 페이지"
+    }
   }
 }

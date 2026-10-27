@@ -663,5 +663,10 @@
       "draft": "Nacrt",
       "frozen": "Zamrznut"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Stranica {page} od {total}"
+    }
   }
 }

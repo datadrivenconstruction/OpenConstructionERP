@@ -669,6 +669,9 @@
           "refunded": "Erstattet"
         }
       }
+    },
+    "furniture": {
+      "footer_page": "Seite {page} von {total}"
     }
   },
   "cost_control": {

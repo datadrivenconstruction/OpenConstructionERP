@@ -663,5 +663,10 @@
       "draft": "Πρόχειρο",
       "frozen": "Παγωμένο"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Σελίδα {page} από {total}"
+    }
   }
 }

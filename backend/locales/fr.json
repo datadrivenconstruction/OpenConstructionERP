@@ -663,5 +663,10 @@
       "draft": "Brouillon",
       "frozen": "Figé"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Page {page} sur {total}"
+    }
   }
 }

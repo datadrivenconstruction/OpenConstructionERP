@@ -663,5 +663,10 @@
       "draft": "Nháp",
       "frozen": "Đã khóa"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Trang {page} / {total}"
+    }
   }
 }

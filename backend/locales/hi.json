@@ -663,5 +663,10 @@
       "draft": "ड्राफ़्ट",
       "frozen": "फ़्रीज़ किया गया"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "पेज {page} / {total}"
+    }
   }
 }

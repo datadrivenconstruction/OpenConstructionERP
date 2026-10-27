@@ -663,5 +663,10 @@
       "draft": "Draf",
       "frozen": "Beku"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Halaman {page} dari {total}"
+    }
   }
 }

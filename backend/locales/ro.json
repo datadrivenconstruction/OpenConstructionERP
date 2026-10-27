@@ -663,5 +663,10 @@
       "draft": "Ciornă",
       "frozen": "Înghețat"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "Pagina {page} din {total}"
+    }
   }
 }

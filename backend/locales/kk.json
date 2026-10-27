@@ -663,5 +663,10 @@
       "draft": "Жоба нұсқасы",
       "frozen": "Қатырылған"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "{page} / {total} бет"
+    }
   }
 }

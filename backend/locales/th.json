@@ -663,5 +663,10 @@
       "draft": "ฉบับร่าง",
       "frozen": "ล็อกแล้ว"
     }
+  },
+  "document_forms": {
+    "furniture": {
+      "footer_page": "หน้า {page} จาก {total}"
+    }
   }
 }
