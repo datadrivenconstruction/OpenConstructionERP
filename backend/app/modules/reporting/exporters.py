@@ -586,6 +586,7 @@ def _export_pdf(
         branded_footer,
         branded_header_footer,
         branded_letterhead,
+        build_with_page_count,
     )
     from app.core.pdf_fonts import BODY_FONT, BOLD_FONT, pdf_markup, pdf_style_for_text, register_pdf_fonts
 
@@ -780,7 +781,7 @@ def _export_pdf(
         letterhead.hAlign = "CENTER"
         flowables.insert(0, letterhead)
     first_page = branded_header_footer if letterhead is None else branded_footer
-    doc.build(flowables, onFirstPage=first_page, onLaterPages=branded_header_footer)
+    build_with_page_count(doc, flowables, onFirstPage=first_page, onLaterPages=branded_header_footer)
     return buffer.getvalue()
 
 

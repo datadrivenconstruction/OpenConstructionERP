@@ -59,6 +59,8 @@ from app.core.pdf_branding import (
     branded_doc_metadata,
     branded_header_logo,
     branded_letterhead,
+    build_with_page_count,
+    page_number_text,
 )
 from app.core.pdf_fonts import (
     BODY_FONT,
@@ -221,7 +223,7 @@ def _build_styles() -> dict[str, ParagraphStyle]:
 
 def _footer(canvas: Any, doc: Any) -> None:
     generated = datetime.now(tz=UTC).strftime("%Y-%m-%d %H:%M UTC")
-    page_text = f"Page {doc.page}"
+    page_text = page_number_text(None, page=doc.page, total=getattr(doc, "page_count", 0))
     # The brand is the firm's own name: it may be Chinese, and a legal name may
     # be long enough to reach the page number, so the line is fitted into the
     # room beside it. The page number is ours and stays where it is.
@@ -474,7 +476,7 @@ def generate_award_letter_pdf(
     signer = awarded_by_name or project_name or "The Project Team"
     flow.append(_safe_para(signer, styles["value"]))
 
-    doc.build(flow)
+    build_with_page_count(doc, flow)
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
@@ -559,7 +561,7 @@ def generate_rejection_letter_pdf(
     signer = signed_by_name or project_name or "The Project Team"
     flow.append(_safe_para(signer, styles["value"]))
 
-    doc.build(flow)
+    build_with_page_count(doc, flow)
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
@@ -746,7 +748,7 @@ def generate_award_record_pdf(*, record: dict[str, Any], package_ref: str) -> by
             flow.append(_safe_para(f"Superseded statement{dated}: {earlier_text}", styles["label"]))
         flow.append(Spacer(1, 2 * mm))
 
-    doc.build(flow)
+    build_with_page_count(doc, flow)
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
