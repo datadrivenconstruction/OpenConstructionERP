@@ -87,7 +87,7 @@ describe('index.html appearance boot script', () => {
       JSON.stringify({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round' }),
     );
     boot();
-    expect(attrs()).toEqual({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round', text: 'default' });
+    expect(attrs()).toEqual({ accent: 'violet', font: 'inter', density: 'comfortable', radius: 'round', look: 'standard', text: 'default' });
     const link = document.head.querySelector<HTMLLinkElement>('link[data-oe-font="inter"]');
     expect(link?.getAttribute('href')).toBe(fontStylesheetHref('inter'));
   });
