@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Comision pentru partea neexecutată",
+      "presumed_unperformed_pct": "Cota presupusă a părții neexecutate",
+      "profit_pct": "Profit pentru partea executată"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "O sumă introdusă pentru acest element",
+        "name": "Condiții personalizate"
+      },
+      "de_bgb_648": {
+        "description": "Prețul convenit minus costurile economisite; se presupune 5 % din partea neexecutată când costurile economisite nu sunt documentate",
+        "name": "Reziliere liberă de către beneficiar (§ 648 BGB)",
+        "presumption": "Cota presupusă a părții neexecutate"
+      },
+      "de_public_owner": {
+        "description": "Exemplu de delegare pentru un beneficiar public: pragul UE pentru lucrări ca cel mai înalt nivel, angajamente pluriannuale la conducătorul autorității",
+        "eu_works_threshold": "Pragul UE pentru lucrări 2026-27 (Regulamentul delegat (UE) 2025/2152), neconfirmat",
+        "name": "Beneficiar public (Germania), exemplu"
+      },
+      "de_vob_b_8_1": {
+        "description": "Același decont ca la § 648 BGB, la care face trimitere clauza",
+        "name": "Reziliere liberă conform § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Trimite la § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Costuri suportate plus profit pentru lucrările executate plus cheltuielile de decontare",
+        "name": "Reziliere pentru convenienţă (FAR 49)",
+        "profit_negotiated": "Rata profitului negociată"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Lucrări executate plus un procent de onorariu din partea neexecutată, conform datelor contractuale",
+        "fee_from_contract_data": "Procentul din datele contractuale",
+        "name": "Reziliere din motive proprii ale beneficiarului (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Manager de proiect, sponsor și consiliu cu plafoane exemplificative în moneda proiectului; fără cifre legale",
+        "name": "Grafic neutru pe trei niveluri"
+      },
+      "none_free_cancellation": {
+        "description": "Fără penalități la anulare",
+        "name": "Anulare gratuită"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Penalități pe dată sau pe stadiul de fabricație, convenite cu furnizorul",
+        "name": "Graficul de anulare al furnizorului"
+      },
+      "uk_public_body": {
+        "description": "Exemplu de autoritate delegată după valoare și noutate, conform Managing Public Money",
+        "name": "Organism public (Regatul Unit), exemplu"
+      },
+      "us_federal_owner": {
+        "description": "Exemplu de niveluri începând de la pragul achiziției simplificate",
+        "name": "Beneficiar federal (SUA), exemplu",
+        "sat": "Pragul achiziției simplificate USD 350.000 din 01.10.2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Baza de reziliere necunoscută",
+      "abort_exposure_unknown": "Pierderea reziduală este necunoscută. Completați mai întâi termenii de reziliere.",
+      "abort_parameter_invalid": "Un parametru de reziliere este o cotă între 0 și 1",
+      "abort_parameter_not_in_basis": "Baza de reziliere aleasă nu are acest parametru",
+      "abort_type_not_in_schedule": "Graficul nu are un nivel pentru un decont de reziliere",
+      "activity_not_found": "Activitatea din grafic nu a fost găsită în acest proiect",
+      "amount_invalid": "Suma nu este un număr valid",
+      "amount_not_positive": "Suma trebuie să fie mai mare decât zero",
+      "assignee_not_project_member": "Persoana nu este membru al acestui proiect",
+      "assignment_expired": "Atribuirea aprobatorului a expirat; actualizați atribuirile",
+      "assignment_needs_approver": "Numiți aprobatorul acestui nivel înainte de un supleant sau de o perioadă de valabilitate",
+      "assignment_window_inverted": "Atribuirea se încheie înainte să înceapă",
+      "cancellation_schedule_invalid": "Fiecare pas necesită un reper, o dată sau un progres și exact un cost",
+      "catalogue_code_taken": "Un alt catalog folosește deja acest cod",
+      "catalogue_invalid": "Catalogul nu este valid",
+      "catalogue_retired": "Acest catalog este scos din uz",
+      "change_belongs_to_contract_item": "O modificare și contractul ei sunt legate de același element",
+      "commitment_guard_unavailable": "Verificarea eliberării nu a putut fi efectuată, așa că nu a fost permisă",
+      "commitment_not_in_matrix": "Acest document nu se află în matricea angajamentelor",
+      "commitment_not_released": "Acest angajament nu este eliberat pentru această sumă",
+      "commitment_type_unknown": "Acest tip de angajament nu există în schema de competențe",
+      "contingency_insufficient": "Soldul fondului de rezervă nu acoperă această retragere",
+      "contingency_line_required": "O retragere din fondul de rezervă necesită linia bugetară care deține fondul",
+      "date_invalid": "Aceasta nu este o dată",
+      "decider_not_tier_holder": "Aprobat de cineva care nu deține nivelul",
+      "decision_invalid": "Alegeți aprobare sau respingere",
+      "deferral_needs_reason": "Notați motivul amânării elementului",
+      "document_linked_elsewhere": "Acest document este deja numărat într-un alt element",
+      "document_not_found": "Documentul nu a fost găsit în acest proiect",
+      "drawdown_released_by_commitment": "Această retragere este un element de angajament eliberat. Reziliați acel element pentru a recupera banii.",
+      "edit_required": "Rolul dumneavoastră nu permite editarea elementelor de angajament",
+      "enforcement_invalid": "Aplicarea trebuie să fie dezactivată, de avertizare sau de blocare",
+      "external_approval_not_required": "Această sumă este decisă de un nivel al graficului: eliminați referința la aprobarea externă",
+      "external_approval_required": "Suma depășește toate nivelurile: atașați referința la aprobarea externă",
+      "field_frozen": "Acest câmp nu mai poate fi modificat pentru acest element",
+      "field_required": "Acest câmp nu poate fi gol",
+      "flag_unknown": "Acest indicator nu există în schema de competențe",
+      "four_eyes_no_approver": "Nimeni de pe acest nivel nu poate decide această cerere conform regulii celor patru ochi",
+      "four_eyes_requester_is_approver": "Patru ochi: nu puteți solicita o eliberare pe care ați aproba-o chiar dumneavoastră",
+      "four_eyes_violation": "Cel care a solicitat, deține sau a confirmat acest element nu îl poate decide",
+      "frame_document_not_found": "Documentul-cadru nu a fost găsit în acest proiect",
+      "funding_application_not_found": "Cererea de finanțare nu a fost găsită în acest proiect",
+      "fx_policy_invalid": "Politică necunoscută de curs de schimb",
+      "fx_rate_missing": "Nu există curs de schimb pentru această dată: eliberarea nu poate fi evaluată",
+      "gate_unknown": "Această etapă de control nu există în modelul de guvernanță al proiectului",
+      "gates_not_in_use": "Acest proiect nu folosește etape de control, deci nimic nu poate aștepta una",
+      "governance_area_required": "Un element legat de o etapă de control necesită o zonă de management",
+      "governance_area_unknown": "Această zonă de management nu există în modelul de guvernanță al proiectului",
+      "invalid_transition": "Acest pas nu este posibil în starea curentă",
+      "item_changed": "Elementul s-a modificat între timp. Încercați din nou.",
+      "item_closed": "Elementul este închis",
+      "item_code_taken": "Un alt element folosește deja acest cod",
+      "item_not_found": "Elementul de angajament nu a fost găsit",
+      "link_kind_invalid": "Tip de document necunoscut",
+      "link_kind_not_supported": "Acest tip de document nu poate fi legat încă",
+      "link_not_found": "Legătura nu a fost găsită",
+      "manage_required": "Doar cine gestionează matricea poate face acest lucru",
+      "manual_amount_needs_currency": "O estimare manuală necesită o sumă și o monedă",
+      "matrix_missing": "Acest proiect nu are încă o matrice a angajamentelor",
+      "no_pending_release": "Nu există nicio cerere de eliberare în așteptare",
+      "no_route_for_tier": "Nimeni nu este încă desemnat pentru nivelul necesar",
+      "not_entitled_decider": "Nu dețineți nivelul pe care se decide această cerere",
+      "not_item_owner": "Doar proprietarul elementului sau un manager poate modifica acest element",
+      "not_requester": "Doar solicitantul sau un manager poate retrage această cerere",
+      "planned_source_invalid": "Sursă necunoscută pentru suma planificată",
+      "planned_source_not_found": "Linia bugetară, linia de cost sau poziția nu a fost găsită în acest proiect",
+      "plant_item_not_found": "Utilajul nu a fost găsit în acest proiect",
+      "precondition_is_computed": "Această condiție este citită din modul și nu poate fi bifată",
+      "precondition_kind_invalid": "Tip de condiție necunoscut",
+      "precondition_needs_evidence": "Atașați referința probei",
+      "precondition_needs_ref": "Această condiție necesită o referință",
+      "precondition_not_found": "Condiția nu a fost găsită",
+      "preconditions_open": "Condițiile deschise blochează această eliberare",
+      "project_not_found": "Proiectul nu a fost găsit",
+      "rationale_required": "Motivați",
+      "release_decided": "Această cerere de eliberare a fost deja decisă",
+      "release_expired": "Eliberarea acestui element a depășit data de valabilitate: solicitați o eliberare reînnoită înainte de a lega alte sume",
+      "release_pending": "O cerere de eliberare pentru acest element este deja în curs",
+      "requisition_not_found": "Cererea de achiziție nu a fost găsită în acest proiect",
+      "route_changed_since_accepted": "Traseul de aprobare al acestui nivel a fost modificat. Un manager trebuie să îl fixeze din nou.",
+      "route_must_belong_to_project": "Doar un traseu de aprobare al acestui proiect poate fi fixat",
+      "route_not_found": "Traseul de aprobare nu a fost găsit",
+      "schedule_currency_mismatch": "Acest grafic folosește altă monedă decât eliberările deja înregistrate",
+      "schedule_not_in_force": "Graficul fixat nu este în vigoare astăzi. Fixați versiunea care este în vigoare.",
+      "schedule_type_mismatch": "Acest grafic nu cunoaște tipul de angajament al unui element existent",
+      "tier_unknown": "Acest nivel nu există în schema de competențe",
+      "transfer_links_stay_in_project": "Documentele legate aparțin acestui proiect. Eliminați legăturile înainte de a transfera în alt proiect.",
+      "transfer_target_invalid": "Un element nu poate fi transferat către el însuși",
+      "transfer_target_not_open": "Elementul țintă este închis sau așteaptă o decizie",
+      "transferable_invalid": "Opțiune de transfer necunoscută",
+      "type_fixed_after_release": "Tipul nu poate fi schimbat după ce a fost solicitată o eliberare",
+      "unknown_catalogue": "Catalogul nu a fost găsit"
+    },
+    "evidence": {
+      "decision_overdue": "Data-limită de decizie a acestui element de angajament a trecut și nimic nu este eliberat: decideți, amânați cu motiv sau înregistrați costul întârzierii",
+      "items_released_by_gate": "Angajamentele scadente la această etapă sunt eliberate sau amânate",
+      "items_without_area": "Elementele de angajament ale acestei etape indică o zonă de management pe care proiectul nu o mai are",
+      "no_items_for_gate": "Niciun element de angajament nu indică această etapă, deci nu se știe dacă banii trebuie eliberați până atunci"
+    },
+    "export": {
+      "as_of": "La data de",
+      "col_code": "Cod",
+      "col_committed": "Angajat",
+      "col_currency": "Moneda",
+      "col_decision_date": "Data-limită de decizie",
+      "col_open_preconditions": "Condiții deschise",
+      "col_overdue": "Decizie întârziată",
+      "col_planned": "Planificat",
+      "col_released": "Eliberat",
+      "col_residual_loss": "Pierdere reziduală la reziliere",
+      "col_status": "Stare",
+      "col_tier": "Nivel necesar",
+      "col_title": "Angajament",
+      "col_type": "Tip",
+      "empty": "Încă nu există elemente de angajament",
+      "overdue": "Întârziat",
+      "project": "Proiect",
+      "title": "Matricea angajamentelor și eliberărilor"
+    },
+    "exposure": {
+      "nothing_committed": "Nimic angajat, nimic cheltuit"
+    },
+    "flag": {
+      "multi_year_commitment": "Leagă exerciții bugetare ulterioare",
+      "novel_contentious": "Nou sau litigios"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Elementul {item} este angajat, dar termenii lui de reziliere sunt necunoscuți",
+        "suggestion": "Introduceți baza de reziliere sau un grafic de anulare"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Plafoanele graficului {schedule} nu cresc odată cu nivelul",
+        "suggestion": "Corectați intervalele și publicați o versiune nouă"
+      },
+      "committed_within_release": {
+        "fail": "Elementul {item} angajează mai mult decât s-a eliberat",
+        "suggestion": "Solicitați o eliberare suplimentară sau reduceți documentele legate"
+      },
+      "decision_date_not_passed": {
+        "fail": "Data-limită de decizie {date} a elementului {item} a trecut",
+        "suggestion": "Decideți, amânați cu motiv sau înregistrați costul întârzierii"
+      },
+      "document_linked_once": {
+        "fail": "Documentul {document} este numărat în mai mult de un element",
+        "suggestion": "Eliminați a doua legătură"
+      },
+      "fx_rate_available": {
+        "fail": "O sumă legată a elementului {item} nu are curs de schimb",
+        "suggestion": "Adăugați un curs pentru data respectivă în registrul cursurilor sau în proiect"
+      },
+      "item_has_cost_code": {
+        "fail": "Elementul {item} nu are linie de cost",
+        "suggestion": "Atribuiți linia de cost pe care este înregistrat elementul"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Suma planificată a elementului {item} nu poate fi citită",
+        "suggestion": "Indicați pentru element o linie bugetară, o linie de cost sau o poziție, ori introduceți o estimare manuală"
+      },
+      "plant_item_in_register": {
+        "fail": "Elementul {item} indică un utilaj care nu mai este în registrul de utilaje, deci se aplică propriul său termen de livrare",
+        "suggestion": "Legați elementul de utilajul care l-a înlocuit sau eliminați legătura"
+      },
+      "release_in_date": {
+        "fail": "O eliberare a elementului {item} a fost valabilă până la {date}: nimic nou nu poate fi angajat sub ea",
+        "suggestion": "Solicitați o eliberare reînnoită pentru ce mai urmează să fie angajat"
+      },
+      "release_within_authority": {
+        "fail": "Eliberarea {release} a fost decisă sub nivelul necesar {tier}",
+        "suggestion": "Solicitați o eliberare nouă conform graficului în vigoare"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Elementele grupului {group} au fost eliberate sub nivelul pe care îl cere suma lor",
+        "suggestion": "Solicitați următoarea eliberare la nivelul totalului grupului"
+      }
+    },
+    "status": {
+      "aborted": "Reziliat",
+      "closed": "Închis",
+      "committed": "Angajat",
+      "on_hold": "Suspendat",
+      "partially_released": "Eliberat parțial",
+      "planned": "Planificat",
+      "re_release_required": "Este necesară reeliberarea",
+      "release_requested": "Eliberare solicitată",
+      "released": "Eliberat",
+      "transferred": "Transferat"
+    },
+    "tier": {
+      "accounting_officer": "Responsabil financiar-contabil",
+      "authority_head": "Conducătorul autorității",
+      "board": "Consiliul de administrație",
+      "contracting_officer": "Responsabil cu achizițiile",
+      "department_head": "Șeful departamentului",
+      "head_of_contracting_activity": "Șeful activității de achiziții",
+      "project_director": "Directorul de proiect",
+      "project_lead": "Coordonatorul proiectului",
+      "project_manager": "Managerul de proiect",
+      "senior_responsible_owner": "Proprietarul senior responsabil",
+      "simplified_acquisition": "Achiziție simplificată",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Modificare",
+      "claim_settlement": "Decontarea unei pretenții",
+      "contingency_drawdown": "Retragere din fondul de rezervă",
+      "design": "Proiectare",
+      "services": "Servicii",
+      "supplies": "Livrări",
+      "termination_settlement": "Decont la reziliere",
+      "works": "Lucrări"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} ar fi trebuit decis până la {latest_decision_date}.",
+        "title": "Decizie de eliberare întârziată"
+      },
+      "re_release_required": {
+        "body": "Documentele legate de {code} angajează acum {committed}, peste eliberarea de {released}.",
+        "title": "Este necesară reeliberarea"
+      },
+      "release_aborted": {
+        "body": "{code} a fost oprit.",
+        "title": "Reziliere aprobată"
+      },
+      "release_rejected": {
+        "body": "Eliberarea pentru {code} a fost respinsă.",
+        "title": "Eliberare respinsă"
+      },
+      "release_released": {
+        "body": "{code} a fost eliberat.",
+        "title": "Eliberare acordată"
+      }
+    }
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Díj a el nem végzett részre",
+      "presumed_unperformed_pct": "A el nem végzett rész feltételezett aránya",
+      "profit_pct": "Nyereség az elvégzett részre"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Ehhez a tételhez megadott díj",
+        "name": "Egyedi feltételek"
+      },
+      "de_bgb_648": {
+        "description": "Megállapodott ár a megtakarított költségek levonásával; ha a megtakarított költségek nincsenek igazolva, az el nem végzett rész 5 %-a feltételezett",
+        "name": "Szabad felmondás a megrendelő részéről (BGB 648. §)",
+        "presumption": "Az el nem végzett rész feltételezett aránya"
+      },
+      "de_public_owner": {
+        "description": "Példa közbeszerzői megbízásra: az uniós közbeszerzési küszöb a legmagasabb sávként, többéves kötelezettségek a hatóság vezetőjének",
+        "eu_works_threshold": "EU-s kivitelezési küszöb 2026-27 (2025/2152 (EU) felhatalmazáson alapuló rendelet), nem megerősített",
+        "name": "Közintézmény megrendelő (Németország), példa"
+      },
+      "de_vob_b_8_1": {
+        "description": "Ugyanaz az elszámolás, mint a BGB 648. §-ban, amelyre a záradék hivatkozik",
+        "name": "Szabad felmondás a VOB/B 8. § (1) bekezdése szerint",
+        "refers_to_bgb_648": "A BGB 648. §-ára hivatkozik"
+      },
+      "far_49_convenience": {
+        "description": "Felmerült költségek, az elvégzett munka nyeresége és a lezárási költségek",
+        "name": "Felmondás üzleti érdekből (FAR 49)",
+        "profit_negotiated": "Megállapodott nyereségráta"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Elvégzett munka plusz díj százalék az el nem végzett részre, a szerződési adatokban megadottak szerint",
+        "fee_from_contract_data": "Százalék a szerződési adatokból",
+        "name": "Felmondás a megrendelő saját okából (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Projektvezető, szponzor és igazgatóság példaszerű felső határokkal a projekt pénznemében; nincsenek törvényi összegek",
+        "name": "Semleges háromszintű ütemezés"
+      },
+      "none_free_cancellation": {
+        "description": "Lemondás esetén nincs díj",
+        "name": "Díjmentes lemondás"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Díjak dátum vagy gyártási előrehaladás szerint, a szállítóval megállapodottak szerint",
+        "name": "Szállítói lemondási ütemezés"
+      },
+      "uk_public_body": {
+        "description": "Példa a delegált hatáskörre összeg és újszerűség szerint, a Managing Public Money alapján",
+        "name": "Közintézmény (Egyesült Királyság), példa"
+      },
+      "us_federal_owner": {
+        "description": "Példa a szintekre, a egyszerűsített beszerzési küszöbtől kezdve",
+        "name": "Szövetségi megrendelő (Egyesült Államok), példa",
+        "sat": "Egyszerűsített beszerzési küszöb 350 000 USD 2025-10-01-től (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Ismeretlen megszakítási alap",
+      "abort_exposure_unknown": "A fennmaradó veszteség ismeretlen. Előbb töltse ki a megszakítási feltételeket.",
+      "abort_parameter_invalid": "A megszakítási paraméter 0 és 1 közötti arány legyen",
+      "abort_parameter_not_in_basis": "A kiválasztott megszakítási alapnak nincs ilyen paramétere",
+      "abort_type_not_in_schedule": "Az ütemezésben nincs szint a felmondási elszámoláshoz",
+      "activity_not_found": "Az ütemezési tevékenység nem található ebben a projektben",
+      "amount_invalid": "Az összeg nem érvényes szám",
+      "amount_not_positive": "Az összegnek nullánál nagyobbnak kell lennie",
+      "assignee_not_project_member": "A személy nem tagja ennek a projektnek",
+      "assignment_expired": "A jóváhagyó megbízatása lejárt; frissítse a hozzárendeléseket",
+      "assignment_needs_approver": "Nevezze meg ennek a szintnek a jóváhagyóját, mielőtt helyettest vagy érvényességi időszakot adna meg",
+      "assignment_window_inverted": "A megbízatás a kezdete előtt ér véget",
+      "cancellation_schedule_invalid": "Minden lépéshez mérföldkő, dátum vagy előrehaladás, és pontosan egy díj kell",
+      "catalogue_code_taken": "Egy másik katalógus már használja ezt a kódot",
+      "catalogue_invalid": "A katalógus nem érvényes",
+      "catalogue_retired": "Ez a katalógus ki van vonva",
+      "change_belongs_to_contract_item": "A módosítás és a szerződése ugyanazon a tételen van összekapcsolva",
+      "commitment_guard_unavailable": "A kiadási ellenőrzést nem lehetett elvégezni, ezért nem engedélyezett",
+      "commitment_not_in_matrix": "Ez a dokumentum nincs a kötelezettségi mátrixban",
+      "commitment_not_released": "Ez a kötelezettség erre az összegre nincs felszabadítva",
+      "commitment_type_unknown": "Ez a kötelezettségtípus nincs a hatásköri ütemezésben",
+      "contingency_insufficient": "A tartalék egyenlege nem fedezi ezt a lehívást",
+      "contingency_line_required": "A tartalék lehívásához meg kell adni a tartalékot tartalmazó költségvetési sort",
+      "date_invalid": "Ez nem dátum",
+      "decider_not_tier_holder": "Olyan személy hagyta jóvá, aki nem rendelkezik ezzel a szinttel",
+      "decision_invalid": "Válassza a jóváhagyást vagy az elutasítást",
+      "deferral_needs_reason": "Írja le, miért halasztja el a tételt",
+      "document_linked_elsewhere": "Ez a dokumentum már egy másik tételben szerepel",
+      "document_not_found": "A dokumentum nem található ebben a projektben",
+      "drawdown_released_by_commitment": "Ez a lehívás felszabadított kötelezettségi tétel. A pénz visszavételéhez szakítsa meg azt a tételt.",
+      "edit_required": "Az Ön szerepköre nem szerkeszthet kötelezettségi tételeket",
+      "enforcement_invalid": "Az érvényesítés legyen kikapcsolva, figyelmeztetés vagy blokkolás",
+      "external_approval_not_required": "Ezt az összeget az ütemezés egyik szintje dönti el: távolítsa el a külső jóváhagyás hivatkozását",
+      "external_approval_required": "Az összeg minden szint felett van: csatolja a külső jóváhagyás hivatkozását",
+      "field_frozen": "Ez a mező már nem módosítható ennél a tételnél",
+      "field_required": "Ez a mező nem lehet üres",
+      "flag_unknown": "Ez a jelölés nincs a hatásköri ütemezésben",
+      "four_eyes_no_approver": "Ezen a szinten senki nem dönthet a kérelemről a négyszemes elv szerint",
+      "four_eyes_requester_is_approver": "Négyszemes elv: nem kérheti olyan felszabadítás, amelyet ön maga hagyna jóvá",
+      "four_eyes_violation": "Aki kérte, birtokolja vagy megerősítette ezt a tételt, nem dönthet róla",
+      "frame_document_not_found": "A keretdokumentum nem található ebben a projektben",
+      "funding_application_not_found": "A finanszírozási kérelem nem található ebben a projektben",
+      "fx_policy_invalid": "Ismeretlen árfolyam-szabályzat",
+      "fx_rate_missing": "Nincs árfolyam erre a dátumra: a felszabadítás nem értékelhető",
+      "gate_unknown": "Ez a mérföldkő nincs a projekt irányítási modelljében",
+      "gates_not_in_use": "Ez a projekt nem használ mérföldköveket, így semmi nem várhat rájuk",
+      "governance_area_required": "A mérföldkőhöz kötött tételhez irányítási terület kell",
+      "governance_area_unknown": "Ez az irányítási terület nincs a projekt irányítási modelljében",
+      "invalid_transition": "Ez a lépés a jelenlegi állapotban nem lehetséges",
+      "item_changed": "A tétel időközben megváltozott. Próbálja újra.",
+      "item_closed": "A tétel le van zárva",
+      "item_code_taken": "Egy másik tétel már használja ezt a kódot",
+      "item_not_found": "A kötelezettségi tétel nem található",
+      "link_kind_invalid": "Ismeretlen dokumentumtípus",
+      "link_kind_not_supported": "Ez a dokumentumtípus egyelőre nem kapcsolható",
+      "link_not_found": "A hivatkozás nem található",
+      "manage_required": "Ezt csak a mátrixot kezelő személy végezheti el",
+      "manual_amount_needs_currency": "A kézi becsléshez összeg és pénznem kell",
+      "matrix_missing": "Ennek a projektnek még nincs kötelezettségi mátrixa",
+      "no_pending_release": "Nincs függőben lévő felszabadítási kérelem",
+      "no_route_for_tier": "A szükséges szintre még senkit nem jelöltek ki",
+      "not_entitled_decider": "Nincs meg az a szint, amelyen ez a kérelem dől el",
+      "not_item_owner": "A tételt csak a tulajdonosa vagy egy kezelő módosíthatja",
+      "not_requester": "A kérelmet csak a kérelmező vagy egy kezelő vonhatja vissza",
+      "planned_source_invalid": "Ismeretlen forrás a tervezett összeghez",
+      "planned_source_not_found": "A költségvetési sor, költségsor vagy tétel nem található ebben a projektben",
+      "plant_item_not_found": "A gépi tétel nem található ebben a projektben",
+      "precondition_is_computed": "Ezt a feltételt a modulja határozza meg, nem lehet kipipálni",
+      "precondition_kind_invalid": "Ismeretlen feltételtípus",
+      "precondition_needs_evidence": "Csatolja a bizonyíték hivatkozását",
+      "precondition_needs_ref": "Ehhez a feltételhez hivatkozás kell",
+      "precondition_not_found": "A feltétel nem található",
+      "preconditions_open": "A nyitott feltételek blokkolják ezt a felszabadítást",
+      "project_not_found": "A projekt nem található",
+      "rationale_required": "Adjon meg egy indoklást",
+      "release_decided": "Ez a felszabadítási kérelem már el van döntve",
+      "release_expired": "A tétel felszabadítása lejárt: kérjen megújított felszabadítást, mielőtt további kötelezettséget vállal",
+      "release_pending": "Ehhez a tételhez már fut felszabadítási kérelem",
+      "requisition_not_found": "A rekvizíció nem található ebben a projektben",
+      "route_changed_since_accepted": "Ennek a szintnek a jóváhagyási útvonalát módosították. Egy kezelőnek újra rögzítenie kell.",
+      "route_must_belong_to_project": "Csak ennek a projektnek a jóváhagyási útvonala rögzíthető",
+      "route_not_found": "A jóváhagyási útvonal nem található",
+      "schedule_currency_mismatch": "Ez az ütemezés más pénznemet használ, mint a már rögzített felszabadítások",
+      "schedule_not_in_force": "A rögzített ütemezés ma nincs hatályban. Rögzítse a hatályos verziót.",
+      "schedule_type_mismatch": "Ez az ütemezés nem ismeri a meglévő tétel kötelezettségtípusát",
+      "tier_unknown": "Ez a szint nincs a hatásköri ütemezésben",
+      "transfer_links_stay_in_project": "A hivatkozott dokumentumok ehhez a projekthez tartoznak. Másik projektbe való áthelyezés előtt szüntesse meg a hivatkozásokat.",
+      "transfer_target_invalid": "Egy tétel nem helyezhető át önmagába",
+      "transfer_target_not_open": "A célul szolgáló tétel le van zárva, vagy döntésre vár",
+      "transferable_invalid": "Ismeretlen áthelyezési lehetőség",
+      "type_fixed_after_release": "A típus nem módosítható, miután felszabadítást kértek",
+      "unknown_catalogue": "A katalógus nem található"
+    },
+    "evidence": {
+      "decision_overdue": "Ennek a kötelezettségi tételnek a legkésőbbi döntési határideje lejárt, és semmi nincs felszabadítva: döntsön, halassza el indoklással, vagy rögzítse a késedelem költségét",
+      "items_released_by_gate": "A mérföldkőhöz tartozó kötelezettségek fel vannak szabadítva vagy el vannak halasztva",
+      "items_without_area": "Ennek a mérföldkőnek a kötelezettségi tételei olyan irányítási területet neveznek meg, amely a projektben már nincs",
+      "no_items_for_gate": "Egyetlen kötelezettségi tétel sem nevezi meg ezt a mérföldkövet, így nem ismert, hogy addig fel kell-e szabadítani pénzt"
+    },
+    "export": {
+      "as_of": "Ekkori állapot:",
+      "col_code": "Kód",
+      "col_committed": "Lekötött",
+      "col_currency": "Pénznem",
+      "col_decision_date": "Legkésőbbi döntési határidő",
+      "col_open_preconditions": "Nyitott feltételek",
+      "col_overdue": "Döntés késik",
+      "col_planned": "Tervezett",
+      "col_released": "Felszabadított",
+      "col_residual_loss": "Maradványveszteség megszakításkor",
+      "col_status": "Állapot",
+      "col_tier": "Szükséges szint",
+      "col_title": "Kötelezettség",
+      "col_type": "Típus",
+      "empty": "Még nincsenek kötelezettségi tételek",
+      "overdue": "Késedelmes",
+      "project": "Projekt",
+      "title": "Kötelezettségi és felszabadítási mátrix"
+    },
+    "exposure": {
+      "nothing_committed": "Nincs lekötve, nincs elköltve"
+    },
+    "flag": {
+      "multi_year_commitment": "Későbbi költségvetési éveket köt le",
+      "novel_contentious": "Újszerű vagy vitatott"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "A(z) {item} tétel le van kötve, de a megszakítási feltételei ismeretlenek",
+        "suggestion": "Adja meg a megszakítási alapot vagy a lemondási ütemezést"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "A(z) {schedule} ütemezés felső határai nem emelkednek a szinttel",
+        "suggestion": "Javítsa a sávokat, és tegyen közzé új verziót"
+      },
+      "committed_within_release": {
+        "fail": "A(z) {item} tétel többet köt le, mint amennyi fel lett szabadítva",
+        "suggestion": "Kérjen további felszabadítást, vagy csökkentse a hivatkozott dokumentumokat"
+      },
+      "decision_date_not_passed": {
+        "fail": "A(z) {item} tétel legkésőbbi döntési határideje ({date}) lejárt",
+        "suggestion": "Döntsön, halassza el indoklással, vagy rögzítse a késedelem költségét"
+      },
+      "document_linked_once": {
+        "fail": "A(z) {document} dokumentum több mint egy tételben szerepel",
+        "suggestion": "Távolítsa el a második hivatkozást"
+      },
+      "fx_rate_available": {
+        "fail": "A(z) {item} tétel egyik kapcsolt összegéhez nincs árfolyam",
+        "suggestion": "Adjon hozzá árfolyamot erre a dátumra az árfolyamregiszterben vagy a projektben"
+      },
+      "item_has_cost_code": {
+        "fail": "A(z) {item} tételhez nincs költségsor",
+        "suggestion": "Rendeljen hozzá költségsort, amelyre a tétel könyvelve lesz"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "A(z) {item} tétel tervezett összege nem olvasható ki",
+        "suggestion": "Mutasson a tételből egy költségvetési sorra, költségsorra vagy tételre, vagy adjon meg kézi becslést"
+      },
+      "plant_item_in_register": {
+        "fail": "A(z) {item} tétel olyan gépi tételt nevez meg, amely már nincs a gépnyilvántartásban, ezért a saját szállítási határideje érvényes",
+        "suggestion": "Kapcsolja a tételt a helyette álló gépi tételhez, vagy szüntesse meg a hivatkozást"
+      },
+      "release_in_date": {
+        "fail": "A(z) {item} tétel felszabadítása {date} napjáig volt érvényes: alatta már nem köthető le új összeg",
+        "suggestion": "Kérjen megújított felszabadítást arra, ami még lekötendő"
+      },
+      "release_within_authority": {
+        "fail": "A(z) {release} felszabadítást a szükséges {tier} szint alatt döntötték el",
+        "suggestion": "Kérjen új felszabadítást a jelenlegi ütemezés szerint"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "A(z) {group} csoport tételeit a szint alatt szabadították fel, amelyet az összegük igényelne",
+        "suggestion": "Kérje a következő felszabadítást a csoport összesített összegének megfelelő szinten"
+      }
+    },
+    "status": {
+      "aborted": "Megszakítva",
+      "closed": "Lezárva",
+      "committed": "Lekötve",
+      "on_hold": "Felfüggesztve",
+      "partially_released": "Részben felszabadítva",
+      "planned": "Tervezett",
+      "re_release_required": "Újbóli felszabadítás szükséges",
+      "release_requested": "Felszabadítás kérve",
+      "released": "Felszabadítva",
+      "transferred": "Áthelyezve"
+    },
+    "tier": {
+      "accounting_officer": "Számviteli felelős",
+      "authority_head": "Hatóság vezetője",
+      "board": "Igazgatóság",
+      "contracting_officer": "Szerződéskötő tisztviselő",
+      "department_head": "Osztályvezető",
+      "head_of_contracting_activity": "Beszerzési tevékenység vezetője",
+      "project_director": "Projektigazgató",
+      "project_lead": "Projektvezető",
+      "project_manager": "Projektmenedzser",
+      "senior_responsible_owner": "Felelős vezető tulajdonos",
+      "simplified_acquisition": "Egyszerűsített beszerzés",
+      "sponsor": "Szponzor"
+    },
+    "type": {
+      "change": "Módosítás",
+      "claim_settlement": "Követelés rendezése",
+      "contingency_drawdown": "Tartalék lehívása",
+      "design": "Tervezés",
+      "services": "Szolgáltatások",
+      "supplies": "Áruk",
+      "termination_settlement": "Felmondási elszámolás",
+      "works": "Kivitelezés"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "A(z) {code} tételről {latest_decision_date} napjáig kellett volna dönteni.",
+        "title": "A felszabadítási döntés késik"
+      },
+      "re_release_required": {
+        "body": "A(z) {code} hivatkozott dokumentumai most {committed} összeget kötnek le, ami meghaladja a felszabadított {released} összeget.",
+        "title": "Újbóli felszabadítás szükséges"
+      },
+      "release_aborted": {
+        "body": "A(z) {code} leállításra került.",
+        "title": "Megszakítás jóváhagyva"
+      },
+      "release_rejected": {
+        "body": "A(z) {code} felszabadítását elutasították.",
+        "title": "Felszabadítás elutasítva"
+      },
+      "release_released": {
+        "body": "A(z) {code} fel lett szabadítva.",
+        "title": "Felszabadítás megadva"
+      }
+    }
+  }
+}

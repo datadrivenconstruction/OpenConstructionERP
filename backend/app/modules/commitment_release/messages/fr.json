@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Honoraires sur la part non exécutée",
+      "presumed_unperformed_pct": "Part présumée non exécutée",
+      "profit_pct": "Bénéfice sur la part exécutée"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Un montant saisi pour cet élément",
+        "name": "Conditions personnalisées"
+      },
+      "de_bgb_648": {
+        "description": "Prix convenu diminué des coûts économisés ; 5 % de la part non exécutée présumés lorsque les coûts économisés ne sont pas documentés",
+        "name": "Résiliation libre par le maître d'ouvrage (§ 648 BGB)",
+        "presumption": "Part présumée non exécutée"
+      },
+      "de_public_owner": {
+        "description": "Exemple de délégation pour un maître d'ouvrage public : seuil européen des travaux comme tranche supérieure, engagements pluriannuels envers le responsable de l'autorité",
+        "eu_works_threshold": "Seuil européen des travaux 2026-27 (règlement délégué (UE) 2025/2152), non confirmé",
+        "name": "Maître d'ouvrage public (Allemagne), exemple"
+      },
+      "de_vob_b_8_1": {
+        "description": "Même règlement que le § 648 BGB, auquel la clause renvoie",
+        "name": "Résiliation libre au titre du § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Renvoie au § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Coûts engagés, plus bénéfice sur les travaux réalisés, plus frais de liquidation",
+        "name": "Résiliation pour convenance (FAR 49)",
+        "profit_negotiated": "Taux de bénéfice négocié"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Travaux réalisés, plus un pourcentage de frais sur la part non exécutée, tel qu'indiqué dans les données du contrat",
+        "fee_from_contract_data": "Pourcentage issu des données du contrat",
+        "name": "Résiliation pour motif propre au client (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Chef de projet, promoteur et direction avec plafonds d'exemple dans la devise du projet ; aucun chiffre légal",
+        "name": "Échéancier neutre à trois niveaux"
+      },
+      "none_free_cancellation": {
+        "description": "Aucune indemnité en cas d'annulation",
+        "name": "Annulation libre"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Indemnités selon une date ou l'avancement de la fabrication, telles que convenues avec le fournisseur",
+        "name": "Échéancier d'annulation fournisseur"
+      },
+      "uk_public_body": {
+        "description": "Exemple de délégation d'autorité selon le montant et la nouveauté, d'après Managing Public Money",
+        "name": "Organisme public (Royaume-Uni), exemple"
+      },
+      "us_federal_owner": {
+        "description": "Exemple de tranches à partir du seuil de la procédure simplifiée",
+        "name": "Maître d'ouvrage fédéral (États-Unis), exemple",
+        "sat": "Seuil de la procédure simplifiée de 350 000 USD à compter du 01/10/2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Base d'abandon inconnue",
+      "abort_exposure_unknown": "La perte résiduelle est inconnue. Complétez d'abord les conditions d'abandon.",
+      "abort_parameter_invalid": "Un paramètre d'abandon est une part comprise entre 0 et 1",
+      "abort_parameter_not_in_basis": "La base d'abandon choisie ne comporte pas ce paramètre",
+      "abort_type_not_in_schedule": "L'échéancier ne prévoit aucun palier pour un règlement de résiliation",
+      "activity_not_found": "L'activité de l'échéancier est introuvable dans ce projet",
+      "amount_invalid": "Le montant n'est pas un nombre valide",
+      "amount_not_positive": "Le montant doit être supérieur à zéro",
+      "assignee_not_project_member": "Cette personne ne fait pas partie de ce projet",
+      "assignment_expired": "L'affectation de l'approbateur a expiré ; mettez à jour les affectations",
+      "assignment_needs_approver": "Désignez l'approbateur de ce palier avant un suppléant ou une période de validité",
+      "assignment_window_inverted": "L'affectation se termine avant de commencer",
+      "cancellation_schedule_invalid": "Chaque étape nécessite un jalon, une date ou un avancement, et exactement une indemnité",
+      "catalogue_code_taken": "Un autre catalogue utilise déjà ce code",
+      "catalogue_invalid": "Le catalogue n'est pas valide",
+      "catalogue_retired": "Ce catalogue est retiré",
+      "change_belongs_to_contract_item": "Un avenant et son contrat sont liés sur le même élément",
+      "commitment_guard_unavailable": "La vérification de libération n'a pas pu être effectuée, l'opération a donc été refusée",
+      "commitment_not_in_matrix": "Ce document ne figure pas dans la matrice des engagements",
+      "commitment_not_released": "Cet engagement n'est pas libéré pour ce montant",
+      "commitment_type_unknown": "Ce type d'engagement ne figure pas dans l'échéancier des délégations",
+      "contingency_insufficient": "Le solde de la provision ne couvre pas ce prélèvement",
+      "contingency_line_required": "Un prélèvement sur provision nécessite la ligne budgétaire qui porte la provision",
+      "date_invalid": "Ce n'est pas une date",
+      "decider_not_tier_holder": "Approuvé par une personne qui ne détient pas ce palier",
+      "decision_invalid": "Choisissez approuver ou rejeter",
+      "deferral_needs_reason": "Indiquez pourquoi l'élément est reporté",
+      "document_linked_elsewhere": "Ce document est déjà comptabilisé dans un autre élément",
+      "document_not_found": "Document introuvable dans ce projet",
+      "drawdown_released_by_commitment": "Ce prélèvement est un élément d'engagement libéré. Abandonnez cet élément pour récupérer les fonds.",
+      "edit_required": "Votre rôle ne permet pas de modifier les éléments d'engagement",
+      "enforcement_invalid": "Le contrôle doit être désactivé, en alerte ou bloquant",
+      "external_approval_not_required": "Ce montant est décidé par un palier de l'échéancier : supprimez la référence d'approbation externe",
+      "external_approval_required": "Le montant dépasse tous les paliers : joignez la référence d'approbation externe",
+      "field_frozen": "Ce champ ne peut plus être modifié pour cet élément",
+      "field_required": "Ce champ ne peut pas être vide",
+      "flag_unknown": "Ce marqueur ne figure pas dans l'échéancier des délégations",
+      "four_eyes_no_approver": "Personne à ce palier ne peut décider de cette demande selon la règle des quatre yeux",
+      "four_eyes_requester_is_approver": "Règle des quatre yeux : vous ne pouvez pas demander une libération que vous approuveriez vous-même",
+      "four_eyes_violation": "Le demandeur, le responsable ou le confirmateur de cet élément ne peut pas le décider",
+      "frame_document_not_found": "Le document cadre est introuvable dans ce projet",
+      "funding_application_not_found": "La demande de financement est introuvable dans ce projet",
+      "fx_policy_invalid": "Politique de taux de change inconnue",
+      "fx_rate_missing": "Aucun taux de change pour cette date : la libération ne peut pas être évaluée",
+      "gate_unknown": "Ce jalon ne figure pas dans le modèle de gouvernance du projet",
+      "gates_not_in_use": "Ce projet n'utilise pas de jalons, rien ne peut donc attendre un jalon",
+      "governance_area_required": "Un élément lié à un jalon doit indiquer un domaine de gestion",
+      "governance_area_unknown": "Ce domaine de gestion ne figure pas dans le modèle de gouvernance du projet",
+      "invalid_transition": "Cette étape n'est pas possible dans l'état actuel",
+      "item_changed": "L'élément a été modifié entre-temps. Réessayez.",
+      "item_closed": "L'élément est clos",
+      "item_code_taken": "Un autre élément utilise déjà ce code",
+      "item_not_found": "Élément d'engagement introuvable",
+      "link_kind_invalid": "Type de document inconnu",
+      "link_kind_not_supported": "Ce type de document ne peut pas encore être lié",
+      "link_not_found": "Lien introuvable",
+      "manage_required": "Seule une personne qui gère la matrice peut faire cela",
+      "manual_amount_needs_currency": "Une estimation manuelle nécessite un montant et une devise",
+      "matrix_missing": "Ce projet n'a pas encore de matrice des engagements",
+      "no_pending_release": "Aucune demande de libération en attente",
+      "no_route_for_tier": "Aucune personne n'est encore affectée au palier requis",
+      "not_entitled_decider": "Vous ne détenez pas le palier sur lequel cette demande est décidée",
+      "not_item_owner": "Seul le responsable de l'élément ou un gestionnaire peut le modifier",
+      "not_requester": "Seul le demandeur ou un gestionnaire peut retirer cette demande",
+      "planned_source_invalid": "Source inconnue pour le montant prévisionnel",
+      "planned_source_not_found": "La ligne budgétaire, la ligne de coût ou le poste est introuvable dans ce projet",
+      "plant_item_not_found": "Le matériel est introuvable dans ce projet",
+      "precondition_is_computed": "Cette condition préalable est lue depuis son module et ne peut pas être cochée",
+      "precondition_kind_invalid": "Type de condition préalable inconnu",
+      "precondition_needs_evidence": "Joignez la référence du justificatif",
+      "precondition_needs_ref": "Cette condition préalable nécessite une référence",
+      "precondition_not_found": "Condition préalable introuvable",
+      "preconditions_open": "Des conditions préalables ouvertes bloquent cette libération",
+      "project_not_found": "Projet introuvable",
+      "rationale_required": "Indiquez une justification",
+      "release_decided": "Cette demande de libération a déjà été décidée",
+      "release_expired": "La libération de cet élément a dépassé sa date de validité : demandez une libération renouvelée avant d'engager davantage",
+      "release_pending": "Une demande de libération pour cet élément est déjà en cours",
+      "requisition_not_found": "La demande d'achat est introuvable dans ce projet",
+      "route_changed_since_accepted": "Le circuit d'approbation de ce palier a été modifié. Un responsable doit le réépingler.",
+      "route_must_belong_to_project": "Seul un circuit d'approbation de ce projet peut être épinglé",
+      "route_not_found": "Circuit d'approbation introuvable",
+      "schedule_currency_mismatch": "Cet échéancier utilise une autre devise que les libérations déjà enregistrées",
+      "schedule_not_in_force": "L'échéancier épinglé n'est pas en vigueur aujourd'hui. Épinglez la version en vigueur.",
+      "schedule_type_mismatch": "Cet échéancier ne connaît pas le type d'engagement d'un élément existant",
+      "tier_unknown": "Ce palier ne figure pas dans l'échéancier des délégations",
+      "transfer_links_stay_in_project": "Les documents liés appartiennent à ce projet. Supprimez les liens avant de transférer vers un autre projet.",
+      "transfer_target_invalid": "Un élément ne peut pas être transféré vers lui-même",
+      "transfer_target_not_open": "L'élément cible est clos ou en attente de décision",
+      "transferable_invalid": "Option de transfert inconnue",
+      "type_fixed_after_release": "Le type ne peut plus changer une fois une libération demandée",
+      "unknown_catalogue": "Catalogue introuvable"
+    },
+    "evidence": {
+      "decision_overdue": "La dernière date de décision de cet élément d'engagement est dépassée et rien n'est libéré : décidez, reportez avec une justification ou enregistrez le coût du retard",
+      "items_released_by_gate": "Les engagements échus à ce jalon sont libérés ou reportés",
+      "items_without_area": "Des éléments d'engagement de ce jalon désignent un domaine de gestion que le projet n'a plus",
+      "no_items_for_gate": "Aucun élément d'engagement ne désigne ce jalon : on ne sait donc pas si des fonds doivent être libérés à ce stade"
+    },
+    "export": {
+      "as_of": "Au",
+      "col_code": "Code",
+      "col_committed": "Engagé",
+      "col_currency": "Devise",
+      "col_decision_date": "Dernière date de décision",
+      "col_open_preconditions": "Conditions préalables ouvertes",
+      "col_overdue": "Décision en retard",
+      "col_planned": "Prévu",
+      "col_released": "Libéré",
+      "col_residual_loss": "Perte résiduelle en cas d'abandon",
+      "col_status": "Statut",
+      "col_tier": "Palier requis",
+      "col_title": "Engagement",
+      "col_type": "Type",
+      "empty": "Aucun élément d'engagement pour le moment",
+      "overdue": "En retard",
+      "project": "Projet",
+      "title": "Matrice des engagements et des libérations"
+    },
+    "exposure": {
+      "nothing_committed": "Rien d'engagé, rien de dépensé"
+    },
+    "flag": {
+      "multi_year_commitment": "Engage des exercices budgétaires ultérieurs",
+      "novel_contentious": "Nouveau ou contesté"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "L'élément {item} est engagé mais ses conditions d'abandon sont inconnues",
+        "suggestion": "Saisissez la base d'abandon ou un échéancier d'annulation"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Les plafonds de l'échéancier {schedule} ne croissent pas avec le palier",
+        "suggestion": "Corrigez les tranches et publiez une nouvelle version"
+      },
+      "committed_within_release": {
+        "fail": "L'élément {item} engage plus que ce qui a été libéré",
+        "suggestion": "Demandez une libération complémentaire ou réduisez les documents liés"
+      },
+      "decision_date_not_passed": {
+        "fail": "La dernière date de décision {date} de l'élément {item} est dépassée",
+        "suggestion": "Décidez, reportez avec une justification ou enregistrez le coût du retard"
+      },
+      "document_linked_once": {
+        "fail": "Le document {document} est comptabilisé dans plus d'un élément",
+        "suggestion": "Supprimez le second lien"
+      },
+      "fx_rate_available": {
+        "fail": "Un montant lié à l'élément {item} n'a pas de taux de change",
+        "suggestion": "Ajoutez un taux pour la date dans le registre des taux de change ou dans le projet"
+      },
+      "item_has_cost_code": {
+        "fail": "L'élément {item} n'a pas de ligne de coût",
+        "suggestion": "Affectez la ligne de coût sur laquelle l'élément est imputé"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Le montant prévisionnel de l'élément {item} ne peut pas être lu",
+        "suggestion": "Rattachez l'élément à une ligne budgétaire, une ligne de coût ou un poste, ou saisissez une estimation manuelle"
+      },
+      "plant_item_in_register": {
+        "fail": "L'élément {item} désigne un matériel qui ne figure plus au registre du matériel : son propre délai de livraison s'applique",
+        "suggestion": "Liez l'élément au matériel qui l'a remplacé, ou supprimez le lien"
+      },
+      "release_in_date": {
+        "fail": "Une libération de l'élément {item} était valable jusqu'au {date} : rien de nouveau ne peut être engagé sous elle",
+        "suggestion": "Demandez une libération renouvelée pour ce qui reste à engager"
+      },
+      "release_within_authority": {
+        "fail": "La libération {release} a été décidée en dessous du palier requis {tier}",
+        "suggestion": "Demandez une nouvelle libération selon l'échéancier en vigueur"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Les éléments du groupe {group} ont été libérés en dessous du palier que leur somme exige",
+        "suggestion": "Demandez la libération suivante au palier du total du groupe"
+      }
+    },
+    "status": {
+      "aborted": "Abandonné",
+      "closed": "Clos",
+      "committed": "Engagé",
+      "on_hold": "En suspens",
+      "partially_released": "Partiellement libéré",
+      "planned": "Prévu",
+      "re_release_required": "Nouvelle libération requise",
+      "release_requested": "Libération demandée",
+      "released": "Libéré",
+      "transferred": "Transféré"
+    },
+    "tier": {
+      "accounting_officer": "Comptable public",
+      "authority_head": "Responsable de l'autorité",
+      "board": "Conseil d'administration",
+      "contracting_officer": "Responsable des marchés",
+      "department_head": "Chef de département",
+      "head_of_contracting_activity": "Responsable de l'activité contractuelle",
+      "project_director": "Directeur de projet",
+      "project_lead": "Responsable de projet",
+      "project_manager": "Chef de projet",
+      "senior_responsible_owner": "Responsable senior",
+      "simplified_acquisition": "Procédure simplifiée",
+      "sponsor": "Promoteur"
+    },
+    "type": {
+      "change": "Avenant",
+      "claim_settlement": "Règlement de réclamation",
+      "contingency_drawdown": "Prélèvement sur provision",
+      "design": "Maîtrise d'œuvre",
+      "services": "Prestations de services",
+      "supplies": "Fournitures",
+      "termination_settlement": "Règlement de résiliation",
+      "works": "Travaux"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} aurait dû être décidé au plus tard le {latest_decision_date}.",
+        "title": "Décision de libération en retard"
+      },
+      "re_release_required": {
+        "body": "Les documents liés de {code} engagent désormais {committed}, au-delà de la libération de {released}.",
+        "title": "Nouvelle libération requise"
+      },
+      "release_aborted": {
+        "body": "{code} a été arrêté.",
+        "title": "Abandon approuvé"
+      },
+      "release_rejected": {
+        "body": "La libération de {code} a été rejetée.",
+        "title": "Libération rejetée"
+      },
+      "release_released": {
+        "body": "{code} a été libéré.",
+        "title": "Libération accordée"
+      }
+    }
+  }
+}

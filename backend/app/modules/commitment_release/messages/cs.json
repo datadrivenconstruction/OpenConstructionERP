@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Poplatek z nevykonané části",
+      "presumed_unperformed_pct": "Předpokládaný podíl nevykonané části",
+      "profit_pct": "Zisk z vykonané části"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Částka zadaná pro tuto položku",
+        "name": "Vlastní podmínky"
+      },
+      "de_bgb_648": {
+        "description": "Dohodnutá cena snížená o ušetřené náklady; když ušetřené náklady nejsou doloženy, předpokládá se 5 % nevykonané části",
+        "name": "Volné ukončení objednatelem (§ 648 BGB)",
+        "presumption": "Předpokládaný podíl nevykonané části"
+      },
+      "de_public_owner": {
+        "description": "Příklad delegace pro veřejného objednatele: práh EU pro stavební práce jako nejvyšší pásmo, víceleté závazky pro vedoucího úřadu",
+        "eu_works_threshold": "Práh EU pro stavební práce 2026–27 (delegované nařízení (EU) 2025/2152), nepotvrzeno",
+        "name": "Veřejný objednatel (Německo), příklad"
+      },
+      "de_vob_b_8_1": {
+        "description": "Stejné vypořádání jako u § 648 BGB, na které doložka odkazuje",
+        "name": "Volné ukončení podle § 8 odst. 1 VOB/B",
+        "refers_to_bgb_648": "Odkazuje na § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Vynaložené náklady plus zisk z provedených prací plus náklady na vypořádání",
+        "name": "Ukončení z vlastního pohodlí (FAR 49)",
+        "profit_negotiated": "Dohodnutá míra zisku"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Provedené práce plus procento poplatku z nevykonané části, podle údajů ve smlouvě",
+        "fee_from_contract_data": "Procento z údajů ve smlouvě",
+        "name": "Ukončení z vlastního důvodu klienta (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Projektový manažer, sponzor a představenstvo s příkladovými stropy v měně projektu; bez zákonných hodnot",
+        "name": "Neutrální tříúrovňový rozpis"
+      },
+      "none_free_cancellation": {
+        "description": "Při zrušení se neúčtuje žádný poplatek",
+        "name": "Bezplatné zrušení"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Poplatky podle termínu nebo postupu výroby, jak bylo dohodnuto s dodavatelem",
+        "name": "Harmonogram zrušení u dodavatele"
+      },
+      "uk_public_body": {
+        "description": "Příklad delegované pravomoci podle částky a novosti podle Managing Public Money",
+        "name": "Veřejný subjekt (Spojené království), příklad"
+      },
+      "us_federal_owner": {
+        "description": "Příkladová pásma počínaje limitem zjednodušeného zadávání",
+        "name": "Federální objednatel (USA), příklad",
+        "sat": "Limit zjednodušeného zadávání 350 000 USD od 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Neznámý základ ukončení",
+      "abort_exposure_unknown": "Zbytková ztráta není známa. Nejprve doplňte podmínky ukončení.",
+      "abort_parameter_invalid": "Parametr ukončení je podíl mezi 0 a 1",
+      "abort_parameter_not_in_basis": "Zvolený základ ukončení tento parametr nemá",
+      "abort_type_not_in_schedule": "Harmonogram nemá pásmo pro vypořádání ukončení",
+      "activity_not_found": "Činnost harmonogramu nebyla v tomto projektu nalezena",
+      "amount_invalid": "Částka není platné číslo",
+      "amount_not_positive": "Částka musí být větší než nula",
+      "assignee_not_project_member": "Tato osoba není členem projektu",
+      "assignment_expired": "Přiřazení schvalovatele vypršelo; aktualizujte přiřazení",
+      "assignment_needs_approver": "Před zástupcem nebo platností uveďte schvalovatele tohoto pásma",
+      "assignment_window_inverted": "Přiřazení končí dříve, než začíná",
+      "cancellation_schedule_invalid": "Každý krok potřebuje milník, datum nebo postup a přesně jednu platbu",
+      "catalogue_code_taken": "Jiný katalog již tento kód používá",
+      "catalogue_invalid": "Katalog není platný",
+      "catalogue_retired": "Tento katalog je vyřazen",
+      "change_belongs_to_contract_item": "Změna a smlouva jsou propojeny ve stejné položce",
+      "commitment_guard_unavailable": "Kontrolu uvolnění nebylo možné provést, proto nebylo povoleno",
+      "commitment_not_in_matrix": "Tento dokument není v matici závazků",
+      "commitment_not_released": "Tento závazek není pro tuto částku uvolněn",
+      "commitment_type_unknown": "Tento typ závazku není v harmonogramu pravomocí",
+      "contingency_insufficient": "Zůstatek rezervy nepokrývá toto čerpání",
+      "contingency_line_required": "Čerpání rezervy vyžaduje rozpočtový řádek, na kterém je rezerva vedena",
+      "date_invalid": "Toto není datum",
+      "decider_not_tier_holder": "Schválil někdo, kdo dané pásmo nedrží",
+      "decision_invalid": "Zvolte schválit nebo zamítnout",
+      "deferral_needs_reason": "Napište, proč je položka odložena",
+      "document_linked_elsewhere": "Tento dokument je již započten v jiné položce",
+      "document_not_found": "Dokument nebyl v tomto projektu nalezen",
+      "drawdown_released_by_commitment": "Toto čerpání je uvolněná položka závazku. Chcete-li peníze vrátit, ukončete tuto položku.",
+      "edit_required": "Vaše role nemůže upravovat položky závazků",
+      "enforcement_invalid": "Vynucení musí být vypnuto, s varováním nebo blokující",
+      "external_approval_not_required": "Tuto částku rozhoduje pásmo harmonogramu: odstraňte odkaz na externí schválení",
+      "external_approval_required": "Částka je nad všemi pásmy: připojte odkaz na externí schválení",
+      "field_frozen": "Toto pole už pro tuto položku nelze změnit",
+      "field_required": "Toto pole nesmí zůstat prázdné",
+      "flag_unknown": "Tento příznak není v harmonogramu pravomocí",
+      "four_eyes_no_approver": "Podle pravidla čtyř očí nikdo v tomto pásmu nemůže o této žádosti rozhodnout",
+      "four_eyes_requester_is_approver": "Čtyři oči: nemůžete požádat o uvolnění, které byste sám schválil",
+      "four_eyes_violation": "Ten, kdo žádal, vlastní nebo potvrdil tuto položku, o ní nemůže rozhodovat",
+      "frame_document_not_found": "Rámcový dokument nebyl v tomto projektu nalezen",
+      "funding_application_not_found": "Žádost o financování nebyla v tomto projektu nalezena",
+      "fx_policy_invalid": "Neznámá politika směnného kurzu",
+      "fx_rate_missing": "Pro toto datum není směnný kurz: uvolnění nelze vyhodnotit",
+      "gate_unknown": "Tato brána není v řídicím modelu projektu",
+      "gates_not_in_use": "Tento projekt nepoužívá brány, takže na žádnou nelze čekat",
+      "governance_area_required": "Položka navázaná na bránu potřebuje oblast řízení",
+      "governance_area_unknown": "Tato oblast řízení není v řídicím modelu projektu",
+      "invalid_transition": "Tento krok není v aktuálním stavu možný",
+      "item_changed": "Položka se mezitím změnila. Zkuste to znovu.",
+      "item_closed": "Položka je uzavřena",
+      "item_code_taken": "Jiná položka již tento kód používá",
+      "item_not_found": "Položka závazku nebyla nalezena",
+      "link_kind_invalid": "Neznámý druh dokumentu",
+      "link_kind_not_supported": "Tento druh dokumentu zatím nelze propojit",
+      "link_not_found": "Propojení nebylo nalezeno",
+      "manage_required": "Toto může provést jen ten, kdo spravuje matici",
+      "manual_amount_needs_currency": "Ruční odhad vyžaduje částku a měnu",
+      "matrix_missing": "Tento projekt zatím nemá matici závazků",
+      "no_pending_release": "Nečeká žádná žádost o uvolnění",
+      "no_route_for_tier": "Požadovanému pásmu zatím nikdo nepřiřazen",
+      "not_entitled_decider": "Nedržíte pásmo, na kterém se o této žádosti rozhoduje",
+      "not_item_owner": "Položku může měnit jen její vlastník nebo správce",
+      "not_requester": "Žádost může stáhnout jen žadatel nebo správce",
+      "planned_source_invalid": "Neznámý zdroj plánované částky",
+      "planned_source_not_found": "Rozpočtový řádek, nákladový řádek nebo pozice nebyly v tomto projektu nalezeny",
+      "plant_item_not_found": "Položka strojního zařízení nebyla v tomto projektu nalezena",
+      "precondition_is_computed": "Tento předpoklad se čte z jeho modulu a nelze jej zaškrtnout",
+      "precondition_kind_invalid": "Neznámý druh předpokladu",
+      "precondition_needs_evidence": "Připojte odkaz na důkaz",
+      "precondition_needs_ref": "Tento předpoklad potřebuje odkaz",
+      "precondition_not_found": "Předpoklad nebyl nalezen",
+      "preconditions_open": "Otevřené předpoklady blokují toto uvolnění",
+      "project_not_found": "Projekt nebyl nalezen",
+      "rationale_required": "Uveďte důvod",
+      "release_decided": "Tato žádost o uvolnění je již vyřízena",
+      "release_expired": "Uvolnění této položky je po datu platnosti: před dalším závazkem si vyžádejte nové uvolnění",
+      "release_pending": "Žádost o uvolnění této položky již probíhá",
+      "requisition_not_found": "Požadavek nebyl v tomto projektu nalezen",
+      "route_changed_since_accepted": "Schvalovací trasa tohoto pásma byla upravena. Správce ji musí znovu připnout.",
+      "route_must_belong_to_project": "Připnout lze jen schvalovací trasu tohoto projektu",
+      "route_not_found": "Schvalovací trasa nebyla nalezena",
+      "schedule_currency_mismatch": "Tento harmonogram používá jinou měnu než už zaznamenaná uvolnění",
+      "schedule_not_in_force": "Připnutý harmonogram dnes neplatí. Připněte verzi, která platí.",
+      "schedule_type_mismatch": "Tento harmonogram nezná typ závazku existující položky",
+      "tier_unknown": "Toto pásmo není v harmonogramu pravomocí",
+      "transfer_links_stay_in_project": "Propojené dokumenty patří k tomuto projektu. Před převodem do jiného projektu je odpojte.",
+      "transfer_target_invalid": "Položku nelze převést sama na sebe",
+      "transfer_target_not_open": "Cílová položka je uzavřena nebo čeká na rozhodnutí",
+      "transferable_invalid": "Neznámá možnost převodu",
+      "type_fixed_after_release": "Typ nelze změnit poté, co bylo požádáno o uvolnění",
+      "unknown_catalogue": "Katalog nebyl nalezen"
+    },
+    "evidence": {
+      "decision_overdue": "Poslední termín rozhodnutí této položky závazku uplynul a nic není uvolněno: rozhodněte, odložte s důvodem, nebo zaznamenejte náklady zpoždění",
+      "items_released_by_gate": "Závazky splatné u této brány jsou uvolněny nebo odloženy",
+      "items_without_area": "Položky závazků této brány uvádějí oblast řízení, kterou projekt už nemá",
+      "no_items_for_gate": "Žádná položka závazku tuto bránu neuvádí, proto není známo, zda musí být peníze uvolněny"
+    },
+    "export": {
+      "as_of": "K datu",
+      "col_code": "Kód",
+      "col_committed": "Zavázáno",
+      "col_currency": "Měna",
+      "col_decision_date": "Poslední termín rozhodnutí",
+      "col_open_preconditions": "Otevřené předpoklady",
+      "col_overdue": "Rozhodnutí po termínu",
+      "col_planned": "Plánováno",
+      "col_released": "Uvolněno",
+      "col_residual_loss": "Zbytková ztráta při ukončení",
+      "col_status": "Stav",
+      "col_tier": "Požadované pásmo",
+      "col_title": "Závazek",
+      "col_type": "Typ",
+      "empty": "Zatím žádné položky závazků",
+      "overdue": "Po termínu",
+      "project": "Projekt",
+      "title": "Matice závazků a uvolnění"
+    },
+    "exposure": {
+      "nothing_committed": "Nic není zavázáno, nic není utraceno"
+    },
+    "flag": {
+      "multi_year_commitment": "Váže rozpočty dalších let",
+      "novel_contentious": "Nové nebo sporné"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Položka {item} je zavázána, ale její podmínky ukončení nejsou známy",
+        "suggestion": "Zadejte základ ukončení nebo harmonogram zrušení"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Stropy harmonogramu {schedule} s pásmem neroste",
+        "suggestion": "Opravte pásma a zveřejněte novou verzi"
+      },
+      "committed_within_release": {
+        "fail": "Položka {item} váže více, než bylo uvolněno",
+        "suggestion": "Požádejte o další uvolnění nebo snižte propojené dokumenty"
+      },
+      "decision_date_not_passed": {
+        "fail": "Poslední termín rozhodnutí {date} položky {item} uplynul",
+        "suggestion": "Rozhodněte, odložte s důvodem, nebo zaznamenejte náklady zpoždění"
+      },
+      "document_linked_once": {
+        "fail": "Dokument {document} je započten ve více než jedné položce",
+        "suggestion": "Odstraňte druhé propojení"
+      },
+      "fx_rate_available": {
+        "fail": "Propojená částka položky {item} nemá směnný kurz",
+        "suggestion": "Přidejte kurz pro toto datum do registru směnných kurzů nebo do projektu"
+      },
+      "item_has_cost_code": {
+        "fail": "Položka {item} nemá nákladový řádek",
+        "suggestion": "Přiřaďte nákladový řádek, ke kterému se položka účtuje"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Plánovanou částku položky {item} nelze přečíst",
+        "suggestion": "Nasměrujte položku na rozpočtový řádek, nákladový řádek nebo pozici, nebo zadejte ruční odhad"
+      },
+      "plant_item_in_register": {
+        "fail": "Položka {item} uvádí strojní zařízení, které už není v registru strojů, takže platí jeho vlastní dodací lhůta",
+        "suggestion": "Propojte položku se strojem, který ho nahradil, nebo odkaz odstraňte"
+      },
+      "release_in_date": {
+        "fail": "Uvolnění položky {item} platilo do {date}: pod ním nelze zavázat nic nového",
+        "suggestion": "Požádejte o obnovené uvolnění pro to, co ještě zbývá zavázat"
+      },
+      "release_within_authority": {
+        "fail": "Uvolnění {release} bylo schváleno pod požadovaným pásmem {tier}",
+        "suggestion": "Požádejte o nové uvolnění podle platného harmonogramu"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Položky skupiny {group} byly uvolněny pod pásmem, které vyžaduje jejich součet",
+        "suggestion": "Požádejte o další uvolnění na pásmu celkového součtu skupiny"
+      }
+    },
+    "status": {
+      "aborted": "Ukončeno",
+      "closed": "Uzavřeno",
+      "committed": "Zavázáno",
+      "on_hold": "Pozastaveno",
+      "partially_released": "Částečně uvolněno",
+      "planned": "Plánováno",
+      "re_release_required": "Vyžaduje nové uvolnění",
+      "release_requested": "Uvolnění požadováno",
+      "released": "Uvolněno",
+      "transferred": "Převedeno"
+    },
+    "tier": {
+      "accounting_officer": "Účetní odpovědná osoba",
+      "authority_head": "Vedoucí úřadu",
+      "board": "Představenstvo",
+      "contracting_officer": "Smluvní pracovník",
+      "department_head": "Vedoucí odboru",
+      "head_of_contracting_activity": "Vedoucí zadávání veřejných zakázek",
+      "project_director": "Ředitel projektu",
+      "project_lead": "Vedoucí projektu",
+      "project_manager": "Projektový manažer",
+      "senior_responsible_owner": "Hlavní odpovědný vlastník",
+      "simplified_acquisition": "Zjednodušené zadávání",
+      "sponsor": "Sponzor"
+    },
+    "type": {
+      "change": "Změna",
+      "claim_settlement": "Vypořádání nároku",
+      "contingency_drawdown": "Čerpání rezervy",
+      "design": "Projektování",
+      "services": "Služby",
+      "supplies": "Dodávky",
+      "termination_settlement": "Vypořádání ukončení",
+      "works": "Stavební práce"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} mělo být rozhodnuto do {latest_decision_date}.",
+        "title": "Rozhodnutí o uvolnění je po termínu"
+      },
+      "re_release_required": {
+        "body": "Propojené dokumenty položky {code} nyní váží {committed}, což je více než uvolněných {released}.",
+        "title": "Vyžaduje nové uvolnění"
+      },
+      "release_aborted": {
+        "body": "Položka {code} byla zastavena.",
+        "title": "Ukončení schváleno"
+      },
+      "release_rejected": {
+        "body": "Uvolnění položky {code} bylo zamítnuto.",
+        "title": "Uvolnění zamítnuto"
+      },
+      "release_released": {
+        "body": "Položka {code} byla uvolněna.",
+        "title": "Uvolnění uděleno"
+      }
+    }
+  }
+}

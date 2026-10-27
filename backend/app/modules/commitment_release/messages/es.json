@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Honorario sobre la parte no ejecutada",
+      "presumed_unperformed_pct": "Proporción presunta de la parte no ejecutada",
+      "profit_pct": "Beneficio sobre la parte ejecutada"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Un cargo introducido para esta partida",
+        "name": "Condiciones personalizadas"
+      },
+      "de_bgb_648": {
+        "description": "Precio acordado menos costes ahorrados; se presume el 5 % de la parte no ejecutada cuando los costes ahorrados no están documentados",
+        "name": "Resolución libre por el propietario (§ 648 BGB)",
+        "presumption": "Proporción presunta de la parte no ejecutada"
+      },
+      "de_public_owner": {
+        "description": "Ejemplo de delegación para un propietario público: umbral de obras de la UE como banda superior de obras, compromisos plurianuales para el responsable de la entidad",
+        "eu_works_threshold": "Umbral de obras de la UE 2026-27 (Reglamento Delegado (UE) 2025/2152), no confirmado",
+        "name": "Propietario público (Alemania), ejemplo"
+      },
+      "de_vob_b_8_1": {
+        "description": "Misma liquidación que el § 648 BGB, a la que remite la cláusula",
+        "name": "Resolución libre según el § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Remite al § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Costes incurridos más beneficio sobre la obra realizada más gastos de liquidación",
+        "name": "Resolución por conveniencia (FAR 49)",
+        "profit_negotiated": "Tipo de beneficio negociado"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Obra realizada más un porcentaje de honorario sobre la parte no ejecutada, según se indique en los datos del contrato",
+        "fee_from_contract_data": "Porcentaje de los datos del contrato",
+        "name": "Resolución por motivo propio del cliente (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Director de proyecto, promotor y consejo con techos de ejemplo en la moneda del proyecto; sin cifras legales",
+        "name": "Calendario neutro de tres niveles"
+      },
+      "none_free_cancellation": {
+        "description": "Sin cargo por cancelación",
+        "name": "Cancelación libre"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Cargos por fecha o avance de fabricación según lo acordado con el proveedor",
+        "name": "Calendario de cancelación del proveedor"
+      },
+      "uk_public_body": {
+        "description": "Ejemplo de autoridad delegada por importe y novedad según Managing Public Money",
+        "name": "Organismo público (Reino Unido), ejemplo"
+      },
+      "us_federal_owner": {
+        "description": "Ejemplo de niveles a partir del umbral de adquisición simplificada",
+        "name": "Propietario federal (Estados Unidos), ejemplo",
+        "sat": "Umbral de adquisición simplificada USD 350 000 desde 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Base de resolución desconocida",
+      "abort_exposure_unknown": "La pérdida residual es desconocida. Complete primero las condiciones de resolución.",
+      "abort_parameter_invalid": "Un parámetro de resolución es una proporción entre 0 y 1",
+      "abort_parameter_not_in_basis": "La base de resolución elegida no tiene este parámetro",
+      "abort_type_not_in_schedule": "El calendario no tiene un nivel para una liquidación por resolución",
+      "activity_not_found": "La actividad del calendario no se encontró en este proyecto",
+      "amount_invalid": "El importe no es un número válido",
+      "amount_not_positive": "El importe debe ser mayor que cero",
+      "assignee_not_project_member": "La persona no es miembro de este proyecto",
+      "assignment_expired": "La asignación del aprobador ha caducado; actualice las asignaciones",
+      "assignment_needs_approver": "Indique el aprobador de este nivel antes de asignar un suplente o un periodo de validez",
+      "assignment_window_inverted": "La asignación termina antes de empezar",
+      "cancellation_schedule_invalid": "Cada paso necesita un hito, una fecha o un avance, y exactamente un cargo",
+      "catalogue_code_taken": "Otro catálogo ya usa este código",
+      "catalogue_invalid": "El catálogo no es válido",
+      "catalogue_retired": "Este catálogo está retirado",
+      "change_belongs_to_contract_item": "Un cambio y su contrato están vinculados en la misma partida",
+      "commitment_guard_unavailable": "No se pudo realizar la comprobación de liberación, por lo que no se permitió",
+      "commitment_not_in_matrix": "Este documento no está en la matriz de compromisos",
+      "commitment_not_released": "Este compromiso no está liberado por este importe",
+      "commitment_type_unknown": "Este tipo de compromiso no está en el esquema de autoridad",
+      "contingency_insufficient": "El saldo de contingencia no cubre esta disposición",
+      "contingency_line_required": "Una disposición de contingencia necesita la partida presupuestaria que contiene la contingencia",
+      "date_invalid": "Esto no es una fecha",
+      "decider_not_tier_holder": "Aprobado por alguien que no ostenta el nivel",
+      "decision_invalid": "Elija aprobar o rechazar",
+      "deferral_needs_reason": "Escriba por qué se aplaza la partida",
+      "document_linked_elsewhere": "Este documento ya se cuenta en otra partida",
+      "document_not_found": "Documento no encontrado en este proyecto",
+      "drawdown_released_by_commitment": "Esta disposición es una partida de compromiso liberada. Resuelva esa partida para recuperar el dinero.",
+      "edit_required": "Su rol no puede editar partidas de compromiso",
+      "enforcement_invalid": "La aplicación debe ser desactivada, de aviso o de bloqueo",
+      "external_approval_not_required": "Este importe lo decide un nivel del calendario: elimine la referencia de aprobación externa",
+      "external_approval_required": "El importe supera todos los niveles: adjunte la referencia de aprobación externa",
+      "field_frozen": "Este campo ya no se puede cambiar para esta partida",
+      "field_required": "Este campo no puede estar vacío",
+      "flag_unknown": "Este indicador no está en el esquema de autoridad",
+      "four_eyes_no_approver": "Nadie en este nivel puede decidir esta solicitud según la regla de los cuatro ojos",
+      "four_eyes_requester_is_approver": "Cuatro ojos: no puede solicitar una liberación que usted mismo aprobaría",
+      "four_eyes_violation": "Quien solicitó, es responsable o confirmó esta partida no puede decidir sobre ella",
+      "frame_document_not_found": "El documento marco no se encontró en este proyecto",
+      "funding_application_not_found": "La solicitud de financiación no se encontró en este proyecto",
+      "fx_policy_invalid": "Política de tipo de cambio desconocida",
+      "fx_rate_missing": "No hay tipo de cambio para esta fecha: la liberación no puede evaluarse",
+      "gate_unknown": "Este hito de control no está en el modelo de gobernanza del proyecto",
+      "gates_not_in_use": "Este proyecto no usa hitos de control, así que nada puede esperar a uno",
+      "governance_area_required": "Una partida vinculada a un hito de control necesita un área de gestión",
+      "governance_area_unknown": "Esta área de gestión no está en el modelo de gobernanza del proyecto",
+      "invalid_transition": "Este paso no es posible en el estado actual",
+      "item_changed": "La partida cambió entretanto. Inténtelo de nuevo.",
+      "item_closed": "La partida está cerrada",
+      "item_code_taken": "Otra partida ya usa este código",
+      "item_not_found": "Partida de compromiso no encontrada",
+      "link_kind_invalid": "Tipo de documento desconocido",
+      "link_kind_not_supported": "Este tipo de documento todavía no se puede vincular",
+      "link_not_found": "Vínculo no encontrado",
+      "manage_required": "Solo quien gestiona la matriz puede hacer esto",
+      "manual_amount_needs_currency": "Una estimación manual necesita un importe y una moneda",
+      "matrix_missing": "Este proyecto todavía no tiene matriz de compromisos",
+      "no_pending_release": "No hay ninguna solicitud de liberación pendiente",
+      "no_route_for_tier": "Todavía no se ha asignado nadie al nivel requerido",
+      "not_entitled_decider": "No ostenta el nivel en el que se decide esta solicitud",
+      "not_item_owner": "Solo el responsable de la partida o un gestor puede cambiar esta partida",
+      "not_requester": "Solo el solicitante o un gestor puede retirar esta solicitud",
+      "planned_source_invalid": "Origen desconocido para el importe planificado",
+      "planned_source_not_found": "La partida presupuestaria, la partida de coste o la posición no se encontró en este proyecto",
+      "plant_item_not_found": "El elemento de equipo no se encontró en este proyecto",
+      "precondition_is_computed": "Esta condición previa se lee de su módulo y no puede marcarse",
+      "precondition_kind_invalid": "Tipo de condición previa desconocido",
+      "precondition_needs_evidence": "Adjunte la referencia de la evidencia",
+      "precondition_needs_ref": "Esta condición previa necesita una referencia",
+      "precondition_not_found": "Condición previa no encontrada",
+      "preconditions_open": "Las condiciones previas abiertas bloquean esta liberación",
+      "project_not_found": "Proyecto no encontrado",
+      "rationale_required": "Indique un motivo",
+      "release_decided": "Esta solicitud de liberación ya está decidida",
+      "release_expired": "La liberación de esta partida ha superado su fecha de validez: solicite una liberación renovada antes de comprometer más",
+      "release_pending": "Ya hay en curso una solicitud de liberación para esta partida",
+      "requisition_not_found": "La requisición no se encontró en este proyecto",
+      "route_changed_since_accepted": "Se editó la ruta de aprobación de este nivel. Un gestor debe volver a fijarla.",
+      "route_must_belong_to_project": "Solo se puede fijar una ruta de aprobación de este proyecto",
+      "route_not_found": "Ruta de aprobación no encontrada",
+      "schedule_currency_mismatch": "Este calendario usa otra moneda que las liberaciones ya registradas",
+      "schedule_not_in_force": "El calendario fijado no está vigente hoy. Fije la versión que sí lo esté.",
+      "schedule_type_mismatch": "Este calendario no conoce el tipo de compromiso de una partida existente",
+      "tier_unknown": "Este nivel no está en el esquema de autoridad",
+      "transfer_links_stay_in_project": "Los documentos vinculados pertenecen a este proyecto. Desvincúlelos antes de transferir a otro proyecto.",
+      "transfer_target_invalid": "Una partida no se puede transferir a sí misma",
+      "transfer_target_not_open": "La partida de destino está cerrada o pendiente de decisión",
+      "transferable_invalid": "Opción de transferencia desconocida",
+      "type_fixed_after_release": "El tipo no puede cambiar una vez solicitada una liberación",
+      "unknown_catalogue": "Catálogo no encontrado"
+    },
+    "evidence": {
+      "decision_overdue": "Ha vencido la fecha límite de decisión de esta partida de compromiso y no se ha liberado nada: decida, aplace con motivo o registre el coste del retraso",
+      "items_released_by_gate": "Los compromisos que vencen en este hito de control se liberan o se aplazan",
+      "items_without_area": "Las partidas de compromiso de este hito nombran un área de gestión que el proyecto ya no tiene",
+      "no_items_for_gate": "Ninguna partida de compromiso nombra este hito, así que no se sabe si el dinero debe liberarse por él"
+    },
+    "export": {
+      "as_of": "A fecha de",
+      "col_code": "Código",
+      "col_committed": "Comprometido",
+      "col_currency": "Moneda",
+      "col_decision_date": "Fecha límite de decisión",
+      "col_open_preconditions": "Condiciones previas abiertas",
+      "col_overdue": "Decisión vencida",
+      "col_planned": "Planificado",
+      "col_released": "Liberado",
+      "col_residual_loss": "Pérdida residual por resolución",
+      "col_status": "Estado",
+      "col_tier": "Nivel requerido",
+      "col_title": "Compromiso",
+      "col_type": "Tipo",
+      "empty": "Todavía no hay partidas de compromiso",
+      "overdue": "Vencido",
+      "project": "Proyecto",
+      "title": "Matriz de compromisos y liberaciones"
+    },
+    "exposure": {
+      "nothing_committed": "Nada comprometido, nada gastado"
+    },
+    "flag": {
+      "multi_year_commitment": "Compromete presupuestos de años posteriores",
+      "novel_contentious": "Novedoso o controvertido"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "La partida {item} está comprometida, pero sus condiciones de resolución son desconocidas",
+        "suggestion": "Introduzca la base de resolución o un calendario de cancelación"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Los techos del calendario {schedule} no aumentan con el nivel",
+        "suggestion": "Corrija los niveles y publique una nueva versión"
+      },
+      "committed_within_release": {
+        "fail": "La partida {item} compromete más de lo que se liberó",
+        "suggestion": "Solicite una liberación adicional o reduzca los documentos vinculados"
+      },
+      "decision_date_not_passed": {
+        "fail": "Ha pasado la fecha límite de decisión {date} de la partida {item}",
+        "suggestion": "Decida, aplace con motivo o registre el coste del retraso"
+      },
+      "document_linked_once": {
+        "fail": "El documento {document} se cuenta en más de una partida",
+        "suggestion": "Elimine el segundo vínculo"
+      },
+      "fx_rate_available": {
+        "fail": "Un importe vinculado de la partida {item} no tiene tipo de cambio",
+        "suggestion": "Añada un tipo para la fecha en el registro de tipos de cambio o en el proyecto"
+      },
+      "item_has_cost_code": {
+        "fail": "La partida {item} no tiene partida de coste",
+        "suggestion": "Asigne la partida de coste en la que se imputa la partida"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "No se puede leer el importe planificado de la partida {item}",
+        "suggestion": "Apunte la partida a una partida presupuestaria, de coste o posición, o introduzca una estimación manual"
+      },
+      "plant_item_in_register": {
+        "fail": "La partida {item} nombra un elemento de equipo que ya no está en el registro de equipos, así que se aplica su propio plazo de entrega",
+        "suggestion": "Vincule la partida al elemento de equipo que lo sustituyó, o elimine el vínculo"
+      },
+      "release_in_date": {
+        "fail": "Una liberación de la partida {item} estuvo vigente hasta {date}: no se puede comprometer nada nuevo con ella",
+        "suggestion": "Solicite una liberación renovada para lo que todavía falta por comprometer"
+      },
+      "release_within_authority": {
+        "fail": "La liberación {release} se decidió por debajo del nivel requerido {tier}",
+        "suggestion": "Solicite una nueva liberación según el calendario vigente"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Las partidas del grupo {group} se liberaron por debajo del nivel que exige su suma",
+        "suggestion": "Solicite la siguiente liberación en el nivel del total del grupo"
+      }
+    },
+    "status": {
+      "aborted": "Resuelto",
+      "closed": "Cerrado",
+      "committed": "Comprometido",
+      "on_hold": "En espera",
+      "partially_released": "Liberado parcialmente",
+      "planned": "Planificado",
+      "re_release_required": "Requiere nueva liberación",
+      "release_requested": "Liberación solicitada",
+      "released": "Liberado",
+      "transferred": "Transferido"
+    },
+    "tier": {
+      "accounting_officer": "Responsable contable",
+      "authority_head": "Responsable de la entidad",
+      "board": "Consejo de administración",
+      "contracting_officer": "Responsable de contratación",
+      "department_head": "Jefe de departamento",
+      "head_of_contracting_activity": "Responsable de la actividad de contratación",
+      "project_director": "Director del proyecto",
+      "project_lead": "Responsable del proyecto",
+      "project_manager": "Jefe de proyecto",
+      "senior_responsible_owner": "Responsable principal del programa",
+      "simplified_acquisition": "Adquisición simplificada",
+      "sponsor": "Promotor"
+    },
+    "type": {
+      "change": "Modificación",
+      "claim_settlement": "Liquidación de reclamación",
+      "contingency_drawdown": "Disposición de contingencia",
+      "design": "Diseño",
+      "services": "Servicios",
+      "supplies": "Suministros",
+      "termination_settlement": "Liquidación por resolución",
+      "works": "Obras"
+    }
+  },
+  "common": {
+    "ok": "Aceptar"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} debía haberse decidido antes del {latest_decision_date}.",
+        "title": "Decisión de liberación vencida"
+      },
+      "re_release_required": {
+        "body": "Los documentos vinculados a {code} comprometen ahora {committed}, por encima de la liberación de {released}.",
+        "title": "Requiere nueva liberación"
+      },
+      "release_aborted": {
+        "body": "Se detuvo {code}.",
+        "title": "Resolución aprobada"
+      },
+      "release_rejected": {
+        "body": "Se rechazó la liberación de {code}.",
+        "title": "Liberación rechazada"
+      },
+      "release_released": {
+        "body": "Se liberó {code}.",
+        "title": "Liberación concedida"
+      }
+    }
+  }
+}

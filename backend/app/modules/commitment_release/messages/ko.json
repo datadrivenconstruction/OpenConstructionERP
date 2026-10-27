@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "미시공 부분에 대한 수수료",
+      "presumed_unperformed_pct": "미시공 부분의 추정 비율",
+      "profit_pct": "시공 완료 부분에 대한 이익"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "이 항목에 입력한 비용",
+        "name": "사용자 지정 조건"
+      },
+      "de_bgb_648": {
+        "description": "합의 금액에서 절감된 비용을 뺀 금액; 절감 비용이 입증되지 않으면 미시공 부분의 5 %를 추정",
+        "name": "발주자의 자유 해지 (BGB § 648)",
+        "presumption": "미시공 부분의 추정 비율"
+      },
+      "de_public_owner": {
+        "description": "공공 발주자의 권한 위임 예시: 최상위 구간으로서의 EU 공사 기준금액, 기관장에 대한 다년간 약정",
+        "eu_works_threshold": "EU 공사 기준금액 2026-27 (위임규정 (EU) 2025/2152), 미확정",
+        "name": "공공 발주자(독일), 예시"
+      },
+      "de_vob_b_8_1": {
+        "description": "조항이 참조하는 BGB § 648과 동일한 정산 방식",
+        "name": "VOB/B § 8 (1)에 따른 자유 해지",
+        "refers_to_bgb_648": "BGB § 648 참조"
+      },
+      "far_49_convenience": {
+        "description": "발생 비용, 수행 작업에 대한 이익, 정산 비용의 합계",
+        "name": "편의에 의한 계약 해지 (FAR 49)",
+        "profit_negotiated": "협의된 이익률"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "계약 데이터에 명시된 대로, 수행 작업에 미시공 부분에 대한 수수료 비율을 더한 금액",
+        "fee_from_contract_data": "계약 데이터의 비율",
+        "name": "발주자 사유에 의한 해지 (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "프로젝트 통화로 된 예시 상한의 프로젝트 관리자, 후원자 및 이사회; 법정 금액 아님",
+        "name": "중립적 3단계 일정"
+      },
+      "none_free_cancellation": {
+        "description": "취소 시 비용 없음",
+        "name": "무상 취소"
+      },
+      "supply_cancellation_schedule": {
+        "description": "공급업체와 합의한 일자 또는 제작 진행률에 따른 비용",
+        "name": "공급업체 취소 일정"
+      },
+      "uk_public_body": {
+        "description": "Managing Public Money에 따른 금액 및 신규성별 위임 권한 예시",
+        "name": "공공기관(영국), 예시"
+      },
+      "us_federal_owner": {
+        "description": "간이 조달 기준금액부터 시작하는 구간 예시",
+        "name": "연방 발주자(미국), 예시",
+        "sat": "간이 조달 기준금액 2025-10-01부터 USD 350,000 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "알 수 없는 중단 기준",
+      "abort_exposure_unknown": "잔여 손실을 알 수 없습니다. 먼저 중단 조건을 입력하세요.",
+      "abort_parameter_invalid": "중단 파라미터는 0과 1 사이의 비율이어야 합니다",
+      "abort_parameter_not_in_basis": "선택한 중단 기준에는 이 파라미터가 없습니다",
+      "abort_type_not_in_schedule": "일정표에 계약 해지 정산 구간이 없습니다",
+      "activity_not_found": "이 프로젝트에서 일정 활동을 찾을 수 없습니다",
+      "amount_invalid": "금액이 올바른 숫자가 아닙니다",
+      "amount_not_positive": "금액은 0보다 커야 합니다",
+      "assignee_not_project_member": "이 사람은 이 프로젝트의 구성원이 아닙니다",
+      "assignment_expired": "승인자의 지정 기간이 만료되었습니다. 지정을 갱신하세요",
+      "assignment_needs_approver": "대리인이나 유효 기간을 지정하기 전에 이 구간의 승인자를 지정하세요",
+      "assignment_window_inverted": "지정 기간이 시작 전에 끝납니다",
+      "cancellation_schedule_invalid": "각 단계에는 마일스톤, 날짜 또는 진행률, 그리고 정확히 하나의 비용이 필요합니다",
+      "catalogue_code_taken": "다른 카탈로그가 이 코드를 이미 사용하고 있습니다",
+      "catalogue_invalid": "카탈로그가 올바르지 않습니다",
+      "catalogue_retired": "이 카탈로그는 폐기되었습니다",
+      "change_belongs_to_contract_item": "변경과 계약은 같은 항목에 연결되어 있습니다",
+      "commitment_guard_unavailable": "릴리스 확인을 수행할 수 없어 허용되지 않았습니다",
+      "commitment_not_in_matrix": "이 문서는 약정 매트릭스에 없습니다",
+      "commitment_not_released": "이 약정은 이 금액에 대해 릴리스되지 않았습니다",
+      "commitment_type_unknown": "이 약정 유형은 권한 일정표에 없습니다",
+      "contingency_insufficient": "예비비 잔액이 이 인출을 감당하지 못합니다",
+      "contingency_line_required": "예비비 인출에는 예비비가 들어 있는 예산 항목이 필요합니다",
+      "date_invalid": "올바른 날짜가 아닙니다",
+      "decider_not_tier_holder": "해당 구간의 권한이 없는 사람이 승인했습니다",
+      "decision_invalid": "승인 또는 반려를 선택하세요",
+      "deferral_needs_reason": "항목을 보류하는 이유를 적어 주세요",
+      "document_linked_elsewhere": "이 문서는 이미 다른 항목에 포함되어 있습니다",
+      "document_not_found": "이 프로젝트에서 문서를 찾을 수 없습니다",
+      "drawdown_released_by_commitment": "이 인출은 릴리스된 약정 항목입니다. 자금을 되찾으려면 그 항목을 중단하세요.",
+      "edit_required": "회원님의 역할로는 약정 항목을 편집할 수 없습니다",
+      "enforcement_invalid": "적용은 끔, 경고 또는 차단 중 하나여야 합니다",
+      "external_approval_not_required": "이 금액은 일정표의 구간에서 결정됩니다: 외부 승인 참조를 삭제하세요",
+      "external_approval_required": "금액이 모든 구간을 초과합니다: 외부 승인 참조를 첨부하세요",
+      "field_frozen": "이 항목에서는 이 필드를 더 이상 변경할 수 없습니다",
+      "field_required": "이 필드는 비워 둘 수 없습니다",
+      "flag_unknown": "이 표시는 권한 일정표에 없습니다",
+      "four_eyes_no_approver": "4안 원칙에 따라 이 구간의 누구도 이 요청을 결정할 수 없습니다",
+      "four_eyes_requester_is_approver": "4안 원칙: 본인이 승인하게 될 릴리스를 요청할 수 없습니다",
+      "four_eyes_violation": "이 항목을 요청했거나 소유하거나 확인한 사람은 이를 결정할 수 없습니다",
+      "frame_document_not_found": "이 프로젝트에서 기본 문서를 찾을 수 없습니다",
+      "funding_application_not_found": "이 프로젝트에서 자금 신청서를 찾을 수 없습니다",
+      "fx_policy_invalid": "알 수 없는 환율 정책입니다",
+      "fx_rate_missing": "이 날짜의 환율이 없어 릴리스를 평가할 수 없습니다",
+      "gate_unknown": "이 게이트는 프로젝트의 거버넌스 모델에 없습니다",
+      "gates_not_in_use": "이 프로젝트는 게이트를 사용하지 않으므로 게이트를 기다리는 항목이 없습니다",
+      "governance_area_required": "게이트에 연결된 항목에는 관리 영역이 필요합니다",
+      "governance_area_unknown": "이 관리 영역은 프로젝트의 거버넌스 모델에 없습니다",
+      "invalid_transition": "현재 상태에서는 이 단계를 수행할 수 없습니다",
+      "item_changed": "그사이 항목이 변경되었습니다. 다시 시도하세요.",
+      "item_closed": "항목이 마감되었습니다",
+      "item_code_taken": "다른 항목이 이 코드를 이미 사용하고 있습니다",
+      "item_not_found": "약정 항목을 찾을 수 없습니다",
+      "link_kind_invalid": "알 수 없는 문서 유형입니다",
+      "link_kind_not_supported": "이 문서 유형은 아직 연결할 수 없습니다",
+      "link_not_found": "연결을 찾을 수 없습니다",
+      "manage_required": "매트릭스를 관리하는 사람만 이 작업을 할 수 있습니다",
+      "manual_amount_needs_currency": "수동 견적에는 금액과 통화가 필요합니다",
+      "matrix_missing": "이 프로젝트에는 아직 약정 매트릭스가 없습니다",
+      "no_pending_release": "대기 중인 릴리스 요청이 없습니다",
+      "no_route_for_tier": "필요한 구간에 아직 지정된 사람이 없습니다",
+      "not_entitled_decider": "이 요청이 결정되는 구간의 권한이 없습니다",
+      "not_item_owner": "항목 소유자 또는 관리자만 이 항목을 변경할 수 있습니다",
+      "not_requester": "요청자 또는 관리자만 이 요청을 철회할 수 있습니다",
+      "planned_source_invalid": "계획 금액의 알 수 없는 원천입니다",
+      "planned_source_not_found": "이 프로젝트에서 예산 항목, 비용 항목 또는 품목을 찾을 수 없습니다",
+      "plant_item_not_found": "이 프로젝트에서 장비 항목을 찾을 수 없습니다",
+      "precondition_is_computed": "이 선행 조건은 해당 모듈에서 읽어 오므로 체크할 수 없습니다",
+      "precondition_kind_invalid": "알 수 없는 선행 조건 유형입니다",
+      "precondition_needs_evidence": "증빙 참조를 첨부하세요",
+      "precondition_needs_ref": "이 선행 조건에는 참조가 필요합니다",
+      "precondition_not_found": "선행 조건을 찾을 수 없습니다",
+      "preconditions_open": "미완료 선행 조건이 이 릴리스를 막고 있습니다",
+      "project_not_found": "프로젝트를 찾을 수 없습니다",
+      "rationale_required": "사유를 입력하세요",
+      "release_decided": "이 릴리스 요청은 이미 결정되었습니다",
+      "release_expired": "이 항목의 릴리스가 유효 기간을 넘겼습니다: 더 약정하기 전에 갱신된 릴리스를 요청하세요",
+      "release_pending": "이 항목에 대한 릴리스 요청이 이미 진행 중입니다",
+      "requisition_not_found": "이 프로젝트에서 구매 요청을 찾을 수 없습니다",
+      "route_changed_since_accepted": "이 구간의 승인 경로가 편집되었습니다. 관리자가 다시 고정해야 합니다.",
+      "route_must_belong_to_project": "이 프로젝트의 승인 경로만 고정할 수 있습니다",
+      "route_not_found": "승인 경로를 찾을 수 없습니다",
+      "schedule_currency_mismatch": "이 일정표는 이미 기록된 릴리스와 다른 통화를 사용합니다",
+      "schedule_not_in_force": "고정된 일정표는 오늘 시행 중이 아닙니다. 현재 시행 중인 버전을 고정하세요.",
+      "schedule_type_mismatch": "이 일정표는 기존 항목의 약정 유형을 알지 못합니다",
+      "tier_unknown": "이 구간은 권한 일정표에 없습니다",
+      "transfer_links_stay_in_project": "연결된 문서는 이 프로젝트에 속합니다. 다른 프로젝트로 이전하기 전에 연결을 해제하세요.",
+      "transfer_target_invalid": "항목을 자기 자신으로 이전할 수 없습니다",
+      "transfer_target_not_open": "대상 항목이 마감되었거나 결정을 기다리고 있습니다",
+      "transferable_invalid": "알 수 없는 이전 옵션입니다",
+      "type_fixed_after_release": "릴리스를 요청한 후에는 유형을 변경할 수 없습니다",
+      "unknown_catalogue": "카탈로그를 찾을 수 없습니다"
+    },
+    "evidence": {
+      "decision_overdue": "이 약정 항목의 최종 결정 기한이 지났고 아무것도 릴리스되지 않았습니다: 결정하거나, 사유를 적어 보류하거나, 지연 비용을 기록하세요",
+      "items_released_by_gate": "이 게이트에서 기한이 도래하는 약정은 릴리스되었거나 보류되었습니다",
+      "items_without_area": "이 게이트의 약정 항목이 프로젝트에 더 이상 없는 관리 영역을 지정하고 있습니다",
+      "no_items_for_gate": "이 게이트를 지정한 약정 항목이 없어, 이 게이트까지 자금을 릴리스해야 하는지 알 수 없습니다"
+    },
+    "export": {
+      "as_of": "기준일",
+      "col_code": "코드",
+      "col_committed": "약정액",
+      "col_currency": "통화",
+      "col_decision_date": "최종 결정 기한",
+      "col_open_preconditions": "미완료 선행 조건",
+      "col_overdue": "결정 기한 초과",
+      "col_planned": "계획액",
+      "col_released": "릴리스액",
+      "col_residual_loss": "중단 시 잔여 손실",
+      "col_status": "상태",
+      "col_tier": "필요 구간",
+      "col_title": "약정",
+      "col_type": "유형",
+      "empty": "아직 약정 항목이 없습니다",
+      "overdue": "기한 초과",
+      "project": "프로젝트",
+      "title": "약정 및 릴리스 매트릭스"
+    },
+    "exposure": {
+      "nothing_committed": "약정도 지출도 없습니다"
+    },
+    "flag": {
+      "multi_year_commitment": "이후 예산 연도에 영향을 줌",
+      "novel_contentious": "신규 또는 논쟁적"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "항목 {item}은 약정되었지만 중단 조건을 알 수 없습니다",
+        "suggestion": "중단 기준 또는 취소 일정을 입력하세요"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "일정표 {schedule}의 상한이 구간에 따라 올라가지 않습니다",
+        "suggestion": "구간을 수정하고 새 버전을 게시하세요"
+      },
+      "committed_within_release": {
+        "fail": "항목 {item}이 릴리스된 금액을 초과해 약정합니다",
+        "suggestion": "추가 릴리스를 요청하거나 연결된 문서를 줄이세요"
+      },
+      "decision_date_not_passed": {
+        "fail": "항목 {item}의 최종 결정 기한 {date}이 지났습니다",
+        "suggestion": "결정하거나, 사유를 적어 보류하거나, 지연 비용을 기록하세요"
+      },
+      "document_linked_once": {
+        "fail": "문서 {document}이 두 개 이상의 항목에 포함되어 있습니다",
+        "suggestion": "두 번째 연결을 제거하세요"
+      },
+      "fx_rate_available": {
+        "fail": "항목 {item}의 연결된 금액에 환율이 없습니다",
+        "suggestion": "환율 등록부 또는 프로젝트에 해당 날짜의 환율을 추가하세요"
+      },
+      "item_has_cost_code": {
+        "fail": "항목 {item}에 비용 항목이 없습니다",
+        "suggestion": "항목이 계상될 비용 항목을 지정하세요"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "항목 {item}의 계획 금액을 읽을 수 없습니다",
+        "suggestion": "항목을 예산 항목, 비용 항목 또는 품목에 연결하거나 수동 견적을 입력하세요"
+      },
+      "plant_item_in_register": {
+        "fail": "항목 {item}이 장비 등록부에 더 이상 없는 장비 항목을 지정하므로 해당 장비의 자체 리드타임이 적용됩니다",
+        "suggestion": "항목을 이를 대체한 장비 항목에 연결하거나 연결을 제거하세요"
+      },
+      "release_in_date": {
+        "fail": "항목 {item}의 릴리스는 {date}까지 유효했습니다: 그 아래에서는 새로 약정할 수 없습니다",
+        "suggestion": "아직 약정해야 할 부분에 대해 갱신된 릴리스를 요청하세요"
+      },
+      "release_within_authority": {
+        "fail": "릴리스 {release}가 필요 구간 {tier}보다 낮은 권한으로 결정되었습니다",
+        "suggestion": "현재 일정표에 따라 새 릴리스를 요청하세요"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "그룹 {group}의 항목들이 합계에 필요한 구간보다 낮은 권한으로 릴리스되었습니다",
+        "suggestion": "다음 릴리스는 그룹 합계의 구간으로 요청하세요"
+      }
+    },
+    "status": {
+      "aborted": "중단됨",
+      "closed": "마감",
+      "committed": "약정됨",
+      "on_hold": "보류",
+      "partially_released": "부분 릴리스",
+      "planned": "계획됨",
+      "re_release_required": "재릴리스 필요",
+      "release_requested": "릴리스 요청됨",
+      "released": "릴리스됨",
+      "transferred": "이전됨"
+    },
+    "tier": {
+      "accounting_officer": "회계 책임자",
+      "authority_head": "기관장",
+      "board": "이사회",
+      "contracting_officer": "계약 담당관",
+      "department_head": "부서장",
+      "head_of_contracting_activity": "계약 업무 책임자",
+      "project_director": "프로젝트 이사",
+      "project_lead": "프로젝트 리드",
+      "project_manager": "프로젝트 관리자",
+      "senior_responsible_owner": "책임 임원",
+      "simplified_acquisition": "간이 조달",
+      "sponsor": "후원자"
+    },
+    "type": {
+      "change": "변경",
+      "claim_settlement": "클레임 정산",
+      "contingency_drawdown": "예비비 인출",
+      "design": "설계",
+      "services": "용역",
+      "supplies": "물품",
+      "termination_settlement": "계약 해지 정산",
+      "works": "공사"
+    }
+  },
+  "common": {
+    "ok": "확인"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code}은(는) {latest_decision_date}까지 결정되었어야 합니다.",
+        "title": "릴리스 결정 기한 초과"
+      },
+      "re_release_required": {
+        "body": "{code}의 연결된 문서가 이제 {committed}을(를) 약정하며, 이는 릴리스된 {released}을(를) 초과합니다.",
+        "title": "재릴리스 필요"
+      },
+      "release_aborted": {
+        "body": "{code}이(가) 중단되었습니다.",
+        "title": "중단 승인됨"
+      },
+      "release_rejected": {
+        "body": "{code}의 릴리스가 반려되었습니다.",
+        "title": "릴리스 반려됨"
+      },
+      "release_released": {
+        "body": "{code}이(가) 릴리스되었습니다.",
+        "title": "릴리스 승인됨"
+      }
+    }
+  }
+}

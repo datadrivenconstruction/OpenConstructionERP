@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "未施工部分に対する手数料",
+      "presumed_unperformed_pct": "未施工部分の推定割合",
+      "profit_pct": "施工済み部分に対する利益"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "この項目に入力された費用",
+        "name": "個別条件"
+      },
+      "de_bgb_648": {
+        "description": "合意価格から節約された費用を差し引いた額。節約費用が証明されない場合は未施工部分の5 %と推定",
+        "name": "発注者による自由解除（BGB第648条）",
+        "presumption": "未施工部分の推定割合"
+      },
+      "de_public_owner": {
+        "description": "公共発注者の権限委譲の例：最上位区分としてEUの工事基準額、機関の長への複数年度の約束",
+        "eu_works_threshold": "EU工事基準額 2026-27年（委任規則(EU) 2025/2152）、未確定",
+        "name": "公共発注者（ドイツ）、例"
+      },
+      "de_vob_b_8_1": {
+        "description": "条項が参照する BGB第648条と同じ精算方法",
+        "name": "VOB/B第8条(1)項による自由解除",
+        "refers_to_bgb_648": "BGB第648条を参照"
+      },
+      "far_49_convenience": {
+        "description": "発生費用、施工済み分の利益、精算費用の合計",
+        "name": "便宜的解約（FAR 49）",
+        "profit_negotiated": "交渉による利益率"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "契約データに記載された、施工済み分と未施工分の手数料率による金額",
+        "fee_from_contract_data": "契約データに記載された割合",
+        "name": "発注者側の事由による解約（NEC4 ECC）"
+      },
+      "neutral": {
+        "description": "プロジェクトマネージャー、スポンサー、取締役会によるプロジェクト通貨での上限例；法定額ではない",
+        "name": "中立的な三段階の基準"
+      },
+      "none_free_cancellation": {
+        "description": "キャンセル時の費用なし",
+        "name": "無償キャンセル"
+      },
+      "supply_cancellation_schedule": {
+        "description": "サプライヤーと合意した期日または製造進捗に応じた費用",
+        "name": "サプライヤーのキャンセル基準"
+      },
+      "uk_public_body": {
+        "description": "Managing Public Money に基づく金額と新規性による委任権限の例",
+        "name": "公共機関（英国）、例"
+      },
+      "us_federal_owner": {
+        "description": "簡易調達基準額から始まる区分の例",
+        "name": "連邦政府発注者（米国）、例",
+        "sat": "簡易調達基準額 350,000 USD（2025-10-01以降、FAR 2.101）"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "中止の基準が不明です",
+      "abort_exposure_unknown": "残存損失が不明です。先に中止条件を入力してください。",
+      "abort_parameter_invalid": "中止パラメータは 0 から 1 の間の割合である必要があります",
+      "abort_parameter_not_in_basis": "選択された中止基準にはこのパラメータがありません",
+      "abort_type_not_in_schedule": "基準表に解約精算の区分がありません",
+      "activity_not_found": "このプロジェクトに工程の作業が見つかりません",
+      "amount_invalid": "金額が正しい数値ではありません",
+      "amount_not_positive": "金額はゼロより大きい必要があります",
+      "assignee_not_project_member": "この人物はプロジェクトのメンバーではありません",
+      "assignment_expired": "承認者の任命期限が切れています。割り当てを更新してください",
+      "assignment_needs_approver": "代理または有効期間を設定する前に、この区分の承認者を指定してください",
+      "assignment_window_inverted": "任命の終了が開始より前になっています",
+      "cancellation_schedule_invalid": "各段階には、マイルストーン、日付または進捗、そして費用が1つ必要です",
+      "catalogue_code_taken": "このコードは別のカタログで既に使われています",
+      "catalogue_invalid": "カタログが正しくありません",
+      "catalogue_retired": "このカタログは廃止されています",
+      "change_belongs_to_contract_item": "変更と契約は同じ項目で関連付けられています",
+      "commitment_guard_unavailable": "リリースの確認を行えなかったため、許可されませんでした",
+      "commitment_not_in_matrix": "この文書はコミットメント・マトリクスに含まれていません",
+      "commitment_not_released": "このコミットメントは、この金額について解放されていません",
+      "commitment_type_unknown": "このコミットメント種別は権限基準表にありません",
+      "contingency_insufficient": "予備費の残高がこの引き出しを賄えません",
+      "contingency_line_required": "予備費の引き出しには、予備費を含む予算行が必要です",
+      "date_invalid": "日付ではありません",
+      "decider_not_tier_holder": "その区分の権限を持たない人物が承認しています",
+      "decision_invalid": "承認または却下を選択してください",
+      "deferral_needs_reason": "項目を延期する理由を記入してください",
+      "document_linked_elsewhere": "この文書は既に別の項目に計上されています",
+      "document_not_found": "このプロジェクトに文書が見つかりません",
+      "drawdown_released_by_commitment": "この引き出しはリリース済みのコミットメント項目です。資金を取り戻すには、その項目を中止してください。",
+      "edit_required": "あなたの役割ではコミットメント項目を編集できません",
+      "enforcement_invalid": "適用は「オフ」「警告」「ブロック」のいずれかである必要があります",
+      "external_approval_not_required": "この金額は基準表の区分で決定されます：外部承認の参照を削除してください",
+      "external_approval_required": "金額がすべての区分を超えています：外部承認の参照を添付してください",
+      "field_frozen": "この項目では、この欄はもう変更できません",
+      "field_required": "この欄は空にできません",
+      "flag_unknown": "この区分は権限基準表にありません",
+      "four_eyes_no_approver": "四つの目のルールにより、この区分の誰もこの依頼を決裁できません",
+      "four_eyes_requester_is_approver": "四つの目：自分自身が承認するリリースを依頼することはできません",
+      "four_eyes_violation": "この項目の依頼者、担当者、確認者は、その項目を決裁できません",
+      "frame_document_not_found": "このプロジェクトに枠組文書が見つかりません",
+      "funding_application_not_found": "このプロジェクトに資金申請が見つかりません",
+      "fx_policy_invalid": "不明な為替レート方針です",
+      "fx_rate_missing": "この日付の為替レートがないため、リリースを評価できません",
+      "gate_unknown": "このゲートはプロジェクトのガバナンスモデルにありません",
+      "gates_not_in_use": "このプロジェクトはゲートを使用していないため、ゲートを待つものはありません",
+      "governance_area_required": "ゲートに紐づく項目には管理領域が必要です",
+      "governance_area_unknown": "この管理領域はプロジェクトのガバナンスモデルにありません",
+      "invalid_transition": "現在の状態ではこの操作はできません",
+      "item_changed": "その間に項目が変更されました。もう一度お試しください。",
+      "item_closed": "この項目は締め切られています",
+      "item_code_taken": "このコードは別の項目で既に使われています",
+      "item_not_found": "コミットメント項目が見つかりません",
+      "link_kind_invalid": "不明な文書の種類です",
+      "link_kind_not_supported": "この文書の種類はまだリンクできません",
+      "link_not_found": "リンクが見つかりません",
+      "manage_required": "マトリクスを管理する人のみが実行できます",
+      "manual_amount_needs_currency": "手動の見積もりには金額と通貨が必要です",
+      "matrix_missing": "このプロジェクトにはまだコミットメント・マトリクスがありません",
+      "no_pending_release": "保留中のリリース依頼はありません",
+      "no_route_for_tier": "必要な区分にまだ担当者が割り当てられていません",
+      "not_entitled_decider": "この依頼が決裁される区分の権限を持っていません",
+      "not_item_owner": "この項目を変更できるのは項目の所有者または管理者のみです",
+      "not_requester": "この依頼を取り下げられるのは依頼者または管理者のみです",
+      "planned_source_invalid": "計画金額の不明な参照元です",
+      "planned_source_not_found": "このプロジェクトに予算行、原価行、または明細が見つかりません",
+      "plant_item_not_found": "このプロジェクトに機械項目が見つかりません",
+      "precondition_is_computed": "この前提条件はモジュールから読み取られるため、チェックできません",
+      "precondition_kind_invalid": "不明な前提条件の種類です",
+      "precondition_needs_evidence": "根拠の参照を添付してください",
+      "precondition_needs_ref": "この前提条件には参照が必要です",
+      "precondition_not_found": "前提条件が見つかりません",
+      "preconditions_open": "未完了の前提条件があるため、このリリースはできません",
+      "project_not_found": "プロジェクトが見つかりません",
+      "rationale_required": "理由を入力してください",
+      "release_decided": "このリリース依頼は既に決裁されています",
+      "release_expired": "この項目のリリースは有効期限を過ぎています：さらにコミットする前に、更新されたリリースを依頼してください",
+      "release_pending": "この項目のリリース依頼は既に進行中です",
+      "requisition_not_found": "このプロジェクトに購買依頼が見つかりません",
+      "route_changed_since_accepted": "この区分の承認ルートが編集されました。管理者が再度固定する必要があります。",
+      "route_must_belong_to_project": "このプロジェクトの承認ルートのみ固定できます",
+      "route_not_found": "承認ルートが見つかりません",
+      "schedule_currency_mismatch": "この基準表は、既に記録されたリリースとは異なる通貨を使用しています",
+      "schedule_not_in_force": "固定された基準表は本日有効ではありません。現在有効な版を固定してください。",
+      "schedule_type_mismatch": "この基準表は、既存の項目のコミットメント種別を扱えません",
+      "tier_unknown": "この区分は権限基準表にありません",
+      "transfer_links_stay_in_project": "リンクされた文書はこのプロジェクトに属します。別のプロジェクトへ移す前にリンクを解除してください。",
+      "transfer_target_invalid": "項目を自身に移すことはできません",
+      "transfer_target_not_open": "移し先の項目は締め切られているか、決裁待ちです",
+      "transferable_invalid": "不明な移管オプションです",
+      "type_fixed_after_release": "リリースが依頼された後は種別を変更できません",
+      "unknown_catalogue": "カタログが見つかりません"
+    },
+    "evidence": {
+      "decision_overdue": "このコミットメント項目の最終決裁期限を過ぎ、何もリリースされていません：決裁するか、理由を付けて延期するか、遅延コストを記録してください",
+      "items_released_by_gate": "このゲートで期限を迎えるコミットメントは、リリースまたは延期されています",
+      "items_without_area": "このゲートのコミットメント項目が、プロジェクトにもはや存在しない管理領域を指定しています",
+      "no_items_for_gate": "このゲートを指定するコミットメント項目がないため、ゲートまでに資金をリリースする必要があるかは分かりません"
+    },
+    "export": {
+      "as_of": "基準日",
+      "col_code": "コード",
+      "col_committed": "コミット額",
+      "col_currency": "通貨",
+      "col_decision_date": "最終決裁期限",
+      "col_open_preconditions": "未完了の前提条件",
+      "col_overdue": "決裁期限超過",
+      "col_planned": "計画額",
+      "col_released": "リリース済み",
+      "col_residual_loss": "中止時の残存損失",
+      "col_status": "ステータス",
+      "col_tier": "必要な区分",
+      "col_title": "コミットメント",
+      "col_type": "種別",
+      "empty": "コミットメント項目はまだありません",
+      "overdue": "期限超過",
+      "project": "プロジェクト",
+      "title": "コミットメントおよびリリース・マトリクス"
+    },
+    "exposure": {
+      "nothing_committed": "コミットも支出もありません"
+    },
+    "flag": {
+      "multi_year_commitment": "後続の予算年度を拘束する",
+      "novel_contentious": "新規または論争的"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "項目 {item} はコミット済みですが、その中止条件が不明です",
+        "suggestion": "中止の基準または解約スケジュールを入力してください"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "基準表 {schedule} の上限が区分とともに上がっていません",
+        "suggestion": "区分を修正し、新しい版を公開してください"
+      },
+      "committed_within_release": {
+        "fail": "項目 {item} はリリースされた額を超えてコミットしています",
+        "suggestion": "追加のリリースを依頼するか、リンクされた文書を減らしてください"
+      },
+      "decision_date_not_passed": {
+        "fail": "項目 {item} の最終決裁期限 {date} を過ぎています",
+        "suggestion": "決裁するか、理由を付けて延期するか、遅延コストを記録してください"
+      },
+      "document_linked_once": {
+        "fail": "文書 {document} は複数の項目に計上されています",
+        "suggestion": "2つ目のリンクを削除してください"
+      },
+      "fx_rate_available": {
+        "fail": "項目 {item} のリンクされた金額に為替レートがありません",
+        "suggestion": "為替レート登録簿またはプロジェクトに、その日付のレートを追加してください"
+      },
+      "item_has_cost_code": {
+        "fail": "項目 {item} に原価行がありません",
+        "suggestion": "この項目を計上する原価行を割り当ててください"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "項目 {item} の計画金額を読み取れません",
+        "suggestion": "項目を予算行、原価行、または明細に紐付けるか、手動の見積もりを入力してください"
+      },
+      "plant_item_in_register": {
+        "fail": "項目 {item} が指定する機械項目は機械登録簿にもうありません。そのため、機械自身のリードタイムが適用されます",
+        "suggestion": "項目を代わりの機械項目に紐付けるか、リンクを削除してください"
+      },
+      "release_in_date": {
+        "fail": "項目 {item} のリリースは {date} まで有効でした：その下で新たにコミットすることはできません",
+        "suggestion": "まだコミットする必要のある分について、更新されたリリースを依頼してください"
+      },
+      "release_within_authority": {
+        "fail": "リリース {release} は必要な区分 {tier} を下回る区分で決裁されました",
+        "suggestion": "現在の基準表に基づき、新しいリリースを依頼してください"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "グループ {group} の項目は、合計額が必要とする区分を下回ってリリースされました",
+        "suggestion": "次のリリースは、グループ合計の区分で依頼してください"
+      }
+    },
+    "status": {
+      "aborted": "中止",
+      "closed": "締切",
+      "committed": "コミット済み",
+      "on_hold": "保留",
+      "partially_released": "一部リリース",
+      "planned": "計画",
+      "re_release_required": "再リリースが必要",
+      "release_requested": "リリース依頼中",
+      "released": "リリース済み",
+      "transferred": "移管済み"
+    },
+    "tier": {
+      "accounting_officer": "会計責任者",
+      "authority_head": "機関の長",
+      "board": "取締役会",
+      "contracting_officer": "契約担当官",
+      "department_head": "部門長",
+      "head_of_contracting_activity": "契約業務の責任者",
+      "project_director": "プロジェクト・ディレクター",
+      "project_lead": "プロジェクトリード",
+      "project_manager": "プロジェクトマネージャー",
+      "senior_responsible_owner": "上級責任者",
+      "simplified_acquisition": "簡易調達",
+      "sponsor": "スポンサー"
+    },
+    "type": {
+      "change": "変更",
+      "claim_settlement": "クレーム精算",
+      "contingency_drawdown": "予備費の引き出し",
+      "design": "設計",
+      "services": "サービス",
+      "supplies": "物品",
+      "termination_settlement": "解約精算",
+      "works": "工事"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} は {latest_decision_date} までに決裁されるべきでした。",
+        "title": "リリース決裁の期限超過"
+      },
+      "re_release_required": {
+        "body": "{code} のリンクされた文書が、リリース額 {released} を超える {committed} をコミットしています。",
+        "title": "再リリースが必要"
+      },
+      "release_aborted": {
+        "body": "{code} は中止されました。",
+        "title": "中止が承認されました"
+      },
+      "release_rejected": {
+        "body": "{code} のリリースは却下されました。",
+        "title": "リリースが却下されました"
+      },
+      "release_released": {
+        "body": "{code} はリリースされました。",
+        "title": "リリースが承認されました"
+      }
+    }
+  }
+}

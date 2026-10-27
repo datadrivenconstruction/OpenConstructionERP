@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Toeslag op het niet-uitgevoerde deel",
+      "presumed_unperformed_pct": "Vermoedelijk aandeel van het niet-uitgevoerde deel",
+      "profit_pct": "Winst op het uitgevoerde deel"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Een bedrag dat voor dit onderdeel is ingevoerd",
+        "name": "Eigen voorwaarden"
+      },
+      "de_bgb_648": {
+        "description": "Overeengekomen prijs minus bespaarde kosten; 5 % van het niet-uitgevoerde deel wordt verondersteld wanneer bespaarde kosten niet zijn gedocumenteerd",
+        "name": "Vrije opzegging door de opdrachtgever (§ 648 BGB)",
+        "presumption": "Vermoedelijk aandeel van het niet-uitgevoerde deel"
+      },
+      "de_public_owner": {
+        "description": "Voorbeeld van delegatie voor een publieke opdrachtgever: EU-drempel voor werken als hoogste schijf, meerjarige verplichtingen bij het hoofd van de instantie",
+        "eu_works_threshold": "EU-drempel voor werken 2026-27 (Gedelegeerde Verordening (EU) 2025/2152), niet bevestigd",
+        "name": "Publieke opdrachtgever (Duitsland), voorbeeld"
+      },
+      "de_vob_b_8_1": {
+        "description": "Dezelfde afrekening als § 648 BGB, waarnaar de clausule verwijst",
+        "name": "Vrije opzegging volgens § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Verwijst naar § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Gemaakte kosten plus winst op het uitgevoerde werk plus afwikkelingskosten",
+        "name": "Opzegging om redenen van gemak (FAR 49)",
+        "profit_negotiated": "Onderhandeld winstpercentage"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Uitgevoerd werk plus een honorarium-percentage over het niet-uitgevoerde deel, zoals vermeld in de contractgegevens",
+        "fee_from_contract_data": "Percentage uit de contractgegevens",
+        "name": "Opzegging om een eigen reden van de opdrachtgever (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Projectmanager, opdrachtgever en stuurgroep met voorbeeldplafonds in de projectvaluta; geen wettelijke bedragen",
+        "name": "Neutraal schema met drie niveaus"
+      },
+      "none_free_cancellation": {
+        "description": "Geen kosten bij annulering",
+        "name": "Gratis annulering"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Kosten per datum of fabricagevoortgang zoals met de leverancier overeengekomen",
+        "name": "Annuleringsschema leverancier"
+      },
+      "uk_public_body": {
+        "description": "Voorbeeld van gedelegeerde bevoegdheid naar bedrag en nieuwheid volgens Managing Public Money",
+        "name": "Publieke instantie (Verenigd Koninkrijk), voorbeeld"
+      },
+      "us_federal_owner": {
+        "description": "Voorbeeld van schijven vanaf de drempel voor vereenvoudigde aanbesteding",
+        "name": "Federale opdrachtgever (Verenigde Staten), voorbeeld",
+        "sat": "Drempel voor vereenvoudigde aanbesteding USD 350.000 vanaf 1-10-2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Onbekende grondslag voor beëindiging",
+      "abort_exposure_unknown": "Het restverlies is onbekend. Vul eerst de beëindigingsvoorwaarden in.",
+      "abort_parameter_invalid": "Een beëindigingsparameter is een percentage tussen 0 en 1",
+      "abort_parameter_not_in_basis": "De gekozen grondslag voor beëindiging heeft deze parameter niet",
+      "abort_type_not_in_schedule": "Het schema heeft geen schijf voor een beëindigingsafrekening",
+      "activity_not_found": "De schema-activiteit is in dit project niet gevonden",
+      "amount_invalid": "Het bedrag is geen geldig getal",
+      "amount_not_positive": "Het bedrag moet groter zijn dan nul",
+      "assignee_not_project_member": "Deze persoon is geen lid van dit project",
+      "assignment_expired": "De toewijzing van de goedkeurder is verlopen; werk de toewijzingen bij",
+      "assignment_needs_approver": "Benoem de goedkeurder van deze schijf voordat u een plaatsvervanger of geldigheidsperiode invult",
+      "assignment_window_inverted": "De toewijzing eindigt voordat zij begint",
+      "cancellation_schedule_invalid": "Elke stap heeft een mijlpaal, datum of voortgang nodig en precies één kostenpost",
+      "catalogue_code_taken": "Een andere catalogus gebruikt deze code al",
+      "catalogue_invalid": "De catalogus is niet geldig",
+      "catalogue_retired": "Deze catalogus is buiten gebruik gesteld",
+      "change_belongs_to_contract_item": "Een wijziging en het bijbehorende contract zijn aan hetzelfde onderdeel gekoppeld",
+      "commitment_guard_unavailable": "De vrijgavecontrole kon niet worden uitgevoerd, daarom is dit niet toegestaan",
+      "commitment_not_in_matrix": "Dit document staat niet in de verplichtingenmatrix",
+      "commitment_not_released": "Deze verplichting is niet vrijgegeven voor dit bedrag",
+      "commitment_type_unknown": "Dit verplichtingstype staat niet in het bevoegdhedenschema",
+      "contingency_insufficient": "Het saldo van de post onvoorzien dekt deze opname niet",
+      "contingency_line_required": "Een opname uit de post onvoorzien vereist de begrotingspost waarop het onvoorzien staat",
+      "date_invalid": "Dit is geen datum",
+      "decider_not_tier_holder": "Goedgekeurd door iemand die de schijf niet bezit",
+      "decision_invalid": "Kies goedkeuren of afwijzen",
+      "deferral_needs_reason": "Schrijf op waarom het onderdeel wordt uitgesteld",
+      "document_linked_elsewhere": "Dit document wordt al bij een ander onderdeel geteld",
+      "document_not_found": "Document niet gevonden in dit project",
+      "drawdown_released_by_commitment": "Deze opname is een vrijgegeven verplichtingspost. Beëindig die post om het geld terug te halen.",
+      "edit_required": "Uw rol mag geen verplichtingsonderdelen bewerken",
+      "enforcement_invalid": "Handhaving moet uit, waarschuwen of blokkeren zijn",
+      "external_approval_not_required": "Dit bedrag wordt bepaald door een schijf van het schema: verwijder de verwijzing naar de externe goedkeuring",
+      "external_approval_required": "Het bedrag is hoger dan alle schijven: voeg de verwijzing naar de externe goedkeuring toe",
+      "field_frozen": "Dit veld kan voor dit onderdeel niet meer worden gewijzigd",
+      "field_required": "Dit veld mag niet leeg zijn",
+      "flag_unknown": "Deze markering staat niet in het bevoegdhedenschema",
+      "four_eyes_no_approver": "Niemand op deze schijf mag dit verzoek beslissen volgens het vier-ogenprincipe",
+      "four_eyes_requester_is_approver": "Vier ogen: u kunt geen vrijgave aanvragen die u zelf zou goedkeuren",
+      "four_eyes_violation": "Wie dit onderdeel heeft aangevraagd, beheert of bevestigd, kan het niet beslissen",
+      "frame_document_not_found": "Het kaderdocument is in dit project niet gevonden",
+      "funding_application_not_found": "De financieringsaanvraag is in dit project niet gevonden",
+      "fx_policy_invalid": "Onbekend wisselkoersbeleid",
+      "fx_rate_missing": "Geen wisselkoers voor deze datum: de vrijgave kan niet worden beoordeeld",
+      "gate_unknown": "Dit beslismoment staat niet in het governancemodel van het project",
+      "gates_not_in_use": "Dit project gebruikt geen beslismomenten, dus niets kan op een beslismoment wachten",
+      "governance_area_required": "Een onderdeel dat aan een beslismoment is gekoppeld, heeft een beheersgebied nodig",
+      "governance_area_unknown": "Dit beheersgebied staat niet in het governancemodel van het project",
+      "invalid_transition": "Deze stap is in de huidige status niet mogelijk",
+      "item_changed": "Het onderdeel is inmiddels gewijzigd. Probeer het opnieuw.",
+      "item_closed": "Het onderdeel is gesloten",
+      "item_code_taken": "Een ander onderdeel gebruikt deze code al",
+      "item_not_found": "Verplichtingsonderdeel niet gevonden",
+      "link_kind_invalid": "Onbekend documenttype",
+      "link_kind_not_supported": "Dit documenttype kan nog niet worden gekoppeld",
+      "link_not_found": "Koppeling niet gevonden",
+      "manage_required": "Alleen wie de matrix beheert, kan dit doen",
+      "manual_amount_needs_currency": "Een handmatige raming heeft een bedrag en een valuta nodig",
+      "matrix_missing": "Dit project heeft nog geen verplichtingenmatrix",
+      "no_pending_release": "Er is geen openstaand vrijgaveverzoek",
+      "no_route_for_tier": "Er is nog niemand toegewezen aan de vereiste schijf",
+      "not_entitled_decider": "U bezit de schijf niet waarop dit verzoek wordt beslist",
+      "not_item_owner": "Alleen de eigenaar van het onderdeel of een beheerder kan dit onderdeel wijzigen",
+      "not_requester": "Alleen de aanvrager of een beheerder kan dit verzoek intrekken",
+      "planned_source_invalid": "Onbekende bron voor het geplande bedrag",
+      "planned_source_not_found": "De begrotingspost, kostenpost of positie is in dit project niet gevonden",
+      "plant_item_not_found": "Het materieel is in dit project niet gevonden",
+      "precondition_is_computed": "Deze voorwaarde wordt uit de module gelezen en kan niet worden aangevinkt",
+      "precondition_kind_invalid": "Onbekend type voorwaarde",
+      "precondition_needs_evidence": "Voeg de verwijzing naar het bewijs toe",
+      "precondition_needs_ref": "Deze voorwaarde heeft een verwijzing nodig",
+      "precondition_not_found": "Voorwaarde niet gevonden",
+      "preconditions_open": "Openstaande voorwaarden blokkeren deze vrijgave",
+      "project_not_found": "Project niet gevonden",
+      "rationale_required": "Geef een reden op",
+      "release_decided": "Dit vrijgaveverzoek is al beslist",
+      "release_expired": "De vrijgave van dit onderdeel is verlopen: vraag een nieuwe vrijgave aan voordat u meer verplicht",
+      "release_pending": "Er loopt al een vrijgaveverzoek voor dit onderdeel",
+      "requisition_not_found": "De inkoopaanvraag is in dit project niet gevonden",
+      "route_changed_since_accepted": "De goedkeuringsroute van deze schijf is gewijzigd. Een beheerder moet hem opnieuw vastzetten.",
+      "route_must_belong_to_project": "Alleen een goedkeuringsroute van dit project kan worden vastgezet",
+      "route_not_found": "Goedkeuringsroute niet gevonden",
+      "schedule_currency_mismatch": "Dit schema gebruikt een andere valuta dan de vrijgaven die al zijn vastgelegd",
+      "schedule_not_in_force": "Het vastgezette schema is vandaag niet van kracht. Zet de versie vast die van kracht is.",
+      "schedule_type_mismatch": "Dit schema kent het verplichtingstype van een bestaand onderdeel niet",
+      "tier_unknown": "Deze schijf staat niet in het bevoegdhedenschema",
+      "transfer_links_stay_in_project": "Gekoppelde documenten horen bij dit project. Ontkoppel ze voordat u naar een ander project overdraagt.",
+      "transfer_target_invalid": "Een onderdeel kan niet naar zichzelf worden overgedragen",
+      "transfer_target_not_open": "Het doelonderdeel is gesloten of wacht op een beslissing",
+      "transferable_invalid": "Onbekende overdrachtsoptie",
+      "type_fixed_after_release": "Het type kan niet meer worden gewijzigd nadat een vrijgave is aangevraagd",
+      "unknown_catalogue": "Catalogus niet gevonden"
+    },
+    "evidence": {
+      "decision_overdue": "De uiterste beslisdatum van dit verplichtingsonderdeel is verstreken en er is niets vrijgegeven: beslis, stel uit met een reden of registreer de kosten van de vertraging",
+      "items_released_by_gate": "Verplichtingen die op dit beslismoment vervallen, zijn vrijgegeven of uitgesteld",
+      "items_without_area": "Verplichtingsonderdelen van dit beslismoment noemen een beheersgebied dat het project niet meer heeft",
+      "no_items_for_gate": "Geen enkel verplichtingsonderdeel noemt dit beslismoment, dus het is niet bekend of er geld op dit moment moet worden vrijgegeven"
+    },
+    "export": {
+      "as_of": "Per",
+      "col_code": "Code",
+      "col_committed": "Verplicht",
+      "col_currency": "Valuta",
+      "col_decision_date": "Uiterste beslisdatum",
+      "col_open_preconditions": "Openstaande voorwaarden",
+      "col_overdue": "Beslissing verlopen",
+      "col_planned": "Gepland",
+      "col_released": "Vrijgegeven",
+      "col_residual_loss": "Restverlies bij beëindiging",
+      "col_status": "Status",
+      "col_tier": "Vereiste schijf",
+      "col_title": "Verplichting",
+      "col_type": "Type",
+      "empty": "Nog geen verplichtingsonderdelen",
+      "overdue": "Verlopen",
+      "project": "Project",
+      "title": "Verplichtingen- en vrijgavematrix"
+    },
+    "exposure": {
+      "nothing_committed": "Niets verplicht, niets uitgegeven"
+    },
+    "flag": {
+      "multi_year_commitment": "Bindt latere begrotingsjaren",
+      "novel_contentious": "Nieuw of omstreden"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Onderdeel {item} is verplicht, maar de beëindigingsvoorwaarden zijn onbekend",
+        "suggestion": "Vul de grondslag voor beëindiging of een annuleringsschema in"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "De plafonds van schema {schedule} stijgen niet mee met de schijf",
+        "suggestion": "Corrigeer de schijven en publiceer een nieuwe versie"
+      },
+      "committed_within_release": {
+        "fail": "Onderdeel {item} verplicht meer dan er is vrijgegeven",
+        "suggestion": "Vraag een aanvullende vrijgave aan of verminder de gekoppelde documenten"
+      },
+      "decision_date_not_passed": {
+        "fail": "De uiterste beslisdatum {date} van onderdeel {item} is verstreken",
+        "suggestion": "Beslis, stel uit met een reden of registreer de kosten van de vertraging"
+      },
+      "document_linked_once": {
+        "fail": "Document {document} wordt bij meer dan één onderdeel geteld",
+        "suggestion": "Verwijder de tweede koppeling"
+      },
+      "fx_rate_available": {
+        "fail": "Een gekoppeld bedrag van onderdeel {item} heeft geen wisselkoers",
+        "suggestion": "Voeg een koers voor de datum toe in het wisselkoersregister of in het project"
+      },
+      "item_has_cost_code": {
+        "fail": "Onderdeel {item} heeft geen kostenpost",
+        "suggestion": "Wijs de kostenpost toe waarop het onderdeel wordt geboekt"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Het geplande bedrag van onderdeel {item} kan niet worden gelezen",
+        "suggestion": "Koppel het onderdeel aan een begrotingspost, kostenpost of positie, of voer een handmatige raming in"
+      },
+      "plant_item_in_register": {
+        "fail": "Onderdeel {item} noemt een materieel dat niet meer in het materieelregister staat, dus de eigen levertermijn geldt",
+        "suggestion": "Koppel het onderdeel aan het materieel dat het heeft vervangen, of verwijder de koppeling"
+      },
+      "release_in_date": {
+        "fail": "Een vrijgave van onderdeel {item} was geldig tot {date}: er kan niets nieuws onder worden verplicht",
+        "suggestion": "Vraag een verlenging van de vrijgave aan voor wat nog moet worden verplicht"
+      },
+      "release_within_authority": {
+        "fail": "Vrijgave {release} is beslist onder de vereiste schijf {tier}",
+        "suggestion": "Vraag een nieuwe vrijgave aan volgens het huidige schema"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "De onderdelen van groep {group} zijn vrijgegeven onder de schijf die hun som vereist",
+        "suggestion": "Vraag de volgende vrijgave aan op de schijf van het totaal van de groep"
+      }
+    },
+    "status": {
+      "aborted": "Beëindigd",
+      "closed": "Gesloten",
+      "committed": "Verplicht",
+      "on_hold": "Gepauzeerd",
+      "partially_released": "Deels vrijgegeven",
+      "planned": "Gepland",
+      "re_release_required": "Opnieuw vrijgeven vereist",
+      "release_requested": "Vrijgave aangevraagd",
+      "released": "Vrijgegeven",
+      "transferred": "Overgedragen"
+    },
+    "tier": {
+      "accounting_officer": "Accountable functionaris",
+      "authority_head": "Hoofd van de instantie",
+      "board": "Raad van bestuur",
+      "contracting_officer": "Aanbestedingsfunctionaris",
+      "department_head": "Afdelingshoofd",
+      "head_of_contracting_activity": "Hoofd van de aanbestedingsactiviteit",
+      "project_director": "Projectdirecteur",
+      "project_lead": "Projectleider",
+      "project_manager": "Projectmanager",
+      "senior_responsible_owner": "Senior verantwoordelijke eigenaar",
+      "simplified_acquisition": "Vereenvoudigde aanbesteding",
+      "sponsor": "Opdrachtgever"
+    },
+    "type": {
+      "change": "Wijziging",
+      "claim_settlement": "Claimafwikkeling",
+      "contingency_drawdown": "Opname post onvoorzien",
+      "design": "Ontwerp",
+      "services": "Diensten",
+      "supplies": "Leveringen",
+      "termination_settlement": "Beëindigingsafrekening",
+      "works": "Werken"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} had uiterlijk op {latest_decision_date} beslist moeten zijn.",
+        "title": "Beslissing over vrijgave verlopen"
+      },
+      "re_release_required": {
+        "body": "De gekoppelde documenten van {code} verplichten nu {committed}, boven de vrijgave van {released}.",
+        "title": "Opnieuw vrijgeven vereist"
+      },
+      "release_aborted": {
+        "body": "{code} is stopgezet.",
+        "title": "Beëindiging goedgekeurd"
+      },
+      "release_rejected": {
+        "body": "De vrijgave van {code} is afgewezen.",
+        "title": "Vrijgave afgewezen"
+      },
+      "release_released": {
+        "body": "{code} is vrijgegeven.",
+        "title": "Vrijgave verleend"
+      }
+    }
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Phí trên phần chưa thực hiện",
+      "presumed_unperformed_pct": "Tỷ lệ giả định của phần chưa thực hiện",
+      "profit_pct": "Lợi nhuận trên phần đã thực hiện"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Khoản tiền nhập cho hạng mục này",
+        "name": "Điều khoản tùy chỉnh"
+      },
+      "de_bgb_648": {
+        "description": "Giá đã thỏa thuận trừ chi phí tiết kiệm được; giả định 5 % phần chưa thực hiện khi chi phí tiết kiệm được không có chứng từ",
+        "name": "Chủ đầu tư chấm dứt tự do (§ 648 BGB)",
+        "presumption": "Tỷ lệ giả định của phần chưa thực hiện"
+      },
+      "de_public_owner": {
+        "description": "Ví dụ phân cấp ủy quyền cho chủ đầu tư công: ngưỡng công trình của EU là bậc công trình cao nhất, cam kết nhiều năm cho người đứng đầu cơ quan",
+        "eu_works_threshold": "Ngưỡng công trình EU 2026-27 (Quy định ủy quyền (EU) 2025/2152), chưa xác nhận",
+        "name": "Chủ đầu tư công (Đức), ví dụ"
+      },
+      "de_vob_b_8_1": {
+        "description": "Cùng cách quyết toán như § 648 BGB, mà điều khoản dẫn chiếu tới",
+        "name": "Chấm dứt tự do theo § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Dẫn chiếu tới § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Chi phí đã phát sinh cộng lợi nhuận trên công việc đã thực hiện cộng chi phí quyết toán",
+        "name": "Chấm dứt vì tiện lợi (FAR 49)",
+        "profit_negotiated": "Tỷ suất lợi nhuận theo thương lượng"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Công việc đã thực hiện cộng tỷ lệ phí trên phần chưa thực hiện, theo dữ liệu hợp đồng",
+        "fee_from_contract_data": "Tỷ lệ theo dữ liệu hợp đồng",
+        "name": "Chấm dứt vì lý do riêng của chủ đầu tư (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Quản lý dự án, nhà tài trợ và hội đồng với trần ví dụ bằng tiền tệ dự án; không có con số theo luật định",
+        "name": "Lịch ba cấp trung lập"
+      },
+      "none_free_cancellation": {
+        "description": "Không tính phí khi hủy",
+        "name": "Hủy miễn phí"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Các khoản phí theo ngày hoặc tiến độ chế tạo theo thỏa thuận với nhà cung cấp",
+        "name": "Lịch hủy của nhà cung cấp"
+      },
+      "uk_public_body": {
+        "description": "Ví dụ ủy quyền theo số tiền và mức độ mới lạ theo Managing Public Money",
+        "name": "Cơ quan công (Vương quốc Anh), ví dụ"
+      },
+      "us_federal_owner": {
+        "description": "Ví dụ các bậc bắt đầu từ ngưỡng mua sắm đơn giản hóa",
+        "name": "Chủ đầu tư liên bang (Hoa Kỳ), ví dụ",
+        "sat": "Ngưỡng mua sắm đơn giản hóa 350.000 USD từ 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Căn cứ chấm dứt không xác định",
+      "abort_exposure_unknown": "Thiệt hại còn lại chưa xác định. Hãy hoàn tất điều khoản chấm dứt trước.",
+      "abort_parameter_invalid": "Tham số chấm dứt là tỷ lệ từ 0 đến 1",
+      "abort_parameter_not_in_basis": "Căn cứ chấm dứt đã chọn không có tham số này",
+      "abort_type_not_in_schedule": "Lịch không có bậc nào cho quyết toán khi chấm dứt",
+      "activity_not_found": "Không tìm thấy hoạt động trong lịch của dự án này",
+      "amount_invalid": "Số tiền không phải là số hợp lệ",
+      "amount_not_positive": "Số tiền phải lớn hơn không",
+      "assignee_not_project_member": "Người này không phải thành viên của dự án",
+      "assignment_expired": "Phân công của người phê duyệt đã hết hạn; hãy cập nhật phân công",
+      "assignment_needs_approver": "Nêu người phê duyệt của bậc này trước khi đặt người thay thế hoặc thời hạn hiệu lực",
+      "assignment_window_inverted": "Phân công kết thúc trước khi bắt đầu",
+      "cancellation_schedule_invalid": "Mỗi bước cần một mốc, một ngày hoặc tiến độ, và đúng một khoản phí",
+      "catalogue_code_taken": "Một danh mục khác đã dùng mã này",
+      "catalogue_invalid": "Danh mục không hợp lệ",
+      "catalogue_retired": "Danh mục này đã ngừng sử dụng",
+      "change_belongs_to_contract_item": "Một thay đổi và hợp đồng của nó được liên kết trên cùng một hạng mục",
+      "commitment_guard_unavailable": "Không thể kiểm tra giải ngân nên thao tác này không được phép",
+      "commitment_not_in_matrix": "Tài liệu này không có trong ma trận cam kết",
+      "commitment_not_released": "Cam kết này chưa được giải ngân cho số tiền này",
+      "commitment_type_unknown": "Loại cam kết này không có trong lịch thẩm quyền",
+      "contingency_insufficient": "Số dư dự phòng không đủ cho khoản rút này",
+      "contingency_line_required": "Rút dự phòng cần dòng ngân sách đang giữ khoản dự phòng",
+      "date_invalid": "Đây không phải là ngày",
+      "decider_not_tier_holder": "Được phê duyệt bởi người không nắm giữ bậc này",
+      "decision_invalid": "Chọn phê duyệt hoặc từ chối",
+      "deferral_needs_reason": "Ghi lý do hoãn hạng mục này",
+      "document_linked_elsewhere": "Tài liệu này đã được tính trong một hạng mục khác",
+      "document_not_found": "Không tìm thấy tài liệu trong dự án này",
+      "drawdown_released_by_commitment": "Khoản rút này là hạng mục cam kết đã giải ngân. Hãy chấm dứt hạng mục đó để lấy lại tiền.",
+      "edit_required": "Vai trò của bạn không thể chỉnh sửa hạng mục cam kết",
+      "enforcement_invalid": "Việc thực thi phải là tắt, cảnh báo hoặc chặn",
+      "external_approval_not_required": "Số tiền này do một bậc trong lịch quyết định: hãy bỏ tham chiếu phê duyệt bên ngoài",
+      "external_approval_required": "Số tiền vượt mọi bậc: hãy đính kèm tham chiếu phê duyệt bên ngoài",
+      "field_frozen": "Trường này không thể thay đổi nữa đối với hạng mục này",
+      "field_required": "Trường này không được để trống",
+      "flag_unknown": "Nhãn này không có trong lịch thẩm quyền",
+      "four_eyes_no_approver": "Theo quy tắc bốn mắt, không ai ở bậc này được quyết định yêu cầu này",
+      "four_eyes_requester_is_approver": "Bốn mắt: bạn không thể yêu cầu giải ngân mà chính bạn sẽ phê duyệt",
+      "four_eyes_violation": "Người đã yêu cầu, sở hữu hoặc xác nhận hạng mục này không thể quyết định hạng mục đó",
+      "frame_document_not_found": "Không tìm thấy tài liệu khung trong dự án này",
+      "funding_application_not_found": "Không tìm thấy hồ sơ xin tài trợ trong dự án này",
+      "fx_policy_invalid": "Chính sách tỷ giá không xác định",
+      "fx_rate_missing": "Không có tỷ giá cho ngày này: không thể đánh giá giải ngân",
+      "gate_unknown": "Cổng này không có trong mô hình quản trị của dự án",
+      "gates_not_in_use": "Dự án này không dùng cổng, nên không có gì phải chờ một cổng",
+      "governance_area_required": "Hạng mục gắn với cổng cần một lĩnh vực quản lý",
+      "governance_area_unknown": "Lĩnh vực quản lý này không có trong mô hình quản trị của dự án",
+      "invalid_transition": "Bước này không thể thực hiện ở trạng thái hiện tại",
+      "item_changed": "Hạng mục đã thay đổi trong lúc này. Hãy thử lại.",
+      "item_closed": "Hạng mục đã đóng",
+      "item_code_taken": "Một hạng mục khác đã dùng mã này",
+      "item_not_found": "Không tìm thấy hạng mục cam kết",
+      "link_kind_invalid": "Loại tài liệu không xác định",
+      "link_kind_not_supported": "Loại tài liệu này chưa thể liên kết",
+      "link_not_found": "Không tìm thấy liên kết",
+      "manage_required": "Chỉ người quản lý ma trận mới làm được việc này",
+      "manual_amount_needs_currency": "Dự toán thủ công cần số tiền và tiền tệ",
+      "matrix_missing": "Dự án này chưa có ma trận cam kết",
+      "no_pending_release": "Không có yêu cầu giải ngân nào đang chờ",
+      "no_route_for_tier": "Chưa có ai được phân công cho bậc cần thiết",
+      "not_entitled_decider": "Bạn không nắm giữ bậc mà yêu cầu này được quyết định",
+      "not_item_owner": "Chỉ chủ hạng mục hoặc người quản lý mới được thay đổi hạng mục này",
+      "not_requester": "Chỉ người yêu cầu hoặc người quản lý mới được rút yêu cầu này",
+      "planned_source_invalid": "Nguồn của số tiền dự kiến không xác định",
+      "planned_source_not_found": "Không tìm thấy dòng ngân sách, dòng chi phí hoặc vị trí trong dự án này",
+      "plant_item_not_found": "Không tìm thấy hạng mục thiết bị trong dự án này",
+      "precondition_is_computed": "Điều kiện tiên quyết này được đọc từ mô-đun của nó và không thể đánh dấu",
+      "precondition_kind_invalid": "Loại điều kiện tiên quyết không xác định",
+      "precondition_needs_evidence": "Đính kèm tham chiếu chứng cứ",
+      "precondition_needs_ref": "Điều kiện tiên quyết này cần một tham chiếu",
+      "precondition_not_found": "Không tìm thấy điều kiện tiên quyết",
+      "preconditions_open": "Các điều kiện tiên quyết còn mở đang chặn việc giải ngân này",
+      "project_not_found": "Không tìm thấy dự án",
+      "rationale_required": "Hãy nêu lý do",
+      "release_decided": "Yêu cầu giải ngân này đã được quyết định",
+      "release_expired": "Giải ngân của hạng mục này đã quá ngày hiệu lực: hãy yêu cầu giải ngân lại trước khi cam kết thêm",
+      "release_pending": "Một yêu cầu giải ngân cho hạng mục này đang được xử lý",
+      "requisition_not_found": "Không tìm thấy phiếu đề nghị trong dự án này",
+      "route_changed_since_accepted": "Luồng phê duyệt của bậc này đã được chỉnh sửa. Người quản lý phải ghim lại.",
+      "route_must_belong_to_project": "Chỉ có thể ghim luồng phê duyệt của dự án này",
+      "route_not_found": "Không tìm thấy luồng phê duyệt",
+      "schedule_currency_mismatch": "Lịch này dùng tiền tệ khác với các giải ngân đã ghi nhận",
+      "schedule_not_in_force": "Lịch đã ghim hiện không có hiệu lực. Hãy ghim phiên bản đang có hiệu lực.",
+      "schedule_type_mismatch": "Lịch này không biết loại cam kết của một hạng mục hiện có",
+      "tier_unknown": "Bậc này không có trong lịch thẩm quyền",
+      "transfer_links_stay_in_project": "Tài liệu liên kết thuộc dự án này. Hãy hủy liên kết trước khi chuyển sang dự án khác.",
+      "transfer_target_invalid": "Không thể chuyển hạng mục cho chính nó",
+      "transfer_target_not_open": "Hạng mục đích đã đóng hoặc đang chờ quyết định",
+      "transferable_invalid": "Tùy chọn chuyển không xác định",
+      "type_fixed_after_release": "Loại không thể thay đổi sau khi đã yêu cầu giải ngân",
+      "unknown_catalogue": "Không tìm thấy danh mục"
+    },
+    "evidence": {
+      "decision_overdue": "Ngày quyết định muộn nhất của hạng mục cam kết này đã qua và chưa có gì được giải ngân: hãy quyết định, hoãn kèm lý do, hoặc ghi nhận chi phí của sự chậm trễ",
+      "items_released_by_gate": "Các cam kết đến hạn tại cổng này đã được giải ngân hoặc hoãn",
+      "items_without_area": "Các hạng mục cam kết của cổng này nêu một lĩnh vực quản lý mà dự án không còn có",
+      "no_items_for_gate": "Không có hạng mục cam kết nào nêu cổng này, nên không biết tiền có phải được giải ngân trước cổng này hay không"
+    },
+    "export": {
+      "as_of": "Tính đến",
+      "col_code": "Mã",
+      "col_committed": "Đã cam kết",
+      "col_currency": "Tiền tệ",
+      "col_decision_date": "Ngày quyết định muộn nhất",
+      "col_open_preconditions": "Điều kiện tiên quyết còn mở",
+      "col_overdue": "Quá hạn quyết định",
+      "col_planned": "Kế hoạch",
+      "col_released": "Đã giải ngân",
+      "col_residual_loss": "Thiệt hại còn lại khi chấm dứt",
+      "col_status": "Trạng thái",
+      "col_tier": "Bậc yêu cầu",
+      "col_title": "Cam kết",
+      "col_type": "Loại",
+      "empty": "Chưa có hạng mục cam kết nào",
+      "overdue": "Quá hạn",
+      "project": "Dự án",
+      "title": "Ma trận cam kết và giải ngân"
+    },
+    "exposure": {
+      "nothing_committed": "Chưa cam kết gì, chưa chi tiêu gì"
+    },
+    "flag": {
+      "multi_year_commitment": "Ràng buộc các năm ngân sách sau",
+      "novel_contentious": "Mới hoặc gây tranh cãi"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Hạng mục {item} đã được cam kết nhưng điều khoản chấm dứt chưa xác định",
+        "suggestion": "Nhập căn cứ chấm dứt hoặc lịch hủy"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Các trần của lịch {schedule} không tăng theo bậc",
+        "suggestion": "Sửa các mức và xuất bản phiên bản mới"
+      },
+      "committed_within_release": {
+        "fail": "Hạng mục {item} cam kết nhiều hơn mức đã giải ngân",
+        "suggestion": "Yêu cầu giải ngân bổ sung hoặc giảm các tài liệu liên kết"
+      },
+      "decision_date_not_passed": {
+        "fail": "Ngày quyết định muộn nhất {date} của hạng mục {item} đã qua",
+        "suggestion": "Quyết định, hoãn kèm lý do, hoặc ghi nhận chi phí của sự chậm trễ"
+      },
+      "document_linked_once": {
+        "fail": "Tài liệu {document} được tính trong nhiều hơn một hạng mục",
+        "suggestion": "Xóa liên kết thứ hai"
+      },
+      "fx_rate_available": {
+        "fail": "Một số tiền liên kết của hạng mục {item} không có tỷ giá",
+        "suggestion": "Thêm tỷ giá cho ngày này trong sổ tỷ giá hoặc trong dự án"
+      },
+      "item_has_cost_code": {
+        "fail": "Hạng mục {item} không có dòng chi phí",
+        "suggestion": "Gán dòng chi phí mà hạng mục được ghi nhận"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Không đọc được số tiền kế hoạch của hạng mục {item}",
+        "suggestion": "Trỏ hạng mục tới một dòng ngân sách, dòng chi phí hoặc vị trí, hoặc nhập dự toán thủ công"
+      },
+      "plant_item_in_register": {
+        "fail": "Hạng mục {item} nêu một hạng mục thiết bị không còn trong sổ thiết bị, nên thời gian giao hàng riêng của nó được áp dụng",
+        "suggestion": "Liên kết hạng mục với thiết bị thay thế, hoặc xóa liên kết"
+      },
+      "release_in_date": {
+        "fail": "Giải ngân của hạng mục {item} có hiệu lực đến {date}: không thể cam kết thêm gì theo đó",
+        "suggestion": "Yêu cầu giải ngân lại cho phần còn phải cam kết"
+      },
+      "release_within_authority": {
+        "fail": "Giải ngân {release} được quyết định thấp hơn bậc yêu cầu {tier}",
+        "suggestion": "Yêu cầu giải ngân mới theo lịch hiện hành"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Các hạng mục của nhóm {group} được giải ngân thấp hơn bậc mà tổng của chúng yêu cầu",
+        "suggestion": "Yêu cầu lần giải ngân tiếp theo ở bậc của tổng nhóm"
+      }
+    },
+    "status": {
+      "aborted": "Đã chấm dứt",
+      "closed": "Đã đóng",
+      "committed": "Đã cam kết",
+      "on_hold": "Tạm dừng",
+      "partially_released": "Đã giải ngân một phần",
+      "planned": "Đã lên kế hoạch",
+      "re_release_required": "Cần giải ngân lại",
+      "release_requested": "Đã yêu cầu giải ngân",
+      "released": "Đã giải ngân",
+      "transferred": "Đã chuyển"
+    },
+    "tier": {
+      "accounting_officer": "Kế toán trưởng",
+      "authority_head": "Người đứng đầu cơ quan",
+      "board": "Hội đồng quản trị",
+      "contracting_officer": "Cán bộ ký hợp đồng",
+      "department_head": "Trưởng phòng",
+      "head_of_contracting_activity": "Trưởng bộ phận đấu thầu",
+      "project_director": "Giám đốc dự án",
+      "project_lead": "Trưởng nhóm dự án",
+      "project_manager": "Quản lý dự án",
+      "senior_responsible_owner": "Chủ sở hữu chịu trách nhiệm chính",
+      "simplified_acquisition": "Mua sắm đơn giản hóa",
+      "sponsor": "Nhà tài trợ"
+    },
+    "type": {
+      "change": "Thay đổi",
+      "claim_settlement": "Quyết toán khiếu nại",
+      "contingency_drawdown": "Rút dự phòng",
+      "design": "Thiết kế",
+      "services": "Dịch vụ",
+      "supplies": "Vật tư",
+      "termination_settlement": "Quyết toán chấm dứt",
+      "works": "Thi công"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} lẽ ra phải được quyết định trước {latest_decision_date}.",
+        "title": "Quyết định giải ngân quá hạn"
+      },
+      "re_release_required": {
+        "body": "Các tài liệu liên kết của {code} hiện cam kết {committed}, vượt mức giải ngân {released}.",
+        "title": "Cần giải ngân lại"
+      },
+      "release_aborted": {
+        "body": "{code} đã được dừng.",
+        "title": "Đã phê duyệt chấm dứt"
+      },
+      "release_rejected": {
+        "body": "Giải ngân của {code} đã bị từ chối.",
+        "title": "Giải ngân bị từ chối"
+      },
+      "release_released": {
+        "body": "{code} đã được giải ngân.",
+        "title": "Đã cấp giải ngân"
+      }
+    }
+  }
+}

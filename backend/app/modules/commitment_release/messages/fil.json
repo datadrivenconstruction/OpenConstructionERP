@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Bayad sa bahagi na hindi pa naisasagawa",
+      "presumed_unperformed_pct": "Ipinapalagay na bahagi ng hindi pa naisasagawa",
+      "profit_pct": "Tubo sa bahagi na naisagawa na"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Singil na inilagay para sa item na ito",
+        "name": "Pasadyang mga tuntunin"
+      },
+      "de_bgb_648": {
+        "description": "Napagkasunduang presyo na binawasan ng natipid na gastos; 5 % ng hindi pa naisasagawa ang ipinapalagay kapag hindi dokumentado ang natipid na gastos",
+        "name": "Malayang pagtatapos ng may-ari (§ 648 BGB)",
+        "presumption": "Ipinapalagay na bahagi ng hindi pa naisasagawa"
+      },
+      "de_public_owner": {
+        "description": "Halimbawa ng pagtatalaga para sa pampublikong may-ari: threshold ng EU sa mga gawaing konstruksyon bilang pinakamataas na antas, maramihang taong pangako sa pinuno ng ahensya",
+        "eu_works_threshold": "Threshold ng EU sa mga gawaing konstruksyon 2026-27 (Delegated Regulation (EU) 2025/2152), hindi pa kumpirmado",
+        "name": "Pampublikong may-ari (Germany), halimbawa"
+      },
+      "de_vob_b_8_1": {
+        "description": "Parehong pag-aayos gaya ng § 648 BGB, na tinutukoy ng sugnay",
+        "name": "Malayang pagtatapos sa ilalim ng § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Tumutukoy sa § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Natamong gastos kasama ang tubo sa nagawang gawain at mga gastos sa pag-aayos",
+        "name": "Pagtatapos para sa kaginhawahan (FAR 49)",
+        "profit_negotiated": "Rate ng tubo ayon sa napagkasunduan"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Nagawang gawain kasama ang porsyento ng bayad sa hindi pa naisasagawa, ayon sa datos ng kontrata",
+        "fee_from_contract_data": "Porsyento mula sa datos ng kontrata",
+        "name": "Pagtatapos dahil sa sariling dahilan ng kliyente (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Project manager, sponsor at lupon na may halimbawang limitasyon sa pera ng proyekto; walang opisyal na bilang",
+        "name": "Neutral na iskedyul na may tatlong antas"
+      },
+      "none_free_cancellation": {
+        "description": "Walang singil sa pagkansela",
+        "name": "Libreng pagkansela"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Mga singil ayon sa petsa o pag-usad ng paggawa gaya ng napagkasunduan sa supplier",
+        "name": "Iskedyul ng pagkansela ng supplier"
+      },
+      "uk_public_body": {
+        "description": "Halimbawang ipinagkaloob na awtoridad ayon sa halaga at pagiging bago, batay sa Managing Public Money",
+        "name": "Pampublikong ahensya (United Kingdom), halimbawa"
+      },
+      "us_federal_owner": {
+        "description": "Halimbawang antas simula sa simplified acquisition threshold",
+        "name": "Federal na may-ari (United States), halimbawa",
+        "sat": "Simplified acquisition threshold na USD 350,000 mula 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Hindi kilala ang batayan ng pagtatapos",
+      "abort_exposure_unknown": "Hindi alam ang natitirang pagkalugi. Kumpletuhin muna ang mga tuntunin sa pagtatapos.",
+      "abort_parameter_invalid": "Ang parameter ng pagtatapos ay bahagi sa pagitan ng 0 at 1",
+      "abort_parameter_not_in_basis": "Walang ganitong parameter ang napiling batayan ng pagtatapos",
+      "abort_type_not_in_schedule": "Walang antas ang iskedyul para sa settlement ng pagwawakas",
+      "activity_not_found": "Hindi natagpuan ang aktibidad sa iskedyul sa proyektong ito",
+      "amount_invalid": "Hindi wastong numero ang halaga",
+      "amount_not_positive": "Dapat mas malaki sa zero ang halaga",
+      "assignee_not_project_member": "Hindi miyembro ng proyektong ito ang tao",
+      "assignment_expired": "Nag-expire na ang pagtatalaga ng aprubador; i-update ang mga pagtatalaga",
+      "assignment_needs_approver": "Pangalanan ang aprubador ng antas na ito bago ang kapalit o panahon ng bisa",
+      "assignment_window_inverted": "Nagtatapos ang pagtatalaga bago pa ito magsimula",
+      "cancellation_schedule_invalid": "Bawat hakbang ay nangangailangan ng milestone, petsa o pag-usad, at eksaktong isang singil",
+      "catalogue_code_taken": "Gumagamit na ng code na ito ang ibang katalogo",
+      "catalogue_invalid": "Hindi wasto ang katalogo",
+      "catalogue_retired": "Retirado na ang katalogong ito",
+      "change_belongs_to_contract_item": "Nakaugnay ang pagbabago at ang kontrata sa parehong item",
+      "commitment_guard_unavailable": "Hindi maisagawa ang pagsusuri sa paglabas, kaya hindi ito pinahintulutan",
+      "commitment_not_in_matrix": "Wala sa commitment matrix ang dokumentong ito",
+      "commitment_not_released": "Hindi pa inilabas ang commitment na ito para sa halagang ito",
+      "commitment_type_unknown": "Wala sa iskedyul ng awtoridad ang uri ng commitment na ito",
+      "contingency_insufficient": "Hindi sapat ang balanse ng contingency para sa withdrawal na ito",
+      "contingency_line_required": "Kailangan ng withdrawal mula sa contingency ang budget line na may hawak ng contingency",
+      "date_invalid": "Hindi ito petsa",
+      "decider_not_tier_holder": "Inaprubahan ng taong hindi nagtataglay ng antas",
+      "decision_invalid": "Piliin ang aprubahan o tanggihan",
+      "deferral_needs_reason": "Isulat kung bakit ipinagpaliban ang item",
+      "document_linked_elsewhere": "Nabilang na ang dokumentong ito sa ibang item",
+      "document_not_found": "Hindi natagpuan ang dokumento sa proyektong ito",
+      "drawdown_released_by_commitment": "Ang withdrawal na ito ay inilabas na commitment item. I-abort ang item na iyon para mabawi ang pera.",
+      "edit_required": "Hindi pinapayagan ng iyong papel na i-edit ang mga commitment item",
+      "enforcement_invalid": "Dapat naka-off, naka-warn o naka-block ang enforcement",
+      "external_approval_not_required": "Ang halagang ito ay dinedesisyunan ng antas sa iskedyul: alisin ang reperensiya ng external na pag-apruba",
+      "external_approval_required": "Lampas sa lahat ng antas ang halaga: maglakip ng reperensiya ng external na pag-apruba",
+      "field_frozen": "Hindi na maaaring baguhin ang field na ito para sa item na ito",
+      "field_required": "Hindi maaaring walang laman ang field na ito",
+      "flag_unknown": "Wala sa iskedyul ng awtoridad ang flag na ito",
+      "four_eyes_no_approver": "Walang sinumang nasa antas na ito ang maaaring magdesisyon sa kahilingang ito sa ilalim ng four-eyes rule",
+      "four_eyes_requester_is_approver": "Four-eyes: hindi mo maaaring hilingin ang paglabas na ikaw mismo ang mag-aaprubahan",
+      "four_eyes_violation": "Ang humiling, may-ari, o nagkumpirma para sa item na ito ay hindi maaaring magdesisyon dito",
+      "frame_document_not_found": "Hindi natagpuan ang frame document sa proyektong ito",
+      "funding_application_not_found": "Hindi natagpuan ang funding application sa proyektong ito",
+      "fx_policy_invalid": "Hindi kilala ang patakaran sa palitan ng pera",
+      "fx_rate_missing": "Walang palitan ng pera para sa petsang ito: hindi masusuri ang paglabas",
+      "gate_unknown": "Wala sa governance model ng proyekto ang gate na ito",
+      "gates_not_in_use": "Hindi gumagamit ng gate ang proyektong ito, kaya walang maaaring maghintay sa gate",
+      "governance_area_required": "Ang item na nakatali sa gate ay nangangailangan ng management area",
+      "governance_area_unknown": "Wala sa governance model ng proyekto ang management area na ito",
+      "invalid_transition": "Hindi posible ang hakbang na ito sa kasalukuyang estado",
+      "item_changed": "Nagbago ang item sa pagitan ng panahon. Subukan muli.",
+      "item_closed": "Sarado na ang item",
+      "item_code_taken": "Gumagamit na ng code na ito ang ibang item",
+      "item_not_found": "Hindi natagpuan ang commitment item",
+      "link_kind_invalid": "Hindi kilala ang uri ng dokumento",
+      "link_kind_not_supported": "Hindi pa maaaring i-link ang ganitong uri ng dokumento",
+      "link_not_found": "Hindi natagpuan ang link",
+      "manage_required": "Ang taong namamahala sa matrix lamang ang maaaring gumawa nito",
+      "manual_amount_needs_currency": "Kailangan ng manual na estimasyon ang halaga at pera",
+      "matrix_missing": "Wala pang commitment matrix ang proyektong ito",
+      "no_pending_release": "Walang nakabinbing kahilingan sa paglabas",
+      "no_route_for_tier": "Wala pang nakatalagang tao sa kinakailangang antas",
+      "not_entitled_decider": "Wala kang antas kung saan dinedesisyunan ang kahilingang ito",
+      "not_item_owner": "Ang may-ari ng item o manager lamang ang maaaring magbago ng item na ito",
+      "not_requester": "Ang humiling o manager lamang ang maaaring bawiin ang kahilingang ito",
+      "planned_source_invalid": "Hindi kilala ang pinagmulan ng planadong halaga",
+      "planned_source_not_found": "Hindi natagpuan ang budget line, cost line o posisyon sa proyektong ito",
+      "plant_item_not_found": "Hindi natagpuan ang plant item sa proyektong ito",
+      "precondition_is_computed": "Binabasa ang kundisyong ito mula sa module nito at hindi maaaring lagyan ng tsek",
+      "precondition_kind_invalid": "Hindi kilala ang uri ng paunang kundisyon",
+      "precondition_needs_evidence": "Maglakip ng reperensiya ng ebidensiya",
+      "precondition_needs_ref": "Nangangailangan ng reperensiya ang paunang kundisyong ito",
+      "precondition_not_found": "Hindi natagpuan ang paunang kundisyon",
+      "preconditions_open": "Hinahadlangan ng mga bukas na paunang kundisyon ang paglabas na ito",
+      "project_not_found": "Hindi natagpuan ang proyekto",
+      "rationale_required": "Magbigay ng dahilan",
+      "release_decided": "Napagdesisyunan na ang kahilingang ito sa paglabas",
+      "release_expired": "Lampas na sa petsa ng bisa ang paglabas ng item na ito: humiling ng bagong paglabas bago magtali pa",
+      "release_pending": "May tumatakbong kahilingan sa paglabas para sa item na ito",
+      "requisition_not_found": "Hindi natagpuan ang requisition sa proyektong ito",
+      "route_changed_since_accepted": "Na-edit ang ruta ng pag-apruba ng antas na ito. Kailangan itong muling i-pin ng manager.",
+      "route_must_belong_to_project": "Maaari lamang i-pin ang ruta ng pag-apruba ng proyektong ito",
+      "route_not_found": "Hindi natagpuan ang ruta ng pag-apruba",
+      "schedule_currency_mismatch": "Iba ang pera ng iskedyul na ito kaysa sa mga paglabas na naitala na",
+      "schedule_not_in_force": "Hindi na epektibo ngayon ang naka-pin na iskedyul. I-pin ang bersyong epektibo.",
+      "schedule_type_mismatch": "Hindi alam ng iskedyul na ito ang uri ng commitment ng umiiral na item",
+      "tier_unknown": "Wala sa iskedyul ng awtoridad ang antas na ito",
+      "transfer_links_stay_in_project": "Ang mga naka-link na dokumento ay pag-aari ng proyektong ito. Alisin ang link bago ilipat sa ibang proyekto.",
+      "transfer_target_invalid": "Hindi maaaring ilipat ang item sa sarili nito",
+      "transfer_target_not_open": "Sarado o naghihintay ng desisyon ang target na item",
+      "transferable_invalid": "Hindi kilala ang opsyon sa paglilipat",
+      "type_fixed_after_release": "Hindi na mababago ang uri kapag naipadala na ang kahilingan sa paglabas",
+      "unknown_catalogue": "Hindi natagpuan ang katalogo"
+    },
+    "evidence": {
+      "decision_overdue": "Lumampas na ang huling petsa ng desisyon ng commitment item na ito at walang inilabas: magdesisyon, ipagpaliban nang may dahilan, o itala ang gastos ng pagkaantala",
+      "items_released_by_gate": "Nailabas o naipagpaliban na ang mga commitment na dapat sa gate na ito",
+      "items_without_area": "Pinangalanan ng mga commitment item ng gate na ito ang management area na wala na sa proyekto",
+      "no_items_for_gate": "Walang commitment item na nagbabanggit sa gate na ito, kaya hindi alam kung kailangang ilabas ang pera dito"
+    },
+    "export": {
+      "as_of": "Hanggang",
+      "col_code": "Code",
+      "col_committed": "Naitali",
+      "col_currency": "Pera",
+      "col_decision_date": "Huling petsa ng desisyon",
+      "col_open_preconditions": "Mga bukas na paunang kundisyon",
+      "col_overdue": "Lampas sa takdang desisyon",
+      "col_planned": "Planado",
+      "col_released": "Nailabas",
+      "col_residual_loss": "Natitirang pagkalugi sa pagtatapos",
+      "col_status": "Katayuan",
+      "col_tier": "Kinakailangang antas",
+      "col_title": "Commitment",
+      "col_type": "Uri",
+      "empty": "Wala pang commitment item",
+      "overdue": "Lampas na sa takdang petsa",
+      "project": "Proyekto",
+      "title": "Commitment at release matrix"
+    },
+    "exposure": {
+      "nothing_committed": "Walang naitali, walang nagastos"
+    },
+    "flag": {
+      "multi_year_commitment": "Nagtatali sa mga susunod na taon ng badyet",
+      "novel_contentious": "Bago o pinagtatalunan"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Naitali ang item {item} ngunit hindi alam ang mga tuntunin sa pagtatapos nito",
+        "suggestion": "Ilagay ang batayan ng pagtatapos o iskedyul ng pagkansela"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Hindi tumataas kasabay ng antas ang mga limitasyon ng iskedyul {schedule}",
+        "suggestion": "Itama ang mga banda at mag-publish ng bagong bersyon"
+      },
+      "committed_within_release": {
+        "fail": "Mas marami ang itinali ng item {item} kaysa sa nailabas",
+        "suggestion": "Humiling ng karagdagang paglabas o bawasan ang mga naka-link na dokumento"
+      },
+      "decision_date_not_passed": {
+        "fail": "Lumampas na ang huling petsa ng desisyon na {date} ng item {item}",
+        "suggestion": "Magdesisyon, ipagpaliban nang may dahilan, o itala ang gastos ng pagkaantala"
+      },
+      "document_linked_once": {
+        "fail": "Nabilang ang dokumento {document} sa higit sa isang item",
+        "suggestion": "Alisin ang pangalawang link"
+      },
+      "fx_rate_available": {
+        "fail": "Walang palitan ng pera ang isang naka-link na halaga ng item {item}",
+        "suggestion": "Magdagdag ng rate para sa petsa sa exchange rate register o sa proyekto"
+      },
+      "item_has_cost_code": {
+        "fail": "Walang cost line ang item {item}",
+        "suggestion": "Italaga ang cost line kung saan nakatala ang item"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Hindi mabasa ang planadong halaga ng item {item}",
+        "suggestion": "Ituro ang item sa budget line, cost line o posisyon, o maglagay ng manual na estimasyon"
+      },
+      "plant_item_in_register": {
+        "fail": "Ang item {item} ay tumutukoy sa plant item na wala na sa plant register, kaya ang sarili nitong lead time ang masusunod",
+        "suggestion": "I-link ang item sa plant item na pumalit dito, o alisin ang link"
+      },
+      "release_in_date": {
+        "fail": "Ang paglabas ng item {item} ay balido hanggang {date}: walang bagong maaaring itali sa ilalim nito",
+        "suggestion": "Humiling ng bagong paglabas para sa mga matitira pang itatali"
+      },
+      "release_within_authority": {
+        "fail": "Ang paglabas na {release} ay napagdesisyunan sa ibaba ng kinakailangang antas na {tier}",
+        "suggestion": "Humiling ng bagong paglabas sa ilalim ng kasalukuyang iskedyul"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Nailabas ang mga item ng grupo {group} sa ibaba ng antas na kailangan ng kanilang kabuuan",
+        "suggestion": "Humiling ng susunod na paglabas sa antas ng kabuuan ng grupo"
+      }
+    },
+    "status": {
+      "aborted": "Itinigil",
+      "closed": "Sarado",
+      "committed": "Naitali",
+      "on_hold": "Nakahinto",
+      "partially_released": "Bahagyang nailabas",
+      "planned": "Planado",
+      "re_release_required": "Kailangan ng muling paglabas",
+      "release_requested": "Hiniling ang paglabas",
+      "released": "Nailabas",
+      "transferred": "Nailipat"
+    },
+    "tier": {
+      "accounting_officer": "Opisyal sa pananalapi",
+      "authority_head": "Pinuno ng ahensya",
+      "board": "Lupon",
+      "contracting_officer": "Opisyal sa kontrata",
+      "department_head": "Pinuno ng departamento",
+      "head_of_contracting_activity": "Pinuno ng aktibidad sa kontrata",
+      "project_director": "Direktor ng proyekto",
+      "project_lead": "Lider ng proyekto",
+      "project_manager": "Project manager",
+      "senior_responsible_owner": "Senior na may pananagutan",
+      "simplified_acquisition": "Pinasimpleng pagkuha",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Pagbabago",
+      "claim_settlement": "Settlement ng claim",
+      "contingency_drawdown": "Withdrawal mula sa contingency",
+      "design": "Disenyo",
+      "services": "Serbisyo",
+      "supplies": "Suplay",
+      "termination_settlement": "Settlement sa pagwawakas",
+      "works": "Gawaing konstruksyon"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "Dapat sana ay nadesisyunan na ang {code} bago ang {latest_decision_date}.",
+        "title": "Lampas na sa takdang desisyon ang paglabas"
+      },
+      "re_release_required": {
+        "body": "Ang mga naka-link na dokumento ng {code} ay nagtatali na ngayon ng {committed}, na lampas sa nailabas na {released}.",
+        "title": "Kailangan ng muling paglabas"
+      },
+      "release_aborted": {
+        "body": "Itinigil ang {code}.",
+        "title": "Naaprubahan ang pagtatapos"
+      },
+      "release_rejected": {
+        "body": "Tinanggihan ang paglabas ng {code}.",
+        "title": "Tinanggihan ang paglabas"
+      },
+      "release_released": {
+        "body": "Nailabas na ang {code}.",
+        "title": "Naibigay ang paglabas"
+      }
+    }
+  }
+}

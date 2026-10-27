@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Palkkio suorittamattomasta osasta",
+      "presumed_unperformed_pct": "Suorittamattoman osan oletettu osuus",
+      "profit_pct": "Voitto suoritetusta osasta"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Tälle kohteelle syötetty veloitus",
+        "name": "Mukautetut ehdot"
+      },
+      "de_bgb_648": {
+        "description": "Sovittu hinta vähennettynä säästyneillä kustannuksilla; 5 % suorittamattomasta osasta oletetaan, kun säästyneitä kustannuksia ei ole dokumentoitu",
+        "name": "Tilaajan vapaa irtisanominen (BGB § 648)",
+        "presumption": "Suorittamattoman osan oletettu osuus"
+      },
+      "de_public_owner": {
+        "description": "Esimerkkivaltuutus julkiselle tilaajalle: EU:n rakennusurakoiden kynnysarvo ylimpänä urakkaluokkana, monivuotiset sitoumukset hallintoyksikön johtajalle",
+        "eu_works_threshold": "EU:n rakennusurakoiden kynnysarvo 2026–27 (delegoitu asetus (EU) 2025/2152), vahvistamaton",
+        "name": "Julkinen tilaaja (Saksa), esimerkki"
+      },
+      "de_vob_b_8_1": {
+        "description": "Sama selvitys kuin BGB § 648 -säännöksessä, johon lausekkeessa viitataan",
+        "name": "Vapaa irtisanominen VOB/B § 8 (1) mukaan",
+        "refers_to_bgb_648": "Viittaa BGB § 648 -säännökseen"
+      },
+      "far_49_convenience": {
+        "description": "Aiheutuneet kustannukset ja tehdystä työstä voitto sekä selvityskulut",
+        "name": "Irtisanominen tilaajan harkinnan mukaan (FAR 49)",
+        "profit_negotiated": "Neuvoteltu voittoprosentti"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Tehty työ ja sopimustiedoissa ilmoitettu prosentti suorittamattomasta osasta",
+        "fee_from_contract_data": "Prosentti sopimustiedoista",
+        "name": "Irtisanominen tilaajan omasta syystä (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Projektipäällikkö, sponsori ja johtokunta esimerkkikatoilla projektin valuutassa; ei lakisääteisiä lukuja",
+        "name": "Neutraali kolmitasoinen aikataulu"
+      },
+      "none_free_cancellation": {
+        "description": "Peruutuksesta ei veloiteta",
+        "name": "Vapaa peruutus"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Veloitukset päivämäärän tai valmistuksen edistymisen mukaan toimittajan kanssa sovitusti",
+        "name": "Toimittajan peruutusaikataulu"
+      },
+      "uk_public_body": {
+        "description": "Esimerkkivaltuudet summan ja uutuuden mukaan Managing Public Money -ohjeen mukaisesti",
+        "name": "Julkinen toimielin (Iso-Britannia), esimerkki"
+      },
+      "us_federal_owner": {
+        "description": "Esimerkkitasot alkaen yksinkertaistetun hankinnan kynnysarvosta",
+        "name": "Liittovaltion tilaaja (Yhdysvallat), esimerkki",
+        "sat": "Yksinkertaistetun hankinnan kynnysarvo 350 000 USD alkaen 1.10.2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Tuntematon keskeytyksen peruste",
+      "abort_exposure_unknown": "Jäljelle jäävä tappio on tuntematon. Täydennä ensin keskeytysehdot.",
+      "abort_parameter_invalid": "Keskeytysparametrin on oltava osuus välillä 0–1",
+      "abort_parameter_not_in_basis": "Valitussa keskeytyksen perusteessa ei ole tätä parametria",
+      "abort_type_not_in_schedule": "Aikataulussa ei ole porrasta sopimuksen päättämisen selvitykselle",
+      "activity_not_found": "Aikataulun tehtävää ei löytynyt tästä projektista",
+      "amount_invalid": "Summa ei ole kelvollinen luku",
+      "amount_not_positive": "Summan on oltava suurempi kuin nolla",
+      "assignee_not_project_member": "Henkilö ei ole tämän projektin jäsen",
+      "assignment_expired": "Hyväksyjän nimeäminen on vanhentunut; päivitä nimeämiset",
+      "assignment_needs_approver": "Nimeä tämän portaan hyväksyjä ennen varahenkilön tai voimassaoloajan asettamista",
+      "assignment_window_inverted": "Nimeäminen päättyy ennen kuin se alkaa",
+      "cancellation_schedule_invalid": "Jokaisessa vaiheessa on oltava virstanpylväs, päivämäärä tai edistyminen sekä täsmälleen yksi veloitus",
+      "catalogue_code_taken": "Toinen luettelo käyttää jo tätä koodia",
+      "catalogue_invalid": "Luettelo ei ole kelvollinen",
+      "catalogue_retired": "Tämä luettelo on poistettu käytöstä",
+      "change_belongs_to_contract_item": "Muutos ja sopimus on linkitetty samaan kohteeseen",
+      "commitment_guard_unavailable": "Vapautustarkistusta ei voitu tehdä, joten toimintoa ei sallittu",
+      "commitment_not_in_matrix": "Tämä asiakirja ei kuulu sitoumusmatriisiin",
+      "commitment_not_released": "Tätä sitoumusta ei ole vapautettu tälle summalle",
+      "commitment_type_unknown": "Tätä sitoumuslajia ei ole valtuusaikataulussa",
+      "contingency_insufficient": "Varauksen saldo ei riitä tähän nostoon",
+      "contingency_line_required": "Varauksen nosto edellyttää budjettirivin, jolla varaus on",
+      "date_invalid": "Tämä ei ole päivämäärä",
+      "decider_not_tier_holder": "Hyväksyjä ei ole tämän portaan haltija",
+      "decision_invalid": "Valitse hyväksy tai hylkää",
+      "deferral_needs_reason": "Kirjaa, miksi kohde lykätään",
+      "document_linked_elsewhere": "Tämä asiakirja on jo laskettu toiseen kohteeseen",
+      "document_not_found": "Asiakirjaa ei löytynyt tästä projektista",
+      "drawdown_released_by_commitment": "Tämä nosto on vapautettu sitoumuskohde. Keskeytä kohde, jotta rahat palautuvat.",
+      "edit_required": "Roolisi ei salli sitoumuskohteiden muokkausta",
+      "enforcement_invalid": "Valvonnan on oltava pois, varoitus tai esto",
+      "external_approval_not_required": "Tämän summan päättää aikataulun porras: poista ulkoisen hyväksynnän viite",
+      "external_approval_required": "Summa ylittää kaikki portaat: liitä ulkoisen hyväksynnän viite",
+      "field_frozen": "Tätä kenttää ei voi enää muuttaa tälle kohteelle",
+      "field_required": "Tämä kenttä ei voi olla tyhjä",
+      "flag_unknown": "Tätä merkintää ei ole valtuusaikataulussa",
+      "four_eyes_no_approver": "Kukaan tällä portaalla ei saa päättää tätä pyyntöä neljän silmän periaatteella",
+      "four_eyes_requester_is_approver": "Neljän silmän periaate: et voi pyytää vapautusta, jonka itse hyväksyisit",
+      "four_eyes_violation": "Pyytäjä, kohteen omistaja tai vahvistaja ei voi päättää tästä kohteesta",
+      "frame_document_not_found": "Kehysasiakirjaa ei löytynyt tästä projektista",
+      "funding_application_not_found": "Rahoitushakemusta ei löytynyt tästä projektista",
+      "fx_policy_invalid": "Tuntematon valuuttakurssikäytäntö",
+      "fx_rate_missing": "Tälle päivälle ei ole valuuttakurssia: vapautusta ei voi arvioida",
+      "gate_unknown": "Tätä porttia ei ole projektin hallintomallissa",
+      "gates_not_in_use": "Tässä projektissa ei käytetä portteja, joten mikään ei voi odottaa porttia",
+      "governance_area_required": "Porttiin sidottu kohde tarvitsee hallintoalueen",
+      "governance_area_unknown": "Tätä hallintoaluetta ei ole projektin hallintomallissa",
+      "invalid_transition": "Tämä vaihe ei ole mahdollinen nykyisessä tilassa",
+      "item_changed": "Kohde muuttui välissä. Yritä uudelleen.",
+      "item_closed": "Kohde on suljettu",
+      "item_code_taken": "Toinen kohde käyttää jo tätä koodia",
+      "item_not_found": "Sitoumuskohdetta ei löytynyt",
+      "link_kind_invalid": "Tuntematon asiakirjalaji",
+      "link_kind_not_supported": "Tätä asiakirjalajia ei voi vielä linkittää",
+      "link_not_found": "Linkkiä ei löytynyt",
+      "manage_required": "Vain matriisia hallinnoiva henkilö voi tehdä tämän",
+      "manual_amount_needs_currency": "Manuaalinen arvio tarvitsee summan ja valuutan",
+      "matrix_missing": "Tällä projektilla ei ole vielä sitoumusmatriisia",
+      "no_pending_release": "Vapautuspyyntöä ei ole vireillä",
+      "no_route_for_tier": "Vaadittuun porrasta ei ole vielä kukaan nimetty",
+      "not_entitled_decider": "Sinulla ei ole tätä porrasta, jolla tämä pyyntö päätetään",
+      "not_item_owner": "Vain kohteen omistaja tai hallinnoija voi muuttaa kohdetta",
+      "not_requester": "Vain pyytäjä tai hallinnoija voi peruuttaa tämän pyynnön",
+      "planned_source_invalid": "Tuntematon suunnitellun summan lähde",
+      "planned_source_not_found": "Budjettiriviä, kustannusriviä tai erää ei löytynyt tästä projektista",
+      "plant_item_not_found": "Kalustokohdetta ei löytynyt tästä projektista",
+      "precondition_is_computed": "Tämä ennakkoehto luetaan moduulista eikä sitä voi valita",
+      "precondition_kind_invalid": "Tuntematon ennakkoehdon laji",
+      "precondition_needs_evidence": "Liitä todisteen viite",
+      "precondition_needs_ref": "Tämä ennakkoehto tarvitsee viitteen",
+      "precondition_not_found": "Ennakkoehtoa ei löytynyt",
+      "preconditions_open": "Avoimet ennakkoehdot estävät vapautuksen",
+      "project_not_found": "Projektia ei löytynyt",
+      "rationale_required": "Anna perustelu",
+      "release_decided": "Tämä vapautuspyyntö on jo päätetty",
+      "release_expired": "Tämän kohteen vapautus on voimassaolon päättymispäivän jälkeen: pyydä uusittu vapautus ennen kuin sidot lisää",
+      "release_pending": "Tälle kohteelle on jo vireillä vapautuspyyntö",
+      "requisition_not_found": "Hankintapyyntöä ei löytynyt tästä projektista",
+      "route_changed_since_accepted": "Tämän portaan hyväksyntäreittiä on muokattu. Hallinnoijan on kiinnitettävä se uudelleen.",
+      "route_must_belong_to_project": "Vain tämän projektin hyväksyntäreitin voi kiinnittää",
+      "route_not_found": "Hyväksyntäreittiä ei löytynyt",
+      "schedule_currency_mismatch": "Tämä aikataulu käyttää eri valuuttaa kuin jo kirjatut vapautukset",
+      "schedule_not_in_force": "Kiinnitetty aikataulu ei ole tänään voimassa. Kiinnitä voimassa oleva versio.",
+      "schedule_type_mismatch": "Tämä aikataulu ei tunne olemassa olevan kohteen sitoumuslajia",
+      "tier_unknown": "Tätä porrasta ei ole valtuusaikataulussa",
+      "transfer_links_stay_in_project": "Linkitetyt asiakirjat kuuluvat tähän projektiin. Poista linkit ennen siirtoa toiseen projektiin.",
+      "transfer_target_invalid": "Kohdetta ei voi siirtää itselleen",
+      "transfer_target_not_open": "Kohde on suljettu tai odottaa päätöstä",
+      "transferable_invalid": "Tuntematon siirtovaihtoehto",
+      "type_fixed_after_release": "Lajia ei voi muuttaa, kun vapautus on jo pyydetty",
+      "unknown_catalogue": "Luetteloa ei löytynyt"
+    },
+    "evidence": {
+      "decision_overdue": "Tämän sitoumuskohteen viimeinen päätöspäivä on mennyt eikä mitään ole vapautettu: päätä, lykkää perustelluin syin tai kirjaa viivästyksen kustannus",
+      "items_released_by_gate": "Tähän porttiin sidotut sitoumukset on vapautettu tai lykätty",
+      "items_without_area": "Tämän portin sitoumuskohteet nimeävät hallintoalueen, jota projektilla ei enää ole",
+      "no_items_for_gate": "Yksikään sitoumuskohde ei nimeä tätä porttia, joten ei tiedetä, täytyykö rahat vapauttaa tämän portin kohdalla"
+    },
+    "export": {
+      "as_of": "Tilanne",
+      "col_code": "Koodi",
+      "col_committed": "Sitoutettu",
+      "col_currency": "Valuutta",
+      "col_decision_date": "Viimeisin päätöspäivä",
+      "col_open_preconditions": "Avoimet ennakkoehdot",
+      "col_overdue": "Päätös myöhässä",
+      "col_planned": "Suunniteltu",
+      "col_released": "Vapautettu",
+      "col_residual_loss": "Jäljelle jäävä tappio keskeytyksessä",
+      "col_status": "Tila",
+      "col_tier": "Vaadittu porras",
+      "col_title": "Sitoumus",
+      "col_type": "Laji",
+      "empty": "Sitoumuskohteita ei vielä ole",
+      "overdue": "Myöhässä",
+      "project": "Projekti",
+      "title": "Sitoumus- ja vapautusmatriisi"
+    },
+    "exposure": {
+      "nothing_committed": "Ei sitoumuksia, ei kulutusta"
+    },
+    "flag": {
+      "multi_year_commitment": "Sitoo myöhempiä budjettivuosia",
+      "novel_contentious": "Uusi tai kiistanalainen"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Kohde {item} on sitoutettu, mutta sen keskeytysehdot ovat tuntemattomat",
+        "suggestion": "Syötä keskeytyksen peruste tai peruutusaikataulu"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Aikataulun {schedule} katot eivät nouse portaan mukana",
+        "suggestion": "Korjaa vaihteluvälit ja julkaise uusi versio"
+      },
+      "committed_within_release": {
+        "fail": "Kohde {item} sitoo enemmän kuin on vapautettu",
+        "suggestion": "Pyydä lisävapautus tai pienennä linkitettyjä asiakirjoja"
+      },
+      "decision_date_not_passed": {
+        "fail": "Kohteen {item} viimeinen päätöspäivä {date} on mennyt",
+        "suggestion": "Päätä, lykkää perustelluin syin tai kirjaa viivästyksen kustannus"
+      },
+      "document_linked_once": {
+        "fail": "Asiakirja {document} on laskettu useampaan kuin yhteen kohteeseen",
+        "suggestion": "Poista toinen linkki"
+      },
+      "fx_rate_available": {
+        "fail": "Kohteen {item} linkitetyllä summalla ei ole valuuttakurssia",
+        "suggestion": "Lisää kurssi tälle päivälle valuuttakurssirekisteriin tai projektiin"
+      },
+      "item_has_cost_code": {
+        "fail": "Kohteella {item} ei ole kustannusriviä",
+        "suggestion": "Liitä kustannusrivi, jolle kohde kirjataan"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Kohteen {item} suunniteltua summaa ei voi lukea",
+        "suggestion": "Osoita kohde budjettiriviin, kustannusriviin tai erään tai syötä manuaalinen arvio"
+      },
+      "plant_item_in_register": {
+        "fail": "Kohde {item} nimeää kalustokohteen, jota ei enää ole kalustorekisterissä, joten sen oma toimitusaika pätee",
+        "suggestion": "Linkitä kohde kalustokohteeseen, joka korvasi sen, tai poista linkki"
+      },
+      "release_in_date": {
+        "fail": "Kohteen {item} vapautus oli voimassa {date} asti: sen alla ei voi sitoa uutta",
+        "suggestion": "Pyydä uusittu vapautus siihen, mitä on vielä sidottava"
+      },
+      "release_within_authority": {
+        "fail": "Vapautus {release} päätettiin vaadittua porrasta {tier} alemmalla tasolla",
+        "suggestion": "Pyydä uusi vapautus voimassa olevan aikataulun mukaan"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Ryhmän {group} kohteet vapautettiin portaan alapuolella, jonka niiden summa vaatii",
+        "suggestion": "Pyydä seuraava vapautus ryhmän kokonaissumman portaalta"
+      }
+    },
+    "status": {
+      "aborted": "Keskeytetty",
+      "closed": "Suljettu",
+      "committed": "Sitoutettu",
+      "on_hold": "Pidossa",
+      "partially_released": "Osittain vapautettu",
+      "planned": "Suunniteltu",
+      "re_release_required": "Uusi vapautus vaaditaan",
+      "release_requested": "Vapautus pyydetty",
+      "released": "Vapautettu",
+      "transferred": "Siirretty"
+    },
+    "tier": {
+      "accounting_officer": "Kirjanpidosta vastaava",
+      "authority_head": "Hallintoyksikön johtaja",
+      "board": "Hallitus",
+      "contracting_officer": "Hankintavirkailija",
+      "department_head": "Osaston johtaja",
+      "head_of_contracting_activity": "Hankintatoiminnan johtaja",
+      "project_director": "Projektijohtaja",
+      "project_lead": "Projektivastaava",
+      "project_manager": "Projektipäällikkö",
+      "senior_responsible_owner": "Vastuullinen johtaja",
+      "simplified_acquisition": "Yksinkertaistettu hankinta",
+      "sponsor": "Sponsori"
+    },
+    "type": {
+      "change": "Muutos",
+      "claim_settlement": "Vaatimuksen selvitys",
+      "contingency_drawdown": "Varauksen nosto",
+      "design": "Suunnittelu",
+      "services": "Palvelut",
+      "supplies": "Tavarat",
+      "termination_settlement": "Sopimuksen päättämisen selvitys",
+      "works": "Rakennustyöt"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "Kohteen {code} olisi pitänyt saada päätös {latest_decision_date} mennessä.",
+        "title": "Vapautuspäätös myöhässä"
+      },
+      "re_release_required": {
+        "body": "Kohteen {code} linkitetyt asiakirjat sitovat nyt {committed}, mikä ylittää vapautetun {released}.",
+        "title": "Uusi vapautus vaaditaan"
+      },
+      "release_aborted": {
+        "body": "Kohde {code} pysäytettiin.",
+        "title": "Keskeytys hyväksytty"
+      },
+      "release_rejected": {
+        "body": "Kohteen {code} vapautus hylättiin.",
+        "title": "Vapautus hylätty"
+      },
+      "release_released": {
+        "body": "Kohde {code} on vapautettu.",
+        "title": "Vapautus myönnetty"
+      }
+    }
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Narzut na część niewykonaną",
+      "presumed_unperformed_pct": "Domniemany udział części niewykonanej",
+      "profit_pct": "Zysk na część wykonaną"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Kwota wprowadzona dla tej pozycji",
+        "name": "Warunki indywidualne"
+      },
+      "de_bgb_648": {
+        "description": "Uzgodniona cena pomniejszona o oszczędności; przy braku udokumentowanych oszczędności domniemane jest 5 % części niewykonanej",
+        "name": "Swobodne wypowiedzenie przez inwestora (§ 648 BGB)",
+        "presumption": "Domniemany udział części niewykonanej"
+      },
+      "de_public_owner": {
+        "description": "Przykład delegacji dla inwestora publicznego: próg UE dla robót jako najwyższy przedział, wieloletnie zobowiązania u kierownika urzędu",
+        "eu_works_threshold": "Próg UE dla robót 2026–2027 (rozporządzenie delegowane (UE) 2025/2152), niepotwierdzony",
+        "name": "Inwestor publiczny (Niemcy), przykład"
+      },
+      "de_vob_b_8_1": {
+        "description": "To samo rozliczenie co w § 648 BGB, do którego odsyła klauzula",
+        "name": "Swobodne wypowiedzenie wg § 8 ust. 1 VOB/B",
+        "refers_to_bgb_648": "Odsyła do § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Poniesione koszty plus zysk za wykonane prace plus koszty rozliczenia",
+        "name": "Wypowiedzenie z przyczyn dogodności (FAR 49)",
+        "profit_negotiated": "Stawka zysku ustalona w negocjacjach"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Wykonane prace plus procent wynagrodzenia od części niewykonanej, zgodnie z danymi kontraktowymi",
+        "fee_from_contract_data": "Procent z danych kontraktowych",
+        "name": "Wypowiedzenie z przyczyny leżącej po stronie zamawiającego (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Kierownik projektu, sponsor i zarząd z przykładowymi limitami w walucie projektu; bez wartości ustawowych",
+        "name": "Neutralny harmonogram trzystopniowy"
+      },
+      "none_free_cancellation": {
+        "description": "Brak opłaty za anulowanie",
+        "name": "Bezpłatne anulowanie"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Opłaty według terminów lub postępu produkcji uzgodnionych z dostawcą",
+        "name": "Harmonogram anulowania dla dostawcy"
+      },
+      "uk_public_body": {
+        "description": "Przykład delegowanych uprawnień według kwoty i nowatorskości zgodnie z Managing Public Money",
+        "name": "Podmiot publiczny (Wielka Brytania), przykład"
+      },
+      "us_federal_owner": {
+        "description": "Przykładowe progi zaczynające się od progu uproszczonych zamówień",
+        "name": "Inwestor federalny (USA), przykład",
+        "sat": "Próg uproszczonych zamówień 350 000 USD od 1.10.2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Nieznana podstawa rozliczenia wypowiedzenia",
+      "abort_exposure_unknown": "Pozostała strata jest nieznana. Najpierw uzupełnij warunki wypowiedzenia.",
+      "abort_parameter_invalid": "Parametr wypowiedzenia to udział z przedziału od 0 do 1",
+      "abort_parameter_not_in_basis": "Wybrana podstawa wypowiedzenia nie zawiera tego parametru",
+      "abort_type_not_in_schedule": "Harmonogram nie ma przedziału dla rozliczenia wypowiedzenia",
+      "activity_not_found": "Czynność harmonogramu nie została znaleziona w tym projekcie",
+      "amount_invalid": "Kwota nie jest poprawną liczbą",
+      "amount_not_positive": "Kwota musi być większa od zera",
+      "assignee_not_project_member": "Ta osoba nie jest członkiem tego projektu",
+      "assignment_expired": "Przydział zatwierdzającego wygasł; zaktualizuj przydziały",
+      "assignment_needs_approver": "Podaj zatwierdzającego tego poziomu przed wskazaniem zastępcy lub okresu ważności",
+      "assignment_window_inverted": "Przydział kończy się przed rozpoczęciem",
+      "cancellation_schedule_invalid": "Każdy krok wymaga kamienia milowego, daty lub postępu oraz dokładnie jednej opłaty",
+      "catalogue_code_taken": "Ten kod jest już używany przez inny katalog",
+      "catalogue_invalid": "Katalog jest nieprawidłowy",
+      "catalogue_retired": "Ten katalog został wycofany",
+      "change_belongs_to_contract_item": "Zmiana i jej kontrakt są powiązane w tej samej pozycji",
+      "commitment_guard_unavailable": "Nie udało się wykonać sprawdzenia zwolnienia, dlatego działanie nie zostało dozwolone",
+      "commitment_not_in_matrix": "Ten dokument nie znajduje się w macierzy zobowiązań",
+      "commitment_not_released": "To zobowiązanie nie zostało zwolnione na tę kwotę",
+      "commitment_type_unknown": "Tego typu zobowiązania nie ma w harmonogramie uprawnień",
+      "contingency_insufficient": "Saldo rezerwy nie pokrywa tego wydatkowania",
+      "contingency_line_required": "Wydatkowanie z rezerwy wymaga pozycji budżetu, na której znajduje się rezerwa",
+      "date_invalid": "To nie jest data",
+      "decider_not_tier_holder": "Zatwierdzone przez osobę, która nie posiada tego poziomu uprawnień",
+      "decision_invalid": "Wybierz zatwierdzenie lub odrzucenie",
+      "deferral_needs_reason": "Zapisz, dlaczego pozycja zostaje odroczona",
+      "document_linked_elsewhere": "Ten dokument jest już wliczony w inną pozycję",
+      "document_not_found": "Nie znaleziono dokumentu w tym projekcie",
+      "drawdown_released_by_commitment": "To wydatkowanie dotyczy zwolnionej pozycji zobowiązania. Anuluj tę pozycję, aby odzyskać pieniądze.",
+      "edit_required": "Twoja rola nie pozwala edytować pozycji zobowiązań",
+      "enforcement_invalid": "Egzekwowanie musi być wyłączone, ostrzegawcze lub blokujące",
+      "external_approval_not_required": "Kwotę rozstrzyga poziom harmonogramu: usuń odniesienie do zewnętrznej zgody",
+      "external_approval_required": "Kwota przekracza wszystkie poziomy: dołącz odniesienie do zewnętrznej zgody",
+      "field_frozen": "Tego pola nie można już zmienić dla tej pozycji",
+      "field_required": "To pole nie może być puste",
+      "flag_unknown": "Tej flagi nie ma w harmonogramie uprawnień",
+      "four_eyes_no_approver": "Nikt na tym poziomie nie może rozstrzygnąć tego wniosku zgodnie z zasadą czterech oczu",
+      "four_eyes_requester_is_approver": "Cztery oczy: nie możesz zgłosić zwolnienia, które sam zatwierdziłbyś",
+      "four_eyes_violation": "Osoba, która zgłosiła, prowadzi lub potwierdziła tę pozycję, nie może jej rozstrzygnąć",
+      "frame_document_not_found": "Nie znaleziono dokumentu ramowego w tym projekcie",
+      "funding_application_not_found": "Nie znaleziono wniosku o finansowanie w tym projekcie",
+      "fx_policy_invalid": "Nieznana polityka kursów walutowych",
+      "fx_rate_missing": "Brak kursu walutowego na tę datę: zwolnienia nie można ocenić",
+      "gate_unknown": "Tej bramki nie ma w modelu zarządzania projektem",
+      "gates_not_in_use": "Ten projekt nie używa bramek, więc nic nie może na nie czekać",
+      "governance_area_required": "Pozycja powiązana z bramką wymaga obszaru zarządzania",
+      "governance_area_unknown": "Tego obszaru zarządzania nie ma w modelu zarządzania projektem",
+      "invalid_transition": "Ten krok jest niemożliwy w bieżącym stanie",
+      "item_changed": "Pozycja zmieniła się w międzyczasie. Spróbuj ponownie.",
+      "item_closed": "Pozycja jest zamknięta",
+      "item_code_taken": "Ten kod jest już używany przez inną pozycję",
+      "item_not_found": "Nie znaleziono pozycji zobowiązania",
+      "link_kind_invalid": "Nieznany rodzaj dokumentu",
+      "link_kind_not_supported": "Tego rodzaju dokumentu nie można jeszcze powiązać",
+      "link_not_found": "Nie znaleziono powiązania",
+      "manage_required": "Tylko osoba zarządzająca macierzą może to zrobić",
+      "manual_amount_needs_currency": "Ręczny szacunek wymaga kwoty i waluty",
+      "matrix_missing": "Ten projekt nie ma jeszcze macierzy zobowiązań",
+      "no_pending_release": "Brak oczekującego wniosku o zwolnienie",
+      "no_route_for_tier": "Na wymagany poziom nie przydzielono jeszcze nikogo",
+      "not_entitled_decider": "Nie posiadasz poziomu uprawnień, na którym rozstrzygany jest ten wniosek",
+      "not_item_owner": "Tylko właściciel pozycji lub kierownik może ją zmienić",
+      "not_requester": "Tylko zgłaszający lub kierownik może wycofać ten wniosek",
+      "planned_source_invalid": "Nieznane źródło kwoty planowanej",
+      "planned_source_not_found": "Nie znaleziono pozycji budżetu, kosztu ani pozycji kosztorysowej w tym projekcie",
+      "plant_item_not_found": "Nie znaleziono pozycji sprzętu w tym projekcie",
+      "precondition_is_computed": "Ten warunek jest odczytywany z modułu i nie może zostać zaznaczony ręcznie",
+      "precondition_kind_invalid": "Nieznany rodzaj warunku",
+      "precondition_needs_evidence": "Dołącz odniesienie do dowodu",
+      "precondition_needs_ref": "Ten warunek wymaga odniesienia",
+      "precondition_not_found": "Nie znaleziono warunku",
+      "preconditions_open": "Otwarte warunki blokują to zwolnienie",
+      "project_not_found": "Nie znaleziono projektu",
+      "rationale_required": "Podaj uzasadnienie",
+      "release_decided": "Ten wniosek o zwolnienie został już rozstrzygnięty",
+      "release_expired": "Zwolnienie tej pozycji przekroczyło datę ważności: przed kolejnymi zobowiązaniami wnioskuj o odnowienie zwolnienia",
+      "release_pending": "Wniosek o zwolnienie tej pozycji jest już w toku",
+      "requisition_not_found": "Nie znaleziono zapotrzebowania w tym projekcie",
+      "route_changed_since_accepted": "Ścieżka zatwierdzania tego poziomu została zmieniona. Kierownik musi ją ponownie przypiąć.",
+      "route_must_belong_to_project": "Można przypiąć tylko ścieżkę zatwierdzania należącą do tego projektu",
+      "route_not_found": "Nie znaleziono ścieżki zatwierdzania",
+      "schedule_currency_mismatch": "Ten harmonogram używa innej waluty niż już zapisane zwolnienia",
+      "schedule_not_in_force": "Przypięty harmonogram nie obowiązuje dzisiaj. Przypnij wersję, która obowiązuje.",
+      "schedule_type_mismatch": "Ten harmonogram nie zna typu zobowiązania istniejącej pozycji",
+      "tier_unknown": "Tego poziomu nie ma w harmonogramie uprawnień",
+      "transfer_links_stay_in_project": "Powiązane dokumenty należą do tego projektu. Przed przeniesieniem do innego projektu odłącz je.",
+      "transfer_target_invalid": "Pozycji nie można przenieść na nią samą",
+      "transfer_target_not_open": "Pozycja docelowa jest zamknięta lub czeka na decyzję",
+      "transferable_invalid": "Nieznana opcja przeniesienia",
+      "type_fixed_after_release": "Typu nie można zmienić po zgłoszeniu zwolnienia",
+      "unknown_catalogue": "Nie znaleziono katalogu"
+    },
+    "evidence": {
+      "decision_overdue": "Ostateczny termin decyzji dla tej pozycji zobowiązania minął, a nic nie zostało zwolnione: podejmij decyzję, odrocz z uzasadnieniem lub zapisz koszt opóźnienia",
+      "items_released_by_gate": "Zobowiązania przypadające na tę bramkę są zwolnione lub odroczone",
+      "items_without_area": "Pozycje zobowiązań tej bramki wskazują obszar zarządzania, którego projekt już nie ma",
+      "no_items_for_gate": "Żadna pozycja zobowiązania nie wskazuje tej bramki, więc nie wiadomo, czy przez nią trzeba zwolnić pieniądze"
+    },
+    "export": {
+      "as_of": "Stan na",
+      "col_code": "Kod",
+      "col_committed": "Zobowiązane",
+      "col_currency": "Waluta",
+      "col_decision_date": "Ostateczny termin decyzji",
+      "col_open_preconditions": "Otwarte warunki",
+      "col_overdue": "Termin decyzji minął",
+      "col_planned": "Planowane",
+      "col_released": "Zwolnione",
+      "col_residual_loss": "Strata pozostała po wypowiedzeniu",
+      "col_status": "Status",
+      "col_tier": "Wymagany poziom",
+      "col_title": "Zobowiązanie",
+      "col_type": "Typ",
+      "empty": "Brak pozycji zobowiązań",
+      "overdue": "Po terminie",
+      "project": "Projekt",
+      "title": "Macierz zobowiązań i zwolnień"
+    },
+    "exposure": {
+      "nothing_committed": "Nic nie zobowiązano, nic nie wydano"
+    },
+    "flag": {
+      "multi_year_commitment": "Wiąże kolejne lata budżetowe",
+      "novel_contentious": "Nowatorskie lub sporne"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Pozycja {item} jest zobowiązana, ale jej warunki wypowiedzenia są nieznane",
+        "suggestion": "Wpisz podstawę wypowiedzenia lub harmonogram anulowania"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Limity harmonogramu {schedule} nie rosną wraz z poziomem",
+        "suggestion": "Popraw przedziały i opublikuj nową wersję"
+      },
+      "committed_within_release": {
+        "fail": "Pozycja {item} wiąże więcej, niż zostało zwolnione",
+        "suggestion": "Zgłoś kolejne zwolnienie lub zmniejsz liczbę powiązanych dokumentów"
+      },
+      "decision_date_not_passed": {
+        "fail": "Ostateczny termin decyzji {date} pozycji {item} minął",
+        "suggestion": "Podejmij decyzję, odrocz z uzasadnieniem lub zapisz koszt opóźnienia"
+      },
+      "document_linked_once": {
+        "fail": "Dokument {document} jest wliczony w więcej niż jedną pozycję",
+        "suggestion": "Usuń drugie powiązanie"
+      },
+      "fx_rate_available": {
+        "fail": "Powiązana kwota pozycji {item} nie ma kursu walutowego",
+        "suggestion": "Dodaj kurs na tę datę w rejestrze kursów lub w projekcie"
+      },
+      "item_has_cost_code": {
+        "fail": "Pozycja {item} nie ma pozycji kosztowej",
+        "suggestion": "Przypisz pozycję kosztową, do której pozycja jest księgowana"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Nie można odczytać planowanej kwoty pozycji {item}",
+        "suggestion": "Wskaż pozycję budżetu, koszt lub pozycję kosztorysową albo wpisz ręczny szacunek"
+      },
+      "plant_item_in_register": {
+        "fail": "Pozycja {item} wskazuje sprzęt, którego nie ma już w rejestrze sprzętu, więc obowiązuje jej własny termin dostawy",
+        "suggestion": "Powiąż pozycję z sprzętem, który go zastąpił, albo usuń powiązanie"
+      },
+      "release_in_date": {
+        "fail": "Zwolnienie pozycji {item} obowiązywało do {date}: nic nowego nie może być zobowiązane w jego ramach",
+        "suggestion": "Zgłoś odnowienie zwolnienia na to, co jeszcze ma zostać zobowiązane"
+      },
+      "release_within_authority": {
+        "fail": "Zwolnienie {release} zostało rozstrzygnięte poniżej wymaganego poziomu {tier}",
+        "suggestion": "Zgłoś nowe zwolnienie zgodnie z obowiązującym harmonogramem"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Pozycje grupy {group} zostały zwolnione poniżej poziomu, jakiego wymaga ich suma",
+        "suggestion": "Zgłoś kolejne zwolnienie na poziomie sumy grupy"
+      }
+    },
+    "status": {
+      "aborted": "Wypowiedziane",
+      "closed": "Zamknięte",
+      "committed": "Zobowiązane",
+      "on_hold": "Wstrzymane",
+      "partially_released": "Częściowo zwolnione",
+      "planned": "Zaplanowane",
+      "re_release_required": "Wymagane ponowne zwolnienie",
+      "release_requested": "Zgłoszono zwolnienie",
+      "released": "Zwolnione",
+      "transferred": "Przeniesione"
+    },
+    "tier": {
+      "accounting_officer": "Główny księgowy",
+      "authority_head": "Kierownik urzędu",
+      "board": "Zarząd",
+      "contracting_officer": "Referent zamówień",
+      "department_head": "Kierownik departamentu",
+      "head_of_contracting_activity": "Kierownik działalności zamówieniowej",
+      "project_director": "Dyrektor projektu",
+      "project_lead": "Kierownik projektu wiodący",
+      "project_manager": "Kierownik projektu",
+      "senior_responsible_owner": "Nadrzędny właściciel odpowiedzialny",
+      "simplified_acquisition": "Zamówienia uproszczone",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Zmiana",
+      "claim_settlement": "Rozliczenie roszczenia",
+      "contingency_drawdown": "Wydatkowanie z rezerwy",
+      "design": "Projektowanie",
+      "services": "Usługi",
+      "supplies": "Dostawy",
+      "termination_settlement": "Rozliczenie wypowiedzenia",
+      "works": "Roboty budowlane"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "Decyzja w sprawie {code} powinna zapaść do {latest_decision_date}.",
+        "title": "Termin decyzji o zwolnieniu minął"
+      },
+      "re_release_required": {
+        "body": "Powiązane dokumenty {code} wiążą teraz {committed}, ponad zwolnione {released}.",
+        "title": "Wymagane ponowne zwolnienie"
+      },
+      "release_aborted": {
+        "body": "{code} zostało wstrzymane.",
+        "title": "Wypowiedzenie zatwierdzone"
+      },
+      "release_rejected": {
+        "body": "Zwolnienie {code} zostało odrzucone.",
+        "title": "Zwolnienie odrzucone"
+      },
+      "release_released": {
+        "body": "{code} zostało zwolnione.",
+        "title": "Zwolnienie przyznane"
+      }
+    }
+  }
+}

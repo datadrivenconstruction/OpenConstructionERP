@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Taxa sobre a parte não executada",
+      "presumed_unperformed_pct": "Percentagem presumida da parte não executada",
+      "profit_pct": "Lucro sobre a parte executada"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Um valor introduzido para este item",
+        "name": "Condições personalizadas"
+      },
+      "de_bgb_648": {
+        "description": "Preço acordado menos custos poupados; presume-se 5 % da parte não executada quando os custos poupados não estão documentados",
+        "name": "Rescisão livre pelo dono da obra (§ 648 BGB)",
+        "presumption": "Percentagem presumida da parte não executada"
+      },
+      "de_public_owner": {
+        "description": "Exemplo de delegação para um dono de obra público: limiar da UE para obras como o escalão superior, compromissos plurianuais junto do dirigente do organismo",
+        "eu_works_threshold": "Limiar da UE para obras 2026-27 (Regulamento Delegado (UE) 2025/2152), não confirmado",
+        "name": "Dono de obra público (Alemanha), exemplo"
+      },
+      "de_vob_b_8_1": {
+        "description": "Mesmo acerto que o § 648 BGB, a que a cláusula remete",
+        "name": "Rescisão livre nos termos do § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Remete para o § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Custos incorridos mais lucro sobre o trabalho executado mais despesas de liquidação",
+        "name": "Rescisão por conveniência (FAR 49)",
+        "profit_negotiated": "Taxa de lucro negociada"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Trabalho executado mais uma percentagem de honorários sobre a parte não executada, conforme indicado nos dados do contrato",
+        "fee_from_contract_data": "Percentagem dos dados do contrato",
+        "name": "Rescisão por motivo próprio do cliente (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Gestor de projeto, promotor e conselho com tetos de exemplo na moeda do projeto; sem valores legais",
+        "name": "Cronograma neutro de três níveis"
+      },
+      "none_free_cancellation": {
+        "description": "Sem encargos no cancelamento",
+        "name": "Cancelamento gratuito"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Encargos por data ou progresso de fabrico acordados com o fornecedor",
+        "name": "Calendário de cancelamento do fornecedor"
+      },
+      "uk_public_body": {
+        "description": "Exemplo de autoridade delegada por montante e novidade, segundo o Managing Public Money",
+        "name": "Entidade pública (Reino Unido), exemplo"
+      },
+      "us_federal_owner": {
+        "description": "Exemplo de escalões a partir do limiar de aquisição simplificada",
+        "name": "Dono de obra federal (EUA), exemplo",
+        "sat": "Limiar de aquisição simplificada de 350 000 USD desde 1-10-2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Base de rescisão desconhecida",
+      "abort_exposure_unknown": "A perda residual é desconhecida. Preencha primeiro os termos de rescisão.",
+      "abort_parameter_invalid": "Um parâmetro de rescisão é uma percentagem entre 0 e 1",
+      "abort_parameter_not_in_basis": "A base de rescisão escolhida não tem este parâmetro",
+      "abort_type_not_in_schedule": "O cronograma não tem escalão para um acerto de rescisão",
+      "activity_not_found": "A atividade do cronograma não foi encontrada neste projeto",
+      "amount_invalid": "O montante não é um número válido",
+      "amount_not_positive": "O montante tem de ser superior a zero",
+      "assignee_not_project_member": "Esta pessoa não é membro deste projeto",
+      "assignment_expired": "A atribuição do aprovador expirou; atualize as atribuições",
+      "assignment_needs_approver": "Indique o aprovador deste escalão antes de um substituto ou de um período de validade",
+      "assignment_window_inverted": "A atribuição termina antes de começar",
+      "cancellation_schedule_invalid": "Cada passo precisa de um marco, uma data ou progresso e exatamente um encargo",
+      "catalogue_code_taken": "Outro catálogo já usa este código",
+      "catalogue_invalid": "O catálogo não é válido",
+      "catalogue_retired": "Este catálogo está desativado",
+      "change_belongs_to_contract_item": "Uma alteração e o seu contrato estão ligados ao mesmo item",
+      "commitment_guard_unavailable": "Não foi possível fazer a verificação de libertação, por isso não foi permitido",
+      "commitment_not_in_matrix": "Este documento não está na matriz de compromissos",
+      "commitment_not_released": "Este compromisso não está libertado para este montante",
+      "commitment_type_unknown": "Este tipo de compromisso não consta do cronograma de competências",
+      "contingency_insufficient": "O saldo da contingência não cobre este levantamento",
+      "contingency_line_required": "Um levantamento de contingência precisa da rubrica orçamental que detém a contingência",
+      "date_invalid": "Isto não é uma data",
+      "decider_not_tier_holder": "Aprovado por alguém que não detém o escalão",
+      "decision_invalid": "Escolha aprovar ou rejeitar",
+      "deferral_needs_reason": "Escreva o motivo do adiamento do item",
+      "document_linked_elsewhere": "Este documento já está contado noutro item",
+      "document_not_found": "Documento não encontrado neste projeto",
+      "drawdown_released_by_commitment": "Este levantamento é um item de compromisso libertado. Anule esse item para recuperar o dinheiro.",
+      "edit_required": "A sua função não pode editar itens de compromisso",
+      "enforcement_invalid": "A aplicação tem de estar desligada, em aviso ou bloqueada",
+      "external_approval_not_required": "Este montante é decidido por um escalão do cronograma: remova a referência de aprovação externa",
+      "external_approval_required": "O montante está acima de todos os escalões: anexe a referência de aprovação externa",
+      "field_frozen": "Este campo já não pode ser alterado neste item",
+      "field_required": "Este campo não pode estar vazio",
+      "flag_unknown": "Esta marca não consta do cronograma de competências",
+      "four_eyes_no_approver": "Ninguém neste escalão pode decidir este pedido segundo a regra dos quatro olhos",
+      "four_eyes_requester_is_approver": "Quatro olhos: não pode pedir uma libertação que aprovaria você mesmo",
+      "four_eyes_violation": "Quem pediu, é responsável ou confirmou este item não o pode decidir",
+      "frame_document_not_found": "Documento-quadro não encontrado neste projeto",
+      "funding_application_not_found": "Candidatura de financiamento não encontrada neste projeto",
+      "fx_policy_invalid": "Política de taxa de câmbio desconhecida",
+      "fx_rate_missing": "Não há taxa de câmbio para esta data: a libertação não pode ser avaliada",
+      "gate_unknown": "Este marco não consta do modelo de governação do projeto",
+      "gates_not_in_use": "Este projeto não usa marcos, por isso nada pode aguardar por um",
+      "governance_area_required": "Um item ligado a um marco exige uma área de gestão",
+      "governance_area_unknown": "Esta área de gestão não consta do modelo de governação do projeto",
+      "invalid_transition": "Este passo não é possível no estado atual",
+      "item_changed": "O item foi alterado entretanto. Tente novamente.",
+      "item_closed": "O item está fechado",
+      "item_code_taken": "Outro item já usa este código",
+      "item_not_found": "Item de compromisso não encontrado",
+      "link_kind_invalid": "Tipo de documento desconhecido",
+      "link_kind_not_supported": "Este tipo de documento ainda não pode ser ligado",
+      "link_not_found": "Ligação não encontrada",
+      "manage_required": "Só quem gere a matriz pode fazer isto",
+      "manual_amount_needs_currency": "Uma estimativa manual precisa de um montante e de uma moeda",
+      "matrix_missing": "Este projeto ainda não tem matriz de compromissos",
+      "no_pending_release": "Não há nenhum pedido de libertação pendente",
+      "no_route_for_tier": "Ainda não foi atribuído ninguém ao escalão exigido",
+      "not_entitled_decider": "Não detém o escalão em que este pedido é decidido",
+      "not_item_owner": "Só o responsável pelo item ou um gestor pode alterar este item",
+      "not_requester": "Só quem fez o pedido ou um gestor pode retirar este pedido",
+      "planned_source_invalid": "Origem desconhecida para o montante planeado",
+      "planned_source_not_found": "A rubrica orçamental, a linha de custo ou a posição não foi encontrada neste projeto",
+      "plant_item_not_found": "O equipamento não foi encontrado neste projeto",
+      "precondition_is_computed": "Esta pré-condição é lida do seu módulo e não pode ser assinalada",
+      "precondition_kind_invalid": "Tipo de pré-condição desconhecido",
+      "precondition_needs_evidence": "Anexe a referência da evidência",
+      "precondition_needs_ref": "Esta pré-condição precisa de uma referência",
+      "precondition_not_found": "Pré-condição não encontrada",
+      "preconditions_open": "Pré-condições em aberto bloqueiam esta libertação",
+      "project_not_found": "Projeto não encontrado",
+      "rationale_required": "Indique um motivo",
+      "release_decided": "Este pedido de libertação já foi decidido",
+      "release_expired": "A libertação deste item ultrapassou a data de validade: peça uma nova libertação antes de comprometer mais valores",
+      "release_pending": "Já existe um pedido de libertação em curso para este item",
+      "requisition_not_found": "Requisição não encontrada neste projeto",
+      "route_changed_since_accepted": "O circuito de aprovação deste escalão foi editado. Um gestor tem de o fixar novamente.",
+      "route_must_belong_to_project": "Só pode ser fixado um circuito de aprovação deste projeto",
+      "route_not_found": "Circuito de aprovação não encontrado",
+      "schedule_currency_mismatch": "Este cronograma usa outra moeda das libertações já registadas",
+      "schedule_not_in_force": "O cronograma fixado não está em vigor hoje. Fixe a versão que está em vigor.",
+      "schedule_type_mismatch": "Este cronograma não conhece o tipo de compromisso de um item existente",
+      "tier_unknown": "Este escalão não consta do cronograma de competências",
+      "transfer_links_stay_in_project": "Os documentos ligados pertencem a este projeto. Desligue-os antes de transferir para outro projeto.",
+      "transfer_target_invalid": "Um item não pode ser transferido para si próprio",
+      "transfer_target_not_open": "O item de destino está fechado ou à espera de decisão",
+      "transferable_invalid": "Opção de transferência desconhecida",
+      "type_fixed_after_release": "O tipo não pode mudar depois de ter sido pedida uma libertação",
+      "unknown_catalogue": "Catálogo não encontrado"
+    },
+    "evidence": {
+      "decision_overdue": "A data limite de decisão deste item de compromisso já passou e nada foi libertado: decida, adie com motivo ou registe o custo do atraso",
+      "items_released_by_gate": "Os compromissos vencidos neste marco estão libertados ou adiados",
+      "items_without_area": "Os itens de compromisso deste marco indicam uma área de gestão que o projeto já não tem",
+      "no_items_for_gate": "Nenhum item de compromisso indica este marco, por isso não se sabe se é preciso libertar dinheiro até lá"
+    },
+    "export": {
+      "as_of": "A",
+      "col_code": "Código",
+      "col_committed": "Comprometido",
+      "col_currency": "Moeda",
+      "col_decision_date": "Data limite de decisão",
+      "col_open_preconditions": "Pré-condições em aberto",
+      "col_overdue": "Decisão em atraso",
+      "col_planned": "Planeado",
+      "col_released": "Libertado",
+      "col_residual_loss": "Perda residual na rescisão",
+      "col_status": "Estado",
+      "col_tier": "Escalão exigido",
+      "col_title": "Compromisso",
+      "col_type": "Tipo",
+      "empty": "Ainda não há itens de compromisso",
+      "overdue": "Em atraso",
+      "project": "Projeto",
+      "title": "Matriz de compromissos e libertações"
+    },
+    "exposure": {
+      "nothing_committed": "Nada comprometido, nada gasto"
+    },
+    "flag": {
+      "multi_year_commitment": "Vincula anos orçamentais seguintes",
+      "novel_contentious": "Novo ou controverso"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "O item {item} está comprometido, mas os seus termos de rescisão são desconhecidos",
+        "suggestion": "Indique a base de rescisão ou um calendário de cancelamento"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Os tetos do cronograma {schedule} não sobem com o escalão",
+        "suggestion": "Corrija os intervalos e publique uma nova versão"
+      },
+      "committed_within_release": {
+        "fail": "O item {item} compromete mais do que foi libertado",
+        "suggestion": "Peça uma libertação adicional ou reduza os documentos ligados"
+      },
+      "decision_date_not_passed": {
+        "fail": "A data limite de decisão {date} do item {item} já passou",
+        "suggestion": "Decida, adie com motivo ou registe o custo do atraso"
+      },
+      "document_linked_once": {
+        "fail": "O documento {document} está contado em mais de um item",
+        "suggestion": "Remova a segunda ligação"
+      },
+      "fx_rate_available": {
+        "fail": "Um montante ligado ao item {item} não tem taxa de câmbio",
+        "suggestion": "Adicione uma taxa para a data no registo de câmbios ou no projeto"
+      },
+      "item_has_cost_code": {
+        "fail": "O item {item} não tem linha de custo",
+        "suggestion": "Atribua a linha de custo em que o item é lançado"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Não é possível ler o montante planeado do item {item}",
+        "suggestion": "Aponte o item para uma rubrica orçamental, linha de custo ou posição, ou introduza uma estimativa manual"
+      },
+      "plant_item_in_register": {
+        "fail": "O item {item} indica um equipamento que já não está no registo de equipamentos, por isso aplica-se o seu próprio prazo de entrega",
+        "suggestion": "Ligue o item ao equipamento que o substituiu ou remova a ligação"
+      },
+      "release_in_date": {
+        "fail": "Uma libertação do item {item} era válida até {date}: nada de novo pode ser comprometido ao abrigo dela",
+        "suggestion": "Peça a renovação da libertação para o que ainda falta comprometer"
+      },
+      "release_within_authority": {
+        "fail": "A libertação {release} foi decidida abaixo do escalão exigido {tier}",
+        "suggestion": "Peça uma nova libertação segundo o cronograma em vigor"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Os itens do grupo {group} foram libertados abaixo do escalão que a sua soma exige",
+        "suggestion": "Peça a libertação seguinte ao escalão do total do grupo"
+      }
+    },
+    "status": {
+      "aborted": "Rescindido",
+      "closed": "Fechado",
+      "committed": "Comprometido",
+      "on_hold": "Suspenso",
+      "partially_released": "Parcialmente libertado",
+      "planned": "Planeado",
+      "re_release_required": "Nova libertação necessária",
+      "release_requested": "Libertação pedida",
+      "released": "Libertado",
+      "transferred": "Transferido"
+    },
+    "tier": {
+      "accounting_officer": "Responsável contabilístico",
+      "authority_head": "Dirigente do organismo",
+      "board": "Conselho de administração",
+      "contracting_officer": "Responsável pela contratação",
+      "department_head": "Chefe de departamento",
+      "head_of_contracting_activity": "Responsável pela atividade de contratação",
+      "project_director": "Diretor de projeto",
+      "project_lead": "Responsável do projeto",
+      "project_manager": "Gestor de projeto",
+      "senior_responsible_owner": "Responsável sénior pelo projeto",
+      "simplified_acquisition": "Aquisição simplificada",
+      "sponsor": "Promotor"
+    },
+    "type": {
+      "change": "Alteração",
+      "claim_settlement": "Liquidação de reclamação",
+      "contingency_drawdown": "Levantamento de contingência",
+      "design": "Projeto",
+      "services": "Serviços",
+      "supplies": "Fornecimentos",
+      "termination_settlement": "Acerto de rescisão",
+      "works": "Obras"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} devia ter sido decidido até {latest_decision_date}.",
+        "title": "Decisão de libertação em atraso"
+      },
+      "re_release_required": {
+        "body": "Os documentos ligados a {code} comprometem agora {committed}, acima da libertação de {released}.",
+        "title": "Nova libertação necessária"
+      },
+      "release_aborted": {
+        "body": "{code} foi interrompido.",
+        "title": "Rescisão aprovada"
+      },
+      "release_rejected": {
+        "body": "A libertação de {code} foi rejeitada.",
+        "title": "Libertação rejeitada"
+      },
+      "release_released": {
+        "body": "{code} foi libertado.",
+        "title": "Libertação concedida"
+      }
+    }
+  }
+}

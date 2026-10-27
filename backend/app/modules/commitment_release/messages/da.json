@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Gebyr på den ikke udførte del",
+      "presumed_unperformed_pct": "Antaget andel af den ikke udførte del",
+      "profit_pct": "Avance på den udførte del"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "En omkostning indtastet for denne post",
+        "name": "Brugerdefinerede vilkår"
+      },
+      "de_bgb_648": {
+        "description": "Aftalt pris med fradrag af sparede omkostninger; 5 % af den ikke udførte del antages, når sparede omkostninger ikke er dokumenteret",
+        "name": "Fri opsigelse af bygherre (§ 648 BGB)",
+        "presumption": "Antaget andel af den ikke udførte del"
+      },
+      "de_public_owner": {
+        "description": "Eksempel på delegation for en offentlig bygherre: EU-tærskel for bygge- og anlægsarbejder som øverste niveau, flerårige forpligtelser for myndighedens chef",
+        "eu_works_threshold": "EU-tærskel for bygge- og anlægsarbejder 2026-27 (delegeret forordning (EU) 2025/2152), ikke bekræftet",
+        "name": "Offentlig bygherre (Tyskland), eksempel"
+      },
+      "de_vob_b_8_1": {
+        "description": "Samme afregning som § 648 BGB, som klausulen henviser til",
+        "name": "Fri opsigelse efter § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Henviser til § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Afholdte omkostninger plus avance på udført arbejde plus afregningsudgifter",
+        "name": "Opsigelse af bekvemmelighedsgrunde (FAR 49)",
+        "profit_negotiated": "Avancesats fastsat ved forhandling"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Udført arbejde plus en procentsats i gebyr på den ikke udførte del, som angivet i kontraktdata",
+        "fee_from_contract_data": "Procentsats fra kontraktdata",
+        "name": "Opsigelse af bygherrens egen grund (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Projektleder, sponsor og bestyrelse med eksempelloft i projektets valuta; ingen lovmæssige beløb",
+        "name": "Neutral tre-trins oversigt"
+      },
+      "none_free_cancellation": {
+        "description": "Ingen gebyr ved annullering",
+        "name": "Gratis annullering"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Gebyrer efter dato eller fremstillingsfremdrift som aftalt med leverandøren",
+        "name": "Leverandørens annulleringsplan"
+      },
+      "uk_public_body": {
+        "description": "Eksempel på delegeret beføjelse efter beløb og nyhed i henhold til Managing Public Money",
+        "name": "Offentligt organ (Storbritannien), eksempel"
+      },
+      "us_federal_owner": {
+        "description": "Eksempelniveauer fra den forenklede indkøbstærskel",
+        "name": "Føderal bygherre (USA), eksempel",
+        "sat": "Forenklet indkøbstærskel USD 350.000 fra 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Ukendt grundlag for opsigelse",
+      "abort_exposure_unknown": "Restkravet er ukendt. Udfyld først opsigelsesvilkårene.",
+      "abort_parameter_invalid": "En opsigelsesparameter er en andel mellem 0 og 1",
+      "abort_parameter_not_in_basis": "Det valgte opsigelsesgrundlag har ikke denne parameter",
+      "abort_type_not_in_schedule": "Oversigten har ingen niveau for opgørelse ved opsigelse",
+      "activity_not_found": "Oversigtsaktiviteten blev ikke fundet i dette projekt",
+      "amount_invalid": "Beløbet er ikke et gyldigt tal",
+      "amount_not_positive": "Beløbet skal være større end nul",
+      "assignee_not_project_member": "Personen er ikke medlem af dette projekt",
+      "assignment_expired": "Godkenderens tildeling er udløbet; opdater tildelingerne",
+      "assignment_needs_approver": "Angiv godkenderen for dette niveau, før der tilføjes en stedfortræder eller en gyldighedsperiode",
+      "assignment_window_inverted": "Tildelingen slutter, før den begynder",
+      "cancellation_schedule_invalid": "Hvert trin kræver en milepæl, en dato eller fremdrift og præcis ét gebyr",
+      "catalogue_code_taken": "En anden katalog bruger allerede denne kode",
+      "catalogue_invalid": "Kataloget er ikke gyldigt",
+      "catalogue_retired": "Dette katalog er udgået",
+      "change_belongs_to_contract_item": "En ændring og dens kontrakt er knyttet til samme post",
+      "commitment_guard_unavailable": "Frigivelsestjekket kunne ikke udføres, så dette blev ikke tilladt",
+      "commitment_not_in_matrix": "Dette dokument er ikke i forpligtelsesmatricen",
+      "commitment_not_released": "Denne forpligtelse er ikke frigivet for dette beløb",
+      "commitment_type_unknown": "Denne forpligtelsestype findes ikke i beføjelsesoversigten",
+      "contingency_insufficient": "Saldoen på reserven dækker ikke dette træk",
+      "contingency_line_required": "Et træk på reserven kræver den budgetlinje, som reserven ligger på",
+      "date_invalid": "Dette er ikke en dato",
+      "decider_not_tier_holder": "Godkendt af en person, der ikke har dette niveau",
+      "decision_invalid": "Vælg godkend eller afvis",
+      "deferral_needs_reason": "Skriv, hvorfor posten udskydes",
+      "document_linked_elsewhere": "Dette dokument er allerede talt med i en anden post",
+      "document_not_found": "Dokumentet blev ikke fundet i dette projekt",
+      "drawdown_released_by_commitment": "Dette træk er en frigivet forpligtelsespost. Annuller den post for at få pengene tilbage.",
+      "edit_required": "Din rolle kan ikke redigere forpligtelsesposter",
+      "enforcement_invalid": "Håndhævelse skal være fra, advar eller bloker",
+      "external_approval_not_required": "Dette beløb afgøres af et niveau i oversigten: fjern referencen til ekstern godkendelse",
+      "external_approval_required": "Beløbet er over alle niveauer: vedhæft referencen til ekstern godkendelse",
+      "field_frozen": "Dette felt kan ikke længere ændres for denne post",
+      "field_required": "Dette felt må ikke være tomt",
+      "flag_unknown": "Dette flag findes ikke i beføjelsesoversigten",
+      "four_eyes_no_approver": "Ingen på dette niveau må afgøre denne anmodning efter firøjneprincippet",
+      "four_eyes_requester_is_approver": "Firøjneprincippet: du kan ikke anmode om en frigivelse, som du selv ville godkende",
+      "four_eyes_violation": "Den, der anmodede om, ejer eller bekræftede denne post, kan ikke afgøre den",
+      "frame_document_not_found": "Rammedokumentet blev ikke fundet i dette projekt",
+      "funding_application_not_found": "Finansieringsansøgningen blev ikke fundet i dette projekt",
+      "fx_policy_invalid": "Ukendt valutakursspolitik",
+      "fx_rate_missing": "Der er ingen valutakurs for denne dato: frigivelsen kan ikke vurderes",
+      "gate_unknown": "Denne gate findes ikke i projektets styringsmodel",
+      "gates_not_in_use": "Dette projekt bruger ikke gates, så intet kan vente på en gate",
+      "governance_area_required": "En post knyttet til en gate kræver et ledelsesområde",
+      "governance_area_unknown": "Dette ledelsesområde findes ikke i projektets styringsmodel",
+      "invalid_transition": "Dette trin er ikke muligt i den aktuelle tilstand",
+      "item_changed": "Posten er ændret i mellemtiden. Prøv igen.",
+      "item_closed": "Posten er lukket",
+      "item_code_taken": "En anden post bruger allerede denne kode",
+      "item_not_found": "Forpligtelsespost blev ikke fundet",
+      "link_kind_invalid": "Ukendt dokumenttype",
+      "link_kind_not_supported": "Denne dokumenttype kan endnu ikke knyttes",
+      "link_not_found": "Linket blev ikke fundet",
+      "manage_required": "Kun den, der administrerer matricen, kan gøre dette",
+      "manual_amount_needs_currency": "Et manuelt skøn kræver et beløb og en valuta",
+      "matrix_missing": "Dette projekt har endnu ingen forpligtelsesmatrice",
+      "no_pending_release": "Der er ingen afventende frigivelsesanmodning",
+      "no_route_for_tier": "Ingen er endnu tildelt det krævede niveau",
+      "not_entitled_decider": "Du har ikke det niveau, som denne anmodning afgøres på",
+      "not_item_owner": "Kun postens ejer eller en leder kan ændre denne post",
+      "not_requester": "Kun anmoderen eller en leder kan trække denne anmodning tilbage",
+      "planned_source_invalid": "Ukendt kilde til det planlagte beløb",
+      "planned_source_not_found": "Budgetlinjen, omkostningslinjen eller positionen blev ikke fundet i dette projekt",
+      "plant_item_not_found": "Anlægsposten blev ikke fundet i dette projekt",
+      "precondition_is_computed": "Denne forudsætning læses fra sit modul og kan ikke afkrydses",
+      "precondition_kind_invalid": "Ukendt type af forudsætning",
+      "precondition_needs_evidence": "Vedhæft referencen til dokumentationen",
+      "precondition_needs_ref": "Denne forudsætning kræver en reference",
+      "precondition_not_found": "Forudsætningen blev ikke fundet",
+      "preconditions_open": "Åbne forudsætninger blokerer denne frigivelse",
+      "project_not_found": "Projektet blev ikke fundet",
+      "rationale_required": "Angiv en begrundelse",
+      "release_decided": "Denne frigivelsesanmodning er allerede afgjort",
+      "release_expired": "Frigivelsen af denne post er ud over sin gyldighedsdato: anmod om fornyet frigivelse, før der binds mere",
+      "release_pending": "En frigivelsesanmodning for denne post kører allerede",
+      "requisition_not_found": "Rekvisitionen blev ikke fundet i dette projekt",
+      "route_changed_since_accepted": "Godkendelsesruten for dette niveau er ændret. En leder skal fastgøre den igen.",
+      "route_must_belong_to_project": "Kun en godkendelsesrute for dette projekt kan fastgøres",
+      "route_not_found": "Godkendelsesruten blev ikke fundet",
+      "schedule_currency_mismatch": "Denne oversigt bruger en anden valuta end de frigivelser, der allerede er registreret",
+      "schedule_not_in_force": "Den fastgjorte oversigt gælder ikke i dag. Fastgør den version, der gælder.",
+      "schedule_type_mismatch": "Denne oversigt kender ikke forpligtelsestypen for en eksisterende post",
+      "tier_unknown": "Dette niveau findes ikke i beføjelsesoversigten",
+      "transfer_links_stay_in_project": "Tilknyttede dokumenter hører til dette projekt. Fjern forbindelserne, før overførsel til et andet projekt.",
+      "transfer_target_invalid": "En post kan ikke overføres til sig selv",
+      "transfer_target_not_open": "Målposten er lukket eller venter på en afgørelse",
+      "transferable_invalid": "Ukendt overførselsmulighed",
+      "type_fixed_after_release": "Typen kan ikke ændres, når der er anmodet om frigivelse",
+      "unknown_catalogue": "Kataloget blev ikke fundet"
+    },
+    "evidence": {
+      "decision_overdue": "Den seneste beslutningsdato for denne forpligtelsespost er passeret, og intet er frigivet: beslut, udsæt med begrundelse, eller registrer omkostningen ved forsinkelsen",
+      "items_released_by_gate": "Forpligtelser, der forfalder ved denne gate, er frigivet eller udskudt",
+      "items_without_area": "Forpligtelsesposter ved denne gate angiver et ledelsesområde, som projektet ikke længere har",
+      "no_items_for_gate": "Ingen forpligtelsespost angiver denne gate, så det er ukendt, om penge skal frigives ved den"
+    },
+    "export": {
+      "as_of": "Pr.",
+      "col_code": "Kode",
+      "col_committed": "Forpligtet",
+      "col_currency": "Valuta",
+      "col_decision_date": "Seneste beslutningsdato",
+      "col_open_preconditions": "Åbne forudsætninger",
+      "col_overdue": "Beslutning forsinket",
+      "col_planned": "Planlagt",
+      "col_released": "Frigivet",
+      "col_residual_loss": "Restkrav ved opsigelse",
+      "col_status": "Status",
+      "col_tier": "Krævet niveau",
+      "col_title": "Forpligtelse",
+      "col_type": "Type",
+      "empty": "Ingen forpligtelsesposter endnu",
+      "overdue": "Forsinket",
+      "project": "Projekt",
+      "title": "Forpligtelses- og frigivelsesmatrice"
+    },
+    "exposure": {
+      "nothing_committed": "Intet forpligtet, intet brugt"
+    },
+    "flag": {
+      "multi_year_commitment": "Binder senere budgetår",
+      "novel_contentious": "Nyt eller omstridt"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Post {item} er forpligtet, men dens opsigelsesvilkår er ukendte",
+        "suggestion": "Angiv opsigelsesgrundlaget eller en annulleringsplan"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Lofterne i oversigten {schedule} stiger ikke med niveauet",
+        "suggestion": "Ret niveauerne og offentliggør en ny version"
+      },
+      "committed_within_release": {
+        "fail": "Post {item} binder mere, end der er frigivet",
+        "suggestion": "Anmod om en yderligere frigivelse eller reducer de tilknyttede dokumenter"
+      },
+      "decision_date_not_passed": {
+        "fail": "Den seneste beslutningsdato {date} for post {item} er passeret",
+        "suggestion": "Beslut, udsæt med begrundelse, eller registrer omkostningen ved forsinkelsen"
+      },
+      "document_linked_once": {
+        "fail": "Dokument {document} er talt med i mere end én post",
+        "suggestion": "Fjern den anden forbindelse"
+      },
+      "fx_rate_available": {
+        "fail": "Et tilknyttet beløb på post {item} har ingen valutakurs",
+        "suggestion": "Tilføj en kurs for datoen i valutakursregistret eller i projektet"
+      },
+      "item_has_cost_code": {
+        "fail": "Post {item} har ingen omkostningslinje",
+        "suggestion": "Tildel den omkostningslinje, som posten bogføres på"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Det planlagte beløb for post {item} kan ikke læses",
+        "suggestion": "Peg posten på en budgetlinje, omkostningslinje eller position, eller indtast et manuelt skøn"
+      },
+      "plant_item_in_register": {
+        "fail": "Post {item} angiver en anlægspost, der ikke længere findes i anlægsregistret, så dens egen leveringstid gælder",
+        "suggestion": "Knyt posten til den anlægspost, der erstattede den, eller fjern forbindelsen"
+      },
+      "release_in_date": {
+        "fail": "En frigivelse af post {item} var gyldig til {date}: der kan ikke bindes noget nyt under den",
+        "suggestion": "Anmod om en fornyet frigivelse for det, der stadig skal bindes"
+      },
+      "release_within_authority": {
+        "fail": "Frigivelse {release} blev besluttet under det krævede niveau {tier}",
+        "suggestion": "Anmod om en ny frigivelse efter den gældende oversigt"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Posterne i gruppe {group} blev frigivet under det niveau, deres sum kræver",
+        "suggestion": "Anmod om den næste frigivelse på niveauet for gruppens samlede sum"
+      }
+    },
+    "status": {
+      "aborted": "Opsagt",
+      "closed": "Lukket",
+      "committed": "Forpligtet",
+      "on_hold": "På hold",
+      "partially_released": "Delvist frigivet",
+      "planned": "Planlagt",
+      "re_release_required": "Ny frigivelse påkrævet",
+      "release_requested": "Frigivelse anmodet",
+      "released": "Frigivet",
+      "transferred": "Overført"
+    },
+    "tier": {
+      "accounting_officer": "Regnskabsansvarlig",
+      "authority_head": "Myndighedens chef",
+      "board": "Bestyrelse",
+      "contracting_officer": "Kontraktansvarlig",
+      "department_head": "Afdelingschef",
+      "head_of_contracting_activity": "Chef for udbudsaktiviteten",
+      "project_director": "Projektdirektør",
+      "project_lead": "Projektleder",
+      "project_manager": "Projektchef",
+      "senior_responsible_owner": "Overordnet ansvarlig ejer",
+      "simplified_acquisition": "Forenklet indkøb",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Ændring",
+      "claim_settlement": "Kravsopgørelse",
+      "contingency_drawdown": "Træk på reserve",
+      "design": "Projektering",
+      "services": "Ydelser",
+      "supplies": "Leverancer",
+      "termination_settlement": "Opgørelse ved opsigelse",
+      "works": "Entreprise"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} skulle have været besluttet senest {latest_decision_date}.",
+        "title": "Frigivelsesbeslutning forsinket"
+      },
+      "re_release_required": {
+        "body": "De tilknyttede dokumenter til {code} binder nu {committed}, over frigivelsen på {released}.",
+        "title": "Ny frigivelse påkrævet"
+      },
+      "release_aborted": {
+        "body": "{code} blev stoppet.",
+        "title": "Opsigelse godkendt"
+      },
+      "release_rejected": {
+        "body": "Frigivelsen af {code} blev afvist.",
+        "title": "Frigivelse afvist"
+      },
+      "release_released": {
+        "body": "{code} blev frigivet.",
+        "title": "Frigivelse givet"
+      }
+    }
+  }
+}

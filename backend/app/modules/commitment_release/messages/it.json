@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Compenso sulla parte non eseguita",
+      "presumed_unperformed_pct": "Quota presunta della parte non eseguita",
+      "profit_pct": "Utile sulla parte eseguita"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Un importo inserito per questa voce",
+        "name": "Condizioni personalizzate"
+      },
+      "de_bgb_648": {
+        "description": "Prezzo concordato al netto dei costi risparmiati; si presume il 5 % della parte non eseguita quando i costi risparmiati non sono documentati",
+        "name": "Recesso libero del committente (§ 648 BGB)",
+        "presumption": "Quota presunta della parte non eseguita"
+      },
+      "de_public_owner": {
+        "description": "Esempio di delega per un committente pubblico: soglia UE per i lavori come fascia più alta, impegni pluriennali al responsabile dell'ente",
+        "eu_works_threshold": "Soglia UE per i lavori 2026-27 (Regolamento delegato (UE) 2025/2152), non confermata",
+        "name": "Committente pubblico (Germania), esempio"
+      },
+      "de_vob_b_8_1": {
+        "description": "Stesso regolamento del § 648 BGB, a cui la clausola rimanda",
+        "name": "Recesso libero ai sensi del § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Rinvia al § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Costi sostenuti più utile sul lavoro eseguito più spese di liquidazione",
+        "name": "Risoluzione per convenienza (FAR 49)",
+        "profit_negotiated": "Percentuale di utile concordata"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Lavori eseguiti più una percentuale di compenso sulla parte non eseguita, come indicato nei dati del contratto",
+        "fee_from_contract_data": "Percentuale dai dati del contratto",
+        "name": "Risoluzione per motivo proprio del committente (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Responsabile di progetto, sponsor e consiglio con limiti di esempio nella valuta del progetto; nessun importo di legge",
+        "name": "Schema neutro a tre livelli"
+      },
+      "none_free_cancellation": {
+        "description": "Nessun costo in caso di annullamento",
+        "name": "Annullamento gratuito"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Costi per data o avanzamento della fabbricazione, come concordato con il fornitore",
+        "name": "Calendario di annullamento del fornitore"
+      },
+      "uk_public_body": {
+        "description": "Esempio di autorità delegata per importo e novità secondo Managing Public Money",
+        "name": "Ente pubblico (Regno Unito), esempio"
+      },
+      "us_federal_owner": {
+        "description": "Esempio di fasce a partire dalla soglia degli acquisti semplificati",
+        "name": "Committente federale (Stati Uniti), esempio",
+        "sat": "Soglia degli acquisti semplificati USD 350.000 dal 1-10-2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Base di recesso sconosciuta",
+      "abort_exposure_unknown": "La perdita residua non è nota. Completa prima le condizioni di recesso.",
+      "abort_parameter_invalid": "Un parametro di recesso è una quota compresa tra 0 e 1",
+      "abort_parameter_not_in_basis": "La base di recesso scelta non prevede questo parametro",
+      "abort_type_not_in_schedule": "Il calendario non prevede una fascia per la liquidazione del recesso",
+      "activity_not_found": "L'attività del calendario non è stata trovata in questo progetto",
+      "amount_invalid": "L'importo non è un numero valido",
+      "amount_not_positive": "L'importo deve essere maggiore di zero",
+      "assignee_not_project_member": "La persona non è membro di questo progetto",
+      "assignment_expired": "L'incarico dell'approvatore è scaduto; aggiorna gli incarichi",
+      "assignment_needs_approver": "Indica l'approvatore di questa fascia prima di definire un sostituto o un periodo di validità",
+      "assignment_window_inverted": "L'incarico termina prima di iniziare",
+      "cancellation_schedule_invalid": "Ogni passo richiede una milestone, una data o un avanzamento e esattamente un costo",
+      "catalogue_code_taken": "Un altro catalogo usa già questo codice",
+      "catalogue_invalid": "Il catalogo non è valido",
+      "catalogue_retired": "Questo catalogo è ritirato",
+      "change_belongs_to_contract_item": "Una variante e il suo contratto sono collegati sulla stessa voce",
+      "commitment_guard_unavailable": "Non è stato possibile eseguire la verifica di svincolo, quindi l'operazione non è consentita",
+      "commitment_not_in_matrix": "Questo documento non è nella matrice degli impegni",
+      "commitment_not_released": "Questo impegno non è svincolato per questo importo",
+      "commitment_type_unknown": "Questo tipo di impegno non è nel calendario delle autorizzazioni",
+      "contingency_insufficient": "Il saldo dell'imprevisto non copre questo prelievo",
+      "contingency_line_required": "Un prelievo dall'imprevisto richiede la voce di budget che contiene l'imprevisto",
+      "date_invalid": "Non è una data",
+      "decider_not_tier_holder": "Approvato da chi non detiene la fascia",
+      "decision_invalid": "Scegli approva o respingi",
+      "deferral_needs_reason": "Scrivi perché la voce viene rinviata",
+      "document_linked_elsewhere": "Questo documento è già conteggiato in un'altra voce",
+      "document_not_found": "Documento non trovato in questo progetto",
+      "drawdown_released_by_commitment": "Questo prelievo è una voce di impegno svincolata. Annulla quella voce per recuperare il denaro.",
+      "edit_required": "Il tuo ruolo non può modificare le voci di impegno",
+      "enforcement_invalid": "L'applicazione deve essere disattivata, solo avviso o blocco",
+      "external_approval_not_required": "Questo importo è deciso da una fascia del calendario: rimuovi il riferimento all'approvazione esterna",
+      "external_approval_required": "L'importo supera tutte le fasce: allega il riferimento all'approvazione esterna",
+      "field_frozen": "Questo campo non può più essere modificato per questa voce",
+      "field_required": "Questo campo non può essere vuoto",
+      "flag_unknown": "Questo contrassegno non è nel calendario delle autorizzazioni",
+      "four_eyes_no_approver": "Nessuno in questa fascia può decidere questa richiesta secondo la regola dei quattro occhi",
+      "four_eyes_requester_is_approver": "Quattro occhi: non puoi richiedere uno svincolo che approveresti tu stesso",
+      "four_eyes_violation": "Chi ha richiesto, possiede o ha confermato questa voce non può deciderla",
+      "frame_document_not_found": "Il documento quadro non è stato trovato in questo progetto",
+      "funding_application_not_found": "La domanda di finanziamento non è stata trovata in questo progetto",
+      "fx_policy_invalid": "Politica di cambio sconosciuta",
+      "fx_rate_missing": "Nessun tasso di cambio per questa data: lo svincolo non può essere valutato",
+      "gate_unknown": "Questo gate non è nel modello di governance del progetto",
+      "gates_not_in_use": "Questo progetto non usa gate, quindi nulla può attendere un gate",
+      "governance_area_required": "Una voce legata a un gate richiede un'area di gestione",
+      "governance_area_unknown": "Questa area di gestione non è nel modello di governance del progetto",
+      "invalid_transition": "Questo passaggio non è possibile nello stato attuale",
+      "item_changed": "La voce è cambiata nel frattempo. Riprova.",
+      "item_closed": "La voce è chiusa",
+      "item_code_taken": "Un'altra voce usa già questo codice",
+      "item_not_found": "Voce di impegno non trovata",
+      "link_kind_invalid": "Tipo di documento sconosciuto",
+      "link_kind_not_supported": "Questo tipo di documento non può ancora essere collegato",
+      "link_not_found": "Collegamento non trovato",
+      "manage_required": "Solo chi gestisce la matrice può farlo",
+      "manual_amount_needs_currency": "Una stima manuale richiede un importo e una valuta",
+      "matrix_missing": "Questo progetto non ha ancora una matrice degli impegni",
+      "no_pending_release": "Non c'è alcuna richiesta di svincolo in attesa",
+      "no_route_for_tier": "Nessuno è ancora assegnato alla fascia richiesta",
+      "not_entitled_decider": "Non detieni la fascia su cui viene decisa questa richiesta",
+      "not_item_owner": "Solo il responsabile della voce o un gestore può modificare questa voce",
+      "not_requester": "Solo il richiedente o un gestore può ritirare questa richiesta",
+      "planned_source_invalid": "Fonte sconosciuta per l'importo pianificato",
+      "planned_source_not_found": "La voce di budget, la voce di costo o la posizione non sono state trovate in questo progetto",
+      "plant_item_not_found": "L'elemento di impianto non è stato trovato in questo progetto",
+      "precondition_is_computed": "Questa precondizione è letta dal suo modulo e non può essere spuntata",
+      "precondition_kind_invalid": "Tipo di precondizione sconosciuto",
+      "precondition_needs_evidence": "Allega il riferimento alla prova",
+      "precondition_needs_ref": "Questa precondizione richiede un riferimento",
+      "precondition_not_found": "Precondizione non trovata",
+      "preconditions_open": "Le precondizioni aperte bloccano questo svincolo",
+      "project_not_found": "Progetto non trovato",
+      "rationale_required": "Indica un motivo",
+      "release_decided": "Questa richiesta di svincolo è già stata decisa",
+      "release_expired": "Lo svincolo di questa voce ha superato la data di validità: richiedi uno svincolo rinnovato prima di impegnare altro",
+      "release_pending": "Una richiesta di svincolo per questa voce è già in corso",
+      "requisition_not_found": "La richiesta d'acquisto non è stata trovata in questo progetto",
+      "route_changed_since_accepted": "Il percorso di approvazione di questa fascia è stato modificato. Un responsabile deve fissarlo di nuovo.",
+      "route_must_belong_to_project": "Si può fissare solo un percorso di approvazione di questo progetto",
+      "route_not_found": "Percorso di approvazione non trovato",
+      "schedule_currency_mismatch": "Questo calendario usa una valuta diversa da quella degli svincoli già registrati",
+      "schedule_not_in_force": "Il calendario fissato non è in vigore oggi. Fissa la versione in vigore.",
+      "schedule_type_mismatch": "Questo calendario non conosce il tipo di impegno di una voce esistente",
+      "tier_unknown": "Questa fascia non è nel calendario delle autorizzazioni",
+      "transfer_links_stay_in_project": "I documenti collegati appartengono a questo progetto. Scollegali prima di trasferire in un altro progetto.",
+      "transfer_target_invalid": "Una voce non può essere trasferita su se stessa",
+      "transfer_target_not_open": "La voce di destinazione è chiusa o in attesa di una decisione",
+      "transferable_invalid": "Opzione di trasferimento sconosciuta",
+      "type_fixed_after_release": "Il tipo non può cambiare dopo che è stato richiesto uno svincolo",
+      "unknown_catalogue": "Catalogo non trovato"
+    },
+    "evidence": {
+      "decision_overdue": "La data ultima di decisione di questa voce di impegno è passata e nulla è svincolato: decidi, rinvia con un motivo o registra il costo del ritardo",
+      "items_released_by_gate": "Gli impegni in scadenza a questo gate sono svincolati o rinviati",
+      "items_without_area": "Le voci di impegno di questo gate indicano un'area di gestione che il progetto non ha più",
+      "no_items_for_gate": "Nessuna voce di impegno indica questo gate, quindi non si sa se il denaro debba essere svincolato entro di esso"
+    },
+    "export": {
+      "as_of": "Al",
+      "col_code": "Codice",
+      "col_committed": "Impegnato",
+      "col_currency": "Valuta",
+      "col_decision_date": "Ultima data di decisione",
+      "col_open_preconditions": "Precondizioni aperte",
+      "col_overdue": "Decisione in ritardo",
+      "col_planned": "Pianificato",
+      "col_released": "Svincolato",
+      "col_residual_loss": "Perdita residua al recesso",
+      "col_status": "Stato",
+      "col_tier": "Fascia richiesta",
+      "col_title": "Impegno",
+      "col_type": "Tipo",
+      "empty": "Nessuna voce di impegno ancora",
+      "overdue": "In ritardo",
+      "project": "Progetto",
+      "title": "Matrice degli impegni e degli svincoli"
+    },
+    "exposure": {
+      "nothing_committed": "Nulla impegnato, nulla speso"
+    },
+    "flag": {
+      "multi_year_commitment": "Vincola anni di bilancio successivi",
+      "novel_contentious": "Nuovo o controverso"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "La voce {item} è impegnata ma le sue condizioni di recesso sono sconosciute",
+        "suggestion": "Inserisci la base di recesso o un calendario di annullamento"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "I limiti del calendario {schedule} non crescono con la fascia",
+        "suggestion": "Correggi le fasce e pubblica una nuova versione"
+      },
+      "committed_within_release": {
+        "fail": "La voce {item} impegna più di quanto è stato svincolato",
+        "suggestion": "Richiedi un ulteriore svincolo o riduci i documenti collegati"
+      },
+      "decision_date_not_passed": {
+        "fail": "La data ultima di decisione {date} della voce {item} è passata",
+        "suggestion": "Decidi, rinvia con un motivo o registra il costo del ritardo"
+      },
+      "document_linked_once": {
+        "fail": "Il documento {document} è conteggiato in più di una voce",
+        "suggestion": "Rimuovi il secondo collegamento"
+      },
+      "fx_rate_available": {
+        "fail": "Un importo collegato della voce {item} non ha un tasso di cambio",
+        "suggestion": "Aggiungi un tasso per la data nel registro dei cambi o nel progetto"
+      },
+      "item_has_cost_code": {
+        "fail": "La voce {item} non ha una voce di costo",
+        "suggestion": "Assegna la voce di costo a cui la voce è contabilizzata"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "L'importo pianificato della voce {item} non può essere letto",
+        "suggestion": "Collega la voce a una voce di budget, di costo o a una posizione, oppure inserisci una stima manuale"
+      },
+      "plant_item_in_register": {
+        "fail": "La voce {item} indica un elemento di impianto non più presente nel registro impianti, quindi si applica il suo tempo di consegna",
+        "suggestion": "Collega la voce all'elemento di impianto che lo ha sostituito, oppure rimuovi il collegamento"
+      },
+      "release_in_date": {
+        "fail": "Uno svincolo della voce {item} era valido fino al {date}: non si può più impegnare nulla in base ad esso",
+        "suggestion": "Richiedi uno svincolo rinnovato per quanto deve ancora essere impegnato"
+      },
+      "release_within_authority": {
+        "fail": "Lo svincolo {release} è stato deciso sotto la fascia richiesta {tier}",
+        "suggestion": "Richiedi un nuovo svincolo secondo il calendario in vigore"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Le voci del gruppo {group} sono state svincolate sotto la fascia richiesta dalla loro somma",
+        "suggestion": "Richiedi il prossimo svincolo alla fascia del totale del gruppo"
+      }
+    },
+    "status": {
+      "aborted": "Annullato",
+      "closed": "Chiuso",
+      "committed": "Impegnato",
+      "on_hold": "In sospeso",
+      "partially_released": "Svincolato parzialmente",
+      "planned": "Pianificato",
+      "re_release_required": "Nuovo svincolo richiesto",
+      "release_requested": "Svincolo richiesto",
+      "released": "Svincolato",
+      "transferred": "Trasferito"
+    },
+    "tier": {
+      "accounting_officer": "Responsabile contabile",
+      "authority_head": "Responsabile dell'ente",
+      "board": "Consiglio",
+      "contracting_officer": "Responsabile contrattuale",
+      "department_head": "Responsabile di dipartimento",
+      "head_of_contracting_activity": "Responsabile dell'attività contrattuale",
+      "project_director": "Direttore di progetto",
+      "project_lead": "Responsabile di progetto",
+      "project_manager": "Project manager",
+      "senior_responsible_owner": "Responsabile senior",
+      "simplified_acquisition": "Acquisti semplificati",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Variante",
+      "claim_settlement": "Liquidazione di riserve",
+      "contingency_drawdown": "Prelievo dall'imprevisto",
+      "design": "Progettazione",
+      "services": "Servizi",
+      "supplies": "Forniture",
+      "termination_settlement": "Liquidazione di recesso",
+      "works": "Lavori"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} avrebbe dovuto essere deciso entro il {latest_decision_date}.",
+        "title": "Decisione di svincolo in ritardo"
+      },
+      "re_release_required": {
+        "body": "I documenti collegati a {code} ora impegnano {committed}, oltre lo svincolo di {released}.",
+        "title": "Nuovo svincolo richiesto"
+      },
+      "release_aborted": {
+        "body": "{code} è stato interrotto.",
+        "title": "Annullamento approvato"
+      },
+      "release_rejected": {
+        "body": "Lo svincolo di {code} è stato respinto.",
+        "title": "Svincolo respinto"
+      },
+      "release_released": {
+        "body": "{code} è stato svincolato.",
+        "title": "Svincolo concesso"
+      }
+    }
+  }
+}

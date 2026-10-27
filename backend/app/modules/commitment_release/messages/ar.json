@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "نسبة الرسوم على الجزء غير المنفذ",
+      "presumed_unperformed_pct": "النسبة المفترضة للجزء غير المنفذ",
+      "profit_pct": "نسبة الربح على الجزء المنفذ"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "مبلغ يُدخل لهذا البند",
+        "name": "شروط مخصصة"
+      },
+      "de_bgb_648": {
+        "description": "السعر المتفق عليه ناقصاً التكاليف الموفرة؛ يُفترض 5 % من الجزء غير المنفذ عند عدم توثيق التكاليف الموفرة",
+        "name": "الإنهاء الحر من قبل المالك (§ 648 BGB)",
+        "presumption": "النسبة المفترضة للجزء غير المنفذ"
+      },
+      "de_public_owner": {
+        "description": "مثال على تفويض لمالك عام: عتبة أعمال الاتحاد الأوروبي كأعلى شريحة للأعمال، والالتزامات متعددة السنوات لرئيس الجهة",
+        "eu_works_threshold": "عتبة أعمال الاتحاد الأوروبي 2026-27 (اللائحة المفوضة (EU) 2025/2152)، غير مؤكدة",
+        "name": "المالك العام (ألمانيا)، مثال"
+      },
+      "de_vob_b_8_1": {
+        "description": "التسوية نفسها الواردة في § 648 BGB، والتي يشير إليها البند",
+        "name": "الإنهاء الحر وفق § 8 (1) VOB/B",
+        "refers_to_bgb_648": "يشير إلى § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "التكاليف المتكبدة مع ربح على الأعمال المنجزة ومصاريف التسوية",
+        "name": "الإنهاء لمصلحة الجهة (FAR 49)",
+        "profit_negotiated": "نسبة الربح المتفق عليها"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "الأعمال المنجزة مع نسبة رسوم على الجزء غير المنفذ، كما هو وارد في بيانات العقد",
+        "fee_from_contract_data": "النسبة الواردة في بيانات العقد",
+        "name": "الإنهاء لسبب يخص العميل (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "مدير المشروع والراعي ومجلس الإدارة مع سقوف توضيحية بعملة المشروع؛ دون أرقام قانونية",
+        "name": "جدول محايد من ثلاث شرائح"
+      },
+      "none_free_cancellation": {
+        "description": "لا توجد أي رسوم عند الإلغاء",
+        "name": "إلغاء حر"
+      },
+      "supply_cancellation_schedule": {
+        "description": "رسوم حسب التاريخ أو تقدم التصنيع وفق ما اتفق عليه مع المورد",
+        "name": "جدول إلغاء المورد"
+      },
+      "uk_public_body": {
+        "description": "مثال على الصلاحيات المفوضة حسب القيمة والجِدّة وفق Managing Public Money",
+        "name": "هيئة عامة (المملكة المتحدة)، مثال"
+      },
+      "us_federal_owner": {
+        "description": "أمثلة على الشرائح ابتداءً من عتبة الشراء المبسط",
+        "name": "مالك فيدرالي (الولايات المتحدة)، مثال",
+        "sat": "عتبة الشراء المبسط 350,000 دولار أمريكي من 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "أساس الإنهاء غير معروف",
+      "abort_exposure_unknown": "الخسارة المتبقية غير معروفة. أكمل شروط الإنهاء أولاً.",
+      "abort_parameter_invalid": "معامل الإنهاء نسبة بين 0 و 1",
+      "abort_parameter_not_in_basis": "أساس الإنهاء المختار لا يتضمن هذا المعامل",
+      "abort_type_not_in_schedule": "الجدول لا يتضمن شريحة لتسوية الإنهاء",
+      "activity_not_found": "نشاط الجدول الزمني غير موجود في هذا المشروع",
+      "amount_invalid": "المبلغ ليس رقماً صالحاً",
+      "amount_not_positive": "يجب أن يكون المبلغ أكبر من صفر",
+      "assignee_not_project_member": "هذا الشخص ليس عضواً في هذا المشروع",
+      "assignment_expired": "انتهت صلاحية تكليف المعتمِد؛ حدّث التكليفات",
+      "assignment_needs_approver": "سمِّ معتمِد هذه الشريحة قبل إضافة نائب أو فترة صلاحية",
+      "assignment_window_inverted": "تنتهي الفترة قبل أن تبدأ",
+      "cancellation_schedule_invalid": "كل خطوة تحتاج إلى معلم أو تاريخ أو تقدم، ورسم واحد بالضبط",
+      "catalogue_code_taken": "يستخدم كتالوج آخر هذا الرمز بالفعل",
+      "catalogue_invalid": "الكتالوج غير صالح",
+      "catalogue_retired": "هذا الكتالوج متقاعد",
+      "change_belongs_to_contract_item": "التغيير والعقد مرتبطان في البند نفسه",
+      "commitment_guard_unavailable": "تعذر إجراء فحص الإصدار، لذلك لم يُسمح بهذا الإجراء",
+      "commitment_not_in_matrix": "هذه الوثيقة ليست في مصفوفة الالتزامات",
+      "commitment_not_released": "هذا الالتزام غير مُصدَر لهذا المبلغ",
+      "commitment_type_unknown": "نوع الالتزام هذا غير موجود في جدول الصلاحيات",
+      "contingency_insufficient": "رصيد الاحتياطي لا يغطي هذا السحب",
+      "contingency_line_required": "سحب الاحتياطي يحتاج إلى بند الميزانية الذي يحتوي على الاحتياطي",
+      "date_invalid": "هذا ليس تاريخاً",
+      "decider_not_tier_holder": "اعتمده شخص لا يشغل هذه الشريحة",
+      "decision_invalid": "اختر الموافقة أو الرفض",
+      "deferral_needs_reason": "اكتب سبب تأجيل هذا البند",
+      "document_linked_elsewhere": "هذه الوثيقة محتسبة بالفعل في بند آخر",
+      "document_not_found": "الوثيقة غير موجودة في هذا المشروع",
+      "drawdown_released_by_commitment": "هذا السحب بند التزام مُصدَر. أنهِ ذلك البند لاسترداد المال.",
+      "edit_required": "دورك لا يسمح بتعديل بنود الالتزامات",
+      "enforcement_invalid": "يجب أن يكون التطبيق إيقافاً أو تحذيراً أو منعاً",
+      "external_approval_not_required": "يقرر هذا المبلغ مستوى في الجدول: احذف مرجع الموافقة الخارجية",
+      "external_approval_required": "المبلغ أعلى من كل الشرائح: أرفق مرجع الموافقة الخارجية",
+      "field_frozen": "لا يمكن تغيير هذا الحقل بعد الآن لهذا البند",
+      "field_required": "لا يمكن أن يبقى هذا الحقل فارغاً",
+      "flag_unknown": "هذه العلامة غير موجودة في جدول الصلاحيات",
+      "four_eyes_no_approver": "لا يحق لأحد في هذه الشريحة البت في هذا الطلب وفق قاعدة الأربع أعين",
+      "four_eyes_requester_is_approver": "قاعدة الأربع أعين: لا يمكنك طلب إصدار تعتمده بنفسك",
+      "four_eyes_violation": "من طلب هذا البند أو يملكه أو أكّده لا يمكنه البت فيه",
+      "frame_document_not_found": "وثيقة الإطار غير موجودة في هذا المشروع",
+      "funding_application_not_found": "طلب التمويل غير موجود في هذا المشروع",
+      "fx_policy_invalid": "سياسة سعر صرف غير معروفة",
+      "fx_rate_missing": "لا يوجد سعر صرف لهذا التاريخ: لا يمكن تقييم الإصدار",
+      "gate_unknown": "هذه البوابة غير موجودة في نموذج حوكمة المشروع",
+      "gates_not_in_use": "هذا المشروع لا يستخدم البوابات، لذلك لا يوجد ما ينتظر بوابة",
+      "governance_area_required": "البند المرتبط ببوابة يحتاج إلى مجال إدارة",
+      "governance_area_unknown": "مجال الإدارة هذا غير موجود في نموذج حوكمة المشروع",
+      "invalid_transition": "هذه الخطوة غير ممكنة في الحالة الحالية",
+      "item_changed": "تغيّر البند في هذه الأثناء. حاول مرة أخرى.",
+      "item_closed": "البند مغلق",
+      "item_code_taken": "يستخدم بند آخر هذا الرمز بالفعل",
+      "item_not_found": "بند الالتزام غير موجود",
+      "link_kind_invalid": "نوع وثيقة غير معروف",
+      "link_kind_not_supported": "لا يمكن ربط هذا النوع من الوثائق بعد",
+      "link_not_found": "الربط غير موجود",
+      "manage_required": "لا يستطيع إجراء هذا إلا من يدير المصفوفة",
+      "manual_amount_needs_currency": "التقدير اليدوي يحتاج إلى مبلغ وعملة",
+      "matrix_missing": "لا توجد لدى هذا المشروع مصفوفة التزامات بعد",
+      "no_pending_release": "لا يوجد طلب إصدار معلّق",
+      "no_route_for_tier": "لم يُكلَّف أحد بعد بالشريحة المطلوبة",
+      "not_entitled_decider": "أنت لا تشغل الشريحة التي يُبت فيها هذا الطلب",
+      "not_item_owner": "لا يمكن تغيير هذا البند إلا من مالكه أو مدير",
+      "not_requester": "لا يمكن سحب هذا الطلب إلا من مقدمه أو مدير",
+      "planned_source_invalid": "مصدر غير معروف للمبلغ المخطط",
+      "planned_source_not_found": "بند الميزانية أو بند التكلفة أو البند غير موجود في هذا المشروع",
+      "plant_item_not_found": "عنصر المعدات غير موجود في هذا المشروع",
+      "precondition_is_computed": "يُقرأ هذا الشرط المسبق من وحدته ولا يمكن تحديده",
+      "precondition_kind_invalid": "نوع شرط مسبق غير معروف",
+      "precondition_needs_evidence": "أرفق مرجع الإثبات",
+      "precondition_needs_ref": "يحتاج هذا الشرط المسبق إلى مرجع",
+      "precondition_not_found": "الشرط المسبق غير موجود",
+      "preconditions_open": "الشروط المسبقة المفتوحة تمنع هذا الإصدار",
+      "project_not_found": "المشروع غير موجود",
+      "rationale_required": "اذكر السبب",
+      "release_decided": "تم البت في طلب الإصدار هذا بالفعل",
+      "release_expired": "انتهى تاريخ صلاحية إصدار هذا البند: اطلب إصداراً متجدداً قبل الالتزام بمزيد",
+      "release_pending": "يوجد طلب إصدار لهذا البند قيد التنفيذ بالفعل",
+      "requisition_not_found": "طلب الشراء غير موجود في هذا المشروع",
+      "route_changed_since_accepted": "عُدّل مسار الاعتماد لهذه الشريحة. يجب على مدير أن يثبّته من جديد.",
+      "route_must_belong_to_project": "لا يمكن تثبيت إلا مسار اعتماد يتبع هذا المشروع",
+      "route_not_found": "مسار الاعتماد غير موجود",
+      "schedule_currency_mismatch": "يستخدم هذا الجدول عملة أخرى غير تلك المسجلة في الإصدارات السابقة",
+      "schedule_not_in_force": "الجدول المثبّت غير ساري المفعول اليوم. ثبّت النسخة السارية.",
+      "schedule_type_mismatch": "هذا الجدول لا يعرف نوع الالتزام لأحد البنود القائمة",
+      "tier_unknown": "هذه الشريحة غير موجودة في جدول الصلاحيات",
+      "transfer_links_stay_in_project": "الوثائق المرتبطة تنتمي إلى هذا المشروع. فك ارتباطها قبل النقل إلى مشروع آخر.",
+      "transfer_target_invalid": "لا يمكن نقل البند إلى نفسه",
+      "transfer_target_not_open": "البند الهدف مغلق أو في انتظار قرار",
+      "transferable_invalid": "خيار نقل غير معروف",
+      "type_fixed_after_release": "لا يمكن تغيير النوع بعد طلب الإصدار",
+      "unknown_catalogue": "الكتالوج غير موجود"
+    },
+    "evidence": {
+      "decision_overdue": "تجاوز آخر تاريخ للقرار في بند الالتزام ولم يُصدر شيء: اتخذ قراراً، أو أجّل مع ذكر السبب، أو سجّل تكلفة التأخير",
+      "items_released_by_gate": "الالتزامات المستحقة عند هذه البوابة تُصدر أو تُؤجَّل",
+      "items_without_area": "بنود الالتزامات لهذه البوابة تسمّي مجال إدارة لم يعد المشروع يملكه",
+      "no_items_for_gate": "لا يوجد بند التزام يسمّي هذه البوابة، لذلك لا يُعرف إن كان يجب إصدار مال عندها"
+    },
+    "export": {
+      "as_of": "حتى تاريخ",
+      "col_code": "الرمز",
+      "col_committed": "ملتزم به",
+      "col_currency": "العملة",
+      "col_decision_date": "آخر تاريخ للقرار",
+      "col_open_preconditions": "الشروط المسبقة المفتوحة",
+      "col_overdue": "القرار متأخر",
+      "col_planned": "مخطط",
+      "col_released": "مُصدَر",
+      "col_residual_loss": "الخسارة المتبقية عند الإنهاء",
+      "col_status": "الحالة",
+      "col_tier": "الشريحة المطلوبة",
+      "col_title": "الالتزام",
+      "col_type": "النوع",
+      "empty": "لا توجد بنود التزامات بعد",
+      "overdue": "متأخر",
+      "project": "المشروع",
+      "title": "مصفوفة الالتزامات والإصدار"
+    },
+    "exposure": {
+      "nothing_committed": "لا يوجد التزام ولا إنفاق"
+    },
+    "flag": {
+      "multi_year_commitment": "يلزم ميزانيات السنوات اللاحقة",
+      "novel_contentious": "جديد أو محل خلاف"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "البند {item} ملتزم به لكن شروط إنهائه غير معروفة",
+        "suggestion": "أدخل أساس الإنهاء أو جدول الإلغاء"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "السقوف في الجدول {schedule} لا ترتفع مع الشريحة",
+        "suggestion": "صحّح الشرائح وانشر إصداراً جديداً"
+      },
+      "committed_within_release": {
+        "fail": "البند {item} يلزم أكثر مما أُصدر",
+        "suggestion": "اطلب إصداراً إضافياً أو قلّل الوثائق المرتبطة"
+      },
+      "decision_date_not_passed": {
+        "fail": "انقضى آخر تاريخ قرار {date} للبند {item}",
+        "suggestion": "اتخذ قراراً، أو أجّل مع ذكر السبب، أو سجّل تكلفة التأخير"
+      },
+      "document_linked_once": {
+        "fail": "الوثيقة {document} محتسبة في أكثر من بند",
+        "suggestion": "أزل الربط الثاني"
+      },
+      "fx_rate_available": {
+        "fail": "مبلغ مرتبط بالبند {item} لا يملك سعر صرف",
+        "suggestion": "أضف سعراً لهذا التاريخ في سجل أسعار الصرف أو في المشروع"
+      },
+      "item_has_cost_code": {
+        "fail": "البند {item} لا يملك بند تكلفة",
+        "suggestion": "حدد بند التكلفة الذي يُقيَّد عليه البند"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "تعذّرت قراءة المبلغ المخطط للبند {item}",
+        "suggestion": "وجّه البند إلى بند ميزانية أو بند تكلفة أو بند، أو أدخل تقديراً يدوياً"
+      },
+      "plant_item_in_register": {
+        "fail": "البند {item} يسمّي عنصر معدات لم يعد في سجل المعدات، لذلك يسري زمن التوريد الخاص به",
+        "suggestion": "اربط البند بعنصر المعدات الذي حل محله، أو أزل الربط"
+      },
+      "release_in_date": {
+        "fail": "كان إصدار البند {item} ساري المفعول حتى {date}: لا يمكن الالتزام بأي شيء جديد بموجبه",
+        "suggestion": "اطلب إصداراً متجدداً لما لم يُلتزم به بعد"
+      },
+      "release_within_authority": {
+        "fail": "الإصدار {release} اعتُمد بأدنى من الشريحة المطلوبة {tier}",
+        "suggestion": "اطلب إصداراً جديداً وفق الجدول الساري"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "بنود المجموعة {group} أُصدرت بأدنى من الشريحة التي يتطلبها مجموعها",
+        "suggestion": "اطلب الإصدار التالي عند شريحة إجمالي المجموعة"
+      }
+    },
+    "status": {
+      "aborted": "أُنهي",
+      "closed": "مغلق",
+      "committed": "ملتزم به",
+      "on_hold": "معلّق",
+      "partially_released": "مُصدَر جزئياً",
+      "planned": "مخطط",
+      "re_release_required": "يتطلب إعادة إصدار",
+      "release_requested": "طُلب الإصدار",
+      "released": "مُصدَر",
+      "transferred": "منقول"
+    },
+    "tier": {
+      "accounting_officer": "المسؤول المحاسبي",
+      "authority_head": "رئيس الجهة",
+      "board": "مجلس الإدارة",
+      "contracting_officer": "مسؤول التعاقد",
+      "department_head": "رئيس القسم",
+      "head_of_contracting_activity": "رئيس نشاط التعاقد",
+      "project_director": "مدير المشروع التنفيذي",
+      "project_lead": "قائد المشروع",
+      "project_manager": "مدير المشروع",
+      "senior_responsible_owner": "المالك المسؤول الأعلى",
+      "simplified_acquisition": "الشراء المبسط",
+      "sponsor": "الراعي"
+    },
+    "type": {
+      "change": "تغيير",
+      "claim_settlement": "تسوية مطالبة",
+      "contingency_drawdown": "سحب من الاحتياطي",
+      "design": "تصميم",
+      "services": "خدمات",
+      "supplies": "توريدات",
+      "termination_settlement": "تسوية إنهاء",
+      "works": "أعمال"
+    }
+  },
+  "common": {
+    "ok": "موافق"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "كان يجب البت في {code} بحلول {latest_decision_date}.",
+        "title": "قرار الإصدار متأخر"
+      },
+      "re_release_required": {
+        "body": "الوثائق المرتبطة بـ {code} تلزم الآن {committed}، وهو أعلى من الإصدار البالغ {released}.",
+        "title": "يتطلب إعادة الإصدار"
+      },
+      "release_aborted": {
+        "body": "تم إيقاف {code}.",
+        "title": "تمت الموافقة على الإنهاء"
+      },
+      "release_rejected": {
+        "body": "رُفض إصدار {code}.",
+        "title": "رُفض الإصدار"
+      },
+      "release_released": {
+        "body": "تم إصدار {code}.",
+        "title": "منح الإصدار"
+      }
+    }
+  }
+}

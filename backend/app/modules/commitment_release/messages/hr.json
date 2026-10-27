@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Naknada na neizvršeni dio",
+      "presumed_unperformed_pct": "Pretpostavljeni udio neizvršenog dijela",
+      "profit_pct": "Dobit na izvršeni dio"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Naknada unesena za ovu stavku",
+        "name": "Prilagođeni uvjeti"
+      },
+      "de_bgb_648": {
+        "description": "Ugovorena cijena umanjena za uštedjene troškove; 5 % neizvršenog dijela pretpostavlja se kada uštedjeni troškovi nisu dokumentirani",
+        "name": "Slobodan raskid od strane naručitelja (§ 648 BGB)",
+        "presumption": "Pretpostavljeni udio neizvršenog dijela"
+      },
+      "de_public_owner": {
+        "description": "Primjer ovlasti za javnog naručitelja: prag EU-a za radove kao najviši razred, višegodišnje obveze prema čelniku tijela",
+        "eu_works_threshold": "Prag EU-a za radove 2026.-27. (Delegirana uredba (EU) 2025/2152), nepotvrđeno",
+        "name": "Javni naručitelj (Njemačka), primjer"
+      },
+      "de_vob_b_8_1": {
+        "description": "Ista obračunska pravila kao u § 648 BGB, na koja se klauzula poziva",
+        "name": "Slobodan raskid prema § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Upućuje na § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Nastali troškovi plus dobit na izvršene radove plus troškovi obračuna",
+        "name": "Raskid iz praktičnih razloga (FAR 49)",
+        "profit_negotiated": "Stopa dobiti prema dogovoru"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Izvršeni radovi plus postotak naknade na neizvršeni dio, kako je navedeno u podacima ugovora",
+        "fee_from_contract_data": "Postotak iz podataka ugovora",
+        "name": "Raskid iz razloga na strani naručitelja (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Voditelj projekta, pokrovitelj i upravni odbor s primjernim gornjim granicama u valuti projekta; bez zakonskih iznosa",
+        "name": "Neutralni trorazinski raspored"
+      },
+      "none_free_cancellation": {
+        "description": "Bez naknade pri otkazu",
+        "name": "Besplatno otkazivanje"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Naknade prema datumu ili napretku proizvodnje, kako je dogovoreno s dobavljačem",
+        "name": "Raspored otkazivanja dobavljača"
+      },
+      "uk_public_body": {
+        "description": "Primjer delegirane ovlasti prema iznosu i novosti, prema Managing Public Money",
+        "name": "Javno tijelo (Ujedinjena Kraljevina), primjer"
+      },
+      "us_federal_owner": {
+        "description": "Primjer razina počevši od pojednostavljenog praga nabave",
+        "name": "Savezni naručitelj (Sjedinjene Američke Države), primjer",
+        "sat": "Pojednostavljeni prag nabave 350.000 USD od 1.10.2025. (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Nepoznata osnova za prekid",
+      "abort_exposure_unknown": "Preostali gubitak nije poznat. Prvo dovršite uvjete prekida.",
+      "abort_parameter_invalid": "Parametar prekida mora biti udio između 0 i 1",
+      "abort_parameter_not_in_basis": "Odabrana osnova prekida nema ovaj parametar",
+      "abort_type_not_in_schedule": "Raspored nema razinu za namiru raskida",
+      "activity_not_found": "Aktivnost rasporeda nije pronađena u ovom projektu",
+      "amount_invalid": "Iznos nije valjan broj",
+      "amount_not_positive": "Iznos mora biti veći od nule",
+      "assignee_not_project_member": "Osoba nije član ovog projekta",
+      "assignment_expired": "Zadužnica odobravatelja je istekla; ažurirajte zaduženja",
+      "assignment_needs_approver": "Navedite odobravatelja ove razine prije zamjene ili razdoblja valjanosti",
+      "assignment_window_inverted": "Zaduženje završava prije početka",
+      "cancellation_schedule_invalid": "Svaki korak treba rok, datum ili napredak i točno jednu naknadu",
+      "catalogue_code_taken": "Drugi katalog već koristi ovu oznaku",
+      "catalogue_invalid": "Katalog nije valjan",
+      "catalogue_retired": "Ovaj katalog je povučen",
+      "change_belongs_to_contract_item": "Izmjena i njezin ugovor povezani su na istoj stavci",
+      "commitment_guard_unavailable": "Provjera oslobađanja nije mogla biti izvršena, pa nije dopuštena",
+      "commitment_not_in_matrix": "Ovaj dokument nije u matrici obveza",
+      "commitment_not_released": "Ova obveza nije oslobođena za ovaj iznos",
+      "commitment_type_unknown": "Ova vrsta obveze nije u rasporedu ovlasti",
+      "contingency_insufficient": "Stanje rezerve ne pokriva ovo povlačenje",
+      "contingency_line_required": "Povlačenje rezerve zahtijeva proračunsku stavku u kojoj se nalazi rezerva",
+      "date_invalid": "Ovo nije datum",
+      "decider_not_tier_holder": "Odobrio je osoba koja nema tu razinu",
+      "decision_invalid": "Odaberite odobri ili odbij",
+      "deferral_needs_reason": "Zapišite zašto se stavka odgađa",
+      "document_linked_elsewhere": "Ovaj dokument već je uračunat u drugoj stavci",
+      "document_not_found": "Dokument nije pronađen u ovom projektu",
+      "drawdown_released_by_commitment": "Ovo povlačenje je oslobođena stavka obveze. Prekinite tu stavku da biste vratili novac.",
+      "edit_required": "Vaša uloga ne smije uređivati stavke obveza",
+      "enforcement_invalid": "Provedba mora biti isključena, upozorenje ili blokiranje",
+      "external_approval_not_required": "Ovaj iznos odlučuje razina rasporeda: uklonite referencu vanjskog odobrenja",
+      "external_approval_required": "Iznos je iznad svih razina: priložite referencu vanjskog odobrenja",
+      "field_frozen": "Ovo polje za ovu stavku više se ne može mijenjati",
+      "field_required": "Ovo polje ne smije biti prazno",
+      "flag_unknown": "Ova oznaka nije u rasporedu ovlasti",
+      "four_eyes_no_approver": "Nitko na ovoj razini ne smije odlučivati o ovom zahtjevu prema načelu četiri oka",
+      "four_eyes_requester_is_approver": "Četiri oka: ne možete tražiti oslobađanje koje biste sami odobrili",
+      "four_eyes_violation": "Osoba koja je tražila, vodi ili potvrdila ovu stavku ne može o njoj odlučivati",
+      "frame_document_not_found": "Okvirni dokument nije pronađen u ovom projektu",
+      "funding_application_not_found": "Zahtjev za financiranje nije pronađen u ovom projektu",
+      "fx_policy_invalid": "Nepoznata politika tečaja",
+      "fx_rate_missing": "Nema tečaja za ovaj datum: oslobađanje se ne može procijeniti",
+      "gate_unknown": "Ova prekretnica nije u upravljačkom modelu projekta",
+      "gates_not_in_use": "Ovaj projekt ne koristi prekretnice, pa ništa ne može čekati na njih",
+      "governance_area_required": "Stavka vezana uz prekretnicu treba područje upravljanja",
+      "governance_area_unknown": "Ovo područje upravljanja nije u upravljačkom modelu projekta",
+      "invalid_transition": "Ovaj korak nije moguć u trenutačnom stanju",
+      "item_changed": "Stavka se u međuvremenu promijenila. Pokušajte ponovno.",
+      "item_closed": "Stavka je zatvorena",
+      "item_code_taken": "Druga stavka već koristi ovu oznaku",
+      "item_not_found": "Stavka obveze nije pronađena",
+      "link_kind_invalid": "Nepoznata vrsta dokumenta",
+      "link_kind_not_supported": "Ova vrsta dokumenta još se ne može povezati",
+      "link_not_found": "Veza nije pronađena",
+      "manage_required": "Ovo može samo osoba koja upravlja matricom",
+      "manual_amount_needs_currency": "Ručna procjena treba iznos i valutu",
+      "matrix_missing": "Ovaj projekt još nema matricu obveza",
+      "no_pending_release": "Nema zahtjeva za oslobađanje na čekanju",
+      "no_route_for_tier": "Na potrebnu razinu još nitko nije dodijeljen",
+      "not_entitled_decider": "Nemate razinu na koju se odnosi ovaj zahtjev",
+      "not_item_owner": "Stavku može mijenjati samo njezin vlasnik ili voditelj",
+      "not_requester": "Zahtjev može povući samo podnositelj ili voditelj",
+      "planned_source_invalid": "Nepoznat izvor planiranog iznosa",
+      "planned_source_not_found": "Proračunska stavka, stavka troška ili pozicija nisu pronađene u ovom projektu",
+      "plant_item_not_found": "Stavka strojeva nije pronađena u ovom projektu",
+      "precondition_is_computed": "Ovaj preduvjet čita se iz njegova modula i ne može se označiti",
+      "precondition_kind_invalid": "Nepoznata vrsta preduvjeta",
+      "precondition_needs_evidence": "Priložite referencu dokaza",
+      "precondition_needs_ref": "Ovaj preduvjet treba referencu",
+      "precondition_not_found": "Preduvjet nije pronađen",
+      "preconditions_open": "Otvoreni preduvjeti blokiraju ovo oslobađanje",
+      "project_not_found": "Projekt nije pronađen",
+      "rationale_required": "Navedite razlog",
+      "release_decided": "Ovaj zahtjev za oslobađanje već je riješen",
+      "release_expired": "Oslobađanje ove stavke prošlo je rok valjanosti: zatražite obnovljeno oslobađanje prije preuzimanja novih obveza",
+      "release_pending": "Zahtjev za oslobađanje ove stavke već je u tijeku",
+      "requisition_not_found": "Zahtjev za nabavu nije pronađen u ovom projektu",
+      "route_changed_since_accepted": "Put odobravanja ove razine je izmijenjen. Voditelj ga mora ponovno fiksirati.",
+      "route_must_belong_to_project": "Može se fiksirati samo put odobravanja ovog projekta",
+      "route_not_found": "Put odobravanja nije pronađen",
+      "schedule_currency_mismatch": "Ovaj raspored koristi drugu valutu od već evidentiranih oslobađanja",
+      "schedule_not_in_force": "Fiksirani raspored danas nije na snazi. Fiksirajte verziju koja jest.",
+      "schedule_type_mismatch": "Ovaj raspored ne poznaje vrstu obveze postojeće stavke",
+      "tier_unknown": "Ova razina nije u rasporedu ovlasti",
+      "transfer_links_stay_in_project": "Povezani dokumenti pripadaju ovom projektu. Prije prijenosa u drugi projekt odvežite ih.",
+      "transfer_target_invalid": "Stavka se ne može prenijeti sama na sebe",
+      "transfer_target_not_open": "Ciljna stavka je zatvorena ili čeka odluku",
+      "transferable_invalid": "Nepoznata opcija prijenosa",
+      "type_fixed_after_release": "Vrsta se ne može mijenjati nakon što je zatraženo oslobađanje",
+      "unknown_catalogue": "Katalog nije pronađen"
+    },
+    "evidence": {
+      "decision_overdue": "Posljednji rok odluke ove stavke obveze je prošao, a ništa nije oslobođeno: odlučite, odgodite uz razlog ili evidentirajte trošak kašnjenja",
+      "items_released_by_gate": "Obveze s rokom na ovoj prekretnici oslobođene su ili odgođene",
+      "items_without_area": "Stavke obveza ove prekretnice navode područje upravljanja koje projekt više nema",
+      "no_items_for_gate": "Nijedna stavka obveze ne navodi ovu prekretnicu, pa nije poznato treba li do nje oslobositi novac"
+    },
+    "export": {
+      "as_of": "Stanje na dan",
+      "col_code": "Oznaka",
+      "col_committed": "Obvezano",
+      "col_currency": "Valuta",
+      "col_decision_date": "Posljednji rok odluke",
+      "col_open_preconditions": "Otvoreni preduvjeti",
+      "col_overdue": "Odluka kasni",
+      "col_planned": "Planirano",
+      "col_released": "Oslobođeno",
+      "col_residual_loss": "Preostali gubitak pri prekidu",
+      "col_status": "Status",
+      "col_tier": "Potrebna razina",
+      "col_title": "Obveza",
+      "col_type": "Vrsta",
+      "empty": "Još nema stavki obveza",
+      "overdue": "Kasni",
+      "project": "Projekt",
+      "title": "Matrica obveza i oslobađanja"
+    },
+    "exposure": {
+      "nothing_committed": "Ništa nije obvezano, ništa nije potrošeno"
+    },
+    "flag": {
+      "multi_year_commitment": "Obvezuje buduće proračunske godine",
+      "novel_contentious": "Nov ili sporan"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Stavka {item} je obvezana, ali uvjeti njezina prekida nisu poznati",
+        "suggestion": "Unesite osnovu prekida ili raspored otkazivanja"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Gornje granice rasporeda {schedule} ne rastu s razinom",
+        "suggestion": "Ispravite razine i objavite novu verziju"
+      },
+      "committed_within_release": {
+        "fail": "Stavka {item} obvezuje više nego što je oslobođeno",
+        "suggestion": "Zatražite daljnje oslobađanje ili smanjite povezane dokumente"
+      },
+      "decision_date_not_passed": {
+        "fail": "Posljednji rok odluke {date} stavke {item} je prošao",
+        "suggestion": "Odlučite, odgodite uz razlog ili evidentirajte trošak kašnjenja"
+      },
+      "document_linked_once": {
+        "fail": "Dokument {document} uračunat je u više od jedne stavke",
+        "suggestion": "Uklonite drugu vezu"
+      },
+      "fx_rate_available": {
+        "fail": "Povezani iznos stavke {item} nema tečaj",
+        "suggestion": "Dodajte tečaj za taj datum u registar tečajeva ili u projekt"
+      },
+      "item_has_cost_code": {
+        "fail": "Stavka {item} nema stavku troška",
+        "suggestion": "Dodijelite stavku troška na koju se stavka knjiži"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Planirani iznos stavke {item} ne može se očitati",
+        "suggestion": "Usmjerite stavku na proračunsku stavku, stavku troška ili poziciju, ili unesite ručnu procjenu"
+      },
+      "plant_item_in_register": {
+        "fail": "Stavka {item} navodi stavku strojeva koja više nije u registru strojeva, pa vrijedi njezin vlastiti rok isporuke",
+        "suggestion": "Povežite stavku sa stavkom strojeva koja ju je zamijenila ili uklonite vezu"
+      },
+      "release_in_date": {
+        "fail": "Oslobađanje stavke {item} vrijedilo je do {date}: ništa novo ne može se obvezati prema njemu",
+        "suggestion": "Zatražite obnovljeno oslobađanje za ono što se još treba obvezati"
+      },
+      "release_within_authority": {
+        "fail": "Oslobađanje {release} odlučeno je ispod potrebne razine {tier}",
+        "suggestion": "Zatražite novo oslobađanje prema trenutačnom rasporedu"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Stavke grupe {group} oslobođene su ispod razine koju zbroj zahtijeva",
+        "suggestion": "Zatražite sljedeće oslobađanje na razini ukupnog iznosa grupe"
+      }
+    },
+    "status": {
+      "aborted": "Prekinuto",
+      "closed": "Zatvoreno",
+      "committed": "Obvezano",
+      "on_hold": "Na čekanju",
+      "partially_released": "Djelomično oslobođeno",
+      "planned": "Planirano",
+      "re_release_required": "Potrebno ponovno oslobađanje",
+      "release_requested": "Oslobađanje traženo",
+      "released": "Oslobođeno",
+      "transferred": "Preneseno"
+    },
+    "tier": {
+      "accounting_officer": "Računovodstveni službenik",
+      "authority_head": "Čelnik tijela",
+      "board": "Upravni odbor",
+      "contracting_officer": "Službenik za ugovaranje",
+      "department_head": "Voditelj odjela",
+      "head_of_contracting_activity": "Čelnik ugovorne djelatnosti",
+      "project_director": "Direktor projekta",
+      "project_lead": "Vođa projekta",
+      "project_manager": "Voditelj projekta",
+      "senior_responsible_owner": "Glavni odgovorni vlasnik",
+      "simplified_acquisition": "Pojednostavljena nabava",
+      "sponsor": "Pokrovitelj"
+    },
+    "type": {
+      "change": "Izmjena",
+      "claim_settlement": "Namira potraživanja",
+      "contingency_drawdown": "Povlačenje rezerve",
+      "design": "Projektiranje",
+      "services": "Usluge",
+      "supplies": "Roba",
+      "termination_settlement": "Namira raskida",
+      "works": "Radovi"
+    }
+  },
+  "common": {
+    "ok": "U redu"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} je trebalo biti riješeno do {latest_decision_date}.",
+        "title": "Odluka o oslobađanju kasni"
+      },
+      "re_release_required": {
+        "body": "Povezani dokumenti za {code} sada obvezuju {committed}, što je više od oslobođenih {released}.",
+        "title": "Potrebno ponovno oslobađanje"
+      },
+      "release_aborted": {
+        "body": "{code} je zaustavljeno.",
+        "title": "Prekid odobren"
+      },
+      "release_rejected": {
+        "body": "Oslobađanje za {code} je odbijeno.",
+        "title": "Oslobađanje odbijeno"
+      },
+      "release_released": {
+        "body": "{code} je oslobođeno.",
+        "title": "Oslobađanje odobreno"
+      }
+    }
+  }
+}

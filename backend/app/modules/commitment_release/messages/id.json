@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Biaya atas bagian yang belum dikerjakan",
+      "presumed_unperformed_pct": "Perkiraan porsi bagian yang belum dikerjakan",
+      "profit_pct": "Laba atas bagian yang sudah dikerjakan"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Biaya yang dimasukkan untuk item ini",
+        "name": "Ketentuan khusus"
+      },
+      "de_bgb_648": {
+        "description": "Harga yang disepakati dikurangi biaya yang dihemat; 5 % dari bagian yang belum dikerjakan diperkirakan jika biaya yang dihemat tidak terdokumentasi",
+        "name": "Pemutusan bebas oleh pemilik (§ 648 BGB)",
+        "presumption": "Perkiraan porsi bagian yang belum dikerjakan"
+      },
+      "de_public_owner": {
+        "description": "Contoh pendelegasian untuk pemilik publik: ambang pekerjaan UE sebagai kelas tertinggi, komitmen multi-tahun kepada kepala instansi",
+        "eu_works_threshold": "Ambang pekerjaan UE 2026-27 (Peraturan Delegasi (EU) 2025/2152), belum dikonfirmasi",
+        "name": "Pemilik publik (Jerman), contoh"
+      },
+      "de_vob_b_8_1": {
+        "description": "Penyelesaian yang sama dengan § 648 BGB, yang dirujuk klausul ini",
+        "name": "Pemutusan bebas berdasarkan § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Merujuk ke § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Biaya yang timbul ditambah laba atas pekerjaan yang dikerjakan ditambah biaya penyelesaian",
+        "name": "Pemutusan untuk kenyamanan (FAR 49)",
+        "profit_negotiated": "Tingkat laba sesuai negosiasi"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Pekerjaan yang dikerjakan ditambah persentase biaya atas bagian yang belum dikerjakan, sebagaimana tertera dalam data kontrak",
+        "fee_from_contract_data": "Persentase dari data kontrak",
+        "name": "Pemutusan karena alasan klien sendiri (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Manajer proyek, sponsor dan dewan dengan contoh batas dalam mata uang proyek; tanpa angka menurut undang-undang",
+        "name": "Jadwal tiga tingkat netral"
+      },
+      "none_free_cancellation": {
+        "description": "Tanpa biaya saat pembatalan",
+        "name": "Pembatalan gratis"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Biaya berdasarkan tanggal atau kemajuan fabrikasi sebagaimana disepakati dengan pemasok",
+        "name": "Jadwal pembatalan pemasok"
+      },
+      "uk_public_body": {
+        "description": "Contoh kewenangan yang didelegasikan berdasarkan nilai dan kebaruan sesuai Managing Public Money",
+        "name": "Badan publik (Inggris Raya), contoh"
+      },
+      "us_federal_owner": {
+        "description": "Contoh tingkatan mulai dari ambang pengadaan sederhana",
+        "name": "Pemilik federal (Amerika Serikat), contoh",
+        "sat": "Ambang pengadaan sederhana USD 350.000 sejak 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Dasar pembatalan tidak diketahui",
+      "abort_exposure_unknown": "Kerugian sisa belum diketahui. Lengkapi dulu ketentuan pembatalan.",
+      "abort_parameter_invalid": "Parameter pembatalan harus berupa proporsi antara 0 dan 1",
+      "abort_parameter_not_in_basis": "Dasar pembatalan yang dipilih tidak memiliki parameter ini",
+      "abort_type_not_in_schedule": "Jadwal tidak memiliki tingkat untuk penyelesaian pemutusan",
+      "activity_not_found": "Aktivitas jadwal tidak ditemukan dalam proyek ini",
+      "amount_invalid": "Jumlah bukan angka yang valid",
+      "amount_not_positive": "Jumlah harus lebih besar dari nol",
+      "assignee_not_project_member": "Orang tersebut bukan anggota proyek ini",
+      "assignment_expired": "Penugasan penyetuju sudah kedaluwarsa; perbarui penugasan",
+      "assignment_needs_approver": "Sebutkan penyetuju tingkat ini sebelum menetapkan pengganti atau masa berlaku",
+      "assignment_window_inverted": "Penugasan berakhir sebelum dimulai",
+      "cancellation_schedule_invalid": "Setiap langkah memerlukan tonggak, tanggal atau kemajuan, dan tepat satu biaya",
+      "catalogue_code_taken": "Katalog lain sudah menggunakan kode ini",
+      "catalogue_invalid": "Katalog tidak valid",
+      "catalogue_retired": "Katalog ini sudah dinonaktifkan",
+      "change_belongs_to_contract_item": "Perubahan dan kontraknya terhubung pada item yang sama",
+      "commitment_guard_unavailable": "Pemeriksaan pelepasan dana tidak dapat dilakukan, sehingga tidak diizinkan",
+      "commitment_not_in_matrix": "Dokumen ini tidak ada dalam matriks komitmen",
+      "commitment_not_released": "Komitmen ini belum dilepaskan untuk jumlah ini",
+      "commitment_type_unknown": "Jenis komitmen ini tidak ada dalam jadwal kewenangan",
+      "contingency_insufficient": "Saldo kontingensi tidak mencukupi penarikan ini",
+      "contingency_line_required": "Penarikan kontingensi memerlukan baris anggaran yang memuat kontingensi",
+      "date_invalid": "Ini bukan tanggal",
+      "decider_not_tier_holder": "Disetujui oleh orang yang tidak memegang tingkat ini",
+      "decision_invalid": "Pilih setujui atau tolak",
+      "deferral_needs_reason": "Tuliskan alasan item ini ditunda",
+      "document_linked_elsewhere": "Dokumen ini sudah dihitung dalam item lain",
+      "document_not_found": "Dokumen tidak ditemukan dalam proyek ini",
+      "drawdown_released_by_commitment": "Penarikan ini adalah item komitmen yang sudah dilepaskan. Batalkan item tersebut untuk mengambil kembali dana.",
+      "edit_required": "Peran Anda tidak dapat mengubah item komitmen",
+      "enforcement_invalid": "Penegakan harus nonaktif, peringatan, atau blokir",
+      "external_approval_not_required": "Jumlah ini diputuskan oleh tingkat dalam jadwal: hapus referensi persetujuan eksternal",
+      "external_approval_required": "Jumlah berada di atas semua tingkat: lampirkan referensi persetujuan eksternal",
+      "field_frozen": "Kolom ini tidak lagi dapat diubah untuk item ini",
+      "field_required": "Kolom ini tidak boleh kosong",
+      "flag_unknown": "Penanda ini tidak ada dalam jadwal kewenangan",
+      "four_eyes_no_approver": "Tidak ada seorang pun di tingkat ini yang boleh memutuskan permintaan ini berdasarkan aturan empat mata",
+      "four_eyes_requester_is_approver": "Empat mata: Anda tidak dapat meminta pelepasan yang akan Anda setujui sendiri",
+      "four_eyes_violation": "Pihak yang mengajukan, memiliki, atau mengonfirmasi item ini tidak boleh memutuskannya",
+      "frame_document_not_found": "Dokumen rangka tidak ditemukan dalam proyek ini",
+      "funding_application_not_found": "Permohonan pendanaan tidak ditemukan dalam proyek ini",
+      "fx_policy_invalid": "Kebijakan kurs valuta asing tidak dikenal",
+      "fx_rate_missing": "Tidak ada kurs untuk tanggal ini: pelepasan dana tidak dapat dievaluasi",
+      "gate_unknown": "Gerbang ini tidak ada dalam model tata kelola proyek",
+      "gates_not_in_use": "Proyek ini tidak menggunakan gerbang, sehingga tidak ada yang dapat menunggu gerbang",
+      "governance_area_required": "Item yang terkait gerbang memerlukan area manajemen",
+      "governance_area_unknown": "Area manajemen ini tidak ada dalam model tata kelola proyek",
+      "invalid_transition": "Langkah ini tidak mungkin dilakukan pada status saat ini",
+      "item_changed": "Item telah berubah sementara itu. Coba lagi.",
+      "item_closed": "Item sudah ditutup",
+      "item_code_taken": "Item lain sudah menggunakan kode ini",
+      "item_not_found": "Item komitmen tidak ditemukan",
+      "link_kind_invalid": "Jenis dokumen tidak dikenal",
+      "link_kind_not_supported": "Jenis dokumen ini belum dapat ditautkan",
+      "link_not_found": "Tautan tidak ditemukan",
+      "manage_required": "Hanya orang yang mengelola matriks yang dapat melakukan ini",
+      "manual_amount_needs_currency": "Estimasi manual memerlukan jumlah dan mata uang",
+      "matrix_missing": "Proyek ini belum memiliki matriks komitmen",
+      "no_pending_release": "Tidak ada permintaan pelepasan yang menunggu",
+      "no_route_for_tier": "Belum ada yang ditugaskan untuk tingkat yang diperlukan",
+      "not_entitled_decider": "Anda tidak memegang tingkat tempat permintaan ini diputuskan",
+      "not_item_owner": "Hanya pemilik item atau manajer yang dapat mengubah item ini",
+      "not_requester": "Hanya pemohon atau manajer yang dapat menarik permintaan ini",
+      "planned_source_invalid": "Sumber jumlah yang direncanakan tidak dikenal",
+      "planned_source_not_found": "Baris anggaran, baris biaya, atau posisi tidak ditemukan dalam proyek ini",
+      "plant_item_not_found": "Item peralatan tidak ditemukan dalam proyek ini",
+      "precondition_is_computed": "Prasyarat ini dibaca dari modulnya dan tidak dapat dicentang",
+      "precondition_kind_invalid": "Jenis prasyarat tidak dikenal",
+      "precondition_needs_evidence": "Lampirkan referensi bukti",
+      "precondition_needs_ref": "Prasyarat ini memerlukan referensi",
+      "precondition_not_found": "Prasyarat tidak ditemukan",
+      "preconditions_open": "Prasyarat yang belum terpenuhi menghalangi pelepasan ini",
+      "project_not_found": "Proyek tidak ditemukan",
+      "rationale_required": "Berikan alasan",
+      "release_decided": "Permintaan pelepasan ini sudah diputuskan",
+      "release_expired": "Pelepasan item ini telah melewati tanggal berlakunya: ajukan pelepasan baru sebelum mengikat dana lebih lanjut",
+      "release_pending": "Permintaan pelepasan untuk item ini sudah berjalan",
+      "requisition_not_found": "Permintaan pembelian tidak ditemukan dalam proyek ini",
+      "route_changed_since_accepted": "Alur persetujuan tingkat ini telah diubah. Manajer harus menetapkannya kembali.",
+      "route_must_belong_to_project": "Hanya alur persetujuan dari proyek ini yang dapat ditetapkan",
+      "route_not_found": "Alur persetujuan tidak ditemukan",
+      "schedule_currency_mismatch": "Jadwal ini menggunakan mata uang yang berbeda dari pelepasan yang sudah tercatat",
+      "schedule_not_in_force": "Jadwal yang ditetapkan tidak berlaku hari ini. Tetapkan versi yang berlaku.",
+      "schedule_type_mismatch": "Jadwal ini tidak mengenal jenis komitmen dari item yang ada",
+      "tier_unknown": "Tingkat ini tidak ada dalam jadwal kewenangan",
+      "transfer_links_stay_in_project": "Dokumen tertaut termasuk dalam proyek ini. Lepaskan tautannya sebelum memindahkan ke proyek lain.",
+      "transfer_target_invalid": "Item tidak dapat dipindahkan ke dirinya sendiri",
+      "transfer_target_not_open": "Item tujuan sudah ditutup atau menunggu keputusan",
+      "transferable_invalid": "Opsi pemindahan tidak dikenal",
+      "type_fixed_after_release": "Jenis tidak dapat diubah setelah pelepasan diajukan",
+      "unknown_catalogue": "Katalog tidak ditemukan"
+    },
+    "evidence": {
+      "decision_overdue": "Tanggal keputusan terakhir item komitmen ini sudah lewat dan belum ada yang dilepaskan: putuskan, tunda dengan alasan, atau catat biaya keterlambatannya",
+      "items_released_by_gate": "Komitmen yang jatuh tempo pada gerbang ini sudah dilepaskan atau ditunda",
+      "items_without_area": "Item komitmen pada gerbang ini menyebut area manajemen yang sudah tidak dimiliki proyek",
+      "no_items_for_gate": "Tidak ada item komitmen yang menyebut gerbang ini, sehingga tidak diketahui apakah dana harus dilepaskan sebelumnya"
+    },
+    "export": {
+      "as_of": "Per tanggal",
+      "col_code": "Kode",
+      "col_committed": "Terikat",
+      "col_currency": "Mata uang",
+      "col_decision_date": "Tanggal keputusan terakhir",
+      "col_open_preconditions": "Prasyarat terbuka",
+      "col_overdue": "Keputusan terlambat",
+      "col_planned": "Direncanakan",
+      "col_released": "Dilepaskan",
+      "col_residual_loss": "Kerugian sisa saat pembatalan",
+      "col_status": "Status",
+      "col_tier": "Tingkat yang diperlukan",
+      "col_title": "Komitmen",
+      "col_type": "Jenis",
+      "empty": "Belum ada item komitmen",
+      "overdue": "Terlambat",
+      "project": "Proyek",
+      "title": "Matriks komitmen dan pelepasan"
+    },
+    "exposure": {
+      "nothing_committed": "Tidak ada yang terikat, tidak ada yang dibelanjakan"
+    },
+    "flag": {
+      "multi_year_commitment": "Mengikat tahun anggaran berikutnya",
+      "novel_contentious": "Baru atau diperdebatkan"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Item {item} sudah terikat tetapi ketentuan pembatalannya belum diketahui",
+        "suggestion": "Masukkan dasar pembatalan atau jadwal pembatalan"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Batas atas pada jadwal {schedule} tidak naik seiring tingkat",
+        "suggestion": "Perbaiki rentang dan terbitkan versi baru"
+      },
+      "committed_within_release": {
+        "fail": "Item {item} mengikat lebih banyak dari yang telah dilepaskan",
+        "suggestion": "Ajukan pelepasan lanjutan atau kurangi dokumen yang ditautkan"
+      },
+      "decision_date_not_passed": {
+        "fail": "Tanggal keputusan terakhir {date} untuk item {item} sudah lewat",
+        "suggestion": "Putuskan, tunda dengan alasan, atau catat biaya keterlambatannya"
+      },
+      "document_linked_once": {
+        "fail": "Dokumen {document} dihitung dalam lebih dari satu item",
+        "suggestion": "Hapus tautan kedua"
+      },
+      "fx_rate_available": {
+        "fail": "Jumlah tertaut dari item {item} tidak memiliki kurs valuta asing",
+        "suggestion": "Tambahkan kurs untuk tanggal tersebut di register kurs atau di proyek"
+      },
+      "item_has_cost_code": {
+        "fail": "Item {item} tidak memiliki baris biaya",
+        "suggestion": "Tetapkan baris biaya tempat item ini dicatat"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Jumlah yang direncanakan untuk item {item} tidak dapat dibaca",
+        "suggestion": "Arahkan item ke baris anggaran, baris biaya, atau posisi, atau masukkan estimasi manual"
+      },
+      "plant_item_in_register": {
+        "fail": "Item {item} menyebut item peralatan yang sudah tidak ada dalam register peralatan, sehingga waktu tunggu tersendirinya berlaku",
+        "suggestion": "Tautkan item ke item peralatan yang menggantikannya, atau hapus tautan"
+      },
+      "release_in_date": {
+        "fail": "Pelepasan item {item} berlaku sampai {date}: tidak ada yang baru dapat diikat di bawahnya",
+        "suggestion": "Ajukan pelepasan baru untuk hal yang masih akan diikat"
+      },
+      "release_within_authority": {
+        "fail": "Pelepasan {release} diputuskan di bawah tingkat yang diperlukan {tier}",
+        "suggestion": "Ajukan pelepasan baru sesuai jadwal yang berlaku"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Item dalam grup {group} dilepaskan di bawah tingkat yang dibutuhkan jumlah totalnya",
+        "suggestion": "Ajukan pelepasan berikutnya pada tingkat total grup"
+      }
+    },
+    "status": {
+      "aborted": "Dibatalkan",
+      "closed": "Ditutup",
+      "committed": "Terikat",
+      "on_hold": "Ditahan",
+      "partially_released": "Dilepaskan sebagian",
+      "planned": "Direncanakan",
+      "re_release_required": "Perlu pelepasan ulang",
+      "release_requested": "Pelepasan diminta",
+      "released": "Dilepaskan",
+      "transferred": "Dipindahkan"
+    },
+    "tier": {
+      "accounting_officer": "Pejabat akuntansi",
+      "authority_head": "Kepala instansi",
+      "board": "Dewan",
+      "contracting_officer": "Pejabat kontrak",
+      "department_head": "Kepala departemen",
+      "head_of_contracting_activity": "Kepala kegiatan kontrak",
+      "project_director": "Direktur proyek",
+      "project_lead": "Pimpinan proyek",
+      "project_manager": "Manajer proyek",
+      "senior_responsible_owner": "Pemilik tanggung jawab senior",
+      "simplified_acquisition": "Pengadaan sederhana",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Perubahan",
+      "claim_settlement": "Penyelesaian klaim",
+      "contingency_drawdown": "Penarikan kontingensi",
+      "design": "Desain",
+      "services": "Jasa",
+      "supplies": "Barang",
+      "termination_settlement": "Penyelesaian pemutusan",
+      "works": "Pekerjaan"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} seharusnya sudah diputuskan pada {latest_decision_date}.",
+        "title": "Keputusan pelepasan terlambat"
+      },
+      "re_release_required": {
+        "body": "Dokumen tertaut untuk {code} kini mengikat {committed}, melebihi pelepasan sebesar {released}.",
+        "title": "Perlu pelepasan ulang"
+      },
+      "release_aborted": {
+        "body": "{code} telah dihentikan.",
+        "title": "Pembatalan disetujui"
+      },
+      "release_rejected": {
+        "body": "Pelepasan {code} ditolak.",
+        "title": "Pelepasan ditolak"
+      },
+      "release_released": {
+        "body": "{code} telah dilepaskan.",
+        "title": "Pelepasan disetujui"
+      }
+    }
+  }
+}

@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "未履行部分的费用",
+      "presumed_unperformed_pct": "未履行部分的推定比例",
+      "profit_pct": "已履行部分的利润"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "为该项目录入的费用",
+        "name": "自定义条款"
+      },
+      "de_bgb_648": {
+        "description": "约定价款减去节省的成本；未记录节省成本时，推定未履行部分的 5%",
+        "name": "业主自由解除合同（BGB 第 648 条）",
+        "presumption": "未履行部分的推定比例"
+      },
+      "de_public_owner": {
+        "description": "公共业主授权示例：以欧盟工程门槛作为最高工程档位，多年度承诺需报机关负责人批准",
+        "eu_works_threshold": "2026-27 年欧盟工程门槛（授权条例 (EU) 2025/2152），未经确认",
+        "name": "公共业主（德国）示例"
+      },
+      "de_vob_b_8_1": {
+        "description": "与条款所引用的 BGB 第 648 条相同的结算方式",
+        "name": "依据 VOB/B 第 8 条第 (1) 款的自由解除",
+        "refers_to_bgb_648": "引用 BGB 第 648 条"
+      },
+      "far_49_convenience": {
+        "description": "已发生成本加已完成工作的利润，再加结算费用",
+        "name": "便利性终止（FAR 49）",
+        "profit_negotiated": "协商确定的利润率"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "已完成工作加合同数据中约定的未履行部分费率",
+        "fee_from_contract_data": "合同数据中的百分比",
+        "name": "因业主自身原因终止（NEC4 ECC）"
+      },
+      "neutral": {
+        "description": "项目经理、发起人与董事会的三级示例上限，以项目货币计；不含法定数值",
+        "name": "中性三级审批方案"
+      },
+      "none_free_cancellation": {
+        "description": "取消时不收取任何费用",
+        "name": "免费取消"
+      },
+      "supply_cancellation_schedule": {
+        "description": "按与供应商约定的日期或制造进度收取费用",
+        "name": "供应商取消费用表"
+      },
+      "uk_public_body": {
+        "description": "按金额和新颖性划分的授权示例，依据《公共资金管理》（Managing Public Money）",
+        "name": "公共机构（英国）示例"
+      },
+      "us_federal_owner": {
+        "description": "从简易采购门槛起算的档位示例",
+        "name": "联邦业主（美国）示例",
+        "sat": "简易采购门槛 350,000 美元，自 2025-10-01 起（FAR 2.101）"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "未知的终止依据",
+      "abort_exposure_unknown": "剩余损失未知，请先完成终止条款。",
+      "abort_parameter_invalid": "终止参数必须是 0 到 1 之间的比例",
+      "abort_parameter_not_in_basis": "所选终止依据不包含该参数",
+      "abort_type_not_in_schedule": "费用表中没有终止结算的对应档位",
+      "activity_not_found": "在本项目中未找到该进度活动",
+      "amount_invalid": "金额不是有效数字",
+      "amount_not_positive": "金额必须大于零",
+      "assignee_not_project_member": "该人员不是本项目成员",
+      "assignment_expired": "审批人的指派已过期；请更新指派",
+      "assignment_needs_approver": "设置代理人或有效期前，请先指定该档位的审批人",
+      "assignment_window_inverted": "指派结束时间早于开始时间",
+      "cancellation_schedule_invalid": "每个步骤都需要一个里程碑、一个日期或进度，并且只能有一项费用",
+      "catalogue_code_taken": "已有其他目录使用该代码",
+      "catalogue_invalid": "目录无效",
+      "catalogue_retired": "该目录已停用",
+      "change_belongs_to_contract_item": "变更与其合同须关联到同一项目",
+      "commitment_guard_unavailable": "无法完成放行检查，因此未予允许",
+      "commitment_not_in_matrix": "该文件不在承诺矩阵中",
+      "commitment_not_released": "该承诺金额尚未放行",
+      "commitment_type_unknown": "该承诺类型不在授权表中",
+      "contingency_insufficient": "应急费用余额不足以支付此次支取",
+      "contingency_line_required": "应急费用支取需要指定持有应急费用的预算行",
+      "date_invalid": "这不是有效日期",
+      "decider_not_tier_holder": "批准人并不持有该档位的权限",
+      "decision_invalid": "请选择批准或驳回",
+      "deferral_needs_reason": "请写明推迟该项目的原因",
+      "document_linked_elsewhere": "该文件已计入另一项目",
+      "document_not_found": "在本项目中未找到该文件",
+      "drawdown_released_by_commitment": "此次支取属于已放行的承诺项目。请终止该项目以收回款项。",
+      "edit_required": "您的角色无权编辑承诺项目",
+      "enforcement_invalid": "执行方式必须为关闭、警告或阻止",
+      "external_approval_not_required": "该金额由费用表中的某一档位决定：请删除外部批准参考",
+      "external_approval_required": "金额超过所有档位：请附上外部批准参考",
+      "field_frozen": "该项目的此字段已不能再修改",
+      "field_required": "此字段不能为空",
+      "flag_unknown": "该标记不在授权表中",
+      "four_eyes_no_approver": "根据四眼原则，该档位上无人可以批准此申请",
+      "four_eyes_requester_is_approver": "四眼原则：您不能申请自己会批准的放行",
+      "four_eyes_violation": "申请人、负责人或确认人本人不能对该项目作出决定",
+      "frame_document_not_found": "在本项目中未找到框架文件",
+      "funding_application_not_found": "在本项目中未找到该资金申请",
+      "fx_policy_invalid": "未知的汇率政策",
+      "fx_rate_missing": "该日期没有汇率，无法评估放行",
+      "gate_unknown": "该关口不在项目的治理模型中",
+      "gates_not_in_use": "本项目未使用关口，因此没有任何事项需要等待关口",
+      "governance_area_required": "与关口挂钩的项目需要指定管理领域",
+      "governance_area_unknown": "该管理领域不在项目的治理模型中",
+      "invalid_transition": "当前状态下无法执行此步骤",
+      "item_changed": "该项目已被他人修改，请重试。",
+      "item_closed": "该项目已关闭",
+      "item_code_taken": "已有其他项目使用该代码",
+      "item_not_found": "未找到承诺项目",
+      "link_kind_invalid": "未知的文件类型",
+      "link_kind_not_supported": "该类型的文件暂不支持关联",
+      "link_not_found": "未找到该关联",
+      "manage_required": "只有承诺矩阵的管理人员才能执行此操作",
+      "manual_amount_needs_currency": "人工估算需要金额和货币",
+      "matrix_missing": "本项目尚无承诺矩阵",
+      "no_pending_release": "没有待处理的放行申请",
+      "no_route_for_tier": "该所需档位尚未指派任何人",
+      "not_entitled_decider": "您不持有此申请所依据的档位权限",
+      "not_item_owner": "只有项目负责人或管理员才能修改此项目",
+      "not_requester": "只有申请人或管理员才能撤回此申请",
+      "planned_source_invalid": "计划金额的来源未知",
+      "planned_source_not_found": "在本项目中未找到该预算行、成本行或工程项",
+      "plant_item_not_found": "在本项目中未找到该机械设备项",
+      "precondition_is_computed": "此前提条件由其模块自动读取，不能手动勾选",
+      "precondition_kind_invalid": "未知的前提条件类型",
+      "precondition_needs_evidence": "请附上证据参考",
+      "precondition_needs_ref": "此前提条件需要一个参考编号",
+      "precondition_not_found": "未找到该前提条件",
+      "preconditions_open": "未完成的前提条件阻止本次放行",
+      "project_not_found": "未找到项目",
+      "rationale_required": "请说明理由",
+      "release_decided": "该放行申请已作出决定",
+      "release_expired": "该项目的放行已超过有效期：在继续承诺之前，请申请续期放行",
+      "release_pending": "该项目已有进行中的放行申请",
+      "requisition_not_found": "在本项目中未找到该请购单",
+      "route_changed_since_accepted": "该档位的审批路径已被编辑。管理员须重新固定。",
+      "route_must_belong_to_project": "只能固定属于本项目的审批路径",
+      "route_not_found": "未找到审批路径",
+      "schedule_currency_mismatch": "该费用表使用的货币与已记录的放行不同",
+      "schedule_not_in_force": "所固定的费用表今日未生效。请固定当前有效的版本。",
+      "schedule_type_mismatch": "该费用表不包含现有项目的承诺类型",
+      "tier_unknown": "该档位不在授权表中",
+      "transfer_links_stay_in_project": "关联文件属于本项目。转入其他项目前请先解除关联。",
+      "transfer_target_invalid": "项目不能转给其自身",
+      "transfer_target_not_open": "目标项目已关闭或正在等待决定",
+      "transferable_invalid": "未知的转移选项",
+      "type_fixed_after_release": "一旦提交放行申请，类型便不能更改",
+      "unknown_catalogue": "未找到目录"
+    },
+    "evidence": {
+      "decision_overdue": "该承诺项目的最晚决定日期已过且尚未放行：请立即决定、说明理由后推迟，或记录延误成本",
+      "items_released_by_gate": "在此关口到期的承诺已放行或已推迟",
+      "items_without_area": "该关口的承诺项目指定了项目已不再拥有的管理领域",
+      "no_items_for_gate": "没有承诺项目指定此关口，因此无法确定该关口前是否须放行资金"
+    },
+    "export": {
+      "as_of": "截至",
+      "col_code": "编号",
+      "col_committed": "已承诺",
+      "col_currency": "货币",
+      "col_decision_date": "最晚决定日期",
+      "col_open_preconditions": "未完成的前提条件",
+      "col_overdue": "决定已逾期",
+      "col_planned": "计划",
+      "col_released": "已放行",
+      "col_residual_loss": "终止时的剩余损失",
+      "col_status": "状态",
+      "col_tier": "所需档位",
+      "col_title": "承诺",
+      "col_type": "类型",
+      "empty": "尚无承诺项目",
+      "overdue": "已逾期",
+      "project": "项目",
+      "title": "承诺与放行矩阵"
+    },
+    "exposure": {
+      "nothing_committed": "未作承诺，亦无支出"
+    },
+    "flag": {
+      "multi_year_commitment": "约束后续预算年度",
+      "novel_contentious": "新颖或有争议"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "项目 {item} 已承诺，但其终止条款未知",
+        "suggestion": "请填写终止依据或取消费用表"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "费用表 {schedule} 的上限未随档位递增",
+        "suggestion": "修正各档位并发布新版本"
+      },
+      "committed_within_release": {
+        "fail": "项目 {item} 的承诺金额超过已放行金额",
+        "suggestion": "申请追加放行，或减少所关联的文件"
+      },
+      "decision_date_not_passed": {
+        "fail": "项目 {item} 的最晚决定日期 {date} 已过",
+        "suggestion": "请立即决定、说明理由后推迟，或记录延误成本"
+      },
+      "document_linked_once": {
+        "fail": "文件 {document} 被计入了多个项目",
+        "suggestion": "删除第二个关联"
+      },
+      "fx_rate_available": {
+        "fail": "项目 {item} 的某个关联金额没有汇率",
+        "suggestion": "在汇率登记册或项目中添加该日期的汇率"
+      },
+      "item_has_cost_code": {
+        "fail": "项目 {item} 没有成本行",
+        "suggestion": "指定该项目应计入的成本行"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "无法读取项目 {item} 的计划金额",
+        "suggestion": "将该项目指向某个预算行、成本行或工程项，或录入人工估算"
+      },
+      "plant_item_in_register": {
+        "fail": "项目 {item} 所指的机械设备已不在机械登记册中，因此适用其自身的交付周期",
+        "suggestion": "将该项目关联到替代的机械设备，或删除此关联"
+      },
+      "release_in_date": {
+        "fail": "项目 {item} 的放行有效期至 {date}：在此之下不能再承诺新的内容",
+        "suggestion": "就仍需承诺的部分申请续期放行"
+      },
+      "release_within_authority": {
+        "fail": "放行 {release} 的决定低于所需档位 {tier}",
+        "suggestion": "依据现行费用表申请新的放行"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "分组 {group} 的各项目放行所依据的档位，低于其总额所需的档位",
+        "suggestion": "按分组总额所需的档位申请下一次放行"
+      }
+    },
+    "status": {
+      "aborted": "已终止",
+      "closed": "已关闭",
+      "committed": "已承诺",
+      "on_hold": "暂停",
+      "partially_released": "部分放行",
+      "planned": "计划中",
+      "re_release_required": "需重新放行",
+      "release_requested": "已申请放行",
+      "released": "已放行",
+      "transferred": "已转移"
+    },
+    "tier": {
+      "accounting_officer": "会计负责人",
+      "authority_head": "机关负责人",
+      "board": "董事会",
+      "contracting_officer": "合同官",
+      "department_head": "部门负责人",
+      "head_of_contracting_activity": "采购活动负责人",
+      "project_director": "项目总监",
+      "project_lead": "项目负责人",
+      "project_manager": "项目经理",
+      "senior_responsible_owner": "高级责任人",
+      "simplified_acquisition": "简易采购",
+      "sponsor": "发起人"
+    },
+    "type": {
+      "change": "变更",
+      "claim_settlement": "索赔结算",
+      "contingency_drawdown": "应急费用支取",
+      "design": "设计",
+      "services": "服务",
+      "supplies": "物资",
+      "termination_settlement": "终止结算",
+      "works": "工程"
+    }
+  },
+  "common": {
+    "ok": "确定"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} 本应在 {latest_decision_date} 前作出决定。",
+        "title": "放行决定已逾期"
+      },
+      "re_release_required": {
+        "body": "{code} 的关联文件现承诺 {committed}，已超过 {released} 的放行金额。",
+        "title": "需重新放行"
+      },
+      "release_aborted": {
+        "body": "{code} 已终止。",
+        "title": "终止已批准"
+      },
+      "release_rejected": {
+        "body": "{code} 的放行已被驳回。",
+        "title": "放行已驳回"
+      },
+      "release_released": {
+        "body": "{code} 已放行。",
+        "title": "已获放行"
+      }
+    }
+  }
+}

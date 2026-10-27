@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Honorar på den uutførte delen",
+      "presumed_unperformed_pct": "Antatt andel av den uutførte delen",
+      "profit_pct": "Fortjeneste på den utførte delen"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "En kostnad registrert for dette elementet",
+        "name": "Egne vilkår"
+      },
+      "de_bgb_648": {
+        "description": "Avtalt pris minus spart kostnad; 5 % av den uutførte delen antas når spart kostnad ikke er dokumentert",
+        "name": "Fri oppsigelse fra byggherren (§ 648 BGB)",
+        "presumption": "Antatt andel av den uutførte delen"
+      },
+      "de_public_owner": {
+        "description": "Eksempel på delegering for en offentlig byggherre: EU-terskelen for bygg som øverste nivå, flerårige forpliktelser hos virksomhetens leder",
+        "eu_works_threshold": "EU-terskel for bygg 2026–27 (delegert forordning (EU) 2025/2152), ikke bekreftet",
+        "name": "Offentlig byggherre (Tyskland), eksempel"
+      },
+      "de_vob_b_8_1": {
+        "description": "Samme oppgjør som § 648 BGB, som klausulen viser til",
+        "name": "Fri oppsigelse etter § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Viser til § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Påløpte kostnader pluss fortjeneste på utført arbeid pluss oppgjørskostnader",
+        "name": "Oppsigelse for bekvemmelighet (FAR 49)",
+        "profit_negotiated": "Forhandlet fortjenestesats"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Utført arbeid pluss en honorarprosent på den uutførte delen, slik det står i kontraktsdataene",
+        "fee_from_contract_data": "Prosent fra kontraktsdataene",
+        "name": "Oppsigelse av byggherrens egen grunn (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Prosjektleder, sponsor og styre med eksempelgrenser i prosjektvalutaen; ingen lovfestede beløp",
+        "name": "Nøytral tredelt plan"
+      },
+      "none_free_cancellation": {
+        "description": "Ingen kostnad ved avbestilling",
+        "name": "Gratis avbestilling"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Kostnader etter dato eller produksjonsfremdrift som er avtalt med leverandøren",
+        "name": "Leverandørens avbestillingsplan"
+      },
+      "uk_public_body": {
+        "description": "Eksempel på delegert myndighet etter beløp og nyhetsgrad i henhold til Managing Public Money",
+        "name": "Offentlig organ (Storbritannia), eksempel"
+      },
+      "us_federal_owner": {
+        "description": "Eksempel på nivåer som starter ved terskelen for forenklet innkjøp",
+        "name": "Føderal byggherre (USA), eksempel",
+        "sat": "Terskel for forenklet innkjøp USD 350 000 fra 01.10.2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Ukjent grunnlag for avbrudd",
+      "abort_exposure_unknown": "Restet tap er ukjent. Fullfør vilkårene for avbrudd først.",
+      "abort_parameter_invalid": "En avbruddsparameter er en andel mellom 0 og 1",
+      "abort_parameter_not_in_basis": "Det valgte avbruddsgrunnlaget har ikke denne parameteren",
+      "abort_type_not_in_schedule": "Planen har ikke et nivå for et oppgjør ved avbrudd",
+      "activity_not_found": "Planaktiviteten ble ikke funnet i dette prosjektet",
+      "amount_invalid": "Beløpet er ikke et gyldig tall",
+      "amount_not_positive": "Beløpet må være større enn null",
+      "assignee_not_project_member": "Personen er ikke medlem av dette prosjektet",
+      "assignment_expired": "Godkjenners tildeling har utløpt; oppdater tildelingene",
+      "assignment_needs_approver": "Oppgi godkjenneren for dette nivået før du legger inn en stedfortreder eller en gyldighetsperiode",
+      "assignment_window_inverted": "Tildelingen slutter før den starter",
+      "cancellation_schedule_invalid": "Hvert trinn må ha en milepæl, en dato eller fremdrift, og nøyaktig én kostnad",
+      "catalogue_code_taken": "En annen katalog bruker allerede denne koden",
+      "catalogue_invalid": "Katalogen er ikke gyldig",
+      "catalogue_retired": "Denne katalogen er utfast",
+      "change_belongs_to_contract_item": "En endring og kontrakten er koblet til samme element",
+      "commitment_guard_unavailable": "Frigjøringskontrollen kunne ikke gjennomføres, så dette ble ikke tillatt",
+      "commitment_not_in_matrix": "Dette dokumentet finnes ikke i forpliktelsesmatrisen",
+      "commitment_not_released": "Denne forpliktelsen er ikke frigitt for dette beløpet",
+      "commitment_type_unknown": "Denne forpliktelsestypen finnes ikke i myndighetsplanen",
+      "contingency_insufficient": "Saldoen på reserven dekker ikke dette uttaket",
+      "contingency_line_required": "Et uttak fra reserven krever budsjettlinjen som holder reserven",
+      "date_invalid": "Dette er ikke en dato",
+      "decider_not_tier_holder": "Godkjent av noen som ikke har nivået",
+      "decision_invalid": "Velg godkjenn eller avvis",
+      "deferral_needs_reason": "Skriv ned hvorfor elementet utsettes",
+      "document_linked_elsewhere": "Dette dokumentet er allerede telt i et annet element",
+      "document_not_found": "Dokumentet ble ikke funnet i dette prosjektet",
+      "drawdown_released_by_commitment": "Dette uttaket er et frigitt forpliktelseselement. Avbryt det elementet for å hente pengene tilbake.",
+      "edit_required": "Rollen din kan ikke redigere forpliktelseselementer",
+      "enforcement_invalid": "Håndhevingen må være av, varsle eller blokkere",
+      "external_approval_not_required": "Dette beløpet avgjøres av et nivå i planen: fjern henvisningen til ekstern godkjenning",
+      "external_approval_required": "Beløpet er over alle nivåer: legg ved henvisningen til ekstern godkjenning",
+      "field_frozen": "Dette feltet kan ikke lenger endres for dette elementet",
+      "field_required": "Dette feltet kan ikke være tomt",
+      "flag_unknown": "Dette flagget finnes ikke i myndighetsplanen",
+      "four_eyes_no_approver": "Ingen på dette nivået kan avgjøre denne forespørselen etter fire-øyne-prinsippet",
+      "four_eyes_requester_is_approver": "Fire øyne: du kan ikke be om en frigjøring du selv ville godkjent",
+      "four_eyes_violation": "Den som ba om, eier eller bekreftet dette elementet, kan ikke avgjøre det",
+      "frame_document_not_found": "Rammedokumentet ble ikke funnet i dette prosjektet",
+      "funding_application_not_found": "Finansieringssøknaden ble ikke funnet i dette prosjektet",
+      "fx_policy_invalid": "Ukjent valutakursregel",
+      "fx_rate_missing": "Det finnes ingen valutakurs for denne datoen: frigjøringen kan ikke vurderes",
+      "gate_unknown": "Denne porten finnes ikke i prosjektets styringsmodell",
+      "gates_not_in_use": "Dette prosjektet bruker ikke porter, så ingenting kan vente på en port",
+      "governance_area_required": "Et element knyttet til en port trenger et ledelsesområde",
+      "governance_area_unknown": "Dette ledelsesområdet finnes ikke i prosjektets styringsmodell",
+      "invalid_transition": "Dette steget er ikke mulig i gjeldende tilstand",
+      "item_changed": "Elementet er endret i mellomtiden. Prøv igjen.",
+      "item_closed": "Elementet er avsluttet",
+      "item_code_taken": "Et annet element bruker allerede denne koden",
+      "item_not_found": "Forpliktelseselementet ble ikke funnet",
+      "link_kind_invalid": "Ukjent dokumenttype",
+      "link_kind_not_supported": "Denne dokumenttypen kan ikke kobles ennå",
+      "link_not_found": "Koblingen ble ikke funnet",
+      "manage_required": "Bare den som forvalter matrisen kan gjøre dette",
+      "manual_amount_needs_currency": "Et manuelt anslag trenger et beløp og en valuta",
+      "matrix_missing": "Dette prosjektet har ingen forpliktelsesmatrise ennå",
+      "no_pending_release": "Det finnes ingen ventende frigjøringsforespørsel",
+      "no_route_for_tier": "Ingen er tildelt det påkrevde nivået ennå",
+      "not_entitled_decider": "Du har ikke nivået forespørselen avgjøres på",
+      "not_item_owner": "Bare eieren av elementet eller en forvalter kan endre dette elementet",
+      "not_requester": "Bare den som ba om det, eller en forvalter, kan trekke tilbake denne forespørselen",
+      "planned_source_invalid": "Ukjent kilde for det planlagte beløpet",
+      "planned_source_not_found": "Budsjettlinjen, kostnadslinjen eller posten ble ikke funnet i dette prosjektet",
+      "plant_item_not_found": "Maskinelementet ble ikke funnet i dette prosjektet",
+      "precondition_is_computed": "Denne forutsetningen leses fra modulen og kan ikke hakes av",
+      "precondition_kind_invalid": "Ukjent type forutsetning",
+      "precondition_needs_evidence": "Legg ved henvisningen til dokumentasjonen",
+      "precondition_needs_ref": "Denne forutsetningen trenger en henvisning",
+      "precondition_not_found": "Forutsetningen ble ikke funnet",
+      "preconditions_open": "Åpne forutsetninger hindrer denne frigjøringen",
+      "project_not_found": "Prosjektet ble ikke funnet",
+      "rationale_required": "Oppgi en begrunnelse",
+      "release_decided": "Denne frigjøringsforespørselen er allerede avgjort",
+      "release_expired": "Frigjøringen av dette elementet har passert gyldighetsdatoen: be om fornyet frigjøring før du binder mer",
+      "release_pending": "Det går allerede en frigjøringsforespørsel for dette elementet",
+      "requisition_not_found": "Rekvisisjonen ble ikke funnet i dette prosjektet",
+      "route_changed_since_accepted": "Godkjenningsflyten for dette nivået er endret. En forvalter må feste den på nytt.",
+      "route_must_belong_to_project": "Bare en godkjenningsflyt i dette prosjektet kan festes",
+      "route_not_found": "Godkjenningsflyten ble ikke funnet",
+      "schedule_currency_mismatch": "Denne planen bruker en annen valuta enn frigjøringene som allerede er registrert",
+      "schedule_not_in_force": "Den festede planen gjelder ikke i dag. Fest versjonen som gjelder.",
+      "schedule_type_mismatch": "Denne planen kjenner ikke forpliktelsestypen til et eksisterende element",
+      "tier_unknown": "Dette nivået finnes ikke i myndighetsplanen",
+      "transfer_links_stay_in_project": "Koblede dokumenter hører til dette prosjektet. Fjern koblingene før du overfører til et annet prosjekt.",
+      "transfer_target_invalid": "Et element kan ikke overføres til seg selv",
+      "transfer_target_not_open": "Måleelementet er avsluttet eller venter på en beslutning",
+      "transferable_invalid": "Ukjent overføringsalternativ",
+      "type_fixed_after_release": "Typen kan ikke endres etter at en frigjøring er bedt om",
+      "unknown_catalogue": "Katalogen ble ikke funnet"
+    },
+    "evidence": {
+      "decision_overdue": "Siste beslutningsdato for dette forpliktelseselementet er passert, og ingenting er frigitt: beslutt, utsett med begrunnelse, eller før kostnaden av forsinkelsen",
+      "items_released_by_gate": "Forpliktelser som forfaller ved denne porten er frigitt eller utsatt",
+      "items_without_area": "Forpliktelseselementer for denne porten angir et ledelsesområde som prosjektet ikke lenger har",
+      "no_items_for_gate": "Ingen forpliktelseselementer angir denne porten, så det er ukjent om penger må frigjøres innen den"
+    },
+    "export": {
+      "as_of": "Per",
+      "col_code": "Kode",
+      "col_committed": "Forpliktet",
+      "col_currency": "Valuta",
+      "col_decision_date": "Siste beslutningsdato",
+      "col_open_preconditions": "Åpne forutsetninger",
+      "col_overdue": "Beslutning forfalt",
+      "col_planned": "Planlagt",
+      "col_released": "Frigitt",
+      "col_residual_loss": "Restet tap ved avbrudd",
+      "col_status": "Status",
+      "col_tier": "Påkrevd nivå",
+      "col_title": "Forpliktelse",
+      "col_type": "Type",
+      "empty": "Ingen forpliktelseselementer ennå",
+      "overdue": "Forfalt",
+      "project": "Prosjekt",
+      "title": "Forpliktelses- og frigjøringsmatrise"
+    },
+    "exposure": {
+      "nothing_committed": "Ingenting forpliktet, ingenting brukt"
+    },
+    "flag": {
+      "multi_year_commitment": "Binder senere budsjettår",
+      "novel_contentious": "Nytt eller omstridt"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Element {item} er forpliktet, men vilkårene for avbrudd er ukjente",
+        "suggestion": "Legg inn grunnlaget for avbrudd eller en avbestillingsplan"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Grensene i plan {schedule} stiger ikke med nivået",
+        "suggestion": "Rett opp nivåene og publiser en ny versjon"
+      },
+      "committed_within_release": {
+        "fail": "Element {item} binder mer enn det som er frigitt",
+        "suggestion": "Be om en ny frigjøring eller reduser antall koblede dokumenter"
+      },
+      "decision_date_not_passed": {
+        "fail": "Siste beslutningsdato {date} for element {item} er passert",
+        "suggestion": "Beslutt, utsett med begrunnelse, eller før kostnaden av forsinkelsen"
+      },
+      "document_linked_once": {
+        "fail": "Dokument {document} er talt med i mer enn ett element",
+        "suggestion": "Fjern den andre koblingen"
+      },
+      "fx_rate_available": {
+        "fail": "Et koblet beløp for element {item} har ingen valutakurs",
+        "suggestion": "Legg til en kurs for datoen i valutakursregisteret eller i prosjektet"
+      },
+      "item_has_cost_code": {
+        "fail": "Element {item} har ingen kostnadslinje",
+        "suggestion": "Tilordne kostnadslinjen elementet føres mot"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Det planlagte beløpet for element {item} kan ikke leses",
+        "suggestion": "Pek elementet mot en budsjettlinje, kostnadslinje eller post, eller legg inn et manuelt anslag"
+      },
+      "plant_item_in_register": {
+        "fail": "Element {item} nevner et maskinelement som ikke lenger står i maskinregisteret, så dets egen leveringstid gjelder",
+        "suggestion": "Koble elementet til maskinelementet som erstattet det, eller fjern koblingen"
+      },
+      "release_in_date": {
+        "fail": "En frigjøring av element {item} var gyldig til {date}: ingenting nytt kan bindes under den",
+        "suggestion": "Be om fornyet frigjøring for det som fortsatt skal bindes"
+      },
+      "release_within_authority": {
+        "fail": "Frigjøring {release} ble avgjort under påkrevd nivå {tier}",
+        "suggestion": "Be om en ny frigjøring etter gjeldende plan"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Elementene i gruppe {group} ble frigitt under nivået summen deres krever",
+        "suggestion": "Be om neste frigjøring på nivået for gruppens sum"
+      }
+    },
+    "status": {
+      "aborted": "Avbrutt",
+      "closed": "Avsluttet",
+      "committed": "Forpliktet",
+      "on_hold": "På vent",
+      "partially_released": "Delvis frigitt",
+      "planned": "Planlagt",
+      "re_release_required": "Ny frigjøring kreves",
+      "release_requested": "Frigjøring bedt om",
+      "released": "Frigitt",
+      "transferred": "Overført"
+    },
+    "tier": {
+      "accounting_officer": "Regnskapsansvarlig",
+      "authority_head": "Virksomhetsleder",
+      "board": "Styre",
+      "contracting_officer": "Innkjøpsansvarlig",
+      "department_head": "Avdelingsleder",
+      "head_of_contracting_activity": "Leder for innkjøpsvirksomheten",
+      "project_director": "Prosjektdirektør",
+      "project_lead": "Prosjektleder",
+      "project_manager": "Prosjektansvarlig",
+      "senior_responsible_owner": "Overordnet ansvarlig eier",
+      "simplified_acquisition": "Forenklet innkjøp",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Endring",
+      "claim_settlement": "Oppgjør av krav",
+      "contingency_drawdown": "Uttak av reserve",
+      "design": "Prosjektering",
+      "services": "Tjenester",
+      "supplies": "Leveranser",
+      "termination_settlement": "Oppgjør ved oppsigelse",
+      "works": "Bygg- og anleggsarbeid"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} skulle vært besluttet innen {latest_decision_date}.",
+        "title": "Frigjøringsbeslutning forfalt"
+      },
+      "re_release_required": {
+        "body": "Koblede dokumenter til {code} binder nå {committed}, over frigjøringen på {released}.",
+        "title": "Ny frigjøring kreves"
+      },
+      "release_aborted": {
+        "body": "{code} ble stoppet.",
+        "title": "Avbrudd godkjent"
+      },
+      "release_rejected": {
+        "body": "Frigjøringen av {code} ble avvist.",
+        "title": "Frigjøring avvist"
+      },
+      "release_released": {
+        "body": "{code} ble frigitt.",
+        "title": "Frigjøring innvilget"
+      }
+    }
+  }
+}

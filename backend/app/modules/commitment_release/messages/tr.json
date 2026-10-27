@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Yapılmayan kısım üzerinden ücret",
+      "presumed_unperformed_pct": "Yapılmayan kısmın varsayılan payı",
+      "profit_pct": "Yapılan kısım üzerinden kâr"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Bu kalem için girilen bir bedel",
+        "name": "Özel koşullar"
+      },
+      "de_bgb_648": {
+        "description": "Kararlaştırılan bedel eksi tasarruf edilen maliyetler; tasarruf edilen maliyetler belgelenmediğinde yapılmayan kısmın %5'i varsayılır",
+        "name": "İşverenin serbest fesih hakkı (§ 648 BGB)",
+        "presumption": "Yapılmayan kısmın varsayılan payı"
+      },
+      "de_public_owner": {
+        "description": "Kamu işveren için örnek yetki devri: en üst iş kademesi olarak AB iş eşiği, kurum başkanına çok yıllı taahhütler",
+        "eu_works_threshold": "AB iş eşiği 2026-27 (Delege Tüzük (AB) 2025/2152), doğrulanmadı",
+        "name": "Kamu işveren (Almanya), örnek"
+      },
+      "de_vob_b_8_1": {
+        "description": "Maddenin atıfta bulunduğu § 648 BGB ile aynı hesap",
+        "name": "§ 8 (1) VOB/B uyarınca serbest fesih",
+        "refers_to_bgb_648": "§ 648 BGB'ye atıfta bulunur"
+      },
+      "far_49_convenience": {
+        "description": "Yapılan harcamalar, tamamlanan iş üzerinden kâr ve tasfiye giderleri",
+        "name": "Kolaylık nedeniyle fesih (FAR 49)",
+        "profit_negotiated": "Pazarlıkla belirlenen kâr oranı"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Sözleşme verilerinde belirtildiği üzere yapılan iş artı yapılmayan kısım üzerinden yüzde bedel",
+        "fee_from_contract_data": "Sözleşme verilerinden yüzde",
+        "name": "İşverenin kendi nedeniyle fesih (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Proje yöneticisi, sponsor ve yönetim kurulu için proje para biriminde örnek tavanlar; yasal rakam yok",
+        "name": "Tarafsız üç kademeli çizelge"
+      },
+      "none_free_cancellation": {
+        "description": "İptalde herhangi bir bedel yok",
+        "name": "Ücretsiz iptal"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Tedarikçi ile kararlaştırılan tarihe veya imalat ilerlemesine göre bedeller",
+        "name": "Tedarikçi iptal çizelgesi"
+      },
+      "uk_public_body": {
+        "description": "Managing Public Money'e göre tutar ve yenilik derecesine göre örnek devredilmiş yetki",
+        "name": "Kamu kurumu (Birleşik Krallık), örnek"
+      },
+      "us_federal_owner": {
+        "description": "Basitleştirilmiş satın alma eşiğinden başlayan örnek kademeler",
+        "name": "Federal işveren (ABD), örnek",
+        "sat": "Basitleştirilmiş satın alma eşiği 350.000 USD, 2025-10-01'den itibaren (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Bilinmeyen fesih esası",
+      "abort_exposure_unknown": "Kalan kayıp bilinmiyor. Önce fesih koşullarını tamamlayın.",
+      "abort_parameter_invalid": "Bir fesih parametresi 0 ile 1 arasında bir paydır",
+      "abort_parameter_not_in_basis": "Seçilen fesih esasında bu parametre yok",
+      "abort_type_not_in_schedule": "Çizelgede fesih tasfiyesi için bir kademe yok",
+      "activity_not_found": "Çizelge faaliyeti bu projede bulunamadı",
+      "amount_invalid": "Tutar geçerli bir sayı değil",
+      "amount_not_positive": "Tutar sıfırdan büyük olmalı",
+      "assignee_not_project_member": "Kişi bu projenin üyesi değil",
+      "assignment_expired": "Onaylayıcının atamasının süresi doldu; atamaları güncelleyin",
+      "assignment_needs_approver": "Vekil veya geçerlilik süresi belirlemeden önce bu kademenin onaylayıcısını adlandırın",
+      "assignment_window_inverted": "Atama başlamadan bitiyor",
+      "cancellation_schedule_invalid": "Her adımda bir kilometre taşı, bir tarih veya ilerleme ve tam olarak bir bedel olmalı",
+      "catalogue_code_taken": "Başka bir katalog bu kodu zaten kullanıyor",
+      "catalogue_invalid": "Katalog geçerli değil",
+      "catalogue_retired": "Bu katalog kullanımdan kaldırıldı",
+      "change_belongs_to_contract_item": "Bir değişiklik ile sözleşmesi aynı kalemde bağlı",
+      "commitment_guard_unavailable": "Serbest bırakma kontrolü yapılamadı, bu nedenle izin verilmedi",
+      "commitment_not_in_matrix": "Bu belge taahhüt matrisinde yok",
+      "commitment_not_released": "Bu taahhüt bu tutar için serbest bırakılmadı",
+      "commitment_type_unknown": "Bu taahhüt türü yetki çizelgesinde yok",
+      "contingency_insufficient": "Yedek ödeneğin bakiyesi bu çekimi karşılamıyor",
+      "contingency_line_required": "Yedek ödenek çekimi, yedeği barındıran bütçe kalemini gerektirir",
+      "date_invalid": "Bu bir tarih değil",
+      "decider_not_tier_holder": "Kademeyi elinde tutmayan biri tarafından onaylandı",
+      "decision_invalid": "Onayla veya reddet seçin",
+      "deferral_needs_reason": "Kalemin neden ertelendiğini yazın",
+      "document_linked_elsewhere": "Bu belge zaten başka bir kalemde sayılıyor",
+      "document_not_found": "Belge bu projede bulunamadı",
+      "drawdown_released_by_commitment": "Bu çekim serbest bırakılmış bir taahhüt kalemidir. Parayı geri almak için o kalemi iptal edin.",
+      "edit_required": "Rolünüz taahhüt kalemlerini düzenleyemez",
+      "enforcement_invalid": "Uygulama kapalı, uyarı veya engelleme olmalı",
+      "external_approval_not_required": "Bu tutar çizelgedeki bir kademe tarafından karara bağlanır: dış onay referansını kaldırın",
+      "external_approval_required": "Tutar her kademenin üzerinde: dış onay referansını ekleyin",
+      "field_frozen": "Bu alan bu kalem için artık değiştirilemez",
+      "field_required": "Bu alan boş bırakılamaz",
+      "flag_unknown": "Bu işaret yetki çizelgesinde yok",
+      "four_eyes_no_approver": "Dört göz ilkesi gereği bu kademedeki hiç kimse bu talebe karar veremez",
+      "four_eyes_requester_is_approver": "Dört göz: kendi onaylayacağınız bir serbest bırakma talebinde bulunamazsınız",
+      "four_eyes_violation": "Bu kalem için talep eden, sahip olan veya onaylayan kişi karar veremez",
+      "frame_document_not_found": "Çerçeve belgesi bu projede bulunamadı",
+      "funding_application_not_found": "Finansman başvurusu bu projede bulunamadı",
+      "fx_policy_invalid": "Bilinmeyen döviz kuru politikası",
+      "fx_rate_missing": "Bu tarih için döviz kuru yok: serbest bırakma değerlendirilemez",
+      "gate_unknown": "Bu kapı projenin yönetişim modelinde yok",
+      "gates_not_in_use": "Bu proje kapı kullanmıyor, bu nedenle hiçbir şey bir kapıyı bekleyemez",
+      "governance_area_required": "Bir kapıya bağlı kalemin bir yönetim alanı olmalı",
+      "governance_area_unknown": "Bu yönetim alanı projenin yönetişim modelinde yok",
+      "invalid_transition": "Bu adım mevcut durumda mümkün değil",
+      "item_changed": "Kalem bu arada değişti. Tekrar deneyin.",
+      "item_closed": "Kalem kapalı",
+      "item_code_taken": "Başka bir kalem bu kodu zaten kullanıyor",
+      "item_not_found": "Taahhüt kalemi bulunamadı",
+      "link_kind_invalid": "Bilinmeyen belge türü",
+      "link_kind_not_supported": "Bu belge türü henüz bağlanamaz",
+      "link_not_found": "Bağlantı bulunamadı",
+      "manage_required": "Bunu yalnızca matrisi yöneten biri yapabilir",
+      "manual_amount_needs_currency": "Elle yapılan bir tahmin için tutar ve para birimi gerekir",
+      "matrix_missing": "Bu projenin henüz bir taahhüt matrisi yok",
+      "no_pending_release": "Bekleyen bir serbest bırakma talebi yok",
+      "no_route_for_tier": "Gerekli kademeye henüz kimse atanmadı",
+      "not_entitled_decider": "Bu talebin karara bağlandığı kademeyi elinde tutmuyorsunuz",
+      "not_item_owner": "Bu kalemi yalnızca kalem sahibi veya bir yönetici değiştirebilir",
+      "not_requester": "Bu talebi yalnızca talep sahibi veya bir yönetici geri çekebilir",
+      "planned_source_invalid": "Planlanan tutarın kaynağı bilinmiyor",
+      "planned_source_not_found": "Bütçe kalemi, maliyet kalemi veya pozisyon bu projede bulunamadı",
+      "plant_item_not_found": "Ekipman kalemi bu projede bulunamadı",
+      "precondition_is_computed": "Bu ön koşul ilgili modülden okunur ve işaretlenemez",
+      "precondition_kind_invalid": "Bilinmeyen ön koşul türü",
+      "precondition_needs_evidence": "Kanıt referansını ekleyin",
+      "precondition_needs_ref": "Bu ön koşul bir referans gerektirir",
+      "precondition_not_found": "Ön koşul bulunamadı",
+      "preconditions_open": "Açık ön koşullar bu serbest bırakmayı engelliyor",
+      "project_not_found": "Proje bulunamadı",
+      "rationale_required": "Bir gerekçe yazın",
+      "release_decided": "Bu serbest bırakma talebi zaten karara bağlandı",
+      "release_expired": "Bu kalemin serbest bırakılması geçerlilik tarihini aştı: daha fazla bağlamadan önce yenilenmiş bir serbest bırakma talep edin",
+      "release_pending": "Bu kalem için bir serbest bırakma talebi zaten işliyor",
+      "requisition_not_found": "Satın alma talebi bu projede bulunamadı",
+      "route_changed_since_accepted": "Bu kademenin onay yolu düzenlendi. Bir yöneticinin yeniden sabitlemesi gerekiyor.",
+      "route_must_belong_to_project": "Yalnızca bu projenin bir onay yolu sabitlenebilir",
+      "route_not_found": "Onay yolu bulunamadı",
+      "schedule_currency_mismatch": "Bu çizelge, kayıtlı serbest bırakmalardan farklı bir para birimi kullanıyor",
+      "schedule_not_in_force": "Sabitlenen çizelge bugün yürürlükte değil. Yürürlükteki sürümü sabitleyin.",
+      "schedule_type_mismatch": "Bu çizelge mevcut bir kalemin taahhüt türünü tanımıyor",
+      "tier_unknown": "Bu kademe yetki çizelgesinde yok",
+      "transfer_links_stay_in_project": "Bağlı belgeler bu projeye aittir. Başka bir projeye aktarmadan önce bağlantılarını kaldırın.",
+      "transfer_target_invalid": "Bir kalem kendisine aktarılamaz",
+      "transfer_target_not_open": "Hedef kalem kapalı veya bir karar bekliyor",
+      "transferable_invalid": "Bilinmeyen aktarım seçeneği",
+      "type_fixed_after_release": "Serbest bırakma talep edildikten sonra tür değiştirilemez",
+      "unknown_catalogue": "Katalog bulunamadı"
+    },
+    "evidence": {
+      "decision_overdue": "Bu taahhüt kaleminin en son karar tarihi geçti ve hiçbir şey serbest bırakılmadı: karar verin, gerekçeyle erteleyin veya gecikmenin maliyetini kaydedin",
+      "items_released_by_gate": "Bu kapıda vadesi gelen taahhütler serbest bırakıldı veya ertelendi",
+      "items_without_area": "Bu kapının taahhüt kalemleri, projenin artık sahip olmadığı bir yönetim alanını belirtiyor",
+      "no_items_for_gate": "Hiçbir taahhüt kalemi bu kapıyı belirtmiyor, bu nedenle bu kapıya kadar paranın serbest bırakılması gerekip gerekmediği bilinmiyor"
+    },
+    "export": {
+      "as_of": "Tarih",
+      "col_code": "Kod",
+      "col_committed": "Taahhüt edilen",
+      "col_currency": "Para birimi",
+      "col_decision_date": "En son karar tarihi",
+      "col_open_preconditions": "Açık ön koşullar",
+      "col_overdue": "Karar gecikti",
+      "col_planned": "Planlanan",
+      "col_released": "Serbest bırakılan",
+      "col_residual_loss": "Fesihte kalan kayıp",
+      "col_status": "Durum",
+      "col_tier": "Gerekli kademe",
+      "col_title": "Taahhüt",
+      "col_type": "Tür",
+      "empty": "Henüz taahhüt kalemi yok",
+      "overdue": "Gecikmiş",
+      "project": "Proje",
+      "title": "Taahhüt ve serbest bırakma matrisi"
+    },
+    "exposure": {
+      "nothing_committed": "Taahhüt yok, harcama yok"
+    },
+    "flag": {
+      "multi_year_commitment": "Sonraki bütçe yıllarını bağlar",
+      "novel_contentious": "Yeni veya tartışmalı"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "{item} kalemi taahhüt edildi ama fesih koşulları bilinmiyor",
+        "suggestion": "Fesih esasını veya bir iptal çizelgesini girin"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "{schedule} çizelgesinin tavanları kademeyle birlikte artmıyor",
+        "suggestion": "Aralıkları düzeltin ve yeni bir sürüm yayımlayın"
+      },
+      "committed_within_release": {
+        "fail": "{item} kalemi serbest bırakılandan fazlasını bağlıyor",
+        "suggestion": "Ek bir serbest bırakma talep edin veya bağlı belgeleri azaltın"
+      },
+      "decision_date_not_passed": {
+        "fail": "{item} kaleminin en son karar tarihi {date} geçti",
+        "suggestion": "Karar verin, gerekçeyle erteleyin veya gecikmenin maliyetini kaydedin"
+      },
+      "document_linked_once": {
+        "fail": "{document} belgesi birden fazla kalemde sayılıyor",
+        "suggestion": "İkinci bağlantıyı kaldırın"
+      },
+      "fx_rate_available": {
+        "fail": "{item} kaleminin bağlı bir tutarında döviz kuru yok",
+        "suggestion": "Döviz kuru kaydında veya projede bu tarih için bir kur ekleyin"
+      },
+      "item_has_cost_code": {
+        "fail": "{item} kaleminin maliyet satırı yok",
+        "suggestion": "Kalemin kaydedildiği maliyet satırını atayın"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "{item} kaleminin planlanan tutarı okunamıyor",
+        "suggestion": "Kalemi bir bütçe kalemine, maliyet kalemine veya pozisyona yönlendirin ya da elle bir tahmin girin"
+      },
+      "plant_item_in_register": {
+        "fail": "{item} kalemi artık ekipman kayıt defterinde olmayan bir ekipman kalemi belirtiyor, bu nedenle kendi teslim süresi uygulanıyor",
+        "suggestion": "Kalemi onun yerini alan ekipman kalemine bağlayın veya bağlantıyı kaldırın"
+      },
+      "release_in_date": {
+        "fail": "{item} kaleminin bir serbest bırakması {date} tarihine kadar geçerliydi: bunun altında yeni bir şey bağlanamaz",
+        "suggestion": "Hâlâ bağlanacak olanlar için yenilenmiş bir serbest bırakma talep edin"
+      },
+      "release_within_authority": {
+        "fail": "{release} serbest bırakması gerekli {tier} kademesinin altında karara bağlandı",
+        "suggestion": "Geçerli çizelgeye göre yeni bir serbest bırakma talep edin"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "{group} grubunun kalemleri, toplamlarının gerektirdiği kademenin altında serbest bırakıldı",
+        "suggestion": "Bir sonraki serbest bırakmayı grup toplamının kademesinde talep edin"
+      }
+    },
+    "status": {
+      "aborted": "İptal edildi",
+      "closed": "Kapalı",
+      "committed": "Taahhüt edildi",
+      "on_hold": "Beklemede",
+      "partially_released": "Kısmen serbest bırakıldı",
+      "planned": "Planlandı",
+      "re_release_required": "Yeniden serbest bırakma gerekli",
+      "release_requested": "Serbest bırakma talep edildi",
+      "released": "Serbest bırakıldı",
+      "transferred": "Aktarıldı"
+    },
+    "tier": {
+      "accounting_officer": "Muhasebe yetkilisi",
+      "authority_head": "Kurum başkanı",
+      "board": "Yönetim kurulu",
+      "contracting_officer": "Sözleşme yetkilisi",
+      "department_head": "Daire başkanı",
+      "head_of_contracting_activity": "Sözleşme faaliyetleri başkanı",
+      "project_director": "Proje direktörü",
+      "project_lead": "Proje lideri",
+      "project_manager": "Proje yöneticisi",
+      "senior_responsible_owner": "Üst düzey sorumlu sahip",
+      "simplified_acquisition": "Basitleştirilmiş satın alma",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Değişiklik",
+      "claim_settlement": "Talep uzlaşması",
+      "contingency_drawdown": "Yedek ödenek çekimi",
+      "design": "Tasarım",
+      "services": "Hizmetler",
+      "supplies": "Malzeme tedariki",
+      "termination_settlement": "Fesih tasfiyesi",
+      "works": "İnşaat işleri"
+    }
+  },
+  "common": {
+    "ok": "Tamam"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} için karar {latest_decision_date} tarihine kadar verilmeliydi.",
+        "title": "Serbest bırakma kararı gecikti"
+      },
+      "re_release_required": {
+        "body": "{code} kalemine bağlı belgeler artık {released} serbest bırakmasının üzerinde olan {committed} tutarını bağlıyor.",
+        "title": "Yeniden serbest bırakma gerekli"
+      },
+      "release_aborted": {
+        "body": "{code} durduruldu.",
+        "title": "İptal onaylandı"
+      },
+      "release_rejected": {
+        "body": "{code} için serbest bırakma reddedildi.",
+        "title": "Serbest bırakma reddedildi"
+      },
+      "release_released": {
+        "body": "{code} serbest bırakıldı.",
+        "title": "Serbest bırakma verildi"
+      }
+    }
+  }
+}

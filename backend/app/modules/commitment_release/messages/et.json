@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Tasu täitmata osalt",
+      "presumed_unperformed_pct": "Täitmata osa eeldatav osakaal",
+      "profit_pct": "Kasum täidetud osalt"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Selle positsiooni jaoks sisestatud tasu",
+        "name": "Kohandatud tingimused"
+      },
+      "de_bgb_648": {
+        "description": "Kokkulepitud hind miinus säästetud kulud; kui säästetud kulusid ei ole dokumenteeritud, eeldatakse 5 % täitmata osast",
+        "name": "Tellija tasuta lepingu lõpetamine (BGB § 648)",
+        "presumption": "Täitmata osa eeldatav osakaal"
+      },
+      "de_public_owner": {
+        "description": "Näidisvolitus avaliku tellija jaoks: ELi ehitustööde künnis kõrgeima tööde astmena, mitmeaastased kohustused asutuse juhile",
+        "eu_works_threshold": "ELi ehitustööde künnis 2026–27 (delegeeritud määrus (EL) 2025/2152), kinnitamata",
+        "name": "Avalik tellija (Saksamaa), näide"
+      },
+      "de_vob_b_8_1": {
+        "description": "Sama arveldus nagu BGB § 648 puhul, millele klausel viitab",
+        "name": "Tasuta lepingu lõpetamine VOB/B § 8 (1) alusel",
+        "refers_to_bgb_648": "Viitab BGB § 648-le"
+      },
+      "far_49_convenience": {
+        "description": "Tehtud kulud pluss tehtud töö kasum pluss arveldamiskulud",
+        "name": "Lõpetamine tellija mugavuse alusel (FAR 49)",
+        "profit_negotiated": "Läbirääkimistel kokku lepitud kasumimäär"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Tehtud töö pluss lepingu andmetes märgitud protsent täitmata osalt",
+        "fee_from_contract_data": "Protsent lepingu andmetest",
+        "name": "Lõpetamine tellija enda põhjusel (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Projektijuht, sponsor ja juhatus näidislaelagedega projekti valuutas; seadusest tulenevaid näitajaid ei ole",
+        "name": "Neutraalne kolmetasemeline graafik"
+      },
+      "none_free_cancellation": {
+        "description": "Tühistamisel tasu ei võeta",
+        "name": "Tasuta tühistamine"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Tasud kuupäeva või valmistamise edenemise järgi, nagu on tarnijaga kokku lepitud",
+        "name": "Tarnija tühistamise graafik"
+      },
+      "uk_public_body": {
+        "description": "Näidisvolitused summa ja uudsuse järgi vastavalt juhendile Managing Public Money",
+        "name": "Avalik-õiguslik asutus (Ühendkuningriik), näide"
+      },
+      "us_federal_owner": {
+        "description": "Näidisastmed alates lihtsustatud hankelävest",
+        "name": "Föderaalne tellija (Ameerika Ühendriigid), näide",
+        "sat": "Lihtsustatud hankelävi 350 000 USD alates 01.10.2025 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Tundmatu lõpetamise alus",
+      "abort_exposure_unknown": "Jääkkahju on teadmata. Täida kõigepealt lõpetamise tingimused.",
+      "abort_parameter_invalid": "Lõpetamise parameeter peab olema osakaal vahemikus 0 kuni 1",
+      "abort_parameter_not_in_basis": "Valitud lõpetamise alusel seda parameetrit ei ole",
+      "abort_type_not_in_schedule": "Graafikus ei ole lepingu lõpetamise arveldamise astet",
+      "activity_not_found": "Graafiku tegevust ei leitud sellest projektist",
+      "amount_invalid": "Summa ei ole korrektne arv",
+      "amount_not_positive": "Summa peab olema suurem kui null",
+      "assignee_not_project_member": "Isik ei ole selle projekti liige",
+      "assignment_expired": "Kinnitaja määramine on aegunud; uuenda määramisi",
+      "assignment_needs_approver": "Enne asendaja või kehtivusperioodi määramist nimeta selle astme kinnitaja",
+      "assignment_window_inverted": "Määramine lõpeb enne, kui see algab",
+      "cancellation_schedule_invalid": "Igal sammul peavad olema verstapost, kuupäev või edenemine ning täpselt üks tasu",
+      "catalogue_code_taken": "Teine kataloog kasutab juba seda koodi",
+      "catalogue_invalid": "Kataloog ei ole korrektne",
+      "catalogue_retired": "See kataloog on kasutusest kõrvaldatud",
+      "change_belongs_to_contract_item": "Muudatus ja leping on seotud samal positsioonil",
+      "commitment_guard_unavailable": "Vabastamise kontrolli ei õnnestunud teha, seetõttu ei lubatud toimingut",
+      "commitment_not_in_matrix": "See dokument ei ole kohustuste maatriksis",
+      "commitment_not_released": "Seda kohustust ei ole selle summa jaoks vabastatud",
+      "commitment_type_unknown": "Seda kohustuse tüüpi ei ole volituste graafikus",
+      "contingency_insufficient": "Reservi jääk ei kata seda väljavõtet",
+      "contingency_line_required": "Reservi väljavõte nõuab eelarverida, kus reserv asub",
+      "date_invalid": "See ei ole kuupäev",
+      "decider_not_tier_holder": "Kinnitas isik, kellel ei ole seda astet",
+      "decision_invalid": "Vali kinnita või lükka tagasi",
+      "deferral_needs_reason": "Kirjuta üles, miks positsioon edasi lükatakse",
+      "document_linked_elsewhere": "See dokument on juba arvestatud mõnes teises positsioonis",
+      "document_not_found": "Dokumenti ei leitud sellest projektist",
+      "drawdown_released_by_commitment": "See väljavõte on vabastatud kohustuse positsioon. Lõpeta see positsioon, et raha tagasi saada.",
+      "edit_required": "Sinu roll ei luba kohustuste positsioone muuta",
+      "enforcement_invalid": "Jõustamine peab olema väljas, hoiatus või blokeeritud",
+      "external_approval_not_required": "Selle summa otsustab graafiku aste: eemalda välise kinnituse viide",
+      "external_approval_required": "Summa ületab kõiki astmeid: lisa välise kinnituse viide",
+      "field_frozen": "Seda välja ei saa selle positsiooni puhul enam muuta",
+      "field_required": "See väli ei tohi olla tühi",
+      "flag_unknown": "Seda märgist ei ole volituste graafikus",
+      "four_eyes_no_approver": "Selle astme keegi ei tohi nelja silma põhimõttel seda taotlust otsustada",
+      "four_eyes_requester_is_approver": "Nelja silma põhimõte: sa ei saa taotleda vabastamist, mille ise kinnitaksid",
+      "four_eyes_violation": "Positsiooni taotleja, omanik või kinnitaja ei saa seda otsustada",
+      "frame_document_not_found": "Raamdokumenti ei leitud sellest projektist",
+      "funding_application_not_found": "Rahastustaotlust ei leitud sellest projektist",
+      "fx_policy_invalid": "Tundmatu valuutakursi põhimõte",
+      "fx_rate_missing": "Selle kuupäeva kohta puudub valuutakurss: vabastamist ei saa hinnata",
+      "gate_unknown": "Seda väravat ei ole projekti juhtimismudelis",
+      "gates_not_in_use": "See projekt ei kasuta väravaid, seega ei ole midagi, mis ootaks väravat",
+      "governance_area_required": "Väravaga seotud positsioon vajab juhtimisvaldkonda",
+      "governance_area_unknown": "Seda juhtimisvaldkonda ei ole projekti juhtimismudelis",
+      "invalid_transition": "See samm ei ole praeguses olekus võimalik",
+      "item_changed": "Positsioon muutus vahepeal. Proovi uuesti.",
+      "item_closed": "Positsioon on suletud",
+      "item_code_taken": "Teine positsioon kasutab juba seda koodi",
+      "item_not_found": "Kohustuse positsiooni ei leitud",
+      "link_kind_invalid": "Tundmatu dokumendi liik",
+      "link_kind_not_supported": "Seda liiki dokumenti ei saa veel siduda",
+      "link_not_found": "Linki ei leitud",
+      "manage_required": "Seda saab teha ainult maatriksi haldaja",
+      "manual_amount_needs_currency": "Käsitsi hinnang vajab summat ja valuutat",
+      "matrix_missing": "Sellel projektil ei ole veel kohustuste maatriksit",
+      "no_pending_release": "Ootel vabastamistaotlust ei ole",
+      "no_route_for_tier": "Nõutavale astmele ei ole veel kedagi määratud",
+      "not_entitled_decider": "Sul ei ole selle taotluse otsustamise astet",
+      "not_item_owner": "Positsiooni saab muuta ainult positsiooni omanik või haldaja",
+      "not_requester": "Taotluse saab tagasi võtta ainult taotleja või haldaja",
+      "planned_source_invalid": "Planeeritud summa allikas on tundmatu",
+      "planned_source_not_found": "Eelarverida, kulurida ega positsiooni ei leitud sellest projektist",
+      "plant_item_not_found": "Masinapositsiooni ei leitud sellest projektist",
+      "precondition_is_computed": "See eeltingimus loetakse moodulist ega saa seda märkida",
+      "precondition_kind_invalid": "Tundmatu eeltingimuse liik",
+      "precondition_needs_evidence": "Lisa tõendi viide",
+      "precondition_needs_ref": "See eeltingimus vajab viidet",
+      "precondition_not_found": "Eeltingimust ei leitud",
+      "preconditions_open": "Avatud eeltingimused takistavad vabastamist",
+      "project_not_found": "Projekti ei leitud",
+      "rationale_required": "Põhjenda",
+      "release_decided": "See vabastamistaotlus on juba otsustatud",
+      "release_expired": "Selle positsiooni vabastamise kehtivus on möödas: enne uute kohustuste sidumist taotle vabastamise uuendamist",
+      "release_pending": "Selle positsiooni vabastamistaotlus on juba menetluses",
+      "requisition_not_found": "Taotlust ei leitud sellest projektist",
+      "route_changed_since_accepted": "Selle astme kinnitusmarsruuti on muudetud. Haldaja peab selle uuesti kinnitama.",
+      "route_must_belong_to_project": "Kinnitada saab ainult selle projekti kinnitusmarsruuti",
+      "route_not_found": "Kinnitusmarsruuti ei leitud",
+      "schedule_currency_mismatch": "See graafik kasutab teistsugust valuutat kui juba salvestatud vabastamised",
+      "schedule_not_in_force": "Kinnitatud graafik ei kehti täna. Kinnita versioon, mis kehtib.",
+      "schedule_type_mismatch": "See graafik ei tunne olemasoleva positsiooni kohustuse tüüpi",
+      "tier_unknown": "Seda astet ei ole volituste graafikus",
+      "transfer_links_stay_in_project": "Seotud dokumendid kuuluvad sellesse projekti. Enne teise projekti üleandmist eemalda seosed.",
+      "transfer_target_invalid": "Positsiooni ei saa üle kanda iseendale",
+      "transfer_target_not_open": "Sihtpositsioon on suletud või ootab otsust",
+      "transferable_invalid": "Tundmatu üleandmise valik",
+      "type_fixed_after_release": "Tüüpi ei saa muuta, kui vabastamist on juba taotletud",
+      "unknown_catalogue": "Kataloogi ei leitud"
+    },
+    "evidence": {
+      "decision_overdue": "Selle kohustuse positsiooni viimane otsustamise kuupäev on möödas ega midagi ole vabastatud: otsusta, lükka põhjendusega edasi või salvesta viivituse hind",
+      "items_released_by_gate": "Selle värava juures tähtajaks saabuvad kohustused on vabastatud või edasi lükatud",
+      "items_without_area": "Selle värava kohustuste positsioonid nimetavad juhtimisvaldkonna, mida projektil enam ei ole",
+      "no_items_for_gate": "Ükski kohustuse positsioon ei nimeta seda väravat, seega ei ole teada, kas raha tuleb selle värava juures vabastada"
+    },
+    "export": {
+      "as_of": "Seisuga",
+      "col_code": "Kood",
+      "col_committed": "Kohustatud",
+      "col_currency": "Valuuta",
+      "col_decision_date": "Viimane otsustamise kuupäev",
+      "col_open_preconditions": "Avatud eeltingimused",
+      "col_overdue": "Otsustamine hilineb",
+      "col_planned": "Planeeritud",
+      "col_released": "Vabastatud",
+      "col_residual_loss": "Jääkkahju lõpetamisel",
+      "col_status": "Olek",
+      "col_tier": "Nõutav aste",
+      "col_title": "Kohustus",
+      "col_type": "Tüüp",
+      "empty": "Kohustuste positsioone ei ole veel",
+      "overdue": "Hilinenud",
+      "project": "Projekt",
+      "title": "Kohustuste ja vabastamise maatriks"
+    },
+    "exposure": {
+      "nothing_committed": "Midagi ei ole kohustatud, midagi ei ole kulutatud"
+    },
+    "flag": {
+      "multi_year_commitment": "Seob hilisemaid eelarveaastaid",
+      "novel_contentious": "Uudne või vaidlustatav"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Positsioon {item} on kohustatud, kuid selle lõpetamise tingimused on teadmata",
+        "suggestion": "Sisesta lõpetamise alus või tühistamise graafik"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Graafiku {schedule} laed ei tõuse astmega",
+        "suggestion": "Paranda vahemikud ja avalda uus versioon"
+      },
+      "committed_within_release": {
+        "fail": "Positsioon {item} seob rohkem, kui on vabastatud",
+        "suggestion": "Taotle täiendavat vabastamist või vähenda seotud dokumente"
+      },
+      "decision_date_not_passed": {
+        "fail": "Positsiooni {item} viimane otsustamise kuupäev {date} on möödas",
+        "suggestion": "Otsusta, lükka põhjendusega edasi või salvesta viivituse hind"
+      },
+      "document_linked_once": {
+        "fail": "Dokument {document} on arvestatud rohkem kui ühes positsioonis",
+        "suggestion": "Eemalda teine seos"
+      },
+      "fx_rate_available": {
+        "fail": "Positsiooni {item} seotud summal puudub valuutakurss",
+        "suggestion": "Lisa kurss kuupäevale valuutakursside registrisse või projekti"
+      },
+      "item_has_cost_code": {
+        "fail": "Positsioonil {item} puudub kulurida",
+        "suggestion": "Määra kulurida, millele positsioon kantakse"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Positsiooni {item} planeeritud summat ei saa lugeda",
+        "suggestion": "Suuna positsioon eelarverea, kululeide või positsiooni juurde või sisesta käsitsi hinnang"
+      },
+      "plant_item_in_register": {
+        "fail": "Positsioon {item} nimetab masinapositsiooni, mis ei ole enam masinaregistris, seega kehtib selle enda tarneaeg",
+        "suggestion": "Seo positsioon masinapositsiooniga, mis selle asendas, või eemalda seos"
+      },
+      "release_in_date": {
+        "fail": "Positsiooni {item} vabastamine kehtis kuni {date}: selle alusel ei saa midagi uut siduda",
+        "suggestion": "Taotle uuendatud vabastamist sellele, mida veel tuleb siduda"
+      },
+      "release_within_authority": {
+        "fail": "Vabastamine {release} otsustati allpool nõutavat astet {tier}",
+        "suggestion": "Taotle uut vabastamist praeguse graafiku alusel"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Grupi {group} positsioonid vabastati astmest madalamal, kui nende summa nõuab",
+        "suggestion": "Taotle järgmine vabastamine grupi kogusumma astmel"
+      }
+    },
+    "status": {
+      "aborted": "Lõpetatud",
+      "closed": "Suletud",
+      "committed": "Kohustatud",
+      "on_hold": "Ootel",
+      "partially_released": "Osaliselt vabastatud",
+      "planned": "Planeeritud",
+      "re_release_required": "Vajab uut vabastamist",
+      "release_requested": "Vabastamine taotletud",
+      "released": "Vabastatud",
+      "transferred": "Üle antud"
+    },
+    "tier": {
+      "accounting_officer": "Raamatupidamisvastutaja",
+      "authority_head": "Asutuse juht",
+      "board": "Juhatus",
+      "contracting_officer": "Hankija ametnik",
+      "department_head": "Osakonna juht",
+      "head_of_contracting_activity": "Hankimise juht",
+      "project_director": "Projektijuht",
+      "project_lead": "Projekti juht",
+      "project_manager": "Projektijuht",
+      "senior_responsible_owner": "Vastutav kõrgem omanik",
+      "simplified_acquisition": "Lihtsustatud hange",
+      "sponsor": "Sponsor"
+    },
+    "type": {
+      "change": "Muudatus",
+      "claim_settlement": "Nõude rahuldamine",
+      "contingency_drawdown": "Reservi väljavõte",
+      "design": "Projekteerimine",
+      "services": "Teenused",
+      "supplies": "Tarned",
+      "termination_settlement": "Lepingu lõpetamise arveldus",
+      "works": "Ehitustööd"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} oleks pidanud olema otsustatud kuupäevaks {latest_decision_date}.",
+        "title": "Vabastamise otsus on hilinenud"
+      },
+      "re_release_required": {
+        "body": "{code} seotud dokumendid seovad nüüd {committed}, mis ületab vabastatud {released}.",
+        "title": "Vajab uut vabastamist"
+      },
+      "release_aborted": {
+        "body": "{code} peatati.",
+        "title": "Lõpetamine kinnitatud"
+      },
+      "release_rejected": {
+        "body": "{code} vabastamine lükati tagasi.",
+        "title": "Vabastamine tagasi lükatud"
+      },
+      "release_released": {
+        "body": "{code} on vabastatud.",
+        "title": "Vabastamine antud"
+      }
+    }
+  }
+}

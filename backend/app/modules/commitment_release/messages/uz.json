@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Bajarilmagan qism bo'yicha to'lov",
+      "presumed_unperformed_pct": "Bajarilmagan qismning taxminiy ulushi",
+      "profit_pct": "Bajarilgan qism bo'yicha foyda"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Ushbu band uchun kiritilgan to'lov",
+        "name": "Maxsus shartlar"
+      },
+      "de_bgb_648": {
+        "description": "Kelishilgan narx minus tejalgan xarajatlar; tejalgan xarajatlar hujjatlashtirilmagan bo'lsa, bajarilmagan qismning 5 % taxmin qilinadi",
+        "name": "Buyurtmachi tomonidan erkin bekor qilish (§ 648 BGB)",
+        "presumption": "Bajarilmagan qismning taxminiy ulushi"
+      },
+      "de_public_owner": {
+        "description": "Davlat buyurtmachisi uchun namunaviy vakolat berish: eng yuqori ish darajasi sifatida YeI ish chegarasi, rahbarga ko'p yillik majburiyatlar",
+        "eu_works_threshold": "YeI ish chegarasi 2026-27 (Delegat etilgan nizom (EU) 2025/2152), tasdiqlanmagan",
+        "name": "Davlat buyurtmachisi (Germaniya), namuna"
+      },
+      "de_vob_b_8_1": {
+        "description": "Band havola qiladigan § 648 BGB bilan bir xil hisob-kitob",
+        "name": "§ 8 (1) VOB/B bo'yicha erkin bekor qilish",
+        "refers_to_bgb_648": "§ 648 BGB ga havola qiladi"
+      },
+      "far_49_convenience": {
+        "description": "Qilingan xarajatlar, bajarilgan ish bo'yicha foyda va hisob-kitob xarajatlari",
+        "name": "Qulaylik uchun bekor qilish (FAR 49)",
+        "profit_negotiated": "Kelishuv bo'yicha foyda stavkasi"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Shartnoma ma'lumotlarida ko'rsatilganidek, bajarilgan ish va bajarilmagan qism bo'yicha foiz to'lov",
+        "fee_from_contract_data": "Shartnoma ma'lumotlaridagi foiz",
+        "name": "Buyurtmachining o'z sababi bo'yicha bekor qilish (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Loyiha menejeri, homiy va kengash loyiha valyutasidagi namunaviy chegaralar bilan; qonuniy raqamlarsiz",
+        "name": "Neytral uch bosqichli jadval"
+      },
+      "none_free_cancellation": {
+        "description": "Bekor qilishda to'lov yo'q",
+        "name": "Bepul bekor qilish"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Yetkazib beruvchi bilan kelishilganidek, sana yoki ishlab chiqarish bosqichi bo'yicha to'lovlar",
+        "name": "Yetkazib beruvchi bekor qilish jadvali"
+      },
+      "uk_public_body": {
+        "description": "Managing Public Money bo'yicha summa va yangilik darajasiga ko'ra namunaviy topshirilgan vakolat",
+        "name": "Davlat organi (Buyuk Britaniya), namuna"
+      },
+      "us_federal_owner": {
+        "description": "Soddalashtirilgan xarid chegarasidan boshlanadigan namunaviy darajalar",
+        "name": "Federal buyurtmachi (AQSH), namuna",
+        "sat": "Soddalashtirilgan xarid chegarasi 350 000 USD, 2025-10-01 dan (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Bekor qilish asosi noma'lum",
+      "abort_exposure_unknown": "Qolgan zarar noma'lum. Avval bekor qilish shartlarini to'ldiring.",
+      "abort_parameter_invalid": "Bekor qilish parametri 0 va 1 orasidagi ulush bo'lishi kerak",
+      "abort_parameter_not_in_basis": "Tanlangan bekor qilish asosida bu parametr yo'q",
+      "abort_type_not_in_schedule": "Jadvalda bekor qilish hisob-kitobi uchun daraja yo'q",
+      "activity_not_found": "Jadval faoliyati ushbu loyihada topilmadi",
+      "amount_invalid": "Summa to'g'ri son emas",
+      "amount_not_positive": "Summa noldan katta bo'lishi kerak",
+      "assignee_not_project_member": "Shaxs ushbu loyihaning a'zosi emas",
+      "assignment_expired": "Tasdiqlovchining topshirig'i muddati tugagan; topshiriqlarni yangilang",
+      "assignment_needs_approver": "O'rinbosar yoki amal qilish muddatini belgilashdan oldin ushbu daraja tasdiqlovchisini ko'rsating",
+      "assignment_window_inverted": "Topshiriq boshlanishidan oldin tugaydi",
+      "cancellation_schedule_invalid": "Har bir bosqichda bosqich nazorati nuqtasi, sana yoki progress va aynan bitta to'lov bo'lishi kerak",
+      "catalogue_code_taken": "Boshqa katalog ushbu kodni allaqachon ishlatmoqda",
+      "catalogue_invalid": "Katalog yaroqsiz",
+      "catalogue_retired": "Ushbu katalog eskirgan",
+      "change_belongs_to_contract_item": "O'zgartirish va uning shartnomasi bir bandga bog'langan",
+      "commitment_guard_unavailable": "Ozod etish tekshiruvini amalga oshirib bo'lmadi, shu sababli ruxsat berilmadi",
+      "commitment_not_in_matrix": "Bu hujjat majburiyatlar matritsasida yo'q",
+      "commitment_not_released": "Ushbu majburiyat bu summa uchun ozod etilmagan",
+      "commitment_type_unknown": "Bu majburiyat turi vakolatlar jadvalida yo'q",
+      "contingency_insufficient": "Zaxira mablag'i qoldig'i ushbu yechib olishni qoplamaydi",
+      "contingency_line_required": "Zaxira mablag'idan yechib olish uchun zaxirani saqlaydigan byudjet satri kerak",
+      "date_invalid": "Bu sana emas",
+      "decider_not_tier_holder": "Ushbu darajaga ega bo'lmagan shaxs tomonidan tasdiqlangan",
+      "decision_invalid": "Tasdiqlash yoki rad etishni tanlang",
+      "deferral_needs_reason": "Band nima uchun kechiktirilganini yozing",
+      "document_linked_elsewhere": "Bu hujjat boshqa bandda allaqachon hisobga olingan",
+      "document_not_found": "Hujjat ushbu loyihada topilmadi",
+      "drawdown_released_by_commitment": "Bu yechib olish ozod etilgan majburiyat bandi. Pulni qaytarib olish uchun ushbu bandni bekor qiling.",
+      "edit_required": "Sizning rolingiz majburiyat bandlarini tahrirlay olmaydi",
+      "enforcement_invalid": "Majburlash o'chirilgan, ogohlantirish yoki bloklash bo'lishi kerak",
+      "external_approval_not_required": "Bu summani jadvaldagi daraja hal qiladi: tashqi tasdiqlash havolasini olib tashlang",
+      "external_approval_required": "Summa barcha darajalardan yuqori: tashqi tasdiqlash havolasini biriktiring",
+      "field_frozen": "Ushbu maydonni bu band uchun endi o'zgartirib bo'lmaydi",
+      "field_required": "Bu maydon bo'sh bo'lishi mumkin emas",
+      "flag_unknown": "Bu belgi vakolatlar jadvalida yo'q",
+      "four_eyes_no_approver": "To'rt ko'z qoidasiga ko'ra bu darajadagi hech kim ushbu so'rovni hal qila olmaydi",
+      "four_eyes_requester_is_approver": "To'rt ko'z: o'zingiz tasdiqlaydigan ozod etishni so'rab bo'lmaydi",
+      "four_eyes_violation": "Ushbu band uchun so'rov yuborgan, unga egalik qilgan yoki tasdiqlagan shaxs uni hal qila olmaydi",
+      "frame_document_not_found": "Asosiy hujjat ushbu loyihada topilmadi",
+      "funding_application_not_found": "Moliyalashtirish arizasi ushbu loyihada topilmadi",
+      "fx_policy_invalid": "Valyuta kursi siyosati noma'lum",
+      "fx_rate_missing": "Ushbu sana uchun valyuta kursi yo'q: ozod etishni baholab bo'lmaydi",
+      "gate_unknown": "Bu gate loyihaning boshqaruv modelida yo'q",
+      "gates_not_in_use": "Bu loyihada gate ishlatilmaydi, shuning uchun hech narsa gate kutishi mumkin emas",
+      "governance_area_required": "Gate bilan bog'langan bandga boshqaruv sohasi kerak",
+      "governance_area_unknown": "Bu boshqaruv sohasi loyihaning boshqaruv modelida yo'q",
+      "invalid_transition": "Ushbu qadam joriy holatda mumkin emas",
+      "item_changed": "Band shu orada o'zgartirildi. Qaytadan urining.",
+      "item_closed": "Band yopilgan",
+      "item_code_taken": "Boshqa band ushbu kodni allaqachon ishlatmoqda",
+      "item_not_found": "Majburiyat bandi topilmadi",
+      "link_kind_invalid": "Noma'lum hujjat turi",
+      "link_kind_not_supported": "Bu hujjat turini hozircha bog'lab bo'lmaydi",
+      "link_not_found": "Havola topilmadi",
+      "manage_required": "Buni faqat matritsani boshqaradigan shaxs bajara oladi",
+      "manual_amount_needs_currency": "Qo'lda baholash uchun summa va valyuta kerak",
+      "matrix_missing": "Bu loyihada hali majburiyatlar matritsasi yo'q",
+      "no_pending_release": "Kutilayotgan ozod etish so'rovi yo'q",
+      "no_route_for_tier": "Kerakli darajaga hali hech kim tayinlanmagan",
+      "not_entitled_decider": "Siz ushbu so'rov hal qilinadigan darajaga ega emassiz",
+      "not_item_owner": "Ushbu bandni faqat band egasi yoki menejer o'zgartira oladi",
+      "not_requester": "Ushbu so'rovni faqat so'rov muallifi yoki menejer qaytarib olishi mumkin",
+      "planned_source_invalid": "Rejalashtirilgan summaning manbai noma'lum",
+      "planned_source_not_found": "Byudjet satri, xarajat satri yoki pozitsiya ushbu loyihada topilmadi",
+      "plant_item_not_found": "Texnika bandi ushbu loyihada topilmadi",
+      "precondition_is_computed": "Bu old shart o'z modulidan o'qiladi va belgilanmaydi",
+      "precondition_kind_invalid": "Old shartning noma'lum turi",
+      "precondition_needs_evidence": "Isbot havolasini biriktiring",
+      "precondition_needs_ref": "Bu old shartga havola kerak",
+      "precondition_not_found": "Old shart topilmadi",
+      "preconditions_open": "Ochiq old shartlar ushbu ozod etishni to'sib qo'yadi",
+      "project_not_found": "Loyiha topilmadi",
+      "rationale_required": "Sabab yozing",
+      "release_decided": "Ushbu ozod etish so'rovi allaqachon hal qilingan",
+      "release_expired": "Ushbu bandni ozod etish amal qilish muddatidan o'tgan: ko'proq majburiyat olishdan oldin yangilangan ozod etishni so'rang",
+      "release_pending": "Ushbu band uchun ozod etish so'rovi allaqachon ko'rib chiqilmoqda",
+      "requisition_not_found": "Talabnoma ushbu loyihada topilmadi",
+      "route_changed_since_accepted": "Ushbu darajaning tasdiqlash yo'nalishi tahrirlangan. Menejer uni qayta mahkamlashi kerak.",
+      "route_must_belong_to_project": "Faqat ushbu loyihaning tasdiqlash yo'nalishini mahkamlash mumkin",
+      "route_not_found": "Tasdiqlash yo'nalishi topilmadi",
+      "schedule_currency_mismatch": "Bu jadval allaqachon qayd etilgan ozod etishlardan boshqa valyutadan foydalanadi",
+      "schedule_not_in_force": "Mahkamlangan jadval bugun amalda emas. Amaldagi versiyani mahkamlang.",
+      "schedule_type_mismatch": "Bu jadval mavjud bandning majburiyat turini tanimaydi",
+      "tier_unknown": "Bu daraja vakolatlar jadvalida yo'q",
+      "transfer_links_stay_in_project": "Bog'langan hujjatlar ushbu loyihaga tegishli. Boshqa loyihaga o'tkazishdan oldin ularni uzing.",
+      "transfer_target_invalid": "Band o'ziga o'tkazilishi mumkin emas",
+      "transfer_target_not_open": "Maqsadli band yopilgan yoki qaror kutmoqda",
+      "transferable_invalid": "Noma'lum o'tkazish varianti",
+      "type_fixed_after_release": "Ozod etish so'ralgandan keyin turni o'zgartirib bo'lmaydi",
+      "unknown_catalogue": "Katalog topilmadi"
+    },
+    "evidence": {
+      "decision_overdue": "Ushbu majburiyat bandining so'nggi qaror sanasi o'tib ketdi va hech narsa ozod etilmadi: qaror qabul qiling, sabab bilan kechiktiring yoki kechikish xarajatini qayd eting",
+      "items_released_by_gate": "Ushbu gate muddati kelgan majburiyatlar ozod etilgan yoki kechiktirilgan",
+      "items_without_area": "Ushbu gate majburiyat bandlari loyihada endi mavjud bo'lmagan boshqaruv sohasini ko'rsatadi",
+      "no_items_for_gate": "Hech bir majburiyat bandi bu gate ni ko'rsatmaydi, shuning uchun unga qadar pul ozod etilishi kerakmi, noma'lum"
+    },
+    "export": {
+      "as_of": "Sana",
+      "col_code": "Kod",
+      "col_committed": "Majburiyat olingan",
+      "col_currency": "Valyuta",
+      "col_decision_date": "So'nggi qaror sanasi",
+      "col_open_preconditions": "Ochiq old shartlar",
+      "col_overdue": "Qaror muddati o'tgan",
+      "col_planned": "Rejalashtirilgan",
+      "col_released": "Ozod etilgan",
+      "col_residual_loss": "Bekor qilishda qolgan zarar",
+      "col_status": "Holat",
+      "col_tier": "Talab etilgan daraja",
+      "col_title": "Majburiyat",
+      "col_type": "Turi",
+      "empty": "Hali majburiyat bandlari yo'q",
+      "overdue": "Muddati o'tgan",
+      "project": "Loyiha",
+      "title": "Majburiyatlar va ozod etish matritsasi"
+    },
+    "exposure": {
+      "nothing_committed": "Majburiyat olinmagan, hech narsa sarflanmagan"
+    },
+    "flag": {
+      "multi_year_commitment": "Keyingi byudjet yillarini bog'laydi",
+      "novel_contentious": "Yangi yoki bahsli"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "{item} bandiga majburiyat olingan, ammo uning bekor qilish shartlari noma'lum",
+        "suggestion": "Bekor qilish asosini yoki bekor qilish jadvalini kiriting"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "{schedule} jadvalining chegaralari daraja bilan birga oshmaydi",
+        "suggestion": "Diapazonlarni tuzating va yangi versiyani e'lon qiling"
+      },
+      "committed_within_release": {
+        "fail": "{item} bandi ozod etilganidan ko'proq majburiyat oladi",
+        "suggestion": "Qo'shimcha ozod etishni so'rang yoki bog'langan hujjatlarni kamaytiring"
+      },
+      "decision_date_not_passed": {
+        "fail": "{item} bandining so'nggi qaror sanasi {date} o'tib ketdi",
+        "suggestion": "Qaror qabul qiling, sabab bilan kechiktiring yoki kechikish xarajatini qayd eting"
+      },
+      "document_linked_once": {
+        "fail": "{document} hujjati bir necha bandda hisobga olingan",
+        "suggestion": "Ikkinchi havolani olib tashlang"
+      },
+      "fx_rate_available": {
+        "fail": "{item} bandining bog'langan summasi uchun valyuta kursi yo'q",
+        "suggestion": "Valyuta kursi reestriga yoki loyihaga ushbu sana uchun kurs qo'shing"
+      },
+      "item_has_cost_code": {
+        "fail": "{item} bandida xarajat satri yo'q",
+        "suggestion": "Band hisobga olinadigan xarajat satrini tayinlang"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "{item} bandining rejalashtirilgan summasini o'qib bo'lmaydi",
+        "suggestion": "Bandni byudjet satri, xarajat satri yoki pozitsiyaga yo'naltiring yoki qo'lda baho kiriting"
+      },
+      "plant_item_in_register": {
+        "fail": "{item} bandi endi texnika reestrida bo'lmagan texnika bandini ko'rsatadi, shuning uchun uning o'z yetkazib berish muddati qo'llanadi",
+        "suggestion": "Bandni uning o'rnini bosgan texnika bandiga bog'lang yoki havolani olib tashlang"
+      },
+      "release_in_date": {
+        "fail": "{item} bandining ozod etilishi {date} gacha amal qilgan: uning doirasida yangi narsa bog'lab bo'lmaydi",
+        "suggestion": "Hali bog'lanishi kerak bo'lganlar uchun yangilangan ozod etishni so'rang"
+      },
+      "release_within_authority": {
+        "fail": "{release} ozod etilishi talab etilgan {tier} darajasidan past darajada qaror qilingan",
+        "suggestion": "Joriy jadval bo'yicha yangi ozod etishni so'rang"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "{group} guruhining bandlari yig'indisi talab qiladigan darajadan past darajada ozod etilgan",
+        "suggestion": "Keyingi ozod etishni guruh jami darajasida so'rang"
+      }
+    },
+    "status": {
+      "aborted": "Bekor qilingan",
+      "closed": "Yopilgan",
+      "committed": "Majburiyat olingan",
+      "on_hold": "To'xtatilgan",
+      "partially_released": "Qisman ozod etilgan",
+      "planned": "Rejalashtirilgan",
+      "re_release_required": "Qayta ozod etish talab etiladi",
+      "release_requested": "Ozod etish so'raldi",
+      "released": "Ozod etilgan",
+      "transferred": "O'tkazilgan"
+    },
+    "tier": {
+      "accounting_officer": "Buxgalteriya mas'ul shaxsi",
+      "authority_head": "Vakolatli organ rahbari",
+      "board": "Kengash",
+      "contracting_officer": "Shartnoma bo'yicha mas'ul shaxs",
+      "department_head": "Bo'lim rahbari",
+      "head_of_contracting_activity": "Shartnoma faoliyati rahbari",
+      "project_director": "Loyiha direktori",
+      "project_lead": "Loyiha rahbari",
+      "project_manager": "Loyiha menejeri",
+      "senior_responsible_owner": "Mas'ul yuqori darajadagi egasi",
+      "simplified_acquisition": "Soddalashtirilgan xarid",
+      "sponsor": "Homiy"
+    },
+    "type": {
+      "change": "O'zgartirish",
+      "claim_settlement": "Da'vo bo'yicha hisob-kitob",
+      "contingency_drawdown": "Zaxira mablag'idan yechib olish",
+      "design": "Loyihalash",
+      "services": "Xizmatlar",
+      "supplies": "Yetkazib berish",
+      "termination_settlement": "Bekor qilish bo'yicha hisob-kitob",
+      "works": "Qurilish ishlari"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} bo'yicha qaror {latest_decision_date} gacha qabul qilinishi kerak edi.",
+        "title": "Ozod etish bo'yicha qaror muddati o'tdi"
+      },
+      "re_release_required": {
+        "body": "{code} ning bog'langan hujjatlari endi {released} ozod etilgandan yuqori bo'lgan {committed} ni bog'laydi.",
+        "title": "Qayta ozod etish talab etiladi"
+      },
+      "release_aborted": {
+        "body": "{code} to'xtatildi.",
+        "title": "Bekor qilish tasdiqlandi"
+      },
+      "release_rejected": {
+        "body": "{code} ni ozod etish rad etildi.",
+        "title": "Ozod etish rad etildi"
+      },
+      "release_released": {
+        "body": "{code} ozod etildi.",
+        "title": "Ozod etish berildi"
+      }
+    }
+  }
+}

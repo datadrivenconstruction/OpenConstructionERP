@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "עמלה על החלק שלא בוצע",
+      "presumed_unperformed_pct": "שיעור משוער של החלק שלא בוצע",
+      "profit_pct": "רווח על החלק שבוצע"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "חיוב שהוזן עבור פריט זה",
+        "name": "תנאים מותאמים אישית"
+      },
+      "de_bgb_648": {
+        "description": "המחיר המוסכם בניכוי עלויות שנחסכו; 5 % מהחלק שלא בוצע נחשבים כשנחסכו כאשר עלויות החיסכון אינן מתועדות",
+        "name": "ביטול חופשי על ידי הבעלים (סעיף 648 ל-BGB)",
+        "presumption": "שיעור משוער של החלק שלא בוצע"
+      },
+      "de_public_owner": {
+        "description": "דוגמה להאצלת סמכות לבעלים ציבורי: סף העבודות של האיחוד האירופי כמדרגה הגבוהה ביותר, התחייבויות רב-שנתיות לראש הרשות",
+        "eu_works_threshold": "סף העבודות של האיחוד האירופי 2026-27 (תקנה מואצלת (EU) 2025/2152), לא מאושר",
+        "name": "בעלים ציבורי (גרמניה), דוגמה"
+      },
+      "de_vob_b_8_1": {
+        "description": "אותה התחשבנות כמו בסעיף 648 ל-BGB, שאליו הסעיף מפנה",
+        "name": "ביטול חופשי לפי סעיף 8 (1) ל-VOB/B",
+        "refers_to_bgb_648": "מפנה לסעיף 648 ל-BGB"
+      },
+      "far_49_convenience": {
+        "description": "עלויות שנגרמו בתוספת רווח על העבודה שבוצעה בתוספת הוצאות סילוק",
+        "name": "סיום לנוחות הרשות (FAR 49)",
+        "profit_negotiated": "שיעור רווח כפי שסוכם"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "עבודה שבוצעה בתוספת שיעור עמלה על החלק שלא בוצע, כפי שנקבע בנתוני החוזה",
+        "fee_from_contract_data": "שיעור מנתוני החוזה",
+        "name": "סיום מסיבה של הלקוח עצמו (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "מנהל פרויקט, נותן חסות וועד מנהל עם תקרות לדוגמה במטבע הפרויקט; ללא נתונים סטטוטוריים",
+        "name": "לוח זמנים ניטרלי בן שלוש דרגות"
+      },
+      "none_free_cancellation": {
+        "description": "ללא חיוב בביטול",
+        "name": "ביטול חינם"
+      },
+      "supply_cancellation_schedule": {
+        "description": "חיובים לפי תאריך או התקדמות הייצור כפי שסוכם עם הספק",
+        "name": "לוח ביטול של ספק"
+      },
+      "uk_public_body": {
+        "description": "דוגמה לסמכויות מואצלות לפי סכום וחידושיות, בהתאם ל-Managing Public Money",
+        "name": "גוף ציבורי (בריטניה), דוגמה"
+      },
+      "us_federal_owner": {
+        "description": "דוגמה למדרגות החל מסף הרכש המפושט",
+        "name": "בעלים פדרלי (ארצות הברית), דוגמה",
+        "sat": "סף הרכש המפושט 350,000 דולר אמריקאי מ-2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "בסיס ביטול לא ידוע",
+      "abort_exposure_unknown": "ההפסד השאריתי אינו ידוע. יש להשלים תחילה את תנאי הביטול.",
+      "abort_parameter_invalid": "פרמטר ביטול חייב להיות שיעור בין 0 ל-1",
+      "abort_parameter_not_in_basis": "לבסיס הביטול שנבחר אין פרמטר זה",
+      "abort_type_not_in_schedule": "בלוח הזמנים אין מדרגה להתחשבנות בסיום חוזה",
+      "activity_not_found": "פעילות לוח הזמנים לא נמצאה בפרויקט זה",
+      "amount_invalid": "הסכום אינו מספר תקין",
+      "amount_not_positive": "הסכום חייב להיות גדול מאפס",
+      "assignee_not_project_member": "האדם אינו חבר בפרויקט זה",
+      "assignment_expired": "תוקף השיוך של המאשר פג; יש לעדכן את השיוכים",
+      "assignment_needs_approver": "יש לציין את המאשר של מדרגה זו לפני מחליף או תקופת תוקף",
+      "assignment_window_inverted": "השיוך מסתיים לפני שהחל",
+      "cancellation_schedule_invalid": "לכל שלב נדרש אבן דרך, תאריך או התקדמות, וחיוב אחד בלבד",
+      "catalogue_code_taken": "קטלוג אחר כבר משתמש בקוד זה",
+      "catalogue_invalid": "הקטלוג אינו תקין",
+      "catalogue_retired": "קטלוג זה הוצא משימוש",
+      "change_belongs_to_contract_item": "שינוי והחוזה מקושרים באותו פריט",
+      "commitment_guard_unavailable": "לא ניתן היה לבצע את בדיקת השחרור, ולכן הפעולה לא אושרה",
+      "commitment_not_in_matrix": "מסמך זה אינו נמצא במטריצת ההתחייבויות",
+      "commitment_not_released": "התחייבות זו לא שוחררה לסכום זה",
+      "commitment_type_unknown": "סוג התחייבות זה אינו נמצא בלוח הסמכויות",
+      "contingency_insufficient": "יתרת הרזרבה אינה מספיקה למשיכה זו",
+      "contingency_line_required": "משיכה מרזרבה דורשת את שורת התקציב שבה נמצאת הרזרבה",
+      "date_invalid": "זה אינו תאריך",
+      "decider_not_tier_holder": "אושר על ידי מי שאינו מחזיק במדרגה",
+      "decision_invalid": "בחרו אישור או דחייה",
+      "deferral_needs_reason": "רשמו מדוע הפריט נדחה",
+      "document_linked_elsewhere": "מסמך זה כבר נספר בפריט אחר",
+      "document_not_found": "המסמך לא נמצא בפרויקט זה",
+      "drawdown_released_by_commitment": "משיכה זו היא פריט התחייבות ששוחרר. יש לבטל את הפריט כדי להחזיר את הכסף.",
+      "edit_required": "התפקיד שלכם אינו מאפשר עריכת פריטי התחייבות",
+      "enforcement_invalid": "האכיפה חייבת להיות כבויה, אזהרה או חסימה",
+      "external_approval_not_required": "הסכום הזה מוכרע על ידי מדרגה בלוח הזמנים: יש להסיר את הפניית האישור החיצוני",
+      "external_approval_required": "הסכום חורג מכל המדרגות: יש לצרף הפניה לאישור חיצוני",
+      "field_frozen": "לא ניתן עוד לשנות שדה זה עבור פריט זה",
+      "field_required": "שדה זה אינו יכול להיות ריק",
+      "flag_unknown": "סימון זה אינו נמצא בלוח הסמכויות",
+      "four_eyes_no_approver": "לאיש במדרגה זו אסור להכריע בבקשה זו לפי כלל ארבע העיניים",
+      "four_eyes_requester_is_approver": "ארבע עיניים: לא ניתן לבקש שחרור שאתם עצמכם הייתם מאשרים",
+      "four_eyes_violation": "מי שביקש, מחזיק או אישר את הפריט אינו יכול להכריע בו",
+      "frame_document_not_found": "מסמך המסגרת לא נמצא בפרויקט זה",
+      "funding_application_not_found": "בקשת המימון לא נמצאה בפרויקט זה",
+      "fx_policy_invalid": "מדיניות שער חליפין לא ידועה",
+      "fx_rate_missing": "אין שער חליפין לתאריך זה: לא ניתן להעריך את השחרור",
+      "gate_unknown": "שער זה אינו נמצא במודל הממשל של הפרויקט",
+      "gates_not_in_use": "הפרויקט אינו משתמש בשערים, ולכן אין מה להמתין לשער",
+      "governance_area_required": "פריט הקשור לשער חייב תחום ניהול",
+      "governance_area_unknown": "תחום ניהול זה אינו נמצא במודל הממשל של הפרויקט",
+      "invalid_transition": "שלב זה אינו אפשרי במצב הנוכחי",
+      "item_changed": "הפריט השתנה בינתיים. נסו שוב.",
+      "item_closed": "הפריט סגור",
+      "item_code_taken": "פריט אחר כבר משתמש בקוד זה",
+      "item_not_found": "פריט התחייבות לא נמצא",
+      "link_kind_invalid": "סוג מסמך לא ידוע",
+      "link_kind_not_supported": "לא ניתן עדיין לקשר סוג מסמך זה",
+      "link_not_found": "הקישור לא נמצא",
+      "manage_required": "רק מי שמנהל את המטריצה יכול לבצע זאת",
+      "manual_amount_needs_currency": "אומדן ידני דורש סכום ומטבע",
+      "matrix_missing": "לפרויקט זה אין עדיין מטריצת התחייבויות",
+      "no_pending_release": "אין בקשת שחרור ממתינה",
+      "no_route_for_tier": "עדיין לא שויך אדם למדרגה הנדרשת",
+      "not_entitled_decider": "אינכם מחזיקים במדרגה שעליה מוכרעת בקשה זו",
+      "not_item_owner": "רק בעל הפריט או מנהל יכול לשנות את הפריט",
+      "not_requester": "רק המבקש או מנהל יכול למשוך בקשה זו",
+      "planned_source_invalid": "מקור לא ידוע לסכום המתוכנן",
+      "planned_source_not_found": "שורת התקציב, שורת העלות או הסעיף לא נמצאו בפרויקט זה",
+      "plant_item_not_found": "פריט הציוד לא נמצא בפרויקט זה",
+      "precondition_is_computed": "תנאי מוקדם זה נקרא ממודול ואינו ניתן לסימון",
+      "precondition_kind_invalid": "סוג תנאי מוקדם לא ידוע",
+      "precondition_needs_evidence": "יש לצרף הפניה לראיה",
+      "precondition_needs_ref": "תנאי מוקדם זה דורש הפניה",
+      "precondition_not_found": "התנאי המוקדם לא נמצא",
+      "preconditions_open": "תנאים מוקדמים פתוחים חוסמים שחרור זה",
+      "project_not_found": "הפרויקט לא נמצא",
+      "rationale_required": "יש לנמק",
+      "release_decided": "בקשת שחרור זו כבר הוכרעה",
+      "release_expired": "השחרור של פריט זה עבר את תאריך התוקף: יש לבקש שחרור מחודש לפני התחייבות נוספת",
+      "release_pending": "בקשת שחרור לפריט זה כבר פתוחה",
+      "requisition_not_found": "דרישת הרכש לא נמצאה בפרויקט זה",
+      "route_changed_since_accepted": "מסלול האישור של מדרגה זו נערך. מנהל חייב לקבע אותו מחדש.",
+      "route_must_belong_to_project": "ניתן לקבע רק מסלול אישור של פרויקט זה",
+      "route_not_found": "מסלול האישור לא נמצא",
+      "schedule_currency_mismatch": "לוח זמנים זה משתמש במטבע אחר מזה של השחרורים שכבר נרשמו",
+      "schedule_not_in_force": "לוח הזמנים המקובע אינו בתוקף היום. יש לקבע את הגרסה שבתוקף.",
+      "schedule_type_mismatch": "לוח זמנים זה אינו מכיר את סוג ההתחייבות של פריט קיים",
+      "tier_unknown": "מדרגה זו אינה נמצאת בלוח הסמכויות",
+      "transfer_links_stay_in_project": "המסמכים המקושרים שייכים לפרויקט זה. יש לבטל את הקישורים לפני העברה לפרויקט אחר.",
+      "transfer_target_invalid": "לא ניתן להעביר פריט לעצמו",
+      "transfer_target_not_open": "פריט היעד סגור או ממתין להחלטה",
+      "transferable_invalid": "אפשרות העברה לא ידועה",
+      "type_fixed_after_release": "לא ניתן לשנות את הסוג לאחר שהתבקש שחרור",
+      "unknown_catalogue": "הקטלוג לא נמצא"
+    },
+    "evidence": {
+      "decision_overdue": "תאריך ההחלטה האחרון של פריט ההתחייבות הזה עבר ולא שוחרר דבר: יש להחליט, לדחות עם נימוק או לרשום את עלות העיכוב",
+      "items_released_by_gate": "התחייבויות שמועדן בשער זה שוחררו או נדחו",
+      "items_without_area": "פריטי ההתחייבות של שער זה מציינים תחום ניהול שאינו קיים עוד בפרויקט",
+      "no_items_for_gate": "אין פריט התחייבות שמציין שער זה, ולכן לא ידוע אם יש לשחרר כסף בשער זה"
+    },
+    "export": {
+      "as_of": "נכון ל",
+      "col_code": "קוד",
+      "col_committed": "מחויב",
+      "col_currency": "מטבע",
+      "col_decision_date": "תאריך ההחלטה האחרון",
+      "col_open_preconditions": "תנאים מוקדמים פתוחים",
+      "col_overdue": "החלטה באיחור",
+      "col_planned": "מתוכנן",
+      "col_released": "שוחרר",
+      "col_residual_loss": "הפסד שאריתי בביטול",
+      "col_status": "סטטוס",
+      "col_tier": "מדרגה נדרשת",
+      "col_title": "התחייבות",
+      "col_type": "סוג",
+      "empty": "אין עדיין פריטי התחייבות",
+      "overdue": "באיחור",
+      "project": "פרויקט",
+      "title": "מטריצת התחייבויות ושחרורים"
+    },
+    "exposure": {
+      "nothing_committed": "שום דבר לא מחויב, שום דבר לא הוצא"
+    },
+    "flag": {
+      "multi_year_commitment": "מחייב שנות תקציב עתידיות",
+      "novel_contentious": "חדשני או שנוי במחלוקת"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "הפריט {item} מחויב אך תנאי הביטול שלו אינם ידועים",
+        "suggestion": "הזינו את בסיס הביטול או לוח הביטול"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "התקרות של לוח הזמנים {schedule} אינן עולות עם המדרגה",
+        "suggestion": "תקנו את הטווחים ופרסמו גרסה חדשה"
+      },
+      "committed_within_release": {
+        "fail": "הפריט {item} מחייב יותר ממה ששוחרר",
+        "suggestion": "בקשו שחרור נוסף או הפחיתו את המסמכים המקושרים"
+      },
+      "decision_date_not_passed": {
+        "fail": "תאריך ההחלטה האחרון {date} של הפריט {item} עבר",
+        "suggestion": "החליטו, דחו עם נימוק או רשמו את עלות העיכוב"
+      },
+      "document_linked_once": {
+        "fail": "המסמך {document} נספר ביותר מפריט אחד",
+        "suggestion": "הסירו את הקישור השני"
+      },
+      "fx_rate_available": {
+        "fail": "לסכום מקושר של הפריט {item} אין שער חליפין",
+        "suggestion": "הוסיפו שער לתאריך במרשם שערי החליפין או בפרויקט"
+      },
+      "item_has_cost_code": {
+        "fail": "לפריט {item} אין שורת עלות",
+        "suggestion": "שייכו את שורת העלות שאליה הפריט מתנגש"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "לא ניתן לקרוא את הסכום המתוכנן של הפריט {item}",
+        "suggestion": "הפנו את הפריט לשורת תקציב, שורת עלות או סעיף, או הזינו אומדן ידני"
+      },
+      "plant_item_in_register": {
+        "fail": "הפריט {item} מציין פריט ציוד שאינו עוד במרשם הציוד, ולכן חל זמן האספקה שלו עצמו",
+        "suggestion": "קשרו את הפריט לפריט הציוד שהחליף אותו, או הסירו את הקישור"
+      },
+      "release_in_date": {
+        "fail": "שחרור של הפריט {item} היה בתוקף עד {date}: לא ניתן להתחייב עוד דבר תחתיו",
+        "suggestion": "בקשו שחרור מחודש למה שעדיין צריך להתחייב"
+      },
+      "release_within_authority": {
+        "fail": "השחרור {release} הוכרע מתחת למדרגה הנדרשת {tier}",
+        "suggestion": "בקשו שחרור חדש לפי לוח הזמנים הנוכחי"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "הפריטים של הקבוצה {group} שוחררו מתחת למדרגה שסכומם דורש",
+        "suggestion": "בקשו את השחרור הבא במדרגה של סך הקבוצה"
+      }
+    },
+    "status": {
+      "aborted": "בוטל",
+      "closed": "סגור",
+      "committed": "מחויב",
+      "on_hold": "בהמתנה",
+      "partially_released": "שוחרר חלקית",
+      "planned": "מתוכנן",
+      "re_release_required": "נדרש שחרור מחודש",
+      "release_requested": "שחרור התבקש",
+      "released": "שוחרר",
+      "transferred": "הועבר"
+    },
+    "tier": {
+      "accounting_officer": "קצין חשבונות",
+      "authority_head": "ראש הרשות",
+      "board": "דירקטוריון",
+      "contracting_officer": "קצין רכש",
+      "department_head": "ראש מחלקה",
+      "head_of_contracting_activity": "ראש פעילות הרכש",
+      "project_director": "מנהל פרויקט בכיר",
+      "project_lead": "מוביל פרויקט",
+      "project_manager": "מנהל פרויקט",
+      "senior_responsible_owner": "בעל אחריות בכיר",
+      "simplified_acquisition": "רכש מפושט",
+      "sponsor": "נותן חסות"
+    },
+    "type": {
+      "change": "שינוי",
+      "claim_settlement": "סילוק תביעה",
+      "contingency_drawdown": "משיכה מרזרבה",
+      "design": "תכנון",
+      "services": "שירותים",
+      "supplies": "אספקה",
+      "termination_settlement": "התחשבנות בסיום חוזה",
+      "works": "עבודות"
+    }
+  },
+  "common": {
+    "ok": "אישור"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "יש להחליט על {code} עד {latest_decision_date}.",
+        "title": "החלטת שחרור באיחור"
+      },
+      "re_release_required": {
+        "body": "המסמכים המקושרים של {code} מחייבים כעת {committed}, מעבר לשחרור של {released}.",
+        "title": "נדרש שחרור מחודש"
+      },
+      "release_aborted": {
+        "body": "{code} הופסק.",
+        "title": "הביטול אושר"
+      },
+      "release_rejected": {
+        "body": "השחרור של {code} נדחה.",
+        "title": "השחרור נדחה"
+      },
+      "release_released": {
+        "body": "{code} שוחרר.",
+        "title": "השחרור אושר"
+      }
+    }
+  }
+}

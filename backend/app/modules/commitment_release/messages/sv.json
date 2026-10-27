@@ -1,0 +1,301 @@
+{
+  "commitment": {
+    "abort_parameter": {
+      "fee_pct": "Påslag på den outförda delen",
+      "presumed_unperformed_pct": "Antagen andel av den outförda delen",
+      "profit_pct": "Vinst på den utförda delen"
+    },
+    "catalogue": {
+      "custom": {
+        "description": "Ett belopp som angetts för denna post",
+        "name": "Egna villkor"
+      },
+      "de_bgb_648": {
+        "description": "Avtalat pris minus sparade kostnader; 5 % av den outförda delen antas när sparade kostnader inte är dokumenterade",
+        "name": "Fri uppsägning av byggherren (§ 648 BGB)",
+        "presumption": "Antagen andel av den outförda delen"
+      },
+      "de_public_owner": {
+        "description": "Exempel på delegering för en offentlig beställare: EU:s tröskelvärde för entreprenader som övre entreprenadnivå, fleråriga åtaganden till myndighetschefen",
+        "eu_works_threshold": "EU:s tröskelvärde för entreprenader 2026–27 (delegerad förordning (EU) 2025/2152), ej bekräftat",
+        "name": "Offentlig beställare (Tyskland), exempel"
+      },
+      "de_vob_b_8_1": {
+        "description": "Samma avräkning som § 648 BGB, till vilken klausulen hänvisar",
+        "name": "Fri uppsägning enligt § 8 (1) VOB/B",
+        "refers_to_bgb_648": "Hänvisar till § 648 BGB"
+      },
+      "far_49_convenience": {
+        "description": "Nedlagda kostnader plus vinst på utfört arbete plus avvecklingskostnader",
+        "name": "Uppsägning av bekvämlighetsskäl (FAR 49)",
+        "profit_negotiated": "Vinstsats enligt förhandling"
+      },
+      "nec4_ecc_client_reason": {
+        "description": "Utfört arbete plus en procentsats på den outförda delen, enligt kontraktsdata",
+        "fee_from_contract_data": "Procentsats från kontraktsdata",
+        "name": "Uppsägning av beställarens egen orsak (NEC4 ECC)"
+      },
+      "neutral": {
+        "description": "Projektledare, uppdragsgivare och styrelse med exempelvisa tak i projektvalutan; inga lagstadgade belopp",
+        "name": "Neutral tretrappig tabell"
+      },
+      "none_free_cancellation": {
+        "description": "Ingen avgift vid avbokning",
+        "name": "Avbokning utan kostnad"
+      },
+      "supply_cancellation_schedule": {
+        "description": "Avgifter per datum eller tillverkningsframsteg enligt överenskommelse med leverantören",
+        "name": "Leverantörens avbokningsschema"
+      },
+      "uk_public_body": {
+        "description": "Exempel på delegerad behörighet efter belopp och nyhetsgrad enligt Managing Public Money",
+        "name": "Offentlig myndighet (Storbritannien), exempel"
+      },
+      "us_federal_owner": {
+        "description": "Exempel på nivåer från den förenklade upphandlingsgränsen",
+        "name": "Federal beställare (USA), exempel",
+        "sat": "Förenklad upphandlingsgräns 350 000 USD från 2025-10-01 (FAR 2.101)"
+      }
+    },
+    "errors": {
+      "abort_basis_unknown": "Okänd grund för avbrott",
+      "abort_exposure_unknown": "Den kvarvarande förlusten är okänd. Komplettera först villkoren för avbrott.",
+      "abort_parameter_invalid": "En parameter för avbrott är en andel mellan 0 och 1",
+      "abort_parameter_not_in_basis": "Vald grund för avbrott saknar denna parameter",
+      "abort_type_not_in_schedule": "Schemat har ingen nivå för avräkning vid uppsägning",
+      "activity_not_found": "Schemaaktiviteten hittades inte i detta projekt",
+      "amount_invalid": "Beloppet är inte ett giltigt tal",
+      "amount_not_positive": "Beloppet måste vara större än noll",
+      "assignee_not_project_member": "Personen är inte medlem i detta projekt",
+      "assignment_expired": "Attestantens tilldelning har gått ut; uppdatera tilldelningarna",
+      "assignment_needs_approver": "Ange attestanten för denna nivå innan ersättare eller giltighetsperiod anges",
+      "assignment_window_inverted": "Tilldelningen slutar innan den börjar",
+      "cancellation_schedule_invalid": "Varje steg behöver en milstolpe, ett datum eller framsteg och exakt en avgift",
+      "catalogue_code_taken": "En annan katalog använder redan denna kod",
+      "catalogue_invalid": "Katalogen är inte giltig",
+      "catalogue_retired": "Denna katalog är utfasad",
+      "change_belongs_to_contract_item": "En ändring och dess kontrakt är kopplade till samma post",
+      "commitment_guard_unavailable": "Frigörelsekontrollen kunde inte göras, så detta tilläts inte",
+      "commitment_not_in_matrix": "Detta dokument finns inte i åtagandematrisen",
+      "commitment_not_released": "Detta åtagande är inte frigjort för detta belopp",
+      "commitment_type_unknown": "Denna typ av åtagande finns inte i behörighetsschemat",
+      "contingency_insufficient": "Reservens saldo täcker inte detta uttag",
+      "contingency_line_required": "Ett uttag från reserven kräver den budgetrad som innehåller reserven",
+      "date_invalid": "Detta är inte ett datum",
+      "decider_not_tier_holder": "Godkänd av någon som inte innehar nivån",
+      "decision_invalid": "Välj godkänn eller avslå",
+      "deferral_needs_reason": "Skriv ned varför posten skjuts upp",
+      "document_linked_elsewhere": "Detta dokument räknas redan i en annan post",
+      "document_not_found": "Dokumentet hittades inte i detta projekt",
+      "drawdown_released_by_commitment": "Detta uttag är en frigjord åtagandepost. Avbryt den posten för att ta tillbaka pengarna.",
+      "edit_required": "Din roll kan inte redigera åtagandeposter",
+      "enforcement_invalid": "Tillämpning måste vara av, varna eller blockera",
+      "external_approval_not_required": "Detta belopp beslutas av en nivå i schemat: ta bort hänvisningen till externt godkännande",
+      "external_approval_required": "Beloppet överstiger alla nivåer: bifoga hänvisningen till externt godkännande",
+      "field_frozen": "Detta fält kan inte längre ändras för denna post",
+      "field_required": "Detta fält får inte vara tomt",
+      "flag_unknown": "Denna flagga finns inte i behörighetsschemat",
+      "four_eyes_no_approver": "Ingen på denna nivå får besluta om begäran enligt principen om fyra ögon",
+      "four_eyes_requester_is_approver": "Fyra ögon: du kan inte begära en frigörelse som du själv skulle godkänna",
+      "four_eyes_violation": "Den som begärt, äger eller bekräftat denna post kan inte besluta om den",
+      "frame_document_not_found": "Ramdokumentet hittades inte i detta projekt",
+      "funding_application_not_found": "Finansieringsansökan hittades inte i detta projekt",
+      "fx_policy_invalid": "Okänd växelkurspolicy",
+      "fx_rate_missing": "Det finns ingen växelkurs för detta datum: frigörelsen kan inte bedömas",
+      "gate_unknown": "Denna gate finns inte i projektets styrningsmodell",
+      "gates_not_in_use": "Projektet använder inte gates, så ingenting kan vänta på en gate",
+      "governance_area_required": "En post kopplad till en gate behöver ett styrningsområde",
+      "governance_area_unknown": "Detta styrningsområde finns inte i projektets styrningsmodell",
+      "invalid_transition": "Detta steg är inte möjligt i nuvarande läge",
+      "item_changed": "Posten har ändrats under tiden. Försök igen.",
+      "item_closed": "Posten är stängd",
+      "item_code_taken": "En annan post använder redan denna kod",
+      "item_not_found": "Åtagandeposten hittades inte",
+      "link_kind_invalid": "Okänd dokumenttyp",
+      "link_kind_not_supported": "Denna dokumenttyp kan inte kopplas ännu",
+      "link_not_found": "Kopplingen hittades inte",
+      "manage_required": "Endast den som förvaltar matrisen kan göra detta",
+      "manual_amount_needs_currency": "En manuell kostnadsuppskattning kräver ett belopp och en valuta",
+      "matrix_missing": "Detta projekt har ännu ingen åtagandematris",
+      "no_pending_release": "Det finns ingen väntande begäran om frigörelse",
+      "no_route_for_tier": "Ingen är ännu tilldelad den nödvändiga nivån",
+      "not_entitled_decider": "Du innehar inte den nivå som denna begäran beslutas på",
+      "not_item_owner": "Endast postens ägare eller en förvaltare kan ändra denna post",
+      "not_requester": "Endast den som begärt eller en förvaltare kan dra tillbaka denna begäran",
+      "planned_source_invalid": "Okänd källa för det planerade beloppet",
+      "planned_source_not_found": "Budgetraden, kostnadsraden eller positionen hittades inte i detta projekt",
+      "plant_item_not_found": "Anläggningsposten hittades inte i detta projekt",
+      "precondition_is_computed": "Detta villkor läses från dess modul och kan inte bockas i",
+      "precondition_kind_invalid": "Okänd typ av villkor",
+      "precondition_needs_evidence": "Bifoga referensen till underlaget",
+      "precondition_needs_ref": "Detta villkor kräver en referens",
+      "precondition_not_found": "Villkoret hittades inte",
+      "preconditions_open": "Öppna villkor blockerar denna frigörelse",
+      "project_not_found": "Projektet hittades inte",
+      "rationale_required": "Ange en motivering",
+      "release_decided": "Denna begäran om frigörelse är redan beslutad",
+      "release_expired": "Frigörelsen av denna post har passerat sitt giltighetsdatum: begär en förnyad frigörelse innan fler åtaganden görs",
+      "release_pending": "En begäran om frigörelse för denna post pågår redan",
+      "requisition_not_found": "Rekvisitionen hittades inte i detta projekt",
+      "route_changed_since_accepted": "Attestvägen för denna nivå har ändrats. En förvaltare måste fästa den på nytt.",
+      "route_must_belong_to_project": "Endast en attestväg i detta projekt kan fästas",
+      "route_not_found": "Attestvägen hittades inte",
+      "schedule_currency_mismatch": "Detta schema använder en annan valuta än de frigörelser som redan registrerats",
+      "schedule_not_in_force": "Det fästa schemat gäller inte idag. Fäst den version som gäller.",
+      "schedule_type_mismatch": "Detta schema känner inte till åtagandetypen för en befintlig post",
+      "tier_unknown": "Denna nivå finns inte i behörighetsschemat",
+      "transfer_links_stay_in_project": "Kopplade dokument hör till detta projekt. Koppla loss dem innan överföring till ett annat projekt.",
+      "transfer_target_invalid": "En post kan inte överföras till sig själv",
+      "transfer_target_not_open": "Målposten är stängd eller väntar på ett beslut",
+      "transferable_invalid": "Okänt alternativ för överföring",
+      "type_fixed_after_release": "Typen kan inte ändras när en frigörelse har begärts",
+      "unknown_catalogue": "Katalogen hittades inte"
+    },
+    "evidence": {
+      "decision_overdue": "Det senaste beslutsdatumet för denna åtagandepost har passerat och inget är frigjort: besluta, skjut upp med motivering eller registrera kostnaden för förseningen",
+      "items_released_by_gate": "Åtaganden som förfaller vid denna gate är frigjorda eller uppskjutna",
+      "items_without_area": "Åtagandeposter för denna gate anger ett styrningsområde som projektet inte längre har",
+      "no_items_for_gate": "Ingen åtagandepost anger denna gate, så det är okänt om pengar måste frigöras till den"
+    },
+    "export": {
+      "as_of": "Per",
+      "col_code": "Kod",
+      "col_committed": "Åtagen",
+      "col_currency": "Valuta",
+      "col_decision_date": "Senaste beslutsdatum",
+      "col_open_preconditions": "Öppna villkor",
+      "col_overdue": "Beslut försenat",
+      "col_planned": "Planerad",
+      "col_released": "Frigjord",
+      "col_residual_loss": "Kvarvarande förlust vid avbrott",
+      "col_status": "Status",
+      "col_tier": "Krävd nivå",
+      "col_title": "Åtagande",
+      "col_type": "Typ",
+      "empty": "Inga åtagandeposter ännu",
+      "overdue": "Försenad",
+      "project": "Projekt",
+      "title": "Matris för åtaganden och frigörelse"
+    },
+    "exposure": {
+      "nothing_committed": "Inget åtagen, inget spenderat"
+    },
+    "flag": {
+      "multi_year_commitment": "Binder senare budgetår",
+      "novel_contentious": "Ny eller omstridd"
+    },
+    "rules": {
+      "abort_terms_present_for_committed": {
+        "fail": "Post {item} är åtagen men villkoren för avbrott är okända",
+        "suggestion": "Ange grunden för avbrott eller ett avbokningsschema"
+      },
+      "authority_schedule_bands_monotonic": {
+        "fail": "Taken i schema {schedule} stiger inte med nivån",
+        "suggestion": "Rätta nivåerna och publicera en ny version"
+      },
+      "committed_within_release": {
+        "fail": "Post {item} binder mer än som frigjorts",
+        "suggestion": "Begär ytterligare frigörelse eller minska de kopplade dokumenten"
+      },
+      "decision_date_not_passed": {
+        "fail": "Det senaste beslutsdatumet {date} för post {item} har passerat",
+        "suggestion": "Besluta, skjut upp med motivering eller registrera kostnaden för förseningen"
+      },
+      "document_linked_once": {
+        "fail": "Dokument {document} räknas i fler än en post",
+        "suggestion": "Ta bort den andra kopplingen"
+      },
+      "fx_rate_available": {
+        "fail": "Ett kopplat belopp för post {item} saknar växelkurs",
+        "suggestion": "Lägg till en kurs för datumet i valutaregistret eller i projektet"
+      },
+      "item_has_cost_code": {
+        "fail": "Post {item} saknar kostnadsrad",
+        "suggestion": "Tilldela den kostnadsrad som posten bokförs mot"
+      },
+      "item_has_planned_amount_source": {
+        "fail": "Det planerade beloppet för post {item} kan inte läsas",
+        "suggestion": "Peka posten mot en budgetrad, kostnadsrad eller position, eller ange en manuell uppskattning"
+      },
+      "plant_item_in_register": {
+        "fail": "Post {item} anger en anläggningspost som inte längre finns i anläggningsregistret, så dess egen leveranstid gäller",
+        "suggestion": "Koppla posten till anläggningsposten som ersatte den, eller ta bort kopplingen"
+      },
+      "release_in_date": {
+        "fail": "En frigörelse av post {item} gällde till {date}: inget nytt kan bindas under den",
+        "suggestion": "Begär en förnyad frigörelse för det som ännu ska bindas"
+      },
+      "release_within_authority": {
+        "fail": "Frigörelse {release} beslutades under den krävda nivån {tier}",
+        "suggestion": "Begär en ny frigörelse enligt det gällande schemat"
+      },
+      "split_group_not_bypassing_tier": {
+        "fail": "Posterna i grupp {group} frigjordes under den nivå som deras summa kräver",
+        "suggestion": "Begär nästa frigörelse på nivån för gruppens totalsumma"
+      }
+    },
+    "status": {
+      "aborted": "Avbruten",
+      "closed": "Stängd",
+      "committed": "Åtagen",
+      "on_hold": "Vilande",
+      "partially_released": "Delvis frigjord",
+      "planned": "Planerad",
+      "re_release_required": "Ny frigörelse krävs",
+      "release_requested": "Frigörelse begärd",
+      "released": "Frigjord",
+      "transferred": "Överförd"
+    },
+    "tier": {
+      "accounting_officer": "Ekonomiskt ansvarig",
+      "authority_head": "Myndighetschef",
+      "board": "Styrelse",
+      "contracting_officer": "Upphandlingsansvarig",
+      "department_head": "Avdelningschef",
+      "head_of_contracting_activity": "Chef för upphandlingsverksamheten",
+      "project_director": "Projektdirektör",
+      "project_lead": "Projektledare",
+      "project_manager": "Projektchef",
+      "senior_responsible_owner": "Ansvarig övergripande projektägare",
+      "simplified_acquisition": "Förenklad upphandling",
+      "sponsor": "Uppdragsgivare"
+    },
+    "type": {
+      "change": "Ändring",
+      "claim_settlement": "Reglering av krav",
+      "contingency_drawdown": "Uttag ur reserv",
+      "design": "Projektering",
+      "services": "Tjänster",
+      "supplies": "Leveranser",
+      "termination_settlement": "Avräkning vid uppsägning",
+      "works": "Entreprenad"
+    }
+  },
+  "common": {
+    "ok": "OK"
+  },
+  "notifications": {
+    "commitment": {
+      "decision_overdue": {
+        "body": "{code} skulle ha beslutats senast {latest_decision_date}.",
+        "title": "Beslut om frigörelse försenat"
+      },
+      "re_release_required": {
+        "body": "Kopplade dokument till {code} binder nu {committed}, över frigörelsen på {released}.",
+        "title": "Ny frigörelse krävs"
+      },
+      "release_aborted": {
+        "body": "{code} stoppades.",
+        "title": "Avbrott godkänt"
+      },
+      "release_rejected": {
+        "body": "Frigörelsen av {code} avslogs.",
+        "title": "Frigörelse avslagen"
+      },
+      "release_released": {
+        "body": "{code} frigjordes.",
+        "title": "Frigörelse beviljad"
+      }
+    }
+  }
+}
