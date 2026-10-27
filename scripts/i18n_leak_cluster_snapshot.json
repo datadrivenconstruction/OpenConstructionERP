@@ -2057,5 +2057,25 @@
     ],
     "key_count_at_seed": 3,
     "note": "Formula is the native word in Croatian and Italian (boq.apply_tab_formula, boq.column_formula, boq.measurement.formula); a shared word, not a leak."
+  },
+  {
+    "locale_set": [
+      "en-GB",
+      "fr"
+    ],
+    "key_count_at_seed": 6,
+    "note": "Description, Notes, Active, inactive and page are the native French words (field_clock.fence_*, offline_sync.field_*, supplier_catalogs.f_notes, boq.drawing_ref.page_n); en-GB is a delta over en."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "et",
+      "nl",
+      "no",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Register is the native word in each of these languages (guarantees.back, stakeholders.ui.tab_register), and Element A is shared by clash.col_a."
   }
 ]
