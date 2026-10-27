@@ -58,6 +58,7 @@ from app.core.pdf_branding import (
     branded_doc_metadata,
     branded_header_logo,
     branded_letterhead,
+    build_with_page_count,
     draw_furniture_line,
 )
 
@@ -2071,8 +2072,7 @@ def generate_boq_pdf_simple(
 
     # Single-pass build (no two-pass for page count - acceptable trade-off
     # for large BOQs; footer shows "Page X" without " of Y")
-    doc.page_count = 0  # Will not display " of 0" - see footer_func logic
-    doc.build(flowables)
+    build_with_page_count(doc, flowables)
 
     pdf_bytes = buffer.getvalue()
     buffer.close()
