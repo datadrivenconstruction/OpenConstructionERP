@@ -53,8 +53,9 @@ MAX_LOGO_DATA_URL_CHARS = 4 * 1024 * 1024
 APPEARANCE_OPTIONS: dict[str, tuple[str, ...]] = {
     "accent": ("blue", "teal", "violet", "emerald", "amber", "graphite", "crimson"),
     "font": ("system", "inter", "ibm-plex-sans", "source-sans-3"),
-    "density": ("comfortable", "compact"),
+    "density": ("comfortable", "normal", "compact"),
     "radius": ("standard", "sharp", "round"),
+    "look": ("standard", "classic"),
 }
 
 #: Allowed values of the workspace menu look (``appearance.menu``), one tuple

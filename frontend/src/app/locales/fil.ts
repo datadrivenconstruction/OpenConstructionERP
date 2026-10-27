@@ -51446,6 +51446,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Ipinapakita ang petsang Hijri sa tabi ng petsang Gregorian sa bawat petsa sa app.",
     "settings.tab_market": "Merkado at pamantayan",
     "settings.tab_market_desc": "Bansa, mga pack, pamantayan at yunit",
+    "settings.style_look": "Istilo ng interface",
+    "settings.style_look_standard": "Karaniwan",
+    "settings.style_look_classic": "Klasiko",
+    "settings.style_look_hint": "Klasiko: neutral na kulay, iisang accent para sa mga aksyon at status, manipis na divider, walang gradient o glass effect.",
+    "settings.style_preset_standard": "Karaniwan",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Change order",
     "approvalRoutes.kind_contract": "Kontrata",

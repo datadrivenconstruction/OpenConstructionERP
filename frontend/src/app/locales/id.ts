@@ -51253,6 +51253,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Menampilkan tanggal Hijriah di samping tanggal Masehi pada setiap tanggal di aplikasi.",
     "settings.tab_market": "Pasar dan standar",
     "settings.tab_market_desc": "Negara, paket, standar, dan satuan",
+    "settings.style_look": "Gaya antarmuka",
+    "settings.style_look_standard": "Standar",
+    "settings.style_look_classic": "Klasik",
+    "settings.style_look_hint": "Klasik: warna netral, satu warna aksen untuk aksi dan status, pembatas tipis, tanpa gradasi atau efek kaca.",
+    "settings.style_preset_standard": "Standar",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Perintah perubahan",
     "approvalRoutes.kind_contract": "Kontrak",

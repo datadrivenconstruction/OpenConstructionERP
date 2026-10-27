@@ -51260,6 +51260,12 @@ const resource = {
     "settings.secondary_calendar_hint": "แสดงวันที่ฮิจเราะห์ควบคู่กับวันที่แบบเกรกอเรียนในทุกวันที่ของแอป",
     "settings.tab_market": "ตลาดและมาตรฐาน",
     "settings.tab_market_desc": "ประเทศ แพ็ก มาตรฐาน และหน่วย",
+    "settings.style_look": "รูปแบบอินเทอร์เฟซ",
+    "settings.style_look_standard": "มาตรฐาน",
+    "settings.style_look_classic": "คลาสสิก",
+    "settings.style_look_hint": "คลาสสิก: สีโทนกลาง ใช้สีเน้นเพียงสีเดียวสำหรับการดำเนินการและสถานะ เส้นคั่นบาง ไม่มีการไล่เฉดหรือเอฟเฟกต์กระจก",
+    "settings.style_preset_standard": "มาตรฐาน",
+    "settings.style_density_normal": "ปกติ",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "คำสั่งเปลี่ยนแปลง",
     "approvalRoutes.kind_contract": "สัญญา",

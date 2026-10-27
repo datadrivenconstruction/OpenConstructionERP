@@ -51751,6 +51751,12 @@ const resource = {
     "settings.secondary_calendar_hint": "מציג את התאריך ההיג'רי לצד התאריך הלועזי בכל תאריך באפליקציה.",
     "settings.tab_market": "שוק ותקנים",
     "settings.tab_market_desc": "מדינה, חבילות, תקנים ויחידות",
+    "settings.style_look": "סגנון ממשק",
+    "settings.style_look_standard": "סטנדרטי",
+    "settings.style_look_classic": "קלאסי",
+    "settings.style_look_hint": "קלאסי: צבעים ניטרליים, צבע הדגשה אחד לפעולות ולסטטוסים, מפרידים דקים, ללא מעברי צבע או אפקט זכוכית.",
+    "settings.style_preset_standard": "סטנדרטי",
+    "settings.style_density_normal": "רגיל",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "צו שינוי",
     "approvalRoutes.kind_contract": "חוזה",

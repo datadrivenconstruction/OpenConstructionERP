@@ -51487,6 +51487,12 @@ const resource = {
     "settings.secondary_calendar_hint": "ایپ میں ہر تاریخ کے ساتھ عیسوی تاریخ کے آگے ہجری تاریخ دکھاتا ہے۔",
     "settings.tab_market": "مارکیٹ اور معیارات",
     "settings.tab_market_desc": "ملک، پیکس، معیارات اور اکائیاں",
+    "settings.style_look": "انٹرفیس انداز",
+    "settings.style_look_standard": "معیاری",
+    "settings.style_look_classic": "کلاسک",
+    "settings.style_look_hint": "کلاسک: غیر جانبدار رنگ، کارروائیوں اور حالتوں کے لیے ایک ہی نمایاں رنگ، باریک لکیریں، کوئی گریڈینٹ یا شیشے کا اثر نہیں۔",
+    "settings.style_preset_standard": "معیاری",
+    "settings.style_density_normal": "عام",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "تبدیلی آرڈر",
     "approvalRoutes.kind_contract": "کنٹریکٹ",

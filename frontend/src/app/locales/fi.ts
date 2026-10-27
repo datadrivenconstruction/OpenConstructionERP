@@ -51517,6 +51517,12 @@ const resource = {
     "settings.secondary_calendar_hint": "Näyttää hijri-päivämäärän gregoriaanisen päivämäärän vieressä kaikissa sovelluksen päivämäärissä.",
     "settings.tab_market": "Markkina ja standardit",
     "settings.tab_market_desc": "Maa, paketit, standardit ja yksiköt",
+    "settings.style_look": "Käyttöliittymän tyyli",
+    "settings.style_look_standard": "Vakio",
+    "settings.style_look_classic": "Klassinen",
+    "settings.style_look_hint": "Klassinen: neutraalit värit, yksi korostusväri toiminnoille ja tiloille, ohuet erottimet, ei liukuvärejä eikä lasivaikutelmaa.",
+    "settings.style_preset_standard": "Vakio",
+    "settings.style_density_normal": "Normaali",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Muutostilaus",
     "approvalRoutes.kind_contract": "Sopimus",

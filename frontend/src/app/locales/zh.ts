@@ -53729,6 +53729,12 @@ const resource = {
     "settings.secondary_calendar_hint": "在应用中的每个日期旁边显示伊斯兰历日期。",
     "settings.tab_market": "市场与标准",
     "settings.tab_market_desc": "国家、包、标准和单位",
+    "settings.style_look": "界面风格",
+    "settings.style_look_standard": "标准",
+    "settings.style_look_classic": "经典",
+    "settings.style_look_hint": "经典：中性配色，操作和状态只用一种强调色，细分割线，没有渐变和玻璃效果。",
+    "settings.style_preset_standard": "标准",
+    "settings.style_density_normal": "常规",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "变更单",
     "approvalRoutes.kind_contract": "合同",

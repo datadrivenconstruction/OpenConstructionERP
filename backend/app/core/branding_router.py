@@ -132,8 +132,9 @@ class WorkspaceAppearance(BaseModel):
 
     accent: Literal["blue", "teal", "violet", "emerald", "amber", "graphite", "crimson"] | None = None
     font: Literal["system", "inter", "ibm-plex-sans", "source-sans-3"] | None = None
-    density: Literal["comfortable", "compact"] | None = None
+    density: Literal["comfortable", "normal", "compact"] | None = None
     radius: Literal["standard", "sharp", "round"] | None = None
+    look: Literal["standard", "classic"] | None = None
     #: A free company colour; wins over ``accent`` when set.
     accent_hex: str | None = Field(default=None, pattern=r"^#[0-9a-fA-F]{6}$")
     menu: WorkspaceMenu | None = None
