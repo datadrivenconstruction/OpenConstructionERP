@@ -340,7 +340,7 @@ export function DashboardCasesCard() {
             {anyInProgress ? (
               <PlayCircle size={11} className="text-oe-blue" aria-hidden="true" />
             ) : (
-              <Sparkles size={11} className="text-oe-blue" aria-hidden="true" />
+              <Sparkles size={11} className="text-oe-blue" aria-hidden="true" data-decorative-icon />
             )}
             {framingLabel}
           </div>
