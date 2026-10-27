@@ -23,6 +23,7 @@ import {
   FONTS,
   FONT_FAMILY_NAME,
   FONT_STACK,
+  LOOKS,
   RADII,
   TEXT_SCALE,
   TEXT_SIZES,
@@ -57,7 +58,7 @@ function useFontLabel() {
 function StylePreview({ value, label, active }: { value: Appearance; label: string; active: boolean }) {
   const r = PREVIEW_RADIUS[value.radius];
   const accent = ACCENT_SWATCH[value.accent];
-  const gap = value.density === 'compact' ? 4 : 7;
+  const gap = value.density === 'compact' ? 4 : value.density === 'normal' ? 5 : 7;
   return (
     <div
       className="flex h-[6.5rem] w-full flex-col justify-between overflow-hidden border border-border-light bg-surface-elevated p-2.5"
@@ -269,7 +270,7 @@ export function AppearanceStyleCard() {
       await apiPut('/v1/branding/', {
         appearance: value
           ? { ...axes, accent_hex: accentHex ?? null }
-          : { accent: null, font: null, density: null, radius: null, accent_hex: null },
+          : { accent: null, font: null, density: null, radius: null, look: null, accent_hex: null },
       });
       setWorkspaceDefault(value);
       useToastStore.getState().addToast({
@@ -297,6 +298,24 @@ export function AppearanceStyleCard() {
         })}
       />
       <CardContent>
+        <div className="mb-4">
+          <OptionRow label={t('settings.style_look', { defaultValue: 'Interface style' })}>
+            {LOOKS.map((look) => (
+              <Choice
+                key={look}
+                active={effective.look === look}
+                onSelect={() => setAxis('look', look)}
+                label={t(`settings.style_look_${look}`, { defaultValue: look })}
+              />
+            ))}
+          </OptionRow>
+          <p className="mt-1 text-xs text-content-tertiary sm:ps-[9.5rem]">
+            {t('settings.style_look_hint', {
+              defaultValue:
+                'Classic: neutral colours, one accent for actions and statuses, thin dividers, no gradients or glass.',
+            })}
+          </p>
+        </div>
         <div
           role="radiogroup"
           aria-label={t('settings.style_title', { defaultValue: 'Style' })}

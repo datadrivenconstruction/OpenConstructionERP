@@ -52029,6 +52029,12 @@ const resource = {
     "settings.chords_reset_all": "Återställ alla genvägar",
     "settings.tab_packages": "Paket och moduler",
     "settings.tab_packages_desc": "Installerade lösningspaket, lägg till ett paket, slå på eller av enskilda moduler",
+    "settings.style_look": "Gränssnittsstil",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Klassisk",
+    "settings.style_look_hint": "Klassisk: neutrala färger, en accentfärg för åtgärder och statusar, tunna avdelare, inga gradienter eller glaseffekt.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ändringsorder",
     "approvalRoutes.kind_contract": "Kontrakt",

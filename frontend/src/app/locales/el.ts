@@ -51368,6 +51368,12 @@ const resource = {
     "settings.chords_reset_all": "Επαναφορά όλων των συντομεύσεων",
     "settings.tab_packages": "Πακέτα και μονάδες",
     "settings.tab_packages_desc": "Εγκατεστημένα πακέτα λύσεων, προσθήκη πακέτου, ενεργοποίηση ή απενεργοποίηση μεμονωμένων μονάδων",
+    "settings.style_look": "Στυλ διεπαφής",
+    "settings.style_look_standard": "Τυπικό",
+    "settings.style_look_classic": "Κλασικό",
+    "settings.style_look_hint": "Κλασικό: ουδέτερα χρώματα, ένα χρώμα έμφασης για ενέργειες και καταστάσεις, λεπτοί διαχωριστικοί, χωρίς διαβαθμίσεις ή εφέ γυαλιού.",
+    "settings.style_preset_standard": "Τυπικό",
+    "settings.style_density_normal": "Κανονική",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Εντολή αλλαγής",
     "approvalRoutes.kind_contract": "Σύμβαση",

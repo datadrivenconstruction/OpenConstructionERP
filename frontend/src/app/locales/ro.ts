@@ -51688,6 +51688,12 @@ const resource = {
     "settings.chords_reset_all": "Resetează toate scurtăturile",
     "settings.tab_packages": "Pachete și module",
     "settings.tab_packages_desc": "Pachete de soluții instalate, adăugarea unui pachet, activarea sau dezactivarea modulelor individuale",
+    "settings.style_look": "Stilul interfeței",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Clasic",
+    "settings.style_look_hint": "Clasic: culori neutre, o singură culoare de accent pentru acțiuni și statusuri, separatoare subțiri, fără gradienți sau efect de sticlă.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Dispoziție de modificare",
     "approvalRoutes.kind_contract": "Contract",

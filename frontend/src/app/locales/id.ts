@@ -51148,6 +51148,12 @@ const resource = {
     "settings.chords_reset_all": "Atur ulang semua pintasan",
     "settings.tab_packages": "Paket & modul",
     "settings.tab_packages_desc": "Paket solusi terpasang, tambah paket, aktifkan atau nonaktifkan modul satu per satu",
+    "settings.style_look": "Gaya antarmuka",
+    "settings.style_look_standard": "Standar",
+    "settings.style_look_classic": "Klasik",
+    "settings.style_look_hint": "Klasik: warna netral, satu warna aksen untuk aksi dan status, pembatas tipis, tanpa gradasi atau efek kaca.",
+    "settings.style_preset_standard": "Standar",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Perintah perubahan",
     "approvalRoutes.kind_contract": "Kontrak",

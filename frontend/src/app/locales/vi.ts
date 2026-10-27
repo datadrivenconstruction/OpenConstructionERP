@@ -51163,6 +51163,12 @@ const resource = {
     "settings.chords_reset_all": "Đặt lại tất cả phím tắt",
     "settings.tab_packages": "Gói và mô-đun",
     "settings.tab_packages_desc": "Các gói giải pháp đã cài đặt, thêm gói, bật hoặc tắt từng mô-đun",
+    "settings.style_look": "Kiểu giao diện",
+    "settings.style_look_standard": "Tiêu chuẩn",
+    "settings.style_look_classic": "Cổ điển",
+    "settings.style_look_hint": "Cổ điển: màu trung tính, một màu nhấn duy nhất cho thao tác và trạng thái, đường phân cách mỏng, không chuyển màu hay hiệu ứng kính.",
+    "settings.style_preset_standard": "Tiêu chuẩn",
+    "settings.style_density_normal": "Thông thường",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Lệnh thay đổi",
     "approvalRoutes.kind_contract": "Hợp đồng",

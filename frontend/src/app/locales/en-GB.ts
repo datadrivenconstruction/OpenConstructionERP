@@ -609,6 +609,12 @@ const resource = {
     "module_packages.host_token_failed": "The module page could not be signed in. Reload to try again.",
     "module_packages.host_pick_project": "Select a project in the top bar to open this module.",
     "propdev.compliance.regulator.rega": "<missing>",
+    "settings.style_look": "Interface style",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classic",
+    "settings.style_look_hint": "Classic: neutral colours, one accent for actions and statuses, thin dividers, no gradients or glass.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
   }
 } as { translation: Record<string, string> };
 

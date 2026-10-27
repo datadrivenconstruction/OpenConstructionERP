@@ -51412,6 +51412,12 @@ const resource = {
     "settings.chords_reset_all": "Връщане на всички комбинации по подразбиране",
     "settings.tab_packages": "Пакети и модули",
     "settings.tab_packages_desc": "Инсталирани пакети с решения, добавяне на пакет, включване или изключване на отделни модули",
+    "settings.style_look": "Стил на интерфейса",
+    "settings.style_look_standard": "Стандартен",
+    "settings.style_look_classic": "Класически",
+    "settings.style_look_hint": "Класически: неутрални цветове, един акцентен цвят за действия и статуси, тънки разделители, без преливания и стъклен ефект.",
+    "settings.style_preset_standard": "Стандартен",
+    "settings.style_density_normal": "Нормална",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Заповед за промяна",
     "approvalRoutes.kind_contract": "Договор",

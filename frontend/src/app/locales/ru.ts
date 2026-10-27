@@ -54307,6 +54307,12 @@ const resource = {
     "settings.chords_reset_all": "Сбросить все клавиши",
     "settings.tab_packages": "Пакеты и модули",
     "settings.tab_packages_desc": "Установленные пакеты решений, добавление пакета, включение и отключение отдельных модулей",
+    "settings.style_look": "Стиль интерфейса",
+    "settings.style_look_standard": "Стандартный",
+    "settings.style_look_classic": "Классический",
+    "settings.style_look_hint": "Классический: нейтральные цвета, один акцентный цвет для действий и статусов, тонкие разделители, без градиентов и эффекта стекла.",
+    "settings.style_preset_standard": "Стандартный",
+    "settings.style_density_normal": "Обычная",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",

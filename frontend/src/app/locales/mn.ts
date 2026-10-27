@@ -51055,6 +51055,12 @@ const resource = {
     "settings.chords_reset_all": "Бүх товчлолыг анхдагч руу буцаах",
     "settings.tab_packages": "Багц ба модулиуд",
     "settings.tab_packages_desc": "Суулгасан шийдлийн багцууд, багц нэмэх, модулиудыг тус тусад нь асаах эсвэл унтраах",
+    "settings.style_look": "Интерфейсийн загвар",
+    "settings.style_look_standard": "Стандарт",
+    "settings.style_look_classic": "Сонгодог",
+    "settings.style_look_hint": "Сонгодог: саармаг өнгө, үйлдэл болон төлөвт зориулсан нэг онцлох өнгө, нимгэн зураас, градиент болон шилэн эффектгүй.",
+    "settings.style_preset_standard": "Стандарт",
+    "settings.style_density_normal": "Энгийн",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өөрчлөлтийн тушаал",
     "approvalRoutes.kind_contract": "Гэрээ",

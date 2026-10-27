@@ -52576,6 +52576,12 @@ const resource = {
     "settings.chords_reset_all": "Obnovit všechny zkratky",
     "settings.tab_packages": "Balíčky a moduly",
     "settings.tab_packages_desc": "Nainstalované balíčky řešení, přidání balíčku, zapínání nebo vypínání jednotlivých modulů",
+    "settings.style_look": "Vzhled rozhraní",
+    "settings.style_look_standard": "Standardní",
+    "settings.style_look_classic": "Klasický",
+    "settings.style_look_hint": "Klasický: neutrální barvy, jeden zvýrazňující odstín pro akce a stavy, tenké oddělovače, bez přechodů a skleněného efektu.",
+    "settings.style_preset_standard": "Standardní",
+    "settings.style_density_normal": "Normální",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Změnový příkaz",
     "approvalRoutes.kind_contract": "Smlouva",

@@ -51772,6 +51772,12 @@ const resource = {
     "settings.chords_reset_all": "모든 단축키 재설정",
     "settings.tab_packages": "패키지 및 모듈",
     "settings.tab_packages_desc": "설치된 솔루션 패키지, 패키지 추가, 개별 모듈 켜기 또는 끄기",
+    "settings.style_look": "인터페이스 스타일",
+    "settings.style_look_standard": "표준",
+    "settings.style_look_classic": "클래식",
+    "settings.style_look_hint": "클래식: 중립 색상, 작업과 상태에만 쓰는 강조색 하나, 얇은 구분선, 그라데이션과 유리 효과 없음.",
+    "settings.style_preset_standard": "표준",
+    "settings.style_density_normal": "보통",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "변경 지시",
     "approvalRoutes.kind_contract": "계약",

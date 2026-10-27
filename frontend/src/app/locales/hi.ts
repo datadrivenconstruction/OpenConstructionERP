@@ -51419,6 +51419,12 @@ const resource = {
     "settings.chords_reset_all": "सभी शॉर्टकट रीसेट करें",
     "settings.tab_packages": "पैकेज और मॉड्यूल",
     "settings.tab_packages_desc": "इंस्टॉल किए गए समाधान पैकेज, पैकेज जोड़ना, अलग-अलग मॉड्यूल चालू या बंद करना",
+    "settings.style_look": "इंटरफ़ेस शैली",
+    "settings.style_look_standard": "मानक",
+    "settings.style_look_classic": "क्लासिक",
+    "settings.style_look_hint": "क्लासिक: तटस्थ रंग, क्रियाओं और स्थितियों के लिए एक ही हाइलाइट रंग, पतली विभाजक रेखाएँ, कोई ग्रेडिएंट या ग्लास प्रभाव नहीं।",
+    "settings.style_preset_standard": "मानक",
+    "settings.style_density_normal": "सामान्य",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "परिवर्तन आदेश",
     "approvalRoutes.kind_contract": "अनुबंध",
