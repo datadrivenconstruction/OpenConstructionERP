@@ -206,6 +206,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/daily-diary': BookOpen,
   '/field-reports': ClipboardList,
   '/field-time': Timer,
+  '/site-sensors': Gauge,
   '/service': Wrench,
   '/portal': Globe,
   '/portal/payments': FileText,

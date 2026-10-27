@@ -136,6 +136,12 @@ const InspectionsQualityCard = lazy(() =>
 const OnSiteNowCard = lazy(() =>
   import('./OnSiteNowCard').then((m) => ({ default: m.OnSiteNowCard })),
 );
+const FleetUtilisationCard = lazy(() =>
+  import('./FleetUtilisationCard').then((m) => ({ default: m.FleetUtilisationCard })),
+);
+const SensorAlertsCard = lazy(() =>
+  import('./SensorAlertsCard').then((m) => ({ default: m.SensorAlertsCard })),
+);
 const PunchListQualityCard = lazy(() =>
   import('./PunchListQualityCard').then((m) => ({ default: m.PunchListQualityCard })),
 );
@@ -2698,6 +2704,8 @@ function DashboardPageInner() {
     guarantees_summary: <GuaranteesSummaryCard />,
     on_site_now: <OnSiteNowCard />,
     wip_summary: <WipSummaryCard />,
+    fleet_utilisation: <FleetUtilisationCard />,
+    sensor_alerts: <SensorAlertsCard />,
 
     // Never in WIDGET_NULL_FALLBACK: unlike the delivery cards above, this one
     // always resolves to something. A deployment with no pack applied is the

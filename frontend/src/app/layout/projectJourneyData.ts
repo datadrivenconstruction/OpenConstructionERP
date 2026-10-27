@@ -262,6 +262,7 @@ export const JOURNEY_PHASES: readonly JourneyPhase[] = [
     extraRoutes: [
       '/field-reports',
       '/field-time',
+      '/site-sensors',
       '/meetings',
       '/correspondence',
       '/transmittals',

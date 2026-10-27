@@ -21,6 +21,7 @@ import {
   Save,
   Info,
   Tags,
+  Radio,
   Gauge,
   HeartPulse,
   Users,
@@ -88,6 +89,7 @@ import { DamageReportFormModal } from './modals/DamageReportFormModal';
 import { TypeFormModal } from './modals/TypeFormModal';
 import { EquipmentHealthDashboard } from './components/EquipmentHealthDashboard';
 import { FleetOptimizationPanel } from './components/FleetOptimizationPanel';
+import { TelematicsTab } from './components/TelematicsTab';
 import { equipmentGuide } from './equipmentGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildEquipmentInsights } from './equipmentInsights';
@@ -119,7 +121,7 @@ type DrawerTab =
   | 'maintenance'
   | 'certifications'
   | 'damage';
-const EQUIPMENT_TAB_IDS = ['assets', 'types'] as const;
+const EQUIPMENT_TAB_IDS = ['assets', 'types', 'telematics'] as const;
 type PageTab = (typeof EQUIPMENT_TAB_IDS)[number];
 
 const STATUS_VARIANT: Record<
@@ -482,6 +484,7 @@ export function EquipmentPage() {
             [
               { id: 'assets', label: t('equipment.tab_assets', { defaultValue: 'Assets' }), icon: Truck },
               { id: 'types', label: t('equipment.tab_types', { defaultValue: 'Types' }), icon: Tags },
+              { id: 'telematics', label: t('equipment.tab_telematics', { defaultValue: 'Telematics' }), icon: Radio },
             ] as { id: PageTab; label: string; icon: React.ElementType }[]
           ).map((pt) => {
             const Icon = pt.icon;
@@ -513,6 +516,8 @@ export function EquipmentPage() {
 
       {pageTab === 'types' ? (
         <TypesPage />
+      ) : pageTab === 'telematics' ? (
+        <TelematicsTab />
       ) : (
       <>
       <FleetOptimizationPanel

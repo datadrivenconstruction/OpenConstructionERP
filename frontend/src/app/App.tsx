@@ -194,6 +194,9 @@ const FieldReportsPage = lazy(() =>
 const FieldTimePage = lazy(() =>
   import('@/features/field-time').then((m) => ({ default: m.FieldTimePage }))
 );
+const SiteSensorsPage = lazy(() =>
+  import('@/features/site_sensors').then((m) => ({ default: m.SiteSensorsPage }))
+);
 const FinancePage = lazy(() =>
   import('@/features/finance/FinancePage').then((m) => ({ default: m.FinancePage }))
 );
@@ -1710,6 +1713,8 @@ export default function App() {
         <Route path="/daily-diary" element={<P title="Daily Diary"><DailyDiaryPage /></P>} />
         <Route path="/projects/:projectId/daily-diary" element={<P title="Daily Diary"><DailyDiaryPage /></P>} />
         <Route path="/field-time" element={<P title="Field Time"><FieldTimePage /></P>} />
+        <Route path="/site-sensors" element={<P title="Site Sensors"><SiteSensorsPage /></P>} />
+        <Route path="/projects/:projectId/site-sensors" element={<P title="Site Sensors"><SiteSensorsPage /></P>} />
         <Route path="/projects/:projectId/field-time" element={<P title="Field Time"><FieldTimePage /></P>} />
         <Route path="/portal" element={<P title="Client & Partner Portal"><PortalPage /></P>} />
         {/* Portal users, access rules and sessions carry no project at all. */}

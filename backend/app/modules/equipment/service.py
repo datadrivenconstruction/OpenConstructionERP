@@ -397,6 +397,10 @@ class EquipmentService:
             lat=data.lat,
             lng=data.lng,
             engine_status=data.engine_status,
+            idle_hours=data.idle_hours,
+            fuel_used_l=data.fuel_used_l,
+            fault_codes=list(data.fault_codes),
+            source=data.source,
             raw_payload=data.raw_payload,
         )
         await self.telemetry_repo.create(reading)
@@ -803,6 +807,9 @@ class EquipmentService:
         hours_logged = md.get("hours_logged")
 
         billing_amount = compute_rental_billing(rental, start_date, end_iso, hours_logged)
+        # Telematics allocation already posted this hire day by day; billing it again here would count it twice.
+        if md.get("billing_mode") == "telematics":
+            billing_amount = Decimal("0")
         billing_type = "hourly" if (hours_logged is not None and Decimal(str(rate_per_hour or 0)) > 0) else "daily"
         calculated_at = datetime.now(UTC).isoformat()
 
