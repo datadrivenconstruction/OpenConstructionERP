@@ -78,6 +78,7 @@ import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
 import { useToastStore } from '@/stores/useToastStore';
+import { AvatarEditor } from './AvatarEditor';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import {
   aiApi,
@@ -112,6 +113,7 @@ interface UserProfile {
   role: string;
   locale: string;
   is_active: boolean;
+  avatar_url?: string | null;
   created_at: string;
 }
 
@@ -1223,14 +1225,8 @@ function ProfileCard({ profile, loading, editing, setEditing, formName, setFormN
       />
       <CardContent>
         {profile ? (
-          <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-            {/* Avatar */}
-            <div
-              className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-oe-blue to-oe-blue-hover text-3xl font-bold text-oe-on-accent shadow-sm"
-              aria-hidden="true"
-            >
-              {profile.full_name?.charAt(0)?.toUpperCase() || 'U'}
-            </div>
+          <div className="flex flex-col sm:flex-row sm:items-start gap-5">
+            <AvatarEditor name={profile.full_name} avatarUrl={profile.avatar_url} />
 
             {/* Info */}
             <div className="flex-1 min-w-0 space-y-3">
