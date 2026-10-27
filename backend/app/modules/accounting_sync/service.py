@@ -55,6 +55,7 @@ from app.modules.accounting_sync.postings import (
 )
 from app.modules.accounting_sync.providers import API_PROVIDERS, FILE_PROVIDERS
 from app.modules.accounting_sync.providers.base import OAuthTokens, ProviderAdapter, ProviderContext, ProviderError
+from app.modules.accounting_sync.repository import AccountingSyncRepository
 from app.modules.accounting_sync.validators import evaluate
 
 logger = logging.getLogger(__name__)
@@ -93,15 +94,15 @@ class AccountingSyncService:
 
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+        self.repo = AccountingSyncRepository(session)
 
     # -- connections ---------------------------------------------------------
 
     async def list_connections(self) -> list[AccountingConnection]:
-        rows = await self.session.execute(select(AccountingConnection).order_by(AccountingConnection.name))
-        return list(rows.scalars())
+        return await self.repo.list_connections()
 
     async def get_connection(self, connection_id: uuid.UUID) -> AccountingConnection:
-        row = await self.session.get(AccountingConnection, connection_id)
+        row = await self.repo.get_connection(connection_id)
         if row is None:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Connection not found")
         return row
@@ -186,18 +187,10 @@ class AccountingSyncService:
         await self.session.flush()
 
     async def account_mappings(self, conn: AccountingConnection) -> list[AccountMapping]:
-        rows = await self.session.execute(
-            select(AccountMapping).where(AccountMapping.connection_id == conn.id).order_by(AccountMapping.category)
-        )
-        return list(rows.scalars())
+        return await self.repo.account_mappings(conn.id)
 
     async def tax_mappings(self, conn: AccountingConnection) -> list[TaxCodeMapping]:
-        rows = await self.session.execute(
-            select(TaxCodeMapping)
-            .where(TaxCodeMapping.connection_id == conn.id)
-            .order_by(TaxCodeMapping.direction, TaxCodeMapping.tax_code)
-        )
-        return list(rows.scalars())
+        return await self.repo.tax_mappings(conn.id)
 
     async def set_account_mappings(self, conn: AccountingConnection, rows: list[dict[str, str]]) -> None:
         existing = {m.category: m for m in await self.account_mappings(conn)}
@@ -263,6 +256,7 @@ class AccountingSyncService:
             for ln in rows.scalars():
                 lines_by_inv.setdefault(ln.invoice_id, []).append(ln)
         fees = await self._guarantee_fee_docs(scope, period)
+        fees += await self._payroll_docs(scope)
         project_ids |= {uuid.UUID(d.project_id) for d in fees if d.project_id}
         projects = {}
         if project_ids:
@@ -437,6 +431,45 @@ class AccountingSyncService:
                     source="guarantee_fee",
                     project_id=str(g.project_id),
                     recorded_total=fee,
+                )
+            )
+        return out
+
+    async def _payroll_docs(self, scope: set[uuid.UUID]) -> list[SyncDocument]:
+        """Gross labour cost of each approved payroll batch, credited to wages payable."""
+        try:
+            from app.modules.payroll.models import PayrollBatch
+        except ImportError:  # pragma: no cover - optional module
+            return []
+        stmt = select(PayrollBatch).where(PayrollBatch.status.in_(("approved", "posted")))
+        if scope:
+            stmt = stmt.where(PayrollBatch.project_id.in_(scope))
+        out = []
+        for b in (await self.session.execute(stmt)).scalars():
+            gross = money(b.total_amount or "0")
+            day = _parse_day(b.period_end) or (b.approved_at.date() if b.approved_at else None)
+            if gross <= ZERO or day is None:
+                continue
+            out.append(
+                SyncDocument(
+                    record_type=AP_BILL,
+                    record_id=f"payroll:{b.id}",
+                    number=f"PR-{b.period_label or day.isoformat()}"[:36],
+                    doc_date=day,
+                    contact=SyncContact(record_id="payroll", name="Payroll", kind="supplier", is_business=False),
+                    currency=b.currency or "EUR",
+                    lines=[
+                        SyncLine(
+                            description=f"Payroll {b.period_label}".strip(),
+                            net=gross,
+                            category="payroll_cost",
+                            tax_code="ZERO",
+                            tax_rate=ZERO,
+                        )
+                    ],
+                    source="payroll",
+                    project_id=str(b.project_id),
+                    recorded_total=gross,
                 )
             )
         return out
@@ -665,9 +698,11 @@ class AccountingSyncService:
     # -- push ------------------------------------------------------------------
 
     async def push(
-        self, conn: AccountingConnection, *, project_id: uuid.UUID | None = None, record_ids: set[str] | None = None
+        self, conn: AccountingConnection, *, record_ids: set[str], project_id: uuid.UUID | None = None
     ) -> dict[str, int]:
-        """Push documents (and their contacts and projects) to a live provider."""
+        """Push the documents a user reviewed (and their contacts and projects) to a live provider."""
+        if not record_ids:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Select the reviewed documents to post")
         adapter = await self.adapter(conn)
         docs = await self.documents(conn, project_id=project_id, record_ids=record_ids)
         findings = await self.findings(conn, docs)
@@ -896,6 +931,7 @@ class AccountingSyncService:
                 media = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         elif kind == "saft":
             contacts = list({(c.kind, c.record_id): c for c in (d.contact for d in docs)}.values())
+            variant = templates.saft_variant(conn.country_code)
             content = saft.build(
                 journal_for(docs, mapping),
                 contacts,
@@ -904,6 +940,8 @@ class AccountingSyncService:
                 currency=conn.base_currency,
                 period=period,
                 tax_rows=templates.tax_codes(conn.country_code, period[1]),
+                namespace=variant["namespace"],
+                audit_file_version=variant["audit_file_version"],
             )
             name, media = f"SAF-T_{stamp}.xml", "application/xml"
         else:

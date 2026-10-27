@@ -38,7 +38,6 @@ export interface FormState {
   external_tenant_id: string;
   lock_date: string;
   project_ids: string[];
-  auto_push: boolean;
   consultant_number: string;
   client_number: string;
   journal_columns: string[];
@@ -57,7 +56,6 @@ function initialState(c: Connection | null, projects: ProjectOption[]): FormStat
     external_tenant_id: c?.external_tenant_id ?? '',
     lock_date: c?.lock_date ?? '',
     project_ids: c ? c.project_ids : projects.length === 1 ? projects.map((p) => p.id) : [],
-    auto_push: s.auto_push === true,
     consultant_number: typeof s.consultant_number === 'string' ? s.consultant_number : '',
     client_number: typeof s.client_number === 'string' ? s.client_number : '',
     journal_columns: Array.isArray(s.journal_columns) ? s.journal_columns : [],
@@ -71,7 +69,6 @@ export function buildBody(
   existing: Connection | null,
 ): ConnectionCreate & ConnectionUpdate {
   const settings: ConnectionSettings = { ...(existing?.settings ?? {}) };
-  if (LIVE_PROVIDERS.includes(provider)) settings.auto_push = f.auto_push;
   if (provider === 'datev') {
     settings.consultant_number = f.consultant_number.trim();
     settings.client_number = f.client_number.trim();
@@ -216,16 +213,6 @@ export function ConnectionForm({
         >
           <input type="date" className={inputCls} value={f.lock_date} onChange={(e) => set('lock_date', e.target.value)} />
         </WideModalField>
-        {live && (
-          <div className="flex items-end pb-2">
-            <Toggle
-              checked={f.auto_push}
-              onChange={(v) => set('auto_push', v)}
-              label={t('accountingSync.field.auto_push', { defaultValue: 'Send automatically on approval' })}
-              hint={t('accountingSync.field.auto_push_hint', { defaultValue: 'Otherwise you push by hand from the Sync tab.' })}
-            />
-          </div>
-        )}
 
         <WideModalField
           span={2}

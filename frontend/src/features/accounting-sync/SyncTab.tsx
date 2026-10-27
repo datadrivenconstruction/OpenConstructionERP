@@ -51,6 +51,8 @@ export function SyncTab({
   const live = LIVE_PROVIDERS.includes(connection.provider);
   const [failedOnly, setFailedOnly] = useState(false);
   const [offset, setOffset] = useState(0);
+  // Nothing is posted until the user ticks the documents they reviewed.
+  const [selected, setSelected] = useState<Set<string>>(new Set());
 
   const findingsQ = useFindings(id);
   const docsQ = useDocuments(id, range);
@@ -69,7 +71,7 @@ export function SyncTab({
       }),
     });
 
-  const pushMut = useSyncMutation(() => pushRecords(id));
+  const pushMut = useSyncMutation(() => pushRecords(id, { record_ids: [...selected] }));
   const pullMut = useSyncMutation(() => pullPayments(id));
   const retryMut = useSyncMutation((entryId: string) => retryLogEntry(id, entryId));
 
@@ -87,11 +89,14 @@ export function SyncTab({
             <Button
               variant="primary"
               icon={<Upload size={14} />}
-              disabled={!canEdit || blocked}
+              disabled={!canEdit || blocked || selected.size === 0}
               loading={pushMut.isPending}
-              onClick={() => pushMut.mutate(undefined, { onSuccess: resultToast, onError })}
+              onClick={() =>
+                pushMut.mutate(undefined, { onSuccess: (r) => { setSelected(new Set()); resultToast(r); }, onError })
+              }
+              data-testid="accounting-sync-push"
             >
-              {t('accountingSync.sync.push', { defaultValue: 'Push now' })}
+              {t('accountingSync.sync.push_selected', { defaultValue: 'Post {{count}} reviewed', count: selected.size })}
             </Button>
             <Button
               variant="secondary"
@@ -105,7 +110,7 @@ export function SyncTab({
             <p className="text-xs text-content-tertiary">
               {blocked
                 ? t('accountingSync.sync.authorise_first', { defaultValue: 'Authorise the connection in Settings before you push.' })
-                : t('accountingSync.sync.push_hint', { defaultValue: 'Sends approved invoices and bills that were not sent yet. Payments recorded in your books come back.' })}
+                : t('accountingSync.sync.push_hint_review', { defaultValue: 'Tick the documents you reviewed below, then post them. Payments recorded in your books come back.' })}
             </p>
           </div>
         </Card>
@@ -149,6 +154,17 @@ export function SyncTab({
             <table className="w-full min-w-[44rem] text-sm" data-testid="accounting-sync-docs">
               <thead>
                 <tr className="text-left text-2xs uppercase tracking-wide text-content-tertiary">
+                  {live && (
+                    <th className="pb-2 pr-3 font-medium">
+                      <input
+                        type="checkbox"
+                        aria-label={t('accountingSync.docs.review_all', { defaultValue: 'Mark all as reviewed' })}
+                        className="h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue/30"
+                        checked={docs.length > 0 && selected.size === docs.length}
+                        onChange={(e) => setSelected(e.target.checked ? new Set(docs.map((d) => d.record_id)) : new Set())}
+                      />
+                    </th>
+                  )}
                   <th className="pb-2 pr-3 font-medium">{t('accountingSync.docs.number', { defaultValue: 'Number' })}</th>
                   <th className="pb-2 pr-3 font-medium">{t('accountingSync.docs.type', { defaultValue: 'Type' })}</th>
                   <th className="pb-2 pr-3 font-medium">{t('accountingSync.docs.date', { defaultValue: 'Date' })}</th>
@@ -161,6 +177,24 @@ export function SyncTab({
               <tbody>
                 {docs.map((d) => (
                   <tr key={`${d.record_type}-${d.record_id}`} className="border-t border-border-light">
+                    {live && (
+                      <td className="py-1.5 pr-3">
+                        <input
+                          type="checkbox"
+                          aria-label={t('accountingSync.docs.review_one', { defaultValue: 'Reviewed {{number}}', number: d.number })}
+                          className="h-4 w-4 rounded border-border text-oe-blue focus:ring-oe-blue/30"
+                          checked={selected.has(d.record_id)}
+                          onChange={(e) =>
+                            setSelected((prev) => {
+                              const next = new Set(prev);
+                              if (e.target.checked) next.add(d.record_id);
+                              else next.delete(d.record_id);
+                              return next;
+                            })
+                          }
+                        />
+                      </td>
+                    )}
                     <td className="py-1.5 pr-3 font-medium text-content-primary">{d.number}</td>
                     <td className="py-1.5 pr-3 text-content-secondary">
                       {recordTypeLabel(t, d.record_type)}

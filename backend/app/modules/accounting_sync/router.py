@@ -222,11 +222,11 @@ async def findings(connection_id: uuid.UUID, session: SessionDep) -> list[Findin
 
 @router.post("/connections/{connection_id}/push", response_model=SyncCounts, dependencies=[_WRITE])
 async def push(connection_id: uuid.UUID, body: PushRequest, session: SessionDep) -> SyncCounts:
+    if not body.record_ids:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Select the reviewed documents to post")
     svc = AccountingSyncService(session)
     conn = await svc.get_connection(connection_id)
-    counts = await svc.push(
-        conn, project_id=body.project_id, record_ids=set(body.record_ids) if body.record_ids else None
-    )
+    counts = await svc.push(conn, project_id=body.project_id, record_ids=set(body.record_ids))
     await session.commit()
     return SyncCounts(**counts)
 

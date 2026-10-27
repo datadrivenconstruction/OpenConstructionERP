@@ -34,7 +34,7 @@ const CONNECTION: Connection = {
   external_tenant_id: 'ten-1',
   lock_date: '2026-03-31',
   project_ids: [],
-  settings: { auto_push: true },
+  settings: {},
   last_sync_at: '2026-10-01T10:00:00Z',
   last_sync_status: 'failed',
   created_at: '2026-09-01T10:00:00Z',
@@ -209,14 +209,13 @@ describe('pure rules', () => {
   it('sends the secret only when typed and clears a removed lock date', () => {
     const state = {
       name: 'Books EU', country_code: 'de', chart_template: 'skr03', base_currency: 'eur', is_sandbox: false,
-      client_id: 'abc', client_secret: '', external_tenant_id: '', lock_date: '', project_ids: [], auto_push: false,
+      client_id: 'abc', client_secret: '', external_tenant_id: '', lock_date: '', project_ids: [],
       consultant_number: '', client_number: '', journal_columns: [],
     };
     const body = buildBody('xero', state, CONNECTION);
     expect(body.client_secret).toBeUndefined();
     expect(body.clear_lock_date).toBe(true);
     expect(body.base_currency).toBe('EUR');
-    expect(body.settings?.auto_push).toBe(false);
     expect(buildBody('xero', { ...state, client_secret: 's3cret' }, CONNECTION).client_secret).toBe('s3cret');
   });
 });

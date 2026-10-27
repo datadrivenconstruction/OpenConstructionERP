@@ -12,7 +12,9 @@
     "retention_payable",
     "bank",
     "output_tax",
-    "input_tax"
+    "input_tax",
+    "payroll_cost",
+    "payroll_liability"
   ],
   "templates": {
     "generic": {
@@ -72,6 +74,14 @@
         "input_tax": [
           "1300",
           "Input tax"
+        ],
+        "payroll_cost": [
+          "6000",
+          "Wages and salaries"
+        ],
+        "payroll_liability": [
+          "2100",
+          "Wages payable"
         ]
       },
       "tax_keys": {
@@ -157,6 +167,14 @@
         "input_tax": [
           "1576",
           "Abziehbare Vorsteuer 19 %"
+        ],
+        "payroll_cost": [
+          "4110",
+          "Löhne"
+        ],
+        "payroll_liability": [
+          "1740",
+          "Verbindlichkeiten aus Lohn und Gehalt"
         ]
       },
       "tax_keys": {
@@ -243,6 +261,14 @@
         "input_tax": [
           "1406",
           "Abziehbare Vorsteuer 19 %"
+        ],
+        "payroll_cost": [
+          "6010",
+          "Löhne"
+        ],
+        "payroll_liability": [
+          "3720",
+          "Verbindlichkeiten aus Lohn und Gehalt"
         ]
       },
       "tax_keys": {
@@ -457,6 +483,33 @@
           "Bemerkung (Sonstige)"
         ]
       },
+      "review_status": "needs_expert_review"
+    }
+  },
+  "saft_variants": {
+    "_comment": "SAF-T flavours. The OECD 2.0 schema is the base; a national variant changes the namespace and the audit file version. Extra national elements are added by the country pack.",
+    "oecd": {
+      "label": "OECD SAF-T 2.0",
+      "namespace": "urn:OECD:StandardAuditFile-Tax:2.00",
+      "audit_file_version": "2.00",
+      "countries": []
+    },
+    "NO": {
+      "label": "SAF-T Financial (Norway) 1.30",
+      "namespace": "urn:StandardAuditFile-Taxation-Financial:NO",
+      "audit_file_version": "1.30",
+      "countries": [
+        "NO"
+      ],
+      "review_status": "needs_expert_review"
+    },
+    "LT": {
+      "label": "i.SAF-T (Lithuania) 2.01",
+      "namespace": "https://www.vmi.lt/cms/saf-t",
+      "audit_file_version": "2.01",
+      "countries": [
+        "LT"
+      ],
       "review_status": "needs_expert_review"
     }
   }
