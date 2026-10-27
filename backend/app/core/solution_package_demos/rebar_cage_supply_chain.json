@@ -1,0 +1,90 @@
+{
+  "demo_id": "rebar-cage-supply-chain",
+  "project": {
+    "name": "Bored pile foundation: rebar cage supply chain",
+    "description": "Eight reinforcement cages for D900 bored piles, tracked from the bending schedule through fabrication, QA, dispatch, delivery with QR receipt and installation into each pile.",
+    "currency": "EUR",
+    "classification_standard": "din276",
+    "region": "global"
+  },
+  "unit_type": "rebar_cage",
+  "stages": [
+    "design",
+    "approved_for_production",
+    "in_production",
+    "qa",
+    "dispatched",
+    "delivered",
+    "installed"
+  ],
+  "units": [
+    {
+      "ref": "RC-BP-01",
+      "element_ref": "BP-01",
+      "status": "installed",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-01, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 2,
+      "delivery_note_ref": "DN-2026-1041"
+    },
+    {
+      "ref": "RC-BP-02",
+      "element_ref": "BP-02",
+      "status": "installed",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-02, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 4,
+      "delivery_note_ref": "DN-2026-1042"
+    },
+    {
+      "ref": "RC-BP-03",
+      "element_ref": "BP-03",
+      "status": "delivered",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-03, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 6,
+      "delivery_note_ref": "DN-2026-1043"
+    },
+    {
+      "ref": "RC-BP-04",
+      "element_ref": "BP-04",
+      "status": "delivered",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-04, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 8,
+      "delivery_note_ref": "DN-2026-1044"
+    },
+    {
+      "ref": "RC-BP-05",
+      "element_ref": "BP-05",
+      "status": "dispatched",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-05, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 10
+    },
+    {
+      "ref": "RC-BP-06",
+      "element_ref": "BP-06",
+      "status": "qa",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-06, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 12
+    },
+    {
+      "ref": "RC-BP-07",
+      "element_ref": "BP-07",
+      "status": "in_production",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-07, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 14
+    },
+    {
+      "ref": "RC-BP-08",
+      "element_ref": "BP-08",
+      "status": "approved_for_production",
+      "drawing_ref": "BS-PILE-001 rev B, marks 01-06",
+      "notes": "Bored pile BP-08, D900, 18.0 m: 12 H25 longitudinal bars, H12 helix at 150, H16 stiffener rings at 2.0 m, 75 mm cover spacers.",
+      "target_install_offset_days": 16
+    }
+  ]
+}

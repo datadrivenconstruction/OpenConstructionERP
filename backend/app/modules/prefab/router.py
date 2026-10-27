@@ -14,6 +14,7 @@ Mounted at ``/api/v1/prefab``.
     PATCH  /units/{unit_id}/link         - set/clear the BOQ position / assembly link
     DELETE /units/{unit_id}              - delete a unit
     POST   /units/{unit_id}/advance      - advance the unit's production stage
+    POST   /units/receive                - book a dispatched unit in by its QR token
     GET    /units/{unit_id}/events       - production-stage audit timeline
 
 Reads need viewer access (``prefab.read``); create/edit/delete need
@@ -46,6 +47,7 @@ from app.modules.prefab.schemas import (
     PrefabUnitResponse,
     PrefabUnitUpdate,
     ProductionEventResponse,
+    ReceiveByQrRequest,
 )
 from app.modules.prefab.service import PrefabService
 
@@ -247,6 +249,22 @@ async def advance_stage(
     existing = await service.get_unit(unit_id)
     await verify_project_access(existing.project_id, user_id, session)
     unit = await service.advance_stage(unit_id, data, user_id=user_id)
+    await session.commit()
+    return await service.to_response(unit)
+
+
+@router.post("/units/receive/", response_model=PrefabUnitResponse, dependencies=[_ADVANCE])
+async def receive_by_qr(
+    data: ReceiveByQrRequest,
+    user_id: CurrentUserId,
+    session: SessionDep,
+) -> PrefabUnitResponse:
+    """Book a dispatched unit in on site from its scanned QR code and delivery note."""
+    service = _service(session)
+    unit = await service.unit_repo.get_by_qr_token(data.qr_token)
+    if unit is not None:
+        await verify_project_access(unit.project_id, user_id, session)
+    unit = await service.receive_by_qr(data, user_id=user_id)
     await session.commit()
     return await service.to_response(unit)
 

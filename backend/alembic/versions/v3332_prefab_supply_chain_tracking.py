@@ -1,0 +1,76 @@
+# DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""prefab - QR label, delivery note and element reference on an off-site unit.
+
+Adds three nullable columns to ``oe_prefab_unit`` so a unit can be tracked
+through the supply chain: ``qr_token`` (unique, printed as the QR label and
+scanned on arrival), ``delivery_note_ref`` (the note it arrived with) and
+``element_ref`` (the element it goes into, such as a pile mark). Existing
+units get a token so they can be scanned too.
+
+Idempotent. The downgrade drops the index and the columns.
+
+Revision ID: v3332_prefab_supply_chain_tracking
+Revises: v3331_cost_benchmarks_payroll_periods
+Create Date: 2026-10-27
+"""
+
+from __future__ import annotations
+
+import logging
+import secrets
+from typing import Sequence, Union
+
+import sqlalchemy as sa
+from alembic import op
+
+revision: str = "v3332_prefab_supply_chain_tracking"
+down_revision: Union[str, Sequence[str], None] = "v3331_cost_benchmarks_payroll_periods"
+branch_labels: Union[str, Sequence[str], None] = None
+depends_on: Union[str, Sequence[str], None] = None
+
+logger = logging.getLogger("alembic.runtime.migration")
+
+_TABLE = "oe_prefab_unit"
+_IX_QR = "ix_oe_prefab_unit_qr_token"
+_COLUMNS = (("qr_token", 64), ("delivery_note_ref", 120), ("element_ref", 120))
+
+
+def _columns(inspector: sa.engine.reflection.Inspector) -> set[str]:
+    return {c["name"] for c in inspector.get_columns(_TABLE)}
+
+
+def upgrade() -> None:
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if _TABLE not in inspector.get_table_names():
+        logger.info("v3332 prefab supply chain: table %s absent, skipping", _TABLE)
+        return
+
+    present = _columns(inspector)
+    for name, length in _COLUMNS:
+        if name not in present:
+            op.add_column(_TABLE, sa.Column(name, sa.String(length), nullable=True))
+
+    units = sa.table(_TABLE, sa.column("id", sa.String(36)), sa.column("qr_token", sa.String(64)))
+    ids = bind.execute(sa.select(units.c.id).where(units.c.qr_token.is_(None))).scalars().all()
+    for unit_id in ids:
+        bind.execute(sa.update(units).where(units.c.id == unit_id).values(qr_token=secrets.token_urlsafe(18)))
+
+    inspector = sa.inspect(bind)
+    if not any(ix["name"] == _IX_QR for ix in inspector.get_indexes(_TABLE)):
+        op.create_index(_IX_QR, _TABLE, ["qr_token"], unique=True)
+    logger.info("v3332 prefab supply chain: schema ensured, %d tokens issued", len(ids))
+
+
+def downgrade() -> None:
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    if _TABLE not in inspector.get_table_names():
+        return
+    if any(ix["name"] == _IX_QR for ix in inspector.get_indexes(_TABLE)):
+        op.drop_index(_IX_QR, table_name=_TABLE)
+    present = _columns(inspector)
+    for name, _length in reversed(_COLUMNS):
+        if name in present:
+            op.drop_column(_TABLE, name)
