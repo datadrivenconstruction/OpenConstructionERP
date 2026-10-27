@@ -53,6 +53,8 @@ const CATEGORY_LABELS: Record<string, Label> = {
   subcontract_cost: { key: 'accountingSync.category.subcontract_cost', en: 'Subcontract cost' },
   material_cost: { key: 'accountingSync.category.material_cost', en: 'Material cost' },
   guarantee_fees: { key: 'accountingSync.category.guarantee_fees', en: 'Guarantee fees' },
+  payroll_cost: { key: 'accountingSync.category.payroll_cost', en: 'Payroll cost' },
+  payroll_liability: { key: 'accountingSync.category.payroll_liability', en: 'Wages payable' },
   retention_receivable: { key: 'accountingSync.category.retention_receivable', en: 'Retention receivable' },
   retention_payable: { key: 'accountingSync.category.retention_payable', en: 'Retention payable' },
   bank: { key: 'accountingSync.category.bank', en: 'Bank' },
@@ -117,6 +119,7 @@ const SOURCE_LABELS: Record<DocumentSource, Label> = {
   subcontractor: { key: 'accountingSync.doc_source.subcontractor', en: 'Subcontractor' },
   procurement: { key: 'accountingSync.doc_source.procurement', en: 'Procurement' },
   guarantee_fee: { key: 'accountingSync.doc_source.guarantee_fee', en: 'Guarantee fee' },
+  payroll: { key: 'accountingSync.doc_source.payroll', en: 'Payroll' },
 };
 
 const RECORD_TYPE_LABELS: Record<DocumentRecordType, Label> = {

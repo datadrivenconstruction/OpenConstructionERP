@@ -18,6 +18,7 @@ from decimal import Decimal
 import httpx
 import pytest
 import pytest_asyncio
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -25,10 +26,12 @@ from app.core.crypto import decrypt_secret
 from app.modules.accounting_sync import service as svc_mod
 from app.modules.accounting_sync.demo import seed_demo_accounting_sync
 from app.modules.accounting_sync.models import ExternalRef, SyncLogEntry
+from app.modules.accounting_sync.postings import build_journal
 from app.modules.accounting_sync.service import AccountingSyncService
 from app.modules.contacts.models import Contact
 from app.modules.finance.models import Invoice, InvoiceLineItem, Payment
 from app.modules.guarantees.models import Guarantee
+from app.modules.payroll.models import PayrollBatch
 from app.modules.projects.models import Project
 from app.modules.users.models import User
 from tests._pg import isolated_engine
@@ -79,6 +82,11 @@ class FakeXero:
         if path.endswith("/Payments"):
             return httpx.Response(200, json={"Payments": self.payments})
         return httpx.Response(404, json={})
+
+
+async def _all_ids(svc: AccountingSyncService, conn) -> set[str]:
+    """Every document in scope, as if the user ticked them all after review."""
+    return {d.record_id for d in await svc.documents(conn) if d.source != "payroll"}
 
 
 @pytest_asyncio.fixture
@@ -157,11 +165,11 @@ async def test_documents_cover_ipc_subcontractor_and_guarantee_fee(ctx) -> None:
 @pytest.mark.asyncio
 async def test_push_is_idempotent_and_logs_each_record(ctx) -> None:
     session, svc, conn, fake, ar, *_ = ctx
-    first = await svc.push(conn)
+    first = await svc.push(conn, record_ids=await _all_ids(svc, conn))
     assert first == {"success": 3, "failed": 0, "skipped": 0}
     posts = [r for r in fake.requests if r.url.path.endswith("/Invoices")]
     assert len(posts) == 3
-    again = await svc.push(conn)
+    again = await svc.push(conn, record_ids=await _all_ids(svc, conn))
     assert again == {"success": 0, "failed": 0, "skipped": 3}
     assert len([r for r in fake.requests if r.url.path.endswith("/Invoices")]) == 3
     ref = (await session.execute(select(ExternalRef).where(ExternalRef.record_id == str(ar.id)))).scalar_one()
@@ -170,7 +178,7 @@ async def test_push_is_idempotent_and_logs_each_record(ctx) -> None:
     line = (await session.execute(select(InvoiceLineItem).where(InvoiceLineItem.invoice_id == ar.id))).scalar_one()
     line.description = "Interim payment 3 (revised)"
     await session.flush()
-    await svc.push(conn)
+    await svc.push(conn, record_ids=await _all_ids(svc, conn))
     last = fake.invoices[ref.external_id]
     assert last["InvoiceID"] == ref.external_id  # update, not a duplicate
     assert len(fake.invoices) == 3
@@ -260,3 +268,28 @@ async def test_demo_seeds_a_success_and_a_failure_and_a_datev_connection(ctx) ->
     datev_conn = names["DATEV export (SKR03)"]
     content, _, _ = await svc.export(datev_conn, "datev_postings", (date(2026, 1, 1), date(2026, 12, 31)))
     assert content.startswith(b'"EXTF";700;21;')
+
+
+@pytest.mark.asyncio
+async def test_push_needs_reviewed_documents(ctx) -> None:
+    _session, svc, conn, fake, *_ = ctx
+    with pytest.raises(HTTPException):
+        await svc.push(conn, record_ids=set())
+    assert not fake.requests
+
+
+@pytest.mark.asyncio
+async def test_approved_payroll_posts_to_wages_payable(ctx) -> None:
+    session, svc, conn, _fake, _ar, _ap, project = ctx
+    session.add(
+        PayrollBatch(project_id=project.id, period_label="2026-W14", period_end="2026-04-05", status="approved",
+                     currency="EUR", total_amount="4200.00")
+    )  # fmt: skip
+    session.add(PayrollBatch(project_id=project.id, period_label="draft", status="draft", total_amount="99"))
+    await session.flush()
+    docs = [d for d in await svc.documents(conn) if d.source == "payroll"]
+    assert len(docs) == 1 and docs[0].gross_total == Decimal("4200.00")
+    lines = build_journal(docs[0], await svc.mapping(conn))
+    accounts = {ln.account: (ln.debit, ln.credit) for ln in lines}
+    assert accounts["4110"][0] == Decimal("4200.00")
+    assert accounts["1740"][1] == Decimal("4200.00")

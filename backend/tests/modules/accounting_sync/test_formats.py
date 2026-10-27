@@ -172,3 +172,29 @@ def test_saft_is_balanced_oecd_xml() -> None:
     assert gle.find("s:NumberOfEntries", ns).text == "2"
     assert gle.find("s:TotalDebit", ns).text == gle.find("s:TotalCredit", ns).text
     assert root.find("s:MasterFiles/s:Customers/s:Customer/s:TaxRegistrationNumber", ns).text == "DE123456789"
+
+
+def test_saft_variant_comes_from_country_data() -> None:
+    no = templates.saft_variant("no")
+    assert no["key"] == "NO" and no["audit_file_version"] == "1.30"
+    assert templates.saft_variant("FR")["key"] == "oecd"
+    xml = saft.build(
+        journal_for([_ar()], _mapping("generic")),
+        [_ar().contact],
+        company_name="Demo",
+        country_code="NO",
+        currency="NOK",
+        period=PERIOD,
+        tax_rows=[],
+        namespace=no["namespace"],
+        audit_file_version=no["audit_file_version"],
+    )
+    root = ET.fromstring(xml)
+    assert root.tag == f"{{{no['namespace']}}}AuditFile"
+    assert root.find("s:Header/s:AuditFileVersion", {"s": no["namespace"]}).text == "1.30"
+
+
+def test_every_template_maps_payroll() -> None:
+    for key in ("generic", "DE-SKR03", "DE-SKR04"):
+        accounts = templates.get_template(key)["accounts"]
+        assert {"payroll_cost", "payroll_liability"} <= set(accounts)
