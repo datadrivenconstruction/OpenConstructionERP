@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "音響報告書",
+        "contamination": "地盤汚染報告書",
+        "daylight": "採光・日照報告書",
+        "drainage": "排水計画",
+        "environmental": "環境報告書",
+        "fire_proof_check": "第三者による防火安全検証",
+        "fire_safety_concept": "防火安全コンセプト",
+        "geotechnical": "地盤調査報告書",
+        "sound_insulation": "遮音性能証明書",
+        "structural_design": "構造設計および計算書",
+        "structural_proof_check": "第三者による構造検証",
+        "kitchen_planning": "厨房計画報告書",
+        "survey": "現場測量",
+        "thermal_energy": "断熱・省エネルギー性能証明書",
+        "traffic": "交通報告書",
+        "uxo": "不発弾調査報告書",
+        "vibration": "振動報告書"
+      }
+    },
+    "cde_state": {
+      "archived": "アーカイブ済み",
+      "published": "公開済み",
+      "shared": "共有済み",
+      "wip": "作業中"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "数量内訳書",
+        "cvr": "原価・価値照合",
+        "design_management": "設計管理",
+        "field_time": "現場工数",
+        "fieldreports": "現場報告書",
+        "finance": "財務",
+        "inspections": "検査",
+        "procurement": "調達",
+        "schedule": "工程表"
+      },
+      "phase": {
+        "approval": "承認",
+        "award": "発注",
+        "brief": "要件定義",
+        "concept": "基本構想",
+        "construction": "施工",
+        "design": "設計",
+        "detail": "実施設計",
+        "development": "開発",
+        "execution": "施工実行",
+        "handover": "引き渡し",
+        "operation": "運用",
+        "strategy": "戦略",
+        "tender": "入札"
+      }
+    },
+    "errors": {
+      "answer_required": "回答が必要です。",
+      "approval_point_locked": "承認ポイントは審査中または決定済みのため、変更できません。",
+      "approval_point_not_found": "承認ポイントが見つかりません。",
+      "approval_point_not_rejected": "差し戻された承認ポイントのみ再開できます。",
+      "binding_requires_change_request": "設計基準文書は拘束力があるため、変更には変更依頼が必要です。",
+      "catalogue_retired": "このカタログは廃止されており、固定できません。",
+      "code_duplicate": "このコードはプロジェクト内ですでに使用されています。",
+      "comment_not_found": "コメントが見つかりません。",
+      "comment_text_required": "コメントには本文が必要です。",
+      "concurrent_issue": "リリースが同時に変更されました。もう一度お試しください。",
+      "condition_needs_owner_and_due_date": "確定した条件には担当者と期限が必要です。",
+      "condition_not_found": "条件が見つかりません。",
+      "condition_not_proposed": "この条件はすでに確定または却下されています。",
+      "condition_owner_not_member": "条件の担当者は、このプロジェクトのメンバーである必要があります。",
+      "contact_not_found": "連絡先が見つかりません。",
+      "container_not_found": "このプロジェクトに文書コンテナが見つかりません。",
+      "deliverable_not_found": "設計工程の行が見つかりません。",
+      "dist_rule_not_found": "配布ルールが見つかりません。",
+      "distribution_list_not_found": "このプロジェクトに配布リストが見つかりません。",
+      "drawing_not_found": "図面が見つかりません。",
+      "duplicate_issue": "一部の改訂版はすでにこれらの受領者に送付されています。再発行には理由が必要です。",
+      "field_required": "必須項目が入力されていません。",
+      "forbidden": "この操作を行う権限がありません。",
+      "frame_document_missing": "このプロジェクトのガバナンスモデルに設計基準文書がありません。",
+      "frame_register_unknown": "この台帳は設計基準文書として書き込めません。",
+      "governance_gate_not_found": "このゲートはプロジェクトのフェーズモデルに含まれていません。",
+      "hint_override_needs_rationale": "カタログの推奨事項を変更するには理由が必要です。",
+      "invalid_id": "無効なIDです。",
+      "invalid_transition": "現在この状態変更は許可されていません。",
+      "manage_required": "この項目を変更するには、設計管理の権限が必要です。",
+      "model_exists": "フェーズモデルはすでに固定されています。",
+      "no_approval_route": "このプロジェクトには、設計承認ポイント用の有効な承認ルートがありません。",
+      "not_area_owner": "設計基準文書を書き込めるのは、ガバナンス領域の担当者または代理人、もしくはガバナンス管理者のみです。",
+      "not_required_needs_rationale": "報告書を不要とするには理由が必要です。",
+      "number_reserved": "この番号は削除された図面に割り当てられていたため、再利用されることはありません。",
+      "number_taken": "この番号はプロジェクト内で使用されている、または使用されていました。",
+      "numbering_case_invalid": "番号は大文字で入力してください。",
+      "numbering_chars_invalid": "番号に採番規則で許可されていない文字が含まれています。",
+      "numbering_code_not_in_list": "フィールドの値が採番規則のコード一覧にありません。",
+      "numbering_empty": "番号が空です。",
+      "numbering_field_invalid": "番号のフィールドが書式に適合していません。",
+      "numbering_field_missing": "番号の必須フィールドがありません。",
+      "numbering_invalid": "番号がプロジェクトの採番規則に適合していません。",
+      "numbering_metadata_in_number": "ステータスと改訂はメタデータのため、番号に含めないでください。",
+      "numbering_parts_mismatch": "番号と保存された構成要素が一致しません。",
+      "numbering_structure_invalid": "番号に採番規則のフィールドがありません。",
+      "numbering_too_long": "番号が採番規則で許される長さを超えています。",
+      "option_kind_unknown": "そのような選択肢一覧はありません。",
+      "originator_duplicate": "別の有効な設計役割がこの作成者コードを使用しています。",
+      "originator_required": "分野別設計者には作成者コードが必要です。",
+      "originator_unknown": "この作成者は有効な設計役割に属していません。",
+      "party_kind_invalid": "不明な関係者区分です。",
+      "permit_empty": "許認可パッケージに項目がありません。",
+      "permit_incomplete": "必要な項目が不足しているか、まだ共有されていません。",
+      "permit_item_kind_invalid": "不明な項目区分です。",
+      "permit_item_missing": "必要な項目がありません。",
+      "permit_item_not_found": "パッケージ項目が見つかりません。",
+      "permit_link_frozen": "提出後は、紐づく審査サイクルまたは提出を差し替えることはできません。",
+      "permit_locked": "パッケージは提出済みのため、内容は固定されています。",
+      "permit_not_approved": "条件は承認済みのパッケージにのみ記録できます。",
+      "permit_not_found": "許認可パッケージが見つかりません。",
+      "permit_profile_unknown": "不明な許認可プロファイルです。",
+      "permit_state_read_from_cycle": "提出後の状態は当局の審査サイクルに従います。",
+      "phase_required": "これが属するフェーズを選択してください。",
+      "phase_unknown": "このフェーズはプロジェクトのフェーズモデルにありません。",
+      "planned_count_reduction_needs_rationale": "計画数量を減らすには理由が必要です。",
+      "project_not_found": "プロジェクトが見つかりません。",
+      "rationale_required": "理由が必要です。",
+      "recipient_exactly_one": "配布リストまたは設計役割のいずれか一つを選択してください。",
+      "release_contains_wip": "リリースには作業中の成果物を含めることはできません。",
+      "release_empty": "リリースに改訂版がありません。",
+      "release_four_eyes": "リリースを準備した本人は、そのリリースを発行できません。",
+      "release_needs_published": "施工向けの発行には、公開済みの改訂版が必要です。",
+      "release_no_recipients": "配布マトリクスのどの受領者もこのリリースに該当しません。",
+      "release_not_approved": "承認ルート上でまだリリースが承認されていません。",
+      "release_not_draft": "変更できるのは下書きのリリースのみです。",
+      "release_not_found": "リリースが見つかりません。",
+      "release_not_pending": "このリリースは承認待ちではありません。",
+      "release_not_ready": "発行するには、リリースが準備完了状態である必要があります。",
+      "release_recipient_empty": "配布マトリクスの受領者に送付先の担当者がいません。先にリストまたは役割を完成させてください。",
+      "report_author_required": "必須の独立検証がある報告書には、作成者の役割が必要です。",
+      "report_checker_required": "独立検証には検証者の役割が必要です。",
+      "report_checker_same_party": "検証者は作成者とは別の関係者に所属している必要があります。",
+      "report_external_check_not_approved": "外部検証のサイクルがまだ承認されていません。",
+      "report_fields_frozen": "提出後は、作成者、検証者、外部検証、審査サイクルを変更できません。",
+      "report_kind_unknown": "不明な報告書区分です。",
+      "report_not_found": "報告書が見つかりません。",
+      "review_comments_open": "未解決のコメントを先に閉じてください。",
+      "review_cycle_not_found": "このプロジェクトに審査サイクルが見つかりません。",
+      "review_not_found": "審査が見つかりません。",
+      "review_not_open": "この審査はコメントを受け付けていません。",
+      "review_outcome_invalid": "不明な審査結果です。",
+      "revision_not_current": "リリースに含められるのは、図面の現行改訂版のみです。",
+      "revision_not_found": "このプロジェクトに改訂版が見つかりません。",
+      "role_in_use": "この役割はまだ図面で使用されています。",
+      "role_not_active": "この役割はプロジェクトから解任されています。",
+      "role_not_found": "設計役割が見つかりません。",
+      "route_start_failed": "承認ルートを開始できませんでした。",
+      "scheme_has_no_form_list": "固定された採番規則には文書様式の一覧がありません。",
+      "setup_exists": "このプロジェクトではすでに設計管理が設定されています。",
+      "setup_missing": "このプロジェクトではまだ設計管理が設定されていません。",
+      "severity_invalid": "不明な重大度です。",
+      "source_not_installed": "これらのレコードを保持するモジュールがインストールされていません。",
+      "submission_not_found": "このプロジェクトに当局への提出が見つかりません。",
+      "unknown_catalogue": "カタログが見つかりません。",
+      "use_conclude": "結果を記録するには「終了」を使用してください。",
+      "use_issue": "リリースを送付するには「発行」を使用してください。",
+      "waiver_needs_rationale": "設計工程の行を免除するには理由が必要です。",
+      "wbs_code_duplicate": "このWBSコードはプロジェクト内ですでに使用されています。",
+      "wbs_code_not_under_parent": "下位コードは上位コードで始まる必要があります。",
+      "wbs_code_required": "WBSコードが必要です。",
+      "wbs_invalid": "作業分解構成がプロジェクトのWBS規則に違反しています。",
+      "wbs_move_cycle": "ノードを自身の下位ノードの配下に移動することはできません。",
+      "wbs_node_closed": "このWBSノードは新規の参照を受け付けていません。",
+      "wbs_node_not_found": "WBSノードが見つかりません。",
+      "wbs_node_referenced": "このノードまたはその下位ノードが参照されています。代わりに閉じてください。",
+      "wbs_parent_not_found": "上位のWBSノードが見つかりません。"
+    },
+    "evidence": {
+      "deliverables": "フェーズの設計工程の行が承認済み",
+      "major_comments": "未解決の重大な審査コメントがないこと",
+      "no_host_area": "設計の準備状況は不明です。ガバナンスモデルに設計の担当領域が指定されていません",
+      "no_host_document": "設計の準備状況は不明です。プロジェクトにはまだ設計基準文書がありません。設計台帳を作成してください（CDEでファイルとして保存）",
+      "no_phase": "設計の準備状況は不明です。このゲートが完了させるフェーズがありません",
+      "reports": "フェーズに必要な報告書が承認済み"
+    },
+    "export": {
+      "col_check": "独立検証",
+      "col_code": "コード",
+      "col_copies": "紙の部数",
+      "col_discipline": "分野",
+      "col_disciplines": "分野",
+      "col_format": "形式",
+      "col_forms": "様式",
+      "col_kind": "区分",
+      "col_last_issue": "最終発行",
+      "col_min_status": "最低ステータス",
+      "col_number": "番号",
+      "col_phase": "フェーズ",
+      "col_phases": "フェーズ",
+      "col_pinned_revision": "固定された改訂版",
+      "col_present": "有無",
+      "col_purpose": "目的",
+      "col_recipient": "受領者",
+      "col_recipients": "受領者",
+      "col_required": "必須",
+      "col_revision": "改訂",
+      "col_state": "状態",
+      "col_status": "ステータス",
+      "col_title": "タイトル",
+      "empty": "一覧に表示する項目がありません。",
+      "project": "プロジェクト",
+      "title_matrix": "配布マトリクス",
+      "title_permit": "許認可パッケージ",
+      "title_register": "図面台帳",
+      "title_reports": "報告書および証明書",
+      "yes": "はい"
+    },
+    "independent_check": {
+      "none": "なし",
+      "optional": "任意",
+      "required_by_rule": "規則により必須"
+    },
+    "permit_item": {
+      "drawing": "図面",
+      "form": "様式",
+      "report": "報告書"
+    },
+    "purpose": {
+      "for_approval": "承認用",
+      "for_construction": "施工用",
+      "for_information": "参考用",
+      "for_record": "記録用",
+      "for_review": "審査用",
+      "for_tender": "入札用"
+    },
+    "report_state": {
+      "accepted": "承認済み",
+      "commissioned": "発注済み",
+      "in_progress": "作成中",
+      "not_required": "不要",
+      "rejected": "却下",
+      "remarks": "備考",
+      "required": "必要",
+      "submitted": "提出済み",
+      "under_check": "検証中"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "承認ポイント {code} は、権限を持つ承認者による決定がされていません。",
+        "suggestion": "承認ルートから再度決定してください。"
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "{phase} の設計工程の行 {code} が承認されていません。",
+        "suggestion": "図面を完成させるか、理由を付けて免除してください。"
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "番号 {number} が採番規則 ({fields}) に適合していません。",
+        "suggestion": "図面の番号を振り直してください。"
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "番号 {number} が保存された構成要素 ({fields}) と一致しません。",
+        "suggestion": "コンテナのフィールドを修正してください。"
+      },
+      "drawing_originator_known": {
+        "fail": "{number} の作成者 {value} は有効な役割に属していません。",
+        "suggestion": "設計役割を追加するか、番号を修正してください。"
+      },
+      "not_required_has_rationale": {
+        "fail": "報告書 {code} に理由がありません。",
+        "suggestion": "理由を追加してください。"
+      },
+      "permit_content_current": {
+        "fail": "許認可パッケージ {code} に旧版の改訂が含まれています。",
+        "suggestion": "当局に連絡するか、再提出してください。"
+      },
+      "permit_package_complete": {
+        "fail": "許認可パッケージ {code} に必要な項目が {count} 件不足しています。",
+        "suggestion": "不足している項目を追加するか、共有してください。"
+      },
+      "release_revisions_suitable": {
+        "fail": "リリース {release} に適合しない改訂版が {count} 件あります。",
+        "suggestion": "作業中の成果物を取り除くか、先に公開してください。"
+      },
+      "report_independent_check": {
+        "fail": "報告書 {code} は、有効な独立検証なしに承認されています。",
+        "suggestion": "別の関係者の検証者を指名してください。"
+      },
+      "title_block_matches_number": {
+        "fail": "{number} の表題欄に {value} と表示されています。",
+        "suggestion": "表題欄を修正してください。"
+      },
+      "wbs_code_unique": {
+        "fail": "WBSコード {code} が複数回使用されています。",
+        "suggestion": "重複しているものを振り直してください。"
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} が参照しているWBS値 {value} に一致するノードがありません。",
+        "suggestion": "参照を修正するか、ノードを追加してください。"
+      }
+    }
+  }
+}

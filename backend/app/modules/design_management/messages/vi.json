@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Báo cáo âm học",
+        "contamination": "Báo cáo ô nhiễm đất",
+        "daylight": "Báo cáo ánh sáng ban ngày và nắng",
+        "drainage": "Chiến lược thoát nước",
+        "environmental": "Báo cáo môi trường",
+        "fire_proof_check": "Kiểm tra độc lập về an toàn phòng cháy",
+        "fire_safety_concept": "Phương án an toàn phòng cháy",
+        "geotechnical": "Báo cáo địa kỹ thuật",
+        "sound_insulation": "Chứng nhận cách âm",
+        "structural_design": "Thiết kế kết cấu và tính toán",
+        "structural_proof_check": "Kiểm tra kết cấu độc lập",
+        "kitchen_planning": "Báo cáo quy hoạch bếp",
+        "survey": "Khảo sát hiện trường",
+        "thermal_energy": "Chứng nhận hiệu suất nhiệt và năng lượng",
+        "traffic": "Báo cáo giao thông",
+        "uxo": "Đánh giá bom mìn và vật liệu nổ chưa nổ",
+        "vibration": "Báo cáo rung động"
+      }
+    },
+    "cde_state": {
+      "archived": "Đã lưu trữ",
+      "published": "Đã phát hành",
+      "shared": "Đã chia sẻ",
+      "wip": "Đang thực hiện"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Bảng khối lượng",
+        "cvr": "Đối chiếu chi phí và giá trị",
+        "design_management": "Quản lý thiết kế",
+        "field_time": "Thời gian tại công trường",
+        "fieldreports": "Nhật ký công trường",
+        "finance": "Tài chính",
+        "inspections": "Kiểm tra",
+        "procurement": "Mua sắm",
+        "schedule": "Tiến độ"
+      },
+      "phase": {
+        "approval": "Phê duyệt",
+        "award": "Trao thầu",
+        "brief": "Yêu cầu dự án",
+        "concept": "Ý tưởng",
+        "construction": "Thi công",
+        "design": "Thiết kế",
+        "detail": "Thiết kế chi tiết",
+        "development": "Phát triển",
+        "execution": "Thực hiện",
+        "handover": "Bàn giao",
+        "operation": "Vận hành",
+        "strategy": "Chiến lược",
+        "tender": "Đấu thầu"
+      }
+    },
+    "errors": {
+      "answer_required": "Cần nhập câu trả lời.",
+      "approval_point_locked": "Điểm phê duyệt đang được xem xét hoặc đã quyết định nên không thể thay đổi.",
+      "approval_point_not_found": "Không tìm thấy điểm phê duyệt.",
+      "approval_point_not_rejected": "Chỉ có thể mở lại điểm phê duyệt đã bị từ chối.",
+      "binding_requires_change_request": "Tài liệu khung thiết kế có tính ràng buộc; mọi thay đổi cần có yêu cầu thay đổi.",
+      "catalogue_retired": "Danh mục này đã ngừng sử dụng và không thể ghim.",
+      "code_duplicate": "Mã này đã được sử dụng trong dự án.",
+      "comment_not_found": "Không tìm thấy bình luận.",
+      "comment_text_required": "Bình luận cần có nội dung.",
+      "concurrent_issue": "Bản phát hành vừa được thay đổi đồng thời; vui lòng thử lại.",
+      "condition_needs_owner_and_due_date": "Điều kiện đã xác nhận cần có người phụ trách và hạn hoàn thành.",
+      "condition_not_found": "Không tìm thấy điều kiện.",
+      "condition_not_proposed": "Điều kiện này đã được xác nhận hoặc bác bỏ.",
+      "condition_owner_not_member": "Người phụ trách điều kiện phải là thành viên của dự án này.",
+      "contact_not_found": "Không tìm thấy liên hệ.",
+      "container_not_found": "Không tìm thấy thư mục tài liệu trong dự án này.",
+      "deliverable_not_found": "Không tìm thấy dòng trong lịch thiết kế.",
+      "dist_rule_not_found": "Không tìm thấy quy tắc phân phối.",
+      "distribution_list_not_found": "Không tìm thấy danh sách phân phối trong dự án này.",
+      "drawing_not_found": "Không tìm thấy bản vẽ.",
+      "duplicate_issue": "Một số bản sửa đổi đã được gửi cho các người nhận này; cần nêu lý do để phát hành lại.",
+      "field_required": "Thiếu trường bắt buộc.",
+      "forbidden": "Bạn không có quyền thực hiện thao tác này.",
+      "frame_document_missing": "Mô hình quản trị của dự án chưa có tài liệu khung thiết kế.",
+      "frame_register_unknown": "Không thể ghi sổ đăng ký này thành tài liệu khung.",
+      "governance_gate_not_found": "Cổng này không thuộc mô hình giai đoạn của dự án.",
+      "hint_override_needs_rationale": "Ghi đè gợi ý danh mục cần có lý do.",
+      "invalid_id": "Mã định danh không hợp lệ.",
+      "invalid_transition": "Không được phép chuyển trạng thái này vào lúc này.",
+      "manage_required": "Thay đổi trường này cần quyền quản lý thiết kế.",
+      "model_exists": "Đã có mô hình giai đoạn được ghim.",
+      "no_approval_route": "Dự án chưa có luồng phê duyệt đang hoạt động cho các điểm phê duyệt thiết kế.",
+      "not_area_owner": "Chỉ chủ sở hữu, người thay thế của khu vực quản trị hoặc quản lý quản trị mới được ghi tài liệu khung của khu vực đó.",
+      "not_required_needs_rationale": "Đánh dấu báo cáo không bắt buộc cần có lý do.",
+      "number_reserved": "Số này thuộc về một bản vẽ đã xóa và sẽ không bao giờ được tái sử dụng.",
+      "number_taken": "Số này đã hoặc đang được dùng trong dự án.",
+      "numbering_case_invalid": "Số phải viết hoa.",
+      "numbering_chars_invalid": "Số chứa ký tự mà quy tắc đánh số không cho phép.",
+      "numbering_code_not_in_list": "Giá trị trường không có trong danh sách mã của quy tắc đánh số.",
+      "numbering_empty": "Số bị để trống.",
+      "numbering_field_invalid": "Một trường của số không đúng định dạng.",
+      "numbering_field_missing": "Thiếu một trường bắt buộc của số.",
+      "numbering_invalid": "Số không phù hợp với quy tắc đánh số của dự án.",
+      "numbering_metadata_in_number": "Trạng thái và bản sửa đổi là siêu dữ liệu và không được nằm trong số.",
+      "numbering_parts_mismatch": "Số và các phần đã lưu không khớp nhau.",
+      "numbering_structure_invalid": "Số không có đủ các trường theo quy tắc đánh số.",
+      "numbering_too_long": "Số dài hơn mức quy tắc cho phép.",
+      "option_kind_unknown": "Không có danh sách lựa chọn này.",
+      "originator_duplicate": "Một vai trò thiết kế đang hoạt động khác đã dùng mã người lập này.",
+      "originator_required": "Người thiết kế bộ môn cần có mã người lập.",
+      "originator_unknown": "Người lập không thuộc vai trò thiết kế đang hoạt động nào.",
+      "party_kind_invalid": "Loại bên liên quan không xác định.",
+      "permit_empty": "Hồ sơ xin phép không có hạng mục nào.",
+      "permit_incomplete": "Thiếu hạng mục bắt buộc hoặc chưa được chia sẻ.",
+      "permit_item_kind_invalid": "Loại hạng mục không xác định.",
+      "permit_item_missing": "Thiếu hạng mục bắt buộc.",
+      "permit_item_not_found": "Không tìm thấy hạng mục trong hồ sơ.",
+      "permit_link_frozen": "Sau khi nộp, chu kỳ xem xét hoặc hồ sơ nộp liên kết không thể thay thế.",
+      "permit_locked": "Hồ sơ đã nộp và nội dung đã được khóa.",
+      "permit_not_approved": "Điều kiện chỉ được ghi nhận trên hồ sơ đã phê duyệt.",
+      "permit_not_found": "Không tìm thấy hồ sơ xin phép.",
+      "permit_profile_unknown": "Hồ sơ xin phép không xác định.",
+      "permit_state_read_from_cycle": "Sau khi nộp, trạng thái theo chu kỳ xem xét của cơ quan có thẩm quyền.",
+      "phase_required": "Chọn giai đoạn mà mục này thuộc về.",
+      "phase_unknown": "Giai đoạn này không có trong mô hình giai đoạn của dự án.",
+      "planned_count_reduction_needs_rationale": "Giảm số lượng kế hoạch cần có lý do.",
+      "project_not_found": "Không tìm thấy dự án.",
+      "rationale_required": "Cần nêu lý do.",
+      "recipient_exactly_one": "Chọn một trong hai: danh sách phân phối hoặc vai trò thiết kế.",
+      "release_contains_wip": "Bản phát hành không được bao gồm công việc đang thực hiện.",
+      "release_empty": "Bản phát hành không có bản sửa đổi nào.",
+      "release_four_eyes": "Người chuẩn bị bản phát hành không được tự phát hành.",
+      "release_needs_published": "Phát hành cho thi công cần có các bản sửa đổi đã phát hành.",
+      "release_no_recipients": "Không có người nhận nào trong ma trận phân phối phù hợp với bản phát hành này.",
+      "release_not_approved": "Bản phát hành chưa được phê duyệt trên luồng phê duyệt của nó.",
+      "release_not_draft": "Chỉ có thể thay đổi bản phát hành ở trạng thái nháp.",
+      "release_not_found": "Không tìm thấy bản phát hành.",
+      "release_not_pending": "Bản phát hành không đang chờ phê duyệt.",
+      "release_not_ready": "Bản phát hành phải sẵn sàng trước khi được phát hành.",
+      "release_recipient_empty": "Một người nhận trong ma trận phân phối không có người cụ thể để gửi. Hãy hoàn thiện danh sách hoặc vai trò trước.",
+      "report_author_required": "Báo cáo có yêu cầu kiểm tra độc lập cần có vai trò tác giả.",
+      "report_checker_required": "Kiểm tra độc lập cần có vai trò người kiểm tra.",
+      "report_checker_same_party": "Người kiểm tra phải thuộc bên khác với tác giả.",
+      "report_external_check_not_approved": "Chu kỳ kiểm tra bên ngoài chưa được phê duyệt.",
+      "report_fields_frozen": "Sau khi nộp, không thể thay đổi tác giả, người kiểm tra, kiểm tra bên ngoài và chu kỳ xem xét.",
+      "report_kind_unknown": "Loại báo cáo không xác định.",
+      "report_not_found": "Không tìm thấy báo cáo.",
+      "review_comments_open": "Cần đóng các bình luận đang mở trước.",
+      "review_cycle_not_found": "Không tìm thấy chu kỳ xem xét trong dự án này.",
+      "review_not_found": "Không tìm thấy đợt xem xét.",
+      "review_not_open": "Đợt xem xét đã đóng để nhận bình luận.",
+      "review_outcome_invalid": "Kết quả xem xét không xác định.",
+      "revision_not_current": "Bản phát hành chỉ có thể chứa bản sửa đổi hiện hành của một bản vẽ.",
+      "revision_not_found": "Không tìm thấy bản sửa đổi trong dự án này.",
+      "role_in_use": "Vai trò này vẫn đang được các bản vẽ sử dụng.",
+      "role_not_active": "Vai trò đã được rút khỏi dự án.",
+      "role_not_found": "Không tìm thấy vai trò thiết kế.",
+      "route_start_failed": "Không thể khởi động luồng phê duyệt.",
+      "scheme_has_no_form_list": "Quy tắc đánh số được ghim không có danh sách biểu mẫu tài liệu.",
+      "setup_exists": "Quản lý thiết kế đã được thiết lập cho dự án này.",
+      "setup_missing": "Quản lý thiết kế chưa được thiết lập cho dự án này.",
+      "severity_invalid": "Mức độ nghiêm trọng không xác định.",
+      "source_not_installed": "Mô-đun lưu các bản ghi này chưa được cài đặt.",
+      "submission_not_found": "Không tìm thấy hồ sơ nộp cho cơ quan có thẩm quyền trong dự án này.",
+      "unknown_catalogue": "Không tìm thấy danh mục.",
+      "use_conclude": "Dùng conclude để ghi nhận kết quả.",
+      "use_issue": "Dùng issue để gửi bản phát hành.",
+      "waiver_needs_rationale": "Miễn một dòng trong lịch thiết kế cần có lý do.",
+      "wbs_code_duplicate": "Mã WBS này đã được sử dụng trong dự án.",
+      "wbs_code_not_under_parent": "Mã của hạng mục con phải bắt đầu bằng mã của hạng mục cha.",
+      "wbs_code_required": "Cần có mã WBS.",
+      "wbs_invalid": "Cấu trúc phân rã công việc vi phạm các quy tắc WBS của dự án.",
+      "wbs_move_cycle": "Một nút không thể được chuyển xuống dưới nút con của chính nó.",
+      "wbs_node_closed": "Nút WBS này đã đóng với các tham chiếu mới.",
+      "wbs_node_not_found": "Không tìm thấy nút WBS.",
+      "wbs_node_referenced": "Nút hoặc một trong các nút con đang được tham chiếu; hãy đóng nút thay thế.",
+      "wbs_parent_not_found": "Không tìm thấy nút WBS cha."
+    },
+    "evidence": {
+      "deliverables": "Các dòng lịch thiết kế của giai đoạn đã được chấp nhận",
+      "major_comments": "Không có bình luận xem xét quan trọng nào đang mở",
+      "no_host_area": "Chưa rõ mức sẵn sàng thiết kế: mô hình quản trị không chỉ định khu vực cho thiết kế",
+      "no_host_document": "Chưa rõ mức sẵn sàng thiết kế: dự án chưa có tài liệu khung thiết kế. Hãy tạo sổ đăng ký thiết kế (Tệp trong CDE) để lập tài liệu này.",
+      "no_phase": "Chưa rõ mức sẵn sàng thiết kế: cổng này không đóng giai đoạn nào",
+      "reports": "Các báo cáo bắt buộc của giai đoạn đã được chấp nhận"
+    },
+    "export": {
+      "col_check": "Kiểm tra độc lập",
+      "col_code": "Mã",
+      "col_copies": "Số bản in",
+      "col_discipline": "Bộ môn",
+      "col_disciplines": "Các bộ môn",
+      "col_format": "Khổ",
+      "col_forms": "Biểu mẫu",
+      "col_kind": "Loại",
+      "col_last_issue": "Lần phát hành gần nhất",
+      "col_min_status": "Trạng thái tối thiểu",
+      "col_number": "Số hiệu",
+      "col_phase": "Giai đoạn",
+      "col_phases": "Các giai đoạn",
+      "col_pinned_revision": "Bản sửa đổi được ghim",
+      "col_present": "Có",
+      "col_purpose": "Mục đích",
+      "col_recipient": "Người nhận",
+      "col_recipients": "Những người nhận",
+      "col_required": "Bắt buộc",
+      "col_revision": "Bản sửa đổi",
+      "col_state": "Trạng thái",
+      "col_status": "Tình trạng",
+      "col_title": "Tên",
+      "empty": "Không có gì để liệt kê.",
+      "project": "Dự án",
+      "title_matrix": "Ma trận phân phối",
+      "title_permit": "Hồ sơ xin phép",
+      "title_register": "Sổ đăng ký bản vẽ",
+      "title_reports": "Báo cáo và chứng nhận",
+      "yes": "Có"
+    },
+    "independent_check": {
+      "none": "Không có",
+      "optional": "Tùy chọn",
+      "required_by_rule": "Bắt buộc theo quy tắc"
+    },
+    "permit_item": {
+      "drawing": "Bản vẽ",
+      "form": "Biểu mẫu",
+      "report": "Báo cáo"
+    },
+    "purpose": {
+      "for_approval": "Để phê duyệt",
+      "for_construction": "Để thi công",
+      "for_information": "Để biết",
+      "for_record": "Để lưu hồ sơ",
+      "for_review": "Để xem xét",
+      "for_tender": "Để đấu thầu"
+    },
+    "report_state": {
+      "accepted": "Đã chấp nhận",
+      "commissioned": "Đã đưa vào vận hành",
+      "in_progress": "Đang thực hiện",
+      "not_required": "Không bắt buộc",
+      "rejected": "Đã từ chối",
+      "remarks": "Ghi chú",
+      "required": "Bắt buộc",
+      "submitted": "Đã nộp",
+      "under_check": "Đang kiểm tra"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Điểm phê duyệt {code} chưa được quyết định bởi người phê duyệt có thẩm quyền.",
+        "suggestion": "Quyết định lại thông qua luồng phê duyệt của điểm này."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Dòng lịch thiết kế {code} của {phase} chưa được chấp nhận.",
+        "suggestion": "Hoàn thành bản vẽ hoặc miễn với lý do."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Số {number} không phù hợp với quy tắc đánh số ({fields}).",
+        "suggestion": "Đánh số lại bản vẽ."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Số {number} không khớp với các phần đã lưu ({fields}).",
+        "suggestion": "Sửa các trường của thư mục tài liệu."
+      },
+      "drawing_originator_known": {
+        "fail": "Người lập {value} của {number} không thuộc vai trò đang hoạt động nào.",
+        "suggestion": "Thêm vai trò thiết kế hoặc sửa số."
+      },
+      "not_required_has_rationale": {
+        "fail": "Báo cáo {code} chưa có lý do.",
+        "suggestion": "Thêm lý do."
+      },
+      "permit_content_current": {
+        "fail": "Hồ sơ xin phép {code} có chứa các bản sửa đổi đã bị thay thế.",
+        "suggestion": "Thông báo cho cơ quan có thẩm quyền hoặc nộp lại."
+      },
+      "permit_package_complete": {
+        "fail": "Hồ sơ xin phép {code} còn thiếu {count} hạng mục bắt buộc.",
+        "suggestion": "Thêm hoặc chia sẻ các hạng mục còn thiếu."
+      },
+      "release_revisions_suitable": {
+        "fail": "Bản phát hành {release} có {count} bản sửa đổi không phù hợp.",
+        "suggestion": "Loại bỏ công việc đang thực hiện hoặc phát hành trước."
+      },
+      "report_independent_check": {
+        "fail": "Báo cáo {code} đã được chấp nhận khi chưa có kiểm tra độc lập hợp lệ.",
+        "suggestion": "Chỉ định người kiểm tra thuộc bên khác."
+      },
+      "title_block_matches_number": {
+        "fail": "Khung tên của {number} hiển thị {value}.",
+        "suggestion": "Sửa khung tên."
+      },
+      "wbs_code_unique": {
+        "fail": "Mã WBS {code} được dùng nhiều hơn một lần.",
+        "suggestion": "Đánh số lại các mã trùng."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} tham chiếu đến giá trị WBS {value}, không khớp với nút nào.",
+        "suggestion": "Sửa tham chiếu hoặc thêm nút."
+      }
+    }
+  }
+}

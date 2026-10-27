@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akusztikai jelentés",
+        "contamination": "Talajszennyezési jelentés",
+        "daylight": "Nappali fény és napsütés jelentés",
+        "drainage": "Vízelvezetési stratégia",
+        "environmental": "Környezeti jelentés",
+        "fire_proof_check": "Független tűzvédelmi ellenőrzés",
+        "fire_safety_concept": "Tűzvédelmi koncepció",
+        "geotechnical": "Geotechnikai jelentés",
+        "sound_insulation": "Hangszigetelési igazolás",
+        "structural_design": "Szerkezeti tervezés és számítások",
+        "structural_proof_check": "Független szerkezeti ellenőrzés",
+        "kitchen_planning": "Konyhatervezési jelentés",
+        "survey": "Helyszíni felmérés",
+        "thermal_energy": "Hőtechnikai és energetikai teljesítményigazolás",
+        "traffic": "Forgalmi jelentés",
+        "uxo": "Fel nem robbant lőszer felmérés",
+        "vibration": "Rezgési jelentés"
+      }
+    },
+    "cde_state": {
+      "archived": "Archivált",
+      "published": "Közzétett",
+      "shared": "Megosztott",
+      "wip": "Folyamatban"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Költségvetés",
+        "cvr": "Költség-érték egyeztetés",
+        "design_management": "Tervezésmenedzsment",
+        "field_time": "Helyszíni idő",
+        "fieldreports": "Építési naplók",
+        "finance": "Pénzügy",
+        "inspections": "Ellenőrzések",
+        "procurement": "Beszerzés",
+        "schedule": "Ütemterv"
+      },
+      "phase": {
+        "approval": "Engedélyezés",
+        "award": "Odaítélés",
+        "brief": "Tervezési program",
+        "concept": "Koncepció",
+        "construction": "Kivitelezés",
+        "design": "Tervezés",
+        "detail": "Kiviteli tervezés",
+        "development": "Fejlesztés",
+        "execution": "Végrehajtás",
+        "handover": "Átadás",
+        "operation": "Üzemeltetés",
+        "strategy": "Stratégia",
+        "tender": "Közbeszerzés"
+      }
+    },
+    "errors": {
+      "answer_required": "Választ kell adni.",
+      "approval_point_locked": "A jóváhagyási pont felülvizsgálat alatt van vagy már döntöttek róla, ezért nem módosítható.",
+      "approval_point_not_found": "A jóváhagyási pont nem található.",
+      "approval_point_not_rejected": "Csak az elutasított jóváhagyási pont nyitható meg újra.",
+      "binding_requires_change_request": "A tervezési keretdokumentum kötelező érvényű; a módosításhoz változtatási kérelem szükséges.",
+      "catalogue_retired": "Ez a katalógus visszavonásra került, nem rögzíthető.",
+      "code_duplicate": "Ez a kód már szerepel a projektben.",
+      "comment_not_found": "A megjegyzés nem található.",
+      "comment_text_required": "A megjegyzésnek szöveget kell tartalmaznia.",
+      "concurrent_issue": "A kiadást közben módosították; próbálja újra.",
+      "condition_needs_owner_and_due_date": "A megerősített feltételhez felelős és határidő szükséges.",
+      "condition_not_found": "A feltétel nem található.",
+      "condition_not_proposed": "Ezt a feltételt már megerősítették vagy elvetették.",
+      "condition_owner_not_member": "A feltétel felelősének a projekt tagjának kell lennie.",
+      "contact_not_found": "A kapcsolattartó nem található.",
+      "container_not_found": "A dokumentumtároló nem található ebben a projektben.",
+      "deliverable_not_found": "A tervezési ütemterv sora nem található.",
+      "dist_rule_not_found": "A terjesztési szabály nem található.",
+      "distribution_list_not_found": "A terjesztési lista nem található ebben a projektben.",
+      "drawing_not_found": "A terv nem található.",
+      "duplicate_issue": "Egyes revíziókat már elküldték ezeknek a címzetteknek; újrakiadáshoz indokot kell megadni.",
+      "field_required": "Kötelező mező hiányzik.",
+      "forbidden": "Nincs jogosultsága ehhez a művelethez.",
+      "frame_document_missing": "A projekt irányítási modelljében nincs tervezési keretdokumentum.",
+      "frame_register_unknown": "Ez a nyilvántartás nem írható keretdokumentumként.",
+      "governance_gate_not_found": "Ez a kapu nem része a projekt fázismodelljének.",
+      "hint_override_needs_rationale": "A katalógus javaslatától való eltéréshez indoklás szükséges.",
+      "invalid_id": "Érvénytelen azonosító.",
+      "invalid_transition": "Ez az állapotváltás jelenleg nem engedélyezett.",
+      "manage_required": "Ennek a mezőnek a módosításához a tervezés kezelésének jogosultsága szükséges.",
+      "model_exists": "Már van rögzített fázismodell.",
+      "no_approval_route": "Nincs aktív jóváhagyási útvonal a tervezési jóváhagyási pontokhoz ebben a projektben.",
+      "not_area_owner": "Az irányítási terület keretdokumentumát csak a terület felelőse vagy helyettese, illetve irányítási felelős írhatja.",
+      "not_required_needs_rationale": "A jelentés nem szükségesként jelöléséhez indoklás szükséges.",
+      "number_reserved": "Ez a szám egy törölt tervhez tartozott, és soha nem használják fel újra.",
+      "number_taken": "Ezt a számot már használják vagy használták a projektben.",
+      "numbering_case_invalid": "A számot nagybetűvel kell írni.",
+      "numbering_chars_invalid": "A szám olyan karaktereket tartalmaz, amelyeket a séma nem enged.",
+      "numbering_code_not_in_list": "Egy mező értéke nincs benne a séma kódlistájában.",
+      "numbering_empty": "A szám üres.",
+      "numbering_field_invalid": "A szám egy mezője nem felel meg a formátumának.",
+      "numbering_field_missing": "A szám egy kötelező mezője hiányzik.",
+      "numbering_invalid": "A szám nem felel meg a projekt számozási sémájának.",
+      "numbering_metadata_in_number": "Az állapot és a revízió metaadat, nem szerepelhet a számban.",
+      "numbering_parts_mismatch": "A szám és a tárolt részek nem egyeznek.",
+      "numbering_structure_invalid": "A szám nem tartalmazza a séma mezőit.",
+      "numbering_too_long": "A szám hosszabb, mint amennyit a séma megenged.",
+      "option_kind_unknown": "Ilyen választólista nincs.",
+      "originator_duplicate": "Egy másik aktív tervezői szerep már használja ezt a készítőkódot.",
+      "originator_required": "A szakági tervezőnek készítőkódra van szüksége.",
+      "originator_unknown": "A készítő nem tartozik aktív tervezési szerepkörhöz.",
+      "party_kind_invalid": "Ismeretlen szereplőtípus.",
+      "permit_empty": "Az engedélyezési csomag nem tartalmaz tételeket.",
+      "permit_incomplete": "Kötelező tételek hiányoznak, vagy még nincsenek megosztva.",
+      "permit_item_kind_invalid": "Ismeretlen tételtípus.",
+      "permit_item_missing": "Kötelező tétel hiányzik.",
+      "permit_item_not_found": "A csomagtétel nem található.",
+      "permit_link_frozen": "Benyújtás után a kapcsolt felülvizsgálati ciklus vagy benyújtás nem cserélhető.",
+      "permit_locked": "A csomagot benyújtották, a tartalma le van zárva.",
+      "permit_not_approved": "Feltételek csak jóváhagyott csomagon rögzíthetők.",
+      "permit_not_found": "Az engedélyezési csomag nem található.",
+      "permit_profile_unknown": "Ismeretlen engedélyezési profil.",
+      "permit_state_read_from_cycle": "Benyújtás után az állapot a hatósági felülvizsgálati ciklust követi.",
+      "phase_required": "Válassza ki, melyik fázishoz tartozik.",
+      "phase_unknown": "Ez a fázis nincs a projekt fázismodelljében.",
+      "planned_count_reduction_needs_rationale": "A tervezett darabszám csökkentéséhez indoklás szükséges.",
+      "project_not_found": "A projekt nem található.",
+      "rationale_required": "Indoklás szükséges.",
+      "recipient_exactly_one": "Válasszon terjesztési listát vagy tervezési szerepkört.",
+      "release_contains_wip": "A kiadás nem tartalmazhat folyamatban lévő munkát.",
+      "release_empty": "A kiadás nem tartalmaz revíziókat.",
+      "release_four_eyes": "A kiadást előkészítő személy nem adhatja ki.",
+      "release_needs_published": "A kivitelezésre szóló kiadáshoz közzétett revíziók szükségesek.",
+      "release_no_recipients": "A terjesztési mátrixban nincs olyan címzett, amely megfelelne ennek a kiadásnak.",
+      "release_not_approved": "A kiadást még nem hagyták jóvá a jóváhagyási útvonalán.",
+      "release_not_draft": "Csak tervezet állapotú kiadás módosítható.",
+      "release_not_found": "A kiadás nem található.",
+      "release_not_pending": "A kiadás nem vár jóváhagyásra.",
+      "release_not_ready": "A kiadásnak készen kell állnia, mielőtt kiadják.",
+      "release_recipient_empty": "A terjesztési mátrix egyik címzettjéhez nincs küldhető személy. Előbb a listát vagy a szerepkört kell kitölteni.",
+      "report_author_required": "A kötelező független ellenőrzéssel rendelkező jelentéshez szerzői szerepkör szükséges.",
+      "report_checker_required": "A független ellenőrzéshez ellenőri szerepkör szükséges.",
+      "report_checker_same_party": "Az ellenőrnek a szerzőtől eltérő szereplőhöz kell tartoznia.",
+      "report_external_check_not_approved": "A külső ellenőrzési ciklus még nincs jóváhagyva.",
+      "report_fields_frozen": "A szerző, az ellenőr, a külső ellenőrzés és a felülvizsgálati ciklus benyújtás után nem módosítható.",
+      "report_kind_unknown": "Ismeretlen jelentéstípus.",
+      "report_not_found": "A jelentés nem található.",
+      "review_comments_open": "Előbb le kell zárni a nyitott megjegyzéseket.",
+      "review_cycle_not_found": "A felülvizsgálati ciklus nem található ebben a projektben.",
+      "review_not_found": "A felülvizsgálat nem található.",
+      "review_not_open": "A felülvizsgálat megjegyzések számára le van zárva.",
+      "review_outcome_invalid": "Ismeretlen felülvizsgálati eredmény.",
+      "revision_not_current": "Kiadás csak a terv aktuális revízióját tartalmazhatja.",
+      "revision_not_found": "A revízió nem található ebben a projektben.",
+      "role_in_use": "A szerepkört a tervek még használják.",
+      "role_not_active": "A szerepkört felmentették a projektből.",
+      "role_not_found": "A tervezési szerepkör nem található.",
+      "route_start_failed": "A jóváhagyási útvonalat nem sikerült elindítani.",
+      "scheme_has_no_form_list": "A rögzített számozási sémához nincs dokumentumtípus-lista.",
+      "setup_exists": "A tervezésmenedzsment már be van állítva ehhez a projekthez.",
+      "setup_missing": "A tervezésmenedzsment ehhez a projekthez még nincs beállítva.",
+      "severity_invalid": "Ismeretlen súlyosság.",
+      "source_not_installed": "Az ezeket a rekordokat tartalmazó modul nincs telepítve.",
+      "submission_not_found": "A hatósági benyújtás nem található ebben a projektben.",
+      "unknown_catalogue": "A katalógus nem található.",
+      "use_conclude": "Az eredmény rögzítéséhez használja a lezárást (conclude).",
+      "use_issue": "A kiadáshoz használja a kiadást (issue).",
+      "waiver_needs_rationale": "A tervezési ütemterv egy sorának elhagyásához indoklás szükséges.",
+      "wbs_code_duplicate": "Ez a WBS-kód már szerepel a projektben.",
+      "wbs_code_not_under_parent": "Az alárendelt kódnak a szülő kódjával kell kezdődnie.",
+      "wbs_code_required": "WBS-kód szükséges.",
+      "wbs_invalid": "A munkabontási struktúra megsérti a projekt WBS-szabályait.",
+      "wbs_move_cycle": "Egy csomópont nem helyezhető a saját leszármazottja alá.",
+      "wbs_node_closed": "Ez a WBS-csomópont új hivatkozásokra le van zárva.",
+      "wbs_node_not_found": "A WBS-csomópont nem található.",
+      "wbs_node_referenced": "A csomópontra vagy egyik alárendeltjére hivatkoznak; helyette zárja le.",
+      "wbs_parent_not_found": "A szülő WBS-csomópont nem található."
+    },
+    "evidence": {
+      "deliverables": "A fázis tervezési ütemterv-sorai elfogadva",
+      "major_comments": "Nincs nyitott jelentős felülvizsgálati megjegyzés",
+      "no_host_area": "A tervezési érettség ismeretlen: az irányítási modell nem nevez meg területet a tervezéshez",
+      "no_host_document": "A tervezési érettség ismeretlen: a projektnek még nincs tervezési keretdokumentuma. A létrehozásához készítsen tervezési nyilvántartást (Fájl a CDE-ben).",
+      "no_phase": "A tervezési érettség ismeretlen: ez a kapu nem zár le fázist",
+      "reports": "A fázis előírt jelentései elfogadva"
+    },
+    "export": {
+      "col_check": "Független ellenőrzés",
+      "col_code": "Kód",
+      "col_copies": "Papíralapú példányok",
+      "col_discipline": "Szakág",
+      "col_disciplines": "Szakágak",
+      "col_format": "Formátum",
+      "col_forms": "Űrlapok",
+      "col_kind": "Típus",
+      "col_last_issue": "Utolsó kiadás",
+      "col_min_status": "Minimális állapot",
+      "col_number": "Szám",
+      "col_phase": "Fázis",
+      "col_phases": "Fázisok",
+      "col_pinned_revision": "Rögzített revízió",
+      "col_present": "Megvan",
+      "col_purpose": "Cél",
+      "col_recipient": "Címzett",
+      "col_recipients": "Címzettek",
+      "col_required": "Szükséges",
+      "col_revision": "Revízió",
+      "col_state": "Állapot",
+      "col_status": "Státusz",
+      "col_title": "Cím",
+      "empty": "Nincs listázandó elem.",
+      "project": "Projekt",
+      "title_matrix": "Terjesztési mátrix",
+      "title_permit": "Engedélyezési csomag",
+      "title_register": "Tervjegyzék",
+      "title_reports": "Jelentések és igazolások",
+      "yes": "Igen"
+    },
+    "independent_check": {
+      "none": "Nincs",
+      "optional": "Opcionális",
+      "required_by_rule": "Szabály írja elő"
+    },
+    "permit_item": {
+      "drawing": "Terv",
+      "form": "Űrlap",
+      "report": "Jelentés"
+    },
+    "purpose": {
+      "for_approval": "Jóváhagyásra",
+      "for_construction": "Kivitelezésre",
+      "for_information": "Tájékoztatásul",
+      "for_record": "Nyilvántartásba",
+      "for_review": "Felülvizsgálatra",
+      "for_tender": "Közbeszerzésre"
+    },
+    "report_state": {
+      "accepted": "Elfogadva",
+      "commissioned": "Megbízva",
+      "in_progress": "Folyamatban",
+      "not_required": "Nem szükséges",
+      "rejected": "Elutasítva",
+      "remarks": "Megjegyzések",
+      "required": "Szükséges",
+      "submitted": "Benyújtva",
+      "under_check": "Ellenőrzés alatt"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "A(z) {code} jóváhagyási pontról nem jogosult jóváhagyó döntött.",
+        "suggestion": "Döntsön újra az útvonalán keresztül."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "A(z) {phase} fázis {code} tervezési ütemterv-sora nincs elfogadva.",
+        "suggestion": "Fejezze be a terveket, vagy mondjon le indoklással."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "A(z) {number} szám nem felel meg a sémának ({fields}).",
+        "suggestion": "Számozza újra a tervet."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "A(z) {number} szám nem egyezik a tárolt részeivel ({fields}).",
+        "suggestion": "Javítsa a tárolómezőket."
+      },
+      "drawing_originator_known": {
+        "fail": "A(z) {number} készítője ({value}) nem tartozik aktív szerepkörhöz.",
+        "suggestion": "Adjon hozzá tervezési szerepkört, vagy javítsa a számot."
+      },
+      "not_required_has_rationale": {
+        "fail": "A(z) {code} jelentésnek nincs indoklása.",
+        "suggestion": "Adja meg az indoklást."
+      },
+      "permit_content_current": {
+        "fail": "A(z) {code} engedélyezési csomag elavult revíziókat tartalmaz.",
+        "suggestion": "Értesítse a hatóságot, vagy nyújtsa be újra."
+      },
+      "permit_package_complete": {
+        "fail": "A(z) {code} engedélyezési csomagból {count} kötelező tétel hiányzik.",
+        "suggestion": "Adja hozzá vagy ossza meg a hiányzó tételeket."
+      },
+      "release_revisions_suitable": {
+        "fail": "A(z) {release} kiadás {count} alkalmatlan revíziót tartalmaz.",
+        "suggestion": "Távolítsa el a folyamatban lévő munkát, vagy előbb tegye közzé."
+      },
+      "report_independent_check": {
+        "fail": "A(z) {code} jelentést érvényes független ellenőrzés nélkül fogadták el.",
+        "suggestion": "Nevezzen meg egy másik szereplőhöz tartozó ellenőrt."
+      },
+      "title_block_matches_number": {
+        "fail": "A(z) {number} tervfejléce ezt mutatja: {value}.",
+        "suggestion": "Javítsa a tervfejlécet."
+      },
+      "wbs_code_unique": {
+        "fail": "A(z) {code} WBS-kód többször szerepel.",
+        "suggestion": "Számozza át az ismétlődőket."
+      },
+      "wbs_reference_resolves": {
+        "fail": "A(z) {module} a(z) {value} WBS-értékre hivatkozik, amely egyik csomóponthoz sem tartozik.",
+        "suggestion": "Javítsa a hivatkozást, vagy adja hozzá a csomópontot."
+      }
+    }
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "صوتیات کی رپورٹ",
+        "contamination": "زمینی آلودگی کی رپورٹ",
+        "daylight": "دن کی روشنی اور دھوپ کی رپورٹ",
+        "drainage": "نکاسیِ آب کی حکمتِ عملی",
+        "environmental": "ماحولیاتی رپورٹ",
+        "fire_proof_check": "آزاد آتش سے تحفظ کی جانچ",
+        "fire_safety_concept": "آتش سے حفاظت کا تصور",
+        "geotechnical": "جیوٹیکنیکل رپورٹ",
+        "sound_insulation": "آواز کی روک تھام کا ثبوت",
+        "structural_design": "ساختی ڈیزائن اور حسابات",
+        "structural_proof_check": "آزاد ساختی جانچ",
+        "kitchen_planning": "کچن کی منصوبہ بندی کی رپورٹ",
+        "survey": "موقع کا سروے",
+        "thermal_energy": "حرارتی اور توانائی کارکردگی کا ثبوت",
+        "traffic": "ٹریفک رپورٹ",
+        "uxo": "غیر پھٹے ہوئے گولہ بارود کا جائزہ",
+        "vibration": "ارتعاش کی رپورٹ"
+      }
+    },
+    "cde_state": {
+      "archived": "محفوظ شدہ (آرکائیو)",
+      "published": "شائع شدہ",
+      "shared": "شیئر شدہ",
+      "wip": "زیرِ کار"
+    },
+    "common": {
+      "ok": "ٹھیک ہے",
+      "module": {
+        "boq": "بل آف کوانٹٹیز",
+        "cvr": "لاگت و قدر کا مقابلہ",
+        "design_management": "ڈیزائن مینجمنٹ",
+        "field_time": "فیلڈ کا وقت",
+        "fieldreports": "فیلڈ رپورٹس",
+        "finance": "مالیات",
+        "inspections": "معائنے",
+        "procurement": "خریداری",
+        "schedule": "شیڈول"
+      },
+      "phase": {
+        "approval": "منظوری",
+        "award": "ٹھیکے کی تفویض",
+        "brief": "بریف",
+        "concept": "تصور",
+        "construction": "تعمیر",
+        "design": "ڈیزائن",
+        "detail": "تفصیلی ڈیزائن",
+        "development": "ترقی",
+        "execution": "عمل درآمد",
+        "handover": "حوالگی",
+        "operation": "آپریشن",
+        "strategy": "حکمتِ عملی",
+        "tender": "ٹینڈر"
+      }
+    },
+    "errors": {
+      "answer_required": "جواب درکار ہے۔",
+      "approval_point_locked": "منظوری کا نقطہ زیرِ جائزہ ہے یا فیصلہ ہو چکا ہے، اس لیے اسے تبدیل نہیں کیا جا سکتا۔",
+      "approval_point_not_found": "منظوری کا نقطہ نہیں ملا۔",
+      "approval_point_not_rejected": "صرف مسترد شدہ منظوری کا نقطہ دوبارہ کھولا جا سکتا ہے۔",
+      "binding_requires_change_request": "ڈیزائن فریم دستاویز لازمی ہے؛ تبدیلیوں کے لیے تبدیلی کی درخواست درکار ہے۔",
+      "catalogue_retired": "یہ کیٹلاگ ختم کر دیا گیا ہے اور اسے پن نہیں کیا جا سکتا۔",
+      "code_duplicate": "یہ کوڈ پروجیکٹ میں پہلے ہی استعمال ہو رہا ہے۔",
+      "comment_not_found": "تبصرہ نہیں ملا۔",
+      "comment_text_required": "تبصرے کے لیے متن درکار ہے۔",
+      "concurrent_issue": "اجرا (ریلیز) بیک وقت تبدیل ہو گیا؛ براہ کرم دوبارہ کوشش کریں۔",
+      "condition_needs_owner_and_due_date": "تصدیق شدہ شرط کے لیے ذمہ دار اور آخری تاریخ درکار ہے۔",
+      "condition_not_found": "شرط نہیں ملی۔",
+      "condition_not_proposed": "یہ شرط پہلے ہی تصدیق یا مسترد ہو چکی ہے۔",
+      "condition_owner_not_member": "شرط کا ذمہ دار اس پروجیکٹ کا رکن ہونا چاہیے۔",
+      "contact_not_found": "رابطہ نہیں ملا۔",
+      "container_not_found": "اس پروجیکٹ میں دستاویز کنٹینر نہیں ملا۔",
+      "deliverable_not_found": "ڈیزائن شیڈول کی قطار نہیں ملی۔",
+      "dist_rule_not_found": "ترسیل کا اصول نہیں ملا۔",
+      "distribution_list_not_found": "اس پروجیکٹ میں ترسیل کی فہرست نہیں ملی۔",
+      "drawing_not_found": "ڈرائنگ نہیں ملی۔",
+      "duplicate_issue": "کچھ ریویژن ان وصول کنندگان کو پہلے ہی بھیجے جا چکے ہیں؛ دوبارہ جاری کرنے کی وجہ دیں۔",
+      "field_required": "ایک لازمی فیلڈ غائب ہے۔",
+      "forbidden": "آپ کو اس عمل کی اجازت نہیں ہے۔",
+      "frame_document_missing": "پروجیکٹ کے گورننس ماڈل میں ڈیزائن فریم دستاویز موجود نہیں ہے۔",
+      "frame_register_unknown": "اس رجسٹر کو فریم دستاویز کے طور پر نہیں لکھا جا سکتا۔",
+      "governance_gate_not_found": "یہ گیٹ پروجیکٹ کے مرحلے کے ماڈل کا حصہ نہیں ہے۔",
+      "hint_override_needs_rationale": "کیٹلاگ کا اشارہ تبدیل کرنے کے لیے وجہ درکار ہے۔",
+      "invalid_id": "غلط شناخت۔",
+      "invalid_transition": "اس وقت یہ حالت کی تبدیلی جائز نہیں ہے۔",
+      "manage_required": "اس فیلڈ کو بدلنے کے لیے ڈیزائن کے انتظام کی اجازت درکار ہے۔",
+      "model_exists": "ایک مرحلہ ماڈل پہلے ہی پن کیا جا چکا ہے۔",
+      "no_approval_route": "اس پروجیکٹ میں ڈیزائن منظوری کے نقاط کے لیے کوئی فعال منظوری راستہ نہیں ہے۔",
+      "not_area_owner": "گورننس ایریا کا مالک، نائب یا گورننس مینیجر ہی اس کی فریم دستاویز لکھ سکتا ہے۔",
+      "not_required_needs_rationale": "کسی رپورٹ کو غیر ضروری نشان زد کرنے کے لیے وجہ درکار ہے۔",
+      "number_reserved": "یہ نمبر ایک حذف شدہ ڈرائنگ کا تھا اور اسے کبھی دوبارہ استعمال نہیں کیا جاتا۔",
+      "number_taken": "یہ نمبر پروجیکٹ میں استعمال ہو چکا ہے یا ہو رہا ہے۔",
+      "numbering_case_invalid": "نمبر بڑے حروف میں ہونا چاہیے۔",
+      "numbering_chars_invalid": "نمبر میں ایسے حروف ہیں جنہیں نمبرنگ کا نظام اجازت نہیں دیتا۔",
+      "numbering_code_not_in_list": "ایک فیلڈ کی قدر نظام کی کوڈ فہرست میں نہیں ہے۔",
+      "numbering_empty": "نمبر خالی ہے۔",
+      "numbering_field_invalid": "نمبر کی ایک فیلڈ اپنے فارمیٹ سے مطابقت نہیں رکھتی۔",
+      "numbering_field_missing": "نمبر کی ایک لازمی فیلڈ غائب ہے۔",
+      "numbering_invalid": "نمبر پروجیکٹ کے نمبرنگ نظام سے مطابقت نہیں رکھتا۔",
+      "numbering_metadata_in_number": "حیثیت اور ریویژن میٹا ڈیٹا ہیں اور نمبر کا حصہ نہیں ہونے چاہئیں۔",
+      "numbering_parts_mismatch": "نمبر اور محفوظ شدہ حصے آپس میں متفق نہیں ہیں۔",
+      "numbering_structure_invalid": "نمبر میں نظام کی مطلوبہ فیلڈز موجود نہیں ہیں۔",
+      "numbering_too_long": "نمبر نظام کی اجازت سے طویل ہے۔",
+      "option_kind_unknown": "ایسی اختیارات کی فہرست موجود نہیں ہے۔",
+      "originator_duplicate": "ایک اور فعال ڈیزائن کردار یہ اوریجنیٹر کوڈ پہلے ہی استعمال کر رہا ہے۔",
+      "originator_required": "ڈسپلن ڈیزائنر کو اوریجنیٹر کوڈ درکار ہے۔",
+      "originator_unknown": "یہ اوریجنیٹر کسی فعال ڈیزائن کردار سے منسلک نہیں ہے۔",
+      "party_kind_invalid": "نامعلوم فریق کی قسم۔",
+      "permit_empty": "پرمٹ پیکیج میں کوئی آئٹم نہیں ہے۔",
+      "permit_incomplete": "لازمی آئٹمز غائب ہیں یا ابھی تک شیئر نہیں کیے گئے۔",
+      "permit_item_kind_invalid": "نامعلوم آئٹم کی قسم۔",
+      "permit_item_missing": "لازمی آئٹم غائب ہے۔",
+      "permit_item_not_found": "پیکیج آئٹم نہیں ملا۔",
+      "permit_link_frozen": "جمع کرانے کے بعد منسلک ریویو سائیکل یا جمع کرانے کو تبدیل نہیں کیا جا سکتا۔",
+      "permit_locked": "پیکیج جمع ہو چکا ہے اور اس کا مواد پن کر دیا گیا ہے۔",
+      "permit_not_approved": "شرائط صرف منظور شدہ پیکیج پر درج کی جا سکتی ہیں۔",
+      "permit_not_found": "پرمٹ پیکیج نہیں ملا۔",
+      "permit_profile_unknown": "نامعلوم پرمٹ پروفائل۔",
+      "permit_state_read_from_cycle": "جمع کرانے کے بعد حیثیت متعلقہ ادارے کے ریویو سائیکل کے مطابق ہوتی ہے۔",
+      "phase_required": "وہ مرحلہ منتخب کریں جس سے یہ تعلق رکھتا ہے۔",
+      "phase_unknown": "یہ مرحلہ پروجیکٹ کے مرحلے کے ماڈل میں نہیں ہے۔",
+      "planned_count_reduction_needs_rationale": "منصوبہ بند تعداد کم کرنے کے لیے وجہ درکار ہے۔",
+      "project_not_found": "پروجیکٹ نہیں ملا۔",
+      "rationale_required": "وجہ درکار ہے۔",
+      "recipient_exactly_one": "یا تو ترسیل کی فہرست یا ڈیزائن کردار منتخب کریں۔",
+      "release_contains_wip": "اجرا میں زیرِ کار کام شامل نہیں ہو سکتا۔",
+      "release_empty": "اجرا میں کوئی ریویژن نہیں ہے۔",
+      "release_four_eyes": "جس شخص نے اجرا تیار کیا ہے وہ اسے جاری نہیں کر سکتا۔",
+      "release_needs_published": "تعمیر کے لیے جاری کرنے کو شائع شدہ ریویژنز درکار ہیں۔",
+      "release_no_recipients": "ترسیل میٹرکس میں اس اجرا سے مطابقت رکھنے والا کوئی وصول کنندہ نہیں ہے۔",
+      "release_not_approved": "اجرا ابھی اپنے منظوری راستے پر منظور نہیں ہوا۔",
+      "release_not_draft": "صرف مسودہ اجرا تبدیل کیا جا سکتا ہے۔",
+      "release_not_found": "اجرا نہیں ملا۔",
+      "release_not_pending": "اجرا منظوری کا منتظر نہیں ہے۔",
+      "release_not_ready": "جاری کرنے سے پہلے اجرا تیار ہونا چاہیے۔",
+      "release_recipient_empty": "ترسیل میٹرکس کے ایک وصول کنندہ کے لیے بھیجنے والا شخص موجود نہیں ہے۔ پہلے فہرست یا کردار مکمل کریں۔",
+      "report_author_required": "لازمی آزاد جانچ والی رپورٹ کو مصنف کے کردار کی ضرورت ہے۔",
+      "report_checker_required": "آزاد جانچ کے لیے جانچ کنندہ کا کردار درکار ہے۔",
+      "report_checker_same_party": "جانچ کنندہ مصنف سے مختلف فریق سے ہونا چاہیے۔",
+      "report_external_check_not_approved": "بیرونی جانچ کا سائیکل ابھی منظور نہیں ہوا۔",
+      "report_fields_frozen": "جمع کرانے کے بعد مصنف، جانچ کنندہ، بیرونی جانچ اور ریویو سائیکل تبدیل نہیں کیے جا سکتے۔",
+      "report_kind_unknown": "نامعلوم رپورٹ کی قسم۔",
+      "report_not_found": "رپورٹ نہیں ملی۔",
+      "review_comments_open": "پہلے کھلے تبصرے بند کرنے ہوں گے۔",
+      "review_cycle_not_found": "اس پروجیکٹ میں ریویو سائیکل نہیں ملا۔",
+      "review_not_found": "ریویو نہیں ملا۔",
+      "review_not_open": "ریویو تبصروں کے لیے بند ہے۔",
+      "review_outcome_invalid": "نامعلوم ریویو نتیجہ۔",
+      "revision_not_current": "اجرا میں صرف ڈرائنگ کا موجودہ ریویژن شامل ہو سکتا ہے۔",
+      "revision_not_found": "اس پروجیکٹ میں ریویژن نہیں ملا۔",
+      "role_in_use": "یہ کردار اب بھی ڈرائنگز میں استعمال ہو رہا ہے۔",
+      "role_not_active": "یہ کردار پروجیکٹ سے ہٹا دیا گیا ہے۔",
+      "role_not_found": "ڈیزائن کردار نہیں ملا۔",
+      "route_start_failed": "منظوری کا راستہ شروع نہیں ہو سکا۔",
+      "scheme_has_no_form_list": "پن شدہ نمبرنگ نظام میں دستاویزی فارمز کی فہرست موجود نہیں ہے۔",
+      "setup_exists": "اس پروجیکٹ کے لیے ڈیزائن مینجمنٹ پہلے ہی ترتیب دی جا چکی ہے۔",
+      "setup_missing": "اس پروجیکٹ کے لیے ڈیزائن مینجمنٹ ابھی ترتیب نہیں دی گئی۔",
+      "severity_invalid": "نامعلوم شدت۔",
+      "source_not_installed": "وہ ماڈیول جس میں یہ ریکارڈ ہیں انسٹال نہیں ہے۔",
+      "submission_not_found": "اس پروجیکٹ میں حکام کو جمع کرائی گئی دستاویز نہیں ملی۔",
+      "unknown_catalogue": "کیٹلاگ نہیں ملا۔",
+      "use_conclude": "نتیجہ درج کرنے کے لیے conclude استعمال کریں۔",
+      "use_issue": "اجرا بھیجنے کے لیے issue استعمال کریں۔",
+      "waiver_needs_rationale": "ڈیزائن شیڈول کی قطار کو چھوڑنے کے لیے وجہ درکار ہے۔",
+      "wbs_code_duplicate": "یہ WBS کوڈ پروجیکٹ میں پہلے ہی استعمال ہو رہا ہے۔",
+      "wbs_code_not_under_parent": "ذیلی کوڈ اپنے والد کے کوڈ سے شروع ہونا چاہیے۔",
+      "wbs_code_required": "WBS کوڈ درکار ہے۔",
+      "wbs_invalid": "ورک بریک ڈاؤن ڈھانچہ پروجیکٹ کے WBS قواعد کی خلاف ورزی کرتا ہے۔",
+      "wbs_move_cycle": "کوئی نوڈ اپنے ہی ذیلی نوڈ کے نیچے منتقل نہیں ہو سکتا۔",
+      "wbs_node_closed": "یہ WBS نوڈ نئے حوالوں کے لیے بند ہے۔",
+      "wbs_node_not_found": "WBS نوڈ نہیں ملا۔",
+      "wbs_node_referenced": "نوڈ یا اس کے کسی ذیلی نوڈ کا حوالہ دیا گیا ہے؛ اس کے بجائے اسے بند کریں۔",
+      "wbs_parent_not_found": "والد WBS نوڈ نہیں ملا۔"
+    },
+    "evidence": {
+      "deliverables": "مرحلے کی قبول شدہ ڈیزائن شیڈول قطاریں",
+      "major_comments": "کوئی کھلا بڑا ریویو تبصرہ نہیں",
+      "no_host_area": "ڈیزائن کی تیاری نامعلوم ہے: گورننس ماڈل میں ڈیزائن کے لیے کوئی ایریا مقرر نہیں",
+      "no_host_document": "ڈیزائن کی تیاری نامعلوم ہے: پروجیکٹ میں ابھی تک ڈیزائن فریم دستاویز نہیں ہے۔ اسے بنانے کے لیے ڈیزائن رجسٹر (CDE میں فائل) تیار کریں۔",
+      "no_phase": "ڈیزائن کی تیاری نامعلوم ہے: یہ گیٹ کسی مرحلے کو بند نہیں کرتا",
+      "reports": "مرحلے کی مطلوبہ رپورٹس قبول شدہ ہیں"
+    },
+    "export": {
+      "col_check": "آزاد جانچ",
+      "col_code": "کوڈ",
+      "col_copies": "کاغذی نقول",
+      "col_discipline": "ڈسپلن",
+      "col_disciplines": "ڈسپلنز",
+      "col_format": "فارمیٹ",
+      "col_forms": "فارمز",
+      "col_kind": "قسم",
+      "col_last_issue": "آخری اجرا",
+      "col_min_status": "کم از کم حیثیت",
+      "col_number": "نمبر",
+      "col_phase": "مرحلہ",
+      "col_phases": "مراحل",
+      "col_pinned_revision": "پن شدہ ریویژن",
+      "col_present": "موجود",
+      "col_purpose": "مقصد",
+      "col_recipient": "وصول کنندہ",
+      "col_recipients": "وصول کنندگان",
+      "col_required": "درکار",
+      "col_revision": "ریویژن",
+      "col_state": "حالت",
+      "col_status": "حیثیت",
+      "col_title": "عنوان",
+      "empty": "فہرست میں دکھانے کے لیے کچھ نہیں۔",
+      "project": "پروجیکٹ",
+      "title_matrix": "ترسیل میٹرکس",
+      "title_permit": "پرمٹ پیکیج",
+      "title_register": "ڈرائنگ رجسٹر",
+      "title_reports": "رپورٹس اور ثبوت",
+      "yes": "ہاں"
+    },
+    "independent_check": {
+      "none": "کوئی نہیں",
+      "optional": "اختیاری",
+      "required_by_rule": "اصول کے تحت لازمی"
+    },
+    "permit_item": {
+      "drawing": "ڈرائنگ",
+      "form": "فارم",
+      "report": "رپورٹ"
+    },
+    "purpose": {
+      "for_approval": "منظوری کے لیے",
+      "for_construction": "تعمیر کے لیے",
+      "for_information": "معلومات کے لیے",
+      "for_record": "ریکارڈ کے لیے",
+      "for_review": "جائزے کے لیے",
+      "for_tender": "ٹینڈر کے لیے"
+    },
+    "report_state": {
+      "accepted": "قبول شدہ",
+      "commissioned": "فعال کی گئی",
+      "in_progress": "جاری ہے",
+      "not_required": "درکار نہیں",
+      "rejected": "مسترد",
+      "remarks": "ملاحظات",
+      "required": "درکار",
+      "submitted": "جمع کرائی گئی",
+      "under_check": "جانچ کے تحت"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "منظوری کے نقطہ {code} کا فیصلہ کسی مجاز منظور کنندہ نے نہیں کیا۔",
+        "suggestion": "اسے اس کے راستے کے ذریعے دوبارہ فیصلہ کریں۔"
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "{phase} کے ڈیزائن شیڈول کی قطار {code} قبول نہیں ہوئی۔",
+        "suggestion": "ڈرائنگز مکمل کریں یا وجہ کے ساتھ چھوٹ دیں۔"
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "نمبر {number} نظام ({fields}) سے مطابقت نہیں رکھتا۔",
+        "suggestion": "ڈرائنگ کو دوبارہ نمبر دیں۔"
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "نمبر {number} محفوظ شدہ حصوں ({fields}) سے متفق نہیں ہے۔",
+        "suggestion": "کنٹینر کی فیلڈز درست کریں۔"
+      },
+      "drawing_originator_known": {
+        "fail": "{number} کا اوریجنیٹر {value} کسی فعال کردار سے منسلک نہیں ہے۔",
+        "suggestion": "ڈیزائن کردار شامل کریں یا نمبر درست کریں۔"
+      },
+      "not_required_has_rationale": {
+        "fail": "رپورٹ {code} کی کوئی وجہ درج نہیں ہے۔",
+        "suggestion": "وجہ شامل کریں۔"
+      },
+      "permit_content_current": {
+        "fail": "پرمٹ پیکیج {code} میں متروک ریویژنز شامل ہیں۔",
+        "suggestion": "حکام کو مطلع کریں یا دوبارہ جمع کرائیں۔"
+      },
+      "permit_package_complete": {
+        "fail": "پرمٹ پیکیج {code} میں {count} لازمی آئٹمز غائب ہیں۔",
+        "suggestion": "غائب آئٹمز شامل کریں یا شیئر کریں۔"
+      },
+      "release_revisions_suitable": {
+        "fail": "اجرا {release} میں {count} ناموزوں ریویژنز ہیں۔",
+        "suggestion": "زیرِ کار کام ہٹائیں یا پہلے شائع کریں۔"
+      },
+      "report_independent_check": {
+        "fail": "رپورٹ {code} کو درست آزاد جانچ کے بغیر قبول کیا گیا۔",
+        "suggestion": "کسی دوسرے فریق سے جانچ کنندہ مقرر کریں۔"
+      },
+      "title_block_matches_number": {
+        "fail": "ڈرائنگ {number} کے ٹائٹل بلاک میں {value} دکھایا گیا ہے۔",
+        "suggestion": "ٹائٹل بلاک درست کریں۔"
+      },
+      "wbs_code_unique": {
+        "fail": "WBS کوڈ {code} ایک سے زیادہ بار استعمال ہوا ہے۔",
+        "suggestion": "ڈپلیکیٹ کوڈز کو دوبارہ نمبر دیں۔"
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} میں WBS قدر {value} کا حوالہ ہے، جو کسی نوڈ سے مطابقت نہیں رکھتی۔",
+        "suggestion": "حوالہ درست کریں یا نوڈ شامل کریں۔"
+      }
+    }
+  }
+}

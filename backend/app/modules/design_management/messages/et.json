@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustikaaruanne",
+        "contamination": "Pinnase saastatuse aruanne",
+        "daylight": "Päevavalguse ja insolatsiooni aruanne",
+        "drainage": "Drenaažikontseptsioon",
+        "environmental": "Keskkonnamõju aruanne",
+        "fire_proof_check": "Sõltumatu tuleohutuse kontroll",
+        "fire_safety_concept": "Tuleohutuse kontseptsioon",
+        "geotechnical": "Geotehniline aruanne",
+        "sound_insulation": "Helaisolatsiooni tõend",
+        "structural_design": "Kandekonstruktsiooni projekt ja arvutused",
+        "structural_proof_check": "Sõltumatu kandevõime kontroll",
+        "kitchen_planning": "Köögi planeerimise aruanne",
+        "survey": "Objekti mõõdistus",
+        "thermal_energy": "Soojus- ja energiatõhususe tõend",
+        "traffic": "Liiklusaruanne",
+        "uxo": "Lõhkemata laskemoona hindamine",
+        "vibration": "Vibratsiooniaruanne"
+      }
+    },
+    "cde_state": {
+      "archived": "Arhiveeritud",
+      "published": "Avaldatud",
+      "shared": "Jagatud",
+      "wip": "Töös"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Koguste nimekiri",
+        "cvr": "Kulude ja väärtuse vastavus",
+        "design_management": "Projekteerimise juhtimine",
+        "field_time": "Objekti tööaeg",
+        "fieldreports": "Objektiaruanded",
+        "finance": "Finantsid",
+        "inspections": "Inspektsioonid",
+        "procurement": "Hanked",
+        "schedule": "Ajakava"
+      },
+      "phase": {
+        "approval": "Kinnitamine",
+        "award": "Hankeleping",
+        "brief": "Lähteülesanne",
+        "concept": "Kontseptsioon",
+        "construction": "Ehitus",
+        "design": "Projekteerimine",
+        "detail": "Detailprojekteerimine",
+        "development": "Arendus",
+        "execution": "Teostus",
+        "handover": "Üleandmine",
+        "operation": "Kasutamine",
+        "strategy": "Strateegia",
+        "tender": "Hange"
+      }
+    },
+    "errors": {
+      "answer_required": "Vastus on kohustuslik.",
+      "approval_point_locked": "Kinnituspunkt on läbivaatamisel või otsustatud ega ole muudetav.",
+      "approval_point_not_found": "Kinnituspunkti ei leitud.",
+      "approval_point_not_rejected": "Ümber avada saab ainult tagasilükatud kinnituspunkti.",
+      "binding_requires_change_request": "Projekteerimise raamdokument on siduv; muudatused nõuavad muudatustaotlust.",
+      "catalogue_retired": "See kataloog on kasutusest kõrvaldatud ja seda ei saa kinnitada.",
+      "code_duplicate": "See kood on projektis juba kasutusel.",
+      "comment_not_found": "Kommentaari ei leitud.",
+      "comment_text_required": "Kommentaar peab sisaldama teksti.",
+      "concurrent_issue": "Väljastamist muudeti samal ajal; proovige uuesti.",
+      "condition_needs_owner_and_due_date": "Kinnitatud tingimusel peavad olema vastutaja ja tähtaeg.",
+      "condition_not_found": "Tingimust ei leitud.",
+      "condition_not_proposed": "See tingimus on juba kinnitatud või tagasi lükatud.",
+      "condition_owner_not_member": "Tingimuse vastutaja peab olema selle projekti liige.",
+      "contact_not_found": "Kontakti ei leitud.",
+      "container_not_found": "Dokumendikonteinerit ei leitud sellest projektist.",
+      "deliverable_not_found": "Projekteerimisgraafiku rida ei leitud.",
+      "dist_rule_not_found": "Levitamise reeglit ei leitud.",
+      "distribution_list_not_found": "Levitusloendit ei leitud sellest projektist.",
+      "drawing_not_found": "Jooniseid ei leitud.",
+      "duplicate_issue": "Mõned redaktsioonid on nendele adressaatidele juba saadetud; uuesti väljastamiseks esitage põhjendus.",
+      "field_required": "Kohustuslik väli on täitmata.",
+      "forbidden": "Teil ei ole selle toimingu tegemiseks õigust.",
+      "frame_document_missing": "Projektil ei ole juhtimismudelis projekteerimise raamdokumenti.",
+      "frame_register_unknown": "Seda registrit ei saa kirjutada raamdokumendina.",
+      "governance_gate_not_found": "See värav ei kuulu projekti etapimudelisse.",
+      "hint_override_needs_rationale": "Kataloogi soovituse ületamiseks on vaja põhjendust.",
+      "invalid_id": "Vigane identifikaator.",
+      "invalid_transition": "Selline olekumuutus praegu ei ole lubatud.",
+      "manage_required": "Selle välja muutmiseks on vaja projekteerimise haldamise õigust.",
+      "model_exists": "Etapimudel on juba kinnitatud.",
+      "no_approval_route": "Selles projektis puudub projekteerimise kinnituspunktide aktiivne kinnitusmarsruut.",
+      "not_area_owner": "Juhtimisvaldkonna raamdokumenti saab kirjutada ainult valdkonna omanik või asendaja või juhtimisjuht.",
+      "not_required_needs_rationale": "Aruande märkimine mittevajalikuks nõuab põhjendust.",
+      "number_reserved": "See number kuulus kustutatud joonisele ja seda ei kasutata kunagi uuesti.",
+      "number_taken": "See number on projektis kasutusel või on olnud.",
+      "numbering_case_invalid": "Number peab olema suurtähtedega.",
+      "numbering_chars_invalid": "Numbris on tähemärgid, mida nummerdusskeem ei luba.",
+      "numbering_code_not_in_list": "Välja väärtus ei ole skeemi koodiloendis.",
+      "numbering_empty": "Number on tühi.",
+      "numbering_field_invalid": "Numbri väli ei vasta oma formaadile.",
+      "numbering_field_missing": "Numbri kohustuslik väli puudub.",
+      "numbering_invalid": "Number ei vasta projekti nummerdusskeemile.",
+      "numbering_metadata_in_number": "Olek ja redaktsioon on metaandmed ja neid ei tohi numbrisse lisada.",
+      "numbering_parts_mismatch": "Number ja salvestatud osad ei ühildu.",
+      "numbering_structure_invalid": "Numbril puuduvad skeemi väljad.",
+      "numbering_too_long": "Number on pikem, kui skeem lubab.",
+      "option_kind_unknown": "Sellist valikuloendit ei ole.",
+      "originator_duplicate": "Teine aktiivne projekteerimisroll kasutab juba seda koostajakoodi.",
+      "originator_required": "Erialaprojekteerijal peab olema koostajakood.",
+      "originator_unknown": "Koostaja ei kuulu ühegi aktiivse projekteerimisrolli alla.",
+      "party_kind_invalid": "Tundmatu osapoole liik.",
+      "permit_empty": "Loataotluse paketis ei ole ühtegi kirjet.",
+      "permit_incomplete": "Nõutavad kirjed puuduvad või ei ole veel jagatud.",
+      "permit_item_kind_invalid": "Tundmatu kirjeliik.",
+      "permit_item_missing": "Nõutav kirje puudub.",
+      "permit_item_not_found": "Paketi kirjet ei leitud.",
+      "permit_link_frozen": "Pärast esitamist ei saa seotud läbivaatustsüklit ega esitust asendada.",
+      "permit_locked": "Pakett on esitatud ja selle sisu on fikseeritud.",
+      "permit_not_approved": "Tingimusi saab lisada ainult kinnitatud paketile.",
+      "permit_not_found": "Loataotluse paketti ei leitud.",
+      "permit_profile_unknown": "Tundmatu loataotluse profiil.",
+      "permit_state_read_from_cycle": "Pärast esitamist järgib olek ametiasutuse läbivaatustsüklit.",
+      "phase_required": "Valige etapp, millesse see kuulub.",
+      "phase_unknown": "Seda etappi ei ole projekti etapimudelis.",
+      "planned_count_reduction_needs_rationale": "Planeeritud koguse vähendamine nõuab põhjendust.",
+      "project_not_found": "Projekti ei leitud.",
+      "rationale_required": "Põhjendus on kohustuslik.",
+      "recipient_exactly_one": "Valige kas levitusloend või projekteerimisroll.",
+      "release_contains_wip": "Väljastus ei tohi sisaldada töös olevat tööd.",
+      "release_empty": "Väljastusel ei ole ühtegi redaktsiooni.",
+      "release_four_eyes": "Väljastuse koostaja ei saa seda ise välja anda.",
+      "release_needs_published": "Ehitusele väljastamiseks on vaja avaldatud redaktsioone.",
+      "release_no_recipients": "Levitusmaatriksi ükski adressaat ei vasta sellele väljastusele.",
+      "release_not_approved": "Väljastust ei ole veel oma kinnitusmarsruudil kinnitatud.",
+      "release_not_draft": "Muuta saab ainult mustandis väljastust.",
+      "release_not_found": "Väljastust ei leitud.",
+      "release_not_pending": "Väljastus ei oota kinnitamist.",
+      "release_not_ready": "Väljastus peab enne välja andmist olema valmis.",
+      "release_recipient_empty": "Levitusmaatriksi adressaadil ei ole saajat. Täitke kõigepealt loend või roll.",
+      "report_author_required": "Nõutava sõltumatu kontrolliga aruandel peab olema autori roll.",
+      "report_checker_required": "Sõltumatu kontroll vajab kontrollija rolli.",
+      "report_checker_same_party": "Kontrollija peab kuuluma teise osapoolde kui autor.",
+      "report_external_check_not_approved": "Väline kontrolltsükkel ei ole veel kinnitatud.",
+      "report_fields_frozen": "Autorit, kontrollijat, välist kontrolli ja läbivaatustsüklit ei saa pärast esitamist muuta.",
+      "report_kind_unknown": "Tundmatu aruande liik.",
+      "report_not_found": "Aruannet ei leitud.",
+      "review_comments_open": "Kõigepealt tuleb sulgeda avatud kommentaarid.",
+      "review_cycle_not_found": "Läbivaatustsüklit ei leitud sellest projektist.",
+      "review_not_found": "Läbivaatust ei leitud.",
+      "review_not_open": "Läbivaatus on kommenteerimiseks suletud.",
+      "review_outcome_invalid": "Tundmatu läbivaatuse tulemus.",
+      "revision_not_current": "Väljastusse saab lisada ainult joonise kehtiva redaktsiooni.",
+      "revision_not_found": "Redaktsiooni ei leitud sellest projektist.",
+      "role_in_use": "Roll on veel joonistel kasutusel.",
+      "role_not_active": "Roll on projektist vabastatud.",
+      "role_not_found": "Projekteerimisrolli ei leitud.",
+      "route_start_failed": "Kinnitusmarsruuti ei õnnestunud käivitada.",
+      "scheme_has_no_form_list": "Kinnitatud nummerdusskeemil ei ole dokumendivormide loendit.",
+      "setup_exists": "Projekteerimise juhtimine on sellele projektile juba seadistatud.",
+      "setup_missing": "Projekteerimise juhtimine ei ole sellele projektile veel seadistatud.",
+      "severity_invalid": "Tundmatu raskusaste.",
+      "source_not_installed": "Nende kirjete hoidev moodul ei ole paigaldatud.",
+      "submission_not_found": "Ametiasutusele esitatud taotlust ei leitud sellest projektist.",
+      "unknown_catalogue": "Kataloogi ei leitud.",
+      "use_conclude": "Tulemuse salvestamiseks kasutage lõpetamist.",
+      "use_issue": "Väljastuse saatmiseks kasutage väljastamist.",
+      "waiver_needs_rationale": "Projekteerimisgraafiku rea loobumine nõuab põhjendust.",
+      "wbs_code_duplicate": "See WBS-kood on projektis juba kasutusel.",
+      "wbs_code_not_under_parent": "Alamkood peab algama oma ülemkoodiga.",
+      "wbs_code_required": "WBS-kood on kohustuslik.",
+      "wbs_invalid": "Tööde struktuur rikub projekti WBS-reegleid.",
+      "wbs_move_cycle": "Sõlme ei saa teisaldada oma järglase alla.",
+      "wbs_node_closed": "See WBS-sõlm on uutele viidetele suletud.",
+      "wbs_node_not_found": "WBS-sõlme ei leitud.",
+      "wbs_node_referenced": "Sõlm või selle alamsõlm on viidatud; sulgege see selle asemel.",
+      "wbs_parent_not_found": "Ülemsõlme WBS-is ei leitud."
+    },
+    "evidence": {
+      "deliverables": "Etapi projekteerimisgraafiku read on aktsepteeritud",
+      "major_comments": "Avatud olulisi läbivaatuse kommentaare ei ole",
+      "no_host_area": "Projekteerimise valmisolek teadmata: juhtimismudel ei nimeta projekteerimisele valdkonda",
+      "no_host_document": "Projekteerimise valmisolek teadmata: projektil ei ole veel projekteerimise raamdokumenti. Loomiseks looge projekteerimisregister (fail CDE-s).",
+      "no_phase": "Projekteerimise valmisolek teadmata: see värav ei sulge ühtegi etappi",
+      "reports": "Etapi nõutavad aruanded on aktsepteeritud"
+    },
+    "export": {
+      "col_check": "Sõltumatu kontroll",
+      "col_code": "Kood",
+      "col_copies": "Paberkoopiad",
+      "col_discipline": "Eriala",
+      "col_disciplines": "Erialad",
+      "col_format": "Formaat",
+      "col_forms": "Vormid",
+      "col_kind": "Liik",
+      "col_last_issue": "Viimane väljastus",
+      "col_min_status": "Miinimumolek",
+      "col_number": "Number",
+      "col_phase": "Etapp",
+      "col_phases": "Etapid",
+      "col_pinned_revision": "Kinnitatud redaktsioon",
+      "col_present": "Olemas",
+      "col_purpose": "Otstarve",
+      "col_recipient": "Adressaat",
+      "col_recipients": "Adressaadid",
+      "col_required": "Nõutud",
+      "col_revision": "Redaktsioon",
+      "col_state": "Olek",
+      "col_status": "Staatus",
+      "col_title": "Pealkiri",
+      "empty": "Loetelus ei ole midagi.",
+      "project": "Projekt",
+      "title_matrix": "Levitusmaatriks",
+      "title_permit": "Loataotluse pakett",
+      "title_register": "Jooniste register",
+      "title_reports": "Aruanded ja tõendid",
+      "yes": "Jah"
+    },
+    "independent_check": {
+      "none": "Puudub",
+      "optional": "Valikuline",
+      "required_by_rule": "Nõutud reegliga"
+    },
+    "permit_item": {
+      "drawing": "Joonis",
+      "form": "Vorm",
+      "report": "Aruanne"
+    },
+    "purpose": {
+      "for_approval": "Kinnitamiseks",
+      "for_construction": "Ehitamiseks",
+      "for_information": "Teabeks",
+      "for_record": "Arhiivi",
+      "for_review": "Läbivaatamiseks",
+      "for_tender": "Hankeks"
+    },
+    "report_state": {
+      "accepted": "Aktsepteeritud",
+      "commissioned": "Tellitud",
+      "in_progress": "Töös",
+      "not_required": "Ei ole nõutud",
+      "rejected": "Tagasi lükatud",
+      "remarks": "Märkused",
+      "required": "Nõutud",
+      "submitted": "Esitatud",
+      "under_check": "Kontrollimisel"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Kinnituspunkti {code} ei otsustanud volitatud kinnitaja.",
+        "suggestion": "Otsustage see uuesti läbi selle marsruudi."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Projekteerimisgraafiku rida {code} etapist {phase} ei ole aktsepteeritud.",
+        "suggestion": "Lõpetage joonised või loobuge põhjendusega."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Number {number} ei vasta skeemile ({fields}).",
+        "suggestion": "Nummerdage joonis ümber."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Number {number} ei ühildu salvestatud osadega ({fields}).",
+        "suggestion": "Parandage konteineri väljad."
+      },
+      "drawing_originator_known": {
+        "fail": "Joonise {number} koostaja {value} ei kuulu ühegi aktiivse rolli alla.",
+        "suggestion": "Lisage projekteerimisroll või parandage number."
+      },
+      "not_required_has_rationale": {
+        "fail": "Aruandel {code} puudub põhjendus.",
+        "suggestion": "Lisage põhjendus."
+      },
+      "permit_content_current": {
+        "fail": "Loataotluse pakett {code} sisaldab asendatud redaktsioone.",
+        "suggestion": "Teavitage ametiasutust või esitage uuesti."
+      },
+      "permit_package_complete": {
+        "fail": "Loataotluse pakett {code} ei sisalda {count} nõutavat kirjet.",
+        "suggestion": "Lisage või jagage puuduvad kirjed."
+      },
+      "release_revisions_suitable": {
+        "fail": "Väljastusel {release} on {count} sobimatut redaktsiooni.",
+        "suggestion": "Eemaldage töös olev töö või avaldage enne."
+      },
+      "report_independent_check": {
+        "fail": "Aruanne {code} aktsepteeriti ilma kehtiva sõltumatu kontrollita.",
+        "suggestion": "Nimetage teisest osapoolest kontrollija."
+      },
+      "title_block_matches_number": {
+        "fail": "Joonise {number} tiitelplokil on {value}.",
+        "suggestion": "Parandage tiitelplokk."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS-kood {code} on kasutusel mitu korda.",
+        "suggestion": "Nummerdage duplikaadid ümber."
+      },
+      "wbs_reference_resolves": {
+        "fail": "Moodul {module} viitab WBS-väärtusele {value}, mis ei vasta ühelegi sõlmele.",
+        "suggestion": "Parandage viide või lisage sõlm."
+      }
+    }
+  }
+}

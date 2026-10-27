@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustika hisoboti",
+        "contamination": "Yer ifloslanishi hisoboti",
+        "daylight": "Kunduzgi yorug'lik va quyosh hisoboti",
+        "drainage": "Drenaj strategiyasi",
+        "environmental": "Ekologik hisobot",
+        "fire_proof_check": "Mustaqil yong'in xavfsizligi tekshiruvi",
+        "fire_safety_concept": "Yong'in xavfsizligi konsepsiyasi",
+        "geotechnical": "Geotexnik hisobot",
+        "sound_insulation": "Tovush izolyatsiyasi isboti",
+        "structural_design": "Konstruktiv loyihalash va hisob-kitoblar",
+        "structural_proof_check": "Mustaqil konstruktiv tekshiruv",
+        "kitchen_planning": "Oshxona rejalashtirish hisoboti",
+        "survey": "Obyektni tekshirish (survey)",
+        "thermal_energy": "Issiqlik va energiya samaradorligi isboti",
+        "traffic": "Transport hisoboti",
+        "uxo": "Portlamagan o'q-dorilarni baholash",
+        "vibration": "Tebranish hisoboti"
+      }
+    },
+    "cde_state": {
+      "archived": "Arxivlangan",
+      "published": "Nashr etilgan",
+      "shared": "Ulashilgan",
+      "wip": "Jarayondagi ish"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Hajmlar ro'yxati (BOQ)",
+        "cvr": "Xarajat va qiymatni solishtirish",
+        "design_management": "Loyihalarni boshqarish",
+        "field_time": "Dala vaqti",
+        "fieldreports": "Dala hisobotlari",
+        "finance": "Moliya",
+        "inspections": "Tekshiruvlar",
+        "procurement": "Xaridlar",
+        "schedule": "Jadval"
+      },
+      "phase": {
+        "approval": "Tasdiqlash",
+        "award": "Shartnoma berish",
+        "brief": "Topshiriq",
+        "concept": "Konsepsiya",
+        "construction": "Qurilish",
+        "design": "Loyihalash",
+        "detail": "Batafsil loyihalash",
+        "development": "Ishlab chiqish",
+        "execution": "Ijro",
+        "handover": "Topshirish",
+        "operation": "Foydalanish",
+        "strategy": "Strategiya",
+        "tender": "Tender"
+      }
+    },
+    "errors": {
+      "answer_required": "Javob talab qilinadi.",
+      "approval_point_locked": "Tasdiqlash nuqtasi ko'rib chiqilmoqda yoki qaror qabul qilingan, uni o'zgartirib bo'lmaydi.",
+      "approval_point_not_found": "Tasdiqlash nuqtasi topilmadi.",
+      "approval_point_not_rejected": "Faqat rad etilgan tasdiqlash nuqtasini qayta ochish mumkin.",
+      "binding_requires_change_request": "Loyihalashning asosiy hujjati majburiy; o'zgartirishlar uchun o'zgartirish so'rovi kerak.",
+      "catalogue_retired": "Bu katalog eskirgan va uni biriktirib bo'lmaydi.",
+      "code_duplicate": "Bu kod loyihada allaqachon ishlatilgan.",
+      "comment_not_found": "Izoh topilmadi.",
+      "comment_text_required": "Izohda matn bo'lishi kerak.",
+      "concurrent_issue": "Reliz bir vaqtning o'zida o'zgartirildi; iltimos, qayta urinib ko'ring.",
+      "condition_needs_owner_and_due_date": "Tasdiqlangan shart uchun mas'ul shaxs va muddat kerak.",
+      "condition_not_found": "Shart topilmadi.",
+      "condition_not_proposed": "Bu shart allaqachon tasdiqlangan yoki rad etilgan.",
+      "condition_owner_not_member": "Shart uchun mas'ul shaxs ushbu loyiha a'zosi bo'lishi kerak.",
+      "contact_not_found": "Kontakt topilmadi.",
+      "container_not_found": "Ushbu loyihada hujjatlar konteyneri topilmadi.",
+      "deliverable_not_found": "Loyihalash jadvali qatori topilmadi.",
+      "dist_rule_not_found": "Tarqatish qoidasi topilmadi.",
+      "distribution_list_not_found": "Ushbu loyihada tarqatish ro'yxati topilmadi.",
+      "drawing_not_found": "Chizma topilmadi.",
+      "duplicate_issue": "Ba'zi reviziyalar ushbu qabul qiluvchilarga allaqachon yuborilgan; qayta chiqarish uchun sabab ko'rsating.",
+      "field_required": "Majburiy maydon to'ldirilmagan.",
+      "forbidden": "Sizda ushbu amal uchun ruxsat yo'q.",
+      "frame_document_missing": "Loyihaning boshqaruv modelida loyihalashning asosiy hujjati yo'q.",
+      "frame_register_unknown": "Bu registrni asosiy hujjat sifatida yozib bo'lmaydi.",
+      "governance_gate_not_found": "Bu nazorat nuqtasi loyihaning bosqichlar modeliga kirmaydi.",
+      "hint_override_needs_rationale": "Katalog ko'rsatmasini o'zgartirish uchun asos kerak.",
+      "invalid_id": "Noto'g'ri identifikator.",
+      "invalid_transition": "Hozir bu holat o'zgarishiga ruxsat berilmagan.",
+      "manage_required": "Ushbu maydonni o'zgartirish uchun loyihalashni boshqarish huquqi kerak.",
+      "model_exists": "Bosqichlar modeli allaqachon biriktirilgan.",
+      "no_approval_route": "Ushbu loyihada loyihalash tasdiqlash nuqtalari uchun faol tasdiqlash yo'nalishi yo'q.",
+      "not_area_owner": "Boshqaruv sohasining faqat egasi, o'rinbosari yoki boshqaruv menejeri uning asosiy hujjatini yozishi mumkin.",
+      "not_required_needs_rationale": "Hisobotni talab qilinmaydigan deb belgilash uchun asos kerak.",
+      "number_reserved": "Bu raqam o'chirilgan chizmaga tegishli edi va hech qachon qayta ishlatilmaydi.",
+      "number_taken": "Bu raqam loyihada ishlatilgan yoki oldin ishlatilgan.",
+      "numbering_case_invalid": "Raqam katta harflarda bo'lishi kerak.",
+      "numbering_chars_invalid": "Raqamda nomerlash sxemasi ruxsat bermaydigan belgilar bor.",
+      "numbering_code_not_in_list": "Maydon qiymati sxemaning kodlar ro'yxatida yo'q.",
+      "numbering_empty": "Raqam bo'sh.",
+      "numbering_field_invalid": "Raqamning maydoni o'z formatiga mos kelmaydi.",
+      "numbering_field_missing": "Raqamning majburiy maydoni yo'q.",
+      "numbering_invalid": "Raqam loyihaning nomerlash sxemasiga mos kelmaydi.",
+      "numbering_metadata_in_number": "Holat va reviziya metama'lumotlar bo'lib, raqam tarkibiga kirmasligi kerak.",
+      "numbering_parts_mismatch": "Raqam va saqlangan qismlar bir-biriga mos emas.",
+      "numbering_structure_invalid": "Raqamda sxemaning maydonlari yo'q.",
+      "numbering_too_long": "Raqam sxema ruxsat etganidan uzun.",
+      "option_kind_unknown": "Bunday variantlar ro'yxati mavjud emas.",
+      "originator_duplicate": "Boshqa faol loyihalash roli bu muallif kodidan allaqachon foydalanmoqda.",
+      "originator_required": "Intizom loyihalovchisiga muallif kodi kerak.",
+      "originator_unknown": "Bu muallif hech qanday faol loyihalash roliga tegishli emas.",
+      "party_kind_invalid": "Noma'lum tomon turi.",
+      "permit_empty": "Ruxsatnoma paketida elementlar yo'q.",
+      "permit_incomplete": "Majburiy elementlar yo'q yoki hali ulashilmagan.",
+      "permit_item_kind_invalid": "Noma'lum element turi.",
+      "permit_item_missing": "Majburiy element yo'q.",
+      "permit_item_not_found": "Paket elementi topilmadi.",
+      "permit_link_frozen": "Topshirilgandan keyin bog'langan ko'rib chiqish sikli yoki topshirish almashtirilmaydi.",
+      "permit_locked": "Paket topshirilgan va uning mazmuni qotirilgan.",
+      "permit_not_approved": "Shartlar faqat tasdiqlangan paketga yoziladi.",
+      "permit_not_found": "Ruxsatnoma paketi topilmadi.",
+      "permit_profile_unknown": "Noma'lum ruxsatnoma profili.",
+      "permit_state_read_from_cycle": "Topshirilgandan keyin holat vakolatli organning ko'rib chiqish sikliga bog'liq bo'ladi.",
+      "phase_required": "Bu tegishli bo'lgan bosqichni tanlang.",
+      "phase_unknown": "Bu bosqich loyihaning bosqichlar modelida yo'q.",
+      "planned_count_reduction_needs_rationale": "Rejalashtirilgan sonni kamaytirish uchun asos kerak.",
+      "project_not_found": "Loyiha topilmadi.",
+      "rationale_required": "Asos kerak.",
+      "recipient_exactly_one": "Tarqatish ro'yxati yoki loyihalash rolidan birini tanlang.",
+      "release_contains_wip": "Relizga jarayondagi ish kiritib bo'lmaydi.",
+      "release_empty": "Relizda reviziyalar yo'q.",
+      "release_four_eyes": "Relizni tayyorlagan shaxs uni chiqara olmaydi.",
+      "release_needs_published": "Qurilish uchun chiqarish nashr etilgan reviziyalarni talab qiladi.",
+      "release_no_recipients": "Tarqatish matritsasida ushbu relizga mos qabul qiluvchi yo'q.",
+      "release_not_approved": "Reliz hali o'z tasdiqlash yo'nalishida tasdiqlanmagan.",
+      "release_not_draft": "Faqat qoralama holatidagi reliz o'zgartirilishi mumkin.",
+      "release_not_found": "Reliz topilmadi.",
+      "release_not_pending": "Reliz tasdiqlashni kutmayapti.",
+      "release_not_ready": "Chiqarishdan oldin reliz tayyor bo'lishi kerak.",
+      "release_recipient_empty": "Tarqatish matritsasining qabul qiluvchisida yuborish uchun shaxs yo'q. Avval ro'yxatni yoki rolni to'ldiring.",
+      "report_author_required": "Majburiy mustaqil tekshiruvi bo'lgan hisobotga muallif roli kerak.",
+      "report_checker_required": "Mustaqil tekshiruv uchun tekshiruvchi roli kerak.",
+      "report_checker_same_party": "Tekshiruvchi muallifdan boshqa tomonga tegishli bo'lishi kerak.",
+      "report_external_check_not_approved": "Tashqi tekshiruv sikli hali tasdiqlanmagan.",
+      "report_fields_frozen": "Topshirilgandan keyin muallif, tekshiruvchi, tashqi tekshiruv va ko'rib chiqish sikli o'zgartirilmaydi.",
+      "report_kind_unknown": "Noma'lum hisobot turi.",
+      "report_not_found": "Hisobot topilmadi.",
+      "review_comments_open": "Avval ochiq izohlar yopilishi kerak.",
+      "review_cycle_not_found": "Ushbu loyihada ko'rib chiqish sikli topilmadi.",
+      "review_not_found": "Ko'rib chiqish topilmadi.",
+      "review_not_open": "Ko'rib chiqish izohlar uchun yopilgan.",
+      "review_outcome_invalid": "Noma'lum ko'rib chiqish natijasi.",
+      "revision_not_current": "Relizda faqat chizmaning joriy reviziyasi bo'lishi mumkin.",
+      "revision_not_found": "Ushbu loyihada reviziya topilmadi.",
+      "role_in_use": "Rol hali ham chizmalarda ishlatilmoqda.",
+      "role_not_active": "Rol loyihadan chiqarilgan.",
+      "role_not_found": "Loyihalash roli topilmadi.",
+      "route_start_failed": "Tasdiqlash yo'nalishini boshlab bo'lmadi.",
+      "scheme_has_no_form_list": "Biriktirilgan nomerlash sxemasida hujjat shakllari ro'yxati yo'q.",
+      "setup_exists": "Ushbu loyiha uchun loyihalashni boshqarish allaqachon sozlangan.",
+      "setup_missing": "Ushbu loyiha uchun loyihalashni boshqarish hali sozlanmagan.",
+      "severity_invalid": "Noma'lum jiddiylik darajasi.",
+      "source_not_installed": "Ushbu yozuvlarni saqlovchi modul o'rnatilmagan.",
+      "submission_not_found": "Ushbu loyihada vakolatli organga topshiruv topilmadi.",
+      "unknown_catalogue": "Katalog topilmadi.",
+      "use_conclude": "Natijani qayd etish uchun conclude dan foydalaning.",
+      "use_issue": "Relizni yuborish uchun issue dan foydalaning.",
+      "waiver_needs_rationale": "Loyihalash jadvali qatoridan voz kechish uchun asos kerak.",
+      "wbs_code_duplicate": "Bu WBS kodi loyihada allaqachon ishlatilgan.",
+      "wbs_code_not_under_parent": "Quyi kod ota kodi bilan boshlanishi kerak.",
+      "wbs_code_required": "WBS kodi kerak.",
+      "wbs_invalid": "Ish tuzilmasi (WBS) loyihaning WBS qoidalarini buzadi.",
+      "wbs_move_cycle": "Tugun o'zining quyi tuguni ostiga ko'chirilishi mumkin emas.",
+      "wbs_node_closed": "Bu WBS tuguni yangi havolalar uchun yopilgan.",
+      "wbs_node_not_found": "WBS tuguni topilmadi.",
+      "wbs_node_referenced": "Tugun yoki uning quyi tugunlaridan biri havola qilingan; uni o'rniga yoping.",
+      "wbs_parent_not_found": "Ota WBS tuguni topilmadi."
+    },
+    "evidence": {
+      "deliverables": "Bosqichning qabul qilingan loyihalash jadvali qatorlari",
+      "major_comments": "Ochiq jiddiy ko'rib chiqish izohi yo'q",
+      "no_host_area": "Loyihalash tayyorligi noma'lum: boshqaruv modelida loyihalash uchun soha ko'rsatilmagan",
+      "no_host_document": "Loyihalash tayyorligi noma'lum: loyihada hali loyihalashning asosiy hujjati yo'q. Uni yaratish uchun loyihalash registrini (CDE dagi Fayl) yarating.",
+      "no_phase": "Loyihalash tayyorligi noma'lum: bu nazorat nuqtasi hech qanday bosqichni yopmaydi",
+      "reports": "Bosqichning majburiy hisobotlari qabul qilingan"
+    },
+    "export": {
+      "col_check": "Mustaqil tekshiruv",
+      "col_code": "Kod",
+      "col_copies": "Qog'oz nusxalari",
+      "col_discipline": "Intizom",
+      "col_disciplines": "Intizomlar",
+      "col_format": "Format",
+      "col_forms": "Shakllar",
+      "col_kind": "Turi",
+      "col_last_issue": "Oxirgi chiqarish",
+      "col_min_status": "Minimal holat",
+      "col_number": "Raqam",
+      "col_phase": "Bosqich",
+      "col_phases": "Bosqichlar",
+      "col_pinned_revision": "Biriktirilgan reviziya",
+      "col_present": "Mavjud",
+      "col_purpose": "Maqsad",
+      "col_recipient": "Qabul qiluvchi",
+      "col_recipients": "Qabul qiluvchilar",
+      "col_required": "Talab qilinadi",
+      "col_revision": "Reviziya",
+      "col_state": "Holat",
+      "col_status": "Holat",
+      "col_title": "Nomi",
+      "empty": "Ro'yxatga kiritish uchun hech narsa yo'q.",
+      "project": "Loyiha",
+      "title_matrix": "Tarqatish matritsasi",
+      "title_permit": "Ruxsatnoma paketi",
+      "title_register": "Chizmalar registri",
+      "title_reports": "Hisobotlar va isbotlar",
+      "yes": "Ha"
+    },
+    "independent_check": {
+      "none": "Yo'q",
+      "optional": "Ixtiyoriy",
+      "required_by_rule": "Qoida bo'yicha majburiy"
+    },
+    "permit_item": {
+      "drawing": "Chizma",
+      "form": "Shakl",
+      "report": "Hisobot"
+    },
+    "purpose": {
+      "for_approval": "Tasdiqlash uchun",
+      "for_construction": "Qurilish uchun",
+      "for_information": "Ma'lumot uchun",
+      "for_record": "Qayd uchun",
+      "for_review": "Ko'rib chiqish uchun",
+      "for_tender": "Tender uchun"
+    },
+    "report_state": {
+      "accepted": "Qabul qilingan",
+      "commissioned": "Ishga tushirilgan",
+      "in_progress": "Jarayonda",
+      "not_required": "Talab qilinmaydi",
+      "rejected": "Rad etilgan",
+      "remarks": "Izohlar",
+      "required": "Talab qilinadi",
+      "submitted": "Topshirilgan",
+      "under_check": "Tekshirilmoqda"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Tasdiqlash nuqtasi {code} vakolatli tasdiqlovchi tomonidan hal qilinmagan.",
+        "suggestion": "Uni o'z yo'nalishi orqali qayta hal qiling."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "{phase} bosqichining loyihalash jadvali qatori {code} qabul qilinmagan.",
+        "suggestion": "Chizmalarni yakunlang yoki sabab ko'rsatib voz keching."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "{number} raqami sxemaga mos kelmaydi ({fields}).",
+        "suggestion": "Chizmani qayta raqamlang."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "{number} raqami saqlangan qismlariga ({fields}) mos kelmaydi.",
+        "suggestion": "Konteyner maydonlarini tuzating."
+      },
+      "drawing_originator_known": {
+        "fail": "{number} ning muallifi {value} hech qanday faol rolga tegishli emas.",
+        "suggestion": "Loyihalash rolini qo'shing yoki raqamni tuzating."
+      },
+      "not_required_has_rationale": {
+        "fail": "{code} hisobotida asos yo'q.",
+        "suggestion": "Asosni qo'shing."
+      },
+      "permit_content_current": {
+        "fail": "{code} ruxsatnoma paketida eskirgan reviziyalar bor.",
+        "suggestion": "Vakolatli organga xabar bering yoki qayta topshiring."
+      },
+      "permit_package_complete": {
+        "fail": "{code} ruxsatnoma paketida {count} ta majburiy element yetishmayapti.",
+        "suggestion": "Yetishmayotgan elementlarni qo'shing yoki ulashing."
+      },
+      "release_revisions_suitable": {
+        "fail": "{release} relizida {count} ta mos kelmaydigan reviziya bor.",
+        "suggestion": "Jarayondagi ishni olib tashlang yoki avval nashr qiling."
+      },
+      "report_independent_check": {
+        "fail": "{code} hisoboti haqiqiy mustaqil tekshiruvsiz qabul qilingan.",
+        "suggestion": "Boshqa tomondan tekshiruvchi tayinlang."
+      },
+      "title_block_matches_number": {
+        "fail": "{number} chizmasining sarlavha bloki {value} ni ko'rsatmoqda.",
+        "suggestion": "Sarlavha blokini tuzating."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS kodi {code} bir necha marta ishlatilgan.",
+        "suggestion": "Takroriy kodlarni qayta raqamlang."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} WBS qiymati {value} ga murojaat qilmoqda, ammo u hech qaysi tugunga mos kelmaydi.",
+        "suggestion": "Havolani tuzating yoki tugunni qo'shing."
+      }
+    }
+  }
+}

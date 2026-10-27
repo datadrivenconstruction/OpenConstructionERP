@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Laporan akustik",
+        "contamination": "Laporan kontaminasi tanah",
+        "daylight": "Laporan cahaya dan sinar matahari",
+        "drainage": "Strategi drainase",
+        "environmental": "Laporan lingkungan",
+        "fire_proof_check": "Pemeriksaan keselamatan kebakaran independen",
+        "fire_safety_concept": "Konsep keselamatan kebakaran",
+        "geotechnical": "Laporan geoteknik",
+        "sound_insulation": "Bukti isolasi suara",
+        "structural_design": "Desain dan perhitungan struktur",
+        "structural_proof_check": "Pemeriksaan struktur independen",
+        "kitchen_planning": "Laporan perencanaan dapur",
+        "survey": "Survei lokasi",
+        "thermal_energy": "Bukti kinerja termal dan energi",
+        "traffic": "Laporan lalu lintas",
+        "uxo": "Penilaian amunisi tidak meledak",
+        "vibration": "Laporan getaran"
+      }
+    },
+    "cde_state": {
+      "archived": "Diarsipkan",
+      "published": "Diterbitkan",
+      "shared": "Dibagikan",
+      "wip": "Sedang dikerjakan"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Daftar kuantitas",
+        "cvr": "Rekonsiliasi nilai biaya",
+        "design_management": "Manajemen desain",
+        "field_time": "Waktu lapangan",
+        "fieldreports": "Laporan lapangan",
+        "finance": "Keuangan",
+        "inspections": "Inspeksi",
+        "procurement": "Pengadaan",
+        "schedule": "Jadwal"
+      },
+      "phase": {
+        "approval": "Persetujuan",
+        "award": "Penetapan pemenang",
+        "brief": "Brief",
+        "concept": "Konsep",
+        "construction": "Konstruksi",
+        "design": "Desain",
+        "detail": "Desain detail",
+        "development": "Pengembangan",
+        "execution": "Pelaksanaan",
+        "handover": "Serah terima",
+        "operation": "Operasi",
+        "strategy": "Strategi",
+        "tender": "Tender"
+      }
+    },
+    "errors": {
+      "answer_required": "Jawaban diperlukan.",
+      "approval_point_locked": "Titik persetujuan sedang ditinjau atau sudah diputuskan dan tidak dapat diubah.",
+      "approval_point_not_found": "Titik persetujuan tidak ditemukan.",
+      "approval_point_not_rejected": "Hanya titik persetujuan yang ditolak yang dapat dibuka kembali.",
+      "binding_requires_change_request": "Dokumen kerangka desain bersifat mengikat; perubahan memerlukan permintaan perubahan.",
+      "catalogue_retired": "Katalog ini sudah dihentikan dan tidak dapat dipasang.",
+      "code_duplicate": "Kode ini sudah digunakan dalam proyek.",
+      "comment_not_found": "Komentar tidak ditemukan.",
+      "comment_text_required": "Komentar harus berisi teks.",
+      "concurrent_issue": "Rilis diubah pada saat yang sama; silakan coba lagi.",
+      "condition_needs_owner_and_due_date": "Kondisi yang sudah dikonfirmasi memerlukan penanggung jawab dan tanggal jatuh tempo.",
+      "condition_not_found": "Kondisi tidak ditemukan.",
+      "condition_not_proposed": "Kondisi ini sudah dikonfirmasi atau dibatalkan.",
+      "condition_owner_not_member": "Penanggung jawab kondisi harus anggota proyek ini.",
+      "contact_not_found": "Kontak tidak ditemukan.",
+      "container_not_found": "Wadah dokumen tidak ditemukan dalam proyek ini.",
+      "deliverable_not_found": "Baris jadwal desain tidak ditemukan.",
+      "dist_rule_not_found": "Aturan distribusi tidak ditemukan.",
+      "distribution_list_not_found": "Daftar distribusi tidak ditemukan dalam proyek ini.",
+      "drawing_not_found": "Gambar tidak ditemukan.",
+      "duplicate_issue": "Beberapa revisi sudah dikirim ke penerima ini; berikan alasan untuk menerbitkan ulang.",
+      "field_required": "Kolom wajib belum diisi.",
+      "forbidden": "Anda tidak memiliki izin untuk tindakan ini.",
+      "frame_document_missing": "Proyek tidak memiliki dokumen kerangka desain dalam model tata kelolanya.",
+      "frame_register_unknown": "Register ini tidak dapat ditulis sebagai dokumen kerangka.",
+      "governance_gate_not_found": "Gerbang ini bukan bagian dari model fase proyek.",
+      "hint_override_needs_rationale": "Mengesampingkan saran katalog memerlukan alasan.",
+      "invalid_id": "ID tidak valid.",
+      "invalid_transition": "Perubahan status ini tidak diizinkan saat ini.",
+      "manage_required": "Mengubah kolom ini memerlukan izin untuk mengelola desain.",
+      "model_exists": "Model fase sudah ditetapkan.",
+      "no_approval_route": "Tidak ada rute persetujuan aktif untuk titik persetujuan desain dalam proyek ini.",
+      "not_area_owner": "Hanya pemilik atau wakil area tata kelola, atau manajer tata kelola, yang boleh menulis dokumen kerangkanya.",
+      "not_required_needs_rationale": "Menandai laporan sebagai tidak diperlukan memerlukan alasan.",
+      "number_reserved": "Nomor ini milik gambar yang dihapus dan tidak akan pernah digunakan kembali.",
+      "number_taken": "Nomor ini sedang atau pernah digunakan dalam proyek.",
+      "numbering_case_invalid": "Nomor harus menggunakan huruf kapital.",
+      "numbering_chars_invalid": "Nomor berisi karakter yang tidak diizinkan oleh skema.",
+      "numbering_code_not_in_list": "Nilai kolom tidak ada dalam daftar kode skema.",
+      "numbering_empty": "Nomor kosong.",
+      "numbering_field_invalid": "Kolom pada nomor tidak sesuai dengan formatnya.",
+      "numbering_field_missing": "Kolom wajib pada nomor belum diisi.",
+      "numbering_invalid": "Nomor tidak sesuai dengan skema penomoran proyek.",
+      "numbering_metadata_in_number": "Status dan revisi adalah metadata dan tidak boleh menjadi bagian dari nomor.",
+      "numbering_parts_mismatch": "Nomor dan bagian yang tersimpan tidak sesuai.",
+      "numbering_structure_invalid": "Nomor tidak memiliki kolom yang ditetapkan skema.",
+      "numbering_too_long": "Nomor lebih panjang dari yang diizinkan skema.",
+      "option_kind_unknown": "Daftar pilihan tersebut tidak ada.",
+      "originator_duplicate": "Peran desain aktif lain sudah menggunakan kode originator ini.",
+      "originator_required": "Perancang disiplin memerlukan kode originator.",
+      "originator_unknown": "Originator tidak termasuk dalam peran desain aktif mana pun.",
+      "party_kind_invalid": "Jenis pihak tidak dikenal.",
+      "permit_empty": "Paket perizinan tidak memiliki item.",
+      "permit_incomplete": "Item wajib belum ada atau belum dibagikan.",
+      "permit_item_kind_invalid": "Jenis item tidak dikenal.",
+      "permit_item_missing": "Item wajib tidak ada.",
+      "permit_item_not_found": "Item paket tidak ditemukan.",
+      "permit_link_frozen": "Setelah pengajuan, siklus tinjauan atau pengajuan yang ditautkan tidak dapat diganti.",
+      "permit_locked": "Paket telah diajukan dan isinya dikunci.",
+      "permit_not_approved": "Kondisi hanya dapat dicatat pada paket yang sudah disetujui.",
+      "permit_not_found": "Paket perizinan tidak ditemukan.",
+      "permit_profile_unknown": "Profil perizinan tidak dikenal.",
+      "permit_state_read_from_cycle": "Setelah pengajuan, status mengikuti siklus tinjauan otoritas.",
+      "phase_required": "Pilih fase tempat ini termasuk.",
+      "phase_unknown": "Fase ini tidak ada dalam model fase proyek.",
+      "planned_count_reduction_needs_rationale": "Mengurangi jumlah yang direncanakan memerlukan alasan.",
+      "project_not_found": "Proyek tidak ditemukan.",
+      "rationale_required": "Alasan diperlukan.",
+      "recipient_exactly_one": "Pilih salah satu: daftar distribusi atau peran desain.",
+      "release_contains_wip": "Rilis tidak boleh memuat pekerjaan yang sedang dikerjakan.",
+      "release_empty": "Rilis tidak memiliki revisi.",
+      "release_four_eyes": "Orang yang menyiapkan rilis tidak boleh menerbitkannya.",
+      "release_needs_published": "Penerbitan untuk konstruksi memerlukan revisi yang sudah diterbitkan.",
+      "release_no_recipients": "Tidak ada penerima dalam matriks distribusi yang sesuai dengan rilis ini.",
+      "release_not_approved": "Rilis belum disetujui pada rute persetujuannya.",
+      "release_not_draft": "Hanya rilis berstatus draf yang dapat diubah.",
+      "release_not_found": "Rilis tidak ditemukan.",
+      "release_not_pending": "Rilis tidak sedang menunggu persetujuan.",
+      "release_not_ready": "Rilis harus siap sebelum diterbitkan.",
+      "release_recipient_empty": "Salah satu penerima dalam matriks distribusi tidak memiliki orang tujuan. Lengkapi daftar atau peran terlebih dahulu.",
+      "report_author_required": "Laporan dengan pemeriksaan independen wajib memerlukan peran penulis.",
+      "report_checker_required": "Pemeriksaan independen memerlukan peran pemeriksa.",
+      "report_checker_same_party": "Pemeriksa harus berasal dari pihak yang berbeda dengan penulis.",
+      "report_external_check_not_approved": "Siklus pemeriksaan eksternal belum disetujui.",
+      "report_fields_frozen": "Penulis, pemeriksa, pemeriksaan eksternal, dan siklus tinjauan tidak dapat diubah setelah pengajuan.",
+      "report_kind_unknown": "Jenis laporan tidak dikenal.",
+      "report_not_found": "Laporan tidak ditemukan.",
+      "review_comments_open": "Komentar yang masih terbuka harus ditutup terlebih dahulu.",
+      "review_cycle_not_found": "Siklus tinjauan tidak ditemukan dalam proyek ini.",
+      "review_not_found": "Tinjauan tidak ditemukan.",
+      "review_not_open": "Tinjauan sudah ditutup untuk komentar.",
+      "review_outcome_invalid": "Hasil tinjauan tidak dikenal.",
+      "revision_not_current": "Rilis hanya dapat memuat revisi terkini dari sebuah gambar.",
+      "revision_not_found": "Revisi tidak ditemukan dalam proyek ini.",
+      "role_in_use": "Peran masih digunakan oleh gambar.",
+      "role_not_active": "Peran telah dilepas dari proyek.",
+      "role_not_found": "Peran desain tidak ditemukan.",
+      "route_start_failed": "Rute persetujuan tidak dapat dimulai.",
+      "scheme_has_no_form_list": "Skema penomoran yang ditetapkan tidak memiliki daftar jenis dokumen.",
+      "setup_exists": "Manajemen desain sudah diatur untuk proyek ini.",
+      "setup_missing": "Manajemen desain belum diatur untuk proyek ini.",
+      "severity_invalid": "Tingkat keparahan tidak dikenal.",
+      "source_not_installed": "Modul yang menyimpan catatan ini belum terpasang.",
+      "submission_not_found": "Pengajuan ke otoritas tidak ditemukan dalam proyek ini.",
+      "unknown_catalogue": "Katalog tidak ditemukan.",
+      "use_conclude": "Gunakan conclude untuk mencatat hasilnya.",
+      "use_issue": "Gunakan issue untuk mengirim rilis.",
+      "waiver_needs_rationale": "Membebaskan baris jadwal desain memerlukan alasan.",
+      "wbs_code_duplicate": "Kode WBS ini sudah digunakan dalam proyek.",
+      "wbs_code_not_under_parent": "Kode anak harus diawali dengan kode induknya.",
+      "wbs_code_required": "Kode WBS diperlukan.",
+      "wbs_invalid": "Struktur rincian kerja melanggar aturan WBS proyek.",
+      "wbs_move_cycle": "Sebuah node tidak dapat dipindahkan ke bawah turunannya sendiri.",
+      "wbs_node_closed": "Node WBS ini ditutup untuk referensi baru.",
+      "wbs_node_not_found": "Node WBS tidak ditemukan.",
+      "wbs_node_referenced": "Node ini atau salah satu anaknya sedang dirujuk; tutup saja.",
+      "wbs_parent_not_found": "Node WBS induk tidak ditemukan."
+    },
+    "evidence": {
+      "deliverables": "Baris jadwal desain fase telah diterima",
+      "major_comments": "Tidak ada komentar tinjauan utama yang masih terbuka",
+      "no_host_area": "Kesiapan desain tidak diketahui: model tata kelola tidak menetapkan area untuk desain",
+      "no_host_document": "Kesiapan desain tidak diketahui: proyek belum memiliki dokumen kerangka desain. Buat register desain (File di CDE) untuk membuatnya.",
+      "no_phase": "Kesiapan desain tidak diketahui: gerbang ini tidak menutup fase apa pun",
+      "reports": "Laporan wajib untuk fase telah diterima"
+    },
+    "export": {
+      "col_check": "Pemeriksaan independen",
+      "col_code": "Kode",
+      "col_copies": "Salinan cetak",
+      "col_discipline": "Disiplin",
+      "col_disciplines": "Disiplin",
+      "col_format": "Format",
+      "col_forms": "Formulir",
+      "col_kind": "Jenis",
+      "col_last_issue": "Penerbitan terakhir",
+      "col_min_status": "Status minimum",
+      "col_number": "Nomor",
+      "col_phase": "Fase",
+      "col_phases": "Fase",
+      "col_pinned_revision": "Revisi yang ditetapkan",
+      "col_present": "Ada",
+      "col_purpose": "Tujuan",
+      "col_recipient": "Penerima",
+      "col_recipients": "Penerima",
+      "col_required": "Wajib",
+      "col_revision": "Revisi",
+      "col_state": "Kondisi",
+      "col_status": "Status",
+      "col_title": "Judul",
+      "empty": "Tidak ada yang dapat ditampilkan.",
+      "project": "Proyek",
+      "title_matrix": "Matriks distribusi",
+      "title_permit": "Paket perizinan",
+      "title_register": "Register gambar",
+      "title_reports": "Laporan dan bukti",
+      "yes": "Ya"
+    },
+    "independent_check": {
+      "none": "Tidak ada",
+      "optional": "Opsional",
+      "required_by_rule": "Wajib menurut aturan"
+    },
+    "permit_item": {
+      "drawing": "Gambar",
+      "form": "Formulir",
+      "report": "Laporan"
+    },
+    "purpose": {
+      "for_approval": "Untuk persetujuan",
+      "for_construction": "Untuk konstruksi",
+      "for_information": "Untuk informasi",
+      "for_record": "Untuk arsip",
+      "for_review": "Untuk tinjauan",
+      "for_tender": "Untuk tender"
+    },
+    "report_state": {
+      "accepted": "Diterima",
+      "commissioned": "Ditugaskan",
+      "in_progress": "Sedang berjalan",
+      "not_required": "Tidak diperlukan",
+      "rejected": "Ditolak",
+      "remarks": "Catatan",
+      "required": "Diperlukan",
+      "submitted": "Diajukan",
+      "under_check": "Sedang diperiksa"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Titik persetujuan {code} tidak diputuskan oleh pihak penyetuju yang berwenang.",
+        "suggestion": "Putuskan kembali melalui rutenya."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Baris jadwal desain {code} pada fase {phase} belum diterima.",
+        "suggestion": "Selesaikan gambar atau bebaskan dengan alasan."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Nomor {number} tidak sesuai dengan skema ({fields}).",
+        "suggestion": "Beri nomor ulang gambar."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Nomor {number} tidak sesuai dengan bagian yang tersimpan ({fields}).",
+        "suggestion": "Perbaiki kolom wadah."
+      },
+      "drawing_originator_known": {
+        "fail": "Originator {value} dari {number} tidak termasuk dalam peran aktif mana pun.",
+        "suggestion": "Tambahkan peran desain atau perbaiki nomornya."
+      },
+      "not_required_has_rationale": {
+        "fail": "Laporan {code} tidak memiliki alasan.",
+        "suggestion": "Tambahkan alasannya."
+      },
+      "permit_content_current": {
+        "fail": "Paket perizinan {code} memuat revisi yang sudah digantikan.",
+        "suggestion": "Beri tahu otoritas atau ajukan ulang."
+      },
+      "permit_package_complete": {
+        "fail": "Paket perizinan {code} kekurangan {count} item wajib.",
+        "suggestion": "Tambahkan atau bagikan item yang kurang."
+      },
+      "release_revisions_suitable": {
+        "fail": "Rilis {release} memiliki {count} revisi yang tidak sesuai.",
+        "suggestion": "Hapus pekerjaan yang sedang dikerjakan atau terbitkan dulu."
+      },
+      "report_independent_check": {
+        "fail": "Laporan {code} diterima tanpa pemeriksaan independen yang valid.",
+        "suggestion": "Tunjuk pemeriksa dari pihak lain."
+      },
+      "title_block_matches_number": {
+        "fail": "Blok judul {number} menampilkan {value}.",
+        "suggestion": "Perbaiki blok judul."
+      },
+      "wbs_code_unique": {
+        "fail": "Kode WBS {code} digunakan lebih dari sekali.",
+        "suggestion": "Beri nomor ulang pada duplikat."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} merujuk ke nilai WBS {value}, yang tidak cocok dengan node mana pun.",
+        "suggestion": "Perbaiki rujukan atau tambahkan node."
+      }
+    }
+  }
+}

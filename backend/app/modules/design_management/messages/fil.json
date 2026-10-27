@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Ulat sa akustika",
+        "contamination": "Ulat sa kontaminasyon ng lupa",
+        "daylight": "Ulat sa liwanag ng araw at sikat ng araw",
+        "drainage": "Estratehiya sa drenahe",
+        "environmental": "Ulat sa kapaligiran",
+        "fire_proof_check": "Malayang pagsusuri sa kaligtasan laban sa sunog",
+        "fire_safety_concept": "Konsepto ng kaligtasan laban sa sunog",
+        "geotechnical": "Ulat sa geotechnical",
+        "sound_insulation": "Patunay ng pagkakabukod laban sa ingay",
+        "structural_design": "Disenyo ng istruktura at mga kalkulasyon",
+        "structural_proof_check": "Malayang pagsusuri sa istruktura",
+        "kitchen_planning": "Ulat sa pagpaplano ng kusina",
+        "survey": "Survey sa lugar",
+        "thermal_energy": "Patunay ng thermal at energy performance",
+        "traffic": "Ulat sa trapiko",
+        "uxo": "Pagtatasa ng hindi sumabog na bala",
+        "vibration": "Ulat sa vibration"
+      }
+    },
+    "cde_state": {
+      "archived": "Naka-archive",
+      "published": "Nai-publish",
+      "shared": "Ibinahagi",
+      "wip": "Ginagawa pa"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Bill of quantities",
+        "cvr": "Pagkakasundo ng halaga ng gastos",
+        "design_management": "Pamamahala ng disenyo",
+        "field_time": "Oras sa lugar ng proyekto",
+        "fieldreports": "Mga ulat sa lugar ng proyekto",
+        "finance": "Pananalapi",
+        "inspections": "Mga inspeksyon",
+        "procurement": "Pagkuha ng mga materyales",
+        "schedule": "Iskedyul"
+      },
+      "phase": {
+        "approval": "Pag-apruba",
+        "award": "Paggawad",
+        "brief": "Maikling paglalarawan ng proyekto",
+        "concept": "Konsepto",
+        "construction": "Konstruksyon",
+        "design": "Disenyo",
+        "detail": "Detalyadong disenyo",
+        "development": "Pagpapaunlad",
+        "execution": "Pagpapatupad",
+        "handover": "Pagtatapos at paglilipat",
+        "operation": "Operasyon",
+        "strategy": "Estratehiya",
+        "tender": "Tender"
+      }
+    },
+    "errors": {
+      "answer_required": "Kailangan ang sagot.",
+      "approval_point_locked": "Ang punto ng pag-apruba ay nasa pagsusuri o napagpasyahan na at hindi na mababago.",
+      "approval_point_not_found": "Hindi nahanap ang punto ng pag-apruba.",
+      "approval_point_not_rejected": "Tanging tinanggihang punto ng pag-apruba lamang ang maaaring buksang muli.",
+      "binding_requires_change_request": "Ang dokumento ng balangkas ng disenyo ay mandatoryo; ang mga pagbabago ay nangangailangan ng change request.",
+      "catalogue_retired": "Retirado na ang katalogong ito at hindi na maaaring i-pin.",
+      "code_duplicate": "Ginamit na sa proyekto ang code na ito.",
+      "comment_not_found": "Hindi nahanap ang komento.",
+      "comment_text_required": "Kailangan ng teksto ang komento.",
+      "concurrent_issue": "Nabago ang release sa parehong oras; subukan muli.",
+      "condition_needs_owner_and_due_date": "Ang nakumpirmang kondisyon ay nangangailangan ng may-ari at petsa ng pagtatapos.",
+      "condition_not_found": "Hindi nahanap ang kondisyon.",
+      "condition_not_proposed": "Nakumpirma o naalis na ang kondisyong ito.",
+      "condition_owner_not_member": "Dapat miyembro ng proyektong ito ang may-ari ng kondisyon.",
+      "contact_not_found": "Hindi nahanap ang contact.",
+      "container_not_found": "Hindi nahanap sa proyektong ito ang lalagyan ng dokumento.",
+      "deliverable_not_found": "Hindi nahanap ang linya ng iskedyul ng disenyo.",
+      "dist_rule_not_found": "Hindi nahanap ang tuntunin sa distribusyon.",
+      "distribution_list_not_found": "Hindi nahanap sa proyektong ito ang distribution list.",
+      "drawing_not_found": "Hindi nahanap ang drawing.",
+      "duplicate_issue": "Naipadala na sa mga tatanggap na ito ang ilang revision; magbigay ng dahilan para muling mag-isyu.",
+      "field_required": "Kulang ang kinakailangang field.",
+      "forbidden": "Wala kang pahintulot para sa aksyong ito.",
+      "frame_document_missing": "Walang dokumento ng balangkas ng disenyo ang proyekto sa governance model nito.",
+      "frame_register_unknown": "Hindi maisusulat bilang dokumento ng balangkas ang rehistrong ito.",
+      "governance_gate_not_found": "Hindi bahagi ng phase model ng proyekto ang gate na ito.",
+      "hint_override_needs_rationale": "Ang pag-override sa hint ng katalogo ay nangangailangan ng dahilan.",
+      "invalid_id": "Hindi wastong id.",
+      "invalid_transition": "Hindi pinapayagan ngayon ang pagbabago ng estado na ito.",
+      "manage_required": "Ang pagbabago sa field na ito ay nangangailangan ng pahintulot na pamahalaan ang disenyo.",
+      "model_exists": "Naka-pin na ang phase model.",
+      "no_approval_route": "Walang aktibong approval route para sa mga punto ng pag-apruba ng disenyo sa proyektong ito.",
+      "not_area_owner": "Tanging may-ari o kahalili ng governance area, o governance manager, ang maaaring magsulat ng dokumento ng balangkas nito.",
+      "not_required_needs_rationale": "Ang pagmamarka ng ulat bilang hindi kailangan ay nangangailangan ng dahilan.",
+      "number_reserved": "Ang numerong ito ay dating sa isang binurang drawing at hindi na muling gagamitin.",
+      "number_taken": "Ginamit na o ginagamit na ang numerong ito sa proyekto.",
+      "numbering_case_invalid": "Dapat nakasulat sa malalaking titik ang numero.",
+      "numbering_chars_invalid": "May mga karakter ang numero na hindi pinapayagan ng scheme.",
+      "numbering_code_not_in_list": "Wala sa code list ng scheme ang halaga ng isang field.",
+      "numbering_empty": "Walang laman ang numero.",
+      "numbering_field_invalid": "Hindi tumutugma sa format nito ang isang field ng numero.",
+      "numbering_field_missing": "Kulang ang kinakailangang field ng numero.",
+      "numbering_invalid": "Hindi tumutugma ang numero sa numbering scheme ng proyekto.",
+      "numbering_metadata_in_number": "Metadata ang status at revision at hindi dapat bahagi ng numero.",
+      "numbering_parts_mismatch": "Hindi nagtutugma ang numero at ang mga nakaimbak na bahagi nito.",
+      "numbering_structure_invalid": "Kulang sa mga field ng scheme ang numero.",
+      "numbering_too_long": "Mas mahaba ang numero kaysa pinapayagan ng scheme.",
+      "option_kind_unknown": "Walang ganitong listahan ng mga opsyon.",
+      "originator_duplicate": "Ginagamit na ng ibang aktibong design role ang originator code na ito.",
+      "originator_required": "Kailangan ng discipline designer ang originator code.",
+      "originator_unknown": "Hindi kabilang ang originator sa anumang aktibong design role.",
+      "party_kind_invalid": "Hindi kilalang uri ng partido.",
+      "permit_empty": "Walang laman ang permit package.",
+      "permit_incomplete": "Kulang ang mga kinakailangang item o hindi pa ibinabahagi.",
+      "permit_item_kind_invalid": "Hindi kilalang uri ng item.",
+      "permit_item_missing": "Kulang ang kinakailangang item.",
+      "permit_item_not_found": "Hindi nahanap ang item ng package.",
+      "permit_link_frozen": "Pagkatapos ng pagsumite, hindi na mapapalitan ang naka-link na review cycle o pagsumite.",
+      "permit_locked": "Naisumite na ang package at naka-pin na ang nilalaman nito.",
+      "permit_not_approved": "Sa naaprubahang package lamang maitatala ang mga kondisyon.",
+      "permit_not_found": "Hindi nahanap ang permit package.",
+      "permit_profile_unknown": "Hindi kilalang permit profile.",
+      "permit_state_read_from_cycle": "Pagkatapos ng pagsumite, sumusunod ang estado sa review cycle ng awtoridad.",
+      "phase_required": "Piliin ang phase kung saan ito kabilang.",
+      "phase_unknown": "Wala sa phase model ng proyekto ang phase na ito.",
+      "planned_count_reduction_needs_rationale": "Ang pagbabawas ng planadong bilang ay nangangailangan ng dahilan.",
+      "project_not_found": "Hindi nahanap ang proyekto.",
+      "rationale_required": "Kailangan ang dahilan.",
+      "recipient_exactly_one": "Pumili ng alinman sa distribution list o design role.",
+      "release_contains_wip": "Hindi maaaring isama sa release ang gawaing ginagawa pa.",
+      "release_empty": "Walang revision ang release.",
+      "release_four_eyes": "Ang naghanda ng release ay hindi maaaring mag-isyu nito.",
+      "release_needs_published": "Ang isyu para sa konstruksyon ay nangangailangan ng nai-publish na revision.",
+      "release_no_recipients": "Walang tatanggap sa distribution matrix ang tumutugma sa release na ito.",
+      "release_not_approved": "Hindi pa naaaprubahan ang release sa approval route nito.",
+      "release_not_draft": "Draft na release lamang ang maaaring baguhin.",
+      "release_not_found": "Hindi nahanap ang release.",
+      "release_not_pending": "Hindi naghihintay ng pag-apruba ang release.",
+      "release_not_ready": "Dapat handa na ang release bago ito i-isyu.",
+      "release_recipient_empty": "Walang taong pagpapadalhan ang isang tatanggap sa distribution matrix. Kumpletuhin muna ang listahan o ang role.",
+      "report_author_required": "Ang ulat na may kinakailangang independent check ay nangangailangan ng author role.",
+      "report_checker_required": "Ang independent check ay nangangailangan ng checker role.",
+      "report_checker_same_party": "Dapat kabilang sa ibang partido kaysa author ang checker.",
+      "report_external_check_not_approved": "Hindi pa naaaprubahan ang external check cycle.",
+      "report_fields_frozen": "Hindi na mababago pagkatapos ng pagsumite ang author, checker, external check, at review cycle.",
+      "report_kind_unknown": "Hindi kilalang uri ng ulat.",
+      "report_not_found": "Hindi nahanap ang ulat.",
+      "review_comments_open": "Dapat isara muna ang mga bukas na komento.",
+      "review_cycle_not_found": "Hindi nahanap ang review cycle sa proyektong ito.",
+      "review_not_found": "Hindi nahanap ang review.",
+      "review_not_open": "Sarado na para sa mga komento ang review.",
+      "review_outcome_invalid": "Hindi kilalang resulta ng review.",
+      "revision_not_current": "Ang release ay maaari lamang maglaman ng kasalukuyang revision ng drawing.",
+      "revision_not_found": "Hindi nahanap ang revision sa proyektong ito.",
+      "role_in_use": "Ginagamit pa ng mga drawing ang role.",
+      "role_not_active": "Inalis na sa proyekto ang role.",
+      "role_not_found": "Hindi nahanap ang design role.",
+      "route_start_failed": "Hindi masimulan ang approval route.",
+      "scheme_has_no_form_list": "Walang listahan ng mga form ng dokumento ang naka-pin na numbering scheme.",
+      "setup_exists": "Naka-set up na ang pamamahala ng disenyo para sa proyektong ito.",
+      "setup_missing": "Hindi pa naka-set up ang pamamahala ng disenyo para sa proyektong ito.",
+      "severity_invalid": "Hindi kilalang antas ng kalubhaan.",
+      "source_not_installed": "Hindi naka-install ang module na naglalaman ng mga talang ito.",
+      "submission_not_found": "Hindi nahanap sa proyektong ito ang pagsumite sa awtoridad.",
+      "unknown_catalogue": "Hindi nahanap ang katalogo.",
+      "use_conclude": "Gamitin ang conclude para itala ang resulta.",
+      "use_issue": "Gamitin ang issue para ipadala ang release.",
+      "waiver_needs_rationale": "Ang pag-waive ng linya ng iskedyul ng disenyo ay nangangailangan ng dahilan.",
+      "wbs_code_duplicate": "Ginamit na sa proyekto ang WBS code na ito.",
+      "wbs_code_not_under_parent": "Dapat magsimula ang child code sa code ng parent nito.",
+      "wbs_code_required": "Kailangan ang WBS code.",
+      "wbs_invalid": "Nilalabag ng work breakdown structure ang mga tuntunin ng WBS ng proyekto.",
+      "wbs_move_cycle": "Hindi maaaring ilipat ang node sa ilalim ng sarili nitong descendant.",
+      "wbs_node_closed": "Sarado na para sa mga bagong reference ang WBS node na ito.",
+      "wbs_node_not_found": "Hindi nahanap ang WBS node.",
+      "wbs_node_referenced": "Naka-reference ang node o isa sa mga child nito; isara na lang ito.",
+      "wbs_parent_not_found": "Hindi nahanap ang parent WBS node."
+    },
+    "evidence": {
+      "deliverables": "Tanggap na ang mga linya ng iskedyul ng disenyo ng phase",
+      "major_comments": "Walang bukas na pangunahing komento sa review",
+      "no_host_area": "Hindi alam ang kahandaan ng disenyo: walang area para sa disenyo na tinukoy sa governance model",
+      "no_host_document": "Hindi alam ang kahandaan ng disenyo: wala pang dokumento ng balangkas ng disenyo ang proyekto. Mag-generate ng design register (File sa CDE) para gawin ito.",
+      "no_phase": "Hindi alam ang kahandaan ng disenyo: walang phase na isinasara ang gate na ito",
+      "reports": "Tanggap na ang mga kinakailangang ulat ng phase"
+    },
+    "export": {
+      "col_check": "Independent check",
+      "col_code": "Code",
+      "col_copies": "Mga papel na kopya",
+      "col_discipline": "Disiplina",
+      "col_disciplines": "Mga disiplina",
+      "col_format": "Format",
+      "col_forms": "Mga form",
+      "col_kind": "Uri",
+      "col_last_issue": "Huling isyu",
+      "col_min_status": "Pinakamababang status",
+      "col_number": "Numero",
+      "col_phase": "Phase",
+      "col_phases": "Mga phase",
+      "col_pinned_revision": "Naka-pin na revision",
+      "col_present": "Mayroon",
+      "col_purpose": "Layunin",
+      "col_recipient": "Tatanggap",
+      "col_recipients": "Mga tatanggap",
+      "col_required": "Kinakailangan",
+      "col_revision": "Revision",
+      "col_state": "Estado",
+      "col_status": "Status",
+      "col_title": "Pamagat",
+      "empty": "Walang ilalista.",
+      "project": "Proyekto",
+      "title_matrix": "Distribution matrix",
+      "title_permit": "Permit package",
+      "title_register": "Drawing register",
+      "title_reports": "Mga ulat at patunay",
+      "yes": "Oo"
+    },
+    "independent_check": {
+      "none": "Wala",
+      "optional": "Opsyonal",
+      "required_by_rule": "Kinakailangan ayon sa tuntunin"
+    },
+    "permit_item": {
+      "drawing": "Drawing",
+      "form": "Form",
+      "report": "Ulat"
+    },
+    "purpose": {
+      "for_approval": "Para sa pag-apruba",
+      "for_construction": "Para sa konstruksyon",
+      "for_information": "Para sa impormasyon",
+      "for_record": "Para sa talaan",
+      "for_review": "Para sa pagsusuri",
+      "for_tender": "Para sa tender"
+    },
+    "report_state": {
+      "accepted": "Tinanggap",
+      "commissioned": "Inatasan",
+      "in_progress": "Ginagawa pa",
+      "not_required": "Hindi kinakailangan",
+      "rejected": "Tinanggihan",
+      "remarks": "Mga puna",
+      "required": "Kinakailangan",
+      "submitted": "Naisumite",
+      "under_check": "Sinusuri"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Hindi pinagpasyahan ng may karapatang aprubador ang punto ng pag-apruba na {code}.",
+        "suggestion": "Pagpasyahan itong muli sa pamamagitan ng route nito."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Hindi pa tanggap ang linya ng iskedyul ng disenyo na {code} ng {phase}.",
+        "suggestion": "Kumpletuhin ang mga drawing o i-waive na may dahilan."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Hindi tumutugma sa scheme ang numerong {number} ({fields}).",
+        "suggestion": "I-renumber ang drawing."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Hindi nagtutugma ang numerong {number} sa mga nakaimbak nitong bahagi ({fields}).",
+        "suggestion": "Itama ang mga field ng container."
+      },
+      "drawing_originator_known": {
+        "fail": "Ang originator na {value} ng {number} ay hindi kabilang sa anumang aktibong role.",
+        "suggestion": "Idagdag ang design role o itama ang numero."
+      },
+      "not_required_has_rationale": {
+        "fail": "Walang dahilan ang ulat na {code}.",
+        "suggestion": "Magdagdag ng dahilan."
+      },
+      "permit_content_current": {
+        "fail": "Naglalaman ng mga napalitang revision ang permit package na {code}.",
+        "suggestion": "Ipaalam sa awtoridad o isumiteng muli."
+      },
+      "permit_package_complete": {
+        "fail": "Kulang ang permit package na {code} ng {count} kinakailangang item.",
+        "suggestion": "Idagdag o ibahagi ang mga kulang na item."
+      },
+      "release_revisions_suitable": {
+        "fail": "May {count} hindi angkop na revision ang release na {release}.",
+        "suggestion": "Alisin ang gawaing ginagawa pa o mag-publish muna."
+      },
+      "report_independent_check": {
+        "fail": "Tinanggap ang ulat na {code} nang walang wastong independent check.",
+        "suggestion": "Magtalaga ng checker mula sa ibang partido."
+      },
+      "title_block_matches_number": {
+        "fail": "Nakasaad sa title block ng {number} ang {value}.",
+        "suggestion": "Itama ang title block."
+      },
+      "wbs_code_unique": {
+        "fail": "Mahigit isang beses ginamit ang WBS code na {code}.",
+        "suggestion": "I-renumber ang mga duplicate."
+      },
+      "wbs_reference_resolves": {
+        "fail": "Tumutukoy ang {module} sa WBS value na {value}, na hindi tumutugma sa anumang node.",
+        "suggestion": "Itama ang reference o magdagdag ng node."
+      }
+    }
+  }
+}

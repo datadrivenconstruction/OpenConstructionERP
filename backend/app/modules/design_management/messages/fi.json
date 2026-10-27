@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustiikkaselvitys",
+        "contamination": "Maaperän pilaantuneisuusselvitys",
+        "daylight": "Päivänvalo- ja auringonvalselvitys",
+        "drainage": "Salaojitus- ja hulevesistrategia",
+        "environmental": "Ympäristöselvitys",
+        "fire_proof_check": "Riippumaton palotekninen tarkastus",
+        "fire_safety_concept": "Paloturvallisuuskonsepti",
+        "geotechnical": "Geoteknillinen selvitys",
+        "sound_insulation": "Ääneneristävyyden todistus",
+        "structural_design": "Rakennesuunnittelu ja laskelmat",
+        "structural_proof_check": "Riippumaton rakenteiden tarkastus",
+        "kitchen_planning": "Keittiösuunnitelman selvitys",
+        "survey": "Työmaan mittaus",
+        "thermal_energy": "Lämpö- ja energiatehokkuuden todistus",
+        "traffic": "Liikenneselvitys",
+        "uxo": "Räjähtämättömän ammuksen arviointi",
+        "vibration": "Tärinäselvitys"
+      }
+    },
+    "cde_state": {
+      "archived": "Arkistoitu",
+      "published": "Julkaistu",
+      "shared": "Jaettu",
+      "wip": "Työn alla"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Määrä- ja kustannusluettelo",
+        "cvr": "Kustannus-arvo-vertailu",
+        "design_management": "Suunnittelunhallinta",
+        "field_time": "Työmaa-aika",
+        "fieldreports": "Työmaaraportit",
+        "finance": "Talous",
+        "inspections": "Tarkastukset",
+        "procurement": "Hankinnat",
+        "schedule": "Aikataulu"
+      },
+      "phase": {
+        "approval": "Hyväksyntä",
+        "award": "Kilpailutuksen päätös",
+        "brief": "Tarveselvitys",
+        "concept": "Konsepti",
+        "construction": "Rakentaminen",
+        "design": "Suunnittelu",
+        "detail": "Detaljisuunnittelu",
+        "development": "Kehitys",
+        "execution": "Toteutus",
+        "handover": "Luovutus",
+        "operation": "Käyttö",
+        "strategy": "Strategia",
+        "tender": "Tarjouskilpailu"
+      }
+    },
+    "errors": {
+      "answer_required": "Vastaus vaaditaan.",
+      "approval_point_locked": "Hyväksyntäkohta on tarkastelussa tai päätetty, eikä sitä voi muuttaa.",
+      "approval_point_not_found": "Hyväksyntäkohtaa ei löytynyt.",
+      "approval_point_not_rejected": "Vain hylättyä hyväksyntäkohtaa voi avata uudelleen.",
+      "binding_requires_change_request": "Suunnittelun runkoasiakirja on sitova; muutokset edellyttävät muutospyyntöä.",
+      "catalogue_retired": "Tämä luettelo on poistettu käytöstä eikä sitä voi kiinnittää.",
+      "code_duplicate": "Tämä koodi on jo käytössä projektissa.",
+      "comment_not_found": "Kommenttia ei löytynyt.",
+      "comment_text_required": "Kommentti vaatii tekstin.",
+      "concurrent_issue": "Julkaisua muutettiin samaan aikaan; yritä uudelleen.",
+      "condition_needs_owner_and_due_date": "Vahvistettu ehto vaatii vastuuhenkilön ja määräajan.",
+      "condition_not_found": "Ehtoa ei löytynyt.",
+      "condition_not_proposed": "Tämä ehto on jo vahvistettu tai hylätty.",
+      "condition_owner_not_member": "Ehdon vastuuhenkilön täytyy olla tämän projektin jäsen.",
+      "contact_not_found": "Yhteystietoa ei löytynyt.",
+      "container_not_found": "Asiakirjakansiota ei löytynyt tästä projektista.",
+      "deliverable_not_found": "Suunnittelun aikataulurivia ei löytynyt.",
+      "dist_rule_not_found": "Jakosääntöä ei löytynyt.",
+      "distribution_list_not_found": "Jakelulistaa ei löytynyt tästä projektista.",
+      "drawing_not_found": "Piirustusta ei löytynyt.",
+      "duplicate_issue": "Osa revisioista on jo lähetetty näille vastaanottajille; anna syy uudelleenlähetykselle.",
+      "field_required": "Pakollinen kenttä puuttuu.",
+      "forbidden": "Sinulla ei ole oikeutta tähän toimintoon.",
+      "frame_document_missing": "Projektin hallintomallissa ei ole suunnittelun runkoasiakirjaa.",
+      "frame_register_unknown": "Tätä rekisteriä ei voi kirjoittaa runkoasiakirjaksi.",
+      "governance_gate_not_found": "Tämä portti ei kuulu projektin vaihemalliin.",
+      "hint_override_needs_rationale": "Luettelon suosituksen ohittaminen vaatii perustelun.",
+      "invalid_id": "Virheellinen tunniste.",
+      "invalid_transition": "Tämä tilamuutos ei ole nyt sallittu.",
+      "manage_required": "Tämän kentän muuttaminen vaatii suunnittelun hallinnan oikeuden.",
+      "model_exists": "Vaihemalli on jo kiinnitetty.",
+      "no_approval_route": "Tässä projektissa ei ole aktiivista hyväksyntäreittiä suunnittelun hyväksyntäkohdille.",
+      "not_area_owner": "Vain hallinta-alueen vastuuhenkilö tai varahenkilö taikka hallintavastaava voi kirjoittaa sen runkoasiakirjan.",
+      "not_required_needs_rationale": "Selvityksen merkitseminen tarpeettomaksi vaatii perustelun.",
+      "number_reserved": "Tämä numero kuului poistettuun piirustukseen, eikä sitä käytetä uudelleen.",
+      "number_taken": "Tämä numero on käytössä tai on ollut käytössä projektissa.",
+      "numbering_case_invalid": "Numeron on oltava isoilla kirjaimilla.",
+      "numbering_chars_invalid": "Numero sisältää merkkejä, joita numerointijärjestelmä ei salli.",
+      "numbering_code_not_in_list": "Kentän arvo ei ole numerointijärjestelmän koodiluettelossa.",
+      "numbering_empty": "Numero on tyhjä.",
+      "numbering_field_invalid": "Numeron kenttä ei vastaa sen muotoa.",
+      "numbering_field_missing": "Numerosta puuttuu pakollinen kenttä.",
+      "numbering_invalid": "Numero ei vastaa projektin numerointijärjestelmää.",
+      "numbering_metadata_in_number": "Tila ja revisio ovat metatietoja, eivätkä ne saa kuulua numeroon.",
+      "numbering_parts_mismatch": "Numero ja tallennetut osat eivät täsmää.",
+      "numbering_structure_invalid": "Numerosta puuttuvat järjestelmän kentät.",
+      "numbering_too_long": "Numero on pidempi kuin järjestelmä sallii.",
+      "option_kind_unknown": "Tällaista valintaluetteloa ei ole.",
+      "originator_duplicate": "Toinen aktiivinen suunnittelurooli käyttää jo tätä laatijakoodia.",
+      "originator_required": "Erikoisalan suunnittelijalla täytyy olla laatijakoodi.",
+      "originator_unknown": "Laatija ei kuulu yhteenkään aktiiviseen suunnittelurooliin.",
+      "party_kind_invalid": "Tuntematon osapuolen tyyppi.",
+      "permit_empty": "Lupapaketissa ei ole kohteita.",
+      "permit_incomplete": "Vaadittuja kohteita puuttuu tai niitä ei ole vielä jaettu.",
+      "permit_item_kind_invalid": "Tuntematon kohteen tyyppi.",
+      "permit_item_missing": "Vaadittu kohde puuttuu.",
+      "permit_item_not_found": "Paketin kohdetta ei löytynyt.",
+      "permit_link_frozen": "Lähettämisen jälkeen linkitettyä tarkastuskierrosta tai lähetystä ei voi korvata.",
+      "permit_locked": "Paketti on lähetetty, ja sen sisältö on lukittu.",
+      "permit_not_approved": "Ehdot kirjataan vain hyväksytylle paketille.",
+      "permit_not_found": "Lupapakettia ei löytynyt.",
+      "permit_profile_unknown": "Tuntematon lupaprofiili.",
+      "permit_state_read_from_cycle": "Lähettämisen jälkeen tila seuraa viranomaisen tarkastuskierrosta.",
+      "phase_required": "Valitse vaihe, johon tämä kuuluu.",
+      "phase_unknown": "Tämä vaihe ei kuulu projektin vaihemalliin.",
+      "planned_count_reduction_needs_rationale": "Suunniteltujen määrän vähentäminen vaatii perustelun.",
+      "project_not_found": "Projektia ei löytynyt.",
+      "rationale_required": "Perustelu vaaditaan.",
+      "recipient_exactly_one": "Valitse joko jakelulista tai suunnittelurooli.",
+      "release_contains_wip": "Julkaisu ei voi sisältää työn alla olevaa työtä.",
+      "release_empty": "Julkaisussa ei ole revisioita.",
+      "release_four_eyes": "Julkaisun valmistelija ei voi julkaista sitä itse.",
+      "release_needs_published": "Rakentamista varten tehtävä julkaisu vaatii julkaistuja revisioita.",
+      "release_no_recipients": "Jakelumatriisin yksikään vastaanottaja ei vastaa tätä julkaisua.",
+      "release_not_approved": "Julkaisua ei ole vielä hyväksytty sen hyväksyntäreitillä.",
+      "release_not_draft": "Vain luonnosjulkaisua voi muuttaa.",
+      "release_not_found": "Julkaisua ei löytynyt.",
+      "release_not_pending": "Julkaisu ei odota hyväksyntää.",
+      "release_not_ready": "Julkaisun on oltava valmis ennen sen julkaisemista.",
+      "release_recipient_empty": "Jakelumatriisin vastaanottajalla ei ole henkilöä, jolle lähettää. Täydennä ensin lista tai rooli.",
+      "report_author_required": "Pakollisen riippumattoman tarkastuksen vaativalla selvityksellä on oltava laatijarooli.",
+      "report_checker_required": "Riippumaton tarkastus vaatii tarkastajarooliin.",
+      "report_checker_same_party": "Tarkastajan on kuuluttava eri osapuoleen kuin laatijan.",
+      "report_external_check_not_approved": "Ulkoista tarkastuskierrosta ei ole vielä hyväksytty.",
+      "report_fields_frozen": "Laatijaa, tarkastajaa, ulkoista tarkastusta ja tarkastuskierrosta ei voi muuttaa lähettämisen jälkeen.",
+      "report_kind_unknown": "Tuntematon selvityksen tyyppi.",
+      "report_not_found": "Selvitystä ei löytynyt.",
+      "review_comments_open": "Avoimet kommentit on ensin suljettava.",
+      "review_cycle_not_found": "Tarkastuskierrosta ei löytynyt tästä projektista.",
+      "review_not_found": "Katselmusta ei löytynyt.",
+      "review_not_open": "Katselmus on suljettu kommenteilta.",
+      "review_outcome_invalid": "Tuntematon katselmuksen tulos.",
+      "revision_not_current": "Julkaisussa voi olla piirustuksen vain nykyinen revisio.",
+      "revision_not_found": "Revisiota ei löytynyt tästä projektista.",
+      "role_in_use": "Piirustukset käyttävät yhä tätä roolia.",
+      "role_not_active": "Rooli on vapautettu projektista.",
+      "role_not_found": "Suunnitteluroolia ei löytynyt.",
+      "route_start_failed": "Hyväksyntäreittiä ei voitu käynnistää.",
+      "scheme_has_no_form_list": "Kiinnitetyssä numerointijärjestelmässä ei ole asiakirjalomakkeiden luetteloa.",
+      "setup_exists": "Suunnittelunhallinta on jo otettu käyttöön tässä projektissa.",
+      "setup_missing": "Suunnittelunhallintaa ei ole vielä otettu käyttöön tässä projektissa.",
+      "severity_invalid": "Tuntematon vakavuus.",
+      "source_not_installed": "Näitä tietueita sisältävä moduuli ei ole asennettu.",
+      "submission_not_found": "Viranomaislähetystä ei löytynyt tästä projektista.",
+      "unknown_catalogue": "Luetteloa ei löytynyt.",
+      "use_conclude": "Kirjaa tulos käyttämällä päätä -toimintoa.",
+      "use_issue": "Lähetä julkaisu käyttämällä julkaise-toimintoa.",
+      "waiver_needs_rationale": "Suunnittelun aikataulurivistä luopuminen vaatii perustelun.",
+      "wbs_code_duplicate": "Tämä WBS-koodi on jo käytössä projektissa.",
+      "wbs_code_not_under_parent": "Alakoodin on alettava ylätason koodillaan.",
+      "wbs_code_required": "WBS-koodi vaaditaan.",
+      "wbs_invalid": "Työn rakennejako rikkoo projektin WBS-sääntöjä.",
+      "wbs_move_cycle": "Solmu ei voi siirtyä oman jälkeläisensä alle.",
+      "wbs_node_closed": "Tämä WBS-solmu on suljettu uusilta viittauksilta.",
+      "wbs_node_not_found": "WBS-solmua ei löytynyt.",
+      "wbs_node_referenced": "Solmu tai jokin sen alisolmuista on viitattu; sulje se sen sijaan.",
+      "wbs_parent_not_found": "Ylätason WBS-solmua ei löytynyt."
+    },
+    "evidence": {
+      "deliverables": "Vaiheen suunnittelun aikataulurivit on hyväksytty",
+      "major_comments": "Ei avoimia merkittäviä katselmuskommentteja",
+      "no_host_area": "Suunnittelun valmius tuntematon: hallintamalli ei nimeä suunnittelulle aluetta",
+      "no_host_document": "Suunnittelun valmius tuntematon: projektissa ei ole vielä suunnittelun runkoasiakirjaa. Luo suunnittelurekisteri (tiedosto CDE:ssä) sen luomiseksi.",
+      "no_phase": "Suunnittelun valmius tuntematon: tämä portti ei sulje yhtään vaihetta",
+      "reports": "Vaiheen vaaditut selvitykset on hyväksytty"
+    },
+    "export": {
+      "col_check": "Riippumaton tarkastus",
+      "col_code": "Koodi",
+      "col_copies": "Paperikopiot",
+      "col_discipline": "Erikoisala",
+      "col_disciplines": "Erikoisalat",
+      "col_format": "Muoto",
+      "col_forms": "Lomakkeet",
+      "col_kind": "Tyyppi",
+      "col_last_issue": "Viimeisin julkaisu",
+      "col_min_status": "Vähimmäistila",
+      "col_number": "Numero",
+      "col_phase": "Vaihe",
+      "col_phases": "Vaiheet",
+      "col_pinned_revision": "Kiinnitetty revisio",
+      "col_present": "Läsnä",
+      "col_purpose": "Tarkoitus",
+      "col_recipient": "Vastaanottaja",
+      "col_recipients": "Vastaanottajat",
+      "col_required": "Vaadittu",
+      "col_revision": "Revisio",
+      "col_state": "Tila",
+      "col_status": "Tila",
+      "col_title": "Nimike",
+      "empty": "Ei luetteloitavaa.",
+      "project": "Projekti",
+      "title_matrix": "Jakelumatriisi",
+      "title_permit": "Lupapaketti",
+      "title_register": "Piirustusrekisteri",
+      "title_reports": "Selvitykset ja todistukset",
+      "yes": "Kyllä"
+    },
+    "independent_check": {
+      "none": "Ei",
+      "optional": "Valinnainen",
+      "required_by_rule": "Vaaditaan säännön mukaan"
+    },
+    "permit_item": {
+      "drawing": "Piirustus",
+      "form": "Lomake",
+      "report": "Selvitys"
+    },
+    "purpose": {
+      "for_approval": "Hyväksyttäväksi",
+      "for_construction": "Rakentamiseen",
+      "for_information": "Tiedoksi",
+      "for_record": "Arkistoon",
+      "for_review": "Katselmoitavaksi",
+      "for_tender": "Tarjouskilpailuun"
+    },
+    "report_state": {
+      "accepted": "Hyväksytty",
+      "commissioned": "Tilattu",
+      "in_progress": "Työn alla",
+      "not_required": "Ei vaadita",
+      "rejected": "Hylätty",
+      "remarks": "Huomautukset",
+      "required": "Vaadittu",
+      "submitted": "Lähetetty",
+      "under_check": "Tarkastuksessa"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Hyväksyntäkohdan {code} on päättänyt joku, jolla ei ole oikeutta hyväksyä.",
+        "suggestion": "Päätä se uudelleen sen reitin kautta."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Suunnittelun aikataulurivi {code} vaiheesta {phase} ei ole hyväksytty.",
+        "suggestion": "Viimeistele piirustukset tai luovu perustelulla."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Numero {number} ei vastaa järjestelmää ({fields}).",
+        "suggestion": "Anna piirustukselle uusi numero."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Numero {number} ei täsmää tallennettuihin osiinsa ({fields}).",
+        "suggestion": "Korjaa kansion kentät."
+      },
+      "drawing_originator_known": {
+        "fail": "Piirustuksen {number} laatija {value} ei kuulu yhteenkään aktiiviseen rooliin.",
+        "suggestion": "Lisää suunnittelurooli tai korjaa numero."
+      },
+      "not_required_has_rationale": {
+        "fail": "Selvityksellä {code} ei ole perustelua.",
+        "suggestion": "Lisää perustelu."
+      },
+      "permit_content_current": {
+        "fail": "Lupapaketti {code} sisältää korvattuja revisioita.",
+        "suggestion": "Ilmoita viranomaiselle tai lähetä uudelleen."
+      },
+      "permit_package_complete": {
+        "fail": "Lupapakettista {code} puuttuu {count} vaadittua kohdetta.",
+        "suggestion": "Lisää tai jaa puuttuvat kohteet."
+      },
+      "release_revisions_suitable": {
+        "fail": "Julkaisussa {release} on {count} sopimatonta revisiota.",
+        "suggestion": "Poista työn alla oleva työ tai julkaise ensin."
+      },
+      "report_independent_check": {
+        "fail": "Selvitys {code} hyväksyttiin ilman pätevää riippumatonta tarkastusta.",
+        "suggestion": "Nimeä tarkastaja toisesta osapuolesta."
+      },
+      "title_block_matches_number": {
+        "fail": "Piirustuksen {number} nimiölohkossa lukee {value}.",
+        "suggestion": "Korjaa nimiölohko."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS-koodia {code} käytetään useammin kuin kerran.",
+        "suggestion": "Numeroi kaksoiskappaleet uudelleen."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} viittaa WBS-arvoon {value}, joka ei vastaa yhtään solmua.",
+        "suggestion": "Korjaa viittaus tai lisää solmu."
+      }
+    }
+  }
+}

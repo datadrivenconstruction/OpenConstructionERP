@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Raport de acustică",
+        "contamination": "Raport de contaminare a terenului",
+        "daylight": "Raport privind lumina naturală și insolația",
+        "drainage": "Strategia de drenaj",
+        "environmental": "Raport de mediu",
+        "fire_proof_check": "Verificare independentă a securității la incendiu",
+        "fire_safety_concept": "Concept de securitate la incendiu",
+        "geotechnical": "Raport geotehnic",
+        "sound_insulation": "Dovada izolării fonice",
+        "structural_design": "Proiectarea structurii și calcule",
+        "structural_proof_check": "Verificare structurală independentă",
+        "kitchen_planning": "Raport de proiectare a bucătăriei",
+        "survey": "Releveu al amplasamentului",
+        "thermal_energy": "Dovada performanței termice și energetice",
+        "traffic": "Raport de trafic",
+        "uxo": "Evaluarea munițiilor neexplodate",
+        "vibration": "Raport privind vibrațiile"
+      }
+    },
+    "cde_state": {
+      "archived": "Arhivat",
+      "published": "Publicat",
+      "shared": "Partajat",
+      "wip": "În lucru"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Devize și cantități",
+        "cvr": "Reconcilierea valorii costurilor",
+        "design_management": "Managementul proiectării",
+        "field_time": "Timp pe șantier",
+        "fieldreports": "Rapoarte de șantier",
+        "finance": "Finanțe",
+        "inspections": "Inspecții",
+        "procurement": "Achiziții",
+        "schedule": "Grafic"
+      },
+      "phase": {
+        "approval": "Aprobare",
+        "award": "Atribuire",
+        "brief": "Tema de proiectare",
+        "concept": "Concept",
+        "construction": "Execuție",
+        "design": "Proiectare",
+        "detail": "Proiectare de detaliu",
+        "development": "Dezvoltare",
+        "execution": "Realizare",
+        "handover": "Predare",
+        "operation": "Exploatare",
+        "strategy": "Strategie",
+        "tender": "Licitație"
+      }
+    },
+    "errors": {
+      "answer_required": "Este necesar un răspuns.",
+      "approval_point_locked": "Punctul de aprobare este în revizuire sau decis și nu poate fi modificat.",
+      "approval_point_not_found": "Punctul de aprobare nu a fost găsit.",
+      "approval_point_not_rejected": "Doar un punct de aprobare respins poate fi redeschis.",
+      "binding_requires_change_request": "Documentul-cadru de proiectare este obligatoriu; modificările necesită o cerere de modificare.",
+      "catalogue_retired": "Acest catalog a fost retras și nu poate fi fixat.",
+      "code_duplicate": "Acest cod este deja utilizat în proiect.",
+      "comment_not_found": "Comentariul nu a fost găsit.",
+      "comment_text_required": "Un comentariu trebuie să conțină text.",
+      "concurrent_issue": "Emiterea a fost modificată în același timp; încercați din nou.",
+      "condition_needs_owner_and_due_date": "O condiție confirmată necesită un responsabil și un termen.",
+      "condition_not_found": "Condiția nu a fost găsită.",
+      "condition_not_proposed": "Această condiție a fost deja confirmată sau respinsă.",
+      "condition_owner_not_member": "Responsabilul unei condiții trebuie să fie membru al acestui proiect.",
+      "contact_not_found": "Contactul nu a fost găsit.",
+      "container_not_found": "Containerul de documente nu a fost găsit în acest proiect.",
+      "deliverable_not_found": "Rândul din graficul de proiectare nu a fost găsit.",
+      "dist_rule_not_found": "Regula de distribuție nu a fost găsită.",
+      "distribution_list_not_found": "Lista de distribuție nu a fost găsită în acest proiect.",
+      "drawing_not_found": "Planșa nu a fost găsită.",
+      "duplicate_issue": "Unele revizii au fost deja trimise acestor destinatari; indicați un motiv pentru o nouă emitere.",
+      "field_required": "Lipsește un câmp obligatoriu.",
+      "forbidden": "Nu aveți permisiunea pentru această acțiune.",
+      "frame_document_missing": "Proiectul nu are un document-cadru de proiectare în modelul său de guvernanță.",
+      "frame_register_unknown": "Acest registru nu poate fi scris ca document-cadru.",
+      "governance_gate_not_found": "Această poartă nu face parte din modelul de faze al proiectului.",
+      "hint_override_needs_rationale": "Modificarea indicației din catalog necesită o justificare.",
+      "invalid_id": "Identificator invalid.",
+      "invalid_transition": "Această schimbare de stare nu este permisă acum.",
+      "manage_required": "Modificarea acestui câmp necesită permisiunea de a gestiona proiectarea.",
+      "model_exists": "Un model de faze este deja fixat.",
+      "no_approval_route": "Nu există un traseu de aprobare activ pentru punctele de aprobare ale proiectării în acest proiect.",
+      "not_area_owner": "Doar titularul sau supleantul zonei de guvernanță, sau un manager de guvernanță, poate scrie documentul-cadru al acesteia.",
+      "not_required_needs_rationale": "Marcarea unui raport ca neobligatoriu necesită o justificare.",
+      "number_reserved": "Acest număr a aparținut unei planșe șterse și nu este reutilizat niciodată.",
+      "number_taken": "Acest număr este sau a fost utilizat în proiect.",
+      "numbering_case_invalid": "Numărul trebuie scris cu majuscule.",
+      "numbering_chars_invalid": "Numărul conține caractere nepermise de schemă.",
+      "numbering_code_not_in_list": "Valoarea unui câmp nu se află în lista de coduri a schemei.",
+      "numbering_empty": "Numărul este gol.",
+      "numbering_field_invalid": "Un câmp al numărului nu corespunde formatului său.",
+      "numbering_field_missing": "Lipsește un câmp obligatoriu al numărului.",
+      "numbering_invalid": "Numărul nu corespunde schemei de numerotare a proiectului.",
+      "numbering_metadata_in_number": "Starea și revizia sunt metadate și nu trebuie să facă parte din număr.",
+      "numbering_parts_mismatch": "Numărul și părțile stocate nu coincid.",
+      "numbering_structure_invalid": "Numărul nu are câmpurile schemei.",
+      "numbering_too_long": "Numărul este mai lung decât permite schema.",
+      "option_kind_unknown": "Nu există o astfel de listă de opțiuni.",
+      "originator_duplicate": "Un alt rol activ de proiectare folosește deja acest cod de emitent.",
+      "originator_required": "Un proiectant de specialitate are nevoie de un cod de emitent.",
+      "originator_unknown": "Emitentul nu aparține niciunui rol activ de proiectare.",
+      "party_kind_invalid": "Tip de parte necunoscut.",
+      "permit_empty": "Pachetul de autorizare nu conține elemente.",
+      "permit_incomplete": "Lipsesc elemente obligatorii sau nu au fost încă partajate.",
+      "permit_item_kind_invalid": "Tip de element necunoscut.",
+      "permit_item_missing": "Lipsește un element obligatoriu.",
+      "permit_item_not_found": "Elementul din pachet nu a fost găsit.",
+      "permit_link_frozen": "După depunere, ciclul de verificare sau depunerea asociată nu pot fi înlocuite.",
+      "permit_locked": "Pachetul a fost depus, iar conținutul său este fixat.",
+      "permit_not_approved": "Condițiile se înregistrează doar pe un pachet aprobat.",
+      "permit_not_found": "Pachetul de autorizare nu a fost găsit.",
+      "permit_profile_unknown": "Profil de autorizare necunoscut.",
+      "permit_state_read_from_cycle": "După depunere, starea urmează ciclul de verificare al autorității.",
+      "phase_required": "Alegeți faza căreia îi aparține acest lucru.",
+      "phase_unknown": "Această fază nu există în modelul de faze al proiectului.",
+      "planned_count_reduction_needs_rationale": "Reducerea numărului planificat necesită o justificare.",
+      "project_not_found": "Proiectul nu a fost găsit.",
+      "rationale_required": "Este necesară o justificare.",
+      "recipient_exactly_one": "Alegeți fie o listă de distribuție, fie un rol de proiectare.",
+      "release_contains_wip": "O emitere nu poate include lucrări în lucru.",
+      "release_empty": "Emiterea nu conține revizii.",
+      "release_four_eyes": "Persoana care a pregătit emiterea nu o poate efectua.",
+      "release_needs_published": "O emitere pentru execuție necesită revizii publicate.",
+      "release_no_recipients": "Niciun destinatar din matricea de distribuție nu corespunde acestei emiteri.",
+      "release_not_approved": "Emiterea nu a fost încă aprobată pe traseul său.",
+      "release_not_draft": "Doar o emitere în ciornă poate fi modificată.",
+      "release_not_found": "Emiterea nu a fost găsită.",
+      "release_not_pending": "Emiterea nu așteaptă o aprobare.",
+      "release_not_ready": "Emiterea trebuie să fie pregătită înainte de a fi efectuată.",
+      "release_recipient_empty": "Un destinatar din matricea de distribuție nu are o persoană căreia să-i fie trimis. Completați mai întâi lista sau rolul.",
+      "report_author_required": "Un raport cu verificare independentă obligatorie necesită un rol de autor.",
+      "report_checker_required": "O verificare independentă necesită un rol de verificator.",
+      "report_checker_same_party": "Verificatorul trebuie să aparțină altei părți decât autorul.",
+      "report_external_check_not_approved": "Ciclul de verificare externă nu a fost încă aprobat.",
+      "report_fields_frozen": "Autorul, verificatorul, verificarea externă și ciclul de revizuire nu pot fi modificate după depunere.",
+      "report_kind_unknown": "Tip de raport necunoscut.",
+      "report_not_found": "Raportul nu a fost găsit.",
+      "review_comments_open": "Mai întâi trebuie închise comentariile deschise.",
+      "review_cycle_not_found": "Ciclul de revizuire nu a fost găsit în acest proiect.",
+      "review_not_found": "Revizuirea nu a fost găsită.",
+      "review_not_open": "Revizuirea este închisă pentru comentarii.",
+      "review_outcome_invalid": "Rezultat de revizuire necunoscut.",
+      "revision_not_current": "O emitere poate include doar revizia curentă a unei planșe.",
+      "revision_not_found": "Revizia nu a fost găsită în acest proiect.",
+      "role_in_use": "Rolul este încă utilizat de planșe.",
+      "role_not_active": "Rolul a fost eliberat din proiect.",
+      "role_not_found": "Rolul de proiectare nu a fost găsit.",
+      "route_start_failed": "Traseul de aprobare nu a putut fi pornit.",
+      "scheme_has_no_form_list": "Schema de numerotare fixată nu are o listă de forme de document.",
+      "setup_exists": "Managementul proiectării este deja configurat pentru acest proiect.",
+      "setup_missing": "Managementul proiectării nu este încă configurat pentru acest proiect.",
+      "severity_invalid": "Grad de severitate necunoscut.",
+      "source_not_installed": "Modulul care deține aceste înregistrări nu este instalat.",
+      "submission_not_found": "Depunerea către autoritate nu a fost găsită în acest proiect.",
+      "unknown_catalogue": "Catalogul nu a fost găsit.",
+      "use_conclude": "Folosiți concluzionare pentru a înregistra rezultatul.",
+      "use_issue": "Folosiți emitere pentru a trimite emiterea.",
+      "waiver_needs_rationale": "Renunțarea la un rând din graficul de proiectare necesită o justificare.",
+      "wbs_code_duplicate": "Acest cod WBS este deja utilizat în proiect.",
+      "wbs_code_not_under_parent": "Un cod subordonat trebuie să înceapă cu codul părintelui său.",
+      "wbs_code_required": "Este necesar un cod WBS.",
+      "wbs_invalid": "Structura de defalcare a lucrărilor încalcă regulile WBS ale proiectului.",
+      "wbs_move_cycle": "Un nod nu poate fi mutat sub propriul descendent.",
+      "wbs_node_closed": "Acest nod WBS este închis pentru referințe noi.",
+      "wbs_node_not_found": "Nodul WBS nu a fost găsit.",
+      "wbs_node_referenced": "Nodul sau unul dintre copiii săi este referențiat; închideți-l în schimb.",
+      "wbs_parent_not_found": "Nodul WBS părinte nu a fost găsit."
+    },
+    "evidence": {
+      "deliverables": "Rândurile din graficul de proiectare al fazei acceptate",
+      "major_comments": "Niciun comentariu major deschis din revizuire",
+      "no_host_area": "Starea de pregătire a proiectării necunoscută: modelul de guvernanță nu indică o zonă pentru proiectare",
+      "no_host_document": "Starea de pregătire a proiectării necunoscută: proiectul nu are încă un document-cadru de proiectare. Generați un registru de proiectare (fișier din CDE) pentru a-l crea.",
+      "no_phase": "Starea de pregătire a proiectării necunoscută: această poartă nu închide nicio fază",
+      "reports": "Rapoartele obligatorii ale fazei acceptate"
+    },
+    "export": {
+      "col_check": "Verificare independentă",
+      "col_code": "Cod",
+      "col_copies": "Exemplare pe hârtie",
+      "col_discipline": "Specialitate",
+      "col_disciplines": "Specialități",
+      "col_format": "Format",
+      "col_forms": "Forme",
+      "col_kind": "Tip",
+      "col_last_issue": "Ultima emitere",
+      "col_min_status": "Stare minimă",
+      "col_number": "Număr",
+      "col_phase": "Fază",
+      "col_phases": "Faze",
+      "col_pinned_revision": "Revizie fixată",
+      "col_present": "Prezent",
+      "col_purpose": "Scop",
+      "col_recipient": "Destinatar",
+      "col_recipients": "Destinatari",
+      "col_required": "Obligatoriu",
+      "col_revision": "Revizie",
+      "col_state": "Stare",
+      "col_status": "Status",
+      "col_title": "Titlu",
+      "empty": "Nimic de afișat.",
+      "project": "Proiect",
+      "title_matrix": "Matricea de distribuție",
+      "title_permit": "Pachet de autorizare",
+      "title_register": "Registrul planșelor",
+      "title_reports": "Rapoarte și dovezi",
+      "yes": "Da"
+    },
+    "independent_check": {
+      "none": "Niciuna",
+      "optional": "Opțională",
+      "required_by_rule": "Impusă de reglementare"
+    },
+    "permit_item": {
+      "drawing": "Planșă",
+      "form": "Formular",
+      "report": "Raport"
+    },
+    "purpose": {
+      "for_approval": "Pentru aprobare",
+      "for_construction": "Pentru execuție",
+      "for_information": "Pentru informare",
+      "for_record": "Pentru evidență",
+      "for_review": "Pentru revizuire",
+      "for_tender": "Pentru licitație"
+    },
+    "report_state": {
+      "accepted": "Acceptat",
+      "commissioned": "Recepționat",
+      "in_progress": "În curs",
+      "not_required": "Neobligatoriu",
+      "rejected": "Respins",
+      "remarks": "Observații",
+      "required": "Obligatoriu",
+      "submitted": "Depus",
+      "under_check": "În verificare"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Punctul de aprobare {code} nu a fost decis de un aprobator autorizat.",
+        "suggestion": "Decideți din nou prin traseul său."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Rândul din graficul de proiectare {code} din {phase} nu este acceptat.",
+        "suggestion": "Finalizați planșele sau renunțați cu o justificare."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Numărul {number} nu corespunde schemei ({fields}).",
+        "suggestion": "Renumerotați planșa."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Numărul {number} nu corespunde părților stocate ({fields}).",
+        "suggestion": "Corectați câmpurile containerului."
+      },
+      "drawing_originator_known": {
+        "fail": "Emitentul {value} al numărului {number} nu aparține niciunui rol activ.",
+        "suggestion": "Adăugați rolul de proiectare sau corectați numărul."
+      },
+      "not_required_has_rationale": {
+        "fail": "Raportul {code} nu are justificare.",
+        "suggestion": "Adăugați justificarea."
+      },
+      "permit_content_current": {
+        "fail": "Pachetul de autorizare {code} conține revizii înlocuite.",
+        "suggestion": "Informați autoritatea sau depuneți din nou."
+      },
+      "permit_package_complete": {
+        "fail": "Pachetului de autorizare {code} îi lipsesc {count} elemente obligatorii.",
+        "suggestion": "Adăugați sau partajați elementele lipsă."
+      },
+      "release_revisions_suitable": {
+        "fail": "Emiterea {release} are {count} revizii nepotrivite.",
+        "suggestion": "Eliminați lucrările în lucru sau publicați mai întâi."
+      },
+      "report_independent_check": {
+        "fail": "Raportul {code} a fost acceptat fără o verificare independentă validă.",
+        "suggestion": "Desemnați un verificator dintr-o altă parte."
+      },
+      "title_block_matches_number": {
+        "fail": "Ștampila planșei {number} arată {value}.",
+        "suggestion": "Corectați ștampila."
+      },
+      "wbs_code_unique": {
+        "fail": "Codul WBS {code} este utilizat de mai multe ori.",
+        "suggestion": "Renumerotați duplicatele."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} se referă la valoarea WBS {value}, care nu corespunde niciunui nod.",
+        "suggestion": "Corectați referința sau adăugați nodul."
+      }
+    }
+  }
+}

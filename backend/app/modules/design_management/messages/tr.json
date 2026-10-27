@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustik raporu",
+        "contamination": "Zemin kirliliği raporu",
+        "daylight": "Gün ışığı ve güneş raporu",
+        "drainage": "Drenaj stratejisi",
+        "environmental": "Çevre raporu",
+        "fire_proof_check": "Bağımsız yangın güvenliği kontrolü",
+        "fire_safety_concept": "Yangın güvenliği konsepti",
+        "geotechnical": "Jeoteknik rapor",
+        "sound_insulation": "Ses yalıtımı belgesi",
+        "structural_design": "Yapısal tasarım ve hesaplar",
+        "structural_proof_check": "Bağımsız yapısal kontrol",
+        "kitchen_planning": "Mutfak planlama raporu",
+        "survey": "Saha etüdü",
+        "thermal_energy": "Isı ve enerji performans belgesi",
+        "traffic": "Trafik raporu",
+        "uxo": "Patlamamış mühimmat değerlendirmesi",
+        "vibration": "Titreşim raporu"
+      }
+    },
+    "cde_state": {
+      "archived": "Arşivlendi",
+      "published": "Yayımlandı",
+      "shared": "Paylaşıldı",
+      "wip": "Devam eden çalışma"
+    },
+    "common": {
+      "ok": "Tamam",
+      "module": {
+        "boq": "Metraj cetveli",
+        "cvr": "Maliyet değer mutabakatı",
+        "design_management": "Tasarım yönetimi",
+        "field_time": "Saha süresi",
+        "fieldreports": "Saha raporları",
+        "finance": "Finans",
+        "inspections": "Denetimler",
+        "procurement": "Satın alma",
+        "schedule": "Program"
+      },
+      "phase": {
+        "approval": "Onay",
+        "award": "İhale sonuçlandırma",
+        "brief": "Proje gereksinimleri",
+        "concept": "Konsept",
+        "construction": "İnşaat",
+        "design": "Tasarım",
+        "detail": "Detay tasarım",
+        "development": "Geliştirme",
+        "execution": "Uygulama",
+        "handover": "Teslim",
+        "operation": "İşletme",
+        "strategy": "Strateji",
+        "tender": "İhale"
+      }
+    },
+    "errors": {
+      "answer_required": "Bir yanıt gereklidir.",
+      "approval_point_locked": "Onay noktası incelemede veya karara bağlanmış durumda; değiştirilemez.",
+      "approval_point_not_found": "Onay noktası bulunamadı.",
+      "approval_point_not_rejected": "Yalnızca reddedilmiş bir onay noktası yeniden açılabilir.",
+      "binding_requires_change_request": "Tasarım çerçeve belgesi bağlayıcıdır; değişiklikler bir değişiklik talebi gerektirir.",
+      "catalogue_retired": "Bu katalog kullanımdan kaldırıldı ve sabitlenemez.",
+      "code_duplicate": "Bu kod projede zaten kullanılıyor.",
+      "comment_not_found": "Yorum bulunamadı.",
+      "comment_text_required": "Bir yorumun metni olmalıdır.",
+      "concurrent_issue": "Revizyon aynı anda değiştirildi; lütfen tekrar deneyin.",
+      "condition_needs_owner_and_due_date": "Onaylanan bir koşul için sorumlu kişi ve termin tarihi gerekir.",
+      "condition_not_found": "Koşul bulunamadı.",
+      "condition_not_proposed": "Bu koşul zaten onaylandı veya reddedildi.",
+      "condition_owner_not_member": "Bir koşulun sorumlusu bu projenin üyesi olmalıdır.",
+      "contact_not_found": "İletişim kişisi bulunamadı.",
+      "container_not_found": "Bu projede belge konteyneri bulunamadı.",
+      "deliverable_not_found": "Tasarım programı satırı bulunamadı.",
+      "dist_rule_not_found": "Dağıtım kuralı bulunamadı.",
+      "distribution_list_not_found": "Bu projede dağıtım listesi bulunamadı.",
+      "drawing_not_found": "Çizim bulunamadı.",
+      "duplicate_issue": "Bazı revizyonlar bu alıcılara zaten gönderildi; yeniden göndermek için bir gerekçe verin.",
+      "field_required": "Zorunlu bir alan eksik.",
+      "forbidden": "Bu işlem için yetkiniz yok.",
+      "frame_document_missing": "Projenin yönetim modelinde tasarım çerçeve belgesi yok.",
+      "frame_register_unknown": "Bu kayıt bir çerçeve belgesi olarak yazılamaz.",
+      "governance_gate_not_found": "Bu kapı projenin faz modelinin parçası değil.",
+      "hint_override_needs_rationale": "Katalog ipucunu değiştirmek için bir gerekçe gerekir.",
+      "invalid_id": "Geçersiz kimlik.",
+      "invalid_transition": "Bu durum değişikliğine şu an izin verilmiyor.",
+      "manage_required": "Bu alanı değiştirmek için tasarımı yönetme yetkisi gerekir.",
+      "model_exists": "Bir faz modeli zaten sabitlenmiş.",
+      "no_approval_route": "Bu projede tasarım onay noktaları için etkin bir onay akışı yok.",
+      "not_area_owner": "Yönetim alanının yalnızca sahibi, vekili veya bir yönetim yöneticisi çerçeve belgesini yazabilir.",
+      "not_required_needs_rationale": "Bir raporu gerekli olmayan olarak işaretlemek için gerekçe gerekir.",
+      "number_reserved": "Bu numara silinmiş bir çizime aitti ve asla yeniden kullanılmaz.",
+      "number_taken": "Bu numara projede kullanılıyor veya daha önce kullanıldı.",
+      "numbering_case_invalid": "Numara büyük harflerle yazılmalıdır.",
+      "numbering_chars_invalid": "Numara, numaralandırma şemasının izin vermediği karakterler içeriyor.",
+      "numbering_code_not_in_list": "Bir alan değeri şemanın kod listesinde yok.",
+      "numbering_empty": "Numara boş.",
+      "numbering_field_invalid": "Numaranın bir alanı biçimine uymuyor.",
+      "numbering_field_missing": "Numaranın zorunlu bir alanı eksik.",
+      "numbering_invalid": "Numara projenin numaralandırma şemasına uymuyor.",
+      "numbering_metadata_in_number": "Durum ve revizyon üst veridir ve numaranın parçası olmamalıdır.",
+      "numbering_parts_mismatch": "Numara ile kayıtlı parçalar birbiriyle uyuşmuyor.",
+      "numbering_structure_invalid": "Numara, şemanın alanlarına sahip değil.",
+      "numbering_too_long": "Numara, şemanın izin verdiğinden uzun.",
+      "option_kind_unknown": "Böyle bir seçenek listesi yok.",
+      "originator_duplicate": "Bu sorumlu kodunu başka bir aktif tasarım rolü de kullanıyor.",
+      "originator_required": "Bir disiplin tasarımcısının sorumlu kodu olmalıdır.",
+      "originator_unknown": "Bu sorumlu, aktif bir tasarım rolüne bağlı değil.",
+      "party_kind_invalid": "Bilinmeyen taraf türü.",
+      "permit_empty": "İzin paketinde kalem yok.",
+      "permit_incomplete": "Zorunlu kalemler eksik veya henüz paylaşılmadı.",
+      "permit_item_kind_invalid": "Bilinmeyen kalem türü.",
+      "permit_item_missing": "Zorunlu kalem eksik.",
+      "permit_item_not_found": "Paket kalemi bulunamadı.",
+      "permit_link_frozen": "Gönderimden sonra bağlı inceleme döngüsü veya gönderim değiştirilemez.",
+      "permit_locked": "Paket gönderildi ve içeriği sabitlendi.",
+      "permit_not_approved": "Koşullar yalnızca onaylanmış bir pakete kaydedilebilir.",
+      "permit_not_found": "İzin paketi bulunamadı.",
+      "permit_profile_unknown": "Bilinmeyen izin profili.",
+      "permit_state_read_from_cycle": "Gönderimden sonra durum, makam inceleme döngüsünü izler.",
+      "phase_required": "Bunun ait olduğu fazı seçin.",
+      "phase_unknown": "Bu faz projenin faz modelinde yok.",
+      "planned_count_reduction_needs_rationale": "Planlanan adedi azaltmak için gerekçe gerekir.",
+      "project_not_found": "Proje bulunamadı.",
+      "rationale_required": "Bir gerekçe gereklidir.",
+      "recipient_exactly_one": "Bir dağıtım listesi veya bir tasarım rolü seçin.",
+      "release_contains_wip": "Bir revizyon paketi devam eden çalışma içeremez.",
+      "release_empty": "Revizyon paketinde revizyon yok.",
+      "release_four_eyes": "Revizyon paketini hazırlayan kişi onu yayımlayamaz.",
+      "release_needs_published": "İnşaat için yapılan bir gönderim yayımlanmış revizyonlar gerektirir.",
+      "release_no_recipients": "Dağıtım matrisinde bu revizyon paketiyle eşleşen alıcı yok.",
+      "release_not_approved": "Revizyon paketi henüz onay akışında onaylanmadı.",
+      "release_not_draft": "Yalnızca taslak bir revizyon paketi değiştirilebilir.",
+      "release_not_found": "Revizyon paketi bulunamadı.",
+      "release_not_pending": "Revizyon paketi bir onay beklemiyor.",
+      "release_not_ready": "Revizyon paketi gönderilmeden önce hazır olmalıdır.",
+      "release_recipient_empty": "Dağıtım matrisindeki bir alıcının gönderileceği bir kişi yok. Önce listeyi veya rolü tamamlayın.",
+      "report_author_required": "Zorunlu bağımsız kontrolü olan bir rapor, bir yazar rolü gerektirir.",
+      "report_checker_required": "Bağımsız bir kontrol, bir kontrolcü rolü gerektirir.",
+      "report_checker_same_party": "Kontrolcü, yazardan farklı bir tarafa ait olmalıdır.",
+      "report_external_check_not_approved": "Dış kontrol döngüsü henüz onaylanmadı.",
+      "report_fields_frozen": "Gönderimden sonra yazar, kontrolcü, dış kontrol ve inceleme döngüsü değiştirilemez.",
+      "report_kind_unknown": "Bilinmeyen rapor türü.",
+      "report_not_found": "Rapor bulunamadı.",
+      "review_comments_open": "Önce açık yorumlar kapatılmalıdır.",
+      "review_cycle_not_found": "Bu projede inceleme döngüsü bulunamadı.",
+      "review_not_found": "İnceleme bulunamadı.",
+      "review_not_open": "İnceleme yorumlara kapalı.",
+      "review_outcome_invalid": "Bilinmeyen inceleme sonucu.",
+      "revision_not_current": "Bir revizyon paketi yalnızca bir çizimin güncel revizyonunu taşıyabilir.",
+      "revision_not_found": "Bu projede revizyon bulunamadı.",
+      "role_in_use": "Rol hâlâ çizimler tarafından kullanılıyor.",
+      "role_not_active": "Rol projeden çıkarıldı.",
+      "role_not_found": "Tasarım rolü bulunamadı.",
+      "route_start_failed": "Onay akışı başlatılamadı.",
+      "scheme_has_no_form_list": "Sabitlenmiş numaralandırma şemasında belge formu listesi yok.",
+      "setup_exists": "Bu proje için tasarım yönetimi zaten kurulu.",
+      "setup_missing": "Bu proje için tasarım yönetimi henüz kurulmadı.",
+      "severity_invalid": "Bilinmeyen önem derecesi.",
+      "source_not_installed": "Bu kayıtları tutan modül kurulu değil.",
+      "submission_not_found": "Bu projede makam gönderimi bulunamadı.",
+      "unknown_catalogue": "Katalog bulunamadı.",
+      "use_conclude": "Sonucu kaydetmek için conclude kullanın.",
+      "use_issue": "Revizyon paketini göndermek için issue kullanın.",
+      "waiver_needs_rationale": "Bir tasarım programı satırından feragat etmek için gerekçe gerekir.",
+      "wbs_code_duplicate": "Bu WBS kodu projede zaten kullanılıyor.",
+      "wbs_code_not_under_parent": "Alt kod, üst kodunun önekiyle başlamalıdır.",
+      "wbs_code_required": "WBS kodu gereklidir.",
+      "wbs_invalid": "İş kırılım yapısı, projenin WBS kurallarını ihlal ediyor.",
+      "wbs_move_cycle": "Bir düğüm, kendi alt düğümünün altına taşınamaz.",
+      "wbs_node_closed": "Bu WBS düğümü yeni referanslara kapalı.",
+      "wbs_node_not_found": "WBS düğümü bulunamadı.",
+      "wbs_node_referenced": "Düğüm veya alt düğümlerinden biri referans veriliyor; bunun yerine düğümü kapatın.",
+      "wbs_parent_not_found": "Üst WBS düğümü bulunamadı."
+    },
+    "evidence": {
+      "deliverables": "Fazın kabul edilmiş tasarım programı satırları",
+      "major_comments": "Açık büyük inceleme yorumu yok",
+      "no_host_area": "Tasarım hazırlığı bilinmiyor: yönetim modeli tasarım için bir alan belirtmiyor",
+      "no_host_document": "Tasarım hazırlığı bilinmiyor: projenin henüz tasarım çerçeve belgesi yok. Bunu oluşturmak için bir tasarım kaydı (CDE içinde Dosya) üretin.",
+      "no_phase": "Tasarım hazırlığı bilinmiyor: bu kapı hiçbir fazı kapatmıyor",
+      "reports": "Fazın zorunlu raporları kabul edildi"
+    },
+    "export": {
+      "col_check": "Bağımsız kontrol",
+      "col_code": "Kod",
+      "col_copies": "Basılı kopya",
+      "col_discipline": "Disiplin",
+      "col_disciplines": "Disiplinler",
+      "col_format": "Format",
+      "col_forms": "Formlar",
+      "col_kind": "Tür",
+      "col_last_issue": "Son gönderim",
+      "col_min_status": "Asgari durum",
+      "col_number": "Numara",
+      "col_phase": "Faz",
+      "col_phases": "Fazlar",
+      "col_pinned_revision": "Sabitlenmiş revizyon",
+      "col_present": "Mevcut",
+      "col_purpose": "Amaç",
+      "col_recipient": "Alıcı",
+      "col_recipients": "Alıcılar",
+      "col_required": "Gerekli",
+      "col_revision": "Revizyon",
+      "col_state": "Durum",
+      "col_status": "Statü",
+      "col_title": "Başlık",
+      "empty": "Listelenecek bir şey yok.",
+      "project": "Proje",
+      "title_matrix": "Dağıtım matrisi",
+      "title_permit": "İzin paketi",
+      "title_register": "Çizim kayıt listesi",
+      "title_reports": "Raporlar ve belgeler",
+      "yes": "Evet"
+    },
+    "independent_check": {
+      "none": "Yok",
+      "optional": "İsteğe bağlı",
+      "required_by_rule": "Kural gereği zorunlu"
+    },
+    "permit_item": {
+      "drawing": "Çizim",
+      "form": "Form",
+      "report": "Rapor"
+    },
+    "purpose": {
+      "for_approval": "Onay için",
+      "for_construction": "İnşaat için",
+      "for_information": "Bilgi için",
+      "for_record": "Kayıt için",
+      "for_review": "İnceleme için",
+      "for_tender": "İhale için"
+    },
+    "report_state": {
+      "accepted": "Kabul edildi",
+      "commissioned": "Devreye alındı",
+      "in_progress": "Devam ediyor",
+      "not_required": "Gerekli değil",
+      "rejected": "Reddedildi",
+      "remarks": "Notlar",
+      "required": "Gerekli",
+      "submitted": "Gönderildi",
+      "under_check": "Kontrol altında"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Onay noktası {code} yetkili bir onaylayan tarafından karara bağlanmadı.",
+        "suggestion": "Onay akışı üzerinden yeniden karar verin."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "{phase} fazının tasarım programı satırı {code} kabul edilmedi.",
+        "suggestion": "Çizimleri tamamlayın veya gerekçeyle feragat edin."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "{number} numarası şemaya uymuyor ({fields}).",
+        "suggestion": "Çizimi yeniden numaralandırın."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "{number} numarası kayıtlı parçalarıyla uyuşmuyor ({fields}).",
+        "suggestion": "Konteyner alanlarını düzeltin."
+      },
+      "drawing_originator_known": {
+        "fail": "{number} numarasının sorumlusu {value} aktif bir role bağlı değil.",
+        "suggestion": "Tasarım rolünü ekleyin veya numarayı düzeltin."
+      },
+      "not_required_has_rationale": {
+        "fail": "{code} raporunun gerekçesi yok.",
+        "suggestion": "Gerekçeyi ekleyin."
+      },
+      "permit_content_current": {
+        "fail": "{code} izin paketi güncel olmayan revizyonlar içeriyor.",
+        "suggestion": "Makama bildirin veya yeniden gönderin."
+      },
+      "permit_package_complete": {
+        "fail": "{code} izin paketinde {count} zorunlu kalem eksik.",
+        "suggestion": "Eksik kalemleri ekleyin veya paylaşın."
+      },
+      "release_revisions_suitable": {
+        "fail": "{release} revizyon paketinde {count} uygunsuz revizyon var.",
+        "suggestion": "Devam eden çalışmayı kaldırın veya önce yayımlayın."
+      },
+      "report_independent_check": {
+        "fail": "{code} raporu geçerli bir bağımsız kontrol olmadan kabul edildi.",
+        "suggestion": "Başka bir taraftan bir kontrolcü belirleyin."
+      },
+      "title_block_matches_number": {
+        "fail": "{number} çizimindeki başlık bloğu {value} gösteriyor.",
+        "suggestion": "Başlık bloğunu düzeltin."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS kodu {code} birden fazla kullanılıyor.",
+        "suggestion": "Tekrar eden kodları yeniden numaralandırın."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} modülü {value} WBS değerine başvuruyor, ancak hiçbir düğümle eşleşmiyor.",
+        "suggestion": "Referansı düzeltin veya düğümü ekleyin."
+      }
+    }
+  }
+}

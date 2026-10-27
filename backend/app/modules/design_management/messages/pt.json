@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Relatório de acústica",
+        "contamination": "Relatório de contaminação do solo",
+        "daylight": "Relatório de iluminação natural e insolação",
+        "drainage": "Estratégia de drenagem",
+        "environmental": "Relatório ambiental",
+        "fire_proof_check": "Verificação independente de segurança contra incêndio",
+        "fire_safety_concept": "Conceito de segurança contra incêndio",
+        "geotechnical": "Relatório geotécnico",
+        "sound_insulation": "Comprovativo de isolamento sonoro",
+        "structural_design": "Projeto estrutural e cálculos",
+        "structural_proof_check": "Verificação estrutural independente",
+        "kitchen_planning": "Relatório de planeamento de cozinha",
+        "survey": "Levantamento do local",
+        "thermal_energy": "Comprovativo de desempenho térmico e energético",
+        "traffic": "Relatório de tráfego",
+        "uxo": "Avaliação de engenhos explosivos não detonados",
+        "vibration": "Relatório de vibrações"
+      }
+    },
+    "cde_state": {
+      "archived": "Arquivado",
+      "published": "Publicado",
+      "shared": "Partilhado",
+      "wip": "Em desenvolvimento"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Mapa de quantidades",
+        "cvr": "Reconciliação do valor de custos",
+        "design_management": "Gestão de projeto",
+        "field_time": "Tempo de obra",
+        "fieldreports": "Relatórios de obra",
+        "finance": "Finanças",
+        "inspections": "Inspeções",
+        "procurement": "Aprovisionamento",
+        "schedule": "Planeamento"
+      },
+      "phase": {
+        "approval": "Aprovação",
+        "award": "Adjudicação",
+        "brief": "Programa",
+        "concept": "Conceção",
+        "construction": "Construção",
+        "design": "Projeto",
+        "detail": "Projeto de execução",
+        "development": "Desenvolvimento",
+        "execution": "Execução",
+        "handover": "Entrega",
+        "operation": "Exploração",
+        "strategy": "Estratégia",
+        "tender": "Concurso"
+      }
+    },
+    "errors": {
+      "answer_required": "É necessária uma resposta.",
+      "approval_point_locked": "O ponto de aprovação está em revisão ou já foi decidido e não pode ser alterado.",
+      "approval_point_not_found": "Ponto de aprovação não encontrado.",
+      "approval_point_not_rejected": "Só é possível reabrir um ponto de aprovação rejeitado.",
+      "binding_requires_change_request": "O documento de enquadramento do projeto é vinculativo; as alterações exigem um pedido de alteração.",
+      "catalogue_retired": "Este catálogo foi retirado e não pode ser fixado.",
+      "code_duplicate": "Este código já está em uso no projeto.",
+      "comment_not_found": "Comentário não encontrado.",
+      "comment_text_required": "Um comentário precisa de texto.",
+      "concurrent_issue": "A emissão foi alterada ao mesmo tempo; tente novamente.",
+      "condition_needs_owner_and_due_date": "Uma condição confirmada precisa de um responsável e de uma data limite.",
+      "condition_not_found": "Condição não encontrada.",
+      "condition_not_proposed": "Esta condição já foi confirmada ou descartada.",
+      "condition_owner_not_member": "O responsável por uma condição tem de ser membro deste projeto.",
+      "contact_not_found": "Contacto não encontrado.",
+      "container_not_found": "Contentor de documentos não encontrado neste projeto.",
+      "deliverable_not_found": "Linha do cronograma de projeto não encontrada.",
+      "dist_rule_not_found": "Regra de distribuição não encontrada.",
+      "distribution_list_not_found": "Lista de distribuição não encontrada neste projeto.",
+      "drawing_not_found": "Desenho não encontrado.",
+      "duplicate_issue": "Algumas revisões já foram enviadas a estes destinatários; indique um motivo para reemitir.",
+      "field_required": "Falta um campo obrigatório.",
+      "forbidden": "Não tem permissão para esta ação.",
+      "frame_document_missing": "O projeto não tem documento de enquadramento de projeto no seu modelo de governação.",
+      "frame_register_unknown": "Este registo não pode ser escrito como documento de enquadramento.",
+      "governance_gate_not_found": "Esta fase de controlo não faz parte do modelo de fases do projeto.",
+      "hint_override_needs_rationale": "Substituir a indicação do catálogo exige uma justificação.",
+      "invalid_id": "Identificador inválido.",
+      "invalid_transition": "Esta mudança de estado não é permitida neste momento.",
+      "manage_required": "Alterar este campo exige a permissão para gerir o projeto.",
+      "model_exists": "Já existe um modelo de fases fixado.",
+      "no_approval_route": "Não existe um circuito de aprovação ativo para os pontos de aprovação de projeto neste projeto.",
+      "not_area_owner": "Só o responsável ou substituto da área de governação, ou um gestor de governação, pode escrever o seu documento de enquadramento.",
+      "not_required_needs_rationale": "Marcar um relatório como não exigido requer uma justificação.",
+      "number_reserved": "Este número pertencia a um desenho eliminado e nunca é reutilizado.",
+      "number_taken": "Este número está ou esteve em uso no projeto.",
+      "numbering_case_invalid": "O número tem de estar em maiúsculas.",
+      "numbering_chars_invalid": "O número contém caracteres que o esquema não permite.",
+      "numbering_code_not_in_list": "O valor de um campo não consta da lista de códigos do esquema.",
+      "numbering_empty": "O número está vazio.",
+      "numbering_field_invalid": "Um campo do número não corresponde ao seu formato.",
+      "numbering_field_missing": "Falta um campo obrigatório do número.",
+      "numbering_invalid": "O número não corresponde ao esquema de numeração do projeto.",
+      "numbering_metadata_in_number": "O estado e a revisão são metadados e não devem fazer parte do número.",
+      "numbering_parts_mismatch": "O número e as partes guardadas não coincidem.",
+      "numbering_structure_invalid": "O número não tem os campos do esquema.",
+      "numbering_too_long": "O número é mais longo do que o esquema permite.",
+      "option_kind_unknown": "Não existe essa lista de opções.",
+      "originator_duplicate": "Outra função de projeto ativa já utiliza este código de autor.",
+      "originator_required": "Um projetista de especialidade precisa de um código de autor.",
+      "originator_unknown": "O autor não pertence a nenhuma função de projeto ativa.",
+      "party_kind_invalid": "Tipo de entidade desconhecido.",
+      "permit_empty": "O pacote de licenciamento não tem itens.",
+      "permit_incomplete": "Faltam itens obrigatórios ou ainda não foram partilhados.",
+      "permit_item_kind_invalid": "Tipo de item desconhecido.",
+      "permit_item_missing": "Falta um item obrigatório.",
+      "permit_item_not_found": "Item do pacote não encontrado.",
+      "permit_link_frozen": "Após a submissão, o ciclo de revisão ou a submissão associados não podem ser substituídos.",
+      "permit_locked": "O pacote foi submetido e o seu conteúdo está fixado.",
+      "permit_not_approved": "As condições só são registadas num pacote aprovado.",
+      "permit_not_found": "Pacote de licenciamento não encontrado.",
+      "permit_profile_unknown": "Perfil de licenciamento desconhecido.",
+      "permit_state_read_from_cycle": "Após a submissão, o estado segue o ciclo de revisão da entidade licenciadora.",
+      "phase_required": "Escolha a fase a que isto pertence.",
+      "phase_unknown": "Esta fase não consta do modelo de fases do projeto.",
+      "planned_count_reduction_needs_rationale": "Reduzir a quantidade planeada exige uma justificação.",
+      "project_not_found": "Projeto não encontrado.",
+      "rationale_required": "É necessária uma justificação.",
+      "recipient_exactly_one": "Escolha uma lista de distribuição ou uma função de projeto.",
+      "release_contains_wip": "Uma emissão não pode incluir trabalho em desenvolvimento.",
+      "release_empty": "A emissão não tem revisões.",
+      "release_four_eyes": "A pessoa que preparou a emissão não a pode emitir.",
+      "release_needs_published": "Uma emissão para construção precisa de revisões publicadas.",
+      "release_no_recipients": "Nenhum destinatário da matriz de distribuição corresponde a esta emissão.",
+      "release_not_approved": "A emissão ainda não foi aprovada no seu circuito.",
+      "release_not_draft": "Só é possível alterar uma emissão em rascunho.",
+      "release_not_found": "Emissão não encontrada.",
+      "release_not_pending": "A emissão não está a aguardar aprovação.",
+      "release_not_ready": "A emissão tem de estar pronta antes de ser emitida.",
+      "release_recipient_empty": "Um destinatário da matriz de distribuição não tem pessoa para quem enviar. Complete primeiro a lista ou a função.",
+      "report_author_required": "Um relatório com verificação independente obrigatória precisa de uma função de autor.",
+      "report_checker_required": "Uma verificação independente precisa de uma função de verificador.",
+      "report_checker_same_party": "O verificador tem de pertencer a outra entidade que não o autor.",
+      "report_external_check_not_approved": "O ciclo de verificação externa ainda não foi aprovado.",
+      "report_fields_frozen": "O autor, o verificador, a verificação externa e o ciclo de revisão não podem ser alterados após a submissão.",
+      "report_kind_unknown": "Tipo de relatório desconhecido.",
+      "report_not_found": "Relatório não encontrado.",
+      "review_comments_open": "Os comentários em aberto têm de ser fechados primeiro.",
+      "review_cycle_not_found": "Ciclo de revisão não encontrado neste projeto.",
+      "review_not_found": "Revisão não encontrada.",
+      "review_not_open": "A revisão está fechada a comentários.",
+      "review_outcome_invalid": "Resultado de revisão desconhecido.",
+      "revision_not_current": "Uma emissão só pode conter a revisão atual de um desenho.",
+      "revision_not_found": "Revisão não encontrada neste projeto.",
+      "role_in_use": "A função ainda é utilizada por desenhos.",
+      "role_not_active": "A função foi libertada do projeto.",
+      "role_not_found": "Função de projeto não encontrada.",
+      "route_start_failed": "Não foi possível iniciar o circuito de aprovação.",
+      "scheme_has_no_form_list": "O esquema de numeração fixado não tem lista de formas de documento.",
+      "setup_exists": "A gestão de projeto já está configurada para este projeto.",
+      "setup_missing": "A gestão de projeto ainda não está configurada para este projeto.",
+      "severity_invalid": "Gravidade desconhecida.",
+      "source_not_installed": "O módulo que guarda estes registos não está instalado.",
+      "submission_not_found": "Submissão à entidade licenciadora não encontrada neste projeto.",
+      "unknown_catalogue": "Catálogo não encontrado.",
+      "use_conclude": "Use concluir para registar o resultado.",
+      "use_issue": "Use emitir para enviar a emissão.",
+      "waiver_needs_rationale": "Dispensar uma linha do cronograma de projeto exige uma justificação.",
+      "wbs_code_duplicate": "Este código EAP já está em uso no projeto.",
+      "wbs_code_not_under_parent": "Um código subordinado tem de começar pelo código do seu pai.",
+      "wbs_code_required": "É necessário um código EAP.",
+      "wbs_invalid": "A estrutura analítica do trabalho viola as regras EAP do projeto.",
+      "wbs_move_cycle": "Um nó não pode ser movido para debaixo de um dos seus descendentes.",
+      "wbs_node_closed": "Este nó EAP está fechado a novas referências.",
+      "wbs_node_not_found": "Nó EAP não encontrado.",
+      "wbs_node_referenced": "O nó ou um dos seus subnós está referenciado; feche-o em vez disso.",
+      "wbs_parent_not_found": "Nó EAP pai não encontrado."
+    },
+    "evidence": {
+      "deliverables": "Linhas do cronograma de projeto da fase aceites",
+      "major_comments": "Nenhum comentário de revisão importante em aberto",
+      "no_host_area": "Prontidão do projeto desconhecida: o modelo de governação não indica uma área para o projeto",
+      "no_host_document": "Prontidão do projeto desconhecida: o projeto ainda não tem documento de enquadramento. Gere um registo de projeto (ficheiro no CDE) para o criar.",
+      "no_phase": "Prontidão do projeto desconhecida: esta fase de controlo não encerra nenhuma fase",
+      "reports": "Relatórios obrigatórios da fase aceites"
+    },
+    "export": {
+      "col_check": "Verificação independente",
+      "col_code": "Código",
+      "col_copies": "Cópias em papel",
+      "col_discipline": "Especialidade",
+      "col_disciplines": "Especialidades",
+      "col_format": "Formato",
+      "col_forms": "Formas",
+      "col_kind": "Tipo",
+      "col_last_issue": "Última emissão",
+      "col_min_status": "Estado mínimo",
+      "col_number": "Número",
+      "col_phase": "Fase",
+      "col_phases": "Fases",
+      "col_pinned_revision": "Revisão fixada",
+      "col_present": "Presente",
+      "col_purpose": "Finalidade",
+      "col_recipient": "Destinatário",
+      "col_recipients": "Destinatários",
+      "col_required": "Obrigatório",
+      "col_revision": "Revisão",
+      "col_state": "Estado",
+      "col_status": "Situação",
+      "col_title": "Título",
+      "empty": "Nada para listar.",
+      "project": "Projeto",
+      "title_matrix": "Matriz de distribuição",
+      "title_permit": "Pacote de licenciamento",
+      "title_register": "Registo de desenhos",
+      "title_reports": "Relatórios e comprovativos",
+      "yes": "Sim"
+    },
+    "independent_check": {
+      "none": "Nenhuma",
+      "optional": "Opcional",
+      "required_by_rule": "Exigida pela regra"
+    },
+    "permit_item": {
+      "drawing": "Desenho",
+      "form": "Formulário",
+      "report": "Relatório"
+    },
+    "purpose": {
+      "for_approval": "Para aprovação",
+      "for_construction": "Para construção",
+      "for_information": "Para informação",
+      "for_record": "Para arquivo",
+      "for_review": "Para revisão",
+      "for_tender": "Para concurso"
+    },
+    "report_state": {
+      "accepted": "Aceite",
+      "commissioned": "Comissionado",
+      "in_progress": "Em curso",
+      "not_required": "Não exigido",
+      "rejected": "Rejeitado",
+      "remarks": "Observações",
+      "required": "Exigido",
+      "submitted": "Submetido",
+      "under_check": "Em verificação"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "O ponto de aprovação {code} não foi decidido por um aprovador habilitado.",
+        "suggestion": "Decida novamente através do seu circuito."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "A linha do cronograma de projeto {code} de {phase} não está aceite.",
+        "suggestion": "Complete os desenhos ou dispense com uma justificação."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "O número {number} não corresponde ao esquema ({fields}).",
+        "suggestion": "Renumere o desenho."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "O número {number} não coincide com as partes guardadas ({fields}).",
+        "suggestion": "Corrija os campos do contentor."
+      },
+      "drawing_originator_known": {
+        "fail": "O autor {value} de {number} não pertence a nenhuma função ativa.",
+        "suggestion": "Adicione a função de projeto ou corrija o número."
+      },
+      "not_required_has_rationale": {
+        "fail": "O relatório {code} não tem justificação.",
+        "suggestion": "Adicione a justificação."
+      },
+      "permit_content_current": {
+        "fail": "O pacote de licenciamento {code} contém revisões substituídas.",
+        "suggestion": "Informe a entidade licenciadora ou volte a submeter."
+      },
+      "permit_package_complete": {
+        "fail": "O pacote de licenciamento {code} não tem {count} itens obrigatórios.",
+        "suggestion": "Adicione ou partilhe os itens em falta."
+      },
+      "release_revisions_suitable": {
+        "fail": "A emissão {release} tem {count} revisões não adequadas.",
+        "suggestion": "Remova o trabalho em desenvolvimento ou publique primeiro."
+      },
+      "report_independent_check": {
+        "fail": "O relatório {code} foi aceite sem uma verificação independente válida.",
+        "suggestion": "Indique um verificador de outra entidade."
+      },
+      "title_block_matches_number": {
+        "fail": "O cartucho do desenho {number} mostra {value}.",
+        "suggestion": "Corrija o cartucho."
+      },
+      "wbs_code_unique": {
+        "fail": "O código EAP {code} é utilizado mais do que uma vez.",
+        "suggestion": "Renumere os duplicados."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} refere o valor EAP {value}, que não corresponde a nenhum nó.",
+        "suggestion": "Corrija a referência ou adicione o nó."
+      }
+    }
+  }
+}

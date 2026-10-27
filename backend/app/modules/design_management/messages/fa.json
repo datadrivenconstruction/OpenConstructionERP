@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "گزارش صداشناسی",
+        "contamination": "گزارش آلودگی زمین",
+        "daylight": "گزارش نور روز و تابش خورشید",
+        "drainage": "راهبرد زهکشی",
+        "environmental": "گزارش زیست‌محیطی",
+        "fire_proof_check": "بررسی مستقل ایمنی آتش‌سوزی",
+        "fire_safety_concept": "مفهوم ایمنی آتش‌سوزی",
+        "geotechnical": "گزارش ژئوتکنیک",
+        "sound_insulation": "مدرک عایق‌بندی صوتی",
+        "structural_design": "طراحی سازه و محاسبات",
+        "structural_proof_check": "بررسی مستقل سازه",
+        "kitchen_planning": "گزارش طراحی آشپزخانه",
+        "survey": "نقشه‌برداری محل",
+        "thermal_energy": "مدرک عملکرد حرارتی و انرژی",
+        "traffic": "گزارش ترافیک",
+        "uxo": "ارزیابی مهمات منفجرنشده",
+        "vibration": "گزارش ارتعاش"
+      }
+    },
+    "cde_state": {
+      "archived": "بایگانی‌شده",
+      "published": "منتشرشده",
+      "shared": "اشتراک‌گذاری‌شده",
+      "wip": "در حال انجام"
+    },
+    "common": {
+      "ok": "تأیید",
+      "module": {
+        "boq": "فهرست بهای کارها",
+        "cvr": "تطبیق ارزش و هزینه",
+        "design_management": "مدیریت طراحی",
+        "field_time": "زمان کارگاه",
+        "fieldreports": "گزارش‌های کارگاهی",
+        "finance": "مالی",
+        "inspections": "بازرسی‌ها",
+        "procurement": "تدارکات",
+        "schedule": "برنامه زمان‌بندی"
+      },
+      "phase": {
+        "approval": "تأیید",
+        "award": "واگذاری",
+        "brief": "شرح نیازها",
+        "concept": "مفهوم‌سازی",
+        "construction": "اجرا",
+        "design": "طراحی",
+        "detail": "طراحی جزئیات",
+        "development": "توسعه",
+        "execution": "اجراء",
+        "handover": "تحویل",
+        "operation": "بهره‌برداری",
+        "strategy": "راهبرد",
+        "tender": "مناقصه"
+      }
+    },
+    "errors": {
+      "answer_required": "پاسخ الزامی است.",
+      "approval_point_locked": "نقطه تأیید در حال بررسی یا تصمیم‌گیری شده است و قابل تغییر نیست.",
+      "approval_point_not_found": "نقطه تأیید یافت نشد.",
+      "approval_point_not_rejected": "فقط نقطه تأییدی که رد شده است قابل بازگشایی مجدد است.",
+      "binding_requires_change_request": "سند چارچوب طراحی الزام‌آور است؛ تغییرات به درخواست تغییر نیاز دارند.",
+      "catalogue_retired": "این فهرست بازنشسته شده و امکان پین کردن آن وجود ندارد.",
+      "code_duplicate": "این کد قبلاً در پروژه استفاده شده است.",
+      "comment_not_found": "دیدگاه یافت نشد.",
+      "comment_text_required": "دیدگاه باید متن داشته باشد.",
+      "concurrent_issue": "نسخه نشر همزمان تغییر کرد؛ لطفاً دوباره تلاش کنید.",
+      "condition_needs_owner_and_due_date": "شرط تأییدشده به مسئول و مهلت نیاز دارد.",
+      "condition_not_found": "شرط یافت نشد.",
+      "condition_not_proposed": "این شرط قبلاً تأیید یا رد شده است.",
+      "condition_owner_not_member": "مسئول یک شرط باید عضو این پروژه باشد.",
+      "contact_not_found": "مخاطب یافت نشد.",
+      "container_not_found": "پوشه سند در این پروژه یافت نشد.",
+      "deliverable_not_found": "ردیف برنامه طراحی یافت نشد.",
+      "dist_rule_not_found": "قاعده توزیع یافت نشد.",
+      "distribution_list_not_found": "فهرست توزیع در این پروژه یافت نشد.",
+      "drawing_not_found": "نقشه یافت نشد.",
+      "duplicate_issue": "برخی بازنگری‌ها قبلاً برای این گیرندگان ارسال شده‌اند؛ برای ارسال مجدد دلیل ارائه دهید.",
+      "field_required": "فیلد الزامی خالی است.",
+      "forbidden": "شما مجوز این عملیات را ندارید.",
+      "frame_document_missing": "پروژه در مدل حاکمیت خود سند چارچوب طراحی ندارد.",
+      "frame_register_unknown": "این ثبت‌نامه را نمی‌توان به‌عنوان سند چارچوب نوشت.",
+      "governance_gate_not_found": "این گیت بخشی از مدل فازهای پروژه نیست.",
+      "hint_override_needs_rationale": "برای تغییر راهنمای فهرست به دلیل نیاز است.",
+      "invalid_id": "شناسه نامعتبر است.",
+      "invalid_transition": "این تغییر وضعیت در حال حاضر مجاز نیست.",
+      "manage_required": "تغییر این فیلد به مجوز مدیریت طراحی نیاز دارد.",
+      "model_exists": "یک مدل فاز از قبل پین شده است.",
+      "no_approval_route": "مسیر تأییدیه فعالی برای نقاط تأیید طراحی در این پروژه وجود ندارد.",
+      "not_area_owner": "فقط مسئول یا جانشین حوزه حاکمیت، یا مدیر حاکمیت، می‌تواند سند چارچوب آن را بنویسد.",
+      "not_required_needs_rationale": "علامت‌گذاری گزارش به‌عنوان غیرضروری به دلیل نیاز دارد.",
+      "number_reserved": "این شماره متعلق به نقشه حذف‌شده بود و هرگز دوباره استفاده نمی‌شود.",
+      "number_taken": "این شماره در پروژه استفاده شده است یا قبلاً استفاده شده بود.",
+      "numbering_case_invalid": "شماره باید با حروف بزرگ باشد.",
+      "numbering_chars_invalid": "شماره شامل نویسه‌هایی است که طرح شماره‌گذاری مجاز نمی‌داند.",
+      "numbering_code_not_in_list": "مقدار یک فیلد در فهرست کدهای طرح شماره‌گذاری نیست.",
+      "numbering_empty": "شماره خالی است.",
+      "numbering_field_invalid": "یکی از فیلدهای شماره با قالب آن مطابقت ندارد.",
+      "numbering_field_missing": "یکی از فیلدهای الزامی شماره وجود ندارد.",
+      "numbering_invalid": "شماره با طرح شماره‌گذاری پروژه مطابقت ندارد.",
+      "numbering_metadata_in_number": "وضعیت و بازنگری فراداده هستند و نباید در شماره باشند.",
+      "numbering_parts_mismatch": "شماره و بخش‌های ذخیره‌شده با هم مطابقت ندارند.",
+      "numbering_structure_invalid": "شماره فیلدهای طرح شماره‌گذاری را ندارد.",
+      "numbering_too_long": "شماره از حد مجاز طرح شماره‌گذاری طولانی‌تر است.",
+      "option_kind_unknown": "چنین فهرستی از گزینه‌ها وجود ندارد.",
+      "originator_duplicate": "نقش طراحی فعال دیگری از این کد صادرکننده استفاده می‌کند.",
+      "originator_required": "طراح رشته به کد صادرکننده نیاز دارد.",
+      "originator_unknown": "صادرکننده به هیچ نقش طراحی فعالی تعلق ندارد.",
+      "party_kind_invalid": "نوع طرف قرارداد ناشناخته است.",
+      "permit_empty": "بسته مجوز هیچ موردی ندارد.",
+      "permit_incomplete": "موارد الزامی وجود ندارند یا هنوز به اشتراک گذاشته نشده‌اند.",
+      "permit_item_kind_invalid": "نوع مورد ناشناخته است.",
+      "permit_item_missing": "مورد الزامی وجود ندارد.",
+      "permit_item_not_found": "مورد بسته یافت نشد.",
+      "permit_link_frozen": "پس از ارسال، چرخه بازبینی یا ارسال مرتبط قابل جایگزینی نیست.",
+      "permit_locked": "بسته ارسال شده و محتوای آن ثبت شده است.",
+      "permit_not_approved": "شرایط فقط روی بسته تأییدشده ثبت می‌شوند.",
+      "permit_not_found": "بسته مجوز یافت نشد.",
+      "permit_profile_unknown": "پروفایل مجوز ناشناخته است.",
+      "permit_state_read_from_cycle": "پس از ارسال، وضعیت از چرخه بازبینی مرجع پیروی می‌کند.",
+      "phase_required": "فازی را که این مورد به آن تعلق دارد انتخاب کنید.",
+      "phase_unknown": "این فاز در مدل فازهای پروژه وجود ندارد.",
+      "planned_count_reduction_needs_rationale": "کاهش تعداد برنامه‌ریزی‌شده به دلیل نیاز دارد.",
+      "project_not_found": "پروژه یافت نشد.",
+      "rationale_required": "دلیل الزامی است.",
+      "recipient_exactly_one": "یا فهرست توزیع یا نقش طراحی را انتخاب کنید.",
+      "release_contains_wip": "نشر نمی‌تواند شامل کارهای در حال انجام باشد.",
+      "release_empty": "نشر هیچ بازنگری‌ای ندارد.",
+      "release_four_eyes": "کسی که نشر را آماده کرده نمی‌تواند آن را صادر کند.",
+      "release_needs_published": "صدور برای اجرا به بازنگری‌های منتشرشده نیاز دارد.",
+      "release_no_recipients": "هیچ گیرنده‌ای در ماتریس توزیع با این نشر مطابقت ندارد.",
+      "release_not_approved": "نشر هنوز در مسیر تأییدیه خود تأیید نشده است.",
+      "release_not_draft": "فقط نشر پیش‌نویس قابل تغییر است.",
+      "release_not_found": "نشر یافت نشد.",
+      "release_not_pending": "نشر در انتظار تأیید نیست.",
+      "release_not_ready": "نشر باید پیش از صدور آماده باشد.",
+      "release_recipient_empty": "یکی از گیرندگان ماتریس توزیع فرد مقصدی ندارد. ابتدا فهرست یا نقش را کامل کنید.",
+      "report_author_required": "گزارش با بررسی مستقل الزامی به نقش نویسنده نیاز دارد.",
+      "report_checker_required": "بررسی مستقل به نقش بازبین نیاز دارد.",
+      "report_checker_same_party": "بازبین باید به طرفی غیر از نویسنده تعلق داشته باشد.",
+      "report_external_check_not_approved": "چرخه بررسی خارجی هنوز تأیید نشده است.",
+      "report_fields_frozen": "نویسنده، بازبین، بررسی خارجی و چرخه بازبینی پس از ارسال قابل تغییر نیستند.",
+      "report_kind_unknown": "نوع گزارش ناشناخته است.",
+      "report_not_found": "گزارش یافت نشد.",
+      "review_comments_open": "ابتدا دیدگاه‌های باز باید بسته شوند.",
+      "review_cycle_not_found": "چرخه بازبینی در این پروژه یافت نشد.",
+      "review_not_found": "بازبینی یافت نشد.",
+      "review_not_open": "بازبینی برای دیدگاه‌ها بسته است.",
+      "review_outcome_invalid": "نتیجه بازبینی ناشناخته است.",
+      "revision_not_current": "نشر فقط می‌تواند بازنگری جاری یک نقشه را داشته باشد.",
+      "revision_not_found": "بازنگری در این پروژه یافت نشد.",
+      "role_in_use": "این نقش هنوز توسط نقشه‌ها استفاده می‌شود.",
+      "role_not_active": "این نقش از پروژه خارج شده است.",
+      "role_not_found": "نقش طراحی یافت نشد.",
+      "route_start_failed": "مسیر تأییدیه شروع نشد.",
+      "scheme_has_no_form_list": "طرح شماره‌گذاری پین‌شده فهرست فرم‌های سند ندارد.",
+      "setup_exists": "مدیریت طراحی از قبل برای این پروژه راه‌اندازی شده است.",
+      "setup_missing": "مدیریت طراحی هنوز برای این پروژه راه‌اندازی نشده است.",
+      "severity_invalid": "شدت ناشناخته است.",
+      "source_not_installed": "ماژولی که این رکوردها را نگه می‌دارد نصب نشده است.",
+      "submission_not_found": "ارسال به مرجع در این پروژه یافت نشد.",
+      "unknown_catalogue": "فهرست یافت نشد.",
+      "use_conclude": "برای ثبت نتیجه از گزینه نتیجه‌گیری استفاده کنید.",
+      "use_issue": "برای ارسال نشر از گزینه صدور استفاده کنید.",
+      "waiver_needs_rationale": "صرف‌نظر کردن از یک ردیف برنامه طراحی به دلیل نیاز دارد.",
+      "wbs_code_duplicate": "این کد WBS قبلاً در پروژه استفاده شده است.",
+      "wbs_code_not_under_parent": "کد فرزند باید با کد والد خود شروع شود.",
+      "wbs_code_required": "کد WBS الزامی است.",
+      "wbs_invalid": "ساختار شکست کار قوانین WBS پروژه را نقض می‌کند.",
+      "wbs_move_cycle": "یک گره نمی‌تواند زیر یکی از زیرمجموعه‌های خودش منتقل شود.",
+      "wbs_node_closed": "این گره WBS برای ارجاع‌های جدید بسته است.",
+      "wbs_node_not_found": "گره WBS یافت نشد.",
+      "wbs_node_referenced": "گره یا یکی از زیرگره‌های آن ارجاع داده شده است؛ به جای آن آن را ببندید.",
+      "wbs_parent_not_found": "گره WBS والد یافت نشد."
+    },
+    "evidence": {
+      "deliverables": "ردیف‌های برنامه طراحی فاز پذیرفته شده‌اند",
+      "major_comments": "هیچ دیدگاه بازبینی اصلی باز وجود ندارد",
+      "no_host_area": "آمادگی طراحی نامشخص است: مدل حاکمیت هیچ حوزه‌ای را برای طراحی تعیین نکرده است",
+      "no_host_document": "آمادگی طراحی نامشخص است: پروژه هنوز سند چارچوب طراحی ندارد. برای ایجاد آن یک ثبت‌نامه طراحی (فایل در CDE) تولید کنید.",
+      "no_phase": "آمادگی طراحی نامشخص است: این گیت هیچ فازی را نمی‌بندد",
+      "reports": "گزارش‌های الزامی فاز پذیرفته شده‌اند"
+    },
+    "export": {
+      "col_check": "بررسی مستقل",
+      "col_code": "کد",
+      "col_copies": "نسخه‌های کاغذی",
+      "col_discipline": "رشته",
+      "col_disciplines": "رشته‌ها",
+      "col_format": "قالب",
+      "col_forms": "فرم‌ها",
+      "col_kind": "نوع",
+      "col_last_issue": "آخرین نشر",
+      "col_min_status": "حداقل وضعیت",
+      "col_number": "شماره",
+      "col_phase": "فاز",
+      "col_phases": "فازها",
+      "col_pinned_revision": "بازنگری پین‌شده",
+      "col_present": "موجود",
+      "col_purpose": "هدف",
+      "col_recipient": "گیرنده",
+      "col_recipients": "گیرندگان",
+      "col_required": "الزامی",
+      "col_revision": "بازنگری",
+      "col_state": "وضعیت",
+      "col_status": "وضعیت",
+      "col_title": "عنوان",
+      "empty": "موردی برای فهرست کردن وجود ندارد.",
+      "project": "پروژه",
+      "title_matrix": "ماتریس توزیع",
+      "title_permit": "بسته مجوز",
+      "title_register": "ثبت‌نامه نقشه‌ها",
+      "title_reports": "گزارش‌ها و مدارک",
+      "yes": "بله"
+    },
+    "independent_check": {
+      "none": "ندارد",
+      "optional": "اختیاری",
+      "required_by_rule": "طبق قاعده الزامی است"
+    },
+    "permit_item": {
+      "drawing": "نقشه",
+      "form": "فرم",
+      "report": "گزارش"
+    },
+    "purpose": {
+      "for_approval": "برای تأیید",
+      "for_construction": "برای اجرا",
+      "for_information": "برای اطلاع",
+      "for_record": "برای بایگانی",
+      "for_review": "برای بازبینی",
+      "for_tender": "برای مناقصه"
+    },
+    "report_state": {
+      "accepted": "پذیرفته شده",
+      "commissioned": "سفارش داده شده",
+      "in_progress": "در حال انجام",
+      "not_required": "الزامی نیست",
+      "rejected": "رد شده",
+      "remarks": "ملاحظات",
+      "required": "الزامی",
+      "submitted": "ارسال شده",
+      "under_check": "در حال بررسی"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "نقطه تأیید {code} توسط تأییدکننده دارای صلاحیت تصمیم‌گیری نشده است.",
+        "suggestion": "دوباره از طریق مسیر آن تصمیم‌گیری کنید."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "ردیف برنامه طراحی {code} از {phase} پذیرفته نشده است.",
+        "suggestion": "نقشه‌ها را تکمیل کنید یا با ذکر دلیل از آن صرف‌نظر کنید."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "شماره {number} با طرح ({fields}) مطابقت ندارد.",
+        "suggestion": "شماره نقشه را تغییر دهید."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "شماره {number} با بخش‌های ذخیره‌شده‌اش ({fields}) مطابقت ندارد.",
+        "suggestion": "فیلدهای ظرف را اصلاح کنید."
+      },
+      "drawing_originator_known": {
+        "fail": "صادرکننده {value} شماره {number} به هیچ نقش فعالی تعلق ندارد.",
+        "suggestion": "نقش طراحی را اضافه کنید یا شماره را اصلاح کنید."
+      },
+      "not_required_has_rationale": {
+        "fail": "گزارش {code} دلیل ندارد.",
+        "suggestion": "دلیل را اضافه کنید."
+      },
+      "permit_content_current": {
+        "fail": "بسته مجوز {code} شامل بازنگری‌های جایگزین‌شده است.",
+        "suggestion": "به مرجع اطلاع دهید یا دوباره ارسال کنید."
+      },
+      "permit_package_complete": {
+        "fail": "بسته مجوز {code} {count} مورد الزامی را ندارد.",
+        "suggestion": "موارد ناقص را اضافه یا به اشتراک بگذارید."
+      },
+      "release_revisions_suitable": {
+        "fail": "نشر {release} دارای {count} بازنگری نامناسب است.",
+        "suggestion": "کارهای در حال انجام را حذف کنید یا ابتدا منتشر کنید."
+      },
+      "report_independent_check": {
+        "fail": "گزارش {code} بدون بررسی مستقل معتبر پذیرفته شده است.",
+        "suggestion": "بازبینی از طرفی دیگر تعیین کنید."
+      },
+      "title_block_matches_number": {
+        "fail": "بلوک عنوان {number} مقدار {value} را نشان می‌دهد.",
+        "suggestion": "بلوک عنوان را اصلاح کنید."
+      },
+      "wbs_code_unique": {
+        "fail": "کد WBS {code} بیش از یک بار استفاده شده است.",
+        "suggestion": "موارد تکراری را دوباره شماره‌گذاری کنید."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} به مقدار WBS {value} ارجاع می‌دهد که با هیچ گره‌ای مطابقت ندارد.",
+        "suggestion": "ارجاع را اصلاح کنید یا گره را اضافه کنید."
+      }
+    }
+  }
+}

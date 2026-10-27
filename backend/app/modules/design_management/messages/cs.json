@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustická zpráva",
+        "contamination": "Zpráva o kontaminaci půdy",
+        "daylight": "Zpráva o denním osvětlení a oslunění",
+        "drainage": "Koncepce odvodnění",
+        "environmental": "Zpráva o vlivech na životní prostředí",
+        "fire_proof_check": "Nezávislá kontrola požární bezpečnosti",
+        "fire_safety_concept": "Koncept požární bezpečnosti",
+        "geotechnical": "Geotechnický průzkum",
+        "sound_insulation": "Doklad o zvukové izolaci",
+        "structural_design": "Statický návrh a výpočty",
+        "structural_proof_check": "Nezávislá statická kontrola",
+        "kitchen_planning": "Zpráva o návrhu kuchyně",
+        "survey": "Zaměření staveniště",
+        "thermal_energy": "Doklad o tepelně technických a energetických vlastnostech",
+        "traffic": "Dopravně inženýrská zpráva",
+        "uxo": "Posouzení nevybuchlé munice",
+        "vibration": "Zpráva o vibracích"
+      }
+    },
+    "cde_state": {
+      "archived": "Archivováno",
+      "published": "Publikováno",
+      "shared": "Sdíleno",
+      "wip": "Rozpracováno"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Výkaz výměr",
+        "cvr": "Porovnání hodnoty a nákladů",
+        "design_management": "Řízení projektové dokumentace",
+        "field_time": "Čas na stavbě",
+        "fieldreports": "Stavební deníky",
+        "finance": "Finance",
+        "inspections": "Kontroly",
+        "procurement": "Nákup",
+        "schedule": "Harmonogram"
+      },
+      "phase": {
+        "approval": "Schválení",
+        "award": "Zadání",
+        "brief": "Zadání projektu",
+        "concept": "Koncept",
+        "construction": "Realizace",
+        "design": "Projektování",
+        "detail": "Prováděcí projekt",
+        "development": "Vývoj",
+        "execution": "Provádění",
+        "handover": "Předání",
+        "operation": "Provoz",
+        "strategy": "Strategie",
+        "tender": "Výběrové řízení"
+      }
+    },
+    "errors": {
+      "answer_required": "Je vyžadována odpověď.",
+      "approval_point_locked": "Bod schválení je v revizi nebo rozhodnutý a nelze jej změnit.",
+      "approval_point_not_found": "Bod schválení nebyl nalezen.",
+      "approval_point_not_rejected": "Znovu otevřít lze pouze zamítnutý bod schválení.",
+      "binding_requires_change_request": "Rámcový dokument projektování je závazný; změny vyžadují žádost o změnu.",
+      "catalogue_retired": "Tento katalog je vyřazen a nelze jej připnout.",
+      "code_duplicate": "Tento kód je v projektu již použit.",
+      "comment_not_found": "Komentář nebyl nalezen.",
+      "comment_text_required": "Komentář musí obsahovat text.",
+      "concurrent_issue": "Vydání bylo změněno současně; zkuste to prosím znovu.",
+      "condition_needs_owner_and_due_date": "Potvrzená podmínka vyžaduje odpovědnou osobu a termín.",
+      "condition_not_found": "Podmínka nebyla nalezena.",
+      "condition_not_proposed": "Tato podmínka již byla potvrzena nebo zamítnuta.",
+      "condition_owner_not_member": "Odpovědná osoba za podmínku musí být členem tohoto projektu.",
+      "contact_not_found": "Kontakt nebyl nalezen.",
+      "container_not_found": "Kontejner dokumentů nebyl v tomto projektu nalezen.",
+      "deliverable_not_found": "Řádek harmonogramu projektování nebyl nalezen.",
+      "dist_rule_not_found": "Pravidlo distribuce nebylo nalezeno.",
+      "distribution_list_not_found": "Distribuční seznam nebyl v tomto projektu nalezen.",
+      "drawing_not_found": "Výkres nebyl nalezen.",
+      "duplicate_issue": "Některé revize již byly odeslány těmto příjemcům; pro opětovné vydání uveďte důvod.",
+      "field_required": "Chybí povinné pole.",
+      "forbidden": "Nemáte oprávnění k této akci.",
+      "frame_document_missing": "Projekt nemá v modelu řízení rámcový dokument projektování.",
+      "frame_register_unknown": "Tento registr nelze zapsat jako rámcový dokument.",
+      "governance_gate_not_found": "Tato brána není součástí fázového modelu projektu.",
+      "hint_override_needs_rationale": "Přepsání doporučení katalogu vyžaduje odůvodnění.",
+      "invalid_id": "Neplatné ID.",
+      "invalid_transition": "Tato změna stavu není nyní povolena.",
+      "manage_required": "Změna tohoto pole vyžaduje oprávnění řídit projektování.",
+      "model_exists": "Fázový model je již připnutý.",
+      "no_approval_route": "V tomto projektu není pro body schválení projektování aktivní schvalovací trasa.",
+      "not_area_owner": "Rámcový dokument oblasti řízení smí zapisovat pouze vlastník nebo zástupce oblasti řízení, případně správce řízení.",
+      "not_required_needs_rationale": "Označení zprávy jako nepotřebné vyžaduje odůvodnění.",
+      "number_reserved": "Toto číslo patřilo smazanému výkresu a nikdy se znovu nepoužije.",
+      "number_taken": "Toto číslo je v projektu použito nebo bylo použito.",
+      "numbering_case_invalid": "Číslo musí být psáno velkými písmeny.",
+      "numbering_chars_invalid": "Číslo obsahuje znaky, které schéma nepovoluje.",
+      "numbering_code_not_in_list": "Hodnota pole není v seznamu kódů schématu.",
+      "numbering_empty": "Číslo je prázdné.",
+      "numbering_field_invalid": "Pole čísla neodpovídá svému formátu.",
+      "numbering_field_missing": "Chybí povinné pole čísla.",
+      "numbering_invalid": "Číslo neodpovídá číslovacímu schématu projektu.",
+      "numbering_metadata_in_number": "Stav a revize jsou metadata a nesmí být součástí čísla.",
+      "numbering_parts_mismatch": "Číslo a uložené části si neodpovídají.",
+      "numbering_structure_invalid": "Číslo nemá pole podle schématu.",
+      "numbering_too_long": "Číslo je delší, než schéma dovoluje.",
+      "option_kind_unknown": "Takový seznam voleb neexistuje.",
+      "originator_duplicate": "Jiná aktivní projektová role již používá tento kód původce.",
+      "originator_required": "Projektant oboru potřebuje kód původce.",
+      "originator_unknown": "Původce nepatří k žádné aktivní projektové roli.",
+      "party_kind_invalid": "Neznámý typ strany.",
+      "permit_empty": "Balík žádosti o povolení neobsahuje položky.",
+      "permit_incomplete": "Požadované položky chybí nebo ještě nejsou sdíleny.",
+      "permit_item_kind_invalid": "Neznámý typ položky.",
+      "permit_item_missing": "Chybí požadovaná položka.",
+      "permit_item_not_found": "Položka balíku nebyla nalezena.",
+      "permit_link_frozen": "Po podání nelze propojený revizní cyklus ani podání nahradit.",
+      "permit_locked": "Balík byl podán a jeho obsah je uzamčen.",
+      "permit_not_approved": "Podmínky se zaznamenávají pouze u schváleného balíku.",
+      "permit_not_found": "Balík žádosti o povolení nebyl nalezen.",
+      "permit_profile_unknown": "Neznámý profil povolení.",
+      "permit_state_read_from_cycle": "Po podání stav odpovídá reviznímu cyklu úřadu.",
+      "phase_required": "Vyberte fázi, do které to patří.",
+      "phase_unknown": "Tato fáze není ve fázovém modelu projektu.",
+      "planned_count_reduction_needs_rationale": "Snížení plánovaného počtu vyžaduje odůvodnění.",
+      "project_not_found": "Projekt nebyl nalezen.",
+      "rationale_required": "Je vyžadováno odůvodnění.",
+      "recipient_exactly_one": "Vyberte buď distribuční seznam, nebo projektovou roli.",
+      "release_contains_wip": "Vydání nemůže obsahovat rozpracované práce.",
+      "release_empty": "Vydání neobsahuje žádné revize.",
+      "release_four_eyes": "Osoba, která vydání připravila, jej nemůže vydat.",
+      "release_needs_published": "Vydání pro stavbu vyžaduje publikované revize.",
+      "release_no_recipients": "Žádný příjemce v distribuční matici neodpovídá tomuto vydání.",
+      "release_not_approved": "Vydání ještě nebylo schváleno na své schvalovací trase.",
+      "release_not_draft": "Měnit lze pouze koncept vydání.",
+      "release_not_found": "Vydání nebylo nalezeno.",
+      "release_not_pending": "Vydání nečeká na schválení.",
+      "release_not_ready": "Vydání musí být připraveno, než bude vydáno.",
+      "release_recipient_empty": "Příjemce v distribuční matici nemá osobu, které by se mohl odeslat. Nejprve doplňte seznam nebo roli.",
+      "report_author_required": "Zpráva s vyžadovanou nezávislou kontrolou potřebuje roli autora.",
+      "report_checker_required": "Nezávislá kontrola vyžaduje roli kontrolujícího.",
+      "report_checker_same_party": "Kontrolující musí patřit jiné straně než autor.",
+      "report_external_check_not_approved": "Cyklus externí kontroly ještě není schválen.",
+      "report_fields_frozen": "Autor, kontrolující, externí kontrola a revizní cyklus nelze po podání měnit.",
+      "report_kind_unknown": "Neznámý typ zprávy.",
+      "report_not_found": "Zpráva nebyla nalezena.",
+      "review_comments_open": "Nejprve je třeba uzavřít otevřené připomínky.",
+      "review_cycle_not_found": "Revizní cyklus nebyl v tomto projektu nalezen.",
+      "review_not_found": "Revize nebyla nalezena.",
+      "review_not_open": "Revize je uzavřena pro připomínky.",
+      "review_outcome_invalid": "Neznámý výsledek revize.",
+      "revision_not_current": "Vydání může obsahovat pouze aktuální revizi výkresu.",
+      "revision_not_found": "Revize nebyla v tomto projektu nalezena.",
+      "role_in_use": "Role je stále používána ve výkresech.",
+      "role_not_active": "Role byla z projektu uvolněna.",
+      "role_not_found": "Projektová role nebyla nalezena.",
+      "route_start_failed": "Schvalovací trasu se nepodařilo spustit.",
+      "scheme_has_no_form_list": "Připnuté číslovací schéma nemá seznam formulářů dokumentů.",
+      "setup_exists": "Řízení projektové dokumentace je pro tento projekt již nastaveno.",
+      "setup_missing": "Řízení projektové dokumentace pro tento projekt zatím nebylo nastaveno.",
+      "severity_invalid": "Neznámá závažnost.",
+      "source_not_installed": "Modul, který tyto záznamy obsahuje, není nainstalován.",
+      "submission_not_found": "Podání úřadu nebylo v tomto projektu nalezeno.",
+      "unknown_catalogue": "Katalog nebyl nalezen.",
+      "use_conclude": "Výsledek zaznamenejte pomocí ukončení.",
+      "use_issue": "Vydání odešlete pomocí akce vydat.",
+      "waiver_needs_rationale": "Upuštění od řádku harmonogramu projektování vyžaduje odůvodnění.",
+      "wbs_code_duplicate": "Tento kód WBS je v projektu již použit.",
+      "wbs_code_not_under_parent": "Podřízený kód musí začínat kódem svého nadřazeného prvku.",
+      "wbs_code_required": "Je vyžadován kód WBS.",
+      "wbs_invalid": "Struktura rozpadu prací porušuje pravidla WBS projektu.",
+      "wbs_move_cycle": "Uzel nelze přesunout pod vlastního potomka.",
+      "wbs_node_closed": "Tento uzel WBS je uzavřen pro nové odkazy.",
+      "wbs_node_not_found": "Uzel WBS nebyl nalezen.",
+      "wbs_node_referenced": "Na uzel nebo jeden z jeho podřízených prvků je odkazováno; místo toho jej uzavřete.",
+      "wbs_parent_not_found": "Nadřazený uzel WBS nebyl nalezen."
+    },
+    "evidence": {
+      "deliverables": "Řádky harmonogramu projektování fáze jsou přijaty",
+      "major_comments": "Žádná otevřená závažná připomínka z revize",
+      "no_host_area": "Připravenost projektování není známa: model řízení neurčuje oblast pro projektování",
+      "no_host_document": "Připravenost projektování není známa: projekt zatím nemá rámcový dokument projektování. Vygenerujte registr projektování (Soubor v CDE), čímž jej vytvoříte.",
+      "no_phase": "Připravenost projektování není známa: tato brána neuzavírá žádnou fázi",
+      "reports": "Požadované zprávy fáze jsou přijaty"
+    },
+    "export": {
+      "col_check": "Nezávislá kontrola",
+      "col_code": "Kód",
+      "col_copies": "Papírové kopie",
+      "col_discipline": "Obor",
+      "col_disciplines": "Obory",
+      "col_format": "Formát",
+      "col_forms": "Formuláře",
+      "col_kind": "Typ",
+      "col_last_issue": "Poslední vydání",
+      "col_min_status": "Minimální stav",
+      "col_number": "Číslo",
+      "col_phase": "Fáze",
+      "col_phases": "Fáze",
+      "col_pinned_revision": "Připnutá revize",
+      "col_present": "Přítomen",
+      "col_purpose": "Účel",
+      "col_recipient": "Příjemce",
+      "col_recipients": "Příjemci",
+      "col_required": "Požadováno",
+      "col_revision": "Revize",
+      "col_state": "Stav",
+      "col_status": "Status",
+      "col_title": "Název",
+      "empty": "Není co vypsat.",
+      "project": "Projekt",
+      "title_matrix": "Distribuční matice",
+      "title_permit": "Balík žádosti o povolení",
+      "title_register": "Registr výkresů",
+      "title_reports": "Zprávy a doklady",
+      "yes": "Ano"
+    },
+    "independent_check": {
+      "none": "Žádná",
+      "optional": "Volitelná",
+      "required_by_rule": "Požadováno pravidlem"
+    },
+    "permit_item": {
+      "drawing": "Výkres",
+      "form": "Formulář",
+      "report": "Zpráva"
+    },
+    "purpose": {
+      "for_approval": "Ke schválení",
+      "for_construction": "Pro realizaci",
+      "for_information": "Pro informaci",
+      "for_record": "Pro záznam",
+      "for_review": "K posouzení",
+      "for_tender": "Pro výběrové řízení"
+    },
+    "report_state": {
+      "accepted": "Přijato",
+      "commissioned": "Zadáno",
+      "in_progress": "Probíhá",
+      "not_required": "Není požadováno",
+      "rejected": "Zamítnuto",
+      "remarks": "Připomínky",
+      "required": "Požadováno",
+      "submitted": "Podáno",
+      "under_check": "V kontrole"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Bod schválení {code} nerozhodl oprávněný schvalovatel.",
+        "suggestion": "Rozhodněte o něm znovu prostřednictvím jeho trasy."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Řádek harmonogramu projektování {code} pro {phase} není přijat.",
+        "suggestion": "Dokončete výkresy nebo upusťte s uvedením důvodu."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Číslo {number} neodpovídá schématu ({fields}).",
+        "suggestion": "Přečíslujte výkres."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Číslo {number} neodpovídá svým uloženým částem ({fields}).",
+        "suggestion": "Opravte pole kontejneru."
+      },
+      "drawing_originator_known": {
+        "fail": "Původce {value} čísla {number} nepatří k žádné aktivní roli.",
+        "suggestion": "Přidejte projektovou roli nebo opravte číslo."
+      },
+      "not_required_has_rationale": {
+        "fail": "Zpráva {code} nemá odůvodnění.",
+        "suggestion": "Doplňte odůvodnění."
+      },
+      "permit_content_current": {
+        "fail": "Balík žádosti o povolení {code} obsahuje nahrazené revize.",
+        "suggestion": "Informujte úřad nebo podejte znovu."
+      },
+      "permit_package_complete": {
+        "fail": "Balíku žádosti o povolení {code} chybí {count} požadovaných položek.",
+        "suggestion": "Doplňte nebo sdílejte chybějící položky."
+      },
+      "release_revisions_suitable": {
+        "fail": "Vydání {release} obsahuje {count} nevhodných revizí.",
+        "suggestion": "Odstraňte rozpracované práce nebo nejprve publikujte."
+      },
+      "report_independent_check": {
+        "fail": "Zpráva {code} byla přijata bez platné nezávislé kontroly.",
+        "suggestion": "Určete kontrolujícího z jiné strany."
+      },
+      "title_block_matches_number": {
+        "fail": "Razítko výkresu {number} zobrazuje {value}.",
+        "suggestion": "Opravte razítko výkresu."
+      },
+      "wbs_code_unique": {
+        "fail": "Kód WBS {code} je použit více než jednou.",
+        "suggestion": "Přečíslujte duplicity."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} odkazuje na hodnotu WBS {value}, která neodpovídá žádnému uzlu.",
+        "suggestion": "Opravte odkaz nebo přidejte uzel."
+      }
+    }
+  }
+}

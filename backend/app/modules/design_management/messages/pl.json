@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Raport akustyczny",
+        "contamination": "Raport zanieczyszczenia gruntu",
+        "daylight": "Raport nasłonecznienia i oświetlenia dziennego",
+        "drainage": "Koncepcja odwodnienia",
+        "environmental": "Raport środowiskowy",
+        "fire_proof_check": "Niezależna weryfikacja bezpieczeństwa pożarowego",
+        "fire_safety_concept": "Koncepcja ochrony przeciwpożarowej",
+        "geotechnical": "Raport geotechniczny",
+        "sound_insulation": "Dowód izolacyjności akustycznej",
+        "structural_design": "Projekt konstrukcyjny i obliczenia",
+        "structural_proof_check": "Niezależna weryfikacja konstrukcji",
+        "kitchen_planning": "Raport projektowania kuchni",
+        "survey": "Inwentaryzacja terenu",
+        "thermal_energy": "Dowód charakterystyki cieplnej i energetycznej",
+        "traffic": "Raport komunikacyjny",
+        "uxo": "Ocena niewybuchów",
+        "vibration": "Raport drgań"
+      }
+    },
+    "cde_state": {
+      "archived": "Zarchiwizowano",
+      "published": "Opublikowano",
+      "shared": "Udostępniono",
+      "wip": "W trakcie opracowania"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Kosztorys ofertowy",
+        "cvr": "Uzgodnienie wartości kosztów",
+        "design_management": "Zarządzanie projektem",
+        "field_time": "Czas pracy na budowie",
+        "fieldreports": "Raporty z budowy",
+        "finance": "Finanse",
+        "inspections": "Inspekcje",
+        "procurement": "Zaopatrzenie",
+        "schedule": "Harmonogram"
+      },
+      "phase": {
+        "approval": "Zatwierdzenie",
+        "award": "Udzielenie zamówienia",
+        "brief": "Program",
+        "concept": "Koncepcja",
+        "construction": "Budowa",
+        "design": "Projekt",
+        "detail": "Projekt szczegółowy",
+        "development": "Opracowanie",
+        "execution": "Realizacja",
+        "handover": "Odbiór",
+        "operation": "Eksploatacja",
+        "strategy": "Strategia",
+        "tender": "Przetarg"
+      }
+    },
+    "errors": {
+      "answer_required": "Wymagana jest odpowiedź.",
+      "approval_point_locked": "Punkt zatwierdzenia jest w przeglądzie lub rozstrzygnięty i nie może być zmieniony.",
+      "approval_point_not_found": "Nie znaleziono punktu zatwierdzenia.",
+      "approval_point_not_rejected": "Ponownie otworzyć można tylko odrzucony punkt zatwierdzenia.",
+      "binding_requires_change_request": "Dokument ramowy projektu jest wiążący; zmiany wymagają wniosku o zmianę.",
+      "catalogue_retired": "Ten katalog został wycofany i nie może być przypięty.",
+      "code_duplicate": "Ten kod jest już używany w projekcie.",
+      "comment_not_found": "Nie znaleziono komentarza.",
+      "comment_text_required": "Komentarz musi zawierać tekst.",
+      "concurrent_issue": "Wydanie zostało zmienione równocześnie; spróbuj ponownie.",
+      "condition_needs_owner_and_due_date": "Potwierdzone warunki wymagają osoby odpowiedzialnej i terminu.",
+      "condition_not_found": "Nie znaleziono warunku.",
+      "condition_not_proposed": "Ten warunek został już potwierdzony lub odrzucony.",
+      "condition_owner_not_member": "Osoba odpowiedzialna za warunek musi być członkiem tego projektu.",
+      "contact_not_found": "Nie znaleziono kontaktu.",
+      "container_not_found": "Nie znaleziono kontenera dokumentów w tym projekcie.",
+      "deliverable_not_found": "Nie znaleziono pozycji harmonogramu projektu.",
+      "dist_rule_not_found": "Nie znaleziono reguły dystrybucji.",
+      "distribution_list_not_found": "Nie znaleziono listy dystrybucyjnej w tym projekcie.",
+      "drawing_not_found": "Nie znaleziono rysunku.",
+      "duplicate_issue": "Niektóre rewizje zostały już wysłane do tych odbiorców; podaj powód ponownego wydania.",
+      "field_required": "Brakuje wymaganego pola.",
+      "forbidden": "Nie masz uprawnień do tej czynności.",
+      "frame_document_missing": "Model zarządzania projektu nie zawiera dokumentu ramowego projektu.",
+      "frame_register_unknown": "Tego rejestru nie można zapisać jako dokumentu ramowego.",
+      "governance_gate_not_found": "Ta bramka nie należy do modelu faz projektu.",
+      "hint_override_needs_rationale": "Zmiana wskazówki katalogu wymaga uzasadnienia.",
+      "invalid_id": "Nieprawidłowy identyfikator.",
+      "invalid_transition": "Ta zmiana stanu nie jest teraz dozwolona.",
+      "manage_required": "Zmiana tego pola wymaga uprawnienia do zarządzania projektem.",
+      "model_exists": "Model faz jest już przypięty.",
+      "no_approval_route": "W tym projekcie nie ma aktywnej ścieżki zatwierdzania dla punktów zatwierdzenia projektu.",
+      "not_area_owner": "Dokument ramowy obszaru zarządzania może zapisać tylko jego właściciel, zastępca lub menedżer zarządzania.",
+      "not_required_needs_rationale": "Oznaczenie raportu jako niewymaganego wymaga uzasadnienia.",
+      "number_reserved": "Ten numer należał do usuniętego rysunku i nie jest ponownie używany.",
+      "number_taken": "Ten numer jest lub był używany w projekcie.",
+      "numbering_case_invalid": "Numer musi być zapisany wielkimi literami.",
+      "numbering_chars_invalid": "Numer zawiera znaki niedozwolone przez schemat.",
+      "numbering_code_not_in_list": "Wartość pola nie znajduje się na liście kodów schematu.",
+      "numbering_empty": "Numer jest pusty.",
+      "numbering_field_invalid": "Pole numeru nie odpowiada jego formatowi.",
+      "numbering_field_missing": "Brakuje wymaganego pola numeru.",
+      "numbering_invalid": "Numer nie odpowiada schematowi numeracji projektu.",
+      "numbering_metadata_in_number": "Status i rewizja są metadanymi i nie mogą wchodzić w skład numeru.",
+      "numbering_parts_mismatch": "Numer i zapisane części są ze sobą niezgodne.",
+      "numbering_structure_invalid": "Numer nie ma pól wymaganych przez schemat.",
+      "numbering_too_long": "Numer jest dłuższy, niż pozwala schemat.",
+      "option_kind_unknown": "Nie ma takiej listy opcji.",
+      "originator_duplicate": "Inna aktywna rola projektowa używa już tego kodu autora.",
+      "originator_required": "Projektant branży wymaga kodu autora.",
+      "originator_unknown": "Autor nie należy do żadnej aktywnej roli projektowej.",
+      "party_kind_invalid": "Nieznany rodzaj strony.",
+      "permit_empty": "Pakiet uzgodnień nie zawiera pozycji.",
+      "permit_incomplete": "Brakuje wymaganych pozycji lub nie zostały jeszcze udostępnione.",
+      "permit_item_kind_invalid": "Nieznany rodzaj pozycji.",
+      "permit_item_missing": "Brakuje wymaganej pozycji.",
+      "permit_item_not_found": "Nie znaleziono pozycji pakietu.",
+      "permit_link_frozen": "Po złożeniu nie można zastąpić powiązanego cyklu przeglądu ani złożenia.",
+      "permit_locked": "Pakiet został złożony i jego zawartość jest zamrożona.",
+      "permit_not_approved": "Warunki można rejestrować wyłącznie w zatwierdzonym pakiecie.",
+      "permit_not_found": "Nie znaleziono pakietu uzgodnień.",
+      "permit_profile_unknown": "Nieznany profil uzgodnień.",
+      "permit_state_read_from_cycle": "Po złożeniu stan zależy od cyklu przeglądu urzędu.",
+      "phase_required": "Wybierz fazę, do której to należy.",
+      "phase_unknown": "Tej fazy nie ma w modelu faz projektu.",
+      "planned_count_reduction_needs_rationale": "Zmniejszenie planowanej liczby wymaga uzasadnienia.",
+      "project_not_found": "Nie znaleziono projektu.",
+      "rationale_required": "Wymagane jest uzasadnienie.",
+      "recipient_exactly_one": "Wybierz listę dystrybucyjną albo rolę projektową.",
+      "release_contains_wip": "Wydanie nie może zawierać dokumentów w trakcie opracowania.",
+      "release_empty": "Wydanie nie zawiera rewizji.",
+      "release_four_eyes": "Osoba, która przygotowała wydanie, nie może go wystawić.",
+      "release_needs_published": "Wydanie do realizacji wymaga opublikowanych rewizji.",
+      "release_no_recipients": "Żaden odbiorca w macierzy dystrybucji nie pasuje do tego wydania.",
+      "release_not_approved": "Wydanie nie zostało jeszcze zatwierdzone na swojej ścieżce.",
+      "release_not_draft": "Zmienić można tylko wydanie w wersji roboczej.",
+      "release_not_found": "Nie znaleziono wydania.",
+      "release_not_pending": "Wydanie nie oczekuje na zatwierdzenie.",
+      "release_not_ready": "Przed wydaniem wydanie musi być gotowe.",
+      "release_recipient_empty": "Odbiorca w macierzy dystrybucji nie ma osoby, do której można wysłać. Najpierw uzupełnij listę lub rolę.",
+      "report_author_required": "Raport z wymaganą niezależną weryfikacją wymaga roli autora.",
+      "report_checker_required": "Niezależna weryfikacja wymaga roli sprawdzającego.",
+      "report_checker_same_party": "Sprawdzający musi należeć do innej strony niż autor.",
+      "report_external_check_not_approved": "Zewnętrzny cykl weryfikacji nie został jeszcze zatwierdzony.",
+      "report_fields_frozen": "Autora, sprawdzającego, weryfikację zewnętrzną i cykl przeglądu nie można zmienić po złożeniu.",
+      "report_kind_unknown": "Nieznany rodzaj raportu.",
+      "report_not_found": "Nie znaleziono raportu.",
+      "review_comments_open": "Najpierw zamknij otwarte komentarze.",
+      "review_cycle_not_found": "Nie znaleziono cyklu przeglądu w tym projekcie.",
+      "review_not_found": "Nie znaleziono przeglądu.",
+      "review_not_open": "Przegląd jest zamknięty dla komentarzy.",
+      "review_outcome_invalid": "Nieznany wynik przeglądu.",
+      "revision_not_current": "Wydanie może zawierać wyłącznie bieżącą rewizję rysunku.",
+      "revision_not_found": "Nie znaleziono rewizji w tym projekcie.",
+      "role_in_use": "Rola jest nadal używana przez rysunki.",
+      "role_not_active": "Rola została zwolniona z projektu.",
+      "role_not_found": "Nie znaleziono roli projektowej.",
+      "route_start_failed": "Nie udało się uruchomić ścieżki zatwierdzania.",
+      "scheme_has_no_form_list": "Przypięty schemat numeracji nie ma listy form dokumentów.",
+      "setup_exists": "Zarządzanie projektem jest już skonfigurowane dla tego projektu.",
+      "setup_missing": "Zarządzanie projektem nie jest jeszcze skonfigurowane dla tego projektu.",
+      "severity_invalid": "Nieznany stopień wagi.",
+      "source_not_installed": "Moduł, który przechowuje te rekordy, nie jest zainstalowany.",
+      "submission_not_found": "Nie znaleziono złożenia do urzędu w tym projekcie.",
+      "unknown_catalogue": "Nie znaleziono katalogu.",
+      "use_conclude": "Użyj zakończenia, aby zapisać wynik.",
+      "use_issue": "Użyj wydania, aby wysłać wydanie.",
+      "waiver_needs_rationale": "Zwolnienie pozycji harmonogramu wymaga uzasadnienia.",
+      "wbs_code_duplicate": "Ten kod WBS jest już używany w projekcie.",
+      "wbs_code_not_under_parent": "Kod elementu podrzędnego musi zaczynać się od kodu nadrzędnego.",
+      "wbs_code_required": "Wymagany jest kod WBS.",
+      "wbs_invalid": "Struktura podziału prac narusza zasady WBS projektu.",
+      "wbs_move_cycle": "Węzeł nie może zostać przeniesiony pod własnego potomka.",
+      "wbs_node_closed": "Ten węzeł WBS jest zamknięty dla nowych odwołań.",
+      "wbs_node_not_found": "Nie znaleziono węzła WBS.",
+      "wbs_node_referenced": "Węzeł lub jeden z jego elementów podrzędnych jest przywołany; zamknij go zamiast tego.",
+      "wbs_parent_not_found": "Nie znaleziono nadrzędnego węzła WBS."
+    },
+    "evidence": {
+      "deliverables": "Zaakceptowano pozycje harmonogramu projektu dla fazy",
+      "major_comments": "Brak otwartego istotnego komentarza z przeglądu",
+      "no_host_area": "Gotowość projektu nieznana: model zarządzania nie wskazuje obszaru dla projektu",
+      "no_host_document": "Gotowość projektu nieznana: projekt nie ma jeszcze dokumentu ramowego. Wygeneruj rejestr projektu (plik w CDE), aby go utworzyć.",
+      "no_phase": "Gotowość projektu nieznana: ta bramka nie zamyka żadnej fazy",
+      "reports": "Zaakceptowano wymagane raporty dla fazy"
+    },
+    "export": {
+      "col_check": "Niezależna weryfikacja",
+      "col_code": "Kod",
+      "col_copies": "Egzemplarze papierowe",
+      "col_discipline": "Branża",
+      "col_disciplines": "Branże",
+      "col_format": "Format",
+      "col_forms": "Formy",
+      "col_kind": "Rodzaj",
+      "col_last_issue": "Ostatnie wydanie",
+      "col_min_status": "Minimalny status",
+      "col_number": "Numer",
+      "col_phase": "Faza",
+      "col_phases": "Fazy",
+      "col_pinned_revision": "Przypięta rewizja",
+      "col_present": "Obecny",
+      "col_purpose": "Przeznaczenie",
+      "col_recipient": "Odbiorca",
+      "col_recipients": "Odbiorcy",
+      "col_required": "Wymagane",
+      "col_revision": "Rewizja",
+      "col_state": "Stan",
+      "col_status": "Status",
+      "col_title": "Tytuł",
+      "empty": "Brak pozycji do wyświetlenia.",
+      "project": "Projekt",
+      "title_matrix": "Macierz dystrybucji",
+      "title_permit": "Pakiet uzgodnień",
+      "title_register": "Rejestr rysunków",
+      "title_reports": "Raporty i dowody",
+      "yes": "Tak"
+    },
+    "independent_check": {
+      "none": "Brak",
+      "optional": "Opcjonalna",
+      "required_by_rule": "Wymagana przepisem"
+    },
+    "permit_item": {
+      "drawing": "Rysunek",
+      "form": "Formularz",
+      "report": "Raport"
+    },
+    "purpose": {
+      "for_approval": "Do zatwierdzenia",
+      "for_construction": "Do realizacji",
+      "for_information": "Do wiadomości",
+      "for_record": "Do dokumentacji",
+      "for_review": "Do przeglądu",
+      "for_tender": "Do przetargu"
+    },
+    "report_state": {
+      "accepted": "Zaakceptowano",
+      "commissioned": "Odebrano",
+      "in_progress": "W toku",
+      "not_required": "Niewymagany",
+      "rejected": "Odrzucono",
+      "remarks": "Uwagi",
+      "required": "Wymagany",
+      "submitted": "Złożono",
+      "under_check": "W weryfikacji"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Punkt zatwierdzenia {code} nie został rozstrzygnięty przez uprawnionego zatwierdzającego.",
+        "suggestion": "Rozstrzygnij go ponownie na jego ścieżce."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Pozycja harmonogramu projektu {code} w fazie {phase} nie jest zaakceptowana.",
+        "suggestion": "Uzupełnij rysunki albo zwolnij pozycję z podaniem powodu."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Numer {number} nie odpowiada schematowi ({fields}).",
+        "suggestion": "Przenumeruj rysunek."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Numer {number} jest niezgodny z zapisanymi częściami ({fields}).",
+        "suggestion": "Popraw pola kontenera."
+      },
+      "drawing_originator_known": {
+        "fail": "Autor {value} numeru {number} nie należy do żadnej aktywnej roli.",
+        "suggestion": "Dodaj rolę projektową albo popraw numer."
+      },
+      "not_required_has_rationale": {
+        "fail": "Raport {code} nie ma uzasadnienia.",
+        "suggestion": "Dodaj uzasadnienie."
+      },
+      "permit_content_current": {
+        "fail": "Pakiet uzgodnień {code} zawiera zastąpione rewizje.",
+        "suggestion": "Poinformuj urząd lub złóż pakiet ponownie."
+      },
+      "permit_package_complete": {
+        "fail": "Pakietowi uzgodnień {code} brakuje {count} wymaganych pozycji.",
+        "suggestion": "Dodaj brakujące pozycje lub je udostępnij."
+      },
+      "release_revisions_suitable": {
+        "fail": "Wydanie {release} zawiera {count} nieodpowiednich rewizji.",
+        "suggestion": "Usuń dokumenty w trakcie opracowania albo najpierw je opublikuj."
+      },
+      "report_independent_check": {
+        "fail": "Raport {code} został zaakceptowany bez ważnej niezależnej weryfikacji.",
+        "suggestion": "Wskaż sprawdzającego z innej strony."
+      },
+      "title_block_matches_number": {
+        "fail": "Tabliczka tytułowa numeru {number} pokazuje {value}.",
+        "suggestion": "Popraw tabliczkę tytułową."
+      },
+      "wbs_code_unique": {
+        "fail": "Kod WBS {code} jest użyty więcej niż raz.",
+        "suggestion": "Przenumeruj duplikaty."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} odwołuje się do wartości WBS {value}, która nie odpowiada żadnemu węzłowi.",
+        "suggestion": "Popraw odwołanie albo dodaj węzeł."
+      }
+    }
+  }
+}

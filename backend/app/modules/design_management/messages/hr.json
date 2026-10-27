@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustički elaborat",
+        "contamination": "Elaborat o onečišćenju tla",
+        "daylight": "Elaborat o dnevnom svjetlu i osunčanju",
+        "drainage": "Strategija odvodnje",
+        "environmental": "Elaborat zaštite okoliša",
+        "fire_proof_check": "Neovisna provjera zaštite od požara",
+        "fire_safety_concept": "Koncept zaštite od požara",
+        "geotechnical": "Geotehnički elaborat",
+        "sound_insulation": "Dokaz zvučne izolacije",
+        "structural_design": "Projekt konstrukcije i proračuni",
+        "structural_proof_check": "Neovisna provjera konstrukcije",
+        "kitchen_planning": "Elaborat planiranja kuhinje",
+        "survey": "Geodetska snimka lokacije",
+        "thermal_energy": "Dokaz toplinskih i energetskih svojstava",
+        "traffic": "Prometni elaborat",
+        "uxo": "Procjena neeksplodiranih ubojnih sredstava",
+        "vibration": "Elaborat o vibracijama"
+      }
+    },
+    "cde_state": {
+      "archived": "Arhivirano",
+      "published": "Objavljeno",
+      "shared": "Podijeljeno",
+      "wip": "U izradi"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Troškovnik",
+        "cvr": "Usklađivanje troškova i vrijednosti",
+        "design_management": "Upravljanje projektiranjem",
+        "field_time": "Vrijeme na terenu",
+        "fieldreports": "Dnevnici gradilišta",
+        "finance": "Financije",
+        "inspections": "Inspekcije",
+        "procurement": "Nabava",
+        "schedule": "Raspored radova"
+      },
+      "phase": {
+        "approval": "Odobrenje",
+        "award": "Dodjela",
+        "brief": "Projektni zadatak",
+        "concept": "Koncept",
+        "construction": "Izgradnja",
+        "design": "Projektiranje",
+        "detail": "Izvedbeno projektiranje",
+        "development": "Razrada",
+        "execution": "Izvedba",
+        "handover": "Predaja",
+        "operation": "Korištenje",
+        "strategy": "Strategija",
+        "tender": "Natječaj"
+      }
+    },
+    "errors": {
+      "answer_required": "Potrebno je unijeti odgovor.",
+      "approval_point_locked": "Točka odobrenja je u pregledu ili je već odlučena i ne može se mijenjati.",
+      "approval_point_not_found": "Točka odobrenja nije pronađena.",
+      "approval_point_not_rejected": "Ponovno se može otvoriti samo odbijena točka odobrenja.",
+      "binding_requires_change_request": "Okvirni dokument projektiranja je obvezujući; za izmjene je potreban zahtjev za promjenom.",
+      "catalogue_retired": "Ovaj katalog je povučen i ne može se fiksirati.",
+      "code_duplicate": "Ova šifra se već koristi u projektu.",
+      "comment_not_found": "Komentar nije pronađen.",
+      "comment_text_required": "Komentar mora sadržavati tekst.",
+      "concurrent_issue": "Izdanje je istodobno promijenjeno; pokušajte ponovno.",
+      "condition_needs_owner_and_due_date": "Potvrđeni uvjet zahtijeva odgovornu osobu i rok.",
+      "condition_not_found": "Uvjet nije pronađen.",
+      "condition_not_proposed": "Ovaj uvjet je već potvrđen ili odbačen.",
+      "condition_owner_not_member": "Odgovorna osoba za uvjet mora biti član ovog projekta.",
+      "contact_not_found": "Kontakt nije pronađen.",
+      "container_not_found": "Spremnik dokumenata nije pronađen u ovom projektu.",
+      "deliverable_not_found": "Redak rasporeda projektiranja nije pronađen.",
+      "dist_rule_not_found": "Pravilo distribucije nije pronađeno.",
+      "distribution_list_not_found": "Popis za distribuciju nije pronađen u ovom projektu.",
+      "drawing_not_found": "Nacrt nije pronađen.",
+      "duplicate_issue": "Neke revizije su već poslane ovim primateljima; za ponovno izdavanje navedite razlog.",
+      "field_required": "Nedostaje obvezno polje.",
+      "forbidden": "Nemate ovlaštenje za ovu radnju.",
+      "frame_document_missing": "Projekt nema okvirni dokument projektiranja u svom modelu upravljanja.",
+      "frame_register_unknown": "Ovaj registar se ne može zapisati kao okvirni dokument.",
+      "governance_gate_not_found": "Ova prekretnica nije dio modela faza projekta.",
+      "hint_override_needs_rationale": "Odstupanje od preporuke kataloga zahtijeva obrazloženje.",
+      "invalid_id": "Neispravan identifikator.",
+      "invalid_transition": "Ova promjena stanja trenutno nije dopuštena.",
+      "manage_required": "Promjena ovog polja zahtijeva ovlaštenje za upravljanje projektiranjem.",
+      "model_exists": "Model faza je već fiksiran.",
+      "no_approval_route": "U ovom projektu nema aktivnog tijeka odobrenja za točke odobrenja projektiranja.",
+      "not_area_owner": "Okvirni dokument područja upravljanja smiju pisati samo odgovorna osoba ili zamjenik tog područja te voditelj upravljanja.",
+      "not_required_needs_rationale": "Označavanje elaborata kao nepotrebnog zahtijeva obrazloženje.",
+      "number_reserved": "Ovaj broj pripadao je obrisanom nacrtu i nikada se ponovno ne koristi.",
+      "number_taken": "Ovaj broj se koristi ili se koristio u projektu.",
+      "numbering_case_invalid": "Broj mora biti napisan velikim slovima.",
+      "numbering_chars_invalid": "Broj sadrži znakove koje shema ne dopušta.",
+      "numbering_code_not_in_list": "Vrijednost polja nije na popisu šifri sheme.",
+      "numbering_empty": "Broj je prazan.",
+      "numbering_field_invalid": "Polje broja ne odgovara svom formatu.",
+      "numbering_field_missing": "Nedostaje obvezno polje broja.",
+      "numbering_invalid": "Broj ne odgovara shemi numeriranja projekta.",
+      "numbering_metadata_in_number": "Status i revizija su metapodaci i ne smiju biti dio broja.",
+      "numbering_parts_mismatch": "Broj i pohranjeni dijelovi se ne podudaraju.",
+      "numbering_structure_invalid": "Broj nema polja koja propisuje shema.",
+      "numbering_too_long": "Broj je dulji nego što shema dopušta.",
+      "option_kind_unknown": "Takav popis opcija ne postoji.",
+      "originator_duplicate": "Druga aktivna projektantska uloga već koristi ovu šifru autora.",
+      "originator_required": "Projektant discipline mora imati šifru autora.",
+      "originator_unknown": "Autor ne pripada nijednoj aktivnoj projektantskoj ulozi.",
+      "party_kind_invalid": "Nepoznata vrsta sudionika.",
+      "permit_empty": "Paket dozvola nema stavki.",
+      "permit_incomplete": "Nedostaju obavezne stavke ili još nisu podijeljene.",
+      "permit_item_kind_invalid": "Nepoznata vrsta stavke.",
+      "permit_item_missing": "Nedostaje obavezna stavka.",
+      "permit_item_not_found": "Stavka paketa nije pronađena.",
+      "permit_link_frozen": "Nakon predaje povezani ciklus pregleda ili predaja se ne može zamijeniti.",
+      "permit_locked": "Paket je predan i njegov sadržaj je zaključan.",
+      "permit_not_approved": "Uvjeti se bilježe samo na odobrenom paketu.",
+      "permit_not_found": "Paket dozvola nije pronađen.",
+      "permit_profile_unknown": "Nepoznat profil dozvole.",
+      "permit_state_read_from_cycle": "Nakon predaje stanje slijedi ciklus pregleda nadležnog tijela.",
+      "phase_required": "Odaberite fazu kojoj ovo pripada.",
+      "phase_unknown": "Ova faza nije u modelu faza projekta.",
+      "planned_count_reduction_needs_rationale": "Smanjenje planirane količine zahtijeva obrazloženje.",
+      "project_not_found": "Projekt nije pronađen.",
+      "rationale_required": "Potrebno je obrazloženje.",
+      "recipient_exactly_one": "Odaberite popis za distribuciju ili projektantsku ulogu.",
+      "release_contains_wip": "Izdanje ne smije sadržavati radove u izradi.",
+      "release_empty": "Izdanje nema revizija.",
+      "release_four_eyes": "Osoba koja je pripremila izdanje ne smije ga izdati.",
+      "release_needs_published": "Izdanje za izgradnju zahtijeva objavljene revizije.",
+      "release_no_recipients": "Nijedan primatelj u matrici distribucije ne odgovara ovom izdanju.",
+      "release_not_approved": "Izdanje još nije odobreno na svom tijeku odobrenja.",
+      "release_not_draft": "Mijenjati se može samo izdanje u nacrtu.",
+      "release_not_found": "Izdanje nije pronađeno.",
+      "release_not_pending": "Izdanje ne čeka odobrenje.",
+      "release_not_ready": "Izdanje mora biti spremno prije izdavanja.",
+      "release_recipient_empty": "Primatelj u matrici distribucije nema osobu kojoj se može poslati. Najprije dopunite popis ili ulogu.",
+      "report_author_required": "Elaborat s obveznom neovisnom provjerom zahtijeva ulogu autora.",
+      "report_checker_required": "Neovisna provjera zahtijeva ulogu kontrolora.",
+      "report_checker_same_party": "Kontrolor mora pripadati drugom sudioniku od autora.",
+      "report_external_check_not_approved": "Ciklus vanjske provjere još nije odobren.",
+      "report_fields_frozen": "Autor, kontrolor, vanjska provjera i ciklus pregleda ne mogu se mijenjati nakon predaje.",
+      "report_kind_unknown": "Nepoznata vrsta elaborata.",
+      "report_not_found": "Elaborat nije pronađen.",
+      "review_comments_open": "Najprije je potrebno zatvoriti otvorene komentare.",
+      "review_cycle_not_found": "Ciklus pregleda nije pronađen u ovom projektu.",
+      "review_not_found": "Pregled nije pronađen.",
+      "review_not_open": "Pregled je zatvoren za komentare.",
+      "review_outcome_invalid": "Nepoznat ishod pregleda.",
+      "revision_not_current": "Izdanje može sadržavati samo aktualnu reviziju nacrta.",
+      "revision_not_found": "Revizija nije pronađena u ovom projektu.",
+      "role_in_use": "Ulogu i dalje koriste nacrti.",
+      "role_not_active": "Uloga je razriješena u projektu.",
+      "role_not_found": "Projektantska uloga nije pronađena.",
+      "route_start_failed": "Tijek odobrenja nije bilo moguće pokrenuti.",
+      "scheme_has_no_form_list": "Fiksirana shema numeriranja nema popis vrsta dokumenata.",
+      "setup_exists": "Upravljanje projektiranjem je već postavljeno za ovaj projekt.",
+      "setup_missing": "Upravljanje projektiranjem za ovaj projekt još nije postavljeno.",
+      "severity_invalid": "Nepoznata ozbiljnost.",
+      "source_not_installed": "Modul koji sadrži ove zapise nije instaliran.",
+      "submission_not_found": "Predaja nadležnom tijelu nije pronađena u ovom projektu.",
+      "unknown_catalogue": "Katalog nije pronađen.",
+      "use_conclude": "Za bilježenje ishoda koristite zaključivanje (conclude).",
+      "use_issue": "Za slanje izdanja koristite izdavanje (issue).",
+      "waiver_needs_rationale": "Odricanje od retka rasporeda projektiranja zahtijeva obrazloženje.",
+      "wbs_code_duplicate": "Ova WBS šifra se već koristi u projektu.",
+      "wbs_code_not_under_parent": "Šifra podređenog elementa mora započeti šifrom nadređenog elementa.",
+      "wbs_code_required": "Potrebna je WBS šifra.",
+      "wbs_invalid": "Struktura razrade posla krši WBS pravila projekta.",
+      "wbs_move_cycle": "Čvor se ne može premjestiti pod vlastiti podređeni element.",
+      "wbs_node_closed": "Ovaj WBS čvor je zatvoren za nove reference.",
+      "wbs_node_not_found": "WBS čvor nije pronađen.",
+      "wbs_node_referenced": "Na čvor ili jedan od njegovih podređenih elemenata se poziva; umjesto toga zatvorite ga.",
+      "wbs_parent_not_found": "Nadređeni WBS čvor nije pronađen."
+    },
+    "evidence": {
+      "deliverables": "Prihvaćeni redovi rasporeda projektiranja faze",
+      "major_comments": "Nema otvorenih većih komentara pregleda",
+      "no_host_area": "Spremnost projektiranja nepoznata: model upravljanja ne navodi područje za projektiranje",
+      "no_host_document": "Spremnost projektiranja nepoznata: projekt još nema okvirni dokument projektiranja. Za njegovo stvaranje generirajte registar projektiranja (Datoteka u CDE-u).",
+      "no_phase": "Spremnost projektiranja nepoznata: ova prekretnica ne zatvara nijednu fazu",
+      "reports": "Prihvaćeni obavezni elaborati faze"
+    },
+    "export": {
+      "col_check": "Neovisna provjera",
+      "col_code": "Šifra",
+      "col_copies": "Tiskani primjerci",
+      "col_discipline": "Disciplina",
+      "col_disciplines": "Discipline",
+      "col_format": "Format",
+      "col_forms": "Obrasci",
+      "col_kind": "Vrsta",
+      "col_last_issue": "Zadnje izdanje",
+      "col_min_status": "Minimalni status",
+      "col_number": "Broj",
+      "col_phase": "Faza",
+      "col_phases": "Faze",
+      "col_pinned_revision": "Fiksirana revizija",
+      "col_present": "Prisutno",
+      "col_purpose": "Namjena",
+      "col_recipient": "Primatelj",
+      "col_recipients": "Primatelji",
+      "col_required": "Obavezno",
+      "col_revision": "Revizija",
+      "col_state": "Stanje",
+      "col_status": "Status",
+      "col_title": "Naziv",
+      "empty": "Nema stavki za prikaz.",
+      "project": "Projekt",
+      "title_matrix": "Matrica distribucije",
+      "title_permit": "Paket dozvola",
+      "title_register": "Registar nacrta",
+      "title_reports": "Elaborati i dokazi",
+      "yes": "Da"
+    },
+    "independent_check": {
+      "none": "Nema",
+      "optional": "Neobavezno",
+      "required_by_rule": "Obvezno prema propisu"
+    },
+    "permit_item": {
+      "drawing": "Nacrt",
+      "form": "Obrazac",
+      "report": "Elaborat"
+    },
+    "purpose": {
+      "for_approval": "Za odobrenje",
+      "for_construction": "Za izgradnju",
+      "for_information": "Za informaciju",
+      "for_record": "Za evidenciju",
+      "for_review": "Za pregled",
+      "for_tender": "Za natječaj"
+    },
+    "report_state": {
+      "accepted": "Prihvaćeno",
+      "commissioned": "Naručeno",
+      "in_progress": "U tijeku",
+      "not_required": "Nije potrebno",
+      "rejected": "Odbijeno",
+      "remarks": "Primjedbe",
+      "required": "Potrebno",
+      "submitted": "Predano",
+      "under_check": "U provjeri"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Točku odobrenja {code} nije odlučila ovlaštena osoba.",
+        "suggestion": "Ponovno odlučite kroz njen tijek."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Redak rasporeda projektiranja {code} faze {phase} nije prihvaćen.",
+        "suggestion": "Dovršite nacrte ili se odreknite uz obrazloženje."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Broj {number} ne odgovara shemi ({fields}).",
+        "suggestion": "Preimenujte broj nacrta."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Broj {number} ne podudara se s pohranjenim dijelovima ({fields}).",
+        "suggestion": "Ispravite polja spremnika."
+      },
+      "drawing_originator_known": {
+        "fail": "Autor {value} broja {number} ne pripada nijednoj aktivnoj ulozi.",
+        "suggestion": "Dodajte projektantsku ulogu ili ispravite broj."
+      },
+      "not_required_has_rationale": {
+        "fail": "Elaborat {code} nema obrazloženje.",
+        "suggestion": "Dodajte obrazloženje."
+      },
+      "permit_content_current": {
+        "fail": "Paket dozvola {code} sadrži zastarjele revizije.",
+        "suggestion": "Obavijestite nadležno tijelo ili ponovno predajte."
+      },
+      "permit_package_complete": {
+        "fail": "U paketu dozvola {code} nedostaje {count} obaveznih stavki.",
+        "suggestion": "Dodajte ili podijelite nedostajuće stavke."
+      },
+      "release_revisions_suitable": {
+        "fail": "Izdanje {release} sadrži {count} neprikladnih revizija.",
+        "suggestion": "Uklonite radove u izradi ili ih prvo objavite."
+      },
+      "report_independent_check": {
+        "fail": "Elaborat {code} je prihvaćen bez valjane neovisne provjere.",
+        "suggestion": "Navedite kontrolora drugog sudionika."
+      },
+      "title_block_matches_number": {
+        "fail": "Naslovni blok broja {number} prikazuje {value}.",
+        "suggestion": "Ispravite naslovni blok."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS šifra {code} koristi se više puta.",
+        "suggestion": "Preimenujte duplikate."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} upućuje na WBS vrijednost {value}, koja ne odgovara nijednom čvoru.",
+        "suggestion": "Ispravite referencu ili dodajte čvor."
+      }
+    }
+  }
+}

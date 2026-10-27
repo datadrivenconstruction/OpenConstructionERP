@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "ध्वनिकी रिपोर्ट",
+        "contamination": "भूमि प्रदूषण रिपोर्ट",
+        "daylight": "दिन के प्रकाश और धूप की रिपोर्ट",
+        "drainage": "जल निकासी रणनीति",
+        "environmental": "पर्यावरण रिपोर्ट",
+        "fire_proof_check": "स्वतंत्र अग्नि सुरक्षा जाँच",
+        "fire_safety_concept": "अग्नि सुरक्षा अवधारणा",
+        "geotechnical": "भू-तकनीकी रिपोर्ट",
+        "sound_insulation": "ध्वनि रोधन प्रमाण",
+        "structural_design": "संरचनात्मक डिज़ाइन और गणनाएँ",
+        "structural_proof_check": "स्वतंत्र संरचनात्मक जाँच",
+        "kitchen_planning": "रसोई योजना रिपोर्ट",
+        "survey": "स्थल सर्वेक्षण",
+        "thermal_energy": "तापीय और ऊर्जा निष्पादन प्रमाण",
+        "traffic": "यातायात रिपोर्ट",
+        "uxo": "बिना फटे विस्फोटक का आकलन",
+        "vibration": "कंपन रिपोर्ट"
+      }
+    },
+    "cde_state": {
+      "archived": "संग्रहीत",
+      "published": "प्रकाशित",
+      "shared": "साझा किया गया",
+      "wip": "कार्य प्रगति पर"
+    },
+    "common": {
+      "ok": "ठीक है",
+      "module": {
+        "boq": "मात्रा सूची",
+        "cvr": "लागत-मूल्य समाधान",
+        "design_management": "डिज़ाइन प्रबंधन",
+        "field_time": "फ़ील्ड समय",
+        "fieldreports": "फ़ील्ड रिपोर्ट",
+        "finance": "वित्त",
+        "inspections": "निरीक्षण",
+        "procurement": "क्रय",
+        "schedule": "कार्यक्रम"
+      },
+      "phase": {
+        "approval": "अनुमोदन",
+        "award": "ठेका प्रदान",
+        "brief": "परियोजना ब्रीफ",
+        "concept": "अवधारणा",
+        "construction": "निर्माण",
+        "design": "डिज़ाइन",
+        "detail": "विस्तृत डिज़ाइन",
+        "development": "विकास",
+        "execution": "क्रियान्वयन",
+        "handover": "हस्तांतरण",
+        "operation": "संचालन",
+        "strategy": "रणनीति",
+        "tender": "निविदा"
+      }
+    },
+    "errors": {
+      "answer_required": "उत्तर आवश्यक है।",
+      "approval_point_locked": "अनुमोदन बिंदु समीक्षा में है या तय हो चुका है, इसलिए इसे बदला नहीं जा सकता।",
+      "approval_point_not_found": "अनुमोदन बिंदु नहीं मिला।",
+      "approval_point_not_rejected": "केवल अस्वीकृत अनुमोदन बिंदु को दोबारा खोला जा सकता है।",
+      "binding_requires_change_request": "डिज़ाइन फ़्रेम दस्तावेज़ बाध्यकारी है; बदलावों के लिए परिवर्तन अनुरोध आवश्यक है।",
+      "catalogue_retired": "यह सूची बंद कर दी गई है और इसे पिन नहीं किया जा सकता।",
+      "code_duplicate": "यह कोड परियोजना में पहले से उपयोग में है।",
+      "comment_not_found": "टिप्पणी नहीं मिली।",
+      "comment_text_required": "टिप्पणी में पाठ होना आवश्यक है।",
+      "concurrent_issue": "रिलीज़ उसी समय बदली गई; कृपया फिर से प्रयास करें।",
+      "condition_needs_owner_and_due_date": "पुष्ट शर्त के लिए एक उत्तरदायी व्यक्ति और नियत तिथि आवश्यक है।",
+      "condition_not_found": "शर्त नहीं मिली।",
+      "condition_not_proposed": "यह शर्त पहले ही पुष्ट या खारिज की जा चुकी है।",
+      "condition_owner_not_member": "शर्त का उत्तरदायी व्यक्ति इस परियोजना का सदस्य होना चाहिए।",
+      "contact_not_found": "संपर्क नहीं मिला।",
+      "container_not_found": "इस परियोजना में दस्तावेज़ कंटेनर नहीं मिला।",
+      "deliverable_not_found": "डिज़ाइन कार्यक्रम की पंक्ति नहीं मिली।",
+      "dist_rule_not_found": "वितरण नियम नहीं मिला।",
+      "distribution_list_not_found": "इस परियोजना में वितरण सूची नहीं मिली।",
+      "drawing_not_found": "ड्रॉइंग नहीं मिली।",
+      "duplicate_issue": "कुछ संशोधन इन प्राप्तकर्ताओं को पहले ही भेजे जा चुके हैं; दोबारा जारी करने का कारण दें।",
+      "field_required": "एक आवश्यक फ़ील्ड गायब है।",
+      "forbidden": "इस कार्य के लिए आपके पास अनुमति नहीं है।",
+      "frame_document_missing": "परियोजना के शासन मॉडल में कोई डिज़ाइन फ़्रेम दस्तावेज़ नहीं है।",
+      "frame_register_unknown": "इस रजिस्टर को फ़्रेम दस्तावेज़ के रूप में नहीं लिखा जा सकता।",
+      "governance_gate_not_found": "यह गेट परियोजना के चरण मॉडल का हिस्सा नहीं है।",
+      "hint_override_needs_rationale": "सूची के सुझाव को बदलने के लिए तर्क आवश्यक है।",
+      "invalid_id": "अमान्य आईडी।",
+      "invalid_transition": "अभी यह स्थिति परिवर्तन अनुमति योग्य नहीं है।",
+      "manage_required": "इस फ़ील्ड को बदलने के लिए डिज़ाइन प्रबंधन की अनुमति आवश्यक है।",
+      "model_exists": "एक चरण मॉडल पहले से तय है।",
+      "no_approval_route": "इस परियोजना में डिज़ाइन अनुमोदन बिंदुओं के लिए कोई सक्रिय अनुमोदन मार्ग नहीं है।",
+      "not_area_owner": "शासन क्षेत्र का फ़्रेम दस्तावेज़ केवल उसके स्वामी या प्रतिनिधि, या शासन प्रबंधक लिख सकते हैं।",
+      "not_required_needs_rationale": "रिपोर्ट को आवश्यक नहीं चिह्नित करने के लिए तर्क आवश्यक है।",
+      "number_reserved": "यह नंबर एक हटाई गई ड्रॉइंग का था और इसे कभी दोबारा उपयोग नहीं किया जाता।",
+      "number_taken": "यह नंबर परियोजना में उपयोग में है या पहले उपयोग हो चुका है।",
+      "numbering_case_invalid": "नंबर बड़े अक्षरों में होना चाहिए।",
+      "numbering_chars_invalid": "नंबर में ऐसे अक्षर हैं जिन्हें योजना अनुमति नहीं देती।",
+      "numbering_code_not_in_list": "एक फ़ील्ड का मान योजना की कोड सूची में नहीं है।",
+      "numbering_empty": "नंबर खाली है।",
+      "numbering_field_invalid": "नंबर का एक फ़ील्ड उसके प्रारूप से मेल नहीं खाता।",
+      "numbering_field_missing": "नंबर का एक आवश्यक फ़ील्ड गायब है।",
+      "numbering_invalid": "नंबर परियोजना की नंबरिंग योजना से मेल नहीं खाता।",
+      "numbering_metadata_in_number": "स्थिति और संशोधन मेटाडेटा हैं और नंबर का हिस्सा नहीं होने चाहिए।",
+      "numbering_parts_mismatch": "नंबर और संग्रहीत भाग आपस में मेल नहीं खाते।",
+      "numbering_structure_invalid": "नंबर में योजना के फ़ील्ड नहीं हैं।",
+      "numbering_too_long": "नंबर योजना की अनुमति से लंबा है।",
+      "option_kind_unknown": "ऐसी विकल्प सूची मौजूद नहीं है।",
+      "originator_duplicate": "एक अन्य सक्रिय डिज़ाइन भूमिका पहले से यह मूल-कोड उपयोग कर रही है।",
+      "originator_required": "विषय डिज़ाइनर के लिए मूल-कोड आवश्यक है।",
+      "originator_unknown": "यह मूल-कोड किसी सक्रिय डिज़ाइन भूमिका से जुड़ा नहीं है।",
+      "party_kind_invalid": "पक्ष का प्रकार अज्ञात है।",
+      "permit_empty": "अनुमति पैकेज में कोई आइटम नहीं है।",
+      "permit_incomplete": "आवश्यक आइटम गायब हैं या अभी साझा नहीं किए गए हैं।",
+      "permit_item_kind_invalid": "आइटम का प्रकार अज्ञात है।",
+      "permit_item_missing": "आवश्यक आइटम गायब है।",
+      "permit_item_not_found": "पैकेज आइटम नहीं मिला।",
+      "permit_link_frozen": "जमा करने के बाद जुड़ा समीक्षा चक्र या जमा बदला नहीं जा सकता।",
+      "permit_locked": "पैकेज जमा किया जा चुका है और उसकी सामग्री तय हो गई है।",
+      "permit_not_approved": "शर्तें केवल स्वीकृत पैकेज पर दर्ज की जाती हैं।",
+      "permit_not_found": "अनुमति पैकेज नहीं मिला।",
+      "permit_profile_unknown": "अज्ञात अनुमति प्रोफ़ाइल।",
+      "permit_state_read_from_cycle": "जमा करने के बाद स्थिति प्राधिकरण के समीक्षा चक्र का अनुसरण करती है।",
+      "phase_required": "वह चरण चुनें जिससे यह संबंधित है।",
+      "phase_unknown": "यह चरण परियोजना के चरण मॉडल में नहीं है।",
+      "planned_count_reduction_needs_rationale": "नियोजित संख्या घटाने के लिए तर्क आवश्यक है।",
+      "project_not_found": "परियोजना नहीं मिली।",
+      "rationale_required": "तर्क आवश्यक है।",
+      "recipient_exactly_one": "या तो कोई वितरण सूची या कोई डिज़ाइन भूमिका चुनें।",
+      "release_contains_wip": "रिलीज़ में कार्य प्रगति पर शामिल नहीं हो सकता।",
+      "release_empty": "रिलीज़ में कोई संशोधन नहीं है।",
+      "release_four_eyes": "जिस व्यक्ति ने रिलीज़ तैयार की है, वह उसे जारी नहीं कर सकता।",
+      "release_needs_published": "निर्माण के लिए जारी करने हेतु प्रकाशित संशोधन आवश्यक हैं।",
+      "release_no_recipients": "वितरण मैट्रिक्स में इस रिलीज़ से मेल खाने वाला कोई प्राप्तकर्ता नहीं है।",
+      "release_not_approved": "रिलीज़ अभी तक अपने अनुमोदन मार्ग पर स्वीकृत नहीं हुई है।",
+      "release_not_draft": "केवल ड्राफ़्ट रिलीज़ बदली जा सकती है।",
+      "release_not_found": "रिलीज़ नहीं मिली।",
+      "release_not_pending": "रिलीज़ अनुमोदन की प्रतीक्षा में नहीं है।",
+      "release_not_ready": "जारी करने से पहले रिलीज़ तैयार होनी चाहिए।",
+      "release_recipient_empty": "वितरण मैट्रिक्स के एक प्राप्तकर्ता के लिए भेजने हेतु कोई व्यक्ति नहीं है। पहले सूची या भूमिका पूरी करें।",
+      "report_author_required": "अनिवार्य स्वतंत्र जाँच वाली रिपोर्ट के लिए लेखक भूमिका आवश्यक है।",
+      "report_checker_required": "स्वतंत्र जाँच के लिए जाँचकर्ता भूमिका आवश्यक है।",
+      "report_checker_same_party": "जाँचकर्ता लेखक से अलग पक्ष का होना चाहिए।",
+      "report_external_check_not_approved": "बाहरी जाँच चक्र अभी स्वीकृत नहीं है।",
+      "report_fields_frozen": "जमा करने के बाद लेखक, जाँचकर्ता, बाहरी जाँच और समीक्षा चक्र नहीं बदले जा सकते।",
+      "report_kind_unknown": "अज्ञात रिपोर्ट प्रकार।",
+      "report_not_found": "रिपोर्ट नहीं मिली।",
+      "review_comments_open": "पहले खुली टिप्पणियाँ बंद करनी होंगी।",
+      "review_cycle_not_found": "इस परियोजना में समीक्षा चक्र नहीं मिला।",
+      "review_not_found": "समीक्षा नहीं मिली।",
+      "review_not_open": "समीक्षा टिप्पणियों के लिए बंद है।",
+      "review_outcome_invalid": "अज्ञात समीक्षा परिणाम।",
+      "revision_not_current": "रिलीज़ में किसी ड्रॉइंग का केवल वर्तमान संशोधन हो सकता है।",
+      "revision_not_found": "इस परियोजना में संशोधन नहीं मिला।",
+      "role_in_use": "यह भूमिका अभी भी ड्रॉइंग द्वारा उपयोग में है।",
+      "role_not_active": "भूमिका परियोजना से हटाई जा चुकी है।",
+      "role_not_found": "डिज़ाइन भूमिका नहीं मिली।",
+      "route_start_failed": "अनुमोदन मार्ग शुरू नहीं किया जा सका।",
+      "scheme_has_no_form_list": "तय की गई नंबरिंग योजना में दस्तावेज़ प्रपत्रों की सूची नहीं है।",
+      "setup_exists": "इस परियोजना के लिए डिज़ाइन प्रबंधन पहले से सेट है।",
+      "setup_missing": "इस परियोजना के लिए डिज़ाइन प्रबंधन अभी सेट नहीं है।",
+      "severity_invalid": "अज्ञात गंभीरता।",
+      "source_not_installed": "इन रिकॉर्ड्स को रखने वाला मॉड्यूल स्थापित नहीं है।",
+      "submission_not_found": "इस परियोजना में प्राधिकरण को जमा किया गया दस्तावेज़ नहीं मिला।",
+      "unknown_catalogue": "सूची नहीं मिली।",
+      "use_conclude": "परिणाम दर्ज करने के लिए conclude का उपयोग करें।",
+      "use_issue": "रिलीज़ भेजने के लिए issue का उपयोग करें।",
+      "waiver_needs_rationale": "डिज़ाइन कार्यक्रम की पंक्ति छोड़ने के लिए तर्क आवश्यक है।",
+      "wbs_code_duplicate": "यह WBS कोड परियोजना में पहले से उपयोग में है।",
+      "wbs_code_not_under_parent": "उप-कोड अपने मूल कोड से शुरू होना चाहिए।",
+      "wbs_code_required": "WBS कोड आवश्यक है।",
+      "wbs_invalid": "कार्य विभाजन संरचना परियोजना के WBS नियमों का उल्लंघन करती है।",
+      "wbs_move_cycle": "कोई नोड अपने ही वंशज के नीचे नहीं ले जाया जा सकता।",
+      "wbs_node_closed": "यह WBS नोड नए संदर्भों के लिए बंद है।",
+      "wbs_node_not_found": "WBS नोड नहीं मिला।",
+      "wbs_node_referenced": "यह नोड या उसका कोई उप-नोड संदर्भित है; इसके बजाय उसे बंद करें।",
+      "wbs_parent_not_found": "मूल WBS नोड नहीं मिला।"
+    },
+    "evidence": {
+      "deliverables": "चरण की डिज़ाइन कार्यक्रम पंक्तियाँ स्वीकृत",
+      "major_comments": "कोई खुली प्रमुख समीक्षा टिप्पणी नहीं",
+      "no_host_area": "डिज़ाइन तत्परता अज्ञात: शासन मॉडल में डिज़ाइन के लिए कोई क्षेत्र नामित नहीं है",
+      "no_host_document": "डिज़ाइन तत्परता अज्ञात: परियोजना में अभी कोई डिज़ाइन फ़्रेम दस्तावेज़ नहीं है। इसे बनाने के लिए डिज़ाइन रजिस्टर बनाएँ (CDE में फ़ाइल)।",
+      "no_phase": "डिज़ाइन तत्परता अज्ञात: यह गेट कोई चरण बंद नहीं करता",
+      "reports": "चरण की आवश्यक रिपोर्टें स्वीकृत"
+    },
+    "export": {
+      "col_check": "स्वतंत्र जाँच",
+      "col_code": "कोड",
+      "col_copies": "कागज़ी प्रतियाँ",
+      "col_discipline": "विषय",
+      "col_disciplines": "विषय",
+      "col_format": "प्रारूप",
+      "col_forms": "प्रपत्र",
+      "col_kind": "प्रकार",
+      "col_last_issue": "अंतिम जारी",
+      "col_min_status": "न्यूनतम स्थिति",
+      "col_number": "नंबर",
+      "col_phase": "चरण",
+      "col_phases": "चरण",
+      "col_pinned_revision": "तय संशोधन",
+      "col_present": "उपस्थित",
+      "col_purpose": "उद्देश्य",
+      "col_recipient": "प्राप्तकर्ता",
+      "col_recipients": "प्राप्तकर्ता",
+      "col_required": "आवश्यक",
+      "col_revision": "संशोधन",
+      "col_state": "स्थिति",
+      "col_status": "स्थिति",
+      "col_title": "शीर्षक",
+      "empty": "सूचीबद्ध करने के लिए कुछ नहीं है।",
+      "project": "परियोजना",
+      "title_matrix": "वितरण मैट्रिक्स",
+      "title_permit": "अनुमति पैकेज",
+      "title_register": "ड्रॉइंग रजिस्टर",
+      "title_reports": "रिपोर्ट और प्रमाण",
+      "yes": "हाँ"
+    },
+    "independent_check": {
+      "none": "कोई नहीं",
+      "optional": "वैकल्पिक",
+      "required_by_rule": "नियम के अनुसार आवश्यक"
+    },
+    "permit_item": {
+      "drawing": "ड्रॉइंग",
+      "form": "प्रपत्र",
+      "report": "रिपोर्ट"
+    },
+    "purpose": {
+      "for_approval": "अनुमोदन हेतु",
+      "for_construction": "निर्माण हेतु",
+      "for_information": "जानकारी हेतु",
+      "for_record": "अभिलेख हेतु",
+      "for_review": "समीक्षा हेतु",
+      "for_tender": "निविदा हेतु"
+    },
+    "report_state": {
+      "accepted": "स्वीकृत",
+      "commissioned": "सौंपी गई",
+      "in_progress": "प्रगति पर",
+      "not_required": "आवश्यक नहीं",
+      "rejected": "अस्वीकृत",
+      "remarks": "टिप्पणियाँ",
+      "required": "आवश्यक",
+      "submitted": "जमा की गई",
+      "under_check": "जाँच में"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "अनुमोदन बिंदु {code} का निर्णय किसी अधिकृत स्वीकर्ता द्वारा नहीं लिया गया।",
+        "suggestion": "इसे इसके मार्ग के माध्यम से फिर से तय करें।"
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "{phase} चरण की डिज़ाइन कार्यक्रम पंक्ति {code} स्वीकृत नहीं है।",
+        "suggestion": "ड्रॉइंग पूरी करें या कारण के साथ छूट दें।"
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "नंबर {number} योजना ({fields}) से मेल नहीं खाता।",
+        "suggestion": "ड्रॉइंग का नंबर बदलें।"
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "नंबर {number} अपने संग्रहीत भागों ({fields}) से मेल नहीं खाता।",
+        "suggestion": "कंटेनर फ़ील्ड सुधारें।"
+      },
+      "drawing_originator_known": {
+        "fail": "{number} का मूल-कोड {value} किसी सक्रिय भूमिका से जुड़ा नहीं है।",
+        "suggestion": "डिज़ाइन भूमिका जोड़ें या नंबर सुधारें।"
+      },
+      "not_required_has_rationale": {
+        "fail": "रिपोर्ट {code} में कोई तर्क नहीं है।",
+        "suggestion": "तर्क जोड़ें।"
+      },
+      "permit_content_current": {
+        "fail": "अनुमति पैकेज {code} में पुराने संशोधन हैं।",
+        "suggestion": "प्राधिकरण को सूचित करें या फिर से जमा करें।"
+      },
+      "permit_package_complete": {
+        "fail": "अनुमति पैकेज {code} में {count} आवश्यक आइटम गायब हैं।",
+        "suggestion": "गायब आइटम जोड़ें या साझा करें।"
+      },
+      "release_revisions_suitable": {
+        "fail": "रिलीज़ {release} में {count} अनुपयुक्त संशोधन हैं।",
+        "suggestion": "कार्य प्रगति पर हटाएँ या पहले प्रकाशित करें।"
+      },
+      "report_independent_check": {
+        "fail": "रिपोर्ट {code} बिना वैध स्वतंत्र जाँच के स्वीकृत हुई।",
+        "suggestion": "किसी अन्य पक्ष का जाँचकर्ता नामित करें।"
+      },
+      "title_block_matches_number": {
+        "fail": "{number} के शीर्षक ब्लॉक में {value} दिखाया गया है।",
+        "suggestion": "शीर्षक ब्लॉक सुधारें।"
+      },
+      "wbs_code_unique": {
+        "fail": "WBS कोड {code} एक से अधिक बार उपयोग हो रहा है।",
+        "suggestion": "डुप्लिकेट का नंबर बदलें।"
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} WBS मान {value} की ओर संकेत करता है, जो किसी नोड से मेल नहीं खाता।",
+        "suggestion": "संदर्भ सुधारें या नोड जोड़ें।"
+      }
+    }
+  }
+}

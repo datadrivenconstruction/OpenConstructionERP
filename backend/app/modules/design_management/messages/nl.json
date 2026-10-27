@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akoestisch rapport",
+        "contamination": "Rapport grondverontreiniging",
+        "daylight": "Rapport daglicht en zonlicht",
+        "drainage": "Afwateringsstrategie",
+        "environmental": "Milieurapport",
+        "fire_proof_check": "Onafhankelijke brandveiligheidscontrole",
+        "fire_safety_concept": "Brandveiligheidsconcept",
+        "geotechnical": "Geotechnisch rapport",
+        "sound_insulation": "Bewijs geluidisolatie",
+        "structural_design": "Constructief ontwerp en berekeningen",
+        "structural_proof_check": "Onafhankelijke constructieve controle",
+        "kitchen_planning": "Rapport keukenplanning",
+        "survey": "Terreinmeting",
+        "thermal_energy": "Bewijs thermische en energieprestatie",
+        "traffic": "Verkeersrapport",
+        "uxo": "Onderzoek naar explosieven",
+        "vibration": "Trillingsrapport"
+      }
+    },
+    "cde_state": {
+      "archived": "Gearchiveerd",
+      "published": "Gepubliceerd",
+      "shared": "Gedeeld",
+      "wip": "In uitvoering"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Hoeveelheidsstaat",
+        "cvr": "Kostenwaarde-afstemming",
+        "design_management": "Ontwerpmanagement",
+        "field_time": "Veldtijd",
+        "fieldreports": "Veldrapportages",
+        "finance": "Financiën",
+        "inspections": "Inspecties",
+        "procurement": "Inkoop",
+        "schedule": "Planning"
+      },
+      "phase": {
+        "approval": "Goedkeuring",
+        "award": "Gunning",
+        "brief": "Programma van eisen",
+        "concept": "Concept",
+        "construction": "Bouw",
+        "design": "Ontwerp",
+        "detail": "Detailontwerp",
+        "development": "Ontwikkeling",
+        "execution": "Uitvoering",
+        "handover": "Oplevering",
+        "operation": "Gebruik",
+        "strategy": "Strategie",
+        "tender": "Aanbesteding"
+      }
+    },
+    "errors": {
+      "answer_required": "Een antwoord is verplicht.",
+      "approval_point_locked": "Het goedkeuringspunt is in beoordeling of besloten en kan niet meer worden gewijzigd.",
+      "approval_point_not_found": "Goedkeuringspunt niet gevonden.",
+      "approval_point_not_rejected": "Alleen een afgewezen goedkeuringspunt kan opnieuw worden geopend.",
+      "binding_requires_change_request": "Het ontwerpkaderdocument is bindend; wijzigingen vereisen een wijzigingsverzoek.",
+      "catalogue_retired": "Deze catalogus is buiten gebruik gesteld en kan niet worden vastgezet.",
+      "code_duplicate": "Deze code wordt al in het project gebruikt.",
+      "comment_not_found": "Opmerking niet gevonden.",
+      "comment_text_required": "Een opmerking moet tekst bevatten.",
+      "concurrent_issue": "De uitgifte is tegelijkertijd gewijzigd; probeer het opnieuw.",
+      "condition_needs_owner_and_due_date": "Een bevestigde voorwaarde vereist een eigenaar en een einddatum.",
+      "condition_not_found": "Voorwaarde niet gevonden.",
+      "condition_not_proposed": "Deze voorwaarde is al bevestigd of verworpen.",
+      "condition_owner_not_member": "De eigenaar van een voorwaarde moet lid zijn van dit project.",
+      "contact_not_found": "Contact niet gevonden.",
+      "container_not_found": "Documentcontainer niet gevonden in dit project.",
+      "deliverable_not_found": "Regel uit het ontwerpschema niet gevonden.",
+      "dist_rule_not_found": "Distributieregel niet gevonden.",
+      "distribution_list_not_found": "Distributielijst niet gevonden in dit project.",
+      "drawing_not_found": "Tekening niet gevonden.",
+      "duplicate_issue": "Sommige revisies zijn al naar deze ontvangers verzonden; geef een reden om opnieuw uit te geven.",
+      "field_required": "Een verplicht veld ontbreekt.",
+      "forbidden": "U heeft geen recht voor deze actie.",
+      "frame_document_missing": "Het project heeft geen ontwerpkaderdocument in zijn governancemodel.",
+      "frame_register_unknown": "Dit register kan niet als ontwerpkaderdocument worden weggeschreven.",
+      "governance_gate_not_found": "Deze gate maakt geen deel uit van het fasemodel van het project.",
+      "hint_override_needs_rationale": "Afwijken van de catalogusaanwijzing vereist een motivering.",
+      "invalid_id": "Ongeldig ID.",
+      "invalid_transition": "Deze statuswijziging is nu niet toegestaan.",
+      "manage_required": "Het wijzigen van dit veld vereist het recht om ontwerp te beheren.",
+      "model_exists": "Er is al een fasemodel vastgezet.",
+      "no_approval_route": "Er is geen actieve goedkeuringsroute voor ontwerpgoedkeuringspunten in dit project.",
+      "not_area_owner": "Alleen de eigenaar of plaatsvervanger van het governancegebied, of een governancebeheerder, mag het ontwerpkaderdocument schrijven.",
+      "not_required_needs_rationale": "Een rapport als niet vereist markeren vereist een motivering.",
+      "number_reserved": "Dit nummer hoorde bij een verwijderde tekening en wordt nooit opnieuw gebruikt.",
+      "number_taken": "Dit nummer wordt in het project gebruikt of was eerder in gebruik.",
+      "numbering_case_invalid": "Het nummer moet in hoofdletters zijn.",
+      "numbering_chars_invalid": "Het nummer bevat tekens die het schema niet toestaat.",
+      "numbering_code_not_in_list": "Een veldwaarde staat niet in de codelijst van het schema.",
+      "numbering_empty": "Het nummer is leeg.",
+      "numbering_field_invalid": "Een veld van het nummer voldoet niet aan het formaat.",
+      "numbering_field_missing": "Een verplicht veld van het nummer ontbreekt.",
+      "numbering_invalid": "Het nummer past niet bij het nummeringsschema van het project.",
+      "numbering_metadata_in_number": "Status en revisie zijn metadata en mogen geen deel uitmaken van het nummer.",
+      "numbering_parts_mismatch": "Het nummer en de opgeslagen onderdelen komen niet overeen.",
+      "numbering_structure_invalid": "Het nummer heeft niet de velden van het schema.",
+      "numbering_too_long": "Het nummer is langer dan het schema toestaat.",
+      "option_kind_unknown": "Er bestaat geen lijst met opties van dit type.",
+      "originator_duplicate": "Een andere actieve ontwerprol gebruikt deze auteurscode al.",
+      "originator_required": "Een discipline-ontwerper heeft een auteurscode nodig.",
+      "originator_unknown": "De auteur hoort bij geen enkele actieve ontwerprol.",
+      "party_kind_invalid": "Onbekend type partij.",
+      "permit_empty": "Het vergunningspakket bevat geen onderdelen.",
+      "permit_incomplete": "Verplichte onderdelen ontbreken of zijn nog niet gedeeld.",
+      "permit_item_kind_invalid": "Onbekend type onderdeel.",
+      "permit_item_missing": "Verplicht onderdeel ontbreekt.",
+      "permit_item_not_found": "Pakketonderdeel niet gevonden.",
+      "permit_link_frozen": "Na indiening kan de gekoppelde beoordelingscyclus of indiening niet worden vervangen.",
+      "permit_locked": "Het pakket is ingediend en de inhoud is vastgelegd.",
+      "permit_not_approved": "Voorwaarden kunnen alleen op een goedgekeurd pakket worden vastgelegd.",
+      "permit_not_found": "Vergunningspakket niet gevonden.",
+      "permit_profile_unknown": "Onbekend vergunningsprofiel.",
+      "permit_state_read_from_cycle": "Na indiening volgt de status de beoordelingscyclus van de overheid.",
+      "phase_required": "Kies de fase waartoe dit behoort.",
+      "phase_unknown": "Deze fase komt niet voor in het fasemodel van het project.",
+      "planned_count_reduction_needs_rationale": "Een verlaging van het geplande aantal vereist een motivering.",
+      "project_not_found": "Project niet gevonden.",
+      "rationale_required": "Een motivering is verplicht.",
+      "recipient_exactly_one": "Kies een distributielijst of een ontwerprol, niet beide.",
+      "release_contains_wip": "Een uitgave kan geen werk in uitvoering bevatten.",
+      "release_empty": "De uitgave bevat geen revisies.",
+      "release_four_eyes": "De persoon die de uitgave heeft voorbereid, kan die niet uitgeven.",
+      "release_needs_published": "Een uitgifte voor uitvoering vereist gepubliceerde revisies.",
+      "release_no_recipients": "Geen enkele ontvanger in de distributiematrix past bij deze uitgave.",
+      "release_not_approved": "De uitgave is nog niet goedgekeurd op de goedkeuringsroute.",
+      "release_not_draft": "Alleen een concept-uitgave kan worden gewijzigd.",
+      "release_not_found": "Uitgave niet gevonden.",
+      "release_not_pending": "De uitgave wacht niet op een goedkeuring.",
+      "release_not_ready": "De uitgave moet gereed zijn voordat deze wordt uitgegeven.",
+      "release_recipient_empty": "Een ontvanger in de distributiematrix heeft geen persoon om naar te sturen. Vul eerst de lijst of de rol aan.",
+      "report_author_required": "Een rapport met een verplichte onafhankelijke controle vereist een auteursrol.",
+      "report_checker_required": "Een onafhankelijke controle vereist een controleurrol.",
+      "report_checker_same_party": "De controleur moet bij een andere partij horen dan de auteur.",
+      "report_external_check_not_approved": "De externe controlecyclus is nog niet goedgekeurd.",
+      "report_fields_frozen": "Auteur, controleur, externe controle en de beoordelingscyclus kunnen na indiening niet meer worden gewijzigd.",
+      "report_kind_unknown": "Onbekend type rapport.",
+      "report_not_found": "Rapport niet gevonden.",
+      "review_comments_open": "Eerst moeten de openstaande opmerkingen worden afgesloten.",
+      "review_cycle_not_found": "Beoordelingscyclus niet gevonden in dit project.",
+      "review_not_found": "Beoordeling niet gevonden.",
+      "review_not_open": "De beoordeling is gesloten voor opmerkingen.",
+      "review_outcome_invalid": "Onbekende beoordelingsuitkomst.",
+      "revision_not_current": "Een uitgave kan alleen de actuele revisie van een tekening bevatten.",
+      "revision_not_found": "Revisie niet gevonden in dit project.",
+      "role_in_use": "De rol wordt nog door tekeningen gebruikt.",
+      "role_not_active": "De rol is uit het project vrijgegeven.",
+      "role_not_found": "Ontwerprol niet gevonden.",
+      "route_start_failed": "De goedkeuringsroute kon niet worden gestart.",
+      "scheme_has_no_form_list": "Het vastgezette nummeringsschema heeft geen lijst met documentformulieren.",
+      "setup_exists": "Ontwerpmanagement is voor dit project al ingericht.",
+      "setup_missing": "Ontwerpmanagement is voor dit project nog niet ingericht.",
+      "severity_invalid": "Onbekende ernst.",
+      "source_not_installed": "De module die deze gegevens bevat, is niet geïnstalleerd.",
+      "submission_not_found": "Indiening bij de overheid niet gevonden in dit project.",
+      "unknown_catalogue": "Catalogus niet gevonden.",
+      "use_conclude": "Gebruik 'afronden' om het resultaat vast te leggen.",
+      "use_issue": "Gebruik 'uitgeven' om de uitgave te versturen.",
+      "waiver_needs_rationale": "Afzien van een regel uit het ontwerpschema vereist een motivering.",
+      "wbs_code_duplicate": "Deze WBS-code wordt al in het project gebruikt.",
+      "wbs_code_not_under_parent": "Een onderliggende code moet beginnen met de code van de bovenliggende code.",
+      "wbs_code_required": "Een WBS-code is verplicht.",
+      "wbs_invalid": "De werkindelingsstructuur schendt de WBS-regels van het project.",
+      "wbs_move_cycle": "Een knoop kan niet onder een eigen afstammeling worden geplaatst.",
+      "wbs_node_closed": "Deze WBS-knoop is gesloten voor nieuwe verwijzingen.",
+      "wbs_node_not_found": "WBS-knoop niet gevonden.",
+      "wbs_node_referenced": "De knoop of een van de onderliggende knopen wordt verwezen; sluit deze in plaats daarvan.",
+      "wbs_parent_not_found": "Bovenliggende WBS-knoop niet gevonden."
+    },
+    "evidence": {
+      "deliverables": "Regels uit het ontwerpschema van de fase geaccepteerd",
+      "major_comments": "Geen openstaande belangrijke beoordelingsopmerking",
+      "no_host_area": "Ontwerpgereedheid onbekend: het governancemodel benoemt geen gebied voor ontwerp",
+      "no_host_document": "Ontwerpgereedheid onbekend: het project heeft nog geen ontwerpkaderdocument. Maak een ontwerpregister aan (bestand in de CDE) om het te creëren.",
+      "no_phase": "Ontwerpgereedheid onbekend: deze gate sluit geen fase af",
+      "reports": "Verplichte rapporten van de fase geaccepteerd"
+    },
+    "export": {
+      "col_check": "Onafhankelijke controle",
+      "col_code": "Code",
+      "col_copies": "Papieren exemplaren",
+      "col_discipline": "Discipline",
+      "col_disciplines": "Disciplines",
+      "col_format": "Formaat",
+      "col_forms": "Formulieren",
+      "col_kind": "Soort",
+      "col_last_issue": "Laatste uitgave",
+      "col_min_status": "Minimale status",
+      "col_number": "Nummer",
+      "col_phase": "Fase",
+      "col_phases": "Fasen",
+      "col_pinned_revision": "Vastgezette revisie",
+      "col_present": "Aanwezig",
+      "col_purpose": "Doel",
+      "col_recipient": "Ontvanger",
+      "col_recipients": "Ontvangers",
+      "col_required": "Vereist",
+      "col_revision": "Revisie",
+      "col_state": "Toestand",
+      "col_status": "Status",
+      "col_title": "Titel",
+      "empty": "Niets om weer te geven.",
+      "project": "Project",
+      "title_matrix": "Distributiematrix",
+      "title_permit": "Vergunningspakket",
+      "title_register": "Tekeningregister",
+      "title_reports": "Rapporten en bewijzen",
+      "yes": "Ja"
+    },
+    "independent_check": {
+      "none": "Geen",
+      "optional": "Optioneel",
+      "required_by_rule": "Vereist volgens regelgeving"
+    },
+    "permit_item": {
+      "drawing": "Tekening",
+      "form": "Formulier",
+      "report": "Rapport"
+    },
+    "purpose": {
+      "for_approval": "Ter goedkeuring",
+      "for_construction": "Voor uitvoering",
+      "for_information": "Ter informatie",
+      "for_record": "Ter archivering",
+      "for_review": "Ter beoordeling",
+      "for_tender": "Voor aanbesteding"
+    },
+    "report_state": {
+      "accepted": "Geaccepteerd",
+      "commissioned": "Opdracht gegeven",
+      "in_progress": "In uitvoering",
+      "not_required": "Niet vereist",
+      "rejected": "Afgewezen",
+      "remarks": "Opmerkingen",
+      "required": "Vereist",
+      "submitted": "Ingediend",
+      "under_check": "In controle"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Goedkeuringspunt {code} is niet besloten door een bevoegde goedkeurder.",
+        "suggestion": "Besluit er opnieuw over via de route."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Regel {code} uit het ontwerpschema van {phase} is niet geaccepteerd.",
+        "suggestion": "Maak de tekeningen af of doe afstand met een reden."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Nummer {number} past niet bij het schema ({fields}).",
+        "suggestion": "Nummer de tekening opnieuw."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Nummer {number} komt niet overeen met de opgeslagen onderdelen ({fields}).",
+        "suggestion": "Corrigeer de containervelden."
+      },
+      "drawing_originator_known": {
+        "fail": "Auteur {value} van {number} hoort bij geen enkele actieve rol.",
+        "suggestion": "Voeg de ontwerprol toe of corrigeer het nummer."
+      },
+      "not_required_has_rationale": {
+        "fail": "Rapport {code} heeft geen motivering.",
+        "suggestion": "Voeg de motivering toe."
+      },
+      "permit_content_current": {
+        "fail": "Vergunningspakket {code} bevat vervangen revisies.",
+        "suggestion": "Informeer de overheid of dien opnieuw in."
+      },
+      "permit_package_complete": {
+        "fail": "Vergunningspakket {code} mist {count} verplichte onderdelen.",
+        "suggestion": "Voeg de ontbrekende onderdelen toe of deel ze."
+      },
+      "release_revisions_suitable": {
+        "fail": "Uitgave {release} bevat {count} ongeschikte revisies.",
+        "suggestion": "Verwijder werk in uitvoering of publiceer eerst."
+      },
+      "report_independent_check": {
+        "fail": "Rapport {code} is geaccepteerd zonder een geldige onafhankelijke controle.",
+        "suggestion": "Benoem een controleur van een andere partij."
+      },
+      "title_block_matches_number": {
+        "fail": "Het titelblok van {number} toont {value}.",
+        "suggestion": "Corrigeer het titelblok."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS-code {code} wordt meer dan eens gebruikt.",
+        "suggestion": "Nummer de dubbele codes opnieuw."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} verwijst naar WBS-waarde {value}, die met geen enkele knoop overeenkomt.",
+        "suggestion": "Corrigeer de verwijzing of voeg de knoop toe."
+      }
+    }
+  }
+}

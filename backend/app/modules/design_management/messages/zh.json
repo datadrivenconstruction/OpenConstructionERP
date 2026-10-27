@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "声学报告",
+        "contamination": "场地污染报告",
+        "daylight": "采光与日照报告",
+        "drainage": "排水策略",
+        "environmental": "环境报告",
+        "fire_proof_check": "独立消防安全审查",
+        "fire_safety_concept": "消防安全方案",
+        "geotechnical": "岩土工程报告",
+        "sound_insulation": "隔声证明",
+        "structural_design": "结构设计与计算",
+        "structural_proof_check": "独立结构审查",
+        "kitchen_planning": "厨房规划报告",
+        "survey": "现场勘测",
+        "thermal_energy": "热工与能耗性能证明",
+        "traffic": "交通报告",
+        "uxo": "未爆弹药评估",
+        "vibration": "振动报告"
+      }
+    },
+    "cde_state": {
+      "archived": "已归档",
+      "published": "已发布",
+      "shared": "已共享",
+      "wip": "编制中"
+    },
+    "common": {
+      "ok": "确定",
+      "module": {
+        "boq": "工程量清单",
+        "cvr": "成本价值核对",
+        "design_management": "设计管理",
+        "field_time": "现场工时",
+        "fieldreports": "现场日志",
+        "finance": "财务",
+        "inspections": "检查",
+        "procurement": "采购",
+        "schedule": "进度计划"
+      },
+      "phase": {
+        "approval": "审批",
+        "award": "授标",
+        "brief": "需求任务书",
+        "concept": "概念设计",
+        "construction": "施工",
+        "design": "设计",
+        "detail": "施工图设计",
+        "development": "深化",
+        "execution": "实施",
+        "handover": "移交",
+        "operation": "运营",
+        "strategy": "策略",
+        "tender": "招标"
+      }
+    },
+    "errors": {
+      "answer_required": "必须填写答复。",
+      "approval_point_locked": "审批节点正在审查或已作出决定，无法修改。",
+      "approval_point_not_found": "未找到审批节点。",
+      "approval_point_not_rejected": "只有被驳回的审批节点才能重新打开。",
+      "binding_requires_change_request": "设计框架文件具有约束力；变更需提交变更申请。",
+      "catalogue_retired": "该目录已停用，无法固定使用。",
+      "code_duplicate": "该编码已在项目中使用。",
+      "comment_not_found": "未找到评论。",
+      "comment_text_required": "评论需要填写内容。",
+      "concurrent_issue": "发布内容已被同时修改，请重试。",
+      "condition_needs_owner_and_due_date": "已确认的条件需要指定负责人和截止日期。",
+      "condition_not_found": "未找到条件。",
+      "condition_not_proposed": "该条件已被确认或撤销。",
+      "condition_owner_not_member": "条件的负责人必须是本项目成员。",
+      "contact_not_found": "未找到联系人。",
+      "container_not_found": "本项目中未找到文档容器。",
+      "deliverable_not_found": "未找到设计进度计划行。",
+      "dist_rule_not_found": "未找到分发规则。",
+      "distribution_list_not_found": "本项目中未找到分发清单。",
+      "drawing_not_found": "未找到图纸。",
+      "duplicate_issue": "部分修订版已发送给这些收件人；如需重新发送，请说明原因。",
+      "field_required": "缺少必填字段。",
+      "forbidden": "您没有执行此操作的权限。",
+      "frame_document_missing": "项目的治理模型中没有设计框架文件。",
+      "frame_register_unknown": "该登记册无法写入为框架文件。",
+      "governance_gate_not_found": "该关口不属于项目的阶段模型。",
+      "hint_override_needs_rationale": "修改目录提示需要说明理由。",
+      "invalid_id": "标识无效。",
+      "invalid_transition": "当前不允许此状态变更。",
+      "manage_required": "修改该字段需要设计管理权限。",
+      "model_exists": "已固定一个阶段模型。",
+      "no_approval_route": "本项目中没有适用于设计审批节点的有效审批流程。",
+      "not_area_owner": "只有治理领域的负责人或代理人，或治理管理员，才可以编写其框架文件。",
+      "not_required_needs_rationale": "将报告标记为不需要时需要说明理由。",
+      "number_reserved": "该编号曾属于已删除的图纸，不会被再次使用。",
+      "number_taken": "该编号在项目中正在使用或曾经使用过。",
+      "numbering_case_invalid": "编号必须为大写。",
+      "numbering_chars_invalid": "编号包含编号规则不允许的字符。",
+      "numbering_code_not_in_list": "字段值不在编号规则的代码列表中。",
+      "numbering_empty": "编号为空。",
+      "numbering_field_invalid": "编号的某个字段与其格式不符。",
+      "numbering_field_missing": "编号缺少必填字段。",
+      "numbering_invalid": "编号与项目的编号规则不一致。",
+      "numbering_metadata_in_number": "状态和版次属于元数据，不应包含在编号中。",
+      "numbering_parts_mismatch": "编号与已保存的各部分不一致。",
+      "numbering_structure_invalid": "编号不具备编号规则所要求的字段。",
+      "numbering_too_long": "编号超出编号规则允许的长度。",
+      "option_kind_unknown": "不存在此类选项列表。",
+      "originator_duplicate": "另一个有效的设计角色已使用该发起方代码。",
+      "originator_required": "专业设计人员需要发起方代码。",
+      "originator_unknown": "该发起方不属于任何有效的设计角色。",
+      "party_kind_invalid": "未知的参与方类型。",
+      "permit_empty": "许可申请包中没有任何条目。",
+      "permit_incomplete": "必需条目缺失或尚未共享。",
+      "permit_item_kind_invalid": "未知的条目类型。",
+      "permit_item_missing": "缺少必需条目。",
+      "permit_item_not_found": "未找到申请包条目。",
+      "permit_link_frozen": "提交后，所关联的审查周期或提交记录不能被替换。",
+      "permit_locked": "申请包已提交，内容已锁定。",
+      "permit_not_approved": "只能在已批准的申请包上记录条件。",
+      "permit_not_found": "未找到许可申请包。",
+      "permit_profile_unknown": "未知的许可配置。",
+      "permit_state_read_from_cycle": "提交后，状态以主管机构的审查周期为准。",
+      "phase_required": "请选择所属阶段。",
+      "phase_unknown": "该阶段不在项目的阶段模型中。",
+      "planned_count_reduction_needs_rationale": "减少计划数量需要说明理由。",
+      "project_not_found": "未找到项目。",
+      "rationale_required": "必须说明理由。",
+      "recipient_exactly_one": "请选择一个分发清单或一个设计角色。",
+      "release_contains_wip": "发布内容不得包含编制中的文件。",
+      "release_empty": "发布内容中没有任何修订版。",
+      "release_four_eyes": "编制发布内容的人员不能自行发布。",
+      "release_needs_published": "用于施工的发布需要已发布的修订版。",
+      "release_no_recipients": "分发矩阵中没有与此发布内容匹配的收件人。",
+      "release_not_approved": "该发布内容尚未通过其审批流程。",
+      "release_not_draft": "只有草稿状态的发布内容可以修改。",
+      "release_not_found": "未找到发布内容。",
+      "release_not_pending": "该发布内容未在等待审批。",
+      "release_not_ready": "发布前，发布内容必须处于就绪状态。",
+      "release_recipient_empty": "分发矩阵中有一个收件人没有可发送的对象。请先完善清单或角色。",
+      "report_author_required": "需要独立审查的报告必须指定编写人角色。",
+      "report_checker_required": "独立审查需要审核人角色。",
+      "report_checker_same_party": "审核人必须隶属于与编写人不同的参与方。",
+      "report_external_check_not_approved": "外部审查周期尚未批准。",
+      "report_fields_frozen": "提交后，编写人、审核人、外部审查和审查周期均不可更改。",
+      "report_kind_unknown": "未知的报告类型。",
+      "report_not_found": "未找到报告。",
+      "review_comments_open": "须先关闭未结的评论。",
+      "review_cycle_not_found": "本项目中未找到审查周期。",
+      "review_not_found": "未找到审查。",
+      "review_not_open": "该审查已关闭，不再接受评论。",
+      "review_outcome_invalid": "未知的审查结果。",
+      "revision_not_current": "发布内容只能包含图纸的当前修订版。",
+      "revision_not_found": "本项目中未找到该修订版。",
+      "role_in_use": "该角色仍被图纸使用。",
+      "role_not_active": "该角色已从项目中移除。",
+      "role_not_found": "未找到设计角色。",
+      "route_start_failed": "无法启动审批流程。",
+      "scheme_has_no_form_list": "固定的编号规则中没有文件表单列表。",
+      "setup_exists": "该项目的设计管理已完成设置。",
+      "setup_missing": "该项目尚未完成设计管理设置。",
+      "severity_invalid": "未知的严重程度。",
+      "source_not_installed": "存放这些记录的模块未安装。",
+      "submission_not_found": "本项目中未找到向主管机构的提交记录。",
+      "unknown_catalogue": "未找到目录。",
+      "use_conclude": "请使用“conclude”记录结果。",
+      "use_issue": "请使用“issue”发送发布内容。",
+      "waiver_needs_rationale": "豁免设计进度计划行需要说明理由。",
+      "wbs_code_duplicate": "该 WBS 编码已在项目中使用。",
+      "wbs_code_not_under_parent": "子编码必须以父级编码开头。",
+      "wbs_code_required": "必须填写 WBS 编码。",
+      "wbs_invalid": "工作分解结构违反了项目的 WBS 规则。",
+      "wbs_move_cycle": "节点不能移动到其自身的子孙节点之下。",
+      "wbs_node_closed": "该 WBS 节点已关闭，不接受新的引用。",
+      "wbs_node_not_found": "未找到 WBS 节点。",
+      "wbs_node_referenced": "该节点或其子节点已被引用；请改为关闭它。",
+      "wbs_parent_not_found": "未找到上级 WBS 节点。"
+    },
+    "evidence": {
+      "deliverables": "本阶段已接受的设计进度计划行",
+      "major_comments": "没有未关闭的重大审查评论",
+      "no_host_area": "设计就绪状况未知：治理模型未指定设计领域",
+      "no_host_document": "设计就绪状况未知：项目尚无设计框架文件。请生成设计登记册（CDE 中的文件）以创建该文件。",
+      "no_phase": "设计就绪状况未知：该关口不关闭任何阶段",
+      "reports": "本阶段要求的报告已接受"
+    },
+    "export": {
+      "col_check": "独立审查",
+      "col_code": "编码",
+      "col_copies": "纸质份数",
+      "col_discipline": "专业",
+      "col_disciplines": "专业",
+      "col_format": "幅面",
+      "col_forms": "表单",
+      "col_kind": "类型",
+      "col_last_issue": "最近发布",
+      "col_min_status": "最低状态",
+      "col_number": "编号",
+      "col_phase": "阶段",
+      "col_phases": "阶段",
+      "col_pinned_revision": "固定版次",
+      "col_present": "已提供",
+      "col_purpose": "用途",
+      "col_recipient": "收件人",
+      "col_recipients": "收件人",
+      "col_required": "需要",
+      "col_revision": "版次",
+      "col_state": "状态",
+      "col_status": "状态",
+      "col_title": "名称",
+      "empty": "没有可列出的内容。",
+      "project": "项目",
+      "title_matrix": "分发矩阵",
+      "title_permit": "许可申请包",
+      "title_register": "图纸登记册",
+      "title_reports": "报告与证明",
+      "yes": "是"
+    },
+    "independent_check": {
+      "none": "无",
+      "optional": "可选",
+      "required_by_rule": "规则要求"
+    },
+    "permit_item": {
+      "drawing": "图纸",
+      "form": "表单",
+      "report": "报告"
+    },
+    "purpose": {
+      "for_approval": "用于审批",
+      "for_construction": "用于施工",
+      "for_information": "用于参考",
+      "for_record": "用于存档",
+      "for_review": "用于审查",
+      "for_tender": "用于招标"
+    },
+    "report_state": {
+      "accepted": "已接受",
+      "commissioned": "已调试",
+      "in_progress": "进行中",
+      "not_required": "不需要",
+      "rejected": "已驳回",
+      "remarks": "备注",
+      "required": "需要",
+      "submitted": "已提交",
+      "under_check": "审核中"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "审批节点 {code} 未由有权限的审批人作出决定。",
+        "suggestion": "请通过其审批流程重新决定。"
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "{phase} 的设计进度计划行 {code} 未被接受。",
+        "suggestion": "完成图纸，或附理由予以豁免。"
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "编号 {number} 与编号规则（{fields}）不符。",
+        "suggestion": "重新为图纸编号。"
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "编号 {number} 与已保存的各部分（{fields}）不一致。",
+        "suggestion": "更正文档容器字段。"
+      },
+      "drawing_originator_known": {
+        "fail": "{number} 的发起方 {value} 不属于任何有效角色。",
+        "suggestion": "添加设计角色或更正编号。"
+      },
+      "not_required_has_rationale": {
+        "fail": "报告 {code} 没有填写理由。",
+        "suggestion": "请补充理由。"
+      },
+      "permit_content_current": {
+        "fail": "许可申请包 {code} 包含已被替代的修订版。",
+        "suggestion": "通知主管机构或重新提交。"
+      },
+      "permit_package_complete": {
+        "fail": "许可申请包 {code} 缺少 {count} 个必需条目。",
+        "suggestion": "添加或共享缺失的条目。"
+      },
+      "release_revisions_suitable": {
+        "fail": "发布内容 {release} 中有 {count} 个不合格的修订版。",
+        "suggestion": "移除编制中的文件，或先行发布。"
+      },
+      "report_independent_check": {
+        "fail": "报告 {code} 在没有有效独立审查的情况下被接受。",
+        "suggestion": "指定一名来自其他参与方的审核人。"
+      },
+      "title_block_matches_number": {
+        "fail": "图纸 {number} 的标题栏显示为 {value}。",
+        "suggestion": "更正标题栏。"
+      },
+      "wbs_code_unique": {
+        "fail": "WBS 编码 {code} 被使用了多次。",
+        "suggestion": "为重复项重新编号。"
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} 引用的 WBS 值 {value} 与任何节点都不匹配。",
+        "suggestion": "更正引用或添加节点。"
+      }
+    }
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "تقرير الصوتيات",
+        "contamination": "تقرير تلوث التربة",
+        "daylight": "تقرير الإضاءة الطبيعية وأشعة الشمس",
+        "drainage": "استراتيجية الصرف",
+        "environmental": "تقرير بيئي",
+        "fire_proof_check": "فحص مستقل للسلامة من الحريق",
+        "fire_safety_concept": "مفهوم السلامة من الحريق",
+        "geotechnical": "تقرير جيوتقني",
+        "sound_insulation": "إثبات العزل الصوتي",
+        "structural_design": "التصميم الإنشائي والحسابات",
+        "structural_proof_check": "فحص إنشائي مستقل",
+        "kitchen_planning": "تقرير تخطيط المطبخ",
+        "survey": "مسح الموقع",
+        "thermal_energy": "إثبات الأداء الحراري والطاقي",
+        "traffic": "تقرير المرور",
+        "uxo": "تقييم الذخائر غير المنفجرة",
+        "vibration": "تقرير الاهتزازات"
+      }
+    },
+    "cde_state": {
+      "archived": "مؤرشف",
+      "published": "منشور",
+      "shared": "مشترك",
+      "wip": "قيد الإعداد"
+    },
+    "common": {
+      "ok": "موافق",
+      "module": {
+        "boq": "جدول الكميات",
+        "cvr": "مطابقة القيمة والتكلفة",
+        "design_management": "إدارة التصميم",
+        "field_time": "وقت العمل الميداني",
+        "fieldreports": "التقارير الميدانية",
+        "finance": "المالية",
+        "inspections": "عمليات التفتيش",
+        "procurement": "المشتريات",
+        "schedule": "الجدول الزمني"
+      },
+      "phase": {
+        "approval": "الاعتماد",
+        "award": "الترسية",
+        "brief": "متطلبات المشروع",
+        "concept": "المفهوم",
+        "construction": "التشييد",
+        "design": "التصميم",
+        "detail": "التصميم التفصيلي",
+        "development": "التطوير",
+        "execution": "التنفيذ",
+        "handover": "التسليم",
+        "operation": "التشغيل",
+        "strategy": "الاستراتيجية",
+        "tender": "المناقصة"
+      }
+    },
+    "errors": {
+      "answer_required": "الإجابة مطلوبة.",
+      "approval_point_locked": "نقطة الاعتماد قيد المراجعة أو تم البت فيها ولا يمكن تغييرها.",
+      "approval_point_not_found": "نقطة الاعتماد غير موجودة.",
+      "approval_point_not_rejected": "يمكن إعادة فتح نقطة الاعتماد المرفوضة فقط.",
+      "binding_requires_change_request": "وثيقة الإطار التصميمي ملزمة؛ التغييرات تتطلب طلب تغيير.",
+      "catalogue_retired": "هذا الكتالوج متقاعد ولا يمكن تثبيته.",
+      "code_duplicate": "هذا الرمز مستخدم بالفعل في المشروع.",
+      "comment_not_found": "التعليق غير موجود.",
+      "comment_text_required": "التعليق يجب أن يحتوي على نص.",
+      "concurrent_issue": "تم تغيير الإصدار في الوقت نفسه؛ يرجى المحاولة مرة أخرى.",
+      "condition_needs_owner_and_due_date": "الشرط المؤكد يتطلب مسؤولاً وتاريخ استحقاق.",
+      "condition_not_found": "الشرط غير موجود.",
+      "condition_not_proposed": "تم تأكيد هذا الشرط أو رفضه مسبقاً.",
+      "condition_owner_not_member": "يجب أن يكون مسؤول الشرط عضواً في هذا المشروع.",
+      "contact_not_found": "جهة الاتصال غير موجودة.",
+      "container_not_found": "حاوية الوثائق غير موجودة في هذا المشروع.",
+      "deliverable_not_found": "بند جدول التصميم غير موجود.",
+      "dist_rule_not_found": "قاعدة التوزيع غير موجودة.",
+      "distribution_list_not_found": "قائمة التوزيع غير موجودة في هذا المشروع.",
+      "drawing_not_found": "المخطط غير موجود.",
+      "duplicate_issue": "تم إرسال بعض المراجعات إلى هؤلاء المستلمين مسبقاً؛ يرجى ذكر سبب لإعادة الإصدار.",
+      "field_required": "حقل إلزامي مفقود.",
+      "forbidden": "ليست لديك صلاحية لهذا الإجراء.",
+      "frame_document_missing": "لا تحتوي نموذج الحوكمة الخاص بالمشروع على وثيقة إطار تصميمي.",
+      "frame_register_unknown": "لا يمكن كتابة هذا السجل كوثيقة إطار.",
+      "governance_gate_not_found": "هذه البوابة ليست جزءاً من نموذج مراحل المشروع.",
+      "hint_override_needs_rationale": "تجاوز توجيه الكتالوج يتطلب مبرراً.",
+      "invalid_id": "معرّف غير صالح.",
+      "invalid_transition": "تغيير الحالة هذا غير مسموح به الآن.",
+      "manage_required": "تغيير هذا الحقل يتطلب صلاحية إدارة التصميم.",
+      "model_exists": "نموذج المراحل مثبّت بالفعل.",
+      "no_approval_route": "لا يوجد مسار اعتماد نشط لنقاط اعتماد التصميم في هذا المشروع.",
+      "not_area_owner": "لا يحق كتابة وثيقة الإطار إلا لمالك مجال الحوكمة أو نائبه أو لمدير الحوكمة.",
+      "not_required_needs_rationale": "وضع تقرير كغير مطلوب يتطلب مبرراً.",
+      "number_reserved": "هذا الرقم كان لمخطط محذوف ولا يُعاد استخدامه أبداً.",
+      "number_taken": "هذا الرقم مستخدم أو سبق استخدامه في المشروع.",
+      "numbering_case_invalid": "يجب كتابة الرقم بالأحرف الكبيرة.",
+      "numbering_chars_invalid": "يحتوي الرقم على رموز لا يسمح بها نظام الترقيم.",
+      "numbering_code_not_in_list": "قيمة الحقل ليست ضمن قائمة الرموز في نظام الترقيم.",
+      "numbering_empty": "الرقم فارغ.",
+      "numbering_field_invalid": "أحد حقول الرقم لا يطابق صيغته.",
+      "numbering_field_missing": "حقل إلزامي من الرقم مفقود.",
+      "numbering_invalid": "الرقم لا يطابق نظام الترقيم الخاص بالمشروع.",
+      "numbering_metadata_in_number": "الحالة والمراجعة بيانات وصفية ولا يجب أن تكون جزءاً من الرقم.",
+      "numbering_parts_mismatch": "الرقم والأجزاء المحفوظة غير متطابقين.",
+      "numbering_structure_invalid": "الرقم لا يحتوي على حقول نظام الترقيم.",
+      "numbering_too_long": "الرقم أطول مما يسمح به نظام الترقيم.",
+      "option_kind_unknown": "لا توجد قائمة خيارات بهذا الاسم.",
+      "originator_duplicate": "يستخدم دور تصميم نشط آخر رمز الجهة المُعِدّة هذا.",
+      "originator_required": "مصمم التخصص يحتاج إلى رمز جهة مُعِدّة.",
+      "originator_unknown": "الجهة المُعِدّة لا تنتمي إلى أي دور تصميم نشط.",
+      "party_kind_invalid": "نوع الطرف غير معروف.",
+      "permit_empty": "حزمة التصاريح لا تحتوي على بنود.",
+      "permit_incomplete": "بنود مطلوبة مفقودة أو لم تتم مشاركتها بعد.",
+      "permit_item_kind_invalid": "نوع البند غير معروف.",
+      "permit_item_missing": "بند مطلوب مفقود.",
+      "permit_item_not_found": "بند الحزمة غير موجود.",
+      "permit_link_frozen": "بعد الإرسال لا يمكن استبدال دورة المراجعة أو الإرسال المرتبط.",
+      "permit_locked": "تم إرسال الحزمة وتثبيت محتواها.",
+      "permit_not_approved": "تُسجَّل الشروط على حزمة معتمدة فقط.",
+      "permit_not_found": "حزمة التصريح غير موجودة.",
+      "permit_profile_unknown": "ملف التصريح غير معروف.",
+      "permit_state_read_from_cycle": "بعد الإرسال تتبع الحالة دورة مراجعة الجهة المختصة.",
+      "phase_required": "اختر المرحلة التي تنتمي إليها هذه البيانات.",
+      "phase_unknown": "هذه المرحلة غير موجودة في نموذج مراحل المشروع.",
+      "planned_count_reduction_needs_rationale": "تخفيض العدد المخطط يتطلب مبرراً.",
+      "project_not_found": "المشروع غير موجود.",
+      "rationale_required": "المبرر مطلوب.",
+      "recipient_exactly_one": "اختر إما قائمة توزيع أو دوراً تصميمياً.",
+      "release_contains_wip": "لا يمكن أن يتضمن الإصدار أعمالاً قيد الإعداد.",
+      "release_empty": "الإصدار لا يحتوي على مراجعات.",
+      "release_four_eyes": "الشخص الذي أعدّ الإصدار لا يمكنه إصداره.",
+      "release_needs_published": "يتطلب إصدار التنفيذ مراجعات منشورة.",
+      "release_no_recipients": "لا يوجد مستلم في مصفوفة التوزيع يطابق هذا الإصدار.",
+      "release_not_approved": "لم يتم اعتماد الإصدار على مسار الاعتماد الخاص به بعد.",
+      "release_not_draft": "يمكن تعديل الإصدار في حالة المسودة فقط.",
+      "release_not_found": "الإصدار غير موجود.",
+      "release_not_pending": "الإصدار لا ينتظر اعتماداً.",
+      "release_not_ready": "يجب أن يكون الإصدار جاهزاً قبل إصداره.",
+      "release_recipient_empty": "يوجد مستلم في مصفوفة التوزيع بلا شخص للإرسال إليه. أكمل القائمة أو الدور أولاً.",
+      "report_author_required": "يتطلب التقرير ذو الفحص المستقل الإلزامي دوراً للمُعِدّ.",
+      "report_checker_required": "يتطلب الفحص المستقل دوراً للمدقق.",
+      "report_checker_same_party": "يجب أن ينتمي المدقق إلى جهة غير جهة المُعِدّ.",
+      "report_external_check_not_approved": "دورة الفحص الخارجي لم تُعتمد بعد.",
+      "report_fields_frozen": "لا يمكن تغيير المُعِدّ والمدقق والفحص الخارجي ودورة المراجعة بعد الإرسال.",
+      "report_kind_unknown": "نوع التقرير غير معروف.",
+      "report_not_found": "التقرير غير موجود.",
+      "review_comments_open": "يجب إغلاق التعليقات المفتوحة أولاً.",
+      "review_cycle_not_found": "دورة المراجعة غير موجودة في هذا المشروع.",
+      "review_not_found": "المراجعة غير موجودة.",
+      "review_not_open": "المراجعة مغلقة أمام التعليقات.",
+      "review_outcome_invalid": "نتيجة المراجعة غير معروفة.",
+      "revision_not_current": "يمكن للإصدار أن يتضمن المراجعة الحالية للمخطط فقط.",
+      "revision_not_found": "المراجعة غير موجودة في هذا المشروع.",
+      "role_in_use": "الدور ما زال مستخدماً في المخططات.",
+      "role_not_active": "تم إخراج الدور من المشروع.",
+      "role_not_found": "دور التصميم غير موجود.",
+      "route_start_failed": "تعذّر بدء مسار الاعتماد.",
+      "scheme_has_no_form_list": "نظام الترقيم المثبّت لا يحتوي على قائمة أشكال الوثائق.",
+      "setup_exists": "إدارة التصميم مُعدّة لهذا المشروع بالفعل.",
+      "setup_missing": "إدارة التصميم غير مُعدّة لهذا المشروع بعد.",
+      "severity_invalid": "درجة الخطورة غير معروفة.",
+      "source_not_installed": "الوحدة التي تحتوي على هذه السجلات غير مثبّتة.",
+      "submission_not_found": "طلب الإرسال إلى الجهة المختصة غير موجود في هذا المشروع.",
+      "unknown_catalogue": "الكتالوج غير موجود.",
+      "use_conclude": "استخدم الإنهاء لتسجيل النتيجة.",
+      "use_issue": "استخدم الإصدار لإرسال الإصدار.",
+      "waiver_needs_rationale": "التنازل عن بند جدول التصميم يتطلب مبرراً.",
+      "wbs_code_duplicate": "هذا الرمز من هيكل تقسيم العمل مستخدم بالفعل في المشروع.",
+      "wbs_code_not_under_parent": "يجب أن يبدأ الرمز الفرعي برمز عنصره الأب.",
+      "wbs_code_required": "رمز هيكل تقسيم العمل مطلوب.",
+      "wbs_invalid": "هيكل تقسيم العمل يخالف قواعد WBS الخاصة بالمشروع.",
+      "wbs_move_cycle": "لا يمكن نقل العقدة تحت أحد أحفادها.",
+      "wbs_node_closed": "عقدة هيكل تقسيم العمل مغلقة أمام المراجع الجديدة.",
+      "wbs_node_not_found": "عقدة هيكل تقسيم العمل غير موجودة.",
+      "wbs_node_referenced": "العقدة أو أحد فروعها مُشار إليه؛ أغلقه بدلاً من ذلك.",
+      "wbs_parent_not_found": "عقدة هيكل تقسيم العمل الأب غير موجودة."
+    },
+    "evidence": {
+      "deliverables": "بنود جدول التصميم للمرحلة المقبولة",
+      "major_comments": "لا يوجد تعليق مراجعة رئيسي مفتوح",
+      "no_host_area": "جاهزية التصميم غير معروفة: نموذج الحوكمة لا يحدد مجالاً للتصميم",
+      "no_host_document": "جاهزية التصميم غير معروفة: لا يوجد للمشروع حتى الآن وثيقة إطار تصميمي. أنشئ سجل التصميم (ملف في بيئة البيانات المشتركة) لإنشائها.",
+      "no_phase": "جاهزية التصميم غير معروفة: هذه البوابة لا تغلق أي مرحلة",
+      "reports": "التقارير المطلوبة للمرحلة المقبولة"
+    },
+    "export": {
+      "col_check": "الفحص المستقل",
+      "col_code": "الرمز",
+      "col_copies": "النسخ الورقية",
+      "col_discipline": "التخصص",
+      "col_disciplines": "التخصصات",
+      "col_format": "الصيغة",
+      "col_forms": "الأشكال",
+      "col_kind": "النوع",
+      "col_last_issue": "آخر إصدار",
+      "col_min_status": "الحد الأدنى للحالة",
+      "col_number": "الرقم",
+      "col_phase": "المرحلة",
+      "col_phases": "المراحل",
+      "col_pinned_revision": "المراجعة المثبّتة",
+      "col_present": "الحضور",
+      "col_purpose": "الغرض",
+      "col_recipient": "المستلم",
+      "col_recipients": "المستلمون",
+      "col_required": "مطلوب",
+      "col_revision": "المراجعة",
+      "col_state": "الحالة",
+      "col_status": "الوضع",
+      "col_title": "العنوان",
+      "empty": "لا يوجد ما يمكن عرضه.",
+      "project": "المشروع",
+      "title_matrix": "مصفوفة التوزيع",
+      "title_permit": "حزمة التصريح",
+      "title_register": "سجل المخططات",
+      "title_reports": "التقارير والإثباتات",
+      "yes": "نعم"
+    },
+    "independent_check": {
+      "none": "لا شيء",
+      "optional": "اختياري",
+      "required_by_rule": "مطلوب بحكم القاعدة"
+    },
+    "permit_item": {
+      "drawing": "مخطط",
+      "form": "نموذج",
+      "report": "تقرير"
+    },
+    "purpose": {
+      "for_approval": "للاعتماد",
+      "for_construction": "للتنفيذ",
+      "for_information": "للعلم",
+      "for_record": "للتوثيق",
+      "for_review": "للمراجعة",
+      "for_tender": "للمناقصة"
+    },
+    "report_state": {
+      "accepted": "مقبول",
+      "commissioned": "مُكلَّف",
+      "in_progress": "قيد التنفيذ",
+      "not_required": "غير مطلوب",
+      "rejected": "مرفوض",
+      "remarks": "ملاحظات",
+      "required": "مطلوب",
+      "submitted": "مُرسل",
+      "under_check": "قيد الفحص"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "لم يتخذ قراراً بشأن نقطة الاعتماد {code} معتمد مخوّل.",
+        "suggestion": "أعد اتخاذ القرار عبر مساره."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "بند جدول التصميم {code} من {phase} غير مقبول.",
+        "suggestion": "أكمل المخططات أو تنازل عنها مع ذكر السبب."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "الرقم {number} لا يطابق نظام الترقيم ({fields}).",
+        "suggestion": "أعد ترقيم المخطط."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "الرقم {number} لا يتوافق مع أجزائه المحفوظة ({fields}).",
+        "suggestion": "صحّح حقول الحاوية."
+      },
+      "drawing_originator_known": {
+        "fail": "الجهة المُعِدّة {value} للرقم {number} لا تنتمي إلى أي دور نشط.",
+        "suggestion": "أضف دور التصميم أو صحّح الرقم."
+      },
+      "not_required_has_rationale": {
+        "fail": "التقرير {code} لا يحتوي على مبرر.",
+        "suggestion": "أضف المبرر."
+      },
+      "permit_content_current": {
+        "fail": "حزمة التصريح {code} تحتوي على مراجعات مُستبدلة.",
+        "suggestion": "أبلغ الجهة المختصة أو أعد الإرسال."
+      },
+      "permit_package_complete": {
+        "fail": "حزمة التصريح {code} تفتقد {count} بنداً مطلوباً.",
+        "suggestion": "أضف البنود المفقودة أو شاركها."
+      },
+      "release_revisions_suitable": {
+        "fail": "الإصدار {release} يحتوي على {count} مراجعات غير مناسبة.",
+        "suggestion": "أزل الأعمال قيد الإعداد أو انشرها أولاً."
+      },
+      "report_independent_check": {
+        "fail": "قُبل التقرير {code} دون فحص مستقل صالح.",
+        "suggestion": "حدد مدققاً من جهة أخرى."
+      },
+      "title_block_matches_number": {
+        "fail": "جدول عنوان المخطط {number} يُظهر {value}.",
+        "suggestion": "صحّح جدول العنوان."
+      },
+      "wbs_code_unique": {
+        "fail": "رمز هيكل تقسيم العمل {code} مستخدم أكثر من مرة.",
+        "suggestion": "أعد ترقيم المكررات."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} يشير إلى القيمة {value} من هيكل تقسيم العمل، ولا تطابق أي عقدة.",
+        "suggestion": "صحّح المرجع أو أضف العقدة."
+      }
+    }
+  }
+}

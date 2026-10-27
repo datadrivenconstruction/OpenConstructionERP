@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Relazione acustica",
+        "contamination": "Relazione sulla contaminazione del terreno",
+        "daylight": "Relazione su luce diurna e irraggiamento solare",
+        "drainage": "Strategia di drenaggio",
+        "environmental": "Relazione ambientale",
+        "fire_proof_check": "Verifica indipendente di sicurezza antincendio",
+        "fire_safety_concept": "Concetto di sicurezza antincendio",
+        "geotechnical": "Relazione geotecnica",
+        "sound_insulation": "Verifica dell'isolamento acustico",
+        "structural_design": "Progettazione e calcoli strutturali",
+        "structural_proof_check": "Verifica strutturale indipendente",
+        "kitchen_planning": "Relazione di progettazione della cucina",
+        "survey": "Rilievo del sito",
+        "thermal_energy": "Verifica delle prestazioni termiche ed energetiche",
+        "traffic": "Relazione sul traffico",
+        "uxo": "Valutazione di ordigni inesplosi",
+        "vibration": "Relazione sulle vibrazioni"
+      }
+    },
+    "cde_state": {
+      "archived": "Archiviato",
+      "published": "Pubblicato",
+      "shared": "Condiviso",
+      "wip": "In lavorazione"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Computo metrico",
+        "cvr": "Riconciliazione costi e valore",
+        "design_management": "Gestione della progettazione",
+        "field_time": "Ore di cantiere",
+        "fieldreports": "Rapporti di cantiere",
+        "finance": "Finanza",
+        "inspections": "Ispezioni",
+        "procurement": "Approvvigionamento",
+        "schedule": "Cronoprogramma"
+      },
+      "phase": {
+        "approval": "Approvazione",
+        "award": "Aggiudicazione",
+        "brief": "Documento di indirizzo",
+        "concept": "Concept",
+        "construction": "Costruzione",
+        "design": "Progettazione",
+        "detail": "Progettazione esecutiva",
+        "development": "Sviluppo",
+        "execution": "Esecuzione",
+        "handover": "Consegna",
+        "operation": "Esercizio",
+        "strategy": "Strategia",
+        "tender": "Gara d'appalto"
+      }
+    },
+    "errors": {
+      "answer_required": "È richiesta una risposta.",
+      "approval_point_locked": "Il punto di approvazione è in revisione o già deciso e non può essere modificato.",
+      "approval_point_not_found": "Punto di approvazione non trovato.",
+      "approval_point_not_rejected": "Può essere riaperto solo un punto di approvazione respinto.",
+      "binding_requires_change_request": "Il documento quadro di progettazione è vincolante; le modifiche richiedono una richiesta di variante.",
+      "catalogue_retired": "Questo catalogo è ritirato e non può essere fissato.",
+      "code_duplicate": "Questo codice è già utilizzato nel progetto.",
+      "comment_not_found": "Commento non trovato.",
+      "comment_text_required": "Un commento deve contenere del testo.",
+      "concurrent_issue": "La emissione è stata modificata nello stesso momento; riprovare.",
+      "condition_needs_owner_and_due_date": "Una prescrizione confermata richiede un responsabile e una scadenza.",
+      "condition_not_found": "Prescrizione non trovata.",
+      "condition_not_proposed": "Questa prescrizione è già stata confermata o archiviata.",
+      "condition_owner_not_member": "Il responsabile di una prescrizione deve far parte di questo progetto.",
+      "contact_not_found": "Contatto non trovato.",
+      "container_not_found": "Contenitore documentale non trovato in questo progetto.",
+      "deliverable_not_found": "Riga del programma di progettazione non trovata.",
+      "dist_rule_not_found": "Regola di distribuzione non trovata.",
+      "distribution_list_not_found": "Elenco di distribuzione non trovato in questo progetto.",
+      "drawing_not_found": "Elaborato grafico non trovato.",
+      "duplicate_issue": "Alcune revisioni sono già state inviate a questi destinatari; indicare una motivazione per riemetterle.",
+      "field_required": "Manca un campo obbligatorio.",
+      "forbidden": "Non si dispone dell'autorizzazione per questa operazione.",
+      "frame_document_missing": "Il progetto non ha un documento quadro di progettazione nel proprio modello di governance.",
+      "frame_register_unknown": "Questo registro non può essere scritto come documento quadro.",
+      "governance_gate_not_found": "Questo gate non fa parte del modello di fasi del progetto.",
+      "hint_override_needs_rationale": "Discostarsi dall'indicazione del catalogo richiede una motivazione.",
+      "invalid_id": "Identificativo non valido.",
+      "invalid_transition": "Questo cambio di stato non è consentito in questo momento.",
+      "manage_required": "Modificare questo campo richiede l'autorizzazione alla gestione della progettazione.",
+      "model_exists": "Un modello di fasi è già fissato.",
+      "no_approval_route": "Nessun percorso di approvazione attivo per i punti di approvazione della progettazione in questo progetto.",
+      "not_area_owner": "Solo il responsabile o il sostituto dell'area di governance, oppure un gestore della governance, può scrivere il suo documento quadro.",
+      "not_required_needs_rationale": "Segnare una relazione come non richiesta richiede una motivazione.",
+      "number_reserved": "Questo numero apparteneva a un elaborato eliminato e non viene mai riutilizzato.",
+      "number_taken": "Questo numero è o era utilizzato nel progetto.",
+      "numbering_case_invalid": "Il numero deve essere in maiuscolo.",
+      "numbering_chars_invalid": "Il numero contiene caratteri non ammessi dallo schema.",
+      "numbering_code_not_in_list": "Un valore del campo non è presente nell'elenco codici dello schema.",
+      "numbering_empty": "Il numero è vuoto.",
+      "numbering_field_invalid": "Un campo del numero non corrisponde al suo formato.",
+      "numbering_field_missing": "Manca un campo obbligatorio del numero.",
+      "numbering_invalid": "Il numero non corrisponde allo schema di numerazione del progetto.",
+      "numbering_metadata_in_number": "Stato e revisione sono metadati e non devono far parte del numero.",
+      "numbering_parts_mismatch": "Il numero e le parti memorizzate non coincidono.",
+      "numbering_structure_invalid": "Il numero non ha i campi previsti dallo schema.",
+      "numbering_too_long": "Il numero è più lungo di quanto consentito dallo schema.",
+      "option_kind_unknown": "Questo elenco di opzioni non esiste.",
+      "originator_duplicate": "Un altro ruolo di progettazione attivo utilizza già questo codice emittente.",
+      "originator_required": "Un progettista di disciplina richiede un codice emittente.",
+      "originator_unknown": "L'emittente non appartiene a nessun ruolo di progettazione attivo.",
+      "party_kind_invalid": "Tipo di soggetto sconosciuto.",
+      "permit_empty": "Il pacchetto autorizzativo non contiene elementi.",
+      "permit_incomplete": "Mancano elementi richiesti oppure non sono ancora stati condivisi.",
+      "permit_item_kind_invalid": "Tipo di elemento sconosciuto.",
+      "permit_item_missing": "Elemento richiesto mancante.",
+      "permit_item_not_found": "Elemento del pacchetto non trovato.",
+      "permit_link_frozen": "Dopo l'invio, il ciclo di revisione o l'invio collegato non può essere sostituito.",
+      "permit_locked": "Il pacchetto è stato inviato e il suo contenuto è bloccato.",
+      "permit_not_approved": "Le prescrizioni vengono registrate solo su un pacchetto approvato.",
+      "permit_not_found": "Pacchetto autorizzativo non trovato.",
+      "permit_profile_unknown": "Profilo autorizzativo sconosciuto.",
+      "permit_state_read_from_cycle": "Dopo l'invio, lo stato segue il ciclo di revisione dell'ente.",
+      "phase_required": "Scegliere la fase a cui appartiene.",
+      "phase_unknown": "Questa fase non è presente nel modello di fasi del progetto.",
+      "planned_count_reduction_needs_rationale": "Ridurre la quantità pianificata richiede una motivazione.",
+      "project_not_found": "Progetto non trovato.",
+      "rationale_required": "È richiesta una motivazione.",
+      "recipient_exactly_one": "Scegliere un elenco di distribuzione oppure un ruolo di progettazione.",
+      "release_contains_wip": "Una emissione non può includere elaborati in lavorazione.",
+      "release_empty": "L'emissione non contiene revisioni.",
+      "release_four_eyes": "Chi ha preparato l'emissione non può emetterla.",
+      "release_needs_published": "L'emissione per la costruzione richiede revisioni pubblicate.",
+      "release_no_recipients": "Nessun destinatario della matrice di distribuzione corrisponde a questa emissione.",
+      "release_not_approved": "L'emissione non è ancora stata approvata nel suo percorso di approvazione.",
+      "release_not_draft": "Può essere modificata solo un'emissione in bozza.",
+      "release_not_found": "Emissione non trovata.",
+      "release_not_pending": "L'emissione non è in attesa di approvazione.",
+      "release_not_ready": "L'emissione deve essere pronta prima di essere inviata.",
+      "release_recipient_empty": "Un destinatario della matrice di distribuzione non ha una persona a cui inviare. Completare prima l'elenco o il ruolo.",
+      "report_author_required": "Una relazione con verifica indipendente obbligatoria richiede un ruolo di autore.",
+      "report_checker_required": "Una verifica indipendente richiede un ruolo di verificatore.",
+      "report_checker_same_party": "Il verificatore deve appartenere a un soggetto diverso dall'autore.",
+      "report_external_check_not_approved": "Il ciclo di verifica esterna non è ancora approvato.",
+      "report_fields_frozen": "Autore, verificatore, verifica esterna e ciclo di revisione non possono essere modificati dopo l'invio.",
+      "report_kind_unknown": "Tipo di relazione sconosciuto.",
+      "report_not_found": "Relazione non trovata.",
+      "review_comments_open": "Prima occorre chiudere i commenti aperti.",
+      "review_cycle_not_found": "Ciclo di revisione non trovato in questo progetto.",
+      "review_not_found": "Revisione non trovata.",
+      "review_not_open": "La revisione è chiusa ai commenti.",
+      "review_outcome_invalid": "Esito di revisione sconosciuto.",
+      "revision_not_current": "Un'emissione può includere solo la revisione corrente di un elaborato.",
+      "revision_not_found": "Revisione non trovata in questo progetto.",
+      "role_in_use": "Il ruolo è ancora utilizzato dagli elaborati.",
+      "role_not_active": "Il ruolo è stato rimosso dal progetto.",
+      "role_not_found": "Ruolo di progettazione non trovato.",
+      "route_start_failed": "Impossibile avviare il percorso di approvazione.",
+      "scheme_has_no_form_list": "Lo schema di numerazione fissato non ha un elenco delle tipologie documentali.",
+      "setup_exists": "La gestione della progettazione è già configurata per questo progetto.",
+      "setup_missing": "La gestione della progettazione non è ancora configurata per questo progetto.",
+      "severity_invalid": "Gravità sconosciuta.",
+      "source_not_installed": "Il modulo che contiene questi record non è installato.",
+      "submission_not_found": "Invio all'ente non trovato in questo progetto.",
+      "unknown_catalogue": "Catalogo non trovato.",
+      "use_conclude": "Usare conclude per registrare l'esito.",
+      "use_issue": "Usare issue per inviare l'emissione.",
+      "waiver_needs_rationale": "Rinunciare a una riga del programma di progettazione richiede una motivazione.",
+      "wbs_code_duplicate": "Questo codice WBS è già utilizzato nel progetto.",
+      "wbs_code_not_under_parent": "Un codice figlio deve iniziare con il codice del suo padre.",
+      "wbs_code_required": "È richiesto un codice WBS.",
+      "wbs_invalid": "La struttura di scomposizione del lavoro viola le regole WBS del progetto.",
+      "wbs_move_cycle": "Un nodo non può essere spostato sotto un proprio discendente.",
+      "wbs_node_closed": "Questo nodo WBS è chiuso a nuovi riferimenti.",
+      "wbs_node_not_found": "Nodo WBS non trovato.",
+      "wbs_node_referenced": "Il nodo o uno dei suoi figli è referenziato; chiuderlo invece.",
+      "wbs_parent_not_found": "Nodo WBS padre non trovato."
+    },
+    "evidence": {
+      "deliverables": "Righe del programma di progettazione della fase accettate",
+      "major_comments": "Nessun commento di revisione maggiore aperto",
+      "no_host_area": "Maturità della progettazione sconosciuta: il modello di governance non indica un'area per la progettazione",
+      "no_host_document": "Maturità della progettazione sconosciuta: il progetto non ha ancora un documento quadro di progettazione. Generare un registro di progettazione (File nel CDE) per crearlo.",
+      "no_phase": "Maturità della progettazione sconosciuta: questo gate non chiude alcuna fase",
+      "reports": "Relazioni richieste della fase accettate"
+    },
+    "export": {
+      "col_check": "Verifica indipendente",
+      "col_code": "Codice",
+      "col_copies": "Copie cartacee",
+      "col_discipline": "Disciplina",
+      "col_disciplines": "Discipline",
+      "col_format": "Formato",
+      "col_forms": "Modelli",
+      "col_kind": "Tipo",
+      "col_last_issue": "Ultima emissione",
+      "col_min_status": "Stato minimo",
+      "col_number": "Numero",
+      "col_phase": "Fase",
+      "col_phases": "Fasi",
+      "col_pinned_revision": "Revisione fissata",
+      "col_present": "Presente",
+      "col_purpose": "Scopo",
+      "col_recipient": "Destinatario",
+      "col_recipients": "Destinatari",
+      "col_required": "Richiesto",
+      "col_revision": "Revisione",
+      "col_state": "Stato",
+      "col_status": "Stato",
+      "col_title": "Titolo",
+      "empty": "Nulla da elencare.",
+      "project": "Progetto",
+      "title_matrix": "Matrice di distribuzione",
+      "title_permit": "Pacchetto autorizzativo",
+      "title_register": "Registro degli elaborati",
+      "title_reports": "Relazioni e verifiche",
+      "yes": "Sì"
+    },
+    "independent_check": {
+      "none": "Nessuna",
+      "optional": "Facoltativa",
+      "required_by_rule": "Richiesta dalla norma"
+    },
+    "permit_item": {
+      "drawing": "Elaborato",
+      "form": "Modulo",
+      "report": "Relazione"
+    },
+    "purpose": {
+      "for_approval": "Per approvazione",
+      "for_construction": "Per costruzione",
+      "for_information": "Per informazione",
+      "for_record": "Per archivio",
+      "for_review": "Per revisione",
+      "for_tender": "Per gara"
+    },
+    "report_state": {
+      "accepted": "Accettata",
+      "commissioned": "Affidata",
+      "in_progress": "In corso",
+      "not_required": "Non richiesta",
+      "rejected": "Respinta",
+      "remarks": "Osservazioni",
+      "required": "Richiesta",
+      "submitted": "Inviata",
+      "under_check": "In verifica"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Il punto di approvazione {code} non è stato deciso da un approvatore autorizzato.",
+        "suggestion": "Deciderlo di nuovo tramite il suo percorso."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "La riga {code} del programma di progettazione della fase {phase} non è accettata.",
+        "suggestion": "Completare gli elaborati oppure rinunciare con una motivazione."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Il numero {number} non corrisponde allo schema ({fields}).",
+        "suggestion": "Rinumerare l'elaborato."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Il numero {number} non concorda con le sue parti memorizzate ({fields}).",
+        "suggestion": "Correggere i campi del contenitore."
+      },
+      "drawing_originator_known": {
+        "fail": "L'emittente {value} di {number} non appartiene a nessun ruolo attivo.",
+        "suggestion": "Aggiungere il ruolo di progettazione oppure correggere il numero."
+      },
+      "not_required_has_rationale": {
+        "fail": "La relazione {code} non ha una motivazione.",
+        "suggestion": "Aggiungere la motivazione."
+      },
+      "permit_content_current": {
+        "fail": "Il pacchetto autorizzativo {code} contiene revisioni superate.",
+        "suggestion": "Informare l'ente oppure reinviare."
+      },
+      "permit_package_complete": {
+        "fail": "Nel pacchetto autorizzativo {code} mancano {count} elementi richiesti.",
+        "suggestion": "Aggiungere o condividere gli elementi mancanti."
+      },
+      "release_revisions_suitable": {
+        "fail": "L'emissione {release} contiene {count} revisioni non idonee.",
+        "suggestion": "Rimuovere gli elaborati in lavorazione oppure pubblicarli prima."
+      },
+      "report_independent_check": {
+        "fail": "La relazione {code} è stata accettata senza una verifica indipendente valida.",
+        "suggestion": "Indicare un verificatore di un altro soggetto."
+      },
+      "title_block_matches_number": {
+        "fail": "Il cartiglio di {number} riporta {value}.",
+        "suggestion": "Correggere il cartiglio."
+      },
+      "wbs_code_unique": {
+        "fail": "Il codice WBS {code} è utilizzato più di una volta.",
+        "suggestion": "Rinumerare i duplicati."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} fa riferimento al valore WBS {value}, che non corrisponde ad alcun nodo.",
+        "suggestion": "Correggere il riferimento oppure aggiungere il nodo."
+      }
+    }
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "음향 보고서",
+        "contamination": "지반 오염 보고서",
+        "daylight": "채광 및 일조 보고서",
+        "drainage": "배수 계획",
+        "environmental": "환경 보고서",
+        "fire_proof_check": "독립 방화 안전 검토",
+        "fire_safety_concept": "방화 안전 개념",
+        "geotechnical": "지반 조사 보고서",
+        "sound_insulation": "차음 성능 증명",
+        "structural_design": "구조 설계 및 계산서",
+        "structural_proof_check": "독립 구조 검토",
+        "kitchen_planning": "주방 계획 보고서",
+        "survey": "현장 측량",
+        "thermal_energy": "단열 및 에너지 성능 증명",
+        "traffic": "교통 영향 보고서",
+        "uxo": "불발탄 조사 보고서",
+        "vibration": "진동 보고서"
+      }
+    },
+    "cde_state": {
+      "archived": "보관됨",
+      "published": "게시됨",
+      "shared": "공유됨",
+      "wip": "작업 중"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "내역서",
+        "cvr": "원가-가치 대조",
+        "design_management": "설계 관리",
+        "field_time": "현장 작업 시간",
+        "fieldreports": "현장 일지",
+        "finance": "재무",
+        "inspections": "검사",
+        "procurement": "조달",
+        "schedule": "공정표"
+      },
+      "phase": {
+        "approval": "승인",
+        "award": "낙찰",
+        "brief": "사업 개요",
+        "concept": "개념 설계",
+        "construction": "시공",
+        "design": "설계",
+        "detail": "상세 설계",
+        "development": "개발",
+        "execution": "실행",
+        "handover": "인수인계",
+        "operation": "운영",
+        "strategy": "전략",
+        "tender": "입찰"
+      }
+    },
+    "errors": {
+      "answer_required": "답변을 입력해야 합니다.",
+      "approval_point_locked": "승인 항목이 검토 중이거나 결정되어 변경할 수 없습니다.",
+      "approval_point_not_found": "승인 항목을 찾을 수 없습니다.",
+      "approval_point_not_rejected": "반려된 승인 항목만 다시 열 수 있습니다.",
+      "binding_requires_change_request": "설계 기준 문서는 구속력이 있으며, 변경하려면 변경 요청이 필요합니다.",
+      "catalogue_retired": "이 카탈로그는 폐기되어 고정할 수 없습니다.",
+      "code_duplicate": "이 코드는 프로젝트에서 이미 사용 중입니다.",
+      "comment_not_found": "댓글을 찾을 수 없습니다.",
+      "comment_text_required": "댓글에는 내용이 필요합니다.",
+      "concurrent_issue": "배포본이 동시에 변경되었습니다. 다시 시도해 주세요.",
+      "condition_needs_owner_and_due_date": "확정된 조건에는 담당자와 기한이 필요합니다.",
+      "condition_not_found": "조건을 찾을 수 없습니다.",
+      "condition_not_proposed": "이 조건은 이미 확정되었거나 기각되었습니다.",
+      "condition_owner_not_member": "조건의 담당자는 이 프로젝트의 구성원이어야 합니다.",
+      "contact_not_found": "연락처를 찾을 수 없습니다.",
+      "container_not_found": "이 프로젝트에서 문서 컨테이너를 찾을 수 없습니다.",
+      "deliverable_not_found": "설계 공정표 항목을 찾을 수 없습니다.",
+      "dist_rule_not_found": "배포 규칙을 찾을 수 없습니다.",
+      "distribution_list_not_found": "이 프로젝트에서 배포 목록을 찾을 수 없습니다.",
+      "drawing_not_found": "도면을 찾을 수 없습니다.",
+      "duplicate_issue": "일부 개정본은 이미 이 수신자에게 발송되었습니다. 다시 발송하려면 사유를 입력해야 합니다.",
+      "field_required": "필수 항목이 누락되었습니다.",
+      "forbidden": "이 작업을 수행할 권한이 없습니다.",
+      "frame_document_missing": "이 프로젝트의 거버넌스 모델에 설계 기준 문서가 없습니다.",
+      "frame_register_unknown": "이 대장은 설계 기준 문서로 작성할 수 없습니다.",
+      "governance_gate_not_found": "이 게이트는 프로젝트의 단계 모델에 포함되어 있지 않습니다.",
+      "hint_override_needs_rationale": "카탈로그 권장 사항을 재정의하려면 사유가 필요합니다.",
+      "invalid_id": "잘못된 ID입니다.",
+      "invalid_transition": "현재 이 상태 변경은 허용되지 않습니다.",
+      "manage_required": "이 항목을 변경하려면 설계 관리 권한이 필요합니다.",
+      "model_exists": "단계 모델이 이미 고정되어 있습니다.",
+      "no_approval_route": "이 프로젝트에는 설계 승인 항목에 대한 활성 승인 경로가 없습니다.",
+      "not_area_owner": "거버넌스 영역의 담당자 또는 대리인, 혹은 거버넌스 관리자만 설계 기준 문서를 작성할 수 있습니다.",
+      "not_required_needs_rationale": "보고서를 불필요로 표시하려면 사유가 필요합니다.",
+      "number_reserved": "이 번호는 삭제된 도면에 부여되었던 번호이며 재사용되지 않습니다.",
+      "number_taken": "이 번호는 프로젝트에서 사용 중이거나 과거에 사용되었습니다.",
+      "numbering_case_invalid": "번호는 대문자로 입력해야 합니다.",
+      "numbering_chars_invalid": "번호에 체계에서 허용하지 않는 문자가 포함되어 있습니다.",
+      "numbering_code_not_in_list": "필드 값이 체계의 코드 목록에 없습니다.",
+      "numbering_empty": "번호가 비어 있습니다.",
+      "numbering_field_invalid": "번호의 필드가 형식과 일치하지 않습니다.",
+      "numbering_field_missing": "번호의 필수 필드가 누락되었습니다.",
+      "numbering_invalid": "번호가 프로젝트의 번호 체계와 일치하지 않습니다.",
+      "numbering_metadata_in_number": "상태와 개정은 메타데이터이므로 번호에 포함하면 안 됩니다.",
+      "numbering_parts_mismatch": "번호와 저장된 구성 요소가 일치하지 않습니다.",
+      "numbering_structure_invalid": "번호에 체계의 필드가 없습니다.",
+      "numbering_too_long": "번호가 체계에서 허용하는 길이를 초과합니다.",
+      "option_kind_unknown": "해당 옵션 목록이 없습니다.",
+      "originator_duplicate": "다른 활성 설계 역할이 이 작성자 코드를 이미 사용하고 있습니다.",
+      "originator_required": "분야별 설계자에게는 작성자 코드가 필요합니다.",
+      "originator_unknown": "이 작성자는 활성 설계 역할에 속하지 않습니다.",
+      "party_kind_invalid": "알 수 없는 당사자 유형입니다.",
+      "permit_empty": "인허가 패키지에 항목이 없습니다.",
+      "permit_incomplete": "필수 항목이 없거나 아직 공유되지 않았습니다.",
+      "permit_item_kind_invalid": "알 수 없는 항목 유형입니다.",
+      "permit_item_missing": "필수 항목이 없습니다.",
+      "permit_item_not_found": "패키지 항목을 찾을 수 없습니다.",
+      "permit_link_frozen": "제출 후에는 연결된 검토 주기 또는 제출본을 교체할 수 없습니다.",
+      "permit_locked": "패키지가 제출되어 내용이 고정되었습니다.",
+      "permit_not_approved": "조건은 승인된 패키지에만 기록할 수 있습니다.",
+      "permit_not_found": "인허가 패키지를 찾을 수 없습니다.",
+      "permit_profile_unknown": "알 수 없는 인허가 프로필입니다.",
+      "permit_state_read_from_cycle": "제출 후 상태는 관할 기관의 검토 주기를 따릅니다.",
+      "phase_required": "이 항목이 속한 단계를 선택하세요.",
+      "phase_unknown": "이 단계는 프로젝트의 단계 모델에 없습니다.",
+      "planned_count_reduction_needs_rationale": "계획 수량을 줄이려면 사유가 필요합니다.",
+      "project_not_found": "프로젝트를 찾을 수 없습니다.",
+      "rationale_required": "사유를 입력해야 합니다.",
+      "recipient_exactly_one": "배포 목록 또는 설계 역할 중 하나를 선택하세요.",
+      "release_contains_wip": "배포본에는 작업 중인 항목을 포함할 수 없습니다.",
+      "release_empty": "배포본에 개정본이 없습니다.",
+      "release_four_eyes": "배포본을 준비한 사람은 이를 발행할 수 없습니다.",
+      "release_needs_published": "시공용 발행에는 게시된 개정본이 필요합니다.",
+      "release_no_recipients": "배포 매트릭스에서 이 배포본과 일치하는 수신자가 없습니다.",
+      "release_not_approved": "배포본이 아직 승인 경로에서 승인되지 않았습니다.",
+      "release_not_draft": "초안 상태의 배포본만 변경할 수 있습니다.",
+      "release_not_found": "배포본을 찾을 수 없습니다.",
+      "release_not_pending": "배포본이 승인을 기다리는 상태가 아닙니다.",
+      "release_not_ready": "발행하기 전에 배포본이 준비 상태여야 합니다.",
+      "release_recipient_empty": "배포 매트릭스의 수신자에게 발송할 담당자가 없습니다. 목록이나 역할을 먼저 완성하세요.",
+      "report_author_required": "필수 독립 검토가 있는 보고서에는 작성자 역할이 필요합니다.",
+      "report_checker_required": "독립 검토에는 검토자 역할이 필요합니다.",
+      "report_checker_same_party": "검토자는 작성자와 다른 당사자에 속해야 합니다.",
+      "report_external_check_not_approved": "외부 검토 주기가 아직 승인되지 않았습니다.",
+      "report_fields_frozen": "제출 후에는 작성자, 검토자, 외부 검토 및 검토 주기를 변경할 수 없습니다.",
+      "report_kind_unknown": "알 수 없는 보고서 유형입니다.",
+      "report_not_found": "보고서를 찾을 수 없습니다.",
+      "review_comments_open": "먼저 미결 댓글을 종결해야 합니다.",
+      "review_cycle_not_found": "이 프로젝트에서 검토 주기를 찾을 수 없습니다.",
+      "review_not_found": "검토를 찾을 수 없습니다.",
+      "review_not_open": "이 검토는 댓글을 받지 않도록 마감되었습니다.",
+      "review_outcome_invalid": "알 수 없는 검토 결과입니다.",
+      "revision_not_current": "배포본에는 도면의 현재 개정본만 포함할 수 있습니다.",
+      "revision_not_found": "이 프로젝트에서 개정본을 찾을 수 없습니다.",
+      "role_in_use": "이 역할은 아직 도면에서 사용 중입니다.",
+      "role_not_active": "이 역할은 프로젝트에서 해제되었습니다.",
+      "role_not_found": "설계 역할을 찾을 수 없습니다.",
+      "route_start_failed": "승인 경로를 시작할 수 없습니다.",
+      "scheme_has_no_form_list": "고정된 번호 체계에 문서 양식 목록이 없습니다.",
+      "setup_exists": "이 프로젝트에는 이미 설계 관리가 설정되어 있습니다.",
+      "setup_missing": "이 프로젝트에는 아직 설계 관리가 설정되어 있지 않습니다.",
+      "severity_invalid": "알 수 없는 심각도입니다.",
+      "source_not_installed": "이 기록을 보관하는 모듈이 설치되어 있지 않습니다.",
+      "submission_not_found": "이 프로젝트에서 관할 기관 제출본을 찾을 수 없습니다.",
+      "unknown_catalogue": "카탈로그를 찾을 수 없습니다.",
+      "use_conclude": "결과를 기록하려면 '종결'을 사용하세요.",
+      "use_issue": "배포본을 발송하려면 '발행'을 사용하세요.",
+      "waiver_needs_rationale": "설계 공정표 항목을 면제하려면 사유가 필요합니다.",
+      "wbs_code_duplicate": "이 WBS 코드는 프로젝트에서 이미 사용 중입니다.",
+      "wbs_code_not_under_parent": "하위 코드는 상위 항목의 코드로 시작해야 합니다.",
+      "wbs_code_required": "WBS 코드가 필요합니다.",
+      "wbs_invalid": "작업 분류 체계가 프로젝트의 WBS 규칙을 위반합니다.",
+      "wbs_move_cycle": "노드를 자신의 하위 노드 아래로 이동할 수 없습니다.",
+      "wbs_node_closed": "이 WBS 노드는 새로운 참조를 받을 수 없도록 마감되었습니다.",
+      "wbs_node_not_found": "WBS 노드를 찾을 수 없습니다.",
+      "wbs_node_referenced": "이 노드 또는 하위 노드가 참조되고 있습니다. 대신 노드를 마감하세요.",
+      "wbs_parent_not_found": "상위 WBS 노드를 찾을 수 없습니다."
+    },
+    "evidence": {
+      "deliverables": "단계의 설계 공정표 항목이 인수됨",
+      "major_comments": "미결 주요 검토 댓글 없음",
+      "no_host_area": "설계 준비 상태를 알 수 없음: 거버넌스 모델에 설계 담당 영역이 지정되어 있지 않습니다",
+      "no_host_document": "설계 준비 상태를 알 수 없음: 프로젝트에 아직 설계 기준 문서가 없습니다. CDE에서 설계 대장(파일)을 생성하면 만들어집니다.",
+      "no_phase": "설계 준비 상태를 알 수 없음: 이 게이트는 어떤 단계도 마감하지 않습니다",
+      "reports": "단계에 필요한 보고서가 인수됨"
+    },
+    "export": {
+      "col_check": "독립 검토",
+      "col_code": "코드",
+      "col_copies": "인쇄 부수",
+      "col_discipline": "분야",
+      "col_disciplines": "분야",
+      "col_format": "형식",
+      "col_forms": "양식",
+      "col_kind": "유형",
+      "col_last_issue": "최종 발행",
+      "col_min_status": "최소 상태",
+      "col_number": "번호",
+      "col_phase": "단계",
+      "col_phases": "단계",
+      "col_pinned_revision": "고정된 개정본",
+      "col_present": "유무",
+      "col_purpose": "목적",
+      "col_recipient": "수신자",
+      "col_recipients": "수신자",
+      "col_required": "필수",
+      "col_revision": "개정",
+      "col_state": "상태",
+      "col_status": "상태",
+      "col_title": "제목",
+      "empty": "표시할 항목이 없습니다.",
+      "project": "프로젝트",
+      "title_matrix": "배포 매트릭스",
+      "title_permit": "인허가 패키지",
+      "title_register": "도면 대장",
+      "title_reports": "보고서 및 증명서",
+      "yes": "예"
+    },
+    "independent_check": {
+      "none": "없음",
+      "optional": "선택",
+      "required_by_rule": "규정에 따라 필수"
+    },
+    "permit_item": {
+      "drawing": "도면",
+      "form": "양식",
+      "report": "보고서"
+    },
+    "purpose": {
+      "for_approval": "승인용",
+      "for_construction": "시공용",
+      "for_information": "참고용",
+      "for_record": "기록용",
+      "for_review": "검토용",
+      "for_tender": "입찰용"
+    },
+    "report_state": {
+      "accepted": "인수됨",
+      "commissioned": "의뢰됨",
+      "in_progress": "진행 중",
+      "not_required": "불필요",
+      "rejected": "반려됨",
+      "remarks": "비고",
+      "required": "필요",
+      "submitted": "제출됨",
+      "under_check": "검토 중"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "승인 항목 {code}은(는) 권한이 있는 승인자가 결정하지 않았습니다.",
+        "suggestion": "승인 경로를 통해 다시 결정하세요."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "{phase} 단계의 설계 공정표 항목 {code}이(가) 인수되지 않았습니다.",
+        "suggestion": "도면을 완성하거나 사유를 적어 면제하세요."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "번호 {number}이(가) 체계({fields})와 일치하지 않습니다.",
+        "suggestion": "도면의 번호를 다시 부여하세요."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "번호 {number}이(가) 저장된 구성 요소({fields})와 일치하지 않습니다.",
+        "suggestion": "컨테이너 필드를 수정하세요."
+      },
+      "drawing_originator_known": {
+        "fail": "{number}의 작성자 {value}은(는) 활성 역할에 속하지 않습니다.",
+        "suggestion": "설계 역할을 추가하거나 번호를 수정하세요."
+      },
+      "not_required_has_rationale": {
+        "fail": "보고서 {code}에 사유가 없습니다.",
+        "suggestion": "사유를 추가하세요."
+      },
+      "permit_content_current": {
+        "fail": "인허가 패키지 {code}에 대체된 개정본이 포함되어 있습니다.",
+        "suggestion": "관할 기관에 알리거나 다시 제출하세요."
+      },
+      "permit_package_complete": {
+        "fail": "인허가 패키지 {code}에 필수 항목 {count}개가 빠져 있습니다.",
+        "suggestion": "누락된 항목을 추가하거나 공유하세요."
+      },
+      "release_revisions_suitable": {
+        "fail": "배포본 {release}에 부적합한 개정본이 {count}개 있습니다.",
+        "suggestion": "작업 중인 항목을 제거하거나 먼저 게시하세요."
+      },
+      "report_independent_check": {
+        "fail": "보고서 {code}이(가) 유효한 독립 검토 없이 인수되었습니다.",
+        "suggestion": "다른 당사자의 검토자를 지정하세요."
+      },
+      "title_block_matches_number": {
+        "fail": "{number}의 표제란에 {value}이(가) 표시되어 있습니다.",
+        "suggestion": "표제란을 수정하세요."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS 코드 {code}이(가) 두 번 이상 사용되었습니다.",
+        "suggestion": "중복된 항목의 번호를 다시 부여하세요."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module}이(가) 어떤 노드와도 일치하지 않는 WBS 값 {value}을(를) 참조합니다.",
+        "suggestion": "참조를 수정하거나 노드를 추가하세요."
+      }
+    }
+  }
+}

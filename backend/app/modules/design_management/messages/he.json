@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "דוח אקוסטיקה",
+        "contamination": "דוח זיהום קרקע",
+        "daylight": "דוח אור יום ושמש",
+        "drainage": "אסטרטגיית ניקוז",
+        "environmental": "דוח סביבתי",
+        "fire_proof_check": "בדיקת בטיחות אש עצמאית",
+        "fire_safety_concept": "concept בטיחות אש",
+        "geotechnical": "דוח גיאוטכני",
+        "sound_insulation": "הוכחת בידוד אקוסטי",
+        "structural_design": "תכנון קונסטרוקטיבי וחישובים",
+        "structural_proof_check": "בדיקה קונסטרוקטיבית עצמאית",
+        "kitchen_planning": "דוח תכנון מטבח",
+        "survey": "מדידת שטח",
+        "thermal_energy": "הוכחת ביצועים תרמיים ואנרגטיים",
+        "traffic": "דוח תנועה",
+        "uxo": "הערכת תחמושת שלא התפוצצה",
+        "vibration": "דוח רטט"
+      }
+    },
+    "cde_state": {
+      "archived": "בארכיון",
+      "published": "פורסם",
+      "shared": "שותף",
+      "wip": "בעבודה"
+    },
+    "common": {
+      "ok": "אישור",
+      "module": {
+        "boq": "כתב כמויות",
+        "cvr": "התאמת עלות וערך",
+        "design_management": "ניהול תכנון",
+        "field_time": "שעות שטח",
+        "fieldreports": "דוחות שטח",
+        "finance": "כספים",
+        "inspections": "בדיקות",
+        "procurement": "רכש",
+        "schedule": "לוח זמנים"
+      },
+      "phase": {
+        "approval": "אישור",
+        "award": "הענקה",
+        "brief": "תוכנית עבודה",
+        "concept": "concept",
+        "construction": "ביצוע",
+        "design": "תכנון",
+        "detail": "תכנון מפורט",
+        "development": "פיתוח",
+        "execution": "ביצוע",
+        "handover": "מסירה",
+        "operation": "תפעול",
+        "strategy": "אסטרטגיה",
+        "tender": "מכרז"
+      }
+    },
+    "errors": {
+      "answer_required": "נדרשת תשובה.",
+      "approval_point_locked": "נקודת האישור נמצאת בבדיקה או הוכרעה, ואי אפשר לשנות אותה.",
+      "approval_point_not_found": "נקודת האישור לא נמצאה.",
+      "approval_point_not_rejected": "ניתן לפתוח מחדש רק נקודת אישור שנדחתה.",
+      "binding_requires_change_request": "מסמך המסגרת לתכנון הוא מחייב; שינויים דורשים בקשת שינוי.",
+      "catalogue_retired": "קטלוג זה הוצא משימוש ולא ניתן להצמידו.",
+      "code_duplicate": "קוד זה כבר בשימוש בפרויקט.",
+      "comment_not_found": "ההערה לא נמצאה.",
+      "comment_text_required": "הערה חייבת לכלול טקסט.",
+      "concurrent_issue": "השחרור שונה בו-זמנית; נסו שוב.",
+      "condition_needs_owner_and_due_date": "תנאי שאושר דורש אחראי ותאריך יעד.",
+      "condition_not_found": "התנאי לא נמצא.",
+      "condition_not_proposed": "תנאי זה כבר אושר או נדחה.",
+      "condition_owner_not_member": "האחראי על תנאי חייב להיות חבר בפרויקט זה.",
+      "contact_not_found": "איש הקשר לא נמצא.",
+      "container_not_found": "מיכל המסמכים לא נמצא בפרויקט זה.",
+      "deliverable_not_found": "שורת לוח הזמנים של התכנון לא נמצאה.",
+      "dist_rule_not_found": "כלל ההפצה לא נמצא.",
+      "distribution_list_not_found": "רשימת ההפצה לא נמצאה בפרויקט זה.",
+      "drawing_not_found": "השרטוט לא נמצא.",
+      "duplicate_issue": "חלק מהגרסאות כבר נשלחו לנמענים אלה; יש לציין סיבה לשליחה חוזרת.",
+      "field_required": "שדה חובה חסר.",
+      "forbidden": "אין לך הרשאה לפעולה זו.",
+      "frame_document_missing": "לפרויקט אין מסמך מסגרת תכנון במודל הממשל שלו.",
+      "frame_register_unknown": "לא ניתן לכתוב רשימה זו כמסמך מסגרת.",
+      "governance_gate_not_found": "שער זה אינו חלק ממודל השלבים של הפרויקט.",
+      "hint_override_needs_rationale": "סטייה מההמלצה של הקטלוג דורשת נימוק.",
+      "invalid_id": "מזהה לא תקין.",
+      "invalid_transition": "שינוי סטטוס זה אינו מותר כעת.",
+      "manage_required": "שינוי שדה זה דורש הרשאה לניהול התכנון.",
+      "model_exists": "כבר מוצמד מודל שלבים.",
+      "no_approval_route": "אין מסלול אישור פעיל לנקודות אישור תכנון בפרויקט זה.",
+      "not_area_owner": "רק הבעלים או הממלא מקום של אזור הממשל, או מנהל ממשל, רשאים לכתוב את מסמך המסגרת שלו.",
+      "not_required_needs_rationale": "סימון דוח כלא נדרש דורש נימוק.",
+      "number_reserved": "מספר זה שייך לשרטוט שנמחק ולא ינתן שוב לעולם.",
+      "number_taken": "מספר זה נמצא או נמצא היה בשימוש בפרויקט.",
+      "numbering_case_invalid": "המספר חייב להיות באותיות גדולות.",
+      "numbering_chars_invalid": "המספר מכיל תווים שאינם מותרים לפי הסכמה.",
+      "numbering_code_not_in_list": "ערך של שדה אינו נמצא ברשימת הקודים של הסכמה.",
+      "numbering_empty": "המספר ריק.",
+      "numbering_field_invalid": "שדה במספר אינו תואם את הפורמט שלו.",
+      "numbering_field_missing": "שדה חובה במספר חסר.",
+      "numbering_invalid": "המספר אינו תואם לסכמת המספור של הפרויקט.",
+      "numbering_metadata_in_number": "סטטוס וגרסה הם מטא-נתונים ואינם חלק מהמספר.",
+      "numbering_parts_mismatch": "המספר והחלקים השמורים אינם תואמים.",
+      "numbering_structure_invalid": "למספר אין את השדות של הסכמה.",
+      "numbering_too_long": "המספר ארוך יותר ממה שהסכמה מאפשרת.",
+      "option_kind_unknown": "אין רשימת אפשרויות כזו.",
+      "originator_duplicate": "תפקיד תכנון פעיל אחר כבר משתמש בקוד יוצר זה.",
+      "originator_required": "מתכנן תחום נדרש לקוד יוצר.",
+      "originator_unknown": "היוצר אינו משויך לאף תפקיד תכנון פעיל.",
+      "party_kind_invalid": "סוג צד לא מוכר.",
+      "permit_empty": "לחבילת ההיתר אין פריטים.",
+      "permit_incomplete": "פריטים נדרשים חסרים או טרם שותפו.",
+      "permit_item_kind_invalid": "סוג פריט לא מוכר.",
+      "permit_item_missing": "פריט נדרש חסר.",
+      "permit_item_not_found": "פריט החבילה לא נמצא.",
+      "permit_link_frozen": "לאחר ההגשה לא ניתן להחליף את מחזור הבדיקה או ההגשה המקושרים.",
+      "permit_locked": "החבילה הוגשה ותוכנה נעול.",
+      "permit_not_approved": "תנאים נרשמים רק על חבילה שאושרה.",
+      "permit_not_found": "חבילת ההיתר לא נמצאה.",
+      "permit_profile_unknown": "פרופיל היתר לא מוכר.",
+      "permit_state_read_from_cycle": "לאחר ההגשה הסטטוס עוקב אחר מחזור הבדיקה של הרשות.",
+      "phase_required": "בחרו את השלב שאליו זה שייך.",
+      "phase_unknown": "שלב זה אינו נמצא במודל השלבים של הפרויקט.",
+      "planned_count_reduction_needs_rationale": "הפחתת הכמות המתוכננת דורשת נימוק.",
+      "project_not_found": "הפרויקט לא נמצא.",
+      "rationale_required": "נדרש נימוק.",
+      "recipient_exactly_one": "בחרו רשימת הפצה או תפקיד תכנון, אך לא את שניהם.",
+      "release_contains_wip": "שחרור לא יכול לכלול עבודה בתהליך.",
+      "release_empty": "השחרור אינו כולל גרסאות.",
+      "release_four_eyes": "מי שהכין את השחרור אינו רשאי להוציא אותו.",
+      "release_needs_published": "הוצאה לביצוע דורשת גרסאות שפורסמו.",
+      "release_no_recipients": "אף נמען במטריצת ההפצה אינו מתאים לשחרור זה.",
+      "release_not_approved": "השחרור טרם אושר במסלול האישור שלו.",
+      "release_not_draft": "ניתן לשנות רק שחרור במצב טיוטה.",
+      "release_not_found": "השחרור לא נמצא.",
+      "release_not_pending": "השחרור אינו ממתין לאישור.",
+      "release_not_ready": "השחרור חייב להיות מוכן לפני שמוציאים אותו.",
+      "release_recipient_empty": "לנמען במטריצת ההפצה אין אדם לשלוח אליו. יש להשלים קודם את הרשימה או התפקיד.",
+      "report_author_required": "דוח עם בדיקה עצמאית חובה דורש תפקיד כותב.",
+      "report_checker_required": "בדיקה עצמאית דורשת תפקיד בודק.",
+      "report_checker_same_party": "הבודק חייב להיות מצד אחר מהכותב.",
+      "report_external_check_not_approved": "מחזור הבדיקה החיצונית טרם אושר.",
+      "report_fields_frozen": "כותב, בודק, בדיקה חיצונית ומחזור הבדיקה אינם ניתנים לשינוי לאחר ההגשה.",
+      "report_kind_unknown": "סוג דוח לא מוכר.",
+      "report_not_found": "הדוח לא נמצא.",
+      "review_comments_open": "יש לסגור קודם את ההערות הפתוחות.",
+      "review_cycle_not_found": "מחזור הבדיקה לא נמצא בפרויקט זה.",
+      "review_not_found": "הבדיקה לא נמצאה.",
+      "review_not_open": "הבדיקה סגורה להערות.",
+      "review_outcome_invalid": "תוצאת בדיקה לא מוכרת.",
+      "revision_not_current": "שחרור יכול לכלול רק את הגרסה הנוכחית של שרטוט.",
+      "revision_not_found": "הגרסה לא נמצאה בפרויקט זה.",
+      "role_in_use": "התפקיד עדיין בשימוש על ידי שרטוטים.",
+      "role_not_active": "התפקיד שוחרר מהפרויקט.",
+      "role_not_found": "תפקיד התכנון לא נמצא.",
+      "route_start_failed": "לא ניתן היה להתחיל את מסלול האישור.",
+      "scheme_has_no_form_list": "לסכמת המספור המצמדת אין רשימה של סוגי מסמכים.",
+      "setup_exists": "ניהול התכנון כבר מוגדר לפרויקט זה.",
+      "setup_missing": "ניהול התכנון עדיין לא מוגדר לפרויקט זה.",
+      "severity_invalid": "חומרה לא מוכרת.",
+      "source_not_installed": "המודול שמחזיק את הרשומות הללו אינו מותקן.",
+      "submission_not_found": "הגשה לרשות לא נמצאה בפרויקט זה.",
+      "unknown_catalogue": "הקטלוג לא נמצא.",
+      "use_conclude": "השתמשו ב-conclude כדי לרשום את התוצאה.",
+      "use_issue": "השתמשו ב-issue כדי לשלוח את השחרור.",
+      "waiver_needs_rationale": "ויתור על שורת לוח זמנים של התכנון דורש נימוק.",
+      "wbs_code_duplicate": "קוד WBS זה כבר בשימוש בפרויקט.",
+      "wbs_code_not_under_parent": "קוד של פריט משני חייב להתחיל בקוד של הפריט האב.",
+      "wbs_code_required": "נדרש קוד WBS.",
+      "wbs_invalid": "מבנה פירוק העבודה מפר את כללי ה-WBS של הפרויקט.",
+      "wbs_move_cycle": "צומת לא יכול לעבור תחת צאצא שלו.",
+      "wbs_node_closed": "צומת WBS זה סגור להפניות חדשות.",
+      "wbs_node_not_found": "צומת WBS לא נמצא.",
+      "wbs_node_referenced": "הצומת או אחד מהצאצאים שלו מופנה; יש לסגור אותו במקום.",
+      "wbs_parent_not_found": "צומת ה-WBS האב לא נמצא."
+    },
+    "evidence": {
+      "deliverables": "שורות לוח הזמנים של התכנון בשלב אושרו",
+      "major_comments": "אין הערת בדיקה מהותית פתוחה",
+      "no_host_area": "מוכנות התכנון לא ידועה: מודל הממשל אינו מציין אזור לתכנון",
+      "no_host_document": "מוכנות התכנון לא ידועה: לפרויקט אין עדיין מסמך מסגרת תכנון. יש ליצור רישום תכנון (קובץ ב-CDE) כדי להקים אותו.",
+      "no_phase": "מוכנות התכנון לא ידועה: שער זה אינו סוגר שלב",
+      "reports": "הדוחות הנדרשים לשלב אושרו"
+    },
+    "export": {
+      "col_check": "בדיקה עצמאית",
+      "col_code": "קוד",
+      "col_copies": "עותקים מודפסים",
+      "col_discipline": "תחום",
+      "col_disciplines": "תחומים",
+      "col_format": "פורמט",
+      "col_forms": "טפסים",
+      "col_kind": "סוג",
+      "col_last_issue": "הוצאה אחרונה",
+      "col_min_status": "סטטוס מינימלי",
+      "col_number": "מספר",
+      "col_phase": "שלב",
+      "col_phases": "שלבים",
+      "col_pinned_revision": "גרסה מצומדת",
+      "col_present": "קיים",
+      "col_purpose": "מטרה",
+      "col_recipient": "נמען",
+      "col_recipients": "נמענים",
+      "col_required": "נדרש",
+      "col_revision": "גרסה",
+      "col_state": "מצב",
+      "col_status": "סטטוס",
+      "col_title": "כותרת",
+      "empty": "אין מה להציג.",
+      "project": "פרויקט",
+      "title_matrix": "מטריצת הפצה",
+      "title_permit": "חבילת היתר",
+      "title_register": "רשימת שרטוטים",
+      "title_reports": "דוחות והוכחות",
+      "yes": "כן"
+    },
+    "independent_check": {
+      "none": "אין",
+      "optional": "אופציונלי",
+      "required_by_rule": "נדרש לפי כלל"
+    },
+    "permit_item": {
+      "drawing": "שרטוט",
+      "form": "טופס",
+      "report": "דוח"
+    },
+    "purpose": {
+      "for_approval": "לאישור",
+      "for_construction": "לביצוע",
+      "for_information": "לידיעה",
+      "for_record": "לתיעוד",
+      "for_review": "לבדיקה",
+      "for_tender": "למכרז"
+    },
+    "report_state": {
+      "accepted": "אושר",
+      "commissioned": "הוזמן",
+      "in_progress": "בתהליך",
+      "not_required": "לא נדרש",
+      "rejected": "נדחה",
+      "remarks": "הערות",
+      "required": "נדרש",
+      "submitted": "הוגש",
+      "under_check": "בבדיקה"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "נקודת האישור {code} לא הוכרעה על ידי מאשר מורשה.",
+        "suggestion": "יש להכריע שוב דרך המסלול שלה."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "שורת לוח הזמנים של התכנון {code} בשלב {phase} אינה מאושרת.",
+        "suggestion": "יש להשלים את השרטוטים או לוותר עם נימוק."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "המספר {number} אינו תואם לסכמה ({fields}).",
+        "suggestion": "יש לשנות את מספור השרטוט."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "המספר {number} אינו תואם לחלקים השמורים שלו ({fields}).",
+        "suggestion": "יש לתקן את שדות המיכל."
+      },
+      "drawing_originator_known": {
+        "fail": "היוצר {value} של {number} אינו משויך לאף תפקיד פעיל.",
+        "suggestion": "יש להוסיף תפקיד תכנון או לתקן את המספר."
+      },
+      "not_required_has_rationale": {
+        "fail": "לדוח {code} אין נימוק.",
+        "suggestion": "יש להוסיף נימוק."
+      },
+      "permit_content_current": {
+        "fail": "חבילת ההיתר {code} מכילה גרסאות שהוחלפו.",
+        "suggestion": "יש ליידע את הרשות או להגיש מחדש."
+      },
+      "permit_package_complete": {
+        "fail": "בחבילת ההיתר {code} חסרים {count} פריטים נדרשים.",
+        "suggestion": "יש להוסיף או לשתף את הפריטים החסרים."
+      },
+      "release_revisions_suitable": {
+        "fail": "השחרור {release} כולל {count} גרסאות לא מתאימות.",
+        "suggestion": "יש להסיר עבודה בתהליך או לפרסם קודם."
+      },
+      "report_independent_check": {
+        "fail": "הדוח {code} אושר ללא בדיקה עצמאית תקפה.",
+        "suggestion": "יש למנות בודק מצד אחר."
+      },
+      "title_block_matches_number": {
+        "fail": "בלוק הכותרת של {number} מציג {value}.",
+        "suggestion": "יש לתקן את בלוק הכותרת."
+      },
+      "wbs_code_unique": {
+        "fail": "קוד WBS {code} משמש יותר מפעם אחת.",
+        "suggestion": "יש למספר מחדש את הכפילויות."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} מפנה לערך WBS {value}, שאינו תואם לאף צומת.",
+        "suggestion": "יש לתקן את ההפניה או להוסיף את הצומת."
+      }
+    }
+  }
+}

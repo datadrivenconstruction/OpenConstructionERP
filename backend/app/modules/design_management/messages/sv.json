@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustikrapport",
+        "contamination": "Rapport om markförorening",
+        "daylight": "Rapport om dagsljus och solinstrålning",
+        "drainage": "Dräneringsstrategi",
+        "environmental": "Miljörapport",
+        "fire_proof_check": "Oberoende kontroll av brandsäkerhet",
+        "fire_safety_concept": "Brandskyddskoncept",
+        "geotechnical": "Geoteknisk undersökning",
+        "sound_insulation": "Bevis för ljudisolering",
+        "structural_design": "Konstruktionsprojektering och beräkningar",
+        "structural_proof_check": "Oberoende konstruktionskontroll",
+        "kitchen_planning": "Rapport för köksplanering",
+        "survey": "Platsbesiktning",
+        "thermal_energy": "Bevis för termisk och energimässig prestanda",
+        "traffic": "Trafikrapport",
+        "uxo": "Bedömning av oexploderad ammunition",
+        "vibration": "Vibrationsrapport"
+      }
+    },
+    "cde_state": {
+      "archived": "Arkiverad",
+      "published": "Publicerad",
+      "shared": "Delad",
+      "wip": "Pågående arbete"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Mängdförteckning",
+        "cvr": "Kostnadsvärdeavstämning",
+        "design_management": "Projekteringshantering",
+        "field_time": "Tid på fältet",
+        "fieldreports": "Fältrapporter",
+        "finance": "Ekonomi",
+        "inspections": "Besiktningar",
+        "procurement": "Upphandling",
+        "schedule": "Tidplan"
+      },
+      "phase": {
+        "approval": "Godkännande",
+        "award": "Tilldelning",
+        "brief": "Förstudie",
+        "concept": "Koncept",
+        "construction": "Produktion",
+        "design": "Projektering",
+        "detail": "Detaljprojektering",
+        "development": "Utveckling",
+        "execution": "Utförande",
+        "handover": "Överlämning",
+        "operation": "Drift",
+        "strategy": "Strategi",
+        "tender": "Anbud"
+      }
+    },
+    "errors": {
+      "answer_required": "Ett svar krävs.",
+      "approval_point_locked": "Godkännandepunkten är under granskning eller har beslutats och kan inte ändras.",
+      "approval_point_not_found": "Godkännandepunkten hittades inte.",
+      "approval_point_not_rejected": "Endast en avvisad godkännandepunkt kan öppnas igen.",
+      "binding_requires_change_request": "Projekteringens ramdokument är bindande; ändringar kräver en ändringsbegäran.",
+      "catalogue_retired": "Den här katalogen är utfasad och kan inte fästas.",
+      "code_duplicate": "Den här koden används redan i projektet.",
+      "comment_not_found": "Kommentaren hittades inte.",
+      "comment_text_required": "En kommentar måste innehålla text.",
+      "concurrent_issue": "Utgivningen ändrades samtidigt; försök igen.",
+      "condition_needs_owner_and_due_date": "Ett bekräftat villkor kräver en ansvarig och ett förfallodatum.",
+      "condition_not_found": "Villkoret hittades inte.",
+      "condition_not_proposed": "Det här villkoret har redan bekräftats eller avförts.",
+      "condition_owner_not_member": "Den ansvarige för ett villkor måste vara medlem i det här projektet.",
+      "contact_not_found": "Kontakten hittades inte.",
+      "container_not_found": "Dokumentbehållaren hittades inte i det här projektet.",
+      "deliverable_not_found": "Raden i projekteringsschemat hittades inte.",
+      "dist_rule_not_found": "Distributionsregeln hittades inte.",
+      "distribution_list_not_found": "Distributionslistan hittades inte i det här projektet.",
+      "drawing_not_found": "Ritningen hittades inte.",
+      "duplicate_issue": "Vissa revisioner har redan skickats till dessa mottagare; ange en anledning för att skicka igen.",
+      "field_required": "Ett obligatoriskt fält saknas.",
+      "forbidden": "Du har inte behörighet för den här åtgärden.",
+      "frame_document_missing": "Projektet har inget projekteringens ramdokument i sin styrningsmodell.",
+      "frame_register_unknown": "Det här registret kan inte skrivas som ett ramdokument.",
+      "governance_gate_not_found": "Den här spärren ingår inte i projektets fasmodell.",
+      "hint_override_needs_rationale": "För att åsidosätta katalogens rekommendation krävs en motivering.",
+      "invalid_id": "Ogiltigt id.",
+      "invalid_transition": "Den här statusändringen är inte tillåten just nu.",
+      "manage_required": "Ändring av det här fältet kräver behörighet att hantera projekteringen.",
+      "model_exists": "En fasmodell är redan fäst.",
+      "no_approval_route": "Det finns ingen aktiv godkännandeväg för projekteringens godkännandepunkter i det här projektet.",
+      "not_area_owner": "Endast ägaren eller ersättaren för styrningsområdet, eller en styrningsansvarig, får skriva dess ramdokument.",
+      "not_required_needs_rationale": "Att markera en rapport som inte krävs kräver en motivering.",
+      "number_reserved": "Det här numret tillhörde en borttagen ritning och återanvänds aldrig.",
+      "number_taken": "Det här numret används eller har använts i projektet.",
+      "numbering_case_invalid": "Numret måste skrivas med versaler.",
+      "numbering_chars_invalid": "Numret innehåller tecken som inte tillåts av numreringssystemet.",
+      "numbering_code_not_in_list": "Ett fältvärde finns inte i numreringssystemets kodlista.",
+      "numbering_empty": "Numret är tomt.",
+      "numbering_field_invalid": "Ett fält i numret stämmer inte med dess format.",
+      "numbering_field_missing": "Ett obligatoriskt fält i numret saknas.",
+      "numbering_invalid": "Numret stämmer inte med projektets numreringssystem.",
+      "numbering_metadata_in_number": "Status och revision är metadata och ska inte ingå i numret.",
+      "numbering_parts_mismatch": "Numret och de sparade delarna stämmer inte överens.",
+      "numbering_structure_invalid": "Numret saknar de fält som numreringssystemet kräver.",
+      "numbering_too_long": "Numret är längre än numreringssystemet tillåter.",
+      "option_kind_unknown": "Det finns ingen sådan lista med alternativ.",
+      "originator_duplicate": "En annan aktiv projekteringsroll använder redan den här avsändarkoden.",
+      "originator_required": "En disciplinprojektör behöver en avsändarkod.",
+      "originator_unknown": "Avsändaren tillhör ingen aktiv projekteringsroll.",
+      "party_kind_invalid": "Okänd typ av part.",
+      "permit_empty": "Tillståndspaketet innehåller inga poster.",
+      "permit_incomplete": "Obligatoriska poster saknas eller har ännu inte delats.",
+      "permit_item_kind_invalid": "Okänd typ av post.",
+      "permit_item_missing": "En obligatorisk post saknas.",
+      "permit_item_not_found": "Paketets post hittades inte.",
+      "permit_link_frozen": "Efter inlämning kan den kopplade granskningscykeln eller inlämningen inte ersättas.",
+      "permit_locked": "Paketet har lämnats in och dess innehåll är låst.",
+      "permit_not_approved": "Villkor registreras endast på ett godkänt paket.",
+      "permit_not_found": "Tillståndspaketet hittades inte.",
+      "permit_profile_unknown": "Okänd tillståndsprofil.",
+      "permit_state_read_from_cycle": "Efter inlämning följer status myndighetens granskningscykel.",
+      "phase_required": "Välj den fas som detta hör till.",
+      "phase_unknown": "Den här fasen finns inte i projektets fasmodell.",
+      "planned_count_reduction_needs_rationale": "Att minska det planerade antalet kräver en motivering.",
+      "project_not_found": "Projektet hittades inte.",
+      "rationale_required": "En motivering krävs.",
+      "recipient_exactly_one": "Välj antingen en distributionslista eller en projekteringsroll.",
+      "release_contains_wip": "En utgivning kan inte innehålla pågående arbete.",
+      "release_empty": "Utgivningen innehåller inga revisioner.",
+      "release_four_eyes": "Personen som förberedde utgivningen kan inte publicera den.",
+      "release_needs_published": "En utgivning för byggstart kräver publicerade revisioner.",
+      "release_no_recipients": "Ingen mottagare i distributionsmatrisen matchar den här utgivningen.",
+      "release_not_approved": "Utgivningen har ännu inte godkänts på sin godkännandeväg.",
+      "release_not_draft": "Endast en utgivning i utkastläge kan ändras.",
+      "release_not_found": "Utgivningen hittades inte.",
+      "release_not_pending": "Utgivningen väntar inte på något godkännande.",
+      "release_not_ready": "Utgivningen måste vara klar innan den kan publiceras.",
+      "release_recipient_empty": "En mottagare i distributionsmatrisen har ingen person att skicka till. Komplettera listan eller rollen först.",
+      "report_author_required": "En rapport med obligatorisk oberoende kontroll kräver en författarroll.",
+      "report_checker_required": "En oberoende kontroll kräver en kontrollantroll.",
+      "report_checker_same_party": "Kontrollanten måste tillhöra en annan part än författaren.",
+      "report_external_check_not_approved": "Den externa kontrollcykeln är ännu inte godkänd.",
+      "report_fields_frozen": "Författare, kontrollant, extern kontroll och granskningscykeln kan inte ändras efter inlämning.",
+      "report_kind_unknown": "Okänd typ av rapport.",
+      "report_not_found": "Rapporten hittades inte.",
+      "review_comments_open": "Öppna kommentarer måste stängas först.",
+      "review_cycle_not_found": "Granskningscykeln hittades inte i det här projektet.",
+      "review_not_found": "Granskningen hittades inte.",
+      "review_not_open": "Granskningen är stängd för kommentarer.",
+      "review_outcome_invalid": "Okänt granskningsresultat.",
+      "revision_not_current": "En utgivning kan endast innehålla ritningens aktuella revision.",
+      "revision_not_found": "Revisionen hittades inte i det här projektet.",
+      "role_in_use": "Rollen används fortfarande av ritningar.",
+      "role_not_active": "Rollen har avslutats i projektet.",
+      "role_not_found": "Projekteringsrollen hittades inte.",
+      "route_start_failed": "Godkännandevägen kunde inte startas.",
+      "scheme_has_no_form_list": "Det fästa numreringssystemet saknar en lista över dokumentformer.",
+      "setup_exists": "Projekteringshantering är redan konfigurerad för det här projektet.",
+      "setup_missing": "Projekteringshantering är ännu inte konfigurerad för det här projektet.",
+      "severity_invalid": "Okänd allvarlighetsgrad.",
+      "source_not_installed": "Modulen som innehåller dessa poster är inte installerad.",
+      "submission_not_found": "Inlämningen till myndigheten hittades inte i det här projektet.",
+      "unknown_catalogue": "Katalogen hittades inte.",
+      "use_conclude": "Använd avsluta för att registrera resultatet.",
+      "use_issue": "Använd publicera för att skicka utgivningen.",
+      "waiver_needs_rationale": "Att frånträda en rad i projekteringsschemat kräver en motivering.",
+      "wbs_code_duplicate": "Den här WBS-koden används redan i projektet.",
+      "wbs_code_not_under_parent": "En underordnad kod måste börja med sin överordnade nods kod.",
+      "wbs_code_required": "En WBS-kod krävs.",
+      "wbs_invalid": "Arbetsnedbrytningsstrukturen bryter mot projektets WBS-regler.",
+      "wbs_move_cycle": "En nod kan inte flyttas under sin egen underordnade nod.",
+      "wbs_node_closed": "Den här WBS-noden är stängd för nya referenser.",
+      "wbs_node_not_found": "WBS-noden hittades inte.",
+      "wbs_node_referenced": "Noden eller en av dess underordnade noder är refererad; stäng den i stället.",
+      "wbs_parent_not_found": "Överordnad WBS-nod hittades inte."
+    },
+    "evidence": {
+      "deliverables": "Godkända rader i projekteringsschemat för fasen",
+      "major_comments": "Inga öppna större granskningskommentarer",
+      "no_host_area": "Projekteringens beredskap okänd: styrningsmodellen anger inget område för projektering",
+      "no_host_document": "Projekteringens beredskap okänd: projektet har ännu inget ramdokument för projektering. Generera ett projekteringsregister (fil i CDE) för att skapa det.",
+      "no_phase": "Projekteringens beredskap okänd: den här spärren avslutar ingen fas",
+      "reports": "Godkända obligatoriska rapporter för fasen"
+    },
+    "export": {
+      "col_check": "Oberoende kontroll",
+      "col_code": "Kod",
+      "col_copies": "Pappersexemplar",
+      "col_discipline": "Disciplin",
+      "col_disciplines": "Discipliner",
+      "col_format": "Format",
+      "col_forms": "Former",
+      "col_kind": "Typ",
+      "col_last_issue": "Senaste utgåva",
+      "col_min_status": "Lägsta status",
+      "col_number": "Nummer",
+      "col_phase": "Fas",
+      "col_phases": "Faser",
+      "col_pinned_revision": "Fäst revision",
+      "col_present": "Närvarande",
+      "col_purpose": "Syfte",
+      "col_recipient": "Mottagare",
+      "col_recipients": "Mottagare",
+      "col_required": "Obligatoriskt",
+      "col_revision": "Revision",
+      "col_state": "Tillstånd",
+      "col_status": "Status",
+      "col_title": "Titel",
+      "empty": "Inget att visa.",
+      "project": "Projekt",
+      "title_matrix": "Distributionsmatris",
+      "title_permit": "Tillståndspaket",
+      "title_register": "Ritningsregister",
+      "title_reports": "Rapporter och underlag",
+      "yes": "Ja"
+    },
+    "independent_check": {
+      "none": "Ingen",
+      "optional": "Valfri",
+      "required_by_rule": "Krävs enligt regel"
+    },
+    "permit_item": {
+      "drawing": "Ritning",
+      "form": "Formulär",
+      "report": "Rapport"
+    },
+    "purpose": {
+      "for_approval": "För godkännande",
+      "for_construction": "För byggstart",
+      "for_information": "För kännedom",
+      "for_record": "För arkiv",
+      "for_review": "För granskning",
+      "for_tender": "För anbud"
+    },
+    "report_state": {
+      "accepted": "Godkänd",
+      "commissioned": "Driftsatt",
+      "in_progress": "Pågår",
+      "not_required": "Krävs ej",
+      "rejected": "Avvisad",
+      "remarks": "Anmärkningar",
+      "required": "Krävs",
+      "submitted": "Inlämnad",
+      "under_check": "Under kontroll"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Godkännandepunkt {code} beslutades inte av en behörig godkännare.",
+        "suggestion": "Besluta igen via dess godkännandeväg."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Raden {code} i projekteringsschemat för {phase} är inte godkänd.",
+        "suggestion": "Slutför ritningarna eller frånträd med en motivering."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Numret {number} stämmer inte med numreringssystemet ({fields}).",
+        "suggestion": "Numrera om ritningen."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Numret {number} stämmer inte med de sparade delarna ({fields}).",
+        "suggestion": "Rätta behållarens fält."
+      },
+      "drawing_originator_known": {
+        "fail": "Avsändaren {value} för {number} tillhör ingen aktiv roll.",
+        "suggestion": "Lägg till projekteringsrollen eller rätta numret."
+      },
+      "not_required_has_rationale": {
+        "fail": "Rapporten {code} saknar motivering.",
+        "suggestion": "Lägg till motiveringen."
+      },
+      "permit_content_current": {
+        "fail": "Tillståndspaketet {code} innehåller ersatta revisioner.",
+        "suggestion": "Informera myndigheten eller skicka in igen."
+      },
+      "permit_package_complete": {
+        "fail": "Tillståndspaketet {code} saknar {count} obligatoriska poster.",
+        "suggestion": "Lägg till eller dela de saknade posterna."
+      },
+      "release_revisions_suitable": {
+        "fail": "Utgivningen {release} har {count} olämpliga revisioner.",
+        "suggestion": "Ta bort pågående arbete eller publicera först."
+      },
+      "report_independent_check": {
+        "fail": "Rapporten {code} godkändes utan giltig oberoende kontroll.",
+        "suggestion": "Utse en kontrollant från en annan part."
+      },
+      "title_block_matches_number": {
+        "fail": "Ritningsramen för {number} visar {value}.",
+        "suggestion": "Rätta ritningsramen."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS-koden {code} används mer än en gång.",
+        "suggestion": "Numrera om dubbletterna."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} refererar till WBS-värdet {value}, som inte motsvarar någon nod.",
+        "suggestion": "Rätta referensen eller lägg till noden."
+      }
+    }
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "design": {
+    "catalogue": {
+      "report": {
+        "acoustics": "Akustikkrapport",
+        "contamination": "Rapport om grunnforurensning",
+        "daylight": "Rapport om dagslys og solforhold",
+        "drainage": "Overvannsstrategi",
+        "environmental": "Miljørapport",
+        "fire_proof_check": "Uavhengig brannsikkerhetskontroll",
+        "fire_safety_concept": "Brannsikkerhetskonsept",
+        "geotechnical": "Geoteknisk rapport",
+        "sound_insulation": "Dokumentasjon av lydisolering",
+        "structural_design": "Konstruksjonsprosjektering og beregninger",
+        "structural_proof_check": "Uavhengig konstruksjonskontroll",
+        "kitchen_planning": "Rapport for kjøkkenplanlegging",
+        "survey": "Terrengmåling",
+        "thermal_energy": "Dokumentasjon av varme- og energiytelse",
+        "traffic": "Trafikkrapport",
+        "uxo": "Vurdering av eksplosiver i grunnen",
+        "vibration": "Vibrasjonsrapport"
+      }
+    },
+    "cde_state": {
+      "archived": "Arkivert",
+      "published": "Publisert",
+      "shared": "Delt",
+      "wip": "Under arbeid"
+    },
+    "common": {
+      "ok": "OK",
+      "module": {
+        "boq": "Mengdebeskrivelse",
+        "cvr": "Kostnadsverdiavstemming",
+        "design_management": "Prosjekteringsstyring",
+        "field_time": "Feltarbeidstid",
+        "fieldreports": "Feltrapporter",
+        "finance": "Økonomi",
+        "inspections": "Inspeksjoner",
+        "procurement": "Innkjøp",
+        "schedule": "Fremdriftsplan"
+      },
+      "phase": {
+        "approval": "Godkjenning",
+        "award": "Tildeling",
+        "brief": "Behovsbeskrivelse",
+        "concept": "Konsept",
+        "construction": "Bygging",
+        "design": "Prosjektering",
+        "detail": "Detaljprosjektering",
+        "development": "Utvikling",
+        "execution": "Utførelse",
+        "handover": "Overlevering",
+        "operation": "Drift",
+        "strategy": "Strategi",
+        "tender": "Anbud"
+      }
+    },
+    "errors": {
+      "answer_required": "Et svar er påkrevd.",
+      "approval_point_locked": "Godkjenningspunktet er under behandling eller avgjort og kan ikke endres.",
+      "approval_point_not_found": "Godkjenningspunkt ikke funnet.",
+      "approval_point_not_rejected": "Bare et avvist godkjenningspunkt kan åpnes på nytt.",
+      "binding_requires_change_request": "Rammedokumentet for prosjektering er bindende; endringer krever en endringsforespørsel.",
+      "catalogue_retired": "Denne katalogen er utgått og kan ikke festes.",
+      "code_duplicate": "Denne koden er allerede i bruk i prosjektet.",
+      "comment_not_found": "Kommentar ikke funnet.",
+      "comment_text_required": "En kommentar må ha tekst.",
+      "concurrent_issue": "Utgivelsen ble endret samtidig; prøv igjen.",
+      "condition_needs_owner_and_due_date": "Et bekreftet vilkår krever en ansvarlig og en frist.",
+      "condition_not_found": "Vilkår ikke funnet.",
+      "condition_not_proposed": "Dette vilkåret er allerede bekreftet eller avvist.",
+      "condition_owner_not_member": "Ansvarlig for et vilkår må være medlem av dette prosjektet.",
+      "contact_not_found": "Kontakt ikke funnet.",
+      "container_not_found": "Dokumentcontainer ikke funnet i dette prosjektet.",
+      "deliverable_not_found": "Linje i prosjekteringsplanen ikke funnet.",
+      "dist_rule_not_found": "Distribusjonsregel ikke funnet.",
+      "distribution_list_not_found": "Distribusjonsliste ikke funnet i dette prosjektet.",
+      "drawing_not_found": "Tegning ikke funnet.",
+      "duplicate_issue": "Noen revisjoner er allerede sendt til disse mottakerne; oppgi en grunn for å sende på nytt.",
+      "field_required": "Et obligatorisk felt mangler.",
+      "forbidden": "Du har ikke tillatelse til denne handlingen.",
+      "frame_document_missing": "Prosjektet har ikke et rammedokument for prosjektering i styringsmodellen.",
+      "frame_register_unknown": "Dette registeret kan ikke skrives som rammedokument.",
+      "governance_gate_not_found": "Denne porten er ikke en del av prosjektets fasemodell.",
+      "hint_override_needs_rationale": "Å avvike fra katalogens anbefaling krever en begrunnelse.",
+      "invalid_id": "Ugyldig ID.",
+      "invalid_transition": "Denne statusendringen er ikke tillatt nå.",
+      "manage_required": "Endring av dette feltet krever tillatelse til å styre prosjekteringen.",
+      "model_exists": "En fasemodell er allerede festet.",
+      "no_approval_route": "Det finnes ingen aktiv godkjenningsrute for prosjekteringens godkjenningspunkter i dette prosjektet.",
+      "not_area_owner": "Bare ansvarlig eller stedfortreder for styringsområdet, eller en styringsansvarlig, kan skrive rammedokumentet.",
+      "not_required_needs_rationale": "Å markere en rapport som ikke påkrevd krever en begrunnelse.",
+      "number_reserved": "Dette nummeret tilhørte en slettet tegning og blir aldri gjenbrukt.",
+      "number_taken": "Dette nummeret er eller har vært i bruk i prosjektet.",
+      "numbering_case_invalid": "Nummeret må være med store bokstaver.",
+      "numbering_chars_invalid": "Nummeret inneholder tegn som nummereringsskjemaet ikke tillater.",
+      "numbering_code_not_in_list": "En feltverdi finnes ikke i skjemaets kodeliste.",
+      "numbering_empty": "Nummeret er tomt.",
+      "numbering_field_invalid": "Et felt i nummeret samsvarer ikke med formatet.",
+      "numbering_field_missing": "Et obligatorisk felt i nummeret mangler.",
+      "numbering_invalid": "Nummeret samsvarer ikke med prosjektets nummereringsskjema.",
+      "numbering_metadata_in_number": "Status og revisjon er metadata og skal ikke være med i nummeret.",
+      "numbering_parts_mismatch": "Nummeret og de lagrede delene stemmer ikke overens.",
+      "numbering_structure_invalid": "Nummeret har ikke feltene som skjemaet krever.",
+      "numbering_too_long": "Nummeret er lengre enn skjemaet tillater.",
+      "option_kind_unknown": "Det finnes ingen slik valgliste.",
+      "originator_duplicate": "En annen aktiv prosjekteringsrolle bruker allerede denne avsenderkoden.",
+      "originator_required": "En fagprosjekterende må ha en avsenderkode.",
+      "originator_unknown": "Avsenderen tilhører ingen aktiv prosjekteringsrolle.",
+      "party_kind_invalid": "Ukjent type part.",
+      "permit_empty": "Søknadspakken har ingen elementer.",
+      "permit_incomplete": "Påkrevde elementer mangler eller er ikke delt ennå.",
+      "permit_item_kind_invalid": "Ukjent type element.",
+      "permit_item_missing": "Påkrevd element mangler.",
+      "permit_item_not_found": "Pakkeelement ikke funnet.",
+      "permit_link_frozen": "Etter innsending kan den koblede kontrollsyklusen eller innsendingen ikke erstattes.",
+      "permit_locked": "Pakken er sendt inn, og innholdet er låst.",
+      "permit_not_approved": "Vilkår kan bare registreres på en godkjent pakke.",
+      "permit_not_found": "Søknadspakke ikke funnet.",
+      "permit_profile_unknown": "Ukjent søknadsprofil.",
+      "permit_state_read_from_cycle": "Etter innsending følger statusen myndighetens kontrollsyklus.",
+      "phase_required": "Velg fasen dette hører til.",
+      "phase_unknown": "Denne fasen finnes ikke i prosjektets fasemodell.",
+      "planned_count_reduction_needs_rationale": "Å redusere planlagt antall krever en begrunnelse.",
+      "project_not_found": "Prosjekt ikke funnet.",
+      "rationale_required": "En begrunnelse er påkrevd.",
+      "recipient_exactly_one": "Velg enten en distribusjonsliste eller en prosjekteringsrolle.",
+      "release_contains_wip": "En utgivelse kan ikke inneholde arbeid som pågår.",
+      "release_empty": "Utgivelsen har ingen revisjoner.",
+      "release_four_eyes": "Personen som forberedte utgivelsen kan ikke utstede den.",
+      "release_needs_published": "En utstedelse til utførelse krever publiserte revisjoner.",
+      "release_no_recipients": "Ingen mottaker i distribusjonsmatrisen passer til denne utgivelsen.",
+      "release_not_approved": "Utgivelsen er ikke godkjent i godkjenningsruten ennå.",
+      "release_not_draft": "Bare en utgivelse i utkast kan endres.",
+      "release_not_found": "Utgivelse ikke funnet.",
+      "release_not_pending": "Utgivelsen venter ikke på godkjenning.",
+      "release_not_ready": "Utgivelsen må være klar før den kan utstedes.",
+      "release_recipient_empty": "En mottaker i distribusjonsmatrisen har ingen person å sende til. Fullfør listen eller rollen først.",
+      "report_author_required": "En rapport med påkrevd uavhengig kontroll krever en forfatterrolle.",
+      "report_checker_required": "En uavhengig kontroll krever en kontrollørrolle.",
+      "report_checker_same_party": "Kontrolløren må tilhøre en annen part enn forfatteren.",
+      "report_external_check_not_approved": "Den eksterne kontrollsyklusen er ikke godkjent ennå.",
+      "report_fields_frozen": "Forfatter, kontrollør, ekstern kontroll og kontrollsyklusen kan ikke endres etter innsending.",
+      "report_kind_unknown": "Ukjent rapporttype.",
+      "report_not_found": "Rapport ikke funnet.",
+      "review_comments_open": "Åpne kommentarer må lukkes først.",
+      "review_cycle_not_found": "Kontrollsyklus ikke funnet i dette prosjektet.",
+      "review_not_found": "Gjennomgang ikke funnet.",
+      "review_not_open": "Gjennomgangen er stengt for kommentarer.",
+      "review_outcome_invalid": "Ukjent utfall av gjennomgangen.",
+      "revision_not_current": "En utgivelse kan bare inneholde gjeldende revisjon av en tegning.",
+      "revision_not_found": "Revisjon ikke funnet i dette prosjektet.",
+      "role_in_use": "Rollen brukes fortsatt av tegninger.",
+      "role_not_active": "Rollen er frigitt fra prosjektet.",
+      "role_not_found": "Prosjekteringsrolle ikke funnet.",
+      "route_start_failed": "Godkjenningsruten kunne ikke startes.",
+      "scheme_has_no_form_list": "Det festede nummereringsskjemaet har ingen liste over dokumentskjemaer.",
+      "setup_exists": "Prosjekteringsstyring er allerede satt opp for dette prosjektet.",
+      "setup_missing": "Prosjekteringsstyring er ikke satt opp for dette prosjektet ennå.",
+      "severity_invalid": "Ukjent alvorlighetsgrad.",
+      "source_not_installed": "Modulen som inneholder disse postene, er ikke installert.",
+      "submission_not_found": "Innsending til myndighet ikke funnet i dette prosjektet.",
+      "unknown_catalogue": "Katalog ikke funnet.",
+      "use_conclude": "Bruk avslutt for å registrere resultatet.",
+      "use_issue": "Bruk utstede for å sende utgivelsen.",
+      "waiver_needs_rationale": "Å frafalle en linje i prosjekteringsplanen krever en begrunnelse.",
+      "wbs_code_duplicate": "Denne WBS-koden er allerede i bruk i prosjektet.",
+      "wbs_code_not_under_parent": "En underordnet kode må begynne med koden til overordnet element.",
+      "wbs_code_required": "En WBS-kode er påkrevd.",
+      "wbs_invalid": "Arbeidsnedbrytningsstrukturen bryter prosjektets WBS-regler.",
+      "wbs_move_cycle": "Et element kan ikke flyttes under sitt eget underordnede element.",
+      "wbs_node_closed": "Dette WBS-elementet er stengt for nye referanser.",
+      "wbs_node_not_found": "WBS-element ikke funnet.",
+      "wbs_node_referenced": "Elementet eller ett av underelementene er referert; lukk det i stedet.",
+      "wbs_parent_not_found": "Overordnet WBS-element ikke funnet."
+    },
+    "evidence": {
+      "deliverables": "Linjer i prosjekteringsplanen for fasen godkjent",
+      "major_comments": "Ingen åpne vesentlige gjennomgangskommentarer",
+      "no_host_area": "Prosjekteringsberedskap ukjent: styringsmodellen angir ikke et område for prosjektering",
+      "no_host_document": "Prosjekteringsberedskap ukjent: prosjektet har ikke et rammedokument for prosjektering ennå. Lag et prosjekteringsregister (fil i CDE) for å opprette det.",
+      "no_phase": "Prosjekteringsberedskap ukjent: denne porten avslutter ingen fase",
+      "reports": "Påkrevde rapporter for fasen godkjent"
+    },
+    "export": {
+      "col_check": "Uavhengig kontroll",
+      "col_code": "Kode",
+      "col_copies": "Papirkopier",
+      "col_discipline": "Fag",
+      "col_disciplines": "Fag",
+      "col_format": "Format",
+      "col_forms": "Skjemaer",
+      "col_kind": "Type",
+      "col_last_issue": "Siste utstedelse",
+      "col_min_status": "Minstestatus",
+      "col_number": "Nummer",
+      "col_phase": "Fase",
+      "col_phases": "Faser",
+      "col_pinned_revision": "Festet revisjon",
+      "col_present": "Tilstede",
+      "col_purpose": "Formål",
+      "col_recipient": "Mottaker",
+      "col_recipients": "Mottakere",
+      "col_required": "Påkrevd",
+      "col_revision": "Revisjon",
+      "col_state": "Tilstand",
+      "col_status": "Status",
+      "col_title": "Tittel",
+      "empty": "Ingenting å vise.",
+      "project": "Prosjekt",
+      "title_matrix": "Distribusjonsmatrise",
+      "title_permit": "Søknadspakke",
+      "title_register": "Tegningsregister",
+      "title_reports": "Rapporter og dokumentasjon",
+      "yes": "Ja"
+    },
+    "independent_check": {
+      "none": "Ingen",
+      "optional": "Valgfri",
+      "required_by_rule": "Påkrevd etter regelverk"
+    },
+    "permit_item": {
+      "drawing": "Tegning",
+      "form": "Skjema",
+      "report": "Rapport"
+    },
+    "purpose": {
+      "for_approval": "For godkjenning",
+      "for_construction": "For utførelse",
+      "for_information": "For informasjon",
+      "for_record": "For arkiv",
+      "for_review": "For gjennomgang",
+      "for_tender": "For anbud"
+    },
+    "report_state": {
+      "accepted": "Godkjent",
+      "commissioned": "Bestilt",
+      "in_progress": "Under arbeid",
+      "not_required": "Ikke påkrevd",
+      "rejected": "Avvist",
+      "remarks": "Merknader",
+      "required": "Påkrevd",
+      "submitted": "Innsendt",
+      "under_check": "Under kontroll"
+    },
+    "rules": {
+      "approval_by_entitled_user": {
+        "fail": "Godkjenningspunkt {code} ble ikke avgjort av en godkjenner med rett til det.",
+        "suggestion": "Avgjør det på nytt gjennom ruten."
+      },
+      "deliverable_complete_for_phase": {
+        "fail": "Linje {code} i prosjekteringsplanen for {phase} er ikke godkjent.",
+        "suggestion": "Fullfør tegningene, eller frafall med en begrunnelse."
+      },
+      "drawing_number_matches_scheme": {
+        "fail": "Nummer {number} samsvarer ikke med skjemaet ({fields}).",
+        "suggestion": "Gi tegningen et nytt nummer."
+      },
+      "drawing_number_parts_consistent": {
+        "fail": "Nummer {number} stemmer ikke med de lagrede delene ({fields}).",
+        "suggestion": "Korriger containerfeltene."
+      },
+      "drawing_originator_known": {
+        "fail": "Avsender {value} for {number} tilhører ingen aktiv rolle.",
+        "suggestion": "Legg til prosjekteringsrollen, eller korriger nummeret."
+      },
+      "not_required_has_rationale": {
+        "fail": "Rapport {code} har ingen begrunnelse.",
+        "suggestion": "Legg til begrunnelsen."
+      },
+      "permit_content_current": {
+        "fail": "Søknadspakke {code} inneholder utdaterte revisjoner.",
+        "suggestion": "Informer myndigheten, eller send inn på nytt."
+      },
+      "permit_package_complete": {
+        "fail": "Søknadspakke {code} mangler {count} påkrevde elementer.",
+        "suggestion": "Legg til eller del de manglende elementene."
+      },
+      "release_revisions_suitable": {
+        "fail": "Utgivelse {release} har {count} revisjoner som ikke er egnet.",
+        "suggestion": "Fjern arbeid som pågår, eller publiser først."
+      },
+      "report_independent_check": {
+        "fail": "Rapport {code} ble godkjent uten en gyldig uavhengig kontroll.",
+        "suggestion": "Utpek en kontrollør fra en annen part."
+      },
+      "title_block_matches_number": {
+        "fail": "Tegningshodet for {number} viser {value}.",
+        "suggestion": "Korriger tegningshodet."
+      },
+      "wbs_code_unique": {
+        "fail": "WBS-kode {code} er brukt mer enn én gang.",
+        "suggestion": "Gi duplikatene nye nummer."
+      },
+      "wbs_reference_resolves": {
+        "fail": "{module} viser til WBS-verdi {value}, som ikke samsvarer med noe element.",
+        "suggestion": "Korriger referansen, eller legg til elementet."
+      }
+    }
+  }
+}
