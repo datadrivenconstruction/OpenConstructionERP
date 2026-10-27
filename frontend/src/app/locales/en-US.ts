@@ -1780,6 +1780,13 @@ const resource = {
     "auth_classic.status": "Status",
     "auth_classic.privacy": "Privacy",
     "einvoice.profile.ubl_pe": "SUNAT UBL 2.1 (factura electrónica)",
+    "accountingSync.sync.push_selected": "Post {{count}} reviewed",
+    "accountingSync.sync.push_hint_review": "Check the documents you reviewed below, then post them. Payments recorded in your books come back.",
+    "accountingSync.docs.review_all": "Mark all as reviewed",
+    "accountingSync.docs.review_one": "Reviewed {{number}}",
+    "accountingSync.doc_source.payroll": "Payroll",
+    "accountingSync.category.payroll_cost": "Payroll cost",
+    "accountingSync.category.payroll_liability": "Wages payable",
   }
 } as { translation: Record<string, string> };
 
