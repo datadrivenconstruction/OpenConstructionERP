@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { PackagesSettings } from '@/features/solution_packages/PackagesSettings';
 import { ConverterReleaseNotice } from '@/shared/ui/ConverterReleaseNotice';
 import { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
@@ -60,6 +61,7 @@ import {
   Users,
   ScrollText,
   Building2,
+  Boxes,
 } from 'lucide-react';
 import { Card, CardHeader, CardContent, CardFooter, Button, Badge, InfoHint, Skeleton, Breadcrumb, DismissibleInfo, IntroRichText, ConfirmDialog, ModuleGuideButton, CountryFlag } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
@@ -1429,7 +1431,7 @@ function DemoLoginAdminRow() {
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'regional' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'modules' | 'governance' | 'audit' | 'advanced';
+type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'regional' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
 
 interface TabDef {
   id: SettingsTab;
@@ -1466,6 +1468,7 @@ const TABS: readonly TabDef[] = [
   // Modules — installing and removing backend modules. Visible to everyone
   // (seeing what this instance runs is not privileged), but the toggles are
   // admin-only inside the panel because `system.modules.enable/disable` is.
+  { id: 'packages',     labelKey: 'settings.tab_packages',     defaultLabel: 'Packages & modules', icon: Boxes, descKey: 'settings.tab_packages_desc', descDefault: 'Installed solution packages, add a package, switch single modules' },
   { id: 'modules',      labelKey: 'settings.tab_modules',      defaultLabel: 'Modules',      icon: Package,  descKey: 'settings.tab_modules_desc',      descDefault: 'Install or remove modules and see what depends on what' },
   // Audit log — moved here from the sidebar admin grid. Manager+ only; the
   // page component enforces `audit.view` on the backend, and we role-gate the
@@ -2157,6 +2160,11 @@ export function SettingsPage() {
           )}
 
           {/* ── MODULES ──────────────────────────────────────────── */}
+          {activeTab === 'packages' && (
+            <div className="lg:col-span-2">
+              <PackagesSettings />
+            </div>
+          )}
           {activeTab === 'modules' && (
             <div className="lg:col-span-2">
               <ModulesSettings />
