@@ -83,7 +83,7 @@ from reportlab.platypus import (
 from app.core.document_forms_i18n import REGISTER_UNRENDERABLE
 from app.core.i18n import SUPPORTED_LOCALES as PLATFORM_LOCALES
 from app.core.money import minor_units, money_quantum
-from app.core.pdf_branding import branded_cover_brand, branded_doc_metadata, draw_furniture_line
+from app.core.pdf_branding import branded_appearance, branded_cover_brand, branded_doc_metadata, draw_furniture_line
 from app.core.pdf_fonts import (
     BODY_FONT,
     BOLD_FONT,
@@ -93,6 +93,7 @@ from app.core.pdf_fonts import (
     pdf_text_width,
     register_pdf_fonts,
 )
+from app.core.pdf_signatures import signature_block, signers_for
 from app.core.storage import find_existing_upload, module_uploads_dir
 
 # These property documents (contracts, receipts, certificates) ship in every
@@ -1821,25 +1822,18 @@ def render_handover_certificate_pdf(
             _t(locale, "handover_certificate.snag_note", ""),
             styles["small"],
         ),
-        Spacer(1, 14 * mm),
-        Table(
-            [
-                [
-                    _p(
-                        f"{html.escape(_t(locale, 'common.buyer_signature', 'Buyer Signature'))}<br/>"
-                        "________________________________",
-                        styles["body"],
-                        markup=True,
-                    ),
-                    _p(
-                        f"{html.escape(_t(locale, 'common.developer_signature', 'Developer Signature'))}<br/>"
-                        "________________________________",
-                        styles["body"],
-                        markup=True,
-                    ),
-                ]
-            ],
-            colWidths=[75 * mm, 75 * mm],
+        *signature_block(
+            signers_for(
+                "handover_certificate",
+                branded_appearance("handover_certificate"),
+                defaults=(
+                    _t(locale, "common.buyer_signature", "Buyer Signature"),
+                    _t(locale, "common.developer_signature", "Developer Signature"),
+                ),
+            ),
+            150 * mm,
+            locale=locale,
+            heading=False,
         ),
     ]
     return _render(doc, frame, story, ctx, buf)

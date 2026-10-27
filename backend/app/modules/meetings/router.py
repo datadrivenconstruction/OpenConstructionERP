@@ -1994,6 +1994,10 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
         )
         elements.append(act_table)
 
+    from app.core.pdf_branding import branded_appearance as _sig_look
+    from app.core.pdf_signatures import signature_block, signers_for
+
+    elements.extend(signature_block(signers_for("meeting_minutes", _sig_look("meeting_minutes")), USABLE_WIDTH))
     # Footer timestamp
     elements.append(Spacer(1, 10 * mm))
     generated_at = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
