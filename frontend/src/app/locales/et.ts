@@ -59933,7 +59933,7 @@ const resource = {
     "field_evidence.compass_se": "KA",
     "field_evidence.compass_s": "L",
     "field_evidence.compass_sw": "ED",
-    "field_evidence.compass_w": "Lä",
+    "field_evidence.compass_w": "LÄ",
     "field_evidence.compass_nw": "LO",
     "field_evidence.no_location": "Asukohta pole salvestatud",
     "field_evidence.heading": "Suund {{point}} ({{degrees}}°)",

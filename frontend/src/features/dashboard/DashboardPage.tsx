@@ -54,7 +54,6 @@ import { dashboardGuide } from './dashboardGuide';
 import { pricedPositions, type PositionCounts } from './pricedPositions';
 import { MultiCurrencyTotal } from '@/shared/ui/MultiCurrencyTotal';
 import { WhatsNewCard } from '@/shared/ui/WhatsNewCard';
-import { DashboardCasesCard } from './DashboardCasesCard';
 import { CompactProjectCard } from './components/CompactProjectCard';
 import { type ProjectPin } from './components/DashboardProjectsMap';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
@@ -139,6 +138,10 @@ const PunchListQualityCard = lazy(() =>
 );
 const RegionalPackCard = lazy(() =>
   import('./RegionalPackCard').then((m) => ({ default: m.RegionalPackCard })),
+);
+// Both cases cards carry the full playbook catalogue, which must stay out of the entry chunk.
+const DashboardCasesCard = lazy(() =>
+  import('./DashboardCasesCard').then((m) => ({ default: m.DashboardCasesCard })),
 );
 const DashboardMarketCasesCard = lazy(() =>
   import('./DashboardMarketCasesCard').then((m) => ({ default: m.DashboardMarketCasesCard })),
