@@ -61133,6 +61133,8 @@ const resource = {
     "boq.fidelity.view_report": "Ver relatório",
     "boq.fidelity.menu_check": "Verificar o que o arquivo perde…",
     "boq.fidelity.import_title": "Não transferido para a planilha: {{errors}} críticos, {{warnings}} avisos, {{notes}} observações",
+    "boq.fidelity.import_toast_title": "Nem tudo o que está no ficheiro chegou ao orçamento",
+    "boq.fidelity.import_toast": "A importação omitiu ou alterou dados: {{errors}} críticos, {{warnings}} avisos.",
     "boq.scaling.applied": "Itens reescalonados: {{n}}",
     "boq.scaling.undo": "Desfazer",
     "boq.scaling.undone": "Reescalonamento desfeito",

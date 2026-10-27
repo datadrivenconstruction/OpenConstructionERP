@@ -59758,6 +59758,8 @@ const resource = {
     "boq.fidelity.view_report": "Zobacz raport",
     "boq.fidelity.menu_check": "Sprawdź, co traci plik…",
     "boq.fidelity.import_title": "Nie przeniesiono do przedmiaru: krytycznych {{errors}}, ostrzeżeń {{warnings}}, uwag {{notes}}",
+    "boq.fidelity.import_toast_title": "Nie wszystko z pliku trafiło do kosztorysu",
+    "boq.fidelity.import_toast": "Import pominął lub zmienił dane: krytycznych {{errors}}, ostrzeżeń {{warnings}}.",
     "boq.scaling.applied": "Przeskalowane pozycje: {{n}}",
     "boq.scaling.undo": "Cofnij",
     "boq.scaling.undone": "Skalowanie cofnięte",

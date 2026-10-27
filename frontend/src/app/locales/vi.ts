@@ -57996,6 +57996,8 @@ const resource = {
     "boq.fidelity.view_report": "Xem báo cáo",
     "boq.fidelity.menu_check": "Kiểm tra tệp làm mất gì…",
     "boq.fidelity.import_title": "Không chuyển vào bảng tiên lượng: {{errors}} nghiêm trọng, {{warnings}} cảnh báo, {{notes}} ghi chú",
+    "boq.fidelity.import_toast_title": "Không phải toàn bộ nội dung tệp đã vào bảng khối lượng",
+    "boq.fidelity.import_toast": "Quá trình nhập bỏ sót hoặc thay đổi dữ liệu: {{errors}} nghiêm trọng, {{warnings}} cảnh báo.",
     "boq.scaling.applied": "Hạng mục đã đổi tỷ lệ: {{n}}",
     "boq.scaling.undo": "Hoàn tác",
     "boq.scaling.undone": "Đã hoàn tác đổi tỷ lệ",

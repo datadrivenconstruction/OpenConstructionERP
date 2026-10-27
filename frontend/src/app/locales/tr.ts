@@ -59114,6 +59114,8 @@ const resource = {
     "boq.fidelity.view_report": "Raporu görüntüle",
     "boq.fidelity.menu_check": "Dosyanın neyi kaybettiğini kontrol et…",
     "boq.fidelity.import_title": "Metraja aktarılmayanlar: {{errors}} kritik, {{warnings}} uyarı, {{notes}} not",
+    "boq.fidelity.import_toast_title": "Dosyadaki her şey metraja yansımadı",
+    "boq.fidelity.import_toast": "İçe aktarma bazı verileri atladı veya değiştirdi: {{errors}} kritik, {{warnings}} uyarı.",
     "boq.scaling.applied": "Ölçeklenen pozlar: {{n}}",
     "boq.scaling.undo": "Geri al",
     "boq.scaling.undone": "Ölçekleme geri alındı",

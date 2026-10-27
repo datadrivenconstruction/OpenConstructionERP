@@ -59520,6 +59520,8 @@ const resource = {
     "boq.fidelity.view_report": "レポートを表示",
     "boq.fidelity.menu_check": "ファイルで失われる内容を確認…",
     "boq.fidelity.import_title": "内訳書に取り込まれなかったもの: 重大 {{errors}} 件、警告 {{warnings}} 件、注記 {{notes}} 件",
+    "boq.fidelity.import_toast_title": "ファイル内のすべてが内訳書に反映されたわけではありません",
+    "boq.fidelity.import_toast": "インポートで一部のデータが欠落、または変更されました: 重大 {{errors}} 件、警告 {{warnings}} 件。",
     "boq.scaling.applied": "スケーリングした項目: {{n}}",
     "boq.scaling.undo": "元に戻す",
     "boq.scaling.undone": "スケーリングを取り消しました",

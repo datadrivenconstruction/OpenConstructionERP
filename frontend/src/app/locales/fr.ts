@@ -61140,6 +61140,8 @@ const resource = {
     "boq.fidelity.view_report": "Voir le rapport",
     "boq.fidelity.menu_check": "Vérifier ce que le fichier perd…",
     "boq.fidelity.import_title": "Non repris dans le métré : {{errors}} critiques, {{warnings}} avertissements, {{notes}} remarques",
+    "boq.fidelity.import_toast_title": "Tout le contenu du fichier n'a pas été repris dans le métré",
+    "boq.fidelity.import_toast": "L'import a omis ou modifié des données : {{errors}} critiques, {{warnings}} avertissements.",
     "boq.scaling.applied": "Postes mis à l'échelle : {{n}}",
     "boq.scaling.undo": "Annuler",
     "boq.scaling.undone": "Mise à l'échelle annulée",

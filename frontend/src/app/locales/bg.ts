@@ -58237,6 +58237,8 @@ const resource = {
     "boq.fidelity.view_report": "Виж отчета",
     "boq.fidelity.menu_check": "Провери какво губи файлът…",
     "boq.fidelity.import_title": "Не са пренесени в количествената сметка: {{errors}} критични, {{warnings}} предупреждения, {{notes}} забележки",
+    "boq.fidelity.import_toast_title": "Не всичко от файла е отразено в количествената сметка",
+    "boq.fidelity.import_toast": "При импорта са пропуснати или променени данни: {{errors}} критични, {{warnings}} предупреждения.",
     "boq.scaling.applied": "Мащабирани позиции: {{n}}",
     "boq.scaling.undo": "Отмени",
     "boq.scaling.undone": "Мащабирането е отменено",

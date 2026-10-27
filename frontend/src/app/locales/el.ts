@@ -58193,6 +58193,8 @@ const resource = {
     "boq.fidelity.view_report": "Προβολή αναφοράς",
     "boq.fidelity.menu_check": "Έλεγχος του τι χάνει το αρχείο…",
     "boq.fidelity.import_title": "Δεν μεταφέρθηκαν στο τιμολόγιο ποσοτήτων: {{errors}} κρίσιμα, {{warnings}} προειδοποιήσεις, {{notes}} σημειώσεις",
+    "boq.fidelity.import_toast_title": "Δεν μεταφέρθηκαν όλα τα στοιχεία του αρχείου στις προμετρήσεις",
+    "boq.fidelity.import_toast": "Η εισαγωγή παρέλειψε ή άλλαξε δεδομένα: {{errors}} κρίσιμα, {{warnings}} προειδοποιήσεις.",
     "boq.scaling.applied": "Θέσεις που κλιμακώθηκαν: {{n}}",
     "boq.scaling.undo": "Αναίρεση",
     "boq.scaling.undone": "Η κλιμάκωση αναιρέθηκε",

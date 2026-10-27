@@ -58503,6 +58503,8 @@ const resource = {
     "boq.fidelity.view_report": "প্রতিবেদন দেখুন",
     "boq.fidelity.menu_check": "ফাইলে কী হারায় তা যাচাই করুন…",
     "boq.fidelity.import_title": "বিলে স্থানান্তরিত হয়নি: {{errors}}টি জটিল, {{warnings}}টি সতর্কতা, {{notes}}টি নোট",
+    "boq.fidelity.import_toast_title": "ফাইলের সবকিছু বিলে পৌঁছায়নি",
+    "boq.fidelity.import_toast": "আমদানিতে কিছু তথ্য বাদ গেছে বা বদলেছে: {{errors}}টি গুরুতর, {{warnings}}টি সতর্কতা।",
     "boq.scaling.applied": "স্কেল করা আইটেম: {{n}}",
     "boq.scaling.undo": "পূর্বাবস্থায়",
     "boq.scaling.undone": "স্কেলিং পূর্বাবস্থায় ফেরানো হয়েছে",

@@ -60457,6 +60457,8 @@ const resource = {
     "boq.fidelity.view_report": "查看报告",
     "boq.fidelity.menu_check": "检查文件会丢失什么…",
     "boq.fidelity.import_title": "未传入清单：{{errors}} 项严重，{{warnings}} 项警告，{{notes}} 项提示",
+    "boq.fidelity.import_toast_title": "文件中并非所有内容都已进入工程量清单",
+    "boq.fidelity.import_toast": "导入时遗漏或更改了数据：严重 {{errors}} 项，警告 {{warnings}} 项。",
     "boq.scaling.applied": "已缩放的清单项：{{n}}",
     "boq.scaling.undo": "撤销",
     "boq.scaling.undone": "已撤销缩放",

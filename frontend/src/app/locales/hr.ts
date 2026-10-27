@@ -58568,6 +58568,8 @@ const resource = {
     "boq.fidelity.view_report": "Prikaži izvješće",
     "boq.fidelity.menu_check": "Provjeri što datoteka gubi…",
     "boq.fidelity.import_title": "Nije preneseno u troškovnik: {{errors}} kritično, {{warnings}} upozorenja, {{notes}} napomena",
+    "boq.fidelity.import_toast_title": "Nije sve iz datoteke ušlo u troškovnik",
+    "boq.fidelity.import_toast": "Uvoz je izostavio ili promijenio podatke: {{errors}} kritičnih, {{warnings}} upozorenja.",
     "boq.scaling.applied": "Skalirane pozicije: {{n}}",
     "boq.scaling.undo": "Poništi",
     "boq.scaling.undone": "Skaliranje poništeno",

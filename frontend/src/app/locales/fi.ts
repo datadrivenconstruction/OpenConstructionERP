@@ -58237,6 +58237,8 @@ const resource = {
     "boq.fidelity.view_report": "Näytä raportti",
     "boq.fidelity.menu_check": "Tarkista, mitä tiedosto menettää…",
     "boq.fidelity.import_title": "Ei siirretty määräluetteloon: {{errors}} kriittistä, {{warnings}} varoitusta, {{notes}} huomautusta",
+    "boq.fidelity.import_toast_title": "Kaikki tiedoston sisältö ei siirtynyt laskelmaan",
+    "boq.fidelity.import_toast": "Tuonti jätti pois tai muutti tietoja: {{errors}} kriittistä, {{warnings}} varoitusta.",
     "boq.scaling.applied": "Skaalatut nimikkeet: {{n}}",
     "boq.scaling.undo": "Kumoa",
     "boq.scaling.undone": "Skaalaus kumottu",

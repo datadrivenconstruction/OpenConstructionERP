@@ -60305,6 +60305,8 @@ const resource = {
     "boq.fidelity.view_report": "Переглянути звіт",
     "boq.fidelity.menu_check": "Перевірити, що втрачає файл…",
     "boq.fidelity.import_title": "Не перенесено у відомість: критичних {{errors}}, попереджень {{warnings}}, приміток {{notes}}",
+    "boq.fidelity.import_toast_title": "Не все з файлу потрапило у відомість",
+    "boq.fidelity.import_toast": "Імпорт пропустив або змінив дані: критичних — {{errors}}, попереджень — {{warnings}}.",
     "boq.scaling.applied": "Масштабовано позицій: {{n}}",
     "boq.scaling.undo": "Скасувати",
     "boq.scaling.undone": "Масштабування скасовано",

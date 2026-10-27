@@ -58183,6 +58183,8 @@ const resource = {
     "boq.fidelity.view_report": "Vaata aruannet",
     "boq.fidelity.menu_check": "Kontrolli, mida fail kaotab…",
     "boq.fidelity.import_title": "Mahutabelisse üle võtmata: {{errors}} kriitilist, {{warnings}} hoiatust, {{notes}} märkust",
+    "boq.fidelity.import_toast_title": "Kõik failis olevad andmed ei jõudnud eelarvesse",
+    "boq.fidelity.import_toast": "Import jättis andmed välja või muutis neid: {{errors}} kriitilist, {{warnings}} hoiatust.",
     "boq.scaling.applied": "Skaleeritud positsioone: {{n}}",
     "boq.scaling.undo": "Võta tagasi",
     "boq.scaling.undone": "Skaleerimine võeti tagasi",

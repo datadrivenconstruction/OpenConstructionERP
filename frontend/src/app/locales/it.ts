@@ -59441,6 +59441,8 @@ const resource = {
     "boq.fidelity.view_report": "Visualizza report",
     "boq.fidelity.menu_check": "Verifica cosa perde il file…",
     "boq.fidelity.import_title": "Non trasferito nel computo: {{errors}} critici, {{warnings}} avvisi, {{notes}} note",
+    "boq.fidelity.import_toast_title": "Non tutto il contenuto del file è finito nel computo",
+    "boq.fidelity.import_toast": "L'importazione ha omesso o modificato dati: {{errors}} critici, {{warnings}} avvisi.",
     "boq.scaling.applied": "Voci scalate: {{n}}",
     "boq.scaling.undo": "Annulla",
     "boq.scaling.undone": "Scalatura annullata",

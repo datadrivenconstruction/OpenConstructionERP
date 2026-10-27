@@ -57988,6 +57988,8 @@ const resource = {
     "boq.fidelity.view_report": "ดูรายงาน",
     "boq.fidelity.menu_check": "ตรวจสอบสิ่งที่ไฟล์สูญเสีย…",
     "boq.fidelity.import_title": "ไม่ได้ถ่ายโอนเข้าบัญชีรายการ: วิกฤต {{errors}} คำเตือน {{warnings}} หมายเหตุ {{notes}}",
+    "boq.fidelity.import_toast_title": "ไม่ใช่ทุกอย่างในไฟล์ที่เข้าไปอยู่ในใบปริมาณงาน",
+    "boq.fidelity.import_toast": "การนำเข้าข้ามหรือเปลี่ยนข้อมูลบางส่วน: วิกฤต {{errors}} รายการ คำเตือน {{warnings}} รายการ",
     "boq.scaling.applied": "รายการงานที่ปรับสัดส่วนแล้ว: {{n}}",
     "boq.scaling.undo": "เลิกทำ",
     "boq.scaling.undone": "เลิกทำการปรับสัดส่วนแล้ว",

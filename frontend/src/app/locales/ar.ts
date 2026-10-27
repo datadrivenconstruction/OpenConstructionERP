@@ -61288,6 +61288,8 @@ const resource = {
     "boq.fidelity.view_report": "عرض التقرير",
     "boq.fidelity.menu_check": "فحص ما يفقده الملف…",
     "boq.fidelity.import_title": "لم يُنقل إلى جدول الكميات: {{errors}} حرجة، {{warnings}} تحذيرات، {{notes}} ملاحظات",
+    "boq.fidelity.import_toast_title": "لم يصل كل شيء في الملف إلى جدول الكميات",
+    "boq.fidelity.import_toast": "أغفل الاستيراد بعض البيانات أو غيّرها: {{errors}} حرجة، {{warnings}} تحذيرات.",
     "boq.scaling.applied": "البنود التي تم تغيير مقياسها: {{n}}",
     "boq.scaling.undo": "تراجع",
     "boq.scaling.undone": "تم التراجع عن تغيير المقياس",

@@ -58194,6 +58194,8 @@ const resource = {
     "boq.fidelity.view_report": "Есепті көру",
     "boq.fidelity.menu_check": "Файл нені жоғалтатынын тексеру…",
     "boq.fidelity.import_title": "Ведомостке енгізілмеді: {{errors}} күрделі, {{warnings}} ескерту, {{notes}} ескертпе",
+    "boq.fidelity.import_toast_title": "Файлдағы барлық нәрсе ведомостқа енбеді",
+    "boq.fidelity.import_toast": "Импорт кейбір деректерді өткізіп жіберді немесе өзгертті: {{errors}} сыни, {{warnings}} ескерту.",
     "boq.scaling.applied": "Масштабталған позициялар: {{n}}",
     "boq.scaling.undo": "Болдырмау",
     "boq.scaling.undone": "Масштабтау болдырылмады",

@@ -60798,6 +60798,8 @@ const resource = {
     "boq.fidelity.view_report": "Jelentés megtekintése",
     "boq.fidelity.menu_check": "Annak ellenőrzése, mit veszít a fájl…",
     "boq.fidelity.import_title": "Nem került át a kiírásba: {{errors}} kritikus, {{warnings}} figyelmeztetés, {{notes}} megjegyzés",
+    "boq.fidelity.import_toast_title": "A fájl nem minden tétele került be a költségvetésbe",
+    "boq.fidelity.import_toast": "Az importálás kihagyott vagy megváltoztatott adatokat: {{errors}} kritikus, {{warnings}} figyelmeztetés.",
     "boq.scaling.applied": "Átskálázott tételek: {{n}}",
     "boq.scaling.undo": "Visszavonás",
     "boq.scaling.undone": "Skálázás visszavonva",

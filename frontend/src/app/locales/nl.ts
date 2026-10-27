@@ -59114,6 +59114,8 @@ const resource = {
     "boq.fidelity.view_report": "Rapport bekijken",
     "boq.fidelity.menu_check": "Controleren wat het bestand verliest…",
     "boq.fidelity.import_title": "Niet overgenomen in het bestek: {{errors}} kritiek, {{warnings}} waarschuwingen, {{notes}} opmerkingen",
+    "boq.fidelity.import_toast_title": "Niet alles uit het bestand is in de hoeveelheidsstaat terechtgekomen",
+    "boq.fidelity.import_toast": "De import heeft gegevens weggelaten of gewijzigd: {{errors}} kritiek, {{warnings}} waarschuwingen.",
     "boq.scaling.applied": "Geschaalde posten: {{n}}",
     "boq.scaling.undo": "Ongedaan maken",
     "boq.scaling.undone": "Schaling ongedaan gemaakt",

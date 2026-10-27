@@ -57987,6 +57987,8 @@ const resource = {
     "boq.fidelity.view_report": "Lihat laporan",
     "boq.fidelity.menu_check": "Periksa apa yang hilang dari berkas…",
     "boq.fidelity.import_title": "Tidak terbawa ke daftar kuantitas: {{errors}} kritis, {{warnings}} peringatan, {{notes}} catatan",
+    "boq.fidelity.import_toast_title": "Tidak semua isi file masuk ke bill",
+    "boq.fidelity.import_toast": "Impor melewatkan atau mengubah data: {{errors}} kritis, {{warnings}} peringatan.",
     "boq.scaling.applied": "Pos yang diskalakan: {{n}}",
     "boq.scaling.undo": "Urungkan",
     "boq.scaling.undone": "Penskalaan diurungkan",

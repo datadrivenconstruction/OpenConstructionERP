@@ -58558,6 +58558,8 @@ const resource = {
     "boq.fidelity.view_report": "Vezi raportul",
     "boq.fidelity.menu_check": "Verifică ce pierde fișierul…",
     "boq.fidelity.import_title": "Netransferat în deviz: {{errors}} critice, {{warnings}} avertismente, {{notes}} note",
+    "boq.fidelity.import_toast_title": "Nu tot din fișier a ajuns în deviz",
+    "boq.fidelity.import_toast": "Importul a omis sau a modificat date: {{errors}} critice, {{warnings}} avertismente.",
     "boq.scaling.applied": "Poziții scalate: {{n}}",
     "boq.scaling.undo": "Anulează",
     "boq.scaling.undone": "Scalare anulată",

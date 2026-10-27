@@ -59497,6 +59497,8 @@ const resource = {
     "boq.fidelity.view_report": "Zobrazit zprávu",
     "boq.fidelity.menu_check": "Zkontrolovat, co soubor ztrácí…",
     "boq.fidelity.import_title": "Do výkazu výměr nepřevzato: {{errors}} kritických, {{warnings}} varování, {{notes}} poznámek",
+    "boq.fidelity.import_toast_title": "Ne vše ze souboru se dostalo do rozpočtu",
+    "boq.fidelity.import_toast": "Import vynechal nebo změnil data: {{errors}} kritických, {{warnings}} varování.",
     "boq.scaling.applied": "Přepočtené položky: {{n}}",
     "boq.scaling.undo": "Zpět",
     "boq.scaling.undone": "Přepočet vrácen",

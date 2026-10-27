@@ -58848,6 +58848,8 @@ const resource = {
     "boq.fidelity.view_report": "Visa rapport",
     "boq.fidelity.menu_check": "Kontrollera vad filen förlorar…",
     "boq.fidelity.import_title": "Inte överfört till kalkylen: {{errors}} kritiska, {{warnings}} varningar, {{notes}} anmärkningar",
+    "boq.fidelity.import_toast_title": "Allt i filen kom inte med i mängdförteckningen",
+    "boq.fidelity.import_toast": "Importen utelämnade eller ändrade data: {{errors}} kritiska, {{warnings}} varningar.",
     "boq.scaling.applied": "Skalade poster: {{n}}",
     "boq.scaling.undo": "Ångra",
     "boq.scaling.undone": "Skalningen ångrad",

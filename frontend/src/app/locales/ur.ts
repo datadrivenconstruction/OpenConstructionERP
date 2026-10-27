@@ -58199,6 +58199,8 @@ const resource = {
     "boq.fidelity.view_report": "رپورٹ دیکھیں",
     "boq.fidelity.menu_check": "جانچیں کہ فائل کیا کھو دیتی ہے…",
     "boq.fidelity.import_title": "بل میں منتقل نہیں ہوا: {{errors}} نازک، {{warnings}} انتباہات، {{notes}} نوٹ",
+    "boq.fidelity.import_toast_title": "فائل کی ہر چیز بل تک نہیں پہنچی",
+    "boq.fidelity.import_toast": "امپورٹ نے کچھ ڈیٹا چھوڑ دیا یا بدل دیا: {{errors}} اہم، {{warnings}} انتباہات۔",
     "boq.scaling.applied": "پیمانہ بدلے گئے آئٹم: {{n}}",
     "boq.scaling.undo": "واپس کریں",
     "boq.scaling.undone": "پیمانہ بندی واپس کر دی گئی",

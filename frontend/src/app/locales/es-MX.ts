@@ -49156,6 +49156,8 @@ const resource = {
     "boq.fidelity.view_report": "Ver informe",
     "boq.fidelity.menu_check": "Comprobar qué pierde el archivo…",
     "boq.fidelity.import_title": "No trasladado al presupuesto: {{errors}} críticos, {{warnings}} advertencias, {{notes}} notas",
+    "boq.fidelity.import_toast_title": "No todo lo del archivo llegó al presupuesto",
+    "boq.fidelity.import_toast": "La importación omitió o cambió datos: {{errors}} críticos, {{warnings}} advertencias.",
     "boq.scaling.applied": "Partidas escaladas: {{n}}",
     "boq.scaling.undo": "Deshacer",
     "boq.scaling.undone": "Escalado deshecho",

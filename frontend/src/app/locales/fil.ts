@@ -58191,6 +58191,8 @@ const resource = {
     "boq.fidelity.view_report": "Tingnan ang ulat",
     "boq.fidelity.menu_check": "Suriin kung ano ang nawawala sa file…",
     "boq.fidelity.import_title": "Hindi nailipat sa bill: {{errors}} kritikal, {{warnings}} babala, {{notes}} paalala",
+    "boq.fidelity.import_toast_title": "Hindi lahat ng nasa file ay napunta sa bill",
+    "boq.fidelity.import_toast": "Nilaktawan o binago ng import ang ilang data: {{errors}} kritikal, {{warnings}} babala.",
     "boq.scaling.applied": "Mga item na na-scale: {{n}}",
     "boq.scaling.undo": "I-undo",
     "boq.scaling.undone": "Na-undo ang pag-scale",

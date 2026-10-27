@@ -48867,6 +48867,8 @@ const resource = {
     "boq.fidelity.view_report": "Ver relatório",
     "boq.fidelity.menu_check": "Verificar o que o arquivo perde…",
     "boq.fidelity.import_title": "Não transferido ao orçamento: {{errors}} críticos, {{warnings}} avisos, {{notes}} observações",
+    "boq.fidelity.import_toast_title": "Nem tudo do arquivo chegou ao orçamento",
+    "boq.fidelity.import_toast": "A importação omitiu ou alterou dados: {{errors}} críticos, {{warnings}} alertas.",
     "boq.scaling.applied": "Posições escaladas: {{n}}",
     "boq.scaling.undo": "Desfazer",
     "boq.scaling.undone": "Escala desfeita",

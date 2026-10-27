@@ -58350,6 +58350,8 @@ const resource = {
     "boq.fidelity.view_report": "Отчетту көрүү",
     "boq.fidelity.menu_check": "Файл эмнени жоготорун текшерүү…",
     "boq.fidelity.import_title": "Ведомостко киргизилген жок: {{errors}} олуттуу, {{warnings}} эскертүү, {{notes}} белгилөө",
+    "boq.fidelity.import_toast_title": "Файлдагынын баары ведомостко кирген жок",
+    "boq.fidelity.import_toast": "Импорт айрым маалыматтарды өткөрүп жиберди же өзгөртүп койду: {{errors}} маанилүү, {{warnings}} эскертүү.",
     "boq.scaling.applied": "Масштабдалган позициялар: {{n}}",
     "boq.scaling.undo": "Кайтаруу",
     "boq.scaling.undone": "Масштабдоо кайтарылды",

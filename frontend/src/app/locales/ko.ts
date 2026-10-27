@@ -58606,6 +58606,8 @@ const resource = {
     "boq.fidelity.view_report": "보고서 보기",
     "boq.fidelity.menu_check": "파일에서 손실되는 내용 검사…",
     "boq.fidelity.import_title": "내역서에 반영되지 않음: 치명적 {{errors}}건, 경고 {{warnings}}건, 참고 {{notes}}건",
+    "boq.fidelity.import_toast_title": "파일의 모든 내용이 내역서에 반영되지는 않았습니다",
+    "boq.fidelity.import_toast": "가져오기에서 일부 데이터가 누락되었거나 변경되었습니다: 심각 {{errors}}건, 경고 {{warnings}}건.",
     "boq.scaling.applied": "조정된 항목: {{n}}",
     "boq.scaling.undo": "실행 취소",
     "boq.scaling.undone": "조정이 취소되었습니다",

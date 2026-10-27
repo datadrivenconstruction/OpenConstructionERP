@@ -58236,6 +58236,8 @@ const resource = {
     "boq.fidelity.view_report": "रिपोर्ट देखें",
     "boq.fidelity.menu_check": "जाँचें कि फ़ाइल क्या खोती है…",
     "boq.fidelity.import_title": "मात्रा-सूची में नहीं आया: {{errors}} गंभीर, {{warnings}} चेतावनियाँ, {{notes}} टिप्पणियाँ",
+    "boq.fidelity.import_toast_title": "फ़ाइल की सारी जानकारी बिल तक नहीं पहुँची",
+    "boq.fidelity.import_toast": "आयात में कुछ डेटा छूट गया या बदल गया: {{errors}} गंभीर, {{warnings}} चेतावनियाँ।",
     "boq.scaling.applied": "स्केल की गई मदें: {{n}}",
     "boq.scaling.undo": "पूर्ववत करें",
     "boq.scaling.undone": "स्केलिंग पूर्ववत की गई",

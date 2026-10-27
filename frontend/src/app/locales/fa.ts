@@ -58193,6 +58193,8 @@ const resource = {
     "boq.fidelity.view_report": "مشاهده گزارش",
     "boq.fidelity.menu_check": "بررسی آنچه فایل از دست می‌دهد…",
     "boq.fidelity.import_title": "به فهرست مقادیر منتقل نشد: {{errors}} بحرانی، {{warnings}} هشدار، {{notes}} نکته",
+    "boq.fidelity.import_toast_title": "همه موارد فایل به صورت وضعیت وارد نشد",
+    "boq.fidelity.import_toast": "واردسازی بخشی از داده‌ها را حذف یا تغییر داد: {{errors}} مورد بحرانی، {{warnings}} هشدار.",
     "boq.scaling.applied": "ردیف‌های مقیاس‌شده: {{n}}",
     "boq.scaling.undo": "بازگردانی",
     "boq.scaling.undone": "مقیاس‌گذاری بازگردانده شد",

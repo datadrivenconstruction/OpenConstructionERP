@@ -59165,6 +59165,8 @@ const resource = {
     "boq.fidelity.view_report": "Hisobotni ko‘rish",
     "boq.fidelity.menu_check": "Fayl nimani yo‘qotishini tekshirish…",
     "boq.fidelity.import_title": "Vedomostga ko‘chirilmadi: {{errors}} jiddiy, {{warnings}} ogohlantirish, {{notes}} izoh",
+    "boq.fidelity.import_toast_title": "Fayldagi hamma narsa hisob-kitobga kirmadi",
+    "boq.fidelity.import_toast": "Import baʼzi maʼlumotlarni oʼtkazib yubordi yoki oʼzgartirdi: {{errors}} ta jiddiy, {{warnings}} ta ogohlantirish.",
     "boq.scaling.applied": "Masshtablangan pozitsiyalar: {{n}}",
     "boq.scaling.undo": "Bekor qilish",
     "boq.scaling.undone": "Masshtablash bekor qilindi",

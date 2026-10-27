@@ -58514,6 +58514,8 @@ const resource = {
     "boq.fidelity.view_report": "הצג דוח",
     "boq.fidelity.menu_check": "בדיקה מה הקובץ מאבד…",
     "boq.fidelity.import_title": "לא הועבר לכתב הכמויות: {{errors}} קריטיות, {{warnings}} אזהרות, {{notes}} הערות",
+    "boq.fidelity.import_toast_title": "לא כל מה שבקובץ הגיע לכתב הכמויות",
+    "boq.fidelity.import_toast": "הייבוא השמיט או שינה נתונים: {{errors}} קריטיים, {{warnings}} אזהרות.",
     "boq.scaling.applied": "סעיפים שהוגדלו או הוקטנו: {{n}}",
     "boq.scaling.undo": "ביטול",
     "boq.scaling.undone": "שינוי הקנה מידה בוטל",

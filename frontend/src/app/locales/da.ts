@@ -58233,6 +58233,8 @@ const resource = {
     "boq.fidelity.view_report": "Se rapport",
     "boq.fidelity.menu_check": "Kontroller, hvad filen mister…",
     "boq.fidelity.import_title": "Ikke overført til mængdefortegnelsen: {{errors}} kritiske, {{warnings}} advarsler, {{notes}} bemærkninger",
+    "boq.fidelity.import_toast_title": "Ikke alt i filen nåede med i mængden",
+    "boq.fidelity.import_toast": "Importen udelod eller ændrede data: {{errors}} kritiske, {{warnings}} advarsler.",
     "boq.scaling.applied": "Skalerede poster: {{n}}",
     "boq.scaling.undo": "Fortryd",
     "boq.scaling.undone": "Skalering fortrudt",

@@ -57911,6 +57911,8 @@ const resource = {
     "boq.fidelity.view_report": "Тайлан үзэх",
     "boq.fidelity.menu_check": "Файл юуг алддагийг шалгах…",
     "boq.fidelity.import_title": "Тооцоонд шилжээгүй: {{errors}} эгзэгтэй, {{warnings}} анхааруулга, {{notes}} тэмдэглэл",
+    "boq.fidelity.import_toast_title": "Файлын бүх зүйл тооцоололд орсонгүй",
+    "boq.fidelity.import_toast": "Импорт зарим өгөгдлийг алгасав эсвэл өөрчилсөн: {{errors}} чухал, {{warnings}} анхааруулга.",
     "boq.scaling.applied": "Масштабласан байрлал: {{n}}",
     "boq.scaling.undo": "Буцаах",
     "boq.scaling.undone": "Масштаблалт буцаагдлаа",
