@@ -65806,6 +65806,544 @@
       "import_dependencies": []
     },
     {
+      "module_id": "cost_benchmarks",
+      "module_label": "Cost Benchmarks",
+      "module_category": "estimation",
+      "files": [
+        "__init__.py",
+        "bench_math.py",
+        "demo.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_cost_benchmarks",
+        "version": "1.0.0",
+        "display_name": "Cost Benchmarks",
+        "description": "Benchmarks from the company's own completed projects: final cost per m2 GFA and per functional unit and by element group (DIN 276, NRM 1, MasterFormat, Uniformat), normalised to one base date, location and reporting currency with the price indices, location factors and exchange rates on file. A new estimate is compared with comparable projects as a P10, P50, P90 band per element with outliers flagged; the open reference band covers types with no own history. Tenant scoped, with an anonymised export.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "estimation",
+        "depends": [
+          "oe_projects",
+          "oe_boq",
+          "oe_price_index",
+          "oe_fx"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "BenchmarkRecord",
+          "tablename": "oe_cost_benchmarks_record",
+          "docstring": "A completed project's final cost (or an estimate) on its own basis.",
+          "columns": [
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "region",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "cost_date",
+              "annotation": "Mapped[date]",
+              "sql_type": "SafeDate",
+              "nullable": false
+            },
+            {
+              "name": "standard",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "gfa_m2",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "functional_unit",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "functional_units",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "total_cost",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "is_synthetic",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "elements",
+              "type": "one-to-many",
+              "annotation": "Mapped[list['BenchmarkElement']]",
+              "back_populates": "record"
+            }
+          ]
+        },
+        {
+          "class_name": "BenchmarkElement",
+          "tablename": "oe_cost_benchmarks_element",
+          "docstring": "The cost of one element group (DIN 276 ``330``, NRM 1 ``2.5``, ...) of a record.",
+          "columns": [
+            {
+              "name": "record_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_cost_benchmarks_record.id"
+            },
+            {
+              "name": "code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "record",
+              "type": "many-to-one",
+              "annotation": "Mapped[BenchmarkRecord]",
+              "target_model": "BenchmarkRecord",
+              "back_populates": "elements"
+            }
+          ]
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/records/",
+          "handler": "list_records",
+          "response_model": "list[RecordOut]",
+          "request_schema": "CurrentTenantId"
+        },
+        {
+          "method": "POST",
+          "path": "/records/",
+          "handler": "create_record",
+          "response_model": "RecordOut",
+          "request_schema": "RecordCreate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/records/{record_id}",
+          "handler": "delete_record",
+          "request_schema": "CurrentTenantId"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/capture/",
+          "handler": "capture_project",
+          "response_model": "RecordOut",
+          "request_schema": "CurrentTenantId"
+        },
+        {
+          "method": "POST",
+          "path": "/compare/",
+          "handler": "compare",
+          "request_schema": "CompareRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/reference/",
+          "handler": "reference"
+        },
+        {
+          "method": "GET",
+          "path": "/export/anonymised",
+          "handler": "anonymised_export",
+          "response_model": "None",
+          "request_schema": "CurrentTenantId"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ElementIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "RecordCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "Literal['completed', 'estimate']",
+              "default": "'completed'"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "project_type",
+              "type": "str"
+            },
+            {
+              "name": "country",
+              "type": "str"
+            },
+            {
+              "name": "region",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "cost_date",
+              "type": "date"
+            },
+            {
+              "name": "standard",
+              "type": "str"
+            },
+            {
+              "name": "gfa_m2",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "functional_unit",
+              "type": "str"
+            },
+            {
+              "name": "functional_units",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "total_cost",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "notes",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "elements",
+              "type": "list[ElementIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "ElementOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "RecordOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "project_type",
+              "type": "str"
+            },
+            {
+              "name": "country",
+              "type": "str"
+            },
+            {
+              "name": "region",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "cost_date",
+              "type": "date"
+            },
+            {
+              "name": "standard",
+              "type": "str"
+            },
+            {
+              "name": "gfa_m2",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "functional_unit",
+              "type": "str"
+            },
+            {
+              "name": "functional_units",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "total_cost",
+              "type": "Decimal"
+            },
+            {
+              "name": "is_synthetic",
+              "type": "bool"
+            },
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "elements",
+              "type": "list[ElementOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "CompareRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "estimate_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "project_type",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "countries",
+              "type": "list[str]"
+            },
+            {
+              "name": "region",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "gfa_min",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "gfa_max",
+              "type": "Decimal | None",
+              "default": "None"
+            },
+            {
+              "name": "year_from",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "year_to",
+              "type": "int | None",
+              "default": "None"
+            },
+            {
+              "name": "base_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "base_region",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "reporting_currency",
+              "type": "str"
+            },
+            {
+              "name": "fx_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "index_series_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "measure",
+              "type": "Literal['gfa', 'unit']",
+              "default": "'gfa'"
+            },
+            {
+              "name": "min_projects",
+              "type": "int"
+            },
+            {
+              "name": "stale_months",
+              "type": "int"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "boq",
+        "fx",
+        "price_index",
+        "projects"
+      ]
+    },
+    {
       "module_id": "cost_explorer",
       "module_label": "Cost Explorer",
       "module_category": "business",
@@ -113130,6 +113668,7 @@
         "fieldreports",
         "geo_hub",
         "notifications",
+        "payroll",
         "projects",
         "resources",
         "subcontractors",
@@ -160382,17 +160921,23 @@
         "intl.py",
         "manifest.py",
         "models.py",
+        "pay_rules.py",
+        "period_demo.py",
+        "period_exports.py",
+        "period_router.py",
+        "period_service.py",
         "permissions.py",
         "repository.py",
         "router.py",
         "schemas.py",
-        "service.py"
+        "service.py",
+        "validators.py"
       ],
       "manifest": {
         "name": "oe_payroll",
         "version": "0.1.0",
         "display_name": "Payroll",
-        "description": "Draft payroll batches from field labour - aggregates site workforce and field-diary hours per worker/date into entries (hours x rate).",
+        "description": "Draft payroll batches from field labour - aggregates site workforce and field-diary hours per worker/date into entries (hours x rate). Export periods turn approved timesheets into pay lines by country overtime and allowance rules, lock against edits, export CSV, Excel, LODAS or JSON and post labour cost with burden.",
         "author": "OpenConstructionERP Core Team",
         "category": "core",
         "depends": [
@@ -160679,6 +161224,246 @@
             },
             {
               "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "PayrollPeriod",
+          "tablename": "oe_payroll_period",
+          "docstring": "A payroll export period over approved field timesheets of one project.\n\n``open`` -> ``locked`` (timesheet edits in the date range are blocked) ->\n``exported``. A locked or exported period can be reopened with a reason; every\nmove is a :class:`PayrollPeriodEvent`. ``rule_profile`` names the overtime and\nallowance profile in ``country_data/payroll_rules.json``.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "period_start",
+              "annotation": "Mapped[date]",
+              "sql_type": "SafeDate",
+              "nullable": false
+            },
+            {
+              "name": "period_end",
+              "annotation": "Mapped[date]",
+              "sql_type": "SafeDate",
+              "nullable": false
+            },
+            {
+              "name": "country",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "rule_profile",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "total_hours",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "total_gross",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "total_burden",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "locked_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "locked_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "exported_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "posted_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "metadata_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "PayrollPeriodLine",
+          "tablename": "oe_payroll_period_line",
+          "docstring": "One export line: employee x day x cost code x pay type, hours x rate x multiplier.",
+          "columns": [
+            {
+              "name": "period_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_payroll_period.id"
+            },
+            {
+              "name": "employee_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "employee_number",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "employee_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "work_date",
+              "annotation": "Mapped[date]",
+              "sql_type": "SafeDate",
+              "nullable": false
+            },
+            {
+              "name": "cost_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "pay_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "hours",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "rate",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "multiplier",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "overtime_approved",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "source_refs",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "PayrollPeriodEvent",
+          "tablename": "oe_payroll_period_event",
+          "docstring": "Audit of a period: build, lock, reopen (with the reason), export, post.",
+          "columns": [
+            {
+              "name": "period_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_payroll_period.id"
+            },
+            {
+              "name": "action",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "reason",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "actor_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "details",
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
@@ -161284,11 +162069,14 @@
         }
       ],
       "import_dependencies": [
+        "certified_payroll",
         "costmodel",
         "field_diary",
         "field_time",
         "fieldreports",
         "finance",
+        "notifications",
+        "projects",
         "resources"
       ]
     },
@@ -280962,6 +281750,13 @@
       "total_files": 7
     },
     {
+      "name": "cost-benchmarks",
+      "ts_files": 3,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 3
+    },
+    {
       "name": "cost-control",
       "ts_files": 24,
       "css_files": 0,
@@ -281558,10 +282353,10 @@
     },
     {
       "name": "payroll",
-      "ts_files": 4,
+      "ts_files": 7,
       "css_files": 0,
-      "test_files": 1,
-      "total_files": 4
+      "test_files": 2,
+      "total_files": 7
     },
     {
       "name": "permits",
@@ -282527,6 +283322,12 @@
       "projects",
       "users"
     ],
+    "cost_benchmarks": [
+      "boq",
+      "fx",
+      "price_index",
+      "projects"
+    ],
     "cost_explorer": [
       "catalog",
       "costs"
@@ -282811,6 +283612,7 @@
       "fieldreports",
       "geo_hub",
       "notifications",
+      "payroll",
       "projects",
       "resources",
       "subcontractors",
@@ -283115,11 +283917,13 @@
       "subcontractors"
     ],
     "payroll": [
+      "certified_payroll",
       "costmodel",
       "field_diary",
       "field_time",
       "fieldreports",
       "finance",
+      "notifications",
       "projects",
       "resources"
     ],
@@ -283740,17 +284544,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 216,
-    "modules_with_manifests": 214,
-    "total_models": 803,
-    "total_columns": 9359,
-    "total_relationships": 244,
-    "total_routes": 4696,
-    "total_schemas": 4177,
-    "total_python_files": 2853,
-    "frontend_features": 211,
-    "frontend_ts_files": 3682,
-    "frontend_backend_mapped": 188
+    "backend_modules": 217,
+    "modules_with_manifests": 215,
+    "total_models": 808,
+    "total_columns": 9417,
+    "total_relationships": 246,
+    "total_routes": 4703,
+    "total_schemas": 4182,
+    "total_python_files": 2870,
+    "frontend_features": 212,
+    "frontend_ts_files": 3688,
+    "frontend_backend_mapped": 190
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -283768,7 +284572,7 @@
     "auth": "authority_submission",
     "authority-submission": "authority_submission",
     "bcf": "bcf",
-    "benchmarks": null,
+    "benchmarks": "cost_benchmarks",
     "bi-dashboards": "bi_dashboards",
     "bid-management": "bid_management",
     "bid-portal": "portal",
@@ -283798,6 +284602,7 @@
     "contracts": "contracts",
     "coordination": "coordination_hub",
     "correspondence": "correspondence",
+    "cost-benchmarks": "cost_benchmarks",
     "cost-control": null,
     "cost-explorer": "cost_explorer",
     "cost-match": "cost_match",

@@ -46,6 +46,8 @@ import {
 } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { payrollGuide } from './payrollGuide';
+import { PayrollPeriodsSection } from './PayrollPeriodsSection';
+import { PayrollPeriodWidget } from './PayrollPeriodWidget';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
 import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -746,6 +748,8 @@ export default function PayrollPage() {
       ) : (
         <>
 
+      <PayrollPeriodWidget projectId={projectId} />
+
       {/* Labour cost rollup (surfaced beside the cost model) */}
       <Card className="p-4">
         <div className="flex items-center gap-3">
@@ -1131,6 +1135,8 @@ export default function PayrollPage() {
           )}
         </Card>
       </div>
+
+      <PayrollPeriodsSection projectId={projectId} />
 
       <ConfirmDialog
         open={confirmSubmitOpen}

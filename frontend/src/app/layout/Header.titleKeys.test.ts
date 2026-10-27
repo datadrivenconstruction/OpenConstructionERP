@@ -83,6 +83,7 @@ const SPLIT_BASELINE: Record<string, [string, string]> = {
   '/field-reports': ['nav.field_reports', 'fieldreports.title'],
   '/project-intelligence': ['nav.estimation_dashboard', 'project_intelligence.page_title_v191'],
   '/payroll': ['nav.payroll', 'payroll.title'],
+  '/cost-benchmarks': ['nav.cost_benchmarks', 'cost_benchmarks.title'],
   '/projects/:projectId/payroll': ['nav.payroll', 'payroll.title'],
   '/portfolio/capacity': ['nav.capacity_planning', 'capacity.title'],
   '/portfolio/leveling': ['nav.resource_leveling', 'leveling.title'],

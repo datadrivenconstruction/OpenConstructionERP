@@ -262,6 +262,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Field Time': 'nav.field_time',
   'Labor Rates': 'nav.labor_rates',
   'Payroll': 'nav.payroll',
+  'Cost benchmarks': 'nav.cost_benchmarks',
   'Certified Payroll': 'nav.certified_payroll',
   'Site Supervision': 'site_supervision.title',
   'Site Mobilisation': 'site_prep.title',

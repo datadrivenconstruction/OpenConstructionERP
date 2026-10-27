@@ -156,6 +156,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/cost-explorer': Compass,
   '/assemblies': Layers,
   '/benchmarks': BarChart3,
+  '/cost-benchmarks': BarChart3,
   // ── 4. Takeoff ────────────────────────────────────────────────────
   '/quantities': Ruler,
   '/takeoff': Ruler,
