@@ -2390,3 +2390,296 @@ html[data-menu-active='pill'] aside.oe-sidebar [data-active] .oe-nav-icon {
   background: transparent;
 }
 html[data-menu-active='pill'] aside.oe-sidebar .oe-nav-row[data-active] .oe-nav-trail { color: inherit; opacity: 0.85; }
+
+/* ── Spreadsheet tables and keyboard mode ─────────────────────────────────
+   html[data-excel-tables] / html[data-keyboard-mode] from shared/lib/tablePrefs.ts;
+   the behaviour lives in shared/lib/tableEnhancer.ts. */
+td[data-numeric],
+th[data-numeric] {
+  font-variant-numeric: tabular-nums;
+}
+html[data-excel-tables] table[data-oe-enhanced] thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background-color: var(--oe-bg-secondary);
+}
+html[data-excel-tables] table[data-oe-enhanced] tbody td:first-child,
+html[data-excel-tables] table[data-oe-enhanced] thead th:first-child,
+html[data-excel-tables] table[data-oe-enhanced] tfoot td:first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background-color: var(--oe-bg-elevated);
+}
+html[data-excel-tables] table[data-oe-enhanced] thead th:first-child {
+  z-index: 3;
+  background-color: var(--oe-bg-secondary);
+}
+html[data-excel-tables] th[data-oe-sortable] {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  padding-inline-end: 1.5rem;
+}
+html[data-excel-tables] th[aria-sort='ascending']::after,
+html[data-excel-tables] th[aria-sort='descending']::after {
+  content: '\25B2';
+  margin-inline-start: 0.25rem;
+  font-size: 0.6rem;
+  color: var(--oe-blue);
+}
+html[data-excel-tables] th[aria-sort='descending']::after {
+  content: '\25BC';
+}
+[data-oe-filter-btn] {
+  position: absolute;
+  inset-inline-end: 0.375rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0 0.25rem;
+  font-size: 0.7rem;
+  line-height: 1.2;
+  border-radius: var(--oe-radius-xs);
+  color: var(--oe-text-tertiary);
+  opacity: 0;
+}
+th:hover > [data-oe-filter-btn],
+[data-oe-filter-btn]:focus-visible,
+[data-oe-filter-btn][data-active='true'] {
+  opacity: 1;
+}
+[data-oe-filter-btn][data-active='true'] {
+  color: var(--oe-text-inverse);
+  background: var(--oe-blue);
+}
+[data-oe-resize] {
+  position: absolute;
+  inset-inline-end: -3px;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 4;
+}
+[data-oe-resize]:hover {
+  background: var(--oe-blue);
+  opacity: 0.4;
+}
+[data-oe-filter-pop] {
+  position: fixed;
+  z-index: 1000;
+  padding: 0.375rem;
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-sm);
+  background: var(--oe-bg-elevated);
+  box-shadow: var(--oe-shadow-md);
+}
+[data-oe-filter-pop] input {
+  width: 12rem;
+  height: 2rem;
+  padding: 0 0.5rem;
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-xs);
+  background: var(--oe-bg);
+  color: var(--oe-text-primary);
+  font-size: 0.8125rem;
+}
+tr[data-oe-hidden] {
+  display: none;
+}
+tfoot[data-oe-total] td {
+  border-top: 2px solid var(--oe-border);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background-color: var(--oe-bg-secondary);
+  padding: 0.5rem 0.75rem;
+}
+tfoot[data-oe-total] td[data-numeric] {
+  text-align: end;
+}
+html[data-excel-tables] td[data-oe-sel] {
+  background-color: rgb(var(--oe-blue-ch, 0 113 227) / 0.12) !important;
+  box-shadow: inset 0 0 0 1px rgb(var(--oe-blue-ch, 0 113 227) / 0.5);
+}
+html[data-keyboard-mode] table[data-oe-enhanced] td:focus {
+  outline: 2px solid var(--oe-blue);
+  outline-offset: -2px;
+}
+.oe-shortcut-strip {
+  position: fixed;
+  inset-inline-start: 50%;
+  bottom: 0.5rem;
+  transform: translateX(-50%);
+  z-index: 40;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0.25rem 0.75rem;
+  border: 1px solid var(--oe-border-light);
+  border-radius: var(--oe-radius-sm);
+  background: var(--oe-bg-elevated);
+  color: var(--oe-text-secondary);
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+.oe-shortcut-strip kbd {
+  display: inline-block;
+  min-width: 1.1rem;
+  padding: 0 0.25rem;
+  margin-inline-end: 0.125rem;
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-xs);
+  font-family: inherit;
+  font-size: 0.6875rem;
+  text-align: center;
+}
+@media print {
+  [data-oe-filter-btn],
+  [data-oe-resize],
+  .oe-shortcut-strip {
+    display: none !important;
+  }
+}
+
+td[data-oe-col-hidden],
+th[data-oe-col-hidden] {
+  display: none;
+}
+
+/* Saved views control (shared/ui/ListViewsPanel.tsx). */
+.oe-views {
+  position: fixed;
+  inset-inline-end: 1rem;
+  bottom: 3rem;
+  z-index: 45;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.5rem;
+}
+.oe-views-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-sm);
+  background: var(--oe-bg-elevated);
+  color: var(--oe-text-secondary);
+  font-size: 0.8125rem;
+  box-shadow: var(--oe-shadow-sm);
+}
+.oe-views-toggle:hover {
+  color: var(--oe-text-primary);
+}
+.oe-views-count {
+  min-width: 1.1rem;
+  padding: 0 0.25rem;
+  border-radius: var(--oe-radius-full);
+  background: var(--oe-bg-secondary);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+}
+.oe-views-panel {
+  width: 17rem;
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-md);
+  background: var(--oe-bg-elevated);
+  box-shadow: var(--oe-shadow-lg);
+}
+
+/* Inline validation (shared/lib/checks.ts, shared/ui/ChecksPanel.tsx). Status
+   colour by meaning only: red for an error, amber for a risk. */
+[data-oe-check='error'] {
+  box-shadow: inset 3px 0 0 var(--oe-error);
+}
+[data-oe-check='warning'] {
+  box-shadow: inset 3px 0 0 var(--oe-warning);
+}
+[dir='rtl'] [data-oe-check='error'] {
+  box-shadow: inset -3px 0 0 var(--oe-error);
+}
+[dir='rtl'] [data-oe-check='warning'] {
+  box-shadow: inset -3px 0 0 var(--oe-warning);
+}
+input[data-oe-check],
+select[data-oe-check],
+textarea[data-oe-check] {
+  box-shadow: none;
+  border-color: var(--oe-warning) !important;
+}
+input[data-oe-check='error'],
+select[data-oe-check='error'],
+textarea[data-oe-check='error'] {
+  border-color: var(--oe-error) !important;
+}
+[data-oe-check-flash] {
+  outline: 2px solid var(--oe-blue);
+  outline-offset: -2px;
+}
+.oe-checks-toggle {
+  position: fixed;
+  inset-inline-end: 1rem;
+  bottom: 0.5rem;
+  z-index: 45;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  height: 2rem;
+  padding: 0 0.75rem;
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-sm);
+  background: var(--oe-bg-elevated);
+  color: var(--oe-text-secondary);
+  font-size: 0.8125rem;
+  box-shadow: var(--oe-shadow-sm);
+}
+.oe-checks-count {
+  min-width: 1.25rem;
+  padding: 0 0.3rem;
+  border-radius: var(--oe-radius-full);
+  color: var(--oe-text-inverse);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  background: var(--oe-warning);
+}
+.oe-checks-toggle[data-severity='error'] .oe-checks-count {
+  background: var(--oe-error);
+}
+.oe-checks-sheet {
+  position: fixed;
+  top: 3.5rem;
+  bottom: 3rem;
+  inset-inline-end: 1rem;
+  z-index: 46;
+  display: flex;
+  width: min(24rem, calc(100vw - 2rem));
+  flex-direction: column;
+  border: 1px solid var(--oe-border);
+  border-radius: var(--oe-radius-md);
+  background: var(--oe-bg-elevated);
+  box-shadow: var(--oe-shadow-lg);
+}
+.oe-check-dot {
+  flex: none;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--oe-radius-full);
+  background: var(--oe-warning);
+}
+.oe-check-dot[data-severity='error'] {
+  background: var(--oe-error);
+}
+@media print {
+  [data-oe-check] {
+    box-shadow: none !important;
+  }
+}
+
+/* No sideways jump when a page grows a scrollbar. */
+html {
+  scrollbar-gutter: stable;
+}
