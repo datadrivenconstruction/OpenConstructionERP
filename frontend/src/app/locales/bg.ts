@@ -60999,6 +60999,10 @@ const resource = {
     "packages.switch_off_all": "Изключване на всички",
     "packages.cancel": "Отказ",
     "packages.needed_by": "Необходим за: {{modules}}",
+    "packages.remove": "Премахване",
+    "packages.remove_warning": "Премахването на {{name}} скрива тези модули: {{modules}}. Данните им се запазват и се връщат, когато добавите пакета отново.",
+    "packages.remove_none": "Премахването на {{name}} не скрива нито един модул, защото други пакети още ги използват.",
+    "packages.remove_confirm": "Премахни пакета",
   }
 } as { translation: Record<string, string> };
 

@@ -61344,6 +61344,10 @@ const resource = {
     "packages.switch_off_all": "Isključi sve",
     "packages.cancel": "Odustani",
     "packages.needed_by": "Treba za: {{modules}}",
+    "packages.remove": "Ukloni",
+    "packages.remove_warning": "Uklanjanje paketa {{name}} skriva ove module: {{modules}}. Njihovi podaci ostaju i vraćaju se kad paket ponovno dodate.",
+    "packages.remove_none": "Uklanjanje paketa {{name}} ne skriva nijedan modul jer ih drugi paketi i dalje trebaju.",
+    "packages.remove_confirm": "Ukloni paket",
   }
 } as { translation: Record<string, string> };
 

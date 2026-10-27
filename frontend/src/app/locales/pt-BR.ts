@@ -56643,6 +56643,10 @@ const resource = {
     "packages.switch_off_all": "Desativar todos",
     "packages.cancel": "Cancelar",
     "packages.needed_by": "Necessário para: {{modules}}",
+    "packages.remove": "Remover",
+    "packages.remove_warning": "Remover {{name}} oculta estes módulos: {{modules}}. Os dados permanecem e voltam quando você adicionar o pacote de novo.",
+    "packages.remove_none": "Remover {{name}} não oculta nenhum módulo, porque outros pacotes ainda precisam deles.",
+    "packages.remove_confirm": "Remover pacote",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

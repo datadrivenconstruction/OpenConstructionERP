@@ -64106,6 +64106,10 @@ const resource = {
     "packages.switch_off_all": "إيقاف الكل",
     "packages.cancel": "إلغاء",
     "packages.needed_by": "مطلوبة من: {{modules}}",
+    "packages.remove": "إزالة",
+    "packages.remove_warning": "إزالة {{name}} تُخفي هذه الوحدات: {{modules}}. تبقى بياناتها محفوظة وتعود عند إضافة الحزمة مرة أخرى.",
+    "packages.remove_none": "إزالة {{name}} لا تُخفي أي وحدة، لأن حزماً أخرى ما زالت تحتاجها.",
+    "packages.remove_confirm": "إزالة الحزمة",
   }
 } as { translation: Record<string, string> };
 

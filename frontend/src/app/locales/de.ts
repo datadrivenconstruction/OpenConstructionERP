@@ -63631,6 +63631,10 @@ const resource = {
     "packages.switch_off_all": "Alle ausschalten",
     "packages.cancel": "Abbrechen",
     "packages.needed_by": "Benötigt von: {{modules}}",
+    "packages.remove": "Entfernen",
+    "packages.remove_warning": "Wenn Sie {{name}} entfernen, werden diese Module ausgeblendet: {{modules}}. Ihre Daten bleiben erhalten und kehren zurück, wenn Sie das Paket wieder hinzufügen.",
+    "packages.remove_none": "Wenn Sie {{name}} entfernen, wird kein Modul ausgeblendet, weil andere Pakete sie weiterhin brauchen.",
+    "packages.remove_confirm": "Paket entfernen",
   }
 } as { translation: Record<string, string> };
 

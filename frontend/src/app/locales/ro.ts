@@ -61333,6 +61333,10 @@ const resource = {
     "packages.switch_off_all": "Dezactivează toate",
     "packages.cancel": "Anulează",
     "packages.needed_by": "Necesar pentru: {{modules}}",
+    "packages.remove": "Elimină",
+    "packages.remove_warning": "Eliminarea pachetului {{name}} ascunde aceste module: {{modules}}. Datele lor rămân și revin când adăugați din nou pachetul.",
+    "packages.remove_none": "Eliminarea pachetului {{name}} nu ascunde niciun modul, pentru că alte pachete au încă nevoie de ele.",
+    "packages.remove_confirm": "Elimină pachetul",
   }
 } as { translation: Record<string, string> };
 

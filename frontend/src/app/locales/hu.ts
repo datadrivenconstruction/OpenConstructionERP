@@ -63561,6 +63561,10 @@ const resource = {
     "packages.switch_off_all": "Összes kikapcsolása",
     "packages.cancel": "Mégse",
     "packages.needed_by": "Szükséges hozzá: {{modules}}",
+    "packages.remove": "Eltávolítás",
+    "packages.remove_warning": "A(z) {{name}} eltávolítása elrejti ezeket a modulokat: {{modules}}. Adataik megmaradnak, és visszajönnek, ha újra hozzáadja a csomagot.",
+    "packages.remove_none": "A(z) {{name}} eltávolítása egyetlen modult sem rejt el, mert más csomagok még szükségük van rájuk.",
+    "packages.remove_confirm": "Csomag eltávolítása",
   }
 } as { translation: Record<string, string> };
 

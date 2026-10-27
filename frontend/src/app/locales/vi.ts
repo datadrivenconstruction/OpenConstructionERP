@@ -60754,6 +60754,10 @@ const resource = {
     "packages.switch_off_all": "Tắt tất cả",
     "packages.cancel": "Hủy",
     "packages.needed_by": "Cần bởi: {{modules}}",
+    "packages.remove": "Gỡ bỏ",
+    "packages.remove_warning": "Gỡ {{name}} sẽ ẩn các mô-đun này: {{modules}}. Dữ liệu được giữ lại và sẽ quay lại khi bạn thêm lại gói.",
+    "packages.remove_none": "Gỡ {{name}} không ẩn mô-đun nào vì các gói khác vẫn cần chúng.",
+    "packages.remove_confirm": "Gỡ gói",
   }
 } as { translation: Record<string, string> };
 

@@ -60957,6 +60957,10 @@ const resource = {
     "packages.switch_off_all": "Барлығын өшіру",
     "packages.cancel": "Бас тарту",
     "packages.needed_by": "Қажет етеді: {{modules}}",
+    "packages.remove": "Жою",
+    "packages.remove_warning": "{{name}} жойылса, мына модульдер жасырылады: {{modules}}. Олардың деректері сақталады және пакетті қайта қосқанда оралады.",
+    "packages.remove_none": "{{name}} жойылса, басқа пакеттер оларға әлі мұқтаж болғандықтан ешқандай модуль жасырылмайды.",
+    "packages.remove_confirm": "Пакетті жою",
   }
 } as { translation: Record<string, string> };
 

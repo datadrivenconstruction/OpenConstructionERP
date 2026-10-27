@@ -61113,6 +61113,10 @@ const resource = {
     "packages.switch_off_all": "Баарын өчүрүү",
     "packages.cancel": "Жокко чыгаруу",
     "packages.needed_by": "Керектеген: {{modules}}",
+    "packages.remove": "Алып салуу",
+    "packages.remove_warning": "{{name}} алып салынса, бул модулдар жашырылат: {{modules}}. Алардын маалыматы сакталат жана пакетти кайра кошкондо кайтып келет.",
+    "packages.remove_none": "{{name}} алып салынганда эч бир модуль жашырылбайт, анткени башка пакеттер аларга дагы муктаж.",
+    "packages.remove_confirm": "Пакетти алып салуу",
   }
 } as { translation: Record<string, string> };
 

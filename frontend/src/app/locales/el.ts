@@ -60956,6 +60956,10 @@ const resource = {
     "packages.switch_off_all": "Απενεργοποίηση όλων",
     "packages.cancel": "Άκυρο",
     "packages.needed_by": "Απαιτείται από: {{modules}}",
+    "packages.remove": "Αφαίρεση",
+    "packages.remove_warning": "Η αφαίρεση του {{name}} αποκρύπτει αυτές τις μονάδες: {{modules}}. Τα δεδομένα τους μένουν και επανέρχονται όταν προσθέσετε ξανά το πακέτο.",
+    "packages.remove_none": "Η αφαίρεση του {{name}} δεν αποκρύπτει καμία μονάδα, επειδή άλλα πακέτα τις χρειάζονται ακόμη.",
+    "packages.remove_confirm": "Αφαίρεση πακέτου",
   }
 } as { translation: Record<string, string> };
 

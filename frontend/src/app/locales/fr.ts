@@ -63916,6 +63916,10 @@ const resource = {
     "packages.switch_off_all": "Tout désactiver",
     "packages.cancel": "Annuler",
     "packages.needed_by": "Requis par : {{modules}}",
+    "packages.remove": "Retirer",
+    "packages.remove_warning": "Retirer {{name}} masque ces modules : {{modules}}. Leurs données sont conservées et reviennent si vous rajoutez le lot.",
+    "packages.remove_none": "Retirer {{name}} ne masque aucun module, car d'autres lots en ont encore besoin.",
+    "packages.remove_confirm": "Retirer le lot",
   }
 } as { translation: Record<string, string> };
 

@@ -61275,6 +61275,10 @@ const resource = {
     "packages.switch_off_all": "모두 끄기",
     "packages.cancel": "취소",
     "packages.needed_by": "필요한 모듈: {{modules}}",
+    "packages.remove": "제거",
+    "packages.remove_warning": "{{name}}을(를) 제거하면 다음 모듈이 숨겨집니다: {{modules}}. 데이터는 남아 있으며 패키지를 다시 추가하면 돌아옵니다.",
+    "packages.remove_none": "{{name}}을(를) 제거해도 다른 패키지가 아직 필요로 하므로 숨겨지는 모듈은 없습니다.",
+    "packages.remove_confirm": "패키지 제거",
   }
 } as { translation: Record<string, string> };
 

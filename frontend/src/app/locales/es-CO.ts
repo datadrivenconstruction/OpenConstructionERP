@@ -56840,6 +56840,10 @@ const resource = {
     "packages.switch_off_all": "Desactivar todos",
     "packages.cancel": "Cancelar",
     "packages.needed_by": "Lo necesitan: {{modules}}",
+    "packages.remove": "Quitar",
+    "packages.remove_warning": "Al quitar {{name}} se ocultan estos módulos: {{modules}}. Sus datos se conservan y vuelven al añadir el paquete de nuevo.",
+    "packages.remove_none": "Al quitar {{name}} no se oculta ningún módulo, porque otros paquetes todavía los necesitan.",
+    "packages.remove_confirm": "Quitar paquete",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

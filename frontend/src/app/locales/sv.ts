@@ -61611,6 +61611,10 @@ const resource = {
     "packages.switch_off_all": "Stäng av alla",
     "packages.cancel": "Avbryt",
     "packages.needed_by": "Behövs av: {{modules}}",
+    "packages.remove": "Ta bort",
+    "packages.remove_warning": "Att ta bort {{name}} döljer dessa moduler: {{modules}}. Deras data finns kvar och återkommer när du lägger till paketet igen.",
+    "packages.remove_none": "Att ta bort {{name}} döljer inga moduler, eftersom andra paket fortfarande behöver dem.",
+    "packages.remove_confirm": "Ta bort paket",
   }
 } as { translation: Record<string, string> };
 

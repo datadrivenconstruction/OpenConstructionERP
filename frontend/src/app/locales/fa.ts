@@ -60956,6 +60956,10 @@ const resource = {
     "packages.switch_off_all": "خاموش کردن همه",
     "packages.cancel": "انصراف",
     "packages.needed_by": "مورد نیاز: {{modules}}",
+    "packages.remove": "حذف",
+    "packages.remove_warning": "با حذف {{name}} این ماژول‌ها پنهان می‌شوند: {{modules}}. داده‌های آن‌ها باقی می‌ماند و با افزودن دوباره بسته برمی‌گردد.",
+    "packages.remove_none": "با حذف {{name}} هیچ ماژولی پنهان نمی‌شود، چون بسته‌های دیگر هنوز به آن‌ها نیاز دارند.",
+    "packages.remove_confirm": "حذف بسته",
   }
 } as { translation: Record<string, string> };
 
