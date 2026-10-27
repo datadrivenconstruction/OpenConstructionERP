@@ -90,7 +90,8 @@ describe('tabularImport helpers', () => {
   it('picks the template language from the interface language', () => {
     expect(templateLanguageFor('de-AT')).toBe('de');
     expect(templateLanguageFor('pt_BR')).toBe('pt');
-    expect(templateLanguageFor('ja')).toBe('en');
+    expect(templateLanguageFor('ja')).toBe('ja');
+    expect(templateLanguageFor('sw')).toBe('en');
     expect(templateLanguageFor(undefined)).toBe('en');
   });
 

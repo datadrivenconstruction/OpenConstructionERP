@@ -14,6 +14,7 @@
  * backend's `detail.code`, which the dialog branches on.
  */
 import { API_BASE, ApiError, downloadWithAuth, fetchWithAuth } from '@/shared/lib/api';
+import { MESSAGE_DOCUMENT_LOCALES } from '@/shared/lib/documentExport';
 import { fmtList } from '@/shared/lib/formatters';
 
 
@@ -35,9 +36,9 @@ export const IMPORT_FIELDS = [
 ] as const;
 export type ImportField = (typeof IMPORT_FIELDS)[number];
 
-/** Languages the backend writes a template in (and reads headers in). */
-export const TEMPLATE_LANGUAGES = ['en', 'de', 'es', 'fr', 'ru', 'pt', 'it', 'nl', 'pl', 'tr'] as const;
-export type TemplateLanguage = (typeof TEMPLATE_LANGUAGES)[number];
+/** Languages the backend writes a template in (and reads headers in): all of its languages. */
+export const TEMPLATE_LANGUAGES: readonly string[] = MESSAGE_DOCUMENT_LOCALES;
+export type TemplateLanguage = string;
 export type TemplateFormat = 'xlsx' | 'csv';
 
 export type DateOrder = 'dmy' | 'mdy';
@@ -226,7 +227,7 @@ export function importErrorDetail(err: unknown): ImportErrorDetail | null {
 /** The template language closest to the interface language, English when none fits. */
 export function templateLanguageFor(uiLanguage: string | undefined): TemplateLanguage {
   const base = (uiLanguage ?? 'en').toLowerCase().split(/[-_]/)[0] ?? 'en';
-  return (TEMPLATE_LANGUAGES as readonly string[]).includes(base) ? (base as TemplateLanguage) : 'en';
+  return TEMPLATE_LANGUAGES.includes(base) ? base : 'en';
 }
 
 /**

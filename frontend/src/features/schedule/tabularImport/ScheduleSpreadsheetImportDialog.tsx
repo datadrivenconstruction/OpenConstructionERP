@@ -22,6 +22,7 @@ import { CheckCircle2, Copy, Download, FileSpreadsheet, Loader2, Upload, XCircle
 import { Badge, Button, Input, WideModal, WideModalSection } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { changedColumns, chooseColumn, type ColumnMapping } from '@/features/boq/columnMappingOverride';
+import { DocumentLanguageSelect } from '@/shared/ui/DocumentLanguageSelect';
 import { ClientMilestonePicker } from './ClientMilestonePicker';
 import { ColumnMappingTable } from './ColumnMappingTable';
 import { DateOrderChoice } from './DateOrderChoice';
@@ -70,15 +71,6 @@ interface PreviewArgs {
 function mappingField(read: ColumnMapping, chosen: ColumnMapping): string | null {
   const changed = changedColumns(read, chosen);
   return Object.keys(changed).length > 0 ? JSON.stringify(changed) : null;
-}
-
-function languageName(code: string, uiLanguage: string): string {
-  try {
-    const names = new Intl.DisplayNames([uiLanguage || 'en'], { type: 'language' });
-    return names.of(code) ?? code;
-  } catch {
-    return code;
-  }
 }
 
 export function ScheduleSpreadsheetImportDialog({
@@ -446,18 +438,13 @@ export function ScheduleSpreadsheetImportDialog({
               {t('schedule.tabular_import.template_label', { defaultValue: 'Start from a template' })}
             </label>
             <div className="flex flex-wrap items-center gap-2">
-              <select
+              <DocumentLanguageSelect
                 id="tabular-template-lang"
                 value={templateLang}
-                onChange={(e) => setTemplateLang(e.target.value as TemplateLanguage)}
-                className="rounded-md border border-border bg-surface-primary px-2 py-1.5 text-xs text-content-primary"
-              >
-                {TEMPLATE_LANGUAGES.map((code) => (
-                  <option key={code} value={code}>
-                    {languageName(code, i18n.language)}
-                  </option>
-                ))}
-              </select>
+                onChange={setTemplateLang}
+                locales={TEMPLATE_LANGUAGES}
+                className="min-w-[10rem]"
+              />
               <Button
                 size="sm"
                 variant="secondary"
