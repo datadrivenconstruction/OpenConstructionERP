@@ -25,7 +25,9 @@ import { NlRuleBuilderPanel } from '@/features/compliance';
 import { useModuleRouteElements } from '@/modules/ModuleRoutes';
 import { DatabaseSetupPage } from '@/features/setup';
 import { ModuleVideosSlot } from '@/features/videos/ModuleVideosSlot';
-import { Logo, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
+import { Logo, SkeletonTable, ShortcutsDialog, CommandPalette, ToastContainer, DemoReadOnlyDialog, BackgroundInstallBanner, ErrorBoundary, NotFoundPage, ProductTour, OfflineBanner, DesktopPortBanner, PWAInstallPrompt } from '@/shared/ui';
+import { TableEnhancerHost } from '@/shared/ui/TableEnhancerHost';
+import { ChecksPanel } from '@/shared/ui/ChecksPanel';
 import { AdminOnly } from '@/shared/auth/AdminOnly';
 import GlobalSearchModal from '@/features/search/GlobalSearchModal';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
@@ -891,10 +893,20 @@ function LoadingScreen() {
 // area while the layout (sidebar + header) stays visible. Prevents the
 // full-screen dark flash when navigating between code-split routes (e.g.
 // clicking a notification that links to /tasks or /cde).
+// A page-shaped placeholder (title, toolbar, table) so content lands where the
+// skeleton stood instead of pushing the page down.
 function PageLoadingInline() {
+  const { t } = useTranslation();
   return (
-    <div className="flex min-h-[40vh] items-center justify-center">
-      <div className="h-6 w-6 animate-spin rounded-full border-2 border-oe-blue border-t-transparent" />
+    <div className="flex min-h-[60vh] flex-col gap-4 p-1" role="status" aria-busy="true">
+      <span className="sr-only">{t('common.loading', { defaultValue: 'Loading...' })}</span>
+      <div className="h-7 w-56 animate-pulse rounded-md bg-surface-secondary" aria-hidden />
+      <div className="flex gap-2" aria-hidden>
+        <div className="h-9 w-64 animate-pulse rounded-md bg-surface-secondary" />
+        <div className="h-9 w-28 animate-pulse rounded-md bg-surface-secondary" />
+        <div className="ms-auto h-9 w-32 animate-pulse rounded-md bg-surface-secondary" />
+      </div>
+      <SkeletonTable rows={8} columns={6} />
     </div>
   );
 }
@@ -1083,6 +1095,8 @@ function GlobalShortcuts() {
     <>
       <ShortcutsDialog open={shortcutsOpen} onClose={() => setShortcutsOpen(false)} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <TableEnhancerHost />
+      <ChecksPanel />
       <GlobalSearchModal />
     </>
   );
