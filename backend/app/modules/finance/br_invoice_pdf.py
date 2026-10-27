@@ -59,7 +59,7 @@ from reportlab.platypus import (
     TableStyle,
 )
 
-from app.core.pdf_branding import branded_doc_metadata, branded_header_footer
+from app.core.pdf_branding import branded_doc_metadata, branded_header_footer, build_with_page_count
 from app.core.pdf_fonts import BODY_FONT, BOLD_FONT, pdf_style_for_text, register_pdf_fonts
 
 register_pdf_fonts()
@@ -553,5 +553,5 @@ def render_br_invoice_pdf(
     # Brand header / footer on every page (issue #284). Geometry is read from
     # the doc, so it sits in the existing top/bottom margins without disturbing
     # the RPS layout.
-    doc.build(story, onFirstPage=branded_header_footer, onLaterPages=branded_header_footer)
+    build_with_page_count(doc, story, onFirstPage=branded_header_footer, onLaterPages=branded_header_footer)
     return buffer.getvalue()
