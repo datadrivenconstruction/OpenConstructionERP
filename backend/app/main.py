@@ -2406,6 +2406,11 @@ def create_app() -> FastAPI:
         if not cors_origins:
             cors_origins = ["https://openconstructionerp.com"]
 
+    # Added before CORS so CORS wraps the 403 it answers for a hidden module.
+    from app.core.module_guard import ModuleGuardMiddleware
+
+    app.add_middleware(ModuleGuardMiddleware)
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=cors_origins,
@@ -2810,6 +2815,9 @@ def create_app() -> FastAPI:
     from app.core.partner_pack.router import router as partner_pack_router
 
     app.include_router(partner_pack_router)
+    from app.core.solution_packages_router import router as solution_packages_router
+
+    app.include_router(solution_packages_router)
     # Canonical Packs-umbrella alias (/api/v1/packs/*) sharing the same handlers.
     app.include_router(packs_alias_router)
     _active_pack = get_active_pack()
