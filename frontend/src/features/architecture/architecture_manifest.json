@@ -209179,6 +209179,597 @@
       ]
     },
     {
+      "module_id": "quote_capture",
+      "module_label": "Quote Capture and Levelling",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "demo.py",
+        "documents.py",
+        "extraction.py",
+        "levelling.py",
+        "logic.py",
+        "manifest.py",
+        "matching.py",
+        "models.py",
+        "numbers.py",
+        "parsing.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "units.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_quote_capture",
+        "version": "1.0.0",
+        "display_name": "Quote Capture and Levelling",
+        "description": "Reads supplier and subcontractor quotes from PDF, scanned PDF, Excel or email text: header, line items and conditions, each value with a confidence score and a source anchor shown beside the document. Matches the lines to the tender package scope, normalises units and number formats per locale, flags exclusions, qualifications and escalation clauses, and levels several quotes against the scope with plug rates for scope gaps. After human review a quote becomes a bid in the tender comparison, a supplier price list or a draft purchase order, with the trail of machine against human values. Works without AI on a rules parser; uses the configured AI provider when there is one.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_projects",
+          "oe_tendering"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "CapturedQuote",
+          "tablename": "oe_quote_capture_quote",
+          "docstring": "One supplier quote captured for review, levelling and confirmation.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "package_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "boq_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "supplier_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "source_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "original_filename",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "storage_key",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "mime_type",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "extraction_engine",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "locale",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "quote_total",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "page_count",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "header",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "lines",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "document",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "confirmation",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "document_text",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/projects/{project_id}/quotes",
+          "handler": "list_quotes",
+          "response_model": "list[QuoteSummaryOut]"
+        },
+        {
+          "method": "POST",
+          "path": "/projects/{project_id}/quotes/upload",
+          "handler": "upload_quote",
+          "response_model": "QuoteOut",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "POST",
+          "path": "/quotes/text",
+          "handler": "create_from_text",
+          "response_model": "QuoteOut",
+          "request_schema": "QuoteTextCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/quotes/{quote_id}",
+          "handler": "get_quote",
+          "response_model": "QuoteOut"
+        },
+        {
+          "method": "PATCH",
+          "path": "/quotes/{quote_id}",
+          "handler": "update_quote",
+          "response_model": "QuoteOut",
+          "request_schema": "QuoteUpdate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/quotes/{quote_id}/lines/{line_id}",
+          "handler": "update_line",
+          "response_model": "QuoteOut",
+          "request_schema": "LineUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/quotes/{quote_id}/rematch",
+          "handler": "rematch",
+          "response_model": "QuoteOut"
+        },
+        {
+          "method": "POST",
+          "path": "/quotes/{quote_id}/confirm",
+          "handler": "confirm_quote",
+          "response_model": "ConfirmOut",
+          "request_schema": "ConfirmRequest"
+        },
+        {
+          "method": "DELETE",
+          "path": "/quotes/{quote_id}",
+          "handler": "delete_quote"
+        },
+        {
+          "method": "GET",
+          "path": "/quotes/{quote_id}/pages/{page}",
+          "handler": "page_image"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/levelling",
+          "handler": "levelling",
+          "response_model": "LevellingOut"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "QuoteTextCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A quote pasted as text (an email body, for example).",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "package_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "text",
+              "type": "str"
+            },
+            {
+              "name": "filename",
+              "type": "str"
+            },
+            {
+              "name": "locale",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "HeaderFieldUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "value",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "QuoteUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Reviewer edits to the header, the package link and the conditions.",
+          "fields": [
+            {
+              "name": "package_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "header",
+              "type": "dict[str, HeaderFieldUpdate]"
+            },
+            {
+              "name": "acknowledge_notes",
+              "type": "list[str]"
+            },
+            {
+              "name": "status",
+              "type": "Literal['draft', 'in_review', 'rejected'] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LineUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Reviewer edit of one line: values, the matched position, the reviewed tick.",
+          "fields": [
+            {
+              "name": "description",
+              "type": "str | None"
+            },
+            {
+              "name": "quantity",
+              "type": "str | None"
+            },
+            {
+              "name": "unit",
+              "type": "str | None"
+            },
+            {
+              "name": "unit_rate",
+              "type": "str | None"
+            },
+            {
+              "name": "total",
+              "type": "str | None"
+            },
+            {
+              "name": "position_id",
+              "type": "str | None"
+            },
+            {
+              "name": "clear_match",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "reviewed",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "ignored",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ConfirmRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "target",
+              "type": "Literal['bid', 'price_list', 'po_draft']"
+            },
+            {
+              "name": "accept_warnings",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "FindingOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "QuoteSummaryOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "package_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "supplier_name",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "source_kind",
+              "type": "str"
+            },
+            {
+              "name": "original_filename",
+              "type": "str"
+            },
+            {
+              "name": "extraction_engine",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "quote_total",
+              "type": "str"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "line_count",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "open_findings",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "QuoteOut",
+          "bases": [
+            "QuoteSummaryOut"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "boq_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "locale",
+              "type": "str"
+            },
+            {
+              "name": "page_count",
+              "type": "int"
+            },
+            {
+              "name": "has_file",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "header",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "lines",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "notes",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "document",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "confirmation",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "tax",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "findings",
+              "type": "list[FindingOut]"
+            }
+          ]
+        },
+        {
+          "class_name": "ConfirmOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "quote_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "target",
+              "type": "str"
+            },
+            {
+              "name": "target_id",
+              "type": "str"
+            },
+            {
+              "name": "audit",
+              "type": "list[dict[str, Any]]"
+            }
+          ]
+        },
+        {
+          "class_name": "LevellingOut",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "package_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "rows",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "quotes",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "excluded_off_currency",
+              "type": "list[str]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "ai",
+        "boq",
+        "procurement",
+        "projects",
+        "supplier_catalogs",
+        "tendering"
+      ]
+    },
+    {
       "module_id": "rebar_schedule",
       "module_label": "Rebar Schedule",
       "module_category": "business",
@@ -281753,6 +282344,13 @@
       "total_files": 5
     },
     {
+      "name": "quote-capture",
+      "ts_files": 8,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 8
+    },
+    {
       "name": "rebar-schedule",
       "ts_files": 4,
       "css_files": 0,
@@ -283393,6 +283991,14 @@
       "teams",
       "users"
     ],
+    "quote_capture": [
+      "ai",
+      "boq",
+      "procurement",
+      "projects",
+      "supplier_catalogs",
+      "tendering"
+    ],
     "rebar_schedule": [
       "projects",
       "users"
@@ -283740,17 +284346,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 216,
-    "modules_with_manifests": 214,
-    "total_models": 803,
-    "total_columns": 9359,
+    "backend_modules": 217,
+    "modules_with_manifests": 215,
+    "total_models": 804,
+    "total_columns": 9380,
     "total_relationships": 244,
-    "total_routes": 4696,
-    "total_schemas": 4177,
-    "total_python_files": 2853,
-    "frontend_features": 211,
-    "frontend_ts_files": 3682,
-    "frontend_backend_mapped": 188
+    "total_routes": 4707,
+    "total_schemas": 4187,
+    "total_python_files": 2871,
+    "frontend_features": 212,
+    "frontend_ts_files": 3690,
+    "frontend_backend_mapped": 189
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -283911,6 +284517,7 @@
     "qms": "qms",
     "quality_concept": "quality_concept",
     "quantities": null,
+    "quote-capture": "quote_capture",
     "rebar-schedule": "rebar_schedule",
     "reconciliation": "reconciliation",
     "record-publishing": "record_publishing",
