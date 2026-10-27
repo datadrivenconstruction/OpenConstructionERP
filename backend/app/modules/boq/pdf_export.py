@@ -53,12 +53,14 @@ from reportlab.platypus import (
 )
 
 from app.core.pdf_branding import (
+    branded_appearance,
     branded_cover_brand,
     branded_doc_metadata,
     branded_header_logo,
     branded_letterhead,
     build_with_page_count,
 )
+from app.core.pdf_signatures import signature_block, signers_for
 
 # Locale-aware PDF labels. Keyed by locale prefix (first 2 chars of the project
 # locale). Falls back to English when the locale is unknown, and key by key to
@@ -1329,60 +1331,28 @@ def _build_cover_page(
     elements.append(summary_table)
 
     elements.append(Spacer(1, 6 * mm))
-    elements.append(_sign_off_block(prepared_by, styles, lb, uw))
-
-    return elements
-
-
-def _sign_off_block(prepared_by: str, styles: dict[str, ParagraphStyle], lb: dict[str, str], width: float) -> Any:
-    """Who prepared the estimate and who approved it, each with a line to sign on.
-
-    A cost estimate that leaves the office is signed off, and the person who
-    prints it needs somewhere to do that. The preparer is named when the
-    project's owner is known; the approver's name is left for the hand that
-    signs.
-
-    ``prepared_by`` is user-supplied and goes through :func:`_safe_para`, which
-    escapes it (a payload like ``<font color="white">x</font>`` would otherwise
-    render as styled text, BUG-PDF01) and picks the Chinese face when the name
-    needs it.
-    """
-    column = min((width - 16 * mm) / 2, 65 * mm)
-    rule = colors.HexColor("#999999")
-    table = Table(
-        [
-            [
-                Paragraph(lb["prepared_by"], styles["sign_label"]),
-                "",
-                Paragraph(lb["approved_by"], styles["sign_label"]),
-            ],
-            [_safe_para(prepared_by, styles["sign_name"]), "", ""],
-            ["", "", ""],
-            [
-                Paragraph(lb["signature_hint"], styles["sign_hint"]),
-                "",
-                Paragraph(lb["signature_hint"], styles["sign_hint"]),
-            ],
-        ],
-        colWidths=[column, 16 * mm, column],
-        rowHeights=[None, None, 8 * mm, None],
-        hAlign="CENTER",
+    prepared_label, approved_label = lb["prepared_by"], lb["approved_by"]
+    signers = signers_for(
+        "boq",
+        branded_appearance("boq"),
+        names={prepared_label: prepared_by or ""},
+        defaults=(prepared_label, approved_label),
     )
-    table.setStyle(
-        TableStyle(
-            [
-                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
-                ("LEFTPADDING", (0, 0), (-1, -1), 0),
-                ("RIGHTPADDING", (0, 0), (-1, -1), 0),
-                ("TOPPADDING", (0, 0), (-1, -1), 1 * mm),
-                ("BOTTOMPADDING", (0, 0), (-1, -1), 1 * mm),
-                # The two lines to sign on, one under each column.
-                ("LINEBELOW", (0, 2), (0, 2), 0.5, rule),
-                ("LINEBELOW", (2, 2), (2, 2), 0.5, rule),
-            ]
+    elements.extend(
+        signature_block(
+            signers,
+            uw,
+            heading=False,
+            hint=lb["signature_hint"],
+            align="CENTER",
+            gap=16 * mm,
+            max_column=65 * mm,
+            space_before=0,
+            centre_text=True,
         )
     )
-    return table
+
+    return elements
 
 
 def _build_boq_table(
