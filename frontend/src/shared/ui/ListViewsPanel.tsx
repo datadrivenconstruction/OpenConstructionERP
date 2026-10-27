@@ -58,7 +58,7 @@ export function ListViewsPanel() {
   }, [hasTable, views.data, scope]);
 
   const toastError = () =>
-    useToastStore.getState().addToast({ type: 'error', title: t('list_views.save_failed', { defaultValue: 'Could not save the view' }) });
+    useToastStore.getState().addToast({ type: 'error', title: t('list_views.save_failed', { defaultValue: 'Could not save the layout' }) });
 
   const save = useMutation({
     mutationFn: () => {
@@ -116,9 +116,9 @@ export function ListViewsPanel() {
   return (
     <div className="oe-views" data-no-print>
       {open && (
-        <div className="oe-views-panel" role="dialog" aria-label={t('list_views.title', { defaultValue: 'Views' })}>
+        <div className="oe-views-panel" role="dialog" aria-label={t('list_views.title', { defaultValue: 'Table layouts' })}>
           <div className="flex items-center justify-between border-b border-border-light px-3 py-2">
-            <span className="text-sm font-semibold text-content-primary">{t('list_views.title', { defaultValue: 'Views' })}</span>
+            <span className="text-sm font-semibold text-content-primary">{t('list_views.title', { defaultValue: 'Table layouts' })}</span>
             <button type="button" onClick={() => setOpen(false)} aria-label={t('common.close', { defaultValue: 'Close' })} className="text-content-tertiary hover:text-content-primary">
               <X size={16} />
             </button>
@@ -126,7 +126,7 @@ export function ListViewsPanel() {
           <ul className="max-h-48 overflow-auto py-1">
             {(views.data ?? []).length === 0 && (
               <li className="px-3 py-2 text-xs text-content-tertiary">
-                {t('list_views.empty', { defaultValue: 'No saved views for this list yet.' })}
+                {t('list_views.empty', { defaultValue: 'No saved layouts for this table yet.' })}
               </li>
             )}
             {(views.data ?? []).map((v) => (
@@ -154,8 +154,8 @@ export function ListViewsPanel() {
                     <button
                       type="button"
                       aria-pressed={v.is_default}
-                      title={t('list_views.make_default', { defaultValue: 'Open this view by default' })}
-                      aria-label={t('list_views.make_default', { defaultValue: 'Open this view by default' })}
+                      title={t('list_views.make_default', { defaultValue: 'Open this layout by default' })}
+                      aria-label={t('list_views.make_default', { defaultValue: 'Open this layout by default' })}
                       onClick={() => patch.mutate({ id: v.id, body: { is_default: !v.is_default } })}
                       className={v.is_default ? 'text-oe-blue' : 'text-content-tertiary hover:text-content-primary'}
                     >
@@ -163,8 +163,8 @@ export function ListViewsPanel() {
                     </button>
                     <button
                       type="button"
-                      title={t('list_views.delete', { defaultValue: 'Delete view' })}
-                      aria-label={t('list_views.delete', { defaultValue: 'Delete view' })}
+                      title={t('list_views.delete', { defaultValue: 'Delete layout' })}
+                      aria-label={t('list_views.delete', { defaultValue: 'Delete layout' })}
                       onClick={() => remove.mutate(v.id)}
                       className="text-content-tertiary hover:text-semantic-error"
                     >
@@ -186,8 +186,8 @@ export function ListViewsPanel() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               maxLength={120}
-              placeholder={t('list_views.name_placeholder', { defaultValue: 'Name of this view' })}
-              aria-label={t('list_views.name_placeholder', { defaultValue: 'Name of this view' })}
+              placeholder={t('list_views.name_placeholder', { defaultValue: 'Name of this layout' })}
+              aria-label={t('list_views.name_placeholder', { defaultValue: 'Name of this layout' })}
               className="h-8 rounded border border-border bg-surface-primary px-2 text-sm text-content-primary"
             />
             <label className="flex items-center gap-2 text-xs text-content-secondary">
@@ -199,7 +199,7 @@ export function ListViewsPanel() {
               disabled={!name.trim() || save.isPending}
               className="h-8 rounded bg-oe-blue px-3 text-sm font-medium text-white disabled:opacity-50"
             >
-              {t('list_views.save', { defaultValue: 'Save current view' })}
+              {t('list_views.save', { defaultValue: 'Save current layout' })}
             </button>
           </form>
           {keys.length > 0 && (
@@ -224,7 +224,7 @@ export function ListViewsPanel() {
       )}
       <button type="button" className="oe-views-toggle" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         <Bookmark size={14} />
-        {t('list_views.title', { defaultValue: 'Views' })}
+        {t('list_views.title', { defaultValue: 'Table layouts' })}
         {(views.data?.length ?? 0) > 0 && <span className="oe-views-count">{views.data?.length}</span>}
       </button>
     </div>
