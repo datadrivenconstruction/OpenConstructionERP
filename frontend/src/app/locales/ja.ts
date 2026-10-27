@@ -52646,6 +52646,12 @@ const resource = {
     "settings.chords_reset_all": "すべてのショートカットを初期設定に戻す",
     "settings.tab_packages": "パッケージとモジュール",
     "settings.tab_packages_desc": "インストール済みのソリューションパッケージ、パッケージの追加、個別モジュールの有効化・無効化",
+    "settings.style_look": "インターフェースのスタイル",
+    "settings.style_look_standard": "スタンダード",
+    "settings.style_look_classic": "クラシック",
+    "settings.style_look_hint": "クラシック: 無彩色を基調とし、操作と状態の表示にだけアクセント色を使います。区切り線は細く、グラデーションや半透明のガラス効果はありません。",
+    "settings.style_preset_standard": "スタンダード",
+    "settings.style_density_normal": "標準",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "変更指示",
     "approvalRoutes.kind_contract": "契約",

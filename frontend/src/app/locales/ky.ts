@@ -51484,6 +51484,12 @@ const resource = {
     "settings.chords_reset_all": "Бардык тез баскычтарды кайтаруу",
     "settings.tab_packages": "Пакеттер жана модулдар",
     "settings.tab_packages_desc": "Орнотулган чечим пакеттери, пакет кошуу, айрым модулдарды иштетүү же өчүрүү",
+    "settings.style_look": "Интерфейс стили",
+    "settings.style_look_standard": "Стандарттык",
+    "settings.style_look_classic": "Классикалык",
+    "settings.style_look_hint": "Классикалык: нейтралдуу түстөр, аракеттер жана абалдар үчүн бир акцент түсү, жука бөлгүчтөр, градиенттер жана айнек эффектиси жок.",
+    "settings.style_preset_standard": "Стандарттык",
+    "settings.style_density_normal": "Кадимки",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгөртүү буйругу",
     "approvalRoutes.kind_contract": "Келишим",

@@ -54221,6 +54221,12 @@ const resource = {
     "settings.chords_reset_all": "إعادة كل الاختصارات إلى الافتراضي",
     "settings.tab_packages": "الحزم والوحدات",
     "settings.tab_packages_desc": "حزم الحلول المثبّتة، وإضافة حزمة، وتفعيل الوحدات أو إيقافها فردياً",
+    "settings.style_look": "نمط الواجهة",
+    "settings.style_look_standard": "قياسي",
+    "settings.style_look_classic": "كلاسيكي",
+    "settings.style_look_hint": "كلاسيكي: ألوان محايدة، لون تمييز واحد للإجراءات والحالات، فواصل رفيعة، بلا تدرجات أو تأثير زجاجي.",
+    "settings.style_preset_standard": "قياسي",
+    "settings.style_density_normal": "عادي",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "أمر تغيير",
     "approvalRoutes.kind_contract": "عقد",

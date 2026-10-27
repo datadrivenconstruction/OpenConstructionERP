@@ -51300,6 +51300,12 @@ const resource = {
     "settings.chords_reset_all": "I-reset ang lahat ng shortcut",
     "settings.tab_packages": "Mga package at module",
     "settings.tab_packages_desc": "Mga naka-install na solution package, magdagdag ng package, i-on o i-off ang mga indibidwal na module",
+    "settings.style_look": "Istilo ng interface",
+    "settings.style_look_standard": "Karaniwan",
+    "settings.style_look_classic": "Klasiko",
+    "settings.style_look_hint": "Klasiko: neutral na kulay, iisang accent para sa mga aksyon at status, manipis na divider, walang gradient o glass effect.",
+    "settings.style_preset_standard": "Karaniwan",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Change order",
     "approvalRoutes.kind_contract": "Kontrata",

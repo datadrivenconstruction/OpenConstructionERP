@@ -51328,6 +51328,12 @@ const resource = {
     "settings.chords_reset_all": "Барлық жылдам пернелерді қайтару",
     "settings.tab_packages": "Пакеттер және модульдер",
     "settings.tab_packages_desc": "Орнатылған шешім пакеттері, пакет қосу, жеке модульдерді қосу немесе өшіру",
+    "settings.style_look": "Интерфейс стилі",
+    "settings.style_look_standard": "Стандартты",
+    "settings.style_look_classic": "Классикалық",
+    "settings.style_look_hint": "Классикалық: бейтарап түстер, әрекеттер мен күйлер үшін бір акцент түсі, жіңішке бөлгіштер, градиенттер мен шыны эффектісі жоқ.",
+    "settings.style_preset_standard": "Стандартты",
+    "settings.style_density_normal": "Қалыпты",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгеріс бұйрығы",
     "approvalRoutes.kind_contract": "Келісімшарт",

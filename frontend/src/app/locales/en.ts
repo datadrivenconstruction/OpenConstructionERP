@@ -46203,6 +46203,12 @@ const resource = {
     "settings.chords_reset_all": "Reset all shortcuts",
     "settings.tab_packages": "Packages & modules",
     "settings.tab_packages_desc": "Installed solution packages, add a package, switch single modules",
+    "settings.style_look": "Interface style",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classic",
+    "settings.style_look_hint": "Classic: neutral colours, one accent for actions and statuses, thin dividers, no gradients or glass.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

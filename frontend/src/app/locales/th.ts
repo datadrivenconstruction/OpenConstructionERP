@@ -51114,6 +51114,12 @@ const resource = {
     "settings.chords_reset_all": "รีเซ็ตทางลัดทั้งหมด",
     "settings.tab_packages": "แพ็กเกจและโมดูล",
     "settings.tab_packages_desc": "แพ็กเกจโซลูชันที่ติดตั้งแล้ว เพิ่มแพ็กเกจ เปิดหรือปิดโมดูลทีละรายการ",
+    "settings.style_look": "รูปแบบอินเทอร์เฟซ",
+    "settings.style_look_standard": "มาตรฐาน",
+    "settings.style_look_classic": "คลาสสิก",
+    "settings.style_look_hint": "คลาสสิก: สีโทนกลาง ใช้สีเน้นเพียงสีเดียวสำหรับการดำเนินการและสถานะ เส้นคั่นบาง ไม่มีการไล่เฉดหรือเอฟเฟกต์กระจก",
+    "settings.style_preset_standard": "มาตรฐาน",
+    "settings.style_density_normal": "ปกติ",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "คำสั่งเปลี่ยนแปลง",
     "approvalRoutes.kind_contract": "สัญญา",

@@ -51605,6 +51605,12 @@ const resource = {
     "settings.chords_reset_all": "איפוס כל קיצורי הדרך",
     "settings.tab_packages": "חבילות ומודולים",
     "settings.tab_packages_desc": "חבילות פתרונות מותקנות, הוספת חבילה, הפעלה או כיבוי של מודולים בודדים",
+    "settings.style_look": "סגנון ממשק",
+    "settings.style_look_standard": "סטנדרטי",
+    "settings.style_look_classic": "קלאסי",
+    "settings.style_look_hint": "קלאסי: צבעים ניטרליים, צבע הדגשה אחד לפעולות ולסטטוסים, מפרידים דקים, ללא מעברי צבע או אפקט זכוכית.",
+    "settings.style_preset_standard": "סטנדרטי",
+    "settings.style_density_normal": "רגיל",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "צו שינוי",
     "approvalRoutes.kind_contract": "חוזה",

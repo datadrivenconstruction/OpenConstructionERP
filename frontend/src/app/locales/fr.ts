@@ -54229,6 +54229,12 @@ const resource = {
     "settings.chords_reset_all": "Rétablir tous les raccourcis",
     "settings.tab_packages": "Lots et modules",
     "settings.tab_packages_desc": "Lots de solutions installés, ajout d'un lot, activation ou désactivation de modules individuels",
+    "settings.style_look": "Style de l'interface",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classique",
+    "settings.style_look_hint": "Classique : couleurs neutres, une seule couleur d'accent pour les actions et les statuts, filets fins, sans dégradés ni effet verre.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordre de modification",
     "approvalRoutes.kind_contract": "Contrat",

@@ -51335,6 +51335,12 @@ const resource = {
     "settings.chords_reset_all": "بازگردانی همه میانبرها",
     "settings.tab_packages": "بسته‌ها و ماژول‌ها",
     "settings.tab_packages_desc": "بسته‌های راه‌حل نصب‌شده، افزودن بسته، روشن یا خاموش کردن ماژول‌های جدا",
+    "settings.style_look": "سبک رابط کاربری",
+    "settings.style_look_standard": "استاندارد",
+    "settings.style_look_classic": "کلاسیک",
+    "settings.style_look_hint": "کلاسیک: رنگ‌های خنثی، یک رنگ تأکیدی برای اقدام‌ها و وضعیت‌ها، جداکننده‌های نازک، بدون گرادیان یا افکت شیشه‌ای.",
+    "settings.style_preset_standard": "استاندارد",
+    "settings.style_density_normal": "عادی",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "دستور تغییر",
     "approvalRoutes.kind_contract": "قرارداد",

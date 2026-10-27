@@ -2114,6 +2114,146 @@ html[data-density='compact'] .ag-theme-quartz {
   --ag-cell-horizontal-padding: 6px;
 }
 
+/* Density "normal": between comfortable (15px root) and compact. */
+html[data-density='normal'] {
+  font-size: 14.25px;
+}
+html[data-density='normal'] .ag-theme-alpine,
+html[data-density='normal'] .ag-theme-quartz {
+  --ag-row-height: 36px;
+  --ag-header-height: 40px;
+}
+
+/* ── Classic look ─────────────────────────────────────────────────────────
+   html[data-look='classic'] (shared/lib/appearance.ts). A calm business style
+   built from token overrides only: neutral greys, the accent kept for actions
+   and statuses, 4-6px corners, hairline dividers, near-flat surfaces, a 4/8px
+   spacing grid, tabular figures and one icon stroke. Pages are not edited. */
+html[data-look='classic'] {
+  --oe-bg-secondary: #f6f7f8;
+  --oe-bg-tertiary: #fafafb;
+  --oe-bg-page: #f2f3f5;
+  --oe-bg-secondary-ch: 246 247 248;
+  --oe-bg-tertiary-ch: 250 250 251;
+  --oe-bg-page-ch: 242 243 245;
+  --oe-border: #d4d7dc;
+  --oe-border-light: #e3e5e8;
+  --oe-shadow-xs: none;
+  --oe-shadow-sm: 0 1px 1px rgba(16, 24, 40, 0.04);
+  --oe-shadow-md: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --oe-shadow-lg: 0 4px 12px rgba(16, 24, 40, 0.08);
+  --oe-shadow-xl: 0 8px 24px rgba(16, 24, 40, 0.1);
+  --oe-radius-xs: 3px;
+  --oe-radius-sm: 4px;
+  --oe-radius-md: 4px;
+  --oe-radius-lg: 6px;
+  --oe-radius-xl: 6px;
+  --oe-space-1: 4px;
+  --oe-space-2: 8px;
+  --oe-space-3: 12px;
+  --oe-space-4: 16px;
+  --oe-space-5: 20px;
+  --oe-space-6: 24px;
+  --oe-menu-stroke: 1.5;
+}
+html.dark[data-look='classic'] {
+  --oe-bg: #121417;
+  --oe-bg-secondary: #181a1e;
+  --oe-bg-tertiary: #1b1e22;
+  --oe-bg-elevated: #1c1f24;
+  --oe-bg-page: #101215;
+  --oe-bg-ch: 18 20 23;
+  --oe-bg-secondary-ch: 24 26 30;
+  --oe-bg-tertiary-ch: 27 30 34;
+  --oe-bg-elevated-ch: 28 31 36;
+  --oe-bg-page-ch: 16 18 21;
+  --oe-border: #33373e;
+  --oe-border-light: #2a2d33;
+  --oe-shadow-sm: none;
+  --oe-shadow-md: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --oe-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --oe-shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+/* No gradients, glass, glow or decorative motion. */
+html[data-look='classic'] [class*='bg-gradient-'],
+html[data-look='classic'] [class*='bg-[radial'],
+html[data-look='classic'] [class*='bg-[linear'] {
+  background-image: none !important;
+}
+html[data-look='classic'] .glass,
+html[data-look='classic'] .glass-strong,
+html[data-look='classic'] [class*='backdrop-blur'] {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  background-color: var(--oe-bg-elevated) !important;
+}
+html[data-look='classic'] [class*='animate-glow'],
+html[data-look='classic'] [class*='animate-pulse-glow'],
+html[data-look='classic'] [class*='animate-float'],
+html[data-look='classic'] [class*='animate-blob'] {
+  animation: none !important;
+}
+html[data-look='classic'] [class*='shadow-['],
+html[data-look='classic'] [class*='drop-shadow'] {
+  --tw-shadow: none !important;
+  --tw-drop-shadow: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+/* Gradient text falls back to plain text. */
+html[data-look='classic'] .bg-clip-text {
+  color: var(--oe-text-primary) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+/* Figures line up in columns; units and secondary cells read grey. */
+html[data-look='classic'] table,
+html[data-look='classic'] .ag-root-wrapper,
+html[data-look='classic'] input[type='number'],
+html[data-look='classic'] [data-numeric],
+html[data-look='classic'] .oe-num {
+  font-variant-numeric: tabular-nums;
+}
+html[data-look='classic'] td[data-numeric],
+html[data-look='classic'] th[data-numeric],
+html[data-look='classic'] .ag-right-aligned-cell,
+html[data-look='classic'] .oe-num {
+  text-align: right;
+}
+html[data-look='classic'] .oe-unit {
+  color: var(--oe-text-tertiary);
+}
+html[data-look='classic'] table th {
+  font-weight: 600;
+}
+html[data-look='classic'] table td,
+html[data-look='classic'] table th {
+  border-color: var(--oe-border-light);
+}
+/* One icon stroke everywhere; decorative icons step back. */
+html[data-look='classic'] svg.lucide {
+  stroke-width: 1.5;
+}
+html[data-look='classic'] [data-decorative-icon],
+html[data-look='classic'] .oe-decor {
+  display: none !important;
+}
+/* Status colour by meaning only: plain greys for decorative tints. */
+html[data-look='classic'] [class*='bg-violet-'],
+html[data-look='classic'] [class*='bg-fuchsia-'],
+html[data-look='classic'] [class*='bg-pink-'],
+html[data-look='classic'] [class*='bg-indigo-'],
+html[data-look='classic'] [class*='bg-cyan-'],
+html[data-look='classic'] [class*='bg-sky-'] {
+  background-color: var(--oe-bg-secondary) !important;
+}
+html[data-look='classic'] [class*='text-violet-'],
+html[data-look='classic'] [class*='text-fuchsia-'],
+html[data-look='classic'] [class*='text-pink-'],
+html[data-look='classic'] [class*='text-indigo-'],
+html[data-look='classic'] [class*='text-cyan-'] {
+  color: var(--oe-text-secondary) !important;
+}
+
 /* ── Menu look ────────────────────────────────────────────────────────────
    data-menu-* on <html>, painted by the boot script in index.html and kept in
    step by stores/useAppearanceStore.ts (shared/lib/menuAppearance.ts). The

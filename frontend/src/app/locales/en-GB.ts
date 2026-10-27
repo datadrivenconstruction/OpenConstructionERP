@@ -562,6 +562,12 @@ const resource = {
     "prefab.receive_qr_label": "Scanned QR code",
     "prefab.receive_submit": "Book delivery",
     "prefab.type_rebar_cage": "Rebar cage",
+    "settings.style_look": "Interface style",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classic",
+    "settings.style_look_hint": "Classic: neutral colours, one accent for actions and statuses, thin dividers, no gradients or glass.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
   }
 } as { translation: Record<string, string> };
 
