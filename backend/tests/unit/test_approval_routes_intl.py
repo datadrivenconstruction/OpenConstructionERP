@@ -34,7 +34,7 @@ def test_describe_decision_localised_de_ru() -> None:
 
 def test_describe_decision_falls_back_to_english_for_unknown_locale() -> None:
     # An unsupported locale falls back to the English label, never a raw code.
-    assert intl.describe_decision("approved", "fr") == "Approved"
+    assert intl.describe_decision("approved", "zz") == "Approved"
     assert intl.describe_decision("approved", "zz-XX") == "Approved"
 
 

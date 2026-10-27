@@ -52,7 +52,7 @@ def test_localize_status_three_languages() -> None:
 def test_localize_status_unknown_locale_falls_back_to_english() -> None:
     # An unsupported locale must not error and must return the English word.
     assert intl.localize_status("rejected", "zz") == "Rejected"
-    assert intl.localize_status("rejected", "fr-FR") == "Rejected"
+    assert intl.localize_status("rejected", "zz-ZZ") == "Rejected"
 
 
 def test_localize_status_unknown_status_is_readable() -> None:

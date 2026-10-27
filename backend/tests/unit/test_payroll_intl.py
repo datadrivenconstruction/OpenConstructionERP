@@ -297,7 +297,7 @@ def test_describe_pay_component_localized() -> None:
 
 def test_unknown_locale_falls_back_to_english() -> None:
     # A locale we do not carry gets the English label, never a raw code.
-    assert intl.describe_batch_status("approved", "zh") == "Approved"
+    assert intl.describe_batch_status("approved", "zz") == "Approved"
 
 
 def test_locale_region_suffix_is_stripped() -> None:
