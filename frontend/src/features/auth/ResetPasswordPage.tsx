@@ -9,6 +9,7 @@ import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { AuthBackground } from './AuthBackground';
+import { ClassicAuthFooter } from './ClassicAuth';
 import { meetsPasswordPolicy } from './passwordPolicy';
 
 /** The route the password-reset email links to (backend users/service.py builds it). */
@@ -135,9 +136,10 @@ export function ResetPasswordPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-surface-secondary p-4 overflow-hidden">
+    <div className="oe-auth relative flex min-h-screen items-center justify-center bg-surface-secondary p-4 overflow-hidden">
       {/* Animated gradient blobs */}
       <AuthBackground />
+      <ClassicAuthFooter />
 
       {/* Language — top right */}
       <div className="absolute top-3 right-3 z-30" ref={langRef}>
