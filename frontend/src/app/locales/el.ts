@@ -51076,6 +51076,12 @@ const resource = {
     "settings.chords_key_for": "Πλήκτρο μετά το G για {{page}}",
     "settings.chords_reset_one": "Επαναφορά του {{page}} στο {{key}}",
     "settings.chords_reset_all": "Επαναφορά όλων των συντομεύσεων",
+    "settings.style_look": "Στυλ διεπαφής",
+    "settings.style_look_standard": "Τυπικό",
+    "settings.style_look_classic": "Κλασικό",
+    "settings.style_look_hint": "Κλασικό: ουδέτερα χρώματα, ένα χρώμα έμφασης για ενέργειες και καταστάσεις, λεπτοί διαχωριστικοί, χωρίς διαβαθμίσεις ή εφέ γυαλιού.",
+    "settings.style_preset_standard": "Τυπικό",
+    "settings.style_density_normal": "Κανονική",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Εντολή αλλαγής",
     "approvalRoutes.kind_contract": "Σύμβαση",

@@ -51120,6 +51120,12 @@ const resource = {
     "settings.chords_key_for": "G:n jälkeinen näppäin sivulle {{page}}",
     "settings.chords_reset_one": "Palauta {{page}} näppäimeen {{key}}",
     "settings.chords_reset_all": "Palauta kaikki pikanäppäimet",
+    "settings.style_look": "Käyttöliittymän tyyli",
+    "settings.style_look_standard": "Vakio",
+    "settings.style_look_classic": "Klassinen",
+    "settings.style_look_hint": "Klassinen: neutraalit värit, yksi korostusväri toiminnoille ja tiloille, ohuet erottimet, ei liukuvärejä eikä lasivaikutelmaa.",
+    "settings.style_preset_standard": "Vakio",
+    "settings.style_density_normal": "Normaali",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Muutostilaus",
     "approvalRoutes.kind_contract": "Sopimus",

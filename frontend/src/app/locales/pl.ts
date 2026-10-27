@@ -52545,6 +52545,12 @@ const resource = {
     "settings.chords_key_for": "Klawisz po G dla strony {{page}}",
     "settings.chords_reset_one": "Przywróć {{page}} na {{key}}",
     "settings.chords_reset_all": "Przywróć wszystkie skróty",
+    "settings.style_look": "Styl interfejsu",
+    "settings.style_look_standard": "Standardowy",
+    "settings.style_look_classic": "Klasyczny",
+    "settings.style_look_hint": "Klasyczny: neutralne kolory, jeden kolor akcentu dla działań i statusów, cienkie separatory, bez gradientów i efektu szkła.",
+    "settings.style_preset_standard": "Standardowy",
+    "settings.style_density_normal": "Normalna",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Zlecenie zmiany",
     "approvalRoutes.kind_contract": "Umowa",

@@ -51737,6 +51737,12 @@ const resource = {
     "settings.chords_key_for": "Tangent efter G för {{page}}",
     "settings.chords_reset_one": "Återställ {{page}} till {{key}}",
     "settings.chords_reset_all": "Återställ alla genvägar",
+    "settings.style_look": "Gränssnittsstil",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Klassisk",
+    "settings.style_look_hint": "Klassisk: neutrala färger, en accentfärg för åtgärder och statusar, tunna avdelare, inga gradienter eller glaseffekt.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ändringsorder",
     "approvalRoutes.kind_contract": "Kontrakt",

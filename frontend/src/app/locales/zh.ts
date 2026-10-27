@@ -53332,6 +53332,12 @@ const resource = {
     "settings.chords_key_for": "{{page}} 的 G 后按键",
     "settings.chords_reset_one": "将{{page}}重置为{{key}}",
     "settings.chords_reset_all": "重置所有快捷键",
+    "settings.style_look": "界面风格",
+    "settings.style_look_standard": "标准",
+    "settings.style_look_classic": "经典",
+    "settings.style_look_hint": "经典：中性配色，操作和状态只用一种强调色，细分割线，没有渐变和玻璃效果。",
+    "settings.style_preset_standard": "标准",
+    "settings.style_density_normal": "常规",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "变更单",
     "approvalRoutes.kind_contract": "合同",

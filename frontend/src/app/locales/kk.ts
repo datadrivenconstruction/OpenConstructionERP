@@ -51077,6 +51077,12 @@ const resource = {
     "settings.chords_key_for": "{{page}} үшін G-дан кейінгі перне",
     "settings.chords_reset_one": "{{page}} бетін {{key}} пернесіне қайтару",
     "settings.chords_reset_all": "Барлық жылдам пернелерді қайтару",
+    "settings.style_look": "Интерфейс стилі",
+    "settings.style_look_standard": "Стандартты",
+    "settings.style_look_classic": "Классикалық",
+    "settings.style_look_hint": "Классикалық: бейтарап түстер, әрекеттер мен күйлер үшін бір акцент түсі, жіңішке бөлгіштер, градиенттер мен шыны эффектісі жоқ.",
+    "settings.style_preset_standard": "Стандартты",
+    "settings.style_density_normal": "Қалыпты",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгеріс бұйрығы",
     "approvalRoutes.kind_contract": "Келісімшарт",

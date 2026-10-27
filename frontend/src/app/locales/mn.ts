@@ -50763,6 +50763,12 @@ const resource = {
     "settings.chords_key_for": "{{page}}-д зориулсан G-ийн дараах товчлуур",
     "settings.chords_reset_one": "{{page}}-ийг {{key}} руу буцаах",
     "settings.chords_reset_all": "Бүх товчлолыг анхдагч руу буцаах",
+    "settings.style_look": "Интерфейсийн загвар",
+    "settings.style_look_standard": "Стандарт",
+    "settings.style_look_classic": "Сонгодог",
+    "settings.style_look_hint": "Сонгодог: саармаг өнгө, үйлдэл болон төлөвт зориулсан нэг онцлох өнгө, нимгэн зураас, градиент болон шилэн эффектгүй.",
+    "settings.style_preset_standard": "Стандарт",
+    "settings.style_density_normal": "Энгийн",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өөрчлөлтийн тушаал",
     "approvalRoutes.kind_contract": "Гэрээ",

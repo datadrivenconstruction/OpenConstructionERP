@@ -52279,6 +52279,12 @@ const resource = {
     "settings.chords_key_for": "Tasto dopo G per {{page}}",
     "settings.chords_reset_one": "Ripristina {{page}} su {{key}}",
     "settings.chords_reset_all": "Ripristina tutte le scorciatoie",
+    "settings.style_look": "Stile dell'interfaccia",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classico",
+    "settings.style_look_hint": "Classico: colori neutri, un solo colore di accento per azioni e stati, separatori sottili, senza sfumature né effetto vetro.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normale",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordine di modifica",
     "approvalRoutes.kind_contract": "Contratto",

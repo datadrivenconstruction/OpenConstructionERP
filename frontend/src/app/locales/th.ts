@@ -50863,6 +50863,12 @@ const resource = {
     "settings.chords_key_for": "ปุ่มหลัง G สำหรับ {{page}}",
     "settings.chords_reset_one": "รีเซ็ต {{page}} เป็น {{key}}",
     "settings.chords_reset_all": "รีเซ็ตทางลัดทั้งหมด",
+    "settings.style_look": "รูปแบบอินเทอร์เฟซ",
+    "settings.style_look_standard": "มาตรฐาน",
+    "settings.style_look_classic": "คลาสสิก",
+    "settings.style_look_hint": "คลาสสิก: สีโทนกลาง ใช้สีเน้นเพียงสีเดียวสำหรับการดำเนินการและสถานะ เส้นคั่นบาง ไม่มีการไล่เฉดหรือเอฟเฟกต์กระจก",
+    "settings.style_preset_standard": "มาตรฐาน",
+    "settings.style_density_normal": "ปกติ",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "คำสั่งเปลี่ยนแปลง",
     "approvalRoutes.kind_contract": "สัญญา",

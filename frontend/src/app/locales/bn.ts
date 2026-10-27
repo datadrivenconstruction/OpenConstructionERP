@@ -51361,6 +51361,12 @@ const resource = {
     "settings.chords_key_for": "{{page}}-এর জন্য G-এর পরের কী",
     "settings.chords_reset_one": "{{page}}-কে {{key}}-এ রিসেট করুন",
     "settings.chords_reset_all": "সব শর্টকাট রিসেট করুন",
+    "settings.style_look": "ইন্টারফেসের স্টাইল",
+    "settings.style_look_standard": "স্ট্যান্ডার্ড",
+    "settings.style_look_classic": "ক্লাসিক",
+    "settings.style_look_hint": "ক্লাসিক: নিরপেক্ষ রং, কাজ ও অবস্থার জন্য একটিমাত্র উচ্চারণ রং, পাতলা বিভাজক, কোনো গ্রেডিয়েন্ট বা কাচের প্রভাব নেই।",
+    "settings.style_preset_standard": "স্ট্যান্ডার্ড",
+    "settings.style_density_normal": "স্বাভাবিক",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "পরিবর্তন আদেশ",
     "approvalRoutes.kind_contract": "চুক্তি",

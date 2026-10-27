@@ -52476,6 +52476,12 @@ const resource = {
     "settings.chords_key_for": "{{page}} uchun G dan keyingi tugma",
     "settings.chords_reset_one": "{{page}} ni {{key}} ga qaytarish",
     "settings.chords_reset_all": "Barcha tezkor tugmalarni qaytarish",
+    "settings.style_look": "Interfeys uslubi",
+    "settings.style_look_standard": "Standart",
+    "settings.style_look_classic": "Klassik",
+    "settings.style_look_hint": "Klassik: neytral ranglar, amallar va holatlar uchun bitta urg'u rangi, ingichka ajratgichlar, gradiyent va shisha effekti yo'q.",
+    "settings.style_preset_standard": "Standart",
+    "settings.style_density_normal": "Oddiy",
     // --- /Settings → Company & documents ---
     "boq.import_preview.back": "Orqaga",
     "boq.import_preview.cancel": "Bekor qilish",

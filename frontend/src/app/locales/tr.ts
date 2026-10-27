@@ -51997,6 +51997,12 @@ const resource = {
     "settings.chords_key_for": "{{page}} için G'den sonraki tuş",
     "settings.chords_reset_one": "{{page}} sayfasını {{key}} tuşuna sıfırla",
     "settings.chords_reset_all": "Tüm kısayolları sıfırla",
+    "settings.style_look": "Arayüz stili",
+    "settings.style_look_standard": "Standart",
+    "settings.style_look_classic": "Klasik",
+    "settings.style_look_hint": "Klasik: nötr renkler, işlemler ve durumlar için tek bir vurgu rengi, ince ayırıcılar, gradyan ya da cam efekti yok.",
+    "settings.style_preset_standard": "Standart",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Değişiklik emri",
     "approvalRoutes.kind_contract": "Sözleşme",

@@ -51120,6 +51120,12 @@ const resource = {
     "settings.chords_key_for": "Клавиш след G за {{page}}",
     "settings.chords_reset_one": "Връщане на {{page}} към {{key}}",
     "settings.chords_reset_all": "Връщане на всички комбинации по подразбиране",
+    "settings.style_look": "Стил на интерфейса",
+    "settings.style_look_standard": "Стандартен",
+    "settings.style_look_classic": "Класически",
+    "settings.style_look_hint": "Класически: неутрални цветове, един акцентен цвят за действия и статуси, тънки разделители, без преливания и стъклен ефект.",
+    "settings.style_preset_standard": "Стандартен",
+    "settings.style_density_normal": "Нормална",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Заповед за промяна",
     "approvalRoutes.kind_contract": "Договор",

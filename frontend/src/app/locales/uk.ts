@@ -53086,6 +53086,12 @@ const resource = {
     "settings.chords_key_for": "Клавіша після G для «{{page}}»",
     "settings.chords_reset_one": "Повернути «{{page}}» на клавішу {{key}}",
     "settings.chords_reset_all": "Скинути всі швидкі клавіші",
+    "settings.style_look": "Стиль інтерфейсу",
+    "settings.style_look_standard": "Стандартний",
+    "settings.style_look_classic": "Класичний",
+    "settings.style_look_hint": "Класичний: нейтральні кольори, один акцентний колір для дій і статусів, тонкі роздільники, без градієнтів і ефекту скла.",
+    "settings.style_preset_standard": "Стандартний",
+    "settings.style_density_normal": "Звичайна",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Розпорядження про зміни",
     "approvalRoutes.kind_contract": "Договір",

@@ -51481,6 +51481,12 @@ const resource = {
     "settings.chords_key_for": "{{page}}용 G 다음 키",
     "settings.chords_reset_one": "{{page}}을(를) {{key}}(으)로 재설정",
     "settings.chords_reset_all": "모든 단축키 재설정",
+    "settings.style_look": "인터페이스 스타일",
+    "settings.style_look_standard": "표준",
+    "settings.style_look_classic": "클래식",
+    "settings.style_look_hint": "클래식: 중립 색상, 작업과 상태에만 쓰는 강조색 하나, 얇은 구분선, 그라데이션과 유리 효과 없음.",
+    "settings.style_preset_standard": "표준",
+    "settings.style_density_normal": "보통",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "변경 지시",
     "approvalRoutes.kind_contract": "계약",

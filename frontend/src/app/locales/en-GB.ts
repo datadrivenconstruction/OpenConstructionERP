@@ -486,6 +486,12 @@ const resource = {
     "punch.description_saved": "Description saved",
     "punch.no_description": "No description yet.",
     "punch.edit_description": "Edit description",
+    "settings.style_look": "Interface style",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Classic",
+    "settings.style_look_hint": "Classic: neutral colours, one accent for actions and statuses, thin dividers, no gradients or glass.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
   }
 } as { translation: Record<string, string> };
 

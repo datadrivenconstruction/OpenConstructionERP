@@ -51048,6 +51048,12 @@ const resource = {
     "settings.chords_key_for": "G järel klahv lehele {{page}}",
     "settings.chords_reset_one": "Lähtesta {{page}} klahvile {{key}}",
     "settings.chords_reset_all": "Lähtesta kõik kiirklahvid",
+    "settings.style_look": "Liidese stiil",
+    "settings.style_look_standard": "Standardne",
+    "settings.style_look_classic": "Klassikaline",
+    "settings.style_look_hint": "Klassikaline: neutraalsed värvid, üks rõhuvärv toimingute ja olekute jaoks, õhukesed eraldusjooned, ilma gradientide ja klaasefektita.",
+    "settings.style_preset_standard": "Standardne",
+    "settings.style_density_normal": "Tavaline",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Muudatuskorraldus",
     "approvalRoutes.kind_contract": "Leping",

@@ -50856,6 +50856,12 @@ const resource = {
     "settings.chords_key_for": "Tombol setelah G untuk {{page}}",
     "settings.chords_reset_one": "Atur ulang {{page}} ke {{key}}",
     "settings.chords_reset_all": "Atur ulang semua pintasan",
+    "settings.style_look": "Gaya antarmuka",
+    "settings.style_look_standard": "Standar",
+    "settings.style_look_classic": "Klasik",
+    "settings.style_look_hint": "Klasik: warna netral, satu warna aksen untuk aksi dan status, pembatas tipis, tanpa gradasi atau efek kaca.",
+    "settings.style_preset_standard": "Standar",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Perintah perubahan",
     "approvalRoutes.kind_contract": "Kontrak",

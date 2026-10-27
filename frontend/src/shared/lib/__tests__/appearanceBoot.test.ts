@@ -25,7 +25,7 @@ function boot() {
 
 function attrs() {
   const d = document.documentElement.dataset;
-  return { accent: d.accent, font: d.font, density: d.density, radius: d.radius, text: d.text };
+  return { accent: d.accent, font: d.font, density: d.density, radius: d.radius, look: d.look, text: d.text };
 }
 
 function menuAttrs() {
@@ -36,7 +36,7 @@ function menuAttrs() {
 beforeEach(() => {
   localStorage.clear();
   const root = document.documentElement;
-  for (const k of ['accent', 'font', 'density', 'radius', 'text']) root.removeAttribute(`data-${k}`);
+  for (const k of ['accent', 'font', 'density', 'radius', 'look', 'text']) root.removeAttribute(`data-${k}`);
   for (const k of MENU_AXES) root.removeAttribute(`data-menu-${k}`);
   root.classList.remove('dark');
   document.head.querySelectorAll('link[data-oe-font]').forEach((l) => l.remove());

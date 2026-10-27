@@ -51090,6 +51090,12 @@ const resource = {
     "settings.chords_key_for": "{{page}} کے لیے G کے بعد کی کلید",
     "settings.chords_reset_one": "{{page}} کو {{key}} پر ری سیٹ کریں",
     "settings.chords_reset_all": "تمام شارٹ کٹس ری سیٹ کریں",
+    "settings.style_look": "انٹرفیس انداز",
+    "settings.style_look_standard": "معیاری",
+    "settings.style_look_classic": "کلاسک",
+    "settings.style_look_hint": "کلاسک: غیر جانبدار رنگ، کارروائیوں اور حالتوں کے لیے ایک ہی نمایاں رنگ، باریک لکیریں، کوئی گریڈینٹ یا شیشے کا اثر نہیں۔",
+    "settings.style_preset_standard": "معیاری",
+    "settings.style_density_normal": "عام",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "تبدیلی آرڈر",
     "approvalRoutes.kind_contract": "کنٹریکٹ",

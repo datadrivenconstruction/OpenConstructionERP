@@ -51400,6 +51400,12 @@ const resource = {
     "settings.chords_key_for": "Tipka nakon G za {{page}}",
     "settings.chords_reset_one": "Vrati {{page}} na {{key}}",
     "settings.chords_reset_all": "Vrati sve prečace",
+    "settings.style_look": "Stil sučelja",
+    "settings.style_look_standard": "Standardni",
+    "settings.style_look_classic": "Klasični",
+    "settings.style_look_hint": "Klasični: neutralne boje, jedna akcentna boja za radnje i statuse, tanke razdjelnice, bez gradijenata i staklenog efekta.",
+    "settings.style_preset_standard": "Standardni",
+    "settings.style_density_normal": "Normalna",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Nalog za izmjenu",
     "approvalRoutes.kind_contract": "Ugovor",

@@ -51233,6 +51233,12 @@ const resource = {
     "settings.chords_key_for": "{{page}} үчүн G'дан кийинки баскыч",
     "settings.chords_reset_one": "{{page}} барагын {{key}} баскычына кайтаруу",
     "settings.chords_reset_all": "Бардык тез баскычтарды кайтаруу",
+    "settings.style_look": "Интерфейс стили",
+    "settings.style_look_standard": "Стандарттык",
+    "settings.style_look_classic": "Классикалык",
+    "settings.style_look_hint": "Классикалык: нейтралдуу түстөр, аракеттер жана абалдар үчүн бир акцент түсү, жука бөлгүчтөр, градиенттер жана айнек эффектиси жок.",
+    "settings.style_preset_standard": "Стандарттык",
+    "settings.style_density_normal": "Кадимки",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгөртүү буйругу",
     "approvalRoutes.kind_contract": "Келишим",

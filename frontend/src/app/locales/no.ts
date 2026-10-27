@@ -51122,6 +51122,12 @@ const resource = {
     "settings.chords_key_for": "Tast etter G for {{page}}",
     "settings.chords_reset_one": "Tilbakestill {{page}} til {{key}}",
     "settings.chords_reset_all": "Tilbakestill alle snarveier",
+    "settings.style_look": "Grensesnittstil",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Klassisk",
+    "settings.style_look_hint": "Klassisk: nøytrale farger, én aksentfarge for handlinger og statuser, tynne skillelinjer, ingen gradienter eller glasseffekt.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Endringsordre",
     "approvalRoutes.kind_contract": "Kontrakt",

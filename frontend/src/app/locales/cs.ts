@@ -52284,6 +52284,12 @@ const resource = {
     "settings.chords_key_for": "Klávesa po G pro {{page}}",
     "settings.chords_reset_one": "Vrátit {{page}} na {{key}}",
     "settings.chords_reset_all": "Obnovit všechny zkratky",
+    "settings.style_look": "Vzhled rozhraní",
+    "settings.style_look_standard": "Standardní",
+    "settings.style_look_classic": "Klasický",
+    "settings.style_look_hint": "Klasický: neutrální barvy, jeden zvýrazňující odstín pro akce a stavy, tenké oddělovače, bez přechodů a skleněného efektu.",
+    "settings.style_preset_standard": "Standardní",
+    "settings.style_density_normal": "Normální",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Změnový příkaz",
     "approvalRoutes.kind_contract": "Smlouva",

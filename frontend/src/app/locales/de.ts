@@ -53566,6 +53566,12 @@ const resource = {
     "settings.chords_key_for": "Taste nach G für {{page}}",
     "settings.chords_reset_one": "{{page}} auf {{key}} zurücksetzen",
     "settings.chords_reset_all": "Alle Kürzel zurücksetzen",
+    "settings.style_look": "Oberflächenstil",
+    "settings.style_look_standard": "Standard",
+    "settings.style_look_classic": "Klassisch",
+    "settings.style_look_hint": "Klassisch: neutrale Farben, eine Akzentfarbe für Aktionen und Status, dünne Trennlinien, keine Verläufe oder Glaseffekte.",
+    "settings.style_preset_standard": "Standard",
+    "settings.style_density_normal": "Normal",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",
