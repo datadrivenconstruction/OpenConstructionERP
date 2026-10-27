@@ -12,7 +12,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, Plus } from 'lucide-react';
 import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
 import { ApiError } from '@/shared/lib/api';
-import { PACKAGES_QUERY_KEY, setModuleEnabled, useSolutionPackages } from './api';
+import { PACKAGES_QUERY_KEY, removePackage, setModuleEnabled, useSolutionPackages } from './api';
 import { PackageCard, PackagePicker } from './PackagePicker';
 import { directDependents, enabledModules } from './logic';
 
@@ -23,6 +23,19 @@ export function PackagesSettings() {
   const [adding, setAdding] = useState(false);
   const [pending, setPending] = useState<{ module: string; dependents: string[] } | null>(null);
   const [filter, setFilter] = useState('');
+  const [removing, setRemoving] = useState<{ id: string; hidden: string[] } | null>(null);
+
+  async function previewRemove(id: string) {
+    const res = await removePackage(id, false);
+    setRemoving({ id, hidden: res.hidden });
+  }
+
+  async function confirmRemove() {
+    if (!removing) return;
+    await removePackage(removing.id, true);
+    setRemoving(null);
+    await queryClient.invalidateQueries({ queryKey: PACKAGES_QUERY_KEY });
+  }
 
   const enabled = useMemo(() => enabledModules(data?.state), [data]);
   const name = (m: string) => t(moduleDisplayNameKey(m), { defaultValue: m.replace(/_/g, ' ') });
@@ -62,9 +75,43 @@ export function PackagesSettings() {
         {installed.length === 0 && <p className="text-sm text-content-secondary">{t('packages.none_installed')}</p>}
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {installed.map((p) => (
-            <PackageCard key={p.id} pkg={p} selected installed onToggle={() => undefined} />
+            <div key={p.id} className="flex flex-col gap-1">
+              <PackageCard pkg={p} selected installed onToggle={() => undefined} />
+              <button
+                type="button"
+                data-testid={`package-remove-${p.id}`}
+                onClick={() => void previewRemove(p.id)}
+                className="self-end text-xs font-semibold text-content-secondary hover:text-semantic-error"
+              >
+                {t('packages.remove')}
+              </button>
+            </div>
           ))}
         </div>
+        {removing && (
+          <div role="alert" className="rounded-lg border border-semantic-warning/50 bg-semantic-warning/10 p-3 text-sm">
+            <p>
+              {removing.hidden.length
+                ? t('packages.remove_warning', {
+                    name: t(`packages.${removing.id}.name`),
+                    modules: removing.hidden.map(name).join(', '),
+                  })
+                : t('packages.remove_none', { name: t(`packages.${removing.id}.name`) })}
+            </p>
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                className="rounded-lg bg-oe-blue px-2.5 py-1 text-xs font-semibold text-white"
+                onClick={() => void confirmRemove()}
+              >
+                {t('packages.remove_confirm')}
+              </button>
+              <button type="button" className="text-xs" onClick={() => setRemoving(null)}>
+                {t('packages.cancel')}
+              </button>
+            </div>
+          </div>
+        )}
         {adding && (
           <PackagePicker
             packages={data.packages}

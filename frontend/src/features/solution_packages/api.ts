@@ -62,6 +62,13 @@ export function setModuleEnabled(
   return apiPut(`/v1/solution-packages/modules/${encodeURIComponent(module)}/`, { enabled, force });
 }
 
+export function removePackage(
+  packageId: string,
+  confirm: boolean,
+): Promise<PackageState & { hidden: string[]; removed: boolean }> {
+  return apiPost(`/v1/solution-packages/${encodeURIComponent(packageId)}/remove/`, { confirm });
+}
+
 export function seedPackageDemo(packageId: string): Promise<{ demo_id: string | null; project_id?: string }> {
   return apiPost(`/v1/solution-packages/${encodeURIComponent(packageId)}/demo/`);
 }

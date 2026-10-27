@@ -371,6 +371,30 @@ def install(
     return metadata, added
 
 
+def remove(metadata: dict[str, Any], package_id: str) -> tuple[dict[str, Any], list[str]]:
+    """Remove an installed package; returns new metadata and the modules it hides.
+
+    Only modules no remaining package (or its optional picks) needs are
+    hidden, and nothing is deleted. Packages that build on the removed one are
+    removed with it.
+    """
+    metadata = dict(metadata)
+    state = read_state(metadata)
+    if package_id not in state["installed"]:
+        raise ValueError(f"package '{package_id}' is not installed")
+    gone = {p for p in state["installed"] if p == package_id or package_id in package_closure([p])}
+    remaining = [p for p in state["installed"] if p not in gone]
+    still_needed = resolve_modules(remaining, state["optional"])
+    was_needed = resolve_modules(sorted(gone), state["optional"])
+    modules = dict(state["modules"])
+    hidden = sorted(m for m in was_needed - still_needed if m in gateable_modules() and modules.get(m) is not False)
+    for mod in hidden:
+        modules[mod] = False
+    metadata[STATE_KEY] = {**state, "installed": remaining, "modules": modules}
+    _sync_preferences(metadata, modules)
+    return metadata, hidden
+
+
 def set_module(
     metadata: dict[str, Any],
     module: str,
