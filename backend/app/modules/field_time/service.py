@@ -189,6 +189,7 @@ class FieldTimeService:
         """Create a new draft timesheet, optionally with its lines."""
         for line in data.lines:
             self._assert_line_xor(line.resource_id, line.equipment_id)
+        await self._assert_payroll_open(data.project_id, data.date)
 
         reference = await self.repo.next_reference(data.project_id)
         # Record who drafted the timesheet in metadata (the model tracks the
@@ -484,6 +485,7 @@ class FieldTimeService:
         """Update a draft timesheet's header fields."""
         timesheet = await self.get_timesheet(timesheet_id)
         self._assert_draft(timesheet, "edit")
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
 
         fields = data.model_dump(exclude_unset=True)
         if "metadata" in fields:
@@ -508,6 +510,7 @@ class FieldTimeService:
         """Add a line to a draft timesheet."""
         timesheet = await self.get_timesheet(timesheet_id)
         self._assert_draft(timesheet, "add a line to")
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
         self._assert_line_xor(data.resource_id, data.equipment_id)
         await self.repo.add_line(self._line_from_create(timesheet_id, data))
         await self.session.refresh(timesheet)
@@ -522,6 +525,7 @@ class FieldTimeService:
         """Update a single line on a draft timesheet."""
         timesheet = await self.get_timesheet(timesheet_id)
         self._assert_draft(timesheet, "edit a line of")
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
         line = await self.repo.get_line(line_id)
         if line is None or line.timesheet_id != timesheet_id:
             raise HTTPException(
@@ -557,6 +561,7 @@ class FieldTimeService:
         """Delete a line from a draft timesheet."""
         timesheet = await self.get_timesheet(timesheet_id)
         self._assert_draft(timesheet, "remove a line from")
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
         line = await self.repo.get_line(line_id)
         if line is None or line.timesheet_id != timesheet_id:
             raise HTTPException(
@@ -573,6 +578,7 @@ class FieldTimeService:
         """Delete a draft timesheet. Submitted / approved sheets cannot be deleted."""
         timesheet = await self.get_timesheet(timesheet_id)
         self._assert_draft(timesheet, "delete")
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
         await self.repo.delete(timesheet_id)
         logger.info("Field timesheet deleted: %s", timesheet_id)
 
@@ -584,6 +590,7 @@ class FieldTimeService:
         Blocked (HTTP 422) when any ERROR-severity validation rule fails.
         """
         timesheet = await self.get_timesheet(timesheet_id)
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
         if timesheet.status != _DRAFT:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -621,6 +628,7 @@ class FieldTimeService:
         and here reaches the budget once.
         """
         timesheet = await self.get_timesheet(timesheet_id)
+        await self._assert_payroll_open(timesheet.project_id, timesheet.date)
         if timesheet.status != _SUBMITTED:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -668,6 +676,7 @@ class FieldTimeService:
         original flips to ``reversed``. Returns the new reversal timesheet.
         """
         original = await self.get_timesheet(timesheet_id)
+        await self._assert_payroll_open(original.project_id, original.date)
         if original.status != _APPROVED:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -1868,6 +1877,12 @@ class FieldTimeService:
             logger.debug("Audit-log write skipped for timesheet=%s", timesheet.id)
 
     # ── Helpers: assertions + report ─────────────────────────────────────────
+
+    async def _assert_payroll_open(self, project_id: uuid.UUID, day: Any) -> None:
+        """Refuse a change to a day that a locked payroll period covers (409)."""
+        from app.modules.payroll.period_service import assert_day_open
+
+        await assert_day_open(self.session, project_id, day)
 
     @staticmethod
     def _assert_draft(timesheet: FieldTimesheet, action: str) -> None:

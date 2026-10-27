@@ -405,3 +405,8 @@ async def get_labour_cost(
         labour_cost=str(cost),
         total_hours=str(hours),
     )
+
+
+from app.modules.payroll.period_router import router as _period_router  # noqa: E402 - appended sub-router
+
+router.include_router(_period_router)

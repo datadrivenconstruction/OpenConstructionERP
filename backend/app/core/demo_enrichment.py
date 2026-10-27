@@ -207,6 +207,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.commitment_release.seed import seed_commitment_release_demo
         from app.modules.construction_control.seed import seed_construction_control_demo
         from app.modules.contracts.seed import seed_contracts_demo
+        from app.modules.cost_benchmarks.demo import seed_cost_benchmarks_demo
         from app.modules.costmodel.seed import seed_costmodel
         from app.modules.crm.seed import seed_crm_demo
         from app.modules.cvr.seed import seed_cvr_demo
@@ -235,6 +236,7 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
         from app.modules.interface_management.seed import seed_interface_management_demo
         from app.modules.markups.seed import seed_markups
         from app.modules.moc.seed import seed_moc
+        from app.modules.payroll.period_demo import seed_payroll_period_demo
         from app.modules.permits.seed import seed_permits_demo
         from app.modules.plant_register.seed import seed_plant_register_demo
         from app.modules.pointcloud.seed import seed_pointcloud_demo
@@ -368,6 +370,12 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # After the clock, so the machines and the fence check use the site fence it drew.
             ("telematics", None, lambda s: seed_telematics_demo(s, _focus_pids or _demo_pids)),
             ("site_sensors", None, lambda s: seed_site_sensors_demo(s, _focus_pids or _demo_pids)),
+            # One payroll export period (overtime, a night shift, locked, exported,
+            # posted, one refused edit) on its own week, after field time.
+            ("payroll_period", None, lambda s: seed_payroll_period_demo(s, _demo_pids)),
+            # Benchmarks from the demo projects plus synthetic completed offices
+            # and one estimate with two outlier elements. Self-guards per tenant.
+            ("cost_benchmarks", None, lambda s: seed_cost_benchmarks_demo(s, _demo_pids)),
             # Offline capture and a resolved sync conflict (diary entry, punch
             # items, merge audit). Idempotent on fixed client_op_id values.
             ("offline_conflict", None, lambda s: _offline_conflict_counts(s, _first_pid)),

@@ -18,11 +18,13 @@ subtraction with no FX.
 """
 
 import uuid
-from datetime import datetime
+from datetime import date, datetime
+from decimal import Decimal
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Integer, Numeric, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
+from app.core.db_types import SafeDate
 from app.database import GUID, Base
 
 
@@ -226,3 +228,81 @@ class PayrollDeduction(Base):
 
     def __repr__(self) -> str:  # pragma: no cover - debug repr
         return f"<PayrollDeduction {self.label} ({self.deduction_type}) {self.amount}>"
+
+
+class PayrollPeriod(Base):
+    """A payroll export period over approved field timesheets of one project.
+
+    ``open`` -> ``locked`` (timesheet edits in the date range are blocked) ->
+    ``exported``. A locked or exported period can be reopened with a reason; every
+    move is a :class:`PayrollPeriodEvent`. ``rule_profile`` names the overtime and
+    allowance profile in ``country_data/payroll_rules.json``.
+    """
+
+    __tablename__ = "oe_payroll_period"
+    __table_args__ = (Index("ix_oe_payroll_period_project_dates", "project_id", "period_start", "period_end"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    label: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    period_start: Mapped[date] = mapped_column(SafeDate(), nullable=False)
+    period_end: Mapped[date] = mapped_column(SafeDate(), nullable=False)
+    country: Mapped[str] = mapped_column(String(2), nullable=False, default="", server_default="")
+    rule_profile: Mapped[str] = mapped_column(String(60), nullable=False, default="neutral", server_default="neutral")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="open", server_default="open", index=True)
+    currency: Mapped[str] = mapped_column(String(10), nullable=False, default="", server_default="")
+    total_hours: Mapped[Decimal] = mapped_column(
+        Numeric(14, 2), nullable=False, default=Decimal("0"), server_default="0"
+    )
+    total_gross: Mapped[Decimal] = mapped_column(
+        Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
+    )
+    total_burden: Mapped[Decimal] = mapped_column(
+        Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0"
+    )
+    locked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    locked_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    exported_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    posted_ref: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    created_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata", JSON, nullable=False, default=dict, server_default="{}"
+    )
+
+
+class PayrollPeriodLine(Base):
+    """One export line: employee x day x cost code x pay type, hours x rate x multiplier."""
+
+    __tablename__ = "oe_payroll_period_line"
+    __table_args__ = (Index("ix_oe_payroll_period_line_period_emp", "period_id", "employee_id"),)
+
+    period_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_payroll_period.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    employee_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    employee_number: Mapped[str] = mapped_column(String(60), nullable=False, default="", server_default="")
+    employee_name: Mapped[str] = mapped_column(String(255), nullable=False, default="", server_default="")
+    work_date: Mapped[date] = mapped_column(SafeDate(), nullable=False)
+    cost_code: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    pay_type: Mapped[str] = mapped_column(String(30), nullable=False, default="regular", server_default="regular")
+    hours: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, default=Decimal("0"), server_default="0")
+    rate: Mapped[Decimal] = mapped_column(Numeric(14, 4), nullable=False, default=Decimal("0"), server_default="0")
+    multiplier: Mapped[Decimal] = mapped_column(Numeric(8, 4), nullable=False, default=Decimal("1"), server_default="1")
+    amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0")
+    overtime_approved: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
+    source_refs: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
+
+
+class PayrollPeriodEvent(Base):
+    """Audit of a period: build, lock, reopen (with the reason), export, post."""
+
+    __tablename__ = "oe_payroll_period_event"
+
+    period_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_payroll_period.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    action: Mapped[str] = mapped_column(String(30), nullable=False)
+    reason: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    details: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")  # type: ignore[assignment]
