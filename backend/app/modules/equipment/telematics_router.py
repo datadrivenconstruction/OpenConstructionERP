@@ -20,9 +20,10 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Header, HTTPException, Query, Request, UploadFile
 from pydantic import BaseModel, Field
 
+from app.core.rate_limiter import client_identifier, device_ingest_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.equipment.telematics import TelematicsParseError, TelematicsSample, parse_aemp, parse_csv
 from app.modules.equipment.telematics_service import DEFAULT_IDLE_THRESHOLD, TelematicsService
@@ -131,11 +132,15 @@ async def revoke_device(
 
 @router.post("/ingest/")
 async def device_ingest(
+    request: Request,
     data: IngestIn,
     x_device_token: str | None = Header(default=None),
     service: TelematicsService = Depends(_service),
 ) -> dict[str, Any]:
     """Machine data from one device, authenticated by its own token (no user session)."""
+    allowed, _remaining = device_ingest_limiter.is_allowed(client_identifier(request))
+    if not allowed:
+        raise HTTPException(status_code=429, detail="rate_limited", headers={"Retry-After": "60"})
     device = await service.authenticate(x_device_token)
     if device is None:
         raise HTTPException(status_code=401, detail="invalid_device_token")

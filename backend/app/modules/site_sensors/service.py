@@ -114,6 +114,9 @@ class SiteSensorsService:
         stmt = select(ConcreteMix).order_by(ConcreteMix.code)
         if project_id is not None:
             stmt = stmt.where((ConcreteMix.project_id == project_id) | (ConcreteMix.project_id.is_(None)))
+        else:
+            # Without a project the caller has proven access to, only shared mixes are listed.
+            stmt = stmt.where(ConcreteMix.project_id.is_(None))
         return list((await self.session.execute(stmt)).scalars())
 
     async def create_strip(self, data: StripCreate) -> FormworkStrip:

@@ -174,6 +174,10 @@ approval_limiter = RateLimiter(max_requests=40, window_seconds=60)
 # enough for legitimate batch BIM uploads while rejecting abuse.
 upload_limiter = RateLimiter(max_requests=30, window_seconds=60)
 
+# Device ingest (telematics, site sensors) runs without a user session, so the
+# caller's address is the only key that also slows a token guesser down.
+device_ingest_limiter = RateLimiter(max_requests=120, window_seconds=60)
+
 
 def _register_hourly_max() -> int:
     try:

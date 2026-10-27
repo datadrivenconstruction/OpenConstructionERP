@@ -27,8 +27,9 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 
+from app.core.rate_limiter import client_identifier, device_ingest_limiter
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.site_sensors.schemas import (
     AcknowledgeIn,
@@ -151,11 +152,15 @@ async def get_maturity(
 
 @router.post("/ingest/")
 async def device_ingest(
+    request: Request,
     data: ReadingsIn,
     session: SessionDep,
     x_device_token: str | None = Header(default=None),
 ) -> dict[str, Any]:
     """Readings from one sensor, authenticated by its own token (no user session)."""
+    allowed, _remaining = device_ingest_limiter.is_allowed(client_identifier(request))
+    if not allowed:
+        raise HTTPException(status_code=429, detail="rate_limited", headers={"Retry-After": "60"})
     service = SiteSensorsService(session)
     device = await service.authenticate(x_device_token)
     if device is None:
@@ -166,9 +171,12 @@ async def device_ingest(
 @router.get("/mixes/", response_model=list[MixResponse])
 async def list_mixes(
     session: SessionDep,
+    user_id: CurrentUserId,
     project_id: uuid.UUID | None = Query(default=None),
     _perm: None = Depends(RequirePermission("site_sensors.read")),
 ) -> list[MixResponse]:
+    if project_id is not None:
+        await verify_project_access(project_id, user_id, session)
     return [MixResponse.model_validate(m) for m in await SiteSensorsService(session).list_mixes(project_id)]
 
 
