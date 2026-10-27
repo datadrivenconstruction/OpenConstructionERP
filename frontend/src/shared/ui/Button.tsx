@@ -70,6 +70,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
+        data-oe-button={variant}
         disabled={isDisabled}
         className={clsx(
           'inline-flex items-center justify-center',
