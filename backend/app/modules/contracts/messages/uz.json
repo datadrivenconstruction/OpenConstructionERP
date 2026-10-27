@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "{claim} hisob-kitobida davr tugash sanasi ko'rsatilmagan, shuning uchun uni shartnoma hisob-kitoblari ketma-ketligiga joylab bo'lmaydi",
+      "suggestion": "Ushbu hisob-kitob qamrab olgan davrning oxirgi kunini kiriting"
+    },
+    "period_order": {
+      "fail": "{claim} hisob-kitobi {period_from} sanasida boshlanib, {period_to} sanasida tugaydi, ya'ni davr boshlanishidan oldin tugaydi",
+      "suggestion": "Davr boshlanishi yoki tugashini to'g'rilang, shunda boshlanish sanasi birinchi bo'lsin"
+    },
+    "period_overlap": {
+      "fail": "{claim} hisob-kitobi {period_from} sanasida boshlanadi, lekin oldingi {previous} hisob-kitobi {previous_to} sanasigacha davom etadi, shuning uchun ikkala hisob-kitob bir xil kunlar uchun hisoblanadi",
+      "suggestion": "Ushbu hisob-kitobni oldingi hisob-kitob davri tugagan kundan keyingi kundan boshlang"
+    },
+    "period_gap": {
+      "fail": "{claim} hisob-kitobi {period_from} sanasida boshlanadi, lekin oldingi {previous} hisob-kitobi {previous_to} sanasida tugagan, shuning uchun oraliq kunlarni hech bir hisob-kitob hisoblamaydi (hisoblanmagan kunlar: {days})",
+      "suggestion": "Ushbu hisob-kitobni oldingi hisob-kitob davri tugagan kundan keyingi kundan boshlang yoki hisob-kitob yo'qolmaganini tekshiring"
+    },
+    "period_unparsed": {
+      "fail": "{claim} hisob-kitobida {field} '{value}' deb yozilgan, uni sana sifatida o'qib bo'lmaydi",
+      "suggestion": "Sanani yil, oy va kun ko'rinishida kiriting, masalan 2026-03-31",
+      "fields": {
+        "period_start": "davr boshlanishi",
+        "period_end": "davr tugashi",
+        "claim_date": "ariza sanasi"
+      }
+    },
+    "line_overbilled": {
+      "fail": "{line} qatori bugungi kunga {billed} miqdorida hisoblangan, bu rejalashtirilgan qiymati {scheduled} dan ko'p; Progressdan to'ldirish ni qayta ishga tushiring yoki ushbu davr uchun qatordagi summani kamaytiring",
+      "suggestion": "Progressdan to'ldirish har bir qatorni faqat oldingi hisob-kitoblardan keyingi yangi qism uchun hisoblaydi. Agar qator doirasi haqiqatan kengaygan bo'lsa, avval uning rejalashtirilgan qiymatini oshiruvchi o'zgarish buyurtmasini kiriting"
+    },
+    "percent_regressed": {
+      "fail": "{line} qatori bugungi kunga {percent}% bajarilgan, bu {requested}, oldingi hisob-kitoblar unga allaqachon hisoblagan {previous} dan kam, shuning uchun bu davrda unga hech narsa hisoblanmaydi",
+      "suggestion": "Ushbu qatordagi bajarilish foizini tekshiring yoki uni oshirib ko'rsatgan oldingi hisob-kitobni to'g'rilang"
+    },
+    "errors": {
+      "submission_blocked": "Ushbu to'lov arizasini quyidagilar hal etilmaguncha yuborib bo'lmaydi: {findings}",
+      "rules_unavailable": "Bu o'rnatishda to'lov arizasi qoidalari yuklanmagan, shuning uchun ushbu hisob-kitobni yuborishdan oldin tekshirib bo'lmaydi.",
+      "later_claim_already_issued": "{claims} hisob-kitobi bundan keyin keladi va allaqachon chiqarilgan. U bu hisob-kitob qoralama bo'lganida tuzilgan, shuning uchun bu ish uchun allaqachon qo'llaniladi. Ushbu qoralamani o'chiring yoki uning davrini so'nggi chiqarilgan hisob-kitobdan keyinga o'tkazing"
+    },
+    "totals_match_lines": {
+      "fail": "{claim} hisob-kitobi {gross} so'raydi, lekin uning ortidagi qatorlar jami {lines_total} ni tashkil etadi: qatorlar o'zgargandan keyin hisob-kitob qayta hisoblanmagan",
+      "suggestion": "Ushbu hisob-kitobning istalgan qatorini saqlang yoki Progressdan to'ldirish ni qayta ishga tushiring, shunda jamilar o'zi yangilanadi"
+    },
+    "totals_below_lines": {
+      "fail": "{claim} hisob-kitobi qayd etilgan xarajatdan {gross} hisoblaydi, bu o'zining qatorlari jami {lines_total} dan kam: tafsilot hisob-kitobdan ko'p talab qila olmaydi",
+      "suggestion": "Xarajatdan hisoblangan hisob-kitobda qatorlar pulning tafsiloti, manbai emas. Ortiqcha ko'rsatadigan qatorlarni kamaytiring yoki olib tashlang, yoki hisob-kitobni ish xarajatidan qayta tuzing, shunda ikkalasi mos keladi"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "{claim} hisob-kitobi {line} qatorida oldin hisoblangan deb {stored} ni ko'rsatadi, lekin oldingi hisob-kitoblar hozir unda {now} ni hisoblaydi",
+      "total_fail": "{claim} hisob-kitobi oldin tasdiqlangan deb {stored} ni ko'rsatadi, lekin oldingi hisob-kitoblar hozir {now} ni tasdiqlaydi",
+      "suggestion": "Ushbu hisob-kitobni qayta tuzing, shunda u o'zidan oldingi hisob-kitoblar bugun nimani hisoblayotganini o'qiydi"
+    },
+    "within_nte_cap": {
+      "fail": "{claim} hisob-kitobi oldin hisoblangan {billed} ustiga {this} ni hisoblaydi, bu {cap} dan oshmasligi kerak bo'lgan chegaradan ortiq",
+      "suggestion": "Ushbu hisob-kitobda chegaragacha hisoblang va qolgani uchun o'zgarish buyurtmasi bo'yicha kelishing"
+    },
+    "retention_matches_policy": {
+      "fail": "{claim} hisob-kitobi {held} ushlab qolingan, lekin uning ushlab qolish siyosati hozir {expected} beradi: oldingi hisob-kitob, ozod qilish yoki ushbu hisob-kitob hisoblangandan keyin siyosat o'zgargan",
+      "suggestion": "Progressdan to'ldirish ni qayta ishga tushiring yoki ushbu hisob-kitobning istalgan qatorini saqlang, shunda ushlab qolish qayta hisoblanadi"
+    },
+    "retention_above_cap": {
+      "fail": "{claim} hisob-kitobi {held} ushlab qolingan, bu uning ushlab qolish siyosati belgilagan {percent}% chegaradan ortiq, ya'ni ushbu shartnomada {cap}",
+      "suggestion": "Hisob-kitobni qayta hisoblang yoki taraflar yuqoriroq chegaraga kelishgan bo'lsa, shartnomaning ushlab qolish siyosatida chegarani oshiring",
+      "state_cap_unread": "{claim} hisob-kitobi: uning ushlab qolish siyosati chegara belgilamagan, {country} esa ushlab qolishni shtat qonuni bilan cheklaydi. Loyihada kichik hudud kodi yo'qligi sababli shtat aniqlanmadi, shuning uchun qonuniy chegara tekshirilmadi",
+      "state_cap_suggestion": "Shtat chegarasini shartnomaning ushlab qolish siyosatiga chegara sifatida yozing, shunda ushbu shartnomadagi har bir hisob-kitob unga nisbatan tekshiriladi"
+    },
+    "retention_release_within_held": {
+      "fail": "{claim} hisob-kitobigacha hisoblangan ozod qilishlar {released} ni qaytaradi, bu o'shagacha ushlab qolingan {accrued} ushlab qolishdan ko'p",
+      "suggestion": "Juda katta ozod qilishni bekor qiling yoki ko'proq ushlab qolish bo'lgandan keyin uni keyingi hisob-kitobda hisoblang"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Qiymatlar jadvali jami {scheduled} ni tashkil etadi, lekin bugungi kunga shartnoma summasi {contract_sum}: ushbu hisob-kitob hisoblanadigan qatorlar shartnomaning {difference} qismini qatorsiz qoldiradi",
+      "suggestion": "Qiymatlar jadvaliga qatorlar qo'shing yoki tuzating, toki ular shartnoma summasiga teng bo'lsin",
+      "suggestion_reconcile": "Qiymatlar jadvaliga yetib kelishdan oldin tasdiqlangan {count} ta o'zgarish buyurtmasi yoki o'zgarish shartnoma summasini o'zgartirdi. Har biri uchun qator qo'shish uchun shartnomada O'zgarish buyurtmalarini moslashtirish dan foydalaning"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Ushbu ozod qilish uchun {document} kerak, lekin hech biri biriktirilmagan",
+      "suggestion": "Hujjatni shartnomada ro'yxatga oling, ozod qilishga biriktiring va qayta tasdiqlang"
+    },
+    "within_available": {
+      "fail": "Ushbu ozod qilish {amount} ni qaytaradi, lekin ushlab qolingan va boshqa ozod qilishga biriktirilmagan ushlab qolishdan atigi {available} qolgan",
+      "suggestion": "Ushbu ozod qilishni bekor qiling va qayta taklif qiling, shunda u hozir ushlab qolingan miqdorga mos o'lchanadi"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Ushbu ozod qilish hodisadan keyingi {days} kunlik lien davri o'tgandan keyingina to'lanadi ({reference}), va u davr qachon boshlanganini ko'rsatmaydi",
+      "suggestion_no_start": "Davr boshlangan kunni kiriting, masalan, sezilarli bajarilish sertifikatining e'lon qilingan sanasi, va ozod qilishni qayta tasdiqlang",
+      "fail_early": "{started} da boshlangan {days} kunlik lien davri {ends} gacha davom etadi ({reference}), shuning uchun ushbu ozod qilishni hozircha tasdiqlab bo'lmaydi",
+      "suggestion_early": "Lien davri o'tgandan keyin ozod qilishni tasdiqlang, ushlab qolish puliga qarshi biron lien saqlanmaganini tekshirgandan keyin"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "sezilarli bajarilish sertifikati",
+      "acceptance_protocol": "qabul qilish yozuvi",
+      "affidavit_payment_of_debts": "qarzlar va talablar to'langanligi haqida qasamyod",
+      "affidavit_release_of_liens": "lienlardan ozod qilish haqida qasamyod",
+      "consent_of_surety": "kafil roziligi",
+      "final_lien_waiver": "yakuniy lienni voz kechish hujjati",
+      "final_invoice": "yakuniy hisob-faktura"
+    },
+    "errors": {
+      "approval_blocked": "Ushbu ushlab qolishni ozod qilishni quyidagilar hal etilmaguncha tasdiqlab bo'lmaydi: {findings}",
+      "rules_unavailable": "Bu o'rnatishda ushlab qolishni ozod qilish qoidalari yuklanmagan, shuning uchun ushbu ozod qilishni tasdiqlashdan oldin tekshirib bo'lmaydi."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Qiymatlar jadvalining hech bir qatori qamrab olmagan hisoblangan ish"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "O'zgarish buyurtmalari qiymatlar jadvaliga faqat faol shartnoma uchun moslashtiriladi; ushbu shartnoma holati: {status}",
+      "preview_stale": "Moslashtiriladigan o'zgarish buyurtmalari ro'yxati siz uni ochganingizdan beri o'zgargan. Oldindan ko'rishni qayta oching va hozir nimani ko'rsatayotganini tasdiqlang"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Ushbu shartnomani quyidagilar hal etilmaguncha imzolab bo'lmaydi: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "yakunlanish",
+      "approval": "tasdiqlash"
+    },
+    "total_within_contract": {
+      "fail": "Bo'lib to'lovlar jami {scheduled} ni tashkil etadi, bu shartnoma summasi {total} dan ko'p",
+      "suggestion": "Bo'lib to'lovlarni kamaytiring, shunda ular shartnoma summasidan oshmasin"
+    },
+    "percent_sum": {
+      "fail": "Bo'lib to'lovlar shartnoma summasi {total} ning {scheduled} ({percent}%) ni tashkil etadi, shuning uchun narxning bir qismi bo'lib to'lovga ega emas",
+      "suggestion": "Shartnoma summasining qolgan qismi uchun bo'lib to'lov qo'shing yoki summalarni moslang"
+    },
+    "completion_trigger_linked": {
+      "fail": "{milestone} bo'lib to'lovi {trigger} da muddati keladi, lekin u jadval faoliyatiga bog'lanmagan, shuning uchun uning sanasi ish bilan birga siljimaydi",
+      "suggestion": "Bo'lib to'lovni kutayotgan jadval bosqichiga bog'lang"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Jadval {milestone} ga yetganini ko'rsatadi, lekin {instalment} bo'lib to'lovi hali kutilmoqda, shuning uchun uni talab qilib bo'lmaydi",
+      "suggestion": "Bo'lib to'lovni yetgan deb belgilang yoki shartnoma nega faol emasligini tekshiring"
+    },
+    "client_visible_requires_active": {
+      "fail": "{milestone} bo'lib to'lovi mijozga ko'rsatilgan, lekin shartnoma holati: {status}; mijoz faqat faol yoki yakunlangan shartnoma rejasini ko'radi",
+      "suggestion": "Shartnoma kuchga kirguncha bo'lib to'lovni mijozdan yashiring"
+    },
+    "consumer_deposit_cap": {
+      "fail": "{deposit} miqdoridagi avans to'lovi {jurisdiction} da {reference} ruxsat bergan {ceiling} dan oshadi (manba: {source_url}, {checked_on} da tekshirilgan, huquqshunos tomonidan ko'rib chiqilmagan)",
+      "suggestion": "Avansni kamaytiring yoki yuridik maslahatchi bilan ushbu shartnomaga istisno qo'llanishini tasdiqlang",
+      "below_threshold": {
+        "fail": "Shartnoma summasi {jurisdiction} da {reference} avanslarni cheklaydigan miqdorga teng yoki undan kam, shuning uchun avans tekshirilmadi (manba: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Shartnoma {currency} da, lekin {reference} o'z chegarasini {limit_currency} da belgilaydi, shuning uchun {jurisdiction} dagi avans tekshirilmadi (manba: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Agar qonun ushbu shartnomaga tegishli bo'lsa, avansni unga nisbatan qo'lda tekshiring"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Bugungi kunga tasdiqlangan ish {cumulative} ni tashkil etadi, bu shartnoma summasi {contract} dan {over} ko'p",
+      "suggestion": "Avval qo'shimcha ishni qamrab oluvchi o'zgarish buyurtmasini tasdiqlang yoki ushbu sertifikatdagi miqdorlarni to'g'rilang"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Ushbu sertifikat oldingi sertifikatlar jami sifatida {carried} ni ko'rsatadi, lekin {reference} sertifikati {certified} da tasdiqlangan",
+      "work_fail": "Ishlar ro'yxatining oldingi ustuni jami {carried} ni tashkil etadi, lekin {reference} sertifikati bugungi kunga {certified} ish bilan tasdiqlangan",
+      "suggestion": "Ikki sertifikat orasida ularning hech biri ko'rsatmagan hisob-kitob bor-yo'qligini tekshiring, so'ng ushbu sertifikatni qayta tuzing"
+    },
+    "previous_unknown": {
+      "fail": "Oldingi sertifikatlar jami noma'lum",
+      "not_certified": "Oldingi {reference} sertifikati hali tasdiqlanmagan, shuning uchun uning jami yakuniy emas",
+      "suggestion": "Avval oldingi sertifikatni tasdiqlang. Agar u sertifikatlar saqlanishidan oldin tasdiqlangan bo'lsa, uning jamini oldingi sertifikatlar qatoriga kiriting"
+    },
+    "weights_sum": {
+      "fail": "Elementlar og'irliklari jami {total}%, 100% emas",
+      "suggestion": "Jadval qatorlarining qiymatlarini to'g'rilang, shunda ularning ulushlari butun shartnomaga teng bo'lsin"
+    },
+    "percent_regressed": {
+      "fail": "{line} elementi bu davrda manfiy, shuning uchun u oldin tasdiqlangan ishni qaytarib oladi",
+      "suggestion": "Agar bu oldingi ortiqcha o'lchovni tuzatsa, uni qoldiring. Aks holda ushbu sertifikatdagi miqdor yoki foizni to'g'rilang"
+    },
+    "income_withholding_single_year": {
+      "fail": "Daromaddan ushlab qolish tanlangan, lekin shartnoma {start} dan {end} gacha, bitta kalendar yil ichida davom etadi. Ushlab qolish bir necha kalendar yilga cho'zilgan qurilish ishlariga tegishli",
+      "suggestion": "Ish haqiqatan bir yildan ko'proq davom etishini buxgalteringiz bilan tekshiring; aks holda daromaddan ushlab qolishni qo'llanilmaydi deb belgilang"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Bugungi kunga qaytarib olingan avans {recovered}, bu to'langan {advance} avansdan ko'p",
+      "unknown": "Bugungi kunga {recovered} avans qaytarib olingan, lekin shartnomada to'langan avans ko'rsatilmagan, shuning uchun qaytarib olish unga nisbatan tekshirilmaydi",
+      "suggestion": "Ushbu sertifikatdagi qaytarib olishni kamaytiring yoki shartnomaning sertifikat sozlamalarida to'langan avansni ko'rsating"
+    },
+    "retention_matches_config": {
+      "fail": "Sertifikat {certificate} ushlab qolgan ({percent}% bazasidan), lekin uning ortidagi hujjat {stored} ushlab qolgan",
+      "suggestion": "Hujjatni qayta hisoblang yoki shartnomaning sertifikat sozlamalarida ushlab qolish stavkasi yoki bazasini to'g'rilang, shunda ikkalasi bir xil ushlab qolishni ko'rsatsin"
+    },
+    "net_payable_negative": {
+      "fail": "To'lanadigan summa {payable}: ushlanmalar ushbu sertifikat summasidan katta",
+      "suggestion": "Ushlanmalarni tekshiring, ayniqsa avansni qaytarib olishni, va hozir ushlab bo'lmaydigan qismni keyingi sertifikatga o'tkazing"
+    },
+    "taxes_stale": {
+      "fail": "Soliqlar ushbu sertifikat o'zgarishidan oldin hisoblangan, shuning uchun ular endi unga tegishli emas",
+      "suggestion": "Soliqlarni qayta hisoblang. Agar ular allaqachon tasdiqlangan bo'lsa, avval ularni qayta oching, keyin esa keyinroq qayta tasdiqlang"
+    },
+    "taxes_confirmed": {
+      "fail": "Ushbu sertifikatning soliq ko'rsatkichlari tasdiqlanmagan",
+      "suggestion": "Har bir soliq qatorini tekshiring va sertifikatlashdan oldin soliqlarni tasdiqlang"
+    },
+    "lines_complete": {
+      "fail": "{line} qatorida hali raqam yo'q. {reason}",
+      "suggestion": "Summani kiriting yoki qatorni tegishli emas deb belgilab, sababini ko'rsating"
+    },
+    "work_value_differs": {
+      "fail": "{line} elementi bugungi kunga {stated} deb yozilgan, lekin uning miqdori yoki foizi {computed} beradi",
+      "suggestion": "Hujjatdagi miqdor yoki summani to'g'rilang, shunda qatorning ikki ustuni mos kelsin"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "{percent} foizlik ushlab qolish, davlat ishlari qonuni har bir oraliq to'lovda ruxsat beradigan {limit} foizdan ortiq",
+      "suggestion": "Shartnomaning ushlab qolishini qonuniy stavkagacha kamaytiring"
+    },
+    "advance_above_cap": {
+      "fail": "Avans to'lov kafolati shartnoma qiymatining {percent} foizini qoplaydi, bu moliya vaziri ruxsatisiz davlat ishlari ruxsat beradigan {limit} foizdan ortiq",
+      "suggestion": "Avans to'lovni kamaytiring yoki tenderdan oldin olingan ruxsatni shartnoma shartlarida qayd eting"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Kechikish zararini qoplash bandida eng yuqori summa yo'q, holbuki davlat ishlari qonuni kechikish zararlarini shartnoma qiymatining {limit} foizi bilan cheklaydi",
+      "suggestion": "Kechikish zararini qoplash bandining eng yuqori summasini kiriting"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Kechikish zararini qoplash bandi shartnoma qiymatining {percent} foizi bilan cheklangan, bu davlat ishlari qonuni ruxsat beradigan {limit} foizdan ortiq",
+      "suggestion": "Bandning eng yuqori summasini qonuniy chegaragacha kamaytiring"
+    },
+    "performance_security_missing": {
+      "fail": "Bajarilish ta'minoti qayd etilmagan, holbuki davlat ishlari shartnoma qiymatining {limit} foizini talab qiladi",
+      "suggestion": "Yakuniy kafolatni bajarilish kafolati yoki bank kafolati sifatida qayd eting"
+    },
+    "performance_security_below": {
+      "fail": "Bajarilish ta'minoti shartnoma qiymatining {percent} foizini qoplaydi, bu davlat ishlari talab qiladigan {limit} foizdan kam",
+      "suggestion": "Qonuniy foizning to'liq miqdori uchun bajarilish ta'minotini qayd eting"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "{months} oy yoki undan uzoqroq davom etadigan davlat ishlari qonun bo'yicha narx bo'yicha tuzatilishi shart, shartnomada esa uning o'zgaruvchan bandlari uchun koeffitsiyentlar ko'rsatilmagan",
+        "suggestion": "Texnik konvertda pudratchi ko'rsatgan koeffitsiyentlarni kiriting"
+      },
+      "duplicate_item": {
+        "fail": "{item} o'zgaruvchan bandi narx tuzatish koeffitsiyentlari orasida ikki marta ko'rsatilgan",
+        "suggestion": "Har bir o'zgaruvchan band uchun bitta koeffitsiyentni saqlang"
+      },
+      "coefficient_not_a_number": {
+        "fail": "{item} ning narx tuzatish koeffitsiyenti raqam emas",
+        "suggestion": "Koeffitsiyentni o'nlik kasr ko'rinishida kiriting, masalan 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "{item} ning narx tuzatish koeffitsiyenti nol yoki undan kam, holbuki qonun har bir koeffitsiyent noldan katta bo'lishini talab qiladi",
+        "suggestion": "Noldan katta koeffitsiyent kiriting yoki bandni olib tashlang"
+      },
+      "coefficient_negative": {
+        "fail": "{item} ning narx tuzatish koeffitsiyenti manfiy",
+        "suggestion": "Nol yoki undan katta koeffitsiyent kiriting"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Narx tuzatish koeffitsiyentlari jami {item} ni tashkil etadi, holbuki qonun ularning yig'indisi birdan kam bo'lishini talab qiladi",
+        "suggestion": "Koeffitsiyentlarni kamaytiring, shunda narxning qat'iy qismi qolsin"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Narx tuzatish koeffitsiyentlari jami {item} ni tashkil etadi, bu birdan ko'p",
+        "suggestion": "Koeffitsiyentlarni kamaytiring, shunda ular jami bir yoki undan kam bo'lsin"
+      },
+      "no_coefficients_advisory": {
+        "fail": "{months} oydan uzoq davlat ishlarida xom ashyo xarajatning muhim qismi bo'lgan narx qayta ko'rib chiqish bandi bor, shartnomada esa qayta ko'rib chiqish og'irliklari ko'rsatilmagan",
+        "suggestion": "Maxsus shartlardan qayta ko'rib chiqish formulasining og'irliklarini kiriting yoki narx qat'iy ekanini qayd eting"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Narx tuzatish koeffitsiyentlari jami {item} ni tashkil etadi, holbuki formula ularning aynan bir bo'lishini talab qiladi",
+        "suggestion": "Og'irliklarni shartnoma ma'lumotlaridan to'g'rilang, shunda ular jami bir bo'lsin"
+      },
+      "unknown_regime": {
+        "fail": "Shartnomada narx tuzatish rejimi {item} ko'rsatilgan, platforma uni bilmaydi",
+        "suggestion": "Ro'yxatdagi narx tuzatish rejimlaridan birini tanlang"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Narx tuzatishga kirmaydigan qism {item} nol va bir oralig'ida emas",
+        "suggestion": "Qismni shartnoma ma'lumotlaridan o'nlik kasr ko'rinishida kiriting, masalan 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Avans shartnoma qiymatining {percent} foizi, bu davlat ishlari qonuni ushbu pudratchi va buyurtmachi uchun belgilagan {limit} foiz minimumdan kam",
+      "suggestion": "Avansni minimumgacha oshiring yoki pudratchi undan voz kechgan bo'lsa, nolni qayd eting"
+    },
+    "advance_above_maximum": {
+      "fail": "Avans shartnoma qiymatining {percent} foizi, bu davlat ishlari qonuni odatiy maksimum sifatida belgilagan {limit} foizdan ortiq",
+      "suggestion": "Maxsus shartlar yuqori avansga ruxsat berishini tekshiring va u talab qiladigan kafolatni qayd eting"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Kechikish jarimasi bandi kuniga {amount} undiradi, umumiy shartlar esa kuniga {expected} undiradi, bu shartnoma qiymatining {divisor} dan bir ulushi",
+      "suggestion": "Umumiy shartlardagi kunlik stavkani saqlang yoki boshqacha stavkani maxsus shartlarning chetga chiqishlari qatorida ko'rsating"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Kechikish jarimasi bandi shartnoma qiymatining {percent} foizi bilan cheklangan, bu umumiy shartlardagi {limit} foizdan ortiq",
+      "suggestion": "Chegarani umumiy shartlardagi raqamgacha tushiring yoki uni maxsus shartlarning chetga chiqishlari qatorida ko'rsating"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Bu {amount} qiymatli subpudrat davlat buyurtmachisi tomonidan to'g'ridan-to'g'ri to'lov uchun {limit} chegarasiga yetadi, shartnoma esa undan voz kechadi, bu qonun taqiqlaydi",
+      "suggestion": "Davlat buyurtmachisi subpudratchiga to'g'ridan-to'g'ri to'lashini qayd eting"
+    },
+    "direct_payment_unstated": {
+      "fail": "Bu {amount} qiymatli subpudrat davlat buyurtmachisi tomonidan to'g'ridan-to'g'ri to'lov uchun {limit} chegarasiga yetadi, lekin shartnomada bu qayd etilmagan",
+      "suggestion": "Subpudratchi qabul qilinganmi va davlat buyurtmachisi tomonidan to'g'ridan-to'g'ri to'lanadimi, shuni qayd eting"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Xususiy ishlardagi bu subpudratda na bank kafolati, na to'lovni topshirish qayd etilgan, ularsiz subpudrat bekor qilinishi mumkin",
+      "suggestion": "Asosiy pudratchining bank kafolatini yoki egasi zimmasidagi to'lovni topshirishni qayd eting"
+    },
+    "private_retention_above_limit": {
+      "fail": "{percent} foizlik ushlab qolish, qonun xususiy ishlarda ruxsat beradigan {limit} foizdan ortiq",
+      "suggestion": "Shartnomaning ushlab qolishini qonuniy yuqori chegaragacha kamaytiring"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "{contract} shartnomasi QQS rejimi {regime} ni ko'rsatadi, {country} esa uni qo'llamaydi",
+      "suggestion": "Loyiha mamlakati uchun taklif etilgan QQS rejimlaridan birini tanlang yoki tanlovni olib tashlang"
+    },
+    "country_unknown": {
+      "fail": "{contract} shartnomasi QQS rejimi {regime} ni ko'rsatadi, lekin uning loyihasi mamlakatni ko'rsatmagan, shuning uchun rejimni tekshirib bo'lmaydi",
+      "suggestion": "Loyiha mamlakatini belgilang"
+    },
+    "contract_date_missing": {
+      "fail": "QQS rejimi {regime} faqat {cutoff} dan oldin imzolangan shartnomalar uchun, bu shartnomada esa na imzo sanasi, na boshlanish sanasi qayd etilgan",
+      "suggestion": "Shartnoma imzolangan sanani kiriting"
+    },
+    "contract_too_late": {
+      "fail": "QQS rejimi {regime} faqat {cutoff} dan oldin imzolangan shartnomalar uchun, bu shartnoma esa {contract_date} sanasida",
+      "suggestion": "Ushbu shartnoma uchun standart QQS rejimini tanlang"
+    },
+    "evidence_missing": {
+      "fail": "QQS rejimi {regime} {evidence} ni talab qiladi, shartnomada esa hech biri qayd etilmagan",
+      "suggestion": "Shartnomaning QQS rejimi bilan birga hujjat havolasi va berilgan sanani qayd eting"
+    },
+    "evidence_date_missing": {
+      "fail": "QQS rejimi {regime} uchun qayd etilgan {evidence} da berilgan sana yo'q, shuning uchun u {cutoff} dan oldin ekanligini ko'rsatib bo'lmaydi",
+      "suggestion": "Hujjat berilgan sanani kiriting"
+    },
+    "evidence_too_late": {
+      "fail": "QQS rejimi {regime} uchun qayd etilgan {evidence} {issued_on} da berilgan, rejim esa {cutoff} dan oldin berilgan hujjatni talab qiladi",
+      "suggestion": "Oldinroq hujjatni qayd eting yoki standart QQS rejimini tanlang"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Shartnoma qiymati {original_value} dan {current_value} ga oshdi, shartnomada esa ruxsat etilgan o'sish ko'rsatilmagan, shuning uchun QQS rejimi {regime} hali ham qo'llanishi-qo'llanmasligini baholab bo'lmaydi",
+      "suggestion": "Shartnoma ruxsat etgan ko'lamdagi o'sishni qayd eting"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Shartnoma qiymati {original_value} dan {current_value} ga oshdi, bu shartnoma ruxsat etgan {allowed_increase_pct} foizli o'sishdan ortiq, shuning uchun QQS uchun bu yangi shartnoma va QQS rejimi {regime} endi qo'llanmaydi",
+      "suggestion": "Shartnomani standart QQS rejimiga o'tkazing"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "maslahatchi tomonidan tasdiqlangan to'lov sertifikati",
+      "einvoice": "elektron hisob-faktura yoki elektron kvitansiya",
+      "main_contractor_certificate": "loyiha uchun QQS to'langanligi haqida asosiy pudratchining sertifikati"
+    },
+    "not_in_force": {
+      "before": "{claim} hisob-kitobi {on} sanasida, QQS rejimi {regime} esa faqat {effective_from} dan qo'llaniladi; o'sha kuni amalda: {instead}",
+      "after": "{claim} hisob-kitobi {on} sanasida, QQS rejimi {regime} {effective_to} da tugagan; o'sha kuni amalda: {instead}",
+      "suggestion": "Shartnomaning QQS rejimini hisob-kitob sanasida amalda bo'lgan rejimga o'zgartiring yoki hisob-kitob sanasini to'g'rilang"
+    }
+  }
+}

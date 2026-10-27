@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Le décompte {claim} n'a pas de date de fin de période, il ne peut donc pas être placé dans l'ordre des décomptes du contrat",
+      "suggestion": "Saisissez le dernier jour de la période couverte par ce décompte"
+    },
+    "period_order": {
+      "fail": "Le décompte {claim} commence le {period_from} et se termine le {period_to}, sa période se termine donc avant de commencer",
+      "suggestion": "Corrigez le début ou la fin de la période pour que le début soit antérieur"
+    },
+    "period_overlap": {
+      "fail": "Le décompte {claim} commence le {period_from}, mais le décompte précédent {previous} court jusqu'au {previous_to}, de sorte que les deux décomptes facturent les mêmes jours",
+      "suggestion": "Commencez ce décompte le lendemain de la fin de période du décompte précédent"
+    },
+    "period_gap": {
+      "fail": "Le décompte {claim} commence le {period_from}, mais le décompte précédent {previous} s'est terminé le {previous_to}, de sorte qu'aucun décompte ne facture les jours intermédiaires (jours non facturés : {days})",
+      "suggestion": "Commencez ce décompte le lendemain de la fin de période du décompte précédent, ou vérifiez qu'un décompte ne manque pas"
+    },
+    "period_unparsed": {
+      "fail": "Le décompte {claim} indique {field} comme '{value}', ce qui ne peut pas être lu comme une date",
+      "suggestion": "Saisissez la date sous la forme année, mois et jour, par exemple 2026-03-31",
+      "fields": {
+        "period_start": "début de période",
+        "period_end": "fin de période",
+        "claim_date": "date de la demande de paiement"
+      }
+    },
+    "line_overbilled": {
+      "fail": "La ligne {line} est facturée {billed} à ce jour, soit plus que sa valeur prévue de {scheduled} ; relancez Remplir depuis l'avancement ou réduisez le montant de cette période sur la ligne",
+      "suggestion": "Remplir depuis l'avancement ne facture sur chaque ligne que ce qui est nouveau depuis les décomptes précédents. Si le périmètre de la ligne a réellement augmenté, enregistrez d'abord l'ordre de changement qui augmente sa valeur prévue"
+    },
+    "percent_regressed": {
+      "fail": "La ligne {line} est avancée à {percent} % à ce jour, soit {requested}, ce qui est inférieur aux {previous} déjà facturés sur elle par les décomptes précédents ; rien n'est donc facturé sur cette ligne pour cette période",
+      "suggestion": "Vérifiez le pourcentage d'avancement de cette ligne, ou corrigez le décompte précédent qui l'avait surestimé"
+    },
+    "errors": {
+      "submission_blocked": "Cette demande de paiement ne peut pas être soumise tant que ces points ne sont pas résolus : {findings}",
+      "rules_unavailable": "Les règles des demandes de paiement ne sont pas chargées sur cette installation, ce décompte ne peut donc pas être contrôlé avant d'être soumis.",
+      "later_claim_already_issued": "Le décompte {claims} vient après celui-ci et a déjà été émis. Il a été établi pendant que ce décompte était en brouillon, il s'applique donc déjà à ces travaux. Supprimez ce brouillon, ou déplacez sa période après le dernier décompte émis"
+    },
+    "totals_match_lines": {
+      "fail": "Le décompte {claim} réclame {gross}, mais les lignes qui le composent totalisent {lines_total} : le décompte n'a pas été recalculé après la modification de ses lignes",
+      "suggestion": "Enregistrez une ligne de ce décompte, ou relancez Remplir depuis l'avancement, et ses totaux suivront"
+    },
+    "totals_below_lines": {
+      "fail": "Le décompte {claim} facture {gross} à partir des coûts enregistrés, soit moins que les {lines_total} totalisés par ses propres lignes : le détail ne peut pas réclamer plus que le décompte lui-même",
+      "suggestion": "Sur un décompte facturé à partir des coûts, les lignes sont un détail du montant et non sa source. Réduisez ou supprimez les lignes qui le surestiment, ou générez à nouveau le décompte à partir du coût des travaux pour que les deux concordent"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Le décompte {claim} indique {stored} comme déjà facturé sur la ligne {line}, mais les décomptes précédents facturent maintenant {now} sur elle",
+      "total_fail": "Le décompte {claim} indique {stored} comme déjà certifié, mais les décomptes précédents certifient maintenant {now}",
+      "suggestion": "Générez de nouveau ce décompte pour qu'il reprenne ce que les décomptes précédents facturent aujourd'hui"
+    },
+    "within_nte_cap": {
+      "fail": "Le décompte {claim} facture {this} en plus des {billed} déjà facturés, ce qui dépasse le plafond non-dépassable de {cap}",
+      "suggestion": "Facturez jusqu'au plafond sur ce décompte et convenez d'un ordre de changement pour le reste"
+    },
+    "retention_matches_policy": {
+      "fail": "Le décompte {claim} retient {held} au titre de la retenue de garantie, mais sa politique de retenue donne désormais {expected} : un décompte antérieur, une libération ou la politique a changé après l'établissement de ce décompte",
+      "suggestion": "Relancez Remplir depuis l'avancement, ou enregistrez une ligne de ce décompte, et sa retenue sera recalculée"
+    },
+    "retention_above_cap": {
+      "fail": "Le décompte {claim} retient {held} au titre de la retenue de garantie, au-delà du plafond de {percent} % fixé par sa politique de retenue, soit {cap} sur ce contrat",
+      "suggestion": "Recalculez le décompte, ou relevez le plafond dans la politique de retenue du contrat si les parties ont convenu d'un plafond plus élevé",
+      "state_cap_unread": "Décompte {claim} : sa politique de retenue ne fixe aucun plafond, et {country} limite la retenue de garantie par la loi de l'État. L'État n'a pas pu être déterminé car le projet ne comporte aucun code de subdivision, le plafond légal n'a donc pas été vérifié",
+      "state_cap_suggestion": "Inscrivez la limite de l'État dans la politique de retenue du contrat comme plafond, et chaque décompte de ce contrat sera contrôlé par rapport à elle"
+    },
+    "retention_release_within_held": {
+      "fail": "Les libérations facturées jusqu'au décompte {claim} remboursent {released}, soit plus que les {accrued} de retenue détenus jusqu'à lui",
+      "suggestion": "Annulez la libération trop importante, ou facturez-la sur un décompte ultérieur une fois davantage de retenue détenue"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Le bordereau des valeurs totalise {scheduled}, mais le montant du contrat à ce jour est de {contract_sum} : les lignes sur lesquelles ce décompte est facturé laissent {difference} du contrat sans ligne",
+      "suggestion": "Ajoutez ou corrigez des lignes du bordereau des valeurs jusqu'à ce qu'elles totalisent le montant du contrat",
+      "suggestion_reconcile": "{count} ordres de changement ou variations approuvés ont modifié le montant du contrat avant d'atteindre le bordereau des valeurs. Utilisez Réconcilier les ordres de changement sur le contrat pour ajouter une ligne pour chacun"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Cette libération nécessite le document {document}, et aucun n'est joint",
+      "suggestion": "Enregistrez le document sur le contrat, joignez-le à la libération et approuvez-la de nouveau"
+    },
+    "within_available": {
+      "fail": "Cette libération rembourse {amount}, mais seulement {available} de retenue sont encore détenus et non affectés à une autre libération",
+      "suggestion": "Annulez cette libération et proposez-la de nouveau, pour qu'elle soit dimensionnée sur la retenue détenue aujourd'hui"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Cette libération n'est payée qu'une fois écoulé le délai de privilège de {days} jours suivant l'événement ({reference}), et elle n'indique pas à quelle date ce délai a commencé",
+      "suggestion_no_start": "Saisissez le jour où le délai a commencé, par exemple la date de publication du certificat d'achèvement substantiel, et approuvez de nouveau la libération",
+      "fail_early": "Le délai de privilège de {days} jours qui a commencé le {started} court jusqu'au {ends} ({reference}), cette libération ne peut donc pas encore être approuvée",
+      "suggestion_early": "Approuvez la libération une fois le délai de privilège écoulé, après avoir vérifié qu'aucun privilège n'a été conservé sur la retenue"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "certificat d'achèvement substantiel",
+      "acceptance_protocol": "procès-verbal de réception",
+      "affidavit_payment_of_debts": "attestation de paiement des dettes et créances",
+      "affidavit_release_of_liens": "attestation de mainlevée des privilèges",
+      "consent_of_surety": "accord de la caution",
+      "final_lien_waiver": "renonciation définitive aux privilèges",
+      "final_invoice": "facture finale"
+    },
+    "errors": {
+      "approval_blocked": "Cette libération de retenue ne peut pas être approuvée tant que ces points ne sont pas résolus : {findings}",
+      "rules_unavailable": "Les règles de libération de retenue ne sont pas chargées sur cette installation, cette libération ne peut donc pas être contrôlée avant son approbation."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Travaux facturés non couverts par une ligne du bordereau des valeurs"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Les ordres de changement ne sont rapprochés du bordereau des valeurs que pour un contrat actif ; ce contrat est {status}",
+      "preview_stale": "La liste des ordres de changement à rapprocher a changé depuis son ouverture. Ouvrez de nouveau l'aperçu et confirmez ce qu'il affiche maintenant"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Ce contrat ne peut pas être signé tant que ces points ne sont pas résolus : {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "achèvement",
+      "approval": "approbation"
+    },
+    "total_within_contract": {
+      "fail": "Les échéances totalisent {scheduled}, soit plus que le montant du contrat de {total}",
+      "suggestion": "Réduisez les échéances pour qu'elles totalisent au plus le montant du contrat"
+    },
+    "percent_sum": {
+      "fail": "Les échéances totalisent {scheduled} sur le montant du contrat de {total} ({percent} %), une partie du prix n'a donc pas d'échéance",
+      "suggestion": "Ajoutez une échéance pour le solde du montant du contrat, ou ajustez les montants"
+    },
+    "completion_trigger_linked": {
+      "fail": "L'échéance {milestone} arrive à terme à l'{trigger}, mais elle n'est liée à aucune activité du planning, sa date ne bougera donc pas avec les travaux",
+      "suggestion": "Liez l'échéance au jalon du planning qu'elle attend"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Le planning indique le jalon {milestone} atteint, mais l'échéance {instalment} est toujours en attente, elle ne peut donc pas être facturée",
+      "suggestion": "Marquez l'échéance comme atteinte, ou vérifiez pourquoi le contrat n'est pas actif"
+    },
+    "client_visible_requires_active": {
+      "fail": "L'échéance {milestone} est visible par le client, mais le contrat est {status} ; le client ne voit l'échéancier que d'un contrat actif ou achevé",
+      "suggestion": "Masquez l'échéance au client tant que le contrat n'est pas en vigueur"
+    },
+    "consumer_deposit_cap": {
+      "fail": "L'acompte de {deposit} dépasse le plafond de {ceiling} que {reference} autorise en {jurisdiction} (source : {source_url}, vérifié le {checked_on}, non relu par un juriste)",
+      "suggestion": "Réduisez l'acompte, ou faites confirmer par un conseil juridique qu'une exemption s'applique à ce contrat",
+      "below_threshold": {
+        "fail": "Le montant du contrat est égal ou inférieur au seuil à partir duquel {reference} limite les acomptes en {jurisdiction}, l'acompte n'a donc pas été contrôlé (source : {source_url})"
+      },
+      "other_currency": {
+        "fail": "Le contrat est libellé en {currency}, mais {reference} exprime sa limite en {limit_currency}, l'acompte en {jurisdiction} n'a donc pas été contrôlé (source : {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Si la loi s'applique à ce contrat, vérifiez manuellement l'acompte par rapport à elle"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Les travaux certifiés à ce jour s'élèvent à {cumulative}, soit {over} de plus que le montant du contrat de {contract}",
+      "suggestion": "Faites d'abord approuver l'ordre de changement qui couvre les travaux supplémentaires, ou corrigez les quantités de ce certificat"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Ce certificat reprend {carried} comme total des certificats précédents, mais le certificat {reference} a été certifié à {certified}",
+      "work_fail": "La colonne précédente de la liste des travaux totalise {carried}, mais le certificat {reference} a été certifié avec {certified} de travaux à ce jour",
+      "suggestion": "Recherchez un décompte entre les deux certificats qu'aucun des deux ne montre, puis générez de nouveau celui-ci"
+    },
+    "previous_unknown": {
+      "fail": "Le total des certificats précédents n'est pas connu",
+      "not_certified": "Le certificat précédent {reference} n'est pas encore certifié, son total n'est donc pas définitif",
+      "suggestion": "Certifiez d'abord le certificat précédent. S'il a été certifié avant l'enregistrement des certificats, saisissez son total sur la ligne des certificats précédents"
+    },
+    "weights_sum": {
+      "fail": "Les pondérations des postes totalisent {total} %, et non 100 %",
+      "suggestion": "Corrigez les valeurs des lignes du bordereau pour que leurs parts totalisent l'ensemble du contrat"
+    },
+    "percent_regressed": {
+      "fail": "Le poste {line} est négatif sur cette période, il reprend donc des travaux déjà certifiés",
+      "suggestion": "Laissez-le s'il corrige une surmesure antérieure. Sinon, corrigez la quantité ou le pourcentage sur ce certificat"
+    },
+    "income_withholding_single_year": {
+      "fail": "La retenue à la source sur les revenus est sélectionnée, mais le contrat court du {start} au {end}, soit sur une seule année civile. La retenue concerne des travaux de construction qui s'étendent sur plus d'une année civile",
+      "suggestion": "Vérifiez auprès de votre comptable si les travaux s'étendent réellement sur plus d'un an ; si ce n'est pas le cas, marquez la retenue à la source comme non applicable"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "L'avance récupérée à ce jour est de {recovered}, soit plus que l'avance de {advance} qui a été versée",
+      "unknown": "{recovered} d'avance ont été récupérés à ce jour, mais le contrat n'indique pas l'avance versée, la récupération ne peut donc pas être contrôlée par rapport à elle",
+      "suggestion": "Réduisez la récupération sur ce certificat, ou indiquez l'avance versée dans les paramètres de certificats du contrat"
+    },
+    "retention_matches_config": {
+      "fail": "Le certificat retient {certificate} au titre de la retenue de garantie ({percent} % de sa base), mais le document sous-jacent retient {stored}",
+      "suggestion": "Recalculez le document, ou corrigez le taux de retenue ou sa base dans les paramètres de certificats du contrat, pour que les deux affichent la même retenue"
+    },
+    "net_payable_negative": {
+      "fail": "Le montant à payer est de {payable} : les retenues sont supérieures au montant de ce certificat",
+      "suggestion": "Vérifiez les retenues, en particulier la récupération d'avance, et reportez sur le prochain certificat ce qui ne peut pas être déduit maintenant"
+    },
+    "taxes_stale": {
+      "fail": "Les taxes ont été calculées avant que ce certificat ne soit modifié, elles ne s'y rapportent donc plus",
+      "suggestion": "Recalculez les taxes. Si elles étaient déjà confirmées, rouvrez-les d'abord puis confirmez-les de nouveau ensuite"
+    },
+    "taxes_confirmed": {
+      "fail": "Les montants de taxes de ce certificat n'ont pas été confirmés",
+      "suggestion": "Vérifiez chaque ligne de taxe et confirmez les taxes avant de certifier"
+    },
+    "lines_complete": {
+      "fail": "La ligne {line} n'a pas encore de montant. {reason}",
+      "suggestion": "Saisissez le montant, ou marquez la ligne comme non applicable en indiquant la raison"
+    },
+    "work_value_differs": {
+      "fail": "Le poste {line} est enregistré à {stated} à ce jour, mais sa quantité ou son pourcentage donne {computed}",
+      "suggestion": "Corrigez la quantité ou le montant du document pour que les deux colonnes de la ligne concordent"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Une retenue de garantie de {percent} % dépasse les {limit} % que la loi sur les travaux publics autorise sur chaque paiement intermédiaire",
+      "suggestion": "Ramenez la retenue du contrat au taux légal"
+    },
+    "advance_above_cap": {
+      "fail": "La caution de l'avance couvre {percent} % de la valeur du contrat, au-delà des {limit} % que les travaux publics autorisent sans l'accord du ministre des Finances",
+      "suggestion": "Réduisez l'avance, ou consignez dans les conditions du contrat l'accord obtenu avant l'appel d'offres"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Une clause de pénalités de retard n'a aucun montant maximum, alors que la loi sur les travaux publics plafonne les pénalités de retard à {limit} % de la valeur du contrat",
+      "suggestion": "Saisissez le montant maximum de la clause de pénalités de retard"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Une clause de pénalités de retard est plafonnée à {percent} % de la valeur du contrat, au-delà des {limit} % que la loi sur les travaux publics autorise",
+      "suggestion": "Ramenez le montant maximum de la clause au plafond légal"
+    },
+    "performance_security_missing": {
+      "fail": "Aucune garantie de bonne exécution n'est enregistrée, alors que les travaux publics en exigent une de {limit} % de la valeur du contrat",
+      "suggestion": "Enregistrez la garantie finale comme caution de bonne exécution ou garantie bancaire"
+    },
+    "performance_security_below": {
+      "fail": "La garantie de bonne exécution couvre {percent} % de la valeur du contrat, soit moins que les {limit} % exigés pour les travaux publics",
+      "suggestion": "Enregistrez une garantie de bonne exécution pour le pourcentage légal complet"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Les travaux publics d'une durée de {months} mois ou plus doivent faire l'objet d'une révision de prix par la loi, et le contrat n'indique aucun coefficient pour ses éléments variables",
+        "suggestion": "Saisissez les coefficients indiqués par l'entrepreneur dans l'enveloppe technique"
+      },
+      "duplicate_item": {
+        "fail": "L'élément variable {item} figure deux fois dans les coefficients de révision de prix",
+        "suggestion": "Conservez un seul coefficient par élément variable"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Le coefficient de révision de prix de {item} n'est pas un nombre",
+        "suggestion": "Saisissez le coefficient sous forme décimale, par exemple 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Le coefficient de révision de prix de {item} est nul ou négatif, alors que la loi exige que chaque coefficient soit supérieur à zéro",
+        "suggestion": "Saisissez un coefficient supérieur à zéro, ou supprimez l'élément"
+      },
+      "coefficient_negative": {
+        "fail": "Le coefficient de révision de prix de {item} est négatif",
+        "suggestion": "Saisissez un coefficient égal ou supérieur à zéro"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Les coefficients de révision de prix totalisent {item}, alors que la loi exige que leur somme reste inférieure à un",
+        "suggestion": "Réduisez les coefficients pour qu'une part fixe du prix subsiste"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Les coefficients de révision de prix totalisent {item}, soit plus d'un",
+        "suggestion": "Réduisez les coefficients pour qu'ils totalisent un ou moins"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Les travaux publics de plus de {months} mois comportent une clause de révision de prix lorsque les matières premières représentent une part importante du coût, et le contrat n'indique aucune pondération de révision",
+        "suggestion": "Saisissez les pondérations de la formule de révision issues des conditions particulières, ou indiquez que le prix est ferme"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Les coefficients de révision de prix totalisent {item}, alors que la formule exige qu'ils totalisent exactement un",
+        "suggestion": "Corrigez les pondérations à partir des données du contrat pour qu'elles totalisent un"
+      },
+      "unknown_regime": {
+        "fail": "Le contrat désigne le régime de révision de prix {item}, que la plateforme ne connaît pas",
+        "suggestion": "Choisissez l'un des régimes de révision de prix proposés"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "La part non soumise à la révision de prix, {item}, n'est pas comprise entre zéro et un",
+        "suggestion": "Saisissez la part sous forme décimale à partir des données du contrat, par exemple 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "L'avance représente {percent} % de la valeur du contrat, soit moins que le minimum de {limit} % que la loi sur les travaux publics fixe pour cet entrepreneur et ce maître d'ouvrage",
+      "suggestion": "Relevez l'avance au minimum, ou enregistrez zéro si l'entrepreneur y a renoncé"
+    },
+    "advance_above_maximum": {
+      "fail": "L'avance représente {percent} % de la valeur du contrat, soit plus que le maximum usuel de {limit} % fixé par la loi sur les travaux publics",
+      "suggestion": "Vérifiez que les conditions particulières autorisent l'avance plus élevée et enregistrez la garantie qu'elle exige"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Une clause de pénalités de retard facture {amount} par jour, alors que les conditions générales facturent {expected} par jour, soit un {divisor}e de la valeur du contrat",
+      "suggestion": "Conservez le taux journalier des conditions générales, ou indiquez le taux différent parmi les dérogations des conditions particulières"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Une clause de pénalités de retard est plafonnée à {percent} % de la valeur du contrat, au-delà des {limit} % des conditions générales",
+      "suggestion": "Ramenez le plafond au chiffre des conditions générales, ou indiquez-le parmi les dérogations des conditions particulières"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Ce sous-traité de {amount} atteint le seuil de {limit} pour le paiement direct par le maître d'ouvrage public, et le contrat y renonce, ce que la loi interdit",
+      "suggestion": "Indiquez que le maître d'ouvrage public paie directement le sous-traitant"
+    },
+    "direct_payment_unstated": {
+      "fail": "Ce sous-traité de {amount} atteint le seuil de {limit} pour le paiement direct par le maître d'ouvrage public, et le contrat ne le mentionne pas",
+      "suggestion": "Indiquez si le sous-traitant est agréé et payé directement par le maître d'ouvrage public"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Ce sous-traité sur des travaux privés ne mentionne ni garantie bancaire ni délégation de paiement, sans lesquelles le sous-traité peut être annulé",
+      "suggestion": "Enregistrez la garantie bancaire de l'entrepreneur principal ou la délégation de paiement au maître d'ouvrage"
+    },
+    "private_retention_above_limit": {
+      "fail": "Une retenue de garantie de {percent} % dépasse les {limit} % que la loi autorise pour les travaux privés",
+      "suggestion": "Ramenez la retenue du contrat au plafond légal"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Le contrat {contract} désigne le régime de TVA {regime}, que {country} ne connaît pas",
+      "suggestion": "Choisissez l'un des régimes de TVA proposés pour le pays du projet, ou supprimez le choix"
+    },
+    "country_unknown": {
+      "fail": "Le contrat {contract} désigne le régime de TVA {regime}, mais son projet ne mentionne aucun pays, le régime ne peut donc pas être contrôlé",
+      "suggestion": "Renseignez le pays du projet"
+    },
+    "contract_date_missing": {
+      "fail": "Le régime de TVA {regime} ne concerne que les contrats signés avant le {cutoff}, et ce contrat n'indique ni date de signature ni date de début",
+      "suggestion": "Saisissez la date à laquelle le contrat a été signé"
+    },
+    "contract_too_late": {
+      "fail": "Le régime de TVA {regime} ne concerne que les contrats signés avant le {cutoff}, et ce contrat date du {contract_date}",
+      "suggestion": "Choisissez le régime de TVA standard pour ce contrat"
+    },
+    "evidence_missing": {
+      "fail": "Le régime de TVA {regime} nécessite {evidence}, et le contrat n'en enregistre aucun",
+      "suggestion": "Enregistrez la référence du document et sa date d'émission avec le régime de TVA du contrat"
+    },
+    "evidence_date_missing": {
+      "fail": "Le {evidence} enregistré pour le régime de TVA {regime} n'a pas de date d'émission, il ne peut donc pas être présenté comme antérieur au {cutoff}",
+      "suggestion": "Saisissez la date d'émission du document"
+    },
+    "evidence_too_late": {
+      "fail": "Le {evidence} enregistré pour le régime de TVA {regime} a été émis le {issued_on}, alors que le régime exige un document émis avant le {cutoff}",
+      "suggestion": "Enregistrez un document antérieur, ou choisissez le régime de TVA standard"
+    },
+    "scope_increase_unjudged": {
+      "fail": "La valeur du contrat est passée de {original_value} à {current_value}, et le contrat ne mentionne aucune augmentation autorisée ; il n'est donc pas possible de juger si le régime de TVA {regime} s'applique encore",
+      "suggestion": "Enregistrez l'élargissement du périmètre que le contrat autorise"
+    },
+    "scope_increase_new_contract": {
+      "fail": "La valeur du contrat est passée de {original_value} à {current_value}, au-delà de l'augmentation de {allowed_increase_pct} % que le contrat autorise ; pour la TVA, c'est donc un nouveau contrat et le régime de TVA {regime} ne s'applique plus",
+      "suggestion": "Faites passer le contrat au régime de TVA standard"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "un certificat de paiement approuvé par le maître d'œuvre",
+      "einvoice": "une facture ou un reçu électronique",
+      "main_contractor_certificate": "le certificat de l'entrepreneur principal attestant que la TVA a été payée sur le projet"
+    },
+    "not_in_force": {
+      "before": "Le décompte {claim} est daté du {on}, et le régime de TVA {regime} ne s'applique qu'à partir du {effective_from} ; en vigueur ce jour-là : {instead}",
+      "after": "Le décompte {claim} est daté du {on}, et le régime de TVA {regime} a pris fin le {effective_to} ; en vigueur ce jour-là : {instead}",
+      "suggestion": "Changez le régime de TVA du contrat pour un régime en vigueur à la date du décompte, ou corrigez la date du décompte"
+    }
+  }
+}

@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "确定"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "付款申请 {claim} 没有期间结束日期，因此无法在合同的付款申请中排定顺序",
+      "suggestion": "输入本付款申请所覆盖期间的最后一天"
+    },
+    "period_order": {
+      "fail": "付款申请 {claim} 从 {period_from} 开始，到 {period_to} 结束，即期间在开始之前就已结束",
+      "suggestion": "更正期间的开始或结束日期，使开始日期在前"
+    },
+    "period_overlap": {
+      "fail": "付款申请 {claim} 从 {period_from} 开始，但前一份付款申请 {previous} 延续到 {previous_to}，因此两份申请对相同的日期重复计费",
+      "suggestion": "将本付款申请的开始日期设为前一份付款申请期间结束的次日"
+    },
+    "period_gap": {
+      "fail": "付款申请 {claim} 从 {period_from} 开始，但前一份付款申请 {previous} 在 {previous_to} 结束，因此中间的日期没有任何付款申请计费（未计费天数：{days}）",
+      "suggestion": "将本付款申请的开始日期设为前一份付款申请期间结束的次日，或检查是否遗漏了某份付款申请"
+    },
+    "period_unparsed": {
+      "fail": "付款申请 {claim} 将 {field} 记录为 '{value}'，无法识别为日期",
+      "suggestion": "按年、月、日的格式输入日期，例如 2026-03-31",
+      "fields": {
+        "period_start": "期间开始日期",
+        "period_end": "期间结束日期",
+        "claim_date": "申请日期"
+      }
+    },
+    "line_overbilled": {
+      "fail": "明细项 {line} 截至目前已计费 {billed}，超过其计划价值 {scheduled}；请重新运行“根据进度填充”，或降低该明细项本期的金额",
+      "suggestion": "“根据进度填充”只会为每个明细项计入相对于之前付款申请的新增部分。如果该明细项的范围确实扩大了，请先录入提高其计划价值的变更单"
+    },
+    "percent_regressed": {
+      "fail": "明细项 {line} 截至目前完成 {percent}%，即 {requested}，低于之前付款申请已对其计费的 {previous}，因此本期不对该明细项计费",
+      "suggestion": "检查该明细项的完成百分比，或更正之前高估了它的付款申请"
+    },
+    "errors": {
+      "submission_blocked": "在以下问题解决之前，本付款申请无法提交：{findings}",
+      "rules_unavailable": "本部署未加载付款申请规则，因此本付款申请在提交前无法进行检查。",
+      "later_claim_already_issued": "付款申请 {claims} 排在本申请之后，并且已经发出。它是在本申请还是草稿时生成的，因此已经针对这部分工作计费。请删除本草稿，或将其期间移到最后一份已发出的付款申请之后"
+    },
+    "totals_match_lines": {
+      "fail": "付款申请 {claim} 申请 {gross}，但其下各明细项合计为 {lines_total}：明细项变更后，该申请没有重新计算",
+      "suggestion": "保存本付款申请的任一明细项，或重新运行“根据进度填充”，合计金额即会随之更新"
+    },
+    "totals_below_lines": {
+      "fail": "付款申请 {claim} 依据已记录的成本计费 {gross}，低于其自身明细项合计的 {lines_total}：明细拆分不能申请超过付款申请本身的金额",
+      "suggestion": "对于依据成本计费的付款申请，明细项是金额的拆分，而不是金额的来源。请降低或删除高估的明细项，或根据工程成本重新生成付款申请，使两者一致"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "付款申请 {claim} 在明细项 {line} 上记录的此前已计费金额为 {stored}，但此前的付款申请目前在该项上计费 {now}",
+      "total_fail": "付款申请 {claim} 记录的此前已核定金额为 {stored}，但此前的付款申请目前核定为 {now}",
+      "suggestion": "重新生成本付款申请，使其读取前面各份付款申请今天的计费结果"
+    },
+    "within_nte_cap": {
+      "fail": "付款申请 {claim} 在已计费的 {billed} 之上再计费 {this}，超过了 {cap} 的不得超过上限",
+      "suggestion": "本付款申请最多计费至上限，其余部分另行商定变更单"
+    },
+    "retention_matches_policy": {
+      "fail": "付款申请 {claim} 扣留的质保金为 {held}，但其质保金政策现在给出 {expected}：在该申请计算之后，有一份早期申请、一次释放或政策发生了变化",
+      "suggestion": "重新运行“根据进度填充”，或保存本付款申请的任一明细项，质保金即会重新计算"
+    },
+    "retention_above_cap": {
+      "fail": "付款申请 {claim} 扣留的质保金为 {held}，超过其质保金政策规定的 {percent}% 上限，即本合同的 {cap}",
+      "suggestion": "重新计算该付款申请；如果各方已约定更高的上限，请提高合同质保金政策中的上限",
+      "state_cap_unread": "付款申请 {claim}：其质保金政策未设定上限，而 {country} 依据州法律限制质保金。由于项目没有分区代码，无法确定所属州，因此未检查法定上限",
+      "state_cap_suggestion": "将州的限额作为上限写入合同的质保金政策，本合同的每份付款申请都会据此进行检查"
+    },
+    "retention_release_within_held": {
+      "fail": "截至付款申请 {claim} 已计费的质保金释放合计退还 {released}，超过此前已扣留的 {accrued} 质保金",
+      "suggestion": "作废过大的释放，或在扣留了更多质保金之后，在后续付款申请中计费"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "工程量清单（SOV）合计为 {scheduled}，但截至目前的合同金额为 {contract_sum}：本付款申请所计费的明细项使合同中有 {difference} 没有对应明细项",
+      "suggestion": "增加或更正 SOV 明细项，直至其合计等于合同金额",
+      "suggestion_reconcile": "{count} 份已批准的变更单或变更在进入 SOV 之前已改变了合同金额。请在合同上使用“核对变更单”，为每一份增加一个明细项"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "本次释放需要 {document}，但尚未附上任何文件",
+      "suggestion": "在合同中登记该文件，将其附到释放中，然后重新审批"
+    },
+    "within_available": {
+      "fail": "本次释放退还 {amount}，但目前仅有 {available} 的质保金仍被扣留且未被其他释放占用",
+      "suggestion": "作废本次释放并重新提出，使其按当前扣留的质保金确定金额"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "本次释放仅在事件之后 {days} 天的留置权期限届满后支付（{reference}），但未说明该期限从何时开始",
+      "suggestion_no_start": "输入该期限开始的日期，例如实质性完工证书的发布日期，然后重新审批该释放",
+      "fail_early": "从 {started} 开始的 {days} 天留置权期限将持续到 {ends}（{reference}），因此本次释放现在还不能审批",
+      "suggestion_early": "在留置权期限届满后审批该释放，并先确认没有针对质保金保留任何留置权"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "实质性完工证书",
+      "acceptance_protocol": "验收记录",
+      "affidavit_payment_of_debts": "债务及索赔已付清的宣誓书",
+      "affidavit_release_of_liens": "留置权解除宣誓书",
+      "consent_of_surety": "保证人同意书",
+      "final_lien_waiver": "最终留置权放弃书",
+      "final_invoice": "最终发票"
+    },
+    "errors": {
+      "approval_blocked": "在以下问题解决之前，本次质保金释放无法审批：{findings}",
+      "rules_unavailable": "本部署未加载质保金释放规则，因此本次释放在审批前无法进行检查。"
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "已计费的工程量未被任何 SOV 明细项涵盖"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "变更单只能核对到生效合同的 SOV 上；本合同的状态为 {status}",
+      "preview_stale": "自您打开以来，待核对的变更单列表已发生变化。请重新打开预览并确认当前显示的内容"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "在以下问题解决之前，本合同无法签署：{findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "完工",
+      "approval": "批准"
+    },
+    "total_within_contract": {
+      "fail": "分期付款合计为 {scheduled}，超过了合同金额 {total}",
+      "suggestion": "减少分期付款金额，使其合计不超过合同金额"
+    },
+    "percent_sum": {
+      "fail": "分期付款合计为合同金额 {total} 的 {scheduled}（{percent}%），因此部分价款没有对应的分期付款",
+      "suggestion": "为合同金额的剩余部分增加一期分期付款，或调整金额"
+    },
+    "completion_trigger_linked": {
+      "fail": "分期付款 {milestone} 将在 {trigger} 时到期，但它未关联进度活动，因此其日期不会随工程进展而变动",
+      "suggestion": "将该分期付款关联到它所等待的进度里程碑"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "进度显示 {milestone} 已达成，但分期付款 {instalment} 仍处于待定状态，因此无法申请",
+      "suggestion": "将该分期付款标记为已达成，或检查合同为何未生效"
+    },
+    "client_visible_requires_active": {
+      "fail": "分期付款 {milestone} 已向客户显示，但合同状态为 {status}；客户只能查看生效或已完成合同的计划",
+      "suggestion": "在合同生效之前，对客户隐藏该分期付款"
+    },
+    "consumer_deposit_cap": {
+      "fail": "预付款 {deposit} 超过了 {reference} 在 {jurisdiction} 允许的 {ceiling}（来源：{source_url}，核查日期 {checked_on}，未经律师审核）",
+      "suggestion": "降低押金，或与法律顾问确认本合同适用某项豁免",
+      "below_threshold": {
+        "fail": "合同金额等于或低于 {reference} 在 {jurisdiction} 限制押金的起点，因此未对押金进行检查（来源：{source_url}）"
+      },
+      "other_currency": {
+        "fail": "合同以 {currency} 计价，但 {reference} 以 {limit_currency} 规定其限额，因此未对 {jurisdiction} 的押金进行检查（来源：{source_url}）"
+      },
+      "unchecked": {
+        "suggestion": "如果该法律适用于本合同，请人工对照该法律检查押金"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "截至目前已核定的工程量为 {cumulative}，超出合同金额 {contract} {over}",
+      "suggestion": "请先批准涵盖额外工程的变更单，或更正本证书上的工程量"
+    },
+    "previous_matches_last_certified": {
+      "fail": "本证书将前期证书合计记为 {carried}，但证书 {reference} 的核定金额为 {certified}",
+      "work_fail": "工程清单的上期列合计为 {carried}，但证书 {reference} 核定时截至目前的工程量为 {certified}",
+      "suggestion": "检查两份证书之间是否存在两者都未体现的付款申请，然后重新生成本证书"
+    },
+    "previous_unknown": {
+      "fail": "前期证书合计未知",
+      "not_certified": "前期证书 {reference} 尚未核定，因此其合计尚不是最终数额",
+      "suggestion": "请先核定前期证书。如果它是在证书保存功能启用之前核定的，请在前期证书一行中输入其合计"
+    },
+    "weights_sum": {
+      "fail": "各项目的权重合计为 {total}%，而非 100%",
+      "suggestion": "更正进度行的数值，使其占比合计为整个合同"
+    },
+    "percent_regressed": {
+      "fail": "项目 {line} 本期为负数，因此会扣减已核定的工程量",
+      "suggestion": "如果这是为了更正之前的超量计量，可保留。否则请更正本证书上的数量或百分比"
+    },
+    "income_withholding_single_year": {
+      "fail": "已选择所得税代扣代缴，但合同期间为 {start} 至 {end}，在同一个日历年内。代扣代缴适用于跨越多个日历年的建筑工程",
+      "suggestion": "请与会计确认工程是否确实跨越一年以上；如果不是，请将所得税代扣代缴标记为不适用"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "截至目前已收回的预付款为 {recovered}，超过了已支付的预付款 {advance}",
+      "unknown": "截至目前已收回 {recovered} 的预付款，但合同未说明已支付的预付款金额，因此无法对照核实收回金额",
+      "suggestion": "降低本证书上的收回金额，或在合同的证书设置中填写已支付的预付款"
+    },
+    "retention_matches_config": {
+      "fail": "证书扣留的质保金为 {certificate}（其基数的 {percent}%），但其背后的文件扣留了 {stored}",
+      "suggestion": "重新计算该文件，或在合同的证书设置中更正质保金比例或其基数，使两者显示相同的质保金"
+    },
+    "net_payable_negative": {
+      "fail": "应付金额为 {payable}：扣减项大于本证书的金额",
+      "suggestion": "检查扣减项，尤其是预付款收回，并将目前无法扣减的部分结转到下一份证书"
+    },
+    "taxes_stale": {
+      "fail": "税款是在本证书变更之前计算的，因此已不再属于本证书",
+      "suggestion": "重新计算税款。如果税款已确认，请先重新打开，之后再次确认"
+    },
+    "taxes_confirmed": {
+      "fail": "本证书的税务数据尚未确认",
+      "suggestion": "在核定证书之前，逐行检查税务并确认税款"
+    },
+    "lines_complete": {
+      "fail": "第 {line} 行尚无数值。{reason}",
+      "suggestion": "输入金额，或将该行标记为不适用并说明原因"
+    },
+    "work_value_differs": {
+      "fail": "项目 {line} 截至目前记录为 {stated}，但其数量或百分比计算结果为 {computed}",
+      "suggestion": "更正单据上的数量或金额，使该行的两列一致"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "质保金 {percent}% 高于公共工程法律在每次中期付款中允许的 {limit}%",
+      "suggestion": "将合同质保金降至法定比例"
+    },
+    "advance_above_cap": {
+      "fail": "预付款保函覆盖合同价值的 {percent}%，高于公共工程在未经财政部长批准的情况下允许的 {limit}%",
+      "suggestion": "降低预付款，或在合同条款中记录投标前已取得的批准"
+    },
+    "delay_damages_uncapped": {
+      "fail": "延误违约金条款没有最高金额，而公共工程法律将延误违约金限制在合同价值的 {limit}%",
+      "suggestion": "输入延误违约金条款的最高金额"
+    },
+    "delay_damages_above_cap": {
+      "fail": "延误违约金条款限定为合同价值的 {percent}%，高于公共工程法律允许的 {limit}%",
+      "suggestion": "将该条款的最高金额降至法定上限"
+    },
+    "performance_security_missing": {
+      "fail": "未记录履约担保，而公共工程要求合同价值的 {limit}%",
+      "suggestion": "将最终保函记录为履约保证金或银行保函"
+    },
+    "performance_security_below": {
+      "fail": "履约担保覆盖合同价值的 {percent}%，低于公共工程要求的 {limit}%",
+      "suggestion": "按法定百分比足额记录履约担保"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "依法，工期为 {months} 个月或以上的公共工程必须进行价格调整，但合同未为其可变项目规定任何系数",
+        "suggestion": "输入承包商在技术标中声明的系数"
+      },
+      "duplicate_item": {
+        "fail": "可变项目 {item} 在价格调整系数中被列了两次",
+        "suggestion": "每个可变项目只保留一个系数"
+      },
+      "coefficient_not_a_number": {
+        "fail": "{item} 的价格调整系数不是数字",
+        "suggestion": "以小数形式输入系数，例如 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "{item} 的价格调整系数为零或负数，而法律要求每个系数都大于零",
+        "suggestion": "输入大于零的系数，或删除该项目"
+      },
+      "coefficient_negative": {
+        "fail": "{item} 的价格调整系数为负数",
+        "suggestion": "输入零或正数的系数"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "价格调整系数合计为 {item}，而法律要求其总和保持在一以下",
+        "suggestion": "降低系数，使价格中保留固定部分"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "价格调整系数合计为 {item}，超过一",
+        "suggestion": "降低系数，使其合计为一或更小"
+      },
+      "no_coefficients_advisory": {
+        "fail": "工期超过 {months} 个月的公共工程设有价格调整条款，其中原材料是成本的重要组成部分，但合同未规定任何调整权重",
+        "suggestion": "从专用条款中输入调整公式的权重，或记录价格为固定价格"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "价格调整系数合计为 {item}，而公式要求其合计恰好为一",
+        "suggestion": "根据合同数据更正权重，使其合计为一"
+      },
+      "unknown_regime": {
+        "fail": "合同指定的价格调整机制为 {item}，本平台不识别该机制",
+        "suggestion": "从所列价格调整机制中选择一种"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "不进行价格调整的部分 {item} 不在零到一之间",
+        "suggestion": "根据合同数据以小数形式输入该部分，例如 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "预付款为合同价值的 {percent}%，低于公共工程法律针对该承包商和业主规定的 {limit}% 最低比例",
+      "suggestion": "将预付款提高至最低比例，如承包商已放弃则记录为零"
+    },
+    "advance_above_maximum": {
+      "fail": "预付款为合同价值的 {percent}%，高于公共工程法律规定的通常最高比例 {limit}%",
+      "suggestion": "核实专用条款是否允许更高的预付款，并记录其要求的担保"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "延误罚款条款按每日 {amount} 计收，而通用条件按每日 {expected} 计收，即合同价值的 {divisor} 分之一",
+      "suggestion": "保留通用条件的日费率，或将不同的费率列入专用条件的偏离条款"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "延误罚款条款限定为合同价值的 {percent}%，高于通用条件的 {limit}%",
+      "suggestion": "将上限降至通用条件的数值，或将其列入专用条件的偏离条款"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "这份金额为 {amount} 的分包合同达到了公共买方直接付款的 {limit} 门槛，而合同放弃了该门槛，法律禁止这样做",
+      "suggestion": "记录公共买方直接向分包商付款"
+    },
+    "direct_payment_unstated": {
+      "fail": "这份金额为 {amount} 的分包合同达到了公共买方直接付款的 {limit} 门槛，但合同未记录此事项",
+      "suggestion": "记录分包商是否获得接受，并由公共买方直接付款"
+    },
+    "payment_guarantee_missing": {
+      "fail": "这份私营工程分包合同既未记录银行保函，也未记录付款委托，缺少其中之一分包合同可能被撤销",
+      "suggestion": "记录总承包商的银行保函，或业主的付款委托"
+    },
+    "private_retention_above_limit": {
+      "fail": "质保金 {percent}% 高于法律对私营工程允许的 {limit}%",
+      "suggestion": "将合同质保金降至法定上限"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "合同 {contract} 指定的增值税制度 {regime} 在 {country} 并不存在",
+      "suggestion": "从项目所在国提供的增值税制度中选择一种，或取消该选择"
+    },
+    "country_unknown": {
+      "fail": "合同 {contract} 指定的增值税制度为 {regime}，但其项目未指定国家，因此无法检查该制度",
+      "suggestion": "设置项目所在国家"
+    },
+    "contract_date_missing": {
+      "fail": "增值税制度 {regime} 仅适用于 {cutoff} 之前签署的合同，而本合同既未记录签署日期，也未记录开始日期",
+      "suggestion": "输入合同签署日期"
+    },
+    "contract_too_late": {
+      "fail": "增值税制度 {regime} 仅适用于 {cutoff} 之前签署的合同，而本合同签署于 {contract_date}",
+      "suggestion": "为本合同选择标准增值税制度"
+    },
+    "evidence_missing": {
+      "fail": "增值税制度 {regime} 需要 {evidence}，但合同未记录任何此类文件",
+      "suggestion": "在合同的增值税制度旁记录文件编号和出具日期"
+    },
+    "evidence_date_missing": {
+      "fail": "为增值税制度 {regime} 记录的 {evidence} 没有出具日期，因此无法证明其早于 {cutoff}",
+      "suggestion": "输入该文件的出具日期"
+    },
+    "evidence_too_late": {
+      "fail": "为增值税制度 {regime} 记录的 {evidence} 出具于 {issued_on}，而该制度需要在 {cutoff} 之前出具的文件",
+      "suggestion": "记录更早出具的文件，或选择标准增值税制度"
+    },
+    "scope_increase_unjudged": {
+      "fail": "合同价值从 {original_value} 增加到 {current_value}，而合同未说明允许的增幅，因此无法判断增值税制度 {regime} 是否仍然适用",
+      "suggestion": "记录合同允许的范围增加幅度"
+    },
+    "scope_increase_new_contract": {
+      "fail": "合同价值从 {original_value} 增加到 {current_value}，超出了合同允许的 {allowed_increase_pct}% 增幅，因此就增值税而言这是一份新合同，增值税制度 {regime} 不再适用",
+      "suggestion": "将合同改为标准增值税制度"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "经顾问批准的付款证书",
+      "einvoice": "电子发票或电子收据",
+      "main_contractor_certificate": "总承包商出具的、证明已就本项目缴纳增值税的证书"
+    },
+    "not_in_force": {
+      "before": "付款申请 {claim} 日期为 {on}，而增值税制度 {regime} 仅自 {effective_from} 起适用；当日生效的是：{instead}",
+      "after": "付款申请 {claim} 日期为 {on}，而增值税制度 {regime} 已于 {effective_to} 终止；当日生效的是：{instead}",
+      "suggestion": "将合同的增值税制度改为在付款申请日期生效的制度，或更正付款申请的日期"
+    }
+  }
+}

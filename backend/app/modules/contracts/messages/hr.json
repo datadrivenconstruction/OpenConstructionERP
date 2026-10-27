@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "U redu"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Situacija {claim} nema datum završetka razdoblja, pa se ne može posložiti među situacijama ugovora",
+      "suggestion": "Unesite posljednji dan razdoblja koje ova situacija obuhvaća"
+    },
+    "period_order": {
+      "fail": "Situacija {claim} počinje {period_from}, a završava {period_to}, pa razdoblje završava prije nego što počne",
+      "suggestion": "Ispravite početak ili kraj razdoblja tako da početak bude prvi"
+    },
+    "period_overlap": {
+      "fail": "Situacija {claim} počinje {period_from}, ali prethodna situacija {previous} traje do {previous_to}, pa obje situacije naplaćuju iste dane",
+      "suggestion": "Započnite ovu situaciju dan nakon završetka razdoblja prethodne situacije"
+    },
+    "period_gap": {
+      "fail": "Situacija {claim} počinje {period_from}, ali prethodna situacija {previous} završila je {previous_to}, pa nijedna situacija ne naplaćuje dane između (nenaplaćeni dani: {days})",
+      "suggestion": "Započnite ovu situaciju dan nakon završetka razdoblja prethodne situacije ili provjerite da nedostaje li koja situacija"
+    },
+    "period_unparsed": {
+      "fail": "Situacija {claim} bilježi {field} kao '{value}', što se ne može pročitati kao datum",
+      "suggestion": "Unesite datum kao godinu, mjesec i dan, na primjer 2026-03-31",
+      "fields": {
+        "period_start": "početak razdoblja",
+        "period_end": "kraj razdoblja",
+        "claim_date": "datum zahtjeva"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Stavka {line} do sada je obračunata s {billed}, što je više od njezine planirane vrijednosti {scheduled}; ponovno pokrenite Popuni prema napretku ili smanjite iznos ovog razdoblja na stavci",
+      "suggestion": "Popuni prema napretku obračunava svaku stavku samo za ono što je novo u odnosu na ranije situacije. Ako se opseg stavke stvarno povećao, prvo unesite nalog za izmjenu koji povećava njezinu planiranu vrijednost"
+    },
+    "percent_regressed": {
+      "fail": "Stavka {line} do sada je dovršena {percent}%, što iznosi {requested}, a to je manje od {previous} koliko su ranije situacije već obračunale na njoj, pa se ove rade ništa ne obračunava na toj stavci",
+      "suggestion": "Provjerite postotak dovršenosti na ovoj stavci ili ispravite raniju situaciju koja ga je previsoko iskazala"
+    },
+    "errors": {
+      "submission_blocked": "Ovaj zahtjev za plaćanje ne može se predati dok se ovo ne riješi: {findings}",
+      "rules_unavailable": "Pravila zahtjeva za plaćanje nisu učitana na ovoj instalaciji, pa se ova situacija ne može provjeriti prije predaje.",
+      "later_claim_already_issued": "Situacija {claims} dolazi nakon ove i već je izdana. Sastavljena je dok je ova situacija bila nacrt, pa se već primjenjuje na ovaj rad. Obrišite ovaj nacrt ili pomaknite njegovo razdoblje nakon posljednje izdane situacije"
+    },
+    "totals_match_lines": {
+      "fail": "Situacija {claim} traži {gross}, ali stavke iza nje zbrajaju se na {lines_total}: situacija nije ponovno izračunata nakon što su se njezine stavke promijenile",
+      "suggestion": "Spremite bilo koju stavku ove situacije ili ponovno pokrenite Popuni prema napretku, i njezini se zbrojevi će uskladiti"
+    },
+    "totals_below_lines": {
+      "fail": "Situacija {claim} obračunava {gross} iz evidentiranog troška, što je manje od {lines_total} koliko zbrajaju njezine vlastite stavke: raščlamba ne može tražiti više nego što situacija traži",
+      "suggestion": "Kod situacije obračunate iz troška stavke su raščlamba iznosa, a ne njegov izvor. Smanjite ili uklonite stavke koje ga previše iskazuju, ili ponovno generirajte situaciju iz troška rada da se obje slažu"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Situacija {claim} na stavci {line} bilježi {stored} kao ranije obračunato, ali ranije situacije sada na njoj obračunavaju {now}",
+      "total_fail": "Situacija {claim} bilježi {stored} kao ranije ovjereno, ali ranije situacije sada ovjeravaju {now}",
+      "suggestion": "Ponovno generirajte ovu situaciju da pročita što situacije prije nje danas obračunavaju"
+    },
+    "within_nte_cap": {
+      "fail": "Situacija {claim} obračunava {this} uz već obračunatih {billed}, što je iznad gornje granice bez prekoračenja od {cap}",
+      "suggestion": "Obračunajte do granice u ovoj situaciji, a za ostatak dogovorite nalog za izmjenu"
+    },
+    "retention_matches_policy": {
+      "fail": "Situacija {claim} zadržava {held} kao jamstveni zadržak, ali njezina politika zadržaka sada daje {expected}: ranija situacija, oslobađanje ili politika promijenili su se nakon što je ova situacija izračunata",
+      "suggestion": "Ponovno pokrenite Popuni prema napretku ili spremite bilo koju stavku ove situacije, i zadržak će se ponovno izračunati"
+    },
+    "retention_above_cap": {
+      "fail": "Situacija {claim} zadržava {held} kao zadržak, što je iznad granice od {percent}% koju postavlja njezina politika zadržaka, a na ovom ugovoru ona iznosi {cap}",
+      "suggestion": "Ponovno izračunajte situaciju ili podignite granicu u politici zadržaka ugovora ako su stranke dogovorile višu",
+      "state_cap_unread": "Situacija {claim}: njezina politika zadržaka ne postavlja granicu, a {country} ograničava zadržak zakonom države. Država se nije mogla utvrditi jer projekt nema šifru podjele, pa zakonska granica nije provjerena",
+      "state_cap_suggestion": "Upišite ograničenje države u politiku zadržaka ugovora kao granicu, pa će se svaka situacija na ovom ugovoru provjeravati prema njoj"
+    },
+    "retention_release_within_held": {
+      "fail": "Oslobađanja obračunata do situacije {claim} vraćaju {released}, što je više od {accrued} zadržaka zadržanih do nje",
+      "suggestion": "Poništite oslobađanje koje je preveliko ili ga obračunajte u kasnijoj situaciji kad bude zadržano više zadržaka"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Tablica vrijednosti zbraja se na {scheduled}, ali ugovorni iznos do sada je {contract_sum}: stavke na koje se ova situacija obračunava ostavljaju {difference} ugovora bez stavke",
+      "suggestion": "Dodajte ili ispravite stavke tablice vrijednosti dok se ne zbroje na ugovorni iznos",
+      "suggestion_reconcile": "{count} odobrenih naloga za izmjenu ili varijacija promijenilo je ugovorni iznos prije nego što su stigli do tablice vrijednosti. Upotrijebite Usklađi naloge za izmjenu na ugovoru da dodate stavku za svaki"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Ovo oslobađanje treba {document}, a nijedan nije priložen",
+      "suggestion": "Registrirajte dokument na ugovoru, priložite ga uz oslobađanje i ponovno odobrite oslobađanje"
+    },
+    "within_available": {
+      "fail": "Ovo oslobađanje vraća {amount}, ali zadržano je još samo {available} zadržaka koji nisu vezani za drugo oslobađanje",
+      "suggestion": "Poništite ovo oslobađanje i ponovno ga predložite, da se njegova veličina temelji na trenutno zadržanom zadržaku"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Ovo oslobađanje isplaćuje se tek nakon što prođe {days}-dnevni rok za založno pravo od događaja ({reference}), a ne kaže kada je taj rok počeo",
+      "suggestion_no_start": "Unesite dan kada je rok počeo, na primjer datum objave potvrde o značajnom dovršetku, i ponovno odobrite oslobađanje",
+      "fail_early": "{days}-dnevni rok za založno pravo koji je počeo {started} traje do {ends} ({reference}), pa se ovo oslobađanje još ne može odobriti",
+      "suggestion_early": "Odobrite oslobađanje nakon što rok za založno pravo istekne, provjerivši da nije podnesen nikakav zalog na zadršku"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "potvrda o značajnom dovršetku",
+      "acceptance_protocol": "zapisnik o primopredaji",
+      "affidavit_payment_of_debts": "izjava o podmirenju dugova i potraživanja",
+      "affidavit_release_of_liens": "izjava o oslobođenju od založnih prava",
+      "consent_of_surety": "suglasnost jamca",
+      "final_lien_waiver": "konačno odricanje od založnog prava",
+      "final_invoice": "konačni račun"
+    },
+    "errors": {
+      "approval_blocked": "Ovo oslobađanje zadržaka ne može se odobriti dok se ovo ne riješi: {findings}",
+      "rules_unavailable": "Pravila oslobađanja zadržaka nisu učitana na ovoj instalaciji, pa se ovo oslobađanje ne može provjeriti prije odobrenja."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Obračunati radovi koje ne pokriva nijedna stavka tablice vrijednosti"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Nalozi za izmjenu usklađuju se s tablicom vrijednosti samo aktivnog ugovora; ovaj ugovor je {status}",
+      "preview_stale": "Popis naloga za izmjenu za usklađivanje promijenio se otkako ste ga otvorili. Ponovno otvorite pregled i potvrdite što sada prikazuje"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Ovaj ugovor ne može se potpisati dok se ovo ne riješi: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "dovršetak",
+      "approval": "odobrenje"
+    },
+    "total_within_contract": {
+      "fail": "Rate zbrajaju se na {scheduled}, što je više od ugovorenog iznosa od {total}",
+      "suggestion": "Smanjite rate tako da njihov zbroj ne prelazi ugovoreni iznos"
+    },
+    "percent_sum": {
+      "fail": "Rate zbrajaju se na {scheduled} od ugovorenog iznosa od {total} ({percent}%), pa dio cijene nema ratu",
+      "suggestion": "Dodajte ratu za preostali dio ugovorenog iznosa ili prilagodite iznose"
+    },
+    "completion_trigger_linked": {
+      "fail": "Rata {milestone} dospijeva po {trigger}, ali nije povezana s aktivnošću rasporeda, pa se njezin datum neće pomaknuti s radom",
+      "suggestion": "Povežite ratu s prekretnicom rasporeda na koju čeka"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Raspored pokazuje da je prekretnica {milestone} dostignuta, ali rata {instalment} je još na čekanju, pa se ne može potraživati",
+      "suggestion": "Označite ratu kao dostignutu ili provjerite zašto ugovor nije aktivan"
+    },
+    "client_visible_requires_active": {
+      "fail": "Rata {milestone} prikazana je klijentu, ali ugovor je {status}; klijent vidi plan samo aktivnog ili dovršenog ugovora",
+      "suggestion": "Sakrijte ratu od klijenta dok ugovor ne stupi na snagu"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Predujam od {deposit} viši je od {ceiling} koje {reference} dopušta u {jurisdiction} (izvor: {source_url}, provjereno {checked_on}, nije pregledao odvjetnik)",
+      "suggestion": "Smanjite jamčevinu ili potvrdite s pravnim savjetnikom da se na ovaj ugovor primjenjuje iznimka",
+      "below_threshold": {
+        "fail": "Ugovoreni iznos jednak je ili manji od iznosa od kojeg {reference} ograničava jamčevine u {jurisdiction}, pa jamčevina nije provjerena (izvor: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Ugovor je u valuti {currency}, ali {reference} svoju granicu izražava u valuti {limit_currency}, pa jamčevina u {jurisdiction} nije provjerena (izvor: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Ako se zakon primjenjuje na ovaj ugovor, ručno provjerite jamčevinu prema njemu"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Ovjereni radovi do sada iznose {cumulative}, što je {over} više od ugovorenog iznosa od {contract}",
+      "suggestion": "Prvo ishodite odobrenje naloga za izmjenu koji pokriva dodatne radove, ili ispravite količine na ovoj potvrdi"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Ova potvrda prenosi {carried} kao ukupno prethodnih potvrda, ali potvrda {reference} ovjerena je na {certified}",
+      "work_fail": "Stupac prethodnih radova na popisu zbraja se na {carried}, ali potvrda {reference} ovjerena je s {certified} radova do sada",
+      "suggestion": "Potražite situaciju između dviju potvrda koju nijedna od njih ne prikazuje, pa zatim ponovno generirajte ovu potvrdu"
+    },
+    "previous_unknown": {
+      "fail": "Ukupan iznos prethodnih potvrda nije poznat",
+      "not_certified": "Prethodna potvrda {reference} još nije ovjerena, pa njezin ukupni iznos nije konačan",
+      "suggestion": "Prvo ovjerite prethodnu potvrdu. Ako je ovjerena prije nego što su potvrde počele biti pohranjivane, unesite njezin iznos u redak prethodnih potvrda"
+    },
+    "weights_sum": {
+      "fail": "Težine stavki zbrajaju se na {total}%, a ne na 100%",
+      "suggestion": "Ispravite vrijednosti stavki rasporeda tako da njihovi udjeli zbrojem čine cijeli ugovor"
+    },
+    "percent_regressed": {
+      "fail": "Stavka {line} je u ovom razdoblju negativna, pa oduzima rad koji je već ovjeren",
+      "suggestion": "Ostavite je ako ispravlja raniju previsoku izmjeru. Inače ispravite količinu ili postotak na ovoj potvrdi"
+    },
+    "income_withholding_single_year": {
+      "fail": "Odabrano je zadržavanje poreza na dohodak, ali ugovor traje od {start} do {end}, unutar jedne kalendarske godine. Zadržavanje se odnosi na građevinske radove koji traju dulje od jedne kalendarske godine",
+      "suggestion": "Provjerite s računovođom traju li radovi zaista dulje od godinu dana; ako ne, označite zadržavanje poreza na dohodak kao neprimjenjivo"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Naplaćeni predujam do sada iznosi {recovered}, što je više od isplaćenog predujma od {advance}",
+      "unknown": "Do sada je naplaćeno {recovered} predujma, ali ugovor ne navodi isplaćeni predujam, pa se naplata ne može provjeriti prema njemu",
+      "suggestion": "Smanjite naplatu na ovoj potvrdi ili navedite isplaćeni predujam u postavkama potvrda ugovora"
+    },
+    "retention_matches_config": {
+      "fail": "Potvrda zadržava {certificate} kao zadržak ({percent}% njezine osnove), ali dokument iza nje zadržava {stored}",
+      "suggestion": "Ponovno izračunajte dokument ili ispravite stopu zadržaka ili njezinu osnovu u postavkama potvrda ugovora, tako da oba prikazuju isti zadržak"
+    },
+    "net_payable_negative": {
+      "fail": "Iznos za isplatu je {payable}: odbici su veći od iznosa ove potvrde",
+      "suggestion": "Provjerite odbitke, a osobito naplatu predujma, i prenesite na sljedeću potvrdu ono što se sada ne može odbiti"
+    },
+    "taxes_stale": {
+      "fail": "Porezi su izračunati prije nego što se ova potvrda promijenila, pa više ne pripadaju njoj",
+      "suggestion": "Ponovno izračunajte poreze. Ako su već potvrđeni, prvo ih ponovno otvorite pa ih potom ponovno potvrdite"
+    },
+    "taxes_confirmed": {
+      "fail": "Porezni iznosi ove potvrde nisu potvrđeni",
+      "suggestion": "Provjerite svaki porezni redak i potvrdite poreze prije ovjere"
+    },
+    "lines_complete": {
+      "fail": "Redak {line} još nema iznos. {reason}",
+      "suggestion": "Unesite iznos ili označite redak kao neprimjenjiv i navedite razlog"
+    },
+    "work_value_differs": {
+      "fail": "Stavka {line} do sada je evidentirana s {stated}, ali njezina količina ili postotak daju {computed}",
+      "suggestion": "Ispravite količinu ili iznos u dokumentu tako da se dva stupca retka slažu"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Zadržak od {percent} posto viši je od {limit} posto koliko zakon o javnim radovima dopušta na svakoj privremenoj isplati",
+      "suggestion": "Smanjite zadržak ugovora na zakonsku stopu"
+    },
+    "advance_above_cap": {
+      "fail": "Jamstvo za predujam pokriva {percent} posto vrijednosti ugovora, što je iznad {limit} posto koliko javni radovi dopuštaju bez odobrenja ministra financija",
+      "suggestion": "Smanjite predujam ili u uvjete ugovora upišite odobrenje ishođeno prije nadmetanja"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Klauzula o ugovornoj kazni za kašnjenje nema najveći iznos, dok zakon o javnim radovima ograničava kazne za kašnjenje na {limit} posto vrijednosti ugovora",
+      "suggestion": "Unesite najveći iznos klauzule o ugovornoj kazni za kašnjenje"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Klauzula o ugovornoj kazni za kašnjenje ograničena je na {percent} posto vrijednosti ugovora, što je iznad {limit} posto koliko zakon o javnim radovima dopušta",
+      "suggestion": "Smanjite najveći iznos klauzule na zakonsku granicu"
+    },
+    "performance_security_missing": {
+      "fail": "Nije upisano jamstvo za izvršenje, dok javni radovi zahtijevaju jamstvo od {limit} posto vrijednosti ugovora",
+      "suggestion": "Upišite završno jamstvo kao jamstvo za izvršenje ili bankovnu garanciju"
+    },
+    "performance_security_below": {
+      "fail": "Jamstvo za izvršenje pokriva {percent} posto vrijednosti ugovora, što je manje od {limit} posto koliko javni radovi zahtijevaju",
+      "suggestion": "Upišite jamstvo za izvršenje za puni zakonski postotak"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Javni radovi u trajanju od {months} mjeseci ili dulje zakonski se moraju korigirati po cijeni, a ugovor ne navodi koeficijente za svoje promjenjive stavke",
+        "suggestion": "Unesite koeficijente koje je izvoditelj naveo u tehničkoj ponudi"
+      },
+      "duplicate_item": {
+        "fail": "Promjenjiva stavka {item} navedena je dvaput među koeficijentima korekcije cijene",
+        "suggestion": "Zadržite jedan koeficijent po promjenjivoj stavci"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Koeficijent korekcije cijene za {item} nije broj",
+        "suggestion": "Unesite koeficijent kao decimalni broj, na primjer 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Koeficijent korekcije cijene za {item} nula je ili manji od nule, dok zakon zahtijeva da svaki koeficijent bude veći od nule",
+        "suggestion": "Unesite koeficijent veći od nule ili uklonite stavku"
+      },
+      "coefficient_negative": {
+        "fail": "Koeficijent korekcije cijene za {item} je negativan",
+        "suggestion": "Unesite koeficijent nula ili veći"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Koeficijenti korekcije cijene zbrajaju se na {item}, dok zakon zahtijeva da njihov zbroj ostane manji od jedan",
+        "suggestion": "Smanjite koeficijente tako da ostane fiksni dio cijene"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Koeficijenti korekcije cijene zbrajaju se na {item}, što je više od jedan",
+        "suggestion": "Smanjite koeficijente tako da zbrojem daju jedan ili manje"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Javni radovi dulji od {months} mjeseci imaju klauzulu o reviziji cijene kada su sirovine značajan dio troška, a ugovor ne navodi težine revizije",
+        "suggestion": "Unesite težine formule revizije iz posebnih uvjeta ili zabilježite da je cijena fiksna"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Koeficijenti korekcije cijene zbrajaju se na {item}, dok formula zahtijeva da zbrojem daju točno jedan",
+        "suggestion": "Ispravite težine iz podataka ugovora tako da zbrojem daju jedan"
+      },
+      "unknown_regime": {
+        "fail": "Ugovor navodi režim korekcije cijene {item}, koji platforma ne poznaje",
+        "suggestion": "Odaberite jedan od navedenih režima korekcije cijene"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Dio koji nije podložan korekciji cijene, {item}, nije između nule i jedan",
+        "suggestion": "Unesite dio kao decimalni broj iz podataka ugovora, na primjer 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Predujam iznosi {percent} posto vrijednosti ugovora, što je manje od {limit} posto minimuma koji zakon o javnim radovima određuje za ovog izvoditelja i naručitelja",
+      "suggestion": "Povećajte predujam na minimum ili upišite nulu ako je izvoditelj od njega odustao"
+    },
+    "advance_above_maximum": {
+      "fail": "Predujam iznosi {percent} posto vrijednosti ugovora, što je iznad {limit} posto koliko zakon o javnim radovima određuje kao uobičajeni maksimum",
+      "suggestion": "Provjerite dopuštaju li posebni uvjeti viši predujam i upišite jamstvo koje on zahtijeva"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Klauzula o ugovornoj kazni za kašnjenje naplaćuje {amount} dnevno, dok opći uvjeti naplaćuju {expected} dnevno, odnosno jednu {divisor}-inu vrijednosti ugovora",
+      "suggestion": "Zadržite dnevnu stopu iz općih uvjeta ili navedite drugačiju stopu među odstupanjima posebnih uvjeta"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Klauzula o ugovornoj kazni za kašnjenje ograničena je na {percent} posto vrijednosti ugovora, što je iznad {limit} posto iz općih uvjeta",
+      "suggestion": "Smanjite granicu na iznos iz općih uvjeta ili je navedite među odstupanjima posebnih uvjeta"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Ovaj podugovor od {amount} dostiže prag od {limit} za izravnu isplatu od strane javnog naručitelja, a ugovor se od nje odriče, što zakon zabranjuje",
+      "suggestion": "Upišite da javni naručitelj izravno isplaćuje podizvoditelja"
+    },
+    "direct_payment_unstated": {
+      "fail": "Ovaj podugovor od {amount} dostiže prag od {limit} za izravnu isplatu od strane javnog naručitelja, ali ugovor to ne navodi",
+      "suggestion": "Upišite je li podizvoditelj prihvaćen i izravno isplaćen od strane javnog naručitelja"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Ovaj podugovor za privatne radove ne navodi ni bankovnu garanciju ni delegaciju plaćanja, a bez jednog od njih podugovor se može poništiti",
+      "suggestion": "Upišite bankovnu garanciju glavnog izvoditelja ili delegaciju plaćanja na investitora"
+    },
+    "private_retention_above_limit": {
+      "fail": "Zadržak od {percent} posto viši je od {limit} posto koliko zakon dopušta za privatne radove",
+      "suggestion": "Smanjite zadržak ugovora na zakonski gornji prag"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Ugovor {contract} navodi PDV režim {regime}, koji {country} nema",
+      "suggestion": "Odaberite jedan od PDV režima ponuđenih za državu projekta ili uklonite odabir"
+    },
+    "country_unknown": {
+      "fail": "Ugovor {contract} navodi PDV režim {regime}, ali njegov projekt ne navodi državu, pa se režim ne može provjeriti",
+      "suggestion": "Postavite državu projekta"
+    },
+    "contract_date_missing": {
+      "fail": "PDV režim {regime} vrijedi samo za ugovore potpisane prije {cutoff}, a ovaj ugovor ne bilježi ni potpis ni datum početka",
+      "suggestion": "Unesite datum kada je ugovor potpisan"
+    },
+    "contract_too_late": {
+      "fail": "PDV režim {regime} vrijedi samo za ugovore potpisane prije {cutoff}, a ovaj ugovor datira od {contract_date}",
+      "suggestion": "Odaberite standardni PDV režim za ovaj ugovor"
+    },
+    "evidence_missing": {
+      "fail": "PDV režim {regime} zahtijeva {evidence}, a ugovor nema nijedan zabilježen",
+      "suggestion": "Zabilježite referencu dokumenta i datum izdavanja uz PDV režim ugovora"
+    },
+    "evidence_date_missing": {
+      "fail": "Dokument {evidence} zabilježen za PDV režim {regime} nema datum izdavanja, pa se ne može pokazati da prethodi {cutoff}",
+      "suggestion": "Unesite datum kada je dokument izdan"
+    },
+    "evidence_too_late": {
+      "fail": "Dokument {evidence} zabilježen za PDV režim {regime} izdan je {issued_on}, a režim zahtijeva dokument izdan prije {cutoff}",
+      "suggestion": "Zabilježite raniji dokument ili odaberite standardni PDV režim"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Vrijednost ugovora porasla je s {original_value} na {current_value}, a ugovor ne navodi dopušteno povećanje, pa se ne može procijeniti primjenjuje li se još PDV režim {regime}",
+      "suggestion": "Zabilježite povećanje opsega koje ugovor dopušta"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Vrijednost ugovora porasla je s {original_value} na {current_value}, što je iznad povećanja od {allowed_increase_pct} posto koje ugovor dopušta, pa je za PDV riječ o novom ugovoru i PDV režim {regime} više se ne primjenjuje",
+      "suggestion": "Prebacite ugovor na standardni PDV režim"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "potvrda o plaćanju koju je odobrio konzultant",
+      "einvoice": "e-račun ili e-potvrda",
+      "main_contractor_certificate": "potvrda glavnog izvoditelja da je PDV plaćen na projektu"
+    },
+    "not_in_force": {
+      "before": "Situacija {claim} datirana je {on}, a PDV režim {regime} primjenjuje se tek od {effective_from}; na taj dan važeći: {instead}",
+      "after": "Situacija {claim} datirana je {on}, a PDV režim {regime} prestao je vrijediti {effective_to}; na taj dan važeći: {instead}",
+      "suggestion": "Promijenite PDV režim ugovora u onaj koji vrijedi na datum situacije ili ispravite datum situacije"
+    }
+  }
+}

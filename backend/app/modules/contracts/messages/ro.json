@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Situația de plată {claim} nu are dată de sfârșit a perioadei, deci nu poate fi așezată în ordine printre situațiile contractului",
+      "suggestion": "Introduceți ultima zi a perioadei acoperite de această situație de plată"
+    },
+    "period_order": {
+      "fail": "Situația de plată {claim} începe la {period_from} și se termină la {period_to}, deci perioada se termină înainte de a începe",
+      "suggestion": "Corectați începutul sau sfârșitul perioadei, astfel încât începutul să fie primul"
+    },
+    "period_overlap": {
+      "fail": "Situația de plată {claim} începe la {period_from}, dar situația anterioară {previous} se întinde până la {previous_to}, deci ambele situații facturează aceleași zile",
+      "suggestion": "Începeți această situație în ziua următoare sfârșitului perioadei situației anterioare"
+    },
+    "period_gap": {
+      "fail": "Situația de plată {claim} începe la {period_from}, dar situația anterioară {previous} s-a încheiat la {previous_to}, deci nicio situație nu facturează zilele dintre ele (zile nefacturate: {days})",
+      "suggestion": "Începeți această situație în ziua următoare sfârșitului perioadei situației anterioare sau verificați dacă nu lipsește o situație de plată"
+    },
+    "period_unparsed": {
+      "fail": "Situația de plată {claim} înregistrează {field} ca '{value}', ceea ce nu poate fi citit ca dată",
+      "suggestion": "Introduceți data sub forma an, lună și zi, de exemplu 2026-03-31",
+      "fields": {
+        "period_start": "începutul perioadei",
+        "period_end": "sfârșitul perioadei",
+        "claim_date": "data cererii"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Linia {line} este facturată la {billed} până la data curentă, mai mult decât valoarea sa programată de {scheduled}; rulați din nou Completare din progres sau reduceți suma din această perioadă pentru linie",
+      "suggestion": "Completare din progres facturează fiecare linie doar pentru ceea ce este nou față de situațiile anterioare. Dacă domeniul liniei a crescut efectiv, înregistrați mai întâi ordinul de modificare care îi mărește valoarea programată"
+    },
+    "percent_regressed": {
+      "fail": "Linia {line} este finalizată în proporție de {percent}% până la data curentă, adică {requested}, mai puțin decât {previous} deja facturat pe ea în situațiile anterioare, deci în această perioadă nu se facturează nimic pe ea",
+      "suggestion": "Verificați procentul de finalizare de pe această linie sau corectați situația anterioară care l-a supraestimat"
+    },
+    "errors": {
+      "submission_blocked": "Această cerere de plată nu poate fi trimisă până când acestea nu sunt rezolvate: {findings}",
+      "rules_unavailable": "Regulile pentru cererile de plată nu sunt încărcate pe această instalare, deci această situație nu poate fi verificată înainte de trimitere.",
+      "later_claim_already_issued": "Situația {claims} vine după aceasta și a fost deja emisă. A fost construită cât timp această situație era ciornă, deci deja se aplică pentru aceste lucrări. Ștergeți această ciornă sau mutați perioada ei după ultima situație emisă"
+    },
+    "totals_match_lines": {
+      "fail": "Situația {claim} cere {gross}, dar liniile din spatele ei însumează {lines_total}: situația nu a fost recalculată după ce liniile ei s-au modificat",
+      "suggestion": "Salvați orice linie a acestei situații sau rulați din nou Completare din progres, iar totalurile se vor actualiza"
+    },
+    "totals_below_lines": {
+      "fail": "Situația {claim} facturează {gross} din costul înregistrat, mai puțin decât {lines_total} cât însumează propriile sale linii: defalcarea nu poate cere mai mult decât cere situația",
+      "suggestion": "La o situație facturată din cost, liniile sunt o defalcare a banilor, nu sursa lor. Reduceți sau eliminați liniile care o supraestimează sau generați din nou situația din costul lucrărilor, astfel încât cele două să coincidă"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Situația {claim} păstrează {stored} ca facturat anterior pe linia {line}, dar situațiile anterioare facturează acum {now} pe ea",
+      "total_fail": "Situația {claim} păstrează {stored} ca atestat anterior, dar situațiile anterioare atestă acum {now}",
+      "suggestion": "Generați din nou această situație, astfel încât să citească ce facturează astăzi situațiile dinaintea ei"
+    },
+    "within_nte_cap": {
+      "fail": "Situația {claim} facturează {this} peste cei {billed} deja facturați, ceea ce depășește plafonul de nedepășit de {cap}",
+      "suggestion": "Facturați până la plafon pe această situație și convenți un ordin de modificare pentru restul"
+    },
+    "retention_matches_policy": {
+      "fail": "Situația {claim} reține {held} ca garanție de bună execuție, dar politica sa de reținere dă acum {expected}: o situație anterioară, o eliberare sau politica s-a schimbat după ce această situație a fost calculată",
+      "suggestion": "Rulați din nou Completare din progres sau salvați orice linie a acestei situații, iar reținerea se recalculează"
+    },
+    "retention_above_cap": {
+      "fail": "Situația {claim} reține {held} ca garanție, peste plafonul de {percent}% stabilit de politica sa de reținere, adică {cap} pe acest contract",
+      "suggestion": "Recalculați situația sau majorați plafonul din politica de reținere a contractului dacă părțile au convenit unul mai mare",
+      "state_cap_unread": "Situația {claim}: politica sa de reținere nu stabilește niciun plafon, iar {country} limitează reținerea prin lege de stat. Statul nu a putut fi determinat deoarece proiectul nu are cod de subdiviziune, deci nu a fost verificat niciun plafon legal",
+      "state_cap_suggestion": "Treceți limita statului în politica de reținere a contractului ca plafon, și fiecare situație de pe acest contract va fi verificată în raport cu ea"
+    },
+    "retention_release_within_held": {
+      "fail": "Eliberările facturate până la situația {claim} restituie {released}, mai mult decât cele {accrued} de reținere păstrate până atunci",
+      "suggestion": "Anulați eliberarea prea mare sau facturați-o pe o situație ulterioară, după ce se reține mai multă garanție"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Tabelul valorilor programate însumează {scheduled}, dar suma contractului până la data curentă este {contract_sum}: liniile pe care este facturată această situație lasă {difference} din contract fără o linie",
+      "suggestion": "Adăugați sau corectați liniile tabelului valorilor programate până când însumează suma contractului",
+      "suggestion_reconcile": "{count} ordine de modificare sau variații aprobate au schimbat suma contractului înainte de a ajunge în tabelul valorilor programate. Folosiți Reconciliere ordine de modificare pe contract pentru a adăuga o linie pentru fiecare"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Această eliberare are nevoie de {document}, iar niciunul nu este atașat",
+      "suggestion": "Înregistrați documentul pe contract, atașați-l la eliberare și aprobați-o din nou"
+    },
+    "within_available": {
+      "fail": "Această eliberare restituie {amount}, dar din garanție mai sunt păstrate doar {available}, care nu sunt angajate pentru o altă eliberare",
+      "suggestion": "Anulați această eliberare și propuneți-o din nou, astfel încât să fie dimensionată pe garanția reținută acum"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Această eliberare se plătește doar după ce a trecut perioada legală de {days} zile de la eveniment ({reference}), iar aceasta nu precizează când a început perioada",
+      "suggestion_no_start": "Introduceți ziua în care a început perioada, de exemplu data publicării certificatului de finalizare substanțială, și aprobați din nou eliberarea",
+      "fail_early": "Perioada legală de {days} zile care a început la {started} durează până la {ends} ({reference}), deci această eliberare nu poate fi aprobată încă",
+      "suggestion_early": "Aprobați eliberarea după ce perioada legală a trecut, după ce verificați că nu a fost înregistrată nicio notificare de privilegiu împotriva garanției"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "certificat de finalizare substanțială",
+      "acceptance_protocol": "proces-verbal de recepție",
+      "affidavit_payment_of_debts": "declarație pe propria răspundere că datoriile și pretențiile sunt achitate",
+      "affidavit_release_of_liens": "declarație pe propria răspundere de radiere a privilegiilor",
+      "consent_of_surety": "acordul garantului",
+      "final_lien_waiver": "renunțare finală la privilegiu",
+      "final_invoice": "factura finală"
+    },
+    "errors": {
+      "approval_blocked": "Această eliberare de garanție nu poate fi aprobată până când acestea nu sunt rezolvate: {findings}",
+      "rules_unavailable": "Regulile pentru eliberarea garanției nu sunt încărcate pe această instalare, deci această eliberare nu poate fi verificată înainte de aprobare."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Lucrări facturate care nu sunt cuprinse de nicio linie a tabelului valorilor programate"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Ordinele de modificare se reconciliază în tabelul valorilor programate doar pentru un contract activ; acest contract are statusul {status}",
+      "preview_stale": "Lista ordinelor de modificare de reconciliat s-a schimbat de când ați deschis-o. Deschideți din nou previzualizarea și confirmați ce arată acum"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Acest contract nu poate fi semnat până când acestea nu sunt rezolvate: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "finalizare",
+      "approval": "aprobare"
+    },
+    "total_within_contract": {
+      "fail": "Ratele însumează {scheduled}, mai mult decât suma contractului de {total}",
+      "suggestion": "Reduceți ratele astfel încât să nu însumeze mai mult decât suma contractului"
+    },
+    "percent_sum": {
+      "fail": "Ratele însumează {scheduled} din suma contractului de {total} ({percent}%), deci o parte din preț nu are rată",
+      "suggestion": "Adăugați o rată pentru restul sumei contractului sau ajustați sumele"
+    },
+    "completion_trigger_linked": {
+      "fail": "Rata {milestone} devine scadentă la {trigger}, dar nu este legată de o activitate din grafic, deci data sa nu se va muta odată cu lucrările",
+      "suggestion": "Legați rata de reperul din grafic pe care îl așteaptă"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Graficul arată că {milestone} a fost atins, dar rata {instalment} este încă în așteptare, deci nu poate fi revendicată",
+      "suggestion": "Marcați rata ca atinsă sau verificați de ce contractul nu este activ"
+    },
+    "client_visible_requires_active": {
+      "fail": "Rata {milestone} este afișată clientului, dar contractul are statusul {status}; clientul vede planul doar al unui contract activ sau finalizat",
+      "suggestion": "Ascundeți rata față de client până când contractul intră în vigoare"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Plata în avans de {deposit} depășește {ceiling} pe care {reference} o permite în {jurisdiction} (sursa: {source_url}, verificat la {checked_on}, neexaminat de un avocat)",
+      "suggestion": "Reduceți avansul sau confirmați cu consilierul juridic că se aplică o excepție acestui contract",
+      "below_threshold": {
+        "fail": "Suma contractului este egală sau sub pragul de la care {reference} limitează avansurile în {jurisdiction}, deci avansul nu a fost verificat (sursa: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Contractul este în {currency}, dar {reference} își exprimă limita în {limit_currency}, deci avansul în {jurisdiction} nu a fost verificat (sursa: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Dacă legea se aplică acestui contract, verificați manual avansul în raport cu ea"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Lucrările atestate până la data curentă sunt {cumulative}, adică {over} peste suma contractului de {contract}",
+      "suggestion": "Aprobați mai întâi ordinul de modificare care acoperă lucrările suplimentare sau corectați cantitățile din acest certificat"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Acest certificat păstrează {carried} ca total al certificatelor anterioare, dar certificatul {reference} a fost atestat la {certified}",
+      "work_fail": "Coloana precedentă a listei de lucrări însumează {carried}, dar certificatul {reference} a fost atestat cu {certified} de lucrări până la data curentă",
+      "suggestion": "Verificați dacă există o situație între cele două certificate pe care niciunul dintre ele nu o arată, apoi generați din nou acesta"
+    },
+    "previous_unknown": {
+      "fail": "Totalul certificatelor anterioare nu este cunoscut",
+      "not_certified": "Certificatul anterior {reference} nu este încă atestat, deci totalul său nu este final",
+      "suggestion": "Atestați mai întâi certificatul anterior. Dacă a fost atestat înainte de stocarea certificatelor, introduceți totalul său pe linia certificatelor anterioare"
+    },
+    "weights_sum": {
+      "fail": "Ponderile elementelor însumează {total}%, nu 100%",
+      "suggestion": "Corectați valorile liniilor din grafic astfel încât ponderile lor să însumeze întregul contract"
+    },
+    "percent_regressed": {
+      "fail": "Elementul {line} este negativ în această perioadă, deci retrage lucrări care au fost deja atestate",
+      "suggestion": "Lăsați-l dacă aceasta corectează o supramăsurare anterioară. Altfel, corectați cantitatea sau procentul din acest certificat"
+    },
+    "income_withholding_single_year": {
+      "fail": "Reținerea la sursă a veniturilor este selectată, dar contractul se întinde de la {start} la {end}, în cadrul unui singur an calendaristic. Reținerea privește lucrări de construcție care se întind pe mai mulți ani calendaristici",
+      "suggestion": "Verificați cu contabilul dacă lucrarea se întinde într-adevăr pe mai mult de un an; dacă nu, marcați reținerea la sursă ca neaplicabilă"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Avansul recuperat până la data curentă este {recovered}, mai mult decât avansul de {advance} care a fost plătit",
+      "unknown": "Până la data curentă au fost recuperate {recovered} din avans, dar contractul nu precizează avansul plătit, deci recuperarea nu poate fi verificată în raport cu acesta",
+      "suggestion": "Reduceți recuperarea din acest certificat sau precizați avansul plătit în setările de certificate ale contractului"
+    },
+    "retention_matches_config": {
+      "fail": "Certificatul reține {certificate} ca garanție ({percent}% din baza sa), dar documentul din spatele lui reține {stored}",
+      "suggestion": "Recalculați documentul sau corectați rata reținerii ori baza ei în setările de certificate ale contractului, astfel încât ambele să arate aceeași reținere"
+    },
+    "net_payable_negative": {
+      "fail": "Suma de plată este {payable}: deducerile sunt mai mari decât suma acestui certificat",
+      "suggestion": "Verificați deducerile, mai ales recuperarea avansului, și reportați ce nu poate fi dedus acum pe certificatul următor"
+    },
+    "taxes_stale": {
+      "fail": "Taxele au fost calculate înainte ca acest certificat să se modifice, deci nu mai îi aparțin",
+      "suggestion": "Recalculați taxele. Dacă au fost deja confirmate, redeschideți-le mai întâi și confirmați-le din nou după aceea"
+    },
+    "taxes_confirmed": {
+      "fail": "Cifrele fiscale ale acestui certificat nu au fost confirmate",
+      "suggestion": "Verificați fiecare linie de taxă și confirmați taxele înainte de atestare"
+    },
+    "lines_complete": {
+      "fail": "Linia {line} nu are încă nicio cifră. {reason}",
+      "suggestion": "Introduceți suma sau marcați linia ca neaplicabilă și spuneți de ce"
+    },
+    "work_value_differs": {
+      "fail": "Elementul {line} este înregistrat la {stated} până la data curentă, dar cantitatea sau procentul său dau {computed}",
+      "suggestion": "Corectați cantitatea sau suma din document, astfel încât cele două coloane ale rândului să coincidă"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Reținerea de {percent} la sută este peste {limit} la sută pe care legea lucrărilor publice o permite la fiecare plată intermediară",
+      "suggestion": "Reduceți reținerea contractului la cota legală"
+    },
+    "advance_above_cap": {
+      "fail": "Garanția de plată în avans acoperă {percent} la sută din valoarea contractului, peste {limit} la sută pe care lucrările publice le permit fără aprobarea ministrului finanțelor",
+      "suggestion": "Reduceți plata în avans sau consemnați în clauzele contractului aprobarea obținută înainte de licitație"
+    },
+    "delay_damages_uncapped": {
+      "fail": "O clauză de daune pentru întârziere nu are o sumă maximă, în timp ce legea lucrărilor publice plafonează daunele pentru întârziere la {limit} la sută din valoarea contractului",
+      "suggestion": "Introduceți suma maximă a clauzei de daune pentru întârziere"
+    },
+    "delay_damages_above_cap": {
+      "fail": "O clauză de daune pentru întârziere este plafonată la {percent} la sută din valoarea contractului, peste {limit} la sută pe care legea lucrărilor publice o permite",
+      "suggestion": "Reduceți suma maximă a clauzei la plafonul legal"
+    },
+    "performance_security_missing": {
+      "fail": "Nu este consemnată nicio garanție de bună execuție, în timp ce lucrările publice cer una de {limit} la sută din valoarea contractului",
+      "suggestion": "Consemnați garanția finală ca garanție de bună execuție sau scrisoare de garanție bancară"
+    },
+    "performance_security_below": {
+      "fail": "Garanția de bună execuție acoperă {percent} la sută din valoarea contractului, sub {limit} la sută cerute de lucrările publice",
+      "suggestion": "Consemnați o garanție de bună execuție pentru procentul legal integral"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Lucrările publice de {months} luni sau mai mult trebuie ajustate la preț prin lege, iar contractul nu precizează coeficienți pentru elementele sale variabile",
+        "suggestion": "Introduceți coeficienții declarați de antreprenor în plicul tehnic"
+      },
+      "duplicate_item": {
+        "fail": "Elementul variabil {item} figurează de două ori printre coeficienții de ajustare a prețului",
+        "suggestion": "Păstrați un singur coeficient pentru fiecare element variabil"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Coeficientul de ajustare a prețului pentru {item} nu este un număr",
+        "suggestion": "Introduceți coeficientul ca zecimal, de exemplu 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Coeficientul de ajustare a prețului pentru {item} este zero sau mai mic, în timp ce legea cere ca fiecare coeficient să fie peste zero",
+        "suggestion": "Introduceți un coeficient peste zero sau eliminați elementul"
+      },
+      "coefficient_negative": {
+        "fail": "Coeficientul de ajustare a prețului pentru {item} este negativ",
+        "suggestion": "Introduceți un coeficient egal cu zero sau mai mare"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Coeficienții de ajustare a prețului însumează {item}, în timp ce legea cere ca suma lor să rămână sub unu",
+        "suggestion": "Reduceți coeficienții astfel încât să rămână o parte fixă a prețului"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Coeficienții de ajustare a prețului însumează {item}, mai mult decât unu",
+        "suggestion": "Reduceți coeficienții astfel încât să însumeze unu sau mai puțin"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Lucrările publice mai lungi de {months} luni au o clauză de revizuire a prețului în care materialele brute reprezintă o parte importantă a costului, iar contractul nu precizează ponderi de revizuire",
+        "suggestion": "Introduceți ponderile formulei de revizuire din condițiile speciale sau consemnați că prețul este ferm"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Coeficienții de ajustare a prețului însumează {item}, în timp ce formula cere să însumeze exact unu",
+        "suggestion": "Corectați ponderile din datele contractului astfel încât să însumeze unu"
+      },
+      "unknown_regime": {
+        "fail": "Contractul numește regimul de ajustare a prețului {item}, pe care platforma nu îl cunoaște",
+        "suggestion": "Alegeți unul dintre regimurile de ajustare a prețului enumerate"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Partea nesupusă ajustării prețului, {item}, nu este între zero și unu",
+        "suggestion": "Introduceți partea ca zecimal din datele contractului, de exemplu 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Avansul este de {percent} la sută din valoarea contractului, sub minimul de {limit} la sută pe care legea lucrărilor publice îl stabilește pentru acest antreprenor și beneficiar",
+      "suggestion": "Majorați avansul la minim sau consemnați zero dacă antreprenorul a renunțat la el"
+    },
+    "advance_above_maximum": {
+      "fail": "Avansul este de {percent} la sută din valoarea contractului, peste {limit} la sută pe care legea lucrărilor publice le stabilește ca maxim obișnuit",
+      "suggestion": "Verificați că prevederile speciale permit avansul mai mare și consemnați garanția pe care o cere"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "O clauză de penalități pentru întârziere percepe {amount} pe zi, în timp ce condițiile generale percep {expected} pe zi, adică a {divisor}-a parte din valoarea contractului",
+      "suggestion": "Păstrați tariful zilnic din condițiile generale sau treceți tariful diferit printre derogările din condițiile speciale"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "O clauză de penalități pentru întârziere este plafonată la {percent} la sută din valoarea contractului, peste {limit} la sută din condițiile generale",
+      "suggestion": "Reduceți plafonul la cifra din condițiile generale sau treceți-l printre derogările din condițiile speciale"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Acest subcontract de {amount} atinge pragul de {limit} pentru plata directă de către beneficiarul public, iar contractul o renunță, ceea ce legea interzice",
+      "suggestion": "Consemnați că beneficiarul public plătește direct subcontractantul"
+    },
+    "direct_payment_unstated": {
+      "fail": "Acest subcontract de {amount} atinge pragul de {limit} pentru plata directă de către beneficiarul public, iar contractul nu o consemnează",
+      "suggestion": "Consemnați dacă subcontractantul este acceptat și plătit direct de beneficiarul public"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Acest subcontract pentru lucrări private nu consemnează nici o scrisoare de garanție bancară, nici o delegare a plății, fără de care subcontractul poate fi anulat",
+      "suggestion": "Consemnați scrisoarea de garanție bancară a antreprenorului principal sau delegarea plății asupra beneficiarului"
+    },
+    "private_retention_above_limit": {
+      "fail": "Reținerea de {percent} la sută este peste {limit} la sută pe care legea o permite pentru lucrările private",
+      "suggestion": "Reduceți reținerea contractului la plafonul legal"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Contractul {contract} numește regimul de TVA {regime}, pe care {country} nu îl are",
+      "suggestion": "Alegeți unul dintre regimurile de TVA oferite pentru țara proiectului sau eliminați alegerea"
+    },
+    "country_unknown": {
+      "fail": "Contractul {contract} numește regimul de TVA {regime}, dar proiectul său nu numește nicio țară, deci regimul nu poate fi verificat",
+      "suggestion": "Setați țara proiectului"
+    },
+    "contract_date_missing": {
+      "fail": "Regimul de TVA {regime} este doar pentru contractele semnate înainte de {cutoff}, iar acest contract nu consemnează nici o semnătură, nici o dată de început",
+      "suggestion": "Introduceți data la care a fost semnat contractul"
+    },
+    "contract_too_late": {
+      "fail": "Regimul de TVA {regime} este doar pentru contractele semnate înainte de {cutoff}, iar acest contract datează din {contract_date}",
+      "suggestion": "Alegeți regimul standard de TVA pentru acest contract"
+    },
+    "evidence_missing": {
+      "fail": "Regimul de TVA {regime} necesită {evidence}, iar contractul nu consemnează niciunul",
+      "suggestion": "Consemnați referința documentului și data emiterii alături de regimul de TVA al contractului"
+    },
+    "evidence_date_missing": {
+      "fail": "{evidence} consemnat pentru regimul de TVA {regime} nu are dată de emitere, deci nu poate fi arătat că precede {cutoff}",
+      "suggestion": "Introduceți data la care a fost emis documentul"
+    },
+    "evidence_too_late": {
+      "fail": "{evidence} consemnat pentru regimul de TVA {regime} a fost emis la {issued_on}, iar regimul cere unul emis înainte de {cutoff}",
+      "suggestion": "Consemnați un document mai vechi sau alegeți regimul standard de TVA"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Valoarea contractului a crescut de la {original_value} la {current_value}, iar contractul nu precizează nicio creștere admisă, deci nu se poate stabili dacă regimul de TVA {regime} se mai aplică",
+      "suggestion": "Consemnați creșterea de domeniu pe care o permite contractul"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Valoarea contractului a crescut de la {original_value} la {current_value}, peste creșterea de {allowed_increase_pct} la sută pe care contractul o permite, deci pentru TVA este un contract nou, iar regimul de TVA {regime} nu se mai aplică",
+      "suggestion": "Treceți contractul la regimul standard de TVA"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "un certificat de plată aprobat de consultant",
+      "einvoice": "o factură electronică sau o chitanță electronică",
+      "main_contractor_certificate": "certificatul antreprenorului principal că TVA a fost plătită pentru proiect"
+    },
+    "not_in_force": {
+      "before": "Situația {claim} este datată {on}, iar regimul de TVA {regime} se aplică doar de la {effective_from}; în vigoare în acea zi: {instead}",
+      "after": "Situația {claim} este datată {on}, iar regimul de TVA {regime} s-a încheiat la {effective_to}; în vigoare în acea zi: {instead}",
+      "suggestion": "Schimbați regimul de TVA al contractului într-unul aflat în vigoare la data situației sau corectați data situației"
+    }
+  }
+}

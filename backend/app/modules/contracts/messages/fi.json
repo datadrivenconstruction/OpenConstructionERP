@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Laskutuserällä {claim} ei ole jakson päättymispäivää, joten sitä ei voi sijoittaa sopimuksen laskutuserien järjestykseen",
+      "suggestion": "Syötä sen jakson viimeinen päivä, jota tämä laskutuserä koskee"
+    },
+    "period_order": {
+      "fail": "Laskutuserä {claim} alkaa {period_from} ja päättyy {period_to}, joten jakso päättyy ennen kuin se alkaa",
+      "suggestion": "Korjaa jakson alku- tai loppupäivä siten, että alkupäivä on ensin"
+    },
+    "period_overlap": {
+      "fail": "Laskutuserä {claim} alkaa {period_from}, mutta edellinen laskutuserä {previous} kestää {previous_to} asti, joten molemmat erät laskuttavat samat päivät",
+      "suggestion": "Aloita tämä laskutuserä edellisen erän jakson päättymistä seuraavana päivänä"
+    },
+    "period_gap": {
+      "fail": "Laskutuserä {claim} alkaa {period_from}, mutta edellinen laskutuserä {previous} päättyi {previous_to}, joten väliset päivät eivät ole laskutettuna millään erällä (laskuttamattomat päivät: {days})",
+      "suggestion": "Aloita tämä laskutuserä edellisen erän jakson päättymistä seuraavana päivänä, tai tarkista, ettei jokin laskutuserä puutu"
+    },
+    "period_unparsed": {
+      "fail": "Laskutuserä {claim} kirjaa kentän {field} arvoksi '{value}', jota ei voi lukea päivämääränä",
+      "suggestion": "Syötä päivämäärä vuosi, kuukausi ja päivä -muodossa, esimerkiksi 2026-03-31",
+      "fields": {
+        "period_start": "jakson alku",
+        "period_end": "jakson loppu",
+        "claim_date": "laskutuspäivä"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Rivi {line} on laskutettu tähän mennessä {billed}, mikä ylittää sen suunnitellun arvon {scheduled}; suorita Täytä edistymisen mukaan uudelleen tai laske tämän jakson summaa rivillä",
+      "suggestion": "Täytä edistymisen mukaan laskuttaa kullakin rivillä vain edellisten laskutuserien jälkeen uuden osuuden. Jos rivin työmäärä todella kasvoi, kirjaa ensin muutostyö, joka nostaa sen suunniteltua arvoa"
+    },
+    "percent_regressed": {
+      "fail": "Rivin {line} valmiusaste on tähän mennessä {percent} %, mikä on {requested}, eli vähemmän kuin aiemmat laskutuserät ovat jo laskuttaneet sillä ({previous}), joten tällä jaksolla ei laskuteta riviltä mitään",
+      "suggestion": "Tarkista rivin valmiusaste tai korjaa aiempi laskutuserä, jossa se oli yliarvioitu"
+    },
+    "errors": {
+      "submission_blocked": "Tätä maksuhakemusta ei voi lähettää, ennen kuin nämä on ratkaistu: {findings}",
+      "rules_unavailable": "Maksuhakemussääntöjä ei ole ladattu tähän käyttöönottoon, joten tätä laskutuserää ei voi tarkistaa ennen lähettämistä.",
+      "later_claim_already_issued": "Laskutuserä {claims} tulee tämän jälkeen, ja se on jo lähetetty. Se laadittiin, kun tämä erä oli luonnoksena, joten se soveltuu jo tähän työhön. Poista tämä luonnos tai siirrä sen jakso viimeisen lähetetyn erän jälkeen"
+    },
+    "totals_match_lines": {
+      "fail": "Laskutuserä {claim} vaatii {gross}, mutta sen taustalla olevat rivit ovat yhteensä {lines_total}: erää ei laskettu uudelleen rivien muuttumisen jälkeen",
+      "suggestion": "Tallenna jokin tämän erän rivi tai suorita Täytä edistymisen mukaan uudelleen, jolloin summat seuraavat rivejä"
+    },
+    "totals_below_lines": {
+      "fail": "Laskutuserä {claim} laskuttaa {gross} kirjatusta kustannuksesta, mikä on vähemmän kuin sen omat rivit yhteensä ({lines_total}): erittely ei voi vaatia enempää kuin erä itse vaatii",
+      "suggestion": "Kustannuksesta laskutettavassa erässä rivit ovat rahasumman erittely, eivät sen lähde. Pienennä tai poista rivit, jotka ylittävät erän summan, tai luo erä uudelleen työn kustannuksesta, jolloin ne täsmäävät"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Laskutuserä {claim} kirjaa rivin {line} aiemmin laskutetuksi {stored}, mutta aiemmat laskutuserät laskuttavat sillä nyt {now}",
+      "total_fail": "Laskutuserä {claim} kirjaa aiemmin todistetuksi {stored}, mutta aiemmat laskutuserät todistavat nyt {now}",
+      "suggestion": "Luo tämä laskutuserä uudelleen, jotta se lukee, mitä sitä edeltävät erät laskuttavat tänään"
+    },
+    "within_nte_cap": {
+      "fail": "Laskutuserä {claim} laskuttaa {this} jo laskutetun {billed} lisäksi, mikä ylittää enimmäishinnan {cap}",
+      "suggestion": "Laskuta tässä erässä enintään katto ja sovi muutostyöstä loppuosan osalta"
+    },
+    "retention_matches_policy": {
+      "fail": "Laskutuserä {claim} pidättää takuuvakuutuksena {held}, mutta sen takuupidätyskäytäntö antaa nyt {expected}: aiempi erä, vapautus tai käytäntö muuttui sen jälkeen, kun tämä erä laadittiin",
+      "suggestion": "Suorita Täytä edistymisen mukaan uudelleen tai tallenna jokin tämän erän rivi, jolloin takuupidätys lasketaan uudelleen"
+    },
+    "retention_above_cap": {
+      "fail": "Laskutuserä {claim} pidättää takuuna {held}, mikä ylittää takuupidätyskäytäntönsä {percent} %:n katon, eli tässä sopimuksessa {cap}",
+      "suggestion": "Laske erä uudelleen tai nosta sopimuksen takuupidätyskäytännön kattoa, jos osapuolet sopivat korkeammasta",
+      "state_cap_unread": "Laskutuserä {claim}: sen takuupidätyskäytäntö ei aseta kattoa, ja {country} rajoittaa takuupidätystä osavaltion lailla. Osavaltiota ei voitu määrittää, koska hankkeella ei ole aluekoodia, joten lakisääteistä kattoa ei tarkistettu",
+      "state_cap_suggestion": "Kirjoita osavaltion raja sopimuksen takuupidätyskäytäntöön kattona, jolloin jokainen tämän sopimuksen erä tarkistetaan sitä vasten"
+    },
+    "retention_release_within_held": {
+      "fail": "Erään {claim} asti laskutetut vapautukset maksavat takaisin {released}, mikä ylittää siihen mennessä pidätetyn takuun {accrued}",
+      "suggestion": "Mitätöi liian suuri vapautus tai laskuta se myöhemmässä erässä, kun takuuta on pidätetty enemmän"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Suunnitellun arvon taulukko on yhteensä {scheduled}, mutta sopimussumma tähän mennessä on {contract_sum}: rivit, joita tätä erää vastaan laskutetaan, jättävät sopimuksesta {difference} ilman riviä",
+      "suggestion": "Lisää tai korjaa suunnitellun arvon taulukon rivejä, kunnes ne ovat yhteensä sopimussumman verran",
+      "suggestion_reconcile": "{count} hyväksyttyä muutostyötä tai muutosta muutti sopimussummaa ennen kuin ne siirtyivät suunnitellun arvon taulukkoon. Käytä sopimuksen kohtaa Täsmäytä muutostyöt, jolloin jokaiselle lisätään rivi"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Tämä vapautus vaatii asiakirjan {document}, eikä yhtään ole liitetty",
+      "suggestion": "Rekisteröi asiakirja sopimukseen, liitä se vapautukseen ja hyväksy vapautus uudelleen"
+    },
+    "within_available": {
+      "fail": "Tämä vapautus maksaa takaisin {amount}, mutta vain {available} takuusta on vielä pidätettynä eikä sitoutunut toiseen vapautukseen",
+      "suggestion": "Mitätöi tämä vapautus ja ehdota sitä uudelleen, jotta sen koko perustuu nyt pidätettyyn takuuseen"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Tämä vapautus maksetaan vasta, kun {days} päivän lakisääteinen lunastusoikeusaika tapahtuman jälkeen on kulunut ({reference}), eikä se kerro, milloin tuo aika alkoi",
+      "suggestion_no_start": "Syötä päivä, jolloin aika alkoi, esimerkiksi valmistumistodistuksen julkaisupäivä, ja hyväksy vapautus uudelleen",
+      "fail_early": "{days} päivän lakisääteinen lunastusoikeusaika, joka alkoi {started}, kestää {ends} asti ({reference}), joten tätä vapautusta ei voi vielä hyväksyä",
+      "suggestion_early": "Hyväksy vapautus, kun lunastusoikeusaika on kulunut, tarkistettuasi ensin, ettei takuupidätystä vastaan ole esitetty lienvaatimusta"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "valmistumistodistus",
+      "acceptance_protocol": "vastaanottopöytäkirja",
+      "affidavit_payment_of_debts": "vakuutus velkojen ja saatavien maksamisesta",
+      "affidavit_release_of_liens": "vakuutus lienvaatimusten vapauttamisesta",
+      "consent_of_surety": "takaajan suostumus",
+      "final_lien_waiver": "lopullinen lienvaatimuksesta luopuminen",
+      "final_invoice": "loppulasku"
+    },
+    "errors": {
+      "approval_blocked": "Tätä takuupidätyksen vapautusta ei voi hyväksyä, ennen kuin nämä on ratkaistu: {findings}",
+      "rules_unavailable": "Takuupidätyksen vapautussääntöjä ei ole ladattu tähän käyttöönottoon, joten tätä vapautusta ei voi tarkistaa ennen hyväksymistä."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Laskutettu työ, jota mikään suunnitellun arvon taulukon rivi ei kata"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Muutostöitä täsmäytetään suunnitellun arvon taulukkoon vain voimassa olevalla sopimuksella; tämä sopimus on tilassa {status}",
+      "preview_stale": "Täsmäytettävien muutostöiden luettelo on muuttunut sen jälkeen, kun avasit sen. Avaa esikatselu uudelleen ja vahvista, mitä se näyttää nyt"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Tätä sopimusta ei voi allekirjoittaa, ennen kuin nämä on ratkaistu: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "valmistuminen",
+      "approval": "hyväksyntä"
+    },
+    "total_within_contract": {
+      "fail": "Erät ovat yhteensä {scheduled}, mikä ylittää sopimussumman {total}",
+      "suggestion": "Pienennä eriä siten, että ne ovat yhteensä enintään sopimussumman verran"
+    },
+    "percent_sum": {
+      "fail": "Erät ovat yhteensä {scheduled} sopimussummasta {total} ({percent} %), joten osa hinnasta ei ole millekään erälle",
+      "suggestion": "Lisää erä sopimussumman jäljelle jäävälle osalle tai muuta summia"
+    },
+    "completion_trigger_linked": {
+      "fail": "Erä {milestone} erääntyy kohteen {trigger} perusteella, mutta sitä ei ole liitetty aikataulun tehtävään, joten sen päivä ei siirry työn mukana",
+      "suggestion": "Liitä erä aikataulun välitavoitteeseen, jota se odottaa"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Aikataulun mukaan välitavoite {milestone} on saavutettu, mutta erä {instalment} on yhä odottamassa, joten sitä ei voi laskuttaa",
+      "suggestion": "Merkitse erä saavutetuksi tai selvitä, miksi sopimus ei ole voimassa"
+    },
+    "client_visible_requires_active": {
+      "fail": "Erä {milestone} näytetään asiakkaalle, mutta sopimus on tilassa {status}; asiakas näkee maksusuunnitelman vain voimassa olevasta tai valmistuneesta sopimuksesta",
+      "suggestion": "Piilota erä asiakkaalta, kunnes sopimus on voimassa"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Ennakkomaksu {deposit} on suurempi kuin {ceiling}, jonka {reference} sallii maassa {jurisdiction} (lähde: {source_url}, tarkistettu {checked_on}, lakimies ei ole tarkistanut)",
+      "suggestion": "Pienennä ennakkomaksua tai varmista asianajajalta, että tähän sopimukseen sovelletaan poikkeusta",
+      "below_threshold": {
+        "fail": "Sopimussumma on alle sen rajan, josta {reference} rajoittaa ennakkomaksuja maassa {jurisdiction}, joten ennakkomaksua ei tarkistettu (lähde: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Sopimus on valuutassa {currency}, mutta {reference} ilmoittaa rajansa valuutassa {limit_currency}, joten ennakkomaksua maassa {jurisdiction} ei tarkistettu (lähde: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Jos laki koskee tätä sopimusta, tarkista ennakkomaksu sitä vasten käsin"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Tähän mennessä todistettu työ on {cumulative}, eli {over} enemmän kuin sopimussumma {contract}",
+      "suggestion": "Hyväksytä ensin muutostyö, joka kattaa lisätyön, tai korjaa tämän todistuksen määrät"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Tämä todistus kantaa edellisten todistusten yhteissummaksi {carried}, mutta todistus {reference} todistettiin {certified}",
+      "work_fail": "Työluettelon edellinen sarake on yhteensä {carried}, mutta todistus {reference} todistettiin tähän mennessä tehdystä työstä {certified}",
+      "suggestion": "Tarkista, onko kahden todistuksen välissä laskutus, jota kumpikaan ei näytä, ja luo tämä todistus sitten uudelleen"
+    },
+    "previous_unknown": {
+      "fail": "Edellisten todistusten yhteissumma ei ole tiedossa",
+      "not_certified": "Edellistä todistusta {reference} ei ole vielä todistettu, joten sen summa ei ole lopullinen",
+      "suggestion": "Todista ensin edellinen todistus. Jos se todistettiin ennen kuin todistukset tallennettiin, syötä sen summa edellisten todistusten riville"
+    },
+    "weights_sum": {
+      "fail": "Kohtien painot ovat yhteensä {total} %, ei 100 %",
+      "suggestion": "Korjaa aikataulurivien arvot siten, että niiden osuudet ovat yhteensä koko sopimus"
+    },
+    "percent_regressed": {
+      "fail": "Kohta {line} on tällä jaksolla negatiivinen, joten se perii takaisin jo todistettua työtä",
+      "suggestion": "Jätä, jos tämä korjaa aiemman liian suuren mittauksen. Muussa tapauksessa korjaa tämän todistuksen määrä tai prosentti"
+    },
+    "income_withholding_single_year": {
+      "fail": "Tulonpidätys on valittu, mutta sopimus kestää {start}–{end}, eli se sijoittuu yhden kalenterivuoden sisään. Tulonpidätys koskee rakennustöitä, jotka ulottuvat yli yhden kalenterivuoden",
+      "suggestion": "Tarkista tilintarkastajalta, ulottuuko työ todella yli yhden vuoden; jos ei, merkitse tulonpidätys ei sovellettavaksi"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Tähän mennessä takaisin perittyä ennakkoa on {recovered}, mikä on enemmän kuin maksettu ennakko {advance}",
+      "unknown": "Tähän mennessä on perittyä ennakkoa {recovered}, mutta sopimuksessa ei ole mainittu maksettua ennakkoa, joten perintää ei voi tarkistaa sitä vasten",
+      "suggestion": "Pienennä tämän todistuksen perintää tai ilmoita maksettu ennakko sopimuksen todistusasetuksissa"
+    },
+    "retention_matches_config": {
+      "fail": "Todistus pidättää takuuna {certificate} ({percent} % sen pohjasta), mutta sen taustalla oleva asiakirja pidättää {stored}",
+      "suggestion": "Laske asiakirja uudelleen tai korjaa takuupidätysprosentti tai sen pohja sopimuksen todistusasetuksissa, jotta molemmat näyttävät saman takuun"
+    },
+    "net_payable_negative": {
+      "fail": "Maksettava summa on {payable}: vähennykset ovat suuremmat kuin tämän todistuksen summa",
+      "suggestion": "Tarkista vähennykset, ennen kaikkea ennakon perintä, ja siirrä se, mitä ei voi vähentää nyt, seuraavaan todistukseen"
+    },
+    "taxes_stale": {
+      "fail": "Verot laskettiin ennen kuin tätä todistusta muutettiin, joten ne eivät enää kuulu sille",
+      "suggestion": "Laske verot uudelleen. Jos ne oli jo vahvistettu, avaa ne ensin uudelleen ja vahvista ne sen jälkeen"
+    },
+    "taxes_confirmed": {
+      "fail": "Tämän todistuksen veroja ei ole vahvistettu",
+      "suggestion": "Tarkista jokainen verorivi ja vahvista verot ennen todistamista"
+    },
+    "lines_complete": {
+      "fail": "Rivillä {line} ei ole vielä lukua. {reason}",
+      "suggestion": "Syötä summa tai merkitse rivi ei sovellettavaksi ja kerro syy"
+    },
+    "work_value_differs": {
+      "fail": "Kohta {line} on kirjattu tähän mennessä {stated}, mutta sen määrä tai prosentti antaa {computed}",
+      "suggestion": "Korjaa asiakirjan määrä tai summa siten, että rivin kaksi saraketta täsmäävät"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Takuupidätys {percent} prosenttia on suurempi kuin julkisten töiden laki sallii jokaisessa välimaksussa, eli {limit} prosenttia",
+      "suggestion": "Pienennä sopimuksen takuupidätys lakisääteiseen prosenttiin"
+    },
+    "advance_above_cap": {
+      "fail": "Ennakkomaksutakaus kattaa {percent} prosenttia sopimusarvosta, mikä ylittää {limit} prosentin rajan, jonka julkiset työt sallivat ilman valtiovarainministerin hyväksyntää",
+      "suggestion": "Pienennä ennakkomaksua tai kirjaa sopimusehtoihin tarjouskilpailua edeltävä hyväksyntä"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Viivästyssakkolausekkeella ei ole enimmäismäärää, vaikka julkisten töiden laki rajoittaa viivästyssakot {limit} prosenttiin sopimusarvosta",
+      "suggestion": "Syötä viivästyssakkolausekkeen enimmäismäärä"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Viivästyssakkolauseke on rajattu {percent} prosenttiin sopimusarvosta, mikä ylittää {limit} prosentin rajan, jonka julkiset työt sallivat",
+      "suggestion": "Pienennä lausekkeen enimmäismäärä lakisääteiseen rajaan"
+    },
+    "performance_security_missing": {
+      "fail": "Suoritusvakuutta ei ole kirjattu, vaikka julkiset työt vaativat sitä {limit} prosenttia sopimusarvosta",
+      "suggestion": "Kirjaa lopputakuu suoritustakuuna tai pankkitakauksena"
+    },
+    "performance_security_below": {
+      "fail": "Suoritusvakuus kattaa {percent} prosenttia sopimusarvosta, mikä on alle {limit} prosentin, jonka julkiset työt vaativat",
+      "suggestion": "Kirjaa suoritusvakuus koko lakisääteiseltä prosentilta"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Julkiset työt, jotka kestävät {months} kuukautta tai kauemmin, on laista johtuen hinnoiteltava uudelleen, mutta sopimus ei mainitse kertoimia sen muuttuville eristä",
+        "suggestion": "Syötä kertoimet, jotka urakoitsija ilmoitti tekniseen kirjekuoreen"
+      },
+      "duplicate_item": {
+        "fail": "Muuttuva erä {item} on lueteltu kahdesti hintatarkistuksen kertoimissa",
+        "suggestion": "Säilytä yksi kerroin kutakin muuttuvaa erää kohti"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Erän {item} hintatarkistuskerroin ei ole luku",
+        "suggestion": "Syötä kerroin desimaalilukuna, esimerkiksi 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Erän {item} hintatarkistuskerroin on nolla tai pienempi, vaikka laki vaatii, että jokainen kerroin on suurempi kuin nolla",
+        "suggestion": "Syötä kerroin, joka on suurempi kuin nolla, tai poista erä"
+      },
+      "coefficient_negative": {
+        "fail": "Erän {item} hintatarkistuskerroin on negatiivinen",
+        "suggestion": "Syötä kerroin, joka on nolla tai suurempi"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Hintatarkistuskertoimet ovat yhteensä {item}, vaikka laki vaatii niiden summan pysyvän alle yhden",
+        "suggestion": "Pienennä kertoimia siten, että hinnasta jää kiinteä osa"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Hintatarkistuskertoimet ovat yhteensä {item}, mikä on enemmän kuin yksi",
+        "suggestion": "Pienennä kertoimia siten, että ne ovat yhteensä yksi tai vähemmän"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Yli {months} kuukautta kestävissä julkisissa töissä on hintatarkistuslauseke, kun raaka-aineet ovat merkittävä osa kustannuksista, mutta sopimus ei mainitse tarkistuspainoja",
+        "suggestion": "Syötä tarkistuskaavan painot erityisehdoista tai kirjaa, että hinta on kiinteä"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Hintatarkistuskertoimet ovat yhteensä {item}, vaikka kaava vaatii niiden olevan täsmälleen yksi",
+        "suggestion": "Korjaa painot sopimustiedoista siten, että ne ovat yhteensä yksi"
+      },
+      "unknown_regime": {
+        "fail": "Sopimus nimeää hintatarkistusjärjestelmän {item}, jota alusta ei tunne",
+        "suggestion": "Valitse yksi luetelluista hintatarkistusjärjestelmistä"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Hintatarkistuksen ulkopuolelle jäävä osuus {item} ei ole nollan ja yhden välissä",
+        "suggestion": "Syötä osuus desimaalilukuna sopimustiedoista, esimerkiksi 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Ennakko on {percent} prosenttia sopimusarvosta, mikä on alle {limit} prosentin vähimmäismäärän, jonka julkisten töiden laki asettaa tälle urakoitsijalle ja tilaajalle",
+      "suggestion": "Nosta ennakko vähimmäismäärään tai kirjaa nolla, jos urakoitsija luopui siitä"
+    },
+    "advance_above_maximum": {
+      "fail": "Ennakko on {percent} prosenttia sopimusarvosta, mikä ylittää {limit} prosentin tavanomaisen enimmäismäärän, jonka julkisten töiden laki asettaa",
+      "suggestion": "Tarkista, että erityisehdot sallivat suuremman ennakon, ja kirjaa sen edellyttämä takaus"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Viivästyssakkolauseke veloittaa {amount} päivältä, vaikka yleiset ehdot veloittavat {expected} päivältä eli yhden {divisor}:nnen sopimusarvosta",
+      "suggestion": "Säilytä yleisten ehtojen päiväkorko tai lisää poikkeava korko erityisehtojen poikkeuksiin"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Viivästyssakkolauseke on rajattu {percent} prosenttiin sopimusarvosta, mikä ylittää yleisten ehtojen {limit} prosentin rajan",
+      "suggestion": "Pienennä katto yleisten ehtojen lukuun tai lisää se erityisehtojen poikkeuksiin"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Tämä alihankintasopimus on {amount}, mikä saavuttaa julkisen tilaajan suoran maksun rajan {limit}, ja sopimus luopuu siitä, mitä laki kieltää",
+      "suggestion": "Kirjaa, että julkinen tilaaja maksaa alihankkijalle suoraan"
+    },
+    "direct_payment_unstated": {
+      "fail": "Tämä alihankintasopimus on {amount}, mikä saavuttaa julkisen tilaajan suoran maksun rajan {limit}, mutta sopimus ei kirjaa sitä",
+      "suggestion": "Kirjaa, hyväksytäänkö alihankkija ja maksaako julkinen tilaaja hänelle suoraan"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Tämä yksityisen työn alihankintasopimus ei kirjaa pankkitakausta eikä maksun delegointia, ilman niitä alihankintasopimus voidaan mitätöidä",
+      "suggestion": "Kirjaa päähankkijan pankkitakaus tai maksun delegointi tilaajalle"
+    },
+    "private_retention_above_limit": {
+      "fail": "Takuupidätys {percent} prosenttia on suurempi kuin laki sallii yksityisissä töissä, eli {limit} prosenttia",
+      "suggestion": "Pienennä sopimuksen takuupidätys lakisääteiseen enimmäismäärään"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Sopimus {contract} nimeää arvonlisäverojärjestelmän {regime}, jota maassa {country} ei ole",
+      "suggestion": "Valitse yksi hankkeen maan tarjoamista arvonlisäverojärjestelmistä tai poista valinta"
+    },
+    "country_unknown": {
+      "fail": "Sopimus {contract} nimeää arvonlisäverojärjestelmän {regime}, mutta sen hankkeelle ei ole nimetty maata, joten järjestelmää ei voi tarkistaa",
+      "suggestion": "Aseta hankkeen maa"
+    },
+    "contract_date_missing": {
+      "fail": "Arvonlisäverojärjestelmä {regime} koskee vain ennen {cutoff} allekirjoitettuja sopimuksia, eikä tässä sopimuksessa ole kirjattu allekirjoitus- eikä aloituspäivää",
+      "suggestion": "Syötä päivä, jona sopimus allekirjoitettiin"
+    },
+    "contract_too_late": {
+      "fail": "Arvonlisäverojärjestelmä {regime} koskee vain ennen {cutoff} allekirjoitettuja sopimuksia, ja tämä sopimus on peräisin {contract_date}",
+      "suggestion": "Valitse tälle sopimukselle tavanomainen arvonlisäverojärjestelmä"
+    },
+    "evidence_missing": {
+      "fail": "Arvonlisäverojärjestelmä {regime} edellyttää {evidence}, eikä sopimuksessa ole kirjattu yhtään",
+      "suggestion": "Kirjaa asiakirjan viite ja antopäivä sopimuksen arvonlisäverojärjestelmän yhteyteen"
+    },
+    "evidence_date_missing": {
+      "fail": "Järjestelmälle {regime} kirjatulla asiakirjalla {evidence} ei ole antopäivää, joten sitä ei voi näyttää ennen päivämäärää {cutoff} annetuksi",
+      "suggestion": "Syötä päivä, jona asiakirja annettiin"
+    },
+    "evidence_too_late": {
+      "fail": "Järjestelmälle {regime} kirjattu asiakirja {evidence} on annettu {issued_on}, mutta järjestelmä edellyttää asiakirjaa, joka on annettu ennen {cutoff}",
+      "suggestion": "Kirjaa aiempi asiakirja tai valitse tavanomainen arvonlisäverojärjestelmä"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Sopimusarvo nousi arvosta {original_value} arvoon {current_value}, eikä sopimus mainitse sallittua korotusta, joten ei voida arvioida, sovelletaanko yhä arvonlisäverojärjestelmää {regime}",
+      "suggestion": "Kirjaa sopimuksen sallima laajuuden lisäys"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Sopimusarvo nousi arvosta {original_value} arvoon {current_value}, mikä ylittää sopimuksen salliman {allowed_increase_pct} prosentin korotuksen, joten arvonlisäverotuksessa se on uusi sopimus eikä järjestelmää {regime} enää sovelleta",
+      "suggestion": "Siirrä sopimus tavanomaiseen arvonlisäverojärjestelmään"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "konsultin hyväksymä maksutodistus",
+      "einvoice": "sähköinen lasku tai kuitti",
+      "main_contractor_certificate": "päähankkijan todistus siitä, että arvonlisävero on maksettu hankkeesta"
+    },
+    "not_in_force": {
+      "before": "Laskutuserä {claim} on päivätty {on}, ja arvonlisäverojärjestelmä {regime} koskee vain päivästä {effective_from}; tuona päivänä voimassa oleva: {instead}",
+      "after": "Laskutuserä {claim} on päivätty {on}, ja arvonlisäverojärjestelmä {regime} päättyi {effective_to}; tuona päivänä voimassa oleva: {instead}",
+      "suggestion": "Vaihda sopimuksen arvonlisäverojärjestelmä laskutuspäivänä voimassa olevaan järjestelmään tai korjaa laskutuspäivä"
+    }
+  }
+}

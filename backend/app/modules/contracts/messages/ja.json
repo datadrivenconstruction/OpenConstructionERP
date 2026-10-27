@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "出来高請求 {claim} には対象期間の終了日がないため、契約上の請求の順序に配置できません",
+      "suggestion": "この請求が対象とする期間の最終日を入力してください"
+    },
+    "period_order": {
+      "fail": "出来高請求 {claim} は {period_from} に始まり {period_to} に終わるため、期間の終了が開始より前になっています",
+      "suggestion": "期間の開始日または終了日を修正し、開始日が先になるようにしてください"
+    },
+    "period_overlap": {
+      "fail": "出来高請求 {claim} は {period_from} に始まりますが、前の請求 {previous} は {previous_to} まで続くため、両方の請求で同じ日数が請求されています",
+      "suggestion": "前の請求の期間終了日の翌日からこの請求を開始してください"
+    },
+    "period_gap": {
+      "fail": "出来高請求 {claim} は {period_from} に始まりますが、前の請求 {previous} は {previous_to} に終了しているため、その間の日数を請求する請求がありません（未請求日数: {days}）",
+      "suggestion": "前の請求の期間終了日の翌日からこの請求を開始するか、欠けている請求がないか確認してください"
+    },
+    "period_unparsed": {
+      "fail": "出来高請求 {claim} の {field} が '{value}' と記録されていますが、日付として読み取れません",
+      "suggestion": "日付を年・月・日の形式で入力してください（例: 2026-03-31）",
+      "fields": {
+        "period_start": "期間開始日",
+        "period_end": "期間終了日",
+        "claim_date": "申請日"
+      }
+    },
+    "line_overbilled": {
+      "fail": "明細 {line} の請求累計は {billed} で、予定金額 {scheduled} を超えています。進捗から再度作成を実行するか、この明細の今期請求額を減らしてください",
+      "suggestion": "進捗から作成では、前回までの請求との差分のみを明細ごとに計上します。明細の作業範囲が実際に増えた場合は、先に予定金額を増やす変更指示を登録してください"
+    },
+    "percent_regressed": {
+      "fail": "明細 {line} の現時点の出来高は {percent}% で、{requested} となっており、前回までの請求で既に計上された {previous} を下回っているため、今期はこの明細で請求できません",
+      "suggestion": "この明細の出来高率を確認するか、出来高を過大に記録した前回の請求を修正してください"
+    },
+    "errors": {
+      "submission_blocked": "以下の項目が解決されるまで、この出来高請求は提出できません: {findings}",
+      "rules_unavailable": "この環境では出来高請求のルールが読み込まれていないため、提出前にこの請求を検証できません。",
+      "later_claim_already_issued": "請求 {claims} はこの請求より後のものであり、既に発行されています。この請求が下書きの間に作成されたため、同じ作業に対して既に適用されています。この下書きを削除するか、対象期間を発行済みの最後の請求より後に移動してください"
+    },
+    "totals_match_lines": {
+      "fail": "請求 {claim} の請求額は {gross} ですが、その内訳の明細の合計は {lines_total} です。明細の変更後に請求額が再計算されていません",
+      "suggestion": "この請求のいずれかの明細を保存するか、進捗から再度作成を実行すると、合計が更新されます"
+    },
+    "totals_below_lines": {
+      "fail": "請求 {claim} は記録された原価から {gross} を請求していますが、その明細の合計 {lines_total} を下回っています。内訳が請求額を超えることはできません",
+      "suggestion": "原価から請求する場合、明細は金額の内訳であり、金額の根拠ではありません。過大な明細を減らすか削除するか、原価からこの請求を作成し直して両者を一致させてください"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "請求 {claim} は明細 {line} の前回請求額として {stored} を保持していますが、前回までの請求では現在 {now} が計上されています",
+      "total_fail": "請求 {claim} は前回認定額として {stored} を保持していますが、前回までの請求では現在 {now} が認定されています",
+      "suggestion": "この請求を再作成し、その前の請求が現在計上している金額を読み込ませてください"
+    },
+    "within_nte_cap": {
+      "fail": "請求 {claim} は既に請求済みの {billed} に {this} を加えており、上限額（NTE）の {cap} を超えています",
+      "suggestion": "この請求では上限額までを請求し、残りについては変更指示で合意してください"
+    },
+    "retention_matches_policy": {
+      "fail": "請求 {claim} は留保金として {held} を保持していますが、留保方針では現在 {expected} となります。前回の請求、留保金の解放、または方針の変更により、この請求の算出後に差異が生じています",
+      "suggestion": "進捗から再度作成を実行するか、この請求の明細を一つ保存すると、留保金が再計算されます"
+    },
+    "retention_above_cap": {
+      "fail": "請求 {claim} は留保金として {held} を保持していますが、留保方針で定められた上限 {percent}% を超えており、この契約では {cap} が上限です",
+      "suggestion": "請求を再計算するか、当事者が高い率で合意している場合は契約の留保方針で上限を引き上げてください",
+      "state_cap_unread": "請求 {claim}: 留保方針に上限が定められておらず、{country} では州法により留保金が制限されています。プロジェクトに地域コードが設定されていないため州を特定できず、法定上限は確認されていません",
+      "state_cap_suggestion": "州の上限を契約の留保方針に上限として記入すると、この契約のすべての請求がその上限に照らして検証されます"
+    },
+    "retention_release_within_held": {
+      "fail": "請求 {claim} までに請求された解放額は {released} を返還しますが、それまでに保持された留保金は {accrued} です",
+      "suggestion": "過大な解放を無効にするか、より多くの留保金が保持された後の請求で請求してください"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "工事費内訳表の合計は {scheduled} ですが、現時点の契約金額は {contract_sum} です。この請求が対象とする明細では、契約額のうち {difference} に対応する明細がありません",
+      "suggestion": "工事費内訳表の明細を追加または修正し、契約金額と一致させてください",
+      "suggestion_reconcile": "承認済みの変更指示または変更項目 {count} 件が、工事費内訳表に反映される前に契約金額を変更しました。契約の「変更指示を照合」を使い、それぞれの明細を追加してください"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "この解放には {document} が必要ですが、添付されていません",
+      "suggestion": "書類を契約に登録し、解放に添付してから再度承認してください"
+    },
+    "within_available": {
+      "fail": "この解放では {amount} を返還しますが、保持中で他の解放に割り当てられていない留保金は {available} のみです",
+      "suggestion": "この解放を無効にし、現在保持している留保金に基づいて改めて提案してください"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "この解放は、対象事由から {days} 日間の先取特権期間（{reference}）が経過した後にのみ支払われますが、その期間の開始日が記録されていません",
+      "suggestion_no_start": "期間の開始日を入力し（例: 実質完成証明書の発行日）、解放を再度承認してください",
+      "fail_early": "{started} に始まる {days} 日間の先取特権期間は {ends} まで続きます（{reference}）。そのため、この解放は現時点では承認できません",
+      "suggestion_early": "先取特権期間が経過した後に解放を承認してください。保留金に対して先取特権の保全がなされていないことを確認してください"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "実質完成証明書",
+      "acceptance_protocol": "検収記録",
+      "affidavit_payment_of_debts": "債務および請求の支払済み宣誓書",
+      "affidavit_release_of_liens": "先取特権解除の宣誓書",
+      "consent_of_surety": "保証人の同意書",
+      "final_lien_waiver": "最終先取特権放棄書",
+      "final_invoice": "最終請求書"
+    },
+    "errors": {
+      "approval_blocked": "以下の項目が解決されるまで、この留保金解放は承認できません: {findings}",
+      "rules_unavailable": "この環境では留保金解放のルールが読み込まれていないため、承認前にこの解放を検証できません。"
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "工事費内訳表のいずれの明細にも含まれていない請求済みの作業"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "変更指示は有効な契約の工事費内訳表にのみ照合できます。この契約の状態は {status} です",
+      "preview_stale": "照合対象の変更指示の一覧は、開いた後に変更されています。プレビューを開き直し、現在の内容を確認してください"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "以下の項目が解決されるまで、この契約に署名できません: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "完成",
+      "approval": "承認"
+    },
+    "total_within_contract": {
+      "fail": "分割支払額の合計は {scheduled} で、契約金額 {total} を超えています",
+      "suggestion": "分割支払額を減らし、合計が契約金額を超えないようにしてください"
+    },
+    "percent_sum": {
+      "fail": "分割支払額の合計は契約金額 {total} の {scheduled}（{percent}%）であり、請負代金の一部に分割支払が設定されていません",
+      "suggestion": "契約金額の残りに対する分割支払を追加するか、金額を調整してください"
+    },
+    "completion_trigger_linked": {
+      "fail": "分割支払 {milestone} は {trigger} に支払期日が到来しますが、工程表の作業と紐付けられていないため、作業の進捗に応じて期日が動きません",
+      "suggestion": "分割支払を、その完了を待つ工程表のマイルストーンと紐付けてください"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "工程表ではマイルストーン {milestone} に到達していますが、分割支払 {instalment} は未処理のままのため、請求できません",
+      "suggestion": "分割支払を到達済みとしてマークするか、契約が有効でない理由を確認してください"
+    },
+    "client_visible_requires_active": {
+      "fail": "分割支払 {milestone} は発注者に表示されていますが、契約の状態は {status} です。発注者に表示されるのは有効または完了した契約の支払計画のみです",
+      "suggestion": "契約が効力を生じるまで、発注者からこの分割支払を非表示にしてください"
+    },
+    "consumer_deposit_cap": {
+      "fail": "前払金 {deposit} は、{jurisdiction} において {reference} が認める上限 {ceiling} を超えています（出典: {source_url}、確認日: {checked_on}、弁護士による審査は未実施）",
+      "suggestion": "前払金を減額するか、この契約に適用される例外があることを法律顧問と確認してください",
+      "below_threshold": {
+        "fail": "契約金額は、{jurisdiction} において {reference} が前払金を制限する金額以下のため、前払金は確認されていません（出典: {source_url}）"
+      },
+      "other_currency": {
+        "fail": "契約の通貨は {currency} ですが、{reference} は上限を {limit_currency} で定めているため、{jurisdiction} における前払金は確認されていません（出典: {source_url}）"
+      },
+      "unchecked": {
+        "suggestion": "この法令がこの契約に適用される場合は、前払金を手作業で確認してください"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "これまでに認定された出来高は {cumulative} で、契約金額 {contract} を {over} 上回っています",
+      "suggestion": "超過する作業を対象とする変更指示を先に承認するか、この認定書の数量を修正してください"
+    },
+    "previous_matches_last_certified": {
+      "fail": "この認定書は前回までの認定額の合計として {carried} を保持していますが、認定書 {reference} は {certified} で認定されています",
+      "work_fail": "作業一覧の前回欄の合計は {carried} ですが、認定書 {reference} は作業の累計 {certified} で認定されています",
+      "suggestion": "どちらの認定書にも表示されていない、二つの認定書の間の請求がないか確認してから、この認定書を再作成してください"
+    },
+    "previous_unknown": {
+      "fail": "前回までの認定額の合計が不明です",
+      "not_certified": "前回の認定書 {reference} はまだ認定されていないため、その合計は確定していません",
+      "suggestion": "まず前回の認定書を認定してください。認定書が保存される前に認定されていた場合は、前回認定額の欄に合計額を入力してください"
+    },
+    "weights_sum": {
+      "fail": "明細の比率の合計は {total}% で、100% になりません",
+      "suggestion": "工程表の明細の金額を修正し、各比率の合計が契約全体となるようにしてください"
+    },
+    "percent_regressed": {
+      "fail": "明細 {line} は今期マイナスとなっており、既に認定された作業を取り消しています",
+      "suggestion": "以前の過大な計測を修正するためであればそのままにしてください。そうでなければ、この認定書の数量または出来高率を修正してください"
+    },
+    "income_withholding_single_year": {
+      "fail": "所得税源泉徴収が選択されていますが、契約期間は {start} から {end} までで、暦年の範囲内に収まっています。源泉徴収は複数の暦年にまたがる建設工事を対象としています",
+      "suggestion": "作業が実際に複数年にまたがるかどうかを会計士に確認してください。そうでなければ、所得税源泉徴収を対象外としてマークしてください"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "これまでに回収された前渡金は {recovered} ですが、支払われた前渡金 {advance} を超えています",
+      "unknown": "これまでに {recovered} の前渡金が回収されていますが、契約には支払われた前渡金が記載されていないため、回収額を照合できません",
+      "suggestion": "この認定書の回収額を減らすか、契約の認定書設定で支払われた前渡金を記載してください"
+    },
+    "retention_matches_config": {
+      "fail": "認定書は留保金として {certificate} を保持していますが（基準額の {percent}%）、その元となる書類では {stored} が保持されています",
+      "suggestion": "書類を再計算するか、契約の認定書設定で留保率または基準額を修正し、両方に同じ留保金が表示されるようにしてください"
+    },
+    "net_payable_negative": {
+      "fail": "支払額は {payable} です。控除額がこの認定書の金額を上回っています",
+      "suggestion": "控除額、特に前渡金の回収額を確認し、今回控除できない額は次の認定書に繰り越してください"
+    },
+    "taxes_stale": {
+      "fail": "税額はこの認定書の変更前に計算されたため、現在の認定書と一致しません",
+      "suggestion": "税額を再計算してください。既に確定していた場合は、先に再度開いてから、改めて確定してください"
+    },
+    "taxes_confirmed": {
+      "fail": "この認定書の税額が確定していません",
+      "suggestion": "認定する前に各税の行を確認し、税額を確定してください"
+    },
+    "lines_complete": {
+      "fail": "明細 {line} にはまだ金額がありません。{reason}",
+      "suggestion": "金額を入力するか、明細を対象外としてマークしてその理由を記載してください"
+    },
+    "work_value_differs": {
+      "fail": "明細 {line} は現時点の出来高として {stated} と記録されていますが、その数量または出来高率からは {computed} となります",
+      "suggestion": "書類の数量または金額を修正し、その行の二つの欄が一致するようにしてください"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "留保率 {percent}% は、公共工事法が各中間支払について認める {limit}% を超えています",
+      "suggestion": "契約の留保率を法定の率まで下げてください"
+    },
+    "advance_above_cap": {
+      "fail": "前払保証は契約金額の {percent}% を担保していますが、財務大臣の承認なしに公共工事で認められる {limit}% を超えています",
+      "suggestion": "前渡金を減額するか、入札前に得た承認を契約条件に記録してください"
+    },
+    "delay_damages_uncapped": {
+      "fail": "遅延損害金条項に上限額がありませんが、公共工事法は遅延損害金を契約金額の {limit}% に制限しています",
+      "suggestion": "遅延損害金条項の上限額を入力してください"
+    },
+    "delay_damages_above_cap": {
+      "fail": "遅延損害金条項は契約金額の {percent}% に上限が定められていますが、公共工事法が認める {limit}% を超えています",
+      "suggestion": "条項の上限額を法定の上限まで下げてください"
+    },
+    "performance_security_missing": {
+      "fail": "履行保証が記録されていませんが、公共工事では契約金額の {limit}% の履行保証が必要です",
+      "suggestion": "最終保証を履行保証または銀行保証として記録してください"
+    },
+    "performance_security_below": {
+      "fail": "履行保証は契約金額の {percent}% を担保していますが、公共工事で必要な {limit}% を下回っています",
+      "suggestion": "法定の割合の全額について履行保証を記録してください"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "{months} か月以上の公共工事は法律により価格調整が必要ですが、契約には変動項目の係数が定められていません",
+        "suggestion": "技術提案書で受注者が示した係数を入力してください"
+      },
+      "duplicate_item": {
+        "fail": "変動項目 {item} が価格調整係数に二重に記載されています",
+        "suggestion": "変動項目ごとに係数を一つだけ残してください"
+      },
+      "coefficient_not_a_number": {
+        "fail": "{item} の価格調整係数が数値ではありません",
+        "suggestion": "係数を小数で入力してください（例: 0.15）"
+      },
+      "coefficient_not_positive": {
+        "fail": "{item} の価格調整係数がゼロ以下ですが、法律では各係数がゼロより大きいことが求められています",
+        "suggestion": "ゼロより大きい係数を入力するか、この項目を削除してください"
+      },
+      "coefficient_negative": {
+        "fail": "{item} の価格調整係数がマイナスです",
+        "suggestion": "ゼロ以上の係数を入力してください"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "価格調整係数の合計は {item} ですが、法律では合計が1未満にとどまることが求められています",
+        "suggestion": "価格の固定部分が残るように係数を下げてください"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "価格調整係数の合計は {item} で、1を超えています",
+        "suggestion": "係数の合計が1以下になるように下げてください"
+      },
+      "no_coefficients_advisory": {
+        "fail": "{months} か月を超える公共工事には、資材が費用の大きな部分を占める場合に価格改定条項が必要ですが、契約には改定のウェイトが定められていません",
+        "suggestion": "特記仕様書から改定式のウェイトを入力するか、価格が確定していることを記録してください"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "価格調整係数の合計は {item} ですが、算式では合計がちょうど1になることが求められています",
+        "suggestion": "契約データからウェイトを修正し、合計が1になるようにしてください"
+      },
+      "unknown_regime": {
+        "fail": "契約で指定された価格調整方式 {item} は、このプラットフォームでは認識されていません",
+        "suggestion": "表示されている価格調整方式のいずれかを選択してください"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "価格調整の対象外となる部分 {item} が0から1の範囲にありません",
+        "suggestion": "契約データに基づき、その部分を小数で入力してください（例: 0.15）"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "前渡金は契約金額の {percent}% ですが、この受注者と発注者について公共工事法が定める最低 {limit}% を下回っています",
+      "suggestion": "前渡金を最低額まで引き上げるか、受注者が放棄した場合はゼロを記録してください"
+    },
+    "advance_above_maximum": {
+      "fail": "前渡金は契約金額の {percent}% ですが、公共工事法が通常の上限として定める {limit}% を超えています",
+      "suggestion": "特記仕様書がより高い前渡金を認めていることを確認し、それが求める保証を記録してください"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "遅延違約金条項では1日あたり {amount} が課されますが、一般条件では1日あたり {expected}（契約金額の {divisor} 分の1）が課されます",
+      "suggestion": "一般条件の日額を維持するか、異なる率を特記仕様書の特例に記載してください"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "遅延違約金条項は契約金額の {percent}% に上限が定められていますが、一般条件の {limit}% を超えています",
+      "suggestion": "上限を一般条件の数値まで下げるか、特記仕様書の特例に記載してください"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "この下請契約（{amount}）は、公共発注者による直接支払の基準額 {limit} に達していますが、契約ではこれを放棄しており、法律で禁止されています",
+      "suggestion": "公共発注者が下請業者に直接支払うことを記録してください"
+    },
+    "direct_payment_unstated": {
+      "fail": "この下請契約（{amount}）は、公共発注者による直接支払の基準額 {limit} に達していますが、契約には記載されていません",
+      "suggestion": "下請業者が公共発注者に認められ、直接支払われるかどうかを記録してください"
+    },
+    "payment_guarantee_missing": {
+      "fail": "この民間工事の下請契約には、銀行保証も支払委任も記録されていません。これがない場合、下請契約は無効とされることがあります",
+      "suggestion": "元請業者の銀行保証、または発注者に対する支払委任を記録してください"
+    },
+    "private_retention_above_limit": {
+      "fail": "留保率 {percent}% は、民間工事について法律が認める {limit}% を超えています",
+      "suggestion": "契約の留保率を法定の上限まで下げてください"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "契約 {contract} は付加価値税の制度 {regime} を指定していますが、{country} にはこの制度がありません",
+      "suggestion": "プロジェクトの国で提供されている付加価値税の制度のいずれかを選択するか、この選択を削除してください"
+    },
+    "country_unknown": {
+      "fail": "契約 {contract} は付加価値税の制度 {regime} を指定していますが、プロジェクトに国が設定されていないため、この制度を確認できません",
+      "suggestion": "プロジェクトの国を設定してください"
+    },
+    "contract_date_missing": {
+      "fail": "付加価値税の制度 {regime} は {cutoff} より前に締結された契約のみが対象ですが、この契約には署名日も開始日も記録されていません",
+      "suggestion": "契約を締結した日付を入力してください"
+    },
+    "contract_too_late": {
+      "fail": "付加価値税の制度 {regime} は {cutoff} より前に締結された契約のみが対象ですが、この契約は {contract_date} のものです",
+      "suggestion": "この契約には標準の付加価値税の制度を選択してください"
+    },
+    "evidence_missing": {
+      "fail": "付加価値税の制度 {regime} には {evidence} が必要ですが、契約には何も記録されていません",
+      "suggestion": "契約の付加価値税の制度とともに、書類の参照番号と発行日を記録してください"
+    },
+    "evidence_date_missing": {
+      "fail": "付加価値税の制度 {regime} に記録された {evidence} には発行日がないため、{cutoff} より前であることを示せません",
+      "suggestion": "書類の発行日を入力してください"
+    },
+    "evidence_too_late": {
+      "fail": "付加価値税の制度 {regime} に記録された {evidence} は {issued_on} に発行されていますが、この制度には {cutoff} より前に発行された書類が必要です",
+      "suggestion": "より前の日付の書類を記録するか、標準の付加価値税の制度を選択してください"
+    },
+    "scope_increase_unjudged": {
+      "fail": "契約金額が {original_value} から {current_value} に増加していますが、契約には認められる増額が記載されていないため、付加価値税の制度 {regime} がなお適用されるかどうかを判断できません",
+      "suggestion": "契約で認められている範囲の増加を記録してください"
+    },
+    "scope_increase_new_contract": {
+      "fail": "契約金額が {original_value} から {current_value} に増加し、契約で認められる {allowed_increase_pct}% の増加を超えたため、付加価値税の上では新たな契約となり、付加価値税の制度 {regime} はもはや適用されません",
+      "suggestion": "契約を標準の付加価値税の制度に移行してください"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "コンサルタントが承認した支払認定書",
+      "einvoice": "電子インボイスまたは電子領収書",
+      "main_contractor_certificate": "プロジェクトで付加価値税が支払われたことを示す元請業者の証明書"
+    },
+    "not_in_force": {
+      "before": "請求 {claim} の日付は {on} ですが、付加価値税の制度 {regime} は {effective_from} からのみ適用されます。当日有効な制度: {instead}",
+      "after": "請求 {claim} の日付は {on} ですが、付加価値税の制度 {regime} は {effective_to} に終了しました。当日有効な制度: {instead}",
+      "suggestion": "契約の付加価値税の制度を、請求日に有効なものに変更するか、請求日を修正してください"
+    }
+  }
+}

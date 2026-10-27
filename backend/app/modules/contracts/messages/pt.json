@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "A medição {claim} não tem data de fim de período, por isso não pode ser colocada na ordem das medições do contrato",
+      "suggestion": "Introduza o último dia do período que esta medição abrange"
+    },
+    "period_order": {
+      "fail": "A medição {claim} começa em {period_from} e termina em {period_to}, pelo que o seu período termina antes de começar",
+      "suggestion": "Corrija o início ou o fim do período para que o início venha primeiro"
+    },
+    "period_overlap": {
+      "fail": "A medição {claim} começa em {period_from}, mas a medição anterior {previous} decorre até {previous_to}, pelo que ambas faturam os mesmos dias",
+      "suggestion": "Inicie esta medição no dia seguinte ao fim do período da medição anterior"
+    },
+    "period_gap": {
+      "fail": "A medição {claim} começa em {period_from}, mas a medição anterior {previous} terminou em {previous_to}, pelo que nenhuma medição fatura os dias intermédios (dias não faturados: {days})",
+      "suggestion": "Inicie esta medição no dia seguinte ao fim do período da medição anterior, ou verifique se não falta alguma medição"
+    },
+    "period_unparsed": {
+      "fail": "A medição {claim} regista o {field} como '{value}', que não pode ser lido como data",
+      "suggestion": "Introduza a data como ano, mês e dia, por exemplo 2026-03-31",
+      "fields": {
+        "period_start": "início do período",
+        "period_end": "fim do período",
+        "claim_date": "data do pedido"
+      }
+    },
+    "line_overbilled": {
+      "fail": "A linha {line} está faturada em {billed} até à data, mais do que o seu valor previsto de {scheduled}; volte a executar Preencher a partir do progresso ou reduza o montante deste período na linha",
+      "suggestion": "Preencher a partir do progresso fatura cada linha apenas pelo que é novo em relação às medições anteriores. Se o âmbito da linha aumentou efetivamente, registe primeiro a alteração contratual que aumenta o seu valor previsto"
+    },
+    "percent_regressed": {
+      "fail": "A linha {line} está {percent}% concluída até à data, ou seja, {requested}, menos do que os {previous} que as medições anteriores já faturaram nela, pelo que nada é faturado nesta linha neste período",
+      "suggestion": "Verifique a percentagem de conclusão desta linha, ou corrija a medição anterior que a sobrestimou"
+    },
+    "errors": {
+      "submission_blocked": "Este pedido de pagamento não pode ser submetido enquanto estes pontos não forem resolvidos: {findings}",
+      "rules_unavailable": "As regras dos pedidos de pagamento não estão carregadas nesta instalação, pelo que esta medição não pode ser verificada antes de ser submetida.",
+      "later_claim_already_issued": "A medição {claims} é posterior a esta e já foi emitida. Foi elaborada enquanto esta medição estava em rascunho, pelo que já aplica este trabalho. Elimine este rascunho ou mova o seu período para depois da última medição emitida"
+    },
+    "totals_match_lines": {
+      "fail": "A medição {claim} pede {gross}, mas as linhas que a suportam somam {lines_total}: a medição não foi recalculada depois de as suas linhas terem sido alteradas",
+      "suggestion": "Grave qualquer linha desta medição, ou volte a executar Preencher a partir do progresso, e os totais são atualizados"
+    },
+    "totals_below_lines": {
+      "fail": "A medição {claim} fatura {gross} a partir de custos registados, menos do que as {lines_total} que as suas próprias linhas somam: a discriminação não pode pedir mais do que a medição",
+      "suggestion": "Numa medição faturada a partir de custos, as linhas são uma discriminação do montante e não a sua origem. Reduza ou remova as linhas que o sobrestimam, ou volte a gerar a medição a partir do custo da obra para que ambos coincidam"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "A medição {claim} indica {stored} como já faturado na linha {line}, mas as medições anteriores faturam agora {now} nela",
+      "total_fail": "A medição {claim} indica {stored} como já certificado anteriormente, mas as medições anteriores certificam agora {now}",
+      "suggestion": "Volte a gerar esta medição para que leia o que as medições anteriores faturam hoje"
+    },
+    "within_nte_cap": {
+      "fail": "A medição {claim} fatura {this} acima dos {billed} já faturados, o que ultrapassa o limite máximo (NTE) de {cap}",
+      "suggestion": "Fature até ao limite nesta medição e acorde uma alteração contratual para o restante"
+    },
+    "retention_matches_policy": {
+      "fail": "A medição {claim} retém {held} de garantia, mas a sua política de retenção dá agora {expected}: uma medição anterior, uma libertação ou a alteração da política ocorreu depois de esta medição ter sido calculada",
+      "suggestion": "Volte a executar Preencher a partir do progresso, ou grave qualquer linha desta medição, e a retenção é recalculada"
+    },
+    "retention_above_cap": {
+      "fail": "A medição {claim} retém {held} de garantia, acima do limite de {percent}% definido pela sua política de retenção, que é {cap} neste contrato",
+      "suggestion": "Volte a calcular a medição, ou aumente o limite na política de retenção do contrato se as partes acordaram um valor mais elevado",
+      "state_cap_unread": "Medição {claim}: a sua política de retenção não define limite, e {country} limita a retenção por lei estadual. Não foi possível determinar o estado porque o projeto não tem código de subdivisão, pelo que o limite legal não foi verificado",
+      "state_cap_suggestion": "Escreva o limite do estado na política de retenção do contrato como teto, e todas as medições deste contrato serão verificadas contra ele"
+    },
+    "retention_release_within_held": {
+      "fail": "As libertações faturadas até à medição {claim} devolvem {released}, mais do que os {accrued} de retenção acumulados até então",
+      "suggestion": "Anule a libertação excessiva, ou fature-a numa medição posterior quando houver mais retenção acumulada"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "O mapa de valores soma {scheduled}, mas o valor do contrato até à data é {contract_sum}: as linhas em que esta medição é faturada deixam {difference} do contrato sem linha",
+      "suggestion": "Acrescente ou corrija linhas do mapa de valores até que somem o valor do contrato",
+      "suggestion_reconcile": "{count} alterações contratuais ou variações aprovadas alteraram o valor do contrato antes de chegarem ao mapa de valores. Use Reconciliar alterações contratuais no contrato para acrescentar uma linha a cada uma"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Esta libertação precisa do {document}, e nenhum está anexado",
+      "suggestion": "Registe o documento no contrato, anexe-o à libertação e aprove-a novamente"
+    },
+    "within_available": {
+      "fail": "Esta libertação devolve {amount}, mas apenas {available} de retenção continua retido e não comprometido com outra libertação",
+      "suggestion": "Anule esta libertação e proponha-a de novo, para que seja dimensionada com a retenção retida neste momento"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Esta libertação só é paga após decorrer o prazo de privilégio de {days} dias a contar do evento ({reference}), e não indica quando esse prazo começou",
+      "suggestion_no_start": "Introduza o dia em que o prazo começou, como a data de publicação do certificado de conclusão substancial, e aprove a libertação novamente",
+      "fail_early": "O prazo de privilégio de {days} dias que começou em {started} decorre até {ends} ({reference}), pelo que esta libertação ainda não pode ser aprovada",
+      "suggestion_early": "Aprove a libertação quando o prazo de privilégio tiver decorrido, depois de verificar que não foi reclamado nenhum privilégio sobre a retenção"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "certificado de conclusão substancial",
+      "acceptance_protocol": "auto de receção",
+      "affidavit_payment_of_debts": "declaração de pagamento de dívidas e reclamações",
+      "affidavit_release_of_liens": "declaração de libertação de privilégios",
+      "consent_of_surety": "consentimento do fiador",
+      "final_lien_waiver": "renúncia final a privilégios",
+      "final_invoice": "fatura final"
+    },
+    "errors": {
+      "approval_blocked": "Esta libertação de retenção não pode ser aprovada enquanto estes pontos não forem resolvidos: {findings}",
+      "rules_unavailable": "As regras de libertação de retenção não estão carregadas nesta instalação, pelo que esta libertação não pode ser verificada antes de ser aprovada."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Trabalho faturado que não consta de nenhuma linha do mapa de valores"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "As alterações contratuais só são reconciliadas com o mapa de valores de um contrato ativo; este contrato está {status}",
+      "preview_stale": "A lista de alterações contratuais a reconciliar foi alterada desde que a abriu. Abra novamente a pré-visualização e confirme o que mostra agora"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Este contrato não pode ser assinado enquanto estes pontos não forem resolvidos: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "conclusão",
+      "approval": "aprovação"
+    },
+    "total_within_contract": {
+      "fail": "As prestações somam {scheduled}, mais do que o valor do contrato de {total}",
+      "suggestion": "Reduza as prestações para que somem no máximo o valor do contrato"
+    },
+    "percent_sum": {
+      "fail": "As prestações somam {scheduled} do valor do contrato de {total} ({percent}%), pelo que parte do preço não tem prestação",
+      "suggestion": "Acrescente uma prestação para o restante valor do contrato, ou ajuste os montantes"
+    },
+    "completion_trigger_linked": {
+      "fail": "A prestação {milestone} vence com {trigger}, mas não está ligada a uma atividade do cronograma, pelo que a sua data não acompanhará a obra",
+      "suggestion": "Ligue a prestação ao marco do cronograma que aguarda"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "O cronograma mostra o marco {milestone} atingido, mas a prestação {instalment} continua pendente, pelo que não pode ser faturada",
+      "suggestion": "Marque a prestação como atingida, ou verifique porque é que o contrato não está ativo"
+    },
+    "client_visible_requires_active": {
+      "fail": "A prestação {milestone} é mostrada ao cliente, mas o contrato está {status}; o cliente só vê o plano de pagamentos de um contrato ativo ou concluído",
+      "suggestion": "Oculte a prestação ao cliente até o contrato estar em vigor"
+    },
+    "consumer_deposit_cap": {
+      "fail": "O pagamento antecipado de {deposit} está acima do limite de {ceiling} que {reference} permite em {jurisdiction} (fonte: {source_url}, verificado em {checked_on}, sem revisão por advogado)",
+      "suggestion": "Reduza o sinal, ou confirme com um advogado que se aplica uma isenção a este contrato",
+      "below_threshold": {
+        "fail": "O valor do contrato é igual ou inferior ao montante a partir do qual {reference} limita os sinais em {jurisdiction}, pelo que o sinal não foi verificado (fonte: {source_url})"
+      },
+      "other_currency": {
+        "fail": "O contrato está em {currency}, mas {reference} fixa o seu limite em {limit_currency}, pelo que o sinal em {jurisdiction} não foi verificado (fonte: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Se a lei se aplicar a este contrato, verifique manualmente o sinal face a ela"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "O trabalho certificado até à data é {cumulative}, ou seja, mais {over} do que o valor do contrato de {contract}",
+      "suggestion": "Obtenha primeiro a aprovação da alteração contratual que cobre o trabalho extra, ou corrija as quantidades deste certificado"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Este certificado indica {carried} como total dos certificados anteriores, mas o certificado {reference} foi certificado por {certified}",
+      "work_fail": "A coluna anterior da lista de trabalhos soma {carried}, mas o certificado {reference} foi certificado com {certified} de trabalho até à data",
+      "suggestion": "Verifique se existe uma medição entre os dois certificados que nenhum deles mostra e, em seguida, volte a gerar este certificado"
+    },
+    "previous_unknown": {
+      "fail": "O total dos certificados anteriores não é conhecido",
+      "not_certified": "O certificado anterior {reference} ainda não está certificado, pelo que o seu total não é definitivo",
+      "suggestion": "Certifique primeiro o certificado anterior. Se foi certificado antes de os certificados serem guardados, introduza o seu total na linha dos certificados anteriores"
+    },
+    "weights_sum": {
+      "fail": "Os pesos dos itens somam {total}%, e não 100%",
+      "suggestion": "Corrija os valores das linhas do cronograma para que as suas parcelas somem a totalidade do contrato"
+    },
+    "percent_regressed": {
+      "fail": "O item {line} é negativo neste período, pelo que retira trabalho que já tinha sido certificado",
+      "suggestion": "Deixe-o se corrige uma medição excessiva anterior. Caso contrário, corrija a quantidade ou a percentagem neste certificado"
+    },
+    "income_withholding_single_year": {
+      "fail": "A retenção de imposto sobre o rendimento está selecionada, mas o contrato decorre de {start} a {end}, dentro de um mesmo ano civil. A retenção diz respeito a obras de construção que abrangem mais de um ano civil",
+      "suggestion": "Confirme com o seu contabilista se a obra abrange de facto mais de um ano; se não, marque a retenção de imposto sobre o rendimento como não aplicável"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "O adiantamento recuperado até à data é {recovered}, mais do que o adiantamento de {advance} que foi pago",
+      "unknown": "Foram recuperados {recovered} de adiantamento até à data, mas o contrato não indica o adiantamento pago, pelo que a recuperação não pode ser verificada contra ele",
+      "suggestion": "Reduza a recuperação neste certificado, ou indique o adiantamento pago nas definições de certificados do contrato"
+    },
+    "retention_matches_config": {
+      "fail": "O certificado retém {certificate} de garantia ({percent}% da sua base), mas o documento em que assenta retém {stored}",
+      "suggestion": "Volte a calcular o documento, ou corrija a taxa de retenção ou a sua base nas definições de certificados do contrato, para que ambos mostrem a mesma retenção"
+    },
+    "net_payable_negative": {
+      "fail": "O montante a pagar é {payable}: as deduções são superiores ao montante deste certificado",
+      "suggestion": "Verifique as deduções, sobretudo a recuperação do adiantamento, e transfira para o certificado seguinte o que não puder ser deduzido agora"
+    },
+    "taxes_stale": {
+      "fail": "Os impostos foram calculados antes de este certificado ser alterado, pelo que já não lhe correspondem",
+      "suggestion": "Recalcule os impostos. Se já tinham sido confirmados, reabra-os primeiro e volte a confirmá-los depois"
+    },
+    "taxes_confirmed": {
+      "fail": "Os valores de impostos deste certificado não foram confirmados",
+      "suggestion": "Verifique cada linha de imposto e confirme os impostos antes de certificar"
+    },
+    "lines_complete": {
+      "fail": "A linha {line} ainda não tem valor. {reason}",
+      "suggestion": "Introduza o montante, ou marque a linha como não aplicável e indique porquê"
+    },
+    "work_value_differs": {
+      "fail": "O item {line} está registado em {stated} até à data, mas a sua quantidade ou percentagem dá {computed}",
+      "suggestion": "Corrija a quantidade ou o montante no documento para que as duas colunas da linha coincidam"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "A retenção de {percent} por cento está acima dos {limit} por cento que a lei de obras públicas permite em cada pagamento intermédio",
+      "suggestion": "Reduza a retenção do contrato para a taxa legal"
+    },
+    "advance_above_cap": {
+      "fail": "A caução de adiantamento cobre {percent} por cento do valor do contrato, acima dos {limit} por cento que as obras públicas permitem sem autorização do ministro das Finanças",
+      "suggestion": "Reduza o adiantamento, ou registe nas condições do contrato a autorização obtida antes do concurso"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Uma cláusula de indemnização por atraso não tem montante máximo, enquanto a lei de obras públicas limita as indemnizações por atraso a {limit} por cento do valor do contrato",
+      "suggestion": "Indique o montante máximo da cláusula de indemnização por atraso"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Uma cláusula de indemnização por atraso está limitada a {percent} por cento do valor do contrato, acima dos {limit} por cento que a lei de obras públicas permite",
+      "suggestion": "Reduza o montante máximo da cláusula para o limite legal"
+    },
+    "performance_security_missing": {
+      "fail": "Não está registada nenhuma garantia de boa execução, enquanto as obras públicas exigem uma de {limit} por cento do valor do contrato",
+      "suggestion": "Registe a garantia final como caução de boa execução ou garantia bancária"
+    },
+    "performance_security_below": {
+      "fail": "A garantia de boa execução cobre {percent} por cento do valor do contrato, abaixo dos {limit} por cento exigidos nas obras públicas",
+      "suggestion": "Registe uma garantia de boa execução para a percentagem legal total"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "As obras públicas de {months} meses ou mais têm de ter revisão de preços por lei, e o contrato não indica coeficientes para os seus itens variáveis",
+        "suggestion": "Introduza os coeficientes que o empreiteiro indicou no envelope técnico"
+      },
+      "duplicate_item": {
+        "fail": "O item variável {item} está listado duas vezes entre os coeficientes de revisão de preços",
+        "suggestion": "Mantenha um único coeficiente por item variável"
+      },
+      "coefficient_not_a_number": {
+        "fail": "O coeficiente de revisão de preços de {item} não é um número",
+        "suggestion": "Introduza o coeficiente como decimal, por exemplo 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "O coeficiente de revisão de preços de {item} é zero ou inferior, mas a lei exige que cada coeficiente seja superior a zero",
+        "suggestion": "Introduza um coeficiente superior a zero, ou remova o item"
+      },
+      "coefficient_negative": {
+        "fail": "O coeficiente de revisão de preços de {item} é negativo",
+        "suggestion": "Introduza um coeficiente igual ou superior a zero"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Os coeficientes de revisão de preços somam {item}, mas a lei exige que a sua soma fique abaixo de um",
+        "suggestion": "Reduza os coeficientes para que se mantenha uma parte fixa do preço"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Os coeficientes de revisão de preços somam {item}, mais do que um",
+        "suggestion": "Reduza os coeficientes para que somem um ou menos"
+      },
+      "no_coefficients_advisory": {
+        "fail": "As obras públicas com mais de {months} meses incluem uma cláusula de revisão de preços onde as matérias-primas são uma parte significativa do custo, e o contrato não indica pesos de revisão",
+        "suggestion": "Introduza os pesos da fórmula de revisão constantes das condições especiais, ou registe que o preço é fixo"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Os coeficientes de revisão de preços somam {item}, mas a fórmula exige que somem exatamente um",
+        "suggestion": "Corrija os pesos com base nos dados do contrato para que somem um"
+      },
+      "unknown_regime": {
+        "fail": "O contrato indica o regime de revisão de preços {item}, que a plataforma não reconhece",
+        "suggestion": "Escolha um dos regimes de revisão de preços listados"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "A parte não sujeita a revisão de preços, {item}, não está entre zero e um",
+        "suggestion": "Introduza esta parte como decimal a partir dos dados do contrato, por exemplo 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "O adiantamento é de {percent} por cento do valor do contrato, abaixo do mínimo de {limit} por cento que a lei de obras públicas fixa para este empreiteiro e este dono de obra",
+      "suggestion": "Aumente o adiantamento para o mínimo, ou registe zero se o empreiteiro o tiver renunciado"
+    },
+    "advance_above_maximum": {
+      "fail": "O adiantamento é de {percent} por cento do valor do contrato, acima dos {limit} por cento que a lei de obras públicas fixa como máximo habitual",
+      "suggestion": "Verifique se as condições especiais permitem o adiantamento mais elevado e registe a garantia que ele exige"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Uma cláusula de penalidade por atraso cobra {amount} por dia, enquanto as condições gerais cobram {expected} por dia, ou seja, um {divisor}.º do valor do contrato",
+      "suggestion": "Mantenha a taxa diária das condições gerais, ou inclua a taxa diferente entre as derrogações das condições especiais"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Uma cláusula de penalidade por atraso está limitada a {percent} por cento do valor do contrato, acima dos {limit} por cento das condições gerais",
+      "suggestion": "Reduza o limite para o valor das condições gerais, ou inclua-o entre as derrogações das condições especiais"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Esta subempreitada de {amount} atinge o limiar de {limit} para pagamento direto pelo dono de obra público, e o contrato dispensa-o, o que a lei proíbe",
+      "suggestion": "Registe que o dono de obra público paga diretamente ao subempreiteiro"
+    },
+    "direct_payment_unstated": {
+      "fail": "Esta subempreitada de {amount} atinge o limiar de {limit} para pagamento direto pelo dono de obra público, e o contrato não o regista",
+      "suggestion": "Registe se o subempreiteiro é aceite e pago diretamente pelo dono de obra público"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Esta subempreitada em obras particulares não regista nem garantia bancária nem delegação de pagamento, sem as quais a subempreitada pode ser anulada",
+      "suggestion": "Registe a garantia bancária do empreiteiro geral ou a delegação de pagamento no dono de obra"
+    },
+    "private_retention_above_limit": {
+      "fail": "A retenção de {percent} por cento está acima dos {limit} por cento que a lei permite em obras particulares",
+      "suggestion": "Reduza a retenção do contrato para o teto legal"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "O contrato {contract} indica o regime de IVA {regime}, que {country} não tem",
+      "suggestion": "Escolha um dos regimes de IVA oferecidos para o país do projeto, ou remova a escolha"
+    },
+    "country_unknown": {
+      "fail": "O contrato {contract} indica o regime de IVA {regime}, mas o seu projeto não indica país, pelo que o regime não pode ser verificado",
+      "suggestion": "Defina o país do projeto"
+    },
+    "contract_date_missing": {
+      "fail": "O regime de IVA {regime} aplica-se apenas a contratos assinados antes de {cutoff}, e este contrato não regista nem uma assinatura nem uma data de início",
+      "suggestion": "Introduza a data em que o contrato foi assinado"
+    },
+    "contract_too_late": {
+      "fail": "O regime de IVA {regime} aplica-se apenas a contratos assinados antes de {cutoff}, e este contrato é de {contract_date}",
+      "suggestion": "Escolha para este contrato o regime normal de IVA"
+    },
+    "evidence_missing": {
+      "fail": "O regime de IVA {regime} exige {evidence}, e o contrato não regista nenhum",
+      "suggestion": "Registe a referência e a data de emissão do documento juntamente com o regime de IVA do contrato"
+    },
+    "evidence_date_missing": {
+      "fail": "O {evidence} registado para o regime de IVA {regime} não tem data de emissão, pelo que não se pode demonstrar que é anterior a {cutoff}",
+      "suggestion": "Introduza a data em que o documento foi emitido"
+    },
+    "evidence_too_late": {
+      "fail": "O {evidence} registado para o regime de IVA {regime} foi emitido em {issued_on}, e o regime exige um documento emitido antes de {cutoff}",
+      "suggestion": "Registe um documento anterior, ou escolha o regime normal de IVA"
+    },
+    "scope_increase_unjudged": {
+      "fail": "O valor do contrato subiu de {original_value} para {current_value} e o contrato não indica um aumento permitido, pelo que não é possível avaliar se o regime de IVA {regime} continua a aplicar-se",
+      "suggestion": "Registe o aumento de âmbito que o contrato permite"
+    },
+    "scope_increase_new_contract": {
+      "fail": "O valor do contrato subiu de {original_value} para {current_value}, acima do aumento de {allowed_increase_pct} por cento que o contrato permite, pelo que, para efeitos de IVA, é um novo contrato e o regime de IVA {regime} deixa de se aplicar",
+      "suggestion": "Passe o contrato para o regime normal de IVA"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "um certificado de pagamento aprovado pelo consultor",
+      "einvoice": "uma fatura eletrónica ou recibo eletrónico",
+      "main_contractor_certificate": "o certificado do empreiteiro geral de que o IVA foi pago na obra"
+    },
+    "not_in_force": {
+      "before": "A medição {claim} tem data de {on}, e o regime de IVA {regime} aplica-se apenas a partir de {effective_from}; em vigor nesse dia: {instead}",
+      "after": "A medição {claim} tem data de {on}, e o regime de IVA {regime} terminou em {effective_to}; em vigor nesse dia: {instead}",
+      "suggestion": "Altere o regime de IVA do contrato para um que esteja em vigor na data da medição, ou corrija a data da medição"
+    }
+  }
+}

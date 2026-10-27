@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Klaim {claim} tidak memiliki tanggal akhir periode, sehingga tidak dapat diurutkan di antara klaim kontrak",
+      "suggestion": "Masukkan hari terakhir periode yang dicakup klaim ini"
+    },
+    "period_order": {
+      "fail": "Klaim {claim} dimulai pada {period_from} dan berakhir pada {period_to}, sehingga periodenya berakhir sebelum dimulai",
+      "suggestion": "Perbaiki tanggal mulai atau akhir periode agar tanggal mulai lebih dulu"
+    },
+    "period_overlap": {
+      "fail": "Klaim {claim} dimulai pada {period_from}, tetapi klaim sebelumnya {previous} berjalan sampai {previous_to}, sehingga kedua klaim menagih hari yang sama",
+      "suggestion": "Mulai klaim ini pada hari setelah periode klaim sebelumnya berakhir"
+    },
+    "period_gap": {
+      "fail": "Klaim {claim} dimulai pada {period_from}, tetapi klaim sebelumnya {previous} berakhir pada {previous_to}, sehingga tidak ada klaim yang menagih hari di antaranya (hari yang belum ditagih: {days})",
+      "suggestion": "Mulai klaim ini pada hari setelah periode klaim sebelumnya berakhir, atau pastikan tidak ada klaim yang terlewat"
+    },
+    "period_unparsed": {
+      "fail": "Klaim {claim} mencatat {field} sebagai '{value}', yang tidak dapat dibaca sebagai tanggal",
+      "suggestion": "Masukkan tanggal dalam format tahun, bulan, dan hari, misalnya 2026-03-31",
+      "fields": {
+        "period_start": "awal periode",
+        "period_end": "akhir periode",
+        "claim_date": "tanggal pengajuan"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Baris {line} sudah ditagih {billed} sejauh ini, lebih dari nilai terjadwalnya {scheduled}; jalankan lagi Isi dari progres atau kurangi jumlah periode ini pada baris tersebut",
+      "suggestion": "Isi dari progres hanya menagih setiap baris untuk apa yang baru dibandingkan klaim sebelumnya. Jika lingkup baris memang bertambah, catat dulu perintah perubahan yang menaikkan nilai terjadwalnya"
+    },
+    "percent_regressed": {
+      "fail": "Baris {line} sudah {percent}% selesai sejauh ini, yaitu {requested}, lebih rendah dari {previous} yang sudah ditagih klaim sebelumnya, sehingga tidak ada yang ditagih pada baris ini periode ini",
+      "suggestion": "Periksa persentase penyelesaian pada baris ini, atau koreksi klaim sebelumnya yang melebih-lebihkannya"
+    },
+    "errors": {
+      "submission_blocked": "Aplikasi pembayaran ini tidak dapat diserahkan sebelum hal-hal berikut diselesaikan: {findings}",
+      "rules_unavailable": "Aturan aplikasi pembayaran tidak dimuat pada instalasi ini, sehingga klaim ini tidak dapat diperiksa sebelum diserahkan.",
+      "later_claim_already_issued": "Klaim {claims} datang setelah klaim ini dan sudah diterbitkan. Klaim itu dibuat saat klaim ini masih draf, sehingga sudah berlaku untuk pekerjaan ini. Hapus draf ini, atau pindahkan periodenya setelah klaim terakhir yang diterbitkan"
+    },
+    "totals_match_lines": {
+      "fail": "Klaim {claim} meminta {gross}, tetapi baris-baris di baliknya berjumlah {lines_total}: klaim belum dihitung ulang setelah barisnya berubah",
+      "suggestion": "Simpan salah satu baris klaim ini, atau jalankan lagi Isi dari progres, dan totalnya akan mengikuti"
+    },
+    "totals_below_lines": {
+      "fail": "Klaim {claim} menagih {gross} dari biaya yang tercatat, kurang dari {lines_total} yang dijumlahkan barisnya sendiri: rincian tidak boleh meminta lebih dari yang diminta klaim",
+      "suggestion": "Pada klaim yang ditagih dari biaya, baris adalah rincian uangnya, bukan sumbernya. Kurangi atau hapus baris yang melebih-lebihkannya, atau buat ulang klaim dari biaya pekerjaan agar keduanya sesuai"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Klaim {claim} mencatat {stored} sebagai sudah ditagih pada baris {line}, tetapi klaim sebelumnya kini menagih {now} padanya",
+      "total_fail": "Klaim {claim} mencatat {stored} sebagai sudah disertifikasi, tetapi klaim sebelumnya kini menyertifikasi {now}",
+      "suggestion": "Buat ulang klaim ini agar membaca apa yang ditagih klaim sebelumnya hari ini"
+    },
+    "within_nte_cap": {
+      "fail": "Klaim {claim} menagih {this} di atas {billed} yang sudah ditagih, melebihi batas maksimum {cap}",
+      "suggestion": "Tagih sampai batas pada klaim ini dan sepakati perintah perubahan untuk sisanya"
+    },
+    "retention_matches_policy": {
+      "fail": "Klaim {claim} menahan {held} sebagai retensi, tetapi kebijakan retensinya kini memberi {expected}: klaim sebelumnya, pelepasan, atau kebijakan berubah setelah klaim ini dihitung",
+      "suggestion": "Jalankan lagi Isi dari progres, atau simpan salah satu baris klaim ini, dan retensinya akan dihitung ulang"
+    },
+    "retention_above_cap": {
+      "fail": "Klaim {claim} menahan {held} sebagai retensi, di atas batas {percent}% yang ditetapkan kebijakan retensinya, yaitu {cap} pada kontrak ini",
+      "suggestion": "Hitung ulang klaim, atau naikkan batas pada kebijakan retensi kontrak jika para pihak menyepakati batas yang lebih tinggi",
+      "state_cap_unread": "Klaim {claim}: kebijakan retensinya tidak menetapkan batas, dan {country} membatasi retensi menurut undang-undang negara bagian. Negara bagian tidak dapat ditentukan karena proyek tidak memiliki kode subdivisi, sehingga batas menurut undang-undang tidak diperiksa",
+      "state_cap_suggestion": "Tuliskan batas negara bagian dalam kebijakan retensi kontrak sebagai batas, dan setiap klaim pada kontrak ini akan diperiksa terhadapnya"
+    },
+    "retention_release_within_held": {
+      "fail": "Pelepasan yang ditagih hingga klaim {claim} mengembalikan {released}, lebih dari {accrued} retensi yang ditahan sampai di situ",
+      "suggestion": "Batalkan pelepasan yang terlalu besar, atau tagih pada klaim berikutnya setelah retensi yang ditahan bertambah"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Jadwal nilai berjumlah {scheduled}, tetapi jumlah kontrak sampai saat ini adalah {contract_sum}: baris tempat klaim ini ditagih menyisakan {difference} dari kontrak tanpa baris",
+      "suggestion": "Tambah atau perbaiki baris jadwal nilai sampai jumlahnya sama dengan jumlah kontrak",
+      "suggestion_reconcile": "{count} perintah perubahan atau variasi yang disetujui telah mengubah jumlah kontrak sebelum sampai ke jadwal nilai. Gunakan Rekonsiliasi perintah perubahan pada kontrak untuk menambahkan baris untuk setiap perintah"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Pelepasan ini memerlukan {document}, dan belum ada yang dilampirkan",
+      "suggestion": "Daftarkan dokumen pada kontrak, lampirkan ke pelepasan, dan setujui ulang pelepasan"
+    },
+    "within_available": {
+      "fail": "Pelepasan ini mengembalikan {amount}, tetapi hanya {available} retensi yang masih ditahan dan belum dialokasikan untuk pelepasan lain",
+      "suggestion": "Batalkan pelepasan ini dan ajukan ulang agar ukurannya berdasarkan retensi yang ditahan saat ini"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Pelepasan ini hanya dibayarkan setelah masa lien {days} hari sejak peristiwa berlalu ({reference}), dan tidak disebutkan kapan masa tersebut dimulai",
+      "suggestion_no_start": "Masukkan hari dimulainya masa tersebut, misalnya tanggal terbit sertifikat penyelesaian substansial, lalu setujui ulang pelepasan",
+      "fail_early": "Masa lien {days} hari yang dimulai pada {started} berjalan sampai {ends} ({reference}), sehingga pelepasan ini belum dapat disetujui",
+      "suggestion_early": "Setujui pelepasan setelah masa lien berlalu, setelah memastikan tidak ada lien yang diajukan terhadap penahanan"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "sertifikat penyelesaian substansial",
+      "acceptance_protocol": "berita acara serah terima",
+      "affidavit_payment_of_debts": "surat pernyataan pelunasan utang dan tagihan",
+      "affidavit_release_of_liens": "surat pernyataan pelepasan lien",
+      "consent_of_surety": "persetujuan penjamin",
+      "final_lien_waiver": "pelepasan lien final",
+      "final_invoice": "faktur final"
+    },
+    "errors": {
+      "approval_blocked": "Pelepasan retensi ini tidak dapat disetujui sebelum hal-hal berikut diselesaikan: {findings}",
+      "rules_unavailable": "Aturan pelepasan retensi tidak dimuat pada instalasi ini, sehingga pelepasan ini tidak dapat diperiksa sebelum disetujui."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Pekerjaan yang ditagih tetapi tidak tercakup oleh baris jadwal nilai mana pun"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Perintah perubahan hanya direkonsiliasi ke jadwal nilai kontrak yang aktif; kontrak ini berstatus {status}",
+      "preview_stale": "Daftar perintah perubahan yang akan direkonsiliasi telah berubah sejak Anda membukanya. Buka pratinjau lagi dan konfirmasi apa yang ditampilkannya sekarang"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Kontrak ini tidak dapat ditandatangani sebelum hal-hal berikut diselesaikan: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "penyelesaian",
+      "approval": "persetujuan"
+    },
+    "total_within_contract": {
+      "fail": "Angsuran berjumlah {scheduled}, lebih dari nilai kontrak {total}",
+      "suggestion": "Kurangi angsuran agar jumlahnya tidak melebihi nilai kontrak"
+    },
+    "percent_sum": {
+      "fail": "Angsuran berjumlah {scheduled} dari nilai kontrak {total} ({percent}%), sehingga sebagian harga tidak memiliki angsuran",
+      "suggestion": "Tambahkan angsuran untuk sisa nilai kontrak, atau sesuaikan jumlahnya"
+    },
+    "completion_trigger_linked": {
+      "fail": "Angsuran {milestone} jatuh tempo pada {trigger}, tetapi tidak terhubung dengan aktivitas jadwal, sehingga tanggalnya tidak akan bergeser mengikuti pekerjaan",
+      "suggestion": "Hubungkan angsuran dengan tonggak jadwal yang ditunggunya"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Jadwal menunjukkan tonggak {milestone} sudah tercapai, tetapi angsuran {instalment} masih tertunda, sehingga tidak dapat ditagihkan",
+      "suggestion": "Tandai angsuran sebagai tercapai, atau periksa mengapa kontrak belum aktif"
+    },
+    "client_visible_requires_active": {
+      "fail": "Angsuran {milestone} ditampilkan kepada klien, tetapi kontrak berstatus {status}; klien hanya melihat rencana kontrak yang aktif atau sudah selesai",
+      "suggestion": "Sembunyikan angsuran dari klien sampai kontrak berlaku"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Uang muka {deposit} lebih tinggi dari batas {ceiling} yang diizinkan {reference} di {jurisdiction} (sumber: {source_url}, diperiksa pada {checked_on}, belum ditinjau oleh pengacara)",
+      "suggestion": "Kurangi uang muka, atau pastikan dengan penasihat hukum bahwa pengecualian berlaku untuk kontrak ini",
+      "below_threshold": {
+        "fail": "Nilai kontrak sama dengan atau di bawah jumlah yang sejak itu {reference} membatasi uang muka di {jurisdiction}, sehingga uang muka tidak diperiksa (sumber: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Kontrak menggunakan {currency}, tetapi {reference} menyatakan batasnya dalam {limit_currency}, sehingga uang muka di {jurisdiction} tidak diperiksa (sumber: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Jika undang-undang ini berlaku untuk kontrak ini, periksa uang muka terhadapnya secara manual"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Pekerjaan yang disertifikasi sampai saat ini adalah {cumulative}, yaitu {over} di atas nilai kontrak {contract}",
+      "suggestion": "Setujui dulu perintah perubahan yang mencakup pekerjaan tambahan, atau koreksi kuantitas pada sertifikat ini"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Sertifikat ini membawa {carried} sebagai total sertifikat sebelumnya, tetapi sertifikat {reference} disertifikasi sebesar {certified}",
+      "work_fail": "Kolom sebelumnya pada daftar pekerjaan berjumlah {carried}, tetapi sertifikat {reference} disertifikasi dengan {certified} pekerjaan sampai saat ini",
+      "suggestion": "Cari klaim di antara kedua sertifikat yang tidak ditampilkan oleh keduanya, lalu buat ulang sertifikat ini"
+    },
+    "previous_unknown": {
+      "fail": "Total sertifikat sebelumnya belum diketahui",
+      "not_certified": "Sertifikat sebelumnya {reference} belum disertifikasi, sehingga totalnya belum final",
+      "suggestion": "Sertifikasi sertifikat sebelumnya terlebih dahulu. Jika disertifikasi sebelum sertifikat disimpan, masukkan totalnya pada baris sertifikat sebelumnya"
+    },
+    "weights_sum": {
+      "fail": "Bobot item berjumlah {total}%, bukan 100%",
+      "suggestion": "Perbaiki nilai baris jadwal agar bagiannya berjumlah seluruh kontrak"
+    },
+    "percent_regressed": {
+      "fail": "Item {line} bernilai negatif pada periode ini, sehingga menarik kembali pekerjaan yang sudah disertifikasi",
+      "suggestion": "Biarkan jika ini mengoreksi pengukuran berlebih sebelumnya. Jika tidak, perbaiki kuantitas atau persentase pada sertifikat ini"
+    },
+    "income_withholding_single_year": {
+      "fail": "Pemotongan pajak penghasilan dipilih, tetapi kontrak berjalan dari {start} sampai {end}, dalam satu tahun kalender. Pemotongan ini berkaitan dengan pekerjaan konstruksi yang melintasi lebih dari satu tahun kalender",
+      "suggestion": "Periksa dengan akuntan Anda apakah pekerjaan benar-benar melintasi lebih dari satu tahun; jika tidak, tandai pemotongan pajak penghasilan sebagai tidak berlaku"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Uang muka yang sudah dipulihkan sejauh ini adalah {recovered}, lebih dari uang muka {advance} yang telah dibayarkan",
+      "unknown": "Sudah dipulihkan {recovered} uang muka sejauh ini, tetapi kontrak tidak mencantumkan uang muka yang dibayarkan, sehingga pemulihannya tidak dapat diperiksa terhadapnya",
+      "suggestion": "Kurangi pemulihan pada sertifikat ini, atau cantumkan uang muka yang dibayarkan di pengaturan sertifikat kontrak"
+    },
+    "retention_matches_config": {
+      "fail": "Sertifikat menahan {certificate} sebagai retensi ({percent}% dari dasarnya), tetapi dokumen di baliknya menahan {stored}",
+      "suggestion": "Hitung ulang dokumen, atau koreksi tarif retensi atau dasarnya di pengaturan sertifikat kontrak, agar keduanya menampilkan retensi yang sama"
+    },
+    "net_payable_negative": {
+      "fail": "Jumlah yang harus dibayar adalah {payable}: potongan lebih besar dari jumlah sertifikat ini",
+      "suggestion": "Periksa potongannya, terutama pemulihan uang muka, dan bawa ke sertifikat berikutnya apa yang belum dapat dipotong sekarang"
+    },
+    "taxes_stale": {
+      "fail": "Pajak dihitung sebelum sertifikat ini berubah, sehingga pajak tersebut tidak lagi sesuai dengannya",
+      "suggestion": "Hitung ulang pajaknya. Jika sudah dikonfirmasi, buka kembali terlebih dahulu lalu konfirmasi ulang setelahnya"
+    },
+    "taxes_confirmed": {
+      "fail": "Angka pajak pada sertifikat ini belum dikonfirmasi",
+      "suggestion": "Periksa setiap baris pajak dan konfirmasi pajak sebelum mensertifikasi"
+    },
+    "lines_complete": {
+      "fail": "Baris {line} belum memiliki angka. {reason}",
+      "suggestion": "Masukkan jumlahnya, atau tandai baris sebagai tidak berlaku dan jelaskan alasannya"
+    },
+    "work_value_differs": {
+      "fail": "Item {line} tercatat sebesar {stated} sejauh ini, tetapi kuantitas atau persentasenya memberi {computed}",
+      "suggestion": "Koreksi kuantitas atau jumlah pada dokumen agar kedua kolom baris itu sesuai"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Retensi {percent} persen lebih tinggi dari {limit} persen yang diizinkan undang-undang pekerjaan umum pada setiap pembayaran sementara",
+      "suggestion": "Turunkan retensi kontrak ke tarif menurut undang-undang"
+    },
+    "advance_above_cap": {
+      "fail": "Jaminan uang muka mencakup {percent} persen dari nilai kontrak, di atas {limit} persen yang diizinkan pekerjaan umum tanpa persetujuan menteri keuangan",
+      "suggestion": "Kurangi uang muka, atau catat dalam ketentuan kontrak persetujuan yang diperoleh sebelum tender"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Klausul ganti rugi keterlambatan tidak memiliki jumlah maksimum, sedangkan undang-undang pekerjaan umum membatasi ganti rugi keterlambatan sebesar {limit} persen dari nilai kontrak",
+      "suggestion": "Masukkan jumlah maksimum klausul ganti rugi keterlambatan"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Klausul ganti rugi keterlambatan dibatasi {percent} persen dari nilai kontrak, di atas {limit} persen yang diizinkan undang-undang pekerjaan umum",
+      "suggestion": "Turunkan jumlah maksimum klausul ke batas menurut undang-undang"
+    },
+    "performance_security_missing": {
+      "fail": "Tidak ada jaminan pelaksanaan yang tercatat, sedangkan pekerjaan umum mewajibkan {limit} persen dari nilai kontrak",
+      "suggestion": "Catat jaminan final sebagai jaminan pelaksanaan atau garansi bank"
+    },
+    "performance_security_below": {
+      "fail": "Jaminan pelaksanaan mencakup {percent} persen dari nilai kontrak, di bawah {limit} persen yang diwajibkan pekerjaan umum",
+      "suggestion": "Catat jaminan pelaksanaan untuk seluruh persentase menurut undang-undang"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Pekerjaan umum selama {months} bulan atau lebih wajib disesuaikan harganya menurut undang-undang, dan kontrak tidak mencantumkan koefisien untuk item variabelnya",
+        "suggestion": "Masukkan koefisien yang dinyatakan kontraktor dalam amplop teknis"
+      },
+      "duplicate_item": {
+        "fail": "Item variabel {item} tercantum dua kali dalam koefisien penyesuaian harga",
+        "suggestion": "Simpan satu koefisien untuk setiap item variabel"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Koefisien penyesuaian harga untuk {item} bukan angka",
+        "suggestion": "Masukkan koefisien sebagai desimal, misalnya 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Koefisien penyesuaian harga untuk {item} nol atau kurang, sedangkan undang-undang mensyaratkan setiap koefisien lebih besar dari nol",
+        "suggestion": "Masukkan koefisien lebih besar dari nol, atau hapus item tersebut"
+      },
+      "coefficient_negative": {
+        "fail": "Koefisien penyesuaian harga untuk {item} bernilai negatif",
+        "suggestion": "Masukkan koefisien nol atau lebih"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Koefisien penyesuaian harga berjumlah {item}, sedangkan undang-undang mensyaratkan jumlahnya tetap di bawah satu",
+        "suggestion": "Turunkan koefisien agar tetap ada bagian harga yang tetap"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Koefisien penyesuaian harga berjumlah {item}, lebih dari satu",
+        "suggestion": "Turunkan koefisien agar jumlahnya satu atau kurang"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Pekerjaan umum lebih dari {months} bulan memiliki klausul revisi harga ketika bahan baku merupakan bagian besar biaya, dan kontrak tidak mencantumkan bobot revisi",
+        "suggestion": "Masukkan bobot rumus revisi dari kondisi khusus, atau catat bahwa harganya tetap"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Koefisien penyesuaian harga berjumlah {item}, sedangkan rumus mensyaratkan jumlahnya tepat satu",
+        "suggestion": "Koreksi bobot dari data kontrak agar jumlahnya satu"
+      },
+      "unknown_regime": {
+        "fail": "Kontrak menyebut rezim penyesuaian harga {item}, yang tidak dikenali platform",
+        "suggestion": "Pilih salah satu rezim penyesuaian harga yang tercantum"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Bagian yang tidak dapat disesuaikan, {item}, tidak berada di antara nol dan satu",
+        "suggestion": "Masukkan bagian tersebut sebagai desimal dari data kontrak, misalnya 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Uang muka adalah {percent} persen dari nilai kontrak, di bawah minimum {limit} persen yang ditetapkan undang-undang pekerjaan umum untuk kontraktor dan pembeli ini",
+      "suggestion": "Naikkan uang muka ke minimum, atau catat nol jika kontraktor melepaskannya"
+    },
+    "advance_above_maximum": {
+      "fail": "Uang muka adalah {percent} persen dari nilai kontrak, di atas {limit} persen yang ditetapkan undang-undang pekerjaan umum sebagai maksimum lazim",
+      "suggestion": "Pastikan ketentuan khusus mengizinkan uang muka yang lebih tinggi dan catat jaminan yang disyaratkannya"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Klausul denda keterlambatan mengenakan {amount} per hari, sedangkan ketentuan umum mengenakan {expected} per hari, yaitu satu per {divisor} nilai kontrak",
+      "suggestion": "Pertahankan tarif harian dari ketentuan umum, atau cantumkan tarif yang berbeda di antara pengecualian ketentuan khusus"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Klausul denda keterlambatan dibatasi {percent} persen dari nilai kontrak, di atas {limit} persen dari ketentuan umum",
+      "suggestion": "Turunkan batas ke angka dalam ketentuan umum, atau cantumkan di antara pengecualian ketentuan khusus"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Subkontrak senilai {amount} ini mencapai ambang {limit} untuk pembayaran langsung oleh pembeli publik, dan kontrak melepaskannya, yang dilarang undang-undang",
+      "suggestion": "Catat bahwa pembeli publik membayar subkontraktor secara langsung"
+    },
+    "direct_payment_unstated": {
+      "fail": "Subkontrak senilai {amount} ini mencapai ambang {limit} untuk pembayaran langsung oleh pembeli publik, tetapi kontrak tidak mencatatnya",
+      "suggestion": "Catat apakah subkontraktor diterima dan dibayar langsung oleh pembeli publik"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Subkontrak pekerjaan swasta ini tidak mencatat garansi bank maupun delegasi pembayaran, padahal tanpa salah satunya subkontrak dapat dibatalkan",
+      "suggestion": "Catat garansi bank kontraktor utama atau delegasi pembayaran kepada pemilik"
+    },
+    "private_retention_above_limit": {
+      "fail": "Retensi {percent} persen lebih tinggi dari {limit} persen yang diizinkan undang-undang untuk pekerjaan swasta",
+      "suggestion": "Turunkan retensi kontrak ke batas tertinggi menurut undang-undang"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Kontrak {contract} menyebut rezim PPN {regime}, yang tidak dimiliki {country}",
+      "suggestion": "Pilih salah satu rezim PPN yang ditawarkan untuk negara proyek, atau hapus pilihan ini"
+    },
+    "country_unknown": {
+      "fail": "Kontrak {contract} menyebut rezim PPN {regime}, tetapi proyeknya tidak mencantumkan negara, sehingga rezim tidak dapat diperiksa",
+      "suggestion": "Atur negara proyek"
+    },
+    "contract_date_missing": {
+      "fail": "Rezim PPN {regime} hanya berlaku untuk kontrak yang ditandatangani sebelum {cutoff}, dan kontrak ini tidak mencatat tanggal tanda tangan maupun tanggal mulai",
+      "suggestion": "Masukkan tanggal kontrak ditandatangani"
+    },
+    "contract_too_late": {
+      "fail": "Rezim PPN {regime} hanya berlaku untuk kontrak yang ditandatangani sebelum {cutoff}, dan kontrak ini berasal dari {contract_date}",
+      "suggestion": "Pilih rezim PPN standar untuk kontrak ini"
+    },
+    "evidence_missing": {
+      "fail": "Rezim PPN {regime} memerlukan {evidence}, dan kontrak tidak mencatat satu pun",
+      "suggestion": "Catat nomor referensi dan tanggal terbit dokumen bersama rezim PPN kontrak"
+    },
+    "evidence_date_missing": {
+      "fail": "{evidence} yang tercatat untuk rezim PPN {regime} tidak memiliki tanggal terbit, sehingga tidak dapat ditunjukkan bahwa dokumen itu terbit sebelum {cutoff}",
+      "suggestion": "Masukkan tanggal dokumen diterbitkan"
+    },
+    "evidence_too_late": {
+      "fail": "{evidence} yang tercatat untuk rezim PPN {regime} terbit pada {issued_on}, sedangkan rezim itu memerlukan dokumen yang terbit sebelum {cutoff}",
+      "suggestion": "Catat dokumen yang lebih awal, atau pilih rezim PPN standar"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Nilai kontrak naik dari {original_value} menjadi {current_value}, dan kontrak tidak mencantumkan kenaikan yang diizinkan, sehingga tidak dapat dinilai apakah rezim PPN {regime} masih berlaku",
+      "suggestion": "Catat kenaikan lingkup yang diizinkan kontrak"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Nilai kontrak naik dari {original_value} menjadi {current_value}, melampaui kenaikan {allowed_increase_pct} persen yang diizinkan kontrak, sehingga untuk PPN ini adalah kontrak baru dan rezim PPN {regime} tidak lagi berlaku",
+      "suggestion": "Pindahkan kontrak ke rezim PPN standar"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "sertifikat pembayaran yang disetujui konsultan",
+      "einvoice": "e-faktur atau e-kuitansi",
+      "main_contractor_certificate": "sertifikat kontraktor utama bahwa PPN telah dibayar atas proyek"
+    },
+    "not_in_force": {
+      "before": "Klaim {claim} bertanggal {on}, dan rezim PPN {regime} hanya berlaku sejak {effective_from}; yang berlaku pada hari itu: {instead}",
+      "after": "Klaim {claim} bertanggal {on}, dan rezim PPN {regime} berakhir pada {effective_to}; yang berlaku pada hari itu: {instead}",
+      "suggestion": "Ubah rezim PPN kontrak menjadi rezim yang berlaku pada tanggal klaim, atau koreksi tanggal klaim"
+    }
+  }
+}

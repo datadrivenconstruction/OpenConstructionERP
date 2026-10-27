@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Walang petsa ng pagtatapos ng panahon ang claim {claim}, kaya hindi ito maiayos sa pagkakasunod-sunod ng mga claim ng kontrata",
+      "suggestion": "Ilagay ang huling araw ng panahong sakop ng claim na ito"
+    },
+    "period_order": {
+      "fail": "Nagsisimula ang claim {claim} sa {period_from} at nagtatapos sa {period_to}, kaya natatapos ang panahon bago pa ito magsimula",
+      "suggestion": "Itama ang simula o pagtatapos ng panahon upang mauna ang simula"
+    },
+    "period_overlap": {
+      "fail": "Nagsisimula ang claim {claim} sa {period_from}, pero tumatakbo ang nakaraang claim na {previous} hanggang {previous_to}, kaya pareho nang sinisingil ng dalawang claim ang parehong mga araw",
+      "suggestion": "Simulan ang claim na ito sa araw pagkatapos magtapos ang panahon ng nakaraang claim"
+    },
+    "period_gap": {
+      "fail": "Nagsisimula ang claim {claim} sa {period_from}, pero nagtapos ang nakaraang claim na {previous} sa {previous_to}, kaya walang claim na naniningil sa mga araw sa pagitan (mga hindi nasingil na araw: {days})",
+      "suggestion": "Simulan ang claim na ito sa araw pagkatapos magtapos ang panahon ng nakaraang claim, o tiyaking walang nawawalang claim"
+    },
+    "period_unparsed": {
+      "fail": "Itinala ng claim {claim} ang {field} bilang '{value}', na hindi mabasa bilang petsa",
+      "suggestion": "Ilagay ang petsa sa anyong taon, buwan at araw, halimbawa 2026-03-31",
+      "fields": {
+        "period_start": "simula ng panahon",
+        "period_end": "pagtatapos ng panahon",
+        "claim_date": "petsa ng aplikasyon"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Nasingil na ang linya {line} ng {billed} hanggang ngayon, higit sa nakatakdang halaga nitong {scheduled}; patakbuhin muli ang Punan mula sa progreso o bawasan ang halaga ng panahong ito sa linya",
+      "suggestion": "Sinisingil lamang ng Punan mula sa progreso ang bawat linya para sa bagong gawa mula sa mga naunang claim. Kung talagang lumaki ang saklaw ng linya, itala muna ang change order na nagtataas ng nakatakdang halaga nito"
+    },
+    "percent_regressed": {
+      "fail": "Nasa {percent}% na ang pagkakumpleto ng linya {line} hanggang ngayon, na {requested}, mas mababa sa {previous} na nasingil na ng mga naunang claim dito, kaya walang sinisingil sa linyang ito sa panahong ito",
+      "suggestion": "Suriin ang porsyento ng pagkakumpleto sa linyang ito, o itama ang naunang claim na nagpalaki nito"
+    },
+    "errors": {
+      "submission_blocked": "Hindi maisusumite ang aplikasyon sa pagbabayad hangga't hindi naaayos ang mga ito: {findings}",
+      "rules_unavailable": "Hindi naka-load ang mga patakaran ng aplikasyon sa pagbabayad sa deployment na ito, kaya hindi masusuri ang claim na ito bago isumite.",
+      "later_claim_already_issued": "Ang claim {claims} ay sumusunod sa claim na ito at nailabas na. Ginawa ito habang draft pa ang claim na ito, kaya saklaw na nito ang gawaing ito. Burahin ang draft na ito, o ilipat ang panahon nito pagkatapos ng huling claim na nailabas"
+    },
+    "totals_match_lines": {
+      "fail": "Humihingi ng {gross} ang claim {claim}, pero ang mga linyang nasa likod nito ay nagdaragdag ng {lines_total}: hindi muling kinuwenta ang claim matapos magbago ang mga linya nito",
+      "suggestion": "I-save ang alinmang linya ng claim na ito, o patakbuhin muli ang Punan mula sa progreso, at susunod na ang mga kabuuan nito"
+    },
+    "totals_below_lines": {
+      "fail": "Sinisingil ng claim {claim} ang {gross} mula sa naitalang gastos, mas mababa sa {lines_total} na idinaragdag ng sarili nitong mga linya: hindi maaaring humingi ng higit ang breakdown kaysa sa hinihingi ng claim",
+      "suggestion": "Sa claim na sinisingil mula sa gastos, ang mga linya ay breakdown ng pera at hindi ang pinagmulan nito. Bawasan o alisin ang mga linyang nagpapalaki nito, o gawin muli ang claim mula sa gastos ng gawain upang magkatugma ang dalawa"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Dala ng claim {claim} ang {stored} bilang dating nasingil sa linyang {line}, pero ang mga naunang claim ay nagsisingil na ngayon ng {now} dito",
+      "total_fail": "Dala ng claim {claim} ang {stored} bilang dating napatunayan, pero ang mga naunang claim ay nagpapatunay na ngayon ng {now}",
+      "suggestion": "Gawin muli ang claim na ito upang mabasa nito ang sinisingil ngayon ng mga naunang claim"
+    },
+    "within_nte_cap": {
+      "fail": "Sinisingil ng claim {claim} ang {this} bukod pa sa {billed} na nasingil na, na lampas sa hindi-lalampasang takda na {cap}",
+      "suggestion": "Maningil hanggang sa takda sa claim na ito, at sumang-ayon sa change order para sa natitira"
+    },
+    "retention_matches_policy": {
+      "fail": "Pinipigil ng claim {claim} ang {held} bilang retention, pero ang patakaran nitong retention ay nagbibigay na ngayon ng {expected}: nagbago ang naunang claim, isang release, o ang patakaran matapos kuwentahin ang claim na ito",
+      "suggestion": "Patakbuhin muli ang Punan mula sa progreso, o i-save ang alinmang linya ng claim na ito, at muling kukuwentahin ang retention nito"
+    },
+    "retention_above_cap": {
+      "fail": "Pinipigil ng claim {claim} ang {held} bilang retention, higit sa takdang {percent}% na itinakda ng patakaran nitong retention, na {cap} sa kontratang ito",
+      "suggestion": "Kuwentahin muli ang claim, o itaas ang takda sa patakaran ng retention ng kontrata kung sumang-ayon ang mga partido sa mas mataas",
+      "state_cap_unread": "Claim {claim}: walang takdang itinakda ang patakaran nitong retention, at nililimitahan ng {country} ang retainage ayon sa batas ng estado. Hindi natukoy ang estado dahil walang subdivision code ang proyekto, kaya hindi nasuri ang legal na takda",
+      "state_cap_suggestion": "Isulat ang limitasyon ng estado sa patakaran ng retention ng kontrata bilang takda, at masusuri laban dito ang bawat claim ng kontratang ito"
+    },
+    "retention_release_within_held": {
+      "fail": "Ang mga release na nasingil hanggang claim {claim} ay magbabalik ng {released}, higit sa {accrued} na retention na pinigil hanggang doon",
+      "suggestion": "Burahin ang release na masyadong malaki, o singilin ito sa mas huling claim kapag may mas maraming retention nang pinipigil"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Ang schedule of values ay nagdaragdag ng {scheduled}, pero ang kabuuang halaga ng kontrata hanggang ngayon ay {contract_sum}: ang mga linyang sinisingilan ng claim na ito ay nag-iiwan ng {difference} ng kontrata na walang linya",
+      "suggestion": "Magdagdag o magwasto ng mga linya ng schedule of values hanggang magdagdag ang mga ito ng kabuuang halaga ng kontrata",
+      "suggestion_reconcile": "{count} aprubadong change order o variation ang gumalaw sa halaga ng kontrata bago pa umabot sa schedule of values. Gamitin ang Reconcile change orders sa kontrata upang magdagdag ng linya para sa bawat isa"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Kailangan ng release na ito ang {document}, at walang nakakabit",
+      "suggestion": "Irehistro ang dokumento sa kontrata, ikabit ito sa release, at aprubahan muli ang release"
+    },
+    "within_available": {
+      "fail": "Ibabalik ng release na ito ang {amount}, pero {available} na lamang ng retention ang pinipigil pa at hindi nakalaan sa ibang release",
+      "suggestion": "Burahin ang release na ito at ipanukalang muli, upang laki nito ay nakabatay na sa retention na pinipigil ngayon"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Binabayaran lamang ang release na ito kapag tapos na ang {days}-araw na lien period pagkatapos ng pangyayari ({reference}), at hindi nito sinasabi kung kailan nagsimula ang panahong iyon",
+      "suggestion_no_start": "Ilagay ang araw kung kailan nagsimula ang panahon, halimbawa ang petsa ng paglalathala ng sertipiko ng substantial performance, at aprubahan muli ang release",
+      "fail_early": "Ang {days}-araw na lien period na nagsimula noong {started} ay tatakbo hanggang {ends} ({reference}), kaya hindi pa maaaprubahan ang release na ito",
+      "suggestion_early": "Aprubahan ang release kapag tapos na ang lien period, matapos suriin na walang lien na naitala laban sa holdback"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "sertipiko ng substantial completion",
+      "acceptance_protocol": "talaan ng pagtanggap",
+      "affidavit_payment_of_debts": "affidavit na nabayaran na ang mga utang at claim",
+      "affidavit_release_of_liens": "affidavit ng pagpapalaya sa mga lien",
+      "consent_of_surety": "pahintulot ng surety",
+      "final_lien_waiver": "pinal na waiver ng lien",
+      "final_invoice": "pinal na invoice"
+    },
+    "errors": {
+      "approval_blocked": "Hindi maaaprubahan ang retention release na ito hangga't hindi naaayos ang mga ito: {findings}",
+      "rules_unavailable": "Hindi naka-load ang mga patakaran ng retention release sa deployment na ito, kaya hindi masusuri ang release na ito bago ito aprubahan."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Nasingil na gawain na walang linya sa schedule of values"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Sa schedule of values lamang ng aktibong kontrata maaaring i-reconcile ang mga change order; ang kontratang ito ay {status}",
+      "preview_stale": "Nagbago ang listahan ng mga change order na ire-reconcile mula nang buksan mo ito. Buksan muli ang preview at kumpirmahin ang ipinapakita nito ngayon"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Hindi maaaring pirmahan ang kontratang ito hangga't hindi naaayos ang mga ito: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "pagkumpleto",
+      "approval": "pag-apruba"
+    },
+    "total_within_contract": {
+      "fail": "Ang mga installment ay nagdaragdag ng {scheduled}, higit sa halaga ng kontrata na {total}",
+      "suggestion": "Bawasan ang mga installment upang hindi lumampas ang kabuuan nito sa halaga ng kontrata"
+    },
+    "percent_sum": {
+      "fail": "Ang mga installment ay nagdaragdag ng {scheduled} sa halaga ng kontrata na {total} ({percent}%), kaya may bahagi ng presyo na walang installment",
+      "suggestion": "Magdagdag ng installment para sa natitirang halaga ng kontrata, o ayusin ang mga halaga"
+    },
+    "completion_trigger_linked": {
+      "fail": "Ang installment {milestone} ay magiging dapat bayaran sa {trigger}, pero hindi ito naka-link sa aktibidad ng iskedyul, kaya hindi gagalaw ang petsa nito kasabay ng gawain",
+      "suggestion": "I-link ang installment sa milestone ng iskedyul na hinihintay nito"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Ipinapakita ng iskedyul na naabot na ang milestone na {milestone}, pero nakabinbin pa rin ang installment {instalment}, kaya hindi ito maaaring singilin",
+      "suggestion": "Markahan ang installment bilang naabot, o tingnan kung bakit hindi aktibo ang kontrata"
+    },
+    "client_visible_requires_active": {
+      "fail": "Ipinapakita sa kliyente ang installment {milestone}, pero ang kontrata ay {status}; makikita ng kliyente ang plano lamang ng aktibo o natapos na kontrata",
+      "suggestion": "Itago ang installment sa kliyente hanggang maging epektibo ang kontrata"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Ang paunang bayad na {deposit} ay higit sa {ceiling} na pinapayagan ng {reference} sa {jurisdiction} (pinagmulan: {source_url}, sinuri noong {checked_on}, hindi pa nirepaso ng abogado)",
+      "suggestion": "Bawasan ang deposito, o kumpirmahin sa abogado na may exemption na naaangkop sa kontratang ito",
+      "below_threshold": {
+        "fail": "Ang halaga ng kontrata ay katumbas o mas mababa sa halagang kung saan nililimitahan ng {reference} ang mga deposito sa {jurisdiction}, kaya hindi sinuri ang deposito (pinagmulan: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Nasa {currency} ang kontrata, pero itinatakda ng {reference} ang limitasyon nito sa {limit_currency}, kaya hindi sinuri ang deposito sa {jurisdiction} (pinagmulan: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Kung naaangkop sa kontratang ito ang batas, suriin nang manu-mano ang deposito laban dito"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Ang gawaing napatunayan hanggang ngayon ay {cumulative}, na {over} na higit sa halaga ng kontrata na {contract}",
+      "suggestion": "Aprubahan muna ang change order na sumasaklaw sa dagdag na gawain, o itama ang dami sa sertipikong ito"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Dala ng sertipikong ito ang {carried} bilang kabuuan ng mga naunang sertipiko, pero napatunayan ang sertipiko {reference} sa {certified}",
+      "work_fail": "Ang nakaraang hanay ng listahan ng gawain ay nagdaragdag ng {carried}, pero napatunayan ang sertipiko {reference} na may {certified} na gawaing hanggang ngayon",
+      "suggestion": "Hanapin ang claim sa pagitan ng dalawang sertipiko na hindi ipinapakita ng alinman sa dalawa, at pagkatapos ay gawin muli ang isang ito"
+    },
+    "previous_unknown": {
+      "fail": "Hindi alam ang kabuuan ng mga naunang sertipiko",
+      "not_certified": "Hindi pa napapatunayan ang naunang sertipiko na {reference}, kaya hindi pa pinal ang kabuuan nito",
+      "suggestion": "Patunayan muna ang naunang sertipiko. Kung napatunayan ito bago pa maimbak ang mga sertipiko, ilagay ang kabuuan nito sa linya ng mga naunang sertipiko"
+    },
+    "weights_sum": {
+      "fail": "Ang timbang ng mga item ay nagdaragdag ng {total}%, hindi 100%",
+      "suggestion": "Itama ang mga halaga ng mga linya ng iskedyul upang magdagdag ng buong kontrata ang kanilang bahagi"
+    },
+    "percent_regressed": {
+      "fail": "Negatibo ngayong panahon ang item {line}, kaya kinukuha nito pabalik ang gawaing napatunayan na",
+      "suggestion": "Iwan ito kung itinatama nito ang naunang sobrang sukat. Kung hindi, itama ang dami o porsyento sa sertipikong ito"
+    },
+    "income_withholding_single_year": {
+      "fail": "Napili ang withholding ng kita, pero ang kontrata ay mula {start} hanggang {end}, sakop ng iisang taong kalendaryo. Ang withholding ay tumutukoy sa gawaing konstruksyon na lumalampas sa isang taong kalendaryo",
+      "suggestion": "Itanong sa iyong accountant kung talagang lumalampas sa isang taon ang gawain; kung hindi, markahan ang withholding ng kita bilang hindi naaangkop"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Ang advance na nabawi hanggang ngayon ay {recovered}, higit sa advance na {advance} na nabayaran",
+      "unknown": "Nabawi na ang {recovered} ng advance hanggang ngayon, pero hindi nakasaad sa kontrata ang advance na nabayaran, kaya hindi ito masusuri laban dito",
+      "suggestion": "Bawasan ang pagbawi sa sertipikong ito, o itala ang advance na nabayaran sa mga setting ng sertipiko ng kontrata"
+    },
+    "retention_matches_config": {
+      "fail": "Pinipigil ng sertipiko ang {certificate} bilang retention ({percent}% ng base nito), pero ang dokumentong nasa likod nito ay nagpipigil ng {stored}",
+      "suggestion": "Kuwentahin muli ang dokumento, o itama ang rate ng retention o ang base nito sa mga setting ng sertipiko ng kontrata, upang pareho silang magpakita ng iisang retention"
+    },
+    "net_payable_negative": {
+      "fail": "Ang babayaran ay {payable}: mas malaki ang mga bawas kaysa sa halaga ng sertipikong ito",
+      "suggestion": "Suriin ang mga bawas, lalo na ang pagbawi ng advance, at ilipat sa susunod na sertipiko ang hindi pa maibawas ngayon"
+    },
+    "taxes_stale": {
+      "fail": "Kinuwenta ang mga buwis bago nagbago ang sertipikong ito, kaya hindi na ito kabilang dito",
+      "suggestion": "Kuwentahin muli ang mga buwis. Kung kumpirmado na ang mga ito, buksan muna ulit at kumpirmahin ang mga ito pagkatapos"
+    },
+    "taxes_confirmed": {
+      "fail": "Hindi pa kumpirmado ang mga halaga ng buwis ng sertipikong ito",
+      "suggestion": "Suriin ang bawat linya ng buwis at kumpirmahin ang mga buwis bago patunayan"
+    },
+    "lines_complete": {
+      "fail": "Walang halaga pa ang linyang {line}. {reason}",
+      "suggestion": "Ilagay ang halaga, o markahan ang linya bilang hindi naaangkop at sabihin kung bakit"
+    },
+    "work_value_differs": {
+      "fail": "Naitala ang item {line} sa {stated} hanggang ngayon, pero ang dami o porsyento nito ay nagbibigay ng {computed}",
+      "suggestion": "Itama ang dami o halaga sa dokumento upang magkatugma ang dalawang hanay ng hilera"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Ang retention na {percent} porsyento ay higit sa {limit} porsyentong pinapayagan ng batas sa public works sa bawat interim payment",
+      "suggestion": "Ibaba ang retention ng kontrata sa itinakdang rate ng batas"
+    },
+    "advance_above_cap": {
+      "fail": "Sinasaklaw ng advance payment bond ang {percent} porsyento ng halaga ng kontrata, higit sa {limit} porsyentong pinapayagan ng public works nang walang pag-apruba ng finance minister",
+      "suggestion": "Bawasan ang advance payment, o itala sa mga tuntunin ng kontrata ang pag-apruba na nakuha bago ang tender"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Walang pinakamataas na halaga ang delay damages clause, samantalang nililimitahan ng batas sa public works ang delay damages sa {limit} porsyento ng halaga ng kontrata",
+      "suggestion": "Ilagay ang pinakamataas na halaga ng delay damages clause"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Nakatakda sa {percent} porsyento ng halaga ng kontrata ang delay damages clause, higit sa {limit} porsyentong pinapayagan ng batas sa public works",
+      "suggestion": "Ibaba ang pinakamataas na halaga ng clause sa takdang batas"
+    },
+    "performance_security_missing": {
+      "fail": "Walang nakatalang performance security, samantalang kailangan ito ng public works na {limit} porsyento ng halaga ng kontrata",
+      "suggestion": "Itala ang final guarantee bilang performance bond o bank guarantee"
+    },
+    "performance_security_below": {
+      "fail": "Sinasaklaw ng performance security ang {percent} porsyento ng halaga ng kontrata, mas mababa sa {limit} porsyentong kailangan ng public works",
+      "suggestion": "Magtala ng performance security para sa buong porsyentong itinakda ng batas"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Kailangang i-adjust ang presyo ng public works na {months} buwan o higit pa ayon sa batas, at walang nakasaad na coefficient ang kontrata para sa mga variable na item nito",
+        "suggestion": "Ilagay ang mga coefficient na itinakda ng kontratista sa technical envelope"
+      },
+      "duplicate_item": {
+        "fail": "Nakalista nang dalawang beses ang variable na item na {item} sa mga coefficient ng price adjustment",
+        "suggestion": "Panatilihin ang iisang coefficient para sa bawat variable na item"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Hindi numero ang coefficient ng price adjustment ng {item}",
+        "suggestion": "Ilagay ang coefficient bilang decimal, halimbawa 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Zero o mas mababa pa sa zero ang coefficient ng price adjustment ng {item}, samantalang kailangang higit sa zero ang bawat coefficient ayon sa batas",
+        "suggestion": "Maglagay ng coefficient na higit sa zero, o alisin ang item"
+      },
+      "coefficient_negative": {
+        "fail": "Negatibo ang coefficient ng price adjustment ng {item}",
+        "suggestion": "Maglagay ng coefficient na zero o higit pa"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Ang mga coefficient ng price adjustment ay nagdaragdag ng {item}, samantalang kailangang manatiling mas mababa sa isa ang kabuuan nito ayon sa batas",
+        "suggestion": "Ibaba ang mga coefficient upang may natitirang nakapirmi na bahagi ng presyo"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Ang mga coefficient ng price adjustment ay nagdaragdag ng {item}, higit sa isa",
+        "suggestion": "Ibaba ang mga coefficient upang magdagdag ito ng isa o mas mababa pa"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Ang public works na higit sa {months} buwan ay may clause ng pagbabago ng presyo kapag malaking bahagi ng gastos ang hilaw na materyales, at walang nakasaad na revision weight ang kontrata",
+        "suggestion": "Ilagay ang mga timbang ng revision formula mula sa special conditions, o itala na nakapirmi ang presyo"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Ang mga coefficient ng price adjustment ay nagdaragdag ng {item}, samantalang kailangang eksaktong isa ang kabuuan nito ayon sa formula",
+        "suggestion": "Itama ang mga timbang mula sa datos ng kontrata upang magdagdag ng isa"
+      },
+      "unknown_regime": {
+        "fail": "Tinutukoy ng kontrata ang price adjustment regime na {item}, na hindi kilala ng platform",
+        "suggestion": "Pumili ng isa sa mga nakalistang price adjustment regime"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Ang bahaging hindi saklaw ng price adjustment, {item}, ay wala sa pagitan ng zero at isa",
+        "suggestion": "Ilagay ang bahagi bilang decimal mula sa datos ng kontrata, halimbawa 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Ang advance ay {percent} porsyento ng halaga ng kontrata, mas mababa sa {limit} porsyentong pinakamababa na itinakda ng batas sa public works para sa kontratistang ito at sa buyer",
+      "suggestion": "Itaas ang advance sa pinakamababa, o itala ang zero kung isinuko ito ng kontratista"
+    },
+    "advance_above_maximum": {
+      "fail": "Ang advance ay {percent} porsyento ng halaga ng kontrata, higit sa {limit} porsyentong karaniwang pinakamataas na itinakda ng batas sa public works",
+      "suggestion": "Tingnan kung pinapayagan ng special conditions ang mas mataas na advance at itala ang garantiyang hinihingi nito"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Naniningil ang delay penalty clause ng {amount} kada araw, samantalang naniningil ang general conditions ng {expected} kada araw, isang {divisor} bahagi ng halaga ng kontrata",
+      "suggestion": "Panatilihin ang araw-araw na rate ng general conditions, o ilista ang iba't ibang rate sa mga derogation ng special conditions"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Nakatakda sa {percent} porsyento ng halaga ng kontrata ang delay penalty clause, higit sa {limit} porsyento ng general conditions",
+      "suggestion": "Ibaba ang takda sa halagang nasa general conditions, o ilista ito sa mga derogation ng special conditions"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Umaabot ang subcontract na ito na {amount} sa threshold na {limit} para sa direct payment ng public buyer, at isinuko ito ng kontrata, na ipinagbabawal ng batas",
+      "suggestion": "Itala na direktang binabayaran ng public buyer ang subcontractor"
+    },
+    "direct_payment_unstated": {
+      "fail": "Umaabot ang subcontract na ito na {amount} sa threshold na {limit} para sa direct payment ng public buyer, pero hindi ito itinala ng kontrata",
+      "suggestion": "Itala kung tinatanggap at direktang binabayaran ng public buyer ang subcontractor"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Walang nakatalang bank guarantee o delegation of payment ang subcontract na ito sa private works, at kung wala ang alinman dito ay maaaring mapawalang-bisa ang subcontract",
+      "suggestion": "Itala ang bank guarantee ng pangunahing kontratista o ang delegation of payment sa may-ari"
+    },
+    "private_retention_above_limit": {
+      "fail": "Ang retention na {percent} porsyento ay higit sa {limit} porsyentong pinapayagan ng batas sa private works",
+      "suggestion": "Ibaba ang retention ng kontrata sa takdang batas"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Tinutukoy ng kontratang {contract} ang VAT regime na {regime}, na walang katumbas sa {country}",
+      "suggestion": "Pumili ng isa sa mga VAT regime na iniaalok para sa bansa ng proyekto, o alisin ang pagpili"
+    },
+    "country_unknown": {
+      "fail": "Tinutukoy ng kontratang {contract} ang VAT regime na {regime}, pero walang nakatakdang bansa ang proyekto nito, kaya hindi masusuri ang regime",
+      "suggestion": "Itakda ang bansa ng proyekto"
+    },
+    "contract_date_missing": {
+      "fail": "Para lamang sa mga kontratang nilagdaan bago ang {cutoff} ang VAT regime na {regime}, at walang nakatalang pirma o petsa ng simula ang kontratang ito",
+      "suggestion": "Ilagay ang petsa kung kailan nilagdaan ang kontrata"
+    },
+    "contract_too_late": {
+      "fail": "Para lamang sa mga kontratang nilagdaan bago ang {cutoff} ang VAT regime na {regime}, at ang kontratang ito ay mula {contract_date}",
+      "suggestion": "Piliin ang karaniwang VAT regime para sa kontratang ito"
+    },
+    "evidence_missing": {
+      "fail": "Kailangan ng VAT regime na {regime} ang {evidence}, at walang naitala ang kontrata",
+      "suggestion": "Itala ang sanggunian at petsa ng paglabas ng dokumento kasama ng VAT regime ng kontrata"
+    },
+    "evidence_date_missing": {
+      "fail": "Walang petsa ng paglabas ang {evidence} na naitala para sa VAT regime na {regime}, kaya hindi ito maipakitang nauna sa {cutoff}",
+      "suggestion": "Ilagay ang petsa kung kailan inilabas ang dokumento"
+    },
+    "evidence_too_late": {
+      "fail": "Inilabas ang {evidence} na naitala para sa VAT regime na {regime} noong {issued_on}, pero kailangan ng regime ang dokumentong inilabas bago ang {cutoff}",
+      "suggestion": "Magtala ng mas naunang dokumento, o piliin ang karaniwang VAT regime"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Tumaas ang halaga ng kontrata mula {original_value} patungong {current_value}, at walang nakasaad na pinapayagang pagtaas ang kontrata, kaya hindi mahusgahan kung naaangkop pa rin ang VAT regime na {regime}",
+      "suggestion": "Itala ang pagtaas ng saklaw na pinapayagan ng kontrata"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Tumaas ang halaga ng kontrata mula {original_value} patungong {current_value}, lampas sa {allowed_increase_pct} porsyentong pagtaas na pinapayagan ng kontrata, kaya para sa VAT ay bagong kontrata na ito at hindi na naaangkop ang VAT regime na {regime}",
+      "suggestion": "Ilipat ang kontrata sa karaniwang VAT regime"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "payment certificate na inaprubahan ng consultant",
+      "einvoice": "e-invoice o e-receipt",
+      "main_contractor_certificate": "sertipiko ng pangunahing kontratista na nabayaran ang VAT sa proyekto"
+    },
+    "not_in_force": {
+      "before": "Petsado ang claim {claim} sa {on}, at ang VAT regime na {regime} ay naaangkop lamang mula {effective_from}; nakabisa sa araw na iyon: {instead}",
+      "after": "Petsado ang claim {claim} sa {on}, at nagtapos ang VAT regime na {regime} noong {effective_to}; nakabisa sa araw na iyon: {instead}",
+      "suggestion": "Palitan ang VAT regime ng kontrata sa isang nakabisa sa petsa ng claim, o itama ang petsa ng claim"
+    }
+  }
+}

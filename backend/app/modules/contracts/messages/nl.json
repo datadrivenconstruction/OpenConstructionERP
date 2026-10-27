@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Declaratie {claim} heeft geen einddatum van de periode en kan daardoor niet in de volgorde van de declaraties van het contract worden geplaatst",
+      "suggestion": "Voer de laatste dag in van de periode die deze declaratie beslaat"
+    },
+    "period_order": {
+      "fail": "Declaratie {claim} begint op {period_from} en eindigt op {period_to}, dus de periode eindigt voordat zij begint",
+      "suggestion": "Corrigeer het begin of het einde van de periode zodat het begin eerst komt"
+    },
+    "period_overlap": {
+      "fail": "Declaratie {claim} begint op {period_from}, maar de vorige declaratie {previous} loopt tot {previous_to}, zodat beide declaraties dezelfde dagen factureren",
+      "suggestion": "Begin deze declaratie op de dag na het einde van de periode van de vorige declaratie"
+    },
+    "period_gap": {
+      "fail": "Declaratie {claim} begint op {period_from}, maar de vorige declaratie {previous} eindigde op {previous_to}, dus geen enkele declaratie factureert de dagen daartussen (niet-gefactureerde dagen: {days})",
+      "suggestion": "Begin deze declaratie op de dag na het einde van de periode van de vorige declaratie, of controleer of er geen declaratie ontbreekt"
+    },
+    "period_unparsed": {
+      "fail": "Declaratie {claim} registreert {field} als '{value}', wat niet als datum kan worden gelezen",
+      "suggestion": "Voer de datum in als jaar, maand en dag, bijvoorbeeld 2026-03-31",
+      "fields": {
+        "period_start": "begin van de periode",
+        "period_end": "einde van de periode",
+        "claim_date": "datum van de aanvraag"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Post {line} is tot nu toe gefactureerd voor {billed}, meer dan de geplande waarde van {scheduled}; voer Vullen op basis van voortgang opnieuw uit of verlaag het bedrag van deze periode op de post",
+      "suggestion": "Vullen op basis van voortgang factureert elke post alleen voor wat nieuw is ten opzichte van de eerdere declaraties. Als de omvang van de post werkelijk is toegenomen, registreer dan eerst de wijzigingsopdracht die de geplande waarde verhoogt"
+    },
+    "percent_regressed": {
+      "fail": "Post {line} is tot nu toe voor {percent}% gereed, wat {requested} is, minder dan de {previous} die de eerdere declaraties er al op hebben gefactureerd, dus er wordt deze periode niets op de post gefactureerd",
+      "suggestion": "Controleer het percentage gereed van deze post, of corrigeer de eerdere declaratie die het te hoog heeft opgegeven"
+    },
+    "errors": {
+      "submission_blocked": "Deze betalingsaanvraag kan niet worden ingediend zolang het volgende niet is opgelost: {findings}",
+      "rules_unavailable": "De regels voor betalingsaanvragen zijn op deze omgeving niet geladen, dus deze declaratie kan niet worden gecontroleerd voordat zij wordt ingediend.",
+      "later_claim_already_issued": "Declaratie {claims} komt na deze en is al verzonden. Zij is opgesteld terwijl deze declaratie een concept was, en past dus al toe voor dit werk. Verwijder dit concept, of verplaats de periode naar na de laatste verzonden declaratie"
+    },
+    "totals_match_lines": {
+      "fail": "Declaratie {claim} vraagt {gross}, maar de posten erachter tellen op tot {lines_total}: de declaratie is niet opnieuw berekend nadat de posten veranderden",
+      "suggestion": "Sla een van de posten van deze declaratie op, of voer Vullen op basis van voortgang opnieuw uit, dan volgen de totalen"
+    },
+    "totals_below_lines": {
+      "fail": "Declaratie {claim} factureert {gross} op basis van geregistreerde kosten, minder dan de {lines_total} die haar eigen posten optellen: de specificatie kan niet meer vragen dan de declaratie",
+      "suggestion": "Bij een declaratie op basis van kosten zijn de posten een uitsplitsing van het bedrag, niet de bron ervan. Verlaag of verwijder de posten die het bedrag overschrijden, of genereer de declaratie opnieuw op basis van de kosten van het werk, zodat beide overeenkomen"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Declaratie {claim} vermeldt {stored} als eerder gefactureerd op post {line}, maar de eerdere declaraties factureren er nu {now} op",
+      "total_fail": "Declaratie {claim} vermeldt {stored} als eerder gecertificeerd, maar de eerdere declaraties certificeren nu {now}",
+      "suggestion": "Genereer deze declaratie opnieuw, zodat zij leest wat de voorgaande declaraties vandaag factureren"
+    },
+    "within_nte_cap": {
+      "fail": "Declaratie {claim} factureert {this} bovenop de reeds gefactureerde {billed}, wat boven het maximum (NTE) van {cap} ligt",
+      "suggestion": "Factureer op deze declaratie tot het maximum en spreek voor het resterende bedrag een wijzigingsopdracht af"
+    },
+    "retention_matches_policy": {
+      "fail": "Declaratie {claim} houdt {held} aan als retentie, maar het retentiebeleid geeft nu {expected}: een eerdere declaratie, een vrijgave of een wijziging van het beleid vond plaats nadat deze declaratie was berekend",
+      "suggestion": "Voer Vullen op basis van voortgang opnieuw uit, of sla een post van deze declaratie op, dan wordt de retentie opnieuw berekend"
+    },
+    "retention_above_cap": {
+      "fail": "Declaratie {claim} houdt {held} aan als retentie, boven het maximum van {percent}% dat het retentiebeleid stelt, wat op dit contract {cap} is",
+      "suggestion": "Bereken de declaratie opnieuw, of verhoog het maximum in het retentiebeleid van het contract als partijen een hoger percentage zijn overeengekomen",
+      "state_cap_unread": "Declaratie {claim}: het retentiebeleid stelt geen maximum, en {country} beperkt de retentie bij wet per deelstaat. Er kon geen deelstaat worden vastgesteld omdat het project geen deelstaatcode heeft, dus het wettelijke maximum is niet gecontroleerd",
+      "state_cap_suggestion": "Neem de grens van de deelstaat als maximum op in het retentiebeleid van het contract, dan wordt elke declaratie op dit contract daartegen gecontroleerd"
+    },
+    "retention_release_within_held": {
+      "fail": "De vrijgaven die tot en met declaratie {claim} zijn gefactureerd, betalen {released} terug, meer dan de {accrued} aan retentie die tot dan toe is aangehouden",
+      "suggestion": "Maak de vrijgave die te groot is ongedaan, of factureer deze op een latere declaratie zodra er meer retentie is aangehouden"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "De waardenlijst telt op tot {scheduled}, maar de contractsom tot nu toe is {contract_sum}: de posten waarop deze declaratie wordt gefactureerd laten {difference} van het contract zonder post",
+      "suggestion": "Voeg posten van de waardenlijst toe of corrigeer ze tot ze optellen tot de contractsom",
+      "suggestion_reconcile": "{count} goedgekeurde wijzigingsopdrachten of variaties hebben de contractsom veranderd voordat ze in de waardenlijst werden verwerkt. Gebruik Wijzigingsopdrachten afstemmen op het contract om voor elk een post toe te voegen"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Deze vrijgave heeft {document} nodig, en er is geen bijgevoegd",
+      "suggestion": "Registreer het document op het contract, koppel het aan de vrijgave en keur de vrijgave opnieuw goed"
+    },
+    "within_available": {
+      "fail": "Deze vrijgave betaalt {amount} terug, maar er is nog maar {available} aan retentie aangehouden dat niet aan een andere vrijgave is toegewezen",
+      "suggestion": "Maak deze vrijgave ongedaan en stel haar opnieuw voor, zodat zij wordt bepaald op de nu aangehouden retentie"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Deze vrijgave wordt pas betaald nadat de {days}-daagse hypotheektermijn na de gebeurtenis is verstreken ({reference}), en er staat niet vermeld wanneer die termijn is begonnen",
+      "suggestion_no_start": "Voer de dag in waarop de termijn is begonnen, zoals de publicatiedatum van het certificaat van wezenlijke oplevering, en keur de vrijgave opnieuw goed",
+      "fail_early": "De {days}-daagse hypotheektermijn die is begonnen op {started} loopt tot {ends} ({reference}), dus deze vrijgave kan nog niet worden goedgekeurd",
+      "suggestion_early": "Keur de vrijgave goed zodra de hypotheektermijn is verstreken, na controle dat er geen hypotheek op de achterstallige termijn is gevestigd"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "certificaat van wezenlijke oplevering",
+      "acceptance_protocol": "oplevering- en acceptatieverslag",
+      "affidavit_payment_of_debts": "verklaring dat schulden en vorderingen zijn voldaan",
+      "affidavit_release_of_liens": "verklaring van kwijting van hypotheken",
+      "consent_of_surety": "toestemming van de borg",
+      "final_lien_waiver": "eindverklaring van afstand van hypotheekrecht",
+      "final_invoice": "eindfactuur"
+    },
+    "errors": {
+      "approval_blocked": "Deze retentievrijgave kan niet worden goedgekeurd zolang het volgende niet is opgelost: {findings}",
+      "rules_unavailable": "De regels voor retentievrijgaven zijn op deze omgeving niet geladen, dus deze vrijgave kan niet worden gecontroleerd voordat zij wordt goedgekeurd."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Gefactureerd werk dat op geen enkele post van de waardenlijst staat"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Wijzigingsopdrachten worden alleen afgestemd op de waardenlijst van een actief contract; dit contract heeft de status {status}",
+      "preview_stale": "De lijst met af te stemmen wijzigingsopdrachten is gewijzigd sinds u haar opende. Open het voorbeeld opnieuw en bevestig wat het nu toont"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Dit contract kan niet worden ondertekend zolang het volgende niet is opgelost: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "oplevering",
+      "approval": "goedkeuring"
+    },
+    "total_within_contract": {
+      "fail": "De termijnen tellen op tot {scheduled}, meer dan de contractsom van {total}",
+      "suggestion": "Verlaag de termijnen zodat zij samen niet meer bedragen dan de contractsom"
+    },
+    "percent_sum": {
+      "fail": "De termijnen tellen op tot {scheduled} van de contractsom van {total} ({percent}%), dus een deel van de prijs heeft geen termijn",
+      "suggestion": "Voeg een termijn toe voor het resterende deel van de contractsom, of pas de bedragen aan"
+    },
+    "completion_trigger_linked": {
+      "fail": "Termijn {milestone} wordt opeisbaar bij {trigger}, maar zij is niet gekoppeld aan een planningsactiviteit, dus haar datum verschuift niet mee met het werk",
+      "suggestion": "Koppel de termijn aan de mijlpaal in de planning waarop zij wacht"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "De planning toont dat mijlpaal {milestone} is bereikt, maar termijn {instalment} staat nog op in behandeling, dus zij kan niet worden gedeclareerd",
+      "suggestion": "Markeer de termijn als bereikt, of controleer waarom het contract niet actief is"
+    },
+    "client_visible_requires_active": {
+      "fail": "Termijn {milestone} wordt aan de opdrachtgever getoond, maar het contract heeft de status {status}; de opdrachtgever ziet het betalingsplan alleen van een actief of afgerond contract",
+      "suggestion": "Verberg de termijn voor de opdrachtgever totdat het contract van kracht is"
+    },
+    "consumer_deposit_cap": {
+      "fail": "De vooruitbetaling van {deposit} is hoger dan het maximum van {ceiling} dat {reference} in {jurisdiction} toestaat (bron: {source_url}, gecontroleerd op {checked_on}, niet door een jurist beoordeeld)",
+      "suggestion": "Verlaag de vooruitbetaling, of bevestig met een jurist dat voor dit contract een uitzondering geldt",
+      "below_threshold": {
+        "fail": "De contractsom is gelijk aan of lager dan het bedrag waarboven {reference} in {jurisdiction} vooruitbetalingen beperkt, dus de vooruitbetaling is niet gecontroleerd (bron: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Het contract is in {currency}, maar {reference} stelt de grens in {limit_currency}, dus de vooruitbetaling in {jurisdiction} is niet gecontroleerd (bron: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Als de wet op dit contract van toepassing is, controleer de vooruitbetaling dan handmatig daartegen"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Tot nu toe gecertificeerd werk is {cumulative}, dat {over} boven de contractsom van {contract} ligt",
+      "suggestion": "Laat eerst de wijzigingsopdracht die het extra werk dekt goedkeuren, of corrigeer de hoeveelheden op dit certificaat"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Dit certificaat vermeldt {carried} als totaal van de vorige certificaten, maar certificaat {reference} is gecertificeerd op {certified}",
+      "work_fail": "De kolom vorig van de werklijst telt op tot {carried}, maar certificaat {reference} is gecertificeerd met {certified} aan werk tot nu toe",
+      "suggestion": "Controleer of er tussen de twee certificaten een declaratie zit die geen van beide toont, en genereer dit certificaat daarna opnieuw"
+    },
+    "previous_unknown": {
+      "fail": "Het totaal van de vorige certificaten is niet bekend",
+      "not_certified": "Het vorige certificaat {reference} is nog niet gecertificeerd, dus het totaal is nog niet definitief",
+      "suggestion": "Certificeer eerst het vorige certificaat. Als het is gecertificeerd voordat certificaten werden opgeslagen, voer dan het totaal in op de regel van de vorige certificaten"
+    },
+    "weights_sum": {
+      "fail": "De gewichten van de posten tellen op tot {total}%, niet 100%",
+      "suggestion": "Corrigeer de waarden van de planningsposten zodat hun aandelen het volledige contract vormen"
+    },
+    "percent_regressed": {
+      "fail": "Post {line} is deze periode negatief, dus zij neemt werk terug dat al was gecertificeerd",
+      "suggestion": "Laat dit staan als het een eerdere overmeting corrigeert. Corrigeer anders de hoeveelheid of het percentage op dit certificaat"
+    },
+    "income_withholding_single_year": {
+      "fail": "Inhouding van loonbelasting is geselecteerd, maar het contract loopt van {start} tot {end}, binnen één kalenderjaar. De inhouding betreft bouwwerkzaamheden die meer dan één kalenderjaar beslaan",
+      "suggestion": "Controleer met uw accountant of het werk werkelijk meer dan één jaar beslaat; zo niet, markeer de inhouding van loonbelasting dan als niet van toepassing"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "De tot nu toe verrekende voorschot is {recovered}, meer dan het voorschot van {advance} dat is betaald",
+      "unknown": "Er is tot nu toe {recovered} aan voorschot verrekend, maar het contract vermeldt het betaalde voorschot niet, dus de verrekening kan daarmee niet worden gecontroleerd",
+      "suggestion": "Verlaag de verrekening op dit certificaat, of vermeld het betaalde voorschot in de certificaatinstellingen van het contract"
+    },
+    "retention_matches_config": {
+      "fail": "Het certificaat houdt {certificate} aan als retentie ({percent}% van de basis), maar het document waarop het is gebaseerd houdt {stored} aan",
+      "suggestion": "Bereken het document opnieuw, of corrigeer het retentiepercentage of de basis in de certificaatinstellingen van het contract, zodat beide dezelfde retentie tonen"
+    },
+    "net_payable_negative": {
+      "fail": "Het te betalen bedrag is {payable}: de inhoudingen zijn groter dan het bedrag van dit certificaat",
+      "suggestion": "Controleer de inhoudingen, vooral de verrekening van het voorschot, en neem wat nu niet kan worden ingehouden mee naar het volgende certificaat"
+    },
+    "taxes_stale": {
+      "fail": "De belastingen zijn berekend voordat dit certificaat werd gewijzigd, dus zij horen er niet meer bij",
+      "suggestion": "Bereken de belastingen opnieuw. Als ze al waren bevestigd, open ze dan eerst opnieuw en bevestig ze daarna opnieuw"
+    },
+    "taxes_confirmed": {
+      "fail": "De belastingbedragen van dit certificaat zijn niet bevestigd",
+      "suggestion": "Controleer elke belastingregel en bevestig de belastingen voordat u certificeert"
+    },
+    "lines_complete": {
+      "fail": "Post {line} heeft nog geen bedrag. {reason}",
+      "suggestion": "Voer het bedrag in, of markeer de post als niet van toepassing en geef aan waarom"
+    },
+    "work_value_differs": {
+      "fail": "Post {line} is tot nu toe geregistreerd op {stated}, maar de hoeveelheid of het percentage geeft {computed}",
+      "suggestion": "Corrigeer de hoeveelheid of het bedrag op het document zodat de twee kolommen van de rij overeenkomen"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Retentie van {percent} procent is hoger dan de {limit} procent die de wet op openbare werken toestaat bij elke tussentijdse betaling",
+      "suggestion": "Verlaag de retentie van het contract naar het wettelijke percentage"
+    },
+    "advance_above_cap": {
+      "fail": "De garantie voor de voorschotbetaling dekt {percent} procent van de contractwaarde, meer dan de {limit} procent die openbare werken toestaan zonder goedkeuring van de minister van Financiën",
+      "suggestion": "Verlaag de voorschotbetaling, of leg in de contractvoorwaarden de goedkeuring vast die voor de aanbesteding is verkregen"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Een boeterclausule voor vertraging heeft geen maximumbedrag, terwijl de wet op openbare werken de boete voor vertraging beperkt tot {limit} procent van de contractwaarde",
+      "suggestion": "Vul het maximumbedrag van de boeterclausule voor vertraging in"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Een boeterclausule voor vertraging is beperkt tot {percent} procent van de contractwaarde, meer dan de {limit} procent die de wet op openbare werken toestaat",
+      "suggestion": "Verlaag het maximumbedrag van de clausule naar het wettelijke maximum"
+    },
+    "performance_security_missing": {
+      "fail": "Er is geen zekerheid voor nakoming vastgelegd, terwijl openbare werken er een van {limit} procent van de contractwaarde vereisen",
+      "suggestion": "Leg de eindgarantie vast als prestatiegarantie of bankgarantie"
+    },
+    "performance_security_below": {
+      "fail": "De zekerheid voor nakoming dekt {percent} procent van de contractwaarde, minder dan de {limit} procent die openbare werken vereisen",
+      "suggestion": "Leg een zekerheid voor nakoming vast voor het volledige wettelijke percentage"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Openbare werken van {months} maanden of langer moeten wettelijk worden geprijsd, maar het contract vermeldt geen coëfficiënten voor de variabele posten",
+        "suggestion": "Voer de coëfficiënten in die de aannemer in de technische offerte heeft opgegeven"
+      },
+      "duplicate_item": {
+        "fail": "De variabele post {item} staat tweemaal vermeld onder de prijsaanpassingscoëfficiënten",
+        "suggestion": "Houd per variabele post één coëfficiënt aan"
+      },
+      "coefficient_not_a_number": {
+        "fail": "De prijsaanpassingscoëfficiënt van {item} is geen getal",
+        "suggestion": "Voer de coëfficiënt in als decimaal getal, bijvoorbeeld 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "De prijsaanpassingscoëfficiënt van {item} is nul of minder, terwijl de wet vereist dat elke coëfficiënt groter is dan nul",
+        "suggestion": "Voer een coëfficiënt groter dan nul in, of verwijder de post"
+      },
+      "coefficient_negative": {
+        "fail": "De prijsaanpassingscoëfficiënt van {item} is negatief",
+        "suggestion": "Voer een coëfficiënt van nul of meer in"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "De prijsaanpassingscoëfficiënten tellen op tot {item}, terwijl de wet vereist dat hun som onder één blijft",
+        "suggestion": "Verlaag de coëfficiënten zodat een vast deel van de prijs overblijft"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "De prijsaanpassingscoëfficiënten tellen op tot {item}, meer dan één",
+        "suggestion": "Verlaag de coëfficiënten zodat zij samen één of minder zijn"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Openbare werken langer dan {months} maanden bevatten een prijsherzieningsclausule waar grondstoffen een groot deel van de kosten vormen, en het contract vermeldt geen herzieningsgewichten",
+        "suggestion": "Voer de gewichten van de herzieningsformule uit de bijzondere voorwaarden in, of leg vast dat de prijs vast is"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "De prijsaanpassingscoëfficiënten tellen op tot {item}, terwijl de formule vereist dat zij precies één vormen",
+        "suggestion": "Corrigeer de gewichten op basis van de contractgegevens zodat zij samen één vormen"
+      },
+      "unknown_regime": {
+        "fail": "Het contract noemt het prijsaanpassingsregime {item}, dat het platform niet kent",
+        "suggestion": "Kies een van de vermelde prijsaanpassingsregimes"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Het deel dat niet aan prijsaanpassing onderhevig is, {item}, ligt niet tussen nul en één",
+        "suggestion": "Voer dit deel in als decimaal getal uit de contractgegevens, bijvoorbeeld 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Het voorschot is {percent} procent van de contractwaarde, minder dan het minimum van {limit} procent dat de wet op openbare werken stelt voor deze aannemer en opdrachtgever",
+      "suggestion": "Verhoog het voorschot tot het minimum, of leg nul vast als de aannemer er afstand van heeft gedaan"
+    },
+    "advance_above_maximum": {
+      "fail": "Het voorschot is {percent} procent van de contractwaarde, meer dan de {limit} procent die de wet op openbare werken als gebruikelijk maximum stelt",
+      "suggestion": "Controleer of de bijzondere voorwaarden het hogere voorschot toestaan en leg de garantie vast die het vereist"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Een boeteclausule voor vertraging rekent {amount} per dag, terwijl de algemene voorwaarden {expected} per dag rekenen, een {divisor}e deel van de contractwaarde",
+      "suggestion": "Houd het dagtarief van de algemene voorwaarden aan, of vermeld het afwijkende tarief bij de afwijkingen van de bijzondere voorwaarden"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Een boeteclausule voor vertraging is beperkt tot {percent} procent van de contractwaarde, meer dan de {limit} procent van de algemene voorwaarden",
+      "suggestion": "Verlaag het maximum naar het cijfer uit de algemene voorwaarden, of vermeld het bij de afwijkingen van de bijzondere voorwaarden"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Dit onderaannemingscontract van {amount} bereikt de drempel van {limit} voor directe betaling door de publieke opdrachtgever, en het contract doet daar afstand van, wat de wet verbiedt",
+      "suggestion": "Leg vast dat de publieke opdrachtgever de onderaannemer rechtstreeks betaalt"
+    },
+    "direct_payment_unstated": {
+      "fail": "Dit onderaannemingscontract van {amount} bereikt de drempel van {limit} voor directe betaling door de publieke opdrachtgever, en het contract vermeldt dat niet",
+      "suggestion": "Leg vast of de onderaannemer door de publieke opdrachtgever wordt geaccepteerd en rechtstreeks wordt betaald"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Dit onderaannemingscontract bij private werken vermeldt geen bankgarantie en geen delegatie van betaling; zonder een van beide kan het onderaannemingscontract nietig worden verklaard",
+      "suggestion": "Leg de bankgarantie van de hoofdaannemer of de delegatie van betaling aan de opdrachtgever vast"
+    },
+    "private_retention_above_limit": {
+      "fail": "Retentie van {percent} procent is hoger dan de {limit} procent die de wet bij private werken toestaat",
+      "suggestion": "Verlaag de retentie van het contract naar het wettelijke maximum"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Contract {contract} vermeldt het btw-regime {regime}, dat {country} niet kent",
+      "suggestion": "Kies een van de btw-regimes die voor het land van het project gelden, of verwijder de keuze"
+    },
+    "country_unknown": {
+      "fail": "Contract {contract} vermeldt het btw-regime {regime}, maar het project vermeldt geen land, dus het regime kan niet worden gecontroleerd",
+      "suggestion": "Stel het land van het project in"
+    },
+    "contract_date_missing": {
+      "fail": "Het btw-regime {regime} geldt alleen voor contracten die vóór {cutoff} zijn ondertekend, en dit contract vermeldt noch een ondertekeningsdatum noch een startdatum",
+      "suggestion": "Voer de datum in waarop het contract is ondertekend"
+    },
+    "contract_too_late": {
+      "fail": "Het btw-regime {regime} geldt alleen voor contracten die vóór {cutoff} zijn ondertekend, en dit contract dateert van {contract_date}",
+      "suggestion": "Kies het standaard btw-regime voor dit contract"
+    },
+    "evidence_missing": {
+      "fail": "Het btw-regime {regime} vereist {evidence}, en het contract vermeldt er geen",
+      "suggestion": "Leg het kenmerk en de afgiftedatum van het document vast bij het btw-regime van het contract"
+    },
+    "evidence_date_missing": {
+      "fail": "De {evidence} die bij het btw-regime {regime} is vastgelegd, heeft geen afgiftedatum, dus kan niet worden aangetoond dat zij van vóór {cutoff} dateert",
+      "suggestion": "Voer de datum in waarop het document is afgegeven"
+    },
+    "evidence_too_late": {
+      "fail": "De {evidence} die bij het btw-regime {regime} is vastgelegd, is afgegeven op {issued_on}, en het regime vereist een document dat vóór {cutoff} is afgegeven",
+      "suggestion": "Leg een eerder document vast, of kies het standaard btw-regime"
+    },
+    "scope_increase_unjudged": {
+      "fail": "De contractwaarde is gestegen van {original_value} naar {current_value} en het contract vermeldt geen toegestane verhoging, dus niet kan worden beoordeeld of het btw-regime {regime} nog geldt",
+      "suggestion": "Leg de uitbreiding van de opdracht vast die het contract toestaat"
+    },
+    "scope_increase_new_contract": {
+      "fail": "De contractwaarde is gestegen van {original_value} naar {current_value}, meer dan de {allowed_increase_pct} procent verhoging die het contract toestaat, dus voor de btw is het een nieuw contract en geldt het btw-regime {regime} niet meer",
+      "suggestion": "Breng het contract over naar het standaard btw-regime"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "een door de adviseur goedgekeurd betalingscertificaat",
+      "einvoice": "een e-factuur of e-bon",
+      "main_contractor_certificate": "het certificaat van de hoofdaannemer dat de btw voor het project is betaald"
+    },
+    "not_in_force": {
+      "before": "Declaratie {claim} is gedateerd op {on}, en het btw-regime {regime} geldt pas vanaf {effective_from}; op die dag geldend: {instead}",
+      "after": "Declaratie {claim} is gedateerd op {on}, en het btw-regime {regime} is beëindigd op {effective_to}; op die dag geldend: {instead}",
+      "suggestion": "Wijzig het btw-regime van het contract in een regime dat op de datum van de declaratie geldt, of corrigeer de datum van de declaratie"
+    }
+  }
+}

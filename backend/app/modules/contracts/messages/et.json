@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Arve {claim} perioodi lõppkuupäev puudub, seega ei saa seda paigutada lepingu arvete järjekorda",
+      "suggestion": "Sisestage selle arve perioodi viimane päev"
+    },
+    "period_order": {
+      "fail": "Arve {claim} algab {period_from} ja lõpeb {period_to}, seega periood lõpeb enne alguse saamist",
+      "suggestion": "Parandage perioodi algus või lõpp nii, et algus oleks varasem"
+    },
+    "period_overlap": {
+      "fail": "Arve {claim} algab {period_from}, kuid eelmine arve {previous} kestab kuni {previous_to}, seega mõlemad arved arveldavad samu päevi",
+      "suggestion": "Alustage seda arvet päev pärast eelmise arve perioodi lõppu"
+    },
+    "period_gap": {
+      "fail": "Arve {claim} algab {period_from}, kuid eelmine arve {previous} lõppes {previous_to}, seega vahepealseid päevi ei arvelda ükski arve (arvelduseta päevad: {days})",
+      "suggestion": "Alustage seda arvet päev pärast eelmise arve perioodi lõppu või kontrollige, et ühtegi arvet ei puudu"
+    },
+    "period_unparsed": {
+      "fail": "Arve {claim} salvestab välja {field} väärtusena '{value}', mida ei saa kuupäevana lugeda",
+      "suggestion": "Sisestage kuupäev aasta, kuu ja päevana, näiteks 2026-03-31",
+      "fields": {
+        "period_start": "perioodi algus",
+        "period_end": "perioodi lõpp",
+        "claim_date": "arve kuupäev"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Rida {line} on arveldatud seni {billed}, mis on rohkem kui selle kavandatud väärtus {scheduled}; käivitage uuesti Täida edenemise järgi või vähendage selle rea summat sellel perioodil",
+      "suggestion": "Täida edenemise järgi arvestab iga rea jaoks ainult eelmistes arvetes mitte kajastatut. Kui rea ulatus tegelikult kasvas, registreerige enne muudatustellimus, mis suurendab selle kavandatud väärtust"
+    },
+    "percent_regressed": {
+      "fail": "Rida {line} on seni {percent}% valmis, mis on {requested}, vähem kui {previous}, mis eelmised arved sellel juba arvelesid, seega sellel perioodil ei arveldata sellel midagi",
+      "suggestion": "Kontrollige selle rea valmiduse protsenti või parandage eelmine arve, mis seda liialdas"
+    },
+    "errors": {
+      "submission_blocked": "Seda maksetaotlust ei saa esitada, enne kui need on lahendatud: {findings}",
+      "rules_unavailable": "Maksetaotluste reeglid ei ole selles paigalduses laaditud, seega seda arvet ei saa enne esitamist kontrollida.",
+      "later_claim_already_issued": "Arve {claims} tuleb pärast seda ja on juba välja saadetud. See koostati siis, kui see arve oli mustand, seega katab see juba sama töö. Kustutage see mustand või viige selle periood pärast viimast väljasaadetud arvet"
+    },
+    "totals_match_lines": {
+      "fail": "Arve {claim} nõuab {gross}, kuid selle taga olevad read annavad kokku {lines_total}: arvet ei arvutatud pärast selle ridade muutmist uuesti",
+      "suggestion": "Salvestage selle arve mõni rida või käivitage uuesti Täida edenemise järgi ja selle summad järgnevad"
+    },
+    "totals_below_lines": {
+      "fail": "Arve {claim} arveldab {gross} registreeritud kulude alusel, mis on vähem kui {lines_total}, mille annavad kokku selle enda read: erijaotus ei saa nõuda rohkem, kui nõuab arve ise",
+      "suggestion": "Kulude alusel arveldatud arve puhul on read summa jaotus, mitte selle allikas. Vähendage või eemaldage read, mis seda liialdavad, või looge arve uuesti tööde kulude põhjal, et need kattuksid"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Arve {claim} märgib real {line} varem arveldatuks {stored}, kuid eelmised arved arveldavad sellel nüüd {now}",
+      "total_fail": "Arve {claim} märgib varem sertifitseerituks {stored}, kuid eelmised arved sertifitseerivad nüüd {now}",
+      "suggestion": "Looge see arve uuesti, et see kajastaks seda, mida eelmised arved täna arveldavad"
+    },
+    "within_nte_cap": {
+      "fail": "Arve {claim} arveldab {this} lisaks juba arveldatud {billed}, mis ületab maksimaalse piirmäära {cap}",
+      "suggestion": "Arveldage sellel arvel kuni piirmäärani ja leppige ülejäänu osas kokku muudatustellimus"
+    },
+    "retention_matches_policy": {
+      "fail": "Arve {claim} peab kinni {held} tagatisrahana, kuid selle tagatisraha põhimõte annab nüüd {expected}: eelmine arve, vabastamine või põhimõtte muutus toimus pärast selle arve arvutamist",
+      "suggestion": "Käivitage uuesti Täida edenemise järgi või salvestage selle arve mõni rida, ja tagatisraha arvutatakse uuesti"
+    },
+    "retention_above_cap": {
+      "fail": "Arve {claim} peab kinni {held} tagatisrahana, mis ületab selle tagatisraha põhimõtte määratud {percent}% piirmäära, milleks on lepingus {cap}",
+      "suggestion": "Arvutage arve uuesti või tõstke lepingu tagatisraha põhimõttes piirmäära, kui pooled on kokku leppinud kõrgema",
+      "state_cap_unread": "Arve {claim}: selle tagatisraha põhimõte ei sea piirmäära ning {country} piirab tagatisraha osariigi seadusega. Osariiki ei saanud kindlaks teha, sest projektil ei ole piirkonnakoodi, seega seadusjärgset piirmäära ei kontrollitud",
+      "state_cap_suggestion": "Kirjutage osariigi piirmäär lepingu tagatisraha põhimõttesse piirmäärana, ja iga selle lepingu arvet kontrollitakse selle vastu"
+    },
+    "retention_release_within_held": {
+      "fail": "Arve {claim}-ni arveldatud vabastamised tagastavad {released}, mis on rohkem kui seniste {accrued} kinnipeetud tagatisraha",
+      "suggestion": "Tühistage liiga suur vabastamine või arveldage see hilisemal arvel, kui on rohkem tagatisraha kinni peetud"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Väärtuste tabel annab kokku {scheduled}, kuid lepingu summa seni on {contract_sum}: read, mille vastu see arve arveldatakse, jätavad lepingust {difference} ilma reata",
+      "suggestion": "Lisage või parandage väärtuste tabeli read, kuni need annavad kokku lepingu summa",
+      "suggestion_reconcile": "{count} heakskiidetud muudatustellimust või variatsiooni muutsid lepingu summat enne, kui need jõudsid väärtuste tabelisse. Kasutage lepingul funktsiooni Ühita muudatustellimused, et lisada igaühe jaoks rida"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "See vabastamine nõuab dokumenti {document} ega ühtegi ei ole lisatud",
+      "suggestion": "Registreerige dokument lepingus, lisage see vabastamisele ja kinnitage uuesti"
+    },
+    "within_available": {
+      "fail": "See vabastamine tagastab {amount}, kuid tagatisrahast on veel kinni peetud ainult {available}, mis ei ole juba seotud teise vabastamisega",
+      "suggestion": "Tühistage see vabastamine ja esitage uuesti, et selle suurus põhineks praegu kinni peetud tagatisrahal"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Seda vabastamist makstakse alles pärast sündmusele järgneva {days}-päevase seaduslikku hüpoteegi perioodi möödumist ({reference}), kuid pole märgitud, millal see periood algas",
+      "suggestion_no_start": "Sisestage päev, millal periood algas, näiteks olulise valmimise tunnistuse avaldamise kuupäev, ja kinnitage vabastamine uuesti",
+      "fail_early": "{started} alanud {days}-päevane seadusliku hüpoteegi periood kestab kuni {ends} ({reference}), seega seda vabastamist ei saa veel kinnitada",
+      "suggestion_early": "Kinnitage vabastamine, kui seadusliku hüpoteegi periood on möödunud, pärast kontrollimist, et tagatisraha vastu ei ole esitatud hüpoteeki"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "olulise valmimise tunnistus",
+      "acceptance_protocol": "vastuvõtu protokoll",
+      "affidavit_payment_of_debts": "kinnitus võlgade ja nõuete tasumise kohta",
+      "affidavit_release_of_liens": "kinnitus hüpoteegi vabastamise kohta",
+      "consent_of_surety": "tagaja nõusolek",
+      "final_lien_waiver": "lõplik hüpoteegist loobumine",
+      "final_invoice": "lõpparve"
+    },
+    "errors": {
+      "approval_blocked": "Seda tagatisraha vabastamist ei saa kinnitada, enne kui need on lahendatud: {findings}",
+      "rules_unavailable": "Tagatisraha vabastamise reeglid ei ole selles paigalduses laaditud, seega seda vabastamist ei saa enne kinnitamist kontrollida."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Arveldatud töö, mida ükski väärtuste tabeli rida ei kata"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Muudatustellimusi saab väärtuste tabeliga ühitada ainult aktiivsel lepingul; see leping on staatuses {status}",
+      "preview_stale": "Ühitatavate muudatustellimuste loend on pärast selle avamist muutunud. Avage eelvaade uuesti ja kinnitage, mida see nüüd näitab"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Seda lepingut ei saa allkirjastada, enne kui need on lahendatud: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "valmimine",
+      "approval": "heakskiit"
+    },
+    "total_within_contract": {
+      "fail": "Osamaksed annavad kokku {scheduled}, mis on rohkem kui lepingu summa {total}",
+      "suggestion": "Vähendage osamakseid nii, et need annaksid kokku kuni lepingu summa"
+    },
+    "percent_sum": {
+      "fail": "Osamaksed annavad lepingu summast {total} kokku {scheduled} ({percent}%), seega osa hinnast ei ole osamaksega kaetud",
+      "suggestion": "Lisage osamakse lepingu summa ülejäänud osa jaoks või kohandage summasid"
+    },
+    "completion_trigger_linked": {
+      "fail": "Osamakse {milestone} saab maksmisele minna pärast {trigger}, kuid see ei ole seotud graafiku tegevusega, seega selle kuupäev ei liigu töö kaasas",
+      "suggestion": "Siduge osamakse graafiku verstapostiga, mida see ootab"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Graafik näitab, et verstapost {milestone} on saavutatud, kuid osamakse {instalment} on veel ootel, seega seda ei saa nõuda",
+      "suggestion": "Märkige osamakse saavutatuks või kontrollige, miks leping ei ole aktiivne"
+    },
+    "client_visible_requires_active": {
+      "fail": "Osamakse {milestone} on kliendile nähtav, kuid leping on staatuses {status}; klient näeb plaani ainult aktiivse või lõpetatud lepingu puhul",
+      "suggestion": "Peitke osamakse kliendi eest, kuni leping jõustub"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Ettemakse {deposit} ületab {ceiling}, mille {reference} lubab riigis {jurisdiction} (allikas: {source_url}, kontrollitud {checked_on}, ei ole jurist üle vaadanud)",
+      "suggestion": "Vähendage deposiiti või kinnitage juristiga, et sellele lepingule kehtib erand",
+      "below_threshold": {
+        "fail": "Lepingu summa on võrdne või väiksem summast, millest alates {reference} piirab deposiite riigis {jurisdiction}, seega deposiiti ei kontrollitud (allikas: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Leping on valuutas {currency}, kuid {reference} määrab oma piirmäära valuutas {limit_currency}, seega riigi {jurisdiction} deposiiti ei kontrollitud (allikas: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Kui seadus kehtib sellele lepingule, kontrollige deposiiti selle vastu käsitsi"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Seni sertifitseeritud töö on {cumulative}, mis on {over} üle lepingu summa {contract}",
+      "suggestion": "Laske enne heaks kiita muudatustellimus, mis katab lisatöö, või parandage selle sertifikaadi kogused"
+    },
+    "previous_matches_last_certified": {
+      "fail": "See sertifikaat märgib eelmiste sertifikaatide kogusummaks {carried}, kuid sertifikaat {reference} sertifitseeriti summas {certified}",
+      "work_fail": "Tööde loendi eelmiste veergude summa on {carried}, kuid sertifikaat {reference} sertifitseeriti seni {certified} töö eest",
+      "suggestion": "Kontrollige, kas kahe sertifikaadi vahel on arve, mida ükski neist ei näita, ja seejärel looge see sertifikaat uuesti"
+    },
+    "previous_unknown": {
+      "fail": "Eelmiste sertifikaatide kogusumma ei ole teada",
+      "not_certified": "Eelmine sertifikaat {reference} ei ole veel sertifitseeritud, seega selle kogusumma ei ole lõplik",
+      "suggestion": "Sertifitseerige kõigepealt eelmine sertifikaat. Kui see sertifitseeriti enne sertifikaatide salvestamist, sisestage selle kogusumma eelmiste sertifikaatide reale"
+    },
+    "weights_sum": {
+      "fail": "Kirjete kaalud annavad kokku {total}%, mitte 100%",
+      "suggestion": "Parandage graafiku ridade väärtused nii, et nende osad annaksid kokku kogu lepingu"
+    },
+    "percent_regressed": {
+      "fail": "Kirje {line} on sellel perioodil negatiivne, seega võtab see tagasi juba sertifitseeritud töö",
+      "suggestion": "Jätke see alles, kui see parandab varasemat ülemõõtmist. Muidu parandage selle sertifikaadi kogus või protsent"
+    },
+    "income_withholding_single_year": {
+      "fail": "Tulumaksu kinnipidamine on valitud, kuid leping kestab {start} kuni {end}, ehk ühe kalendriaasta piires. Kinnipidamine puudutab ehitustöid, mis ulatuvad üle ühe kalendriaasta",
+      "suggestion": "Kontrollige raamatupidajaga, kas töö tõesti ulatub üle ühe aasta; kui ei, märkige tulumaksu kinnipidamine mitterakendatavaks"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Seni tagasi nõutud ettemakse on {recovered}, mis on rohkem kui makstud ettemakse {advance}",
+      "unknown": "Seni on ettemaksust tagasi nõutud {recovered}, kuid leping ei näita makstud ettemakset, seega tagasinõudmist ei saa selle vastu kontrollida",
+      "suggestion": "Vähendage selle sertifikaadi tagasinõudmist või märkige makstud ettemakse lepingu sertifikaadi seadetes"
+    },
+    "retention_matches_config": {
+      "fail": "Sertifikaat peab kinni {certificate} tagatisrahana ({percent}% selle alusest), kuid dokument, millel see põhineb, peab kinni {stored}",
+      "suggestion": "Arvutage dokument uuesti või parandage lepingu sertifikaadi seadetes tagatisraha määr või selle alus, et mõlemad näitaksid sama tagatisraha"
+    },
+    "net_payable_negative": {
+      "fail": "Makstav summa on {payable}: mahaarvamised on suuremad kui selle sertifikaadi summa",
+      "suggestion": "Kontrollige mahaarvamisi, eelkõige ettemakse tagasinõudmist, ja kandke see, mida praegu maha ei saa arvata, järgmisele sertifikaadile"
+    },
+    "taxes_stale": {
+      "fail": "Maksud arvutati enne, kui see sertifikaat muutus, seega need ei kuulu sellele enam",
+      "suggestion": "Arvutage maksud uuesti. Kui need on juba kinnitatud, avage need enne uuesti ja kinnitage pärast"
+    },
+    "taxes_confirmed": {
+      "fail": "Selle sertifikaadi maksunäitajaid ei ole kinnitatud",
+      "suggestion": "Kontrollige iga maksurida ja kinnitage maksud enne sertifitseerimist"
+    },
+    "lines_complete": {
+      "fail": "Real {line} ei ole veel summat. {reason}",
+      "suggestion": "Sisestage summa või märkige rida mitterakendatavaks ja selgitage põhjust"
+    },
+    "work_value_differs": {
+      "fail": "Kirje {line} on seni registreeritud summas {stated}, kuid selle kogus või protsent annab {computed}",
+      "suggestion": "Parandage dokumendis kogus või summa nii, et rea kaks veergu kattuksid"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "{percent} protsendi suurune tagatisraha on suurem kui {limit} protsenti, mida riigihangete seadus lubab igas vahemaksel",
+      "suggestion": "Vähendage lepingu tagatisraha seadusjärgse määrani"
+    },
+    "advance_above_cap": {
+      "fail": "Ettemakse tagatis katab {percent} protsenti lepingu väärtusest, mis on üle {limit} protsendi, mida riigihanked lubavad ilma rahandusministri loata",
+      "suggestion": "Vähendage ettemakset või registreerige lepingu tingimustes luba, mis saadi enne hankemenetlust"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Viivitustasu klauslil puudub maksimumsumma, samas kui riigihangete seadus piirab viivitustasu {limit} protsendiga lepingu väärtusest",
+      "suggestion": "Sisestage viivitustasu klauli maksimumsumma"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Viivitustasu klausel on piiratud {percent} protsendiga lepingu väärtusest, mis on üle {limit} protsendi, mida riigihangete seadus lubab",
+      "suggestion": "Vähendage klausli maksimumsumma seadusjärgse piirini"
+    },
+    "performance_security_missing": {
+      "fail": "Täitmise tagatist ei ole registreeritud, kuigi riigihanked nõuavad seda {limit} protsenti lepingu väärtusest",
+      "suggestion": "Registreerige lõplik garantii täitmisgarantiina või pangagarantiina"
+    },
+    "performance_security_below": {
+      "fail": "Täitmise tagatis katab {percent} protsenti lepingu väärtusest, mis on alla {limit} protsendi, mida riigihanked nõuavad",
+      "suggestion": "Registreerige täitmise tagatis kogu seadusjärgse protsendi ulatuses"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "{months} kuu või pikemad riigihanked tuleb seaduse järgi hinnaga korrigeerida, kuid leping ei nimeta oma muutuvate kirjete koefitsiente",
+        "suggestion": "Sisestage koefitsiendid, mille töövõtja esitas tehnilises ümbrikus"
+      },
+      "duplicate_item": {
+        "fail": "Muutuv kirje {item} on hinnakorrektsiooni koefitsientide seas kaks korda",
+        "suggestion": "Hoidke iga muutuva kirje kohta üks koefitsient"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Kirje {item} hinnakorrektsiooni koefitsient ei ole number",
+        "suggestion": "Sisestage koefitsient kümnendarvuna, näiteks 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Kirje {item} hinnakorrektsiooni koefitsient on null või väiksem, kuid seadus nõuab, et iga koefitsient oleks suurem kui null",
+        "suggestion": "Sisestage koefitsient, mis on suurem kui null, või eemaldage kirje"
+      },
+      "coefficient_negative": {
+        "fail": "Kirje {item} hinnakorrektsiooni koefitsient on negatiivne",
+        "suggestion": "Sisestage koefitsient, mis on null või suurem"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Hinnakorrektsiooni koefitsientide summa on {item}, kuid seadus nõuab, et nende summa jääks alla ühe",
+        "suggestion": "Vähendage koefitsiente nii, et hinnast jääks püsiosa"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Hinnakorrektsiooni koefitsientide summa on {item}, mis on rohkem kui üks",
+        "suggestion": "Vähendage koefitsiente nii, et nende summa oleks üks või vähem"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Üle {months} kuu kestvatel riigihangetel on hinnamuutuse klausel, kus tooraine on kulude oluline osa, kuid leping ei nimeta muutmise kaalusid",
+        "suggestion": "Sisestage muutmisvalemi kaalud eritingimustest või märkige, et hind on fikseeritud"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Hinnakorrektsiooni koefitsientide summa on {item}, kuid valem nõuab, et nende summa oleks täpselt üks",
+        "suggestion": "Parandage kaalud lepingu andmete järgi nii, et need annaksid kokku üks"
+      },
+      "unknown_regime": {
+        "fail": "Leping nimetab hinnakorrektsiooni korda {item}, mida platvorm ei tunne",
+        "suggestion": "Valige üks loetletud hinnakorrektsiooni kordadest"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Hinnakorrektsioonile mittealluv osa {item} ei ole nulli ja ühe vahel",
+        "suggestion": "Sisestage osa lepingu andmete järgi kümnendarvuna, näiteks 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Ettemakse on {percent} protsenti lepingu väärtusest, mis on alla {limit} protsendi miinimumi, mille riigihangete seadus seab sellele töövõtjale ja tellijale",
+      "suggestion": "Tõstke ettemakse miinimumini või registreerige null, kui töövõtja sellest loobus"
+    },
+    "advance_above_maximum": {
+      "fail": "Ettemakse on {percent} protsenti lepingu väärtusest, mis on üle {limit} protsendi, mille riigihangete seadus seab tavapäraseks maksimumiks",
+      "suggestion": "Kontrollige, kas eritingimused lubavad suuremat ettemakset, ja registreerige selle nõutav tagatis"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Viivitustasu klausel võtab {amount} päevas, kuid üldtingimused võtavad {expected} päevas, mis on üks {divisor}-ik lepingu väärtusest",
+      "suggestion": "Jätke üldtingimuste päevamäär või loetlege erinev määr eritingimuste erandite hulgas"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Viivitustasu klausel on piiratud {percent} protsendiga lepingu väärtusest, mis on üle üldtingimuste {limit} protsendi",
+      "suggestion": "Vähendage piirmäär üldtingimuste näitajani või loetlege see eritingimuste erandite hulgas"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "See {amount} suurune allhange jõuab avaliku tellija otsemakse künniseni {limit}, ja leping sellest loobub, mida seadus keelab",
+      "suggestion": "Registreerige, et avalik tellija maksab allhankijale otse"
+    },
+    "direct_payment_unstated": {
+      "fail": "See {amount} suurune allhange jõuab avaliku tellija otsemakse künniseni {limit}, kuid leping seda ei registreeri",
+      "suggestion": "Registreerige, kas allhankija on vastu võetud ja avaliku tellija poolt otse makstud"
+    },
+    "payment_guarantee_missing": {
+      "fail": "See allhange eraehitusel ei registreeri ei pangagarantiid ega makse delegeerimist, ilma milleta allhanke võib tühistada",
+      "suggestion": "Registreerige peatöövõtja pangagarantii või makse delegeerimine tellijale"
+    },
+    "private_retention_above_limit": {
+      "fail": "{percent} protsendi suurune tagatisraha on suurem kui {limit} protsenti, mida seadus lubab eraehitusel",
+      "suggestion": "Vähendage lepingu tagatisraha seadusjärgse piirini"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Leping {contract} nimetab käibemaksu režiimi {regime}, mida riigil {country} ei ole",
+      "suggestion": "Valige üks projekti riigi jaoks pakutavatest käibemaksu režiimidest või eemaldage valik"
+    },
+    "country_unknown": {
+      "fail": "Leping {contract} nimetab käibemaksu režiimi {regime}, kuid selle projekt ei nimeta riiki, seega režiimi ei saa kontrollida",
+      "suggestion": "Määrake projekti riik"
+    },
+    "contract_date_missing": {
+      "fail": "Käibemaksu režiim {regime} kehtib ainult enne {cutoff} allkirjastatud lepingutele, ja see leping ei registreeri ei allkirjastamise ega alguskuupäeva",
+      "suggestion": "Sisestage kuupäev, millal leping allkirjastati"
+    },
+    "contract_too_late": {
+      "fail": "Käibemaksu režiim {regime} kehtib ainult enne {cutoff} allkirjastatud lepingutele, ja see leping pärineb kuupäevast {contract_date}",
+      "suggestion": "Valige selle lepingu jaoks tavapärane käibemaksu režiim"
+    },
+    "evidence_missing": {
+      "fail": "Käibemaksu režiim {regime} nõuab {evidence}, kuid leping ei registreeri ühtegi",
+      "suggestion": "Registreerige dokumendi viide ja väljastamise kuupäev koos lepingu käibemaksu režiimiga"
+    },
+    "evidence_date_missing": {
+      "fail": "Käibemaksu režiimi {regime} jaoks registreeritud {evidence} väljastamise kuupäev puudub, seega ei saa näidata, et see on varasem kui {cutoff}",
+      "suggestion": "Sisestage kuupäev, millal dokument väljastati"
+    },
+    "evidence_too_late": {
+      "fail": "Käibemaksu režiimi {regime} jaoks registreeritud {evidence} väljastati {issued_on}, kuid režiim nõuab enne {cutoff} väljastatud dokumenti",
+      "suggestion": "Registreerige varasem dokument või valige tavapärane käibemaksu režiim"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Lepingu väärtus kasvas {original_value} pealt {current_value} peale ja leping ei nimeta lubatud suurendust, seega ei saa hinnata, kas käibemaksu režiim {regime} veel kehtib",
+      "suggestion": "Registreerige lepingus lubatud mahu suurendus"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Lepingu väärtus kasvas {original_value} pealt {current_value} peale, ületades lepingus lubatud {allowed_increase_pct} protsendi suurenduse, seega käibemaksu seisukohalt on see uus leping ja käibemaksu režiim {regime} enam ei kehti",
+      "suggestion": "Viige leping üle tavapärasele käibemaksu režiimile"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "konsultandi heaks kiidetud makse sertifikaat",
+      "einvoice": "e-arve või e-kviitung",
+      "main_contractor_certificate": "peatöövõtja tõend, et projekti käibemaks on tasutud"
+    },
+    "not_in_force": {
+      "before": "Arve {claim} on dateeritud {on}, kuid käibemaksu režiim {regime} kehtib alates {effective_from}; sel päeval kehtis: {instead}",
+      "after": "Arve {claim} on dateeritud {on}, kuid käibemaksu režiim {regime} lõppes {effective_to}; sel päeval kehtis: {instead}",
+      "suggestion": "Muutke lepingu käibemaksu režiim arve kuupäeval kehtivaks või parandage arve kuupäev"
+    }
+  }
+}

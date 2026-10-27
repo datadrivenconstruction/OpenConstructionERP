@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Wniosek {claim} nie ma daty końca okresu, więc nie można go uporządkować wśród wniosków kontraktu",
+      "suggestion": "Wpisz ostatni dzień okresu, którego dotyczy ten wniosek"
+    },
+    "period_order": {
+      "fail": "Wniosek {claim} zaczyna się {period_from}, a kończy {period_to}, więc jego okres kończy się przed rozpoczęciem",
+      "suggestion": "Popraw początek lub koniec okresu tak, aby początek był wcześniej"
+    },
+    "period_overlap": {
+      "fail": "Wniosek {claim} zaczyna się {period_from}, ale poprzedni wniosek {previous} trwa do {previous_to}, więc oba wnioski rozliczają te same dni",
+      "suggestion": "Rozpocznij ten wniosek dnia następującego po zakończeniu okresu poprzedniego wniosku"
+    },
+    "period_gap": {
+      "fail": "Wniosek {claim} zaczyna się {period_from}, ale poprzedni wniosek {previous} zakończył się {previous_to}, więc żaden wniosek nie rozlicza dni pomiędzy nimi (nierozliczone dni: {days})",
+      "suggestion": "Rozpocznij ten wniosek dnia następującego po zakończeniu okresu poprzedniego wniosku lub sprawdź, czy nie brakuje któregoś wniosku"
+    },
+    "period_unparsed": {
+      "fail": "Wniosek {claim} zapisuje {field} jako '{value}', czego nie można odczytać jako daty",
+      "suggestion": "Wpisz datę w formacie rok, miesiąc, dzień, na przykład 2026-03-31",
+      "fields": {
+        "period_start": "początek okresu",
+        "period_end": "koniec okresu",
+        "claim_date": "data wniosku"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Pozycja {line} jest rozliczona na {billed} narastająco, czyli więcej niż jej wartość planowana {scheduled}; ponownie uruchom Wypełnij z postępu albo zmniejsz kwotę tej pozycji w tym okresie",
+      "suggestion": "Wypełnij z postępu rozlicza każdą pozycję tylko w zakresie nowych prac względem wcześniejszych wniosków. Jeśli zakres pozycji rzeczywiście wzrósł, najpierw zarejestruj zmianę zlecenia zwiększającą jej wartość planowaną"
+    },
+    "percent_regressed": {
+      "fail": "Pozycja {line} jest ukończona w {percent}% narastająco, czyli w {requested}, mniej niż {previous}, które wcześniejsze wnioski już na niej rozliczyły, więc w tym okresie nic na niej nie jest rozliczane",
+      "suggestion": "Sprawdź procent ukończenia tej pozycji lub popraw wcześniejszy wniosek, który go zawyżył"
+    },
+    "errors": {
+      "submission_blocked": "Ten wniosek o płatność nie może zostać przesłany, dopóki nie zostaną rozwiązane: {findings}",
+      "rules_unavailable": "Reguły wniosków o płatność nie są załadowane w tej instalacji, więc tego wniosku nie można sprawdzić przed przesłaniem.",
+      "later_claim_already_issued": "Wniosek {claims} jest późniejszy niż ten i został już wystawiony. Powstał, gdy ten wniosek był w wersji roboczej, więc już uwzględnia tę pracę. Usuń tę wersję roboczą albo przesuń jej okres za ostatni wystawiony wniosek"
+    },
+    "totals_match_lines": {
+      "fail": "Wniosek {claim} żąda {gross}, ale pozycje, na których się opiera, sumują się do {lines_total}: wniosek nie został przeliczony po zmianie pozycji",
+      "suggestion": "Zapisz dowolną pozycję tego wniosku albo ponownie uruchom Wypełnij z postępu, a sumy zostaną zaktualizowane"
+    },
+    "totals_below_lines": {
+      "fail": "Wniosek {claim} rozlicza {gross} z zarejestrowanego kosztu, czyli mniej niż {lines_total}, do których sumują się jego własne pozycje: zestawienie nie może żądać więcej niż wniosek",
+      "suggestion": "We wniosku rozliczanym od kosztu pozycje są rozbiciem kwoty, a nie jej źródłem. Zmniejsz lub usuń pozycje, które ją zawyżają, albo wygeneruj wniosek ponownie z kosztu robót, aby oba były zgodne"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Wniosek {claim} zawiera {stored} jako wcześniej rozliczone na pozycji {line}, ale wcześniejsze wnioski rozliczają na niej teraz {now}",
+      "total_fail": "Wniosek {claim} zawiera {stored} jako wcześniej zatwierdzone, ale wcześniejsze wnioski zatwierdzają teraz {now}",
+      "suggestion": "Wygeneruj ten wniosek ponownie, aby odczytał to, co wcześniejsze wnioski rozliczają dziś"
+    },
+    "within_nte_cap": {
+      "fail": "Wniosek {claim} rozlicza {this} ponad już rozliczone {billed}, co przekracza limit maksymalnej wartości (NTE) wynoszący {cap}",
+      "suggestion": "Na tym wniosku rozlicz najwyżej do limitu, a resztę uzgodnij w zleceniu zmiany"
+    },
+    "retention_matches_policy": {
+      "fail": "Wniosek {claim} zatrzymuje {held} kaucji wykonawczej, ale jego polityka zatrzymań daje teraz {expected}: wcześniejszy wniosek, zwolnienie albo zmiana polityki nastąpiły po obliczeniu tego wniosku",
+      "suggestion": "Ponownie uruchom Wypełnij z postępu albo zapisz dowolną pozycję tego wniosku, a zatrzymanie zostanie przeliczone"
+    },
+    "retention_above_cap": {
+      "fail": "Wniosek {claim} zatrzymuje {held} kaucji wykonawczej, ponad limit {percent}% ustalony w polityce zatrzymań, czyli {cap} w tym kontrakcie",
+      "suggestion": "Przelicz wniosek albo, jeśli strony uzgodniły wyższą stawkę, podnieś limit w polityce zatrzymań kontraktu",
+      "state_cap_unread": "Wniosek {claim}: jego polityka zatrzymań nie ustala limitu, a {country} ogranicza zatrzymania ustawą stanową. Nie udało się ustalić stanu, ponieważ projekt nie ma kodu jednostki administracyjnej, więc ustawowy limit nie został sprawdzony",
+      "state_cap_suggestion": "Wpisz limit stanowy do polityki zatrzymań kontraktu jako górną granicę, a każdy wniosek w tym kontrakcie zostanie sprawdzony względem niego"
+    },
+    "retention_release_within_held": {
+      "fail": "Zwolnienia rozliczone do wniosku {claim} zwracają {released}, czyli więcej niż {accrued} zatrzymanej do tego czasu kaucji",
+      "suggestion": "Unieważnij zbyt duże zwolnienie albo rozlicz je w późniejszym wniosku, gdy zatrzymana będzie większa kwota"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Harmonogram wartości (SOV) sumuje się do {scheduled}, a suma kontraktowa na dzień dzisiejszy wynosi {contract_sum}: pozycje, na które rozliczany jest ten wniosek, pozostawiają {difference} kontraktu bez pozycji",
+      "suggestion": "Dodaj lub popraw pozycje harmonogramu wartości, aż ich suma zgodzi się z sumą kontraktową",
+      "suggestion_reconcile": "{count} zatwierdzonych zmian zleceń lub odstępstw zmieniło sumę kontraktową, zanim trafiły do harmonogramu wartości. Użyj Uzgodnij zmiany zleceń w kontrakcie, aby dodać pozycję dla każdej z nich"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "To zwolnienie wymaga dokumentu: {document}, a żaden nie jest załączony",
+      "suggestion": "Zarejestruj dokument w kontrakcie, załącz go do zwolnienia i zatwierdź je ponownie"
+    },
+    "within_available": {
+      "fail": "To zwolnienie zwraca {amount}, ale zatrzymana i nieprzydzielona do innego zwolnienia kaucja to tylko {available}",
+      "suggestion": "Unieważnij to zwolnienie i zaproponuj je ponownie, tak aby jego wielkość była ustalona według kaucji zatrzymanej obecnie"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "To zwolnienie jest wypłacane dopiero po upływie {days}-dniowego okresu zastawu ustawowego od zdarzenia ({reference}), a nie podano, kiedy ten okres się rozpoczął",
+      "suggestion_no_start": "Wpisz dzień rozpoczęcia okresu, na przykład datę publikacji świadectwa wykonania (odbioru) i zatwierdź zwolnienie ponownie",
+      "fail_early": "{days}-dniowy okres zastawu ustawowego, który rozpoczął się {started}, trwa do {ends} ({reference}), więc tego zwolnienia nie można jeszcze zatwierdzić",
+      "suggestion_early": "Zatwierdź zwolnienie po upływie okresu zastawu, po sprawdzeniu, że nie zgłoszono żadnego zastawu na kaucji gwarancyjnej"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "świadectwo wykonania (odbioru) robót",
+      "acceptance_protocol": "protokół odbioru",
+      "affidavit_payment_of_debts": "oświadczenie o uregulowaniu zobowiązań i roszczeń",
+      "affidavit_release_of_liens": "oświadczenie o zwolnieniu zastawów",
+      "consent_of_surety": "zgoda poręczyciela",
+      "final_lien_waiver": "końcowe zrzeczenie się zastawu",
+      "final_invoice": "faktura końcowa"
+    },
+    "errors": {
+      "approval_blocked": "To zwolnienie kaucji nie może zostać zatwierdzone, dopóki nie zostaną rozwiązane: {findings}",
+      "rules_unavailable": "Reguły zwolnień kaucji nie są załadowane w tej instalacji, więc tego zwolnienia nie można sprawdzić przed zatwierdzeniem."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Rozliczone roboty nieobjęte żadną pozycją harmonogramu wartości"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Zmiany zleceń są uzgadniane z harmonogramem wartości wyłącznie aktywnego kontraktu; ten kontrakt ma status: {status}",
+      "preview_stale": "Lista zmian zleceń do uzgodnienia zmieniła się od czasu jej otwarcia. Otwórz podgląd ponownie i potwierdź, co pokazuje teraz"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Ten kontrakt nie może zostać podpisany, dopóki nie zostaną rozwiązane: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "zakończenie",
+      "approval": "zatwierdzenie"
+    },
+    "total_within_contract": {
+      "fail": "Raty sumują się do {scheduled}, czyli więcej niż suma kontraktowa wynosząca {total}",
+      "suggestion": "Zmniejsz raty tak, aby ich suma nie przekraczała sumy kontraktowej"
+    },
+    "percent_sum": {
+      "fail": "Raty sumują się do {scheduled} sumy kontraktowej wynoszącej {total} ({percent}%), więc część wynagrodzenia nie ma raty",
+      "suggestion": "Dodaj ratę na pozostałą część sumy kontraktowej albo skoryguj kwoty"
+    },
+    "completion_trigger_linked": {
+      "fail": "Rata {milestone} staje się wymagalna z chwilą: {trigger}, ale nie jest powiązana z czynnością harmonogramu, więc jej termin nie przesunie się wraz z robotami",
+      "suggestion": "Powiąż ratę z kamieniem milowym harmonogramu, na który czeka"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Harmonogram pokazuje osiągnięcie kamienia milowego {milestone}, ale rata {instalment} nadal oczekuje, więc nie może zostać zafakturowana",
+      "suggestion": "Oznacz ratę jako osiągniętą albo sprawdź, dlaczego kontrakt nie jest aktywny"
+    },
+    "client_visible_requires_active": {
+      "fail": "Rata {milestone} jest pokazana inwestorowi, ale kontrakt ma status: {status}; inwestor widzi plan płatności wyłącznie aktywnego lub zakończonego kontraktu",
+      "suggestion": "Ukryj ratę przed inwestorem, dopóki kontrakt nie wejdzie w życie"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Zaliczka w wysokości {deposit} przekracza {ceiling}, które {reference} dopuszcza w {jurisdiction} (źródło: {source_url}, sprawdzono {checked_on}, bez przeglądu przez prawnika)",
+      "suggestion": "Zmniejsz zaliczkę albo potwierdź z radcą prawnym, że do tego kontraktu ma zastosowanie wyłączenie",
+      "below_threshold": {
+        "fail": "Suma kontraktowa jest równa lub niższa od kwoty, od której {reference} ogranicza zaliczki w {jurisdiction}, więc zaliczka nie została sprawdzona (źródło: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Kontrakt jest w walucie {currency}, ale {reference} określa swój limit w walucie {limit_currency}, więc zaliczka w {jurisdiction} nie została sprawdzona (źródło: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Jeśli ustawa ma zastosowanie do tego kontraktu, sprawdź zaliczkę względem niej ręcznie"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Roboty zatwierdzone narastająco wynoszą {cumulative}, czyli o {over} powyżej sumy kontraktowej {contract}",
+      "suggestion": "Najpierw zatwierdź zmianę zlecenia obejmującą dodatkowe roboty albo popraw ilości na tym świadectwie"
+    },
+    "previous_matches_last_certified": {
+      "fail": "To świadectwo zawiera {carried} jako sumę poprzednich świadectw, ale świadectwo {reference} zostało zatwierdzone na {certified}",
+      "work_fail": "Kolumna poprzednich wartości w zestawieniu robót sumuje się do {carried}, ale świadectwo {reference} zostało zatwierdzone z robotami narastająco na {certified}",
+      "suggestion": "Sprawdź, czy między dwoma świadectwami nie ma wniosku, którego żadne z nich nie pokazuje, a następnie wygeneruj to świadectwo ponownie"
+    },
+    "previous_unknown": {
+      "fail": "Suma poprzednich świadectw nie jest znana",
+      "not_certified": "Poprzednie świadectwo {reference} nie jest jeszcze zatwierdzone, więc jego suma nie jest ostateczna",
+      "suggestion": "Najpierw zatwierdź poprzednie świadectwo. Jeśli zostało zatwierdzone przed zapisywaniem świadectw, wpisz jego sumę w wierszu poprzednich świadectw"
+    },
+    "weights_sum": {
+      "fail": "Udziały pozycji sumują się do {total}%, a nie do 100%",
+      "suggestion": "Popraw wartości pozycji harmonogramu tak, aby ich udziały sumowały się do całego kontraktu"
+    },
+    "percent_regressed": {
+      "fail": "Pozycja {line} jest w tym okresie ujemna, więc cofa roboty już zatwierdzone",
+      "suggestion": "Zostaw, jeśli koryguje wcześniejsze zawyżenie pomiaru. W przeciwnym razie popraw ilość lub procent na tym świadectwie"
+    },
+    "income_withholding_single_year": {
+      "fail": "Wybrano zatrzymanie podatku dochodowego, ale kontrakt trwa od {start} do {end}, czyli w obrębie jednego roku kalendarzowego. Zatrzymanie dotyczy robot budowlanych obejmujących więcej niż jeden rok kalendarzowy",
+      "suggestion": "Sprawdź z księgowym, czy roboty rzeczywiście trwają ponad rok; jeśli nie, oznacz zatrzymanie podatku dochodowego jako nieobowiązujące"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Odzyskana dotąd zaliczka wynosi {recovered}, czyli więcej niż wypłacona zaliczka w wysokości {advance}",
+      "unknown": "Odzyskano dotąd {recovered} zaliczki, ale kontrakt nie podaje wypłaconej zaliczki, więc odzyskania nie można z nią porównać",
+      "suggestion": "Zmniejsz odzyskanie na tym świadectwie albo podaj wypłaconą zaliczkę w ustawieniach świadectw kontraktu"
+    },
+    "retention_matches_config": {
+      "fail": "Świadectwo zatrzymuje {certificate} kaucji ({percent}% jej podstawy), ale dokument, na którym się opiera, zatrzymuje {stored}",
+      "suggestion": "Przelicz dokument albo popraw stopę zatrzymania lub jej podstawę w ustawieniach świadectw kontraktu, aby oba pokazywały tę samą kaucję"
+    },
+    "net_payable_negative": {
+      "fail": "Kwota do zapłaty wynosi {payable}: potrącenia są większe niż kwota tego świadectwa",
+      "suggestion": "Sprawdź potrącenia, zwłaszcza odzyskanie zaliczki, a to, czego nie da się potrącić teraz, przenieś na kolejne świadectwo"
+    },
+    "taxes_stale": {
+      "fail": "Podatki zostały obliczone przed zmianą tego świadectwa, więc już do niego nie pasują",
+      "suggestion": "Przelicz podatki. Jeśli zostały już potwierdzone, najpierw otwórz je ponownie, a po przeliczeniu potwierdź ponownie"
+    },
+    "taxes_confirmed": {
+      "fail": "Kwoty podatków na tym świadectwie nie zostały potwierdzone",
+      "suggestion": "Sprawdź każdą pozycję podatku i potwierdź podatki przed zatwierdzeniem świadectwa"
+    },
+    "lines_complete": {
+      "fail": "Pozycja {line} nie ma jeszcze kwoty. {reason}",
+      "suggestion": "Wpisz kwotę albo oznacz pozycję jako nieobowiązującą i podaj powód"
+    },
+    "work_value_differs": {
+      "fail": "Pozycja {line} jest zapisana na {stated} narastająco, ale jej ilość lub procent daje {computed}",
+      "suggestion": "Popraw ilość lub kwotę w dokumencie tak, aby obie kolumny wiersza się zgadzały"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Kaucja w wysokości {percent} procent jest wyższa niż {limit} procent, na jakie prawo o robotach publicznych zezwala przy każdej płatności pośredniej",
+      "suggestion": "Obniż kaucję kontraktu do stawki ustawowej"
+    },
+    "advance_above_cap": {
+      "fail": "Gwarancja zaliczki obejmuje {percent} procent wartości kontraktu, czyli powyżej {limit} procent, na jakie roboty publiczne pozwalają bez zgody ministra finansów",
+      "suggestion": "Zmniejsz zaliczkę albo zapisz w warunkach kontraktu zgodę uzyskaną przed przetargiem"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Klauzula kar za opóźnienie nie ma kwoty maksymalnej, a prawo o robotach publicznych ogranicza kary za opóźnienie do {limit} procent wartości kontraktu",
+      "suggestion": "Wpisz kwotę maksymalną klauzuli kar za opóźnienie"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Klauzula kar za opóźnienie jest ograniczona do {percent} procent wartości kontraktu, czyli powyżej {limit} procent dopuszczalnych przez prawo o robotach publicznych",
+      "suggestion": "Obniż kwotę maksymalną klauzuli do limitu ustawowego"
+    },
+    "performance_security_missing": {
+      "fail": "Nie zapisano zabezpieczenia należytego wykonania, a roboty publiczne wymagają go w wysokości {limit} procent wartości kontraktu",
+      "suggestion": "Zapisz gwarancję końcową jako gwarancję należytego wykonania albo gwarancję bankową"
+    },
+    "performance_security_below": {
+      "fail": "Zabezpieczenie należytego wykonania obejmuje {percent} procent wartości kontraktu, czyli mniej niż {limit} procent wymagane przy robotach publicznych",
+      "suggestion": "Zapisz zabezpieczenie należytego wykonania w pełnej ustawowej wysokości"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Roboty publiczne trwające {months} miesięcy lub dłużej muszą być waloryzowane z mocy prawa, a kontrakt nie podaje współczynników dla pozycji zmiennych",
+        "suggestion": "Wpisz współczynniki, które wykonawca podał w kopercie technicznej"
+      },
+      "duplicate_item": {
+        "fail": "Pozycja zmienna {item} jest wymieniona dwukrotnie wśród współczynników waloryzacji",
+        "suggestion": "Zostaw jeden współczynnik dla każdej pozycji zmiennej"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Współczynnik waloryzacji dla {item} nie jest liczbą",
+        "suggestion": "Wpisz współczynnik jako liczbę dziesiętną, na przykład 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Współczynnik waloryzacji dla {item} wynosi zero lub mniej, podczas gdy prawo wymaga, aby każdy współczynnik był większy od zera",
+        "suggestion": "Wpisz współczynnik większy od zera albo usuń pozycję"
+      },
+      "coefficient_negative": {
+        "fail": "Współczynnik waloryzacji dla {item} jest ujemny",
+        "suggestion": "Wpisz współczynnik równy zero lub większy"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Współczynniki waloryzacji sumują się do {item}, a prawo wymaga, aby ich suma pozostawała poniżej jedności",
+        "suggestion": "Obniż współczynniki tak, aby pozostała stała część ceny"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Współczynniki waloryzacji sumują się do {item}, czyli więcej niż jeden",
+        "suggestion": "Obniż współczynniki tak, aby ich suma wynosiła jeden lub mniej"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Roboty publiczne dłuższe niż {months} miesięcy zawierają klauzulę rewizji cen tam, gdzie materiały stanowią znaczną część kosztów, a kontrakt nie podaje wag rewizji",
+        "suggestion": "Wpisz wagi formuły rewizji z warunków szczególnych albo zapisz, że cena jest stała"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Współczynniki waloryzacji sumują się do {item}, a wzór wymaga, aby sumowały się dokładnie do jedności",
+        "suggestion": "Popraw wagi na podstawie danych kontraktowych tak, aby sumowały się do jedności"
+      },
+      "unknown_regime": {
+        "fail": "Kontrakt wskazuje system waloryzacji {item}, którego platforma nie zna",
+        "suggestion": "Wybierz jeden z wymienionych systemów waloryzacji"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Część nieobjęta waloryzacją, {item}, nie mieści się między zerem a jeden",
+        "suggestion": "Wpisz tę część jako liczbę dziesiętną z danych kontraktowych, na przykład 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Zaliczka wynosi {percent} procent wartości kontraktu, czyli poniżej {limit} procent minimum, jakie prawo o robotach publicznych ustala dla tego wykonawcy i zamawiającego",
+      "suggestion": "Podnieś zaliczkę do minimum albo zapisz zero, jeśli wykonawca się jej zrzekł"
+    },
+    "advance_above_maximum": {
+      "fail": "Zaliczka wynosi {percent} procent wartości kontraktu, czyli powyżej {limit} procent, które prawo o robotach publicznych ustala jako zwykły maksymalny poziom",
+      "suggestion": "Sprawdź, czy warunki szczególne dopuszczają wyższą zaliczkę, i zapisz gwarancję, której wymaga"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Klauzula kary za opóźnienie nalicza {amount} za dzień, podczas gdy warunki ogólne przewidują {expected} za dzień, czyli jedną {divisor} wartości kontraktu",
+      "suggestion": "Zachowaj dzienną stawkę z warunków ogólnych albo wymień inną stawkę wśród odstępstw warunków szczególnych"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Klauzula kary za opóźnienie jest ograniczona do {percent} procent wartości kontraktu, czyli powyżej {limit} procent z warunków ogólnych",
+      "suggestion": "Obniż limit do wartości z warunków ogólnych albo wymień go wśród odstępstw warunków szczególnych"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Ta umowa podwykonawcza na {amount} osiąga próg {limit} bezpośredniej zapłaty przez zamawiającego publicznego, a kontrakt go wyłącza, co jest zabronione przez prawo",
+      "suggestion": "Zapisz, że zamawiający publiczny płaci podwykonawcy bezpośrednio"
+    },
+    "direct_payment_unstated": {
+      "fail": "Ta umowa podwykonawcza na {amount} osiąga próg {limit} bezpośredniej zapłaty przez zamawiającego publicznego, a kontrakt tego nie zapisuje",
+      "suggestion": "Zapisz, czy podwykonawca jest akceptowany i płacony bezpośrednio przez zamawiającego publicznego"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Ta umowa podwykonawcza przy robotach prywatnych nie zawiera ani gwarancji bankowej, ani przelewu płatności na właściciela, a bez nich umowa podwykonawcza może zostać unieważniona",
+      "suggestion": "Zapisz gwarancję bankową generalnego wykonawcy albo przelew płatności na właściciela"
+    },
+    "private_retention_above_limit": {
+      "fail": "Kaucja w wysokości {percent} procent jest wyższa niż {limit} procent, na jakie prawo pozwala przy robotach prywatnych",
+      "suggestion": "Obniż kaucję kontraktu do limitu ustawowego"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Kontrakt {contract} wskazuje system VAT {regime}, którego {country} nie posiada",
+      "suggestion": "Wybierz jeden z systemów VAT oferowanych dla kraju projektu albo usuń ten wybór"
+    },
+    "country_unknown": {
+      "fail": "Kontrakt {contract} wskazuje system VAT {regime}, ale projekt nie podaje kraju, więc system nie może zostać sprawdzony",
+      "suggestion": "Ustaw kraj projektu"
+    },
+    "contract_date_missing": {
+      "fail": "System VAT {regime} dotyczy wyłącznie kontraktów podpisanych przed {cutoff}, a ten kontrakt nie zawiera ani daty podpisania, ani daty rozpoczęcia",
+      "suggestion": "Wpisz datę podpisania kontraktu"
+    },
+    "contract_too_late": {
+      "fail": "System VAT {regime} dotyczy wyłącznie kontraktów podpisanych przed {cutoff}, a ten kontrakt pochodzi z {contract_date}",
+      "suggestion": "Wybierz dla tego kontraktu standardowy system VAT"
+    },
+    "evidence_missing": {
+      "fail": "System VAT {regime} wymaga: {evidence}, a kontrakt nie zawiera żadnego",
+      "suggestion": "Zapisz numer odniesienia i datę wystawienia dokumentu wraz z systemem VAT kontraktu"
+    },
+    "evidence_date_missing": {
+      "fail": "Dokument {evidence} zapisany dla systemu VAT {regime} nie ma daty wystawienia, więc nie można wykazać, że poprzedza on {cutoff}",
+      "suggestion": "Wpisz datę wystawienia dokumentu"
+    },
+    "evidence_too_late": {
+      "fail": "Dokument {evidence} zapisany dla systemu VAT {regime} został wystawiony {issued_on}, a system wymaga dokumentu wystawionego przed {cutoff}",
+      "suggestion": "Zapisz wcześniejszy dokument albo wybierz standardowy system VAT"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Wartość kontraktu wzrosła z {original_value} do {current_value}, a kontrakt nie podaje dopuszczalnego wzrostu, więc nie można ocenić, czy system VAT {regime} nadal obowiązuje",
+      "suggestion": "Zapisz wzrost zakresu, który dopuszcza kontrakt"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Wartość kontraktu wzrosła z {original_value} do {current_value}, czyli ponad dopuszczalny w kontrakcie wzrost o {allowed_increase_pct} procent, więc dla VAT jest to nowy kontrakt i system VAT {regime} nie ma już zastosowania",
+      "suggestion": "Przenieś kontrakt na standardowy system VAT"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "zatwierdzone przez inżyniera świadectwo płatności",
+      "einvoice": "e-faktura lub e-paragon",
+      "main_contractor_certificate": "świadectwo generalnego wykonawcy potwierdzające zapłatę VAT w projekcie"
+    },
+    "not_in_force": {
+      "before": "Wniosek {claim} jest datowany na {on}, a system VAT {regime} obowiązuje dopiero od {effective_from}; obowiązujący tego dnia: {instead}",
+      "after": "Wniosek {claim} jest datowany na {on}, a system VAT {regime} wygasł {effective_to}; obowiązujący tego dnia: {instead}",
+      "suggestion": "Zmień system VAT kontraktu na taki, który obowiązuje w dniu wniosku, albo popraw datę wniosku"
+    }
+  }
+}

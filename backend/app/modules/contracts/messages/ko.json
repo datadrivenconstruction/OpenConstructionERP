@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "확인"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "기성청구 {claim}에 기간 종료일이 없어 계약의 청구 순서에 배치할 수 없습니다",
+      "suggestion": "이 청구가 다루는 기간의 마지막 날짜를 입력하십시오"
+    },
+    "period_order": {
+      "fail": "기성청구 {claim}은(는) {period_from}에 시작하여 {period_to}에 끝나므로, 기간이 시작되기 전에 끝납니다",
+      "suggestion": "기간 시작일 또는 종료일을 수정하여 시작일이 앞서도록 하십시오"
+    },
+    "period_overlap": {
+      "fail": "기성청구 {claim}은(는) {period_from}에 시작하지만, 이전 청구 {previous}은(는) {previous_to}까지이므로 두 청구가 같은 날짜를 청구하게 됩니다",
+      "suggestion": "이전 청구 기간이 끝난 다음 날부터 이 청구를 시작하십시오"
+    },
+    "period_gap": {
+      "fail": "기성청구 {claim}은(는) {period_from}에 시작하지만, 이전 청구 {previous}은(는) {previous_to}에 끝났으므로 그 사이의 날짜를 청구하는 청구가 없습니다(미청구 일수: {days})",
+      "suggestion": "이전 청구 기간이 끝난 다음 날부터 이 청구를 시작하거나, 누락된 청구가 없는지 확인하십시오"
+    },
+    "period_unparsed": {
+      "fail": "기성청구 {claim}의 {field}이(가) '{value}'(으)로 기록되어 있어 날짜로 읽을 수 없습니다",
+      "suggestion": "날짜를 연, 월, 일 형식으로 입력하십시오(예: 2026-03-31)",
+      "fields": {
+        "period_start": "기간 시작일",
+        "period_end": "기간 종료일",
+        "claim_date": "신청일"
+      }
+    },
+    "line_overbilled": {
+      "fail": "내역 {line}의 누적 청구액은 {billed}로, 예정 금액 {scheduled}을(를) 초과합니다. 진행률에서 다시 생성을 실행하거나 이번 기간의 해당 내역 금액을 낮추십시오",
+      "suggestion": "진행률에서 생성은 이전 청구 이후 새로 발생한 금액만 내역별로 청구합니다. 실제로 작업 범위가 늘어난 경우에는 먼저 예정 금액을 늘리는 설계변경을 등록하십시오"
+    },
+    "percent_regressed": {
+      "fail": "내역 {line}의 현재 누적 공정률은 {percent}%로 {requested}이며, 이전 청구에서 이미 청구된 {previous}보다 낮으므로 이번 기간에는 이 내역으로 청구할 수 없습니다",
+      "suggestion": "이 내역의 공정률을 확인하거나, 공정률을 과다하게 기록한 이전 청구를 수정하십시오"
+    },
+    "errors": {
+      "submission_blocked": "다음 항목이 해결되기 전에는 이 기성청구를 제출할 수 없습니다: {findings}",
+      "rules_unavailable": "이 배포 환경에는 기성청구 규칙이 로드되어 있지 않아, 제출 전에 이 청구를 검사할 수 없습니다.",
+      "later_claim_already_issued": "청구 {claims}은(는) 이 청구 이후의 청구이며 이미 발행되었습니다. 이 청구가 초안 상태일 때 작성되어 같은 작업을 이미 반영하고 있습니다. 이 초안을 삭제하거나, 기간을 발행된 마지막 청구 이후로 옮기십시오"
+    },
+    "totals_match_lines": {
+      "fail": "청구 {claim}은(는) {gross}을(를) 청구하지만, 그 내역들의 합계는 {lines_total}입니다. 내역이 변경된 후 청구 금액이 다시 계산되지 않았습니다",
+      "suggestion": "이 청구의 내역 중 하나를 저장하거나 진행률에서 다시 생성을 실행하면 합계가 갱신됩니다"
+    },
+    "totals_below_lines": {
+      "fail": "청구 {claim}은(는) 기록된 원가에서 {gross}을(를) 청구하지만, 그 내역들의 합계 {lines_total}보다 적습니다. 내역 명세가 청구 금액을 초과할 수 없습니다",
+      "suggestion": "원가 기준으로 청구하는 경우 내역은 금액의 근거가 아니라 금액의 명세입니다. 금액을 과다하게 나타내는 내역을 낮추거나 삭제하거나, 공사 원가에서 청구를 다시 생성하여 두 금액을 일치시키십시오"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "청구 {claim}은(는) 내역 {line}의 기청구액으로 {stored}을(를) 보유하고 있으나, 이전 청구들은 현재 이 내역에 {now}을(를) 청구하고 있습니다",
+      "total_fail": "청구 {claim}은(는) 기승인액으로 {stored}을(를) 보유하고 있으나, 이전 청구들은 현재 {now}을(를) 승인하고 있습니다",
+      "suggestion": "이 청구를 다시 생성하여 그 이전 청구들이 오늘 청구하는 금액을 반영하도록 하십시오"
+    },
+    "within_nte_cap": {
+      "fail": "청구 {claim}은(는) 이미 청구된 {billed}에 {this}을(를) 더 청구하여 최대 한도(NTE) {cap}을(를) 초과합니다",
+      "suggestion": "이 청구에서는 한도까지만 청구하고, 나머지는 설계변경으로 합의하십시오"
+    },
+    "retention_matches_policy": {
+      "fail": "청구 {claim}은(는) 유보금으로 {held}을(를) 보유하고 있으나, 현재 유보금 정책에 따르면 {expected}이어야 합니다. 이전 청구, 유보금 해제 또는 정책 변경이 이 청구의 산정 이후에 발생했습니다",
+      "suggestion": "진행률에서 다시 생성을 실행하거나 이 청구의 내역을 하나 저장하면 유보금이 다시 산정됩니다"
+    },
+    "retention_above_cap": {
+      "fail": "청구 {claim}은(는) 유보금으로 {held}을(를) 보유하고 있으나, 유보금 정책이 정한 상한 {percent}%를 초과하며, 이 계약에서 상한은 {cap}입니다",
+      "suggestion": "청구를 다시 산정하거나, 당사자들이 더 높은 비율에 합의한 경우 계약의 유보금 정책에서 상한을 올리십시오",
+      "state_cap_unread": "청구 {claim}: 유보금 정책에 상한이 설정되어 있지 않으며, {country}은(는) 주법으로 유보금을 제한합니다. 프로젝트에 지역 코드가 없어 주를 확인할 수 없으므로 법정 상한은 검사되지 않았습니다",
+      "state_cap_suggestion": "주의 상한을 계약의 유보금 정책에 상한으로 입력하면, 이 계약의 모든 청구가 그 상한에 따라 검사됩니다"
+    },
+    "retention_release_within_held": {
+      "fail": "청구 {claim}까지 청구된 해제금은 {released}을(를) 반환하지만, 그때까지 보유된 유보금은 {accrued}뿐입니다",
+      "suggestion": "지나치게 큰 해제를 무효로 하거나, 유보금이 더 쌓인 후의 청구에서 청구하십시오"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "공사비 내역서의 합계는 {scheduled}이지만, 현재 계약금액은 {contract_sum}입니다. 이 청구가 대상으로 하는 내역들에는 계약금액 중 {difference}에 해당하는 내역이 없습니다",
+      "suggestion": "합계가 계약금액과 일치할 때까지 공사비 내역서 항목을 추가하거나 수정하십시오",
+      "suggestion_reconcile": "승인된 설계변경 또는 변경 항목 {count}건이 공사비 내역서에 반영되기 전에 계약금액을 변경했습니다. 계약의 '설계변경 대사'를 사용하여 각 건에 대한 내역을 추가하십시오"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "이 해제에는 {document}이(가) 필요하지만 첨부되어 있지 않습니다",
+      "suggestion": "계약에 해당 서류를 등록하고 해제에 첨부한 후 다시 승인하십시오"
+    },
+    "within_available": {
+      "fail": "이 해제는 {amount}을(를) 반환하지만, 아직 보유 중이며 다른 해제에 배정되지 않은 유보금은 {available}뿐입니다",
+      "suggestion": "이 해제를 무효로 하고, 현재 보유 중인 유보금을 기준으로 다시 제안하십시오"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "이 해제는 해당 사건 이후 {days}일의 유치권 기간({reference})이 경과한 후에만 지급되지만, 이 기간이 언제 시작되었는지 기록되어 있지 않습니다",
+      "suggestion_no_start": "기간이 시작된 날짜(예: 실질 준공 증명서의 발급일)를 입력하고 해제를 다시 승인하십시오",
+      "fail_early": "{started}에 시작된 {days}일의 유치권 기간은 {ends}까지이며({reference}), 따라서 이 해제는 아직 승인할 수 없습니다",
+      "suggestion_early": "유치권 기간이 경과한 후에 해제를 승인하십시오. 보류금에 대해 유치권이 보존되지 않았는지 먼저 확인하십시오"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "실질 준공 증명서",
+      "acceptance_protocol": "검수 기록",
+      "affidavit_payment_of_debts": "채무 및 청구 변제 확인 진술서",
+      "affidavit_release_of_liens": "유치권 해제 진술서",
+      "consent_of_surety": "보증인 동의서",
+      "final_lien_waiver": "최종 유치권 포기서",
+      "final_invoice": "최종 세금계산서"
+    },
+    "errors": {
+      "approval_blocked": "다음 항목이 해결되기 전에는 이 유보금 해제를 승인할 수 없습니다: {findings}",
+      "rules_unavailable": "이 배포 환경에는 유보금 해제 규칙이 로드되어 있지 않아, 승인 전에 이 해제를 검사할 수 없습니다."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "공사비 내역서의 어떤 항목에도 포함되지 않은 청구된 작업"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "설계변경은 유효한 계약의 공사비 내역서에만 대사할 수 있습니다. 이 계약의 상태는 {status}입니다",
+      "preview_stale": "대사할 설계변경 목록이 연 이후 변경되었습니다. 미리보기를 다시 열어 현재 표시된 내용을 확인하십시오"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "다음 항목이 해결되기 전에는 이 계약에 서명할 수 없습니다: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "완료",
+      "approval": "승인"
+    },
+    "total_within_contract": {
+      "fail": "분할 지급액의 합계는 {scheduled}로, 계약금액 {total}을(를) 초과합니다",
+      "suggestion": "분할 지급액을 줄여 합계가 계약금액을 넘지 않도록 하십시오"
+    },
+    "percent_sum": {
+      "fail": "분할 지급액의 합계는 계약금액 {total}의 {scheduled}({percent}%)이므로, 공사대금의 일부에 분할 지급이 설정되어 있지 않습니다",
+      "suggestion": "계약금액의 나머지에 대한 분할 지급을 추가하거나 금액을 조정하십시오"
+    },
+    "completion_trigger_linked": {
+      "fail": "분할 지급 {milestone}은(는) {trigger} 시점에 지급 기한이 도래하지만, 공정 일정의 작업과 연결되어 있지 않아 작업 진행에 따라 기한이 바뀌지 않습니다",
+      "suggestion": "분할 지급을 그 완료를 기다리는 공정 일정의 마일스톤과 연결하십시오"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "공정 일정에는 마일스톤 {milestone}이(가) 달성된 것으로 나타나지만, 분할 지급 {instalment}이(가) 아직 대기 상태이므로 청구할 수 없습니다",
+      "suggestion": "분할 지급을 달성으로 표시하거나, 계약이 유효하지 않은 이유를 확인하십시오"
+    },
+    "client_visible_requires_active": {
+      "fail": "분할 지급 {milestone}이(가) 발주자에게 표시되어 있으나, 계약 상태는 {status}입니다. 발주자는 유효하거나 완료된 계약의 지급 계획만 볼 수 있습니다",
+      "suggestion": "계약이 효력을 발생할 때까지 이 분할 지급을 발주자에게 숨기십시오"
+    },
+    "consumer_deposit_cap": {
+      "fail": "선금 {deposit}은(는) {jurisdiction}에서 {reference}이(가) 허용하는 상한 {ceiling}을(를) 초과합니다(출처: {source_url}, 확인일: {checked_on}, 법률 자문 검토 전)",
+      "suggestion": "선금을 줄이거나, 이 계약에 적용되는 면제가 있는지 법률 고문과 확인하십시오",
+      "below_threshold": {
+        "fail": "계약금액이 {jurisdiction}에서 {reference}이(가) 선금을 제한하는 금액 이하이므로 선금은 검사되지 않았습니다(출처: {source_url})"
+      },
+      "other_currency": {
+        "fail": "계약 통화는 {currency}이지만, {reference}은(는) 상한을 {limit_currency}로 정하고 있어 {jurisdiction}의 선금은 검사되지 않았습니다(출처: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "이 법령이 이 계약에 적용된다면 선금을 직접 확인하십시오"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "지금까지 승인된 기성은 {cumulative}로, 계약금액 {contract}보다 {over} 많습니다",
+      "suggestion": "추가 작업을 다루는 설계변경을 먼저 승인받거나, 이 기성증명서의 수량을 수정하십시오"
+    },
+    "previous_matches_last_certified": {
+      "fail": "이 기성증명서는 이전 기성증명서들의 합계로 {carried}을(를) 보유하고 있으나, 기성증명서 {reference}은(는) {certified}로 승인되었습니다",
+      "work_fail": "공사 목록의 전회 열 합계는 {carried}이지만, 기성증명서 {reference}은(는) 누적 공사 기성 {certified}로 승인되었습니다",
+      "suggestion": "두 기성증명서 중 어디에도 표시되지 않은, 그 사이의 청구가 있는지 확인한 후 이 증명서를 다시 생성하십시오"
+    },
+    "previous_unknown": {
+      "fail": "이전 기성증명서들의 합계를 알 수 없습니다",
+      "not_certified": "이전 기성증명서 {reference}은(는) 아직 승인되지 않아 그 합계가 확정되지 않았습니다",
+      "suggestion": "먼저 이전 기성증명서를 승인하십시오. 기성증명서가 저장되기 전에 승인된 경우에는 전회 기성증명서 항목에 그 합계를 입력하십시오"
+    },
+    "weights_sum": {
+      "fail": "항목들의 비중 합계는 {total}%로, 100%가 아닙니다",
+      "suggestion": "공정 일정 항목의 금액을 수정하여 각 비중의 합이 전체 계약이 되도록 하십시오"
+    },
+    "percent_regressed": {
+      "fail": "항목 {line}이(가) 이번 기간에 마이너스이므로, 이미 승인된 작업을 되돌리고 있습니다",
+      "suggestion": "이전의 과다 측정을 바로잡는 것이라면 그대로 두십시오. 그렇지 않다면 이 기성증명서의 수량 또는 공정률을 수정하십시오"
+    },
+    "income_withholding_single_year": {
+      "fail": "소득세 원천징수가 선택되어 있으나, 계약 기간은 {start}부터 {end}까지로 한 달력 연도 안에 있습니다. 원천징수는 두 해 이상에 걸친 건설 공사를 대상으로 합니다",
+      "suggestion": "공사가 실제로 두 해 이상에 걸치는지 회계사와 확인하십시오. 그렇지 않다면 소득세 원천징수를 해당 없음으로 표시하십시오"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "지금까지 회수된 선급금은 {recovered}로, 지급된 선급금 {advance}을(를) 초과합니다",
+      "unknown": "지금까지 선급금 {recovered}이(가) 회수되었으나, 계약에 지급된 선급금이 명시되어 있지 않아 회수액을 대조할 수 없습니다",
+      "suggestion": "이 기성증명서의 회수액을 줄이거나, 계약의 기성증명서 설정에 지급된 선급금을 기재하십시오"
+    },
+    "retention_matches_config": {
+      "fail": "기성증명서는 유보금으로 {certificate}을(를) 보유하고 있으나({percent}%, 기준액 대비), 그 바탕이 되는 문서에는 {stored}이(가) 보유되어 있습니다",
+      "suggestion": "문서를 다시 산정하거나, 계약의 기성증명서 설정에서 유보율 또는 기준액을 수정하여 두 곳의 유보금이 같도록 하십시오"
+    },
+    "net_payable_negative": {
+      "fail": "지급액은 {payable}입니다. 공제액이 이 기성증명서의 금액보다 큽니다",
+      "suggestion": "공제액, 특히 선급금 회수액을 확인하고, 지금 공제할 수 없는 금액은 다음 기성증명서로 이월하십시오"
+    },
+    "taxes_stale": {
+      "fail": "세금은 이 기성증명서가 변경되기 전에 계산되었으므로 더 이상 이 증명서에 맞지 않습니다",
+      "suggestion": "세금을 다시 계산하십시오. 이미 확정된 경우에는 먼저 다시 열고, 이후 다시 확정하십시오"
+    },
+    "taxes_confirmed": {
+      "fail": "이 기성증명서의 세금 금액이 확정되지 않았습니다",
+      "suggestion": "승인 전에 각 세금 행을 확인하고 세금을 확정하십시오"
+    },
+    "lines_complete": {
+      "fail": "내역 {line}에 아직 금액이 없습니다. {reason}",
+      "suggestion": "금액을 입력하거나, 내역을 해당 없음으로 표시하고 그 이유를 기재하십시오"
+    },
+    "work_value_differs": {
+      "fail": "항목 {line}은(는) 현재 누적 {stated}으로 기록되어 있으나, 그 수량 또는 공정률로는 {computed}이(가) 됩니다",
+      "suggestion": "문서의 수량 또는 금액을 수정하여 해당 행의 두 열이 일치하도록 하십시오"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "유보율 {percent}%는 공공공사법이 기성 지급마다 허용하는 {limit}%를 초과합니다",
+      "suggestion": "계약의 유보율을 법정 비율까지 낮추십시오"
+    },
+    "advance_above_cap": {
+      "fail": "선급금 보증은 계약금액의 {percent}%를 담보하고 있으며, 재정경제부 장관의 승인 없이 공공공사에서 허용되는 {limit}%를 초과합니다",
+      "suggestion": "선급금을 줄이거나, 입찰 전에 받은 승인을 계약 조건에 기록하십시오"
+    },
+    "delay_damages_uncapped": {
+      "fail": "지체상금 조항에 최대 금액이 없으나, 공공공사법은 지체상금을 계약금액의 {limit}%로 제한합니다",
+      "suggestion": "지체상금 조항의 최대 금액을 입력하십시오"
+    },
+    "delay_damages_above_cap": {
+      "fail": "지체상금 조항은 계약금액의 {percent}%로 상한이 정해져 있으나, 공공공사법이 허용하는 {limit}%를 초과합니다",
+      "suggestion": "조항의 최대 금액을 법정 상한까지 낮추십시오"
+    },
+    "performance_security_missing": {
+      "fail": "이행 보증이 기록되어 있지 않으나, 공공공사에서는 계약금액의 {limit}%에 해당하는 이행 보증이 필요합니다",
+      "suggestion": "최종 보증을 이행 보증 또는 은행 보증으로 기록하십시오"
+    },
+    "performance_security_below": {
+      "fail": "이행 보증은 계약금액의 {percent}%를 담보하고 있으나, 공공공사에서 요구하는 {limit}%에 미치지 못합니다",
+      "suggestion": "법정 비율 전액에 대한 이행 보증을 기록하십시오"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "{months}개월 이상의 공공공사는 법에 따라 물가변동 조정이 필요하나, 계약에 변동 항목의 계수가 정해져 있지 않습니다",
+        "suggestion": "기술 봉투에서 시공자가 제시한 계수를 입력하십시오"
+      },
+      "duplicate_item": {
+        "fail": "변동 항목 {item}이(가) 물가변동 계수 목록에 두 번 나타납니다",
+        "suggestion": "변동 항목마다 계수를 하나만 남기십시오"
+      },
+      "coefficient_not_a_number": {
+        "fail": "{item}의 물가변동 계수가 숫자가 아닙니다",
+        "suggestion": "계수를 소수로 입력하십시오(예: 0.15)"
+      },
+      "coefficient_not_positive": {
+        "fail": "{item}의 물가변동 계수가 0 이하이나, 법은 각 계수가 0보다 크기를 요구합니다",
+        "suggestion": "0보다 큰 계수를 입력하거나 이 항목을 삭제하십시오"
+      },
+      "coefficient_negative": {
+        "fail": "{item}의 물가변동 계수가 음수입니다",
+        "suggestion": "0 이상의 계수를 입력하십시오"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "물가변동 계수의 합계는 {item}이지만, 법은 그 합이 1 미만이어야 한다고 요구합니다",
+        "suggestion": "공사대금의 고정 부분이 남도록 계수를 낮추십시오"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "물가변동 계수의 합계는 {item}으로, 1을 초과합니다",
+        "suggestion": "계수의 합이 1 이하가 되도록 낮추십시오"
+      },
+      "no_coefficients_advisory": {
+        "fail": "{months}개월을 초과하는 공공공사에는 원자재가 원가의 큰 부분을 차지할 때 가격 조정 조항이 필요하나, 계약에 조정 가중치가 정해져 있지 않습니다",
+        "suggestion": "특수 조건의 조정 공식 가중치를 입력하거나, 공사대금이 확정되어 있음을 기록하십시오"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "물가변동 계수의 합계는 {item}이지만, 산식은 합이 정확히 1이 되도록 요구합니다",
+        "suggestion": "계약 데이터의 가중치를 수정하여 합이 1이 되도록 하십시오"
+      },
+      "unknown_regime": {
+        "fail": "계약이 지정한 물가변동 방식 {item}을(를) 이 플랫폼이 인식하지 못합니다",
+        "suggestion": "표시된 물가변동 방식 중 하나를 선택하십시오"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "물가변동 대상에서 제외되는 부분 {item}이(가) 0과 1 사이에 있지 않습니다",
+        "suggestion": "계약 데이터에 따라 그 부분을 소수로 입력하십시오(예: 0.15)"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "선급금은 계약금액의 {percent}%로, 이 시공자와 발주자에 대해 공공공사법이 정한 최소 {limit}%에 미치지 못합니다",
+      "suggestion": "선급금을 최소 비율까지 올리거나, 시공자가 포기한 경우 0을 기록하십시오"
+    },
+    "advance_above_maximum": {
+      "fail": "선급금은 계약금액의 {percent}%로, 공공공사법이 통상적인 최대치로 정한 {limit}%를 초과합니다",
+      "suggestion": "특수 조건이 더 높은 선급금을 허용하는지 확인하고, 그에 따른 보증을 기록하십시오"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "지체 위약금 조항은 하루 {amount}을(를) 부과하나, 일반 조건은 하루 {expected}, 즉 계약금액의 {divisor}분의 1을 부과합니다",
+      "suggestion": "일반 조건의 일일 요율을 유지하거나, 다른 요율을 특수 조건의 특례 목록에 기재하십시오"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "지체 위약금 조항은 계약금액의 {percent}%로 상한이 정해져 있으나, 일반 조건의 {limit}%를 초과합니다",
+      "suggestion": "상한을 일반 조건의 수치까지 낮추거나, 특수 조건의 특례 목록에 기재하십시오"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "이 하도급 계약({amount})은 공공 발주자의 직접 지급 기준인 {limit}에 해당하는데, 계약은 이를 포기하고 있으며 법으로 금지되어 있습니다",
+      "suggestion": "공공 발주자가 하도급업체에 직접 지급한다는 내용을 기록하십시오"
+    },
+    "direct_payment_unstated": {
+      "fail": "이 하도급 계약({amount})은 공공 발주자의 직접 지급 기준인 {limit}에 해당하는데, 계약에 이에 대한 기재가 없습니다",
+      "suggestion": "하도급업체가 공공 발주자에 의해 승인되어 직접 지급받는지 기록하십시오"
+    },
+    "payment_guarantee_missing": {
+      "fail": "민간공사의 이 하도급 계약에는 은행 보증도, 지급 위임도 기록되어 있지 않으며, 이것이 없으면 하도급 계약이 무효가 될 수 있습니다",
+      "suggestion": "원도급자의 은행 보증 또는 발주자에 대한 지급 위임을 기록하십시오"
+    },
+    "private_retention_above_limit": {
+      "fail": "유보율 {percent}%는 법이 민간공사에 허용하는 {limit}%를 초과합니다",
+      "suggestion": "계약의 유보율을 법정 상한까지 낮추십시오"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "계약 {contract}은(는) 부가가치세 제도 {regime}을(를) 지정하고 있으나, {country}에는 그러한 제도가 없습니다",
+      "suggestion": "프로젝트 국가에서 제공되는 부가가치세 제도 중 하나를 선택하거나, 이 선택을 삭제하십시오"
+    },
+    "country_unknown": {
+      "fail": "계약 {contract}은(는) 부가가치세 제도 {regime}을(를) 지정하고 있으나, 프로젝트에 국가가 지정되어 있지 않아 제도를 검사할 수 없습니다",
+      "suggestion": "프로젝트의 국가를 설정하십시오"
+    },
+    "contract_date_missing": {
+      "fail": "부가가치세 제도 {regime}은(는) {cutoff} 이전에 체결된 계약에만 해당하나, 이 계약에는 서명일도 시작일도 기록되어 있지 않습니다",
+      "suggestion": "계약을 체결한 날짜를 입력하십시오"
+    },
+    "contract_too_late": {
+      "fail": "부가가치세 제도 {regime}은(는) {cutoff} 이전에 체결된 계약에만 해당하나, 이 계약은 {contract_date}의 것입니다",
+      "suggestion": "이 계약에는 표준 부가가치세 제도를 선택하십시오"
+    },
+    "evidence_missing": {
+      "fail": "부가가치세 제도 {regime}에는 {evidence}이(가) 필요하나, 계약에는 아무것도 기록되어 있지 않습니다",
+      "suggestion": "계약의 부가가치세 제도와 함께 서류의 참조 번호와 발행일을 기록하십시오"
+    },
+    "evidence_date_missing": {
+      "fail": "부가가치세 제도 {regime}에 기록된 {evidence}에 발행일이 없어 {cutoff} 이전의 것임을 입증할 수 없습니다",
+      "suggestion": "서류가 발행된 날짜를 입력하십시오"
+    },
+    "evidence_too_late": {
+      "fail": "부가가치세 제도 {regime}에 기록된 {evidence}은(는) {issued_on}에 발행되었으나, 이 제도에는 {cutoff} 이전에 발행된 서류가 필요합니다",
+      "suggestion": "더 이른 서류를 기록하거나 표준 부가가치세 제도를 선택하십시오"
+    },
+    "scope_increase_unjudged": {
+      "fail": "계약금액이 {original_value}에서 {current_value}로 증가했으나, 계약에 허용된 증가 범위가 기재되어 있지 않아 부가가치세 제도 {regime}이 여전히 적용되는지 판단할 수 없습니다",
+      "suggestion": "계약이 허용하는 범위 내의 증액을 기록하십시오"
+    },
+    "scope_increase_new_contract": {
+      "fail": "계약금액이 {original_value}에서 {current_value}로 증가하여, 계약이 허용하는 {allowed_increase_pct}% 증가를 넘었습니다. 따라서 부가가치세 측면에서는 새로운 계약이 되며, 부가가치세 제도 {regime}은(는) 더 이상 적용되지 않습니다",
+      "suggestion": "계약을 표준 부가가치세 제도로 전환하십시오"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "컨설턴트가 승인한 지급 증명서",
+      "einvoice": "전자세금계산서 또는 전자영수증",
+      "main_contractor_certificate": "프로젝트에 대해 부가가치세가 납부되었음을 증명하는 원도급자의 증명서"
+    },
+    "not_in_force": {
+      "before": "청구 {claim}의 날짜는 {on}이지만, 부가가치세 제도 {regime}은(는) {effective_from}부터만 적용됩니다. 그 날짜에 유효한 제도: {instead}",
+      "after": "청구 {claim}의 날짜는 {on}이지만, 부가가치세 제도 {regime}은(는) {effective_to}에 종료되었습니다. 그 날짜에 유효한 제도: {instead}",
+      "suggestion": "계약의 부가가치세 제도를 청구일에 유효한 제도로 변경하거나, 청구일을 수정하십시오"
+    }
+  }
+}

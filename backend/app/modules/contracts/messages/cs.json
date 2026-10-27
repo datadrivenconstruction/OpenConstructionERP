@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Žádost o platbu {claim} nemá datum konce období, takže ji nelze zařadit do pořadí žádostí o platbu ke smlouvě",
+      "suggestion": "Zadejte poslední den období, které tato žádost pokrývá"
+    },
+    "period_order": {
+      "fail": "Žádost o platbu {claim} začíná {period_from} a končí {period_to}, takže období skončí dříve, než začne",
+      "suggestion": "Opravte začátek nebo konec období tak, aby začátek byl první"
+    },
+    "period_overlap": {
+      "fail": "Žádost o platbu {claim} začíná {period_from}, ale předchozí žádost {previous} běží do {previous_to}, takže obě žádosti fakturují stejné dny",
+      "suggestion": "Začněte tuto žádost den po skončení období předchozí žádosti"
+    },
+    "period_gap": {
+      "fail": "Žádost o platbu {claim} začíná {period_from}, ale předchozí žádost {previous} skončila {previous_to}, takže dny mezi nimi nefakturuje žádná žádost (nefakturované dny: {days})",
+      "suggestion": "Začněte tuto žádost den po skončení období předchozí žádosti, nebo zkontrolujte, zda nechybí některá žádost"
+    },
+    "period_unparsed": {
+      "fail": "Žádost o platbu {claim} eviduje {field} jako '{value}', což nelze přečíst jako datum",
+      "suggestion": "Zadejte datum jako rok, měsíc a den, například 2026-03-31",
+      "fields": {
+        "period_start": "začátek období",
+        "period_end": "konec období",
+        "claim_date": "datum žádosti"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Položka {line} je fakturována v částce {billed} k dnešnímu dni, což je více než její plánovaná hodnota {scheduled}; spusťte znovu Naplnit z postupu nebo snižte částku této položky za toto období",
+      "suggestion": "Naplnit z postupu fakturuje každou položku jen za to, co je nové oproti předchozím žádostem. Pokud se rozsah položky skutečně zvětšil, nejprve zaevidujte změnový příkaz, který zvyšuje její plánovanou hodnotu"
+    },
+    "percent_regressed": {
+      "fail": "Položka {line} je k dnešnímu dni hotova na {percent} %, což je {requested}, méně než {previous}, které na ní již fakturovaly předchozí žádosti, takže se v tomto období na ní nefakturuje nic",
+      "suggestion": "Zkontrolujte procento dokončení u této položky, nebo opravte předchozí žádost, která je nadhodnotila"
+    },
+    "errors": {
+      "submission_blocked": "Tuto žádost o platbu nelze odeslat, dokud nebudou vyřešeny tyto body: {findings}",
+      "rules_unavailable": "Pravidla pro žádosti o platbu nejsou v této instalaci načtena, takže tuto žádost nelze před odesláním zkontrolovat.",
+      "later_claim_already_issued": "Žádost {claims} následuje po této a již byla vydána. Vznikla, když tato žádost byla konceptem, takže se již vztahuje na stejné práce. Smažte tento koncept, nebo posuňte jeho období za poslední vydanou žádost"
+    },
+    "totals_match_lines": {
+      "fail": "Žádost {claim} požaduje {gross}, ale položky, ze kterých se skládá, dávají dohromady {lines_total}: žádost nebyla přepočítána po změně jejích položek",
+      "suggestion": "Uložte kteroukoli položku této žádosti, nebo spusťte znovu Naplnit z postupu a její součty se aktualizují"
+    },
+    "totals_below_lines": {
+      "fail": "Žádost {claim} fakturuje {gross} z evidovaných nákladů, což je méně než {lines_total}, které dávají dohromady její vlastní položky: rozpis nemůže požadovat více, než žádá sama žádost",
+      "suggestion": "U žádosti fakturované z nákladů jsou položky rozpisem peněz, nikoli jejich zdrojem. Snižte nebo odstraňte položky, které je nadhodnocují, nebo žádost znovu vygenerujte z nákladů na práce, aby obě hodnoty souhlasily"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Žádost {claim} uvádí {stored} jako dříve fakturované u položky {line}, ale předchozí žádosti na ni nyní fakturují {now}",
+      "total_fail": "Žádost {claim} uvádí {stored} jako dříve schválené, ale předchozí žádosti nyní schvalují {now}",
+      "suggestion": "Vygenerujte tuto žádost znovu, aby se načetly částky, které předchozí žádosti dnes fakturují"
+    },
+    "within_nte_cap": {
+      "fail": "Žádost {claim} fakturuje {this} navíc k již fakturovaným {billed}, což překračuje strop nepřesáhnutelné částky {cap}",
+      "suggestion": "Fakturujte na této žádosti jen do stropu a zbytek sjednejte změnovým příkazem"
+    },
+    "retention_matches_policy": {
+      "fail": "Žádost {claim} zadržuje {held} jako záruku, ale její zásady zadržného nyní dávají {expected}: předchozí žádost, uvolnění nebo změna zásad proběhly poté, co byla tato žádost vypočtena",
+      "suggestion": "Spusťte znovu Naplnit z postupu, nebo uložte kteroukoli položku této žádosti, a zadržné se přepočítá"
+    },
+    "retention_above_cap": {
+      "fail": "Žádost {claim} zadržuje {held} jako zadržné, což je nad stropem {percent} %, který stanoví zásady zadržného, tedy {cap} u této smlouvy",
+      "suggestion": "Vypočtěte žádost znovu, nebo zvyšte strop v zásadách zadržného smlouvy, pokud strany dohodly vyšší",
+      "state_cap_unread": "Žádost {claim}: zásady zadržného nestanoví žádný strop, a {country} omezuje zadržné zákonem daného státu. Stát nebylo možné určit, protože projekt nemá kód podjednotky, takže zákonný strop nebyl zkontrolován",
+      "state_cap_suggestion": "Zapište státní limit do zásad zadržného smlouvy jako strop a každá žádost k této smlouvě bude proti němu kontrolována"
+    },
+    "retention_release_within_held": {
+      "fail": "Uvolnění fakturovaná až do žádosti {claim} vracejí {released}, což je více než {accrued} zadržného nahromaděného do té doby",
+      "suggestion": "Zrušte uvolnění, které je příliš velké, nebo je zafakturujte v pozdější žádosti, až bude zadrženo více zadržného"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Soupis hodnot dává dohromady {scheduled}, ale celková cena smlouvy k dnešnímu dni je {contract_sum}: položky, proti kterým se tato žádost fakturuje, nechávají {difference} smlouvy bez položky",
+      "suggestion": "Přidejte nebo opravte položky soupisu hodnot, dokud se jejich součet nerovná ceně smlouvy",
+      "suggestion_reconcile": "{count} schválených změnových příkazů nebo variací posunulo cenu smlouvy dříve, než se promítly do soupisu hodnot. Pro každou z nich přidejte položku pomocí funkce Sladit změnové příkazy u smlouvy"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Toto uvolnění vyžaduje {document} a žádný není připojen",
+      "suggestion": "Zaregistrujte dokument u smlouvy, připojte jej k uvolnění a uvolnění znovu schvalte"
+    },
+    "within_available": {
+      "fail": "Toto uvolnění vrací {amount}, ale z zadržného je ještě zadrženo jen {available} a není vyhrazeno pro jiné uvolnění",
+      "suggestion": "Zrušte toto uvolnění a navrhněte jej znovu, aby se jeho velikost odvíjela od zadržného, které je nyní zadrženo"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Toto uvolnění se vyplácí až po uplynutí {days}denní lhůty pro zástavní právo po události ({reference}), ale není uvedeno, kdy tato lhůta začala",
+      "suggestion_no_start": "Zadejte den, kdy lhůta začala, například datum zveřejnění osvědčení o podstatném dokončení, a uvolnění znovu schvalte",
+      "fail_early": "{days}denní lhůta pro zástavní právo, která začala {started}, běží do {ends} ({reference}), takže toto uvolnění zatím nelze schválit",
+      "suggestion_early": "Schvalte uvolnění, až lhůta pro zástavní právo uplyne, a předtím ověřte, že vůči zádržnému nebylo uplatněno žádné zástavní právo"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "osvědčení o podstatném dokončení",
+      "acceptance_protocol": "záznam o převzetí",
+      "affidavit_payment_of_debts": "čestné prohlášení o uhrazení dluhů a pohledávek",
+      "affidavit_release_of_liens": "čestné prohlášení o zproštění zástavních práv",
+      "consent_of_surety": "souhlas ručitele",
+      "final_lien_waiver": "závěrečné vzdání se zástavního práva",
+      "final_invoice": "konečná faktura"
+    },
+    "errors": {
+      "approval_blocked": "Toto uvolnění zadržného nelze schválit, dokud nebudou vyřešeny tyto body: {findings}",
+      "rules_unavailable": "Pravidla pro uvolnění zadržného nejsou v této instalaci načtena, takže toto uvolnění nelze před schválením zkontrolovat."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Fakturované práce, které nepokrývá žádná položka soupisu hodnot"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Změnové příkazy lze sladit se soupisem hodnot pouze u aktivní smlouvy; tato smlouva je ve stavu {status}",
+      "preview_stale": "Seznam změnových příkazů ke sladění se od vašeho otevření změnil. Otevřete náhled znovu a potvrďte, co nyní zobrazuje"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Tuto smlouvu nelze podepsat, dokud nebudou vyřešeny tyto body: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "dokončení",
+      "approval": "schválení"
+    },
+    "total_within_contract": {
+      "fail": "Splátky dávají dohromady {scheduled}, což je více než cena smlouvy {total}",
+      "suggestion": "Snižte splátky tak, aby jejich součet nepřesáhl cenu smlouvy"
+    },
+    "percent_sum": {
+      "fail": "Splátky dávají dohromady {scheduled} z ceny smlouvy {total} ({percent} %), takže část ceny nemá žádnou splátku",
+      "suggestion": "Přidejte splátku na zbytek ceny smlouvy, nebo upravte částky"
+    },
+    "completion_trigger_linked": {
+      "fail": "Splátka {milestone} je splatná při {trigger}, ale není navázána na činnost harmonogramu, takže se její datum nebude posouvat s prací",
+      "suggestion": "Navažte splátku na milník harmonogramu, na který čeká"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Harmonogram ukazuje, že milník {milestone} je splněn, ale splátka {instalment} je stále čekající, takže ji nelze uplatnit",
+      "suggestion": "Označte splátku jako dosaženou, nebo zkontrolujte, proč smlouva není aktivní"
+    },
+    "client_visible_requires_active": {
+      "fail": "Splátka {milestone} je zobrazena klientovi, ale smlouva je ve stavu {status}; klient vidí plán pouze u aktivní nebo dokončené smlouvy",
+      "suggestion": "Skryjte splátku před klientem, dokud smlouva nenabude účinnosti"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Záloha ve výši {deposit} je vyšší než {ceiling}, které {reference} v {jurisdiction} povoluje (zdroj: {source_url}, ověřeno {checked_on}, neprošlo kontrolou advokáta)",
+      "suggestion": "Snižte zálohu, nebo si s právníkem potvrďte, že se na tuto smlouvu vztahuje výjimka",
+      "below_threshold": {
+        "fail": "Cena smlouvy je rovna nebo nižší než částka, od které {reference} v {jurisdiction} omezuje zálohy, takže záloha nebyla zkontrolována (zdroj: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Smlouva je v {currency}, ale {reference} stanoví svůj limit v {limit_currency}, takže záloha v {jurisdiction} nebyla zkontrolována (zdroj: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Pokud se zákon na tuto smlouvu vztahuje, zkontrolujte zálohu proti němu ručně"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Práce osvědčené k dnešnímu dni činí {cumulative}, což je o {over} nad cenou smlouvy {contract}",
+      "suggestion": "Nechte nejprve schválit změnový příkaz, který pokrývá navíc provedené práce, nebo opravte množství na tomto osvědčení"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Toto osvědčení uvádí {carried} jako součet předchozích osvědčení, ale osvědčení {reference} bylo osvědčeno na {certified}",
+      "work_fail": "Sloupec předchozích hodnot v seznamu prací dává dohromady {carried}, ale osvědčení {reference} bylo osvědčeno s {certified} práce k dnešnímu dni",
+      "suggestion": "Zkontrolujte, zda mezi oběma osvědčeními není žádost, kterou ani jedno neuvádí, a poté toto osvědčení vygenerujte znovu"
+    },
+    "previous_unknown": {
+      "fail": "Součet předchozích osvědčení není znám",
+      "not_certified": "Předchozí osvědčení {reference} ještě není osvědčeno, takže jeho součet není konečný",
+      "suggestion": "Nejprve osvědčte předchozí osvědčení. Pokud bylo osvědčeno dříve, než se osvědčení začala ukládat, zadejte jeho součet na řádek předchozích osvědčení"
+    },
+    "weights_sum": {
+      "fail": "Váhy položek dávají dohromady {total} %, nikoli 100 %",
+      "suggestion": "Opravte hodnoty řádků harmonogramu tak, aby jejich podíly tvořily celou smlouvu"
+    },
+    "percent_regressed": {
+      "fail": "Položka {line} je v tomto období záporná, takže odebírá práci, která již byla osvědčena",
+      "suggestion": "Ponechte ji, pokud opravuje dřívější nadměrné měření. Jinak opravte množství nebo procento na tomto osvědčení"
+    },
+    "income_withholding_single_year": {
+      "fail": "Je zvolena srážka z příjmu, ale smlouva běží od {start} do {end}, tedy v rámci jednoho kalendářního roku. Srážka se týká stavebních prací přesahujících více kalendářních roků",
+      "suggestion": "Ověřte u svého účetního, zda práce skutečně přesahuje více let; pokud ne, označte srážku z příjmu jako nepoužitelnou"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Zúčtovaná záloha k dnešnímu dni činí {recovered}, což je více než vyplacená záloha {advance}",
+      "unknown": "K dnešnímu dni bylo zúčtováno {recovered} zálohy, ale smlouva neuvádí vyplacenou zálohu, takže zúčtování nelze proti ní zkontrolovat",
+      "suggestion": "Snižte zúčtování na tomto osvědčení, nebo uveďte vyplacenou zálohu v nastavení osvědčení ve smlouvě"
+    },
+    "retention_matches_config": {
+      "fail": "Osvědčení zadržuje {certificate} jako zadržné ({percent} % z jeho základu), ale dokument, na kterém stojí, zadržuje {stored}",
+      "suggestion": "Vypočtěte dokument znovu, nebo opravte sazbu zadržného nebo jeho základ v nastavení osvědčení ve smlouvě, aby obě hodnoty ukazovaly stejné zadržné"
+    },
+    "net_payable_negative": {
+      "fail": "Splatná částka je {payable}: srážky jsou větší než částka tohoto osvědčení",
+      "suggestion": "Zkontrolujte srážky, zejména zúčtování zálohy, a to, co nelze nyní odečíst, přeneste do dalšího osvědčení"
+    },
+    "taxes_stale": {
+      "fail": "Daně byly vypočteny předtím, než se toto osvědčení změnilo, takže k němu již nepatří",
+      "suggestion": "Přepočítejte daně. Pokud již byly potvrzeny, nejprve je znovu otevřete a potom je znovu potvrďte"
+    },
+    "taxes_confirmed": {
+      "fail": "Daňové údaje tohoto osvědčení nebyly potvrzeny",
+      "suggestion": "Zkontrolujte každý daňový řádek a před osvědčením daně potvrďte"
+    },
+    "lines_complete": {
+      "fail": "Položka {line} zatím nemá údaj. {reason}",
+      "suggestion": "Zadejte částku, nebo označte položku jako nepoužitelnou a uveďte proč"
+    },
+    "work_value_differs": {
+      "fail": "Položka {line} je k dnešnímu dni evidována na {stated}, ale její množství nebo procento dává {computed}",
+      "suggestion": "Opravte množství nebo částku v dokumentu tak, aby se oba sloupce řádku shodovaly"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Zadržné ve výši {percent} % je vyšší než {limit} %, které zákon o veřejných zakázkách povoluje u každé průběžné platby",
+      "suggestion": "Snižte zadržné ve smlouvě na zákonnou sazbu"
+    },
+    "advance_above_cap": {
+      "fail": "Záruka za zálohovou platbu kryje {percent} % hodnoty smlouvy, což je nad {limit} %, které veřejné zakázky povolují bez souhlasu ministra financí",
+      "suggestion": "Snižte zálohovou platbu, nebo do podmínek smlouvy zapište souhlas získaný před vypsáním zakázky"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Ujednání o smluvní pokutě za prodlení nemá maximální částku, zatímco zákon o veřejných zakázkách omezuje smluvní pokuty za prodlení na {limit} % hodnoty smlouvy",
+      "suggestion": "Zadejte maximální částku ujednání o smluvní pokutě za prodlení"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Ujednání o smluvní pokutě za prodlení je omezeno na {percent} % hodnoty smlouvy, což je nad {limit} %, které zákon o veřejných zakázkách povoluje",
+      "suggestion": "Snižte maximální částku ujednání na zákonný strop"
+    },
+    "performance_security_missing": {
+      "fail": "Není zaevidováno žádné zajištění plnění, přitom veřejné zakázky vyžadují {limit} % hodnoty smlouvy",
+      "suggestion": "Zaevidujte závěrečnou záruku jako záruku za provedení díla nebo bankovní záruku"
+    },
+    "performance_security_below": {
+      "fail": "Zajištění plnění kryje {percent} % hodnoty smlouvy, což je méně, než veřejné zakázky vyžadují ({limit} %)",
+      "suggestion": "Zaevidujte zajištění plnění v plné zákonné výši"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Veřejné zakázky v délce {months} měsíců nebo více musí být ze zákona cenově upraveny, ale smlouva neuvádí koeficienty pro své proměnné položky",
+        "suggestion": "Zadejte koeficienty, které zhotovitel uvedl v technické obálce"
+      },
+      "duplicate_item": {
+        "fail": "Proměnná položka {item} je mezi koeficienty cenové úpravy uvedena dvakrát",
+        "suggestion": "Ponechte jeden koeficient na každou proměnnou položku"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Koeficient cenové úpravy položky {item} není číslo",
+        "suggestion": "Zadejte koeficient jako desetinné číslo, například 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Koeficient cenové úpravy položky {item} je nula nebo méně, zatímco zákon vyžaduje, aby každý koeficient byl větší než nula",
+        "suggestion": "Zadejte koeficient větší než nula, nebo položku odstraňte"
+      },
+      "coefficient_negative": {
+        "fail": "Koeficient cenové úpravy položky {item} je záporný",
+        "suggestion": "Zadejte koeficient nula nebo vyšší"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Koeficienty cenové úpravy dávají dohromady {item}, zatímco zákon vyžaduje, aby jejich součet zůstal pod jedničkou",
+        "suggestion": "Snižte koeficienty tak, aby zůstala pevná část ceny"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Koeficienty cenové úpravy dávají dohromady {item}, což je více než jedna",
+        "suggestion": "Snižte koeficienty tak, aby jejich součet byl jedna nebo méně"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Veřejné zakázky delší než {months} měsíců mají doložku o revizi ceny, kde jsou suroviny významnou částí nákladů, ale smlouva neuvádí žádné váhy revize",
+        "suggestion": "Zadejte váhy revizního vzorce ze zvláštních podmínek, nebo zaznamenejte, že cena je pevná"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Koeficienty cenové úpravy dávají dohromady {item}, zatímco vzorec vyžaduje, aby byly přesně jedna",
+        "suggestion": "Opravte váhy podle údajů ze smlouvy tak, aby dávaly dohromady jedna"
+      },
+      "unknown_regime": {
+        "fail": "Smlouva uvádí režim cenové úpravy {item}, který platforma nezná",
+        "suggestion": "Zvolte jeden z uvedených režimů cenové úpravy"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Podíl, na který se cenová úprava nevztahuje, {item}, není mezi nulou a jedničkou",
+        "suggestion": "Zadejte podíl jako desetinné číslo podle údajů ze smlouvy, například 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Záloha činí {percent} % hodnoty smlouvy, což je pod {limit} % minimem, které zákon o veřejných zakázkách stanoví pro tohoto zhotovitele a objednatele",
+      "suggestion": "Zvyšte zálohu na minimum, nebo zapište nulu, pokud se zhotovitel jejího čerpání vzdal"
+    },
+    "advance_above_maximum": {
+      "fail": "Záloha činí {percent} % hodnoty smlouvy, což je nad {limit} %, které zákon o veřejných zakázkách stanoví jako obvyklé maximum",
+      "suggestion": "Zkontrolujte, zda zvláštní podmínky vyšší zálohu povolují, a zaevidujte záruku, kterou vyžaduje"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Ujednání o smluvní pokutě za prodlení účtuje {amount} za den, zatímco všeobecné podmínky účtují {expected} za den, tedy jednu {divisor}tinu hodnoty smlouvy",
+      "suggestion": "Ponechte denní sazbu podle všeobecných podmínek, nebo uveďte odlišnou sazbu mezi odchylkami ve zvláštních podmínkách"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Ujednání o smluvní pokutě za prodlení je omezeno na {percent} % hodnoty smlouvy, což je nad {limit} % podle všeobecných podmínek",
+      "suggestion": "Snižte strop na hodnotu z všeobecných podmínek, nebo ho uveďte mezi odchylkami ve zvláštních podmínkách"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Tento subdodavatelský vztah ve výši {amount} dosahuje prahu {limit} pro přímou platbu veřejným objednatelem, a smlouva se od ní vzdává, což zákon zakazuje",
+      "suggestion": "Zaznamenejte, že veřejný objednatel platí subdodavateli přímo"
+    },
+    "direct_payment_unstated": {
+      "fail": "Tento subdodavatelský vztah ve výši {amount} dosahuje prahu {limit} pro přímou platbu veřejným objednatelem, ale smlouva to neuvádí",
+      "suggestion": "Zaznamenejte, zda je subdodavatel přijat a placen přímo veřejným objednatelem"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Tento subdodavatelský vztah u soukromých prací neuvádí ani bankovní záruku, ani postoupení platby, bez nichž může být subdodavatelský vztah neplatný",
+      "suggestion": "Zaznamenejte bankovní záruku hlavního dodavatele nebo postoupení platby vlastníkem"
+    },
+    "private_retention_above_limit": {
+      "fail": "Zadržné ve výši {percent} % je vyšší než {limit} %, které zákon u soukromých prací povoluje",
+      "suggestion": "Snižte zadržné ve smlouvě na zákonný strop"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Smlouva {contract} uvádí režim DPH {regime}, který {country} nemá",
+      "suggestion": "Zvolte jeden z režimů DPH nabízených pro zemi projektu, nebo volbu odstraňte"
+    },
+    "country_unknown": {
+      "fail": "Smlouva {contract} uvádí režim DPH {regime}, ale její projekt neuvádí zemi, takže režim nelze zkontrolovat",
+      "suggestion": "Nastavte zemi projektu"
+    },
+    "contract_date_missing": {
+      "fail": "Režim DPH {regime} platí jen pro smlouvy podepsané před {cutoff}, a tato smlouva neuvádí ani datum podpisu, ani datum zahájení",
+      "suggestion": "Zadejte datum, kdy byla smlouva podepsána"
+    },
+    "contract_too_late": {
+      "fail": "Režim DPH {regime} platí jen pro smlouvy podepsané před {cutoff}, a tato smlouva pochází z {contract_date}",
+      "suggestion": "Zvolte pro tuto smlouvu standardní režim DPH"
+    },
+    "evidence_missing": {
+      "fail": "Režim DPH {regime} vyžaduje {evidence}, a smlouva nemá žádný záznam",
+      "suggestion": "K režimu DPH smlouvy zaznamenejte označení dokladu a datum jeho vystavení"
+    },
+    "evidence_date_missing": {
+      "fail": "{evidence} zaznamenaný pro režim DPH {regime} nemá datum vystavení, takže nelze ukázat, že předchází {cutoff}",
+      "suggestion": "Zadejte datum, kdy byl doklad vystaven"
+    },
+    "evidence_too_late": {
+      "fail": "{evidence} zaznamenaný pro režim DPH {regime} byl vystaven {issued_on}, zatímco režim vyžaduje doklad vystavený před {cutoff}",
+      "suggestion": "Zaznamenejte dřívější doklad, nebo zvolte standardní režim DPH"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Hodnota smlouvy vzrostla z {original_value} na {current_value} a smlouva neuvádí žádné povolené navýšení, takže nelze posoudit, zda režim DPH {regime} stále platí",
+      "suggestion": "Zaznamenejte navýšení rozsahu, které smlouva připouští"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Hodnota smlouvy vzrostla z {original_value} na {current_value}, což překračuje {allowed_increase_pct} % navýšení, které smlouva připouští, takže pro účely DPH jde o novou smlouvu a režim DPH {regime} již neplatí",
+      "suggestion": "Přeřaďte smlouvu na standardní režim DPH"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "platební osvědčení schválené konzultantem",
+      "einvoice": "elektronickou fakturu nebo elektronickou účtenku",
+      "main_contractor_certificate": "osvědčení hlavního dodavatele, že DPH z projektu byla zaplacena"
+    },
+    "not_in_force": {
+      "before": "Žádost {claim} je datována {on}, ale režim DPH {regime} platí jen od {effective_from}; v ten den platilo: {instead}",
+      "after": "Žádost {claim} je datována {on}, ale režim DPH {regime} skončil {effective_to}; v ten den platilo: {instead}",
+      "suggestion": "Změňte režim DPH smlouvy na ten, který platil k datu žádosti, nebo opravte datum žádosti"
+    }
+  }
+}

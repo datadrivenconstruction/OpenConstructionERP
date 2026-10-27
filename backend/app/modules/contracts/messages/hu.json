@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "A(z) {claim} számlának nincs időszak-záró dátuma, ezért nem sorolható be a szerződés számláinak sorrendjébe",
+      "suggestion": "Adja meg annak az időszaknak az utolsó napját, amelyet ez a számla lefed"
+    },
+    "period_order": {
+      "fail": "A(z) {claim} számla {period_from} napon kezdődik és {period_to} napon végződik, így az időszak a kezdete előtt véget ér",
+      "suggestion": "Javítsa az időszak kezdetét vagy végét, hogy a kezdet legyen előbb"
+    },
+    "period_overlap": {
+      "fail": "A(z) {claim} számla {period_from} napon kezdődik, de az előző {previous} számla {previous_to} napig tart, így mindkét számla ugyanazokat a napokat számlázza",
+      "suggestion": "Ezt a számlát az előző számla időszakának végét követő napon kezdje"
+    },
+    "period_gap": {
+      "fail": "A(z) {claim} számla {period_from} napon kezdődik, de az előző {previous} számla {previous_to} napon végződött, így a köztes napokat egyik számla sem számlázza (nem számlázott napok: {days})",
+      "suggestion": "Ezt a számlát az előző számla időszakának végét követő napon kezdje, vagy ellenőrizze, hogy nem hiányzik-e egy számla"
+    },
+    "period_unparsed": {
+      "fail": "A(z) {claim} számla a(z) {field} mezőt '{value}' értékkel rögzítette, amely nem olvasható dátumként",
+      "suggestion": "Adja meg a dátumot év, hónap és nap formában, például 2026-03-31",
+      "fields": {
+        "period_start": "időszak kezdete",
+        "period_end": "időszak vége",
+        "claim_date": "kérelem dátuma"
+      }
+    },
+    "line_overbilled": {
+      "fail": "A(z) {line} tétel eddig {billed} összegben van számlázva, ami meghaladja a tervezett értékét, a(z) {scheduled} összeget; futtassa újra a Kitöltés a készültség alapján műveletet, vagy csökkentse a tétel ezen időszaki összegét",
+      "suggestion": "A Kitöltés a készültség alapján csak azt számlázza tételenként, ami a korábbi számlákhoz képest új. Ha a tétel hatóköre valóban nőtt, előbb rögzítse azt a módosítási megrendelést, amely megemeli a tervezett értékét"
+    },
+    "percent_regressed": {
+      "fail": "A(z) {line} tétel eddig {percent}%-os készültségű, ami {requested}, és kevesebb, mint a korábbi számlák által már elszámolt {previous}, így ebben az időszakban a tételen semmi nem számlázható",
+      "suggestion": "Ellenőrizze a tétel készültségi százalékát, vagy javítsa a korábbi számlát, amely túlbecsülte"
+    },
+    "errors": {
+      "submission_blocked": "Ez a fizetési kérelem addig nem nyújtható be, amíg ezek nincsenek megoldva: {findings}",
+      "rules_unavailable": "A fizetési kérelmek szabályai nincsenek betöltve ebben a telepítésben, ezért ez a számla benyújtás előtt nem ellenőrizhető.",
+      "later_claim_already_issued": "A(z) {claims} számla ez után következik, és már ki lett állítva. Akkor készült, amikor ez a számla még tervezet volt, így erre a munkára már vonatkozik. Törölje ezt a tervezetet, vagy helyezze az időszakát az utolsó kiállított számla után"
+    },
+    "totals_match_lines": {
+      "fail": "A(z) {claim} számla {gross} összeget követel, de a mögötte álló tételek együtt {lines_total} összeget adnak: a számla a tételeinek módosítása után nem lett újraszámolva",
+      "suggestion": "Mentse el ennek a számlának valamelyik tételét, vagy futtassa újra a Kitöltés a készültség alapján műveletet, és az összegei követni fogják"
+    },
+    "totals_below_lines": {
+      "fail": "A(z) {claim} számla a rögzített költségből {gross} összeget számláz, ami kevesebb, mint a saját tételeinek összege, {lines_total}: a részletezés nem követelhet többet, mint maga a számla",
+      "suggestion": "Költség alapján számlázott számlánál a tételek az összeg részletezései, nem a forrásai. Csökkentse vagy távolítsa el a túlbecsülő tételeket, vagy állítsa elő újra a számlát a munka költségéből, hogy a kettő egyezzen"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "A(z) {claim} számla a(z) {line} tételen korábban számlázottként {stored} értéket rögzít, de a korábbi számlák most {now} összeget számláznak rajta",
+      "total_fail": "A(z) {claim} számla korábban igazoltként {stored} értéket rögzít, de a korábbi számlák most {now} összeget igazolnak",
+      "suggestion": "Állítsa elő újra ezt a számlát, hogy beolvassa, mit számláznak ma a korábbi számlák"
+    },
+    "within_nte_cap": {
+      "fail": "A(z) {claim} számla a már számlázott {billed} összegen felül további {this} összeget számláz, ami meghaladja a(z) {cap} felső határt",
+      "suggestion": "Ezen a számlán a felső határig számlázzon, a többiről pedig egyezzen meg módosítási megrendelésben"
+    },
+    "retention_matches_policy": {
+      "fail": "A(z) {claim} számla {held} összeget tart vissza biztosítékként, de a biztosítéki szabályzata most {expected} összeget adna: egy korábbi számla, egy felszabadítás vagy a szabályzat megváltozott azután, hogy ez a számla elkészült",
+      "suggestion": "Futtassa újra a Kitöltés a készültség alapján műveletet, vagy mentse el ennek a számlának valamelyik tételét, és a biztosítéka újraszámolódik"
+    },
+    "retention_above_cap": {
+      "fail": "A(z) {claim} számla {held} összeget tart vissza biztosítékként, ami meghaladja a biztosítéki szabályzata által megadott {percent}%-os felső határt, ez ebben a szerződésben {cap}",
+      "suggestion": "Számolja újra a számlát, vagy emelje a szerződés biztosítéki szabályzatának felső határát, ha a felek magasabbat állapítottak meg",
+      "state_cap_unread": "A(z) {claim} számla: biztosítéki szabályzata nem ír elő felső határt, a(z) {country} pedig tartományi jog szerint korlátozza a visszatartást. A tartományt nem lehetett meghatározni, mert a projekthez nincs területi kód, ezért a törvényi felső határt nem ellenőrizték",
+      "state_cap_suggestion": "Írja be a tartomány korlátját a szerződés biztosítéki szabályzatába felső határként, és ennek a szerződésnek minden számláját ehhez fogják mérni"
+    },
+    "retention_release_within_held": {
+      "fail": "A(z) {claim} számlaig számlázott felszabadítások {released} összeget fizetnek vissza, ami meghaladja a számla előtt visszatartott {accrued} biztosítékot",
+      "suggestion": "Vonja vissza a túl nagy felszabadítást, vagy számlázza egy későbbi számlán, amikor már több biztosíték van visszatartva"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Az értéklista összesen {scheduled}, de a szerződés eddigi összege {contract_sum}: azok a tételek, amelyekre ez a számla vonatkozik, a szerződés {difference} részét tétel nélkül hagyják",
+      "suggestion": "Adjon hozzá vagy javítson értéklista-tételeket, amíg összegük ki nem adja a szerződés összegét",
+      "suggestion_reconcile": "{count} jóváhagyott módosítási megrendelés vagy változás az értéklistához való eljutás előtt módosította a szerződés összegét. Használja a szerződésen a Módosítási megrendelések egyeztetése műveletet, hogy mindegyikhez tételt adjon"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Ehhez a felszabadításhoz szükség van a következőre: {document}, de egy sincs csatolva",
+      "suggestion": "Regisztrálja a dokumentumot a szerződésen, csatolja a felszabadításhoz, majd hagyja jóvá újra a felszabadítást"
+    },
+    "within_available": {
+      "fail": "Ez a felszabadítás {amount} összeget fizet vissza, de a biztosítékból még csak {available} van visszatartva, és nincs más felszabadításhoz kötve",
+      "suggestion": "Vonja vissza ezt a felszabadítást, és javasolja újra, hogy a mérete a most visszatartott biztosítékhoz igazodjon"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Ezt a felszabadítást csak az esemény utáni {days} napos zálogjogi határidő letelte után lehet kifizetni ({reference}), és nem mondja meg, mikor kezdődött ez a határidő",
+      "suggestion_no_start": "Adja meg azt a napot, amikor a határidő kezdődött, például a részleges teljesítési igazolás közzétételének dátumát, és hagyja újra jóvá a felszabadítást",
+      "fail_early": "A(z) {started} napon kezdődött {days} napos zálogjogi határidő {ends} napig tart ({reference}), ezért ezt a felszabadítást még nem lehet jóváhagyni",
+      "suggestion_early": "A felszabadítást a zálogjogi határidő letelte után hagyja jóvá, miután ellenőrizte, hogy a visszatartás ellen nem történt zálogjogi bejegyzés"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "részleges teljesítési igazolás",
+      "acceptance_protocol": "átadás-átvételi jegyzőkönyv",
+      "affidavit_payment_of_debts": "nyilatkozat a tartozások és követelések kifizetéséről",
+      "affidavit_release_of_liens": "nyilatkozat a zálogjogok megszüntetéséről",
+      "consent_of_surety": "kezes hozzájárulása",
+      "final_lien_waiver": "végleges zálogjog-lemondás",
+      "final_invoice": "végszámla"
+    },
+    "errors": {
+      "approval_blocked": "Ezt a biztosíték-felszabadítást addig nem lehet jóváhagyni, amíg ezek nincsenek megoldva: {findings}",
+      "rules_unavailable": "A biztosíték-felszabadítás szabályai nincsenek betöltve ebben a telepítésben, ezért ez a felszabadítás jóváhagyás előtt nem ellenőrizhető."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Számlázott munka, amelyet az értéklista egyik tétele sem fed le"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "A módosítási megrendeléseket csak aktív szerződés értéklistájához lehet egyeztetni; ez a szerződés {status} állapotú",
+      "preview_stale": "Az egyeztetendő módosítási megrendelések listája megváltozott azóta, hogy megnyitotta. Nyissa meg újra az előnézetet, és erősítse meg, mit mutat most"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Ezt a szerződést addig nem lehet aláírni, amíg ezek nincsenek megoldva: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "teljesítés",
+      "approval": "jóváhagyás"
+    },
+    "total_within_contract": {
+      "fail": "A részletek összesen {scheduled}, ami meghaladja a {total} szerződésösszeget",
+      "suggestion": "Csökkentse a részleteket úgy, hogy összegük ne haladja meg a szerződésösszeget"
+    },
+    "percent_sum": {
+      "fail": "A részletek összesen {scheduled}, a {total} szerződésösszegből ({percent}%), így az ár egy része nincs részlethez rendelve",
+      "suggestion": "Adjon hozzá részletet a szerződésösszeg fennmaradó részére, vagy módosítsa az összegeket"
+    },
+    "completion_trigger_linked": {
+      "fail": "A(z) {milestone} részlet a(z) {trigger} időpontjában esedékes, de nincs ütemezési tevékenységhez kötve, ezért esedékessége nem fog a munkával együtt mozogni",
+      "suggestion": "Kösse a részletet ahhoz az ütemezési mérföldkőhöz, amelyre vár"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Az ütemezés szerint a(z) {milestone} mérföldkő elérte, de a(z) {instalment} részlet még függőben van, ezért nem számlázható",
+      "suggestion": "Jelölje a részletet elértnek, vagy nézze meg, miért nem aktív a szerződés"
+    },
+    "client_visible_requires_active": {
+      "fail": "A(z) {milestone} részlet látható az ügyfél számára, de a szerződés {status} állapotú; az ügyfél csak aktív vagy teljesített szerződés tervét látja",
+      "suggestion": "Rejtse el a részletet az ügyfél elől, amíg a szerződés hatályba nem lép"
+    },
+    "consumer_deposit_cap": {
+      "fail": "A(z) {deposit} összegű előleg meghaladja a(z) {ceiling} összeget, amelyet a(z) {reference} enged meg {jurisdiction} területén (forrás: {source_url}, ellenőrizve: {checked_on}, jogász nem vizsgálta felül)",
+      "suggestion": "Csökkentse a letétet, vagy egyeztessen jogi tanácsadóval arról, hogy erre a szerződésre mentesítés vonatkozik-e",
+      "below_threshold": {
+        "fail": "A szerződésösszeg eléri vagy nem haladja meg azt az összeget, amelytől a(z) {reference} korlátozza a letéteket {jurisdiction} területén, ezért a letét nem lett ellenőrizve (forrás: {source_url})"
+      },
+      "other_currency": {
+        "fail": "A szerződés {currency} pénznemben készült, de a(z) {reference} korlátját {limit_currency} pénznemben határozza meg, ezért a(z) {jurisdiction} területi letét nem lett ellenőrizve (forrás: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Ha a törvény erre a szerződésre vonatkozik, kézzel ellenőrizze a letétet a törvény szerint"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Az eddig igazolt munka {cumulative}, ami {over} összeggel több, mint a {contract} szerződésösszeg",
+      "suggestion": "Előbb hagyassa jóvá a többletmunkát fedező módosítási megrendelést, vagy javítsa a mennyiségeket ezen az igazoláson"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Ez az igazolás a korábbi igazolások összegeként {carried} értéket visz át, de a(z) {reference} igazolás {certified} összegben lett igazolva",
+      "work_fail": "A munkalista előző oszlopa összesen {carried}, de a(z) {reference} igazolás eddigi {certified} munkával lett igazolva",
+      "suggestion": "Keressen két igazolás között olyan számlázást, amelyet egyik sem mutat, majd állítsa elő újra ezt az igazolást"
+    },
+    "previous_unknown": {
+      "fail": "A korábbi igazolások összege nem ismert",
+      "not_certified": "A(z) {reference} korábbi igazolás még nincs igazolva, ezért összege nem végleges",
+      "suggestion": "Előbb igazolja a korábbi igazolást. Ha az igazolások tárolása előtt lett igazolva, adja meg az összegét a korábbi igazolások sorában"
+    },
+    "weights_sum": {
+      "fail": "A tételek súlyai összesen {total}%, nem 100%",
+      "suggestion": "Javítsa az ütemezési sorok értékeit, hogy részesedéseik együtt a teljes szerződést adják ki"
+    },
+    "percent_regressed": {
+      "fail": "A(z) {line} tétel ebben az időszakban negatív, ezért visszavon már igazolt munkát",
+      "suggestion": "Hagyja így, ha egy korábbi túlmérést javít. Egyébként javítsa a mennyiséget vagy a százalékot ezen az igazoláson"
+    },
+    "income_withholding_single_year": {
+      "fail": "A jövedelemadó-levonás be van jelölve, de a szerződés {start} és {end} között tart, azaz egy naptári éven belül. A levonás olyan építési munkákra vonatkozik, amelyek egynél több naptári évre nyúlnak",
+      "suggestion": "Kérdezze meg könyvelőjét, hogy a munka valóban egynél több évig tart-e; ha nem, jelölje a jövedelemadó-levonást nem alkalmazandónak"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Az eddig visszavont előleg {recovered}, ami meghaladja a kifizetett {advance} előleget",
+      "unknown": "Eddig {recovered} előleg lett visszavonva, de a szerződés nem adja meg a kifizetett előleget, ezért a visszavonás nem ellenőrizhető vele szemben",
+      "suggestion": "Csökkentse a visszavonást ezen az igazoláson, vagy adja meg a kifizetett előleget a szerződés igazolási beállításaiban"
+    },
+    "retention_matches_config": {
+      "fail": "Az igazolás {certificate} összeget tart vissza biztosítékként (az alapja {percent}%-a), de a mögöttes dokumentum {stored} összeget tart vissza",
+      "suggestion": "Számolja újra a dokumentumot, vagy javítsa a biztosíték mértékét vagy alapját a szerződés igazolási beállításaiban, hogy mindkettő ugyanazt a biztosítékot mutassa"
+    },
+    "net_payable_negative": {
+      "fail": "A fizetendő összeg {payable}: a levonások nagyobbak, mint ennek az igazolásnak az összege",
+      "suggestion": "Ellenőrizze a levonásokat, elsősorban az előleg-visszavonást, és a most nem levonható részt vigye át a következő igazolásra"
+    },
+    "taxes_stale": {
+      "fail": "Az adókat azelőtt számolták, hogy ez az igazolás megváltozott volna, ezért már nem hozzá tartoznak",
+      "suggestion": "Számolja újra az adókat. Ha már véglegesítve voltak, előbb nyissa meg újra őket, majd utána erősítse meg újra"
+    },
+    "taxes_confirmed": {
+      "fail": "Ennek az igazolásnak az adóösszegei nincsenek megerősítve",
+      "suggestion": "Ellenőrizze az egyes adósorokat, és erősítse meg az adókat az igazolás előtt"
+    },
+    "lines_complete": {
+      "fail": "A(z) {line} sorhoz még nincs összeg. {reason}",
+      "suggestion": "Adja meg az összeget, vagy jelölje a sort nem alkalmazandónak, és írja le az okát"
+    },
+    "work_value_differs": {
+      "fail": "A(z) {line} tétel eddig {stated} értéken van rögzítve, de mennyisége vagy százaléka {computed} értéket ad",
+      "suggestion": "Javítsa a dokumentum mennyiségét vagy összegét, hogy a sor két oszlopa egyezzen"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "A {percent} százalékos biztosíték meghaladja azt a {limit} százalékot, amelyet a közbeszerzési törvény minden részszámlán megenged",
+      "suggestion": "Csökkentse a szerződés biztosítékát a törvényes mértékre"
+    },
+    "advance_above_cap": {
+      "fail": "Az előlegfizetési kezességvállalás a szerződésérték {percent} százalékát fedezi, ami meghaladja a pénzügyminiszter jóváhagyása nélkül közbeszerzésben megengedett {limit} százalékot",
+      "suggestion": "Csökkentse az előlegfizetést, vagy rögzítse a szerződési feltételekben a közbeszerzés előtt beszerzett jóváhagyást"
+    },
+    "delay_damages_uncapped": {
+      "fail": "A késedelmi kötbér záradéknak nincs legfeljebbi összege, miközben a közbeszerzési törvény a késedelmi kötbért a szerződésérték {limit} százalékában korlátozza",
+      "suggestion": "Adja meg a késedelmi kötbér záradék legfeljebbi összegét"
+    },
+    "delay_damages_above_cap": {
+      "fail": "A késedelmi kötbér záradék a szerződésérték {percent} százalékában van korlátozva, ami meghaladja a közbeszerzési törvény által megengedett {limit} százalékot",
+      "suggestion": "Csökkentse a záradék legfeljebbi összegét a törvényes határra"
+    },
+    "performance_security_missing": {
+      "fail": "Nincs rögzített teljesítési biztosíték, miközben a közbeszerzés a szerződésérték {limit} százalékát követeli meg",
+      "suggestion": "Rögzítse a végső garanciát teljesítési kezességként vagy bankgarancia formájában"
+    },
+    "performance_security_below": {
+      "fail": "A teljesítési biztosíték a szerződésérték {percent} százalékát fedezi, ami kevesebb, mint a közbeszerzés által megkövetelt {limit} százalék",
+      "suggestion": "Rögzítsen teljesítési biztosítékot a teljes törvényes százalékra"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "A {months} hónapot vagy azt meghaladó közbeszerzést törvényből fakadóan árkiigazítással kell kezelni, a szerződés pedig nem határoz meg együtthatókat a változó tételeihez",
+        "suggestion": "Adja meg a vállalkozó által a műszaki borítékban megadott együtthatókat"
+      },
+      "duplicate_item": {
+        "fail": "A(z) {item} változó tétel kétszer szerepel az árkiigazítási együtthatók között",
+        "suggestion": "Minden változó tételhez csak egy együtthatót tartson meg"
+      },
+      "coefficient_not_a_number": {
+        "fail": "A(z) {item} árkiigazítási együtthatója nem szám",
+        "suggestion": "Adja meg az együtthatót tizedes törtként, például 0,15"
+      },
+      "coefficient_not_positive": {
+        "fail": "A(z) {item} árkiigazítási együtthatója nulla vagy annál kisebb, miközben a törvény szerint minden együtthatónak nullánál nagyobbnak kell lennie",
+        "suggestion": "Adjon meg nullánál nagyobb együtthatót, vagy törölje a tételt"
+      },
+      "coefficient_negative": {
+        "fail": "A(z) {item} árkiigazítási együtthatója negatív",
+        "suggestion": "Adjon meg nulla vagy annál nagyobb együtthatót"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Az árkiigazítási együtthatók összege {item}, miközben a törvény szerint összegüknek egynél kisebbnek kell maradnia",
+        "suggestion": "Csökkentse az együtthatókat, hogy az árnak maradjon fix része"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Az árkiigazítási együtthatók összege {item}, ami több mint egy",
+        "suggestion": "Csökkentse az együtthatókat, hogy összegük egy vagy kevesebb legyen"
+      },
+      "no_coefficients_advisory": {
+        "fail": "A {months} hónapnál hosszabb közbeszerzésnél árfelülvizsgálati záradék van, ha az alapanyagok a költség jelentős részét teszik ki, a szerződés pedig nem határoz meg felülvizsgálati súlyokat",
+        "suggestion": "Adja meg a különleges feltételekből származó felülvizsgálati képlet súlyait, vagy rögzítse, hogy az ár fix"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Az árkiigazítási együtthatók összege {item}, miközben a képlet szerint pontosan egy kell legyen",
+        "suggestion": "Javítsa a súlyokat a szerződési adatokból úgy, hogy összegük egy legyen"
+      },
+      "unknown_regime": {
+        "fail": "A szerződés a(z) {item} árkiigazítási rendszert nevezi meg, amelyet a platform nem ismer",
+        "suggestion": "Válasszon a felsorolt árkiigazítási rendszerek egyikét"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Az árkiigazítás hatálya alá nem tartozó rész, {item}, nem nulla és egy közé esik",
+        "suggestion": "Adja meg a részt tizedes törtként a szerződési adatokból, például 0,15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Az előleg a szerződésérték {percent} százaléka, ami kevesebb, mint a közbeszerzési törvény által erre a vállalkozóra és megrendelőre megállapított {limit} százalékos minimum",
+      "suggestion": "Emelje az előleget a minimumra, vagy adjon meg nullát, ha a vállalkozó lemondott róla"
+    },
+    "advance_above_maximum": {
+      "fail": "Az előleg a szerződésérték {percent} százaléka, ami meghaladja a közbeszerzési törvény által megállapított szokásos {limit} százalékos maximumot",
+      "suggestion": "Ellenőrizze, hogy a különleges feltételek megengedik-e a magasabb előleget, és rögzítse az általa megkívánt biztosítékot"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "A késedelmi kötbér záradék naponta {amount} összeget számít fel, míg az általános feltételek naponta {expected} összeget, vagyis a szerződésérték egy {divisor}-ed részét",
+      "suggestion": "Tartsa meg az általános feltételek napi mértékét, vagy sorolja fel az eltérő mértéket a különleges feltételek eltéréseinél"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "A késedelmi kötbér záradék a szerződésérték {percent} százalékában van korlátozva, ami meghaladja az általános feltételek {limit} százalékát",
+      "suggestion": "Csökkentse a felső határt az általános feltételekben szereplő értékre, vagy sorolja fel a különleges feltételek eltérései között"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Ez a {amount} összegű alvállalkozói szerződés eléri a közbeszerző általi közvetlen kifizetés {limit} küszöbét, a szerződés pedig lemond róla, amit a törvény tilt",
+      "suggestion": "Rögzítse, hogy a közbeszerző közvetlenül fizet az alvállalkozónak"
+    },
+    "direct_payment_unstated": {
+      "fail": "Ez a {amount} összegű alvállalkozói szerződés eléri a közbeszerző általi közvetlen kifizetés {limit} küszöbét, de a szerződés nem rögzíti ezt",
+      "suggestion": "Rögzítse, hogy az alvállalkozó elfogadott-e, és a közbeszerző közvetlenül fizet-e neki"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Ez a magánmunkára vonatkozó alvállalkozói szerződés sem bankgaranciát, sem fizetési megbízást nem rögzít, enélkül pedig az alvállalkozói szerződés érvénytelen lehet",
+      "suggestion": "Rögzítse a fővállalkozó bankgaranciáját vagy a tulajdonosra vonatkozó fizetési megbízást"
+    },
+    "private_retention_above_limit": {
+      "fail": "A {percent} százalékos biztosíték meghaladja a törvény által magánmunkákra megengedett {limit} százalékot",
+      "suggestion": "Csökkentse a szerződés biztosítékát a törvényes felső határra"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "A(z) {contract} szerződés a(z) {regime} ÁFA-rendszert nevezi meg, amely {country} területén nem létezik",
+      "suggestion": "Válasszon a projekt országához felajánlott ÁFA-rendszerek egyikét, vagy törölje a választást"
+    },
+    "country_unknown": {
+      "fail": "A(z) {contract} szerződés a(z) {regime} ÁFA-rendszert nevezi meg, de projektjéhez nincs ország megadva, így a rendszer nem ellenőrizhető",
+      "suggestion": "Adja meg a projekt országát"
+    },
+    "contract_date_missing": {
+      "fail": "A(z) {regime} ÁFA-rendszer csak {cutoff} előtt aláírt szerződésekre vonatkozik, ez a szerződés pedig sem aláírási, sem kezdő dátumot nem rögzít",
+      "suggestion": "Adja meg azt a dátumot, amikor a szerződést aláírták"
+    },
+    "contract_too_late": {
+      "fail": "A(z) {regime} ÁFA-rendszer csak {cutoff} előtt aláírt szerződésekre vonatkozik, ez a szerződés pedig {contract_date} keltezésű",
+      "suggestion": "Válassza ehhez a szerződéshez a szokásos ÁFA-rendszert"
+    },
+    "evidence_missing": {
+      "fail": "A(z) {regime} ÁFA-rendszerhez szükség van: {evidence}, a szerződés pedig egyiket sem rögzíti",
+      "suggestion": "Rögzítse a dokumentum hivatkozását és kiállítási dátumát a szerződés ÁFA-rendszerével együtt"
+    },
+    "evidence_date_missing": {
+      "fail": "A(z) {regime} ÁFA-rendszerhez rögzített {evidence} nem rendelkezik kiállítási dátummal, ezért nem mutatható meg, hogy {cutoff} előtti",
+      "suggestion": "Adja meg a dokumentum kiállításának dátumát"
+    },
+    "evidence_too_late": {
+      "fail": "A(z) {regime} ÁFA-rendszerhez rögzített {evidence} {issued_on} napon lett kiállítva, a rendszer pedig {cutoff} előtt kiállított dokumentumot igényel",
+      "suggestion": "Rögzítsen korábbi dokumentumot, vagy válassza a szokásos ÁFA-rendszert"
+    },
+    "scope_increase_unjudged": {
+      "fail": "A szerződésérték {original_value} összegről {current_value} összegre nőtt, a szerződés pedig nem határoz meg megengedett növekedést, ezért nem ítélhető meg, hogy a(z) {regime} ÁFA-rendszer még érvényes-e",
+      "suggestion": "Rögzítse a szerződés által megengedett terjedelmi növekedést"
+    },
+    "scope_increase_new_contract": {
+      "fail": "A szerződésérték {original_value} összegről {current_value} összegre nőtt, ami meghaladja a szerződés által megengedett {allowed_increase_pct} százalékos növekedést, így az ÁFA szempontjából ez új szerződés, és a(z) {regime} ÁFA-rendszer már nem alkalmazható",
+      "suggestion": "Helyezze át a szerződést a szokásos ÁFA-rendszerbe"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "a konzulens által jóváhagyott fizetési igazolás",
+      "einvoice": "elektronikus számla vagy nyugta",
+      "main_contractor_certificate": "a fővállalkozó igazolása arról, hogy a projekt után az ÁFA megfizetésre került"
+    },
+    "not_in_force": {
+      "before": "A(z) {claim} számla kelte {on}, a(z) {regime} ÁFA-rendszer viszont csak {effective_from} napjától érvényes; azon a napon érvényes: {instead}",
+      "after": "A(z) {claim} számla kelte {on}, a(z) {regime} ÁFA-rendszer pedig {effective_to} napján megszűnt; azon a napon érvényes: {instead}",
+      "suggestion": "Módosítsa a szerződés ÁFA-rendszerét a számla keltének napján érvényes rendszerre, vagy javítsa a számla keltét"
+    }
+  }
+}

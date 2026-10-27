@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Begäran {claim} saknar slutdatum för perioden, så den kan inte placeras i ordning bland kontraktets begäranden",
+      "suggestion": "Ange den sista dagen i perioden som denna begäran avser"
+    },
+    "period_order": {
+      "fail": "Begäran {claim} startar {period_from} och slutar {period_to}, så perioden slutar innan den börjar",
+      "suggestion": "Rätta periodens start- eller slutdatum så att starten kommer först"
+    },
+    "period_overlap": {
+      "fail": "Begäran {claim} startar {period_from}, men den föregående begäran {previous} löper till {previous_to}, så båda begärandena fakturerar samma dagar",
+      "suggestion": "Starta denna begäran dagen efter att den föregående begärans period slutar"
+    },
+    "period_gap": {
+      "fail": "Begäran {claim} startar {period_from}, men den föregående begäran {previous} slutade {previous_to}, så ingen begäran fakturerar dagarna mellan (ofakturerade dagar: {days})",
+      "suggestion": "Starta denna begäran dagen efter att den föregående begärans period slutar, eller kontrollera att ingen begäran saknas"
+    },
+    "period_unparsed": {
+      "fail": "Begäran {claim} anger {field} som '{value}', vilket inte kan tolkas som ett datum",
+      "suggestion": "Ange datumet som år, månad och dag, till exempel 2026-03-31",
+      "fields": {
+        "period_start": "periodens start",
+        "period_end": "periodens slut",
+        "claim_date": "ansökningsdatum"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Rad {line} är fakturerad med {billed} hittills, mer än dess planerade värde på {scheduled}; kör Fyll i från framsteg igen eller sänk denna periods belopp på raden",
+      "suggestion": "Fyll i från framsteg fakturerar varje rad endast för det som är nytt sedan tidigare begäranden. Om radens omfattning verkligen ökat, registrera först ändringsordern som höjer dess planerade värde"
+    },
+    "percent_regressed": {
+      "fail": "Rad {line} är {percent} % färdig hittills, vilket är {requested}, mindre än de {previous} som tidigare begäranden redan fakturerat på den, så ingenting faktureras på den denna period",
+      "suggestion": "Kontrollera procentandelen färdigställt på denna rad eller rätta den tidigare begäran som överskattade den"
+    },
+    "errors": {
+      "submission_blocked": "Denna betalningsbegäran kan inte skickas förrän följande är åtgärdat: {findings}",
+      "rules_unavailable": "Reglerna för betalningsbegäran är inte inlästa på denna installation, så denna begäran kan inte kontrolleras innan den skickas.",
+      "later_claim_already_issued": "Begäran {claims} kommer efter denna och har redan skickats ut. Den byggdes medan denna begäran var ett utkast, så den gäller redan för detta arbete. Ta bort detta utkast eller flytta dess period till efter den sista utskickade begäran"
+    },
+    "totals_match_lines": {
+      "fail": "Begäran {claim} begär {gross}, men raderna bakom den summerar till {lines_total}: begäran räknades inte om efter att dess rader ändrats",
+      "suggestion": "Spara någon rad i denna begäran eller kör Fyll i från framsteg igen, så följer summorna med"
+    },
+    "totals_below_lines": {
+      "fail": "Begäran {claim} fakturerar {gross} från registrerad kostnad, mindre än de {lines_total} dess egna rader summerar till: specifikationen kan inte begära mer än vad begäran gör",
+      "suggestion": "På en begäran fakturerad från kostnad är raderna en uppdelning av pengarna, inte källan till dem. Sänk eller ta bort de rader som överdriver, eller generera begäran på nytt från arbetskostnaden så att de två stämmer överens"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Begäran {claim} anger {stored} som tidigare fakturerat på rad {line}, men de tidigare begäranden fakturerar nu {now} på den",
+      "total_fail": "Begäran {claim} anger {stored} som tidigare certifierat, men de tidigare begäranden certifierar nu {now}",
+      "suggestion": "Generera denna begäran på nytt så att den läser vad begärandena före den fakturerar idag"
+    },
+    "within_nte_cap": {
+      "fail": "Begäran {claim} fakturerar {this} utöver de {billed} som redan fakturerats, vilket överskrider taket om högst {cap}",
+      "suggestion": "Fakturera upp till taket på denna begäran och överenskom en ändringsorder för resten"
+    },
+    "retention_matches_policy": {
+      "fail": "Begäran {claim} håller inne {held} i retention, men dess retentionspolicy ger nu {expected}: en tidigare begäran, en frigörelse eller att policyn ändrades efter att denna begäran räknades ut",
+      "suggestion": "Kör Fyll i från framsteg igen, eller spara någon rad i denna begäran, så räknas retentionen om"
+    },
+    "retention_above_cap": {
+      "fail": "Begäran {claim} håller inne {held} i retention, över det tak på {percent} % som dess retentionspolicy anger, vilket är {cap} i detta kontrakt",
+      "suggestion": "Räkna ut begäran igen, eller höj taket i kontraktets retentionspolicy om parterna överenskommit om ett högre",
+      "state_cap_unread": "Begäran {claim}: dess retentionspolicy anger inget tak, och {country} begränsar retention genom delstatslag. Ingen delstat kunde fastställas eftersom projektet saknar underdelningskod, så inget lagstadgat tak kontrollerades",
+      "state_cap_suggestion": "Skriv in delstatens gräns i kontraktets retentionspolicy som ett tak, så kontrolleras varje begäran på detta kontrakt mot den"
+    },
+    "retention_release_within_held": {
+      "fail": "Frigörelserna fakturerade fram till begäran {claim} betalar tillbaka {released}, mer än de {accrued} i retention som hållits fram till dess",
+      "suggestion": "Ogiltigförklara den frigörelse som är för stor eller fakturera den på en senare begäran när mer retention hållits"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Värdeförteckningen summerar till {scheduled}, men kontraktssumman hittills är {contract_sum}: raderna som denna begäran faktureras mot lämnar {difference} av kontraktet utan en rad",
+      "suggestion": "Lägg till eller rätta rader i värdeförteckningen tills de summerar till kontraktssumman",
+      "suggestion_reconcile": "{count} godkända ändringsorder eller variationer ändrade kontraktssumman innan de nådde värdeförteckningen. Använd Stäm av ändringsorder på kontraktet för att lägga till en rad för var och en"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Denna frigörelse kräver {document}, och inget är bifogat",
+      "suggestion": "Registrera dokumentet på kontraktet, bifoga det till frigörelsen och godkänn den igen"
+    },
+    "within_available": {
+      "fail": "Denna frigörelse betalar tillbaka {amount}, men endast {available} av retentionen hålls fortfarande och är inte bundet till en annan frigörelse",
+      "suggestion": "Ogiltigförklara denna frigörelse och föreslå den igen, så att den dimensioneras efter retentionen som hålls nu"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Denna frigörelse betalas först när den {days} dagar långa tidsfristen för lienrätt efter händelsen har löpt ut ({reference}), och den anger inte när perioden började",
+      "suggestion_no_start": "Ange den dag då perioden började, till exempel publiceringsdatumet för intyget om väsentlig färdigställande, och godkänn frigörelsen igen",
+      "fail_early": "Den {days} dagar långa tidsfristen för lienrätt som började {started} löper till {ends} ({reference}), så denna frigörelse kan inte godkännas ännu",
+      "suggestion_early": "Godkänn frigörelsen när tidsfristen för lienrätt löpt ut, efter att ha kontrollerat att ingen lienrätt gjorts gällande mot innehållet"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "intyg om väsentlig färdigställande",
+      "acceptance_protocol": "godkännandeprotokoll",
+      "affidavit_payment_of_debts": "försäkran om att skulder och fordringar är betalda",
+      "affidavit_release_of_liens": "försäkran om frigörelse från lienrätt",
+      "consent_of_surety": "borgensmannens samtycke",
+      "final_lien_waiver": "slutlig avstående från lienrätt",
+      "final_invoice": "slutfaktura"
+    },
+    "errors": {
+      "approval_blocked": "Denna retentionsfrigörelse kan inte godkännas förrän följande är åtgärdat: {findings}",
+      "rules_unavailable": "Reglerna för retentionsfrigörelse är inte inlästa på denna installation, så denna frigörelse kan inte kontrolleras innan den godkänns."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Fakturerat arbete som inte omfattas av någon rad i värdeförteckningen"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Ändringsorder stäms av mot värdeförteckningen endast för ett aktivt kontrakt; detta kontrakt har status {status}",
+      "preview_stale": "Listan över ändringsorder att stämma av har ändrats sedan du öppnade den. Öppna förhandsgranskningen igen och bekräfta vad den visar nu"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Detta kontrakt kan inte signeras förrän följande är åtgärdat: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "färdigställande",
+      "approval": "godkännande"
+    },
+    "total_within_contract": {
+      "fail": "Delbetalningarna summerar till {scheduled}, mer än kontraktssumman på {total}",
+      "suggestion": "Minska delbetalningarna så att de summerar till högst kontraktssumman"
+    },
+    "percent_sum": {
+      "fail": "Delbetalningarna summerar till {scheduled} av kontraktssumman på {total} ({percent} %), så en del av priset saknar delbetalning",
+      "suggestion": "Lägg till en delbetalning för resten av kontraktssumman eller justera beloppen"
+    },
+    "completion_trigger_linked": {
+      "fail": "Delbetalning {milestone} förfaller vid {trigger}, men den är inte kopplad till en schemaaktivitet, så dess datum flyttas inte med arbetet",
+      "suggestion": "Koppla delbetalningen till den schemamilstolpe den väntar på"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Schemat visar att {milestone} är nådd, men delbetalning {instalment} väntar fortfarande, så den kan inte begäras",
+      "suggestion": "Markera delbetalningen som nådd eller kontrollera varför kontraktet inte är aktivt"
+    },
+    "client_visible_requires_active": {
+      "fail": "Delbetalning {milestone} visas för kunden, men kontraktet har status {status}; kunden ser planen endast för ett aktivt eller slutfört kontrakt",
+      "suggestion": "Dölj delbetalningen för kunden tills kontraktet träder i kraft"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Förskottsbetalningen på {deposit} överskrider {ceiling} som {reference} tillåter i {jurisdiction} (källa: {source_url}, kontrollerad {checked_on}, ej granskad av jurist)",
+      "suggestion": "Sänk depositionen eller bekräfta med juridiskt ombud att ett undantag gäller för detta kontrakt",
+      "below_threshold": {
+        "fail": "Kontraktssumman ligger på eller under beloppet från vilket {reference} begränsar deposition i {jurisdiction}, så depositionen kontrollerades inte (källa: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Kontraktet är i {currency}, men {reference} anger sin gräns i {limit_currency}, så depositionen i {jurisdiction} kontrollerades inte (källa: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Om lagen gäller detta kontrakt, kontrollera depositionen mot den för hand"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Certifierat arbete hittills är {cumulative}, vilket är {over} över kontraktssumman på {contract}",
+      "suggestion": "Låt först godkänna ändringsordern som täcker det extra arbetet, eller rätta kvantiteterna på detta intyg"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Detta intyg anger {carried} som summan av de tidigare intygen, men intyg {reference} certifierades till {certified}",
+      "work_fail": "Kolumnen för föregående i arbetslistan summerar till {carried}, men intyg {reference} certifierades med {certified} arbete hittills",
+      "suggestion": "Leta efter en begäran mellan de två intygen som inget av dem visar och generera sedan detta igen"
+    },
+    "previous_unknown": {
+      "fail": "Summan av de tidigare intygen är inte känd",
+      "not_certified": "Det tidigare intyget {reference} är ännu inte certifierat, så dess summa är inte slutlig",
+      "suggestion": "Certifiera det tidigare intyget först. Om det certifierades innan intyg lagrades, ange dess summa på raden för tidigare intyg"
+    },
+    "weights_sum": {
+      "fail": "Vikterna för posterna summerar till {total} %, inte 100 %",
+      "suggestion": "Rätta värdena på schemaraderna så att deras andelar summerar till hela kontraktet"
+    },
+    "percent_regressed": {
+      "fail": "Post {line} är negativ denna period, så den tar tillbaka arbete som redan certifierats",
+      "suggestion": "Låt den stå om detta rättar en tidigare övermätning. Annars rätta kvantiteten eller procenten på detta intyg"
+    },
+    "income_withholding_single_year": {
+      "fail": "Källskatt på inkomst är vald, men kontraktet löper från {start} till {end}, inom ett och samma kalenderår. Källskatten avser byggarbete som sträcker sig över mer än ett kalenderår",
+      "suggestion": "Kontrollera med din revisor om arbetet verkligen sträcker sig över mer än ett år; om inte, markera källskatten som inte tillämplig"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Förskottet återfört hittills är {recovered}, mer än förskottet på {advance} som betalats ut",
+      "unknown": "{recovered} av förskottet har återförts hittills, men kontraktet anger inte vilket förskott som betalats, så återföringen kan inte kontrolleras mot det",
+      "suggestion": "Sänk återföringen på detta intyg eller ange det utbetalda förskottet i kontraktets intygsinställningar"
+    },
+    "retention_matches_config": {
+      "fail": "Intyget håller inne {certificate} i retention ({percent} % av dess bas), men dokumentet bakom det håller inne {stored}",
+      "suggestion": "Räkna ut dokumentet igen eller rätta retentionssatsen eller dess bas i kontraktets intygsinställningar, så att båda visar samma retention"
+    },
+    "net_payable_negative": {
+      "fail": "Det utbetalningsbara beloppet är {payable}: avdragen är större än beloppet på detta intyg",
+      "suggestion": "Kontrollera avdragen, framför allt återföringen av förskottet, och för över det som inte kan dras nu till nästa intyg"
+    },
+    "taxes_stale": {
+      "fail": "Skatterna beräknades innan detta intyg ändrades, så de hör inte längre till det",
+      "suggestion": "Beräkna skatterna på nytt. Om de redan bekräftats, öppna dem igen först och bekräfta dem på nytt efteråt"
+    },
+    "taxes_confirmed": {
+      "fail": "Skattesiffrorna för detta intyg har inte bekräftats",
+      "suggestion": "Kontrollera varje skattrad och bekräfta skatterna innan intyget certifieras"
+    },
+    "lines_complete": {
+      "fail": "Rad {line} har ännu ingen siffra. {reason}",
+      "suggestion": "Ange beloppet eller markera raden som inte tillämplig och ange varför"
+    },
+    "work_value_differs": {
+      "fail": "Post {line} är registrerad till {stated} hittills, men dess kvantitet eller procent ger {computed}",
+      "suggestion": "Rätta kvantiteten eller beloppet i dokumentet så att de två kolumnerna på raden stämmer överens"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Retention på {percent} procent är över de {limit} procent som lagen om offentlig upphandling tillåter vid varje delbetalning",
+      "suggestion": "Sänk kontraktets retention till den lagstadgade satsen"
+    },
+    "advance_above_cap": {
+      "fail": "Förskottsgarantin täcker {percent} procent av kontraktsvärdet, över de {limit} procent som offentliga byggprojekt tillåter utan finansministerns godkännande",
+      "suggestion": "Sänk förskottet eller anteckna i kontraktsvillkoren det godkännande som inhämtats före upphandlingen"
+    },
+    "delay_damages_uncapped": {
+      "fail": "En klausul om förseningsskadestånd saknar högsta belopp, medan lagen om offentlig upphandling begränsar förseningsskadestånd till {limit} procent av kontraktsvärdet",
+      "suggestion": "Ange klausulens högsta belopp för förseningsskadestånd"
+    },
+    "delay_damages_above_cap": {
+      "fail": "En klausul om förseningsskadestånd är begränsad till {percent} procent av kontraktsvärdet, över de {limit} procent som lagen om offentlig upphandling tillåter",
+      "suggestion": "Sänk klausulens högsta belopp till det lagstadgade taket"
+    },
+    "performance_security_missing": {
+      "fail": "Ingen säkerhet för fullgörande är registrerad, medan offentliga byggprojekt kräver en på {limit} procent av kontraktsvärdet",
+      "suggestion": "Registrera slutgarantin som en fullgörandegaranti eller bankgaranti"
+    },
+    "performance_security_below": {
+      "fail": "Säkerheten för fullgörande täcker {percent} procent av kontraktsvärdet, under de {limit} procent som offentliga byggprojekt kräver",
+      "suggestion": "Registrera en säkerhet för fullgörande för hela den lagstadgade procentsatsen"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Offentliga byggprojekt på {months} månader eller längre måste prisjusteras enligt lag, och kontraktet anger inga koefficienter för dess rörliga poster",
+        "suggestion": "Ange de koefficienter entreprenören angav i den tekniska kuvertet"
+      },
+      "duplicate_item": {
+        "fail": "Den rörliga posten {item} står två gånger bland koefficienterna för prisjustering",
+        "suggestion": "Behåll en koefficient per rörlig post"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Prisjusteringskoefficienten för {item} är inte ett tal",
+        "suggestion": "Ange koefficienten som decimaltal, till exempel 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Prisjusteringskoefficienten för {item} är noll eller lägre, medan lagen kräver att varje koefficient är över noll",
+        "suggestion": "Ange en koefficient över noll eller ta bort posten"
+      },
+      "coefficient_negative": {
+        "fail": "Prisjusteringskoefficienten för {item} är negativ",
+        "suggestion": "Ange en koefficient på noll eller högre"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Prisjusteringskoefficienterna summerar till {item}, medan lagen kräver att deras summa förblir under ett",
+        "suggestion": "Sänk koefficienterna så att en fast del av priset kvarstår"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Prisjusteringskoefficienterna summerar till {item}, mer än ett",
+        "suggestion": "Sänk koefficienterna så att de summerar till ett eller mindre"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Offentliga byggprojekt längre än {months} månader har en prisrevideringsklausul där råvaror utgör en betydande del av kostnaden, och kontraktet anger inga revideringsvikter",
+        "suggestion": "Ange vikterna i revideringsformeln från de särskilda villkoren eller anteckna att priset är fast"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Prisjusteringskoefficienterna summerar till {item}, medan formeln kräver att de summerar till exakt ett",
+        "suggestion": "Rätta vikterna från kontraktsdata så att de summerar till ett"
+      },
+      "unknown_regime": {
+        "fail": "Kontraktet anger prisjusteringsregimen {item}, som plattformen inte känner till",
+        "suggestion": "Välj en av de listade prisjusteringsregimerna"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Den del som inte omfattas av prisjustering, {item}, ligger inte mellan noll och ett",
+        "suggestion": "Ange delen som decimaltal från kontraktsdata, till exempel 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Förskottet är {percent} procent av kontraktsvärdet, under det minimum på {limit} procent som lagen om offentlig upphandling anger för denna entreprenör och beställare",
+      "suggestion": "Höj förskottet till minimum eller anteckna noll om entreprenören avstått från det"
+    },
+    "advance_above_maximum": {
+      "fail": "Förskottet är {percent} procent av kontraktsvärdet, över de {limit} procent som lagen om offentlig upphandling anger som normalt maximum",
+      "suggestion": "Kontrollera att de särskilda villkoren tillåter det högre förskottet och registrera den garanti det kräver"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "En klausul om förseningsavgift tar ut {amount} per dag, medan de allmänna villkoren tar ut {expected} per dag, en {divisor}-del av kontraktsvärdet",
+      "suggestion": "Behåll den dagliga satsen från de allmänna villkoren eller ange den avvikande satsen bland undantagen i de särskilda villkoren"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "En klausul om förseningsavgift är begränsad till {percent} procent av kontraktsvärdet, över de {limit} procent i de allmänna villkoren",
+      "suggestion": "Sänk taket till de allmänna villkorens siffra eller ange det bland undantagen i de särskilda villkoren"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Denna underentreprenad på {amount} når tröskeln på {limit} för direktbetalning av den offentliga beställaren, och kontraktet avstår från den, vilket lagen förbjuder",
+      "suggestion": "Anteckna att den offentliga beställaren betalar underentreprenören direkt"
+    },
+    "direct_payment_unstated": {
+      "fail": "Denna underentreprenad på {amount} når tröskeln på {limit} för direktbetalning av den offentliga beställaren, och kontraktet anger inte det",
+      "suggestion": "Anteckna om underentreprenören godkänns och betalas direkt av den offentliga beställaren"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Denna underentreprenad i privata projekt registrerar varken en bankgaranti eller en överlåtelse av betalning, utan vilken underentreprenaden kan ogiltigförklaras",
+      "suggestion": "Registrera huvudentreprenörens bankgaranti eller överlåtelsen av betalningen från ägaren"
+    },
+    "private_retention_above_limit": {
+      "fail": "Retention på {percent} procent är över de {limit} procent som lagen tillåter i privata projekt",
+      "suggestion": "Sänk kontraktets retention till det lagstadgade taket"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Kontrakt {contract} anger momsregimen {regime}, som {country} inte har",
+      "suggestion": "Välj en av de momsregimer som erbjuds för projektets land eller ta bort valet"
+    },
+    "country_unknown": {
+      "fail": "Kontrakt {contract} anger momsregimen {regime}, men dess projekt anger inget land, så regimen kan inte kontrolleras",
+      "suggestion": "Ange projektets land"
+    },
+    "contract_date_missing": {
+      "fail": "Momsregimen {regime} gäller endast för kontrakt undertecknade före {cutoff}, och detta kontrakt anger varken en underskrift eller ett startdatum",
+      "suggestion": "Ange det datum då kontraktet undertecknades"
+    },
+    "contract_too_late": {
+      "fail": "Momsregimen {regime} gäller endast för kontrakt undertecknade före {cutoff}, och detta kontrakt är daterat {contract_date}",
+      "suggestion": "Välj den vanliga momsregimen för detta kontrakt"
+    },
+    "evidence_missing": {
+      "fail": "Momsregimen {regime} kräver {evidence}, och kontraktet anger ingen",
+      "suggestion": "Anteckna dokumentets referens och utfärdandedatum tillsammans med kontraktets momsregim"
+    },
+    "evidence_date_missing": {
+      "fail": "{evidence} som angetts för momsregimen {regime} saknar utfärdandedatum, så det kan inte visas vara äldre än {cutoff}",
+      "suggestion": "Ange det datum då dokumentet utfärdades"
+    },
+    "evidence_too_late": {
+      "fail": "{evidence} som angetts för momsregimen {regime} utfärdades {issued_on}, och regimen kräver ett dokument utfärdat före {cutoff}",
+      "suggestion": "Registrera ett tidigare dokument eller välj den vanliga momsregimen"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Kontraktsvärdet steg från {original_value} till {current_value} och kontraktet anger ingen tillåten ökning, så det går inte att bedöma om momsregimen {regime} fortfarande gäller",
+      "suggestion": "Anteckna den ökning av omfattningen som kontraktet tillåter"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Kontraktsvärdet steg från {original_value} till {current_value}, utöver den ökning på {allowed_increase_pct} procent som kontraktet tillåter, så för moms är det ett nytt kontrakt och momsregimen {regime} gäller inte längre",
+      "suggestion": "Flytta kontraktet till den vanliga momsregimen"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "ett av konsulten godkänt betalningsintyg",
+      "einvoice": "en e-faktura eller ett e-kvitto",
+      "main_contractor_certificate": "huvudentreprenörens intyg om att moms betalats för projektet"
+    },
+    "not_in_force": {
+      "before": "Begäran {claim} är daterad {on}, och momsregimen {regime} gäller först från {effective_from}; gällande den dagen: {instead}",
+      "after": "Begäran {claim} är daterad {on}, och momsregimen {regime} upphörde {effective_to}; gällande den dagen: {instead}",
+      "suggestion": "Ändra kontraktets momsregim till en som gäller på begärans datum eller rätta begärans datum"
+    }
+  }
+}

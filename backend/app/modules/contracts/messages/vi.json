@@ -1,0 +1,376 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "pay_application": {
+    "period_present": {
+      "fail": "Đề nghị thanh toán {claim} không có ngày kết thúc kỳ, nên không thể xếp đúng thứ tự trong các đề nghị thanh toán của hợp đồng",
+      "suggestion": "Nhập ngày cuối cùng của kỳ mà đề nghị thanh toán này bao phủ"
+    },
+    "period_order": {
+      "fail": "Đề nghị thanh toán {claim} bắt đầu ngày {period_from} và kết thúc ngày {period_to}, tức kỳ kết thúc trước khi bắt đầu",
+      "suggestion": "Sửa ngày bắt đầu hoặc kết thúc của kỳ sao cho ngày bắt đầu đứng trước"
+    },
+    "period_overlap": {
+      "fail": "Đề nghị thanh toán {claim} bắt đầu ngày {period_from}, nhưng đề nghị trước {previous} kéo dài đến {previous_to}, nên cả hai đề nghị cùng tính tiền cho các ngày trùng nhau",
+      "suggestion": "Bắt đầu đề nghị này từ ngày sau khi kỳ của đề nghị trước kết thúc"
+    },
+    "period_gap": {
+      "fail": "Đề nghị thanh toán {claim} bắt đầu ngày {period_from}, nhưng đề nghị trước {previous} kết thúc ngày {previous_to}, nên không đề nghị nào tính tiền cho các ngày ở giữa (số ngày chưa được tính: {days})",
+      "suggestion": "Bắt đầu đề nghị này từ ngày sau khi kỳ của đề nghị trước kết thúc, hoặc kiểm tra xem có đề nghị nào bị thiếu không"
+    },
+    "period_unparsed": {
+      "fail": "Đề nghị thanh toán {claim} ghi {field} là '{value}', không thể đọc như một ngày",
+      "suggestion": "Nhập ngày theo dạng năm, tháng, ngày, ví dụ 2026-03-31",
+      "fields": {
+        "period_start": "ngày bắt đầu kỳ",
+        "period_end": "ngày kết thúc kỳ",
+        "claim_date": "ngày lập đề nghị"
+      }
+    },
+    "line_overbilled": {
+      "fail": "Hạng mục {line} đã được lập hóa đơn {billed} tính đến nay, vượt quá giá trị theo kế hoạch {scheduled}; hãy chạy lại Điền từ tiến độ hoặc giảm số tiền kỳ này của hạng mục",
+      "suggestion": "Điền từ tiến độ chỉ lập hóa đơn cho từng hạng mục phần khối lượng mới so với các đề nghị trước. Nếu phạm vi hạng mục thực sự tăng, hãy ghi nhận phiếu thay đổi làm tăng giá trị theo kế hoạch của nó trước"
+    },
+    "percent_regressed": {
+      "fail": "Hạng mục {line} đã hoàn thành {percent}% tính đến nay, tức {requested}, thấp hơn {previous} mà các đề nghị trước đã lập hóa đơn cho nó, nên kỳ này không lập hóa đơn gì cho hạng mục này",
+      "suggestion": "Kiểm tra phần trăm hoàn thành của hạng mục này hoặc sửa đề nghị trước đã ghi cao hơn thực tế"
+    },
+    "errors": {
+      "submission_blocked": "Đề nghị thanh toán này không thể gửi cho đến khi giải quyết các mục sau: {findings}",
+      "rules_unavailable": "Các quy tắc đề nghị thanh toán chưa được tải trên hệ thống này, nên đề nghị này không thể kiểm tra trước khi gửi.",
+      "later_claim_already_issued": "Đề nghị {claims} nằm sau đề nghị này và đã được phát hành. Nó được lập khi đề nghị này còn là bản nháp, nên đã áp dụng cho công việc này. Hãy xóa bản nháp này hoặc chuyển kỳ của nó sang sau đề nghị đã phát hành cuối cùng"
+    },
+    "totals_match_lines": {
+      "fail": "Đề nghị {claim} yêu cầu {gross}, nhưng các hạng mục bên dưới cộng lại là {lines_total}: đề nghị chưa được tính lại sau khi các hạng mục thay đổi",
+      "suggestion": "Lưu bất kỳ hạng mục nào của đề nghị này, hoặc chạy lại Điền từ tiến độ, khi đó tổng sẽ tự cập nhật"
+    },
+    "totals_below_lines": {
+      "fail": "Đề nghị {claim} lập hóa đơn {gross} từ chi phí đã ghi nhận, thấp hơn {lines_total} mà chính các hạng mục của nó cộng lại: phần chi tiết không thể yêu cầu nhiều hơn đề nghị",
+      "suggestion": "Với đề nghị lập từ chi phí, các hạng mục là phần phân bổ của số tiền, không phải nguồn của nó. Giảm hoặc xóa các hạng mục đang ghi quá cao, hoặc lập lại đề nghị từ chi phí công việc để hai bên khớp nhau"
+    },
+    "prior_matches_earlier_claims": {
+      "line_fail": "Đề nghị {claim} ghi {stored} là đã lập hóa đơn trước đó ở hạng mục {line}, nhưng các đề nghị trước hiện lập {now} cho hạng mục này",
+      "total_fail": "Đề nghị {claim} ghi {stored} là đã xác nhận trước đó, nhưng các đề nghị trước hiện xác nhận {now}",
+      "suggestion": "Lập lại đề nghị này để nó đọc những gì các đề nghị trước đang lập hóa đơn hôm nay"
+    },
+    "within_nte_cap": {
+      "fail": "Đề nghị {claim} lập thêm {this} trên số {billed} đã lập hóa đơn, vượt mức trần không vượt quá {cap}",
+      "suggestion": "Lập hóa đơn tối đa đến mức trần trên đề nghị này và thống nhất phiếu thay đổi cho phần còn lại"
+    },
+    "retention_matches_policy": {
+      "fail": "Đề nghị {claim} đang giữ lại {held} tiền bảo lưu, nhưng chính sách bảo lưu của nó hiện cho ra {expected}: một đề nghị trước, một lần giải phóng, hoặc chính sách đã thay đổi sau khi đề nghị này được tính",
+      "suggestion": "Chạy lại Điền từ tiến độ, hoặc lưu bất kỳ hạng mục nào của đề nghị này, và tiền bảo lưu sẽ được tính lại"
+    },
+    "retention_above_cap": {
+      "fail": "Đề nghị {claim} đang giữ lại {held} tiền bảo lưu, vượt mức trần {percent}% mà chính sách bảo lưu của nó đặt ra, tức {cap} trên hợp đồng này",
+      "suggestion": "Tính lại đề nghị, hoặc nâng mức trần trong chính sách bảo lưu của hợp đồng nếu các bên đã thỏa thuận mức cao hơn",
+      "state_cap_unread": "Đề nghị {claim}: chính sách bảo lưu của nó không đặt mức trần nào, còn {country} giới hạn tiền bảo lưu theo luật tiểu bang. Không xác định được tiểu bang vì dự án không có mã phân khu, nên không kiểm tra được mức trần theo luật",
+      "state_cap_suggestion": "Ghi mức giới hạn của tiểu bang vào chính sách bảo lưu của hợp đồng dưới dạng mức trần, khi đó mọi đề nghị trên hợp đồng này sẽ được kiểm tra theo mức đó"
+    },
+    "retention_release_within_held": {
+      "fail": "Các lần giải phóng đã lập hóa đơn đến đề nghị {claim} hoàn trả {released}, nhiều hơn {accrued} tiền bảo lưu đã giữ đến thời điểm đó",
+      "suggestion": "Hủy lần giải phóng quá lớn, hoặc lập hóa đơn nó trên một đề nghị sau khi đã giữ thêm tiền bảo lưu"
+    },
+    "sov_reconciles_contract_sum": {
+      "fail": "Bảng giá trị khối lượng cộng lại là {scheduled}, nhưng giá trị hợp đồng đến nay là {contract_sum}: các hạng mục mà đề nghị này lập hóa đơn để lại {difference} của hợp đồng không có hạng mục",
+      "suggestion": "Thêm hoặc sửa các hạng mục bảng giá trị khối lượng cho đến khi chúng cộng đúng bằng giá trị hợp đồng",
+      "suggestion_reconcile": "{count} phiếu thay đổi hoặc phát sinh đã được phê duyệt đã làm thay đổi giá trị hợp đồng trước khi chúng được đưa vào bảng giá trị khối lượng. Dùng Đối chiếu phiếu thay đổi trên hợp đồng để thêm một hạng mục cho mỗi phiếu"
+    }
+  },
+  "retention_release": {
+    "documents_attached": {
+      "fail": "Lần giải phóng này cần {document}, và chưa có tài liệu nào được đính kèm",
+      "suggestion": "Đăng ký tài liệu vào hợp đồng, đính kèm vào lần giải phóng và phê duyệt lại"
+    },
+    "within_available": {
+      "fail": "Lần giải phóng này hoàn trả {amount}, nhưng chỉ còn {available} tiền bảo lưu đang được giữ và chưa cam kết cho lần giải phóng khác",
+      "suggestion": "Hủy lần giải phóng này và đề xuất lại, để nó được tính theo tiền bảo lưu đang giữ hiện tại"
+    },
+    "release_period_elapsed": {
+      "fail_no_start": "Lần giải phóng này chỉ được chi trả sau khi thời hạn quyền giữ lại {days} ngày kể từ sự kiện đã trôi qua ({reference}), nhưng không ghi thời điểm bắt đầu kỳ đó",
+      "suggestion_no_start": "Nhập ngày bắt đầu kỳ, ví dụ ngày công bố chứng chỉ hoàn thành về cơ bản, rồi phê duyệt lại lần giải phóng",
+      "fail_early": "Thời hạn quyền giữ lại {days} ngày bắt đầu từ {started} kéo dài đến {ends} ({reference}), nên lần giải phóng này chưa thể phê duyệt",
+      "suggestion_early": "Phê duyệt lần giải phóng sau khi thời hạn quyền giữ lại đã trôi qua, sau khi kiểm tra không có quyền giữ lại nào được lập đối với khoản giữ lại"
+    },
+    "document_roles": {
+      "certificate_substantial_completion": "chứng chỉ hoàn thành về cơ bản",
+      "acceptance_protocol": "biên bản nghiệm thu",
+      "affidavit_payment_of_debts": "giấy cam kết đã thanh toán các khoản nợ và yêu cầu",
+      "affidavit_release_of_liens": "giấy cam kết giải phóng quyền giữ lại",
+      "consent_of_surety": "văn bản chấp thuận của bên bảo lãnh",
+      "final_lien_waiver": "giấy từ bỏ quyền giữ lại lần cuối",
+      "final_invoice": "hóa đơn cuối cùng"
+    },
+    "errors": {
+      "approval_blocked": "Lần giải phóng tiền bảo lưu này không thể phê duyệt cho đến khi giải quyết các mục sau: {findings}",
+      "rules_unavailable": "Các quy tắc giải phóng tiền bảo lưu chưa được tải trên hệ thống này, nên lần giải phóng này không thể kiểm tra trước khi phê duyệt."
+    }
+  },
+  "aia": {
+    "g703": {
+      "billed_not_on_a_schedule_line": "Khối lượng đã lập hóa đơn không thuộc hạng mục nào của bảng giá trị khối lượng"
+    }
+  },
+  "sov_reconcile": {
+    "errors": {
+      "not_active": "Phiếu thay đổi chỉ được đối chiếu vào bảng giá trị khối lượng của hợp đồng đang hiệu lực; hợp đồng này có trạng thái {status}",
+      "preview_stale": "Danh sách phiếu thay đổi cần đối chiếu đã thay đổi kể từ khi bạn mở nó. Hãy mở lại bản xem trước và xác nhận những gì đang hiển thị"
+    }
+  },
+  "compliance_gate": {
+    "errors": {
+      "signature_blocked": "Hợp đồng này không thể ký cho đến khi giải quyết các mục sau: {findings}"
+    }
+  },
+  "payment_plan": {
+    "triggers": {
+      "completion": "hoàn thành",
+      "approval": "phê duyệt"
+    },
+    "total_within_contract": {
+      "fail": "Các đợt thanh toán cộng lại là {scheduled}, vượt quá giá trị hợp đồng {total}",
+      "suggestion": "Giảm các đợt thanh toán để tổng của chúng không vượt quá giá trị hợp đồng"
+    },
+    "percent_sum": {
+      "fail": "Các đợt thanh toán cộng lại là {scheduled} trên giá trị hợp đồng {total} ({percent}%), nên một phần giá không có đợt thanh toán nào",
+      "suggestion": "Thêm một đợt thanh toán cho phần còn lại của giá trị hợp đồng hoặc điều chỉnh số tiền"
+    },
+    "completion_trigger_linked": {
+      "fail": "Đợt thanh toán {milestone} đến hạn khi {trigger}, nhưng chưa được liên kết với hoạt động tiến độ, nên ngày của nó sẽ không thay đổi theo công việc",
+      "suggestion": "Liên kết đợt thanh toán với mốc tiến độ mà nó đang chờ"
+    },
+    "schedule_done_plan_pending": {
+      "fail": "Tiến độ cho thấy {milestone} đã đạt, nhưng đợt thanh toán {instalment} vẫn đang chờ, nên chưa thể yêu cầu thanh toán",
+      "suggestion": "Đánh dấu đợt thanh toán là đã đạt, hoặc kiểm tra vì sao hợp đồng chưa có hiệu lực"
+    },
+    "client_visible_requires_active": {
+      "fail": "Đợt thanh toán {milestone} đang hiển thị cho khách hàng, nhưng hợp đồng có trạng thái {status}; khách hàng chỉ xem kế hoạch của hợp đồng đang hiệu lực hoặc đã hoàn thành",
+      "suggestion": "Ẩn đợt thanh toán khỏi khách hàng cho đến khi hợp đồng có hiệu lực"
+    },
+    "consumer_deposit_cap": {
+      "fail": "Khoản thanh toán trước {deposit} vượt quá mức {ceiling} mà {reference} cho phép tại {jurisdiction} (nguồn: {source_url}, kiểm tra ngày {checked_on}, chưa được luật sư xem xét)",
+      "suggestion": "Giảm khoản đặt cọc, hoặc xác nhận với cố vấn pháp lý rằng một ngoại lệ áp dụng cho hợp đồng này",
+      "below_threshold": {
+        "fail": "Giá trị hợp đồng bằng hoặc thấp hơn mức mà {reference} giới hạn tiền đặt cọc tại {jurisdiction}, nên khoản đặt cọc chưa được kiểm tra (nguồn: {source_url})"
+      },
+      "other_currency": {
+        "fail": "Hợp đồng bằng {currency}, nhưng {reference} quy định giới hạn bằng {limit_currency}, nên khoản đặt cọc tại {jurisdiction} chưa được kiểm tra (nguồn: {source_url})"
+      },
+      "unchecked": {
+        "suggestion": "Nếu luật này áp dụng cho hợp đồng, hãy tự kiểm tra khoản đặt cọc theo luật"
+      }
+    }
+  },
+  "hakedis": {
+    "cumulative_exceeds_contract": {
+      "fail": "Khối lượng đã nghiệm thu đến nay là {cumulative}, vượt {over} so với giá trị hợp đồng {contract}",
+      "suggestion": "Phê duyệt trước phiếu thay đổi bao phủ phần việc phát sinh, hoặc sửa khối lượng trên chứng chỉ này"
+    },
+    "previous_matches_last_certified": {
+      "fail": "Chứng chỉ này ghi {carried} là tổng của các chứng chỉ trước, nhưng chứng chỉ {reference} đã được nghiệm thu ở mức {certified}",
+      "work_fail": "Cột trước đó của danh sách công việc cộng lại là {carried}, nhưng chứng chỉ {reference} đã được nghiệm thu với {certified} khối lượng đến nay",
+      "suggestion": "Tìm một đề nghị nằm giữa hai chứng chỉ mà cả hai đều không thể hiện, rồi lập lại chứng chỉ này"
+    },
+    "previous_unknown": {
+      "fail": "Tổng các chứng chỉ trước chưa được xác định",
+      "not_certified": "Chứng chỉ trước {reference} chưa được nghiệm thu, nên tổng của nó chưa cuối cùng",
+      "suggestion": "Nghiệm thu chứng chỉ trước đó trước. Nếu nó được nghiệm thu trước khi chứng chỉ được lưu, hãy nhập tổng của nó vào dòng chứng chỉ trước"
+    },
+    "weights_sum": {
+      "fail": "Trọng số các hạng mục cộng lại là {total}%, không phải 100%",
+      "suggestion": "Sửa giá trị các dòng tiến độ sao cho tỷ trọng của chúng cộng đủ cho toàn bộ hợp đồng"
+    },
+    "percent_regressed": {
+      "fail": "Hạng mục {line} âm trong kỳ này, nên nó thu hồi khối lượng đã được nghiệm thu",
+      "suggestion": "Giữ nguyên nếu đây là việc sửa một lần đo quá mức trước đó. Nếu không, hãy sửa khối lượng hoặc phần trăm trên chứng chỉ này"
+    },
+    "income_withholding_single_year": {
+      "fail": "Đã chọn khấu trừ thuế thu nhập, nhưng hợp đồng chạy từ {start} đến {end}, trong cùng một năm dương lịch. Khấu trừ áp dụng cho công việc xây dựng kéo dài qua nhiều năm dương lịch",
+      "suggestion": "Hỏi kế toán xem công việc có thực sự kéo dài hơn một năm không; nếu không, đánh dấu khấu trừ thuế thu nhập là không áp dụng"
+    },
+    "advance_recovery_exceeds_advance": {
+      "fail": "Số tạm ứng đã thu hồi đến nay là {recovered}, nhiều hơn khoản tạm ứng {advance} đã chi",
+      "unknown": "Đã thu hồi {recovered} tạm ứng đến nay, nhưng hợp đồng không ghi khoản tạm ứng đã chi, nên không thể đối chiếu việc thu hồi với khoản này",
+      "suggestion": "Giảm mức thu hồi trên chứng chỉ này, hoặc ghi khoản tạm ứng đã chi trong cài đặt chứng chỉ của hợp đồng"
+    },
+    "retention_matches_config": {
+      "fail": "Chứng chỉ giữ lại {certificate} tiền bảo lưu ({percent}% trên cơ sở của nó), nhưng tài liệu đứng sau nó giữ lại {stored}",
+      "suggestion": "Tính lại tài liệu, hoặc sửa tỷ lệ bảo lưu hoặc cơ sở của nó trong cài đặt chứng chỉ của hợp đồng, để cả hai thể hiện cùng một mức bảo lưu"
+    },
+    "net_payable_negative": {
+      "fail": "Số tiền phải trả là {payable}: các khoản khấu trừ lớn hơn số tiền của chứng chỉ này",
+      "suggestion": "Kiểm tra các khoản khấu trừ, nhất là việc thu hồi tạm ứng, và chuyển sang chứng chỉ tiếp theo phần không thể khấu trừ lúc này"
+    },
+    "taxes_stale": {
+      "fail": "Thuế được tính trước khi chứng chỉ này thay đổi, nên chúng không còn thuộc về nó nữa",
+      "suggestion": "Tính lại thuế. Nếu đã xác nhận, hãy mở lại trước rồi xác nhận lại sau"
+    },
+    "taxes_confirmed": {
+      "fail": "Số liệu thuế của chứng chỉ này chưa được xác nhận",
+      "suggestion": "Kiểm tra từng dòng thuế và xác nhận thuế trước khi nghiệm thu"
+    },
+    "lines_complete": {
+      "fail": "Dòng {line} chưa có số liệu. {reason}",
+      "suggestion": "Nhập số tiền, hoặc đánh dấu dòng là không áp dụng và nêu lý do"
+    },
+    "work_value_differs": {
+      "fail": "Hạng mục {line} ghi {stated} đến nay, nhưng khối lượng hoặc phần trăm của nó cho ra {computed}",
+      "suggestion": "Sửa khối lượng hoặc số tiền trên tài liệu để hai cột của dòng khớp nhau"
+    }
+  },
+  "public_works": {
+    "retention_above_limit": {
+      "fail": "Tiền bảo lưu {percent} phần trăm vượt quá mức {limit} phần trăm mà luật công trình công cho phép ở mỗi đợt thanh toán tạm thời",
+      "suggestion": "Giảm tiền bảo lưu của hợp đồng xuống mức theo luật định"
+    },
+    "advance_above_cap": {
+      "fail": "Bảo lãnh tạm ứng bao phủ {percent} phần trăm giá trị hợp đồng, vượt mức {limit} phần trăm mà công trình công cho phép khi chưa có phê duyệt của bộ trưởng tài chính",
+      "suggestion": "Giảm khoản tạm ứng, hoặc ghi trong điều khoản hợp đồng văn bản phê duyệt đã có được trước khi đấu thầu"
+    },
+    "delay_damages_uncapped": {
+      "fail": "Điều khoản bồi thường thiệt hại do chậm tiến độ không có mức tối đa, trong khi luật công trình công giới hạn bồi thường thiệt hại do chậm ở mức {limit} phần trăm giá trị hợp đồng",
+      "suggestion": "Nhập mức tối đa của điều khoản bồi thường thiệt hại do chậm tiến độ"
+    },
+    "delay_damages_above_cap": {
+      "fail": "Điều khoản bồi thường thiệt hại do chậm tiến độ bị giới hạn ở {percent} phần trăm giá trị hợp đồng, vượt mức {limit} phần trăm mà luật công trình công cho phép",
+      "suggestion": "Giảm mức tối đa của điều khoản xuống mức trần theo luật định"
+    },
+    "performance_security_missing": {
+      "fail": "Chưa ghi nhận bảo đảm thực hiện hợp đồng, trong khi công trình công yêu cầu {limit} phần trăm giá trị hợp đồng",
+      "suggestion": "Ghi bảo lãnh cuối cùng như bảo lãnh thực hiện hoặc bảo lãnh ngân hàng"
+    },
+    "performance_security_below": {
+      "fail": "Bảo đảm thực hiện hợp đồng bao phủ {percent} phần trăm giá trị hợp đồng, thấp hơn mức {limit} phần trăm mà công trình công yêu cầu",
+      "suggestion": "Ghi bảo đảm thực hiện hợp đồng với đủ tỷ lệ theo luật định"
+    },
+    "price_adjustment": {
+      "no_coefficients": {
+        "fail": "Công trình công từ {months} tháng trở lên phải được điều chỉnh giá theo luật, nhưng hợp đồng không ghi hệ số nào cho các hạng mục biến đổi",
+        "suggestion": "Nhập các hệ số nhà thầu đã nêu trong hồ sơ kỹ thuật"
+      },
+      "duplicate_item": {
+        "fail": "Hạng mục biến đổi {item} được liệt kê hai lần trong các hệ số điều chỉnh giá",
+        "suggestion": "Giữ một hệ số cho mỗi hạng mục biến đổi"
+      },
+      "coefficient_not_a_number": {
+        "fail": "Hệ số điều chỉnh giá của {item} không phải là số",
+        "suggestion": "Nhập hệ số dưới dạng số thập phân, ví dụ 0.15"
+      },
+      "coefficient_not_positive": {
+        "fail": "Hệ số điều chỉnh giá của {item} bằng không hoặc âm, trong khi luật yêu cầu mỗi hệ số phải lớn hơn không",
+        "suggestion": "Nhập hệ số lớn hơn không, hoặc xóa hạng mục"
+      },
+      "coefficient_negative": {
+        "fail": "Hệ số điều chỉnh giá của {item} là số âm",
+        "suggestion": "Nhập hệ số bằng không hoặc lớn hơn"
+      },
+      "coefficient_sum_not_below_one": {
+        "fail": "Các hệ số điều chỉnh giá cộng lại là {item}, trong khi luật yêu cầu tổng của chúng phải nhỏ hơn một",
+        "suggestion": "Giảm các hệ số để vẫn còn một phần giá cố định"
+      },
+      "coefficient_sum_above_one": {
+        "fail": "Các hệ số điều chỉnh giá cộng lại là {item}, lớn hơn một",
+        "suggestion": "Giảm các hệ số để tổng của chúng bằng một hoặc nhỏ hơn"
+      },
+      "no_coefficients_advisory": {
+        "fail": "Công trình công dài hơn {months} tháng có điều khoản điều chỉnh giá, trong đó nguyên vật liệu chiếm phần đáng kể của chi phí, nhưng hợp đồng không ghi trọng số điều chỉnh nào",
+        "suggestion": "Nhập trọng số của công thức điều chỉnh từ điều kiện riêng, hoặc ghi rằng giá là cố định"
+      },
+      "coefficient_sum_not_one": {
+        "fail": "Các hệ số điều chỉnh giá cộng lại là {item}, trong khi công thức yêu cầu tổng đúng bằng một",
+        "suggestion": "Sửa trọng số theo dữ liệu hợp đồng sao cho tổng bằng một"
+      },
+      "unknown_regime": {
+        "fail": "Hợp đồng nêu chế độ điều chỉnh giá {item}, mà nền tảng không biết",
+        "suggestion": "Chọn một trong các chế độ điều chỉnh giá được liệt kê"
+      },
+      "non_adjustable_portion_out_of_range": {
+        "fail": "Phần không thuộc diện điều chỉnh giá, {item}, không nằm trong khoảng từ không đến một",
+        "suggestion": "Nhập phần đó dưới dạng số thập phân từ dữ liệu hợp đồng, ví dụ 0.15"
+      }
+    },
+    "advance_below_minimum": {
+      "fail": "Tạm ứng là {percent} phần trăm giá trị hợp đồng, thấp hơn mức tối thiểu {limit} phần trăm mà luật công trình công quy định cho nhà thầu và chủ đầu tư này",
+      "suggestion": "Tăng tạm ứng lên mức tối thiểu, hoặc ghi bằng không nếu nhà thầu đã từ bỏ"
+    },
+    "advance_above_maximum": {
+      "fail": "Tạm ứng là {percent} phần trăm giá trị hợp đồng, vượt mức {limit} phần trăm mà luật công trình công quy định là mức tối đa thông thường",
+      "suggestion": "Kiểm tra điều kiện riêng có cho phép mức tạm ứng cao hơn và ghi lại bảo lãnh mà nó yêu cầu"
+    },
+    "delay_damages_rate_differs": {
+      "fail": "Điều khoản phạt chậm tiến độ tính {amount} mỗi ngày, trong khi điều kiện chung tính {expected} mỗi ngày, tức một phần {divisor} của giá trị hợp đồng",
+      "suggestion": "Giữ mức theo ngày của điều kiện chung, hoặc liệt kê mức khác trong các ngoại lệ của điều kiện riêng"
+    },
+    "delay_damages_above_general_conditions": {
+      "fail": "Điều khoản phạt chậm tiến độ bị giới hạn ở {percent} phần trăm giá trị hợp đồng, vượt {limit} phần trăm của điều kiện chung",
+      "suggestion": "Giảm mức trần xuống con số của điều kiện chung, hoặc liệt kê trong các ngoại lệ của điều kiện riêng"
+    }
+  },
+  "works_contract": {
+    "direct_payment_waived": {
+      "fail": "Hợp đồng thầu phụ {amount} này đạt ngưỡng {limit} để chủ đầu tư công trả trực tiếp, và hợp đồng từ bỏ điều đó, điều mà luật cấm",
+      "suggestion": "Ghi nhận rằng chủ đầu tư công trả trực tiếp cho nhà thầu phụ"
+    },
+    "direct_payment_unstated": {
+      "fail": "Hợp đồng thầu phụ {amount} này đạt ngưỡng {limit} để chủ đầu tư công trả trực tiếp, nhưng hợp đồng không ghi điều này",
+      "suggestion": "Ghi nhận nhà thầu phụ có được chấp thuận và được chủ đầu tư công trả trực tiếp hay không"
+    },
+    "payment_guarantee_missing": {
+      "fail": "Hợp đồng thầu phụ công trình tư nhân này không ghi bảo lãnh ngân hàng cũng không ghi ủy quyền thanh toán, thiếu cả hai thì hợp đồng thầu phụ có thể bị vô hiệu",
+      "suggestion": "Ghi bảo lãnh ngân hàng của nhà thầu chính hoặc ủy quyền thanh toán từ chủ đầu tư"
+    },
+    "private_retention_above_limit": {
+      "fail": "Tiền bảo lưu {percent} phần trăm vượt mức {limit} phần trăm mà luật cho phép đối với công trình tư",
+      "suggestion": "Giảm tiền bảo lưu của hợp đồng xuống mức trần theo luật định"
+    }
+  },
+  "vat_regime": {
+    "unknown": {
+      "fail": "Hợp đồng {contract} nêu chế độ thuế GTGT {regime}, mà {country} không có",
+      "suggestion": "Chọn một trong các chế độ thuế GTGT được áp dụng cho quốc gia của dự án, hoặc bỏ lựa chọn này"
+    },
+    "country_unknown": {
+      "fail": "Hợp đồng {contract} nêu chế độ thuế GTGT {regime}, nhưng dự án không ghi quốc gia nào, nên không thể kiểm tra chế độ này",
+      "suggestion": "Đặt quốc gia cho dự án"
+    },
+    "contract_date_missing": {
+      "fail": "Chế độ thuế GTGT {regime} chỉ áp dụng cho hợp đồng ký trước {cutoff}, còn hợp đồng này không ghi cả ngày ký lẫn ngày bắt đầu",
+      "suggestion": "Nhập ngày ký hợp đồng"
+    },
+    "contract_too_late": {
+      "fail": "Chế độ thuế GTGT {regime} chỉ áp dụng cho hợp đồng ký trước {cutoff}, còn hợp đồng này có ngày {contract_date}",
+      "suggestion": "Chọn chế độ thuế GTGT tiêu chuẩn cho hợp đồng này"
+    },
+    "evidence_missing": {
+      "fail": "Chế độ thuế GTGT {regime} cần {evidence}, nhưng hợp đồng không ghi nhận tài liệu nào",
+      "suggestion": "Ghi số tham chiếu và ngày phát hành của tài liệu cùng với chế độ thuế GTGT của hợp đồng"
+    },
+    "evidence_date_missing": {
+      "fail": "{evidence} được ghi cho chế độ thuế GTGT {regime} không có ngày phát hành, nên không thể chứng minh nó có trước {cutoff}",
+      "suggestion": "Nhập ngày tài liệu được phát hành"
+    },
+    "evidence_too_late": {
+      "fail": "{evidence} được ghi cho chế độ thuế GTGT {regime} được phát hành ngày {issued_on}, còn chế độ này cần tài liệu phát hành trước {cutoff}",
+      "suggestion": "Ghi một tài liệu cũ hơn, hoặc chọn chế độ thuế GTGT tiêu chuẩn"
+    },
+    "scope_increase_unjudged": {
+      "fail": "Giá trị hợp đồng tăng từ {original_value} lên {current_value}, và hợp đồng không nêu mức tăng được phép, nên không thể đánh giá chế độ thuế GTGT {regime} còn áp dụng hay không",
+      "suggestion": "Ghi nhận mức tăng phạm vi mà hợp đồng cho phép"
+    },
+    "scope_increase_new_contract": {
+      "fail": "Giá trị hợp đồng tăng từ {original_value} lên {current_value}, vượt mức tăng {allowed_increase_pct} phần trăm mà hợp đồng cho phép, nên về thuế GTGT đây là một hợp đồng mới và chế độ thuế GTGT {regime} không còn áp dụng",
+      "suggestion": "Chuyển hợp đồng sang chế độ thuế GTGT tiêu chuẩn"
+    },
+    "evidence_kinds": {
+      "approved_certificate": "chứng chỉ thanh toán đã được tư vấn phê duyệt",
+      "einvoice": "hóa đơn điện tử hoặc biên lai điện tử",
+      "main_contractor_certificate": "chứng nhận của nhà thầu chính rằng thuế GTGT đã được nộp cho dự án"
+    },
+    "not_in_force": {
+      "before": "Đề nghị {claim} ghi ngày {on}, còn chế độ thuế GTGT {regime} chỉ áp dụng từ {effective_from}; có hiệu lực vào ngày đó: {instead}",
+      "after": "Đề nghị {claim} ghi ngày {on}, còn chế độ thuế GTGT {regime} đã hết hiệu lực vào {effective_to}; có hiệu lực vào ngày đó: {instead}",
+      "suggestion": "Đổi chế độ thuế GTGT của hợp đồng sang chế độ có hiệu lực vào ngày đề nghị, hoặc sửa ngày của đề nghị"
+    }
+  }
+}
