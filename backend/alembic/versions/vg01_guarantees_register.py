@@ -277,6 +277,10 @@ def _move_contract_bonds() -> None:
         bind.execute(sa.text(f"UPDATE {_SEC} SET guarantee_id = :g WHERE id = :id"), {"g": gid, "id": str(row["id"])})
 
 
+# data-rewrite-ack: table=oe_contracts_security growth=tenure rows=one per bond or insurance line on a contract, kept for the life of the contract
+# boot-repair: gap - the boot heal adds the nullable guarantee_id column and writes no rows, so on an install that never runs alembic the bonds already on contracts are not copied into the register and the contract rows stay editable
+
+
 def upgrade() -> None:
     _create()
     _add_link()

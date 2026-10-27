@@ -72,6 +72,7 @@ UNCONSTRAINED_DOCUMENT_REFERENCES: dict[str, tuple[str, ...]] = {
     "design_options": ("DesignOption.source_document_id",),
     "documents": ("ProjectPhoto.document_id", "Sheet.document_id"),
     "fieldreports": ("FieldReport.document_ids",),
+    "guarantees": ("GuaranteeDocument.document_id",),
     "markups": ("Markup.document_id", "ScaleConfig.document_id"),
     "meetings": ("Meeting.document_ids",),
     "plan_room": ("PlanPin.document_id",),
