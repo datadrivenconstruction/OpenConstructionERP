@@ -8,6 +8,7 @@ import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
 import { SUPPORTED_LANGUAGES, getLanguageByCode } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { AuthBackground } from './AuthBackground';
+import { ClassicAuthFooter } from './ClassicAuth';
 
 export function ForgotPasswordPage() {
   const { t, i18n } = useTranslation();
@@ -57,9 +58,10 @@ export function ForgotPasswordPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center bg-surface-secondary p-4 overflow-hidden">
+    <div className="oe-auth relative flex min-h-screen items-center justify-center bg-surface-secondary p-4 overflow-hidden">
       {/* Animated gradient blobs */}
       <AuthBackground />
+      <ClassicAuthFooter />
 
       {/* Language — top right */}
       <div className="absolute top-3 right-3 z-30" ref={langRef}>

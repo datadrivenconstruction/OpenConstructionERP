@@ -19,6 +19,7 @@ import { DesktopServerCard } from './DesktopServerCard';
 import { TextSizeSetting } from './TextSizeSetting';
 import { AppearanceStyleCard } from './AppearanceStyleCard';
 import { TableOptionsCard } from './TableOptionsCard';
+import { WorkModesCard } from './WorkModesCard';
 import { WorkspaceBrandCard } from './WorkspaceBrandCard';
 import { WorkPrefsCard } from './WorkPrefsCard';
 import { MenuAppearanceCard } from './MenuAppearanceCard';
@@ -1482,6 +1483,8 @@ const TABS: readonly TabDef[] = [
 // ── Main Settings Page ───────────────────────────────────────────────────────
 
 export function SettingsPage() {
+  // Remounts the cards a work mode changes, so they show its values.
+  const [modeKey, setModeKey] = useState(0);
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
@@ -1842,11 +1845,12 @@ export function SettingsPage() {
                 <AppearanceCard />
                 <InterfaceModeCard />
               </div>
-              <AppearanceStyleCard />
+              <WorkModesCard onApplied={() => setModeKey((k) => k + 1)} />
+              <AppearanceStyleCard key={`style-${modeKey}`} />
               <MenuAppearanceCard />
               <WorkspaceBrandCard />
               <WorkPrefsCard />
-              <TableOptionsCard />
+              <TableOptionsCard key={`tables-${modeKey}`} />
               <SidebarFooterCard />
               <FloatingButtonsCard />
               <NotificationChannelsCard />

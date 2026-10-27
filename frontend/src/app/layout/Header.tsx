@@ -407,7 +407,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
     <header
       className={clsx(
         'sticky z-30',
-        'flex h-header items-center justify-between gap-3 px-4 sm:px-6 lg:px-8',
+        'oe-app-header flex h-header items-center justify-between gap-3 px-4 sm:px-6 lg:px-8',
         'bg-surface-primary/80 backdrop-blur-xl',
       )}
       // In the desktop shell the browser-style toolbar (h-9 = 36px) sits above
@@ -461,6 +461,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
                   strokeWidth={1.75}
                   className="shrink-0 text-content-secondary"
                   aria-hidden
+                  data-decorative-icon
                 />
               )}
               <span className="truncate" title={translatedTitle}>{translatedTitle}</span>

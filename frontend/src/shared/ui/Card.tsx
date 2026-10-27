@@ -25,7 +25,7 @@ export function Card({
   return (
     <div
       className={clsx(
-        'rounded-xl border border-border-light bg-surface-elevated',
+        'oe-card rounded-xl border border-border-light bg-surface-elevated',
         'shadow-xs',
         'transition-all duration-normal ease-oe transform-gpu',
         hoverable && [
