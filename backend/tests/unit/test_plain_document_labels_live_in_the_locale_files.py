@@ -56,7 +56,7 @@ def test_english_defines_every_label_and_every_other_language_is_a_subset(form: 
 def test_a_translated_label_keeps_the_placeholders_of_the_english_text(code: str, form: str) -> None:
     english = _file_strings("en", form)
     for key, text in _file_strings(code, form).items():
-        assert text.strip(), (code, key)
+        assert text != "", (code, key)
         assert _placeholders(text) == _placeholders(english[key]), (form, code, key)
 
 

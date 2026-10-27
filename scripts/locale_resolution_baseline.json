@@ -1,5 +1,5 @@
 {
-  "_comment": "Functions that resolve a locale by exact match and so answer English for a regional code. Twelve have no production caller; the other four are reached only through resolve_document_locale, which strips first. See the module docstring of scripts/check_locale_resolution.py. This list may shrink, never grow.",
+  "_comment": "Functions that resolve a locale by exact match and so answer English for a regional code. Ten have no production caller; the other four are reached only through resolve_document_locale, which strips first. See the module docstring of scripts/check_locale_resolution.py. This list may shrink, never grow.",
   "known_unstripped": {
     "app.modules.ai_estimator.intl": [
       "band_label",
@@ -18,10 +18,6 @@
     "app.modules.closeout.completeness": [
       "package_status_label",
       "slot_status_label"
-    ],
-    "app.modules.daily_diary.pdf_translations": [
-      "entry_type_label",
-      "status_label"
     ],
     "app.modules.project_intelligence.scorer": [
       "severity_label"

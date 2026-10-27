@@ -91,7 +91,8 @@ def load_document_forms(code: str) -> dict[str, Any]:
 def _text_map(value: Any) -> dict[str, str]:
     if not isinstance(value, dict):
         return {}
-    return {str(k): v for k, v in value.items() if isinstance(v, str) and v.strip()}
+    # Not stripped: a thousands separator is legitimately one non-breaking space.
+    return {str(k): v for k, v in value.items() if isinstance(v, str) and v != ""}
 
 
 def _furniture_for(code: str, default: str) -> dict[str, str]:
