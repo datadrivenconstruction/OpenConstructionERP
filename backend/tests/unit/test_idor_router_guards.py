@@ -458,6 +458,8 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "complete_inspection",
         "create_defect_from_inspection",
         "create_ncr_from_inspection",
+        "inspection_merge_audit",
+        "merge_inspection",
     ],
     "meetings": [
         "get_meeting",
@@ -493,6 +495,8 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "remove_photo",
         "transition_status",
         "upload_photo",
+        "item_merge_audit",
+        "merge_item",
     ],
     "risk": [
         "get_risk",
