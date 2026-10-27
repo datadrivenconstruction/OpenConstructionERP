@@ -69,6 +69,7 @@ import {
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
 import { useToastStore } from '@/stores/useToastStore';
 import { FlagshipDemoCards } from './FlagshipDemoCards';
+import { StepSolutionPackages } from '@/features/solution_packages/StepSolutionPackages';
 import { ReadyPackBrowser } from './ReadyPackBrowser';
 import { OnboardingStepper, STEP, nextStep, previousStep, STEP_COUNT } from './OnboardingStepper';
 import { foldText } from '@/features/modules/packs/packCatalog';
@@ -5054,6 +5055,17 @@ export function OnboardingWizard() {
     setStep(3); // always go to module review
   }, []);
 
+  // Solution packages are the default way through the Profile step; the
+  // single company profile stays one click away.
+  const [useProfiles, setUseProfiles] = useState(false);
+  const handlePackagesInstalled = useCallback((modules: string[]) => {
+    setCompanyType(null);
+    setProfileTouched(true);
+    setEnabledModules(new Set(modules));
+    setShowModuleConfig(true);
+    setStep(3);
+  }, []);
+
   // Onboarding already finished: render nothing while the effect above
   // redirects to the app. Returning null (instead of the wizard) is what
   // actually stops the "Welcome to OpenConstructionERP" modal from
@@ -5188,7 +5200,14 @@ export function OnboardingWizard() {
                   onFinish={() => setStep(STEP.finish)}
                 />
               )}
-              {step === 2 && (
+              {step === 2 && !useProfiles && (
+                <StepSolutionPackages
+                  onInstalled={handlePackagesInstalled}
+                  onUseProfiles={() => setUseProfiles(true)}
+                  onBack={goBack}
+                />
+              )}
+              {step === 2 && useProfiles && (
                 <StepCompanyProfile
                   onNext={handleNextFromProfile}
                   onBack={goBack}

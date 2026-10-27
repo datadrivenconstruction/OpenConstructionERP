@@ -55,7 +55,7 @@ class SolutionPackage:
         return {
             "id": self.id,
             "icon": self.icon,
-            "image": f"/packages/{self.id}.svg",
+            "image": f"illustration:{self.id}",
             "name_key": self.name_key,
             "value_key": self.value_key,
             "audience_key": self.audience_key,

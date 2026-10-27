@@ -1,5 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { useSolutionPackages } from '@/features/solution_packages/api';
+import { isRouteHiddenByPackages } from '@/features/solution_packages/logic';
 import { useState, useCallback, useEffect, useMemo, useRef, Fragment, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -642,16 +644,22 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     return set;
   }, [backendModules]);
 
-  // True when the sidebar route's backing backend module is disabled.
+  // Modules the tenant's solution packages switched off (fail-open while loading).
+  const { data: packageListing } = useSolutionPackages(isAuthenticated);
+  const packageState = packageListing?.state;
+
+  // True when the sidebar route's backing backend module is disabled, on the
+  // server or by the tenant's solution packages.
   const isRouteBackendDisabled = useCallback(
     (to: string) => {
       const path = to.split('?')[0]!;
       const owner = ROUTE_BACKEND_MODULE[to] ?? ROUTE_BACKEND_MODULE[path];
       if (!owner) return false;
+      if (isRouteHiddenByPackages(owner, packageState)) return true;
       if (typeof owner === 'string') return disabledBackendModules.has(owner);
       return owner.every((name) => disabledBackendModules.has(name));
     },
-    [disabledBackendModules],
+    [disabledBackendModules, packageState],
   );
 
   // Role-gate the admin grid. Items without a `roleGate` always show;
