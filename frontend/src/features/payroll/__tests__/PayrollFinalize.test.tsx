@@ -38,7 +38,12 @@ vi.mock('@/stores/useToastStore', () => ({
 
 /* ── Feature-local API mock ───────────────────────────────────────── */
 
-vi.mock('../api', () => ({
+vi.mock('../api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('../api')>()),
+  fetchRuleProfiles: vi.fn().mockResolvedValue([]),
+  fetchPeriods: vi.fn().mockResolvedValue([]),
+  fetchPeriod: vi.fn(),
+  fetchPeriodDashboard: vi.fn().mockResolvedValue(null),
   fetchPayrollBatches: vi.fn(),
   fetchPayrollBatch: vi.fn(),
   generatePayrollBatch: vi.fn(),
@@ -57,6 +62,9 @@ import {
   fetchPayrollBatch,
   finalizeBatch,
   fetchLabourCost,
+  fetchRuleProfiles,
+  fetchPeriods,
+  fetchPeriodDashboard,
 } from '../api';
 import type { PayrollBatch, PayrollBatchDetail, LabourCost } from '../api';
 import PayrollPage from '../PayrollPage';
@@ -152,6 +160,9 @@ beforeEach(() => {
   useProjectContextStore.getState().setActiveProject('proj-1', 'Riverside HQ');
   // Every read on the page needs payroll.read, which starts at manager.
   useAuthStore.setState({ userRole: 'manager' });
+  asMock(fetchRuleProfiles).mockResolvedValue([]);
+  asMock(fetchPeriods).mockResolvedValue([]);
+  asMock(fetchPeriodDashboard).mockResolvedValue(null);
   asMock(fetchPayrollBatches).mockResolvedValue([DRAFT_BATCH]);
   asMock(fetchLabourCost).mockResolvedValue(LABOUR_COST);
   asMock(fetchPayrollBatch).mockResolvedValue(DRAFT_DETAIL);

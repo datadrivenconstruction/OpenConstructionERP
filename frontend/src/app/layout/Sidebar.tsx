@@ -308,6 +308,7 @@ const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
   '/equipment': 'oe_equipment',
   '/resources': 'oe_resources',
   '/payroll': 'oe_payroll',
+  '/cost-benchmarks': 'oe_cost_benchmarks',
   '/certified-payroll': 'oe_certified_payroll',
   '/service': 'oe_service',
   '/portal': 'oe_portal',

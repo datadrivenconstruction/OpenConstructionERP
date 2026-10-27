@@ -305,6 +305,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.cost_match', to: '/cost-match', icon: Link2 },
       { labelKey: 'nav.fx', to: '/fx', icon: Wallet },
       { labelKey: 'nav.benchmarks', to: '/benchmarks', icon: BarChart3, moduleKey: 'cost-benchmark', advancedOnly: true },
+      { labelKey: 'nav.cost_benchmarks', to: '/cost-benchmarks', icon: BarChart3, advancedOnly: true },
     ],
   },
   // ── 4. ESTIMATING ──────────────────────────────────────────────────
