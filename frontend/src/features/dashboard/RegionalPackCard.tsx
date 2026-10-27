@@ -80,7 +80,7 @@ function PackTile({ icon: Icon, label, value }: { icon: LucideIcon; label: strin
       className="flex min-w-0 items-center gap-2.5 rounded-lg bg-surface-secondary/60 px-2.5 py-2"
       data-testid="regional-pack-tile"
     >
-      <Icon size={15} strokeWidth={1.75} className="shrink-0 text-oe-blue" aria-hidden="true" />
+      <Icon size={15} strokeWidth={1.75} className="shrink-0 text-oe-blue" aria-hidden="true" data-decorative-icon />
       <div className="min-w-0">
         <p className="truncate text-2xs text-content-tertiary" title={label}>
           {label}
@@ -181,7 +181,7 @@ export function RegionalPackCard() {
       <div className={SHELL} data-testid="regional-pack-none">
         <div className="flex items-start gap-3">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-secondary text-content-tertiary">
-            <Globe2 size={18} strokeWidth={1.75} aria-hidden="true" />
+            <Globe2 size={18} strokeWidth={1.75} aria-hidden="true" data-decorative-icon />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-semibold text-content-primary">
@@ -268,8 +268,7 @@ export function RegionalPackCard() {
         <ChevronDown
           size={12}
           className={rulesOpen ? 'rotate-180 transition-transform' : 'transition-transform'}
-          aria-hidden="true"
-        />
+          aria-hidden="true" />
       </button>
     );
   }
@@ -281,7 +280,7 @@ export function RegionalPackCard() {
           <CountryFlag code={country} size={28} className="shrink-0 rounded-sm shadow-sm" />
         ) : (
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-surface-secondary text-content-tertiary">
-            <Globe2 size={16} strokeWidth={1.75} aria-hidden="true" />
+            <Globe2 size={16} strokeWidth={1.75} aria-hidden="true" data-decorative-icon />
           </div>
         )}
         <div className="min-w-0 flex-1">
