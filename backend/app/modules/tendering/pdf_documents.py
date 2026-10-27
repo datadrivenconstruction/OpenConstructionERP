@@ -55,6 +55,7 @@ from reportlab.platypus import (
 from app.core.money import minor_units, money_quantum
 from app.core.pdf_branding import (
     DEFAULT_BRAND,
+    branded_appearance,
     branded_cover_brand,
     branded_doc_metadata,
     branded_header_logo,
@@ -70,6 +71,7 @@ from app.core.pdf_fonts import (
     pdf_style_for_text,
     register_pdf_fonts,
 )
+from app.core.pdf_signatures import signature_block, signers_for
 
 # Register the bundled Unicode (DejaVu) faces with reportlab. Idempotent and
 # safe at import time because reportlab is imported at module level here.
@@ -474,7 +476,13 @@ def generate_award_letter_pdf(
 
     flow.append(Paragraph("Yours faithfully,", styles["signoff"]))
     signer = awarded_by_name or project_name or "The Project Team"
-    flow.append(_safe_para(signer, styles["value"]))
+    flow.extend(
+        signature_block(
+            signers_for("award_letter", branded_appearance("award_letter"), names={"client": signer}),
+            PAGE_WIDTH - MARGIN_LEFT - MARGIN_RIGHT,
+            heading=False,
+        )
+    )
 
     build_with_page_count(doc, flow)
     pdf_bytes = buffer.getvalue()

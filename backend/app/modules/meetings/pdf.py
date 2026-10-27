@@ -459,6 +459,10 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
         elements.append(minutes_paragraph(style_heading, L("summary")))
         elements.append(minutes_paragraph(style_body, summary, line_breaks=True))
 
+    from app.core.pdf_branding import branded_appearance as _sig_look
+    from app.core.pdf_signatures import signature_block, signers_for
+
+    elements.extend(signature_block(signers_for("meeting_minutes", _sig_look("meeting_minutes")), USABLE_WIDTH))
     elements.append(Spacer(1, 8 * mm))
     stamp = datetime.now(UTC).strftime("%Y-%m-%d %H:%M UTC")
     issued_note = ""
