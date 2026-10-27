@@ -467,6 +467,7 @@ teach identifiers that were never rule sets at all.
 | `submittal` | Submittals |
 | `property_dev` | Development appraisal |
 | `pipeline` | Opportunity pipeline |
+| `offline_sync` | Offline merge from a device: every conflicting field resolved before the merge applies |
 | `din276` | DIN 276 cost groups (DE) |
 | `gaeb` | GAEB LV structure and ordinals (DE) |
 | `onorm` | ÖNORM (AT) |

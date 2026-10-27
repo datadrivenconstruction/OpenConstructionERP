@@ -170,6 +170,11 @@
       "es",
       "ru"
     ],
+    "backend/app/modules/schedule_advanced/messages": [
+      "de",
+      "en",
+      "ru"
+    ],
     "backend/app/modules/site_logistics/messages": [
       "de",
       "en"
