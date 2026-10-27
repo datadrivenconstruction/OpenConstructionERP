@@ -731,6 +731,13 @@ const resource = {
     "projects.color.label": "Project colour",
     "projects.color.auto": "Automatic",
     "projects.color.hint": "Shown as a stripe at the top while you work in this project and as a dot in project lists. Everyone on the team sees it.",
+    "accountingSync.sync.push_selected": "Post {{count}} reviewed",
+    "accountingSync.sync.push_hint_review": "Tick the documents you reviewed below, then post them. Payments recorded in your books come back.",
+    "accountingSync.docs.review_all": "Mark all as reviewed",
+    "accountingSync.docs.review_one": "Reviewed {{number}}",
+    "accountingSync.doc_source.payroll": "Payroll",
+    "accountingSync.category.payroll_cost": "Payroll cost",
+    "accountingSync.category.payroll_liability": "Wages payable",
   }
 } as { translation: Record<string, string> };
 

@@ -1671,6 +1671,13 @@ const resource = {
     "tax_rates.flow_intro": "Some countries have one sales tax rate and some do not. Canada has a federal rate that one province replaces with a single harmonized one, that several add their own to, and that four charge on its own. There is no Canadian rate, only a rate for a place on a date, so this page asks for both before it answers.",
     "schedule.tabular_import.match_none": "Not recognized",
     "supplier_catalogs.err_unknown_unit": "unit not recognized",
+    "accountingSync.sync.push_selected": "Post {{count}} reviewed",
+    "accountingSync.sync.push_hint_review": "Check the documents you reviewed below, then post them. Payments recorded in your books come back.",
+    "accountingSync.docs.review_all": "Mark all as reviewed",
+    "accountingSync.docs.review_one": "Reviewed {{number}}",
+    "accountingSync.doc_source.payroll": "Payroll",
+    "accountingSync.category.payroll_cost": "Payroll cost",
+    "accountingSync.category.payroll_liability": "Wages payable",
   }
 } as { translation: Record<string, string> };
 
