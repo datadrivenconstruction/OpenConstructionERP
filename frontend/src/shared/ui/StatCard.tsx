@@ -125,6 +125,7 @@ export function StatCard({
               ICON_CHIP_TONES[tone],
             )}
             aria-hidden
+            data-decorative-icon
           >
             <Icon size={16} />
           </span>

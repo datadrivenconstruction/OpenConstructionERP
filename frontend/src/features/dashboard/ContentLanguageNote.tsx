@@ -33,7 +33,7 @@ export function ContentLanguageNote({
       data-testid={testId}
       className={clsx('inline-flex flex-wrap items-center gap-1 text-2xs text-content-tertiary', className)}
     >
-      <Languages size={11} aria-hidden="true" />
+      <Languages size={11} aria-hidden="true" data-decorative-icon />
       {shown.map((tag) => (
         <span key={tag} className="rounded border border-border-light px-1 font-semibold uppercase">
           {tag}
