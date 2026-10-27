@@ -245,6 +245,8 @@ export function WideModal({
 // procurement line items).
 
 export interface WideModalSectionProps {
+  /** Record id; inline validation marks this section when the record has findings. */
+  checkRef?: string;
   /** Section heading (rendered as <h3>). */
   title?: string;
   /** Optional helper copy under the heading. */
@@ -267,9 +269,10 @@ export function WideModalSection({
   columns = 2,
   children,
   className,
+  checkRef,
 }: WideModalSectionProps) {
   return (
-    <section className={clsx('mb-6 last:mb-0', className)}>
+    <section className={clsx('mb-6 last:mb-0', className)} data-check-ref={checkRef || undefined}>
       {title && (
         <h3 className="text-sm font-semibold text-content-primary mb-1">
           {title}
