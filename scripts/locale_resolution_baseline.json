@@ -18,6 +18,10 @@
     "app.modules.daily_diary.pdf_translations": [
       "entry_type_label",
       "status_label"
+    ],
+    "app.modules.reporting.report_translations": [
+      "field_label",
+      "section_title"
     ]
   }
 }

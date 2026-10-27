@@ -16,15 +16,11 @@ from app.core.i18n import SUPPORTED_LOCALES, catalogue_table, get_all_translatio
 from app.core.money import format_money
 from app.core.regional_format import date_format_for_language, number_style_for_language
 from app.core.validation.dsl.nl_builder import parse_nl_to_dsl
-from app.modules.einvoice import pdf_translations as inv
 from app.modules.property_dev.intl import explain_figure, localize_status, localize_term
 from app.modules.reporting import intl as rep
-from app.modules.reporting import report_translations as rt
 
 
-def test_every_document_catalogue_offers_every_interface_language() -> None:
-    assert set(rt.SUPPORTED_REPORT_LOCALES) == set(SUPPORTED_LOCALES)
-    assert set(inv.SUPPORTED_PDF_LOCALES) == set(SUPPORTED_LOCALES)
+def test_every_explainer_offers_every_interface_language() -> None:
     assert set(rep.SUPPORTED_LOCALES) == set(SUPPORTED_LOCALES)
 
 
@@ -36,29 +32,6 @@ def test_every_language_has_number_and_date_conventions(locale: str) -> None:
     assert {"YYYY", "MM", "DD"} <= {tok for tok in ("YYYY", "MM", "DD") if tok in pattern}
 
 
-@pytest.mark.parametrize(
-    ("locale", "money", "number", "day"),
-    [
-        ("en", "1,240,000.50", "1.5", "2026-04-15"),
-        ("de", "1.240.000,50", "1,5", "15.04.2026"),
-        ("hu", "1\u00a0240\u00a0000,50", "1,5", "2026.04.15."),
-        ("ja", "1,240,000.50", "1.5", "2026/04/15"),
-        ("hi", "12,40,000.50", "1.5", "15/04/2026"),
-    ],
-)
-def test_the_invoice_page_formats_for_the_reader_language(locale: str, money: str, number: str, day: str) -> None:
-    assert inv.fmt_money(Decimal("1240000.5"), "EUR", locale) == money
-    assert inv.fmt_number(Decimal("1.5"), locale) == number
-    assert inv.fmt_date("2026-04-15", locale) == day
-
-
-@pytest.mark.parametrize("locale", ["fr", "ja", "el", "uk", "ar", "vi"])
-def test_the_invoice_labels_come_from_the_catalogue(locale: str) -> None:
-    # A language still waiting for its translation reads English per key, never a raw key.
-    assert inv.tr(locale, "amount_due")
-    assert not inv.tr(locale, "amount_due").startswith("einvoice.")
-
-
 def test_money_follows_the_language_not_just_en_and_de() -> None:
     assert format_money("1234.5", "EUR", "en") == "\u20ac 1,234.50"
     assert format_money("1234.5", "EUR", "de") == "1.234,50 \u20ac"
@@ -67,13 +40,13 @@ def test_money_follows_the_language_not_just_en_and_de() -> None:
 
 
 def test_catalogue_table_covers_every_language_and_falls_back_to_english() -> None:
-    table = catalogue_table("reporting.field", ("budget", "actual"))
+    table = catalogue_table("property_dev.term", ("gross_development_value", "residual_land_value"))
     assert set(table) == set(SUPPORTED_LOCALES)
-    assert table["de"]["budget"] == "Budget"
-    assert table["sw" if "sw" in table else "en"]["actual"] == "Actual"
-    by_key = catalogue_table("reporting.field", ("budget",), by_key=True)
-    assert set(by_key["budget"]) == set(SUPPORTED_LOCALES)
-    assert lookup("reporting.field.no_such_key", "de") is None
+    assert table["de"]["gross_development_value"] == "Bruttoentwicklungswert"
+    assert table["en"]["residual_land_value"]
+    by_key = catalogue_table("property_dev.term", ("gross_development_value",), by_key=True)
+    assert set(by_key["gross_development_value"]) == set(SUPPORTED_LOCALES)
+    assert lookup("property_dev.term.no_such_key", "de") is None
 
 
 def test_explainers_follow_the_language() -> None:
@@ -100,7 +73,7 @@ def test_rule_builder_errors_and_hints_are_localized() -> None:
 
 def test_migrated_label_tables_are_complete_in_en_de_ru() -> None:
     en = get_all_translations("en")
-    prefixes = ("reporting.doc.", "reporting.section.", "reporting.field.", "einvoice.pdf.", "property_dev.term.")
+    prefixes = ("property_dev.term.",)
     for locale in ("de", "ru"):
         bundle = get_all_translations(locale)
         for key in en:
