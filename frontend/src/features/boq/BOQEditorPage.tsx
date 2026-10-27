@@ -104,6 +104,7 @@ import { ImportPreviewDialog } from './ImportPreviewDialog';
 import { BOQFilterBar, type BoqFilterKind } from './BOQFilterBar';
 import { BOQOutline } from './BOQOutline';
 import type { TenderPackageRef } from './api';
+import { BOQSheetMode, SheetModeToggle, useSheetMode } from './sheet/SheetMode';
 import { boqGuide } from './boqGuide';
 import { isTextEntryElement, resolveBoqShortcut } from './boqShortcuts';
 // evaluateFormula used in BOQGrid, not directly here
@@ -317,6 +318,7 @@ export function BOQEditorPage() {
   // option value, so it matched thirteen of its thirty-one regions and none of
   // the demo projects at all.
   const locale = useNumberLocale();
+  const sheetMode = useSheetMode();
   // Issue #270 - the user's measurement-system preference, threaded into the
   // client-side PDF export so quantities + unit labels print in the chosen
   // system (storage stays metric-canonical; only the export boundary
@@ -5625,6 +5627,20 @@ export function BOQEditorPage() {
             setBoqFilter('all');
           }}
         />
+        {sheetMode.available && (
+          <SheetModeToggle active={sheetMode.active} onToggle={sheetMode.toggle} />
+        )}
+        {sheetMode.active ? (
+          <BOQSheetMode
+            boqId={boqId!}
+            positions={filteredGridPositions}
+            locale={locale}
+            standard={project?.classification_standard}
+            variables={boqVariables}
+            readOnly={Boolean(boq.is_locked)}
+            onCreateRows={handleExcelPaste}
+          />
+        ) : (
         <BOQGrid
           ref={boqGridRef}
           positions={filteredGridPositions}
@@ -5709,7 +5725,8 @@ export function BOQEditorPage() {
           boqVariables={boqVariables}
           bimModelId={bimModelId}
           onHighlightBIMElements={handleHighlightBIMElements}
-        /></div>
+        />
+        )}</div>
       ) : boq.is_locked ? null : (
         <div className="rounded-xl border border-border-light bg-surface-elevated shadow-xs overflow-hidden p-8">
           <EmptyBOQOnboarding

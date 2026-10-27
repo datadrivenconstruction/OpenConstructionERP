@@ -209,6 +209,9 @@ from app.modules.boq.schemas import (
     SectionCreate,
     SensitivityItem,
     SensitivityResponse,
+    SheetEditedRow,
+    SheetEditRequest,
+    SheetEditResult,
     SnapshotCompareRequest,
     SnapshotCompareResponse,
     SnapshotCreate,
@@ -2302,6 +2305,65 @@ async def bulk_update_positions(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
+
+
+@router.patch(
+    "/boqs/{boq_id}/positions/sheet-edit/",
+    response_model=SheetEditResult,
+    summary="Write a spreadsheet-mode batch of cell edits",
+    description=(
+        "Writes different values to many positions in one transaction. Each row carries the version "
+        "the client read; one stale row refuses the whole batch with 409. Totals and markups are "
+        "recomputed exactly and the validation engine runs on the result."
+    ),
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def sheet_edit_positions(
+    boq_id: uuid.UUID,
+    data: SheetEditRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> SheetEditResult:
+    """Apply a sheet edit, then answer with new versions, exact totals and the validation verdict."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    try:
+        rows, log_id = await service.apply_sheet_edits(boq_id, data, actor_id=user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+    report = await validate_boq(boq_id, user_id, payload, session, service)
+    bill = await service.get_boq_with_positions(boq_id)
+    counts = report.get("counts", {}) if isinstance(report, dict) else {}
+    return SheetEditResult(
+        rows=[
+            SheetEditedRow(
+                id=r.id,
+                version=int(r.version or 0),
+                quantity=Decimal(str(r.quantity)),
+                unit_rate=Decimal(str(r.unit_rate)),
+                total=Decimal(str(r.total)),
+            )
+            for r in rows
+        ],
+        direct_cost_total=bill.direct_cost_total,
+        markups_total=bill.markups_total,
+        grand_total=bill.grand_total,
+        validation_status=report.get("status") if isinstance(report, dict) else None,
+        validation_errors=int(counts.get("errors", 0)),
+        validation_warnings=int(counts.get("warnings", 0)),
+        issues=[
+            {
+                "position_id": r.get("element_ref"),
+                "rule_id": r.get("rule_id"),
+                "severity": r.get("severity"),
+                "message": r.get("message"),
+            }
+            for r in (report.get("results", []) if isinstance(report, dict) else [])
+            if not r.get("passed") and r.get("element_ref")
+        ],
+        log_id=log_id,
+    )
 
 
 @router.post(

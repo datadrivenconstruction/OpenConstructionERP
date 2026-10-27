@@ -25818,6 +25818,13 @@
           "request_schema": "BulkPositionUpdate"
         },
         {
+          "method": "PATCH",
+          "path": "/boqs/{boq_id}/positions/sheet-edit/",
+          "handler": "sheet_edit_positions",
+          "response_model": "SheetEditResult",
+          "request_schema": "SheetEditRequest"
+        },
+        {
           "method": "POST",
           "path": "/boqs/{boq_id}/positions/{position_id}/restore-field/",
           "handler": "restore_position_field",
@@ -26892,6 +26899,119 @@
               "name": "log_id",
               "type": "UUID | None",
               "description": "Activity-log entry id for the umbrella bulk action."
+            }
+          ]
+        },
+        {
+          "class_name": "SheetCellEdit",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "One row's changed cells from the spreadsheet editing mode.\n\n``version`` is the row version the client last read; the whole batch is\nrefused with 409 when any row moved on since.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "version",
+              "type": "int"
+            },
+            {
+              "name": "fields",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "SheetEditRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A bulk cell edit: every row is written in one transaction or none is.",
+          "fields": [
+            {
+              "name": "edits",
+              "type": "list[SheetCellEdit]"
+            }
+          ]
+        },
+        {
+          "class_name": "SheetEditedRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "The new state of one edited row, so the client can refresh its versions.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "version",
+              "type": "int"
+            },
+            {
+              "name": "quantity",
+              "type": "Decimal"
+            },
+            {
+              "name": "unit_rate",
+              "type": "Decimal"
+            },
+            {
+              "name": "total",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "SheetEditResult",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Outcome of a sheet edit: new rows, exact bill totals and the validation verdict.",
+          "fields": [
+            {
+              "name": "rows",
+              "type": "list[SheetEditedRow]"
+            },
+            {
+              "name": "direct_cost_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "markups_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "grand_total",
+              "type": "Decimal"
+            },
+            {
+              "name": "validation_status",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "validation_errors",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "validation_warnings",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "issues",
+              "type": "list[dict[str, Any]]",
+              "description": "Failed rule results that name a position: position_id, rule_id, severity, message."
+            },
+            {
+              "name": "log_id",
+              "type": "UUID | None",
+              "default": "None"
             }
           ]
         },
@@ -280795,10 +280915,10 @@
     },
     {
       "name": "boq",
-      "ts_files": 214,
+      "ts_files": 228,
       "css_files": 0,
-      "test_files": 113,
-      "total_files": 214
+      "test_files": 115,
+      "total_files": 228
     },
     {
       "name": "buyer-portal",
@@ -283745,11 +283865,11 @@
     "total_models": 803,
     "total_columns": 9359,
     "total_relationships": 244,
-    "total_routes": 4696,
-    "total_schemas": 4177,
+    "total_routes": 4697,
+    "total_schemas": 4181,
     "total_python_files": 2853,
     "frontend_features": 211,
-    "frontend_ts_files": 3682,
+    "frontend_ts_files": 3696,
     "frontend_backend_mapped": 188
   },
   "frontend_backend_mapping": {
