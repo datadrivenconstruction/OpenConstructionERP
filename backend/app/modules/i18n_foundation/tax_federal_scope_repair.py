@@ -130,9 +130,11 @@ _UNSET_COMBINATION = "national"
 #: nothing, which is what a state rate adds to. Hong Kong ships an identically
 #: shaped ``NONE`` row and stays ``national``, since nothing sits alongside it -
 #: which is why this is a list of pairs and not a rule about zero rates.
+#: Pakistan's federal sales tax is the layer the provincial services taxes sit beside.
 SHIPPED_FEDERAL_COMBINATION: dict[tuple[str, str], str] = {
     ("CA", "GST"): "federal",
     ("US", "NONE"): "federal",
+    ("PK", "GST"): "federal",
 }
 
 
