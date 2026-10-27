@@ -352,6 +352,7 @@ from app.modules.boq.schemas import (
     ScenarioCreate,
     SectionCreate,
     SectionResponse,
+    SheetEditRequest,
     TemplateInfo,
 )
 from app.modules.boq.templates import TEMPLATES
@@ -5405,6 +5406,85 @@ class BOQService:
         return position
 
     # ── v3.12.0 Stream A - bulk update & per-field restore ───────────────────
+
+    async def apply_sheet_edits(
+        self,
+        boq_id: uuid.UUID,
+        payload: SheetEditRequest,
+        *,
+        actor_id: uuid.UUID | None = None,
+    ) -> tuple[list[Position], uuid.UUID | None]:
+        """Write a spreadsheet-mode batch of cell edits all or nothing.
+
+        Every row's version is checked before the first write, so a stale
+        batch is refused whole with 409 and nothing is half applied. Each row
+        then goes through :meth:`update_position` (total recompute, audit
+        diff, version bump, link propagation) inside one savepoint. Metadata
+        keys are merged into the stored metadata, never replace it.
+
+        Args:
+            boq_id: BOQ every edited position must belong to.
+            payload: Validated sheet edit.
+            actor_id: User the audit rows are attributed to.
+
+        Returns:
+            The updated positions in request order and the umbrella log id.
+
+        Raises:
+            HTTPException 409: BOQ locked, or a row was changed by someone else.
+            HTTPException 404: A position is not in this BOQ.
+        """
+        boq = await self._ensure_not_locked(boq_id)
+        ids = [e.id for e in payload.edits]
+        loaded = {row.id: row for row in await self.position_repo.list_by_ids(ids)}
+        stale: list[str] = []
+        for edit in payload.edits:
+            row = loaded.get(edit.id)
+            if row is None or row.boq_id != boq_id:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Position {edit.id} not found in BOQ {boq_id}",
+                )
+            if int(row.version or 0) != edit.version:
+                stale.append(str(edit.id))
+        if stale:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"message": "Positions were changed by another writer. Reload and retry.", "ids": stale},
+            )
+
+        updated: list[Position] = []
+        async with self.session.begin_nested():
+            for edit in payload.edits:
+                fields = dict(edit.fields)
+                if "metadata" in fields:
+                    stored = loaded[edit.id].metadata_ if isinstance(loaded[edit.id].metadata_, dict) else {}
+                    fields["metadata"] = {**stored, **(fields["metadata"] or {})}
+                if fields.get("quantity") is not None:
+                    fields["quantity"] = float(_quantize_money(_to_decimal(fields["quantity"], default=Decimal("0"))))
+                if fields.get("unit_rate") is not None:
+                    fields["unit_rate"] = _quantize_money(_to_decimal(fields["unit_rate"], default=Decimal("0")))
+                data = PositionUpdate(**fields, version=edit.version)
+                updated.append(await self.update_position(edit.id, data, actor_id=actor_id))
+
+        log_id: uuid.UUID | None = None
+        if actor_id is not None:
+            entry = await self.log_activity(
+                user_id=actor_id,
+                action="position.sheet_edit",
+                target_type="boq",
+                description=f"Sheet edit on {len(updated)} position(s)",
+                project_id=boq.project_id,
+                boq_id=boq_id,
+                changes={"ids": [str(i) for i in ids], "fields": sorted({k for e in payload.edits for k in e.fields})},
+            )
+            log_id = entry.id
+        await _safe_publish(
+            "boq.positions.sheet_edited",
+            {"boq_id": str(boq_id), "project_id": str(boq.project_id), "position_ids": [str(i) for i in ids]},
+            session=self.session,
+        )
+        return updated, log_id
 
     async def bulk_update_positions(
         self,

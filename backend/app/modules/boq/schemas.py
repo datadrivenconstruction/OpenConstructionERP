@@ -981,6 +981,80 @@ class BulkUpdateResult(BaseModel):
     )
 
 
+class SheetCellEdit(BaseModel):
+    """One row's changed cells from the spreadsheet editing mode.
+
+    ``version`` is the row version the client last read; the whole batch is
+    refused with 409 when any row moved on since.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    id: UUID
+    version: int = Field(..., ge=0)
+    fields: dict[str, Any] = Field(..., min_length=1)
+
+    @model_validator(mode="after")
+    def _allowed_fields(self) -> "SheetCellEdit":
+        bad = set(self.fields) - SHEET_EDITABLE_FIELDS
+        if bad:
+            raise ValueError(f"fields not editable in sheet mode: {sorted(bad)}")
+        return self
+
+
+SHEET_EDITABLE_FIELDS: frozenset[str] = frozenset(
+    {"ordinal", "description", "unit", "quantity", "unit_rate", "classification", "metadata"},
+)
+
+
+class SheetEditRequest(BaseModel):
+    """A bulk cell edit: every row is written in one transaction or none is."""
+
+    edits: list[SheetCellEdit] = Field(..., min_length=1, max_length=10_000)
+
+    @model_validator(mode="after")
+    def _unique_rows(self) -> "SheetEditRequest":
+        ids = [e.id for e in self.edits]
+        if len(ids) != len(set(ids)):
+            raise ValueError("each position may appear only once per sheet edit")
+        return self
+
+
+class SheetEditedRow(BaseModel):
+    """The new state of one edited row, so the client can refresh its versions."""
+
+    id: UUID
+    version: int
+    quantity: Decimal
+    unit_rate: Decimal
+    total: Decimal
+
+    @field_serializer("quantity", "unit_rate", "total", when_used="json")
+    def _money_str(self, v: Decimal) -> str:
+        return str(v)
+
+
+class SheetEditResult(BaseModel):
+    """Outcome of a sheet edit: new rows, exact bill totals and the validation verdict."""
+
+    rows: list[SheetEditedRow]
+    direct_cost_total: Decimal
+    markups_total: Decimal
+    grand_total: Decimal
+    validation_status: str | None = None
+    validation_errors: int = 0
+    validation_warnings: int = 0
+    issues: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Failed rule results that name a position: position_id, rule_id, severity, message.",
+    )
+    log_id: UUID | None = None
+
+    @field_serializer("direct_cost_total", "markups_total", "grand_total", when_used="json")
+    def _total_str(self, v: Decimal) -> str:
+        return str(v)
+
+
 class RestoreFieldRequest(BaseModel):
     """Restore a single field on one position from a prior activity-log row.
 

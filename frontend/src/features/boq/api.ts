@@ -130,6 +130,8 @@ export interface Position {
   price_basis?: string | null;
   sort_order: number;
   validation_status: string;
+  /** Optimistic concurrency token; the sheet edit sends it back unchanged. */
+  version?: number;
   /** BIM element IDs linked to this position (cross-highlight source). */
   cad_element_ids?: string[];
   /**
@@ -1982,6 +1984,13 @@ export const boqApi = {
     ),
 
   /**
+   * Spreadsheet mode: write different values to many rows in one
+   * transaction. One stale row version refuses the whole batch with 409.
+   */
+  sheetEditPositions: (boqId: string, data: SheetEditRequest) =>
+    apiPatch<SheetEditResult, SheetEditRequest>(`/v1/boq/boqs/${boqId}/positions/sheet-edit/`, data),
+
+  /**
    * v3.12.0 Stream A — restore a single field on a position from a prior
    * `BOQActivityLog` entry. The backend writes through the normal update
    * path so totals recompute, validation resets, and the version bumps.
@@ -2453,6 +2462,29 @@ export interface CustomColumnDef {
  * sign for display only. Values are typed: `number` round-trips as a
  * float, `text` and `date` as strings, `null` means unset.
  */
+export interface SheetEditRequest {
+  edits: Array<{ id: string; version: number; fields: Record<string, unknown> }>;
+}
+
+export interface SheetEditIssue {
+  position_id: string;
+  rule_id: string;
+  severity: 'error' | 'warning' | 'info';
+  message: string;
+}
+
+export interface SheetEditResult {
+  rows: Array<{ id: string; version: number; quantity: string; unit_rate: string; total: string }>;
+  direct_cost_total: string;
+  markups_total: string;
+  grand_total: string;
+  validation_status: string | null;
+  validation_errors: number;
+  validation_warnings: number;
+  issues: SheetEditIssue[];
+  log_id: string | null;
+}
+
 export interface BOQVariable {
   name: string;
   type: 'number' | 'text' | 'date';
