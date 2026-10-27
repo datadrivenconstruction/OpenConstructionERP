@@ -1736,7 +1736,7 @@ function PackageDetail({
   const awardablePackage = pkg.status === 'collecting' || pkg.status === 'evaluating';
 
   return (
-    <div className="mt-4 space-y-4 animate-fade-in">
+    <div className="mt-4 space-y-4 animate-fade-in" data-check-ref={packageId}>
       {/* Package info + actions */}
       <Card>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
