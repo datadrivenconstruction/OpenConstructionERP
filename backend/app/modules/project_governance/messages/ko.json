@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "확인"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "알 수 없는 결정 결과입니다",
+      "gate_not_in_review": "게이트가 검토 중이 아니므로 결정을 기록할 수 없습니다",
+      "gate_not_decided": "결정이 끝난 게이트만 다시 열 수 있습니다",
+      "rationale_required": "이 결정의 사유를 입력하세요",
+      "required_document_not_approved": "이 게이트에서 필요한 프레임 문서가 승인 준비가 되지 않았습니다",
+      "area_without_owner": "이 관리 영역에는 담당자가 없어 준비 상태를 확인해 줄 사람이 없습니다",
+      "area_not_ready": "이 관리 영역은 게이트를 위한 준비가 되지 않았습니다",
+      "evidence_not_met": "이 영역에 필요한 준비 상태 증빙이 충족되지 않았습니다",
+      "unknown_evidence_not_acknowledged": "이 영역의 준비 상태 증빙이 확인되지 않았거나 경고를 포함하고 있습니다. 게이트를 통과시키기 전에 증빙을 확인했는지 체크하세요",
+      "unknown_criterion": "이 준비 기준은 해당 영역과 게이트에 대한 프로젝트 모델에 포함되어 있지 않습니다",
+      "check_stale": "준비 상태 확인 이후 문서가 변경되어 해당 영역을 다시 확인해야 합니다",
+      "condition_overdue": "이전 게이트의 조건이 기한을 넘겼으므로 먼저 해소하거나 면제해야 합니다",
+      "conditions_required": "조건부 진행에는 최소 하나의 조건이 필요합니다",
+      "conditions_not_allowed": "조건은 조건부 진행에만 설정할 수 있습니다",
+      "condition_text_required": "모든 조건에는 내용이 필요합니다",
+      "condition_unknown_area": "이 조건이 지정한 영역은 이 프로젝트에 포함되어 있지 않습니다",
+      "waiver_needs_rationale": "면제에는 서면 사유가 필요합니다",
+      "not_applicable_needs_rationale": "해당 없음으로 표시하려면 서면 사유가 필요합니다",
+      "not_applicable_not_accepted": "결정권자가 이 영역을 해당 없음으로 인정하지 않았습니다",
+      "decider_not_entitled": "승인 경로에 따라 이 게이트를 결정할 권한이 없습니다",
+      "decider_is_area_owner": "4안 원칙에 따라 영역 담당자 또는 대리인은 이 게이트를 결정할 수 없습니다",
+      "hold_needs_resume_date": "보류에는 앞으로의 재개 날짜가 필요합니다",
+      "proceed_at_risk_needs_conditions": "위험을 감수한 진행은 조건부 진행일 때만 가능합니다",
+      "proceed_at_risk_area_not_blocking": "이 영역은 진행을 막지 않으므로 위험 감수 진행 대상으로 지정할 수 없습니다",
+      "project_stopped": "프로젝트가 한 게이트에서 중단되었습니다",
+      "document_read_only": "프로젝트가 중단되어 이 프레임 문서는 읽기 전용입니다",
+      "binding_requires_change_request": "이 프레임 문서는 구속력이 있으며 변경 요청을 통해서만 바꿀 수 있습니다",
+      "phase_mapping_missing": "새 단계 모델에는 이 단계에 대한 매핑이 필요합니다",
+      "phase_mapping_unknown_target": "매핑이 새 모델에 없는 단계를 지정하고 있습니다",
+      "no_decision_route": "게이트 결정에 고정된 승인 경로가 없습니다. 거버넌스 관리자가 거버넌스 설정에서 프로젝트 고유의 경로 하나를 지정해야 합니다",
+      "route_not_at_final_step": "승인 경로가 아직 마지막 단계에 도달하지 않았습니다",
+      "route_not_pending": "이 게이트의 승인 경로는 더 이상 대기 중이 아닙니다",
+      "concurrent_decision": "방금 다른 사용자가 이 게이트를 결정했습니다. 새로고침한 후 결정 내용을 확인하세요",
+      "gate_out_of_order": "프로젝트가 이 게이트가 마무리하는 단계에 있지 않습니다",
+      "model_missing": "이 프로젝트에 거버넌스 모델이 설정되어 있지 않습니다",
+      "model_exists": "거버넌스 모델이 이미 설정되어 있습니다. 단계 매핑을 통해 변경하세요",
+      "unknown_catalogue": "알 수 없는 카탈로그입니다",
+      "area_not_found": "관리 영역을 찾을 수 없습니다",
+      "gate_not_found": "게이트를 찾을 수 없습니다",
+      "document_not_found": "프레임 문서를 찾을 수 없습니다",
+      "condition_not_found": "조건을 찾을 수 없습니다",
+      "change_request_not_found": "변경 요청을 찾을 수 없습니다",
+      "check_not_found": "준비 상태 점검을 찾을 수 없습니다",
+      "not_area_owner": "이 영역의 담당자 또는 대리인만 이 작업을 할 수 있습니다",
+      "owner_not_project_member": "담당자는 이 프로젝트에 접근 권한이 있어야 합니다",
+      "unknown_document_type": "이 문서 유형은 이 영역의 카탈로그에 포함되어 있지 않습니다",
+      "container_not_in_project": "CDE 컨테이너가 이 프로젝트에 속하지 않습니다",
+      "invalid_transition": "이 상태 변경은 허용되지 않습니다",
+      "condition_not_open": "열림 상태의 조건만 해소하거나 면제할 수 있습니다",
+      "document_not_binding": "구속력 있는 프레임 문서만 변경 요청을 통해 바꿀 수 있습니다",
+      "no_pending_revision": "구속력을 부여할 새 개정본이 없습니다",
+      "change_request_not_open": "이 변경 요청은 더 이상 열려 있지 않습니다",
+      "invalid_status": "이 상태는 여기에서 허용되지 않습니다",
+      "decision_immutable": "게이트 결정은 변경하거나 삭제할 수 없습니다",
+      "document_exists": "이 프레임 문서는 이미 해당 영역에서 관리되고 있습니다",
+      "catalogue_code_taken": "이 코드를 가진 카탈로그가 이미 있습니다",
+      "catalogue_retired": "이 카탈로그는 폐기되어 더 이상 편집하거나 고정할 수 없습니다",
+      "catalogue_invalid": "카탈로그 초안이 카탈로그 규칙을 위반하여 게시할 수 없습니다",
+      "gate_historic": "이 게이트는 프로젝트가 이미 벗어난 단계 모델에 속하며 더 이상 변경할 수 없습니다",
+      "gate_not_on_hold": "보류 중인 게이트만 재개할 수 있습니다",
+      "later_gate_active": "이후 게이트가 이미 시작되어 이 게이트를 다시 열 수 없습니다",
+      "model_unchanged": "프로젝트가 이미 이 버전의 단계 모델을 사용하고 있습니다",
+      "not_condition_owner": "이 조건을 부여받은 사람 또는 관리자만 해소할 수 있습니다",
+      "route_needs_more_approvals": "승인 경로의 마지막 단계에는 다른 승인자의 승인이 아직 필요합니다. 승인자는 승인 화면에서 승인하며, 마지막 승인자가 결정을 기록합니다",
+      "activity_not_in_project": "일정 활동이 이 프로젝트에 속하지 않습니다",
+      "target_date_owned_by_schedule": "이 게이트는 날짜를 관리하는 일정 활동과 연결되어 있습니다. 여기서 날짜를 설정하려면 연결을 해제하세요",
+      "no_change_route": "구속력 있는 문서 변경에 고정된 승인 경로가 없습니다. 거버넌스 관리자가 거버넌스 설정에서 프로젝트 고유의 경로 하나를 지정해야 합니다",
+      "route_not_pinnable": "이 승인 경로는 지정할 수 없습니다. 이 유형의 결정에 대해 프로젝트의 활성 경로여야 합니다",
+      "area_retired": "이 영역은 단계 모델 변경으로 폐기되어 새 문서를 받지 않습니다",
+      "pack_catalogue_invalid": "활성 팩이 이 카탈로그를 선언하지만, 해당 파일이 없거나 카탈로그 규칙을 위반합니다",
+      "settings_frozen_in_review": "게이트가 검토 중이거나 보류 중이면 변경할 수 없습니다. 먼저 해당 게이트를 결정하세요",
+      "null_not_allowed": "이 항목은 비워 둘 수 없습니다"
+    },
+    "outcome": {
+      "go": "진행",
+      "go_with_conditions": "조건부 진행",
+      "hold": "보류",
+      "recycle": "재작업 요청",
+      "stop": "중단"
+    },
+    "gate_state": {
+      "not_started": "시작 전",
+      "in_preparation": "준비 중",
+      "in_review": "검토 중",
+      "on_hold": "보류",
+      "decided": "결정됨"
+    },
+    "document_state": {
+      "draft": "초안",
+      "in_review": "검토 중",
+      "approved_at_gate": "게이트에서 승인됨",
+      "binding": "구속력 있음",
+      "superseded": "대체됨"
+    },
+    "check_status": {
+      "not_assessed": "평가 전",
+      "ready": "준비 완료",
+      "ready_with_risks": "위험 있음, 준비 완료",
+      "not_ready": "준비 미완료",
+      "not_applicable": "해당 없음"
+    },
+    "condition_status": {
+      "open": "열림",
+      "cleared": "해소됨",
+      "waived": "면제됨",
+      "overdue": "기한 초과"
+    },
+    "export": {
+      "title": "거버넌스 결정 이력",
+      "col_gate": "게이트",
+      "col_attempt": "시도",
+      "col_outcome": "결과",
+      "col_decided_by": "결정자",
+      "col_decided_at": "결정 일시",
+      "col_rationale": "사유",
+      "col_conditions": "조건",
+      "col_at_risk": "위험 감수 진행",
+      "project": "프로젝트",
+      "empty": "아직 기록된 게이트 결정이 없습니다"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "관리 영역 {area}에 담당자가 없습니다",
+        "suggestion": "영역의 준비 상태를 확인할 수 있도록 담당자를 지정하세요"
+      },
+      "required_documents_defined": {
+        "fail": "게이트 {gate}에 필요한 프레임 문서가 없는 해당 영역이 있습니다",
+        "suggestion": "이 게이트에서 카탈로그가 요구하는 프레임 문서를 첨부하거나, 사유를 적어 해당 영역을 해당 없음으로 표시하세요"
+      },
+      "binding_document_unchanged": {
+        "fail": "구속력 있는 프레임 문서 {document}에 승인된 변경 요청으로 다루지 않은 더 새로운 개정본이 있습니다",
+        "suggestion": "새 개정본이 사용되기 전에 승인되도록 변경 요청을 올리세요"
+      },
+      "conditions_not_overdue": {
+        "fail": "조건 {condition}이(가) {due}부터 기한을 넘겼습니다",
+        "suggestion": "증빙과 함께 조건을 해소하거나, 결정권자가 사유를 적어 면제하도록 하세요"
+      },
+      "gate_date_after_previous": {
+        "fail": "게이트 {gate}은(는) {date}로 계획되어 있으며, 이전 게이트({previous})보다 앞섭니다",
+        "suggestion": "게이트가 단계 순서를 따르도록 게이트 날짜를 옮기세요"
+      },
+      "decision_by_entitled_user": {
+        "fail": "게이트 {gate}의 결정이 해당 게이트의 영역 담당자 중 한 명인 사용자에 의해 기록되었습니다",
+        "suggestion": "4안 원칙에 따라 다른 사람이 결정해야 합니다"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "영역 {area}이(가) 사유 없이 해당 없음으로 표시되어 있습니다",
+        "suggestion": "이 영역이 적용되지 않는 이유를 적으세요"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "게이트: 인허가에서 상세 설계로",
+          "award_to_construction": "게이트: 계약 체결에서 시공으로",
+          "brief_to_concept": "게이트: 브리프에서 컨셉으로",
+          "concept_to_design": "게이트: 컨셉에서 설계로",
+          "construction_to_handover": "게이트: 시공에서 인도로",
+          "design_to_approval": "게이트: 설계에서 인허가로",
+          "detail_to_tender": "게이트: 상세 설계에서 입찰로",
+          "handover_to_operation": "게이트: 인도에서 운영으로",
+          "strategy_to_brief": "게이트: 전략에서 브리프로",
+          "tender_to_award": "게이트: 입찰에서 계약 체결로"
+        }
+      }
+    }
+  }
+}

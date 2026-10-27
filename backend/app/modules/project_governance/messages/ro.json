@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Acest rezultat al deciziei nu este cunoscut",
+      "gate_not_in_review": "Etapa nu este în analiză, prin urmare nu se poate înregistra o decizie pentru ea",
+      "gate_not_decided": "Doar o etapă decisă poate fi redeschisă",
+      "rationale_required": "Notați motivul acestei decizii",
+      "required_document_not_approved": "Un document-cadru obligatoriu nu este pregătit pentru aprobare la această etapă",
+      "area_without_owner": "Acest domeniu de management nu are un responsabil, deci nimeni nu poate atesta pregătirea lui",
+      "area_not_ready": "Acest domeniu de management nu este pregătit pentru etapă",
+      "evidence_not_met": "Dovezile de pregătire obligatorii pentru acest domeniu nu sunt îndeplinite",
+      "unknown_evidence_not_acknowledged": "Dovezile de pregătire ale acestui domeniu sunt neconfirmate sau au un avertisment. Confirmați că le-ați văzut înainte de a lăsa etapa să treacă",
+      "unknown_criterion": "Acest criteriu de pregătire nu face parte din modelul proiectului pentru acest domeniu și această etapă",
+      "check_stale": "Un document a fost modificat după confirmarea pregătirii, prin urmare domeniul trebuie confirmat din nou",
+      "condition_overdue": "O condiție dintr-o etapă anterioară a depășit termenul și trebuie mai întâi îndeplinită sau renunțată",
+      "conditions_required": "Un „da cu condiții” necesită cel puțin o condiție",
+      "conditions_not_allowed": "Doar un „da cu condiții” poate avea condiții",
+      "condition_text_required": "Fiecare condiție necesită un text",
+      "condition_unknown_area": "Condiția indică un domeniu care nu face parte din acest proiect",
+      "waiver_needs_rationale": "Renunțarea la o condiție necesită o motivație scrisă",
+      "not_applicable_needs_rationale": "Marcarea ca neaplicabil necesită o motivație scrisă",
+      "not_applicable_not_accepted": "Decidentul nu a acceptat acest domeniu ca neaplicabil",
+      "decider_not_entitled": "Nu aveți dreptul să decideți asupra acestei etape conform traseului de aprobare",
+      "decider_is_area_owner": "Potrivit regulii celor patru ochi, un responsabil de domeniu sau supleantul său nu poate decide asupra acestei etape",
+      "hold_needs_resume_date": "Suspendarea necesită o dată de reluare în viitor",
+      "proceed_at_risk_needs_conditions": "Continuarea cu risc este posibilă doar cu un „da cu condiții”",
+      "proceed_at_risk_area_not_blocking": "Acest domeniu nu blochează, prin urmare nu poate fi indicat ca fiind continuat cu risc",
+      "project_stopped": "Proiectul a fost oprit la o etapă",
+      "document_read_only": "Acest document-cadru este doar pentru citire, deoarece proiectul a fost oprit",
+      "binding_requires_change_request": "Acest document-cadru este obligatoriu și se modifică doar printr-o cerere de modificare",
+      "phase_mapping_missing": "Noul model de faze necesită o corespondență pentru această fază",
+      "phase_mapping_unknown_target": "Corespondența indică o fază pe care noul model nu o are",
+      "no_decision_route": "Nu este fixat un traseu de aprobare pentru deciziile de etapă. Un responsabil cu guvernanța fixează unul dintre traseele proprii ale proiectului în setările de guvernanță",
+      "route_not_at_final_step": "Traseul de aprobare nu a ajuns încă la pasul final",
+      "route_not_pending": "Traseul de aprobare al acestei etape nu mai este în așteptare",
+      "concurrent_decision": "Altcineva a decis asupra acestei etape chiar acum; reîncărcați pagina și verificați decizia",
+      "gate_out_of_order": "Proiectul nu se află în faza pe care o încheie această etapă",
+      "model_missing": "Nu este setat un model de guvernanță pentru acest proiect",
+      "model_exists": "Un model de guvernanță este deja setat; modificați-l printr-o corespondență de faze",
+      "unknown_catalogue": "Acest catalog nu este cunoscut",
+      "area_not_found": "Domeniul de management nu a fost găsit",
+      "gate_not_found": "Etapa nu a fost găsită",
+      "document_not_found": "Documentul-cadru nu a fost găsit",
+      "condition_not_found": "Condiția nu a fost găsită",
+      "change_request_not_found": "Cererea de modificare nu a fost găsită",
+      "check_not_found": "Verificarea de pregătire nu a fost găsită",
+      "not_area_owner": "Doar responsabilul sau supleantul acestui domeniu poate face aceasta",
+      "owner_not_project_member": "Responsabilul trebuie să aibă acces la acest proiect",
+      "unknown_document_type": "Acest tip de document nu face parte din catalogul pentru acest domeniu",
+      "container_not_in_project": "Containerul CDE nu aparține acestui proiect",
+      "invalid_transition": "Această modificare de stare nu este permisă",
+      "condition_not_open": "Doar o condiție deschisă poate fi îndeplinită sau renunțată",
+      "document_not_binding": "Doar un document-cadru obligatoriu poate fi modificat printr-o cerere de modificare",
+      "no_pending_revision": "Nu există o revizie mai nouă care să devină obligatorie",
+      "change_request_not_open": "Această cerere de modificare nu mai este deschisă",
+      "invalid_status": "Acest status nu este permis aici",
+      "decision_immutable": "O decizie de etapă nu poate fi modificată sau ștearsă",
+      "document_exists": "Acest document-cadru este deja urmărit pentru domeniu",
+      "catalogue_code_taken": "Există deja un catalog cu acest cod",
+      "catalogue_retired": "Acest catalog a fost retras și nu mai poate fi editat sau fixat",
+      "catalogue_invalid": "Ciorna catalogului încalcă o regulă a catalogului și nu poate fi publicată",
+      "gate_historic": "Această etapă aparține unui model de faze pe care proiectul l-a părăsit și nu mai poate fi modificată",
+      "gate_not_on_hold": "Doar o etapă suspendată poate fi reluată",
+      "later_gate_active": "O etapă ulterioară a fost deja începută, prin urmare această etapă nu poate fi redeschisă",
+      "model_unchanged": "Proiectul folosește deja această versiune a modelului de faze",
+      "not_condition_owner": "Doar persoana căreia i s-a atribuit această condiție sau un manager o poate îndeplini",
+      "route_needs_more_approvals": "Pasul final al traseului de aprobare mai necesită alți aprobatori; aceștia aprobă în ecranul de aprobări, iar ultimul înregistrează decizia",
+      "activity_not_in_project": "Activitatea din grafic nu aparține acestui proiect",
+      "target_date_owned_by_schedule": "Această etapă este legată de o activitate din grafic, care îi stabilește data; desfaceți legătura pentru a seta aici o dată",
+      "no_change_route": "Nu este fixat un traseu de aprobare pentru modificările documentelor obligatorii. Un responsabil cu guvernanța fixează unul dintre traseele proprii ale proiectului în setările de guvernanță",
+      "route_not_pinnable": "Acest traseu de aprobare nu poate fi fixat: trebuie să fie un traseu activ al acestui proiect pentru acest tip de decizie",
+      "area_retired": "Acest domeniu a fost retras printr-o modificare a modelului de faze și nu mai primește documente noi",
+      "pack_catalogue_invalid": "Pachetul activ declară acest catalog, dar fișierul său lipsește sau încalcă regulile catalogului",
+      "settings_frozen_in_review": "Acest lucru nu poate fi modificat cât timp o etapă este în analiză sau suspendată; decideți mai întâi asupra etapei",
+      "null_not_allowed": "Acest câmp nu poate fi gol"
+    },
+    "outcome": {
+      "go": "Da",
+      "go_with_conditions": "Da cu condiții",
+      "hold": "Suspendare",
+      "recycle": "Reluare analiză",
+      "stop": "Oprire"
+    },
+    "gate_state": {
+      "not_started": "Nepornită",
+      "in_preparation": "În pregătire",
+      "in_review": "În analiză",
+      "on_hold": "Suspendată",
+      "decided": "Decisă"
+    },
+    "document_state": {
+      "draft": "Ciornă",
+      "in_review": "În analiză",
+      "approved_at_gate": "Aprobat la etapă",
+      "binding": "Obligatoriu",
+      "superseded": "Înlocuit"
+    },
+    "check_status": {
+      "not_assessed": "Neevaluat",
+      "ready": "Pregătit",
+      "ready_with_risks": "Pregătit cu riscuri",
+      "not_ready": "Nepregătit",
+      "not_applicable": "Neaplicabil"
+    },
+    "condition_status": {
+      "open": "Deschisă",
+      "cleared": "Îndeplinită",
+      "waived": "Renunțat",
+      "overdue": "Depășită"
+    },
+    "export": {
+      "title": "Jurnalul deciziilor de guvernanță",
+      "col_gate": "Etapă",
+      "col_attempt": "Încercare",
+      "col_outcome": "Rezultat",
+      "col_decided_by": "Decis de",
+      "col_decided_at": "Decis la",
+      "col_rationale": "Motivație",
+      "col_conditions": "Condiții",
+      "col_at_risk": "Continuare cu risc",
+      "project": "Proiect",
+      "empty": "Nu a fost înregistrată încă nicio decizie de etapă"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Domeniul de management {area} nu are un responsabil",
+        "suggestion": "Desemnați un responsabil pentru domeniu, astfel încât pregătirea lui să poată fi atestată"
+      },
+      "required_documents_defined": {
+        "fail": "Etapa {gate} are domenii aplicabile fără niciun document-cadru obligatoriu",
+        "suggestion": "Atașați documentele-cadru pe care catalogul le cere pentru această etapă sau marcați domeniul ca neaplicabil, cu o motivație"
+      },
+      "binding_document_unchanged": {
+        "fail": "Documentul-cadru obligatoriu {document} are o revizie mai nouă care nu este acoperită de o cerere de modificare aprobată",
+        "suggestion": "Depuneți o cerere de modificare pentru ca noua revizie să fie aprobată înainte de utilizare"
+      },
+      "conditions_not_overdue": {
+        "fail": "Condiția {condition} a depășit termenul din {due}",
+        "suggestion": "Îndepliniți condiția cu dovezi sau cereți decidentului să o renunțe motivat"
+      },
+      "gate_date_after_previous": {
+        "fail": "Etapa {gate} este planificată pentru {date}, înaintea etapei anterioare din {previous}",
+        "suggestion": "Mutați data etapei astfel încât etapele să urmeze ordinea fazelor"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Decizia pentru etapa {gate} a fost înregistrată de un utilizator care este responsabilul unuia dintre domeniile sale",
+        "suggestion": "Potrivit regulii celor patru ochi, decizia trebuie luată de o altă persoană"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Domeniul {area} este marcat ca neaplicabil fără motivație",
+        "suggestion": "Notați de ce domeniul nu se aplică"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Etapă: Autorizare către proiectare de detaliu",
+          "award_to_construction": "Etapă: Atribuire către execuție",
+          "brief_to_concept": "Etapă: Tema de proiectare către concept",
+          "concept_to_design": "Etapă: Concept către proiectare",
+          "construction_to_handover": "Etapă: Execuție către recepție",
+          "design_to_approval": "Etapă: Proiectare către autorizare",
+          "detail_to_tender": "Etapă: Proiectare de detaliu către licitație",
+          "handover_to_operation": "Etapă: Recepție către exploatare",
+          "strategy_to_brief": "Etapă: Strategie către tema de proiectare",
+          "tender_to_award": "Etapă: Licitație către atribuire"
+        }
+      }
+    }
+  }
+}

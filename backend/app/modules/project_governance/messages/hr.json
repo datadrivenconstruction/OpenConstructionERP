@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Ovaj ishod odluke nije poznat",
+      "gate_not_in_review": "Prag nije u pregledu, pa se na njemu ne može zabilježiti odluka",
+      "gate_not_decided": "Ponovno se može otvoriti samo prag na kojem je odluka donesena",
+      "rationale_required": "Upišite razlog za ovu odluku",
+      "required_document_not_approved": "Obvezni okvirni dokument nije spreman za odobrenje na ovom pragu",
+      "area_without_owner": "Ovo upravljačko područje nema odgovornu osobu, pa nitko ne može potvrditi njegovu spremnost",
+      "area_not_ready": "Ovo upravljačko područje nije spremno za prag",
+      "evidence_not_met": "Obvezni dokazi spremnosti za ovo područje nisu ispunjeni",
+      "unknown_evidence_not_acknowledged": "Dokaz spremnosti ovog područja nije potvrđen ili sadrži upozorenje. Potvrdite da ste ga pregledali prije nego što propustite prag",
+      "unknown_criterion": "Ovaj kriterij spremnosti nije dio modela projekta za ovo područje i ovaj prag",
+      "check_stale": "Dokument je promijenjen nakon potvrde spremnosti, pa područje treba ponovno potvrditi",
+      "condition_overdue": "Uvjet iz ranijeg praga je zakašnjeo i prvo ga treba zatvoriti ili odreći se",
+      "conditions_required": "Uvjetno odobrenje zahtijeva najmanje jedan uvjet",
+      "conditions_not_allowed": "Samo uvjetno odobrenje može imati uvjete",
+      "condition_text_required": "Svaki uvjet mora imati tekst",
+      "condition_unknown_area": "Uvjet navodi područje koje nije dio ovog projekta",
+      "waiver_needs_rationale": "Odricanje zahtijeva pisano obrazloženje",
+      "not_applicable_needs_rationale": "Označavanje ovoga kao neprimjenjivoga zahtijeva pisano obrazloženje",
+      "not_applicable_not_accepted": "Donositelj odluke nije prihvatio ovo područje kao neprimjenjivo",
+      "decider_not_entitled": "Prema svom putu odobrenja niste ovlašteni donijeti odluku o ovom pragu",
+      "decider_is_area_owner": "Prema načelu četiri oka, odgovorna osoba ili zamjenik područja ne smije donijeti odluku o ovom pragu",
+      "hold_needs_resume_date": "Zadržavanje zahtijeva datum nastavka u budućnosti",
+      "proceed_at_risk_needs_conditions": "Nastavak uz rizik moguć je samo uz uvjetno odobrenje",
+      "proceed_at_risk_area_not_blocking": "Ovo područje nije blokirajuće, pa se ne može navesti kao nastavak uz rizik",
+      "project_stopped": "Projekt je zaustavljen na pragu",
+      "document_read_only": "Ovaj okvirni dokument je samo za čitanje jer je projekt zaustavljen",
+      "binding_requires_change_request": "Ovaj okvirni dokument je obvezujući i mijenja se samo putem zahtjeva za izmjenu",
+      "phase_mapping_missing": "Novi model faza zahtijeva preslikavanje za ovu fazu",
+      "phase_mapping_unknown_target": "Preslikavanje navodi fazu koju novi model nema",
+      "no_decision_route": "Za odluke o pragovima nije određen put odobrenja. Voditelj upravljanja odabire jedan od vlastitih puteva projekta u postavkama upravljanja",
+      "route_not_at_final_step": "Put odobrenja još nije stigao do završnog koraka",
+      "route_not_pending": "Put odobrenja ovog praga više nije na čekanju",
+      "concurrent_decision": "Netko je upravo donio odluku o ovom pragu; ponovno učitajte stranicu i provjerite odluku",
+      "gate_out_of_order": "Projekt nije u fazi koju ovaj prag zatvara",
+      "model_missing": "Za ovaj projekt nije postavljen model upravljanja",
+      "model_exists": "Model upravljanja već je postavljen; promijenite ga preslikavanjem faza",
+      "unknown_catalogue": "Ovaj katalog nije poznat",
+      "area_not_found": "Upravljačko područje nije pronađeno",
+      "gate_not_found": "Prag nije pronađen",
+      "document_not_found": "Okvirni dokument nije pronađen",
+      "condition_not_found": "Uvjet nije pronađen",
+      "change_request_not_found": "Zahtjev za izmjenu nije pronađen",
+      "check_not_found": "Provjera spremnosti nije pronađena",
+      "not_area_owner": "Ovo može učiniti samo odgovorna osoba ili zamjenik ovog područja",
+      "owner_not_project_member": "Odgovorna osoba mora imati pristup ovom projektu",
+      "unknown_document_type": "Ova vrsta dokumenta nije dio kataloga za ovo područje",
+      "container_not_in_project": "CDE spremnik ne pripada ovom projektu",
+      "invalid_transition": "Ova promjena stanja nije dopuštena",
+      "condition_not_open": "Zatvoriti ili odreći se može samo otvoreni uvjet",
+      "document_not_binding": "Kroz zahtjev za izmjenu može se mijenjati samo obvezujući okvirni dokument",
+      "no_pending_revision": "Nema novije revizije koju bi trebalo učiniti obvezujućom",
+      "change_request_not_open": "Ovaj zahtjev za izmjenu više nije otvoren",
+      "invalid_status": "Ovaj status ovdje nije dopušten",
+      "decision_immutable": "Odluka o pragu ne može se mijenjati ni brisati",
+      "document_exists": "Ovaj okvirni dokument već se prati za područje",
+      "catalogue_code_taken": "Katalog s ovom oznakom već postoji",
+      "catalogue_retired": "Ovaj katalog je povučen i više se ne može uređivati ni određivati",
+      "catalogue_invalid": "Nacrt kataloga krši pravilo kataloga i ne može se objaviti",
+      "gate_historic": "Ovaj prag pripada modelu faza koji je projekt napustio i više se ne može mijenjati",
+      "gate_not_on_hold": "Nastaviti se može samo prag koji je zadržan",
+      "later_gate_active": "Kasniji prag je već pokrenut, pa se ovaj prag ne može ponovno otvoriti",
+      "model_unchanged": "Projekt već koristi ovu verziju modela faza",
+      "not_condition_owner": "Uvjet može zatvoriti samo osoba kojoj je dodijeljen ili voditelj",
+      "route_needs_more_approvals": "Završni korak puta odobrenja još čeka druge odobravatelje; oni odobravaju na zaslonu za odobrenja, a posljednji bilježi odluku",
+      "activity_not_in_project": "Aktivnost rasporeda ne pripada ovom projektu",
+      "target_date_owned_by_schedule": "Ovaj prag povezan je s aktivnošću rasporeda koja upravlja njegovim datumom; prekinite povezivanje da biste ovdje postavili datum",
+      "no_change_route": "Za izmjene obvezujućih dokumenata nije određen put odobrenja. Voditelj upravljanja odabire jedan od vlastitih puteva projekta u postavkama upravljanja",
+      "route_not_pinnable": "Ovaj put odobrenja ne može se odrediti: mora biti aktivan put projekta za ovu vrstu odluke",
+      "area_retired": "Ovo područje je povučeno promjenom modela faza i ne prima nove dokumente",
+      "pack_catalogue_invalid": "Aktivni paket deklarira ovaj katalog, ali njegova datoteka nedostaje ili krši pravila kataloga",
+      "settings_frozen_in_review": "Ovo se ne može mijenjati dok je prag u pregledu ili zadržan; prvo donesite odluku o pragu",
+      "null_not_allowed": "Ovo polje ne smije biti prazno"
+    },
+    "outcome": {
+      "go": "Odobreno",
+      "go_with_conditions": "Odobreno uz uvjete",
+      "hold": "Zadržano",
+      "recycle": "Vraćeno na doradu",
+      "stop": "Zaustavljeno"
+    },
+    "gate_state": {
+      "not_started": "Nije započeto",
+      "in_preparation": "U pripremi",
+      "in_review": "U pregledu",
+      "on_hold": "Zadržano",
+      "decided": "Odlučeno"
+    },
+    "document_state": {
+      "draft": "Nacrt",
+      "in_review": "U pregledu",
+      "approved_at_gate": "Odobreno na pragu",
+      "binding": "Obvezujuće",
+      "superseded": "Zamijenjeno"
+    },
+    "check_status": {
+      "not_assessed": "Nije procijenjeno",
+      "ready": "Spremno",
+      "ready_with_risks": "Spremno uz rizike",
+      "not_ready": "Nije spremno",
+      "not_applicable": "Nije primjenjivo"
+    },
+    "condition_status": {
+      "open": "Otvoreno",
+      "cleared": "Zatvoreno",
+      "waived": "Odreknuto",
+      "overdue": "Zakašnjelo"
+    },
+    "export": {
+      "title": "Dnevnik odluka upravljanja",
+      "col_gate": "Prag",
+      "col_attempt": "Pokušaj",
+      "col_outcome": "Ishod",
+      "col_decided_by": "Odlučio",
+      "col_decided_at": "Odlučeno",
+      "col_rationale": "Obrazloženje",
+      "col_conditions": "Uvjeti",
+      "col_at_risk": "Nastavak uz rizik",
+      "project": "Projekt",
+      "empty": "Još nije zabilježena nijedna odluka o pragu"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Upravljačko područje {area} nema odgovornu osobu",
+        "suggestion": "Imenujte odgovornu osobu za područje kako bi se njegova spremnost mogla potvrditi"
+      },
+      "required_documents_defined": {
+        "fail": "Prag {gate} ima primjenjiva područja bez ijednog obveznog okvirnog dokumenta",
+        "suggestion": "Priložite okvirne dokumente koje katalog zahtijeva za ovaj prag ili označite područje kao neprimjenjivo s obrazloženjem"
+      },
+      "binding_document_unchanged": {
+        "fail": "Obvezujući okvirni dokument {document} ima noviju reviziju koju ne pokriva odobreni zahtjev za izmjenu",
+        "suggestion": "Podnesite zahtjev za izmjenu kako bi nova revizija bila odobrena prije uporabe"
+      },
+      "conditions_not_overdue": {
+        "fail": "Uvjet {condition} zakašnjava od {due}",
+        "suggestion": "Zatvorite uvjet dokazom ili neka donositelj odluke ga odbaci uz obrazloženje"
+      },
+      "gate_date_after_previous": {
+        "fail": "Prag {gate} planiran je za {date}, prije prethodnog praga planiranog za {previous}",
+        "suggestion": "Pomaknite datum praga tako da pragovi slijede redoslijed faza"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Odluku o pragu {gate} zabilježio je korisnik koji je odgovoran za jedno od njegovih područja",
+        "suggestion": "Prema načelu četiri oka odluku mora donijeti druga osoba"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Područje {area} označeno je kao neprimjenjivo bez obrazloženja",
+        "suggestion": "Napišite zašto se područje ne primjenjuje"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Prag: od odobrenja do detaljnog projektiranja",
+          "award_to_construction": "Prag: od dodjele do izgradnje",
+          "brief_to_concept": "Prag: od zadatka do koncepta",
+          "concept_to_design": "Prag: od koncepta do projektiranja",
+          "construction_to_handover": "Prag: od izgradnje do primopredaje",
+          "design_to_approval": "Prag: od projektiranja do odobrenja",
+          "detail_to_tender": "Prag: od detaljnog projektiranja do natječaja",
+          "handover_to_operation": "Prag: od primopredaje do pogona",
+          "strategy_to_brief": "Prag: od strategije do zadatka",
+          "tender_to_award": "Prag: od natječaja do dodjele"
+        }
+      }
+    }
+  }
+}

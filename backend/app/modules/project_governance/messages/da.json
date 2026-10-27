@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Dette beslutningsudfald er ukendt",
+      "gate_not_in_review": "Gaten er ikke under behandling, så der kan ikke registreres en beslutning på den",
+      "gate_not_decided": "Kun en besluttet gate kan genåbnes",
+      "rationale_required": "Skriv begrundelsen for denne beslutning",
+      "required_document_not_approved": "Et påkrævet rammedokument er ikke klar til godkendelse ved denne gate",
+      "area_without_owner": "Dette ledelsesområde har ingen ejer, så ingen kan attestere dets parathed",
+      "area_not_ready": "Dette ledelsesområde er ikke klar til gaten",
+      "evidence_not_met": "Det påkrævede parathedsbevis for dette område er ikke opfyldt",
+      "unknown_evidence_not_acknowledged": "Parathedsbeviset for dette område er ubekræftet eller har en advarsel. Bekræft, at du har set det, før du lader gaten passere",
+      "unknown_criterion": "Dette parathedskriterium indgår ikke i projektets model for dette område og denne gate",
+      "check_stale": "Et dokument er ændret efter parathed blev bekræftet, så området skal bekræftes igen",
+      "condition_overdue": "En betingelse fra en tidligere gate er forfalden og skal først opfyldes eller frafaldes",
+      "conditions_required": "En go med betingelser kræver mindst én betingelse",
+      "conditions_not_allowed": "Kun en go med betingelser kan have betingelser",
+      "condition_text_required": "Hver betingelse skal have en tekst",
+      "condition_unknown_area": "Betingelsen nævner et område, der ikke indgår i dette projekt",
+      "waiver_needs_rationale": "En dispensation kræver en skriftlig begrundelse",
+      "not_applicable_needs_rationale": "At markere dette som ikke relevant kræver en skriftlig begrundelse",
+      "not_applicable_not_accepted": "Beslutningstageren har ikke accepteret dette område som ikke relevant",
+      "decider_not_entitled": "Du har ikke beføjelse til at træffe beslutning om denne gate efter dens godkendelsesvej",
+      "decider_is_area_owner": "Efter fire-øjne-princippet må en områdeejer eller stedfortræder ikke træffe beslutning om denne gate",
+      "hold_needs_resume_date": "En pause kræver en genoptagelsesdato i fremtiden",
+      "proceed_at_risk_needs_conditions": "Fortsættelse med risiko er kun mulig med en go med betingelser",
+      "proceed_at_risk_area_not_blocking": "Dette område er ikke blokerende, så det kan ikke angives som område, der fortsættes med risiko",
+      "project_stopped": "Projektet blev stoppet ved en gate",
+      "document_read_only": "Dette rammedokument er skrivebeskyttet, fordi projektet blev stoppet",
+      "binding_requires_change_request": "Dette rammedokument er bindende og ændres kun via en ændringsanmodning",
+      "phase_mapping_missing": "Den nye fasemodel kræver en mapping for denne fase",
+      "phase_mapping_unknown_target": "Mappingen nævner en fase, som den nye model ikke har",
+      "no_decision_route": "Der er ikke fastlagt en godkendelsesvej for gatebeslutninger. En governance-leder fastlægger en af projektets egne veje i governance-indstillingerne",
+      "route_not_at_final_step": "Godkendelsesvejen er endnu ikke nået til sit sidste trin",
+      "route_not_pending": "Godkendelsesvejen for denne gate venter ikke længere",
+      "concurrent_decision": "Nogen andre har netop truffet beslutning om denne gate; genindlæs og kontroller beslutningen",
+      "gate_out_of_order": "Projektet er ikke i den fase, som denne gate forlader",
+      "model_missing": "Der er ikke angivet en governance-model for dette projekt",
+      "model_exists": "En governance-model er allerede angivet; ændr den med en fasemapping",
+      "unknown_catalogue": "Dette katalog er ukendt",
+      "area_not_found": "Ledelsesområdet blev ikke fundet",
+      "gate_not_found": "Gaten blev ikke fundet",
+      "document_not_found": "Rammedokumentet blev ikke fundet",
+      "condition_not_found": "Betingelsen blev ikke fundet",
+      "change_request_not_found": "Ændringsanmodningen blev ikke fundet",
+      "check_not_found": "Parathedstjekket blev ikke fundet",
+      "not_area_owner": "Kun ejeren eller stedfortræderen for dette område må gøre dette",
+      "owner_not_project_member": "Ejeren skal have adgang til dette projekt",
+      "unknown_document_type": "Denne dokumenttype indgår ikke i kataloget for dette område",
+      "container_not_in_project": "CDE-containeren hører ikke til dette projekt",
+      "invalid_transition": "Denne tilstandsændring er ikke tilladt",
+      "condition_not_open": "Kun en åben betingelse kan opfyldes eller frafaldes",
+      "document_not_binding": "Kun et bindende rammedokument kan ændres via en ændringsanmodning",
+      "no_pending_revision": "Der er ingen nyere revision, der kan gøres bindende",
+      "change_request_not_open": "Denne ændringsanmodning er ikke længere åben",
+      "invalid_status": "Denne status er ikke tilladt her",
+      "decision_immutable": "En gatebeslutning kan ikke ændres eller slettes",
+      "document_exists": "Dette rammedokument følges allerede for området",
+      "catalogue_code_taken": "Et katalog med denne kode findes allerede",
+      "catalogue_retired": "Dette katalog er udfaset og kan ikke længere redigeres eller fastlægges",
+      "catalogue_invalid": "Kataloget bryder en katalogregel og kan ikke offentliggøres",
+      "gate_historic": "Denne gate hører til en fasemodel, som projektet har forladt, og den kan ikke længere ændres",
+      "gate_not_on_hold": "Kun en gate på pause kan genoptages",
+      "later_gate_active": "En senere gate er allerede startet, så denne gate kan ikke genåbnes",
+      "model_unchanged": "Projektet bruger allerede denne version af fasemodellen",
+      "not_condition_owner": "Kun den person, betingelsen er givet til, eller en leder må frigive den",
+      "route_needs_more_approvals": "Det sidste trin i godkendelsesvejen kræver stadig andre godkendere; de godkender på godkendelsesskærmen, og den sidste registrerer beslutningen",
+      "activity_not_in_project": "Aktiviteten i tidsplanen hører ikke til dette projekt",
+      "target_date_owned_by_schedule": "Denne gate er knyttet til en tidsplanaktivitet, som ejer dens dato; fjern koblingen for at angive en dato her",
+      "no_change_route": "Der er ikke fastlagt en godkendelsesvej for ændringer af bindende dokumenter. En governance-leder fastlægger en af projektets egne veje i governance-indstillingerne",
+      "route_not_pinnable": "Denne godkendelsesvej kan ikke fastlægges: den skal være en aktiv vej for dette projekt til denne type beslutning",
+      "area_retired": "Dette område blev udfaset ved en ændring af fasemodellen og modtager ingen nye dokumenter",
+      "pack_catalogue_invalid": "Den aktive pakke erklærer dette katalog, men filen mangler eller bryder katalogreglerne",
+      "settings_frozen_in_review": "Dette kan ikke ændres, mens en gate er under behandling eller på pause; besluttet gaten først",
+      "null_not_allowed": "Dette felt må ikke være tomt"
+    },
+    "outcome": {
+      "go": "Go",
+      "go_with_conditions": "Go med betingelser",
+      "hold": "Pause",
+      "recycle": "Tilbage til bearbejdning",
+      "stop": "Stop"
+    },
+    "gate_state": {
+      "not_started": "Ikke startet",
+      "in_preparation": "Under forberedelse",
+      "in_review": "Under behandling",
+      "on_hold": "På pause",
+      "decided": "Besluttet"
+    },
+    "document_state": {
+      "draft": "Udkast",
+      "in_review": "Under behandling",
+      "approved_at_gate": "Godkendt ved gate",
+      "binding": "Bindende",
+      "superseded": "Erstattet"
+    },
+    "check_status": {
+      "not_assessed": "Ikke vurderet",
+      "ready": "Klar",
+      "ready_with_risks": "Klar med risici",
+      "not_ready": "Ikke klar",
+      "not_applicable": "Ikke relevant"
+    },
+    "condition_status": {
+      "open": "Åben",
+      "cleared": "Opfyldt",
+      "waived": "Frafaldet",
+      "overdue": "Forfalden"
+    },
+    "export": {
+      "title": "Governance-beslutningslog",
+      "col_gate": "Gate",
+      "col_attempt": "Forsøg",
+      "col_outcome": "Udfald",
+      "col_decided_by": "Besluttet af",
+      "col_decided_at": "Besluttet den",
+      "col_rationale": "Begrundelse",
+      "col_conditions": "Betingelser",
+      "col_at_risk": "Fortsættelse med risiko",
+      "project": "Projekt",
+      "empty": "Der er endnu ikke registreret nogen gatebeslutning"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Ledelsesområde {area} har ingen ejer",
+        "suggestion": "Udpeg en ejer for området, så dets parathed kan attesteres"
+      },
+      "required_documents_defined": {
+        "fail": "Gate {gate} har relevante områder uden nogen påkrævet rammedokument",
+        "suggestion": "Vedhæft de rammedokumenter, kataloget kræver for denne gate, eller markér området som ikke relevant med en begrundelse"
+      },
+      "binding_document_unchanged": {
+        "fail": "Bindende rammedokument {document} har en nyere revision, der ikke er dækket af en godkendt ændringsanmodning",
+        "suggestion": "Opret en ændringsanmodning, så den nye revision godkendes, før den bruges"
+      },
+      "conditions_not_overdue": {
+        "fail": "Betingelse {condition} er forfalden siden {due}",
+        "suggestion": "Luk betingelsen med dokumentation, eller lad beslutningstageren frafalde den med en begrundelse"
+      },
+      "gate_date_after_previous": {
+        "fail": "Gate {gate} er planlagt til {date}, før den forrige gate den {previous}",
+        "suggestion": "Flyt gatedatoen, så gates følger fasernes rækkefølge"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Beslutningen om gate {gate} blev registreret af en bruger, der ejer et af dens områder",
+        "suggestion": "Efter fire-øjne-princippet skal en anden person træffe beslutningen"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Område {area} er markeret som ikke relevant uden en begrundelse",
+        "suggestion": "Skriv, hvorfor området ikke er relevant"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Gate: Tilladelse til detailprojektering",
+          "award_to_construction": "Gate: Tildeling til udførelse",
+          "brief_to_concept": "Gate: Program til koncept",
+          "concept_to_design": "Gate: Koncept til projektering",
+          "construction_to_handover": "Gate: Udførelse til aflevering",
+          "design_to_approval": "Gate: Projektering til tilladelse",
+          "detail_to_tender": "Gate: Detailprojektering til udbud",
+          "handover_to_operation": "Gate: Aflevering til drift",
+          "strategy_to_brief": "Gate: Strategi til program",
+          "tender_to_award": "Gate: Udbud til tildeling"
+        }
+      }
+    }
+  }
+}

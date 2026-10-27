@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Hindi kilala ang resulta ng desisyong ito",
+      "gate_not_in_review": "Wala sa pagsusuri ang gate, kaya hindi maitatala ang desisyon dito",
+      "gate_not_decided": "Tanging gate na may desisyon lang ang maaaring buksang muli",
+      "rationale_required": "Isulat ang dahilan ng desisyong ito",
+      "required_document_not_approved": "Hindi pa handa para sa pag-apruba sa gate na ito ang kinakailangang dokumento ng balangkas",
+      "area_without_owner": "Walang may-ari ang lugar ng pamamahalang ito, kaya walang makapagpapatunay ng kahandaan nito",
+      "area_not_ready": "Hindi pa handa ang lugar ng pamamahalang ito para sa gate",
+      "evidence_not_met": "Hindi natugunan ang kinakailangang ebidensya ng kahandaan para sa lugar na ito",
+      "unknown_evidence_not_acknowledged": "Hindi pa kumpirmado ang ebidensya ng kahandaan ng lugar na ito o may babala ito. Kumpirmahin muna na nakita mo ito bago payagang lumampas ang gate",
+      "unknown_criterion": "Hindi bahagi ng modelo ng proyekto para sa lugar at gate na ito ang pamantayan ng kahandaang ito",
+      "check_stale": "May dokumentong nabago pagkatapos makumpirma ang kahandaan, kaya kailangang kumpirmahin muli ang lugar",
+      "condition_overdue": "Lampas na sa takdang petsa ang kondisyon mula sa naunang gate at kailangan muna itong matupad o talikuran",
+      "conditions_required": "Kailangan ng kahit isang kondisyon ang go na may kondisyon",
+      "conditions_not_allowed": "Ang go na may kondisyon lang ang maaaring magkaroon ng kondisyon",
+      "condition_text_required": "Kailangan ng teksto ang bawat kondisyon",
+      "condition_unknown_area": "Ang kondisyon ay tumutukoy sa lugar na hindi bahagi ng proyektong ito",
+      "waiver_needs_rationale": "Kailangan ng nakasulat na dahilan ang pagtalikod",
+      "not_applicable_needs_rationale": "Kailangan ng nakasulat na dahilan ang pagmarka nito bilang hindi naaangkop",
+      "not_applicable_not_accepted": "Hindi tinanggap ng nagpapasya na hindi naaangkop ang lugar na ito",
+      "decider_not_entitled": "Wala kang karapatang magpasya sa gate na ito ayon sa ruta ng pag-apruba nito",
+      "decider_is_area_owner": "Ayon sa four-eyes rule, hindi maaaring magpasya sa gate na ito ang may-ari ng lugar o ang kahalili nito",
+      "hold_needs_resume_date": "Kailangan ng petsa ng pagpapatuloy sa hinaharap ang pagpigil",
+      "proceed_at_risk_needs_conditions": "Posible lang ang pagpapatuloy nang may panganib kapag go na may kondisyon",
+      "proceed_at_risk_area_not_blocking": "Hindi nakahahadlang ang lugar na ito, kaya hindi ito maaaring itala bilang lugar na nagpapatuloy nang may panganib",
+      "project_stopped": "Huminto ang proyekto sa isang gate",
+      "document_read_only": "Read-only ang dokumento ng balangkas na ito dahil huminto ang proyekto",
+      "binding_requires_change_request": "Mandatory ang dokumento ng balangkas na ito at nagbabago lamang sa pamamagitan ng change request",
+      "phase_mapping_missing": "Kailangan ng mapping para sa yugtong ito ang bagong modelo ng yugto",
+      "phase_mapping_unknown_target": "Tumutukoy ang mapping sa yugtong wala sa bagong modelo",
+      "no_decision_route": "Walang nakatakdang ruta ng pag-apruba para sa mga desisyon sa gate. Magtatakda ang isang governance manager ng isa sa sariling ruta ng proyekto sa mga setting ng governance",
+      "route_not_at_final_step": "Hindi pa umaabot sa huling hakbang nito ang ruta ng pag-apruba",
+      "route_not_pending": "Hindi na nakabinbin ang ruta ng pag-apruba ng gate na ito",
+      "concurrent_decision": "May ibang nagdesisyon sa gate na ito kanina lang; i-reload at suriin ang desisyon",
+      "gate_out_of_order": "Wala ang proyekto sa yugtong iniiwan ng gate na ito",
+      "model_missing": "Walang nakatakdang modelo ng governance para sa proyektong ito",
+      "model_exists": "May nakatakda nang modelo ng governance; baguhin ito gamit ang phase mapping",
+      "unknown_catalogue": "Hindi kilala ang katalogong ito",
+      "area_not_found": "Hindi nahanap ang lugar ng pamamahala",
+      "gate_not_found": "Hindi nahanap ang gate",
+      "document_not_found": "Hindi nahanap ang dokumento ng balangkas",
+      "condition_not_found": "Hindi nahanap ang kondisyon",
+      "change_request_not_found": "Hindi nahanap ang change request",
+      "check_not_found": "Hindi nahanap ang pagsusuri ng kahandaan",
+      "not_area_owner": "Ang may-ari o kahalili lamang ng lugar na ito ang maaaring gumawa nito",
+      "owner_not_project_member": "Dapat may access sa proyektong ito ang may-ari",
+      "unknown_document_type": "Hindi bahagi ng katalogo ng lugar na ito ang uri ng dokumentong ito",
+      "container_not_in_project": "Hindi pag-aari ng proyektong ito ang CDE container",
+      "invalid_transition": "Hindi pinapayagan ang ganitong pagbabago ng estado",
+      "condition_not_open": "Tanging bukas na kondisyon lang ang maaaring matupad o talikuran",
+      "document_not_binding": "Tanging mandatory na dokumento ng balangkas lang ang maaaring baguhin sa pamamagitan ng change request",
+      "no_pending_revision": "Walang mas bagong rebisyon na maaaring gawing mandatory",
+      "change_request_not_open": "Hindi na bukas ang change request na ito",
+      "invalid_status": "Hindi pinapayagan dito ang estadong ito",
+      "decision_immutable": "Hindi maaaring baguhin o burahin ang desisyon sa gate",
+      "document_exists": "Sinusubaybayan na para sa lugar na ito ang dokumento ng balangkas",
+      "catalogue_code_taken": "May katalogo na na may ganitong code",
+      "catalogue_retired": "Retired na ang katalogong ito at hindi na ito maaaring i-edit o itakda",
+      "catalogue_invalid": "Nilalabag ng draft ng katalogo ang isang patakaran ng katalogo at hindi ito maaaring i-publish",
+      "gate_historic": "Kabilang ang gate na ito sa modelo ng yugto na iniwan na ng proyekto at hindi na ito maaaring baguhin",
+      "gate_not_on_hold": "Tanging gate na naka-hold lang ang maaaring ipagpatuloy",
+      "later_gate_active": "Nasimulan na ang susunod na gate, kaya hindi na mabubuksang muli ang gate na ito",
+      "model_unchanged": "Ginagamit na ng proyekto ang bersyon na ito ng modelo ng yugto",
+      "not_condition_owner": "Tanging ang taong pinagbigyan ng kondisyong ito o isang manager ang maaaring magtupad nito",
+      "route_needs_more_approvals": "Kailangan pa ng ibang aprobador ang huling hakbang ng ruta ng pag-apruba; nag-aapruba sila sa screen ng pag-apruba at ang huli ang nagtatala ng desisyon",
+      "activity_not_in_project": "Hindi bahagi ng proyektong ito ang aktibidad ng iskedyul",
+      "target_date_owned_by_schedule": "Naka-link ang gate na ito sa isang aktibidad ng iskedyul, na siyang may-ari ng petsa nito; alisin ang link para makapagtakda ng petsa rito",
+      "no_change_route": "Walang nakatakdang ruta ng pag-apruba para sa mga pagbabago sa mandatory na dokumento. Magtatakda ang isang governance manager ng isa sa sariling ruta ng proyekto sa mga setting ng governance",
+      "route_not_pinnable": "Hindi maitatakda ang ruta ng pag-apruba na ito: dapat itong aktibong ruta ng proyektong ito para sa ganitong uri ng desisyon",
+      "area_retired": "Na-retire ang lugar na ito dahil sa pagbabago ng modelo ng yugto at hindi na tumatanggap ng bagong dokumento",
+      "pack_catalogue_invalid": "Idineklara ng aktibong pack ang katalogong ito, pero nawawala ang file nito o nilalabag nito ang mga patakaran ng katalogo",
+      "settings_frozen_in_review": "Hindi ito mababago habang nasa pagsusuri o naka-hold ang isang gate; magpasya muna sa gate",
+      "null_not_allowed": "Hindi maaaring walang laman ang field na ito"
+    },
+    "outcome": {
+      "go": "Go",
+      "go_with_conditions": "Go na may kondisyon",
+      "hold": "Hold",
+      "recycle": "Ibalik para sa rebisyon",
+      "stop": "Stop"
+    },
+    "gate_state": {
+      "not_started": "Hindi pa nasisimulan",
+      "in_preparation": "Inihahanda",
+      "in_review": "Nasa pagsusuri",
+      "on_hold": "Naka-hold",
+      "decided": "Napagpasyahan"
+    },
+    "document_state": {
+      "draft": "Draft",
+      "in_review": "Nasa pagsusuri",
+      "approved_at_gate": "Naaprubahan sa gate",
+      "binding": "Mandatory",
+      "superseded": "Pinalitan na"
+    },
+    "check_status": {
+      "not_assessed": "Hindi pa natatasa",
+      "ready": "Handa",
+      "ready_with_risks": "Handa na may panganib",
+      "not_ready": "Hindi pa handa",
+      "not_applicable": "Hindi naaangkop"
+    },
+    "condition_status": {
+      "open": "Bukas",
+      "cleared": "Natupad",
+      "waived": "Tinalikuran",
+      "overdue": "Lampas sa takdang petsa"
+    },
+    "export": {
+      "title": "Talaan ng mga desisyon sa governance",
+      "col_gate": "Gate",
+      "col_attempt": "Pagtatangka",
+      "col_outcome": "Resulta",
+      "col_decided_by": "Nagpasya",
+      "col_decided_at": "Petsa ng desisyon",
+      "col_rationale": "Dahilan",
+      "col_conditions": "Mga kondisyon",
+      "col_at_risk": "Nagpapatuloy nang may panganib",
+      "project": "Proyekto",
+      "empty": "Wala pang naitalang desisyon sa gate"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Walang may-ari ang lugar ng pamamahala na {area}",
+        "suggestion": "Magtalaga ng may-ari sa lugar para maisailalim sa pagpapatunay ang kahandaan nito"
+      },
+      "required_documents_defined": {
+        "fail": "May mga naaangkop na lugar ang gate {gate} na walang kinakailangang dokumento ng balangkas",
+        "suggestion": "Ikabit ang mga dokumento ng balangkas na kailangan ng katalogo para sa gate na ito, o markahan ang lugar bilang hindi naaangkop na may dahilan"
+      },
+      "binding_document_unchanged": {
+        "fail": "May mas bagong rebisyon ang mandatory na dokumento ng balangkas na {document} na wala sa naaprubahang change request",
+        "suggestion": "Magtaas ng change request para maaprubahan ang bagong rebisyon bago gamitin"
+      },
+      "conditions_not_overdue": {
+        "fail": "Lampas na sa takdang petsa mula {due} ang kondisyon na {condition}",
+        "suggestion": "Tuparin ang kondisyon gamit ang ebidensya, o ipatalikod ito ng nagpapasya nang may dahilan"
+      },
+      "gate_date_after_previous": {
+        "fail": "Naka-plano ang gate na {gate} sa {date}, na mas maaga kaysa sa nakaraang gate sa {previous}",
+        "suggestion": "Ilipat ang petsa ng gate para sumunod ang mga gate sa pagkakasunod ng yugto"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Naitala ng user na may-ari ng isa sa mga lugar nito ang desisyon sa gate na {gate}",
+        "suggestion": "Ayon sa four-eyes rule, dapat ibang tao ang magpasya"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Minarkahang hindi naaangkop ang lugar na {area} nang walang dahilan",
+        "suggestion": "Isulat kung bakit hindi naaangkop ang lugar"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Gate: Mula Permit tungo sa Detalyadong Disenyo",
+          "award_to_construction": "Gate: Mula Award tungo sa Konstruksyon",
+          "brief_to_concept": "Gate: Mula Brief tungo sa Konsepto",
+          "concept_to_design": "Gate: Mula Konsepto tungo sa Disenyo",
+          "construction_to_handover": "Gate: Mula Konstruksyon tungo sa Turnover",
+          "design_to_approval": "Gate: Mula Disenyo tungo sa Permit",
+          "detail_to_tender": "Gate: Mula Detalyadong Disenyo tungo sa Tender",
+          "handover_to_operation": "Gate: Mula Turnover tungo sa Operasyon",
+          "strategy_to_brief": "Gate: Mula Estratehiya tungo sa Brief",
+          "tender_to_award": "Gate: Mula Tender tungo sa Award"
+        }
+      }
+    }
+  }
+}

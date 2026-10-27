@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Tento výsledek rozhodnutí není znám",
+      "gate_not_in_review": "Brána není ve schvalování, takže na ní nelze zaznamenat rozhodnutí",
+      "gate_not_decided": "Znovu otevřít lze pouze rozhodnutou bránu",
+      "rationale_required": "Zapište důvod tohoto rozhodnutí",
+      "required_document_not_approved": "Požadovaný rámcový dokument není u této brány připraven ke schválení",
+      "area_without_owner": "Tato oblast řízení nemá vlastníka, takže nikdo nemůže potvrdit její připravenost",
+      "area_not_ready": "Tato oblast řízení není pro bránu připravena",
+      "evidence_not_met": "Požadované důkazy připravenosti pro tuto oblast nejsou splněny",
+      "unknown_evidence_not_acknowledged": "Důkaz připravenosti této oblasti není potvrzen nebo obsahuje varování. Před propuštěním brány potvrďte, že jste jej viděli",
+      "unknown_criterion": "Toto kritérium připravenosti není součástí modelu projektu pro tuto oblast a bránu",
+      "check_stale": "Dokument byl změněn po potvrzení připravenosti, proto je třeba oblast potvrdit znovu",
+      "condition_overdue": "Podmínka z dřívější brány je po termínu a je nutné ji nejprve splnit nebo odpustit",
+      "conditions_required": "Postup s podmínkami vyžaduje alespoň jednu podmínku",
+      "conditions_not_allowed": "Podmínky může mít pouze postup s podmínkami",
+      "condition_text_required": "Každá podmínka potřebuje text",
+      "condition_unknown_area": "Podmínka odkazuje na oblast, která není součástí tohoto projektu",
+      "waiver_needs_rationale": "Odpuštění podmínky vyžaduje písemný důvod",
+      "not_applicable_needs_rationale": "Označení jako neuplatnitelné vyžaduje písemný důvod",
+      "not_applicable_not_accepted": "Rozhodovatel tuto oblast jako neuplatnitelnou nepřijal",
+      "decider_not_entitled": "Podle schvalovací cesty této brány nejste oprávněni o ní rozhodovat",
+      "decider_is_area_owner": "Podle pravidla čtyř očí nesmí vlastník oblasti ani jeho zástupce o této bráně rozhodovat",
+      "hold_needs_resume_date": "Pozastavení vyžaduje datum obnovení v budoucnosti",
+      "proceed_at_risk_needs_conditions": "Pokračování s rizikem je možné pouze u postupu s podmínkami",
+      "proceed_at_risk_area_not_blocking": "Tato oblast není blokující, takže ji nelze uvést jako oblast, která pokračuje s rizikem",
+      "project_stopped": "Projekt byl zastaven na bráně",
+      "document_read_only": "Tento rámcový dokument je pouze pro čtení, protože projekt byl zastaven",
+      "binding_requires_change_request": "Tento rámcový dokument je závazný a mění se pouze prostřednictvím žádosti o změnu",
+      "phase_mapping_missing": "Nový model fází vyžaduje mapování pro tuto fázi",
+      "phase_mapping_unknown_target": "Mapování odkazuje na fázi, kterou nový model nemá",
+      "no_decision_route": "Pro rozhodnutí o bráně není připojena žádná schvalovací cesta. Správce řízení připojí jednu z vlastních cest projektu v nastavení řízení",
+      "route_not_at_final_step": "Schvalovací cesta ještě nedosáhla svého posledního kroku",
+      "route_not_pending": "Schvalovací cesta této brány již nečeká na vyřízení",
+      "concurrent_decision": "Někdo jiný rozhodl o této bráně před chvílí; obnovte stránku a zkontrolujte rozhodnutí",
+      "gate_out_of_order": "Projekt není ve fázi, kterou tato brána opouští",
+      "model_missing": "Pro tento projekt není nastaven žádný model řízení",
+      "model_exists": "Model řízení je již nastaven; změňte jej pomocí mapování fází",
+      "unknown_catalogue": "Tento katalog není znám",
+      "area_not_found": "Oblast řízení nebyla nalezena",
+      "gate_not_found": "Brána nebyla nalezena",
+      "document_not_found": "Rámcový dokument nebyl nalezen",
+      "condition_not_found": "Podmínka nebyla nalezena",
+      "change_request_not_found": "Žádost o změnu nebyla nalezena",
+      "check_not_found": "Kontrola připravenosti nebyla nalezena",
+      "not_area_owner": "Toto může provést pouze vlastník nebo zástupce této oblasti",
+      "owner_not_project_member": "Vlastník musí mít přístup k tomuto projektu",
+      "unknown_document_type": "Tento typ dokumentu není v katalogu pro tuto oblast",
+      "container_not_in_project": "Kontejner společného datového prostředí (CDE) nepatří k tomuto projektu",
+      "invalid_transition": "Tato změna stavu není povolena",
+      "condition_not_open": "Odpustit nebo splnit lze pouze otevřenou podmínku",
+      "document_not_binding": "Změnit prostřednictvím žádosti o změnu lze pouze závazný rámcový dokument",
+      "no_pending_revision": "Není k dispozici novější revize, která by se stala závaznou",
+      "change_request_not_open": "Tato žádost o změnu již není otevřená",
+      "invalid_status": "Tento stav zde není povolen",
+      "decision_immutable": "Rozhodnutí o bráně nelze změnit ani smazat",
+      "document_exists": "Tento rámcový dokument je pro oblast již sledován",
+      "catalogue_code_taken": "Katalog s tímto kódem již existuje",
+      "catalogue_retired": "Tento katalog je vyřazen a již nelze upravovat ani připojovat",
+      "catalogue_invalid": "Návrh katalogu porušuje pravidlo katalogu a nelze jej publikovat",
+      "gate_historic": "Tato brána patří k modelu fází, který projekt opustil, a již ji nelze měnit",
+      "gate_not_on_hold": "Obnovit lze pouze bránu, která je pozastavena",
+      "later_gate_active": "Pozdější brána již byla zahájena, takže tuto bránu nelze znovu otevřít",
+      "model_unchanged": "Projekt již tuto verzi modelu fází používá",
+      "not_condition_owner": "Podmínku může splnit pouze osoba, které byla přidělena, nebo správce",
+      "route_needs_more_approvals": "Poslední krok schvalovací cesty ještě vyžaduje další schvalovatele; ti schvalují na obrazovce schvalování a poslední z nich rozhodnutí zaznamená",
+      "activity_not_in_project": "Činnost harmonogramu nepatří k tomuto projektu",
+      "target_date_owned_by_schedule": "Tato brána je propojena s činností harmonogramu, která určuje její termín; pro nastavení termínu zde propojení zrušte",
+      "no_change_route": "Pro změny závazných dokumentů není připojena žádná schvalovací cesta. Správce řízení připojí jednu z vlastních cest projektu v nastavení řízení",
+      "route_not_pinnable": "Tuto schvalovací cestu nelze připojit: musí být aktivní cestou tohoto projektu pro tento druh rozhodnutí",
+      "area_retired": "Tato oblast byla vyřazena změnou modelu fází a nepřijímá nové dokumenty",
+      "pack_catalogue_invalid": "Aktivní balíček tento katalog deklaruje, ale jeho soubor chybí nebo porušuje pravidla katalogu",
+      "settings_frozen_in_review": "Toto nelze změnit, dokud je brána ve schvalování nebo pozastavena; nejprve o bráně rozhodněte",
+      "null_not_allowed": "Toto pole nesmí být prázdné"
+    },
+    "outcome": {
+      "go": "Pokračovat",
+      "go_with_conditions": "Pokračovat s podmínkami",
+      "hold": "Pozastavit",
+      "recycle": "Vrátit k přepracování",
+      "stop": "Zastavit"
+    },
+    "gate_state": {
+      "not_started": "Nezahájeno",
+      "in_preparation": "V přípravě",
+      "in_review": "Ve schvalování",
+      "on_hold": "Pozastaveno",
+      "decided": "Rozhodnuto"
+    },
+    "document_state": {
+      "draft": "Koncept",
+      "in_review": "Ve schvalování",
+      "approved_at_gate": "Schváleno na bráně",
+      "binding": "Závazný",
+      "superseded": "Nahrazen"
+    },
+    "check_status": {
+      "not_assessed": "Nehodnoceno",
+      "ready": "Připraveno",
+      "ready_with_risks": "Připraveno s riziky",
+      "not_ready": "Nepřipraveno",
+      "not_applicable": "Neuplatnitelné"
+    },
+    "condition_status": {
+      "open": "Otevřeno",
+      "cleared": "Splněno",
+      "waived": "Odpuštěno",
+      "overdue": "Po termínu"
+    },
+    "export": {
+      "title": "Záznam rozhodnutí řízení",
+      "col_gate": "Brána",
+      "col_attempt": "Pokus",
+      "col_outcome": "Výsledek",
+      "col_decided_by": "Rozhodl",
+      "col_decided_at": "Datum rozhodnutí",
+      "col_rationale": "Odůvodnění",
+      "col_conditions": "Podmínky",
+      "col_at_risk": "Pokračování s rizikem",
+      "project": "Projekt",
+      "empty": "Zatím nebylo zaznamenáno žádné rozhodnutí o bráně"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Oblast řízení {area} nemá vlastníka",
+        "suggestion": "Určete vlastníka oblasti, aby bylo možné potvrdit její připravenost"
+      },
+      "required_documents_defined": {
+        "fail": "Brána {gate} obsahuje uplatnitelné oblasti bez jakéhokoli požadovaného rámcového dokumentu",
+        "suggestion": "Připojte rámcové dokumenty, které katalog pro tuto bránu vyžaduje, nebo oblast označte jako neuplatnitelnou s uvedením důvodu"
+      },
+      "binding_document_unchanged": {
+        "fail": "Závazný rámcový dokument {document} má novější revizi, která není pokryta schválenou žádostí o změnu",
+        "suggestion": "Podejte žádost o změnu, aby byla nová revize schválena dříve, než se použije"
+      },
+      "conditions_not_overdue": {
+        "fail": "Podmínka {condition} je po termínu od {due}",
+        "suggestion": "Splňte podmínku s doložením důkazu, nebo nechte rozhodovatele podmínku odpustit s uvedením důvodu"
+      },
+      "gate_date_after_previous": {
+        "fail": "Brána {gate} je naplánována na {date}, tedy před předchozí bránu z {previous}",
+        "suggestion": "Přesuňte termín brány tak, aby brány následovaly pořadí fází"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Rozhodnutí o bráně {gate} zaznamenal uživatel, který vlastní jednu z jejích oblastí",
+        "suggestion": "Podle pravidla čtyř očí musí rozhodnout jiná osoba"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Oblast {area} je označena jako neuplatnitelná bez důvodu",
+        "suggestion": "Zapište, proč se oblast neuplatňuje"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Brána: Povolení k podrobnému projektování",
+          "award_to_construction": "Brána: Zadání ke stavbě",
+          "brief_to_concept": "Brána: Zadání ke koncepci",
+          "concept_to_design": "Brána: Koncepce k projektu",
+          "construction_to_handover": "Brána: Stavba k předání",
+          "design_to_approval": "Brána: Projekt k povolení",
+          "detail_to_tender": "Brána: Podrobný projekt k výběrovému řízení",
+          "handover_to_operation": "Brána: Předání do provozu",
+          "strategy_to_brief": "Brána: Strategie k zadání",
+          "tender_to_award": "Brána: Výběrové řízení k zadání"
+        }
+      }
+    }
+  }
+}

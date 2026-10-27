@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "Aceptar"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Este resultado de decisión no es válido",
+      "gate_not_in_review": "El punto de control no está en revisión, por lo que no se puede registrar una decisión en él",
+      "gate_not_decided": "Solo se puede reabrir un punto de control que ya tiene una decisión",
+      "rationale_required": "Indique el motivo de esta decisión",
+      "required_document_not_approved": "Un documento marco obligatorio no está listo para su aprobación en este punto de control",
+      "area_without_owner": "Esta área de gestión no tiene responsable, por lo que nadie puede certificar su preparación",
+      "area_not_ready": "Esta área de gestión no está preparada para el punto de control",
+      "evidence_not_met": "No se cumplen las evidencias de preparación requeridas para esta área",
+      "unknown_evidence_not_acknowledged": "La evidencia de preparación de esta área no está confirmada o tiene una advertencia. Confirme que la ha revisado antes de dar paso al punto de control",
+      "unknown_criterion": "Este criterio de preparación no forma parte del modelo del proyecto para esta área y este punto de control",
+      "check_stale": "Un documento se modificó después de confirmar la preparación, por lo que el área debe confirmarse de nuevo",
+      "condition_overdue": "Una condición de un punto de control anterior está vencida y primero debe cumplirse o renunciarse a ella",
+      "conditions_required": "Una decisión de continuar con condiciones requiere al menos una condición",
+      "conditions_not_allowed": "Solo una decisión de continuar con condiciones puede tener condiciones",
+      "condition_text_required": "Cada condición necesita un texto",
+      "condition_unknown_area": "La condición menciona un área que no forma parte de este proyecto",
+      "waiver_needs_rationale": "Una renuncia requiere un motivo por escrito",
+      "not_applicable_needs_rationale": "Marcar esto como no aplicable requiere un motivo por escrito",
+      "not_applicable_not_accepted": "La persona que decide no ha aceptado esta área como no aplicable",
+      "decider_not_entitled": "No tiene derecho a decidir este punto de control según su ruta de aprobación",
+      "decider_is_area_owner": "Según el principio de los cuatro ojos, el responsable de un área o su suplente no puede decidir este punto de control",
+      "hold_needs_resume_date": "Una suspensión requiere una fecha futura de reanudación",
+      "proceed_at_risk_needs_conditions": "Continuar asumiendo riesgo solo es posible con una decisión de continuar con condiciones",
+      "proceed_at_risk_area_not_blocking": "Esta área no es bloqueante, por lo que no puede indicarse como área que continúa asumiendo riesgo",
+      "project_stopped": "El proyecto se detuvo en un punto de control",
+      "document_read_only": "Este documento marco es de solo lectura porque el proyecto se detuvo",
+      "binding_requires_change_request": "Este documento marco es vinculante y solo cambia mediante una solicitud de cambio",
+      "phase_mapping_missing": "El nuevo modelo de fases necesita una correspondencia para esta fase",
+      "phase_mapping_unknown_target": "La correspondencia menciona una fase que el nuevo modelo no tiene",
+      "no_decision_route": "No hay una ruta de aprobación fijada para las decisiones de los puntos de control. Un responsable de gobernanza fija una de las rutas propias del proyecto en la configuración de gobernanza",
+      "route_not_at_final_step": "La ruta de aprobación todavía no ha llegado a su paso final",
+      "route_not_pending": "La ruta de aprobación de este punto de control ya no está pendiente",
+      "concurrent_decision": "Otra persona acaba de decidir sobre este punto de control; recargue y revise la decisión",
+      "gate_out_of_order": "El proyecto no está en la fase que deja este punto de control",
+      "model_missing": "No hay un modelo de gobernanza definido para este proyecto",
+      "model_exists": "Ya hay un modelo de gobernanza definido; cámbielo mediante una correspondencia de fases",
+      "unknown_catalogue": "Este catálogo no es válido",
+      "area_not_found": "No se encontró el área de gestión",
+      "gate_not_found": "No se encontró el punto de control",
+      "document_not_found": "No se encontró el documento marco",
+      "condition_not_found": "No se encontró la condición",
+      "change_request_not_found": "No se encontró la solicitud de cambio",
+      "check_not_found": "No se encontró la comprobación de preparación",
+      "not_area_owner": "Solo el responsable o el suplente de esta área puede hacer esto",
+      "owner_not_project_member": "El responsable debe tener acceso a este proyecto",
+      "unknown_document_type": "Este tipo de documento no forma parte del catálogo de esta área",
+      "container_not_in_project": "El contenedor del entorno común de datos (CDE) no pertenece a este proyecto",
+      "invalid_transition": "Este cambio de estado no está permitido",
+      "condition_not_open": "Solo una condición abierta puede cumplirse o renunciarse",
+      "document_not_binding": "Solo un documento marco vinculante puede modificarse mediante una solicitud de cambio",
+      "no_pending_revision": "No hay una revisión más reciente que pueda hacerse vinculante",
+      "change_request_not_open": "Esta solicitud de cambio ya no está abierta",
+      "invalid_status": "Este estado no está permitido aquí",
+      "decision_immutable": "Una decisión de punto de control no puede modificarse ni eliminarse",
+      "document_exists": "Este documento marco ya está registrado para el área",
+      "catalogue_code_taken": "Ya existe un catálogo con este código",
+      "catalogue_retired": "Este catálogo está retirado y ya no puede editarse ni fijarse",
+      "catalogue_invalid": "El borrador del catálogo incumple una regla de catálogo y no puede publicarse",
+      "gate_historic": "Este punto de control pertenece a un modelo de fases que el proyecto ya ha dejado y ya no puede modificarse",
+      "gate_not_on_hold": "Solo se puede reanudar un punto de control suspendido",
+      "later_gate_active": "Ya se ha iniciado un punto de control posterior, por lo que este no puede reabrirse",
+      "model_unchanged": "El proyecto ya usa esta versión del modelo de fases",
+      "not_condition_owner": "Solo la persona a la que se asignó la condición o un responsable pueden cumplirla",
+      "route_needs_more_approvals": "El paso final de la ruta de aprobación todavía necesita otros aprobadores; ellos aprueban en la pantalla de aprobación y el último registra la decisión",
+      "activity_not_in_project": "La actividad del cronograma no pertenece a este proyecto",
+      "target_date_owned_by_schedule": "Este punto de control está vinculado a una actividad del cronograma, que determina su fecha; desvincúlelo para fijar una fecha aquí",
+      "no_change_route": "No hay una ruta de aprobación fijada para los cambios en documentos vinculantes. Un responsable de gobernanza fija una de las rutas propias del proyecto en la configuración de gobernanza",
+      "route_not_pinnable": "Esta ruta de aprobación no puede fijarse: debe ser una ruta activa de este proyecto para este tipo de decisión",
+      "area_retired": "Esta área se retiró por un cambio del modelo de fases y ya no admite documentos nuevos",
+      "pack_catalogue_invalid": "El paquete activo declara este catálogo, pero su archivo falta o incumple las reglas de catálogo",
+      "settings_frozen_in_review": "No se puede cambiar mientras un punto de control esté en revisión o suspendido; decida primero sobre el punto de control",
+      "null_not_allowed": "Este campo no puede estar vacío"
+    },
+    "outcome": {
+      "go": "Continuar",
+      "go_with_conditions": "Continuar con condiciones",
+      "hold": "Suspender",
+      "recycle": "Devolver para revisión",
+      "stop": "Detener"
+    },
+    "gate_state": {
+      "not_started": "No iniciado",
+      "in_preparation": "En preparación",
+      "in_review": "En revisión",
+      "on_hold": "Suspendido",
+      "decided": "Decidido"
+    },
+    "document_state": {
+      "draft": "Borrador",
+      "in_review": "En revisión",
+      "approved_at_gate": "Aprobado en el punto de control",
+      "binding": "Vinculante",
+      "superseded": "Sustituido"
+    },
+    "check_status": {
+      "not_assessed": "Sin evaluar",
+      "ready": "Listo",
+      "ready_with_risks": "Listo con riesgos",
+      "not_ready": "No listo",
+      "not_applicable": "No aplicable"
+    },
+    "condition_status": {
+      "open": "Abierta",
+      "cleared": "Cumplida",
+      "waived": "Renunciada",
+      "overdue": "Vencida"
+    },
+    "export": {
+      "title": "Registro de decisiones de gobernanza",
+      "col_gate": "Punto de control",
+      "col_attempt": "Intento",
+      "col_outcome": "Resultado",
+      "col_decided_by": "Decidido por",
+      "col_decided_at": "Fecha de decisión",
+      "col_rationale": "Motivo",
+      "col_conditions": "Condiciones",
+      "col_at_risk": "Continuar asumiendo riesgo",
+      "project": "Proyecto",
+      "empty": "Todavía no se ha registrado ninguna decisión de punto de control"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "El área de gestión {area} no tiene responsable",
+        "suggestion": "Asigne un responsable al área para que se pueda certificar su preparación"
+      },
+      "required_documents_defined": {
+        "fail": "El punto de control {gate} tiene áreas aplicables sin ningún documento marco obligatorio",
+        "suggestion": "Adjunte los documentos marco que el catálogo exige para este punto de control, o marque el área como no aplicable con un motivo"
+      },
+      "binding_document_unchanged": {
+        "fail": "El documento marco vinculante {document} tiene una revisión más reciente que no está cubierta por una solicitud de cambio aprobada",
+        "suggestion": "Presente una solicitud de cambio para que la nueva revisión se apruebe antes de usarla"
+      },
+      "conditions_not_overdue": {
+        "fail": "La condición {condition} está vencida desde {due}",
+        "suggestion": "Cumpla la condición con evidencia, o pida a quien decide que renuncie a ella con un motivo"
+      },
+      "gate_date_after_previous": {
+        "fail": "El punto de control {gate} está planificado para el {date}, antes del punto de control anterior del {previous}",
+        "suggestion": "Mueva la fecha del punto de control para que los puntos de control sigan el orden de las fases"
+      },
+      "decision_by_entitled_user": {
+        "fail": "La decisión sobre el punto de control {gate} la registró un usuario que es responsable de una de sus áreas",
+        "suggestion": "Según el principio de los cuatro ojos, debe decidir una persona distinta"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "El área {area} está marcada como no aplicable sin motivo",
+        "suggestion": "Indique por qué el área no aplica"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Punto de control: De permiso a diseño de detalle",
+          "award_to_construction": "Punto de control: De adjudicación a construcción",
+          "brief_to_concept": "Punto de control: De programa a concepto",
+          "concept_to_design": "Punto de control: De concepto a diseño",
+          "construction_to_handover": "Punto de control: De construcción a entrega",
+          "design_to_approval": "Punto de control: De diseño a permiso",
+          "detail_to_tender": "Punto de control: De diseño de detalle a licitación",
+          "handover_to_operation": "Punto de control: De entrega a explotación",
+          "strategy_to_brief": "Punto de control: De estrategia a programa",
+          "tender_to_award": "Punto de control: De licitación a adjudicación"
+        }
+      }
+    }
+  }
+}

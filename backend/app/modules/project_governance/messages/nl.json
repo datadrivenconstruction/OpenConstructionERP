@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Dit besluitresultaat is niet bekend",
+      "gate_not_in_review": "De gate is niet in beoordeling, dus er kan geen besluit op worden vastgelegd",
+      "gate_not_decided": "Alleen een besloten gate kan opnieuw worden geopend",
+      "rationale_required": "Leg de reden voor dit besluit vast",
+      "required_document_not_approved": "Een vereist kaderdocument is bij deze gate nog niet gereed voor goedkeuring",
+      "area_without_owner": "Dit managementgebied heeft geen eigenaar, dus niemand kan de gereedheid ervan bevestigen",
+      "area_not_ready": "Dit managementgebied is nog niet gereed voor de gate",
+      "evidence_not_met": "Aan het vereiste gereedheidsbewijs voor dit gebied is niet voldaan",
+      "unknown_evidence_not_acknowledged": "Het gereedheidsbewijs van dit gebied is onbevestigd of bevat een waarschuwing. Bevestig dat u het heeft gezien voordat u de gate laat passeren",
+      "unknown_criterion": "Dit gereedheidscriterium maakt voor dit gebied en deze gate geen onderdeel uit van het model van het project",
+      "check_stale": "Een document is gewijzigd nadat de gereedheid was bevestigd, dus het gebied moet opnieuw worden bevestigd",
+      "condition_overdue": "Een voorwaarde uit een eerdere gate is verlopen en moet eerst worden afgerond of kwijtgescholden",
+      "conditions_required": "Een go met voorwaarden vereist ten minste één voorwaarde",
+      "conditions_not_allowed": "Alleen een go met voorwaarden kan voorwaarden bevatten",
+      "condition_text_required": "Elke voorwaarde heeft een tekst nodig",
+      "condition_unknown_area": "De voorwaarde verwijst naar een gebied dat niet bij dit project hoort",
+      "waiver_needs_rationale": "Een kwijtschelding vereist een schriftelijke motivering",
+      "not_applicable_needs_rationale": "Het markeren als niet van toepassing vereist een schriftelijke motivering",
+      "not_applicable_not_accepted": "De beslisser heeft dit gebied niet geaccepteerd als niet van toepassing",
+      "decider_not_entitled": "U bent op grond van de goedkeuringsroute niet bevoegd om over deze gate te beslissen",
+      "decider_is_area_owner": "Volgens het vier-ogenprincipe mag een eigenaar of plaatsvervanger van een gebied niet over deze gate beslissen",
+      "hold_needs_resume_date": "Een pauze vereist een hervattingsdatum in de toekomst",
+      "proceed_at_risk_needs_conditions": "Doorgaan op risico is alleen mogelijk met een go met voorwaarden",
+      "proceed_at_risk_area_not_blocking": "Dit gebied blokkeert niet, dus het kan niet als doorgaand op risico worden aangemerkt",
+      "project_stopped": "Het project is bij een gate stopgezet",
+      "document_read_only": "Dit kaderdocument is alleen-lezen omdat het project is stopgezet",
+      "binding_requires_change_request": "Dit kaderdocument is bindend en wordt alleen gewijzigd via een wijzigingsverzoek",
+      "phase_mapping_missing": "Het nieuwe fasemodel vereist een koppeling voor deze fase",
+      "phase_mapping_unknown_target": "De koppeling verwijst naar een fase die het nieuwe model niet heeft",
+      "no_decision_route": "Er is geen goedkeuringsroute vastgelegd voor gatebesluiten. Een governancebeheerder legt in de governance-instellingen een van de eigen routes van het project vast",
+      "route_not_at_final_step": "De goedkeuringsroute heeft nog niet de laatste stap bereikt",
+      "route_not_pending": "De goedkeuringsroute van deze gate is niet langer in behandeling",
+      "concurrent_decision": "Iemand anders heeft zojuist over deze gate beslist; laad de pagina opnieuw en controleer het besluit",
+      "gate_out_of_order": "Het project bevindt zich niet in de fase die deze gate afsluit",
+      "model_missing": "Voor dit project is geen governancemodel ingesteld",
+      "model_exists": "Er is al een governancemodel ingesteld; wijzig het met een fasekoppeling",
+      "unknown_catalogue": "Deze catalogus is niet bekend",
+      "area_not_found": "Managementgebied niet gevonden",
+      "gate_not_found": "Gate niet gevonden",
+      "document_not_found": "Kaderdocument niet gevonden",
+      "condition_not_found": "Voorwaarde niet gevonden",
+      "change_request_not_found": "Wijzigingsverzoek niet gevonden",
+      "check_not_found": "Gereedheidscontrole niet gevonden",
+      "not_area_owner": "Alleen de eigenaar of plaatsvervanger van dit gebied mag dit doen",
+      "owner_not_project_member": "De eigenaar moet toegang tot dit project hebben",
+      "unknown_document_type": "Dit documenttype hoort in de catalogus niet bij dit gebied",
+      "container_not_in_project": "De CDE-container hoort niet bij dit project",
+      "invalid_transition": "Deze statuswijziging is niet toegestaan",
+      "condition_not_open": "Alleen een open voorwaarde kan worden afgerond of kwijtgescholden",
+      "document_not_binding": "Alleen een bindend kaderdocument kan via een wijzigingsverzoek worden gewijzigd",
+      "no_pending_revision": "Er is geen nieuwere revisie om bindend te maken",
+      "change_request_not_open": "Dit wijzigingsverzoek is niet langer open",
+      "invalid_status": "Deze status is hier niet toegestaan",
+      "decision_immutable": "Een gatebesluit kan niet worden gewijzigd of verwijderd",
+      "document_exists": "Dit kaderdocument wordt al voor het gebied bijgehouden",
+      "catalogue_code_taken": "Er bestaat al een catalogus met deze code",
+      "catalogue_retired": "Deze catalogus is buiten gebruik gesteld en kan niet meer worden bewerkt of vastgelegd",
+      "catalogue_invalid": "De conceptcatalogus schendt een catalogusregel en kan niet worden gepubliceerd",
+      "gate_historic": "Deze gate hoort bij een fasemodel dat het project heeft verlaten en kan niet meer worden gewijzigd",
+      "gate_not_on_hold": "Alleen een gate in de wacht kan worden hervat",
+      "later_gate_active": "Een latere gate is al gestart, dus deze gate kan niet opnieuw worden geopend",
+      "model_unchanged": "Het project gebruikt deze versie van het fasemodel al",
+      "not_condition_owner": "Alleen de persoon aan wie deze voorwaarde is toegewezen of een manager mag deze afronden",
+      "route_needs_more_approvals": "De laatste stap van de goedkeuringsroute heeft nog andere goedkeurders nodig; zij keuren goed in het goedkeuringsscherm en de laatste legt het besluit vast",
+      "activity_not_in_project": "De planningsactiviteit hoort niet bij dit project",
+      "target_date_owned_by_schedule": "Deze gate is gekoppeld aan een planningsactiviteit, die de datum bepaalt; ontkoppel deze om hier een datum in te stellen",
+      "no_change_route": "Er is geen goedkeuringsroute vastgelegd voor wijzigingen in bindende documenten. Een governancebeheerder legt in de governance-instellingen een van de eigen routes van het project vast",
+      "route_not_pinnable": "Deze goedkeuringsroute kan niet worden vastgelegd: het moet een actieve route van dit project zijn voor dit soort besluit",
+      "area_retired": "Dit gebied is buiten gebruik gesteld door een wijziging van het fasemodel en neemt geen nieuwe documenten meer op",
+      "pack_catalogue_invalid": "Het actieve pakket noemt deze catalogus, maar het bestand ontbreekt of schendt de catalogusregels",
+      "settings_frozen_in_review": "Dit kan niet worden gewijzigd zolang een gate in beoordeling of in de wacht is; beslis eerst over de gate",
+      "null_not_allowed": "Dit veld mag niet leeg zijn"
+    },
+    "outcome": {
+      "go": "Go",
+      "go_with_conditions": "Go met voorwaarden",
+      "hold": "Wacht",
+      "recycle": "Herzien",
+      "stop": "Stop"
+    },
+    "gate_state": {
+      "not_started": "Niet gestart",
+      "in_preparation": "In voorbereiding",
+      "in_review": "In beoordeling",
+      "on_hold": "In de wacht",
+      "decided": "Besloten"
+    },
+    "document_state": {
+      "draft": "Concept",
+      "in_review": "In beoordeling",
+      "approved_at_gate": "Goedgekeurd bij gate",
+      "binding": "Bindend",
+      "superseded": "Vervangen"
+    },
+    "check_status": {
+      "not_assessed": "Niet beoordeeld",
+      "ready": "Gereed",
+      "ready_with_risks": "Gereed met risico's",
+      "not_ready": "Niet gereed",
+      "not_applicable": "Niet van toepassing"
+    },
+    "condition_status": {
+      "open": "Open",
+      "cleared": "Afgerond",
+      "waived": "Kwijtgescholden",
+      "overdue": "Verlopen"
+    },
+    "export": {
+      "title": "Governance-besluitenregister",
+      "col_gate": "Gate",
+      "col_attempt": "Poging",
+      "col_outcome": "Resultaat",
+      "col_decided_by": "Besloten door",
+      "col_decided_at": "Besloten op",
+      "col_rationale": "Motivering",
+      "col_conditions": "Voorwaarden",
+      "col_at_risk": "Doorgaand op risico",
+      "project": "Project",
+      "empty": "Er is nog geen gatebesluit vastgelegd"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Managementgebied {area} heeft geen eigenaar",
+        "suggestion": "Wijs een eigenaar voor het gebied aan, zodat de gereedheid ervan kan worden bevestigd"
+      },
+      "required_documents_defined": {
+        "fail": "Gate {gate} heeft gebieden die van toepassing zijn zonder vereist kaderdocument",
+        "suggestion": "Voeg de kaderdocumenten toe die de catalogus voor deze gate vereist, of markeer het gebied met een motivering als niet van toepassing"
+      },
+      "binding_document_unchanged": {
+        "fail": "Bindend kaderdocument {document} heeft een nieuwere revisie die niet is gedekt door een goedgekeurd wijzigingsverzoek",
+        "suggestion": "Dien een wijzigingsverzoek in, zodat de nieuwe revisie wordt goedgekeurd voordat deze wordt gebruikt"
+      },
+      "conditions_not_overdue": {
+        "fail": "Voorwaarde {condition} is verlopen sinds {due}",
+        "suggestion": "Rond de voorwaarde af met bewijs, of laat de beslisser deze met een motivering kwijtschelden"
+      },
+      "gate_date_after_previous": {
+        "fail": "Gate {gate} is gepland op {date}, vóór de vorige gate op {previous}",
+        "suggestion": "Verplaats de gatedatum zodat de gates de fasevolgorde volgen"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Het besluit over gate {gate} is vastgelegd door een gebruiker die eigenaar is van een van de gebieden",
+        "suggestion": "Volgens het vier-ogenprincipe moet een andere persoon beslissen"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Gebied {area} is zonder reden als niet van toepassing gemarkeerd",
+        "suggestion": "Leg vast waarom het gebied niet van toepassing is"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Gate: Vergunning naar detailontwerp",
+          "award_to_construction": "Gate: Gunning naar uitvoering",
+          "brief_to_concept": "Gate: Programma naar concept",
+          "concept_to_design": "Gate: Concept naar ontwerp",
+          "construction_to_handover": "Gate: Uitvoering naar oplevering",
+          "design_to_approval": "Gate: Ontwerp naar vergunning",
+          "detail_to_tender": "Gate: Detailontwerp naar aanbesteding",
+          "handover_to_operation": "Gate: Oplevering naar exploitatie",
+          "strategy_to_brief": "Gate: Strategie naar programma",
+          "tender_to_award": "Gate: Aanbesteding naar gunning"
+        }
+      }
+    }
+  }
+}

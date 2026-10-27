@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Kết quả quyết định này không được nhận diện",
+      "gate_not_in_review": "Cổng chưa ở trạng thái đang xem xét nên không thể ghi nhận quyết định",
+      "gate_not_decided": "Chỉ cổng đã có quyết định mới có thể mở lại",
+      "rationale_required": "Vui lòng ghi rõ lý do cho quyết định này",
+      "required_document_not_approved": "Một tài liệu khung bắt buộc chưa sẵn sàng để phê duyệt tại cổng này",
+      "area_without_owner": "Lĩnh vực quản lý này chưa có người phụ trách nên không ai có thể xác nhận mức độ sẵn sàng của lĩnh vực",
+      "area_not_ready": "Lĩnh vực quản lý này chưa sẵn sàng cho cổng",
+      "evidence_not_met": "Bằng chứng sẵn sàng bắt buộc của lĩnh vực này chưa đạt",
+      "unknown_evidence_not_acknowledged": "Bằng chứng sẵn sàng của lĩnh vực này chưa được xác nhận hoặc có cảnh báo. Hãy xác nhận bạn đã xem trước khi cho phép cổng đi qua",
+      "unknown_criterion": "Tiêu chí sẵn sàng này không nằm trong mô hình của dự án cho lĩnh vực và cổng này",
+      "check_stale": "Tài liệu đã thay đổi sau khi sự sẵn sàng được xác nhận, vì vậy lĩnh vực phải được xác nhận lại",
+      "condition_overdue": "Một điều kiện từ cổng trước đã quá hạn và phải được hoàn thành hoặc miễn trừ trước",
+      "conditions_required": "Quyết định thông qua có điều kiện cần ít nhất một điều kiện",
+      "conditions_not_allowed": "Chỉ quyết định thông qua có điều kiện mới được kèm điều kiện",
+      "condition_text_required": "Mỗi điều kiện cần có nội dung",
+      "condition_unknown_area": "Điều kiện này nêu một lĩnh vực không thuộc dự án",
+      "waiver_needs_rationale": "Việc miễn trừ cần có lý do bằng văn bản",
+      "not_applicable_needs_rationale": "Đánh dấu không áp dụng cần có lý do bằng văn bản",
+      "not_applicable_not_accepted": "Người quyết định chưa chấp nhận lĩnh vực này là không áp dụng",
+      "decider_not_entitled": "Bạn không có quyền quyết định cổng này theo tuyến phê duyệt",
+      "decider_is_area_owner": "Theo nguyên tắc bốn mắt, người phụ trách lĩnh vực hoặc người thay thế không được quyết định cổng này",
+      "hold_needs_resume_date": "Tạm dừng cần có ngày tiếp tục trong tương lai",
+      "proceed_at_risk_needs_conditions": "Tiếp tục có rủi ro chỉ khả thi khi thông qua có điều kiện",
+      "proceed_at_risk_area_not_blocking": "Lĩnh vực này không gây cản trở nên không thể được nêu là tiếp tục có rủi ro",
+      "project_stopped": "Dự án đã bị dừng tại một cổng",
+      "document_read_only": "Tài liệu khung này chỉ đọc vì dự án đã bị dừng",
+      "binding_requires_change_request": "Tài liệu khung này có tính ràng buộc và chỉ được thay đổi thông qua yêu cầu thay đổi",
+      "phase_mapping_missing": "Mô hình giai đoạn mới cần có ánh xạ cho giai đoạn này",
+      "phase_mapping_unknown_target": "Ánh xạ nêu một giai đoạn mà mô hình mới không có",
+      "no_decision_route": "Chưa ghim tuyến phê duyệt nào cho quyết định cổng. Quản lý dự án cần ghim một tuyến của chính dự án trong phần cài đặt quản trị",
+      "route_not_at_final_step": "Tuyến phê duyệt chưa đến bước cuối cùng",
+      "route_not_pending": "Tuyến phê duyệt của cổng này không còn ở trạng thái chờ",
+      "concurrent_decision": "Vừa có người khác quyết định cổng này; hãy tải lại và kiểm tra quyết định",
+      "gate_out_of_order": "Dự án không ở giai đoạn mà cổng này rời khỏi",
+      "model_missing": "Dự án chưa thiết lập mô hình quản trị",
+      "model_exists": "Mô hình quản trị đã được thiết lập; hãy thay đổi bằng ánh xạ giai đoạn",
+      "unknown_catalogue": "Danh mục này không được nhận diện",
+      "area_not_found": "Không tìm thấy lĩnh vực quản lý",
+      "gate_not_found": "Không tìm thấy cổng",
+      "document_not_found": "Không tìm thấy tài liệu khung",
+      "condition_not_found": "Không tìm thấy điều kiện",
+      "change_request_not_found": "Không tìm thấy yêu cầu thay đổi",
+      "check_not_found": "Không tìm thấy kiểm tra sẵn sàng",
+      "not_area_owner": "Chỉ người phụ trách hoặc người thay thế của lĩnh vực này mới được thực hiện thao tác này",
+      "owner_not_project_member": "Người phụ trách phải có quyền truy cập dự án",
+      "unknown_document_type": "Loại tài liệu này không thuộc danh mục của lĩnh vực",
+      "container_not_in_project": "Thư mục CDE này không thuộc dự án",
+      "invalid_transition": "Không được phép chuyển trạng thái như vậy",
+      "condition_not_open": "Chỉ điều kiện đang mở mới có thể được hoàn thành hoặc miễn trừ",
+      "document_not_binding": "Chỉ tài liệu khung có tính ràng buộc mới được thay đổi thông qua yêu cầu thay đổi",
+      "no_pending_revision": "Không có bản sửa đổi mới hơn để đặt làm bản ràng buộc",
+      "change_request_not_open": "Yêu cầu thay đổi này không còn mở",
+      "invalid_status": "Trạng thái này không được phép ở đây",
+      "decision_immutable": "Quyết định cổng không được thay đổi hoặc xóa",
+      "document_exists": "Tài liệu khung này đã được theo dõi cho lĩnh vực",
+      "catalogue_code_taken": "Đã tồn tại danh mục với mã này",
+      "catalogue_retired": "Danh mục này đã ngừng sử dụng và không thể chỉnh sửa hoặc ghim nữa",
+      "catalogue_invalid": "Bản nháp danh mục vi phạm quy tắc danh mục và không thể xuất bản",
+      "gate_historic": "Cổng này thuộc mô hình giai đoạn mà dự án đã rời khỏi và không thể thay đổi nữa",
+      "gate_not_on_hold": "Chỉ cổng đang tạm dừng mới có thể tiếp tục",
+      "later_gate_active": "Một cổng sau đã được khởi động nên không thể mở lại cổng này",
+      "model_unchanged": "Dự án đã sử dụng phiên bản mô hình giai đoạn này",
+      "not_condition_owner": "Chỉ người được giao điều kiện này hoặc quản lý mới được hoàn thành điều kiện",
+      "route_needs_more_approvals": "Bước cuối của tuyến phê duyệt vẫn cần thêm người phê duyệt; họ phê duyệt trên màn hình phê duyệt và người cuối cùng ghi nhận quyết định",
+      "activity_not_in_project": "Hoạt động tiến độ này không thuộc dự án",
+      "target_date_owned_by_schedule": "Cổng này được liên kết với một hoạt động tiến độ, hoạt động đó quyết định ngày của cổng; hãy bỏ liên kết để đặt ngày tại đây",
+      "no_change_route": "Chưa ghim tuyến phê duyệt nào cho thay đổi tài liệu ràng buộc. Quản lý dự án cần ghim một tuyến của chính dự án trong phần cài đặt quản trị",
+      "route_not_pinnable": "Tuyến phê duyệt này không thể ghim: tuyến phải đang hoạt động trong dự án cho loại quyết định này",
+      "area_retired": "Lĩnh vực này đã bị loại bỏ do thay đổi mô hình giai đoạn và không nhận tài liệu mới",
+      "pack_catalogue_invalid": "Gói đang hoạt động khai báo danh mục này, nhưng tệp của nó bị thiếu hoặc vi phạm quy tắc danh mục",
+      "settings_frozen_in_review": "Không thể thay đổi khi cổng đang được xem xét hoặc tạm dừng; hãy quyết định cổng trước",
+      "null_not_allowed": "Trường này không được để trống"
+    },
+    "outcome": {
+      "go": "Thông qua",
+      "go_with_conditions": "Thông qua có điều kiện",
+      "hold": "Tạm dừng",
+      "recycle": "Quay lại chỉnh sửa",
+      "stop": "Dừng dự án"
+    },
+    "gate_state": {
+      "not_started": "Chưa bắt đầu",
+      "in_preparation": "Đang chuẩn bị",
+      "in_review": "Đang xem xét",
+      "on_hold": "Tạm dừng",
+      "decided": "Đã quyết định"
+    },
+    "document_state": {
+      "draft": "Bản nháp",
+      "in_review": "Đang xem xét",
+      "approved_at_gate": "Đã phê duyệt tại cổng",
+      "binding": "Có tính ràng buộc",
+      "superseded": "Đã được thay thế"
+    },
+    "check_status": {
+      "not_assessed": "Chưa đánh giá",
+      "ready": "Sẵn sàng",
+      "ready_with_risks": "Sẵn sàng nhưng có rủi ro",
+      "not_ready": "Chưa sẵn sàng",
+      "not_applicable": "Không áp dụng"
+    },
+    "condition_status": {
+      "open": "Đang mở",
+      "cleared": "Đã hoàn thành",
+      "waived": "Đã miễn trừ",
+      "overdue": "Quá hạn"
+    },
+    "export": {
+      "title": "Nhật ký quyết định quản trị",
+      "col_gate": "Cổng",
+      "col_attempt": "Lần",
+      "col_outcome": "Kết quả",
+      "col_decided_by": "Người quyết định",
+      "col_decided_at": "Thời điểm quyết định",
+      "col_rationale": "Lý do",
+      "col_conditions": "Điều kiện",
+      "col_at_risk": "Tiếp tục có rủi ro",
+      "project": "Dự án",
+      "empty": "Chưa ghi nhận quyết định cổng nào"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Lĩnh vực quản lý {area} chưa có người phụ trách",
+        "suggestion": "Chỉ định người phụ trách cho lĩnh vực để có thể xác nhận mức độ sẵn sàng"
+      },
+      "required_documents_defined": {
+        "fail": "Cổng {gate} có các lĩnh vực áp dụng nhưng chưa có tài liệu khung bắt buộc nào",
+        "suggestion": "Đính kèm các tài liệu khung mà danh mục yêu cầu cho cổng này, hoặc đánh dấu lĩnh vực là không áp dụng kèm lý do"
+      },
+      "binding_document_unchanged": {
+        "fail": "Tài liệu khung ràng buộc {document} có bản sửa đổi mới hơn chưa được bao phủ bởi yêu cầu thay đổi đã phê duyệt",
+        "suggestion": "Tạo yêu cầu thay đổi để bản sửa đổi mới được phê duyệt trước khi sử dụng"
+      },
+      "conditions_not_overdue": {
+        "fail": "Điều kiện {condition} đã quá hạn từ {due}",
+        "suggestion": "Hoàn thành điều kiện kèm bằng chứng, hoặc để người quyết định miễn trừ kèm lý do"
+      },
+      "gate_date_after_previous": {
+        "fail": "Cổng {gate} được lập kế hoạch vào {date}, sớm hơn cổng trước {previous}",
+        "suggestion": "Điều chỉnh ngày cổng để các cổng theo đúng thứ tự giai đoạn"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Quyết định cổng {gate} được ghi nhận bởi người dùng đang phụ trách một trong các lĩnh vực của cổng",
+        "suggestion": "Theo nguyên tắc bốn mắt, phải có người khác quyết định"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Lĩnh vực {area} được đánh dấu không áp dụng nhưng thiếu lý do",
+        "suggestion": "Ghi rõ lý do lĩnh vực không áp dụng"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Cổng: Từ phê duyệt đến thiết kế chi tiết",
+          "award_to_construction": "Cổng: Từ trao thầu đến thi công",
+          "brief_to_concept": "Cổng: Từ yêu cầu đến ý tưởng",
+          "concept_to_design": "Cổng: Từ ý tưởng đến thiết kế",
+          "construction_to_handover": "Cổng: Từ thi công đến bàn giao",
+          "design_to_approval": "Cổng: Từ thiết kế đến giấy phép",
+          "detail_to_tender": "Cổng: Từ thiết kế chi tiết đến đấu thầu",
+          "handover_to_operation": "Cổng: Từ bàn giao đến vận hành",
+          "strategy_to_brief": "Cổng: Từ chiến lược đến yêu cầu",
+          "tender_to_award": "Cổng: Từ đấu thầu đến trao thầu"
+        }
+      }
+    }
+  }
+}

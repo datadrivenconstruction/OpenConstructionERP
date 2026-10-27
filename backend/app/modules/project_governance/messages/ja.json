@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "この決定結果は認識されていません",
+      "gate_not_in_review": "ゲートはレビュー中ではないため、決定を記録できません",
+      "gate_not_decided": "決定済みのゲートのみ再オープンできます",
+      "rationale_required": "この決定の理由を記入してください",
+      "required_document_not_approved": "このゲートで必要なフレーム文書が承認可能な状態にありません",
+      "area_without_owner": "この管理領域には責任者がいないため、その準備状況を承認できる人がいません",
+      "area_not_ready": "この管理領域はゲートの準備ができていません",
+      "evidence_not_met": "この領域に必要な準備状況の根拠が満たされていません",
+      "unknown_evidence_not_acknowledged": "この領域の準備状況の根拠は未確認か、警告を含んでいます。ゲートを通す前に、内容を確認したことを確認してください",
+      "unknown_criterion": "この準備基準は、この領域とこのゲートについてプロジェクトのモデルに含まれていません",
+      "check_stale": "準備状況の確認後に文書が変更されたため、この領域を再度確認する必要があります",
+      "condition_overdue": "前のゲートの条件が期限を過ぎているため、先に解消するか免除する必要があります",
+      "conditions_required": "条件付き承認には少なくとも1つの条件が必要です",
+      "conditions_not_allowed": "条件を設定できるのは条件付き承認のみです",
+      "condition_text_required": "すべての条件に本文が必要です",
+      "condition_unknown_area": "この条件が指定している領域は、このプロジェクトに含まれていません",
+      "waiver_needs_rationale": "免除には理由を文書で記入する必要があります",
+      "not_applicable_needs_rationale": "該当なしとするには理由を文書で記入する必要があります",
+      "not_applicable_not_accepted": "決定者はこの領域を該当なしとして受け入れていません",
+      "decider_not_entitled": "承認ルートに基づき、あなたにはこのゲートを決定する権限がありません",
+      "decider_is_area_owner": "四つの目の原則により、領域の責任者または代理人はこのゲートを決定できません",
+      "hold_needs_resume_date": "保留には将来の再開日が必要です",
+      "proceed_at_risk_needs_conditions": "リスクを承知での進行は、条件付き承認の場合のみ可能です",
+      "proceed_at_risk_area_not_blocking": "この領域は進行を妨げていないため、リスクを承知での進行の対象にはできません",
+      "project_stopped": "プロジェクトはゲートで停止されました",
+      "document_read_only": "プロジェクトが停止されたため、このフレーム文書は読み取り専用です",
+      "binding_requires_change_request": "このフレーム文書は拘束力があり、変更は変更要求を通じてのみ行えます",
+      "phase_mapping_missing": "新しいフェーズモデルでは、このフェーズの対応付けが必要です",
+      "phase_mapping_unknown_target": "対応付けが、新しいモデルに存在しないフェーズを指定しています",
+      "no_decision_route": "ゲート決定用の承認ルートが設定されていません。ガバナンス管理者がガバナンス設定で、プロジェクト独自のルートを一つ設定してください",
+      "route_not_at_final_step": "承認ルートがまだ最終ステップに到達していません",
+      "route_not_pending": "このゲートの承認ルートは、もう承認待ちではありません",
+      "concurrent_decision": "ほんの少し前に別の担当者がこのゲートを決定しました。ページを再読み込みして決定内容を確認してください",
+      "gate_out_of_order": "プロジェクトは、このゲートが終了させるフェーズにありません",
+      "model_missing": "このプロジェクトにはガバナンスモデルが設定されていません",
+      "model_exists": "ガバナンスモデルは設定済みです。フェーズの対応付けを使って変更してください",
+      "unknown_catalogue": "このカタログは認識されていません",
+      "area_not_found": "管理領域が見つかりません",
+      "gate_not_found": "ゲートが見つかりません",
+      "document_not_found": "フレーム文書が見つかりません",
+      "condition_not_found": "条件が見つかりません",
+      "change_request_not_found": "変更要求が見つかりません",
+      "check_not_found": "準備状況の確認が見つかりません",
+      "not_area_owner": "この領域の責任者または代理人のみがこの操作を行えます",
+      "owner_not_project_member": "責任者はこのプロジェクトへのアクセス権を持っている必要があります",
+      "unknown_document_type": "この文書の種類は、この領域のカタログに含まれていません",
+      "container_not_in_project": "CDE コンテナはこのプロジェクトに属していません",
+      "invalid_transition": "この状態変更は許可されていません",
+      "condition_not_open": "解消または免除できるのは未解決の条件のみです",
+      "document_not_binding": "変更要求を通じて変更できるのは拘束力のあるフレーム文書のみです",
+      "no_pending_revision": "拘束力を持たせる、より新しい改訂版がありません",
+      "change_request_not_open": "この変更要求は、もう未処理ではありません",
+      "invalid_status": "このステータスはここでは許可されていません",
+      "decision_immutable": "ゲートの決定は変更も削除もできません",
+      "document_exists": "このフレーム文書は、この領域で既に管理されています",
+      "catalogue_code_taken": "このコードのカタログは既に存在します",
+      "catalogue_retired": "このカタログは廃止されており、もう編集も設定もできません",
+      "catalogue_invalid": "カタログの草案がカタログのルールに違反しているため、公開できません",
+      "gate_historic": "このゲートは、プロジェクトが既に離れたフェーズモデルに属しており、もう変更できません",
+      "gate_not_on_hold": "再開できるのは保留中のゲートのみです",
+      "later_gate_active": "後のゲートが既に開始されているため、このゲートを再オープンできません",
+      "model_unchanged": "プロジェクトは既にこのバージョンのフェーズモデルを使用しています",
+      "not_condition_owner": "この条件を解消できるのは、割り当てられた本人または管理者のみです",
+      "route_needs_more_approvals": "承認ルートの最終ステップには、ほかの承認者の承認が必要です。承認者は承認画面で承認し、最後の承認者が決定を記録します",
+      "activity_not_in_project": "工程のアクティビティはこのプロジェクトに属していません",
+      "target_date_owned_by_schedule": "このゲートは日付を管理する工程アクティビティに関連付けられています。ここで日付を設定するには関連付けを解除してください",
+      "no_change_route": "拘束力のある文書の変更用の承認ルートが設定されていません。ガバナンス管理者がガバナンス設定で、プロジェクト独自のルートを一つ設定してください",
+      "route_not_pinnable": "この承認ルートは設定できません。この種類の決定に対するプロジェクトの有効なルートである必要があります",
+      "area_retired": "この領域はフェーズモデルの変更により廃止されており、新しい文書は受け付けません",
+      "pack_catalogue_invalid": "有効なパックはこのカタログを宣言していますが、そのファイルが見つからないか、カタログのルールに違反しています",
+      "settings_frozen_in_review": "ゲートがレビュー中または保留中の間は変更できません。先にそのゲートを決定してください",
+      "null_not_allowed": "この項目は空にできません"
+    },
+    "outcome": {
+      "go": "承認",
+      "go_with_conditions": "条件付き承認",
+      "hold": "保留",
+      "recycle": "差し戻し",
+      "stop": "中止"
+    },
+    "gate_state": {
+      "not_started": "未開始",
+      "in_preparation": "準備中",
+      "in_review": "レビュー中",
+      "on_hold": "保留中",
+      "decided": "決定済み"
+    },
+    "document_state": {
+      "draft": "下書き",
+      "in_review": "レビュー中",
+      "approved_at_gate": "ゲートで承認済み",
+      "binding": "拘束力あり",
+      "superseded": "差し替え済み"
+    },
+    "check_status": {
+      "not_assessed": "未評価",
+      "ready": "準備完了",
+      "ready_with_risks": "リスクありで準備完了",
+      "not_ready": "準備未完了",
+      "not_applicable": "該当なし"
+    },
+    "condition_status": {
+      "open": "未解決",
+      "cleared": "解消済み",
+      "waived": "免除",
+      "overdue": "期限超過"
+    },
+    "export": {
+      "title": "ガバナンス決定の記録",
+      "col_gate": "ゲート",
+      "col_attempt": "試行",
+      "col_outcome": "結果",
+      "col_decided_by": "決定者",
+      "col_decided_at": "決定日時",
+      "col_rationale": "理由",
+      "col_conditions": "条件",
+      "col_at_risk": "リスクを承知での進行",
+      "project": "プロジェクト",
+      "empty": "ゲートの決定はまだ記録されていません"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "管理領域 {area} に責任者がいません",
+        "suggestion": "領域の準備状況を承認できるよう、責任者を任命してください"
+      },
+      "required_documents_defined": {
+        "fail": "ゲート {gate} には、必要なフレーム文書がない該当領域があります",
+        "suggestion": "このゲートでカタログが要求するフレーム文書を添付するか、理由を添えて領域を該当なしとしてください"
+      },
+      "binding_document_unchanged": {
+        "fail": "拘束力のあるフレーム文書 {document} には、承認済みの変更要求で対応されていない、より新しい改訂版があります",
+        "suggestion": "新しい改訂版が使用前に承認されるよう、変更要求を提出してください"
+      },
+      "conditions_not_overdue": {
+        "fail": "条件 {condition} は {due} から期限を過ぎています",
+        "suggestion": "根拠を添えて条件を解消するか、決定者に理由を添えて免除してもらってください"
+      },
+      "gate_date_after_previous": {
+        "fail": "ゲート {gate} は {date} に予定されていますが、前のゲート {previous} より前になっています",
+        "suggestion": "ゲートがフェーズの順序に従うよう、ゲートの日付を移動してください"
+      },
+      "decision_by_entitled_user": {
+        "fail": "ゲート {gate} の決定は、その領域のいずれかの責任者であるユーザーが記録しました",
+        "suggestion": "四つの目の原則により、別の担当者が決定する必要があります"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "領域 {area} は理由なしで該当なしとされています",
+        "suggestion": "その領域が該当しない理由を記入してください"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "ゲート: 許可取得から詳細設計へ",
+          "award_to_construction": "ゲート: 発注から施工へ",
+          "brief_to_concept": "ゲート: ブリーフからコンセプトへ",
+          "concept_to_design": "ゲート: コンセプトから設計へ",
+          "construction_to_handover": "ゲート: 施工から引渡しへ",
+          "design_to_approval": "ゲート: 設計から許可取得へ",
+          "detail_to_tender": "ゲート: 詳細設計から入札へ",
+          "handover_to_operation": "ゲート: 引渡しから運用へ",
+          "strategy_to_brief": "ゲート: 戦略からブリーフへ",
+          "tender_to_award": "ゲート: 入札から発注へ"
+        }
+      }
+    }
+  }
+}

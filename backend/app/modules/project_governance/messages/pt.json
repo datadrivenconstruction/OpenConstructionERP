@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Este resultado de decisão não é conhecido",
+      "gate_not_in_review": "O marco não está em análise, por isso não pode ser registada nenhuma decisão nele",
+      "gate_not_decided": "Só um marco decidido pode ser reaberto",
+      "rationale_required": "Registe o motivo desta decisão",
+      "required_document_not_approved": "Um documento de enquadramento obrigatório não está pronto para aprovação neste marco",
+      "area_without_owner": "Esta área de gestão não tem responsável, por isso ninguém pode atestar a sua prontidão",
+      "area_not_ready": "Esta área de gestão não está pronta para o marco",
+      "evidence_not_met": "Não foram cumpridas as evidências de prontidão obrigatórias para esta área",
+      "unknown_evidence_not_acknowledged": "As evidências de prontidão desta área não estão confirmadas ou têm um aviso. Confirme que as viu antes de deixar o marco avançar",
+      "unknown_criterion": "Este critério de prontidão não faz parte do modelo do projeto para esta área e marco",
+      "check_stale": "Um documento foi alterado depois de a prontidão ser confirmada, por isso a área tem de ser confirmada novamente",
+      "condition_overdue": "Uma condição de um marco anterior está em atraso e tem de ser cumprida ou dispensada primeiro",
+      "conditions_required": "Um avanço com condições requer pelo menos uma condição",
+      "conditions_not_allowed": "Só um avanço com condições pode ter condições",
+      "condition_text_required": "Cada condição requer um texto",
+      "condition_unknown_area": "A condição indica uma área que não faz parte deste projeto",
+      "waiver_needs_rationale": "Uma dispensa requer uma justificação escrita",
+      "not_applicable_needs_rationale": "Marcar como não aplicável requer uma justificação escrita",
+      "not_applicable_not_accepted": "O decisor não aceitou esta área como não aplicável",
+      "decider_not_entitled": "Não tem direito a decidir este marco segundo o circuito de aprovação",
+      "decider_is_area_owner": "Pela regra dos quatro olhos, um responsável de área ou o seu substituto não pode decidir este marco",
+      "hold_needs_resume_date": "Uma suspensão requer uma data de retoma no futuro",
+      "proceed_at_risk_needs_conditions": "Prosseguir com risco só é possível com um avanço com condições",
+      "proceed_at_risk_area_not_blocking": "Esta área não é bloqueante, por isso não pode ser indicada como prosseguindo com risco",
+      "project_stopped": "O projeto foi parado num marco",
+      "document_read_only": "Este documento de enquadramento está só para leitura porque o projeto foi parado",
+      "binding_requires_change_request": "Este documento de enquadramento é vinculativo e só é alterado através de um pedido de alteração",
+      "phase_mapping_missing": "O novo modelo de fases requer uma correspondência para esta fase",
+      "phase_mapping_unknown_target": "A correspondência indica uma fase que o novo modelo não tem",
+      "no_decision_route": "Não está definido um circuito de aprovação para as decisões de marco. Um gestor de governance fixa um dos circuitos do próprio projeto nas definições de governance",
+      "route_not_at_final_step": "O circuito de aprovação ainda não chegou ao passo final",
+      "route_not_pending": "O circuito de aprovação deste marco já não está pendente",
+      "concurrent_decision": "Outra pessoa decidiu sobre este marco há instantes; recarregue a página e verifique a decisão",
+      "gate_out_of_order": "O projeto não está na fase que este marco encerra",
+      "model_missing": "Não está definido um modelo de governance para este projeto",
+      "model_exists": "Já está definido um modelo de governance; altere-o com uma correspondência de fases",
+      "unknown_catalogue": "Este catálogo não é conhecido",
+      "area_not_found": "Área de gestão não encontrada",
+      "gate_not_found": "Marco não encontrado",
+      "document_not_found": "Documento de enquadramento não encontrado",
+      "condition_not_found": "Condição não encontrada",
+      "change_request_not_found": "Pedido de alteração não encontrado",
+      "check_not_found": "Verificação de prontidão não encontrada",
+      "not_area_owner": "Só o responsável ou o substituto desta área pode fazer isto",
+      "owner_not_project_member": "O responsável tem de ter acesso a este projeto",
+      "unknown_document_type": "Este tipo de documento não faz parte do catálogo desta área",
+      "container_not_in_project": "O contentor CDE não pertence a este projeto",
+      "invalid_transition": "Esta mudança de estado não é permitida",
+      "condition_not_open": "Só uma condição aberta pode ser cumprida ou dispensada",
+      "document_not_binding": "Só um documento de enquadramento vinculativo pode ser alterado através de um pedido de alteração",
+      "no_pending_revision": "Não existe uma revisão mais recente para tornar vinculativa",
+      "change_request_not_open": "Este pedido de alteração já não está aberto",
+      "invalid_status": "Este estado não é permitido aqui",
+      "decision_immutable": "Uma decisão de marco não pode ser alterada nem eliminada",
+      "document_exists": "Este documento de enquadramento já está registado para a área",
+      "catalogue_code_taken": "Já existe um catálogo com este código",
+      "catalogue_retired": "Este catálogo foi retirado e já não pode ser editado nem fixado",
+      "catalogue_invalid": "O rascunho do catálogo viola uma regra do catálogo e não pode ser publicado",
+      "gate_historic": "Este marco pertence a um modelo de fases que o projeto já abandonou e já não pode ser alterado",
+      "gate_not_on_hold": "Só um marco suspenso pode ser retomado",
+      "later_gate_active": "Um marco posterior já foi iniciado, por isso este marco não pode ser reaberto",
+      "model_unchanged": "O projeto já utiliza esta versão do modelo de fases",
+      "not_condition_owner": "Só a pessoa a quem esta condição foi atribuída ou um gestor a pode cumprir",
+      "route_needs_more_approvals": "O passo final do circuito de aprovação ainda precisa de outros aprovadores; eles aprovam no ecrã de aprovações e o último regista a decisão",
+      "activity_not_in_project": "A atividade do cronograma não pertence a este projeto",
+      "target_date_owned_by_schedule": "Este marco está ligado a uma atividade do cronograma, que define a sua data; desligue-a para definir aqui uma data",
+      "no_change_route": "Não está definido um circuito de aprovação para alterações a documentos vinculativos. Um gestor de governance fixa um dos circuitos do próprio projeto nas definições de governance",
+      "route_not_pinnable": "Este circuito de aprovação não pode ser fixado: tem de ser um circuito ativo deste projeto para este tipo de decisão",
+      "area_retired": "Esta área foi retirada por uma alteração do modelo de fases e já não recebe novos documentos",
+      "pack_catalogue_invalid": "O pacote ativo declara este catálogo, mas o seu ficheiro está em falta ou viola as regras do catálogo",
+      "settings_frozen_in_review": "Não é possível alterar isto enquanto um marco estiver em análise ou suspenso; decida primeiro o marco",
+      "null_not_allowed": "Este campo não pode estar vazio"
+    },
+    "outcome": {
+      "go": "Avançar",
+      "go_with_conditions": "Avançar com condições",
+      "hold": "Suspender",
+      "recycle": "Rever",
+      "stop": "Parar"
+    },
+    "gate_state": {
+      "not_started": "Não iniciado",
+      "in_preparation": "Em preparação",
+      "in_review": "Em análise",
+      "on_hold": "Suspenso",
+      "decided": "Decidido"
+    },
+    "document_state": {
+      "draft": "Rascunho",
+      "in_review": "Em análise",
+      "approved_at_gate": "Aprovado no marco",
+      "binding": "Vinculativo",
+      "superseded": "Substituído"
+    },
+    "check_status": {
+      "not_assessed": "Não avaliado",
+      "ready": "Pronto",
+      "ready_with_risks": "Pronto com riscos",
+      "not_ready": "Não pronto",
+      "not_applicable": "Não aplicável"
+    },
+    "condition_status": {
+      "open": "Aberta",
+      "cleared": "Cumprida",
+      "waived": "Dispensada",
+      "overdue": "Em atraso"
+    },
+    "export": {
+      "title": "Registo de decisões de governance",
+      "col_gate": "Marco",
+      "col_attempt": "Tentativa",
+      "col_outcome": "Resultado",
+      "col_decided_by": "Decidido por",
+      "col_decided_at": "Decidido em",
+      "col_rationale": "Justificação",
+      "col_conditions": "Condições",
+      "col_at_risk": "Prosseguir com risco",
+      "project": "Projeto",
+      "empty": "Ainda não foi registada nenhuma decisão de marco"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "A área de gestão {area} não tem responsável",
+        "suggestion": "Indique um responsável pela área para que a sua prontidão possa ser atestada"
+      },
+      "required_documents_defined": {
+        "fail": "O marco {gate} tem áreas aplicáveis sem qualquer documento de enquadramento obrigatório",
+        "suggestion": "Anexe os documentos de enquadramento que o catálogo exige para este marco, ou marque a área como não aplicável com uma justificação"
+      },
+      "binding_document_unchanged": {
+        "fail": "O documento de enquadramento vinculativo {document} tem uma revisão mais recente que não está coberta por um pedido de alteração aprovado",
+        "suggestion": "Submeta um pedido de alteração para que a nova revisão seja aprovada antes de ser utilizada"
+      },
+      "conditions_not_overdue": {
+        "fail": "A condição {condition} está em atraso desde {due}",
+        "suggestion": "Cumpra a condição com evidências ou peça ao decisor que a dispense com uma justificação"
+      },
+      "gate_date_after_previous": {
+        "fail": "O marco {gate} está planeado para {date}, antes do marco anterior de {previous}",
+        "suggestion": "Mova a data do marco para que os marcos sigam a ordem das fases"
+      },
+      "decision_by_entitled_user": {
+        "fail": "A decisão sobre o marco {gate} foi registada por um utilizador que é responsável por uma das suas áreas",
+        "suggestion": "Pela regra dos quatro olhos, a decisão tem de ser tomada por outra pessoa"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "A área {area} está marcada como não aplicável sem justificação",
+        "suggestion": "Registe porque é que a área não se aplica"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Marco: Licença para projeto de execução",
+          "award_to_construction": "Marco: Adjudicação para construção",
+          "brief_to_concept": "Marco: Programa para conceito",
+          "concept_to_design": "Marco: Conceito para projeto",
+          "construction_to_handover": "Marco: Construção para entrega",
+          "design_to_approval": "Marco: Projeto para licenciamento",
+          "detail_to_tender": "Marco: Projeto de execução para concurso",
+          "handover_to_operation": "Marco: Entrega para exploração",
+          "strategy_to_brief": "Marco: Estratégia para programa",
+          "tender_to_award": "Marco: Concurso para adjudicação"
+        }
+      }
+    }
+  }
+}

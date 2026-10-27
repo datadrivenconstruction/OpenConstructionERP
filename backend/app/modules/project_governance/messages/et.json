@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Seda otsuse tulemust ei tunta",
+      "gate_not_in_review": "Värav ei ole ülevaatamisel, seega ei saa sellele otsust salvestada",
+      "gate_not_decided": "Uuesti avada saab ainult otsustatud värava",
+      "rationale_required": "Kirjutage selle otsuse põhjendus",
+      "required_document_not_approved": "Nõutav raamdokument ei ole selle värava jaoks kinnitamiseks valmis",
+      "area_without_owner": "Sellel juhtimisvaldkonnal pole omanikku, seega ei saa keegi kinnitada selle valmisolekut",
+      "area_not_ready": "See juhtimisvaldkond ei ole värava jaoks valmis",
+      "evidence_not_met": "Selle valdkonna nõutavad valmisoleku tõendid ei ole täidetud",
+      "unknown_evidence_not_acknowledged": "Selle valdkonna valmisoleku tõend on kinnitamata või sisaldab hoiatust. Kinnitage, et olete selle läbi vaadanud, enne kui värava läbimist lubate",
+      "unknown_criterion": "See valmisoleku kriteerium ei kuulu selle valdkonna ja värava jaoks projekti mudelisse",
+      "check_stale": "Dokument muutus pärast valmisoleku kinnitamist, seega tuleb valdkond uuesti kinnitada",
+      "condition_overdue": "Varasema värava tingimus on tähtaja ületanud ja see tuleb esmalt täita või sellest loobuda",
+      "conditions_required": "Tingimustega heakskiit vajab vähemalt ühte tingimust",
+      "conditions_not_allowed": "Tingimusi saab olla ainult tingimustega heakskiidul",
+      "condition_text_required": "Igal tingimusel peab olema tekst",
+      "condition_unknown_area": "Tingimus viitab valdkonnale, mis ei kuulu sellesse projekti",
+      "waiver_needs_rationale": "Loobumine vajab kirjalikku põhjendust",
+      "not_applicable_needs_rationale": "Märkimine mitterakendatavaks vajab kirjalikku põhjendust",
+      "not_applicable_not_accepted": "Otsustaja ei ole seda valdkonda mitterakendatavaks aktsepteerinud",
+      "decider_not_entitled": "Teil ei ole õigust seda väravat oma heakskiidu marsruudi järgi otsustada",
+      "decider_is_area_owner": "Neljasilmapõhimõtte kohaselt ei tohi valdkonna omanik ega asendaja seda väravat otsustada",
+      "hold_needs_resume_date": "Peatamine vajab tulevast jätkamise kuupäeva",
+      "proceed_at_risk_needs_conditions": "Riskiga jätkamine on võimalik ainult tingimustega heakskiidu korral",
+      "proceed_at_risk_area_not_blocking": "See valdkond ei ole takistav, seega ei saa seda nimetada riskiga jätkavaks valdkonnaks",
+      "project_stopped": "Projekt peatati väravas",
+      "document_read_only": "See raamdokument on ainult lugemiseks, sest projekt peatati",
+      "binding_requires_change_request": "See raamdokument on siduv ja seda muudetakse ainult muudatustaotluse kaudu",
+      "phase_mapping_missing": "Uus faasimudel vajab selle faasi vastendust",
+      "phase_mapping_unknown_target": "Vastendus viitab faasile, mida uuel mudelil ei ole",
+      "no_decision_route": "Väravaotsuste jaoks ei ole kinnitatud heakskiidu marsruuti. Juhtimisjuht kinnitab juhtimise seadetes ühe projekti enda marsruutidest",
+      "route_not_at_final_step": "Heakskiidu marsruut ei ole veel jõudnud oma viimase sammuni",
+      "route_not_pending": "Selle värava heakskiidu marsruut ei ole enam ootel",
+      "concurrent_decision": "Keegi teine otsustas selle värava just äsja; laadige leht uuesti ja kontrollige otsust",
+      "gate_out_of_order": "Projekt ei ole faasis, mille see värav lahkub",
+      "model_missing": "Sellele projektile ei ole juhtimismudelit määratud",
+      "model_exists": "Juhtimismudel on juba määratud; muutke seda faasivastenduse kaudu",
+      "unknown_catalogue": "Seda kataloogi ei tunta",
+      "area_not_found": "Juhtimisvaldkonda ei leitud",
+      "gate_not_found": "Väravat ei leitud",
+      "document_not_found": "Raamdokumenti ei leitud",
+      "condition_not_found": "Tingimust ei leitud",
+      "change_request_not_found": "Muudatustaotlust ei leitud",
+      "check_not_found": "Valmisoleku kontrolli ei leitud",
+      "not_area_owner": "Seda saab teha ainult selle valdkonna omanik või asendaja",
+      "owner_not_project_member": "Omanikul peab olema juurdepääs sellele projektile",
+      "unknown_document_type": "See dokumenditüüp ei kuulu selle valdkonna kataloogi",
+      "container_not_in_project": "CDE konteiner ei kuulu sellesse projekti",
+      "invalid_transition": "See olekumuutus ei ole lubatud",
+      "condition_not_open": "Ainult avatud tingimuse võib täita või sellest loobuda",
+      "document_not_binding": "Muudatustaotluse kaudu saab muuta ainult siduvat raamdokumenti",
+      "no_pending_revision": "Siduvaks muutmiseks ei ole uuemat redaktsiooni",
+      "change_request_not_open": "See muudatustaotlus ei ole enam avatud",
+      "invalid_status": "See staatus ei ole siin lubatud",
+      "decision_immutable": "Väravaotsust ei saa muuta ega kustutada",
+      "document_exists": "See raamdokument on selle valdkonna jaoks juba jälgimisel",
+      "catalogue_code_taken": "Selle koodiga kataloog on juba olemas",
+      "catalogue_retired": "See kataloog on kasutusest kõrvaldatud ega ole enam muudetav ega kinnitatav",
+      "catalogue_invalid": "Kataloogi mustand rikub kataloogireeglit ja seda ei saa avaldada",
+      "gate_historic": "See värav kuulub faasimudelisse, mille projekt on juba maha jätnud, ja seda ei saa enam muuta",
+      "gate_not_on_hold": "Jätkata saab ainult peatatud väravat",
+      "later_gate_active": "Hilisem värav on juba alustatud, seega seda väravat ei saa uuesti avada",
+      "model_unchanged": "Projekt kasutab juba seda faasimudeli versiooni",
+      "not_condition_owner": "Tingimuse võib täita ainult isik, kellele see anti, või juht",
+      "route_needs_more_approvals": "Heakskiidu marsruudi viimane samm vajab veel teisi kinnitajaid; nad kinnitavad heakskiidu vaates ja viimane salvestab otsuse",
+      "activity_not_in_project": "Ajakava tegevus ei kuulu sellesse projekti",
+      "target_date_owned_by_schedule": "See värav on seotud ajakava tegevusega, mis määrab selle kuupäeva; tühistage seos, et siin kuupäev määrata",
+      "no_change_route": "Siduvate dokumentide muudatuste jaoks ei ole kinnitatud heakskiidu marsruuti. Juhtimisjuht kinnitab juhtimise seadetes ühe projekti enda marsruutidest",
+      "route_not_pinnable": "Seda heakskiidu marsruuti ei saa kinnitada: see peab olema selle projekti aktiivne marsruut selle otsuse liigi jaoks",
+      "area_retired": "See valdkond eemaldati faasimudeli muudatusega ega võta uusi dokumente vastu",
+      "pack_catalogue_invalid": "Aktiivne pakett deklareerib seda kataloogi, kuid selle fail puudub või rikub kataloogireegleid",
+      "settings_frozen_in_review": "Seda ei saa muuta, kui värav on ülevaatamisel või peatatud; otsustage esmalt värava üle",
+      "null_not_allowed": "See väli ei tohi olla tühi"
+    },
+    "outcome": {
+      "go": "Jätka",
+      "go_with_conditions": "Jätka tingimustega",
+      "hold": "Peata",
+      "recycle": "Tagasi täiendamiseks",
+      "stop": "Peata lõplikult"
+    },
+    "gate_state": {
+      "not_started": "Pole alustatud",
+      "in_preparation": "Ettevalmistamisel",
+      "in_review": "Ülevaatamisel",
+      "on_hold": "Peatatud",
+      "decided": "Otsustatud"
+    },
+    "document_state": {
+      "draft": "Mustand",
+      "in_review": "Ülevaatamisel",
+      "approved_at_gate": "Kinnitatud väravas",
+      "binding": "Siduv",
+      "superseded": "Asendatud"
+    },
+    "check_status": {
+      "not_assessed": "Hindamata",
+      "ready": "Valmis",
+      "ready_with_risks": "Valmis riskidega",
+      "not_ready": "Pole valmis",
+      "not_applicable": "Pole rakendatav"
+    },
+    "condition_status": {
+      "open": "Avatud",
+      "cleared": "Täidetud",
+      "waived": "Loobutud",
+      "overdue": "Tähtaeg ületatud"
+    },
+    "export": {
+      "title": "Juhtimise otsuste logi",
+      "col_gate": "Värav",
+      "col_attempt": "Katse",
+      "col_outcome": "Tulemus",
+      "col_decided_by": "Otsustas",
+      "col_decided_at": "Otsustatud",
+      "col_rationale": "Põhjendus",
+      "col_conditions": "Tingimused",
+      "col_at_risk": "Riskiga jätkamine",
+      "project": "Projekt",
+      "empty": "Väravaotsuseid ei ole veel salvestatud"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Juhtimisvaldkonnal {area} ei ole omanikku",
+        "suggestion": "Määrake valdkonnale omanik, et selle valmisolekut saaks kinnitada"
+      },
+      "required_documents_defined": {
+        "fail": "Väravas {gate} on rakendatavaid valdkondi ilma ühegi nõutava raamdokumendita",
+        "suggestion": "Lisage raamdokumendid, mida kataloog selle värava jaoks nõuab, või märkige valdkond põhjendusega mitterakendatavaks"
+      },
+      "binding_document_unchanged": {
+        "fail": "Siduval raamdokumendil {document} on uuem redaktsioon, mida ei kata kinnitatud muudatustaotlus",
+        "suggestion": "Esitage muudatustaotlus, et uus redaktsioon kinnitataks enne kasutamist"
+      },
+      "conditions_not_overdue": {
+        "fail": "Tingimus {condition} on tähtaja ületanud alates {due}",
+        "suggestion": "Täitke tingimus tõendiga või laske otsustajal sellest põhjendusega loobuda"
+      },
+      "gate_date_after_previous": {
+        "fail": "Värav {gate} on planeeritud kuupäevaks {date}, mis on enne eelmist väravat kuupäevaga {previous}",
+        "suggestion": "Nihutage värava kuupäeva, et väravad järgiksid faaside järjekorda"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Värava {gate} otsuse salvestas kasutaja, kes on selle ühe valdkonna omanik",
+        "suggestion": "Neljasilmapõhimõtte kohaselt peab otsustama teine isik"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Valdkond {area} on märgitud mitterakendatavaks ilma põhjenduseta",
+        "suggestion": "Kirjutage, miks valdkond ei kehti"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Värav: Loast detailprojekteerimiseni",
+          "award_to_construction": "Värav: Hankelepingust ehitamiseni",
+          "brief_to_concept": "Värav: Lähteülesandest kontseptsioonini",
+          "concept_to_design": "Värav: Kontseptsioonist projekteerimiseni",
+          "construction_to_handover": "Värav: Ehitusest üleandmiseni",
+          "design_to_approval": "Värav: Projekteerimisest loani",
+          "detail_to_tender": "Värav: Detailprojekteerimisest hanketeni",
+          "handover_to_operation": "Värav: Üleandmisest kasutuseni",
+          "strategy_to_brief": "Värav: Strateegiast lähteülesandeni",
+          "tender_to_award": "Värav: Hanketest hankelepinguni"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "אישור"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "תוצאת החלטה זו אינה ידועה",
+      "gate_not_in_review": "השער אינו בבדיקה, ולכן לא ניתן לרשום עליו החלטה",
+      "gate_not_decided": "ניתן לפתוח מחדש רק שער שהוחלט עליו",
+      "rationale_required": "יש לרשום את הנימוק להחלטה זו",
+      "required_document_not_approved": "מסמך מסגרת נדרש אינו מוכן לאישור בשער זה",
+      "area_without_owner": "לתחום ניהול זה אין אחראי, ולכן אין מי שיאשר את מוכנותו",
+      "area_not_ready": "תחום ניהול זה אינו מוכן לשער",
+      "evidence_not_met": "ראיות המוכנות הנדרשות לתחום זה אינן מתקיימות",
+      "unknown_evidence_not_acknowledged": "ראיית מוכנות של תחום זה אינה מאושרת או כוללת אזהרה. יש לאשר שראית אותה לפני שמעבירים את השער",
+      "unknown_criterion": "קריטריון מוכנות זה אינו חלק ממודל הפרויקט עבור תחום ושער אלה",
+      "check_stale": "מסמך השתנה לאחר אישור המוכנות, ולכן יש לאשר את התחום מחדש",
+      "condition_overdue": "תנאי משער קודם עבר את מועדו ויש לסגור או לוותר עליו קודם",
+      "conditions_required": "אישור מותנה דורש לפחות תנאי אחד",
+      "conditions_not_allowed": "רק אישור מותנה יכול לכלול תנאים",
+      "condition_text_required": "לכל תנאי נדרש טקסט",
+      "condition_unknown_area": "התנאי מציין תחום שאינו חלק מהפרויקט",
+      "waiver_needs_rationale": "ויתור דורש נימוק בכתב",
+      "not_applicable_needs_rationale": "סימון זה כלא רלוונטי דורש נימוק בכתב",
+      "not_applicable_not_accepted": "מקבל ההחלטה לא אישר את התחום כלא רלוונטי",
+      "decider_not_entitled": "אינך מוסמך להחליט על שער זה לפי מסלול האישור שלו",
+      "decider_is_area_owner": "לפי כלל ארבע העיניים, אחראי תחום או מחליפו אינם רשאים להחליט על שער זה",
+      "hold_needs_resume_date": "עצירה דורשת תאריך חידוש עתידי",
+      "proceed_at_risk_needs_conditions": "המשך בסיכון אפשרי רק עם אישור מותנה",
+      "proceed_at_risk_area_not_blocking": "תחום זה אינו חוסם, ולכן אי אפשר לציין אותו כהמשך בסיכון",
+      "project_stopped": "הפרויקט הופסק בשער",
+      "document_read_only": "מסמך מסגרת זה לקריאה בלבד מאחר שהפרויקט הופסק",
+      "binding_requires_change_request": "מסמך מסגרת זה מחייב ומשתנה רק באמצעות בקשת שינוי",
+      "phase_mapping_missing": "מודל השלבים החדש דורש מיפוי לשלב זה",
+      "phase_mapping_unknown_target": "המיפוי מציין שלב שאינו קיים במודל החדש",
+      "no_decision_route": "לא הוגדר מסלול אישור להחלטות שערים. מנהל ממשל מצמיד אחד ממסלולי הפרויקט בהגדרות הממשל",
+      "route_not_at_final_step": "מסלול האישור טרם הגיע לשלב האחרון שלו",
+      "route_not_pending": "מסלול האישור של שער זה כבר אינו ממתין",
+      "concurrent_decision": "מישהו אחר החליט על שער זה לפני רגע; טענו מחדש את הדף ובדקו את ההחלטה",
+      "gate_out_of_order": "הפרויקט אינו נמצא בשלב שהשער הזה מסיים",
+      "model_missing": "לא הוגדר מודל ממשל לפרויקט זה",
+      "model_exists": "מודל ממשל כבר הוגדר; יש לשנות אותו באמצעות מיפוי שלבים",
+      "unknown_catalogue": "קטלוג זה אינו ידוע",
+      "area_not_found": "תחום הניהול לא נמצא",
+      "gate_not_found": "השער לא נמצא",
+      "document_not_found": "מסמך המסגרת לא נמצא",
+      "condition_not_found": "התנאי לא נמצא",
+      "change_request_not_found": "בקשת השינוי לא נמצאה",
+      "check_not_found": "בדיקת המוכנות לא נמצאה",
+      "not_area_owner": "רק האחראי או המחליף של תחום זה רשאים לבצע פעולה זו",
+      "owner_not_project_member": "לאחראי חייבת להיות גישה לפרויקט זה",
+      "unknown_document_type": "סוג מסמך זה אינו חלק מהקטלוג של תחום זה",
+      "container_not_in_project": "מיכל ה-CDE אינו שייך לפרויקט זה",
+      "invalid_transition": "שינוי מצב זה אינו מותר",
+      "condition_not_open": "ניתן לסגור או לוותר רק על תנאי פתוח",
+      "document_not_binding": "ניתן לשנות באמצעות בקשת שינוי רק מסמך מסגרת מחייב",
+      "no_pending_revision": "אין גרסה חדשה יותר שניתן להפוך למחייבת",
+      "change_request_not_open": "בקשת שינוי זו כבר אינה פתוחה",
+      "invalid_status": "סטטוס זה אינו מותר כאן",
+      "decision_immutable": "לא ניתן לשנות או למחוק החלטת שער",
+      "document_exists": "מסמך מסגרת זה כבר במעקב עבור התחום",
+      "catalogue_code_taken": "כבר קיים קטלוג עם קוד זה",
+      "catalogue_retired": "קטלוג זה הוצא משימוש ואין אפשרות לערוך או להצמיד אותו",
+      "catalogue_invalid": "טיוטת הקטלוג מפרה כלל של קטלוג ולא ניתן לפרסם אותה",
+      "gate_historic": "שער זה שייך למודל שלבים שהפרויקט כבר עזב, ואין אפשרות לשנותו",
+      "gate_not_on_hold": "ניתן לחדש רק שער שנמצא בעצירה",
+      "later_gate_active": "שער מאוחר יותר כבר הופעל, ולכן אי אפשר לפתוח שער זה מחדש",
+      "model_unchanged": "הפרויקט כבר משתמש בגרסה זו של מודל השלבים",
+      "not_condition_owner": "רק האדם שהתנאי הוקצה לו או מנהל יכולים לסגור אותו",
+      "route_needs_more_approvals": "השלב האחרון של מסלול האישור עדיין דורש מאשרים נוספים; הם מאשרים במסך האישורים, והאחרון רושם את ההחלטה",
+      "activity_not_in_project": "פעילות לוח הזמנים אינה שייכת לפרויקט זה",
+      "target_date_owned_by_schedule": "שער זה מקושר לפעילות לוח זמנים שמנהלת את תאריכו; יש לנתק את הקישור כדי לקבוע כאן תאריך",
+      "no_change_route": "לא הוגדר מסלול אישור לשינויים במסמכים מחייבים. מנהל ממשל מצמיד אחד ממסלולי הפרויקט בהגדרות הממשל",
+      "route_not_pinnable": "לא ניתן להצמיד מסלול אישור זה: עליו להיות מסלול פעיל של הפרויקט לסוג החלטה זה",
+      "area_retired": "תחום זה בוטל בשל שינוי במודל השלבים ואינו מקבל מסמכים חדשים",
+      "pack_catalogue_invalid": "החבילה הפעילה מגדירה קטלוג זה, אך הקובץ שלו חסר או מפר את כללי הקטלוג",
+      "settings_frozen_in_review": "לא ניתן לשנות זאת כל עוד שער נמצא בבדיקה או בעצירה; יש להחליט על השער קודם",
+      "null_not_allowed": "שדה זה אינו יכול להיות ריק"
+    },
+    "outcome": {
+      "go": "אישור להמשך",
+      "go_with_conditions": "אישור להמשך עם תנאים",
+      "hold": "עצירה",
+      "recycle": "החזרה לעיבוד מחדש",
+      "stop": "עצירה סופית"
+    },
+    "gate_state": {
+      "not_started": "לא התחיל",
+      "in_preparation": "בהכנה",
+      "in_review": "בבדיקה",
+      "on_hold": "בעצירה",
+      "decided": "הוחלט"
+    },
+    "document_state": {
+      "draft": "טיוטה",
+      "in_review": "בבדיקה",
+      "approved_at_gate": "אושר בשער",
+      "binding": "מחייב",
+      "superseded": "הוחלף"
+    },
+    "check_status": {
+      "not_assessed": "לא הוערך",
+      "ready": "מוכן",
+      "ready_with_risks": "מוכן עם סיכונים",
+      "not_ready": "לא מוכן",
+      "not_applicable": "לא רלוונטי"
+    },
+    "condition_status": {
+      "open": "פתוח",
+      "cleared": "נסגר",
+      "waived": "בוטל",
+      "overdue": "עבר מועדו"
+    },
+    "export": {
+      "title": "יומן החלטות ממשל",
+      "col_gate": "שער",
+      "col_attempt": "ניסיון",
+      "col_outcome": "תוצאה",
+      "col_decided_by": "הוחלט על ידי",
+      "col_decided_at": "הוחלט בתאריך",
+      "col_rationale": "נימוק",
+      "col_conditions": "תנאים",
+      "col_at_risk": "המשך בסיכון",
+      "project": "פרויקט",
+      "empty": "טרם נרשמה החלטת שער"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "לתחום הניהול {area} אין אחראי",
+        "suggestion": "מנו אחראי לתחום כדי שניתן יהיה לאשר את מוכנותו"
+      },
+      "required_documents_defined": {
+        "fail": "לשער {gate} יש תחומים רלוונטיים ללא מסמך מסגרת נדרש",
+        "suggestion": "צרפו את מסמכי המסגרת שהקטלוג דורש לשער זה, או סמנו את התחום כלא רלוונטי עם נימוק"
+      },
+      "binding_document_unchanged": {
+        "fail": "למסמך המסגרת המחייב {document} יש גרסה חדשה שאינה מכוסה על ידי בקשת שינוי מאושרת",
+        "suggestion": "פתחו בקשת שינוי כדי שהגרסה החדשה תאושר לפני השימוש בה"
+      },
+      "conditions_not_overdue": {
+        "fail": "התנאי {condition} עבר את מועדו מאז {due}",
+        "suggestion": "סגרו את התנאי עם ראיה, או הורו למקבל ההחלטה לוותר עליו עם נימוק"
+      },
+      "gate_date_after_previous": {
+        "fail": "השער {gate} מתוכנן ל-{date}, לפני השער הקודם שמתוכנן ל-{previous}",
+        "suggestion": "הזיזו את תאריך השער כך ששערים יבואו לפי סדר השלבים"
+      },
+      "decision_by_entitled_user": {
+        "fail": "ההחלטה על השער {gate} נרשמה על ידי משתמש שהוא אחראי לאחד מתחומיו",
+        "suggestion": "לפי כלל ארבע העיניים, החלטה חייבת להתקבל על ידי אדם אחר"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "התחום {area} סומן כלא רלוונטי ללא נימוק",
+        "suggestion": "רשמו מדוע התחום אינו רלוונטי"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "שער: מהיתר לתכנון מפורט",
+          "award_to_construction": "שער: מהזכייה לביצוע",
+          "brief_to_concept": "שער: מהתיאור הנדרש לקונספט",
+          "concept_to_design": "שער: מהקונספט לתכנון",
+          "construction_to_handover": "שער: מביצוע למסירה",
+          "design_to_approval": "שער: מתכנון להיתר",
+          "detail_to_tender": "שער: מתכנון מפורט למכרז",
+          "handover_to_operation": "שער: ממסירה להפעלה",
+          "strategy_to_brief": "שער: מאסטרטגיה לתיאור הנדרש",
+          "tender_to_award": "שער: ממכרז לזכייה"
+        }
+      }
+    }
+  }
+}

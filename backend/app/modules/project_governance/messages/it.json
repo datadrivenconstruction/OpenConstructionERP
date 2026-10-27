@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Questo esito della decisione non è riconosciuto",
+      "gate_not_in_review": "Il gate non è in revisione, quindi non è possibile registrare una decisione",
+      "gate_not_decided": "Solo un gate già deciso può essere riaperto",
+      "rationale_required": "Indicare la motivazione di questa decisione",
+      "required_document_not_approved": "Un documento quadro richiesto non è pronto per l'approvazione a questo gate",
+      "area_without_owner": "Questa area gestionale non ha un responsabile, quindi nessuno può attestarne la prontezza",
+      "area_not_ready": "Questa area gestionale non è pronta per il gate",
+      "evidence_not_met": "Le evidenze di prontezza richieste per questa area non sono soddisfatte",
+      "unknown_evidence_not_acknowledged": "Un'evidenza di prontezza di questa area non è confermata oppure presenta un avvertimento. Confermare di averla visionata prima di far superare il gate",
+      "unknown_criterion": "Questo criterio di prontezza non fa parte del modello del progetto per questa area e questo gate",
+      "check_stale": "Un documento è stato modificato dopo la conferma di prontezza, quindi l'area deve essere confermata di nuovo",
+      "condition_overdue": "Una condizione di un gate precedente è scaduta e deve prima essere chiusa o annullata",
+      "conditions_required": "Un via libera con condizioni richiede almeno una condizione",
+      "conditions_not_allowed": "Solo un via libera con condizioni può avere delle condizioni",
+      "condition_text_required": "Ogni condizione deve avere un testo",
+      "condition_unknown_area": "La condizione indica un'area che non fa parte di questo progetto",
+      "waiver_needs_rationale": "Una deroga richiede una motivazione scritta",
+      "not_applicable_needs_rationale": "Marcare questa voce come non applicabile richiede una motivazione scritta",
+      "not_applicable_not_accepted": "Chi decide non ha accettato questa area come non applicabile",
+      "decider_not_entitled": "Non si è autorizzati a decidere questo gate secondo il suo percorso di approvazione",
+      "decider_is_area_owner": "Secondo il principio dei quattro occhi, un responsabile o un vice di area non può decidere questo gate",
+      "hold_needs_resume_date": "Una sospensione richiede una data di ripresa futura",
+      "proceed_at_risk_needs_conditions": "Procedere a rischio è possibile solo con un via libera con condizioni",
+      "proceed_at_risk_area_not_blocking": "Questa area non è bloccante, quindi non può essere indicata come procedura a rischio",
+      "project_stopped": "Il progetto è stato fermato a un gate",
+      "document_read_only": "Questo documento quadro è in sola lettura perché il progetto è stato fermato",
+      "binding_requires_change_request": "Questo documento quadro è vincolante e può essere modificato solo tramite una richiesta di modifica",
+      "phase_mapping_missing": "Il nuovo modello delle fasi richiede una corrispondenza per questa fase",
+      "phase_mapping_unknown_target": "La corrispondenza indica una fase che il nuovo modello non prevede",
+      "no_decision_route": "Nessun percorso di approvazione è fissato per le decisioni sui gate. Un responsabile della governance fissa uno dei percorsi del progetto nelle impostazioni di governance",
+      "route_not_at_final_step": "Il percorso di approvazione non ha ancora raggiunto la fase finale",
+      "route_not_pending": "Il percorso di approvazione di questo gate non è più in attesa",
+      "concurrent_decision": "Un'altra persona ha appena deciso questo gate; ricaricare la pagina e verificare la decisione",
+      "gate_out_of_order": "Il progetto non si trova nella fase che questo gate chiude",
+      "model_missing": "Nessun modello di governance è impostato per questo progetto",
+      "model_exists": "Un modello di governance è già impostato; modificarlo tramite una corrispondenza di fasi",
+      "unknown_catalogue": "Questo catalogo non è riconosciuto",
+      "area_not_found": "Area gestionale non trovata",
+      "gate_not_found": "Gate non trovato",
+      "document_not_found": "Documento quadro non trovato",
+      "condition_not_found": "Condizione non trovata",
+      "change_request_not_found": "Richiesta di modifica non trovata",
+      "check_not_found": "Verifica di prontezza non trovata",
+      "not_area_owner": "Solo il responsabile o il vice di questa area può eseguire questa operazione",
+      "owner_not_project_member": "Il responsabile deve avere accesso a questo progetto",
+      "unknown_document_type": "Questo tipo di documento non fa parte del catalogo di questa area",
+      "container_not_in_project": "Il contenitore CDE non appartiene a questo progetto",
+      "invalid_transition": "Questo cambio di stato non è consentito",
+      "condition_not_open": "Solo una condizione aperta può essere chiusa o annullata",
+      "document_not_binding": "Solo un documento quadro vincolante può essere modificato tramite richiesta di modifica",
+      "no_pending_revision": "Non esiste una revisione più recente da rendere vincolante",
+      "change_request_not_open": "Questa richiesta di modifica non è più aperta",
+      "invalid_status": "Questo stato non è consentito qui",
+      "decision_immutable": "Una decisione di gate non può essere modificata né eliminata",
+      "document_exists": "Questo documento quadro è già tracciato per l'area",
+      "catalogue_code_taken": "Esiste già un catalogo con questo codice",
+      "catalogue_retired": "Questo catalogo è ritirato e non può più essere modificato né fissato",
+      "catalogue_invalid": "La bozza del catalogo viola una regola del catalogo e non può essere pubblicata",
+      "gate_historic": "Questo gate appartiene a un modello delle fasi che il progetto ha lasciato e non può più essere modificato",
+      "gate_not_on_hold": "Solo un gate sospeso può essere ripreso",
+      "later_gate_active": "Un gate successivo è già stato avviato, quindi questo gate non può essere riaperto",
+      "model_unchanged": "Il progetto utilizza già questa versione del modello delle fasi",
+      "not_condition_owner": "Solo la persona a cui è stata assegnata la condizione o un responsabile può chiuderla",
+      "route_needs_more_approvals": "La fase finale del percorso di approvazione richiede ancora altri approvatori; essi approvano nella schermata di approvazione e l'ultimo registra la decisione",
+      "activity_not_in_project": "L'attività di programma non appartiene a questo progetto",
+      "target_date_owned_by_schedule": "Questo gate è collegato a un'attività di programma, che ne gestisce la data; scollegarlo per impostare qui una data",
+      "no_change_route": "Nessun percorso di approvazione è fissato per le modifiche ai documenti vincolanti. Un responsabile della governance fissa uno dei percorsi del progetto nelle impostazioni di governance",
+      "route_not_pinnable": "Questo percorso di approvazione non può essere fissato: deve essere un percorso attivo del progetto per questo tipo di decisione",
+      "area_retired": "Questa area è stata ritirata da una modifica del modello delle fasi e non accetta nuovi documenti",
+      "pack_catalogue_invalid": "Il pacchetto attivo dichiara questo catalogo, ma il suo file manca oppure viola le regole del catalogo",
+      "settings_frozen_in_review": "Non è possibile modificare questo mentre un gate è in revisione o sospeso; decidere prima il gate",
+      "null_not_allowed": "Questo campo non può essere vuoto"
+    },
+    "outcome": {
+      "go": "Via libera",
+      "go_with_conditions": "Via libera con condizioni",
+      "hold": "Sospensione",
+      "recycle": "Rielaborazione",
+      "stop": "Arresto"
+    },
+    "gate_state": {
+      "not_started": "Non avviato",
+      "in_preparation": "In preparazione",
+      "in_review": "In revisione",
+      "on_hold": "Sospeso",
+      "decided": "Deciso"
+    },
+    "document_state": {
+      "draft": "Bozza",
+      "in_review": "In revisione",
+      "approved_at_gate": "Approvato al gate",
+      "binding": "Vincolante",
+      "superseded": "Sostituito"
+    },
+    "check_status": {
+      "not_assessed": "Non valutato",
+      "ready": "Pronto",
+      "ready_with_risks": "Pronto con rischi",
+      "not_ready": "Non pronto",
+      "not_applicable": "Non applicabile"
+    },
+    "condition_status": {
+      "open": "Aperta",
+      "cleared": "Chiusa",
+      "waived": "Annullata",
+      "overdue": "Scaduta"
+    },
+    "export": {
+      "title": "Registro delle decisioni di governance",
+      "col_gate": "Gate",
+      "col_attempt": "Tentativo",
+      "col_outcome": "Esito",
+      "col_decided_by": "Decisa da",
+      "col_decided_at": "Decisa il",
+      "col_rationale": "Motivazione",
+      "col_conditions": "Condizioni",
+      "col_at_risk": "Procedura a rischio",
+      "project": "Progetto",
+      "empty": "Non è stata ancora registrata alcuna decisione di gate"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "L'area gestionale {area} non ha un responsabile",
+        "suggestion": "Nominare un responsabile per l'area, così che la sua prontezza possa essere attestata"
+      },
+      "required_documents_defined": {
+        "fail": "Il gate {gate} ha aree applicabili senza alcun documento quadro richiesto",
+        "suggestion": "Allegare i documenti quadro che il catalogo richiede per questo gate, oppure marcare l'area come non applicabile con una motivazione"
+      },
+      "binding_document_unchanged": {
+        "fail": "Il documento quadro vincolante {document} ha una revisione più recente non coperta da una richiesta di modifica approvata",
+        "suggestion": "Aprire una richiesta di modifica in modo che la nuova revisione sia approvata prima di essere usata"
+      },
+      "conditions_not_overdue": {
+        "fail": "La condizione {condition} è scaduta dal {due}",
+        "suggestion": "Chiudere la condizione con una evidenza, oppure far annullare la condizione a chi decide con una motivazione"
+      },
+      "gate_date_after_previous": {
+        "fail": "Il gate {gate} è pianificato il {date}, prima del gate precedente previsto il {previous}",
+        "suggestion": "Spostare la data del gate in modo che i gate seguano l'ordine delle fasi"
+      },
+      "decision_by_entitled_user": {
+        "fail": "La decisione sul gate {gate} è stata registrata da un utente responsabile di una delle sue aree",
+        "suggestion": "Secondo il principio dei quattro occhi, la decisione deve essere presa da una persona diversa"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "L'area {area} è marcata come non applicabile senza motivazione",
+        "suggestion": "Scrivere perché l'area non si applica"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Gate: dall'autorizzazione alla progettazione esecutiva",
+          "award_to_construction": "Gate: dall'aggiudicazione alla costruzione",
+          "brief_to_concept": "Gate: dal brief al concept",
+          "concept_to_design": "Gate: dal concept alla progettazione",
+          "construction_to_handover": "Gate: dalla costruzione alla consegna",
+          "design_to_approval": "Gate: dalla progettazione all'autorizzazione",
+          "detail_to_tender": "Gate: dalla progettazione esecutiva alla gara",
+          "handover_to_operation": "Gate: dalla consegna all'esercizio",
+          "strategy_to_brief": "Gate: dalla strategia al brief",
+          "tender_to_award": "Gate: dalla gara all'aggiudicazione"
+        }
+      }
+    }
+  }
+}

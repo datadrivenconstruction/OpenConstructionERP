@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Det här beslutsutfallet är okänt",
+      "gate_not_in_review": "Grindet är inte under granskning, så något beslut kan inte registreras på det",
+      "gate_not_decided": "Bara ett beslutat grind kan öppnas igen",
+      "rationale_required": "Skriv ned skälet till det här beslutet",
+      "required_document_not_approved": "Ett obligatoriskt ramdokument är inte redo för godkännande vid den här grinden",
+      "area_without_owner": "Det här förvaltningsområdet saknar ägare, så ingen kan intyga att det är redo",
+      "area_not_ready": "Det här förvaltningsområdet är inte redo för grinden",
+      "evidence_not_met": "Det obligatoriska underlaget för beredskap för det här området är inte uppfyllt",
+      "unknown_evidence_not_acknowledged": "Beredskapsunderlaget för det här området är obekräftat eller har en varning. Bekräfta att du har sett det innan du låter grinden passera",
+      "unknown_criterion": "Det här beredskapskriteriet ingår inte i projektets modell för det här området och den här grinden",
+      "check_stale": "Ett dokument har ändrats efter att beredskapen bekräftades, så området måste bekräftas igen",
+      "condition_overdue": "Ett villkor från en tidigare grind har förfallit och måste först uppfyllas eller efterges",
+      "conditions_required": "Ett go med villkor kräver minst ett villkor",
+      "conditions_not_allowed": "Bara ett go med villkor kan ha villkor",
+      "condition_text_required": "Varje villkor måste ha en text",
+      "condition_unknown_area": "Villkoret anger ett område som inte ingår i det här projektet",
+      "waiver_needs_rationale": "En eftergift kräver ett skriftligt skäl",
+      "not_applicable_needs_rationale": "Att markera som ej tillämpligt kräver ett skriftligt skäl",
+      "not_applicable_not_accepted": "Beslutsfattaren har inte godtagit att det här området är ej tillämpligt",
+      "decider_not_entitled": "Du har inte behörighet att besluta om den här grinden enligt godkännandevägen",
+      "decider_is_area_owner": "Enligt principen om fyra ögon får en områdesägare eller ersättare inte besluta om den här grinden",
+      "hold_needs_resume_date": "Ett uppehåll kräver ett återupptagandedatum i framtiden",
+      "proceed_at_risk_needs_conditions": "Att gå vidare med risk är bara möjligt med ett go med villkor",
+      "proceed_at_risk_area_not_blocking": "Det här området blockerar inte, så det kan inte anges som att man går vidare med risk",
+      "project_stopped": "Projektet stoppades vid en grind",
+      "document_read_only": "Det här ramdokumentet är skrivskyddat eftersom projektet stoppades",
+      "binding_requires_change_request": "Det här ramdokumentet är bindande och ändras bara genom en ändringsbegäran",
+      "phase_mapping_missing": "Den nya fasmodellen kräver en koppling för den här fasen",
+      "phase_mapping_unknown_target": "Kopplingen anger en fas som den nya modellen inte har",
+      "no_decision_route": "Ingen godkännandeväg är fastställd för grindbeslut. En styrningsansvarig fastställer en av projektets egna vägar i styrningsinställningarna",
+      "route_not_at_final_step": "Godkännandevägen har ännu inte nått sitt sista steg",
+      "route_not_pending": "Godkännandevägen för den här grinden väntar inte längre",
+      "concurrent_decision": "Någon annan beslutade om den här grinden nyss; ladda om och kontrollera beslutet",
+      "gate_out_of_order": "Projektet befinner sig inte i den fas som den här grinden avslutar",
+      "model_missing": "Ingen styrningsmodell är inställd för det här projektet",
+      "model_exists": "En styrningsmodell är redan inställd; ändra den med en fasmappning",
+      "unknown_catalogue": "Den här katalogen är okänd",
+      "area_not_found": "Förvaltningsområdet hittades inte",
+      "gate_not_found": "Grinden hittades inte",
+      "document_not_found": "Ramdokumentet hittades inte",
+      "condition_not_found": "Villkoret hittades inte",
+      "change_request_not_found": "Ändringsbegäran hittades inte",
+      "check_not_found": "Beredskapskontrollen hittades inte",
+      "not_area_owner": "Bara områdets ägare eller ersättare får göra det här",
+      "owner_not_project_member": "Ägaren måste ha åtkomst till projektet",
+      "unknown_document_type": "Den här dokumenttypen ingår inte i katalogen för området",
+      "container_not_in_project": "CDE-containern tillhör inte projektet",
+      "invalid_transition": "Den här statusändringen är inte tillåten",
+      "condition_not_open": "Bara ett öppet villkor kan uppfyllas eller efterges",
+      "document_not_binding": "Bara ett bindande ramdokument kan ändras genom en ändringsbegäran",
+      "no_pending_revision": "Det finns ingen nyare revision att göra bindande",
+      "change_request_not_open": "Den här ändringsbegäran är inte längre öppen",
+      "invalid_status": "Den här statusen är inte tillåten här",
+      "decision_immutable": "Ett grindbeslut kan inte ändras eller tas bort",
+      "document_exists": "Det här ramdokumentet följs redan för området",
+      "catalogue_code_taken": "En katalog med den här koden finns redan",
+      "catalogue_retired": "Den här katalogen är utfasad och kan inte längre redigeras eller fastställas",
+      "catalogue_invalid": "Katalogutkastet bryter mot en katalogregel och kan inte publiceras",
+      "gate_historic": "Den här grinden hör till en fasmodell som projektet har lämnat och kan inte längre ändras",
+      "gate_not_on_hold": "Bara en grind på uppehåll kan återupptas",
+      "later_gate_active": "En senare grind har redan startats, så den här grinden kan inte öppnas igen",
+      "model_unchanged": "Projektet använder redan den här versionen av fasmodellen",
+      "not_condition_owner": "Bara personen villkoret tilldelats eller en chef får uppfylla det",
+      "route_needs_more_approvals": "Det sista steget i godkännandevägen behöver fler godkännare; de godkänner i godkännandevyn och den sista registrerar beslutet",
+      "activity_not_in_project": "Schemaaktiviteten tillhör inte projektet",
+      "target_date_owned_by_schedule": "Den här grinden är kopplad till en schemaaktivitet som styr dess datum; koppla bort den för att ange ett datum här",
+      "no_change_route": "Ingen godkännandeväg är fastställd för ändringar i bindande dokument. En styrningsansvarig fastställer en av projektets egna vägar i styrningsinställningarna",
+      "route_not_pinnable": "Den här godkännandevägen kan inte fastställas: den måste vara en aktiv väg i projektet för den här typen av beslut",
+      "area_retired": "Området avvecklades genom en ändring av fasmodellen och tar inte emot nya dokument",
+      "pack_catalogue_invalid": "Det aktiva paketet deklarerar den här katalogen, men filen saknas eller bryter mot katalogreglerna",
+      "settings_frozen_in_review": "Detta kan inte ändras medan en grind är under granskning eller på uppehåll; besluta om grinden först",
+      "null_not_allowed": "Det här fältet får inte vara tomt"
+    },
+    "outcome": {
+      "go": "Go",
+      "go_with_conditions": "Go med villkor",
+      "hold": "Uppehåll",
+      "recycle": "Omarbeta",
+      "stop": "Stopp"
+    },
+    "gate_state": {
+      "not_started": "Ej startad",
+      "in_preparation": "Under förberedelse",
+      "in_review": "Under granskning",
+      "on_hold": "På uppehåll",
+      "decided": "Beslutad"
+    },
+    "document_state": {
+      "draft": "Utkast",
+      "in_review": "Under granskning",
+      "approved_at_gate": "Godkänd vid grind",
+      "binding": "Bindande",
+      "superseded": "Ersatt"
+    },
+    "check_status": {
+      "not_assessed": "Ej bedömd",
+      "ready": "Redo",
+      "ready_with_risks": "Redo med risker",
+      "not_ready": "Inte redo",
+      "not_applicable": "Ej tillämplig"
+    },
+    "condition_status": {
+      "open": "Öppen",
+      "cleared": "Uppfylld",
+      "waived": "Eftergiven",
+      "overdue": "Förfallen"
+    },
+    "export": {
+      "title": "Styrningens beslutslogg",
+      "col_gate": "Grind",
+      "col_attempt": "Försök",
+      "col_outcome": "Utfall",
+      "col_decided_by": "Beslutat av",
+      "col_decided_at": "Beslutat den",
+      "col_rationale": "Skäl",
+      "col_conditions": "Villkor",
+      "col_at_risk": "Går vidare med risk",
+      "project": "Projekt",
+      "empty": "Inget grindbeslut har registrerats än"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Förvaltningsområde {area} saknar ägare",
+        "suggestion": "Utse en ägare för området så att dess beredskap kan intygas"
+      },
+      "required_documents_defined": {
+        "fail": "Grind {gate} har tillämpliga områden utan obligatoriskt ramdokument",
+        "suggestion": "Bifoga de ramdokument som katalogen kräver för den här grinden, eller markera området som ej tillämpligt med ett skäl"
+      },
+      "binding_document_unchanged": {
+        "fail": "Bindande ramdokument {document} har en nyare revision som inte omfattas av en godkänd ändringsbegäran",
+        "suggestion": "Skapa en ändringsbegäran så att den nya revisionen godkänns innan den används"
+      },
+      "conditions_not_overdue": {
+        "fail": "Villkor {condition} har varit förfallet sedan {due}",
+        "suggestion": "Uppfyll villkoret med underlag, eller låt beslutsfattaren efterge det med ett skäl"
+      },
+      "gate_date_after_previous": {
+        "fail": "Grind {gate} är planerad till {date}, före föregående grind den {previous}",
+        "suggestion": "Flytta grindens datum så att grinderna följer fasordningen"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Beslutet om grind {gate} registrerades av en användare som äger ett av dess områden",
+        "suggestion": "Enligt principen om fyra ögon måste en annan person besluta"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Område {area} är markerat som ej tillämpligt utan skäl",
+        "suggestion": "Skriv ned varför området inte gäller"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Grind: Tillstånd till detaljprojektering",
+          "award_to_construction": "Grind: Upphandling till byggnation",
+          "brief_to_concept": "Grind: Förstudie till koncept",
+          "concept_to_design": "Grind: Koncept till projektering",
+          "construction_to_handover": "Grind: Byggnation till överlämning",
+          "design_to_approval": "Grind: Projektering till tillstånd",
+          "detail_to_tender": "Grind: Detaljprojektering till upphandling",
+          "handover_to_operation": "Grind: Överlämning till drift",
+          "strategy_to_brief": "Grind: Strategi till förstudie",
+          "tender_to_award": "Grind: Upphandling till tilldelning"
+        }
+      }
+    }
+  }
+}

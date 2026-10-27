@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Dette beslutningsutfallet er ikke kjent",
+      "gate_not_in_review": "Porten er ikke under vurdering, så det kan ikke registreres noen beslutning på den",
+      "gate_not_decided": "Bare en besluttet port kan åpnes på nytt",
+      "rationale_required": "Skriv ned begrunnelsen for denne beslutningen",
+      "required_document_not_approved": "Et påkrevd rammedokument er ikke klart for godkjenning ved denne porten",
+      "area_without_owner": "Dette ledelsesområdet har ingen eier, så ingen kan attestere at det er klart",
+      "area_not_ready": "Dette ledelsesområdet er ikke klart for porten",
+      "evidence_not_met": "Påkrevd dokumentasjon for klarhet for dette området er ikke oppfylt",
+      "unknown_evidence_not_acknowledged": "Dokumentasjonen for klarhet for dette området er ubekreftet eller har en advarsel. Bekreft at du har sett den før du lar porten passere",
+      "unknown_criterion": "Dette klarhetskriteriet er ikke en del av prosjektets modell for dette området og denne porten",
+      "check_stale": "Et dokument er endret etter at klarhet ble bekreftet, så området må bekreftes på nytt",
+      "condition_overdue": "En betingelse fra en tidligere port er forfalt og må avklares eller frafalles først",
+      "conditions_required": "Et ja med betingelser krever minst én betingelse",
+      "conditions_not_allowed": "Bare et ja med betingelser kan ha betingelser",
+      "condition_text_required": "Hver betingelse må ha en tekst",
+      "condition_unknown_area": "Betingelsen nevner et område som ikke er en del av dette prosjektet",
+      "waiver_needs_rationale": "Et frafall krever en skriftlig begrunnelse",
+      "not_applicable_needs_rationale": "Å markere dette som ikke aktuelt krever en skriftlig begrunnelse",
+      "not_applicable_not_accepted": "Beslutningstakeren har ikke godtatt at dette området er ikke aktuelt",
+      "decider_not_entitled": "Du har ikke myndighet til å beslutte om denne porten etter godkjenningsløpet",
+      "decider_is_area_owner": "Etter firøyneprinsippet kan ikke en områdeeier eller stedfortreder beslutte om denne porten",
+      "hold_needs_resume_date": "En pause krever en gjenopptakelsesdato i fremtiden",
+      "proceed_at_risk_needs_conditions": "Å gå videre med risiko er bare mulig med et ja med betingelser",
+      "proceed_at_risk_area_not_blocking": "Dette området er ikke blokkerende, så det kan ikke oppgis som videreføring med risiko",
+      "project_stopped": "Prosjektet ble stoppet ved en port",
+      "document_read_only": "Dette rammedokumentet er skrivebeskyttet fordi prosjektet ble stoppet",
+      "binding_requires_change_request": "Dette rammedokumentet er bindende og endres bare gjennom en endringsforespørsel",
+      "phase_mapping_missing": "Den nye fasemodellen trenger en kobling for denne fasen",
+      "phase_mapping_unknown_target": "Koblingen nevner en fase som den nye modellen ikke har",
+      "no_decision_route": "Det er ikke festet et godkjenningsløp for portbeslutninger. En styringsansvarlig fester et av prosjektets egne løp i styringsinnstillingene",
+      "route_not_at_final_step": "Godkjenningsløpet har ikke nådd sitt siste trinn ennå",
+      "route_not_pending": "Godkjenningsløpet for denne porten er ikke lenger til behandling",
+      "concurrent_decision": "Noen andre besluttet om denne porten for et øyeblikk siden; last inn på nytt og kontroller beslutningen",
+      "gate_out_of_order": "Prosjektet er ikke i fasen denne porten avslutter",
+      "model_missing": "Ingen styringsmodell er satt for dette prosjektet",
+      "model_exists": "En styringsmodell er allerede satt; endre den med en fasekobling",
+      "unknown_catalogue": "Denne katalogen er ikke kjent",
+      "area_not_found": "Ledelsesområde ikke funnet",
+      "gate_not_found": "Port ikke funnet",
+      "document_not_found": "Rammedokument ikke funnet",
+      "condition_not_found": "Betingelse ikke funnet",
+      "change_request_not_found": "Endringsforespørsel ikke funnet",
+      "check_not_found": "Klarhetskontroll ikke funnet",
+      "not_area_owner": "Bare eieren eller stedfortrederen for dette området kan gjøre dette",
+      "owner_not_project_member": "Eieren må ha tilgang til dette prosjektet",
+      "unknown_document_type": "Denne dokumenttypen er ikke en del av katalogen for dette området",
+      "container_not_in_project": "CDE-containeren tilhører ikke dette prosjektet",
+      "invalid_transition": "Denne statusendringen er ikke tillatt",
+      "condition_not_open": "Bare en åpen betingelse kan avklares eller frafalles",
+      "document_not_binding": "Bare et bindende rammedokument kan endres gjennom en endringsforespørsel",
+      "no_pending_revision": "Det finnes ingen nyere revisjon som kan gjøres bindende",
+      "change_request_not_open": "Denne endringsforespørselen er ikke lenger åpen",
+      "invalid_status": "Denne statusen er ikke tillatt her",
+      "decision_immutable": "En portbeslutning kan ikke endres eller slettes",
+      "document_exists": "Dette rammedokumentet føres allerede for området",
+      "catalogue_code_taken": "Det finnes allerede en katalog med denne koden",
+      "catalogue_retired": "Denne katalogen er faset ut og kan ikke lenger redigeres eller festes",
+      "catalogue_invalid": "Kataloggrunnlaget bryter en katalogregel og kan ikke publiseres",
+      "gate_historic": "Denne porten hører til en fasemodell prosjektet har forlatt, og den kan ikke endres lenger",
+      "gate_not_on_hold": "Bare en port på pause kan gjenopptas",
+      "later_gate_active": "En senere port er allerede startet, så denne porten kan ikke åpnes på nytt",
+      "model_unchanged": "Prosjektet bruker allerede denne versjonen av fasemodellen",
+      "not_condition_owner": "Bare personen betingelsen er gitt til, eller en leder, kan avklare den",
+      "route_needs_more_approvals": "Det siste trinnet i godkjenningsløpet trenger flere godkjennere; de godkjenner i godkjenningsbildet, og den siste registrerer beslutningen",
+      "activity_not_in_project": "Aktiviteten i fremdriftsplanen tilhører ikke dette prosjektet",
+      "target_date_owned_by_schedule": "Denne porten er koblet til en aktivitet i fremdriftsplanen, som eier datoen; koble den fra for å sette en dato her",
+      "no_change_route": "Det er ikke festet et godkjenningsløp for endringer i bindende dokumenter. En styringsansvarlig fester et av prosjektets egne løp i styringsinnstillingene",
+      "route_not_pinnable": "Dette godkjenningsløpet kan ikke festes: det må være et aktivt løp for dette prosjektet for denne typen beslutning",
+      "area_retired": "Dette området ble faset ut ved en endring av fasemodellen og tar ikke imot nye dokumenter",
+      "pack_catalogue_invalid": "Den aktive pakken angir denne katalogen, men filen mangler eller bryter katalogreglene",
+      "settings_frozen_in_review": "Dette kan ikke endres mens en port er under vurdering eller på pause; beslutt porten først",
+      "null_not_allowed": "Dette feltet kan ikke være tomt"
+    },
+    "outcome": {
+      "go": "Ja",
+      "go_with_conditions": "Ja med betingelser",
+      "hold": "Pause",
+      "recycle": "Omarbeid",
+      "stop": "Stopp"
+    },
+    "gate_state": {
+      "not_started": "Ikke startet",
+      "in_preparation": "Under forberedelse",
+      "in_review": "Under vurdering",
+      "on_hold": "På pause",
+      "decided": "Besluttet"
+    },
+    "document_state": {
+      "draft": "Utkast",
+      "in_review": "Under vurdering",
+      "approved_at_gate": "Godkjent ved port",
+      "binding": "Bindende",
+      "superseded": "Erstattet"
+    },
+    "check_status": {
+      "not_assessed": "Ikke vurdert",
+      "ready": "Klar",
+      "ready_with_risks": "Klar med risiko",
+      "not_ready": "Ikke klar",
+      "not_applicable": "Ikke aktuelt"
+    },
+    "condition_status": {
+      "open": "Åpen",
+      "cleared": "Avklart",
+      "waived": "Frafalt",
+      "overdue": "Forfalt"
+    },
+    "export": {
+      "title": "Styringens beslutningslogg",
+      "col_gate": "Port",
+      "col_attempt": "Forsøk",
+      "col_outcome": "Utfall",
+      "col_decided_by": "Besluttet av",
+      "col_decided_at": "Besluttet den",
+      "col_rationale": "Begrunnelse",
+      "col_conditions": "Betingelser",
+      "col_at_risk": "Videreføring med risiko",
+      "project": "Prosjekt",
+      "empty": "Ingen portbeslutning er registrert ennå"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Ledelsesområde {area} har ingen eier",
+        "suggestion": "Utpek en eier for området slik at dets klarhet kan attesteres"
+      },
+      "required_documents_defined": {
+        "fail": "Port {gate} har aktuelle områder uten påkrevd rammedokument",
+        "suggestion": "Legg til rammedokumentene katalogen krever for denne porten, eller merk området som ikke aktuelt med en begrunnelse"
+      },
+      "binding_document_unchanged": {
+        "fail": "Bindende rammedokument {document} har en nyere revisjon som ikke dekkes av en godkjent endringsforespørsel",
+        "suggestion": "Send en endringsforespørsel slik at den nye revisjonen godkjennes før den tas i bruk"
+      },
+      "conditions_not_overdue": {
+        "fail": "Betingelse {condition} har vært forfalt siden {due}",
+        "suggestion": "Avklar betingelsen med dokumentasjon, eller la beslutningstakeren frafalle den med en begrunnelse"
+      },
+      "gate_date_after_previous": {
+        "fail": "Port {gate} er planlagt til {date}, før forrige port den {previous}",
+        "suggestion": "Flytt portdatoen slik at portene følger faserekkefølgen"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Beslutningen om port {gate} ble registrert av en bruker som eier et av områdene",
+        "suggestion": "Etter firøyneprinsippet må en annen person beslutte"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Område {area} er merket som ikke aktuelt uten begrunnelse",
+        "suggestion": "Skriv ned hvorfor området ikke gjelder"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Port: Tillatelse til detaljprosjektering",
+          "award_to_construction": "Port: Kontraktstildeling til utførelse",
+          "brief_to_concept": "Port: Behovsbeskrivelse til konsept",
+          "concept_to_design": "Port: Konsept til prosjektering",
+          "construction_to_handover": "Port: Utførelse til overlevering",
+          "design_to_approval": "Port: Prosjektering til tillatelse",
+          "detail_to_tender": "Port: Detaljprosjektering til anbud",
+          "handover_to_operation": "Port: Overlevering til drift",
+          "strategy_to_brief": "Port: Strategi til behovsbeskrivelse",
+          "tender_to_award": "Port: Anbud til kontraktstildeling"
+        }
+      }
+    }
+  }
+}

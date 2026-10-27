@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "Tamam"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Bu karar sonucu bilinmiyor",
+      "gate_not_in_review": "Kapı inceleme aşamasında değil, bu nedenle üzerine karar kaydedilemez",
+      "gate_not_decided": "Yalnızca karara bağlanmış bir kapı yeniden açılabilir",
+      "rationale_required": "Bu karar için gerekçeyi yazın",
+      "required_document_not_approved": "Zorunlu bir çerçeve belgesi bu kapıda onaya hazır değil",
+      "area_without_owner": "Bu yönetim alanının sahibi yok, bu nedenle hazır olduğunu onaylayacak kimse yok",
+      "area_not_ready": "Bu yönetim alanı kapı için hazır değil",
+      "evidence_not_met": "Bu alan için gerekli hazırlık kanıtları karşılanmadı",
+      "unknown_evidence_not_acknowledged": "Bu alanın hazırlık kanıtı doğrulanmamış veya bir uyarı içeriyor. Kapının geçmesine izin vermeden önce gördüğünüzü onaylayın",
+      "unknown_criterion": "Bu hazırlık ölçütü, bu alan ve kapı için projenin modelinin bir parçası değil",
+      "check_stale": "Hazırlık onaylandıktan sonra bir belge değişti, bu nedenle alanın yeniden onaylanması gerekiyor",
+      "condition_overdue": "Önceki bir kapıdan gelen koşulun süresi doldu; önce tamamlanmalı veya feragat edilmelidir",
+      "conditions_required": "Koşullu onay en az bir koşul gerektirir",
+      "conditions_not_allowed": "Yalnızca koşullu onay koşul içerebilir",
+      "condition_text_required": "Her koşulun bir metni olmalı",
+      "condition_unknown_area": "Koşul, bu projenin parçası olmayan bir alanı belirtiyor",
+      "waiver_needs_rationale": "Feragat için yazılı bir gerekçe gerekir",
+      "not_applicable_needs_rationale": "Uygulanamaz olarak işaretlemek için yazılı bir gerekçe gerekir",
+      "not_applicable_not_accepted": "Karar verici bu alanı uygulanamaz olarak kabul etmedi",
+      "decider_not_entitled": "Onay yoluna göre bu kapı hakkında karar verme yetkiniz yok",
+      "decider_is_area_owner": "Dört göz ilkesi gereği, bir alan sahibi veya vekili bu kapı hakkında karar veremez",
+      "hold_needs_resume_date": "Bekletme için gelecekte bir devam tarihi gerekir",
+      "proceed_at_risk_needs_conditions": "Riskle devam etmek yalnızca koşullu onayla mümkündür",
+      "proceed_at_risk_area_not_blocking": "Bu alan engelleyici değil, bu nedenle riskle devam eden olarak belirtilemez",
+      "project_stopped": "Proje bir kapıda durduruldu",
+      "document_read_only": "Proje durdurulduğu için bu çerçeve belgesi salt okunurdur",
+      "binding_requires_change_request": "Bu çerçeve belgesi bağlayıcıdır ve yalnızca bir değişiklik talebi ile değiştirilebilir",
+      "phase_mapping_missing": "Yeni faz modeli bu faz için bir eşleştirme gerektirir",
+      "phase_mapping_unknown_target": "Eşleştirme, yeni modelde bulunmayan bir fazı belirtiyor",
+      "no_decision_route": "Kapı kararları için bir onay yolu sabitlenmemiş. Yönetişim yöneticisi, yönetişim ayarlarında projenin kendi yollarından birini sabitler",
+      "route_not_at_final_step": "Onay yolu henüz son adıma ulaşmadı",
+      "route_not_pending": "Bu kapının onay yolu artık beklemede değil",
+      "concurrent_decision": "Az önce başka biri bu kapı hakkında karar verdi; sayfayı yenileyip kararı kontrol edin",
+      "gate_out_of_order": "Proje, bu kapının kapattığı fazda değil",
+      "model_missing": "Bu proje için bir yönetişim modeli ayarlanmamış",
+      "model_exists": "Bir yönetişim modeli zaten ayarlanmış; bunu bir faz eşleştirmesiyle değiştirin",
+      "unknown_catalogue": "Bu katalog bilinmiyor",
+      "area_not_found": "Yönetim alanı bulunamadı",
+      "gate_not_found": "Kapı bulunamadı",
+      "document_not_found": "Çerçeve belgesi bulunamadı",
+      "condition_not_found": "Koşul bulunamadı",
+      "change_request_not_found": "Değişiklik talebi bulunamadı",
+      "check_not_found": "Hazırlık kontrolü bulunamadı",
+      "not_area_owner": "Bunu yalnızca bu alanın sahibi veya vekili yapabilir",
+      "owner_not_project_member": "Sahibinin bu projeye erişimi olmalı",
+      "unknown_document_type": "Bu belge türü bu alan için katalogda yer almıyor",
+      "container_not_in_project": "CDE konteyneri bu projeye ait değil",
+      "invalid_transition": "Bu durum değişikliğine izin verilmiyor",
+      "condition_not_open": "Yalnızca açık bir koşul tamamlanabilir veya feragat edilebilir",
+      "document_not_binding": "Yalnızca bağlayıcı bir çerçeve belgesi değişiklik talebi ile değiştirilebilir",
+      "no_pending_revision": "Bağlayıcı hale getirilecek daha yeni bir revizyon yok",
+      "change_request_not_open": "Bu değişiklik talebi artık açık değil",
+      "invalid_status": "Bu durum burada kullanılamaz",
+      "decision_immutable": "Bir kapı kararı değiştirilemez veya silinemez",
+      "document_exists": "Bu çerçeve belgesi bu alan için zaten takip ediliyor",
+      "catalogue_code_taken": "Bu koda sahip bir katalog zaten var",
+      "catalogue_retired": "Bu katalog kullanımdan kaldırıldı ve artık düzenlenemez veya sabitlenemez",
+      "catalogue_invalid": "Katalog taslağı bir katalog kuralını ihlal ediyor ve yayımlanamaz",
+      "gate_historic": "Bu kapı, projenin çoktan terk ettiği bir faz modeline ait ve artık değiştirilemez",
+      "gate_not_on_hold": "Yalnızca bekletmede olan bir kapı devam ettirilebilir",
+      "later_gate_active": "Daha sonraki bir kapı zaten başlatıldı, bu nedenle bu kapı yeniden açılamaz",
+      "model_unchanged": "Proje zaten bu faz modeli sürümünü kullanıyor",
+      "not_condition_owner": "Bu koşulu yalnızca kendisine atanan kişi veya bir yönetici tamamlayabilir",
+      "route_needs_more_approvals": "Onay yolunun son adımı hâlâ diğer onaylayıcıları bekliyor; onaylar onay ekranında verilir ve son onaylayan kararı kaydeder",
+      "activity_not_in_project": "Program faaliyeti bu projeye ait değil",
+      "target_date_owned_by_schedule": "Bu kapı, tarihini belirleyen bir program faaliyetine bağlı; burada tarih ayarlamak için bağlantıyı kaldırın",
+      "no_change_route": "Bağlayıcı belgelerdeki değişiklikler için bir onay yolu sabitlenmemiş. Yönetişim yöneticisi, yönetişim ayarlarında projenin kendi yollarından birini sabitler",
+      "route_not_pinnable": "Bu onay yolu sabitlenemez: bu tür bir karar için projenin etkin bir yolu olmalıdır",
+      "area_retired": "Bu alan bir faz modeli değişikliğiyle kullanımdan kaldırıldı ve artık yeni belge kabul etmiyor",
+      "pack_catalogue_invalid": "Etkin paket bu kataloğu tanımlıyor, ancak dosyası eksik veya katalog kurallarını ihlal ediyor",
+      "settings_frozen_in_review": "Bir kapı inceleme veya bekletme aşamasındayken bu değiştirilemez; önce kapı hakkında karar verin",
+      "null_not_allowed": "Bu alan boş bırakılamaz"
+    },
+    "outcome": {
+      "go": "Devam",
+      "go_with_conditions": "Koşullu devam",
+      "hold": "Beklet",
+      "recycle": "Yeniden çalış",
+      "stop": "Durdur"
+    },
+    "gate_state": {
+      "not_started": "Başlamadı",
+      "in_preparation": "Hazırlanıyor",
+      "in_review": "İncelemede",
+      "on_hold": "Beklemede",
+      "decided": "Karara bağlandı"
+    },
+    "document_state": {
+      "draft": "Taslak",
+      "in_review": "İncelemede",
+      "approved_at_gate": "Kapıda onaylandı",
+      "binding": "Bağlayıcı",
+      "superseded": "Yerine geçildi"
+    },
+    "check_status": {
+      "not_assessed": "Değerlendirilmedi",
+      "ready": "Hazır",
+      "ready_with_risks": "Riskli hazır",
+      "not_ready": "Hazır değil",
+      "not_applicable": "Uygulanamaz"
+    },
+    "condition_status": {
+      "open": "Açık",
+      "cleared": "Tamamlandı",
+      "waived": "Feragat edildi",
+      "overdue": "Süresi doldu"
+    },
+    "export": {
+      "title": "Yönetişim karar kaydı",
+      "col_gate": "Kapı",
+      "col_attempt": "Deneme",
+      "col_outcome": "Sonuç",
+      "col_decided_by": "Karar veren",
+      "col_decided_at": "Karar tarihi",
+      "col_rationale": "Gerekçe",
+      "col_conditions": "Koşullar",
+      "col_at_risk": "Riskle devam",
+      "project": "Proje",
+      "empty": "Henüz hiçbir kapı kararı kaydedilmedi"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "{area} yönetim alanının sahibi yok",
+        "suggestion": "Hazırlığının onaylanabilmesi için alana bir sahip atayın"
+      },
+      "required_documents_defined": {
+        "fail": "{gate} kapısında, zorunlu çerçeve belgesi olmayan uygulanabilir alanlar var",
+        "suggestion": "Katalogun bu kapı için gerektirdiği çerçeve belgelerini ekleyin veya alanı gerekçeyle uygulanamaz olarak işaretleyin"
+      },
+      "binding_document_unchanged": {
+        "fail": "Bağlayıcı {document} çerçeve belgesinin, onaylanmış bir değişiklik talebiyle kapsanmayan daha yeni bir revizyonu var",
+        "suggestion": "Yeni revizyon kullanılmadan önce onaylansın diye bir değişiklik talebi açın"
+      },
+      "conditions_not_overdue": {
+        "fail": "{condition} koşulunun süresi {due} tarihinden beri doldu",
+        "suggestion": "Koşulu kanıtla tamamlayın veya karar vericinin gerekçeyle feragat etmesini sağlayın"
+      },
+      "gate_date_after_previous": {
+        "fail": "{gate} kapısı {date} tarihine planlanmış, ancak önceki kapı {previous} tarihinde",
+        "suggestion": "Kapı tarihini, kapılar faz sırasını izleyecek şekilde taşıyın"
+      },
+      "decision_by_entitled_user": {
+        "fail": "{gate} kapısına ilişkin karar, alanlarından birinin sahibi olan bir kullanıcı tarafından kaydedildi",
+        "suggestion": "Dört göz ilkesi gereği kararı farklı bir kişi vermelidir"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "{area} alanı gerekçe olmadan uygulanamaz olarak işaretlenmiş",
+        "suggestion": "Alanın neden geçerli olmadığını yazın"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Kapı: Onaydan detay tasarıma",
+          "award_to_construction": "Kapı: İhaleden inşaata",
+          "brief_to_concept": "Kapı: Brifingden konsepte",
+          "concept_to_design": "Kapı: Konseptten tasarıma",
+          "construction_to_handover": "Kapı: İnşaattan teslime",
+          "design_to_approval": "Kapı: Tasarımdan onaya",
+          "detail_to_tender": "Kapı: Detay tasarımdan ihaleye",
+          "handover_to_operation": "Kapı: Teslimden işletmeye",
+          "strategy_to_brief": "Kapı: Stratejiden brifinge",
+          "tender_to_award": "Kapı: İhaleden atamaya"
+        }
+      }
+    }
+  }
+}

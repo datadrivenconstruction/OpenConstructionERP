@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Ushbu qaror natijasi noma'lum",
+      "gate_not_in_review": "Bosqich ko'rib chiqishda emas, shuning uchun unga qaror qayd etib bo'lmaydi",
+      "gate_not_decided": "Faqat qaror qabul qilingan bosqichni qayta ochish mumkin",
+      "rationale_required": "Ushbu qaror uchun sababni yozing",
+      "required_document_not_approved": "Ushbu bosqichda majburiy asosiy hujjat tasdiqlashga tayyor emas",
+      "area_without_owner": "Ushbu boshqaruv sohasining mas'ul shaxsi yo'q, shuning uchun uning tayyorligini hech kim tasdiqlay olmaydi",
+      "area_not_ready": "Ushbu boshqaruv sohasi bosqich uchun tayyor emas",
+      "evidence_not_met": "Ushbu soha uchun talab qilinadigan tayyorlik dalillari bajarilmagan",
+      "unknown_evidence_not_acknowledged": "Ushbu soha tayyorlik dalillari tasdiqlanmagan yoki ogohlantirish mavjud. Bosqichni o'tkazishdan oldin ularni ko'rib chiqqaningizni tasdiqlang",
+      "unknown_criterion": "Ushbu tayyorlik mezoni loyihaning ushbu soha va bosqich uchun modeliga kirmaydi",
+      "check_stale": "Tayyorlik tasdiqlanganidan keyin hujjat o'zgargan, shuning uchun soha qayta tasdiqlanishi kerak",
+      "condition_overdue": "Oldingi bosqichdan kelgan shart muddati o'tgan, avval uni bajarish yoki voz kechish kerak",
+      "conditions_required": "Shartli o'tkazish uchun kamida bitta shart kerak",
+      "conditions_not_allowed": "Faqat shartli o'tkazish shartlarga ega bo'lishi mumkin",
+      "condition_text_required": "Har bir shartning matni bo'lishi kerak",
+      "condition_unknown_area": "Shart loyihaga kirmaydigan sohani ko'rsatmoqda",
+      "waiver_needs_rationale": "Voz kechish uchun yozma sabab kerak",
+      "not_applicable_needs_rationale": "Ushbu sohani tegishli emas deb belgilash uchun yozma sabab kerak",
+      "not_applicable_not_accepted": "Qaror qabul qiluvchi ushbu sohani tegishli emas deb qabul qilmagan",
+      "decider_not_entitled": "Tasdiqlash yo'nalishiga ko'ra, siz ushbu bosqich bo'yicha qaror qabul qilish huquqiga ega emassiz",
+      "decider_is_area_owner": "To'rt ko'z qoidasiga ko'ra, soha mas'uli yoki o'rinbosari ushbu bosqich bo'yicha qaror qabul qila olmaydi",
+      "hold_needs_resume_date": "To'xtatib turish uchun kelajakdagi davom ettirish sanasi kerak",
+      "proceed_at_risk_needs_conditions": "Xavf ostida davom ettirish faqat shartli o'tkazish bilan mumkin",
+      "proceed_at_risk_area_not_blocking": "Ushbu soha to'sqinlik qilmaydi, shuning uchun uni xavf ostida davom etayotgan deb belgilab bo'lmaydi",
+      "project_stopped": "Loyiha bosqichlardan birida to'xtatilgan",
+      "document_read_only": "Loyiha to'xtatilgani sababli ushbu asosiy hujjat faqat o'qish uchun",
+      "binding_requires_change_request": "Ushbu asosiy hujjat majburiy bo'lib, faqat o'zgartirish so'rovi orqali o'zgaradi",
+      "phase_mapping_missing": "Yangi bosqich modeli ushbu bosqich uchun moslashtirishni talab qiladi",
+      "phase_mapping_unknown_target": "Moslashtirish yangi modelda mavjud bo'lmagan bosqichni ko'rsatmoqda",
+      "no_decision_route": "Bosqich qarorlari uchun tasdiqlash yo'nalishi belgilanmagan. Boshqaruv menejeri boshqaruv sozlamalarida loyihaning o'z yo'nalishlaridan birini belgilashi kerak",
+      "route_not_at_final_step": "Tasdiqlash yo'nalishi hali oxirgi bosqichga yetmagan",
+      "route_not_pending": "Ushbu bosqichning tasdiqlash yo'nalishi endi kutilmoqda emas",
+      "concurrent_decision": "Bir oz oldin boshqa kimdir ushbu bosqich bo'yicha qaror qabul qildi; sahifani yangilang va qarorni tekshiring",
+      "gate_out_of_order": "Loyiha ushbu bosqich tark etadigan bosqichda emas",
+      "model_missing": "Ushbu loyiha uchun boshqaruv modeli o'rnatilmagan",
+      "model_exists": "Boshqaruv modeli allaqachon o'rnatilgan; uni bosqich moslashtirish orqali o'zgartiring",
+      "unknown_catalogue": "Ushbu katalog noma'lum",
+      "area_not_found": "Boshqaruv sohasi topilmadi",
+      "gate_not_found": "Bosqich topilmadi",
+      "document_not_found": "Asosiy hujjat topilmadi",
+      "condition_not_found": "Shart topilmadi",
+      "change_request_not_found": "O'zgartirish so'rovi topilmadi",
+      "check_not_found": "Tayyorlik tekshiruvi topilmadi",
+      "not_area_owner": "Faqat ushbu sohaning mas'uli yoki o'rinbosari bu amalni bajara oladi",
+      "owner_not_project_member": "Mas'ul shaxs ushbu loyihaga kirish huquqiga ega bo'lishi kerak",
+      "unknown_document_type": "Ushbu hujjat turi ushbu soha katalogiga kirmaydi",
+      "container_not_in_project": "CDE konteyneri ushbu loyihaga tegishli emas",
+      "invalid_transition": "Holatning bunday o'zgarishiga ruxsat berilmaydi",
+      "condition_not_open": "Faqat ochiq shartni bajarish yoki bekor qilish mumkin",
+      "document_not_binding": "Faqat majburiy asosiy hujjatni o'zgartirish so'rovi orqali o'zgartirish mumkin",
+      "no_pending_revision": "Majburiy qilinadigan yangiroq reviziya mavjud emas",
+      "change_request_not_open": "Ushbu o'zgartirish so'rovi endi ochiq emas",
+      "invalid_status": "Bu yerda ushbu holatga ruxsat berilmaydi",
+      "decision_immutable": "Bosqich qarorini o'zgartirish yoki o'chirish mumkin emas",
+      "document_exists": "Ushbu asosiy hujjat soha uchun allaqachon kuzatuvga olingan",
+      "catalogue_code_taken": "Ushbu kod bilan katalog allaqachon mavjud",
+      "catalogue_retired": "Ushbu katalog eskirgan va endi tahrirlash yoki belgilash mumkin emas",
+      "catalogue_invalid": "Katalog qoralamasi katalog qoidasini buzadi va nashr etib bo'lmaydi",
+      "gate_historic": "Ushbu bosqich loyiha tark etgan bosqich modeliga tegishli va endi o'zgartirib bo'lmaydi",
+      "gate_not_on_hold": "Faqat to'xtatib turilgan bosqichni davom ettirish mumkin",
+      "later_gate_active": "Keyingi bosqich allaqachon boshlangan, shuning uchun ushbu bosqichni qayta ochib bo'lmaydi",
+      "model_unchanged": "Loyiha allaqachon ushbu bosqich modelining versiyasidan foydalanmoqda",
+      "not_condition_owner": "Faqat ushbu shart berilgan shaxs yoki menejer uni bajarilgan deb belgilashi mumkin",
+      "route_needs_more_approvals": "Tasdiqlash yo'nalishining oxirgi bosqichi hali boshqa tasdiqlovchilarni talab qiladi; ular tasdiqlashni tasdiqlash ekranida bajaradi, oxirgisi qarorni qayd etadi",
+      "activity_not_in_project": "Jadval faoliyati ushbu loyihaga tegishli emas",
+      "target_date_owned_by_schedule": "Ushbu bosqich jadval faoliyati bilan bog'langan va sanani o'sha faoliyat belgilaydi; bu yerda sana qo'yish uchun bog'lanishni uzing",
+      "no_change_route": "Majburiy hujjatlardagi o'zgarishlar uchun tasdiqlash yo'nalishi belgilanmagan. Boshqaruv menejeri boshqaruv sozlamalarida loyihaning o'z yo'nalishlaridan birini belgilashi kerak",
+      "route_not_pinnable": "Ushbu tasdiqlash yo'nalishini belgilab bo'lmaydi: u ushbu turdagi qarorlar uchun loyihaning faol yo'nalishi bo'lishi kerak",
+      "area_retired": "Ushbu soha bosqich modelining o'zgarishi bilan olib tashlangan va yangi hujjatlarni qabul qilmaydi",
+      "pack_catalogue_invalid": "Faol paket ushbu katalogni e'lon qilgan, ammo uning fayli yo'q yoki katalog qoidalarini buzadi",
+      "settings_frozen_in_review": "Bosqich ko'rib chiqilayotgan yoki to'xtatib turilgan paytda buni o'zgartirib bo'lmaydi; avval bosqich bo'yicha qaror qabul qiling",
+      "null_not_allowed": "Ushbu maydon bo'sh bo'lishi mumkin emas"
+    },
+    "outcome": {
+      "go": "Davom etish",
+      "go_with_conditions": "Shartlar bilan davom etish",
+      "hold": "To'xtatib turish",
+      "recycle": "Qayta ishlash",
+      "stop": "To'xtatish"
+    },
+    "gate_state": {
+      "not_started": "Boshlanmagan",
+      "in_preparation": "Tayyorlanmoqda",
+      "in_review": "Ko'rib chiqilmoqda",
+      "on_hold": "To'xtatib turilgan",
+      "decided": "Qaror qabul qilingan"
+    },
+    "document_state": {
+      "draft": "Qoralama",
+      "in_review": "Ko'rib chiqilmoqda",
+      "approved_at_gate": "Bosqichda tasdiqlangan",
+      "binding": "Majburiy",
+      "superseded": "Almashtirilgan"
+    },
+    "check_status": {
+      "not_assessed": "Baholanmagan",
+      "ready": "Tayyor",
+      "ready_with_risks": "Xavflar bilan tayyor",
+      "not_ready": "Tayyor emas",
+      "not_applicable": "Tegishli emas"
+    },
+    "condition_status": {
+      "open": "Ochiq",
+      "cleared": "Bajarilgan",
+      "waived": "Bekor qilingan",
+      "overdue": "Muddati o'tgan"
+    },
+    "export": {
+      "title": "Boshqaruv qarorlari jurnali",
+      "col_gate": "Bosqich",
+      "col_attempt": "Urinish",
+      "col_outcome": "Natija",
+      "col_decided_by": "Qaror qabul qilgan",
+      "col_decided_at": "Qaror sanasi",
+      "col_rationale": "Sabab",
+      "col_conditions": "Shartlar",
+      "col_at_risk": "Xavf ostida davom etish",
+      "project": "Loyiha",
+      "empty": "Hali hech qanday bosqich qarori qayd etilmagan"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "{area} boshqaruv sohasining mas'uli yo'q",
+        "suggestion": "Sohaning tayyorligini tasdiqlash uchun unga mas'ul shaxs tayinlang"
+      },
+      "required_documents_defined": {
+        "fail": "{gate} bosqichida tegishli sohalar bor, lekin ularda majburiy asosiy hujjatlar yo'q",
+        "suggestion": "Ushbu bosqich uchun katalog talab qilgan asosiy hujjatlarni biriktiring yoki sohani sabab ko'rsatib tegishli emas deb belgilang"
+      },
+      "binding_document_unchanged": {
+        "fail": "{document} majburiy asosiy hujjatining tasdiqlangan o'zgartirish so'rovi qamrab olmagan yangiroq revizisi bor",
+        "suggestion": "Yangi revizya ishlatilishidan oldin tasdiqlanishi uchun o'zgartirish so'rovi yarating"
+      },
+      "conditions_not_overdue": {
+        "fail": "{condition} sharti {due} dan beri muddati o'tgan",
+        "suggestion": "Shartni dalil bilan bajaring yoki qaror qabul qiluvchi sabab ko'rsatib uni bekor qilsin"
+      },
+      "gate_date_after_previous": {
+        "fail": "{gate} bosqichi {date} sanasiga rejalashtirilgan, bu oldingi {previous} bosqichidan oldin",
+        "suggestion": "Bosqichlar bosqichlar tartibiga mos kelishi uchun bosqich sanasini o'zgartiring"
+      },
+      "decision_by_entitled_user": {
+        "fail": "{gate} bosqichi bo'yicha qaror uning sohalaridan biriga egalik qiluvchi foydalanuvchi tomonidan qayd etilgan",
+        "suggestion": "To'rt ko'z qoidasiga ko'ra, qarorni boshqa shaxs qabul qilishi kerak"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "{area} sohasi sabab ko'rsatilmasdan tegishli emas deb belgilangan",
+        "suggestion": "Sohaning nima uchun tegishli emasligini yozing"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Bosqich: Tasdiqlashdan batafsil loyihalashga",
+          "award_to_construction": "Bosqich: Shartnomadan qurilishga",
+          "brief_to_concept": "Bosqich: Topshiriqdan konseptsiyaga",
+          "concept_to_design": "Bosqich: Konseptsiyadan loyihaga",
+          "construction_to_handover": "Bosqich: Qurilishdan topshirishga",
+          "design_to_approval": "Bosqich: Loyihadan ruxsatnomaga",
+          "detail_to_tender": "Bosqich: Batafsil loyihadan tenderga",
+          "handover_to_operation": "Bosqich: Topshirishdan ekspluatatsiyaga",
+          "strategy_to_brief": "Bosqich: Strategiyadan topshiriqqa",
+          "tender_to_award": "Bosqich: Tenderdan shartnomaga"
+        }
+      }
+    }
+  }
+}

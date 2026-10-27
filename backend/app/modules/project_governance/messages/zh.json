@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "确定"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "该决策结果未知",
+      "gate_not_in_review": "节点不在审查中，无法记录决策",
+      "gate_not_decided": "只有已决策的节点才能重新开启",
+      "rationale_required": "请写明此决策的理由",
+      "required_document_not_approved": "必需的框架文件在此节点尚未达到可批准状态",
+      "area_without_owner": "该管理领域没有负责人，因此无人能确认其就绪状态",
+      "area_not_ready": "该管理领域尚未满足本节点要求",
+      "evidence_not_met": "该领域所需的就绪证据不足",
+      "unknown_evidence_not_acknowledged": "该领域的就绪证据未经确认或带有警告。请先确认您已查阅，再放行节点",
+      "unknown_criterion": "该就绪标准不属于项目针对此领域和节点的模型",
+      "check_stale": "就绪确认之后文件已发生变更，因此该领域须重新确认",
+      "condition_overdue": "更早节点的一项条件已逾期，必须先清除或豁免",
+      "conditions_required": "附条件通过至少需要一项条件",
+      "conditions_not_allowed": "只有附条件通过才能带有条件",
+      "condition_text_required": "每项条件都需要填写内容",
+      "condition_unknown_area": "该条件所指的领域不属于本项目",
+      "waiver_needs_rationale": "豁免需要书面理由",
+      "not_applicable_needs_rationale": "将此项标记为不适用需要书面理由",
+      "not_applicable_not_accepted": "决策人尚未接受该领域为不适用",
+      "decider_not_entitled": "根据审批流程，您无权对此节点作出决策",
+      "decider_is_area_owner": "依据四眼原则，领域负责人或代理人不得对此节点作出决策",
+      "hold_needs_resume_date": "暂停需要设定一个未来的恢复日期",
+      "proceed_at_risk_needs_conditions": "带风险推进仅适用于附条件通过",
+      "proceed_at_risk_area_not_blocking": "该领域并未构成阻碍，因此不能列为带风险推进的对象",
+      "project_stopped": "项目已在某节点被叫停",
+      "document_read_only": "项目已被叫停，因此该框架文件为只读",
+      "binding_requires_change_request": "该框架文件具有约束力，只能通过变更请求进行修改",
+      "phase_mapping_missing": "新的阶段模型需要为该阶段提供映射",
+      "phase_mapping_unknown_target": "映射所指的阶段在新模型中不存在",
+      "no_decision_route": "尚未为节点决策指定审批流程。治理经理需在治理设置中指定本项目自有的一条流程",
+      "route_not_at_final_step": "审批流程尚未到达最后一步",
+      "route_not_pending": "此节点的审批流程已不再待处理",
+      "concurrent_decision": "刚刚有其他人对此节点作出了决策；请刷新并核对该决策",
+      "gate_out_of_order": "项目不处于该节点所离开的阶段",
+      "model_missing": "该项目尚未设定治理模型",
+      "model_exists": "治理模型已设定；如需更改，请使用阶段映射",
+      "unknown_catalogue": "该目录未知",
+      "area_not_found": "未找到管理领域",
+      "gate_not_found": "未找到节点",
+      "document_not_found": "未找到框架文件",
+      "condition_not_found": "未找到条件",
+      "change_request_not_found": "未找到变更请求",
+      "check_not_found": "未找到就绪检查",
+      "not_area_owner": "只有该领域的负责人或代理人才能执行此操作",
+      "owner_not_project_member": "负责人必须拥有本项目的访问权限",
+      "unknown_document_type": "该文件类型不属于此领域的目录",
+      "container_not_in_project": "该 CDE 容器不属于本项目",
+      "invalid_transition": "不允许此状态变更",
+      "condition_not_open": "只有待办条件才能被清除或豁免",
+      "document_not_binding": "只有具有约束力的框架文件才能通过变更请求修改",
+      "no_pending_revision": "没有可以设为约束力版本的更新修订",
+      "change_request_not_open": "该变更请求已不再处于待办状态",
+      "invalid_status": "此处不允许该状态",
+      "decision_immutable": "节点决策一经记录不得更改或删除",
+      "document_exists": "该框架文件已在此领域中登记",
+      "catalogue_code_taken": "已存在使用此代码的目录",
+      "catalogue_retired": "该目录已退役，不能再编辑或指定",
+      "catalogue_invalid": "目录草稿违反目录规则，无法发布",
+      "gate_historic": "该节点属于项目已离开的阶段模型，不能再更改",
+      "gate_not_on_hold": "只有处于暂停状态的节点才能恢复",
+      "later_gate_active": "后续节点已经启动，因此无法重新开启此节点",
+      "model_unchanged": "项目已在使用此版本的阶段模型",
+      "not_condition_owner": "只有该条件的被指派人或经理才能清除它",
+      "route_needs_more_approvals": "审批流程的最后一步仍需其他审批人批准；他们在审批界面中批准，最后一位审批人记录决策",
+      "activity_not_in_project": "该进度活动不属于本项目",
+      "target_date_owned_by_schedule": "此节点与某进度活动相关联，日期由该活动决定；如需在此设定日期，请先解除关联",
+      "no_change_route": "尚未为约束性文件的变更指定审批流程。治理经理需在治理设置中指定本项目自有的一条流程",
+      "route_not_pinnable": "该审批流程无法指定：它必须是本项目针对此类决策的有效流程",
+      "area_retired": "该领域已因阶段模型的变更而退役，不再接受新文件",
+      "pack_catalogue_invalid": "当前启用的数据包声明了此目录，但其文件缺失或违反目录规则",
+      "settings_frozen_in_review": "节点处于审查或暂停状态时无法更改此项；请先对该节点作出决策",
+      "null_not_allowed": "此字段不能为空"
+    },
+    "outcome": {
+      "go": "通过",
+      "go_with_conditions": "附条件通过",
+      "hold": "暂停",
+      "recycle": "返回修改",
+      "stop": "叫停"
+    },
+    "gate_state": {
+      "not_started": "未开始",
+      "in_preparation": "准备中",
+      "in_review": "审查中",
+      "on_hold": "暂停中",
+      "decided": "已决策"
+    },
+    "document_state": {
+      "draft": "草稿",
+      "in_review": "审查中",
+      "approved_at_gate": "节点已批准",
+      "binding": "具有约束力",
+      "superseded": "已被替代"
+    },
+    "check_status": {
+      "not_assessed": "未评估",
+      "ready": "已就绪",
+      "ready_with_risks": "有风险就绪",
+      "not_ready": "未就绪",
+      "not_applicable": "不适用"
+    },
+    "condition_status": {
+      "open": "待办",
+      "cleared": "已清除",
+      "waived": "已豁免",
+      "overdue": "已逾期"
+    },
+    "export": {
+      "title": "治理决策记录",
+      "col_gate": "节点",
+      "col_attempt": "次数",
+      "col_outcome": "结果",
+      "col_decided_by": "决策人",
+      "col_decided_at": "决策时间",
+      "col_rationale": "理由",
+      "col_conditions": "条件",
+      "col_at_risk": "带风险推进",
+      "project": "项目",
+      "empty": "尚未记录任何节点决策"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "管理领域 {area} 没有负责人",
+        "suggestion": "为该领域指定负责人，以便确认其就绪状态"
+      },
+      "required_documents_defined": {
+        "fail": "节点 {gate} 中存在适用的领域，但没有任何必需的框架文件",
+        "suggestion": "附上该节点目录要求的框架文件，或将该领域标记为不适用并注明原因"
+      },
+      "binding_document_unchanged": {
+        "fail": "具有约束力的框架文件 {document} 有更新的修订，但未被已批准的变更请求覆盖",
+        "suggestion": "提交变更请求，使新修订在使用前获得批准"
+      },
+      "conditions_not_overdue": {
+        "fail": "条件 {condition} 自 {due} 起已逾期",
+        "suggestion": "附上证据清除该条件，或由决策人注明理由予以豁免"
+      },
+      "gate_date_after_previous": {
+        "fail": "节点 {gate} 计划于 {date}，早于前一节点 {previous} 的日期",
+        "suggestion": "调整节点日期，使其符合阶段顺序"
+      },
+      "decision_by_entitled_user": {
+        "fail": "节点 {gate} 的决策由拥有其中某个领域的用户记录",
+        "suggestion": "依据四眼原则，必须由其他人作出决策"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "领域 {area} 被标记为不适用，但未注明原因",
+        "suggestion": "写明该领域不适用的原因"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "节点：从批准到详细设计",
+          "award_to_construction": "节点：从授标到施工",
+          "brief_to_concept": "节点：从任务书到概念",
+          "concept_to_design": "节点：从概念到设计",
+          "construction_to_handover": "节点：从施工到交付",
+          "design_to_approval": "节点：从设计到许可",
+          "detail_to_tender": "节点：从详细设计到招标",
+          "handover_to_operation": "节点：从交付到运营",
+          "strategy_to_brief": "节点：从战略到任务书",
+          "tender_to_award": "节点：从招标到授标"
+        }
+      }
+    }
+  }
+}

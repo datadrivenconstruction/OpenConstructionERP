@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Ez a döntési kimenetel nem ismert",
+      "gate_not_in_review": "A kapu nincs felülvizsgálat alatt, ezért nem rögzíthető rajta döntés",
+      "gate_not_decided": "Csak egy már eldöntött kapu nyitható újra",
+      "rationale_required": "Adja meg az indoklást ehhez a döntéshez",
+      "required_document_not_approved": "Egy kötelező keretdokumentum ezen a kapun még nem áll készen a jóváhagyásra",
+      "area_without_owner": "Ennek a menedzsment-területnek nincs felelőse, ezért senki nem igazolhatja a készültségét",
+      "area_not_ready": "Ez a menedzsment-terület nem áll készen a kapura",
+      "evidence_not_met": "A terület kötelező készültségi bizonyítékai nem teljesülnek",
+      "unknown_evidence_not_acknowledged": "A terület egyik készültségi bizonyítéka nincs megerősítve, vagy figyelmeztetést tartalmaz. Erősítse meg, hogy megtekintette, mielőtt átengedi a kaput",
+      "unknown_criterion": "Ez a készültségi kritérium nem része a projekt modelljének ehhez a területhez és kapuhoz",
+      "check_stale": "Egy dokumentum a készültség megerősítése után módosult, ezért a területet újra meg kell erősíteni",
+      "condition_overdue": "Egy korábbi kapu feltétele lejárt, ezért előbb le kell zárni vagy el kell engedni",
+      "conditions_required": "A feltételes továbbengedéshez legalább egy feltétel szükséges",
+      "conditions_not_allowed": "Csak a feltételes továbbengedés tartalmazhat feltételeket",
+      "condition_text_required": "Minden feltételnek szöveget kell tartalmaznia",
+      "condition_unknown_area": "A feltétel olyan területet nevez meg, amely nem tartozik ehhez a projekthez",
+      "waiver_needs_rationale": "A felmentéshez írásos indoklás szükséges",
+      "not_applicable_needs_rationale": "A nem alkalmazhatóként jelöléshez írásos indoklás szükséges",
+      "not_applicable_not_accepted": "A döntéshozó nem fogadta el ezt a területet nem alkalmazhatónak",
+      "decider_not_entitled": "A jóváhagyási útvonala alapján Ön nem jogosult erről a kapuról dönteni",
+      "decider_is_area_owner": "A négyszemes elv alapján a terület felelőse vagy helyettese nem dönthet erről a kapuról",
+      "hold_needs_resume_date": "A felfüggesztéshez jövőbeli folytatási dátum szükséges",
+      "proceed_at_risk_needs_conditions": "Kockázatos továbbhaladás csak feltételes továbbengedéssel lehetséges",
+      "proceed_at_risk_area_not_blocking": "Ez a terület nem akadályoz, ezért nem nevezhető meg kockázatos továbbhaladásként",
+      "project_stopped": "A projektet egy kapunál leállították",
+      "document_read_only": "Ez a keretdokumentum csak olvasható, mert a projektet leállították",
+      "binding_requires_change_request": "Ez a keretdokumentum kötelező érvényű, és csak módosítási kérelemmel változtatható",
+      "phase_mapping_missing": "Az új fázismodellhez szükséges ehhez a fázishoz a megfeleltetés",
+      "phase_mapping_unknown_target": "A megfeleltetés olyan fázisra hivatkozik, amely az új modellben nincs meg",
+      "no_decision_route": "A kapudöntésekhez nincs rögzített jóváhagyási útvonal. Egy irányítási felelős rögzíti a projekt egyik saját útvonalát a irányítási beállításokban",
+      "route_not_at_final_step": "A jóváhagyási útvonal még nem érte el a záró lépést",
+      "route_not_pending": "Ennek a kapunak a jóváhagyási útvonala már nincs függőben",
+      "concurrent_decision": "Valaki más az imént döntött erről a kapuról; töltse újra az oldalt, és ellenőrizze a döntést",
+      "gate_out_of_order": "A projekt nincs abban a fázisban, amelyet ez a kapu lezár",
+      "model_missing": "Ehhez a projekthez nincs irányítási modell beállítva",
+      "model_exists": "Már be van állítva irányítási modell; módosítsa fázismegfeleltetéssel",
+      "unknown_catalogue": "Ez a katalógus nem ismert",
+      "area_not_found": "A menedzsment-terület nem található",
+      "gate_not_found": "A kapu nem található",
+      "document_not_found": "A keretdokumentum nem található",
+      "condition_not_found": "A feltétel nem található",
+      "change_request_not_found": "A módosítási kérelem nem található",
+      "check_not_found": "A készültségi ellenőrzés nem található",
+      "not_area_owner": "Ezt csak a terület felelőse vagy helyettese végezheti el",
+      "owner_not_project_member": "A felelősnek hozzá kell férnie ehhez a projekthez",
+      "unknown_document_type": "Ez a dokumentumtípus nem része a terület katalógusának",
+      "container_not_in_project": "A CDE-tároló nem tartozik ehhez a projekthez",
+      "invalid_transition": "Ez az állapotváltás nem engedélyezett",
+      "condition_not_open": "Csak nyitott feltétel zárható le vagy engedhető el",
+      "document_not_binding": "Csak kötelező érvényű keretdokumentum módosítható módosítási kérelemmel",
+      "no_pending_revision": "Nincs újabb revízió, amelyet kötelező érvényűvé lehetne tenni",
+      "change_request_not_open": "Ez a módosítási kérelem már nincs nyitva",
+      "invalid_status": "Ez az állapot itt nem engedélyezett",
+      "decision_immutable": "A kapudöntés nem módosítható és nem törölhető",
+      "document_exists": "Ez a keretdokumentum már nyilván van tartva a területhez",
+      "catalogue_code_taken": "Ilyen kóddal már létezik katalógus",
+      "catalogue_retired": "Ez a katalógus ki lett vonva, nem szerkeszthető és nem rögzíthető többé",
+      "catalogue_invalid": "A katalógustervezet megsért egy katalógusszabályt, ezért nem tehető közzé",
+      "gate_historic": "Ez a kapu olyan fázismodellhez tartozik, amelyet a projekt már elhagyott, ezért nem módosítható",
+      "gate_not_on_hold": "Csak felfüggesztett kapu folytatható",
+      "later_gate_active": "Egy későbbi kaput már elindítottak, ezért ez a kapu nem nyitható újra",
+      "model_unchanged": "A projekt már ezt a fázismodell-verziót használja",
+      "not_condition_owner": "A feltételt csak az lezárhatja, akinek kiadták, vagy egy irányító",
+      "route_needs_more_approvals": "A jóváhagyási útvonal záró lépéséhez további jóváhagyók kellenek; ők a jóváhagyási képernyőn hagyják jóvá, és az utolsó rögzíti a döntést",
+      "activity_not_in_project": "Az ütemezési tevékenység nem tartozik ehhez a projekthez",
+      "target_date_owned_by_schedule": "Ez a kapu egy ütemezési tevékenységhez kapcsolódik, amely a dátumát kezeli; a dátum itt történő beállításához oldja a kapcsolatot",
+      "no_change_route": "A kötelező érvényű dokumentumok módosításához nincs rögzített jóváhagyási útvonal. Egy irányítási felelős rögzíti a projekt egyik saját útvonalát a irányítási beállításokban",
+      "route_not_pinnable": "Ez a jóváhagyási útvonal nem rögzíthető: a projekt aktív útvonalának kell lennie erre a döntéstípusra",
+      "area_retired": "Ezt a területet a fázismodell egyik módosítása kivonta, új dokumentumot nem fogad",
+      "pack_catalogue_invalid": "Az aktív csomag ezt a katalógust deklarálja, de a fájlja hiányzik vagy megsérti a katalógusszabályokat",
+      "settings_frozen_in_review": "Ez nem módosítható, amíg egy kapu felülvizsgálat alatt vagy felfüggesztve van; előbb döntsön a kapuról",
+      "null_not_allowed": "Ez a mező nem maradhat üresen"
+    },
+    "outcome": {
+      "go": "Továbbengedés",
+      "go_with_conditions": "Továbbengedés feltételekkel",
+      "hold": "Felfüggesztés",
+      "recycle": "Visszaküldés átdolgozásra",
+      "stop": "Leállítás"
+    },
+    "gate_state": {
+      "not_started": "Nem indult el",
+      "in_preparation": "Előkészítés alatt",
+      "in_review": "Felülvizsgálat alatt",
+      "on_hold": "Felfüggesztve",
+      "decided": "Eldöntve"
+    },
+    "document_state": {
+      "draft": "Tervezet",
+      "in_review": "Felülvizsgálat alatt",
+      "approved_at_gate": "Kapun jóváhagyva",
+      "binding": "Kötelező érvényű",
+      "superseded": "Felülírva"
+    },
+    "check_status": {
+      "not_assessed": "Nincs értékelve",
+      "ready": "Kész",
+      "ready_with_risks": "Kész kockázatokkal",
+      "not_ready": "Nincs készen",
+      "not_applicable": "Nem alkalmazható"
+    },
+    "condition_status": {
+      "open": "Nyitott",
+      "cleared": "Lezárva",
+      "waived": "Elengedve",
+      "overdue": "Lejárt"
+    },
+    "export": {
+      "title": "Irányítási döntési napló",
+      "col_gate": "Kapu",
+      "col_attempt": "Kísérlet",
+      "col_outcome": "Kimenetel",
+      "col_decided_by": "Döntött",
+      "col_decided_at": "Döntés ideje",
+      "col_rationale": "Indoklás",
+      "col_conditions": "Feltételek",
+      "col_at_risk": "Kockázatos továbbhaladás",
+      "project": "Projekt",
+      "empty": "Még nem került rögzítésre kapudöntés"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "A(z) {area} menedzsment-területnek nincs felelőse",
+        "suggestion": "Nevezzen ki felelőst a területhez, hogy a készültsége igazolható legyen"
+      },
+      "required_documents_defined": {
+        "fail": "A(z) {gate} kapunál vannak alkalmazható területek kötelező keretdokumentum nélkül",
+        "suggestion": "Csatolja a katalógus által ehhez a kapuhoz előírt keretdokumentumokat, vagy jelölje a területet indoklással nem alkalmazhatónak"
+      },
+      "binding_document_unchanged": {
+        "fail": "A(z) {document} kötelező érvényű keretdokumentumnak van újabb revíziója, amelyet nem fed jóváhagyott módosítási kérelem",
+        "suggestion": "Indítson módosítási kérelmet, hogy az új revíziót jóváhagyják, mielőtt használják"
+      },
+      "conditions_not_overdue": {
+        "fail": "A(z) {condition} feltétel {due} óta lejárt",
+        "suggestion": "Zárja le a feltételt bizonyítékkal, vagy a döntéshozó indoklással engedje el"
+      },
+      "gate_date_after_previous": {
+        "fail": "A(z) {gate} kapu {date} napra van tervezve, a megelőző, {previous} napra tervezett kapu elé",
+        "suggestion": "Mozgassa a kapu dátumát, hogy a kapuk kövessék a fázissorrendet"
+      },
+      "decision_by_entitled_user": {
+        "fail": "A(z) {gate} kapuról szóló döntést olyan felhasználó rögzítette, aki az egyik területének a felelőse",
+        "suggestion": "A négyszemes elv alapján másik személynek kell döntenie"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "A(z) {area} terület indoklás nélkül van nem alkalmazhatóként jelölve",
+        "suggestion": "Írja le, miért nem alkalmazható a terület"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Kapu: az engedélyeztetéstől a részletes tervezésig",
+          "award_to_construction": "Kapu: a szerződéskötéstől az építésig",
+          "brief_to_concept": "Kapu: a feladatleírástól a koncepcióig",
+          "concept_to_design": "Kapu: a koncepciótól a tervezésig",
+          "construction_to_handover": "Kapu: az építéstől az átadásig",
+          "design_to_approval": "Kapu: a tervezéstől az engedélyeztetésig",
+          "detail_to_tender": "Kapu: a részletes tervezéstől a közbeszerzésig",
+          "handover_to_operation": "Kapu: az átadástól az üzemeltetésig",
+          "strategy_to_brief": "Kapu: a stratégiától a feladatleírásig",
+          "tender_to_award": "Kapu: a közbeszerzéstől a szerződéskötésig"
+        }
+      }
+    }
+  }
+}

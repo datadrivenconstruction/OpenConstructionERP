@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Hasil keputusan ini tidak dikenal",
+      "gate_not_in_review": "Gerbang tidak sedang ditinjau, jadi tidak ada keputusan yang dapat dicatat padanya",
+      "gate_not_decided": "Hanya gerbang yang sudah diputuskan yang dapat dibuka kembali",
+      "rationale_required": "Tuliskan alasan untuk keputusan ini",
+      "required_document_not_approved": "Dokumen kerangka wajib belum siap disetujui pada gerbang ini",
+      "area_without_owner": "Area manajemen ini belum memiliki penanggung jawab, sehingga tidak ada yang dapat mengesahkan kesiapannya",
+      "area_not_ready": "Area manajemen ini belum siap untuk gerbang",
+      "evidence_not_met": "Bukti kesiapan wajib untuk area ini belum terpenuhi",
+      "unknown_evidence_not_acknowledged": "Bukti kesiapan area ini belum dikonfirmasi atau memuat peringatan. Konfirmasi bahwa Anda telah melihatnya sebelum meloloskan gerbang",
+      "unknown_criterion": "Kriteria kesiapan ini bukan bagian dari model proyek untuk area dan gerbang ini",
+      "check_stale": "Sebuah dokumen berubah setelah kesiapan dikonfirmasi, sehingga area harus dikonfirmasi ulang",
+      "condition_overdue": "Sebuah kondisi dari gerbang sebelumnya sudah lewat tenggat dan harus diselesaikan atau dikesampingkan terlebih dahulu",
+      "conditions_required": "Persetujuan bersyarat memerlukan setidaknya satu kondisi",
+      "conditions_not_allowed": "Hanya persetujuan bersyarat yang dapat memiliki kondisi",
+      "condition_text_required": "Setiap kondisi harus memiliki teks",
+      "condition_unknown_area": "Kondisi menyebut area yang bukan bagian dari proyek ini",
+      "waiver_needs_rationale": "Pengesampingan memerlukan alasan tertulis",
+      "not_applicable_needs_rationale": "Menandai ini sebagai tidak berlaku memerlukan alasan tertulis",
+      "not_applicable_not_accepted": "Pengambil keputusan belum menerima area ini sebagai tidak berlaku",
+      "decider_not_entitled": "Anda tidak berwenang memutuskan gerbang ini menurut jalur persetujuannya",
+      "decider_is_area_owner": "Berdasarkan prinsip empat mata, penanggung jawab atau wakil area tidak boleh memutuskan gerbang ini",
+      "hold_needs_resume_date": "Penahanan memerlukan tanggal pelanjutan di masa depan",
+      "proceed_at_risk_needs_conditions": "Melanjutkan dengan risiko hanya dimungkinkan dengan persetujuan bersyarat",
+      "proceed_at_risk_area_not_blocking": "Area ini tidak menghambat, sehingga tidak dapat ditetapkan sebagai dilanjutkan dengan risiko",
+      "project_stopped": "Proyek dihentikan pada sebuah gerbang",
+      "document_read_only": "Dokumen kerangka ini hanya dapat dibaca karena proyek dihentikan",
+      "binding_requires_change_request": "Dokumen kerangka ini mengikat dan hanya dapat diubah melalui permintaan perubahan",
+      "phase_mapping_missing": "Model fase baru memerlukan pemetaan untuk fase ini",
+      "phase_mapping_unknown_target": "Pemetaan menyebut fase yang tidak ada dalam model baru",
+      "no_decision_route": "Belum ada jalur persetujuan yang ditetapkan untuk keputusan gerbang. Manajer tata kelola menetapkan salah satu jalur milik proyek dalam pengaturan tata kelola",
+      "route_not_at_final_step": "Jalur persetujuan belum mencapai langkah terakhirnya",
+      "route_not_pending": "Jalur persetujuan gerbang ini tidak lagi menunggu",
+      "concurrent_decision": "Pihak lain baru saja memutuskan gerbang ini; muat ulang dan periksa keputusannya",
+      "gate_out_of_order": "Proyek tidak berada pada fase yang ditinggalkan gerbang ini",
+      "model_missing": "Belum ada model tata kelola yang ditetapkan untuk proyek ini",
+      "model_exists": "Model tata kelola sudah ditetapkan; ubah melalui pemetaan fase",
+      "unknown_catalogue": "Katalog ini tidak dikenal",
+      "area_not_found": "Area manajemen tidak ditemukan",
+      "gate_not_found": "Gerbang tidak ditemukan",
+      "document_not_found": "Dokumen kerangka tidak ditemukan",
+      "condition_not_found": "Kondisi tidak ditemukan",
+      "change_request_not_found": "Permintaan perubahan tidak ditemukan",
+      "check_not_found": "Pemeriksaan kesiapan tidak ditemukan",
+      "not_area_owner": "Hanya penanggung jawab atau wakil area ini yang dapat melakukan ini",
+      "owner_not_project_member": "Penanggung jawab harus memiliki akses ke proyek ini",
+      "unknown_document_type": "Jenis dokumen ini bukan bagian dari katalog untuk area ini",
+      "container_not_in_project": "Kontainer CDE tidak termasuk dalam proyek ini",
+      "invalid_transition": "Perubahan status ini tidak diizinkan",
+      "condition_not_open": "Hanya kondisi yang masih terbuka yang dapat diselesaikan atau dikesampingkan",
+      "document_not_binding": "Hanya dokumen kerangka yang mengikat dapat diubah melalui permintaan perubahan",
+      "no_pending_revision": "Tidak ada revisi yang lebih baru untuk dijadikan mengikat",
+      "change_request_not_open": "Permintaan perubahan ini sudah tidak terbuka",
+      "invalid_status": "Status ini tidak diizinkan di sini",
+      "decision_immutable": "Keputusan gerbang tidak dapat diubah atau dihapus",
+      "document_exists": "Dokumen kerangka ini sudah dilacak untuk area tersebut",
+      "catalogue_code_taken": "Katalog dengan kode ini sudah ada",
+      "catalogue_retired": "Katalog ini sudah dipensiunkan dan tidak dapat lagi diubah atau ditetapkan",
+      "catalogue_invalid": "Draf katalog melanggar aturan katalog dan tidak dapat diterbitkan",
+      "gate_historic": "Gerbang ini milik model fase yang sudah ditinggalkan proyek dan tidak dapat lagi diubah",
+      "gate_not_on_hold": "Hanya gerbang yang sedang ditahan yang dapat dilanjutkan",
+      "later_gate_active": "Gerbang berikutnya sudah dimulai, sehingga gerbang ini tidak dapat dibuka kembali",
+      "model_unchanged": "Proyek sudah menggunakan versi model fase ini",
+      "not_condition_owner": "Hanya orang yang diberi kondisi ini atau manajer yang dapat menyelesaikannya",
+      "route_needs_more_approvals": "Langkah terakhir jalur persetujuan masih memerlukan pemberi persetujuan lain; mereka menyetujui di layar persetujuan dan yang terakhir mencatat keputusan",
+      "activity_not_in_project": "Aktivitas jadwal tidak termasuk dalam proyek ini",
+      "target_date_owned_by_schedule": "Gerbang ini terhubung dengan aktivitas jadwal yang mengelola tanggalnya; lepaskan tautan untuk menetapkan tanggal di sini",
+      "no_change_route": "Belum ada jalur persetujuan yang ditetapkan untuk perubahan dokumen mengikat. Manajer tata kelola menetapkan salah satu jalur milik proyek dalam pengaturan tata kelola",
+      "route_not_pinnable": "Jalur persetujuan ini tidak dapat ditetapkan: harus berupa jalur aktif proyek untuk jenis keputusan ini",
+      "area_retired": "Area ini dipensiunkan oleh perubahan model fase dan tidak menerima dokumen baru",
+      "pack_catalogue_invalid": "Paket aktif mendeklarasikan katalog ini, tetapi berkasnya hilang atau melanggar aturan katalog",
+      "settings_frozen_in_review": "Ini tidak dapat diubah selama sebuah gerbang sedang ditinjau atau ditahan; putuskan gerbang tersebut terlebih dahulu",
+      "null_not_allowed": "Kolom ini tidak boleh kosong"
+    },
+    "outcome": {
+      "go": "Lanjut",
+      "go_with_conditions": "Lanjut dengan kondisi",
+      "hold": "Tahan",
+      "recycle": "Kembalikan untuk diperbaiki",
+      "stop": "Hentikan"
+    },
+    "gate_state": {
+      "not_started": "Belum dimulai",
+      "in_preparation": "Sedang disiapkan",
+      "in_review": "Sedang ditinjau",
+      "on_hold": "Ditahan",
+      "decided": "Diputuskan"
+    },
+    "document_state": {
+      "draft": "Draf",
+      "in_review": "Sedang ditinjau",
+      "approved_at_gate": "Disetujui pada gerbang",
+      "binding": "Mengikat",
+      "superseded": "Digantikan"
+    },
+    "check_status": {
+      "not_assessed": "Belum dinilai",
+      "ready": "Siap",
+      "ready_with_risks": "Siap dengan risiko",
+      "not_ready": "Belum siap",
+      "not_applicable": "Tidak berlaku"
+    },
+    "condition_status": {
+      "open": "Terbuka",
+      "cleared": "Selesai",
+      "waived": "Dikesampingkan",
+      "overdue": "Terlambat"
+    },
+    "export": {
+      "title": "Jejak keputusan tata kelola",
+      "col_gate": "Gerbang",
+      "col_attempt": "Percobaan",
+      "col_outcome": "Hasil",
+      "col_decided_by": "Diputuskan oleh",
+      "col_decided_at": "Diputuskan pada",
+      "col_rationale": "Alasan",
+      "col_conditions": "Kondisi",
+      "col_at_risk": "Dilanjutkan dengan risiko",
+      "project": "Proyek",
+      "empty": "Belum ada keputusan gerbang yang dicatat"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Area manajemen {area} belum memiliki penanggung jawab",
+        "suggestion": "Tunjuk penanggung jawab untuk area tersebut agar kesiapannya dapat disahkan"
+      },
+      "required_documents_defined": {
+        "fail": "Gerbang {gate} memiliki area berlaku tanpa dokumen kerangka wajib",
+        "suggestion": "Lampirkan dokumen kerangka yang diwajibkan katalog untuk gerbang ini, atau tandai area sebagai tidak berlaku dengan alasan"
+      },
+      "binding_document_unchanged": {
+        "fail": "Dokumen kerangka mengikat {document} memiliki revisi yang lebih baru yang belum tercakup oleh permintaan perubahan yang disetujui",
+        "suggestion": "Ajukan permintaan perubahan agar revisi baru disetujui sebelum digunakan"
+      },
+      "conditions_not_overdue": {
+        "fail": "Kondisi {condition} sudah terlambat sejak {due}",
+        "suggestion": "Selesaikan kondisi dengan bukti, atau minta pengambil keputusan mengesampingkannya dengan alasan"
+      },
+      "gate_date_after_previous": {
+        "fail": "Gerbang {gate} direncanakan pada {date}, sebelum gerbang sebelumnya pada {previous}",
+        "suggestion": "Pindahkan tanggal gerbang agar gerbang mengikuti urutan fase"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Keputusan pada gerbang {gate} dicatat oleh pengguna yang memiliki salah satu area di dalamnya",
+        "suggestion": "Berdasarkan prinsip empat mata, orang yang berbeda harus memutuskan"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Area {area} ditandai tidak berlaku tanpa alasan",
+        "suggestion": "Tuliskan mengapa area tersebut tidak berlaku"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Gerbang: dari perizinan ke desain detail",
+          "award_to_construction": "Gerbang: dari penetapan pemenang ke konstruksi",
+          "brief_to_concept": "Gerbang: dari brief ke konsep",
+          "concept_to_design": "Gerbang: dari konsep ke desain",
+          "construction_to_handover": "Gerbang: dari konstruksi ke serah terima",
+          "design_to_approval": "Gerbang: dari desain ke perizinan",
+          "detail_to_tender": "Gerbang: dari desain detail ke tender",
+          "handover_to_operation": "Gerbang: dari serah terima ke operasi",
+          "strategy_to_brief": "Gerbang: dari strategi ke brief",
+          "tender_to_award": "Gerbang: dari tender ke penetapan pemenang"
+        }
+      }
+    }
+  }
+}

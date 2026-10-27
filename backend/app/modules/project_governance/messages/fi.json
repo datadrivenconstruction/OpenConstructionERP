@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Tätä päätöksen tulosta ei tunneta",
+      "gate_not_in_review": "Portti ei ole käsittelyssä, joten siihen ei voi kirjata päätöstä",
+      "gate_not_decided": "Vain päätetty portti voidaan avata uudelleen",
+      "rationale_required": "Kirjoita tämän päätöksen perustelu",
+      "required_document_not_approved": "Vaadittu kehitysasiakirja ei ole valmis hyväksyttäväksi tässä portissa",
+      "area_without_owner": "Tällä hallinnan osa-alueella ei ole vastuuhenkilöä, joten kukaan ei voi vahvistaa sen valmiutta",
+      "area_not_ready": "Tämä hallinnan osa-alue ei ole valmis porttiin",
+      "evidence_not_met": "Tämän osa-alueen vaadittu valmiuden todiste ei täyty",
+      "unknown_evidence_not_acknowledged": "Tämän osa-alueen valmiuden todiste on vahvistamaton tai siihen liittyy varoitus. Vahvista, että olet nähnyt sen, ennen kuin päästät portin läpi",
+      "unknown_criterion": "Tämä valmiuskriteeri ei kuulu hankkeen malliin tälle osa-alueelle ja tälle portille",
+      "check_stale": "Asiakirja muuttui valmiuden vahvistamisen jälkeen, joten osa-alue on vahvistettava uudelleen",
+      "condition_overdue": "Aiemmalle portille asetettu ehto on myöhässä, ja se on ensin täytettävä tai siitä on luovuttava",
+      "conditions_required": "Ehdollinen hyväksyntä vaatii vähintään yhden ehdon",
+      "conditions_not_allowed": "Vain ehdollinen hyväksyntä voi sisältää ehtoja",
+      "condition_text_required": "Jokaiseen ehtoon tarvitaan teksti",
+      "condition_unknown_area": "Ehto viittaa osa-alueeseen, joka ei kuulu tähän hankkeeseen",
+      "waiver_needs_rationale": "Ehdosta luopuminen vaatii kirjallisen perustelun",
+      "not_applicable_needs_rationale": "Merkitseminen ei sovellettavaksi vaatii kirjallisen perustelun",
+      "not_applicable_not_accepted": "Päättäjä ei ole hyväksynyt tätä osa-aluetta ei sovellettavaksi",
+      "decider_not_entitled": "Sinulla ei ole oikeutta päättää tästä portista sen hyväksyntäreitin mukaan",
+      "decider_is_area_owner": "Neljän silmän periaatteen mukaan osa-alueen vastuuhenkilö tai varahenkilö ei saa päättää tästä portista",
+      "hold_needs_resume_date": "Pidätys vaatii tulevan jatkamispäivän",
+      "proceed_at_risk_needs_conditions": "Eteneminen riskillä on mahdollista vain ehdollisella hyväksynnällä",
+      "proceed_at_risk_area_not_blocking": "Tämä osa-alue ei ole estävä, joten sitä ei voi nimetä riskillä etenväksi osa-alueeksi",
+      "project_stopped": "Hanke pysäytettiin portissa",
+      "document_read_only": "Tämä kehitysasiakirja on vain luettavissa, koska hanke pysäytettiin",
+      "binding_requires_change_request": "Tämä kehitysasiakirja on sitova, ja sitä muutetaan vain muutospyynnön kautta",
+      "phase_mapping_missing": "Uusi vaihemalli tarvitsee tälle vaiheelle vastaavuuden",
+      "phase_mapping_unknown_target": "Vastaavuus viittaa vaiheeseen, jota uudessa mallissa ei ole",
+      "no_decision_route": "Portin päätöksille ei ole kiinnitetty hyväksyntäreittiä. Hallintovastaava kiinnittää yhden hankkeen omista reiteistä hallinnan asetuksissa",
+      "route_not_at_final_step": "Hyväksyntäreitti ei ole vielä päässyt viimeiseen vaiheeseensa",
+      "route_not_pending": "Tämän portin hyväksyntäreitti ei enää odota",
+      "concurrent_decision": "Joku muu päätti tästä portista juuri äsken; lataa sivu uudelleen ja tarkista päätös",
+      "gate_out_of_order": "Hanke ei ole vaiheessa, jonka tämä portti päättää",
+      "model_missing": "Tälle hankkeelle ei ole asetettu hallintamallia",
+      "model_exists": "Hallintamalli on jo asetettu; muuta sitä vaihevastaavuuden avulla",
+      "unknown_catalogue": "Tätä luetteloa ei tunneta",
+      "area_not_found": "Hallinnan osa-aluetta ei löytynyt",
+      "gate_not_found": "Porttia ei löytynyt",
+      "document_not_found": "Kehitysasiakirjaa ei löytynyt",
+      "condition_not_found": "Ehtoa ei löytynyt",
+      "change_request_not_found": "Muutospyyntöä ei löytynyt",
+      "check_not_found": "Valmiustarkastusta ei löytynyt",
+      "not_area_owner": "Vain tämän osa-alueen vastuuhenkilö tai varahenkilö voi tehdä tämän",
+      "owner_not_project_member": "Vastuuhenkilöllä on oltava pääsy tähän hankkeeseen",
+      "unknown_document_type": "Tämä asiakirjatyyppi ei kuulu tämän osa-alueen luetteloon",
+      "container_not_in_project": "CDE-säiliö ei kuulu tähän hankkeeseen",
+      "invalid_transition": "Tämä tilamuutos ei ole sallittu",
+      "condition_not_open": "Vain avoin ehto voidaan täyttää tai siitä voidaan luopua",
+      "document_not_binding": "Vain sitova kehitysasiakirja voidaan muuttaa muutospyynnön kautta",
+      "no_pending_revision": "Sitovaksi tehtävää uudempaa revisiota ei ole",
+      "change_request_not_open": "Tämä muutospyyntö ei ole enää avoinna",
+      "invalid_status": "Tämä tila ei ole sallittu täällä",
+      "decision_immutable": "Portin päätöstä ei voi muuttaa eikä poistaa",
+      "document_exists": "Tämä kehitysasiakirja seurataan jo osa-alueelle",
+      "catalogue_code_taken": "Tällä koodilla oleva luettelo on jo olemassa",
+      "catalogue_retired": "Tämä luettelo on poistettu käytöstä, eikä sitä voi enää muokata eikä kiinnittää",
+      "catalogue_invalid": "Luettelon luonnos rikkoo luettelosääntöä eikä sitä voi julkaista",
+      "gate_historic": "Tämä portti kuuluu vaihemalliin, jonka hanke on jättänyt taakseen, eikä sitä voi enää muuttaa",
+      "gate_not_on_hold": "Vain pidätetty portti voidaan jatkaa",
+      "later_gate_active": "Myöhempi portti on jo aloitettu, joten tätä porttia ei voi avata uudelleen",
+      "model_unchanged": "Hanke käyttää jo tätä vaihemallin versiota",
+      "not_condition_owner": "Vain ehdon saaja tai hallintovastaava voi poistaa ehdon",
+      "route_needs_more_approvals": "Hyväksyntäreitin viimeinen vaihe tarvitsee vielä muita hyväksyjiä; he hyväksyvät hyväksyntänäkymässä, ja viimeinen kirjaa päätöksen",
+      "activity_not_in_project": "Aikataulun tehtävä ei kuulu tähän hankkeeseen",
+      "target_date_owned_by_schedule": "Tämä portti on linkitetty aikataulutehtävään, joka määrittää sen päivämäärän; poista linkitys asettaaksesi päivämäärän tässä",
+      "no_change_route": "Sitovien asiakirjojen muutoksille ei ole kiinnitetty hyväksyntäreittiä. Hallintovastaava kiinnittää yhden hankkeen omista reiteistä hallinnan asetuksissa",
+      "route_not_pinnable": "Tätä hyväksyntäreittiä ei voi kiinnittää: sen on oltava tämän hankkeen aktiivinen reitti tällaiselle päätökselle",
+      "area_retired": "Tämä osa-alue poistettiin vaihemallin muutoksella, eikä se ota vastaan uusia asiakirjoja",
+      "pack_catalogue_invalid": "Aktiivinen paketti ilmoittaa tämän luettelon, mutta sen tiedosto puuttuu tai rikkoo luettelosääntöjä",
+      "settings_frozen_in_review": "Tätä ei voi muuttaa, kun portti on käsittelyssä tai pidätettynä; päätä portista ensin",
+      "null_not_allowed": "Tämä kenttä ei voi olla tyhjä"
+    },
+    "outcome": {
+      "go": "Eteenpäin",
+      "go_with_conditions": "Eteenpäin ehdoin",
+      "hold": "Pidätä",
+      "recycle": "Palauta uudelleen käsiteltäväksi",
+      "stop": "Pysäytä"
+    },
+    "gate_state": {
+      "not_started": "Ei aloitettu",
+      "in_preparation": "Valmisteilla",
+      "in_review": "Käsittelyssä",
+      "on_hold": "Pidätetty",
+      "decided": "Päätetty"
+    },
+    "document_state": {
+      "draft": "Luonnos",
+      "in_review": "Käsittelyssä",
+      "approved_at_gate": "Hyväksytty portissa",
+      "binding": "Sitova",
+      "superseded": "Korvattu"
+    },
+    "check_status": {
+      "not_assessed": "Arvioimatta",
+      "ready": "Valmis",
+      "ready_with_risks": "Valmis riskien kanssa",
+      "not_ready": "Ei valmis",
+      "not_applicable": "Ei sovellettavissa"
+    },
+    "condition_status": {
+      "open": "Avoin",
+      "cleared": "Täytetty",
+      "waived": "Hylätty",
+      "overdue": "Myöhässä"
+    },
+    "export": {
+      "title": "Hallinnan päätösloki",
+      "col_gate": "Portti",
+      "col_attempt": "Yritys",
+      "col_outcome": "Tulos",
+      "col_decided_by": "Päättäjä",
+      "col_decided_at": "Päätetty",
+      "col_rationale": "Perustelu",
+      "col_conditions": "Ehdot",
+      "col_at_risk": "Eteneminen riskillä",
+      "project": "Hanke",
+      "empty": "Yhtään portin päätöstä ei ole vielä kirjattu"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Hallinnan osa-alueella {area} ei ole vastuuhenkilöä",
+        "suggestion": "Nimeä osa-alueelle vastuuhenkilö, jotta sen valmius voidaan vahvistaa"
+      },
+      "required_documents_defined": {
+        "fail": "Portilla {gate} on sovellettavia osa-alueita ilman yhtään vaadittua kehitysasiakirjaa",
+        "suggestion": "Liitä portille luettelon vaatimat kehitysasiakirjat tai merkitse osa-alue perustellusti ei sovellettavaksi"
+      },
+      "binding_document_unchanged": {
+        "fail": "Sitovalla kehitysasiakirjalla {document} on uudempi revisio, jota ei kata hyväksytty muutospyyntö",
+        "suggestion": "Tee muutospyyntö, jotta uusi revisio hyväksytään ennen käyttöä"
+      },
+      "conditions_not_overdue": {
+        "fail": "Ehto {condition} on myöhässä päivästä {due} lähtien",
+        "suggestion": "Täytä ehto todisteella tai pyydä päättäjää hylkäämään se perustellusti"
+      },
+      "gate_date_after_previous": {
+        "fail": "Portti {gate} on suunniteltu päivälle {date}, eli ennen edellistä porttia päivälle {previous}",
+        "suggestion": "Siirrä portin päivämäärää, jotta portit seuraavat vaiheiden järjestystä"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Portin {gate} päätöksen kirjasi käyttäjä, joka omistaa yhden sen osa-alueista",
+        "suggestion": "Neljän silmän periaatteen mukaan päätöksen tekee toinen henkilö"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Osa-alue {area} on merkitty ei sovellettavaksi ilman perustelua",
+        "suggestion": "Kirjoita, miksi osa-alue ei koske hanketta"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Portti: Luvasta yksityiskohtaiseen suunnitteluun",
+          "award_to_construction": "Portti: Hankinnan kohteesta rakentamiseen",
+          "brief_to_concept": "Portti: Tarveselvityksestä konseptiin",
+          "concept_to_design": "Portti: Konseptista suunnitteluun",
+          "construction_to_handover": "Portti: Rakentamisesta luovutukseen",
+          "design_to_approval": "Portti: Suunnittelusta lupaan",
+          "detail_to_tender": "Portti: Yksityiskohtaisesta suunnittelusta tarjouskilpailuun",
+          "handover_to_operation": "Portti: Luovutuksesta käyttöön",
+          "strategy_to_brief": "Portti: Strategiasta tarveselvitykseen",
+          "tender_to_award": "Portti: Tarjouskilpailusta hankintapäätökseen"
+        }
+      }
+    }
+  }
+}

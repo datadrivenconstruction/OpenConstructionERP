@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Ten wynik decyzji jest nieznany",
+      "gate_not_in_review": "Bramka nie jest w trakcie przeglądu, więc nie można zarejestrować na niej decyzji",
+      "gate_not_decided": "Ponownie otworzyć można tylko bramkę, na której podjęto decyzję",
+      "rationale_required": "Zapisz uzasadnienie tej decyzji",
+      "required_document_not_approved": "Wymagany dokument ramowy nie jest gotowy do zatwierdzenia na tej bramce",
+      "area_without_owner": "Ten obszar zarządczy nie ma właściciela, więc nikt nie może potwierdzić jego gotowości",
+      "area_not_ready": "Ten obszar zarządczy nie jest gotowy na bramkę",
+      "evidence_not_met": "Wymagane dowody gotowości dla tego obszaru nie zostały spełnione",
+      "unknown_evidence_not_acknowledged": "Dowody gotowości tego obszaru są niepotwierdzone lub zawierają ostrzeżenie. Potwierdź, że je widziałeś, zanim przepuścisz bramkę",
+      "unknown_criterion": "To kryterium gotowości nie należy do modelu projektu dla tego obszaru i tej bramki",
+      "check_stale": "Dokument został zmieniony po potwierdzeniu gotowości, dlatego obszar musi zostać potwierdzony ponownie",
+      "condition_overdue": "Warunek z wcześniejszej bramki jest przeterminowany i najpierw musi zostać spełniony lub odstąpiony",
+      "conditions_required": "Decyzja „tak z warunkami” wymaga co najmniej jednego warunku",
+      "conditions_not_allowed": "Warunki może mieć wyłącznie decyzja „tak z warunkami”",
+      "condition_text_required": "Każdy warunek wymaga treści",
+      "condition_unknown_area": "Warunek wskazuje obszar, który nie należy do tego projektu",
+      "waiver_needs_rationale": "Odstąpienie od warunku wymaga pisemnego uzasadnienia",
+      "not_applicable_needs_rationale": "Oznaczenie jako niedotyczące wymaga pisemnego uzasadnienia",
+      "not_applicable_not_accepted": "Decydujący nie zaakceptował tego obszaru jako niedotyczącego",
+      "decider_not_entitled": "Nie masz uprawnień do decydowania o tej bramce zgodnie ze ścieżką zatwierdzania",
+      "decider_is_area_owner": "Zgodnie zasadą czterech oczu właściciel obszaru lub jego zastępca nie może decydować o tej bramce",
+      "hold_needs_resume_date": "Wstrzymanie wymaga daty wznowienia w przyszłości",
+      "proceed_at_risk_needs_conditions": "Kontynuowanie z ryzykiem jest możliwe wyłącznie przy decyzji „tak z warunkami”",
+      "proceed_at_risk_area_not_blocking": "Ten obszar nie blokuje prac, dlatego nie może być wskazany jako kontynuowany z ryzykiem",
+      "project_stopped": "Projekt został zatrzymany na bramce",
+      "document_read_only": "Ten dokument ramowy jest tylko do odczytu, ponieważ projekt został zatrzymany",
+      "binding_requires_change_request": "Ten dokument ramowy jest wiążący i zmienia się wyłącznie w drodze wniosku o zmianę",
+      "phase_mapping_missing": "Nowy model faz wymaga mapowania dla tej fazy",
+      "phase_mapping_unknown_target": "Mapowanie wskazuje fazę, której nowy model nie posiada",
+      "no_decision_route": "Dla decyzji o bramkach nie przypisano ścieżki zatwierdzania. Kierownik ds. nadzoru przypisuje jedną z własnych ścieżek projektu w ustawieniach nadzoru",
+      "route_not_at_final_step": "Ścieżka zatwierdzania nie dotarła jeszcze do ostatniego kroku",
+      "route_not_pending": "Ścieżka zatwierdzania tej bramki nie jest już oczekująca",
+      "concurrent_decision": "Ktoś inny przed chwilą podjął decyzję o tej bramce; odśwież stronę i sprawdź decyzję",
+      "gate_out_of_order": "Projekt nie znajduje się w fazie, którą zamyka ta bramka",
+      "model_missing": "Dla tego projektu nie ustawiono modelu nadzoru",
+      "model_exists": "Model nadzoru jest już ustawiony; zmień go za pomocą mapowania faz",
+      "unknown_catalogue": "Ten katalog jest nieznany",
+      "area_not_found": "Nie znaleziono obszaru zarządczego",
+      "gate_not_found": "Nie znaleziono bramki",
+      "document_not_found": "Nie znaleziono dokumentu ramowego",
+      "condition_not_found": "Nie znaleziono warunku",
+      "change_request_not_found": "Nie znaleziono wniosku o zmianę",
+      "check_not_found": "Nie znaleziono kontroli gotowości",
+      "not_area_owner": "Tylko właściciel lub zastępca tego obszaru może wykonać tę czynność",
+      "owner_not_project_member": "Właściciel musi mieć dostęp do tego projektu",
+      "unknown_document_type": "Ten typ dokumentu nie należy do katalogu dla tego obszaru",
+      "container_not_in_project": "Kontener CDE nie należy do tego projektu",
+      "invalid_transition": "Ta zmiana stanu jest niedozwolona",
+      "condition_not_open": "Spełnić lub odstąpić można tylko warunek otwarty",
+      "document_not_binding": "Wniosek o zmianę może dotyczyć wyłącznie wiążącego dokumentu ramowego",
+      "no_pending_revision": "Nie ma nowszej wersji, która mogłaby stać się wiążącą",
+      "change_request_not_open": "Ten wniosek o zmianę nie jest już otwarty",
+      "invalid_status": "Ten status jest tutaj niedozwolony",
+      "decision_immutable": "Decyzji o bramce nie można zmienić ani usunąć",
+      "document_exists": "Ten dokument ramowy jest już prowadzony dla obszaru",
+      "catalogue_code_taken": "Katalog o tym kodzie już istnieje",
+      "catalogue_retired": "Ten katalog został wycofany i nie można go już edytować ani przypisywać",
+      "catalogue_invalid": "Projekt katalogu narusza zasadę katalogu i nie może zostać opublikowany",
+      "gate_historic": "Ta bramka należy do modelu faz, który projekt opuścił, i nie można jej już zmieniać",
+      "gate_not_on_hold": "Wznowić można tylko bramkę wstrzymaną",
+      "later_gate_active": "Późniejsza bramka została już uruchomiona, więc tej bramki nie można otworzyć ponownie",
+      "model_unchanged": "Projekt już korzysta z tej wersji modelu faz",
+      "not_condition_owner": "Tylko osoba, której przydzielono ten warunek, lub kierownik może go spełnić",
+      "route_needs_more_approvals": "Ostatni krok ścieżki zatwierdzania wymaga jeszcze innych osób zatwierdzających; zatwierdzają oni na ekranie zatwierdzeń, a ostatnia osoba rejestruje decyzję",
+      "activity_not_in_project": "Działanie harmonogramu nie należy do tego projektu",
+      "target_date_owned_by_schedule": "Ta bramka jest powiązana z działaniem harmonogramu, które określa jej termin; odłącz je, aby ustawić tutaj datę",
+      "no_change_route": "Dla zmian w wiążących dokumentach nie przypisano ścieżki zatwierdzania. Kierownik ds. nadzoru przypisuje jedną z własnych ścieżek projektu w ustawieniach nadzoru",
+      "route_not_pinnable": "Tej ścieżki zatwierdzania nie można przypisać: musi być aktywną ścieżką tego projektu dla tego rodzaju decyzji",
+      "area_retired": "Ten obszar został wycofany przy zmianie modelu faz i nie przyjmuje nowych dokumentów",
+      "pack_catalogue_invalid": "Aktywny pakiet deklaruje ten katalog, ale jego plik brakuje lub narusza zasady katalogu",
+      "settings_frozen_in_review": "Nie można tego zmienić, dopóki bramka jest w przeglądzie lub wstrzymana; najpierw podejmij decyzję o bramce",
+      "null_not_allowed": "To pole nie może być puste"
+    },
+    "outcome": {
+      "go": "Tak",
+      "go_with_conditions": "Tak z warunkami",
+      "hold": "Wstrzymaj",
+      "recycle": "Do poprawy",
+      "stop": "Stop"
+    },
+    "gate_state": {
+      "not_started": "Nierozpoczęta",
+      "in_preparation": "W przygotowaniu",
+      "in_review": "W przeglądzie",
+      "on_hold": "Wstrzymana",
+      "decided": "Zdecydowana"
+    },
+    "document_state": {
+      "draft": "Projekt",
+      "in_review": "W przeglądzie",
+      "approved_at_gate": "Zatwierdzony na bramce",
+      "binding": "Wiążący",
+      "superseded": "Zastąpiony"
+    },
+    "check_status": {
+      "not_assessed": "Nieocenione",
+      "ready": "Gotowe",
+      "ready_with_risks": "Gotowe z ryzykiem",
+      "not_ready": "Niegotowe",
+      "not_applicable": "Nie dotyczy"
+    },
+    "condition_status": {
+      "open": "Otwarty",
+      "cleared": "Spełniony",
+      "waived": "Odstąpiono",
+      "overdue": "Przeterminowany"
+    },
+    "export": {
+      "title": "Rejestr decyzji nadzoru",
+      "col_gate": "Bramka",
+      "col_attempt": "Próba",
+      "col_outcome": "Wynik",
+      "col_decided_by": "Decyzję podjął",
+      "col_decided_at": "Data decyzji",
+      "col_rationale": "Uzasadnienie",
+      "col_conditions": "Warunki",
+      "col_at_risk": "Kontynuacja z ryzykiem",
+      "project": "Projekt",
+      "empty": "Nie zarejestrowano jeszcze żadnej decyzji o bramce"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Obszar zarządczy {area} nie ma właściciela",
+        "suggestion": "Wyznacz właściciela obszaru, aby można było potwierdzić jego gotowość"
+      },
+      "required_documents_defined": {
+        "fail": "Bramka {gate} ma właściwe obszary bez wymaganego dokumentu ramowego",
+        "suggestion": "Dołącz dokumenty ramowe, które katalog wymaga dla tej bramki, albo oznacz obszar jako niedotyczący z uzasadnieniem"
+      },
+      "binding_document_unchanged": {
+        "fail": "Wiążący dokument ramowy {document} ma nowszą wersję, która nie jest objęta zatwierdzonym wnioskiem o zmianę",
+        "suggestion": "Złóż wniosek o zmianę, aby nowa wersja została zatwierdzona przed użyciem"
+      },
+      "conditions_not_overdue": {
+        "fail": "Warunek {condition} jest przeterminowany od {due}",
+        "suggestion": "Spełnij warunek z dowodem albo poproś decydującego o odstąpienie od niego z uzasadnieniem"
+      },
+      "gate_date_after_previous": {
+        "fail": "Bramka {gate} jest zaplanowana na {date}, przed poprzednią bramką z {previous}",
+        "suggestion": "Przesuń datę bramki tak, aby bramki następowały zgodnie z kolejnością faz"
+      },
+      "decision_by_entitled_user": {
+        "fail": "Decyzję o bramce {gate} zarejestrował użytkownik, który jest właścicielem jednego z jej obszarów",
+        "suggestion": "Zgodnie z zasadą czterech oczu decyzję musi podjąć inna osoba"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Obszar {area} jest oznaczony jako niedotyczący bez uzasadnienia",
+        "suggestion": "Zapisz, dlaczego obszar nie ma zastosowania"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Bramka: Pozwolenie do projektu szczegółowego",
+          "award_to_construction": "Bramka: Udzielenie zamówienia do budowy",
+          "brief_to_concept": "Bramka: Program do koncepcji",
+          "concept_to_design": "Bramka: Koncepcja do projektu",
+          "construction_to_handover": "Bramka: Budowa do odbioru",
+          "design_to_approval": "Bramka: Projekt do pozwolenia",
+          "detail_to_tender": "Bramka: Projekt szczegółowy do przetargu",
+          "handover_to_operation": "Bramka: Odbiór do eksploatacji",
+          "strategy_to_brief": "Bramka: Strategia do programu",
+          "tender_to_award": "Bramka: Przetarg do udzielenia zamówienia"
+        }
+      }
+    }
+  }
+}

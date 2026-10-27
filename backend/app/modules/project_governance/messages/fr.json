@@ -1,0 +1,174 @@
+{
+  "common": {
+    "ok": "OK"
+  },
+  "governance": {
+    "errors": {
+      "unknown_outcome": "Ce résultat de décision n'est pas connu",
+      "gate_not_in_review": "Le jalon n'est pas en revue, aucune décision ne peut donc y être enregistrée",
+      "gate_not_decided": "Seul un jalon décidé peut être rouvert",
+      "rationale_required": "Veuillez indiquer le motif de cette décision",
+      "required_document_not_approved": "Un document-cadre requis n'est pas prêt pour approbation à ce jalon",
+      "area_without_owner": "Ce domaine de management n'a pas de responsable, personne ne peut donc attester sa disponibilité",
+      "area_not_ready": "Ce domaine de management n'est pas prêt pour le jalon",
+      "evidence_not_met": "Les preuves de disponibilité requises pour ce domaine ne sont pas remplies",
+      "unknown_evidence_not_acknowledged": "Une preuve de disponibilité de ce domaine n'est pas confirmée ou comporte un avertissement. Confirmez que vous l'avez consultée avant de laisser passer le jalon",
+      "unknown_criterion": "Ce critère de disponibilité ne fait pas partie du modèle du projet pour ce domaine et ce jalon",
+      "check_stale": "Un document a été modifié après la confirmation de disponibilité, le domaine doit donc être reconfirmé",
+      "condition_overdue": "Une condition d'un jalon précédent est en retard et doit d'abord être levée ou abandonnée",
+      "conditions_required": "Un feu vert avec conditions exige au moins une condition",
+      "conditions_not_allowed": "Seul un feu vert avec conditions peut comporter des conditions",
+      "condition_text_required": "Chaque condition doit avoir un texte",
+      "condition_unknown_area": "La condition désigne un domaine qui ne fait pas partie de ce projet",
+      "waiver_needs_rationale": "Une dérogation exige un motif écrit",
+      "not_applicable_needs_rationale": "Marquer ceci comme non applicable exige un motif écrit",
+      "not_applicable_not_accepted": "Le décideur n'a pas accepté ce domaine comme non applicable",
+      "decider_not_entitled": "Vous n'êtes pas habilité à décider de ce jalon selon son circuit d'approbation",
+      "decider_is_area_owner": "Selon le principe des quatre yeux, un responsable ou suppléant de domaine ne peut pas décider de ce jalon",
+      "hold_needs_resume_date": "Une suspension exige une date de reprise future",
+      "proceed_at_risk_needs_conditions": "Poursuivre à risque n'est possible qu'avec un feu vert avec conditions",
+      "proceed_at_risk_area_not_blocking": "Ce domaine n'est pas bloquant, il ne peut donc pas être désigné comme poursuivi à risque",
+      "project_stopped": "Le projet a été arrêté à un jalon",
+      "document_read_only": "Ce document-cadre est en lecture seule car le projet a été arrêté",
+      "binding_requires_change_request": "Ce document-cadre est contraignant et ne peut être modifié que par une demande de modification",
+      "phase_mapping_missing": "Le nouveau modèle de phases exige une correspondance pour cette phase",
+      "phase_mapping_unknown_target": "La correspondance désigne une phase que le nouveau modèle ne possède pas",
+      "no_decision_route": "Aucun circuit d'approbation n'est épinglé pour les décisions de jalon. Un responsable de la gouvernance épingle l'un des circuits propres au projet dans les paramètres de gouvernance",
+      "route_not_at_final_step": "Le circuit d'approbation n'a pas encore atteint son étape finale",
+      "route_not_pending": "Le circuit d'approbation de ce jalon n'est plus en attente",
+      "concurrent_decision": "Quelqu'un d'autre a décidé ce jalon il y a un instant ; rechargez la page et vérifiez la décision",
+      "gate_out_of_order": "Le projet n'est pas dans la phase que ce jalon clôt",
+      "model_missing": "Aucun modèle de gouvernance n'est défini pour ce projet",
+      "model_exists": "Un modèle de gouvernance est déjà défini ; modifiez-le avec une correspondance de phases",
+      "unknown_catalogue": "Ce catalogue n'est pas connu",
+      "area_not_found": "Domaine de management introuvable",
+      "gate_not_found": "Jalon introuvable",
+      "document_not_found": "Document-cadre introuvable",
+      "condition_not_found": "Condition introuvable",
+      "change_request_not_found": "Demande de modification introuvable",
+      "check_not_found": "Contrôle de disponibilité introuvable",
+      "not_area_owner": "Seul le responsable ou le suppléant de ce domaine peut effectuer cette action",
+      "owner_not_project_member": "Le responsable doit avoir accès à ce projet",
+      "unknown_document_type": "Ce type de document ne fait pas partie du catalogue de ce domaine",
+      "container_not_in_project": "Le conteneur CDE n'appartient pas à ce projet",
+      "invalid_transition": "Ce changement d'état n'est pas autorisé",
+      "condition_not_open": "Seule une condition ouverte peut être levée ou abandonnée",
+      "document_not_binding": "Seul un document-cadre contraignant peut être modifié par une demande de modification",
+      "no_pending_revision": "Il n'existe aucune révision plus récente à rendre contraignante",
+      "change_request_not_open": "Cette demande de modification n'est plus ouverte",
+      "invalid_status": "Ce statut n'est pas autorisé ici",
+      "decision_immutable": "Une décision de jalon ne peut être ni modifiée ni supprimée",
+      "document_exists": "Ce document-cadre est déjà suivi pour ce domaine",
+      "catalogue_code_taken": "Un catalogue portant ce code existe déjà",
+      "catalogue_retired": "Ce catalogue est retiré et ne peut plus être modifié ni épinglé",
+      "catalogue_invalid": "Le brouillon du catalogue enfreint une règle de catalogue et ne peut pas être publié",
+      "gate_historic": "Ce jalon appartient à un modèle de phases que le projet a quitté et ne peut plus être modifié",
+      "gate_not_on_hold": "Seul un jalon suspendu peut être repris",
+      "later_gate_active": "Un jalon ultérieur a déjà été lancé, ce jalon ne peut donc pas être rouvert",
+      "model_unchanged": "Le projet utilise déjà cette version du modèle de phases",
+      "not_condition_owner": "Seule la personne à qui cette condition a été confiée ou un responsable peut la lever",
+      "route_needs_more_approvals": "L'étape finale du circuit d'approbation attend encore d'autres approbateurs ; ils approuvent dans l'écran d'approbation et le dernier enregistre la décision",
+      "activity_not_in_project": "L'activité du calendrier n'appartient pas à ce projet",
+      "target_date_owned_by_schedule": "Ce jalon est lié à une activité du calendrier qui gère sa date ; dissociez-le pour définir une date ici",
+      "no_change_route": "Aucun circuit d'approbation n'est épinglé pour les modifications des documents contraignants. Un responsable de la gouvernance épingle l'un des circuits propres au projet dans les paramètres de gouvernance",
+      "route_not_pinnable": "Ce circuit d'approbation ne peut pas être épinglé : il doit être un circuit actif du projet pour ce type de décision",
+      "area_retired": "Ce domaine a été retiré par une modification du modèle de phases et n'accepte plus de nouveaux documents",
+      "pack_catalogue_invalid": "Le pack actif déclare ce catalogue, mais son fichier est absent ou enfreint les règles du catalogue",
+      "settings_frozen_in_review": "Ceci ne peut pas être modifié tant qu'un jalon est en revue ou suspendu ; décidez d'abord de ce jalon",
+      "null_not_allowed": "Ce champ ne peut pas être vide"
+    },
+    "outcome": {
+      "go": "Feu vert",
+      "go_with_conditions": "Feu vert avec conditions",
+      "hold": "Suspension",
+      "recycle": "Reprise de l'étude",
+      "stop": "Arrêt"
+    },
+    "gate_state": {
+      "not_started": "Non démarré",
+      "in_preparation": "En préparation",
+      "in_review": "En revue",
+      "on_hold": "Suspendu",
+      "decided": "Décidé"
+    },
+    "document_state": {
+      "draft": "Projet",
+      "in_review": "En revue",
+      "approved_at_gate": "Approuvé au jalon",
+      "binding": "Contraignant",
+      "superseded": "Remplacé"
+    },
+    "check_status": {
+      "not_assessed": "Non évalué",
+      "ready": "Prêt",
+      "ready_with_risks": "Prêt avec risques",
+      "not_ready": "Non prêt",
+      "not_applicable": "Non applicable"
+    },
+    "condition_status": {
+      "open": "Ouverte",
+      "cleared": "Levée",
+      "waived": "Abandonnée",
+      "overdue": "En retard"
+    },
+    "export": {
+      "title": "Journal des décisions de gouvernance",
+      "col_gate": "Jalon",
+      "col_attempt": "Tentative",
+      "col_outcome": "Résultat",
+      "col_decided_by": "Décidé par",
+      "col_decided_at": "Décidé le",
+      "col_rationale": "Motif",
+      "col_conditions": "Conditions",
+      "col_at_risk": "Poursuite à risque",
+      "project": "Projet",
+      "empty": "Aucune décision de jalon n'a encore été enregistrée"
+    },
+    "rules": {
+      "area_has_owner": {
+        "fail": "Le domaine de management {area} n'a pas de responsable",
+        "suggestion": "Désignez un responsable pour le domaine afin que sa disponibilité puisse être attestée"
+      },
+      "required_documents_defined": {
+        "fail": "Le jalon {gate} comporte des domaines applicables sans aucun document-cadre requis",
+        "suggestion": "Joignez les documents-cadres exigés par le catalogue pour ce jalon, ou marquez le domaine non applicable avec un motif"
+      },
+      "binding_document_unchanged": {
+        "fail": "Le document-cadre contraignant {document} a une révision plus récente qui n'est couverte par aucune demande de modification approuvée",
+        "suggestion": "Ouvrez une demande de modification afin que la nouvelle révision soit approuvée avant son utilisation"
+      },
+      "conditions_not_overdue": {
+        "fail": "La condition {condition} est en retard depuis le {due}",
+        "suggestion": "Levez la condition avec une preuve, ou faites-la abandonner par le décideur avec un motif"
+      },
+      "gate_date_after_previous": {
+        "fail": "Le jalon {gate} est planifié le {date}, avant le jalon précédent prévu le {previous}",
+        "suggestion": "Déplacez la date du jalon pour que les jalons suivent l'ordre des phases"
+      },
+      "decision_by_entitled_user": {
+        "fail": "La décision sur le jalon {gate} a été enregistrée par un utilisateur responsable de l'un de ses domaines",
+        "suggestion": "Selon le principe des quatre yeux, une autre personne doit décider"
+      },
+      "not_applicable_has_rationale": {
+        "fail": "Le domaine {area} est marqué non applicable sans motif",
+        "suggestion": "Indiquez pourquoi le domaine ne s'applique pas"
+      }
+    },
+    "catalogue": {
+      "neutral": {
+        "gate": {
+          "approval_to_detail": "Jalon : de l'autorisation à l'étude d'exécution",
+          "award_to_construction": "Jalon : de l'attribution à la construction",
+          "brief_to_concept": "Jalon : du programme au concept",
+          "concept_to_design": "Jalon : du concept à l'avant-projet",
+          "construction_to_handover": "Jalon : de la construction à la réception",
+          "design_to_approval": "Jalon : de l'avant-projet à l'autorisation",
+          "detail_to_tender": "Jalon : de l'étude d'exécution à l'appel d'offres",
+          "handover_to_operation": "Jalon : de la réception à l'exploitation",
+          "strategy_to_brief": "Jalon : de la stratégie au programme",
+          "tender_to_award": "Jalon : de l'appel d'offres à l'attribution"
+        }
+      }
+    }
+  }
+}
