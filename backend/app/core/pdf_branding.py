@@ -512,10 +512,7 @@ def _draw_page_furniture(
         # -- Footer: brand + generated date (left), page number (right). --
         page_text = ""
         if appearance.get("show_page_numbers", True):
-            if getattr(doc, "page_count", 0) > 0:
-                page_text = f"Page {doc.page} of {doc.page_count}"
-            else:
-                page_text = f"Page {getattr(doc, 'page', 1)}"
+            page_text = page_of(doc)
         custom_footer = (appearance.get("footer_text") or "").strip()
         suffix = ""
         if custom_footer:
@@ -1169,6 +1166,15 @@ __all__ = [
     "draw_watermark",
     "render_sample_pdf",
 ]
+
+
+def page_of(doc: Any, template: str = "Page {page} of {total}", single: str = "Page {page}") -> str:
+    """The footer page label: "Page x of y" once the total is known, else "Page x"."""
+    page = int(getattr(doc, "page", 1) or 1)
+    total = int(getattr(doc, "page_count", 0) or 0)
+    if total > 0:
+        return template.format(page=page, total=max(total, page))
+    return single.format(page=page)
 
 
 def build_with_page_count(doc: Any, story: list[Any], **build_kwargs: Any) -> None:

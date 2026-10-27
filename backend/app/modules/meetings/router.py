@@ -1759,6 +1759,7 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
         branded_doc_metadata,
         branded_header_logo,
         branded_letterhead,
+        build_with_page_count,
     )
     from app.core.pdf_fonts import (
         BODY_FONT,
@@ -2031,7 +2032,7 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
         **branded_doc_metadata(),
     )
     doc.addPageTemplates([PageTemplate(id="main", frames=[frame], onPage=_header_footer)])
-    doc.build(elements)
+    build_with_page_count(doc, elements)
     return buf.getvalue()
 
 

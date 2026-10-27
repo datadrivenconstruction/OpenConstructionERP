@@ -50,7 +50,7 @@ def draw_minutes_footer(canvas_obj: Any, doc: Any, appearance: dict[str, Any], *
     from reportlab.lib.units import mm
     from reportlab.platypus import Paragraph
 
-    from app.core.pdf_branding import draw_watermark
+    from app.core.pdf_branding import draw_watermark, page_of
     from app.core.pdf_fonts import BODY_FONT, pdf_fit_line, pdf_fitted_style
 
     page_width = doc.pagesize[0]
@@ -58,7 +58,7 @@ def draw_minutes_footer(canvas_obj: Any, doc: Any, appearance: dict[str, Any], *
     colour = appearance.get("footer_color") or _FURNITURE_GREY
     if colour != _FURNITURE_GREY:
         canvas_obj.setFillColor(colors.HexColor(colour))
-    page_text = f"Page {doc.page}" if appearance.get("show_page_numbers", True) is not False else ""
+    page_text = page_of(doc) if appearance.get("show_page_numbers", True) is not False else ""
     if page_text:
         canvas_obj.setFont(BODY_FONT, 7)
         canvas_obj.drawRightString(page_width - margin, 10 * mm, page_text)
@@ -117,6 +117,7 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
         branded_doc_metadata,
         branded_header_logo,
         branded_letterhead,
+        build_with_page_count,
     )
     from app.core.pdf_fonts import (
         BODY_FONT,
@@ -380,6 +381,6 @@ def build_minutes_pdf(meeting: Meeting, minutes: MinutesRecord, project_name: st
         **branded_doc_metadata(),
     )
     doc.addPageTemplates([PageTemplate(id="main", frames=[frame], onPage=_header_footer)])
-    doc.build(elements)
+    build_with_page_count(doc, elements)
 
     return buf.getvalue()
