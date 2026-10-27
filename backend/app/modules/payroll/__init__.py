@@ -9,7 +9,9 @@ generation produces a *draft* batch a manager reviews before any payout.
 
 
 async def on_startup() -> None:
-    """Module startup hook - register permissions."""
+    """Module startup hook - register permissions and the period validation rules."""
     from app.modules.payroll.permissions import register_payroll_permissions
+    from app.modules.payroll.validators import register_payroll_rules
 
     register_payroll_permissions()
+    register_payroll_rules()
