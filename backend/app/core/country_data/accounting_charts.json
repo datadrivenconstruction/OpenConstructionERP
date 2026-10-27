@@ -1,0 +1,463 @@
+{
+  "_comment": "Chart-of-accounts mapping templates for accounting_sync, per country. Read by app/modules/accounting_sync/templates.py. A template maps the platform's neutral posting categories to account codes and the platform tax codes (tax_code of i18n_foundation/seed_data/tax_configurations.json) to the external tax key. Rates are never stored here; they come from the dated tax seed. Debtor and creditor ranges give the personal account numbers a file export assigns. review_status needs_expert_review means the row is shown and a local accountant has not confirmed it.",
+  "categories": [
+    "ar_control",
+    "ap_control",
+    "revenue",
+    "revenue_reduced",
+    "subcontract_cost",
+    "material_cost",
+    "guarantee_fees",
+    "retention_receivable",
+    "retention_payable",
+    "bank",
+    "output_tax",
+    "input_tax"
+  ],
+  "templates": {
+    "generic": {
+      "country_code": null,
+      "label": "Neutral chart (any country)",
+      "account_length": 4,
+      "formats": [
+        "journal_csv",
+        "journal_xlsx",
+        "saft"
+      ],
+      "accounts": {
+        "ar_control": [
+          "1200",
+          "Accounts receivable"
+        ],
+        "ap_control": [
+          "2000",
+          "Accounts payable"
+        ],
+        "revenue": [
+          "4000",
+          "Construction revenue"
+        ],
+        "revenue_reduced": [
+          "4010",
+          "Construction revenue, reduced rate"
+        ],
+        "subcontract_cost": [
+          "5100",
+          "Subcontractor costs"
+        ],
+        "material_cost": [
+          "5000",
+          "Materials and supplies"
+        ],
+        "guarantee_fees": [
+          "6900",
+          "Bank guarantee fees"
+        ],
+        "retention_receivable": [
+          "1250",
+          "Retention receivable"
+        ],
+        "retention_payable": [
+          "2050",
+          "Retention payable"
+        ],
+        "bank": [
+          "1000",
+          "Bank"
+        ],
+        "output_tax": [
+          "2200",
+          "Output tax"
+        ],
+        "input_tax": [
+          "1300",
+          "Input tax"
+        ]
+      },
+      "tax_keys": {
+        "sales": {
+          "VAT": "OUTPUT",
+          "VAT_REDUCED": "OUTPUT_REDUCED",
+          "ZERO": "ZERO_RATED",
+          "RC": "REVERSE_CHARGE"
+        },
+        "purchase": {
+          "VAT": "INPUT",
+          "VAT_REDUCED": "INPUT_REDUCED",
+          "ZERO": "ZERO_RATED",
+          "RC": "REVERSE_CHARGE"
+        }
+      },
+      "debtor_range": [
+        10000,
+        69999
+      ],
+      "creditor_range": [
+        70000,
+        99999
+      ],
+      "review_status": "needs_expert_review"
+    },
+    "DE-SKR03": {
+      "country_code": "DE",
+      "label": "DATEV SKR03",
+      "skr": "03",
+      "account_length": 4,
+      "formats": [
+        "datev_extf",
+        "journal_csv",
+        "journal_xlsx",
+        "saft"
+      ],
+      "accounts": {
+        "ar_control": [
+          "1400",
+          "Forderungen aus Lieferungen und Leistungen"
+        ],
+        "ap_control": [
+          "1600",
+          "Verbindlichkeiten aus Lieferungen und Leistungen"
+        ],
+        "revenue": [
+          "8400",
+          "Erlöse 19 % USt"
+        ],
+        "revenue_reduced": [
+          "8300",
+          "Erlöse 7 % USt"
+        ],
+        "subcontract_cost": [
+          "3100",
+          "Fremdleistungen"
+        ],
+        "material_cost": [
+          "3400",
+          "Wareneingang 19 % Vorsteuer"
+        ],
+        "guarantee_fees": [
+          "4970",
+          "Nebenkosten des Geldverkehrs"
+        ],
+        "retention_receivable": [
+          "1400",
+          "Forderungen aus Lieferungen und Leistungen"
+        ],
+        "retention_payable": [
+          "1600",
+          "Verbindlichkeiten aus Lieferungen und Leistungen"
+        ],
+        "bank": [
+          "1200",
+          "Bank"
+        ],
+        "output_tax": [
+          "1776",
+          "Umsatzsteuer 19 %"
+        ],
+        "input_tax": [
+          "1576",
+          "Abziehbare Vorsteuer 19 %"
+        ]
+      },
+      "tax_keys": {
+        "sales": {
+          "VAT": "3",
+          "VAT_REDUCED": "2",
+          "ZERO": "",
+          "RC": ""
+        },
+        "purchase": {
+          "VAT": "9",
+          "VAT_REDUCED": "8",
+          "ZERO": "",
+          "RC": "94"
+        }
+      },
+      "debtor_range": [
+        10000,
+        69999
+      ],
+      "creditor_range": [
+        70000,
+        99999
+      ],
+      "legal_reference": "DATEV Kontenrahmen SKR03; BU-Schlüssel per DATEV Steuerschlüssel table; reverse charge on construction services under § 13b UStG",
+      "review_status": "needs_expert_review"
+    },
+    "DE-SKR04": {
+      "country_code": "DE",
+      "label": "DATEV SKR04",
+      "skr": "04",
+      "account_length": 4,
+      "formats": [
+        "datev_extf",
+        "journal_csv",
+        "journal_xlsx",
+        "saft"
+      ],
+      "accounts": {
+        "ar_control": [
+          "1200",
+          "Forderungen aus Lieferungen und Leistungen"
+        ],
+        "ap_control": [
+          "3300",
+          "Verbindlichkeiten aus Lieferungen und Leistungen"
+        ],
+        "revenue": [
+          "4400",
+          "Erlöse 19 % USt"
+        ],
+        "revenue_reduced": [
+          "4300",
+          "Erlöse 7 % USt"
+        ],
+        "subcontract_cost": [
+          "5900",
+          "Fremdleistungen"
+        ],
+        "material_cost": [
+          "5400",
+          "Wareneingang 19 % Vorsteuer"
+        ],
+        "guarantee_fees": [
+          "6855",
+          "Nebenkosten des Geldverkehrs"
+        ],
+        "retention_receivable": [
+          "1200",
+          "Forderungen aus Lieferungen und Leistungen"
+        ],
+        "retention_payable": [
+          "3300",
+          "Verbindlichkeiten aus Lieferungen und Leistungen"
+        ],
+        "bank": [
+          "1800",
+          "Bank"
+        ],
+        "output_tax": [
+          "3806",
+          "Umsatzsteuer 19 %"
+        ],
+        "input_tax": [
+          "1406",
+          "Abziehbare Vorsteuer 19 %"
+        ]
+      },
+      "tax_keys": {
+        "sales": {
+          "VAT": "3",
+          "VAT_REDUCED": "2",
+          "ZERO": "",
+          "RC": ""
+        },
+        "purchase": {
+          "VAT": "9",
+          "VAT_REDUCED": "8",
+          "ZERO": "",
+          "RC": "94"
+        }
+      },
+      "debtor_range": [
+        10000,
+        69999
+      ],
+      "creditor_range": [
+        70000,
+        99999
+      ],
+      "legal_reference": "DATEV Kontenrahmen SKR04; BU-Schlüssel per DATEV Steuerschlüssel table; reverse charge on construction services under § 13b UStG",
+      "review_status": "needs_expert_review"
+    }
+  },
+  "file_formats": {
+    "datev_extf": {
+      "country_code": "DE",
+      "encoding": "cp1252",
+      "delimiter": ";",
+      "line_terminator": "\r\n",
+      "format_version": 700,
+      "buchungsstapel": {
+        "category": 21,
+        "name": "Buchungsstapel",
+        "version": 13,
+        "columns": [
+          "Umsatz (ohne Soll/Haben-Kz)",
+          "Soll/Haben-Kennzeichen",
+          "WKZ Umsatz",
+          "Kurs",
+          "Basis-Umsatz",
+          "WKZ Basis-Umsatz",
+          "Konto",
+          "Gegenkonto (ohne BU-Schlüssel)",
+          "BU-Schlüssel",
+          "Belegdatum",
+          "Belegfeld 1",
+          "Belegfeld 2",
+          "Skonto",
+          "Buchungstext",
+          "Postensperre",
+          "Diverse Adressnummer",
+          "Geschäftspartnerbank",
+          "Sachverhalt",
+          "Zinssperre",
+          "Beleglink",
+          "Beleginfo - Art 1",
+          "Beleginfo - Inhalt 1",
+          "Beleginfo - Art 2",
+          "Beleginfo - Inhalt 2",
+          "Beleginfo - Art 3",
+          "Beleginfo - Inhalt 3",
+          "Beleginfo - Art 4",
+          "Beleginfo - Inhalt 4",
+          "Beleginfo - Art 5",
+          "Beleginfo - Inhalt 5",
+          "Beleginfo - Art 6",
+          "Beleginfo - Inhalt 6",
+          "Beleginfo - Art 7",
+          "Beleginfo - Inhalt 7",
+          "Beleginfo - Art 8",
+          "Beleginfo - Inhalt 8",
+          "KOST1 - Kostenstelle",
+          "KOST2 - Kostenstelle",
+          "Kost-Menge",
+          "EU-Land u. UStID (Bestimmung)",
+          "EU-Steuersatz (Bestimmung)",
+          "Abw. Versteuerungsart",
+          "Sachverhalt L+L",
+          "Funktionsergänzung L+L",
+          "BU 49 Hauptfunktionstyp",
+          "BU 49 Hauptfunktionsnummer",
+          "BU 49 Funktionsergänzung",
+          "Zusatzinformation - Art 1",
+          "Zusatzinformation- Inhalt 1",
+          "Zusatzinformation - Art 2",
+          "Zusatzinformation- Inhalt 2",
+          "Zusatzinformation - Art 3",
+          "Zusatzinformation- Inhalt 3",
+          "Zusatzinformation - Art 4",
+          "Zusatzinformation- Inhalt 4",
+          "Zusatzinformation - Art 5",
+          "Zusatzinformation- Inhalt 5",
+          "Zusatzinformation - Art 6",
+          "Zusatzinformation- Inhalt 6",
+          "Zusatzinformation - Art 7",
+          "Zusatzinformation- Inhalt 7",
+          "Zusatzinformation - Art 8",
+          "Zusatzinformation- Inhalt 8",
+          "Zusatzinformation - Art 9",
+          "Zusatzinformation- Inhalt 9",
+          "Zusatzinformation - Art 10",
+          "Zusatzinformation- Inhalt 10",
+          "Zusatzinformation - Art 11",
+          "Zusatzinformation- Inhalt 11",
+          "Zusatzinformation - Art 12",
+          "Zusatzinformation- Inhalt 12",
+          "Zusatzinformation - Art 13",
+          "Zusatzinformation- Inhalt 13",
+          "Zusatzinformation - Art 14",
+          "Zusatzinformation- Inhalt 14",
+          "Zusatzinformation - Art 15",
+          "Zusatzinformation- Inhalt 15",
+          "Zusatzinformation - Art 16",
+          "Zusatzinformation- Inhalt 16",
+          "Zusatzinformation - Art 17",
+          "Zusatzinformation- Inhalt 17",
+          "Zusatzinformation - Art 18",
+          "Zusatzinformation- Inhalt 18",
+          "Zusatzinformation - Art 19",
+          "Zusatzinformation- Inhalt 19",
+          "Zusatzinformation - Art 20",
+          "Zusatzinformation- Inhalt 20",
+          "Stück",
+          "Gewicht",
+          "Zahlweise",
+          "Forderungsart",
+          "Veranlagungsjahr",
+          "Zugeordnete Fälligkeit",
+          "Skontotyp",
+          "Auftragsnummer",
+          "Buchungstyp",
+          "USt-Schlüssel (Anzahlungen)",
+          "EU-Mitgliedstaat (Anzahlungen)",
+          "Sachverhalt L+L (Anzahlungen)",
+          "EU-Steuersatz (Anzahlungen)",
+          "Erlöskonto (Anzahlungen)",
+          "Herkunft-Kz",
+          "Buchungs GUID",
+          "KOST-Datum",
+          "SEPA-Mandatsreferenz",
+          "Skontosperre",
+          "Gesellschaftername",
+          "Beteiligtennummer",
+          "Identifikationsnummer",
+          "Zeichnernummer",
+          "Postensperre bis",
+          "Bezeichnung SoBil-Sachverhalt",
+          "Kennzeichen SoBil-Buchung",
+          "Festschreibung",
+          "Leistungsdatum",
+          "Datum Zuord. Steuerperiode",
+          "Fälligkeit",
+          "Generalumkehr",
+          "Steuersatz",
+          "Land",
+          "Abrechnungsreferenz",
+          "BVV-Position",
+          "EU-Mitgliedstaat u. UStID (Ursprung)",
+          "EU-Steuersatz (Ursprung)",
+          "Abw. Skontokonto"
+        ]
+      },
+      "stammdaten": {
+        "category": 16,
+        "name": "Debitoren/Kreditoren",
+        "version": 5,
+        "columns": [
+          "Konto",
+          "Name (Adressattyp Unternehmen)",
+          "Unternehmensgegenstand",
+          "Name (Adressattyp natürl. Person)",
+          "Vorname (Adressattyp natürl. Person)",
+          "Name (Adressattyp keine Angabe)",
+          "Adressattyp",
+          "Kurzbezeichnung",
+          "EU-Land",
+          "EU-UStID",
+          "Anrede",
+          "Titel/Akad. Grad",
+          "Adelstitel",
+          "Namensvorsatz",
+          "Adressart",
+          "Straße",
+          "Postfach",
+          "Postleitzahl",
+          "Ort",
+          "Land",
+          "Versandzusatz",
+          "Adresszusatz",
+          "Abweichende Anrede",
+          "Abw. Zustellbezeichnung 1",
+          "Abw. Zustellbezeichnung 2",
+          "Kennz. Korrespondenzadresse",
+          "Adresse Gültig von",
+          "Adresse Gültig bis",
+          "Telefon",
+          "Bemerkung (Telefon)",
+          "Telefon GL",
+          "Bemerkung (Telefon GL)",
+          "E-Mail",
+          "Bemerkung (E-Mail)",
+          "Internet",
+          "Bemerkung (Internet)",
+          "Fax",
+          "Bemerkung (Fax)",
+          "Sonstige",
+          "Bemerkung (Sonstige)"
+        ]
+      },
+      "review_status": "needs_expert_review"
+    }
+  }
+}

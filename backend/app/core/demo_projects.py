@@ -12352,6 +12352,18 @@ async def _seed_module_data(
             results["captured_quotes"] = quote_count
     except Exception:
         logger.debug("Quote capture module not loaded, skipping demo quotes", exc_info=True)
+    # ── Accounting sync: a sandbox ledger log and a DATEV export ─────────
+    # After finance and guarantees, so the log names the project's invoices.
+    try:
+        from app.modules.accounting_sync.demo import seed_demo_accounting_sync
+
+        sync_rows = await seed_demo_accounting_sync(
+            session, project_id=project_id, currency=template.currency, created_by=owner_str
+        )
+        if sync_rows:
+            results["accounting_sync"] = sync_rows
+    except Exception:
+        logger.debug("Accounting sync module not loaded, skipping demo connections", exc_info=True)
 
     # ── Formwork (catalogue + this project's priced assignments) ────────
     # Nothing seeded the formwork catalogue before, so the system chooser had
