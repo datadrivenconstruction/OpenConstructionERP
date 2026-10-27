@@ -3084,7 +3084,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
           }
         >
           {/* Direction picker — full-width two-card visual selector. */}
-          <WideModalSection columns={2}>
+          <WideModalSection columns={2} checkRef={editingInvoice?.id}>
             <WideModalField
               label={t('finance.direction', { defaultValue: 'Direction' })}
               span={2}
