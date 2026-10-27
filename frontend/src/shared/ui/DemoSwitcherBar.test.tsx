@@ -76,7 +76,7 @@ describe('DemoSwitcherBar', () => {
   });
 
   it('gives the contractor demo its own look and a shorter menu', async () => {
-    useAppearanceStore.getState().setAppearance({ accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', text: 'default' });
+    useAppearanceStore.getState().setAppearance({ accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' });
     useModuleStore.getState().setHiddenGroups([]);
     captureDemoPick('?demo=contractor-jeddah');
     apiGet.mockResolvedValue({ demo_mode: true });

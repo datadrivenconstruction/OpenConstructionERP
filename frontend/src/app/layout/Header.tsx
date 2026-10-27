@@ -41,6 +41,7 @@ import { getRouteIcon } from './routeIcons';
 import { useIconOverridesVersion } from './menuIcons';
 import { resolveStaleProject } from './staleProject';
 import { isModuleI18nKey } from '@/modules/_i18n';
+import { EstimateCrumb } from '@/shared/ui/EstimateCrumb';
 
 /**
  * Map the English page titles passed from App.tsx routes to i18n keys.
@@ -436,6 +437,7 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Active project switcher (rendered first so the breadcrumb
             reads left-to-right as ProjectName › PageTitle). */}
         <ProjectSwitcher />
+        <EstimateCrumb />
 
         {translatedTitle && (
           <>
