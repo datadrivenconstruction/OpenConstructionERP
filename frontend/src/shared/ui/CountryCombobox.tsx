@@ -322,7 +322,7 @@ export function CountryCombobox({
                       )}
                     >
                       <span className="inline-flex h-4 w-6 items-center justify-center rounded-[2px] bg-content-tertiary/15 text-[10px] text-content-tertiary">
-                        ✕
+                        ×
                       </span>
                       <span className="flex-1 text-content-secondary italic">
                         {t('country_combobox.global_none', {
