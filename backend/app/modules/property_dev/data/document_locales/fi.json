@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Sivu {page} / {total}",
+    "generated_at": "Luotu {timestamp} UTC",
+    "doc_ref": "Asiakirjaviite",
+    "developer": "Kehittäjä",
+    "unit_code": "Huoneiston koodi",
+    "watermark_draft": "LUONNOS",
+    "currency": "Valuutta",
+    "amount": "Summa",
+    "date": "Päivämäärä",
+    "signature": "Allekirjoitus",
+    "place": "Paikka",
+    "buyer_signature": "Ostajan allekirjoitus",
+    "developer_signature": "Kehittäjän allekirjoitus",
+    "witness": "Todistaja"
+  },
+  "reservation_receipt": {
+    "title": "Varauskuitti",
+    "intro": "Tämä kuitti vahvistaa alla kuvatun kiinteistön varauksen. Ennakkomaksu on vastaanotettu, ja huoneisto on pidetty myynnin ulkopuolella ostajalle, kunnes peruutusoikeusaika päättyy tai kauppakirja allekirjoitetaan.",
+    "headings": {
+      "buyer": "Ostaja",
+      "property": "Kiinteistö",
+      "amount_paid": "Maksettu summa",
+      "valid_until": "Voimassa asti",
+      "next_step": "Seuraava vaihe",
+      "reservation_number": "Varausnro",
+      "cooling_off": "Peruutusoikeusaika",
+      "deposit_status": "Ennakkomaksun tila",
+      "plot_details": "Tontin tiedot"
+    },
+    "next_step_text": "Ostajan on allekirjoitettava kauppakirja ja maksettava seuraava erä {days} päivän kuluessa. Muuten varaus raukeaa ja huoneisto palautuu myyntiin.",
+    "cooling_off_text": "{days} päivää tämän asiakirjan vastaanottamisesta.",
+    "footer_note": "Ennakkomaksu palautetaan kokonaisuudessaan vain lainkäyttöalueen määrittämän peruutusoikeusajan aikana. Tämän jälkeen palautettavuus noudattaa sovellettavia menettämissääntöjä."
+  },
+  "sales_contract": {
+    "title": "Kauppakirja",
+    "subtitle": "Sopimus nro {number}",
+    "preamble": "Tämä kauppakirja (jäljempänä \"Sopimus\") on tehty ja allekirjoitettu alla näytetyllä päivämäärällä kehittäjän ja alla mainitun tai mainittujen ostajien välillä koskien tässä yksilöidyn kiinteistön myyntiä.",
+    "headings": {
+      "parties": "Sopimuksen osapuolet",
+      "property": "Kiinteistö",
+      "price": "Kauppahinta",
+      "payment_schedule": "Maksuaikataulu",
+      "clauses": "Ehdot",
+      "instalments": "Erät",
+      "signatures": "Allekirjoitukset",
+      "co_ownership": "Yhteisomistus",
+      "regulatory": "Viranomaisilmoitukset",
+      "annexes": "Liitteet"
+    },
+    "parties_intro": "Ostajat hankkivat kiinteistön yhteisesti alla esitetyin omistusosuuksin. Kaikki osapuolet vastaavat yhteisvastuullisesti tämän sopimuksen velvoitteista, ellei toisin nimenomaisesti todeta.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Välitavoite",
+      "due_date": "Eräpäivä",
+      "amount": "Summa",
+      "currency": "Valuutta"
+    },
+    "party_columns": {
+      "name": "Nimi",
+      "role": "Rooli",
+      "ownership_pct": "Omistus %",
+      "email": "Sähköposti"
+    },
+    "property_columns": {
+      "plot_number": "Tonttinumero",
+      "development": "Hanke",
+      "area_m2": "Pinta-ala (m²)",
+      "house_type": "Talotyyppi"
+    },
+    "price_label": "Kauppahinta yhteensä",
+    "breakdown_label": "Hinnan erittely",
+    "signature_note": "Allekirjoitettu paikassa {place} päivänä {date}. Allekirjoittamalla alla ostaja ja kehittäjä vahvistavat lukeneensa ja ymmärtäneensä tämän sopimuksen ehdot, mukaan lukien kaikki liitteet, ja hyväksyvänsä ne."
+  },
+  "payment_receipt": {
+    "title": "Maksukuitti",
+    "intro": "Tämä kuitti vahvistaa alla mainitun kauppakirjan mukaisen erän maksun.",
+    "headings": {
+      "spa_ref": "Sopimusnro",
+      "instalment": "Erä",
+      "milestone": "Välitavoite",
+      "amount_paid": "Maksettu summa",
+      "payment_method": "Maksutapa",
+      "payment_ref": "Maksun viite",
+      "paid_at": "Maksettu",
+      "outstanding": "Maksamaton saldo"
+    },
+    "footer_note": "Tämä kuitti on luotu automaattisesti, eikä se tarvitse manuaalista allekirjoitusta. Säilytä omia kirjanpitoasi varten."
+  },
+  "handover_certificate": {
+    "title": "Luovutustodistus",
+    "intro": "Tämä todistus kirjaa kiinteistön luovutuksen kehittäjältä ostajalle. Ostaja hyväksyy huoneiston liitteenä olevan puutelistan ja takuuehtojen mukaisesti.",
+    "headings": {
+      "spa_ref": "Sopimusnro",
+      "completed_at": "Luovutuspäivä",
+      "snag_count": "Avoimet puutteet",
+      "warranty_period": "Takuuaika",
+      "keys_handed_over": "Avaimet luovutettu",
+      "buyer_acceptance": "Ostajan hyväksyntä",
+      "developer_declaration": "Kehittäjän vakuutus"
+    },
+    "developer_declaration_text": "Kehittäjä vahvistaa täten, että kiinteistö on rakennettu kauppakirjan mukaisesti, että kaikki vaaditut asiakirjat on toimitettu ostajalle ja että rakenteelliset ja viimeistelyn takuut alkavat tämän todistuksen päivämäärästä.",
+    "buyer_acceptance_text": "Ostaja hyväksyy kiinteistön luovutuksen liitteenä olevan puutelistan mukaisesti. Ostaja vahvistaa saaneensa avaimet, käyttöohjeet ja kaikki liitteissä luetellut vaaditut asiakirjat.",
+    "snag_note": "Kehittäjä korjaa avoimet puutteet kohtuullisessa ajassa kauppakirjan puutteiden korjausehdon mukaisesti."
+  },
+  "warranty_certificate": {
+    "title": "Takuutodistus",
+    "intro": "Tämä todistus määrittelee kehittäjän takuuvelvoitteet alla mainitussa päivämäärässä ostajalle luovutetun kiinteistön osalta.",
+    "headings": {
+      "spa_ref": "Sopimusnro",
+      "handover_date": "Luovutuspäivä",
+      "structural": "Rakenteellinen takuu",
+      "finishing": "Viimeistelytakuu",
+      "structural_period": "Rakenteellinen takuuaika",
+      "finishing_period": "Viimeistelyn takuuaika",
+      "warranty_expiry": "Takuun päättymispäivä",
+      "scope": "Takuun laajuus",
+      "exclusions": "Rajoitukset"
+    },
+    "structural_text": "Kehittäjä takaa kiinteistön rakenteellisen eheyden, mukaan lukien kantavan rakenteen, perustukset ja vedeneristyksen, {years} vuoden ajan luovutuspäivästä lukien.",
+    "finishing_text": "Kehittäjä takaa viimeistelytyöt, mukaan lukien maalauksen, kiinteät varusteet, kalusteet, kehittäjän asentamat laitteet ja pienet kosmeettiset kohteet, {years} vuoden ajan luovutuspäivästä lukien.",
+    "exclusions_text": "Takuu ei kata vahinkoja, jotka johtuvat väärinkäytöstä, ostajan tai kolmannen osapuolen tekemistä muutoksista, normaalista kulumisesta, force majeure -tapahtumista eikä valmistajien erillisten takuiden piiriin kuuluvista kohteista.",
+    "claim_procedure": "Reklamaation tekemiseksi ostajan on toimitettava kehittäjälle kirjallinen ilmoitus takuuaikana. Ilmoituksessa on kuvattava vika ja esitettävä kohtuulliset tukevat todisteet."
+  },
+  "noc": {
+    "title": "Vapautustodistus",
+    "subtitle": "Huoneiston jälleenmyyntiä varten",
+    "intro": "Tämän vapautustodistuksen (NOC) on antanut kehittäjä vahvistaakseen, ettei ostajalla ole avoimia velvoitteita, jotka estäisivät alla yksilöidyn huoneiston jälleenmyynnin.",
+    "headings": {
+      "spa_ref": "Sopimusnro",
+      "requested_by": "Pyytäjä",
+      "issued_to": "Annettu",
+      "purpose": "Tarkoitus",
+      "validity": "Voimassaolo",
+      "outstanding_balance": "Maksamaton saldo",
+      "transfer_fee": "Luovutusmaksu"
+    },
+    "validity_text": "Tämä vapautustodistus on voimassa {days} päivää antopäivästä. Tämän jälkeen on pyydettävä uusi todistus.",
+    "purpose_text": "Huoneiston myynti kolmannelle osapuolelle kehittäjän tavanomaisten luovutusmenettelyjen mukaisesti.",
+    "no_outstanding": "Kaikki tämän todistuksen antopäivään mennessä erääntyneet erät on maksettu kokonaisuudessaan. Tähän sopimukseen ei ole kirjattu avoimia maksuja.",
+    "developer_statement": "Kehittäjä myöntää täten luvan siirtää huoneiston omistusoikeus kolmannelle osapuolelle vakiintuneen luovutusmaksun ja -menettelyn mukaisesti. Tämä todistus ei luovu kehittäjän oikeuksista kauppakirjan nojalla."
+  },
+  "tenant_lease_agreement": {
+    "title": "Vuokrasopimus",
+    "intro": "Tämä vuokrasopimus on tehty vuokranantajan (kehittäjän) ja alla nimettyjen vuokralaisten välillä tässä kuvatun kiinteistön asuinvuokrausta varten.",
+    "tenant_signature": "Vuokralaisen allekirjoitus",
+    "headings": {
+      "lease_number": "Vuokrasopimusnro",
+      "tenant": "Vuokralainen",
+      "property": "Kiinteistö",
+      "term": "Vuokra-aika",
+      "monthly_rent": "Kuukausivuokra",
+      "security_deposit": "Vakuusmaksu",
+      "use_clause": "Kiinteistön käyttö",
+      "maintenance": "Kunnossapito",
+      "termination": "Irtisanominen"
+    },
+    "use_clause_text": "Vuokralainen käyttää kiinteistöä yksinomaan omaan ja lähiomaistensa asuinkäyttöön. Edelleenvuokraus ja liiketoiminnallinen käyttö ovat kiellettyjä ilman vuokranantajan etukäteen antamaa kirjallista suostumusta.",
+    "maintenance_text": "Vuokranantaja vastaa rakenteellisesta kunnossapidosta ja kehittäjän asentamista suurista laitteista. Vuokralainen vastaa päivittäisestä siisteydestä, kohtuullisen rajan alittavista pienistä korjauksista sekä väärinkäytöstä aiheutuvista vahingoista.",
+    "termination_text": "Kumpi tahansa osapuoli voi irtisanoa vuokrasopimuksen vuokra-ajan päättyessä kirjallisella ilmoituksella vähintään 30 päivää ennen päättymistä. Vuokralaisen ennenaikainen irtisanominen menettää vakuusmaksun, ellei vuokranantaja kirjallisesti hyväksy toisin."
+  },
+  "move_in_checklist": {
+    "title": "Sisäänmuuttotarkistuslista",
+    "intro": "Huoneistokohtainen kuntoraportti, joka laaditaan luovutushetkellä. Molemmat osapuolet allekirjoittavat, että lueteltu kunto vastaa tarkastettua huoneistoa.",
+    "empty_rooms": "Huonetietoja ei ole toimitettu.",
+    "acceptance_text": "Allekirjoittamalla alla molemmat osapuolet vahvistavat, että yllä kirjattu huoneistokohtainen kunto vastaa huoneiston tilaa tarkastushetkellä.",
+    "headings": {
+      "spa_ref": "Sopimusnro",
+      "inspection_date": "Tarkastuspäivä"
+    },
+    "columns": {
+      "item": "Kohde",
+      "condition": "Kunto",
+      "notes": "Huomautukset"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Kiinnitysvapautuskirje",
+    "intro": "Kehittäjä antaa tämän kirjeen ostajan pyynnöstä vahvistaakseen, ettei alla yksilöidyssä huoneistossa ole kehittäjän hyväksi olevia avoimia rasitteita, kiinnityksiä, pantti- tai muita panttioikeuksia.",
+    "no_encumbrance_text": "Kehittäjä vahvistaa täten, että yllä mainittu huoneisto on tämän kirjeen päivämääränä vapaa kaikista kiinnityksistä, rasitteista, panttioikeuksista ja muista rasitteista, jotka kohdistuvat kehittäjään tai siihen liittyvään osapuoleen.",
+    "purpose_text": "Tämä kirje on annettu yksinomaan ostajan asuntolainahakemusta ja pankin pyytämää mahdollista huolellisuusselvitystä varten. Se ei luovu kehittäjän oikeuksista kauppakirjan nojalla.",
+    "headings": {
+      "bank": "Annettu (pankille)",
+      "spa_ref": "Sopimusnro",
+      "unit": "Huoneisto"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Kiinteistön lainhuudatushakemus",
+    "intro": "Virallinen pyyntö kiinteistörekisteriin siirtää alla kuvatun huoneiston omistusoikeus kehittäjältä kauppakirjassa mainitulle uudelle omistajalle tai omistajille.",
+    "request_text": "Kehittäjä pyytää täten kiinteistörekisteriä kirjaamaan yllä olevan huoneiston omistusoikeuden siirron mainituille uusille omistajille ilmoitetuin osuuksin tämän pyynnön päivämäärästä lukien.",
+    "attachments_text": "Alkuperäinen allekirjoitettu kauppakirja, viimeinen maksukuitti, luovutustodistus, kaikkien uusien omistajien henkilöllisyysasiakirjat sekä mahdolliset rekisterin edellyttämät leimaverokuitit.",
+    "headings": {
+      "registry": "Kiinteistörekisteri",
+      "spa_ref": "Sopimusnro",
+      "unit": "Huoneisto",
+      "new_owners": "Uudet omistajat",
+      "request_body": "Pyyntö",
+      "attachments": "Liitteet"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Talletuksen vapautusvaltuutus",
+    "intro": "Ohje talletuksen hoitajalle vapauttaa alla yksilöidyllä talletustilillä olevat varat kehittäjälle kuvatun välitavoitteen osalta.",
+    "instruction_text": "Kehittäjä valtuuttaa ja ohjeistaa täten talletuksen hoitajaa vapauttamaan yllä mainitun summan nimetyltä talletustililtä kehittäjän käyttötilille. Vapautus perustuu kauppakirjaan kirjattuun välitavoitteen vahvistukseen.",
+    "headings": {
+      "escrow_account": "Talletustilin nro",
+      "spa_ref": "Sopimusnro",
+      "unit": "Huoneisto",
+      "amount_to_release": "Vapautettava summa",
+      "release_reason": "Vapautuksen peruste"
+    }
+  },
+  "refund_authorization": {
+    "title": "Hyvitysvaltuutus",
+    "intro": "Tämä asiakirja valtuuttaa alla mainitun summan hyvittämisen peruutetun varauksen tai myyntisopimuksen perusteella.",
+    "authorisation_text": "Kehittäjä valtuuttaa täten yllä mainitun summan hyvittämisen ilmoitetulla maksutavalla. Maksun ajoitus noudattaa kehittäjän vakiintuneita talousmenettelyjä sekä alkuperäiseen liiketapahtumaan sovellettavia peruutusoikeus- ja menettämissääntöjä.",
+    "headings": {
+      "reference": "Viite",
+      "unit": "Huoneisto",
+      "amount": "Hyvitettävä summa",
+      "reason": "Peruste",
+      "payment_method": "Maksutapa"
+    }
+  }
+}

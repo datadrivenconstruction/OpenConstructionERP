@@ -23,7 +23,6 @@ every automated receiver) is unaffected.
 
 from __future__ import annotations
 
-import html
 import io
 from decimal import Decimal
 
@@ -44,7 +43,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
 
-from app.core.pdf_fonts import pdf_font_for_text, pdf_shaping_for_text, pdf_style_for_text
+from app.core.pdf_fonts import pdf_font_for_text, pdf_markup, pdf_shaping_for_text, pdf_style_for_text
 from app.core.validation.address import format_address_lines
 from app.modules.einvoice.bank import is_bic, is_iban
 from app.modules.einvoice.cii import EInvoice, Party, build_cii_xml
@@ -149,7 +148,7 @@ def _readable_pdf(inv: EInvoice, locale: str = DEFAULT_PDF_LOCALE) -> bytes:
         # when the text needs complex-script shaping (Thai, Devanagari).
         style = ParagraphStyle("_put", fontName=base, fontSize=size, leading=size)
         styled = pdf_style_for_text(style, text)
-        p = Paragraph(html.escape(text, quote=True), styled)
+        p = Paragraph(pdf_markup(text, style), styled)
         pw, ph = p.wrapOn(c, 9999, size * 2)
         if align_right:
             p.drawOn(c, x - pw, y - ph + size * 0.22)

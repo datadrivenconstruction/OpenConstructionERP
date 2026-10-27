@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Lehekülg {page} / {total}",
+    "generated_at": "Genereeritud {timestamp} UTC",
+    "doc_ref": "Dok. viide",
+    "developer": "Arendaja",
+    "unit_code": "Üksuse kood",
+    "watermark_draft": "MUSTAND",
+    "currency": "Valuuta",
+    "amount": "Summa",
+    "date": "Kuupäev",
+    "signature": "Allkiri",
+    "place": "Koht",
+    "buyer_signature": "Ostja allkiri",
+    "developer_signature": "Arendaja allkiri",
+    "witness": "Tunnistaja"
+  },
+  "reservation_receipt": {
+    "title": "Broneeringu kinnitus",
+    "intro": "See kinnitus tõendab allpool kirjeldatud kinnisvara broneerimist. Broneerimise tagatisraha on laekunud ning üksus on ostja jaoks turult eemaldatud kuni taganemisõiguse tähtaja lõppemiseni või ostu-müügilepingu allkirjastamiseni.",
+    "headings": {
+      "buyer": "Ostja",
+      "property": "Kinnisvara",
+      "amount_paid": "Makstud summa",
+      "valid_until": "Kehtib kuni",
+      "next_step": "Järgmine samm",
+      "reservation_number": "Broneeringu nr",
+      "cooling_off": "Taganemisõiguse tähtaeg",
+      "deposit_status": "Tagatisraha seis",
+      "plot_details": "Krundi andmed"
+    },
+    "next_step_text": "{days} päeva jooksul peab ostja allkirjastama ostu-müügilepingu ja tasuma järgmise osamakse, vastasel juhul broneering aegub ja vabaneb turule.",
+    "cooling_off_text": "{days} päeva alates selle dokumendi kättesaamisest.",
+    "footer_note": "Tagatisraha tagastatakse täies ulatuses ainult jurisdiktsiooniga määratud taganemisõiguse perioodi jooksul. Pärast seda perioodi lähtutakse tagatisraha tagastamisel kehtivatest loobumise reeglitest."
+  },
+  "sales_contract": {
+    "title": "Ostu-müügileping",
+    "subtitle": "Lepingu nr {number}",
+    "preamble": "See ostu-müügileping (edaspidi \"Leping\") on sõlmitud allpool näidatud kuupäeval arendaja ja allpool loetletud ostja(te) vahel allpool määratletud kinnisvara müümiseks.",
+    "headings": {
+      "parties": "Lepingu pooled",
+      "property": "Kinnisvara",
+      "price": "Ostuhind",
+      "payment_schedule": "Maksegraafik",
+      "clauses": "Üldtingimused",
+      "instalments": "Osamaksed",
+      "signatures": "Allkirjad",
+      "co_ownership": "Kaasomand",
+      "regulatory": "Regulatiivsed teatised",
+      "annexes": "Lisad"
+    },
+    "parties_intro": "Ostja(d) omandavad kinnisvara ühiselt allpool esitatud omandiosade kaupa. Kõik pooled vastutavad lepingust tulenevate kohustuste eest solidaarselt, kui pole selgelt sätestatud teisiti.",
+    "instalment_columns": {
+      "sequence": "Nr",
+      "milestone": "Etapp",
+      "due_date": "Tähtaeg",
+      "amount": "Summa",
+      "currency": "Valuuta"
+    },
+    "party_columns": {
+      "name": "Nimi",
+      "role": "Roll",
+      "ownership_pct": "Omandiosa %",
+      "email": "E-post"
+    },
+    "property_columns": {
+      "plot_number": "Krundi number",
+      "development": "Arendusprojekt",
+      "area_m2": "Pind (m²)",
+      "house_type": "Maja tüüp"
+    },
+    "price_label": "Ostuhind kokku",
+    "breakdown_label": "Hinnaarvestus",
+    "signature_note": "Allkirjastatud {place} kuupäeval {date}. Allkirjastades kinnitavad ostja ja arendaja, et on lugenud, mõistnud ning nõustuvad käesolevas lepingus, sealhulgas kõigis lisades, esitatud tingimustega."
+  },
+  "payment_receipt": {
+    "title": "Makse kinnitus",
+    "intro": "See kinnitus tõendab allpool viidatud ostu-müügilepingu alusel osamakse tasumist.",
+    "headings": {
+      "spa_ref": "Lepingu nr",
+      "instalment": "Osamakse",
+      "milestone": "Etapp",
+      "amount_paid": "Makstud summa",
+      "payment_method": "Makseviis",
+      "payment_ref": "Makse viide",
+      "paid_at": "Makstud",
+      "outstanding": "Tasumata jääk"
+    },
+    "footer_note": "See kinnitus on genereeritud automaatselt ning kehtib ilma käsitsi allkirjata. Hoidke oma arvestuses alles."
+  },
+  "handover_certificate": {
+    "title": "Üleandmise akt",
+    "intro": "See akt fikseerib kinnisvara üleandmise arendajalt ostjale. Ostja võtab üksuse vastu, arvestades lisatud puudusnimekirja ja garantiitingimusi.",
+    "headings": {
+      "spa_ref": "Lepingu nr",
+      "completed_at": "Üleandmise kuupäev",
+      "snag_count": "Avatud puudused",
+      "warranty_period": "Garantiiperiood",
+      "keys_handed_over": "Võtmed üle antud",
+      "buyer_acceptance": "Ostja vastuvõtt",
+      "developer_declaration": "Arendaja deklaratsioon"
+    },
+    "developer_declaration_text": "Arendaja kinnitab, et kinnisvara on ehitatud vastavalt ostu-müügilepingule, et kogu nõutav dokumentatsioon on ostjale üle antud ning et konstruktsiooni- ja viimistlustööde garantii algab selle akti kuupäevast.",
+    "buyer_acceptance_text": "Ostja võtab kinnisvara üle, arvestades lisatud puudusnimekirja. Ostja kinnitab võtmete, juhendite ja lisades loetletud nõutava dokumentatsiooni kättesaamist.",
+    "snag_note": "Avatud puudused kõrvaldab arendaja mõistliku aja jooksul vastavalt lepingu puuduste kõrvaldamise sättele."
+  },
+  "warranty_certificate": {
+    "title": "Garantiitunnistus",
+    "intro": "See tunnistus määratleb arendaja garantiikohustused allpool kuupäeval ostjale üle antud kinnisvara suhtes.",
+    "headings": {
+      "spa_ref": "Lepingu nr",
+      "handover_date": "Üleandmise kuupäev",
+      "structural": "Konstruktsioonide garantii",
+      "finishing": "Viimistlustööde garantii",
+      "structural_period": "Konstruktsioonide garantiiperiood",
+      "finishing_period": "Viimistlustööde garantiiperiood",
+      "warranty_expiry": "Garantii lõpeb",
+      "scope": "Garantii ulatus",
+      "exclusions": "Erandid"
+    },
+    "structural_text": "Arendaja garanteerib kinnisvara konstruktiivse terviklikkuse, sealhulgas kandekonstruktsioonid, vundamendi ja hüdroisolatsiooni, {years} aasta jooksul alates üleandmise kuupäevast.",
+    "finishing_text": "Arendaja garanteerib viimistlustööd, sealhulgas värvimise, sanitaartehnika, arendaja paigaldatud seadmed ja kaubad ning väikesed kosmeetilised detailid, {years} aasta jooksul alates üleandmise kuupäevast.",
+    "exclusions_text": "Garantii ei hõlma kahjustusi, mis on tekkinud väärkasutuse, ostja või kolmandate isikute tehtud muudatuste, tavapärase kulumise, vääramatu jõu ning eraldi tootjagarantiiga hõlmatud esemete tõttu.",
+    "claim_procedure": "Nõude esitamiseks peab ostja garantiiperioodi jooksul esitama arendajale kirjaliku teate, kirjeldades defekti ja esitades mõistlikud tõendid."
+  },
+  "noc": {
+    "title": "Nõusolek müügiks (NOC)",
+    "subtitle": "Üksuse edasimüügiks",
+    "intro": "See nõusolek (NOC) on arendaja poolt väljastatud kinnitamaks, et ostjal puuduvad täitmata kohustused, mis takistaksid allpool määratletud üksuse edasimüüki.",
+    "headings": {
+      "spa_ref": "Lepingu nr",
+      "requested_by": "Taotleja",
+      "issued_to": "Väljastatud",
+      "purpose": "Eesmärk",
+      "validity": "Kehtivus",
+      "outstanding_balance": "Tasumata jääk",
+      "transfer_fee": "Üleandmise tasu"
+    },
+    "validity_text": "See nõusolek kehtib {days} päeva väljastamise kuupäevast. Pärast seda perioodi tuleb taotleda uus nõusolek.",
+    "purpose_text": "Üksuse müük kolmandale isikust ostjale arendaja tavapäraste üleandmise korra kohaselt.",
+    "no_outstanding": "Kõik osamaksed kuni käesoleva nõusoleku kuupäevani on täies ulatuses tasutud. Sellele lepingule ei ole registreeritud tasumata makseid.",
+    "developer_statement": "Arendaja annab ostjale loa üksuse omandiõiguse üleandmiseks kolmandale isikule, arvestades standardset üleandmistasu ja korda. See nõusolek ei loobu arendaja õigustest ostu-müügilepingu alusel."
+  },
+  "tenant_lease_agreement": {
+    "title": "Üürileping",
+    "intro": "See üürileping on sõlmitud üüriandja (arendaja) ja allpool nimetatud üürniku(te) vahel allpool kirjeldatud kinnisvara elamiseks üürimiseks.",
+    "tenant_signature": "Üürniku allkiri",
+    "headings": {
+      "lease_number": "Lepingu nr",
+      "tenant": "Üürnik",
+      "property": "Kinnisvara",
+      "term": "Tähtaeg",
+      "monthly_rent": "Kuutasu",
+      "security_deposit": "Tagatisraha",
+      "use_clause": "Kinnisvara kasutamine",
+      "maintenance": "Hooldus",
+      "termination": "Lepingu lõpetamine"
+    },
+    "use_clause_text": "Üürnik kasutab kinnisvara ainult eluruumina enda ja oma pereliikmete jaoks. Allrentimine ja äriline kasutamine on keelatud ilma üüriandja eelneva kirjaliku nõusolekuta.",
+    "maintenance_text": "Üüriandja vastutab konstruktsioonide hoolduse ning arendaja paigaldatud suurte seadmete eest. Üürnik vastutab igapäevase puhtuse, mõistliku piirini väikeste remonttööde ning väärkasutusest tingitud kahjustuste eest.",
+    "termination_text": "Kumbki pool võib lepingu tähtaja lõppemisel lõpetada lepingu kirjaliku teatega vähemalt 30 päeva enne lõppemist. Üürniku ennetähtaegsel lõpetamisel tagatisraha ei tagastata, välja arvatud juhul, kui üüriandja on kirjalikult nõustunud."
+  },
+  "move_in_checklist": {
+    "title": "Sisseolekukontrolli leht",
+    "intro": "Ruumipõhine seisukorra aruanne, mis koostatakse üleandmise hetkel. Mõlemad pooled kinnitavad allkirjastamisega, et loetletud seisukord vastab kontrollitud üksusele.",
+    "empty_rooms": "Ruumide andmeid pole esitatud.",
+    "acceptance_text": "Allkirjastades kinnitavad mõlemad pooled, et ülal registreeritud ruumipõhine seisukord vastab üksusele kontrollimise hetkel.",
+    "headings": {
+      "spa_ref": "Lepingu nr",
+      "inspection_date": "Kontrolli kuupäev"
+    },
+    "columns": {
+      "item": "Objekt",
+      "condition": "Seisukord",
+      "notes": "Märkused"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Hüpoteegi vabastuskiri",
+    "intro": "Selle kirja väljastab arendaja ostja taotlusel, et kinnitada, et allpool määratletud üksusel ei ole arendaja kasuks ühtegi tasumata koormat, hüpoteeki, pantimist ega kitsendust.",
+    "no_encumbrance_text": "Arendaja kinnitab, et käesoleva kirja kuupäeval on ülalnimetatud üksus vaba igasugusest hüpoteegist, koormast, pantimisest või kitsendusest arendaja või sellega seotud isiku kasuks.",
+    "purpose_text": "Käesolev kiri on välja antud üksnes ostja hüpoteegitaotluse ja pangapoolt nõutud seotud due diligence'i menetluse tarbeks. See ei loobu arendaja õigustest ostu-müügilepingu alusel.",
+    "headings": {
+      "bank": "Väljastatud (pank)",
+      "spa_ref": "Lepingu nr",
+      "unit": "Üksus"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Kinnistusraamatu omandiõiguse üleminekutaotlus",
+    "intro": "Ametlik taotlus kinnistusraamatule kanda allpool kirjeldatud üksuse omandiõigus arendajalt ostu-müügilepingus nimetatud uuele omanikule (omanikele).",
+    "request_text": "Arendaja palub kinnistusraamatul kanda ülalnimetatud üksuse omandiõigus loetletud uuele omanikule (omanikele) näidatud omandiosade kaupa, alates käesoleva taotluse kuupäevast.",
+    "attachments_text": "Täidetud originaal ostu-müügileping, viimane makse kinnitus, üleandmise akt, kõigi uute omanike isikut tõendavad dokumendid ning registri nõutud riigilõivu tasumist tõendavad dokumendid.",
+    "headings": {
+      "registry": "Kinnistusraamat",
+      "spa_ref": "Lepingu nr",
+      "unit": "Üksus",
+      "new_owners": "Uus omanik (omanikud)",
+      "request_body": "Taotlus",
+      "attachments": "Lisad"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Depoo vabastamise luba",
+    "intro": "Juhis depoopidajale vabastada allpool märgitud depookontol hoitavad vahendid arendajale kirjeldatud etapi osas.",
+    "instruction_text": "Arendaja volitab ja juhendab depoopidajat vabastama ülaltoodud summa nimetatud depookontolt arendaja tegevuskontole. Vabastamine järgneb ostu-müügilepingus fikseeritud etapi kinnitamisele.",
+    "headings": {
+      "escrow_account": "Depookonto nr",
+      "spa_ref": "Lepingu nr",
+      "unit": "Üksus",
+      "amount_to_release": "Vabastatav summa",
+      "release_reason": "Vabastamise põhjus"
+    }
+  },
+  "refund_authorization": {
+    "title": "Tagasimakse luba",
+    "intro": "See dokument volitab allpool märgitud summa tagasimaksmist seoses tühistatud broneeringu või viidatud müügilepinguga.",
+    "authorisation_text": "Arendaja volitab ülaltoodud summa tagasimaksmise näidatud makseviisil. Arveldusaeg järgib arendaja tavapäraseid finantsmenetlusi ning algse tehingu suhtes kehtivaid taganemisõiguse ja loobumise reegleid.",
+    "headings": {
+      "reference": "Viide",
+      "unit": "Üksus",
+      "amount": "Tagasimakse summa",
+      "reason": "Põhjus",
+      "payment_method": "Makseviis"
+    }
+  }
+}

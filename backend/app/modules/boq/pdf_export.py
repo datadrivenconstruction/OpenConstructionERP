@@ -58,6 +58,7 @@ from app.core.pdf_branding import (
     branded_doc_metadata,
     branded_header_logo,
     branded_letterhead,
+    draw_furniture_line,
 )
 
 # Locale-aware PDF labels, read from ``backend/locales/<code>.json`` under
@@ -114,6 +115,7 @@ from app.core.pdf_fonts import (
     BOLD_FONT,
     pdf_fit_line,
     pdf_fitted_style,
+    pdf_markup,
     pdf_room_beside,
     pdf_style_for_text,
     register_pdf_fonts,
@@ -191,7 +193,7 @@ def _fmt_rate(value: float, decimals: int, currency: str = "", country: str = ""
     return format_number(value, decimals, number_style(country, currency))
 
 
-def _safe_para(text: Any, style: ParagraphStyle) -> "Paragraph":
+def _safe_para(text: Any, style: ParagraphStyle, *, bold: bool = False) -> "Paragraph":
     """Construct a ``Paragraph`` from possibly-untrusted user input.
 
     HTML metacharacters in ``text`` are escaped via ``html.escape`` so
@@ -201,9 +203,9 @@ def _safe_para(text: Any, style: ParagraphStyle) -> "Paragraph":
     application's control (BOQ position descriptions, ordinals, units,
     section titles, the ``prepared_by`` field, project names, etc.).
 
-    Internal labels that need ReportLab inline markup such as ``<b>...</b>``
-    construct ``Paragraph`` directly - that text is checked into source and
-    trusted.
+    Labels go through here too, with ``bold=True`` for the ``<b>`` ones: a
+    translated label can be in a script the style's own face cannot draw, and a
+    string no single face draws is set in runs (``pdf_markup``).
 
     This is also where the Chinese face is chosen. Every string a Chinese bill
     of quantities carries - the section titles, the item descriptions, the unit
@@ -218,7 +220,8 @@ def _safe_para(text: Any, style: ParagraphStyle) -> "Paragraph":
         rendered = text
     else:
         rendered = str(text)
-    return Paragraph(html.escape(rendered, quote=True), pdf_style_for_text(style, rendered))
+    markup = pdf_markup(rendered, style)
+    return Paragraph(f"<b>{markup}</b>" if bold else markup, pdf_style_for_text(style, rendered))
 
 
 def _fmt_currency(value: float, currency: str, decimals: int = 2, country: str = "") -> str:
@@ -691,7 +694,7 @@ def _make_header_footer(
             leading=8,
             textColor=colors.HexColor("#666666"),
         )
-        p = Paragraph(html.escape(text, quote=True), pdf_style_for_text(hdr_style, text))
+        p = Paragraph(pdf_markup(text, hdr_style), pdf_style_for_text(hdr_style, text))
         _pw, _ph = p.wrapOn(canvas, pw - ml - mr, 20)
         p.drawOn(canvas, ml, ph - 15 * mm - _ph + 8 * 0.22)
         canvas.setStrokeColor(colors.HexColor("#cccccc"))
@@ -725,11 +728,10 @@ def _make_header_footer(
             suffix=f"  |  {lb.get('generated', 'Generated:')} {generated_date}",
             base=BODY_FONT,
         )
-        p = Paragraph(html.escape(brand_text, quote=True), pdf_fitted_style(ftr_style, brand_text, brand_size))
+        p = Paragraph(pdf_markup(brand_text, ftr_style), pdf_fitted_style(ftr_style, brand_text, brand_size))
         _pw, _ph = p.wrapOn(canvas, pw - ml - mr, 20)
         p.drawOn(canvas, ml, 10 * mm - _ph + 7 * 0.22)
-        canvas.setFont(BODY_FONT, 7)
-        canvas.drawRightString(pw - mr, 10 * mm, page_text)
+        draw_furniture_line(canvas, page_text, x=pw - mr, y=10 * mm, size=7, color="#999999", align="right")
         canvas.restoreState()
 
     return _header, _footer
@@ -812,7 +814,7 @@ def _build_cover_page(
     elements.append(Spacer(1, 4 * mm))
 
     # Title
-    elements.append(Paragraph(lb["cost_estimate"], styles["title"]))
+    elements.append(_safe_para(lb["cost_estimate"], styles["title"]))
 
     elements.append(Spacer(1, 2 * mm))
     elements.append(line_wrapper)
@@ -837,7 +839,7 @@ def _build_cover_page(
                 # Labels are first-party constants, values come from the
                 # project / BOQ records and may contain HTML - escape only
                 # the dynamic side.
-                Paragraph(label, styles["info_label"]),
+                _safe_para(label, styles["info_label"]),
                 _safe_para(value, styles["info_value"]),
             ]
         )
@@ -880,7 +882,7 @@ def _build_cover_page(
     # Summary heading, centred by its style like the title above it. It used to
     # be pushed right with a run of non-breaking spaces, which put it off the
     # axis of the centred summary table under it.
-    elements.append(Paragraph(lb["summary"], styles["title"]))
+    elements.append(_safe_para(lb["summary"], styles["title"]))
     elements.append(Spacer(1, 4 * mm))
 
     # Cost summary. The tax is already inside ``net_total``, so the pre-tax
@@ -913,7 +915,7 @@ def _build_cover_page(
         val_style = styles["summary_total_value"] if is_total else styles["summary_value"]
         summary_table_data.append(
             [
-                Paragraph(label, lbl_style),
+                _safe_para(label, lbl_style),
                 Paragraph(value, val_style),
             ]
         )
@@ -960,16 +962,16 @@ def _sign_off_block(prepared_by: str, styles: dict[str, ParagraphStyle], lb: dic
     table = Table(
         [
             [
-                Paragraph(lb["prepared_by"], styles["sign_label"]),
+                _safe_para(lb["prepared_by"], styles["sign_label"]),
                 "",
-                Paragraph(lb["approved_by"], styles["sign_label"]),
+                _safe_para(lb["approved_by"], styles["sign_label"]),
             ],
             [_safe_para(prepared_by, styles["sign_name"]), "", ""],
             ["", "", ""],
             [
-                Paragraph(lb["signature_hint"], styles["sign_hint"]),
+                _safe_para(lb["signature_hint"], styles["sign_hint"]),
                 "",
-                Paragraph(lb["signature_hint"], styles["sign_hint"]),
+                _safe_para(lb["signature_hint"], styles["sign_hint"]),
             ],
         ],
         colWidths=[column, 16 * mm, column],
@@ -1114,12 +1116,12 @@ def _build_boq_table(
 
     # Table header row (locale-aware)
     header_row = [
-        Paragraph(f"<b>{lb['pos']}</b>", styles["table_header"]),
-        Paragraph(f"<b>{lb['description']}</b>", styles["table_header"]),
-        Paragraph(f"<b>{lb['unit']}</b>", styles["table_header"]),
-        Paragraph(f"<b>{lb['qty']}</b>", styles["table_header_right"]),
-        Paragraph(f"<b>{lb['rate']} ({currency})</b>", styles["table_header_right"]),
-        Paragraph(f"<b>{lb['total']} ({currency})</b>", styles["table_header_right"]),
+        _safe_para(f"{lb['pos']}", styles["table_header"], bold=True),
+        _safe_para(f"{lb['description']}", styles["table_header"], bold=True),
+        _safe_para(f"{lb['unit']}", styles["table_header"], bold=True),
+        _safe_para(f"{lb['qty']}", styles["table_header_right"], bold=True),
+        _safe_para(f"{lb['rate']} ({currency})", styles["table_header_right"], bold=True),
+        _safe_para(f"{lb['total']} ({currency})", styles["table_header_right"], bold=True),
     ]
 
     table_data: list[list[Any]] = [header_row]
@@ -1156,7 +1158,7 @@ def _build_boq_table(
             [
                 "",
                 "",
-                Paragraph(lb["subtotal"], styles["subtotal_label"]),
+                _safe_para(lb["subtotal"], styles["subtotal_label"]),
                 "",
                 "",
                 Paragraph(_fv(section.subtotal), styles["subtotal_value"]),
@@ -1170,7 +1172,7 @@ def _build_boq_table(
         table_data.append(
             [
                 Paragraph("", styles["section_header"]),
-                Paragraph(lb["other_positions"], styles["section_header"]),
+                _safe_para(lb["other_positions"], styles["section_header"]),
                 _mark(_TOC_UNGROUPED),
                 "",
                 "",
@@ -1194,7 +1196,7 @@ def _build_boq_table(
             [
                 "",
                 "",
-                Paragraph(lb["subtotal"], styles["subtotal_label"]),
+                _safe_para(lb["subtotal"], styles["subtotal_label"]),
                 "",
                 "",
                 Paragraph(_fv(ungrouped_total), styles["subtotal_value"]),
@@ -1213,7 +1215,7 @@ def _build_boq_table(
         [
             "",
             "",
-            Paragraph(f"<b>{lb['direct_cost']}</b>", styles["cell_bold_right"]),
+            _safe_para(f"{lb['direct_cost']}", styles["cell_bold_right"], bold=True),
             "",
             "",
             Paragraph(f"<b>{_fc(boq_data.direct_cost)}</b>", styles["cell_bold_right"]),
@@ -1251,7 +1253,7 @@ def _build_boq_table(
         [
             "",
             "",
-            Paragraph(f"<b>{lb['net_total']}</b>", styles["cell_bold_right"]),
+            _safe_para(f"{lb['net_total']}", styles["cell_bold_right"], bold=True),
             "",
             "",
             Paragraph(f"<b>{_fc(subtotal_ex_tax)}</b>", styles["cell_bold_right"]),
@@ -1268,7 +1270,7 @@ def _build_boq_table(
             [
                 "",
                 "",
-                Paragraph(tax_label, styles["cell_right"]),
+                _safe_para(tax_label, styles["cell_right"]),
                 "",
                 "",
                 Paragraph(_fc(tax_line_amount), styles["cell_right"]),
@@ -1281,7 +1283,7 @@ def _build_boq_table(
         [
             "",
             "",
-            Paragraph(f"<b>{lb['gross_total']} ({currency}):</b>", styles["cell_bold_right"]),
+            _safe_para(f"{lb['gross_total']} ({currency}):", styles["cell_bold_right"], bold=True),
             "",
             "",
             Paragraph(f"<b>{_fc(gross_total)}</b>", styles["cell_bold_right"]),
@@ -1410,9 +1412,9 @@ def _table_of_contents(
     page_heading = lb["page"]
     rows: list[list[Any]] = [
         [
-            Paragraph(f"<b>{lb['section']}</b>", styles["table_header"]),
-            Paragraph(f"<b>{lb['description']}</b>", styles["table_header"]),
-            Paragraph(f"<b>{page_heading}</b>", styles["table_header_right"]),
+            _safe_para(f"{lb['section']}", styles["table_header"], bold=True),
+            _safe_para(f"{lb['description']}", styles["table_header"], bold=True),
+            _safe_para(f"{page_heading}", styles["table_header_right"], bold=True),
         ]
     ]
     for ordinal, title, key in _toc_entries(boq_data, lb):
@@ -1440,7 +1442,7 @@ def _table_of_contents(
         )
     )
     return [
-        Paragraph(f"<b>{lb['table_of_contents']}</b>", styles["section_header"]),
+        _safe_para(f"{lb['table_of_contents']}", styles["section_header"], bold=True),
         Spacer(1, 4 * mm),
         table,
     ]
@@ -1466,10 +1468,10 @@ def _section_summary_table(
     # ``subtotal`` carries the colon the section rows print it with.
     subtotal_heading = lb["subtotal"].rstrip(" :")
     header_row = [
-        Paragraph(f"<b>{lb['section']}</b>", styles["table_header"]),
-        Paragraph(f"<b>{lb['description']}</b>", styles["table_header"]),
-        Paragraph(f"<b>{lb['items']}</b>", styles["table_header_right"]),
-        Paragraph(f"<b>{subtotal_heading}</b>", styles["table_header_right"]),
+        _safe_para(f"{lb['section']}", styles["table_header"], bold=True),
+        _safe_para(f"{lb['description']}", styles["table_header"], bold=True),
+        _safe_para(f"{lb['items']}", styles["table_header_right"], bold=True),
+        _safe_para(f"{subtotal_heading}", styles["table_header_right"], bold=True),
     ]
     col_widths = [35 * mm, width - 35 * mm - 25 * mm - 35 * mm, 25 * mm, 35 * mm]
 
@@ -1496,7 +1498,7 @@ def _section_summary_table(
         table_data.append(
             [
                 Paragraph("", styles["cell"]),
-                Paragraph(lb["other_positions"], styles["cell"]),
+                _safe_para(lb["other_positions"], styles["cell"]),
                 Paragraph(str(len(boq_data.positions)), styles["cell_right"]),
                 Paragraph(_fc(ungrouped_total), styles["cell_right"]),
             ]
@@ -1538,7 +1540,7 @@ def _cost_totals_table(
     cost_rows: list[list[Any]] = []
     cost_rows.append(
         [
-            Paragraph(f"<b>{lb['direct_cost']}</b>", styles["cell_bold_right"]),
+            _safe_para(f"{lb['direct_cost']}", styles["cell_bold_right"], bold=True),
             Paragraph(f"<b>{_fc(boq_data.direct_cost)}</b>", styles["cell_bold_right"]),
         ]
     )
@@ -1561,7 +1563,7 @@ def _cost_totals_table(
     tax_lines, _tax_amount, subtotal_ex_tax, gross_total = _tax_split(boq_data)
     cost_rows.append(
         [
-            Paragraph(f"<b>{lb['net_total']}</b>", styles["cell_bold_right"]),
+            _safe_para(f"{lb['net_total']}", styles["cell_bold_right"], bold=True),
             Paragraph(f"<b>{_fc(subtotal_ex_tax)}</b>", styles["cell_bold_right"]),
         ]
     )
@@ -1572,13 +1574,13 @@ def _cost_totals_table(
     for tax_label, tax_line_amount in tax_rows:
         cost_rows.append(
             [
-                Paragraph(tax_label, styles["cell_right"]),
+                _safe_para(tax_label, styles["cell_right"]),
                 Paragraph(_fc(tax_line_amount), styles["cell_right"]),
             ]
         )
     cost_rows.append(
         [
-            Paragraph(f"<b>{lb['gross_total']} ({currency}):</b>", styles["cell_bold_right"]),
+            _safe_para(f"{lb['gross_total']} ({currency}):", styles["cell_bold_right"], bold=True),
             Paragraph(f"<b>{_fc(gross_total)}</b>", styles["cell_bold_right"]),
         ]
     )
@@ -1749,7 +1751,7 @@ def generate_boq_pdf(
             flowables.extend(_table_of_contents(boq_data, styles, labels, uw, page_refs))
             flowables.append(PageBreak())
         if resources_left_out:
-            flowables.append(Paragraph(html.escape(labels["resources_omitted"]), styles["cell"]))
+            flowables.append(_safe_para(labels["resources_omitted"], styles["cell"]))
             flowables.append(Spacer(1, 3 * mm))
         flowables.extend(
             _build_boq_table(
@@ -1772,7 +1774,7 @@ def generate_boq_pdf(
         flowables.append(PageBreak())
         if page_marks is not None:
             flowables.append(_PageMark(_TOC_SUMMARY, page_marks))
-        flowables.append(Paragraph(f"<b>{labels['cost_summary']}</b>", styles["section_header"]))
+        flowables.append(_safe_para(f"{labels['cost_summary']}", styles["section_header"], bold=True))
         flowables.append(Spacer(1, 4 * mm))
         flowables.append(
             _section_summary_table(
@@ -2039,12 +2041,7 @@ def generate_boq_pdf_simple(
     # Section-level summary table instead of full position listing
     total_positions = count_boq_positions(boq_data)
     omitted = lb["positions_omitted"].format(count=total_positions)
-    flowables.append(
-        Paragraph(
-            f"<b>{lb['summary_report']}</b> &mdash; {html.escape(omitted)}",
-            styles["section_header"],
-        )
-    )
+    flowables.append(_safe_para(f"{lb['summary_report']} — {omitted}", styles["section_header"], bold=True))
     flowables.append(Spacer(1, 4 * mm))
 
     flowables.append(
@@ -2062,7 +2059,7 @@ def generate_boq_pdf_simple(
     flowables.append(Spacer(1, 6 * mm))
 
     # Direct cost, markups, net total, VAT, gross total
-    flowables.append(Paragraph(f"<b>{lb['cost_summary']}</b>", styles["section_header"]))
+    flowables.append(_safe_para(f"{lb['cost_summary']}", styles["section_header"], bold=True))
     flowables.append(Spacer(1, 3 * mm))
     flowables.append(_cost_totals_table(boq_data, currency, styles, lb, uw, country_code=country_code))
 

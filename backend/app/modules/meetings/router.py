@@ -1759,16 +1759,15 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
         branded_doc_metadata,
         branded_header_logo,
         branded_letterhead,
+        draw_furniture_line,
     )
     from app.core.pdf_fonts import (
         BODY_FONT,
         BOLD_FONT,
-        pdf_font_for_text,
-        pdf_style_for_text,
         pdf_table_paragraph_rows,
         register_pdf_fonts,
     )
-    from app.modules.meetings.pdf import draw_minutes_footer
+    from app.modules.meetings.pdf import draw_minutes_footer, minutes_paragraph
 
     register_pdf_fonts()
 
@@ -1854,8 +1853,8 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
 
     # Header
     elements.append(Paragraph("Meeting Minutes", style_title))
-    elements.append(Paragraph(project_name, pdf_style_for_text(style_subtitle, project_name)))
-    elements.append(Paragraph(meeting.title, pdf_style_for_text(style_heading, meeting.title)))
+    elements.append(minutes_paragraph(style_subtitle, project_name))
+    elements.append(minutes_paragraph(style_heading, meeting.title))
 
     # Meeting info table
     info_data = [
@@ -1930,14 +1929,12 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
                 topic = item.get("topic", item.get("title", ""))
                 presenter = item.get("presenter", "")
                 notes = item.get("notes", "")
-                line = f"<b>{idx}.</b> {topic}"
+                line: list[str | tuple[str, str]] = [(f"{idx}.", "b"), f" {topic}"]
                 if presenter:
-                    line += f"  <i>({presenter})</i>"
-                elements.append(Paragraph(line, pdf_style_for_text(style_body, f"{topic}{presenter}")))
+                    line.append(("  (" + str(presenter) + ")", "i"))
+                elements.append(minutes_paragraph(style_body, *line))
                 if notes:
-                    elements.append(
-                        Paragraph(f"&nbsp;&nbsp;&nbsp;&nbsp;{notes}", pdf_style_for_text(style_small, notes))
-                    )
+                    elements.append(minutes_paragraph(style_small, "\u00a0" * 4, str(notes)))
 
     # Action items
     actions = meeting.action_items or []
@@ -2011,8 +2008,7 @@ def _render_meeting_pdf(meeting: SimpleNamespace, project_name: str) -> bytes:
         canvas_obj.setFillColor(colors.HexColor("#999999"))
         if not under_letterhead:
             running_head = f"{project_name} - {meeting.title}"
-            canvas_obj.setFont(pdf_font_for_text(running_head), 7)
-            canvas_obj.drawString(MARGIN, PAGE_HEIGHT - 12 * mm, running_head)
+            draw_furniture_line(canvas_obj, running_head, x=MARGIN, y=PAGE_HEIGHT - 12 * mm, size=7, color="#999999")
         draw_minutes_footer(canvas_obj, doc, look, margin=MARGIN)
         canvas_obj.restoreState()
         if not under_letterhead:

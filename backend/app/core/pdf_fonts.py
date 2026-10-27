@@ -1168,7 +1168,14 @@ def _tag(face: str, chunk: str, anchor: str) -> str:
     return f'<font name="{html.escape(face, quote=True)}">{text}</font>'
 
 
-def pdf_markup(text: str | None, style: Any = None, *, base: str | None = None, line_breaks: bool = False) -> str:
+def pdf_markup(
+    text: str | None,
+    style: Any = None,
+    *,
+    base: str | None = None,
+    line_breaks: bool = False,
+    anchor: str | None = None,
+) -> str:
     """Paragraph markup for ``text``: escaped, with a ``<font>`` per run when one face is not enough.
 
     Pair it with :func:`pdf_style_for_text` for the same string and style. A
@@ -1184,12 +1191,21 @@ def pdf_markup(text: str | None, style: Any = None, *, base: str | None = None, 
             the ladder starts and the face that needs no tag.
         base: Start the ladder at this face instead of the style's own.
         line_breaks: Turn newlines into ``<br/>``.
+        anchor: ``text`` is one stretch of a longer string, and ``anchor`` is
+            the face the paragraph's faced style carries for the whole string
+            (:func:`pdf_style_for_text` of the whole). Every run outside that
+            face is tagged, even a lone one. ``style`` stays the caller's own,
+            so the runs split where they do for the whole string.
     """
     value = text or ""
     start = base or getattr(style, "fontName", None) or BODY_FONT
     runs = pdf_font_runs(value, bold=start in _BOLD_FACES, base=start)
-    anchor = _run_anchor(runs, value, start) if len(runs) > 1 else start
-    if len(runs) <= 1:
+    if anchor is None:
+        anchor = _run_anchor(runs, value, start) if len(runs) > 1 else start
+        lone_is_anchor = True
+    else:
+        lone_is_anchor = not runs or runs[0][0] == anchor
+    if len(runs) <= 1 and lone_is_anchor:
         markup = html.escape(value, quote=True)
     else:
         pieces: list[str] = []

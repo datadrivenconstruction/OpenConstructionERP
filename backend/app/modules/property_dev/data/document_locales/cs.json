@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Strana {page} z {total}",
+    "generated_at": "Vygenerováno {timestamp} UTC",
+    "doc_ref": "Čj.",
+    "developer": "Developer",
+    "unit_code": "Kód jednotky",
+    "watermark_draft": "KONCEPT",
+    "currency": "Měna",
+    "amount": "Částka",
+    "date": "Datum",
+    "signature": "Podpis",
+    "place": "Místo",
+    "buyer_signature": "Podpis kupujícího",
+    "developer_signature": "Podpis developera",
+    "witness": "Svědek"
+  },
+  "reservation_receipt": {
+    "title": "Potvrzení o rezervaci",
+    "intro": "Toto potvrzení potvrzuje rezervaci níže uvedené nemovitosti. Záloha byla přijata a jednotka je pro kupujícího držena mimo trh až do uplynutí lhůty pro odstoupení nebo do podpisu kupní smlouvy.",
+    "headings": {
+      "buyer": "Kupující",
+      "property": "Nemovitost",
+      "amount_paid": "Uhrazená částka",
+      "valid_until": "Platnost do",
+      "next_step": "Další krok",
+      "reservation_number": "Číslo rezervace",
+      "cooling_off": "Lhůta pro odstoupení",
+      "deposit_status": "Stav zálohy",
+      "plot_details": "Údaje o pozemku"
+    },
+    "next_step_text": "Do {days} dnů musí kupující podepsat kupní smlouvu a uhradit další splátku, jinak rezervace zanikne a jednotka se vrátí na trh.",
+    "cooling_off_text": "{days} dnů od přijetí tohoto dokumentu.",
+    "footer_note": "Záloha je vratná v plné výši pouze během lhůty pro odstoupení stanovené právním řádem dané jurisdikce. Po této lhůtě se vratnost řídí platnými pravidly o propadnutí zálohy."
+  },
+  "sales_contract": {
+    "title": "Kupní smlouva",
+    "subtitle": "Smlouva č. {number}",
+    "preamble": "Tato kupní smlouva (dále jen „Smlouva“) je uzavřena dnem uvedeným níže mezi developerem zapsaným v rejstříku a kupujícím (kupujícími) uvedeným(i) níže, a to za účelem prodeje nemovitosti zde specifikované.",
+    "headings": {
+      "parties": "Smluvní strany",
+      "property": "Předmět převodu",
+      "price": "Kupní cena",
+      "payment_schedule": "Splátkový kalendář",
+      "clauses": "Obchodní podmínky",
+      "instalments": "Splátky",
+      "signatures": "Podpisy",
+      "co_ownership": "Spoluvlastnictví",
+      "regulatory": "Regulatorní údaje",
+      "annexes": "Přílohy"
+    },
+    "parties_intro": "Kupující nabývají nemovitost společně v podílech uvedených níže. Všechny smluvní strany ručí za závazky z této Smlouvy solidárně, pokud není výslovně uvedeno jinak.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Milník",
+      "due_date": "Datum splatnosti",
+      "amount": "Částka",
+      "currency": "Měna"
+    },
+    "party_columns": {
+      "name": "Jméno",
+      "role": "Role",
+      "ownership_pct": "Podíl %",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Číslo parcely",
+      "development": "Projekt",
+      "area_m2": "Plocha (m²)",
+      "house_type": "Typ domu"
+    },
+    "price_label": "Celková kupní cena",
+    "breakdown_label": "Rozpis ceny",
+    "signature_note": "Podepsáno v {place} dne {date}. Podpisem níže kupující a developer potvrzují, že si přečetli, porozuměli a souhlasí s podmínkami této Smlouvy včetně všech příloh."
+  },
+  "payment_receipt": {
+    "title": "Potvrzení o platbě",
+    "intro": "Toto potvrzení potvrzuje úhradu splátky podle níže uvedené kupní smlouvy.",
+    "headings": {
+      "spa_ref": "Číslo smlouvy",
+      "instalment": "Splátka",
+      "milestone": "Milník",
+      "amount_paid": "Uhrazená částka",
+      "payment_method": "Způsob platby",
+      "payment_ref": "Referenční číslo platby",
+      "paid_at": "Uhrazeno dne",
+      "outstanding": "Zbývající dluh"
+    },
+    "footer_note": "Toto potvrzení je vygenerováno automaticky a je platné bez ručního podpisu. Uschovejte pro své záznamy."
+  },
+  "handover_certificate": {
+    "title": "Předávací protokol",
+    "intro": "Tento protokol zaznamenává předání nemovitosti od developera kupujícímu (kupujícím). Kupující přejímá jednotku s přiloženým seznamem vad a podmínkami záruky.",
+    "headings": {
+      "spa_ref": "Číslo smlouvy",
+      "completed_at": "Datum předání",
+      "snag_count": "Otevřené vady",
+      "warranty_period": "Záruční doba",
+      "keys_handed_over": "Předané klíče",
+      "buyer_acceptance": "Přijetí kupujícím",
+      "developer_declaration": "Prohlášení developera"
+    },
+    "developer_declaration_text": "Developer tímto potvrzuje, že nemovitost byla postavena v souladu s kupní smlouvou, že kupujícímu byla předána veškerá požadovaná dokumentace a že záruky na konstrukci a dokončení začínají dnem tohoto protokolu.",
+    "buyer_acceptance_text": "Kupující tímto přijímá předání nemovitosti s ohledem na přiložený seznam vad. Kupující potvrzuje převzetí klíčů, návodů a veškeré požadované dokumentace uvedené v přílohách.",
+    "snag_note": "Otevřené vady odstraní developer v přiměřené lhůtě podle reklamačního ustanovení kupní smlouvy."
+  },
+  "warranty_certificate": {
+    "title": "Záruční list",
+    "intro": "Tento list stanoví záruční povinnosti developera vůči nemovitosti předané kupujícímu (kupujícím) ke dni uvedenému níže.",
+    "headings": {
+      "spa_ref": "Číslo smlouvy",
+      "handover_date": "Datum předání",
+      "structural": "Záruka na konstrukci",
+      "finishing": "Záruka na dokončení",
+      "structural_period": "Doba záruky na konstrukci",
+      "finishing_period": "Doba záruky na dokončení",
+      "warranty_expiry": "Konec záruky",
+      "scope": "Rozsah záruky",
+      "exclusions": "Vyloučení"
+    },
+    "structural_text": "Developer ručí za statickou integritu nemovitosti, včetně nosné konstrukce, základů a hydroizolace, po dobu {years} let od data předání.",
+    "finishing_text": "Developer ručí za dokončovací práce, včetně nátěrů, armatur, vybavení a spotřebičů instalovaných developerem a drobných estetických prvků, po dobu {years} let od data předání.",
+    "exclusions_text": "Záruka se nevztahuje na škody způsobené nesprávným používáním, úpravami provedenými kupujícím nebo třetími osobami, běžným opotřebením, vyšší mocí a na položky kryté samostatnými zárukami výrobců.",
+    "claim_procedure": "Pro uplatnění reklamace musí kupující v rámci záruční doby zaslat developerovi písemné oznámení popisující vadu a přiložit přiměřené podpůrné důkazy."
+  },
+  "noc": {
+    "title": "Potvrzení bez námitek (NOC)",
+    "subtitle": "Pro další prodej jednotky",
+    "intro": "Toto potvrzení bez námitek (NOC) vydává developer k potvrzení, že kupující nemá žádné nesplněné závazky, které by bránily dalšímu prodeji níže uvedené jednotky.",
+    "headings": {
+      "spa_ref": "Číslo smlouvy",
+      "requested_by": "Žádal",
+      "issued_to": "Vystaveno pro",
+      "purpose": "Účel",
+      "validity": "Platnost",
+      "outstanding_balance": "Zbývající dluh",
+      "transfer_fee": "Poplatek za převod"
+    },
+    "validity_text": "Toto potvrzení je platné {days} dnů od data vydání. Po uplynutí této lhůty je nutné požádat o nové.",
+    "purpose_text": "Prodej jednotky třetí osobě podle standardních převodních postupů developera.",
+    "no_outstanding": "Všechny splátky do data vydání tohoto potvrzení byly uhrazeny v plné výši. U této smlouvy nejsou evidovány žádné nesplacené platby.",
+    "developer_statement": "Developer tímto uděluje souhlas s převodem vlastnictví jednotky na třetí osobu za podmínky uhrazení standardního převodního poplatku a dodržení stanovených postupů. Toto potvrzení se nevzdává žádných práv developera podle kupní smlouvy."
+  },
+  "tenant_lease_agreement": {
+    "title": "Nájemní smlouva",
+    "intro": "Tato nájemní smlouva je uzavřena mezi pronajímatelem (developerem) a nájemcem (nájemci) uvedenými níže k pronájmu nemovitosti zde popsané za účelem bydlení.",
+    "tenant_signature": "Podpis nájemce",
+    "headings": {
+      "lease_number": "Číslo smlouvy",
+      "tenant": "Nájemce",
+      "property": "Nemovitost",
+      "term": "Doba nájmu",
+      "monthly_rent": "Měsíční nájemné",
+      "security_deposit": "Kauce",
+      "use_clause": "Užívání nemovitosti",
+      "maintenance": "Údržba",
+      "termination": "Ukončení"
+    },
+    "use_clause_text": "Nájemce smí nemovitost užívat výhradně jako soukromé bydlení pro sebe a nejbližší rodinné příslušníky. Podnájem a komerční využití jsou bez předchozího písemného souhlasu pronajímatele zakázány.",
+    "maintenance_text": "Pronajímatel odpovídá za údržbu konstrukce a za hlavní spotřebiče instalované developerem. Nájemce odpovídá za každodenní čistotu, drobné opravy do přiměřené výše a za škody způsobené nesprávným užíváním.",
+    "termination_text": "Každá strana může tuto nájemní smlouvu ukončit ke konci doby nájmu písemnou výpovědí doručenou nejméně 30 dnů před jejím uplynutím. Předčasné ukončení nájemcem vede k propadnutí kauce, pokud pronajímatel nesouhlasí písemně jinak."
+  },
+  "move_in_checklist": {
+    "title": "Kontrolní seznam při nastěhování",
+    "intro": "Protokol o stavu jednotlivých místností zaznamenaný v okamžiku předání. Obě strany podpisem potvrzují, že uvedený stav odpovídá jednotce při kontrole.",
+    "empty_rooms": "Nebyla zadána data o místnostech.",
+    "acceptance_text": "Podpisem níže obě strany potvrzují, že stav jednotlivých místností uvedený výše přesně odpovídá jednotce v okamžiku kontroly.",
+    "headings": {
+      "spa_ref": "Číslo smlouvy",
+      "inspection_date": "Datum kontroly"
+    },
+    "columns": {
+      "item": "Položka",
+      "condition": "Stav",
+      "notes": "Poznámky"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Potvrzení o bezdlužnosti",
+    "intro": "Tento dopis vydává developer na žádost kupujícího k potvrzení, že níže uvedená jednotka nemá žádné nesplacené poplatky, hypotéky, zástavní práva ani věcná břemena ve prospěch developera.",
+    "no_encumbrance_text": "Developer tímto potvrzuje, že ke dni tohoto dopisu je výše uvedená jednotka prostá jakékoli hypotéky, zástavního práva, zástavy nebo věcného břemene ve prospěch developera nebo jakékoli související osoby.",
+    "purpose_text": "Tento dopis je vydán výhradně pro účely žádosti kupujícího o hypoteční úvěr a případného souvisejícího due diligence požadovaného výše uvedenou bankou. Nevzdává se žádných práv developera podle kupní smlouvy.",
+    "headings": {
+      "bank": "Vystaveno pro (banku)",
+      "spa_ref": "Číslo smlouvy",
+      "unit": "Jednotka"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Žádost o převod vlastnického práva",
+    "intro": "Úřední žádost katastrálnímu úřadu o převod vlastnického práva k níže popsané jednotce z developera na nové vlastníky uvedené v kupní smlouvě.",
+    "request_text": "Developer tímto žádá katastrální úřad, aby zapsal převod vlastnického práva k výše uvedené jednotce ve prospěch uvedených nových vlastníků v uvedených podílech s účinností ke dni této žádosti.",
+    "attachments_text": "Originál podepsané kupní smlouvy, doklad o poslední úhradě, předávací protokol, doklady totožnosti všech nových vlastníků a případné doklady o zaplacení poplatků dle požadavků katastrálního úřadu.",
+    "headings": {
+      "registry": "Katastrální úřad",
+      "spa_ref": "Číslo smlouvy",
+      "unit": "Jednotka",
+      "new_owners": "Noví vlastníci",
+      "request_body": "Žádost",
+      "attachments": "Přílohy"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Pokyn k uvolnění úschovy",
+    "intro": "Pokyn úschovnímu agentovi k uvolnění prostředků uložených na níže uvedeném úschovním účtu ve prospěch developera, ve vztahu k popsanému milníku.",
+    "instruction_text": "Developer tímto zmocňuje a pokynuje úschovního agenta k uvolnění výše uvedené částky z uvedeného úschovního účtu na provozní účet developera. Uvolnění následuje po potvrzení milníku zaznamenaného v kupní smlouvě.",
+    "headings": {
+      "escrow_account": "Číslo úschovního účtu",
+      "spa_ref": "Číslo smlouvy",
+      "unit": "Jednotka",
+      "amount_to_release": "Částka k uvolnění",
+      "release_reason": "Důvod uvolnění"
+    }
+  },
+  "refund_authorization": {
+    "title": "Pokyn k vrácení platby",
+    "intro": "Tento dokument zmocňuje k vrácení níže uvedené částky ve vztahu ke zrušené rezervaci nebo kupní smlouvě, na kterou se odkazuje.",
+    "authorisation_text": "Developer tímto zmocňuje k vrácení výše uvedené částky způsobem platby uvedeným výše. Termín vypořádání se řídí standardními finančními postupy developera a případnými lhůtami pro odstoupení a pravidly o propadnutí platnými pro původní transakci.",
+    "headings": {
+      "reference": "Reference",
+      "unit": "Jednotka",
+      "amount": "Částka k vrácení",
+      "reason": "Důvod",
+      "payment_method": "Způsob platby"
+    }
+  }
+}

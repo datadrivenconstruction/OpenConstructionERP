@@ -68,7 +68,6 @@ so translating them would produce a file no COBie consumer can read.
 from __future__ import annotations
 
 import csv
-import html
 import io
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -588,7 +587,7 @@ def _export_pdf(
         branded_header_footer,
         branded_letterhead,
     )
-    from app.core.pdf_fonts import BODY_FONT, BOLD_FONT, pdf_style_for_text, register_pdf_fonts
+    from app.core.pdf_fonts import BODY_FONT, BOLD_FONT, pdf_markup, pdf_style_for_text, register_pdf_fonts
 
     register_pdf_fonts()
 
@@ -665,7 +664,8 @@ def _export_pdf(
         name and every value in its snapshot.
         """
         rendered = "" if text is None else str(text)
-        return Paragraph(html.escape(rendered, quote=True), pdf_style_for_text(styles[style_key], rendered))
+        style = styles[style_key]
+        return Paragraph(pdf_markup(rendered, style), pdf_style_for_text(style, rendered))
 
     flowables: list[Any] = []
     flowables.append(_p(title, "title"))

@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Sahifa {page} / {total}",
+    "generated_at": "{timestamp} UTC da yaratildi",
+    "doc_ref": "Hujjat raqami",
+    "developer": "Dasturchi",
+    "unit_code": "Obyekt kodi",
+    "watermark_draft": "QORALAMA",
+    "currency": "Valyuta",
+    "amount": "Summa",
+    "date": "Sana",
+    "signature": "Imzo",
+    "place": "Joy",
+    "buyer_signature": "Xaridor imzosi",
+    "developer_signature": "Dasturchi imzosi",
+    "witness": "Guvoh"
+  },
+  "reservation_receipt": {
+    "title": "Bron qilish kvitansiyasi",
+    "intro": "Ushbu kvitansiya quyida ko'rsatilgan obyektni bron qilinganini tasdiqlaydi. Depozit qabul qilingan va obyekt sotuvdan chiqarilgan holda xaridor uchun salqilik muddati tugaguncha yoki sotib olish-sotish shartnomasi imzolanguncha saqlanadi.",
+    "headings": {
+      "buyer": "Xaridor",
+      "property": "Obyekt",
+      "amount_paid": "To'langan summa",
+      "valid_until": "Amal qilish muddati",
+      "next_step": "Keyingi qadam",
+      "reservation_number": "Bron raqami",
+      "cooling_off": "Bekor qilish muddati",
+      "deposit_status": "Depozit holati",
+      "plot_details": "Uchastka tafsilotlari"
+    },
+    "next_step_text": "{days} kun ichida xaridor sotib olish-sotish shartnomasini imzolashi va keyingi bo'lib to'lovni amalga oshirishi kerak, aks holda bron muddati tugaydi va obyekt yana bozorga chiqariladi.",
+    "cooling_off_text": "Ushbu hujjat olingan kundan boshlab {days} kun.",
+    "footer_note": "Depozit faqat yurisdiksiya belgilagan bekor qilish muddati ichida to'liq qaytariladi. Bu muddatdan keyin qaytarish amaldagi jarimalar qoidalariga muvofiq amalga oshiriladi."
+  },
+  "sales_contract": {
+    "title": "Sotib olish-sotish shartnomasi",
+    "subtitle": "Shartnoma raqami {number}",
+    "preamble": "Ushbu sotib olish-sotish shartnomasi (\"Shartnoma\") quyida ko'rsatilgan sanada, ro'yxatga olingan Dasturchi va quyida ko'rsatilgan Xaridor(lar) o'rtasida, ushbu hujjatda ko'rsatilgan obyektni sotish uchun tuzildi.",
+    "headings": {
+      "parties": "Shartnoma tomonlari",
+      "property": "Obyekt",
+      "price": "Sotib olish narxi",
+      "payment_schedule": "To'lov jadvali",
+      "clauses": "Shartlar va qoidalar",
+      "instalments": "Bo'lib to'lashlar",
+      "signatures": "Imzolar",
+      "co_ownership": "Birgalikda mulkchilik",
+      "regulatory": "Normativ ma'lumotlar",
+      "annexes": "Ilovalar"
+    },
+    "parties_intro": "Xaridor(lar) obyektni quyida ko'rsatilgan ulushlarga muvofiq birgalikda sotib oladi. Boshqacha aniq ko'rsatilmagan bo'lsa, barcha tomonlar ushbu Shartnoma bo'yicha majburiyatlar uchun birgalikda va alohida javobgar bo'ladi.",
+    "instalment_columns": {
+      "sequence": "№",
+      "milestone": "Bosqich",
+      "due_date": "To'lov muddati",
+      "amount": "Summa",
+      "currency": "Valyuta"
+    },
+    "party_columns": {
+      "name": "Nomi",
+      "role": "Roli",
+      "ownership_pct": "Ulush, %",
+      "email": "Elektron pochta"
+    },
+    "property_columns": {
+      "plot_number": "Uchastka raqami",
+      "development": "Loyiha",
+      "area_m2": "Maydoni (m²)",
+      "house_type": "Uy turi"
+    },
+    "price_label": "Sotib olishning umumiy narxi",
+    "breakdown_label": "Narx tarkibi",
+    "signature_note": "{place} shahrida {date} sanada imzolandi. Quyida imzo chekish orqali Xaridor va Dasturchi ilovalarni o'z ichiga olgan ushbu Shartnomada belgilangan shartlarni o'qiganini, tushunganini va ularga rozi ekanini tasdiqlaydi."
+  },
+  "payment_receipt": {
+    "title": "To'lov kvitansiyasi",
+    "intro": "Ushbu kvitansiya quyida ko'rsatilgan sotib olish-sotish shartnomasi bo'yicha bo'lib to'lashning to'langanini tasdiqlaydi.",
+    "headings": {
+      "spa_ref": "Shartnoma raqami",
+      "instalment": "Bo'lib to'lash",
+      "milestone": "Bosqich",
+      "amount_paid": "To'langan summa",
+      "payment_method": "To'lov usuli",
+      "payment_ref": "To'lov havolasi",
+      "paid_at": "To'langan sana",
+      "outstanding": "Qoldiq qarz"
+    },
+    "footer_note": "Ushbu kvitansiya avtomatik yaratiladi va qo'lda imzosiz haqiqiy hisoblanadi. Hisob-kitoblar uchun saqlab qo'ying."
+  },
+  "handover_certificate": {
+    "title": "Topshirish dalolatnomasi",
+    "intro": "Ushbu dalolatnoma obyektning Dasturchidan Xaridor(lar)ga topshirilganini qayd etadi. Xaridor obyektni ilova qilingan kamchiliklar ro'yxati va kafolat shartlari bilan qabul qiladi.",
+    "headings": {
+      "spa_ref": "Shartnoma raqami",
+      "completed_at": "Topshirish sanasi",
+      "snag_count": "Ochiq kamchiliklar",
+      "warranty_period": "Kafolat muddati",
+      "keys_handed_over": "Kalitlar topshirildi",
+      "buyer_acceptance": "Xaridorning qabul qilishi",
+      "developer_declaration": "Dasturchining bayonoti"
+    },
+    "developer_declaration_text": "Dasturchi ushbu bilan obyekt sotib olish-sotish shartnomasiga muvofiq qurilganini, barcha zarur hujjatlar Xaridorga topshirilganini va konstruktiv hamda pardozlash kafolatlari ushbu dalolatnoma sanasidan boshlanishini tasdiqlaydi.",
+    "buyer_acceptance_text": "Xaridor ilova qilingan kamchiliklar ro'yxati bilan obyektni topshirib olishni qabul qiladi. Xaridor kalitlar, qo'llanmalar va Ilovalarda ko'rsatilgan barcha zarur hujjatlarni olganini tasdiqlaydi.",
+    "snag_note": "Ochiq kamchiliklar Shartnomaning kamchiliklarni bartaraf etish bandiga muvofiq Dasturchi tomonidan oqilona muddatda bartaraf etiladi."
+  },
+  "warranty_certificate": {
+    "title": "Kafolat sertifikati",
+    "intro": "Ushbu Sertifikat quyida ko'rsatilgan sanada Xaridor(lar)ga topshirilgan obyektga nisbatan Dasturchining kafolat majburiyatlarini belgilaydi.",
+    "headings": {
+      "spa_ref": "Shartnoma raqami",
+      "handover_date": "Topshirish sanasi",
+      "structural": "Konstruktiv kafolat",
+      "finishing": "Pardozlash kafolati",
+      "structural_period": "Konstruktiv kafolat muddati",
+      "finishing_period": "Pardozlash kafolati muddati",
+      "warranty_expiry": "Kafolat tugash sanasi",
+      "scope": "Qamrov doirasi",
+      "exclusions": "Istisnolar"
+    },
+    "structural_text": "Dasturchi obyektning konstruktiv yaxlitligini — yuk ko'taruvchi konstruksiyani, poydevorni va gidroizolyatsiyani o'z ichiga olgan holda — topshirilgan sanadan boshlab {years} yil davomida kafolatlaydi.",
+    "finishing_text": "Dasturchi pardozlash ishlarini — bo'yoq, armatura, jihozlar, Dasturchi o'rnatgan asbob-uskunalar va mayda kosmetik buyumlarni o'z ichiga olgan holda — topshirilgan sanadan boshlab {years} yil davomida kafolatlaydi.",
+    "exclusions_text": "Ushbu kafolat noto'g'ri foydalanish, Xaridor yoki uchinchi shaxslar tomonidan amalga oshirilgan o'zgartirishlar, odatdagi eskirish, force majeure holatlari va alohida ishlab chiqaruvchi kafolatlari bilan qoplanadigan buyumlardan kelib chiqqan zararni qoplamaydi.",
+    "claim_procedure": "Da'vo bildirish uchun Xaridor kafolat muddati ichida Dasturchiga nuqsonni tavsiflovchi va asoslovchi dalillarni ilova qilgan holda yozma xabar yuborishi kerak."
+  },
+  "noc": {
+    "title": "E'tirozsizlik sertifikati",
+    "subtitle": "Obyektni qayta sotish uchun",
+    "intro": "Ushbu e'tirozsizlik sertifikati (NOC) Dasturchi tomonidan berilib, quyida ko'rsatilgan obyektni qayta sotishga to'sqinlik qiladigan Xaridorning bajarilmagan majburiyatlari yo'qligini tasdiqlaydi.",
+    "headings": {
+      "spa_ref": "Shartnoma raqami",
+      "requested_by": "So'rov yuborgan",
+      "issued_to": "Kimga berilgan",
+      "purpose": "Maqsad",
+      "validity": "Amal qilish muddati",
+      "outstanding_balance": "Qoldiq qarz",
+      "transfer_fee": "Mulkni o'tkazish to'lovi"
+    },
+    "validity_text": "Ushbu sertifikat berilgan kundan boshlab {days} kun amal qiladi. Bu muddatdan keyin yangi sertifikat so'ralishi kerak.",
+    "purpose_text": "Obyektni uchinchi shaxs xaridoriga sotish, Dasturchining standart o'tkazish tartib-qoidalariga muvofiq.",
+    "no_outstanding": "Ushbu NOC sanasigacha barcha bo'lib to'lashlar to'liq to'langan. Ushbu shartnoma bo'yicha to'lanmagan to'lovlar qayd etilmagan.",
+    "developer_statement": "Dasturchi standart o'tkazish to'lovi va tartib-qoidalariga muvofiq, Xaridorga obyekt mulkini uchinchi shaxsga o'tkazishga ruxsat beradi. Ushbu NOC sotib olish-sotish shartnomasi bo'yicha Dasturchining huquqlaridan voz kechmaydi."
+  },
+  "tenant_lease_agreement": {
+    "title": "Ijarachi bilan ijara shartnomasi",
+    "intro": "Ushbu ijara shartnomasi Ijaraga beruvchi (Dasturchi) va quyida nomi ko'rsatilgan Ijarachi(lar) o'rtasida tuzilgan bo'lib, hujjatda tavsiflangan obyektni turar joy sifatida ijaraga berish uchun mo'ljallangan.",
+    "tenant_signature": "Ijarachi imzosi",
+    "headings": {
+      "lease_number": "Ijara raqami",
+      "tenant": "Ijarachi",
+      "property": "Obyekt",
+      "term": "Muddat",
+      "monthly_rent": "Oylik ijara to'lovi",
+      "security_deposit": "Kafolat depozit",
+      "use_clause": "Obyektdan foydalanish",
+      "maintenance": "Texnik xizmat ko'rsatish",
+      "termination": "Shartnomani bekor qilish"
+    },
+    "use_clause_text": "Ijarachi obyektdan faqat o'zi va yaqin oila a'zolari uchun shaxsiy turar joy sifatida foydalanadi. Ijaraga beruvchining oldindan yozma roziligisiz qayta ijaraga berish va tijorat maqsadida foydalanish taqiqlanadi.",
+    "maintenance_text": "Ijaraga beruvchi konstruktiv ta'mirlash va Dasturchi o'rnatgan yirik maishiy jihozlar uchun javobgar. Ijarachi kundalik tozalik, oqilona chegaradagi kichik ta'mirlash va noto'g'ri foydalanish natijasida yetkazilgan zarar uchun javobgar.",
+    "termination_text": "Har bir tomon muddat tugashidan kamida 30 kun oldin yozma xabar berib, ijara shartnomasini bekor qilishi mumkin. Ijaraga beruvchi yozma ravishda rozi bo'lmasa, Ijarachi tomonidan muddatidan oldin bekor qilinganda kafolat depoziti qaytarilmaydi."
+  },
+  "move_in_checklist": {
+    "title": "Kirish ro'yxati",
+    "intro": "Topshirish paytida xonama-xona holat bo'yicha qayd etilgan hisobot. Ikkala tomon ham ko'rsatilgan holat tekshirilgan obyektga mos kelishini tasdiqlaydi.",
+    "empty_rooms": "Xonalar ma'lumoti taqdim etilmagan.",
+    "acceptance_text": "Quyida imzo chekish orqali ikkala tomon yuqorida qayd etilgan xonama-xona holat tekshiruv vaqtida obyektga aniq mos kelishini tasdiqlaydi.",
+    "headings": {
+      "spa_ref": "Shartnoma raqami",
+      "inspection_date": "Tekshiruv sanasi"
+    },
+    "columns": {
+      "item": "Element",
+      "condition": "Holati",
+      "notes": "Izohlar"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Ipoteka bo'yicha qarzsizlik xati",
+    "intro": "Ushbu xat Xaridor so'rovi bilan Dasturchi tomonidan berilib, quyida ko'rsatilgan obyektda Dasturchi foydasiga hech qanday to'lanmagan majburiyat, ipoteka, garov yoki cheklov yo'qligini tasdiqlaydi.",
+    "no_encumbrance_text": "Dasturchi ushbu xat sanasiga ko'ra, yuqorida ko'rsatilgan obyekt Dasturchi yoki tegishli shaxs foydasiga har qanday ipoteka, garov, sud haqi yoki cheklovdan xoli ekanini tasdiqlaydi.",
+    "purpose_text": "Ushbu xat faqat Xaridorning ipoteka arizasi va yuqorida ko'rsatilgan Bank talab qilgan tegishli tekshiruv maqsadida berildi. Ushbu xat Sotib olish-sotish shartnomasi bo'yicha Dasturchining huquqlaridan voz kechmaydi.",
+    "headings": {
+      "bank": "Kimga berilgan (Bank)",
+      "spa_ref": "Shartnoma raqami",
+      "unit": "Obyekt"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Mulk huquqini o'tkazish to'g'risidagi ariza",
+    "intro": "Quyida tavsiflangan obyekt mulk huquqini Dasturchidan sotib olish-sotish shartnomasida ko'rsatilgan yangi egasi(lar)ga o'tkazish uchun ro'yxatga olish organiga rasmiy ariza.",
+    "request_text": "Dasturchi ushbu ariza sanasidan kuchga kiradigan holda, Kadastr organini yuqoridagi obyektga mulk huquqini ko'rsatilgan ulushlarga muvofiq yangi egasi(lar) foydasiga qayd etishga so'raydi.",
+    "attachments_text": "Imzolangan asl sotib olish-sotish shartnomasi, oxirgi to'lov kvitansiyasi, topshirish dalolatnomasi, barcha yangi egalarning shaxsni tasdiqlovchi hujjatlari va ro'yxatga olish organi talab qilgan har qanday gerb yig'imi kvitansiyalari.",
+    "headings": {
+      "registry": "Kadastr organi",
+      "spa_ref": "Shartnoma raqami",
+      "unit": "Obyekt",
+      "new_owners": "Yangi egalar",
+      "request_body": "So'rov",
+      "attachments": "Ilovalar"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Eskrou hisobdan mablag'ni chiqarish ruxsatnomasi",
+    "intro": "Eskrou agentiga quyida ko'rsatilgan eskrou hisobida saqlanayotgan mablag'ni tavsiflangan bosqich yuzasidan Dasturchiga o'tkazish bo'yicha ko'rsatma.",
+    "instruction_text": "Dasturchi ushbu bilan Eskrou agentiga yuqoridagi summani ko'rsatilgan eskrou hisobidan Dasturchining operatsion hisobiga o'tkazishni buyuradi. Ushbu o'tkazma Sotib olish-sotish shartnomasida qayd etilgan bosqich tasdiqlanganidan keyin amalga oshiriladi.",
+    "headings": {
+      "escrow_account": "Eskrou hisob raqami",
+      "spa_ref": "Shartnoma raqami",
+      "unit": "Obyekt",
+      "amount_to_release": "O'tkaziladigan summa",
+      "release_reason": "O'tkazish sababi"
+    }
+  },
+  "refund_authorization": {
+    "title": "Qaytarish ruxsatnomasi",
+    "intro": "Ushbu hujjat ko'rsatilgan bekor qilingan bron yoki sotish shartnomasi yuzasidan quyida ko'rsatilgan summani qaytarishga ruxsat beradi.",
+    "authorisation_text": "Dasturchi ushbu bilan ko'rsatilgan to'lov usuli orqali yuqoridagi summani qaytarishga ruxsat beradi. Hisob-kitob muddati Dasturchining standart moliyaviy tartib-qoidalari hamda asl operatsiyaga tegishli bekor qilish muddati va jarimalar qoidalariga muvofiq belgilanadi.",
+    "headings": {
+      "reference": "Havola",
+      "unit": "Obyekt",
+      "amount": "Qaytariladigan summa",
+      "reason": "Sabab",
+      "payment_method": "To'lov usuli"
+    }
+  }
+}

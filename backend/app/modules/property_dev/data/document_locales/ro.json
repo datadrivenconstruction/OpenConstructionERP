@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Pagina {page} din {total}",
+    "generated_at": "Generat la {timestamp} UTC",
+    "doc_ref": "Ref. doc.",
+    "developer": "Dezvoltator",
+    "unit_code": "Cod unitate",
+    "watermark_draft": "CIORNĂ",
+    "currency": "Monedă",
+    "amount": "Sumă",
+    "date": "Data",
+    "signature": "Semnătură",
+    "place": "Locul",
+    "buyer_signature": "Semnătura cumpărătorului",
+    "developer_signature": "Semnătura dezvoltatorului",
+    "witness": "Martor"
+  },
+  "reservation_receipt": {
+    "title": "Chitanță de rezervare",
+    "intro": "Această chitanță confirmă rezervarea imobilului descris mai jos. Avansul a fost primit, iar unitatea este reținută pentru cumpărător până la expirarea perioadei de retragere sau până la semnarea contractului de vânzare-cumpărare.",
+    "headings": {
+      "buyer": "Cumpărător",
+      "property": "Imobil",
+      "amount_paid": "Sumă plătită",
+      "valid_until": "Valabilă până la",
+      "next_step": "Pasul următor",
+      "reservation_number": "Nr. rezervare",
+      "cooling_off": "Perioada de retragere",
+      "deposit_status": "Starea avansului",
+      "plot_details": "Detalii parcelă"
+    },
+    "next_step_text": "În termen de {days} zile, cumpărătorul trebuie să semneze contractul de vânzare-cumpărare și să plătească următoarea tranșă, altfel rezervarea va expira și unitatea va fi repusă pe piață.",
+    "cooling_off_text": "{days} zile de la primirea acestui document.",
+    "footer_note": "Avansul se restituie integral numai în perioada de retragere stabilită de jurisdicție. După această perioadă, restituirea urmează regulile aplicabile privind pierderea avansului."
+  },
+  "sales_contract": {
+    "title": "Contract de vânzare-cumpărare",
+    "subtitle": "Contract nr. {number}",
+    "preamble": "Prezentul contract de vânzare-cumpărare (denumit în continuare „Contractul”) se încheie la data indicată mai jos între Dezvoltatorul înregistrat și Cumpărătorul/Cumpărătorii enumerați mai jos, pentru vânzarea imobilului identificat în prezentul document.",
+    "headings": {
+      "parties": "Părțile contractante",
+      "property": "Imobilul",
+      "price": "Prețul de vânzare",
+      "payment_schedule": "Grafic de plată",
+      "clauses": "Termeni și condiții",
+      "instalments": "Tranșe",
+      "signatures": "Semnături",
+      "co_ownership": "Coproprietate",
+      "regulatory": "Informații reglementare",
+      "annexes": "Anexe"
+    },
+    "parties_intro": "Cumpărătorul/Cumpărătorii dobândesc imobilul în comun, în cotele de proprietate stabilite mai jos. Toate părțile răspund solidar pentru obligațiile din prezentul Contract, cu excepția cazului în care se prevede explicit altfel.",
+    "instalment_columns": {
+      "sequence": "Nr.",
+      "milestone": "Etapă",
+      "due_date": "Data scadentă",
+      "amount": "Sumă",
+      "currency": "Monedă"
+    },
+    "party_columns": {
+      "name": "Nume",
+      "role": "Calitate",
+      "ownership_pct": "Cotă (%)",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Număr parcelă",
+      "development": "Ansamblu",
+      "area_m2": "Suprafață (m²)",
+      "house_type": "Tip locuință"
+    },
+    "price_label": "Prețul total de vânzare",
+    "breakdown_label": "Defalcarea prețului",
+    "signature_note": "Semnat în {place} la {date}. Prin semnarea de mai jos, Cumpărătorul și Dezvoltatorul confirmă că au citit, au înțeles și sunt de acord cu termenii prezentului Contract, inclusiv cu toate anexele."
+  },
+  "payment_receipt": {
+    "title": "Chitanță de plată",
+    "intro": "Prezenta chitanță confirmă plata unei tranșe în baza contractului de vânzare-cumpărare menționat mai jos.",
+    "headings": {
+      "spa_ref": "Nr. contract",
+      "instalment": "Tranșă",
+      "milestone": "Etapă",
+      "amount_paid": "Sumă plătită",
+      "payment_method": "Modalitate de plată",
+      "payment_ref": "Referința plății",
+      "paid_at": "Plătită la",
+      "outstanding": "Sold restant"
+    },
+    "footer_note": "Această chitanță este generată automat și este valabilă fără semnătură olografă. Păstrați-o pentru evidența dumneavoastră."
+  },
+  "handover_certificate": {
+    "title": "Proces-verbal de predare-primire",
+    "intro": "Acest proces-verbal consemnează predarea imobilului de la Dezvoltator către Cumpărător/Cumpărători. Cumpărătorul acceptă unitatea sub rezerva listei de remedieri și a termenelor de garanție anexate.",
+    "headings": {
+      "spa_ref": "Nr. contract",
+      "completed_at": "Data predării",
+      "snag_count": "Remedieri deschise",
+      "warranty_period": "Perioada de garanție",
+      "keys_handed_over": "Chei predate",
+      "buyer_acceptance": "Acceptarea cumpărătorului",
+      "developer_declaration": "Declarația dezvoltatorului"
+    },
+    "developer_declaration_text": "Dezvoltatorul confirmă prin prezenta că imobilul a fost construit în conformitate cu contractul de vânzare-cumpărare, că toată documentația necesară a fost predată Cumpărătorului și că garanțiile pentru structură și finisaje încep de la data prezentului proces-verbal.",
+    "buyer_acceptance_text": "Cumpărătorul acceptă prin prezenta predarea imobilului sub rezerva listei de remedieri anexate. Cumpărătorul confirmă primirea cheilor, a manualelor și a tuturor documentelor necesare enumerate în anexe.",
+    "snag_note": "Remedierile deschise vor fi realizate de Dezvoltator într-un termen rezonabil, conform clauzei din contract privind remedierea defectelor."
+  },
+  "warranty_certificate": {
+    "title": "Certificat de garanție",
+    "intro": "Prezentul certificat stabilește obligațiile de garanție ale Dezvoltatorului privind imobilul predat Cumpărătorului/Cumpărătorilor la data de mai jos.",
+    "headings": {
+      "spa_ref": "Nr. contract",
+      "handover_date": "Data predării",
+      "structural": "Garanție pentru structură",
+      "finishing": "Garanție pentru finisaje",
+      "structural_period": "Perioada pentru structură",
+      "finishing_period": "Perioada pentru finisaje",
+      "warranty_expiry": "Expirarea garanției",
+      "scope": "Domeniul acoperit",
+      "exclusions": "Excluderi"
+    },
+    "structural_text": "Dezvoltatorul garantează integritatea structurală a imobilului - inclusiv structura portantă, fundațiile și hidroizolația - pe o perioadă de {years} ani de la data predării.",
+    "finishing_text": "Dezvoltatorul garantează lucrările de finisaje - inclusiv vopsitoriile, obiectele sanitare, accesoriile și echipamentele montate de Dezvoltator, precum și defectele cosmetice minore - pe o perioadă de {years} an(i) de la data predării.",
+    "exclusions_text": "Garanția exclude daunele cauzate de utilizare necorespunzătoare, modificările efectuate de Cumpărător sau de terți, uzura normală, forța majoră și elementele acoperite de garanții separate ale producătorilor.",
+    "claim_procedure": "Pentru a depune o reclamație, Cumpărătorul trebuie să transmită Dezvoltatorului o notificare scrisă în perioada de garanție, descriind defectul și anexând dovezi rezonabile."
+  },
+  "noc": {
+    "title": "Certificat de non-obiecție",
+    "subtitle": "Pentru revânzarea unității",
+    "intro": "Prezentul Certificat de non-obiecție (NOC) este emis de Dezvoltator pentru a confirma că nu există obligații restante ale Cumpărătorului care ar împiedica revânzarea unității identificate mai jos.",
+    "headings": {
+      "spa_ref": "Nr. contract",
+      "requested_by": "Solicitat de",
+      "issued_to": "Emis către",
+      "purpose": "Scop",
+      "validity": "Valabilitate",
+      "outstanding_balance": "Sold restant",
+      "transfer_fee": "Taxa de transfer"
+    },
+    "validity_text": "Acest NOC este valabil {days} zile de la data emiterii. După această perioadă, trebuie solicitat un nou NOC.",
+    "purpose_text": "Vânzarea unității către un cumpărător terț, sub rezerva procedurilor standard de transfer ale Dezvoltatorului.",
+    "no_outstanding": "Toate tranșele până la data prezentului NOC au fost plătite integral. Nu există plăți restante înregistrate pentru acest contract.",
+    "developer_statement": "Dezvoltatorul acordă prin prezenta permisiunea, sub rezerva taxei standard de transfer și a procedurilor aplicabile, ca Cumpărătorul să transmită dreptul de proprietate asupra unității unui terț. Prezentul NOC nu renunță la niciun drept al Dezvoltatorului în baza contractului de vânzare-cumpărare."
+  },
+  "tenant_lease_agreement": {
+    "title": "Contract de închiriere",
+    "intro": "Prezentul contract de închiriere se încheie între Locator (Dezvoltator) și Chiriașul/Chiriașii menționați mai jos, pentru închirierea cu destinație de locuință a imobilului descris în prezentul document.",
+    "tenant_signature": "Semnătura chiriașului",
+    "headings": {
+      "lease_number": "Nr. contract",
+      "tenant": "Chiriaș",
+      "property": "Imobil",
+      "term": "Durată",
+      "monthly_rent": "Chirie lunară",
+      "security_deposit": "Garanție",
+      "use_clause": "Destinația imobilului",
+      "maintenance": "Întreținere",
+      "termination": "Încetare"
+    },
+    "use_clause_text": "Chiriașul va folosi imobilul exclusiv ca locuință privată, pentru sine și familia sa apropiată. Subînchirierea și folosirea în scop comercial sunt interzise fără acordul scris prealabil al Locatorului.",
+    "maintenance_text": "Locatorul răspunde de întreținerea structurală și de aparatele importante montate de Dezvoltator. Chiriașul răspunde de curățenia zilnică, de reparațiile minore sub un prag rezonabil și de orice daune cauzate prin utilizare necorespunzătoare.",
+    "termination_text": "Oricare dintre părți poate denunța prezentul contract la expirarea duratei, printr-o notificare scrisă transmisă cu cel puțin 30 de zile înainte de expirare. Denunțarea anticipată de către Chiriaș atrage pierderea garanției, cu excepția cazului în care Locatorul acceptă altfel în scris."
+  },
+  "move_in_checklist": {
+    "title": "Proces-verbal de intrare în imobil",
+    "intro": "Raport de stare pe camere, întocmit în momentul predării. Ambele părți semnează că starea consemnată reflectă unitatea așa cum a fost inspectată.",
+    "empty_rooms": "Nu au fost furnizate date despre camere.",
+    "acceptance_text": "Prin semnarea de mai jos, ambele părți confirmă că starea consemnată pe camere mai sus reflectă cu exactitate unitatea în momentul inspecției.",
+    "headings": {
+      "spa_ref": "Nr. contract",
+      "inspection_date": "Data inspecției"
+    },
+    "columns": {
+      "item": "Element",
+      "condition": "Stare",
+      "notes": "Observații"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Adresă de lipsă a sarcinilor ipotecare",
+    "intro": "Prezenta adresă este emisă de Dezvoltator, la cererea Cumpărătorului, pentru a confirma că unitatea identificată mai jos nu are sarcini, ipoteci, popriri sau grevări restante în favoarea Dezvoltatorului.",
+    "no_encumbrance_text": "Dezvoltatorul confirmă prin prezenta că, la data prezentei adrese, unitatea de mai sus este liberă de orice ipotecă, sarcină, poprire sau grevare în favoarea Dezvoltatorului sau a oricărei părți afiliate.",
+    "purpose_text": "Prezenta adresă este emisă exclusiv în scopul cererii de credit ipotecar a Cumpărătorului și al oricăror verificări de diligență solicitate de Banca menționată mai sus. Nu renunță la niciun drept al Dezvoltatorului în baza contractului de vânzare-cumpărare.",
+    "headings": {
+      "bank": "Emis către (Banca)",
+      "spa_ref": "Nr. contract",
+      "unit": "Unitate"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Cerere de transfer al dreptului de proprietate",
+    "intro": "Cerere formală către oficiul de cadastru și carte funciară, pentru transferul dreptului de proprietate asupra unității descrise mai jos, de la Dezvoltator către noul/noii proprietar(i) menționat(i) în contractul de vânzare-cumpărare.",
+    "request_text": "Dezvoltatorul solicită prin prezenta ca Oficiul de Cadastru și Carte Funciară să înscrie transferul dreptului de proprietate asupra unității de mai sus în favoarea noului/noilor proprietar(i) enumerat(i), în cotele indicate, cu efect de la data prezentei cereri.",
+    "attachments_text": "Contractul de vânzare-cumpărare original (semnat), chitanța de plată finală, procesul-verbal de predare-primire, actele de identitate ale tuturor noilor proprietari și dovezile privind taxele de timbru, după cum solicită oficiul.",
+    "headings": {
+      "registry": "Oficiul de Cadastru și Carte Funciară",
+      "spa_ref": "Nr. contract",
+      "unit": "Unitate",
+      "new_owners": "Noul/Noii proprietar(i)",
+      "request_body": "Cerere",
+      "attachments": "Anexe"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Autorizație de eliberare din escrow",
+    "intro": "Instrucțiune către Agentul de escrow de a elibera fondurile păstrate în contul de escrow identificat mai jos, în favoarea Dezvoltatorului, pentru etapa descrisă.",
+    "instruction_text": "Dezvoltatorul autorizează și instruiește prin prezenta Agentul de escrow să elibereze suma de mai sus din contul de escrow indicat în contul operațional al Dezvoltatorului. Această eliberare urmează certificării etapei consemnate în contractul de vânzare-cumpărare.",
+    "headings": {
+      "escrow_account": "Nr. cont de escrow",
+      "spa_ref": "Nr. contract",
+      "unit": "Unitate",
+      "amount_to_release": "Sumă de eliberat",
+      "release_reason": "Motivul eliberării"
+    }
+  },
+  "refund_authorization": {
+    "title": "Autorizație de restituire",
+    "intro": "Prezentul document autorizează restituirea sumei identificate mai jos, în legătură cu rezervarea anulată sau contractul de vânzare-cumpărare menționat.",
+    "authorisation_text": "Dezvoltatorul autorizează prin prezenta restituirea sumei de mai sus prin modalitatea de plată indicată. Termenul de decontare urmează procedurile financiare standard ale Dezvoltatorului și regulile privind perioada de retragere sau pierderea avansului, aplicabile tranzacției inițiale.",
+    "headings": {
+      "reference": "Referință",
+      "unit": "Unitate",
+      "amount": "Sumă de restituit",
+      "reason": "Motiv",
+      "payment_method": "Modalitate de plată"
+    }
+  }
+}

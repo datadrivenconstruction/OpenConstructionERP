@@ -677,7 +677,7 @@ def draw_furniture_line(
         else:
             canvas.drawString(x, y, text)
         return
-    style = ParagraphStyle(
+    plain = ParagraphStyle(
         "PageFurniture",
         fontName=face,
         fontSize=size,
@@ -685,8 +685,10 @@ def draw_furniture_line(
         textColor=colors.HexColor(color),
         alignment=TA_RIGHT if align == "right" else TA_LEFT,
     )
-    style = pdf_style_for_text(style, text, base=face)
-    paragraph = Paragraph(pdf_markup(text, style), style)
+    # The runs are cut for the caller's face, not the shaping face the style
+    # takes: cut from that, "m" and its superscript would be split across faces.
+    style = pdf_style_for_text(plain, text, base=face)
+    paragraph = Paragraph(pdf_markup(text, plain, base=face), style)
     # The box is the measured line plus slack, never wider: a Paragraph that
     # reads right to left aligns itself to the far edge of its box, and a box
     # as wide as the page would move the line away from ``x``.

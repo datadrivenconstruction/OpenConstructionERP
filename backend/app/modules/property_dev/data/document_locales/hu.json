@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "{page}. oldal / összesen {total}",
+    "generated_at": "Készült: {timestamp} UTC",
+    "doc_ref": "Dokumentumszám",
+    "developer": "Fejlesztő",
+    "unit_code": "Egységkód",
+    "watermark_draft": "TERVEZET",
+    "currency": "Pénznem",
+    "amount": "Összeg",
+    "date": "Dátum",
+    "signature": "Aláírás",
+    "place": "Hely",
+    "buyer_signature": "Vevő aláírása",
+    "developer_signature": "Fejlesztő aláírása",
+    "witness": "Tanú"
+  },
+  "reservation_receipt": {
+    "title": "Foglalási igazolás",
+    "intro": "Ez az igazolás a lent megnevezett ingatlan foglalását rögzíti. A foglalót megkaptuk, az egységet a vevő számára a visszalépési határidő lejártáig vagy az adásvételi szerződés aláírásáig piacon kívül tartjuk.",
+    "headings": {
+      "buyer": "Vevő",
+      "property": "Ingatlan",
+      "amount_paid": "Befizetett összeg",
+      "valid_until": "Érvényes eddig",
+      "next_step": "Következő lépés",
+      "reservation_number": "Foglalási szám",
+      "cooling_off": "Visszalépési határidő",
+      "deposit_status": "Foglaló állapota",
+      "plot_details": "Telek adatai"
+    },
+    "next_step_text": "{days} napon belül a vevőnek alá kell írnia az adásvételi szerződést és ki kell fizetnie a következő részletet, különben a foglalás lejár, és az egység visszakerül a piacra.",
+    "cooling_off_text": "Az igazolás átvételétől számított {days} nap.",
+    "footer_note": "A foglaló csak a joghatóság szerinti visszalépési határidőn belül téríthető vissza teljes egészében. Ezt követően a visszatéríthetőségre az alkalmazandó elvesztési szabályok vonatkoznak."
+  },
+  "sales_contract": {
+    "title": "Adásvételi szerződés",
+    "subtitle": "Szerződésszám: {number}",
+    "preamble": "Ez az adásvételi szerződés („Szerződés”) az alább feltüntetett napon jön létre a nyilvántartott Fejlesztő és az alább felsorolt Vevő(k) között, a jelen dokumentumban azonosított ingatlan eladására.",
+    "headings": {
+      "parties": "A szerződő felek",
+      "property": "Az ingatlan",
+      "price": "Vételár",
+      "payment_schedule": "Fizetési ütemezés",
+      "clauses": "Szerződési feltételek",
+      "instalments": "Részletek",
+      "signatures": "Aláírások",
+      "co_ownership": "Társtulajdon",
+      "regulatory": "Szabályozási nyilatkozatok",
+      "annexes": "Mellékletek"
+    },
+    "parties_intro": "A Vevő(k) az ingatlant az alábbi tulajdoni arányokban szerzik meg közösen. Valamennyi fél a szerződésből eredő kötelezettségekért egyetemlegesen felel, hacsak kifejezetten másként nem rendelkezünk.",
+    "instalment_columns": {
+      "sequence": "Sor",
+      "milestone": "Mérföldkő",
+      "due_date": "Esedékesség",
+      "amount": "Összeg",
+      "currency": "Pénznem"
+    },
+    "party_columns": {
+      "name": "Név",
+      "role": "Szerep",
+      "ownership_pct": "Tulajdoni arány %",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Helyrajzi szám",
+      "development": "Beruházás",
+      "area_m2": "Terület (m²)",
+      "house_type": "Háztípus"
+    },
+    "price_label": "Teljes vételár",
+    "breakdown_label": "Árbontás",
+    "signature_note": "Aláírva: {place}, {date}. Az alábbi aláírással a Vevő és a Fejlesztő igazolja, hogy elolvasta, megértette és elfogadja a jelen Szerződésben, beleértve valamennyi mellékletet, foglalt feltételeket."
+  },
+  "payment_receipt": {
+    "title": "Befizetési igazolás",
+    "intro": "Ez az igazolás a lent hivatkozott adásvételi szerződés szerinti részlet befizetését ismeri el.",
+    "headings": {
+      "spa_ref": "Szerződésszám",
+      "instalment": "Részlet",
+      "milestone": "Mérföldkő",
+      "amount_paid": "Befizetett összeg",
+      "payment_method": "Fizetési mód",
+      "payment_ref": "Utalási hivatkozás",
+      "paid_at": "Befizetés dátuma",
+      "outstanding": "Fennmaradó egyenleg"
+    },
+    "footer_note": "Ez az igazolás automatikusan készül, kézi aláírás nélkül is érvényes. Őrizze meg a nyilvántartásában."
+  },
+  "handover_certificate": {
+    "title": "Átadás-átvételi igazolás",
+    "intro": "Ez az igazolás rögzíti az ingatlan Fejlesztő általi átadását a Vevő(k) részére. A Vevő a mellékelt hibajegyzék és garanciális feltételek mellett veszi át az egységet.",
+    "headings": {
+      "spa_ref": "Szerződésszám",
+      "completed_at": "Átadás dátuma",
+      "snag_count": "Nyitott hibák",
+      "warranty_period": "Garanciaidő",
+      "keys_handed_over": "Átadott kulcsok",
+      "buyer_acceptance": "Vevői elfogadás",
+      "developer_declaration": "Fejlesztői nyilatkozat"
+    },
+    "developer_declaration_text": "A Fejlesztő ezennel igazolja, hogy az ingatlant az adásvételi szerződésnek megfelelően építette meg, hogy valamennyi szükséges dokumentációt átadta a Vevőnek, és hogy a szerkezeti és kivitelezési garancia ezen igazolás keltével kezdődik.",
+    "buyer_acceptance_text": "A Vevő ezennel a csatolt hibajegyzékkel együtt átveszi az ingatlant. A Vevő tudomásul veszi a kulcsok, a használati útmutatók és a mellékletekben felsorolt valamennyi szükséges dokumentum átvételét.",
+    "snag_note": "A nyitott hibákat a Fejlesztő az adásvételi szerződés hibajavítási pontja szerint, ésszerű határidőn belül kijavítja."
+  },
+  "warranty_certificate": {
+    "title": "Garancialevél",
+    "intro": "Ez a igazolás rögzíti a Fejlesztő garanciális kötelezettségeit a lent megjelölt napon a Vevő(k) részére átadott ingatlannal kapcsolatban.",
+    "headings": {
+      "spa_ref": "Szerződésszám",
+      "handover_date": "Átadás dátuma",
+      "structural": "Szerkezeti garancia",
+      "finishing": "Kivitelezési garancia",
+      "structural_period": "Szerkezeti garanciaidő",
+      "finishing_period": "Kivitelezési garanciaidő",
+      "warranty_expiry": "Garancia lejárta",
+      "scope": "A fedezet terjedelme",
+      "exclusions": "Kizárások"
+    },
+    "structural_text": "A Fejlesztő szavatolja az ingatlan szerkezeti épségét – beleértve a teherhordó szerkezetet, az alapozást és a vízszigetelést – az átadás napjától számított {years} évig.",
+    "finishing_text": "A Fejlesztő szavatolja a kivitelezési munkákat – beleértve a festést, a szerelvényeket, a berendezéseket, a Fejlesztő által beépített készülékeket és a kisebb esztétikai elemeket – az átadás napjától számított {years} évig.",
+    "exclusions_text": "A garancia nem terjed ki a rendeltetéstől eltérő használatból, a Vevő vagy harmadik fél általi átalakításokból, a normál kopásból, a vis maior eseményekből, valamint a külön gyártói garanciával rendelkező tételekből eredő károkra.",
+    "claim_procedure": "Igény bejelentéséhez a Vevőnek a garanciaidőn belül írásban kell értesítenie a Fejlesztőt, megjelölve a hibát és csatolva az észszerűen szükséges bizonyítékokat."
+  },
+  "noc": {
+    "title": "Hozzájárulás az ingatlan továbbértékesítéséhez",
+    "subtitle": "Egység továbbértékesítéséhez",
+    "intro": "Ezt a hozzájáruló nyilatkozatot a Fejlesztő állítja ki annak megerősítésére, hogy a Vevőnek nincs olyan nyitott kötelezettsége, amely akadályozná a lent megnevezett egység továbbértékesítését.",
+    "headings": {
+      "spa_ref": "Szerződésszám",
+      "requested_by": "Kérelmező",
+      "issued_to": "Címzett",
+      "purpose": "Cél",
+      "validity": "Érvényesség",
+      "outstanding_balance": "Fennmaradó egyenleg",
+      "transfer_fee": "Átruházási díj"
+    },
+    "validity_text": "Ez a hozzájárulás a kiállítás napjától számított {days} napig érvényes. Ezt követően új hozzájárulást kell kérni.",
+    "purpose_text": "Az egység értékesítése harmadik személy vevő részére, a Fejlesztő szokásos átruházási eljárásának figyelembevételével.",
+    "no_outstanding": "A jelen hozzájárulás kiállításának napjáig esedékes valamennyi részlet teljes egészében ki lett fizetve. A szerződéshez nincs nyilvántartott tartozás.",
+    "developer_statement": "A Fejlesztő ezennel a szokásos átruházási díj és eljárás mellett hozzájárul ahhoz, hogy a Vevő az egység tulajdonjogát harmadik személyre ruházza át. Ez a hozzájárulás nem mond le a Fejlesztőnek az adásvételi szerződésből eredő jogairól."
+  },
+  "tenant_lease_agreement": {
+    "title": "Bérleti szerződés",
+    "intro": "Ez a bérleti szerződés a Bérbeadó (Fejlesztő) és az alább megnevezett Bérlő(k) között jön létre a jelen dokumentumban leírt ingatlan lakáscélú bérbeadására.",
+    "tenant_signature": "Bérlő aláírása",
+    "headings": {
+      "lease_number": "Bérleti szerződés száma",
+      "tenant": "Bérlő",
+      "property": "Ingatlan",
+      "term": "Időtartam",
+      "monthly_rent": "Havi bérleti díj",
+      "security_deposit": "Óvadék",
+      "use_clause": "Az ingatlan használata",
+      "maintenance": "Karbantartás",
+      "termination": "Felmondás"
+    },
+    "use_clause_text": "A Bérlő az ingatlant kizárólag a saját és a közvetlen családtagjai lakhatására használhatja. Az albérletbe adás és a kereskedelmi célú használat a Bérbeadó előzetes írásbeli hozzájárulása nélkül tilos.",
+    "maintenance_text": "A Bérbeadó felel a szerkezeti karbantartásért és a Fejlesztő által beépített nagy értékű készülékekért. A Bérlő felel a napi tisztaságért, az észszerű határon belüli kisebb javításokért és a rendeltetéstől eltérő használatból eredő károkért.",
+    "termination_text": "Bármelyik fél a bérleti időszak végén felmondhatja a szerződést, legalább 30 nappal a lejárat előtt írásban közölt felmondással. A Bérlő általi korai felmondás esetén az óvadék elvész, hacsak a Bérbeadó írásban nem egyezik bele másként."
+  },
+  "move_in_checklist": {
+    "title": "Beköltözési ellenőrző lista",
+    "intro": "Helyiségenkénti állapotrögzítő jegyzőkönyv, amelyet az átadás pillanatában vesznek fel. Mindkét fél aláírásával igazolja, hogy a rögzített állapot a vizsgált egységet tükrözi.",
+    "empty_rooms": "Nem adtak meg helyiségadatokat.",
+    "acceptance_text": "Az alábbi aláírással mindkét fél megerősíti, hogy a fent rögzített, helyiségenkénti állapot a vizsgálat pillanatában pontosan tükrözi az egységet.",
+    "headings": {
+      "spa_ref": "Szerződésszám",
+      "inspection_date": "Vizsgálat dátuma"
+    },
+    "columns": {
+      "item": "Elem",
+      "condition": "Állapot",
+      "notes": "Megjegyzések"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Jelzálogmentességi igazolás",
+    "intro": "Ezt a levelet a Fejlesztő a Vevő kérésére állítja ki annak igazolására, hogy a lent megnevezett egységen nincs fennálló teher, jelzálog, zálogjog vagy egyéb terhelés a Fejlesztő javára.",
+    "no_encumbrance_text": "A Fejlesztő ezennel igazolja, hogy a levél keltének napjával a fent megjelölt egység mentes minden olyan jelzáloggal, teherrel, zálogjoggal vagy terheléssel, amely a Fejlesztő vagy valamely hozzá kapcsolódó fél javára áll fenn.",
+    "purpose_text": "Ez a levél kizárólag a Vevő jelzálogkölcsön-kérelmének és a fent megnevezett Bank által igényelt kapcsolódó átvilágításnak a céljából készül. Nem mond le a Fejlesztőnek az adásvételi szerződésből eredő jogairól.",
+    "headings": {
+      "bank": "Címzett (Bank)",
+      "spa_ref": "Szerződésszám",
+      "unit": "Egység"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Tulajdoni lap átíratási kérelem",
+    "intro": "Hivatalos kérelem a földhivatal felé, amellyel a lent leírt egység tulajdonjogát a Fejlesztőtől az adásvételi szerződésben megnevezett új tulajdonos(ok)ra kérjük átíratni.",
+    "request_text": "A Fejlesztő ezennel kéri, hogy a földhivatal jegyezze be a fent megjelölt egység tulajdonjogának átruházását a felsorolt új tulajdonos(ok) javára, a megjelölt arányokban, a kérelem keltével hatályosan.",
+    "attachments_text": "Az aláírt eredeti adásvételi szerződés, a végső befizetési igazolás, az átadás-átvételi igazolás, valamennyi új tulajdonos személyazonosító okmánya, valamint a földhivatal által előírt illetékbélyeg-igazolások.",
+    "headings": {
+      "registry": "Földhivatal",
+      "spa_ref": "Szerződésszám",
+      "unit": "Egység",
+      "new_owners": "Új tulajdonos(ok)",
+      "request_body": "Kérelem",
+      "attachments": "Mellékletek"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Letéti felszabadítási meghatalmazás",
+    "intro": "Utasítás a letéti megbízott részére, hogy a lent megjelölt letéti számlán tartott összeget a leírt mérföldkőre tekintettel szabadítsa fel a Fejlesztő javára.",
+    "instruction_text": "A Fejlesztő ezennel meghatalmazza és utasítja a letéti megbízottat, hogy a fent megjelölt összeget a megnevezett letéti számláról a Fejlesztő üzemeltetési számlájára utalja. A felszabadítás az adásvételi szerződésben rögzített mérföldkő-igazolást követi.",
+    "headings": {
+      "escrow_account": "Letéti számla száma",
+      "spa_ref": "Szerződésszám",
+      "unit": "Egység",
+      "amount_to_release": "Felszabadítandó összeg",
+      "release_reason": "Felszabadítás oka"
+    }
+  },
+  "refund_authorization": {
+    "title": "Visszatérítési meghatalmazás",
+    "intro": "Ez a dokumentum engedélyezi a lent megjelölt összeg visszatérítését a hivatkozott, törölt foglalás vagy adásvételi szerződés alapján.",
+    "authorisation_text": "A Fejlesztő ezennel engedélyezi a fenti összeg visszatérítését a megjelölt fizetési móddal. A teljesítés időpontja a Fejlesztő szokásos pénzügyi eljárásait és az eredeti ügyletre alkalmazandó visszalépési és elvesztési szabályokat követi.",
+    "headings": {
+      "reference": "Hivatkozás",
+      "unit": "Egység",
+      "amount": "Visszatérítendő összeg",
+      "reason": "Ok",
+      "payment_method": "Fizetési mód"
+    }
+  }
+}

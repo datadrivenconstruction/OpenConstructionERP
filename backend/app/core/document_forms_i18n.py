@@ -119,6 +119,8 @@ def form_strings(form: str, *, default: str = "en") -> dict[str, dict[str, str]]
         raise ValueError(f"locales/{default}.json has no {_ROOT}.{form}.strings")
     tables: dict[str, dict[str, str]] = {}
     for code in SUPPORTED_LOCALES:
+        if code in REGISTER_UNRENDERABLE:
+            continue
         own = _text_map((load_document_forms(code).get(form) or {}).get("strings"))
         if code == default or any(key in own for key in english):
             tables[code] = {key: own.get(key, value) for key, value in english.items()}

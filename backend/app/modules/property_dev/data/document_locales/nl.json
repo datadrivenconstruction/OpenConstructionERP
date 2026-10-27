@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Pagina {page} van {total}",
+    "generated_at": "Gegenereerd op {timestamp} UTC",
+    "doc_ref": "Doc.-ref.",
+    "developer": "Ontwikkelaar",
+    "unit_code": "Woningcode",
+    "watermark_draft": "CONCEPT",
+    "currency": "Valuta",
+    "amount": "Bedrag",
+    "date": "Datum",
+    "signature": "Handtekening",
+    "place": "Plaats",
+    "buyer_signature": "Handtekening koper",
+    "developer_signature": "Handtekening ontwikkelaar",
+    "witness": "Getuige"
+  },
+  "reservation_receipt": {
+    "title": "Ontvangstbevestiging reservering",
+    "intro": "Deze ontvangstbevestiging bevestigt de reservering van het hieronder beschreven object. De aanbetaling is ontvangen en de woning wordt voor de koper uit de verkoop gehouden totdat de bedenktijd verstrijkt of een koopovereenkomst is getekend.",
+    "headings": {
+      "buyer": "Koper",
+      "property": "Object",
+      "amount_paid": "Betaald bedrag",
+      "valid_until": "Geldig tot",
+      "next_step": "Volgende stap",
+      "reservation_number": "Reserveringsnr.",
+      "cooling_off": "Bedenktijd",
+      "deposit_status": "Status aanbetaling",
+      "plot_details": "Kaveldetails"
+    },
+    "next_step_text": "Binnen {days} dagen moet de koper de koopovereenkomst ondertekenen en het volgende termijnbedrag betalen. Gebeurt dit niet, dan vervalt deze reservering en komt de woning weer op de markt.",
+    "cooling_off_text": "{days} dagen vanaf ontvangst van dit document.",
+    "footer_note": "De aanbetaling is alleen volledig terugvorderbaar binnen de bedenktijd die in de jurisdictie geldt. Na deze periode geldt de verbeurdverklaringsregeling."
+  },
+  "sales_contract": {
+    "title": "Koopovereenkomst",
+    "subtitle": "Overeenkomstnr. {number}",
+    "preamble": "Deze koopovereenkomst (de \"Overeenkomst\") wordt gesloten op de hieronder vermelde datum tussen de ontwikkelaar van record en de hieronder genoemde koper(s), voor de verkoop van het hierin genoemde object.",
+    "headings": {
+      "parties": "Partijen bij de Overeenkomst",
+      "property": "Het object",
+      "price": "Koopprijs",
+      "payment_schedule": "Betalingsschema",
+      "clauses": "Algemene voorwaarden",
+      "instalments": "Termijnen",
+      "signatures": "Handtekeningen",
+      "co_ownership": "Mede-eigendom",
+      "regulatory": "Wettelijke mededelingen",
+      "annexes": "Bijlagen"
+    },
+    "parties_intro": "De koper(s) verwerven het object gezamenlijk in de hieronder vermelde eigendomsverhoudingen. Alle partijen zijn hoofdelijk aansprakelijk voor de verplichtingen uit deze Overeenkomst, tenzij uitdrukkelijk anders is bepaald.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Mijlpaal",
+      "due_date": "Vervaldatum",
+      "amount": "Bedrag",
+      "currency": "Valuta"
+    },
+    "party_columns": {
+      "name": "Naam",
+      "role": "Rol",
+      "ownership_pct": "Eigendom (%)",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Kavelnummer",
+      "development": "Project",
+      "area_m2": "Oppervlakte (m²)",
+      "house_type": "Woningtype"
+    },
+    "price_label": "Totale koopprijs",
+    "breakdown_label": "Prijsopbouw",
+    "signature_note": "Ondertekend te {place} op {date}. Door hieronder te tekenen bevestigen de koper en de ontwikkelaar dat zij de voorwaarden in deze Overeenkomst, inclusief alle bijlagen, hebben gelezen, begrepen en daarmee instemmen."
+  },
+  "payment_receipt": {
+    "title": "Betalingsbewijs",
+    "intro": "Dit bewijs bevestigt de betaling van een termijn onder de hieronder genoemde koopovereenkomst.",
+    "headings": {
+      "spa_ref": "Overeenkomstnr.",
+      "instalment": "Termijn",
+      "milestone": "Mijlpaal",
+      "amount_paid": "Betaald bedrag",
+      "payment_method": "Betaalwijze",
+      "payment_ref": "Betalingskenmerk",
+      "paid_at": "Betaald op",
+      "outstanding": "Openstaand saldo"
+    },
+    "footer_note": "Dit bewijs is automatisch gegenereerd en is geldig zonder handmatige handtekening. Bewaar het voor uw administratie."
+  },
+  "handover_certificate": {
+    "title": "Oplevercertificaat",
+    "intro": "Dit certificaat legt de oplevering van het object vast van de ontwikkelaar aan de koper(s). De koper aanvaardt de woning onder voorbehoud van de bijgevoegde opleverpuntenlijst en garantievoorwaarden.",
+    "headings": {
+      "spa_ref": "Overeenkomstnr.",
+      "completed_at": "Opleveringsdatum",
+      "snag_count": "Open opleverpunten",
+      "warranty_period": "Garantieperiode",
+      "keys_handed_over": "Sleutels overgedragen",
+      "buyer_acceptance": "Acceptatie door koper",
+      "developer_declaration": "Verklaring ontwikkelaar"
+    },
+    "developer_declaration_text": "De ontwikkelaar bevestigt hierbij dat het object is gebouwd overeenkomstig de Koopovereenkomst, dat alle vereiste documentatie aan de koper is overhandigd en dat de constructieve en afwerkingsgaranties ingaan op de datum van dit certificaat.",
+    "buyer_acceptance_text": "De koper aanvaardt hierbij de oplevering van het object onder voorbehoud van de bijgevoegde opleverpuntenlijst. De koper erkent de ontvangst van de sleutels, handleidingen en alle vereiste documentatie zoals vermeld in de bijlagen.",
+    "snag_note": "Open opleverpunten worden door de ontwikkelaar binnen een redelijke termijn hersteld, overeenkomstig de herstelclausule in de Koopovereenkomst."
+  },
+  "warranty_certificate": {
+    "title": "Garantiecertificaat",
+    "intro": "Dit certificaat legt de garantieverplichtingen van de ontwikkelaar vast voor het object dat op de hieronder vermelde datum aan de koper(s) is opgeleverd.",
+    "headings": {
+      "spa_ref": "Overeenkomstnr.",
+      "handover_date": "Opleveringsdatum",
+      "structural": "Constructieve garantie",
+      "finishing": "Afwerkingsgarantie",
+      "structural_period": "Termijn constructieve garantie",
+      "finishing_period": "Termijn afwerkingsgarantie",
+      "warranty_expiry": "Einde garantie",
+      "scope": "Dekkingsomvang",
+      "exclusions": "Uitsluitingen"
+    },
+    "structural_text": "De ontwikkelaar staat in voor de constructieve integriteit van het object, waaronder de draagconstructie, fundering en waterdichting, gedurende {years} jaar vanaf de datum van oplevering.",
+    "finishing_text": "De ontwikkelaar staat in voor de afwerkingswerkzaamheden, waaronder schilderwerk, vaste voorzieningen, armaturen, door de ontwikkelaar geïnstalleerde apparatuur en kleine cosmetische onderdelen, gedurende {years} jaar vanaf de datum van oplevering.",
+    "exclusions_text": "Deze garantie sluit schade uit die is veroorzaakt door verkeerd gebruik, wijzigingen door de koper of derden, normale slijtage, overmacht en onderdelen die onder een afzonderlijke fabrieksgarantie vallen.",
+    "claim_procedure": "Om een claim in te dienen, moet de koper binnen de garantieperiode een schriftelijke melding bij de ontwikkelaar indienen, met een omschrijving van het gebrek en redelijk bewijsmateriaal."
+  },
+  "noc": {
+    "title": "Verklaring van geen bezwaar",
+    "subtitle": "Voor doorverkoop van de woning",
+    "intro": "Deze verklaring van geen bezwaar (NOC) wordt door de ontwikkelaar afgegeven om te bevestigen dat de koper geen openstaande verplichtingen heeft die de doorverkoop van de hieronder genoemde woning in de weg staan.",
+    "headings": {
+      "spa_ref": "Overeenkomstnr.",
+      "requested_by": "Aangevraagd door",
+      "issued_to": "Afgegeven aan",
+      "purpose": "Doel",
+      "validity": "Geldigheid",
+      "outstanding_balance": "Openstaand saldo",
+      "transfer_fee": "Overdrachtskosten"
+    },
+    "validity_text": "Deze verklaring is {days} dagen geldig vanaf de datum van afgifte. Daarna moet een nieuwe verklaring worden aangevraagd.",
+    "purpose_text": "Verkoop van de woning aan een derde koper, onder voorbehoud van de standaard overdrachtsprocedure van de ontwikkelaar.",
+    "no_outstanding": "Alle termijnen tot de datum van deze verklaring zijn volledig betaald. Voor dit contract zijn geen openstaande betalingen geregistreerd.",
+    "developer_statement": "De ontwikkelaar verleent hierbij toestemming, onder voorbehoud van de standaard overdrachtskosten en -procedures, aan de koper om de eigendom van de woning over te dragen aan een derde. Deze verklaring doet geen afbreuk aan de rechten van de ontwikkelaar onder de Koopovereenkomst."
+  },
+  "tenant_lease_agreement": {
+    "title": "Huurovereenkomst",
+    "intro": "Deze huurovereenkomst wordt gesloten tussen de verhuurder (ontwikkelaar) en de hieronder genoemde huurder(s) voor de residentiële verhuur van het hierin beschreven object.",
+    "tenant_signature": "Handtekening huurder",
+    "headings": {
+      "lease_number": "Huurovereenkomstnr.",
+      "tenant": "Huurder",
+      "property": "Object",
+      "term": "Looptijd",
+      "monthly_rent": "Maandhuur",
+      "security_deposit": "Waarborgsom",
+      "use_clause": "Gebruik van het object",
+      "maintenance": "Onderhoud",
+      "termination": "Beëindiging"
+    },
+    "use_clause_text": "De huurder gebruikt het object uitsluitend als particuliere woning voor zichzelf en het eigen gezin. Onderverhuur en commercieel gebruik zijn verboden zonder voorafgaande schriftelijke toestemming van de verhuurder.",
+    "maintenance_text": "De verhuurder is verantwoordelijk voor het constructieve onderhoud en de grote apparatuur die door de ontwikkelaar is geïnstalleerd. De huurder is verantwoordelijk voor de dagelijkse netheid, kleine reparaties tot een redelijke grens en schade die door verkeerd gebruik is ontstaan.",
+    "termination_text": "Beide partijen kunnen deze huurovereenkomst aan het einde van de looptijd opzeggen met een schriftelijke kennisgeving van minimaal 30 dagen voor het verstrijken. Vroegtijdige beëindiging door de huurder leidt tot verbeurdverklaring van de waarborgsom, tenzij de verhuurder schriftelijk instemt."
+  },
+  "move_in_checklist": {
+    "title": "Checklist oplevering bij ingebruikname",
+    "intro": "Ruimte-voor-ruimte staat van de woning, vastgelegd op het moment van oplevering. Beide partijen tekenen dat de vermelde staat de woning weergeeft zoals die is geïnspecteerd.",
+    "empty_rooms": "Geen ruimtegegevens aangeleverd.",
+    "acceptance_text": "Door hieronder te tekenen bevestigen beide partijen dat de hierboven vastgelegde staat per ruimte de woning op het moment van inspectie juist weergeeft.",
+    "headings": {
+      "spa_ref": "Overeenkomstnr.",
+      "inspection_date": "Inspectiedatum"
+    },
+    "columns": {
+      "item": "Onderdeel",
+      "condition": "Staat",
+      "notes": "Opmerkingen"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Verklaring hypotheekvrij",
+    "intro": "Deze brief wordt door de ontwikkelaar op verzoek van de koper afgegeven om te bevestigen dat de hieronder genoemde woning geen openstaande lasten, hypotheken, beslagleggingen of bezwaren ten gunste van de ontwikkelaar kent.",
+    "no_encumbrance_text": "De ontwikkelaar bevestigt hierbij dat de bovengenoemde woning op de datum van deze brief vrij is van hypotheek, last, beslaglegging of bezwaar ten gunste van de ontwikkelaar of een daaraan gelieerde partij.",
+    "purpose_text": "Deze brief wordt uitsluitend afgegeven ten behoeve van de hypotheekaanvraag van de koper en eventueel door de hierboven genoemde bank gevraagd due diligence-onderzoek. Deze brief doet geen afbreuk aan de rechten van de ontwikkelaar onder de Koopovereenkomst.",
+    "headings": {
+      "bank": "Afgegeven aan (bank)",
+      "spa_ref": "Overeenkomstnr.",
+      "unit": "Woning"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Verzoek tot overdracht van de eigendomsakte",
+    "intro": "Formeel verzoek aan het kadaster om de eigendom van de hieronder beschreven woning over te dragen van de ontwikkelaar aan de nieuwe eigenaar(s) die in de Koopovereenkomst zijn genoemd.",
+    "request_text": "De ontwikkelaar verzoekt het kadaster hierbij de overdracht van de eigendom van de bovengenoemde woning vast te leggen ten gunste van de vermelde nieuwe eigenaar(s), in de aangegeven percentages, met ingang van de datum van dit verzoek.",
+    "attachments_text": "Originele Koopovereenkomst (ondertekend), bewijs van de laatste betaling, oplevercertificaat, identiteitsbewijzen van alle nieuwe eigenaren en eventuele zegelbelastingbewijzen zoals vereist door het kadaster.",
+    "headings": {
+      "registry": "Kadaster",
+      "spa_ref": "Overeenkomstnr.",
+      "unit": "Woning",
+      "new_owners": "Nieuwe eigenaar(s)",
+      "request_body": "Verzoek",
+      "attachments": "Bijlagen"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Machtiging vrijgave derdengelden",
+    "intro": "Opdracht aan de derdengeldenbeheerder om de middelen die op de hieronder genoemde derdengeldenrekening worden aangehouden, vrij te geven aan de ontwikkelaar, met betrekking tot de beschreven mijlpaal.",
+    "instruction_text": "De ontwikkelaar machtigt en instrueert de derdengeldenbeheerder hierbij om het bovengenoemde bedrag vanaf de vermelde derdengeldenrekening vrij te geven naar de bedrijfsrekening van de ontwikkelaar. Deze vrijgave volgt op de mijlpaalcertificering zoals vastgelegd in de Koopovereenkomst.",
+    "headings": {
+      "escrow_account": "Derdengeldenrekeningnr.",
+      "spa_ref": "Overeenkomstnr.",
+      "unit": "Woning",
+      "amount_to_release": "Vrij te geven bedrag",
+      "release_reason": "Reden vrijgave"
+    }
+  },
+  "refund_authorization": {
+    "title": "Machtiging terugbetaling",
+    "intro": "Dit document machtigt tot terugbetaling van het hieronder vermelde bedrag ten aanzien van de geannuleerde reservering of verkoopovereenkomst waarnaar wordt verwezen.",
+    "authorisation_text": "De ontwikkelaar machtigt hierbij de terugbetaling van het bovengenoemde bedrag via de vermelde betaalwijze. De afwikkeling vindt plaats volgens de standaard financiële procedures van de ontwikkelaar en de bedenktijd- of verbeurdverklaringsregels die op de oorspronkelijke transactie van toepassing zijn.",
+    "headings": {
+      "reference": "Referentie",
+      "unit": "Woning",
+      "amount": "Terug te betalen bedrag",
+      "reason": "Reden",
+      "payment_method": "Betaalwijze"
+    }
+  }
+}

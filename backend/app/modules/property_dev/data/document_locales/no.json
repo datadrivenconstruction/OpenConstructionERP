@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Side {page} av {total}",
+    "generated_at": "Generert {timestamp} UTC",
+    "doc_ref": "Dok.ref.",
+    "developer": "Utbygger",
+    "unit_code": "Enhetskode",
+    "watermark_draft": "UTKAST",
+    "currency": "Valuta",
+    "amount": "Beløp",
+    "date": "Dato",
+    "signature": "Signatur",
+    "place": "Sted",
+    "buyer_signature": "Kjøpers signatur",
+    "developer_signature": "Utbyggers signatur",
+    "witness": "Vitne"
+  },
+  "reservation_receipt": {
+    "title": "Reservasjonskvittering",
+    "intro": "Denne kvitteringen bekrefter reservasjon av eiendommen beskrevet nedenfor. Depositumet er mottatt, og enheten holdes utenfor markedet for kjøperen til angrefristen utløper eller en kjøpekontrakt er signert.",
+    "headings": {
+      "buyer": "Kjøper",
+      "property": "Eiendom",
+      "amount_paid": "Betalt beløp",
+      "valid_until": "Gyldig til",
+      "next_step": "Neste steg",
+      "reservation_number": "Reservasjonsnr.",
+      "cooling_off": "Angrefrist",
+      "deposit_status": "Status for depositum",
+      "plot_details": "Tomtedetaljer"
+    },
+    "next_step_text": "Innen {days} dager må kjøper signere kjøpekontrakten og betale neste delbeløp, ellers utløper reservasjonen og enheten frigis tilbake til markedet.",
+    "cooling_off_text": "{days} dager fra mottak av dette dokumentet.",
+    "footer_note": "Depositumet kan kun refunderes fullt ut i angrefristen som er fastsatt i jurisdiksjonen. Etter denne perioden følger refusjon de gjeldende reglene for tap av depositum."
+  },
+  "sales_contract": {
+    "title": "Kjøpekontrakt",
+    "subtitle": "Avtale nr. {number}",
+    "preamble": "Denne kjøpekontrakten (heretter «Avtalen») er inngått på datoen angitt nedenfor mellom utbygger og kjøperne oppført nedenfor, for salg av eiendommen identifisert her.",
+    "headings": {
+      "parties": "Avtalens parter",
+      "property": "Eiendommen",
+      "price": "Kjøpesum",
+      "payment_schedule": "Betalingsplan",
+      "clauses": "Vilkår og betingelser",
+      "instalments": "Delbetalinger",
+      "signatures": "Signaturer",
+      "co_ownership": "Sameie",
+      "regulatory": "Regulatoriske opplysninger",
+      "annexes": "Vedlegg"
+    },
+    "parties_intro": "Kjøperne erverver eiendommen i fellesskap med eierandelene angitt nedenfor. Alle parter er solidarisk ansvarlige for forpliktelsene under denne Avtalen med mindre annet uttrykkelig er angitt.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Milepæl",
+      "due_date": "Forfallsdato",
+      "amount": "Beløp",
+      "currency": "Valuta"
+    },
+    "party_columns": {
+      "name": "Navn",
+      "role": "Rolle",
+      "ownership_pct": "Eierandel %",
+      "email": "E-post"
+    },
+    "property_columns": {
+      "plot_number": "Tomtenummer",
+      "development": "Utbygging",
+      "area_m2": "Areal (m²)",
+      "house_type": "Boligtype"
+    },
+    "price_label": "Total kjøpesum",
+    "breakdown_label": "Prisfordeling",
+    "signature_note": "Signert i {place} den {date}. Ved å signere nedenfor bekrefter kjøper og utbygger at de har lest, forstått og godtar vilkårene i denne Avtalen, inkludert alle vedlegg."
+  },
+  "payment_receipt": {
+    "title": "Betalingskvittering",
+    "intro": "Denne kvitteringen bekrefter betaling av et delbeløp under kjøpekontrakten nevnt nedenfor.",
+    "headings": {
+      "spa_ref": "Avtale nr.",
+      "instalment": "Delbeløp",
+      "milestone": "Milepæl",
+      "amount_paid": "Betalt beløp",
+      "payment_method": "Betalingsmåte",
+      "payment_ref": "Betalingsreferanse",
+      "paid_at": "Betalt den",
+      "outstanding": "Utestående saldo"
+    },
+    "footer_note": "Denne kvitteringen er generert automatisk og er gyldig uten manuell signatur. Oppbevares for egne arkiver."
+  },
+  "handover_certificate": {
+    "title": "Overtakelsesbevis",
+    "intro": "Dette beviset dokumenterer overtakelsen av eiendommen fra utbygger til kjøper(e). Kjøper aksepterer enheten med tilhørende feilliste og garantivilkår.",
+    "headings": {
+      "spa_ref": "Avtale nr.",
+      "completed_at": "Overtakelsesdato",
+      "snag_count": "Åpne feil",
+      "warranty_period": "Garantiperiode",
+      "keys_handed_over": "Nøkler overlevert",
+      "buyer_acceptance": "Kjøpers aksept",
+      "developer_declaration": "Utbyggers erklæring"
+    },
+    "developer_declaration_text": "Utbygger bekrefter herved at eiendommen er bygget i samsvar med kjøpekontrakten, at all nødvendig dokumentasjon er levert til kjøper, og at konstruksjons- og overflategarantiene løper fra datoen for dette beviset.",
+    "buyer_acceptance_text": "Kjøper aksepterer herved overtakelsen av eiendommen med tilhørende feilliste. Kjøper bekrefter mottak av nøkler, bruksanvisninger og all nødvendig dokumentasjon oppført i vedleggene.",
+    "snag_note": "Åpne feil utbedres av utbygger innen rimelig tid i henhold til feilretting i kjøpekontrakten."
+  },
+  "warranty_certificate": {
+    "title": "Garantibevis",
+    "intro": "Dette beviset angir utbyggerens garantiforpliktelser for eiendommen som ble overlevert til kjøper(e) på datoen nedenfor.",
+    "headings": {
+      "spa_ref": "Avtale nr.",
+      "handover_date": "Overtakelsesdato",
+      "structural": "Konstruksjonsgaranti",
+      "finishing": "Overflategaranti",
+      "structural_period": "Konstruksjonsperiode",
+      "finishing_period": "Overflateperiode",
+      "warranty_expiry": "Garantiens utløp",
+      "scope": "Dekningsomfang",
+      "exclusions": "Unntak"
+    },
+    "structural_text": "Utbygger garanterer eiendommens konstruktive integritet, herunder bærende konstruksjon, fundamenter og vanntetting, i {years} år fra overtakelsesdatoen.",
+    "finishing_text": "Utbygger garanterer overflatearbeidene, herunder maling, armaturer, innredning, hvitevarer installert av utbygger og mindre kosmetiske elementer, i {years} år fra overtakelsesdatoen.",
+    "exclusions_text": "Garantien omfatter ikke skader som skyldes feil bruk, endringer utført av kjøper eller tredjepart, normal slitasje, force majeure og elementer som er dekket av separate produsentgarantier.",
+    "claim_procedure": "For å fremme et krav må kjøper sende skriftlig varsel til utbygger innen garantiperioden, med beskrivelse av mangelen og rimelig dokumentasjon."
+  },
+  "noc": {
+    "title": "Samtykke til videresalg",
+    "subtitle": "Ved videresalg av enhet",
+    "intro": "Dette samtykket utstedes av utbygger for å bekrefte at kjøper ikke har utestående forpliktelser som hindrer videresalg av enheten nedenfor.",
+    "headings": {
+      "spa_ref": "Avtale nr.",
+      "requested_by": "Bestilt av",
+      "issued_to": "Utstedt til",
+      "purpose": "Formål",
+      "validity": "Gyldighet",
+      "outstanding_balance": "Utestående saldo",
+      "transfer_fee": "Overdragelsesgebyr"
+    },
+    "validity_text": "Dette samtykket er gyldig i {days} dager fra utstedelsesdatoen. Etter denne perioden må et nytt samtykke bestilles.",
+    "purpose_text": "Salg av enheten til tredjepart, underlagt utbyggerens standard overdragelsesprosedyrer.",
+    "no_outstanding": "Alle delbeløp frem til datoen for dette samtykket er betalt i sin helhet. Det er ingen utestående betalinger registrert på denne kontrakten.",
+    "developer_statement": "Utbygger gir herved tillatelse, underlagt standard overdragelsesgebyr og prosedyrer, til at kjøper kan overdra eierskapet til enheten til tredjepart. Dette samtykket frafaller ikke utbyggerens rettigheter etter kjøpekontrakten."
+  },
+  "tenant_lease_agreement": {
+    "title": "Leieavtale for leietaker",
+    "intro": "Denne leieavtalen inngås mellom utleier (utbygger) og leietaker(e) nevnt nedenfor for utleie til bolig av eiendommen beskrevet her.",
+    "tenant_signature": "Leietakers signatur",
+    "headings": {
+      "lease_number": "Leieavtale nr.",
+      "tenant": "Leietaker",
+      "property": "Eiendom",
+      "term": "Leieperiode",
+      "monthly_rent": "Månedlig leie",
+      "security_deposit": "Depositum",
+      "use_clause": "Bruk av eiendommen",
+      "maintenance": "Vedlikehold",
+      "termination": "Oppsigelse"
+    },
+    "use_clause_text": "Leietaker skal bruke eiendommen kun som privat bolig for leietaker og nærmeste familie. Fremleie og næringsmessig bruk er forbudt uten utleiers skriftlige samtykke.",
+    "maintenance_text": "Utleier har ansvar for konstruksjonsvedlikehold og større hvitevarer installert av utbygger. Leietaker har ansvar for daglig renhold, mindre reparasjoner under en rimelig terskel og skader som skyldes feil bruk.",
+    "termination_text": "Begge parter kan si opp leieavtalen ved utløpet av leieperioden med skriftlig varsel minst 30 dager før utløp. Leietakers oppsigelse før tid medfører tap av depositum med mindre utleier skriftlig godtar noe annet."
+  },
+  "move_in_checklist": {
+    "title": "Innflyttingssjekkliste",
+    "intro": "Tilstandsrapport for hvert rom, registrert ved overtakelsen. Begge parter bekrefter at den oppførte tilstanden gjenspeiler enheten slik den ble inspisert.",
+    "empty_rooms": "Ingen romdata oppgitt.",
+    "acceptance_text": "Ved å signere nedenfor bekrefter begge parter at tilstanden for hvert rom, slik den er registrert ovenfor, gjenspeiler enheten på inspeksjonstidspunktet.",
+    "headings": {
+      "spa_ref": "Avtale nr.",
+      "inspection_date": "Inspeksjonsdato"
+    },
+    "columns": {
+      "item": "Element",
+      "condition": "Tilstand",
+      "notes": "Merknader"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Brev om pantefrihet",
+    "intro": "Dette brevet utstedes av utbygger på kjøpers anmodning for å bekrefte at enheten nedenfor ikke har utestående krav, pantelån, heftelser eller andre belastninger til fordel for utbygger.",
+    "no_encumbrance_text": "Utbygger bekrefter herved at enheten ovenfor, per datoen for dette brevet, er fri for pant, krav, heftelse eller annen belastning til fordel for utbygger eller noen nærstående part.",
+    "purpose_text": "Dette brevet er utstedt utelukkende for kjøpers lånesøknad og eventuell tilhørende due diligence som banken nevnt ovenfor krever. Det frafaller ikke utbyggerens rettigheter etter kjøpekontrakten.",
+    "headings": {
+      "bank": "Utstedt til (bank)",
+      "spa_ref": "Avtale nr.",
+      "unit": "Enhet"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Anmodning om overskrivning av tinglyst skjøte",
+    "intro": "Formell anmodning til tingboken om å overføre hjemmelen til enheten beskrevet nedenfor fra utbygger til de nye eierne nevnt i kjøpekontrakten.",
+    "request_text": "Utbygger anmoder herved om at tingboken registrerer overføring av hjemmel til enheten ovenfor til fordel for de nye eierne oppført, i prosentandelene angitt, med virkning fra datoen for denne anmodningen.",
+    "attachments_text": "Original kjøpekontrakt (signert), kvittering for siste betaling, overtakelsesbevis, legitimasjon for alle nye eiere og eventuelle dokumentavgiftskvitteringer som tingboken krever.",
+    "headings": {
+      "registry": "Tingboken",
+      "spa_ref": "Avtale nr.",
+      "unit": "Enhet",
+      "new_owners": "Nye eiere",
+      "request_body": "Anmodning",
+      "attachments": "Vedlegg"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Autorisasjon for frigjøring fra depot",
+    "intro": "Instruks til depotmottakeren om å frigjøre midler på depotkontoen nedenfor til utbygger, knyttet til milepælen som er beskrevet.",
+    "instruction_text": "Utbygger autoriserer og instruerer herved depotmottakeren til å overføre beløpet ovenfor fra den angitte depotkontoen til utbyggerens driftskonto. Frigjøringen følger milepælsbekreftelsen registrert i kjøpekontrakten.",
+    "headings": {
+      "escrow_account": "Depotkontonr.",
+      "spa_ref": "Avtale nr.",
+      "unit": "Enhet",
+      "amount_to_release": "Beløp som skal frigjøres",
+      "release_reason": "Årsak til frigjøring"
+    }
+  },
+  "refund_authorization": {
+    "title": "Autorisasjon for tilbakebetaling",
+    "intro": "Dette dokumentet autoriserer tilbakebetaling av beløpet nedenfor knyttet til den kansellerte reservasjonen eller kjøpekontrakten som er referert.",
+    "authorisation_text": "Utbygger autoriserer herved tilbakebetaling av beløpet ovenfor via angitt betalingsmåte. Oppgjørstiden følger utbyggerens standard finansrutiner og eventuelle angre- og tapsregler som gjelder for den opprinnelige transaksjonen.",
+    "headings": {
+      "reference": "Referanse",
+      "unit": "Enhet",
+      "amount": "Tilbakebetalingsbeløp",
+      "reason": "Årsak",
+      "payment_method": "Betalingsmåte"
+    }
+  }
+}

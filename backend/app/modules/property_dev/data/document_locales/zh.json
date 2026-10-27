@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "第 {page} 页，共 {total} 页",
+    "generated_at": "生成于 {timestamp}（UTC）",
+    "doc_ref": "文件编号",
+    "developer": "开发商",
+    "unit_code": "房号",
+    "watermark_draft": "草稿",
+    "currency": "货币",
+    "amount": "金额",
+    "date": "日期",
+    "signature": "签字",
+    "place": "地点",
+    "buyer_signature": "买方签字",
+    "developer_signature": "开发商签字",
+    "witness": "见证人"
+  },
+  "reservation_receipt": {
+    "title": "预订收据",
+    "intro": "本收据确认下述房产已预订。定金已收到，该房源在冷静期结束或签署买卖合同前为买方保留，暂不对外销售。",
+    "headings": {
+      "buyer": "买方",
+      "property": "房产",
+      "amount_paid": "已付金额",
+      "valid_until": "有效期至",
+      "next_step": "下一步",
+      "reservation_number": "预订编号",
+      "cooling_off": "冷静期",
+      "deposit_status": "定金状态",
+      "plot_details": "地块信息"
+    },
+    "next_step_text": "买方须在 {days} 日内签署买卖合同并支付下一期款项，否则本次预订将失效，房源重新进入市场销售。",
+    "cooling_off_text": "自收到本文件之日起 {days} 日。",
+    "footer_note": "仅在司法辖区规定的冷静期内可全额退还定金。冷静期后，退款按适用的没收规则办理。"
+  },
+  "sales_contract": {
+    "title": "买卖合同",
+    "subtitle": "合同编号：{number}",
+    "preamble": "本买卖合同（以下简称“本合同”）于下列日期由登记在册的开发商与下列买方订立，用于出售本文所载房产。",
+    "headings": {
+      "parties": "合同当事人",
+      "property": "标的房产",
+      "price": "购买价格",
+      "payment_schedule": "付款计划",
+      "clauses": "条款与条件",
+      "instalments": "分期付款",
+      "signatures": "签字",
+      "co_ownership": "共有安排",
+      "regulatory": "监管披露",
+      "annexes": "附件"
+    },
+    "parties_intro": "买方共同按下列份额取得房产。除另有明确约定外，各方对本合同项下义务承担连带责任。",
+    "instalment_columns": {
+      "sequence": "序号",
+      "milestone": "里程碑",
+      "due_date": "到期日",
+      "amount": "金额",
+      "currency": "货币"
+    },
+    "party_columns": {
+      "name": "姓名",
+      "role": "角色",
+      "ownership_pct": "份额（%）",
+      "email": "电子邮箱"
+    },
+    "property_columns": {
+      "plot_number": "地块编号",
+      "development": "楼盘",
+      "area_m2": "面积（m²）",
+      "house_type": "户型"
+    },
+    "price_label": "购房总价",
+    "breakdown_label": "价格构成",
+    "signature_note": "于 {place} 签署，日期 {date}。买方及开发商签字即确认已阅读、理解并同意本合同（包括全部附件）所载条款。"
+  },
+  "payment_receipt": {
+    "title": "付款收据",
+    "intro": "本收据确认已收到下述买卖合同项下的一期分期款项。",
+    "headings": {
+      "spa_ref": "合同编号",
+      "instalment": "分期",
+      "milestone": "里程碑",
+      "amount_paid": "已付金额",
+      "payment_method": "付款方式",
+      "payment_ref": "付款参考号",
+      "paid_at": "付款日期",
+      "outstanding": "未付余额"
+    },
+    "footer_note": "本收据为系统自动生成，无需手写签字即有效。请留存备查。"
+  },
+  "handover_certificate": {
+    "title": "交付证书",
+    "intro": "本证书记录开发商向买方交付房产的情况。买方接受该房产，但须遵守随附的遗留问题清单和质保条款。",
+    "headings": {
+      "spa_ref": "合同编号",
+      "completed_at": "交付日期",
+      "snag_count": "未整改问题数",
+      "warranty_period": "质保期",
+      "keys_handed_over": "钥匙交接",
+      "buyer_acceptance": "买方确认",
+      "developer_declaration": "开发商声明"
+    },
+    "developer_declaration_text": "开发商特此确认，房产已按买卖合同建造，所有必需文件均已交付买方，结构及装修质保自本证书签发之日起计算。",
+    "buyer_acceptance_text": "买方特此接受该房产的交付，但须遵守所附遗留问题清单。买方确认已收到钥匙、使用手册及附件中列明的全部必需文件。",
+    "snag_note": "未整改问题将由开发商依据买卖合同的整改条款在合理期限内完成整改。"
+  },
+  "warranty_certificate": {
+    "title": "质保证书",
+    "intro": "本证书载明开发商对下列日期交付给买方的房产所承担的质保义务。",
+    "headings": {
+      "spa_ref": "合同编号",
+      "handover_date": "交付日期",
+      "structural": "结构质保",
+      "finishing": "装修质保",
+      "structural_period": "结构质保期",
+      "finishing_period": "装修质保期",
+      "warranty_expiry": "质保到期日",
+      "scope": "保修范围",
+      "exclusions": "除外责任"
+    },
+    "structural_text": "开发商保证房产的结构完整性，包括承重结构、基础及防水工程，保证期限为自交付之日起 {years} 年。",
+    "finishing_text": "开发商保证装修工程，包括涂料、固定装置、配件、由开发商安装的电器及轻微外观项目，保证期限为自交付之日起 {years} 年。",
+    "exclusions_text": "本质保不涵盖因误用、买方或第三方改动、正常磨损、不可抗力造成的损坏，也不涵盖由制造商单独保修的项目。",
+    "claim_procedure": "如需索赔，买方须在质保期内以书面形式通知开发商，说明缺陷并提供合理的证明材料。"
+  },
+  "noc": {
+    "title": "无异议证明",
+    "subtitle": "用于房产转售",
+    "intro": "本无异议证明（NOC）由开发商出具，确认下述房产的买方不存在阻碍转售的未履行义务。",
+    "headings": {
+      "spa_ref": "合同编号",
+      "requested_by": "申请人",
+      "issued_to": "出具对象",
+      "purpose": "用途",
+      "validity": "有效期",
+      "outstanding_balance": "未付余额",
+      "transfer_fee": "过户费"
+    },
+    "validity_text": "本无异议证明自签发之日起 {days} 日内有效。逾期须重新申请。",
+    "purpose_text": "将房产出售给第三方买方，但须遵守开发商的标准过户程序。",
+    "no_outstanding": "截至本证明签发日，所有分期款项均已付清。本合同下未记录任何未付款项。",
+    "developer_statement": "在支付标准过户费并遵守标准程序的前提下，开发商特此同意买方将房产所有权转让给第三方。本证明不放弃开发商在买卖合同项下的任何权利。"
+  },
+  "tenant_lease_agreement": {
+    "title": "租赁合同",
+    "intro": "本租赁合同由出租方（开发商）与下列承租人订立，用于出租本文所述住宅房产。",
+    "tenant_signature": "承租人签字",
+    "headings": {
+      "lease_number": "租约编号",
+      "tenant": "承租人",
+      "property": "房产",
+      "term": "租期",
+      "monthly_rent": "月租金",
+      "security_deposit": "押金",
+      "use_clause": "房产用途",
+      "maintenance": "维护",
+      "termination": "终止"
+    },
+    "use_clause_text": "承租人仅可将房产用作本人及直系亲属的私人住所。未经出租方事先书面同意，不得转租或用于商业用途。",
+    "maintenance_text": "出租方负责结构维修及由开发商安装的主要电器。承租人负责日常清洁、合理限额内的小型维修，以及因误用造成的损坏。",
+    "termination_text": "任一方均可在租期届满时提前不少于 30 日书面通知后终止本租约。除非出租方书面同意，承租人提前终止将丧失押金。"
+  },
+  "move_in_checklist": {
+    "title": "入住检查表",
+    "intro": "交付时逐间记录的房屋状况报告。双方签字确认所列状况反映了经检查的房屋实际情况。",
+    "empty_rooms": "未提供房间数据。",
+    "acceptance_text": "双方签字即确认上述逐间记录的状况准确反映了检查时房屋的实际情况。",
+    "headings": {
+      "spa_ref": "合同编号",
+      "inspection_date": "检查日期"
+    },
+    "columns": {
+      "item": "项目",
+      "condition": "状况",
+      "notes": "备注"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "抵押解除函",
+    "intro": "本函由开发商应买方请求出具，确认下述房产不存在以开发商为受益人的未结清费用、抵押、留置权或其他权利负担。",
+    "no_encumbrance_text": "开发商特此确认，截至本函签发之日，上述房产不存在以开发商或任何关联方为受益人的抵押、押记、留置权或其他权利负担。",
+    "purpose_text": "本函仅用于买方的按揭贷款申请以及上述银行要求的相关尽职调查。本函不放弃开发商在买卖合同项下的任何权利。",
+    "headings": {
+      "bank": "出具对象（银行）",
+      "spa_ref": "合同编号",
+      "unit": "房号"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "产权过户申请",
+    "intro": "正式向土地登记机构申请，将下述房产的产权从开发商过户至买卖合同中列明的新业主名下。",
+    "request_text": "开发商特此申请土地登记机构自本申请之日起，按所列份额将上述房产的产权登记至所列新业主名下。",
+    "attachments_text": "已签署的买卖合同原件、最终付款收据、交付证书、所有新业主的身份证明，以及登记机构要求的印花税完税凭证。",
+    "headings": {
+      "registry": "土地登记机构",
+      "spa_ref": "合同编号",
+      "unit": "房号",
+      "new_owners": "新业主",
+      "request_body": "申请事项",
+      "attachments": "附件"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "托管资金放款授权书",
+    "intro": "向托管代理人发出指令，就所述里程碑将下列托管账户中的资金支付给开发商。",
+    "instruction_text": "开发商特此授权并指示托管代理人，将上述金额从指定托管账户划转至开发商的运营账户。本次放款依据买卖合同中已确认的里程碑验收结果办理。",
+    "headings": {
+      "escrow_account": "托管账户编号",
+      "spa_ref": "合同编号",
+      "unit": "房号",
+      "amount_to_release": "放款金额",
+      "release_reason": "放款原因"
+    }
+  },
+  "refund_authorization": {
+    "title": "退款授权书",
+    "intro": "本文件授权对下列已取消的预订或买卖合同退还下述金额。",
+    "authorisation_text": "开发商特此授权通过所列付款方式退还上述金额。结算时间按开发商的标准财务流程办理，并遵守原交易适用的冷静期或没收规则。",
+    "headings": {
+      "reference": "参考号",
+      "unit": "房号",
+      "amount": "退款金额",
+      "reason": "原因",
+      "payment_method": "付款方式"
+    }
+  }
+}

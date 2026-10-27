@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Side {page} af {total}",
+    "generated_at": "Genereret {timestamp} UTC",
+    "doc_ref": "Dok.-ref.",
+    "developer": "Udvikler",
+    "unit_code": "Enhedskode",
+    "watermark_draft": "KLADDE",
+    "currency": "Valuta",
+    "amount": "Beløb",
+    "date": "Dato",
+    "signature": "Underskrift",
+    "place": "Sted",
+    "buyer_signature": "Købers underskrift",
+    "developer_signature": "Udviklerens underskrift",
+    "witness": "Vidne"
+  },
+  "reservation_receipt": {
+    "title": "Reservationskvittering",
+    "intro": "Denne kvittering bekræfter reservation af den nedenfor beskrevne ejendom. Depositummet er modtaget, og enheden holdes uden for markedet for køberen, indtil fortrydelsesfristen udløber, eller en køb- og salgsaftale er underskrevet.",
+    "headings": {
+      "buyer": "Køber",
+      "property": "Ejendom",
+      "amount_paid": "Betalt beløb",
+      "valid_until": "Gyldig til",
+      "next_step": "Næste skridt",
+      "reservation_number": "Reservationsnr.",
+      "cooling_off": "Fortrydelsesfrist",
+      "deposit_status": "Status for depositum",
+      "plot_details": "Grund og detaljer"
+    },
+    "next_step_text": "Inden for {days} dage skal køberen underskrive køb- og salgsaftalen og betale næste rate, ellers udløber reservationen, og enheden frigives til markedet.",
+    "cooling_off_text": "{days} dage fra modtagelse af dette dokument.",
+    "footer_note": "Depositum tilbagebetales kun fuldt ud i den fortrydelsesfrist, som jurisdiktionen fastsætter. Herefter gælder de relevante regler om fortabelse."
+  },
+  "sales_contract": {
+    "title": "Køb- og salgsaftale",
+    "subtitle": "Aftale nr. {number}",
+    "preamble": "Denne køb- og salgsaftale (\"Aftalen\") indgås på den dato, der er angivet nedenfor, mellem den registrerede udvikler og køberne, der er anført nedenfor, om salg af den ejendom, der er identificeret heri.",
+    "headings": {
+      "parties": "Parter i aftalen",
+      "property": "Ejendommen",
+      "price": "Købesum",
+      "payment_schedule": "Betalingsplan",
+      "clauses": "Vilkår og betingelser",
+      "instalments": "Rater",
+      "signatures": "Underskrifter",
+      "co_ownership": "Fælles ejerskab",
+      "regulatory": "Lovpligtige oplysninger",
+      "annexes": "Bilag"
+    },
+    "parties_intro": "Køberne erhverver ejendommen i fællesskab i de ejerandele, der er angivet nedenfor. Alle parter hæfter solidarisk for forpligtelserne i henhold til denne aftale, medmindre andet udtrykkeligt er angivet.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Milepæl",
+      "due_date": "Forfaldsdato",
+      "amount": "Beløb",
+      "currency": "Valuta"
+    },
+    "party_columns": {
+      "name": "Navn",
+      "role": "Rolle",
+      "ownership_pct": "Ejerandel %",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Grundnummer",
+      "development": "Projekt",
+      "area_m2": "Areal (m²)",
+      "house_type": "Hustype"
+    },
+    "price_label": "Samlet købesum",
+    "breakdown_label": "Prisfordeling",
+    "signature_note": "Underskrevet i {place} den {date}. Ved underskrift bekræfter køber og udvikler, at de har læst, forstået og accepterer vilkårene i denne aftale, herunder alle bilag."
+  },
+  "payment_receipt": {
+    "title": "Betalingskvittering",
+    "intro": "Denne kvittering bekræfter betaling af en rate i henhold til den nedenfor nævnte køb- og salgsaftale.",
+    "headings": {
+      "spa_ref": "Aftale nr.",
+      "instalment": "Rate",
+      "milestone": "Milepæl",
+      "amount_paid": "Betalt beløb",
+      "payment_method": "Betalingsmetode",
+      "payment_ref": "Betalingsreference",
+      "paid_at": "Betalt den",
+      "outstanding": "Restgæld"
+    },
+    "footer_note": "Denne kvittering genereres automatisk og er gyldig uden manuel underskrift. Gem den til dine optegnelser."
+  },
+  "handover_certificate": {
+    "title": "Overdragelsesattest",
+    "intro": "Denne attest registrerer overdragelsen af ejendommen fra udvikleren til køberne. Køberen accepterer enheden med den vedhæftede mangelliste og garantivilkår.",
+    "headings": {
+      "spa_ref": "Aftale nr.",
+      "completed_at": "Overdragelsesdato",
+      "snag_count": "Åbne mangler",
+      "warranty_period": "Garantiperiode",
+      "keys_handed_over": "Nøgler overdraget",
+      "buyer_acceptance": "Købers accept",
+      "developer_declaration": "Udviklerens erklæring"
+    },
+    "developer_declaration_text": "Udvikleren bekræfter hermed, at ejendommen er opført i overensstemmelse med køb- og salgsaftalen, at al påkrævet dokumentation er udleveret til køberen, og at garantierne for konstruktion og udførelse træder i kraft på datoen for denne attest.",
+    "buyer_acceptance_text": "Køberen accepterer hermed overdragelsen af ejendommen med den vedhæftede mangelliste. Køberen bekræfter modtagelse af nøgler, manualer og al påkrævet dokumentation, der er anført i bilagene.",
+    "snag_note": "Åbne mangler udbedres af udvikleren inden for en rimelig tid i henhold til udbedringsklausulen i køb- og salgsaftalen."
+  },
+  "warranty_certificate": {
+    "title": "Garantibevis",
+    "intro": "Dette bevis fastlægger udviklerens garantiforpligtelser for ejendommen, der er overdraget til køberne den nedenfor anførte dato.",
+    "headings": {
+      "spa_ref": "Aftale nr.",
+      "handover_date": "Overdragelsesdato",
+      "structural": "Konstruktionsgaranti",
+      "finishing": "Garanti for udførelse",
+      "structural_period": "Konstruktionsperiode",
+      "finishing_period": "Udførelsesperiode",
+      "warranty_expiry": "Garantiens udløb",
+      "scope": "Dækningsomfang",
+      "exclusions": "Undtagelser"
+    },
+    "structural_text": "Udvikleren garanterer ejendommens konstruktionsmæssige integritet, herunder bærende konstruktion, fundamenter og tætning, i {years} år fra overdragelsesdatoen.",
+    "finishing_text": "Udvikleren garanterer udførelsesarbejderne, herunder maling, armaturer, installationer og udstyr installeret af udvikleren samt mindre kosmetiske forhold, i {years} år fra overdragelsesdatoen.",
+    "exclusions_text": "Garantien omfatter ikke skader forårsaget af misbrug, ændringer udført af køberen eller tredjemand, almindelig slid, force majeure og forhold, der er dækket af separate producentgarantier.",
+    "claim_procedure": "For at fremsætte et krav skal køberen indsende en skriftlig meddelelse til udvikleren inden for garantiperioden med en beskrivelse af manglen og rimelig dokumentation."
+  },
+  "noc": {
+    "title": "Tilladelse til videresalg",
+    "subtitle": "Ved videresalg af enhed",
+    "intro": "Denne tilladelse (NOC) udstedes af udvikleren for at bekræfte, at køberen ikke har udestående forpligtelser, der forhindrer videresalg af den nedenfor identificerede enhed.",
+    "headings": {
+      "spa_ref": "Aftale nr.",
+      "requested_by": "Anmodet af",
+      "issued_to": "Udstedt til",
+      "purpose": "Formål",
+      "validity": "Gyldighed",
+      "outstanding_balance": "Restgæld",
+      "transfer_fee": "Overdragelsesgebyr"
+    },
+    "validity_text": "Denne tilladelse er gyldig i {days} dage fra udstedelsesdatoen. Herefter skal der anmodes om en ny tilladelse.",
+    "purpose_text": "Salg af enheden til en tredjemand som køber, underlagt udviklerens standardprocedurer for overdragelse.",
+    "no_outstanding": "Alle rater op til datoen for denne tilladelse er betalt fuldt ud. Der er ingen udestående betalinger registreret på denne kontrakt.",
+    "developer_statement": "Udvikleren giver hermed tilladelse til, at køberen overdrager ejerskabet af enheden til en tredjemand, underlagt standardgebyret for overdragelse og procedurerne. Denne tilladelse fraskriver ikke udviklerens rettigheder i henhold til køb- og salgsaftalen."
+  },
+  "tenant_lease_agreement": {
+    "title": "Lejekontrakt",
+    "intro": "Denne lejekontrakt indgås mellem udlejeren (udvikleren) og lejeren/lejerne, der er anført nedenfor, om boliglejemålet af den ejendom, der er beskrevet heri.",
+    "tenant_signature": "Lejers underskrift",
+    "headings": {
+      "lease_number": "Lejekontrakt nr.",
+      "tenant": "Lejer",
+      "property": "Ejendom",
+      "term": "Lejeperiode",
+      "monthly_rent": "Månedlig leje",
+      "security_deposit": "Depositum",
+      "use_clause": "Anvendelse af ejendommen",
+      "maintenance": "Vedligeholdelse",
+      "termination": "Opsigelse"
+    },
+    "use_clause_text": "Lejeren må kun anvende ejendommen som privat bolig for lejeren og nærmeste familie. Fremleje og erhvervsmæssig brug er forbudt uden udlejerens skriftlige samtykke.",
+    "maintenance_text": "Udlejeren er ansvarlig for konstruktionsmæssig vedligeholdelse og større hvidevarer installeret af udvikleren. Lejeren er ansvarlig for den daglige rengøring, mindre reparationer under en rimelig grænse og skader forårsaget af misbrug.",
+    "termination_text": "Begge parter kan opsige lejemålet ved periodens udløb med skriftlig varsel på mindst 30 dage. Hvis lejeren opsiger tidligt, fortabes depositummet, medmindre udlejeren skriftligt accepterer andet."
+  },
+  "move_in_checklist": {
+    "title": "Indflytningstjekliste",
+    "intro": "Tilstandsrapport for hvert rum, registreret ved overdragelsen. Begge parter bekræfter ved underskrift, at den anførte tilstand svarer til den besigtigede enhed.",
+    "empty_rooms": "Ingen rumdata angivet.",
+    "acceptance_text": "Ved underskrift bekræfter begge parter, at den rum for rum registrerede tilstand ovenfor korrekt afspejler enheden på tidspunktet for besigtigelsen.",
+    "headings": {
+      "spa_ref": "Aftale nr.",
+      "inspection_date": "Besigtigelsesdato"
+    },
+    "columns": {
+      "item": "Genstand",
+      "condition": "Tilstand",
+      "notes": "Noter"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Attest for frigivelse af pantebrev",
+    "intro": "Dette brev udstedes af udvikleren efter anmodning fra køberen for at bekræfte, at den nedenfor identificerede enhed ikke har udestående byrder, pantebreve, retsanpart eller hæftelser til fordel for udvikleren.",
+    "no_encumbrance_text": "Udvikleren bekræfter hermed, at den ovenfor nævnte enhed pr. datoen for dette brev er frit for pant, byrde, retsanpart eller hæftelse til fordel for udvikleren eller en nærtstående part.",
+    "purpose_text": "Dette brev udstedes alene til brug for køberens lånansøgning og eventuel due diligence anmodet af den ovenfor nævnte bank. Det fraskriver ikke udviklerens rettigheder i henhold til køb- og salgsaftalen.",
+    "headings": {
+      "bank": "Udstedt til (bank)",
+      "spa_ref": "Aftale nr.",
+      "unit": "Enhed"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Anmodning om tinglysning af ejerskifte",
+    "intro": "Formel anmodning til tinglysningsmyndigheden om at overføre ejendomsretten til den nedenfor beskrevne enhed fra udvikleren til de nye ejere, der er anført i køb- og salgsaftalen.",
+    "request_text": "Udvikleren anmoder hermed tinglysningsmyndigheden om at registrere overdragelsen af ejendomsretten til ovenstående enhed til fordel for de anførte nye ejere i de angivne andele med virkning fra datoen for denne anmodning.",
+    "attachments_text": "Underskrevet original køb- og salgsaftale, kvittering for sidste betaling, overdragelsesattest, legitimation for alle nye ejere samt eventuelle tinglysningsafgiftskvitteringer, som myndigheden kræver.",
+    "headings": {
+      "registry": "Tinglysningsmyndighed",
+      "spa_ref": "Aftale nr.",
+      "unit": "Enhed",
+      "new_owners": "Nye ejere",
+      "request_body": "Anmodning",
+      "attachments": "Bilag"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Tilladelse til frigivelse fra depot",
+    "intro": "Instruks til depotforvalteren om at frigive midler på den nedenfor identificerede depotkonto til udvikleren vedrørende den beskrevne milepæl.",
+    "instruction_text": "Udvikleren bemyndiger og instruerer hermed depotforvalteren til at frigive ovenstående beløb fra den angivne depotkonto til udviklerens driftskonto. Frigivelsen følger milepælscertificeringen, der er registreret i køb- og salgsaftalen.",
+    "headings": {
+      "escrow_account": "Depotkonto nr.",
+      "spa_ref": "Aftale nr.",
+      "unit": "Enhed",
+      "amount_to_release": "Beløb til frigivelse",
+      "release_reason": "Årsag til frigivelse"
+    }
+  },
+  "refund_authorization": {
+    "title": "Tilladelse til tilbagebetaling",
+    "intro": "Dette dokument bemyndiger tilbagebetaling af det nedenfor angivne beløb i forbindelse med den annullerede reservation eller salgskontrakt, der henvises til.",
+    "authorisation_text": "Udvikleren bemyndiger hermed tilbagebetaling af ovenstående beløb via den angivne betalingsmetode. Afviklingstidspunktet følger udviklerens standardprocedurer for økonomi og de fortrydelses- og fortabelsesregler, der gælder for den oprindelige transaktion.",
+    "headings": {
+      "reference": "Reference",
+      "unit": "Enhed",
+      "amount": "Tilbagebetalingsbeløb",
+      "reason": "Årsag",
+      "payment_method": "Betalingsmetode"
+    }
+  }
+}

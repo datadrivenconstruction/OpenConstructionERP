@@ -156,7 +156,9 @@ def _missing_glyphs(pdf: bytes) -> list[tuple[str, str]]:
         nonlocal drawn
         if isinstance(node, LTChar):
             text = node.get_text()
-            if text.isspace() or text.startswith("(cid:"):
+            # U+FFFF and the private-use block are a shaper's contextual glyphs (a Thai tone mark moved over its vowel,
+            # a Devanagari conjunct) with no Unicode of their own.
+            if text.isspace() or text.startswith("(cid:") or text == "￿" or "" <= text <= "":
                 return
             drawn += 1
             face = _strip_subset(node.fontname)

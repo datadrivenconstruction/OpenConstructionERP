@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Sida {page} av {total}",
+    "generated_at": "Genererad {timestamp} UTC",
+    "doc_ref": "Dok.ref",
+    "developer": "Exploatör",
+    "unit_code": "Enhetskod",
+    "watermark_draft": "UTKAST",
+    "currency": "Valuta",
+    "amount": "Belopp",
+    "date": "Datum",
+    "signature": "Signatur",
+    "place": "Ort",
+    "buyer_signature": "Köparens signatur",
+    "developer_signature": "Exploatörens signatur",
+    "witness": "Vittne"
+  },
+  "reservation_receipt": {
+    "title": "Reservationskvitto",
+    "intro": "Detta kvitto bekräftar reservationen av fastigheten som beskrivs nedan. Handpenningen har mottagits och enheten hålls undan från marknaden för köparen till dess att ångerfristen löper ut eller ett köpekontrakt undertecknas.",
+    "headings": {
+      "buyer": "Köpare",
+      "property": "Fastighet",
+      "amount_paid": "Betalt belopp",
+      "valid_until": "Giltig till",
+      "next_step": "Nästa steg",
+      "reservation_number": "Reservationsnr",
+      "cooling_off": "Ångerfrist",
+      "deposit_status": "Status för handpenning",
+      "plot_details": "Tomtuppgifter"
+    },
+    "next_step_text": "Inom {days} dagar måste köparen underteckna köpekontraktet och betala nästa delbetalning, annars upphör reservationen och enheten släpps tillbaka till marknaden.",
+    "cooling_off_text": "{days} dagar från mottagandet av detta dokument.",
+    "footer_note": "Handpenningen återbetalas helt endast under den ångerfrist som jurisdiktionen fastställer. Efter denna period gäller de tillämpliga reglerna om förverkande."
+  },
+  "sales_contract": {
+    "title": "Köpekontrakt",
+    "subtitle": "Avtalsnr {number}",
+    "preamble": "Detta köpekontrakt (\"Avtalet\") upprättas och ingås på det datum som anges nedan mellan exploatören som är registrerad och köparen/köparna som anges nedan, avseende försäljning av den fastighet som identifieras häri.",
+    "headings": {
+      "parties": "Avtalsparter",
+      "property": "Fastigheten",
+      "price": "Köpesumma",
+      "payment_schedule": "Betalningsplan",
+      "clauses": "Villkor",
+      "instalments": "Delbetalningar",
+      "signatures": "Underskrifter",
+      "co_ownership": "Samägande",
+      "regulatory": "Regulatoriska upplysningar",
+      "annexes": "Bilagor"
+    },
+    "parties_intro": "Köparen/köparna förvärvar fastigheten gemensamt i de ägarandelar som anges nedan. Alla parter är solidariskt ansvariga för förpliktelserna enligt detta avtal, om inte annat uttryckligen anges.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Milstolpe",
+      "due_date": "Förfallodatum",
+      "amount": "Belopp",
+      "currency": "Valuta"
+    },
+    "party_columns": {
+      "name": "Namn",
+      "role": "Roll",
+      "ownership_pct": "Ägarandel %",
+      "email": "E-post"
+    },
+    "property_columns": {
+      "plot_number": "Tomtnummer",
+      "development": "Projekt",
+      "area_m2": "Yta (m²)",
+      "house_type": "Hustyp"
+    },
+    "price_label": "Total köpesumma",
+    "breakdown_label": "Prisfördelning",
+    "signature_note": "Undertecknat i {place} den {date}. Genom att underteckna nedan bekräftar köparen och exploatören att de har läst, förstått och godkänner villkoren i detta avtal, inklusive samtliga bilagor."
+  },
+  "payment_receipt": {
+    "title": "Betalningskvitto",
+    "intro": "Detta kvitto bekräftar betalning av en delbetalning enligt köpekontraktet som refereras nedan.",
+    "headings": {
+      "spa_ref": "Avtalsnr",
+      "instalment": "Delbetalning",
+      "milestone": "Milstolpe",
+      "amount_paid": "Betalt belopp",
+      "payment_method": "Betalningssätt",
+      "payment_ref": "Betalningsreferens",
+      "paid_at": "Betald den",
+      "outstanding": "Kvarstående skuld"
+    },
+    "footer_note": "Detta kvitto genereras automatiskt och är giltigt utan manuell underskrift. Spara för dina arkiv."
+  },
+  "handover_certificate": {
+    "title": "Överlämningsintyg",
+    "intro": "Detta intyg dokumenterar överlämningen av fastigheten från exploatören till köparen/köparna. Köparen godtar enheten med hänsyn till bifogad åtgärdslista och garantivillkor.",
+    "headings": {
+      "spa_ref": "Avtalsnr",
+      "completed_at": "Överlämningsdatum",
+      "snag_count": "Öppna anmärkningar",
+      "warranty_period": "Garantitid",
+      "keys_handed_over": "Nycklar överlämnade",
+      "buyer_acceptance": "Köparens godkännande",
+      "developer_declaration": "Exploatörens försäkran"
+    },
+    "developer_declaration_text": "Exploatören bekräftar härmed att fastigheten har uppförts i enlighet med köpekontraktet, att all erforderlig dokumentation har överlämnats till köparen och att garantierna för konstruktion och ytskikt börjar löpa från datumet för detta intyg.",
+    "buyer_acceptance_text": "Köparen godtar härmed överlämningen av fastigheten med hänsyn till bifogad åtgärdslista. Köparen bekräftar mottagandet av nycklar, bruksanvisningar och all erforderlig dokumentation som anges i bilagorna.",
+    "snag_note": "Öppna anmärkningar åtgärdas av exploatören inom rimlig tid enligt åtgärdsklausulen i köpekontraktet."
+  },
+  "warranty_certificate": {
+    "title": "Garantibevis",
+    "intro": "Detta bevis anger exploatörens garantiåtaganden för den fastighet som överlämnats till köparen/köparna på datumet nedan.",
+    "headings": {
+      "spa_ref": "Avtalsnr",
+      "handover_date": "Överlämningsdatum",
+      "structural": "Konstruktionsgaranti",
+      "finishing": "Ytskiktsgaranti",
+      "structural_period": "Konstruktionsperiod",
+      "finishing_period": "Ytskiktsperiod",
+      "warranty_expiry": "Garantins utgång",
+      "scope": "Omfattning",
+      "exclusions": "Undantag"
+    },
+    "structural_text": "Exploatören garanterar fastighetens konstruktiva integritet, inklusive bärande konstruktion, grundläggning och vattentätning, under {years} år från överlämningsdatumet.",
+    "finishing_text": "Exploatören garanterar ytskiktsarbetena, inklusive målning, armaturer, beslag, vitvaror som installerats av exploatören och mindre kosmetiska delar, under {years} år från överlämningsdatumet.",
+    "exclusions_text": "Garantin omfattar inte skador som orsakats av felaktig användning, ändringar som utförts av köparen eller tredje part, normalt slitage, force majeure eller delar som omfattas av separata tillverkargarantier.",
+    "claim_procedure": "För att framställa ett anspråk ska köparen skriftligen meddela exploatören inom garantitiden, och beskriva felet samt lämna rimliga underlag."
+  },
+  "noc": {
+    "title": "Intyg om att inga invändningar föreligger",
+    "subtitle": "Vid vidareförsäljning av enheten",
+    "intro": "Detta intyg om att inga invändningar föreligger (NOC) utfärdas av exploatören för att bekräfta att köparen inte har några utestående förpliktelser som skulle hindra vidareförsäljningen av enheten som anges nedan.",
+    "headings": {
+      "spa_ref": "Avtalsnr",
+      "requested_by": "Begärd av",
+      "issued_to": "Utfärdat till",
+      "purpose": "Syfte",
+      "validity": "Giltighet",
+      "outstanding_balance": "Kvarstående skuld",
+      "transfer_fee": "Överlåtelseavgift"
+    },
+    "validity_text": "Detta intyg är giltigt i {days} dagar från utfärdandedatumet. Efter denna period måste ett nytt intyg begäras.",
+    "purpose_text": "Försäljning av enheten till en tredje part, med förbehåll för exploatörens standardrutiner för överlåtelse.",
+    "no_outstanding": "Alla delbetalningar fram till datumet för detta intyg har betalats i sin helhet. Inga utestående betalningar är registrerade mot detta avtal.",
+    "developer_statement": "Exploatören lämnar härmed tillstånd, med förbehåll för standardavgiften för överlåtelse och tillhörande rutiner, för köparen att överlåta äganderätten till enheten till en tredje part. Detta intyg innebär inget avkall på exploatörens rättigheter enligt köpekontraktet."
+  },
+  "tenant_lease_agreement": {
+    "title": "Hyresavtal för bostad",
+    "intro": "Detta hyresavtal upprättas mellan hyresvärden (exploatören) och hyresgästen/hyresgästerna som anges nedan för bostadsuthyrning av fastigheten som beskrivs häri.",
+    "tenant_signature": "Hyresgästens underskrift",
+    "headings": {
+      "lease_number": "Hyresavtalsnr",
+      "tenant": "Hyresgäst",
+      "property": "Fastighet",
+      "term": "Löptid",
+      "monthly_rent": "Månadshyra",
+      "security_deposit": "Depositionsbelopp",
+      "use_clause": "Användning av fastigheten",
+      "maintenance": "Underhåll",
+      "termination": "Uppsägning"
+    },
+    "use_clause_text": "Hyresgästen ska använda fastigheten uteslutande som privatbostad för hyresgästen och närmaste familj. Andrahandsuthyrning och kommersiell användning är förbjudna utan hyresvärdens skriftliga medgivande.",
+    "maintenance_text": "Hyresvärden ansvarar för konstruktionsunderhåll och större vitvaror som installerats av exploatören. Hyresgästen ansvarar för den löpande renhållningen, mindre reparationer under en rimlig gräns samt skador som orsakats genom felaktig användning.",
+    "termination_text": "Endera parten får säga upp detta hyresavtal vid löptidens slut med skriftligt meddelande minst 30 dagar före utgången. Om hyresgästen säger upp avtalet i förtid förverkas depositionsbeloppet, såvida inte hyresvärden skriftligen godkänner något annat."
+  },
+  "move_in_checklist": {
+    "title": "Inflyttningsprotokoll",
+    "intro": "Rumsvis skick som registrerats vid överlämningen. Båda parterna undertecknar att det angivna skicket motsvarar enheten såsom besiktigad.",
+    "empty_rooms": "Inga rumsuppgifter angivna.",
+    "acceptance_text": "Genom att underteckna nedan bekräftar båda parterna att det rumsvisa skick som registrerats ovan korrekt återspeglar enheten vid tidpunkten för besiktningen.",
+    "headings": {
+      "spa_ref": "Avtalsnr",
+      "inspection_date": "Besiktningsdatum"
+    },
+    "columns": {
+      "item": "Objekt",
+      "condition": "Skick",
+      "notes": "Anteckningar"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Intyg om skuldfrihet",
+    "intro": "Detta brev utfärdas av exploatören på köparens begäran för att bekräfta att enheten som anges nedan inte har några utestående avgifter, inteckningar, panträtter eller andra belastningar till förmån för exploatören.",
+    "no_encumbrance_text": "Exploatören bekräftar härmed att enheten ovan, per dagen för detta brev, är fri från inteckning, avgift, panträtt eller annan belastning till förmån för exploatören eller närstående part.",
+    "purpose_text": "Detta brev utfärdas uteslutande för köparens bolåneansökan och eventuell tillhörande due diligence som begärs av banken ovan. Det innebär inget avkall på exploatörens rättigheter enligt köpekontraktet.",
+    "headings": {
+      "bank": "Utfärdat till (bank)",
+      "spa_ref": "Avtalsnr",
+      "unit": "Enhet"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Begäran om lagfart",
+    "intro": "Formell begäran till lantmäterimyndigheten om överföring av äganderätten till enheten som beskrivs nedan från exploatören till de nya ägare som anges i köpekontraktet.",
+    "request_text": "Exploatören begär härmed att Lantmäterimyndigheten registrerar överlåtelsen av äganderätten till ovan angivna enhet till förmån för de angivna nya ägarna, i de procentandelar som anges, med verkan från dagen för denna begäran.",
+    "attachments_text": "Undertecknat original av köpekontraktet, slutligt betalningskvitto, överlämningsintyg, identitetshandlingar för alla nya ägare samt eventuella stämpelskattekvitton som registret kräver.",
+    "headings": {
+      "registry": "Lantmäterimyndigheten",
+      "spa_ref": "Avtalsnr",
+      "unit": "Enhet",
+      "new_owners": "Nya ägare",
+      "request_body": "Begäran",
+      "attachments": "Bilagor"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Godkännande av frigivning från deponerade medel",
+    "intro": "Instruktion till deponeringsagenten att frigöra medel som hålls på det deponeringskonto som anges nedan till exploatören, avseende den milstolpe som beskrivs.",
+    "instruction_text": "Exploatören bemyndigar och instruerar härmed deponeringsagenten att frigöra ovan angivet belopp från det angivna deponeringskontot till exploatörens driftskonto. Frigivningen följer på milstolpebesiktningen som registrerats i köpekontraktet.",
+    "headings": {
+      "escrow_account": "Deponeringskontonr",
+      "spa_ref": "Avtalsnr",
+      "unit": "Enhet",
+      "amount_to_release": "Belopp att frigöra",
+      "release_reason": "Skäl för frigivning"
+    }
+  },
+  "refund_authorization": {
+    "title": "Godkännande av återbetalning",
+    "intro": "Detta dokument godkänner återbetalning av beloppet som anges nedan avseende den avbokade reservationen eller det avbrutna köpekontraktet som refereras.",
+    "authorisation_text": "Exploatören godkänner härmed återbetalning av ovan angivet belopp via angivet betalningssätt. Tidpunkten för reglering följer exploatörens ordinarie ekonomirutiner och de ångerfrist- och förverkanderegler som gäller för den ursprungliga transaktionen.",
+    "headings": {
+      "reference": "Referens",
+      "unit": "Enhet",
+      "amount": "Återbetalningsbelopp",
+      "reason": "Skäl",
+      "payment_method": "Betalningssätt"
+    }
+  }
+}

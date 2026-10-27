@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Pagina {page} di {total}",
+    "generated_at": "Generato il {timestamp} UTC",
+    "doc_ref": "Rif. documento",
+    "developer": "Promotore",
+    "unit_code": "Codice unità",
+    "watermark_draft": "BOZZA",
+    "currency": "Valuta",
+    "amount": "Importo",
+    "date": "Data",
+    "signature": "Firma",
+    "place": "Luogo",
+    "buyer_signature": "Firma dell'acquirente",
+    "developer_signature": "Firma del promotore",
+    "witness": "Testimone"
+  },
+  "reservation_receipt": {
+    "title": "Ricevuta di prenotazione",
+    "intro": "La presente ricevuta conferma la prenotazione dell'immobile descritto di seguito. La caparra è stata ricevuta e l'unità è riservata all'acquirente fino alla scadenza del periodo di recesso o alla firma del contratto di compravendita.",
+    "headings": {
+      "buyer": "Acquirente",
+      "property": "Immobile",
+      "amount_paid": "Importo versato",
+      "valid_until": "Valida fino al",
+      "next_step": "Prossimo passo",
+      "reservation_number": "N. prenotazione",
+      "cooling_off": "Periodo di recesso",
+      "deposit_status": "Stato della caparra",
+      "plot_details": "Dati della unità"
+    },
+    "next_step_text": "Entro {days} giorni l'acquirente deve firmare il contratto di compravendita e versare la rata successiva, altrimenti la prenotazione scadrà e l'unità tornerà sul mercato.",
+    "cooling_off_text": "{days} giorni dalla ricezione del presente documento.",
+    "footer_note": "La caparra è rimborsabile integralmente solo durante il periodo di recesso previsto dalla giurisdizione. Trascorso tale periodo, il rimborso segue le regole applicabili in materia di decadenza."
+  },
+  "sales_contract": {
+    "title": "Contratto di compravendita",
+    "subtitle": "Contratto n. {number}",
+    "preamble": "Il presente contratto di compravendita (il \"Contratto\") è stipulato alla data indicata di seguito tra il Promotore risultante e l'/gli Acquirente/i elencato/i di seguito, per la vendita dell'immobile identificato nel presente documento.",
+    "headings": {
+      "parties": "Parti del contratto",
+      "property": "L'immobile",
+      "price": "Prezzo di acquisto",
+      "payment_schedule": "Piano dei pagamenti",
+      "clauses": "Termini e condizioni",
+      "instalments": "Rate",
+      "signatures": "Firme",
+      "co_ownership": "Comproprietà",
+      "regulatory": "Informazioni regolamentari",
+      "annexes": "Allegati"
+    },
+    "parties_intro": "L'/gli Acquirente/i acquista/no l'immobile in comune nelle quote di proprietà indicate di seguito. Tutte le parti sono solidalmente responsabili degli obblighi derivanti dal presente Contratto, salvo diversa espressa indicazione.",
+    "instalment_columns": {
+      "sequence": "N.",
+      "milestone": "Stato di avanzamento",
+      "due_date": "Scadenza",
+      "amount": "Importo",
+      "currency": "Valuta"
+    },
+    "party_columns": {
+      "name": "Nome",
+      "role": "Ruolo",
+      "ownership_pct": "Quota %",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Numero unità",
+      "development": "Intervento",
+      "area_m2": "Superficie (m²)",
+      "house_type": "Tipologia"
+    },
+    "price_label": "Prezzo di acquisto complessivo",
+    "breakdown_label": "Dettaglio del prezzo",
+    "signature_note": "Firmato a {place} il {date}. Firmando qui sotto, l'Acquirente e il Promotore confermano di aver letto, compreso e accettato le condizioni del presente Contratto, inclusi tutti gli allegati."
+  },
+  "payment_receipt": {
+    "title": "Ricevuta di pagamento",
+    "intro": "La presente ricevuta attesta il pagamento di una rata prevista dal contratto di compravendita di riferimento.",
+    "headings": {
+      "spa_ref": "N. contratto",
+      "instalment": "Rata",
+      "milestone": "Stato di avanzamento",
+      "amount_paid": "Importo versato",
+      "payment_method": "Modalità di pagamento",
+      "payment_ref": "Riferimento del pagamento",
+      "paid_at": "Pagato il",
+      "outstanding": "Saldo residuo"
+    },
+    "footer_note": "La presente ricevuta è generata automaticamente ed è valida senza firma manuale. Conservarla con la documentazione."
+  },
+  "handover_certificate": {
+    "title": "Verbale di consegna",
+    "intro": "Il presente verbale attesta la consegna dell'immobile dal Promotore all'/agli Acquirente/i. L'Acquirente accetta l'unità con riserva delle lavorazioni da completare e nel rispetto delle condizioni di garanzia allegate.",
+    "headings": {
+      "spa_ref": "N. contratto",
+      "completed_at": "Data di consegna",
+      "snag_count": "Difetti aperti",
+      "warranty_period": "Periodo di garanzia",
+      "keys_handed_over": "Chiavi consegnate",
+      "buyer_acceptance": "Accettazione dell'Acquirente",
+      "developer_declaration": "Dichiarazione del Promotore"
+    },
+    "developer_declaration_text": "Il Promotore dichiara che l'immobile è stato realizzato in conformità al contratto di compravendita, che tutta la documentazione richiesta è stata consegnata all'Acquirente e che le garanzie strutturali e sulle finiture decorrono dalla data del presente verbale.",
+    "buyer_acceptance_text": "L'Acquirente accetta la consegna dell'immobile con riserva delle lavorazioni da completare indicate nell'elenco allegato. L'Acquirente dichiara di aver ricevuto le chiavi, i manuali e tutta la documentazione richiesta elencata negli Allegati.",
+    "snag_note": "I difetti aperti saranno eliminati dal Promotore entro un termine ragionevole, secondo la clausola del contratto relativa agli interventi di ripristino."
+  },
+  "warranty_certificate": {
+    "title": "Certificato di garanzia",
+    "intro": "Il presente certificato definisce gli obblighi di garanzia del Promotore relativi all'immobile consegnato all'/agli Acquirente/i alla data indicata di seguito.",
+    "headings": {
+      "spa_ref": "N. contratto",
+      "handover_date": "Data di consegna",
+      "structural": "Garanzia strutturale",
+      "finishing": "Garanzia sulle finiture",
+      "structural_period": "Periodo strutturale",
+      "finishing_period": "Periodo finiture",
+      "warranty_expiry": "Scadenza della garanzia",
+      "scope": "Oggetto della copertura",
+      "exclusions": "Esclusioni"
+    },
+    "structural_text": "Il Promotore garantisce l'integrità strutturale dell'immobile, comprese la struttura portante, le fondazioni e le impermeabilizzazioni, per un periodo di {years} anni dalla data di consegna.",
+    "finishing_text": "Il Promotore garantisce le lavorazioni di finitura, comprese tinteggiature, infissi, rivestimenti, apparecchi installati dal Promotore e piccoli difetti estetici, per un periodo di {years} anno/i dalla data di consegna.",
+    "exclusions_text": "La garanzia esclude i danni causati da uso improprio, da modifiche eseguite dall'Acquirente o da terzi, dal normale deperimento, da eventi di forza maggiore e dagli elementi coperti da garanzie separate del produttore.",
+    "claim_procedure": "Per presentare un reclamo, l'Acquirente deve inviare una comunicazione scritta al Promotore entro il periodo di garanzia, descrivendo il difetto e allegando un'adeguata documentazione a supporto."
+  },
+  "noc": {
+    "title": "Nulla osta",
+    "subtitle": "Per la rivendita dell'unità",
+    "intro": "Il presente Nulla osta è rilasciato dal Promotore per confermare che non vi sono obblighi pendenti a carico dell'Acquirente tali da impedire la rivendita dell'unità identificata di seguito.",
+    "headings": {
+      "spa_ref": "N. contratto",
+      "requested_by": "Richiesto da",
+      "issued_to": "Rilasciato a",
+      "purpose": "Finalità",
+      "validity": "Validità",
+      "outstanding_balance": "Saldo residuo",
+      "transfer_fee": "Spese di trasferimento"
+    },
+    "validity_text": "Il presente Nulla osta è valido per {days} giorni dalla data di emissione. Trascorso tale periodo, occorre richiederne uno nuovo.",
+    "purpose_text": "Vendita dell'unità a un acquirente terzo, nel rispetto delle procedure standard di trasferimento del Promotore.",
+    "no_outstanding": "Tutte le rate fino alla data del presente Nulla osta sono state pagate integralmente. Non risultano pagamenti pendenti su questo contratto.",
+    "developer_statement": "Il Promotore concede l'autorizzazione, nel rispetto delle spese e delle procedure standard di trasferimento, affinché l'Acquirente trasferisca la proprietà dell'unità a un terzo. Il presente Nulla osta non comporta rinuncia ad alcun diritto del Promotore ai sensi del contratto di compravendita."
+  },
+  "tenant_lease_agreement": {
+    "title": "Contratto di locazione",
+    "intro": "Il presente contratto di locazione è stipulato tra il Locatore (Promotore) e il/i Conduttore/i indicato/i di seguito per la locazione ad uso abitativo dell'immobile descritto nel presente documento.",
+    "tenant_signature": "Firma del Conduttore",
+    "headings": {
+      "lease_number": "N. contratto di locazione",
+      "tenant": "Conduttore",
+      "property": "Immobile",
+      "term": "Durata",
+      "monthly_rent": "Canone mensile",
+      "security_deposit": "Deposito cauzionale",
+      "use_clause": "Destinazione d'uso dell'immobile",
+      "maintenance": "Manutenzione",
+      "termination": "Risoluzione"
+    },
+    "use_clause_text": "Il Conduttore utilizzerà l'immobile esclusivamente come abitazione privata per sé e per i propri familiari conviventi. Il subaffitto e l'uso commerciale sono vietati senza il preventivo consenso scritto del Locatore.",
+    "maintenance_text": "Il Locatore è responsabile della manutenzione straordinaria e degli elettrodomestici di serie installati dal Promotore. Il Conduttore è responsabile della pulizia ordinaria, delle piccole riparazioni entro una soglia ragionevole e dei danni causati da uso improprio.",
+    "termination_text": "Ciascuna parte può recedere alla scadenza del contratto con preavviso scritto non inferiore a 30 giorni. Il recesso anticipato da parte del Conduttore comporta la perdita del deposito cauzionale, salvo diverso accordo scritto con il Locatore."
+  },
+  "move_in_checklist": {
+    "title": "Verbale di ingresso",
+    "intro": "Rilievo dello stato dei locali, stanza per stanza, redatto al momento della consegna. Entrambe le parti firmano per attestare che lo stato riportato corrisponde all'unità ispezionata.",
+    "empty_rooms": "Nessun dato sui locali fornito.",
+    "acceptance_text": "Firmando qui sotto, entrambe le parti confermano che lo stato dei locali, stanza per stanza, riportato sopra descrive fedelmente l'unità al momento dell'ispezione.",
+    "headings": {
+      "spa_ref": "N. contratto",
+      "inspection_date": "Data di ispezione"
+    },
+    "columns": {
+      "item": "Elemento",
+      "condition": "Stato",
+      "notes": "Note"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Lettera di svincolo ipotecario",
+    "intro": "La presente lettera è rilasciata dal Promotore su richiesta dell'Acquirente per confermare che l'unità identificata di seguito non è gravata da oneri, ipoteche, privilegi o vincoli a favore del Promotore.",
+    "no_encumbrance_text": "Il Promotore conferma che, alla data della presente lettera, l'unità sopra indicata è libera da ipoteche, oneri, privilegi o vincoli a favore del Promotore o di qualsiasi parte correlata.",
+    "purpose_text": "La presente lettera è rilasciata esclusivamente ai fini della domanda di mutuo dell'Acquirente e di ogni eventuale verifica richiesta dalla Banca sopra indicata. Non comporta rinuncia ad alcun diritto del Promotore ai sensi del contratto di compravendita.",
+    "headings": {
+      "bank": "Rilasciato a (Banca)",
+      "spa_ref": "N. contratto",
+      "unit": "Unità"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Richiesta di trascrizione del trasferimento",
+    "intro": "Richiesta formale alla conservatoria dei registri immobiliari di trasferire la proprietà dell'unità descritta di seguito dal Promotore al/ai nuovo/i proprietario/i indicato/i nel contratto di compravendita.",
+    "request_text": "Il Promotore chiede alla conservatoria di registrare il trasferimento della proprietà dell'unità sopra indicata a favore del/dei nuovo/i proprietario/i elencato/i, nelle quote indicate, con effetto dalla data della presente richiesta.",
+    "attachments_text": "Contratto di compravendita originale (sottoscritto), ricevuta dell'ultimo pagamento, verbale di consegna, documenti di identità di tutti i nuovi proprietari e ricevute dell'imposta di registro o di bollo richieste dalla conservatoria.",
+    "headings": {
+      "registry": "Conservatoria dei registri immobiliari",
+      "spa_ref": "N. contratto",
+      "unit": "Unità",
+      "new_owners": "Nuovo/i proprietario/i",
+      "request_body": "Richiesta",
+      "attachments": "Allegati"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Autorizzazione allo svincolo del deposito",
+    "intro": "Istruzione al Depositario per lo svincolo a favore del Promotore dei fondi custoditi nel conto di deposito indicato di seguito, in relazione allo stato di avanzamento descritto.",
+    "instruction_text": "Il Promotore autorizza e incarica il Depositario di svincolare l'importo sopra indicato dal conto di deposito citato, versandolo sul conto operativo del Promotore. Lo svincolo segue la certificazione dello stato di avanzamento prevista dal contratto di compravendita.",
+    "headings": {
+      "escrow_account": "N. conto di deposito",
+      "spa_ref": "N. contratto",
+      "unit": "Unità",
+      "amount_to_release": "Importo da svincolare",
+      "release_reason": "Motivo dello svincolo"
+    }
+  },
+  "refund_authorization": {
+    "title": "Autorizzazione al rimborso",
+    "intro": "Il presente documento autorizza il rimborso dell'importo indicato di seguito in relazione alla prenotazione o al contratto di vendita annullato a cui si fa riferimento.",
+    "authorisation_text": "Il Promotore autorizza il rimborso dell'importo sopra indicato con la modalità di pagamento riportata. I tempi di liquidazione seguono le procedure amministrative standard del Promotore e le eventuali regole di recesso o decadenza applicabili all'operazione originaria.",
+    "headings": {
+      "reference": "Riferimento",
+      "unit": "Unità",
+      "amount": "Importo da rimborsare",
+      "reason": "Motivo",
+      "payment_method": "Modalità di pagamento"
+    }
+  }
+}

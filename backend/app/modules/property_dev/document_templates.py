@@ -53,6 +53,7 @@ from __future__ import annotations
 import html
 import json
 import logging
+import re
 import uuid
 from datetime import UTC, date, datetime, timedelta
 from decimal import ROUND_HALF_UP, Decimal
@@ -82,12 +83,14 @@ from reportlab.platypus import (
 from app.core.document_forms_i18n import REGISTER_UNRENDERABLE
 from app.core.i18n import SUPPORTED_LOCALES as PLATFORM_LOCALES
 from app.core.money import minor_units, money_quantum
-from app.core.pdf_branding import branded_cover_brand, branded_doc_metadata
+from app.core.pdf_branding import branded_cover_brand, branded_doc_metadata, draw_furniture_line
 from app.core.pdf_fonts import (
     BODY_FONT,
     BOLD_FONT,
     pdf_font_for_text,
+    pdf_markup,
     pdf_style_for_text,
+    pdf_text_width,
     register_pdf_fonts,
 )
 from app.core.storage import find_existing_upload, module_uploads_dir
@@ -741,6 +744,9 @@ def _styles(locale: str) -> dict[str, ParagraphStyle]:
     }
 
 
+_MARKUP_TAG = re.compile(r"<[^>]*>")
+
+
 def _p(text: str, style: ParagraphStyle, *, markup: bool = False) -> Paragraph:
     """Build a paragraph faced for the script its own text is written in.
 
@@ -783,7 +789,18 @@ def _p(text: str, style: ParagraphStyle, *, markup: bool = False) -> Paragraph:
     # gets drawn. Escaping only ever adds ASCII, so the two cannot disagree
     # about which face is needed, and asking the original keeps this the same
     # decision the direct Paragraph callers make.
-    return Paragraph(text if markup else html.escape(text), pdf_style_for_text(style, text))
+    if not markup:
+        return Paragraph(pdf_markup(text, style), pdf_style_for_text(style, text))
+    # Markup: the face is chosen from the text a reader sees, and each stretch
+    # between tags is set in runs, so a label in Urdu or Thai beside Latin or
+    # underscores is not drawn by one face that lacks half of it.
+    visible = html.unescape(_MARKUP_TAG.sub("", text))
+    faced = pdf_style_for_text(style, visible)
+    parts = _MARKUP_TAG.split(text)
+    tags = _MARKUP_TAG.findall(text)
+    out = [pdf_markup(html.unescape(part), style, anchor=faced.fontName) for part in parts]
+    merged = "".join(piece + (tags[i] if i < len(tags) else "") for i, piece in enumerate(out))
+    return Paragraph(merged, faced)
 
 
 # ── Page layout (header / footer / watermark / page-numbers) ────────────
@@ -830,14 +847,23 @@ def _build_page_handler(ctx: _PageContext):
         # brand (app name, then the company profile's legal name), never by
         # the platform's when the firm has set one.
         developer = (ctx.developer_name or branded_cover_brand())[:80]
-        canvas.setFont(pdf_font_for_text(developer, bold=True), 14)
+        # Furniture lines go through draw_furniture_line: a name or label in a
+        # script the body face lacks (Urdu, Thai, Hindi, Chinese) is set as a
+        # paragraph, which shapes it and picks a face per run.
         canvas.setFillColor(colors.HexColor("#111827"))
-        canvas.drawString(left, header_y, developer)
+        draw_furniture_line(canvas, developer, x=left, y=header_y, size=14, color="#111827", base=BOLD_FONT)
 
         if ctx.unit_code:
-            canvas.setFont(pdf_font_for_text(ctx.unit_code), 10)
             canvas.setFillColor(colors.HexColor("#374151"))
-            canvas.drawRightString(right_edge, header_y, ctx.unit_code)
+            draw_furniture_line(
+                canvas,
+                ctx.unit_code,
+                x=right_edge,
+                y=header_y,
+                size=10,
+                color="#374151",
+                align="right",
+            )
 
         # Thin separator line under header.
         canvas.setStrokeColor(colors.HexColor("#d1d5db"))
@@ -868,10 +894,9 @@ def _build_page_handler(ctx: _PageContext):
         # footer labels while the document reference stays ASCII, so the two
         # strings do not always want the same face.
         footer_y = left - 10 * mm
-        canvas.setFont(pdf_font_for_text(ref_str), 8)
-        canvas.drawString(left, footer_y, ref_str)
-        canvas.setFont(pdf_font_for_text(gen_str), 8)
-        canvas.drawCentredString(page_w / 2, footer_y, gen_str)
+        draw_furniture_line(canvas, ref_str, x=left, y=footer_y, size=8, color="#6b7280")
+        gen_x = page_w / 2 - pdf_text_width(gen_str, 8) / 2
+        draw_furniture_line(canvas, gen_str, x=gen_x, y=footer_y, size=8, color="#6b7280")
         # Right-side page label - final "X of Y" is injected on second pass.
         # We draw a placeholder that NumberedCanvas will overwrite.
         canvas.restoreState()
@@ -909,10 +934,17 @@ class _NumberedCanvas(Canvas):
         self.setFillColor(colors.HexColor("#6b7280"))
         template = _t(self._locale, "common.page_of", "Page {page} of {total}")
         label = template.replace("{page}", str(self._pageNumber)).replace("{total}", str(n_pages))
-        self.setFont(pdf_font_for_text(label), 8)
         page_w, _ = _doc_page_size(self)
         margin = _page_margin_pt()
-        self.drawRightString(page_w - margin, margin - 10 * mm, label)
+        draw_furniture_line(
+            self,
+            label,
+            x=page_w - margin,
+            y=margin - 10 * mm,
+            size=8,
+            color="#6b7280",
+            align="right",
+        )
         self.restoreState()
 
 

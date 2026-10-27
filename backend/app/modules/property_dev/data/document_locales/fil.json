@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Pahina {page} ng {total}",
+    "generated_at": "Nilikha {timestamp} UTC",
+    "doc_ref": "Sanggunian ng Dok.",
+    "developer": "Developer",
+    "unit_code": "Kodigo ng Unit",
+    "watermark_draft": "BURADOR",
+    "currency": "Pera",
+    "amount": "Halaga",
+    "date": "Petsa",
+    "signature": "Lagda",
+    "place": "Lugar",
+    "buyer_signature": "Lagda ng Mamimili",
+    "developer_signature": "Lagda ng Developer",
+    "witness": "Saksi"
+  },
+  "reservation_receipt": {
+    "title": "Resibo ng Reserbasyon",
+    "intro": "Pinatutunayan ng resibong ito ang reserbasyon ng ari-ariang nakalarawan sa ibaba. Natanggap na ang deposito at nakalaan ang unit para sa mamimili hanggang matapos ang cooling-off period o malagdaan ang Sale-Purchase Agreement.",
+    "headings": {
+      "buyer": "Mamimili",
+      "property": "Ari-arian",
+      "amount_paid": "Halagang Binayaran",
+      "valid_until": "Balido Hanggang",
+      "next_step": "Susunod na Hakbang",
+      "reservation_number": "Blg. ng Reserbasyon",
+      "cooling_off": "Cooling-off Period",
+      "deposit_status": "Katayuan ng Deposito",
+      "plot_details": "Detalye ng Lote"
+    },
+    "next_step_text": "Sa loob ng {days} araw, dapat lagdaan ng mamimili ang Sale-Purchase Agreement at bayaran ang susunod na hulog, o mawawalan ng bisa ang reserbasyon at ibabalik sa merkado.",
+    "cooling_off_text": "{days} araw mula sa pagtanggap ng dokumentong ito.",
+    "footer_note": "Maibabalik nang buo ang deposito lamang sa loob ng cooling-off period na itinakda ng hurisdiksyon. Pagkatapos ng panahong ito, susundin ang mga patakaran sa pagkawala ng deposito na nalalapat."
+  },
+  "sales_contract": {
+    "title": "Sale-Purchase Agreement",
+    "subtitle": "Kasunduan Blg. {number}",
+    "preamble": "Ang Sale-Purchase Agreement na ito (ang \"Kasunduan\") ay ginawa at pinasok sa petsang nakasaad sa ibaba, sa pagitan ng Developer na nakatala at ng (mga) Mamimiling nakalista sa ibaba, para sa pagbebenta ng ari-ariang tinukoy dito.",
+    "headings": {
+      "parties": "Mga Partido sa Kasunduan",
+      "property": "Ang Ari-arian",
+      "price": "Presyo ng Pagbili",
+      "payment_schedule": "Iskedyul ng Pagbabayad",
+      "clauses": "Mga Tuntunin at Kondisyon",
+      "instalments": "Mga Hulog",
+      "signatures": "Mga Lagda",
+      "co_ownership": "Magkasamang Pagmamay-ari",
+      "regulatory": "Mga Pagsisiwalat sa Regulasyon",
+      "annexes": "Mga Annex"
+    },
+    "parties_intro": "Ang (mga) Mamimili ay magkasamang bibili ng ari-arian sa mga porsyento ng pagmamay-ari na nakasaad sa ibaba. Ang lahat ng partido ay magkakasamang at hiwa-hiwalay na mananagot sa mga obligasyon sa ilalim ng Kasunduang ito maliban kung tahasang nakasaad kung hindi.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Milestone",
+      "due_date": "Takdang Petsa",
+      "amount": "Halaga",
+      "currency": "Pera"
+    },
+    "party_columns": {
+      "name": "Pangalan",
+      "role": "Papel",
+      "ownership_pct": "Porsyento ng Pagmamay-ari",
+      "email": "Email"
+    },
+    "property_columns": {
+      "plot_number": "Blg. ng Lote",
+      "development": "Development",
+      "area_m2": "Lawak (m²)",
+      "house_type": "Uri ng Bahay"
+    },
+    "price_label": "Kabuuang Presyo ng Pagbili",
+    "breakdown_label": "Detalye ng Presyo",
+    "signature_note": "Nilagdaan sa {place} noong {date}. Sa pamamagitan ng paglagda sa ibaba, kinukumpirma ng Mamimili at Developer na nabasa, naunawaan, at sumasang-ayon sila sa mga tuntuning nakasaad sa Kasunduang ito, kasama ang lahat ng annex."
+  },
+  "payment_receipt": {
+    "title": "Resibo ng Pagbabayad",
+    "intro": "Kinikilala ng resibong ito ang pagbabayad ng isang hulog sa ilalim ng Sale-Purchase Agreement na nakasaad sa ibaba.",
+    "headings": {
+      "spa_ref": "Blg. ng Kasunduan",
+      "instalment": "Hulog",
+      "milestone": "Milestone",
+      "amount_paid": "Halagang Binayaran",
+      "payment_method": "Paraan ng Pagbabayad",
+      "payment_ref": "Sanggunian ng Pagbabayad",
+      "paid_at": "Binayaran Noong",
+      "outstanding": "Natitirang Balanse"
+    },
+    "footer_note": "Awtomatikong nilikha ang resibong ito at balido kahit walang manwal na lagda. Itago para sa inyong talaan."
+  },
+  "handover_certificate": {
+    "title": "Sertipiko ng Pagtanggap",
+    "intro": "Itinatala ng sertipikong ito ang paglilipat ng ari-arian mula sa Developer patungo sa (mga) Mamimili. Tinatanggap ng Mamimili ang unit alinsunod sa snag list at mga tuntunin ng warranty na nakakabit.",
+    "headings": {
+      "spa_ref": "Blg. ng Kasunduan",
+      "completed_at": "Petsa ng Pagtanggap",
+      "snag_count": "Bukas na Snag",
+      "warranty_period": "Panahon ng Warranty",
+      "keys_handed_over": "Naibigay na Susi",
+      "buyer_acceptance": "Pagtanggap ng Mamimili",
+      "developer_declaration": "Deklarasyon ng Developer"
+    },
+    "developer_declaration_text": "Kinukumpirma ng Developer na naitayo ang ari-arian alinsunod sa Sale-Purchase Agreement, naihatid na sa Mamimili ang lahat ng kinakailangang dokumento, at magsisimula ang warranty sa istruktura at pagtatapos sa petsa ng sertipikong ito.",
+    "buyer_acceptance_text": "Tinatanggap ng Mamimili ang pagtanggap ng ari-arian alinsunod sa nakakabit na snag list. Kinikilala ng Mamimili ang pagtanggap ng mga susi, manwal, at lahat ng kinakailangang dokumentong nakalista sa mga Annex.",
+    "snag_note": "Aayusin ng Developer ang mga bukas na snag item sa makatwirang panahon ayon sa snag-fix clause ng SPA."
+  },
+  "warranty_certificate": {
+    "title": "Sertipiko ng Warranty",
+    "intro": "Itinatakda ng Sertipikong ito ang mga obligasyon ng Developer sa warranty kaugnay ng ari-arian na naipasa sa (mga) Mamimili sa petsang nakasaad sa ibaba.",
+    "headings": {
+      "spa_ref": "Blg. ng Kasunduan",
+      "handover_date": "Petsa ng Pagtanggap",
+      "structural": "Warranty sa Istruktura",
+      "finishing": "Warranty sa Pagtatapos",
+      "structural_period": "Panahon sa Istruktura",
+      "finishing_period": "Panahon sa Pagtatapos",
+      "warranty_expiry": "Pag-expire ng Warranty",
+      "scope": "Saklaw ng Sakop",
+      "exclusions": "Mga Hindi Sakop"
+    },
+    "structural_text": "Ginagarantiyahan ng Developer ang integridad ng istruktura ng ari-arian, kabilang ang load-bearing na istruktura, pundasyon, at waterproofing, sa loob ng {years} taon mula sa petsa ng pagtanggap.",
+    "finishing_text": "Ginagarantiyahan ng Developer ang mga gawaing pagtatapos, kabilang ang pintura, kabit, fitting, kagamitang inilagay ng Developer, at maliliit na kosmetikong bahagi, sa loob ng {years} (na) taon mula sa petsa ng pagtanggap.",
+    "exclusions_text": "Hindi sakop ng warranty na ito ang pinsalang dulot ng maling paggamit, pagbabago ng Mamimili o ng ikatlong partido, karaniwang pagkasira, pangyayaring force majeure, at mga bagay na sakop ng hiwalay na warranty ng tagagawa.",
+    "claim_procedure": "Upang maghain ng claim, dapat magsumite ang Mamimili ng nakasulat na abiso sa Developer sa loob ng panahon ng warranty, na naglalarawan ng depekto at may makatwirang sumusuportang ebidensya."
+  },
+  "noc": {
+    "title": "Sertipiko ng Walang Pagtutol",
+    "subtitle": "Para sa Muling Pagbebenta ng Unit",
+    "intro": "Inilabas ng Developer ang Sertipiko ng Walang Pagtutol (NOC) na ito upang kumpirmahin na walang nakabinbing obligasyon ang Mamimili na hahadlang sa muling pagbebenta ng unit na nakatukoy sa ibaba.",
+    "headings": {
+      "spa_ref": "Blg. ng Kasunduan",
+      "requested_by": "Hiniling ni",
+      "issued_to": "Inilabas Para kay",
+      "purpose": "Layunin",
+      "validity": "Bisa",
+      "outstanding_balance": "Natitirang Balanse",
+      "transfer_fee": "Bayad sa Paglilipat"
+    },
+    "validity_text": "Balido ang NOC na ito sa loob ng {days} araw mula sa petsa ng paglabas. Pagkatapos ng panahong ito, kailangang humiling ng bagong NOC.",
+    "purpose_text": "Pagbebenta ng unit sa isang ikatlong partidong mamimili, alinsunod sa karaniwang proseso ng paglilipat ng Developer.",
+    "no_outstanding": "Nabayaran nang buo ang lahat ng hulog hanggang sa petsa ng NOC na ito. Walang nakabinbing bayaran na nakatala sa kontratang ito.",
+    "developer_statement": "Pinahihintulutan ng Developer, alinsunod sa karaniwang bayad sa paglilipat at mga proseso, ang Mamimili na ilipat ang pagmamay-ari ng unit sa ikatlong partido. Hindi nito isinusuko ang anumang karapatan ng Developer sa ilalim ng Sale-Purchase Agreement."
+  },
+  "tenant_lease_agreement": {
+    "title": "Kasunduan sa Pag-upa ng Nangungupahan",
+    "intro": "Ang Kasunduan sa Pag-upa na ito ay ginawa sa pagitan ng Nagpapaupa (Developer) at ng (mga) Nangungupahang nakasaad sa ibaba para sa tirahang pag-upa ng ari-ariang inilalarawan dito.",
+    "tenant_signature": "Lagda ng Nangungupahan",
+    "headings": {
+      "lease_number": "Blg. ng Pag-upa",
+      "tenant": "Nangungupahan",
+      "property": "Ari-arian",
+      "term": "Termino",
+      "monthly_rent": "Buwanang Upa",
+      "security_deposit": "Security Deposit",
+      "use_clause": "Paggamit ng Ari-arian",
+      "maintenance": "Pagpapanatili",
+      "termination": "Pagwawakas"
+    },
+    "use_clause_text": "Gagamitin ng Nangungupahan ang Ari-arian nang eksklusibo bilang pribadong tirahan para sa Nangungupahan at malapit na pamilya. Ipinagbabawal ang pag-sublet at komersiyal na paggamit nang walang nakasulat na pahintulot ng Nagpapaupa.",
+    "maintenance_text": "Responsable ang Nagpapaupa sa pagpapanatili ng istruktura at mga pangunahing kagamitang inilagay ng Developer. Responsable ang Nangungupahan sa pang-araw-araw na kalinisan, maliliit na pagkukumpuni sa ilalim ng makatwirang limitasyon, at anumang pinsalang dulot ng maling paggamit.",
+    "termination_text": "Maaaring wakasan ng alinmang partido ang Pag-upang ito sa pagtatapos ng termino sa pamamagitan ng nakasulat na abiso na hindi bababa sa 30 araw bago mag-expire. Ang maagang pagwawakas ng Nangungupahan ay magreresulta sa pagkawala ng security deposit maliban kung sumang-ayon ang Nagpapaupa sa nakasulat na paraan."
+  },
+  "move_in_checklist": {
+    "title": "Checklist sa Paglipat",
+    "intro": "Ulat ng kondisyon kada silid na itinala sa mismong oras ng pagtanggap. Pareho ng dalawang partido na lagdaan na ang nakalistang kondisyon ay tumutugma sa unit na sinuri.",
+    "empty_rooms": "Walang ibinigay na datos ng silid.",
+    "acceptance_text": "Sa pamamagitan ng paglagda sa ibaba, kinukumpirma ng dalawang partido na tumpak na nakatala ang kondisyon ng bawat silid sa itaas kaugnay ng unit sa oras ng inspeksyon.",
+    "headings": {
+      "spa_ref": "Blg. ng Kasunduan",
+      "inspection_date": "Petsa ng Inspeksyon"
+    },
+    "columns": {
+      "item": "Aytem",
+      "condition": "Kondisyon",
+      "notes": "Mga Tala"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Liham ng Pag-alis ng Mortgage",
+    "intro": "Inilabas ng Developer ang liham na ito sa hiling ng Mamimili upang kumpirmahin na ang unit na nakatukoy sa ibaba ay walang nakabinbing singil, mortgage, lien, o encumbrance na pabor sa Developer.",
+    "no_encumbrance_text": "Kinukumpirma ng Developer na sa petsa ng liham na ito, ang unit sa itaas ay malaya sa anumang mortgage, singil, lien, o encumbrance na pabor sa Developer o anumang kaugnay na partido.",
+    "purpose_text": "Inilabas ang liham na ito nang eksklusibo para sa aplikasyon ng mortgage ng Mamimili at anumang kaugnay na due diligence na hinihiling ng Bangkong nakasaad sa itaas. Hindi nito isinusuko ang anumang karapatan ng Developer sa ilalim ng Sale-Purchase Agreement.",
+    "headings": {
+      "bank": "Inilabas Para sa (Bangko)",
+      "spa_ref": "Blg. ng Kasunduan",
+      "unit": "Unit"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Hiling sa Paglilipat ng Titulo",
+    "intro": "Pormal na hiling sa tanggapan ng lupa na ilipat ang titulo ng unit na inilalarawan sa ibaba mula sa Developer patungo sa (mga) bagong may-ari na nakalista sa Sale-Purchase Agreement.",
+    "request_text": "Hinihiling ng Developer sa Tanggapan ng Lupa na itala ang paglilipat ng titulo ng nabanggit na unit pabor sa (mga) bagong may-ari na nakalista, sa mga porsyentong nakasaad, simula sa petsa ng hiling na ito.",
+    "attachments_text": "Orihinal na Sale-Purchase Agreement (napirmahan), huling resibo ng pagbabayad, sertipiko ng pagtanggap, pagkakakilanlan ng lahat ng bagong may-ari, at anumang resibo ng documentary stamp tax na kinakailangan ng tanggapan.",
+    "headings": {
+      "registry": "Tanggapan ng Lupa",
+      "spa_ref": "Blg. ng Kasunduan",
+      "unit": "Unit",
+      "new_owners": "Bagong May-ari",
+      "request_body": "Hiling",
+      "attachments": "Mga Kalakip"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Awtorisasyon sa Paglabas ng Escrow",
+    "intro": "Tagubilin sa Escrow Agent na ilabas ang mga pondong nakahawak sa escrow account na nakatukoy sa ibaba pabor sa Developer, kaugnay ng milestone na inilarawan.",
+    "instruction_text": "Awtorisado at inuutusan ng Developer ang Escrow Agent na ilabas ang nabanggit na halaga mula sa nakatalang escrow account patungo sa operating account ng Developer. Sumusunod ang paglabas na ito sa sertipikasyon ng milestone na nakatala sa Sale-Purchase Agreement.",
+    "headings": {
+      "escrow_account": "Blg. ng Escrow Account",
+      "spa_ref": "Blg. ng Kasunduan",
+      "unit": "Unit",
+      "amount_to_release": "Halagang Ilalabas",
+      "release_reason": "Dahilan ng Paglabas"
+    }
+  },
+  "refund_authorization": {
+    "title": "Awtorisasyon sa Refund",
+    "intro": "Inaawtorisa ng dokumentong ito ang refund ng halagang nakatukoy sa ibaba kaugnay ng kinanselang reserbasyon o kontrata ng pagbili na tinukoy.",
+    "authorisation_text": "Awtorisado ng Developer ang refund ng nabanggit na halaga sa pamamagitan ng nakasaad na paraan ng pagbabayad. Ang oras ng pagbabayad ay susunod sa karaniwang proseso ng pananalapi ng Developer at sa anumang cooling-off o patakaran sa pagkawala na nalalapat sa orihinal na transaksyon.",
+    "headings": {
+      "reference": "Sanggunian",
+      "unit": "Unit",
+      "amount": "Halaga ng Refund",
+      "reason": "Dahilan",
+      "payment_method": "Paraan ng Pagbabayad"
+    }
+  }
+}

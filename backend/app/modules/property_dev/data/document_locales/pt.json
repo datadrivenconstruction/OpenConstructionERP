@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Página {page} de {total}",
+    "generated_at": "Gerado em {timestamp} UTC",
+    "doc_ref": "Ref. do documento",
+    "developer": "Promotor",
+    "unit_code": "Código da fração",
+    "watermark_draft": "RASCUNHO",
+    "currency": "Moeda",
+    "amount": "Montante",
+    "date": "Data",
+    "signature": "Assinatura",
+    "place": "Local",
+    "buyer_signature": "Assinatura do comprador",
+    "developer_signature": "Assinatura do promotor",
+    "witness": "Testemunha"
+  },
+  "reservation_receipt": {
+    "title": "Recibo de reserva",
+    "intro": "Este recibo confirma a reserva do imóvel descrito abaixo. O sinal foi recebido e a fração fica retirada do mercado para o comprador até expirar o período de reflexão ou até ser assinado o Contrato de Compra e Venda.",
+    "headings": {
+      "buyer": "Comprador",
+      "property": "Imóvel",
+      "amount_paid": "Montante pago",
+      "valid_until": "Válido até",
+      "next_step": "Próximo passo",
+      "reservation_number": "Nº da reserva",
+      "cooling_off": "Período de reflexão",
+      "deposit_status": "Estado do sinal",
+      "plot_details": "Dados da fração"
+    },
+    "next_step_text": "No prazo de {days} dias, o comprador deve assinar o Contrato de Compra e Venda e pagar a prestação seguinte, caso contrário esta reserva expira e o imóvel volta a ser colocado no mercado.",
+    "cooling_off_text": "{days} dias a contar da receção deste documento.",
+    "footer_note": "O sinal só é reembolsável na totalidade durante o período de reflexão definido pela jurisdição. Após este período, a reembolsabilidade segue as regras de perda aplicáveis."
+  },
+  "sales_contract": {
+    "title": "Contrato de Compra e Venda",
+    "subtitle": "Contrato n.º {number}",
+    "preamble": "O presente Contrato de Compra e Venda (o \"Contrato\") é celebrado na data indicada abaixo entre o Promotor registado e o(s) Comprador(es) indicados abaixo, para a venda do imóvel aqui identificado.",
+    "headings": {
+      "parties": "Partes do contrato",
+      "property": "O imóvel",
+      "price": "Preço de compra",
+      "payment_schedule": "Plano de pagamentos",
+      "clauses": "Termos e condições",
+      "instalments": "Prestações",
+      "signatures": "Assinaturas",
+      "co_ownership": "Compropriedade",
+      "regulatory": "Divulgações regulamentares",
+      "annexes": "Anexos"
+    },
+    "parties_intro": "O(s) Comprador(es) adquire(m) o imóvel em conjunto, nas percentagens de propriedade indicadas abaixo. Todas as partes são solidariamente responsáveis pelas obrigações decorrentes deste Contrato, salvo disposição expressa em contrário.",
+    "instalment_columns": {
+      "sequence": "N.º",
+      "milestone": "Marco",
+      "due_date": "Data de vencimento",
+      "amount": "Montante",
+      "currency": "Moeda"
+    },
+    "party_columns": {
+      "name": "Nome",
+      "role": "Papel",
+      "ownership_pct": "Propriedade (%)",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Número da fração",
+      "development": "Empreendimento",
+      "area_m2": "Área (m²)",
+      "house_type": "Tipologia"
+    },
+    "price_label": "Preço total de compra",
+    "breakdown_label": "Decomposição do preço",
+    "signature_note": "Assinado em {place} a {date}. Ao assinar abaixo, o Comprador e o Promotor confirmam que leram, compreenderam e aceitam os termos deste Contrato, incluindo todos os anexos."
+  },
+  "payment_receipt": {
+    "title": "Recibo de pagamento",
+    "intro": "Este recibo confirma o pagamento de uma prestação ao abrigo do Contrato de Compra e Venda referido abaixo.",
+    "headings": {
+      "spa_ref": "Contrato n.º",
+      "instalment": "Prestação",
+      "milestone": "Marco",
+      "amount_paid": "Montante pago",
+      "payment_method": "Forma de pagamento",
+      "payment_ref": "Referência do pagamento",
+      "paid_at": "Pago em",
+      "outstanding": "Saldo em dívida"
+    },
+    "footer_note": "Este recibo é gerado automaticamente e é válido sem assinatura manual. Guarde-o nos seus registos."
+  },
+  "handover_certificate": {
+    "title": "Auto de entrega",
+    "intro": "Este auto regista a entrega do imóvel do Promotor ao(s) Comprador(es). O Comprador aceita a fração sob reserva da lista de defeitos e dos termos de garantia anexos.",
+    "headings": {
+      "spa_ref": "Contrato n.º",
+      "completed_at": "Data de entrega",
+      "snag_count": "Defeitos em aberto",
+      "warranty_period": "Período de garantia",
+      "keys_handed_over": "Chaves entregues",
+      "buyer_acceptance": "Aceitação do comprador",
+      "developer_declaration": "Declaração do promotor"
+    },
+    "developer_declaration_text": "O Promotor confirma que o imóvel foi construído de acordo com o Contrato de Compra e Venda, que toda a documentação exigida foi entregue ao Comprador e que as garantias estruturais e de acabamentos se iniciam na data deste auto.",
+    "buyer_acceptance_text": "O Comprador aceita a entrega do imóvel sob reserva da lista de defeitos anexa. O Comprador reconhece a receção das chaves, manuais e de toda a documentação exigida listada nos Anexos.",
+    "snag_note": "Os defeitos em aberto serão corrigidos pelo Promotor num prazo razoável, nos termos da cláusula de correção de defeitos do Contrato."
+  },
+  "warranty_certificate": {
+    "title": "Certificado de garantia",
+    "intro": "Este Certificado define as obrigações de garantia do Promotor relativamente ao imóvel entregue ao(s) Comprador(es) na data indicada abaixo.",
+    "headings": {
+      "spa_ref": "Contrato n.º",
+      "handover_date": "Data de entrega",
+      "structural": "Garantia estrutural",
+      "finishing": "Garantia de acabamentos",
+      "structural_period": "Período estrutural",
+      "finishing_period": "Período de acabamentos",
+      "warranty_expiry": "Fim da garantia",
+      "scope": "Âmbito da cobertura",
+      "exclusions": "Exclusões"
+    },
+    "structural_text": "O Promotor garante a integridade estrutural do imóvel, incluindo a estrutura resistente, as fundações e a impermeabilização, pelo período de {years} anos a contar da data de entrega.",
+    "finishing_text": "O Promotor garante os trabalhos de acabamento, incluindo pintura, carpintarias, loiças e equipamentos instalados pelo Promotor e pequenos itens estéticos, pelo período de {years} ano(s) a contar da data de entrega.",
+    "exclusions_text": "Esta garantia exclui danos causados por uso indevido, alterações feitas pelo Comprador ou por terceiros, desgaste normal, casos de força maior e itens abrangidos por garantias separadas dos fabricantes.",
+    "claim_procedure": "Para apresentar uma reclamação, o Comprador deve enviar uma comunicação escrita ao Promotor dentro do período de garantia, descrevendo o defeito e apresentando provas razoáveis."
+  },
+  "noc": {
+    "title": "Declaração de não oposição",
+    "subtitle": "Para revenda da fração",
+    "intro": "A presente Declaração de Não Oposição (DNO) é emitida pelo Promotor para confirmar que não existem obrigações pendentes do Comprador que impeçam a revenda da fração identificada abaixo.",
+    "headings": {
+      "spa_ref": "Contrato n.º",
+      "requested_by": "Solicitado por",
+      "issued_to": "Emitido para",
+      "purpose": "Finalidade",
+      "validity": "Validade",
+      "outstanding_balance": "Saldo em dívida",
+      "transfer_fee": "Taxa de transmissão"
+    },
+    "validity_text": "Esta DNO é válida por {days} dias a contar da data de emissão. Após este período, deve ser solicitada uma nova declaração.",
+    "purpose_text": "Venda da fração a um comprador terceiro, sujeita aos procedimentos-padrão de transmissão do Promotor.",
+    "no_outstanding": "Todas as prestações até à data desta DNO foram pagas na totalidade. Não existem pagamentos em dívida registados para este contrato.",
+    "developer_statement": "O Promotor concede, por este meio, autorização, sujeita à taxa de transmissão e aos procedimentos-padrão, para que o Comprador transmita a propriedade da fração a um terceiro. Esta DNO não renuncia a quaisquer direitos do Promotor ao abrigo do Contrato de Compra e Venda."
+  },
+  "tenant_lease_agreement": {
+    "title": "Contrato de arrendamento",
+    "intro": "O presente Contrato de Arrendamento é celebrado entre o Senhorio (Promotor) e o(s) Arrendatário(s) indicados abaixo, para arrendamento habitacional do imóvel aqui descrito.",
+    "tenant_signature": "Assinatura do arrendatário",
+    "headings": {
+      "lease_number": "Contrato n.º",
+      "tenant": "Arrendatário",
+      "property": "Imóvel",
+      "term": "Prazo",
+      "monthly_rent": "Renda mensal",
+      "security_deposit": "Caução",
+      "use_clause": "Utilização do imóvel",
+      "maintenance": "Manutenção",
+      "termination": "Cessação"
+    },
+    "use_clause_text": "O Arrendatário utilizará o imóvel exclusivamente como habitação própria, para si e para o seu agregado familiar. É proibido o subarrendamento e a utilização comercial sem consentimento prévio e por escrito do Senhorio.",
+    "maintenance_text": "O Senhorio é responsável pela manutenção estrutural e pelos equipamentos principais instalados pelo Promotor. O Arrendatário é responsável pela limpeza diária, pequenas reparações abaixo de um limite razoável e pelos danos causados por uso indevido.",
+    "termination_text": "Qualquer das partes pode fazer cessar o presente Contrato no termo do prazo, mediante comunicação escrita com antecedência mínima de 30 dias. A cessação antecipada pelo Arrendatário implica a perda da caução, salvo acordo escrito do Senhorio."
+  },
+  "move_in_checklist": {
+    "title": "Lista de verificação de entrada",
+    "intro": "Relatório do estado de cada divisão, registado no momento da entrega. Ambas as partes assinam para confirmar que o estado indicado corresponde ao imóvel inspecionado.",
+    "empty_rooms": "Não foram fornecidos dados das divisões.",
+    "acceptance_text": "Ao assinar abaixo, ambas as partes confirmam que o estado de cada divisão aqui registado corresponde com exatidão ao imóvel no momento da inspeção.",
+    "headings": {
+      "spa_ref": "Contrato n.º",
+      "inspection_date": "Data da inspeção"
+    },
+    "columns": {
+      "item": "Item",
+      "condition": "Estado",
+      "notes": "Notas"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Carta de libertação de hipoteca",
+    "intro": "A presente carta é emitida pelo Promotor, a pedido do Comprador, para confirmar que a fração identificada abaixo não tem encargos, hipotecas, penhoras ou ónus pendentes a favor do Promotor.",
+    "no_encumbrance_text": "O Promotor confirma, por este meio, que, à data desta carta, a fração acima está livre de qualquer hipoteca, encargo, penhora ou ónus a favor do Promotor ou de qualquer parte relacionada.",
+    "purpose_text": "A presente carta é emitida exclusivamente para efeitos do pedido de crédito hipotecário do Comprador e de quaisquer diligências associadas solicitadas pelo Banco acima indicado. Não renuncia a quaisquer direitos do Promotor ao abrigo do Contrato de Compra e Venda.",
+    "headings": {
+      "bank": "Emitido para (Banco)",
+      "spa_ref": "Contrato n.º",
+      "unit": "Fração"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Pedido de transmissão de título de propriedade",
+    "intro": "Pedido formal à conservatória do registo predial para transmitir o título da fração descrita abaixo, do Promotor para o(s) novo(s) proprietário(s) indicado(s) no Contrato de Compra e Venda.",
+    "request_text": "O Promotor solicita, por este meio, que a Conservatória do Registo Predial registe a transmissão do título da fração acima a favor do(s) novo(s) proprietário(s) indicado(s), nas percentagens aí referidas, com efeitos a partir da data deste pedido.",
+    "attachments_text": "Contrato de Compra e Venda original (executado), recibo do último pagamento, auto de entrega, documentos de identificação de todos os novos proprietários e comprovativos de imposto de selo ou outros encargos exigidos pela conservatória.",
+    "headings": {
+      "registry": "Conservatória do Registo Predial",
+      "spa_ref": "Contrato n.º",
+      "unit": "Fração",
+      "new_owners": "Novo(s) proprietário(s)",
+      "request_body": "Pedido",
+      "attachments": "Anexos"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Autorização de libertação de depósito em garantia",
+    "intro": "Instrução ao Agente de Depósito para libertar ao Promotor os fundos retidos na conta de garantia identificada abaixo, relativamente ao marco descrito.",
+    "instruction_text": "O Promotor autoriza e instrui, por este meio, o Agente de Depósito a libertar o montante acima da conta de garantia indicada para a conta operacional do Promotor. Esta libertação segue a certificação do marco registada no Contrato de Compra e Venda.",
+    "headings": {
+      "escrow_account": "Conta de garantia n.º",
+      "spa_ref": "Contrato n.º",
+      "unit": "Fração",
+      "amount_to_release": "Montante a libertar",
+      "release_reason": "Motivo da libertação"
+    }
+  },
+  "refund_authorization": {
+    "title": "Autorização de reembolso",
+    "intro": "O presente documento autoriza o reembolso do montante identificado abaixo, relativamente à reserva ou ao contrato de venda cancelado referido.",
+    "authorisation_text": "O Promotor autoriza, por este meio, o reembolso do montante acima através da forma de pagamento indicada. O prazo de liquidação segue os procedimentos financeiros-padrão do Promotor e as regras de período de reflexão ou de perda aplicáveis à operação original.",
+    "headings": {
+      "reference": "Referência",
+      "unit": "Fração",
+      "amount": "Montante a reembolsar",
+      "reason": "Motivo",
+      "payment_method": "Forma de pagamento"
+    }
+  }
+}

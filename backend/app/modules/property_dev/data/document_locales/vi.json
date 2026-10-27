@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Trang {page} trên {total}",
+    "generated_at": "Được tạo {timestamp} UTC",
+    "doc_ref": "Số tham chiếu",
+    "developer": "Chủ đầu tư",
+    "unit_code": "Mã căn",
+    "watermark_draft": "NHÁP",
+    "currency": "Tiền tệ",
+    "amount": "Số tiền",
+    "date": "Ngày",
+    "signature": "Chữ ký",
+    "place": "Địa điểm",
+    "buyer_signature": "Chữ ký người mua",
+    "developer_signature": "Chữ ký chủ đầu tư",
+    "witness": "Người chứng kiến"
+  },
+  "reservation_receipt": {
+    "title": "Phiếu giữ chỗ",
+    "intro": "Phiếu này xác nhận việc giữ chỗ bất động sản được mô tả dưới đây. Tiền đặt cọc đã được nhận và căn hộ được giữ riêng cho người mua cho đến khi hết thời hạn hủy giao dịch hoặc khi Hợp đồng mua bán được ký kết.",
+    "headings": {
+      "buyer": "Người mua",
+      "property": "Bất động sản",
+      "amount_paid": "Số tiền đã đóng",
+      "valid_until": "Có hiệu lực đến",
+      "next_step": "Bước tiếp theo",
+      "reservation_number": "Số phiếu giữ chỗ",
+      "cooling_off": "Thời hạn hủy giao dịch",
+      "deposit_status": "Tình trạng tiền đặt cọc",
+      "plot_details": "Thông tin lô đất"
+    },
+    "next_step_text": "Trong vòng {days} ngày, người mua phải ký Hợp đồng mua bán và thanh toán đợt tiếp theo, nếu không phiếu giữ chỗ sẽ hết hiệu lực và căn hộ được trả lại thị trường.",
+    "cooling_off_text": "{days} ngày kể từ ngày nhận tài liệu này.",
+    "footer_note": "Tiền đặt cọc chỉ được hoàn lại toàn bộ trong thời hạn hủy giao dịch theo quy định của địa phương. Sau thời hạn này, việc hoàn tiền áp dụng theo quy tắc mất cọc hiện hành."
+  },
+  "sales_contract": {
+    "title": "Hợp đồng mua bán",
+    "subtitle": "Hợp đồng số {number}",
+    "preamble": "Hợp đồng mua bán này (sau đây gọi là \"Hợp đồng\") được lập và ký kết vào ngày ghi bên dưới giữa Chủ đầu tư đã đăng ký và (các) Người mua được liệt kê dưới đây, để mua bán bất động sản được xác định trong hợp đồng.",
+    "headings": {
+      "parties": "Các bên tham gia hợp đồng",
+      "property": "Bất động sản",
+      "price": "Giá mua bán",
+      "payment_schedule": "Tiến độ thanh toán",
+      "clauses": "Điều khoản và điều kiện",
+      "instalments": "Các đợt thanh toán",
+      "signatures": "Chữ ký",
+      "co_ownership": "Đồng sở hữu",
+      "regulatory": "Công bố theo quy định",
+      "annexes": "Phụ lục"
+    },
+    "parties_intro": "Người mua cùng nhau mua bất động sản theo tỷ lệ sở hữu nêu dưới đây. Tất cả các bên cùng chịu trách nhiệm liên đới đối với nghĩa vụ theo Hợp đồng này, trừ khi có quy định khác rõ ràng.",
+    "instalment_columns": {
+      "sequence": "STT",
+      "milestone": "Mốc thanh toán",
+      "due_date": "Hạn thanh toán",
+      "amount": "Số tiền",
+      "currency": "Tiền tệ"
+    },
+    "party_columns": {
+      "name": "Họ tên",
+      "role": "Vai trò",
+      "ownership_pct": "Tỷ lệ sở hữu (%)",
+      "email": "Email"
+    },
+    "property_columns": {
+      "plot_number": "Số lô đất",
+      "development": "Dự án",
+      "area_m2": "Diện tích (m²)",
+      "house_type": "Loại nhà"
+    },
+    "price_label": "Tổng giá mua bán",
+    "breakdown_label": "Cơ cấu giá",
+    "signature_note": "Ký tại {place} ngày {date}. Bằng việc ký dưới đây, Người mua và Chủ đầu tư xác nhận đã đọc, hiểu và đồng ý với các điều khoản trong Hợp đồng này, bao gồm toàn bộ phụ lục."
+  },
+  "payment_receipt": {
+    "title": "Biên lai thanh toán",
+    "intro": "Biên lai này xác nhận đã thanh toán một đợt theo Hợp đồng mua bán được nêu dưới đây.",
+    "headings": {
+      "spa_ref": "Số hợp đồng",
+      "instalment": "Đợt thanh toán",
+      "milestone": "Mốc thanh toán",
+      "amount_paid": "Số tiền đã thanh toán",
+      "payment_method": "Hình thức thanh toán",
+      "payment_ref": "Số tham chiếu thanh toán",
+      "paid_at": "Ngày thanh toán",
+      "outstanding": "Số dư còn phải thanh toán"
+    },
+    "footer_note": "Biên lai này được tạo tự động và có giá trị không cần chữ ký tay. Hãy lưu giữ để đối chiếu."
+  },
+  "handover_certificate": {
+    "title": "Biên bản bàn giao",
+    "intro": "Biên bản này ghi nhận việc bàn giao bất động sản từ Chủ đầu tư cho (các) Người mua. Người mua chấp nhận căn hộ theo danh mục hạng mục còn tồn đọng và điều khoản bảo hành đính kèm.",
+    "headings": {
+      "spa_ref": "Số hợp đồng",
+      "completed_at": "Ngày bàn giao",
+      "snag_count": "Hạng mục tồn đọng",
+      "warranty_period": "Thời hạn bảo hành",
+      "keys_handed_over": "Đã bàn giao chìa khóa",
+      "buyer_acceptance": "Xác nhận chấp nhận của người mua",
+      "developer_declaration": "Tuyên bố của chủ đầu tư"
+    },
+    "developer_declaration_text": "Chủ đầu tư xác nhận bất động sản đã được xây dựng theo đúng Hợp đồng mua bán, toàn bộ hồ sơ cần thiết đã được giao cho người mua, và thời hạn bảo hành kết cấu và hoàn thiện bắt đầu từ ngày biên bản này.",
+    "buyer_acceptance_text": "Người mua chấp nhận nhận bàn giao bất động sản theo danh mục hạng mục tồn đọng đính kèm. Người mua xác nhận đã nhận chìa khóa, sổ hướng dẫn và toàn bộ hồ sơ cần thiết liệt kê trong các phụ lục.",
+    "snag_note": "Các hạng mục tồn đọng sẽ do Chủ đầu tư khắc phục trong thời gian hợp lý theo điều khoản khắc phục của hợp đồng."
+  },
+  "warranty_certificate": {
+    "title": "Giấy bảo hành",
+    "intro": "Giấy này nêu rõ nghĩa vụ bảo hành của Chủ đầu tư đối với bất động sản đã bàn giao cho (các) Người mua vào ngày ghi bên dưới.",
+    "headings": {
+      "spa_ref": "Số hợp đồng",
+      "handover_date": "Ngày bàn giao",
+      "structural": "Bảo hành kết cấu",
+      "finishing": "Bảo hành hoàn thiện",
+      "structural_period": "Thời hạn bảo hành kết cấu",
+      "finishing_period": "Thời hạn bảo hành hoàn thiện",
+      "warranty_expiry": "Ngày hết hạn bảo hành",
+      "scope": "Phạm vi bảo hành",
+      "exclusions": "Các trường hợp loại trừ"
+    },
+    "structural_text": "Chủ đầu tư bảo đảm độ bền vững kết cấu của bất động sản, bao gồm kết cấu chịu lực, móng và chống thấm, trong thời hạn {years} năm kể từ ngày bàn giao.",
+    "finishing_text": "Chủ đầu tư bảo đảm các hạng mục hoàn thiện, bao gồm sơn, thiết bị cố định, đồ đạc, thiết bị do Chủ đầu tư lắp đặt và các hạng mục thẩm mỹ nhỏ, trong thời hạn {years} năm kể từ ngày bàn giao.",
+    "exclusions_text": "Bảo hành này không bao gồm hư hỏng do sử dụng sai, do người mua hoặc bên thứ ba thay đổi kết cấu, hao mòn thông thường, sự kiện bất khả kháng và các hạng mục được nhà sản xuất bảo hành riêng.",
+    "claim_procedure": "Để yêu cầu bảo hành, người mua phải gửi thông báo bằng văn bản cho Chủ đầu tư trong thời hạn bảo hành, mô tả khiếm khuyết và cung cấp bằng chứng hợp lý."
+  },
+  "noc": {
+    "title": "Giấy không phản đối",
+    "subtitle": "Dùng cho việc chuyển nhượng căn hộ",
+    "intro": "Giấy không phản đối (NOC) này do Chủ đầu tư cấp nhằm xác nhận người mua không còn nghĩa vụ tồn đọng nào có thể cản trở việc chuyển nhượng căn hộ được nêu dưới đây.",
+    "headings": {
+      "spa_ref": "Số hợp đồng",
+      "requested_by": "Người đề nghị",
+      "issued_to": "Cấp cho",
+      "purpose": "Mục đích",
+      "validity": "Thời hạn hiệu lực",
+      "outstanding_balance": "Số dư còn phải thanh toán",
+      "transfer_fee": "Phí chuyển nhượng"
+    },
+    "validity_text": "Giấy NOC này có hiệu lực {days} ngày kể từ ngày cấp. Sau thời hạn này, phải đề nghị cấp Giấy NOC mới.",
+    "purpose_text": "Chuyển nhượng căn hộ cho bên mua thứ ba, theo quy trình chuyển nhượng tiêu chuẩn của Chủ đầu tư.",
+    "no_outstanding": "Toàn bộ các đợt thanh toán đến ngày cấp Giấy NOC này đã được thanh toán đầy đủ. Không ghi nhận khoản thanh toán còn tồn đọng nào theo hợp đồng này.",
+    "developer_statement": "Chủ đầu tư đồng ý, theo phí chuyển nhượng và quy trình tiêu chuẩn, để người mua chuyển quyền sở hữu căn hộ cho bên thứ ba. Giấy NOC này không từ bỏ bất kỳ quyền nào của Chủ đầu tư theo Hợp đồng mua bán."
+  },
+  "tenant_lease_agreement": {
+    "title": "Hợp đồng thuê nhà",
+    "intro": "Hợp đồng thuê này được lập giữa Bên cho thuê (Chủ đầu tư) và (các) Bên thuê được nêu dưới đây để thuê nhà ở đối với bất động sản được mô tả trong hợp đồng.",
+    "tenant_signature": "Chữ ký bên thuê",
+    "headings": {
+      "lease_number": "Số hợp đồng thuê",
+      "tenant": "Bên thuê",
+      "property": "Bất động sản",
+      "term": "Thời hạn thuê",
+      "monthly_rent": "Tiền thuê hàng tháng",
+      "security_deposit": "Tiền đặt cọc",
+      "use_clause": "Mục đích sử dụng",
+      "maintenance": "Bảo trì",
+      "termination": "Chấm dứt hợp đồng"
+    },
+    "use_clause_text": "Bên thuê chỉ được sử dụng bất động sản làm nơi ở riêng cho bản thân và gia đình trực hệ. Việc cho thuê lại và sử dụng vào mục đích thương mại bị cấm nếu không có sự đồng ý trước bằng văn bản của Bên cho thuê.",
+    "maintenance_text": "Bên cho thuê chịu trách nhiệm bảo trì kết cấu và các thiết bị lớn do Chủ đầu tư lắp đặt. Bên thuê chịu trách nhiệm vệ sinh hằng ngày, sửa chữa nhỏ dưới mức hợp lý và mọi hư hỏng do sử dụng sai.",
+    "termination_text": "Mỗi bên có thể chấm dứt Hợp đồng thuê khi hết hạn bằng thông báo bằng văn bản trước ít nhất 30 ngày. Nếu bên thuê chấm dứt sớm, tiền đặt cọc sẽ không được hoàn lại, trừ khi Bên cho thuê đồng ý bằng văn bản."
+  },
+  "move_in_checklist": {
+    "title": "Biên bản kiểm tra nhận nhà",
+    "intro": "Báo cáo tình trạng từng phòng được ghi nhận tại thời điểm bàn giao. Cả hai bên ký xác nhận tình trạng liệt kê phản ánh đúng căn hộ đã được kiểm tra.",
+    "empty_rooms": "Chưa cung cấp dữ liệu phòng.",
+    "acceptance_text": "Bằng việc ký dưới đây, cả hai bên xác nhận tình trạng từng phòng được ghi nhận ở trên phản ánh đúng căn hộ tại thời điểm kiểm tra.",
+    "headings": {
+      "spa_ref": "Số hợp đồng",
+      "inspection_date": "Ngày kiểm tra"
+    },
+    "columns": {
+      "item": "Hạng mục",
+      "condition": "Tình trạng",
+      "notes": "Ghi chú"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Giấy xác nhận không còn thế chấp",
+    "intro": "Giấy này do Chủ đầu tư cấp theo đề nghị của người mua, xác nhận căn hộ được nêu dưới đây không còn khoản phải thu, thế chấp, quyền giữ tài sản hay hạn chế nào có lợi cho Chủ đầu tư.",
+    "no_encumbrance_text": "Chủ đầu tư xác nhận rằng, tại ngày ghi trong giấy này, căn hộ nêu trên không bị thế chấp, cầm cố, quyền giữ tài sản hay hạn chế nào có lợi cho Chủ đầu tư hoặc bên liên quan.",
+    "purpose_text": "Giấy này chỉ được cấp nhằm phục vụ hồ sơ vay thế chấp của người mua và việc thẩm định liên quan do ngân hàng nêu trên yêu cầu. Giấy này không từ bỏ bất kỳ quyền nào của Chủ đầu tư theo Hợp đồng mua bán.",
+    "headings": {
+      "bank": "Cấp cho (Ngân hàng)",
+      "spa_ref": "Số hợp đồng",
+      "unit": "Căn hộ"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Đề nghị sang tên sổ",
+    "intro": "Đề nghị chính thức gửi cơ quan đăng ký đất đai để chuyển quyền sở hữu căn hộ được mô tả dưới đây từ Chủ đầu tư sang (các) chủ sở hữu mới được nêu trong Hợp đồng mua bán.",
+    "request_text": "Chủ đầu tư đề nghị cơ quan đăng ký đất đai ghi nhận việc chuyển quyền sở hữu căn hộ nêu trên cho (các) chủ sở hữu mới được liệt kê, theo tỷ lệ đã nêu, có hiệu lực kể từ ngày của đề nghị này.",
+    "attachments_text": "Hợp đồng mua bán gốc đã ký, biên lai thanh toán đợt cuối, biên bản bàn giao, giấy tờ tùy thân của tất cả chủ sở hữu mới và biên lai lệ phí trước bạ theo yêu cầu của cơ quan đăng ký.",
+    "headings": {
+      "registry": "Cơ quan đăng ký đất đai",
+      "spa_ref": "Số hợp đồng",
+      "unit": "Căn hộ",
+      "new_owners": "Chủ sở hữu mới",
+      "request_body": "Đề nghị",
+      "attachments": "Hồ sơ đính kèm"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Ủy quyền giải ngân từ tài khoản ký quỹ",
+    "intro": "Chỉ thị gửi Bên giữ tài khoản ký quỹ để giải ngân số tiền đang được giữ trong tài khoản ký quỹ nêu dưới đây cho Chủ đầu tư, theo mốc thanh toán được mô tả.",
+    "instruction_text": "Chủ đầu tư ủy quyền và chỉ thị cho Bên giữ tài khoản ký quỹ giải ngân số tiền nêu trên từ tài khoản ký quỹ đã ghi tên sang tài khoản vận hành của Chủ đầu tư. Việc giải ngân này theo xác nhận hoàn thành mốc thanh toán đã ghi trong Hợp đồng mua bán.",
+    "headings": {
+      "escrow_account": "Số tài khoản ký quỹ",
+      "spa_ref": "Số hợp đồng",
+      "unit": "Căn hộ",
+      "amount_to_release": "Số tiền giải ngân",
+      "release_reason": "Lý do giải ngân"
+    }
+  },
+  "refund_authorization": {
+    "title": "Ủy quyền hoàn tiền",
+    "intro": "Văn bản này ủy quyền hoàn lại số tiền nêu dưới đây liên quan đến phiếu giữ chỗ hoặc hợp đồng mua bán đã hủy được tham chiếu.",
+    "authorisation_text": "Chủ đầu tư ủy quyền hoàn lại số tiền nêu trên theo hình thức thanh toán đã ghi. Thời điểm tất toán theo quy trình tài chính tiêu chuẩn của Chủ đầu tư và các quy định về thời hạn hủy giao dịch hoặc mất cọc áp dụng cho giao dịch gốc.",
+    "headings": {
+      "reference": "Tham chiếu",
+      "unit": "Căn hộ",
+      "amount": "Số tiền hoàn",
+      "reason": "Lý do",
+      "payment_method": "Hình thức thanh toán"
+    }
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Sayfa {page} / {total}",
+    "generated_at": "Oluşturulma: {timestamp} UTC",
+    "doc_ref": "Belge ref.",
+    "developer": "Geliştirici",
+    "unit_code": "Bağımsız bölüm kodu",
+    "watermark_draft": "TASLAK",
+    "currency": "Para birimi",
+    "amount": "Tutar",
+    "date": "Tarih",
+    "signature": "İmza",
+    "place": "Yer",
+    "buyer_signature": "Alıcı imzası",
+    "developer_signature": "Geliştirici imzası",
+    "witness": "Tanık"
+  },
+  "reservation_receipt": {
+    "title": "Rezervasyon Makbuzu",
+    "intro": "Bu makbuz, aşağıda tanımlanan gayrimenkulün rezervasyonunu doğrular. Kapora alınmıştır ve cayma süresi dolana ya da Satış-Satın Alma Sözleşmesi imzalanana kadar bağımsız bölüm alıcı için piyasaya kapalı tutulmaktadır.",
+    "headings": {
+      "buyer": "Alıcı",
+      "property": "Gayrimenkul",
+      "amount_paid": "Ödenen tutar",
+      "valid_until": "Geçerlilik tarihi",
+      "next_step": "Sonraki adım",
+      "reservation_number": "Rezervasyon no.",
+      "cooling_off": "Cayma süresi",
+      "deposit_status": "Kapora durumu",
+      "plot_details": "Parsel bilgileri"
+    },
+    "next_step_text": "{days} gün içinde alıcı Satış-Satın Alma Sözleşmesini imzalamalı ve bir sonraki taksiti ödemelidir; aksi halde bu rezervasyon sona erer ve bağımsız bölüm yeniden piyasaya açılır.",
+    "cooling_off_text": "Bu belgenin teslim alınmasından itibaren {days} gün.",
+    "footer_note": "Kapora, yalnızca yargı alanınca belirlenen cayma süresi içinde tamamen iade edilebilir. Bu süreden sonra iade, geçerli cezai şart kurallarına tabidir."
+  },
+  "sales_contract": {
+    "title": "Satış-Satın Alma Sözleşmesi",
+    "subtitle": "Sözleşme No. {number}",
+    "preamble": "Bu Satış-Satın Alma Sözleşmesi (\"Sözleşme\"), aşağıda belirtilen tarihte, kayıtlı Geliştirici ile aşağıda listelenen Alıcı(lar) arasında, burada tanımlanan gayrimenkulün satışı için düzenlenmiş ve akdedilmiştir.",
+    "headings": {
+      "parties": "Sözleşme tarafları",
+      "property": "Gayrimenkul",
+      "price": "Satış bedeli",
+      "payment_schedule": "Ödeme takvimi",
+      "clauses": "Hüküm ve koşullar",
+      "instalments": "Taksitler",
+      "signatures": "İmzalar",
+      "co_ownership": "Ortak mülkiyet",
+      "regulatory": "Yasal bildirimler",
+      "annexes": "Ekler"
+    },
+    "parties_intro": "Alıcı(lar), gayrimenkulü aşağıda belirtilen hisse oranlarında birlikte edinir. Aksi açıkça belirtilmedikçe, tüm taraflar bu Sözleşmeden doğan yükümlülüklerden müştereken ve müteselsilen sorumludur.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Kilometre taşı",
+      "due_date": "Vade tarihi",
+      "amount": "Tutar",
+      "currency": "Para birimi"
+    },
+    "party_columns": {
+      "name": "Ad",
+      "role": "Rol",
+      "ownership_pct": "Hisse %",
+      "email": "E-posta"
+    },
+    "property_columns": {
+      "plot_number": "Parsel no.",
+      "development": "Proje",
+      "area_m2": "Alan (m²)",
+      "house_type": "Konut tipi"
+    },
+    "price_label": "Toplam satış bedeli",
+    "breakdown_label": "Fiyat dökümü",
+    "signature_note": "{place} yerinde, {date} tarihinde imzalanmıştır. Aşağıdaki imzalarla Alıcı ve Geliştirici, tüm eklerdekiler dahil olmak üzere bu Sözleşmede yer alan hüküm ve koşulları okuduklarını, anladıklarını ve kabul ettiklerini teyit eder."
+  },
+  "payment_receipt": {
+    "title": "Ödeme Makbuzu",
+    "intro": "Bu makbuz, aşağıda referansı verilen Satış-Satın Alma Sözleşmesi kapsamındaki bir taksit ödemesini doğrular.",
+    "headings": {
+      "spa_ref": "Sözleşme No.",
+      "instalment": "Taksit",
+      "milestone": "Kilometre taşı",
+      "amount_paid": "Ödenen tutar",
+      "payment_method": "Ödeme yöntemi",
+      "payment_ref": "Ödeme referansı",
+      "paid_at": "Ödeme tarihi",
+      "outstanding": "Kalan bakiye"
+    },
+    "footer_note": "Bu makbuz otomatik olarak oluşturulmuştur ve manuel imza olmadan geçerlidir. Kayıtlarınız için saklayın."
+  },
+  "handover_certificate": {
+    "title": "Teslim Belgesi",
+    "intro": "Bu belge, gayrimenkulün Geliştirici tarafından Alıcı(lar)a teslimini kayıt altına alır. Alıcı, ekteki eksik işler listesi ve garanti koşullarına tabi olarak bağımsız bölümü kabul eder.",
+    "headings": {
+      "spa_ref": "Sözleşme No.",
+      "completed_at": "Teslim tarihi",
+      "snag_count": "Açık eksik işler",
+      "warranty_period": "Garanti süresi",
+      "keys_handed_over": "Teslim edilen anahtarlar",
+      "buyer_acceptance": "Alıcının kabulü",
+      "developer_declaration": "Geliştiricinin beyanı"
+    },
+    "developer_declaration_text": "Geliştirici, gayrimenkulün Satış-Satın Alma Sözleşmesine uygun olarak inşa edildiğini, gerekli tüm belgelerin Alıcıya teslim edildiğini ve yapısal ile işçilik garantilerinin bu belgenin tarihinde başladığını işbu belgeyle teyit eder.",
+    "buyer_acceptance_text": "Alıcı, ekteki eksik işler listesine tabi olarak gayrimenkulün teslimini kabul eder. Alıcı, anahtarları, kullanım kılavuzlarını ve Eklerde listelenen tüm gerekli belgeleri teslim aldığını kabul eder.",
+    "snag_note": "Açık eksik işler, Sözleşmenin eksik işlerin giderilmesi maddesi uyarınca Geliştirici tarafından makul bir süre içinde giderilecektir."
+  },
+  "warranty_certificate": {
+    "title": "Garanti Belgesi",
+    "intro": "Bu Belge, aşağıdaki tarihte Alıcı(lar)a teslim edilen gayrimenkulle ilgili Geliştiricinin garanti yükümlülüklerini belirler.",
+    "headings": {
+      "spa_ref": "Sözleşme No.",
+      "handover_date": "Teslim tarihi",
+      "structural": "Yapısal garanti",
+      "finishing": "İşçilik garantisi",
+      "structural_period": "Yapısal garanti süresi",
+      "finishing_period": "İşçilik garanti süresi",
+      "warranty_expiry": "Garanti bitiş tarihi",
+      "scope": "Teminat kapsamı",
+      "exclusions": "Kapsam dışı durumlar"
+    },
+    "structural_text": "Geliştirici, taşıyıcı sistem, temeller ve su yalıtımı dahil olmak üzere gayrimenkulün yapısal bütünlüğünü, teslim tarihinden itibaren {years} yıl süreyle garanti eder.",
+    "finishing_text": "Geliştirici, boya, armatür, tesisat, Geliştirici tarafından monte edilen cihazlar ve küçük estetik kusurlar dahil işçilik işlerini teslim tarihinden itibaren {years} yıl süreyle garanti eder.",
+    "exclusions_text": "Bu garanti; kötü kullanımdan, Alıcı veya üçüncü kişilerce yapılan değişikliklerden, olağan aşınma ve yıpranmadan, mücbir sebep olaylarından ve ayrı üretici garantisi kapsamındaki kalemlerden kaynaklanan hasarları kapsam dışı bırakır.",
+    "claim_procedure": "Talepte bulunmak için Alıcı, garanti süresi içinde kusuru tanımlayan ve makul destekleyici kanıt içeren yazılı bildirimi Geliştiriciye iletmelidir."
+  },
+  "noc": {
+    "title": "Muvafakat Belgesi",
+    "subtitle": "Bağımsız bölümün yeniden satışı için",
+    "intro": "Bu Muvafakat Belgesi (NOC), aşağıda tanımlanan bağımsız bölümün yeniden satışını engelleyecek Alıcıya ait açık bir yükümlülük bulunmadığını teyit etmek üzere Geliştirici tarafından düzenlenmiştir.",
+    "headings": {
+      "spa_ref": "Sözleşme No.",
+      "requested_by": "Talep eden",
+      "issued_to": "Düzenlenen kişi",
+      "purpose": "Amaç",
+      "validity": "Geçerlilik",
+      "outstanding_balance": "Kalan bakiye",
+      "transfer_fee": "Devir ücreti"
+    },
+    "validity_text": "Bu Muvafakat Belgesi, düzenlenme tarihinden itibaren {days} gün geçerlidir. Bu sürenin sonunda yeni bir Muvafakat Belgesi talep edilmelidir.",
+    "purpose_text": "Geliştiricinin standart devir ücreti ve prosedürlerine tabi olarak, bağımsız bölümün üçüncü bir kişi alıcıya satışı.",
+    "no_outstanding": "Bu Muvafakat Belgesinin tarihine kadar olan tüm taksitler tamamen ödenmiştir. Bu sözleşme kapsamında kayıtlı bir ödenmemiş tutar bulunmamaktadır.",
+    "developer_statement": "Geliştirici, standart devir ücreti ve prosedürlerine tabi olarak, Alıcının bağımsız bölümün mülkiyetini üçüncü bir kişiye devretmesine işbu belgeyle izin verir. Bu Muvafakat Belgesi, Geliştiricinin Satış-Satın Alma Sözleşmesi kapsamındaki haklarından hiçbirinden feragat etmez."
+  },
+  "tenant_lease_agreement": {
+    "title": "Kiracı Kira Sözleşmesi",
+    "intro": "Bu Kira Sözleşmesi, burada tanımlanan gayrimenkulün konut amaçlı kiralanması için Kiraya Veren (Geliştirici) ile aşağıda adı geçen Kiracı(lar) arasında düzenlenmiştir.",
+    "tenant_signature": "Kiracı imzası",
+    "headings": {
+      "lease_number": "Kira sözleşme no.",
+      "tenant": "Kiracı",
+      "property": "Gayrimenkul",
+      "term": "Süre",
+      "monthly_rent": "Aylık kira",
+      "security_deposit": "Güvence depozitosu",
+      "use_clause": "Gayrimenkulün kullanımı",
+      "maintenance": "Bakım",
+      "termination": "Fesih"
+    },
+    "use_clause_text": "Kiracı, gayrimenkulü yalnızca kendisi ve yakın aile fertleri için özel konut olarak kullanacaktır. Kiraya Verenin önceden yazılı onayı olmadan alt kiralama ve ticari kullanım yasaktır.",
+    "maintenance_text": "Yapısal bakım ile Geliştirici tarafından monte edilen büyük cihazlardan Kiraya Veren sorumludur. Kiracı, günlük temizlikten, makul sınır altındaki küçük onarımlardan ve kötü kullanımdan kaynaklanan hasarlardan sorumludur.",
+    "termination_text": "Taraflardan her biri, süre sonunda, sona ermeden en az 30 gün önce yazılı bildirimde bulunarak bu Kira Sözleşmesini feshedebilir. Kiracının erken feshi, Kiraya Verenin yazılı onayı olmadıkça güvence depozitosunun kaybına yol açar."
+  },
+  "move_in_checklist": {
+    "title": "Taşınma Kontrol Listesi",
+    "intro": "Teslim anında kaydedilen oda oda durum raporu. Taraflar, listelenen durumun incelenen bağımsız bölümü yansıttığını imzalayarak kabul eder.",
+    "empty_rooms": "Oda verisi girilmedi.",
+    "acceptance_text": "Aşağıdaki imzalarla taraflar, yukarıda kaydedilen oda oda durumun inceleme anında bağımsız bölümü doğru yansıttığını teyit eder.",
+    "headings": {
+      "spa_ref": "Sözleşme No.",
+      "inspection_date": "İnceleme tarihi"
+    },
+    "columns": {
+      "item": "Kalem",
+      "condition": "Durum",
+      "notes": "Notlar"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "İpotek Fekki Mektubu",
+    "intro": "Bu mektup, Alıcının talebi üzerine Geliştirici tarafından, aşağıda tanımlanan bağımsız bölümün Geliştirici lehine hiçbir açık yük, ipotek, rehin veya takyidat taşımadığını teyit etmek üzere düzenlenmiştir.",
+    "no_encumbrance_text": "Geliştirici, bu mektubun tarihi itibarıyla yukarıda tanımlanan bağımsız bölümün Geliştirici veya ilgili herhangi bir tarafın lehine hiçbir ipotek, yük, rehin veya takyidattan arındırılmış olduğunu işbu belgeyle teyit eder.",
+    "purpose_text": "Bu mektup yalnızca Alıcının ipotekli kredi başvurusu ve yukarıda adı geçen Bankanın talep ettiği ilgili due diligence süreci için düzenlenmiştir. Sözleşme kapsamındaki Geliştirici haklarından hiçbirinden feragat etmez.",
+    "headings": {
+      "bank": "Düzenlenen kişi (Banka)",
+      "spa_ref": "Sözleşme No.",
+      "unit": "Bağımsız bölüm"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Tapu Devir Talebi",
+    "intro": "Aşağıda tanımlanan bağımsız bölümün mülkiyetinin, Satış-Satın Alma Sözleşmesinde adı geçen yeni malik(ler)e Geliştiriciden devri için tapu siciline yapılan resmi talep.",
+    "request_text": "Geliştirici, yukarıdaki bağımsız bölümün mülkiyetinin, belirtilen oranlarda, işbu talep tarihinden itibaren geçerli olmak üzere, listelenen yeni malik(ler) lehine tescil edilmesini talep eder.",
+    "attachments_text": "İmzalanmış asıl Satış-Satın Alma Sözleşmesi, son ödeme makbuzu, teslim belgesi, tüm yeni maliklerin kimlik belgeleri ve tapu sicilinin talep ettiği varsa harç makbuzları.",
+    "headings": {
+      "registry": "Tapu sicili",
+      "spa_ref": "Sözleşme No.",
+      "unit": "Bağımsız bölüm",
+      "new_owners": "Yeni malik(ler)",
+      "request_body": "Talep",
+      "attachments": "Ekler"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Emanet Hesabı Serbest Bırakma Yetkisi",
+    "intro": "Aşağıda belirtilen kilometre taşıyla ilgili olarak, aşağıda tanımlanan emanet hesabında tutulan fonların Geliştiriciye serbest bırakılmasına ilişkin Emanet Ajanına verilen talimattır.",
+    "instruction_text": "Geliştirici, yukarıdaki tutarın adı geçen emanet hesabından Geliştiricinin işletme hesabına aktarılması için Emanet Ajanına işbu belgeyle yetki verir ve talimat verir. Bu serbest bırakma, Satış-Satın Alma Sözleşmesinde kaydedilen kilometre taşı onayını takip eder.",
+    "headings": {
+      "escrow_account": "Emanet hesap no.",
+      "spa_ref": "Sözleşme No.",
+      "unit": "Bağımsız bölüm",
+      "amount_to_release": "Serbest bırakılacak tutar",
+      "release_reason": "Serbest bırakma nedeni"
+    }
+  },
+  "refund_authorization": {
+    "title": "İade Yetkisi",
+    "intro": "Bu belge, referansı verilen iptal edilmiş rezervasyon veya satış sözleşmesi kapsamında aşağıda tanımlanan tutarın iadesine yetki verir.",
+    "authorisation_text": "Geliştirici, yukarıdaki tutarın belirtilen ödeme yöntemiyle iadesine işbu belgeyle yetki verir. Ödemenin zamanlaması Geliştiricinin standart finans prosedürlerini ve ilk işleme uygulanabilir cayma veya cezai şart kurallarını izler.",
+    "headings": {
+      "reference": "Referans",
+      "unit": "Bağımsız bölüm",
+      "amount": "İade tutarı",
+      "reason": "Neden",
+      "payment_method": "Ödeme yöntemi"
+    }
+  }
+}

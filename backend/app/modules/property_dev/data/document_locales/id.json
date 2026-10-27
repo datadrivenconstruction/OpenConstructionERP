@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Halaman {page} dari {total}",
+    "generated_at": "Dibuat {timestamp} UTC",
+    "doc_ref": "Ref. Dok.",
+    "developer": "Pengembang",
+    "unit_code": "Kode Unit",
+    "watermark_draft": "DRAF",
+    "currency": "Mata uang",
+    "amount": "Jumlah",
+    "date": "Tanggal",
+    "signature": "Tanda tangan",
+    "place": "Tempat",
+    "buyer_signature": "Tanda Tangan Pembeli",
+    "developer_signature": "Tanda Tangan Pengembang",
+    "witness": "Saksi"
+  },
+  "reservation_receipt": {
+    "title": "Tanda Terima Pemesanan",
+    "intro": "Tanda terima ini mengonfirmasi pemesanan properti yang diuraikan di bawah. Uang muka telah diterima dan unit ditahan dari pasar untuk pembeli hingga masa tenggang berakhir atau Perjanjian Jual Beli ditandatangani.",
+    "headings": {
+      "buyer": "Pembeli",
+      "property": "Properti",
+      "amount_paid": "Jumlah Dibayar",
+      "valid_until": "Berlaku Hingga",
+      "next_step": "Langkah Berikutnya",
+      "reservation_number": "No. Pemesanan",
+      "cooling_off": "Masa Tenggang",
+      "deposit_status": "Status Uang Muka",
+      "plot_details": "Rincian Kavling"
+    },
+    "next_step_text": "Dalam {days} hari pembeli harus menandatangani Perjanjian Jual Beli dan membayar cicilan berikutnya, atau pemesanan ini akan kedaluwarsa dan dilepas kembali ke pasar.",
+    "cooling_off_text": "{days} hari sejak diterimanya dokumen ini.",
+    "footer_note": "Uang muka dapat dikembalikan sepenuhnya hanya selama masa tenggang yang ditetapkan oleh yurisdiksi. Setelah masa ini, pengembalian mengikuti aturan hilangnya hak yang berlaku."
+  },
+  "sales_contract": {
+    "title": "Perjanjian Jual Beli",
+    "subtitle": "Perjanjian No. {number}",
+    "preamble": "Perjanjian Jual Beli ini (selanjutnya disebut \"Perjanjian\") dibuat dan ditandatangani pada tanggal yang tertera di bawah ini antara Pengembang yang tercatat dan Pembeli yang tercantum di bawah ini, untuk penjualan properti yang diidentifikasi dalam dokumen ini.",
+    "headings": {
+      "parties": "Para Pihak dalam Perjanjian",
+      "property": "Properti",
+      "price": "Harga Jual Beli",
+      "payment_schedule": "Jadwal Pembayaran",
+      "clauses": "Syarat dan Ketentuan",
+      "instalments": "Cicilan",
+      "signatures": "Tanda Tangan",
+      "co_ownership": "Kepemilikan Bersama",
+      "regulatory": "Pengungkapan Peraturan",
+      "annexes": "Lampiran"
+    },
+    "parties_intro": "Pembeli memperoleh properti secara bersama-sama dengan persentase kepemilikan sebagaimana diuraikan di bawah. Semua pihak bertanggung jawab secara tanggung renteng atas kewajiban dalam Perjanjian ini kecuali dinyatakan lain secara tegas.",
+    "instalment_columns": {
+      "sequence": "#",
+      "milestone": "Tonggak",
+      "due_date": "Tanggal Jatuh Tempo",
+      "amount": "Jumlah",
+      "currency": "Mata Uang"
+    },
+    "party_columns": {
+      "name": "Nama",
+      "role": "Peran",
+      "ownership_pct": "Kepemilikan (%)",
+      "email": "Email"
+    },
+    "property_columns": {
+      "plot_number": "Nomor Kavling",
+      "development": "Pengembangan",
+      "area_m2": "Luas (m²)",
+      "house_type": "Tipe Rumah"
+    },
+    "price_label": "Total Harga Jual Beli",
+    "breakdown_label": "Rincian Harga",
+    "signature_note": "Ditandatangani di {place} pada {date}. Dengan menandatangani di bawah ini, Pembeli dan Pengembang menyatakan telah membaca, memahami, dan menyetujui syarat-syarat dalam Perjanjian ini, termasuk seluruh lampirannya."
+  },
+  "payment_receipt": {
+    "title": "Tanda Terima Pembayaran",
+    "intro": "Tanda terima ini menyatakan telah diterimanya pembayaran cicilan berdasarkan Perjanjian Jual Beli yang dirujuk di bawah.",
+    "headings": {
+      "spa_ref": "No. Perjanjian",
+      "instalment": "Cicilan",
+      "milestone": "Tonggak",
+      "amount_paid": "Jumlah Dibayar",
+      "payment_method": "Metode Pembayaran",
+      "payment_ref": "Referensi Pembayaran",
+      "paid_at": "Dibayar Pada",
+      "outstanding": "Sisa Saldo"
+    },
+    "footer_note": "Tanda terima ini dibuat secara otomatis dan sah tanpa tanda tangan manual. Simpan untuk catatan Anda."
+  },
+  "handover_certificate": {
+    "title": "Berita Acara Serah Terima",
+    "intro": "Berita acara ini mencatat serah terima properti dari Pengembang kepada Pembeli. Pembeli menerima unit ini sesuai dengan daftar kekurangan (snag list) dan ketentuan garansi yang terlampir.",
+    "headings": {
+      "spa_ref": "No. Perjanjian",
+      "completed_at": "Tanggal Serah Terima",
+      "snag_count": "Kekurangan Terbuka",
+      "warranty_period": "Masa Garansi",
+      "keys_handed_over": "Kunci Diserahkan",
+      "buyer_acceptance": "Penerimaan Pembeli",
+      "developer_declaration": "Pernyataan Pengembang"
+    },
+    "developer_declaration_text": "Pengembang dengan ini menyatakan bahwa properti telah dibangun sesuai dengan Perjanjian Jual Beli, seluruh dokumentasi yang diperlukan telah diserahkan kepada Pembeli, dan garansi struktur serta finishing mulai berlaku sejak tanggal berita acara ini.",
+    "buyer_acceptance_text": "Pembeli dengan ini menerima serah terima properti sesuai dengan daftar kekurangan yang terlampir. Pembeli mengakui telah menerima kunci, manual, dan seluruh dokumentasi yang diperlukan sebagaimana tercantum dalam Lampiran.",
+    "snag_note": "Kekurangan yang masih terbuka akan diperbaiki oleh Pengembang dalam jangka waktu yang wajar sesuai klausul perbaikan kekurangan dalam Perjanjian Jual Beli."
+  },
+  "warranty_certificate": {
+    "title": "Sertifikat Garansi",
+    "intro": "Sertifikat ini menetapkan kewajiban garansi Pengembang atas properti yang diserahkan kepada Pembeli pada tanggal di bawah ini.",
+    "headings": {
+      "spa_ref": "No. Perjanjian",
+      "handover_date": "Tanggal Serah Terima",
+      "structural": "Garansi Struktur",
+      "finishing": "Garansi Finishing",
+      "structural_period": "Masa Garansi Struktur",
+      "finishing_period": "Masa Garansi Finishing",
+      "warranty_expiry": "Berakhirnya Garansi",
+      "scope": "Lingkup Jaminan",
+      "exclusions": "Pengecualian"
+    },
+    "structural_text": "Pengembang menjamin integritas struktur properti, termasuk struktur pemikul beban, pondasi, dan kedap air, selama {years} tahun sejak tanggal serah terima.",
+    "finishing_text": "Pengembang menjamin pekerjaan finishing, termasuk cat, perlengkapan, instalasi, peralatan yang dipasang oleh Pengembang, dan item kosmetik kecil, selama {years} tahun sejak tanggal serah terima.",
+    "exclusions_text": "Garansi ini tidak mencakup kerusakan akibat penyalahgunaan, perubahan yang dilakukan oleh Pembeli atau pihak ketiga, keausan normal, keadaan kahar, dan item yang tercakup dalam garansi pabrikan terpisah.",
+    "claim_procedure": "Untuk mengajukan klaim, Pembeli wajib menyampaikan pemberitahuan tertulis kepada Pengembang dalam masa garansi, yang menjelaskan cacat dan disertai bukti pendukung yang wajar."
+  },
+  "noc": {
+    "title": "Surat Tidak Keberatan",
+    "subtitle": "Untuk Penjualan Kembali Unit",
+    "intro": "Surat Tidak Keberatan (NOC) ini diterbitkan oleh Pengembang untuk mengonfirmasi bahwa tidak ada kewajiban Pembeli yang belum diselesaikan dan dapat menghalangi penjualan kembali unit yang diidentifikasi di bawah.",
+    "headings": {
+      "spa_ref": "No. Perjanjian",
+      "requested_by": "Diminta Oleh",
+      "issued_to": "Diterbitkan Kepada",
+      "purpose": "Tujuan",
+      "validity": "Masa Berlaku",
+      "outstanding_balance": "Sisa Saldo",
+      "transfer_fee": "Biaya Pengalihan"
+    },
+    "validity_text": "NOC ini berlaku selama {days} hari sejak tanggal penerbitan. Setelah masa ini, NOC baru harus diajukan kembali.",
+    "purpose_text": "Penjualan unit kepada pembeli pihak ketiga, dengan tunduk pada prosedur pengalihan standar Pengembang.",
+    "no_outstanding": "Seluruh cicilan hingga tanggal NOC ini telah dibayar lunas. Tidak ada pembayaran yang tertunggak untuk kontrak ini.",
+    "developer_statement": "Pengembang dengan ini memberikan izin, dengan tunduk pada biaya dan prosedur pengalihan standar, kepada Pembeli untuk mengalihkan kepemilikan unit kepada pihak ketiga. NOC ini tidak menghapus hak apa pun dari Pengembang berdasarkan Perjanjian Jual Beli."
+  },
+  "tenant_lease_agreement": {
+    "title": "Perjanjian Sewa Penyewa",
+    "intro": "Perjanjian Sewa ini dibuat antara Pemberi Sewa (Pengembang) dan Penyewa yang disebutkan di bawah untuk penyewaan hunian atas properti yang diuraikan dalam dokumen ini.",
+    "tenant_signature": "Tanda Tangan Penyewa",
+    "headings": {
+      "lease_number": "No. Sewa",
+      "tenant": "Penyewa",
+      "property": "Properti",
+      "term": "Jangka Waktu",
+      "monthly_rent": "Sewa Bulanan",
+      "security_deposit": "Uang Jaminan",
+      "use_clause": "Penggunaan Properti",
+      "maintenance": "Pemeliharaan",
+      "termination": "Pengakhiran"
+    },
+    "use_clause_text": "Penyewa hanya boleh menggunakan Properti sebagai tempat tinggal pribadi bagi Penyewa dan keluarga inti. Sub-sewa dan penggunaan komersial dilarang tanpa persetujuan tertulis sebelumnya dari Pemberi Sewa.",
+    "maintenance_text": "Pemberi Sewa bertanggung jawab atas pemeliharaan struktur dan peralatan utama yang dipasang oleh Pengembang. Penyewa bertanggung jawab atas kebersihan harian, perbaikan kecil di bawah batas wajar, dan kerusakan akibat penyalahgunaan.",
+    "termination_text": "Salah satu pihak dapat mengakhiri Sewa ini pada akhir jangka waktu dengan pemberitahuan tertulis paling lambat 30 hari sebelum berakhir. Pengakhiran lebih awal oleh Penyewa menyebabkan uang jaminan hangus, kecuali Pemberi Sewa menyetujui secara tertulis."
+  },
+  "move_in_checklist": {
+    "title": "Daftar Periksa Serah Terima Hunian",
+    "intro": "Laporan kondisi per ruangan yang dicatat pada saat serah terima. Kedua pihak menandatangani bahwa kondisi yang tercantum sesuai dengan unit saat diperiksa.",
+    "empty_rooms": "Tidak ada data ruangan.",
+    "acceptance_text": "Dengan menandatangani di bawah ini, kedua pihak menyatakan bahwa kondisi per ruangan yang tercatat di atas sesuai dengan unit pada saat pemeriksaan.",
+    "headings": {
+      "spa_ref": "No. Perjanjian",
+      "inspection_date": "Tanggal Pemeriksaan"
+    },
+    "columns": {
+      "item": "Item",
+      "condition": "Kondisi",
+      "notes": "Catatan"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Surat Keterangan Bebas Hipotek",
+    "intro": "Surat ini diterbitkan oleh Pengembang atas permintaan Pembeli untuk menyatakan bahwa unit yang diidentifikasi di bawah tidak memiliki beban, hipotek, hak gadai, atau pembebanan lain yang menguntungkan Pengembang.",
+    "no_encumbrance_text": "Pengembang dengan ini menyatakan bahwa, per tanggal surat ini, unit di atas bebas dari hipotek, beban, hak gadai, atau pembebanan apa pun yang menguntungkan Pengembang atau pihak terkait mana pun.",
+    "purpose_text": "Surat ini diterbitkan semata-mata untuk keperluan permohonan hipotek Pembeli dan uji tuntas terkait yang diminta oleh Bank yang disebutkan di atas. Surat ini tidak menghapus hak apa pun dari Pengembang berdasarkan Perjanjian Jual Beli.",
+    "headings": {
+      "bank": "Diterbitkan Kepada (Bank)",
+      "spa_ref": "No. Perjanjian",
+      "unit": "Unit"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Permohonan Balik Nama Sertifikat",
+    "intro": "Permohonan resmi kepada kantor pertanahan untuk mengalihkan hak atas unit yang diuraikan di bawah dari Pengembang kepada pemilik baru sebagaimana tercantum dalam Perjanjian Jual Beli.",
+    "request_text": "Pengembang dengan ini memohon agar Kantor Pertanahan mencatat peralihan hak atas unit di atas kepada pemilik baru yang tercantum, dalam persentase yang ditunjukkan, terhitung sejak tanggal permohonan ini.",
+    "attachments_text": "Perjanjian Jual Beli asli (yang telah ditandatangani), tanda terima pembayaran terakhir, berita acara serah terima, dokumen identitas seluruh pemilik baru, dan bukti pembayaran bea perolehan atau pajak lain sebagaimana disyaratkan oleh kantor pertanahan.",
+    "headings": {
+      "registry": "Kantor Pertanahan",
+      "spa_ref": "No. Perjanjian",
+      "unit": "Unit",
+      "new_owners": "Pemilik Baru",
+      "request_body": "Permohonan",
+      "attachments": "Lampiran"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Surat Kuasa Pencairan Dana Escrow",
+    "intro": "Instruksi kepada Agen Escrow untuk mencairkan dana yang ditahan dalam rekening escrow yang diidentifikasi di bawah kepada Pengembang, sehubungan dengan tonggak yang diuraikan.",
+    "instruction_text": "Pengembang dengan ini memberi kuasa dan instruksi kepada Agen Escrow untuk mencairkan jumlah di atas dari rekening escrow yang disebutkan ke rekening operasional Pengembang. Pencairan ini mengikuti sertifikasi tonggak yang tercatat dalam Perjanjian Jual Beli.",
+    "headings": {
+      "escrow_account": "No. Rekening Escrow",
+      "spa_ref": "No. Perjanjian",
+      "unit": "Unit",
+      "amount_to_release": "Jumlah yang Dicairkan",
+      "release_reason": "Alasan Pencairan"
+    }
+  },
+  "refund_authorization": {
+    "title": "Surat Kuasa Pengembalian Dana",
+    "intro": "Dokumen ini memberi kuasa pengembalian jumlah yang diidentifikasi di bawah sehubungan dengan pemesanan atau perjanjian jual beli yang dibatalkan dan dirujuk.",
+    "authorisation_text": "Pengembang dengan ini memberi kuasa pengembalian jumlah di atas melalui metode pembayaran yang tercantum. Waktu penyelesaian mengikuti prosedur keuangan standar Pengembang serta ketentuan masa tenggang atau hilangnya hak yang berlaku pada transaksi awal.",
+    "headings": {
+      "reference": "Referensi",
+      "unit": "Unit",
+      "amount": "Jumlah Pengembalian",
+      "reason": "Alasan",
+      "payment_method": "Metode Pembayaran"
+    }
+  }
+}

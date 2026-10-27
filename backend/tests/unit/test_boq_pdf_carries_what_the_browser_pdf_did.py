@@ -627,5 +627,5 @@ def test_the_declared_language_is_the_one_the_labels_are_printed_in() -> None:
     assert pdf_language("de-DE") == "de"
     assert pdf_language("uk") == "uk"
     assert pdf_language("zh-CN") == "en"
-    assert pdf_language("ja") == "en"
+    assert pdf_language("ja") == "ja"
     assert pdf_language("") == "en"

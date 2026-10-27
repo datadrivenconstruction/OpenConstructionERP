@@ -61,8 +61,10 @@ def test_a_language_without_a_file_prints_english_left_to_right(code: str) -> No
 
 
 def test_a_translated_right_to_left_language_is_set_right_to_left() -> None:
-    assert dt._styles("ar")["body"].wordWrap == "RTL"
-    assert dt._styles("he")["body"].wordWrap is None
+    for code in sorted(dt.RTL_LOCALES):
+        assert (dt._LOCALE_DIR / f"{code}.json").exists(), code
+        assert dt._styles(code)["body"].wordWrap == "RTL", code
+    assert dt._styles("en")["body"].wordWrap is None
 
 
 def test_the_web_client_offers_messages_and_workbooks_in_every_backend_language() -> None:

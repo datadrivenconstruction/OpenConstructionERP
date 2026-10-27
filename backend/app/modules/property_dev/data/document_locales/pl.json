@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Strona {page} z {total}",
+    "generated_at": "Wygenerowano {timestamp} UTC",
+    "doc_ref": "Nr dok.",
+    "developer": "Deweloper",
+    "unit_code": "Kod lokalu",
+    "watermark_draft": "PROJEKT",
+    "currency": "Waluta",
+    "amount": "Kwota",
+    "date": "Data",
+    "signature": "Podpis",
+    "place": "Miejsce",
+    "buyer_signature": "Podpis nabywcy",
+    "developer_signature": "Podpis dewelopera",
+    "witness": "Świadek"
+  },
+  "reservation_receipt": {
+    "title": "Potwierdzenie rezerwacji",
+    "intro": "Niniejsze potwierdzenie stwierdza rezerwację nieruchomości opisanej poniżej. Zadatek został otrzymany, a lokal jest wstrzymany ze sprzedaży dla nabywcy do upływu okresu na odstąpienie od umowy lub do podpisania umowy sprzedaży.",
+    "headings": {
+      "buyer": "Nabywca",
+      "property": "Nieruchomość",
+      "amount_paid": "Wpłacona kwota",
+      "valid_until": "Ważne do",
+      "next_step": "Kolejny krok",
+      "reservation_number": "Nr rezerwacji",
+      "cooling_off": "Okres na odstąpienie",
+      "deposit_status": "Status zadatku",
+      "plot_details": "Dane działki"
+    },
+    "next_step_text": "W ciągu {days} dni nabywca musi podpisać umowę sprzedaży i wpłacić kolejną transzę, w przeciwnym razie rezerwacja wygaśnie, a lokal wróci do sprzedaży.",
+    "cooling_off_text": "{days} dni od otrzymania niniejszego dokumentu.",
+    "footer_note": "Zadatek podlega pełnemu zwrotowi wyłącznie w okresie na odstąpienie określonym przepisami jurysdykcji. Po tym okresie zwrot zależy od obowiązujących zasad przepadku zadatku."
+  },
+  "sales_contract": {
+    "title": "Umowa sprzedaży",
+    "subtitle": "Umowa nr {number}",
+    "preamble": "Niniejsza umowa sprzedaży (zwana dalej \"Umową\") zostaje zawarta w dniu wskazanym poniżej pomiędzy Deweloperem wpisanym w rejestrze a Nabywcą (Nabywcami) wymienionymi poniżej, w przedmiocie sprzedaży nieruchomości wskazanej w niniejszej umowie.",
+    "headings": {
+      "parties": "Strony umowy",
+      "property": "Nieruchomość",
+      "price": "Cena sprzedaży",
+      "payment_schedule": "Harmonogram płatności",
+      "clauses": "Warunki i postanowienia",
+      "instalments": "Raty",
+      "signatures": "Podpisy",
+      "co_ownership": "Współwłasność",
+      "regulatory": "Informacje regulacyjne",
+      "annexes": "Załączniki"
+    },
+    "parties_intro": "Nabywca (Nabywcy) nabywa nieruchomość wspólnie w udziałach wskazanych poniżej. Wszystkie strony odpowiadają solidarnie za zobowiązania wynikające z niniejszej umowy, chyba że wyraźnie postanowiono inaczej.",
+    "instalment_columns": {
+      "sequence": "Lp.",
+      "milestone": "Etap",
+      "due_date": "Termin płatności",
+      "amount": "Kwota",
+      "currency": "Waluta"
+    },
+    "party_columns": {
+      "name": "Imię i nazwisko / nazwa",
+      "role": "Rola",
+      "ownership_pct": "Udział (%)",
+      "email": "E-mail"
+    },
+    "property_columns": {
+      "plot_number": "Nr działki",
+      "development": "Inwestycja",
+      "area_m2": "Powierzchnia (m²)",
+      "house_type": "Typ domu"
+    },
+    "price_label": "Łączna cena sprzedaży",
+    "breakdown_label": "Szczegółowa cena",
+    "signature_note": "Podpisano w {place} dnia {date}. Podpisując poniżej, Nabywca i Deweloper potwierdzają, że zapoznali się z treścią niniejszej Umowy, w tym ze wszystkimi załącznikami, rozumieją ją i akceptują jej postanowienia."
+  },
+  "payment_receipt": {
+    "title": "Potwierdzenie wpłaty",
+    "intro": "Niniejsze potwierdzenie stwierdza wpłatę raty na podstawie poniżej wskazanej umowy sprzedaży.",
+    "headings": {
+      "spa_ref": "Nr umowy",
+      "instalment": "Rata",
+      "milestone": "Etap",
+      "amount_paid": "Wpłacona kwota",
+      "payment_method": "Forma płatności",
+      "payment_ref": "Referencja płatności",
+      "paid_at": "Data wpłaty",
+      "outstanding": "Saldo do zapłaty"
+    },
+    "footer_note": "Niniejsze potwierdzenie zostało wygenerowane automatycznie i jest ważne bez podpisu. Zachowaj je do swoich dokumentów."
+  },
+  "handover_certificate": {
+    "title": "Protokół odbioru lokalu",
+    "intro": "Niniejszy protokół stwierdza przekazanie nieruchomości przez Dewelopera Nabywcy (Nabywcom). Nabywca przyjmuje lokal z zastrzeżeniem listy usterek i warunków gwarancji dołączonych do protokołu.",
+    "headings": {
+      "spa_ref": "Nr umowy",
+      "completed_at": "Data odbioru",
+      "snag_count": "Otwarte usterki",
+      "warranty_period": "Okres gwarancji",
+      "keys_handed_over": "Wydane klucze",
+      "buyer_acceptance": "Oświadczenie nabywcy",
+      "developer_declaration": "Oświadczenie dewelopera"
+    },
+    "developer_declaration_text": "Deweloper niniejszym potwierdza, że nieruchomość została wykonana zgodnie z umową sprzedaży, że cała wymagana dokumentacja została przekazana Nabywcy oraz że gwarancje konstrukcyjne i wykończeniowe biegną od dnia sporządzenia niniejszego protokołu.",
+    "buyer_acceptance_text": "Nabywca niniejszym przyjmuje nieruchomość z zastrzeżeniem listy usterek dołączonej do protokołu. Nabywca potwierdza odbiór kluczy, instrukcji oraz całej wymaganej dokumentacji wymienionej w załącznikach.",
+    "snag_note": "Otwarte usterki zostaną usunięte przez Dewelopera w rozsądnym terminie, zgodnie z postanowieniami umowy dotyczącymi usuwania usterek."
+  },
+  "warranty_certificate": {
+    "title": "Karta gwarancyjna",
+    "intro": "Niniejsza karta określa zobowiązania gwarancyjne Dewelopera w odniesieniu do nieruchomości przekazanej Nabywcy (Nabywcom) w dniu wskazanym poniżej.",
+    "headings": {
+      "spa_ref": "Nr umowy",
+      "handover_date": "Data odbioru",
+      "structural": "Gwarancja konstrukcyjna",
+      "finishing": "Gwarancja wykończeniowa",
+      "structural_period": "Okres gwarancji konstrukcyjnej",
+      "finishing_period": "Okres gwarancji wykończeniowej",
+      "warranty_expiry": "Koniec gwarancji",
+      "scope": "Zakres gwarancji",
+      "exclusions": "Wyłączenia"
+    },
+    "structural_text": "Deweloper gwarantuje integralność konstrukcyjną nieruchomości, w tym konstrukcji nośnej, fundamentów i hydroizolacji, przez okres {years} lat od dnia odbioru.",
+    "finishing_text": "Deweloper gwarantuje prace wykończeniowe, w tym malowanie, armaturę, wyposażenie i urządzenia zainstalowane przez Dewelopera oraz drobne elementy wykończenia, przez okres {years} rok(lata) od dnia odbioru.",
+    "exclusions_text": "Gwarancja nie obejmuje szkód spowodowanych niewłaściwym użytkowaniem, przeróbkami wykonanymi przez Nabywcę lub osoby trzecie, normalnym zużyciem, siłą wyższą oraz elementów objętych odrębnymi gwarancjami producentów.",
+    "claim_procedure": "Aby zgłosić roszczenie, Nabywca musi złożyć na piśmie zawiadomienie Deweloperowi w okresie gwarancji, opisując wadę i przedstawiając uzasadnione dowody."
+  },
+  "noc": {
+    "title": "Zaświadczenie o braku przeciwwskazań",
+    "subtitle": "Do odsprzedaży lokalu",
+    "intro": "Niniejsze zaświadczenie o braku przeciwwskazań (NOC) zostaje wydane przez Dewelopera w celu potwierdzenia, że Nabywca nie ma zaległych zobowiązań, które stanowiłyby przeszkodę w odsprzedaży lokalu wskazanego poniżej.",
+    "headings": {
+      "spa_ref": "Nr umowy",
+      "requested_by": "Wnioskodawca",
+      "issued_to": "Wydano dla",
+      "purpose": "Cel",
+      "validity": "Ważność",
+      "outstanding_balance": "Saldo do zapłaty",
+      "transfer_fee": "Opłata za przeniesienie"
+    },
+    "validity_text": "Zaświadczenie jest ważne przez {days} dni od daty wydania. Po tym okresie należy wystąpić o nowe zaświadczenie.",
+    "purpose_text": "Sprzedaż lokalu nabywcy trzeciemu, z zastrzeżeniem standardowej procedury przeniesienia Dewelopera.",
+    "no_outstanding": "Wszystkie raty do dnia wydania niniejszego zaświadczenia zostały opłacone w całości. Dla tej umowy nie zarejestrowano żadnych zaległych płatności.",
+    "developer_statement": "Deweloper niniejszym wyraża zgodę, z zastrzeżeniem standardowej opłaty za przeniesienie i procedur, na przeniesienie przez Nabywcę prawa własności lokalu na osobę trzecią. Niniejsze zaświadczenie nie zrzeka się żadnych praw Dewelopera wynikających z umowy sprzedaży."
+  },
+  "tenant_lease_agreement": {
+    "title": "Umowa najmu lokalu",
+    "intro": "Niniejsza umowa najmu zostaje zawarta pomiędzy Wynajmującym (Deweloperem) a Najemcą (Najemcami) wymienionymi poniżej, w przedmiocie najmu mieszkalnego nieruchomości opisanej w niniejszej umowie.",
+    "tenant_signature": "Podpis najemcy",
+    "headings": {
+      "lease_number": "Nr umowy najmu",
+      "tenant": "Najemca",
+      "property": "Nieruchomość",
+      "term": "Okres najmu",
+      "monthly_rent": "Czynsz miesięczny",
+      "security_deposit": "Kaucja zabezpieczająca",
+      "use_clause": "Sposób korzystania z nieruchomości",
+      "maintenance": "Utrzymanie",
+      "termination": "Rozwiązanie umowy"
+    },
+    "use_clause_text": "Najemca będzie korzystać z nieruchomości wyłącznie jako prywatnego miejsca zamieszkania dla siebie i najbliższej rodziny. Podnajem i użytkowanie komercyjne są zabronione bez uprzedniej pisemnej zgody Wynajmującego.",
+    "maintenance_text": "Wynajmujący odpowiada za remonty konstrukcyjne oraz za większe urządzenia zainstalowane przez Dewelopera. Najemca odpowiada za bieżące utrzymanie czystości, drobne naprawy do określonej wartości oraz szkody wynikłe z niewłaściwego użytkowania.",
+    "termination_text": "Każda ze stron może rozwiązać niniejszą umowę z upływem okresu najmu, zawiadamiając drugą stronę na piśmie co najmniej 30 dni przed jej zakończeniem. Wcześniejsze rozwiązanie przez Najemcę powoduje utratę kaucji zabezpieczającej, chyba że Wynajmujący wyrazi na to zgodę na piśmie."
+  },
+  "move_in_checklist": {
+    "title": "Protokół zdawczo-odbiorczy lokalu",
+    "intro": "Raport stanu pomieszczeń sporządzony pokój po pokoju w chwili przekazania. Obie strony podpisują, że wskazany stan odpowiada lokalowi w chwili oględzin.",
+    "empty_rooms": "Nie podano danych o pomieszczeniach.",
+    "acceptance_text": "Podpisując poniżej, obie strony potwierdzają, że stan pomieszczeń opisany powyżej wiernie odpowiada lokalowi w chwili oględzin.",
+    "headings": {
+      "spa_ref": "Nr umowy",
+      "inspection_date": "Data oględzin"
+    },
+    "columns": {
+      "item": "Element",
+      "condition": "Stan",
+      "notes": "Uwagi"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Zaświadczenie o wolności hipotecznej",
+    "intro": "Niniejsze pismo zostaje wydane przez Dewelopera na wniosek Nabywcy w celu potwierdzenia, że lokal wskazany poniżej nie jest obciążony żadnymi zaległymi należnościami, hipotekami, zastawami ani innymi obciążeniami na rzecz Dewelopera.",
+    "no_encumbrance_text": "Deweloper niniejszym potwierdza, że na dzień wystawienia niniejszego pisma powyższy lokal jest wolny od wszelkich hipotek, zastawów, zajęć i obciążeń na rzecz Dewelopera lub podmiotu z nim powiązanego.",
+    "purpose_text": "Niniejsze pismo zostaje wydane wyłącznie w celu wniosku Nabywcy o kredyt hipoteczny oraz ewentualnej analizy due diligence zleconej przez wskazany powyżej bank. Nie zrzeka się ono żadnych praw Dewelopera wynikających z umowy sprzedaży.",
+    "headings": {
+      "bank": "Wydano dla (bank)",
+      "spa_ref": "Nr umowy",
+      "unit": "Lokal"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Wniosek o przeniesienie własności",
+    "intro": "Formalny wniosek do wydziału ksiąg wieczystych o przeniesienie własności lokalu opisanego poniżej z Dewelopera na nowego właściciela (nowych właścicieli) wskazanego w umowie sprzedaży.",
+    "request_text": "Deweloper niniejszym wnosi o wpisanie w księdze wieczystej przeniesienia prawa własności powyższego lokalu na rzecz wymienionych nowych właścicieli, w udziałach wskazanych poniżej, z dniem złożenia niniejszego wniosku.",
+    "attachments_text": "Oryginał podpisanej umowy sprzedaży, dowód ostatniej wpłaty, protokół odbioru, dokumenty tożsamości wszystkich nowych właścicieli oraz potwierdzenia opłat skarbowych wymaganych przez sąd wieczystoksięgowy.",
+    "headings": {
+      "registry": "Sąd wieczystoksięgowy",
+      "spa_ref": "Nr umowy",
+      "unit": "Lokal",
+      "new_owners": "Nowy właściciel (nowi właściciele)",
+      "request_body": "Wniosek",
+      "attachments": "Załączniki"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Upoważnienie do zwolnienia środków z depozytu",
+    "intro": "Polecenie dla Agenta Depozytowego zwolnienia środków zdeponowanych na rachunku depozytowym wskazanym poniżej na rzecz Dewelopera, w związku z opisanym etapem inwestycji.",
+    "instruction_text": "Deweloper niniejszym upoważnia i poleca Agentowi Depozytowemu zwolnienie powyższej kwoty z wymienionego rachunku depozytowego na rachunek operacyjny Dewelopera. Zwolnienie następuje po potwierdzeniu realizacji etapu zapisanego w umowie sprzedaży.",
+    "headings": {
+      "escrow_account": "Nr rachunku depozytowego",
+      "spa_ref": "Nr umowy",
+      "unit": "Lokal",
+      "amount_to_release": "Kwota do zwolnienia",
+      "release_reason": "Podstawa zwolnienia"
+    }
+  },
+  "refund_authorization": {
+    "title": "Upoważnienie do zwrotu",
+    "intro": "Niniejszy dokument upoważnia do zwrotu kwoty wskazanej poniżej w związku z anulowaną rezerwacją lub umową sprzedaży, których dotyczy.",
+    "authorisation_text": "Deweloper niniejszym upoważnia do zwrotu powyższej kwoty wskazaną formą płatności. Termin rozliczenia zależy od standardowych procedur finansowych Dewelopera oraz od zasad odstąpienia i przepadku zadatku, mających zastosowanie do pierwotnej transakcji.",
+    "headings": {
+      "reference": "Referencja",
+      "unit": "Lokal",
+      "amount": "Kwota zwrotu",
+      "reason": "Powód",
+      "payment_method": "Forma płatności"
+    }
+  }
+}

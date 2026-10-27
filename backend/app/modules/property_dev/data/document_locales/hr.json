@@ -1,0 +1,227 @@
+{
+  "common": {
+    "page_of": "Stranica {page} od {total}",
+    "generated_at": "Generirano {timestamp} UTC",
+    "doc_ref": "Oznaka dokumenta",
+    "developer": "Investitor",
+    "unit_code": "Oznaka jedinice",
+    "watermark_draft": "NACRT",
+    "currency": "Valuta",
+    "amount": "Iznos",
+    "date": "Datum",
+    "signature": "Potpis",
+    "place": "Mjesto",
+    "buyer_signature": "Potpis kupca",
+    "developer_signature": "Potpis investitora",
+    "witness": "Svjedok"
+  },
+  "reservation_receipt": {
+    "title": "Potvrda o rezervaciji",
+    "intro": "Ova potvrda potvrđuje rezervaciju nekretnine opisane u nastavku. Predujam je primljen, a jedinica se do isteka roka za odustajanje ili potpisivanja Ugovora o kupoprodaji povlači s tržišta za kupca.",
+    "headings": {
+      "buyer": "Kupac",
+      "property": "Nekretnina",
+      "amount_paid": "Uplaćeni iznos",
+      "valid_until": "Vrijedi do",
+      "next_step": "Sljedeći korak",
+      "reservation_number": "Broj rezervacije",
+      "cooling_off": "Rok za odustajanje",
+      "deposit_status": "Status predujma",
+      "plot_details": "Podaci o parceli"
+    },
+    "next_step_text": "U roku od {days} dana kupac mora potpisati Ugovor o kupoprodaji i platiti sljedeću ratu, inače će rezervacija isteći i nekretnina će se vratiti na tržište.",
+    "cooling_off_text": "{days} dana od primitka ovog dokumenta.",
+    "footer_note": "Predujam se u cijelosti vraća samo tijekom roka za odustajanje koji određuje jurisdikcija. Nakon tog roka povrat se određuje prema važećim pravilima o gubitku predujma."
+  },
+  "sales_contract": {
+    "title": "Ugovor o kupoprodaji",
+    "subtitle": "Ugovor br. {number}",
+    "preamble": "Ovaj Ugovor o kupoprodaji (u daljnjem tekstu „Ugovor“) sklapa se na datum naveden u nastavku između investitora upisanog u registar i kupca (kupaca) navedenih u nastavku, radi prodaje nekretnine ovdje označene.",
+    "headings": {
+      "parties": "Ugovorne strane",
+      "property": "Nekretnina",
+      "price": "Kupoprodajna cijena",
+      "payment_schedule": "Plan plaćanja",
+      "clauses": "Uvjeti i odredbe",
+      "instalments": "Rate",
+      "signatures": "Potpisi",
+      "co_ownership": "Suvlasništvo",
+      "regulatory": "Regulatorne napomene",
+      "annexes": "Prilozi"
+    },
+    "parties_intro": "Kupac (kupci) stječe nekretninu zajednički u udjelima vlasništva navedenima u nastavku. Sve strane solidarno odgovaraju za obveze iz ovog Ugovora, osim ako je izričito drukčije navedeno.",
+    "instalment_columns": {
+      "sequence": "Br.",
+      "milestone": "Prekretnica",
+      "due_date": "Datum dospijeća",
+      "amount": "Iznos",
+      "currency": "Valuta"
+    },
+    "party_columns": {
+      "name": "Naziv",
+      "role": "Uloga",
+      "ownership_pct": "Udio u vlasništvu (%)",
+      "email": "E-pošta"
+    },
+    "property_columns": {
+      "plot_number": "Broj parcele",
+      "development": "Projekt",
+      "area_m2": "Površina (m²)",
+      "house_type": "Tip kuće"
+    },
+    "price_label": "Ukupna kupoprodajna cijena",
+    "breakdown_label": "Raščlamba cijene",
+    "signature_note": "Potpisano u {place}, dana {date}. Potpisom u nastavku kupac i investitor potvrđuju da su pročitali, razumjeli i prihvaćaju uvjete iz ovog Ugovora, uključujući sve priloge."
+  },
+  "payment_receipt": {
+    "title": "Potvrda o uplati",
+    "intro": "Ova potvrda potvrđuje uplatu rate prema Ugovoru o kupoprodaji navedenom u nastavku.",
+    "headings": {
+      "spa_ref": "Broj ugovora",
+      "instalment": "Rata",
+      "milestone": "Prekretnica",
+      "amount_paid": "Uplaćeni iznos",
+      "payment_method": "Način plaćanja",
+      "payment_ref": "Poziv na broj",
+      "paid_at": "Plaćeno dana",
+      "outstanding": "Preostali dug"
+    },
+    "footer_note": "Ova potvrda generirana je automatski i vrijedi bez ručnog potpisa. Čuvajte je za svoju evidenciju."
+  },
+  "handover_certificate": {
+    "title": "Potvrda o primopredaji",
+    "intro": "Ova potvrda evidentira primopredaju nekretnine od investitora kupcu (kupcima). Kupac prihvaća jedinicu uz priloženu listu nedostataka i uvjete jamstva.",
+    "headings": {
+      "spa_ref": "Broj ugovora",
+      "completed_at": "Datum primopredaje",
+      "snag_count": "Otvoreni nedostaci",
+      "warranty_period": "Rok jamstva",
+      "keys_handed_over": "Predani ključevi",
+      "buyer_acceptance": "Prihvaćanje kupca",
+      "developer_declaration": "Izjava investitora"
+    },
+    "developer_declaration_text": "Investitor ovime potvrđuje da je nekretnina izgrađena u skladu s Ugovorom o kupoprodaji, da je kupcu dostavljena sva potrebna dokumentacija te da jamstva za konstrukciju i završne radove počinju teći na datum ove potvrde.",
+    "buyer_acceptance_text": "Kupac ovime prihvaća primopredaju nekretnine uz priloženu listu nedostataka. Kupac potvrđuje primitak ključeva, uputa i svte potrebne dokumentacije navedene u prilozima.",
+    "snag_note": "Investitor će otvorene nedostatke otkloniti u razumnom roku prema klauzuli o otklanjanju nedostataka iz Ugovora."
+  },
+  "warranty_certificate": {
+    "title": "Jamstvena potvrda",
+    "intro": "Ova potvrda određuje jamstvene obveze investitora za nekretninu predanu kupcu (kupcima) na datum naveden u nastavku.",
+    "headings": {
+      "spa_ref": "Broj ugovora",
+      "handover_date": "Datum primopredaje",
+      "structural": "Jamstvo za konstrukciju",
+      "finishing": "Jamstvo za završne radove",
+      "structural_period": "Rok jamstva za konstrukciju",
+      "finishing_period": "Rok jamstva za završne radove",
+      "warranty_expiry": "Istek jamstva",
+      "scope": "Opseg pokrića",
+      "exclusions": "Isključenja"
+    },
+    "structural_text": "Investitor jamči cjelovitost konstrukcije nekretnine, uključujući nosivu konstrukciju, temelje i hidroizolaciju, u razdoblju od {years} godina od datuma primopredaje.",
+    "finishing_text": "Investitor jamči završne radove, uključujući farbanje, armaturu, opremu i uređaje koje je ugradio investitor te manje kozmetičke stavke, u razdoblju od {years} godine (godina) od datuma primopredaje.",
+    "exclusions_text": "Jamstvo ne pokriva štetu nastalu nepravilnom uporabom, izmjenama koje su izvršili kupac ili treće osobe, uobičajeno trošenje, više silu te stavke pokrivene zasebnim jamstvima proizvođača.",
+    "claim_procedure": "Za podnošenje zahtjeva iz jamstva kupac mora investitoru dostaviti pisanu obavijest unutar jamstvenog roka, s opisom nedostatka i razumnim dokazima."
+  },
+  "noc": {
+    "title": "Potvrda o nepostojanju prigovora",
+    "subtitle": "Za preprodaju jedinice",
+    "intro": "Ovu Potvrdu o nepostojanju prigovora (NOC) investitor izdaje radi potvrde da kupac nema nepodmirenih obveza koje bi onemogućile preprodaju jedinice navedene u nastavku.",
+    "headings": {
+      "spa_ref": "Broj ugovora",
+      "requested_by": "Zatražio",
+      "issued_to": "Izdano",
+      "purpose": "Svrha",
+      "validity": "Valjanost",
+      "outstanding_balance": "Preostali dug",
+      "transfer_fee": "Naknada za prijenos"
+    },
+    "validity_text": "Ova potvrda vrijedi {days} dana od datuma izdavanja. Nakon tog razdoblja mora se zatražiti nova potvrda.",
+    "purpose_text": "Prodaja jedinice trećoj osobi kupcu, podložno standardnom postupku prijenosa investitora.",
+    "no_outstanding": "Sve rate do datuma ove potvrde u potpunosti su plaćene. Za ovaj ugovor nema evidentiranih nepodmirenih plaćanja.",
+    "developer_statement": "Investitor ovime daje suglasnost, uz standardnu naknadu za prijenos i postupak, da kupac prenese vlasništvo nad jedinicom na treću osobu. Ova potvrda ne odriče se nijednog prava investitora iz Ugovora o kupoprodaji."
+  },
+  "tenant_lease_agreement": {
+    "title": "Ugovor o najmu stana",
+    "intro": "Ovaj Ugovor o najmu sklapa se između najmodavca (investitora) i najmoprimca (najmoprimaca) navedenih u nastavku radi stambenog najma nekretnine ovdje opisane.",
+    "tenant_signature": "Potpis najmoprimca",
+    "headings": {
+      "lease_number": "Broj ugovora o najmu",
+      "tenant": "Najmoprimac",
+      "property": "Nekretnina",
+      "term": "Trajanje",
+      "monthly_rent": "Mjesečna najamnina",
+      "security_deposit": "Depozit",
+      "use_clause": "Uporaba nekretnine",
+      "maintenance": "Održavanje",
+      "termination": "Raskid"
+    },
+    "use_clause_text": "Najmoprimac nekretninu smije koristiti isključivo kao privatni stan za sebe i članove uže obitelji. Podnajam i poslovna uporaba zabranjeni su bez prethodne pisane suglasnosti najmodavca.",
+    "maintenance_text": "Najmodavac je odgovoran za održavanje konstrukcije i većih kućanskih uređaja koje je ugradio investitor. Najmoprimac je odgovoran za svakodnevnu čistoću, manje popravke ispod razumnog iznosa te za štetu nastalu nepravilnom uporabom.",
+    "termination_text": "Svaka stranka može raskinuti ovaj Ugovor na kraju trajanja pisanom obaviješću najmanje 30 dana prije isteka. Ako najmoprimac raskine ugovor prije vremena, gubi depozit, osim ako najmodavac pisano ne pristane drukčije."
+  },
+  "move_in_checklist": {
+    "title": "Popis stanja pri useljenju",
+    "intro": "Izvješće o stanju po prostorijama zabilježeno u trenutku primopredaje. Obje strane potpisuju da navedeno stanje odgovara jedinici pregledanoj pri inspekciji.",
+    "empty_rooms": "Nisu uneseni podaci o prostorijama.",
+    "acceptance_text": "Potpisom u nastavku obje strane potvrđuju da stanje po prostorijama zabilježeno iznad točno odražava stanje jedinice u trenutku pregleda.",
+    "headings": {
+      "spa_ref": "Broj ugovora",
+      "inspection_date": "Datum pregleda"
+    },
+    "columns": {
+      "item": "Stavka",
+      "condition": "Stanje",
+      "notes": "Napomene"
+    }
+  },
+  "mortgage_clearance_letter": {
+    "title": "Potvrda o nepostojanju tereta na nekretnini",
+    "intro": "Ovo pismo investitor izdaje na zahtjev kupca radi potvrde da jedinica navedena u nastavku nema nepodmirenih tereta, hipoteka, založnih prava ni opterećenja u korist investitora.",
+    "no_encumbrance_text": "Investitor ovime potvrđuje da je, na dan ovog pisma, gore navedena jedinica slobodna od svake hipoteke, tereta, založnog prava ili opterećenja u korist investitora ili bilo koje povezane osobe.",
+    "purpose_text": "Ovo pismo izdaje se isključivo za potrebe kreditnog zahtjeva kupca i eventualne dubinske analize koju traži banka navedena iznad. Ne odriče se nijednog prava investitora iz Ugovora o kupoprodaji.",
+    "headings": {
+      "bank": "Izdano banci",
+      "spa_ref": "Broj ugovora",
+      "unit": "Jedinica"
+    }
+  },
+  "title_deed_transfer_request": {
+    "title": "Zahtjev za upis prijenosa vlasništva",
+    "intro": "Službeni zahtjev zemljišnoknjižnom uredu za prijenos vlasništva nad jedinicom opisanom u nastavku s investitora na novog vlasnika (nove vlasnike) naveden u Ugovoru o kupoprodaji.",
+    "request_text": "Investitor ovime traži da zemljišnoknjižni ured upiše prijenos vlasništva nad gore navedenom jedinicom u korist navedenog novog vlasnika (novih vlasnika), u naznačenim udjelima, s učinkom od datuma ovog zahtjeva.",
+    "attachments_text": "Izvornik potpisanog Ugovora o kupoprodaji, potvrda o zadnjoj uplati, potvrda o primopredaji, osobne isprave svih novih vlasnika te potvrde o plaćenom porezu na promet nekretninama koje ured zahtijeva.",
+    "headings": {
+      "registry": "Zemljišnoknjižni ured",
+      "spa_ref": "Broj ugovora",
+      "unit": "Jedinica",
+      "new_owners": "Novi vlasnik (vlasnici)",
+      "request_body": "Zahtjev",
+      "attachments": "Prilozi"
+    }
+  },
+  "escrow_release_authorization": {
+    "title": "Nalog za oslobađanje sredstava s escrow računa",
+    "intro": "Uputa agentu escrow računa za oslobađanje sredstava s računa navedenog u nastavku investitoru, u vezi s opisanom prekretnicom.",
+    "instruction_text": "Investitor ovime ovlašćuje i nalaže agentu escrow računa da navedeni iznos oslobodi s navedenog escrow računa na poslovni račun investitora. Oslobađanje slijedi nakon potvrde prekretnice zabilježene u Ugovoru o kupoprodaji.",
+    "headings": {
+      "escrow_account": "Broj escrow računa",
+      "spa_ref": "Broj ugovora",
+      "unit": "Jedinica",
+      "amount_to_release": "Iznos za oslobađanje",
+      "release_reason": "Razlog oslobađanja"
+    }
+  },
+  "refund_authorization": {
+    "title": "Nalog za povrat",
+    "intro": "Ovim dokumentom odobrava se povrat iznosa navedenog u nastavku u vezi s otkazanom rezervacijom ili ugovorom o kupoprodaji naznačenim u nastavku.",
+    "authorisation_text": "Investitor ovime odobrava povrat navedenog iznosa putem navedenog načina plaćanja. Rok isplate slijedi standardne financijske postupke investitora i sva pravila o roku za odustajanje ili gubitku predujma koja se primjenjuju na izvornu transakciju.",
+    "headings": {
+      "reference": "Referenca",
+      "unit": "Jedinica",
+      "amount": "Iznos povrata",
+      "reason": "Razlog",
+      "payment_method": "Način plaćanja"
+    }
+  }
+}
