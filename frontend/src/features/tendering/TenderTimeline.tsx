@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Tender​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ timeline: issue, question cut-off, addenda, deadline moves and closing, plus the jurisdiction rules as data.
+// Tender timeline: issue, question cut-off, addenda, deadline moves and closing, plus the jurisdiction rules as data.
 
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';

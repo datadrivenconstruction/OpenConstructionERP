@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Addenda​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ and bidder Q&A panels: question lifecycle, anonymity of published answers, timeline, BOQ diff.
+// Addenda and bidder Q&A panels: question lifecycle, anonymity of published answers, timeline, BOQ diff.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen,

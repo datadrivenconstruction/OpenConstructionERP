@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 //
-// <PayrollPeriodsSection />​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: lock, reopen asks for a reason, a blocked export
+// <PayrollPeriodsSection />: lock, reopen asks for a reason, a blocked export
 // shows the findings the server sent.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

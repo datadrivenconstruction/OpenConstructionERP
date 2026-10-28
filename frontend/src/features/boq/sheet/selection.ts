@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Cell​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ addressing, range selection and keyboard movement for the BOQ sheet,
+ * Cell addressing, range selection and keyboard movement for the BOQ sheet,
  * kept free of React so every key path is unit tested.
  */
 

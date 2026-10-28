@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // Tests for <PortfolioCashFlowWidget>: per-currency blocks, negative projects
 // listed with links to the cost model, projects without a forecast.

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Telematics devices​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ per machine: create a device token (shown once) and revoke it.
+ * Telematics devices per machine: create a device token (shown once) and revoke it.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

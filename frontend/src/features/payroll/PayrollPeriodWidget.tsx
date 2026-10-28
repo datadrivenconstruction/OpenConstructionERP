@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Payroll​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ period widget: how many export periods are open, locked and
+ * Payroll period widget: how many export periods are open, locked and
  * exported, and the latest period's hours by pay type.
  */
 import { useTranslation } from 'react-i18next';

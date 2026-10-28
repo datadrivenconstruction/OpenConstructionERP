@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Sheet​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ logic: locale numbers, clipboard text, keys, fill, undo, find, formulas.
+ * Sheet logic: locale numbers, clipboard text, keys, fill, undo, find, formulas.
  */
 import { describe, expect, it } from 'vitest';
 import type { Position } from '../../api';

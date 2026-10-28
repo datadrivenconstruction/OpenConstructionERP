@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * API​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ helpers for Cost benchmarks.
+ * API helpers for Cost benchmarks.
  *
  * All endpoints are prefixed with /v1/cost_benchmarks/. Money and quantities
  * are returned as Decimal-as-string; the UI parses with Number(...) only for

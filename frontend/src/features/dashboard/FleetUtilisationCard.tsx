@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * FleetUtilisationCard​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ - dashboard widget: utilisation and idle share of the fleet
+ * FleetUtilisationCard - dashboard widget: utilisation and idle share of the fleet
  * over the last 14 days, hours split and CO2, from equipment telematics.
  */
 

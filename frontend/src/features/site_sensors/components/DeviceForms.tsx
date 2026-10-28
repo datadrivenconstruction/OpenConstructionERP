@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Device forms​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ for site sensors: add a device and add readings by hand.
+ * Device forms for site sensors: add a device and add readings by hand.
  */
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

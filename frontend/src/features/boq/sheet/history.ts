@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Undo​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ and redo for the BOQ sheet. One entry is one user action, however
+ * Undo and redo for the BOQ sheet. One entry is one user action, however
  * many cells it touched (a paste, a fill, a replace-all), so Ctrl+Z reverts
  * the whole action at once.
  */

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Cell​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ formulas in the sheet's quantity and rate cells, on top of the BOQ
+ * Cell formulas in the sheet's quantity and rate cells, on top of the BOQ
  * formula engine: the same $VARIABLES, pos("01.010").qty links and
  * section("Name").total. A quantity formula lives on metadata.formula, the
  * same key the grid uses; a rate formula on metadata.rate_formula.

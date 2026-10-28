@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
-// The optional​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ CO2 column of the bid comparison: off by default, and when
+// The optional CO2 column of the bid comparison: off by default, and when
 // switched on it shows tCO2e per line and in total from POST /carbon/bid-carbon.
 
 import { describe, it, expect, vi, afterEach } from 'vitest';

@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+/**
  * API helpers for life-cycle carbon (A4, A5, hotspots, budget, checks) and
  * company climate reporting (ESRS E1, SECR, US state templates).
  * Backed by backend/app/modules/carbon/lifecycle_router.py.

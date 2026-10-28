@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * CarbonBudgetCard​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ - dashboard widget: the active project's carbon
+ * CarbonBudgetCard - dashboard widget: the active project's carbon
  * budget against its target and the top hotspot by cost group. Self-hides
  * without a project, while loading, on error and when no budget is set.
  */

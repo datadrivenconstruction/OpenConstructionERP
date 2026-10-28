@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Site sensor​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ data helpers: grouping, online state and strength progress.
+ * Site sensor data helpers: grouping, online state and strength progress.
  * Pure functions with no React, so they are easy to test.
  */
 import type { SensorKind } from './api';

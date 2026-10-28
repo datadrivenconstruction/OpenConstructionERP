@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Telematics import​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ panel: upload an ISO 15143-3 (AEMP 2.0) XML/JSON fleet
+ * Telematics import panel: upload an ISO 15143-3 (AEMP 2.0) XML/JSON fleet
  * snapshot or a CSV and see what was accepted, unmatched and rejected.
  */
 import { useRef, useState } from 'react';

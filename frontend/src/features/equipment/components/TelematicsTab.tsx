@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Telematics​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ tab of the Equipment page: utilisation per machine for the last
+ * Telematics tab of the Equipment page: utilisation per machine for the last
  * 14 days, hire cost allocation, snapshot import, devices and rule results.
  */
 import { useMemo } from 'react';

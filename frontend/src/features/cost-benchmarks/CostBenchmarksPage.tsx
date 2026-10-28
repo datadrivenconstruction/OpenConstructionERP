@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Cost​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ benchmarks: compare an estimate against the cost per m2 (or per
+ * Cost benchmarks: compare an estimate against the cost per m2 (or per
  * functional unit) of completed projects, element by element. Bands come from
  * the company's own history; when it is too thin the server falls back to an
  * open reference set and says so.

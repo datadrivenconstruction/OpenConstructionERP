@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * API helpers for Site sensors​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
+ * API helpers for Site sensors.
  *
  * Backed by /api/v1/site_sensors/ - see backend/app/modules/site_sensors/router.py.
  * Decimals are strings; sensor values are floats.

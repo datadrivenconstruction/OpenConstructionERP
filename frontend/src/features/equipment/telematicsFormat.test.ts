@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Telematics formatting​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ helper tests.
+// Telematics formatting helper tests.
 import { describe, expect, it } from 'vitest';
 import { barWidth, hoursShares, idleTone, importKindFor, lastDaysWindow, toNumber } from './telematicsFormat';
 

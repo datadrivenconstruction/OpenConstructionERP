@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Maturity card​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ for one concrete sensor: maturity, estimated strength against
+ * Maturity card for one concrete sensor: maturity, estimated strength against
  * the target, hours to target and a small line chart of the maturity series.
  */
 import { useTranslation } from 'react-i18next';

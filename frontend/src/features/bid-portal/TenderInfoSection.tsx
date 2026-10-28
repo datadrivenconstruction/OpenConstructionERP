@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Addenda​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ and clarifications on the bidder price-entry page: acknowledge addenda, read published answers, ask a question.
+// Addenda and clarifications on the bidder price-entry page: acknowledge addenda, read published answers, ask a question.
 
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';

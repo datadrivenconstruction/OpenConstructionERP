@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Bidder​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ compliance chips: which bill revision a bid was priced on and which addenda it missed.
+// Bidder compliance chips: which bill revision a bid was priced on and which addenda it missed.
 
 export interface BidComplianceInput {
   boq_revision_no?: number | null;

@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Pure​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ helpers for the life-cycle and company report panels. No DOM, no i18next.
+// Pure helpers for the life-cycle and company report panels. No DOM, no i18next.
 
 import type { CarbonBudget, CarbonChecks, DataQuality } from './lifecycleApi';
 

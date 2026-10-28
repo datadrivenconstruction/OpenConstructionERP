@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Outline​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ levels for the sheet: group rows by the bill's hierarchy, collapse
+ * Outline levels for the sheet: group rows by the bill's hierarchy, collapse
  * and expand, and name each level the way the active standard does.
  */
 

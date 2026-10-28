@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Site sensor​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ helper tests.
+// Site sensor helper tests.
 import { describe, expect, it } from 'vitest';
 import { failedRules, ruleLight, ruleMessage, tallyRules, type RuleResult } from '@/shared/lib/ruleResults';
 import {

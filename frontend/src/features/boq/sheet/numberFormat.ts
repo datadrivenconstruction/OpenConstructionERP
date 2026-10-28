@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Locale​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ number separators for the BOQ sheet: read and write numbers the
+ * Locale number separators for the BOQ sheet: read and write numbers the
  * way the user's spreadsheet does (1.234,56 in de, 1,234.56 in en, 1 234,56 in fr).
  */
 

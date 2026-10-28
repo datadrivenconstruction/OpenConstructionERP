@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Tab​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠-separated clipboard text as spreadsheets write it: quoted cells may
+ * Tab-separated clipboard text as spreadsheets write it: quoted cells may
  * hold tabs, line breaks and doubled quotes; rows end in CRLF or LF.
  */
 

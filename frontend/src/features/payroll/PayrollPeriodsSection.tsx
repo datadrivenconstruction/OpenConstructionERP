@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Export​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ periods: group a project's timesheet hours into a pay period, apply a
+ * Export periods: group a project's timesheet hours into a pay period, apply a
  * country rule profile (overtime, night, weekend, holiday pay types), lock the
  * period and hand it to payroll as CSV / XLSX / JSON / LODAS. A locked period
  * freezes the timesheets inside its dates; reopening needs a reason that lands

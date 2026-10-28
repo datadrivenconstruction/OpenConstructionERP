@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Bid​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ compliance chips: stale revision, missing addenda, compliant, and silence without data.
+// Bid compliance chips: stale revision, missing addenda, compliant, and silence without data.
 
 import { describe, it, expect } from 'vitest';
 import { bidComplianceChips } from '../bidCompliance';

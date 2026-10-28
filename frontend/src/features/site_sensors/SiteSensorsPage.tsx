@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Site sensors​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ page for a project: devices by kind with last value and limit,
+ * Site sensors page for a project: devices by kind with last value and limit,
  * concrete maturity cards, alerts, formwork strikes and rule results.
  */
 import { useTranslation } from 'react-i18next';

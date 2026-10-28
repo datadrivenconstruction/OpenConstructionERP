@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Spreadsheet​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ editing mode for a bill of quantities: keyboard-first cells,
+ * Spreadsheet editing mode for a bill of quantities: keyboard-first cells,
  * range selection, clipboard to and from spreadsheets in the user's number
  * format, fill, undo across bulk edits, find and replace, cell formulas and
  * an outline by the bill's hierarchy. Rows are windowed and memoised, so an

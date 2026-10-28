@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * New​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ rows from a pasted block: map the block onto the sheet columns it was
+ * New rows from a pasted block: map the block onto the sheet columns it was
  * pasted under, read numbers in the user's locale and check every row before
  * anything is written, so the preview shows exactly what will be created.
  */

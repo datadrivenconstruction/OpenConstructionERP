@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * API helpers for equipment telematics​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠.
+ * API helpers for equipment telematics.
  *
  * Backed by /api/v1/equipment/telematics/ - see
  * backend/app/modules/equipment/telematics_router.py. Decimals are strings.

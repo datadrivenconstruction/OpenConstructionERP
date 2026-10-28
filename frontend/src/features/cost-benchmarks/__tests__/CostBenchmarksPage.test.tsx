@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 //
-// <CostBenchmarksPage />​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: renders a compare result, highlights the outlier
+// <CostBenchmarksPage />: renders a compare result, highlights the outlier
 // rows (below / above the band) and shows the low-confidence badge.
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';

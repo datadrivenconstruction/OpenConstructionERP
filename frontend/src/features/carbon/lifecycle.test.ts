@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Unit​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ tests for the pure life-cycle helpers.
+// Unit tests for the pure life-cycle helpers.
 import { describe, expect, it } from 'vitest';
 
 import { budgetTone, failingChecks, kgToTonnes, qualityTone } from './lifecycle';

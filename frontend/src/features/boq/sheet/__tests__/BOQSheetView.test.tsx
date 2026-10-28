@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Sheet​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ mode in the DOM: type to overwrite, Esc, F2, paste per locale, Ctrl+D,
+ * Sheet mode in the DOM: type to overwrite, Esc, F2, paste per locale, Ctrl+D,
  * undo, grid roles, and a 10,000-row bill that stays windowed and repaints
  * only the edited row.
  */

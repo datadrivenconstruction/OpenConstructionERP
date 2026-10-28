@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Rule results​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ list: a traffic-light tally plus one line per failed rule.
+ * Rule results list: a traffic-light tally plus one line per failed rule.
  * Shared by the equipment telematics tab and the site sensors page.
  */
 import clsx from 'clsx';

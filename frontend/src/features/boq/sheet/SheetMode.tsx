@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Sheet​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ mode wiring for the BOQ editor: the toggle, the write through the
+ * Sheet mode wiring for the BOQ editor: the toggle, the write through the
  * sheet-edit endpoint and the validation verdict it returns. On a touch
  * screen the toggle is not offered and the editor keeps its usual grid.
  */

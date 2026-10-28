@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-//​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
+//
 // Life-cycle tab (budget, checks, hotspots, A4 / A5 lines, EPD import) and the
 // company climate report tab (ESRS E1, SECR, US state) with audit-ready exports.
 

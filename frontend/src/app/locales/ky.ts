@@ -26897,7 +26897,7 @@ const resource = {
   "carbon.lc.budget_none": "Бюджет азырынча жок. «Максаттар» өтмөгүнөн «бюджет» түрүндөгү максат кошуңуз.",
   "carbon.lc.checks_title": "Көмүртек текшерүүлөрү",
   "carbon.lc.checks_ok": "Бардык текшерүүлөр ийгиликтүү өттү.",
-  "carbon.lc.hotspots_title": "Чыгым топтору боюнча чыгарынды очоктор​",
+  "carbon.lc.hotspots_title": "Чыгым топтору боюнча чыгарынды очоктор",
   "carbon.lc.classification": "Классификация",
   "carbon.lc.hotspots_empty": "BOQ позицияларына байланышкан көмүртек саптары азырынча жок",
   "carbon.lc.group": "Топ",

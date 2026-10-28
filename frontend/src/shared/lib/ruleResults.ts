@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Rule results​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ as the validation endpoints return them, and the pure helpers
+ * Rule results as the validation endpoints return them, and the pure helpers
  * that turn them into traffic lights and translatable sentences.
  */
 

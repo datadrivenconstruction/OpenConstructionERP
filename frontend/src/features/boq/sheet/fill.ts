@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Fill​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ handle and fill down. Two or more numeric seeds continue their step,
+ * Fill handle and fill down. Two or more numeric seeds continue their step,
  * an ordinal like 01.02.0010 counts on in its last segment keeping the padding,
  * anything else repeats the seeds in order.
  */

@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Find​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ and replace over the sheet, limited to the selected range when there
+ * Find and replace over the sheet, limited to the selected range when there
  * is one, else to the visible rows and columns.
  */
 

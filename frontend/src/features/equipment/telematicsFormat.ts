@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Telematics formatting​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ helpers: pure functions, no React, easy to test.
+ * Telematics formatting helpers: pure functions, no React, easy to test.
  * Backend Decimals arrive as strings; these turn them into display numbers.
  */
 

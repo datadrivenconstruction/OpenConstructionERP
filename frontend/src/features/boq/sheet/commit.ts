@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Cell​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ text to stored values: what a sheet cell shows, what it edits as, and
+ * Cell text to stored values: what a sheet cell shows, what it edits as, and
  * how a batch of text changes becomes one sheet-edit request. Changes are
  * applied in order to a working copy, so a formula reading a row changed in
  * the same paste sees the new value.

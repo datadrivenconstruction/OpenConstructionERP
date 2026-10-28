@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// Bidder​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ questions and answers: record, answer, publish to all bidders anonymously, promote to an addendum.
+// Bidder questions and answers: record, answer, publish to all bidders anonymously, promote to an addendum.
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';

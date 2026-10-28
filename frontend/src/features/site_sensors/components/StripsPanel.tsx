@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * Formwork strikes​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠: planned strikes per concrete sensor, the Strike action and a
+ * Formwork strikes: planned strikes per concrete sensor, the Strike action and a
  * warning when formwork was struck below the target strength.
  */
 import { useState } from 'react';
