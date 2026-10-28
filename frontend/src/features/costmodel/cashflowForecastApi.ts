@@ -116,26 +116,24 @@ function query(p: CashFlowScenarioParams = {}): string {
   return s ? `?${s}` : '';
 }
 
-const base = (projectId: string) => `/v1/costmodel/projects/${projectId}/5d/cashflow-forecast`;
-const PORTFOLIO = '/v1/costmodel/5d/cashflow-forecast/portfolio';
 
 export const cashflowForecastApi = {
   getProjectForecast: (projectId: string, p?: CashFlowScenarioParams) =>
-    apiGet<ProjectCashFlowForecast>(`${base(projectId)}/${query(p)}`),
+    apiGet<ProjectCashFlowForecast>(`/v1/costmodel/projects/${projectId}/5d/cashflow-forecast/${query(p)}`),
   getPortfolioForecast: (p?: CashFlowScenarioParams) =>
-    apiGet<PortfolioCashFlowForecast>(`${PORTFOLIO}/${query(p)}`),
+    apiGet<PortfolioCashFlowForecast>(`/v1/costmodel/5d/cashflow-forecast/portfolio/${query(p)}`),
   evaluate: (projectId: string, p?: CashFlowScenarioParams) =>
     apiPost<{ findings: ForecastFinding[]; published: number }>(
-      `${base(projectId)}/evaluate/${query(p)}`,
+      `/v1/costmodel/projects/${projectId}/5d/cashflow-forecast/evaluate/${query(p)}`,
       {},
     ),
   exportProject: (projectId: string, p: CashFlowScenarioParams | undefined, filename: string) =>
     downloadWithAuth(
-      documentExportUrl(`${base(projectId)}/export/`, exportParams(p)),
+      documentExportUrl(`/v1/costmodel/projects/${projectId}/5d/cashflow-forecast/export/`, exportParams(p)),
       filename,
     ),
   exportPortfolio: (p: CashFlowScenarioParams | undefined, filename: string) =>
-    downloadWithAuth(documentExportUrl(`${PORTFOLIO}/export/`, exportParams(p)), filename),
+    downloadWithAuth(documentExportUrl(`/v1/costmodel/5d/cashflow-forecast/portfolio/export/`, exportParams(p)), filename),
 };
 
 function exportParams(p: CashFlowScenarioParams = {}): Record<string, string | undefined> {

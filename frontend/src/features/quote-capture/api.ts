@@ -170,34 +170,33 @@ export interface PackageOption {
   name: string;
 }
 
-const BASE = '/v1/quote-capture';
 
 export const listPackages = (projectId: string) =>
   apiGet<PackageOption[]>(`/v1/tendering/packages/?project_id=${projectId}`);
 export const listQuotes = (projectId: string, packageId?: string) =>
   apiGet<QuoteSummary[]>(
-    `${BASE}/projects/${projectId}/quotes${packageId ? `?package_id=${packageId}` : ''}`,
+    `/v1/quote-capture/projects/${projectId}/quotes${packageId ? `?package_id=${packageId}` : ''}`,
   );
-export const getQuote = (id: string) => apiGet<Quote>(`${BASE}/quotes/${id}`);
-export const updateQuote = (id: string, body: unknown) => apiPatch<Quote>(`${BASE}/quotes/${id}`, body);
+export const getQuote = (id: string) => apiGet<Quote>(`/v1/quote-capture/quotes/${id}`);
+export const updateQuote = (id: string, body: unknown) => apiPatch<Quote>(`/v1/quote-capture/quotes/${id}`, body);
 export const updateLine = (id: string, lineId: string, body: unknown) =>
-  apiPatch<Quote>(`${BASE}/quotes/${id}/lines/${lineId}`, body);
+  apiPatch<Quote>(`/v1/quote-capture/quotes/${id}/lines/${lineId}`, body);
 export const confirmQuote = (id: string, target: ConfirmTarget, acceptWarnings: boolean) =>
-  apiPost<{ target_id: string; target: ConfirmTarget }>(`${BASE}/quotes/${id}/confirm`, {
+  apiPost<{ target_id: string; target: ConfirmTarget }>(`/v1/quote-capture/quotes/${id}/confirm`, {
     target,
     accept_warnings: acceptWarnings,
   });
-export const deleteQuote = (id: string) => apiDelete(`${BASE}/quotes/${id}`);
+export const deleteQuote = (id: string) => apiDelete(`/v1/quote-capture/quotes/${id}`);
 export const getLevelling = (packageId: string) =>
-  apiGet<Levelling>(`${BASE}/packages/${packageId}/levelling`);
+  apiGet<Levelling>(`/v1/quote-capture/packages/${packageId}/levelling`);
 export const createQuoteFromText = (body: { project_id: string; package_id?: string; text: string }) =>
-  apiPost<Quote>(`${BASE}/quotes/text`, body);
+  apiPost<Quote>(`/v1/quote-capture/quotes/text`, body);
 
 export async function uploadQuote(projectId: string, file: File, packageId?: string): Promise<Quote> {
   const body = new FormData();
   body.append('file', file);
   if (packageId) body.append('package_id', packageId);
-  const response = await fetchWithAuth(`${API_BASE}${BASE}/projects/${projectId}/quotes/upload`, {
+  const response = await fetchWithAuth(`${API_BASE}/v1/quote-capture/projects/${projectId}/quotes/upload`, {
     method: 'POST',
     body,
   });
@@ -207,7 +206,7 @@ export async function uploadQuote(projectId: string, file: File, packageId?: str
 }
 
 export async function fetchPageImage(quoteId: string, page: number): Promise<string> {
-  const response = await fetchWithAuth(`${API_BASE}${BASE}/quotes/${quoteId}/pages/${page}`);
+  const response = await fetchWithAuth(`${API_BASE}/v1/quote-capture/quotes/${quoteId}/pages/${page}`);
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   return URL.createObjectURL(await response.blob());
 }

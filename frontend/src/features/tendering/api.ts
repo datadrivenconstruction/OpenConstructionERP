@@ -200,17 +200,16 @@ export interface Clarification {
   days_before_closing: number | null;
 }
 
-const clarBase = (packageId: string) => `/v1/tendering/packages/${packageId}/clarifications/`;
 
 export function listClarifications(packageId: string): Promise<Clarification[]> {
-  return apiGet<Clarification[]>(clarBase(packageId));
+  return apiGet<Clarification[]>(`/v1/tendering/packages/${packageId}/clarifications/`);
 }
 
 export function createClarification(
   packageId: string,
   body: { question: string; recipient_id?: string; asked_by_email?: string },
 ): Promise<Clarification> {
-  return apiPost<Clarification>(clarBase(packageId), body);
+  return apiPost<Clarification>(`/v1/tendering/packages/${packageId}/clarifications/`, body);
 }
 
 export function answerClarification(
@@ -218,21 +217,21 @@ export function answerClarification(
   clarificationId: string,
   answer: string,
 ): Promise<Clarification> {
-  return apiPost<Clarification>(`${clarBase(packageId)}${clarificationId}/answer/`, { answer });
+  return apiPost<Clarification>(`/v1/tendering/packages/${packageId}/clarifications/${clarificationId}/answer/`, { answer });
 }
 
 export function publishClarification(
   packageId: string,
   clarificationId: string,
 ): Promise<Clarification> {
-  return apiPost<Clarification>(`${clarBase(packageId)}${clarificationId}/publish/`, {});
+  return apiPost<Clarification>(`/v1/tendering/packages/${packageId}/clarifications/${clarificationId}/publish/`, {});
 }
 
 export function promoteClarification(
   packageId: string,
   clarificationId: string,
 ): Promise<Addendum> {
-  return apiPost<Addendum>(`${clarBase(packageId)}${clarificationId}/promote/`, {});
+  return apiPost<Addendum>(`/v1/tendering/packages/${packageId}/clarifications/${clarificationId}/promote/`, {});
 }
 
 /* ── Timeline and jurisdiction rules ──────────────────────────────────── */

@@ -142,47 +142,46 @@ export interface SensorValidation {
   failed: number;
 }
 
-const BASE = '/v1/site_sensors';
 
 export const fetchSensorDevices = (projectId: string) =>
-  apiGet<SensorDevice[]>(`${BASE}/devices/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<SensorDevice[]>(`/v1/site_sensors/devices/?project_id=${encodeURIComponent(projectId)}`);
 
 export const createSensorDevice = (data: SensorDeviceInput) =>
-  apiPost<SensorDevice, SensorDeviceInput>(`${BASE}/devices/`, data);
+  apiPost<SensorDevice, SensorDeviceInput>(`/v1/site_sensors/devices/`, data);
 
 export const updateSensorDevice = (id: string, data: Partial<SensorDeviceInput> & { active?: boolean }) =>
-  apiPatch<SensorDevice, typeof data>(`${BASE}/devices/${id}`, data);
+  apiPatch<SensorDevice, typeof data>(`/v1/site_sensors/devices/${id}`, data);
 
 export const addSensorReadings = (id: string, readings: { recorded_at: string; value: number }[]) =>
   apiPost<{ accepted: number; exceedances: number }, { readings: typeof readings }>(
-    `${BASE}/devices/${id}/readings`,
+    `/v1/site_sensors/devices/${id}/readings`,
     { readings },
   );
 
-export const fetchMaturity = (id: string) => apiGet<Maturity>(`${BASE}/devices/${id}/maturity`);
+export const fetchMaturity = (id: string) => apiGet<Maturity>(`/v1/site_sensors/devices/${id}/maturity`);
 
 export const fetchSensorMixes = (projectId: string) =>
-  apiGet<SensorMix[]>(`${BASE}/mixes/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<SensorMix[]>(`/v1/site_sensors/mixes/?project_id=${encodeURIComponent(projectId)}`);
 
 export const fetchSensorAlerts = (projectId: string) =>
-  apiGet<SensorAlert[]>(`${BASE}/alerts/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<SensorAlert[]>(`/v1/site_sensors/alerts/?project_id=${encodeURIComponent(projectId)}`);
 
 export const acknowledgeAlert = (id: string, note: string) =>
-  apiPost<SensorAlert, { note: string }>(`${BASE}/alerts/${id}/acknowledge`, { note });
+  apiPost<SensorAlert, { note: string }>(`/v1/site_sensors/alerts/${id}/acknowledge`, { note });
 
 export const linkAlert = (id: string, links: AlertLinks) =>
-  apiPost<SensorAlert, AlertLinks>(`${BASE}/alerts/${id}/links`, links);
+  apiPost<SensorAlert, AlertLinks>(`/v1/site_sensors/alerts/${id}/links`, links);
 
 export const fetchStrips = (projectId: string) =>
-  apiGet<FormworkStrip[]>(`${BASE}/strips/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<FormworkStrip[]>(`/v1/site_sensors/strips/?project_id=${encodeURIComponent(projectId)}`);
 
 export const createStrip = (data: { device_id: string; element: string; target_strength_mpa?: string }) =>
-  apiPost<FormworkStrip, typeof data>(`${BASE}/strips/`, data);
+  apiPost<FormworkStrip, typeof data>(`/v1/site_sensors/strips/`, data);
 
-export const strikeStrip = (id: string) => apiPost<FormworkStrip, Record<string, never>>(`${BASE}/strips/${id}/strike`, {});
+export const strikeStrip = (id: string) => apiPost<FormworkStrip, Record<string, never>>(`/v1/site_sensors/strips/${id}/strike`, {});
 
 export const fetchSensorSummary = (projectId?: string) =>
-  apiGet<SensorSummary>(`${BASE}/summary/?${projectId ? `project_id=${encodeURIComponent(projectId)}` : ''}`);
+  apiGet<SensorSummary>(`/v1/site_sensors/summary/?${projectId ? `project_id=${encodeURIComponent(projectId)}` : ''}`);
 
 export const fetchSensorValidation = (projectId: string) =>
-  apiGet<SensorValidation>(`${BASE}/validation/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<SensorValidation>(`/v1/site_sensors/validation/?project_id=${encodeURIComponent(projectId)}`);

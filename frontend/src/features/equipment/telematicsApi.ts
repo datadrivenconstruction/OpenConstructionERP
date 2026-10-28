@@ -76,18 +76,17 @@ export interface TelematicsValidation {
   machines: number;
 }
 
-const BASE = '/v1/equipment/telematics';
 
 function projectQuery(projectId?: string): string {
   return projectId ? `&project_id=${encodeURIComponent(projectId)}` : '';
 }
 
 export function fetchUtilisation(dateFrom: string, dateTo: string, projectId?: string): Promise<Utilisation> {
-  return apiGet<Utilisation>(`${BASE}/utilisation/?date_from=${dateFrom}&date_to=${dateTo}${projectQuery(projectId)}`);
+  return apiGet<Utilisation>(`/v1/equipment/telematics/utilisation/?date_from=${dateFrom}&date_to=${dateTo}${projectQuery(projectId)}`);
 }
 
 export function allocateHire(dateFrom: string, dateTo: string, projectId?: string): Promise<AllocateResult> {
-  return apiPost<AllocateResult, { date_from: string; date_to: string; project_id?: string }>(`${BASE}/allocate/`, {
+  return apiPost<AllocateResult, { date_from: string; date_to: string; project_id?: string }>(`/v1/equipment/telematics/allocate/`, {
     date_from: dateFrom,
     date_to: dateTo,
     ...(projectId ? { project_id: projectId } : {}),
@@ -95,28 +94,28 @@ export function allocateHire(dateFrom: string, dateTo: string, projectId?: strin
 }
 
 export function fetchTelematicsValidation(projectId?: string): Promise<TelematicsValidation> {
-  return apiGet<TelematicsValidation>(`${BASE}/validation/?${projectQuery(projectId).slice(1)}`);
+  return apiGet<TelematicsValidation>(`/v1/equipment/telematics/validation/?${projectQuery(projectId).slice(1)}`);
 }
 
 export function fetchTelematicsDevices(): Promise<TelematicsDevice[]> {
-  return apiGet<TelematicsDevice[]>(`${BASE}/devices/`);
+  return apiGet<TelematicsDevice[]>(`/v1/equipment/telematics/devices/`);
 }
 
 export function createTelematicsDevice(equipmentId: string, label: string): Promise<TelematicsDevice> {
-  return apiPost<TelematicsDevice, { equipment_id: string; label: string }>(`${BASE}/devices/`, {
+  return apiPost<TelematicsDevice, { equipment_id: string; label: string }>(`/v1/equipment/telematics/devices/`, {
     equipment_id: equipmentId,
     label,
   });
 }
 
 export function revokeTelematicsDevice(deviceId: string): Promise<void> {
-  return apiPost<void>(`${BASE}/devices/${deviceId}/revoke`);
+  return apiPost<void>(`/v1/equipment/telematics/devices/${deviceId}/revoke`);
 }
 
 export async function importTelematics(kind: ImportKind, file: File): Promise<ImportResult> {
   const form = new FormData();
   form.append('file', file);
-  const res = await fetchWithAuth(`${API_BASE}${BASE}/import/${kind}/`, { method: 'POST', body: form });
+  const res = await fetchWithAuth(`${API_BASE}/v1/equipment/telematics/import/${kind}/`, { method: 'POST', body: form });
   const payload: unknown = await res.json().catch(() => null);
   if (!res.ok) throw new ApiError(res.status, res.statusText, payload);
   return payload as ImportResult;
