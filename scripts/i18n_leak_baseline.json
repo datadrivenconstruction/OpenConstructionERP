@@ -55,7 +55,6 @@
   "bim.quick_boq": {
     "en_value": "BOQ",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -85,7 +84,6 @@
   "bim.sel_boq": {
     "en_value": "BOQ",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -545,53 +543,6 @@
   "enterprise_workflows.flow_intro": {
     "en_value": "Set up multi-step approval routes for any entity type, then track every request from submission through to a final decision.",
     "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "enterprise_workflows.flow_related": {
-    "en_value": "Related:",
-    "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -637,7 +588,6 @@
   "enterprise_workflows.flow_step_1": {
     "en_value": "Define a workflow",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -699,7 +649,6 @@
   "enterprise_workflows.flow_step_2": {
     "en_value": "Activate and assign",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -745,7 +694,6 @@
   "enterprise_workflows.flow_step_2_desc": {
     "en_value": "Toggle the workflow to active so it starts receiving requests. Inactive workflows are paused without being deleted.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -791,7 +739,6 @@
   "enterprise_workflows.flow_step_3": {
     "en_value": "Review requests",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -837,7 +784,6 @@
   "enterprise_workflows.flow_step_3_desc": {
     "en_value": "When a record triggers an approval, it appears in the Approval Requests tab. Approve or reject each step, and the request advances or stops.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -883,7 +829,6 @@
   "enterprise_workflows.flow_step_4": {
     "en_value": "Track outcomes",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -929,7 +874,6 @@
   "enterprise_workflows.flow_step_4_desc": {
     "en_value": "Filter requests by status to see what is pending, approved or rejected. The audit trail records who decided and when.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -975,7 +919,6 @@
   "enterprise_workflows.flow_title": {
     "en_value": "How enterprise workflows work",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -1064,7 +1007,6 @@
   "enterprise_workflows.mod_contracts": {
     "en_value": "Contracts",
     "leaked_locales": [
-      "ar",
       "bn",
       "cs",
       "da",
@@ -1105,7 +1047,6 @@
   "enterprise_workflows.mod_timeline": {
     "en_value": "Timeline",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -2167,7 +2108,6 @@
   "hse.advanced.subtab_capa": {
     "en_value": "CAPAs",
     "leaked_locales": [
-      "ar",
       "bg",
       "cs",
       "da",
@@ -3272,53 +3212,6 @@
   "jobs.flow_intro": {
     "en_value": "Background jobs handle heavy work off the main thread so the interface stays responsive. This page is the single place to watch, cancel and inspect every queued task.",
     "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "jobs.flow_related": {
-    "en_value": "Related:",
-    "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3364,7 +3257,6 @@
   "jobs.flow_step_1": {
     "en_value": "Tasks are queued",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3410,7 +3302,6 @@
   "jobs.flow_step_1_desc": {
     "en_value": "Long-running operations such as PDF generation, data imports and cost recalculations are sent to the background queue instead of blocking the UI.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3456,7 +3347,6 @@
   "jobs.flow_step_2": {
     "en_value": "Monitor progress",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3502,7 +3392,6 @@
   "jobs.flow_step_2_desc": {
     "en_value": "Each job shows its kind, status and a live progress bar. Click a row to see timing, the Celery task ID, result payload or error details.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3548,7 +3437,6 @@
   "jobs.flow_step_3": {
     "en_value": "Cancel or export",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3594,7 +3482,6 @@
   "jobs.flow_step_3_desc": {
     "en_value": "Stuck or unnecessary jobs can be cancelled while they are pending or running. Finished jobs let you download the result or error payload as JSON.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3640,7 +3527,6 @@
   "jobs.flow_step_4": {
     "en_value": "Filter and page",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3686,7 +3572,6 @@
   "jobs.flow_step_4_desc": {
     "en_value": "Narrow the list by status or job kind, and search across the current page. Server-side pagination keeps the view responsive even with thousands of runs.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3732,7 +3617,6 @@
   "jobs.flow_title": {
     "en_value": "How background jobs work",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3821,7 +3705,6 @@
   "jobs.mod_schedule": {
     "en_value": "Schedule",
     "leaked_locales": [
-      "ar",
       "bn",
       "cs",
       "el",
@@ -3851,7 +3734,6 @@
   "jobs.mod_settings": {
     "en_value": "Settings",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -3897,7 +3779,6 @@
   "jobs.mod_timeline": {
     "en_value": "Timeline",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -4202,7 +4083,6 @@
   "modules.catalog.global_presence": {
     "en_value": "Global Presence",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -4242,34 +4122,6 @@
       "ur",
       "uz",
       "vi",
-      "zh"
-    ]
-  },
-  "nav.rfq_bidding": {
-    "en_value": "RFQ Bidding",
-    "leaked_locales": [
-      "ar",
-      "da",
-      "de",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "fil",
-      "fr",
-      "he",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "pt",
-      "pt-BR",
-      "sv",
-      "uk",
-      "ur",
       "zh"
     ]
   },
@@ -4706,53 +4558,6 @@
   "rebar_schedule.flow_intro": {
     "en_value": "Import bar-bending schedules from ABS files, review parsed shapes and weights, and produce cutting lists grouped by diameter for procurement.",
     "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rebar_schedule.flow_related": {
-    "en_value": "Related:",
-    "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -4798,7 +4603,6 @@
   "rebar_schedule.flow_step_1": {
     "en_value": "Upload an ABS file",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -4844,7 +4648,6 @@
   "rebar_schedule.flow_step_1_desc": {
     "en_value": "Drag and drop or browse for a .abs bar-bending schedule file. The parser reads bar marks, shape codes, dimensions and quantities.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -4890,7 +4693,6 @@
   "rebar_schedule.flow_step_2": {
     "en_value": "Review the preview",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -4936,7 +4738,6 @@
   "rebar_schedule.flow_step_2_desc": {
     "en_value": "Before committing, check the parsed shapes and any warnings. Fix problems in the source file and re-upload if needed.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -4982,7 +4783,6 @@
   "rebar_schedule.flow_step_3": {
     "en_value": "Inspect shapes and weights",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -5028,7 +4828,6 @@
   "rebar_schedule.flow_step_3_desc": {
     "en_value": "Open an import to see every bar mark with its shape, diameter, length, quantity and unit weight. Stat cards show totals at a glance.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -5074,7 +4873,6 @@
   "rebar_schedule.flow_step_4": {
     "en_value": "Generate cutting lists",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -5120,7 +4918,6 @@
   "rebar_schedule.flow_step_4_desc": {
     "en_value": "The cutting list groups bars by diameter and totals the count and weight, ready for ordering or export back to .abs.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -5166,7 +4963,6 @@
   "rebar_schedule.flow_title": {
     "en_value": "How rebar schedules work",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -5341,7 +5137,6 @@
   "rebar_schedule.mod_boq": {
     "en_value": "BOQ",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -5381,7 +5176,6 @@
   "rebar_schedule.mod_formwork": {
     "en_value": "Formwork",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -5427,7 +5221,6 @@
   "rebar_schedule.mod_quantities": {
     "en_value": "Quantities",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -6330,178 +6123,6 @@
       "zh"
     ]
   },
-  "rfq_bidding.award_action": {
-    "en_value": "Award to",
-    "leaked_locales": [
-      "bn",
-      "cs",
-      "da",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.award_error": {
-    "en_value": "Failed to award bid",
-    "leaked_locales": [
-      "bn",
-      "cs",
-      "da",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.award_success": {
-    "en_value": "Bid awarded successfully",
-    "leaked_locales": [
-      "bn",
-      "cs",
-      "da",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.awarded_on": {
-    "en_value": "Awarded on",
-    "leaked_locales": [
-      "bn",
-      "cs",
-      "da",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
   "rfq_bidding.bids_count": {
     "en_value": "{{count}} bids",
     "leaked_locales": [
@@ -7345,53 +6966,6 @@
   "rfq_bidding.flow_intro": {
     "en_value": "Create a request for quotation, send it to vendors, collect and compare their bids, then award the best offer - all in one place.",
     "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.flow_related": {
-    "en_value": "Related:",
-    "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7437,7 +7011,6 @@
   "rfq_bidding.flow_step_1": {
     "en_value": "Draft the RFQ",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7483,7 +7056,6 @@
   "rfq_bidding.flow_step_1_desc": {
     "en_value": "Describe the scope, set a due date and list the vendors you want to invite. The RFQ stays in draft until you are ready.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7529,7 +7101,6 @@
   "rfq_bidding.flow_step_2": {
     "en_value": "Issue to vendors",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7575,7 +7146,6 @@
   "rfq_bidding.flow_step_2_desc": {
     "en_value": "Issue the RFQ and vendors receive an invitation to bid. They submit pricing against each scope line before the due date.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7621,7 +7191,6 @@
   "rfq_bidding.flow_step_3": {
     "en_value": "Compare bids",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7667,7 +7236,6 @@
   "rfq_bidding.flow_step_3_desc": {
     "en_value": "Open the comparison matrix to see every vendor side by side, line by line. The lowest total is highlighted automatically.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7713,7 +7281,6 @@
   "rfq_bidding.flow_step_4": {
     "en_value": "Award and track",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7759,7 +7326,6 @@
   "rfq_bidding.flow_step_4_desc": {
     "en_value": "Select the winning bid, and the award is recorded with the vendor, amount and date. Past awards are available for audit on the Awards tab.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -7805,7 +7371,6 @@
   "rfq_bidding.flow_title": {
     "en_value": "How RFQ bidding works",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -8026,185 +7591,6 @@
       "bn",
       "cs",
       "da",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.mod_bid_management": {
-    "en_value": "Bid Management",
-    "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.mod_contracts": {
-    "en_value": "Contracts",
-    "leaked_locales": [
-      "ar",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "ko",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.mod_subcontractors": {
-    "en_value": "Subcontractors",
-    "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.mod_tendering": {
-    "en_value": "Tendering",
-    "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
       "el",
       "es",
       "es-CL",
@@ -8589,7 +7975,6 @@
   "rfq_bidding.page_title": {
     "en_value": "RFQ Bidding",
     "leaked_locales": [
-      "ar",
       "da",
       "de",
       "es",
@@ -9122,92 +8507,6 @@
   },
   "rfq_bidding.tab_list": {
     "en_value": "RFQ List",
-    "leaked_locales": [
-      "bn",
-      "cs",
-      "da",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.tabs_label": {
-    "en_value": "RFQ Bidding tabs",
-    "leaked_locales": [
-      "bn",
-      "cs",
-      "da",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "rfq_bidding.title": {
-    "en_value": "RFQ Bidding",
     "leaked_locales": [
       "bn",
       "cs",
@@ -10772,7 +10071,6 @@
   "settings.governance_validation": {
     "en_value": "Validation Rules",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -10876,53 +10174,6 @@
   "timeline.flow_intro": {
     "en_value": "A chronological feed of every meaningful event on the project, collected from all modules so you can see what happened, who did it, and when.",
     "leaked_locales": [
-      "ar",
-      "bg",
-      "bn",
-      "cs",
-      "da",
-      "de",
-      "el",
-      "es",
-      "es-CL",
-      "es-CO",
-      "es-MX",
-      "et",
-      "fa",
-      "fi",
-      "fil",
-      "fr",
-      "he",
-      "hi",
-      "hr",
-      "hu",
-      "id",
-      "it",
-      "ja",
-      "kk",
-      "ko",
-      "ky",
-      "mn",
-      "nl",
-      "no",
-      "pl",
-      "pt",
-      "pt-BR",
-      "ro",
-      "sv",
-      "th",
-      "tr",
-      "uk",
-      "ur",
-      "uz",
-      "vi",
-      "zh"
-    ]
-  },
-  "timeline.flow_related": {
-    "en_value": "Related:",
-    "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -10968,7 +10219,6 @@
   "timeline.flow_step_1": {
     "en_value": "Events are recorded",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11014,7 +10264,6 @@
   "timeline.flow_step_1_desc": {
     "en_value": "Every create, update, status change and deletion across all modules is logged automatically with a timestamp, actor and affected entity.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11060,7 +10309,6 @@
   "timeline.flow_step_2": {
     "en_value": "Browse the feed",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11106,7 +10354,6 @@
   "timeline.flow_step_2_desc": {
     "en_value": "Events appear in reverse chronological order. Click any row to expand its details, including status transitions, metadata and a link to the record.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11152,7 +10399,6 @@
   "timeline.flow_step_3": {
     "en_value": "Filter and search",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11198,7 +10444,6 @@
   "timeline.flow_step_3_desc": {
     "en_value": "Narrow the feed by module, action type or date range. The search bar also matches entity types and reasons across the current page.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11244,7 +10489,6 @@
   "timeline.flow_step_4": {
     "en_value": "Export for audit",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11290,7 +10534,6 @@
   "timeline.flow_step_4_desc": {
     "en_value": "Download the current view as CSV for offline review or compliance reporting. The export includes all visible columns and respects active filters.",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11336,8 +10579,6 @@
   "timeline.flow_title": {
     "en_value": "How the project timeline works",
     "leaked_locales": [
-      "ar",
-      "bg",
       "bn",
       "cs",
       "da",
@@ -11382,7 +10623,6 @@
   "timeline.go_to_record": {
     "en_value": "Go to record",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11428,7 +10668,6 @@
   "timeline.mod_correspondence": {
     "en_value": "Correspondence",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11468,7 +10707,6 @@
   "timeline.mod_deadlines": {
     "en_value": "Deadlines",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
@@ -11514,7 +10752,6 @@
   "timeline.mod_jobs": {
     "en_value": "Background Jobs",
     "leaked_locales": [
-      "ar",
       "bg",
       "bn",
       "cs",
