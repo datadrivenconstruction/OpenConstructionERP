@@ -6,7 +6,7 @@
  * Backed by backend/app/modules/carbon/lifecycle_router.py.
  */
 
-import { apiGet, apiPost, downloadWithAuth, fetchWithAuth, getErrorMessage } from '@/shared/lib/api';
+import { apiGet, apiPost, downloadWithAuth, fetchWithAuth, getErrorMessage, type Page } from '@/shared/lib/api';
 
 export type DataQuality = 'measured' | 'calculated' | 'estimated';
 export type ClassificationSystem = 'din276' | 'nrm' | 'masterformat';
@@ -102,7 +102,7 @@ export async function importEpdFile(file: File, materialClass = 'other'): Promis
 }
 
 export function listCompanyReports(): Promise<CompanyReport[]> {
-  return apiGet<CompanyReport[]>('/v1/carbon/company/reports');
+  return apiGet<Page<CompanyReport>>('/v1/carbon/company/reports?limit=500').then((p) => p.items);
 }
 
 export function generateCompanyReport(body: {

@@ -150,6 +150,20 @@ class ReportOut(BaseModel):
     audit: dict[str, Any]
 
 
+class ActivityListResponse(BaseModel):
+    items: list[ActivityOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
+class ReportListResponse(BaseModel):
+    items: list[ReportOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 # ── EPD ──────────────────────────────────────────────────────────────────
 
 
@@ -350,15 +364,20 @@ async def _admin(session: Any, user_id: str) -> tuple[set[uuid.UUID] | None, boo
     return ids, ids is None
 
 
-@router.get("/company/activities", response_model=list[ActivityOut])
+@router.get("/company/activities", response_model=ActivityListResponse)
 async def list_activities(
     user_id: CurrentUserId,
     session: SessionDep,
     year: int = Query(..., ge=1990, le=2100),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
     svc: CarbonLifecycleService = Depends(_svc),
-) -> Any:
+) -> ActivityListResponse:
     _, admin = await _admin(session, user_id)
-    return await svc.list_activities(year, user_id, admin)
+    rows, total = await svc.page_activities(year, user_id, admin, offset, limit)
+    return ActivityListResponse(
+        items=[ActivityOut.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post("/company/activities", response_model=ActivityOut, status_code=201)
@@ -399,14 +418,19 @@ async def templates(user_id: CurrentUserId) -> dict[str, Any]:
     return csrd.report_templates()
 
 
-@router.get("/company/reports", response_model=list[ReportOut])
+@router.get("/company/reports", response_model=ReportListResponse)
 async def list_reports(
     user_id: CurrentUserId,
     session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
     svc: CarbonLifecycleService = Depends(_svc),
-) -> Any:
+) -> ReportListResponse:
     _, admin = await _admin(session, user_id)
-    return await svc.list_company_reports(user_id, admin)
+    rows, total = await svc.list_company_reports(user_id, admin, offset, limit)
+    return ReportListResponse(
+        items=[ReportOut.model_validate(r) for r in rows], total=total, offset=offset, limit=limit
+    )
 
 
 @router.post("/company/reports", response_model=ReportOut, status_code=201)
@@ -452,6 +476,9 @@ async def export_report(
         body, media, ext = csrd.to_pdf(data), "application/pdf", "pdf"
     else:
         body, media, ext = csrd.to_xbrl_csv(data).encode("utf-8"), "text/csv", "csv"
+    # The report templates are written in English only, so the bytes say so.
     return Response(
-        content=body, media_type=media, headers={"Content-Disposition": f'attachment; filename="{stem}.{ext}"'}
+        content=body,
+        media_type=media,
+        headers={"Content-Disposition": f'attachment; filename="{stem}.{ext}"', "Content-Language": "en"},
     )

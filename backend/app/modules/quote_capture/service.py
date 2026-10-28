@@ -255,8 +255,10 @@ class QuoteCaptureService:
             raise _not_found()
         return row
 
-    async def list(self, project_id: uuid.UUID, package_id: uuid.UUID | None = None) -> list[CapturedQuote]:
-        return await self.repo.list(project_id, package_id=package_id)
+    async def list(
+        self, project_id: uuid.UUID, package_id: uuid.UUID | None = None, offset: int = 0, limit: int = 50
+    ) -> tuple[list[CapturedQuote], int]:
+        return await self.repo.page(project_id, package_id=package_id, offset=offset, limit=limit)
 
     async def snapshot(self, row: CapturedQuote) -> dict[str, Any]:
         project = await self._project(row.project_id)

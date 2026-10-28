@@ -161,6 +161,20 @@ CANNOT_TRUNCATE: frozenset[str] = frozenset(
         # picker has to offer every one, so a short answer would make a
         # supported language impossible to choose.
         "meetings/audio_router.py::minutes_pdf_languages",
+        # The fixed taxonomy of payroll rule profiles compiled into the source.
+        # The route returns every profile with no query, so a short answer
+        # would hide a profile the payroll period cannot then be run under.
+        "payroll/period_router.py::rule_profiles",
+        # A ranking over the whole carbon inventory. Each hotspot share is only
+        # right against the full set, so a page of it would show wrong shares
+        # and a missing top contributor, a correctness bug rather than a page.
+        "carbon/lifecycle_router.py::hotspots",
+        # The saved-view picker of one scope. The user chooses among every view
+        # they may use, so a short answer would hide a view that exists.
+        "list_views/router.py::list_views",
+        # The EPD candidates of one catalogue item, all shown so the user picks
+        # one. A page would hide a candidate the user may need to choose.
+        "carbon/lifecycle_router.py::epds_for_item",
     }
 )
 

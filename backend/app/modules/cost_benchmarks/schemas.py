@@ -78,6 +78,13 @@ class RecordOut(BaseModel):
         return None if v is None else str(v)
 
 
+class RecordListResponse(BaseModel):
+    items: list[RecordOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class CompareRequest(BaseModel):
     estimate_id: uuid.UUID | None = None
     project_id: uuid.UUID | None = None

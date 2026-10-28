@@ -1032,3 +1032,10 @@ class X84ImportPreview(BaseModel):
     missing_ordinals: list[str] = Field(default_factory=list)
     total_amount: str = "0.00"
     blocking: bool = False
+
+
+class ClarificationListResponse(BaseModel):
+    items: list[ClarificationResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50

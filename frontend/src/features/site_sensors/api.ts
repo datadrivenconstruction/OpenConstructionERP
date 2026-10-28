@@ -7,7 +7,7 @@
  * Decimals are strings; sensor values are floats.
  */
 
-import { apiGet, apiPatch, apiPost } from '@/shared/lib/api';
+import { apiGet, apiPatch, apiPost, type Page } from '@/shared/lib/api';
 import type { RuleResult } from '@/shared/lib/ruleResults';
 
 export type SensorKind =
@@ -144,7 +144,7 @@ export interface SensorValidation {
 
 
 export const fetchSensorDevices = (projectId: string) =>
-  apiGet<SensorDevice[]>(`/v1/site_sensors/devices/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<Page<SensorDevice>>(`/v1/site_sensors/devices/?project_id=${encodeURIComponent(projectId)}&limit=500`).then((p) => p.items);
 
 export const createSensorDevice = (data: SensorDeviceInput) =>
   apiPost<SensorDevice, SensorDeviceInput>(`/v1/site_sensors/devices/`, data);
@@ -161,10 +161,10 @@ export const addSensorReadings = (id: string, readings: { recorded_at: string; v
 export const fetchMaturity = (id: string) => apiGet<Maturity>(`/v1/site_sensors/devices/${id}/maturity`);
 
 export const fetchSensorMixes = (projectId: string) =>
-  apiGet<SensorMix[]>(`/v1/site_sensors/mixes/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<Page<SensorMix>>(`/v1/site_sensors/mixes/?project_id=${encodeURIComponent(projectId)}&limit=500`).then((p) => p.items);
 
 export const fetchSensorAlerts = (projectId: string) =>
-  apiGet<SensorAlert[]>(`/v1/site_sensors/alerts/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<Page<SensorAlert>>(`/v1/site_sensors/alerts/?project_id=${encodeURIComponent(projectId)}&limit=500`).then((p) => p.items);
 
 export const acknowledgeAlert = (id: string, note: string) =>
   apiPost<SensorAlert, { note: string }>(`/v1/site_sensors/alerts/${id}/acknowledge`, { note });
@@ -173,7 +173,7 @@ export const linkAlert = (id: string, links: AlertLinks) =>
   apiPost<SensorAlert, AlertLinks>(`/v1/site_sensors/alerts/${id}/links`, links);
 
 export const fetchStrips = (projectId: string) =>
-  apiGet<FormworkStrip[]>(`/v1/site_sensors/strips/?project_id=${encodeURIComponent(projectId)}`);
+  apiGet<Page<FormworkStrip>>(`/v1/site_sensors/strips/?project_id=${encodeURIComponent(projectId)}&limit=500`).then((p) => p.items);
 
 export const createStrip = (data: { device_id: string; element: string; target_strength_mpa?: string }) =>
   apiPost<FormworkStrip, typeof data>(`/v1/site_sensors/strips/`, data);

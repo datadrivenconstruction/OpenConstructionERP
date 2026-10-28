@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import flag_modified
 
@@ -30,6 +30,16 @@ class QuoteRepository:
             stmt = stmt.where(CapturedQuote.status != "rejected")
         stmt = stmt.order_by(CapturedQuote.created_at.desc())
         return list((await self.session.execute(stmt)).scalars().all())
+
+    async def page(
+        self, project_id: uuid.UUID, *, package_id: uuid.UUID | None = None, offset: int = 0, limit: int = 50
+    ) -> tuple[list[CapturedQuote], int]:
+        base = select(CapturedQuote).where(CapturedQuote.project_id == project_id)
+        if package_id is not None:
+            base = base.where(CapturedQuote.package_id == package_id)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        stmt = base.order_by(CapturedQuote.created_at.desc(), CapturedQuote.id).offset(offset).limit(limit)
+        return list((await self.session.execute(stmt)).scalars().all()), total
 
     async def list_for_package(self, package_id: uuid.UUID) -> list[CapturedQuote]:
         stmt = (

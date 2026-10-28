@@ -78,6 +78,13 @@ class QuoteSummaryOut(BaseModel):
     open_findings: int = 0
 
 
+class QuoteCaptureListResponse(BaseModel):
+    items: list[QuoteSummaryOut]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class QuoteOut(QuoteSummaryOut):
     boq_id: uuid.UUID | None
     locale: str

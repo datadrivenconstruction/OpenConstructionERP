@@ -93,6 +93,13 @@ class WipPeriodResponse(_Figures):
     created_at: datetime | None = None
 
 
+class WipPeriodListResponse(BaseModel):
+    items: list[WipPeriodResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class ClosePeriodRequest(BaseModel):
     period: str = Field(pattern=_PERIOD)
     notes: str | None = Field(default=None, max_length=2000)

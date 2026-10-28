@@ -16,6 +16,7 @@ import {
   fetchWithAuth,
   getAuthToken,
   triggerDownload,
+  type Page,
 } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -402,10 +403,10 @@ export async function fetchPeriodDashboard(projectId: string): Promise<PeriodDas
 
 export async function fetchPeriods(projectId: string): Promise<PeriodHeader[]> {
   if (!projectId) return [];
-  const res = await apiGet<PeriodHeader[]>(
-    `/v1/payroll/projects/${encodeURIComponent(projectId)}/periods/`,
+  const res = await apiGet<Page<PeriodHeader>>(
+    `/v1/payroll/projects/${encodeURIComponent(projectId)}/periods/?limit=500`,
   );
-  return Array.isArray(res) ? res : [];
+  return Array.isArray(res?.items) ? res.items : [];
 }
 
 export async function fetchPeriod(periodId: string): Promise<PeriodDetail> {

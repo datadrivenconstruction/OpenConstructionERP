@@ -34,6 +34,16 @@ class SiteSensorsRepository:
             stmt = stmt.where(SensorDevice.kind == kind)
         return list((await self.session.execute(stmt)).scalars())
 
+    async def devices_page(
+        self, project_id: uuid.UUID, kind: str | None, offset: int, limit: int
+    ) -> tuple[list[SensorDevice], int]:
+        base = select(SensorDevice).where(SensorDevice.project_id == project_id)
+        if kind:
+            base = base.where(SensorDevice.kind == kind)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(SensorDevice.code, SensorDevice.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars()), total
+
     async def device_by_token_hash(self, token_hash: str) -> SensorDevice | None:
         stmt = select(SensorDevice).where(SensorDevice.token_hash == token_hash)
         return (await self.session.execute(stmt)).scalar_one_or_none()
@@ -120,6 +130,16 @@ class SiteSensorsRepository:
     async def any_alert(self, device_id: uuid.UUID, kind: str) -> SensorAlert | None:
         stmt = select(SensorAlert).where(SensorAlert.device_id == device_id, SensorAlert.kind == kind).limit(1)
         return (await self.session.execute(stmt)).scalar_one_or_none()
+
+    async def alerts_page(
+        self, project_id: uuid.UUID, status: str | None, offset: int, limit: int
+    ) -> tuple[list[SensorAlert], int]:
+        base = select(SensorAlert).where(SensorAlert.project_id == project_id)
+        if status:
+            base = base.where(SensorAlert.status == status)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(SensorAlert.raised_at.desc(), SensorAlert.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars()), total
 
     async def alerts(
         self, project_id: uuid.UUID | None = None, status: str | None = None, limit: int = 200

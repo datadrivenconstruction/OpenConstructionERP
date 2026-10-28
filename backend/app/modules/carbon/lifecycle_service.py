@@ -16,7 +16,7 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import extract, select
+from sqlalchemy import extract, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -509,6 +509,16 @@ class CarbonLifecycleService:
             stmt = stmt.where(CarbonCompanyActivity.created_by == user_id)
         return list((await self.session.execute(stmt.order_by(CarbonCompanyActivity.created_at))).scalars())
 
+    async def page_activities(
+        self, year: int, user_id: str | None, admin: bool, offset: int, limit: int
+    ) -> tuple[list[CarbonCompanyActivity], int]:
+        stmt = select(CarbonCompanyActivity).where(CarbonCompanyActivity.reporting_year == year)
+        if not admin:
+            stmt = stmt.where(CarbonCompanyActivity.created_by == user_id)
+        total = (await self.session.execute(select(func.count()).select_from(stmt.subquery()))).scalar_one()
+        page = stmt.order_by(CarbonCompanyActivity.created_at, CarbonCompanyActivity.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars()), total
+
     async def delete_activity(self, activity_id: uuid.UUID, user_id: str | None, admin: bool) -> None:
         row = await self.session.get(CarbonCompanyActivity, activity_id)
         if row is None or (not admin and row.created_by != user_id):
@@ -672,11 +682,17 @@ class CarbonLifecycleService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Report not found")
         return rep
 
-    async def list_company_reports(self, user_id: str | None, admin: bool) -> list[CarbonCompanyReport]:
-        stmt = select(CarbonCompanyReport).order_by(CarbonCompanyReport.reporting_year.desc())
+    async def list_company_reports(
+        self, user_id: str | None, admin: bool, offset: int = 0, limit: int = 50
+    ) -> tuple[list[CarbonCompanyReport], int]:
+        base = select(CarbonCompanyReport)
         if not admin:
-            stmt = stmt.where(CarbonCompanyReport.created_by == user_id)
-        return list((await self.session.execute(stmt)).scalars())
+            base = base.where(CarbonCompanyReport.created_by == user_id)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = (
+            base.order_by(CarbonCompanyReport.reporting_year.desc(), CarbonCompanyReport.id).offset(offset).limit(limit)
+        )
+        return list((await self.session.execute(page)).scalars()), total
 
 
 __all__ = ["BUDGET_TARGET_TYPE", "CarbonLifecycleService"]

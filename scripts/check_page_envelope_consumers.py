@@ -271,6 +271,17 @@ MIGRATED_ENDPOINTS: dict[str, str] = {
     # listed rather than listed at zero call sites.
     "/v1/subcontractors/unlinked-twins/": "subcontract twin pairs",
     "/v1/schedule/scheduling-profiles/": "scheduling profiles",
+    "/v1/carbon/company/reports": "carbon company reports",
+    "/v1/cost_benchmarks/records/": "cost benchmark records",
+    "/v1/equipment/telematics/devices/": "telematics devices",
+    "/v1/payroll/projects/{}/periods/": "payroll periods",
+    "/v1/quote-capture/projects/{}/quotes": "captured quotes",
+    "/v1/site_sensors/devices/": "site sensor devices",
+    "/v1/site_sensors/mixes/": "site sensor mixes",
+    "/v1/site_sensors/alerts/": "site sensor alerts",
+    "/v1/site_sensors/strips/": "formwork strips",
+    "/v1/tendering/packages/{}/clarifications/": "tender clarifications",
+    "/v1/wip-report/projects/{}/periods": "wip closed periods",
 }
 
 # Left bare on purpose in wave 4: `/v1/documents/photos/recent/`. It is a

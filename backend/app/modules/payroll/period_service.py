@@ -22,7 +22,7 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
-from sqlalchemy import and_, delete, select
+from sqlalchemy import and_, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.modules.payroll import pay_rules, period_exports
@@ -89,13 +89,13 @@ class PayrollPeriodService:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Payroll period not found")
         return row
 
-    async def list_for_project(self, project_id: uuid.UUID) -> list[PayrollPeriod]:
-        stmt = (
-            select(PayrollPeriod)
-            .where(PayrollPeriod.project_id == project_id)
-            .order_by(PayrollPeriod.period_start.desc())
-        )
-        return list((await self.session.execute(stmt)).scalars().all())
+    async def list_for_project(
+        self, project_id: uuid.UUID, offset: int = 0, limit: int = 50
+    ) -> tuple[list[PayrollPeriod], int]:
+        base = select(PayrollPeriod).where(PayrollPeriod.project_id == project_id)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(PayrollPeriod.period_start.desc(), PayrollPeriod.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars().all()), total
 
     async def lines(self, period_id: uuid.UUID) -> list[PayrollPeriodLine]:
         stmt = (

@@ -180,7 +180,7 @@ async def test_demo_period_is_locked_exported_and_records_a_blocked_edit(session
     assert counts["periods"] == 1
     assert counts["blocked_edits"] == 1
     svc = PayrollPeriodService(session)
-    period = (await svc.list_for_project(project_id))[0]
+    period = (await svc.list_for_project(project_id))[0][0]
     assert period.status == "exported"
     assert period.posted_ref
     types = {ln.pay_type for ln in await svc.lines(period.id)}

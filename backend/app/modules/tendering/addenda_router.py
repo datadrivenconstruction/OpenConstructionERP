@@ -12,7 +12,7 @@ from __future__ import annotations
 import uuid
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from pydantic import BaseModel, Field
 
 from app.core.validation.engine import ValidationContext, rule_registry
@@ -24,6 +24,7 @@ from app.modules.tendering.schemas import (
     AddendumResponse,
     ClarificationAnswer,
     ClarificationCreate,
+    ClarificationListResponse,
     ClarificationResponse,
     PublicClarification,
     TenderTimelineResponse,
@@ -68,16 +69,19 @@ def _out(package: Any, row: Any) -> ClarificationResponse:
 # ── Clarifications (buyer) ─────────────────────────────────────────────────
 
 
-@router.get("/packages/{package_id}/clarifications/", response_model=list[ClarificationResponse])
+@router.get("/packages/{package_id}/clarifications/", response_model=ClarificationListResponse)
 async def list_clarifications(
     package_id: uuid.UUID,
     user_id: CurrentUserId,
     session: SessionDep,
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
     _perm: None = Depends(RequirePermission("tendering.clarification.read")),
-) -> list[ClarificationResponse]:
-    """Every question on the package, the asker included (buyer view)."""
+) -> ClarificationListResponse:
+    """Questions on the package, the asker included (buyer view)."""
     package = await _package(session, package_id, user_id)
-    return [_out(package, r) for r in await AddendaService(session).list_clarifications(package_id)]
+    rows, total = await AddendaService(session).page_clarifications(package_id, offset, limit)
+    return ClarificationListResponse(items=[_out(package, r) for r in rows], total=total, offset=offset, limit=limit)
 
 
 @router.post("/packages/{package_id}/clarifications/", response_model=ClarificationResponse, status_code=201)

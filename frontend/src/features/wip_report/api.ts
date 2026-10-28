@@ -10,7 +10,7 @@
  */
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiGet, apiPost, apiPut, apiDelete, downloadWithAuth } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPut, apiDelete, downloadWithAuth, type Page } from '@/shared/lib/api';
 
 export interface WipRow {
   project_id: string;
@@ -263,7 +263,7 @@ export function fetchLive(projectId: string, asOf?: string): Promise<WipRow> {
 }
 
 export function fetchPeriods(projectId: string): Promise<WipPeriod[]> {
-  return apiGet<WipPeriod[]>(`/v1/wip-report/projects/${projectId}/periods`);
+  return apiGet<Page<WipPeriod>>(`/v1/wip-report/projects/${projectId}/periods?limit=500`).then((p) => p.items);
 }
 
 export function closePeriod(projectId: string, body: { period: string; notes?: string }): Promise<WipPeriod> {

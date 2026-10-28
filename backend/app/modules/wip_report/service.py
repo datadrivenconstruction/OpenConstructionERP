@@ -227,6 +227,12 @@ class WipReportService:
         stmt = select(WipPeriod).where(WipPeriod.project_id == project_id).order_by(WipPeriod.period.desc())
         return list((await self.session.execute(stmt)).scalars().all())
 
+    async def page_periods(self, project_id: uuid.UUID, offset: int, limit: int) -> tuple[list[WipPeriod], int]:
+        base = select(WipPeriod).where(WipPeriod.project_id == project_id)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(WipPeriod.period.desc()).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars().all()), total
+
     async def close_period(
         self, project_id: uuid.UUID, period: str, user_id: str | None = None, notes: str | None = None
     ) -> WipPeriod:

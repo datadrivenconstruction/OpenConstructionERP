@@ -19,7 +19,7 @@ from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import and_, or_, select
+from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -96,11 +96,15 @@ class TelematicsService:
         await self.session.flush()
         return device, token
 
-    async def list_devices(self, equipment_id: uuid.UUID | None = None) -> list[TelematicsDevice]:
-        stmt = select(TelematicsDevice).order_by(TelematicsDevice.created_at)
+    async def list_devices(
+        self, equipment_id: uuid.UUID | None = None, offset: int = 0, limit: int = 50
+    ) -> tuple[list[TelematicsDevice], int]:
+        base = select(TelematicsDevice)
         if equipment_id is not None:
-            stmt = stmt.where(TelematicsDevice.equipment_id == equipment_id)
-        return list((await self.session.execute(stmt)).scalars())
+            base = base.where(TelematicsDevice.equipment_id == equipment_id)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(TelematicsDevice.created_at, TelematicsDevice.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars()), total
 
     async def revoke_device(self, device_id: uuid.UUID) -> None:
         device = await self.session.get(TelematicsDevice, device_id)

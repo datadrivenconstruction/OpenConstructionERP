@@ -21,7 +21,7 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 from typing import Any
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus
@@ -110,14 +110,18 @@ class SiteSensorsService:
         await self.session.flush()
         return mix
 
-    async def list_mixes(self, project_id: uuid.UUID | None) -> list[ConcreteMix]:
-        stmt = select(ConcreteMix).order_by(ConcreteMix.code)
+    async def list_mixes(
+        self, project_id: uuid.UUID | None, offset: int = 0, limit: int = 50
+    ) -> tuple[list[ConcreteMix], int]:
+        base = select(ConcreteMix)
         if project_id is not None:
-            stmt = stmt.where((ConcreteMix.project_id == project_id) | (ConcreteMix.project_id.is_(None)))
+            base = base.where((ConcreteMix.project_id == project_id) | (ConcreteMix.project_id.is_(None)))
         else:
             # Without a project the caller has proven access to, only shared mixes are listed.
-            stmt = stmt.where(ConcreteMix.project_id.is_(None))
-        return list((await self.session.execute(stmt)).scalars())
+            base = base.where(ConcreteMix.project_id.is_(None))
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(ConcreteMix.code, ConcreteMix.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars()), total
 
     async def create_strip(self, data: StripCreate) -> FormworkStrip:
         device = await self.get_device(data.device_id)
@@ -149,6 +153,12 @@ class SiteSensorsService:
     async def list_strips(self, project_id: uuid.UUID) -> list[FormworkStrip]:
         stmt = select(FormworkStrip).where(FormworkStrip.project_id == project_id).order_by(FormworkStrip.created_at)
         return list((await self.session.execute(stmt)).scalars())
+
+    async def page_strips(self, project_id: uuid.UUID, offset: int, limit: int) -> tuple[list[FormworkStrip], int]:
+        base = select(FormworkStrip).where(FormworkStrip.project_id == project_id)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(FormworkStrip.created_at, FormworkStrip.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars()), total
 
     async def strike(self, strip_id: uuid.UUID, struck_at: datetime | None = None) -> FormworkStrip:
         """Record the strike with the strength estimated at that moment.

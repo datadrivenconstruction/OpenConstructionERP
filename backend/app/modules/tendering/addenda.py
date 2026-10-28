@@ -372,6 +372,14 @@ class AddendaService:
         )
         return list(rows.scalars().all())
 
+    async def page_clarifications(
+        self, package_id: uuid.UUID, offset: int, limit: int
+    ) -> tuple[list[TenderClarification], int]:
+        base = select(TenderClarification).where(TenderClarification.package_id == package_id)
+        total = (await self.session.execute(select(func.count()).select_from(base.subquery()))).scalar_one()
+        page = base.order_by(TenderClarification.number, TenderClarification.id).offset(offset).limit(limit)
+        return list((await self.session.execute(page)).scalars().all()), total
+
     async def get_clarification(self, package_id: uuid.UUID, clarification_id: uuid.UUID) -> TenderClarification:
         row = await self.session.get(TenderClarification, clarification_id)
         if row is None or row.package_id != package_id:

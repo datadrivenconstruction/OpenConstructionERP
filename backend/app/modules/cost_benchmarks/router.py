@@ -16,7 +16,7 @@ from fastapi.responses import Response
 
 from app.dependencies import CurrentTenantId, CurrentUserId, RequirePermission, SessionDep, verify_project_access
 from app.modules.cost_benchmarks.bench_math import STANDARDS
-from app.modules.cost_benchmarks.schemas import CompareRequest, RecordCreate, RecordOut
+from app.modules.cost_benchmarks.schemas import CompareRequest, RecordCreate, RecordListResponse, RecordOut
 from app.modules.cost_benchmarks.service import CostBenchmarksService, load_reference
 from app.modules.cost_benchmarks.validators import evaluate
 
@@ -25,18 +25,26 @@ _READ = Depends(RequirePermission("cost_benchmarks.read"))
 _WRITE = Depends(RequirePermission("cost_benchmarks.write"))
 
 
-@router.get("/records/", response_model=list[RecordOut], dependencies=[_READ])
+@router.get("/records/", response_model=RecordListResponse, dependencies=[_READ])
 async def list_records(
     session: SessionDep,
     tenant_id: CurrentTenantId,
     kind: str | None = None,
     project_type: str | None = None,
     country: str | None = None,
-) -> list[RecordOut]:
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
+) -> RecordListResponse:
+    # Filters run in Python over the tenant's rows, which are loaded whole anyway.
     rows = await CostBenchmarksService(session, tenant_id).list_records(
         kind, project_type=project_type, countries=[country] if country else None
     )
-    return [RecordOut.model_validate(r) for r in rows]
+    return RecordListResponse(
+        items=[RecordOut.model_validate(r) for r in rows[offset : offset + limit]],
+        total=len(rows),
+        offset=offset,
+        limit=limit,
+    )
 
 
 @router.post("/records/", response_model=RecordOut, status_code=201, dependencies=[_WRITE])

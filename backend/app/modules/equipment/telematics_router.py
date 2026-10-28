@@ -50,6 +50,13 @@ class DeviceResponse(BaseModel):
     token: str | None = None
 
 
+class DeviceListResponse(BaseModel):
+    items: list[DeviceResponse]
+    total: int
+    offset: int = 0
+    limit: int = 50
+
+
 class SampleIn(BaseModel):
     recorded_at: datetime
     engine_hours: Decimal | None = None
@@ -109,13 +116,16 @@ async def create_device(
     return _device_out(device, token)
 
 
-@router.get("/devices/", response_model=list[DeviceResponse])
+@router.get("/devices/", response_model=DeviceListResponse)
 async def list_devices(
     equipment_id: uuid.UUID | None = Query(default=None),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, ge=1, le=500),
     _perm: None = Depends(RequirePermission("equipment.read")),
     service: TelematicsService = Depends(_service),
-) -> list[DeviceResponse]:
-    return [_device_out(d) for d in await service.list_devices(equipment_id)]
+) -> DeviceListResponse:
+    rows, total = await service.list_devices(equipment_id, offset, limit)
+    return DeviceListResponse(items=[_device_out(d) for d in rows], total=total, offset=offset, limit=limit)
 
 
 @router.post("/devices/{device_id}/revoke", status_code=204)

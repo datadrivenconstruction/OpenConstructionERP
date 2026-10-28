@@ -14,6 +14,7 @@ import {
   apiDelete,
   extractErrorMessageFromBody,
   fetchWithAuth,
+  type Page,
 } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -202,7 +203,7 @@ export interface Clarification {
 
 
 export function listClarifications(packageId: string): Promise<Clarification[]> {
-  return apiGet<Clarification[]>(`/v1/tendering/packages/${packageId}/clarifications/`);
+  return apiGet<Page<Clarification>>(`/v1/tendering/packages/${packageId}/clarifications/?limit=500`).then((p) => p.items);
 }
 
 export function createClarification(

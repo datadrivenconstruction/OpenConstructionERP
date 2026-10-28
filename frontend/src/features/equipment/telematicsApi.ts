@@ -7,7 +7,7 @@
  * backend/app/modules/equipment/telematics_router.py. Decimals are strings.
  */
 
-import { API_BASE, ApiError, apiGet, apiPost, fetchWithAuth } from '@/shared/lib/api';
+import { API_BASE, ApiError, apiGet, apiPost, fetchWithAuth, type Page } from '@/shared/lib/api';
 import type { RuleResult } from '@/shared/lib/ruleResults';
 import type { ImportKind } from './telematicsFormat';
 
@@ -98,7 +98,7 @@ export function fetchTelematicsValidation(projectId?: string): Promise<Telematic
 }
 
 export function fetchTelematicsDevices(): Promise<TelematicsDevice[]> {
-  return apiGet<TelematicsDevice[]>(`/v1/equipment/telematics/devices/`);
+  return apiGet<Page<TelematicsDevice>>(`/v1/equipment/telematics/devices/?limit=500`).then((p) => p.items);
 }
 
 export function createTelematicsDevice(equipmentId: string, label: string): Promise<TelematicsDevice> {
