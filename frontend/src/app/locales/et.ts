@@ -61488,6 +61488,7 @@ const resource = {
     "market.preview_unchanged": "Muutmata ({{count}})",
     "market.onboarding_sets": "See seadistab: {{items}}",
     "market.change_later": "Saate seda hiljem seadetes muuta.",
+    "packages.use_packages": "Alusta hoopis lahenduspakettidest",
   }
 } as { translation: Record<string, string> };
 

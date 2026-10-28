@@ -61541,6 +61541,7 @@ const resource = {
     "market.preview_unchanged": "अपरिवर्तित ({{count}})",
     "market.onboarding_sets": "यह सेट करता है: {{items}}",
     "market.change_later": "आप इसे बाद में सेटिंग्स में बदल सकते हैं।",
+    "packages.use_packages": "इसके बजाय समाधान पैकेज से शुरू करें",
   }
 } as { translation: Record<string, string> };
 

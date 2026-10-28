@@ -61538,6 +61538,7 @@ const resource = {
     "market.preview_unchanged": "Uendret ({{count}})",
     "market.onboarding_sets": "Dette setter opp: {{items}}",
     "market.change_later": "Du kan endre dette senere i Innstillinger.",
+    "packages.use_packages": "Start heller med løsningspakker",
   }
 } as { translation: Record<string, string> };
 

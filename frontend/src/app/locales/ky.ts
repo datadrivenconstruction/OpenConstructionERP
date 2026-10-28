@@ -61655,6 +61655,7 @@ const resource = {
     "market.preview_unchanged": "Өзгөрүүсүз ({{count}})",
     "market.onboarding_sets": "Орнотулат: {{items}}",
     "market.change_later": "Муну кийин жөндөөлөрдөн өзгөртсөңүз болот.",
+    "packages.use_packages": "Анын ордуна даяр чечим пакеттеринен баштоо",
   }
 } as { translation: Record<string, string> };
 

@@ -61216,6 +61216,7 @@ const resource = {
     "market.preview_unchanged": "Өөрчлөлтгүй ({{count}})",
     "market.onboarding_sets": "Тохируулна: {{items}}",
     "market.change_later": "Үүнийг дараа Тохиргоонд өөрчилж болно.",
+    "packages.use_packages": "Оронд нь бэлэн шийдлийн багцаас эхлэх",
   }
 } as { translation: Record<string, string> };
 

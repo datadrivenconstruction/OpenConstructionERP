@@ -64103,6 +64103,7 @@ const resource = {
     "market.preview_unchanged": "Változatlan ({{count}})",
     "market.onboarding_sets": "Ez beállítja: {{items}}",
     "market.change_later": "Ezt később a Beállításokban módosíthatja.",
+    "packages.use_packages": "Inkább megoldáscsomagokkal kezdés",
   }
 } as { translation: Record<string, string> };
 

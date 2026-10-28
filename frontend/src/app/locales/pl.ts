@@ -63090,6 +63090,7 @@ const resource = {
     "market.preview_unchanged": "Bez zmian ({{count}})",
     "market.onboarding_sets": "To ustawia: {{items}}",
     "market.change_later": "Możesz to zmienić później w Ustawieniach.",
+    "packages.use_packages": "Zacznij zamiast tego od pakietów rozwiązań",
   }
 } as { translation: Record<string, string> };
 

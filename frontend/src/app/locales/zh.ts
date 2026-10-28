@@ -63757,6 +63757,7 @@ const resource = {
     "market.preview_unchanged": "不变 ({{count}})",
     "market.onboarding_sets": "将设置：{{items}}",
     "market.change_later": "之后可在设置中更改。",
+    "packages.use_packages": "改为从解决方案包开始",
   }
 } as { translation: Record<string, string> };
 

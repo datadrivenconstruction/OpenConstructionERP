@@ -61542,6 +61542,7 @@ const resource = {
     "market.preview_unchanged": "Ennallaan ({{count}})",
     "market.onboarding_sets": "Tämä määrittää: {{items}}",
     "market.change_later": "Voit muuttaa tätä myöhemmin asetuksissa.",
+    "packages.use_packages": "Aloita sen sijaan ratkaisupaketeista",
   }
 } as { translation: Record<string, string> };
 

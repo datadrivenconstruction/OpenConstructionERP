@@ -54,7 +54,11 @@ describe('<StepLook>', () => {
     expect(screen.getByRole('radiogroup', { name: 'Menu view' }).querySelectorAll('[role="radio"]')).toHaveLength(
       MENU_PRESETS.length,
     );
-    expect(screen.getAllByRole('radio', { name: 'Classic' }).every((r) => r.getAttribute('aria-checked') === 'true')).toBe(true);
+    // The platform default is the Standard style beside the Classic menu set.
+    const styles = screen.getByRole('radiogroup', { name: 'Colour style' });
+    expect(styles.querySelector('[aria-label="Standard"]')?.getAttribute('aria-checked')).toBe('true');
+    const menus = screen.getByRole('radiogroup', { name: 'Menu view' });
+    expect(menus.querySelector('[aria-label="Classic"]')?.getAttribute('aria-checked')).toBe('true');
   });
 
   it('updates the preview at once when a style, a menu or an accent is picked', () => {

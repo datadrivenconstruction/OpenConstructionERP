@@ -62820,6 +62820,7 @@ const resource = {
     "market.preview_unchanged": "変更なし ({{count}})",
     "market.onboarding_sets": "設定内容: {{items}}",
     "market.change_later": "後から設定で変更できます。",
+    "packages.use_packages": "代わりにソリューションパッケージから始める",
   }
 } as { translation: Record<string, string> };
 

@@ -61499,6 +61499,7 @@ const resource = {
     "market.preview_unchanged": "Өзгеріссіз ({{count}})",
     "market.onboarding_sets": "Бапталады: {{items}}",
     "market.change_later": "Мұны кейін баптауларда өзгертуге болады.",
+    "packages.use_packages": "Оның орнына дайын шешім пакеттерінен бастау",
   }
 } as { translation: Record<string, string> };
 

@@ -61498,6 +61498,7 @@ const resource = {
     "market.preview_unchanged": "بدون تغییر ({{count}})",
     "market.onboarding_sets": "این تنظیم می‌کند: {{items}}",
     "market.change_later": "بعداً می‌توانید در تنظیمات تغییر دهید.",
+    "packages.use_packages": "به‌جای آن با بسته‌های راهکار شروع کنید",
   }
 } as { translation: Record<string, string> };
 

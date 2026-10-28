@@ -61504,6 +61504,7 @@ const resource = {
     "market.preview_unchanged": "بغیر تبدیلی ({{count}})",
     "market.onboarding_sets": "یہ ترتیب دیتا ہے: {{items}}",
     "market.change_later": "آپ اسے بعد میں ترتیبات میں بدل سکتے ہیں۔",
+    "packages.use_packages": "اس کے بجائے حل کے پیکجوں سے شروع کریں",
   }
 } as { translation: Record<string, string> };
 
