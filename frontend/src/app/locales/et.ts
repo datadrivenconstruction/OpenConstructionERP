@@ -61355,6 +61355,7 @@ const resource = {
     "measurement_book.tab_bill": "Jooksev arve",
     "measurement_book.empty_title": "BOQ positsioone veel pole",
     "measurement_book.empty_desc": "Lisage kõigepealt positsioonid kogusteatesse ja mõõtke need siis siin.",
+    "packages.use_packages": "Alusta hoopis lahenduspakettidest",
   }
 } as { translation: Record<string, string> };
 

@@ -61702,6 +61702,7 @@ const resource = {
     "measurement_book.tab_bill": "חשבון שוטף",
     "measurement_book.empty_title": "אין עדיין סעיפי BOQ",
     "measurement_book.empty_desc": "הוסף תחילה סעיפים לכתב כמויות, ואז מדוד אותם כאן.",
+    "packages.use_packages": "להתחיל במקום זאת מחבילות פתרונות",
   }
 } as { translation: Record<string, string> };
 

@@ -64326,6 +64326,7 @@ const resource = {
     "measurement_book.tab_bill": "Décompte courant",
     "measurement_book.empty_title": "Aucun poste du devis quantitatif pour l'instant",
     "measurement_book.empty_desc": "Ajoutez d'abord les postes au métré estimatif, puis mesurez-les ici.",
+    "packages.use_packages": "Commencer plutôt par des packs de solutions",
   }
 } as { translation: Record<string, string> };
 

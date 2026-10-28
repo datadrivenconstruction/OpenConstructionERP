@@ -62957,6 +62957,7 @@ const resource = {
     "measurement_book.tab_bill": "Rachunek bieżący",
     "measurement_book.empty_title": "Brak pozycji BOQ",
     "measurement_book.empty_desc": "Najpierw dodaj pozycje do przedmiaru, a potem obmierz je tutaj.",
+    "packages.use_packages": "Zacznij zamiast tego od pakietów rozwiązań",
   }
 } as { translation: Record<string, string> };
 

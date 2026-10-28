@@ -62687,6 +62687,7 @@ const resource = {
     "measurement_book.tab_bill": "出来高累計",
     "measurement_book.empty_title": "内訳書の項目がまだありません",
     "measurement_book.empty_desc": "先に内訳書に項目を追加し、ここで計測してください。",
+    "packages.use_packages": "代わりにソリューションパッケージから始める",
   }
 } as { translation: Record<string, string> };
 

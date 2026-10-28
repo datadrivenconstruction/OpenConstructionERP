@@ -61408,6 +61408,7 @@ const resource = {
     "measurement_book.tab_bill": "चालू बिल",
     "measurement_book.empty_title": "अभी कोई BOQ मद नहीं",
     "measurement_book.empty_desc": "पहले बिल ऑफ़ क्वांटिटीज़ में मदें जोड़ें, फिर यहाँ माप लें।",
+    "packages.use_packages": "इसके बजाय समाधान पैकेज से शुरू करें",
   }
 } as { translation: Record<string, string> };
 

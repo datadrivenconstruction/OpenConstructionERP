@@ -61743,6 +61743,7 @@ const resource = {
     "measurement_book.tab_bill": "Decont curent",
     "measurement_book.empty_title": "Nicio poziție BOQ încă",
     "measurement_book.empty_desc": "Adăugați întâi poziții într-un deviz, apoi măsurați-le aici.",
+    "packages.use_packages": "Începeți în schimb cu pachete de soluții",
   }
 } as { translation: Record<string, string> };
 

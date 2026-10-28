@@ -61405,6 +61405,7 @@ const resource = {
     "measurement_book.tab_bill": "Løpende regning",
     "measurement_book.empty_title": "Ingen BOQ-poster ennå",
     "measurement_book.empty_desc": "Legg først inn poster i en mengdeoversikt, og mål dem så her.",
+    "packages.use_packages": "Start heller med løsningspakker",
   }
 } as { translation: Record<string, string> };
 

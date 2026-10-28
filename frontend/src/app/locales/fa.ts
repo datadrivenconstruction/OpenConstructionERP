@@ -61365,6 +61365,7 @@ const resource = {
     "measurement_book.tab_bill": "صورت‌حساب جاری",
     "measurement_book.empty_title": "هنوز قلم BOQ نداریم",
     "measurement_book.empty_desc": "ابتدا اقلامی را به فهرست مقادیر اضافه کنید، سپس اینجا اندازه‌گیری کنید.",
+    "packages.use_packages": "به‌جای آن با بسته‌های راهکار شروع کنید",
   }
 } as { translation: Record<string, string> };
 

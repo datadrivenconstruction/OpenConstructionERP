@@ -61163,6 +61163,7 @@ const resource = {
     "measurement_book.tab_bill": "Bảng thanh toán lũy kế",
     "measurement_book.empty_title": "Chưa có hạng mục BOQ nào",
     "measurement_book.empty_desc": "Hãy thêm hạng mục vào bảng khối lượng trước, sau đó đo tại đây.",
+    "packages.use_packages": "Bắt đầu từ các gói giải pháp",
   }
 } as { translation: Record<string, string> };
 

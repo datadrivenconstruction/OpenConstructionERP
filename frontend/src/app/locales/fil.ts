@@ -61363,6 +61363,7 @@ const resource = {
     "measurement_book.tab_bill": "Tumatakbong singil",
     "measurement_book.empty_title": "Wala pang posisyon sa BOQ",
     "measurement_book.empty_desc": "Magdagdag muna ng mga posisyon sa bill of quantities, saka sukatin dito.",
+    "packages.use_packages": "Magsimula na lang sa mga solution package",
   }
 } as { translation: Record<string, string> };
 

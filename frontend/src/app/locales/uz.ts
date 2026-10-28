@@ -62337,6 +62337,7 @@ const resource = {
     "measurement_book.tab_bill": "Joriy hisob",
     "measurement_book.empty_title": "Hali BOQ pozitsiyalari yoʻq",
     "measurement_book.empty_desc": "Avval miqdorlar roʻyxatiga pozitsiyalar qoʻshing, soʻng ularni shu yerda oʻlchang.",
+    "packages.use_packages": "Buning o‘rniga tayyor yechim paketlaridan boshlash",
   }
 } as { translation: Record<string, string> };
 

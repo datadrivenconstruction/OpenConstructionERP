@@ -64325,6 +64325,7 @@ const resource = {
     "measurement_book.tab_bill": "Cuenta corriente",
     "measurement_book.empty_title": "Todavía no hay partidas BOQ",
     "measurement_book.empty_desc": "Añada antes partidas a un presupuesto y luego mídalas aquí.",
+    "packages.use_packages": "Empezar con paquetes de soluciones",
   }
 } as { translation: Record<string, string> };
 

@@ -63624,6 +63624,7 @@ const resource = {
     "measurement_book.tab_bill": "累计账单",
     "measurement_book.empty_title": "暂无清单项",
     "measurement_book.empty_desc": "请先在工程量清单中添加清单项，再在此处计量。",
+    "packages.use_packages": "改为从解决方案包开始",
   }
 } as { translation: Record<string, string> };
 

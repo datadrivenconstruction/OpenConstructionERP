@@ -62286,6 +62286,7 @@ const resource = {
     "measurement_book.tab_bill": "Lopende afrekening",
     "measurement_book.empty_title": "Nog geen BOQ-posten",
     "measurement_book.empty_desc": "Voeg eerst posten toe aan een hoeveelheidsstaat en meet ze daarna hier op.",
+    "packages.use_packages": "Begin in plaats daarvan met oplossingspakketten",
   }
 } as { translation: Record<string, string> };
 

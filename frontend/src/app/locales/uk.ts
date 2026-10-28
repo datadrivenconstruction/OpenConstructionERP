@@ -63504,6 +63504,7 @@ const resource = {
     "measurement_book.tab_bill": "Поточний підсумок",
     "measurement_book.empty_title": "Позицій BOQ ще немає",
     "measurement_book.empty_desc": "Спершу додайте позиції до відомості обсягів, а потім виміряйте їх тут.",
+    "packages.use_packages": "Почати з готових пакетів рішень",
   }
 } as { translation: Record<string, string> };
 

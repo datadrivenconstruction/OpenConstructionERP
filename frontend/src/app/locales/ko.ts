@@ -61771,6 +61771,7 @@ const resource = {
     "measurement_book.tab_bill": "누계 내역",
     "measurement_book.empty_title": "아직 내역서 항목이 없습니다",
     "measurement_book.empty_desc": "먼저 내역서에 항목을 추가한 뒤 여기서 측정하십시오.",
+    "packages.use_packages": "대신 솔루션 패키지로 시작",
   }
 } as { translation: Record<string, string> };
 

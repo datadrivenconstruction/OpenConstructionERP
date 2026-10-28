@@ -61155,6 +61155,7 @@ const resource = {
     "measurement_book.tab_bill": "ใบเรียกเก็บงวดปัจจุบัน",
     "measurement_book.empty_title": "ยังไม่มีรายการ BOQ",
     "measurement_book.empty_desc": "เพิ่มรายการงานในใบประมาณปริมาณงานก่อน แล้วค่อยวัดที่นี่",
+    "packages.use_packages": "เริ่มจากแพ็กเกจโซลูชันแทน",
   }
 } as { translation: Record<string, string> };
 

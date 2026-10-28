@@ -57048,6 +57048,7 @@ const resource = {
     "measurement_book.tab_bill": "Conta corrente",
     "measurement_book.empty_title": "Ainda não há itens BOQ",
     "measurement_book.empty_desc": "Primeiro adicione itens a um orçamento e depois meça-os aqui.",
+    "packages.use_packages": "Começar pelos pacotes de soluções",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

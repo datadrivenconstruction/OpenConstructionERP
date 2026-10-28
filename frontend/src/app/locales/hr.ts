@@ -61753,6 +61753,7 @@ const resource = {
     "measurement_book.tab_bill": "Tekući obračun",
     "measurement_book.empty_title": "Još nema stavki BOQ",
     "measurement_book.empty_desc": "Najprije dodajte stavke u troškovnik, a zatim ih ovdje izmjerite.",
+    "packages.use_packages": "Umjesto toga započnite s paketima rješenja",
   }
 } as { translation: Record<string, string> };
 

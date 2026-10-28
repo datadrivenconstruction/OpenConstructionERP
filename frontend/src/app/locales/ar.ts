@@ -64515,6 +64515,7 @@ const resource = {
     "measurement_book.tab_bill": "الحساب الجاري",
     "measurement_book.empty_title": "لا توجد بنود BOQ بعد",
     "measurement_book.empty_desc": "أضف البنود إلى جدول الكميات أولاً، ثم قسها هنا.",
+    "packages.use_packages": "ابدأ بحزم الحلول بدلاً من ذلك",
   }
 } as { translation: Record<string, string> };
 

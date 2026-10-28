@@ -61154,6 +61154,7 @@ const resource = {
     "measurement_book.tab_bill": "Tagihan berjalan",
     "measurement_book.empty_title": "Belum ada posisi BOQ",
     "measurement_book.empty_desc": "Tambahkan posisi ke daftar kuantitas dulu, lalu ukur di sini.",
+    "packages.use_packages": "Mulai dari paket solusi saja",
   }
 } as { translation: Record<string, string> };
 

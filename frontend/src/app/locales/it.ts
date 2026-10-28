@@ -62627,6 +62627,7 @@ const resource = {
     "measurement_book.tab_bill": "Conto corrente",
     "measurement_book.empty_title": "Nessuna voce del computo ancora",
     "measurement_book.empty_desc": "Aggiungete prima le voci al computo metrico, poi misuratele qui.",
+    "packages.use_packages": "Inizia invece dai pacchetti di soluzioni",
   }
 } as { translation: Record<string, string> };
 

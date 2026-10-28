@@ -64319,6 +64319,7 @@ const resource = {
     "measurement_book.tab_bill": "Conta corrente",
     "measurement_book.empty_title": "Ainda não há posições BOQ",
     "measurement_book.empty_desc": "Adicione primeiro posições ao mapa de quantidades e depois meça-as aqui.",
+    "packages.use_packages": "Começar antes pelos pacotes de soluções",
   }
 } as { translation: Record<string, string> };
 

@@ -62286,6 +62286,7 @@ const resource = {
     "measurement_book.tab_bill": "Cari hesap",
     "measurement_book.empty_title": "Henüz BOQ kalemi yok",
     "measurement_book.empty_desc": "Önce bir metraj cetvelinde kalem ekleyin, sonra burada ölçün.",
+    "packages.use_packages": "Bunun yerine çözüm paketleriyle başlayın",
   }
 } as { translation: Record<string, string> };
 

@@ -61371,6 +61371,7 @@ const resource = {
     "measurement_book.tab_bill": "جاری بل",
     "measurement_book.empty_title": "ابھی کوئی BOQ مد نہیں",
     "measurement_book.empty_desc": "پہلے مقداروں کے بل میں مدیں شامل کریں، پھر یہاں ناپیں۔",
+    "packages.use_packages": "اس کے بجائے حل کے پیکجوں سے شروع کریں",
   }
 } as { translation: Record<string, string> };
 

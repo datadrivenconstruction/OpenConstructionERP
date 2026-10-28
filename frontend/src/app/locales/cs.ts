@@ -62696,6 +62696,7 @@ const resource = {
     "measurement_book.tab_bill": "Průběžný účet",
     "measurement_book.empty_title": "Zatím žádné pozice BOQ",
     "measurement_book.empty_desc": "Nejdřív přidejte pozice do soupisu prací a pak je zde změřte.",
+    "packages.use_packages": "Začít raději balíčky řešení",
   }
 } as { translation: Record<string, string> };
 

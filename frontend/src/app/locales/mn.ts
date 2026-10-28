@@ -61083,6 +61083,7 @@ const resource = {
     "measurement_book.tab_bill": "Одоогийн данс",
     "measurement_book.empty_title": "BOQ зүйл одоогоор алга",
     "measurement_book.empty_desc": "Эхлээд тоо хэмжээний тодорхойлолтод зүйл нэмээд, дараа нь энд хэмжинэ үү.",
+    "packages.use_packages": "Оронд нь бэлэн шийдлийн багцаас эхлэх",
   }
 } as { translation: Record<string, string> };
 

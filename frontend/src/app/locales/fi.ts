@@ -61409,6 +61409,7 @@ const resource = {
     "measurement_book.tab_bill": "Juokseva lasku",
     "measurement_book.empty_title": "Ei vielä BOQ-kohtia",
     "measurement_book.empty_desc": "Lisää ensin kohdat määräluetteloon ja mittaa ne sitten täällä.",
+    "packages.use_packages": "Aloita sen sijaan ratkaisupaketeista",
   }
 } as { translation: Record<string, string> };
 

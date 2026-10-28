@@ -64040,6 +64040,7 @@ const resource = {
     "measurement_book.tab_bill": "Laufende Abrechnung",
     "measurement_book.empty_title": "Noch keine Positionen im Leistungsverzeichnis",
     "measurement_book.empty_desc": "Legen Sie zuerst Positionen im Leistungsverzeichnis an, messen Sie sie dann hier auf.",
+    "packages.use_packages": "Stattdessen mit Lösungspaketen beginnen",
   }
 } as { translation: Record<string, string> };
 

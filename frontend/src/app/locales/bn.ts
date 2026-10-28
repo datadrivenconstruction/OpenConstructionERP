@@ -61675,6 +61675,7 @@ const resource = {
     "measurement_book.tab_bill": "চলতি বিল",
     "measurement_book.empty_title": "এখনও কোনো BOQ অবস্থান নেই",
     "measurement_book.empty_desc": "প্রথমে পরিমাণ-তালিকায় অবস্থান যোগ করুন, তারপর এখানে পরিমাপ করুন।",
+    "packages.use_packages": "এর বদলে সমাধান প্যাকেজ দিয়ে শুরু করুন",
   }
 } as { translation: Record<string, string> };
 

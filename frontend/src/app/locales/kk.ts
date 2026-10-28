@@ -61366,6 +61366,7 @@ const resource = {
     "measurement_book.tab_bill": "Ағымдағы шот",
     "measurement_book.empty_title": "Әзірге BOQ позициялары жоқ",
     "measurement_book.empty_desc": "Алдымен көлем ведомосіне позицияларды қосып, содан кейін осында өлшеңіз.",
+    "packages.use_packages": "Оның орнына дайын шешім пакеттерінен бастау",
   }
 } as { translation: Record<string, string> };
 

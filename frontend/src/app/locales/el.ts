@@ -61365,6 +61365,7 @@ const resource = {
     "measurement_book.tab_bill": "Τρέχων λογαριασμός",
     "measurement_book.empty_title": "Δεν υπάρχουν θέσεις BOQ ακόμη",
     "measurement_book.empty_desc": "Προσθέστε πρώτα θέσεις σε προϋπολογισμό ποσοτήτων, και μετά μετρήστε τες εδώ.",
+    "packages.use_packages": "Ξεκινήστε αντί γι' αυτό από πακέτα λύσεων",
   }
 } as { translation: Record<string, string> };
 

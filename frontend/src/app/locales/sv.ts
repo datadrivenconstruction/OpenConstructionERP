@@ -62020,6 +62020,7 @@ const resource = {
     "measurement_book.tab_bill": "Löpande räkning",
     "measurement_book.empty_title": "Inga BOQ-poster ännu",
     "measurement_book.empty_desc": "Lägg först till poster i en mängdförteckning och mät sedan upp dem här.",
+    "packages.use_packages": "Börja i stället med lösningspaket",
   }
 } as { translation: Record<string, string> };
 

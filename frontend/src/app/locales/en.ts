@@ -55601,6 +55601,7 @@ const resource = {
     "measurement_book.tab_bill": "Running bill",
     "measurement_book.empty_title": "No BOQ positions yet",
     "measurement_book.empty_desc": "Add positions to a bill of quantities first, then measure them here.",
+    "packages.use_packages": "Start from solution packages instead",
   }
 } as { translation: Record<string, string> };
 

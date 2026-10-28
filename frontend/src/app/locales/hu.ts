@@ -63970,6 +63970,7 @@ const resource = {
     "measurement_book.tab_bill": "Folyó számla",
     "measurement_book.empty_title": "Még nincs BOQ tétel",
     "measurement_book.empty_desc": "Előbb adjon tételeket a költségvetéshez, utána mérje őket itt.",
+    "packages.use_packages": "Inkább megoldáscsomagokkal kezdés",
   }
 } as { translation: Record<string, string> };
 
