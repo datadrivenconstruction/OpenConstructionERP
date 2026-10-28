@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // The register: every plant item on one line, with the three facts that

@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // ClaimValidationPanel — the submission check of one progress claim, as a

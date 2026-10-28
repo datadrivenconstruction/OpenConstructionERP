@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // 4D snapshot view - a date scrubber over the existing 4D snapshot endpoint.
 // For a chosen data date (and optional BIM model) it shows the derived status

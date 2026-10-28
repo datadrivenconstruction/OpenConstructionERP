@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 
 /** Translated text for a failed conversion. A known ``errorCode`` wins; a

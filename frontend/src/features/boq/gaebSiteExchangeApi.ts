@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Client for the GAEB site phases: X31 measured quantities and X89 invoices.

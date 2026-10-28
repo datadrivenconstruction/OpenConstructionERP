@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * API helpers and pure preview math for the Preliminaries (general conditions)

@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 /**
  * PartnerPackDeactivateDialog - the "deactivate this pack" flow with a live
  * progress bar, the mirror of PartnerPackApplyDialog.

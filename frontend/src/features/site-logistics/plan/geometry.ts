@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // Pure helpers for drawing on the site plan. Everything is in metres of the

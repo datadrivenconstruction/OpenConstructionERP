@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction‌‍‌‍‌‍‌‍ · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction‌‍‌‍‌‍‌‍ · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** One guarantee: lifecycle actions, advance recovery, documents, commission and the event timeline. */
 import { useState } from 'react';

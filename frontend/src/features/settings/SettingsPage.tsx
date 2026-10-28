@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { ConverterReleaseNotice } from '@/shared/ui/ConverterReleaseNotice';
 import { useState, useCallback, useEffect, useMemo, lazy, Suspense } from 'react';

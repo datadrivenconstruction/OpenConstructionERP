@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // Typed API client for the portfolio / multi-project module (T3.3), mounted by

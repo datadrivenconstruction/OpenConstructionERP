@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 //
 // 6D whole-life tab: EN 15978 carbon (A-B-C-D) beside ISO 15686-5 whole-life

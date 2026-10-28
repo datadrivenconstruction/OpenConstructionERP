@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Real-time collaboration panel (T3.4). A self-contained view mode mounted in
 // SchedulePage, modelled on the sibling schedule panels (ScheduleResourcePanel /

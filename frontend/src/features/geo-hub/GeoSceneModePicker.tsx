@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 /**
  * Scene-mode segmented pill — switches the Cesium viewer between 3D
  * globe, 2D flat top-down and 2.5-D Columbus View projections.

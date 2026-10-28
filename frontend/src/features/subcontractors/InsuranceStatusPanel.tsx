@@ -1,4 +1,4 @@
-// Subcontractor insurance status‌‍‌‍‌‍‌‍
+// Subcontractor insurance status‌‍‌‍‌‍‌‍​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Insurance register of one subcontractor: the overall verdict (compliant,

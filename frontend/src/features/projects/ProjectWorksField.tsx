@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import type { ProjectWorks } from './api';
 
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Whether the project's client is a public buyer. Where a country's law on
  * retention follows the client (France: the public procurement code for a
  * public buyer, loi 71-584 for private works), new contracts on the project

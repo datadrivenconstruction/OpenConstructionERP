@@ -1,6 +1,6 @@
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Shared locale-aware digit rendering for takeoff quantity readouts
  * (audit case-2 K-12 follow-up).
  *

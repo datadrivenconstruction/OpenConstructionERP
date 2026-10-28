@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Display text of a DDC converter. The backend (`converter_source.PACKAGES`)
  * is the only place that knows a converter's version and the source-format
  * range it reads; both arrive in the API row and are only interpolated here.

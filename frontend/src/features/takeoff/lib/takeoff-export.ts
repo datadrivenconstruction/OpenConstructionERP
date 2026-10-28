@@ -1,4 +1,4 @@
-// OpenConstructionERP — DataDrivenConstruction (DDC)
+// OpenConstructionERP — DataDrivenConstruction (DDC)​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // CAD2DATA Pipeline · PDF Takeoff Module · Export helpers
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // DDC-CWICR-OE-2026

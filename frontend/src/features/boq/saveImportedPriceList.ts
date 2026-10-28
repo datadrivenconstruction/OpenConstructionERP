@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Keep the price list of an imported XPWE bill as a cost database.
  *
  * An XPWE (or PWE) export carries the price list the bill is priced from next

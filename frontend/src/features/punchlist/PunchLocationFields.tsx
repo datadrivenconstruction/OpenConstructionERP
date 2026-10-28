@@ -16,7 +16,7 @@ export interface PunchAssetLink {
   asset_label: string;
 }
 
-/** Zone, floor or room: free text, with the areas already used on the project offered. */
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ Zone, floor or room: free text, with the areas already used on the project offered. */
 export function PunchAreaField({ value, onChange, suggestions = [], disabled = false, label, placeholder }: {
   value: string; onChange: (value: string) => void; suggestions?: string[]; disabled?: boolean;
   label: string; placeholder?: string;

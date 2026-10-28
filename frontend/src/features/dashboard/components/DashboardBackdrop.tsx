@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Layered dashboard backdrop. Rewritten 2026-05-11 to match styles-lab
 // variant 03 "Dot Grid + Spotlight" — the design-system recommendation.

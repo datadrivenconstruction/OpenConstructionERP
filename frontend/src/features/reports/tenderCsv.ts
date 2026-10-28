@@ -1,4 +1,4 @@
-// Cells and rows of the tender comparison CSV.
+// Cells and rows of the tender comparison CSV.​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // The rows carry text typed by others (package names, bidder names), so every
 // field is quoted and a leading = + - @ is defused: a bidder called

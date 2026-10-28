@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Field-type metadata for the template builder + a light mirror of the backend
 // validation engine (app/modules/forms/validation.py). The backend remains the

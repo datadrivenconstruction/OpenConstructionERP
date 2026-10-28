@@ -1,4 +1,4 @@
-/** Deciding what a failed sign-in is allowed to tell the person signing in.
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ Deciding what a failed sign-in is allowed to tell the person signing in.
  *
  * A backend that is down does not produce a network error when anything sits
  * in front of it. A reverse proxy answers 502, 503 or 504, and that is an

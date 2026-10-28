@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Schedule interchange panel (T1.1). Three independent sections:
 //   - EXPORT: download the live schedule as the canonical interchange JSON

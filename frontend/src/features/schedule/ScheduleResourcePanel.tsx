@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Resource depth panel (T3.1). A self-contained view mode mounted in
 // SchedulePage, modelled on the sibling schedule panels. Two in-panel tabs

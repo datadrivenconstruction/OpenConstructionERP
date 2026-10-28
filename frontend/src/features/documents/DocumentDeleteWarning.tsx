@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * What still links to a document, shown on the menu that deletes it.
  *
  * Twenty-eight columns across twenty-one modules hold a document id that no

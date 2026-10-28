@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // ClashClusterChips — Wave A4 cluster-filter strip rendered above the
 // review-result table. Each cluster surfaces as a coloured chip carrying

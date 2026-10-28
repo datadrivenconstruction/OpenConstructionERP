@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Pure helpers for the progress-rigor panel (T3.2). Kept out of the .tsx so
 // they can be unit-tested without a DOM. The authoritative math lives in the

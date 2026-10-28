@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Model versions: an upload can declare itself a new version of a model the
  * project already holds (``parent_model_id``), so the quantity rules that
  * priced the earlier version can be re-applied to it through the BOQ change

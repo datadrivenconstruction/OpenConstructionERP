@@ -1,4 +1,4 @@
-// Project insurance dashboard‌‍‌‍‌‍‌‍
+// Project insurance dashboard‌‍‌‍‌‍‌‍​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Insurance compliance of every subcontractor on the active project: a count

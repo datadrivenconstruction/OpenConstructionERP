@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // ChecklistRunnerCompact - a lighter, embeddable FormFiller. It runs a
 // checklist template inline (inside an issue panel, a drawer, a card) rather

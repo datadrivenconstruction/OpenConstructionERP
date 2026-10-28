@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * What the cost-base browser shows when the catalogue request fails.
  *
  * `useBaseCatalog` runs with `retry: false`, so a failed request leaves `data`

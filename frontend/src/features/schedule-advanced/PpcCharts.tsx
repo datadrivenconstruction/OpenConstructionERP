@@ -1,4 +1,4 @@
-// PPC trend and variance Pareto‌‍‌‍‌‍‌‍
+// PPC trend and variance Pareto‌‍‌‍‌‍‌‍​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * Percent plan complete per week as bars with the average as a dashed line,

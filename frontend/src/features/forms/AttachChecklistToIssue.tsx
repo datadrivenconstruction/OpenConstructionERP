@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // AttachChecklistToIssue - attach and run a checklist against a tracked site
 // issue (a punch item, a BCF topic, ...). Given an issue reference (type + id)

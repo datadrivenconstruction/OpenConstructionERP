@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Claims-grade schedule quality panel (T1.2). A read-only forensic view of a
 // base schedule driven by POST /v1/schedule-advanced/{scheduleId}/schedule-quality:

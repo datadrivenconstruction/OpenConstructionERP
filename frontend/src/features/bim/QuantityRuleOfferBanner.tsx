@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Offer, on a new model version, to re-apply the quantity rules that priced
  * the version it replaces.
  *

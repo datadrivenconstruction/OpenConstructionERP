@@ -1,4 +1,4 @@
-// OpenConstructionERP — DataDrivenConstruction (DDC)
+// OpenConstructionERP — DataDrivenConstruction (DDC)​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // CWICR AI Estimation Engine — example prompts
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // DDC-CWICR-OE-2026

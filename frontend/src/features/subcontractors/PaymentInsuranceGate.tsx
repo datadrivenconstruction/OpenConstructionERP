@@ -1,4 +1,4 @@
-// Payment insurance gate‌‍‌‍‌‍‌‍
+// Payment insurance gate‌‍‌‍‌‍‌‍​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
  * The insurance gate of one pay application. While a mandatory certificate of

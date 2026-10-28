@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Resolving the name a backend module wears on screen.
  *
  * The module registry page used to render `display_name` straight from the

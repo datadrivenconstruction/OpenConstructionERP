@@ -1,6 +1,6 @@
 import i18n from '@/app/i18n';
 
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Locale display names for the built-in measurement groups (audit case-2
  * K-4-bis).
  *

@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * How the optional invoice-mention fields are drawn.
  *
  * The backend names which fields a country offers (`optional_document_fields`,

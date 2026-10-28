@@ -1,4 +1,4 @@
-// Last Planner validation‌‍‌‍‌‍‌‍
+// Last Planner validation‌‍‌‍‌‍‌‍​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /** Findings of the last_planner rule set over one master schedule. */
 import { useTranslation } from 'react-i18next';

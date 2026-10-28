@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // ClashKpiPanel — Wave A4 dashboard rendering the run's aggregated
 // KPIs: total clashes, severity histogram, type breakdown, MTTR,

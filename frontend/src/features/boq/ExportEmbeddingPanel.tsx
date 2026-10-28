@@ -9,7 +9,7 @@ import { boqApi } from './api';
 export interface ExportEmbeddingPanelProps {
   t: (key: string, options?: Record<string, string | number>) => string;
   boqId: string;
-  /** The bill's `metadata.export_embed_markups`. */
+  /**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ The bill's `metadata.export_embed_markups`. */
   enabled: boolean;
   /** ISO 4217 code of the bill's base currency; the preview amounts are in it. */
   currency?: string;

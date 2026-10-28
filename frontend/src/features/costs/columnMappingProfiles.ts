@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Remembered column mappings for cost-file imports.
  *
  * A regional price list is published in the same layout every year, so once

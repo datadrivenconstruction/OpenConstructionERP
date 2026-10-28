@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 //
 // Schedule comparison / diff panel (T1.3). Picks a base (a captured baseline)
 // and a target (the live schedule by default, or another baseline), runs

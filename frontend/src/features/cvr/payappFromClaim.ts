@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Prefill for a payment application raised from a contract progress claim.
  *
  * The backend fills the same figures when the form leaves them empty, so this

@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Browser-side SVG to PNG conversion for logos. The server prints PDFs from the
  * PNG, so an SVG logo is rasterised once at upload time and stored beside it.
  */

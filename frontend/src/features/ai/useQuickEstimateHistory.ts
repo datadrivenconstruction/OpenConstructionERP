@@ -1,4 +1,4 @@
-// OpenConstructionERP — DataDrivenConstruction (DDC)
+// OpenConstructionERP — DataDrivenConstruction (DDC)​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // CWICR AI Estimation Engine — quick-estimate history hook
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // DDC-CWICR-OE-2026
