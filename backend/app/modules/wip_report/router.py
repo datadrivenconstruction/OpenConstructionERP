@@ -73,7 +73,8 @@ async def export_portfolio(
     return Response(
         content=body,
         media_type=media,
-        headers={"Content-Disposition": f'attachment; filename="wip-schedule-{stamp}.{fmt}"'},
+        # The schedule is laid out in English only, so the bytes say so.
+        headers={"Content-Disposition": f'attachment; filename="wip-schedule-{stamp}.{fmt}"', "Content-Language": "en"},
     )
 
 

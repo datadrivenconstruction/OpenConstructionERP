@@ -33,7 +33,7 @@ from app.modules.notifications import email_render, localized
 from app.modules.notifications.templates import all_template_keys, english_template
 from app.modules.portal import login_email
 from app.modules.schedule import tabular_headers as headers
-from app.modules.tendering import invitation_email, xlsx_translations
+from app.modules.tendering import addendum_email, invitation_email, xlsx_translations
 
 SECTIONS = (
     "portal_login",
@@ -45,6 +45,7 @@ SECTIONS = (
     "notification_templates",
     "schedule_headers",
     "module_suggest",
+    "tender_addendum",
 )
 
 TABLES = {
@@ -54,6 +55,7 @@ TABLES = {
     "tender_xlsx": xlsx_translations._STRINGS,
     "cost_plan": cost_export._LABELS,
     "bim_requirements_excel": excel_exporter._STRINGS,
+    "tender_addendum": addendum_email._TABLES,
 }
 
 _BACKEND = Path(__file__).resolve().parents[2]
