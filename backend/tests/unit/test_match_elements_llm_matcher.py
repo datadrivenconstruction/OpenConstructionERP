@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the LLM matcher (``matchers/llm.py``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the LLM matcher (``matchers/llm.py``).
 
 The LLM matcher is a two-stage re-ranker: it takes a vector-prefiltered
 shortlist of real catalogue candidates and asks an LLM to choose / order

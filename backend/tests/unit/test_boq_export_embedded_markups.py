@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Sale-rate export: markups folded into the unit rates, tax left visible.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Sale-rate export: markups folded into the unit rates, tax left visible.
 
 Pins the arithmetic of :mod:`app.modules.boq.embedding`: an exact percentage,
 a fixed line spread pro rata, a section-scoped line loading only its own

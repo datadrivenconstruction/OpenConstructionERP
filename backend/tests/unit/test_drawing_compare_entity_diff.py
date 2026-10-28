@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Entity-level diff of two DWG/DXF revisions and its clustering into regions."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Entity-level diff of two DWG/DXF revisions and its clustering into regions."""
 
 from __future__ import annotations
 

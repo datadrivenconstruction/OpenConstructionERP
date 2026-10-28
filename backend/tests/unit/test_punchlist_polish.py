@@ -1,4 +1,4 @@
-"""Wave 1 / T2 — Punch list polish tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wave 1 / T2 — Punch list polish tests.
 
 Covers:
     * Reopen audit lifecycle (closed -> open writes a reopen_history entry).

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resource-category normalisation: machinery must stay distinct from equipment.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resource-category normalisation: machinery must stay distinct from equipment.
 
 Regression for the methodology engine. The post-Soviet СМР/SMR cascade splits
 construction machinery (which rides inside the SMR works base) from installed

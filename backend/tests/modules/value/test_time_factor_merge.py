@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-engine tests for the hours-saved factor merge (no DB, py3.11-safe).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-engine tests for the hours-saved factor merge (no DB, py3.11-safe).
 
 ``merge_factors`` is the deterministic glue that turns a tenant's sparse
 overrides into the full effective factor map the aggregation functions take.

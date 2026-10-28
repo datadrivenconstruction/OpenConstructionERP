@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the FX service (PostgreSQL).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the FX service (PostgreSQL).
 
 The network is stubbed at the transport method (``_fetch_ecb_xml`` /
 ``_fetch_ppp``) and never above it, so the XML parsing, the upsert, the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seeded baseline must be a plan the earned-value screen can measure against.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seeded baseline must be a plan the earned-value screen can measure against.
 
 Two steps of the cost-control walkthrough land on this screen, the one that
 freezes the plan and the one that reads the forecast, and the module shipped

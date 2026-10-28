@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The page, header, footer and watermark settings of the document appearance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The page, header, footer and watermark settings of the document appearance.
 
 Each setting is read back off the generated PDF rather than off a stub canvas,
 because the shared page furniture guards every draw: a stub that refuses a call

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Historical performance: statistics, splits, currency, data quality, drilldown, comparison, context.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Historical performance: statistics, splits, currency, data quality, drilldown, comparison, context.
 
 Every figure below is invented and worked out by hand in the comment beside it, so a failure says
 which arithmetic moved. The contracts:

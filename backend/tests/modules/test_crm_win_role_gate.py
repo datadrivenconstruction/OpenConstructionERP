@@ -1,4 +1,4 @@
-"""CRM win-opportunity role-gate tests (R7 audit).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRM win-opportunity role-gate tests (R7 audit).
 
 ``crm.win_opportunity`` was originally an ``EDITOR``-level permission.
 Round-5 audit tightened it to ``MANAGER+`` because winning a deal:

@@ -1,4 +1,4 @@
-"""Performance contract for the cost autocomplete endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Performance contract for the cost autocomplete endpoint.
 
 Before this wave the autocomplete handler fetched ``limit * 3`` rows
 via the generic ``search_costs`` path, then re-sorted them in Python by

@@ -1,4 +1,4 @@
-"""Unit tests for tender addenda and bid leveling.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for tender addenda and bid leveling.
 
 Covers:
 - ``revision_no`` auto-increments per package (1, 2, ...) across

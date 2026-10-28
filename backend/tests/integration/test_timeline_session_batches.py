@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Real PostgreSQL savepoints/commits, isolated by an outer test transaction."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Real PostgreSQL savepoints/commits, isolated by an outer test transaction."""
 
 from __future__ import annotations
 

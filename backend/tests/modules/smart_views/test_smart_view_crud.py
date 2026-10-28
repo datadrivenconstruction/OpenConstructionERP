@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Smart Views CRUD tests — service-layer, against an isolated PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views CRUD tests — service-layer, against an isolated PostgreSQL.
 
 Every test uses a transaction-isolated session from ``tests._pg`` (the shared
 schema-loaded ``oe_test_unit`` database, rolled back on teardown) — never the

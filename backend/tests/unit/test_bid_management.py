@@ -1,4 +1,4 @@
-"""Unit tests for the Bid Management module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Bid Management module.
 
 Covers:
     * Pure helpers (compute_submission_total, compute_completeness_score,

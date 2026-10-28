@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A deployment without a frontend must not look like a crashed server.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A deployment without a frontend must not look like a crashed server.
 
 Two states, and until this fix they were answered by one bug and one silence.
 

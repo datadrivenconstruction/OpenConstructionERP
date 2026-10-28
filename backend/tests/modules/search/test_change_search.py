@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for change-family unified search (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for change-family unified search (PostgreSQL, py3.12).
 
 Drives the new SQL-track branches in :func:`_sql_search_collection` directly:
 change orders, MoC entries, and the combined variations surface (notice /

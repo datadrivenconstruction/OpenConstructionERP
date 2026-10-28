@@ -1,4 +1,4 @@
-"""Tests for the accommodation/room booking list endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the accommodation/room booking list endpoints.
 
 Covers:
     * GET /accommodation/{id}/bookings — paginated multi-room list with

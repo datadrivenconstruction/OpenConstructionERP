@@ -1,4 +1,4 @@
-"""A vector reindex must read the collection, and let go of it, one page at a time.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A vector reindex must read the collection, and let go of it, one page at a time.
 
 ``create_vector_routes`` is the factory behind ``POST /vector/reindex/`` in six
 modules, so whatever shape it reads in is the shape all six read in. It read the

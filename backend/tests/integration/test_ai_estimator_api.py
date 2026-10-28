@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration baseline for the ``/api/v1/ai-estimator/`` API surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration baseline for the ``/api/v1/ai-estimator/`` API surface.
 
 Drives the full AI Estimate Builder run lifecycle end-to-end through the
 ASGI app with no AI key and no Qdrant (the deterministic graceful-degradation

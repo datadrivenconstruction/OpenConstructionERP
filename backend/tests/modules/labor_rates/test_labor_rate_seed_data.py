@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The starter rate library must survive the layers that read it silently.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The starter rate library must survive the layers that read it silently.
 
 Three readers take the seed data without complaining about it, so a bad row
 here shows up as a wrong number on screen rather than as a failure:

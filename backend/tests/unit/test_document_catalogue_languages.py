@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every platform language has a complete entry in every outgoing-document catalogue.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every platform language has a complete entry in every outgoing-document catalogue.
 
 An email, a workbook header or a notification that a reader in Hindi or Hebrew
 gets in English is a defect nobody sees until that one event fires for that one

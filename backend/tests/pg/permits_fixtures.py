@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the permits PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the permits PostgreSQL tests.
 
 A world is a throwaway database with real users and a DE project in North
 Rhine-Westphalia whose roadmap pins the shipped ``de_nw`` catalogue (it extends

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How a holiday answer was arrived at, not only what it was.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How a holiday answer was arrived at, not only what it was.
 
 ``_get_holidays`` used to collapse four situations into one ``frozenset``:
 covered and complete, covered but outside a curated window, not covered at all,

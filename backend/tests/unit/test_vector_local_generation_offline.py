@@ -1,4 +1,4 @@
-"""The offline fallback of the vector loader has to survive its own first line.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The offline fallback of the vector loader has to survive its own first line.
 
 When the pre-built embeddings cannot be fetched, this endpoint falls back to
 generating them locally from the cost items already in the database. That branch

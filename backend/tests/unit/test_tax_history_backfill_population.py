@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The past windows ``tax_history_backfill`` may deliver, pinned against the seed file.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The past windows ``tax_history_backfill`` may deliver, pinned against the seed file.
 
 Every entry has to be a window the file really ships, closed, and in front of
 a later window on the same line: that is the only shape the repair exists for,

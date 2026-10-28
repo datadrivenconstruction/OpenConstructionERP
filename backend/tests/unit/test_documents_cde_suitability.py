@@ -1,4 +1,4 @@
-"""Unit tests for item #21 — ISO 19650 CDE suitability transitions on Documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for item #21 — ISO 19650 CDE suitability transitions on Documents.
 
 Pins the unified Documents <-> CDE state-transition contract:
 

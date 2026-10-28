@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The weak-JWT-secret rules have one source of truth, and it is strict.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The weak-JWT-secret rules have one source of truth, and it is strict.
 
 These constants used to exist twice, in ``app/config.py`` and in
 ``app/main.py``, maintained by hand. They had already drifted: the copy in

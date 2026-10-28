@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every onboarding Country Pack preset must name a cost base that really exists.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every onboarding Country Pack preset must name a cost base that really exists.
 
 ``countryPacks.ts`` states this as its own invariant: every ``region`` is an
 existing CWICR database id. Nothing enforced it. The preset table is

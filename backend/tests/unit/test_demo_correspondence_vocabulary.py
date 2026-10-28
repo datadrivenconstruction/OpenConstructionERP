@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo estate must give every project its own correspondence register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo estate must give every project its own correspondence register.
 
 Two defects, both reported by eye rather than by a gate, both fixed in
 ``0ada247a8``. What was seeded until then:

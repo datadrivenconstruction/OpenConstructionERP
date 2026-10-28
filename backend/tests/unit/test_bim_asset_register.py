@@ -1,4 +1,4 @@
-"""Unit tests for Asset Register (BIMElement.asset_info, v2.3.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for Asset Register (BIMElement.asset_info, v2.3.0).
 
 Covers the repository-level merge / auto-flag logic only - avoids the
 full app lifespan because SQLAlchemy models can be exercised in

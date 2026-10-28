@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``normalize_standard`` matches by substring, and that is a hazard with no victim yet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``normalize_standard`` matches by substring, and that is a hazard with no victim yet.
 
 The function recognises a contract family anywhere in a free-text hint, which is
 what lets ``"NEC4 ECC Option A"`` and ``"nec3"`` both resolve to NEC. The cost of

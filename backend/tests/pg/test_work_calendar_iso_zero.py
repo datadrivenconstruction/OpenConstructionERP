@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ISO-zero repair against the row it exists for and the row it must not touch.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ISO-zero repair against the row it exists for and the row it must not touch.
 
 The headline number is the one to read first. Saudi Arabia stored as
 ``[0, 1, 2, 3, 4]`` counts four working days in the week of 4 January 2026,

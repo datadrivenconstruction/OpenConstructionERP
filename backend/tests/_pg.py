@@ -1,4 +1,4 @@
-"""PostgreSQL test-isolation helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PostgreSQL test-isolation helpers.
 
 The backend runs only on PostgreSQL, so the test suite does too. ``conftest``
 provisions a cluster for the session (an embedded PostgreSQL 16 when no

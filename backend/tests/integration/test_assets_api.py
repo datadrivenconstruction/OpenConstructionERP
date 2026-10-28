@@ -1,4 +1,4 @@
-"""Integration tests for the Asset Operations API (/api/v1/assets).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the Asset Operations API (/api/v1/assets).
 
 Drives the full HTTP stack against create_app() so routing, permission
 gating, project-access checks and serialization are all exercised. BIM

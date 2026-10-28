@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration test: takeoff service raises 422 unit_system_mismatch.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration test: takeoff service raises 422 unit_system_mismatch.
 
 Wave 24 (#167) — assert that persisting a metric takeoff measurement into
 an imperial project raises HTTP 422 with code='unit_system_mismatch'.

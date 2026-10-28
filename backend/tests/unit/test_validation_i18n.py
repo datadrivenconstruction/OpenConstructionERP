@@ -1,4 +1,4 @@
-"""Tests for the validation i18n bundle and rule-level locale wiring.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the validation i18n bundle and rule-level locale wiring.
 
 Covers three concerns:
 

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Policy gate for every third-party host the basemap proxy talks to.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Policy gate for every third-party host the basemap proxy talks to.
 
 WHY THIS EXISTS. The basemap upstream was a keyless CARTO raster. It stopped
 being keyless with no release, no notice and no failing check: it kept

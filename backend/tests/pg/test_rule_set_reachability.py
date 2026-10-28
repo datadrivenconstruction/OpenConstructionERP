@@ -1,4 +1,4 @@
-"""Every rule set a module asks the engine for must resolve to real rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every rule set a module asks the engine for must resolve to real rules.
 
 A rule set is a name, and nothing checks that the name means anything. Rules
 register into the set named by their ``standard`` unless the registration

@@ -1,4 +1,4 @@
-"""Unit tests for construction-vocabulary synonym expansion.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for construction-vocabulary synonym expansion.
 
 ``app.modules.catalog.synonyms`` is pure (stdlib only), so it is loaded here
 directly from its file path - independent of the FastAPI dependency graph, and

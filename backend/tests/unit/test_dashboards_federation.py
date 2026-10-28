@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T10 unit tests — Multi-Source Project Federation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T10 unit tests — Multi-Source Project Federation.
 
 Pins :mod:`app.modules.dashboards.federation`:
 

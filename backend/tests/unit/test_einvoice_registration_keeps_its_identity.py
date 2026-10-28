@@ -1,4 +1,4 @@
-"""A registration with documents filed under it keeps the identity they were sent with.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A registration with documents filed under it keeps the identity they were sent with.
 
 ``remove_registration`` already refuses to delete such a registration, because
 it is the only record of which company, country and tax number the filed

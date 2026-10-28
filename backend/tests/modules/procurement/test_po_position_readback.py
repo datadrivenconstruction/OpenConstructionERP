@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A purchase order has to read back the position it was ordered against.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A purchase order has to read back the position it was ordered against.
 
 ``POItemCreate`` accepts a ``boq_position_id``, the buyer picks one, and the
 order stores only the cost line it resolved to, because a money row carries no

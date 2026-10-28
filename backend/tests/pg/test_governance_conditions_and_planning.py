@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Conditions, the stop freeze and gate planning, over HTTP against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Conditions, the stop freeze and gate planning, over HTTP against PostgreSQL.
 
 What a condition is today does not wait for a sweep, who may close one is
 answered per row for the caller, a stop freezes the whole frame, and a gate's

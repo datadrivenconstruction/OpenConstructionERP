@@ -1,4 +1,4 @@
-"""Norwegian catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Norwegian catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

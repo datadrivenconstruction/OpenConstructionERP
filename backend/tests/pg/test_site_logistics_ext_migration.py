@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v78 builds exactly the schema the site-logistics models build, and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v78 builds exactly the schema the site-logistics models build, and undoes it.
 
 Up, down, up on PostgreSQL for the fifteen new tables and the nullable columns
 added to the gate, laydown zone and delivery tables. The reflected schema from

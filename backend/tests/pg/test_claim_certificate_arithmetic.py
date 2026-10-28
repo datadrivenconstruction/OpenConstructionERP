@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The G702 asks the owner for what the claim is owed, in ordinary workflows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The G702 asks the owner for what the claim is owed, in ordinary workflows.
 
 A money review ran real claims through the service and the endpoints and
 found the certificate and the claim disagreeing in four everyday cases. The

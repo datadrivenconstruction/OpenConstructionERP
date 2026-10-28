@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database-free unit tests for the transmittals international reporting layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the transmittals international reporting layer.
 
 Covers localization with English fallback, the one-line explainers, counts by
 status and by purpose, the acknowledgement rate (with its division-by-zero and

@@ -1,4 +1,4 @@
-"""Integration tests for the BCF module HTTP surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the BCF module HTTP surface.
 
 Covers:
     * topic / comment / viewpoint CRUD with auth

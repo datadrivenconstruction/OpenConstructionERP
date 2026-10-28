@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project scoping of the drawing-sheet register, asserted at the route.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project scoping of the drawing-sheet register, asserted at the route.
 
 The register now has a screen of its own - an index, a detail drawer and an
 insights band - and every number on it comes from one of the eight

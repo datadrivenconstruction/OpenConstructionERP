@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""French works contracts measured against the Code de la commande publique, CCAG-Travaux 2021 and the 1970s laws.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠French works contracts measured against the Code de la commande publique, CCAG-Travaux 2021 and the 1970s laws.
 
 The French row lives in the same registries as the Egyptian one
 (:mod:`app.modules.contracts.public_procurement`,

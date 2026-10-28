@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An approved change order moves the schedule lines its items name.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approved change order moves the schedule lines its items name.
 
 It used to land as one pooled line whatever its items said, so the concrete
 line a change added 20 m3 to kept its old scheduled value, and every claim

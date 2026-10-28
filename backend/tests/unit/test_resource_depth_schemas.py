@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the resource-depth schemas (T3.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the resource-depth schemas (T3.1).
 
 Schema-only (pydantic + stdlib), so they run on the local Python 3.11 runner
 without importing the ORM / DB layer. The focus is the money-as-string

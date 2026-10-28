@@ -1,4 +1,4 @@
-"""Wave 8 (Tests) - pure unit coverage for under-tested RFI service logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wave 8 (Tests) - pure unit coverage for under-tested RFI service logic.
 
 These tests need no database: they drive ``RFIService`` against the same
 in-memory stub family the other RFI unit suites use, so they run locally and

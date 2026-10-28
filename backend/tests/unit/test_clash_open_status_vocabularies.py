@@ -1,4 +1,4 @@
-"""The clash package defines "open" twice, for two different questions (#187).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The clash package defines "open" twice, for two different questions (#187).
 
 ``clash.schemas.OPEN_STATUSES`` answers "which ``ClashResult.status`` values
 still need attention" and is drawn from ``CLASH_STATUSES``. It is what every

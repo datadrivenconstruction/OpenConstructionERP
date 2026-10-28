@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A refused property search carries a code, not only an English sentence.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A refused property search carries a code, not only an English sentence.
 
 The 400 ``detail`` used to be the store's message as a bare string, and the
 panel rendered it as written, so an Italian reader got "Unknown column" and

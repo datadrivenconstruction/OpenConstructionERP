@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seeded service desk must not report a 100% SLA breach.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seeded service desk must not report a 100% SLA breach.
 
 Every ticket the demo shipped had breached, which reads as a broken feature
 rather than as a struggling contractor. Two independent causes:

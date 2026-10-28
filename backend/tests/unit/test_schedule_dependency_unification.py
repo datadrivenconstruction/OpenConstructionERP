@@ -1,4 +1,4 @@
-"""Unit tests for the unified schedule dependency graph (Lane B).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the unified schedule dependency graph (Lane B).
 
 Scope:
     Pins the single-source-of-truth contract introduced for schedule

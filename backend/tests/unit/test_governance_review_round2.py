@@ -1,4 +1,4 @@
-"""Rules the second review asked for, each pinned without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rules the second review asked for, each pinned without a database.
 
 The same rules run against PostgreSQL in tests/pg/test_governance_idor.py
 (settings and areas frozen while a gate is in review, explicit nulls) and in

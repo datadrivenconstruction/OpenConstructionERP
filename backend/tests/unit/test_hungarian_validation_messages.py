@@ -1,4 +1,4 @@
-"""Hungarian catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hungarian catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

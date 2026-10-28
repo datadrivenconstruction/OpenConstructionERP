@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The chat's own Anthropic call sends an API model id, never the UI alias.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The chat's own Anthropic call sends an API model id, never the UI alias.
 
 Settings > AI stores the dropdown choice ("claude-sonnet", "claude-opus",
 "claude-haiku"), and ``resolve_provider_key_model`` hands that choice back as

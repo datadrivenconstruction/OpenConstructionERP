@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`app.core.csv_safety` — CSV formula-injection defence.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.core.csv_safety` — CSV formula-injection defence.
 
 These tests pin down the contract of :func:`neutralise_formula` so that
 future refactors cannot silently weaken the BUG-CSV-INJECTION fix:

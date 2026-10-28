@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Baseline unit tests for the Pipeline Builder module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline unit tests for the Pipeline Builder module.
 
 Covers the three workflow touch-points the module owns end-to-end:
 

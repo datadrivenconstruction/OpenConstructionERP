@@ -1,4 +1,4 @@
-"""Epic I6 — FIEBDC-3 / BC3 parser tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I6 — FIEBDC-3 / BC3 parser tests.
 
 Covers four synthetic BC3 fixtures (the format has no canonical reference
 file the test repo can ship — every spec example is copyrighted by AENOR

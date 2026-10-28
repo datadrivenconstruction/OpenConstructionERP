@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A closed final account keeps the value it was closed at.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A closed final account keeps the value it was closed at.
 
 Closing a final account is a MANAGER action that records the signer and moves
 the account to ``closed``, a status the lifecycle leaves no way out of. The

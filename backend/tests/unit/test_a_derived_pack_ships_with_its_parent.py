@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A pack derived from another pack is only a pack while its parent is there.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A pack derived from another pack is only a pack while its parent is there.
 
 ``turkey-tr-mep`` builds its manifest from the ``turkey-tr`` manifest when it
 is loaded and states only its own fields. Everything that ships packs was

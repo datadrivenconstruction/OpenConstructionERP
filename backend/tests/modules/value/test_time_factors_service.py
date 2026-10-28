@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the admin-tunable hours-saved factors (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the admin-tunable hours-saved factors (PostgreSQL, py3.12).
 
 Exercises the ``oe_value_time_factor`` read / upsert layer end to end: listing
 defaults vs overrides, upserting an override (and seeing it flow into the

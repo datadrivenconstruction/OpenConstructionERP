@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for :mod:`app.modules.file_references`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.modules.file_references`.
 
 Coverage:
     * ISO 19650 validator passes on a well-formed name.

@@ -1,4 +1,4 @@
-"""Unit tests for the subcontractors module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the subcontractors module.
 
 Scope:
     - Pure helpers: derive_cert_status, compute_expiry_alerts,

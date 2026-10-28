@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the approval-route dry-run simulator.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the approval-route dry-run simulator.
 
 Pure logic only - no database, no session. Covers the shared clearance rule
 (``step_cleared``), the minimum-approvals helper, and the ``simulate_route``

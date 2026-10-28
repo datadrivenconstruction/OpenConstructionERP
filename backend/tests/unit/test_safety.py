@@ -1,4 +1,4 @@
-"""Unit tests for :class:`SafetyService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`SafetyService`.
 
 Scope:
     Covers incident CRUD, observation CRUD with risk score computation,

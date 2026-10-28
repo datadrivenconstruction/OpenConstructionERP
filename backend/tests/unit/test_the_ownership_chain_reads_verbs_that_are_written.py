@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ownership chain reads two activity-log verbs. Something must write them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ownership chain reads two activity-log verbs. Something must write them.
 
 Two services reconstruct who held a change record and when, and both do it by
 selecting activity rows whose ``action`` is one of two verbs. Each declares

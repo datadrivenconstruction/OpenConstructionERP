@@ -1,4 +1,4 @@
-"""Punch photo evidence and the BCF round-trip (real PostgreSQL session)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Punch photo evidence and the BCF round-trip (real PostgreSQL session)."""
 
 from __future__ import annotations
 

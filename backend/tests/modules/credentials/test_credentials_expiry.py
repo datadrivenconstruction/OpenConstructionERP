@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The register's whole reason to exist: a credential that ages out.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The register's whole reason to exist: a credential that ages out.
 
 Nothing writes to a credential row as it ages. It is created once, and then the
 calendar moves. Every query that trusts the stored ``status`` column therefore

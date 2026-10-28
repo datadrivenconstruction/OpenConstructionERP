@@ -1,4 +1,4 @@
-"""Unit tests for :class:`ProcurementService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ProcurementService`.
 
 Scope:
     Covers PO creation, status transitions (draft -> issued -> received),

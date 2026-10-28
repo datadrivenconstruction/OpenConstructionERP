@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""uvicorn's log lines do not carry a credential from a URL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠uvicorn's log lines do not carry a credential from a URL.
 
 The realtime sockets took the access token as ``?token=``, and uvicorn wrote
 it twice: on the WebSocket ``[accepted]`` line (``uvicorn.error``, logged even

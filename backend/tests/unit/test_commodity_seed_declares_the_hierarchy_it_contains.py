@@ -1,4 +1,4 @@
-"""The commodity-code seed must describe a hierarchy it actually contains.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The commodity-code seed must describe a hierarchy it actually contains.
 
 ``app/modules/supplier_catalogs/data/unspsc_construction.csv`` ships inside the
 wheel and is loaded verbatim by ``SupplierCatalogsService.seed_commodity_codes``:

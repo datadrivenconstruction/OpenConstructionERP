@@ -1,4 +1,4 @@
-"""Regression tests for BUG-011: validate-BOQ payload completeness.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for BUG-011: validate-BOQ payload completeness.
 
 Background
 ~~~~~~~~~~

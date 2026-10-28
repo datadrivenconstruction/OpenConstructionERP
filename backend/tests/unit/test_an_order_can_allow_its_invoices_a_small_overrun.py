@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A purchase order may allow its invoices a stated overrun before warning.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A purchase order may allow its invoices a stated overrun before warning.
 
 Freight, rounding on a weighed delivery, a price index clause: a supplier's
 invoice often lands a little above the order, and a buyer who has agreed to

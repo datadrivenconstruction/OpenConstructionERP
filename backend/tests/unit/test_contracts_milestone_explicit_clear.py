@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An instalment can be switched from a fixed amount to a percentage.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An instalment can be switched from a fixed amount to a percentage.
 
 The contracts updates drop None so an omitted field is never written as
 NULL. For an instalment that made the switch impossible: ``value`` wins over

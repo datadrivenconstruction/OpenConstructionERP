@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Smart Views — preset catalogue + install tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views — preset catalogue + install tests.
 
 Exercises the static catalogue surface (``BUILTIN_PRESETS``,
 ``list_presets``) and the service-layer ``install_preset`` path. Every

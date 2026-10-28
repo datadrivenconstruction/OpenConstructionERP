@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The two reindex endpoints that are NOT built by ``create_vector_routes``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The two reindex endpoints that are NOT built by ``create_vector_routes``.
 
 Six modules mount their vector routes from the factory, so bounding the factory
 bounded six of the platform's eight reindex paths at once. The other two are

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""The BI list endpoints answer for the project in the address bar.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The BI list endpoints answer for the project in the address bar.
 
 ``/projects/{id}/bi-dashboards`` used to render the company-wide page: the
 five list endpoints had no project dimension, so the route claimed a project

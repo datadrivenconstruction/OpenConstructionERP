@@ -1,4 +1,4 @@
-"""A punch item written by any module is priced in its project's currency.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A punch item written by any module is priced in its project's currency.
 
 ``PunchListService.create_item`` already stamped the project currency, but the
 model default was ``USD`` and five other writers build ``PunchItem`` directly:

@@ -1,4 +1,4 @@
-"""Unit tests for :class:`NCRService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`NCRService`.
 
 Scope:
     Covers NCR CRUD, severity validation, status transition enforcement,

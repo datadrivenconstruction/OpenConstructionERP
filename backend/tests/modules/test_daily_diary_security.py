@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""R7 audit regressions — daily_diary module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 audit regressions — daily_diary module.
 
 Pins down the security guarantees the R7 sweep enforces over the daily-
 diary surface (53 endpoints, 7 upload-style paths, signed-immutable

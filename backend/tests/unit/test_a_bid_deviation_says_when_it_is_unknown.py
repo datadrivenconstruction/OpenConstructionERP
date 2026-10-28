@@ -1,4 +1,4 @@
-"""A bid total's deviation says when it could not be computed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bid total's deviation says when it could not be computed.
 
 ``compare_bids`` writes ``deviation_pct = 0.0`` for a bid it cannot compare
 with the budget (a zero budget, or a bid in another currency). The tender

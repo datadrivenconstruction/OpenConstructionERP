@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Bridge tests for the NCR clash auto-creation (Lane A).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bridge tests for the NCR clash auto-creation (Lane A).
 
 The NCR module subscribes to ``clash.high_severity.detected`` and raises a
 formal NCR for CRITICAL clashes (or reviewer-confirmed ones). High clashes

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The per-row write path and the bulk route, end to end, against the booted app.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The per-row write path and the bulk route, end to end, against the booted app.
 
 GAEB (``_persist_imported_boq``), Excel (``import_boq_excel``) and the smart
 import all create the rows of a bill with ``BOQService.add_position`` inside one

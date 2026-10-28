@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Five endpoints a stranger could call, and what each of them gave away.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Five endpoints a stranger could call, and what each of them gave away.
 
 A per-route pass over the live router tree found four routes with no gate of
 any kind plus one install route gated on authentication alone. They are not

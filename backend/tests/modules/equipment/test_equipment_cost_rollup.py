@@ -1,4 +1,4 @@
-"""Gap C tests: equipment cost rollup to ``BudgetLine.actual``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap C tests: equipment cost rollup to ``BudgetLine.actual``.
 
 Exercises :class:`EquipmentActualsService` (the Gap C shared cost-spine
 interface for equipment) and its detached event subscribers. The service is

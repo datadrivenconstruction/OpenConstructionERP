@@ -1,4 +1,4 @@
-"""Per-region vector stats count a projected ``region`` column, never the vectors."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-region vector stats count a projected ``region`` column, never the vectors."""
 
 import pyarrow as pa
 

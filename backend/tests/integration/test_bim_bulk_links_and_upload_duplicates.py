@@ -1,4 +1,4 @@
-"""Bulk BOQ linking and same-file upload detection in the BIM hub.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bulk BOQ linking and same-file upload detection in the BIM hub.
 
 * ``POST /bim_hub/links/bulk/`` links a whole selection to one BOQ position in
   one request (it used to take one request per element), skips elements that

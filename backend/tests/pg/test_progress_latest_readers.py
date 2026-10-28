@@ -1,4 +1,4 @@
-"""PG: the single-row "latest" readers lead with ``seq``, not with ``recorded_at``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the single-row "latest" readers lead with ``seq``, not with ``recorded_at``.
 
 Progress entries are append-only: a mistake is corrected by recording a NEW
 entry, so the reading that counts is the one appended LAST. ``seq`` is what

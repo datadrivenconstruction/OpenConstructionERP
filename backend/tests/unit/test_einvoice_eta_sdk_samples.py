@@ -1,4 +1,4 @@
-"""ETA serialization and signature, pinned to the samples ETA publishes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ETA serialization and signature, pinned to the samples ETA publishes.
 
 The fixtures in ``tests/fixtures/eta`` are copied unedited from the ETA SDK
 (https://sdk.invoicing.eta.gov.eg/files/, read 2026-10-19), except that the

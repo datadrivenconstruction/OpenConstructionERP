@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The PDF route is the BOQ editor's PDF now, so it has to answer what the editor asks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The PDF route is the BOQ editor's PDF now, so it has to answer what the editor asks.
 
 The editor's button downloads ``/export/pdf/?measurement_system=...&
 include_resources=true``. Through the real route, against a euro project that

@@ -1,4 +1,4 @@
-"""The upgrade path for the one timestamp column that was declared naive.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The upgrade path for the one timestamp column that was declared naive.
 
 ``classified_at`` is now ``DateTime(timezone=True)`` like the other 197 module
 timestamps, which fixes a fresh installation outright. It does not fix an

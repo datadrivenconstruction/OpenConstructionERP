@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Front-door OOM guards on the BIM Hub upload endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Front-door OOM guards on the BIM Hub upload endpoint.
 
 ``upload_bim_data`` used to ``await file.read()`` both the element table and
 the geometry blob with no size cap, and handed the xlsx straight to openpyxl

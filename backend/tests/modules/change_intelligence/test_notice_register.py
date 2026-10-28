@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the contractual notice / time-bar register (PG, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the contractual notice / time-bar register (PG, py3.12).
 
 Seeds change-family records, a contract that declares the project standard, and a
 notice letter, then drives :func:`build_notice_register` and checks the derived

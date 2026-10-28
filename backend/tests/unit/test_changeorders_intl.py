@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the change orders international helpers (app.modules.changeorders.intl).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the change orders international helpers (app.modules.changeorders.intl).
 
 Pure functions, no database. These cover the international-robustness contract:
 Decimal-exact money, no hardcoded currency, never summing across currency codes,

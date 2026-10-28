@@ -1,6 +1,6 @@
 # OpenConstructionERP — DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Round-7 hardening tests for the Punch List module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-7 hardening tests for the Punch List module.
 
 Covers:
     1. FSM — ``assigned`` state: open → assigned → in_progress → verified → closed

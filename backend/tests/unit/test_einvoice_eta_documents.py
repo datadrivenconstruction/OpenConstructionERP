@@ -1,4 +1,4 @@
-"""ETA documents: the SDK equations, the builder and the pre-submit rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ETA documents: the SDK equations, the builder and the pre-submit rules.
 
 The equations are those of the ETA SDK document reference
 (https://sdk.invoicing.eta.gov.eg/documents/invoice-v1-0/ and the calculation

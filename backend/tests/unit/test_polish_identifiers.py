@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Polish NIP, REGON, KRS and postal code: the checks and where they are enforced.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Polish NIP, REGON, KRS and postal code: the checks and where they are enforced.
 
 Every valid value below has its check digit worked out in the comment beside
 it, so a reader can see the case is a real distinguishing one and not a value

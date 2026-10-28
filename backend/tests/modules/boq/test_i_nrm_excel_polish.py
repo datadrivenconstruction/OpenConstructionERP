@@ -1,4 +1,4 @@
-"""Epic I9 — Excel/CSV polish: NRM element-code detection.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I9 — Excel/CSV polish: NRM element-code detection.
 
 The Excel importer now recognises NRM-style codes (``2.6.1``) and NRM
 section headers (``Element 2 — Substructure``) and surfaces them in

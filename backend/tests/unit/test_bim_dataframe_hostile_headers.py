@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Property search over column names and cell text straight from a CAD export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property search over column names and cell text straight from a CAD export.
 
 Every sidecar column name is a CAD header, so it is text the person who built
 the model chose: an imperial inch mark (``diameter 1"``), a balanced quote that

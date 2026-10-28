@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic tests for the defects-liability / DLP register core.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic tests for the defects-liability / DLP register core.
 
 Every test drives :mod:`app.modules.defects_liability.register` from plain
 dataclasses with no database, mirroring the sibling temporary-works and

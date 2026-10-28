@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database tests for the opt-in limitation regime on a warranty entry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database tests for the opt-in limitation regime on a warranty entry.
 
 The pure tests in ``tests/unit/test_defects_liability_limitation.py`` drive the
 derivation helper directly. These drive the two service methods that actually

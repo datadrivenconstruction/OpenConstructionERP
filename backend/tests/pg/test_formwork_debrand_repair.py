@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The boot-path repair for trademarked formwork catalogue rows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The boot-path repair for trademarked formwork catalogue rows.
 
 Runs against a real PostgreSQL cluster because the thing under test is a data rewrite and a
 duplicate guard that compares a nullable ``tenant_id``, and both of those are exactly what an

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""OOM hardening for the match_elements file-upload endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OOM hardening for the match_elements file-upload endpoints.
 
 The from-excel and from-pdf session-creation handlers used to read the whole
 request body into RAM with ``await file.read()`` and had no spreadsheet-bomb

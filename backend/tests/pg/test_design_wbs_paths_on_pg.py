@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""WBS rules hold on the projects write paths: duplication and the projects router."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠WBS rules hold on the projects write paths: duplication and the projects router."""
 
 from __future__ import annotations
 

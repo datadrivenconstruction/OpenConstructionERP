@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — IDOR protection for PDF takeoff documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — IDOR protection for PDF takeoff documents.
 
 Covers bullet 6 of the R7 hardening sweep:
   * Wrong-tenant cannot retrieve another tenant's takeoff results.

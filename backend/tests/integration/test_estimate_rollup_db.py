@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed tests for the estimate-rollup composition service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed tests for the estimate-rollup composition service.
 
 Builds a project with a known BOQ base, known preliminaries and known allowances
 on a real PostgreSQL database, then asserts the composed estimate total is exactly

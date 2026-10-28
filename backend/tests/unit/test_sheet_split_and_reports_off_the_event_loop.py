@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The drawing set split, the project COBie and BI reports render off the loop.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The drawing set split, the project COBie and BI reports render off the loop.
 
 Companion to ``test_exports_render_off_the_event_loop.py``, same method: a spy
 records the thread the heavy call ran on, then calls the real one, and the test

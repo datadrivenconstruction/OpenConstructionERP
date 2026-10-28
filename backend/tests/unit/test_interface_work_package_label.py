@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The work-package label recases keys and leaves written text alone.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The work-package label recases keys and leaves written text alone.
 
 The interface register printed "Lv 01" where the work package is "LV 01 -
 Baustelleneinrichtung und Gemeinkosten". The label is built at seed time from a

@@ -1,4 +1,4 @@
-"""Tests for AI prompt templates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for AI prompt templates.
 
 Verifies that all prompts exist, are non-empty, and contain
 required placeholders for runtime string formatting.

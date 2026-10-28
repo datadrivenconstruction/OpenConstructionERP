@@ -1,4 +1,4 @@
-"""Epic I2 + I11 + I12 — GAEB XML importer regression tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I2 + I11 + I12 — GAEB XML importer regression tests.
 
 Pins that the refactored ``GAEBXMLImporter`` still parses representative
 GAEB DA XML fixtures correctly. Specifically:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Relinking cannot keep the prior catalogue's provenance for an unresolved item."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Relinking cannot keep the prior catalogue's provenance for an unresolved item."""
 
 from __future__ import annotations
 

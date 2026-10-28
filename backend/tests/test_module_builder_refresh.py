@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bringing an installed module's code up to the current generator, on boot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bringing an installed module's code up to the current generator, on boot.
 
 The generator never overwrites a module directory, so a fix to what it renders
 reaches modules built from then on and none of those already installed. When

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``POST /schedule-advanced/{id}/level-resources`` levels the whole logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``POST /schedule-advanced/{id}/level-resources`` levels the whole logic.
 
 The endpoint used to run an FS-only leveler while ``/level-preview`` and
 ``/level-apply`` already ran the engine that honours all four PDM link types.

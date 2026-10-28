@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The payment certificate (hakediş) we issue to one of our own subcontractors.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The payment certificate (hakediş) we issue to one of our own subcontractors.
 
 The same sheet as the one a progress claim prints, read the other way round:
 we are the employer, the subcontractor is the contractor, and the taxes are

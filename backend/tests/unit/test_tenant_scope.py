@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the Phase 1 tenant-scope scaffolding.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Phase 1 tenant-scope scaffolding.
 
 These pin the *resolution policy* of :mod:`app.core.tenant_scope` so the
 multi-tenant hardening that builds on it (Phase 2 onwards) has a stable,

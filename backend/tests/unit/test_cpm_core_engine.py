@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure CPM core engine (cpm.compute_cpm / TaskNetwork).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure CPM core engine (cpm.compute_cpm / TaskNetwork).
 
 Pure-Python, no DB. The claims-grade extension tests
 (``test_cpm_claims_grade.py``) exercise the additive forensic post-processors,

@@ -1,4 +1,4 @@
-"""Wave 23 — Document template currency parameterisation integration tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wave 23 — Document template currency parameterisation integration tests.
 
 Covers the ``resolve_template_currency`` helper from
 ``app.modules.reporting.currency_resolver`` and the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the inbound webhook signature-verification seam.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the inbound webhook signature-verification seam.
 
 Pure (no DB, no app, no network): exercises
 :func:`verify_provider_signature` and its helpers directly. Proves the seam

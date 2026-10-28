@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locale gate: fail a locale file that is still mostly English placeholder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale gate: fail a locale file that is still mostly English placeholder.
 
 The Hungarian bundle was assembled and passed every locale gate this repository
 has while 30746 of its 41903 values were byte-identical to their English source.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A traced variation line says what it does to its source, and the rule that judges it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A traced variation line says what it does to its source, and the rule that judges it.
 
 Issue #435. A trace row said where a line of a variation's bill came from and
 nothing about what the variation does to that source. A line citing contract

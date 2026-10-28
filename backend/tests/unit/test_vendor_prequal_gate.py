@@ -1,4 +1,4 @@
-"""Vendor prequalification: scoring + procurement PO gate (TOP-30 #20).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Vendor prequalification: scoring + procurement PO gate (TOP-30 #20).
 
 Two layers:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read and write an HSE frame, over HTTP against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read and write an HSE frame, over HTTP against PostgreSQL.
 
 A stranger to the project answers 404 on every route, exactly like a missing
 project. Reading never writes: the frame exists only after an explicit write.

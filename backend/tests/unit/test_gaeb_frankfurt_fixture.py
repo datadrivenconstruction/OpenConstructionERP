@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Frankfurt Rohbau X83 fixture: schema-valid, realistic, fully imported.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Frankfurt Rohbau X83 fixture: schema-valid, realistic, fully imported.
 
 ``frankfurt_rohbau_x83.x83`` is the everyday-shaped companion to the
 conformance fixture: a clean German Angebotsaufforderung (X83, DA83/3.3)

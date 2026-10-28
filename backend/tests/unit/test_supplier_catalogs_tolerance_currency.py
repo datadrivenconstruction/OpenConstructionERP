@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""supplier_catalogs: a tolerance profile's absolute floor names its currency.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠supplier_catalogs: a tolerance profile's absolute floor names its currency.
 
 A profile carries two price bands and the wider one wins: a percentage of the
 order total, and an absolute floor. The percentage is safe in any currency,

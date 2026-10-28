@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the AI Estimate Builder service-layer logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the AI Estimate Builder service-layer logic.
 
 These are pure unit tests (no DB, no HTTP, no AI key, no Qdrant). They pin the
 load-bearing pure-logic invariants of the new ``oe_ai_estimator`` module:

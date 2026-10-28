@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Portfolio capacity-planning heatmap (Wave 2, item #5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Portfolio capacity-planning heatmap (Wave 2, item #5).
 
 ``ResourcesService.portfolio_capacity`` aggregates resource assignments across
 every project into a week/month-bucketed utilization heatmap, flagging

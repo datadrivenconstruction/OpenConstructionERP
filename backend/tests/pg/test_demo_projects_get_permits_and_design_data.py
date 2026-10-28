@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Every demo project gets its permits and design data through the normal install, with no warning.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every demo project gets its permits and design data through the normal install, with no warning.
 
 The permits and design seeders write through services that refuse a live change to a binding
 frame. The governance story binds the frame first, so these projects used to log a skipped

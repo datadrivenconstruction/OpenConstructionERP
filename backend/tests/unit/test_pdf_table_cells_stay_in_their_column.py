@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A table cell longer than its column must not be drawn over the column beside it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A table cell longer than its column must not be drawn over the column beside it.
 
 These four documents give their tables explicit column widths, so they always
 fitted the page and nothing ever looked wrong about their geometry. What they

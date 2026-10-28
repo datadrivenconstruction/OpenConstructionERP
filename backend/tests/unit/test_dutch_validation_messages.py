@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction ? OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Dutch must resolve every validation message without an English fallback."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Dutch must resolve every validation message without an English fallback."""
 
 from __future__ import annotations
 

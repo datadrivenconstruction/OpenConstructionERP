@@ -1,4 +1,4 @@
-"""Quantity rules behind the BIM quantity proposals.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Quantity rules behind the BIM quantity proposals.
 
 The proposal must compute a linked position's quantity exactly the way the BIM
 Hub set it when the link was made, otherwise the first look at an untouched

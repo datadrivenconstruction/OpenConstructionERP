@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A claim line entered as "% complete" bills that percent of its SoV line.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A claim line entered as "% complete" bills that percent of its SoV line.
 
 The line editor sends the percent and the value together, and a line typed as
 a percent alone arrives with a value of zero. The endpoints stored the zero,

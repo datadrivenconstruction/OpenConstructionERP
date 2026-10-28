@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One row the sweep cannot write must not silence the sweep.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One row the sweep cannot write must not silence the sweep.
 
 Found in production, not by reading: a single punch item held an
 ``owner_user_id`` that parses as a UUID and names nobody. The sweeper decided

@@ -1,4 +1,4 @@
-"""The model payload carries the running conversion step only while it is processing."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The model payload carries the running conversion step only while it is processing."""
 
 from datetime import UTC, datetime
 from types import SimpleNamespace

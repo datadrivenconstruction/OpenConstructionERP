@@ -1,4 +1,4 @@
-"""Every cost base card resolves to a file in its own language, or says it has none.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every cost base card resolves to a file in its own language, or says it has none.
 
 A national base's market card promises two things: the market's prices and the
 market's language. Before this matrix existed, an English card on a base that had

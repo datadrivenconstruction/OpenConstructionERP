@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule HTTP authorship cannot be supplied by the client."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule HTTP authorship cannot be supplied by the client."""
 
 import uuid
 

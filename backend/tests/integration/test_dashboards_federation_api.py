@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T10 integration tests — Multi-Source Project Federation API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T10 integration tests — Multi-Source Project Federation API.
 
 Stands up a minimal FastAPI app with the dashboards router + a
 ``LocalStorageBackend`` rooted in a temp dir, seeds two snapshots'

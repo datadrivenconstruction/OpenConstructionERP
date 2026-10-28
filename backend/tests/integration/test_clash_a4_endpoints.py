@@ -1,4 +1,4 @@
-"""Integration tests for the Wave A4 clash endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the Wave A4 clash endpoints.
 
 Covers:
     * GET  /runs/{rid}/clusters         — cluster chip payload

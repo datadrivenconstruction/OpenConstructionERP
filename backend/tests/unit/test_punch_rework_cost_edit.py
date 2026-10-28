@@ -1,4 +1,4 @@
-"""Rework cost on a punch item, entered and then edited from the punch list.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rework cost on a punch item, entered and then edited from the punch list.
 
 The punch list screen now prices a snag when it is raised and lets the price be
 changed later from the item drawer. The schema tests elsewhere check that a

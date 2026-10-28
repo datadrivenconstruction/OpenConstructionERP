@@ -1,4 +1,4 @@
-"""Tests for the RBAC permission engine."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the RBAC permission engine."""
 
 import pytest
 

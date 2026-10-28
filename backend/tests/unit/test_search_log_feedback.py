@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the v2936 search-log user-feedback hook.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the v2936 search-log user-feedback hook.
 
 Two pieces under test:
 

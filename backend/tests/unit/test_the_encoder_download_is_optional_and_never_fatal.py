@@ -1,4 +1,4 @@
-"""The encoder download happens only when asked, and is never fatal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The encoder download happens only when asked, and is never fatal.
 
 Three properties are being pinned here, and the third is the one that is easy to
 lose while building the first two:

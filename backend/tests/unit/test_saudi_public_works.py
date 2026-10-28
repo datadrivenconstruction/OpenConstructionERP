@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Saudi public works: the GTPL figures, two dated laws, and the private FIDIC profile beside them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Saudi public works: the GTPL figures, two dated laws, and the private FIDIC profile beside them.
 
 A Saudi project that records public works is governed by the Government
 Tenders and Procurement Law; which one depends on when the tender was

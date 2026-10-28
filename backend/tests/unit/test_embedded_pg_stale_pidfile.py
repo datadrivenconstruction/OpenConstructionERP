@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A leftover ``postmaster.pid`` must not be believed just because its number is alive.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A leftover ``postmaster.pid`` must not be believed just because its number is alive.
 
 Operating systems reuse process identifiers, and Windows reuses them quickly.
 A pidfile left behind by a force-killed postmaster keeps naming a number, and

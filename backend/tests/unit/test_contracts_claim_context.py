@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Other modules add to a claim's rule context by registering, not by import.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Other modules add to a claim's rule context by registering, not by import.
 
 Contracts used to import the subcontractors rollup lazily to put it into the
 ``pay_application`` context. Modules are plugins, so that import is a server

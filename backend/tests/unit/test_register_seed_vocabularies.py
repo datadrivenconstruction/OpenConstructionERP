@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Seeded register values, read out of the shapes the wide gate cannot see.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seeded register values, read out of the shapes the wide gate cannot see.
 
 ``test_demo_seed_speaks_module_vocabularies.py`` asks the same question across
 every module, and its answer is trustworthy for the shape it reads: a dict

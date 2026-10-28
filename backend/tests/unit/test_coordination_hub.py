@@ -1,4 +1,4 @@
-"""Baseline tests for the Coordination Hub aggregator (v4.2.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline tests for the Coordination Hub aggregator (v4.2.0).
 
 Covers:
 

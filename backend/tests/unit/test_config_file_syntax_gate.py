@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The categorical config-syntax gate has to be able to fail.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The categorical config-syntax gate has to be able to fail.
 
 scripts/check_config_file_syntax.py parses every tracked YAML and JSON file. A
 gate whose good outcome is an empty list is worth nothing until it has been

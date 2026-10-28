@@ -1,4 +1,4 @@
-"""Coordinate-validation tests for ``GET /api/v1/fieldreports/weather/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Coordinate-validation tests for ``GET /api/v1/fieldreports/weather/``.
 
 The endpoint accepts ``lat`` / ``lon`` query params and forwards them
 to OpenWeatherMap. Pre-fix the params were declared as unbounded

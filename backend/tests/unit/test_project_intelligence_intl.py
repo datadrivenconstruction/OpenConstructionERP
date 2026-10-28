@@ -1,4 +1,4 @@
-"""Database-free tests for project_intelligence presentation helpers."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free tests for project_intelligence presentation helpers."""
 
 from app.modules.project_intelligence.scorer import (
     SEVERITIES,

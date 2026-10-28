@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The unset paper size follows the country, and the country list is not invented.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The unset paper size follows the country, and the country list is not invented.
 
 ``app.core.paper_size`` exists because ``oe_users_user.paper_size`` was offered,
 stored and read by nothing. The interesting half of the fix is not the wiring

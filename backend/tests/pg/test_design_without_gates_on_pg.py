@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management on a project that does not use gates, walked to the end on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management on a project that does not use gates, walked to the end on PostgreSQL.
 
 Nothing in design is approved by a gate decision: approval points and releases
 are decided on approval routes, reports are accepted by hand. So a project

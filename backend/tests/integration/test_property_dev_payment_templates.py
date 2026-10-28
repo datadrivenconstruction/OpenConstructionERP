@@ -1,4 +1,4 @@
-"""Integration tests for the milestone-template payment-schedule flows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the milestone-template payment-schedule flows.
 
 Covers the new endpoints + service helpers added so the PropertyDevPage
 UI can drive Reservations → SPA → Payment Schedule end-to-end:

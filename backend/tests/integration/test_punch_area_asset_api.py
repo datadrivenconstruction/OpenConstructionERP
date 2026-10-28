@@ -1,4 +1,4 @@
-"""HTTP tests: where a punch item is (area) and which asset it concerns."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP tests: where a punch item is (area) and which asset it concerns."""
 
 from __future__ import annotations
 

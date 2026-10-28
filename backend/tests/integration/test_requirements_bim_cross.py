@@ -1,4 +1,4 @@
-"""Integration tests for the Requirements ↔ BIM cross-module wiring.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the Requirements ↔ BIM cross-module wiring.
 
 Drives the full v1.4.3 flow end-to-end against a live app instance:
 

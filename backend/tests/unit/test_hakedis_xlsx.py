@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The hakediş workbook holds the same figures as the PDF, as numbers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The hakediş workbook holds the same figures as the PDF, as numbers.
 
 A cost control department reworks a certificate in a spreadsheet. So the
 workbook has to carry the computed totals exactly (no float, no formula that

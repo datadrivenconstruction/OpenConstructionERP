@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Upload endpoints must advertise exactly the formats and limits they enforce.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Upload endpoints must advertise exactly the formats and limits they enforce.
 
 The BIM Hub CAD upload published ``CAD file (RVT, IFC, DWG, DGN, FBX, OBJ,
 3DS)`` in its OpenAPI metadata long after the handler had stopped accepting the

@@ -1,4 +1,4 @@
-"""R7 deep-hardening tests — Material Planning + Work Orders + Payments + Transactions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 deep-hardening tests — Material Planning + Work Orders + Payments + Transactions.
 
 Modules covered:
     * procurement  — MaterialRequisition FSM, delivery date, qty reconciliation, IDOR

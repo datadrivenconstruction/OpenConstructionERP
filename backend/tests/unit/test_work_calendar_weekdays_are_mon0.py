@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No shipped Monday-zero calendar may carry a weekday the CPM engine cannot count.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No shipped Monday-zero calendar may carry a weekday the CPM engine cannot count.
 
 This is the mirror of ``tests/unit/test_work_calendar_weekdays_are_iso.py``.
 

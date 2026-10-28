@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP tests for the FX router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP tests for the FX router.
 
 The router is mounted on a bare app with the test session injected, so these
 exercise the real request/response contract - status codes, serialisation of

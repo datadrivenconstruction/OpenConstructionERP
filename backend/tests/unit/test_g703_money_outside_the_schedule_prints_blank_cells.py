@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The G703 row carrying money no schedule line carries leaves C, % and H empty.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The G703 row carrying money no schedule line carries leaves C, % and H empty.
 
 That row exists because earlier claims billed work that no schedule of values
 line holds, either a month billed from cost on a contract that can bill both

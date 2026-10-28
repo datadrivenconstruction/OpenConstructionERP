@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The certified payroll demo seed: which weeks it builds and where it runs."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The certified payroll demo seed: which weeks it builds and where it runs."""
 
 import uuid
 from datetime import date

@@ -1,4 +1,4 @@
-"""The computed-key guard sees the t() call sites whose key is not a literal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The computed-key guard sees the t() call sites whose key is not a literal.
 
 scripts/check_i18n_orphan_keys.py reads `t('literal', {defaultValue})` and
 resolves the key. Its regex requires a quoted string, so every call site that

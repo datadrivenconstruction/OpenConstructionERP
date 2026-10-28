@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Hits from the ``oe_cost_items`` vector collection follow the catalogue owner.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hits from the ``oe_cost_items`` vector collection follow the catalogue owner.
 
 The collection is fed by the cost event handlers and the admin reindex with
 every cost row, rows of user-owned catalogues included, and its points carry

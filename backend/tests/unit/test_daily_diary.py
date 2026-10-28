@@ -1,4 +1,4 @@
-"""Unit tests for the daily-diary module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the daily-diary module.
 
 Coverage:
     * Pure helpers: payload determinism, hashing, completeness,

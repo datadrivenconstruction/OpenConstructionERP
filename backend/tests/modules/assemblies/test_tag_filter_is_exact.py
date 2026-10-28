@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The tag filter matches whole tags, case-insensitively, not substrings."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The tag filter matches whole tags, case-insensitively, not substrings."""
 
 from __future__ import annotations
 

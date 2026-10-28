@@ -1,4 +1,4 @@
-"""Every CLI command has to land in the data directory, not in the directory it was started from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every CLI command has to land in the data directory, not in the directory it was started from.
 
 A path that resolves against the working directory works everywhere it is
 developed and tested. It fails only where the product is actually installed:

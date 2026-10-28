@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The dates on a demo RFI have to agree with the labels the register prints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The dates on a demo RFI have to agree with the labels the register prints.
 
 On the RFI screen a row printed "22d" in the DAYS column and a red "+113" pill
 beside it, meaning it was raised 22 days ago and is 113 days past its deadline:

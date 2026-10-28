@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An approved change moves the schedule of values with the contract sum.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approved change moves the schedule of values with the contract sum.
 
 The wave-5 subscribers used to move ``Contract.total_value`` and nothing else,
 so the lines the claims bill against stopped adding up to G702 line 3 with the

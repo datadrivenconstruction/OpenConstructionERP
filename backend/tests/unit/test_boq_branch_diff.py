@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure rules of estimate branches: identity, compare, three-way plan, drift.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure rules of estimate branches: identity, compare, three-way plan, drift.
 
 Everything here runs on plain rows, no database: what a cherry-pick or a merge
 writes is decided by :mod:`app.modules.boq.branch_diff` alone.

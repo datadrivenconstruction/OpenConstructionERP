@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed tests for a variation request's own bill of quantities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed tests for a variation request's own bill of quantities.
 
 A variation request could only ever carry two headline numbers, an estimated
 cost and a number of days. Issue #435 lets it own a dedicated bill instead,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Hungarian költségvetés imports with its quantities, its rates and its totals left out.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Hungarian költségvetés imports with its quantities, its rates and its totals left out.
 
 A tester in Hungary imported their bills and "did not get a good result".
 Run through the spreadsheet importer, a bill in the everyday Hungarian layout

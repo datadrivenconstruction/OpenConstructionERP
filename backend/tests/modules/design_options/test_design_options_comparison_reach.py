@@ -1,4 +1,4 @@
-"""The comparison answers more than cost, and says when it cannot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The comparison answers more than cost, and says when it cannot.
 
 A design option is a whole alternative, so a column carries the programme and
 the embodied carbon of the things the option links, not only the money. These

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Compliance pack resolution keys off the ISO country column, not free text.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance pack resolution keys off the ISO country column, not free text.
 
 A project carries both ``country_code`` (ISO 3166-1 alpha-2, a controlled
 value) and ``region`` (free text somebody types). Pack selection used to read

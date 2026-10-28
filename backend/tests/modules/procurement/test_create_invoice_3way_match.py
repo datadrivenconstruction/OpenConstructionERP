@@ -1,4 +1,4 @@
-"""Router-level tests for ``POST /v1/procurement/{po_id}/create-invoice/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Router-level tests for ``POST /v1/procurement/{po_id}/create-invoice/``.
 
 Covers the P0-1 fix: only-draft GRs without ``force`` → 400 with
 ``code == "no_confirmed_grs"``; with ``force=true`` → 201 + the invoice

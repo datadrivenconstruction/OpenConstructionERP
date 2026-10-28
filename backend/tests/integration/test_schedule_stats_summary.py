@@ -1,4 +1,4 @@
-"""Project schedule rollup: ``GET /api/v1/schedule/stats/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project schedule rollup: ``GET /api/v1/schedule/stats/``.
 
 The project-dashboard "Schedule summary" widget reads this endpoint for
 progress, completed/delayed counts, and the next milestone. This pins:

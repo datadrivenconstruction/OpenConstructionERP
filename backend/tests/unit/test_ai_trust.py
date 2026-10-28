@@ -1,4 +1,4 @@
-"""Unit tests for the AI trust-envelope module (pure stdlib, py3.11).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the AI trust-envelope module (pure stdlib, py3.11).
 
 Covers ``clamp_confidence`` normalisation, ``parse_envelope_from_text`` over
 clean / absent / malformed / partial blocks, ``Source`` round-tripping through

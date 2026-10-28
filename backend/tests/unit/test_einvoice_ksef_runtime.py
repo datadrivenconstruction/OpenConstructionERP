@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""KSeF around the document: QR codes, offline deadlines, the API, the rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠KSeF around the document: QR codes, offline deadlines, the API, the rules.
 
 Nothing here reaches KSeF. The API client runs against an in-process fake that
 holds its own RSA key, so the fake can decrypt what the client encrypted and

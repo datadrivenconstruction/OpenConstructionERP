@@ -1,4 +1,4 @@
-"""Construction-control Pillar 3 (as-built) integration + IDOR/tenant-isolation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 3 (as-built) integration + IDOR/tenant-isolation tests.
 
 Covers the verified-record flow end to end:
 

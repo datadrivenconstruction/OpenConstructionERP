@@ -1,4 +1,4 @@
-"""Bootstrap PropDev block → Accommodation rooms.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bootstrap PropDev block → Accommodation rooms.
 
 Two runs in a row must produce the same final room set; ``rooms_created``
 on the second pass must be zero.

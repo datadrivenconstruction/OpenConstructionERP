@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Forecast methods, documented snapshots, comparison and exports, end to end on the database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Forecast methods, documented snapshots, comparison and exports, end to end on the database.
 
 The project is the one of ``test_cost_control_service``: the shell line (330)
 is awarded at 100 000 against an estimate of 110 000 and a budget of 100 000,

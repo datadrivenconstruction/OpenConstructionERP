@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Saudi real estate sale is VAT exempt and carries the 5 percent RETT.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Saudi real estate sale is VAT exempt and carries the 5 percent RETT.
 
 The property table called the post-2020 treatment ``zero_rated``. The amount
 was the same 0.00, the meaning was not: a zero-rated supply keeps the

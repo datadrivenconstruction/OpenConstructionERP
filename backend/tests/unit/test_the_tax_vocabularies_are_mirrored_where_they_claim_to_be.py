@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Two vocabularies in this module are copied by hand and say so in a comment.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Two vocabularies in this module are copied by hand and say so in a comment.
 
 ``schemas.py`` carries a ``Literal`` that mirrors ``TAX_COMBINATIONS`` in
 models.py and another that mirrors ``ResolutionStatus`` in tax_rules.py. Both

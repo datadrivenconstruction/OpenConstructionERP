@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A price analysis has to come out in the shape the estimator's market expects.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A price analysis has to come out in the shape the estimator's market expects.
 
 ``Preset`` has carried a ``region`` field since the presets were written. It is
 declared on the dataclass, it is serialised into ``to_dict`` for the UI, and

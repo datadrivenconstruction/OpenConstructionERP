@@ -1,4 +1,4 @@
-"""The commit-subject guard rejects shell artefacts and nothing else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The commit-subject guard rejects shell artefacts and nothing else.
 
 Twelve published commits open with ``@`` before their real subject, one of them
 the v14.6.0 release commit, because a PowerShell here-string opener was written

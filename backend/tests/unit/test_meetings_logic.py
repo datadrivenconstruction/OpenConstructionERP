@@ -1,4 +1,4 @@
-"""Unit tests for the meetings carry-over and minutes logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the meetings carry-over and minutes logic.
 
 Scope:
     Pure, database-free helpers in ``app.modules.meetings.logic``: action

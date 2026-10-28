@@ -1,4 +1,4 @@
-"""An RVT the installed converter rejects is an error, not a missing converter."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An RVT the installed converter rejects is an error, not a missing converter."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Registration bootstrap — first user becomes admin, subsequent users viewer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Registration bootstrap — first user becomes admin, subsequent users viewer.
 
 Regression test for the v2.0.0 RBAC UX regression where self-registered users
 were universally demoted to `viewer`, causing every write action to 403 in

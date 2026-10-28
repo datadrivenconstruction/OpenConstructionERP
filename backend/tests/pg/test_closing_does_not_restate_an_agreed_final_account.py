@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Closing a contract does not restate a final account somebody signed off.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closing a contract does not restate a final account somebody signed off.
 
 ``close_contract`` creates the final account, or updates the one already
 there, and completes the contract. It used to write the request's figures and

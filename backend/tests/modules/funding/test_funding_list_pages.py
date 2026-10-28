@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The four registers under an application answer with a page, and say so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The four registers under an application answer with a page, and say so.
 
 These endpoints used to answer with a bare array, which cannot tell a reader
 it was cut short. The envelope they answer with now can, and the only thing

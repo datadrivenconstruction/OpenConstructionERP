@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-module event-emission tests for approval-routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-module event-emission tests for approval-routes.
 
 The wave-fix introduced ``approval_routes.instance.{started,advanced,
 completed,rejected,cancelled}`` events so consumer modules (variations,

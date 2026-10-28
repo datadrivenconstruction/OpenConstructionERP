@@ -1,4 +1,4 @@
-"""Unit tests for the 8.6.1 BIM data-dir fix - back-compat-root LISTING gap.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the 8.6.1 BIM data-dir fix - back-compat-root LISTING gap.
 
 Background
 ----------

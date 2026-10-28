@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Certified payroll arithmetic: the week, the package comparison, the pay split."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Certified payroll arithmetic: the week, the package comparison, the pay split."""
 
 from decimal import Decimal
 

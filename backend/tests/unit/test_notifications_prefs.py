@@ -1,4 +1,4 @@
-"""Unit tests for Notifications preferences + digest queue (Wave 3 / T9).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for Notifications preferences + digest queue (Wave 3 / T9).
 
 Covers the four behavioural contracts of the new
 ``NotificationService.enqueue_or_dispatch`` + ``flush_digest_queue`` pair:

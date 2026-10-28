@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The handover-side demo seeds must fill their registers, once, and coherently.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The handover-side demo seeds must fill their registers, once, and coherently.
 
 Closeout, commissioning and construction control all shipped routed,
 permissioned and empty. The three seeders that fix that share the same ways of

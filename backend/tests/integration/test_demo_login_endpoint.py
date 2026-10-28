@@ -1,4 +1,4 @@
-"""Integration tests for the password-free demo-login endpoint (v2.6.22).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the password-free demo-login endpoint (v2.6.22).
 
 Covers:
     * Test A — POST /auth/demo-login/ with a whitelisted, seeded email

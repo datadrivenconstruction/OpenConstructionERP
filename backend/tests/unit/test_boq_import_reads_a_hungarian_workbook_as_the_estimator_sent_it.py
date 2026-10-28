@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Hungarian workbook imports whole, with its numbers, and says what it left out.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Hungarian workbook imports whole, with its numbers, and says what it left out.
 
 A user in Hungary installed the Hungarian country pack, imported their bills
 and "did not get a good result". The flat single-sheet bill already imported

@@ -1,4 +1,4 @@
-"""MISC-14: refusing a guessed revision survives real PostgreSQL transactions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠MISC-14: refusing a guessed revision survives real PostgreSQL transactions.
 
 Each case owns a new, empty database on the test session's cluster. No table in
 the shared test schema is changed. The two-boot cases preserve both the missing

@@ -1,4 +1,4 @@
-"""The risk register reports to the governance gate."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The risk register reports to the governance gate."""
 
 from __future__ import annotations
 

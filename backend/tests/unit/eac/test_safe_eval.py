@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the safe formula evaluator (EAC-1.3 §3 / §4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the safe formula evaluator (EAC-1.3 §3 / §4).
 
 Covers:
 

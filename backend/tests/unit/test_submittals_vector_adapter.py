@@ -1,4 +1,4 @@
-"""Unit tests for :class:`SubmittalVectorAdapter` (item 16)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`SubmittalVectorAdapter` (item 16)."""
 
 from __future__ import annotations
 

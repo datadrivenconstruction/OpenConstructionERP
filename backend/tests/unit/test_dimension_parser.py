@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — dimension-string parser (OCR output → float).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — dimension-string parser (OCR output → float).
 
 Covers bullet 5 of the R7 hardening sweep:
   * 20+ cases: metric mm/cm/m, imperial ft/in, mixed feet-inches with

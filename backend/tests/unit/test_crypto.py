@@ -1,4 +1,4 @@
-"""Tests for symmetric secret encryption (BUG-AI-CRYPTO01 regression).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for symmetric secret encryption (BUG-AI-CRYPTO01 regression).
 
 The crypto layer protects user-supplied AI provider keys at rest. These
 tests pin down the contract so a future refactor can't silently break

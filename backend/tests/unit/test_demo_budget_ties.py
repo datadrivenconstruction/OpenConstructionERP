@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The money of a filmed demo project adds up across the economics frame, the packages and the commitments.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The money of a filmed demo project adds up across the economics frame, the packages and the commitments.
 
 The rule, per project: the works, supply and supply-and-install packages plus the contingency drawdown equal the
 cost groups 300 and 400 of the DIN 276 cost frame; the design package equals the design fees already committed plus the

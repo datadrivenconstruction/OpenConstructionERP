@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Standing e-invoice configuration filling the gaps in one invoice's metadata.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Standing e-invoice configuration filling the gaps in one invoice's metadata.
 
 Seller identity and the bank account are the same on every invoice a company
 issues, so they belong to the instance rather than to the document. The document

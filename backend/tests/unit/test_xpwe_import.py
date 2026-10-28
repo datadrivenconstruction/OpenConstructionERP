@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An XPWE (Italian estimating XML) bill imports with its hierarchy, its libretto and its money intact.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An XPWE (Italian estimating XML) bill imports with its hierarchy, its libretto and its money intact.
 
 The fixture is described in :mod:`tests.fixtures.xpwe_builder`. Each item of it
 has a row only one rule gets right, so a test failing names the rule.

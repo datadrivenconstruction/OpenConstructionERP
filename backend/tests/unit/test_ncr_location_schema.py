@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure schema tests for the optional NCR location (no DB, no HTTP).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure schema tests for the optional NCR location (no DB, no HTTP).
 
 ``location_lat`` / ``location_lon`` / ``location_accuracy_m`` are what make
 "an inspector flags a non-conformity and a pin appears on the map" true

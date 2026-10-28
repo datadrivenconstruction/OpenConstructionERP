@@ -1,4 +1,4 @@
-"""Gap B unit tests: ``CostSpineService.post_actual_to_budget_line``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap B unit tests: ``CostSpineService.post_actual_to_budget_line``.
 
 The shared actual-cost posting method (costmodel/service.py) is the single sink
 Finance and Gaps A/C/E call to fold realised cost into ``BudgetLine.actual_amount``.

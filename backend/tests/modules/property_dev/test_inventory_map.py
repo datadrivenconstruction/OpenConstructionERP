@@ -1,4 +1,4 @@
-"""Inventory Map (task #142) — backend test suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inventory Map (task #142) — backend test suite.
 
 Covers the three new endpoints under ``/api/v1/property-dev/developments/
 {dev_id}/inventory-map/``:

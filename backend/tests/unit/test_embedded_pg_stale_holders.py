@@ -1,4 +1,4 @@
-"""A holder that was killed must not stop the next process from stopping the cluster.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A holder that was killed must not stop the next process from stopping the cluster.
 
 ``pixeltable-pgserver`` records one process identifier per process that opens
 the embedded cluster and stops the postmaster on the way out only when the list

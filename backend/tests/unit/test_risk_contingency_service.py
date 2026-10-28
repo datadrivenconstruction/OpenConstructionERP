@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Risk register to finance contingency, through the services and a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Risk register to finance contingency, through the services and a real database.
 
 What a project manager relies on, each pinned with a case where the wrong
 implementation gives a different number:

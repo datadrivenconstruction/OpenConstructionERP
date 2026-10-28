@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Regenerating a demo project's schedule from its bill gives a cost-loaded plan.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regenerating a demo project's schedule from its bill gives a cost-loaded plan.
 
 The demo is what people are shown first. Its bill carries labour and machine
 rows on every position, but their hours are synthetic (``demo_provenance.

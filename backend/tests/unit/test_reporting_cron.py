@@ -1,4 +1,4 @@
-"""Unit tests for the minimal cron parser (v2.3.0 scheduled reports).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the minimal cron parser (v2.3.0 scheduled reports).
 
 Covers field parsing, range/list/step syntax, invalid inputs and the
 ``next_occurrence`` walker for the patterns we care about (daily,

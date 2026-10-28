@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the per-project region TTL cache.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the per-project region TTL cache.
 
 The cache lives in ``app.core.match_service.region_cache`` and exists
 to amortise ``ProjectRepository.get_by_id`` calls that the ranker would

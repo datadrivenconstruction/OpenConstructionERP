@@ -1,4 +1,4 @@
-"""Database-level row-level-security enforcement (RLS Phase 2+).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-level row-level-security enforcement (RLS Phase 2+).
 
 The suite in ``test_tenant_isolation.py`` pins the *app-layer* tenant guards at
 the HTTP boundary. This suite pins the *database* backstop underneath them: when

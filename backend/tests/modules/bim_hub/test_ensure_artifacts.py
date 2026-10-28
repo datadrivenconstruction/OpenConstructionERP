@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level tests for ``BIMHubService.ensure_artifacts`` and friends.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level tests for ``BIMHubService.ensure_artifacts`` and friends.
 
 These cover the "every BIM import gets viewer + property artifacts" guarantee:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The public works rules speak on an Egyptian public contract and nowhere else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The public works rules speak on an Egyptian public contract and nowhere else.
 
 ``contracts.public_works_limits`` holds retention, the advance payment, the
 cap on delay damages and the performance security to Law 182/2018;

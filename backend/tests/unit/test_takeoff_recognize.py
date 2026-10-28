@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the offline vector recognition detectors (issue #194).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the offline vector recognition detectors (issue #194).
 
 These exercise :mod:`app.modules.takeoff.recognize` directly with synthetic
 ``get_drawings()``-shaped input (plain tuples), so no PDF, PDF reader or database

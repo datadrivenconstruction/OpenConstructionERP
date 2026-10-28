@@ -1,4 +1,4 @@
-"""French late-payment notice regimes: four clocks. Interest figures live in app/core/late_payment.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠French late-payment notice regimes: four clocks. Interest figures live in app/core/late_payment.
 
 France had no regime of its own, so a French clock could only be opened on the
 EU Directive row, which states ECB + 8 points. That is the public-buyer rate and

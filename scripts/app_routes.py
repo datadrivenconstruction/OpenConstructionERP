@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The route table the single-page application can actually serve.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The route table the single-page application can actually serve.
 
 Two things in this repository need to know which URLs the app answers, and
 until now each of them worked it out for itself. They disagreed, and the

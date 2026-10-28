@@ -1,4 +1,4 @@
-"""Unit tests for the HSE Advanced module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the HSE Advanced module.
 
 Coverage:
     * pure helpers — risk score, JSA risk, permit window, TRIR / LTIFR,

@@ -1,4 +1,4 @@
-"""Regression test for issue #342 - real notifications never reached Telegram.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression test for issue #342 - real notifications never reached Telegram.
 
 Connecting Telegram succeeded and the "Test" button delivered a message, but
 no real platform notification (task/RFI assignment, mention, status change, ...)

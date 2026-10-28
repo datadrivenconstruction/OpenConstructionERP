@@ -1,4 +1,4 @@
-"""Untrusted names that reach the filesystem never escape their base directory."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Untrusted names that reach the filesystem never escape their base directory."""
 
 from __future__ import annotations
 

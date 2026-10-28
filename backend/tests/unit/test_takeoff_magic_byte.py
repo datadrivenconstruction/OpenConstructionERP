@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — PDF upload magic-byte check.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — PDF upload magic-byte check.
 
 Covers bullet 1 of the R7 hardening sweep:
   * Every PDF upload endpoint must validate the file starts with ``%PDF-``

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rules V19, V20 and V22: each fires on its bad case and stays silent on the good one."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rules V19, V20 and V22: each fires on its bad case and stays silent on the good one."""
 
 from __future__ import annotations
 

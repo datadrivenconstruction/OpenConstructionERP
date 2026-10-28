@@ -1,4 +1,4 @@
-"""A workflow GitHub refuses to parse does not go red, it stops existing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A workflow GitHub refuses to parse does not go red, it stops existing.
 
 This exists because of a specific failure that cost two commits of coverage on a
 required lane. A job-level ``env:`` block named ``${{ runner.temp }}``. That is

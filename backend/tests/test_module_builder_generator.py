@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the module builder's spec and generator.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the module builder's spec and generator.
 
 The generator's claim is strong and so the tests are correspondingly literal:
 a spec that validates renders a module that compiles, that ruff accepts, and

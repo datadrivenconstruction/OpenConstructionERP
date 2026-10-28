@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Money-input hardening across audit wave-3 + release-gate modules (risk / qms /
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Money-input hardening across audit wave-3 + release-gate modules (risk / qms /
 punchlist / rfq_bidding / crm / portal / subcontractors).
 
 Each module accepts a monetary value that previously had no upper-magnitude

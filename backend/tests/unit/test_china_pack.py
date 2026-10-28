@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Chinese pack, and the one word it spelled two ways.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Chinese pack, and the one word it spelled two ways.
 
 A Chinese cost item is read by two things that never agreed with each other.
 ``match_elements`` builds a section path by asking

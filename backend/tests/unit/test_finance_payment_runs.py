@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment run rules: what is proposed, what blocks, what the bank receives."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment run rules: what is proposed, what blocks, what the bank receives."""
 
 from __future__ import annotations
 

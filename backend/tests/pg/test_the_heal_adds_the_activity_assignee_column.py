@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An install from before ``Activity.assignee_id`` gets the column on boot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An install from before ``Activity.assignee_id`` gets the column on boot.
 
 The column was added to the model without an Alembic revision. Installs are
 stamped rather than migrated, so the column reaches an existing database only

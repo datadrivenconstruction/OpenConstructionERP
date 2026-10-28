@@ -1,4 +1,4 @@
-"""Bengali catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bengali catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

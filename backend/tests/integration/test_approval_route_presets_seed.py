@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the approval-route preset seed (DB-backed).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the approval-route preset seed (DB-backed).
 
 Confirms the startup seed creates the tenant-wide presets with their steps and
 is idempotent: a second run inserts nothing and the table still holds exactly

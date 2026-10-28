@@ -1,4 +1,4 @@
-"""Korean messages preserve formats and the project's established BOQ vocabulary."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Korean messages preserve formats and the project's established BOQ vocabulary."""
 
 from __future__ import annotations
 

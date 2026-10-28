@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Snapshot immutability tests for the EAC alias-snapshot subsystem.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Snapshot immutability tests for the EAC alias-snapshot subsystem.
 
 EAC captures an :class:`EacAliasSnapshot` at the start of every run to
 guarantee deterministic replay even when aliases are later edited or

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-unit tests for the resumable-upload chunk math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-unit tests for the resumable-upload chunk math.
 
 No DB, no storage, no request layer - exercises
 :mod:`app.modules.resumable_uploads.chunking` directly. Covers the

@@ -1,4 +1,4 @@
-"""Replace the large text assets of a built frontend dist with xz copies.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Replace the large text assets of a built frontend dist with xz copies.
 
 Run between ``npm run build`` and ``python -m build --wheel``. The wheel is a
 deflate zip, and xz takes roughly another third off minified JS and the locale

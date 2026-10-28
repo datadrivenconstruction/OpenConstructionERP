@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for self-serve change reconstruction (#16).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for self-serve change reconstruction (#16).
 
 Reconstruction assembles an evidence pack scoped to ONE subject's reconciled
 cross-channel thread (the reconciliation engine's connected component of linked

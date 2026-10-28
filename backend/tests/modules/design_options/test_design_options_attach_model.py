@@ -1,4 +1,4 @@
-"""``POST /options/{option_id}/attach-model/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``POST /options/{option_id}/attach-model/``.
 
 The heavy CAD upload and conversion belongs to the BIM hub; this route only
 pairs an option with an already-converted model, or records a document that

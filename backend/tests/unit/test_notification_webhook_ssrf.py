@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A notification webhook target cannot point the server at an internal address.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A notification webhook target cannot point the server at an internal address.
 
 The integrations module's webhooks pass every URL through ``url_safety`` when
 it is saved and again right before it is sent. The notification module keeps a

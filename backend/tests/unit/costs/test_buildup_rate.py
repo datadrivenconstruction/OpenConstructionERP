@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The cost picker states the rate the bill line will receive.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost picker states the rate the bill line will receive.
 
 The "From Database" picker showed the catalogue ``rate`` while the add flow
 priced the new line from the item's components, so a row listed at one price

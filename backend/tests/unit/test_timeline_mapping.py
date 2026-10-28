@@ -1,4 +1,4 @@
-"""Pure unit tests for app.modules.timeline.mapping.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for app.modules.timeline.mapping.
 
 The mapping module imports only the standard library, but importing it via the
 normal dotted path would execute ``app/modules/timeline/__init__.py`` (which

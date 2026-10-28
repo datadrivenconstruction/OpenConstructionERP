@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The company name in a header band or a footer is drawn in a face that can
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The company name in a header band or a footer is drawn in a face that can
 draw it, and fits the room it is given.
 
 The name printed there is the firm's own. It reaches these lines through the

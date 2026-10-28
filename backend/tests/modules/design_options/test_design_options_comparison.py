@@ -1,4 +1,4 @@
-"""``GET /sets/{set_id}/comparison/`` and its spreadsheet twin.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``GET /sets/{set_id}/comparison/`` and its spreadsheet twin.
 
 The comparison is the point of the module: every option in a set is read from
 its OWN bill, rebased to one comparison currency, laid out as columns and trade

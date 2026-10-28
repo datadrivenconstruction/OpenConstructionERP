@@ -1,4 +1,4 @@
-"""Unit tests for the region → currency table and its warning path.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the region → currency table and its warning path.
 
 Audit fix #1 (2026-05-21): ``_resolve_currency`` previously fell through
 silently to ``EUR`` on unknown/malformed regions.

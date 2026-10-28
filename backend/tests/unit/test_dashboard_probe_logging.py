@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A failed dashboard probe must be visible, not just survivable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A failed dashboard probe must be visible, not just survivable.
 
 Both the BI KPI registry and the Coordination Hub aggregator are built to
 degrade rather than crash: a probe that fails yields a zero and the page

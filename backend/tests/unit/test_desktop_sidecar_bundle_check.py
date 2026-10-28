@@ -1,4 +1,4 @@
-"""The build gate that reads the produced desktop sidecar.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The build gate that reads the produced desktop sidecar.
 
 ``scripts/check_desktop_sidecar_bundle.py`` is the output half of the issue
 #419 fix: the hook refuses to build without PostgreSQL's loadable modules, and

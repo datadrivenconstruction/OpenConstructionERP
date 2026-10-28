@@ -1,4 +1,4 @@
-"""MISC-05: a base total never combines unconvertible currencies."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠MISC-05: a base total never combines unconvertible currencies."""
 
 from decimal import Decimal
 from types import SimpleNamespace

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The site-logistics plan service against PostgreSQL: rules that need real rows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The site-logistics plan service against PostgreSQL: rules that need real rows.
 
 Covers the area balance per stage, heavy-transport scheduling against permits,
 permit expiry, customs document templates, the plant-position power hook,

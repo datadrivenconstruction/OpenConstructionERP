@@ -1,4 +1,4 @@
-"""Closeout ZIP assembly test (real PostgreSQL session).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout ZIP assembly test (real PostgreSQL session).
 
 Exercises ``_build_zip_blob`` end to end and asserts the archive carries a
 cover PDF, machine-readable manifest.json, an index.json and a README, and

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for the temporary-works pure register core.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the temporary-works pure register core.
 
 Every test constructs plain :class:`RegisterItem` / :class:`RegisterPermit` value
 objects and asserts against exact results. No database, no ORM, no FastAPI - the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Hungary has a holiday calendar of its own, and says what it leaves out.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hungary has a holiday calendar of its own, and says what it leaves out.
 
 Until this file the engine had no Hungarian table and the seed had no
 Hungarian row, so a project in Hungary was planned on a Monday to Friday week

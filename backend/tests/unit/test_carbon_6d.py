@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the 6D carbon BIM-enrichment pure helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the 6D carbon BIM-enrichment pure helpers.
 
 All DB-free: only the pure helpers in ``carbon.service`` and the coverage
 ``ValidationRule`` are exercised. No AsyncSession, no fixtures, no database.

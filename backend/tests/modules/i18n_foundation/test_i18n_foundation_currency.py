@@ -1,4 +1,4 @@
-"""Currency conversion: exact decimal strings, rate selection, and bad input.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Currency conversion: exact decimal strings, rate selection, and bad input.
 
 Every assertion here is on an exact string. ``convert_currency`` takes a string
 amount, reads a string rate out of the database and returns a string result, so

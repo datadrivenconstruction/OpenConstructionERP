@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Applying an AI estimate to an existing bill respects that bill's lock.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Applying an AI estimate to an existing bill respects that bill's lock.
 
 The BOQ service refuses every position write on a locked bill
 (``_ensure_not_locked`` and ``_ensure_boq_writable`` both read ``is_locked``)

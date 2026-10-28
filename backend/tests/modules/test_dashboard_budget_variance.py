@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The over-budget card counts money that is promised, not only money that is gone.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The over-budget card counts money that is promised, not only money that is gone.
 
 ``variance.py`` was written because three callers each carried their own copy of
 the rule and a correction reached one of them. This card was a fourth, and it

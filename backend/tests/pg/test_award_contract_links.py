@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: the contract an award drafts names a real firm, and every award drafts one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the contract an award drafts names a real firm, and every award drafts one.
 
 Three gaps between the award and the contract it turns into, each written as a
 failing control before the fix:

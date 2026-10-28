@@ -1,4 +1,4 @@
-"""Integration tests for BIM model persistence policy (v2.6.29).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for BIM model persistence policy (v2.6.29).
 
 Covers the user-visible promise: "uploaded BIM models stay visible on
 /bim revisit without re-conversion".  The persistence policy:

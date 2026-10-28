@@ -1,4 +1,4 @@
-"""Unit tests for the schedule diff envelope adapters (snapshot_envelope).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the schedule diff envelope adapters (snapshot_envelope).
 
 Pure (stdlib only). Exercises ``live_envelope`` / ``normalize_envelope`` and a
 round-trip through the real ``diff_snapshots`` so the adapter and engine are

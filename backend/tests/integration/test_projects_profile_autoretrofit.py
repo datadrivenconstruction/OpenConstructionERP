@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Regression: GET /v1/projects/{id}/profile must auto-retrofit a
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: GET /v1/projects/{id}/profile must auto-retrofit a
 default profile for projects that never ran through the setup wizard,
 instead of returning 404.
 

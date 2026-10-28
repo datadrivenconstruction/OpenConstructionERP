@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v74 builds exactly the schema the design models build, and undoes it (up, down, up)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v74 builds exactly the schema the design models build, and undoes it (up, down, up)."""
 
 from __future__ import annotations
 

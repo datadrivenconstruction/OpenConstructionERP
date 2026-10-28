@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A seeded letter must reach the database pointing at the contact it is with.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A seeded letter must reach the database pointing at the contact it is with.
 
 The unit tests next to the generator check that every letter names a role the
 same demo seeds a contact for. They cannot check the step after that: the role

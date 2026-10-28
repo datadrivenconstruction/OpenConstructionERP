@@ -1,4 +1,4 @@
-"""Unit tests for :class:`ProcurementService` scorecard + 3-way match (Wave 2 / T4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ProcurementService` scorecard + 3-way match (Wave 2 / T4).
 
 Scope:
     * ``get_match_status`` — per-line PO/GR/Invoice classification (ok /

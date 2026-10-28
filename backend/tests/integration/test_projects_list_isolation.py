@@ -1,4 +1,4 @@
-"""Project list scoping (BUG-RBAC04 regression).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project list scoping (BUG-RBAC04 regression).
 
 The QA report ``BUGS_R2_R3_R4_2026_04_25.md`` flagged that a self-registered
 viewer could ``GET /api/v1/projects/`` and see every project on the

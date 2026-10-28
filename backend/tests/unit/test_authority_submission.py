@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure engine tests for the authority-submission factory.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure engine tests for the authority-submission factory.
 
 Pins the three jurisdiction-neutral engine functions with no DB and no clock:
 

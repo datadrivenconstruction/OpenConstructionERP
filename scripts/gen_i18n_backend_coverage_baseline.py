@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Regenerate scripts/i18n_backend_coverage_baseline.json from backend/locales.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regenerate scripts/i18n_backend_coverage_baseline.json from backend/locales.
 
 The baseline records, per locale, how many of en.json's keys that locale is
 still missing, plus a digest of which keys those are. It is declared debt and

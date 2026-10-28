@@ -1,4 +1,4 @@
-"""Partner-pack state must live in the ACTIVE data dir (FA-0003).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Partner-pack state must live in the ACTIVE data dir (FA-0003).
 
 Before the fix, ``partner_pack_state.json`` was always resolved to the
 DEFAULT ``~/.openestimate`` regardless of ``serve --data-dir``, so a stale

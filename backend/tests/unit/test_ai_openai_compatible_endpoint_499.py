@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Issue #499 - the self-hosted ``vllm`` provider as a generic OpenAI-compatible endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #499 - the self-hosted ``vllm`` provider as a generic OpenAI-compatible endpoint.
 
 A self-hosting operator asked for a provider that takes a base URL, an optional
 key and a model name, so any gateway or local runtime speaking the OpenAI chat

@@ -1,4 +1,4 @@
-"""Phase 4 - per-element ERP context endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Phase 4 - per-element ERP context endpoint.
 
 ``GET /api/v1/bim_hub/elements/{element_id}/context`` composes, on demand,
 everything the platform knows about one selected model element: its linked

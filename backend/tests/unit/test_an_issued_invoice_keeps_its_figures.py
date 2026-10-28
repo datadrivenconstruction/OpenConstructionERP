@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An approved, sent or paid invoice keeps what it charges, to whom and in which currency.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approved, sent or paid invoice keeps what it charges, to whom and in which currency.
 
 ``update_invoice`` checked only that a status change followed the invoice
 lifecycle. It never looked at the status the invoice was already in, so the

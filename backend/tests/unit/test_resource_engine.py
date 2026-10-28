@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Pure unit tests for the resource-depth engine (T3.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the resource-depth engine (T3.1).
 
 These tests import ONLY ``app.modules.resources.resource_engine`` (which itself
 depends only on the pure CPM engine in ``schedule_advanced.cpm``) plus the

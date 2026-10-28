@@ -1,4 +1,4 @@
-"""Self-service account erasure (GDPR Art. 17) - DELETE /api/v1/users/me.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Self-service account erasure (GDPR Art. 17) - DELETE /api/v1/users/me.
 
 Covers the service + router for the right-to-erasure endpoint that backs the
 signup UI's "delete your account at any time" promise:

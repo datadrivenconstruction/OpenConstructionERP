@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How the chat stream offers, dispatches and stores ``propose_*`` tool calls.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How the chat stream offers, dispatches and stores ``propose_*`` tool calls.
 
 The model changes nothing by itself. It reads through the read tools and
 proposes a change through the action registry's ``propose_*`` tools; a person

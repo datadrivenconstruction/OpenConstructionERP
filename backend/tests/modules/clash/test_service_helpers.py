@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-function tests for the clash service helpers (no DB, no GLB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function tests for the clash service helpers (no DB, no GLB).
 
 These pin the mathematical / heuristic contracts of the small pure
 helpers that the clash engine, the cluster/rule subsystem, the KPI

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Static wiring of the stakeholders module: IDOR guards, migration parity, messages, approval kind.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Static wiring of the stakeholders module: IDOR guards, migration parity, messages, approval kind.
 
 The repository's IDOR census only covers the modules it lists, so a new module
 passes it untouched; this file is the module's own guard (SPEC rule 22).

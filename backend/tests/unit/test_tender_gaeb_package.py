@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The GAEB call for bids of one tender package holds exactly the package's lines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The GAEB call for bids of one tender package holds exactly the package's lines.
 
 The tender page sent the whole source bill as X83, so a bidder asked to price
 the drywall also received the earthworks and the concrete. The package export

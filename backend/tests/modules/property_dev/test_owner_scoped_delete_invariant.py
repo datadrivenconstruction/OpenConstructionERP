@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Owner-scoped permissions are only safe next to an owner check.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Owner-scoped permissions are only safe next to an owner check.
 
 The module has permissions that map to EDITOR on the assumption that every
 route carrying them also calls a ``_verify_owner_via_*`` helper. Without that

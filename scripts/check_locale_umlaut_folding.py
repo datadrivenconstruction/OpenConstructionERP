@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locale umlaut guard: block a word from being spelled two ways in one file.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale umlaut guard: block a word from being spelled two ways in one file.
 
 German writes an umlaut either as the letter itself or, where the letter is
 unavailable, as the ASCII digraph that stands in for it: `ue` for u-umlaut,

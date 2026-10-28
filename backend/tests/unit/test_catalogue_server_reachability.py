@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Catalogue status distinguishes a failed probe from an empty server."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalogue status distinguishes a failed probe from an empty server."""
 
 import asyncio
 import threading

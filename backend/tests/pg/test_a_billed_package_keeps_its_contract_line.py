@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A work package billed on a locked GC claim keeps its schedule-of-values line, on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A work package billed on a locked GC claim keeps its schedule-of-values line, on PostgreSQL.
 
 A pay-application line without its own ``contract_line_id`` bills under its
 work package's line, so remapping the package moves that billed amount. Once

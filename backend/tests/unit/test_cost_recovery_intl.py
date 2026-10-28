@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure recovery-breakdown / provability / plain-language helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure recovery-breakdown / provability / plain-language helpers.
 
 Stdlib + pytest only - mirrors the engine's constraint so it runs on the local
 Python 3.11 test runner without app.* runtime services (no database, no ORM, no

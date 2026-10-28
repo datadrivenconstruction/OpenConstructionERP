@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Permits service on real PostgreSQL: route to roadmap, decisions, conditions, discharge, variation, races."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permits service on real PostgreSQL: route to roadmap, decisions, conditions, discharge, variation, races."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the schedule interchange cleaner (T1.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the schedule interchange cleaner (T1.1).
 
 Stdlib + the pure modules only, so they run on the local Python 3.11 runner.
 Each test drives one repair (or the advisory metrics) through

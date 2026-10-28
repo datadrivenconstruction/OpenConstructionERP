@@ -1,4 +1,4 @@
-"""Issues #139 & #136 — insert-below-selected-row + deep nesting (HTTP roundtrip).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issues #139 & #136 — insert-below-selected-row + deep nesting (HTTP roundtrip).
 
 Issue #139 — when the user inserts a new partida while a row mid-section is
 selected, the new row MUST land directly after that row (same parent /

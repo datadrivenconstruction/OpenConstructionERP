@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Money inside a module's validation message is rendered, never interpolated raw.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Money inside a module's validation message is rendered, never interpolated raw.
 
 The core rules were fixed first. The module rule sets carried the same defect:
 a ``Decimal`` dropped straight into the sentence reaches the reader as

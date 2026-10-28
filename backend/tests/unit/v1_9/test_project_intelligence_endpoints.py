@@ -1,4 +1,4 @@
-"""Unit tests for the Project Intelligence analytics endpoints (RFC 25).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Project Intelligence analytics endpoints (RFC 25).
 
 Scope:
     - Happy path for each of the 5 new services:

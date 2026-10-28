@@ -1,4 +1,4 @@
-"""Defect photo evidence: attach, pin, detach, and the rectified-defect rule."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Defect photo evidence: attach, pin, detach, and the rectified-defect rule."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""The onboarding save and read endpoints, over HTTP.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The onboarding save and read endpoints, over HTTP.
 
 The wizard and the Modules page both write the user's company profile through
 ``POST /v1/users/me/onboarding/``, and the sidebar, the Modules page and the

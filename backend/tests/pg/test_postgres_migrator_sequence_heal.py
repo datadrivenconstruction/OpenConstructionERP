@@ -1,4 +1,4 @@
-"""PG: the auto-migrator creates the sequence its own ADD COLUMN defaults from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the auto-migrator creates the sequence its own ADD COLUMN defaults from.
 
 ``oe_progress_entry.seq`` defaults from a named sequence. On a database created
 before v3258 the column is absent, so the boot-time healer emits

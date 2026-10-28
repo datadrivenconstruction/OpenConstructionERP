@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The sections a package was raised over can be read, not only computed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The sections a package was raised over can be read, not only computed.
 
 ``create_from_boq`` has recorded ``source_section_ids`` in the package metadata
 since it was written, and nothing has ever read it back. The comparison and

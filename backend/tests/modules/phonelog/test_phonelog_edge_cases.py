@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Edge-case integration tests for the phone-log module (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Edge-case integration tests for the phone-log module (PostgreSQL, py3.12).
 
 Complements ``test_phonelog_service.py`` with the boundaries: an empty capture,
 malformed / inconsistent timestamps, an unrecognised channel and direction, the

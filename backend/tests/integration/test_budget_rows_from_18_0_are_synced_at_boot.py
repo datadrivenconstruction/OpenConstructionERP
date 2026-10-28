@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Budget rows written by 18.0 read the right outturn from the first boot of 18.1.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Budget rows written by 18.0 read the right outturn from the first boot of 18.1.
 
 18.1 made ``committed`` the open part of each commitment and the outturn of a
 budget row ``committed + actual`` (``finance.variance``). 18.0 rows still hold

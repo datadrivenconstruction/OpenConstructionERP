@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration tests for GET /api/v1/projects/{id}/module-presence.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for GET /api/v1/projects/{id}/module-presence.
 
 The endpoint answers "does this project have any rows in module X?"
 for every module the sidebar can render, so the frontend can dim

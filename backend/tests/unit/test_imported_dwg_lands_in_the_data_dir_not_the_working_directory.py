@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One DWG root, and the project importer used to spell it a second way.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One DWG root, and the project importer used to spell it a second way.
 
 ``dwg_takeoff`` writes and serves drawings under ``_dwg_data_base()``, which
 defers to :func:`app.core.storage.resolve_data_dir`. Its docstring records why:

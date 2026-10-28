@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Edge-case integration tests for the connectors module (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Edge-case integration tests for the connectors module (PostgreSQL, py3.12).
 
 Complements ``test_connector_sync.py`` (the happy-path + root-confinement suite)
 with the boundary cases a thin integration test usually skips: an empty folder,

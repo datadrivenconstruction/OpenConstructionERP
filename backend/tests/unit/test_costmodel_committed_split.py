@@ -1,4 +1,4 @@
-"""Committed from documents split across budget lines adds up to the cent."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Committed from documents split across budget lines adds up to the cent."""
 
 from __future__ import annotations
 

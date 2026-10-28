@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The head-import guard follows a module reached through a local name.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The head-import guard follows a module reached through a local name.
 
 On 2026-08-29 the three supplier-catalog delete endpoints published event topics
 that ``app/modules/supplier_catalogs/events.py`` did not define. The module was

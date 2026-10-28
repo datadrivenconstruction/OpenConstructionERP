@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The signature gate says what blocks the contract and which line it is.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The signature gate says what blocks the contract and which line it is.
 
 Signing a subcontract with a blocking finding showed the generic "Compliance
 gate failed" line and, next to each finding, the id of the schedule line it

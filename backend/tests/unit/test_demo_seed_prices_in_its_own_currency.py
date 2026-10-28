@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo seed must not print one price under every currency code.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seed must not print one price under every currency code.
 
 Three blocks in ``demo_projects`` are written once and reused by all thirty-one
 packs: the assembly recipes, the plant rates and the resource pool. Their

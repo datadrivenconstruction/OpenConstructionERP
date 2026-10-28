@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egyptian withholding on account of tax, and the data-file registry that serves it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egyptian withholding on account of tax, and the data-file registry that serves it.
 
 Egypt is the second country with payment tax rows, and the first one added
 as a data file only: ``rows_for`` used to name Türkiye in code. These tests

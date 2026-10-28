@@ -1,4 +1,4 @@
-"""Unit tests for the SARIF v2.1.0 exporter.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the SARIF v2.1.0 exporter.
 
 Covers task tracker #224 mandates:
     1. round-trip: 2 errors + 1 warning → schema-shape valid SARIF

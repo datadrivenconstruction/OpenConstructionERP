@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Budget delta rows written by 17.7.0 and 17.7.1 are put back into delta shape.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Budget delta rows written by 17.7.0 and 17.7.1 are put back into delta shape.
 
 Those two releases wrote a change order's budget row with the project budget
 carried forward as ``original`` and ``revised`` as that plus the effect, and

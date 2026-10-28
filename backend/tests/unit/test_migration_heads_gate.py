@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The single-head gate sees a fork that no single author can see.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The single-head gate sees a fork that no single author can see.
 
 Three revisions were added in parallel and two chained off the same parent.
 Each author ran ``alembic heads`` inside their own task, each saw one head, and

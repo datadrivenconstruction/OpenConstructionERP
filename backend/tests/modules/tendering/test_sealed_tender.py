@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Sealed submission mode, end to end against the database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Sealed submission mode, end to end against the database.
 
 The guarantees under test: before an authorised opening no staff read, list,
 export, backup or event payload carries a sealed bid's figures; the server

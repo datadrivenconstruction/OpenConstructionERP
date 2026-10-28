@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A database with no ledger table repairs its rows and must not answer healthy.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A database with no ledger table repairs its rows and must not answer healthy.
 
 The sibling in ``test_data_repairs.py`` proves the *runner* reports the two
 halves separately: it monkeypatches ``_record`` to raise and asserts the repairs

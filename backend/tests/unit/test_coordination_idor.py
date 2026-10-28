@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""IDOR audit tests for the Coordination Hub module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠IDOR audit tests for the Coordination Hub module.
 
 Verifies that cross-tenant requests to coordination dashboard, thresholds,
 trade-matrix, and timeline endpoints are denied (404 per

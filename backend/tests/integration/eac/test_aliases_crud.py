@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for EAC v2 alias service (RFC 35 §6 EAC-2.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for EAC v2 alias service (RFC 35 §6 EAC-2.1).
 
 Drives the service layer (no HTTP) against PostgreSQL so we exercise the
 SQLAlchemy mappings and the actual cascade rules. Each test runs inside an

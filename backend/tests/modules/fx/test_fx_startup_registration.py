@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The running application loads the fx rules, not just this test package.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The running application loads the fx rules, not just this test package.
 
 ``conftest.py`` registers the rule set by hand for every test here and states the
 reason plainly: the application registers them from ``on_startup``, which no test

@@ -1,4 +1,4 @@
-"""Unit tests for the Mexican regional validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Mexican regional validation rules.
 
 Covers the four rules the Mexico pack registers into the built-in rule
 registry (``register_builtin_rules``): APU cost-component completeness, IVA

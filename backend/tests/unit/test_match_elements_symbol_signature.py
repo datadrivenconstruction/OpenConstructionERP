@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the deterministic symbol-signature recogniser (item #18).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the deterministic symbol-signature recogniser (item #18).
 
 Coverage:
     * Signature computation: dimension extraction (SI + bare keys + mm),

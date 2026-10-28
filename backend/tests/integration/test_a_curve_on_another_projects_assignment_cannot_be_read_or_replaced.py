@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Resource-depth curve IDOR suite: the assignment-keyed curve routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resource-depth curve IDOR suite: the assignment-keyed curve routes.
 
 An assignment's spreading curve hangs off the assignment, and the assignment
 hangs off a project. The assignment routes themselves resolve that project and

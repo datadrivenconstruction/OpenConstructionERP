@@ -1,4 +1,4 @@
-"""Shared fakes for the saved-views security tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fakes for the saved-views security tests.
 
 Pure-unit fakes so the gate tests run WITHOUT a database: a stub session that
 records the SQL it is asked to execute, a tiny seed-row store, and helpers to

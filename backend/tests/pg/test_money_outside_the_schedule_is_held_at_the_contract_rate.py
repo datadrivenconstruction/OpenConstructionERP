@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Legacy money outside the schedule keeps its original flat-rate calculation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Legacy money outside the schedule keeps its original flat-rate calculation.
 
 A retention ladder is a rate against percent complete on the schedule of
 values: here 10% until the job is half done, then nothing. A month billed

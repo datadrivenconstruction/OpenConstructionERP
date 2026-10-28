@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pin which test trees the workflow files say they run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pin which test trees the workflow files say they run.
 
 A test that no lane names does not fail. It reports nothing at all, and an
 absent signal is indistinguishable from a green one when you are reading a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The assembly picker has to find what an estimator types.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The assembly picker has to find what an estimator types.
 
 Issue #406 was reported against a Swiss civil-works catalogue and the
 reporter supplied the five positions his estimator picks between, plus the

@@ -1,4 +1,4 @@
-"""Issue #347 - per-element formula projection on quantity links (HTTP).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #347 - per-element formula projection on quantity links (HTTP).
 
 Drives the real quantity-link surface end to end:
 

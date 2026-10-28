@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for cost-recovery performance analytics (PG, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for cost-recovery performance analytics (PG, py3.12).
 
 Exercises the recovery-performance service end to end on real PostgreSQL: the
 overall recovery rate over the back-charge ledger, the high-vs-low traceability

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A country pack install says what it did, what it did not, and what was there already.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country pack install says what it did, what it did not, and what was there already.
 
 The product promise is "pick your country, press Install, everything is set
 up". Each test here pins one place where the install or its preview said

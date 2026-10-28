@@ -1,4 +1,4 @@
-"""The migrator must restore missing constraints without ever failing a boot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The migrator must restore missing constraints without ever failing a boot.
 
 ``postgres_auto_migrate`` runs at startup on every embedded and desktop install.
 Adding constraint healing to it introduces a hazard that the column and index

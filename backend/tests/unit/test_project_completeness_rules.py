@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``project_completeness`` rule set, rule by rule and as a set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``project_completeness`` rule set, rule by rule and as a set.
 
 Twenty two demo templates named this set while nothing registered into it, so
 the first thing asserted here is that the name now resolves to exactly these

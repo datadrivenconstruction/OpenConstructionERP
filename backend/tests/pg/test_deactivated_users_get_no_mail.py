@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Notification mail reaches active accounts only, and each nudge mails once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Notification mail reaches active accounts only, and each nudge mails once.
 
 Two defects, one symptom: a mailbox that should hear nothing kept hearing the
 same reminder.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FA(3) documents are valid against the official schema and say the right things.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FA(3) documents are valid against the official schema and say the right things.
 
 The schema files in ``tests/fixtures/ksef/fa3`` are the Ministry of Finance's,
 unedited. They import their base types by ``http://crd.gov.pl/...`` URL; a

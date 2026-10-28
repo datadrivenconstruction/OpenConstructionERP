@@ -1,4 +1,4 @@
-"""Whether the two CWICR work-name columns are joined depends on the base type.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Whether the two CWICR work-name columns are joined depends on the base type.
 
 The classic CIS parquets split one sentence across ``rate_original_name`` and
 ``rate_final_name``, so those must be concatenated. The national bases carry two

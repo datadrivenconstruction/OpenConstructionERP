@@ -1,4 +1,4 @@
-"""Cost benchmarks against the database: tenant scope, demo cohort, outliers, rules, export."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost benchmarks against the database: tenant scope, demo cohort, outliers, rules, export."""
 
 from __future__ import annotations
 

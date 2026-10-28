@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the EAC v2 parameter-alias resolver (RFC 35 §6 EAC-2.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the EAC v2 parameter-alias resolver (RFC 35 §6 EAC-2.1).
 
 The resolver is intentionally pure (no DB) so we drive it with simple
 duck-typed namespaces — no pytest-asyncio, no SQLAlchemy session.

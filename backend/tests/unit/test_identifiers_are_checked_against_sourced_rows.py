@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""National identifiers are checked against rows that say where they came from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠National identifiers are checked against rows that say where they came from.
 
 The Egyptian rows are the first in the catalogue. None of them was verified
 against a primary regulator text, so every one ships flagged for expert review,

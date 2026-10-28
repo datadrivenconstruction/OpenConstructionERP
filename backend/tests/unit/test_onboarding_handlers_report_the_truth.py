@@ -1,4 +1,4 @@
-"""The onboarding job handlers must not report a failed load as a success.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The onboarding job handlers must not report a failed load as a success.
 
 ``load_cwicr_handler`` and ``install_demo_handler`` used to catch a failed load,
 return ``{"skipped": True}`` and let the job runner record ``success``. The

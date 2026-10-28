@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BGE-M3 + Qdrant recall benchmark scaffold (Task #186, MAPPING_PROCESS §4/§5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BGE-M3 + Qdrant recall benchmark scaffold (Task #186, MAPPING_PROCESS §4/§5).
 
 Companion to :mod:`tests.eval.test_v3_recall_benchmark` — *that* file
 runs through the full ranker (high-level dispatch through the project

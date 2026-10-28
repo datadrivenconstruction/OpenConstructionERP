@@ -1,4 +1,4 @@
-"""Unit tests for the progress-reporter agent (item 15).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the progress-reporter agent (item 15).
 
 Pure unit tests - no DB, no network. They exercise:
 

@@ -1,4 +1,4 @@
-"""Tests for the snapshot-restore error → user-hint mapper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the snapshot-restore error → user-hint mapper.
 
 The hint mapper exists because Qdrant's verbatim recover-from-URL error
 is good for debugging but unactionable for end users — especially on

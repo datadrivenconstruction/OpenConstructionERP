@@ -1,4 +1,4 @@
-"""Integration tests for the per-user dashboard widget layout API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the per-user dashboard widget layout API.
 
 Mirrors the sidebar-preferences test suite. The endpoints move the dashboard
 widget order + hidden list off per-browser localStorage onto the user record

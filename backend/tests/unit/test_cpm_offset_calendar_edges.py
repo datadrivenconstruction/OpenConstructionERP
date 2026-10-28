@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Edge-case unit tests for the working-day offset calendar (cpm.OffsetCalendar).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Edge-case unit tests for the working-day offset calendar (cpm.OffsetCalendar).
 
 Pure-Python, no DB. These complement ``test_cpm_offset_calendar.py`` by pinning
 the harder corners of the calendar-aware day-offset arithmetic a future CPM

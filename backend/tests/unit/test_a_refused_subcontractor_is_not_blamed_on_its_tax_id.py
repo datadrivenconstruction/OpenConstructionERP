@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A refused subcontractor row is answered by what the database refused.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A refused subcontractor row is answered by what the database refused.
 
 Nothing makes ``tax_id`` unique in the database (``v3099`` builds a plain,
 non-unique index), so an ``IntegrityError`` on create is never a tax number

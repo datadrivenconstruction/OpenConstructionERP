@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""crm: the forecast's currency breakdown survives being stored.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠crm: the forecast's currency breakdown survives being stored.
 
 ``compute_forecast`` has always returned ``by_currency`` and
 ``mixed_currency`` alongside its four scalars. They were computed correctly

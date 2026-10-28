@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Arabic, Persian, Urdu and Hebrew print joined and in reading order.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Arabic, Persian, Urdu and Hebrew print joined and in reading order.
 
 Two instruments. The first half asks the helper directly, with expected
 strings written out codepoint by codepoint, so a regression in either library

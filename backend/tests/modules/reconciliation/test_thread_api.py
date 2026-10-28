@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for event reconciliation (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for event reconciliation (PostgreSQL, py3.12).
 
 Exercises the persistence + gather layer end to end on real PostgreSQL: gathering
 a project's heterogeneous records, scoring them with the pure engine into an

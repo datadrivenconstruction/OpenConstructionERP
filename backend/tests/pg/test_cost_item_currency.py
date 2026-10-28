@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A cost item may not be stored without the currency its region names.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cost item may not be stored without the currency its region names.
 
 The authoritative signal is the region tag. A CWICR catalogue is imported one
 region at a time and every rate inside it is denominated in that region's local

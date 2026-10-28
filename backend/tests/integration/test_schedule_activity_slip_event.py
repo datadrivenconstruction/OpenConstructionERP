@@ -1,4 +1,4 @@
-"""A finish date that moves past its baseline announces the slip, once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A finish date that moves past its baseline announces the slip, once.
 
 ``schedule.activity.slipped`` feeds the subcontractor rating, so it has to fire
 when an assigned activity's finish crosses the active baseline and not for an

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Splitting an approved change order over schedule of values lines, on paper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Splitting an approved change order over schedule of values lines, on paper.
 
 Every case is arithmetic a person can check by hand. The property that
 matters to the owner is asserted in all of them: the per-line deltas add up

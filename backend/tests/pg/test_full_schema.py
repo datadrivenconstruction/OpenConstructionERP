@@ -1,4 +1,4 @@
-"""Full-schema smoke on embedded PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Full-schema smoke on embedded PostgreSQL.
 
 The session-scoped ``pg_async_url`` fixture already builds the ENTIRE ORM schema
 (every module's models) once per run via ``create_all`` on a real PG cluster — so

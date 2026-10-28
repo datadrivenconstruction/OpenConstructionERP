@@ -1,4 +1,4 @@
-"""Every notification title/body key the backend can emit has an English text.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every notification title/body key the backend can emit has an English text.
 
 The inbox and the bell translate ``title_key`` on the client. A key missing
 from ``en.ts`` shows up as raw ``notifications.x.y.title`` text.

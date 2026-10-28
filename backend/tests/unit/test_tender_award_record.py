@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The award record is assembled from the procedure and names what is missing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The award record is assembled from the procedure and names what is missing.
 
 German public procurement asks a contracting authority to keep a written record
 of the award procedure while the procedure runs (VOB/A section 20 below the EU

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T13 unit tests — natural-language → DSL pattern matcher.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T13 unit tests — natural-language → DSL pattern matcher.
 
 Covers every supported pattern, the i18n alias pre-pass for DE / RU,
 empty / oversize input handling, the AI fallback contract (rejected

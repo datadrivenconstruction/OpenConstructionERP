@@ -1,4 +1,4 @@
-"""Magic-byte hardening for ``POST /api/v1/fieldreports/reports/import/file/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Magic-byte hardening for ``POST /api/v1/fieldreports/reports/import/file/``.
 
 The import route used to trust the uploader-supplied filename extension
 (``.xlsx`` / ``.xls`` / ``.csv``) for both routing and validation. Any

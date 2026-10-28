@@ -1,4 +1,4 @@
-"""scripts/sign_windows_binaries.py picks the right files and builds the right argv.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠scripts/sign_windows_binaries.py picks the right files and builds the right argv.
 
 The signing itself needs a certificate and a Windows runner, so what is checked
 here is everything that decides WHAT gets signed and HOW the command is formed.

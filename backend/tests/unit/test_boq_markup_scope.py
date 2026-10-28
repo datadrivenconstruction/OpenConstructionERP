@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for markup inheritance with per-position and per-section override.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for markup inheritance with per-position and per-section override.
 
 ``_calculate_markup_amounts_scoped`` is the composition layer over the bill's
 markup cascade. It partitions the direct cost into buckets of leaves that see

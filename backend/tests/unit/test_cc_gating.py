@@ -1,4 +1,4 @@
-"""Construction-control Pillar 5 (gating) schema + pure-logic tests (no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 5 (gating) schema + pure-logic tests (no DB).
 
 Pins the gate discriminators (point type, attached kind, required party role), the
 party-role satisfaction rule that backs defence-in-depth release (a qc cannot release an

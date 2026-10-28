@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""EAC / VAC / ETC are written to the row in the project currency's own units.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EAC / VAC / ETC are written to the row in the project currency's own units.
 
 These three are not a view. ``FinanceService.create_evm_snapshot`` computes
 them and persists them on ``oe_finance_evm_snapshot``, whose model declares

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A PATCH of metadata merges keys; tags survive and can be set explicitly."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A PATCH of metadata merges keys; tags survive and can be set explicitly."""
 
 from __future__ import annotations
 

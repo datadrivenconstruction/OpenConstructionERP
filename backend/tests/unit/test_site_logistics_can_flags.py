@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Allowed moves of the logistics plan: the flags come from the guards the writes call.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Allowed moves of the logistics plan: the flags come from the guards the writes call.
 
 The agreement of a flag with the write it describes is proven on real rows in
 ``tests/pg/test_site_logistics_can_on_pg.py``. Here: the shape, the guards

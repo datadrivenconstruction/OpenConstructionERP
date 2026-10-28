@@ -1,4 +1,4 @@
-"""An Ontario holdback is not released before the lien period has run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An Ontario holdback is not released before the lien period has run.
 
 The Construction Act keeps the holdback until 60 days after the certificate of
 substantial performance is published. The figure sat in the country defaults

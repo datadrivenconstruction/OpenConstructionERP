@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""i18n orphan guard: block t() keys that no locale file can answer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠i18n orphan guard: block t() keys that no locale file can answer.
 
 The two existing locale guards both start from a key that exists. The escape
 guard reads locale files; the leak guard compares a locale's value against

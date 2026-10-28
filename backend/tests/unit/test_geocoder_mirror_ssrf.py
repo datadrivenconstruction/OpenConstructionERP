@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A geocoding mirror may live on the LAN, but never on a metadata address.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A geocoding mirror may live on the LAN, but never on a metadata address.
 
 A manager answering the geocoding question can name a private Nominatim
 mirror, and every address lookup is then sent there from the server. The URL

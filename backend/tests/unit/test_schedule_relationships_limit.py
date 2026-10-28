@@ -1,4 +1,4 @@
-"""Cap + ?limit= contract for ``GET /schedules/{id}/relationships/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cap + ?limit= contract for ``GET /schedules/{id}/relationships/``.
 
 The endpoint USED TO fetch every ``ScheduleRelationship`` row for a
 schedule without bound. A schedule imported from a large MS Project or

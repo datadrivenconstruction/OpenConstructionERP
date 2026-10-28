@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The pack install stream keeps talking while a long step runs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The pack install stream keeps talking while a long step runs.
 
 The docker nginx closes an /api/ read that is silent for 120 s, and loading a
 large cost base takes minutes. The stream used to say nothing between

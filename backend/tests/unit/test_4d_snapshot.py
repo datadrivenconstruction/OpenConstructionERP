@@ -1,4 +1,4 @@
-"""Unit tests for the 4D snapshot service (Section 6 / FR-6.5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the 4D snapshot service (Section 6 / FR-6.5).
 
 Goal: lock down the per-task status derivation
 (``not_started``/``in_progress``/``completed``/``delayed``/``ahead_of_schedule``)

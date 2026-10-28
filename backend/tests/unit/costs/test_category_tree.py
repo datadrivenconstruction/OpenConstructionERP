@@ -1,4 +1,4 @@
-"""Unit tests for the 4-level category-tree aggregation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the 4-level category-tree aggregation.
 
 Covers:
     - The tree nests collection → department → section → subsection.

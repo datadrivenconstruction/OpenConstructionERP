@@ -1,4 +1,4 @@
-"""Schedule interop over HTTP: progress sheet round-trip, scheduling profiles, imported source.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule interop over HTTP: progress sheet round-trip, scheduling profiles, imported source.
 
 Runs the real app against the test PostgreSQL cluster with two tenants: A owns
 a project and a schedule, B is a viewer of nothing. 2026-05-04 is a Monday.

@@ -1,4 +1,4 @@
-"""The pre-built embedding parquet must be read in bounded batches.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The pre-built embedding parquet must be read in bounded batches.
 
 The file carries one embedding per cost item beside its text columns, so for a
 large region it is tens of thousands of rows and hundreds of megabytes once

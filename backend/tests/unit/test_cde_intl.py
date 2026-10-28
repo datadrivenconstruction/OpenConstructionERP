@@ -1,4 +1,4 @@
-"""Unit tests for the international, explainable CDE helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international, explainable CDE helpers.
 
 All checks are pure and database free. They pin the plain-language, locale-aware
 behaviour added in :mod:`app.modules.cde.intl`: state and status localization

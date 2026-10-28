@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: v3304 classifies stock rows that already existed before it ran.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: v3304 classifies stock rows that already existed before it ran.
 
 A fresh install never runs this migration. ``env.py`` detects a blank database
 on entry and short-circuits to ``create_all`` plus ``stamp heads``, so "empty

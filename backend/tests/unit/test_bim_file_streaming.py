@@ -1,4 +1,4 @@
-"""BIM model files are served and copied through disk/streams, never whole in RAM."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM model files are served and copied through disk/streams, never whole in RAM."""
 
 import pathlib
 

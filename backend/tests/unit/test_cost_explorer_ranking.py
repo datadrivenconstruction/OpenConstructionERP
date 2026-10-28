@@ -1,4 +1,4 @@
-"""Unit tests for the Cost Explorer resource-match ranking engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Cost Explorer resource-match ranking engine.
 
 The engine (``app.modules.cost_explorer.ranking``) is pure - stdlib only, no
 ORM or app imports - so it is loaded here directly from its file path. That

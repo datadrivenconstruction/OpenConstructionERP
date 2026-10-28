@@ -1,4 +1,4 @@
-"""Issue #347 - BIM quantity links must resolve against their OWN model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #347 - BIM quantity links must resolve against their OWN model.
 
 A project can hold several BIM models. The BOQ grid "pick quantity from BIM"
 picker used to resolve EVERY position against one project-level "first ready"

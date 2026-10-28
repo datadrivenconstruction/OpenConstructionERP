@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A country with rate tiers resolves to the standard rate, not to their sum.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country with rate tiers resolves to the standard rate, not to their sum.
 
 The bug this file convicts
 --------------------------

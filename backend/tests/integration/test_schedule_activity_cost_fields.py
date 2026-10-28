@@ -1,4 +1,4 @@
-"""Integration: an activity's cost and progress-rigor columns survive the API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: an activity's cost and progress-rigor columns survive the API.
 
 ``Activity`` has carried ``cost_planned`` / ``cost_actual`` and the four
 progress-rigor columns for several releases, but none of them appeared in

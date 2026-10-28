@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project created under a country pack is planned on that country's working week.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project created under a country pack is planned on that country's working week.
 
 The schedule picks a project's week from ``project.region`` alone. A project
 created while a country pack is active inherits the pack's market into

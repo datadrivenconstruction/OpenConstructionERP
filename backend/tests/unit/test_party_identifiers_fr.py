@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""SIREN and SIRET through the shared party identifier registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠SIREN and SIRET through the shared party identifier registry.
 
 The cases are chosen so a wrong implementation fails a specific one: a shape
 check alone passes the one-digit typo, a Luhn check alone refuses the La Poste

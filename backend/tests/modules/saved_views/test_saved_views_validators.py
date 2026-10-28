@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The saved-views validation rules, without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The saved-views validation rules, without a database.
 
 A saved view is a question written down once and asked for months afterwards.
 These tests cover the case the module exists to survive: the register changed

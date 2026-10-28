@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What a production norm predicted, against what the job actually cost.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a production norm predicted, against what the job actually cost.
 
 Issue #457 asks for one number an estimator cannot get today: for a given
 production norm, what did the estimates built from it allow, and what did the

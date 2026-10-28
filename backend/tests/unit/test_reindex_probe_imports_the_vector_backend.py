@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The reindex probe must import the backend, not merely locate it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The reindex probe must import the backend, not merely locate it.
 
 ``find_spec`` resolves a module without executing it. lancedb is almost
 entirely one Rust extension, so it can sit on disk, resolve perfectly, and

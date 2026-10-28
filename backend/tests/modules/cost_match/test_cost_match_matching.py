@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level behaviour of cost matching against a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level behaviour of cost matching against a real database.
 
 Covers the things only rows can show: what retrieval actually pulls out of a
 cost base, which tier each scored line lands in, that identical lines are

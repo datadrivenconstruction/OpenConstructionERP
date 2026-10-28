@@ -1,4 +1,4 @@
-"""Unit tests for RFC 33 — CDE module deep audit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for RFC 33 — CDE module deep audit.
 
 Covers the five must-fix items:
 1. Suitability code validation — right codes for right state, 422 otherwise.

@@ -1,4 +1,4 @@
-"""Integration: a schedule generated from the estimate is cost- and resource-loaded.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: a schedule generated from the estimate is cost- and resource-loaded.
 
 Before this, generating from a bill wrote ``cost_planned = None`` and
 ``resources = []`` on every task, so a fresh plan had BAC 0, an empty S-curve

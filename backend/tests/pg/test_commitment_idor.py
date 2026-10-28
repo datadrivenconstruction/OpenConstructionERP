@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read, link, release and decide, over HTTP against PostgreSQL; plus the API contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read, link, release and decide, over HTTP against PostgreSQL; plus the API contract.
 
 Identity is the variable under test: a stranger from another tenant, a
 project member reaching for another project's document, an editor touching

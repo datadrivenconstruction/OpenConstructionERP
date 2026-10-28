@@ -1,4 +1,4 @@
-"""Unit tests for the Epic B notifications dispatcher.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Epic B notifications dispatcher.
 
 Covers the new pieces introduced by the Epic B wave:
 

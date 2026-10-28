@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: an award keeps the bill's rate on a line the winner did not price.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: an award keeps the bill's rate on a line the winner did not price.
 
 The award wrote every winning line that carried a ``unit_rate`` key into the
 bill, and a key holding null was written as 0: the estimate for that line was

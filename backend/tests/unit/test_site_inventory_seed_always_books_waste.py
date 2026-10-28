@@ -1,4 +1,4 @@
-"""A seeded yard always books waste, because a waste report that reads zero is a bug report.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A seeded yard always books waste, because a waste report that reads zero is a bug report.
 
 The waste ratio is the number this module's report exists to state. It was
 computed for every metered material and then booked or not booked on a coin

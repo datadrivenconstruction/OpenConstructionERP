@@ -1,4 +1,4 @@
-"""The development JWT secret lives in the data directory, not in the home folder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The development JWT secret lives in the data directory, not in the home folder.
 
 ``openconstructionerp serve --data-dir X`` resolves every path through the
 data directory: the embedded cluster, the uploads, the demo credentials. The

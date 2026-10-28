@@ -1,4 +1,4 @@
-"""BOQ exports mark rows a model produced (EU AI Act, art. 50(2)).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ exports mark rows a model produced (EU AI Act, art. 50(2)).
 
 One test per format proves the marker is there for an AI row, and each also
 proves an ordinary bill carries none, so the marker cannot pass by being

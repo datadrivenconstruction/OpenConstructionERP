@@ -1,4 +1,4 @@
-"""Round-7 security audit tests for the ``costs`` module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-7 security audit tests for the ``costs`` module.
 
 Pins the four trip-wires established by the audit:
 

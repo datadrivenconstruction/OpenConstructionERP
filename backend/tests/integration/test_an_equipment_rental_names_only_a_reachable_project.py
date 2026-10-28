@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Equipment rental routes that name a project check the caller may open it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Equipment rental routes that name a project check the caller may open it.
 
 The fleet is shared, rentals are not: each rental bills a machine to one
 project. ``GET /rentals/?project_id=``, ``POST /rentals/`` and the per-project

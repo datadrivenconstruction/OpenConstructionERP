@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the portfolio CPM bridging (T3.3).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the portfolio CPM bridging (T3.3).
 
 Exercises :func:`build_portfolio_inputs` end-to-end through the pure portfolio
 engine, so they run on the local Python 3.11 runner without the ORM / DB. Focus:

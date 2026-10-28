@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - the four estimate_audit validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - the four estimate_audit validation rules.
 
 Covers the curated estimate-audit rule set: work-type unit sanity,
 near-duplicate line detection, companion-item completeness (driven by the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v79 builds exactly the schema the engineering brief models build, and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v79 builds exactly the schema the engineering brief models build, and undoes it.
 
 Up, down, up on PostgreSQL; the reflected schema from the revision must equal the one ``create_all``
 produces from the models, so a fresh install and an upgraded one cannot drift.

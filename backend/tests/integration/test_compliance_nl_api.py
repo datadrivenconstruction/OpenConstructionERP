@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T13 integration tests — NL → DSL builder API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T13 integration tests — NL → DSL builder API.
 
 Stands up a minimal FastAPI app with the compliance router mounted and
 session/auth dependencies overridden against a per-test throwaway

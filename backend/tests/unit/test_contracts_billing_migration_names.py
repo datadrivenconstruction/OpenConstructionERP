@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``v42_contracts_billing_depth`` builds the same schema the models declare.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``v42_contracts_billing_depth`` builds the same schema the models declare.
 
 An install reaches the contracts billing tables one of two ways: ``create_all``
 plus the boot heal, which read the models, or the revision chain, which reads

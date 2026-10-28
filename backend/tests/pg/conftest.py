@@ -1,4 +1,4 @@
-"""Embedded-PostgreSQL test lane (no Docker).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Embedded-PostgreSQL test lane (no Docker).
 
 These tests run against a REAL PostgreSQL 16 cluster booted in-process from the
 ``pixeltable-pgserver`` wheel (bundled PG binaries). They guard the dialect

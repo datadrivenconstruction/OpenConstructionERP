@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""EAC v2 R7 deep-improve audit (Wave 3, 2026-05-25).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EAC v2 R7 deep-improve audit (Wave 3, 2026-05-25).
 
 Covers the new findings on the aliases sub-router that the Round-3 sweep
 missed (rules / rulesets / runs were already hardened; aliases were not):

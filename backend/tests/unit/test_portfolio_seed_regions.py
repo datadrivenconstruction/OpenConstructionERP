@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo portfolio files each project under a delivery region it belongs to."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo portfolio files each project under a delivery region it belongs to."""
 
 from __future__ import annotations
 

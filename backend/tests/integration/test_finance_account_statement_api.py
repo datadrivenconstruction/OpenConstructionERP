@@ -1,4 +1,4 @@
-"""Statement of account through the API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statement of account through the API.
 
 A customer with two invoices on two projects and a partial payment. The
 statement must list them in date order with a running balance, bring earlier

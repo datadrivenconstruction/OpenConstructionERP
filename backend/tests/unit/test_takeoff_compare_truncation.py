@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A revision compare must never present a partial diff as a complete one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A revision compare must never present a partial diff as a complete one.
 
 ``compare_documents`` used to read each side with ``limit=500`` over a
 ``created_at DESC`` ordering. Two documents were therefore sliced into two

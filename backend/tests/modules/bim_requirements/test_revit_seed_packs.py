@@ -1,4 +1,4 @@
-"""Integration check for the Revit-flavoured seed packs in data/bim_rules/.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration check for the Revit-flavoured seed packs in data/bim_rules/.
 
 Each Revit template must load through the real ``load_rule_pack`` loader
 (the same code path the frontend preview endpoint uses) AND dry-run against

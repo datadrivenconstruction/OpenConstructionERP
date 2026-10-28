@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The rule that finds a duration counted on another week than the project's.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The rule that finds a duration counted on another week than the project's.
 
 Until September every recompute in the schedule module counted Monday to
 Friday whatever the project's region, while BOQ generation drew dates on the

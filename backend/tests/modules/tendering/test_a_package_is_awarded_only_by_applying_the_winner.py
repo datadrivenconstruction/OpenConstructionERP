@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A tender package reaches ``awarded`` only through ``apply_winner``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A tender package reaches ``awarded`` only through ``apply_winner``.
 
 ``apply_winner`` names the winning bid, writes its rates into the BOQ, rejects
 the other bids and announces the award. ``PATCH /packages/{id}`` could set the

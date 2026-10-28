@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Meta-tests for the eval harness itself.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Meta-tests for the eval harness itself.
 
 These tests do *not* measure match-quality — they verify the harness
 plumbing (golden-set parses, judge prompt formats, fallback works,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A supplier invoice line can be attributed to the bill item it paid for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A supplier invoice line can be attributed to the bill item it paid for.
 
 Issue #454. The link from an invoice line to the cost spine has always existed,
 and it has always been spelled ``cost_line_id``. Nobody entering a supplier

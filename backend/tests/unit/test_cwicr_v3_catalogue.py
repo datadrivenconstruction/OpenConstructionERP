@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the CWICR v3 catalogue registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CWICR v3 catalogue registry.
 
 Covers:
 

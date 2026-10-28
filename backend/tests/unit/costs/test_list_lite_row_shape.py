@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A slim cost list row carries what the list views read, and nothing heavier.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A slim cost list row carries what the list views read, and nothing heavier.
 
 ``GET /v1/costs/`` with ``lite=true`` is what every list in the app asks for:
 the cost database page, the cost-match override picker and the BOQ "From

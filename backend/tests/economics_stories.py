@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The economics stories shipped in the eleven-areas pack, read from the pack files as a test double for the pack lookup."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The economics stories shipped in the eleven-areas pack, read from the pack files as a test double for the pack lookup."""
 
 from __future__ import annotations
 

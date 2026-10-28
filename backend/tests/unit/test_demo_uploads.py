@@ -1,4 +1,4 @@
-"""Public demo upload block: multipart and octet-stream bodies answer 403."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public demo upload block: multipart and octet-stream bodies answer 403."""
 
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the post-calculation (Nachkalkulation) compute (pure, DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the post-calculation (Nachkalkulation) compute (pure, DB-free).
 
 The compute layer takes plain dicts and returns Decimal-exact dataclasses, so every
 case here is asserted from plain values without a database - normal productivity,

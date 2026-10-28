@@ -1,4 +1,4 @@
-"""PG: the RFI, risk, punch item and schedule progress proposals, from card to record and back.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the RFI, risk, punch item and schedule progress proposals, from card to record and back.
 
 Each proposal is checked the way the BOQ line and the task are in
 ``test_erp_chat_action_lifecycle.py``, against real PostgreSQL:

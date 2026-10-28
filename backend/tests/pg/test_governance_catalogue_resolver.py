@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The resolver keeps a tenant catalogue inside its tenant; a stored pin keeps resolving."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The resolver keeps a tenant catalogue inside its tenant; a stored pin keeps resolving."""
 
 from __future__ import annotations
 

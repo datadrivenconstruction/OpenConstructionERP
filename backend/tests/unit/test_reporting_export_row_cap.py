@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Defensive row cap on the reporting export entry point.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Defensive row cap on the reporting export entry point.
 
 ``export_report`` builds the CSV / XLSX / PDF download entirely in memory (the
 XLSX writer holds a cell object per value), so a report whose snapshot carries a

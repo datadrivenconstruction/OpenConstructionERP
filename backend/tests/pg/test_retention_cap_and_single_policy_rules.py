@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Two checks on the rule a contract holds retention by: its ceiling, and how many there are.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Two checks on the rule a contract holds retention by: its ceiling, and how many there are.
 
 The engine applies a cap last, so a claim it worked out is never over one.
 Claims get their figures from elsewhere as well, and the one that matters here

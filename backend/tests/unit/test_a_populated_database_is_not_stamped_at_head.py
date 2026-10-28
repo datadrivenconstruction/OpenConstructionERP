@@ -1,4 +1,4 @@
-"""Stamping a populated, unstamped database destroys the only evidence it is odd.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Stamping a populated, unstamped database destroys the only evidence it is odd.
 
 Releases before 15.4.0 shipped no ``alembic.ini``, so their databases record no
 revision at all. On boot ``create_all`` creates whatever tables are wholly

@@ -1,4 +1,4 @@
-"""Real PostgreSQL coverage, replay and conservative ownership of v58 indexes."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Real PostgreSQL coverage, replay and conservative ownership of v58 indexes."""
 
 import importlib.util
 import json

@@ -1,4 +1,4 @@
-"""A bill of quantities has one state set, and everything that writes it agrees.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill of quantities has one state set, and everything that writes it agrees.
 
 ``BOQ.status`` is a free ``String(50)``, so nothing in the database constrains
 it. The only constraint is ``BOQUpdate``'s pattern, and the only writers that

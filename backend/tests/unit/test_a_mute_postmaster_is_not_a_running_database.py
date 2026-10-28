@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A listen socket is not a database, and the readiness probe has to know that.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A listen socket is not a database, and the readiness probe has to know that.
 
 A released build announced "Embedded PostgreSQL ready" and then failed every
 connection it made in the next breath. The cluster it attached to was a

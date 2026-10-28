@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure contractual notice / time-bar engine (runs on py3.11).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure contractual notice / time-bar engine (runs on py3.11).
 
 Covers the period config lookup, standard normalisation, clause labels, date
 parsing, deadline derivation, status classification, the entitlement-at-risk

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""GAEB X31 (Mengenermittlung): export, import proposal, and refusals.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠GAEB X31 (Mengenermittlung): export, import proposal, and refusals.
 
 Pure tests over the builder, the parser and the matcher, with hand-written
 files. No app, no database.

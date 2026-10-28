@@ -1,4 +1,4 @@
-"""Governance catalogues: shipped data loads, every cross-reference rule can fail.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Governance catalogues: shipped data loads, every cross-reference rule can fail.
 
 Each rule has a broken minimal catalogue below that the loader must reject; a
 loader missing that rule would accept it, so the test goes red.

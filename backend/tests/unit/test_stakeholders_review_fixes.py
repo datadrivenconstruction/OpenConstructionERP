@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-function pins for defects found in review: masking, hosting by tag, quorum, money, export, routes."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function pins for defects found in review: masking, hosting by tag, quorum, money, export, routes."""
 
 from __future__ import annotations
 

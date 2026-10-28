@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the CWICR Qdrant adapter — region→collection routing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CWICR Qdrant adapter — region→collection routing.
 
 The heavy paths (encoder + Qdrant Query API + parquet lookup) need a
 live Qdrant + parquet root and are exercised by the smoke endpoint

@@ -1,4 +1,4 @@
-"""Cost-item usage ledger is written when a position is added from /costs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost-item usage ledger is written when a position is added from /costs.
 
 Founder bug (2026-06-06): the Cost Database "used in an estimate" indicator
 never flipped because nothing ever wrote a ``CostItemUsage`` row. Adding a

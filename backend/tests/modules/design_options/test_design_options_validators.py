@@ -1,4 +1,4 @@
-"""The six ``design_options`` validation rules, one at a time.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The six ``design_options`` validation rules, one at a time.
 
 Every rejection test is driven through the core engine rather than by calling a
 rule object directly, for two reasons: it is the path production uses, and it is

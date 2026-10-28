@@ -1,4 +1,4 @@
-"""Database-free tests for equipment billing guards and utilization windows."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free tests for equipment billing guards and utilization windows."""
 
 import uuid
 from datetime import date

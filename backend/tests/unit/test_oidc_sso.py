@@ -1,4 +1,4 @@
-"""OIDC single sign-on: discovery, ID token verification, role mapping, login rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OIDC single sign-on: discovery, ID token verification, role mapping, login rules.
 
 Discovery and JWKS are served from memory with a locally generated RSA key, so
 the tests exercise real signature checks without a network or an identity provider.

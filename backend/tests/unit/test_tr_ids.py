@@ -1,4 +1,4 @@
-"""Unit tests for the Turkish identifier checks (VKN, TCKN, document ID, UUID).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Turkish identifier checks (VKN, TCKN, document ID, UUID).
 
 No number in this file belongs to a taxpayer that was looked up anywhere.
 The valid ones are built from made-up stems by the implementation's own check

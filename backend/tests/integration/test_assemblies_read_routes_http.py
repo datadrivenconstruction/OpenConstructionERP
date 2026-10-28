@@ -1,4 +1,4 @@
-"""The assembly read routes enforce ownership over HTTP.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The assembly read routes enforce ownership over HTTP.
 
 An assembly is a recipe in its owner's catalogue, not a project record, so
 these routes stay out of the project-access check and sit in the security

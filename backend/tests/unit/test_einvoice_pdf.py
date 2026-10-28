@@ -1,4 +1,4 @@
-"""Unit tests for the Factur-X / ZUGFeRD hybrid PDF builder."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Factur-X / ZUGFeRD hybrid PDF builder."""
 
 import io
 import xml.etree.ElementTree as ET

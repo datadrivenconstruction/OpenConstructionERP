@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: the currency backfill keeps what it filled when the migration is interrupted.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the currency backfill keeps what it filled when the migration is interrupted.
 
 ``v3273_backfill_cost_item_currency`` rewrites potentially every row of
 ``oe_costs_item``. Alembic runs an entire upgrade inside one transaction, so the

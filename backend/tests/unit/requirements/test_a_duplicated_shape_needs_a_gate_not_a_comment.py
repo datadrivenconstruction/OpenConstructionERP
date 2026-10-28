@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A comment saying two shapes must stay in sync does not keep them in sync.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A comment saying two shapes must stay in sync does not keep them in sync.
 
 ``bim_hub.schemas.RequirementBrief`` is a hand-written subset of
 ``requirements.schemas.RequirementResponse``, defined locally so bim_hub does

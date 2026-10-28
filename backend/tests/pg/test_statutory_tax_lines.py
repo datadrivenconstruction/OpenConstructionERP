@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The statutory tax lines of a payment document, through the real routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The statutory tax lines of a payment document, through the real routes.
 
 Three things here can only be shown on PostgreSQL.
 

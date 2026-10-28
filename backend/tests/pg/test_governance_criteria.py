@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The readiness criteria of a catalogue as a checklist per area, over HTTP against PostgreSQL."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The readiness criteria of a catalogue as a checklist per area, over HTTP against PostgreSQL."""
 
 from __future__ import annotations
 

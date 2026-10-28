@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One vocabulary for every reason a payment certificate can show.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One vocabulary for every reason a payment certificate can show.
 
 A line of the certificate that has no figure says why with a reason key. The
 calculator emits some keys, the module that stores a document's taxes emits

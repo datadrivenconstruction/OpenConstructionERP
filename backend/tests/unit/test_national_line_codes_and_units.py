@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The national code and unit rules accept what a real bill in the country writes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The national code and unit rules accept what a real bill in the country writes.
 
 Four rules judged a line by one spelling of its national structure and warned
 on every other one a real estimate uses:

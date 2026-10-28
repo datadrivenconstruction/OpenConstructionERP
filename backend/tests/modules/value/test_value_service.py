@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the value-realized service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the value-realized service.
 
 PostgreSQL, py3.12. Seeds the upstream records the service composes - approved
 change orders / variation orders (committed cost + schedule), back-charges (the

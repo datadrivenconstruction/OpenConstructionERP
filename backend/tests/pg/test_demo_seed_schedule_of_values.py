@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A demo contract must arrive with a schedule of values that closes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A demo contract must arrive with a schedule of values that closes.
 
 Before this, every contract on every demo project carried an agreed value and
 nothing behind it: 52 contracts, 0 schedule lines, 0 claim lines. The catalog

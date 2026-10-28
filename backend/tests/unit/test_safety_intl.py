@@ -1,4 +1,4 @@
-"""Unit tests for the international, explainable safety helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international, explainable safety helpers.
 
 Scope:
     Pure-logic coverage of :mod:`app.modules.safety.intl`: TRIR/LTIFR/severity

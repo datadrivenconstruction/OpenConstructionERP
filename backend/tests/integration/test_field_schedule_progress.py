@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for field-captured schedule progress (T3.4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for field-captured schedule progress (T3.4).
 
 Covers the offline field -> T3.2 progress bridge:
 

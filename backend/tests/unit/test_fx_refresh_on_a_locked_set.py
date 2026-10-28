@@ -1,4 +1,4 @@
-"""A refresh that lands on a locked ECB set answers 409, not 500.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A refresh that lands on a locked ECB set answers 409, not 500.
 
 The repository already refuses to rewrite a locked set (``RateSetLockedError``),
 and the create and delete routes translate that into a conflict. The refresh

@@ -1,4 +1,4 @@
-"""Unit tests for DWG pre-conversion stability guards.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for DWG pre-conversion stability guards.
 
 Covers the Phase-2 fixes added on 2026-05-13 for the Indian-user DWG
 stability ticket:

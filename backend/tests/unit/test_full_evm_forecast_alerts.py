@@ -1,4 +1,4 @@
-"""Unit tests for predictive EVM forecast alerts (TOP-30 #19).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for predictive EVM forecast alerts (TOP-30 #19).
 
 Scope:
     * ``EVMService.evaluate_forecast_against_rules`` — deterministic

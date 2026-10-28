@@ -1,4 +1,4 @@
-"""Unit tests for the price-breakdown library (pure, DB-free)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the price-breakdown library (pure, DB-free)."""
 
 from decimal import Decimal
 

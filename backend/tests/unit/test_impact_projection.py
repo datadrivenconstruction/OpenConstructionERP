@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure change cost/schedule impact projection engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure change cost/schedule impact projection engine.
 
 Stdlib + pytest only; money is asserted as exact Decimal, never float.
 """

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for the site-inventory demo seed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the site-inventory demo seed.
 
 The module with the strongest estimate integration in the platform shipped
 without a seeder, so every demo project opened it empty and post-calculation had

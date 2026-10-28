@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A viewer can delete the estimate they started, and only that one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A viewer can delete the estimate they started, and only that one.
 
 ``boq.create`` is open to viewers (issue #101) while ``boq.delete`` needs an
 editor, so a viewer could start an estimate and never remove it again. A BOQ

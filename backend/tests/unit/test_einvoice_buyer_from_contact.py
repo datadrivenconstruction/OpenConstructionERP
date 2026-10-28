@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The buyer party read off the contact an invoice already names.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The buyer party read off the contact an invoice already names.
 
 Until this existed no screen could write a buyer address at all: the e-invoice
 panel is read-only, and the contact form kept its address as one unstructured

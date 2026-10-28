@@ -1,4 +1,4 @@
-"""Clash profile + multi-dimensional grouping tests (item #23).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clash profile + multi-dimensional grouping tests (item #23).
 
 Two layers (same isolation discipline as ``test_clash_triage_delta.py``):
 

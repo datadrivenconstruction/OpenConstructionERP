@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The payment release computation, to the cent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The payment release computation, to the cent.
 
 All figures are invented. Each case walks one contract's invoices in order and
 checks every step the release view prints: net, deductions, VAT, gross,

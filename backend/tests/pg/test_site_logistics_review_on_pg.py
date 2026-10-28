@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The defects the review of 2026-10-12 found in the logistics plan, against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The defects the review of 2026-10-12 found in the logistics plan, against PostgreSQL.
 
 Each test is one database, so related defects share a test:
 

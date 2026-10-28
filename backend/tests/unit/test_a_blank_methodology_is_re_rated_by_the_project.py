@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What a hand-made methodology is priced at, against what it says on screen.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a hand-made methodology is priced at, against what it says on screen.
 
 A methodology installed from the catalogue carries its country's rate, and the
 project VAT override lands on a number the reader recognises. A methodology the

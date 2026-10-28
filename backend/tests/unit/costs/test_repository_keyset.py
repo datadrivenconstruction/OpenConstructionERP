@@ -1,4 +1,4 @@
-"""Unit tests for keyset pagination + classification_path on CostItemRepository.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for keyset pagination + classification_path on CostItemRepository.
 
 Covers:
     - First-page-then-cursor pagination yields every row exactly once.

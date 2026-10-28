@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the revision-compare -> variation handoff (Item 17).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the revision-compare -> variation handoff (Item 17).
 
 Covers the genuinely-untested pieces the handoff lane added on top of the
 already-shipped deterministic compare:

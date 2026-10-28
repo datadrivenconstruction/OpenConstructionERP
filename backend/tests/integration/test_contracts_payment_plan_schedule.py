@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment-plan instalments that follow schedule activities, on a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment-plan instalments that follow schedule activities, on a real database.
 
 An instalment linked to an activity takes its forecast from the activity's
 live finish (``Activity.end_date``), plus its lag and the client's payment

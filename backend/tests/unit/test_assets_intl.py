@@ -1,4 +1,4 @@
-"""DB-free unit tests for the international fixed-asset finance helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the international fixed-asset finance helpers.
 
 Covers Decimal-exact depreciation (straight-line and declining-balance),
 net book value, per-currency register totals, plain-language explainers,

@@ -1,4 +1,4 @@
-"""PG: a deleted project is gone from every cross-project list that offers it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a deleted project is gone from every cross-project list that offers it.
 
 Deleting a project archives it (``status = "archived"``) and keeps the row so
 it can be restored. The projects list and the dashboard already leave archived

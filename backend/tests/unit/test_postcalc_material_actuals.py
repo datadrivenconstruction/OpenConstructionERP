@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for the material half of the post-calculation report.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the material half of the post-calculation report.
 
 Post-calculation used to report material cost as unknown on every project, even
 where the site had metered its yard: ``actual_cost_known`` was set for labour

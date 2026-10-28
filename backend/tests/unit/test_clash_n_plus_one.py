@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""N+1 query audit for the clash list endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠N+1 query audit for the clash list endpoint.
 
 Verifies that listing many clash results uses a bounded, fixed number of
 queries (not one query per result row). Specifically:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic unit tests for the invoice-approval DMS.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic unit tests for the invoice-approval DMS.
 
 These tests touch no database, no HTTP client, no OCR engine and no LLM. They
 pin the deterministic behaviour the whole feature relies on:

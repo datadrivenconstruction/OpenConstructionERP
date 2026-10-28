@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for acknowledging and dismissing inbox rows (PostgreSQL).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for acknowledging and dismissing inbox rows (PostgreSQL).
 
 Seeds a user with one unread alert and one pending change-order approval, then
 checks that the actions do what their names promise and, just as importantly,

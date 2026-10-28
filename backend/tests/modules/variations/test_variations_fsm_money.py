@@ -1,4 +1,4 @@
-"""R5 audit: FSM + high-value approval gate tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R5 audit: FSM + high-value approval gate tests.
 
 Patterned on tests/unit/test_rfq_bidding.py — exercises the
 state-machine boundaries and the new ``ensure_high_value_authorised``

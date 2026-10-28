@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: the estimate basis quotes the freshest bill's price base, not the luckiest spelling.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the estimate basis quotes the freshest bill's price base, not the luckiest spelling.
 
 The defect
 ----------

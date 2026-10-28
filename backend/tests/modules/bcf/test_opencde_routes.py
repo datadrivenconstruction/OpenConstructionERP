@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration tests for the OpenCDE BCF-API 3.0 surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the OpenCDE BCF-API 3.0 surface.
 
 Covers the 14 endpoints of the minimum compliance profile mounted at
 ``/api/v1/bcf/3.0/``:

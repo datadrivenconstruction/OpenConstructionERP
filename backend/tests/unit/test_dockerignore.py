@@ -1,4 +1,4 @@
-"""``.dockerignore`` coverage tests (BUG-B06 fix).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``.dockerignore`` coverage tests (BUG-B06 fix).
 
 Without a ``.dockerignore`` every ``docker build`` ships gigabytes of
 context to the build daemon: customer BIM uploads, exports, the

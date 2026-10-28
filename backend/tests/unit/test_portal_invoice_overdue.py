@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A client sees which of their invoices are overdue, and only those they owe.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A client sees which of their invoices are overdue, and only those they owe.
 
 ``Invoice.due_date`` is text. The finance dashboard learned that a blank due
 date compares lexically below any date and showed phantom overdues; the

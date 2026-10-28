@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Real schedule progress reaches EVM, once per project per day.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Real schedule progress reaches EVM, once per project per day.
 
 The cross-module handler that writes ``oe_finance_evm_snapshot`` from progress
 listened for ``schedule.progress_updated``, a name nothing publishes, and

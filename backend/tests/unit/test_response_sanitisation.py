@@ -1,4 +1,4 @@
-"""Response-layer sanitisation (BUG-MATH04 fix).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Response-layer sanitisation (BUG-MATH04 fix).
 
 The PDF export path is already hardened via ``html.escape`` in
 ``app.modules.boq.pdf_export._safe_para`` (covered by

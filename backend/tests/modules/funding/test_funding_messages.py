@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The funding findings say the same thing in every language the product offers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The funding findings say the same thing in every language the product offers.
 
 A missing message does not raise. ``translate`` falls back to English and then
 to the raw key, so a hole shows up as an English sentence inside a German

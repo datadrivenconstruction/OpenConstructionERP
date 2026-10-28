@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the AIA G702/G703 payment-application vertical.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the AIA G702/G703 payment-application vertical.
 
 Two layers:
 

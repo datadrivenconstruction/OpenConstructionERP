@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the Decimal-exact EVM metric kernel.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Decimal-exact EVM metric kernel.
 
 The maths here is the reason the module exists, so every expected value below
 is worked out by hand from the standard formulas rather than read back from the

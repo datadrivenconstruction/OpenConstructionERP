@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Seeded bids have to carry the lines the price comparison compares.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seeded bids have to carry the lines the price comparison compares.
 
 The leveling matrix and the budget comparison are both built by indexing a
 bid's ``line_items`` on ``position_id``. The demo seeder used to write

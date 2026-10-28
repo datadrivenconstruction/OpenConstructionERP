@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Tests for the validation-report -> notification bridge (Lane A).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the validation-report -> notification bridge (Lane A).
 
 The notifications module subscribes to ``validation.report.created`` and
 rolls a failing validation report up into ONE summary notification per

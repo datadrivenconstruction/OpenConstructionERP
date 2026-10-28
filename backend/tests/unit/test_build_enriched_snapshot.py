@@ -1,4 +1,4 @@
-"""Tests for the ``scripts/build_enriched_snapshot.py`` synthesis layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the ``scripts/build_enriched_snapshot.py`` synthesis layer.
 
 The script lives outside the ``backend/app/`` package so we import it
 via a path injection. We're testing the pure-function bits — payload-

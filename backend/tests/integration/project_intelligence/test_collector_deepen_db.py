@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed tests for the project_intelligence collector deepenings.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed tests for the project_intelligence collector deepenings.
 
 Covers the wave that made the Estimation Dashboard's zero-data widgets honest:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The bidder's contact email sits with the addressee, not under the signature.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bidder's contact email sits with the addressee, not under the signature.
 
 Both decision letters printed the winning (or losing) bidder's contact address
 as the last line of the page, under "Yours faithfully" and the signer's name,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — YOLO symbol-detection determinism for PDF takeoff.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — YOLO symbol-detection determinism for PDF takeoff.
 
 Covers bullet 4 of the R7 hardening sweep:
   * When the YOLO inference path is present, output is deterministic for a

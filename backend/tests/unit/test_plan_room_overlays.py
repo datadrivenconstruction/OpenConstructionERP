@@ -1,4 +1,4 @@
-"""Baseline unit tests for the Plan Room overlays endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline unit tests for the Plan Room overlays endpoint.
 
 Scope (tight, DB-backed):
     1. The overlays composite groups a document page's defect pins, markups and

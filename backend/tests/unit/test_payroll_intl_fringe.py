@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The overtime base: what the multiplier is allowed to touch.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The overtime base: what the multiplier is allowed to touch.
 
 Overtime is computed on the basic hourly wage. Where a rate is made up of a
 basic wage plus an hourly fringe benefit amount, multiplying the combined figure

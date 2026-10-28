@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A revision that widens a column never ran, so the heal has to do it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A revision that widens a column never ran, so the heal has to do it.
 
 What runs on upgrade for most installs is ``postgres_auto_migrate``, not the
 migration chain. Until now it only ever added things, so a revision whose whole

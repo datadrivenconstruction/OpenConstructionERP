@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for Wave 24 unit-system formatting / validation helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for Wave 24 unit-system formatting / validation helpers.
 
 Covers:
     - BOQUnitSystemConsistencyRule (pure async, no DB)

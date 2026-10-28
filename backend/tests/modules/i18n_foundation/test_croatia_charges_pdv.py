@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Croatia charges PDV at 25 %, and its 13, 5 and 0 % rates are on file beside it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Croatia charges PDV at 25 %, and its 13, 5 and 0 % rates are on file beside it.
 
 A Croatian main contractor had to type 25 % by hand on every line. The shipped
 seed carried one Croatian row, the 25 % standard rate, dated a year late

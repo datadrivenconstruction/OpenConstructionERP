@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A cost item in a user-owned catalogue is read by its owner and by admins only.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cost item in a user-owned catalogue is read by its owner and by admins only.
 
 ``app.core.cost_scope`` applies one rule to every ORM read of a cost item, for
 the caller the request bound. These tests pin the rule against the query

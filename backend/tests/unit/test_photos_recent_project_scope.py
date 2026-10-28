@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project scoping of the recent-photos feed (``PhotoService.recent_across_projects``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project scoping of the recent-photos feed (``PhotoService.recent_across_projects``).
 
 The dashboard's site-photos card is project facing: clicking a photo selects
 that project and opens its gallery. So when a project is selected the card

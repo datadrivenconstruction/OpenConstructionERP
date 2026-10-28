@@ -1,4 +1,4 @@
-"""Tests for scripts/i18n.py on small fixture bundles in a tmp dir."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for scripts/i18n.py on small fixture bundles in a tmp dir."""
 
 from __future__ import annotations
 

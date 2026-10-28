@@ -1,4 +1,4 @@
-"""Regional price-list readers: every published format, read from trimmed real files.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regional price-list readers: every published format, read from trimmed real files.
 
 The fixtures under ``tests/fixtures/pricelists/`` are excerpts of the files the
 regions publish, cut to a handful of rows and otherwise unchanged; each names

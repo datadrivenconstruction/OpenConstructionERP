@@ -1,4 +1,4 @@
-"""R5 audit: object-level IDOR guards for variations.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R5 audit: object-level IDOR guards for variations.
 
 Patterned on tests/unit/test_teams.py — every cross-table dereference
 must verify the row lives in the caller's project before mutating

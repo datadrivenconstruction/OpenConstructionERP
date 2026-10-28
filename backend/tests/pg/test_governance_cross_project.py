@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Ids of another project, callers from outside the project, and who names the decider.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ids of another project, callers from outside the project, and who names the decider.
 
 Every request goes over HTTP against PostgreSQL with the real project-access
 and permission dependencies. Two projects exist side by side; the second one

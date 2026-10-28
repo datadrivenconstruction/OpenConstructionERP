@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locale diacritic ratchet: stop a new sentence shipping with its marks stripped.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale diacritic ratchet: stop a new sentence shipping with its marks stripped.
 
 Ten locale files ship strings that are the right words in the right order with
 every diacritic deleted. The Swedish reads "En driftsattningskontroll utan ett

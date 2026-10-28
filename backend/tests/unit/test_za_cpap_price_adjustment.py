@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""South Africa's Haylett formula, the P0151.1 Table 1 parser and the formula rule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠South Africa's Haylett formula, the P0151.1 Table 1 parser and the formula rule.
 
 All index values below are SAMPLE numbers chosen for easy arithmetic; they are
 not Stats SA figures.

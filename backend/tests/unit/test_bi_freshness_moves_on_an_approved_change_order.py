@@ -1,4 +1,4 @@
-"""An approved change order tells the BI dashboards their EVM figures moved.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approved change order tells the BI dashboards their EVM figures moved.
 
 Approving a change order writes a budget delta row, which EVM reads as BAC, so
 every KPI built on budget is stale the moment it lands. The BI layer keeps a

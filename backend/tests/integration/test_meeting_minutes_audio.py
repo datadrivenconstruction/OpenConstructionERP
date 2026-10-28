@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Minutes from audio, end to end over HTTP with the speech service and the AI mocked.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Minutes from audio, end to end over HTTP with the speech service and the AI mocked.
 
 Covers the order a meeting secretary goes through and the guards on each step:
 consent before audio, transcription with glossary hints and alias correction,

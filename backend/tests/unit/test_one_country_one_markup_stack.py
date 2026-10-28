@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One country, one markup stack, whichever engine you ask.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One country, one markup stack, whichever engine you ask.
 
 The platform has two markup engines with two different jobs.
 :func:`app.modules.boq.service._calculate_markup_amounts` prices a bill's own

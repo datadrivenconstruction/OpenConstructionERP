@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail the build if a proprietary classification leaks into shippable files.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail the build if a proprietary classification leaks into shippable files.
 
 The licensing position is that division NUMBERS are interoperability facts and stay,
 while the official division TITLES are the licensor's expression and must never be

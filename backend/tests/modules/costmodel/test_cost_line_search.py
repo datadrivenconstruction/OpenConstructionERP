@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Finding a cost line that sorts past the first page.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finding a cost line that sorts past the first page.
 
 Every test here seeds more lines than one page holds, and that is the point
 rather than an incidental detail. A search test over a handful of rows passes

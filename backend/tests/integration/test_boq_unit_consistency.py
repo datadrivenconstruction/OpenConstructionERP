@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration test: BOQUnitSystemConsistencyRule fires WARNING for mismatched units.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration test: BOQUnitSystemConsistencyRule fires WARNING for mismatched units.
 
 Wave 24 (#167) — task: seed an imperial project, create a BOQ position with a
 metric unit, assert the validation rule fires a WARNING.

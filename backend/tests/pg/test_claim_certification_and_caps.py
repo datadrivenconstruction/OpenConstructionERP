@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What a claim reads, what it freezes and what it is allowed to undo.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a claim reads, what it freezes and what it is allowed to undo.
 
 Four things a money review found, each one a place where a figure moved after
 somebody had already acted on it:

@@ -1,3 +1,3 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Timeline module test suite."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Timeline module test suite."""

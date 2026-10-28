@@ -1,4 +1,4 @@
-"""GAEB DA XML 3.3 exporter conformance + money round-trip tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠GAEB DA XML 3.3 exporter conformance + money round-trip tests.
 
 The exporter must produce documents a GAEB consumer will accept, and those
 documents must round-trip (export -> import) without losing a cent or a

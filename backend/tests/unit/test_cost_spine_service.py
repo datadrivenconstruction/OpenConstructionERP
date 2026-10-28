@@ -1,4 +1,4 @@
-"""Unit tests for :class:`CostSpineService` (Cost Spine, v6.4 keystone).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`CostSpineService` (Cost Spine, v6.4 keystone).
 
 Scope:
     Pure-logic coverage for the Cost Spine service using ``SimpleNamespace``

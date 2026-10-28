@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""i18n plural guard: block a counted key missing a form its language needs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠i18n plural guard: block a counted key missing a form its language needs.
 
 The orphan guard answers "can this key be reached at all", and says so in
 its own comments: a Russian file carrying only `_other` counts as reachable

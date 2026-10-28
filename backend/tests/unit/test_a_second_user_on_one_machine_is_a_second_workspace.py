@@ -1,4 +1,4 @@
-"""One machine can hold two workspaces, and ``/api/health`` has to say which.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One machine can hold two workspaces, and ``/api/health`` has to say which.
 
 The desktop installer is per-machine, so one Windows box runs one copy of the
 application for every account on it. Loopback is not per-session there: a

@@ -1,4 +1,4 @@
-"""Unit tests for the Phase F autocomplete cost-breakdown payload.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Phase F autocomplete cost-breakdown payload.
 
 Covers:
     - ``cost_breakdown`` is populated from CostItem.metadata when the

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Repo hygiene guard: keep internal-only files out of the repo and builds.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Repo hygiene guard: keep internal-only files out of the repo and builds.
 
 Internal planning docs, strategy, QA artifacts, audits and runbooks are kept
 local only. They must never ship in the public repository or in a release

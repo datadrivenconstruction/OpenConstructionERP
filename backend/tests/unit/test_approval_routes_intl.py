@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the framework-free approval-routes intl helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the framework-free approval-routes intl helpers.
 
 Pure date / Decimal / string math, no database and no FastAPI, so this file
 runs on its own without any fixtures. Covers the international guarantees:

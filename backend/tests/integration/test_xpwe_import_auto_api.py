@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End-to-end XPWE (Italian estimating XML) import through ``POST /import/auto/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end XPWE (Italian estimating XML) import through ``POST /import/auto/``.
 
 The unit suite pins the parser and the shaper; this one pins what lands in the
 database through the real ASGI app:

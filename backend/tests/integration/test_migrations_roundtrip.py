@@ -1,4 +1,4 @@
-"""Alembic up/down round-trip tests (Wave 3-D / Task #237).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Alembic up/down round-trip tests (Wave 3-D / Task #237).
 
 Goal: catch the "missing or broken downgrade()" CI bug class — a
 recent migration whose ``downgrade()`` is empty or doesn't reverse what

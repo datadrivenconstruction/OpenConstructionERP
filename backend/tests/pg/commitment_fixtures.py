@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the commitment release PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the commitment release PostgreSQL tests.
 
 A world is a throwaway database with real users, an EUR project whose own
 ``fx_rates`` know GBP (1 GBP = 1.20 EUR) and nothing else, team membership, the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A DWG conversion must not hold the drawing row while it runs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A DWG conversion must not hold the drawing row while it runs.
 
 Issue #409 reported a 22 MB DWG whose conversion failed, and then three
 things that look like separate problems and are not:

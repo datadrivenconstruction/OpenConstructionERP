@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Writer ↔ Reader round-trip fidelity tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Writer ↔ Reader round-trip fidelity tests.
 
 Sanity guarantee: every BCF 3.0 archive produced by our
 :class:`BCFWriter` must be readable by :class:`BCFReader` with no field

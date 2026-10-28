@@ -1,4 +1,4 @@
-"""The rule that lets the de-brand code name the things it is de-branding.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The rule that lets the de-brand code name the things it is de-branding.
 
 A gate that asks only whether a forbidden name is present convicts the three
 files that exist to remove it. ``app.modules.formwork.debrand`` holds the old

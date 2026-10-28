@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A requirement governs work, plural, and both writers have to agree on that.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A requirement governs work, plural, and both writers have to agree on that.
 
 ``link_to_position`` predates the link table. It writes ``linked_position_id``,
 one column, so linking position A and then position B leaves the requirement

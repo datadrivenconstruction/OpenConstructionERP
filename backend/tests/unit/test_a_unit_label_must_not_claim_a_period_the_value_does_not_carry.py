@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The hour unit must be labelled as an hour in every backend locale.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The hour unit must be labelled as an hour in every backend locale.
 
 ``units.h`` is the only time-valued key in the backend catalogue, and it is the
 only one where a mistranslation changes a number rather than a word. Every

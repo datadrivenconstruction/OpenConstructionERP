@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure workflow maths and provider abstraction for the e-signature registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure workflow maths and provider abstraction for the e-signature registry.
 
 Pins the jurisdiction-neutral, crypto-free logic without a DB or a clock:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Installing over a kept table: what the plan adds, what it refuses.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Installing over a kept table: what the plan adds, what it refuses.
 
 The tables here are made from the real generated model, on SQLite in memory,
 and the planner's own idea of the table is compared with that model column by

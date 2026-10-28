@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""W22 audit follow-up — diary delete happy-path + immutability gate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠W22 audit follow-up — diary delete happy-path + immutability gate.
 
 The W22 sweep flagged ``daily_diary.delete_diary`` as orphan: the
 backend endpoint and service method existed, the frontend exposed

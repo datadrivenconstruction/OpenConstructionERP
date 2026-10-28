@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the sheet register actually holds after a drawing set is split.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the sheet register actually holds after a drawing set is split.
 
 The register's new screen displays exactly what ``split_pdf_to_sheets`` wrote,
 so these tests pin the split's output rather than its plumbing: one row per

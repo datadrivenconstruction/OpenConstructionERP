@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An awarded RFQ drafts its purchase order, once, for the right supplier and money.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An awarded RFQ drafts its purchase order, once, for the right supplier and money.
 
 ``rfq.awarded`` was published and nothing listened, so every award was retyped
 as an order by hand. ``procurement/rfq_award.py`` now drafts it. What is pinned

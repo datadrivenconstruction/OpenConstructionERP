@@ -1,4 +1,4 @@
-"""A tax charged on the price that includes it cannot be a percentage of the subtotal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A tax charged on the price that includes it cannot be a percentage of the subtotal.
 
 Brazilian BDI is the case that forces this. The composition the federal audit
 court lays out is multiplicative, and its tax term divides rather than adds:

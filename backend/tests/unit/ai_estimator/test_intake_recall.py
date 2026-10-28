@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""In-process recall harness for the intake v2 element-group composer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠In-process recall harness for the intake v2 element-group composer.
 
 This is design section 10.3 made literal: the "look hard at our vector DB and
 pull as many real positions as possible" MEASUREMENT. It runs IN the backend

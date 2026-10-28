@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The module is discovered, mountable, and registers what it says it does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The module is discovered, mountable, and registers what it says it does.
 
 A module that fails to import drops out of the registry silently rather than
 raising, so "it is in the folder" is not evidence that it loads.

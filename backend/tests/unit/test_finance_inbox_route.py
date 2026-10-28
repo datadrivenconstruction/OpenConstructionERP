@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""``GET /finance/inbox`` reaches the inbox list, not the get-invoice route.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``GET /finance/inbox`` reaches the inbox list, not the get-invoice route.
 
 The inbox sub-router is included at the bottom of ``finance/router.py``, after
 ``GET /{invoice_id}``. With a bare parameter that route matched ``/inbox`` first

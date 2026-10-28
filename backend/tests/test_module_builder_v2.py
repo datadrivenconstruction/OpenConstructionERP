@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Module builder v2: links, features, suggestions, and what stays as it was.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Module builder v2: links, features, suggestions, and what stays as it was.
 
 The claims checked here, in the order a reviewer would ask them:
 

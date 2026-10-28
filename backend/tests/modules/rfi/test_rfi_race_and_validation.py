@@ -1,4 +1,4 @@
-"""R5 deep-audit tests for the RFI race-safety + schema validation surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R5 deep-audit tests for the RFI race-safety + schema validation surface.
 
 Scope:
     1. ``(project_id, rfi_number)`` UniqueConstraint is reflected on the

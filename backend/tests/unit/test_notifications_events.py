@@ -1,4 +1,4 @@
-"""Event-emission tests for the Notifications service (slice E)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Event-emission tests for the Notifications service (slice E)."""
 
 from __future__ import annotations
 

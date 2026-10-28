@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for pre-construction scope-ambiguity scoring (#24).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for pre-construction scope-ambiguity scoring (#24).
 
 The service reads a project's bill-of-quantities lines and grades each for the
 signals that breed a downstream variation (a provisional sum, vague wording, a

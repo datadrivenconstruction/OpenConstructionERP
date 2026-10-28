@@ -1,4 +1,4 @@
-"""Unit tests for the hand-rolled BCF-XML codec (BCF 2.1 + 3.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the hand-rolled BCF-XML codec (BCF 2.1 + 3.0).
 
 Validates against the published buildingSMART BCF-XML element names
 (``Markup``, ``Topic``, ``TopicGuid``-equivalent ``@Guid``,

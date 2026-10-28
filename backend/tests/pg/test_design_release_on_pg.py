@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Releases against PostgreSQL: the approval route, the purpose that is sent, who receives what.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Releases against PostgreSQL: the approval route, the purpose that is sent, who receives what.
 
 Four-eyes through approval_routes ``design_release`` (decision 14), rule 13
 checked against the purpose a transmittal really carries, only current

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A failed DWG conversion tells the user what to do, never where the file is.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A failed DWG conversion tells the user what to do, never where the file is.
 
 The converter echoes its input path in its JSON report, and that report used
 to be appended to the stored error as ``Details: {"input": "C:\\\\..."}``. The

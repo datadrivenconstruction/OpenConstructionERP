@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for inbound capture persistence (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for inbound capture persistence (PostgreSQL, py3.12).
 
 Exercises the service end to end on real PostgreSQL: each channel (email, chat
 webhook, SMS) normalizes and persists as an INCOMING correspondence row with the

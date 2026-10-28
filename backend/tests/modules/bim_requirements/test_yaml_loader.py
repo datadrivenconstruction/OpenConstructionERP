@@ -1,4 +1,4 @@
-"""Tests for ``app.modules.bim_requirements.yaml_loader``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for ``app.modules.bim_requirements.yaml_loader``.
 
 The loader is the security boundary of the rules-as-YAML feature: it
 must refuse code-injection-shaped inputs (``!!python/object/apply``),

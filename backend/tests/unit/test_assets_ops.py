@@ -1,4 +1,4 @@
-"""Unit + service tests for the Asset Operations module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit + service tests for the Asset Operations module.
 
 Two layers:
   * Pure functions (lifecycle health, discovery scoring) - no DB.

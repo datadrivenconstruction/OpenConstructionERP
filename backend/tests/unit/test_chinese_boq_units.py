@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit vocabulary for Chinese bills of quantities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit vocabulary for Chinese bills of quantities.
 
 A GB/T 50500 bill writes its units as words. ``app.modules.boq.units`` keeps
 non-Latin units verbatim rather than folding them to Latin, so those words

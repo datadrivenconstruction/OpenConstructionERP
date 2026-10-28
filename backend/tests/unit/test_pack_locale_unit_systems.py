@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A pack locale may translate a unit label. It may not re-measure it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A pack locale may translate a unit label. It may not re-measure it.
 
 A pack ships locale overrides that the host merges over the core strings, so a
 pack can give any key a new label. Relabelling is exactly what a locale is for

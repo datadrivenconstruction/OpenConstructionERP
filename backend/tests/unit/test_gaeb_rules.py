@@ -1,4 +1,4 @@
-"""Tests for the GAEB rule set expansion (slice D).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the GAEB rule set expansion (slice D).
 
 Each of the four new rules (``GAEBLVStructure``, ``GAEBEinheitspreisSanity``,
 ``GAEBTradeSectionCode``, ``GAEBQuantityDecimals``) gets a pair of cases:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The committed-by-position rollup answers with a page, and says how big it is.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The committed-by-position rollup answers with a page, and says how big it is.
 
 This rollup is a register keyed to the bill, not a fixed taxonomy: one row
 appears for every position the project has raised an order against, so the

@@ -1,4 +1,4 @@
-"""Unit tests for user-owned cost catalogs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for user-owned cost catalogs.
 
 Covers:
     - Catalog CRUD: create with required currency, list with item counts,

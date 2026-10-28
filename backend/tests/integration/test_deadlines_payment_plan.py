@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment-plan reminders in the deadline register and sweep, on a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment-plan reminders in the deadline register and sweep, on a real database.
 
 Two sources read ``oe_contracts_milestone``: a reached instalment nobody has
 claimed, and an owed instalment approaching or past its forecast due date.

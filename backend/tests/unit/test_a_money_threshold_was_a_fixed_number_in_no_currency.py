@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A money threshold was a fixed number in no currency.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A money threshold was a fixed number in no currency.
 
 ``boq_quality.unrealistic_rate`` compared every unit rate against 100,000 and
 every total against 10,000,000; ``boq_quality.rate_vs_benchmark`` compared a

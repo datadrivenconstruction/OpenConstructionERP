@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The equipment list routes describe how much of themselves they return.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The equipment list routes describe how much of themselves they return.
 
 ``GET /equipment/`` used to answer with a bare ``list[EquipmentResponse]``. The
 repository had counted the yard on every call and the route discarded the count

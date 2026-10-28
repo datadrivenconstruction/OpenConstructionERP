@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for ``app.core.match_service``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ``app.core.match_service``.
 
 Uses an isolated, throwaway PostgreSQL database (cloned from a
 schema-loaded template by ``tests._pg.isolated_engine`` - never the

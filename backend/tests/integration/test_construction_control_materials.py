@@ -1,4 +1,4 @@
-"""Construction-control Pillar 2 integration + IDOR/tenant-isolation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 2 integration + IDOR/tenant-isolation tests.
 
 Covers the materials / digital-passport and test-result flows end to end:
 

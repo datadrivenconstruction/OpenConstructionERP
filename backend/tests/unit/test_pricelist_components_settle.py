@@ -1,4 +1,4 @@
-"""Every price-list reader hands over components that add up to the item's rate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every price-list reader hands over components that add up to the item's rate.
 
 The BOQ editor prices a line added from the cost database as the sum of the
 item's components when it has any (``BOQModals.tsx``, and the server states

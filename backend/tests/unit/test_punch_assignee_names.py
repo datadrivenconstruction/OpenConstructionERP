@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A punch item names its owner rather than quoting an id at the reader.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A punch item names its owner rather than quoting an id at the reader.
 
 ``assigned_to`` and ``verified_by`` are free-text columns, and a typed-in name,
 a contact id and a user id are all legitimate contents. The seeder writes a

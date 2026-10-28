@@ -1,4 +1,4 @@
-# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 #
 # Two delete paths took the commercial record of a live job away in one call.

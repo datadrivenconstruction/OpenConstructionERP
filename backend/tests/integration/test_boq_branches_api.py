@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate branches through the HTTP API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate branches through the HTTP API.
 
 * An editor may fork, compare, preview and cherry-pick between branches, but
   writing into the main estimate (merge, or a cherry-pick whose target is main)

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Publishing a CDE container tells the owners of records linked to it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Publishing a CDE container tells the owners of records linked to it.
 
 The chain under test is the real one, driven through HTTP: create a container,
 link a revision to a Documents hub row, promote wip -> shared -> published.

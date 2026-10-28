@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Every migration that rewrites rows must say whether that rewrite reaches a real install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every migration that rewrites rows must say whether that rewrite reaches a real install.
 
 Why this exists
 ---------------

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the multi-source intake (#14) and predictive delay-risk
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the multi-source intake (#14) and predictive delay-risk
 (#19) service compositions.
 
 Intake is a pure, stateless normalizer, so its service surface is exercised

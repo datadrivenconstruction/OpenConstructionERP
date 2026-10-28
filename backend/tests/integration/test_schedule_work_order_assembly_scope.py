@@ -1,4 +1,4 @@
-"""Work-order assembly references use established assembly owner/admin access."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Work-order assembly references use established assembly owner/admin access."""
 
 import copy
 import uuid

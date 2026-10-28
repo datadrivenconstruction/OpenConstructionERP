@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Guard: no bare numeric literal may act as money inside the COPQ maths.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Guard: no bare numeric literal may act as money inside the COPQ maths.
 
 The cost of poor quality used to be part guess. ``compute_copq`` multiplied
 the open punch count by a module constant of ``Decimal("250.00")`` in no

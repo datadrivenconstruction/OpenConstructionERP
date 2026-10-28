@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The version floor, on the path an operator takes without booting the app.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The version floor, on the path an operator takes without booting the app.
 
 ``alembic upgrade head`` reaches a database on its own, and on a blank server
 ``alembic/env.py`` does not walk the revision chain at all - it builds the whole

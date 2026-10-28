@@ -1,4 +1,4 @@
-"""Round-5 hardening tests for the subcontractors module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-5 hardening tests for the subcontractors module.
 
 Covers the v4.3.0 audit deltas:
 

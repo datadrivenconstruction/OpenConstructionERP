@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rolling a subcontractor pay application into a GC progress claim, on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rolling a subcontractor pay application into a GC progress claim, on PostgreSQL.
 
 Including a pay application is the one write the rollup makes: it records that
 a person chose to bill that sub's work on this claim. It never writes the

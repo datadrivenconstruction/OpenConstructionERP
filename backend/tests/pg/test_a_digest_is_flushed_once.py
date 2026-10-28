@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Two flushes over the same digest rows send the digest once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Two flushes over the same digest rows send the digest once.
 
 The notification worker flushes every five minutes and the admin endpoint can
 flush on demand. ``flush_digest_queue`` read the unsent rows, sent the digest,

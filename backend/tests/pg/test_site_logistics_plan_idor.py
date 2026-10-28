@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read and change a logistics plan, over HTTP against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read and change a logistics plan, over HTTP against PostgreSQL.
 
 A stranger to the project is 404 on every plan route; an id of another
 project's row is 404 inside an accessible project; an editor cannot move a

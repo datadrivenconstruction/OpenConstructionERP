@@ -1,4 +1,4 @@
-"""Next WBS code in a section and the slot a new child takes in the flat order."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Next WBS code in a section and the slot a new child takes in the flat order."""
 
 from __future__ import annotations
 

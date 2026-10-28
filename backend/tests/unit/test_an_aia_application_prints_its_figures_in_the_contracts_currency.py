@@ -1,4 +1,4 @@
-"""An AIA payment application prints figures in the contract's own units.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An AIA payment application prints figures in the contract's own units.
 
 The G702 face and the G703 continuation sheet were both formatted by one
 helper, and that helper was handed the currency code, printed the code next to

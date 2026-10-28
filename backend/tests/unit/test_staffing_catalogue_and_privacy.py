@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shipped staffing catalogues, the validator, and the privacy shape of the schema.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shipped staffing catalogues, the validator, and the privacy shape of the schema.
 
 Catalogue (SPEC 8.1): every shipped file loads, every role's document kinds
 exist, every ``credential_type`` is in the credentials registry, every

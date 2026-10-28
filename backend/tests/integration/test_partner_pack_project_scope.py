@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Partner-pack project scoping: an active pack shows its own + untagged projects.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Partner-pack project scoping: an active pack shows its own + untagged projects.
 
 When a pack is active the workspace presents a focused view. Projects tagged
 with the active pack's slug AND projects that carry no pack tag at all are

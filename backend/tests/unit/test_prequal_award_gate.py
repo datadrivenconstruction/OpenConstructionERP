@@ -1,4 +1,4 @@
-"""Prequalification award gate (TOP-30 #20).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Prequalification award gate (TOP-30 #20).
 
 A subcontractor that is administratively blocked, or whose prequalification is
 ``rejected`` / ``suspended``, must not be moved onto a live subcontract or paid.

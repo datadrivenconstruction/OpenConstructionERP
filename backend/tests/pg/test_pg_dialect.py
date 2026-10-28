@@ -1,4 +1,4 @@
-"""PostgreSQL dialect-correctness tests (embedded PG, no Docker).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PostgreSQL dialect-correctness tests (embedded PG, no Docker).
 
 These guard the SQLite -> PostgreSQL divergences that the default in-memory
 SQLite suite cannot see. They would have caught the ``ARRAY(JSON)`` -> ``jsonb[]``

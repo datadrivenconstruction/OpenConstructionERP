@@ -1,4 +1,4 @@
-"""Work-order BOQ links stay in the owning activity's project."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Work-order BOQ links stay in the owning activity's project."""
 
 import copy
 import uuid

@@ -1,4 +1,4 @@
-"""Tests for the automated progress report (item 15).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the automated progress report (item 15).
 
 Covers the bounded increment shipped under reporting + progress:
 

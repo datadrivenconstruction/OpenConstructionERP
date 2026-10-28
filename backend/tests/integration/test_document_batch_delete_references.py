@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The bulk document delete says what it severs, and asks before it does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bulk document delete says what it severs, and asks before it does.
 
 Deleting one document already warns about the rows elsewhere that still point
 at it (``GET /documents/{id}/references``). The batch path did not: it removed

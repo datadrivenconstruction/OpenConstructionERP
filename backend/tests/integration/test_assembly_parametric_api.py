@@ -1,4 +1,4 @@
-"""Integration tests - Parametric BOQ assemblies (Issue #365).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests - Parametric BOQ assemblies (Issue #365).
 
 Exercises the DB / service / router wiring built on top of the pure parametric
 core (``app.modules.assemblies.parametric``): an assembly that carries named

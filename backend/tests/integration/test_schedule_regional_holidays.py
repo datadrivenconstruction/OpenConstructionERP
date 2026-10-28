@@ -1,4 +1,4 @@
-"""Country holidays survive generation and the first CPM recalculation on PostgreSQL."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Country holidays survive generation and the first CPM recalculation on PostgreSQL."""
 
 from datetime import date
 

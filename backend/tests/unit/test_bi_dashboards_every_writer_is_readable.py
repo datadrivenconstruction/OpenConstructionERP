@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A report reads like a document in every format it is offered in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A report reads like a document in every format it is offered in.
 
 ``build_report`` dispatches on ``output_format``, which is a per-report
 setting somebody chose once. The readability work that stopped the PDF

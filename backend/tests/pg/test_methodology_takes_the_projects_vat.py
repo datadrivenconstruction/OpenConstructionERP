@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: a methodology asked about a project prices that project's VAT.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a methodology asked about a project prices that project's VAT.
 
 VAT is a property of the transaction, not of the method. "How Germany
 estimates" is a catalogue fact and the template's 19 belongs there. But

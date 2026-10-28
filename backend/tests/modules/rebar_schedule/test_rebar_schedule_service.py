@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Importing a bending schedule end to end (PostgreSQL).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Importing a bending schedule end to end (PostgreSQL).
 
 Exercises the persistence layer against a real database: importing the whole
 fixture corpus, reading the shapes back, recognising a re-sent file, summarising

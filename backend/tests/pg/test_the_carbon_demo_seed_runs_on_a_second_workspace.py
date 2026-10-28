@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The carbon demo seed has to run again once its projects are gone.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The carbon demo seed has to run again once its projects are gone.
 
 The seed writes a shared EPD library (``epd_id`` is unique) and then one set of
 inventories per project. Enrichment decides whether to run it by counting

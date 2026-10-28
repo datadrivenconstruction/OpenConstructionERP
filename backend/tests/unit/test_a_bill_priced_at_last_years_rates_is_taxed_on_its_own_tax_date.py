@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bill's tax date is its own field, and it follows the base date until set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill's tax date is its own field, and it follows the base date until set.
 
 The defect
 ----------

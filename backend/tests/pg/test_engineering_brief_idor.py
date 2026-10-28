@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may see and change the engineering brief, over HTTP against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may see and change the engineering brief, over HTTP against PostgreSQL.
 
 A stranger from another tenant sees 404 on every project route, a project member with the editor role reads
 but cannot approve, and the approver cannot be the submitter.

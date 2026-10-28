@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the WorkGroup derivation + assumptions descriptor.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the WorkGroup derivation + assumptions descriptor.
 
 Pure tests (no DB, no AI). They pin the human-facing provenance the dialogue
 composer writes onto every group (design section 3.1): a short formula

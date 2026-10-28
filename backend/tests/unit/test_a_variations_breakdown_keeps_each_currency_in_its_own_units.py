@@ -1,4 +1,4 @@
-"""A per-currency variations breakdown is written in each currency's units.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A per-currency variations breakdown is written in each currency's units.
 
 ``variations.service._money_str_map`` turns a ``{code: Decimal}`` map into the
 wire format the dashboard reads. It is keyed by currency code, which is the

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""DB-free unit tests for the pure interference risk matrix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the pure interference risk matrix.
 
 Exercises :mod:`app.modules.clash.risk_matrix` with plain values only - no
 database, no ORM, no session. Covers overlap classification, the imminent /

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the DIN SPEC 91350 BIM-LV container codec.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the DIN SPEC 91350 BIM-LV container codec.
 
 Pure round-trip / edge-case coverage - no DB, no network. Validates that
 ``write_container`` -> ``read_container`` preserves the LV positions, the

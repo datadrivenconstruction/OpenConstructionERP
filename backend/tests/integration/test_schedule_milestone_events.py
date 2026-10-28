@@ -1,4 +1,4 @@
-"""A schedule milestone announces itself when reached, once, and when reopened.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A schedule milestone announces itself when reached, once, and when reopened.
 
 Payment plans fall due on programme milestones, so ``schedule.milestone.reached``
 has to fire when one is actually completed on site and at no other time: not

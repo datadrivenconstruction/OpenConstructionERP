@@ -1,4 +1,4 @@
-"""Unit tests for the pluggable storage backend abstraction.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pluggable storage backend abstraction.
 
 These tests only exercise :class:`LocalStorageBackend` plus the
 settings-driven factory.  The S3 backend is intentionally *not*

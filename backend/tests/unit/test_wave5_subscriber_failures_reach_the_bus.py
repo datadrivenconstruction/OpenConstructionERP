@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A wave-5 subscriber that fails says so on the bus.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A wave-5 subscriber that fails says so on the bus.
 
 Every handler in ``_wave5_cross_module_subscribers`` used to wrap its whole
 body in ``except Exception`` and report the failure at ``logger.debug``. The

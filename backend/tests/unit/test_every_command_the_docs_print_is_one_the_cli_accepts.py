@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every command line our documentation prints must be one the CLI accepts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every command line our documentation prints must be one the CLI accepts.
 
 A command line in a document is a claim: this program exists, it takes these
 arguments, and typing it does what the surrounding paragraph says. Nothing

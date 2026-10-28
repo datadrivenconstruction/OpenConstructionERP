@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The plural guard must take its call sites from code and not from prose.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The plural guard must take its call sites from code and not from prose.
 
 ``scripts/check_i18n_plural_forms.py`` excludes a key that is named literally
 at a call site, on the sound reasoning that such a suffix belongs to the name

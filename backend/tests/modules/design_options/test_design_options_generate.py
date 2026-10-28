@@ -1,4 +1,4 @@
-"""``POST /options/{option_id}/generate/`` - preview and priced apply.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``POST /options/{option_id}/generate/`` - preview and priced apply.
 
 The generate flow is assembled from other platform services: the BIM hub owns
 conversion, element matching owns turning a model into confirmed groups, and the

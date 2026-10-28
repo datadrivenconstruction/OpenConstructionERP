@@ -1,4 +1,4 @@
-"""Unit tests for restoring a backup's embedded files (DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for restoring a backup's embedded files (DB-free).
 
 Export can embed the binaries referenced by a row (documents, drawings, photos)
 under ``files/<backup_key>/<storage-key>``. Restore writes them back so a

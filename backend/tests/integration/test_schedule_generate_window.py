@@ -1,4 +1,4 @@
-"""Integration: generating a schedule from a BOQ stays inside the project window.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: generating a schedule from a BOQ stays inside the project window.
 
 The generate dialog now sends the project's duration as ``total_project_days``.
 That only helps if the generator honours it: before the fix each activity was

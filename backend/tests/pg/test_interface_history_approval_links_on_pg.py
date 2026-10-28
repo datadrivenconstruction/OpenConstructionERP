@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Interface register on PostgreSQL: status history, approval routing, validated links.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Interface register on PostgreSQL: status history, approval routing, validated links.
 
 Three things the register lacked, each pinned against a real database and, where
 it matters, over HTTP:

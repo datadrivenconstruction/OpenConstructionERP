@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""EVM (Earned Value Management) formula correctness tests for the EAC module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EVM (Earned Value Management) formula correctness tests for the EAC module.
 
 This test suite validates all EVM calculations in isolation — no DB, no HTTP,
 no async. All monetary values (BAC, EV, AC, EAC, ETC, VAC) are represented

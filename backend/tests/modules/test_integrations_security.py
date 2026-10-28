@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integrations module — Round-7 security audit regressions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integrations module — Round-7 security audit regressions.
 
 Covers the six guarantees the R7 sweep pinned down for outbound
 credential-bearing connectors (chat / webhook / email):

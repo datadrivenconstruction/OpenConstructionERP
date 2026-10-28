@@ -1,4 +1,4 @@
-"""JWT timing-attack regression tests (BUG-JWT01 / Wave 3-A).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠JWT timing-attack regression tests (BUG-JWT01 / Wave 3-A).
 
 Goal: detect order-of-magnitude timing leaks between failure modes in the
 JWT decode path. We don't aim for cryptographic-grade timing parity —

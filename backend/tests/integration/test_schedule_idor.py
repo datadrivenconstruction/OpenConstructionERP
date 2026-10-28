@@ -1,4 +1,4 @@
-"""Schedule (4D Schedule) IDOR regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule (4D Schedule) IDOR regression suite.
 
 The ``/api/v1/schedule/`` router exposes endpoints keyed off
 ``schedule_id``. Several read/mutate endpoints historically skipped the

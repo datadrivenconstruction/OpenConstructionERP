@@ -1,4 +1,4 @@
-"""Unit tests for Turkish amounts in words.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for Turkish amounts in words.
 
 Three kinds of evidence, because a speller can be wrong in three ways. The
 vocabulary is pinned by literals written out by hand. The grammar ("bin" and

@@ -1,4 +1,4 @@
-"""A variation order whose change order died can take a replacement; voiding needs a reason."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A variation order whose change order died can take a replacement; voiding needs a reason."""
 
 from __future__ import annotations
 

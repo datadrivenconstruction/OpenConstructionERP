@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The running application loads the full_evm rules, not just this test package.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The running application loads the full_evm rules, not just this test package.
 
 ``conftest.py`` registers the rule set by hand for every test here, and says why
 in as many words: the application does it from ``on_startup``, which no test

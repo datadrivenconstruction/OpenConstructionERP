@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed tests for subcontractor scorecards + prequalification (TOP-30 #20).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed tests for subcontractor scorecards + prequalification (TOP-30 #20).
 
 Drives the service layer against PostgreSQL so we exercise the real
 SQLAlchemy mappings, the ``(subcontractor_id, period)`` unique constraint, and

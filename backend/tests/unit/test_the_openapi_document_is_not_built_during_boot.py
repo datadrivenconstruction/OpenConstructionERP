@@ -1,4 +1,4 @@
-"""Booting must not build the OpenAPI document unless somebody asked for it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Booting must not build the OpenAPI document unless somebody asked for it.
 
 The document takes 73.0s to assemble on this stand, for 2923 paths and 3601
 component schemas, and it is CPU-bound Python. Running it on a worker thread is

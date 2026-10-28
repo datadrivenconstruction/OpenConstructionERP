@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The photo cross-link must not take the upload down with it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The photo cross-link must not take the upload down with it.
 
 Uploading a site photo writes two rows: the photo itself, and a ``Document`` row
 so the photo also shows up in the documents hub. The second one is convenience

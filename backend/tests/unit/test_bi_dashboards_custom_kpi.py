@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Custom KPI definitions - issue #441.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Custom KPI definitions - issue #441.
 
 The module shipped 35 built-in KPIs and no way to add a 36th without
 shipping Python. These tests pin the way in that was added for the people

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The governance demo seed leaves the demo projects at different, deliberate moments.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The governance demo seed leaves the demo projects at different, deliberate moments.
 
 The module seeders read a project's state through the governance port: the gate
 into the phase that enables ``construction_start`` is undecided (preparation

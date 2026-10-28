@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A self-hosted AI endpoint is checked again at the moment it is called.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A self-hosted AI endpoint is checked again at the moment it is called.
 
 GHSA-rq5j-mwq2-6558 was closed in two places: the settings schema refuses a
 metadata or link-local URL when it is saved, and the dispatch re-resolves the

@@ -1,4 +1,4 @@
-"""Unit tests for cache-layer error logging (v2.3.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for cache-layer error logging (v2.3.1).
 
 Before v2.3.1 the Redis cache silently swallowed every exception with
 ``except: pass``.  Outages went invisible, making failed invalidations

@@ -1,4 +1,4 @@
-"""Evidence records for field photos: sources, precedence, grading, privacy."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Evidence records for field photos: sources, precedence, grading, privacy."""
 
 from __future__ import annotations
 

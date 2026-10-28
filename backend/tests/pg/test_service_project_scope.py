@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project-scoped service listing must filter in the query, not after it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project-scoped service listing must filter in the query, not after it.
 
 The Service module is mounted twice: flat at ``/service``, which is the
 tenant-wide dispatcher view, and under ``/projects/:projectId/service``. The

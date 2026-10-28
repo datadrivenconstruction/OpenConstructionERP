@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A pack that sells a country must price with that country's method.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A pack that sells a country must price with that country's method.
 
 The platform already knows how to price a bill nationally. ``markup_templates``
 states the national markup stacks, ``REGION_BY_COUNTRY`` says which country

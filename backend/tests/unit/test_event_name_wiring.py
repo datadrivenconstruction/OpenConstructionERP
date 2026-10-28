@@ -1,4 +1,4 @@
-"""Every event name a handler subscribes to must be published by someone.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every event name a handler subscribes to must be published by someone.
 
 The event bus matches subscribers to publishers by exact string. Nothing checks
 the two sides agree, so a handler subscribed to a name no module publishes is

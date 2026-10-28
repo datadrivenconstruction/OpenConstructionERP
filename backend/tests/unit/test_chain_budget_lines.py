@@ -1,4 +1,4 @@
-"""Unit tests for the BOQ -> budget -> progress -> schedule chain fixes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BOQ -> budget -> progress -> schedule chain fixes.
 
 Covers the three audit blockers:
 

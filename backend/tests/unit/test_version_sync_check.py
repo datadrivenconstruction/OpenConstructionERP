@@ -1,4 +1,4 @@
-"""The release gate that reads every version literal in the tree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The release gate that reads every version literal in the tree.
 
 ``scripts/check_version_sync.py`` is the only thing standing between a release
 and a build whose parts disagree about which version they are. It grew one

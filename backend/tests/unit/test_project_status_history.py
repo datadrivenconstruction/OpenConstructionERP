@@ -1,4 +1,4 @@
-"""Unit tests for the project status-history audit trail.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the project status-history audit trail.
 
 Pins the contract behind GET /api/v1/projects/{id}/status-history:
 

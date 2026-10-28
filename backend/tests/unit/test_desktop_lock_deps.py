@@ -1,4 +1,4 @@
-"""Guard: the desktop PyInstaller lock carries the right dependency set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Guard: the desktop PyInstaller lock carries the right dependency set.
 
 The desktop build installs dependencies from ``requirements-desktop.lock`` and
 then runs ``pip install -e . --no-deps``, so anything missing from the lock is

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Service tests for building a priced assembly from a production norm.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service tests for building a priced assembly from a production norm.
 
 These drive :func:`app.modules.norm_expansion.service.build_assembly_from_norm`
 end to end against a real (transaction-isolated) PostgreSQL session, seeding a

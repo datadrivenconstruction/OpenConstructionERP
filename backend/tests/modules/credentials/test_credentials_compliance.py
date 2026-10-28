@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may not work today.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may not work today.
 
 The compliance report joins what the project requires to what its people hold.
 These tests pin the distinctions that decide whether somebody is stopped at the

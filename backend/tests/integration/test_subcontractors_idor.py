@@ -1,4 +1,4 @@
-"""Subcontractors agreements IDOR regression suite (issue #29).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Subcontractors agreements IDOR regression suite (issue #29).
 
 A ``Subcontractor`` is a GLOBAL, tenant-shared registry entry (no
 ``project_id``); only its ``Agreement`` rows carry a ``project_id`` and

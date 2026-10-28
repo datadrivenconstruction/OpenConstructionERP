@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An XPWE price list is read from disk in bounded memory, whatever its layout or code page.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An XPWE price list is read from disk in bounded memory, whatever its layout or code page.
 
 A regional list exported as XPWE runs to tens of megabytes. Read whole into
 memory, re-encoded when it is not UTF-8, and with every item held back whose

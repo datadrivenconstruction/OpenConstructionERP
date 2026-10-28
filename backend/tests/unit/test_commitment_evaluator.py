@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Delegation of authority, decision dates and the matrix's own FX, as pure functions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Delegation of authority, decision dates and the matrix's own FX, as pure functions.
 
 Every case names the rule it pins and is built so that removing the rule flips
 the answer: bands of the item's own type over ``*`` bands, the lowest sufficient

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Saudi partner pack cites the building code in force and no unsourced labour rule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Saudi partner pack cites the building code in force and no unsourced labour rule.
 
 SBC 2024 replaced SBC 2018 and is mandatory since 2025-06-30, so a pack that
 told a contractor to confirm "which SBC 2018 Parts apply" pointed at a code the

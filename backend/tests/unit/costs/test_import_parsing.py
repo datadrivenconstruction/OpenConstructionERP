@@ -1,4 +1,4 @@
-"""Unit tests for cost-import parsing helpers (audit fixes M1/m2 + zip guard).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for cost-import parsing helpers (audit fixes M1/m2 + zip guard).
 
 Covers:
   1. ``_safe_float`` locale handling: a SINGLE comma is ALWAYS the decimal

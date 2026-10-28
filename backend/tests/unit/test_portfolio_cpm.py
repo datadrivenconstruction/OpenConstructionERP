@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the multi-project (schedule-of-schedules) CPM engine - T3.3.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the multi-project (schedule-of-schedules) CPM engine - T3.3.
 
 Pure-Python, no DB - everything under test post-processes the output of the
 single-project kernel ``compute_cpm`` and imports nothing beyond the

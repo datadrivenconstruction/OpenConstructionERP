@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Quantity check against real rows: contract quantity, measured quantity, cost effect.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Quantity check against real rows: contract quantity, measured quantity, cost effect.
 
 The bill below goes through the life the check exists for. It is priced, one
 position carries the estimating take-off its quantity was derived from, the

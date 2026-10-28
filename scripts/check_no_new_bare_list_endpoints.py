@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Refuse a new collection endpoint that answers with a bare array.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Refuse a new collection endpoint that answers with a bare array.
 
 The pagination programme migrates registers one wave at a time, from a bare
 ``list[...]`` to ``{items, total, offset, limit}``. Waves subtract; nothing

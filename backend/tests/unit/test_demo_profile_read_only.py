@@ -1,4 +1,4 @@
-"""An unprofiled project must open on the read-only demo without a write."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An unprofiled project must open on the read-only demo without a write."""
 
 import uuid
 from unittest.mock import AsyncMock, MagicMock

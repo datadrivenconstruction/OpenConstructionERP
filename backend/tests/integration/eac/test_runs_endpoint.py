@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP integration tests for the EAC v2 run endpoints (RFC 35 §1.7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP integration tests for the EAC v2 run endpoints (RFC 35 §1.7).
 
 Drives the real FastAPI app — covers:
 

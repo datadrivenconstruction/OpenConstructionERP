@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Document-level per-page scale calibration (issue #334).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document-level per-page scale calibration (issue #334).
 
 Calibration for a PDF takeoff used to live only in the browser (localStorage)
 plus a weak per-measurement ``scale_pixels_per_unit`` echo, so a reload where a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The retention schedule routes keep the accrual lock the policy editor keeps.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The retention schedule routes keep the accrual lock the policy editor keeps.
 
 Once a claim on a contract has left draft (and was not rejected), how the
 contract holds retention is part of what that claim certified, and

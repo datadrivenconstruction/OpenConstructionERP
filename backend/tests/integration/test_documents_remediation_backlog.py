@@ -1,4 +1,4 @@
-"""Regression tests for the documents-module remediation backlog.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for the documents-module remediation backlog.
 
 Pins the contracts fixed in the A-DOC-* triage pass:
 

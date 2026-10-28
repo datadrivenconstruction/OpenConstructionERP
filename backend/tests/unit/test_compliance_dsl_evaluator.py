@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the compliance DSL evaluator (T08).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the compliance DSL evaluator (T08).
 
 Each test compiles a definition into a dynamic
 :class:`~app.core.validation.engine.ValidationRule`, runs it against a

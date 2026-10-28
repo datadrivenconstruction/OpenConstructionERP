@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may see what, over HTTP against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may see what, over HTTP against PostgreSQL.
 
 Identity is the variable under test: a stranger from another tenant, an editor
 reaching for a personnel file, a manager with no relationship to the person,

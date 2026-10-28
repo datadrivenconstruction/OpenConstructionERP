@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level tests for ``BIMHubService.ensure_tileset``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level tests for ``BIMHubService.ensure_tileset``.
 
 Exercises the bake orchestration end to end against the real storage backend
 and DB session (no HTTP / auth - that is the endpoint's job): a model's

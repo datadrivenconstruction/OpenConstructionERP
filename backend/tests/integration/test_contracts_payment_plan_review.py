@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment-plan billing kept honest, on a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment-plan billing kept honest, on a real database.
 
 A contract is billed one way: by its payment plan or by measured progress,
 never both, or the same work is billed twice. The schedule moves only what

@@ -1,4 +1,4 @@
-"""The paged reindex walk, against real PostgreSQL and a real Session.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The paged reindex walk, against real PostgreSQL and a real Session.
 
 The unit test beside this one replaces the session with a recorder, which is
 what makes its peak measurable - but a recorder agrees with whatever the code

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the CPM Slice 1 engine + resource leveling + PPC roll-up.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the CPM Slice 1 engine + resource leveling + PPC roll-up.
 
 Pure-Python, no DB — the engine is fully decoupled from SQLAlchemy.
 

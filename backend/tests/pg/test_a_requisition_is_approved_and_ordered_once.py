@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A material requisition is approved by someone else and ordered exactly once (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A material requisition is approved by someone else and ordered exactly once (issue #516).
 
 Drives ``/api/v1/procurement/requisitions`` over HTTP against PostgreSQL, one
 session per request with commit on success and rollback on error, as the

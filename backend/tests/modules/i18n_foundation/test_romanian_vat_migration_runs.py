@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``v3308`` run against a real database, not just read.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``v3308`` run against a real database, not just read.
 
 Why this file exists separately from the repair's own tests
 -----------------------------------------------------------

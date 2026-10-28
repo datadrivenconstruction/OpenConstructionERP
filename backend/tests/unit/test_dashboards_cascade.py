@@ -1,4 +1,4 @@
-"""T04 unit tests — Cascade Filter Engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T04 unit tests — Cascade Filter Engine.
 
 Covers the pure DataFrame path AND the DuckDB-backed path against a
 real Parquet fixture, mirroring the structure of

@@ -1,4 +1,4 @@
-"""The award gate reads the expiry dates the compliance register already holds.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The award gate reads the expiry dates the compliance register already holds.
 
 Three registers on the platform carry expiry dates, but only one of them is
 keyed to a counterparty: ``oe_subcontractors_certificate``, plus the

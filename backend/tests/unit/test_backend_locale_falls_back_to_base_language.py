@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A regional locale reads its base language, not English.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A regional locale reads its base language, not English.
 
 The UI offers five regional codes and resolves every one of them through its
 base language, so a Brazilian reader sees the Portuguese strings. The backend

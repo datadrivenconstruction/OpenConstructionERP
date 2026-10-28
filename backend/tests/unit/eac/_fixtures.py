@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Test fixtures for EAC v2 schema parity tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Test fixtures for EAC v2 schema parity tests.
 
 Per RFC 35 EAC-1.2 acceptance criterion: ≥30 valid and ≥30 invalid
 fixtures with coverage of every selector kind, attribute kind, and

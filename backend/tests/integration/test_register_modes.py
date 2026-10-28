@@ -1,4 +1,4 @@
-"""Self-registration modes (BUG-RBAC03 / BUG-RBAC04 fix).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Self-registration modes (BUG-RBAC03 / BUG-RBAC04 fix).
 
 The platform exposes ``POST /auth/register`` so a fresh install can be
 bootstrapped. For internet-exposed deployments that endpoint becomes a

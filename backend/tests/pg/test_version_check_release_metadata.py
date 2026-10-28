@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The version the banner names and the notes it shows must be one release.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The version the banner names and the notes it shows must be one release.
 
 ``GET /api/system/version-check`` reads two sources. The number comes from
 PyPI, which is the source of truth precisely because a hotfix can publish a

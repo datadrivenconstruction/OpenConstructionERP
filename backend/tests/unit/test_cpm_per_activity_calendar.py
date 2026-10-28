@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for per-activity work calendars in the CPM engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for per-activity work calendars in the CPM engine.
 
 ``app.core.cpm.calculate_cpm`` lets each activity carry its own ``calendar``
 ({"work_days": [...], "exceptions": [...]}) so its duration is measured on its

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The XRechnung rules beyond the postal address, checked against the artefact.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The XRechnung rules beyond the postal address, checked against the artefact.
 
 The address half (BR-DE-3/4/8/9) lives in ``test_einvoice_br_de_address``. This
 file covers the rest of what a German receiver applies to a document this

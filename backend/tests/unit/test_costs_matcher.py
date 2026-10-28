@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the CWICR cost-item matcher (T12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CWICR cost-item matcher (T12).
 
 Strategy
 --------

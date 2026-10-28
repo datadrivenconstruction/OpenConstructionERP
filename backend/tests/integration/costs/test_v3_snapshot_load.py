@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration test — DDC v3 snapshot upload against a live Qdrant server.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration test — DDC v3 snapshot upload against a live Qdrant server.
 
 Skipped automatically unless ``CWICR_QDRANT_URL`` is set, so the suite
 stays green in CI environments without a Qdrant container. To run::

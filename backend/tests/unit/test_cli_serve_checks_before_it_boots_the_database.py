@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``serve`` must answer the cheap questions before it does the expensive thing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``serve`` must answer the cheap questions before it does the expensive thing.
 
 ``cmd_serve`` used to call ``_setup_env`` first and run its blocking pre-flight
 afterwards. ``_setup_env`` boots the embedded PostgreSQL cluster, and on a first

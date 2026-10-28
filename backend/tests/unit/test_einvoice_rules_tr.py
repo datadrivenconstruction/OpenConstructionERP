@@ -1,4 +1,4 @@
-"""Unit tests for the UBL-TR validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the UBL-TR validation rules.
 
 Every rule id has a passing case (the clean scenarios raise nothing at all,
 warnings included) and at least one failing case built by breaking exactly

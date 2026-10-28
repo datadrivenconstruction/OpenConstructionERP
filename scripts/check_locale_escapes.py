@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locale escape guard: block doubled single-character escapes in translations.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale escape guard: block doubled single-character escapes in translations.
 
 A TypeScript string literal escapes a Unicode code point as a single
 backslash followed by `u` and four hex digits, e.g. `"\\u2013"` in the source

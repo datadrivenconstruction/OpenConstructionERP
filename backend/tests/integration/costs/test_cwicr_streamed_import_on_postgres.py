@@ -1,4 +1,4 @@
-"""On PostgreSQL, the streamed cost import stores what the whole-frame import stored.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠On PostgreSQL, the streamed cost import stores what the whole-frame import stored.
 
 The unit tests compare what the two imports hand to the database layer. This
 file compares what PostgreSQL ends up holding, through the real COPY, staging

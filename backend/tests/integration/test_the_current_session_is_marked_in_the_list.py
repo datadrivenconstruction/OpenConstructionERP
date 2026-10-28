@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The session list says which session you are reading it from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The session list says which session you are reading it from.
 
 Revocation is only usable if the person can tell the sessions apart. Without
 this flag the list is five rows of timestamps, and the one action people

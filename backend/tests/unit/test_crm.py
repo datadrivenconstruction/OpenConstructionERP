@@ -1,4 +1,4 @@
-"""Unit tests for the CRM module (:class:`CrmService` + pure helpers).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CRM module (:class:`CrmService` + pure helpers).
 
 Scope:
     * Pure math helpers (compute_weighted_value, compute_win_rate, etc.)

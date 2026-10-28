@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An upload can be a new version of a model, and then offers its quantity rules again.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An upload can be a new version of a model, and then offers its quantity rules again.
 
 The upload names the model it replaces (``parent_model_id``); the server checks
 that the parent is a finished model of the same project that no finished newer

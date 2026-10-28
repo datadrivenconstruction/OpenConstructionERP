@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database-free unit tests for the transmittals pure-logic layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the transmittals pure-logic layer.
 
 Covers the numbering scheme, the response-due-date maths and the
 readiness-to-issue checks in ``app.modules.transmittals.logic``, plus the

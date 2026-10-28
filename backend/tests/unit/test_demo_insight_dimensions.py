@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Demo seed values that a chart groups by, checked against their reader.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo seed values that a chart groups by, checked against their reader.
 
 A panel that draws one category called "Not recorded" is not a picture of an
 empty register. It is a picture of a full register grouped by a field nothing

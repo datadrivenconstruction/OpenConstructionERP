@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the pure production-norm pricing math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure production-norm pricing math.
 
 These exercise :mod:`app.modules.norm_expansion.price_math` directly with plain
 ``Decimal`` inputs - no database, FastAPI or ORM - so they run on any

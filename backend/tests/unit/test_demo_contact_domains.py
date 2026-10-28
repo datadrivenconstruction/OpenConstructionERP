@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A demo contact must carry a domain a resolver could actually use.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A demo contact must carry a domain a resolver could actually use.
 
 The German demo packs name their firms properly, umlauts and all, and the
 addresses were written the same way: ``vergabe@sommerfeld-kältetechnik.de``.

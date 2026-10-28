@@ -1,4 +1,4 @@
-"""Integration tests for Wave-2 user API hardening.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for Wave-2 user API hardening.
 
 Covers four bugs landing in the same patch:
 

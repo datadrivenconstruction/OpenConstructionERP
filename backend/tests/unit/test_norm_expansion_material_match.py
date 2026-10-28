@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for resolving a norm material to the cost item that prices it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for resolving a norm material to the cost item that prices it.
 
 These cover :mod:`app.modules.norm_expansion.material_match`, which decides
 which catalogue row puts money on a norm-derived line, called directly rather

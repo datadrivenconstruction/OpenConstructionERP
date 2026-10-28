@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pipeline Builder Phase-1 spine tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pipeline Builder Phase-1 spine tests.
 
 Covers the three core contracts the design pins:
 

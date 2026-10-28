@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Money invariants of a payment application, against the database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Money invariants of a payment application, against the database.
 
 Three defects shared one symptom, a certificate asking the owner for the wrong
 amount, and this file holds all three shut on the lane that blocks:

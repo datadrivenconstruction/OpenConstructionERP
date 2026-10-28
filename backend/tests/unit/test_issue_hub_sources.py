@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every module that owns a defect register is either in the Issue Hub or named here.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every module that owns a defect register is either in the Issue Hub or named here.
 
 The Unified Issue Hub merges five registers into one list so that, in the words
 of its own subtitle, nothing falls between the cracks. The union it reads is

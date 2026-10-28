@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design data that follows other modules, against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design data that follows other modules, against PostgreSQL.
 
 Deliverable state read from CDE (rule 15), a report following an external
 check cycle (rules 17-18), a permit package pinning and detecting superseded

@@ -1,4 +1,4 @@
-"""Unit tests for credit notes (BT-3 type code 381).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for credit notes (BT-3 type code 381).
 
 A credit note is the same EN 16931 model as an invoice but a different
 document. In CII it is only the TypeCode; in UBL it is a whole different root

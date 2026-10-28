@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A money reading over BOQ lines can say which currency it is in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A money reading over BOQ lines can say which currency it is in.
 
 Every money measure a custom KPI can reach lives on ``boq_position``:
 ``unit_rate``, ``total`` and the derived ``amount``. The entity offered no

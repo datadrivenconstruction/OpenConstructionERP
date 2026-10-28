@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An Excel 97-2003 workbook imports exactly as the same workbook saved as .xlsx.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An Excel 97-2003 workbook imports exactly as the same workbook saved as .xlsx.
 
 Estimating programs still export .xls, and the import used to refuse it with a
 request to open the file in Excel and save it again. It is read now, through

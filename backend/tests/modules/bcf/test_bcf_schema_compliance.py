@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Hand-coded BCF 3.0 schema compliance probe.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hand-coded BCF 3.0 schema compliance probe.
 
 The buildingSMART BCF 3.0 XSD set lives at
 https://github.com/buildingSMART/BCF-XML/blob/release_3_0/Schemas/. We

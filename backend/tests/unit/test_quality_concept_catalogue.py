@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Catalogue kind ``quality_concept``: every shipped file validates and every cross-reference is checked.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalogue kind ``quality_concept``: every shipped file validates and every cross-reference is checked.
 
 Each negative case mutates the shipped neutral body in exactly one place and
 asserts the validator names it, so a validator that stopped checking that

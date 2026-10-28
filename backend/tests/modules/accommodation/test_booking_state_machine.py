@@ -1,4 +1,4 @@
-"""Booking state-machine + date-validation tests."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Booking state-machine + date-validation tests."""
 
 from __future__ import annotations
 

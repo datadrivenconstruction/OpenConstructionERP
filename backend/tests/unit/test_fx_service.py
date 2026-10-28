@@ -1,4 +1,4 @@
-"""FX service: market conversion, ECB parsing, graceful fallback and caching.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FX service: market conversion, ECB parsing, graceful fallback and caching.
 
 The FX service converts cost figures between currencies using ECB EUR-based
 reference rates, with no hard network dependency: a conversion resolves rates

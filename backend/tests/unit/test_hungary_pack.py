@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Hungarian pack, and the three places its facts are written down twice.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Hungarian pack, and the three places its facts are written down twice.
 
 A country pack states the same thing in several files by necessity: the engine
 holds the chapter list because rules run on it, the manifest holds it because

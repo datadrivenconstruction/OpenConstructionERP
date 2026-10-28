@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the file-favourites module (W11 — file-manager cluster).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the file-favourites module (W11 — file-manager cluster).
 
 Covers the service layer end-to-end against a transaction-isolated
 PostgreSQL session so the dead-code follow-up that re-introduced router +

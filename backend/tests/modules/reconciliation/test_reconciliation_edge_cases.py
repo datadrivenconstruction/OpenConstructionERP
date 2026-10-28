@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Edge-case integration tests for the reconciliation module (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Edge-case integration tests for the reconciliation module (PostgreSQL, py3.12).
 
 ``test_thread_api.py`` already covers the confirm/reject round-trip, idempotent
 upsert, the rejected-link cut, project scoping and the invalid-status guard. This

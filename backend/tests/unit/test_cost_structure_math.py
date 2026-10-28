@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost structure arithmetic: tree totals with own amounts, and splitting a position."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost structure arithmetic: tree totals with own amounts, and splitting a position."""
 
 from __future__ import annotations
 

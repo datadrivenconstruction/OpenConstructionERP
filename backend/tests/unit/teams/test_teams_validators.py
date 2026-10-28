@@ -1,4 +1,4 @@
-"""The six ``teams`` validation rules, each on a project that actually trips it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The six ``teams`` validation rules, each on a project that actually trips it.
 
 Each rule gets a positive case (a clean project it stays quiet on) and a
 negative case (a misconfiguration it names). The clean case is what stops a

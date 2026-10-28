@@ -1,4 +1,4 @@
-"""The guard that stops a module writing uploads next to whatever directory it was started in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The guard that stops a module writing uploads next to whatever directory it was started in.
 
 A module that declares ``ATTACHMENTS_DIR = Path("uploads/rfi/attachments")`` has
 not chosen a directory. It has chosen whatever the process happened to be

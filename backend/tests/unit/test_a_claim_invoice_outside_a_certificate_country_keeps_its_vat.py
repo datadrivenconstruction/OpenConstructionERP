@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A claim invoice in a country without a payment certificate layout is untouched.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A claim invoice in a country without a payment certificate layout is untouched.
 
 Where a project's country has a payment certificate (hakediş) layout, the
 invoice raised from a certified claim takes its VAT from the claim's confirmed

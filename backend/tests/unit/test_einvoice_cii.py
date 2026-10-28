@@ -1,4 +1,4 @@
-"""Unit tests for the EN 16931 CII e-invoice builder (einvoice module).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the EN 16931 CII e-invoice builder (einvoice module).
 
 Pure and DB-free: they exercise the builder and the finance-dict mapping the
 same way the GAEB export tests pin ``build_gaeb_xml``.

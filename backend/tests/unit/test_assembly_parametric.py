@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the parametric assembly engine (Issue #365).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the parametric assembly engine (Issue #365).
 
 Database-free: exercises the parameter graph (unique names, references,
 cycles), Decimal-exact resolution in dependency order, the allow-listed

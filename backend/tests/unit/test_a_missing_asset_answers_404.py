@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A request for a file that is not there must be told so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A request for a file that is not there must be told so.
 
 The SPA fallback answers any unmatched path with ``index.html``, which is
 correct for client-side routes and wrong for assets. A browser holding a stale

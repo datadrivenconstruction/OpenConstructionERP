@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for EAC block-graph persistence and its validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for EAC block-graph persistence and its validation rules.
 
 Two halves.
 

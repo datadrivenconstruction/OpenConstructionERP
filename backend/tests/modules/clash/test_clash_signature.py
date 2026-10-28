@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the clash signature algorithm (v41).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the clash signature algorithm (v41).
 
 The signature is the join key that lets a smart issue persist across
 re-runs. These tests pin its mathematical contract:

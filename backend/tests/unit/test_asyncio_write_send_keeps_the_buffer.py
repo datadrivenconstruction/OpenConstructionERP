@@ -1,4 +1,4 @@
-"""The test run's selector transport must not lose a chunk send() refused.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The test run's selector transport must not lose a chunk send() refused.
 
 See ``tests/_asyncio_write_send.py``. These tests drive the replacement on
 every platform (the stdlib only takes this path on Windows), through a real

@@ -1,4 +1,4 @@
-"""The seeded work week must outlive the single year the seed file covers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seeded work week must outlive the single year the seed file covers.
 
 Every other test in this package builds its calendars with ``make_calendar``.
 That proves the mechanism and certifies nothing about the data we ship, which is

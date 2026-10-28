@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo estate must speak the safety module's own vocabulary.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo estate must speak the safety module's own vocabulary.
 
 Same failure as the variations module, in two places at once. The seeder inserts
 through the ORM, so nothing it writes ever passes the Pydantic layer that owns

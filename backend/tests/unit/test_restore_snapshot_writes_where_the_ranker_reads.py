@@ -1,4 +1,4 @@
-"""A snapshot restore creates the collection on the server it uploads to.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A snapshot restore creates the collection on the server it uploads to.
 
 The restore handler used to take its Qdrant client from
 ``app.core.vector._get_qdrant``, which resolves on ``qdrant_url``, and then

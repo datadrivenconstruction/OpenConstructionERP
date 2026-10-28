@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Two ways of building the same tables have to agree on what things are called.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Two ways of building the same tables have to agree on what things are called.
 
 A fresh install gets the funding tables from ``Base.metadata.create_all``. An
 install that already exists gets them from ``alembic/versions/v41_funding_module.py``.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests pinning the DWG-takeoff IDOR sweep.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests pinning the DWG-takeoff IDOR sweep.
 
 Round-6 audit caught that *every* endpoint in
 ``backend/app/modules/dwg_takeoff/router.py`` trusted the path / query

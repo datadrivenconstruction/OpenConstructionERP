@@ -1,4 +1,4 @@
-"""A stock movement that has no unit cost must still serialize.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A stock movement that has no unit cost must still serialize.
 
 ``StockMovement.unit_cost`` is nullable on purpose: a movement out of a balance
 whose average is not knowable has no unit cost to record, and zero would read as

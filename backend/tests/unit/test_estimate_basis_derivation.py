@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the basis-of-estimate derivation engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the basis-of-estimate derivation engine.
 
 The engine (``app.modules.estimate_basis.derivation``) is pure - stdlib only, no
 ORM or app imports - so it is loaded here directly from its file path. That keeps

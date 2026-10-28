@@ -1,4 +1,4 @@
-"""Does the invoice we emit add up, measured the way its receiver adds it up?
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Does the invoice we emit add up, measured the way its receiver adds it up?
 
 BR-CO-10 says the document line total (BT-106) is the sum of the line net
 amounts (BT-131), with no tolerance. A receiver checks that against the figures

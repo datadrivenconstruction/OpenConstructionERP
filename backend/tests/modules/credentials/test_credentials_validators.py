@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seven credentials rules, each fired and each proved silent when clean.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seven credentials rules, each fired and each proved silent when clean.
 
 A rule that never fires and a rule that always fires are equally useless, so
 every rule here is tested twice: once on data that should trigger it, once on

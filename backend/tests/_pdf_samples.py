@@ -1,4 +1,4 @@
-"""Hand-built PDF drawings for the PDF reader tests and the parity harness.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hand-built PDF drawings for the PDF reader tests and the parity harness.
 
 Each sample is written operator by operator, so a test knows exactly which
 content stream a reader saw: an ``re`` rectangle and the same rectangle drawn

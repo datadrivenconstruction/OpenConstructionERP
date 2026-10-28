@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-layer unit tests for the GAAP general ledger (task #77).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-layer unit tests for the GAAP general ledger (task #77).
 
 These exercise :class:`FinanceService`'s GAAP methods with in-memory stub
 repositories (no database, no event loop fixtures beyond ``pytest.mark.asyncio``)

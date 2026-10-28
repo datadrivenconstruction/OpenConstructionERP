@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The retention engine, held against figures worked out by hand.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The retention engine, held against figures worked out by hand.
 
 Every expectation below is arithmetic a person can check on paper, on a
 contract sum of 100,000 with the common US policy of 10% stepping down to 5%

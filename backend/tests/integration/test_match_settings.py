@@ -1,4 +1,4 @@
-"""v2.8.0 — per-project match-settings integration tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠v2.8.0 — per-project match-settings integration tests.
 
 Stands up a minimal FastAPI app with the projects router mounted plus
 session/auth dependencies overridden against a per-test throwaway PostgreSQL

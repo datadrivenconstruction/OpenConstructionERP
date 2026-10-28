@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A seeded programme has to read off the calendar, not off the row number.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A seeded programme has to read off the calendar, not off the row number.
 
 Percent complete was derived from an activity's position in the template list,
 which puts every value strictly between 0 and 100. Two things follow, and the

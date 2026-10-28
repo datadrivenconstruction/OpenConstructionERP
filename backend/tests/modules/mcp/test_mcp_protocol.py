@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The JSON-RPC envelope on its own: no database, no HTTP."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The JSON-RPC envelope on its own: no database, no HTTP."""
 
 from __future__ import annotations
 

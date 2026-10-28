@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Building the app must not take logging away from the process that hosts it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Building the app must not take logging away from the process that hosts it.
 
 ``configure_logging`` used to call ``logging.basicConfig(force=True)``. The
 ``force`` flag removes and closes every handler already on the root logger,

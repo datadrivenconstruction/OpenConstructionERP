@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - vision-LLM plan-read cost cap (issue #194).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - vision-LLM plan-read cost cap (issue #194).
 
 The plan-read path must never spend over the per-user rolling cap. These tests
 pin the pre-flight gate: with the cap at zero a run is refused with a 400 and

@@ -1,4 +1,4 @@
-"""Geo Hub integration suite — anchors, tilesets, imagery, terrain,
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub integration suite — anchors, tilesets, imagery, terrain,
 viewpoints, overlays, GeoJSON / KML I/O, tile-generation jobs, and
 the map-config bundle.
 

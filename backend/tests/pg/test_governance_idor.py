@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read and decide a gate, over HTTP against PostgreSQL; plus the API contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read and decide a gate, over HTTP against PostgreSQL; plus the API contract.
 
 Identity is the variable under test: a stranger to the project (another
 tenant), an editor, a manager who is a project member but not named by the

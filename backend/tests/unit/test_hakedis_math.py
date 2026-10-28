@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The arithmetic of the hakediş (Turkish progress payment certificate).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The arithmetic of the hakediş (Turkish progress payment certificate).
 
 One realistic bill for an MEP subcontract, twenty five mechanical and
 electrical rows, is certified three times, the third being final. Every

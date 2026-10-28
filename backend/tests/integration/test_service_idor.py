@@ -1,4 +1,4 @@
-"""Service (field-service / PPM) schedule IDOR regression suite (issue #29).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service (field-service / PPM) schedule IDOR regression suite (issue #29).
 
 PPM schedules do not carry a ``project_id`` of their own; they inherit their
 tenant scope from a chain: ``ServiceSchedule -> ServiceAsset -> ServiceContract``

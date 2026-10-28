@@ -1,4 +1,4 @@
-"""French must resolve every validation message without an English fallback."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠French must resolve every validation message without an English fallback."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``payment_plan`` rule set, over plain dict contexts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``payment_plan`` rule set, over plain dict contexts.
 
 The deposit rule warns and never blocks: the statutory table is research that
 no lawyer has checked for a given contract, so the person drawing up the

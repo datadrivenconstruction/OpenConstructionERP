@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Reporting module — Round-7 security audit regressions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reporting module — Round-7 security audit regressions.
 
 The wire-level IDOR boundary is already pinned by
 ``tests/integration/test_reporting_idor.py`` (eight tenant-isolation

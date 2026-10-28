@@ -1,4 +1,4 @@
-"""Readiness criteria of a catalogue shown as a checklist the area owner ticks."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Readiness criteria of a catalogue shown as a checklist the area owner ticks."""
 
 from __future__ import annotations
 

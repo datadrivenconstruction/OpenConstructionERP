@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A country default's note reaches the reader through a locale key, in step with the table.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country default's note reaches the reader through a locale key, in step with the table.
 
 Each figure in ``contracts.country_defaults`` carries a ``note``, an English
 sentence a person reads in the tooltip beside "Default for Germany". It used to

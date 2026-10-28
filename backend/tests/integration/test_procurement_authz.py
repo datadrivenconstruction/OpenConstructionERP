@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed integration tests for the procurement API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed integration tests for the procurement API.
 
 Stands up the real FastAPI app over the ASGI transport (no network) and
 drives the procurement router end-to-end against the test PostgreSQL the

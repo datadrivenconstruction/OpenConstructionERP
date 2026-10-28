@@ -1,4 +1,4 @@
-"""The ``pack`` catalogue source: what the active pack ships resolves like any other catalogue.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``pack`` catalogue source: what the active pack ships resolves like any other catalogue.
 
 Pack discovery is replaced by three fakes, so no pack has to be installed.
 The bodies are the shipped neutral catalogue under another id: a pack file is

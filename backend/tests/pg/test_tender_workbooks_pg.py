@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: the tender workbooks are the stored package, read through the routes the contractor uses.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the tender workbooks are the stored package, read through the routes the contractor uses.
 
 The comparison workbook must say what the comparison endpoint says: the same
 totals per bidder, a line a bidder left out shown as missing rather than as 0,

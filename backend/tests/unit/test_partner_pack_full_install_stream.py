@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Behaviour tests for the streaming partner-pack activation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Behaviour tests for the streaming partner-pack activation.
 
 These prove the Modules-page "Activate pack" path (``full_install_stream``)
 actually installs the pack's bundled work catalog AND its embedded resource

@@ -1,4 +1,4 @@
-"""Demo cost allocations identify their origin without changing pricing or planning."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo cost allocations identify their origin without changing pricing or planning."""
 
 from decimal import Decimal
 

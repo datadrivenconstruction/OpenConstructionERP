@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the built-in methodology templates and the spec builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the built-in methodology templates and the spec builder.
 
 Covers the PURE parts of :mod:`app.modules.methodology.templates`:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The two lifecycles of project governance, every move allowed and refused.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The two lifecycles of project governance, every move allowed and refused.
 
 Both machines are tables, so the tests are tables too. Every pair of states is
 asked once: the allowed set must answer yes and every other pair must answer no.

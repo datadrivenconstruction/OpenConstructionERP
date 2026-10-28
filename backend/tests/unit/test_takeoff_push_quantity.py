@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-Python tests for the takeoff push-quantity helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-Python tests for the takeoff push-quantity helpers.
 
 Estimation-cluster deep-improve wave (2026-05-28) introduced an opt-in
 ``push_quantity`` flag on the link-to-BOQ endpoints (PDF takeoff +

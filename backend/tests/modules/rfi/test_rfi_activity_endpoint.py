@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Focused tests for the RFI activity-journal endpoint (item #13).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Focused tests for the RFI activity-journal endpoint (item #13).
 
 ``GET /{rfi_id}/activity/`` reuses the generic ``get_activity_for_entity``
 helper over the shared ``oe_activity_log`` table to surface an RFI's

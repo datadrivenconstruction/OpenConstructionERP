@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rule V19: a payment waits for the certificate the law makes a condition of paying.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rule V19: a payment waits for the certificate the law makes a condition of paying.
 
 Egypt suspends each interim and the final payment on a construction contract
 until the contractor shows a social insurance clearance (MoSS Decree

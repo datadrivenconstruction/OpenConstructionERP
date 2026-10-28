@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the international, database-free estimating helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international, database-free estimating helpers.
 
 These are pure unit tests (no DB, no HTTP, no AI key, no Qdrant). They pin the
 international-robustness, edge-case and explainability contracts of

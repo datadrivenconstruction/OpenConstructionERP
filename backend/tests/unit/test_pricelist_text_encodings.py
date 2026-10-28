@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A price list saved as Excel "Unicode text" is read, and a damaged archive is refused by name.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A price list saved as Excel "Unicode text" is read, and a damaged archive is refused by name.
 
 Excel saves "Unicode text" as UTF-16 with a byte-order mark, and the reader
 used to take it for Windows-1252: every second byte a NUL, no header found,

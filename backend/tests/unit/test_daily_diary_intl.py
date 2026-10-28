@@ -1,4 +1,4 @@
-"""Unit tests for the international, unit-safe daily-diary helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international, unit-safe daily-diary helpers.
 
 These cover the pure functions in ``app.modules.daily_diary.intl``: no
 database, no network. They pin the international robustness (unit and

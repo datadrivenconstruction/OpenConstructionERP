@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the T2.3 layout-spec grammar and schema validation."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the T2.3 layout-spec grammar and schema validation."""
 
 from __future__ import annotations
 

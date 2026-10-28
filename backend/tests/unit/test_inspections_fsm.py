@@ -1,4 +1,4 @@
-"""FSM lifecycle tests for ``InspectionService.complete_inspection``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FSM lifecycle tests for ``InspectionService.complete_inspection``.
 
 The inspection lifecycle is:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No repository may follow an update-by-primary-key with ``expire_all()``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No repository may follow an update-by-primary-key with ``expire_all()``.
 
 ``UPDATE ... WHERE id = :pk`` writes past the ORM, and the tempting repair is
 ``session.expire_all()``. It marks every loaded instance stale, so the next

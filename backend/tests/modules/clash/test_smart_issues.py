@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the smart-issue lifecycle (v41).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the smart-issue lifecycle (v41).
 
 Pins the cross-run contract:
 

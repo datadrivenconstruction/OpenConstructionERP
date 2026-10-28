@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A locked bill refuses a write in the language of the person who tried it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A locked bill refuses a write in the language of the person who tried it.
 
 Three refusals guard a locked bill: the full guard that hands the bill back,
 the one-column guard used by the per-line writers, and the link refusal that

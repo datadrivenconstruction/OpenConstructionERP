@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No seeded row tells the reader it was seeded.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No seeded row tells the reader it was seeded.
 
 A demo estate is meant to read like a project someone is running. A row whose
 title is "Demo Opportunity 0041" or whose note is "Seeded activity body" says

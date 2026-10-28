@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every refusal of a bill import reaches the reader as a code, never as a sentence the server wrote.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every refusal of a bill import reaches the reader as a code, never as a sentence the server wrote.
 
 The import dialog words a refused file from ``boq.import_error.<code>`` in the
 reader's language. A raise without a code would fall back to the English

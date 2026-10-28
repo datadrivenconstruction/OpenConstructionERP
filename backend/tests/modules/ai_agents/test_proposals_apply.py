@@ -1,4 +1,4 @@
-"""BOQ-proposal extraction + apply for AI-agent runs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ-proposal extraction + apply for AI-agent runs.
 
 The drafter agent's whole value is "turn a brief into priced BOQ positions",
 but those proposals (emitted as ``create_position`` observation steps) were

@@ -1,4 +1,4 @@
-"""Unit tests for ``FieldReportCreate.signature_data`` validation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``FieldReportCreate.signature_data`` validation.
 
 ``signature_data`` is a base64 data URI of a hand-drawn signature image.
 Pre-fix it was an unbounded ``str | None`` — any authenticated caller

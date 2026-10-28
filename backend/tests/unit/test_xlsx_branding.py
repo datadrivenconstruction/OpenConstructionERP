@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The company letterhead on Excel exports (``app.core.xlsx_branding``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The company letterhead on Excel exports (``app.core.xlsx_branding``).
 
 Every test sets the company profile, the app branding and the document
 appearance through the PDF layer's three readers, which is where the

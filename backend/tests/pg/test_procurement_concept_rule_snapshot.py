@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Frozen rule snapshots and reasoned overrides of the procurement concept.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Frozen rule snapshots and reasoned overrides of the procurement concept.
 
 A snapshot is taken when a package's procedure is set and never changes; an
 override of a rule outcome needs a reason and records who and when; a project

@@ -1,4 +1,4 @@
-"""Integration: linking BOQ positions to a schedule activity by hand.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: linking BOQ positions to a schedule activity by hand.
 
 The activity edit panel lets a planner attach positions to an activity they
 created themselves. The ids live in a JSON list with no foreign key, so the

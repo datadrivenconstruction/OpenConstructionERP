@@ -1,4 +1,4 @@
-"""HR-driven room-suggestion tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HR-driven room-suggestion tests.
 
 The suggestion endpoint must:
     * return the lowest-labelled available worker-camp room

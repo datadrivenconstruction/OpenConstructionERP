@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the pure resource-index computation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure resource-index computation.
 
 The resource-index method prices each resource group of a norm at base prices
 and multiplies it by that group's own regional quarterly index, then charges

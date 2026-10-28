@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The vendor label on a purchase order, for a contact with only an email.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The vendor label on a purchase order, for a contact with only an email.
 
 ``Contact`` has no ``email`` column - the column is ``primary_email`` - and the
 same display-name rule was written out by hand in several places, two of which

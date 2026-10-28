@@ -1,4 +1,4 @@
-"""The gate that keeps the registered sign on a CAD tool named in a UI string.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The gate that keeps the registered sign on a CAD tool named in a UI string.
 
 The founder ruling of 2026-08-14 allows the authoring tool the converter reads
 from to be named in UI strings, on the condition that the first mention in each

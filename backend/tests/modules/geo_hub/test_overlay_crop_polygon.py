@@ -1,4 +1,4 @@
-"""PATCH a GeoJSON crop polygon and a corners array; assert round-trip."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PATCH a GeoJSON crop polygon and a corners array; assert round-trip."""
 
 from __future__ import annotations
 

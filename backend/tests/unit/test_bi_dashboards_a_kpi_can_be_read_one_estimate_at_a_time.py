@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A KPI can be read one estimate at a time.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A KPI can be read one estimate at a time.
 
 A stored KPI value was a value of one project over one period, and a project
 that holds several estimates had no way to say which one a number belonged to.

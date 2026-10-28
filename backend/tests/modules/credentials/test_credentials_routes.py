@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The HTTP surface: requirements, verification, summary, and the access guard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The HTTP surface: requirements, verification, summary, and the access guard.
 
 The authorisation cases are the ones worth being explicit about. A credential
 register holds who is qualified and who is not, which is exactly the sort of

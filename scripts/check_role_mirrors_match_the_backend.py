@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Keep every copy of the backend role vocabulary in the UI equal to the backend.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keep every copy of the backend role vocabulary in the UI equal to the backend.
 
 The UI hides a control when the current role could not use it anyway. That is
 a UX decision, not a security boundary, and the backend stays the only

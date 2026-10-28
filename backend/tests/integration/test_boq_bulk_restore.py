@@ -1,4 +1,4 @@
-"""v3.12.0 Stream A — BOQ bulk-update + per-field restore endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠v3.12.0 Stream A — BOQ bulk-update + per-field restore endpoints.
 
 Covers:
 

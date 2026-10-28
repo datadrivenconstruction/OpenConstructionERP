@@ -1,4 +1,4 @@
-"""Regression test: pool_size/max_overflow are applied unconditionally.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression test: pool_size/max_overflow are applied unconditionally.
 
 ``create_engine_from_settings`` must size the connection pool from
 ``Settings.database_pool_size`` / ``database_max_overflow``. An earlier version

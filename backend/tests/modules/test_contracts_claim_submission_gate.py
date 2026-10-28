@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Submitting a progress claim runs the ``pay_application`` rules first.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Submitting a progress claim runs the ``pay_application`` rules first.
 
 The rules themselves are held red and green in
 ``tests/unit/test_contracts_pay_application_rules.py``. This file holds the

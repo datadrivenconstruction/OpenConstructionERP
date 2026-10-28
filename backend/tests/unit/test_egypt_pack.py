@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Egypt pack composes data the platform already holds and invents none of it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Egypt pack composes data the platform already holds and invents none of it.
 
 The pack sets no VAT, calendar or contract limit. Those live in core registries
 keyed by the country, each with its own source. What the pack can get wrong is

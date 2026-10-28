@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A module download URL goes through the same outbound check as a webhook.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A module download URL goes through the same outbound check as a webhook.
 
 ``install_from_url`` fetched whatever URL it was handed, and ``install`` hands
 it the ``download_url`` a registry answers with, so a registry entry naming a

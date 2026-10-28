@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A JWT secret that cannot be persisted or read back must be loud, never destructive.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A JWT secret that cannot be persisted or read back must be loud, never destructive.
 
 Every session the browser holds is signed with this secret. When the
 auto-provisioned secret changes across a restart, every open tab gets a 401

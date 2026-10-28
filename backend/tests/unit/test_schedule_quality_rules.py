@@ -1,4 +1,4 @@
-"""Tests for the C1 schedule-quality rule pack (DCMA-14-style health checks).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the C1 schedule-quality rule pack (DCMA-14-style health checks).
 
 Each of the seven rules (``ScheduleOpenEnds``, ``ScheduleNegativeLag``,
 ``ScheduleExcessiveLag``, ``ScheduleHardConstraints``, ``ScheduleNegativeFloat``,

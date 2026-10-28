@@ -1,4 +1,4 @@
-"""Unit tests for the pure, international submittal helpers in ``intl.py``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure, international submittal helpers in ``intl.py``.
 
 These tests need no database and no FastAPI app; they exercise the
 dependency-free reporting helpers directly. They cover the international

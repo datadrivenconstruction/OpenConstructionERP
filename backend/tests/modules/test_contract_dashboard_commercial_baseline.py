@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Legacy contract dashboards must agree with payment applications, without backfill."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Legacy contract dashboards must agree with payment applications, without backfill."""
 
 from decimal import Decimal
 

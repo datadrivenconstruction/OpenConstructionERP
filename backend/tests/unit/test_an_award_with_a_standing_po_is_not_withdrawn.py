@@ -1,4 +1,4 @@
-"""An award whose purchase order still stands is not withdrawn.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An award whose purchase order still stands is not withdrawn.
 
 ``delete_award`` steps an awarded bid package back to closed so it can be
 re-awarded, which is deliberate. But procurement raises a PO from the award,

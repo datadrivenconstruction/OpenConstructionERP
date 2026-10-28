@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Security + correctness hardening tests for the EAC v2 module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Security + correctness hardening tests for the EAC v2 module.
 
 Covers the v4.3 Round-3 Wave A audit findings:
 

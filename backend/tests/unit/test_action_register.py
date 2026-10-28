@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure cross-source commitment / action register engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure cross-source commitment / action register engine.
 
 Stdlib + pytest only, so it runs on the local Python 3.11 runner exactly like
 the cycle-time and coordination engine tests.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locale escape guard, second direction: block escapes stripped to bare letters.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale escape guard, second direction: block escapes stripped to bare letters.
 
 `check_locale_escapes.py` guards one way an escape sequence can be corrupted:
 a doubled backslash, where `\\n` in the source becomes two literal backslashes

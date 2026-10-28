@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the plant register PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the plant register PostgreSQL tests.
 
 A world is a throwaway database with real users, a project with the governance
 ``elf_module_framework`` model pinned (its document type ``m04_equipment_frame``

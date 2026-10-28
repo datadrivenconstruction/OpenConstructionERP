@@ -1,4 +1,4 @@
-/**
+/**​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
  * Personal comfort options (motion, contrast): kept on this device and set as
  * `data-motion` / `data-contrast` on <html>, like the appearance axes. They are
  * accessibility preferences, so they are never part of a workspace default.

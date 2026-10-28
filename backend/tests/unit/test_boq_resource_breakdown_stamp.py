@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Server-side canonical M/L/E rollup + the resource_split_mismatch rule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Server-side canonical M/L/E rollup + the resource_split_mismatch rule.
 
 The BOQ grid's Material/Labor/Equipment split columns read
 ``metadata.resource_breakdown`` as their fallback. Historically only the

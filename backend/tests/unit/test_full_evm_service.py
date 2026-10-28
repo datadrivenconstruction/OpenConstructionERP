@@ -1,4 +1,4 @@
-"""Unit tests for :class:`EVMService` (full_evm module).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`EVMService` (full_evm module).
 
 Scope:
     Baseline smoke coverage for the advanced EVM forecast calculation

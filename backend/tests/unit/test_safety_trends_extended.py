@@ -1,4 +1,4 @@
-"""Unit tests for the LTIFR/TRIR extended-trend analytics (item 13).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the LTIFR/TRIR extended-trend analytics (item 13).
 
 Scope:
     Pure-logic coverage of :meth:`SafetyService.get_trends_extended`,

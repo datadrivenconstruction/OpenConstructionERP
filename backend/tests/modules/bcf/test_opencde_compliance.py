@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""OpenCDE BCF-API 3.0 — protocol compliance tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OpenCDE BCF-API 3.0 — protocol compliance tests.
 
 These tests assert structural conformance with the buildingSMART
 OpenCDE BCF-API 3.0 spec (``release_3_0/Schemas_draft-03``):

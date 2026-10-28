@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A line written by hand moves the claim's own totals, or it is refused.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A line written by hand moves the claim's own totals, or it is refused.
 
 The inline line editor wrote the line and nothing else. The claim kept the
 gross, retention and net it was generated with, the accounts receivable

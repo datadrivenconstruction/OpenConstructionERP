@@ -1,4 +1,4 @@
-"""Query builder - operator compilation and bind-parameter safety (no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Query builder - operator compilation and bind-parameter safety (no DB).
 
 Locks down that each operator compiles to the expected SQL expression, that
 values flow through bind parameters (no literal identifier interpolation), and

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Migrations must not declare new native PostgreSQL UUID columns.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Migrations must not declare new native PostgreSQL UUID columns.
 
 ``Base.metadata.create_all`` is the source of truth for our schema, and it
 emits ``character varying(36)`` for every identity column: measured across all

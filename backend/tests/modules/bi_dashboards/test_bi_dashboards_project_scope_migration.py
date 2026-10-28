@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Executes ``v3293_bi_dashboards_project_scope`` against real PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Executes ``v3293_bi_dashboards_project_scope`` against real PostgreSQL.
 
 Reading a migration proves nothing about it, and this one carries a claim that
 only a populated database can settle: adding the project dimension must leave

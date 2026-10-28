@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Turkish pack: every name it declares resolves, and it is written in Turkish.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Turkish pack: every name it declares resolves, and it is written in Turkish.
 
 Two things went wrong in this pack before, and both were silent.
 

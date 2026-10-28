@@ -1,4 +1,4 @@
-"""Baseline unit tests for the ``compliance_docs`` module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline unit tests for the ``compliance_docs`` module.
 
 Covers the four behaviours we just hardened:
 

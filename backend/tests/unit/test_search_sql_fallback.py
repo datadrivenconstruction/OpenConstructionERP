@@ -1,4 +1,4 @@
-"""Unit tests for the SQL fallback layer of unified search.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the SQL fallback layer of unified search.
 
 BUG-013 / IMP-016: when LanceDB is not installed (fresh ``pip install``
 without ``[vector]`` extras) the unified search must still return hits

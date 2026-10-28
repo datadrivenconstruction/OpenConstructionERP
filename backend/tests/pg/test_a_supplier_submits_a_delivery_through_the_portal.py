@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A supplier tells the site what is on its way, through the portal (BF-01).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A supplier tells the site what is on its way, through the portal (BF-01).
 
 The supplier holds a portal account and a ``po`` access rule. With ``submit``
 it can send a delivery note, quantities per line and certificates; that is a

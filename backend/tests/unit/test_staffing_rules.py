@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The staffing rules as pure functions (SPEC section 4), table-driven.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The staffing rules as pure functions (SPEC section 4), table-driven.
 
 Every test names its rule and carries the case that would pass if the rule
 were missing: a derived status that a stored one would contradict, a day on

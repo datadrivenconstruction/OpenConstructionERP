@@ -1,4 +1,4 @@
-"""Issue #79 — Position ↔ CostItem linkage on create/update.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #79 — Position ↔ CostItem linkage on create/update.
 
 Covers:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The three ways this module refuses a decision each say something different.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The three ways this module refuses a decision each say something different.
 
 ``submit_decision`` answers 403 from two places and with three sentences,
 because the first of them chooses between two of those sentences on whether

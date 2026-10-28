@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Stakeholders on a project with a pinned phase model: evidence and frame documents by tag.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Stakeholders on a project with a pinned phase model: evidence and frame documents by tag.
 
 The world is the shipped neutral phase model. Nothing here names its areas or
 document types: the expected place of each subject is read from the model

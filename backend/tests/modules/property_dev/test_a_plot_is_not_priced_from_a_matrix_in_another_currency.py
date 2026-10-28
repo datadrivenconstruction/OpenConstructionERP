@@ -1,4 +1,4 @@
-"""A price matrix in one currency does not write a price onto a plot in another.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A price matrix in one currency does not write a price onto a plot in another.
 
 ``_svc_bulk_recompute_dev_prices`` wrote ``Plot.computed_price`` from the
 active PriceMatrix without reading a currency on either side. A EUR matrix

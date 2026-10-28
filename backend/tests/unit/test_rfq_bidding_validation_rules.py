@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the ``rfq_issue`` and ``rfq_award`` validation rule sets.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the ``rfq_issue`` and ``rfq_award`` validation rule sets.
 
 This module has two rule sets rather than one, because the deadline must be in
 the future when an RFQ is published and has necessarily passed by the time it is

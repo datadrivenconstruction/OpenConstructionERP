@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Forecast-method provenance on the legacy snapshot-derived surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Forecast-method provenance on the legacy snapshot-derived surface.
 
 ``EVMService.calculate_forecast`` used to accept any string as a method and
 quietly treat everything it did not recognise as the cost-trend formula. It

@@ -1,4 +1,4 @@
-"""Unit tests for the Carbon & Sustainability module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Carbon & Sustainability module.
 
 Coverage:
     * pure carbon-math helpers (units, embodied math, scope 1/2, intensity)

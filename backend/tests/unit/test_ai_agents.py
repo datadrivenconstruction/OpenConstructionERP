@@ -1,4 +1,4 @@
-"""Baseline tests for the AI Agents framework — cost-runaway guards + safety.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline tests for the AI Agents framework — cost-runaway guards + safety.
 
 Focuses on the safety contract added during the v4.2.2 audit pass:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the intake v2 taxonomy, formulas and FSM primitives.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the intake v2 taxonomy, formulas and FSM primitives.
 
 No DB, no HTTP, no AI key, no Qdrant. These pin the deterministic building
 blocks the conversational intake composes:

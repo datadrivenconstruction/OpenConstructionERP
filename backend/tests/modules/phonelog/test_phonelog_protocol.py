@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic tests for the recording-to-protocol path (phonelog.transcription).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic tests for the recording-to-protocol path (phonelog.transcription).
 
 These cover the parts that must be right without a provider or a database:
 upload format/size validation, structured-protocol assembly (both when the LLM

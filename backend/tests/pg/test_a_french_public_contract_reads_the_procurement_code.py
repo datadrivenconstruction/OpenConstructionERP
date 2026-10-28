@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project's works survive the database and reach the contracts written on it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project's works survive the database and reach the contracts written on it.
 
 The unit tests hold the law; these hold the column. A project created as
 public keeps ``works`` through the service, an edit can change it or clear it

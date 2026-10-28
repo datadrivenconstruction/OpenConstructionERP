@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Edge-case unit tests for the grouped band-tree stringifier + builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Edge-case unit tests for the grouped band-tree stringifier + builder.
 
 Pure-Python, no DB. Complements ``test_codes_grouped_tree.py`` by pinning the
 corners of ``codes_bandtree.group_key`` and ``build_band_tree``:

@@ -1,4 +1,4 @@
-"""Reality-capture / drone auto-categorisation tests (issue #288).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reality-capture / drone auto-categorisation tests (issue #288).
 
 Scope
 -----

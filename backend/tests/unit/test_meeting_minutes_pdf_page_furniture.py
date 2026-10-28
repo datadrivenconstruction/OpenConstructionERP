@@ -1,4 +1,4 @@
-"""The minutes PDF prints the shared, translated "Page x of y" footer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The minutes PDF prints the shared, translated "Page x of y" footer."""
 
 import io
 import uuid

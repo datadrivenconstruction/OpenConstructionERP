@@ -1,4 +1,4 @@
-"""DB-free unit tests for the pure OTIF delivery-performance helper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the pure OTIF delivery-performance helper.
 
 Exercises app.modules.procurement.otif.compute_project_delivery_performance
 directly with in-memory ReceiptRecord rows: no database, no session, no

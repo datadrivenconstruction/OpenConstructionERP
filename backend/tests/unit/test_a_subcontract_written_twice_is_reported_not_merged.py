@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An agreement and a contract that look like one subcontract are reported, never merged.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An agreement and a contract that look like one subcontract are reported, never merged.
 
 A subcontract can be written as an agreement on the Subcontractors page and as
 a contract with a subcontractor in the contracts module. Linked, the pair

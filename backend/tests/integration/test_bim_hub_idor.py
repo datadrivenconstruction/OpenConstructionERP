@@ -1,4 +1,4 @@
-"""BIM Hub IDOR / authorization audit (v8.8.3 hardening - findings #12, #13).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM Hub IDOR / authorization audit (v8.8.3 hardening - findings #12, #13).
 
 Two confirmed cross-tenant defects in ``app.modules.bim_hub.router`` are
 pinned here:

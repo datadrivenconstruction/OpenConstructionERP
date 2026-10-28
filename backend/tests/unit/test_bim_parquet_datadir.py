@@ -1,4 +1,4 @@
-"""Unit tests for the BIM element-data Parquet sidecar data-dir resolution.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BIM element-data Parquet sidecar data-dir resolution.
 
 Background
 ----------

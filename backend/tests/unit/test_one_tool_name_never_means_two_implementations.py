@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Several modules fill one tool registry, and a name collision leaves no trace.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Several modules fill one tool registry, and a name collision leaves no trace.
 
 ``global_tool_registry`` is a single process-wide dict of name -> tool, filled
 by ``register()`` calls that run inside module ``on_startup`` hooks rather than

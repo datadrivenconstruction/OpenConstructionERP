@@ -1,4 +1,4 @@
-"""No phase of startup may be silent for longer than the heartbeat interval.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No phase of startup may be silent for longer than the heartbeat interval.
 
 The desktop launcher gives up on a sidecar that has written nothing for four
 minutes, and until the port is bound the only evidence that a boot is working is

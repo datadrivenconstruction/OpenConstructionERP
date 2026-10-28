@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locale encoding guard: block text that was UTF-8 and got read as a code page.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale encoding guard: block text that was UTF-8 and got read as a code page.
 
 When a UTF-8 string is handed to something that decodes one byte at a time as
 CP1252, every non-ASCII character turns into two or three Latin ones. An em

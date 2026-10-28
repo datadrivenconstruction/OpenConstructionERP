@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One commercial change must move a contract's value exactly once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One commercial change must move a contract's value exactly once.
 
 Promoting a variation request mirrors the resulting variation order into
 ``oe_changeorders`` as a draft change order

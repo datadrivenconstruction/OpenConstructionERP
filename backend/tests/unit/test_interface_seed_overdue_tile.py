@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No project id can seed a demo register with an empty overdue tile.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No project id can seed a demo register with an empty overdue tile.
 
 The seeder derives its random number generator from the project id, so the
 register is redrawn for every project and everything the demo screens show is a

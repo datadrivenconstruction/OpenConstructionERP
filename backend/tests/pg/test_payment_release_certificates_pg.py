@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rule V19 on real PostgreSQL: an Egyptian payment waits for the social insurance clearance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rule V19 on real PostgreSQL: an Egyptian payment waits for the social insurance clearance.
 
 Builds on the invented subcontract of ``test_payment_release_pg``. The project
 is moved to Egypt and the contract's counterparty is a subcontractor record;

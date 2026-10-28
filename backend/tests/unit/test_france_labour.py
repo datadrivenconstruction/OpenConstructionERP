@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""French labour facts live in the shared labour standards catalogue, dated and sourced.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠French labour facts live in the shared labour standards catalogue, dated and sourced.
 
 The distinguishing cases are dates and review flags: the SMIC row starts on
 1 January 2026 and is shown but not enforced while a later 2026 revision is

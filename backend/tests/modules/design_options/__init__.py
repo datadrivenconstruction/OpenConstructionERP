@@ -1,1 +1,1 @@
-"""Tests for the Design Options module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the Design Options module."""

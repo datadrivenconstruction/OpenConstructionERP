@@ -1,4 +1,4 @@
-"""Document / photo / sheet uploads must follow the configured data dir.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document / photo / sheet uploads must follow the configured data dir.
 
 Regression guard for a production report: the upload base directories were
 hard-coded to ``~/.openestimator``. Inside a container whose home is ``/app``

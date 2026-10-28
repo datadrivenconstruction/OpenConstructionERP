@@ -1,4 +1,4 @@
-"""Unit tests for the validation CSV / XLSX exporters.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the validation CSV / XLSX exporters.
 
 Pure tests - no DB import. Cover:
     1. row mapping: a report's results project to the documented flat shape.

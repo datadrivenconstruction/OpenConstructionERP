@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The project list pages in a total order, so no page repeats or skips a row.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project list pages in a total order, so no page repeats or skips a row.
 
 ``ProjectRepository.list_for_user`` sorted by ``created_at`` alone. Projects
 created in one transaction (a seed, a pack install, a bulk import) share that

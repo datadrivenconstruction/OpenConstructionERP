@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed tests for which bill an approved change order is written into.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed tests for which bill an approved change order is written into.
 
 The target used to be "the project's oldest unlocked BOQ", picked by
 ``created_at`` and recorded only in a log line. No caller passes ``boq_id``,

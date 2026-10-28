@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests — Dashboard rollup IDOR hardening (R7-style).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests — Dashboard rollup IDOR hardening (R7-style).
 
 Verifies that a caller from one tenant cannot read another tenant's
 dashboard widget data via the ``GET /api/v1/dashboard/rollup/`` endpoint.

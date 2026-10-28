@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The set of rate lines the supersede repair will rewrite is pinned, not merely derived.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The set of rate lines the supersede repair will rewrite is pinned, not merely derived.
 
 Why this file exists at all
 ---------------------------

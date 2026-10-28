@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every entrance to the CPM work calendar refuses the same overrides.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every entrance to the CPM work calendar refuses the same overrides.
 
 The engine has more than one way in. A calendar reaches it through a
 schedule's ``metadata`` and through the CPM endpoint's request body, and the

@@ -1,4 +1,4 @@
-"""Prompt-injection defence regression — Audit AI1 / AI3.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Prompt-injection defence regression — Audit AI1 / AI3.
 
 These tests pin the behaviour of ``fence_user_content`` (the wrapper
 used by ``analyze_document`` before splicing PDF text into the

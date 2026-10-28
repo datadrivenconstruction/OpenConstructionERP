@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A back-charge names a real party and a real source, and shows up as a deduction.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A back-charge names a real party and a real source, and shows up as a deduction.
 
 A back-charge used to carry the responsible party and its origin as free text
 only, so nothing could ask "what does this subcontractor owe us back". These

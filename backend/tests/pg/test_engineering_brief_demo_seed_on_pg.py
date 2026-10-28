@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo seed tells each demo project its own brief from the pack story, on a governance model with gates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seed tells each demo project its own brief from the pack story, on a governance model with gates.
 
 The shipped gates carry no target date, which is what once made publishing refuse with ``milestone_date_missing``
 and left the showcase project without a brief. Both stories are seeded here on a world with the real model.

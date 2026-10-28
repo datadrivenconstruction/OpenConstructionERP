@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A document writes digits the way its market does, unless the reader chose.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A document writes digits the way its market does, unless the reader chose.
 
 The separators of a number belong to the market and were already decided by
 the country row. Which digit shapes print is a second, independent question:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure delay-analysis compute orchestration (T2.2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure delay-analysis compute orchestration (T2.2).
 
 Drives :func:`delay_report.run_analysis` through every forensic method using
 stored-shape dicts (exactly what the ORM/JSON columns hold), so the persistence

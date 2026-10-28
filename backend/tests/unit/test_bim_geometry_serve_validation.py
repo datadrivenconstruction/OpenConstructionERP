@@ -1,4 +1,4 @@
-"""Serve-time geometry validation guards bad bytes from reaching the viewer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Serve-time geometry validation guards bad bytes from reaching the viewer.
 
 Regression for an external user report (Downtown Medical Center / RVT) where
 ``_validate_geometry_file`` caught corrupt geometry only on ingest, while

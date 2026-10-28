@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Commit attribution guard: forbid AI co-author / generated-by trailers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commit attribution guard: forbid AI co-author / generated-by trailers.
 
 Project policy (see CLAUDE.md): commits are authored solely by
 DataDrivenConstruction. An automated assistant must never be recorded as a

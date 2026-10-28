@@ -1,4 +1,4 @@
-"""PG: the boot heal numbers ``seq`` by heap order, and the fixup puts it back.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the boot heal numbers ``seq`` by heap order, and the fixup puts it back.
 
 ``app.core.postgres_migrator`` adds ``oe_progress_entry.seq`` to a pre-v3258
 table with ``ADD COLUMN ... DEFAULT nextval(...)``, which PostgreSQL evaluates

@@ -1,4 +1,4 @@
-"""Round-5 deep-audit tests for the Service & Maintenance module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-5 deep-audit tests for the Service & Maintenance module.
 
 Scope (one happy path per finding from the v4.3.0 service-module audit):
     1. ``update_ticket`` refuses to mutate dispatch-protected fields

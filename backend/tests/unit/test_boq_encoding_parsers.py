@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-unit tests for the shared BOQ importer encoding / number parsers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-unit tests for the shared BOQ importer encoding / number parsers.
 
 ``app.modules.boq.importers._encoding`` centralises three concerns the
 historical inline importer parsers each re-implemented (and got slightly

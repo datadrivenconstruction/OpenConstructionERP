@@ -1,4 +1,4 @@
-"""Unit tests for IFC civil infrastructure support.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for IFC civil infrastructure support.
 
 Verifies that the text-based IFC parser correctly handles IFC4x3 civil
 entity types (bridges, roads, railways, alignments, earthworks, etc.)

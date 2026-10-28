@@ -1,4 +1,4 @@
-"""Unit tests for the Cost Explorer international text-matching helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Cost Explorer international text-matching helpers.
 
 ``app.modules.cost_explorer.search`` builds on the shared construction vocabulary
 in ``app.modules.catalog.synonyms``; both are pure (stdlib ``re`` + ``unicodedata``

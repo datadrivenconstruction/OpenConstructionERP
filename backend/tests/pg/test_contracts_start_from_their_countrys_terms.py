@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A contract starts from its country's usual payment terms, and the money follows them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A contract starts from its country's usual payment terms, and the money follows them.
 
 Until now a contract that named no retention got 5 percent and a release at
 substantial completion wherever it was, which is a German habit applied to

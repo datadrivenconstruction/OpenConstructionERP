@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""XRechnung wants more of a postal address than EN 16931 does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠XRechnung wants more of a postal address than EN 16931 does.
 
 EN 16931 is satisfied by an address that names only its country (BR-8 with
 BR-9, BR-10 with BR-11), so a document can be EN 16931 complete and still be

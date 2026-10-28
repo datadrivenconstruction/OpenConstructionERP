@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project is fitted out by its own country's pack, not always the active one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project is fitted out by its own country's pack, not always the active one.
 
 One pack is active on an installation, and a contractor works in more than one
 country. Project creation copied the active pack's rule sets and methodology

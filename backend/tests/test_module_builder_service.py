@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the builder's own service and API surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the builder's own service and API surface.
 
 The interesting claims are about refusal rather than success. An assistant that
 returns something plausible but unbuildable, a key already taken, a module that

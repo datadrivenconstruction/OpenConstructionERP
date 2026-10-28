@@ -1,4 +1,4 @@
-"""Atomic convert_vr_to_vo tests — standalone file per task spec.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Atomic convert_vr_to_vo tests — standalone file per task spec.
 
 Focused on the transactional guarantee: if the CO-mirror step fails,
 the entire promotion (VO insert + VR.status flip) is rolled back so

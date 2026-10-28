@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule Advanced (LPS) — Round-7 security audit regressions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule Advanced (LPS) — Round-7 security audit regressions.
 
 The schedule_advanced module is the Last Planner System (LPS) core: master
 schedules, phase plans, look-ahead plans, constraints, weekly work plans,

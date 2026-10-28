@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every cost route answers with the rows its caller may read, and no others.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every cost route answers with the rows its caller may read, and no others.
 
 The rule lives in ``app.core.cost_scope`` and is pinned against query shapes
 in ``test_cost_items_are_read_as_the_caller``. This file proves it over HTTP,

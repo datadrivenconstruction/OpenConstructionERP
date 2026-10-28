@@ -1,4 +1,4 @@
-"""Kazakh catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Kazakh catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A national bill of quantities imports as the work it prices, and nothing else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A national bill of quantities imports as the work it prices, and nothing else.
 
 The sheet below is a trimmed Croatian troskovnik laid out the way the market
 writes one: a letterhead, the header row "R.br. | Opis stavke | Jed. mj. |

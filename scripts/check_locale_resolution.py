@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""LOCK: a catalogue must answer a regional locale the same way it answers its base language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠LOCK: a catalogue must answer a regional locale the same way it answers its base language.
 
 THIS IS A REGRESSION LOCK, NOT A BUG REPORT, and the distinction is the first
 thing a reader deserves. It was written after measuring whether the defect it

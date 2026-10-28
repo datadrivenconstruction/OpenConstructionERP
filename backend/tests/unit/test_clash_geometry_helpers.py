@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-function tests for the clash geometry helpers (no DB, no GLB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function tests for the clash geometry helpers (no DB, no GLB).
 
 ``app.modules.clash.geometry`` only touches the database / bim_hub
 *lazily* (inside method bodies), so its small pure helpers import and run

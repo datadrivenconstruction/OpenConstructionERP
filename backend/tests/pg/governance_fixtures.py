@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the project governance PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the project governance PostgreSQL tests.
 
 A world is a throwaway database with real users, a project, team membership,
 an approval route for ``phase_gate`` and ``frame_change`` whose single step

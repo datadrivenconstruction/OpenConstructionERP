@@ -1,4 +1,4 @@
-"""Unit tests for project_intelligence.actions backend action executors.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for project_intelligence.actions backend action executors.
 
 These tests exercise the three real backend actions (``_run_validation``,
 ``_match_cwicr_prices``, ``_generate_schedule``) with the real domain

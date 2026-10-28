@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration tests for property_dev ValidationRules + regulator reports
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for property_dev ValidationRules + regulator reports
 + cross-module event subscribers (task #139).
 
 Covers:

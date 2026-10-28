@@ -1,4 +1,4 @@
-"""Contact list (offset vs cursor) and GAEB X31 parse benchmark.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contact list (offset vs cursor) and GAEB X31 parse benchmark.
 
 Not collected by pytest (no ``test_`` prefix). Run from ``backend/``:
 

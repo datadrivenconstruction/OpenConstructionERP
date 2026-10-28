@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A subcontractor's tax number, typed the way its own country prints it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A subcontractor's tax number, typed the way its own country prints it.
 
 The failure this file exists to prevent is a lockout, and it is invisible from
 the inside. A Swiss firm writes ``CHE-123.456.789 TVA`` because the number is

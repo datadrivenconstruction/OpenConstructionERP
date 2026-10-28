@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo logistics plan is really seeded, and tells the story of where the project stands.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo logistics plan is really seeded, and tells the story of where the project stands.
 
 The seed goes through the service, so one refused write used to leave a demo
 project without its plan and a warning in a log nobody reads. Here it runs

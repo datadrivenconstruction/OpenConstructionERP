@@ -1,4 +1,4 @@
-"""Service calculations use the same currency precision as payment applications."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service calculations use the same currency precision as payment applications."""
 
 from decimal import Decimal
 from types import SimpleNamespace

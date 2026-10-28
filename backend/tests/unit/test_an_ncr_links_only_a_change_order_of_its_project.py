@@ -1,4 +1,4 @@
-"""An NCR's ``change_order_id`` must name a change order of the NCR's own project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An NCR's ``change_order_id`` must name a change order of the NCR's own project.
 
 The column is a plain ``VARCHAR(36)`` with no foreign key, so the database
 takes any string: a typo, an id from another project, a change order that was

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The country's retention ladder is written onto a contract when it is signed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The country's retention ladder is written onto a contract when it is signed.
 
 The regional packs have declared a retention policy per country for a long
 time, and the engine applies one only from a ``RetentionSchedule`` row. Nothing

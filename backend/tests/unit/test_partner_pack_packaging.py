@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The documents a pack ships in the repository, and the ones it ships to a user.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The documents a pack ships in the repository, and the ones it ships to a user.
 
 Thirteen packs carried rule-pack documents in the tree that no installed copy
 ever received, because a wheel only carries a non-Python file when a

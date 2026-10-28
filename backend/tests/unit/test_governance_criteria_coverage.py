@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every readiness criterion of a shipped phase model says how it is judged.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every readiness criterion of a shipped phase model says how it is judged.
 
 Governance never evaluates a criterion: the area owner ticks it and a tick blocks nothing. A criterion
 that a module can read from its data is covered by that module's gate evidence provider

@@ -1,4 +1,4 @@
-"""Regression: ``/critical-path/`` must order activities by integer day offset.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: ``/critical-path/`` must order activities by integer day offset.
 
 The CPM engine populates ``Activity.early_start`` as integer day-offsets
 serialised into a ``String(20)`` column (``"0"``, ``"1"``, ``"10"``, ``"2"``…).

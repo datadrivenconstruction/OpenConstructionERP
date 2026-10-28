@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared fixtures for the MCP server tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for the MCP server tests.
 
 The session is the shared PostgreSQL unit database from ``tests/_pg.py`` inside
 an outer transaction rolled back on teardown. The MCP endpoint authenticates by

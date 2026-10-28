@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""A project's region label resolves to the catalogue language it wants.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project's region label resolves to the catalogue language it wants.
 
 The project form stores labels ("Italy", "DACH") in ``project.region``.
 ``language_for`` only knows catalogue ids, so every label used to resolve

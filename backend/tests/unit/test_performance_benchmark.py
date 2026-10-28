@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-project performance: ratio KPIs, actuals entities and the benchmark.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-project performance: ratio KPIs, actuals entities and the benchmark.
 
 The contract under test is the one an estimator relies on when reading
 historical productivity off finished work:

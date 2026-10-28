@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The country VAT fills an unrated invoice line only when it matches the stated tax.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The country VAT fills an unrated invoice line only when it matches the stated tax.
 
 An invoice saved with a tax of 0 and lines without a rate had those lines
 filled with the country's standard rate, so the header said 0 and the lines

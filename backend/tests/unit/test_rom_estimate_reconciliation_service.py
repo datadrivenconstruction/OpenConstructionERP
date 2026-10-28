@@ -1,4 +1,4 @@
-"""Service-level tests for the conceptual-vs-detailed reconciliation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level tests for the conceptual-vs-detailed reconciliation.
 
 Exercise :meth:`RomEstimateService.reconcile_with_boq` end to end on a
 transaction-isolated PostgreSQL session: a saved conceptual (ROM) baseline

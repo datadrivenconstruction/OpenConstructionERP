@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The module's declared vocabularies, checked against their sources of truth.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The module's declared vocabularies, checked against their sources of truth.
 
 ``VALIDATION_STATUSES`` is not a choice this module gets to make. The write is
 ``row.validation_status = report.status.value`` in ``_apply_report``, so the set

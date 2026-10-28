@@ -1,4 +1,4 @@
-"""Unit tests for :class:`CostModelService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`CostModelService`.
 
 Scope:
     Baseline smoke coverage for the 5D cost model service — asserts the

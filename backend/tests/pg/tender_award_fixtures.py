@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rows for the PG tender-award tests: a project, a bill, a package and its bids."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rows for the PG tender-award tests: a project, a bill, a package and its bids."""
 
 from __future__ import annotations
 

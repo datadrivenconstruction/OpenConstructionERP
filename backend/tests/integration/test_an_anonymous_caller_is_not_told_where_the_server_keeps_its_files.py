@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No unauthenticated response names the server's own filesystem.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No unauthenticated response names the server's own filesystem.
 
 Three routes answer without credentials on purpose and used to describe the
 machine while doing it: the converter listing, the converter version check and

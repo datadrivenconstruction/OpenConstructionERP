@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A CVR payment application can be raised from a contract progress claim.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A CVR payment application can be raised from a contract progress claim.
 
 Until this link existed the CVR interim payment application was standalone: the
 commercial team retyped the claim's gross and retention, and nothing recorded

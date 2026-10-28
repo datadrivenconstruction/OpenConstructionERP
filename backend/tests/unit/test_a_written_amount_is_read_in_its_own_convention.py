@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A cost typed as free text is read in the convention it was written in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cost typed as free text is read in the convention it was written in.
 
 An NCR's ``cost_impact`` is free text. The old reader only stripped commas,
 so ``"BRL 12.000,00"`` became 12.00 and ``"EUR 12.500,50"`` became 12.5005: a

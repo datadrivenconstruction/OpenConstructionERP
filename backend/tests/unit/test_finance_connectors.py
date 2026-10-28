@@ -1,4 +1,4 @@
-"""Finance ERP / accounting connectors (TOP-30 #4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance ERP / accounting connectors (TOP-30 #4).
 
 Covers:
 

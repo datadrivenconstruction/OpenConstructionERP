@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Correctness properties and runtime bounds of the 1D cutting optimiser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Correctness properties and runtime bounds of the 1D cutting optimiser.
 
 Every plan must place each demanded piece exactly once, keep every bar within
 its stock length once kerf and trim are counted, respect stock availability,

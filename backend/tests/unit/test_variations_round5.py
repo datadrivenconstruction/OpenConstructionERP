@@ -1,4 +1,4 @@
-"""Round-5 / R7 hardening tests for the Variations module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-5 / R7 hardening tests for the Variations module.
 
 Scope:
     * FSM allowlist enforcement: only valid transitions accepted, invalid ones

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may reach a personnel file, what leaves it, and how it ends, against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may reach a personnel file, what leaves it, and how it ends, against PostgreSQL.
 
 These pin the privacy and authorisation defects of the independent review:
 nobody grants themself a relationship to a person, a personnel document is

@@ -1,4 +1,4 @@
-"""Unit tests for :class:`RFIVectorAdapter` (item 16)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`RFIVectorAdapter` (item 16)."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Japanese messages preserve formats and use the established construction vocabulary."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Japanese messages preserve formats and use the established construction vocabulary."""
 
 from __future__ import annotations
 

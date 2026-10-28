@@ -1,4 +1,4 @@
-"""Catalogue-name conflicts are neutral, localized and atomic on PostgreSQL."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalogue-name conflicts are neutral, localized and atomic on PostgreSQL."""
 
 from __future__ import annotations
 

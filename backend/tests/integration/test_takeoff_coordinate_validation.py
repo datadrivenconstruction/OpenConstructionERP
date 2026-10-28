@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Coordinate validation pin for ``PointSchema`` on takeoff measurements.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Coordinate validation pin for ``PointSchema`` on takeoff measurements.
 
 Round-6 audit (2026-05-22) — pre-fix the schema accepted unbounded ``x``
 / ``y`` floats. A malicious client could send ``{"x": 1e30, "y": 1e30}``

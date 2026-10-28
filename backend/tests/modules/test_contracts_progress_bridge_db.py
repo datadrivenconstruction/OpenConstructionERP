@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed module tests for the Gap I progress-claim bridge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed module tests for the Gap I progress-claim bridge.
 
 Runs against the real embedded PostgreSQL the suite boots, using the canonical
 ``transactional_session`` isolation primitive (one outer transaction rolled

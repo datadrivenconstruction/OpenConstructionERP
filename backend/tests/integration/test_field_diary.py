@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration tests for the Field Diary MVP (task #113 / Epic F).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the Field Diary MVP (task #113 / Epic F).
 
 End-to-end exercises:
     * PIN-gated magic-link request → consume → session-bearer flow.

@@ -1,4 +1,4 @@
-"""Module-routes smoke tests — guard the 404/422 fixes from BUGS_R2_R3_R4.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Module-routes smoke tests — guard the 404/422 fixes from BUGS_R2_R3_R4.
 
 These tests cover the path-name and route-ordering bugs reported in
 ``/tmp/qa_install/bugs/BUGS_R2_R3_R4_2026_04_25.md``:

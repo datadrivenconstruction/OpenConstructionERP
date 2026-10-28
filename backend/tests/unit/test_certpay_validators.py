@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Certified payroll validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Certified payroll validation rules.
 
 The rules take a plain dict, so these run without a database or an application.
 Each test asserts on the rule that should fire AND on the message naming the

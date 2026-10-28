@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An edit must not re-price a position from resource rows that are not per-unit norms.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An edit must not re-price a position from resource rows that are not per-unit norms.
 
 ``BOQService.update_position`` re-derives ``unit_rate`` as ``sum(quantity *
 unit_rate)`` over the resources whenever the incoming list differs from the

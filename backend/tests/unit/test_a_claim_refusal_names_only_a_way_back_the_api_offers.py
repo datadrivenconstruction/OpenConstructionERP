@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A refused claim edit names only a way back the API actually offers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A refused claim edit names only a way back the API actually offers.
 
 The claim state machine lists ``rejected -> draft``, but no route has ever made
 that move: the router offers submit, approve, certify, reject and mark-paid. The

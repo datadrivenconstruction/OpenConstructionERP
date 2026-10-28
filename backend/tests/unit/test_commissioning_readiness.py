@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database-free unit tests for the commissioning readiness math and gate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the commissioning readiness math and gate.
 
 These pin the pure behaviour in
 :mod:`app.modules.commissioning.validators.compute_readiness`: the

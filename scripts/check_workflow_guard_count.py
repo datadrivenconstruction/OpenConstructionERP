@@ -1,4 +1,4 @@
-"""Check that the guard count in the repo-hygiene header still matches the file.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Check that the guard count in the repo-hygiene header still matches the file.
 
 The header of `.github/workflows/repo-hygiene.yml` opens by saying how many
 guards the file runs. That number was written by hand on 2026-08-24 and nobody

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A register notification exists after the commit, and not before it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A register notification exists after the commit, and not before it.
 
 Subscribers on the event bus open a session of their own. An event published
 from inside the publisher's still-open transaction is therefore handled by a

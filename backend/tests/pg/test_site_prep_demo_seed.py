@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The site prep demo seed must fill the register, attach it, and fill it once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The site prep demo seed must fill the register, attach it, and fill it once.
 
 Site prep shipped complete and unseeded, so the readiness rollup, the category
 breakdown and the commencement gate all opened empty on every project. The

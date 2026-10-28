@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure site-supervision domain logic and label localization.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure site-supervision domain logic and label localization.
 
 Pins the jurisdiction-neutral supervision maths without a DB or a clock:
 plan-versus-fact counting and overdue detection, the hidden-works acceptance

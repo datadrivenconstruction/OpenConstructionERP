@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Menu badge counts: what each badge counts, and whose projects it may count.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Menu badge counts: what each badge counts, and whose projects it may count.
 
 The access part is the one that matters: a project id the caller cannot open
 answers 404 exactly like a missing one, and the unscoped call never counts

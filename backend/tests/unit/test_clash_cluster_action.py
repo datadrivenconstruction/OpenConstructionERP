@@ -1,4 +1,4 @@
-"""Cluster → coordination action (cross-module link) tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cluster → coordination action (cross-module link) tests.
 
 Covers the deliberate, human-confirmed bridge that turns one clash cluster
 into a single tracked work item (punch item or task), with a reverse link

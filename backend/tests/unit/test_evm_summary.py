@@ -1,4 +1,4 @@
-"""Pure unit tests for the scalar EVM rollup (Section 6 - earned value).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the scalar EVM rollup (Section 6 - earned value).
 
 These import only :mod:`app.modules.schedule.evm_math`, which is intentionally
 free of ORM / DB imports, so the whole module runs without a PostgreSQL

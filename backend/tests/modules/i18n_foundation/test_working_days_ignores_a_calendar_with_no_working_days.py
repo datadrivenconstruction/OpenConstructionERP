@@ -1,4 +1,4 @@
-"""A calendar naming no working day must not silently zero the count.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A calendar naming no working day must not silently zero the count.
 
 ``work_days`` is the weekly pattern, so a row with an empty one states no
 working week at all. Counted with, it makes every date in every range a

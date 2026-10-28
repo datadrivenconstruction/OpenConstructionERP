@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free parts of the payment-plan reminders in the deadlines module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free parts of the payment-plan reminders in the deadlines module."""
 
 from __future__ import annotations
 

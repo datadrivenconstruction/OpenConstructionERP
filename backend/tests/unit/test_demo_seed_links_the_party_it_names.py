@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A seeded record must link to the firm it names, on every demo project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A seeded record must link to the firm it names, on every demo project.
 
 The purchase orders used to fail this in two different ways, and only one of
 them was visible. Sixteen orders linked to nothing and printed an empty vendor

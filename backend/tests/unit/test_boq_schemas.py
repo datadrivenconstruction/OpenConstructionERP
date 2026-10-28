@@ -1,4 +1,4 @@
-"""Tests for BOQ Pydantic schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for BOQ Pydantic schemas.
 
 Validates create/update/markup schemas with boundary conditions,
 defaults, and constraint enforcement. No database required.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An assignment that has been worked is not deleted.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An assignment that has been worked is not deleted.
 
 Deleting a resource is refused while it has worked assignments (in progress or
 completed), because the allocation history of work already done would go with

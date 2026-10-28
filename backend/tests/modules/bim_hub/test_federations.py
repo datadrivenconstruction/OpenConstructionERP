@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the BIM Federation feature (v4.0 / Slice 1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the BIM Federation feature (v4.0 / Slice 1).
 
 Every test uses a transaction-isolated PostgreSQL session (rolled back on
 teardown) from ``tests._pg`` — never the production / shared test DB.

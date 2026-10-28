@@ -1,4 +1,4 @@
-"""The three answers ``scripts/inspect_desktop_sidecar_signatures.py`` can give.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The three answers ``scripts/inspect_desktop_sidecar_signatures.py`` can give.
 
 The census is a release gate: it reads the Mach-O members sealed inside the onefile
 sidecar and fails the build when one of them disagrees with the wrapper about a Team ID.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Router-level tests for the approval-routes module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Router-level tests for the approval-routes module.
 
 Coverage:
     * Cross-tenant 404: a caller who is not on the route's project gets

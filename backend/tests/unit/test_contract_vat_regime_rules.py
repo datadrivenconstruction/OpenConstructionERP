@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The contract rules that check a VAT regime choice, run over the context the service builds.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The contract rules that check a VAT regime choice, run over the context the service builds.
 
 The contexts here have the shape ``ContractsService.run_contract_rules`` and
 ``claim_rule_context`` produce. Each failing case changes one fact of an

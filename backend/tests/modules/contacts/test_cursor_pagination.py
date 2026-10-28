@@ -1,4 +1,4 @@
-"""Keyset (cursor) pagination of the contacts list.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keyset (cursor) pagination of the contacts list.
 
 Run:
     cd backend

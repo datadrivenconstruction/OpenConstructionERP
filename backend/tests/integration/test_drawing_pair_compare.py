@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the drawing-vs-drawing compare (discussion #289).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the drawing-vs-drawing compare (discussion #289).
 
 The revision compare shipped as version-vs-version of ONE drawing. This
 covers the new drawing-PAIR path that diffs the latest version of two

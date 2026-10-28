@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Issues #417 and #424 - which providers in erp_chat get a tool schema.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issues #417 and #424 - which providers in erp_chat get a tool schema.
 
 Providers we call WITHOUT one (Cohere, Mistral, Groq, Ollama, ...) go through
 ``_call_fallback`` as plain text. That path used to send ``SYSTEM_PROMPT``, which advertises

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for saved searches: the persistence behind the Find Records history.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for saved searches: the persistence behind the Find Records history.
 
 Three layers, in the order a failure is worth reading:
 

@@ -1,4 +1,4 @@
-"""A buyer's option selection carries a currency, and refuses a line in another.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A buyer's option selection carries a currency, and refuses a line in another.
 
 ``BuyerSelection.total_options_value`` summed every line's price with no
 currency on the selection or on the lines, while the options those prices

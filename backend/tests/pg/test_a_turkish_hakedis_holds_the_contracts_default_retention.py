@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Turkish contract starts at three percent retention and its hakediş holds it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Turkish contract starts at three percent retention and its hakediş holds it.
 
 The certificate reads the retention from the contract unless its terms say
 otherwise (``retention_source`` defaults to ``contract``). A contract on a

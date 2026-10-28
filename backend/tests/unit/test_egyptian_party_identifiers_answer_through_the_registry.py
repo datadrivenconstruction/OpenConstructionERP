@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egyptian identifiers answer through the shared party identifier registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egyptian identifiers answer through the shared party identifier registry.
 
 Other features (e-invoice pre-submit checks, the subcontractor register) ask
 the registry, not the catalogue. These tests pin that the registry answers for

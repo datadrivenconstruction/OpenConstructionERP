@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every notification handler must reach a recipient from its publisher's payload.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every notification handler must reach a recipient from its publisher's payload.
 
 A subscriber that reads ``event.data["winner_user_id"]`` when its publisher
 never emits that key resolves nobody and sends nothing. Nothing fails, nothing

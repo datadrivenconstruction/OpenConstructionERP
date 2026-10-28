@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The purchase order from a bid award names the bidder's contact as its vendor.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The purchase order from a bid award names the bidder's contact as its vendor.
 
 The order was always written with ``vendor_contact_id=None``, because a bidder
 was only a free-text company. A bidder invited from the directory now carries

@@ -1,4 +1,4 @@
-"""Every method the router calls on the service has to exist on the service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every method the router calls on the service has to exist on the service.
 
 ``PropertyDevService`` is assembled twice over. Most methods are defined inside
 the class; forty-one more are module-level ``_svc_*`` functions bolted on at

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A broken XPWE price list is refused with the code the bill import names it by.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A broken XPWE price list is refused with the code the bill import names it by.
 
 The XPWE reader raises coded parse errors (``xpwe_not_well_formed`` with the
 line and column, ``xpwe_dtd_refused``, ...). The price-list preview used to

@@ -1,4 +1,4 @@
-"""Baseline tests for project_intelligence advisor and cross-project ACL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline tests for project_intelligence advisor and cross-project ACL.
 
 Covers two correctness properties the module must hold:
 

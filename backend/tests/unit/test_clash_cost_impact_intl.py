@@ -1,4 +1,4 @@
-"""Database-free tests for multilingual discipline normalization in clash cost impact."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free tests for multilingual discipline normalization in clash cost impact."""
 
 from app.modules.clash_cost_impact.service import (
     CANONICAL_DISCIPLINES,

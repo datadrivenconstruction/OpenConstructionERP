@@ -1,4 +1,4 @@
-"""PG: an unreviewed detector proposal is never counted as a quantity.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: an unreviewed detector proposal is never counted as a quantity.
 
 Proposals became durable rows in the takeoff table, which means every read
 path that used to see only hand-drawn work now sees suggestions too. That is

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A gate only moves the way its lifecycle says, over HTTP against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A gate only moves the way its lifecycle says, over HTTP against PostgreSQL.
 
 Every test here starts from a move that used to be accepted and left a gate in
 a state nothing could leave: a decided gate put back in preparation by an

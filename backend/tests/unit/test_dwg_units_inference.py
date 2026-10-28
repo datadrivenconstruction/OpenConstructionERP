@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit-factor inference + lazy backfill tests for the dwg_takeoff module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit-factor inference + lazy backfill tests for the dwg_takeoff module.
 
 Covers BUG-D-TKC-002c: a DWG/DXF authored in millimetres but with no
 usable ``$INSUNITS`` was stored with ``units == null`` ("unitless"), which

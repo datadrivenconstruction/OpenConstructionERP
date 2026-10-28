@@ -1,4 +1,4 @@
-"""Pre-release security regression — Pipeline Builder auth gating.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pre-release security regression — Pipeline Builder auth gating.
 
 The Pipeline Builder router is auto-mounted by the module loader, which
 injects NO global auth dependency (auth in this codebase is per-route).

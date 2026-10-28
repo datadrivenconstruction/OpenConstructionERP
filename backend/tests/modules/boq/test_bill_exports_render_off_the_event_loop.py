@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The bill's file exports are written in a worker thread, not on the event loop.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bill's file exports are written in a worker thread, not on the event loop.
 
 One worker serves every user of an install, and a CSV, Excel, GAEB or BC3 file
 written on its event loop answers nobody else until the last line of the bill

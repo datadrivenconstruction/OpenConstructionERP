@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Sample purchase order, goods receipt, invoice and payment for the PDF tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Sample purchase order, goods receipt, invoice and payment for the PDF tests.
 
 Plain namespaces with the attributes the ORM rows carry, so the builders are
 exercised without a database. Shared by the record form tests and the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A lunisolar festival sits a bounded distance from its own year's lunar new year.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A lunisolar festival sits a bounded distance from its own year's lunar new year.
 
 ``tests/unit/core/test_calendar.py`` already holds this invariant over the curated
 ``_CN_FESTIVALS`` table in ``app/core/calendar.py``. This file is the mirror for the

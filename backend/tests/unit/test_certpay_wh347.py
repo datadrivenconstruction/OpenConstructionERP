@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The weekly form: the pivot, the deduction columns and the statement."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The weekly form: the pivot, the deduction columns and the statement."""
 
 from typing import Any
 

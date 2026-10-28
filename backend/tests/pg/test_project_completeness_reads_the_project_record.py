@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The project record the completeness rules read has to come out of the database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project record the completeness rules read has to come out of the database.
 
 The unit tests drive each rule with a record written by hand. That proves the
 rules, and proves nothing about the half the product actually runs: the shared

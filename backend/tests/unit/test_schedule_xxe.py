@@ -1,4 +1,4 @@
-"""Regression tests for XML XXE / billion-laughs hardening on the schedule
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for XML XXE / billion-laughs hardening on the schedule
 import path.
 
 The schedule router accepts user-uploaded MS Project XML schedules and used

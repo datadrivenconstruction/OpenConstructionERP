@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Phone and address rules must say whose rules they are.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Phone and address rules must say whose rules they are.
 
 Fourteen countries have phone rules here and thirteen have address rules. Every
 other country in the world is answered by a generic table, and until now the

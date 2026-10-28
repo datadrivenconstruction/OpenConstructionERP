@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v97 adds a benchmark set's split and reporting currency, keeps the rows, and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v97 adds a benchmark set's split and reporting currency, keeps the rows, and undoes it.
 
 On PostgreSQL and on SQLite (the desktop build): a set saved before the revision keeps its row and
 reads NULL for both new columns, the downgrade drops only those two columns, and a second upgrade over

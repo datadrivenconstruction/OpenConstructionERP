@@ -1,4 +1,4 @@
-"""Regression tests for the IFC text-fallback parser bugfixes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for the IFC text-fallback parser bugfixes.
 
 Each test pins one specific audit finding so a future refactor cannot
 silently reintroduce the bug. The audit references are listed in the

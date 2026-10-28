@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Removal verbs for a purchase order: cancel (void) and delete.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Removal verbs for a purchase order: cancel (void) and delete.
 
 A purchase order is a commercial document, so "get rid of it" is three
 different operations depending on what the document has already done:

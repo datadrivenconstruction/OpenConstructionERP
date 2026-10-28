@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the approval-SLA escalation-depth engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the approval-SLA escalation-depth engine.
 
 Pure standard-library tests - no app.* imports, no DB, no FastAPI. Runs
 on Python 3.11.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``/api/health`` counts the modules that loaded, and says what it counted.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``/api/health`` counts the modules that loaded, and says what it counted.
 
 ``modules_loaded`` was ``len(module_loader.list_modules())``, and that list is
 built by iterating ``_manifests`` - every manifest that parsed, whether the

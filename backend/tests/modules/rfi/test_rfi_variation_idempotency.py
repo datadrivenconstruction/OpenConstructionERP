@@ -1,4 +1,4 @@
-"""Data-integrity tests for the RFI -> change-order variation handoff.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data-integrity tests for the RFI -> change-order variation handoff.
 
 Scope (BUG-RFI-VARIATION-DUP):
     1. ``POST /{rfi_id}/create-variation/`` is idempotent - a second call

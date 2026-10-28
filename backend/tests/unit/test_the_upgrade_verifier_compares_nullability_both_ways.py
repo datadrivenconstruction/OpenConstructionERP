@@ -1,4 +1,4 @@
-"""The upgrade verifier has to look in both directions, not one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The upgrade verifier has to look in both directions, not one.
 
 ``schema_gap`` used to report a single nullability list: columns the model marks
 NOT NULL that the database accepts NULL in. The reverse - the database insisting

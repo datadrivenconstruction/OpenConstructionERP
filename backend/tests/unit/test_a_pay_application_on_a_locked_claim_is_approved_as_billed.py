@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Finance approval does not move what a locked GC claim already billed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance approval does not move what a locked GC claim already billed.
 
 The GC claim rollup bills each pay application line's approved amount, and
 the claim's retention follows the pay application's accrual. Rejecting or

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Seeding a project's finance budget twice must not double it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seeding a project's finance budget twice must not double it.
 
 The budget insert in ``demo_projects`` carried no existence check. The guards
 around it are not a substitute: both callers of ``_seed_module_data`` gate on a

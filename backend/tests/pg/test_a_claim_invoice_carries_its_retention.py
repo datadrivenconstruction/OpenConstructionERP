@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The invoice raised from a certified claim carries the claim's retention.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The invoice raised from a certified claim carries the claim's retention.
 
 A client claim billed from a schedule of values at 10 % retention: 40 % of a
 60 000 line is 24 000 gross, 2 400 held, 21 600 due. The invoice keeps the

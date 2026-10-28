@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Permits tenant isolation: foreign ids answer 404, editors cannot decide, owners cannot verify themselves."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permits tenant isolation: foreign ids answer 404, editors cannot decide, owners cannot verify themselves."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Unit tests for the international profile registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international profile registry.
 
 Proves each national Peppol CIUS profile resolves, carries the right
 CustomizationID (BT-24), and produces a valid EN 16931 UBL document. Sample

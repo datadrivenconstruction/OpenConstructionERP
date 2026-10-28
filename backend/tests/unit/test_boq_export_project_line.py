@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The project line printed under the title of an exported BOQ sheet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project line printed under the title of an exported BOQ sheet.
 
 An exported workbook used to be titled with the bill's own name and nothing
 else, so a recipient outside the company could not tell which job it belonged

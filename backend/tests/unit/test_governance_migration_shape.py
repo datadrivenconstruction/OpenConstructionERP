@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v68 declares the schema the governance models declare, compared without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v68 declares the schema the governance models declare, compared without a database.
 
 A fresh install builds these tables from the models (``create_all``); an
 upgraded one builds them from the revision. The round trip on PostgreSQL

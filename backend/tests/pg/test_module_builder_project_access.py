@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A built module keeps each project's records inside that project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A built module keeps each project's records inside that project.
 
 A project-scoped module built with the wizard used to check only the module's
 own permission. Anyone holding ``<key>.read`` could list every project's rows

@@ -1,4 +1,4 @@
-"""Payment runs through the API: draw up, edit, approve, execute.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment runs through the API: draw up, edit, approve, execute.
 
 One legal entity, supplier invoices in several states. A run must propose what
 is still open on each approved invoice that falls due, never put an invoice in

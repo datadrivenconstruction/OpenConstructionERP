@@ -1,4 +1,4 @@
-"""Money / Decimal precision tests for charges.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Money / Decimal precision tests for charges.
 
 Float coercion would silently break sub-cent precision on rollups; this
 suite ensures every dollar/euro stays exact through the API round-trip

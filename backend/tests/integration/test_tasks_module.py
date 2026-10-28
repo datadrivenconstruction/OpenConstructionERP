@@ -1,4 +1,4 @@
-"""Integration tests for the Tasks (Planning) module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the Tasks (Planning) module.
 
 Covers the bugs fixed in the v3.0.x Tasks audit:
 

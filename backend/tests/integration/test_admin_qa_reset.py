@@ -1,4 +1,4 @@
-"""Integration tests for the qa-reset admin endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the qa-reset admin endpoint.
 
 Covers all three safety gates plus the happy path and idempotency. Tests
 explicitly toggle the env vars so the suite is self-contained — never

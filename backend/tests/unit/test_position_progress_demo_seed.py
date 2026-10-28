@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Demo data feeds the position-level productivity KPIs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo data feeds the position-level productivity KPIs.
 
 Hours per installed unit reads approved hours booked to a BoQ position over that
 position's installed quantity. A fresh demo had neither half: the field-time seed

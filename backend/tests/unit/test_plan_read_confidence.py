@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - vision-LLM plan-read confidence gating and accept (issue #194).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - vision-LLM plan-read confidence gating and accept (issue #194).
 
 Pins the human-confirm contract on accept: confirm only at or above a
 threshold, BLOCK a self-intersection ERROR proposal (must redraw, counted in

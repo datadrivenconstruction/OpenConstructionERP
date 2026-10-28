@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Wave 5 (API contract) regressions for the procurement schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wave 5 (API contract) regressions for the procurement schemas.
 
 Pure-schema tests (no Postgres, no FastAPI app) covering the wire contract
 tightened in this wave:

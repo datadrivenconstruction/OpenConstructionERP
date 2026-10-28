@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The variations list routes describe how much of themselves they return.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The variations list routes describe how much of themselves they return.
 
 All seven registers in this module used to answer with a bare
 ``list[XResponse]``. Each one already received a total from

@@ -1,4 +1,4 @@
-"""An imported catalogue indexed for CAD-BIM Match (``costs.match_index``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An imported catalogue indexed for CAD-BIM Match (``costs.match_index``).
 
 The store and the encoder are faked: neither the vector client nor the
 embedding model is installed in the test environment, and what is under test

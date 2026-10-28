@@ -1,4 +1,4 @@
-"""Unit tests for the CRM international helpers (``app.modules.crm.intl``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CRM international helpers (``app.modules.crm.intl``).
 
 Pure, DB-free. Covers Decimal-exact money, ``0..1`` probability, per-currency
 grouping (never blended), win-rate zero guard, ISO 8601 date parsing,

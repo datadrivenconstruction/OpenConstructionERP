@@ -1,4 +1,4 @@
-"""Unit tests for :class:`BIMElementVectorAdapter`."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`BIMElementVectorAdapter`."""
 
 from __future__ import annotations
 

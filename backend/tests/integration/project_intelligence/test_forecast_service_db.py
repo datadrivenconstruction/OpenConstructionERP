@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed end-to-end test for the forecast service (TOP-30 #19).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed end-to-end test for the forecast service (TOP-30 #19).
 
 Seeds a real project with an EVM snapshot, a dated schedule with progress and
 a high-severity unmitigated risk into an isolated PostgreSQL database (rolled

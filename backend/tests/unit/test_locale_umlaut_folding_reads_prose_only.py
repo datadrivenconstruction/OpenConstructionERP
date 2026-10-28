@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The umlaut-folding guard counts words a reader sees, not identifiers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The umlaut-folding guard counts words a reader sees, not identifiers.
 
 A key and an interpolation placeholder are both names the code looks up, so
 `{{gross}}` next to the German `Bruttofläche groß` is not the word spelled two

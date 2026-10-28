@@ -1,4 +1,4 @@
-"""The CWICR v3 store resolves to one place, and writes never outrun reads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The CWICR v3 store resolves to one place, and writes never outrun reads.
 
 Four call sites used to answer "where is the CWICR store" and no two were
 written from the same rule. ``qdrant_adapter._get_client`` consulted

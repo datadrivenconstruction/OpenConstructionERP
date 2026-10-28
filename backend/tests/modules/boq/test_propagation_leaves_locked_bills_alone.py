@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A shared definition edit reaches every bill of the project except a locked one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A shared definition edit reaches every bill of the project except a locked one.
 
 A code is shared across the project, not the bill. Editing a linked master line
 (issue #127), a sub-line of a linked master (#132) or a coded resource on its

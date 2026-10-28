@@ -1,4 +1,4 @@
-"""PG contract tests for ``collaboration_locks``: races, expiry, and ownership.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG contract tests for ``collaboration_locks``: races, expiry, and ownership.
 
 The module had zero coverage. Its whole purpose is arbitrating between two
 people who reach for the same row at the same moment, so the interesting

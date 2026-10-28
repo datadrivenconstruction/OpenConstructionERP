@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A custom KPI can break down by a key inside ``classification``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A custom KPI can break down by a key inside ``classification``.
 
 ``classification`` is the only place a BOQ position records what KIND of work
 it is, and an estimator's own vocabulary lives there: labour, material,

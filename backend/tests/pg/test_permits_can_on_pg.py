@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Permits on real PostgreSQL: the ``can`` flags against the writes they describe, and the notice extraction.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permits on real PostgreSQL: the ``can`` flags against the writes they describe, and the notice extraction.
 
 A flag is only worth serving if the write then does what it said, so every flag
 asserted here is followed by the write it belongs to. The AI provider and the

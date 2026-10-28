@@ -1,4 +1,4 @@
-"""A unit price analysis must print money at the currency's own precision.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A unit price analysis must print money at the currency's own precision.
 
 Reported from a self-hosted install in Chile: a rate read ``82000.00 CLP``. The
 peso has no minor unit, so those two decimals are not just noise, they are false

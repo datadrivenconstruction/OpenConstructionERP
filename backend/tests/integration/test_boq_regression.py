@@ -1,4 +1,4 @@
-"""BOQ regression smoke test -- mandatory gate before every release.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ regression smoke test -- mandatory gate before every release.
 
 Tests the complete BOQ lifecycle:
 1. Create project

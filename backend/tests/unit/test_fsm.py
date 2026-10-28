@@ -1,4 +1,4 @@
-"""Unit tests for the FSM engine + the six registered entity FSMs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the FSM engine + the six registered entity FSMs.
 
 Scope
 ~~~~~

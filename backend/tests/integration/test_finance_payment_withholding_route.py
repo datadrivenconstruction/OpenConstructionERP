@@ -1,4 +1,4 @@
-"""A held-back payment cannot be recorded through the cash-only route.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A held-back payment cannot be recorded through the cash-only route.
 
 ``POST /finance/payments/`` used to accept ``withholding_amount`` and
 ``withholding_release_date`` and drop both, so the payment was stored as if

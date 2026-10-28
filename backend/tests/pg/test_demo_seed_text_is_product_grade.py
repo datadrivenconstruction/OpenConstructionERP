@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo seeders must write text a customer can read, and must fit the schema.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seeders must write text a customer can read, and must fit the schema.
 
 Two things are gated here, both against a real database rather than by
 inspecting the format strings:

@@ -1,4 +1,4 @@
-"""The HTTP surface over the bundled licence texts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The HTTP surface over the bundled licence texts.
 
 Mounted on a bare FastAPI app rather than through ``create_app``, so these run
 without a database and without importing 190 modules. That the real app mounts

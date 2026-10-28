@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the EAC execution planner (EAC-1.3 §5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the EAC execution planner (EAC-1.3 §5).
 
 The planner compiles an ``EacRuleDefinition`` into an
 ``ExecutionPlan`` whose ``duckdb_sql`` field is well-formed SQL with

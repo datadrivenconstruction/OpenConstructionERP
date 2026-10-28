@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the ISO-zero repair will and will not touch.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the ISO-zero repair will and will not touch.
 
 The whole safety of the repair is in one decision - repair this row, or leave
 it - and that decision is a pure function, so it is tested here without a

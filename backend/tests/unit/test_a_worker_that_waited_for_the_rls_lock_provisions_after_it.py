@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A worker that finds the RLS provisioning lock taken waits, then provisions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A worker that finds the RLS provisioning lock taken waits, then provisions.
 
 Several workers booting against one PostgreSQL race for the provisioning lock.
 The loser used to skip at once and go on to ``verify_rls_role`` and to serving

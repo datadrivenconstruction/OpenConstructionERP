@@ -1,4 +1,4 @@
-"""The database URL is assembled from parts without breaking on punctuation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The database URL is assembled from parts without breaking on punctuation.
 
 Issue #404 was an installation that would not come up: the app container exited
 on ``socket.gaierror: [Errno -2] Name or service not known`` while PostgreSQL

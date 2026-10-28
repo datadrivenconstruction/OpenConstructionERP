@@ -1,4 +1,4 @@
-"""Completeness contract for the project-detail widget rollup keys (W23 P0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Completeness contract for the project-detail widget rollup keys (W23 P0).
 
 The frontend's ``ProjectWidgets.tsx`` consolidates 8 of its 13 widgets
 behind ``GET /api/v1/dashboard/rollup/`` via the ``ProjectWidgetsRollupProvider``.

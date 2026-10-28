@@ -1,4 +1,4 @@
-"""Unit tests for the conceptual (ROM) estimate engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the conceptual (ROM) estimate engine.
 
 These pin the behaviour of :mod:`app.modules.rom_estimate.service`, a pure,
 database-free layer that turns minimal input (building type, gross floor area,

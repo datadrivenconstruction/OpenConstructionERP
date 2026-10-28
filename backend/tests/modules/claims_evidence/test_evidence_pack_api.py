@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the claims evidence-pack service (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the claims evidence-pack service (PostgreSQL, py3.12).
 
 Seeds change-family records and checks that the assembled pack collects them
 into the right sections, is deterministic across calls, and is fenced to one

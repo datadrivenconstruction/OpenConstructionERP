@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plant register rules on PostgreSQL: what a state is read from, what money binds on, what stays true.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plant register rules on PostgreSQL: what a state is read from, what money binds on, what stays true.
 
 Each test pins a way the register once said something its sources did not:
 ``ordered`` after the order was cancelled, a slot held on a made-up commitment

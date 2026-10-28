@@ -1,4 +1,4 @@
-"""Tests for AI client utilities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for AI client utilities.
 
 Focuses on the extract_json function and resolve_provider_and_key.
 No network calls — all tests are pure unit tests.

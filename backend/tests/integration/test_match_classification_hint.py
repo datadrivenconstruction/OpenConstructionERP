@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests — auto-classifier-hint flow through extractors.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests — auto-classifier-hint flow through extractors.
 
 Phase 1 of the v2.8.0 vector match feature wires the
 :func:`enrich_classification` helper into the BIM/PDF/DWG extractors so

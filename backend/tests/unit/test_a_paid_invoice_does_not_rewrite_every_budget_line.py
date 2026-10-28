@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The core invoice.paid handler must stay unsubscribed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The core invoice.paid handler must stay unsubscribed.
 
 ``_handle_invoice_paid`` wrote the total of every paid invoice onto EACH project
 budget line, so a project with three lines showed three times its actual cost.

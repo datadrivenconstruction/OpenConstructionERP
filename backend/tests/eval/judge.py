@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI-as-judge for the element-to-CWICR vector match evaluation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI-as-judge for the element-to-CWICR vector match evaluation.
 
 The judge takes (element_info, ground_truth, candidate) and returns a
 verdict: ``correct``, ``partial``, or ``incorrect``. We use an LLM

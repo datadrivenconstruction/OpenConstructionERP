@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``--strict-markers`` has to stay in ``addopts``, because losing it is silent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``--strict-markers`` has to stay in ``addopts``, because losing it is silent.
 
 Without the flag a misspelled marker is a ``PytestUnknownMarkWarning`` and the
 run still exits 0. The test keeps passing, and it quietly leaves whatever lane

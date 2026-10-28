@@ -1,4 +1,4 @@
-"""Unit tests for the pure estimate-audit helpers (DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure estimate-audit helpers (DB-free).
 
 Exercise :mod:`app.modules.validation.audit`: rule-set expansion, the median /
 dominant-unit suggestions, the per-position status roll-up, and the grouped

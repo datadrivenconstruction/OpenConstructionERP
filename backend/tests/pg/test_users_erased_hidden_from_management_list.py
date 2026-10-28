@@ -1,4 +1,4 @@
-"""PG: an erased account leaves the user management list (issue #418).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: an erased account leaves the user management list (issue #418).
 
 Deleting a user anonymises the row in place rather than removing it. Projects
 point at the user through ``owner_id`` and activity / audit rows through

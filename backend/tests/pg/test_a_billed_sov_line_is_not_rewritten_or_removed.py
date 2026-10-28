@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A schedule of values line a claim has billed on stays as it was billed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A schedule of values line a claim has billed on stays as it was billed.
 
 ``ProgressClaimLine.contract_line_id`` is declared ``ondelete="CASCADE"`` and
 has no ORM relationship, so the database is the only actor when a schedule

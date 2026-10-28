@@ -1,4 +1,4 @@
-"""The embedded cluster gets the lock headroom the platform's schema needs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The embedded cluster gets the lock headroom the platform's schema needs.
 
 PostgreSQL sizes its lock table as ``max_locks_per_transaction`` times
 ``max_connections`` and shares it across the whole cluster. Creating or

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A change order still in draft or in review never reaches the client portal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A change order still in draft or in review never reaches the client portal.
 
 Surface (portal-session-gated):
     GET /api/v1/portal/me/change-orders

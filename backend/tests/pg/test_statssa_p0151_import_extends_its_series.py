@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Importing Stats SA P0151.1 Table 1 twice extends each work group series and keeps revisions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Importing Stats SA P0151.1 Table 1 twice extends each work group series and keeps revisions.
 
 A later release repeats earlier months, some revised. The second import must
 add the new month, overwrite the revised value, leave the rest alone and not

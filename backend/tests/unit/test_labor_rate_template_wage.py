@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the base-wage constraint on labor rate template payloads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the base-wage constraint on labor rate template payloads.
 
 A template whose base wage is zero builds up to an all-in rate of ``0.00``.
 That is a number, not ``None``, so a consumer asking "is this priced?" is told

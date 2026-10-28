@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Turkish sales invoice through the real finance routes: report, file, refusal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Turkish sales invoice through the real finance routes: report, file, refusal.
 
 What only a database can show:
 

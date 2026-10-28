@@ -1,1 +1,1 @@
-"""Tests for the Labor Rates module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the Labor Rates module."""

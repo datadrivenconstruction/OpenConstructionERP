@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An inspector has to reach the client as a name, whoever wrote the row.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An inspector has to reach the client as a name, whoever wrote the row.
 
 ``QualityInspection.inspector_id`` is a bare 36-character string with no
 foreign key, and three different writers put three different things in it: the

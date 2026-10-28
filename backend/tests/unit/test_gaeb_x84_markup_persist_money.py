@@ -1,4 +1,4 @@
-"""FA-GAEB-002 - GAEB X84 markup must persist its exact <IT>, not re-derive it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FA-GAEB-002 - GAEB X84 markup must persist its exact <IT>, not re-derive it.
 
 Sister test to ``test_gaeb_x84_import_money.py``. That one proves the parser
 surfaces the Zuschlagsposition (ITMarkup 850,000.00 at 10% = IT 85,000.00)

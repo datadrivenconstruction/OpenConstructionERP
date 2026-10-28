@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""International robustness and explainability tests for EAC forecasting.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠International robustness and explainability tests for EAC forecasting.
 
 These tests exercise :mod:`app.modules.eac.evm` with no database, no HTTP and
 no async. They pin the international-safety guarantees (any currency, any

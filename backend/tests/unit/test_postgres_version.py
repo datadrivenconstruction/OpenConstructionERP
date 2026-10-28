@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Startup version check, against the PostgreSQL the suite actually runs on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Startup version check, against the PostgreSQL the suite actually runs on.
 
 The stub-driven branch coverage lives in ``test_postgres_version_errors``. What
 only a real server can answer is here:

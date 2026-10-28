@@ -1,4 +1,4 @@
-"""Event-emission tests for the Reporting service (slice E)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Event-emission tests for the Reporting service (slice E)."""
 
 from __future__ import annotations
 

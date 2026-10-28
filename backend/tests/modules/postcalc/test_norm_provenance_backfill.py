@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The v3320 backfill, run against real PostgreSQL rather than read.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The v3320 backfill, run against real PostgreSQL rather than read.
 
 The write side of the norm provenance shipped before the column existed, so
 there is a window of bills that carry ``metadata["norm_id"]`` against a NULL

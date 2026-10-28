@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the BOQ Excel/CSV round-trip differ (GitHub #360).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BOQ Excel/CSV round-trip differ (GitHub #360).
 
 These pin the PURE, DB-free decision layer that turns a set of
 export-then-edited spreadsheet rows plus the target BOQ's current position

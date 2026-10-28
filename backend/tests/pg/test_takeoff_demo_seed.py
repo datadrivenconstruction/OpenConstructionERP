@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The takeoff demo seed must draw what it claims and link only what exists.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The takeoff demo seed must draw what it claims and link only what exists.
 
 The old seed had three ways to lie that no gate caught: a measurement's value
 contradicted its own polygon (248.50 m2 stored on a 13.44 m2 rectangle), 48

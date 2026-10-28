@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the DDC 2026.10 converter output turns into: quantities, levels, types, categories.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the DDC 2026.10 converter output turns into: quantities, levels, types, categories.
 
 The RVT converter stores no calculated quantities and only numeric category ids,
 the IFC converter writes base quantities under ``Qto_*`` sets and no geometry,

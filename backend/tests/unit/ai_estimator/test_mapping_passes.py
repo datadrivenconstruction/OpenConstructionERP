@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Mapping recall / sanity harness for the multi-pass mapping pipeline (WP5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Mapping recall / sanity harness for the multi-pass mapping pipeline (WP5).
 
 This is design section 8 (the founder test matrix) made literal as an
 in-process, deterministic harness. It drives the WHOLE WorkGroup pipeline -

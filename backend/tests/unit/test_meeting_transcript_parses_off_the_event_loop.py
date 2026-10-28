@@ -1,4 +1,4 @@
-"""A meeting transcript upload is parsed in a worker thread, page by page.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A meeting transcript upload is parsed in a worker thread, page by page.
 
 ``_extract_text_from_file`` ran pdfplumber on the event loop for up to 50
 pages, so every other request waited for the parse, and every parsed page's

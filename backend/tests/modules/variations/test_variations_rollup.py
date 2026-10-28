@@ -1,4 +1,4 @@
-"""R5 audit: Decimal-exact + currency-aware variations roll-up tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R5 audit: Decimal-exact + currency-aware variations roll-up tests.
 
 Patterned on tests/modules/clash_cost_impact/test_cost_rollup.py — pure
 Decimal arithmetic in / Decimal out, currency drift surfaced as

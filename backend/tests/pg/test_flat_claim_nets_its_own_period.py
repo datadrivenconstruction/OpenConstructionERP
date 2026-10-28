@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The flat branch nets a period, and that is the right answer, not a defect.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The flat branch nets a period, and that is the right answer, not a defect.
 
 This file looks like a test of nothing. It passes today, it asserts behaviour
 nobody is changing, and the first instinct on meeting it is to delete it as

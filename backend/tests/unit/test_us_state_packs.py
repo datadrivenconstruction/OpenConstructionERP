@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A state pack may not state a rule it cannot source.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A state pack may not state a rule it cannot source.
 
 The Texas and California packs carry tax treatments, wage duties, retainage
 caps and statutory deadlines. A user prices work on those figures, so a wrong

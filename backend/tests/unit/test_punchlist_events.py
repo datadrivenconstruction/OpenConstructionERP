@@ -1,4 +1,4 @@
-"""Event-emission tests for the Punch List service (slice E).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Event-emission tests for the Punch List service (slice E).
 
 Verifies that ``PunchListService`` publishes the right events on its
 state-mutating paths.  Mirrors the stub-based pattern in

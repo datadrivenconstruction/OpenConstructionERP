@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the unified region/catalogue → language map.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the unified region/catalogue → language map.
 
 The lookup used to live in two separate tables (vector_adapter and
 ranker) which drifted silently. These tests pin both the canonical

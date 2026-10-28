@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every way the server is started keeps idle connections longer than uvicorn's 5 s default.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every way the server is started keeps idle connections longer than uvicorn's 5 s default.
 
 Under a busy conversion the event loop can stall for ~5 s; with the default the
 keep-alive close then wins the race against a client reusing the connection and

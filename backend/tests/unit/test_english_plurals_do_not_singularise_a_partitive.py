@@ -1,4 +1,4 @@
-"""English cannot singularise the noun inside a partitive, and a locale file did.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠English cannot singularise the noun inside a partitive, and a locale file did.
 
 **The defect this file exists to prevent.**
 

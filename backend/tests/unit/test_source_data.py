@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure logic for the source-data (prerequisite documents) register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure logic for the source-data (prerequisite documents) register.
 
 Pins the jurisdiction-neutral status maths (a requested document ignores expiry,
 a perpetual one keeps its in-hand state, the reminder window is inclusive on the

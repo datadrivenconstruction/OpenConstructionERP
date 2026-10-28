@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Delivery forms catalogue: every shipped file validates against the platform's own vocabularies.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Delivery forms catalogue: every shipped file validates against the platform's own vocabularies.
 
 Each check names the vocabulary it is held to (contract types, party roles,
 risk register categories, the phase spine), and the negative cases show the

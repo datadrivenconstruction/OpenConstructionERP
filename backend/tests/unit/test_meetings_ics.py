@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the meetings iCalendar (RFC 5545) builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the meetings iCalendar (RFC 5545) builder.
 
 Scope:
     Pure, database-free helpers in ``app.modules.meetings.ics``: TEXT escaping,

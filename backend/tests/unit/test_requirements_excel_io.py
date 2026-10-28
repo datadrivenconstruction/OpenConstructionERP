@@ -1,4 +1,4 @@
-"""Tests for the EAC Excel/CSV import-export module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the EAC Excel/CSV import-export module."""
 
 from __future__ import annotations
 

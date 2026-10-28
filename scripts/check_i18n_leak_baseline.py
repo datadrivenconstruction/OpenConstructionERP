@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""i18n leak guard: block new locale values that are byte-identical to en.ts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠i18n leak guard: block new locale values that are byte-identical to en.ts.
 
 On 2026-07-26, six commits added 422 keys across 11 modules to all 29 locale
 files (five titled "translate the X panel...", one an ordinary feature commit,

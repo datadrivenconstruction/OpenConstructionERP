@@ -1,4 +1,4 @@
-"""CRM money/Decimal precision unit tests (R7 audit).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRM money/Decimal precision unit tests (R7 audit).
 
 Ensures the pure aggregation helpers + weighted-value computation never
 silently coerce to float — a single ``Decimal × float`` ladders into

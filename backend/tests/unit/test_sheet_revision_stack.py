@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How revised drawings stack on top of each other in the sheet register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How revised drawings stack on top of each other in the sheet register.
 
 A revised drawing arrives as a new PDF. The register recognises it as the next
 revision of a sheet it already holds and retires the previous one. That used to

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A draft claim is not a previous certificate, and leaving it out never pays twice.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A draft claim is not a previous certificate, and leaving it out never pays twice.
 
 A draft has not left the contractor, so it certified nothing, and a payment
 application built now leaves it out of column D and G702 line 7. Counting it

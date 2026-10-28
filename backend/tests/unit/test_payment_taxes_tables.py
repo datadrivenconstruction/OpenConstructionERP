@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rate rows: finding the one in force on a date, and refusing bad tables.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rate rows: finding the one in force on a date, and refusing bad tables.
 
 Every row here is synthetic. No statutory value of any country appears in this
 file, so a test can never become the place a rate was "filled in".

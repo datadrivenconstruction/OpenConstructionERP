@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End-to-end BOQ Excel/CSV round-trip fidelity tests (GitHub #360).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end BOQ Excel/CSV round-trip fidelity tests (GitHub #360).
 
 Exercises the full export -> edit -> re-import cycle against the live API:
 

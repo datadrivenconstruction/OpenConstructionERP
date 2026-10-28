@@ -1,4 +1,4 @@
-"""Every write on legal entities is admin-only; reads need only a signed-in user.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every write on legal entities is admin-only; reads need only a signed-in user.
 
 The service tests run below the router, so a write route that lost its
 permission dependency would still pass all of them. These tests read the gate

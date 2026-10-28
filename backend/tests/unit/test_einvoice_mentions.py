@@ -1,4 +1,4 @@
-"""The invoice mentions mechanism is country-neutral: rows are data, one validator serves all."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The invoice mentions mechanism is country-neutral: rows are data, one validator serves all."""
 
 from __future__ import annotations
 

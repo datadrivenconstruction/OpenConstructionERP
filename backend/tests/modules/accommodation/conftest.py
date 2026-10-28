@@ -1,4 +1,4 @@
-"""Shared fixtures for accommodation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for accommodation tests.
 
 These tests run against the PostgreSQL engine provisioned by the top-level
 ``tests/conftest.py``, which binds the SQLAlchemy engine before any test

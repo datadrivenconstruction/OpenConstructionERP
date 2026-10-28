@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every writer of resource rows stores per-unit norms, and the estimator's money does not move.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every writer of resource rows stores per-unit norms, and the estimator's money does not move.
 
 ``metadata.resources[].quantity`` is the amount of a resource per ONE unit of
 the position; ``sum(quantity * unit_rate)`` is the position's unit rate. The

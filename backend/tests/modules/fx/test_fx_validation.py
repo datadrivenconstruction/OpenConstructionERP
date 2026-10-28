@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the ``fx`` validation rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the ``fx`` validation rule set.
 
 Each rule gets three cases: one context it must reject, one it must pass, and
 one where there is nothing of its kind to look at and it must stay silent. The

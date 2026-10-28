@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The recurring-schedule register fills, and fills the projects still empty.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The recurring-schedule register fills, and fills the projects still empty.
 
 The service module's recurring schedules tab is a real screen with a real
 backend, and every demo project opened it on an empty table, so the feature read

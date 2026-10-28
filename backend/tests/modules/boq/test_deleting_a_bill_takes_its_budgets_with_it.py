@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deleting a bill takes the budgets it generated with it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deleting a bill takes the budgets it generated with it.
 
 "Create budget" on a locked bill writes two layers: finance budgets stamped
 with the bill's id, one per WBS or section group, and one cost model budget

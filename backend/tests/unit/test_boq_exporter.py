@@ -1,4 +1,4 @@
-"""Unit tests for the BOQ (Bill of Quantities) workbook builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BOQ (Bill of Quantities) workbook builder.
 
 Structural / value tests rather than a byte snapshot - openpyxl embeds
 build metadata that makes byte-level reproducibility brittle, so we pin

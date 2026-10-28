@@ -1,4 +1,4 @@
-"""The vector and encoder checks must import, not merely locate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The vector and encoder checks must import, not merely locate.
 
 ``find_spec`` resolves a module without executing it. That is the wrong
 question for the two optional extras that are mostly compiled code: lancedb is

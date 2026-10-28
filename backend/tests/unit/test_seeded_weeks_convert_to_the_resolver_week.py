@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every seeded working week must mean the same week the schedule resolver means.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every seeded working week must mean the same week the schedule resolver means.
 
 The platform holds two weekday conventions at once, on purpose.
 ``oe_i18n_work_calendar.work_days`` counts Monday = 1 through Sunday = 7,

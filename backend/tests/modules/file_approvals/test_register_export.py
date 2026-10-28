@@ -1,4 +1,4 @@
-"""DB-free tests for the approvals-register Excel export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free tests for the approvals-register Excel export.
 
 Mirrors the style of ``test_notifications.py``: build transient
 workflow/step objects in memory and exercise the pure workbook builder

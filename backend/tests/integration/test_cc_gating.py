@@ -1,4 +1,4 @@
-"""Construction-control Pillar 5 (gating) integration + IDOR/tenant-isolation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 5 (gating) integration + IDOR/tenant-isolation tests.
 
 Covers the hold/witness/surveillance/review gating engine end to end:
 

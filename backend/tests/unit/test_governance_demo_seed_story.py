@@ -1,4 +1,4 @@
-"""Where the governance demo seed leaves each project, as data, before anything touches a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Where the governance demo seed leaves each project, as data, before anything touches a database.
 
 The module seeders tell a pre-construction or a running-site story from the
 state governance left behind, so the placements and the reading of a pack's

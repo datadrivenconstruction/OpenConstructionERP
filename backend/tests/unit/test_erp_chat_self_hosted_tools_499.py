@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Issue #499 - the assistant on a self-hosted endpoint: tools, timeout, keepalive.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #499 - the assistant on a self-hosted endpoint: tools, timeout, keepalive.
 
 Three things the assistant did not do for an operator's own OpenAI-compatible
 endpoint:

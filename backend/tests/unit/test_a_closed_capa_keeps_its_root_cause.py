@@ -1,4 +1,4 @@
-"""HSE: the root-cause category of a closed CAPA is part of its closure record.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HSE: the root-cause category of a closed CAPA is part of its closure record.
 
 ``set_capa_five_whys`` refuses to rewrite the 5-Whys chain, and with it the
 root-cause category, of a completed or cancelled CAPA. ``update_capa`` froze

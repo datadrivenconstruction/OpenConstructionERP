@@ -1,4 +1,4 @@
-"""``POST /options/{option_id}/link/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``POST /options/{option_id}/link/``.
 
 A design option is a whole alternative, not a model, so it has to be able to
 point at the estimate, the programme and the carbon inventory the project

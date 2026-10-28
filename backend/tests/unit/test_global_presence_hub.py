@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The presence hub keeps each project's room to itself.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The presence hub keeps each project's room to itself.
 
 It used to be one room for the whole server, so a tab saw every signed-in
 account and the page each was on. The router decides which project a tab may

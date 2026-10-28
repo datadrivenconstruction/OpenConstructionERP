@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Indexing a batch of rows must not stall the event loop either.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Indexing a batch of rows must not stall the event loop either.
 
 A bill created row by row is indexed in batches through
 ``app.core.vector_index.index_many``, the same way ``index_one`` handles a

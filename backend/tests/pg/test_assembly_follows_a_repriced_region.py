@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Repricing a region has to reach the assemblies built on it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Repricing a region has to reach the assemblies built on it.
 
 Three code paths write ``CostItem.rate``. Two of them announced the change and
 the assemblies subscriber pulled the new price through. The third,

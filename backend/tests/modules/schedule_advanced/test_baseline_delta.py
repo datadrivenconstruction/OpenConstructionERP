@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for ``compute_baseline_delta`` — variance computation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``compute_baseline_delta`` — variance computation.
 
 These tests exercise the pure-Python helper directly (no DB / no HTTP)
 so the variance math is provable in isolation. They also lock in the

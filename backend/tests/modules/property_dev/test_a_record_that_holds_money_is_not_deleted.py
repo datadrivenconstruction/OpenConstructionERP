@@ -1,4 +1,4 @@
-"""Deletes high in the property chain no longer take money records with them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deletes high in the property chain no longer take money records with them.
 
 A plot cascades to its sales contracts, their payment schedules and every
 instalment. A development cascades to its plots, buyers, escrow accounts and

@@ -1,4 +1,4 @@
-"""PG: the Project-Files -> takeoff document link.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the Project-Files -> takeoff document link.
 
 Opening a PDF from the /files area must land on a REAL ``TakeoffDocument``
 rather than on the ``oe_documents_document`` id, because every takeoff artefact

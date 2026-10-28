@@ -1,4 +1,4 @@
-"""Epic I10 — Excel/CSV polish: CSI MasterFormat code detection.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I10 — Excel/CSV polish: CSI MasterFormat code detection.
 
 The Excel importer now recognises 6-digit MasterFormat codes
 (``03 30 00``, ``03.30.00``, ``03-30-00``) and division headers

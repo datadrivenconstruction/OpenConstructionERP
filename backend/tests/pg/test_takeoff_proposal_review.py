@@ -1,4 +1,4 @@
-"""PG: the takeoff proposal review queue is durable and server-authoritative.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the takeoff proposal review queue is durable and server-authoritative.
 
 The offline detectors used to hand candidates to the canvas and keep nothing,
 so a rejection was a local drop and a reload resurrected everything the

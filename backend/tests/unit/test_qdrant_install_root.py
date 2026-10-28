@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Where the embedded vector service installs itself.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Where the embedded vector service installs itself.
 
 ``app.core.storage.resolve_data_dir`` is documented as the single source of
 truth for writable state, and every other component defers to it. The vector

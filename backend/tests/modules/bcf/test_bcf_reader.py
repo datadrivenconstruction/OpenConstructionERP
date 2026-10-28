@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for :class:`app.modules.bcf.reader.BCFReader`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`app.modules.bcf.reader.BCFReader`.
 
 The reader is pure-Python / stdlib (defusedxml + zipfile + xml.etree)
 so the tests build .bcfzip archives in-memory — no database, no async

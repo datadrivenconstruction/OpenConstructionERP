@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Outbound webhook senders must refuse SSRF-unsafe target URLs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Outbound webhook senders must refuse SSRF-unsafe target URLs.
 
 Discord / Slack / Teams webhook URLs are configured by a tenant admin and
 POSTed to server-side, so a URL pointing at loopback, a private LAN address,

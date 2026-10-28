@@ -1,4 +1,4 @@
-"""Unit tests for the 8.6.1 DWG/DXF takeoff data-dir resolution fix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the 8.6.1 DWG/DXF takeoff data-dir resolution fix.
 
 Background
 ----------

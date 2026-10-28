@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The runner is wired into startup, in the right branch and in the right order.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The runner is wired into startup, in the right branch and in the right order.
 
 ``tests/pg/test_data_repairs.py`` proves the runner does the right thing when it
 is called. Nothing there proves that anything calls it. That gap is not a

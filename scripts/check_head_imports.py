@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Every `from app... import name` in the commit must resolve inside the commit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every `from app... import name` in the commit must resolve inside the commit.
 
 On 2026-08-17 `app/modules/rfi/router.py` was committed, clean, importing
 `count_activity_for_entity` from `app.core.audit_log` twice. The function

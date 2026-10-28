@@ -1,4 +1,4 @@
-"""Cost Spine on real PostgreSQL (PG lane only).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Spine on real PostgreSQL (PG lane only).
 
 Runs against the embedded PostgreSQL 16 cluster (``OE_TEST_DB=pg``) via the
 ``pg_session`` savepoint-isolated fixture. Guards the two things the SQLite

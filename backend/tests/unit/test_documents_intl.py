@@ -1,4 +1,4 @@
-"""Unit tests for the document-register international helpers (``intl.py``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the document-register international helpers (``intl.py``).
 
 Pure, database-free logic checks for the additive helpers that make the
 document register clear worldwide: ISO 8601 dates, explicit-unit file

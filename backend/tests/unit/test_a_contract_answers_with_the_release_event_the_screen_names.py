@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A contract answers with a release event the screen has a name for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A contract answers with a release event the screen has a name for.
 
 Contracts written before the vocabulary was unified store an alias such as
 ``practical_completion``, and the contract panel printed it raw because the

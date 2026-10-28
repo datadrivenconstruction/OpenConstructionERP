@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management against PostgreSQL: number allocation under load, releases into transmittals, scheme change."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management against PostgreSQL: number allocation under load, releases into transmittals, scheme change."""
 
 from __future__ import annotations
 

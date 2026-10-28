@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A group that had no value is not a group whose value says so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A group that had no value is not a group whose value says so.
 
 ``_group_key`` turns one grouped column's value into the key it takes in a
 KPI's breakdown, and it answered ``"(unset)"`` for a NULL. That is a data

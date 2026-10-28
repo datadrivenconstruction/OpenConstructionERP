@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for persistent clash profiles + multi-dimensional grouping (item #23).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for persistent clash profiles + multi-dimensional grouping (item #23).
 
 Two contracts are pinned here:
 

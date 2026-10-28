@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration tests for the selective ``.bcfzip`` export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the selective ``.bcfzip`` export.
 
 ``POST /api/v1/bcf/projects/{project_id}/export`` hands the other side exactly
 the topics a model-review session walked, named by BCF GUID. The companion

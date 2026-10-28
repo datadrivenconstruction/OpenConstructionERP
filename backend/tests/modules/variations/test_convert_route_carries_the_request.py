@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Promoting a request over HTTP must commit the figures it was approved on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Promoting a request over HTTP must commit the figures it was approved on.
 
 The service carries a request's own figures into the order for anything the
 caller left unnamed, but the route used to name every field itself, so the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A new demo pack must not fall out of the hand-maintained tables in silence.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A new demo pack must not fall out of the hand-maintained tables in silence.
 
 Three tables in ``demo_projects`` are keyed by something a pack file carries,
 and every one of them answers a miss with a value that looks like an answer:

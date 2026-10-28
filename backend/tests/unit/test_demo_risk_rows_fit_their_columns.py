@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Every risk row a demo pack seeds has to fit the column it is written to.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every risk row a demo pack seeds has to fit the column it is written to.
 
 The catalogue is a promise: a project a user can pick from the list has to
 install. One could not. ``it-park-bangalore`` prices an Indian campus in INR,

@@ -1,4 +1,4 @@
-"""SAFETY PRIMITIVE 3 - the result budget (pure unit, no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠SAFETY PRIMITIVE 3 - the result budget (pure unit, no DB).
 
 Proves the hard row cap, the no-unlimited clamp, the static complexity ceiling
 (refused BEFORE any database round-trip), the capped count path, and that a

@@ -1,4 +1,4 @@
-"""RFI deep-audit regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFI deep-audit regression suite.
 
 Each test below pins a finding from the deep audit on
 ``backend/app/modules/rfi/``:

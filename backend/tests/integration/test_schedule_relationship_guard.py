@@ -1,4 +1,4 @@
-"""Regression: relationship create + predecessor completion guard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: relationship create + predecessor completion guard.
 
 Two behaviours, both introduced with the dependency-unification work and both
 only reproducible against a real (async) database, so they run against an

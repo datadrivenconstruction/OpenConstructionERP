@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the dedicated field-module grant table.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the dedicated field-module grant table.
 
 These exercise the grant repository + service against a real PostgreSQL
 database inside an outer transaction that is rolled back on teardown, so the

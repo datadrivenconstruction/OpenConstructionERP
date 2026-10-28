@@ -1,4 +1,4 @@
-"""Invoice FSM transitions must leave an ActivityLog row (PG lane only).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Invoice FSM transitions must leave an ActivityLog row (PG lane only).
 
 ``approve_invoice`` and ``pay_invoice`` write their audit row through
 ``log_activity`` inside a ``try/except`` that downgrades any failure to a

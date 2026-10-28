@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Issue #499 - the endpoint key, tool mode and timeouts, stored and read back on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #499 - the endpoint key, tool mode and timeouts, stored and read back on PostgreSQL.
 
 The key of the OpenAI-compatible endpoint is kept inside ``metadata`` rather
 than in a column of its own, so an upgraded install needs no schema change.

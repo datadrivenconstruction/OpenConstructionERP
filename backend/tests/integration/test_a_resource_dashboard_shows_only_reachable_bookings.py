@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A resource's dashboard shows only the bookings of projects the caller can reach.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A resource's dashboard shows only the bookings of projects the caller can reach.
 
 Resources are a shared pool, so any reader may open any resource. Its
 dashboard, though, listed every active and upcoming assignment of that

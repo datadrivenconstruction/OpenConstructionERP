@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Baseline comparison + human-readable regression diff."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline comparison + human-readable regression diff."""
 
 from __future__ import annotations
 

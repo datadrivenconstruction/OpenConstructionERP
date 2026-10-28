@@ -1,4 +1,4 @@
-"""Integration tests for the admin-controlled public demo-login switch.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the admin-controlled public demo-login switch.
 
 A site admin can turn the password-free "Try demo" sign-in on or off from the
 Settings screen. The choice is persisted in a small JSON file in the data dir

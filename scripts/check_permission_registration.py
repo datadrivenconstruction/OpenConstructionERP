@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Permission guard: a route may not ask for a permission nobody registers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permission guard: a route may not ask for a permission nobody registers.
 
 ``RequirePermission.__call__`` checks the key against the caller's own
 permission list, then falls back to ``permission_registry.role_has_permission``.

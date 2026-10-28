@@ -1,4 +1,4 @@
-"""A retained cluster survives an application shutdown.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A retained cluster survives an application shutdown.
 
 The application stops the embedded cluster from its own shutdown handler. That
 is right when the application booted it and wrong when something longer-lived

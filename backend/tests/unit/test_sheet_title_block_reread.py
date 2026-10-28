@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Re-reading the title blocks of sheets already in the register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Re-reading the title blocks of sheets already in the register.
 
 The reader that registered an Italian drawing set at revision "ole" and with no
 sheet numbers has been fixed, but the rows it wrote are still in the register.

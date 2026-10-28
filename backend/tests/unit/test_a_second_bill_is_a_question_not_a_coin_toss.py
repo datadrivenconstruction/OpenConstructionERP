@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Three write paths stop guessing which bill of quantities they act on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Three write paths stop guessing which bill of quantities they act on.
 
 A project may hold any number of bills. Three modules used to answer "which
 one" with ``ORDER BY created_at LIMIT 1``: the oldest bill won, the lock was

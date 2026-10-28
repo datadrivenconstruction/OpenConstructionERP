@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Installing a country pack has to leave the workspace knowing which country.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Installing a country pack has to leave the workspace knowing which country.
 
 A project created while a country pack is active inherited the pack's
 estimating methodology and nothing else. Everything else in the product that

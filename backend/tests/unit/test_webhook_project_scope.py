@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A missing event project is not permission to reach every scoped endpoint."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A missing event project is not permission to reach every scoped endpoint."""
 
 from types import SimpleNamespace
 from unittest.mock import AsyncMock

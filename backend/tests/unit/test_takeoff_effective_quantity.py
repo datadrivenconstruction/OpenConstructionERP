@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The reported takeoff quantity, server side.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The reported takeoff quantity, server side.
 
 ``effective_takeoff_quantity`` mirrors the frontend ``effectiveQuantity`` /
 ``effectiveUnit``: a linear row with a wall height reports wall area (length x

@@ -1,4 +1,4 @@
-"""Unit tests for the BIM/RVT converter diagnostic helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BIM/RVT converter diagnostic helpers.
 
 These helpers exist so the UI can show a real reason ("File saved with
 Revit 2024 but installed converter is 18.x") instead of the generic

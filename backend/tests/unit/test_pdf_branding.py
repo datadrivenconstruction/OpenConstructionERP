@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the shared PDF branding helper (``app.core.pdf_branding``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the shared PDF branding helper (``app.core.pdf_branding``).
 
 These tests import NO database and NO module ORM models - only the branding
 core and reportlab, which is a base dependency. They assert the documented

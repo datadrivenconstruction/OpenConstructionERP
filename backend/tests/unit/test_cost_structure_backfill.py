@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The planner the v92 revision and the boot repair share, without a database."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The planner the v92 revision and the boot repair share, without a database."""
 
 from __future__ import annotations
 

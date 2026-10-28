@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure schema contract tests for change-family ball-in-court / due-date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure schema contract tests for change-family ball-in-court / due-date.
 
 The five change-management entities (change order, MoC entry, variation notice
 / request / order) all expose two additive fields - ``ball_in_court`` and

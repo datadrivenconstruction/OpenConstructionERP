@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database-free unit tests for the closeout certifying-artifact gate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the closeout certifying-artifact gate.
 
 These pin :func:`app.modules.closeout.service._generated_slot_delivered`, the
 pure decision behind the handover readiness fix: a generated artifact is never

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Drawing traceability of BOQ lines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Drawing traceability of BOQ lines.
 
 * A takeoff measurement records the sheet number, title and revision it was taken on.
 * A position derives its source drawings from the measurements linked to it.

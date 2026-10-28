@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A module installed by the first generator is closed on the next start.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A module installed by the first generator is closed on the next start.
 
 The file-level behaviour of the refresh is in ``tests/test_module_builder_refresh.py``.
 This is the claim an operator cares about, on the database it runs against:

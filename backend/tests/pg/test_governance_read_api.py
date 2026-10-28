@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the governance screens read: labels, catalogue phases, caller capabilities, the matrix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the governance screens read: labels, catalogue phases, caller capabilities, the matrix.
 
 The capability test is the important one. ``can.decide`` is only honest if it
 is false exactly when the decide endpoint refuses the same caller, so every

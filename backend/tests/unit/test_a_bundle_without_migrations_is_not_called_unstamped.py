@@ -1,4 +1,4 @@
-"""An install that ships no migration tree does not report itself unstamped.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An install that ships no migration tree does not report itself unstamped.
 
 The desktop bundle carries neither ``alembic.ini`` nor the script directory, so
 the boot-time stamp can never write a revision there. From its second start

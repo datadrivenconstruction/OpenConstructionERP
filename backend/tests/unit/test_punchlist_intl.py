@@ -1,4 +1,4 @@
-"""Unit tests for the Punch List international helpers (``intl.py``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Punch List international helpers (``intl.py``).
 
 These are pure, database-free tests. They pin the international behaviour that
 keeps a punch list clear and correct anywhere in the world:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Proportional scaling of resource norms: the factor, rounding, locks and scope."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Proportional scaling of resource norms: the factor, rounding, locks and scope."""
 
 from __future__ import annotations
 

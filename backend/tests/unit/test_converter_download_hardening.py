@@ -1,4 +1,4 @@
-"""Converter-installer hardening regression — Audit A2 / A9 / A11.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Converter-installer hardening regression — Audit A2 / A9 / A11.
 
 The DDC converter installer pulls binaries from the GitHub Contents API
 into ``~/.openestimator/converters/``. A poisoned response could

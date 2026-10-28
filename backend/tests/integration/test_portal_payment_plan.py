@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A client sees the payment plan of their contract, as far as a person marked it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A client sees the payment plan of their contract, as far as a person marked it.
 
 Surface (portal-session-gated):
     GET /api/v1/portal/projects/{project_id}/payment-plan

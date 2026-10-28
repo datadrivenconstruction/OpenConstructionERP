@@ -1,4 +1,4 @@
-"""The onboarding save stores the interface mode a client reports, and no other.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The onboarding save stores the interface mode a client reports, and no other.
 
 The wizard switched every new user to Simple mode and in the same breath told
 the server ``interface_mode: "advanced"``; the Modules page profile switch sent

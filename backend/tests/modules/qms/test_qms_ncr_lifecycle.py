@@ -1,4 +1,4 @@
-"""Integration tests: QMS NCR lifecycle — open → root-cause → corrective-action → closed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests: QMS NCR lifecycle — open → root-cause → corrective-action → closed.
 
 Covers:
     * Full happy-path: open → action_pending → verifying → closed.

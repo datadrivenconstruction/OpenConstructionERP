@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The gate reads the repair registry as source text, so the two must not drift.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The gate reads the repair registry as source text, so the two must not drift.
 
 ``scripts/check_data_rewrite_boot_repair.py`` validates a revision's
 ``# boot-repair: registry=<id>`` line against the ``register_data_repair()``

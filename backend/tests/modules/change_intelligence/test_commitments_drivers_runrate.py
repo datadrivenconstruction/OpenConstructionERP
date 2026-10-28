@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the commitment register, change drivers and run-rate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the commitment register, change drivers and run-rate.
 
 PostgreSQL, py3.12. Seeds records across the source modules directly and drives
 the three services that feed the pure :mod:`action_register`,

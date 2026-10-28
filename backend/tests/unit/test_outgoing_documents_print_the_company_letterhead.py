@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The BOQ estimate, the diary, the minutes, the dashboard report, the project
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The BOQ estimate, the diary, the minutes, the dashboard report, the project
 report, the regulator disclosures and the tender letters carry the letterhead.
 
 These are the documents a firm sends out under its own name: an estimate to a

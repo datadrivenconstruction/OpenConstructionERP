@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project team member reaches property_dev data as their role allows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project team member reaches property_dev data as their role allows.
 
 Every other module gates project data through ``verify_project_access``:
 the owner passes and so does anyone on one of the project's teams. The

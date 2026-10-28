@@ -1,4 +1,4 @@
-"""Unit tests — assembly total calculation, regional factors, and cycle detection.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — assembly total calculation, regional factors, and cycle detection.
 
 Scope (R7 deep-improve sweep):
 

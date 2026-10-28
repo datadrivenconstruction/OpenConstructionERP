@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""G702 line 5 counts retention held on money no schedule line carries exactly once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠G702 line 5 counts retention held on money no schedule line carries exactly once.
 
 Line 5 is the total of G703 column I: everything withheld to date less what
 has been released. On a contract whose retention the engine works out (lump

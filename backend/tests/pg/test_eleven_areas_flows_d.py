@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Write flows over HTTP for plant_register, site_logistics, staffing and stakeholders.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Write flows over HTTP for plant_register, site_logistics, staffing and stakeholders.
 
 Each test drives one module end to end on a demo project of the eleven-areas pack:
 create, update, move through the state machine, try a transition the machine does not

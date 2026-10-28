@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Canadian GST filed as ``national`` is not a label problem, it is a wrong total.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Canadian GST filed as ``national`` is not a label problem, it is a wrong total.
 
 ``v3302_tax_combination`` backfilled ``combination`` on the thirteen Canadian
 and United States rows, and a revision body never executes on the boot path, so

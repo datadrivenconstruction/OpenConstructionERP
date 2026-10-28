@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v71 builds exactly the schema the plant register models build (and the site plant extension), and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v71 builds exactly the schema the plant register models build (and the site plant extension), and undoes it.
 
 Up, down, up on PostgreSQL; the reflected schema from the revision must equal
 the one ``create_all`` produces from the models, so a fresh install and an

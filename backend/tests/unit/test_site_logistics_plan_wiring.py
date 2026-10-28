@@ -1,4 +1,4 @@
-"""Wiring of the site-logistics plan extension: permissions, routes, rules, messages."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wiring of the site-logistics plan extension: permissions, routes, rules, messages."""
 
 from __future__ import annotations
 

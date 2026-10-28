@@ -1,4 +1,4 @@
-"""``GET /api/v1/partner-pack/installed`` must not rescan the machine per request.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``GET /api/v1/partner-pack/installed`` must not rescan the machine per request.
 
 The header asks for this listing on every page. Each ``has_logo`` /
 ``has_favicon`` / ``has_onboarding_script`` flag in it used to call

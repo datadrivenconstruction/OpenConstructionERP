@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Upload hardening: a PDF upload can never OOM-kill the API process.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Upload hardening: a PDF upload can never OOM-kill the API process.
 
 These are DB-free unit tests. They exercise:
 

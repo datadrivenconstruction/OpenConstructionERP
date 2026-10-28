@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for change impact projection and the clarifier service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for change impact projection and the clarifier service.
 
 The impact test seeds approved change orders and an agreed variation order and
 checks the materialized cost / schedule roll-up (and that non-approved changes

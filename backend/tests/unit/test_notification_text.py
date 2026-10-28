@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for notification text helpers (``app.modules.notifications.templates``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for notification text helpers (``app.modules.notifications.templates``).
 
 Pure - no DB, no event bus. Focuses on ``combine_title_body``, the shared
 one-line folding used by positional-parameter delivery sinks (e.g. a WhatsApp

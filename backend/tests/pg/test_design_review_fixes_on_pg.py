@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design numbering, frame documents, approval points, reports and permits against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design numbering, frame documents, approval points, reports and permits against PostgreSQL.
 
 One test per defect an independent review found: the generator that wedged on
 a taken code, numbers reserved whichever door they came through, a register

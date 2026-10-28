@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Seeded cost build-up rows are named in the demo project's own language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seeded cost build-up rows are named in the demo project's own language.
 
 A German demo bill used to break "Trennwand Trockenbau doppelt beplankt CW100"
 down into "Drywall boards/profiles", "Drywall installers" and "Tools": English

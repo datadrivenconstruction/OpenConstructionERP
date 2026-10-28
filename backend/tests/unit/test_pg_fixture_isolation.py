@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The two properties ``tests/_pg.py`` exists to provide, asserted directly.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The two properties ``tests/_pg.py`` exists to provide, asserted directly.
 
 Both are expensive enough to be tempting to weaken, and both fail silently when
 weakened, which is why they are pinned here rather than trusted to the suite.

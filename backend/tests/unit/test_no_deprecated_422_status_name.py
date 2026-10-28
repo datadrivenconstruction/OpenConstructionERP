@@ -1,4 +1,4 @@
-"""The 422 status constant is spelled by its current name everywhere.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The 422 status constant is spelled by its current name everywhere.
 
 Starlette 0.48 renamed ``HTTP_422_UNPROCESSABLE_ENTITY`` to
 ``HTTP_422_UNPROCESSABLE_CONTENT`` (RFC 9110) and keeps the old one only as a

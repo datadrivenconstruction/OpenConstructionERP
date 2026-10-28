@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A locked bill keeps its numbers and its resource breakdown.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A locked bill keeps its numbers and its resource breakdown.
 
 ``renumber`` and ``enrich-resources`` wrote straight through the position
 repository from the router, past the lock guard every service writer takes, so

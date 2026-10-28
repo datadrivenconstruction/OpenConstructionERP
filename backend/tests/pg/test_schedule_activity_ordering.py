@@ -1,4 +1,4 @@
-"""PG: schedule activities list in code order, not in text order (internal #167).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: schedule activities list in code order, not in text order (internal #167).
 
 ``ActivityRepository.list_for_schedule`` ordered by ``sort_order`` then
 ``wbs_code``. ``wbs_code`` is a ``String(50)``, so the second term compared

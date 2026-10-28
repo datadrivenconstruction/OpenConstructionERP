@@ -1,4 +1,4 @@
-"""An upgrade must not overwrite the binaries it is running from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An upgrade must not overwrite the binaries it is running from.
 
 ``pip install --upgrade`` replaces files in site-packages, and on this install
 some of those files are executing: the embedded PostgreSQL binaries ship inside

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Russia charges 20 % before 2026 and 22 % from 2026-01-01, and both halves are asserted.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Russia charges 20 % before 2026 and 22 % from 2026-01-01, and both halves are asserted.
 
 The defect this pins
 --------------------

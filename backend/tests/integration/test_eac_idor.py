@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""IDOR (Insecure Direct Object Reference) integration tests for the EAC module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠IDOR (Insecure Direct Object Reference) integration tests for the EAC module.
 
 Verifies that cross-tenant access to EAC resources returns HTTP 404 —
 tenant isolation is enforced at the API boundary on every GET/POST/PUT/DELETE

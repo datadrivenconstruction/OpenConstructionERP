@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Per-call IDOR guard on the AI-agent data-reading tools (Findings #4 / #6).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-call IDOR guard on the AI-agent data-reading tools (Findings #4 / #6).
 
 The data-reading agent tools (``search_documents``, ``project_cost_summary``,
 ``read_boq``, ``check_boq_quality``) run OUTSIDE the request cycle, so they

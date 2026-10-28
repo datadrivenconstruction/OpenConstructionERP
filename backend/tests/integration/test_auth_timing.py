@@ -1,4 +1,4 @@
-"""Login-endpoint timing-parity test (BUG-JWT01 / Wave 3-A).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Login-endpoint timing-parity test (BUG-JWT01 / Wave 3-A).
 
 Verifies that ``UserService.login`` already pays the dummy-bcrypt cost on
 the missing-user branch (line ~329 of users/service.py), so that the wall

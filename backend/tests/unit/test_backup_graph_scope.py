@@ -1,4 +1,4 @@
-"""DB-free tests for the schema-driven backup scope derivation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free tests for the schema-driven backup scope derivation.
 
 Builds a synthetic SQLAlchemy schema (no app import, no database) and checks the
 fixpoint reproduces the ownership rules: user columns, project_id by name, FK

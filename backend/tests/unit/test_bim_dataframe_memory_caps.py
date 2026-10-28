@@ -1,4 +1,4 @@
-"""BIM Parquet sidecar reads stay bounded: capped DuckDB, batch-wise pyarrow."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM Parquet sidecar reads stay bounded: capped DuckDB, batch-wise pyarrow."""
 
 import sys
 

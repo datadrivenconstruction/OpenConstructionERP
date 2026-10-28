@@ -1,4 +1,4 @@
-"""A cluster written by another PostgreSQL major is named, not just refused.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cluster written by another PostgreSQL major is named, not just refused.
 
 PostgreSQL will not open a data directory that a different major version wrote,
 in either direction. Until this guard existed the code read only whether

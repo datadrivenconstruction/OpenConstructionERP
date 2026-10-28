@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A progress period is a point in time, so two of them cannot be the same one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A progress period is a point in time, so two of them cannot be the same one.
 
 The S-curve on a demo project fell 36.7 points in one month and ended the
 year below its own July. Nothing was wrong with the readings: the seeder

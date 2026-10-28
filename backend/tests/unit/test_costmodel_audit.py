@@ -1,4 +1,4 @@
-"""Unit tests for the costmodel R5 audit fixes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the costmodel R5 audit fixes.
 
 These tests pin behaviour for the issues identified in the May 2026 deep
 audit of the 5D cost model module:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Spreadsheet schedule import over HTTP: preview, commit, replace, template.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Spreadsheet schedule import over HTTP: preview, commit, replace, template.
 
 What is pinned here:
 

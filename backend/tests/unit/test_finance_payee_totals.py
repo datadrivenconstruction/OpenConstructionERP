@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What each supplier was paid over a reporting period, as an annual payee return reads it."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What each supplier was paid over a reporting period, as an annual payee return reads it."""
 
 from __future__ import annotations
 

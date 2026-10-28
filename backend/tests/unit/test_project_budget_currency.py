@@ -1,4 +1,4 @@
-"""Every write path into ``oe_finance_budget`` must supply a currency.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every write path into ``oe_finance_budget`` must supply a currency.
 
 ``ProjectBudget.currency_code`` deliberately carries no database default
 (``finance/models.py:197-206``): "no DB default; service code MUST supply

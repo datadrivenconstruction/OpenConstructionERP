@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the local BGE cross-encoder reranker.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the local BGE cross-encoder reranker.
 
 The actual ``FlagReranker`` model (BAAI/bge-reranker-v2-m3) is too
 heavy to load during CI / dev tests — it's ~568 MB and pulls in

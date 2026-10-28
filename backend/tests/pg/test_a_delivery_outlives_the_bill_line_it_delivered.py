@@ -1,4 +1,4 @@
-"""A delivery record survives the deletion of the bill position it delivered.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A delivery record survives the deletion of the bill position it delivered.
 
 This is the site-logistics module's orphan discipline, and it is enforced by the
 database rather than by a sweep: ``oe_site_logistics_delivery_line`` holds a

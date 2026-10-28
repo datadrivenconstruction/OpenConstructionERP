@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Engineering brief rules, catalogues, lifecycle and wiring, without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Engineering brief rules, catalogues, lifecycle and wiring, without a database.
 
 Each test names the rule and carries the case that would pass if the rule were missing: a gate with no
 milestone, a milestone dated after the date its successor needs, a chain that loops back, a must

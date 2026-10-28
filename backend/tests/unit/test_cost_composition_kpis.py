@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the cost-composition KPI math (bi_dashboards.kpis).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the cost-composition KPI math (bi_dashboards.kpis).
 
 These exercise the pure, DB-free helpers that back the six cost-composition
 tiles directly with fixture cost / EVM snapshots - no database, FastAPI or

@@ -1,4 +1,4 @@
-"""Unit tests for :class:`ScheduleService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ScheduleService`.
 
 Scope:
     Covers schedule CRUD, activity CRUD with auto-duration calculation,

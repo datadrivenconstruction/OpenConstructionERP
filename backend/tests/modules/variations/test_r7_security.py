@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""R7 audit regressions — variations + changeorders.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 audit regressions — variations + changeorders.
 
 Covers the five guarantees the R7 sweep pinned down across the linked
 financial-adjustment chain (Variation -> ChangeOrder):

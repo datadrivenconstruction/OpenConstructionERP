@@ -1,4 +1,4 @@
-"""The governance demo seed pins the phase model before any module seeder runs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The governance demo seed pins the phase model before any module seeder runs.
 
 The seed skips a project that already has a model. A module seeder that ran
 first and pinned one would leave the demo project without area owners, gates

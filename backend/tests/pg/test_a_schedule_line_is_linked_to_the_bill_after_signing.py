@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A schedule of values line is linked to the bill it measures, from the app, at any stage.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A schedule of values line is linked to the bill it measures, from the app, at any stage.
 
 "Populate from progress" reads each schedule line's link to a BOQ position and
 bills the position's latest reading. Nothing on screen could make that link,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A signed contract's schedule of values is not editable in place.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A signed contract's schedule of values is not editable in place.
 
 The contract lines are what every claim bills against. A claim line points at
 one of them, column D is assembled per line from what earlier claims billed,

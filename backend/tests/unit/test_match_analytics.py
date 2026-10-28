@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the §10 analytics aggregator.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the §10 analytics aggregator.
 
 Two surfaces under test:
 

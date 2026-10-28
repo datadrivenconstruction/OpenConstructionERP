@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contracts module — clause templates + clone-flow smoke tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contracts module — clause templates + clone-flow smoke tests.
 
 The frontend deep-improvement wave (see
 ``frontend/src/features/contracts/ContractsPage.tsx``) added two new

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: the forecast's two currency columns, against a real cluster and a real row.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the forecast's two currency columns, against a real cluster and a real row.
 
 Two things the SQLite unit lane cannot say anything about.
 

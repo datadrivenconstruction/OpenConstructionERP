@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Q15: physical hour norms stay distinct from monetary resource allowances."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Q15: physical hour norms stay distinct from monetary resource allowances."""
 
 from __future__ import annotations
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""i18n placeholder guard: block a translation that renamed a variable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠i18n placeholder guard: block a translation that renamed a variable.
 
 i18next substitutes by name. `t('boq.outline_count', { count: 12 })` fills
 `{{count}}` and nothing else, so a locale whose value says `{{Pays}}` renders

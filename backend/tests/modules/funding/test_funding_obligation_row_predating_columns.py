@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An obligation written before ``detail_key`` existed must still be readable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An obligation written before ``detail_key`` existed must still be readable.
 
 ``detail_key`` and ``detail_params`` are newer than ``oe_funding_obligation``.
 Every installation upgrading to this version has rows that predate them, and

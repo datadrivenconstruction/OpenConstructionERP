@@ -1,4 +1,4 @@
-"""BOQ lock/unlock CAS regression — Audit B7 / CC4.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ lock/unlock CAS regression — Audit B7 / CC4.
 
 The pre-fix lock_boq did READ -> CHECK -> UPDATE, which let two
 concurrent callers both pass the "not locked" check and both write

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The invoice raised from a certified claim falls due on the agreed terms.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The invoice raised from a certified claim falls due on the agreed terms.
 
 Without a due date the client portal can never call the bill overdue, and a
 payment plan's reminders have nothing to count down to. An invoice whose

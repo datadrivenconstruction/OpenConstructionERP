@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The daily diary seeder must run at boot, and must run once per project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The daily diary seeder must run at boot, and must run once per project.
 
 The seeder was written complete and then never referenced by anything, so the
 module shipped with an empty register on every install while the code that

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The spreadsheet header table, and what a market may claim from it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The spreadsheet header table, and what a market may claim from it.
 
 The BOQ Excel importer maps a header row onto canonical columns through a
 table that used to be seven languages flattened into one set of strings. It

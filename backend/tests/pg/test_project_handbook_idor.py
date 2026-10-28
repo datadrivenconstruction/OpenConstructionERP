@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may see and change the project handbook and the data room, over HTTP against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may see and change the project handbook and the data room, over HTTP against PostgreSQL.
 
 A stranger from another tenant sees 404 on every project route, a project member with the editor role reads
 and writes text but cannot approve, and the approver cannot be the submitter.

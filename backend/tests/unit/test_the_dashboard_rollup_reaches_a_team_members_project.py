@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The dashboard rollup answers for every project the caller can open.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The dashboard rollup answers for every project the caller can open.
 
 ``accessible_projects`` in the dashboard service is the rollup's whole scope:
 every widget aggregates over the list it returns and nothing else. It used to

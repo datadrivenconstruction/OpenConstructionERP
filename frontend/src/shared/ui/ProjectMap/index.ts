@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // The barrel re-exports the *lazy* wrapper, so a feature that imports
 // ProjectMap from ``@/shared/ui`` does NOT eagerly pull maplibre-gl into

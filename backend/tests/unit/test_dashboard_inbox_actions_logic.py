@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure tests for the inbox item-state logic (no database).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure tests for the inbox item-state logic (no database).
 
 Covers the two things the action endpoints stand on: that an item id can be
 parsed back into the source and row it names, and that a recorded state changes

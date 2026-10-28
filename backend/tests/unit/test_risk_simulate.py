@@ -1,4 +1,4 @@
-"""Unit tests for the Risk Register Monte Carlo simulation (v3.11 — T1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Risk Register Monte Carlo simulation (v3.11 — T1).
 
 Covers:
 

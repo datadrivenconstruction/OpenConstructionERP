@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Guard the seam between what a partner pack declares and what the engine has.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Guard the seam between what a partner pack declares and what the engine has.
 
 ``validation_rule_packs`` carries two kinds of name at once: identifiers of
 built-in rule sets, which switch those rules on, and ids of the JSON documents

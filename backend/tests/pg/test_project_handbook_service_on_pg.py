@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The project handbook service and the data room against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project handbook service and the data room against PostgreSQL.
 
 Chapters come from the pinned catalogue, approval is four-eyes and freezes an immutable version, the
 organisation chapter reads stakeholders and staffing live, and the governance folder tree materialises

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Many threads asking for the embedder at once must build exactly one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Many threads asking for the embedder at once must build exactly one.
 
 ``get_embedder`` is a lazy singleton whose construction takes seconds, and it is
 reachable from several threads at once: the embedding pool's workers, the

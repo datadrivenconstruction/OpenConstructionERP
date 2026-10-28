@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every printed form draws every glyph of every language it is offered in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every printed form draws every glyph of every language it is offered in.
 
 A form is offered in a language once its labels are translated, but whether the
 PDF can draw that script is a different question: a face with no glyph for a

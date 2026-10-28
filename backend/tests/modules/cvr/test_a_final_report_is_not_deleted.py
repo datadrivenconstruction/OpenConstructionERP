@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A finalized CVR report is not deleted.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A finalized CVR report is not deleted.
 
 The lines of a final report are refused for create, update and delete until the
 report is set back to draft. Deleting the report itself had no status check, so

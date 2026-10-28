@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`app.modules.property_dev.intl`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.modules.property_dev.intl`.
 
 Scope:
     Covers the pure, database-free international appraisal helpers: gross

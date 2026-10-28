@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG contract tests for the shared ``_update_fields`` repository helper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG contract tests for the shared ``_update_fields`` repository helper.
 
 ``crm.repository._update_fields`` is one module-level function serving eight
 repository classes, and ``webhook_leads`` carries its own copy of the same

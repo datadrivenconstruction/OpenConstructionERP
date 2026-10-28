@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for the final-account readiness checklist helper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the final-account readiness checklist helper.
 
 These exercise the pure evaluator in ``app.modules.contracts.final_account``
 directly with plain :class:`ClosureFacts` value objects, so no database, ORM or

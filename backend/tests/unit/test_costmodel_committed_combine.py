@@ -1,4 +1,4 @@
-"""One cost line's purchase orders and contracts, each commitment counted once."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One cost line's purchase orders and contracts, each commitment counted once."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - which budget line each source's committed and actual lands on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - which budget line each source's committed and actual lands on.
 
 ``plan_budget`` is pure; every rule in ``finance.budget_actuals`` is pinned
 here. The one that matters most: N budget lines keep their own figures, an

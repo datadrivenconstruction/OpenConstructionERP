@@ -1,4 +1,4 @@
-"""A tender letter quotes an amount with the digits its currency has.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A tender letter quotes an amount with the digits its currency has.
 
 The award letter, the rejection notice and the award record all print money
 through one renderer, ``pdf_documents._fmt_money``. It was handed the currency

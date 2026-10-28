@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An install seeded before 18.4 learns Ireland's 21 % half year, and nothing else moves.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An install seeded before 18.4 learns Ireland's 21 % half year, and nothing else moves.
 
 Ireland charged 21 % instead of 23 % from 1 September 2020 to 28 February 2021.
 Every install seeded before 18.4 holds one open 23 % row from 2012-01-01, so a

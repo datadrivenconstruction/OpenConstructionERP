@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project governance without a database: registration, router guards, error
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project governance without a database: registration, router guards, error
 contract, validation rules and the tenant catalogue validator.
 
 Database behaviour (decisions, locks, routes, tenants) is in

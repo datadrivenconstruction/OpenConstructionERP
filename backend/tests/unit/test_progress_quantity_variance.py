@@ -1,6 +1,6 @@
 # OpenConstructionERP - DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Unit tests for the pure quantity-variance engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure quantity-variance engine.
 
 Exercise app.modules.progress.quantity_variance directly with Decimal inputs -
 no database, FastAPI or ORM - covering the empty report, the zero design-qty

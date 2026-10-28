@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The BOQ editor's GAEB route imports the file instead of skipping all of it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The BOQ editor's GAEB route imports the file instead of skipping all of it.
 
 ``POST /boqs/{id}/import/gaeb/`` used to run an inline walker whose text
 helpers read only an element's own ``.text``. GAEB DA XML 3.3 keeps an item's

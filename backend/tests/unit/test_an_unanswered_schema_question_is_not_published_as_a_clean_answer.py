@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``/api/health`` distinguishes "I did not find out" from "everything is fine".
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``/api/health`` distinguishes "I did not find out" from "everything is fine".
 
 Three questions on this payload were answered comfortably when they had not been
 answered at all, and they are one defect wearing three hats: an absent answer

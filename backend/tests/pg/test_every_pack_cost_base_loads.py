@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every cost base a pack points at loads, loads once, and fits the server floor.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every cost base a pack points at loads, loads once, and fits the server floor.
 
 A country pack names its cost bases as ``cwicr_regions`` slugs, and the one-click
 installer resolves each slug to a loader id and imports that base. The import

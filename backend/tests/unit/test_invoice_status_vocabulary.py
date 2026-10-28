@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An invoice status must exist in the lifecycle and be sayable on screen.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An invoice status must exist in the lifecycle and be sayable on screen.
 
 Two failures met on the same row of the same table, and neither is visible from
 one side alone.

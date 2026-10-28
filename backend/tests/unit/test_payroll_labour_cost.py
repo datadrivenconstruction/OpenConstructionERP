@@ -1,4 +1,4 @@
-"""Unit tests - payroll labour-cost math, aggregation, FX, and idempotency.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - payroll labour-cost math, aggregation, FX, and idempotency.
 
 Scope (Wave 4 lane 2):
 

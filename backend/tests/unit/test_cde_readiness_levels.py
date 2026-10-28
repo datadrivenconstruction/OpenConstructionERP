@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the CDE readiness-level ranking helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the CDE readiness-level ranking helpers.
 
 These back the go-live gate: a project may only open its CDE to the whole team
 once its readiness level meets a configured minimum. The ranking must be total

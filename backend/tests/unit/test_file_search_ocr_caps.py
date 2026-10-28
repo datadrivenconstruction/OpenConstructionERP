@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""OOM guards for the file_search OCR rasteriser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OOM guards for the file_search OCR rasteriser.
 
 ``_extract_ocr_text`` renders each PDF page to a pixmap before OCR. ``get_pixmap``
 has no size ceiling, so a large-format sheet (an A0 drawing at 150 DPI is ~35 MP)

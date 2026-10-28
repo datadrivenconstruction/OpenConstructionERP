@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic unit tests for Gap E retainage withholding maths + FX helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic unit tests for Gap E retainage withholding maths + FX helpers.
 
 These tests touch no database. They pin the exact ``Decimal`` arithmetic that
 splits a certified gross into (cash paid, retainage withheld), and the FX

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The quality concept's rules against PostgreSQL, through the service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The quality concept's rules against PostgreSQL, through the service.
 
 Four walks, each over one project: the proof plan and its evidence, a stage
 released by its hold gate, an acceptance with reservations and its effects,

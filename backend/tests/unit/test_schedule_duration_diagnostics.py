@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Q15 diagnostics: current demo bills, without installing demos or starting ASGI.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Q15 diagnostics: current demo bills, without installing demos or starting ASGI.
 
 Only the Project/BOQ/Position/Schedule projection is seeded, by the same helpers
 as install_demo_project. Each case lives in an outer PostgreSQL transaction

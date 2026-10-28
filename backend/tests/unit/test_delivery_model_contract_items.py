@@ -1,4 +1,4 @@
-"""Contract-side items of module 2: rules, catalogue kinds, request schemas."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contract-side items of module 2: rules, catalogue kinds, request schemas."""
 
 from __future__ import annotations
 

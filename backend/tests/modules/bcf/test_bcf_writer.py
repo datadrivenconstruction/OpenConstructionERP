@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Tests for :mod:`app.modules.bcf.writer` — the BCF 3.0 zip builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for :mod:`app.modules.bcf.writer` — the BCF 3.0 zip builder.
 
 Coverage matrix
 ---------------

@@ -1,4 +1,4 @@
-"""End-to-end SSE rendering regression for GitHub issue #138 / task #249.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end SSE rendering regression for GitHub issue #138 / task #249.
 
 Issue #138 — "Chat IA no responde"
 ==================================

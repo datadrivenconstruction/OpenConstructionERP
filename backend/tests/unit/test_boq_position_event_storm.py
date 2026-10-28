@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bill written row by row must not open one database session per row.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill written row by row must not open one database session per row.
 
 Every importer that keeps the per-row loop (GAEB, Excel, the smart import)
 calls ``add_position`` once per row inside one request, and each call defers a

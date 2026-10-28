@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Variance answers how much of the budget is still free.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Variance answers how much of the budget is still free.
 
 The defect these tests hold is not arithmetic that went wrong once. It is a
 rule that was written separately at each caller, so correcting one of them left

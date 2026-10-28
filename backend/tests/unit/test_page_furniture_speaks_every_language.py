@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The generic page furniture in every language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The generic page furniture in every language.
 
 ``pdf_footer`` exists in every locale file with the placeholders English has,
 and the page number, the stamp and the generated date reach the page in every

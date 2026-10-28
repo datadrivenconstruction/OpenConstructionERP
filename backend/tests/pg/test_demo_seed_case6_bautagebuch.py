@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seeded German Bautagebuch must read as a document, not as filler.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seeded German Bautagebuch must read as a document, not as filler.
 
 The showcase register is filmed as evidence that holds up in a dispute, so
 the properties gated here are the ones a Bauleiter checks first: the days

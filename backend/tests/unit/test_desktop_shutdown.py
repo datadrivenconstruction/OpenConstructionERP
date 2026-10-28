@@ -1,4 +1,4 @@
-"""The desktop launcher's clean-stop endpoint, and the guards that refuse it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The desktop launcher's clean-stop endpoint, and the guards that refuse it.
 
     POST /api/system/desktop-shutdown
 

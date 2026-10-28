@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The standing e-invoice configuration, stored and read back as a document sees it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The standing e-invoice configuration, stored and read back as a document sees it.
 
 The unit tests cover the merge and the validation on their own. What only a real
 database can show is the part in between: that a configuration written through

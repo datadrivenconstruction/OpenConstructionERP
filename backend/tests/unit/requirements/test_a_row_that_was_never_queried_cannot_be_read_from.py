@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Creating a requirement has to leave something a response can be built from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Creating a requirement has to leave something a response can be built from.
 
 Both write routes in this module answered with a server error. The cause was
 not in either route: ``create`` and ``bulk_create`` add a row and flush it, and

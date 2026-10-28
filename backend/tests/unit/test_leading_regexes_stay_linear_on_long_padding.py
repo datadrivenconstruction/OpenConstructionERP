@@ -1,4 +1,4 @@
-"""Regexes fed with request or document text stay linear on long whitespace runs."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regexes fed with request or document text stay linear on long whitespace runs."""
 
 from __future__ import annotations
 

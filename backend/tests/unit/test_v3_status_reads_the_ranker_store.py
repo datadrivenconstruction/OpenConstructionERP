@@ -1,4 +1,4 @@
-"""``/vector/v3-status/`` answers about the store the ranker actually opens.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``/vector/v3-status/`` answers about the store the ranker actually opens.
 
 The endpoint assembled its answer from two different servers. The collection
 NAME came from ``country_to_collection``, which is CWICR naming, but

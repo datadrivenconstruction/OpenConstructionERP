@@ -1,4 +1,4 @@
-"""A CWICR parquet built to break a cost import that reads the file in batches.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A CWICR parquet built to break a cost import that reads the file in batches.
 
 A work item (rate code) spans several parquet rows, and the import builds one
 cost row per item from all of them: the first non-empty value of each column,

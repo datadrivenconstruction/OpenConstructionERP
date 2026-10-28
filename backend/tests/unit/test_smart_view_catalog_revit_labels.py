@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Smart View property catalog shows Revit's own property names.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Smart View property catalog shows Revit's own property names.
 
 Property keys are stored lowercased ("phase created"); the header text the
 converter wrote is kept on the model as ``column_labels``. Property search used

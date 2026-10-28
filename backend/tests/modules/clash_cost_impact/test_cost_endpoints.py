@@ -1,4 +1,4 @@
-"""HTTP integration tests for the clash cost-impact endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP integration tests for the clash cost-impact endpoints.
 
 Covers:
     * GET /clash/{id}/impact     — happy path, 401, 403, 404

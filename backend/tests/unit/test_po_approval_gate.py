@@ -1,4 +1,4 @@
-"""PO approval gate (TOP-30 #10).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PO approval gate (TOP-30 #10).
 
 A purchase order is committed money, so it must be approved before it can be
 issued to a vendor. Approval (draft -> approved) is what publishes

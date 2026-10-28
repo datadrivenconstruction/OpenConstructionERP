@@ -1,4 +1,4 @@
-"""Backend ignore rules must live where the wheel build actually reads them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Backend ignore rules must live where the wheel build actually reads them.
 
 Written against a leak that shipped. A clean-room build produced a wheel
 carrying ``app/scripts/demo_seed_issues.md``, an internal defect log with

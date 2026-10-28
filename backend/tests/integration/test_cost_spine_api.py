@@ -1,4 +1,4 @@
-"""Cost Spine API integration suite (v6.4 keystone).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Spine API integration suite (v6.4 keystone).
 
 Boots the real FastAPI app against the conftest-provisioned PostgreSQL cluster
 and drives the full /api/v1/costmodel/.../spine/... surface end to end.

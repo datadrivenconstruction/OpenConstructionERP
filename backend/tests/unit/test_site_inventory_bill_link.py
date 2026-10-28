@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for the site-inventory link to the priced bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the site-inventory link to the priced bill.
 
 The stock ledger answers two questions an inventory is kept for: how much of
 what was bought is still to arrive, and what the material standing on site

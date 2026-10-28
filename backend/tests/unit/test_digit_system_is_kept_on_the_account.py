@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The digit shapes a reader chose survive a sign-in on another device.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The digit shapes a reader chose survive a sign-in on another device.
 
 The choice is kept in the account's metadata JSON rather than a column, so it
 needed no migration; these tests pin that it is written there without

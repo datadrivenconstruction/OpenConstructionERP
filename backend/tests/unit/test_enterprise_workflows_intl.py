@@ -1,4 +1,4 @@
-"""Unit tests for the enterprise-workflows international reporting helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the enterprise-workflows international reporting helpers.
 
 These tests are pure and DB-free: they exercise ``app.modules.
 enterprise_workflows.intl`` only, which has no database, framework or I/O

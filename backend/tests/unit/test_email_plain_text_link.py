@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The plain-text alternative of an outgoing mail must carry its link targets.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The plain-text alternative of an outgoing mail must carry its link targets.
 
 Every mail is authored as HTML and the ``text/plain`` part of the
 ``multipart/alternative`` body is derived from it.  When that derivation

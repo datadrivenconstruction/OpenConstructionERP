@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Procurement concept ids are bound to their project and frameworks to their company.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Procurement concept ids are bound to their project and frameworks to their company.
 
 An id from project B used under project A, or a framework id used by another
 company, answers 404 and changes nothing.

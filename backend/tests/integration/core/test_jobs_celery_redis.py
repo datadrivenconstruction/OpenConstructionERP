@@ -1,4 +1,4 @@
-"""Integration: Celery happy-path with eager mode (RFC 34 §4 W0.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: Celery happy-path with eager mode (RFC 34 §4 W0.1).
 
 Why eager mode and not testcontainers Redis?
     Real testcontainers Redis adds a 3-5 s container spin-up per test

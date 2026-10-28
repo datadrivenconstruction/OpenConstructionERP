@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the §4.1.5 ``exact_code`` short-circuit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the §4.1.5 ``exact_code`` short-circuit.
 
 When the upstream extractor (today: BoQ adapter, tomorrow: any ingestor
 that knows the rate verbatim) populates ``attributes["exact_code"]``,

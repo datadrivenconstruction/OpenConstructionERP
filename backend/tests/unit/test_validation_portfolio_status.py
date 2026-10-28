@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-project validation status (``GET /validation/portfolio-status/``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-project validation status (``GET /validation/portfolio-status/``).
 
 What has to hold for a head of estimating to trust the card:
 

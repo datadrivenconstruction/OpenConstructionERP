@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""International-robustness tests for the change-request clarifier (py3.11 pure).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠International-robustness tests for the change-request clarifier (py3.11 pure).
 
 Covers the widened, currency-agnostic cost signal (so a note written anywhere in
 the world is read the same way, not only one priced in euros / dollars / pounds)

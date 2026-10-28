@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - IDOR / tenant scoping for the vision plan-read endpoints (#194).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - IDOR / tenant scoping for the vision plan-read endpoints (#194).
 
 A stranger must not be able to poll a run, list its proposals, or accept them
 on a project they cannot access. Every plan-read endpoint runs

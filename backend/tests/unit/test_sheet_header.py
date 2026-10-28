@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The shared header-row locator the spreadsheet importers use.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The shared header-row locator the spreadsheet importers use.
 
 Pure: rows are tuples, the matcher is a small alias table, no workbook needed.
 """

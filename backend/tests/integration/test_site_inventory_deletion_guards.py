@@ -1,4 +1,4 @@
-"""Site-inventory deletion guards: the ledger refuses to be cascaded away.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-inventory deletion guards: the ledger refuses to be cascaded away.
 
 Before these verbs existed the module had no delete route at all, so a stock item
 or a storage location entered by mistake stayed on the register for good. Adding

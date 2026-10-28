@@ -1,4 +1,4 @@
-"""Scheduling an inspection or a meeting tells the people it was scheduled for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Scheduling an inspection or a meeting tells the people it was scheduled for.
 
 ``_notify_inspection_due`` and ``_notify_meeting_scheduled`` in
 ``app.core.event_handlers`` were subscribed to ``inspection.scheduled`` and

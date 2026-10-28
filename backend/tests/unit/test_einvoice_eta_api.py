@@ -1,4 +1,4 @@
-"""The ETA client and the clearance adapter, against a fake ETA.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ETA client and the clearance adapter, against a fake ETA.
 
 Nothing here reaches ETA. :class:`httpx.MockTransport` answers with bodies
 shaped like the examples on the SDK pages (read 2026-10-19):

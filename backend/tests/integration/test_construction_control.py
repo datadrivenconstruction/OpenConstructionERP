@@ -1,4 +1,4 @@
-"""Construction-control (Pillar 1) integration + IDOR/tenant-isolation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control (Pillar 1) integration + IDOR/tenant-isolation tests.
 
 Covers the universal QA/QC core end to end:
 

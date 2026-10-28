@@ -1,4 +1,4 @@
-"""Database-free unit tests for the international cost_match matcher.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the international cost_match matcher.
 
 Covers accent folding, multilingual synonym matching, metric/imperial unit
 normalisation, the explainable confidence score, and the edge-case guards

@@ -1,4 +1,4 @@
-"""Tests for the printable single-RFI PDF.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the printable single-RFI PDF.
 
 Before the export existed, the only way to put one RFI on paper was the
 browser's print command on the detail page, which printed three A4 sheets for

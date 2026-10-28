@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the runtime module root.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the runtime module root.
 
 The claim under test is not "a string was appended to a list". It is "a module
 written into the instance's data directory can be imported as

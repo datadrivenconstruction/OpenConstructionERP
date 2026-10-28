@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One Chinese fee name, one markup category, in every file that states one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One Chinese fee name, one markup category, in every file that states one.
 
 建标[2013]44号 describes a construction price along two axes that are
 alternatives rather than layers. By cost element it is labour, material, plant,

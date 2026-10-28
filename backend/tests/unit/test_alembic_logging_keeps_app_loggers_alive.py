@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Running a migration must not silence the application's loggers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Running a migration must not silence the application's loggers.
 
 ``alembic/env.py`` configures logging from ``alembic.ini`` on every migration
 run. ``logging.config.fileConfig`` defaults ``disable_existing_loggers`` to

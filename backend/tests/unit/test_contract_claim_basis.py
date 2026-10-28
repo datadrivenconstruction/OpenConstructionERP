@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A claim bills percent to date less what the earlier claims billed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A claim bills percent to date less what the earlier claims billed.
 
 The defect this holds shut: a line's percent complete is a figure TO DATE, and
 the generators stored ``line value × percent`` as the value for the period. A

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The supplier card says whether the supplier is still qualified to buy from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The supplier card says whether the supplier is still qualified to buy from.
 
 Performance alone (on time, in full) does not tell a buyer the supplier's
 prequalification ran out last month. The card now carries the contact's

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate branches against the database: fork, tree, compare, cherry-pick, merge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate branches against the database: fork, tree, compare, cherry-pick, merge.
 
 The branch is an ordinary bill built by ``duplicate_boq``; what is pinned here
 is what the branch layer adds on top:

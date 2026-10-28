@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A row exempted from a constraint's validation scan is not exempt from anything else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A row exempted from a constraint's validation scan is not exempt from anything else.
 
 The boot heal adds every CHECK and FOREIGN KEY it restores as ``NOT VALID``,
 because that is the only way onto a table that already holds rows: PostgreSQL

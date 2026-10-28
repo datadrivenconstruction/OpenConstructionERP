@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The printed RFI and the printed RFI log name things; the rows only hold ids.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The printed RFI and the printed RFI log name things; the rows only hold ids.
 
 An RFI stores the people it names, the drawings it links and the variation
 raised from it as ids. Both printable outputs resolve those ids through SQL:

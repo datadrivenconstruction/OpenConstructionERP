@@ -1,4 +1,4 @@
-"""Unit tests for :class:`TaskVectorAdapter`."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`TaskVectorAdapter`."""
 
 from __future__ import annotations
 

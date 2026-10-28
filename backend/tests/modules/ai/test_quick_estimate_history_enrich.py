@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Quick-estimate deepening: server-side history + enriched BOQ creation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Quick-estimate deepening: server-side history + enriched BOQ creation.
 
 Covers the two highest-value depth additions for the quick-estimate module:
 

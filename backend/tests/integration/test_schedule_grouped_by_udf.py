@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Group the server-side activity grid by a user-defined field (T2.3).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Group the server-side activity grid by a user-defined field (T2.3).
 
 ``resolve_grouped_layout`` used to refuse a UDF group key outright. This suite
 drives the real grouped endpoint end to end - register, login, a project, a

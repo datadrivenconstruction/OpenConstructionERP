@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""The E-Rechnung settings screen is filled on the install whose invoice passes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The E-Rechnung settings screen is filled on the install whose invoice passes.
 
 The German showcase preflight found the two halves disagreeing: the seeded
 invoice exports a green XRechnung because it carries the seller in its own

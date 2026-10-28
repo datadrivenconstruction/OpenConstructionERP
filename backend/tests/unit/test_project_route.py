@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure decision-tree classification and label localization for project_route.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure decision-tree classification and label localization for project_route.
 
 Pins the jurisdiction-neutral route maths: each work type resolves to the
 expected generic route, the more-specific criteria rules win over the catch-all,

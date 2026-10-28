@@ -1,4 +1,4 @@
-"""PG: the cost breakdown's Grand Total is the grid's Grand Total, to the cent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the cost breakdown's Grand Total is the grid's Grand Total, to the cent.
 
 The toolbar's Grand Total card reads ``get_cost_breakdown``. The grid, the
 markup panel and the exports read ``get_boq_structured``. The breakdown used to

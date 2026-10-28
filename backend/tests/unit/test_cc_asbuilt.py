@@ -1,4 +1,4 @@
-"""Construction-control Pillar 3 (as-built) schema + pure-logic tests (no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 3 (as-built) schema + pure-logic tests (no DB).
 
 Pins the discriminators that keep the as-built schemas honest (capture method, accuracy
 class, source kind, the update-time status grammar), the deterministic tolerance

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Recalculating the critical path keeps what else an activity's metadata holds.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Recalculating the critical path keeps what else an activity's metadata holds.
 
 The CPM write merges its figures into ``metadata_``, but it read the existing
 metadata from a snapshot that never carried it, so every recalculation left

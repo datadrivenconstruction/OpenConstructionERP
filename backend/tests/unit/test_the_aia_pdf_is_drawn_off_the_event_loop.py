@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The AIA G702/G703 PDF is drawn in a worker thread, not on the event loop.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The AIA G702/G703 PDF is drawn in a worker thread, not on the event loop.
 
 ReportLab lays the form out synchronously. Called straight from the async
 route, a long continuation sheet held the event loop for as long as it took

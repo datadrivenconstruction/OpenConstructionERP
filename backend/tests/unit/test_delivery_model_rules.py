@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure rules of the delivery model (SPEC section 4) and its lifecycles.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure rules of the delivery model (SPEC section 4) and its lifecycles.
 
 Each rule has the case that passes and the case that would pass only if the
 rule were missing. Forms come from the shipped neutral catalogue so the rules

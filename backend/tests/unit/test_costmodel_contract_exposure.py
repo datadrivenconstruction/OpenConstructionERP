@@ -1,4 +1,4 @@
-"""Unit tests for the contract-exposure helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the contract-exposure helpers.
 
 These pin the behaviour of :mod:`app.modules.costmodel.contract_exposure`, a
 pure, database-free layer that turns budget-vs-committed figures into a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every contact the demo seeds must be a contact the API would accept.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every contact the demo seeds must be a contact the API would accept.
 
 The seeder builds ``Contact`` rows through the ORM, so ``contact_type`` never
 meets ``ContactCreate`` on the way in. It wrote "contractor" on the generated

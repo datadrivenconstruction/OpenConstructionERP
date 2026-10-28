@@ -1,4 +1,4 @@
-"""Separate PostgreSQL transactions must not overwrite edits or deliver a rate twice."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Separate PostgreSQL transactions must not overwrite edits or deliver a rate twice."""
 
 from __future__ import annotations
 

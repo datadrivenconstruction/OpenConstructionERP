@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""No route is answered in its place by a route declared before it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No route is answered in its place by a route declared before it.
 
 ``GET /finance/{invoice_id}`` sat before the inbox router's ``GET /finance/inbox``
 and took every inbox request (see ``tests/_route_shadowing.py``). Each route was

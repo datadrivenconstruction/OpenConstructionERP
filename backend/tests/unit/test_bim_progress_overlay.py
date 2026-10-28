@@ -1,5 +1,5 @@
 # OpenConstructionERP — DataDrivenConstruction (DDC)
-"""Unit tests for the BIM "By progress" overlay folding logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BIM "By progress" overlay folding logic.
 
 Lane #28 adds a model-based progress overlay to the BIM 3D viewer: each
 element is coloured by the latest ``percent_complete`` of its linked BOQ

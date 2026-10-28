@@ -1,4 +1,4 @@
-"""France classifies to DPGF, and UNTEC stays readable for the rows that carry it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠France classifies to DPGF, and UNTEC stays readable for the rows that carry it.
 
 Until 2026-10 the registry mapped FR to ``untec``, a standard with no rules in
 the engine, while every French line the product ships is keyed

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The bill position read back with everything recorded against it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bill position read back with everything recorded against it.
 
 Two kinds of assertion here and they check different things. The pure ones
 drive ``assemble_rows`` with dictionaries and prove the join and the arithmetic

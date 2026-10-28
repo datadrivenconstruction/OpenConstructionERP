@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the takt / line-of-balance geometry engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the takt / line-of-balance geometry engine.
 
 Pure-Python, no DB — ``compute_line_of_balance_geometry`` is fully
 decoupled from SQLAlchemy and FastAPI so the diagonal-bar math is

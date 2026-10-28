@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End-to-end behaviour of the saved-views API against a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end behaviour of the saved-views API against a real database.
 
 Three things only show up once rows and identities exist:
 

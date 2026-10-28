@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the FX repository (PostgreSQL).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the FX repository (PostgreSQL).
 
 Covers the storage rules the rest of the module leans on: point-in-time
 resolution, idempotent re-ingest, the lock that makes a pin worth having, and

@@ -1,4 +1,4 @@
-"""Unit tests for :class:`FinanceService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`FinanceService`.
 
 Scope:
     Baseline smoke coverage for invoicing, payments, budgets, and the

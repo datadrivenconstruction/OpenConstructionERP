@@ -1,4 +1,4 @@
-"""The CLI's data directory must obey the same overrides as everything else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The CLI's data directory must obey the same overrides as everything else.
 
 ``OE_DATA_DIR``, then ``DATA_DIR``, then ``OE_CLI_DATA_DIR`` is the order the
 uploads root, the JWT secret, the demo seed and the partner pack state all

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the BI Dashboards cross-filter pipeline (Wave 4 / T11).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BI Dashboards cross-filter pipeline (Wave 4 / T11).
 
 These tests stub the KPI registry so we can observe what arguments
 ``_kpis.compute`` was called with — proving that:

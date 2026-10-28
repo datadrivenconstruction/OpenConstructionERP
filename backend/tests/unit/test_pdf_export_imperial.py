@@ -1,4 +1,4 @@
-"""Imperial-unit reconciliation in the priced BOQ PDF (GitHub #285).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Imperial-unit reconciliation in the priced BOQ PDF (GitHub #285).
 
 When ``measurement_system="imperial"`` the printed quantity column is
 converted (m -> ft, m2 -> sq ft ...). Before this fix the per-unit RATE

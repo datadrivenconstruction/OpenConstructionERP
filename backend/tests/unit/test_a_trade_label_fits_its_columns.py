@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A trade label the demo seeder derives has to fit every column it is written to.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A trade label the demo seeder derives has to fit every column it is written to.
 
 The seeder turns each bill section title into a short trade label and writes it
 into the punch list's ``trade``, the finance budget's ``category`` and the other

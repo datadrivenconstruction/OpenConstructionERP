@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Regression tests pinning the v3 universality sweep behaviour.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests pinning the v3 universality sweep behaviour.
 
 Each finding from the 2026-05-09 audit gets one test below — the goal
 is to catch any future regression that re-introduces the hardcoded /

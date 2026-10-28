@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Linking an NCR to a change order with the change orders module off is a 400, not a 500.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Linking an NCR to a change order with the change orders module off is a 400, not a 500.
 
 ``_check_change_order`` imported the change orders model with no guard, so on
 an install where that module is disabled or not installed a write naming a

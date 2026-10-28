@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo estate must not stamp a progress claim at a time that has not come.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo estate must not stamp a progress claim at a time that has not come.
 
 ``seed_contracts_demo`` limits a claim to ``today`` and then lays a business
 hour on top of it, so an installation seeded at 07:30 UTC wrote claims

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Statutory clocks of the permits module (SPEC rules 4, 5, 7), table driven over the shipped catalogues."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statutory clocks of the permits module (SPEC rules 4, 5, 7), table driven over the shipped catalogues."""
 
 from __future__ import annotations
 

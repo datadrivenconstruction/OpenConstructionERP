@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The measurement routes total a sheet with the line rounding stored on it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The measurement routes total a sheet with the line rounding stored on it.
 
 A sheet saved with ``row_decimals`` (``metadata.measurement.row_decimals``)
 rounds every line before adding them; the read route and the compute route

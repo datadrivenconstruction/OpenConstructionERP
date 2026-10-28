@@ -1,4 +1,4 @@
-"""Remediation-backlog regression tests — projects / dashboard / catalog.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Remediation-backlog regression tests — projects / dashboard / catalog.
 
 Covers the triaged backlog IDs that were still real bugs at v3.1.0:
 

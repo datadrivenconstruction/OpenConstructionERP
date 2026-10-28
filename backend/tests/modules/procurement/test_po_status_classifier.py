@@ -1,4 +1,4 @@
-"""Tests for ProcurementService._classify_line_match.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for ProcurementService._classify_line_match.
 
 The frontend's per-row match badge and the per-line drilldown both rely
 on this single helper to collapse three quantities (ordered / received /

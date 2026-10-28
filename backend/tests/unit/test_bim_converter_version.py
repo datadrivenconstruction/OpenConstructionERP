@@ -1,4 +1,4 @@
-"""Unit tests for the BIM converter-version surfacing path.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BIM converter-version surfacing path.
 
 The BIM hub's ``_try_cad2data`` success path attaches the installed DDC
 converter's version + source onto its result dict so the frontend can render a

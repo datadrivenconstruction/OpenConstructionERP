@@ -1,4 +1,4 @@
-"""PG: the editor's cost breakdown and classification panels read the bill once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the editor's cost breakdown and classification panels read the bill once.
 
 Both panels open with the BOQ editor. The cost breakdown proved the bill exists
 with ``get_boq``, which loads every position and markup through the ``selectin``

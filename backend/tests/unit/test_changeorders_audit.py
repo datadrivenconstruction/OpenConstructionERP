@@ -1,4 +1,4 @@
-"""Deep-audit unit tests for the ``changeorders`` module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deep-audit unit tests for the ``changeorders`` module.
 
 These tests target the second-pass audit fixes:
 

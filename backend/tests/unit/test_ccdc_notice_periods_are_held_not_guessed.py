@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CCDC is recognised as a standard and carries its own sourced periods.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CCDC is recognised as a standard and carries its own sourced periods.
 
 Two shipped Canadian demo packs declare CCDC 2 (2020) as their contract form.
 The normaliser maps every CCDC variant to the CCDC family, which has real

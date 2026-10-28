@@ -1,4 +1,4 @@
-"""Regression tests for AI provider key leakage (BUG-AI-CRYPTO01).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for AI provider key leakage (BUG-AI-CRYPTO01).
 
 User-supplied OpenAI/Anthropic/etc API keys must never come back out of
 the platform in plaintext. The settings endpoint returns booleans

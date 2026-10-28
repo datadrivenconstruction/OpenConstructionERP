@@ -1,4 +1,4 @@
-"""Unit tests for :class:`BOQPositionAdapter`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`BOQPositionAdapter`.
 
 Covers ``to_text``, ``to_payload`` and ``project_id_of`` using plain
 duck-typed stubs — no database needed.  See

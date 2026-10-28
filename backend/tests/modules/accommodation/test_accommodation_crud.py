@@ -1,4 +1,4 @@
-"""CRUD + IDOR tests for the Accommodation module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRUD + IDOR tests for the Accommodation module.
 
 Verifies the Wave-5 IDOR pattern: a user from project A always sees 404
 for project B's rows — never 403 (no info leak).

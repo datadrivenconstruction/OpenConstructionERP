@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The doctor's PDF probe must import the way the upload path imports.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The doctor's PDF probe must import the way the upload path imports.
 
 The probe spawns ``sys.executable -c "import <mod>"`` so a broken native
 extension takes down a child instead of the diagnostic. That is right for a

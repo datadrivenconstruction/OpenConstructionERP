@@ -1,4 +1,4 @@
-"""The cost-base catalogue path must reach its own handler, not the item-by-id route.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost-base catalogue path must reach its own handler, not the item-by-id route.
 
 ``GET /api/v1/costs/base-catalog`` used to answer ``400 {"error": "Invalid request"}``.
 Nothing about the request was bad. Starlette matches routes in registration order, and

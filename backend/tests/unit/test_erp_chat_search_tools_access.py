@@ -1,4 +1,4 @@
-"""Access-control tests for the erp_chat semantic-search tools (item 16).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Access-control tests for the erp_chat semantic-search tools (item 16).
 
 The per-module search tools (``search_rfis`` / ``search_submittals`` /
 ``search_correspondence`` and their siblings) and ``search_anything`` must

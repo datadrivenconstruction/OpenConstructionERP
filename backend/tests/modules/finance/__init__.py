@@ -1,1 +1,1 @@
-"""Finance module integration tests."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance module integration tests."""

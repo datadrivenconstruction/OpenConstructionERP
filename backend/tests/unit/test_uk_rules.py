@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The UK cost-plan and statutory rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The UK cost-plan and statutory rules.
 
 Two rule sets, and the split between them is the point. ``nrm`` is a method of
 measurement and travels wherever the method is used, so an Australian project

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan-side rules of staffing against PostgreSQL: numbers, gate fields, warnings, evidence, the demo seed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan-side rules of staffing against PostgreSQL: numbers, gate fields, warnings, evidence, the demo seed.
 
 PostgreSQL is where these defects lived: a third decimal that the Numeric
 column rounds away, a NULL that only a NOT NULL constraint refuses, a gate

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Write flows of delivery_model, design_management, permits and transmittals over HTTP.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Write flows of delivery_model, design_management, permits and transmittals over HTTP.
 
 Each test creates NEW rows on a demo project of the eleven-areas-framework install, drives
 them through their lifecycle (create, update, transition, approve with a second user, return,

@@ -1,4 +1,4 @@
-"""Meetings IDOR regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Meetings IDOR regression suite.
 
 The ``/api/v1/meetings/`` router exposes endpoints keyed off
 ``meeting_id`` and ``project_id``. Most endpoints already gate access

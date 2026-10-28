@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An export that does not fit the paper must still be entirely on the paper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An export that does not fit the paper must still be entirely on the paper.
 
 Two generators built their tables without ``colWidths``, so reportlab sized the
 columns to their content and the table simply grew. It did not refuse and it did

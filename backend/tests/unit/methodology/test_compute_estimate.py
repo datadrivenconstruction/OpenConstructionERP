@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the compute-estimate math pipeline (pure parts).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the compute-estimate math pipeline (pure parts).
 
 ``MethodologyService.compute_estimate`` is a thin orchestration over three
 PURE steps: build the cascade spec from a methodology config, resolve the leaf

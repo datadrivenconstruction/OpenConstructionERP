@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Only an administrator may point the IATE import at a file on the server.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Only an administrator may point the IATE import at a file on the server.
 
 ``POST /translation/lookup-tables/download`` with ``local_tbx_path`` parses
 whatever path it is given on the server's own disk and writes the result into

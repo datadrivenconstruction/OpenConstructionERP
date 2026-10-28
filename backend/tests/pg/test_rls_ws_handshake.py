@@ -1,4 +1,4 @@
-"""Websocket handshake guard for the app-wide RLS dependency.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Websocket handshake guard for the app-wide RLS dependency.
 
 Regression cover for the defect that shipped in 12.3 through 12.6: both
 realtime sockets (live notifications and collaboration presence) answered every

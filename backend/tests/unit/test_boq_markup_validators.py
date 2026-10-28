@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the four markup-stack validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the four markup-stack validation rules.
 
 Each rule is exercised twice, on a stack that breaks it and on one that does
 not, because a rule that fires on everything and a rule that fires on nothing

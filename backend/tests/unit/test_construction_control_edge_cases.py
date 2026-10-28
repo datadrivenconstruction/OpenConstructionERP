@@ -1,4 +1,4 @@
-"""Construction-control edge-case guards (pure, no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control edge-case guards (pure, no DB).
 
 Covers the conservative validation added so a real user cannot save a self-contradictory
 record and so international behaviour stays consistent:

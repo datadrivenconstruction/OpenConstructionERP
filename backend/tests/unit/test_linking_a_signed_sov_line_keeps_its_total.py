@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Linking a schedule of values line to the bill leaves its signed total alone.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Linking a schedule of values line to the bill leaves its signed total alone.
 
 A signed line's total is the agreed figure and is not always quantity x rate:
 0.7 x 37 is 25.90, and 0.7 x 36.9963 is 25.8974. ``update_line`` rewrote

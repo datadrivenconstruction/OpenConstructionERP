@@ -1,4 +1,4 @@
-"""Progress-update tests for the W0.1 job runner (RFC 34 §4 W0.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Progress-update tests for the W0.1 job runner (RFC 34 §4 W0.1).
 
 Contract:
     update_progress(job_run_id, percent, message) MUST atomically update

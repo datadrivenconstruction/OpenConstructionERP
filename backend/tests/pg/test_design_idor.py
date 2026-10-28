@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read and write design data, over HTTP against PostgreSQL (rule 24)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read and write design data, over HTTP against PostgreSQL (rule 24)."""
 
 from __future__ import annotations
 

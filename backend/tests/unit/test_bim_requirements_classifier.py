@@ -1,4 +1,4 @@
-"""Unit tests for the format classifier."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the format classifier."""
 
 import tempfile
 from pathlib import Path

@@ -1,4 +1,4 @@
-"""Fail if the weak-JWT-secret denylist or its length threshold is restated.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail if the weak-JWT-secret denylist or its length threshold is restated.
 
 Why this exists. The denylist of known-weak JWT secrets and the 32-unit
 minimum length lived in two files at once, ``app/config.py`` and

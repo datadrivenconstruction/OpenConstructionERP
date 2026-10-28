@@ -1,4 +1,4 @@
-"""Tests for the EAC constraint evaluator."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the EAC constraint evaluator."""
 
 import pytest
 

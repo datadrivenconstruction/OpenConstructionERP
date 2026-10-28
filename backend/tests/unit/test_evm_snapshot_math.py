@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the pure EVM-snapshot derivation math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure EVM-snapshot derivation math.
 
 These exercise :mod:`app.modules.schedule.evm_snapshot_math` directly with plain
 ``Decimal`` / ``int`` / ``float`` / ``str`` inputs - no database, FastAPI or ORM -

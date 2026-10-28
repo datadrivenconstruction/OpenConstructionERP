@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Delete and restore every trash kind, through the endpoints, with real rows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Delete and restore every trash kind, through the endpoints, with real rows.
 
 The recycle bin is polymorphic: one table holds a JSON snapshot of a row
 belonging to any of eight kinds. Every existing test drove one half of that

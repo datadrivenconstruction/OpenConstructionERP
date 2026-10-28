@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A schedule milestone falls due on one sales contract, never on all of them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A schedule milestone falls due on one sales contract, never on all of them.
 
 Milestone names (``foundation_complete``) are free text that every tenant
 uses. The handler used to fall back to matching on the name alone when the

@@ -1,4 +1,4 @@
-"""Generating a design option matches as the user who asked for it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Generating a design option matches as the user who asked for it.
 
 An imported price list is a user-owned catalogue, and so is its Match index.
 The generate flow hands its matching to the element-matching service; the

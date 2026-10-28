@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A priced GAEB X84 bid return lands in the bid comparison, checked line by line.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A priced GAEB X84 bid return lands in the bid comparison, checked line by line.
 
 Run:
     cd backend

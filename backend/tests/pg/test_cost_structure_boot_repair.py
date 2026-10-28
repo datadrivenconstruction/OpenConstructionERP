@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An upgraded install that never runs alembic still gets its flat cost structure nested.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An upgraded install that never runs alembic still gets its flat cost structure nested.
 
 The boot heal adds ``title``, ``level``, ``own_amount`` and ``is_leaf_postable``
 empty and stamps head, so revision v92's backfill never runs there. The boot

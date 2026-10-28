@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Formal ground-truth correctness gate for the clash-detection engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Formal ground-truth correctness gate for the clash-detection engine.
 
 DB-free, GLB-free. Builds :class:`ElementGeom` objects (and bare
 triangle soups) by hand, drives the *real* engine

@@ -1,4 +1,4 @@
-"""Epic I — registry + protocol smoke tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I — registry + protocol smoke tests.
 
 These tests are deliberately stupid-simple: they pin the *contract*
 that every importer must satisfy so the dispatcher loop can rely on

@@ -1,4 +1,4 @@
-"""Per-element BIM rules added to deepen the model-review check set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-element BIM rules added to deepen the model-review check set.
 
 Covers, for each new rule, a happy path, the failing case it catches, and a
 sparse / missing-data case proving it never raises. Mirrors the element shape

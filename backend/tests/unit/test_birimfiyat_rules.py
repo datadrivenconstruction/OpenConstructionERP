@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Turkish poz rules judge what a bill line carries, and nothing it does not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Turkish poz rules judge what a bill line carries, and nothing it does not.
 
 Six rules joined the two that read the poz number: the chapter the number
 starts with, the unit the line is measured in, one poz in one unit and at one

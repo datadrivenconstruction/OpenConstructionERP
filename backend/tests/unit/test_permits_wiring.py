@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Permits module wiring: router guards, approval kind, messages, model/migration parity, rule set."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permits module wiring: router guards, approval kind, messages, model/migration parity, rule set."""
 
 from __future__ import annotations
 

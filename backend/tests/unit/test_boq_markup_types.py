@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the banded and escalation markup types.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the banded and escalation markup types.
 
 Two shapes a markup stack could not express before:
 

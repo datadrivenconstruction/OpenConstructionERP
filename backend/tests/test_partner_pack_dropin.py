@@ -1,4 +1,4 @@
-"""Tests for the drop-in partner-pack feature.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the drop-in partner-pack feature.
 
 Covers the three new capabilities:
   * data-dir folder discovery (a ``manifest.json`` pack dropped in a folder),

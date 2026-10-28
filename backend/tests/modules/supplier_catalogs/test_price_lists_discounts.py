@@ -1,4 +1,4 @@
-"""Vendor price list import, contractor discounts, net prices on orders, item links.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Vendor price list import, contractor discounts, net prices on orders, item links.
 
 Covers:
     - discount resolution precedence (pure, no database)

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The payment certificate (hakediş) through its routes: who may, and what is printed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The payment certificate (hakediş) through its routes: who may, and what is printed.
 
 Two projects with two owners. The certificate of a claim on the first is read,
 edited, taxed and printed by its owner, in Turkish, in English and in both.

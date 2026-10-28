@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for the site-inventory pure ledger core.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the site-inventory pure ledger core.
 
 Every test constructs plain :class:`Movement` value objects and asserts against
 exact ``Decimal`` results. No database, no ORM, no FastAPI - the whole point of

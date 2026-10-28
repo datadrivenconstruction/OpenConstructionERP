@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""OOM guards for the point-cloud inline decode path.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OOM guards for the point-cloud inline decode path.
 
 Two front-door guards keep ``get_points`` from OOMing the 3 GB core:
 

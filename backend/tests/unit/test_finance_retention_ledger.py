@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic unit tests for the finance retention / withholding ledger.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic unit tests for the finance retention / withholding ledger.
 
 These tests touch no database and import nothing from SQLAlchemy or FastAPI.
 They pin the exact Decimal arithmetic that rolls stored invoice retention and

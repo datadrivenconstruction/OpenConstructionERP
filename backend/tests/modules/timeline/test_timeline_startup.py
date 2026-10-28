@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the running app loads at startup, not what the fixtures load.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the running app loads at startup, not what the fixtures load.
 
 The credentials module shipped with validation rules that ``on_startup`` never
 registered. Its conftest registered them by hand, so seventy-two tests ran

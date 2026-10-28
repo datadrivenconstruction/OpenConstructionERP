@@ -1,4 +1,4 @@
-"""Integration tests for paginated cost search + category tree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for paginated cost search + category tree.
 
 Covers (end-to-end through the FastAPI router):
     - Cursor flow: page 1 → next_cursor → page 2 → next_cursor=None at end.

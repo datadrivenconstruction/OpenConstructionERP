@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""EN 16931 rule engine tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EN 16931 rule engine tests.
 
 These assert on rule identifiers (``BR-61``), never on the prose of a message.
 A message is a translation-and-wording concern that changes; the rule it stands

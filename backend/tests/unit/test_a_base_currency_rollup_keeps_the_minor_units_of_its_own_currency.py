@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``_convert_to_base`` rounds an FX rollup to the base currency's own units.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``_convert_to_base`` rounds an FX rollup to the base currency's own units.
 
 The helper is handed ``base_currency`` and is the last step that sees it, then
 it quantised the converted total to a ``Decimal("0.01")`` literal for every

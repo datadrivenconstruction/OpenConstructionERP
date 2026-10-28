@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deep-audit regressions for the Contracts module (post-R5 sweep).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deep-audit regressions for the Contracts module (post-R5 sweep).
 
 R5 closed the obvious IDOR holes and the financial-terms lock. This
 suite pins down the remaining money-correctness and state-machine

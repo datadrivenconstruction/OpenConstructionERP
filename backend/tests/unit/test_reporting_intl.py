@@ -1,4 +1,4 @@
-"""Unit tests for the reporting international math + explainer helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the reporting international math + explainer helpers.
 
 Pure (stdlib only) - no app lifespan, no database, no clock. Exercises the
 Decimal-exact report total, ratio / percent guards, grouped breakdown,

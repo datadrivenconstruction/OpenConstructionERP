@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the procurement concept PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the procurement concept PostgreSQL tests.
 
 A world is a throwaway database with real users (a manager, an editor who owns
 the procurement area once a test names them, an editor who does not, an

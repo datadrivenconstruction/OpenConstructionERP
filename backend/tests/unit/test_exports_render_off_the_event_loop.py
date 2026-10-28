@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Heavy exports render in a worker thread, not on the event loop.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Heavy exports render in a worker thread, not on the event loop.
 
 One worker serves every user of an install, and an export rendered on its
 event loop answers nobody else until it is done. The BIM COBie and BOQ

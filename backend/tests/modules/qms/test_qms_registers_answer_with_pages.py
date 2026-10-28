@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The quality registers have to say how much of themselves they returned.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The quality registers have to say how much of themselves they returned.
 
 Every one of these routes capped its result and answered with a bare array,
 so a project past the cap was handed a full page with nothing to say it was

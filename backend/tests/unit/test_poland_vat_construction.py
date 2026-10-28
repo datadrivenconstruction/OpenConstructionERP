@@ -1,4 +1,4 @@
-"""Polish VAT rules for construction invoices: split payment, housing rate limits, reverse charge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Polish VAT rules for construction invoices: split payment, housing rate limits, reverse charge.
 
 Each case differs from its neighbour in exactly the input the rule turns on:
 the gross amount either side of PLN 15,000, the date either side of

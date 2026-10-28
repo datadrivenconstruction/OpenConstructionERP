@@ -1,4 +1,4 @@
-"""Tests for ``GET /api/v1/admin/permissions/matrix`` and friends.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for ``GET /api/v1/admin/permissions/matrix`` and friends.
 
 The endpoint snapshots the live ``PermissionRegistry`` for the admin
 UI. We exercise the pure builder directly (no ASGI) so the unit suite

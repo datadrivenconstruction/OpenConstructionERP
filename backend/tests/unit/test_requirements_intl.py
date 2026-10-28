@@ -1,4 +1,4 @@
-"""Database-free tests for requirements localized labels and coverage maths."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free tests for requirements localized labels and coverage maths."""
 
 import pytest
 

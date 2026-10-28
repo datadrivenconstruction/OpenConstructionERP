@@ -1,4 +1,4 @@
-"""T00 smoke tests for the dashboards / compliance_ai / cost_match modules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T00 smoke tests for the dashboards / compliance_ai / cost_match modules.
 
 These tests assert the *wiring* is correct — manifests load, message
 bundles round-trip en/de/ru, snapshot-storage helpers compose the

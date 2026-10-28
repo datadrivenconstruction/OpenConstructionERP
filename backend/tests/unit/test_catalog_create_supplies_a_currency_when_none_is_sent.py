@@ -1,4 +1,4 @@
-"""The catalogue must name a currency when the caller cannot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The catalogue must name a currency when the caller cannot.
 
 The BOQ editor saves a resource into the user's own catalogue. It used to
 rebuild the currency code from the display symbol, which recognised three

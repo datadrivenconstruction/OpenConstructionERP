@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the BI Dashboards module (Module 20, Wave 4)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BI Dashboards module (Module 20, Wave 4)."""
 
 from __future__ import annotations
 

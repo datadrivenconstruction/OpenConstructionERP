@@ -1,4 +1,4 @@
-"""Retention billed on a claim is announced as released when that claim is paid."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Retention billed on a claim is announced as released when that claim is paid."""
 
 from __future__ import annotations
 

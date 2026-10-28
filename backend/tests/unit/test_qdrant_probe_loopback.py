@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Qdrant health probe does not send a loopback request to a proxy.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Qdrant health probe does not send a loopback request to a proxy.
 
 ``urllib.request.urlopen`` uses the default opener, whose ``ProxyHandler`` is
 seeded from the environment. Its bypass check is ``no_proxy`` alone on POSIX,

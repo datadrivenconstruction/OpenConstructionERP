@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The permits guards (what a write refuses and what a ``can`` flag says) and the notice extraction parser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The permits guards (what a write refuses and what a ``can`` flag says) and the notice extraction parser.
 
 Both are pure: no database, no provider.
 """

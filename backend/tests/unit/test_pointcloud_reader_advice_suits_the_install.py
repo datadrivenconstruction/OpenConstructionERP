@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The E57 refusal must not tell a desktop user to run pip.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The E57 refusal must not tell a desktop user to run pip.
 
 This message is different in kind from the ones in ``doctor``. It is a response
 detail an ordinary user reads after opening a scan, not a line an operator finds

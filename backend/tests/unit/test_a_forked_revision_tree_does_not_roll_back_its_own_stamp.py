@@ -1,4 +1,4 @@
-"""A stamp that succeeded must not be undone by the call that reports it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A stamp that succeeded must not be undone by the call that reports it.
 
 ``stamp_head_if_unstamped`` writes a row per head and then names what it wrote.
 Naming it with ``ScriptDirectory.get_current_head`` was wrong for a tree with

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CRUD round-trip tests for EAC v2 ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRUD round-trip tests for EAC v2 ORM models.
 
 Runs against PostgreSQL: each test gets a session wrapped in an outer
 transaction that is rolled back on teardown, so the database starts empty

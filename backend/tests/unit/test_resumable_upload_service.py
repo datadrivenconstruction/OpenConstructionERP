@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the resumable-upload service lifecycle.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the resumable-upload service lifecycle.
 
 Runs without a DB: the repository and document service are stubbed and the
 chunk store is pointed at a pytest ``tmp_path`` via ``OE_CLI_DATA_DIR`` so

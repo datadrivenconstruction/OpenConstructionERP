@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure MSPDI (MS Project XML) exporter.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure MSPDI (MS Project XML) exporter.
 
 Runs anywhere - no DB, no app import. Builds an XML document and parses it
 back to assert the structure round-trips with the MSP-XML importer's

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment release against figures worked out by hand, to the cent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment release against figures worked out by hand, to the cent.
 
 Every amount below was computed on paper before the code ran; the comments
 show the arithmetic so a reader can redo it. All figures are invented.

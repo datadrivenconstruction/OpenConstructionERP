@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project's currency policy is reachable only by people who can reach the project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project's currency policy is reachable only by people who can reach the project.
 
 The four policy routes take the project id from the path and used to check the
 caller's role and nothing else, so a viewer of one project could read the

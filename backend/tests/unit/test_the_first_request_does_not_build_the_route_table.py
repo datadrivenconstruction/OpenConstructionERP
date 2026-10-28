@@ -1,4 +1,4 @@
-"""The route table is built during boot, not inside the first request.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The route table is built during boot, not inside the first request.
 
 FastAPI does not build a route's dependant tree, its response field or its
 operation id when the route is registered. It builds them the first time a

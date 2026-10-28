@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The button in a notification email opens the app, in the reader's language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The button in a notification email opens the app, in the reader's language.
 
 Producers write ``action_url`` as an in-app path (``/boq/{id}``,
 ``/rfi?id=...``), which is what the router in the bell needs. The email put

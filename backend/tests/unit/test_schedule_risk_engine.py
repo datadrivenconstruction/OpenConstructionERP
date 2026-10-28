@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the pure Monte Carlo schedule-risk engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure Monte Carlo schedule-risk engine.
 
 These exercise :mod:`app.modules.schedule_advanced.schedule_risk_engine`
 directly with plain :class:`~cpm.Activity` values - no database, FastAPI or

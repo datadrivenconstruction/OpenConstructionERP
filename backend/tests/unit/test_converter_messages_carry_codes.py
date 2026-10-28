@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Converter and CAD-upload refusals carry a stable code, and the facts agree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Converter and CAD-upload refusals carry a stable code, and the facts agree.
 
 Three things are pinned here:
 

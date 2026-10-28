@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DXF text decoding and unresolved external references.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DXF text decoding and unresolved external references.
 
 The DWG converter writes R2000 DXF with an ANSI code page, so every non-ASCII
 character in a layer name or a text arrives as ``\\U+XXXX`` (and East Asian

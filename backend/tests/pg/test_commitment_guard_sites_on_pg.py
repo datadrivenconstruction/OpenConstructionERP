@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The release guard at every guard point outside tendering (SPEC rule 3, INTEGRATION 7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The release guard at every guard point outside tendering (SPEC rule 3, INTEGRATION 7).
 
 One item is released at 40,000 EUR (tolerance 2%, ceiling 40,800). Each guard
 point then tries to bind 60,000 EUR on a document linked to that item, or, for

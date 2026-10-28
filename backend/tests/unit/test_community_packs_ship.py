@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The community packs have to be packaged, and then they have to be findable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The community packs have to be packaged, and then they have to be findable.
 
 Nineteen packs sat in the repository and no pip or desktop install had ever
 listed one. Two independent defects, either of which alone was enough:

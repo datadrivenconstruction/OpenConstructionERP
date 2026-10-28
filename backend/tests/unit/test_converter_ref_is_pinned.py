@@ -1,4 +1,4 @@
-"""The converter release is pinned by tag and by digest, and every copy agrees.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The converter release is pinned by tag and by digest, and every copy agrees.
 
 The installer downloads one package per format from a GitHub release and the
 desktop release workflow bakes the IFC package into the Windows installer. Two

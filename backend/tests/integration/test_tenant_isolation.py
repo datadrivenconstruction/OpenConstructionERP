@@ -1,4 +1,4 @@
-"""Multi-tenant isolation regression suite (Wave 3-C, Task #236).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Multi-tenant isolation regression suite (Wave 3-C, Task #236).
 
 The platform exposes per-tenant data via the ``tenant_id`` column on
 contacts and dashboards (snapshots), and per-owner scoping via the

@@ -1,4 +1,4 @@
-"""The lite SQL projection preserves the public row and pagination contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The lite SQL projection preserves the public row and pagination contracts."""
 
 import copy
 import inspect

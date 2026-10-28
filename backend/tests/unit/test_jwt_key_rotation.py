@@ -1,4 +1,4 @@
-"""JWT key ring: ``kid`` headers and rotation without forced logout."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠JWT key ring: ``kid`` headers and rotation without forced logout."""
 
 from __future__ import annotations
 

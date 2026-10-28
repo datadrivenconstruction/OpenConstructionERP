@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure CDE readiness engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure CDE readiness engine.
 
 No database, no app fixtures - the engine is stdlib-only, so these run on the
 local Python 3.11 runner exactly like the other pure-engine tests.

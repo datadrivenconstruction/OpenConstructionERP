@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Correctness properties and runtime bounds of the 2D guillotine optimiser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Correctness properties and runtime bounds of the 2D guillotine optimiser.
 
 Every layout must place each piece exactly once, keep pieces inside the
 trimmed sheet, keep a saw kerf between neighbours, never turn a grain-locked

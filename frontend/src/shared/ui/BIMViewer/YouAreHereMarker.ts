@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 /**
  * A "you are here" pin for the model: a short pole with a dot on top plus a
  * flat ground ring whose radius reflects the GPS accuracy. Drawn on top of the

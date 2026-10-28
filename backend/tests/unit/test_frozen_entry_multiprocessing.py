@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The frozen sidecar has to answer the command lines multiprocessing sends it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The frozen sidecar has to answer the command lines multiprocessing sends it.
 
 Why this file exists
 --------------------

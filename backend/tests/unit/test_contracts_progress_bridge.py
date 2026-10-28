@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic unit tests for the Gap I progress-claim bridge helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic unit tests for the Gap I progress-claim bridge helpers.
 
 Covers the side-effect-free helpers that back the bridge service:
 

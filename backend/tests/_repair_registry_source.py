@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The set of data repairs, read from source instead of from the registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The set of data repairs, read from source instead of from the registry.
 
 Why a second reading exists at all
 ----------------------------------

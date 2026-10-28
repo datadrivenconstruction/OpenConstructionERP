@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project-Files -> takeoff bridge: idempotent find-or-create.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project-Files -> takeoff bridge: idempotent find-or-create.
 
 DB-free tests for ``TakeoffService.get_or_create_takeoff_from_source``. Opening
 a Project-Files PDF in takeoff must create exactly one real takeoff document for

@@ -1,4 +1,4 @@
-"""Every shipped calendar is compared against the engine that computes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every shipped calendar is compared against the engine that computes it.
 
 We ship holiday dates twice. ``app/core/calendar.py`` computes them, and
 ``i18n_foundation/seed_data/work_calendars.json`` states them as data for 38

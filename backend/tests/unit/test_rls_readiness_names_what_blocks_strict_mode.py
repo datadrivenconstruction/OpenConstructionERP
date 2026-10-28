@@ -1,4 +1,4 @@
-"""The RLS readiness report names what blocks a strict tenant policy.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The RLS readiness report names what blocks a strict tenant policy.
 
 Row-level security stays off. Before anybody sets ``OE_RLS_ENFORCE=1`` the
 administrator needs to know what that would do to the data as it is, and the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""VAT regimes per contract, and Egypt's three construction regimes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠VAT regimes per contract, and Egypt's three construction regimes.
 
 The distinguishing dates: 2025-07-17 and 2025-07-18 for the document, a
 contract signed on either side of 2025-07-18, and evidence issued on either

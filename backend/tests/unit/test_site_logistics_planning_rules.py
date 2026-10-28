@@ -1,4 +1,4 @@
-"""Pure rules of the site-logistics plan (framework module 11): no database."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure rules of the site-logistics plan (framework module 11): no database."""
 
 from __future__ import annotations
 

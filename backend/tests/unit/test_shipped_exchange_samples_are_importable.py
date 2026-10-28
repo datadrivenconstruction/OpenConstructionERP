@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The sample budgets the regional exchange screens offer must import as budgets.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The sample budgets the regional exchange screens offer must import as budgets.
 
 Every country screen under ``/regional-exchange`` may name a ``sampleFile``, and
 the page renders it as "download a sample file to try it". That file is the first

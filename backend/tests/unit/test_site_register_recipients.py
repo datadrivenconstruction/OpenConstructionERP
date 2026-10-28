@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who a site register notification goes to, and who it does not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who a site register notification goes to, and who it does not.
 
 Three rules, each a way a notification system loses the trust of the people it
 is for: nobody is told about their own action, nobody is told twice because

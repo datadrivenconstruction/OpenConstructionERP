@@ -1,4 +1,4 @@
-"""First tests for the AIA payment application renderer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠First tests for the AIA payment application renderer.
 
 This module renders a contract document that goes to an owner and an architect,
 and until now it had no test of any kind anywhere in the tree. The defect these

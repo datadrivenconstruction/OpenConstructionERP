@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A shipped regional module has to be selectable at the one moment it is offered.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A shipped regional module has to be selectable at the one moment it is offered.
 
 The onboarding wizard's module list is a hand-written mirror of the backend
 module manifests. Nothing joined the two, so a module could ship, register its

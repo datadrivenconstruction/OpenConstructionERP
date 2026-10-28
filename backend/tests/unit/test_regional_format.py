@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A document is written the way its country writes numbers and dates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A document is written the way its country writes numbers and dates.
 
 The distinguishing cases are the ones a currency-only rule gets wrong: an Irish
 euro amount is ``1,234.56`` and not the German ``1.234,56``, a French one is

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Preview a percent-complete type change without applying it (T3.2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Preview a percent-complete type change without applying it (T3.2).
 
 The progress panel shows the EVM-distortion warnings of a type while the user
 hovers it, before anything is committed. It called a preview route the backend

@@ -1,4 +1,4 @@
-"""Unit tests for equipment predictive maintenance + fleet analytics.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for equipment predictive maintenance + fleet analytics.
 
 All tests exercise the pure (no-I/O) helpers in
 ``app.modules.equipment.predictive_service`` so they run without a database.

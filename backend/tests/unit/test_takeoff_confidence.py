@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — confidence-score contract for PDF takeoff.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — confidence-score contract for PDF takeoff.
 
 Covers bullet 3 of the R7 hardening sweep:
   * Every AI suggestion has ``confidence`` in [0.0, 1.0].

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The validation rules and request schemas of the legal entities module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The validation rules and request schemas of the legal entities module.
 
 Shape checks, not closed lists: a two-letter country, a three-letter currency,
 an ISO 3166-2 subdivision under the same country. A branch abroad is allowed

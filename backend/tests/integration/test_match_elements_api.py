@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration baseline for the ``/api/v1/match_elements/`` API surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration baseline for the ``/api/v1/match_elements/`` API surface.
 
 The Wave 5 audit flagged ``match_elements`` (20 endpoints, 0 dedicated
 tests) as the highest-risk untested surface in the codebase. This file

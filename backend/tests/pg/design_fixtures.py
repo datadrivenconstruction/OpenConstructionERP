@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the design management PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the design management PostgreSQL tests.
 
 A world is the governance world (users, project, team, pinned governance model)
 plus a design setup on the ``simple_sequential`` scheme, so a number needs only

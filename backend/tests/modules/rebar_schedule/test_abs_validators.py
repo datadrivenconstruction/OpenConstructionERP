@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``bvbs_abs`` validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``bvbs_abs`` validation rules.
 
 Every rule is exercised twice: once against the conforming corpus, where it
 must pass, and once against a record built to break exactly that rule, where it

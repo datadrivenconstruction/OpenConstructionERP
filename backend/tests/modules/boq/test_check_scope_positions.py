@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``BOQService.check_scope_completeness`` has to load the BOQ's positions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``BOQService.check_scope_completeness`` has to load the BOQ's positions.
 
 It called ``self.position_repo.list_by_boq(boq_id)``, a name
 :class:`PositionRepository` has never carried, so the read raised

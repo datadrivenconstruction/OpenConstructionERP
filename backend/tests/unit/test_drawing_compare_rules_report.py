@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rule set ``drawing_compare`` and the printable change report."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rule set ``drawing_compare`` and the printable change report."""
 
 from __future__ import annotations
 

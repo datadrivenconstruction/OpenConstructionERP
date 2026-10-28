@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A missing diacritic must not decide which project type a request lands in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A missing diacritic must not decide which project type a request lands in.
 
 The offline detector matches synonym substrings against the raw request, so
 before accents were folded the answer depended on the writer's keyboard.

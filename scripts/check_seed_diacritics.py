@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail the build if a corrected foreign spelling reverts to its stripped form.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail the build if a corrected foreign spelling reverts to its stripped form.
 
 The demo packs ship German, Portuguese, Spanish and French text to users who
 read those languages. Several packs were authored without the marks - umlauts

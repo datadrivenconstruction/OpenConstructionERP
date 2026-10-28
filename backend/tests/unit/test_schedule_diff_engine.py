@@ -1,4 +1,4 @@
-"""Unit tests for the pure schedule diff engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure schedule diff engine.
 
 These tests exercise :func:`app.modules.schedule.diff_engine.diff_snapshots`
 against hand-built normalized envelopes. The engine is pure (stdlib only), so

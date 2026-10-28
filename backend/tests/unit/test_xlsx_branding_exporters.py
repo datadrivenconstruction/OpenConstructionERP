@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The company letterhead on the second batch of wired Excel exports.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The company letterhead on the second batch of wired Excel exports.
 
 Each exporter is run for real, DB-free: route handlers are called directly
 with a stub session or service and the project-access check stubbed out.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The notice register's screen holds a hand-written copy of the standard registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The notice register's screen holds a hand-written copy of the standard registry.
 
 ``ChangeIntelligencePage`` carries two literals that mirror
 ``change_intelligence.time_bar``: the contract-standard picker, whose values are

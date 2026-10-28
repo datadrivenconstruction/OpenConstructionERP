@@ -1,4 +1,4 @@
-"""Supplier payments of a legal entity over a year, as the T5018 needs them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Supplier payments of a legal entity over a year, as the T5018 needs them.
 
 An Ontario entity pays a steel subcontractor on two projects and a small
 supplier once, and pays the steel subcontractor again in January of the next

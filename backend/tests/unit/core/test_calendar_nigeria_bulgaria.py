@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Nigeria and Bulgaria join the calendar engine as covered jurisdictions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Nigeria and Bulgaria join the calendar engine as covered jurisdictions.
 
 Written before _holidays_ng and _holidays_bg exist, per the fleet rule that
 the standing test lands before the change it stands for. Every assertion

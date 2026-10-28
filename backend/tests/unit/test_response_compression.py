@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The bundle a browser asks for compressed arrives compressed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bundle a browser asks for compressed arrives compressed.
 
 Measured on the local stand before this existed: the application bundle is
 2,496,962 bytes and the English locale chunk 2,267,263 bytes, and both came back

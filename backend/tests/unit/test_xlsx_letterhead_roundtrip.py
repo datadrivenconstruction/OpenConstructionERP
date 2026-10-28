@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Exports that carry the company letterhead import back as the same records.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Exports that carry the company letterhead import back as the same records.
 
 Tasks, field reports, contacts and requirements each have an Excel export and
 an Excel import. With a company profile set, the export puts the firm's name

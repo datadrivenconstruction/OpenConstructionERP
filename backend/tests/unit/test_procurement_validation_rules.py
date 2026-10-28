@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - the procurement purchase-order rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - the procurement purchase-order rule set.
 
 Three layers, because each can fail without the others noticing:
 

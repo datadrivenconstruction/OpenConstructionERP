@@ -1,4 +1,4 @@
-"""The provenance type must refuse to describe the defects it was built for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The provenance type must refuse to describe the defects it was built for.
 
 Every assertion here that a construction *succeeds* would also pass against a
 plain dataclass with no validation at all, so those carry no weight on their

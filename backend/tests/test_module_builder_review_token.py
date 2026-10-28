@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The install endpoint's proof that a human reviewed what is being written.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The install endpoint's proof that a human reviewed what is being written.
 
 These pin the property that matters: a token is only accepted for the exact
 spec, the exact user and the time window it was issued for. Every test names the

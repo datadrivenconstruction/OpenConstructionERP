@@ -1,4 +1,4 @@
-"""Epic H — Universal Audit Trail backend tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic H — Universal Audit Trail backend tests.
 
 Coverage:
     1.  ``log_activity`` persists the 8 new capture-context columns.

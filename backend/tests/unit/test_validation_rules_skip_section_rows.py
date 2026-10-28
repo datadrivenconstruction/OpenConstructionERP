@@ -1,4 +1,4 @@
-"""Section headers must not be convicted of missing a leaf-row attribute.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Section headers must not be convicted of missing a leaf-row attribute.
 
 A section header aggregates its children. By construction it carries no
 unit, no quantity, no rate and no classification code: those live on the

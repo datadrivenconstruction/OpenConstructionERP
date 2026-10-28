@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure tests for the per-norm estimate-against-outturn rollup (DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure tests for the per-norm estimate-against-outturn rollup (DB-free).
 
 The end-to-end contract lives in ``tests/modules/postcalc/test_norm_outturn.py``
 and is the one that would have caught the feature being unusable. These are the

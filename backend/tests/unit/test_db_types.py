@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`app.core.db_types` — MoneyType + SafeDate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.core.db_types` — MoneyType + SafeDate.
 
 The app is PostgreSQL-only: binds always normalise to the strict Python
 type (``Decimal`` / ``date``) and the columns store native ``NUMERIC`` /

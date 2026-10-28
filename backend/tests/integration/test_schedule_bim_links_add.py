@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Add BIM links to an activity without erasing the ones already there.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Add BIM links to an activity without erasing the ones already there.
 
 The link-activity dialog merged the new element ids into a cached copy of the
 activity and sent the whole list back, which the route stores as given. A

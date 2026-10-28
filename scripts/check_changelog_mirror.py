@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Changelog mirror guard: the file and the in-app page must tell the same story.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Changelog mirror guard: the file and the in-app page must tell the same story.
 
 This project keeps two changelogs. ``CHANGELOG.md`` at the repo root carries the
 prose, and ``frontend/src/features/about/Changelog.tsx`` carries a trimmed card

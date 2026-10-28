@@ -1,4 +1,4 @@
-"""Unit tests for the Contract Types Engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Contract Types Engine.
 
 Covers:
     * Pure helpers: validate_contract_terms, compute_line_total,

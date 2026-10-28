@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the Variance column on a budget line is allowed to mean.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the Variance column on a budget line is allowed to mean.
 
 Variance used to be ``revised_budget - actual``, which is spend to date
 measured against the budget. On a job that is half built that quantity is

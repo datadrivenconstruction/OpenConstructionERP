@@ -1,4 +1,4 @@
-"""Unit tests for scheduled report templates (v2.3.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for scheduled report templates (v2.3.0).
 
 Exercises ``ReportingService.schedule_template``, ``list_due_templates``
 and ``mark_template_ran`` against PostgreSQL so we can verify the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Held-days / approval-timeline analytics (pure computation).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Held-days / approval-timeline analytics (pure computation).
 
 Pins the timeline maths that the held-days report reads: a step's held time is
 measured from the previous hand-off, a pending step accrues against the

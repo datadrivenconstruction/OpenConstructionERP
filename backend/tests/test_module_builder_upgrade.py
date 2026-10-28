@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Upgrading an installed module, without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Upgrading an installed module, without a database.
 
 What counts as adding and what as taking away, the token that only an upgrade
 accepts, and the refusals the frontend words itself. The upgrade itself, over

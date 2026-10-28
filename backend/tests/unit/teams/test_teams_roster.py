@@ -1,4 +1,4 @@
-"""The project roster: who is on the job, where they come from, what expires.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project roster: who is on the job, where they come from, what expires.
 
 Against a real PostgreSQL session, because the questions worth asking here are
 about data: does a line survive its team being deleted, does a person the

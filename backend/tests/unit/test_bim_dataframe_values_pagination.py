@@ -1,4 +1,4 @@
-"""Distinct value paging keeps a complete count and does not lose late options."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Distinct value paging keeps a complete count and does not lose late options."""
 
 import sys
 from types import SimpleNamespace

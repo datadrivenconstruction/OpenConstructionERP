@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The work calendar reconciler agrees with the file it delivers from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The work calendar reconciler agrees with the file it delivers from.
 
 The reconciler itself needs a database and is covered where the other boot-path
 repairs are. What is checked here is the half that does not: the table of ship

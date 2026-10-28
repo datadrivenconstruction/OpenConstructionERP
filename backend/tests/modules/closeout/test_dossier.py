@@ -1,4 +1,4 @@
-"""Handover dossier: check, assemble, deliver, resend (real PostgreSQL session)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Handover dossier: check, assemble, deliver, resend (real PostgreSQL session)."""
 
 from __future__ import annotations
 

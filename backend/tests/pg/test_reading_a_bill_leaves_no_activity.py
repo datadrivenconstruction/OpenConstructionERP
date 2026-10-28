@@ -1,4 +1,4 @@
-"""PG: opening a bill writes nothing to its activity feed, and the feed reads as prose.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: opening a bill writes nothing to its activity feed, and the feed reads as prose.
 
 ``get_cost_breakdown`` published ``boq.cost_breakdown.computed`` on every GET.
 The activity handler logs every ``boq.*`` event, and it had no sentence for this

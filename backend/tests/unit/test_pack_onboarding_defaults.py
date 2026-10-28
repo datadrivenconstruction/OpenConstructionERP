@@ -1,4 +1,4 @@
-"""Every pack onboarding default must be one of the options it sits next to.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every pack onboarding default must be one of the options it sits next to.
 
 A default that is only a prefix of an option ("Deemed-to-Satisfy" next to
 "Deemed-to-Satisfy (DTS)") preselects nothing, so the question starts

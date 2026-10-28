@@ -1,4 +1,4 @@
-"""Tests for Lane 7 — photo EXIF GPS extraction and defect-category heuristic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for Lane 7 — photo EXIF GPS extraction and defect-category heuristic.
 
 Covers:
 - ``extract_exif_gps``: real EXIF GPS parsing from a hand-built TIFF/EXIF

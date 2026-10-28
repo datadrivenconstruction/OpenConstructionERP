@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rules V6 to V10 and V15 of the cost chain: each fails on its defect and passes on a clean chain."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rules V6 to V10 and V15 of the cost chain: each fails on its defect and passes on a clean chain."""
 
 from __future__ import annotations
 

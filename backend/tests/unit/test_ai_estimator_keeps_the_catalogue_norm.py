@@ -1,4 +1,4 @@
-"""The AI estimator must carry the catalogue's per-unit norm, not substitute 1.0.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The AI estimator must carry the catalogue's per-unit norm, not substitute 1.0.
 
 The catalogue stores a work item's resource buildup in ``CostItem.components``
 and writes each component's per-unit norm as ``quantity``. That is established

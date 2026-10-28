@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A socket that cannot judge your token must not say your token was bad.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A socket that cannot judge your token must not say your token was bad.
 
 Both WebSocket handlers used to answer every authentication problem with a
 1008 policy close and the reason "unauthenticated". Measured against the real

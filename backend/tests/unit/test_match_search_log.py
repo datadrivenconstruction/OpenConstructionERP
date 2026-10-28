@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the v3-P10 :class:`MatchSearchLog` analytics row.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the v3-P10 :class:`MatchSearchLog` analytics row.
 
 Pure schema-level coverage — column types, FK on-delete behaviour,
 index coverage, default-value policy. The end-to-end insert behaviour

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every seeded tender package holds the trade it is named for, and is dated from today.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every seeded tender package holds the trade it is named for, and is dated from today.
 
 The installer used to cut each demo bill into money-balanced contiguous slices
 and hand them to the packages in order, so the office demo's "Innenausbau"

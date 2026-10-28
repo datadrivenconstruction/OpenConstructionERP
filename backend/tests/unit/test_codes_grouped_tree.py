@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure grouped band-tree builder (T2.3, acceptance #5)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure grouped band-tree builder (T2.3, acceptance #5)."""
 
 from __future__ import annotations
 

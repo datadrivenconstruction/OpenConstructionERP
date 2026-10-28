@@ -1,4 +1,4 @@
-"""TOP-30 #2 delta: payroll batch lifecycle (submit/post), reconcile, export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠TOP-30 #2 delta: payroll batch lifecycle (submit/post), reconcile, export.
 
 Extends the v6.8 ``finalize_batch`` (draft -> approved) with the full
 ``draft -> submitted -> approved -> posted`` FSM, plus the read-only

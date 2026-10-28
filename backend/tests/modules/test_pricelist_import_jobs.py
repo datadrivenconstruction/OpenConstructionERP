@@ -1,4 +1,4 @@
-"""A regional price list is read and imported as background jobs the import screen polls.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A regional price list is read and imported as background jobs the import screen polls.
 
 A list of tens of thousands of voci outlasts the 120 s the proxy waits, so the
 screen stores the upload once, then follows a preview job and an import job.

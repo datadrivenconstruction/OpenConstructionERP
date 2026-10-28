@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every route that renders a document declares the language it rendered.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every route that renders a document declares the language it rendered.
 
 The defect this file exists to stop is not a wrong header, it is an absent one.
 ``AcceptLanguageMiddleware`` sets ``Content-Language`` on every response with

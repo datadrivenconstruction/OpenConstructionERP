@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""User-facing output reads from the platform catalogue in every interface language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠User-facing output reads from the platform catalogue in every interface language.
 
 These places used to hold their own en/de/ru (or en/de) tables, so a reader in
 any other language got English. They now resolve through ``app.core.i18n``.

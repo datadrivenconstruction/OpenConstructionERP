@@ -1,4 +1,4 @@
-"""Unit tests for the Contacts ↔ PropDev module bridge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Contacts ↔ PropDev module bridge.
 
 Covers the v3117 bridge:
 

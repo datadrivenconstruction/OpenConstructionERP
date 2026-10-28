@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - resumable upload chunk math and integrity checks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - resumable upload chunk math and integrity checks.
 
 ``resumable_uploads`` shipped with no tests at all, and this is the half of it
 that decides whether a reassembled file is the file the client sent. The

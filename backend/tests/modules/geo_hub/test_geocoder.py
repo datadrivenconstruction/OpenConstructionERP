@@ -1,4 +1,4 @@
-"""Unit tests for the Nominatim geocoder + cache layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Nominatim geocoder + cache layer.
 
 These tests poke ``app.modules.geo_hub.geocoder`` directly without
 the FastAPI app — they only need the per-module PostgreSQL fixture from

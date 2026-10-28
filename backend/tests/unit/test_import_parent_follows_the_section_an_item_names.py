@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An imported row lands under the section it names, whichever importer wrote it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An imported row lands under the section it names, whichever importer wrote it.
 
 ``_resolve_import_parent`` reads three signals: a section's dotted ordinal, a
 GAEB item's ``gaeb_section`` and, since the XPWE importer, the neutral

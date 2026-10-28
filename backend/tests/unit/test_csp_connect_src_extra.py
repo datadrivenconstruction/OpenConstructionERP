@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""OE_CSP_CONNECT_SRC_EXTRA extends connect-src with vetted origins only."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OE_CSP_CONNECT_SRC_EXTRA extends connect-src with vetted origins only."""
 
 from __future__ import annotations
 

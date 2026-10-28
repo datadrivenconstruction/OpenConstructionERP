@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic parity check for ``EacRuleDefinition``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic parity check for ``EacRuleDefinition``.
 
 For every valid JSON-Schema fixture, parsing through Pydantic and
 serialising back must yield a body equivalent to the input. This

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if a shared test clock anchor appears that is not the declared one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail if a shared test clock anchor appears that is not the declared one.
 
 Ninety-nine fixed date constants live in the backend test suite, spread over
 seventy-seven files, and between them they name forty distinct instants. The

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An install seeded before 18.4 learns Switzerland's 2018 to 2023 rates, once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An install seeded before 18.4 learns Switzerland's 2018 to 2023 rates, once.
 
 The seed shipped only the Swiss rates in force from 2024-01-01, and 18.4 put
 the 7.7, 2.5 and 3.7 % windows in front of them. Neither older tax repair

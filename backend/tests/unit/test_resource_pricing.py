@@ -1,4 +1,4 @@
-"""Resource price sheet: seed, edit and re-price coefficient bases.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resource price sheet: seed, edit and re-price coefficient bases.
 
 CWICR coefficient bases (Vietnam Dinh Muc, Indonesia AHSP) import their work
 items with the full labour / material / machine breakdown as norm quantities but

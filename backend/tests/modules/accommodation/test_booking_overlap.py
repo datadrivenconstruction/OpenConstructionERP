@@ -1,4 +1,4 @@
-"""Reject overlapping live bookings on the same room (V6 regression).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reject overlapping live bookings on the same room (V6 regression).
 
 Pre-fix the create endpoint accepted any number of overlapping bookings on
 the same room — silently double-booking a hotel slot or worker bunk. The

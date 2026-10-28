@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost lines inherited down the chain, on real PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost lines inherited down the chain, on real PostgreSQL.
 
 The bill position's cost line (and its split) travels to the scope line, the
 award's contract line, the change order item, the supplier invoice line and

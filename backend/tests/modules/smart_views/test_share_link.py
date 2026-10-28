@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Smart Views — share-by-link token tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views — share-by-link token tests.
 
 Exercises ``create_share_token`` / ``resolve_share_token`` /
 ``revoke_share_token``. Token rotation behaviour is deliberate: each

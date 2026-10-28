@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A zero-VAT document must say why, or say that it is saying nothing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A zero-VAT document must say why, or say that it is saying nothing.
 
 Two families of findings, one defect. First, the EN 16931 exemption-reason
 rules: a VAT breakdown group in an exempting category (E, AE, K, G, O) must

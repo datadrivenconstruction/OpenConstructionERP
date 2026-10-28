@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Schedule-of-Values tracker must report the retention the claims certified.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Schedule-of-Values tracker must report the retention the claims certified.
 
 ``compute_sov_status`` works out retention for itself, ``billed * the
 contract's flat retention_percent``, and every claim line it walks is already

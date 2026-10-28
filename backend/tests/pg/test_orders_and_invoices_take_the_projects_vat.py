@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: purchase orders and invoices are taxed at the project's default VAT rate (issue #515).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: purchase orders and invoices are taxed at the project's default VAT rate (issue #515).
 
 Project Settings holds a default VAT rate. A new purchase order ignored it and
 was saved with a tax of 0, and an invoice line without a rate took the country

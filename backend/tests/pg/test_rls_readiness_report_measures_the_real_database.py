@@ -1,4 +1,4 @@
-"""The RLS readiness report counts what a strict policy would do, on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The RLS readiness report counts what a strict policy would do, on PostgreSQL.
 
 Probe tables stand in for the tenant tables so the counts do not depend on any
 one model's NOT NULL columns, and everything happens inside a transaction that

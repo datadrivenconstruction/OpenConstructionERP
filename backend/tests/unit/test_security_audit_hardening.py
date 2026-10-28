@@ -1,4 +1,4 @@
-"""Regression tests for the application-level findings of the production security audit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for the application-level findings of the production security audit.
 
 Each block pins one finding: demo-mode identity redaction on user-returning
 endpoints, field magic-link secrets independent of APP_DEBUG, the hourly

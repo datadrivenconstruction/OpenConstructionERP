@@ -1,4 +1,4 @@
-"""Pure-function tests for the procurement service helpers + ORM money math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function tests for the procurement service helpers + ORM money math.
 
 These pin the small, side-effect-free helpers the procurement service leans
 on. They are pure unit tests - no DB, no fixtures, no event loop required -

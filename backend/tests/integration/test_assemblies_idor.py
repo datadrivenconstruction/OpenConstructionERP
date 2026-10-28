@@ -1,4 +1,4 @@
-"""Integration tests — Assemblies IDOR and library-vs-custom access control.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests — Assemblies IDOR and library-vs-custom access control.
 
 Verifies that:
 1.  A user from tenant A cannot read an assembly belonging to tenant B

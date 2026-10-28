@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if a directory under backend/app/modules has no manifest.py.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail if a directory under backend/app/modules has no manifest.py.
 
 The module loader finds modules by looking for a manifest. `ModuleLoader.discover`
 walks each module root and `_discover_in` keeps a directory only if it holds a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rules that guard who may move a gate or a condition, and when.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rules that guard who may move a gate or a condition, and when.
 
 Each rule is pure and sits next to the case that must fail without it: a gate
 that is un-decided by a plain "prepare", a reopen that would leave a later gate

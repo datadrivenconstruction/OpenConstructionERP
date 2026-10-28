@@ -1,4 +1,4 @@
-"""Vietnamese catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Vietnamese catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""Round-5 / R7 tests for the Management of Change (MoC) module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-5 / R7 tests for the Management of Change (MoC) module.
 
 Scope:
     * FSM allowlist: proposed -> reviewed -> accepted/declined -> implemented.

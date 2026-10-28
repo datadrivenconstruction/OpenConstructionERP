@@ -1,4 +1,4 @@
-"""A requirement stored as an EAC triplet says what. It does not say why.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A requirement stored as an EAC triplet says what. It does not say why.
 
 Nor who asked for it, at which phase it applies, how anyone would prove it was
 met, or which priced work it governs. These pin the five answers the triplet was

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for mass-based (per-tonne / per-kg) cost pricing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for mass-based (per-tonne / per-kg) cost pricing.
 
 These exercise the pure conversion helper and the schema-level mass-field
 normalisers, so they run WITHOUT a database. The worked example throughout is

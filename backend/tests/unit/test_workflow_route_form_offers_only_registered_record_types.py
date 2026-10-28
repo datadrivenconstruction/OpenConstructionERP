@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The route form lists record types from the approval registry itself.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The route form lists record types from the approval registry itself.
 
 The form used to take the record type as free text, so a typo only surfaced
 as a server error. It now reads the list from the registry that submit

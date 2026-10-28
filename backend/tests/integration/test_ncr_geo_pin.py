@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An inspector flags a non-conformity and a pin appears on the map.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An inspector flags a non-conformity and a pin appears on the map.
 
 Two layers are gated here, and they fail differently.
 

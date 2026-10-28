@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Demo diary media must point at files that exist.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo diary media must point at files that exist.
 
 The generic diary seeder used to write every photo as
 ``https://seed.local/photos/<uuid>.jpg``. That host does not exist, so on

@@ -1,4 +1,4 @@
-"""WebSocket smoke tests for the collaboration-locks presence channel.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠WebSocket smoke tests for the collaboration-locks presence channel.
 
 Uses Starlette's ``TestClient.websocket_connect`` because ``httpx`` has
 no WebSocket transport.  The app lifespan runs via the ``with`` block

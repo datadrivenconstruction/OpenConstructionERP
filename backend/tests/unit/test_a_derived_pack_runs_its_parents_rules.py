@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""With the derived pack active, the parent's rules are found and they fire.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠With the derived pack active, the parent's rules are found and they fire.
 
 ``turkey-tr-mep`` ships no ``rule_packs/`` directory and writes no rule set in
 its source. Whether that costs a Turkish installation its rules depends on how

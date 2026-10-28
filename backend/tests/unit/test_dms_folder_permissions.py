@@ -1,4 +1,4 @@
-"""R7 DMS folder-permission tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 DMS folder-permission tests.
 
 Scope
 -----

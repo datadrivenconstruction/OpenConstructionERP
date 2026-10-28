@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The Owner's Project Control pack states its manifest twice and its files by path.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Owner's Project Control pack states its manifest twice and its files by path.
 
 ``manifest.py`` is what the source tree and every text-reading pack check see.
 ``manifest.json`` is what a pack dropped into the data directory is read from.

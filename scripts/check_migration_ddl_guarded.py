@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Refuse a migration that adds schema without first asking whether it is there.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Refuse a migration that adds schema without first asking whether it is there.
 
 Why this has to be a gate rather than a convention
 --------------------------------------------------

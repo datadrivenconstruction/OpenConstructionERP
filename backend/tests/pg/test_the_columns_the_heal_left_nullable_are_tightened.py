@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Can anything put back the NOT NULL the boot heal had to decline.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Can anything put back the NOT NULL the boot heal had to decline.
 
 ``not_null_divergences`` reports the divergence and stops there; nothing on the
 boot path tightened the column afterwards. These tests cover the repair that

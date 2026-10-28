@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ABS checksum rule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ABS checksum rule.
 
 The checksum is the only self-verifying part of the format, which makes it the
 oracle for everything else: a record that reproduces its own checksum has been

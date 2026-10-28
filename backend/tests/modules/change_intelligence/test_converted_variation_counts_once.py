@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A converted variation is one change, and must be counted as one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A converted variation is one change, and must be counted as one.
 
 Promoting a variation request creates two rows for one agreed change: the
 variation order, and the change order that mirrors it

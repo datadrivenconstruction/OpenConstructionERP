@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Write flows of engineering_brief, economics, hse_frame and risk over HTTP on a fresh install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Write flows of engineering_brief, economics, hse_frame and risk over HTTP on a fresh install.
 
 Each flow runs on a project of its own, created through the API by the demo administrator, with the
 second manager on its team. A project without a governance model has no gates, so the hand approval

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Where the delivery model meets the rest of the platform: bus, gate screen, demo seed, `applies`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Where the delivery model meets the rest of the platform: bus, gate screen, demo seed, `applies`.
 
 Pure checks; the database side of each is in ``tests/pg``.
 """

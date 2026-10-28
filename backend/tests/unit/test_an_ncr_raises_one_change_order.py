@@ -1,4 +1,4 @@
-"""An NCR's cost becomes one change order, however often the action is sent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An NCR's cost becomes one change order, however often the action is sent.
 
 ``POST /ncr/{id}/create-variation/`` minted a new change order on every call
 and re-pointed the NCR at the newest one, so a double click or a retried

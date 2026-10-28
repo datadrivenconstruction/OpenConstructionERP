@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Entity-id and actor extraction, checked against real publisher payloads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Entity-id and actor extraction, checked against real publisher payloads.
 
 The payload key lists here are read out of ``app/`` with :mod:`ast` rather than
 typed into the test. That is not tidiness: an earlier draft of this check typed

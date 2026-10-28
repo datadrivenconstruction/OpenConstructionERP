@@ -1,4 +1,4 @@
-"""Guard: every ``app.*`` hidden import in the desktop spec names a real file.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Guard: every ``app.*`` hidden import in the desktop spec names a real file.
 
 PyInstaller reports a hidden import it cannot find and keeps going:
 

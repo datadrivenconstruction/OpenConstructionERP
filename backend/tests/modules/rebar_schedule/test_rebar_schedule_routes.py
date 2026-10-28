@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Route-level tests for the rebar schedule API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Route-level tests for the rebar schedule API.
 
 The module's other tests all exercise the ABS codec and the service, so a
 router that never reached the database was invisible to them: every

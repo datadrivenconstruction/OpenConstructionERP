@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost items read from other modules follow the same rule as the cost routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost items read from other modules follow the same rule as the cost routes.
 
 The rule is applied to ORM reads of ``CostItem`` wherever they are written, so
 a module does not opt in. That only holds while every read IS an ORM read and

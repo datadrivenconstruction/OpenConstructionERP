@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An approval request may only target a record of its route's project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approval request may only target a record of its route's project.
 
 A request stores its target as ``entity_type`` + ``entity_id`` strings, and
 submit used to check only access to the route's own project. An editor of

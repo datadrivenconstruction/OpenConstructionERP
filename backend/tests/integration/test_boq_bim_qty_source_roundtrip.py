@@ -1,4 +1,4 @@
-"""HTTP roundtrip: BIM picker payload must preserve bim_qty_source.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP roundtrip: BIM picker payload must preserve bim_qty_source.
 
 Regression: when the BIM Quantity picker sends ``{quantity, metadata: {
 bim_qty_source: ...}}`` in a single PATCH, the backend was stripping the

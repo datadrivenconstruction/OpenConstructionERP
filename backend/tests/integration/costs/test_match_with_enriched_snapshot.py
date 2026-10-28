@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration test — read path against the enriched Qdrant collection.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration test — read path against the enriched Qdrant collection.
 
 This test is **gated on a live Qdrant** with the ``cwicr_en_v3_enriched``
 collection built by ``scripts/build_enriched_snapshot.py``. Without the

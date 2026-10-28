@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One invoice row must not become two different documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One invoice row must not become two different documents.
 
 An invoice can be rendered as EN 16931 by two callers: the finance export
 route, and the clearance module when a tax authority asks for the document.

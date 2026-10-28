@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the site-logistics plan PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the site-logistics plan PostgreSQL tests.
 
 A world is a throwaway database with real users and a project whose team holds
 a manager and an editor; an outsider is a manager of nothing here. The plan is

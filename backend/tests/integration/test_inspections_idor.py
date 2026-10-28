@@ -1,4 +1,4 @@
-"""Inspections IDOR regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inspections IDOR regression suite.
 
 The ``/api/v1/inspections/`` router exposes endpoints keyed off
 ``inspection_id``. Pre-fix several mutating endpoints fetched the

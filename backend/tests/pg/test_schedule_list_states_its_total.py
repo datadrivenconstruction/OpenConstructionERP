@@ -1,4 +1,4 @@
-"""PG: the schedule list endpoints report the whole set, not just the page.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the schedule list endpoints report the whole set, not just the page.
 
 Both reads were capped and silent. ``GET /schedules/`` returned at most 50
 rows and ``GET /schedules/{id}/activities/`` at most 1000, each as a bare

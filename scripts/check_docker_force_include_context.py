@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Every force-include path the wheel needs must reach the Docker build context.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every force-include path the wheel needs must reach the Docker build context.
 
 The backend wheel is built by pip inside the image, from ``./backend``, and
 ``[tool.hatch.build.targets.wheel.force-include]`` in backend/pyproject.toml

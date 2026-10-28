@@ -1,4 +1,4 @@
-"""Schedule Advanced (LPS) HTTP-level IDOR regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule Advanced (LPS) HTTP-level IDOR regression suite.
 
 ``tests/modules/test_schedule_advanced_security.py`` proves the resolver
 helpers + ``verify_project_access`` reject cross-tenant access, but it does so

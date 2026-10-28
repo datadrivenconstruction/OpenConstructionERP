@@ -1,4 +1,4 @@
-"""Loading a user must not load their API keys.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Loading a user must not load their API keys.
 
 Every authenticated request re-reads the caller with ``session.get(User, id)``
 (``app.dependencies``). While ``User.api_keys`` was ``lazy="selectin"`` that one

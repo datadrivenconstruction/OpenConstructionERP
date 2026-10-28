@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An XPWE export read as a price list: one cost-database row per ``EPItem``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An XPWE export read as a price list: one cost-database row per ``EPItem``.
 
 The rows come from the same streaming reader the bill import uses, so these
 tests pin what the price-list side adds: the chapter path as (code, title)

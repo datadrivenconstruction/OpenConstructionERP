@@ -1,4 +1,4 @@
-"""The import path must decide the work-name join from the base type.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The import path must decide the work-name join from the base type.
 
 ``_join_work_name_columns`` is unit-tested on both sides already; what this pins
 is the WIRING, that ``_process_and_insert_cwicr`` passes the right flag for the

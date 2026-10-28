@@ -1,4 +1,4 @@
-"""PG contract tests for ``resumable_uploads``: chunk order, replay, and integrity.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG contract tests for ``resumable_uploads``: chunk order, replay, and integrity.
 
 The module had zero coverage. Its entire reason to exist is surviving an
 interrupted upload, so the tests concentrate on the paths an interruption

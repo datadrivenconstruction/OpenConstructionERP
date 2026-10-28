@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The review path for resource buildups the AI estimator stored the wrong size.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The review path for resource buildups the AI estimator stored the wrong size.
 
 Rows written before the estimator read the catalogue norm hold the position
 quantity on every line; rows written after hold ``factor * position_quantity``;

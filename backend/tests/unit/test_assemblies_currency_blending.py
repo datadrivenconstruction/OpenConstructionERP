@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Assemblies must never report one number that holds two currencies.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Assemblies must never report one number that holds two currencies.
 
 The apply-template preview converts each matched component into the target
 currency and rolls the results into ``grand_total``. When no rate could be found

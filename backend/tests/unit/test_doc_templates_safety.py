@@ -1,4 +1,4 @@
-"""R7 Document Templates safety and locale-override tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 Document Templates safety and locale-override tests.
 
 Scope
 -----

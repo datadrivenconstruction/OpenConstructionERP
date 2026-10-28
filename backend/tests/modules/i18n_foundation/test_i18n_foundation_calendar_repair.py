@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``v3303`` run against a real database, not just its decision rule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``v3303`` run against a real database, not just its decision rule.
 
 The seed file fix reaches new installs only - ``seed.py`` returns early once
 the table has rows - so the Saudi calendar shipped as ``[0, 1, 2, 3, 4]`` stays

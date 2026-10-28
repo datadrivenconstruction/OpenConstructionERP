@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Bridge tests for the punchlist clash/inspection auto-creation (Lane A).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bridge tests for the punchlist clash/inspection auto-creation (Lane A).
 
 The punchlist module subscribes to two upstream signals and materialises
 site-actionable punch items:

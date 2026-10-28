@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG contract tests for ``app.core.orm_write.apply_update``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG contract tests for ``app.core.orm_write.apply_update``.
 
 This helper replaces ``session.expire_all()`` at every bulk-UPDATE site in the
 platform, so a mistake in it is not one broken endpoint but stale reads

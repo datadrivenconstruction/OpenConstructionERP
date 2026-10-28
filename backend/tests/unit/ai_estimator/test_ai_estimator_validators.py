@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the AI Estimate Builder module validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the AI Estimate Builder module validation rules.
 
 Pure unit tests over ``ValidationContext`` (no DB). They pin the module's
 estimator-specific invariants that gate (or flag) an applied estimate:

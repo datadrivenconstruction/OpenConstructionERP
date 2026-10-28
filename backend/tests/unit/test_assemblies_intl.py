@@ -1,4 +1,4 @@
-"""Unit tests for the database-free international assembly helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the database-free international assembly helpers.
 
 These tests exercise ``app.modules.assemblies.intl`` in isolation - no
 database, no ORM, no locale. They lock the international guarantees:

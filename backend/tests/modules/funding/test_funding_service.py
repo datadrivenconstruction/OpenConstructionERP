@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Awards, draws and rollups against a real database (PostgreSQL).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Awards, draws and rollups against a real database (PostgreSQL).
 
 The interesting behaviour of this module is not the CRUD. It is that
 recording an award writes down dates nobody typed, that re-recording one

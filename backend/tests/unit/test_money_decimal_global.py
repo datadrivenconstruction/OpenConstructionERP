@@ -1,4 +1,4 @@
-"""Global money-as-Decimal Pydantic schema audit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Global money-as-Decimal Pydantic schema audit.
 
 v3 §10 — every monetary field on a request/response schema must be
 emitted to JSON as a *string* (not a number) so:

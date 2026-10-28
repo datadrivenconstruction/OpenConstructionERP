@@ -1,4 +1,4 @@
-"""An approved payroll batch and the field logs it was built from count once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approved payroll batch and the field logs it was built from count once.
 
 Field labour is costed onto the budget as it is logged, at the resource rate.
 A payroll batch is generated from those same field records and, on approval,

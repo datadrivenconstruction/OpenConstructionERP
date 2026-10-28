@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every pack installs on a fresh PostgreSQL database, the way an admin installs it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every pack installs on a fresh PostgreSQL database, the way an admin installs it.
 
 The unit suite already holds the pack wiring to account from the outside: that
 every declared rule set is registered, that every demo id resolves to a

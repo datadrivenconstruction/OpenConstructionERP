@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An escalation that cannot be resolved never reaches the cascade.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An escalation that cannot be resolved never reaches the cascade.
 
 The failure this pins used to work like this: a markup line named a cost-index
 series, the series had been deleted or was missing one of the two months, the

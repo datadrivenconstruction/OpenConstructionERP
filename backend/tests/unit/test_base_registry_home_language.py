@@ -1,4 +1,4 @@
-"""Home-language resolution and locale aliasing for the national cost bases."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Home-language resolution and locale aliasing for the national cost bases."""
 
 from app.modules.costs import base_registry
 

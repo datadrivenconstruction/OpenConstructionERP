@@ -1,4 +1,4 @@
-"""Unit tests for BIM requirements international helpers (database-free)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for BIM requirements international helpers (database-free)."""
 
 from datetime import date, datetime
 from pathlib import Path

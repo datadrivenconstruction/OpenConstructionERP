@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every finding the economics module can raise has a validation rule and a message in both languages."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every finding the economics module can raise has a validation rule and a message in both languages."""
 
 from __future__ import annotations
 

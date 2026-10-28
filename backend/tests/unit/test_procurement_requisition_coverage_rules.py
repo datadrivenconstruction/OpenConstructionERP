@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - requisition source reconciliation and over-allocation (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - requisition source reconciliation and over-allocation (issue #516).
 
 Pure Python, no database. Each check is shown failing on the case it exists for
 and passing on its neighbour.

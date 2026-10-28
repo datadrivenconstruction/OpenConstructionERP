@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database-free unit tests for the record-publishing pure helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the record-publishing pure helpers.
 
 These cover the deterministic pieces of the publish-and-distribute flow -
 storage key derivation, the forwarded URLs, filename sanitisation and the

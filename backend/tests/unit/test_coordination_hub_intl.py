@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Database-free unit tests for the Coordination Hub international helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the Coordination Hub international helpers.
 
 These pin the pure functions in
 :mod:`app.modules.coordination_hub.intl`: multilingual discipline

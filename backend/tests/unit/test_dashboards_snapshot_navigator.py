@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T11 unit tests — Historical Snapshot Navigator.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T11 unit tests — Historical Snapshot Navigator.
 
 Pins the pure helpers in
 :mod:`app.modules.dashboards.snapshot_navigator`. Each test exercises

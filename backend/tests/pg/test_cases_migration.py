@@ -1,4 +1,4 @@
-"""``v3281_cases_module`` builds the same schema ``create_all`` builds.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``v3281_cases_module`` builds the same schema ``create_all`` builds.
 
 The platform installs its schema two ways: ``Base.metadata.create_all`` on a
 fresh install, and the alembic chain on an existing deployment. A new module

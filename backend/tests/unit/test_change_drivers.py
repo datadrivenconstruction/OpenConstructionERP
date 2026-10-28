@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure change-driver (Pareto) analytics engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure change-driver (Pareto) analytics engine.
 
 Stdlib + pytest only; cost is asserted as exact Decimal, never float. Runs on
 the local Python 3.11 runner like the impact and cycle-time engine tests.

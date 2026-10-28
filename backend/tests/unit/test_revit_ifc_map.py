@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the Revit OST → IFC class crosswalk.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Revit OST → IFC class crosswalk.
 
 These exercise :func:`normalize_to_ifc_class` in isolation — no DB, no
 session, plain ``assert``. The crosswalk is what lets a Revit (RVT) model

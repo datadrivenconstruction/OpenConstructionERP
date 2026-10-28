@@ -1,4 +1,4 @@
-"""``load_base_market`` delivers the card's language or says it did not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``load_base_market`` delivers the card's language or says it did not.
 
 A market card on a national base names a language. The endpoint used to run the
 text swap, ignore how it ended and reprice anyway, so a failed French swap still

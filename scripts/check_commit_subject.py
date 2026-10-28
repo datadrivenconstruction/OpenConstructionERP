@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Commit subject guard: reject a shell quoting artefact in the subject line.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commit subject guard: reject a shell quoting artefact in the subject line.
 
 Twelve commits in this history open with ``@ `` before their real subject,
 among them the v14.6.0 release commit. None of that was intended. A PowerShell

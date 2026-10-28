@@ -1,4 +1,4 @@
-"""The four tables: shape, constraints, and the loading policy that does not apply.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The four tables: shape, constraints, and the loading policy that does not apply.
 
 ``test_no_model_declares_a_relationship`` is the one to read first. The platform
 rule is that every ``relationship()`` must carry an explicit ``lazy=``

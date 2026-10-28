@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure claims / dispute evidence-pack engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure claims / dispute evidence-pack engine.
 
 These exercise :mod:`app.modules.claims_evidence.evidence_pack` directly with
 plain dataclass inputs - no database, FastAPI or ORM - so they run on any

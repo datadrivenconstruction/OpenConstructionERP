@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Subcontractor-portal payment-application submission suite (item #22).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Subcontractor-portal payment-application submission suite (item #22).
 
 A subcontractor portal user must see / submit payment applications ONLY for
 the agreements they were granted access to. Another subcontractor on the same

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A build we ship must not sign tokens with a secret that is in the repository.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A build we ship must not sign tokens with a secret that is in the repository.
 
 The desktop sidecar is started by the CLI, and ``cli.py`` sets
 ``APP_ENV=development`` and ``JWT_SECRET=openestimate-local-dev-key`` with no

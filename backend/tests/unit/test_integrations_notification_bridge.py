@@ -1,4 +1,4 @@
-"""Unit tests for the integrations chat-connector notification bridge (#279).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the integrations chat-connector notification bridge (#279).
 
 These exercise the bridge that forwards ``notifications.notification.created``
 events to a user's connected chat connectors (Telegram / Slack / Teams /

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Whose name the plant demo seed may write, on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Whose name the plant demo seed may write, on PostgreSQL.
 
 The seed runs on real installations when a pack with demo projects is
 installed. It may act as the project owner and let the decision paper be

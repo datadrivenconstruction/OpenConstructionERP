@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A contract family is registered in three places or it is half present.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A contract family is registered in three places or it is half present.
 
 Three modules hold a table of contract standards and they are at three
 different granularities:

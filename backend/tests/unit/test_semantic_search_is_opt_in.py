@@ -1,4 +1,4 @@
-"""Semantic search stays off until someone turns it on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Semantic search stays off until someone turns it on.
 
 The embedding model and the vector store are what pushed a low-memory desktop
 over the edge, so nothing loads them unasked: not weights already on disk, not

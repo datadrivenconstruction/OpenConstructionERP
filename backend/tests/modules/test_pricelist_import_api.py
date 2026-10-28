@@ -1,4 +1,4 @@
-"""Import a regional price list through the API: preview, confirm, persist.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Import a regional price list through the API: preview, confirm, persist.
 
 Boots the app against the conftest database, uploads trimmed real lists from
 ``tests/fixtures/pricelists/`` and reads the stored cost items back.

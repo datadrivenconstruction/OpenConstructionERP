@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``publish_after_commit`` over a real ``AsyncSession`` and real PostgreSQL SAVEPOINTs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``publish_after_commit`` over a real ``AsyncSession`` and real PostgreSQL SAVEPOINTs.
 
 The unit file (tests/unit/test_publish_after_commit_savepoints.py) covers the
 full matrix over SQLite through a synchronous session. This one repeats the

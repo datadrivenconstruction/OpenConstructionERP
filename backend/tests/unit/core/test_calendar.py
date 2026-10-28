@@ -1,4 +1,4 @@
-"""Tests for the working-days calendar engine's multi-year holiday computation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the working-days calendar engine's multi-year holiday computation.
 
 These exercise the three holiday families that used to be single-year (2026)
 stubs and are now computed for any year:

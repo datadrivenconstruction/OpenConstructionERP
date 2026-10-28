@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""An HSE investigation is only real if its project can reach it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An HSE investigation is only real if its project can reach it.
 
 The seeder minted a fresh ``uuid4()`` for every investigation's ``incident_ref``
 and so wrote ten rows that belong to no incident anywhere. Nothing about the

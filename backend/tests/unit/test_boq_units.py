@@ -1,4 +1,4 @@
-"""Tests for the BOQ unit normaliser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the BOQ unit normaliser.
 
 The normaliser used to be a strict allowlist that 422'd anything outside
 the curated catalogue.  Locale spellings (Romanian "Bucat", Bulgarian

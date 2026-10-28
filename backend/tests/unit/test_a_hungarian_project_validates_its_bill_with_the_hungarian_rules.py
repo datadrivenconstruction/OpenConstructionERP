@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Hungarian project's bill is checked by the Hungarian rules, whatever the pack.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Hungarian project's bill is checked by the Hungarian rules, whatever the pack.
 
 The classification a Hungarian bill is written against is registered as
 ``tetelrend`` and the rule set that checks it is registered as ``hungary``.

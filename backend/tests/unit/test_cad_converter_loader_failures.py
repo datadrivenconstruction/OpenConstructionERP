@@ -1,4 +1,4 @@
-"""The converter health check has to notice a binary Windows refuses to start.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The converter health check has to notice a binary Windows refuses to start.
 
 Issue #416. A user opened the BIM page and Windows put up a "Bad Image" box
 naming a DLL beside the converter executable, error 0xC000007B. Two separate

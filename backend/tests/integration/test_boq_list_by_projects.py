@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``POST /boqs/by-projects/``: the bill register of many projects in one call.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``POST /boqs/by-projects/``: the bill register of many projects in one call.
 
 The bill register page used to ask ``GET /boqs/?project_id=`` once per project.
 Browsers run six requests to a host at a time over HTTP/1.1 and the desktop app

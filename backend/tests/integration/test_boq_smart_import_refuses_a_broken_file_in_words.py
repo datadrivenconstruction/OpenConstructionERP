@@ -1,4 +1,4 @@
-"""The BOQ editor's import button refuses a broken spreadsheet with a reason, not a 500.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The BOQ editor's import button refuses a broken spreadsheet with a reason, not a 500.
 
 ``/import/smart/`` is what the Import button in the BOQ editor posts to. A file
 named ``.xlsx`` that is not a readable workbook (renamed, truncated, corrupt)

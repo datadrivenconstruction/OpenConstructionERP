@@ -1,4 +1,4 @@
-"""PostgreSQL regression tests for the confirmed dialect-divergence bugs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PostgreSQL regression tests for the confirmed dialect-divergence bugs.
 
 Each test reproduces a query that worked on SQLite but crashed (or silently
 returned wrong results) on PostgreSQL before the corresponding fix. They run

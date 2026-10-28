@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Three columns that exist in the schema become readable by a custom KPI.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Three columns that exist in the schema become readable by a custom KPI.
 
 Gross floor area, the age of a catalogue price, and the markup rate an
 estimate carries. None of the three needs a schema change; each was one

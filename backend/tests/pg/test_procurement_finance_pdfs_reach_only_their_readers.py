@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The purchase order, goods receipt, invoice and payment PDFs over the API (#514).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The purchase order, goods receipt, invoice and payment PDFs over the API (#514).
 
 Through the real routers and a real PostgreSQL database:
 

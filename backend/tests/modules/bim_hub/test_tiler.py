@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the BIM geometry tiler (``app.modules.bim_hub.tiler``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BIM geometry tiler (``app.modules.bim_hub.tiler``).
 
 Pure geometry - no DB, no storage, no HTTP. We synthesise a monolithic GLB
 with trimesh (a grid of named boxes, one per "element"), run it through the

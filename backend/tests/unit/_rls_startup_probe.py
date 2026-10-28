@@ -1,4 +1,4 @@
-"""Separate-process real startup probe; invoked only with a private test cluster."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Separate-process real startup probe; invoked only with a private test cluster."""
 
 from __future__ import annotations
 

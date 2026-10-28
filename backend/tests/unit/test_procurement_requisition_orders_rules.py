@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - requisition approvers, line order progress and the feed cursor (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - requisition approvers, line order progress and the feed cursor (issue #516).
 
 Each check is shown failing on the case it exists for and passing on its
 neighbour. Pure Python, no database.

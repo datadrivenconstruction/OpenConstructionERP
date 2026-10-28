@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Hours booked on site, read back against the bill position that predicted them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hours booked on site, read back against the bill position that predicted them.
 
 The money side of this report was already here. This is the other half an
 estimator asks for: an estimate written from productivity norms predicts labour

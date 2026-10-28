@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Red control for the upload advertised-versus-enforced gate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Red control for the upload advertised-versus-enforced gate.
 
 A gate whose two sides are equal by construction is green forever and proves
 nothing. These tests perturb one side at a time and assert the gate in

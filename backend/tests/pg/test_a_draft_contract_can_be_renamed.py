@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A draft contract can be renamed; a signed one keeps its code.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A draft contract can be renamed; a signed one keeps its code.
 
 The code could not be changed through PATCH at all, so a code typed by mistake
 was freed only by deleting the draft and writing it again. A draft's code is a

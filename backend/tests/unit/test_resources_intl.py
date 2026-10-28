@@ -1,4 +1,4 @@
-"""Unit tests for the pure international resource-planning helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure international resource-planning helpers.
 
 These tests are database-free: every helper in ``app.modules.resources.intl``
 is a pure function, so the suite imports it directly and asserts behaviour,

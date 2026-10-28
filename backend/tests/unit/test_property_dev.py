@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`app.modules.property_dev`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.modules.property_dev`.
 
 Scope:
     Covers pure helpers (freeze deadline, selection totals, option

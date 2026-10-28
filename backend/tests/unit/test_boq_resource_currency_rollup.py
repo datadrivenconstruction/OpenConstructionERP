@@ -1,4 +1,4 @@
-"""Issue #111 (skolodi follow-up) — resource-level currency in section subtotal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #111 (skolodi follow-up) — resource-level currency in section subtotal.
 
 The owner's v2.9.29 fix and #131 converted a position priced in a foreign
 currency *via* ``metadata.currency``.  The contributor's actual data

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Drawing revision compare - API contract end to end.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Drawing revision compare - API contract end to end.
 
 1. A PDF compare computed in the browser is stored against two takeoff
    documents of the project; regions off the sheet, a self-compare and a

@@ -1,4 +1,4 @@
-"""Unit tests for the per-resource variant re-pick helper logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the per-resource variant re-pick helper logic.
 
 These tests exercise the pure-data branch of
 ``BOQService.repick_resource_variant`` indirectly through the

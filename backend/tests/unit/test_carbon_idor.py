@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Round-5 carbon module audit — IDOR, race, bulk-insert, allowlist tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-5 carbon module audit — IDOR, race, bulk-insert, allowlist tests.
 
 This complements the existing ``test_carbon.py`` pure-math coverage with
 the security + correctness guarantees added in the Round-5 sweep:

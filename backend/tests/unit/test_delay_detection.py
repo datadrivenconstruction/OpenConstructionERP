@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the heuristic delay-signal detector.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the heuristic delay-signal detector.
 
 Covers per-category detection from representative sentences, the bounded
 confidence score and its ordering, the empty / no-match contract, and the

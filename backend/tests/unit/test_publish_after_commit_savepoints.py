@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``publish_after_commit`` must follow the fate of the transaction it was deferred in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``publish_after_commit`` must follow the fate of the transaction it was deferred in.
 
 An event deferred inside a SAVEPOINT describes work done inside that savepoint.
 When the savepoint is rolled back the work is gone, so the event must go with

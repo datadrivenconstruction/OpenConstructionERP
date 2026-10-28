@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Exchange fidelity reports and proportional scaling, against real rows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Exchange fidelity reports and proportional scaling, against real rows.
 
 * every interchange export stores its report and names it in a header; the
   register lists it, a report of another bill answers 404, the download

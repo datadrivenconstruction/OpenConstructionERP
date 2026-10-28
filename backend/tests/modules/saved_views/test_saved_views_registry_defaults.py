@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``default_columns`` has to resolve, or a run silently returns fewer columns.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``default_columns`` has to resolve, or a run silently returns fewer columns.
 
 A spec that names its own columns is checked by ``FilterSpec.bind``. The
 default set is not: it is read straight out of the registration when a spec

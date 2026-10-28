@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the dispute-risk, decision-impact and change-watch
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the dispute-risk, decision-impact and change-watch
 service compositions (PostgreSQL, py3.12).
 
 These three reads each gather a project's change-family records and feed them to

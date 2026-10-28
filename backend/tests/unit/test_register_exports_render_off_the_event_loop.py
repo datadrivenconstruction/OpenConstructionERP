@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Register exports and letters are written in a worker thread, not on the loop.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Register exports and letters are written in a worker thread, not on the loop.
 
 One worker serves every user of an install, and a file written on its event
 loop answers nobody else until the last row is on the page. The whole active

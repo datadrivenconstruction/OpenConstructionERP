@@ -1,4 +1,4 @@
-"""Integration: CDE per-project settings + the go-live invite gate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: CDE per-project settings + the go-live invite gate.
 
 Exercises the setup-wizard persistence (GET/PATCH /v1/cde/settings) and the
 go-live gate (GET /v1/cde/go-live) end to end through the public API, plus the

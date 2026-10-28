@@ -1,4 +1,4 @@
-"""Localization tests for the daily-diary PDF export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Localization tests for the daily-diary PDF export.
 
 The diary PDF used to come out hardcoded English regardless of the
 request language, and rendered the ``weather_summary`` snapshot as raw

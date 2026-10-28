@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The tax seed reconciler, against the two cohorts it has to tell apart.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The tax seed reconciler, against the two cohorts it has to tell apart.
 
 Why the fixtures are built the way they are
 -------------------------------------------

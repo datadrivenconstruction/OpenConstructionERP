@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the schedule interchange model (T1.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the schedule interchange model (T1.1).
 
 Stdlib + the pure module only, so they run on the local Python 3.11 runner
 without the ORM / DB. Focus: export captures every column, the parse -> emit

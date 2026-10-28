@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration tests for the BCF 3.0 clash-export endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the BCF 3.0 clash-export endpoint.
 
 The test suite runs against the PostgreSQL cluster provisioned by
 ``tests/conftest.py`` (the engine is already bound to PostgreSQL before

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Baseline service tests for the dwg_takeoff module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline service tests for the dwg_takeoff module.
 
 Three small scenarios covering the three correctness properties we
 care about most for v4.3 Round-3 Wave-A:

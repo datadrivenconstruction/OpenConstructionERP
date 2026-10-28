@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The HSE frame's rules against PostgreSQL, through the service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The HSE frame's rules against PostgreSQL, through the service.
 
 One walk over a German project: the facts decide the duties, the register comes
 from the catalogue, nothing is "met" by silence, submitting is refused with the

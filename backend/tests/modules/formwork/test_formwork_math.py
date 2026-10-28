@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure quantity-surveying math behind the formwork rate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure quantity-surveying math behind the formwork rate.
 
 No database and no app: these exercise ``compute_cost``, ``single_use_cost``
 and ``derive_cycle`` directly, which is where the module's domain claims live.

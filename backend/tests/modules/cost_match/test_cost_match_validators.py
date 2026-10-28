@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``cost_match`` rule set, exercised through the core validation engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``cost_match`` rule set, exercised through the core validation engine.
 
 No database: the rules are pure and read plain dicts, so these drive
 ``evaluate_result`` / ``evaluate_run`` directly. Going through the engine is

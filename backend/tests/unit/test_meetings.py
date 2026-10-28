@@ -1,4 +1,4 @@
-"""Unit tests for :class:`MeetingService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`MeetingService`.
 
 Scope:
     CRUD, status transitions, attendee/agenda/action-item management,

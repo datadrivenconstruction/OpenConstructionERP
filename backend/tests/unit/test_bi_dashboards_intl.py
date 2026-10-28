@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""DB-free unit tests for the BI Dashboards international helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for the BI Dashboards international helpers.
 
 These pin the pure, no-I/O helpers in ``app.modules.bi_dashboards.intl``:
 Decimal-exact aggregation, currency-safe money grouping, a zero-prior-guarded

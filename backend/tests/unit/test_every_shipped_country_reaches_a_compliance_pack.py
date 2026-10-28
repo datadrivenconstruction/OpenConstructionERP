@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A country the product ships for must reach a compliance pack, or be named here.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country the product ships for must reach a compliance pack, or be named here.
 
 The failure this file exists to catch is silent. ``resolve_pack`` answers for
 every country, because an unmatched one falls back to ``universal``, and the

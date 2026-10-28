@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Retention accrues on claims by policy and goes back through releases billed on a claim.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Retention accrues on claims by policy and goes back through releases billed on a claim.
 
 What was wrong before: a release was an entry appended to the contract's
 metadata, counted as paid the moment it was written, with no documents behind

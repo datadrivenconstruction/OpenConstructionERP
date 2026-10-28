@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the Data & Security posture builder (#4, pure, py3.11-safe).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the Data & Security posture builder (#4, pure, py3.11-safe).
 
 The builder backs the in-product trust panel. These tests pin the contract the
 frontend renders: AI status is derived from the configured provider names, the

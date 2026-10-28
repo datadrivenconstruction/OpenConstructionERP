@@ -1,4 +1,4 @@
-"""Unit tests for BOQ event wiring + vector-indexing error logging (v2.4.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for BOQ event wiring + vector-indexing error logging (v2.4.0).
 
 Two audit findings are exercised here:
 

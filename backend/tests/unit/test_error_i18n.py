@@ -1,4 +1,4 @@
-"""Tests for HTTPException detail i18n wiring (errors.* namespace).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for HTTPException detail i18n wiring (errors.* namespace).
 
 Covers:
   - Every audited ``errors.*`` key resolves in en / de / ru bundles

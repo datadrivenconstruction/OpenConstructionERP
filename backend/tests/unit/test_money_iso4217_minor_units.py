@@ -1,4 +1,4 @@
-"""ISO-4217 minor-unit handling — Audit I1.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ISO-4217 minor-unit handling — Audit I1.
 
 The ``MoneyValue.convert`` method used to hardcode ``Decimal("0.01")``
 as the quantisation quantum for the converted amount, regardless of

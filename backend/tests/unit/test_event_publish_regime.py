@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Guard the synchronous-publish contract unit tests are written against.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Guard the synchronous-publish contract unit tests are written against.
 
 ``tests/conftest.py`` replaces ``event_bus.publish_detached`` so a test can call
 a service and assert on its own recorder on the very next line, with no await in

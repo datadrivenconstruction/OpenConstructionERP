@@ -1,4 +1,4 @@
-"""Regression tests for the backup restore data-loss footgun.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for the backup restore data-loss footgun.
 
 Export is scoped to the requesting user's own project graph, but restore in
 ``replace`` mode used to run an unconditional ``DELETE FROM <table>`` over

@@ -1,4 +1,4 @@
-"""A cost-file import that dies half-way must leave nothing behind, and say so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cost-file import that dies half-way must leave nothing behind, and say so.
 
 The endpoint stages its rows through ``bulk_import``, which adds and flushes but
 never commits; the request-scoped session commits once when the endpoint returns

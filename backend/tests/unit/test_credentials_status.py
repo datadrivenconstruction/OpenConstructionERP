@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure status derivation and label localization for the credentials registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure status derivation and label localization for the credentials registry.
 
 Pins the jurisdiction-neutral status maths: a perpetual credential stays active,
 the reminder window is inclusive on the boundary day, an expired window flips to

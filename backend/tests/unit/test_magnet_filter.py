@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the magnet-candidate suppressor.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the magnet-candidate suppressor.
 
 Coverage:
     * Query classifier: confidence buckets from BIM vs sparse envelopes

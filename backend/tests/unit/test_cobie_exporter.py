@@ -1,4 +1,4 @@
-"""Unit tests for the COBie UK 2.4 workbook builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the COBie UK 2.4 workbook builder.
 
 Structural tests (sheet names + header rows + row counts) instead of a
 full byte-for-byte snapshot, because openpyxl embeds build metadata

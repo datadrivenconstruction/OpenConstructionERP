@@ -1,4 +1,4 @@
-"""Integration: /api/v1/jobs/* status endpoints (RFC 34 §4 W0.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: /api/v1/jobs/* status endpoints (RFC 34 §4 W0.1).
 
 Verifies that the read-only status surface for the job runner works
 end-to-end via the FastAPI test client. We mount only the jobs router

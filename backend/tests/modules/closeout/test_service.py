@@ -1,4 +1,4 @@
-"""Closeout service logic tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout service logic tests.
 
 Covers checklist seeding per project type, completeness recompute + gaps,
 bind / verify flow, suggest-bindings (suggests without binding), and the

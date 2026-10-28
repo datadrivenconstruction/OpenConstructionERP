@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The GAEB import must PERSIST the LV hierarchy, not only parse it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The GAEB import must PERSIST the LV hierarchy, not only parse it.
 
 The importer emits ``BoQCtgy`` section rows parent-before-children (proven by
 ``test_gaeb_frankfurt_fixture.py``), but the persistence step used to drop the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The payment record under a subcontract cannot be deleted from one level down.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The payment record under a subcontract cannot be deleted from one level down.
 
 ``delete_subcontractor`` refuses a firm that holds an agreement, because the
 delete cascades and would take the payment applications and retention ledger

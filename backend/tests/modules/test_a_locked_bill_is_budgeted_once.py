@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A locked bill is the project budget once, however many ways it gets there.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A locked bill is the project budget once, however many ways it gets there.
 
 Locking a bill seeds the finance budget (``costmodel.budget.generated`` ->
 ``FinanceService.seed_budget_from_boq``, rows in category ``estimate``). The

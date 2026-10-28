@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Code lists: order, placement, validation of uploads, and the shipped data."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Code lists: order, placement, validation of uploads, and the shipped data."""
 
 from __future__ import annotations
 

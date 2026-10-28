@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Orchestrator for the element-to-CWICR vector match evaluation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Orchestrator for the element-to-CWICR vector match evaluation.
 
 Loads :file:`golden_set.yaml`, calls the match service for each entry,
 feeds candidates through the judge, aggregates metrics, and (optionally)

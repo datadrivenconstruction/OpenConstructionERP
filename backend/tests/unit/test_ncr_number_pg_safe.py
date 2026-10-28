@@ -1,4 +1,4 @@
-"""Regression: ``next_ncr_number`` must survive non-canonical NCR numbers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: ``next_ncr_number`` must survive non-canonical NCR numbers.
 
 PostgreSQL casts an empty or non-numeric string to integer strictly
 (``invalid input syntax for type integer: ""``), unlike SQLite which silently

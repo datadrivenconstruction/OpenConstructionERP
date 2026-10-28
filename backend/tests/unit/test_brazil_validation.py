@@ -1,4 +1,4 @@
-"""Unit tests for the NBR 12721 (ABNT Brazil) validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the NBR 12721 (ABNT Brazil) validation rules.
 
 The ABNT NBR 12721 cost-group hierarchy uses sections S1..S11 to organise
 construction scope. These tests confirm:

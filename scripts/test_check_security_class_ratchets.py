@@ -1,4 +1,4 @@
-"""The security-class ratchet sees each advisory's shape and stays quiet on the fix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The security-class ratchet sees each advisory's shape and stays quiet on the fix.
 
 Every case is a small module written to a temporary tree, in the shape the
 advisory had before it was fixed and in the shape it has now. A guard that

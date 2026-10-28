@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The vector arithmetic every link of the chain shares: build, store as percent, expand to cents."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The vector arithmetic every link of the chain shares: build, store as percent, expand to cents."""
 
 from __future__ import annotations
 

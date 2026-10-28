@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure rules of the plant register (SPEC section 4), table-driven.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure rules of the plant register (SPEC section 4), table-driven.
 
 Each case names the rule it guards and would pass if the rule were missing
 only by accident: the expected values differ from what the naive formula or

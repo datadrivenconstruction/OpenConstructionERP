@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prepare Authenticode signing through Azure Artifact Signing, or stand down.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Prepare Authenticode signing through Azure Artifact Signing, or stand down.
 
 Called by the Windows legs of ``.github/workflows/desktop-release.yml``. It
 decides from which secrets are present, and it is a no-op without them, so the

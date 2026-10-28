@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A remedy the reader cannot carry out is worse than no remedy at all.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A remedy the reader cannot carry out is worse than no remedy at all.
 
 Every hint in the doctor was written for a pip install, which is where most of
 them are read. The desktop build has no pip in it: ``sys.executable`` is the

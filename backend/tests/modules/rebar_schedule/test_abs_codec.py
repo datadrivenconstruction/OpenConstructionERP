@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Reading and writing ABS records."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reading and writing ABS records."""
 
 from decimal import Decimal
 

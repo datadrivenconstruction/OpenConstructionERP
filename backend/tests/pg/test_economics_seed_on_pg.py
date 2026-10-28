@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo seed fills a demo project's economics from its own bill, and only that.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seed fills a demo project's economics from its own bill, and only that.
 
 The figures are derived from the bill (every frame group rounded up to 100 000, the markups likewise
 as the allowance), the sources add up to the frame to the cent, and a re-run adds nothing.

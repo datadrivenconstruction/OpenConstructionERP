@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A diacritic must not decide which trade a line item lands in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A diacritic must not decide which trade a line item lands in.
 
 The classifier matches keyword substrings, so before accents were folded the
 answer depended on whether the export that produced the text kept its marks:

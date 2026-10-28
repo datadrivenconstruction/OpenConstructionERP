@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The sample ABS file the rebar schedule page offers for download.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The sample ABS file the rebar schedule page offers for download.
 
 A first-time user downloads it, or loads it with one click, to see what an ABS
 import does before they have a file of their own. A sample that the module's

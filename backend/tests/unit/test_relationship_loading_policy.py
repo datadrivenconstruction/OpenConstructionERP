@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every relationship() must declare an explicit lazy= strategy.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every relationship() must declare an explicit lazy= strategy.
 
 A ``relationship()`` with no ``lazy=`` gets SQLAlchemy's default ``select``.
 Touched on an instance that came back from the identity map inside an async

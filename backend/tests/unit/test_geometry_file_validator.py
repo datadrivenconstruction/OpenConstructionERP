@@ -1,4 +1,4 @@
-"""Sanity-tests for ``_validate_geometry_file`` and ``_convert_dae_to_glb``
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Sanity-tests for ``_validate_geometry_file`` and ``_convert_dae_to_glb``
 size-guard in ``app.modules.bim_hub.ifc_processor``.
 
 Why these exist

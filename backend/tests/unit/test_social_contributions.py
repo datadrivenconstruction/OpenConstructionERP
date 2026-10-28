@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Statutory social insurance contributions, resolved by country, cohort and date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statutory social insurance contributions, resolved by country, cohort and date.
 
 Saudi Arabia is the first country in the table and the reason it has a cohort
 axis: since the Social Insurance Law came into force on 2024-07-03, a Saudi

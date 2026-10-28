@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for ``POST /api/v1/match_elements/sessions/from-image``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ``POST /api/v1/match_elements/sessions/from-image``.
 
 The image source (MAPPING_PROCESS.md §3.1 / §4.1.4) lets an estimator
 upload one site photo / drawing snapshot; the file is bound to the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Readiness evidence provider registry: registration, blocking, failure, not-applicable areas."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Readiness evidence provider registry: registration, blocking, failure, not-applicable areas."""
 
 from __future__ import annotations
 

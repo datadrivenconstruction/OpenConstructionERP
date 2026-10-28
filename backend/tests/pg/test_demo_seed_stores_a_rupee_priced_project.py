@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A rupee-priced demo has to survive the trip into PostgreSQL and back.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A rupee-priced demo has to survive the trip into PostgreSQL and back.
 
 Pricing each demo project in its own currency multiplied the money by up to
 fifty five, and the two ways that breaks are both invisible from a unit test

@@ -1,4 +1,4 @@
-"""Integration tests for the per-user module info-card collapse API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the per-user module info-card collapse API.
 
 Mirrors the dashboard-layout / sidebar-preferences suites. The endpoints move
 the DismissibleInfo collapse state off per-browser localStorage onto the user

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The deadline register has to name whoever the row was given to.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The deadline register has to name whoever the row was given to.
 
 ``owner_user_id`` is normalised from columns that carry no foreign key, and the
 three writers behind them store three different things: a contact id when the

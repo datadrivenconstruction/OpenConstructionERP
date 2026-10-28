@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Statutory labour facts are sourced, dated data, and unconfirmed ones cannot be enforced.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statutory labour facts are sourced, dated data, and unconfirmed ones cannot be enforced.
 
 The catalogue is ``app/core/country_data/labour_standards.json``. The point of
 the split between :func:`standard` and :func:`hard_standard` is that a fact the

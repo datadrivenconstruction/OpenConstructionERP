@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A stored appearance must reach the page, not just the store.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A stored appearance must reach the page, not just the store.
 
 ``test_pdf_appearance`` proves the settings file round-trips and that the
 defaults still equal the literals the drawing code used to hold. Neither of

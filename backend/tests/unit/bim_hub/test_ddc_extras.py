@@ -1,4 +1,4 @@
-"""Unit tests for ``app.modules.bim_hub.ddc_extras`` (RFC 34 W0.2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``app.modules.bim_hub.ddc_extras`` (RFC 34 W0.2).
 
 The tests exercise the three public helpers — :func:`geometry_signature`,
 :func:`property_set_diff`, :func:`material_signature` — using synthetic

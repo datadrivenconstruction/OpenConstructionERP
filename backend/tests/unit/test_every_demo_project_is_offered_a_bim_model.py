@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every demo project is offered a BIM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every demo project is offered a BIM model.
 
 ``install_demo_project`` only attaches CAD/BIM assets when
 ``bundle_key_for(demo_id)`` returns a bundle. A demo template that is missing

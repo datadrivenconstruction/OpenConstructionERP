@@ -1,4 +1,4 @@
-"""An imported bill's codes satisfy the project's national code rule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An imported bill's codes satisfy the project's national code rule.
 
 An Indian bill of quantities carries the CPWD DSR item number of every line
 in its code column. The importer filed it under ``code`` and the rule

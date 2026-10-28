@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The QA reset reads the Host header last, so a spoofed Host opens nothing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The QA reset reads the Host header last, so a spoofed Host opens nothing.
 
 The hostname gate reads ``Host``, which any caller sets. It may only ever add
 a refusal on top of the gates a caller cannot forge, the environment switch

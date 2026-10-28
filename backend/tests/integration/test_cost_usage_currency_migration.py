@@ -1,4 +1,4 @@
-"""Legacy usage amounts keep an unknown currency through the additive migration."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Legacy usage amounts keep an unknown currency through the additive migration."""
 
 import importlib.util
 import uuid

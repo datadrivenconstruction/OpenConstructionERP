@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The contracts subscribers that follow the schedule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The contracts subscribers that follow the schedule.
 
 They are bound when the module's events file is imported, never raise into
 the publisher, ignore a payload they cannot act on, and only refresh

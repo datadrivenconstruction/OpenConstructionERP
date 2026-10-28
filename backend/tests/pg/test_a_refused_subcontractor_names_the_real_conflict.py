@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: a subcontractor the database refuses names the real conflict.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a subcontractor the database refuses names the real conflict.
 
 ``create_subcontractor`` answered every ``IntegrityError`` with "A
 subcontractor with this tax_id already exists.", but nothing in the database

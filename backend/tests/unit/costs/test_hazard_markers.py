@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Hazardous-material markers read from data, in every cost database language."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hazardous-material markers read from data, in every cost database language."""
 
 from __future__ import annotations
 

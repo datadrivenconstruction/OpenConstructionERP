@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the stored-message parser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the stored-message parser.
 
 Builds sample raw messages inline and asserts header, threading, body, and
 attachment parsing, plus the contract that malformed or empty input does not

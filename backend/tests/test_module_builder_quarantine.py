@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A module installed by a generator that wrote names into code unescaped.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A module installed by a generator that wrote names into code unescaped.
 
 Up to generator 2 a name holding quotes could end the docstring it was
 written into and leave a statement of its own behind, which ran every time

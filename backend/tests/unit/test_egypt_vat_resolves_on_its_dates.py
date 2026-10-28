@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egypt's VAT and its construction line price at the rate of the document's own date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egypt's VAT and its construction line price at the rate of the document's own date.
 
 Read against the shipped seed file, never a fixture. The day that tells the
 answers apart is 2025-07-18, when Law No. 157 of 2025 moved construction and

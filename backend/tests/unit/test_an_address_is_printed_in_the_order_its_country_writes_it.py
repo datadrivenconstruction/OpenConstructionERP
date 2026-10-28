@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One address order was printed for every country, and it was Europe's.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One address order was printed for every country, and it was Europe's.
 
 The invoice page joined the post code to the city in that order for every party
 it has ever printed. That is right for the DACH countries and for the rest of

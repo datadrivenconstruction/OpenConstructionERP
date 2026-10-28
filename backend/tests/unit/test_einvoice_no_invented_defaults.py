@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An unconfigured field must stay unset all the way to the document.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An unconfigured field must stay unset all the way to the document.
 
 An e-invoice is a legal statement. BT-40 (seller country) and BT-5 (invoice
 currency) are mandatory under EN 16931, and a document that answers them with a

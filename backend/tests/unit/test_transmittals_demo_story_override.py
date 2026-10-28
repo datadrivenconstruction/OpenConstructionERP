@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The transmittals demo seed is driven entirely by the project story."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The transmittals demo seed is driven entirely by the project story."""
 
 from __future__ import annotations
 

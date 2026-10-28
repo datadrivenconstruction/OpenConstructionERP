@@ -1,4 +1,4 @@
-"""Tests for the LanceDB filter injection guard (audit fix 2026-05-28).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the LanceDB filter injection guard (audit fix 2026-05-28).
 
 ``_safe_quote_scalar`` is the boundary function that prevents SQL injection
 via attacker-controlled string values (region, project_id, tenant_id) that

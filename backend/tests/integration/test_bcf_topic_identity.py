@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""A topic can be addressed by its BCF GUID, not only by its surrogate id.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A topic can be addressed by its BCF GUID, not only by its surrogate id.
 
 ``TopicResponse`` publishes ``guid`` and nothing else that identifies the
 topic, so every client that reads a topic and then edits it can only address it

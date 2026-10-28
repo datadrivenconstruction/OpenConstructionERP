@@ -1,4 +1,4 @@
-"""Unit tests: QMS FSM (Finite State Machine) allowlist enforcement.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests: QMS FSM (Finite State Machine) allowlist enforcement.
 
 Every status-transition guard (inspection, NCR, punch item, audit, ITP plan)
 is covered — both legal moves that must succeed and illegal moves that must

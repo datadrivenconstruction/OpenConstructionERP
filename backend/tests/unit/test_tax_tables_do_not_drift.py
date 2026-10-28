@@ -1,4 +1,4 @@
-"""Five tax tables, hand-maintained, that can silently disagree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Five tax tables, hand-maintained, that can silently disagree.
 
 The platform carries VAT rates in five unrelated places:
 

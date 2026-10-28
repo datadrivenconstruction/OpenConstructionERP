@@ -1,4 +1,4 @@
-"""Unit tests for the UBL-TR 1.2.1 (e-Fatura / e-Arşiv Fatura) invoice writer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the UBL-TR 1.2.1 (e-Fatura / e-Arşiv Fatura) invoice writer.
 
 Structural assertions with ElementTree, one byte-stable golden document, the
 element order against sequences derived from the official XSD, and an optional

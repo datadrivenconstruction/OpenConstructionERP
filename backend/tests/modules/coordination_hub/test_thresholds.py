@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Coordination Hub threshold endpoints + evaluation contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Coordination Hub threshold endpoints + evaluation contract.
 
 Covers:
     * default seeding on first read

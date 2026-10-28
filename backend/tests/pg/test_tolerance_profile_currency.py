@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: v3306 lands on tolerance profiles that already exist.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: v3306 lands on tolerance profiles that already exist.
 
 ``env.py`` short-circuits a blank database to ``create_all`` plus
 ``stamp heads``, so "empty database, upgrade head" runs no revision at all and

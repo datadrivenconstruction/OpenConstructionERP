@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the revision-compare -> variation handoff (Item 17).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the revision-compare -> variation handoff (Item 17).
 
 The deterministic diff math itself is locked in by
 ``tests/unit/test_dwg_compare.py``. This file covers the pieces the

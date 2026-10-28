@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Item state machine table, the shipped catalogues, and the approval target kind.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Item state machine table, the shipped catalogues, and the approval target kind.
 
 The catalogue tests read every shipped file through module 1's kind registry,
 so a schedule that does not validate, bands that are not monotonic, a

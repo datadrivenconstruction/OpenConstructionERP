@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for PO retainage logic (Gap F).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for PO retainage logic (Gap F).
 
 Two layers:
 

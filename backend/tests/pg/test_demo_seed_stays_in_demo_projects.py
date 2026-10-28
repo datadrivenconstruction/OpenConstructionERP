@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Demo data belongs to demo projects, and a demo the user removed stays removed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo data belongs to demo projects, and a demo the user removed stays removed.
 
 A self-hosted install reported three things after deleting the demo projects:
 the deleted projects kept showing up on the dashboard and answered "Project not

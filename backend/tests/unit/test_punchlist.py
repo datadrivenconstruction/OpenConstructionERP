@@ -1,4 +1,4 @@
-"""Unit tests for :class:`PunchListService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`PunchListService`.
 
 Scope:
     Covers punch item CRUD, status transition workflow

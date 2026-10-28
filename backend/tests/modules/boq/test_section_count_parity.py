@@ -1,4 +1,4 @@
-"""A bill's card and the bill itself must count the same line items.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill's card and the bill itself must count the same line items.
 
 A section header is stored with one of two spellings of ``Position.unit``:
 ``""`` is what the demo seeders write, ``"section"`` is what

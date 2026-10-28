@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Hardening tests for the ``projects`` module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hardening tests for the ``projects`` module.
 
 Covers the four security/correctness fixes shipped alongside this file:
 

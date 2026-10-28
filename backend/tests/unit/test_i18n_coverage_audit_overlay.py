@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The coverage audit measures a regional variant against its base language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The coverage audit measures a regional variant against its base language.
 
 en-US, es-MX, es-CL, es-CO and pt-BR carry only the words that differ from en,
 es and pt. Every other key is answered by the base file, and a reader of the

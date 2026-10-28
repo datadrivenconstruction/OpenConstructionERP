@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the revision-compare diff logic (Item 17).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the revision-compare diff logic (Item 17).
 
 The diff helpers are pure functions — no DB, no FastAPI — so they are
 the right place to lock in the correctness properties the design calls

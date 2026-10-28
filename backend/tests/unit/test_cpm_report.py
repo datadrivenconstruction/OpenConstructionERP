@@ -1,4 +1,4 @@
-"""Unit tests for the claims-grade quality-report assembly (cpm_report).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the claims-grade quality-report assembly (cpm_report).
 
 Pure (stdlib only) - exercises the full ``quality_report`` aggregation over a
 small hand-built network so the wiring between ``compute_cpm`` and every

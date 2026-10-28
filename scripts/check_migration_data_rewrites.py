@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Report migrations whose upgrade() rewrites rows in a table it did not create.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Report migrations whose upgrade() rewrites rows in a table it did not create.
 
 Grew out of #126: a migration that filled a pre-existing 1724 MB table inside
 the single transaction Alembic wraps a whole upgrade() run in died with

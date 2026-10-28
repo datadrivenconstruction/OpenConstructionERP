@@ -1,4 +1,4 @@
-"""A data directory with a live postmaster must not get a second one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A data directory with a live postmaster must not get a second one.
 
 Two OpenConstructionERP processes on one machine share ``~/.openestimate``, and
 the desktop launcher can decide to start a backend while another one is already

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Linux and macOS converter packages: pins, host selection, install, command lines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Linux and macOS converter packages: pins, host selection, install, command lines.
 
 The release carries one ``.tar.gz`` per tool, OS and architecture. These tests
 run the real installer and the real archive reader against synthetic packages;

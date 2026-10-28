@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The date the seeder computes for an RFI has to be the date the row ends up with.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The date the seeder computes for an RFI has to be the date the row ends up with.
 
 ``created_at`` carries a Python-side ``default`` and a ``server_default``, so a
 value passed to the constructor is one the ORM can yield on and the database can

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Seven writes on global reference tables used to authenticate and stop there.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seven writes on global reference tables used to authenticate and stop there.
 
 ``POST``/``PATCH``/``DELETE`` on exchange rates, work calendars and tax
 configurations each declared a ``CurrentUserId`` it underscore-prefixed and

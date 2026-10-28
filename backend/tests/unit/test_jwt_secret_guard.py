@@ -1,4 +1,4 @@
-"""JWT secret guard — security audit 2026-05-24 follow-up.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠JWT secret guard — security audit 2026-05-24 follow-up.
 
 The model validator ``_refuse_default_jwt_in_non_dev`` on ``Settings`` is the
 single point that prevents a fresh ``docker compose up`` from accidentally

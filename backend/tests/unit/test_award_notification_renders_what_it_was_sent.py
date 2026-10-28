@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The award notification renders the values its publisher actually sent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The award notification renders the values its publisher actually sent.
 
 A subscriber that reads a key its publisher does not emit says nothing about
 it. ``str(data.get("award_amount") or "")`` yields an empty string, the

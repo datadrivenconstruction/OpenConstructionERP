@@ -1,4 +1,4 @@
-"""Integration tests for ``GET /api/v1/dashboard/rollup/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ``GET /api/v1/dashboard/rollup/``.
 
 Verifies the four key contracts:
 

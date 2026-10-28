@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Which copilot proposal decides a legacy line's provenance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which copilot proposal decides a legacy line's provenance.
 
 The last proposal that was actually written wins; dismissed, failed and
 pending ones never touched the line. A confidence outside 0..1 or unreadable

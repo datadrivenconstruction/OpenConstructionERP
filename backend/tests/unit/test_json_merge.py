@@ -1,4 +1,4 @@
-"""Unit + guard tests for the canonical ``metadata_`` merge helper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit + guard tests for the canonical ``metadata_`` merge helper.
 
 ``merge_metadata`` (``app.core.json_merge``) is the single source of truth
 for the PATCH-merges-into-metadata contract that ~30 modules rely on. These

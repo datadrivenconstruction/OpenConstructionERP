@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A request a proxy forwarded is not a request from this machine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A request a proxy forwarded is not a request from this machine.
 
 The desktop bootstrap logs the caller in as the workspace owner without a
 password, and it trusted any request whose peer address was loopback. A

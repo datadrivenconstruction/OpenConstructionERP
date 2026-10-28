@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Canadian project that names its province works the province's holidays.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Canadian project that names its province works the province's holidays.
 
 The federal list was the only Canadian one, so an Ontario schedule worked
 Family Day and stopped on Remembrance Day, and a Quebec one worked 24 June.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Benchmark sets, unit conversion and the estimate-against-history check.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Benchmark sets, unit conversion and the estimate-against-history check.
 
 What an estimator relies on here:
 

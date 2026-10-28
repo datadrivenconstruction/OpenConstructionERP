@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure AI feedback rollup engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure AI feedback rollup engine.
 
 Dependency-free: exercises :func:`summarize_feedback` directly so the overall /
 per-surface counts, the alphabetical surface order, and the "no verdicts ->

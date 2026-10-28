@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A decided variation is kept: the edit guards now hold against delete as well.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A decided variation is kept: the edit guards now hold against delete as well.
 
 ``update_order`` refuses a completed or voided variation order because its money
 has already moved: completing a VO bumps the contract sum and the final account

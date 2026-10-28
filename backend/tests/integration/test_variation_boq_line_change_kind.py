@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What a variation line does to its source, recorded, summed and judged.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a variation line does to its source, recorded, summed and judged.
 
 Issue #435. A trace row said where a line of a variation's bill came from - the
 schedule-of-values line it affects, the estimating position it was priced

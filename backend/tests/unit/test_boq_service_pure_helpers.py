@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-function unit tests for the BOQ service helper layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function unit tests for the BOQ service helper layer.
 
 These pin the small, side-effect-free helpers in
 ``app.modules.boq.service`` that no DB session can exercise but that several

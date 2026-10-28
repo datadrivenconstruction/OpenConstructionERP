@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ai_estimate — cost-tracking pure-arithmetic tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ai_estimate — cost-tracking pure-arithmetic tests.
 
 Closes the parity gap the prior audit flagged
 (`backend/app/modules/ai/__cost_tracking_followup.md`): both

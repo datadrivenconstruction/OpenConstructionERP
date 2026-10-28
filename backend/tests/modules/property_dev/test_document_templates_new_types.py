@@ -1,4 +1,4 @@
-"""Tests for the new PDF generators shipped in v3124.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the new PDF generators shipped in v3124.
 
 Covers the six new sales-pipeline templates:
 

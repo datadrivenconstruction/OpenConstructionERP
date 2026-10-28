@@ -1,4 +1,4 @@
-"""Resources module IDOR regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resources module IDOR regression suite.
 
 The ``/api/v1/resources/`` router exposes endpoints keyed off
 ``project_id`` for the resource-request and assignment flows, plus a

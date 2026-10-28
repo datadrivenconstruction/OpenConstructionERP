@@ -1,4 +1,4 @@
-"""A validation run is timed with a clock fine enough to see it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A validation run is timed with a clock fine enough to see it.
 
 ``time.monotonic()`` on Windows is backed by the interrupt timer and advances
 in steps of about 15.625 ms. A validation pass over a few hundred rules is

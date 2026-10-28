@@ -1,4 +1,4 @@
-"""Shared fixtures for property_dev R7 security tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for property_dev R7 security tests.
 
 The test suite runs against the PostgreSQL cluster provisioned by the
 top-level ``tests/conftest.py``, which binds the SQLAlchemy engine before

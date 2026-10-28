@@ -1,4 +1,4 @@
-"""Tests for ranker_qdrant's payload-derived fallbacks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for ranker_qdrant's payload-derived fallbacks.
 
 When the snapshot install populates Qdrant vectors but the SQL/parquet
 side is empty (the v3.0.x default — only metadata in the snapshot),

@@ -1,4 +1,4 @@
-"""A Polish detailed estimate puts each narzut on its own component base.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Polish detailed estimate puts each narzut on its own component base.
 
 In the kalkulacja szczegolowa Kz (koszty zakupu) is taken on materials, Kp
 (koszty posrednie) on labour and equipment, and Z (zysk) on labour, equipment

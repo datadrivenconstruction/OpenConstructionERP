@@ -1,4 +1,4 @@
-"""Unit tests for the demo-seed choice mechanism (issue #272 / demo sign-in).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the demo-seed choice mechanism (issue #272 / demo sign-in).
 
 These cover the precedence that ``seed_demo_enabled()`` encodes and that both
 CLI flags rely on: ``SEED_DEMO`` in the environment wins, then the persisted

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every option the project create page offers must reach the registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every option the project create page offers must reach the registry.
 
 ``frontend/src/features/projects/CreateProjectPage.tsx`` holds two hand-written
 mirrors of ``app.core.classification_registry``, and both have shipped a defect

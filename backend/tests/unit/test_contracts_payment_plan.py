@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An instalment tied to a schedule milestone moves when the schedule does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An instalment tied to a schedule milestone moves when the schedule does.
 
 And the plan as a whole is checked against the statutory ceilings on what a
 consumer may be asked to pay before work starts, where one is recorded.

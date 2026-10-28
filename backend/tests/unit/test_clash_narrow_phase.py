@@ -1,4 +1,4 @@
-"""Mathematically-exact clash narrow-phase tests (no DB, no GLB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Mathematically-exact clash narrow-phase tests (no DB, no GLB).
 
 Builds :class:`ElementGeom` objects by hand and drives
 :class:`ClashService` directly with lightweight fake ``ClashRun`` /

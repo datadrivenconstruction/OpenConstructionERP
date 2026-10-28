@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A readiness message names its proof by title or evidence type, never by a raw id."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A readiness message names its proof by title or evidence type, never by a raw id."""
 
 from __future__ import annotations
 

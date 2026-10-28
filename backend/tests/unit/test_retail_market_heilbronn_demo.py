@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integrity tests for the Retail Market Heilbronn public showcase demo.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integrity tests for the Retail Market Heilbronn public showcase demo.
 
 The template (``app/core/demo_packs/retail_market_heilbronn.py``) is the
 ninth showcase project and carries a reconciled DIN 276 cost frame as a

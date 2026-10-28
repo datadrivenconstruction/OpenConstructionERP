@@ -1,4 +1,4 @@
-"""Integration tests for the per-user custom-unit catalogue.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the per-user custom-unit catalogue.
 
 ``PATCH /api/v1/users/me/custom-units/`` used to replace the stored list
 with the body. The client sent its own local copy, so two sessions under

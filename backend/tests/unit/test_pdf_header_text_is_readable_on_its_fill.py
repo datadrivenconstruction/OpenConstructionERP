@@ -1,4 +1,4 @@
-"""Text drawn on a dark filled rectangle has to be light enough to read.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Text drawn on a dark filled rectangle has to be light enough to read.
 
 A ``TableStyle`` command cannot reach a cell that holds a flowable. A table
 that fills its header row dark and then says ``("TEXTCOLOR", (0, 0), (-1, 0),

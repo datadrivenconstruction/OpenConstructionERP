@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Four registers name a party in prose; each must also point at one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Four registers name a party in prose; each must also point at one.
 
 Purchase orders, contracts, inspections and the punch list each have a column
 for the contact they are about, and every one of them was left null. On screen

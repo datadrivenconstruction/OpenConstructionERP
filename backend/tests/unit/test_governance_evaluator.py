@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The gate evaluator, one test group per behaviour of SPEC section 4.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The gate evaluator, one test group per behaviour of SPEC section 4.
 
 The evaluator is pure: plain values in, blockers and violations out. Every rule
 has a case that passes and, next to it, the smallest change that must make it

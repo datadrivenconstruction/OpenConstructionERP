@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A failed documents cross-link must not lose the uploaded CAD model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A failed documents cross-link must not lose the uploaded CAD model.
 
 READ THIS BEFORE WRITING ANY TRANSACTION-ISOLATION TEST IN THIS CODEBASE.
 

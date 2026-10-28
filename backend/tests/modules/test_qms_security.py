@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""R7 audit regressions — QMS module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 audit regressions — QMS module.
 
 Pins down the security guarantees the R7 sweep enforces over the QMS
 surface (42 endpoints, 5 state machines):

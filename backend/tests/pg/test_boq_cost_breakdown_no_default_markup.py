@@ -1,4 +1,4 @@
-"""PG: the cost breakdown must not invent overhead or profit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the cost breakdown must not invent overhead or profit.
 
 ``get_cost_breakdown`` used to fall back to a synthetic 15% overhead plus 10%
 profit whenever a BOQ had no markup rows, and fold both into ``grand_total``.

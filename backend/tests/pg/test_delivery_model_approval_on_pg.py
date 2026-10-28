@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How a delivery decision gets approved, and every way the review found it could go wrong.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How a delivery decision gets approved, and every way the review found it could go wrong.
 
 The carrier document is named by a tag in the governance catalogue and
 resolved at read time; no document of the area stands in for it. The mirror is

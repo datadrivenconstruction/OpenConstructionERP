@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the CPM engine's per-activity ``start_offset`` floor.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CPM engine's per-activity ``start_offset`` floor.
 
 ``app.core.cpm.calculate_cpm`` is the engine the schedule module's
 ``reschedule`` runs. A root activity has no predecessor, so before

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A cost base whose import was cut off is finished on request, not called loaded.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cost base whose import was cut off is finished on request, not called loaded.
 
 ``load_cwicr_region`` treats a region with more than ten rows as loaded. The
 import commits every 5 000 rows on its own, so an import cut by a proxy timeout

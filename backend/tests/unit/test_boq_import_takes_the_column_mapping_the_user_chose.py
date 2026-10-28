@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The column mapping a user picks in the import preview is the one the import uses.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The column mapping a user picks in the import preview is the one the import uses.
 
 The preview has always shown a dropdown per column, and the import never sent
 it: whatever the user chose, the bill was read with the importer's own guess,

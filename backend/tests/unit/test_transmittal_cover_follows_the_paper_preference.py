@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The paper preference reaches the paper, measured on the sheet itself.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The paper preference reaches the paper, measured on the sheet itself.
 
 Two defects met in this generator. ``oe_users_user.paper_size`` was offered in
 Settings, stored, and read by no generator in the tree; and the transmittal

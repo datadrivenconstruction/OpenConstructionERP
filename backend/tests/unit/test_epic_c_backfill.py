@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Epic C — alembic ``v3143`` backfill regression test.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic C — alembic ``v3143`` backfill regression test.
 
 Runs against PostgreSQL (the only supported dialect) inside an outer
 transaction that is rolled back on teardown, so the database starts

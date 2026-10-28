@@ -1,4 +1,4 @@
-"""Costs IDOR audit (v2.4.0 slice A — task #177).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Costs IDOR audit (v2.4.0 slice A — task #177).
 
 The ``/api/v1/costs/`` router exposes endpoints keyed off
 ``cost_item_id`` (a.k.a. ``item_id`` in the URL). Unlike most other

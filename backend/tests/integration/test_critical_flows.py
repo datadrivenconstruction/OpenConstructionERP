@@ -1,4 +1,4 @@
-"""Integration tests for critical API flows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for critical API flows.
 
 Tests end-to-end: HTTP -> Router -> Service -> Repository -> PostgreSQL.
 Covers: Contacts, Finance, Notifications, RFI, Module System,

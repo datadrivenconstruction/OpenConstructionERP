@@ -1,4 +1,4 @@
-"""BOQ import / export hardening regression tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ import / export hardening regression tests.
 
 Covers the cluster of bugs filed in
 ``BUGS_R2_R3_R4_2026_04_25.md`` against the BOQ import / export surface:

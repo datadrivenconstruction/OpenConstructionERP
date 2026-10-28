@@ -1,4 +1,4 @@
-"""Baseline shape tests for the ``cost_match`` module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline shape tests for the ``cost_match`` module.
 
 The matcher work has landed: the module now persists a run, its results
 and a per-result review decision, and exposes the three-tier surface

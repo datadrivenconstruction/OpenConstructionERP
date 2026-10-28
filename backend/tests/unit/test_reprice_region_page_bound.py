@@ -1,4 +1,4 @@
-"""Re-pricing a region must read it, and let go of it, one bounded page at a time.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Re-pricing a region must read it, and let go of it, one bounded page at a time.
 
 ``reprice_region`` used to pull the whole region into one buffered read - up to
 its own 250 000-item ceiling - and then walk it. Measured against a synthetic

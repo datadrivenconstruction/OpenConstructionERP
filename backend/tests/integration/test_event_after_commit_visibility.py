@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A cross-module subscriber must see the row the publisher told it about.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cross-module subscriber must see the row the publisher told it about.
 
 Every subscriber on the event bus opens its OWN session via
 ``async_session_factory()``. When the publisher is still inside an open

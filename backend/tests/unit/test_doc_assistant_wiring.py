@@ -1,4 +1,4 @@
-"""Wiring tests for the RFI / submittals / correspondence semantic assistant.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wiring tests for the RFI / submittals / correspondence semantic assistant.
 
 Item 16 plugs three existing project-document modules into the shared
 semantic-search + chat-tool pipeline.  These tests assert the registry,

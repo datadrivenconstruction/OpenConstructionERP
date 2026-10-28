@@ -1,4 +1,4 @@
-"""Unit tests for ``ProjectRepository``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``ProjectRepository``.
 
 Focus: the SQL-MAX aggregate that replaced the in-memory scan in
 ``max_project_code_seq``. Two contracts pinned here:

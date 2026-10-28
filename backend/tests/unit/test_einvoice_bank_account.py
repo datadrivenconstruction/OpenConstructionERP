@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The bank account an e-invoice tells the buyer to pay into (BT-84, BT-86).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bank account an e-invoice tells the buyer to pay into (BT-84, BT-86).
 
 A mistyped IBAN is not caught downstream by anything the sender sees. The
 receiver's validator checks the syntax of the document, not whether the account

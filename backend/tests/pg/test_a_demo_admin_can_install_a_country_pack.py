@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""On a self-installed platform the seeded demo administrator can install a country pack.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠On a self-installed platform the seeded demo administrator can install a country pack.
 
 A person who installs the platform for themselves (pip, desktop, docker) with
 the demo seed on signs in through one of the demo tiles on the login page and

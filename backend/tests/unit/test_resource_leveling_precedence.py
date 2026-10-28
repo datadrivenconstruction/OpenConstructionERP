@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Precedence feasibility of the resource-leveling priority queue.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Precedence feasibility of the resource-leveling priority queue.
 
 The leveler orders activities by the shipped key (LS asc -> total_float asc ->
 id) and places them one at a time, bounding each start by the predecessors it has

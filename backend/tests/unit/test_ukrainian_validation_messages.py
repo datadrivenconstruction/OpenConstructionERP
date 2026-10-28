@@ -1,4 +1,4 @@
-"""Ukrainian catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ukrainian catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

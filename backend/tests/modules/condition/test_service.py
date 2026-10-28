@@ -1,4 +1,4 @@
-"""Condition service: scales, ratings, derived plan, inflation, validation (real PostgreSQL)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition service: scales, ratings, derived plan, inflation, validation (real PostgreSQL)."""
 
 from __future__ import annotations
 

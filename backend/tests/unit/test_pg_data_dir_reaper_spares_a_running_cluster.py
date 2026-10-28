@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The data-dir reaper must not delete a cluster that is serving.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The data-dir reaper must not delete a cluster that is serving.
 
 ``_reap_stale_pg_data_dirs`` removes throwaway PostgreSQL data dirs left by
 runs that ended without cleaning up. It is guarded twice: a directory is spared

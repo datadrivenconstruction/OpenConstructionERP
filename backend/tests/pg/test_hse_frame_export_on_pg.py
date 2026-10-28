@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The HSE frame exports on a seeded German demo project: both registers, both formats.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The HSE frame exports on a seeded German demo project: both registers, both formats.
 
 The spreadsheet is opened and read back, so a header that lost its German
 wording, a register without rows or a sheet title that fell back to English

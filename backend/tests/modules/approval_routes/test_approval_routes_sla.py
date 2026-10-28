@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the approval-SLA breach monitor (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the approval-SLA breach monitor (PostgreSQL, py3.12).
 
 Exercises :func:`app.modules.approval_routes.sla_monitor.check_sla_breaches`
 end to end against real rows: a pending instance whose current step is past its

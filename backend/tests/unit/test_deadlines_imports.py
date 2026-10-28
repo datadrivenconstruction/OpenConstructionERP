@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free import smoke test for the deadlines module (item #18).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free import smoke test for the deadlines module (item #18).
 
 The pure-logic test cannot catch an import typo, a bad symbol, or a circular
 import in the impure files (service / router / sweeper), and a broken router

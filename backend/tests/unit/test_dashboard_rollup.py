@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for dashboard rollup service (module ``oe_dashboard``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for dashboard rollup service (module ``oe_dashboard``).
 
 Coverage:
 * Each built-in widget kind produces expected aggregate from fixture data.

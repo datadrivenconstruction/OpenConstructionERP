@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A claim billed off the cost of work keeps that basis when a line is added.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A claim billed off the cost of work keeps that basis when a line is added.
 
 A cost-plus claim is generated from costs and carries no schedule-of-values
 lines: the generator returns an empty line list on purpose, because there is no

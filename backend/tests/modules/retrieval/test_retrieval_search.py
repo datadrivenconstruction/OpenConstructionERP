@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the retrieval (findability) service (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the retrieval (findability) service (PostgreSQL, py3.12).
 
 Seeds a document, a correspondence and a change order on one project, then
 checks faceted, ranked search across all three: free text, record-type filter,

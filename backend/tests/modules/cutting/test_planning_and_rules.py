@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan figures, the ``cutting`` rule set and the cut-list file reader, without a database."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan figures, the ``cutting`` rule set and the cut-list file reader, without a database."""
 
 from __future__ import annotations
 

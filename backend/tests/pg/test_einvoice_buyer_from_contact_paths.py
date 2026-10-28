@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An invoice naming a contact carries that contact's address into both documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An invoice naming a contact carries that contact's address into both documents.
 
 Two callers render an invoice with the EN 16931 engine: the finance export route
 and the clearance module. The buyer had to be resolved for both or the same

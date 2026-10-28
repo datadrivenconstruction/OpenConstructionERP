@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The zone-to-area and delivery-to-transport links are real foreign keys, on every install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The zone-to-area and delivery-to-transport links are real foreign keys, on every install.
 
 The two keys were once left out of the models because the boot heal issued them
 before ``create_all`` had built the area and transport tables, and PostgreSQL

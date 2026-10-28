@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The cost routes resolve a reader with the shared rule, not a copy of it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost routes resolve a reader with the shared rule, not a copy of it.
 
 ``app/core/document_locale.py`` was extracted so the rule would live in one
 place, and its docstring says so. That was not true when it was written:

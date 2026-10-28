@@ -1,4 +1,4 @@
-"""The public demo is genuinely read-only, and only when it is switched on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The public demo is genuinely read-only, and only when it is switched on.
 
 The claim under test is not "the guard answers 403". It is that with the flag
 on, nothing a visitor can reach writes to the database, which is a different

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A fresh install with the eleven-areas-framework pack and both of its demo projects.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A fresh install with the eleven-areas-framework pack and both of its demo projects.
 
 The world is built once per module the way a self-hosted user meets it: an empty
 database, the application with every module mounted, the demo administrator

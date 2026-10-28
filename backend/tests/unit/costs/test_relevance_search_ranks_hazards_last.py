@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The relevance search puts the hazard flag first in its ordering.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The relevance search puts the hazard flag first in its ordering.
 
 The relevance branch runs only on PostgreSQL with pg_trgm, which the embedded
 test cluster does not ship, so the PG test of the ranking skips there. This

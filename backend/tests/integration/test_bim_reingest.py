@@ -1,4 +1,4 @@
-"""Integration tests for ``app.scripts.reingest_bim_model``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ``app.scripts.reingest_bim_model``.
 
 These tests exercise the BIM re-ingest CLI end-to-end against the
 session-scoped PostgreSQL database (set up by the shared ``tests/conftest.py``).  DDC

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A completion release waits out the lien period its jurisdiction sets.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A completion release waits out the lien period its jurisdiction sets.
 
 Ontario keeps the holdback until 60 days after the certificate of substantial
 performance is published; paying it earlier leaves the owner liable to lien

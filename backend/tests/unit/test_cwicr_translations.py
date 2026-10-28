@@ -1,4 +1,4 @@
-"""Unit tests for CWICR cost-database translation tables.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for CWICR cost-database translation tables.
 
 Covers the small fixed-vocabulary lookup that fills in localized mirror
 fields next to CWICR's frozen-German source columns

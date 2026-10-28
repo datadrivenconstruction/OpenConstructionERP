@@ -1,4 +1,4 @@
-"""A large drawing's preview comes from the parsed geometry, not the slow ezdxf renderer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A large drawing's preview comes from the parsed geometry, not the slow ezdxf renderer."""
 
 from __future__ import annotations
 

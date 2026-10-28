@@ -1,4 +1,4 @@
-"""An image header declaring an implausible surface answers 413, not a bare 500.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An image header declaring an implausible surface answers 413, not a bare 500.
 
 Pillow reads the declared width and height off the header and refuses to open
 anything far above ``Image.MAX_IMAGE_PIXELS``, so a few dozen bytes are enough

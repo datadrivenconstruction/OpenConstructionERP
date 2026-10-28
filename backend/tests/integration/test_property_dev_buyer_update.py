@@ -1,4 +1,4 @@
-"""Property Development buyer-update regression suite (task #134).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property Development buyer-update regression suite (task #134).
 
 User report: "in Property Development module, it's not possible to modify
 a buyer." The frontend never wired ``PATCH /api/v1/property-dev/buyers/{id}``

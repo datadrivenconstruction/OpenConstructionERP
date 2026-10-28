@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the match-backend selector in ``app.core.match_service``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the match-backend selector in ``app.core.match_service``.
 
 Historically this file pinned the LanceDB-vs-Qdrant dispatcher. The
 LanceDB ranker was removed in v3 (Phase 5 cleanup), so the selector now

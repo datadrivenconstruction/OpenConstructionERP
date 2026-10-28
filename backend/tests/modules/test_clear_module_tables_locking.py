@@ -1,4 +1,4 @@
-"""What ``clear_module_tables`` must do when somebody leaks a transaction.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What ``clear_module_tables`` must do when somebody leaks a transaction.
 
 The nightly cross-OS job used to die at 9% of the suite. The cause was not the
 test that failed but the one after it: a fixture rebuilt the schema per test

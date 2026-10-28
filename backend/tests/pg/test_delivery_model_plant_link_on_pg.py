@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An owner-furnished item that is also a plant item, on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An owner-furnished item that is also a plant item, on PostgreSQL.
 
 The register's read port is stood in for by a small module with the same two
 functions, so these tests run with and without the plant register installed:

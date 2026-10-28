@@ -1,4 +1,4 @@
-"""FIEBDC-3 / BC3 exporter tests - build_bc3 + parser round-trip.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FIEBDC-3 / BC3 exporter tests - build_bc3 + parser round-trip.
 
 The exporter's contract is that a priced ``BOQWithSections`` serialised to
 BC3 re-imports through :class:`BC3Importer` with its chapters, partidas,

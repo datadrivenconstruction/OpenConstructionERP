@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Snag deep-integration tests — buyer_id, cost_impact, photos (task #156).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Snag deep-integration tests — buyer_id, cost_impact, photos (task #156).
 
 Locks in the new Snag fields:
 

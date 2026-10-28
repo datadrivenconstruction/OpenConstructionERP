@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Where a bill of quantities keeps its consumption tax, and where it does not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Where a bill of quantities keeps its consumption tax, and where it does not.
 
 Tax on a bill is a markup row of category ``tax``. There is no ``tax_rate``
 column: ``BOQ`` does not declare one, the service never writes one, and

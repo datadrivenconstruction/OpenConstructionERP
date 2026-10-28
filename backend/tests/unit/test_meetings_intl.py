@@ -1,4 +1,4 @@
-"""Unit tests for the meetings international helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the meetings international helpers.
 
 Scope:
     Pure, database-free helpers in ``app.modules.meetings.intl``:

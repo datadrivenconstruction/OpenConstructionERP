@@ -1,4 +1,4 @@
-"""Buyer self-service portal — endpoint tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Buyer self-service portal — endpoint tests.
 
 Covers the v3124 buyer-portal magic-link surface end-to-end:
 

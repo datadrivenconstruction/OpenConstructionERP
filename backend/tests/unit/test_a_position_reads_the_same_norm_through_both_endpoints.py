@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One position, two read paths, one answer about the norm that priced it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One position, two read paths, one answer about the norm that priced it.
 
 Issue #457. A position is turned into a ``PositionResponse`` by two different
 builders. ``service.build_position_response`` serves the whole-bill read and

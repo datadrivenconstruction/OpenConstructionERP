@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``hakedis`` rule set: every rule with a context it passes and one it fails.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``hakedis`` rule set: every rule with a context it passes and one it fails.
 
 The rules read a plain dict, so no database is involved. Every amount and
 percent here is synthetic.

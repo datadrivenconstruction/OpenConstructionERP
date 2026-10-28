@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""P1 — Backend ``group_by`` validation regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠P1 — Backend ``group_by`` validation regression suite.
 
 The /match-elements pipeline's Group stage used to silently skip a
 ``rebuild_groups`` call when the user-supplied ``group_by`` keys didn't

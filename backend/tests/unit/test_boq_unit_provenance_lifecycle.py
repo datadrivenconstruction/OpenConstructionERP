@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Editing a unit retires the claim that the source file never stated one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Editing a unit retires the claim that the source file never stated one.
 
 A GAEB import records the source's own ``<QU>`` in
 ``metadata['gaeb_unit_original']``, writing the empty string when the file

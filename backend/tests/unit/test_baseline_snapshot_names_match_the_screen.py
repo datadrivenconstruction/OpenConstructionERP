@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The screen recognises the snapshot names the quantity baseline stores.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The screen recognises the snapshot names the quantity baseline stores.
 
 The two snapshots the baseline takes on its own are stored with English names,
 and the frontend shows them in the reader's language by matching those exact

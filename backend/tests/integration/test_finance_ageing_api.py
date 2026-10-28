@@ -1,4 +1,4 @@
-"""AR / AP ageing through the API, per legal entity.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AR / AP ageing through the API, per legal entity.
 
 Two projects belong to two legal entities. The report must age each invoice
 on its open balance (a partial payment counts), keep holdback out of what is

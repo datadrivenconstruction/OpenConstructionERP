@@ -1,4 +1,4 @@
-"""Unit tests for the leading vs lagging safety indicators rollup.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the leading vs lagging safety indicators rollup.
 
 Scope:
     Pure-logic coverage of :mod:`app.modules.safety.safety_indicators`: the

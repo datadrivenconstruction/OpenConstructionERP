@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The SSRF helpers block every address that is not on the public internet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The SSRF helpers block every address that is not on the public internet.
 
 The webhook policy described itself as blocking carrier-grade NAT, but it
 tested ``is_private``, and Python does not count 100.64.0.0/10 as private. So

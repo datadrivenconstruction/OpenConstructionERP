@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Parse every tracked YAML and JSON file, as a category rather than by name.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Parse every tracked YAML and JSON file, as a category rather than by name.
 
 These files are already parsed in a number of places, and saying so precisely
 matters, because the first thing said about this gap was that nothing checks

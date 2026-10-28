@@ -1,4 +1,4 @@
-"""Unit tests for the measurement (quantity determination) library."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the measurement (quantity determination) library."""
 
 from decimal import Decimal
 

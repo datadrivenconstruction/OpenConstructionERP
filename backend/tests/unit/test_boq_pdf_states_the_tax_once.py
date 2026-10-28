@@ -1,4 +1,4 @@
-"""The exported bill states its tax once, and states every levy it carries.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The exported bill states its tax once, and states every levy it carries.
 
 WHAT WAS WRONG. ``get_boq_structured`` prices a bill as
 ``net_total = direct_cost + sum(every active markup)`` and sets ``grand_total``

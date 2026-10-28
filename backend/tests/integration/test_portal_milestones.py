@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A client sees the next milestones a person marked for them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A client sees the next milestones a person marked for them.
 
 Surface (portal-session-gated):
     GET /api/v1/portal/projects/{project_id}/milestones

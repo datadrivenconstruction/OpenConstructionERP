@@ -1,4 +1,4 @@
-"""Cross-tenant IDOR closures collapse to 404 (not 403)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-tenant IDOR closures collapse to 404 (not 403)."""
 
 from __future__ import annotations
 

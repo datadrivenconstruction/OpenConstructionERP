@@ -1,4 +1,4 @@
-"""Tests for placeholder-geometry tagging in ``ifc_processor``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for placeholder-geometry tagging in ``ifc_processor``.
 
 Issue #53 — H1: when DDC ``cad2data`` is unavailable the text-IFC parser
 falls back to synthesizing 0.3×3.0×1.0 m boxes and laying them out in a

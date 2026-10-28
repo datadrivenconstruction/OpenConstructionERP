@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rules V1 to V5 of the cost structure: each one fails on its defect and passes on a clean structure."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rules V1 to V5 of the cost structure: each one fails on its defect and passes on a clean structure."""
 
 from __future__ import annotations
 

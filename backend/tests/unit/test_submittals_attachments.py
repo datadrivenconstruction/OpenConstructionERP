@@ -1,4 +1,4 @@
-"""R4+R5 hardening tests for the submittals module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R4+R5 hardening tests for the submittals module.
 
 Scope:
     1. Direct attachment upload — magic-byte gate accepts a real PDF and

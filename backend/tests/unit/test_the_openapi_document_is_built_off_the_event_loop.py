@@ -1,4 +1,4 @@
-"""A visitor asking for /api/openapi.json must not stop every other request.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A visitor asking for /api/openapi.json must not stop every other request.
 
 FastAPI registers the document route itself, in ``FastAPI.setup()``, as an
 ``async`` handler that calls ``app.openapi()`` inline. With ~190 module routers

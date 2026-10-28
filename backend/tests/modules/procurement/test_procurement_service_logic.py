@@ -1,4 +1,4 @@
-"""Service-logic tests for ProcurementService + MaterialRequisitionService.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-logic tests for ProcurementService + MaterialRequisitionService.
 
 These exercise the business rules with in-memory repository stubs (mirroring
 ``test_procurement_security``), so they assert behaviour without standing up

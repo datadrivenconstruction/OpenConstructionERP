@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for API-key permission scoping.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for API-key permission scoping.
 
 An ``APIKey`` row carries a ``permissions`` list that was written at creation
 and read by nothing. These tests pin the rule that now reads it: the authority

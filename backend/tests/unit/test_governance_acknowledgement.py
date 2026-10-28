@@ -1,4 +1,4 @@
-"""Unknown evidence of a blocking provider never blocks, and never passes unseen.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unknown evidence of a blocking provider never blocks, and never passes unseen.
 
 A blocking provider that fails, or that says nothing about the area it is
 registered for, leaves an ``unknown`` item. A go must name each of them, so the

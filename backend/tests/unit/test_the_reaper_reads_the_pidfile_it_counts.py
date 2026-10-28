@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A pid file left by a killed postmaster used to protect its data dir forever.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A pid file left by a killed postmaster used to protect its data dir forever.
 
 The reaper removed a throwaway cluster only when its directory had no
 ``postmaster.pid`` at all, on the reasoning that a pid file means somebody is

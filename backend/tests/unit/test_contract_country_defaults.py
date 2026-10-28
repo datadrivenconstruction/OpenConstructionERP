@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The payment terms a contract starts from, per country, and the money they decide.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The payment terms a contract starts from, per country, and the money they decide.
 
 Three promises are tested here without a database. Each country in the table
 resolves to its own figures with a source for every one. An author's figure

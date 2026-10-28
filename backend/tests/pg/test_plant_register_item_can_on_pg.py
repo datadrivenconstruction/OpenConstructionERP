@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``can`` of a plant item over HTTP against PostgreSQL: the verdict and the write agree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``can`` of a plant item over HTTP against PostgreSQL: the verdict and the write agree.
 
 Every item answer says, per action, whether the action exists for the item in
 its state (``applies``), whether this caller may use it (``allowed``) and the

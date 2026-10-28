@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Write flows over HTTP on a fresh install: procurement concept, quality concept, commitment release, governance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Write flows over HTTP on a fresh install: procurement concept, quality concept, commitment release, governance.
 
 Each flow runs on a project created for it (owned by the demo administrator, with the second manager and the
 viewer on its team) rather than on a seeded demo project, so a flow starts from a draft whatever the pack

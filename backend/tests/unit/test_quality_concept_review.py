@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pins for the defects an independent review found in the quality concept.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pins for the defects an independent review found in the quality concept.
 
 Each test names the behaviour that was wrong and fails on the code as it was:
 the gate evidence that could never be met, stages that never left ``blocked``,

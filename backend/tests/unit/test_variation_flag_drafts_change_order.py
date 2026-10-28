@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A flagged variation becomes a DRAFT change order, once, linked to its source.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A flagged variation becomes a DRAFT change order, once, linked to its source.
 
 ``variation.flagged`` used to reach nothing but the outgoing-webhook wildcard,
 and neither of its two triggers fired at all: the RFI flag listened for

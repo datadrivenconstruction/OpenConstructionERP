@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The tender workbooks read the comparison the way the screen does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The tender workbooks read the comparison the way the screen does.
 
 Pure renderer tests over a hand-built comparison answer. The round trip through
 the stored package, the comparison endpoint and the export route is in

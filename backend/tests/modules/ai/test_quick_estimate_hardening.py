@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the quick-estimate prompt-hardening + correctness pass.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the quick-estimate prompt-hardening + correctness pass.
 
 The fixtures here are deliberately unit-scoped: prompt-injection
 mitigations live in pure functions (``sanitize_user_text`` and

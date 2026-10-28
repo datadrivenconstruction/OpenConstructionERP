@@ -1,4 +1,4 @@
-"""Demo seed data must not name real trading companies or design practices.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo seed data must not name real trading companies or design practices.
 
 ``scripts/check_no_brand_tokens.py`` is the repo-wide gate for this, and it
 deliberately cannot express three kinds of name. Its docstring states the

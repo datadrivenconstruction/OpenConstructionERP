@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Backfilling a healed column is half the repair; the column itself must move.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Backfilling a healed column is half the repair; the column itself must move.
 
 ``oe_funding_obligation.detail_params`` arrives in two different shapes. An
 installation that takes the migration gets it from ``add_column`` with

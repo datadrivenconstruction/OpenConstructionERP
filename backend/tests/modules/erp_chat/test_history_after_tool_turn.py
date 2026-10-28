@@ -1,4 +1,4 @@
-"""A tool turn reads back through ``GET /sessions/{id}/messages/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A tool turn reads back through ``GET /sessions/{id}/messages/``.
 
 The floating dock and the /chat page rebuild a conversation from this endpoint,
 so a card that cannot be read back is a card the user loses on reload. The

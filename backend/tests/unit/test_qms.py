@@ -1,4 +1,4 @@
-"""Unit tests for :class:`QMSService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`QMSService`.
 
 Scope:
     * ITP plan CRUD + items + activation

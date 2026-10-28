@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A regional variant is covered by its base language, not by English.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A regional variant is covered by its base language, not by English.
 
 Four locale files here carry only the words that differ from their base:
 es-MX, es-CL and es-CO resolve through es, pt-BR through pt. en-US joined

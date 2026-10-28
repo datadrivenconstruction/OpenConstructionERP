@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A country pack names the rule sets its country runs, and the engine resolves each name.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country pack names the rule sets its country runs, and the engine resolves each name.
 
 Ten packs shipped with ``validation_rule_packs`` filled and no
 ``validation_rule_sets`` at all: aus, nzs, saudi-vision2030, turkey-tr,

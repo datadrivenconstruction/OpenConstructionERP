@@ -1,4 +1,4 @@
-"""A closed quality or safety record is kept: the edit locks now hold against delete.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A closed quality or safety record is kept: the edit locks now hold against delete.
 
 Each of these registers already froze a record once it was closed, verified or
 approved: ``update_inventory`` refuses an archived carbon inventory,

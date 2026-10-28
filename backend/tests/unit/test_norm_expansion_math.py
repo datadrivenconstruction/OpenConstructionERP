@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the pure production-norm expansion math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure production-norm expansion math.
 
 These exercise :mod:`app.modules.norm_expansion.expand_math` directly with plain
 ``Decimal`` / ``int`` / ``str`` inputs - no database, FastAPI or ORM - so they

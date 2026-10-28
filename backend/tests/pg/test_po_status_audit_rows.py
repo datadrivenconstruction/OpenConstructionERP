@@ -1,4 +1,4 @@
-"""Purchase-order FSM transitions must leave an ActivityLog row (PG lane only).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Purchase-order FSM transitions must leave an ActivityLog row (PG lane only).
 
 The same defect the invoice tests next door cover, in two more places and with a
 worse failure mode. ``approve_po`` and ``issue_po`` read ``po.po_number`` for

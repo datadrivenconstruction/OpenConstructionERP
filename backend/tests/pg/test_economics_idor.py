@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read, edit and propose the economics, over HTTP against PostgreSQL; plus the API contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read, edit and propose the economics, over HTTP against PostgreSQL; plus the API contract.
 
 Identity is the variable under test: a stranger from another tenant, an editor trying to propose or
 approve (manager only), another project's rows reached through this project's route, and the money

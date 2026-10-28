@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
-"""An install instruction must be worded for the install that will read it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An install instruction must be worded for the install that will read it.
 
 Most remedies in this tree are written for a pip install, which is where most
 of them are read. Inside the frozen desktop sidecar they are not merely awkward

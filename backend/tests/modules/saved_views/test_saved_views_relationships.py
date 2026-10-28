@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The declared loading strategy on both saved-views relationships.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The declared loading strategy on both saved-views relationships.
 
 Per ``.claude/rules/backend-modules.md`` a green test lane is NOT evidence that
 a loading strategy is right - a lane that never walks the relationship passes

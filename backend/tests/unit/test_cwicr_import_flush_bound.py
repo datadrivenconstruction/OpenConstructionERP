@@ -1,4 +1,4 @@
-"""The cost import must hand rows over in bounded slices, never in one list.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost import must hand rows over in bounded slices, never in one list.
 
 This pins the shape of the memory the import holds while it runs, which
 nothing else observes. The import used to build every row of a region before

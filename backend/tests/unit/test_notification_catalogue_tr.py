@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Turkish notification catalogue says everything the English one says.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Turkish notification catalogue says everything the English one says.
 
 A notification added in English without its Turkish line would reach a Turkish
 mailbox in English, and nobody would see it until that one event fired on a

@@ -1,4 +1,4 @@
-"""A cross-link has to be built out of fields the model it writes actually has.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cross-link has to be built out of fields the model it writes actually has.
 
 ``_generate_pdf_in_background`` passed ``created_by`` to ``Document``, which has
 no such column - ``Base`` carries id, created_at and updated_at and nothing

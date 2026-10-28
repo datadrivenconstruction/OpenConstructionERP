@@ -1,4 +1,4 @@
-"""Shared fixtures for the Teams test suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for the Teams test suite.
 
 Placed under ``tests/unit`` rather than ``tests/modules`` on purpose. This is an
 access-control module, and ``tests/unit`` is what the sharded CI gate actually

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Per-document-type overrides of the document appearance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-document-type overrides of the document appearance.
 
 Three promises, each checked on what the generators actually print rather than
 on the code path:

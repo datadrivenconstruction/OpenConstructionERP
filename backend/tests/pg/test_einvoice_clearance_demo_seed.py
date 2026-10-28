@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""The clearance screen opens on a real trail, tied to the real invoice.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The clearance screen opens on a real trail, tied to the real invoice.
 
 The module shipped complete and unseeded, so ``/einvoice-clearance`` was empty
 on every install: no registration, no document, no history. What is pinned here

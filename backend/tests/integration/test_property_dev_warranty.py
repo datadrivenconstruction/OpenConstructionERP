@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Warranty Claims integration tests (v3113).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Warranty Claims integration tests (v3113).
 
 Covers the deep-integration capabilities added on top of the base IDOR
 suite in ``test_snag_warranty_idor.py``:

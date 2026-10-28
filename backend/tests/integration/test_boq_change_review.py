@@ -1,4 +1,4 @@
-"""BOQ change review: change flags and BIM quantity proposals.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ change review: change flags and BIM quantity proposals.
 
 End to end through the HTTP API on the per-session PostgreSQL that
 ``tests/conftest.py`` boots, plus the two event subscribers driven through the

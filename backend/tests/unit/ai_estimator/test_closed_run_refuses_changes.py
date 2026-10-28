@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An applied or cancelled estimate run no longer changes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An applied or cancelled estimate run no longer changes.
 
 Applying a run writes its confirmed groups into a BOQ and marks the run
 ``applied``; cancelling marks it ``cancelled``. ``add_sources`` and ``cancel``

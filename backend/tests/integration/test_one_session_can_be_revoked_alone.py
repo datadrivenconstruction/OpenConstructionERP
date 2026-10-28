@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Ending one session must not end the others, and every session must be endable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ending one session must not end the others, and every session must be endable.
 
 Before this, an issued token could not be revoked at all. Every token carried a
 ``jti`` that nothing ever read, so a credential had a name and no record behind

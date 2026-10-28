@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v75 builds exactly the schema the quality concept models build, and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v75 builds exactly the schema the quality concept models build, and undoes it.
 
 The revision writes every column out and never reads the models, so the two can
 drift; this is the test that catches it. The throwaway database starts with the

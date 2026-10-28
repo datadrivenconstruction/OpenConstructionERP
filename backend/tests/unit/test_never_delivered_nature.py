@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The third repair nature, and the checker that makes it mean something.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The third repair nature, and the checker that makes it mean something.
 
 ``never_delivered`` says a repair only ever adds rows. That claim is worth
 having only if a repair which breaks it fails, so the controls here are repairs

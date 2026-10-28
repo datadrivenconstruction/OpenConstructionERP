@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Geometry tests for the Retail Market Heilbronn procedural 3D model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geometry tests for the Retail Market Heilbronn procedural 3D model.
 
 The procedural model (``app/scripts/gen_retail_heilbronn_assets.py``) is
 generated from the same canonical geometry that drives the LV quantities, so

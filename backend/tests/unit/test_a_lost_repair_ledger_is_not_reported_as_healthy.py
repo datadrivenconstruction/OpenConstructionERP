@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``/api/health`` says whether the record of the boot-time repairs survived.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``/api/health`` says whether the record of the boot-time repairs survived.
 
 ``run_data_repairs`` returns ``ledger_written`` separately from the repair
 outcomes, and the report's own docstring argues at length for why: a repair can

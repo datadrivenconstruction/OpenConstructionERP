@@ -1,4 +1,4 @@
-"""Unit tests for the UBL / Peppol BIS Billing 3.0 e-invoice writer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the UBL / Peppol BIS Billing 3.0 e-invoice writer.
 
 Proves the same EN 16931 invoice renders as valid UBL for worldwide use
 (Peppol reaches the EU, UK, Australia, New Zealand, Singapore and more), not

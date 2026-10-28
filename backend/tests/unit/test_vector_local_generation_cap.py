@@ -1,4 +1,4 @@
-"""Generating vectors locally must cover the catalogue, or say where it stopped.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Generating vectors locally must cover the catalogue, or say where it stopped.
 
 When the pre-built embeddings cannot be fetched, this endpoint falls back to
 generating them from the cost items already in the database. That fallback took

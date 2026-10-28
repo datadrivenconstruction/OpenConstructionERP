@@ -1,4 +1,4 @@
-"""Revit DAE matching, type rows, type parameters, embedded PG cleanup, flat machinery base."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revit DAE matching, type rows, type parameters, embedded PG cleanup, flat machinery base."""
 
 from __future__ import annotations
 

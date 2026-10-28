@@ -1,4 +1,4 @@
-"""Cross-machine transfer: export as one user, restore as another.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-machine transfer: export as one user, restore as another.
 
 Regression for the restore that aborted on a second PC. The exporter's own
 ``users`` row travels in the backup with its password hash stripped, and its

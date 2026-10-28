@@ -1,4 +1,4 @@
-"""Construction control: a result, a verification and an issued gate are set only by their actions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction control: a result, a verification and an issued gate are set only by their actions.
 
 Three writers reached state that their own actions guard:
 

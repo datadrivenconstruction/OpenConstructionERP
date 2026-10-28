@@ -1,4 +1,4 @@
-"""Unit tests for :class:`RequirementVectorAdapter`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`RequirementVectorAdapter`.
 
 Scope:
     - ``to_text`` — the canonical string that gets embedded.  Must

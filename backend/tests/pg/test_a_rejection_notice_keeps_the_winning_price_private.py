@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: a rejection notice does not tell the losing bidder the winning price.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a rejection notice does not tell the losing bidder the winning price.
 
 The notice printed the winner's price to every unsuccessful bidder. It now
 does so only for a package that opted in through ``disclose_award_sum``, for

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persisting which modules are on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persisting which modules are on.
 
 The guard here reads as one rule and does two things. Core modules cannot be
 turned off, which is the rule everybody knows about; and until a module is

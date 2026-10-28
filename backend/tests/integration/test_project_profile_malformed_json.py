@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Regression: GET /v1/projects/{id}/profile must survive a
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: GET /v1/projects/{id}/profile must survive a
 ``ProjectProfile`` whose JSON columns hold scalars instead of the
 declared list / dict shape.
 

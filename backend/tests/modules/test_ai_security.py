@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""R7 audit regressions — AI module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 audit regressions — AI module.
 
 Pins down the security guarantees the R7 sweep enforces over the AI
 estimate / advisor surface:

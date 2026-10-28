@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo seeder must name systems the catalogue actually ships.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seeder must name systems the catalogue actually ships.
 
 ``seed_demo_formwork`` picks its systems out of the catalogue BY NAME, and a
 name it cannot find is skipped with a debug log rather than an error. That is

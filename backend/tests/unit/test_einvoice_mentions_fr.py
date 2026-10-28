@@ -1,4 +1,4 @@
-"""French rows of the invoice mentions catalogue and the rules that read them."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠French rows of the invoice mentions catalogue and the rules that read them."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every path that copies a bill line carries its norm onto the column.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every path that copies a bill line carries its norm onto the column.
 
 Issue #457. ``add_position`` is not the only writer of a position. A line is
 also created by duplicating one, by duplicating a whole bill into a revision, by

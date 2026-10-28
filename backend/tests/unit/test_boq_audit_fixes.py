@@ -1,4 +1,4 @@
-"""Unit tests for BOQ security/correctness audit fixes (2026-05-28).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for BOQ security/correctness audit fixes (2026-05-28).
 
 Covers three issues identified in the deep audit:
 

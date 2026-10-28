@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the phone-log capture service (#23).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the phone-log capture service (#23).
 
 PostgreSQL, py3.12. ``create_phone_log`` runs the pure ``phonelog.normalize``
 engine and persists a canonical row; these tests seed real projects and assert

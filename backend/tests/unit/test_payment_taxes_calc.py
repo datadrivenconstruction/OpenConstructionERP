@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The shared payment tax calculation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The shared payment tax calculation.
 
 Every rate, fraction, threshold and cap in this file is synthetic and belongs
 to the invented country ``XX``. A statutory value never enters a test: that is

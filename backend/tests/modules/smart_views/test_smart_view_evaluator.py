@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Smart-View evaluator tests — pure, no DB.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart-View evaluator tests — pure, no DB.
 
 The evaluator is the highest-leverage part of the module: every render
 of the BIM viewer hits it. Tests cover every operator + action + tie-

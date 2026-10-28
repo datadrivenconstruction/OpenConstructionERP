@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Document labels that need no register furniture are read from the locale files.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document labels that need no register furniture are read from the locale files.
 
 The bill-of-quantities PDF, the generated reports and the e-invoice page each kept
 a table of their own in code. Their labels now sit under

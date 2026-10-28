@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the Federation Type Tree feature (v4.0 / Slice 2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the Federation Type Tree feature (v4.0 / Slice 2).
 
 The type tree is **federation-flat by IfcClass** (not Federation › Model
 › Storey › Element). These tests pin that contract — sums per class,

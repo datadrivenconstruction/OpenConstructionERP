@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Snag -> Punchlist auto-bridge integration test (task #156).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Snag -> Punchlist auto-bridge integration test (task #156).
 
 Verifies the event-bus bridge that subscribes ``punchlist`` to
 ``property_dev.snag.created`` and auto-creates a matching punchlist

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Compliance-gate enforcement on the contract draft → active transition (Item #27).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance-gate enforcement on the contract draft → active transition (Item #27).
 
 The contract-signature gate runs the project's compliance rule packs (resolved
 to validation rule sets) against the contract's schedule of values before the

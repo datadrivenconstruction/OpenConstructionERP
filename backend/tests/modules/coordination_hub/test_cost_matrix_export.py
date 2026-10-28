@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Tests for the cost-weighted trade matrix and the CSV snapshot export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the cost-weighted trade matrix and the CSV snapshot export.
 
 These cover the deepening work that wires the existing clash_cost_impact
 arithmetic into the coordination hub:

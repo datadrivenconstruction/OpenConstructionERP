@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Characterisation tests for the unit the GAEB importer invents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Characterisation tests for the unit the GAEB importer invents.
 
 ``gaeb_xml.py`` normalises a missing ``<QU>`` into a guessed unit::
 

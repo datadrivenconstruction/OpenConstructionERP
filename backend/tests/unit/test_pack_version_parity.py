@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A pack carries its version twice and nothing kept the two in step.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A pack carries its version twice and nothing kept the two in step.
 
 ``pyproject.toml`` holds the version the wheel is built and published under.
 ``manifest.py`` holds ``pack_version``, which is what the application reports

@@ -1,4 +1,4 @@
-"""Tests for the once-per-version boot seeds (``app.core.seed_once``)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the once-per-version boot seeds (``app.core.seed_once``)."""
 
 from __future__ import annotations
 

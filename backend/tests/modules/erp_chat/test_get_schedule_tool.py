@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The chat schedule tool has to read the fields ``GanttActivity`` actually has.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The chat schedule tool has to read the fields ``GanttActivity`` actually has.
 
 ``handle_get_schedule`` read ``act.progress`` while the schema's field is
 ``progress_pct``. Pydantic v2 raises on an undeclared attribute, the handler

@@ -1,4 +1,4 @@
-"""v3307 on the path that actually reaches installs, not the one on paper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠v3307 on the path that actually reaches installs, not the one on paper.
 
 ``alembic upgrade head`` is not how most of this platform's databases get a new
 column. The embedded-PostgreSQL runtime builds its schema with ``create_all``

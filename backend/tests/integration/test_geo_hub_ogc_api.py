@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""OGC API - Features integration suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OGC API - Features integration suite.
 
 Drives the service the way a GIS client does: land on the root, follow the
 links to the collections, then page the items. What is gated here is the

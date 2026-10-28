@@ -1,4 +1,4 @@
-"""Governance wiring other modules and repo-wide guards depend on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Governance wiring other modules and repo-wide guards depend on.
 
 Three seams, each of which failed silently before it was pinned here: the
 names governance publishes its events under, the subscribers surviving an

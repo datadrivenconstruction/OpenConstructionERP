@@ -1,4 +1,4 @@
-"""Unit tests for :class:`InspectionService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`InspectionService`.
 
 Scope:
     CRUD, status transitions, complete_inspection with pass/fail/partial,

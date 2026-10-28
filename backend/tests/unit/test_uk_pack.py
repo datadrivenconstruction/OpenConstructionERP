@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The UK pack, and the ninety-seven checks it promised and did not have.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The UK pack, and the ninety-seven checks it promised and did not have.
 
 ``enables_rule_ids`` reads as a promise: switching this document on turns
 these checks on. The UK pack declared 97 ids across seven documents and the

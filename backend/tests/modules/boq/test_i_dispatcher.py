@@ -1,4 +1,4 @@
-"""Epic I4 — dispatcher detect() chain tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I4 — dispatcher detect() chain tests.
 
 Validates that the importer registry's ``detect()`` chain claims the
 right format for each canonical fixture (synthetic minimal files):

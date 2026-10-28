@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The assistant may suggest a palette action; it can never run one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The assistant may suggest a palette action; it can never run one.
 
 The browser sends the ids it can run, the prompt lists them, and the tool only
 echoes a validated suggestion with a clamped confidence for the user to confirm.

@@ -1,4 +1,4 @@
-"""End-to-end XSS response sanitisation (BUG-MATH04 fix).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end XSS response sanitisation (BUG-MATH04 fix).
 
 Asserts that the JSON API never returns un-stripped HTML tags in BOQ /
 project free-text fields, even when the database contains them.

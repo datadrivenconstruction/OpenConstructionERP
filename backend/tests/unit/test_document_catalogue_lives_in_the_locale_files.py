@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The outgoing-document catalogue is one more group of ``backend/locales/<code>.json``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The outgoing-document catalogue is one more group of ``backend/locales/<code>.json``.
 
 It used to be a second mechanism, a folder of JSON files beside
 ``app/core/document_catalogue.py``. It now lives in the locale files, under

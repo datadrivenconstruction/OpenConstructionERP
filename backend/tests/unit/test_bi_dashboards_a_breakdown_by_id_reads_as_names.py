@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A breakdown keyed by an id has to say what each id is - issue #441.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A breakdown keyed by an id has to say what each id is - issue #441.
 
 Grouping a custom KPI by ``boq_id`` is how the reporter asked for a number
 per bid, and it is the only way to ask: the group key is what the database

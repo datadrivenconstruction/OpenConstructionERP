@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Keeping a linked code's group in order never writes into a locked bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keeping a linked code's group in order never writes into a locked bill.
 
 A code is shared across the project (issue #127). Its master line owns the
 definition, the other lines are instances, and three writers keep the group in

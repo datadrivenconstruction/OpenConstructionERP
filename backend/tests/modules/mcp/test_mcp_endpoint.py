@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The MCP endpoint end to end: handshake, tool listing, permissions, proposals, revocation, limits, audit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The MCP endpoint end to end: handshake, tool listing, permissions, proposals, revocation, limits, audit.
 
 The authorisation cases carry the weight. A token must never reach further than
 its owner: another person's project answers like a missing one, a read-only

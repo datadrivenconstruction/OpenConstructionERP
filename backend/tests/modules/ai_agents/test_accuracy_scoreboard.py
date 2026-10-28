@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the AI accuracy scoreboard service (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the AI accuracy scoreboard service (PostgreSQL, py3.12).
 
 Seeds AgentRun rows with trust confidences, records outcomes, and checks the
 calibration roll-up plus the owner-scoping of outcome recording.

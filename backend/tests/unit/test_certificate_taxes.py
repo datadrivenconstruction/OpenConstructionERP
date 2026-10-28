@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A certificate gets its taxes from whoever registered to compute them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A certificate gets its taxes from whoever registered to compute them.
 
 Contracts cannot import the tax module, so the tax module registers a provider
 with ``contracts.certificate_taxes``. These tests hold what that registry

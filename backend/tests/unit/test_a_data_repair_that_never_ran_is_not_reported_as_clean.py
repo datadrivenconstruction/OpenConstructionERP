@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``/api/health`` says whether the boot-time data repairs ran, in three states.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``/api/health`` says whether the boot-time data repairs ran, in three states.
 
 The field beside this one, ``schema_heal_failed``, answers for the SCHEMA half
 of an upgrade. Until ``data_repairs_failed`` existed there was no answer for the

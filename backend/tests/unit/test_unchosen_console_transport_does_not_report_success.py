@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A console transport nobody chose must not report a successful delivery.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A console transport nobody chose must not report a successful delivery.
 
 ``test_email_configuration_diagnosis.py`` next door pins the case where an
 operator filled in every ``SMTP_*`` variable and left ``EMAIL_BACKEND`` alone.

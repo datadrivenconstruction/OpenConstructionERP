@@ -1,4 +1,4 @@
-"""PG: the project headline percent is a weighted rollup, not the loudest reading.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the project headline percent is a weighted rollup, not the loudest reading.
 
 ``/progress`` used to derive a project's cumulative percentage from a single
 ``MAX(percent_complete)`` grouped by period label alone. Every reading in the

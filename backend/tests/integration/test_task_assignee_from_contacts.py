@@ -1,4 +1,4 @@
-"""A task assignee picked from contacts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A task assignee picked from contacts.
 
 A contact linked to a platform user makes that user the task's
 ``responsible_id``, so the task shows up in their my-tasks list. A contact

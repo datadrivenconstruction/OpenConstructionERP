@@ -1,4 +1,4 @@
-"""HSE: a CAPA is completed, cancelled or escalated only through its action.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HSE: a CAPA is completed, cancelled or escalated only through its action.
 
 ``update_capa`` wrote every field it was given. ``CAPAUpdate.status`` accepts
 ``completed``, ``cancelled`` and ``overdue``, so an editor could close a CAPA

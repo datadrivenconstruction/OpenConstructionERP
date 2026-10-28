@@ -1,4 +1,4 @@
-"""Property-dev handover-doc IDOR regression suite (issue #29).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property-dev handover-doc IDOR regression suite (issue #29).
 
 Two by-id / body-id endpoints under ``/api/v1/property-dev/`` historically
 ran WITHOUT the ownership guard every sibling handover endpoint already

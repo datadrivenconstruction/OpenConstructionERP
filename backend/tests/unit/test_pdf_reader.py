@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The PDF reader adapter: pages, text, rendering and the vector layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The PDF reader adapter: pages, text, rendering and the vector layer.
 
 Every case reads a PDF written operator by operator in
 ``tests/_pdf_samples.py``, so the expected geometry is known exactly. The

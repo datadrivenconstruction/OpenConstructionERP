@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A locked bill refuses the writers that live in the router, imports included.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A locked bill refuses the writers that live in the router, imports included.
 
 CO2 enrichment, the manual CO2 assignment, custom column definitions and the
 bill's named variables wrote straight from the router, past the lock guard the

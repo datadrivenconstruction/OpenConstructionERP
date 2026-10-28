@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: a package over part of a bill is levelled and compared against that part.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a package over part of a bill is levelled and compared against that part.
 
 Both comparison screens load the package's BOQ, and a package covering a
 quarter of a bill points at the whole thing. Until the package's own scope was

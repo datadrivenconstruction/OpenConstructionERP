@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A holiday the engine cannot read is refused at the write, not dropped later.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A holiday the engine cannot read is refused at the write, not dropped later.
 
 ``cpm._parse_exceptions`` used to swallow an unreadable exception date with a
 bare ``except ValueError: pass``. The day was then scheduled as a working day,

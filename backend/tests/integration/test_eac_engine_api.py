@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP + service integration tests for the EAC engine API (task #221).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP + service integration tests for the EAC engine API (task #221).
 
 Covers the round-trip flows wired up by RFC 35 §1.7:
 

@@ -1,4 +1,4 @@
-"""Integration tests for the per-user sidebar visibility preferences API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the per-user sidebar visibility preferences API.
 
 Covers the new endpoints introduced after v4.5.0 that move the sidebar
 "hidden modules" list off per-browser localStorage onto the user record

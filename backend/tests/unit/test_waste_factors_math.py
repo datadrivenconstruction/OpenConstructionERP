@@ -1,4 +1,4 @@
-"""Unit tests for the pure net-to-gross waste-factor engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure net-to-gross waste-factor engine.
 
 Stdlib + pytest only: imports just the pure engine and the import-safe default
 factor data, so it runs on the local test runner without a database or

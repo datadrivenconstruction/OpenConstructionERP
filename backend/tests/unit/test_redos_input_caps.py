@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Regression tests for the ReDoS input caps added in v11.17.0.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for the ReDoS input caps added in v11.17.0.
 
 Three server-side regexes take caller-influenced strings and are super-linear
 in shape, so a crafted long value could stall a request (stdlib ``re`` has no

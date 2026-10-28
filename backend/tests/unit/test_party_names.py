@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The core party resolver, tested where it lives rather than through a caller.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The core party resolver, tested where it lives rather than through a caller.
 
 ``test_punch_assignee_names.py`` covers this logic through the punch list,
 which is where it was written. It now serves inspections and deadlines as well,

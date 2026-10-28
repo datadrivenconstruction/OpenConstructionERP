@@ -1,4 +1,4 @@
-"""Custom (user-authored) AI agents — service + run-path lifecycle.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Custom (user-authored) AI agents — service + run-path lifecycle.
 
 Exercises the custom-agent feature end to end against a transaction-isolated
 PostgreSQL session (rolled back on teardown), never the production DB and

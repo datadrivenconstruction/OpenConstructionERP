@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every seeded resource buildup must add up to the position's own unit rate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every seeded resource buildup must add up to the position's own unit rate.
 
 The BOQ grid derives its resource columns by summing ``quantity * unit_rate``
 over a position's leaves: the labour / material / plant columns on the German

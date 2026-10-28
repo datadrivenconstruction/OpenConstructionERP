@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-function unit tests for the cross-module deadline logic (item #18).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function unit tests for the cross-module deadline logic (item #18).
 
 These pin the DB-free helpers in ``app.modules.deadlines.logic``:
 

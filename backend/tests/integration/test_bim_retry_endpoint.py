@@ -1,4 +1,4 @@
-"""Integration tests for ``POST /api/v1/bim_hub/{model_id}/retry/`` (v2.6.22).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ``POST /api/v1/bim_hub/{model_id}/retry/`` (v2.6.22).
 
 Covers:
     * Test A — retry on a non-existent model → 404.

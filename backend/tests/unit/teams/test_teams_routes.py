@@ -1,4 +1,4 @@
-"""The HTTP surface: every endpoint, and the status code each denial produces.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The HTTP surface: every endpoint, and the status code each denial produces.
 
 The service-level guards are covered in ``test_teams_access_control.py``. What
 is pinned here is that the routes actually reach them - a gate in the service

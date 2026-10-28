@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A subcontractor contact person and a tender recipient resolve to the contacts directory.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A subcontractor contact person and a tender recipient resolve to the contacts directory.
 
 Runs the service layer against PostgreSQL inside a rolled-back transaction.
 """

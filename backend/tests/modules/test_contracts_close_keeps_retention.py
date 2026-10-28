@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Closing a contract must not forget the retention it holds.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closing a contract must not forget the retention it holds.
 
 The Close button posted the final value and a status and nothing else. The
 schema filled the rest with 0, so closing a contract that held retention

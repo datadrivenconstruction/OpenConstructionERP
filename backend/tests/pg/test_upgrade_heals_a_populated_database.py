@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An upgrade lands on a database that already holds rows, and nothing tested that.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An upgrade lands on a database that already holds rows, and nothing tested that.
 
 Every other test of the schema-building path starts from an empty database. That
 is the one shape the upgrade path never has: an existing install boots with the

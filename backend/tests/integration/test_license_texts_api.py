@@ -1,4 +1,4 @@
-"""The licence endpoints as the real application mounts them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The licence endpoints as the real application mounts them.
 
 ``tests/unit/test_license_texts_route.py`` mounts the router on a bare app and
 covers its behaviour. That leaves one thing unproven and it is the one that

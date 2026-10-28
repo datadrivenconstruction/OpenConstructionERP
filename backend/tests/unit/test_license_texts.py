@@ -1,4 +1,4 @@
-"""The bundled licence texts, and the two layouts they have to be found in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bundled licence texts, and the two layouts they have to be found in.
 
 ``app/core/licenses`` reaches every published artefact and, until the route
 these tests cover, nothing in the backend could read it. What is checked here

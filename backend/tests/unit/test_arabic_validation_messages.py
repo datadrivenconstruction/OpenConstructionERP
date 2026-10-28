@@ -1,4 +1,4 @@
-"""Arabic catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Arabic catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

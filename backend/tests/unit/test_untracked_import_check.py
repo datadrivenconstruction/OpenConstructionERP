@@ -1,4 +1,4 @@
-"""The gate that refuses a commit importing a module git does not carry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The gate that refuses a commit importing a module git does not carry.
 
 ``scripts/check_untracked_imports.py`` exists because of a defect that is
 invisible where it is written. A committed file imports a module that only

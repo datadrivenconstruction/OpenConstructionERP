@@ -1,4 +1,4 @@
-"""Unit tests for the quantity-map match-quality confidence helper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the quantity-map match-quality confidence helper.
 
 ``BIMHubService._match_quality_confidence`` derives the confidence bucket that
 is stamped onto an auto-created BOQ position (``source='cad_import'``) when a

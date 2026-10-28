@@ -1,4 +1,4 @@
-"""Share links, upload URLs and review tokens survive a signing-key rotation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Share links, upload URLs and review tokens survive a signing-key rotation.
 
 Every HMAC signature that carries no ``kid`` is signed with the current
 ``JWT_SECRET`` and accepted under any secret in the key ring, so moving the

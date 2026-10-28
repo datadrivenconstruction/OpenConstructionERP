@@ -1,4 +1,4 @@
-"""Integration smoke tests — verify critical API paths work end-to-end.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration smoke tests — verify critical API paths work end-to-end.
 
 Tests the full stack: HTTP → Router → Service → Repository → PostgreSQL.
 Uses the FastAPI test client against the per-session embedded PostgreSQL database.

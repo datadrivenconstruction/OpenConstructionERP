@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The transport refuses the seeded demo logins.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The transport refuses the seeded demo logins.
 
 These three addresses are logins on a domain we own where exactly one
 mailbox exists, so every message addressed to them is refused by the

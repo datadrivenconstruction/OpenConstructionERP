@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A subcontract's money reaches finance once, in the right direction.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A subcontract's money reaches finance once, in the right direction.
 
 One scenario runs through every test: a 120,000 EUR subcontract with 5%
 retention, and a first claim (or payment application) at 30% of it. That is a

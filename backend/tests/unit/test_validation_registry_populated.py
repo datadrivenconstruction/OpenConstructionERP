@@ -1,4 +1,4 @@
-"""The validation registry must be populated before a test runs, not after it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The validation registry must be populated before a test runs, not after it.
 
 ``register_builtin_rules()`` is called by the application lifespan, which no test
 process starts. The autouse guard in ``conftest`` used to repopulate the registry

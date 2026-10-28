@@ -1,4 +1,4 @@
-"""The project a chat request names reaches the model only after an access check.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project a chat request names reaches the model only after an access check.
 
 The dock sends where the person is: ``locale`` and ``client_context`` with the
 route and the open project, next to the older ``project_id`` field. All of it

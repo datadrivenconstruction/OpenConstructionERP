@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Regression: POResponse must validate an ORM PO whose retainage values are
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: POResponse must validate an ORM PO whose retainage values are
 *methods*, not attributes.
 
 The procurement list endpoint 500'd for any project with at least one purchase

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Keep the requirements import sample a row the importer would actually accept.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keep the requirements import sample a row the importer would actually accept.
 
 `requirements.import_placeholder` is the greyed-out example under the paste box
 on the requirements import panel. A user reads it to learn the row format and

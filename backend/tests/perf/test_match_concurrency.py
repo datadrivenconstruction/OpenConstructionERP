@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Concurrency perf tests for the match service (Phase 4 hardening).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Concurrency perf tests for the match service (Phase 4 hardening).
 
 These tests use a mocked vector adapter so they don't depend on a real
 LanceDB index — what we're measuring is the *Python-side* contention

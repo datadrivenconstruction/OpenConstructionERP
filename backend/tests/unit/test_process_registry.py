@@ -1,4 +1,4 @@
-"""Tests for the background process registry (``app.core.processes``)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the background process registry (``app.core.processes``)."""
 
 from __future__ import annotations
 

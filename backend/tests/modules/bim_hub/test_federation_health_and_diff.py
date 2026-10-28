@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for BIM Federation health + snapshot/diff (v7.x).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for BIM Federation health + snapshot/diff (v7.x).
 
 Two layers are exercised:
 

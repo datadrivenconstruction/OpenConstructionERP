@@ -1,4 +1,4 @@
-"""Baseline unit tests for the ``contacts`` module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline unit tests for the ``contacts`` module.
 
 Covers the CRUD service round-trip (create / list / update / delete) plus
 two security regressions:

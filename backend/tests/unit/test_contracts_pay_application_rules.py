@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``pay_application`` rules, each held red and green.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``pay_application`` rules, each held red and green.
 
 A rule that never fires passes every test that only asserts the absence of a
 finding, so every rule here gets one input it must reject and one it must

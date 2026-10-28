@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The resolution every document renderer shares.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The resolution every document renderer shares.
 
 This used to be three functions copied byte-for-byte into two PDF modules,
 so a fix to either reached one document and not the other. The tests below

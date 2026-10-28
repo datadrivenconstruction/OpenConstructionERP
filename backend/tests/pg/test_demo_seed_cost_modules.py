@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The cost-side demo seeds must fill their screens, and fill them only once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost-side demo seeds must fill their screens, and fill them only once.
 
 Allowances, the basis of estimate and the value dashboard all shipped with no
 demo data at all, so every demo project photographed as an empty state. The

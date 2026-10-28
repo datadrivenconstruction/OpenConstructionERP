@@ -1,4 +1,4 @@
-"""Unit tests for the supplier_catalogs module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the supplier_catalogs module.
 
 Scope:
     - Vendor CRUD + status lifecycle (active → suspended → blacklisted)

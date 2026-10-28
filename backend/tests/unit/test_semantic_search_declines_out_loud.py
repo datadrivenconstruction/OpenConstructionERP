@@ -1,4 +1,4 @@
-"""Semantic search says it is unavailable instead of answering an empty list.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Semantic search says it is unavailable instead of answering an empty list.
 
 The endpoint used to catch the missing optional stack and return ``200 []``. The cost
 grid draws that exactly as it draws a query that matched nothing, so a reader on a

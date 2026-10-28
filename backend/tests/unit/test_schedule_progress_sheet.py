@@ -1,4 +1,4 @@
-"""The progress sheet: build, fill in like a site would, read back (pure, no database)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The progress sheet: build, fill in like a site would, read back (pure, no database)."""
 
 from __future__ import annotations
 

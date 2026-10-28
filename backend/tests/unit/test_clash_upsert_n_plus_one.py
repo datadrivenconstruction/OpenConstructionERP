@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""N+1 query audit for the smart-issue upsert + bulk-suppress fan-out.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠N+1 query audit for the smart-issue upsert + bulk-suppress fan-out.
 
 The clash engine used to link every result row to its persistent
 ``ClashIssue`` one row at a time (``upsert_clash_with_signature`` in a

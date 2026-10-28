@@ -1,4 +1,4 @@
-"""Public registration hands out admin only on a genuinely fresh install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public registration hands out admin only on a genuinely fresh install.
 
 The bootstrap used to ask a single question, "is there an active real admin?".
 On a public server in ``open`` mode whose operator never registered, that

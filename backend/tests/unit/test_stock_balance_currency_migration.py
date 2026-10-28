@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Classification rules of the v3304 stock-cost-currency migration.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Classification rules of the v3304 stock-cost-currency migration.
 
 The migration decides, per stock balance, whether its stored average cost was
 denominated in one currency all along ("single", keep the number), blended two

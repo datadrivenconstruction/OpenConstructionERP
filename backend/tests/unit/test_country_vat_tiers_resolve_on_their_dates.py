@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Ireland, Hungary, Switzerland and Russia price at the rate of the document's own date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ireland, Hungary, Switzerland and Russia price at the rate of the document's own date.
 
 Read against the shipped seed file, never a fixture: a hand-built fixture lets
 this go green while the data a customer installs stays wrong.

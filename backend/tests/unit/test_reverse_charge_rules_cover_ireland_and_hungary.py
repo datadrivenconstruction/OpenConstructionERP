@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Ireland and Hungary move construction VAT to the customer, and the catalogue says how.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ireland and Hungary move construction VAT to the customer, and the catalogue says how.
 
 Both countries run a domestic reverse charge on construction between businesses,
 and both put a sentence on the invoice that is the whole of the obligation. A

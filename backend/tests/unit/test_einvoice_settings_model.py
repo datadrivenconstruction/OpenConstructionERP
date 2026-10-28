@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The stored configuration and the document must speak one vocabulary.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The stored configuration and the document must speak one vocabulary.
 
 A settings table whose columns do not reach the document is the failure this
 guards: the user fills a field, the screen saves it, and the invoice is still

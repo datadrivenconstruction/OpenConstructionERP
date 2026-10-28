@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure decision-core tests for the review-authority module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure decision-core tests for the review-authority module.
 
 Pins the jurisdiction-neutral logic without a DB or a clock:
 

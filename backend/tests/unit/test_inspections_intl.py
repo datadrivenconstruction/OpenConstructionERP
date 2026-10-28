@@ -1,4 +1,4 @@
-"""Unit tests for the Inspections international helpers (``intl.py``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Inspections international helpers (``intl.py``).
 
 These are pure, database-free tests. They pin the international behaviour that
 keeps quality and site inspections clear and correct anywhere in the world:

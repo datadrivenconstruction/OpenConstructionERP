@@ -1,4 +1,4 @@
-"""A DXF must open on a host that has no converter binary for its CPU.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A DXF must open on a host that has no converter binary for its CPU.
 
 The DWG, RVT and DGN converters are proprietary x86-64 binaries. ``.dxf`` was
 routed to the DWG one through a format alias, so an ARM host could not open a

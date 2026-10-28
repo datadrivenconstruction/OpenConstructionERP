@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the multi-language xlsx BoQ parser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the multi-language xlsx BoQ parser.
 
 Covers MAPPING_PROCESS.md §4.1.5 — the Excel BoQ source path. The
 parser must:

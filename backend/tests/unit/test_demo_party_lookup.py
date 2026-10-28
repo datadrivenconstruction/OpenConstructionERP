@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resolving a seed row's party must fail to nothing, never to the wrong party.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resolving a seed row's party must fail to nothing, never to the wrong party.
 
 Five registers link to a contact through ``_seeded_party_id``. The PG tests
 prove the links reach the database; this pins the rule that decides what happens

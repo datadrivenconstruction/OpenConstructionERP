@@ -1,4 +1,4 @@
-"""A dict-backed stand-in for ``oe_costs_base_state`` for tests without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A dict-backed stand-in for ``oe_costs_base_state`` for tests without a database.
 
 The costs router reads and writes a base's market and language only through
 ``app.modules.costs.base_state``. Tests that drive the router with

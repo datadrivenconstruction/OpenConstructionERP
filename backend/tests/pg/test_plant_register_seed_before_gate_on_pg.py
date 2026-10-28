@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo register of a project that has not started building, on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo register of a project that has not started building, on PostgreSQL.
 
 A project whose gate into the phase that enables construction start is still
 undecided is seeded as one day before that gate. Nothing may contradict that

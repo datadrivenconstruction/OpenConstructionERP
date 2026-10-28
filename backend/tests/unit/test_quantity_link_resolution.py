@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level resolution of formula-mode quantity links (Issue #347).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level resolution of formula-mode quantity links (Issue #347).
 
 Exercises the real ``BOQService._compute_link_quantity`` - the method the
 refresh/apply endpoints call - with the element repository monkeypatched to

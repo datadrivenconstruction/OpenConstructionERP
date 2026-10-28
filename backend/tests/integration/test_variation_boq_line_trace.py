@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tracing a line that was added to a variation bill after the bill was opened.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tracing a line that was added to a variation bill after the bill was opened.
 
 Opening a variation request's bill can seed it from named contract
 schedule-of-values lines and estimating positions, and each seeded line gets a

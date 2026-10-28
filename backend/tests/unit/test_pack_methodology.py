@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pack -> estimating-methodology wiring (pure, no database).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pack -> estimating-methodology wiring (pure, no database).
 
 Validates the contract added so applying a country/region pack opens its demo
 project (and any project created while the pack is active) with the partner's

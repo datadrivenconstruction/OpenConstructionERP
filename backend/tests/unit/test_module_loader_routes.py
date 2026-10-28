@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Turning a module off has to stop it answering.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Turning a module off has to stop it answering.
 
 The loader mounts a module by handing its router to ``app.include_router`` and
 takes it down again by editing ``app.routes``. That worked while including a

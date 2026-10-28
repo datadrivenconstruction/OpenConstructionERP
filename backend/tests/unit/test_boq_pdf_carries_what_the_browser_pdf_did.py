@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The server PDF is the BOQ editor's only PDF, so it carries what the browser one did.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The server PDF is the BOQ editor's only PDF, so it carries what the browser one did.
 
 The editor used to build its PDF in the browser for bills of up to 500 lines.
 That copy took its tax from the first percentage tax markup only, so a second

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""What the meetings module does with its type list, beyond agreeing on it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the meetings module does with its type list, beyond agreeing on it.
 
 The cross-layer agreement, that the Python tuple, the TypeScript array and the
 locale files all say the same words, is held for every module at once in

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The converter's intermediate spreadsheet must not outlive the conversion.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The converter's intermediate spreadsheet must not outlive the conversion.
 
 Issue #409. A DWG conversion writes a ``<name>_dwg.xlsx`` beside the upload,
 reads the entities out of it, and left it there. On every path: the five error

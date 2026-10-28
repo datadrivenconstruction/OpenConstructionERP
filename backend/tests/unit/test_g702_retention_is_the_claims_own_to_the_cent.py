@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""G702 line 5 is the claim's own retention to the cent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠G702 line 5 is the claim's own retention to the cent.
 
 The certificate used to round retention on each G703 row and add the rounded
 rows up, so on a schedule of odd-cent lines line 5 came out a cent or more

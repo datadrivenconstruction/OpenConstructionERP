@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An RFQ that has gone out keeps what vendors priced, and a decided one keeps its record.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An RFQ that has gone out keeps what vendors priced, and a decided one keeps its record.
 
 The service already refuses two things. ``_require_editable_scope`` stops the
 scope lines changing once vendors have been asked to price them, and

@@ -1,4 +1,4 @@
-"""Unit + service tests for the Payment Clock module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit + service tests for the Payment Clock module.
 
 Four layers:
   * The statutory arithmetic - no DB. Worked examples with the dates written

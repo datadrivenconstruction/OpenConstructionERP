@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A progress claim's period strings read as dates, and claims order by them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A progress claim's period strings read as dates, and claims order by them.
 
 ``app.modules.contracts.periods`` decides what a payment application counts as
 previously certified: the claims before this one in period order. A parser that

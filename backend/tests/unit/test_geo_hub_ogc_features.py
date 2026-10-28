@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-function tests for the OGC API - Features layer (no DB, no HTTP).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function tests for the OGC API - Features layer (no DB, no HTTP).
 
 ``app.modules.geo_hub.ogc_features`` keeps every decision a GIS client
 depends on in small functions that take plain data: how ``bbox`` and

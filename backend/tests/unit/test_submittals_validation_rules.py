@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the ``submittal`` validation rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the ``submittal`` validation rule set.
 
 Three layers: the pure checks, what the engine makes of them, and whether a
 caller passes the set by name at all. The last one is the only guard against a

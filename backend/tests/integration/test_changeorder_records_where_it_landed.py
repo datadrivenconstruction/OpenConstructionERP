@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An approved change order says which bill section and budget row it wrote.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approved change order says which bill section and budget row it wrote.
 
 Approval writes the order's scope into a bill of quantities as a section and
 its money into a revised-budget row. The ids of both reached the

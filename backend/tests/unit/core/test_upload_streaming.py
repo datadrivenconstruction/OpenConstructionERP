@@ -1,4 +1,4 @@
-"""Unit tests for ``app.core.upload_streaming``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``app.core.upload_streaming``.
 
 Covers:
 

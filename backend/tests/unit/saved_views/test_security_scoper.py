@@ -1,4 +1,4 @@
-"""SAFETY PRIMITIVE 1 - the mandatory scoper (pure-unit gates).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠SAFETY PRIMITIVE 1 - the mandatory scoper (pure-unit gates).
 
 The cross-tenant data-isolation assertions need real rows in PostgreSQL, so they
 live in ``test_security_scoper_db.py`` (gated on a bootable cluster). The tests

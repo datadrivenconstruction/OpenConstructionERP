@@ -1,4 +1,4 @@
-"""Property Development PDF document-template integration suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property Development PDF document-template integration suite.
 
 Covers the six PDF generators in
 ``app.modules.property_dev.document_templates`` and the two HTTP

@@ -1,4 +1,4 @@
-"""Tests for Project Discussion comment notifications (issue #279).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for Project Discussion comment notifications (issue #279).
 
 Two halves:
 

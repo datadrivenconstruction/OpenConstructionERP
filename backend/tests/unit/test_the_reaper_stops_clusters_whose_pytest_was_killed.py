@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A test cluster whose pytest was killed is stopped and removed by the next run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A test cluster whose pytest was killed is stopped and removed by the next run.
 
 ``atexit`` stops the session's postmaster, but a pytest killed by a timeout
 never reaches it. The postmaster keeps running, its pid file names a live

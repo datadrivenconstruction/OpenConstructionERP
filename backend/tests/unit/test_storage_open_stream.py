@@ -1,4 +1,4 @@
-"""Unit tests for :meth:`StorageBackend.open_stream` default fallback (v2.4.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :meth:`StorageBackend.open_stream` default fallback (v2.4.0).
 
 Audit finding: :meth:`StorageBackend.open_stream` was declared as
 ``@abstractmethod`` and unconditionally raised ``NotImplementedError``

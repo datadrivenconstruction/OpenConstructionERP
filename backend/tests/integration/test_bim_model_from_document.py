@@ -1,4 +1,4 @@
-"""Integration tests for "create a BIM model from a Project Document" (issue #273).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for "create a BIM model from a Project Document" (issue #273).
 
 A file uploaded through the Documents hub is stored but never converted, so
 opening it in the BIM viewer used to find no model and ask the user to upload

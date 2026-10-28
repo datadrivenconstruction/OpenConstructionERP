@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit-system consistency has to reach a Chinese bill of quantities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit-system consistency has to reach a Chinese bill of quantities.
 
 ``BOQUnitSystemConsistencyRule`` reads ``data["project_unit_system"]``, and that
 value comes from whichever regional pack claims the project's country. A market

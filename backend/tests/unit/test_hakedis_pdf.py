@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The hakediş PDF carries the Turkish form, in Turkish, with Turkish numbers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The hakediş PDF carries the Turkish form, in Turkish, with Turkish numbers.
 
 A certificate that does not look like the document a cost control department
 files is refused whatever its arithmetic, so these tests read the page back:

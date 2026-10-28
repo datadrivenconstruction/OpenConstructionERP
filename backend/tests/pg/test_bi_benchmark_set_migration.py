@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revisions v90 and v97 build exactly the benchmark set table the model builds, and undo it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revisions v90 and v97 build exactly the benchmark set table the model builds, and undo it.
 
 Up, down, up on PostgreSQL; the reflected schema from the revision must equal the one ``create_all``
 produces from the model, so a fresh install and an upgraded one cannot drift.

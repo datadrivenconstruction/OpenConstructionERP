@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Turkish KDV rate check.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Turkish KDV rate check.
 
 The law of one country, registered under ``birimfiyat`` because that is the
 one set a Turkish project runs. It reads the one place a Turkish bill carries

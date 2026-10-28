@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The procurement concept API over HTTP against PostgreSQL: who may do what, and the error contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The procurement concept API over HTTP against PostgreSQL: who may do what, and the error contract.
 
 Identity is the variable under test: a stranger to the project, a viewer, an
 editor who does not own the procurement area, the editor who does, and a

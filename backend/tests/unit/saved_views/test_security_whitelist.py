@@ -1,4 +1,4 @@
-"""SAFETY PRIMITIVE 2 - column-whitelist rejection paths (pure unit, no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠SAFETY PRIMITIVE 2 - column-whitelist rejection paths (pure unit, no DB).
 
 Proves that a saved view may only filter / sort / group / select on columns that
 were explicitly whitelisted for the target entity, and that anything else is

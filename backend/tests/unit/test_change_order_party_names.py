@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The change order audit trail says who submitted and approved it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The change order audit trail says who submitted and approved it.
 
 ``submitted_by``, ``approved_by`` and ``rejected_by`` are free-text columns and
 the demo estate writes a user id into all three. The audit cards under a change

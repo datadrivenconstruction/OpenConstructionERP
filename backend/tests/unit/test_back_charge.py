@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure back-charge / cost-recovery engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure back-charge / cost-recovery engine.
 
 Stdlib + pytest only - mirrors the engine's constraint so it runs on the
 local Python 3.11 test runner without app.* or SQLAlchemy on the path. Money

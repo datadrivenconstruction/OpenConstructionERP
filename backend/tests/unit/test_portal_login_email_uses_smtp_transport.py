@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Portal sign-in links and invitations leave through the shared SMTP transport.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Portal sign-in links and invitations leave through the shared SMTP transport.
 
 The portal has no mailer of its own: ``send_login_email`` hands its message to
 ``get_email_service()``, which resolves ``EMAIL_BACKEND=smtp`` to

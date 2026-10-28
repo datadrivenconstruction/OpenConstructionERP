@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the connectors sync service (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the connectors sync service (PostgreSQL, py3.12).
 
 Drops files into a temp folder, registers a watched-folder source, and checks
 that a sync imports each new file as a project Document, deduplicates on a

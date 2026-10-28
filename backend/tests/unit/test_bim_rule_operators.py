@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Quantity-rule property conditions beyond equality.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Quantity-rule property conditions beyond equality.
 
 Matching itself is pinned by the shared parity table
 (``test_rule_matching_parity.py``); this file pins what a rule may store:

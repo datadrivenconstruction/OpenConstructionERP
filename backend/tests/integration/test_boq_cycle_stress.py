@@ -1,4 +1,4 @@
-"""BOQ position-hierarchy cycle detection — scale & concurrency stress.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ position-hierarchy cycle detection — scale & concurrency stress.
 
 Companion to ``test_boq_cycle_detection.py``: that file pins the
 correctness contract on small (≤ 4-node) trees; this one stresses the

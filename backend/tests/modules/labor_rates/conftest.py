@@ -1,4 +1,4 @@
-"""Shared fixtures for labor rate tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for labor rate tests.
 
 The top-level ``tests/conftest.py`` binds the engine to the PostgreSQL it
 provisions but only eagerly registers a handful of model modules, so the labor

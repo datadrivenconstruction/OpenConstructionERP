@@ -1,4 +1,4 @@
-"""Pure-function tests for the geo_hub tile pipeline.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function tests for the geo_hub tile pipeline.
 
 No DB, no HTTP — exercises the canonical-JSON -> glTF -> 3D Tiles
 build stages directly. Each stage is verifiable against the OGC 3D

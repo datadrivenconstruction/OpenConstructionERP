@@ -1,4 +1,4 @@
-"""Tests for the Accept-Language middleware and its helper functions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the Accept-Language middleware and its helper functions.
 
 Covers:
   - parse_accept_language() with valid, weighted, and malformed headers

@@ -1,4 +1,4 @@
-"""Unit tests for the IDS XML parser."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the IDS XML parser."""
 
 import pytest
 

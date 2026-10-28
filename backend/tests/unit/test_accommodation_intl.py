@@ -1,4 +1,4 @@
-"""Unit tests for the framework-free accommodation intl helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the framework-free accommodation intl helpers.
 
 Pure Decimal / date / string math, no database and no FastAPI, so this file
 runs on its own without any fixtures. Covers the international guarantees:

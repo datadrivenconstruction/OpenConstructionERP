@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the additive working-day offset calendar (cpm.OffsetCalendar).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the additive working-day offset calendar (cpm.OffsetCalendar).
 
 Pure-Python, no DB - exercises the calendar-aware day-offset arithmetic that a
 future CPM integration can adopt to skip weekends and holidays. The existing

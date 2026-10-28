@@ -1,4 +1,4 @@
-"""The bundled PostgreSQL runs from an ASCII path wherever the app is installed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The bundled PostgreSQL runs from an ASCII path wherever the app is installed.
 
 Since the desktop backend became a onedir folder, ``pginstall`` sits inside the
 install directory. Installed under a path with non-ASCII characters on a

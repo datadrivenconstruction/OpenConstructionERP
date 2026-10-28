@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A stored site photo carries no GPS block unless the deployer keeps it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A stored site photo carries no GPS block unless the deployer keeps it.
 
 A photo's EXIF GPS says where a person stood, and the file travels on every
 download and share. The upload still reads the coordinates onto the photo

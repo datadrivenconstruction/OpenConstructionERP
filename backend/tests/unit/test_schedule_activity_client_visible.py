@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The flag that sends a milestone to the client portal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The flag that sends a milestone to the client portal.
 
 ``client_visible`` is NOT NULL in the table, so the update schema must keep
 an omitted flag out of the update and refuse an explicit null, rather than

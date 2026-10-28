@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Deterministic calculation tests for the Carbon module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deterministic calculation tests for the Carbon module.
 
 Covers:
     * BOQ-position embodied carbon (concrete reference case: 100 m³ @ density

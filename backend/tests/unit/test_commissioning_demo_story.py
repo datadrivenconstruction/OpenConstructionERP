@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The commissioning demo seed takes the systems of a building from the pack story, in the project's language."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The commissioning demo seed takes the systems of a building from the pack story, in the project's language."""
 
 from __future__ import annotations
 

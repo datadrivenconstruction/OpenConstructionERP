@@ -1,4 +1,4 @@
-"""Pure-logic unit tests for the partner-pack full-install CWICR resolver.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic unit tests for the partner-pack full-install CWICR resolver.
 
 These exercise only the §5.1 slug → ``load-cwicr`` db_id resolution and the
 demo install-list ordering. No database, no embedding model, no HTTP — the

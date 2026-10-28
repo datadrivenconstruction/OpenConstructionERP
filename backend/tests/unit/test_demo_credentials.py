@@ -1,4 +1,4 @@
-"""Demo-account password generation (BUG-D01 fix).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo-account password generation (BUG-D01 fix).
 
 Until v2.5.x the platform shipped a hardcoded ``DemoPass1234!`` at four
 call sites in ``main.py``. README claimed *"passwords are randomly

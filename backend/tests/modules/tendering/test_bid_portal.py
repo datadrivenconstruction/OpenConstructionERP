@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bidder price-entry links, end to end against the database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bidder price-entry links, end to end against the database.
 
 A subcontractor without an account opens ``/tendering/bid/{token}``, prices the bill and
 submits. These tests drive the real routes: staff make the link, an anonymous

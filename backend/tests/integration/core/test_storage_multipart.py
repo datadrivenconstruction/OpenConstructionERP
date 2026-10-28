@@ -1,4 +1,4 @@
-"""Integration: storage multipart upload (RFC 34 §4 W0.5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: storage multipart upload (RFC 34 §4 W0.5).
 
 Covers the multipart_upload + presigned_put_url surface added to
 :mod:`app.core.storage` for browser-direct uploads of files >100 MB.

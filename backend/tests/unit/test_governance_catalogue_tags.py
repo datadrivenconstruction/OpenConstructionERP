@@ -1,4 +1,4 @@
-"""Catalogue tags: a document type says what it hosts, a phase says what it enables.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalogue tags: a document type says what it hosts, a phase says what it enables.
 
 The expectations below are written by hand from the source models, not derived
 from ``spine_keys`` or from the JSON, so a catalogue that loses or misplaces a

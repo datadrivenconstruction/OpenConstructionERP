@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The contract standard a demo pack declares must reach the notice engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The contract standard a demo pack declares must reach the notice engine.
 
 Driven from the shipped packs rather than from a constructed contract, because
 a hand-built fixture is exactly what let the defect sit. ``normalize_standard``

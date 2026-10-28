@@ -1,4 +1,4 @@
-"""Unit tests for :class:`RFIService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`RFIService`.
 
 Scope:
     CRUD, status transitions, respond/close workflow, is_overdue logic,

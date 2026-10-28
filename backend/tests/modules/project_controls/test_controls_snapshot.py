@@ -1,4 +1,4 @@
-"""Project Controls aggregation tests (feature 09).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project Controls aggregation tests (feature 09).
 
 Exercises the six new KPIs and the snapshot orchestrator against a real
 PostgreSQL session (the only dialect the app runs on) in a per-test

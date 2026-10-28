@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The comparison, the matrix and the package plan on PostgreSQL: the smaller review findings.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The comparison, the matrix and the package plan on PostgreSQL: the smaller review findings.
 
 Each test pins one input the review showed going wrong: a catalogue mapping
 that collides, an explicit null that was ignored, packages that parent each

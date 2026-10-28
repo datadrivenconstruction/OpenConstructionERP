@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The subcontract rollup of a GC progress claim, as pure functions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The subcontract rollup of a GC progress claim, as pure functions.
 
 ``subcontractors.rollup`` lines up the pay applications included in one GC
 claim against the GC's schedule of values. Everything here runs on plain

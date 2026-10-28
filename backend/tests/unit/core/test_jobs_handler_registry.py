@@ -1,4 +1,4 @@
-"""Handler-registry tests for the W0.1 job runner (RFC 34 §4 W0.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Handler-registry tests for the W0.1 job runner (RFC 34 §4 W0.1).
 
 Contract:
     register_handler(kind, handler) attaches a callable to a JobRun.kind.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The quality concept demo seed, run after the seeders it reads from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The quality concept demo seed, run after the seeders it reads from.
 
 The seed goes through the service, so what is asserted here is what a user
 would see on the screens: every register filled, the concept free of

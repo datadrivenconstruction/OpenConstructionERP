@@ -1,4 +1,4 @@
-"""What ``PlantService.capabilities`` tells a caller, and the guard names of the router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What ``PlantService.capabilities`` tells a caller, and the guard names of the router.
 
 ``applies`` is the server's word on whether an action exists in this state.
 Editing and managing the register exist on every project, so a caller without

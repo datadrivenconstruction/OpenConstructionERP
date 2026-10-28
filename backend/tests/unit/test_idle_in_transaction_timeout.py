@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every connection the app opens must carry a bound on abandoned transactions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every connection the app opens must carry a bound on abandoned transactions.
 
 A session that opens a transaction and then stops talking keeps every lock it
 took until its connection closes. The fuse this tree already had is

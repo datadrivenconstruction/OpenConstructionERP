@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure rules of the procurement concept: thresholds, lots, consistency, shortlist, schedule, frameworks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure rules of the procurement concept: thresholds, lots, consistency, shortlist, schedule, frameworks.
 
 Each test names the SPEC rule it pins and contains the case that would pass if
 the rule were missing (a breach that must be reported, or a boundary that must

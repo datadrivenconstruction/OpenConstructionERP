@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A derived deadline's title cannot be edited into something nobody reads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A derived deadline's title cannot be edited into something nobody reads.
 
 ``title_key`` is not stored. It is worked out from ``source``: a row this
 module derived is named by its ``kind``, which is an enum and translates, and

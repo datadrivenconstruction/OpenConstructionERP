@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The statutory working-time record: deadlines, retention, and derived durations.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The statutory working-time record: deadlines, retention, and derived durations.
 
 Every test here runs on the pure engine plus the service's own line builder, so
 none of it needs a database and none of it can be skipped for the want of one.

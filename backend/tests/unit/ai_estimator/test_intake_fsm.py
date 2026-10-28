@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persistence-backed unit tests for the conversational intake (v2) FSM.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persistence-backed unit tests for the conversational intake (v2) FSM.
 
 These drive the real :class:`IntakeService` against a function-scoped,
 transaction-isolated PostgreSQL session (``tests._pg.transactional_session``,

@@ -1,4 +1,4 @@
-"""Integration: CDE go-live readiness endpoint (GET /v1/cde/readiness).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: CDE go-live readiness endpoint (GET /v1/cde/readiness).
 
 Drives real data through the public API and checks the readiness score reflects
 it - which exercises the aggregate repository SQL (mixed COUNT(*)/COUNT(col),

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The printed purchase order, goods receipt, invoice and payment (#514).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The printed purchase order, goods receipt, invoice and payment (#514).
 
 Checked on the form layer (:func:`app.core.register_export.record_text_lines`,
 every string the form prints in reading order) and on the rendered bytes:

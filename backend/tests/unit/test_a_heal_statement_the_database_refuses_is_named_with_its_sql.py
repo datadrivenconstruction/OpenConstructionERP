@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A heal statement the database refuses is collected, named and handed back as SQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A heal statement the database refuses is collected, named and handed back as SQL.
 
 The boot-time heal (``postgres_auto_migrate``) wraps every statement in its own
 SAVEPOINT and catches whatever it raises, so one refusal cannot stop the rest.

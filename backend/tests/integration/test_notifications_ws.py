@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""WebSocket tests for the notifications push channel.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠WebSocket tests for the notifications push channel.
 
 The channel had no test of its own. It is server-push only, so what is worth
 covering is the handshake policy and the keep-alive loop: who is let in, and

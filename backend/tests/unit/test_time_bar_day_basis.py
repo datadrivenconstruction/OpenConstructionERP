@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The notice engine counts working days when a standard says working days.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The notice engine counts working days when a standard says working days.
 
 Every notice period configured today is a calendar-day period, so a bare
 integer has been the right answer by coincidence rather than by design. These

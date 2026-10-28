@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure, DB-free tests for the estimate-rollup composition engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure, DB-free tests for the estimate-rollup composition engine.
 
 The composition is factored out of the database precisely so the summation, the
 double-counting decision (remaining, not held) and the FX fold can be asserted on

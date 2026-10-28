@@ -1,4 +1,4 @@
-"""Unit tests for :class:`ScheduleAdvancedService` and module pure helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ScheduleAdvancedService` and module pure helpers.
 
 Scope:
     * Pure helpers: ``compute_ppc``, ``compute_rnc_pareto``,

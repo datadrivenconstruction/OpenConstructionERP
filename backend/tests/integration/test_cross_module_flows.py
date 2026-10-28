@@ -1,4 +1,4 @@
-"""Cross-module integration tests for OpenConstructionERP.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-module integration tests for OpenConstructionERP.
 
 Tests the CONNECTIONS between modules -- not individual module CRUD,
 but the workflows where one module's action triggers side-effects

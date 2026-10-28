@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The cost structure revision turns flat account lists into trees and can be undone."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost structure revision turns flat account lists into trees and can be undone."""
 
 from __future__ import annotations
 

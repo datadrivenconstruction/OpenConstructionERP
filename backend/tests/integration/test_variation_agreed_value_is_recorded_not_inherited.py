@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The commercial approval boundary of a variation - issue #435.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The commercial approval boundary of a variation - issue #435.
 
 A variation request carries a headline estimate and may own a priced bill, and
 the two are allowed to differ while the change is being priced. Nothing

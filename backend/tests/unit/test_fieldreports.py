@@ -1,4 +1,4 @@
-"""Unit tests for :class:`FieldReportService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`FieldReportService`.
 
 Scope:
     CRUD, status transitions (draft -> submitted -> approved), document

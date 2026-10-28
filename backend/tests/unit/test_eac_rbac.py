@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RBAC tests for the EAC v2 engine (Max-Audit finding #6).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RBAC tests for the EAC v2 engine (Max-Audit finding #6).
 
 Before this fix the entire EAC router gated every endpoint with only
 ``CurrentUserId`` + a tenant check - there was no ``permissions.py`` and

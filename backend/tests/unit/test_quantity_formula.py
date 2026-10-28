@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the per-element quantity formula evaluator (Issue #347).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the per-element quantity formula evaluator (Issue #347).
 
 Two layers:
 

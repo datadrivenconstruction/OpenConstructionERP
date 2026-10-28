@@ -1,4 +1,4 @@
-"""French statutory late payment as a row of the shared engine, not an engine of its own.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠French statutory late payment as a row of the shared engine, not an engine of its own.
 
 Each case is chosen so a wrong reading gives another answer: the ECB move of 17 June 2026
 falls inside H1 and must not reach the 1 July fixing early, a public debtor has no rate

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Pure unit tests for the 6D Phase 2 whole-life engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the 6D Phase 2 whole-life engine.
 
 Imports only ``app.modules.carbon.lcc`` - a leaf module with no app / database
 imports - so the whole file runs on the local Python 3.11 runner (the rest of

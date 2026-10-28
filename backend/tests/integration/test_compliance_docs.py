@@ -1,4 +1,4 @@
-"""Compliance documents tracker — integration tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance documents tracker — integration tests.
 
 Covers the 8 scenarios in the spec:
 

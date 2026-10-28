@@ -1,4 +1,4 @@
-"""Fixtures for closeout module tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fixtures for closeout module tests.
 
 Uses the fast transactional-session primitive from ``tests/_pg.py`` against
 the session PostgreSQL cluster. FK triggers are disabled so a package can be

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``v3267_saved_views_team_share`` runs, reverses and re-runs on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``v3267_saved_views_team_share`` runs, reverses and re-runs on PostgreSQL.
 
 Every other test in this directory builds its schema through
 ``Base.metadata.create_all``, so none of them executes a single line of the

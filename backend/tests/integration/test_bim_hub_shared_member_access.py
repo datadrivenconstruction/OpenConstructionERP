@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM Hub shared-member read access regression (issue #271).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM Hub shared-member read access regression (issue #271).
 
 Pins the access policy for opening a BIM model in the viewer: a non-admin
 user the project has been SHARED with (added via ``add_project_member``)

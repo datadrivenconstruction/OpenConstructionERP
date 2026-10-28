@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""A market DDC ships must not read as unpublished in the v3 registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A market DDC ships must not read as unpublished in the v3 registry.
 
 ``_HF_PUBLISHED`` in :mod:`app.modules.costs.cwicr_v3_catalogue` is the hand
 kept record of which regions DDC has actually published a v3 BGE-M3 snapshot

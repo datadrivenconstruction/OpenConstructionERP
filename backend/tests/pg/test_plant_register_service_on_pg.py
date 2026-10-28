@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plant register service on PostgreSQL (SPEC 8.2): quotes, route and OFI, paper approval, slots, reads."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plant register service on PostgreSQL (SPEC 8.2): quotes, route and OFI, paper approval, slots, reads."""
 
 from __future__ import annotations
 

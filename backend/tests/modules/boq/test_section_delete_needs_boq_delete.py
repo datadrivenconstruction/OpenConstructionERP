@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deleting a section is a ``boq.delete`` call: a viewer is refused, an editor is not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deleting a section is a ``boq.delete`` call: a viewer is refused, an editor is not.
 
 The BOQ grid now hides its delete controls (the section trash icon, the
 "Delete section" menu item, the position Delete, the batch Delete) from any

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-link activity/schedule consistency guard - T3.3 portfolio.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-link activity/schedule consistency guard - T3.3 portfolio.
 
 ``PortfolioService.create_cross_link`` verifies the caller can reach BOTH
 projects (IDOR defence, 404 on deny). On top of that it must also reject a

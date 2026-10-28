@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — manual measurement override behavior.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — manual measurement override behavior.
 
 Covers bullet 8 of the R7 hardening sweep:
   * A user's manual correction overrides the AI suggestion.

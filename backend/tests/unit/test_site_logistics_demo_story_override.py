@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The site logistics demo seeds apply a per-project story on top of their defaults, key by key."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The site logistics demo seeds apply a per-project story on top of their defaults, key by key."""
 
 from __future__ import annotations
 

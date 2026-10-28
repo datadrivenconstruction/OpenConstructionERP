@@ -1,4 +1,4 @@
-"""Unit tests for the Excel/CSV generic parser."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Excel/CSV generic parser."""
 
 import tempfile
 from pathlib import Path

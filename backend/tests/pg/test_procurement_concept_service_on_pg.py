@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Procurement concept service on PostgreSQL: gate approval, binding, execution, read-back, frameworks, shortlist.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Procurement concept service on PostgreSQL: gate approval, binding, execution, read-back, frameworks, shortlist.
 
 Each test is a SPEC rule or a review finding with the case that would pass if
 the rule were missing.

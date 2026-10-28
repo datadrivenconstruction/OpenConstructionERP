@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the regional cost-benchmark metric variants (#21).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the regional cost-benchmark metric variants (#21).
 
 PostgreSQL, py3.12. CostBenchmarkService.portfolio_distribution gained a metric
 selector: the original currency-scoped ``cost_per_m2`` (BOQ grand total over

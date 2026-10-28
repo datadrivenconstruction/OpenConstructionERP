@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every seeded letter must name a party the demo actually has a contact for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every seeded letter must name a party the demo actually has a contact for.
 
 The correspondence seeds carry the counterparty as a role on the seed tuple.
 The writer turns that role into a contact id, so a role with no matching

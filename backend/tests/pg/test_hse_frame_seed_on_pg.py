@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The HSE frame demo seed, through the service, for the two German demo stories.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The HSE frame demo seed, through the service, for the two German demo stories.
 
 What is asserted is what a person sees on the screens: the Bavarian residential
 frame is complete and in review without a blocker, the Baden-Wuerttemberg school

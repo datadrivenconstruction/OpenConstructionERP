@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Both API reference pages have to render with no way out to the internet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Both API reference pages have to render with no way out to the internet.
 
 FastAPI's stock routes write pages that fetch their application code from
 ``cdn.jsdelivr.net``: ``swagger-ui-bundle.js`` and ``swagger-ui.css`` for

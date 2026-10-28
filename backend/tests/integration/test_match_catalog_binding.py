@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""v2.8.2 — per-project CWICR catalogue binding.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠v2.8.2 — per-project CWICR catalogue binding.
 
 Coverage:
 

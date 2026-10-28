@@ -1,4 +1,4 @@
-"""Regression test for DXF arc length — audit C3.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression test for DXF arc length — audit C3.
 
 The DXF processor stores arc angles as ``math.radians(dxf.start_angle)``
 in :mod:`app.modules.dwg_takeoff.dxf_processor` (see ``_extract_geometry``

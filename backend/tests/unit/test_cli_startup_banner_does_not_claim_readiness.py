@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The startup banner must not tell the user the server is up before it is.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The startup banner must not tell the user the server is up before it is.
 
 ``print_startup_banner`` has exactly one caller and it runs BEFORE uvicorn
 starts, so everything the banner asserts about the server is asserted about a

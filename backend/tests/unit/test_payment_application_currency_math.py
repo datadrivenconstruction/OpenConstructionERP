@@ -1,4 +1,4 @@
-"""Shared application math keeps currency units before any regional renderer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared application math keeps currency units before any regional renderer."""
 
 from decimal import Decimal as D
 from types import SimpleNamespace as NS

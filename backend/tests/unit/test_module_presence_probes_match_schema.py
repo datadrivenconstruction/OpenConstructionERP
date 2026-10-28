@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Every module-presence probe must be executable against the mapped schema.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every module-presence probe must be executable against the mapped schema.
 
 ``PRESENCE_PROBES`` is hand-maintained SQL: each entry names a table and a
 column by string, so nothing stops an entry from naming a table that was never

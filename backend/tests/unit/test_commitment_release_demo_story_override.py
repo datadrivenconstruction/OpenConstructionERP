@@ -1,4 +1,4 @@
-"""Demo story override of the commitment release seeder: pure validation and the shipped Ludwigsburg file."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo story override of the commitment release seeder: pure validation and the shipped Ludwigsburg file."""
 
 from __future__ import annotations
 

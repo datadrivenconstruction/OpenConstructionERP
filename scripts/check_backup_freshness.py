@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Backup freshness guard: complain when the newest database dump is too old.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Backup freshness guard: complain when the newest database dump is too old.
 
 Production ran nine days with no database backup and nothing said so. The
 nightly job was refusing correctly - it checked for free disk, found too

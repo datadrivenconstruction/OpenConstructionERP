@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The four Saudi showcase demos are registered, priced, and install with every business area filled.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The four Saudi showcase demos are registered, priced, and install with every business area filled.
 
 Static checks read the templates only. The install check runs the real seeder and then counts what the
 project holds: bill, budget, procurement, subcontract, schedule and billing, and that the numbers reconcile.

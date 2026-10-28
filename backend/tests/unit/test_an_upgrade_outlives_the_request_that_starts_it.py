@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An upgrade takes longer than any browser waits, so it cannot be a request.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An upgrade takes longer than any browser waits, so it cannot be a request.
 
 Downloading a release, resolving its dependencies and installing them takes as
 long as it takes. The client gave up at 45 seconds and told the user the

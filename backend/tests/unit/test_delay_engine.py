@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure forensic delay-analysis engine (T2.2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure forensic delay-analysis engine (T2.2).
 
 Covers the engine acceptance criteria: fragnet float-absorption, TIA
 regression against a single-duration bump, insert-after / suspend-resume

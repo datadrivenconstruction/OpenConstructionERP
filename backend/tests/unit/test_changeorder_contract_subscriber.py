@@ -1,4 +1,4 @@
-"""Unit tests for the ``changeorder.approved`` → contract-value subscriber.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the ``changeorder.approved`` → contract-value subscriber.
 
 Covers ``_on_changeorder_approved_contract`` in
 ``app.modules.notifications._wave5_cross_module_subscribers``:

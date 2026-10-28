@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure pre-construction scope-ambiguity engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure pre-construction scope-ambiguity engine.
 
 Stdlib + pytest only; runs on the local Python 3.11 runner. Table-driven where
 the cases share shape, with focused tests for the score arithmetic, band

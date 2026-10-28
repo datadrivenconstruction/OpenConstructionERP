@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the pure Monte Carlo cost-risk engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure Monte Carlo cost-risk engine.
 
 These exercise :mod:`app.modules.boq.cost_risk_engine` directly with plain
 floats - no database, FastAPI or numpy - so they run on any interpreter, exactly

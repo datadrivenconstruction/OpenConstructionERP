@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure rules behind minutes from audio: glossary, corrections, proposals, retention."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure rules behind minutes from audio: glossary, corrections, proposals, retention."""
 
 from __future__ import annotations
 

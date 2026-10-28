@@ -1,4 +1,4 @@
-"""A property document writes an amount with the digits its currency has.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A property document writes an amount with the digits its currency has.
 
 Every contract, receipt and certificate the property module issues goes through
 one renderer, ``document_templates._format_money``. It took a locale and no

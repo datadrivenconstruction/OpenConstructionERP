@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The vertex rows of a DDC export are read once, not once per polyline.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The vertex rows of a DDC export are read once, not once per polyline.
 
 A 22 MB drawing sat in "converting" for over an hour and was then declared
 dead. The DDC subprocess had long finished; the phase that had not was the

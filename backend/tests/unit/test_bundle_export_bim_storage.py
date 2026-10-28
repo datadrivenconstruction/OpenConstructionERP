@@ -1,4 +1,4 @@
-"""Unit tests for the 8.6.1 BIM data-dir fix as it touches project-bundle export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the 8.6.1 BIM data-dir fix as it touches project-bundle export.
 
 Background
 ----------

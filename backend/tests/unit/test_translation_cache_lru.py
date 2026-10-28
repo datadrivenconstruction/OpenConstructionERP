@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Tests for the in-process LRU layered on the PostgreSQL translation cache.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the in-process LRU layered on the PostgreSQL translation cache.
 
 The LRU exists to amortise DB SELECTs across N concurrent match requests
 with identical envelopes. These tests verify hit / miss behaviour and

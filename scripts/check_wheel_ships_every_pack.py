@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Ask an INSTALLED wheel which packs it lists, and whether each one can read its files.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ask an INSTALLED wheel which packs it lists, and whether each one can read its files.
 
 Run with the interpreter of a clean virtualenv the built wheel was installed
 into, from a directory outside the repository, so ``app`` resolves to

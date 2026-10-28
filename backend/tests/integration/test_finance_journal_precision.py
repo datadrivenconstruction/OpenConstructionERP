@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Ledger admission must preserve balance through PostgreSQL's amount scale."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ledger admission must preserve balance through PostgreSQL's amount scale."""
 
 from __future__ import annotations
 

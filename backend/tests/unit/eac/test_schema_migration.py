@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Verify the EAC v2 core migration is reversible.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Verify the EAC v2 core migration is reversible.
 
 Strategy: build a metadata containing only the EAC tables, run
 ``create_all`` against an in-memory SQLite engine, drop them via the

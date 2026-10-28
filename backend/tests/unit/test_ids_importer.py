@@ -1,4 +1,4 @@
-"""Unit tests for the IDS → ValidationRule importer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the IDS → ValidationRule importer.
 
 Covers task tracker #224 mandates:
     1. parse a known-good IDS file and assert rule count + ids

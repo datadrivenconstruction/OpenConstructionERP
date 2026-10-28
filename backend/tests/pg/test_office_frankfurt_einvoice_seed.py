@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A freshly seeded office-frankfurt invoice survives an XRechnung dry-run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A freshly seeded office-frankfurt invoice survives an XRechnung dry-run.
 
 The German showcase preflight found the seeded invoices unusable for the
 E-Rechnung walkthrough: every invoice carried ``contact_id`` NULL and no

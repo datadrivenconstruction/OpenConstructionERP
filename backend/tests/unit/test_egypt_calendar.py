@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egypt works Sunday to Thursday and has a holiday calendar of its own.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egypt works Sunday to Thursday and has a holiday calendar of its own.
 
 Until this file an Egyptian project fell through to the Monday to Friday
 default with no public holidays: Fridays were working days, Sundays rest days,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Authored clause templates: the union, the freeze, and the pinned version.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Authored clause templates: the union, the freeze, and the pinned version.
 
 Three things here can only be checked against a database, which is why this
 file lives in the PostgreSQL lane rather than beside the pure-function tests.

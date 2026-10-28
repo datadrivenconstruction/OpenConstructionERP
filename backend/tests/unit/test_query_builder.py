@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the CWICR Qdrant query builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CWICR Qdrant query builder.
 
 Pins the pure helpers (``unit_dim_for``, ``department_code_for``,
 ``extract_resource_hints``) and the end-to-end ``build_query`` so the

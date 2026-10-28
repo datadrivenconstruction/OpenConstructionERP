@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the reporting module's COBie export profile.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the reporting module's COBie export profile.
 
 Mirrors the structural-assertion style of
 ``backend/tests/unit/test_cobie_exporter.py`` (sheet names + header rows,

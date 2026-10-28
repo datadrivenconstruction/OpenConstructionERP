@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure provability scoring engine (runs on py3.11).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure provability scoring engine (runs on py3.11).
 
 These exercise :mod:`app.modules.claims_evidence.provability` directly with
 plain dataclass inputs - no database, FastAPI or ORM - exactly like the other

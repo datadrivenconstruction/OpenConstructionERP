@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The stakeholders service against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The stakeholders service against PostgreSQL.
 
 Append-only assessments, the sweep, the communication plan, the commitment
 lifecycle (direct, through an approval route, breach to risk), the mandate

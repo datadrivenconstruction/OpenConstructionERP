@@ -1,4 +1,4 @@
-"""The BOQ editor's readiness gate stands for features that read the cost store.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The BOQ editor's readiness gate stands for features that read the cost store.
 
 `BOQEditorPage` gates three actions behind `vectorReady`, which it computes
 from the `cost_items` vector count reported by `/v1/costs/vector/status/`.

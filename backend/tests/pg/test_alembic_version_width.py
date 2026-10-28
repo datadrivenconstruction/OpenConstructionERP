@@ -1,4 +1,4 @@
-"""Width of alembic's own version table on real PostgreSQL (issue #399).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Width of alembic's own version table on real PostgreSQL (issue #399).
 
 The app's boot path creates ``alembic_version`` itself, through a bare
 ``MigrationContext`` that never loads ``alembic/env.py``. It therefore used to

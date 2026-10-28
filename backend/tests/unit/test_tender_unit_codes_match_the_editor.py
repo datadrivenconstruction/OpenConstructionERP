@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The tender workbooks spell trade units the way the BOQ editor does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The tender workbooks spell trade units the way the BOQ editor does.
 
 The editor's per-language unit spellings (``LOCALE_UNIT_CODES`` in
 ``frontend/src/shared/lib/unitLabels.ts``) are copied into the workbook

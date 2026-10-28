@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure inbound-capture normalizer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure inbound-capture normalizer.
 
 Stdlib + pytest only - mirrors the engine's constraint so it runs on the local
 Python 3.11 test runner without app.* / SQLAlchemy / FastAPI on the path. The

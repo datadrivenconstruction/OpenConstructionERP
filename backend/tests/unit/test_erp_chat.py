@@ -1,4 +1,4 @@
-"""Baseline correctness + hardening tests for ``erp_chat``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline correctness + hardening tests for ``erp_chat``.
 
 Covers, with the LLM provider fully mocked so the suite runs offline:
 

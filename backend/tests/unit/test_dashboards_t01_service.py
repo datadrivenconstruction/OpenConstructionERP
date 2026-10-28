@@ -1,4 +1,4 @@
-"""T01 unit tests for :class:`SnapshotService` and the cad2data bridge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T01 unit tests for :class:`SnapshotService` and the cad2data bridge.
 
 Covers:
 * Cad2data bridge — canonicalisation of IFC-ish element dicts into the

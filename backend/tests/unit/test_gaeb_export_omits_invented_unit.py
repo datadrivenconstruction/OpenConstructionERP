@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The X83 export must not state a unit the source file never stated.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The X83 export must not state a unit the source file never stated.
 
 An X84 item carries no ``QU``, so the importer guesses a unit to be able to
 store the row at all and records the source's silence in

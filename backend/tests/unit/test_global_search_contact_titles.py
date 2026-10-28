@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Global search must not return a result with no title.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Global search must not return a result with no title.
 
 The contact search matches on ``primary_email`` among other columns, so a
 contact who has only an email address is findable by typing that address. The

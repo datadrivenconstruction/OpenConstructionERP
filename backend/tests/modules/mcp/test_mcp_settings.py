@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The settings surface and the ``mcp`` validation rules."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The settings surface and the ``mcp`` validation rules."""
 
 from __future__ import annotations
 

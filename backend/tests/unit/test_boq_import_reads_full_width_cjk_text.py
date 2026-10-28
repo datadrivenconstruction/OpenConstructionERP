@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bill typed with full-width characters imports as the same bill typed without.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill typed with full-width characters imports as the same bill typed without.
 
 Chinese, Japanese and Korean input methods type brackets, digits, separators
 and unit squares in their full-width forms, and an estimator's workbook mixes

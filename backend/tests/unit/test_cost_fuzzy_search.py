@@ -1,4 +1,4 @@
-"""Fuzzy (trigram) cost-item search.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fuzzy (trigram) cost-item search.
 
 Cost search upgraded from plain substring (ILIKE) matching to fuzzy, ranked
 search using PostgreSQL's pg_trgm extension (``similarity`` / ``word_similarity``).

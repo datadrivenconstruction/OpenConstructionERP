@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A frozen desktop build must refuse to pip-upgrade itself (issue #403).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A frozen desktop build must refuse to pip-upgrade itself (issue #403).
 
 The reporter clicked "Apply update" in the Windows app on 9.4.0 and got an
 argparse usage dump ending ``invalid choice: 'pip'``. That output is this

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Service tests for PROJECT-scoped "escalate stored rates" preview.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service tests for PROJECT-scoped "escalate stored rates" preview.
 
 The catalogue-scoped path (region / category / explicit ids) is covered by
 ``test_price_index_escalation.py``. These add the project scope: given a project

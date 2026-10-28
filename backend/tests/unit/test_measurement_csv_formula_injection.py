@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The measurement sheet's CSV download does not hand a spreadsheet a formula.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The measurement sheet's CSV download does not hand a spreadsheet a formula.
 
 Every text cell of a measurement sheet comes from a user or an imported file:
 the reference, the description, the formula, the unit, the error. A cell that

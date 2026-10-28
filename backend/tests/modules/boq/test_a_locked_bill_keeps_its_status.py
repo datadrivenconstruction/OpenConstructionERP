@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A generic bill update cannot move a locked bill's status or unlock it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A generic bill update cannot move a locked bill's status or unlock it.
 
 Status and lock mean this together. ``POST /boqs/{id}/lock`` approves a bill:
 it sets ``is_locked``, records the approver and moves the status to ``final``.

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the embedding warm-pool (Phase-4 perf fix).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the embedding warm-pool (Phase-4 perf fix).
 
 These exercise the pool wiring without spinning up real torch — the
 ``encode_texts`` import inside the worker is stubbed by setting

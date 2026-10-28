@@ -1,4 +1,4 @@
-"""Tests for the pure parts of scripts/release_gate/gate.py.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the pure parts of scripts/release_gate/gate.py.
 
 The release gate decides whether a wheel installs and upgrades cleanly on
 every platform, so a verdict function that cannot fail would wave a broken

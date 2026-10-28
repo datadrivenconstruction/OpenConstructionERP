@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the ``full_evm`` validation rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the ``full_evm`` validation rule set.
 
 Each rule is exercised both ways: on data it should accept and on data it
 should reject. A rule that only ever sees good data proves nothing, and a rule

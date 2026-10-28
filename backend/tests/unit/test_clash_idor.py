@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""IDOR audit tests for the Clash Detection module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠IDOR audit tests for the Clash Detection module.
 
 Verifies that cross-tenant access to clash runs, results, and issues
 raises 403 / 404 — never silently returning another project's data.

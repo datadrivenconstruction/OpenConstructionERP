@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for ``POST /api/v1/eac/rules:validate`` (EAC-1.3 §6).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ``POST /api/v1/eac/rules:validate`` (EAC-1.3 §6).
 
 Drives the real router against the FastAPI test client. Verifies that
 the validator endpoint replaces the EAC-1.1/1.2 stub: malformed rules

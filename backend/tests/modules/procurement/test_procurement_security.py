@@ -1,4 +1,4 @@
-"""Procurement R7 security regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Procurement R7 security regression suite.
 
 Pins the five R7 invariants for the procurement module so a future refactor
 that drops one of them trips here instead of in production:

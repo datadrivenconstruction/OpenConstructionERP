@@ -1,4 +1,4 @@
-"""Tests for the submittal FSM transition table.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the submittal FSM transition table.
 
 The frontend's <SubmittalStatusPipeline> mirrors this table, so any
 change here is a contract break with the UI stepper. Pin the allow-list

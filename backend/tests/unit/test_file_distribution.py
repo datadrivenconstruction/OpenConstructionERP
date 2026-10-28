@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the file-distribution (W10) module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the file-distribution (W10) module.
 
 Covers both sub-features:
 

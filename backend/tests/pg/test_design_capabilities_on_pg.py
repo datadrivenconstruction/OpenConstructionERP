@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``can`` flags against the writes they describe, option listings and the references they feed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``can`` flags against the writes they describe, option listings and the references they feed.
 
 The flags are only worth returning if a button and its request cannot
 disagree. So the first test does not assert a list of expected flags: it takes

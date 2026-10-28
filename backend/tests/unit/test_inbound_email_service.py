@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the inbound email service wrapper (runs on py3.11).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the inbound email service wrapper (runs on py3.11).
 
 The service composes the two pure engines, so it imports without the database
 or framework stack.

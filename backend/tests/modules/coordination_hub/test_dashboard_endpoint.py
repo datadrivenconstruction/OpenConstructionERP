@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""HTTP integration tests for the Coordination Hub endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP integration tests for the Coordination Hub endpoints.
 
 Covers:
     * GET /projects/{id}/dashboard      — happy path, 401, 404, 403-via-permission

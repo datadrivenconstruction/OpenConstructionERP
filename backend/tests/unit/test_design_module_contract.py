@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management wiring without a database: registration, router guards, messages, migration shape.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management wiring without a database: registration, router guards, messages, migration shape.
 
 Database behaviour (counters under load, releases into transmittals, IDOR over
 HTTP, migration up/down/up) lives in ``tests/pg/test_design_*.py``.

@@ -1,4 +1,4 @@
-"""The notification worker waits out a database that is still booting.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The notification worker waits out a database that is still booting.
 
 A flush that times out reaching the database during a slow boot used to log a
 full traceback on every tick. It now logs one warning, retries on a short

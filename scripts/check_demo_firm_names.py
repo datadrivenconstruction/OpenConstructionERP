@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if the demo seed pool can still produce a real firm name.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail if the demo seed pool can still produce a real firm name.
 
 The demo data ships with invented contractors, clients and consultants. Real
 firms had leaked into it, were removed, and the removal is held by

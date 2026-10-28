@@ -1,4 +1,4 @@
-"""Pakistan pack: data rows, rule set, units, calendar, contract regimes and the demo template."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pakistan pack: data rows, rule set, units, calendar, contract regimes and the demo template."""
 
 from __future__ import annotations
 

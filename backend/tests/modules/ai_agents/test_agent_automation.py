@@ -1,4 +1,4 @@
-"""Custom-agent automation: schedule + tool-access (Item 29).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Custom-agent automation: schedule + tool-access (Item 29).
 
 Exercises the scheduling / tool-grant foundations end to end against a
 transaction-isolated PostgreSQL session (rolled back on teardown):

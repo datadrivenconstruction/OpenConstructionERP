@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Timeline read queries: scope, filters and paging stability."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Timeline read queries: scope, filters and paging stability."""
 
 from __future__ import annotations
 

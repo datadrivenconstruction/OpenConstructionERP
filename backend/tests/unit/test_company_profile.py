@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Company profile: the letterhead printed on generated documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Company profile: the letterhead printed on generated documents.
 
 Two tests here guard promises nothing else in the codebase checks.
 

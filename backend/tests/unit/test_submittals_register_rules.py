@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The register rules of the ``submittal`` rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The register rules of the ``submittal`` rule set.
 
 Same three layers as ``test_submittals_validation_rules.py``: the pure checks
 (a passing and a failing case each), what the engine reports in English and

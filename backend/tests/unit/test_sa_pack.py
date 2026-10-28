@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the South Africa regional pack (oe_sa_pack).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the South Africa regional pack (oe_sa_pack).
 
 Covers the stateless service: the PPPFA price-points formula and the ZA VAT
 breakdown. These functions have no database dependency, so they run in

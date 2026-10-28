@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for ``DwgTakeoffService.resolve_view_status``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``DwgTakeoffService.resolve_view_status``.
 
 This pure static method is what stops the fresh-install "perpetual
 Converting..." spinner on /dwg-takeoff: a seeded ``.dwg`` row sits at

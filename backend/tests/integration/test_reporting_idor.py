@@ -1,4 +1,4 @@
-"""Reporting IDOR regression suite (v2.4.0 slice A — task #177).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reporting IDOR regression suite (v2.4.0 slice A — task #177).
 
 The ``/api/v1/reporting/`` router exposes endpoints keyed off
 ``project_id``, ``template_id``, and ``report_id``. Every endpoint that

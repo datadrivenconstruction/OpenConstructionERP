@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Document appearance: the stored look of every generated PDF.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document appearance: the stored look of every generated PDF.
 
 The test that matters most here is :func:`test_the_defaults_are_what_the_consumers_had_hard_coded`.
 Making the look configurable meant lifting values out of the modules that drew

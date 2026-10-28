@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The generators ask for the Chinese face, and asking changes nothing else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The generators ask for the Chinese face, and asking changes nothing else.
 
 An earlier change made the face reachable and wired no generator to it, so
 every generated document still printed Chinese as boxes. These tests are about

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seeded Gulf week must *mean* Sunday to Thursday, not merely be legal ISO.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seeded Gulf week must *mean* Sunday to Thursday, not merely be legal ISO.
 
 How this differs from the two guards beside it, so neither gets deleted as a
 duplicate of the other:

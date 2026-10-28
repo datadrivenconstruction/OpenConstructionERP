@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Index healing in :func:`app.core.postgres_migrator.postgres_auto_migrate`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Index healing in :func:`app.core.postgres_migrator.postgres_auto_migrate`.
 
 Upgraded embedded-PG installs stamp alembic instead of running it, so an
 index added in a later release (e.g. ``ix_oe_costs_item_catalog_id``) never

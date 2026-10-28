@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One tax number is one subcontractor, however the number was typed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One tax number is one subcontractor, however the number was typed.
 
 ``validate_tax_id`` accepts a number in every form its country prints it, and
 the register then stored the form that was typed and compared that column for

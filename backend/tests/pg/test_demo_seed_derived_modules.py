@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Four demo seeds whose rows are derived from data that already exists.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Four demo seeds whose rows are derived from data that already exists.
 
 Validation reports, reconciliation links, project documents and DWG markup are
 not registers a seeder may author from imagination. Each one is a statement

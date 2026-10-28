@@ -1,4 +1,4 @@
-"""Unit tests for DWG offline-readiness probe (R3 #9).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for DWG offline-readiness probe (R3 #9).
 
 Scope:
     - Converter present -> ``ready=True`` with a non-empty message.

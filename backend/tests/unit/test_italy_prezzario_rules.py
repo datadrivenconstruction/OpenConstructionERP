@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Italian prezzario rules run, are reachable from an Italian project, and say so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Italian prezzario rules run, are reachable from an Italian project, and say so.
 
 Five of the twelve ``prezzario.*`` ids the Italy pack declares have a body:
 the voce code format, the voce presence, the separated safety costs, the

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Service and router tests for the resource-index method (Russia).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service and router tests for the resource-index method (Russia).
 
 The arithmetic is pinned in ``test_resource_index_math.py``. These cover what
 sits around it: reading indices and norms from their tables (and refusing an

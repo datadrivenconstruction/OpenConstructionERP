@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Price adjustment: one country-neutral engine, the Egyptian Art. 97 formula as data.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Price adjustment: one country-neutral engine, the Egyptian Art. 97 formula as data.
 
 Law 182/2018 Art. 47 makes price adjustment mandatory on public contracts of
 six months or more, settled every three months. Executive Regulations Art. 97

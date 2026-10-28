@@ -1,4 +1,4 @@
-"""HTTP-layer verification of the new BOQ proposal endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP-layer verification of the new BOQ proposal endpoints.
 
 In-process FastAPI app + TestClient, mounting ONLY the ai_agents router with
 the auth/session dependencies overridden, so the new

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo seed fills project governance through the service, once per project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seed fills project governance through the service, once per project.
 
 A demo project opens on the governance screen with a pinned phase model, an owner
 on every area, a first gate decided with conditions, frame documents in several

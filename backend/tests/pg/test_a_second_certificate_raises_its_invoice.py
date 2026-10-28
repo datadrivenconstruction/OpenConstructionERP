@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The invoice of a certificate that has a previous one behind it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The invoice of a certificate that has a previous one behind it.
 
 Raising the invoice of a certified claim refuses when the certificate was
 taxed on another amount than the claim's gross. A refusal that fires on the

@@ -1,4 +1,4 @@
-"""Unit tests for the Service & Maintenance module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Service & Maintenance module.
 
 Scope:
     * State-machine helpers (tickets / work orders / contracts) — pure functions.

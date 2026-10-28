@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free tests for the interface register's ageing view, lifecycle edge and rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free tests for the interface register's ageing view, lifecycle edge and rule set.
 
 The ageing numbers come from the pure core, so every band edge is pinned here
 from plain values. The ``interface_management`` rules are pure over the payload

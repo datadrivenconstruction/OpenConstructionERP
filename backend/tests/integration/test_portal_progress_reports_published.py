@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""A client sees a progress report only after a person published it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A client sees a progress report only after a person published it.
 
 Before ``published_at`` existed, the portal listed and served every generated
 progress report of a project, so a draft carrying internal notes reached the

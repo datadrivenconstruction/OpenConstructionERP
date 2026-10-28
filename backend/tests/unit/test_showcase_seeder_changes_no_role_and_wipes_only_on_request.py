@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The CAD showcase seeder leaves every role alone and wipes only when asked.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The CAD showcase seeder leaves every role alone and wipes only when asked.
 
 ``seed_demo_showcase`` used to write ``role = 'admin'`` onto its seed account
 straight into the database, and then deleted every project on the

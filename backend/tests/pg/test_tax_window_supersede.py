@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Nova Scotia's rate cut, against the install that never received it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Nova Scotia's rate cut, against the install that never received it.
 
 What is under test
 ------------------

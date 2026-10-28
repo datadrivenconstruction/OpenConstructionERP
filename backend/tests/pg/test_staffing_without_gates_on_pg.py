@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A staffing plan on a project that uses no gates is walked to the end by hand.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A staffing plan on a project that uses no gates is walked to the end by hand.
 
 Without gates nothing binds a frame document, so the plan is approved through
 the module's own service by a second person holding the manage right. Where

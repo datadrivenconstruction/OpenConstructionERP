@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""A confirmed contingency drawdown survives every other writer of the row's metadata.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A confirmed contingency drawdown survives every other writer of the row's metadata.
 
 A drawdown is a key in ``ProjectBudget.metadata_``. Four code paths rewrite
 that whole dict from a copy they read first: the budget PATCH, the budget sync

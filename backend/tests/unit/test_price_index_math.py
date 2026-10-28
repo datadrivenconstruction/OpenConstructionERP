@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the pure price-index math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure price-index math.
 
 These exercise :mod:`app.modules.price_index.index_math` directly with plain
 ``Decimal`` / ``dict`` inputs - no database, FastAPI or ORM - so they run on any

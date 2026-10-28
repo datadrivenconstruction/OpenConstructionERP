@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The readable half of a hybrid invoice printed no street, the XML half did.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The readable half of a hybrid invoice printed no street, the XML half did.
 
 A Factur-X / ZUGFeRD file is one invoice in two representations: a page a person
 reads and a CII document the receiver's software reads. They have to say the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The reconciler has to have an opinion about every rate the seed file ships.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The reconciler has to have an opinion about every rate the seed file ships.
 
 Why this file exists at all
 ---------------------------

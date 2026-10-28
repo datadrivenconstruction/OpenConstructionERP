@@ -1,4 +1,4 @@
-"""What the server tells a caller about one plant item, and the texts of a refusal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the server tells a caller about one plant item, and the texts of a refusal.
 
 ``can`` on an item is answered by the functions the writes raise from, so the
 client never has to copy a state rule. These tests pin three things: the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A "code required" set a pack adds to a project is filtered by the project's standard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A "code required" set a pack adds to a project is filtered by the project's standard.
 
 Eight country packs were given a set that demands one classification code on
 every line: aus, nzs and south-africa name nrm, saudi-vision2030,

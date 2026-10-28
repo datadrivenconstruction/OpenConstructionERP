@@ -1,4 +1,4 @@
-"""Property Development R6 dashboards aggregations integration suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property Development R6 dashboards aggregations integration suite.
 
 Task #140 — covers the six new dashboard endpoints introduced by
 ``backend/app/modules/property_dev/router.py``::

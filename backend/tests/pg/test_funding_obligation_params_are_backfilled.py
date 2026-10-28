@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``v41_funding_obligation_detail`` must fill NULL ``detail_params`` rows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``v41_funding_obligation_detail`` must fill NULL ``detail_params`` rows.
 
 The revision is inspector-guarded so it can run on an installation whose
 tables came from ``Base.metadata.create_all`` plus the boot heal rather than

@@ -1,6 +1,6 @@
 # OpenConstructionERP — DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Security hardening tests for Punch List and Progress modules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Security hardening tests for Punch List and Progress modules.
 
 Covers:
     1. Punchlist: remove_photo requires project access (IDOR guard)

@@ -1,4 +1,4 @@
-"""The global admin role does not cross a tenant boundary in property_dev.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The global admin role does not cross a tenant boundary in property_dev.
 
 The module decided once that ownership is strict: an admin from another
 tenant must still 404 on an object they do not own. That decision lived in

@@ -1,4 +1,4 @@
-"""An unauthenticated probe must not be handed the database's own words.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An unauthenticated probe must not be handed the database's own words.
 
 ``/api/health`` reports whether the boot-time schema heal failed, and it briefly
 also reported *why*, as ``f"{type(exc).__name__}: {exc}"``. What fails there is a

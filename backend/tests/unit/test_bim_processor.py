@@ -1,4 +1,4 @@
-"""Tests for BIM file processing pipeline (ifc_processor.py).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for BIM file processing pipeline (ifc_processor.py).
 
 Covers:
 - Text-based IFC parser fallback (works without DDC converters)

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The hakediş layout: the standard order, a contract's changes to it, and the printed words.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The hakediş layout: the standard order, a contract's changes to it, and the printed words.
 
 The standard Turkish layout has to stay the public form line for line, because
 a cost control department recognises the document by it. A contract's own

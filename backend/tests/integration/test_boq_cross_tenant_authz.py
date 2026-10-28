@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-tenant authorization regression for the BOQ analytics / enrichment
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-tenant authorization regression for the BOQ analytics / enrichment
 endpoints and the AI-estimator unfiltered run listing.
 
 Locks in the just-shipped owner-gate fixes so a future refactor that drops a

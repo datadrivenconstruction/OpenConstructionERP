@@ -1,4 +1,4 @@
-"""Deleting a chat removes its messages from the search index too.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deleting a chat removes its messages from the search index too.
 
 Every chat message is embedded into the ``oe_chat`` vector collection, which
 global search reads. ``erp_chat/events.py`` subscribed a delete handler to

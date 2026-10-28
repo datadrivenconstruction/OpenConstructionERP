@@ -1,4 +1,4 @@
-"""Standalone change order preflight: a check that lists active variations, never a block."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Standalone change order preflight: a check that lists active variations, never a block."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+// DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 /**
  * Types for the streaming geometry tileset served by the backend tiler
  * (GET /api/v1/bim_hub/models/{id}/tiles/manifest/). A model's monolithic GLB

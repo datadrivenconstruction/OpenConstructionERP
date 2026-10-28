@@ -1,4 +1,4 @@
-"""Integration check: every seed YAML pack in data/bim_rules/ must
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration check: every seed YAML pack in data/bim_rules/ must
 load AND dry-run against a small synthetic element set without raising.
 
 This is the "real-world smoke test" that catches schema drift between

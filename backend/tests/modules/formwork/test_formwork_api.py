@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End-to-end behaviour of the Formwork API against a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end behaviour of the Formwork API against a real database.
 
 Covers the things that only show up once rows exist: a catalogue rate change
 re-pricing every assignment derived from it, the pour cycle driving the reuse

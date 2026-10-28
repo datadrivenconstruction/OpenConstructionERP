@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The module's own validation rules: the scope, the standing, the comparison.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The module's own validation rules: the scope, the standing, the comparison.
 
 Ten rules for this module live in the core rule file and are covered by
 ``tests/unit/test_rfq_bidding_validation_rules.py``. The rules here are the

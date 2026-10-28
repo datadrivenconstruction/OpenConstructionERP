@@ -1,4 +1,4 @@
-"""Database-free tests for :class:`TeamService`'s two authorisation gates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free tests for :class:`TeamService`'s two authorisation gates.
 
 Scope, and the reason for the split: the behavioural coverage of this module -
 what a restriction does, who may write one, what a stranger sees - lives in

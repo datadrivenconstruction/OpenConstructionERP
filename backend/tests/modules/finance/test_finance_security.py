@@ -1,4 +1,4 @@
-"""Finance R7 security regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance R7 security regression suite.
 
 Pins the five R7 invariants for the finance module:
 

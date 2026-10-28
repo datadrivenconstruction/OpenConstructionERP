@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The password-free Admin tile works until a real administrator exists.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The password-free Admin tile works until a real administrator exists.
 
 ``UserService.demo_login`` is the one sink both password-free paths reach: the
 ``/auth/demo-login`` endpoint behind the login page tiles, and the shortcut in

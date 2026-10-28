@@ -1,4 +1,4 @@
-"""Transparent one-time SQLite -> embedded-PostgreSQL data migration.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Transparent one-time SQLite -> embedded-PostgreSQL data migration.
 
 Builds a legacy ``openestimate.db`` with a couple of rows, boots an embedded PG
 at the same data dir, runs the auto-migration, and verifies the rows landed in

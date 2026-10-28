@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""API stability of the eleven-areas-framework pack on a fresh install, over HTTP.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠API stability of the eleven-areas-framework pack on a fresh install, over HTTP.
 
 One install, two demo projects, then the checks a user would feel:
 

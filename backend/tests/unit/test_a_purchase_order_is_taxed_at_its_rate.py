@@ -1,4 +1,4 @@
-"""A purchase order's tax follows its VAT rate (issue #515).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A purchase order's tax follows its VAT rate (issue #515).
 
 A new order used to keep a tax of 0 whatever the project's default VAT rate
 said, and the tax could only be typed as an absolute amount. The order now

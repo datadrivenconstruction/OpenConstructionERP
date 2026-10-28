@@ -1,4 +1,4 @@
-"""Run the shipped container entrypoint and check the DATABASE_URL guard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Run the shipped container entrypoint and check the DATABASE_URL guard.
 
 `test_config_db_url_from_parts.py` says in a docstring that "the container
 entrypoint refuses to start on this and names the reason". Nothing executed

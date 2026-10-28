@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Deepen-wave tests for the Geo Hub map summary, address-coords anchor
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deepen-wave tests for the Geo Hub map summary, address-coords anchor
 fallback, and enriched GeoJSON export.
 
 What is under test

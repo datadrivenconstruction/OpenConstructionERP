@@ -1,4 +1,4 @@
-"""Gap A access-control tests for the payroll finalize endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap A access-control tests for the payroll finalize endpoint.
 
 These cover the security slice of the TEST MATRIX without spinning up a full
 FastAPI app (per the suite convention: prefer the gate helpers + service layer,

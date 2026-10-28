@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Smoke test for the Transmittals module (test-coverage audit 5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smoke test for the Transmittals module (test-coverage audit 5).
 
 Proves end-to-end wiring of the `oe_transmittals` module surface:
 

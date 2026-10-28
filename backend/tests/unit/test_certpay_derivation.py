@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deriving a certified payroll week from the payroll entries.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deriving a certified payroll week from the payroll entries.
 
 The pivot is the part of this module with the most ways to be quietly wrong: it
 groups per-worker rows, spreads them across the days of the week, splits

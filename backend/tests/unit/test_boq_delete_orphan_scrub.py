@@ -1,4 +1,4 @@
-"""Data-integrity: deleting / restoring a BOQ must scrub orphaned position refs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data-integrity: deleting / restoring a BOQ must scrub orphaned position refs.
 
 Schedule activities can reference BOQ positions through the
 ``Activity.boq_position_ids`` JSON array.  ``delete_position`` already

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The cost control demo shows exactly the figures the film script expects.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost control demo shows exactly the figures the film script expects.
 
 Table B of the script is what the page must show right after the install,
 table C the saved forecasts, table D the figures after each live step of the

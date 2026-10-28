@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the pure labor / crew rate build-up math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure labor / crew rate build-up math.
 
 These exercise :mod:`app.modules.labor_rates.rate_math` directly with plain
 ``Decimal`` inputs -- no database, FastAPI or ORM -- so they run on any

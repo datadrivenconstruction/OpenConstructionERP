@@ -1,4 +1,4 @@
-"""Unit tests for the 4D dashboard service (Section 6 / FR-6.9).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the 4D dashboard service (Section 6 / FR-6.9).
 
 Locks down: SPI/CPI computation, S-curve generation, by_wbs breakdown and
 the no-cost-data graceful path.

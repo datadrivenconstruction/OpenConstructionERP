@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Module builder v2 on PostgreSQL, where a review found it broke.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Module builder v2 on PostgreSQL, where a review found it broke.
 
 Reinstalling over kept data, upgrading a module in place, one project's backlog starving another's
 reminders, a workbook refusing a pasted control character, link names lost

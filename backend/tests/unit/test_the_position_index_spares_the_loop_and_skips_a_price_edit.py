@@ -1,4 +1,4 @@
-"""Re-indexing a BOQ position after an edit must not stall the event loop.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Re-indexing a BOQ position after an edit must not stall the event loop.
 
 Every ``boq.position.updated`` event re-indexes the position through
 ``app.core.vector_index.index_one``. That used to clip the text on the event

@@ -1,4 +1,4 @@
-"""Unit tests for the Forms computed (formula) field engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Forms computed (formula) field engine.
 
 The engine (``app.modules.forms.formula``) is pure - stdlib only, no ORM or app
 imports - so it is loaded here directly from its file path, keeping the test

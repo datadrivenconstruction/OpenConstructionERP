@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A call recording expires after the retention window; its transcript stays.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A call recording expires after the retention window; its transcript stays.
 
 Recordings were stored with no time limit. They now expire after
 ``OE_PHONELOG_AUDIO_RETENTION_DAYS`` (default 90): the object is deleted from

@@ -1,4 +1,4 @@
-"""SAFETY PRIMITIVE 1 - cross-tenant data isolation (DB-backed, CI-gated).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠SAFETY PRIMITIVE 1 - cross-tenant data isolation (DB-backed, CI-gated).
 
 These assertions need real rows in PostgreSQL. They run on the transaction-
 isolated session from ``tests._pg.transactional_session`` (rolled back on

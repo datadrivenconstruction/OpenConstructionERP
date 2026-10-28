@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic unit tests for predictive forecast analytics (TOP-30 #19).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic unit tests for predictive forecast analytics (TOP-30 #19).
 
 Covers every formula and guard in
 ``app.modules.project_intelligence.forecast`` with no database:

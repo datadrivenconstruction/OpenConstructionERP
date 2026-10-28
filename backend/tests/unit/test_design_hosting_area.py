@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design finds its governance host through module 1's read port, by the ``design`` subject, never by a code."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design finds its governance host through module 1's read port, by the ``design`` subject, never by a code."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Three decisions about deliveries and permits, against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Three decisions about deliveries and permits, against PostgreSQL.
 
 1. A site without a time zone keeps booking and approving deliveries. The
    opening hours are not compared on any clock; the delivery, the plan findings

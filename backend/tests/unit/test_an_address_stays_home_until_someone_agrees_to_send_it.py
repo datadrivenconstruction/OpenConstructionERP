@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A site address goes to a geocoder only after the installation agreed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A site address goes to a geocoder only after the installation agreed.
 
 Saving a project address used to send it to the public OpenStreetMap
 services at once. The installation is now asked once (allow, deny or own

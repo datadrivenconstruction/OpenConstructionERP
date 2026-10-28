@@ -1,4 +1,4 @@
-"""Unit tests for the resources module — service + pure helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the resources module — service + pure helpers.
 
 Scope:
     detect_conflicts, is_resource_available, validate_skill_requirements,

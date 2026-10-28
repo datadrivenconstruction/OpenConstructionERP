@@ -1,4 +1,4 @@
-"""Team-member project access regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Team-member project access regression suite.
 
 Pins the access policy introduced in fix/user-access-management:
 users added via ``add_project_member`` must be able to read the

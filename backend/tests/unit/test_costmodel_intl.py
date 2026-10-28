@@ -1,4 +1,4 @@
-"""Unit tests for the international elemental / parametric cost model helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international elemental / parametric cost model helpers.
 
 These pin the behaviour of :mod:`app.modules.costmodel.elemental`, a pure,
 database-free layer that builds an early-stage elemental cost estimate. The

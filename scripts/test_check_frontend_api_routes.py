@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for the frontend API route guard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the frontend API route guard.
 
 The guard earns its place only if it goes red on the four ways a call misses
 its route, so each verdict has a case that must produce it next to a case that

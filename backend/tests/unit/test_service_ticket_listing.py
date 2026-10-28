@@ -1,4 +1,4 @@
-"""Regression tests for the Service & Maintenance ticket listing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for the Service & Maintenance ticket listing.
 
 Pins the bug where ``GET /api/v1/service/tickets/`` with no ``contract_id``
 and no ``project_id`` returned ``[]`` — which left the default ``/service``

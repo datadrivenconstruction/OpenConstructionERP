@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - suggested supplier and needed-by date per requisition line (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - suggested supplier and needed-by date per requisition line (issue #516).
 
 The pure checks of the six rules added in the second slice, each with a case it
 must find and a case it must pass; the BOQ suggestion helpers (resource beats

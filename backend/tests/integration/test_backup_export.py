@@ -1,4 +1,4 @@
-"""Regression tests for BUG-018: ``POST /backup/export/`` returns empty zip.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for BUG-018: ``POST /backup/export/`` returns empty zip.
 
 Originally, ``POST /api/v1/backup/export/`` with a JSON body — even
 ``{}`` — returned ``HTTP 200`` with ``Content-Length: 0``. The combo of

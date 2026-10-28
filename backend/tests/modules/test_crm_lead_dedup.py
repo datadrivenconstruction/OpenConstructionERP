@@ -1,4 +1,4 @@
-"""CRM lead-dedup atomicity tests (R7 audit).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRM lead-dedup atomicity tests (R7 audit).
 
 Covers the race-window where two concurrent inbound webhooks targeting
 the same email both pass Pydantic + auth and both call

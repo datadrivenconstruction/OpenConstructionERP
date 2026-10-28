@@ -1,4 +1,4 @@
-"""Tests for the architecture_map module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the architecture_map module.
 
 Two things are pinned here, and they are different in kind.
 

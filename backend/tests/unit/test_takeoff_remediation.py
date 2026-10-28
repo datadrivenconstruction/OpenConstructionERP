@@ -1,4 +1,4 @@
-"""Remediation-backlog regression suite (takeoff + bim_hub slice).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Remediation-backlog regression suite (takeoff + bim_hub slice).
 
 Pins the fixes for the IDs triaged in this pass:
 

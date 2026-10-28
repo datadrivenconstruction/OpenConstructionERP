@@ -1,4 +1,4 @@
-"""Schedule from estimate, P0: effort, machine hours, confidence and the 5D rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule from estimate, P0: effort, machine hours, confidence and the 5D rules.
 
 Pure tests, no database. The design and the weights they pin are in
 ``docs/design/schedule_from_estimate.md`` (sections 3.2 to 3.4).

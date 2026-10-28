@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for cost-recovery apportionment (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for cost-recovery apportionment (PostgreSQL, py3.12).
 
 Exercises the persistence layer end to end on real PostgreSQL: splitting a
 back-charge's chargeable amount across parties (reconciled to the cent),

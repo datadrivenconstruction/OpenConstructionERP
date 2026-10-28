@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every reader of a stored working week reads it the same way, or refuses it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every reader of a stored working week reads it the same way, or refuses it.
 
 Four readers used to wrap the whole conversion in ``except (TypeError,
 ValueError)`` and fall back to Monday through Friday. That guard is ornamental

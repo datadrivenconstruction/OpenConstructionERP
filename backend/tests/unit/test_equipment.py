@@ -1,4 +1,4 @@
-"""Unit tests for :class:`EquipmentService` and pure helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`EquipmentService` and pure helpers.
 
 Scope:
     * compute_next_due - hours/km/date triggers

@@ -1,4 +1,4 @@
-"""ERP Chat IDOR regression suite (v2.4.0 slice A — task #177).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ERP Chat IDOR regression suite (v2.4.0 slice A — task #177).
 
 The ``/api/v1/erp_chat/`` router exposes endpoints keyed off
 ``session_id`` and ``message_id`` — both must verify that the parent

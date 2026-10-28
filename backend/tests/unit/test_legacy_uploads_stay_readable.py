@@ -1,4 +1,4 @@
-"""Files written before upload roots were anchored on the data dir must still be readable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Files written before upload roots were anchored on the data dir must still be readable.
 
 Moving a write root is only half a repair. Ten modules spent their whole life
 writing to a bare ``uploads/...`` literal, so on every deployment that started

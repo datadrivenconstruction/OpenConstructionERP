@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Snag + WarrantyClaim IDOR closure integration suite (task #156).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Snag + WarrantyClaim IDOR closure integration suite (task #156).
 
 Pre-task #156, every ``/api/v1/property-dev/snags/...`` and
 ``/api/v1/property-dev/warranty-claims/...`` route accepted any

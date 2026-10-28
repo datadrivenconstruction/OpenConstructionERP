@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level tests for the no_match(custom) -> real BOQ line flow.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level tests for the no_match(custom) -> real BOQ line flow.
 
 These cover the deepening that replaced the old stub in
 ``MatchElementsService.no_match`` for ``action="custom"``. The stub used to

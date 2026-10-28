@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Permits review pins on real PostgreSQL: gate evidence, four-eyes, gate-read fields, variation, links."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permits review pins on real PostgreSQL: gate evidence, four-eyes, gate-read fields, variation, links."""
 
 from __future__ import annotations
 

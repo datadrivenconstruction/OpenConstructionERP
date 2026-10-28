@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the consolidated ``POST /api/v1/match/accept`` flow.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the consolidated ``POST /api/v1/match/accept`` flow.
 
 Phase 4 of the v2.8.0 vector match feature wires the ``Accept`` button on
 ``MatchSuggestionsPanel`` to a single backend endpoint that creates /

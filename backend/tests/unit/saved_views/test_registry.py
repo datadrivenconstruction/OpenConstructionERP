@@ -1,4 +1,4 @@
-"""Registry validation - the column whitelist's registration-time guards.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Registry validation - the column whitelist's registration-time guards.
 
 Pure-unit (no DB): these lock down that an entity cannot be registered without a
 valid scoper, that a FieldSpec pointing at a non-existent column is refused, and

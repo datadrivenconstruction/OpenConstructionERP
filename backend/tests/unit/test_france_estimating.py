@@ -1,4 +1,4 @@
-"""France prices a bill one way, and offers the documents a French unit-price contract uses.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠France prices a bill one way, and offers the documents a French unit-price contract uses.
 
 Three French markup stacks used to disagree: the regional table (FC 10, FG 15,
 B&A 8), the methodology literal (12 / 7) and the Lyon hospital demo (9 / 12 /

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v77 builds exactly the schema the staffing models build, and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v77 builds exactly the schema the staffing models build, and undoes it.
 
 Up, down, up on PostgreSQL; the reflected schema from the revision must equal
 the one ``create_all`` produces from the models, so a fresh install and an

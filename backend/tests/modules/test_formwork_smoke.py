@@ -1,4 +1,4 @@
-"""Happy-path smoke test for the Formwork module (task #112).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Happy-path smoke test for the Formwork module (task #112).
 
 Proves end-to-end wiring:
 

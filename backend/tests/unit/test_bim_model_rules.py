@@ -1,4 +1,4 @@
-"""Model-level BIM rules - duplicate ids, completeness, units, georeference.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Model-level BIM rules - duplicate ids, completeness, units, georeference.
 
 Pure, DB-free tests over ``SimpleNamespace`` elements and hand-built
 ``BIMModelContext`` objects. Each rule gets a happy path, the failing case it

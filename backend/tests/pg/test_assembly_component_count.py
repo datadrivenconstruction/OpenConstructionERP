@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A card must not say "0 components" about a recipe that has three.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A card must not say "0 components" about a recipe that has three.
 
 The list query loads assemblies without their components on purpose, to keep a
 page of fifty from dragging every component row across and to stay clear of a

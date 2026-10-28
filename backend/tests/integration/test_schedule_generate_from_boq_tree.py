@@ -1,4 +1,4 @@
-"""Integration: generating a schedule from a BOQ, against real PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: generating a schedule from a BOQ, against real PostgreSQL.
 
 A tester's report: "Generate from BoQ always gives me errors". Reproduced, the
 generator

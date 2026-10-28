@@ -1,4 +1,4 @@
-"""Every spreadsheet import route reads a national bill the same way.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every spreadsheet import route reads a national bill the same way.
 
 Three routes take a spreadsheet into a BOQ: ``/import/auto/`` (the import
 dialog and project creation), ``/import/smart/`` (the BOQ editor's import

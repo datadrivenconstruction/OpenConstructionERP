@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the Text and BoQ source adapters.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Text and BoQ source adapters.
 
 Both adapters are session-scoped readers — they pull their input data
 from ``MatchSession.metadata_`` rather than a project-level table.

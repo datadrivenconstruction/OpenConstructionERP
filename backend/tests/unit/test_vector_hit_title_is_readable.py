@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The last rung of the display-title chain may not be a bare identifier.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The last rung of the display-title chain may not be a bare identifier.
 
 :class:`VectorHit` resolves a title from the stored payload, then from the
 embedded text, and finally from the row id. Both frontend consumers of the

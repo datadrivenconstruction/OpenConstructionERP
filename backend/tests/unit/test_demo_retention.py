@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for :mod:`app.core.demo_retention`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.core.demo_retention`.
 
 This job deletes user data, so the suite pins the dangerous cases rather than
 the happy path. What is covered, and why each one is here:

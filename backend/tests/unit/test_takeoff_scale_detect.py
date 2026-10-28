@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for tier-1 drawing-scale detection from the PDF text layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for tier-1 drawing-scale detection from the PDF text layer.
 
 These exercise :mod:`app.modules.takeoff.scale_detect` directly with plain
 strings, so no PDF, PDF reader or database is needed (mirrors

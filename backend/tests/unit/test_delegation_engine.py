@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the approval delegation / out-of-office engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the approval delegation / out-of-office engine.
 
 No DB, no FastAPI, no event bus - imports only the pure
 ``app.modules.approval_routes.delegation_engine`` so it runs on Python 3.11.

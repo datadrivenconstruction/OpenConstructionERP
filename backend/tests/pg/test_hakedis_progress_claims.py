@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The payment certificate (hakediş) of a progress claim, from claim to certified sheet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The payment certificate (hakediş) of a progress claim, from claim to certified sheet.
 
 One mechanical and electrical bill is claimed three times on a unit-price
 contract of a Turkish project, the third claim being final, and the same is

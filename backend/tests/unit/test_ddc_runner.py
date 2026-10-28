@@ -1,4 +1,4 @@
-"""The DDC 2026.10 converters' output, read the way the platform reads it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The DDC 2026.10 converters' output, read the way the platform reads it.
 
 The release replaced the 18.x ``*Exporter.exe`` programs. None of the new
 command lines writes the one-row-per-element workbook plus COLLADA file the BIM

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The BOQ access guards answer in one statement, and refuse exactly as before.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The BOQ access guards answer in one statement, and refuse exactly as before.
 
 Opening a bill in the editor fires one request per panel: the bill, its markups,
 its cost breakdown, its classification, the structural limits and the project.

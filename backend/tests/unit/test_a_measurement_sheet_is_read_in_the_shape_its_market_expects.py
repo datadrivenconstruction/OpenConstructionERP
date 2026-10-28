@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A measurement sheet has to come out in the shape its market's rules expect.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A measurement sheet has to come out in the shape its market's rules expect.
 
 The measurement presets carry a ``region`` field, exactly like the price
 breakdown presets did, and until now nothing resolved a preset from it. Both

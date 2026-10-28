@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the generic AI feedback sink (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the generic AI feedback sink (PostgreSQL, py3.12).
 
 The accuracy scoreboard scores agent *runs*; this sink records verdicts on the
 AI surfaces that have no run row (AI Estimator result, match suggestions, the

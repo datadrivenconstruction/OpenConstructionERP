@@ -1,4 +1,4 @@
-"""Tests for the shared safe zip-extraction util (``_safe_extract``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the shared safe zip-extraction util (``_safe_extract``).
 
 These cover the security-critical core: every unsafe-member shape must be
 rejected (table-driven), and a benign archive must extract correctly into a

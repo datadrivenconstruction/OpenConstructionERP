@@ -1,4 +1,4 @@
-"""PG: a proposal the chat stream makes is there for another connection before the stream ends.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a proposal the chat stream makes is there for another connection before the stream ends.
 
 The card's Apply request runs on a connection of its own while the chat stream
 is still open - the model may still be writing its answer. So the stream stores

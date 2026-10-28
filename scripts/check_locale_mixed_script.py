@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Locale homoglyph guard: block Cyrillic and Latin letters inside one word.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale homoglyph guard: block Cyrillic and Latin letters inside one word.
 
 A translation value may freely contain both scripts - "Excel файл" is two
 words in two scripts and is correct. What is never correct is one *word*

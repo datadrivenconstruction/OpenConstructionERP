@@ -1,4 +1,4 @@
-"""Unit tests for the material procurement buy-list aggregation (pure, DB-free)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the material procurement buy-list aggregation (pure, DB-free)."""
 
 from decimal import Decimal
 

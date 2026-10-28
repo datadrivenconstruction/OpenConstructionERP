@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A manual forecast outlives the document it cites.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A manual forecast outlives the document it cites.
 
 ``oe_costmodel_forecast_override.document_id`` is a real foreign key to
 ``oe_documents_document`` declared ``ON DELETE SET NULL``. Deleting the cited

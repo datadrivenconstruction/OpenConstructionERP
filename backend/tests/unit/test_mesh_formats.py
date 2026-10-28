@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the geometry-only mesh classifier used by the BIM upload guards.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the geometry-only mesh classifier used by the BIM upload guards.
 
 Pure, DB-free: exercises ``app.modules.bim_hub.mesh_formats`` in isolation so
 the friendly rejection behaviour is pinned without spinning up the app.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The module-name guard must read every manifest, however the file is written.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The module-name guard must read every manifest, however the file is written.
 
 `scripts/check_module_display_names.py` decides which modules have to have a
 `modules.catalog.<name>` key. Whatever it fails to read is not merely unchecked,

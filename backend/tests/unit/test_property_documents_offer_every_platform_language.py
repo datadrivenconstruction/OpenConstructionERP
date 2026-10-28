@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The property-development documents are offered in every platform language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The property-development documents are offered in every platform language.
 
 The picker used to list the 27 languages somebody chose when the module was
 written, so a reader in Hebrew, Ukrainian or Greek could not pick their own.

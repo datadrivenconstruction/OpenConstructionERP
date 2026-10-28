@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the two demo projects of the eleven-areas pack read back after a fresh install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the two demo projects of the eleven-areas pack read back after a fresh install.
 
 Each test reads what a viewer of the demo would see and checks it against the story: the staffing plan
 puts every story person on the role the story gives them, every commitment item sits on a cost line, and

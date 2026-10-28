@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for :meth:`ClashService.bulk_suppress`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for :meth:`ClashService.bulk_suppress`.
 
 Pin the contract:
 

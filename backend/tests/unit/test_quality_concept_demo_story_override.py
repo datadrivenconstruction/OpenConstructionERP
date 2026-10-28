@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The quality concept seed applies a pack story key by key and keeps its defaults otherwise."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The quality concept seed applies a pack story key by key and keeps its defaults otherwise."""
 
 from __future__ import annotations
 

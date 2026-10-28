@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""i18n nesting guard: block a locale key that is a sibling of the dictionary.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠i18n nesting guard: block a locale key that is a sibling of the dictionary.
 
 Every locale file is one object with one member:
 

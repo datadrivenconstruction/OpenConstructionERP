@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The event-bus bridge: which events become rows, and what those rows carry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The event-bus bridge: which events become rows, and what those rows carry.
 
 ``_record_event`` opens its own session through ``async_session_factory``,
 which the rolled-back test session cannot intercept. These tests therefore

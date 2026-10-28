@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared fixtures for the cost_match database-backed suites.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for the cost_match database-backed suites.
 
 The app is booted once for the whole package rather than once per module:
 standing it up is the expensive part of these tests, and both the service-level

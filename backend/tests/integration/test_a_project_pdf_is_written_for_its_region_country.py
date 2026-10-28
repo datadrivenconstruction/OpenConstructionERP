@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project created by picking its region gets that country's separators in its PDF.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project created by picking its region gets that country's separators in its PDF.
 
 The create form posts ``region`` and leaves ``country_code`` empty unless a
 geocoded address or an active country pack fills it. The PDF export used to

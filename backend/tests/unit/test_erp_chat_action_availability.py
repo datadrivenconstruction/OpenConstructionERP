@@ -1,4 +1,4 @@
-"""Which proposal tools the assistant is offered when modules are switched off.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which proposal tools the assistant is offered when modules are switched off.
 
 A spec names the modules it writes to (``ActionSpec.modules``). The model is
 offered its tool only while those modules are loaded, enabled and serving

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The German showcase diary tells what the site is doing, and nothing for a site that has not started."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The German showcase diary tells what the site is doing, and nothing for a site that has not started."""
 
 from __future__ import annotations
 

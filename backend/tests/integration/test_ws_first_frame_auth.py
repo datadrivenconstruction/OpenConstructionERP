@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Realtime sockets authenticate with a first frame, and presence stays in its project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Realtime sockets authenticate with a first frame, and presence stays in its project.
 
 Two defects, one application start (a start costs minutes here).
 

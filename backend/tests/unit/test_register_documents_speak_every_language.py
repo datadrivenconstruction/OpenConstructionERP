@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every register and record form can be printed in every language the platform runs in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every register and record form can be printed in every language the platform runs in.
 
 The submittal, change order, claims evidence, correspondence, transmittal,
 variation, RFI log and daily diary documents used to carry English and Turkish

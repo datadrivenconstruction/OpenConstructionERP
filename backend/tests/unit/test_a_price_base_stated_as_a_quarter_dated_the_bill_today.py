@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bill is taxed at its own base date, and a quarter is a base date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill is taxed at its own base date, and a quarter is a base date.
 
 The defect
 ----------

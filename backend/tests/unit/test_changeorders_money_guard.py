@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Money-field hardening for change orders (audit wave-2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Money-field hardening for change orders (audit wave-2).
 
 A change order's monetary inputs must reject non-finite (NaN / Infinity) and
 absurd-magnitude values:

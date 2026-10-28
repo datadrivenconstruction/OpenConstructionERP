@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A German Sicherheitseinbehalt is cut from the payment with VAT in it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A German Sicherheitseinbehalt is cut from the payment with VAT in it.
 
 § 17 Abs. 6 Nr. 1 VOB/B (2016): "Soll der Auftraggeber vereinbarungsgemäß die
 Sicherheit in Teilbeträgen von seinen Zahlungen einbehalten, so darf er jeweils

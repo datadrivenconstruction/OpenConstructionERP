@@ -1,4 +1,4 @@
-"""Combined tax rates: does the shipped data say how two rates add up?
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Combined tax rates: does the shipped data say how two rates add up?
 
 These tests read ``seed_data/tax_configurations.json`` directly rather than a
 database, because the seed file is what a new installation gets and it is the

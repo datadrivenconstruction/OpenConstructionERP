@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The one sanctioned way for a test to narrow the process-wide evidence registry."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The one sanctioned way for a test to narrow the process-wide evidence registry."""
 
 from __future__ import annotations
 

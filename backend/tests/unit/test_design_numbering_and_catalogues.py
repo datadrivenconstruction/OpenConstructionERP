@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management catalogues and drawing numbers, without a database (SPEC rules 5-10, section 2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management catalogues and drawing numbers, without a database (SPEC rules 5-10, section 2).
 
 Every shipped scheme is loaded through module 1's kind registry, composes a
 number, validates it and parses it back into exactly the parts it was built

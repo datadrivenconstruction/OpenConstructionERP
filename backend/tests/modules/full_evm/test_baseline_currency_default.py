@@ -1,4 +1,4 @@
-"""Creation defaults follow the currency; explicit and persisted precision wins."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Creation defaults follow the currency; explicit and persisted precision wins."""
 
 from datetime import date
 from decimal import Decimal

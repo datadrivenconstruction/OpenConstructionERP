@@ -1,4 +1,4 @@
-"""Unit tests for the takeoff-PDF data-dir resolution fix (8.6.1 follow-up).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the takeoff-PDF data-dir resolution fix (8.6.1 follow-up).
 
 Background
 ----------

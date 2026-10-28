@@ -1,4 +1,4 @@
-"""Cost Explorer candidate pool ordering on real PostgreSQL (PG lane only).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Explorer candidate pool ordering on real PostgreSQL (PG lane only).
 
 ``CostExplorerRepository.search_work`` fetches a pool of candidates and cuts it
 with ``LIMIT``; the service then re-ranks only what survived. So the cut decides

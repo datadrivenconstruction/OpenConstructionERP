@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the ``subcontract`` validation rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the ``subcontract`` validation rule set.
 
 Three layers, because each catches something the others cannot:
 

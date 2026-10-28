@@ -1,4 +1,4 @@
-"""Unit tests for the rfq_bidding module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the rfq_bidding module.
 
 Scope (this is the FIRST test for this module — previously zero coverage):
     * Happy-path workflow: create RFQ → issue → vendor submits bid →

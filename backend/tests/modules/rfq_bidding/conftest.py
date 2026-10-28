@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Keep the in-memory service doubles here independent of the commitment guard registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keep the in-memory service doubles here independent of the commitment guard registry.
 
 The guard keeps a process-global checker and enforcement-mode provider, installed by the
 commitment_release module whenever an earlier test in the same process loaded the app. These

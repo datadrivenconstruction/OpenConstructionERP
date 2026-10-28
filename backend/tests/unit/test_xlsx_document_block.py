@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The document block an exporter asks for, with or without a letterhead.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The document block an exporter asks for, with or without a letterhead.
 
 ``apply_company_header(ws, details=[...])`` prints the title and the detail
 lines (which project, which bill, which currency, when) above the table

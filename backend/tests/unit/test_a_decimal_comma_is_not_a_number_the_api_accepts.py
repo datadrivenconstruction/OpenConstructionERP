@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The wire format for money stays dot-decimal, and this test keeps it that way.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The wire format for money stays dot-decimal, and this test keeps it that way.
 
 Most of the countries this product ships a language for write one and a half as
 ``1,5``. That belongs in the UI, and the frontend normalises it before the value

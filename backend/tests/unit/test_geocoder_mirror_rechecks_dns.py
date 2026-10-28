@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A stored geocoding mirror is resolved before each request, like an AI endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A stored geocoding mirror is resolved before each request, like an AI endpoint.
 
 The mirror URL a manager saves passes the self-hosted policy by its text, but a
 hostname is only a promise: it can resolve to a cloud metadata address, or be

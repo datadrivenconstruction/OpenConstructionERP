@@ -1,4 +1,4 @@
-"""Integration tests for the per-user tour-state API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the per-user tour-state API.
 
 Mirrors the dashboard-rollup test suite (single app boot per module)
 so the test runs fast and is independent of any other test's state.

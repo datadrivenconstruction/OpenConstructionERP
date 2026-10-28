@@ -1,4 +1,4 @@
-"""The match tuning data has to be found from an installed layout, not just a checkout.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The match tuning data has to be found from an installed layout, not just a checkout.
 
 ``data/match`` holds four files that tune matching, and all four are optional:
 every reader falls back to hardcoded constants when they are absent. That

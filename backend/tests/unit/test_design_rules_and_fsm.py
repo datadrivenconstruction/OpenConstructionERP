@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management rules and state machines, without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management rules and state machines, without a database.
 
 WBS tree rules (SPEC rules 1-3), deliverable state (15), release content and
 distribution (12-14), report acceptance (17, 18), permit completeness (19),

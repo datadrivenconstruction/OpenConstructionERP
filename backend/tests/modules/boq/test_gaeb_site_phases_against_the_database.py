@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""GAEB X31 apply and X89 claim export, against real rows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠GAEB X31 apply and X89 claim export, against real rows.
 
 The pure modules are tested on their own; these tests hold the route
 functions to what they promise once rows are involved:

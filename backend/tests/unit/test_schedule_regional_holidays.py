@@ -1,4 +1,4 @@
-"""Regional planning uses the country's holidays without borrowing a neighbour's."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regional planning uses the country's holidays without borrowing a neighbour's."""
 
 from datetime import date
 from types import SimpleNamespace

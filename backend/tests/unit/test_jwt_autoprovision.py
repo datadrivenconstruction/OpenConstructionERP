@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Zero-config JWT secret auto-provisioning (production hardening).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Zero-config JWT secret auto-provisioning (production hardening).
 
 ``_ensure_persistent_jwt_secret`` lets the published production image boot with
 no ``JWT_SECRET`` set: it generates a strong random secret, persists it under

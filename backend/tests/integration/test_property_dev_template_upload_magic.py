@@ -1,4 +1,4 @@
-"""Magic-byte gate for the Property-Dev custom-template upload endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Magic-byte gate for the Property-Dev custom-template upload endpoint.
 
 Mirrors the v4.2.x defense-in-depth pattern used by Punchlist photos,
 correspondence attachments and submittal attachments: the upload route

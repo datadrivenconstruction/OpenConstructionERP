@@ -1,4 +1,4 @@
-"""Unit tests for the partner-pack core (manifest + discovery + router)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the partner-pack core (manifest + discovery + router)."""
 
 from __future__ import annotations
 

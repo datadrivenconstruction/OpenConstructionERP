@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Page-object probes for rendered test PDFs, read through pypdfium2.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Page-object probes for rendered test PDFs, read through pypdfium2.
 
 ``app.core.pdf_reader`` answers what a reader sees (text, words, vectors).
 Some tests ask what was *drawn*: which face a run was set in, whether a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure faceted-retrieval engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure faceted-retrieval engine.
 
 All tests are IO-free and deterministic.  No database, no clock: any
 reference time is passed explicitly via ``as_of``.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rules V20 to V23 on plain payloads: statutory VAT and payment term rules read from country data.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rules V20 to V23 on plain payloads: statutory VAT and payment term rules read from country data.
 
 Every case has a twin that differs in the one input the rule turns on, and a
 German project with the same invoices reports nothing, because Germany has no

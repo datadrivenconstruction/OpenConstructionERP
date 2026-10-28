@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What every country and industry pack has to be true about, checked for all of them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What every country and industry pack has to be true about, checked for all of them.
 
 The Hungarian pack was taken apart in 18.3 and eight kinds of defect came out
 of it: a rule set named by the classification instead of the engine, a locale

@@ -1,4 +1,4 @@
-"""Unit tests for the clash → BOQ cost-impact service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the clash → BOQ cost-impact service.
 
 The service is a pure read-projection — no clash module mutation, no
 BOQ module mutation. The tests therefore build a small PostgreSQL

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""``served_routes`` sees a module's routes, WebSockets included.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``served_routes`` sees a module's routes, WebSockets included.
 
 The case this exists for could not be expressed before. ``served_routes`` used
 FastAPI's own ``iter_route_contexts``, which resolves HTTP paths correctly and

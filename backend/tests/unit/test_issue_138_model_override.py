@@ -1,4 +1,4 @@
-"""Regression suite locking in the GitHub issue #138 fix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression suite locking in the GitHub issue #138 fix.
 
 Issue #138
 ~~~~~~~~~~

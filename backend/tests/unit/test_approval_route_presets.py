@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the approval-route preset library (DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the approval-route preset library (DB-free).
 
 Validates the pure ``PRESETS`` data - stable keys, valid target kinds / modes /
 roles, dense ordinals - and dry-runs every preset through the inc3a simulator to

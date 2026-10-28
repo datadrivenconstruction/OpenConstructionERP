@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The contracts findings exist for every key the source can ask for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The contracts findings exist for every key the source can ask for.
 
 ``translate`` falls back to English and then to the raw key, so a missing
 message never raises: it shows up as ``pay_application.period_gap.fail``

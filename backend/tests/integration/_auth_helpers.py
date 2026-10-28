@@ -1,4 +1,4 @@
-"""Test-only helpers for promoting a freshly registered user to admin.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Test-only helpers for promoting a freshly registered user to admin.
 
 The public `/auth/register` endpoint intentionally demotes new users to
 ``viewer`` (security hardening, BUG-327/386). Integration tests need admin

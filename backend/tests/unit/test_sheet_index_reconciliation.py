@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for sheet-completeness reconciliation (item #46).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for sheet-completeness reconciliation (item #46).
 
 Covers the pure parse + normalize + set-diff core in
 ``documents.sheet_index`` and the three ``sheet_completeness`` validation

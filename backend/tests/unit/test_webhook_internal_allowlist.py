@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An administrator can open webhooks to named internal hosts, and only to those.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An administrator can open webhooks to named internal hosts, and only to those.
 
 A self-hosted company often runs the tool it wants events in (a workflow
 engine, a chat server) on its own LAN, so refusing every private address breaks

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A pack that declares a readme has to ship one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A pack that declares a readme has to ship one.
 
 ``readme = "README.md"`` in ``pyproject.toml`` is not documentation, it is a
 build input: setuptools reads the file to fill the distribution's long

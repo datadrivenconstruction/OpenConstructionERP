@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End-to-end cover for ``GET /api/v1/documents/{id}/references``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end cover for ``GET /api/v1/documents/{id}/references``.
 
 The endpoint answers "what still points at this document" so the delete
 confirmation can say what it costs. Thirty-four columns across twenty-one

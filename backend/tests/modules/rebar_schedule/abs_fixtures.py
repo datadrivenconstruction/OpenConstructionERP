@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ABS records written here, from the format rules, for these tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ABS records written here, from the format rules, for these tests.
 
 These are ours. Nothing below is copied from anybody's document. Every record
 was written from the rules stated in

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The catalog export must name the same two files from any working directory.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The catalog export must name the same two files from any working directory.
 
 ``app.scripts.export_full_catalog`` used to build both its input and its output
 path on ``os.getcwd()``, so the same command read and wrote a different tree

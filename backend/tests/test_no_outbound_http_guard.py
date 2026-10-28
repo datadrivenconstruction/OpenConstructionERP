@@ -1,4 +1,4 @@
-"""The outbound-HTTP guard must be able to refuse, and to allow.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The outbound-HTTP guard must be able to refuse, and to allow.
 
 A guard nobody has ever seen refuse is indistinguishable from a guard that
 does nothing: both leave a green suite and a quiet log. So every test here

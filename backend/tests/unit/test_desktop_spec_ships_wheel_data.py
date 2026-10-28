@@ -1,4 +1,4 @@
-"""The desktop bundle must ship the runtime data the wheel force-includes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The desktop bundle must ship the runtime data the wheel force-includes.
 
 A wheel and a frozen sidecar are two ways of shipping one backend, and they
 collect files by two unrelated mechanisms. Hatchling walks the ``app`` package

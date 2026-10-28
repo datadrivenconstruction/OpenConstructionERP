@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No global-search result may come back without a title a person can read.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No global-search result may come back without a title a person can read.
 
 Global search matches a row on one set of columns and then builds the row's
 title from another, smaller set. Every column involved is NOT NULL, so nothing

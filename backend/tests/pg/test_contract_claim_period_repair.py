@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A claim billed before the period date columns existed gets its dates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A claim billed before the period date columns existed gets its dates.
 
 The product never runs ``alembic upgrade``. An existing install boots with its
 claims already in the table, the boot heal adds ``period_from``, ``period_to``

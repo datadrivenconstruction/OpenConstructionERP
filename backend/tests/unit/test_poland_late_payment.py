@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Polish statutory late payment: dated interest, term caps and recovery compensation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Polish statutory late payment: dated interest, term caps and recovery compensation.
 
 Each case is chosen so that a wrong implementation gives a different answer:
 the half-year boundary, a day before the first known period, the statute's

@@ -1,4 +1,4 @@
-"""Unit tests for the tendering international / plain-language helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the tendering international / plain-language helpers.
 
 These are pure, database-free tests for ``app.modules.tendering.intl``. They
 pin the behaviour that matters for a worldwide audience: guarded divisions,

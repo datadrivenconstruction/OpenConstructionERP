@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Hungarian workbook profiles, driven by workbooks built to the real shape.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Hungarian workbook profiles, driven by workbooks built to the real shape.
 
 Every fixture here reproduces something the delivered files actually do, and
 each one is here because writing the profile without it produced a wrong

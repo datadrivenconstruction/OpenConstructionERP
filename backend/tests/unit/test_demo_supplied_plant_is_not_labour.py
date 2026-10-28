@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A scanner priced in millions is the machine, not 45 % labour.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A scanner priced in millions is the machine, not 45 % labour.
 
 The generic split read 45 % of a 12.5M SAR MRI scanner as labour and turned it
 into 178,571 hours on one position. Equipment supplied and installed by its

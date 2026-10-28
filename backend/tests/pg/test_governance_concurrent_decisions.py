@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Two decisions on one gate at the same moment: exactly one is recorded, the other is a 409.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Two decisions on one gate at the same moment: exactly one is recorded, the other is a 409.
 
 Two independent connections to a throwaway database, each in its own
 transaction, run ``decide`` concurrently. The model and gate rows are locked

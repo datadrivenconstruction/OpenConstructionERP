@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Abort exposure: each basis, unknown terms as ``None``, negative residual kept, schedules by date and progress."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Abort exposure: each basis, unknown terms as ``None``, negative residual kept, schedules by date and progress."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contracts of the plant register that need no database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contracts of the plant register that need no database.
 
 Each test pins one way the module once let something through: a write route
 that took the clock from the caller, a subscription to an event nobody

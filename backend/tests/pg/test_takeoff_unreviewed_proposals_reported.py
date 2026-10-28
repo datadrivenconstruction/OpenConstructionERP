@@ -1,4 +1,4 @@
-"""PG: the estimate says how much takeoff work it left out.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the estimate says how much takeoff work it left out.
 
 Excluding unreviewed proposals from priced quantities is correct and already
 pinned by ``test_takeoff_proposals_excluded_from_quantities``. What that

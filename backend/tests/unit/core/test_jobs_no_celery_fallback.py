@@ -1,4 +1,4 @@
-"""Regression: the job runner must run in-process when Celery is absent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: the job runner must run in-process when Celery is absent.
 
 Celery/kombu is an OPTIONAL extra (``celery[redis]`` in
 ``[project.optional-dependencies]``); the default ``pip install`` and the

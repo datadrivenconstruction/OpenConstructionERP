@@ -1,4 +1,4 @@
-"""A date-only field keeps the day the user typed, whatever the zones involved.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A date-only field keeps the day the user typed, whatever the zones involved.
 
 A punch item's due date lives in a ``TIMESTAMP WITH TIME ZONE`` column. Pydantic
 read ``"2026-10-16"`` as the naive ``datetime(2026, 10, 16)``, asyncpg bound that

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Database-free unit tests for the carbon module's international robustness,
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the carbon module's international robustness,
 edge-case guards and auditable totals.
 
 Every test here is pure (no session, no DB). They cover the improvements made

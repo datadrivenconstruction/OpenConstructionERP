@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A German claim holds its Sicherheitseinbehalt on the payment with VAT in it, end to end.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A German claim holds its Sicherheitseinbehalt on the payment with VAT in it, end to end.
 
 § 17 Abs. 6 Nr. 1 VOB/B lets the client cut "jeweils die Zahlung um höchstens
 10 v. H.", and leaves the USt out of that only for a § 13b UStG invoice that

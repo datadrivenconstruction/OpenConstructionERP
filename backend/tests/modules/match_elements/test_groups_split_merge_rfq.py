@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level tests for split_group / merge_groups / no_match(rfq).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level tests for split_group / merge_groups / no_match(rfq).
 
 These exercise the group-operation methods that used to raise
 ``NotImplementedError("Phase A.5b")`` plus the RFQ wiring that replaced

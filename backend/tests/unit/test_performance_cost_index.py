@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Historical cost brought to a reference date and region with the price index register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Historical cost brought to a reference date and region with the price index register.
 
 The contracts, each pinned by a case the obvious wrong implementation fails:
 

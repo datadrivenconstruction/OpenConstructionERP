@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An import without the DDC converter names its missing quantities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An import without the DDC converter names its missing quantities.
 
 The background CAD processor stores such a model as ``degraded`` and writes a
 stable ``error_code``; the UI turns that code into translated text. These tests

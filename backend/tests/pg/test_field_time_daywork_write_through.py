@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Approving a daywork timesheet must post the hours, whatever daywork does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Approving a daywork timesheet must post the hours, whatever daywork does.
 
 Approving a field timesheet mirrors each daywork line onto a daywork sheet in
 Variations. That mirror is documented as best-effort - "the hours actuals must

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A string no single PDF face can draw is set in runs, one face per run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A string no single PDF face can draw is set in runs, one face per run.
 
 Urdu is the case that forced it: its letters need the bundled Naskh face (the
 Unicode face lacks heh goal and yeh barree) and Naskh has digits and Arabic

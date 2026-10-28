@@ -1,4 +1,4 @@
-"""ZATCA platform tests: the client and adapter against a mock gateway, the rules, the registry row and the wiring.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ZATCA platform tests: the client and adapter against a mock gateway, the rules, the registry row and the wiring.
 
 No database and no network. The adapter takes its credentials from an injected loader and talks through
 ``httpx.MockTransport``.

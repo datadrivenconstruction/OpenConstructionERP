@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP integration tests for the clash AI triage endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP integration tests for the clash AI triage endpoints.
 
 These tests run against the PostgreSQL engine provisioned by
 ``tests/conftest.py`` before any test module is imported.

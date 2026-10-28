@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A client asks for a sign-in link and gets it by email.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A client asks for a sign-in link and gets it by email.
 
 Surface (anonymous):
     POST /api/v1/portal/auth/magic-link

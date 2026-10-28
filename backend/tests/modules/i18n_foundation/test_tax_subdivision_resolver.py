@@ -1,4 +1,4 @@
-"""Resolving a Canadian tax rate: does asking for a province get that province?
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resolving a Canadian tax rate: does asking for a province get that province?
 
 The platform could always *store* a per-province rate. What it could not do was
 *select* one. The province lived inside ``tax_code`` as a naming convention -

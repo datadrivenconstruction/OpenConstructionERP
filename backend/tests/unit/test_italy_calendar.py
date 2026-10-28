@@ -1,4 +1,4 @@
-"""An Italian project is planned on Italy's week and Italy's holidays.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An Italian project is planned on Italy's week and Italy's holidays.
 
 Italy had a seeded 2026 roster but no runtime binding, so every Italian
 project fell back to the default week and reported no public holidays for

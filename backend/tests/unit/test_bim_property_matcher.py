@@ -1,4 +1,4 @@
-"""Unit tests for ``BIMHubService._property_value_matches``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``BIMHubService._property_value_matches``.
 
 The helper is shared between two callers:
     1. The dynamic-element-group ``_matches`` predicate

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""i18n script guard: block a locale value written in someone else's alphabet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠i18n script guard: block a locale value written in someone else's alphabet.
 
 Found 10.08.2026 on the live site. `th/cases/build-an-all-in-labour-rate`
 served the Korean title 종합 노무 단가 산정 under Thai chrome, because 42 of

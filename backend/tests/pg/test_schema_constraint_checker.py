@@ -1,4 +1,4 @@
-"""The read-only schema checker must report clean, and must name what is absent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The read-only schema checker must report clean, and must name what is absent.
 
 A checker that only ever reports clean is indistinguishable from a broken one, so every
 test here strips something first and demands the checker names it. DDL is transactional

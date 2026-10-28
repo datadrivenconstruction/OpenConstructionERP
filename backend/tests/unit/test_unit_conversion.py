@@ -1,4 +1,4 @@
-"""Metric -> imperial conversion helper - GitHub #270.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Metric -> imperial conversion helper - GitHub #270.
 
 ``app.core.unit_conversion`` is the backend twin of the frontend
 ``unitConversion.ts``; printed reports (BOQ PDF) convert physical quantities

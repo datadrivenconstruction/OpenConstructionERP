@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Two Turkish rules read a bill against the unit-price book, and say so when they could not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Two Turkish rules read a bill against the unit-price book, and say so when they could not.
 
 ``birimfiyat.unit_matches_poz_definition`` and
 ``birimfiyat.unit_rate_within_published_price`` judge a line by what the

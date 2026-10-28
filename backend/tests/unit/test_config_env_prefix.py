@@ -1,4 +1,4 @@
-"""The settings model must accept the documented ``OE_``-prefixed env vars.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The settings model must accept the documented ``OE_``-prefixed env vars.
 
 Regression guard for a production report: ``OE_REGISTRATION_MODE`` (the spelling
 used throughout the docs, examples and deployment guides) was silently ignored

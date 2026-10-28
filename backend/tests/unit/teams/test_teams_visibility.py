@@ -1,4 +1,4 @@
-"""Restriction semantics: what a visibility row does, and what it cannot do.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Restriction semantics: what a visibility row does, and what it cannot do.
 
 ``EntityVisibility`` is subtractive. A record with no row is open to everyone
 who can reach its project; a record with rows is open to the named teams, plus

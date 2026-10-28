@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A right-to-left document lays its tables out right to left, and can be bold.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A right-to-left document lays its tables out right to left, and can be bold.
 
 Shaping already worked: letters joined and each line read in the right order.
 What stayed left to right was the layout. An Arabic invoice put the item number

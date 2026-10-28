@@ -1,4 +1,4 @@
-"""Poland's public holidays, working week and Saturday-holiday rule.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Poland's public holidays, working week and Saturday-holiday rule.
 
 The rosters below are the ones Polish secondary sources publish for 2026 and
 2027 (infor.pl, forsal.pl, gazetaprawna.pl, read 2026-10-19), written out by

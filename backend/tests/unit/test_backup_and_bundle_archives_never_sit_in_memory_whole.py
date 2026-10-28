@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The backup and the project bundle are built on disk, not in one piece in memory.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The backup and the project bundle are built on disk, not in one piece in memory.
 
 The core runs on a server with 3 GB for the application, its database and
 everything else. A backup was already spooled to disk past 16 MiB, and then its

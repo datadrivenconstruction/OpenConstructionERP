@@ -1,4 +1,4 @@
-"""Integration tests for ``POST /sales-contracts/{id}/tax-quote``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ``POST /sales-contracts/{id}/tax-quote``.
 
 Exercises the full HTTP stack — auth → permission gate → IDOR check →
 service-layer dispatch → tax_engine pure functions → response shape.

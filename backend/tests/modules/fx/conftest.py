@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared fixtures for the Currency / FX test suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for the Currency / FX test suite.
 
 The session fixture runs against the shared PostgreSQL unit database from
 ``tests/_pg.py``, inside an outer transaction that is rolled back on teardown.

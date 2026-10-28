@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Money inside a validation message is rendered, never interpolated raw.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Money inside a validation message is rendered, never interpolated raw.
 
 A ``Decimal`` dropped straight into a message reaches the estimator as
 ``1234.5000000000`` or ``1E+3``: no thousands separator, no currency, and a

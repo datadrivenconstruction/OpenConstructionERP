@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Determinism regression test for the match pipeline.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Determinism regression test for the match pipeline.
 
 Background: prior bench runs measured recall@1 between 0.20 and 0.45 on
 the same code / fixtures / Qdrant state — different backend processes

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The cost structure on real PostgreSQL: tree, suspense, splits, copies, code lists.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cost structure on real PostgreSQL: tree, suspense, splits, copies, code lists.
 
 Each test reads money back through the same paths the UI uses (the structure
 tree, the bill's vectors, the cost control report), so a split that counted a

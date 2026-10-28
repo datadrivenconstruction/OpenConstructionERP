@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A project's country has to be settled before its compliance pack is resolved.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project's country has to be settled before its compliance pack is resolved.
 
 ``ProjectService.create_project`` did two things in the wrong order. It
 resolved the compliance rule pack from ``data.country_code``, and only

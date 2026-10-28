@@ -1,4 +1,4 @@
-"""Gap D unit tests: the pure overrun-decision function.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap D unit tests: the pure overrun-decision function.
 
 ``is_budget_line_overrun`` is a no-I/O decision used by both the subscriber and
 the threshold UI logic, so it is exercised in isolation here (no DB needed).

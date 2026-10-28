@@ -1,4 +1,4 @@
-"""Construction-control schema validation (pure, no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control schema validation (pure, no DB).
 
 Pins the discriminators that keep one schema serving every phase document and legal
 regime: the inspection type (MIR/WIR/IR/hidden-works/acceptance), the party role

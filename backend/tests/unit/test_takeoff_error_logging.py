@@ -1,4 +1,4 @@
-"""Unit tests for takeoff PDF-parsing error logging (v2.4.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for takeoff PDF-parsing error logging (v2.4.0).
 
 Audit finding: :mod:`app.modules.takeoff.service` was swallowing
 ``pdfplumber`` and ``pypdfium2`` exceptions with a single generic

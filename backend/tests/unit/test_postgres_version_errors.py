@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Every branch of the startup version check that must not end in a return.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every branch of the startup version check that must not end in a return.
 
 ``validate_postgres_version`` only needs an object that answers two statements,
 so a stub engine reaches every rejection, every acceptance and - the part a

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for reading a day's offline journey out of timesheet metadata.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for reading a day's offline journey out of timesheet metadata.
 
 The two findings a day captured with no signal can produce - a device clock that
 ran ahead, and an entry that reached the office long after the day it books -

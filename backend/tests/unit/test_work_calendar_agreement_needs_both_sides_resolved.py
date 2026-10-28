@@ -1,4 +1,4 @@
-"""An agreement between the two working-week registries only counts when both sides answered.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An agreement between the two working-week registries only counts when both sides answered.
 
 Two registries answer "which days does this country work":
 

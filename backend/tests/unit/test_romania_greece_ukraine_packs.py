@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Three country packs, Romania, Greece and Ukraine, and what each one promises.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Three country packs, Romania, Greece and Ukraine, and what each one promises.
 
 A country pack is a set of claims written in several places at once: the
 manifest names a currency and a method, the methodology catalogue carries a

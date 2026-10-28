@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An amount that could not be converted is reported, not hidden in the total.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An amount that could not be converted is reported, not hidden in the total.
 
 Unusable foreign FX excludes money from the base total. The response carries
 excluded amounts in their native currencies so no source money is hidden.

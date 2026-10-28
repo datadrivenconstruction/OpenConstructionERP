@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The commitment guard's plumbing, without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The commitment guard's plumbing, without a database.
 
 Pins: a ``block`` is recorded in its own committed session (it must outlive the
 refused write's rollback) while a ``warn`` rides the caller's transaction; the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An SVG logo is printed from the PNG the browser rasterised it to.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An SVG logo is printed from the PNG the browser rasterised it to.
 
 The server does not rasterise SVG. The browser sends a PNG next to the SVG, and
 both stores keep it only while the SVG it belongs to is the logo: a raster logo,

@@ -1,4 +1,4 @@
-"""Unit tests for the integrations module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the integrations module.
 
 Covers:
     - Webhook schemas (create, update, response serialization)

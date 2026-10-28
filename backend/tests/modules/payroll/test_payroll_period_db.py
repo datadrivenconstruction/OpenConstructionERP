@@ -1,4 +1,4 @@
-"""Payroll export period against the database: build, lock, blocked edit, export, cost posting."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payroll export period against the database: build, lock, blocked edit, export, cost posting."""
 
 from __future__ import annotations
 

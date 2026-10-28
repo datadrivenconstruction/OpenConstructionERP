@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Permits lifecycles (table driven), shipped catalogues and their wiring into module 1."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permits lifecycles (table driven), shipped catalogues and their wiring into module 1."""
 
 from __future__ import annotations
 

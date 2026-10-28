@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The hook config and the lanes may diverge, but only on purpose.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The hook config and the lanes may diverge, but only on purpose.
 
 ``.pre-commit-config.yaml`` declares 39 hooks and exactly two of them run when
 you commit here. Thirty-five sit at the default pre-commit stage and none of

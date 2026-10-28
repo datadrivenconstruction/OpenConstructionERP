@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Russian pack, and the seams it has to hold together.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Russian pack, and the seams it has to hold together.
 
 A country pack states the same fact in several files by necessity: the engine
 holds the code pattern because a rule compiles it, the manifest holds it

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""A payment application is a claim for money, never a piece of software.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A payment application is a claim for money, never a piece of software.
 
 On the subcontractor payment portal and the cost value reconciliation screen,
 the English word "application" means a formal claim for work done in a period,

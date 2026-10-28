@@ -1,4 +1,4 @@
-"""Seeding the resource sheet must read the region in bounded pages.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seeding the resource sheet must read the region in bounded pages.
 
 ``seed_region`` runs inside the same request as a cost-base import, directly
 after it, and it walks the components breakdown of every work item in the

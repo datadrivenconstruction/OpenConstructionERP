@@ -1,4 +1,4 @@
-"""PG: the file manager lists takeoff's own store alongside the documents area.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the file manager lists takeoff's own store alongside the documents area.
 
 The takeoff module keeps its documents in ``oe_takeoff_document``. The
 "open from project files" dialog listed ``oe_documents_document`` and nothing

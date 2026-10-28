@@ -1,4 +1,4 @@
-"""International robustness of the variations value roll-ups.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠International robustness of the variations value roll-ups.
 
 Pure, database-free tests for the additive helpers that turn a set of
 variations into a currency-safe revised contract sum. They pin the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Structural ``pipeline`` validation rule — "AI proposes, human confirms".
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Structural ``pipeline`` validation rule — "AI proposes, human confirms".
 
 A side-effecting (write) node MUST have a ``gate.validation`` or
 ``gate.human_approval`` on every path from a trigger/AI node to it. A

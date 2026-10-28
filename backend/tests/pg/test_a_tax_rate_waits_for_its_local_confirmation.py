@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A tax rate marked for local confirmation, end to end against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A tax rate marked for local confirmation, end to end against PostgreSQL.
 
 Created pending, it resolves to nothing and is left out of the rates a form
 offers. Confirmed with a name and a source, it resolves and the confirmation is

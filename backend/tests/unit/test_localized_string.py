@@ -1,4 +1,4 @@
-"""Tests for LocalizedStr utility and resolve_localized helper."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for LocalizedStr utility and resolve_localized helper."""
 
 from unittest.mock import patch
 

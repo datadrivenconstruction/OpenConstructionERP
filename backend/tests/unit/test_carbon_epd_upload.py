@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""EPD file ingestion: magic-byte validation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EPD file ingestion: magic-byte validation tests.
 
 The carbon module accepts EPD documents in three formats:
     - PDF  (Environmental Product Declaration document — magic: %PDF)

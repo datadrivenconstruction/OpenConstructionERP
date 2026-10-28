@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A due date that has passed stays passed, so the nudge needs a ceiling.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A due date that has passed stays passed, so the nudge needs a ceiling.
 
 The sweep silenced an item only for :data:`sweeper.RENOTIFY_WINDOW_HOURS`
 after its last nudge. That bounds the rate and not the total: an item nobody

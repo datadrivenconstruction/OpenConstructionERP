@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An assignment can name the schedule activity it staffs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An assignment can name the schedule activity it staffs.
 
 Covers the whole of the link: the column is persisted on create and on
 propose, a PATCH can both set and clear it, the list query filters on it, the

@@ -1,4 +1,4 @@
-"""Field Reports IDOR regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Reports IDOR regression suite.
 
 The ``/api/v1/fieldreports/`` router exposes several endpoints keyed off
 an unscoped resource id (``entry_id`` for workforce / equipment logs,

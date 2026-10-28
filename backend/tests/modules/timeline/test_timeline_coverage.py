@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Hold the timeline allowlist against the events ``app/`` actually publishes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hold the timeline allowlist against the events ``app/`` actually publishes.
 
 This is the check whose absence *was* the bug. The module shipped with sixteen
 prefixes, nine of which matched no event in the codebase at all

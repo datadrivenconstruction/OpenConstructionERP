@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tenant catalogues: clone, validate, publish frozen versions, pin, and stay in their tenant."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tenant catalogues: clone, validate, publish frozen versions, pin, and stay in their tenant."""
 
 from __future__ import annotations
 

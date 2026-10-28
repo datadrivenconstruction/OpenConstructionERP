@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A read-only demo refuses a WebSocket handshake it did not allowlist.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A read-only demo refuses a WebSocket handshake it did not allowlist.
 
 Separate from ``test_demo_read_only.py`` because it asserts a different thing.
 That file proves the guarantee over the HTTP surface with a row census; this

@@ -1,4 +1,4 @@
-"""Unit tests for the Cost Explorer construction-aware spelling correction.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Cost Explorer construction-aware spelling correction.
 
 ``app.modules.cost_explorer.spelling`` is pure (``re`` + ``unicodedata`` only),
 so it is loaded here directly from its file path, independent of the FastAPI

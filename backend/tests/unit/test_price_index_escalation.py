@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Service tests for the price-index "escalate stored rates" preview.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service tests for the price-index "escalate stored rates" preview.
 
 These stand up a real (throwaway PostgreSQL) session, seed one cost-index
 series plus a handful of cost items with known ``price_as_of`` capture dates,

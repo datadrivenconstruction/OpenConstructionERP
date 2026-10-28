@@ -1,4 +1,4 @@
-"""Tests for core Pydantic schemas in app/schemas.py.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for core Pydantic schemas in app/schemas.py.
 
 Validates enums, Classification model, PaginatedResponse, and
 the canonical data structures. No database required.

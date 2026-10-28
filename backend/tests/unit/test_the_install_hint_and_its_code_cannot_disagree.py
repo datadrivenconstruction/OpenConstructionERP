@@ -1,4 +1,4 @@
-"""The embedder status card is told which case it is in, not asked to guess.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The embedder status card is told which case it is in, not asked to guess.
 
 ``/embedder/status/`` has always returned English prose telling the reader how
 to install the optional semantic extra, and the frontend rendered that prose

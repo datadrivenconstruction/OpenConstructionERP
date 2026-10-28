@@ -1,4 +1,4 @@
-"""Integration tests for the canonical -> 3D Tileset packaging endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the canonical -> 3D Tileset packaging endpoint.
 
 POST /api/v1/geo-hub/from-canonical/{cad_import_id}
 

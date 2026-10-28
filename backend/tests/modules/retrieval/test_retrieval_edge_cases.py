@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Edge-case integration tests for the retrieval module (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Edge-case integration tests for the retrieval module (PostgreSQL, py3.12).
 
 Complements ``test_retrieval_search.py`` with the boundaries: searching a project
 that holds nothing, a term that matches nothing, the wrong-project / access-denied

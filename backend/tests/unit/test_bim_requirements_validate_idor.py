@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""IDOR audit test for ``BIMRequirementService.validate_against_model``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠IDOR audit test for ``BIMRequirementService.validate_against_model``.
 
 Finding #11 (Max-Audit v8.8.3): the ``POST /bim-requirements/validate/{set_id}/
 ?model_id=...`` path verified project access only for the requirement SET, then

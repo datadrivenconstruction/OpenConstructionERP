@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A photo category has to mean the same thing at all three places that state it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A photo category has to mean the same thing at all three places that state it.
 
 The module said it three times and one of them disagreed. Uploading validated
 against ``VALID_PHOTO_CATEGORIES`` in the service, which listed ``aerial``;

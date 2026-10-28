@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Forecast documentation: the evidence threshold, the delta ladder, the comparison matrix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Forecast documentation: the evidence threshold, the delta ladder, the comparison matrix.
 
 Invented figures throughout; every expected value is worked out by hand in the
 comment next to it.

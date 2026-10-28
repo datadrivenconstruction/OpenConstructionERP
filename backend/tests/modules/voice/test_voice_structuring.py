@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic tests for the voice-to-structured-entry engine (voice.structuring).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic tests for the voice-to-structured-entry engine (voice.structuring).
 
 These cover the parts that must be right without a provider or a database: the
 target registry, field cleaners (enum clamping, date normalization, length

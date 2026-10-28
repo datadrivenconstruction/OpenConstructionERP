@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A locked bill cannot be deleted, like it cannot be edited.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A locked bill cannot be deleted, like it cannot be edited.
 
 Locking a bill is how an estimate is approved, and from then on its figures
 change only through a revision. Every position and markup writer refuses a

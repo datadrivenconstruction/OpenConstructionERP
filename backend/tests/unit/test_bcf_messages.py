@@ -1,4 +1,4 @@
-"""Tests for the BCF module's locale-scoped message bundle.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the BCF module's locale-scoped message bundle.
 
 ``app.modules.bcf.messages`` used to carry its own hand-rolled bundle class
 (a copy of :class:`app.core.validation.messages.MessageBundle` that had

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for ``app.modules.cad.classification_mapper``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``app.modules.cad.classification_mapper``.
 
 Covers Phase-1 of the v2.8.0 vector match feature:
 

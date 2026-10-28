@@ -1,4 +1,4 @@
-"""Every region the product offers must reach a working week someone chose for it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every region the product offers must reach a working week someone chose for it.
 
 **The defect this file exists to prevent, and why the previous gate missed it.**
 

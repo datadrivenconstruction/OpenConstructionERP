@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The SMTP transport refuses domains reserved by RFC 2606 / RFC 6761.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The SMTP transport refuses domains reserved by RFC 2606 / RFC 6761.
 
 Nothing on ``.invalid``, ``.test``, ``.example``, ``.localhost`` or the
 ``example.com/net/org`` names can receive mail. Handing such a message to

@@ -1,4 +1,4 @@
-"""GAEB X84 (Angebotsabgabe / priced bid submission) export tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠GAEB X84 (Angebotsabgabe / priced bid submission) export tests.
 
 These pin the phase-specific contract of the GAEB exporter
 (``build_gaeb_xml``) for the priced X84 phase, complementing the XSD

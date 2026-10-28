@@ -1,4 +1,4 @@
-"""Integration tests for the project-member endpoints used by the Team Strip.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the project-member endpoints used by the Team Strip.
 
 Covers the three endpoints registered on the ``oe_projects`` router:
 

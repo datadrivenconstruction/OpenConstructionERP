@@ -1,4 +1,4 @@
-"""Geo Hub cross-module event subscriber suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub cross-module event subscriber suite.
 
 Verifies the marker subscribers fire when other modules publish domain
 events. The address geocoding subscriber has its own suite in

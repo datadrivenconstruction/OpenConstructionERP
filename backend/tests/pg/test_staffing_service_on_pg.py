@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The staffing service against PostgreSQL: derived status, approval through governance, reminders, rule 4.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The staffing service against PostgreSQL: derived status, approval through governance, reminders, rule 4.
 
 Each test builds its own throwaway database (``isolated_engine``), so commits,
 row locks and the governance frame document behave as they do in production.

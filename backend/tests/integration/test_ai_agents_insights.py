@@ -1,4 +1,4 @@
-"""Project AI insights: ``GET /api/v1/ai-agents/insights``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project AI insights: ``GET /api/v1/ai-agents/insights``.
 
 The project-dashboard "AI insights" widget reads this endpoint. There is no
 separate insight table: each insight is distilled from a real completed

@@ -1,4 +1,4 @@
-"""Pure-function tests for the international procurement helpers (``intl.py``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function tests for the international procurement helpers (``intl.py``).
 
 These pin the database-free, framework-free helpers that keep procurement money
 and delivery math correct and clear for users worldwide. No DB, no fixtures, no

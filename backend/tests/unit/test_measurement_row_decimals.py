@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A sheet that rounds every line before totalling it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A sheet that rounds every line before totalling it.
 
 Italian practice, and the files that come out of it, round each partial
 quantity of a measurement sheet to the decimals the bill declares and then

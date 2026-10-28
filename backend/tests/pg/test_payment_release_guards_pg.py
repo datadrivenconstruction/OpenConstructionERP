@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment release on real PostgreSQL: hand figures, ordering guards, roles and project access.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment release on real PostgreSQL: hand figures, ordering guards, roles and project access.
 
 Builds on the invented subcontract of ``test_payment_release_pg`` (two
 supplier invoices dated 10 March and 10 May). Gated by ``OE_TEST_DB=pg``.

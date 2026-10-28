@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - supplier invoice against its purchase order (simple three-way match).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - supplier invoice against its purchase order (simple three-way match).
 
 Same three layers as the purchase-order rule tests: the pure checks, the rule
 classes with their messages in every shipped locale, and reachability (the

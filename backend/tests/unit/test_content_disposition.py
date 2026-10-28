@@ -1,4 +1,4 @@
-"""A German LV name must survive the trip to the browser's save dialog.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A German LV name must survive the trip to the browser's save dialog.
 
 The regression these pin: export endpoints built the header from
 ``name.encode("ascii", errors="replace")``, so "Bürogebäude Frankfurt

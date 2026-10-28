@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: the last three currency revisions run against a schema that already has them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: the last three currency revisions run against a schema that already has them.
 
 The default runtime does not migrate its way to the current schema. ``env.py``
 short-circuits a blank database to ``create_all`` plus ``stamp heads``, so the

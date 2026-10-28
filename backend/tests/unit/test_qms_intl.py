@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`app.modules.qms.intl`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.modules.qms.intl`.
 
 These tests are deliberately database-free: the ``intl`` helpers are pure
 functions over counts, statuses, severities and ISO 8601 dates, so they run

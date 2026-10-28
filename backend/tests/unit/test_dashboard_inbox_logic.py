@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-function unit tests for the unified inbox merge/sort/scope logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-function unit tests for the unified inbox merge/sort/scope logic.
 
 These pin the DB-free helpers in ``app.modules.dashboard.inbox_logic`` that
 drive the unified approvals/alerts inbox:

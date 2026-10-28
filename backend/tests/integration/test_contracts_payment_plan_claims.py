@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Claims raised from payment-plan instalments, on a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Claims raised from payment-plan instalments, on a real database.
 
 An instalment that is reached becomes a draft claim for the instalment's
 agreed amount. Its gross is not made of schedule-of-values lines, so it

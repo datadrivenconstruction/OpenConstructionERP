@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T09 unit tests — Preset → Snapshot Sync Protocol.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T09 unit tests — Preset → Snapshot Sync Protocol.
 
 Pure-Python coverage of the probe + auto-heal pipeline. No DB, no
 DuckDB — every test feeds hand-crafted ``SnapshotMeta`` objects into

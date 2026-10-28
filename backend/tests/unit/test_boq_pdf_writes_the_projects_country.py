@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A BOQ PDF is written in its project's country: separators, date, labels, paper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A BOQ PDF is written in its project's country: separators, date, labels, paper.
 
 Each case pairs the right answer with the one the generator used to print:
 

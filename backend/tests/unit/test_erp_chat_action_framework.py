@@ -1,4 +1,4 @@
-"""The erp_chat action framework, without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The erp_chat action framework, without a database.
 
 What a proposal is made of before it touches PostgreSQL: how the model's
 numbers and dates are read, how a new BOQ line is numbered, how a typed name

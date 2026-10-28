@@ -1,4 +1,4 @@
-"""Which of the two schema facts ``/api/health`` is entitled to degrade on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which of the two schema facts ``/api/health`` is entitled to degrade on.
 
 The product never runs ``alembic upgrade``. The schema moves through
 ``create_all`` and the boot heal, so the recorded revision falls behind on a

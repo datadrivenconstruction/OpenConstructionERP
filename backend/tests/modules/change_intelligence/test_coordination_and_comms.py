@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the coordination and correspondence-digest co-pilots.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the coordination and correspondence-digest co-pilots.
 
 PostgreSQL, py3.12. Seeds change-family records and correspondence directly and
 drives the two services that feed the pure :mod:`coordination` and

@@ -1,4 +1,4 @@
-"""Tests for database utilities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for database utilities.
 
 Tests the GUID type decorator and Base model column definitions.
 No actual database connection required — tests operate on the type

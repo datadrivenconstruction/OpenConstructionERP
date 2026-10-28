@@ -1,4 +1,4 @@
-"""Integration tests for server-persisted white-label branding (issue #272).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for server-persisted white-label branding (issue #272).
 
 Branding used to live only in the browser's localStorage, so it never followed
 the workspace to another browser or to an invited user's pre-auth view of the

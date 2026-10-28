@@ -1,4 +1,4 @@
-"""Condition scales and maintenance planning maths (no database)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition scales and maintenance planning maths (no database)."""
 
 from __future__ import annotations
 

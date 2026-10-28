@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The half of ``v41_funding_obligation_detail`` that reaches an ordinary install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The half of ``v41_funding_obligation_detail`` that reaches an ordinary install.
 
 The revision tightens ``oe_funding_obligation.detail_params``, and on its own
 that reaches almost nobody. The product does not run ``alembic upgrade``: it

@@ -1,4 +1,4 @@
-"""Tests for the reporting renderer wired into ReportingService.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the reporting renderer wired into ReportingService.
 
 Pinned by W23 P0 audit (task #252): before the renderer existed,
 ``ReportingService.generate_report`` persisted a metadata row but the

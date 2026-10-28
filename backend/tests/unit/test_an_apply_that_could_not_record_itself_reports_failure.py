@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Applying a pack that could not be recorded must not come back as applied.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Applying a pack that could not be recorded must not come back as applied.
 
 ``pack_state.json`` is the whole of "a pack is applied". ``get_active_pack``
 reads that file and nothing else remembers the decision, so a write that does

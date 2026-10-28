@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The cutting API end to end against the real ASGI app and database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The cutting API end to end against the real ASGI app and database.
 
 Covers the whole loop an estimator walks: create a job, import a cut list,
 optimise, export the cutting list, review the proposal, confirm it into the BOQ

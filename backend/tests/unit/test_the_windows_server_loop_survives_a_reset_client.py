@@ -1,4 +1,4 @@
-"""The server must keep accepting after a client resets in the listen backlog.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The server must keep accepting after a client resets in the listen backlog.
 
 On Windows uvicorn runs on asyncio's proactor loop unless told otherwise, and
 CPython's proactor loop closes the listening socket when one accept fails

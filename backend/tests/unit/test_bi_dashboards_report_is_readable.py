@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""A report a person opens should read like a document - issue #441.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A report a person opens should read like a document - issue #441.
 
 ``run_report`` flattens each KPI's breakdown into ``breakdown__<key>``
 columns and hands the rows straight to the renderer, so the PDF printed

@@ -1,4 +1,4 @@
-"""A slow crash recovery has to keep saying that it is still recovering.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A slow crash recovery has to keep saying that it is still recovering.
 
 Why this is worth a test of its own: the desktop launcher gives up on a backend
 that has written nothing for a few minutes, and that limit is only safe because

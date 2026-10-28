@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A generated module creates its table on the database it will actually run on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A generated module creates its table on the database it will actually run on.
 
 The unit tests render the module and create its table on SQLite, which proves
 the DDL is well formed. It does not prove the things only PostgreSQL enforces:

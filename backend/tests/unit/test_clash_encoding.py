@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Mojibake regression tests for clash detection encoding.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Mojibake regression tests for clash detection encoding.
 
 Covers:
 * Clash result names with German umlauts (ä, ö, ü, ß, Ä, Ö, Ü) survive

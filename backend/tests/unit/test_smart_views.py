@@ -1,4 +1,4 @@
-"""Smart Views baseline tests — first coverage for the v4.2.0 module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views baseline tests — first coverage for the v4.2.0 module.
 
 Covers the three smoke paths the module must never regress on:
 

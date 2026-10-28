@@ -1,4 +1,4 @@
-"""Unit + module tests for portfolio resource leveling (TOP-30 #5).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit + module tests for portfolio resource leveling (TOP-30 #5).
 
 Scope:
     * build_leveling_suggestions (pure): shift vs spread, no-overflow, zero/negative

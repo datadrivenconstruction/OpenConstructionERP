@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure geometry of the drawing revision compare: transforms, region merge, containment."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure geometry of the drawing revision compare: transforms, region merge, containment."""
 
 from __future__ import annotations
 

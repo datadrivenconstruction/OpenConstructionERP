@@ -1,4 +1,4 @@
-"""Every notification i18n key the backend can emit must exist in ``en.ts``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every notification i18n key the backend can emit must exist in ``en.ts``.
 
 A notification row stores ``title_key`` / ``body_key``, and the frontend hands
 that string straight to i18next: ``features/inbox/inboxUtils.ts`` ``resolveTitle``

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The VAT regimes a contract on an Egyptian project is offered, priced from the stored tax table.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The VAT regimes a contract on an Egyptian project is offered, priced from the stored tax table.
 
 The rate of each regime is read from the tax table the install holds, not
 from the regime data, so a tenant who corrects a row sees the regime follow.

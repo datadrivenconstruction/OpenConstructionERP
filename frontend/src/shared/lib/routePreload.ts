@@ -1,4 +1,4 @@
-// Hover-intent chunk preloader: when the user hovers a sidebar nav item,
+// Hover-intent chunk preloader: when the user hovers a sidebar nav item,​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // we fire the dynamic import() for that route's page component so the
 // chunk is already in the browser cache by the time they click.
 //

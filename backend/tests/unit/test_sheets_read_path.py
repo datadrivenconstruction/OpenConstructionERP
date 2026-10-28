@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the drawing-sheet register promises on the way out: an order and a count.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the drawing-sheet register promises on the way out: an order and a count.
 
 Two properties, neither of which the read path actually had.
 

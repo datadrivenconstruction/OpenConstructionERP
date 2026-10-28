@@ -1,4 +1,4 @@
-"""Shared fixtures for the i18n Foundation test suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for the i18n Foundation test suite.
 
 The session fixture runs against the shared PostgreSQL unit database from
 ``tests/_pg.py``, inside an outer transaction that is rolled back on teardown.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integrity tests for the partner-pack flagship country projects.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integrity tests for the partner-pack flagship country projects.
 
 Each active partner pack ships one fully worked-out demo project authored as
 a standalone ``DemoTemplate`` under ``app/core/demo_packs/``. These templates

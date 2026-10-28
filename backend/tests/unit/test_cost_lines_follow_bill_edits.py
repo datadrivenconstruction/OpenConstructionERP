@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bill edits refresh cost lines in batches, never one session per edited row."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bill edits refresh cost lines in batches, never one session per edited row."""
 
 from __future__ import annotations
 

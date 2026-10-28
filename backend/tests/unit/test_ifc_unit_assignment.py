@@ -1,4 +1,4 @@
-"""Comprehensive tests for the IFC IfcUnitAssignment parser (audit C2 v3).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Comprehensive tests for the IFC IfcUnitAssignment parser (audit C2 v3).
 
 Covers per-dimension unit resolution (LENGTH / AREA / VOLUME / MASS /
 ANGLE / TIME / FREQUENCY / ENERGY / PRESSURE / POWER / FORCE), SI prefix

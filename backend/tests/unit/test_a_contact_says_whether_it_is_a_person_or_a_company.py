@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A contact records whether it is a natural person or a legal entity.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A contact records whether it is a natural person or a legal entity.
 
 Nothing told a sole trader from a GmbH, so a supplier rating could be
 personal data without anyone knowing. The field is optional: an old contact

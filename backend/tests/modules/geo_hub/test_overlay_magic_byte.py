@@ -1,4 +1,4 @@
-"""Magic-byte sniffer rejects mislabelled uploads with HTTP 415."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Magic-byte sniffer rejects mislabelled uploads with HTTP 415."""
 
 from __future__ import annotations
 

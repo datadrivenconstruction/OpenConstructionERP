@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the pure field-time engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure field-time engine.
 
 These exercise :mod:`app.modules.field_time.field_time_math` directly with plain
 ``Decimal`` / ``dict`` inputs - no database, FastAPI or ORM - so they run on any

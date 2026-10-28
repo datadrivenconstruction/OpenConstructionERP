@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The allowances demo seed hands every project a register of its own.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The allowances demo seed hands every project a register of its own.
 
 A demo estate in which two projects list the same allowances teaches the reader
 that the data is generated, which is the one thing a demo must not say. The

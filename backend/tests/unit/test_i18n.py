@@ -1,4 +1,4 @@
-"""Tests for the i18n (internationalization) system.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the i18n (internationalization) system.
 
 Tests cover locale definitions, the flatten helper, and the t() translation
 function including fallback and interpolation behavior.

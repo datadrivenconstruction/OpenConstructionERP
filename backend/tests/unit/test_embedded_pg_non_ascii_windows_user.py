@@ -1,4 +1,4 @@
-"""Embedded PostgreSQL bring-up for a Windows account with a non-ASCII name.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Embedded PostgreSQL bring-up for a Windows account with a non-ASCII name.
 
 A user named ``田田`` on a Chinese Windows install (ANSI code page 936) could not
 start the desktop app at all. initdb prints the operating-system user name and

@@ -1,4 +1,4 @@
-"""Packs-umbrella rename: pack type inference + backward-compat aliases.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Packs-umbrella rename: pack type inference + backward-compat aliases.
 
 Covers the contract that external packs and existing installs depend on:
   * old manifests with no ``pack_type`` still load and infer a sensible type;

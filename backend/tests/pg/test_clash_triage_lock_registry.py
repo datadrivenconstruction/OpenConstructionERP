@@ -1,4 +1,4 @@
-"""The per-subject triage lock registry must give its entries back.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The per-subject triage lock registry must give its entries back.
 
 ``_subject_locks`` maps a clash id to an :class:`asyncio.Lock` so two callers
 triaging the same clash in one process serialise and the second one hits the

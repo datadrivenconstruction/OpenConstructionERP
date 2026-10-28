@@ -1,4 +1,4 @@
-"""Tax configurations: which rate is active, and what the module does not do.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tax configurations: which rate is active, and what the module does not do.
 
 Scope note that shapes this whole file: **the module never applies a tax.** It
 stores ``rate_pct`` as a string and hands the row to whoever asked. There is no

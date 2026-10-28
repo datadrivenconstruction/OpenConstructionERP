@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the CRS auto-detector.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the CRS auto-detector.
 
 Covers all 9 major regions plus WGS 84 / project-local edge cases. We
 use synthetic bounding boxes that sit firmly inside each region's

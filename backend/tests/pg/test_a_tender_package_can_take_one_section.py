@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: a package raised from the bill takes the rows it was asked for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a package raised from the bill takes the rows it was asked for.
 
 "Send to tender" on a bill with no sections packaged nothing, and a priced
 line loose at the top of the bill was left out of a whole-bill package. Every

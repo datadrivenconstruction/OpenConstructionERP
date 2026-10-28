@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A pack must not boot the generic parent of a locale it ships itself.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A pack must not boot the generic parent of a locale it ships itself.
 
 ``default_locale`` is not documentation. The onboarding wizard hands it
 straight to the language switcher (``onActivateLocale(pack.default_locale)`` in

@@ -1,4 +1,4 @@
-"""Validation rules of the progress sheet and the imported-source check, plus import-source helpers."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules of the progress sheet and the imported-source check, plus import-source helpers."""
 
 from __future__ import annotations
 

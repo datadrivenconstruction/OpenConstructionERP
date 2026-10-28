@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A generated report reads in the language it was asked for.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A generated report reads in the language it was asked for.
 
 Every word the reporting module put in front of a reader used to be an
 English literal - section headings, field labels, the metadata line, the

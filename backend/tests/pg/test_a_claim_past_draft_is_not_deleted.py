@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A progress claim that has left draft is not deleted, and its lines stay.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A progress claim that has left draft is not deleted, and its lines stay.
 
 ``ProgressClaimLine.progress_claim_id`` cascades, so deleting a claim deletes
 its breakdown with it. The claim line routes already refuse to add, change or

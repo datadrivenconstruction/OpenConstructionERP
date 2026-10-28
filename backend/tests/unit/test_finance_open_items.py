@@ -1,4 +1,4 @@
-"""Reading a file of open invoices carried over from another system.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reading a file of open invoices carried over from another system.
 
 Amounts and dates must read one way only or be refused, the paid part must be
 what the total, the retention and the open amount leave, a row that cannot be

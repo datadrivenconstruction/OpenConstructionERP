@@ -1,4 +1,4 @@
-"""T05 integration tests — Dashboard Presets & Collections API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T05 integration tests — Dashboard Presets & Collections API.
 
 Stands up a minimal FastAPI app with just the dashboards router mounted
 plus session/auth dependencies overridden to point at a per-test throwaway

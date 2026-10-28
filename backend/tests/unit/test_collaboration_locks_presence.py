@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - collaboration-locks presence hub and expiry sweeper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - collaboration-locks presence hub and expiry sweeper.
 
 ``collaboration_locks`` shipped with no tests, and it is a concurrency surface:
 without a test we simply do not know whether it works. These two files are the

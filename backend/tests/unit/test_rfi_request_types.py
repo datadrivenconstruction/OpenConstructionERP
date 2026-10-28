@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request types as data: presets, numbering, required fields and catalogue rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request types as data: presets, numbering, required fields and catalogue rules.
 
 Pure tests, no database. The PostgreSQL half (catalogue rows, numbering per
 type through the real MAX scan, the API, the migration backfill) lives in

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A saved element group or Smart View can be a BOQ position's quantity source.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A saved element group or Smart View can be a BOQ position's quantity source.
 
 It goes through a quantity rule that names the group (``metadata.element_group_id``)
 and targets the position, so preview, apply, the links and the change review

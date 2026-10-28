@@ -1,4 +1,4 @@
-"""Server-side measurement recompute — Audit B8 regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Server-side measurement recompute — Audit B8 regression suite.
 
 The takeoff API used to trust client-supplied ``measurement_value``
 alongside the raw ``points`` array. A malicious client could draw a

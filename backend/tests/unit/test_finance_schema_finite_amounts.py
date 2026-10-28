@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Finance request strings must reject nonfinite numbers as validation errors."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance request strings must reject nonfinite numbers as validation errors."""
 
 from __future__ import annotations
 

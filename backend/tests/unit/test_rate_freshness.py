@@ -1,4 +1,4 @@
-"""Unit tests for the rate-freshness (re-price-due) helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the rate-freshness (re-price-due) helpers.
 
 These live in ``app.modules.costs.service`` and are pure functions - no
 database, no session - so every case here pins behaviour by passing an

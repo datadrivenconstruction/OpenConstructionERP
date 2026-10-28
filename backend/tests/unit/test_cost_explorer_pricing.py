@@ -1,4 +1,4 @@
-"""Unit tests for the Cost Explorer pricing engine (substitution + price stats).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Cost Explorer pricing engine (substitution + price stats).
 
 Like the ranking engine, ``app.modules.cost_explorer.pricing`` is pure (stdlib
 only), so it is loaded here directly from its file path - independent of the

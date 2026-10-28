@@ -1,4 +1,4 @@
-"""Integration tests for documents module — search broadening + activity log.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for documents module — search broadening + activity log.
 
 Two slices live here:
 

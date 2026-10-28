@@ -1,4 +1,4 @@
-"""Unit tests for the company-profile onboarding presets.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the company-profile onboarding presets.
 
 The sidebar is gated on ``module_preferences``, which ``modules_for`` builds
 from the module set a profile selects. Two behaviours matter and are easy to

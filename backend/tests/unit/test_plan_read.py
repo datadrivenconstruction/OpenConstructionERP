@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - vision-LLM plan reading core (issue #194).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - vision-LLM plan reading core (issue #194).
 
 Covers the deterministic half of the vision plan reader: the structured-output
 parsing and rejection, the scale plausibility belt and inferred-confidence

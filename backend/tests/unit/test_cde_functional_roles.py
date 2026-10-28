@@ -1,4 +1,4 @@
-"""Tests for the ISO 19650 CDE functional-roles catalog.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the ISO 19650 CDE functional-roles catalog.
 
 The catalog (Author / Reviewer / Approver / Viewer) must stay consistent with the
 state machine it references: every role's ``cde_role`` has to be a real gate role,

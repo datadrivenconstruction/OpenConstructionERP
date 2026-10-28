@@ -1,4 +1,4 @@
-"""The Turkey MEP contractor pack, and the manifest field it is built around.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Turkey MEP contractor pack, and the manifest field it is built around.
 
 Three things are locked here.
 

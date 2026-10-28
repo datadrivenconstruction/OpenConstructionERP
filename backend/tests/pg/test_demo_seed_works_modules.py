@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The temporary-works, forms and portfolio demo seeds must fill, once, coherently.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The temporary-works, forms and portfolio demo seeds must fill, once, coherently.
 
 All three shipped routed, permissioned and empty, and the seeders that fix that
 share the same ways of being wrong - none of which shows up as a non-zero exit

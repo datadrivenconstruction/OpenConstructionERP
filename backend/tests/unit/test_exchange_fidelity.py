@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Exchange fidelity report: every format's loss cases, from the writers' own traces.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Exchange fidelity report: every format's loss cases, from the writers' own traces.
 
 Each test builds a small bill, runs the real writer (GAEB, BC3) or the real
 reader (GAEB, BC3, spreadsheet), and checks that what the format cannot carry

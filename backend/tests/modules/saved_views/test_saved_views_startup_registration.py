@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The running application loads the saved-views rules, not just the tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The running application loads the saved-views rules, not just the tests.
 
 A rule registered at import time is registered the moment anything in the test
 process imports the module that defines it - including a fixture, a conftest, or

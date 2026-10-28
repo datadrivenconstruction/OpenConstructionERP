@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: a seeded tender package is what its name says, read by the screens that use it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a seeded tender package is what its name says, read by the screens that use it.
 
 The office demo's "Innenausbau" package (drywall, raised floors, acoustic
 ceilings, floor finishes, doors) used to cover the roof slab, the roof sealing,

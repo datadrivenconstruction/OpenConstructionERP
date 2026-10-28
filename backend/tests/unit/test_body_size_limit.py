@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Global request-body-size backstop middleware.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Global request-body-size backstop middleware.
 
 ``MaxBodySizeMiddleware`` is a coarse safety net above the per-endpoint upload
 caps: it rejects an absurdly large request body before an endpoint can read it

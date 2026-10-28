@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Stakeholder analysis as pure functions: SPEC rules 2, 3, 4, 5 and 8, plus JSON safety."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Stakeholder analysis as pure functions: SPEC rules 2, 3, 4, 5 and 8, plus JSON safety."""
 
 from __future__ import annotations
 

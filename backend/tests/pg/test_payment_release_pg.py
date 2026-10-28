@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment release end to end on real PostgreSQL, through the routes a controller uses.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment release end to end on real PostgreSQL, through the routes a controller uses.
 
 One invented subcontract with a measured schedule line and a lump-sum line,
 a certified claim, and two cumulative supplier invoices. The test walks the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Performance tests — Dashboard rollup at 50 projects × 10 widgets.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Performance tests — Dashboard rollup at 50 projects × 10 widgets.
 
 Assertions:
 * Single ``compute_rollup`` call for all 10 widgets completes in < 2 s on the

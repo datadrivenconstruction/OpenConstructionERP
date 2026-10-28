@@ -1,4 +1,4 @@
-"""R5 deep-audit tests for the RFI state-machine + role gates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R5 deep-audit tests for the RFI state-machine + role gates.
 
 Scope:
     1. ``service.respond_to_rfi`` rejects a caller who isn't the assignee

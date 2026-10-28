@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The heal drops a NOT NULL it cannot honour, and now it says so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The heal drops a NOT NULL it cannot honour, and now it says so.
 
 ``postgres_auto_migrate`` enforces NOT NULL on a column it is adding only when
 a default exists to backfill the rows already in the table. Without one it adds

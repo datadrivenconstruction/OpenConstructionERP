@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The showcase projects belong to the demo account, never to a deactivated one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The showcase projects belong to the demo account, never to a deactivated one.
 
 The seeders took the owner with ``WHERE role = 'admin' LIMIT 1``. On a live
 installation that row is a real administrator, picked in whatever order the

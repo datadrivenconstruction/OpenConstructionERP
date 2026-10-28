@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: which submission an award refers to, when a bidder has more than one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: which submission an award refers to, when a bidder has more than one.
 
 A bidder can hold several submissions in one package. ``BidSubmission``
 constrains ``invitation_id`` to be unique but not ``bidder_id``, nothing forbids

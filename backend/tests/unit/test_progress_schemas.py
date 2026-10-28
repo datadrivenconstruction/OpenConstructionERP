@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the progress-rigor Pydantic schemas (T3.2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the progress-rigor Pydantic schemas (T3.2).
 
 Pure (pydantic only) so they run on the local 3.11 runner without a DB.
 """

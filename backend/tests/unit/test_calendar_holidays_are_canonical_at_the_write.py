@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A stored calendar holiday is canonical, and means the same as a CPM exception.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A stored calendar holiday is canonical, and means the same as a CPM exception.
 
 ``work_days`` on these models has been constrained since the Monday-zero
 convention was settled. ``holidays`` beside it was not, so the calendar write

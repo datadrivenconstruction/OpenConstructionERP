@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure allowances / contingency register engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure allowances / contingency register engine.
 
 Stdlib + pytest only - mirrors the engine's constraint so it runs on the local
 Python test runner without app.* database plumbing on the path. Money is

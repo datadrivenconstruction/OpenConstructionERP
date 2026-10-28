@@ -1,4 +1,4 @@
-"""Max-Audit #10: ProjectBudget.committed must be idempotent and reversible.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Max-Audit #10: ProjectBudget.committed must be idempotent and reversible.
 
 `procurement.po.approved` commits a PO's amount against the project budget.
 Two failure modes were confirmed by the audit:

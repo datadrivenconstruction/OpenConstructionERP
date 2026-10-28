@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the EAC v2 runner (EAC-1.4 / RFC 35 §1.6 / §1.7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the EAC v2 runner (EAC-1.4 / RFC 35 §1.6 / §1.7).
 
 The runner wraps :func:`execute_rule` with the persistence envelope
 that ``POST /rulesets/{id}:run`` and the Celery worker share. We

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A tax rate marked for local confirmation is not used until someone confirms it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A tax rate marked for local confirmation is not used until someone confirms it.
 
 Some rates ship before anyone on the ground has checked them; the Democratic
 Republic of the Congo was the case that raised it. The decision was that the

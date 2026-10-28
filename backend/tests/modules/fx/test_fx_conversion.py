@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the FX conversion maths and the ECB parser.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the FX conversion maths and the ECB parser.
 
 Everything here is pure: no database, no network. The point of keeping the
 arithmetic in free functions is that these can be reasoned about on their own,

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Phase-0 performance smoke tests for v2.8.0 vector match feature.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Phase-0 performance smoke tests for v2.8.0 vector match feature.
 
 Sanity-bounds, not formal benchmarks. The numbers below are intentionally
 generous (2–10x typical observed) so we catch order-of-magnitude

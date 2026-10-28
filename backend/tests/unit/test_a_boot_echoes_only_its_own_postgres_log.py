@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A start echoes the PostgreSQL log lines it wrote, not the ones it inherited.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A start echoes the PostgreSQL log lines it wrote, not the ones it inherited.
 
 ``pixeltable-pgserver`` gives ``pg_ctl`` the cluster log with ``-l``, which
 appends, and logs the WHOLE of that file when the start fails or times out

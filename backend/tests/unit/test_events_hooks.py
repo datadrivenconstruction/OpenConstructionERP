@@ -1,4 +1,4 @@
-"""Tests for event bus and hook system."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for event bus and hook system."""
 
 import pytest
 

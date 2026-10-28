@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End-to-end GAEB import through ``POST /import/auto/`` (server-side path).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end GAEB import through ``POST /import/auto/`` (server-side path).
 
 The audit of the DACH import flow found the client-side import losing 5 of
 the conformance fixture's 27 positions (4x 409 from dropped RNoIndex,

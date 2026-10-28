@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bare table cell prints complex script correctly, not merely visibly.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bare table cell prints complex script correctly, not merely visibly.
 
 ``pdf_table_font_commands`` gives a cell the right face. It cannot give it the
 right shape, because reportlab draws a cell that is not a flowable through

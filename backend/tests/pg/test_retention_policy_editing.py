@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What a person may change about how a contract holds retention, and when.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a person may change about how a contract holds retention, and when.
 
 The accrual ladder decides money that has already been taken off the
 contractor. A certified claim carries its own frozen figures and survives a

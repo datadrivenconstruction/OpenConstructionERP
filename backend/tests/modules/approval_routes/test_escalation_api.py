@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for approval-SLA escalation depth (#17, PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for approval-SLA escalation depth (#17, PostgreSQL, py3.12).
 
 Exercises the escalation service end to end against real rows: a breached step
 past its grace window escalates up the route's approver chain to the next

@@ -1,4 +1,4 @@
-"""T03 unit tests — Smart Value Autocomplete.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T03 unit tests — Smart Value Autocomplete.
 
 Covers:
 * DataFrame fallback (pure-Python) — fast deterministic path used when

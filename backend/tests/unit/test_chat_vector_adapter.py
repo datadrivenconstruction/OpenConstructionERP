@@ -1,4 +1,4 @@
-"""Unit tests for :class:`ChatMessageAdapter`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ChatMessageAdapter`.
 
 Chat messages are unusual: ``to_text`` returns an empty string for
 rows whose role isn't user/assistant.  Several tests cover that skip

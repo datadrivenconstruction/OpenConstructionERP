@@ -1,4 +1,4 @@
-"""Regression: geo_hub PATCH must MERGE the ``metadata_`` JSON column.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: geo_hub PATCH must MERGE the ``metadata_`` JSON column.
 
 Audit finding #14 - the shared ``_dump`` helper renamed ``metadata`` ->
 ``metadata_`` and fed it straight into ``update_fields``, which issues a plain

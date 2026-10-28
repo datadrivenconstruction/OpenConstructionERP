@@ -1,4 +1,4 @@
-"""The backup guard complains about the artefact, not about the run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The backup guard complains about the artefact, not about the run.
 
 Production went nine days with no database dump and nothing said so. The job
 was refusing correctly and writing that refusal to a log nobody reads, so the

@@ -1,4 +1,4 @@
-"""Integration tests for the 4D module HTTP surface (Section 6, MVP slice).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the 4D module HTTP surface (Section 6, MVP slice).
 
 Stands up a minimal FastAPI app with the 4D v2 routers mounted plus the
 session/user dependencies overridden to point at a per-test throwaway

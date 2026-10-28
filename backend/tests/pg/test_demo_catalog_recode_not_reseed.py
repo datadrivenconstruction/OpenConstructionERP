@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Re-seeding a catalogue that carries the previous codes must not double it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Re-seeding a catalogue that carries the previous codes must not double it.
 
 The catalogue seeder is idempotent by marker bail-out: it looks for one known
 ``resource_code`` and returns early if it is there. Renaming the thirty-three

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for clash signature suppressions (v41).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for clash signature suppressions (v41).
 
 Pin the contract:
 

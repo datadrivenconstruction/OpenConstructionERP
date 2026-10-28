@@ -1,4 +1,4 @@
-"""Unit tests for the Assemblies module — remediation contract lock.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Assemblies module — remediation contract lock.
 
 Covers the QA-backlog items triaged in the ASM-* sweep:
 

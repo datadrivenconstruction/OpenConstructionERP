@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the canonical-format Smart View rule engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the canonical-format Smart View rule engine.
 
 Coverage:
 - Boolean logic (AND / OR / nested groups)

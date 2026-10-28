@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The India pack: does what the manifest promises reach an Indian estimate?
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The India pack: does what the manifest promises reach an Indian estimate?
 
 India was the only member of the jurisdiction cohort with no pack test of its
 own. China, the UK, Russia and Hungary each have one, and each of those found

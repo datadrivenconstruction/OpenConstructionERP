@@ -1,4 +1,4 @@
-"""Unit tests for the pluggable email service (``app.core.email``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pluggable email service (``app.core.email``).
 
 Covers:
     - Per-backend behaviour (console, noop, memory, smtp-without-config)

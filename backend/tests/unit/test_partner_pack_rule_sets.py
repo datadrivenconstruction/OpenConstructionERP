@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seam where a partner pack switches validation rule sets on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seam where a partner pack switches validation rule sets on.
 
 A pack manifest carries two lists that read alike and mean opposite things.
 ``validation_rule_packs`` names the reference documents the pack ships under

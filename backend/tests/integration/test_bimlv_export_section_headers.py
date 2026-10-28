@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A BIM-LV container must not export a bill's section headers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A BIM-LV container must not export a bill's section headers.
 
 A section header is a ``Position`` carrying a sentinel unit, and the BOQ module
 spells that sentinel two ways: ``""`` from the demo seeders, ``"section"`` from

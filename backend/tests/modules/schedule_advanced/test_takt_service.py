@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Orchestration tests for :class:`TaktScheduleService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Orchestration tests for :class:`TaktScheduleService`.
 
 The pure line-of-balance geometry is locked in ``test_takt.py`` with string
 ids ("L1", "F"). Those never exercise the *service* seam, where the geometry

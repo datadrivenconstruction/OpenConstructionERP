@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Tests for publishing a labour-rate template as a reusable labor cost item.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for publishing a labour-rate template as a reusable labor cost item.
 
 A pure check locks the published rate to :func:`rate_math.all_in_rate` for a
 known template (no database). DB-backed checks drive

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pin the Round-6 N+1 fix on the measurement PATCH / DELETE / link path.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pin the Round-6 N+1 fix on the measurement PATCH / DELETE / link path.
 
 Pre-fix, ``service.update_measurement`` / ``delete_measurement`` /
 ``link_measurement_to_boq`` each ran ``self.get_measurement(...)`` even

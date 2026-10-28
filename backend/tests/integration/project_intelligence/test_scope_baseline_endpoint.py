@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration test for POST /api/v1/project_intelligence/scope-baseline/.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration test for POST /api/v1/project_intelligence/scope-baseline/.
 
 Drives the scope-baseline capture end to end through the ASGI app:
 

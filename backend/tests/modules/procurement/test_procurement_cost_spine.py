@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A purchase-order line's link to the cost spine, written and read back.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A purchase-order line's link to the cost spine, written and read back.
 
 The committed-against-budget report has been complete and dead since it was
 written: ``CostSpineRepository.po_committed_by_cost_line`` filters

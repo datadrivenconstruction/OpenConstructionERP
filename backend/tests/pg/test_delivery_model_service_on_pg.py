@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The delivery model service on PostgreSQL, through the real governance gate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The delivery model service on PostgreSQL, through the real governance gate.
 
 Approval is the governance gate decision on the contracts area (lead decision
 2): these tests drive the gate with the evidence provider registered and show

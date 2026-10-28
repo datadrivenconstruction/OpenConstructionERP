@@ -1,4 +1,4 @@
-"""A project PATCH that names a legal entity is answered, not dropped.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A project PATCH that names a legal entity is answered, not dropped.
 
 The owning entity is set through ``PUT /legal-entities/projects/{id}/entity``,
 which checks the legal entities permission. ``PATCH /projects/{id}`` used to

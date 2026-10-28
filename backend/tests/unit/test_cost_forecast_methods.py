@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Forecast methods, computed by hand on invented figures.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Forecast methods, computed by hand on invented figures.
 
 Line A is let below its budget, half measured and invoiced a little ahead of
 the measurement. Line B bills well behind what is measured. Line C is

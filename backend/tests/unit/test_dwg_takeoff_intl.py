@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database-free tests for the dwg_takeoff international takeoff helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free tests for the dwg_takeoff international takeoff helpers.
 
 These exercise the pure functions in ``app.modules.dwg_takeoff.intl``:
 canonical unit conversion (metric and imperial, exact Decimal, no float

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost control on a real schema: the figures, the axes, overrides, snapshots.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost control on a real schema: the figures, the axes, overrides, snapshots.
 
 One project carries every case the report has to tell apart: a line let with a
 change and part-certified, a line still at estimate, a line whose contract is

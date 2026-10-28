@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Module-name guard: every module name a user reads must be reachable by a translator.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Module-name guard: every module name a user reads must be reachable by a translator.
 
 `ModuleManifest` carries `display_name` and an optional `display_name_i18n`
 dict. The module registry page used to render `display_name` straight, so all

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Putting quotes on one basis before ranking them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Putting quotes on one basis before ranking them.
 
 No database and no clock: the comparison takes dictionaries and a supplied
 ``as_of``, so every case here is the arithmetic itself rather than a fixture of

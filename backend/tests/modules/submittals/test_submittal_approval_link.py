@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Feature 06 — submittal ↔ approval-routes wiring tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Feature 06 — submittal ↔ approval-routes wiring tests.
 
 Pins the connective tissue:
 

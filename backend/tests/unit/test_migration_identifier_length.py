@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every identifier a migration names must fit PostgreSQL's 63-character limit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every identifier a migration names must fit PostgreSQL's 63-character limit.
 
 PostgreSQL truncates identifiers at ``NAMEDATALEN - 1`` = 63 characters, and
 SQLAlchemy refuses to emit a name it knows would be silently cut, raising

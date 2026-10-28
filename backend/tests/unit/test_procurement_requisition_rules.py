@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - material requisition rules, line merging and buy-list sources.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - material requisition rules, line merging and buy-list sources.
 
 The pure checks, the rule classes with their messages in every shipped locale,
 and reachability: the ``procurement_requisition`` set is one the submit path

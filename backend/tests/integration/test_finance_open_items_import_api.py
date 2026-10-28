@@ -1,4 +1,4 @@
-"""Open receivables and payables carried over from another system, through the API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Open receivables and payables carried over from another system, through the API.
 
 A company switching over brings what customers still owe it and what it still
 owes its suppliers. The preview must match each row to a contact by tax number

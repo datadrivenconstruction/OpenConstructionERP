@@ -1,4 +1,4 @@
-"""A cost base's market and language survive a restart, a second worker and a return home.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A cost base's market and language survive a restart, a second worker and a return home.
 
 Which market a national base is priced into, and which language its text is in,
 used to live in a process-local dict and in the browser. These tests run against

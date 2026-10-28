@@ -1,4 +1,4 @@
-"""Unit tests for the BIM requirements exporters.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BIM requirements exporters.
 
 Includes round-trip tests: create requirements -> export -> re-import -> verify.
 """

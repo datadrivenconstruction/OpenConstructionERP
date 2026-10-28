@@ -1,4 +1,4 @@
-"""Unit tests for :class:`CostItemVectorAdapter` and helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`CostItemVectorAdapter` and helpers.
 
 Covers:
     * to_text format (description | classifier_codes | unit) per the design brief

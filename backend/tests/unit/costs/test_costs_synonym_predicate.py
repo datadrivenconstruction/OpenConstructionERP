@@ -1,4 +1,4 @@
-"""DB-free tests for the main cost-browser multilingual synonym predicate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free tests for the main cost-browser multilingual synonym predicate.
 
 ``synonym_text_predicate`` wires the shared construction-vocabulary matcher
 (:func:`app.modules.cost_explorer.search.match_terms`) into the primary cost

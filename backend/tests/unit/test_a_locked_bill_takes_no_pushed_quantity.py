@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A takeoff push does not write a quantity into a locked bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A takeoff push does not write a quantity into a locked bill.
 
 Every position writer in the BOQ module refuses a locked bill with 409
 (``BOQService._ensure_not_locked``). Linking a PDF measurement or a DWG

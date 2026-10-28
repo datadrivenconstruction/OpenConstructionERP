@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Statement of account: lines, running balance, brought and carried forward."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statement of account: lines, running balance, brought and carried forward."""
 
 from __future__ import annotations
 

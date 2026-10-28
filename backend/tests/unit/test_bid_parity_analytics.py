@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-free unit tests for line-level bid parity and fairness analytics.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-free unit tests for line-level bid parity and fairness analytics.
 
 Exercises the pure ``compute_bid_parity_analytics`` helper over hand-built
 leveling matrices (the exact shape ``leveling_matrix`` emits): line

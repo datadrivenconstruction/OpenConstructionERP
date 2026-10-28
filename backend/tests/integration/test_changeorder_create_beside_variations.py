@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Creating a change order on a project that already holds variation orders.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Creating a change order on a project that already holds variation orders.
 
 A standalone change order raised next to active variation orders gets a
 warning written into its metadata after the insert. That second write is

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The work calendar reconciler, against the cohorts it has to tell apart.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The work calendar reconciler, against the cohorts it has to tell apart.
 
 The repair delivers calendars an install was seeded too early to receive, and
 the whole of its safety is in one distinction: a country with no calendar

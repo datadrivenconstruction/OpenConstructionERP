@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the EAC v2 rule executor (EAC-1.4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the EAC v2 rule executor (EAC-1.4).
 
 Covers selector matching, predicate evaluation, attribute resolution,
 and the three implemented output modes (``boolean``, ``issue``,

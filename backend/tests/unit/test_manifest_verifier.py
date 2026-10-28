@@ -1,4 +1,4 @@
-"""Signed-manifest verifier — Audit A1 regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Signed-manifest verifier — Audit A1 regression suite.
 
 These tests pin the integrity guarantees of the manifest verifier:
 

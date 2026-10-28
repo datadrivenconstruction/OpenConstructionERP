@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A generated PDF can print Chinese, and printing it changes nothing else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A generated PDF can print Chinese, and printing it changes nothing else.
 
 The bundled DejaVu faces have no Han glyphs at all - not a thin subset, none -
 so until now every Chinese string in every generated PDF came out as boxes.

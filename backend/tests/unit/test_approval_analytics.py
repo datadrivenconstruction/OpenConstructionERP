@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure approval-cycle aggregate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure approval-cycle aggregate.
 
 Mirrors ``test_approval_timeline.py``: fixed clock, ``InstanceInput``s built by
 hand, no DB. Every test pins one rule of ``analytics.aggregate`` so a naive

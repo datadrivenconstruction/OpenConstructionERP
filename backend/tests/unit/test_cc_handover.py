@@ -1,4 +1,4 @@
-"""Construction-control Pillar 4 (handover) schema + pure-logic tests (no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 4 (handover) schema + pure-logic tests (no DB).
 
 Pins the handover discriminators (completion regime, completion type), the regime ->
 certificate-title mapping, the create/issue/override schema validation, and the SHA-256

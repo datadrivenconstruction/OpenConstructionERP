@@ -1,4 +1,4 @@
-"""PG: a search does not offer an asbestos item ahead of an ordinary one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a search does not offer an asbestos item ahead of an ordinary one.
 
 Searching the cost database for "frame walls" returned a wall clad in
 chrysotile (asbestos) cement sheets as a top hit. Such items stay in the data,

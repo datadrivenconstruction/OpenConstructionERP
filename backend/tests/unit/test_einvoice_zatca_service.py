@@ -1,4 +1,4 @@
-"""ZATCA service tests: the chain, onboarding, and a document's whole way through the clearance module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ZATCA service tests: the chain, onboarding, and a document's whole way through the clearance module.
 
 Runs against the shared PostgreSQL unit database with per-test transaction isolation, like
 ``test_einvoice_clearance_module.py``. ZATCA is a fake behind ``httpx.MockTransport``: it reads the CSR it

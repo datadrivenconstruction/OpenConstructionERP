@@ -1,4 +1,4 @@
-"""Locale-tolerant numeric handling in the core validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale-tolerant numeric handling in the core validation rules.
 
 Covers the keystone i18n-data-layer fixes:
 

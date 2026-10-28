@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How long a country makes a business keep its records, and in which language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How long a country makes a business keep its records, and in which language.
 
 Saudi Arabia is the first country in the table: VAT records six years from the
 end of the tax period, capital asset records for the adjustment period plus

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""API-level regression tests for the production-norm library (issue #442).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠API-level regression tests for the production-norm library (issue #442).
 
 Two faults, both reachable from a plain request body.
 

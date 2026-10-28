@@ -1,4 +1,4 @@
-"""Wave V_REPORTING — backend invariants the new history panel relies on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wave V_REPORTING — backend invariants the new history panel relies on.
 
 The frontend ``<GeneratedReportsHistory>`` hits
 ``GET /api/v1/reporting/reports/?project_id=X&limit=10`` and renders

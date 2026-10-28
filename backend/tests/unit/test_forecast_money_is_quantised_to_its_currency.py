@@ -1,4 +1,4 @@
-"""Forecast money is rounded to the currency it is denominated in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Forecast money is rounded to the currency it is denominated in.
 
 Two surfaces used to round an amount with a quantum that never looked at the
 currency, which is the defect ``app.core.money.money_quantum`` exists to end:

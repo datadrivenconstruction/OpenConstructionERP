@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A French contract's retention follows the law of its works, public or private.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A French contract's retention follows the law of its works, public or private.
 
 The French row of the contract defaults cited loi n° 71-584 for the rate, the
 ceiling and the release of every French contract. That law governs private

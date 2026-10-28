@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Listener setup cannot silently disable requested tenant enforcement."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Listener setup cannot silently disable requested tenant enforcement."""
 
 import os
 import secrets

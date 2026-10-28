@@ -1,4 +1,4 @@
-"""Gap D module tests: ``CostModelService.set_overrun_alert_threshold``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap D module tests: ``CostModelService.set_overrun_alert_threshold``.
 
 Exercised directly against a real PostgreSQL session wrapped in a per-test
 transaction that is rolled back on teardown (canonical ``transactional_session``).

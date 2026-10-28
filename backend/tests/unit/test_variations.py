@@ -1,4 +1,4 @@
-"""Unit tests for the Variations module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Variations module.
 
 Covers pure helpers, state machines, service transitions, repository
 basics, conversion flow, and permission registration. Repositories and

@@ -1,4 +1,4 @@
-"""Unit tests for the digital handover / closeout-package assembly (item #25).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the digital handover / closeout-package assembly (item #25).
 
 Targets the pure helpers in :mod:`app.modules.property_dev.service`:
 

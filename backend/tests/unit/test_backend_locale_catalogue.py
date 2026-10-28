@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Catalogue guard for backend/locales: the list and the files must agree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalogue guard for backend/locales: the list and the files must agree.
 
 Two lists decide what a backend locale is. ``SUPPORTED_LOCALES`` in
 app/core/i18n.py is what every caller gates on - the Accept-Language

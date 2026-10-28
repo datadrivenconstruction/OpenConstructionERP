@@ -1,4 +1,4 @@
-"""Desktop first-run + bootstrap flow.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Desktop first-run + bootstrap flow.
 
 Covers the backend half of the desktop first-run contract:
 

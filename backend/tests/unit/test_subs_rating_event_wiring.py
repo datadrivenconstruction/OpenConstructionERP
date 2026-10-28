@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic tests for the subcontractor rating event wiring (TOP-30 #20).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic tests for the subcontractor rating event wiring (TOP-30 #20).
 
 These cover the parts of ``subcontractors/events.py`` that do not need a
 database:

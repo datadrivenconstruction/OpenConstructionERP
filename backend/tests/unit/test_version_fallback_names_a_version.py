@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The version the CLI prints has to be a version, and it has to be this tree's.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The version the CLI prints has to be a version, and it has to be this tree's.
 
 ``_resolve_version`` reads the ``Settings`` field first and falls back to
 ``importlib.metadata`` when that raises. It was the other way round until

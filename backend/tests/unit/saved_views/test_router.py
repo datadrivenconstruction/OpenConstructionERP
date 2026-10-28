@@ -1,4 +1,4 @@
-"""Router surface and permission gates (structural, no full app boot).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Router surface and permission gates (structural, no full app boot).
 
 The full TestClient path is flaky on Windows (the documented loop artifact), so
 these tests inspect the assembled APIRouter directly: that the ten documented

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The shipped Türkiye rows, checked for form and provenance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The shipped Türkiye rows, checked for form and provenance.
 
 These tests hold for a table of any size, including an empty one. They never
 state what a rate should be: a test that repeats the number proves only that

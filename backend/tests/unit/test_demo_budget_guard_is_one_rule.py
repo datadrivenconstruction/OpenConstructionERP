@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Keep the budget re-seed suite honest about the guard it claims to describe.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keep the budget re-seed suite honest about the guard it claims to describe.
 
 ``tests/pg/test_demo_budget_reseed_idempotent.py`` cannot call the seeder's
 budget guard: it sits in the middle of an install routine that writes every

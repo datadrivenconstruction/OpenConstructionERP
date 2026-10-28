@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""OOM hardening for the documents photo upload path.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OOM hardening for the documents photo upload path.
 
 A raster photo's PIXEL count, not its byte size, is what OOMs the decoder: a
 few-MB file can declare ~150 MP and expand to hundreds of MB of RGB on decode,

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the v3-P9 :func:`confidence_band_for` derivation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the v3-P9 :func:`confidence_band_for` derivation.
 
 Per MAPPING_PROCESS.md v3 §6.4 the confidence band is no longer a pure
 score threshold — it factors in:

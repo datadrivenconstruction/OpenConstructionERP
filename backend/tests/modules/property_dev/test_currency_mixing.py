@@ -1,4 +1,4 @@
-"""Mixed-currency money in the sales kanban and the development P&L.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Mixed-currency money in the sales kanban and the development P&L.
 
 Two defects of one family, both fixed by folding money per ISO currency
 before it becomes a headline figure:

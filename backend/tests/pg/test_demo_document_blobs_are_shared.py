@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Demo document bytes are stored once per install and outlive a sibling deletion.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo document bytes are stored once per install and outlive a sibling deletion.
 
 Every demo project is handed the same native CAD sources, and the seeder used to
 write them into a folder per project. One eighteen megabyte coordinated model was

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The shipped Regensburg story files resolve through the same pure merge functions as the module override tests."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The shipped Regensburg story files resolve through the same pure merge functions as the module override tests."""
 
 from __future__ import annotations
 

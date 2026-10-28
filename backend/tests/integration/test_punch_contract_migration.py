@@ -1,4 +1,4 @@
-"""The optional contract link upgrades legacy rows without assigning their money."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The optional contract link upgrades legacy rows without assigning their money."""
 
 import importlib.util
 import uuid

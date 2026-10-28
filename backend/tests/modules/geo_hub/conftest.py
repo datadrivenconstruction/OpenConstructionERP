@@ -1,4 +1,4 @@
-"""Shared fixtures for the Geo Hub raster-overlay test suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared fixtures for the Geo Hub raster-overlay test suite.
 
 The engine is bound to the shared PostgreSQL cluster by ``tests/conftest.py``
 before any ``from app...`` import runs, so these fixtures operate against that

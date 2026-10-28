@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Decimal precision pin for ``TakeoffMeasurement`` quantity columns.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Decimal precision pin for ``TakeoffMeasurement`` quantity columns.
 
 Round-6 audit (2026-05-22) flagged ``measurement_value`` + ``depth`` +
 ``volume`` + ``perimeter`` on ``oe_takeoff_measurement`` as ``Float``

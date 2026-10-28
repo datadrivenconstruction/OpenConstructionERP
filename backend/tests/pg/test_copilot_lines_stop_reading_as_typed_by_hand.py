@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A BOQ line the copilot wrote before 16.3.0 stops claiming a person typed it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A BOQ line the copilot wrote before 16.3.0 stops claiming a person typed it.
 
 The old write path left ``source="manual"`` on every copilot edit. The line's
 copilot thread still records each proposal with its status and confidence, and

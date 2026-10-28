@@ -1,4 +1,4 @@
-"""Performance contract for the BIM Hub model list endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Performance contract for the BIM Hub model list endpoint.
 
 The list endpoint used to issue an ``asyncio.gather`` of
 ``compute_artifact_size_bytes`` + ``has_original_cad`` + ``find_geometry_key``

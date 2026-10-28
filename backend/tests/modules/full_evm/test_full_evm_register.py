@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database-backed tests for the Full EVM baseline and measurement register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-backed tests for the Full EVM baseline and measurement register.
 
 Driven against a PostgreSQL session inside an outer transaction that is rolled
 back on teardown, so every test starts from an empty but fully schema-loaded

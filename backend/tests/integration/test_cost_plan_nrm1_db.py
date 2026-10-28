@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed tests for the NRM 1 cost plan.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed tests for the NRM 1 cost plan.
 
 The plan is a regrouping of a bill, so the tests that matter compare it with the
 bill as the rest of the platform reads it: its direct cost and grand total must

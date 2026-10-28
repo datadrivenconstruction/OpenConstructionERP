@@ -1,4 +1,4 @@
-"""Tests for SecurityHeadersMiddleware.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for SecurityHeadersMiddleware.
 
 We pin two things:
   1. The middleware actually emits the headers we claim it does (the

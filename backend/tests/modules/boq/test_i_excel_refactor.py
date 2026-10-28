@@ -1,4 +1,4 @@
-"""Epic I3 — Excel/CSV importer regression tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I3 — Excel/CSV importer regression tests.
 
 Pins that the refactored ``ExcelImporter`` still handles the canonical
 column-alias lookup, locale-tolerant numeric parsing, section-row

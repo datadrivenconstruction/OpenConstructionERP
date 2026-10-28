@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The register and record forms render in every language they are offered in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The register and record forms render in every language they are offered in.
 
 ``test_register_documents_speak_every_language.py`` pins the catalogues. This
 file renders the documents themselves, with the rows of the Turkish pilot

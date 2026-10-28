@@ -1,4 +1,4 @@
-"""Tests for Cost item Pydantic schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for Cost item Pydantic schemas.
 
 Validates CostItemCreate, CostItemUpdate, and CostSearchQuery
 with boundary conditions and constraint enforcement. No database required.

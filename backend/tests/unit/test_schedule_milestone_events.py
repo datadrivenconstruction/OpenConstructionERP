@@ -1,4 +1,4 @@
-"""What counts as a milestone and as complete, for the milestone announcement.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What counts as a milestone and as complete, for the milestone announcement.
 
 The database half, where the transitions publish, lives in
 tests/integration/test_schedule_milestone_events.py.

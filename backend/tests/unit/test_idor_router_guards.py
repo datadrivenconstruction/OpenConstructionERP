@@ -1,4 +1,4 @@
-"""IDOR (Insecure Direct Object Reference) anti-regression, v2.6.43+.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠IDOR (Insecure Direct Object Reference) anti-regression, v2.6.43+.
 
 Pins the router-level ``verify_project_access`` calls in the single-resource
 GET / PATCH / DELETE handlers across both sweeps:

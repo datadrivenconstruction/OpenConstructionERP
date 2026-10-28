@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Geo Hub — Round-7 security audit (non-raster surface).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub — Round-7 security audit (non-raster surface).
 
 Round 6 (in v4.6.0) already hardened the raster-overlay endpoints —
 those tests live in ``tests/modules/geo_hub/test_overlay_*.py``. This

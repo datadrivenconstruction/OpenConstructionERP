@@ -1,4 +1,4 @@
-"""International robustness tests for Bid Management comparison helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠International robustness tests for Bid Management comparison helpers.
 
 Covers the additive, database-free helpers that make bid comparison safe and
 clear for a worldwide audience:

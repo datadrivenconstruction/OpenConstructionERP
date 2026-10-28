@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The header words each market's own bills are written in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The header words each market's own bills are written in.
 
 The header table knew one word per column for most languages: "prezzo" but
 not "Prezzo unitario", "precio" but not "Precio unitario", "наименование" but

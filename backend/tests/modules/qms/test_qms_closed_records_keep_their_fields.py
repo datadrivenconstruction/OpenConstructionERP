@@ -1,4 +1,4 @@
-"""A closed audit and an ITP plan past active keep what they recorded.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A closed audit and an ITP plan past active keep what they recorded.
 
 Both records already refuse the neighbouring writes: ``add_finding`` refuses a
 closed audit, and ``add_itp_item`` / ``link_itp_item_to_spec`` refuse a plan

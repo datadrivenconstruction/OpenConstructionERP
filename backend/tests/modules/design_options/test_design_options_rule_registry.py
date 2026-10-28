@@ -1,4 +1,4 @@
-"""Positive control: the design_options rule set is really registered.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Positive control: the design_options rule set is really registered.
 
 Every other validation test in this suite is only meaningful when the six rules
 are in the process-global registry. When they are not, the engine resolves

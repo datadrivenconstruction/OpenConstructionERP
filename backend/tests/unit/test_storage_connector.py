@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure storage-connector framework (roadmap item #26).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure storage-connector framework (roadmap item #26).
 
 No DB / network -- exercises only the IO-free normalizer, the in-memory
 adapter and the deterministic sync-plan reconciler. Runs on Python 3.11.

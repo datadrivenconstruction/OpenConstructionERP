@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`app.modules.property_dev.tax_engine`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.modules.property_dev.tax_engine`.
 
 Pure-function coverage — no DB, no HTTP. Each test pins one of the
 edge cases enumerated in the task brief: UK SDLT bands + first-home +

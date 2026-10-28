@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the schedule real-time guarded-update surface (T3.4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the schedule real-time guarded-update surface (T3.4).
 
 Covers the optimistic-concurrency contract end to end against PostgreSQL:
 

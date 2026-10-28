@@ -1,4 +1,4 @@
-"""A property document punctuates an amount the way the locale it is issued in does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A property document punctuates an amount the way the locale it is issued in does.
 
 Digit grouping is not three-by-three everywhere, and the renderer behind every
 contract, receipt and certificate the property module issues assumed it was.

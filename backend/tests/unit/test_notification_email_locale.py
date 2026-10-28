@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A notification e-mail is written in its recipient's language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A notification e-mail is written in its recipient's language.
 
 The deadline e-mail used to be English for everybody: the dispatcher loaded
 the user, kept the address and the name, and threw the language away. A

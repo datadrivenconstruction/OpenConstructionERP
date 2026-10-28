@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Property search "=" / "!=" with a number read in the user's convention.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property search "=" / "!=" with a number read in the user's convention.
 
 ``=`` matches the text, or the number when the value reads as one. The
 server read the typed text as a number itself, dot-decimal, so an Italian

@@ -1,4 +1,4 @@
-"""Unit tests for ``BIMHubService.get_model_schema`` (RFC 24).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``BIMHubService.get_model_schema`` (RFC 24).
 
 The endpoint feeds the quantity-rule editor combobox options from the
 selected BIM model. Every scenario below targets a promise made in the RFC:

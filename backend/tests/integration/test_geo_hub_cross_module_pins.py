@@ -1,4 +1,4 @@
-"""Geo Hub cross-module pin layers — HSE incidents, Punchlist items,
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub cross-module pin layers — HSE incidents, Punchlist items,
 Daily Diary photos.
 
 Runs on the conftest-provisioned PostgreSQL engine (bound before any

@@ -1,4 +1,4 @@
-"""The planning week may extend a country's week; it may never rest a working day.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The planning week may extend a country's week; it may never rest a working day.
 
 Two structures in this product answer questions about a working week, and they
 answer *different* questions:

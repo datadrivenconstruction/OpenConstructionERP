@@ -1,4 +1,4 @@
-"""The decision-impact engine and the service must agree on what is committed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The decision-impact engine and the service must agree on what is committed.
 
 ``decision_impact`` is deliberately a pure module: no ORM, no ``app.*`` imports,
 stdlib and ``Decimal`` only. The price of that is a duplicated copy of the

@@ -1,4 +1,4 @@
-"""A passed inspection is closure evidence, so it makes a built closeout package stale.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A passed inspection is closure evidence, so it makes a built closeout package stale.
 
 The closeout module clears a project's built package (and drops ``ready`` or
 ``issued`` back to ``in_progress``) whenever closure evidence changes, so the

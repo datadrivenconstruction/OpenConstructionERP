@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deleting a CRM lead, and the records that must stop it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deleting a CRM lead, and the records that must stop it.
 
 ``DELETE /v1/crm/leads/{id}`` has always existed and has always been a raw
 delete behind a 404 check. Two things hang off a lead, and both are destroyed

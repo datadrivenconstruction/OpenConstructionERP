@@ -1,4 +1,4 @@
-"""The daily site report prints in Turkish, and no language can be half there.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The daily site report prints in Turkish, and no language can be half there.
 
 Two things are pinned.
 

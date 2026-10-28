@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A contacts import must not quietly refile a party as something else.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A contacts import must not quietly refile a party as something else.
 
 The row loop of the file import rewrote any contact_type it did not recognise
 to supplier and said nothing about it, so a file naming main contractors

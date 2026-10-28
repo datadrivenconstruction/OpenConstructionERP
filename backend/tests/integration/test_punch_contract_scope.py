@@ -1,4 +1,4 @@
-"""Explicit punch contract links are validated and never inferred from a project."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Explicit punch contract links are validated and never inferred from a project."""
 
 import uuid
 from contextlib import asynccontextmanager

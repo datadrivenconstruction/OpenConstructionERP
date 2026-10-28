@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shipped catalogue labels resolve to text, governance gate names are authored, and a locale a module bundle
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shipped catalogue labels resolve to text, governance gate names are authored, and a locale a module bundle
 does not ship falls back to English without a warning."""
 
 from __future__ import annotations

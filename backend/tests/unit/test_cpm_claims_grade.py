@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the claims-grade CPM extensions (T1.2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the claims-grade CPM extensions (T1.2).
 
 Pure-Python, no DB - every function under test post-processes the output of
 ``compute_cpm`` (plus the network adjacency) and imports nothing beyond the

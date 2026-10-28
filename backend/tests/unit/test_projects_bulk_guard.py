@@ -1,4 +1,4 @@
-"""Bulk-guard + N+1 contract for ``ProjectService._generate_project_code``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bulk-guard + N+1 contract for ``ProjectService._generate_project_code``.
 
 The generator runs inside ``create_project`` and is invoked once per
 new project. It opens with a stale-reservation prune that USED TO call

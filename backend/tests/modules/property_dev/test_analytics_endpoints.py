@@ -1,4 +1,4 @@
-"""Tests for the v3124 sales-analytics endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the v3124 sales-analytics endpoints.
 
 Coverage matrix per endpoint:
 - IDOR — cross-tenant scoping (random + cross-tenant dev_id → 404 or

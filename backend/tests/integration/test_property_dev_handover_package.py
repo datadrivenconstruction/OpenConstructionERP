@@ -1,4 +1,4 @@
-"""Integration tests for the handover closeout package + completion gate (item #25).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the handover closeout package + completion gate (item #25).
 
 Exercises end-to-end against the in-process ASGI app:
 

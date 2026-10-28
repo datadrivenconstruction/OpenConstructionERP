@@ -1,4 +1,4 @@
-"""Embedded-PostgreSQL runtime helper: boot -> set URLs -> connect -> shutdown.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Embedded-PostgreSQL runtime helper: boot -> set URLs -> connect -> shutdown.
 
 Exercises app.core.embedded_pg directly (the helper the CLI wires into
 _setup_env). Gated to the PG lane like the rest of tests/pg.

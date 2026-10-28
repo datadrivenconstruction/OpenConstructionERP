@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Baseline tests for the ``clash_ai_triage`` module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Baseline tests for the ``clash_ai_triage`` module.
 
 This module carries real LLM cost — these tests therefore NEVER make a
 network call. ``call_ai`` is stubbed at the import boundary inside

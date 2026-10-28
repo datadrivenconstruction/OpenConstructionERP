@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The headers of a regional Italian price list map without a manual step."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The headers of a regional Italian price list map without a manual step."""
 
 import pytest
 

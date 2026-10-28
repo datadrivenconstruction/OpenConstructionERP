@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The performance-index pass must not index a column a table-level unique already leads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The performance-index pass must not index a column a table-level unique already leads.
 
 ``pg_optimizations`` adds a btree index on every foreign-key column that is not
 already the left-most column of an index. It counted model ``Index`` objects

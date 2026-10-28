@@ -1,4 +1,4 @@
-"""Integration tests for admin-initiated account deletion (issue #272).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for admin-initiated account deletion (issue #272).
 
 Until now an administrator could only deactivate an account; the row, and its
 email, stayed on the books. ``DELETE /users/{id}`` lets an admin erase another

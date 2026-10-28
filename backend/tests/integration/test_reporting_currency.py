@@ -1,4 +1,4 @@
-"""Wave 23 — Reporting currency parameterisation integration tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wave 23 — Reporting currency parameterisation integration tests.
 
 Verifies that the ``POST /reporting/generate/`` endpoint:
 

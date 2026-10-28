@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service rules exercised against in-memory repositories.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service rules exercised against in-memory repositories.
 
 The ORM objects here are real and detached: no session, no database, no HTTP
 app. That is enough to cover the decisions this layer owns - what a late quote

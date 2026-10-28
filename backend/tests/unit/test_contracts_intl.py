@@ -1,4 +1,4 @@
-"""Unit tests for the international contract money and date helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international contract money and date helpers.
 
 Database-free: everything under test in ``app.modules.contracts.intl`` is pure
 and stdlib-only, so these tests need no session, app, or config. They pin the

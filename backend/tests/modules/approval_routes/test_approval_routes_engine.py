@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level tests for the approval-routes engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level tests for the approval-routes engine.
 
 Coverage:
     * Happy path: 3-step route, 2 user-pinned approvers, all approve →

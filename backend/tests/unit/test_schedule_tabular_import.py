@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the spreadsheet schedule import parser (pure, no database).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the spreadsheet schedule import parser (pure, no database).
 
 Covers header recognition in ten languages, the day/month order of text dates,
 duration and predecessor grammar, outline sources, limits, CSV dialects, .xlsx

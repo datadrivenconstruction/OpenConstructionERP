@@ -1,4 +1,4 @@
-"""Gap D module tests: ``CostOverrunAlertService.check_and_alert`` + subscriber.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap D module tests: ``CostOverrunAlertService.check_and_alert`` + subscriber.
 
 The alerting logic is the single sink the cost-overrun subscriber calls when a
 budget line changes. It is exercised directly (single PostgreSQL session, rolled

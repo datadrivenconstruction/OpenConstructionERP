@@ -1,4 +1,4 @@
-"""Site logistics plan: the wiring the review of 2026-10-12 found missing or wrong, pinned without a database."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site logistics plan: the wiring the review of 2026-10-12 found missing or wrong, pinned without a database."""
 
 from __future__ import annotations
 

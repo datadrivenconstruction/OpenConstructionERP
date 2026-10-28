@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The BI list endpoints honour the project in the address bar.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The BI list endpoints honour the project in the address bar.
 
 ``/projects/{id}/bi-dashboards`` and ``/bi-dashboards`` used to render the
 same page from the same data: the list endpoints took no project at all. This

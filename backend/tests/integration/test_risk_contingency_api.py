@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""HTTP surface of the risk-based contingency routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP surface of the risk-based contingency routes.
 
 * ``GET    /api/v1/risk/projects/{pid}/contingency``
 * ``POST   /api/v1/risk/projects/{pid}/contingency/drawdowns/{risk_id}``

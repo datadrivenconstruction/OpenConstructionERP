@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The progress billing figures in the national packs say where they came from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The progress billing figures in the national packs say where they came from.
 
 ``us_pack`` and ``dach_pack`` carry a ``progress_billing`` block: retention
 tiers and caps, the events that release retention and the documents each one

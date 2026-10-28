@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Signing is decided by what the release carries, not by how the run ended.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Signing is decided by what the release carries, not by how the run ended.
 
 v15.0.0 was published with no signature, no certificate, no SHA256SUMS and no
 SBOM. Nothing in the signing workflow failed; nothing in it ran. Its first job

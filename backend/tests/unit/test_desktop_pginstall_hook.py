@@ -1,4 +1,4 @@
-"""The PyInstaller hook that bundles the embedded PostgreSQL tree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The PyInstaller hook that bundles the embedded PostgreSQL tree.
 
 Issue #419: on Ubuntu based distributions the desktop app stopped at "Starting
 the local database" because initdb could not load ``$libdir/dict_snowball``.

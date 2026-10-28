@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An imported price list can be indexed for CAD-BIM Match.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An imported price list can be indexed for CAD-BIM Match.
 
 Reported by a user with an Italian regional prezzario: Match only ever searched
 the published CWICR collections, so an imported catalogue never appeared. The

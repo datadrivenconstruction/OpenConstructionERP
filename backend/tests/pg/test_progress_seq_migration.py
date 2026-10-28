@@ -1,4 +1,4 @@
-"""PG: migration ``v3258_progress_entry_seq`` actually runs, and backfills in order.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: migration ``v3258_progress_entry_seq`` actually runs, and backfills in order.
 
 Every "latest wins" query in the progress module now leads with ``seq``, so a
 migration that fails, or that numbers historical rows in the wrong order, is not

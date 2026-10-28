@@ -1,4 +1,4 @@
-"""End-to-end proof that the three new rule sets actually run on a write.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end proof that the three new rule sets actually run on a write.
 
 The per-module rule tests next to this file drive ``validation_engine`` directly
 and prove the rules are correct and reachable. They cannot prove the services

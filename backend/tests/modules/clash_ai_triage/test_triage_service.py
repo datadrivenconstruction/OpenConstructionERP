@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for :class:`ClashTriageService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ClashTriageService`.
 
 The LLM client is mocked (``app.modules.clash_ai_triage.service.call_ai``)
 so the suite is hermetic and fast. Per ``feedback_test_isolation.md``

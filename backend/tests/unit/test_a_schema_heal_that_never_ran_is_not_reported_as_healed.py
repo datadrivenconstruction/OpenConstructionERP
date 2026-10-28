@@ -1,4 +1,4 @@
-"""A verdict about work that never happened is not "it went fine".
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A verdict about work that never happened is not "it went fine".
 
 ``/api/health`` reports ``schema_heal_failed``, and it computed it as a plain
 two-valued boolean: false unless a failure was recorded. The heal that would

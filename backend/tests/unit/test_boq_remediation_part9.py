@@ -1,4 +1,4 @@
-"""Unit tests pinning the Part-9 BOQ remediation contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests pinning the Part-9 BOQ remediation contract.
 
 Covers the pure-function fixes (no DB session required):
 

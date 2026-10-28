@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Database-free unit tests for the preliminaries pricing math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free unit tests for the preliminaries pricing math.
 
 These pin the pure behaviour the module exists for, with no database, session or
 fixtures:

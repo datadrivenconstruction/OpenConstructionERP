@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Round-trip test for the Full EVM register migration.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-trip test for the Full EVM register migration.
 
 A migration nobody has run is a guess. This drives the real ``upgrade()`` and
 ``downgrade()`` of ``v3264_full_evm_baseline_register`` against a throwaway

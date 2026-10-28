@@ -1,4 +1,4 @@
-"""Project setup-wizard scoring engine — pure unit tests (Slice 1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project setup-wizard scoring engine — pure unit tests (Slice 1).
 
 No DB / no app fixtures: ``profile_presets`` + ``profile_scoring`` are
 deterministic pure functions. Asserts every one of the 8 real presets

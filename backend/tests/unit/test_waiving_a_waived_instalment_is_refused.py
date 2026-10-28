@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Waiving an instalment that is already waived is a conflict, not a rewrite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Waiving an instalment that is already waived is a conflict, not a rewrite.
 
 ``_ensure_transition`` returns early when the target equals the current status,
 so a second waive used to fall through, overwrite ``waiver_reason`` and

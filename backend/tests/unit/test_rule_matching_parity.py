@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The quantity-rule sandbox and the server apply select the same elements.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The quantity-rule sandbox and the server apply select the same elements.
 
 The rules page runs a draft rule in the browser ("Test this rule",
 ``ruleSandbox.ts``) and then on the server (Preview / Apply,

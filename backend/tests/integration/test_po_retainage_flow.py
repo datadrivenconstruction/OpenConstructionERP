@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DB-backed module tests for PO retainage + reconciliation report (Gap F).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DB-backed module tests for PO retainage + reconciliation report (Gap F).
 
 Runs against PostgreSQL via the canonical ``transactional_session`` helper:
 each test gets a session inside an outer transaction that is rolled back on

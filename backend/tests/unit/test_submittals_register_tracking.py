@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The figures the submittal register derives, and what a review writes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The figures the submittal register derives, and what a review writes.
 
 No database: ``tracking`` is standard library only and the clock is an
 argument, so every date here is pinned and none of this rots.

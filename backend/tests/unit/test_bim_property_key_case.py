@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A property filter names a Revit parameter the way Revit spells it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A property filter names a Revit parameter the way Revit spells it.
 
 The DDC import lowercases every header (``parse_cad_excel``), so a canonical
 element carries ``{"phase created": "Progetto"}``. An estimator writing a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seeded German Nachtrag chain must be linked, dated and provably strong.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seeded German Nachtrag chain must be linked, dated and provably strong.
 
 The German showcase seeder writes a Mehrkostenanzeige -> Nachtragsangebot ->
 beauftragter Nachtrag chain plus the activity trail the claims-evidence

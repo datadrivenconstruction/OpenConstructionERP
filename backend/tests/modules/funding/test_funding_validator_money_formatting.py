@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""What the funding messages write as money, and what they must never.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the funding messages write as money, and what they must never.
 
 Two of this module's amounts already go through ``_fmt_money``. The three
 figures beside them are **rates**, and their templates glue the word

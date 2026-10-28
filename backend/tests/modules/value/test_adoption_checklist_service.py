@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the guided adoption checklist service (#22).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the guided adoption checklist service (#22).
 
 PostgreSQL, py3.12. Seeds one project's real first-value records - a BOQ, a
 takeoff measurement, an approval instance against a project route, a change

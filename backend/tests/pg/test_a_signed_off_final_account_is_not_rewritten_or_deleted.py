@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The final-account routes keep to the rule Close keeps.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The final-account routes keep to the rule Close keeps.
 
 ``PATCH /final-accounts/{id}`` wrote whatever the request sent over the
 account, figures and status alike, and ``DELETE`` removed it, whatever state

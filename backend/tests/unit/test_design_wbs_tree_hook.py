@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""WBS rules on writes made outside the design module: the pure tree check and the core hook.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠WBS rules on writes made outside the design module: the pure tree check and the core hook.
 
 The copy, restore and projects-router paths against a database are in
 ``tests/pg/test_design_wbs_paths_on_pg.py``.

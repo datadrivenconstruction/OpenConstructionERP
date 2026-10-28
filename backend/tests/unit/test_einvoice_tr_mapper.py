@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The mapping from plain invoice data to a UBL-TR document, and its dispatch.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The mapping from plain invoice data to a UBL-TR document, and its dispatch.
 
 Every party, tax number, rate and fraction here is invented. The tax figures
 are hand-built with the helpers of the writer's own tests; in production they

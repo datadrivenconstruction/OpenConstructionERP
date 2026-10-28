@@ -1,4 +1,4 @@
-"""The backend's version check obeys the same two switches as the launcher's.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The backend's version check obeys the same two switches as the launcher's.
 
 In the PG lane because that is the lane CI runs; it needs no database.
 """

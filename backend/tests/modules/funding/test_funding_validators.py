@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The five ways public funding is lost, and the rules that catch them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The five ways public funding is lost, and the rules that catch them.
 
 Each rule is exercised directly against a hand-built context rather than
 through the service, so the assertions are about the rule's own judgement and

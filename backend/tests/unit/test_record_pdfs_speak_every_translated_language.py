@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Issue #514 tails: the procurement and finance PDFs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #514 tails: the procurement and finance PDFs.
 
 Their strings used to sit in Python dictionaries with English, German and
 Russian only, so every other language printed English. They now come from the

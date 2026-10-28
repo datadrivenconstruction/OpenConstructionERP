@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The read side says which VAT rate is in force, and where it came from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The read side says which VAT rate is in force, and where it came from.
 
 ``compute_estimate`` substitutes the project's own rate for a stack's single
 tax line, and everything downstream of the computation reports the figure it

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Timeline validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Timeline validation rules.
 
 Each rule is checked twice: once on data that should trip it, and once on data
 that should not. A rule that only ever sees its own failure case cannot show

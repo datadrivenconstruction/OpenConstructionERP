@@ -1,6 +1,6 @@
 # OpenConstructionERP — DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Round-7 tests for the Progress tracking module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-7 tests for the Progress tracking module.
 
 Covers:
     1. percent_complete enforcement: must be in [0, 100]

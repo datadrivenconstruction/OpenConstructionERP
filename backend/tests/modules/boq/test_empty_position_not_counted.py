@@ -1,4 +1,4 @@
-"""A row nobody has typed into is not a line of the bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A row nobody has typed into is not a line of the bill.
 
 "Add Position" in the editor creates the row on the server immediately and
 opens its description cell, which is the behaviour the author built: the

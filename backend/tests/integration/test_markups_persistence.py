@@ -1,4 +1,4 @@
-"""Integration tests for the markups persistence + threaded comments wiring.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the markups persistence + threaded comments wiring.
 
 Covers the persistence promises shipped with v2.9.40:
 

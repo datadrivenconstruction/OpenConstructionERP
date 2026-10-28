@@ -1,4 +1,4 @@
-"""Service CRUD and run round-trips (DB-backed, CI-gated).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service CRUD and run round-trips (DB-backed, CI-gated).
 
 save -> get -> update -> delete; the unique-name-per-scope constraint; and an
 ad-hoc run that returns the seeded rows. Skipped automatically when no

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""SSRF policy for self-hosted AI provider endpoints (Ollama / vLLM).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠SSRF policy for self-hosted AI provider endpoints (Ollama / vLLM).
 
 Covers the GHSA-rq5j-mwq2-6558 hardening: a user-supplied AI base URL is
 fetched server-side, so it must never reach a link-local / cloud-metadata

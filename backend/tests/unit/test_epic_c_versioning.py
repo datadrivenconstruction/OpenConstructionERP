@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Epic C — Document Versioning Unification regression tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic C — Document Versioning Unification regression tests.
 
 Verifies the seven wiring points the design doc calls out:
 

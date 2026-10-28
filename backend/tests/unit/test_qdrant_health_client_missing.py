@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The health report says when nothing in the process can talk to the server.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The health report says when nothing in the process can talk to the server.
 
 A running vector database and a client library for it are two separate things,
 and the shipped containers and the desktop build have neither. Both install the

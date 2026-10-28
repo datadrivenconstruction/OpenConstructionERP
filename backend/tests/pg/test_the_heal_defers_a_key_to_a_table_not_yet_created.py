@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A foreign key from an existing table to a brand-new one must survive the upgrade boot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A foreign key from an existing table to a brand-new one must survive the upgrade boot.
 
 The boot heals existing tables (``postgres_auto_migrate``) BEFORE
 ``create_all`` builds the tables this release introduces. A model that adds a

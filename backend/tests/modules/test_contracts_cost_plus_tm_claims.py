@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost-plus and T&M claims bill their own period, and the cap counts all billing.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost-plus and T&M claims bill their own period, and the cap counts all billing.
 
 Two defects, one on each contract type without a schedule of values:
 

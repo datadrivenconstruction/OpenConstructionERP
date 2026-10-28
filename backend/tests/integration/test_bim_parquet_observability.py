@@ -1,4 +1,4 @@
-"""Integration tests for Parquet sidecar write observability (Task #155).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for Parquet sidecar write observability (Task #155).
 
 Covers the silent-failure path in
 ``_process_cad_in_background`` (``backend/app/modules/bim_hub/router.py``)

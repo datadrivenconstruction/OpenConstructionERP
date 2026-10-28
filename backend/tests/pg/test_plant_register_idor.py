@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read and change the plant register, over HTTP against PostgreSQL; plus the API contract (rule 19).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read and change the plant register, over HTTP against PostgreSQL; plus the API contract (rule 19).
 
 Identity is the variable under test: a stranger from another tenant, a project
 member reaching for another project's item, an editor who does not own the

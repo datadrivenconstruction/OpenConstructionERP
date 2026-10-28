@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A P6 export never says which code page it is in, so we have to be right anyway.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A P6 export never says which code page it is in, so we have to be right anyway.
 
 The defect these tests pin is not a crash. Decoding a cp1256 export as Latin-1
 raises nothing, logs nothing and stores every Arabic activity name as mojibake,

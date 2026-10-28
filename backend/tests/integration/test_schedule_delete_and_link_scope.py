@@ -1,4 +1,4 @@
-"""Integration: deleting schedules and activities, and the reach of a new link.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: deleting schedules and activities, and the reach of a new link.
 
 Against real PostgreSQL with foreign keys enforced:
 

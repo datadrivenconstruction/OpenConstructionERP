@@ -1,4 +1,4 @@
-"""Price list file parser (xlsx, SAP-style csv), import-row validation and the import routes."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Price list file parser (xlsx, SAP-style csv), import-row validation and the import routes."""
 
 from __future__ import annotations
 

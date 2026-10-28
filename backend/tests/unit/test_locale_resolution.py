@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Wires scripts/check_locale_resolution.py into the pytest run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wires scripts/check_locale_resolution.py into the pytest run.
 
 That script is a regression LOCK, not a bug report: the defect it guards is
 not live today and its own docstring says so and shows the measurement. This

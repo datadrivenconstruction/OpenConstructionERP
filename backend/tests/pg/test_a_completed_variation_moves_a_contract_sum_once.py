@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A completed variation moves the contract sum once, and never on a closed contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A completed variation moves the contract sum once, and never on a closed contract.
 
 ``variations.contract_sum.updated`` is published when a variation order
 completes against a contract. Exactly one subscriber owns the rollup into

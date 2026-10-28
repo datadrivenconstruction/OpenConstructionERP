@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The unified search must name a hit by something the searcher could have typed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The unified search must name a hit by something the searcher could have typed.
 
 The SQL track matches a row on one set of columns and titles it from a
 narrower one. Where a searched column is missing from the title chain, a row

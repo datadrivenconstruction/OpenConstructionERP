@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the Files CDE UI splice + W3/W10 hooks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the Files CDE UI splice + W3/W10 hooks.
 
 Covers the v3.12.0 Stream-E deliverables that the unit suites do not:
 

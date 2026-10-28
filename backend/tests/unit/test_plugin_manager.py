@@ -1,4 +1,4 @@
-"""Tests for the module marketplace plugin manager.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the module marketplace plugin manager.
 
 Covers the two formerly-stubbed paths:
     * ``_install_from_zipfile`` now parses the extracted manifest and returns a

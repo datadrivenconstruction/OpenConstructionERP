@@ -1,4 +1,4 @@
-"""Tests for the shared register and record form renderer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the shared register and record form renderer.
 
 A register is a contractual record that gets attached to a letter, so these
 tests pin what makes it one: the header says which project and when, the

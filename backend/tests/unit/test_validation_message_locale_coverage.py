@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Wires scripts/check_validation_message_locale_coverage.py into the pytest run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wires scripts/check_validation_message_locale_coverage.py into the pytest run.
 
 That script is the actual gate (it can be run by hand and prints its own
 report); this file is what makes it fire on every ordinary backend test run

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deleting a position takes the cost model budget line it generated with it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deleting a position takes the cost model budget line it generated with it.
 
 "Create budget" writes one cost model budget line per position. Deleting the
 whole bill already removes or detaches them; deleting a single position (or a

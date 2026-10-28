@@ -1,4 +1,4 @@
-"""Fixtures for defects-liability module tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fixtures for defects-liability module tests.
 
 Uses the fast transactional-session primitive from ``tests/_pg.py`` against
 the session PostgreSQL cluster. FK triggers are disabled so rows can be

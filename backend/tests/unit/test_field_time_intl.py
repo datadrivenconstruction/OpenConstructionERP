@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for the international / edge-case field-time engine additions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international / edge-case field-time engine additions.
 
 These exercise the timezone-safe worked-interval math, configurable rounding and
 overtime, week-start handling, per-worker overlap detection and the metadata

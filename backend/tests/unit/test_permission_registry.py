@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Taking a module's permissions back out of the registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Taking a module's permissions back out of the registry.
 
 Registering is what every module does at startup and it has always worked. The
 reverse direction only became reachable when modules started being installed

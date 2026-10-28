@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An estimate carries judgement, not only arithmetic - issue #453.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An estimate carries judgement, not only arithmetic - issue #453.
 
 Three measures had no home in the model. Each is here for a different reason
 and each fails in its own way if it is put in the wrong place:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service-level tests for the site-inventory link to the priced bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service-level tests for the site-inventory link to the priced bill.
 
 The pure arithmetic is pinned DB-free in
 :mod:`tests.unit.test_site_inventory_bill_link`. What is left to prove is the

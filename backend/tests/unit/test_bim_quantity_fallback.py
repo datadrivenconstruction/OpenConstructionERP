@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the BIM ingest quantity fallback (issue #347).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BIM ingest quantity fallback (issue #347).
 
 Pure functions, no database: recover canonical quantities from differently
 named columns, and as a last resort from the bounding box.

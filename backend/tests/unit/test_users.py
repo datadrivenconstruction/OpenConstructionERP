@@ -1,4 +1,4 @@
-"""Tests for user service utilities and schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for user service utilities and schemas.
 
 Tests cover password hashing, API key generation, JWT token creation,
 and Pydantic schema validation. No database required — the heavy ORM

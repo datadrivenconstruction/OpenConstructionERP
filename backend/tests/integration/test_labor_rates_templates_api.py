@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Regression test for POST /api/v1/labor-rates/templates/ returning a 500.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression test for POST /api/v1/labor-rates/templates/ returning a 500.
 
 A minimal, schema-valid create payload (just ``name`` and ``base_wage``) was
 observed to 500 on a live instance after passing validation - the template

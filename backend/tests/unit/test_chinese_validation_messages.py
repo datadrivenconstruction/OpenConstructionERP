@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Simplified Chinese resolves the full validation bundle without English fallback."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Simplified Chinese resolves the full validation bundle without English fallback."""
 
 from __future__ import annotations
 

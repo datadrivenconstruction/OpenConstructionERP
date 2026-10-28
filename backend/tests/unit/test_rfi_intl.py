@@ -1,4 +1,4 @@
-"""Unit tests for the RFI international / plain-language helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the RFI international / plain-language helpers.
 
 These tests are database-free: every function under test in
 :mod:`app.modules.rfi.intl` is pure, so the suite exercises the maths,

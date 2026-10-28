@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Auth gate on the in-app upgrade endpoint (GHSA-pc2c-6g89-xxcr).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Auth gate on the in-app upgrade endpoint (GHSA-pc2c-6g89-xxcr).
 
 POST /api/system/upgrade shells out to ``pip install --upgrade`` and used to run
 with NO authentication, so anyone who could reach the API could force a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No seeded record may hold a value its own module would refuse.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No seeded record may hold a value its own module would refuse.
 
 Four modules have now been caught doing exactly that: contacts on
 ``contact_type``, variations on its status vocabulary, safety on four fields at

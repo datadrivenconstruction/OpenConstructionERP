@@ -1,4 +1,4 @@
-"""Regression tests for IFC placement/bbox unit scaling (issue #53).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression tests for IFC placement/bbox unit scaling (issue #53).
 
 The IfcUnitAssignment parser already rescales IfcQuantity values into
 canonical SI metres (covered by ``test_ifc_unit_assignment.py``). This

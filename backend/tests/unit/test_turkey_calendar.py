@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Türkiye has a holiday calendar of its own, on the dates offices close.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Türkiye has a holiday calendar of its own, on the dates offices close.
 
 Until this file the engine had no Turkish table at all, so a Turkish project
 was planned on a Monday to Friday week with no public holidays, while the

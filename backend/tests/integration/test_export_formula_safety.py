@@ -1,4 +1,4 @@
-"""End-to-end CSV / Excel formula-injection regression tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end CSV / Excel formula-injection regression tests.
 
 Reproduces the BUG-CSV-INJECTION attack: a user who can edit a BOQ position
 (e.g. via the import-from-Excel endpoint, or a malicious tenant insider)

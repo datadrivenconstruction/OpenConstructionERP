@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bill priced as material plus labour reads its halves the way the file writes numbers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill priced as material plus labour reads its halves the way the file writes numbers.
 
 The importer decides once per file whether "1.250" or "1,250" groups thousands:
 the header language proposes it and one cell that can only be written the

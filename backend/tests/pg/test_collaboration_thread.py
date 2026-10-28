@@ -1,4 +1,4 @@
-"""PG regression: collaboration comment thread/list serialization (no MissingGreenlet).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG regression: collaboration comment thread/list serialization (no MissingGreenlet).
 
 ``CommentResponse.replies`` is a self-referential schema Pydantic serializes
 recursively. The model relationships are ``lazy="selectin"`` which pre-loads only

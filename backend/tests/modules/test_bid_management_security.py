@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction / OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bid Management module — Round-7 security audit regressions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bid Management module — Round-7 security audit regressions.
 
 Pins down the eight guarantees the R7 audit swept across the module:
 

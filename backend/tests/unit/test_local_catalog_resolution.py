@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Where the catalogue directory resolves, in an install as well as a checkout.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Where the catalogue directory resolves, in an install as well as a checkout.
 
 ``app/modules/catalog/router.py`` located the locally generated catalogue CSVs
 by counting five parent directories up from its own file. That reaches the repo

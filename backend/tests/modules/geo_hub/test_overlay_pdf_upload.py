@@ -1,4 +1,4 @@
-"""PDF upload: overlay is created, raster bytes are generated, and default
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PDF upload: overlay is created, raster bytes are generated, and default
 corners follow the project's own location: the persisted anchor bbox when
 one exists, and the address-derived coordinates when the project is located
 by address only (regression against the overlay landing on null island)."""

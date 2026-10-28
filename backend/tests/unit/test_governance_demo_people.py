@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The people who own the areas of the two filmed demo projects: file shape, names and mail addresses."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The people who own the areas of the two filmed demo projects: file shape, names and mail addresses."""
 
 from __future__ import annotations
 

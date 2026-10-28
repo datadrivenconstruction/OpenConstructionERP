@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A saved setting must be seen even when the clock did not move.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A saved setting must be seen even when the clock did not move.
 
 :mod:`app.core.pdf_appearance` and :mod:`app.core.app_branding` both keep a
 process-local cache of their parsed settings file so a PDF export does not

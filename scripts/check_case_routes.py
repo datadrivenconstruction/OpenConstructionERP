@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Case-route guard: every step of every shipped case must land on a real screen.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Case-route guard: every step of every shipped case must land on a real screen.
 
 A case is a guided walkthrough. Each step names the screen it happens on in its
 ``to`` field, and the reader clicks straight through to it. If that path has no

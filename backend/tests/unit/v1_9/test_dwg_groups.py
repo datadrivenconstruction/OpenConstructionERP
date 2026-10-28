@@ -1,4 +1,4 @@
-"""Unit tests for DWG entity group CRUD (RFC 11).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for DWG entity group CRUD (RFC 11).
 
 Scope:
     - Happy-path create: stores entity_ids + name, refuses empty lists.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the smart-issue lifecycle state machine (v41).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the smart-issue lifecycle state machine (v41).
 
 Pins the ``ClashIssue.status`` transitions driven by
 :meth:`ClashService.upsert_clash_with_signature` +

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo seed on PostgreSQL, on catalogues and governance models it must not assume.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seed on PostgreSQL, on catalogues and governance models it must not assume.
 
 A pack may pin delivery forms without the form the seed used to compare, and a
 project may have no frame document for the decision. The seed tells its story

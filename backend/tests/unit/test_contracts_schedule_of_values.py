@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The arithmetic a schedule of values has to close.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The arithmetic a schedule of values has to close.
 
 A schedule of values is a promise about money: these lines, at these rates,
 for these quantities, add up to what the contract is worth. Every assertion

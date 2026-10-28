@@ -1,4 +1,4 @@
-"""The access-control negatives for the teams module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The access-control negatives for the teams module.
 
 The invariant under test, stated once so every case below can be read against
 it: **no arrangement of teams, memberships or restrictions may show a user a

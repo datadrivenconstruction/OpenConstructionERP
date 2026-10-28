@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - the project cost position (committed, actual, invoiced, paid) and the PO link.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - the project cost position (committed, actual, invoiced, paid) and the PO link.
 
 ``build_cost_position`` is pure, so every rule its docstring states is pinned
 here without a database: the order and its invoice count once, a payment

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure tests for the NRM 1 elemental rollup.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure tests for the NRM 1 elemental rollup.
 
 The engine regroups a bill; it never invents or loses money. Every test that
 builds a plan therefore checks the one invariant a cost plan has to keep:

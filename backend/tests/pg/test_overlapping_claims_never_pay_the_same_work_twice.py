@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Two claims waiting for certification at once never pay the same work twice.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Two claims waiting for certification at once never pay the same work twice.
 
 G702 line 7 is what the earlier claims certified, and a claim's net due is
 worked out against it when the claim is generated. The net due is not worked

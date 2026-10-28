@@ -1,4 +1,4 @@
-"""Wave 8 (Tests) - RFI repository SQL coverage (real PostgreSQL).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Wave 8 (Tests) - RFI repository SQL coverage (real PostgreSQL).
 
 The in-memory stub repos the unit suites use cannot exercise the actual SQL in
 ``RFIRepository`` - the ``next_rfi_number`` MAX(cast(...)) aggregate with its

@@ -1,4 +1,4 @@
-"""Per-source coverage for the cross-module deadline register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-source coverage for the cross-module deadline register.
 
 ``tests/integration/test_deadlines_integration.py`` proves the register, the
 status filter, the project guard and the sweep. This file proves each individual

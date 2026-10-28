@@ -1,4 +1,4 @@
-"""Event-emission tests for the Tendering service (slice E).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Event-emission tests for the Tendering service (slice E).
 
 The tendering service had previously commented-out ``_safe_publish`` calls;
 slice E re-enables them and adds a missing ``tendering.package.created``

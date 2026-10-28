@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A module's subscribers must come back when its registrar runs on an emptied bus.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A module's subscribers must come back when its registrar runs on an emptied bus.
 
 Registrars used to guard themselves with a flag, either set on ``event_bus``
 (``setattr(event_bus, "_x_subscribers_registered", True)``) or held in a module

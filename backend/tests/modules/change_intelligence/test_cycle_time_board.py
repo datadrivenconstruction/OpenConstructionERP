@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the change cycle-time board (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the change cycle-time board (PostgreSQL, py3.12).
 
 Seeds change-family records directly and drives the service that feeds the pure
 :mod:`cycle_time` engine, then checks the per-party rollup, that closed records

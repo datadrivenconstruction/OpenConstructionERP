@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail the build if a competitor brand leaks in, or a named CAD tool loses its mark.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail the build if a competitor brand leaks in, or a named CAD tool loses its mark.
 
 Two rules live here and they are not the same rule.
 

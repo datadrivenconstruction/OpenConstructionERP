@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bid's figures stop changing once its tender package is awarded or closed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bid's figures stop changing once its tender package is awarded or closed.
 
 ``apply_winner`` copies the winning bid's unit rates into the BOQ and records
 the award against that bid. ``PATCH /bids/{id}`` could still rewrite the bid's

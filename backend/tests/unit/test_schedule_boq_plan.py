@@ -1,4 +1,4 @@
-"""Unit tests for the BOQ-to-schedule planner (:mod:`app.modules.schedule.boq_plan`).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BOQ-to-schedule planner (:mod:`app.modules.schedule.boq_plan`).
 
 The planner is pure: it turns the bill's tree into groups and work items, lays
 the work items out in crews, and fits the layout into a window. These tests pin

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Legal entities and branches against PostgreSQL: the invariants the service holds."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Legal entities and branches against PostgreSQL: the invariants the service holds."""
 
 from __future__ import annotations
 

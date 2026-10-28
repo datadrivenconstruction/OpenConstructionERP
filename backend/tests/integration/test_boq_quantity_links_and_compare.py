@@ -1,4 +1,4 @@
-"""Feature 1+2 — model→BOQ quantity links + line-level BOQ compare.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Feature 1+2 — model→BOQ quantity links + line-level BOQ compare.
 
 Covers end-to-end through the router:
 

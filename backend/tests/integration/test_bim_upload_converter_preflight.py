@@ -1,4 +1,4 @@
-"""Integration tests for the BIM upload converter preflight.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the BIM upload converter preflight.
 
 Covers:
     * Test A — ``.rvt`` upload with no converter installed → 202 with

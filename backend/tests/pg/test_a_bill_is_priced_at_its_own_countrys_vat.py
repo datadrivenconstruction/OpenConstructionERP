@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: a seeded bill charges its own country's VAT, not its region's.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a seeded bill charges its own country's VAT, not its region's.
 
 The defect
 ----------

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Catalogue kind ``plant_register``, the message bundle and the one-list grep tests (rules 1, 12, 20)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalogue kind ``plant_register``, the message bundle and the one-list grep tests (rules 1, 12, 20)."""
 
 from __future__ import annotations
 

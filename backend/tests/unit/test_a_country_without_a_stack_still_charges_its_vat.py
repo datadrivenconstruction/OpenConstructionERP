@@ -1,4 +1,4 @@
-"""A country priced on the neutral stack still gets its own VAT line.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country priced on the neutral stack still gets its own VAT line.
 
 Bulgaria and Mexico have no regional markup stack, so their bills are
 seeded with ``DEFAULT``, which carries no tax line. The tax seed knows each of

@@ -1,4 +1,4 @@
-"""Buyer self-service portal — spec-driven complementary test suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Buyer self-service portal — spec-driven complementary test suite.
 
 The sibling ``test_portal.py`` covers the 23-point endpoint contract:
 issue / verify / revoke / IDOR / KYC magic-byte / contact-agent / rate

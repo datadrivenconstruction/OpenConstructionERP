@@ -1,4 +1,4 @@
-"""Integration: /api/v1/uploads/local/{token} PUT endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: /api/v1/uploads/local/{token} PUT endpoint.
 
 Verifies the HMAC-signed direct PUT route consumes presigned tokens minted by
 :meth:`app.core.storage.LocalStorageBackend.presigned_put_url`.

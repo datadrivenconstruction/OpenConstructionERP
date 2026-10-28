@@ -1,4 +1,4 @@
-"""Tests for ISO 19650 CDE state machine."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for ISO 19650 CDE state machine."""
 
 import pytest
 

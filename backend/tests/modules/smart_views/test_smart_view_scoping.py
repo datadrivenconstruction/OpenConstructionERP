@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Smart Views scoping tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views scoping tests.
 
 Cross-cuts the user-/project-/federation- scoping rules from the
 service layer:

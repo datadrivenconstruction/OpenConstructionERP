@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AR / AP ageing arithmetic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AR / AP ageing arithmetic.
 
 The ageing report answers "how much is owed, to whom, and how late", per legal
 entity, which is the first screen an accounting team that runs several company

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The three GESN rules the Russian pack added, and what they decline to judge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The three GESN rules the Russian pack added, and what they decline to judge.
 
 A Russian estimate cites norms rather than describing works, so the rules are
 about whether a derivation is present and traceable, not about whether a price

@@ -1,4 +1,4 @@
-"""Unit tests for the subcontractors international reporting helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the subcontractors international reporting helpers.
 
 Scope (pure, database-free):
     - on-time delivery rate and quality pass rate with zero / empty / negative

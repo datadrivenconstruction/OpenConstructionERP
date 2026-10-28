@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Completeness tests for vat_rates in all regional pack configs (Wave 25 / task #168).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Completeness tests for vat_rates in all regional pack configs (Wave 25 / task #168).
 
 For each pack that declares a non-empty ``vat_rates`` dict, assert that:
 1. Every country entry has a ``'standard'`` key.

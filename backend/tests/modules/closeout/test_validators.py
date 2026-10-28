@@ -1,4 +1,4 @@
-"""Closeout validation rule tests."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout validation rule tests."""
 
 from __future__ import annotations
 

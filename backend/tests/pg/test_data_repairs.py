@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The boot-path data-repair runner, against a real database with rows in it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The boot-path data-repair runner, against a real database with rows in it.
 
 Why this suite is shaped the way it is
 --------------------------------------

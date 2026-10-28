@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the BIM property search means by each operator, on both engines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the BIM property search means by each operator, on both engines.
 
 The property search panel in the BIM viewer sends ``column / op / value``
 filters to ``dataframe_store.query_parquet``. Every Parquet column is stored as

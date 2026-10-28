@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests EacRuleDefinition JSON Schema against ≥30 valid + ≥30 invalid fixtures.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests EacRuleDefinition JSON Schema against ≥30 valid + ≥30 invalid fixtures.
 
 Acceptance per RFC 35 EAC-1.2:
 

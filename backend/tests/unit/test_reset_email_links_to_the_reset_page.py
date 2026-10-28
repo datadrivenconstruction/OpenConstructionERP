@@ -1,4 +1,4 @@
-"""The password-reset email links to the page that can use it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The password-reset email links to the page that can use it.
 
 The email has always pointed at ``{frontend_url}/auth/reset?token=...``, and
 for as long as that was true the web app had no such page: the catch-all

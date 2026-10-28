@@ -1,4 +1,4 @@
-"""Q05: reversible schedule archives, real PostgreSQL/FKs and HTTP RBAC.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Q05: reversible schedule archives, real PostgreSQL/FKs and HTTP RBAC.
 
 Only authentication is supplied by the fixture. Route dependencies, project
 ownership checks, schemas, repositories and SQL all run normally. Each test

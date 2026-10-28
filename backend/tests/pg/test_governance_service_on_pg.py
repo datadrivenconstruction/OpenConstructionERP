@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project governance end to end on PostgreSQL: decisions, snapshots, binding
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project governance end to end on PostgreSQL: decisions, snapshots, binding
 documents and change control, staleness, owner change, model change, and the
 approval-route subscribers.
 """

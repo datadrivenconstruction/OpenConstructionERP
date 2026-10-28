@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A development owned by an EDITOR can be deleted by nobody.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A development owned by an EDITOR can be deleted by nobody.
 
 Two independent walls guard DELETE /developments/{dev_id}, and no role
 satisfies both at once when the owning project belongs to an editor:

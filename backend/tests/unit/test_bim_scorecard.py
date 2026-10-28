@@ -1,4 +1,4 @@
-"""BIM quality scorecard - pure facet, composite, and trend tests (DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM quality scorecard - pure facet, composite, and trend tests (DB-free).
 
 Feeds synthetic element sets (dicts and namespaces) into the pure facet and
 scorecard functions and synthetic prior-report rows into the trend assembler.

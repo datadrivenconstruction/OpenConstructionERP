@@ -1,4 +1,4 @@
-"""Issue #111 — FX-aware structured rollup + frozen FX export appendix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Issue #111 — FX-aware structured rollup + frozen FX export appendix.
 
 #131 fixed the grid path (``groupPositionsIntoSections``): a position
 priced in a non-base currency is converted into the project base before

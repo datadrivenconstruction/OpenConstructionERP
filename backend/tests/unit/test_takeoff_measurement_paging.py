@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``list_all_for_document`` must page out a complete, stable row set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``list_all_for_document`` must page out a complete, stable row set.
 
 The revision compare depends on getting every measurement of a document, so
 the paging loop is worth pinning on its own. Two properties matter:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The generated sheets PDF has to reach the documents hub. It never once did.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The generated sheets PDF has to reach the documents hub. It never once did.
 
 ``_generate_pdf_in_background`` runs the DDC PDF-only export for a model that
 is already converted and then writes a ``Document`` row so the sheets turn up

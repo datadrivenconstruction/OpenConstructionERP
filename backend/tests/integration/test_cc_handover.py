@@ -1,4 +1,4 @@
-"""Construction-control Pillar 4 (handover) integration + IDOR/tenant-isolation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 4 (handover) integration + IDOR/tenant-isolation tests.
 
 Covers the handover / acceptance package end to end:
 

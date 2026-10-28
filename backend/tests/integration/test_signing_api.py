@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""E-signature registry - integration tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠E-signature registry - integration tests.
 
 Covers the API contract end to end:
 

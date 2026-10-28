@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: create a bill position from a takeoff measurement, in one go.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: create a bill position from a takeoff measurement, in one go.
 
 A wall drawn as a line on the plan, with a height and its openings typed in,
 becomes a new bill position carrying the NET wall area, placed in the chosen

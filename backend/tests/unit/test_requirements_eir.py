@@ -1,4 +1,4 @@
-"""Unit tests for Wave 4 / T13 — ISO 19650 EIR deliverable matrix.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for Wave 4 / T13 — ISO 19650 EIR deliverable matrix.
 
 Covers:
     * compute_deliverable_coverage(): 3 rows, 2 accepted → 66.67%.

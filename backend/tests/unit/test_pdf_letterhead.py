@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The company letterhead and the document logo, as they reach the printed page.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The company letterhead and the document logo, as they reach the printed page.
 
 Some firms may not send an RFI without their formal logo and registered
 details on it. These tests look at the produced PDF, not at the settings: the

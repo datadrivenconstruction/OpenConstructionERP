@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shutdown waits, within a bound, for detached event subscribers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shutdown waits, within a bound, for detached event subscribers.
 
 ``EventBus.publish_detached`` hands the request back at once and lets the
 subscribers run afterwards. Before :meth:`EventBus.drain` existed nothing ever

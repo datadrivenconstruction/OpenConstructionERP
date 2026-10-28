@@ -1,4 +1,4 @@
-"""Tests for application configuration.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for application configuration.
 
 Validates that Settings has all required fields, correct defaults,
 and computed fields work as expected. No database required.

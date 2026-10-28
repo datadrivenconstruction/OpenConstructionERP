@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the seeded AI sandbox (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the seeded AI sandbox (PostgreSQL, py3.12).
 
 Seeds the sample agent runs and checks that they are scored (so the accuracy
 scoreboard renders populated), idempotent, per-user scoped, and clearly marked

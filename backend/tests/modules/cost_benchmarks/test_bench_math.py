@@ -1,4 +1,4 @@
-"""Normalisation, element grouping and percentile band maths of the cost benchmarks."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Normalisation, element grouping and percentile band maths of the cost benchmarks."""
 
 from datetime import date
 from decimal import Decimal

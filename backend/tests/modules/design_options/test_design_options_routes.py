@@ -1,4 +1,4 @@
-"""Set and option CRUD routes: success paths and every failure path they have.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Set and option CRUD routes: success paths and every failure path they have.
 
 Covers ``POST /sets/``, ``GET /sets/``, ``GET /sets/{id}``,
 ``POST /sets/{id}/options/``, ``POST /sets/{id}/baseline/``,

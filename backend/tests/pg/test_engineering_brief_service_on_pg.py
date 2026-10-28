@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The engineering brief service against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The engineering brief service against PostgreSQL.
 
 The requirements really live in the requirements module, the framework schedule really lands in the schedule
 module, and the gates really take the schedule activity as the owner of their date. Each test builds its own

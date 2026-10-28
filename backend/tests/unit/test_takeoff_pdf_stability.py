@@ -1,4 +1,4 @@
-"""Unit tests for PDF takeoff stability (Indian / global edge cases).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for PDF takeoff stability (Indian / global edge cases).
 
 Covers the fixes shipped in v3.0.x to address fresh-install report from a
 user in India where PDF takeoff did not perform as expected:

@@ -1,4 +1,4 @@
-"""The AGPL-3.0 text has to be present, verbatim, and reachable by the build.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The AGPL-3.0 text has to be present, verbatim, and reachable by the build.
 
 The project declares ``AGPL-3.0-or-later`` everywhere it can - the SPDX
 expression in ``pyproject.toml``, the trove classifier, ``NOTICE``, the desktop

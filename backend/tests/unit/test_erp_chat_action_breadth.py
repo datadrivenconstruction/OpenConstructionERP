@@ -1,4 +1,4 @@
-"""Field building and validation of the RFI, risk, punch item and schedule progress proposals.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field building and validation of the RFI, risk, punch item and schedule progress proposals.
 
 Each spec turns the model's arguments (and a person's edits on the card) into
 a checked payload and the fields the person reviews, and must accept its own

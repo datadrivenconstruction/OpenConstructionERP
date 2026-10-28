@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan recurrence (rules 6, 7) and the mandate resolver (rules 11 to 15) as pure functions."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan recurrence (rules 6, 7) and the mandate resolver (rules 11 to 15) as pure functions."""
 
 from __future__ import annotations
 

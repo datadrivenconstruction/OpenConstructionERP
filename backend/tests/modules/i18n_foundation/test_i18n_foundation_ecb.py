@@ -1,4 +1,4 @@
-"""The ECB feed: parsing it, and surviving it being missing or wrong.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ECB feed: parsing it, and surviving it being missing or wrong.
 
 No network is touched and no HTTP mocking library is added. ``_parse_ecb_xml``
 is a pure function, so every malformed-feed case is a direct call; the store

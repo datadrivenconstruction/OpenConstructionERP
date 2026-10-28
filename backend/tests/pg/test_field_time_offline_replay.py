@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A day recorded with no signal reaches the office once, however often it is sent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A day recorded with no signal reaches the office once, however often it is sent.
 
 A foreman in a basement or a lift shaft has no data. The device keeps the day in
 a local queue and replays it when there is signal, and that replay is

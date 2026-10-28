@@ -1,4 +1,4 @@
-"""Lifecycle edges of the processes center that the registry tests leave open.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Lifecycle edges of the processes center that the registry tests leave open.
 
 The sibling module pins each action on its own. These tests pin what happens
 when actions overlap or arrive at the wrong moment: restarts fired together,

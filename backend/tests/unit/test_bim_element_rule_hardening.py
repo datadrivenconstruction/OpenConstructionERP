@@ -1,4 +1,4 @@
-"""BIM element-rule correctness + security hardening.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM element-rule correctness + security hardening.
 
 * E-I18N-017 — ``_coerce_number`` accepts comma decimals / trailing units
 * E-SEC-002  — ``must_match`` is ReDoS-resistant (bounded, safe-regex guard)

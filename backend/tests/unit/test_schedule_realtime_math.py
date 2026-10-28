@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure unit tests for the schedule real-time / field math (T3.4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure unit tests for the schedule real-time / field math (T3.4).
 
 Stdlib and the pure module only, so they run on the local Python 3.11 runner
 without the ORM or the database. Focus: the optimistic-concurrency revision

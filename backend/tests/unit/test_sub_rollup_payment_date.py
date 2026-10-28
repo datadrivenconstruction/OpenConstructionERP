@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A certificate the law asks for on the payment date is judged on that date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A certificate the law asks for on the payment date is judged on that date.
 
 The German pack declares the construction withholding tax exemption
 (Freistellungsbescheinigung) with ``valid_at: payment_date``: it has to be

@@ -1,4 +1,4 @@
-"""AI Agents — runner + registry + persistence tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Agents — runner + registry + persistence tests.
 
 The DB-touching test uses a transaction-isolated PostgreSQL session from
 ``tests._pg`` (rolled back on teardown) — never the production DB.

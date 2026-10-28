@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An imported line's code reaches the key the project's national rules read.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An imported line's code reaches the key the project's national rules read.
 
 The spreadsheet importer files a code column under ``code``, or under ``nrm``
 or ``masterformat`` when the code has that shape. The national code rules

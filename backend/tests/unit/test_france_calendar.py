@@ -1,4 +1,4 @@
-"""A French project is planned on France's holidays for every year, and Alsace-Moselle on its own.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A French project is planned on France's holidays for every year, and Alsace-Moselle on its own.
 
 France had a seeded 2026 roster and no rule, so a programme running into 2027
 lost every French public holiday after 31 December 2026. The three departments

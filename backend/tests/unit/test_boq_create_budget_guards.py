@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""create_budget_from_boq guards - audit findings (access check + idempotency).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠create_budget_from_boq guards - audit findings (access check + idempotency).
 
 The handler historically had two gaps:
 

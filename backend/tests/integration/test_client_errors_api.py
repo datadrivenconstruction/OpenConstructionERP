@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Regression test for POST /api/v1/client-errors/ returning a 500.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression test for POST /api/v1/client-errors/ returning a 500.
 
 This is the sink the frontend reports its own runtime errors to
 (``frontend/src/shared/lib/errorLogger.ts``). It is unauthenticated,

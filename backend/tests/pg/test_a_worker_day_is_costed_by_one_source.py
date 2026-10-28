@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""One shift, two honest records, one entry on the budget.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One shift, two honest records, one entry on the budget.
 
 A foreman punches the crew in and out on a phone; the diary publishes those
 hours to the cost model when the entry is approved. Somebody in the office fills

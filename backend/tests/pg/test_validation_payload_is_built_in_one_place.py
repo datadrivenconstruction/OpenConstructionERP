@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A payload of positions must reach the engine through the shared builder.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A payload of positions must reach the engine through the shared builder.
 
 A validation rule reads its inputs from the mapping the caller hands the
 engine, and a rule whose input is missing returns nothing rather than failing.

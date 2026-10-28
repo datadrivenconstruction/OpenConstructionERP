@@ -1,4 +1,4 @@
-"""Tests for the schedulers and warm-ups declared in ``app.core.processes.builtin``."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the schedulers and warm-ups declared in ``app.core.processes.builtin``."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the PDF source: parser (``pdf_import``) + adapter.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the PDF source: parser (``pdf_import``) + adapter.
 
 Two layers under test:
 

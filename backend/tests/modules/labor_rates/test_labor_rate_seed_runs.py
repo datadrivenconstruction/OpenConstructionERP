@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The starter rate library has to survive contact with the real schema.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The starter rate library has to survive contact with the real schema.
 
 ``_seed_demo_account`` calls this seeder inside a ``try/except`` that logs a
 warning and carries on, which is the right behaviour at boot and the reason a

@@ -1,4 +1,4 @@
-"""What a bill line takes from the price-list item it is made from, and what a copy keeps.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a bill line takes from the price-list item it is made from, and what a copy keeps.
 
 The routes themselves run on PG in
 ``tests/modules/test_price_list_lines_keep_their_source.py``; this file pins

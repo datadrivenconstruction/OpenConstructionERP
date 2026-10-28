@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One user's self-hosted AI endpoint is one user's.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One user's self-hosted AI endpoint is one user's.
 
 Reported as GHSA-wfpw-cv5v-64j5. Saving an Ollama or vLLM base URL wrote it
 into a module-global provider table, so the endpoint belonged to the worker

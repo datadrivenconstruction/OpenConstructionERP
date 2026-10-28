@@ -1,4 +1,4 @@
-"""Integration tests for the per-user Simple / Advanced menu choice.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the per-user Simple / Advanced menu choice.
 
 The choice used to live only in one browser's localStorage. It now follows
 the login through ``/api/v1/users/me/view-mode/``, which is ``null`` until the

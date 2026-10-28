@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A change order says which instrument it is, not only why it exists.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A change order says which instrument it is, not only why it exists.
 
 ``reason_category`` has always answered "why": a design changed, a condition
 was unforeseen. ``variation_type`` answers a different question, "what document

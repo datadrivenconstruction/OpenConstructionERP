@@ -1,4 +1,4 @@
-"""Tests for Project Pydantic schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for Project Pydantic schemas.
 
 Validates ProjectCreate and ProjectUpdate with boundary conditions
 and verifies no hardcoded restrictions on region/currency/standard.

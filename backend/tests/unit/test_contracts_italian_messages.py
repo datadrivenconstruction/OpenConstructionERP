@@ -1,4 +1,4 @@
-"""Italian contract messages use the production bundle without importing the app."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Italian contract messages use the production bundle without importing the app."""
 
 from __future__ import annotations
 

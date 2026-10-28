@@ -1,4 +1,4 @@
-"""The real text swap reports what landed, and only that.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The real text swap reports what landed, and only that.
 
 ``_ensure_region_text_language`` decides which file a national base's text comes
 from and whether the switch happened. Its callers turn a ``None`` into an error

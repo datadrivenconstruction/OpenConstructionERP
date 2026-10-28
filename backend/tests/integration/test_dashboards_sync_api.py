@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T09 integration tests — Sync Protocol API surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T09 integration tests — Sync Protocol API surface.
 
 Stands up a minimal FastAPI app with the dashboards router mounted plus
 session/auth deps overridden to a per-test throwaway PostgreSQL database

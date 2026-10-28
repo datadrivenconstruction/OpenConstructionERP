@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Module builder v2 against PostgreSQL: links, status, export, comments, deadlines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Module builder v2 against PostgreSQL: links, status, export, comments, deadlines.
 
 A module with links and every feature, installed for real, read and written
 through its own HTTP API and the platform routes that serve it (the link

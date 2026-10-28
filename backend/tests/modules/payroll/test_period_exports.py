@@ -1,4 +1,4 @@
-"""CSV, Excel, JSON and DATEV LODAS writers of a payroll period."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CSV, Excel, JSON and DATEV LODAS writers of a payroll period."""
 
 import io
 import json

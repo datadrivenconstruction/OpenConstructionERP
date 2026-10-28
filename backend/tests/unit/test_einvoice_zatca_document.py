@@ -1,4 +1,4 @@
-"""ZATCA document tests: the UBL builder, the cryptographic stamp, the QR and the offline rule checks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ZATCA document tests: the UBL builder, the cryptographic stamp, the QR and the offline rule checks.
 
 No database and no network. The distinguishing cases are the ones where a plausible
 simplification gives a different, wrong answer: the invoice hash taken with the standard

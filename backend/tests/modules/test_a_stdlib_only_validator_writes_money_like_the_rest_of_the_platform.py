@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""The two dependency-free validator modules write money the way everything else does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The two dependency-free validator modules write money the way everything else does.
 
 ``procurement/validators.py`` and ``subcontractors/validators.py`` declare
 themselves standard-library-only in their docstrings and mean it, so until

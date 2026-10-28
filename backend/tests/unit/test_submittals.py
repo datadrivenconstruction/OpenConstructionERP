@@ -1,4 +1,4 @@
-"""Unit tests for :class:`SubmittalService`.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`SubmittalService`.
 
 Scope:
     CRUD operations, status transition validation, submit/review/approve

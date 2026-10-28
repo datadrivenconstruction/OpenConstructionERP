@@ -1,4 +1,4 @@
-"""CWICR abstract-resource variant flow on BOQ positions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CWICR abstract-resource variant flow on BOQ positions.
 
 Covers the production-quality variant pipeline:
 

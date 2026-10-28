@@ -1,4 +1,4 @@
-"""Unit tests for the Brazilian invoice PDF renderer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Brazilian invoice PDF renderer.
 
 Covers BRL formatting helpers (comma decimal, period thousands), date
 flipping (ISO → DD/MM/YYYY), em-dash fallbacks for missing fields, and

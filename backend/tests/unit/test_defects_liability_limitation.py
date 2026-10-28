@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the opt-in limitation regime on the defects-liability register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the opt-in limitation regime on the defects-liability register.
 
 Two things are being proved here and they pull in opposite directions.
 

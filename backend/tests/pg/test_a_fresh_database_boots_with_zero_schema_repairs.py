@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A database create_all just built must not need repairing on the same boot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A database create_all just built must not need repairing on the same boot.
 
 A fresh 17.0.2 install logged nine ``Schema repair:`` lines on its first boot.
 The nine are the columns ``formwork/repairs.py`` and ``requirements/repairs.py``

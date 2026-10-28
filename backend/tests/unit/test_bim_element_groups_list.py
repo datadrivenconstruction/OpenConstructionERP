@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Saved element groups as the BIM viewer lists them for one model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Saved element groups as the BIM viewer lists them for one model.
 
 A project-wide group (no model) must appear in every model's list, and a
 dynamic group must carry its live members even when its cached snapshot is

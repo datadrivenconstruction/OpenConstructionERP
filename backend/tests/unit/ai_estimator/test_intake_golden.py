@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Golden-fixture composition tests for the intake v2 element-group composer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Golden-fixture composition tests for the intake v2 element-group composer.
 
 Twelve fixtures (RU / EN / DE x kitchen / bathroom / full apartment / new
 house) under ``tests/fixtures/ai_estimator_intake/`` drive the REAL composer

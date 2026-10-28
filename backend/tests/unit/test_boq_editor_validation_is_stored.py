@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The Validate button in the BOQ editor leaves a stored report behind.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Validate button in the BOQ editor leaves a stored report behind.
 
 ``POST /boq/boqs/{id}/validate/`` used to return the engine summary and store
 nothing. Every reader of validation (the validation page, the dashboard, the

@@ -1,4 +1,4 @@
-"""The locale scripts under ``scripts/`` must be transparent to invisible characters.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The locale scripts under ``scripts/`` must be transparent to invisible characters.
 
 Zero-width characters are invisible by construction, so every way of mishandling
 them looks correct on screen. Three of those ways were live in this repository at

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A BC3 file is decoded in the character set its ``~V`` record declares.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A BC3 file is decoded in the character set its ``~V`` record declares.
 
 FIEBDC-3 names the character set in the fifth field of ``~V``
 (JUEGO_CARACTERES): ``850`` and ``437`` for the MS-DOS code pages, ``ANSI``

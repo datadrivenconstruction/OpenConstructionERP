@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``or "0"`` money fallback must stay unreachable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``or "0"`` money fallback must stay unreachable.
 
 Several response schemas serialize money through a private helper and then add
 ``or "0"`` at the call site::

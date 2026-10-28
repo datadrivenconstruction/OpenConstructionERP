@@ -1,4 +1,4 @@
-"""PG: a Turkish bill is read against the installed unit-price base in one statement.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a Turkish bill is read against the installed unit-price base in one statement.
 
 Two ``birimfiyat`` rules compare a line with the book it cites. A rule gets
 data, not a session, so the surface that validates the bill looks the poz

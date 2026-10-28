@@ -1,4 +1,4 @@
-"""Integration tests for per-folder permissions (Issue #FP).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for per-folder permissions (Issue #FP).
 
 Covers the eight scenarios in the spec:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every email the platform sends carries the OpenConstructionERP brand.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every email the platform sends carries the OpenConstructionERP brand.
 
 The brand shows in the same places in every mail: the ``From:`` display name,
 the line beside the logo, and the closing line of the footer. It is never

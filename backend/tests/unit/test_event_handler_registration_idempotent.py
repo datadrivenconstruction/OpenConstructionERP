@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Starting the application twice in one process must not double every handler.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Starting the application twice in one process must not double every handler.
 
 ``register_event_handlers`` runs from the lifespan, which is once per process in
 production and more often anywhere the app is started again in place: the test

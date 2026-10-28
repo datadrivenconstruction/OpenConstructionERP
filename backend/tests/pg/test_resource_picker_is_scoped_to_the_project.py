@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A site picker must offer this project's roster, not the whole install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A site picker must offer this project's roster, not the whole install.
 
 The repository has carried the ``project_id`` filter from the start; the
 service dropped it and the endpoint never asked for it, so every caller got

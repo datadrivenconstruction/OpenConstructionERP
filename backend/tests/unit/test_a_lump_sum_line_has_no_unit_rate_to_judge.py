@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""A lump-sum line has no unit rate to judge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A lump-sum line has no unit rate to judge.
 
 ``boq_quality.unrealistic_rate`` compared every unit rate against a ceiling
 written per unit. A lump sum is priced as one unit whose rate is the whole

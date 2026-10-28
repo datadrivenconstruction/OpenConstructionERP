@@ -1,4 +1,4 @@
-"""Governance backend messages: every shipped locale answers every English key with the same placeholders."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Governance backend messages: every shipped locale answers every English key with the same placeholders."""
 
 from __future__ import annotations
 

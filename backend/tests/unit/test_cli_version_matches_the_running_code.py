@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The version the CLI prints is the version the server reports.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The version the CLI prints is the version the server reports.
 
 ``_resolve_version`` used to ask ``importlib.metadata`` first, which returns
 whatever distribution is installed in the environment. On a source checkout

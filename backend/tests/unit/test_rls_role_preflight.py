@@ -1,4 +1,4 @@
-"""Role attributes are cluster-wide: never use the application/test database here."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Role attributes are cluster-wide: never use the application/test database here."""
 
 from __future__ import annotations
 

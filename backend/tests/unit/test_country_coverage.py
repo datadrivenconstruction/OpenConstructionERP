@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the country coverage manifest.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the country coverage manifest.
 
 These test the instrument, not the coverage. A country having no payment regime
 is a finding for the register and not a failure here; the manifest reporting it

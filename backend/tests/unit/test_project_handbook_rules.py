@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project handbook rules, catalogues, lifecycle, messages and wiring, without a database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project handbook rules, catalogues, lifecycle, messages and wiring, without a database.
 
 Each test names the rule and carries the case that would pass if the rule were missing: a required chapter
 nobody approved, an approver who is the submitter, a catalogue chapter that reads a source nobody wrote.

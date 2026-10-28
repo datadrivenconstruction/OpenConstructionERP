@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PG: an award says what it did to the bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: an award says what it did to the bill.
 
 The award wrote the winning rates into the bill even when the bill was locked,
 so an approved baseline changed behind its approval. It now leaves a locked

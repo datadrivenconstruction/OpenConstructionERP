@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The printed G702/G703 has to add up, to itself and to the claim behind it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The printed G702/G703 has to add up, to itself and to the claim behind it.
 
 Three defects that all showed up as a certificate whose own figures disagreed,
 found by an adversarial review of the money math (its scenario ids are kept in

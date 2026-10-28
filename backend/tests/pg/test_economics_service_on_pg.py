@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The economics service against PostgreSQL: the three parts, the readings, and the approval.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The economics service against PostgreSQL: the three parts, the readings, and the approval.
 
 No mocks. The estimate is a real bill read through the bill's own helpers, the commitments are real purchase
 orders counted by the cost spine's rule, the gate is the shipped eleven-area model, and a decision is a real

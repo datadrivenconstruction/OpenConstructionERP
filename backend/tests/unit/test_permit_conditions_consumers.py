@@ -1,4 +1,4 @@
-"""Permit conditions are consumed by quality_concept (checks, gate evidence) and procurement_concept (lot requirements)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permit conditions are consumed by quality_concept (checks, gate evidence) and procurement_concept (lot requirements)."""
 
 from __future__ import annotations
 

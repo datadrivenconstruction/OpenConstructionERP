@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A frozen build must build the encoder on the CPU and say which device it used.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A frozen build must build the encoder on the CPU and say which device it used.
 
 ``SentenceTransformer`` picks its own device when nobody names one, and on any
 Apple Silicon machine that is Metal. The desktop sidecar is a frozen bundle, so

@@ -1,4 +1,4 @@
-"""Tests for reranker_bge's defensive payload-derived fallback.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for reranker_bge's defensive payload-derived fallback.
 
 When the snapshot install populates Qdrant vectors but the SQL/parquet
 side is empty (the v3.0.x default), ``MatchCandidate.description`` can

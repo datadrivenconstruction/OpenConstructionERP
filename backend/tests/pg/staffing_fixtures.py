@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared builders for the staffing PostgreSQL tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared builders for the staffing PostgreSQL tests.
 
 A world is a throwaway database with real users and a project that runs
 governance on the shipped ``elf_module_framework`` model, a demo roster from

@@ -1,4 +1,4 @@
-"""PDF export hardening (BUG-PDF01 / BUG-PDF02 fix).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PDF export hardening (BUG-PDF01 / BUG-PDF02 fix).
 
 ReportLab's ``Paragraph`` parses a subset of HTML. Before this fix, any
 BOQ position ``description`` containing an unrecognised attribute (e.g.

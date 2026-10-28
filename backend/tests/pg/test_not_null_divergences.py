@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Does this database still match the models, and can anything say so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Does this database still match the models, and can anything say so.
 
 ``not_null_divergences`` answers the standing question. The heal's own warning
 answers a different one - what this boot decided - and goes quiet on every boot

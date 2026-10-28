@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The schema is built two ways, and both ways must agree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The schema is built two ways, and both ways must agree.
 
 A fresh install gets its tables from ``Base.metadata.create_all``; an existing
 deployment gets them from the migration. Every other test in this package runs

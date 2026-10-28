@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The wave-eight registers describe how much of themselves they return.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The wave-eight registers describe how much of themselves they return.
 
 Eleven routes across seven modules moved from a bare ``list[XResponse]`` to
 ``{items, total, offset, limit}``: the ten this wave ranked by user impact, plus

@@ -1,4 +1,4 @@
-"""The money resolvers are checked against each other, not against a roster.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The money resolvers are checked against each other, not against a roster.
 
 Five paths are compared here, and until this file existed they agreed because
 somebody had typed the same numbers into each of them. That is the failure mode

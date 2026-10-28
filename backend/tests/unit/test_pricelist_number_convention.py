@@ -1,4 +1,4 @@
-"""A table reads "1.250" the way the rest of its file writes numbers, or says it cannot.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A table reads "1.250" the way the rest of its file writes numbers, or says it cannot.
 
 "1.250" is 1250 in a list that writes "12,50" and 1.25 in one that writes
 "12.50"; on its own it is either. The reader used to take the point as the

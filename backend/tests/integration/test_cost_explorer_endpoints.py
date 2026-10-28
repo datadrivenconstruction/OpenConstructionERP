@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost Explorer service against a real PostgreSQL database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Explorer service against a real PostgreSQL database.
 
 Exercises the reverse-index reindex and the four read paths end to end on a
 throwaway PostgreSQL database, so the SQL the pure unit tests cannot reach (the

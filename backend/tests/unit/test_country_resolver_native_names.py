@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A country written the way its own speakers write it resolves to its code.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country written the way its own speakers write it resolves to its code.
 
 The resolver lowers a name and looks it up, nothing more. It carried
 "magyarorszag", "espana" and "turkiye" without their accents, so the spelling

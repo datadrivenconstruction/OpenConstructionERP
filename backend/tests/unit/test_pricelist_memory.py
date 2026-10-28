@@ -1,4 +1,4 @@
-"""A large price list is read as a stream: memory stays flat as the file grows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A large price list is read as a stream: memory stays flat as the file grows.
 
 The real lists run to 125 MB of XML (Lombardia 2026) and the core server has
 3 GB. The test writes a Toscana-layout file of about 25 MB to a temporary file,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tenant-isolation tests for compliance DSL rule registration.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tenant-isolation tests for compliance DSL rule registration.
 
 The validation ``rule_registry`` is a single process-global singleton with
 no tenant dimension. Compliance DSL rules are authored per tenant, so the

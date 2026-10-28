@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Choosing a formwork system, and getting the chosen one into the bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Choosing a formwork system, and getting the chosen one into the bill.
 
 Two endpoints are covered here, and they are the two the module was missing:
 

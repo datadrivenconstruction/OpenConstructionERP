@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the international, DB-free risk helpers (risk/intl.py).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the international, DB-free risk helpers (risk/intl.py).
 
 Stdlib + pytest only - no database, no app runtime, no network. The tests lock
 in the contract the register's international story depends on:

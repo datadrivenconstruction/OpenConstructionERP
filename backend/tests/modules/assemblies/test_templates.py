@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tests for the Assembly Library templates feature (v4.0 / Slice 1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the Assembly Library templates feature (v4.0 / Slice 1).
 
 Every test runs against a transaction-isolated PostgreSQL session
 (``tests._pg.transactional_session``), rolled back on teardown, so it

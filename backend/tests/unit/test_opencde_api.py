@@ -1,4 +1,4 @@
-"""Unit tests for the OpenCDE BCF-API 3.0 surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the OpenCDE BCF-API 3.0 surface.
 
 The actual ``opencde_*`` module implements the BCF-API 3.0 *REST* protocol
 (buildingSMART), not the OpenCDE Document Management OAuth flow — so the

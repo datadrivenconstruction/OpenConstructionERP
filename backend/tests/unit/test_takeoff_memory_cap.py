@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — memory cap for large PDFs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — memory cap for large PDFs.
 
 Covers bullet 7 of the R7 hardening sweep:
   * Large PDFs (>50 pages or >100 MB) must not OOM the worker.

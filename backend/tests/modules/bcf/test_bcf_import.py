@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Integration tests for :class:`BCFImportService` + ``POST /import/clashes``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for :class:`BCFImportService` + ``POST /import/clashes``.
 
 The fixtures mirror :file:`test_bcf_export.py` exactly so the test runs
 against the conftest-provisioned PostgreSQL DB with the BCF + Clash tables

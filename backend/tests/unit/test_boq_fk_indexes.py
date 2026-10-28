@@ -1,4 +1,4 @@
-"""Index-presence contract for the BOQ FK/composite indexes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Index-presence contract for the BOQ FK/composite indexes.
 
 The 2026-05-24 perf wave shipped explicit composite indexes for the
 hot read patterns on the BOQ tables — see alembic

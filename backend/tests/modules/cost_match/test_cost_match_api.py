@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End-to-end behaviour of the Cost Match API against a real database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End-to-end behaviour of the Cost Match API against a real database.
 
 Walks the workflow the module exists for: paste a foreign bill, get a queue
 back, work the queue by confirming, overriding and rejecting, then validate

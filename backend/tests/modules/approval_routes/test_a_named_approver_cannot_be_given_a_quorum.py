@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A step that names one approver cannot also ask for several approvals.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A step that names one approver cannot also ask for several approvals.
 
 The engine clears a step that names a user on that user's approval alone and
 never reads ``required_approver_count`` for it, while the unique decision row

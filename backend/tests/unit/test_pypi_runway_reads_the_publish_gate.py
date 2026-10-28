@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The pre-tag PyPI check can still find the gate it runs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The pre-tag PyPI check can still find the gate it runs.
 
 ``scripts/check_pypi_runway.py`` does not carry its own copy of the size
 arithmetic. It pulls the Python out of the publish workflow's size step and

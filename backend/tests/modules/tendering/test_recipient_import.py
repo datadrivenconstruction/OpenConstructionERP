@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bulk tender recipients from a CSV/XLSX file: parsing, row checks, preview, confirm.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bulk tender recipients from a CSV/XLSX file: parsing, row checks, preview, confirm.
 
 Run:
     cd backend

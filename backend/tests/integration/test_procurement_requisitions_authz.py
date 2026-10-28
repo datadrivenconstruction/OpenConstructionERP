@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Material requisitions over HTTP: lifecycle, provenance, validation and access.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Material requisitions over HTTP: lifecycle, provenance, validation and access.
 
 Drives ``/api/v1/procurement/requisitions`` against the real app and the test
 PostgreSQL. The bill the requisitions are raised from is written straight to

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v79 builds exactly the schema the economics models build, and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v79 builds exactly the schema the economics models build, and undoes it.
 
 Up, down, up on PostgreSQL for the six tables. The reflected schema from the revision must equal the
 one ``create_all`` produces (columns with types and nullability, the module's own indexes, unique

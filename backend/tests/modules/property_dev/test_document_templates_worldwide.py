@@ -1,4 +1,4 @@
-"""Worldwide parameterization tests for /document-templates endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Worldwide parameterization tests for /document-templates endpoints.
 
 The historical contract whitelisted 18 doc_type / 11 entity slugs that
 were biased toward UAE / RU / DE / IN jurisdictions. Tenants in

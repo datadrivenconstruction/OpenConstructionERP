@@ -1,4 +1,4 @@
-"""Unit tests: QMS ITP hold-point workflow (item 12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests: QMS ITP hold-point workflow (item 12).
 
 Covers the bounded increment:
     - spec linkage (link_itp_item_to_spec) + same-plan / self-cycle guards

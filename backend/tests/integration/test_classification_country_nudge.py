@@ -1,4 +1,4 @@
-"""Integration tests for ClassificationCountryMismatchRule (Wave 27, task #170).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for ClassificationCountryMismatchRule (Wave 27, task #170).
 
 Covers all spec scenarios:
     1. DE project + DIN-only classification → no nudge (passed=True).

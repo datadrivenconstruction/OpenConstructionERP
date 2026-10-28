@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure rules of the quality concept (spec section 4), one test per rule case.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure rules of the quality concept (spec section 4), one test per rule case.
 
 Each test pairs the case the rule refuses with the nearest case it allows, so
 a rule that silently stopped applying fails on the first half.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Source-data register - integration tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Source-data register - integration tests.
 
 Covers the API contract end to end:
 

@@ -1,4 +1,4 @@
-"""Unit tests for the COBie parser."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the COBie parser."""
 
 import tempfile
 from pathlib import Path

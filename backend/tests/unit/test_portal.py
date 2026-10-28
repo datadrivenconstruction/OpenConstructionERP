@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the Customer & Partner Portal service layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Customer & Partner Portal service layer.
 
 Mirrors the stubbed-repository pattern used in ``test_safety.py``: the
 SQLAlchemy session and each repository class are replaced with in-memory

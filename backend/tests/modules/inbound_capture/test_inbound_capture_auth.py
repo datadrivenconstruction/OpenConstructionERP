@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the capture endpoints' JWT-or-API-key authorization gate.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the capture endpoints' JWT-or-API-key authorization gate.
 
 Pure (no DB, no app, no network): exercises
 :class:`app.dependencies.RequirePermissionOrApiKey` directly. Proves that an

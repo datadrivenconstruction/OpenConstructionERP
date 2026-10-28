@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""GAEB importer regression against the in-house X83 conformance fixture.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠GAEB importer regression against the in-house X83 conformance fixture.
 
 ``oce_conformance_x83.x83`` is written by us (see
 scripts/generate_gaeb_conformance_fixtures.py) and deliberately stresses the

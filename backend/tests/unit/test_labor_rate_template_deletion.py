@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Tests for deleting a labour-rate template without destroying referenced data.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for deleting a labour-rate template without destroying referenced data.
 
 A template is referenced from two places once it leaves this module. Publishing
 it writes a labour :class:`CostItem` whose code encodes the template id, and a

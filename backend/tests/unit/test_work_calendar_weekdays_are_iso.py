@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One rule, three places it has to hold: a weekday is 1..7, Monday to Sunday.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One rule, three places it has to hold: a weekday is 1..7, Monday to Sunday.
 
 ``I18nFoundationService.get_working_days`` counts a working week by matching
 each date's ``isoweekday()`` against the calendar's ``work_days``. That call

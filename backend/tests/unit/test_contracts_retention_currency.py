@@ -1,4 +1,4 @@
-"""Retention accrual and release conserve the currency's smallest unit."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Retention accrual and release conserve the currency's smallest unit."""
 
 from dataclasses import replace
 from decimal import Decimal as D

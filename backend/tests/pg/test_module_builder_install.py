@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Installing a module end to end, on the database it will run against.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Installing a module end to end, on the database it will run against.
 
 Everything up to here checks a part: the spec refuses what cannot work, the
 generator renders files that import, the table gets created. This checks the

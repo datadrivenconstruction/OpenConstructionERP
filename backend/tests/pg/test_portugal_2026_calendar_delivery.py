@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PT national holidays for 2026, delivered without overwriting user calendars."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PT national holidays for 2026, delivered without overwriting user calendars."""
 
 from datetime import date
 

@@ -1,4 +1,4 @@
-"""A schema-version signal must be able to say "I could not tell".
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A schema-version signal must be able to say "I could not tell".
 
 ``/api/health`` reports ``alembic_head_matches``, and it used to compute it as
 ``expected == actual`` on two values either of which can legitimately be absent.

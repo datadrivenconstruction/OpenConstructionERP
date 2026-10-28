@@ -1,4 +1,4 @@
-"""PG: walking the progress register's pages returns every entry exactly once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: walking the progress register's pages returns every entry exactly once.
 
 ``ProgressRepository.list_entries_for_project`` pages with OFFSET/LIMIT and
 used to order by ``recorded_at`` alone. That is not a total order over this

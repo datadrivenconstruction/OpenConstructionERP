@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A Saudi bill whose tax seed answers nothing still falls back to Saudi VAT.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Saudi bill whose tax seed answers nothing still falls back to Saudi VAT.
 
 Saudi Arabia read the Gulf stack, whose one tax line is 5: the UAE rate, and
 Saudi Arabia's own rate only until 2020-06-30. A bill seeds its VAT from the

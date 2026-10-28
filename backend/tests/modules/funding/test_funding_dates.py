@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The date arithmetic every funding deadline is derived from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The date arithmetic every funding deadline is derived from.
 
 These three functions decide when a report is due, how long money may sit
 unspent, and when vouchers may be destroyed. Each of those dates is told to a

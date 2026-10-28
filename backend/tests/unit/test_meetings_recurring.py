@@ -1,4 +1,4 @@
-"""Unit tests for the meetings recurring-series + attendance check-in service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the meetings recurring-series + attendance check-in service.
 
 Scope:
     - create_series with FREQ=WEEKLY;COUNT=4 → 1 master + 4 occurrences

@@ -1,4 +1,4 @@
-"""``schedule.activity.slipped`` names a contact; the rating needs the subcontractor."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``schedule.activity.slipped`` names a contact; the rating needs the subcontractor."""
 
 from __future__ import annotations
 

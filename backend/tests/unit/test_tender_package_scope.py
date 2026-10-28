@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A package raised over part of a bill is compared against that part.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A package raised over part of a bill is compared against that part.
 
 Both comparison screens - the leveling matrix and the budget comparison - load
 the package's BOQ, which is the whole bill. A package covering a quarter of it

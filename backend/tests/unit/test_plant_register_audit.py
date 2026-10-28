@@ -1,4 +1,4 @@
-"""PlantService._audit against the real ``log_activity``, not a mock.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PlantService._audit against the real ``log_activity``, not a mock.
 
 A cloud PG run once failed 14 tests because ``_audit`` forwarded extras such as
 ``item=`` straight into ``log_activity``, which rejects unknown keywords. These

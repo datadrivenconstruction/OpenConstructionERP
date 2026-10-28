@@ -1,4 +1,4 @@
-"""PG: a price edit re-prices its own line, and a resource edit only what it names.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a price edit re-prices its own line, and a resource edit only what it names.
 
 Two defects on the single-position PATCH path, both reported as "the BOQ freezes
 when I put in a price".

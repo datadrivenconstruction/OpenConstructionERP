@@ -1,4 +1,4 @@
-"""What the Windows desktop build is allowed to ship, and how it installs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the Windows desktop build is allowed to ship, and how it installs.
 
 Two decisions live here, both of which are one line of configuration and both of
 which fail silently when reverted. A silent packaging regression is not a

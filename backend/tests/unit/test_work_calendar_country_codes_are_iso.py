@@ -1,4 +1,4 @@
-"""A country code must select that country's working week, not another country's.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A country code must select that country's working week, not another country's.
 
 ``schedule.service.get_work_calendar`` picks the working week that
 ``compute_duration`` and the schedule generator count days with. It resolves a

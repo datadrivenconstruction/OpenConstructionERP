@@ -1,4 +1,4 @@
-"""Run the publish workflow's size gate here, before the tag exists.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Run the publish workflow's size gate here, before the tag exists.
 
 PyPI caps a project two ways. Each file must be under 100 MiB, and the total
 stored size of every version must be under 10 GiB. The second one stopped a

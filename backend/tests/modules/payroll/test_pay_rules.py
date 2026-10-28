@@ -1,4 +1,4 @@
-"""Overtime, night, weekend, holiday and per diem rules per country profile."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Overtime, night, weekend, holiday and per diem rules per country profile."""
 
 from datetime import date, datetime
 from decimal import Decimal

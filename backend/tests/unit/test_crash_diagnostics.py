@@ -1,4 +1,4 @@
-"""Crash log, memory probe and the memory guards around embedding work."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Crash log, memory probe and the memory guards around embedding work."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-"""FA-GAEB-001 - GAEB X84 import must preserve every cent.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FA-GAEB-001 - GAEB X84 import must preserve every cent.
 
 The worst money bug in the full audit: importing a conformant GAEB DA XML
 3.3 X84 (Angebotsabgabe / priced bid) used to wipe all 2,000,000.00 EUR to

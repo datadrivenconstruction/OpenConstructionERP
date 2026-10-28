@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A flat-retention certificate asks for what the claim bills, whatever shape the months are.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A flat-retention certificate asks for what the claim bills, whatever shape the months are.
 
 Cost-plus and time-and-materials contracts keep a flat retention rate, and
 that branch works the claim's net out from its own gross. The certificate

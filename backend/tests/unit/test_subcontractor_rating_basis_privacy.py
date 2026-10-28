@@ -1,4 +1,4 @@
-"""The rating provenance record must not leave the process.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The rating provenance record must not leave the process.
 
 A subcontractor rating stores a ``basis`` column describing how each score was
 arrived at. Part of that record, under the ``sources`` key, is a per-metric

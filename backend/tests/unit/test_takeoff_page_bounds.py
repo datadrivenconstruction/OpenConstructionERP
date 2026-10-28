@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests — takeoff page-index bounds validation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests — takeoff page-index bounds validation.
 
 Covers bullet 2 of the R7 hardening sweep:
   Page index requested in API must be in [0, page_count).

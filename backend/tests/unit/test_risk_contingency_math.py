@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Pure tests for the risk-based contingency arithmetic (no database).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure tests for the risk-based contingency arithmetic (no database).
 
 The figures on the contingency card come from ``app.modules.risk.contingency``.
 Each case below is built so that the obvious wrong implementation gives a

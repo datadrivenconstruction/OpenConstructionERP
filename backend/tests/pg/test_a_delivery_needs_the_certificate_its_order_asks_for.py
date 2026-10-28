@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""From a delivery to the release of its payment, on PostgreSQL (BF-01).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠From a delivery to the release of its payment, on PostgreSQL (BF-01).
 
 Reinforcing steel is ordered with an EN 10204 type 3.1 certificate and an
 incoming inspection. The receipt cannot be confirmed until a certificate that

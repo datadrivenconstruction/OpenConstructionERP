@@ -1,4 +1,4 @@
-"""A demo register must reserve, by construction, the row its screen counts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A demo register must reserve, by construction, the row its screen counts.
 
 This is the general form of a defect that was found in the interface register
 and fixed there: demo content is drawn at random, a screen exists to show a

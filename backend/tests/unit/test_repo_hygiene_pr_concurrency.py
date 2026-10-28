@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PR hygiene runs may supersede only runs for the same PR."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PR hygiene runs may supersede only runs for the same PR."""
 
 import re
 from pathlib import Path

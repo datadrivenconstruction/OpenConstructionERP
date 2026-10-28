@@ -1,4 +1,4 @@
-"""Round-2 deep audit: storage cleanup + sweeper + dev-id SQL filter.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-2 deep audit: storage cleanup + sweeper + dev-id SQL filter.
 
 Three behaviours pinned down by this module:
 

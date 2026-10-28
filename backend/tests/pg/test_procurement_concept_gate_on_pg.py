@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The procurement concept against the real governance module, and the demo seed, on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The procurement concept against the real governance module, and the demo seed, on PostgreSQL.
 
 The governance world pins a shipped phase model with its approval routes, and the
 module finds its area, its frame document and its release gate through the

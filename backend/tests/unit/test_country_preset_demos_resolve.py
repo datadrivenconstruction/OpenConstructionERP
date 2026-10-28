@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every onboarding Country Pack preset must name a demo the backend can install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every onboarding Country Pack preset must name a demo the backend can install.
 
 The preset table lives in the frontend and the demo registry lives here, so
 nothing in either language could see both halves at once. What filled the gap

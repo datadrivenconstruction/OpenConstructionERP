@@ -1,4 +1,4 @@
-"""Round-5 / R7 hardening tests for the ChangeOrders module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Round-5 / R7 hardening tests for the ChangeOrders module.
 
 Scope:
     * FSM allowlist: only valid transitions accepted; invalid ones raise HTTP 400.

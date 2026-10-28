@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rules V11 to V14 and V16 to V18 on plain payloads: each one speaks on its case and only there."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rules V11 to V14 and V16 to V18 on plain payloads: each one speaks on its case and only there."""
 
 from __future__ import annotations
 

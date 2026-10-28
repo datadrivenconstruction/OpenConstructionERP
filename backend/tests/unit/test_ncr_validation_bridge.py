@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Bridge tests for NCR auto-creation from validation errors (Wave 2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bridge tests for NCR auto-creation from validation errors (Wave 2).
 
 The NCR module subscribes to ``validation.results.errors_found`` and raises a
 single formal NCR per validation run that produced ERROR-severity results. A

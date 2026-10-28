@@ -1,4 +1,4 @@
-"""Unit tests for SQL ILIKE substring search on CostItemRepository.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for SQL ILIKE substring search on CostItemRepository.
 
 Pins the BUG-012 / IMP-016 contract: ``q``, ``name`` and ``description``
 filters must always evaluate as case-insensitive substring matches at

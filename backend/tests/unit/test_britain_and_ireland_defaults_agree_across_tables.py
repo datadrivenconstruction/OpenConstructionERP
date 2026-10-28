@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A British or Irish project gets one consistent answer from every table that has an opinion.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A British or Irish project gets one consistent answer from every table that has an opinion.
 
 Three tables say something about a new project in these two countries, and
 none of them reads the others:

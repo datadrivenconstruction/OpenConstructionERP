@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A worker that did not get the heal lock does not report a heal it never ran.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A worker that did not get the heal lock does not report a heal it never ran.
 
 Several workers booting against one external PostgreSQL race for the heal's
 advisory lock. The loser used to return 0 straight away, and 0 is what a heal

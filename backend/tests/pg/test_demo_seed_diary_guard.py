@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The diary seeder must skip the projects a person wrote, not the ones it wrote.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The diary seeder must skip the projects a person wrote, not the ones it wrote.
 
 The demo installer lays down a handful of empty diary headers of its own
 before the module seeder runs. The guard used to ask "does this project hold

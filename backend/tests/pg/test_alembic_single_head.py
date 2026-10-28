@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The migration chain must have exactly one head.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The migration chain must have exactly one head.
 
 A second head makes ``alembic upgrade head`` refuse to run at all, for
 everyone, with "Multiple head revisions are present". It is not a degraded

@@ -1,4 +1,4 @@
-"""The diacritics gate must not ask for an accented email address.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The diacritics gate must not ask for an accented email address.
 
 A stripped spelling is correct inside an email address and wrong in a display
 string, and the demo packs carry both on the same line for the same firm:

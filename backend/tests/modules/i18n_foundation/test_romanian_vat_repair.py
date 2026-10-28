@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Healing an install that was seeded before Romania's 2025 VAT reform.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Healing an install that was seeded before Romania's 2025 VAT reform.
 
 What is being tested, and against what
 --------------------------------------

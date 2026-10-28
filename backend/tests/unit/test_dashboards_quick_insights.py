@@ -1,4 +1,4 @@
-"""T02 unit tests — Quick-Insight Panel auto-chart heuristics.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T02 unit tests — Quick-Insight Panel auto-chart heuristics.
 
 Covers the pure-function surface of
 :mod:`app.modules.dashboards.insights`. The router glue is exercised

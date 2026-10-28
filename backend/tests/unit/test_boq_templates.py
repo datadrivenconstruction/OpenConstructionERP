@@ -1,4 +1,4 @@
-"""Tests for BOQ templates data integrity.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for BOQ templates data integrity.
 
 Verifies that all 8 built-in templates are present, structurally valid,
 and contain sensible data (positive rates, no duplicate ordinals, etc.).

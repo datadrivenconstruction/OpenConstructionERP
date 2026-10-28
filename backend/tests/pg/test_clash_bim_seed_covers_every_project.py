@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Coordination data has to reach every project, not the first few.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Coordination data has to reach every project, not the first few.
 
 Both seeders took a prefix of the project list and said so in a comment, so
 nothing read as broken: the code did exactly what it claimed. The screens it

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Import-only RLS failure probe: private process, no database connections."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Import-only RLS failure probe: private process, no database connections."""
 
 import importlib.abc
 import os

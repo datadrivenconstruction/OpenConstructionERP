@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site plant positions over HTTP against PostgreSQL: place, move, remove, and who may.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site plant positions over HTTP against PostgreSQL: place, move, remove, and who may.
 
 A position is a point on the site plan (local metres, y up) with a kind from
 the plant catalogue, optionally the register item it places and the expansion

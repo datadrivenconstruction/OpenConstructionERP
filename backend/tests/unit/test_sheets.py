@@ -1,4 +1,4 @@
-"""Tests for Sheet Management — schemas, detection logic, and discipline mapping.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for Sheet Management — schemas, detection logic, and discipline mapping.
 
 Validates SheetResponse, SheetUpdate, SheetVersionHistory schemas,
 detect_sheet_info regex extraction, and discipline auto-detection.

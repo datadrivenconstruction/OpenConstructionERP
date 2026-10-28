@@ -1,4 +1,4 @@
-"""Regression: GET /v1/users/ limit cap contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: GET /v1/users/ limit cap contract.
 
 Source defect (user error log openconstructionerp-log-2026-05-22.json,
 v4.3.2): the /admin/audit-log page (and other resolvers) defaulted to

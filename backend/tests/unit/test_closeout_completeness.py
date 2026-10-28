@@ -1,4 +1,4 @@
-"""Database-free tests for closeout completeness maths and localized labels."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database-free tests for closeout completeness maths and localized labels."""
 
 import pytest
 

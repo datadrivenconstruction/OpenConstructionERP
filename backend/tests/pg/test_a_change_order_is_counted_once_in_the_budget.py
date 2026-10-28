@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An approved change order moves the budget by its own amount, once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An approved change order moves the budget by its own amount, once.
 
 The approval writes one budget delta row per change order, and the finance
 dashboard, the EVM snapshot and the impact preview all read the budget through

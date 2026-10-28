@@ -1,4 +1,4 @@
-"""The upgrade path for the submitting company column that was too narrow.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The upgrade path for the submitting company column that was too narrow.
 
 ``submitted_by_org`` is now ``String(255)``, which fixes a fresh installation
 outright. It does not fix an existing one: module tables here are built by

@@ -1,4 +1,4 @@
-"""Unit tests for the BOQ per-position AI copilot service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the BOQ per-position AI copilot service.
 
 These exercise :class:`app.modules.boq.copilot_service.BOQCopilotService`
 directly against a transaction-isolated PostgreSQL session (rolled back on

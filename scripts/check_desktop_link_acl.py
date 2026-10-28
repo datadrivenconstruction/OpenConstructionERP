@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if the desktop application window cannot reach the commands it invokes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail if the desktop application window cannot reach the commands it invokes.
 
 The launcher serves the application from the backend it starts, and navigates
 the webview to ``http://127.0.0.1:<port>/``. Tauri calls that a REMOTE origin:

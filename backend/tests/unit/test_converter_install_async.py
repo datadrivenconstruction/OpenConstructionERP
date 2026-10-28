@@ -1,4 +1,4 @@
-"""Unit tests for the non-blocking converter install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the non-blocking converter install.
 
 Covers the v8.8.0 fix for the user-reported "signal timed out" on a slow
 server: the install endpoint must return immediately (the heavy download runs

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Revision v70 builds exactly the schema the delivery model models build, and undoes it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Revision v70 builds exactly the schema the delivery model models build, and undoes it.
 
 Up, down, up on PostgreSQL; the reflected schema from the revision must equal
 the one ``create_all`` produces from the models (type, nullability and server

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The exchange catalogue is a claim about this product, so it is tested as one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The exchange catalogue is a claim about this product, so it is tested as one.
 
 Every row on the world formats screen tells a user whether we can read or
 write their market's document. A row that says "native" where no reader

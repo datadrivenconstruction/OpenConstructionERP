@@ -1,4 +1,4 @@
-"""A create is committed before the client is told it succeeded.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A create is committed before the client is told it succeeded.
 
 ``SessionDep`` yields a session that commits after the path operation. With
 FastAPI's default request scope (0.118 and later) that commit runs after the

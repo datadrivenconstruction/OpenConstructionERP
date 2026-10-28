@@ -1,4 +1,4 @@
-"""Integration tests for the collaboration-locks module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the collaboration-locks module.
 
 Drives the HTTP surface end-to-end against a live FastAPI app.
 Mirrors the module-scoped ``client + auth`` fixture pattern used by

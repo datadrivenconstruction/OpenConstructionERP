@@ -1,4 +1,4 @@
-"""Render the README banner: who the platform is for, and how much of it there is.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Render the README banner: who the platform is for, and how much of it there is.
 
 Two honeycombs, one above the other and drawn to the same margins so they read as
 one field seen at two scales. The upper comb is the cast the Cases hub is built

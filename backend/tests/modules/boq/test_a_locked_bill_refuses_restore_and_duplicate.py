@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A locked bill refuses a snapshot restore and a line duplicate, like every other writer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A locked bill refuses a snapshot restore and a line duplicate, like every other writer.
 
 Locking a bill is how an estimate is approved: ``POST /boqs/{id}/lock`` sets
 ``is_locked`` and the status to ``final``, and from then on the only way to

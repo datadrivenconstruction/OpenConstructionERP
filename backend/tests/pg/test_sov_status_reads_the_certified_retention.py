@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The SoV tracker agrees with the payment applications, through the real path.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The SoV tracker agrees with the payment applications, through the real path.
 
 The unit tests beside this one prove the arithmetic with stub objects. They
 cannot prove that the pieces fit: that the repository hands back the claim

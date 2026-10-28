@@ -1,4 +1,4 @@
-"""Unit tests for :meth:`ScheduleService.get_risk_analysis` (PERT).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :meth:`ScheduleService.get_risk_analysis` (PERT).
 
 Scope:
     The /risk-analysis/ endpoint runs CPM, then derives a three-point

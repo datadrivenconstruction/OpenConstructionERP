@@ -1,4 +1,4 @@
-"""R7 DMS upload magic-byte validation tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠R7 DMS upload magic-byte validation tests.
 
 Scope
 -----

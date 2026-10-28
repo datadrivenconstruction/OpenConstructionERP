@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A mirrored change order has no price of its own - issue #435.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A mirrored change order has no price of its own - issue #435.
 
 Promoting an approved variation request creates a variation order and mirrors
 it into ``oe_changeorders``. The mirror is not a second commercial decision, so

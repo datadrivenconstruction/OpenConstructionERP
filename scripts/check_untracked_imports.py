@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail when a tracked Python file imports a module git does not have.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail when a tracked Python file imports a module git does not have.
 
 The defect this closes is invisible on the author's disk. A file that is
 committed imports a module that only ever existed as an untracked file in the

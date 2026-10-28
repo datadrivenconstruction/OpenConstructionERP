@@ -1,4 +1,4 @@
-"""Bid Management round-2 security/integrity regression suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bid Management round-2 security/integrity regression suite.
 
 Covers three NEW issues found in the 2026-05-28 audit:
 

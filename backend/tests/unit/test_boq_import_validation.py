@@ -1,4 +1,4 @@
-"""Inline-validation-on-BOQ-import regression tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inline-validation-on-BOQ-import regression tests.
 
 Stream B wires the validation engine into every BOQ import path (Excel /
 CSV / GAEB X83/X84) so DIN276, NRM, GAEB, MasterFormat, DPGF and the

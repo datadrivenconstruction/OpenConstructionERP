@@ -1,4 +1,4 @@
-"""HTTP tests: punch photo evidence + BCF, defect photos, handover dossier, condition plan.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP tests: punch photo evidence + BCF, defect photos, handover dossier, condition plan.
 
 Drives the full app so routing, permission gates, project-access checks and
 serialisation are exercised together.

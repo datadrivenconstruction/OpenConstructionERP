@@ -1,4 +1,4 @@
-"""Deterministic fixtures for the contacts and GAEB benchmarks (not a test module)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deterministic fixtures for the contacts and GAEB benchmarks (not a test module)."""
 
 from __future__ import annotations
 

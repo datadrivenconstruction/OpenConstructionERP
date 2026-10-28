@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Allowed moves of the logistics plan against PostgreSQL, through the routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Allowed moves of the logistics plan against PostgreSQL, through the routes.
 
 A ``can`` flag is only worth showing when the write behind it answers the same.
 So every record here is walked through its states over HTTP, and at each stop

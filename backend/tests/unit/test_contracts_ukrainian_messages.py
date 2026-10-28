@@ -1,4 +1,4 @@
-"""Ukrainian contract messages use the production bundle without importing the app."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ukrainian contract messages use the production bundle without importing the app."""
 
 from __future__ import annotations
 

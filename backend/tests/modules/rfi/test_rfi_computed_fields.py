@@ -1,4 +1,4 @@
-"""Tests for the RFI router-computed UX fields the new chips rely on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the RFI router-computed UX fields the new chips rely on.
 
 The frontend ball-in-court chip ("With you / With them / Answered /
 Closed"), the "+N" overdue pill, and the "Awaiting me" quick-view chip

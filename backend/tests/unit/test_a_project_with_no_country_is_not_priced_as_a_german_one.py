@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A bill seeded for a project that names no country must not be a German bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill seeded for a project that names no country must not be a German bill.
 
 ``BOQService.apply_default_markups`` used to demand a region from its caller,
 and the endpoint's default was the neutral international stack. From this

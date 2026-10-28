@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Which classification code sits under which, for the two shapes every standard has."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which classification code sits under which, for the two shapes every standard has."""
 
 from __future__ import annotations
 

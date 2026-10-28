@@ -1,4 +1,4 @@
-"""Committed on the 5D surfaces comes from linked purchase orders and contracts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Committed on the 5D surfaces comes from linked purchase orders and contracts.
 
 ``BudgetLine.committed_amount`` is only ever written by hand, so before this
 suite the dashboard, the budget summary and the contract-exposure overcommit

@@ -1,4 +1,4 @@
-"""Activity calendars, the reset guard and the schedule end date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Activity calendars, the reset guard and the schedule end date.
 
 Three defects reported against the 4D schedule:
 

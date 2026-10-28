@@ -1,4 +1,4 @@
-"""PG: an assistant proposal reaches the project only when a person applies it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: an assistant proposal reaches the project only when a person applies it.
 
 The chat assistant used to write a BOQ line the moment the model asked for it.
 It now stores a proposal and nothing else; the record is created or changed

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One award, and every record describing it agrees what money it is.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One award, and every record describing it agrees what money it is.
 
 Written as a failing control before the fix and kept as the regression for
 it. The chains, as they were:

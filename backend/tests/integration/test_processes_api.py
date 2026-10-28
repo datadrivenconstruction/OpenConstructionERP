@@ -1,4 +1,4 @@
-"""Processes center API against the real app and database."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Processes center API against the real app and database."""
 
 import pytest
 

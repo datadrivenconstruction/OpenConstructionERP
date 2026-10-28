@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Generating a claim writes every line's retention in one statement.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Generating a claim writes every line's retention in one statement.
 
 Working a claim's retention out used to write column I back one UPDATE per
 claim line, so generating a claim on a 500 line schedule of values sent 502

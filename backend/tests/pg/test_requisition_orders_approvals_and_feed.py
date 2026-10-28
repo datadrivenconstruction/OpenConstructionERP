@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Requisitions: designated approvers, line-level ordering, external orders and the feed (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Requisitions: designated approvers, line-level ordering, external orders and the feed (issue #516).
 
 Drives ``/api/v1/procurement/requisitions`` over HTTP against PostgreSQL with
 the world of ``test_a_requisition_is_approved_and_ordered_once``: a manager, two

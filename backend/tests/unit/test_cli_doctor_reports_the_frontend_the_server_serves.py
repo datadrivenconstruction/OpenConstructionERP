@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The frontend check must answer from the server's lookup, not its own copy of it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The frontend check must answer from the server's lookup, not its own copy of it.
 
 The check used to repeat the expression ``cli_static.get_frontend_dir()`` uses,
 on the reasoning that two copies of one expression cannot disagree. In the

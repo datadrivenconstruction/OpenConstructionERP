@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The explicit "update reference data" pass, against an install seeded from an older file.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The explicit "update reference data" pass, against an install seeded from an older file.
 
 The cohort is rebuilt from today's seed file rather than vendored: every
 country and calendar, and every tax row except the four rate lines that

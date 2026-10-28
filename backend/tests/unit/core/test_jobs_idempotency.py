@@ -1,4 +1,4 @@
-"""Idempotency tests for the W0.1 job runner (RFC 34 §4 W0.1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Idempotency tests for the W0.1 job runner (RFC 34 §4 W0.1).
 
 Contract:
     submit_job() with the same ``idempotency_key`` MUST return the same

@@ -1,4 +1,4 @@
-"""Finnish catalogues preserve complete message and formatter contracts."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finnish catalogues preserve complete message and formatter contracts."""
 
 from __future__ import annotations
 

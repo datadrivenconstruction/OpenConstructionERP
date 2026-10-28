@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``POST /contracts/price-adjustment/compute/`` reads indices from the request or a cost-index series.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``POST /contracts/price-adjustment/compute/`` reads indices from the request or a cost-index series.
 
 The endpoint stores nothing: it computes one settlement and a person raises
 the claim. An index it cannot find, or a coefficient set the law refuses, is a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - a DDC conversion failure belongs to the conversion that hit it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - a DDC conversion failure belongs to the conversion that hit it.
 
 ``process_ifc_file`` runs on a shared thread pool (``asyncio.to_thread`` in
 the bim_hub router), so two users' uploads convert at the same time. The

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The forecast documentation revision adds its tables and columns, runs twice, and can be undone.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The forecast documentation revision adds its tables and columns, runs twice, and can be undone.
 
 Runs on PostgreSQL (the suite's database) and on a throwaway SQLite file, the
 two engines an install meets. A snapshot saved before the revision reads as

@@ -1,4 +1,4 @@
-"""Epic I7 — BC3 / FIEBDC-3 rule pack tests.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Epic I7 — BC3 / FIEBDC-3 rule pack tests.
 
 Two rules:
 

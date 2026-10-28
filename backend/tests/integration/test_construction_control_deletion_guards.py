@@ -1,4 +1,4 @@
-"""Construction-control deletion guards: evidence refuses to be deleted.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control deletion guards: evidence refuses to be deleted.
 
 Every ``update_*`` in the module already refuses to edit a record the workflow has
 locked. Not one ``delete_*`` refused anything, and because every cross-record link

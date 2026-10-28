@@ -1,4 +1,4 @@
-"""Integration: CDE ↔ Transmittals revision backlink (RFC 33).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: CDE ↔ Transmittals revision backlink (RFC 33).
 
 End-to-end:
     Create project → create container → create revision → create transmittal

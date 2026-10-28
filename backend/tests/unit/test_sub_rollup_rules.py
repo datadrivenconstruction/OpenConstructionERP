@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The subcontract rules in the ``pay_application`` set, each held red and green.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The subcontract rules in the ``pay_application`` set, each held red and green.
 
 A rule that never fires passes every test that only asserts the absence of a
 finding, so each rule gets an input it must reject and one it must accept, and

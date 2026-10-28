@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""T08 integration tests — Compliance DSL API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠T08 integration tests — Compliance DSL API.
 
 Stands up a minimal FastAPI app with just the compliance router mounted
 plus session/auth dependencies overridden to point at a per-test throwaway

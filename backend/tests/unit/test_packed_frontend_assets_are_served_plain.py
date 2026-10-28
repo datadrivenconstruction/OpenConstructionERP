@@ -1,4 +1,4 @@
-"""The release wheel ships large frontend assets xz-packed; the server must serve them plain.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The release wheel ships large frontend assets xz-packed; the server must serve them plain.
 
 scripts/pack_frontend_dist.py replaces big JS/CSS/JSON/WASM files with ``<name>.xz``
 before the wheel is built. A browser still asks for ``<name>`` and must get the

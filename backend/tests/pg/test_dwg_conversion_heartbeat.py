@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A running conversion must not be declared dead, and reading must not write.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A running conversion must not be declared dead, and reading must not write.
 
 Issue #409. The orphan detector used to ask "has this taken too long?" and
 treat the answer as "is the task that owns it gone?". Those are different

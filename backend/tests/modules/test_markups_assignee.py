@@ -1,4 +1,4 @@
-"""M3 — assignee_id on Markup: create, update, filter, cross-tenant safety.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠M3 — assignee_id on Markup: create, update, filter, cross-tenant safety.
 
 Covers the wave-3 feature added with alembic v3146:
 

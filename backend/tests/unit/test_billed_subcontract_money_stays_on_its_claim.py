@@ -1,4 +1,4 @@
-"""Subcontract money billed on a locked GC claim is not moved by an edit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Subcontract money billed on a locked GC claim is not moved by an edit.
 
 ``reject_payment_application`` and ``update_payment_application_line`` refuse
 with ``claim_not_editable`` once the GC claim a pay application is billed on

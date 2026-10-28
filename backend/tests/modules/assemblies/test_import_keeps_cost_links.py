@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Export then import keeps each component's link to its cost item."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Export then import keeps each component's link to its cost item."""
 
 from __future__ import annotations
 

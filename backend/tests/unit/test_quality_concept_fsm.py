@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Quality concept state machines, table driven.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Quality concept state machines, table driven.
 
 Every machine is checked against the full table below in both directions: each
 listed transition is allowed, and every other ``(state, action)`` pair is

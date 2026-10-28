@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - the requisition rules added for approval and conversion (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - the requisition rules added for approval and conversion (issue #516).
 
 The supplier must come from the Vendor directory and be active, a conversion
 needs one, a requisition is priced in one currency, and a line without a cost

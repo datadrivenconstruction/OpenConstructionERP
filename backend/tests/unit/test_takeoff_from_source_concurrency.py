@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""From-source takeoff is concurrency-safe (issue #369).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠From-source takeoff is concurrency-safe (issue #369).
 
 ``POST /documents/from-source`` find-or-creates a takeoff document per
 ``(project_id, source_document_id)``. The lookup-then-insert used to race, so

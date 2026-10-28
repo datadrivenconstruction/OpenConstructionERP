@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-phase refusals reach the UI as codes, not English parser strings."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-phase refusals reach the UI as codes, not English parser strings."""
 
 from io import BytesIO
 from types import SimpleNamespace

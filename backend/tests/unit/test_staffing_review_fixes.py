@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pins for the defects an independent review found in staffing, the parts that need no database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pins for the defects an independent review found in staffing, the parts that need no database.
 
 Each test names the behaviour it pins. Imports of the code under test sit
 inside the tests, so a missing symbol fails that one test and not the file.

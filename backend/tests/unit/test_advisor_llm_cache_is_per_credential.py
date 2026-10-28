@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The project advisor's answer cache is not shared between credentials.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project advisor's answer cache is not shared between credentials.
 
 The cache is a module-level dict, so it lives as long as the worker and every
 user's requests read it. Its key was the provider, model, system prompt and

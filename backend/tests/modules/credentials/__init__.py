@@ -1,1 +1,1 @@
-"""Tests for the credentials registry module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the credentials registry module."""

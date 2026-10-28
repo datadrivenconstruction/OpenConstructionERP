@@ -1,4 +1,4 @@
-"""Unit tests for the Enterprise Workflows module — hardening contract lock.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the Enterprise Workflows module — hardening contract lock.
 
 Covers the 2026-05-21 hardening sweep:
 

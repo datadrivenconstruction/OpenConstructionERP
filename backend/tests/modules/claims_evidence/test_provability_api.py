@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration tests for the change-provability service (PostgreSQL, py3.12).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the change-provability service (PostgreSQL, py3.12).
 
 Seeds change-family records and checks that the gathered evidence signals map
 onto the pure provability engine the way the per-signal docstrings promise: a

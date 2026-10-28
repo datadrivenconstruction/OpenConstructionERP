@@ -1,4 +1,4 @@
-"""The second question ``scripts/inspect_desktop_sidecar_signatures.py`` asks of a member.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The second question ``scripts/inspect_desktop_sidecar_signatures.py`` asks of a member.
 
 Issue #480. The macOS desktop app installed, started, started its backend, and then could
 not create its own database: initdb, unpacked out of the onefile sidecar and run as its own

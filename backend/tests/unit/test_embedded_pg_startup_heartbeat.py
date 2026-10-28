@@ -1,4 +1,4 @@
-"""The blocking bring-up call has to keep talking while it blocks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The blocking bring-up call has to keep talking while it blocks.
 
 The desktop launcher abandons a backend that has written nothing for four
 minutes. That rule is only safe while every long step says something, and the

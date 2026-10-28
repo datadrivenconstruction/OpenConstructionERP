@@ -1,4 +1,4 @@
-"""The Italy pack offers the Toscana base, credits its publisher, and runs the italy rules."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Italy pack offers the Toscana base, credits its publisher, and runs the italy rules."""
 
 from __future__ import annotations
 

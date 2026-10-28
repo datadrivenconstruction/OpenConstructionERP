@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The defects of the second review, each pinned on PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The defects of the second review, each pinned on PostgreSQL.
 
 The committed figure against a contract header that carries its changes, the
 reconciliation with the cost model, recompute targets, anti-splitting, schedule

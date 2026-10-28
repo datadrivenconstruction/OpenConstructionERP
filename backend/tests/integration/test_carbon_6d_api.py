@@ -1,4 +1,4 @@
-"""Integration tests for the 6D carbon auto-enrichment endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the 6D carbon auto-enrichment endpoint.
 
 Drives the full HTTP stack against ``create_app()`` so routing, permission
 gating and the project-access (IDOR) check are all exercised. BIM elements

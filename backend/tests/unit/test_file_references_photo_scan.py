@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The naming scan has to reach site photos.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The naming scan has to reach site photos.
 
 ``_iter_project_files`` guarded the photo kind with
 ``hasattr(DiaryPhoto, "project_id") and hasattr(DiaryPhoto, "filename")``.

@@ -1,4 +1,4 @@
-"""Access around the erp_chat tools: reads for every caller, changes only as proposals.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Access around the erp_chat tools: reads for every caller, changes only as proposals.
 
 The chat once had one tool that wrote: ``create_boq_item`` added a BOQ line on
 the model's word, behind a manager-only gate in the dispatcher. It is gone. A

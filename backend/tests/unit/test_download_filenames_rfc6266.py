@@ -1,4 +1,4 @@
-"""The download-filename sweep: converted sites must not mangle non-ASCII names.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The download-filename sweep: converted sites must not mangle non-ASCII names.
 
 One shared regression class, many endpoints: export routes used to build
 ``Content-Disposition`` from ``name.encode("ascii", errors="replace")`` (or fed

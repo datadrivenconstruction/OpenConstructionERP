@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A buyer records that the supplier confirmed an issued order.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A buyer records that the supplier confirmed an issued order.
 
 An issued purchase order is a promise the buyer made; the supplier's order
 confirmation is the answer, often with its own reference and a delivery date

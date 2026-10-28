@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The 3D globe shows relief unless an operator configures raster street tiles.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The 3D globe shows relief unless an operator configures raster street tiles.
 
 The globe can only draw raster XYZ imagery and no keyless public raster
 street service permits app use, so relief is the default. These tests pin the

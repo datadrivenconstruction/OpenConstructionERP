@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The DDL guard gate, proved in both directions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The DDL guard gate, proved in both directions.
 
 A gate that only ever refuses is as useless as one that only ever passes, and
 both failure modes look identical from the outside: a green line in a log. So

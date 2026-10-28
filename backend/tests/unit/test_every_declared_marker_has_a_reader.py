@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A declared marker that nothing reads is a name with no effect.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A declared marker that nothing reads is a name with no effect.
 
 The other direction is already closed and closed harder. ``--strict-markers``
 in ``backend/pyproject.toml`` turns a marker used but not declared into a

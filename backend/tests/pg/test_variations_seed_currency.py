@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Seeded variation money must be in the currency its project budgets in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seeded variation money must be in the currency its project budgets in.
 
 ``seed_variations_demo`` wrote EUR on every row regardless of the project, so a
 Dubai project listed AED orders from the demo generator and EUR orders from the

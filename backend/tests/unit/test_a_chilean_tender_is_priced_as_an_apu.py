@@ -1,4 +1,4 @@
-"""Chile must be able to price the way a Chilean public client reads a price.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Chile must be able to price the way a Chilean public client reads a price.
 
 Reported from a self-hosted install in Chile: the platform carried the peso,
 the 19 percent IVA and the country, but wired Chile to the flat method, direct

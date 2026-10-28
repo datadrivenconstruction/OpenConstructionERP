@@ -1,4 +1,4 @@
-"""The Windows installer hook must stop our database, and only ours.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Windows installer hook must stop our database, and only ours.
 
 The hook is a PowerShell one-liner embedded in an NSIS macro. Nothing compiles
 it, nothing type-checks it, and a mistake inside it does not fail a build: it

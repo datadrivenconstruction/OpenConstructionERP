@@ -1,4 +1,4 @@
-"""Property Development SPA / PaymentSchedule integration regressions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property Development SPA / PaymentSchedule integration regressions.
 
 Targets the bugs that surfaced when the user reported "Sales Contracts +
 Payment Schedules tabs не работают":

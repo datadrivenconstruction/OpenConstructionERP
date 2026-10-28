@@ -1,4 +1,4 @@
-"""Working-day counting: work weeks, holidays and the edges around them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Working-day counting: work weeks, holidays and the edges around them.
 
 Both ends of a range are inclusive here, which every count below assumes. That
 convention is worth stating loudly because the platform's other working-day

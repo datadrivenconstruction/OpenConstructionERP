@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Only the client side reads the client's invoices through a project grant.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Only the client side reads the client's invoices through a project grant.
 
 Surface (portal-session-gated):
     GET /api/v1/portal/me/invoices

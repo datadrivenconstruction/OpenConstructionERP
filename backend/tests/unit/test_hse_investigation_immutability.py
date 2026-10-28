@@ -1,4 +1,4 @@
-"""Regulatory-immutability tests for completed HSE investigations.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regulatory-immutability tests for completed HSE investigations.
 
 RIDDOR (UK Reporting of Injuries, Diseases and Dangerous Occurrences
 Regulations) and OSHA 1904.33 (US 5-year retention rule) both treat the

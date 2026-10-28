@@ -1,4 +1,4 @@
-"""The vector-snapshot paths are derived from the registry, not kept by hand.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The vector-snapshot paths are derived from the registry, not kept by hand.
 
 The snapshot map used to be a literal table next to the endpoint that reads it.
 When the data repo nested every market under a common folder, the parquet map

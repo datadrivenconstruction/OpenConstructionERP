@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``--version`` must answer, and answer the same thing the subcommand does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``--version`` must answer, and answer the same thing the subcommand does.
 
 ``openconstructionerp --version`` used to exit 2 with "unrecognized arguments"
 because the only spelling wired up was the ``version`` subcommand. It is the

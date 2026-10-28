@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integration test: magnet_filter env-var gating end-to-end.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration test: magnet_filter env-var gating end-to-end.
 
 Drives the ``rank()`` entrypoint with a stub Qdrant adapter (so the
 real BGE encoder + Qdrant don't need to be running) and verifies:

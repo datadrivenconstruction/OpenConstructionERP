@@ -1,4 +1,4 @@
-"""Unit tests for :class:`ChangeOrderService` + schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ChangeOrderService` + schemas.
 
 Covers the bug fixes bundled in v1.9.7 Phase 1:
 

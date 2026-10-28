@@ -1,4 +1,4 @@
-"""Integration tests for the 6D Phase 2 whole-life endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration tests for the 6D Phase 2 whole-life endpoints.
 
 Drives the full HTTP stack against ``create_app()`` so routing, permission
 gating and the project-access (IDOR) check are exercised. BIM elements are

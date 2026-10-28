@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The classification registry answers by country, not by string shape.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The classification registry answers by country, not by string shape.
 
 The defect these tests exist for: ``PL`` resolved to DIN 276 while
 ``PL_WARSAW`` resolved to MasterFormat. Sixteen countries answered two

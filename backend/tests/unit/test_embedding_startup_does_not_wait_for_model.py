@@ -1,4 +1,4 @@
-"""A stalled optional encoder must not prevent the HTTP server from starting."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A stalled optional encoder must not prevent the HTTP server from starting."""
 
 import asyncio
 import threading

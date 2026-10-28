@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The Field Time demo seed must fill the register, and fill it only once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The Field Time demo seed must fill the register, and fill it only once.
 
 Field Time shipped with no timesheet data anywhere, so the screen rendered
 byte-identical on every demo project. The seeder that fixes that has three ways

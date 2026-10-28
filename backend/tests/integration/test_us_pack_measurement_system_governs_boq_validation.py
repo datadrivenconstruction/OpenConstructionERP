@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The US pack's ``measurement_system`` has to decide a real validation outcome.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The US pack's ``measurement_system`` has to decide a real validation outcome.
 
 ``BOQUnitSystemConsistencyRule`` has always been able to flag a bill whose
 units belong to the other measurement system, and it has always read that

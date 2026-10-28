@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tamper-evident export header helper and its wiring into report exports.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tamper-evident export header helper and its wiring into report exports.
 
 The header stamps every register/report download with the generation time and
 a SHA-256 digest of the content. These tests pin the two guarantees a recipient

@@ -1,4 +1,4 @@
-"""CPM under scheduling options (app.core.cpm_profile).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CPM under scheduling options (app.core.cpm_profile).
 
 2024-01-01 is a Monday, so on the default Monday-Friday calendar offset 0 is
 Monday, 4 is Friday and 7 is the next Monday.

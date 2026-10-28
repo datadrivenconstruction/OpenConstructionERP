@@ -1,4 +1,4 @@
-"""Subcontract money after billing: a billed pay application stays, a waiverless release is flagged.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Subcontract money after billing: a billed pay application stays, a waiverless release is flagged.
 
 ``exclude_payment_application`` refused to take a pay application out of a GC
 claim once that claim was past editing, because the claim's make-up is then

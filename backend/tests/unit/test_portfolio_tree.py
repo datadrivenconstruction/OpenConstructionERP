@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for the pure portfolio-tree pruning (T3.3, acceptance #1).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the pure portfolio-tree pruning (T3.3, acceptance #1).
 
 Pure (stdlib only) so they run on the local 3.11 runner without a DB.
 """

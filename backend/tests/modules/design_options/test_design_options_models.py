@@ -1,4 +1,4 @@
-"""The two design-option tables: constraints, relationships and cascades.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The two design-option tables: constraints, relationships and cascades.
 
 Covers ``oe_design_options_set`` and ``oe_design_options_option``: their
 nullability and foreign keys as materialised in PostgreSQL, the same-module

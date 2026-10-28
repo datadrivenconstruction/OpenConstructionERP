@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What a drawing page's title block, and the file it came in, say about the sheet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a drawing page's title block, and the file it came in, say about the sheet.
 
 The register used to read its revision with one pattern that had no word
 boundary in front of the label and took the first match anywhere on the page.

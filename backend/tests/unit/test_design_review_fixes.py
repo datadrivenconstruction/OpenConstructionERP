@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management decisions that need no database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management decisions that need no database.
 
 Explicit nulls in PATCH bodies, the server-only container marker, the gates
 that answer both a request and its ``can`` flag, the approval-route wiring and

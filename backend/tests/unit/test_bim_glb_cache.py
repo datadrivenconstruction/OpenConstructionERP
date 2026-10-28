@@ -1,4 +1,4 @@
-"""The DAE->GLB conversion runs once per distinct input."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The DAE->GLB conversion runs once per distinct input."""
 
 from __future__ import annotations
 

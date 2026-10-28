@@ -1,4 +1,4 @@
-"""The demo seed's area ownership map must name the areas of the catalogue it pins, and leave none unowned."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo seed's area ownership map must name the areas of the catalogue it pins, and leave none unowned."""
 
 from __future__ import annotations
 

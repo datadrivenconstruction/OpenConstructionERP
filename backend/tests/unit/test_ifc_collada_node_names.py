@@ -1,4 +1,4 @@
-"""Regression: COLLADA node ``name`` must equal the element id, not the label.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Regression: COLLADA node ``name`` must equal the element id, not the label.
 
 The Three.js ColladaLoader sets ``Object3D.name`` from a ``<node>``'s
 ``name`` attribute (it ignores ``id``).  The BIM viewer then matches each

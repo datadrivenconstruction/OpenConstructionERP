@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""``resolve_progress_billing`` answers for the right country or not at all.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠``resolve_progress_billing`` answers for the right country or not at all.
 
 The resolver hands a contract its retention tiers, release conditions and
 payment evidence. The failure it exists to prevent is the one the tax table

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every measurement records where its scale came from, or admits it does not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every measurement records where its scale came from, or admits it does not.
 
 A wrong scale is the one takeoff error that multiplies through every quantity
 on a sheet. Storing the ratio without its origin means a takeoff found to be

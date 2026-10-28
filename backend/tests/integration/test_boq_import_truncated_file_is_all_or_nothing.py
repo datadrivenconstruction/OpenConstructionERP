@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A file cut off midway must not leave half a bill behind.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A file cut off midway must not leave half a bill behind.
 
 Every BOQ import route (``/import/gaeb/``, ``/import/excel/`` and
 ``/import/auto/`` in both its synchronous and background form) is fed a real

@@ -1,4 +1,4 @@
-"""Who may hand a pending step to a stand-in, and to whom.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may hand a pending step to a stand-in, and to whom.
 
 Reassigning makes the stand-in the sole decider of the step. Left open to any
 caller, the person who started an approval could hand the step to an ally, or

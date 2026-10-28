@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo estate must speak the variations module's own status vocabulary.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo estate must speak the variations module's own status vocabulary.
 
 The demo generator wrote "agreed" and "implemented" on two of every three
 variation orders. Both read naturally in English and neither is in

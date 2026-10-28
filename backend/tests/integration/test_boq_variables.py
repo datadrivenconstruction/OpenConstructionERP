@@ -1,4 +1,4 @@
-"""Per-BOQ named variables (Phase B of the v2.7.0 BOQ formula bundle).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-BOQ named variables (Phase B of the v2.7.0 BOQ formula bundle).
 
 Variables live on ``boq.metadata_["variables"]`` and are accessed via two
 endpoints:

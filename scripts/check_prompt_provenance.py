@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Prompt provenance guard: keep the instruction text we send to a model readable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Prompt provenance guard: keep the instruction text we send to a model readable.
 
 Why this exists, which is not the same as what it checks.
 

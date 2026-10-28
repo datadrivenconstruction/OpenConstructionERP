@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The readable page of the hybrid PDF speaks the reader's language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The readable page of the hybrid PDF speaks the reader's language.
 
 The embedded CII is standard-prescribed (ISO dates, decimal points) and must
 never vary with the locale; the page exists for a human and follows their

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure-logic unit tests for the GAAP general ledger (task #77).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure-logic unit tests for the GAAP general ledger (task #77).
 
 These tests touch no database and no event loop. They pin the exact Decimal
 arithmetic and sign conventions of the GAAP layer:

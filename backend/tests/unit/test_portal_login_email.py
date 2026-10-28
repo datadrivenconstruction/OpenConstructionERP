@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The portal emails its own invitations and sign-in links.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The portal emails its own invitations and sign-in links.
 
 Before this the invitation token was copied by hand and the self-service
 ``/auth/magic-link`` answered 202 while sending nothing, so a client whose

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The arithmetic of the economics module: spread, discounting, return, coverage, assignment."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The arithmetic of the economics module: spread, discounting, return, coverage, assignment."""
 
 from __future__ import annotations
 

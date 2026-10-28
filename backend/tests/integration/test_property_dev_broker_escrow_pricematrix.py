@@ -1,4 +1,4 @@
-"""property_dev — Broker + Commission + Escrow + PriceMatrix integration tests
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠property_dev — Broker + Commission + Escrow + PriceMatrix integration tests
 (task #138).
 
 Covers the new entities introduced in v3104:

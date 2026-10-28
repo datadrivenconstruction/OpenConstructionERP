@@ -1,4 +1,4 @@
-"""Finding #8 — ``compute_boq_totals`` batches its per-BOQ loads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finding #8 — ``compute_boq_totals`` batches its per-BOQ loads.
 
 GET /boqs/ (paginated up to 100) calls ``compute_boq_totals(boq_ids)`` for
 the whole page. The original implementation looped per BOQ and, per

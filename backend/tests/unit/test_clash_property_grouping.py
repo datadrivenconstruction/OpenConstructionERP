@@ -1,4 +1,4 @@
-"""Clash group-by-ANY-property tests: enumeration, faceting, membership.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clash group-by-ANY-property tests: enumeration, faceting, membership.
 
 Two layers (same isolation discipline as ``test_clash_triage_delta.py``):
 

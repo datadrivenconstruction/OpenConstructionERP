@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo-history flag lifts the permits and design binding guards only while a seed runs."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo-history flag lifts the permits and design binding guards only while a seed runs."""
 
 from __future__ import annotations
 

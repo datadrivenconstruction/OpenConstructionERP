@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A derived deadline has to be readable by somebody who does not read English.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A derived deadline has to be readable by somebody who does not read English.
 
 The React client never showed the problem, because it renders a deadline from
 the ``kind`` enum through its own locales and ignores the sentence the server

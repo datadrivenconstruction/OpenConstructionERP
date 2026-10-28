@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP-layer verification of the AI feedback sink (POST /feedback).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP-layer verification of the AI feedback sink (POST /feedback).
 
 In-process FastAPI app + httpx AsyncClient, mounting ONLY the ai_agents router
 with the auth/session dependencies overridden, so the generic trust-loop

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A state's statutory retention ceiling reaches the terms a US contract starts from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A state's statutory retention ceiling reaches the terms a US contract starts from.
 
 The US row of the contract defaults opens retention at ten percent, which is
 the common pattern where no statute speaks. California has capped retention at

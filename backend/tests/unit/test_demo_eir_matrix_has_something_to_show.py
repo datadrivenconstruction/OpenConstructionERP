@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The demo EIR matrix shows a project, not a failed one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The demo EIR matrix shows a project, not a failed one.
 
 Two defects, both found by looking at a screenshot rather than by walking the
 tree, and both invisible to every gate because the data was well formed and

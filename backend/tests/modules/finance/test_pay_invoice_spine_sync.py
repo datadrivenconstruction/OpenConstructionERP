@@ -1,4 +1,4 @@
-"""Gap B integration tests: paying an invoice posts into the costmodel spine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap B integration tests: paying an invoice posts into the costmodel spine.
 
 Exercises ``FinanceService.pay_invoice`` end to end against a real PostgreSQL
 session (the only dialect the app runs on), wrapped in a per-test transaction

@@ -1,4 +1,4 @@
-"""Integration: edit a dependency and reschedule the Gantt (issue #348).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integration: edit a dependency and reschedule the Gantt (issue #348).
 
 Exercises the new PATCH ``/relationships/{id}`` and POST
 ``/schedules/{id}/reschedule/`` handlers against a real (async) throwaway

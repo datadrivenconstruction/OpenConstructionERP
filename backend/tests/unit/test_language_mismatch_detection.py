@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for ``_detect_language_mismatch`` (#229).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``_detect_language_mismatch`` (#229).
 
 The helper compares the project region's language with the bound CWICR
 catalogue's language so the UI can surface a "wrong catalogue" warning.

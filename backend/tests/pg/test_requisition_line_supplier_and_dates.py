@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Suggested suppliers travel from the BOQ to requisition lines, and each line has its own date (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Suggested suppliers travel from the BOQ to requisition lines, and each line has its own date (issue #516).
 
 Drives ``/api/v1/boq/positions/{id}/suggested-supplier`` and
 ``/api/v1/procurement/requisitions`` over HTTP against PostgreSQL, reusing the

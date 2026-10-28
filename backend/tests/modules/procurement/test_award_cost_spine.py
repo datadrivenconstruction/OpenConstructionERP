@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A tender award is an order, and it has to land on the cost spine like one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A tender award is an order, and it has to land on the cost spine like one.
 
 Wiring the money link into the order form and the requisition covered what a
 buyer types. It did not cover the largest single commitment the system makes:

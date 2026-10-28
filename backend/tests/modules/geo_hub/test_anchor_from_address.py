@@ -1,4 +1,4 @@
-"""HTTP tests for the auto-anchor + bulk auto-anchor endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP tests for the auto-anchor + bulk auto-anchor endpoints.
 
 These tests rely on the per-module PostgreSQL + tenant fixtures from
 ``conftest.py`` and stub the actual Nominatim call through

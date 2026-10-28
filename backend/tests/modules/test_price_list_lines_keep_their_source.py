@@ -1,4 +1,4 @@
-"""A bill line made from a regional price list keeps saying which list it is from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A bill line made from a regional price list keeps saying which list it is from.
 
 Through the real paths, on the conftest database: each region's trimmed
 official file is imported as a cost database, its voci are added to an

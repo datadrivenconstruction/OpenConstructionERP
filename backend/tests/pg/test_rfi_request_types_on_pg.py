@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request types as data, against PostgreSQL: catalogue, numbering, required fields, routes, API, migration.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request types as data, against PostgreSQL: catalogue, numbering, required fields, routes, API, migration.
 
 Each test gets a throwaway database cloned from the schema template, with a
 manager who owns the project, an editor on the project team and an outsider.

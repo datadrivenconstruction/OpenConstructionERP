@@ -1,4 +1,4 @@
-"""PG: a full-BOQ read loads the bill's positions once, and answers as before.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PG: a full-BOQ read loads the bill's positions once, and answers as before.
 
 ``get_boq_with_positions`` backs the BOQ editor's GET and a dozen exports. It
 used to load the positions three times per request: ``session.get(BOQ)``

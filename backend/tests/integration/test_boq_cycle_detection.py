@@ -1,4 +1,4 @@
-"""BOQ position hierarchy cycle detection (BUG-CYCLE01 / BUG-CYCLE02).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ position hierarchy cycle detection (BUG-CYCLE01 / BUG-CYCLE02).
 
 Regression coverage for the bug where ``parent_id`` could be set to:
 

@@ -1,4 +1,4 @@
-"""Tests for ``app.modules.bim_requirements.rule_runtime``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for ``app.modules.bim_requirements.rule_runtime``.
 
 Covers all 11 operators, multi-predicate selectors, mustache-style
 templating, missing-property semantics, pack-level aggregation, and

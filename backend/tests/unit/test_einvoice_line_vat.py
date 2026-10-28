@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Per-line VAT and the payment account, from the finance dicts outward.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-line VAT and the payment account, from the finance dicts outward.
 
 The mapper is where a mixed-rate invoice is either represented or flattened,
 so these drive it through the same dict shape the finance router builds.

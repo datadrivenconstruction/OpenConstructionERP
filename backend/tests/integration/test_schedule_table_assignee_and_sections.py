@@ -1,4 +1,4 @@
-"""The schedule Table view: assignee round trip and activities created inside a section.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The schedule Table view: assignee round trip and activities created inside a section.
 
 Two defects reported against the Table view:
 

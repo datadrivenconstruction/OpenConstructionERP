@@ -1,4 +1,4 @@
-"""A purchase order that has left draft keeps the figures it was approved with.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A purchase order that has left draft keeps the figures it was approved with.
 
 Approval is given to a sum, a vendor and a list of lines, and finance takes
 its commitment for exactly that sum. ``update_po`` used to let a PATCH change

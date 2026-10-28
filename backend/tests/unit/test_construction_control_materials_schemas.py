@@ -1,4 +1,4 @@
-"""Construction-control Pillar 2 schema validation (pure, no DB).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control Pillar 2 schema validation (pure, no DB).
 
 Pins the discriminators that keep the material passport and test-result schemas honest:
 the EN 10204 / EU CPR certificate grade, the create- vs update-time status grammar, the

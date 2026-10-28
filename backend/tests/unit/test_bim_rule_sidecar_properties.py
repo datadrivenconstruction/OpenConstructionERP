@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A quantity rule finds what property search finds, on a real Revit wall.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A quantity rule finds what property search finds, on a real Revit wall.
 
 The DDC import keeps at most 30 properties per element row in the database,
 while the Parquet sidecar keeps every column. A Revit wall carries 60+

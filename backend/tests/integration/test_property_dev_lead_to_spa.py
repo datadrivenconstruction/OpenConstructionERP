@@ -1,4 +1,4 @@
-"""Property Development R6 lead-to-SPA pipeline integration suite.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property Development R6 lead-to-SPA pipeline integration suite.
 
 Task #137 — extends ``property_dev`` with the full sales-pipeline
 backbone: Lead → Reservation → SalesContract (SPA) → PaymentSchedule

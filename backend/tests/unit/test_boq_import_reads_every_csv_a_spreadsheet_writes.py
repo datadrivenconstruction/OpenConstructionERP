@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every CSV a spreadsheet program writes imports as the same bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every CSV a spreadsheet program writes imports as the same bill.
 
 Excel alone writes a CSV a dozen ways: with or without a UTF-8 byte-order
 mark, in the ANSI code page of the machine, as "Unicode text" in UTF-16 with

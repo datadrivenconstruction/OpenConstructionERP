@@ -1,4 +1,4 @@
-"""What a tax row is not allowed to say, and where saying it is stopped.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a tax row is not allowed to say, and where saying it is stopped.
 
 The defect these rules exist for is a quiet one, which is what makes it worth
 guarding rather than documenting. ``combination`` defaults to ``national`` and

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The staffing demo seed applies a per-project story on top of its defaults, key by key."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The staffing demo seed applies a per-project story on top of its defaults, key by key."""
 
 from __future__ import annotations
 

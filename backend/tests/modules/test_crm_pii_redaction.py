@@ -1,4 +1,4 @@
-"""CRM PII-redaction unit tests (R7 audit).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRM PII-redaction unit tests (R7 audit).
 
 Covers the response-boundary redaction layer that hides ``contact_email``
 / ``contact_phone`` from non-owner viewers:

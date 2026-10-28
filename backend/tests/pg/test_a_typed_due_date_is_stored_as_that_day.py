@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A due date typed as 16 October is stored as 16 October, on a real PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A due date typed as 16 October is stored as 16 October, on a real PostgreSQL.
 
 The punch list's due date is a calendar day in a ``TIMESTAMPTZ`` column. The
 API used to hand the column the naive ``datetime(2026, 10, 16)`` that Pydantic

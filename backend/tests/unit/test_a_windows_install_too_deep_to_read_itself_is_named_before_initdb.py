@@ -1,4 +1,4 @@
-"""A Windows path over MAX_PATH is named, not reported as a corrupted install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A Windows path over MAX_PATH is named, not reported as a corrupted install.
 
 Windows caps a fully qualified path at 259 characters for programs that do not
 declare long-path support, and the bundled PostgreSQL binaries do not declare it,

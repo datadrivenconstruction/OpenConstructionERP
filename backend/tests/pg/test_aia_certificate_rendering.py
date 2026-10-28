@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the G703 lists, against the database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the G703 lists, against the database.
 
 The continuation sheet is built from the contract's schedule of values, and
 these are the shapes that used to render a certificate disagreeing with the

@@ -1,4 +1,4 @@
-"""The workspace UI appearance default rides on the branding payload.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The workspace UI appearance default rides on the branding payload.
 
 An admin pins accent, font, density and radius once; users without a personal
 choice follow it. These tests hold the contract: only allowed values survive,

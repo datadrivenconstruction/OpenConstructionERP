@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""New outside-SOV claims use the current ladder; issued history stays unchanged."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠New outside-SOV claims use the current ladder; issued history stays unchanged."""
 
 from copy import deepcopy
 from decimal import Decimal

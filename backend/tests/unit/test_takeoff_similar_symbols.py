@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Unit tests for seeded similar-symbol search ("count by example").
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for seeded similar-symbol search ("count by example").
 
 Exercises :func:`app.modules.takeoff.recognize.find_similar_symbols` with
 synthetic ``get_drawings()``-shaped input (plain tuples) - no PDF, PDF reader or

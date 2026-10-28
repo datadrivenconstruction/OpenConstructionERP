@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for ``app.modules.notifications.intl``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for ``app.modules.notifications.intl``.
 
 Pure - no database, no event bus. Covers the international, edge-case-safe
 notification analytics helpers: delivery / read rates with zero guards,

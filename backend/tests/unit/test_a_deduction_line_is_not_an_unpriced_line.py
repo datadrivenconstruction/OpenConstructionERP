@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""An imported deduction line carries no price on purpose and is not reported as unpriced.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An imported deduction line carries no price on purpose and is not reported as unpriced.
 
 A bill item with a negative amount is imported with its quantity and no price,
 flagged ``metadata.deduction``; one markup line on the bill takes its amount

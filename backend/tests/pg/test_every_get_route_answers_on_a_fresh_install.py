@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every GET route of a fresh install answers the demo admin without breaking.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every GET route of a fresh install answers the demo admin without breaking.
 
 A self-hosted user boots the platform with the demo seed on, signs in with the
 "Try demo" tile and clicks around. Each screen reads one or more GET routes, and

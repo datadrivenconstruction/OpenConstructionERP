@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A quantity rule ignores whitespace around a value, as property search does.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A quantity rule ignores whitespace around a value, as property search does.
 
 Revit exports often carry a trailing space ("Fase 1 "). Property search trimmed
 it and found the elements, the rule kept it and matched none of them.

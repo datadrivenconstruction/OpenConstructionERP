@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the DDC DWG parser keeps, and what it throws away.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the DDC DWG parser keeps, and what it throws away.
 
 A v12.6.1 report said DWG files upload but the drawing does not look like the
 source. Nothing covered ``parse_ddc_dwg_excel``, so every fidelity loss was

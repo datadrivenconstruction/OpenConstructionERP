@@ -1,4 +1,4 @@
-"""The guard that stops the tree adding bare-list endpoints faster than waves remove them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The guard that stops the tree adding bare-list endpoints faster than waves remove them.
 
 The pagination programme had a metering problem rather than an effort problem.
 Each wave migrated a batch of registers from ``list[...]`` to ``{items, total,

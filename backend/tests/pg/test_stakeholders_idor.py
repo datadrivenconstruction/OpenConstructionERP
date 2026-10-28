@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Who may read, mask and decide in the stakeholders API, over HTTP against PostgreSQL."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Who may read, mask and decide in the stakeholders API, over HTTP against PostgreSQL."""
 
 from __future__ import annotations
 

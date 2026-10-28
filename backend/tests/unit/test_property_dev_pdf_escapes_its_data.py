@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Names go into a property_dev PDF as text, not as markup.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Names go into a property_dev PDF as text, not as markup.
 
 A reportlab ``Paragraph`` takes a small HTML-like markup, so anything
 interpolated into one is parsed rather than printed. A developer called

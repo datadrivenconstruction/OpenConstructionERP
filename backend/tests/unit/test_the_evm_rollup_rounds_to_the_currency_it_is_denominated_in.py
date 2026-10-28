@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The scalar EVM rollup rounds money to the currency it is denominated in.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The scalar EVM rollup rounds money to the currency it is denominated in.
 
 ``app.core.money.money_quantum`` is the platform's single value-layer resolver
 for how many decimals an amount really has. Two surfaces in the schedule module

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""End to end: one project's budget, committed, invoiced and paid on the finance dashboard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠End to end: one project's budget, committed, invoiced and paid on the finance dashboard.
 
 A main contractor records supplier invoices, pays its subcontractors and wants
 one screen that says where the project stands. This drives exactly that job

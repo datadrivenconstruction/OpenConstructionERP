@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""BCF I/O round-trip test for the Coordination / Clash module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BCF I/O round-trip test for the Coordination / Clash module.
 
 Per the architecture guide §3: BCF is an allowed I/O format (XML over data, no
 IfcOpenShell). This test suite verifies that:

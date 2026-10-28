@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""HSE Advanced write-IDOR suite for the incident-keyed rows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HSE Advanced write-IDOR suite for the incident-keyed rows.
 
 Most of ``/api/v1/hse-advanced/`` hangs off a model that carries its own
 ``project_id``, and every one of those routes resolves it through the

@@ -1,4 +1,4 @@
-"""Every teams and roster read route checks project access at the route.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every teams and roster read route checks project access at the route.
 
 The service has always refused a stranger on these reads, and
 ``test_reading_a_project_you_are_not_on_answers_404`` pins that. What this

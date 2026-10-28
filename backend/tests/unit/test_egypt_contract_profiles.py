@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egypt's contract and payment rules live as data in the country-neutral registries.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egypt's contract and payment rules live as data in the country-neutral registries.
 
 Two profiles, decided by the project's ``works``: private works follow FIDIC
 and the contract (no Egyptian law sets retention), public works follow the

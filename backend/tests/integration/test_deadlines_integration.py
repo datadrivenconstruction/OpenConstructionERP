@@ -1,4 +1,4 @@
-"""Cross-module deadline register + sweep integration suite (item #18).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-module deadline register + sweep integration suite (item #18).
 
 Exercises the real aggregation path end to end against the shared
 ``tests/conftest.py`` embedded-PostgreSQL cluster:

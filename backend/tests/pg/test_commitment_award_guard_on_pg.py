@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The release guard on the tender award (``TenderingService.apply_winner``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The release guard on the tender award (``TenderingService.apply_winner``).
 
 An award above the item's release (plus tolerance) is warned and proceeds when
 the matrix enforces ``warn``, is refused with 409 and leaves the package and

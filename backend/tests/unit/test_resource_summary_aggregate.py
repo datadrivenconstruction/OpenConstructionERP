@@ -1,4 +1,4 @@
-"""Unit tests for the resource-summary aggregation library (pure, DB-free)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the resource-summary aggregation library (pure, DB-free)."""
 
 from decimal import Decimal
 

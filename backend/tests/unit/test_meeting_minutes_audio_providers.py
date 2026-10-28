@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Speech provider selection, minutes validation rules and the localized minutes PDF."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Speech provider selection, minutes validation rules and the localized minutes PDF."""
 
 from __future__ import annotations
 

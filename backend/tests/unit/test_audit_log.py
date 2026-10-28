@@ -1,4 +1,4 @@
-"""Unit tests for :mod:`app.core.audit_log` (the FSM-aware audit table).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :mod:`app.core.audit_log` (the FSM-aware audit table).
 
 Coverage:
     * ``log_activity`` flushes a row with the expected columns.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Document-identity validation on measurement writes (issue #238).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document-identity validation on measurement writes (issue #238).
 
 PDF takeoff measurements used to be identified by the PDF *filename*, so two
 same-named PDFs shared a measurement namespace. The invariant is now

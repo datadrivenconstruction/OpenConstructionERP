@@ -1,4 +1,4 @@
-"""Gap A module tests: ``PayrollService.finalize_batch`` against PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Gap A module tests: ``PayrollService.finalize_batch`` against PostgreSQL.
 
 Finalize approves a draft batch and posts its labour cost onto the project's
 cost-spine labour budget line via the shared

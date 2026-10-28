@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Every reader of a stored calendar reads a holiday the same way, and says so.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every reader of a stored calendar reads a holiday the same way, and says so.
 
 There used to be four conventions for the same stored column. One reader
 truncated each entry to ten characters, one passed it through whole, one

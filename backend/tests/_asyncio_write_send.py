@@ -1,4 +1,4 @@
-"""Keep the bytes the selector transport could not send yet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keep the bytes the selector transport could not send yet.
 
 CPython's ``_SelectorSocketTransport._write_send`` (3.12, still so in 3.12.11)
 pops the head of the write buffer before calling ``send()``. When the socket

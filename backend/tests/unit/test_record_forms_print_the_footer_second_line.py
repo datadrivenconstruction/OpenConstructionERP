@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The footer's second line on record forms.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The footer's second line on record forms.
 
 The purchase order, goods receipt, invoice and payment honour the print stamp
 and the registration line, in the form's own language, without touching the

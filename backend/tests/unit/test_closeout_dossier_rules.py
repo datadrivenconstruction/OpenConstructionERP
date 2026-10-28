@@ -1,4 +1,4 @@
-"""Handover dossier checklist: config, scope matching and the validation rules."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Handover dossier checklist: config, scope matching and the validation rules."""
 
 from __future__ import annotations
 

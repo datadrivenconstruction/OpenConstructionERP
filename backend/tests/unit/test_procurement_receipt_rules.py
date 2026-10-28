@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests - material certificates on goods receipts and the payment release rules (BF-01).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests - material certificates on goods receipts and the payment release rules (BF-01).
 
 Three layers, like the other procurement rule tests: the certificate catalogue
 and the pure checks, the rule classes with their messages in every shipped

@@ -1,4 +1,4 @@
-"""Demo story override of the plant register seeder: pure merge/validation and the shipped Ludwigsburg file."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo story override of the plant register seeder: pure merge/validation and the shipped Ludwigsburg file."""
 
 from __future__ import annotations
 

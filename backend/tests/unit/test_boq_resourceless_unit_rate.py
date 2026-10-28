@@ -1,4 +1,4 @@
-"""Founder bug: a Unit Rate on a position WITHOUT (contributing) resources must
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Founder bug: a Unit Rate on a position WITHOUT (contributing) resources must
 be directly editable and PERSIST; a blank / zero-quantity resource row must not
 lock the cell or wipe the manual rate. A position with a REAL resource keeps its
 derived, non-editable rate (the resource-driven invariant).

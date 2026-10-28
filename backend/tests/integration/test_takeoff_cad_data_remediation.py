@@ -1,4 +1,4 @@
-"""HTTP-level regression for the takeoff CAD-data remediation fixes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP-level regression for the takeoff CAD-data remediation fixes.
 
 Seeds an in-memory CAD session owned by the authenticated caller
 (standalone, so the uploader-only gate is what lets these requests

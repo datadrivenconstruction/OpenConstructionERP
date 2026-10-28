@@ -1,4 +1,4 @@
-"""Unit tests for the plain-language validation messages.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the plain-language validation messages.
 
 A non-expert should read a dry-run problem and know exactly which field to fill
 and where. These tests pin that the guidance stays actionable (says "Add ...")

@@ -1,4 +1,4 @@
-"""Offline-first lookup for regional reference data.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Offline-first lookup for regional reference data.
 
 The regional CWICR catalog CSVs are not shipped inside the package; they are
 downloaded on demand and cached, so a region imported once stays available

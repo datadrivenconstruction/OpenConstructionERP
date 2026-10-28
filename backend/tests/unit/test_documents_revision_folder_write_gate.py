@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Folder-permission write gate on ``upload_document_revision`` (Finding #25).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Folder-permission write gate on ``upload_document_revision`` (Finding #25).
 
 Background
 ----------

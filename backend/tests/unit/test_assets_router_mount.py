@@ -1,4 +1,4 @@
-"""Verify the Asset Operations router exposes the expected routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Verify the Asset Operations router exposes the expected routes.
 
 This is a lightweight mount check that does NOT spin up the full app
 lifespan (that path imports the unrelated ``oe_closeout`` module, whose

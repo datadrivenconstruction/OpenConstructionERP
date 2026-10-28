@@ -1,4 +1,4 @@
-"""A regional cost base load must not leave its own session broken.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A regional cost base load must not leave its own session broken.
 
 The onboarding job for a large base (55 719 items for Toronto) used to end as
 ``failed`` at 15% with "Can't reconnect until invalid transaction is rolled

@@ -1,4 +1,4 @@
-"""Every BOQ export format honours the sale-rate (embedded markups) mode.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Every BOQ export format honours the sale-rate (embedded markups) mode.
 
 One bill, one line of 2 x 100.00, overhead 10 % and a cumulative tax of 20 %.
 In the embedded mode every format must carry the sale rate 110.00 and leave

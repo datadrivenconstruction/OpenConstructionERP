@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fail if the Alembic revision graph that ships has more than one head.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Fail if the Alembic revision graph that ships has more than one head.
 
 Written the day three agents added a revision each in parallel and two of them
 chained off the same parent. Every one of them checked ``alembic heads`` inside

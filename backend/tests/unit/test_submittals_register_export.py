@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The printed submittal register carries what procurement runs on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The printed submittal register carries what procurement runs on.
 
 Follows ``test_pilot_documents_render_in_turkish.py``: the documents are
 rendered in Turkish and in English from rows whose text carries every letter

@@ -1,4 +1,4 @@
-"""Unit tests for the assembly factor synthesizer (DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the assembly factor synthesizer (DB-free).
 
 Covers the whole grounded factor-synthesis path that replaces the naive
 ``quantity = 1.0`` AI-generate generation:

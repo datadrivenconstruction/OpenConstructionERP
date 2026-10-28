@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The summer midday outdoor work ban, as data and as a field-time warning.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The summer midday outdoor work ban, as data and as a field-time warning.
 
 Saudi Arabia forbids outdoor work in direct sun from 12:00 to 15:00 between
 15 June and 15 September. The timesheet does not record whether a line was

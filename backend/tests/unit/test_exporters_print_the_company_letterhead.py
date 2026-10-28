@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The pay application, closeout cover, punch list and transmittal carry the letterhead.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The pay application, closeout cover, punch list and transmittal carry the letterhead.
 
 These four generators ignored workspace branding entirely: no logo, no company
 name, and the transmittal stamped the platform name into its author field

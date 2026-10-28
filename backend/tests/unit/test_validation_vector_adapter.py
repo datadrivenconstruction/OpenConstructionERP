@@ -1,4 +1,4 @@
-"""Unit tests for :class:`ValidationReportAdapter`."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for :class:`ValidationReportAdapter`."""
 
 from __future__ import annotations
 

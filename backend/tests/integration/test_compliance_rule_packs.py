@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Compliance rule-pack registry + project assignment (Item #27).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance rule-pack registry + project assignment (Item #27).
 
 Covers:
 1. The pure rule-pack helpers (lookup, validation, region suggestion, rule-set

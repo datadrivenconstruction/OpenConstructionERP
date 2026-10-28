@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The choices and the verdict of a streamed pack install.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The choices and the verdict of a streamed pack install.
 
 The activation dialog offers the country's cost bases before it installs them,
 lets the user untick one, loads the resource catalogue next to the work items,

@@ -1,4 +1,4 @@
-"""Unit tests for structured error logging in the reporting service (v2.4.0).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for structured error logging in the reporting service (v2.4.0).
 
 Before v2.4.0 :meth:`ReportingService.auto_recalculate_kpis` caught every
 sub-module failure with ``logger.debug(..., exc_info=True)`` — below the

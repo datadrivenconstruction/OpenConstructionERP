@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The rule that decides whether a contract has anybody who can sign it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The rule that decides whether a contract has anybody who can sign it.
 
 ``contracts.parties_complete`` used to apply only to a contract that was
 already active or completed, while the only moment its answer matters is the

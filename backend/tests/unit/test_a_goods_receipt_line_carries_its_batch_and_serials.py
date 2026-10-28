@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A procurement goods receipt line carries its batch or lot and serial numbers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A procurement goods receipt line carries its batch or lot and serial numbers.
 
 Procurement is the canonical purchasing flow. The supplier catalogue receipt
 line had batch/lot and serial tracking that procurement lacked; the fields now

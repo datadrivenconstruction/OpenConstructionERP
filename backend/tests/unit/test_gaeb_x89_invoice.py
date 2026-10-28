@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""GAEB X89 (Rechnung): the invoice of a progress claim, and the check of a received one.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠GAEB X89 (Rechnung): the invoice of a progress claim, and the check of a received one.
 
 Pure tests over the line mapping, the builder, the parser and the checker.
 No app, no database.

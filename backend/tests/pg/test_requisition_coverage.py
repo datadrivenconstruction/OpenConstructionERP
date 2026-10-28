@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How much of each BOQ resource the requisitions hold, and whether a line adds up (issue #516).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How much of each BOQ resource the requisitions hold, and whether a line adds up (issue #516).
 
 Drives ``/api/v1/procurement/requisitions`` and the buy list over HTTP against
 PostgreSQL. Pinned here:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit tests for outbound-email configuration diagnosis (``app.core.email``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for outbound-email configuration diagnosis (``app.core.email``).
 
 These pin the behaviour behind a support report where a user filled in every
 ``SMTP_*`` variable, saw no error anywhere, and never received a message. The

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Unit tests for the offline raster recognition detectors (issue #194).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit tests for the offline raster recognition detectors (issue #194).
 
 These exercise :mod:`app.modules.takeoff.raster_recognize` with a small
 synthetic image of black-outlined white rectangles on a white page, so no real

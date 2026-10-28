@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Tests for the changelog mirror guard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tests for the changelog mirror guard.
 
 ``scripts/check_changelog_mirror.py`` exists because the two changelogs drift
 silently, so the thing worth testing is that it goes red in BOTH directions. A

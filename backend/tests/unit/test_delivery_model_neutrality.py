@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The delivery model matches nothing by a literal code: carrier, procurement gate, rule 6, overrides.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The delivery model matches nothing by a literal code: carrier, procurement gate, rule 6, overrides.
 
 Every case shows the input that used to pass or be skipped. The governance
 side is read from the catalogues module 1 ships, through its read port.

@@ -1,4 +1,4 @@
-"""An unlabelled tender must never become a valid monetary competition."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠An unlabelled tender must never become a valid monetary competition."""
 
 from __future__ import annotations
 

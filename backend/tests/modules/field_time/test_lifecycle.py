@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Field-time timesheet lifecycle + payroll integration (CI-only, PostgreSQL).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field-time timesheet lifecycle + payroll integration (CI-only, PostgreSQL).
 
 Exercises the full ``draft -> submitted -> approved`` lifecycle, the validation
 gate (a 24 h over-booking blocks submission), reversal netting, approved-sheet

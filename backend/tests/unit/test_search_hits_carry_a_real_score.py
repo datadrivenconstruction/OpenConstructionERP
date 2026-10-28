@@ -1,4 +1,4 @@
-"""Unified search hits carry a relevance score, and it ranks them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unified search hits carry a relevance score, and it ranks them.
 
 Every result the global search returned scored 0%. The query path was
 fine - results came back - but ``_hit_from_row`` in the search service

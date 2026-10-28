@@ -1,4 +1,4 @@
-"""What a caller may do, answered by the function that refuses the request.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What a caller may do, answered by the function that refuses the request.
 
 The ``can`` flags of the API and the refusals of the service read the same
 functions in ``capabilities``. These tests pin the answers and pin that the

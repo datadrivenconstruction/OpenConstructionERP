@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Executes the FX migration in both directions against real PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Executes the FX migration in both directions against real PostgreSQL.
 
 Reading a migration proves nothing about it. The two claims worth checking are
 the two that only show up in production: that ``upgrade()`` is a no-op against a
