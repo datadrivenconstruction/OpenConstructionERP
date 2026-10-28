@@ -64462,6 +64462,7 @@ const resource = {
     "market.preview_unchanged": "Sin cambios ({{count}})",
     "market.onboarding_sets": "Esto configura: {{items}}",
     "market.change_later": "Puede cambiarlo más tarde en Ajustes.",
+    "packages.use_packages": "Empezar con paquetes de soluciones",
   }
 } as { translation: Record<string, string> };
 

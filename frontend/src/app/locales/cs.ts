@@ -62833,6 +62833,7 @@ const resource = {
     "market.preview_unchanged": "Beze změny ({{count}})",
     "market.onboarding_sets": "Toto nastaví: {{items}}",
     "market.change_later": "Později to můžete změnit v Nastavení.",
+    "packages.use_packages": "Začít raději balíčky řešení",
   }
 } as { translation: Record<string, string> };
 

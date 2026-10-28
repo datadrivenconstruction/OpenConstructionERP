@@ -61546,6 +61546,7 @@ const resource = {
     "market.preview_unchanged": "Без промяна ({{count}})",
     "market.onboarding_sets": "Това настройва: {{items}}",
     "market.change_later": "Можете да го промените по-късно в Настройки.",
+    "packages.use_packages": "Започнете с готови пакети решения",
   }
 } as { translation: Record<string, string> };
 

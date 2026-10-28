@@ -61500,6 +61500,7 @@ const resource = {
     "market.preview_unchanged": "Walang pagbabago ({{count}})",
     "market.onboarding_sets": "Itinatakda nito: {{items}}",
     "market.change_later": "Mababago mo ito mamaya sa Settings.",
+    "packages.use_packages": "Magsimula na lang sa mga solution package",
   }
 } as { translation: Record<string, string> };
 

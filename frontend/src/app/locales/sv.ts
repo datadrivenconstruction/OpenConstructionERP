@@ -62157,6 +62157,7 @@ const resource = {
     "market.preview_unchanged": "Oförändrat ({{count}})",
     "market.onboarding_sets": "Detta ställer in: {{items}}",
     "market.change_later": "Du kan ändra det senare under Inställningar.",
+    "packages.use_packages": "Börja i stället med lösningspaket",
   }
 } as { translation: Record<string, string> };
 

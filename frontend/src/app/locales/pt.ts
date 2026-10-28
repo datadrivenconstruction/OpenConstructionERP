@@ -64456,6 +64456,7 @@ const resource = {
     "market.preview_unchanged": "Inalterado ({{count}})",
     "market.onboarding_sets": "Isto configura: {{items}}",
     "market.change_later": "Pode alterar isto mais tarde nas Definições.",
+    "packages.use_packages": "Começar antes pelos pacotes de soluções",
   }
 } as { translation: Record<string, string> };
 

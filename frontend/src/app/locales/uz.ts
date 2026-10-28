@@ -62474,6 +62474,7 @@ const resource = {
     "market.preview_unchanged": "Oʻzgarishsiz ({{count}})",
     "market.onboarding_sets": "Sozlanadi: {{items}}",
     "market.change_later": "Buni keyinroq Sozlamalarda oʻzgartirishingiz mumkin.",
+    "packages.use_packages": "Buning o‘rniga tayyor yechim paketlaridan boshlash",
   }
 } as { translation: Record<string, string> };
 

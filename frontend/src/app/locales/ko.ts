@@ -61908,6 +61908,7 @@ const resource = {
     "market.preview_unchanged": "변경 없음 ({{count}})",
     "market.onboarding_sets": "설정 항목: {{items}}",
     "market.change_later": "나중에 설정에서 변경할 수 있습니다.",
+    "packages.use_packages": "대신 솔루션 패키지로 시작",
   }
 } as { translation: Record<string, string> };
 

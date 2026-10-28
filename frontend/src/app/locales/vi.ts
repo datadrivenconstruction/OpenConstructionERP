@@ -61300,6 +61300,7 @@ const resource = {
     "market.preview_unchanged": "Không đổi ({{count}})",
     "market.onboarding_sets": "Thiết lập: {{items}}",
     "market.change_later": "Bạn có thể đổi sau trong Cài đặt.",
+    "packages.use_packages": "Bắt đầu từ các gói giải pháp",
   }
 } as { translation: Record<string, string> };
 

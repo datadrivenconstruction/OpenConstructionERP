@@ -61890,6 +61890,7 @@ const resource = {
     "market.preview_unchanged": "Nepromijenjeno ({{count}})",
     "market.onboarding_sets": "Ovo postavlja: {{items}}",
     "market.change_later": "To možete promijeniti kasnije u Postavkama.",
+    "packages.use_packages": "Umjesto toga započnite s paketima rješenja",
   }
 } as { translation: Record<string, string> };
 

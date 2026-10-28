@@ -61880,6 +61880,7 @@ const resource = {
     "market.preview_unchanged": "Neschimbat ({{count}})",
     "market.onboarding_sets": "Aceasta configurează: {{items}}",
     "market.change_later": "Puteți modifica ulterior în Setări.",
+    "packages.use_packages": "Începeți în schimb cu pachete de soluții",
   }
 } as { translation: Record<string, string> };
 

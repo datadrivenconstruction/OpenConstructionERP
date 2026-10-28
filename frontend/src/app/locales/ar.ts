@@ -64652,6 +64652,7 @@ const resource = {
     "market.preview_unchanged": "بلا تغيير ({{count}})",
     "market.onboarding_sets": "يضبط هذا: {{items}}",
     "market.change_later": "يمكنك تغيير ذلك لاحقًا من الإعدادات.",
+    "packages.use_packages": "ابدأ بحزم الحلول بدلاً من ذلك",
   }
 } as { translation: Record<string, string> };
 

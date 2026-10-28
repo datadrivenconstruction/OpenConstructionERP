@@ -62423,6 +62423,7 @@ const resource = {
     "market.preview_unchanged": "Değişmedi ({{count}})",
     "market.onboarding_sets": "Bu şunları ayarlar: {{items}}",
     "market.change_later": "Bunu daha sonra Ayarlar'dan değiştirebilirsiniz.",
+    "packages.use_packages": "Bunun yerine çözüm paketleriyle başlayın",
   }
 } as { translation: Record<string, string> };
 

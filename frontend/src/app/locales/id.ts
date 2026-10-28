@@ -61291,6 +61291,7 @@ const resource = {
     "market.preview_unchanged": "Tidak berubah ({{count}})",
     "market.onboarding_sets": "Ini mengatur: {{items}}",
     "market.change_later": "Anda dapat mengubahnya nanti di Pengaturan.",
+    "packages.use_packages": "Mulai dari paket solusi saja",
   }
 } as { translation: Record<string, string> };
 

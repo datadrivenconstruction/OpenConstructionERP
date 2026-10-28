@@ -61292,6 +61292,7 @@ const resource = {
     "market.preview_unchanged": "ไม่เปลี่ยนแปลง ({{count}})",
     "market.onboarding_sets": "ตั้งค่า: {{items}}",
     "market.change_later": "คุณเปลี่ยนได้ภายหลังในการตั้งค่า",
+    "packages.use_packages": "เริ่มจากแพ็กเกจโซลูชันแทน",
   }
 } as { translation: Record<string, string> };
 

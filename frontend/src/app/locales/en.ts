@@ -55738,6 +55738,7 @@ const resource = {
     "market.preview_unchanged": "Unchanged ({{count}})",
     "market.onboarding_sets": "This sets up: {{items}}",
     "market.change_later": "You can change this later in Settings.",
+    "packages.use_packages": "Start from solution packages instead",
   }
 } as { translation: Record<string, string> };
 

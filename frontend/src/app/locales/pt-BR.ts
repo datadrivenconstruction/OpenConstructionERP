@@ -57117,6 +57117,7 @@ const resource = {
     "market.preview_unchanged": "Inalterado ({{count}})",
     "market.onboarding_sets": "Isto configura: {{items}}",
     "market.change_later": "Você pode alterar isso depois nas Configurações.",
+    "packages.use_packages": "Começar pelos pacotes de soluções",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

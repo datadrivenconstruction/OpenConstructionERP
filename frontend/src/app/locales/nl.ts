@@ -62423,6 +62423,7 @@ const resource = {
     "market.preview_unchanged": "Ongewijzigd ({{count}})",
     "market.onboarding_sets": "Dit stelt in: {{items}}",
     "market.change_later": "U kunt dit later wijzigen in Instellingen.",
+    "packages.use_packages": "Begin in plaats daarvan met oplossingspakketten",
   }
 } as { translation: Record<string, string> };
 

@@ -61502,6 +61502,7 @@ const resource = {
     "market.preview_unchanged": "Χωρίς αλλαγή ({{count}})",
     "market.onboarding_sets": "Ρυθμίζει: {{items}}",
     "market.change_later": "Μπορείτε να το αλλάξετε αργότερα στις Ρυθμίσεις.",
+    "packages.use_packages": "Ξεκινήστε αντί γι' αυτό από πακέτα λύσεων",
   }
 } as { translation: Record<string, string> };
 
