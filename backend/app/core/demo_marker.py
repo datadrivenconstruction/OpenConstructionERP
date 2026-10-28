@@ -1,7 +1,7 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 # AGPL-3.0 License
-"""Which projects are demo projects, and which demos the user removed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which projects are demo projects, and which demos the user removed.
 
 Every seeder that writes demo records asks one of the two questions here and
 nothing else. A demo project is one whose ``metadata_`` carries a ``demo_id``,

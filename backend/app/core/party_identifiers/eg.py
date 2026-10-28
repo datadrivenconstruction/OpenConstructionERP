@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egyptian party identifiers: tax registration number, national ID, commercial register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egyptian party identifiers: tax registration number, national ID, commercial register.
 
 The rules themselves, with their source, date read, confidence and expert
 review flag, are data rows in :mod:`app.core.validation.identifiers`. This

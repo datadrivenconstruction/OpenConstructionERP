@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Single source of truth for region/catalogue → language mapping.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Single source of truth for region/catalogue → language mapping.
 
 Two callsites historically maintained their own copy of this mapping:
 

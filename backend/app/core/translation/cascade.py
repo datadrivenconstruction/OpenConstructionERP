@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cascade orchestrator - runs the four translation tiers in order.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cascade orchestrator - runs the four translation tiers in order.
 
 Each tier returns either a ``TranslationResult`` (with a confidence score)
 or ``None`` (meaning "I can't help, try the next tier"). The cascade

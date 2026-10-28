@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The process registry: one place that knows every background process.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The process registry: one place that knows every background process.
 
 Each process is declared once with a :class:`ProcessSpec`. The registry decides
 whether it should run (env override, then persisted choice, then the default

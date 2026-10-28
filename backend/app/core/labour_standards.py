@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Statutory labour facts per country, as sourced and effective-dated data.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statutory labour facts per country, as sourced and effective-dated data.
 
 Working hours, leave entitlements, minimum wages and the general social
 insurance rates are national facts, so they live in

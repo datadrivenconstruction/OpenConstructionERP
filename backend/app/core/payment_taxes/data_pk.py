@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pakistan payment tax rows: income tax withheld from payments under a works contract.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pakistan payment tax rows: income tax withheld from payments under a works contract.
 
 **What is withheld.** Section 153(1)(c) of the Income Tax Ordinance, 2001 makes
 a withholding agent (a federal or provincial body, a company, an association

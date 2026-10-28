@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bulk-UPDATE helpers that leave the identity map honest.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bulk-UPDATE helpers that leave the identity map honest.
 
 A repository that issues ``UPDATE ... WHERE id = :pk`` writes past the ORM: the
 row changes but any instance the session already holds still carries the old

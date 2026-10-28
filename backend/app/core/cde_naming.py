@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Container code check hook: CDE asks, a numbering module answers, neither imports the other.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Container code check hook: CDE asks, a numbering module answers, neither imports the other.
 
 ``cde`` calls :func:`check_container_code` whenever a container is created or
 its code or ISO parts change. A module that holds a numbering scheme for the

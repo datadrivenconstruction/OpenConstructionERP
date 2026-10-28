@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The price-book half of a Turkish validation payload, read once per run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The price-book half of a Turkish validation payload, read once per run.
 
 Two ``birimfiyat`` rules judge a bill line against the unit-price book it
 cites: the unit the book defines the poz in, and the price the book publishes

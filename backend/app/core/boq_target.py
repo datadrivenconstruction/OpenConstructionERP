@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deciding which bill of quantities a project-scoped operation acts on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deciding which bill of quantities a project-scoped operation acts on.
 
 A bill of quantities is not unique per project. Nothing in the schema
 constrains ``project_id`` to one row, the listing endpoint returns a page, and

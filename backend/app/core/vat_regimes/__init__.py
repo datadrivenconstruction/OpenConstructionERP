@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""VAT regimes a contract can be taxed under, and who may choose which.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠VAT regimes a contract can be taxed under, and who may choose which.
 
 A VAT rate answers "how much of the price is tax". Some countries also ask
 two more questions of a contract, and the rate alone cannot answer them:

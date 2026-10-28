@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""No-op email backend.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠No-op email backend.
 
 Drops every message silently after a single DEBUG log line.  Intended
 for automated test suites where you want the send path to execute (so

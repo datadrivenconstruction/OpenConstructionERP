@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Public showcase demo: Lebensmittelmarkt Karlsruhe / Retail Market Karlsruhe.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public showcase demo: Lebensmittelmarkt Karlsruhe / Retail Market Karlsruhe.
 
 Greenfield single-storey discount-grocery store with a large surface car
 park in the Karlsruhe-Durlach commercial belt (DE). Sister pack to the

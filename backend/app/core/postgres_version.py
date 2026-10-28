@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Refuse to start against a PostgreSQL the platform does not support.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Refuse to start against a PostgreSQL the platform does not support.
 
 The minimum is :data:`MIN_REQUIRED_PG_VERSION`, kept in step with the server
 features the schema relies on (see ``backend/pyproject.toml``).

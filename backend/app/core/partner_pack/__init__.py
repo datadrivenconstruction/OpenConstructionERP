@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Partner-pack system - Shape A (preset bundles).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Partner-pack system - Shape A (preset bundles).
 
 A partner pack is a separate pip-installable Python package that registers
 itself via an ``importlib.metadata`` entry-point in the group

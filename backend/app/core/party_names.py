@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Read a person's name out of the id a register stored for them.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Read a person's name out of the id a register stored for them.
 
 Free-text person columns are everywhere in this codebase - ``assigned_to``,
 ``created_by``, ``submitted_by``, ``approved_by`` - and three different things

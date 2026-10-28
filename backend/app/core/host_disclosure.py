@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Keeping the server's own filesystem out of what an anonymous caller reads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keeping the server's own filesystem out of what an anonymous caller reads.
 
 A few endpoints answer without credentials on purpose. A status check that
 says whether a CAD converter is installed is one of them: the BIM page asks

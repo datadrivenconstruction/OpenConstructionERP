@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Printed form strings read from the platform's locale files.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Printed form strings read from the platform's locale files.
 
 The procurement and finance record forms used to keep their strings in Python
 dictionaries with English, German and Russian only, so every other language

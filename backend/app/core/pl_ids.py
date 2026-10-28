@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Polish business identifiers: NIP, REGON, KRS and the postal code.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Polish business identifiers: NIP, REGON, KRS and the postal code.
 
 Four identifiers a Polish counterparty prints on every invoice, contract and
 letterhead, and what can be checked about each without asking a register.

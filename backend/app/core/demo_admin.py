@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""When the seeded demo administrator is an administrator, and when not.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠When the seeded demo administrator is an administrator, and when not.
 
 A person who installs the platform for themselves with the demo seed on signs
 in through the "Admin" tile on the login page, which is the password-free demo

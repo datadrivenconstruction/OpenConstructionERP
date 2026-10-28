@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Stdlib-only file-signature (magic-byte) sniffer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Stdlib-only file-signature (magic-byte) sniffer.
 
 Filename extensions are fully controlled by the uploader, so they provide
 zero security guarantee. This module inspects the first few bytes of an

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Graph DAG executor - generalises ``match_elements.pipeline.run_stage``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Graph DAG executor - generalises ``match_elements.pipeline.run_stage``.
 
 The match-elements pipeline runs a *fixed* seven-stage tuple. This module
 runs a *user-authored DAG*: the node order is a Kahn topological sort (the

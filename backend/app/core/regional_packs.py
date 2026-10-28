@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""app.core.regional_packs - resolve a project's regional pack at runtime.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠app.core.regional_packs - resolve a project's regional pack at runtime.
 
 A regional pack declares what a market expects: its currency, its date and
 number formats, its standards, and - the part this module serves - its

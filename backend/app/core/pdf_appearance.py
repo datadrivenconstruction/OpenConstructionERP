@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persisted document appearance - how a generated PDF looks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persisted document appearance - how a generated PDF looks.
 
 :mod:`app.core.pdf_branding` made *who* the document belongs to configurable
 (the workspace logo and company name). It left the *look* hard-coded, and said

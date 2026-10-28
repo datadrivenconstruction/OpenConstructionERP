@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DSL parser - YAML/JSON document → typed AST.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DSL parser - YAML/JSON document → typed AST.
 
 The parser is the *only* entry point that touches user-supplied text
 (see ``compile_rule`` in :mod:`.evaluator`). It is responsible for:

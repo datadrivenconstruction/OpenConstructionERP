@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Verify and unpack a DDC converter package (a ``.zip`` or ``.tar.gz`` of a release).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Verify and unpack a DDC converter package (a ``.zip`` or ``.tar.gz`` of a release).
 
 Standard library only. The two steps the installer must not get wrong live
 here so they can be tested without a network: the digest check, and the

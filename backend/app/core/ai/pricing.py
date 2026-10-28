@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Per-model USD cost table - shared across AI modules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Per-model USD cost table - shared across AI modules.
 
 Both ``clash_ai_triage`` (verdict persistence) and ``ai`` (estimate jobs)
 write ``cost_usd_estimate`` columns alongside ``tokens_used`` so per-tenant

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Background process registry (the "Processes" center).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Background process registry (the "Processes" center).
 
 Declare a process once with :class:`ProcessSpec` on :data:`process_registry`;
 the registry starts, stops, restarts and reports it.

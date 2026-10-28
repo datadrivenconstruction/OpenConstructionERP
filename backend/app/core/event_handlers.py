@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-module event handlers -- wires the critical inter-module dataflows.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-module event handlers -- wires the critical inter-module dataflows.
 
 Imported at startup to register all handlers with the event bus.
 Each handler is thin: validates the event, calls the target module's service.

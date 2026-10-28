@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Company-type presets for the onboarding wizard and the Modules page.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Company-type presets for the onboarding wizard and the Modules page.
 
 Each preset is a *role-based starting point*: it declares which optional
 modules a given kind of company sees by default.  The user picks a profile

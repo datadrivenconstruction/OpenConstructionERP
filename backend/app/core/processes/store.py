@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persistence of the desired on/off state of every background process.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persistence of the desired on/off state of every background process.
 
 One row per process id in ``oe_process_settings``. Two reserved keys carry
 installation-level facts: :data:`FRESH_KEY` (this installation started with

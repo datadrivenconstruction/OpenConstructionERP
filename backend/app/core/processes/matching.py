@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The two cost-matching models as registry processes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The two cost-matching models as registry processes.
 
 ``cwicr_ranker`` is the CWICR vector store client plus the BGE-M3 encoder the
 CWICR collections were embedded with; ``bge_reranker`` is the cross-encoder

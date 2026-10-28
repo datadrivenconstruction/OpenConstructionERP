@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""High-level helpers around the JobRun row - RFC 34 §4 W0.1.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠High-level helpers around the JobRun row - RFC 34 §4 W0.1.
 
 This module is the API surface every other Wave (CDE upload pipeline,
 BIM diff engine, EAC validator, QTO export, …) talks to:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persisted company profile - the letterhead printed on generated documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persisted company profile - the letterhead printed on generated documents.
 
 Some firms cannot send an RFI, a transmittal or a certificate without their
 formal letterhead on it: the registered name, the address, the licence or

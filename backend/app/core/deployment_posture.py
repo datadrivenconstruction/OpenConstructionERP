@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure builder for the in-product Data & Security posture (#4).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure builder for the in-product Data & Security posture (#4).
 
 No I/O and no settings access: the caller resolves every fact (deployment mode,
 whether an external database is configured, which AI providers are present) and

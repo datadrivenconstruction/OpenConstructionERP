@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Reusable PDF stamp / burn core.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reusable PDF stamp / burn core.
 
 This module owns the *pure-ish* stamp logic that overlays an approval
 stamp onto a PDF and expands the canonical SVG placeholders. It was

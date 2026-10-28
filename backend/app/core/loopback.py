@@ -1,4 +1,4 @@
-"""Is this request coming from the machine the server runs on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Is this request coming from the machine the server runs on.
 
 Two endpoints answer only to the local desktop shell - the first-run bootstrap
 that auto-provisions the workspace owner, and the shutdown request the launcher

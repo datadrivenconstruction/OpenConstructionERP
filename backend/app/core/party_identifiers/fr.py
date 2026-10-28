@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""French company identifiers: SIREN and SIRET.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠French company identifiers: SIREN and SIRET.
 
 Both end in a Luhn key (INSEE). The shape failure and the key failure are kept
 apart on purpose: the public e-invoicing platform only tests "nine digits"

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared upload safety guards.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared upload safety guards.
 
 Centralises the size/format checks that live on every multipart upload
 endpoint so the policy (and the error surface) stays identical across

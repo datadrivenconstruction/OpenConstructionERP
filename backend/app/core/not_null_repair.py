@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Restore a NOT NULL and its default on a column the boot heal added nullable.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Restore a NOT NULL and its default on a column the boot heal added nullable.
 
 The exact inverse of :func:`app.core.postgres_migrator._relax_not_null`, and it
 exists for the opposite reason. The heal adds a missing column with

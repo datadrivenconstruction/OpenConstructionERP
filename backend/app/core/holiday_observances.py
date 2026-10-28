@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Announced observed dates of public holidays, held as data.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Announced observed dates of public holidays, held as data.
 
 Some governments decide each year, by decree, on which day a holiday is
 actually observed: Egypt moves most midweek national days to the Thursday, and

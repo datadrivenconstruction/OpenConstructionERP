@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Names of the seeded cost build-up rows, in the language of the demo project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Names of the seeded cost build-up rows, in the language of the demo project.
 
 A demo position is broken down into material, labour and equipment rows
 (``metadata.resources``). The generator in ``demo_projects`` writes each row

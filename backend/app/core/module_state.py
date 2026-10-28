@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persistent module state -- tracks enabled/disabled status across restarts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persistent module state -- tracks enabled/disabled status across restarts.
 
 Stores state in a JSON file alongside the database.  Core modules cannot be disabled.
 

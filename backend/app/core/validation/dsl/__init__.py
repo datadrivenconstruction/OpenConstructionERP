@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Compliance DSL - author validation rules as YAML/JSON snippets.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance DSL - author validation rules as YAML/JSON snippets.
 
 Companion to :mod:`app.core.validation.engine` that lets non-programmer
 users (compliance officers, QS leads, project owners) compose new

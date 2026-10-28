@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Which bill positions a seeded tender package covers, decided by trade.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which bill positions a seeded tender package covers, decided by trade.
 
 A demo pack names its tender packages in its own language ("Innenausbau:
 Trockenbau, Doppelboden, Akustikdecken, Bodenbeläge, Türen", "Building

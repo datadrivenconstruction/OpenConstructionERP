@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Dialect-aware date arithmetic for SQL expressions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Dialect-aware date arithmetic for SQL expressions.
 
 PostgreSQL subtracts one ``DATE`` from another and gives whole days as an
 integer. SQLite has no date type at all - a ``Date`` column is stored as the

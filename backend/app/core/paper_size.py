@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Which sheet of paper a generated document is laid out on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which sheet of paper a generated document is laid out on.
 
 ``oe_users_user.paper_size`` was offered in Settings, stored, and read by no
 generator in the tree, so choosing a size changed nothing. This module is the

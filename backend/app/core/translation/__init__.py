@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Translation service - element → catalog cross-lingual normalisation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Translation service - element → catalog cross-lingual normalisation.
 
 Public entrypoint:
 

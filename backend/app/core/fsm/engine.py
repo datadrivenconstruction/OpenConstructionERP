@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Declarative finite-state-machine helper for entity status transitions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Declarative finite-state-machine helper for entity status transitions.
 
 This module supplies a tiny FSM toolkit used to enforce workflow integrity
 across core OpenConstructionERP entities (BOQ, Project, Invoice, NCR, RFQ,

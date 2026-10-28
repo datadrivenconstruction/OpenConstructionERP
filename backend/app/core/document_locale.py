@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Locale resolution for generated documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locale resolution for generated documents.
 
 A document is not an API response. The API can answer in any of the
 locales listed in :data:`app.core.i18n.SUPPORTED_LOCALES`, because those

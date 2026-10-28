@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Port: what other modules do when a legal effect of an acceptance is confirmed.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Port: what other modules do when a legal effect of an acceptance is confirmed.
 
 The quality concept records that a person confirmed an effect of an accepted
 unit (the final account becomes due, a retention is released, the risk passes).

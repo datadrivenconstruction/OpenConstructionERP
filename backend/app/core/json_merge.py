@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Canonical shallow-merge helper for the ``metadata_`` JSON column.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Canonical shallow-merge helper for the ``metadata_`` JSON column.
 
 Almost every module stores a free-form ``metadata_`` JSON dict on its ORM
 rows. The HTTP contract for these resources is a PATCH that *merges* into the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Factory for per-module ``/vector/status/`` and ``/vector/reindex/`` routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Factory for per-module ``/vector/status/`` and ``/vector/reindex/`` routes.
 
 Every module that plugs into the cross-module semantic memory layer
 (``app.core.vector_index``) needs the same two HTTP endpoints:

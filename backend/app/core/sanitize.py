@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Input sanitization for user-supplied text.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Input sanitization for user-supplied text.
 
 We don't want to run user text through a full HTML sanitizer (``bleach``)
 because most construction-ERP fields (project descriptions, BOQ positions,

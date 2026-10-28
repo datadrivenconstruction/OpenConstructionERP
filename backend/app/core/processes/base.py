@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Process building blocks: the ``ManagedProcess`` contract and ready-made shapes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Process building blocks: the ``ManagedProcess`` contract and ready-made shapes.
 
 A managed process owns whatever it starts (an asyncio task, a thread, a loaded
 model) so the registry can stop and restart it without leaking anything. The

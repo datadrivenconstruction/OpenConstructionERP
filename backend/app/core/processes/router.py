@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""API of the processes center, mounted at ``/api/v1/processes``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠API of the processes center, mounted at ``/api/v1/processes``.
 
 Any signed-in user may read the list (non-admins get it without logs and error
 details) and ask for a module's processes to warm up; every change is

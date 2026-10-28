@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Core email abstractions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Core email abstractions.
 
 Defines the ``EmailMessage`` value object and the ``EmailBackend`` protocol
 that every concrete backend (console, smtp, noop, memory) must satisfy.

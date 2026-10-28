@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``italy`` rule set: an Italian bill read against its prezzario regionale.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``italy`` rule set: an Italian bill read against its prezzario regionale.
 
 The Italy pack declares eleven ``prezzario.*`` rule ids in
 ``packs/italy-it/.../rule_packs/prezzario_regionale.json``. Five of them are

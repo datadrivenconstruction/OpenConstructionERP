@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Find the header row of an uploaded spreadsheet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Find the header row of an uploaded spreadsheet.
 
 Importers used to take row 1 as the header, always. An export that carries
 the company letterhead (:mod:`app.core.xlsx_branding`) has the firm's name,

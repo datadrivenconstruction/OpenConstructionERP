@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tamper-evident export headers for register / report downloads.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tamper-evident export headers for register / report downloads.
 
 Why this exists
 ===============

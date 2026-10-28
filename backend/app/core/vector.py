@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Vector database integration - LanceDB (embedded) or Qdrant (server).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Vector database integration - LanceDB (embedded) or Qdrant (server).
 
 Default: LanceDB - embedded vector DB, runs in-process like SQLite.
 No Docker, no server, no network. Data at ~/.openestimator/data/vectors/.

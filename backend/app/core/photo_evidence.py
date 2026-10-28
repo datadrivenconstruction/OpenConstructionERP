@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Evidence-grade photo records for field items (punch items, defects).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Evidence-grade photo records for field items (punch items, defects).
 
 A site photo used as evidence has to answer four questions later, often in a
 dispute: where was it taken, when, which way was the camera pointing, and is

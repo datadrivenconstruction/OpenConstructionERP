@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Printable registers and record forms shared by the project-control modules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Printable registers and record forms shared by the project-control modules.
 
 A register (the RFI log, the submittal log, the correspondence log, the
 variation log) is a contractual record: it is printed, attached to a letter

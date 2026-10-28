@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The company letterhead on generated Excel workbooks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The company letterhead on generated Excel workbooks.
 
 The PDF side prints the firm's letterhead through :mod:`app.core.pdf_branding`.
 A bill of quantities, an RFI log or an invoice register that leaves the office

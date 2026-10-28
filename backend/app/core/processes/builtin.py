@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedulers, sweepers and cache warm-ups as registry processes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedulers, sweepers and cache warm-ups as registry processes.
 
 Everything here used to be a bare ``asyncio.create_task`` in the startup
 handler: no handle was kept, nothing cancelled it on shutdown, and nobody could

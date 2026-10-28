@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Find the country-shaped registries in the tree, without being told where they are.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Find the country-shaped registries in the tree, without being told where they are.
 
 :mod:`app.core.country_coverage` asks one question of every country-shaped
 registry in the product. Its denominator used to be the set of probes somebody

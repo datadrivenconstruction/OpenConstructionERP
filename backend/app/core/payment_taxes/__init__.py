@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment taxes shared by the payment certificate, the tax ledger and the e-invoice.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment taxes shared by the payment certificate, the tax ledger and the e-invoice.
 
 One calculation, so the three documents cannot disagree about a number.
 """

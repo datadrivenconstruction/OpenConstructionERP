@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Universal request/response types for the element-to-CWICR matcher.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Universal request/response types for the element-to-CWICR matcher.
 
 Every source pipeline (BIM, PDF, DWG, photo) feeds the same
 :class:`ElementEnvelope` into the matcher. The envelope is intentionally

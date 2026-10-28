@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Running an upgrade of this install, and knowing when it cannot be run at all.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Running an upgrade of this install, and knowing when it cannot be run at all.
 
 The desktop app ships as a PyInstaller sidecar, so ``sys.executable`` there is
 the frozen binary rather than an interpreter. A ``[sys.executable, "-m", "pip",

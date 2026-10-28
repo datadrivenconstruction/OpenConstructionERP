@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Discover partner packs - via pip entry-points and via the repo ``packs/`` dir.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Discover partner packs - via pip entry-points and via the repo ``packs/`` dir.
 
 A partner pack registers via the entry-point group
 ``openconstructionerp.partner_packs``::

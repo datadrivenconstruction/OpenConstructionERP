@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deterministic-mode helpers for the match pipeline.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deterministic-mode helpers for the match pipeline.
 
 Background
 ==========

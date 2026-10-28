@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The people a demo project has besides its owner.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The people a demo project has besides its owner.
 
 A demo project is installed with one person on it, its owner. Stories that
 show a decision need a second one: under four-eyes whoever owns an area cannot

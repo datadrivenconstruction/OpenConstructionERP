@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for an uploaded workspace logo.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for an uploaded workspace logo.
 
 The logo is public (the login page shows it before sign-in) and is drawn by
 every browser, so it is checked on the server rather than trusted from the

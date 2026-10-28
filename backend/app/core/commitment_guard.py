@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The commitment guard: one call a document module makes before it binds money.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The commitment guard: one call a document module makes before it binds money.
 
 A module that creates or increases a commitment (award, contract activation or
 value change, PO approval or issue, change or variation approval, contingency

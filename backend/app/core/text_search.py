@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Free-text matching for catalogue pickers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Free-text matching for catalogue pickers.
 
 A picker filter built as one ``ILIKE '%<whole query>%'`` answers a question
 nobody asks. Estimators type the words that tell entries apart, not a prefix

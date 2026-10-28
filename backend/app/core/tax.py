@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""app.core.tax - unified VAT/GST rate lookup.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠app.core.tax - unified VAT/GST rate lookup.
 
 Exposes a single :func:`get_vat_rate` entry point so callers never need to
 know which pack owns a given country code.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What every register export has to look up before it can print.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What every register export has to look up before it can print.
 
 The renderers in :mod:`app.core.register_export` are pure: they take names and
 never touch the database. Something has to turn a project id into the name,

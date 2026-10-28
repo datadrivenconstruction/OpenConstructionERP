@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Ask one question of every country-shaped registry in the product.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Ask one question of every country-shaped registry in the product.
 
 The product has several registries that vary by country, each invented where it
 was needed and each with its own shape: a tuple of dicts with a ``country_code``

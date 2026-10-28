@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FSM package public API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FSM package public API.
 
 Importing from :mod:`app.core.fsm` gives you the engine primitives plus
 the six entity-specific FSMs registered in :mod:`app.core.fsm.registry`.

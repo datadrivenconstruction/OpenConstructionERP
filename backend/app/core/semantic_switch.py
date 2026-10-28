@@ -1,4 +1,4 @@
-"""The installation-wide switch for semantic search.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The installation-wide switch for semantic search.
 
 Semantic search loads a sentence-transformers model (several hundred MB of
 RAM once torch is in) and opens the vector store. On a machine with little

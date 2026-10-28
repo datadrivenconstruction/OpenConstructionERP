@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Retention policy for visitor uploads on the public hosted demo.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Retention policy for visitor uploads on the public hosted demo.
 
 Off by default, and off by construction rather than by configuration
 discipline. Nothing in this module deletes anything unless BOTH of these are

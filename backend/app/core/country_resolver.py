@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resolve a free-text country name to an ISO 3166-1 alpha-2 code.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resolve a free-text country name to an ISO 3166-1 alpha-2 code.
 
 Best-effort, no external dependencies. When a user types "Deutschland"
 instead of selecting from an autocomplete, the project's ``country_code``

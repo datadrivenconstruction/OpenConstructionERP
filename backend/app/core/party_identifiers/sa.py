@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Saudi Arabia: VAT registration number and Commercial Registration number.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Saudi Arabia: VAT registration number and Commercial Registration number.
 
 ``vat``
     The 15-digit VAT registration number ZATCA issues. It starts and ends with

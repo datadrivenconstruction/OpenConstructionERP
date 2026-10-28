@@ -1,4 +1,4 @@
-"""Whether this install may ask the internet for a newer version.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Whether this install may ask the internet for a newer version.
 
 The product carries two update checks. The desktop launcher asks GitHub for
 itself (``desktop/src-tauri/src/update_check.rs``), and the signed-in web UI

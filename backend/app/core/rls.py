@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Row-level-security tenant plumbing (default OFF).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Row-level-security tenant plumbing (default OFF).
 
 PostgreSQL row-level security is the backstop under the app-layer tenant
 guards: even if a query forgets its ``tenant_id`` filter, the database refuses

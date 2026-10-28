@@ -1,4 +1,4 @@
-"""Single source of truth for the width of alembic's own version table.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Single source of truth for the width of alembic's own version table.
 
 Alembic's ``DefaultImpl.version_table_impl`` hardcodes
 ``version_num VARCHAR(32)``. Many revision ids in this project are long

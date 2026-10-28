@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Keep user text in a workbook text, not a formula.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keep user text in a workbook text, not a formula.
 
 openpyxl types a cell from the value it is given, so a note a user typed as
 ``=SUM(A1:A5)``, or a smiley written ``=) done``, is stored as a formula. Two

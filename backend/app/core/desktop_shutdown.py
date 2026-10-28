@@ -1,4 +1,4 @@
-"""Clean shutdown request served for the desktop launcher.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clean shutdown request served for the desktop launcher.
 
 Why this exists. The desktop shell stopped its backend by killing the process
 tree, which crash-stops the embedded PostgreSQL cluster on every normal close of

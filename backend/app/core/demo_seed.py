@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persisted demo-seed choice (first-run "Load demo projects?" decision).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persisted demo-seed choice (first-run "Load demo projects?" decision).
 
 The startup seeder (``app.main._seed_demo_account``) installs demo accounts
 and showcase projects unless ``SEED_DEMO`` says otherwise. The environment

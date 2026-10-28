@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Public showcase demo: Lebensmittelmarkt Heilbronn / Retail Market Heilbronn.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public showcase demo: Lebensmittelmarkt Heilbronn / Retail Market Heilbronn.
 
 New-build single-storey food retail market with parking facilities in the
 Wannenäcker commercial belt, Heilbronn-Böckingen (DE). Ninth showcase

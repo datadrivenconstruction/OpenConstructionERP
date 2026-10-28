@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Where the DDC converters come from - one declaration, one place.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Where the DDC converters come from - one declaration, one place.
 
 The converters are published as packages on a GitHub *release* of
 ``datadrivenconstruction/cad2data-Revit-IFC-DWG``. Release 2026.10.0 replaced

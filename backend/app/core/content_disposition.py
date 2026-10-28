@@ -1,4 +1,4 @@
-"""Content-Disposition headers that survive non-ASCII document names.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Content-Disposition headers that survive non-ASCII document names.
 
 Export endpoints used to build the header from
 ``name.encode("ascii", errors="replace")``, which turns every character outside

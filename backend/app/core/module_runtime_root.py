@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""A second home for modules, outside the source tree.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠A second home for modules, outside the source tree.
 
 Modules that ship with the platform live in ``backend/app/modules``. Modules a
 user installs at runtime must not, for two reasons that both bite in

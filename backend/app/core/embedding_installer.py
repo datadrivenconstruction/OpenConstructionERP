@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Encoder-weight installer - a non-critical background download.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Encoder-weight installer - a non-critical background download.
 
 Semantic search needs an encoder, and the encoder is the one asset the
 platform cannot ship inside the package: the weights are hundreds of

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One commercial story for every demo seeder that deals in money.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One commercial story for every demo seeder that deals in money.
 
 The reconciliation register and the earned-value baseline are shown one after
 another in the same walkthrough: a viewer reads the margin on one screen and

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CPM under explicit scheduling options (a scheduling profile).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CPM under explicit scheduling options (a scheduling profile).
 
 The plain pass in :func:`app.core.cpm.calculate_cpm` plans: it knows no data
 date, no actuals, lags run in elapsed days and every activity without a

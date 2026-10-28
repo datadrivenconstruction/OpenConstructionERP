@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""National identifiers, as data rows that say where each rule came from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠National identifiers, as data rows that say where each rule came from.
 
 One validator answers for every country: :func:`validate_identifier` takes a
 country, a kind and a value, and judges the value by the row filed under that

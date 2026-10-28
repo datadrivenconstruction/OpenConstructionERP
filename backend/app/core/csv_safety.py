@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CSV / spreadsheet formula-injection neutralisation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CSV / spreadsheet formula-injection neutralisation.
 
 Spreadsheet applications (Excel, Google Sheets, LibreOffice Calc) interpret
 any cell whose textual value begins with ``=``, ``+``, ``-``, ``@``, a tab

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DSL evaluator - AST → :class:`ValidationRule` instance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DSL evaluator - AST → :class:`ValidationRule` instance.
 
 Given a :class:`~app.core.validation.dsl.parser.RuleDefinition` produced
 by :func:`~app.core.validation.dsl.parser.parse_definition`, this module

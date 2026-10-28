@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""One-click full-workspace installer for a partner pack.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠One-click full-workspace installer for a partner pack.
 
 Implements the orchestration endpoint described in
 ``docs/country-pack-oneclick/DESIGN.md`` §5. A single admin call installs an

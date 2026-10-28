@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared company branding for every reportlab-generated PDF (issue #284).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared company branding for every reportlab-generated PDF (issue #284).
 
 Every PDF generator in the platform used to hard-code the literal
 ``"OpenConstructionERP"`` brand string, the ``#1a1a2e`` accent and the

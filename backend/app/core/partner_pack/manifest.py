@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PartnerPackManifest - the Pydantic schema each partner pack exports."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PartnerPackManifest - the Pydantic schema each partner pack exports."""
 
 from __future__ import annotations
 

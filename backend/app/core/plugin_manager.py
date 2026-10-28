@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Module plugin manager - download, install, update, uninstall modules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Module plugin manager - download, install, update, uninstall modules.
 
 Modules are distributed as zip archives with a standard structure:
     module-name/

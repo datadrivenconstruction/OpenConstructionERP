@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Which asyncio event loop the HTTP server runs on.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which asyncio event loop the HTTP server runs on.
 
 On Windows the server keeps the proactor loop that uvicorn picks there by
 default, with one change: a failed accept is retried instead of ending the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Photo element → envelope adapter + EXIF GPS extraction.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Photo element → envelope adapter + EXIF GPS extraction.
 
 The envelope adapter exercises the matcher interface end-to-end with a
 partial-quality envelope so the rest of the system doesn't block waiting

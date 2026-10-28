@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Statutory late payment in commercial transactions: dated interest, term caps, recovery compensation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statutory late payment in commercial transactions: dated interest, term caps, recovery compensation.
 
 Country-neutral engine over ``country_data/late_payment.json``. A country row
 states the statute, the reference rate it hangs the interest on and the day

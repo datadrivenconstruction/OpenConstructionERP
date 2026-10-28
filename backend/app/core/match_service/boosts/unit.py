@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unit boost - rewards unit alignment, penalises type-mismatches.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unit boost - rewards unit alignment, penalises type-mismatches.
 
 CWICR position units stay in canonical short codes: ``m``, ``m2`` /
 ``m²``, ``m3`` / ``m³``, ``kg``, ``pcs``, ``lsum``. Element envelopes

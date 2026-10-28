@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""WBS tree check hook: ``projects`` stores the tree, a rules module answers, neither imports the other.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠WBS tree check hook: ``projects`` stores the tree, a rules module answers, neither imports the other.
 
 ``projects`` brackets a WBS node create or update that does not go through
 the design module's own endpoints: :func:`wbs_violations` before the write,

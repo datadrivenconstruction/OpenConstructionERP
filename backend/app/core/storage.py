@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Storage backend abstraction for binary blobs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Storage backend abstraction for binary blobs.
 
 Used by BIM geometry files, CAD uploads, takeoff PDFs, and generated
 reports - anything that today lives under ``data/`` on the local

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bounded, context-preserving batches for independent event side effects.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bounded, context-preserving batches for independent event side effects.
 
 Unlike BOQ's keyed queue, this queue never merges or replaces an event. FIFO
 order is preserved, including across request contexts. Only consecutive items

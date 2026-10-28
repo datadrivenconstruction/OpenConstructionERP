@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Run a boot-time baseline seed once per application version.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Run a boot-time baseline seed once per application version.
 
 The baseline seeds (countries and taxes, starter cost items, regional indices,
 house-type presets) are idempotent, but each still queried its tables on every

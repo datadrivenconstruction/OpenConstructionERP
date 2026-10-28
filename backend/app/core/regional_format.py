@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How a country writes a number and a date on a generated document.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How a country writes a number and a date on a generated document.
 
 The question this answers
 -------------------------

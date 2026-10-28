@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""LLM rerank tier - opt-in, cost-capped, gracefully degrades.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠LLM rerank tier - opt-in, cost-capped, gracefully degrades.
 
 When ``MatchRequest.use_reranker=True`` the ranker calls
 :func:`rerank_top_k` to ask an LLM to re-score the top candidates by

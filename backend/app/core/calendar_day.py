@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Calendar days kept in timestamp columns.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Calendar days kept in timestamp columns.
 
 Some date-only fields (a punch item's due date, for one) live in a
 ``TIMESTAMP WITH TIME ZONE`` column. A calendar day has no time and no zone,

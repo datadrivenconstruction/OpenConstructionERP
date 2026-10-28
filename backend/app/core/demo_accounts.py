@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The seeded demo identities, named once.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The seeded demo identities, named once.
 
 These three addresses are logins, not mailboxes. They live on a domain we
 own, and on that domain exactly one mailbox exists, so a message addressed

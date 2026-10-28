@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""What the platform already does for a country, with or without a pack.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠What the platform already does for a country, with or without a pack.
 
 A pack does not set VAT, public holidays, e-invoicing or statutory payment
 terms. Those come from core registries keyed by the project's country, and a

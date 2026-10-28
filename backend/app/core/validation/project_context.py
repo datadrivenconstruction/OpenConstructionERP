@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""The project-derived half of a validation payload, built in one place.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The project-derived half of a validation payload, built in one place.
 
 A rule reads its inputs from the mapping the caller hands the engine, and a
 rule whose input is missing returns nothing rather than failing. So a surface

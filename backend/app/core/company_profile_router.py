@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Company profile API - the letterhead printed on generated documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Company profile API - the letterhead printed on generated documents.
 
     GET    /api/v1/company-profile/         - any signed-in user. The settings
                                               preview reads it, and so does an

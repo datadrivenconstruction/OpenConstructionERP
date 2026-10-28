@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Statutory social insurance contributions on wages, per country. Data, not branches.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Statutory social insurance contributions on wages, per country. Data, not branches.
 
 What an hour of labour costs a contractor is the wage plus what the law adds
 on top of it, and the second part is national: who pays, how much, on which

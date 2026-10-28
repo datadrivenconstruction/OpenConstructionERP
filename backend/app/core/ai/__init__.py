@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared AI primitives used by multiple business modules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared AI primitives used by multiple business modules.
 
 Currently exposes:
 

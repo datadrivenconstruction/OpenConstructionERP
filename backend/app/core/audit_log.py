@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Generic activity-log table and write-through helper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Generic activity-log table and write-through helper.
 
 This is the FSM-aware companion to :mod:`app.core.audit`. While ``audit``
 records arbitrary CRUD actions on any entity, ``audit_log`` is structured

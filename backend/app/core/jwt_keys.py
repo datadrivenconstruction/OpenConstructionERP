@@ -1,4 +1,4 @@
-"""JWT signing key ring with ``kid`` headers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠JWT signing key ring with ``kid`` headers.
 
 Every token the platform mints is signed with the current ``JWT_SECRET`` and
 carries a ``kid`` header derived from that secret (a short one-way hash, never

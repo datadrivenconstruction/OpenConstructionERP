@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The shared payment tax calculation: VAT, VAT withholding, income withholding, stamp duty.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The shared payment tax calculation: VAT, VAT withholding, income withholding, stamp duty.
 
 A payment certificate, the tax ledger and the e-invoice all print these
 numbers. They are computed here once, so the three documents cannot disagree.

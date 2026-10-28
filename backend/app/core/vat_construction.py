@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""VAT rules a construction invoice meets beyond its rate: split payment, area-limited rates, reverse charge.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠VAT rules a construction invoice meets beyond its rate: split payment, area-limited rates, reverse charge.
 
 Country-neutral engine over ``country_data/vat_construction.json``. Three
 questions a VAT rate alone cannot answer, each a block of a country row:

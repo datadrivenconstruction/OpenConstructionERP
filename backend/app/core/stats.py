@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Small descriptive statistics shared by every module that ranks a population.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Small descriptive statistics shared by every module that ranks a population.
 
 Three places in the tree were each carrying their own linear-interpolation
 percentile, and a fourth (the cross-project performance benchmark) needed one

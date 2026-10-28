@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Celery application factory - RFC 34 §4 W0.1.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Celery application factory - RFC 34 §4 W0.1.
 
 The Celery app is the thin transport layer that hands JobRun ids to
 worker processes. It is intentionally framework-agnostic: business

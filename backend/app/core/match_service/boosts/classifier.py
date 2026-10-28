@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Classifier boost - rewards candidates whose classification matches the hint."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Classifier boost - rewards candidates whose classification matches the hint."""
 
 from __future__ import annotations
 

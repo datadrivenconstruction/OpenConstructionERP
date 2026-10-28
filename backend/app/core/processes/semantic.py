@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The semantic-search stack as registry processes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The semantic-search stack as registry processes.
 
 Five processes share one desired state, the installation-wide semantic search
 switch (:mod:`app.core.semantic_switch`): turning any of them on or off flips

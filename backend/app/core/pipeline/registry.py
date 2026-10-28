@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Node Capability Registry - the safe binding surface for pipeline nodes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Node Capability Registry - the safe binding surface for pipeline nodes.
 
 Each module opts a node *type* in by calling :func:`register_node` from its
 autodiscovered ``pipeline_nodes.py`` (the module loader discovers that file

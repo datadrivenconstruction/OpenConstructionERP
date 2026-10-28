@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Server-side metric -> imperial unit conversion for human-facing reports.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Server-side metric -> imperial unit conversion for human-facing reports.
 
 This is the backend twin of the frontend ``unitConversion.ts``
 (``frontend/src/shared/lib/unitConversion.ts``); the conversion factors and

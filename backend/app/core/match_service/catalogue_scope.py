@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The catalogue a match run was told to use, scoped to that run.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The catalogue a match run was told to use, scoped to that run.
 
 The /match-elements wizard lets the user pick a catalogue for a session.
 The ranker reads the project's match settings, so without this scope the

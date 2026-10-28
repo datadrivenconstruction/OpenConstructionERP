@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Prior-pick boost - reward codes the team already confirmed for this work.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Prior-pick boost - reward codes the team already confirmed for this work.
 
 This closes the match learning loop. When an estimator confirms a
 catalogue code for a group (saving a :class:`MatchTemplate` to the

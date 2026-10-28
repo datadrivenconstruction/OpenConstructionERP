@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Console email backend - logs structured records instead of sending.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Console email backend - logs structured records instead of sending.
 
 Purpose: zero-config default for local development.  A fresh checkout
 runs without MSA credentials, but developers still need to see *what*

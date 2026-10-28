@@ -1,4 +1,4 @@
-"""The one PDF reader the backend uses, built on pypdfium2.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The one PDF reader the backend uses, built on pypdfium2.
 
 pypdfium2 (Apache-2.0 / BSD-3-Clause) binds PDFium and already ships in every
 install under pdfplumber. Everything that opens, counts, reads, renders or

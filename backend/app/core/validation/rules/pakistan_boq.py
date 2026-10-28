@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``pakistan`` rule set: a Pakistani bill read for the sales tax it charges.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``pakistan`` rule set: a Pakistani bill read for the sales tax it charges.
 
 A construction service in Pakistan is taxed by the province, not by the
 federation, and the rate differs by province and by who pays: Punjab 16 percent,

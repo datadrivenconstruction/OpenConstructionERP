@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How long a country makes a business keep its records, and in which language.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How long a country makes a business keep its records, and in which language.
 
 Two national obligations every document store and invoice generator has to
 respect, written down once per country as data with the article they come

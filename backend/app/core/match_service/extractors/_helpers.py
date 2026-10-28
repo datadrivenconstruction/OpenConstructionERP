@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Shared envelope-construction helpers used by every extractor."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Shared envelope-construction helpers used by every extractor."""
 
 from __future__ import annotations
 

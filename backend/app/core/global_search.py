@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Global search - searches across all modules simultaneously.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Global search - searches across all modules simultaneously.
 
 Usage:
     GET /api/v1/search?q=reinforced+concrete&project_id=xxx&limit=20

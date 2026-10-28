@@ -3,7 +3,7 @@
 # OpenConstructionERP - DataDrivenConstruction (DDC)
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 # AGPL-3.0 License
-"""Reusable per-module demo enrichment.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reusable per-module demo enrichment.
 
 The rich per-module demo seeders (photos, takeoff, BIM grouping, clash,
 carbon, QMS, advanced scheduling, cost model, MoC, supplier catalogs,

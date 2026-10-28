@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Public showcase demo: Lebensmittelmarkt Heidelberg / Retail Market Heidelberg.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public showcase demo: Lebensmittelmarkt Heidelberg / Retail Market Heidelberg.
 
 Urban-infill single-storey food retail market with a structured car deck on a
 constrained inner-city plot in the Pfaffengrund district of Heidelberg (DE).

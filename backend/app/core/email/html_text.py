@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTML to plain text for the ``multipart/alternative`` text part.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTML to plain text for the ``multipart/alternative`` text part.
 
 Every outbound mail is authored as HTML and the plain-text alternative is
 derived from it, so whatever this module drops is simply missing for a

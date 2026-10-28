@@ -1,7 +1,7 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 # AGPL-3.0 License
-"""Find, and on request remove, demo rows the boot seeding wrote into real projects.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Find, and on request remove, demo rows the boot seeding wrote into real projects.
 
 Up to 18.2 the boot enrichment handed every project in the database to a set
 of demo seeders, so a real project that had not reached a module yet received

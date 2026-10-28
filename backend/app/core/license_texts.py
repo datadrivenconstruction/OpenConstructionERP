@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Locate and read the licence texts that ship inside the application.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locate and read the licence texts that ship inside the application.
 
 ``app/core/licenses`` holds the verbatim texts of the licences our bundled
 third-party libraries are under: LGPL-3.0 and LGPL-2.1 for the libraries

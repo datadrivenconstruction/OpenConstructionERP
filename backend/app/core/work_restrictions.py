@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Seasonal bans on outdoor work, per country. Data, read by a field-time warning.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Seasonal bans on outdoor work, per country. Data, read by a field-time warning.
 
 Some countries forbid outdoor work in direct sun during the hottest hours of
 summer. A schedule that plans concrete pours at 13:00 in July, or a timesheet

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Identity redaction for the public hosted demo (``OE_DEMO_MODE``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Identity redaction for the public hosted demo (``OE_DEMO_MODE``).
 
 On the hosted demo anybody can sign in, and real people register there to
 try the product. Every endpoint that shows one user another user's identity

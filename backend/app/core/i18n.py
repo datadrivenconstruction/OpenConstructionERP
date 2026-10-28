@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Internationalization system.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Internationalization system.
 
 38 languages built into core. Zero hardcoded strings.
 New language = add a JSON file to locales/ AND an entry in both lists below.

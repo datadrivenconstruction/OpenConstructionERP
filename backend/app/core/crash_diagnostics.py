@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Evidence for native crashes and event-loop stalls, plus a memory probe.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Evidence for native crashes and event-loop stalls, plus a memory probe.
 
 A native crash (``0xC0000005`` on Windows, ``SIGSEGV`` elsewhere) kills the
 interpreter without a Python traceback, so the only record used to be the exit

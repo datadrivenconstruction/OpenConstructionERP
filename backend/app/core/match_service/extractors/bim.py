@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM element → envelope adapter (canonical format).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM element → envelope adapter (canonical format).
 
 Input shape mirrors ``backend/app/modules/cad/`` canonical elements:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Celery task definitions - RFC 34 §4 W0.1.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Celery task definitions - RFC 34 §4 W0.1.
 
 There is exactly one task: ``oe.dispatch_job``. Module-specific work
 attaches via :func:`app.core.job_runner.register_handler`, NOT via

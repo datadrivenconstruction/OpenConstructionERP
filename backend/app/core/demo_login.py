@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persisted "is the public demo login enabled" switch (admin-controlled).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persisted "is the public demo login enabled" switch (admin-controlled).
 
 This is deliberately separate from :mod:`app.core.demo_seed`, which decides
 whether the startup seeder installs the demo accounts and showcase projects.

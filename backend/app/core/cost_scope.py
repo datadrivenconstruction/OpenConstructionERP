@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Which cost items a caller may read: the one rule, and where it is applied.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Which cost items a caller may read: the one rule, and where it is applied.
 
 A cost item is either shared (``catalog_id IS NULL``, the installation-wide
 cost base) or belongs to a user-owned catalogue (``CostCatalog.created_by``).

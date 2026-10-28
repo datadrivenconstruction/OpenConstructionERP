@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egypt's VAT regimes for construction and contracting works.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egypt's VAT regimes for construction and contracting works.
 
 Three regimes, and the date that separates them is 2025-07-18, the day Law
 No. 157 of 2025 took effect:

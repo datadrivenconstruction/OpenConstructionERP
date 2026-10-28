@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Türkiye payment tax rows: KDV tevkifatı, stopaj on progress payments, damga vergisi.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Türkiye payment tax rows: KDV tevkifatı, stopaj on progress payments, damga vergisi.
 
 **No VAT rate lives here.** The KDV rate has one source in the platform, the
 tax resolver of the internationalisation module. A second copy in this file is

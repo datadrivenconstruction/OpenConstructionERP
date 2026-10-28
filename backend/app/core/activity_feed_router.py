@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Activity feed API router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Activity feed API router.
 
 Endpoint:
     GET /api/v1/activity?project_id=...&limit=20&offset=0

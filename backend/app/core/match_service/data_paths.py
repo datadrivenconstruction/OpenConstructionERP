@@ -1,4 +1,4 @@
-"""Locate the match service's tuning data in a checkout, a wheel and a bundle.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Locate the match service's tuning data in a checkout, a wheel and a bundle.
 
 ``data/match`` holds four small files that tune matching without a code
 deploy: two JSON profiles read by ``config.py`` and two YAML overlays read by

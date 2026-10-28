@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Translation-memory cache backed by the main PostgreSQL database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Translation-memory cache backed by the main PostgreSQL database.
 
 Past translations are persisted in the ``oe_translation_cache`` table of
 the main application database (embedded PostgreSQL 16 by default, or an

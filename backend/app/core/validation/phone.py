@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Phone number validation engine - Wave 29 of the worldwide-parameterisation audit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Phone number validation engine - Wave 29 of the worldwide-parameterisation audit.
 
 Per-country dial-code and national number patterns allow the engine to:
 

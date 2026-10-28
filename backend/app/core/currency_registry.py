@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The currency table, the decimals each currency keeps, and how an amount is written.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The currency table, the decimals each currency keeps, and how an amount is written.
 
 This is the dependency-free half of :mod:`app.core.money`. It exists as its own
 module for one reason: two validator modules in this platform declare themselves

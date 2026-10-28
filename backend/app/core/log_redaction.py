@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Keep secrets that ride in a URL out of the server's own log lines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Keep secrets that ride in a URL out of the server's own log lines.
 
 Several URLs still carry a credential as a query value: the calendar feed
 (``.ics?token=``), the portal magic link, and, for one release, the realtime

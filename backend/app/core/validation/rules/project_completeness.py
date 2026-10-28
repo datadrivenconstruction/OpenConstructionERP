@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The ``project_completeness`` rule set: is the project record fit to estimate against.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The ``project_completeness`` rule set: is the project record fit to estimate against.
 
 Twenty two shipped demo templates asked for this set by name and no rule
 registered into it. The engine logged "0 rules registered" and carried on, so

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Persisted white-label branding (workspace logo / company name).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Persisted white-label branding (workspace logo / company name).
 
 The in-app branding editor used to keep the customisation in the browser's
 localStorage only, so it never followed the workspace: a teammate opening the

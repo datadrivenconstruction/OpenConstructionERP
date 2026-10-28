@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Read-only mode for the public hosted demo.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Read-only mode for the public hosted demo.
 
 Off by default. A deployment turns it on with ``OE_DEMO_READ_ONLY=true``
 (``demo_read_only`` on :class:`app.config.Settings`), which is the only thing

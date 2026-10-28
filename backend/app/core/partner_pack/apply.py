@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Apply / update / un-apply a partner pack onto the running installation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Apply / update / un-apply a partner pack onto the running installation.
 
 Design decisions (confirmed with the product owner 2026-05-29):
   * Scope is a single global active pack (single-tenant).

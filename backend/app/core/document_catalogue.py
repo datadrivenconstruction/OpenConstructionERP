@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Document and email text for the languages a module does not carry in its own file.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document and email text for the languages a module does not carry in its own file.
 
 A module that writes text for people outside the platform (an invitation, a
 workbook header, a notification) keeps its first languages in a table next to

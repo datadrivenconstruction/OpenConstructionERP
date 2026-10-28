@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Match-service tunables - every magic number lives here.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Match-service tunables - every magic number lives here.
 
 Boost weights, score clamps, fuzzy-match cutoffs, reranker model name,
 and cost caps. The defaults here were calibrated on the v2.8.0 golden

@@ -1,4 +1,4 @@
-"""Read from the content stream what PDFium's page objects leave out.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Read from the content stream what PDFium's page objects leave out.
 
 Two facts about a painted path do not survive PDFium's object model, and the
 vector layer of :mod:`app.core.pdf_reader` depends on both:

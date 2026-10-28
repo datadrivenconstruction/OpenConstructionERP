@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Canonical building geometry for the Retail Market Heilbronn showcase.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Canonical building geometry for the Retail Market Heilbronn showcase.
 
 This module is intentionally dependency-free (no ORM, no app stack) so it can
 be imported offline by the procedural 3D generator

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Working-days calendar engine - Wave 28 of the worldwide-parameterisation audit.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Working-days calendar engine - Wave 28 of the worldwide-parameterisation audit.
 
 Provides:
     is_working_day(date, country_code) -> bool

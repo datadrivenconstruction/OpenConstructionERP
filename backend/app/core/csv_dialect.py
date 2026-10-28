@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pick the delimiter a CSV upload was written with.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pick the delimiter a CSV upload was written with.
 
 The rule first lived in the BOQ importer (``boq/importers/excel.py``) and is
 copied here so other tabular importers, the schedule spreadsheet import first,

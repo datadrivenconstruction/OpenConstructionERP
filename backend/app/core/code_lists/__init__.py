@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Code lists: the dictionaries a cost structure is built from.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Code lists: the dictionaries a cost structure is built from.
 
 A code list is a flat set of ``(code, title, parent)`` entries that together
 form a tree: the cost groups of DIN 276, the elements of NRM, the divisions of

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Registry of national party identifiers (tax numbers, company and person registers).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Registry of national party identifiers (tax numbers, company and person registers).
 
 Each country lives in its own sibling module (``fr.py``, ``pl.py``, ``eg.py`` ...) and
 registers its schemes with :func:`register` at import time. This file only holds the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Region boost - rewards candidates from the project's region.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Region boost - rewards candidates from the project's region.
 
 CWICR ships one regional file per market (``DE_BERLIN``, ``GB_LONDON``,
 ``USA_NEWYORK``, ...). When the project says "DACH" the matcher should

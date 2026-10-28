@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DWG element → envelope adapter (interim).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DWG element → envelope adapter (interim).
 
 Input shape: a layer-name + textual description from the DWG takeoff
 parser. Quantities are best-effort because the DWG visual viewer is

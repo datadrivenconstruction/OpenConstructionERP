@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Boost registry - the ranker iterates ``BOOSTS`` in order.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Boost registry - the ranker iterates ``BOOSTS`` in order.
 
 Each boost is a sync function ``(envelope, candidate, settings) ->
 dict[str, float]``. The ranker sums every reported delta into the

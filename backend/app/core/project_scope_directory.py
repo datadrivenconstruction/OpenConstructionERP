@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Read-only directory hooks for contract packages and plant items.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Read-only directory hooks for contract packages and plant items.
 
 Modules that need "which contract packages does this project have" or "is this
 plant item delivered" must not import the module that owns those rows. The

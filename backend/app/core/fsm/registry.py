@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Declarative FSM registry for the six core OpenConstructionERP entities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Declarative FSM registry for the six core OpenConstructionERP entities.
 
 Each entity declares its full lifecycle here so auditors and frontend
 developers can read off every legal status move in a single file. Add new

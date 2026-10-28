@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Explicitly enabled, year-specific holiday rosters from packaged seed data.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Explicitly enabled, year-specific holiday rosters from packaged seed data.
 
 The seed also carries calendars that have not been reviewed for core scheduling.
 Its presence alone must never enable a country or extrapolate another year.

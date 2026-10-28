@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Marks the span in which the demo seeders write a project's recorded history.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Marks the span in which the demo seeders write a project's recorded history.
 
 A demo project is shown at a moment of its life: its governance story has already bound the
 frame documents, and the permits and design records that belong to that moment must exist

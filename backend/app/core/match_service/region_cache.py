@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""TTL cache for the project ``region`` string used by match boosts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠TTL cache for the project ``region`` string used by match boosts.
 
 The ranker calls ``ProjectRepository(db).get_by_id(project_uuid)`` on every
 match request just to read ``project.region`` - a single string used by the

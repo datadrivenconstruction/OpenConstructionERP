@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Sidebar badge counts - single lightweight endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Sidebar badge counts - single lightweight endpoint.
 
 Returns open/active item counts for Tasks, RFIs, and Safety
 in a single response so the sidebar can display notification badges

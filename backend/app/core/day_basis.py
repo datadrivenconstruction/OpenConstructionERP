@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Counting a period of days on a stated basis. Pure functions, standard library only.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Counting a period of days on a stated basis. Pure functions, standard library only.
 
 A contractual or statutory period is either a run of calendar days or a run of
 working days, and which one it is changes the answer by several days. This

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Local BGE cross-encoder rerank tier - free, fast, gracefully degrades.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Local BGE cross-encoder rerank tier - free, fast, gracefully degrades.
 
 The bi-encoder + RRF fusion path in :mod:`qdrant_adapter` is fast but
 noisy at the boundary between rank 1 and rank 5: the top candidates

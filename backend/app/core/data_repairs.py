@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Boot-path data repairs - the half of a migration the schema heal cannot do.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Boot-path data repairs - the half of a migration the schema heal cannot do.
 
 What this exists for
 --------------------

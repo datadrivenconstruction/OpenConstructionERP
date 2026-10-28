@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The one place that turns a project's region into a classification standard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The one place that turns a project's region into a classification standard.
 
 Before this module the tree carried six hand-kept copies of the same
 mapping: two tables plus a fallback table in the match pipeline, one in

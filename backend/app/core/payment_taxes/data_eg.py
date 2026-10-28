@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Egypt payment tax rows: withholding on account of income tax.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Egypt payment tax rows: withholding on account of income tax.
 
 Egypt's "advance payment" or withholding-at-source system makes the payer
 keep back a percentage of each payment to a resident business and remit it,

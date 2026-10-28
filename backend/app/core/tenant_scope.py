@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tenant-scope resolution (multi-tenant isolation, Phase 1 scaffolding).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tenant-scope resolution (multi-tenant isolation, Phase 1 scaffolding).
 
 This module centralizes "which tenant is the caller?" into one place so
 that, as data-access layers are hardened module-by-module, they can all

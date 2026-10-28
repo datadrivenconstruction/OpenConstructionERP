@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""PDF takeoff element → envelope adapter.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠PDF takeoff element → envelope adapter.
 
 Input shape mirrors ``backend/app/modules/takeoff/schemas.py``
 ``ExtractedElement`` plus the takeoff-measurement view: free-form

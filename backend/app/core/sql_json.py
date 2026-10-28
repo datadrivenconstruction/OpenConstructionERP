@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Dialect-aware JSON access so queries run unchanged on SQLite and PostgreSQL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Dialect-aware JSON access so queries run unchanged on SQLite and PostgreSQL.
 
 Several columns (e.g. ``BIMElement.asset_info``, ``CostItem.data``) store a JSON
 document as *text*. SQLite reads a scalar out of them with

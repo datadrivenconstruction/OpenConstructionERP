@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Saudi Arabia payment tax rows: withholding tax on payments to non-residents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Saudi Arabia payment tax rows: withholding tax on payments to non-residents.
 
 **Who withholds.** A resident of the Kingdom (or a permanent establishment of a
 non-resident) that pays an amount from a source in the Kingdom to a payee who

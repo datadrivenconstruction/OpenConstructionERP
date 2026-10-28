@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Hook that lets a staged commissioning model veto ``commission_system``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Hook that lets a staged commissioning model veto ``commission_system``.
 
 commissioning never imports the module that owns the stage model. That module
 registers one async callable ``(session, project_id, system_id) -> list[str]``

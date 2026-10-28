@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Natural-language → Compliance DSL builder (T13).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Natural-language → Compliance DSL builder (T13).
 
 Bridges plain-English (and DE/RU) authoring with the strict YAML DSL
 shipped in T08. The flow is:

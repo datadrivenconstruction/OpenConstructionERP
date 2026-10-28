@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""How an answer was arrived at, travelling beside the answer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠How an answer was arrived at, travelling beside the answer.
 
 Wave one of the jurisdiction plan. The product resolves a great many things from
 a jurisdiction - working weeks, payment clocks, notice periods, tax rates, phone

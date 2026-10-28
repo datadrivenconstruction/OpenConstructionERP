@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Qdrant-backed ranker - replacement for the legacy LanceDB ranker.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Qdrant-backed ranker - replacement for the legacy LanceDB ranker.
 
 Pipeline (no LLM by default, BGE-M3 multilingual covers cross-lang):
 

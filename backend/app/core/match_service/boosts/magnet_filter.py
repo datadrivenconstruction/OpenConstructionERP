@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Magnet-candidate suppressor - post-retrieval, pre-rerank.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Magnet-candidate suppressor - post-retrieval, pre-rerank.
 
 Background
 ==========

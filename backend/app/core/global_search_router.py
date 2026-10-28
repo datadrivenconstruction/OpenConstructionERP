@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Global search API router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Global search API router.
 
 Endpoint:
     GET /api/v1/global-search?q=...&project_id=...&limit=20

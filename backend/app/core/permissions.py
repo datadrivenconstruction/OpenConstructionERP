@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RBAC permission engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RBAC permission engine.
 
 Role-Based Access Control with permission inheritance.
 Roles are hierarchical: admin > manager > editor > viewer.

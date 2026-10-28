@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Getting a WebSocket's access token out of the URL.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Getting a WebSocket's access token out of the URL.
 
 The browser ``WebSocket`` API cannot set an ``Authorization`` header, so the
 three realtime sockets (notifications, global presence, collaboration-lock

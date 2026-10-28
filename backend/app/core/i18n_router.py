@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""i18n API endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠i18n API endpoints.
 
 Serves the backend catalogue, backend/locales/*.json, to any HTTP consumer.
 

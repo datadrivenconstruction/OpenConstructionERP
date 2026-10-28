@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""LLM tier - translates a single term via the configured AI provider.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠LLM tier - translates a single term via the configured AI provider.
 
 Reuses :func:`app.modules.ai.ai_client.call_ai` so we automatically get
 support for every provider the rest of the platform supports (Anthropic,

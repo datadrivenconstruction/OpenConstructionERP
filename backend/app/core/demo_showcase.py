@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Demo projects that carry a hand-authored, localised register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Demo projects that carry a hand-authored, localised register.
 
 Some demo projects are filmed and demonstrated in German. Their registers
 are written by dedicated seeders (``seed_variations_showcase_de``,

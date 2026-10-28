@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The shape of one statutory rate row and how a row is found for a date.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The shape of one statutory rate row and how a row is found for a date.
 
 A payment tax is never a literal in arithmetic. It is a row: what is taxed, on
 which base, at which rate or fraction, from which date, under which article,

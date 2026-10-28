@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Idempotent PostgreSQL setup for row-level-security enforcement.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Idempotent PostgreSQL setup for row-level-security enforcement.
 
 Runs from the startup auto-migrator when ``settings.rls_enforce`` is on, inside
 its advisory-locked transaction, so workers provision it one at a time and a role

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rule-pack coverage resolver - honest "declared vs implemented" accounting.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rule-pack coverage resolver - honest "declared vs implemented" accounting.
 
 Background
 ----------

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Read the bundled third-party licence texts from the running product.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Read the bundled third-party licence texts from the running product.
 
     GET /api/v1/licenses/        - PUBLIC. Every licence text in this build.
     GET /api/v1/licenses/{name}  - PUBLIC. One text in full.

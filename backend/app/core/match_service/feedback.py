@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Match feedback loop - captures user confirmations for offline tuning.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Match feedback loop - captures user confirmations for offline tuning.
 
 Every time the user accepts, rejects, or hand-overrides a match
 suggestion the router calls :func:`record_feedback`. The captured

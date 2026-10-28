@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Streaming-upload helper.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Streaming-upload helper.
 
 UploadFile.read() loads the entire request body into memory.  On the
 3 GB-RAM server this is a trivial DoS vector once we removed the per-route
