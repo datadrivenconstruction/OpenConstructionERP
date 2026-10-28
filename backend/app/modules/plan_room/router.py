@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan Room API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan Room API routes.
 
 Route prefix (mounted by the module loader): ``/api/v1/plan-room``.
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Correspondence API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Correspondence API routes.
 
 Endpoints:
     GET    /                                            - List correspondence for a project

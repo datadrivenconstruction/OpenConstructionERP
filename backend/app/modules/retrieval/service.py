@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Retrieval services: run a search, and keep the searches worth keeping.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Retrieval services: run a search, and keep the searches worth keeping.
 
 Two services live here.
 

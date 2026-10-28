@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service layer for the file-saved-views module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service layer for the file-saved-views module.
 
 All access checks live here (rather than in the router) so the
 behaviour is easy to unit-test without spinning up FastAPI. The

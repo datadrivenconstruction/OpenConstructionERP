@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Timeline service - read queries over the existing activity-log store.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Timeline service - read queries over the existing activity-log store.
 
 The timeline is a cross-module rollup view. A row belongs to a project's
 timeline when either:

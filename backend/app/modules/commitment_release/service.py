@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Commitment release service: matrix, items, releases, recompute, guard check and exposure.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commitment release service: matrix, items, releases, recompute, guard check and exposure.
 
 Every write runs in the caller's transaction with its audit entry
 (``log_activity``) and its events (``publish_after_commit``). Amounts are

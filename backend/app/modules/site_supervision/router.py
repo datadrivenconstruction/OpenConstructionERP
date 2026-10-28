@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FastAPI router for design-side site supervision.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI router for design-side site supervision.
 
 Auto-mounted at ``/api/v1/site-supervision/``. Every endpoint is project-scoped
 via :func:`app.dependencies.verify_project_access` - the same guard the

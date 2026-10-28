@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFI service - business logic for RFI management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFI service - business logic for RFI management.
 
 - Event publishing on create/update/delete
 - Structured state-change logs (R5: keys = rfi_id / project_id /

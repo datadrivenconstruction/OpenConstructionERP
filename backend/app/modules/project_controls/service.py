@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Project Controls service - the cross-module aggregation tissue.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project Controls service - the cross-module aggregation tissue.
 
 The snapshot does NOT re-query each module directly. It calls the already
 built :func:`app.modules.bi_dashboards.kpis.compute` for each code in the

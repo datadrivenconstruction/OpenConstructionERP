@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Read-only aggregator for the Coordination Hub dashboard.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Read-only aggregator for the Coordination Hub dashboard.
 
 The service issues lightweight per-category SELECT-COUNT statements (one
 per data point) against the existing sibling-module tables. There is

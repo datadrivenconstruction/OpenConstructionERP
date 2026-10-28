@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Finance API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance API routes.
 
 Endpoints:
     GET    /                    - List invoices with filters

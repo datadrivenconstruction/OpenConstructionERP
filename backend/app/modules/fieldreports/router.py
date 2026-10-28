@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Field Reports API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Reports API routes.
 
 Endpoints:
     POST   /reports                        - Create field report

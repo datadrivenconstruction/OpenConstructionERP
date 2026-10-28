@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Currency / FX API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Currency / FX API routes.
 
 Endpoints:
     GET    /status/                      -- Feed status: source, freshness, reachability

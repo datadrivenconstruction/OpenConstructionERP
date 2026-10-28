@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Carbon & Sustainability service - pure carbon-math + orchestration.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Carbon & Sustainability service - pure carbon-math + orchestration.
 
 Pure functions:
     * normalise_quantity_to_factor_unit

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Inbound capture service - persist a normalized inbound message as correspondence.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inbound capture service - persist a normalized inbound message as correspondence.
 
 The pure :mod:`~app.modules.inbound_capture.normalize` engine has already
 flattened the channel payload to a canonical

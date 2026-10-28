@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BCF API routes - mounted by the module loader at ``/api/v1/bcf``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BCF API routes - mounted by the module loader at ``/api/v1/bcf``.
 
 Endpoints
     GET    /projects/{project_id}/topics/

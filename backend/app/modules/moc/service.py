@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Management of Change (MoC) service - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Management of Change (MoC) service - business logic.
 
 State machine:
     proposed  -> reviewed    (moc.review)

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Module builder HTTP API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Module builder HTTP API.
 
 The wizard's four steps map onto four calls. Describing and previewing change
 nothing on the server, so a user can go round that loop as often as they like

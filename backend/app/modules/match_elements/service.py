@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Match Elements orchestrator service - Phase A core wiring.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Match Elements orchestrator service - Phase A core wiring.
 
 The service stitches together the source adapters and matchers behind
 a single API surface the router calls. Stateless: every method takes

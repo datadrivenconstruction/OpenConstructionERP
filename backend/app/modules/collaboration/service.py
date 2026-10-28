@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Collaboration service - business logic for comments and viewpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Collaboration service - business logic for comments and viewpoints.
 
 Stateless service layer. Handles:
 - Comment CRUD with threading

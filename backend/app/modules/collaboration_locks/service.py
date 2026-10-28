@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic for collaboration locks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for collaboration locks.
 
 Responsibilities
 ----------------

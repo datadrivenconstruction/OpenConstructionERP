@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM-LV container service - materialize links + export.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM-LV container service - materialize links + export.
 
 Glue between the pure :mod:`app.modules.bimlv.container` codec and the platform
 data model. It reuses the existing tables rather than adding any of its own:

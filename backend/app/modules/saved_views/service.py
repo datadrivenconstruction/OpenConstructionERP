@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The saved-views orchestrator.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The saved-views orchestrator.
 
 ``SavedViewService`` is the only place that wires the three safety primitives
 together for every entry point. ``_scoped_base`` is the single producer of a base

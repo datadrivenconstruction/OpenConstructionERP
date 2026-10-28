@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate-rollup API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate-rollup API routes.
 
 Mounted at ``/api/v1/estimate-rollup``. One read-only endpoint composes a
 project's full estimate headline number:

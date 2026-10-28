@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CVR (Cost-Value Reconciliation) & Cashflow API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CVR (Cost-Value Reconciliation) & Cashflow API routes.
 
 Endpoints (mounted at /api/v1/cvr):
 

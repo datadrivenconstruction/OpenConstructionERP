@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""South Africa regional pack API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠South Africa regional pack API routes.
 
 Endpoints (all require an authenticated user):
     GET  /config            - Full SA regional configuration

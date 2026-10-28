@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Claims evidence-pack API routes (auto-mounted at /api/v1/claims-evidence).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Claims evidence-pack API routes (auto-mounted at /api/v1/claims-evidence).
 
 Access control mirrors every other project-scoped router: the caller must be
 authenticated and pass :func:`verify_project_access` for the requested project,

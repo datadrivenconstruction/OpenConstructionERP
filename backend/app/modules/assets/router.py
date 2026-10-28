@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Asset Operations API (auto-mounted at /api/v1/assets).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Asset Operations API (auto-mounted at /api/v1/assets).
 
 Operational-phase intelligence on the BIM-sourced asset register:
 

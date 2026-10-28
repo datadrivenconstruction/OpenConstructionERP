@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Transmittals (W7) API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Transmittals (W7) API routes.
 
 Mounted by the module loader at ``/api/v1/file-transmittals``.
 

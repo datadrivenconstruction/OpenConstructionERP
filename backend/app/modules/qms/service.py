@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""QMS service - business logic for the unified quality module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠QMS service - business logic for the unified quality module.
 
 Status transitions are guarded by explicit allow-lists. Illegal moves
 raise :class:`ValueError`; HTTP-layer translation happens in the router.

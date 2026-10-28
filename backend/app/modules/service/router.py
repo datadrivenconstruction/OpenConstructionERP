@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FastAPI routes for the Service & Maintenance module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI routes for the Service & Maintenance module.
 
 Mounted at ``/api/v1/service/`` by the module loader.
 

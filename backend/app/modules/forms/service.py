@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Forms & Checklists service - business logic for templates and submissions."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Forms & Checklists service - business logic for templates and submissions."""
 
 from __future__ import annotations
 

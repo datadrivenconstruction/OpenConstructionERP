@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HSE Advanced service - pure helpers + workflows for JSA / PTW / audits / CAPA / KPI."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HSE Advanced service - pure helpers + workflows for JSA / PTW / audits / CAPA / KPI."""
 
 from __future__ import annotations
 

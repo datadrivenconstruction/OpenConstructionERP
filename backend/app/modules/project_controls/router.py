@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""FastAPI router for the Project Controls module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI router for the Project Controls module.
 
 Mounted by the module loader at ``/api/v1/project-controls/``.
 

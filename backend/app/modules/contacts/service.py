@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contacts service - business logic for contact management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contacts service - business logic for contact management.
 
 Stateless service layer. Handles:
 - Contact CRUD

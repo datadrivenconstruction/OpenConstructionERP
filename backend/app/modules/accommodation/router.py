@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Accommodation API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Accommodation API routes.
 
 Mounted by the module loader at ``/api/v1/accommodation/``.
 

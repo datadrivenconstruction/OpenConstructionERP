@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DWG Takeoff service - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DWG Takeoff service - business logic.
 
 Stateless service layer. Handles:
 - Drawing upload, processing, and retrieval

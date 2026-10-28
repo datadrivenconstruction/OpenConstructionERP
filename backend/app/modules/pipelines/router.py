@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pipeline Builder REST API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pipeline Builder REST API.
 
 Auto-mounted by the module loader at ``/api/v1/pipelines`` (kebab-case of
 the ``pipelines`` directory). The wire contract is PINNED - the frontend

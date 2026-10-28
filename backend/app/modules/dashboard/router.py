@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Dashboard rollup router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Dashboard rollup router.
 
 Mounted by the module loader at ``/api/v1/dashboard/``.
 

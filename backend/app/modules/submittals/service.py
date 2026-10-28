@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Submittals service - business logic for submittal management."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Submittals service - business logic for submittal management."""
 
 import logging
 import uuid

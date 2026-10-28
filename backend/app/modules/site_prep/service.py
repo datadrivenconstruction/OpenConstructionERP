@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-prep service layer (pre-construction mobilisation readiness).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-prep service layer (pre-construction mobilisation readiness).
 
 Business logic delegating data access to :mod:`app.modules.site_prep.repository`
 and projecting persisted rows onto the pure

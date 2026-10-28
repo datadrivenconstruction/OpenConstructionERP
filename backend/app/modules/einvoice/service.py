@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Map a finance ``Invoice`` aggregate onto an EN 16931 :class:`EInvoice`
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Map a finance ``Invoice`` aggregate onto an EN 16931 :class:`EInvoice`
 and render it as CII XML.
 
 Kept ORM-free on purpose (takes plain dicts, exactly like

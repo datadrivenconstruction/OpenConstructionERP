@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management service: every write and every computed view of the module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management service: every write and every computed view of the module.
 
 Sections, in SPEC build order:
     setup       -- pin a numbering scheme and a reports catalogue; scheme change with renumber (rule 9)

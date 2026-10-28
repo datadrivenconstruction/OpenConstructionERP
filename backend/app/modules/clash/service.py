@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Clash detection engine + run lifecycle.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clash detection engine + run lifecycle.
 
 Three-phase, mathematically-exact narrow phase over **real triangle
 meshes** (faces → vertices) supplied by

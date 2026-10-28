@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost recovery service - the thin persistence layer over the back_charge engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost recovery service - the thin persistence layer over the back_charge engine.
 
 Stores back-charge records for a project and feeds their present state to the
 pure :mod:`back_charge` engine to produce the recovery ledger. Writes follow the

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Cost Explorer business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Explorer business logic.
 
 Orchestrates the four capabilities of the workspace on top of the reverse
 index and the cost / catalog tables:

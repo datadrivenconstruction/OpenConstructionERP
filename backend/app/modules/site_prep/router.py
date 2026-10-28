@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-prep API routes (mounted at ``/api/v1/site-prep``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-prep API routes (mounted at ``/api/v1/site-prep``).
 
 Pre-construction mobilisation and site-setup readiness: a per-project plan, the
 readiness items grouped by mobilisation category, and the derived readiness

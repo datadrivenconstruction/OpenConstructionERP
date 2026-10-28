@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Coordination Hub API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Coordination Hub API routes.
 
 Mounted by the loader at ``/api/v1/coordination``.
 

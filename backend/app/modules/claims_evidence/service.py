@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Claims / dispute evidence-pack service - the thin database layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Claims / dispute evidence-pack service - the thin database layer.
 
 Gathers a project's cross-module activity (from the activity-log timeline) and
 its change-family records, projects them to evidence entries, and hands them to

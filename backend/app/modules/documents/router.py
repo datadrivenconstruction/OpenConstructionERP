@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Document Management API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document Management API routes.
 
 Endpoints:
     POST   /upload                  - Upload a document

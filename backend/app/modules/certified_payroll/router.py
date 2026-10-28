@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Certified payroll API routes (mounted at ``/api/v1/certified_payroll``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Certified payroll API routes (mounted at ``/api/v1/certified_payroll``).
 
 Endpoints (all manager-scoped and project-access checked):
 

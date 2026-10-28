@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Labor rate API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Labor rate API routes.
 
 Endpoints:
     POST   /compute                        - build an all-in rate (and optional crew blend)

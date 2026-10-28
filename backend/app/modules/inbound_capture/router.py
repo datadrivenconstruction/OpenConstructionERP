@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Inbound capture API routes (auto-mounted at /api/v1/inbound-capture).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inbound capture API routes (auto-mounted at /api/v1/inbound-capture).
 
 Two capture endpoints turn an outside message into incoming correspondence:
 

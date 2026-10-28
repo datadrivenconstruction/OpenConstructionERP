@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan Room service - read-only overlay aggregation + pin CRUD.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan Room service - read-only overlay aggregation + pin CRUD.
 
 Composites a document page's overlays (defect pins, markups, measurements and
 photos) into a single read-only payload, and owns create / delete for the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Engineering brief API, mounted at ``/api/v1/engineering_brief``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Engineering brief API, mounted at ``/api/v1/engineering_brief``.
 
 Every project-scoped route lives under ``/projects/{project_id}/...`` and awaits ``verify_project_access``
 in its own body before it reads anything, so a project the caller cannot see answers 404 exactly like a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule Advanced service - Last Planner System (LPS) business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule Advanced service - Last Planner System (LPS) business logic.
 
 This module is organised as:
 

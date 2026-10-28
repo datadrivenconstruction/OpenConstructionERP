@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Commissioning (Cx) service - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commissioning (Cx) service - business logic.
 
 Stateless service layer. Owns:
 

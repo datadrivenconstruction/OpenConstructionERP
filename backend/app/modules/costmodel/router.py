@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""5D Cost Model API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠5D Cost Model API routes.
 
 Endpoints:
     GET    /projects/{project_id}/5d/dashboard          - aggregated KPIs

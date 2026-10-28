@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Internationalization foundation service - business logic layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Internationalization foundation service - business logic layer.
 
 Wraps repository classes and adds business logic for:
 - Currency conversion with Decimal precision

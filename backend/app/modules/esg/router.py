@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ESG Site Performance API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ESG Site Performance API routes.
 
 Endpoints (mounted at /api/v1/esg):
     GET    /metrics                 - list the metric-definition catalogue

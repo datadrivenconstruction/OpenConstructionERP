@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Temporary-works API routes (mounted at ``/api/v1/temporary-works``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Temporary-works API routes (mounted at ``/api/v1/temporary-works``).
 
 Safety-critical temporary-works governance: the per-project register of items
 (falsework, propping, excavation support, facade retention, crane bases, ...),

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""MCP business logic: the protocol methods for a token caller, and the settings surface for a signed-in person."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠MCP business logic: the protocol methods for a token caller, and the settings surface for a signed-in person."""
 
 from __future__ import annotations
 

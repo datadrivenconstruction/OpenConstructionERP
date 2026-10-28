@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Correspondence service - business logic for correspondence management."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Correspondence service - business logic for correspondence management."""
 
 import logging
 import uuid

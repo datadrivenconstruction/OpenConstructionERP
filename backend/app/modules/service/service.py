@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic for the Service & Maintenance module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for the Service & Maintenance module.
 
 Houses:
     - State-machine helpers (pure functions, independently testable).

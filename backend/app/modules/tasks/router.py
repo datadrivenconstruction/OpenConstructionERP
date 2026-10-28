@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tasks API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tasks API routes.
 
 Endpoints:
     GET    /                    - List tasks for a project

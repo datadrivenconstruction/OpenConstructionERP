@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Approval Routes business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Approval Routes business logic.
 
 Stateless service layer that owns the workflow rules:
 

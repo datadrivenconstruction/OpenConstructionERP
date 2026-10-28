@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""E-invoice clearance service - the round trip and the state behind it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠E-invoice clearance service - the round trip and the state behind it.
 
 Stateless helpers over the three models. What lives here is the part that is
 genuinely this module's: preparing a payload, deciding whether it may go,

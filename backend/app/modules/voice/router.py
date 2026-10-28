@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Voice-capture API routes (mounted at /api/v1/voice).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Voice-capture API routes (mounted at /api/v1/voice).
 
 Endpoints:
     GET  /targets   - list the supported target types (diary_note, defect, task)

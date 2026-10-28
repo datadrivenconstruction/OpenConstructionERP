@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Connectors service: scan a watched folder and ingest new files as documents.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Connectors service: scan a watched folder and ingest new files as documents.
 
 The pure normalization + dedup logic lives in
 :mod:`app.modules.connectors.storage_connector`. This service supplies the IO

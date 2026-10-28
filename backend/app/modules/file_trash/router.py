@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Trash API routes (auto-mounted at /api/v1/file-trash/).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Trash API routes (auto-mounted at /api/v1/file-trash/).
 
 Endpoints:
 

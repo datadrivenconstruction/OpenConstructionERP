@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Supplier Catalogs API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Supplier Catalogs API routes.
 
 Mounted at ``/api/v1/supplier-catalogs/`` by the module loader.
 """

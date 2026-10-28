@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bid Management service - business logic, state machines, pure helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bid Management service - business logic, state machines, pure helpers.
 
 The pure helpers (``compute_*`` / ``validate_*`` / ``rank_*`` /
 ``recommend_*``) operate on plain dataclass-like objects (anything with

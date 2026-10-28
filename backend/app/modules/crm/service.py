@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CRM service - business logic for sales pipeline, forecasting, analytics.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRM service - business logic for sales pipeline, forecasting, analytics.
 
 Pure helpers (no I/O) for math + state-machine validation are kept at module
 level so they can be unit-tested in isolation. Anything that hits the DB

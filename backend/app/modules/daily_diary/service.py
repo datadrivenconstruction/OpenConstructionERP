@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Daily Site Diary business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Daily Site Diary business logic.
 
 Pure helpers are exposed as module-level functions so they can be unit
 tested without a database. The :class:`DailyDiaryService` orchestrates

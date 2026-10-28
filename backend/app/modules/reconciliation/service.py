@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Event-reconciliation service - persistence + gather layer over the pure engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Event-reconciliation service - persistence + gather layer over the pure engine.
 
 This module owns two responsibilities, both thin:
 

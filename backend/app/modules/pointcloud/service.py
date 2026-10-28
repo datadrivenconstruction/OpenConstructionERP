@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Point Cloud / Reality Capture business logic + IDOR closures.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Point Cloud / Reality Capture business logic + IDOR closures.
 
 Phase 0 implements the read + register + presigned-direct ingest surface end to
 end:

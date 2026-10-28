@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Construction-control API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control API routes.
 
 Acceptance criteria:
     GET    /criteria                       - list criteria for a project

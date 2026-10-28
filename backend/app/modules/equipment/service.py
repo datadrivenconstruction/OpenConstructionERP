@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Equipment service - business logic for fleet, maintenance, rentals, and damage.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Equipment service - business logic for fleet, maintenance, rentals, and damage.
 
 Key features:
     * record_telemetry - append reading + bump Equipment counters if newer.

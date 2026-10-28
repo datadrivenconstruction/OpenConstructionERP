@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Webhook Leads service - security, payload mapping, lead creation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Webhook Leads service - security, payload mapping, lead creation.
 
 Pure helpers (no I/O) for credential hashing, signature verification,
 IP-allowlist matching, and JSON-path extraction are kept at module level

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Users & authentication API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Users & authentication API routes.
 
 Endpoints:
     POST /auth/register         - Register new user

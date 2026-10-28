@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FastAPI router for the authority-submission factory.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI router for the authority-submission factory.
 
 Auto-mounted at ``/api/v1/authority-submission/``. Profiles are global schema
 definitions and are read with only the ``authority_submission.read`` permission.

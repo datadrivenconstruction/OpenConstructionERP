@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tax withholding service - what is deducted, at what rate, from what base.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tax withholding service - what is deducted, at what rate, from what base.
 
 Three decisions live here and nowhere else.
 

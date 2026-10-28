@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Compliance-AI router - health + NL → DSL verify endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance-AI router - health + NL → DSL verify endpoint.
 
 The actual NL-to-DSL conversion lives in :mod:`app.core.validation.dsl.
 nl_builder` so the router stays a thin envelope. Hardening shipped here

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Point Cloud / Reality Capture API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Point Cloud / Reality Capture API routes.
 
 Mounted by the module loader at ``/api/v1/pointcloud/``. All routes are
 RBAC-gated; the service layer additionally closes cross-tenant IDOR holes by

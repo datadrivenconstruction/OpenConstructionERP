@@ -1,6 +1,6 @@
 # OpenConstructionERP - DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Progress tracking service - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Progress tracking service - business logic.
 
 Handles:
 - Percent-complete recording (append-only entries)

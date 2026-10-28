@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Variations service - business logic for the variations lifecycle.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Variations service - business logic for the variations lifecycle.
 
 Pure helpers (top-level functions) are unit-tested directly. The
 :class:`VariationsService` class wires repositories together and emits

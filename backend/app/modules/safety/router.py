@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Safety API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Safety API routes.
 
 Endpoints:
     GET    /stats                       - Project safety KPI dashboard

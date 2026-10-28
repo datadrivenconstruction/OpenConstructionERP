@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project governance API, mounted at ``/api/v1/project-governance``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project governance API, mounted at ``/api/v1/project-governance``.
 
 Every project-scoped route lives under ``/projects/{project_id}/...`` and calls
 ``verify_project_access`` before it reads anything, so a project the caller

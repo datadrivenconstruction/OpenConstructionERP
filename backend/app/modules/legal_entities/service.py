@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Legal entity and branch business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Legal entity and branch business logic.
 
 Two invariants the service holds that the table alone does not:
 

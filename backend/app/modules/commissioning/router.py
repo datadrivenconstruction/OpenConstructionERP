@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Commissioning (Cx) API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commissioning (Cx) API routes.
 
 Route prefix (mounted by the module loader): ``/api/v1/commissioning``.
 

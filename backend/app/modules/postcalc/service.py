@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Post-calculation (Nachkalkulation) compute + live data loader.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Post-calculation (Nachkalkulation) compute + live data loader.
 
 The top of this module is a pure, ``Decimal``-exact compute layer: a set of
 functions that take plain dicts / lists and return the dataclasses from

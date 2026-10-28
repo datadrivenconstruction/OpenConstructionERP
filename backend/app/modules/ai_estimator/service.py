@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimate Builder orchestrator service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimate Builder orchestrator service.
 
 Drives the four-stage pipeline (Understand -> Group -> Match -> Assemble) over
 a long-lived run row. The design rules are absolute:

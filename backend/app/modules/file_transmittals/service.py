@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Transmittals (W7) service layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Transmittals (W7) service layer.
 
 Holds the create/send lifecycle, the cover-sheet generator (PDF via
 ``reportlab`` when available, plain-text TXT fallback otherwise) and

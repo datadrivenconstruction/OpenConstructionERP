@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Stakeholders API, mounted at ``/api/v1/stakeholders``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Stakeholders API, mounted at ``/api/v1/stakeholders``.
 
 The module loader mounts one prefix per module, so the SPEC's two roots are
 realised as ``/api/v1/stakeholders/projects/{project_id}/...`` (register,

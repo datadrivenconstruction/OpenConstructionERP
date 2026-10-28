@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Cost Explorer API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Explorer API routes.
 
 Mounted at ``/api/v1/cost-explorer``. One search-first workspace over the cost
 and resource databases:

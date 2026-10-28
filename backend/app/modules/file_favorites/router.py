@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Favourites API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Favourites API routes.
 
 Mounted at ``/api/v1/file-favorites/`` (kebab-cased per the loader
 convention). All endpoints are per-user - a caller can only see /

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Delivery model service: comparison, decision, risk allocation, package plan, owner-furnished items.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Delivery model service: comparison, decision, risk allocation, package plan, owner-furnished items.
 
 Every write runs in the caller's transaction with its audit entry
 (``log_activity``) and its events (``publish_after_commit``).

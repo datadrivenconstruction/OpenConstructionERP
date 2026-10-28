@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project governance service: reads rows, asks the evaluator, writes the outcome.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project governance service: reads rows, asks the evaluator, writes the outcome.
 
 The rules live in :mod:`evaluator` and are pure. This layer only loads what a
 rule needs, locks what a decision changes, and writes the result together with

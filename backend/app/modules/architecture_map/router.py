@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Architecture Map API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Architecture Map API routes.
 
 Read-only endpoints that serve the architecture manifest JSON and provide
 search/filter capabilities over modules, connections, and statistics.

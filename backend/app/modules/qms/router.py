@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""QMS API routes (mount point: ``/api/v1/qms/``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠QMS API routes (mount point: ``/api/v1/qms/``).
 
 All endpoints require an authenticated user via :func:`get_current_user_payload`.
 Per-project access is enforced via :func:`verify_project_access`.

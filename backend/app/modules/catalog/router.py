@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Catalog API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalog API routes.
 
 The catalog stores **resources** - single-input items (one material, one
 labour rate, one machine, etc.) with one price per region. Resources do

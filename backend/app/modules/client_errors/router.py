@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Client-error sink API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Client-error sink API routes.
 
 Endpoints:
     POST /                         - accept an anonymised client error report

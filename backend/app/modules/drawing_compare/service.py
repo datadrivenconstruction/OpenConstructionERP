@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Drawing revision compare business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Drawing revision compare business logic.
 
 Two ways in, one stored shape out:
 

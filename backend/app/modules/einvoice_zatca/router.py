@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ZATCA EGS unit onboarding routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ZATCA EGS unit onboarding routes.
 
 Mounted at ``/api/v1/einvoice-zatca/``.
 

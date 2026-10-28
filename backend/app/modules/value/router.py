@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Value-realized API routes (auto-mounted at /api/v1/value).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Value-realized API routes (auto-mounted at /api/v1/value).
 
 One read surface that composes figures the rest of the platform already
 computes - approved-change exposure managed, cost recovered, admin hours given

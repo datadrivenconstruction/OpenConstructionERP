@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""India regional pack API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠India regional pack API routes.
 
 Endpoints:
     GET /config  - Return the full India regional configuration

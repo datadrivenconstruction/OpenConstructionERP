@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Notification API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Notification API routes.
 
 Endpoints:
     GET    /                              - list current user's notifications

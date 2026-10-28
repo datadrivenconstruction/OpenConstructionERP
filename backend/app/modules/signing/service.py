@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic for the e-signature registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for the e-signature registry.
 
 The heart of this module is a set of pure, jurisdiction-neutral functions that a
 data model alone cannot express and that unit tests drive without a session:

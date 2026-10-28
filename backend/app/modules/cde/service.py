@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CDE service - business logic for ISO 19650 Common Data Environment.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CDE service - business logic for ISO 19650 Common Data Environment.
 
 Stateless service layer. Handles:
 - Document container CRUD

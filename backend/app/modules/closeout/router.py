@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Closeout API routes (auto-mounted at /api/v1/closeout).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout API routes (auto-mounted at /api/v1/closeout).
 
 Endpoints (all RequirePermission + per-project access check):
     GET    /projects/{project_id}/package         get-or-404

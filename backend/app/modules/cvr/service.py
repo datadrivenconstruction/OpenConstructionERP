@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CVR service - business logic for Cost-Value Reconciliation & Cashflow.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CVR service - business logic for Cost-Value Reconciliation & Cashflow.
 
 Stateless service layer. Handles:
 - CVR report + line CRUD, with the single-currency guard and 2dp money quantize

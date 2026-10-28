@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Teams service - business logic for team management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Teams service - business logic for team management.
 
 Stateless service layer. Handles:
 

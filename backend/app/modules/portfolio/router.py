@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Portfolio tree API (T3.3).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Portfolio tree API (T3.3).
 
 Mounted by the module loader at ``/api/v1/portfolio``. The tree read is pruned
 to the caller's accessible projects; project attach/detach run

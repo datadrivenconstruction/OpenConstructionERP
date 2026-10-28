@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Onboarding provisioning API (auto-mounted at /api/v1/onboarding).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Onboarding provisioning API (auto-mounted at /api/v1/onboarding).
 
 The wizard POSTs the heavy first-run work here instead of awaiting it inline.
 Each requested item becomes a background JobRun; the endpoint returns the job

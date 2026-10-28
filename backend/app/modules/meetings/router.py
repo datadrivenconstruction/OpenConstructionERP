@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Meetings API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Meetings API routes.
 
 Endpoints:
     GET    /                              - List meetings for a project

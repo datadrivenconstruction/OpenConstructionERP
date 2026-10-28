@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Takeoff HTTP endpoints.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Takeoff HTTP endpoints.
 
 Routes:
     GET    /converters                          - list CAD/BIM converter status

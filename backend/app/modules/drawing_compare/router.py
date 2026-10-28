@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Drawing revision compare API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Drawing revision compare API routes.
 
 Route prefix (mounted by the module loader): ``/api/v1/drawing-compare``.
 

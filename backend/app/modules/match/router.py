@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP routes for the element-to-CWICR matcher.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP routes for the element-to-CWICR matcher.
 
 Endpoints:
     * ``POST /api/v1/match/element``  - run the matcher.

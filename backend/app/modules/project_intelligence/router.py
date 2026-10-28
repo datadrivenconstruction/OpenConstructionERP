@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project Intelligence API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project Intelligence API routes.
 
 Endpoints:
     GET  /score/?project_id=X          - Project score with gaps and achievements

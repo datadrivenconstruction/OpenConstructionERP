@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Requirements & Quality Gates API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Requirements & Quality Gates API routes.
 
 Endpoints:
     POST   /                                          - Create requirement set

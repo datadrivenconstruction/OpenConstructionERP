@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service layer for the file-distribution module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service layer for the file-distribution module.
 
 Holds the two sub-feature services side by side so the router stays
 thin:

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Value-realized service - the thin database layer over the pure value engines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Value-realized service - the thin database layer over the pure value engines.
 
 This module owns no records of its own. It gathers figures that other services
 have ALREADY computed and feeds them to the pure :mod:`app.modules.value`

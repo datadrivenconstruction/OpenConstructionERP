@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resumable Uploads business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resumable Uploads business logic.
 
 The service owns the session lifecycle: create, accept-chunk (idempotent),
 report status, complete (assemble + integrity + hand-off to the document

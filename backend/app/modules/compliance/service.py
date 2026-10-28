@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service layer for the compliance DSL module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service layer for the compliance DSL module.
 
 Owns:
 

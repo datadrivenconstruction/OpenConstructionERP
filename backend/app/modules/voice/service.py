@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Voice-capture service - transcribe a recording and structure a note into a draft.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Voice-capture service - transcribe a recording and structure a note into a draft.
 
 This orchestrates the two AI-optional passes that sit behind the voice module's
 single ``/voice/draft`` endpoint:

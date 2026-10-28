@@ -2,7 +2,7 @@
 # CWICR Cost Database Engine · BOQ Module
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 # AGPL-3.0 License · DDC-CWICR-OE-2026
-"""BOQ service - business logic for Bill of Quantities management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ service - business logic for Bill of Quantities management.
 
 Stateless service layer. Handles:
 - BOQ CRUD with project scoping

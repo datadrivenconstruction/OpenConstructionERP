@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contacts API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contacts API routes.
 
 Endpoints:
     GET    /                - List contacts with filters

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Event-reconciliation API routes (auto-mounted at /api/v1/reconciliation).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Event-reconciliation API routes (auto-mounted at /api/v1/reconciliation).
 
 Assembles the reconciled cross-channel thread for one event and persists a
 reviewer's confirm / reject decisions on the engine's suggested links. Every

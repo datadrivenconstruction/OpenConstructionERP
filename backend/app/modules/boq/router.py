@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BOQ API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ API routes.
 
 Endpoints:
     POST   /boqs/                              - Create a new BOQ

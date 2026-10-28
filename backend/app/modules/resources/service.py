@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resources service - business logic for assignment, conflicts, skill matching."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resources service - business logic for assignment, conflicts, skill matching."""
 
 from __future__ import annotations
 

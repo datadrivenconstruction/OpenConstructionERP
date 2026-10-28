@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HSE frame service: the frame, its register, its roles and the readiness it reports.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HSE frame service: the frame, its register, its roles and the readiness it reports.
 
 Owned here: the frame (pinned catalogue, facts, plan state, review state), the
 register of items, the roles and the links from items to records of other

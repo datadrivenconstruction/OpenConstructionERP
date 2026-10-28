@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Condition API routes (auto-mounted at /api/v1/condition).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition API routes (auto-mounted at /api/v1/condition).
 
 Endpoints (RequirePermission + per-project access check on every one):
     GET    /scales?project_id=                 shipped, pack and project scales

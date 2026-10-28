@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Approval Routes API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Approval Routes API routes.
 
 Endpoints (auto-mounted at ``/api/v1/approval-routes/``)::
 

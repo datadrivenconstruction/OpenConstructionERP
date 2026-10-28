@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment release API routes, mounted at ``/api/v1/payment-release/``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment release API routes, mounted at ``/api/v1/payment-release/``.
 
     GET   /projects/{project_id}/ledger/             - invoice ledger of the project, per contract
     GET   /projects/{project_id}/retention/          - retention register of the project

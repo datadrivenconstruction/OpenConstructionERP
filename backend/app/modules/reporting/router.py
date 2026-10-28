@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Reporting & Dashboards API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reporting & Dashboards API routes.
 
 Endpoints:
     GET    /kpi?project_id=X                     - Latest KPI snapshot

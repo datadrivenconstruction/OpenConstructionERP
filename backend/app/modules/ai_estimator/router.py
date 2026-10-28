@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimate Builder REST router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimate Builder REST router.
 
 Auto-mounted by the module loader at ``/api/v1/ai-estimator/`` (the kebab form
 of the ``oe_ai_estimator`` slug; a legacy ``/api/v1/ai_estimator`` mirror is

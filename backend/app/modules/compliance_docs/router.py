@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""FastAPI router for the compliance documents tracker.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI router for the compliance documents tracker.
 
 All endpoints are owner-scoped via the existing
 :func:`app.dependencies.verify_project_access` guard - the same pattern

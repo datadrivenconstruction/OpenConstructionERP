@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Allowances register service - business logic, no HTTP.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Allowances register service - business logic, no HTTP.
 
 Stateless service layer over the two tables. Handles allowance and drawdown CRUD
 (money parsed to a 2dp-quantized :class:`decimal.Decimal` on the way in, never a

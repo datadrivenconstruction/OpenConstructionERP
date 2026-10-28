@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ERP Chat API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ERP Chat API routes.
 
 Endpoints:
     POST   /erp_chat/stream/                       - SSE streaming chat with tool-calling

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Full EVM service - advanced Earned Value Management with forecasting.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Full EVM service - advanced Earned Value Management with forecasting.
 
 Stateless service layer. Two surfaces live here.
 

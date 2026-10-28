@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Economics service: business case, cost frame and financing plan of one project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Economics service: business case, cost frame and financing plan of one project.
 
 The three parts are one record that is proposed and approved together, because
 each is only meaningful next to the others: the investment of the business case

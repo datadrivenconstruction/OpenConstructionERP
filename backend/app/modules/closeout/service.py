@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Closeout business logic (stateless service).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout business logic (stateless service).
 
 Drives the per-project handover package: seeding the checklist from a
 template, recomputing completeness on every mutation, binding / verifying

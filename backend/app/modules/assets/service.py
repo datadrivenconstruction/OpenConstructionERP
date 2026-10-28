@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Asset Operations service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Asset Operations service.
 
 Reads tracked assets straight from the shared BIM tables, computes
 lifecycle health, rolls up a portfolio summary, discovers asset

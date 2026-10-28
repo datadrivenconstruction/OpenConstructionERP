@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-inventory service layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-inventory service layer.
 
 Async data access on top of the module's own tables, plus the read-side loaders
 that build :class:`app.modules.site_inventory.ledger.Movement` lists and the

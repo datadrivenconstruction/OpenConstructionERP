@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""E-invoice standalone API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠E-invoice standalone API routes.
 
 Mounted at ``/api/v1/einvoice/``.
 

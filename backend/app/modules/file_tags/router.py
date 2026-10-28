@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File tags API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File tags API routes.
 
 Mounted under ``/api/v1/file-tags/`` by the module loader:
 

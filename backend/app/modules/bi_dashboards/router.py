@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""FastAPI router for the BI Dashboards module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI router for the BI Dashboards module.
 
 Mounted by the module loader at ``/api/v1/bi-dashboards/``.
 

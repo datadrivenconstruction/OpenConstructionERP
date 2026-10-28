@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tax withholding API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tax withholding API routes.
 
 Mounted at ``/api/v1/tax-withholding/``. The loader kebab-cases the directory
 name for the canonical prefix and keeps the underscore form only as a hidden

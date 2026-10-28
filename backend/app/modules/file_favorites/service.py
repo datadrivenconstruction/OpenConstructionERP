@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Favourites service - toggle / pin / list.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Favourites service - toggle / pin / list.
 
 Stateless helpers around :class:`FileFavorite`. Polymorphic on
 ``(file_kind, file_id)``; ownership is implicit via ``user_id``.

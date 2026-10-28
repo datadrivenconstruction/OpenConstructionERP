@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost recovery API routes (auto-mounted at /api/v1/cost-recovery).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost recovery API routes (auto-mounted at /api/v1/cost-recovery).
 
 Records and rolls up back-charges for a project. Every route is project-scoped:
 the caller must hold the module capability (read or write) and pass

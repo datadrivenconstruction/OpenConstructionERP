@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Collaboration API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Collaboration API routes.
 
 Endpoints:
     GET    /comments              - List comments for entity (threaded)

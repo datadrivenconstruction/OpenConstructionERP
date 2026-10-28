@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""EAC v2 CRUD API router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EAC v2 CRUD API router.
 
 Endpoints for EAC-1.1 + EAC-1.2:
 

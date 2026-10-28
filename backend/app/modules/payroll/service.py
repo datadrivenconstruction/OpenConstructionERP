@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Payroll service - draft batch generation from field labour.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payroll service - draft batch generation from field labour.
 
 Deterministic, human-confirmed: generation aggregates already-recorded
 labour hours (it never invents data) into a *draft* batch a manager then

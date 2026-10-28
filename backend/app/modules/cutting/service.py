@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cutting optimisation business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cutting optimisation business logic.
 
 Jobs and their cut lists, the optimiser run, validation, and the three bridges
 to other modules:

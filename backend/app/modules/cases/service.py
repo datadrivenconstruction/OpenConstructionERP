@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cases service - author, read, duplicate and pin case scenarios.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cases service - author, read, duplicate and pin case scenarios.
 
 Stateless helpers over :class:`UserCase` and :class:`CasePin`.
 

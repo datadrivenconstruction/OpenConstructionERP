@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Compliance-AI service - verdict pipeline + LLM cost controls.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance-AI service - verdict pipeline + LLM cost controls.
 
 Wraps :func:`app.core.validation.dsl.nl_builder.parse_nl_to_dsl` with:
 

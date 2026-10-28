@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment clock service - regimes, applications, notices and the register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment clock service - regimes, applications, notices and the register.
 
 Stateless helpers over the four models. The statutory arithmetic itself is not
 here: it lives in :mod:`app.modules.payment_clock.clock` as pure functions over

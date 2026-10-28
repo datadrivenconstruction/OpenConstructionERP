@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Allowances & contingency register API routes (auto-mounted at /api/v1/allowances).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Allowances & contingency register API routes (auto-mounted at /api/v1/allowances).
 
 A register of the money an estimate carries but has not yet measured - provisional
 sums, prime-cost sums and design / construction contingencies - each with a held

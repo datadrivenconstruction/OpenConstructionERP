@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Connectors API routes (mounted at ``/api/v1/connectors`` by the loader).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Connectors API routes (mounted at ``/api/v1/connectors`` by the loader).
 
 * ``POST /sources/``              - register an inbound document source
 * ``GET  /sources/``              - list a project's sources

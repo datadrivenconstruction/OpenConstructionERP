@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Public funding API routes - mounted at /api/v1/funding/.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public funding API routes - mounted at /api/v1/funding/.
 
 Two scoping rules run through every endpoint here and are worth stating once
 rather than repeating in thirty docstrings.

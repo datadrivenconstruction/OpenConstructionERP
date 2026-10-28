@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FastAPI router for the compliance DSL module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI router for the compliance DSL module.
 
 Endpoints
 ~~~~~~~~~

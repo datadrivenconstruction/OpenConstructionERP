@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic and the pure XML/validation engine for authority submissions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic and the pure XML/validation engine for authority submissions.
 
 The three engine functions are pure (no session, no clock) so they unit-test
 directly and produce byte-stable output:

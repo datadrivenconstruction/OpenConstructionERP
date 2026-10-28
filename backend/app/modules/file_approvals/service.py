@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Approvals (W8) service layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Approvals (W8) service layer.
 
 Holds the submit / decide / withdraw lifecycle and the
 stamp-burning logic that runs when the final step approves.

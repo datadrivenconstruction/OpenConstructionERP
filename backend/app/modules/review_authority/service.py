@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic for the external-review-authority (expertise cycle) module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for the external-review-authority (expertise cycle) module.
 
 The module-level functions here are pure - no session, no clock unless one is
 passed in - so the whole decision core is unit-tested without a database:

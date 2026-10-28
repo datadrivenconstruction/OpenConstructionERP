@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plant register service: the one long-lead list of a project and everything hung on it.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plant register service: the one long-lead list of a project and everything hung on it.
 
 Writes:
     pin_catalogue, create_item, update_item, transition_item, sync_item_state

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Asia-Pacific regional pack API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Asia-Pacific regional pack API routes.
 
 Endpoints:
     GET /config  - Return the full Asia-Pacific regional configuration

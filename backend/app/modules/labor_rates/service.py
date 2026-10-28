@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Labor rate service - stateless build-up orchestration and persistence.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Labor rate service - stateless build-up orchestration and persistence.
 
 The rate arithmetic lives in :mod:`app.modules.labor_rates.rate_math` (pure
 Decimal). This layer maps the schema payloads onto that math for the stateless

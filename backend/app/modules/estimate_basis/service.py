@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate-basis business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate-basis business logic.
 
 Reads the finished estimate contents (the BOQ positions of a project), runs the
 pure :mod:`.derivation` engine over them, and persists the drafted

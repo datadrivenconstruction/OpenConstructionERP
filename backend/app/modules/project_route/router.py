@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FastAPI router for the work-type route classifier.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FastAPI router for the work-type route classifier.
 
 Auto-mounted at ``/api/v1/project-route/``. Every project-scoped endpoint is
 guarded by :func:`app.dependencies.verify_project_access` - the same guard the

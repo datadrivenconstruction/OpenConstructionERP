@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Finance service - business logic for invoicing, payments, budgets, and EVM.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance service - business logic for invoicing, payments, budgets, and EVM.
 
 Stateless service layer.
 """

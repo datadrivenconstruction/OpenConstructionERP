@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM Requirements Import/Export API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM Requirements Import/Export API routes.
 
 Endpoints:
     POST   /import/upload/                    -- Upload and import a requirements file

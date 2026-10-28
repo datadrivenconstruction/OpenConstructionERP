@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Background Jobs API routes - RFC 34 §4 W0.1.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Background Jobs API routes - RFC 34 §4 W0.1.
 
 Endpoints (all prefixed at ``/api/v1/jobs`` by the module loader):
 

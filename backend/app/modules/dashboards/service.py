@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""SnapshotService - the orchestration seam for T01.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠SnapshotService - the orchestration seam for T01.
 
 Composes the repository, the cad2data bridge, the snapshot-storage
 helper, the DuckDB pool, and the event bus. Other dashboards tasks

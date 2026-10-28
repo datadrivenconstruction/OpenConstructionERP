@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Assembly service - business logic for Assemblies & Calculations management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Assembly service - business logic for Assemblies & Calculations management.
 
 Stateless service layer. Handles:
 - Assembly CRUD with search and filtering

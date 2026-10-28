@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimation API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimation API routes.
 
 Endpoints:
     GET    /ai/settings                          - Get user's AI settings

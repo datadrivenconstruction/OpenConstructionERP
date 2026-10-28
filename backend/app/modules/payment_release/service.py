@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment release: terms, the invoice ledger, releasing an invoice, the retention register, the rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment release: terms, the invoice ledger, releasing an invoice, the retention register, the rules.
 
 Every figure is computed on the server from :func:`billing.load_billing`; the
 screens only show it. A person confirms a release (it is then frozen) and

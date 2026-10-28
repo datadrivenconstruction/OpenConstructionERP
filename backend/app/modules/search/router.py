@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Unified semantic search HTTP router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Unified semantic search HTTP router.
 
 Routes:
     GET  /api/v1/search/         - cross-collection semantic search

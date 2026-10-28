@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Construction-control service - acceptance criteria, inspections and the
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control service - acceptance criteria, inspections and the
 failed-inspection -> NCR bridge.
 
 The service owns the business rules that turn a recorded inspection result into a

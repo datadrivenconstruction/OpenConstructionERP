@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost-match business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost-match business logic.
 
 This is where the pure matcher meets the database. The split is deliberate and
 worth keeping: :mod:`app.modules.cost_match.matcher` knows nothing about

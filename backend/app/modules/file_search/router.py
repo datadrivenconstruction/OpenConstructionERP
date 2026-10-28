@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File search API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File search API routes.
 
 Endpoints (mounted under ``/api/v1/file-search/`` by the module loader):
 

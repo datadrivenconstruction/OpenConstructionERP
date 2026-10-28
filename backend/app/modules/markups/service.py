@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Markups & Annotations service - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Markups & Annotations service - business logic.
 
 Stateless service layer. Handles:
 - Markup CRUD, bulk creation, and text search

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Field Diary - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Diary - business logic.
 
 Encapsulates the diary FSM (draft → submitted → approved), the dedicated
 field-module grant check (BYPASSES the standard RBAC stack), and the

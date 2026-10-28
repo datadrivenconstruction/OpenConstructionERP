@@ -1,6 +1,6 @@
 # OpenConstructionERP - DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Progress tracking API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Progress tracking API routes.
 
 Endpoints:
     POST   /entries/                        - Record a progress observation

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Clash detection API routes - mounted by the loader at ``/api/v1/clash``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clash detection API routes - mounted by the loader at ``/api/v1/clash``.
 
 Endpoints
     GET    /projects/{project_id}/models                 → models picker

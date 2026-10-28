@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Interface-register service layer (multi-package coordination register).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Interface-register service layer (multi-package coordination register).
 
 Async data access on top of the module's own two tables plus the read-side
 loaders that project persisted rows onto the pure

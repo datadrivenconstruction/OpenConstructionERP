@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Punch List service - business logic for punch list management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Punch List service - business logic for punch list management.
 
 Stateless service layer. Handles:
 - Punch item CRUD

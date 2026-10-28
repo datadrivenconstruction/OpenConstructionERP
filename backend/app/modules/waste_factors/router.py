@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Waste-factor API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Waste-factor API routes.
 
 Mounted at ``/api/v1/waste-factors/`` by the module loader.
 

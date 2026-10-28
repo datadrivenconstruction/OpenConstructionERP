@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project handbook service: chapters from a catalogue, their text, owners, versions and approval.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project handbook service: chapters from a catalogue, their text, owners, versions and approval.
 
 Every write runs in the caller's transaction with its audit entry (``log_activity``) and its events
 (``publish_after_commit``).

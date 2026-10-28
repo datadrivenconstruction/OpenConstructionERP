@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Field Diary API routes (mounted at ``/api/v1/field-diary``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Diary API routes (mounted at ``/api/v1/field-diary``).
 
 Auth model:
     * ``POST /auth/request-magic-link/`` is **unauthenticated** - it

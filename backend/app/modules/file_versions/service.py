@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Versioning business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Versioning business logic.
 
 Stateless service layer. Owns the version-chain rules:
 

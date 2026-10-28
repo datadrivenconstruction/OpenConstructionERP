@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Portfolio tree service (T3.3).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Portfolio tree service (T3.3).
 
 Node CRUD, project membership, and the access-pruned tree. Every read
 intersects with ``accessible_project_ids`` and every project write goes through

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CDE (Common Data Environment) API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CDE (Common Data Environment) API routes.
 
 Endpoints:
     GET    /suitability-codes                     - ISO 19650 suitability codes

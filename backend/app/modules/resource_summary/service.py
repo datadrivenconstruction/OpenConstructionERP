@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Business logic for the Resource Summary module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for the Resource Summary module.
 
 Reads a project's BoQ positions read-only (via the BoQ position repository), rolls
 their stored resource split up into a procurement statement with the pure

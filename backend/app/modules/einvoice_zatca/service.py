@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""EGS units: onboarding, the chain, and building a stamped document.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EGS units: onboarding, the chain, and building a stamped document.
 
 Two jobs that share one table.
 

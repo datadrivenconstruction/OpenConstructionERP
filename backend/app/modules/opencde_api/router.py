@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""OpenCDE API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠OpenCDE API routes.
 
 BuildingSMART-compliant API endpoints:
 

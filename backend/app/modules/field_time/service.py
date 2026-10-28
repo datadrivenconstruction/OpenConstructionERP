@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Field Time service - business logic for the foreman's field timesheet.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Time service - business logic for the foreman's field timesheet.
 
 Stateless service layer over the pure engine
 (:mod:`app.modules.field_time.field_time_math`). Responsibilities:

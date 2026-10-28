@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Geo Hub API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub API routes.
 
 Mounted by the module loader at ``/api/v1/geo-hub/``. All routes are
 RBAC-gated; the service layer additionally closes cross-tenant IDOR

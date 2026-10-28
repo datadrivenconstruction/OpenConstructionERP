@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate-rollup service - read-only cross-module composition.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate-rollup service - read-only cross-module composition.
 
 Composes a project's full estimate headline number by reading three sibling
 estimating modules and handing their figures to the pure

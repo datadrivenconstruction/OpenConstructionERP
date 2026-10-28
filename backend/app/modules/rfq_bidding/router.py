@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFQ Bidding API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFQ Bidding API routes.
 
 Endpoints:
     GET    /                       - List RFQs (requires rfq.read + project access)

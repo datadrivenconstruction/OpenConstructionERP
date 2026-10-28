@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Customer & Partner Portal - FastAPI routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Customer & Partner Portal - FastAPI routes.
 
 Two surfaces, mounted under ``/api/v1/portal/``:
 

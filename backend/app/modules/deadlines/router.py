@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deadlines API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deadlines API routes.
 
 Endpoints:
     GET  /         - the cross-module deadline register for a project

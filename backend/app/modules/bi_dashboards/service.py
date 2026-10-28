@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Service layer for the BI Dashboards module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service layer for the BI Dashboards module.
 
 All cross-module reads route through :mod:`.kpis` so the service itself
 never imports another module's models directly. This keeps the

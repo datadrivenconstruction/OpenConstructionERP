@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP-facing service layer - keeps the router thin.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP-facing service layer - keeps the router thin.
 
 Loads the acting user's AISettings (so the translation cascade and
 rerank tier can use their key) and verifies project ownership before

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ESG Site Performance service - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ESG Site Performance service - business logic.
 
 Stateless service layer. Handles:
 - listing the code-defined metric catalogue;

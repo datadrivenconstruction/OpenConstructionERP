@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Payroll API routes (mounted at ``/api/v1/payroll``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payroll API routes (mounted at ``/api/v1/payroll``).
 
 Endpoints (all manager-scoped + project-access checked):
     POST  /projects/{project_id}/batches/        - generate a draft batch

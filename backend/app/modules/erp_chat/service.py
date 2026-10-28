@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ERP Chat service - agent loop with SSE streaming and tool calling.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ERP Chat service - agent loop with SSE streaming and tool calling.
 
 Supports Anthropic and OpenAI APIs with tool-calling (function calling).
 Other providers fall back to plain text via the shared ai_client.call_ai().

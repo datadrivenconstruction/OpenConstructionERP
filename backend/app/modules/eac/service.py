@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""High-level service layer for EAC v2 (RFC 35 §1.7, task #221).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠High-level service layer for EAC v2 (RFC 35 §1.7, task #221).
 
 This is the seam between the HTTP router and the engine internals.
 Routers get the auth/tenant guard, the service composes the engine

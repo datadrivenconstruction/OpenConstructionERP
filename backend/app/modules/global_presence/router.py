@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""WebSocket endpoint for app-wide user presence, scoped to a project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠WebSocket endpoint for app-wide user presence, scoped to a project.
 
 Clients connect to ``/ws/`` and send ``{"type": "auth", "token": "<jwt>"}``
 as their first frame (see :mod:`app.core.ws_auth`; the token no longer rides

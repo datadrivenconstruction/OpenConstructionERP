@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Elemental cost plan API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Elemental cost plan API routes.
 
 Mounted at ``/api/v1/cost-plan``. Two read-only endpoints:
 

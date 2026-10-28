@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Defects-liability API routes (mounted at ``/api/v1/defects-liability``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Defects-liability API routes (mounted at ``/api/v1/defects-liability``).
 
 Post-handover warranty and defects-liability-period governance: the per-project
 register of warranty / DLP entries, the defect notices raised against each while

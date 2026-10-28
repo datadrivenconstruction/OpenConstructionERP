@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimating-methodology service layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimating-methodology service layer.
 
 Stateless service over an :class:`~sqlalchemy.ext.asyncio.AsyncSession`,
 following the same shape as the sibling modules:

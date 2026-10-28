@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Reporting service - business logic for KPI snapshots, templates, and report generation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reporting service - business logic for KPI snapshots, templates, and report generation.
 
 Event publishing (slice E):
     reporting.kpi_snapshot.created - new KPI snapshot row

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Geo Hub business logic + FSM transitions + IDOR closures."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub business logic + FSM transitions + IDOR closures."""
 
 from __future__ import annotations
 

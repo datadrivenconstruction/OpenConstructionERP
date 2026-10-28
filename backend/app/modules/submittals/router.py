@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Submittals API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Submittals API routes.
 
 Endpoints:
     GET    /                          - List submittals for a project (filters, sorting)

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Phone-log service - capture a verbal instruction and read a project's log.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Phone-log service - capture a verbal instruction and read a project's log.
 
 The capture path runs the pure ``phonelog.normalize`` engine over the raw input
 so every stored row is canonical (direction, channel, parties, duration,

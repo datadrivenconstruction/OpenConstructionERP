@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule API routes.
 
 Endpoints:
     POST   /schedules/                          - Create a new schedule

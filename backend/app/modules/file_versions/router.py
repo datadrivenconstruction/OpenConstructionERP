@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Versioning API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Versioning API routes.
 
 Endpoints (auto-mounted at ``/api/v1/file-versions/``):
 

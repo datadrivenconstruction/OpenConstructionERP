@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tendering service - business logic for tender packages and bids.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tendering service - business logic for tender packages and bids.
 
 Stateless service layer. Handles:
 - Package CRUD with status workflow

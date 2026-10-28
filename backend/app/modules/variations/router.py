@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Variations API routes - mounted at /api/v1/variations/."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Variations API routes - mounted at /api/v1/variations/."""
 
 from __future__ import annotations
 

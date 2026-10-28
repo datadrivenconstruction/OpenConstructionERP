@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Accommodation business logic - stateless service layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Accommodation business logic - stateless service layer.
 
 All cross-table operations (booking creation with status gates, PropDev
 bootstrap, HR-driven room suggestion, state-machine transitions) live

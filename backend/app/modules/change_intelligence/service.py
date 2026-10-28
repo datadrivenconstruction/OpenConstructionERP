@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Change-intelligence service - the thin database layer over the pure engines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Change-intelligence service - the thin database layer over the pure engines.
 
 Gathers the current state of every change-family record for a project (change
 orders, variation notices / requests / orders, MoC entries) and feeds it to the

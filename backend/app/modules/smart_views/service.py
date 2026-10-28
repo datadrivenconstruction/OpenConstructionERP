@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Smart Views business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views business logic.
 
 The service layer is the single source of truth for the **scoping
 rules** - RBAC at the router decides *whether* a caller may touch the

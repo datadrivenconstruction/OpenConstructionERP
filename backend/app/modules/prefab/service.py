@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Off-site / Prefab / DfMA service - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Off-site / Prefab / DfMA service - business logic.
 
 Stateless service layer. Handles:
 - Prefab unit CRUD

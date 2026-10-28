@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Pure cost-rollup service for the clash cost-impact module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure cost-rollup service for the clash cost-impact module.
 
 The service is deliberately read-only - no ORM writes, no transactional
 side-effects - because the cost-impact column is a derived view over

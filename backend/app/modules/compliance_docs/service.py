@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Compliance documents service - CRUD + status derivation."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance documents service - CRUD + status derivation."""
 
 from __future__ import annotations
 

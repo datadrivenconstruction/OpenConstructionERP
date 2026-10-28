@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic for the work-type route classifier.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for the work-type route classifier.
 
 The heart of the module is a small, ordered **decision tree expressed as data**
 (:data:`DEFAULT_ROUTE_RULES`) and one pure function, :func:`classify`, that walks

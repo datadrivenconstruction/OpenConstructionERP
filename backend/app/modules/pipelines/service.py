@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pipeline Builder business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pipeline Builder business logic.
 
 Owns: graph validation (registry + structural ``pipeline`` rule), JobRun
 submission, run snapshotting and the read-model assembly that the router

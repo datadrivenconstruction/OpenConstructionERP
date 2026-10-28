@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-inventory API routes (mounted at ``/api/v1/site-inventory``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-inventory API routes (mounted at ``/api/v1/site-inventory``).
 
 On-site material metering and stock: storage locations, stock items, the
 movement ledger (inbound / consumption / waste / transfer), and the derived

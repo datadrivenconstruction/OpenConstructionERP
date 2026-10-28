@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Database layer of the NRM 1 cost plan: read the bill, hand it to the engine.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Database layer of the NRM 1 cost plan: read the bill, hand it to the engine.
 
 This writes nothing. It reads a bill exactly the way the bill editor reads it,
 so the plan's direct cost and grand total are the editor's to the cent:

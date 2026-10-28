@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Public funding business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public funding business logic.
 
 Three things here are worth more than the CRUD around them.
 

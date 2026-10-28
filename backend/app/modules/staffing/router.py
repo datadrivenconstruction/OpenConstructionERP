@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Staffing API, mounted at ``/api/v1/staffing``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Staffing API, mounted at ``/api/v1/staffing``.
 
 Every project-scoped route lives under ``/projects/{project_id}/...`` and
 awaits ``verify_project_access`` in its own body before it reads anything, so

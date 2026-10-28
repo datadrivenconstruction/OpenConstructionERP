@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Inbound email API routes (auto-mounted at /api/v1/inbound-email).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inbound email API routes (auto-mounted at /api/v1/inbound-email).
 
 A single endpoint that imports a stored RFC-822 message (a ".eml" file) and
 returns the parsed record together with any construction delay signals detected

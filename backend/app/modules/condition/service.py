@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Condition assessment service: scales, ratings, maintenance plan.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition assessment service: scales, ratings, maintenance plan.
 
 Ratings are recorded per asset or element (typically during an inspection);
 the plan is derived from them as proposals a person approves, priced per year

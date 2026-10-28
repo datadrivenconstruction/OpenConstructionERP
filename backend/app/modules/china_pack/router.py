@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""China regional pack API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠China regional pack API routes.
 
 Endpoints:
     GET /config  - Return the full China regional configuration

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""MCP HTTP surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠MCP HTTP surface.
 
 Mounted at ``/api/v1/mcp``:
 

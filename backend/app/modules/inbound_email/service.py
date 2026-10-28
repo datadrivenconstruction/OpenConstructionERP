@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Inbound email service - parse a stored message and flag delay signals.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inbound email service - parse a stored message and flag delay signals.
 
 A thin wrapper over the two pure engines: it parses a raw RFC-822 message into
 a normalized record and runs the delay detector over its subject and body. It

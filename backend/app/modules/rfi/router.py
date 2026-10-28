@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFI API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFI API routes.
 
 Endpoints:
     GET    /                              - List RFIs for a project

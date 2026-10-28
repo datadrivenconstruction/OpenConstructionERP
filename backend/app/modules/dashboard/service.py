@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Dashboard rollup aggregation service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Dashboard rollup aggregation service.
 
 Each ``compute_*`` function executes ONE query (or a small fixed number)
 across all of the caller's accessible projects, replacing the per-project

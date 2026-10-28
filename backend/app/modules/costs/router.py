@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost database API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost database API routes.
 
 Endpoints:
     GET  /autocomplete    -- Fast text autocomplete for cost items (public)

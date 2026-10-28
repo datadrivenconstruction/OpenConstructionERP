@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""5D Cost Model service - business logic for EVM, budgets, and cash flow.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠5D Cost Model service - business logic for EVM, budgets, and cash flow.
 
 Stateless service layer.  Handles:
 - EVM snapshot creation and S-curve data

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rebar schedule business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rebar schedule business logic.
 
 Two ways in, and the difference is deliberate. :meth:`RebarScheduleService.preview`
 parses and validates and stores nothing, so an estimator can look at what a

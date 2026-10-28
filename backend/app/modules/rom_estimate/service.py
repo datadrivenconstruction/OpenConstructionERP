@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Conceptual (ROM) estimate engine and persistence service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Conceptual (ROM) estimate engine and persistence service.
 
 This module holds the elemental cost-per-m2 reference data and the pure,
 database-free estimator that turns a handful of inputs (building type, gross

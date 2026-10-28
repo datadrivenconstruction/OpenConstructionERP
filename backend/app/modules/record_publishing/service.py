@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Record Publishing service - one-tap "publish a record and distribute it".
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Record Publishing service - one-tap "publish a record and distribute it".
 
 A project accumulates contemporaneous records - the daily site diary today,
 meeting minutes and inspection reports next - that periodically need to leave

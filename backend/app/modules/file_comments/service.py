@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Comments business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Comments business logic.
 
 Stateless service. The router composes these functions inside the
 request-scoped session - they don't open transactions themselves so a

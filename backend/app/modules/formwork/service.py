@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Formwork business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Formwork business logic.
 
 Centralises the reuse-aware rate build-up so every caller (router, import
 wizard, BOQ rollup) shares one source of truth for what a formwork rate is:

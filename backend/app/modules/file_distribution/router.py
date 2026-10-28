@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HTTP routes for the file-distribution module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP routes for the file-distribution module.
 
 Mounted by the module loader at ``/api/v1/file-distribution``.
 

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Customer & Partner Portal - business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Customer & Partner Portal - business logic.
 
 Pure-function helpers (token gen, hashing, permission predicate) plus a
 :class:`PortalService` that wraps the repositories with idempotent operations

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Drafting, previewing, installing and removing a generated module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Drafting, previewing, installing and removing a generated module.
 
 The assistant's only job here is to turn a sentence into a
 :class:`~app.modules.module_builder.spec.ModuleSpec`. It does not write code,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation module business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation module business logic.
 
 Orchestrates validation runs against BOQs, persists reports, and provides
 access to available rule sets. This is the bridge between the core validation

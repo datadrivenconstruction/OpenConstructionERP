@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site Logistics service - business logic for gates, laydown zones and deliveries.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site Logistics service - business logic for gates, laydown zones and deliveries.
 
 Stateless service layer. The delivery rules are enforced here so a booking that
 breaks them is never persisted:

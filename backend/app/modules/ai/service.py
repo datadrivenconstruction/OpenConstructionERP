@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimation service - business logic for AI-powered BOQ generation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimation service - business logic for AI-powered BOQ generation.
 
 Stateless service layer. Handles:
 - Per-user AI settings (get, create, update)

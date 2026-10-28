@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BCF business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BCF business logic.
 
 Owns:
     * Topic / comment / viewpoint CRUD.

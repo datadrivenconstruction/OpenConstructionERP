@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cross-module deadline aggregator - query + normalise layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cross-module deadline aggregator - query + normalise layer.
 
 Modeled directly on :mod:`app.modules.dashboard.inbox`. Each collector imports
 its sibling model **inside** the function, and the caller wraps every collector

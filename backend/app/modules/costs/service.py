@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost item service - business logic for cost database management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost item service - business logic for cost database management.
 
 Stateless service layer. Handles:
 - Cost item CRUD

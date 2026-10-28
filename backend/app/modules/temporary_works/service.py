@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Temporary-works service layer (safety-critical governance register).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Temporary-works service layer (safety-critical governance register).
 
 Async data access on top of the module's own two tables plus the read-side
 loaders that project persisted rows onto the pure

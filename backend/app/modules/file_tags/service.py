@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File tags service - CRUD + bulk assign/unassign + AECO defaults.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File tags service - CRUD + bulk assign/unassign + AECO defaults.
 
 Stateless. Methods take an :class:`AsyncSession` explicitly so the
 router can compose them inside a transaction (or a test can drive them

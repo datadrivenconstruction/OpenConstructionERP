@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Takeoff business logic."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Takeoff business logic."""
 
 import asyncio
 import contextlib

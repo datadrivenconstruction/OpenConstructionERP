@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM-LV container API routes (DIN SPEC 91350).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM-LV container API routes (DIN SPEC 91350).
 
 Endpoints:
     POST /projects/{project_id}/import   - Upload a container, materialize links

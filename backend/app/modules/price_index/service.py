@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Price-index business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Price-index business logic.
 
 Thin orchestration over the three tables plus the pure Decimal core in
 :mod:`app.modules.price_index.index_math`. Data access is inlined on the

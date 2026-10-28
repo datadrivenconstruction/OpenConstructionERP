@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Property Development service - business logic + state machines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Property Development service - business logic + state machines.
 
 Pure helpers (no DB / I/O) live at module top so tests can exercise them
 directly. The :class:`PropertyDevService` orchestrates them against the

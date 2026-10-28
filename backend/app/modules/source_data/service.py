@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic for the source-data (prerequisite documents) register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for the source-data (prerequisite documents) register.
 
 Owns four things a data model alone cannot:
 

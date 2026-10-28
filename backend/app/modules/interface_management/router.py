@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Interface-register API routes (mounted at ``/api/v1/interface-management``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Interface-register API routes (mounted at ``/api/v1/interface-management``).
 
 Multi-package / multi-contractor coordination: the per-project register of
 interfaces (the handshakes where one party's work meets another's), the actions

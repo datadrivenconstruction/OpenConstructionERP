@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Clash AI Triage API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clash AI Triage API routes.
 
 Mounted by the module loader at ``/api/v1/clash-ai-triage`` (kebab-cased
 directory name per the loader convention).

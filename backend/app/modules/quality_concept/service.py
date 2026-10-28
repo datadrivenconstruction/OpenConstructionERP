@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Quality concept service: the plan, its coverage, and the mirrors of other modules' acts.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Quality concept service: the plan, its coverage, and the mirrors of other modules' acts.
 
 Owned here: the concept (pinned catalogue, package scope, state), standards,
 certification and credit targets, proof requirements, evidence links, the

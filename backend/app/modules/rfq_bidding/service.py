@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFQ Bidding service - business logic for RFQ and bid management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFQ Bidding service - business logic for RFQ and bid management.
 
 Stateless service layer. It holds three things beyond plain CRUD:
 

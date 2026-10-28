@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Admin API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Admin API routes.
 
 Endpoints:
     POST /qa-reset                   - reset the demo dataset (triple-gated)

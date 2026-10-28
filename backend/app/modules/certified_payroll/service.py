@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Certified payroll business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Certified payroll business logic.
 
 The one idea worth stating before the code: a draft week owns no rows. Its lines
 are derived from ``oe_payroll`` every time they are asked for, so there is never

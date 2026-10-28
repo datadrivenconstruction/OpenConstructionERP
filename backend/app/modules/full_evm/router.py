@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Full EVM API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Full EVM API routes.
 
 Forecast surface (derived from finance EVM snapshots)::
 

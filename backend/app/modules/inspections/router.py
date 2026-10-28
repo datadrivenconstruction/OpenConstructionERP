@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Inspections API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inspections API routes.
 
 Endpoints:
     GET    /                         - List inspections for a project

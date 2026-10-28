@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Stakeholders service: register, assessments, plan, events, commitments, roles, bodies, mandates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Stakeholders service: register, assessments, plan, events, commitments, roles, bodies, mandates.
 
 Every write runs in the caller's transaction with its audit entry
 (``log_activity``, or the FSM's own entry for a state change) and its events

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""LLM-assisted clash triage service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠LLM-assisted clash triage service.
 
 Public surface
 --------------

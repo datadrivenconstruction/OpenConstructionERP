@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Procurement concept service: every write and every computed view.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Procurement concept service: every write and every computed view.
 
 Ownership of data (SPEC section 6, INTEGRATION section 6):
 

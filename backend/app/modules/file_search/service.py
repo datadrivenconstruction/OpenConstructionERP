@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File search service - index + query business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File search service - index + query business logic.
 
 Stateless service. The indexer pulls the on-disk bytes for the file
 (documents / sheets / markups; other kinds use the embedded ``file_path``

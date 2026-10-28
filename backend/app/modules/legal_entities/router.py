@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Legal entity and branch API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Legal entity and branch API routes.
 
 Mounted at ``/api/v1/legal_entities/`` by the module loader.
 

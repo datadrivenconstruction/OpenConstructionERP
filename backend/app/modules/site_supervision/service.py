@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Business logic for design-side site supervision.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Business logic for design-side site supervision.
 
 Owns the two visit / entry state machines and wires the request path to the
 pure, database-free domain logic in :mod:`app.modules.site_supervision.validators`

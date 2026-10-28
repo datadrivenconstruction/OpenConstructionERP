@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Admin service - qa-reset implementation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Admin service - qa-reset implementation.
 
 Resets the demo dataset to a known baseline so the QA crawler can run
 idempotently. Three independent gates protect the destructive path:

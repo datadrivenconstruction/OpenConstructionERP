@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Clash cost-impact API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clash cost-impact API routes.
 
 The module-loader mounts this router at ``/api/v1/clash-cost-impact``
 (kebab-cased directory name, per the loader convention).

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Match Elements REST router.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Match Elements REST router.
 
 Endpoints (auto-mounted at /api/v1/match_elements/ by the module loader):
 

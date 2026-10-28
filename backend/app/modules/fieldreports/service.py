@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Field Reports service - business logic for field report management.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Reports service - business logic for field report management.
 
 Stateless service layer. Handles:
 - Field report CRUD

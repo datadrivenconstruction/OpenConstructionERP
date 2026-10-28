@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Retrieval API routes (mounted at ``/api/v1/retrieval`` by the loader).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Retrieval API routes (mounted at ``/api/v1/retrieval`` by the loader).
 
 * ``GET /search`` - faceted, ranked search across the project record
   (documents, correspondence, change orders), with provenance on each hit.

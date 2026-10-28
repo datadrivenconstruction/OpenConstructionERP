@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment clock API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment clock API routes.
 
 Mounted at ``/api/v1/payment-clock/``.
 

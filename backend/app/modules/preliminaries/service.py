@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Preliminaries service - business logic for the general-conditions estimator.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Preliminaries service - business logic for the general-conditions estimator.
 
 Stateless service layer over the pure engine
 (:mod:`app.modules.preliminaries.prelim_math`). Responsibilities:

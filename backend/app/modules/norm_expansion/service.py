@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Production-norm business logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Production-norm business logic.
 
 Owns the norm library CRUD and the expansion orchestration: it resolves a
 ``work_key`` to a stored norm, turns the ORM row into the pure

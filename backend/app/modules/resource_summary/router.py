@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Resource Summary API routes.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resource Summary API routes.
 
 Mounted at ``/api/v1/resource-summary``. One procurement-ready rollup of an
 estimate's resource demand:
