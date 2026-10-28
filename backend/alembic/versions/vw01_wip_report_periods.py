@@ -8,7 +8,7 @@ New tables only, no data rewrite. Inspector-guarded, so a database whose tables
 ``create_all`` already built is a no-op.
 
 Revision ID: vw01_wip_report_periods
-Revises: v201_takeoff_measurement_drawing_ref
+Revises: v201_drawing_revision_compare
 Create Date: 2026-10-26
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "vw01_wip_report_periods"
-down_revision: str | Sequence[str] | None = "v201_takeoff_measurement_drawing_ref"
+down_revision: str | Sequence[str] | None = "v201_drawing_revision_compare"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

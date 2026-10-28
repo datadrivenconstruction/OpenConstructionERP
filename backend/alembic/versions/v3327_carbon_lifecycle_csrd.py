@@ -8,7 +8,7 @@ flag (measured, calculated, estimated) to embodied and scope 1/2/3 lines, and
 creates ``oe_carbon_company_activity`` and ``oe_carbon_company_report``.
 
 Revision ID: v3327_carbon_lifecycle_csrd
-Revises: v3326_subcontractor_insurance_compliance
+Revises: v3327_equipment_telematics_site_sensors
 Create Date: 2026-10-26
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3327_carbon_lifecycle_csrd"
-down_revision: str | Sequence[str] | None = "v3326_subcontractor_insurance_compliance"
+down_revision: str | Sequence[str] | None = "v3327_equipment_telematics_site_sensors"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

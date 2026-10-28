@@ -8,7 +8,7 @@ the addendum it was promoted into. Addenda, BOQ revisions and acknowledgements
 stay in the package ``metadata`` JSON store, so no existing row changes.
 
 Revision ID: v3327_tender_clarifications
-Revises: v3326_subcontractor_insurance_compliance
+Revises: vw01_wip_report_periods
 Create Date: 2026-10-26
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3327_tender_clarifications"
-down_revision: str | Sequence[str] | None = "v3326_subcontractor_insurance_compliance"
+down_revision: str | Sequence[str] | None = "vw01_wip_report_periods"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

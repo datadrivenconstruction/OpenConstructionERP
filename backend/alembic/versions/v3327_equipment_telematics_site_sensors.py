@@ -10,7 +10,7 @@ Site sensors: devices, concrete mix curves, a compact raw reading table keyed
 by (device, time), an hourly rollup, alerts and formwork strikes.
 
 Revision ID: v3327_equipment_telematics_site_sensors
-Revises: v3326_subcontractor_insurance_compliance
+Revises: v3327_tender_clarifications
 Create Date: 2026-10-26
 """
 
@@ -22,7 +22,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3327_equipment_telematics_site_sensors"
-down_revision: str | Sequence[str] | None = "v3326_subcontractor_insurance_compliance"
+down_revision: str | Sequence[str] | None = "v3327_tender_clarifications"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

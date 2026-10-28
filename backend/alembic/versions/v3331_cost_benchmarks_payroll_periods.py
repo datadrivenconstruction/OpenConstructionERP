@@ -9,7 +9,7 @@ scoped benchmark records of completed projects and estimates), and
 New tables only, so nothing that runs today changes.
 
 Revision ID: v3331_cost_benchmarks_payroll_periods
-Revises: v3326_subcontractor_insurance_compliance
+Revises: v3327_quote_capture
 Create Date: 2026-10-27
 """
 
@@ -21,7 +21,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3331_cost_benchmarks_payroll_periods"
-down_revision: str | Sequence[str] | None = "v3326_subcontractor_insurance_compliance"
+down_revision: str | Sequence[str] | None = "v3327_quote_capture"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
