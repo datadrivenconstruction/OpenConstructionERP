@@ -2077,5 +2077,21 @@
     ],
     "key_count_at_seed": 3,
     "note": "Register is the native word in each of these languages (guarantees.back, stakeholders.ui.tab_register), and Element A is shared by clash.col_a."
+  },
+  {
+    "locale_set": [
+      "cs",
+      "pl"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Import and Limit are the native words in Czech and Polish too; reviewed 2026-10-28"
+  },
+  {
+    "locale_set": [
+      "fr",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Position and GAEB import labels read the same in French and Swedish; reviewed 2026-10-28"
   }
 ]

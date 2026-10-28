@@ -1903,5 +1903,60 @@
     "en_value": "WBS",
     "note": "work breakdown structure acronym; de PSP, es EDT, pt EAP, ru ISR, uk ISR, kk, el, he and zh are localised, the other locales keep the international acronym",
     "reason_category": "acronym"
+  },
+  "carbon.lc.export_pdf": {
+    "en_value": "PDF",
+    "note": "file format name on an export button",
+    "reason_category": "product_name"
+  },
+  "carbon.lc.export_xlsx": {
+    "en_value": "Excel",
+    "note": "spreadsheet file format name on an export button",
+    "reason_category": "product_name"
+  },
+  "carbon.lc.export_xbrl_csv": {
+    "en_value": "XBRL CSV",
+    "note": "reporting file format name (XBRL in CSV form) on an export button",
+    "reason_category": "standard_code"
+  },
+  "carbon.lc.tpl_esrs_e1": {
+    "en_value": "CSRD / ESRS E1",
+    "note": "EU directive and reporting standard codes, cited as written",
+    "reason_category": "standard_code"
+  },
+  "carbon.lc.tpl_uk_secr": {
+    "en_value": "UK SECR",
+    "note": "UK reporting framework acronym, cited as written",
+    "reason_category": "standard_code"
+  },
+  "cost_benchmarks.col_band": {
+    "en_value": "P10 - P50 - P90",
+    "note": "percentile codes heading a benchmark band column, written the same in every locale",
+    "reason_category": "symbol"
+  },
+  "crumbs.version": {
+    "en_value": "v{{n}}",
+    "note": "version number template in a breadcrumb, the letter v is the convention in every locale we ship",
+    "reason_category": "version_string"
+  },
+  "einvoice.profile.ubl_pe": {
+    "en_value": "SUNAT UBL 2.1 (factura electrónica)",
+    "note": "official name of the Peruvian electronic invoice profile, a standard name kept in its own language",
+    "reason_category": "standard_code"
+  },
+  "quote_capture.tax_gst": {
+    "en_value": "GST",
+    "note": "tax acronym as printed on supplier quotes, not translated",
+    "reason_category": "acronym"
+  },
+  "wip_report.export_pdf": {
+    "en_value": "PDF",
+    "note": "file format name on an export button",
+    "reason_category": "product_name"
+  },
+  "wip_report.export_xlsx": {
+    "en_value": "Excel",
+    "note": "spreadsheet file format name on an export button",
+    "reason_category": "product_name"
   }
 }

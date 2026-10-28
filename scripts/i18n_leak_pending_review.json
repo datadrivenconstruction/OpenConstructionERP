@@ -3430,5 +3430,93 @@
     "en_value": "v{{n}}",
     "n": 37,
     "reason": "Version abbreviation template, v plus a number, written the same in Latin-script locales; the differing locales use their own script."
+  },
+  "dashboard.fleet_util.co2": {
+    "added_by": "integration/18.9-w3 (2026-10-28)",
+    "differs_in": [
+      "ar",
+      "bg",
+      "bn",
+      "fa",
+      "he",
+      "hi",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk",
+      "ur"
+    ],
+    "en_value": "CO2 kg",
+    "n": 30,
+    "reason": "unit label; Latin-script and CJK locales write CO2 kg as is, Cyrillic and some other scripts localise the unit, so it is not identical everywhere"
+  },
+  "equipment.telematics.col_co2": {
+    "added_by": "integration/18.9-w3 (2026-10-28)",
+    "differs_in": [
+      "ar",
+      "bg",
+      "bn",
+      "fa",
+      "he",
+      "hi",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "uk",
+      "ur"
+    ],
+    "en_value": "CO2 kg",
+    "n": 30,
+    "reason": "unit label; Latin-script and CJK locales write CO2 kg as is, Cyrillic and some other scripts localise the unit, so it is not identical everywhere"
+  },
+  "tendering.compare.carbonCol": {
+    "added_by": "integration/18.9-w3 (2026-10-28)",
+    "differs_in": [
+      "ar",
+      "bn",
+      "fa",
+      "he",
+      "hi",
+      "ja",
+      "kk",
+      "ky",
+      "mn",
+      "ru",
+      "th",
+      "uk",
+      "ur",
+      "zh"
+    ],
+    "en_value": "CO2, t",
+    "n": 28,
+    "reason": "unit label for tonnes of CO2; Latin-script locales write it as in English, others localise the unit"
+  },
+  "quote_capture.engine_demo": {
+    "added_by": "integration/18.9-w3 (2026-10-28)",
+    "differs_in": [
+      "ar",
+      "bg",
+      "bn",
+      "de",
+      "fa",
+      "fr",
+      "he",
+      "hi",
+      "ja",
+      "kk",
+      "ko",
+      "ky",
+      "mn",
+      "ru",
+      "th",
+      "uk",
+      "ur",
+      "zh"
+    ],
+    "en_value": "demo",
+    "n": 24,
+    "reason": "short name of the sample reading engine; the word demo is the native word in most Latin-script locales, others translate it"
   }
 }

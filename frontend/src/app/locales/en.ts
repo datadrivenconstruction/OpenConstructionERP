@@ -53645,7 +53645,7 @@ const resource = {
     "boq.sheet.grid_label": "Bill of quantities, spreadsheet mode",
     "boq.sheet.uses": "Uses: {{list}}",
     "boq.sheet.used_by": "Used by: {{list}}",
-    "boq.sheet.variable_users": "${{name}} is used by positions: {{count}}",
+    "boq.sheet.variable_users": "{{name}} is used by positions: {{count}}",
     "boq.sheet.hint": "Arrows move, Enter or F2 edits, Esc cancels, Ctrl+D fills down, Ctrl+Z undoes",
     "boq.sheet.preview_title": "New positions to create: {{count}}",
     "boq.sheet.col_ordinal": "Item",

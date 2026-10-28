@@ -956,8 +956,8 @@ export function BOQSheetView({
         {status?.audit.map((a) => (
           <span key={a.name}>
             {t('boq.sheet.variable_users', {
-              defaultValue: '${{name}} is used by positions: {{count}}',
-              name: a.name,
+              defaultValue: '{{name}} is used by positions: {{count}}',
+              name: `$${a.name}`,
               count: a.users,
             })}
           </span>
