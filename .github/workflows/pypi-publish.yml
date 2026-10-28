@@ -318,7 +318,9 @@ jobs:
           refs = re.findall(r'(?:src|href)="([^"]+)"', html)
           local = [r for r in refs if not r.startswith(('http://', 'https://', 'data:', '//', '#'))]
           assert local, f'{index} asks for nothing; it is not a built page'
-          missing = [r for r in local if 'app/_frontend_dist/' + r.lstrip('/').split('?')[0] not in files]
+          # Large assets ship as <name>.xz (scripts/pack_frontend_dist.py); cli_static expands them.
+          wanted = ['app/_frontend_dist/' + r.lstrip('/').split('?')[0] for r in local]
+          missing = [w for w in wanted if w not in files and w + '.xz' not in files]
           assert not missing, f'wheel {whl} is missing {len(missing)} asset(s) index.html asks for: {missing[:5]}'
 
           # The migration tree and the translations are the other two payloads a
