@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic request/response schemas for the element-to-CWICR matcher.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic request/response schemas for the element-to-CWICR matcher.
 
 Schemas:
     * :class:`MatchElementRequest`   - ``POST /element`` inbound body.

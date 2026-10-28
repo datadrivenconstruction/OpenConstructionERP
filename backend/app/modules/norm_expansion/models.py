@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Production-norm ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Production-norm ORM models.
 
 Tables:
     oe_norm_expansion_norm     - one work item's per-unit productivity

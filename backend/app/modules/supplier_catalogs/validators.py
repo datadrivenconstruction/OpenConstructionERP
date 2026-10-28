@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for supplier prices, discounts, price list imports and item links.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for supplier prices, discounts, price list imports and item links.
 
 Each rule is a pure check function plus a :class:`ValidationRule` wrapper. The
 service calls the check functions on every write and refuses the write on an

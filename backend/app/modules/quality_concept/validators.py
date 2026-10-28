@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``quality_concept`` (spec section 7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``quality_concept`` (spec section 7).
 
 The rules read one payload, built by ``QualityConceptService.validation_payload``;
 every finding in it already carries its code, so a rule here is the lens that

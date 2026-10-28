@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure completeness and date-ordering checks for a submittal.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure completeness and date-ordering checks for a submittal.
 
 Validation is first-class for this module (platform principle #4). Submission
 is the moment a submittal stops being the contractor's private draft and starts

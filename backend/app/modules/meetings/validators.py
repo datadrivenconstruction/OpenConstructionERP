@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Meetings validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Meetings validation rules.
 
 Ships two first-class rules registered with the platform rule registry so the
 meetings module honours the "no module without validation" principle:

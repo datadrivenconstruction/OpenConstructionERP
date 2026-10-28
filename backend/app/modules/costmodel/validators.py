@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost control validation rules, rule set ``cost_control``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost control validation rules, rule set ``cost_control``.
 
 Registered against the global ``rule_registry`` at import time (the module
 loader imports ``validators`` for autodiscovery). The cost control report runs

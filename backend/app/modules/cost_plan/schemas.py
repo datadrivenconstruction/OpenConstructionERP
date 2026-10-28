@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Response shapes for the NRM 1 elemental cost plan.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Response shapes for the NRM 1 elemental cost plan.
 
 Every money figure travels as a plain decimal string (``"1234.5"``, never
 ``"1.2345E+3"``), so the browser formats it and never does arithmetic on a

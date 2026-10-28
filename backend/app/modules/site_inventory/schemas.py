@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-inventory Pydantic v2 schemas (request / response models).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-inventory Pydantic v2 schemas (request / response models).
 
 Money and quantities cross the wire as canonical Decimal STRINGS, never floats:
 create schemas accept a string and validate it parses to a non-negative

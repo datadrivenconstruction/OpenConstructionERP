@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project governance ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project governance ORM models.
 
 Tables (all prefixed ``oe_governance_``):
     catalogue          -- a tenant's own catalogue: code, name, editable draft

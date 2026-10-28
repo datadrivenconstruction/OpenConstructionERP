@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Permit roadmap and permit-condition register ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Permit roadmap and permit-condition register ORM models.
 
 Tables (all prefixed ``oe_permits_``):
     roadmap                -- one per project: pinned ``permit_type`` catalogue, jurisdiction, settings

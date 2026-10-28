@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate-basis request / response schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate-basis request / response schemas.
 
 Money rollups on the coverage summary arrive as Decimal-as-string, matching the
 rest of the estimating surface; nothing here routes a total through a float.

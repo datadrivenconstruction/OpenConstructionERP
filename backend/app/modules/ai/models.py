@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimation ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimation ORM models.
 
 Tables:
     oe_ai_settings - per-user AI provider configuration (API keys, preferred model)

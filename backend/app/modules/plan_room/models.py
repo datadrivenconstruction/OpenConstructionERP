@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan Room ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan Room ORM models.
 
 Tables:
     oe_plan_pin - a positioned photo / note pin dropped on a document page

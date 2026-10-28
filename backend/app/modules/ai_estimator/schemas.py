@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the AI Estimate Builder REST API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the AI Estimate Builder REST API.
 
 Conventions mirror ``app.modules.match_elements.schemas``:
 

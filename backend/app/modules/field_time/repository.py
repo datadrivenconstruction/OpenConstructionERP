@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Field Time data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Time data access layer.
 
 All database queries for field timesheets and their lines live here - pure data
 access, no business logic (which stays in :class:`FieldTimeService`).

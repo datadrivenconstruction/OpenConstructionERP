@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data-access layer for collaboration locks.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data-access layer for collaboration locks.
 
 All queries are scoped to a single SQLAlchemy session passed in by the
 service; no global state.  The only primitive this layer exposes that is

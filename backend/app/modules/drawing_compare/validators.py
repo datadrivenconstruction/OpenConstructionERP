@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules of a drawing revision compare (rule set ``drawing_compare``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules of a drawing revision compare (rule set ``drawing_compare``).
 
 A compare is evidence: it is what an estimator points at when a quantity is
 re-measured or a variation is claimed. These rules check that the evidence

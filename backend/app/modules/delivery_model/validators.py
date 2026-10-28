@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``delivery_model`` (SPEC section 7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``delivery_model`` (SPEC section 7).
 
 The rules read one payload, built by ``DeliveryModelService.validation_payload``::
 

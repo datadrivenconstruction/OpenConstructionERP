@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure arithmetic and completeness checks for a purchase order.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure arithmetic and completeness checks for a purchase order.
 
 Validation is first-class for this module (platform principle #4), and a purchase
 order is the moment a project turns an estimate into committed money. Approval is

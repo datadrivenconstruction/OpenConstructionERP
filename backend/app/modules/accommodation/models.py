@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Accommodation ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Accommodation ORM models.
 
 Tables (all prefixed ``oe_accommodation_``):
 

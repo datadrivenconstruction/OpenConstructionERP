@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the e-invoice standalone API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the e-invoice standalone API.
 
 These schemas type the request/response shapes of the standalone validation
 and generation endpoints in ``router.py``. They are intentionally thin wrappers

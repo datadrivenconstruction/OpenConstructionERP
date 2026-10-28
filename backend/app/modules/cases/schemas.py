@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cases Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cases Pydantic schemas - request/response models.
 
 The step shape mirrors ``PlaybookStep`` in
 ``frontend/src/features/cases/types.ts`` with one deliberate difference: a

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-prep ORM models (pre-construction mobilisation and site-setup readiness).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-prep ORM models (pre-construction mobilisation and site-setup readiness).
 
 Tables:
     oe_site_prep_plan  - one mobilisation plan per project (target start, status)

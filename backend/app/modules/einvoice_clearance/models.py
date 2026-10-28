@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""E-invoice clearance ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠E-invoice clearance ORM models.
 
 Tables:
     oe_einvoice_clearance_profile  - how one legal entity is registered in one

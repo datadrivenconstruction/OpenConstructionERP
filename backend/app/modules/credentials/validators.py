@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Credentials-registry validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Credentials-registry validation rules.
 
 A register of tickets is only worth keeping if something reads it and objects.
 These rules are that reader. They run over one project's credentials, the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Webhook Leads ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Webhook Leads ORM models.
 
 Tables:
     oe_webhook_leads_source   - a configured external webhook source

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response models of the commitment release API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response models of the commitment release API.
 
 Money travels as decimal strings, never floats. Codes (commitment types, tiers,
 flags, abort bases) are catalogue data and plain strings; states, sources and

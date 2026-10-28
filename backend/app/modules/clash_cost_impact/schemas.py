@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Pydantic schemas for the clash cost-impact module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the clash cost-impact module.
 
 All money values are serialised as ``float`` on the wire because the
 frontend's ``MoneyDisplay`` reads ``number``; the service layer keeps

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Closeout validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout validation rules.
 
 Ships two first-class rules registered with the platform rule registry:
 

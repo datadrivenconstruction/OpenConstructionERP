@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Value-realized ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Value-realized ORM models.
 
 The value module is otherwise a pure composition layer that owns no records; the
 single exception is this small admin-tunable lookup.

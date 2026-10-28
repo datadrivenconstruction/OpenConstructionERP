@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFQ Bidding Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFQ Bidding Pydantic schemas - request/response models.
 
 Money on the wire is a Decimal-as-string, both ways: an amount arrives as a
 string or a number and is validated into :class:`~decimal.Decimal`, and every

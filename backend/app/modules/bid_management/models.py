@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Bid Management ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Bid Management ORM models.
 
 Tables:
     oe_bid_management_package           - bid packages (formal RFx)

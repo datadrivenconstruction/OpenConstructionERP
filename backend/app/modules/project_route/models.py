@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Work-type route classifier ORM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Work-type route classifier ORM model.
 
 Table:
     oe_project_route_assessment - a project-scoped record of a work-type

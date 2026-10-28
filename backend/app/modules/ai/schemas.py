@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimation Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimation Pydantic schemas - request/response models.
 
 Defines schemas for AI settings management, quick/photo estimate requests,
 and estimate job responses with generated BOQ items.

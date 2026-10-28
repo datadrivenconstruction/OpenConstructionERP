@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Cost Explorer request/response schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Explorer request/response schemas.
 
 Money and quantities cross the wire as strings (the source rows store them as
 Decimal-compatible strings), so a JS client parses them with its own decimal

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Trash data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Trash data access layer."""
 
 from __future__ import annotations
 

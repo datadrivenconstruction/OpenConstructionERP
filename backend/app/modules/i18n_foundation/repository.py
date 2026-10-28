@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Internationalization foundation data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Internationalization foundation data access layer.
 
 Four repository classes - one per entity. Pure data access, no business logic.
 All queries use SQLAlchemy async select() + where() patterns.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Conceptual (ROM) estimate ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Conceptual (ROM) estimate ORM models.
 
 Tables:
     oe_rom_estimate_estimate - a saved order-of-magnitude estimate for a project

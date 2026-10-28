@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``procurement_concept`` (SPEC section 7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``procurement_concept`` (SPEC section 7).
 
 The rules read one payload, ``{"findings": [...]}``, built by
 :meth:`ProcurementConceptService.findings` from the pure evaluator. Each rule

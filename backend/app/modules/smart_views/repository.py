@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Data access for the Smart Views module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for the Smart Views module."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""NCR ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠NCR ORM models.
 
 Tables:
     oe_ncr_ncr - non-conformance reports with root cause analysis and corrective actions

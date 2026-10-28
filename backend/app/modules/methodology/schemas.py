@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimating-methodology Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimating-methodology Pydantic schemas - request / response models.
 
 Covers the methodology template itself, its analytical dimensions (and their
 values), funding sources, the cascade spec / steps, and the compute-estimate

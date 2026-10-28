@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Meetings ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Meetings ORM models.
 
 Tables:
     oe_meetings_meeting      - project meetings with agendas, attendees, and action items

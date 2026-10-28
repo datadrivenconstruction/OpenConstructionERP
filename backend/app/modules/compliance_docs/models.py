@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Compliance documents ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance documents ORM models.
 
 Tables:
     oe_compliance_docs_doc - project-scoped tracker for any document

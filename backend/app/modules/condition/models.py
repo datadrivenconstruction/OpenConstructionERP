@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Condition assessment ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition assessment ORM models.
 
 Tables:
     oe_condition_scale      - a condition scale defined for one project

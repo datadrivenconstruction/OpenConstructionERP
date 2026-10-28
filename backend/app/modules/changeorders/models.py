@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Change Order ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Change Order ORM models.
 
 Tables:
     oe_changeorders_order   - change order header with status, cost/schedule impact

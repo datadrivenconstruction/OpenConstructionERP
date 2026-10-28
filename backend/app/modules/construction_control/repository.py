@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Construction-control data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control data access layer."""
 
 import uuid
 

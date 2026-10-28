@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Inspections ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Inspections ORM models.
 
 Tables:
     oe_inspections_inspection - quality inspections with checklists and pass/fail results

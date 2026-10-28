@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Payroll ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payroll ORM models.
 
 Tables:
     oe_payroll_batch      - one draft/approved pay run per (project, period)

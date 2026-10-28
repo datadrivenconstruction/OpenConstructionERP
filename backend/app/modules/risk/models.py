@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Risk Register ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Risk Register ORM models.
 
 Tables:
     oe_risk_register - risk items with probability, impact, mitigation, and status

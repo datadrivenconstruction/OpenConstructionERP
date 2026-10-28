@@ -1,6 +1,6 @@
 # OpenConstructionERP - DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Progress tracking ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Progress tracking ORM models.
 
 Tables:
     oe_progress_entry  - append-only percent-complete observations per BOQ position

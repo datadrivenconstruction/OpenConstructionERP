@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Agents ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Agents ORM models.
 
 Tables:
     oe_ai_agents_run    - one row per agent invocation (status, totals, output).

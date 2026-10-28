@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Engineering brief ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Engineering brief ORM models.
 
 Tables (all prefixed ``oe_engbrief_``):
     brief      -- one per project: pinned catalogue, state, the requirement set and schedule it uses

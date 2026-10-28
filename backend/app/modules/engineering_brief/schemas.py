@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request schemas of the engineering brief API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request schemas of the engineering brief API.
 
 Quantities travel as strings, never floats. Platform vocabularies are closed literals; catalogue codes
 (requirement categories, concept topics, programme and milestone kinds) are open strings checked against

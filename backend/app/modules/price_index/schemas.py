@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic v2 schemas for the price-index module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic v2 schemas for the price-index module.
 
 Factors and money are carried as :class:`~decimal.Decimal` and emitted as
 plain decimal *strings* on the wire (via :data:`DecimalStr`) so a precise value

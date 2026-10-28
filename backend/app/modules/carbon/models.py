@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Carbon & Sustainability ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Carbon & Sustainability ORM models.
 
 Tables:
     oe_carbon_epd_record               - Environmental Product Declaration record

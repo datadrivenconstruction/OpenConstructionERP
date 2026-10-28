@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rebar schedule data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rebar schedule data access layer.
 
 Every query for imports and shapes lives here. No business logic.
 """

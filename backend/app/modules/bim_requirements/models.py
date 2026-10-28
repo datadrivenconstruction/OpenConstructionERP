@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM Requirements ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM Requirements ORM models.
 
 Tables:
     oe_bim_requirement_set -- container for an imported requirement file

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for cutting jobs and plans (rule set ``cutting``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for cutting jobs and plans (rule set ``cutting``).
 
 A cutting plan becomes a purchase quantity and a shop instruction, so the job is
 checked before it is optimised and the plan after:

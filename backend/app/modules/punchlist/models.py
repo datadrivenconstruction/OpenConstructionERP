@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Punch List ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Punch List ORM models.
 
 Tables:
     oe_punchlist_item - punch list items tracking construction deficiencies

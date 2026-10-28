@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``design_management`` (SPEC section 7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``design_management`` (SPEC section 7).
 
 The rules read one payload, built by ``DesignService.validation_payload``
 (scheme, WBS, unresolved references, drawings, releases, deliverables, reports,

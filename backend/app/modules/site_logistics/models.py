@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site Logistics & Delivery ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site Logistics & Delivery ORM models.
 
 Tables:
     oe_site_logistics_gate          - site access gates with daily hours + slot capacity

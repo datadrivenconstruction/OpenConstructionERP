@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design Options data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design Options data access layer.
 
 Async CRUD for design-option sets and their options. Every read is scoped by
 ``project_id`` so a set or option from another project can never be reached by

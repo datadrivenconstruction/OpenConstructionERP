@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``interface_management``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``interface_management``.
 
 The rules read one payload, built by
 :meth:`app.modules.interface_management.service.InterfaceManagementService.validation_payload`:

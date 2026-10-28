@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""QMS data-access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠QMS data-access layer.
 
 Thin wrapper around :class:`AsyncSession` providing CRUD helpers per
 entity. All update writes use ``UPDATE ... WHERE id = :id`` to avoid

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the BIM-LV container API."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the BIM-LV container API."""
 
 from __future__ import annotations
 

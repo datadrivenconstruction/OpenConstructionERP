@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BOQ ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ ORM models.
 
 Tables:
     oe_boq_boq - bill of quantities (one per project scope)

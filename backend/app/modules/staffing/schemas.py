@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request schemas of the staffing API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request schemas of the staffing API.
 
 FTE and money travel as strings, never floats. Platform vocabularies are
 closed literals; catalogue codes (roles, organisations, document kinds, leave

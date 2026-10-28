@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Point Cloud / Reality Capture ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Point Cloud / Reality Capture ORM models.
 
 Tables (all prefixed ``oe_pointcloud_``):
 

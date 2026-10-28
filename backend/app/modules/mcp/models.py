@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""MCP server ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠MCP server ORM models.
 
 One table, ``oe_mcp_settings``: whether a person lets external AI clients
 reach their data through the MCP endpoint, and how fast. Everything else the

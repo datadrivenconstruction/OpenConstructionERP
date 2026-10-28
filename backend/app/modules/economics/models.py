@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Economics ORM models: business case, cost frame and financing plan of a project.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Economics ORM models: business case, cost frame and financing plan of a project.
 
 Tables (all prefixed ``oe_economics_``):
     plan            -- one per project: status, currency, classification standard, discount rate, horizon

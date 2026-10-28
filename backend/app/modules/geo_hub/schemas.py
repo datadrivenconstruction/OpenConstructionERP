@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Geo Hub Pydantic schemas - request / response models."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub Pydantic schemas - request / response models."""
 
 from __future__ import annotations
 

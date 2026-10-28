@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Risk Register data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Risk Register data access layer.
 
 All database queries for risk items live here.
 No business logic - pure data access.

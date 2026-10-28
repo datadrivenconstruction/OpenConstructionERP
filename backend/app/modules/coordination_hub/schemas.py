@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Pydantic response schemas for the Coordination Hub module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic response schemas for the Coordination Hub module.
 
 These are presentation-only DTOs; they never round-trip back through a
 write path. Every numeric field is a plain ``int`` / ``float`` so the

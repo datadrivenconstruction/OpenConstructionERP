@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Pydantic schemas for the clash detection module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the clash detection module."""
 
 from __future__ import annotations
 

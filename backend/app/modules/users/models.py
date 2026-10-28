@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""User ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠User ORM models.
 
 Tables:
     oe_users_user - registered users

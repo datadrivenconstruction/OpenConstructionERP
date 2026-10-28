@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Assembly ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Assembly ORM models.
 
 Tables:
     oe_assemblies_assembly - composite cost items (calculations / recipes)

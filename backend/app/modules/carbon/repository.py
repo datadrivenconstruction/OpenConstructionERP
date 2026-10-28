@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Carbon & Sustainability data-access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Carbon & Sustainability data-access layer.
 
 One repository per entity. Methods follow the convention used elsewhere
 in the codebase: ``get_by_id``, ``list_for_*``, ``create``,

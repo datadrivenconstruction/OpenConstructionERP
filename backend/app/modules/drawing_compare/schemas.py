@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Drawing revision compare Pydantic schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Drawing revision compare Pydantic schemas.
 
 A PDF compare is computed in the browser and posted with its regions; a DWG
 compare is computed by the server from two parsed drawing versions. Both read

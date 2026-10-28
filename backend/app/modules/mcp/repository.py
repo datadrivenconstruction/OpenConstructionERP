@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for the MCP module: settings rows, MCP tokens and the call log."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for the MCP module: settings rows, MCP tokens and the call log."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``economics``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``economics``.
 
 One rule per finding code of :mod:`app.modules.economics.rules`, all reading the
 payload built by ``EconomicsService.validation_payload``. Every rule calls the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost item ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost item ORM models.
 
 Tables:
     oe_costs_item - cost database entries (CWICR, regional indices, custom)

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Webhook Leads data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Webhook Leads data access layer."""
 
 from __future__ import annotations
 

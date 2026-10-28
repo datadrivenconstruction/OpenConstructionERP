@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data-access layer for the subcontractors module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data-access layer for the subcontractors module."""
 
 from __future__ import annotations
 

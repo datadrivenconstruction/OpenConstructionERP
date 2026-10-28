@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``hse_frame``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``hse_frame``.
 
 The rules read one payload, built by ``HseFrameService.validation_payload``;
 every finding in it already carries its code, so a rule here is the lens that

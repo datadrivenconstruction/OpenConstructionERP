@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HSE frame ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HSE frame ORM models.
 
 Tables (all prefixed ``oe_hsef_``):
     frame -- one per project: pinned catalogue, state, the facts that decide which duties apply

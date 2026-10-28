@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Commissioning (Cx) data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commissioning (Cx) data access layer.
 
 All database queries for systems, checklists, items and issues live here. No
 business logic - pure data access. Readiness scoring is computed by the pure

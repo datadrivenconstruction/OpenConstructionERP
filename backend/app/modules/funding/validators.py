@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for a public funding application.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for a public funding application.
 
 Public funding is lost in a small number of specific ways, and almost none of
 them are caught by looking at the application form. They are caught by

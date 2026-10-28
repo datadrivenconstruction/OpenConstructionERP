@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Agents Pydantic schemas - request/response models."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Agents Pydantic schemas - request/response models."""
 
 from datetime import datetime
 from typing import Any

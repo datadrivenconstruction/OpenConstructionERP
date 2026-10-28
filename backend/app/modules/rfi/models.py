@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFI ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFI ORM models.
 
 Tables:
     oe_rfi_rfi          - requests (RFI, TQ, Site Query, ...) with response tracking and impact assessment

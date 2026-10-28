@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Public funding data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public funding data access layer.
 
 Two shapes of repository live here. ``ProgrammeRepository`` reads reference
 data shared by every project. The other four read records that belong to one

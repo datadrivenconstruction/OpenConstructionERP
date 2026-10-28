@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Price-index ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Price-index ORM models.
 
 Tables:
     oe_price_index_series          - a named construction cost index series

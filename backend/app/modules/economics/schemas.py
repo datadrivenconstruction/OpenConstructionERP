@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request schemas of the economics API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request schemas of the economics API.
 
 Money, rates and percentages arrive as decimal strings (or integers) and never
 as floats; ``Decimal`` fields reject a JSON float outright so ``0.1`` cannot

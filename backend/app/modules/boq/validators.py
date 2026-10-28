@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for the markup stack of a bill.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for the markup stack of a bill.
 
 The markup stack is where a bill stops being a list of quantities and becomes
 a price. Until now nothing checked it: an estimator could put contingency on

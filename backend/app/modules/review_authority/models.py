@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""External-review-authority ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠External-review-authority ORM models.
 
 Tables
 ======

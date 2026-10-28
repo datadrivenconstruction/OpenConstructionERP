@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Distribution ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Distribution ORM models.
 
 Tables:
     oe_file_distribution_list         - named recipient group

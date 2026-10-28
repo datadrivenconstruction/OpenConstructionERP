@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site-inventory ORM models (on-site material metering and stock).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site-inventory ORM models (on-site material metering and stock).
 
 Tables:
     oe_site_inventory_location  - a geo-tagged storage location on a project

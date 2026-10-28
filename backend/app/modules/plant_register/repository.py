@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access of the plant register: every child row is read by ``(project_id, id)``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access of the plant register: every child row is read by ``(project_id, id)``.
 
 That pairing is the IDOR guard: an id from another project simply is not
 found, so the service answers 404 without ever saying the row exists.

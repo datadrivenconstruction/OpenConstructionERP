@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for EAC block graphs.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for EAC block graphs.
 
 Every function is tenant-scoped: the tenant id is a required argument, never
 inferred, so a caller cannot accidentally reach across tenants by forgetting a

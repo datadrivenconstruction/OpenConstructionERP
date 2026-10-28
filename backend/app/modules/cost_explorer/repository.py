@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Cost Explorer data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Explorer data access layer.
 
 Pure data access over three tables, no business logic:
     oe_cost_item_resource  - the resource -> work reverse index (this module)

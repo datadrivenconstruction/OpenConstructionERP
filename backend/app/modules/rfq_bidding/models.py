@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFQ Bidding ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFQ Bidding ORM models.
 
 An RFQ goes out to several suppliers and the quotes come back on different
 terms. Ranking them means putting them on one basis first, so the register

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Change Order Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Change Order Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for change orders and their items.
 Monetary values (cost_impact, cost_delta, quantities, rates) are exposed as

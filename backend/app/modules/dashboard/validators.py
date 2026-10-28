@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for inbox actions.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for inbox actions.
 
 The inbox is the one screen where a person clears work off their plate, so the
 write path it just gained is the write path most worth guarding. Three rules in

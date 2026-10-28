@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Deadline register transport schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Deadline register transport schemas.
 
 ``DeadlineItem`` is the single normalized row every cross-module adapter emits,
 mirroring the ``InboxItem`` style in :mod:`app.modules.dashboard.schemas`. This

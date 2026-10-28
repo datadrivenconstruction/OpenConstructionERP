@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BCF data-access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BCF data-access layer.
 
 Thin async wrappers around the ORM so the service layer never builds raw
 SQLAlchemy statements. All reads are project-scoped - the service is

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Transmittals (W7) Pydantic schemas - request/response models."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Transmittals (W7) Pydantic schemas - request/response models."""
 
 from __future__ import annotations
 

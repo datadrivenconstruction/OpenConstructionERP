@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for a person's MCP setup.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for a person's MCP setup.
 
 An open door to an AI client is only as safe as the keys hanging next to it.
 These rules read the person's settings, their MCP tokens and the denied calls

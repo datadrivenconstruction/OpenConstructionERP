@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ZATCA rules, registered into the ``einvoice_clearance`` rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ZATCA rules, registered into the ``einvoice_clearance`` rule set.
 
 That set's ERROR rules are the gate the clearance service runs before it calls
 an adapter, so a document ZATCA would refuse never leaves. Every rule passes

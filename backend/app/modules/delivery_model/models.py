@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Delivery model ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Delivery model ORM models.
 
 Tables (all prefixed ``oe_delivery_model_``):
     model       -- one per project: pinned delivery forms catalogue, chosen form, status

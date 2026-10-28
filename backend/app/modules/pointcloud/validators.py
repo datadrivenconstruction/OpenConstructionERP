@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Point Cloud validation helpers.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Point Cloud validation helpers.
 
 Phase 0 ships the accuracy-tier helpers used at register time: the USIBD Level
 of Accuracy (LOA) tolerance table, the tier-allow-list check, and the upload

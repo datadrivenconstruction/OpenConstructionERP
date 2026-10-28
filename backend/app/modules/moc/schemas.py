@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Management of Change (MoC) Pydantic schemas."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Management of Change (MoC) Pydantic schemas."""
 
 from __future__ import annotations
 

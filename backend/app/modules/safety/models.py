@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Safety ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Safety ORM models.
 
 Tables:
     oe_safety_incident    - safety incident reports (injuries, near misses, etc.)

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Integrations ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Integrations ORM models.
 
 Tables:
     oe_integrations_webhook  - user-defined webhook endpoints

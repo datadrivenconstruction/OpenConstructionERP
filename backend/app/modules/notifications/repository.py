@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Notification data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Notification data access layer.
 
 All database queries for notifications live here.
 No business logic - pure data access.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the e-signature registry.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the e-signature registry.
 
 None of these carry cryptographic material. There is deliberately no field for a
 private key, a certificate file, a password or any credential - the API records

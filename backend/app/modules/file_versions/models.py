@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Versioning ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Versioning ORM models.
 
 Tables:
     oe_file_version - polymorphic version chain (no FK to the file

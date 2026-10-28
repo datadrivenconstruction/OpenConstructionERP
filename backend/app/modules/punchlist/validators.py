@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Punch list validation rules (photo evidence).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Punch list validation rules (photo evidence).
 
 * ``punchlist.closure_photo`` (WARNING): an item that is resolved, verified or
   closed carries at least one photo, so the closure can be shown and not only

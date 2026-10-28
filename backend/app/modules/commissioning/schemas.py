@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Commissioning (Cx) Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commissioning (Cx) Pydantic schemas - request/response models.
 
 Create, update and response schemas for systems, checklists, checklist items
 and issues, plus the readiness summary and the commission-action request.

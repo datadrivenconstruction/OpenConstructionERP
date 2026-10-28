@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Stakeholder register, communication plan, commitments, roles, bodies and mandates.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Stakeholder register, communication plan, commitments, roles, bodies and mandates.
 
 Tables (all prefixed ``oe_stakeholders_``):
     settings    -- one per project: pinned framework, analysis method, review interval, commitment route

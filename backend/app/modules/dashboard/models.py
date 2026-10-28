@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Dashboard ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Dashboard ORM models.
 
 One table, ``oe_dashboard_inbox_item_state``: what one person did with one
 inbox row. The inbox itself still owns no data - it aggregates approvals and

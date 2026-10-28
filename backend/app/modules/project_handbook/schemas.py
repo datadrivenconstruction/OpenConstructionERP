@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request bodies of the project handbook API. Responses are plain dicts built by the service."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request bodies of the project handbook API. Responses are plain dicts built by the service."""
 
 from __future__ import annotations
 

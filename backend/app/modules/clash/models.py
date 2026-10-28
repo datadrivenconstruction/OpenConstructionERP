@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Clash detection ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Clash detection ORM models.
 
 Tables:
     oe_clash_run          - one interference/clearance analysis over N models

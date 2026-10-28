@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resumable Uploads validation surface.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resumable Uploads validation surface.
 
 Validation is first-class for this module. The deterministic checks live in
 :mod:`app.modules.resumable_uploads.chunking` (chunk-index bounds, per-index

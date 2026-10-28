@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""NCR Pydantic schemas - request/response models."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠NCR Pydantic schemas - request/response models."""
 
 from datetime import datetime
 from decimal import Decimal

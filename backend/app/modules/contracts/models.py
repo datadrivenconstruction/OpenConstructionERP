@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contracts ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contracts ORM models.
 
 Tables:
     oe_contracts_contract                  - contract header with type-specific terms

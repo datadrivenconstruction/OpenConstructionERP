@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ETA pre-submit rules, registered into the ``einvoice_clearance`` rule set.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ETA pre-submit rules, registered into the ``einvoice_clearance`` rule set.
 
 Registering into that set, rather than a set of their own, is what makes them
 a gate: the clearance service runs every ERROR rule of the set before it hands

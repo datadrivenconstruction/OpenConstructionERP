@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``project_handbook``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``project_handbook``.
 
 The rules read one payload, built by ``ProjectHandbookService.validation_payload``::
 

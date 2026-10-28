@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for the e-invoice clearance module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for the e-invoice clearance module.
 
 Plain functions over an ``AsyncSession``, in the style of the cases module.
 Every filter is on a real column: nothing here reaches inside ``country_fields``

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Match Elements ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Match Elements ORM models.
 
 Tables:
     oe_match_elements_session   - per-project session: source, group-by config,

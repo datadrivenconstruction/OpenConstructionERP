@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tasks ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tasks ORM models.
 
 Tables:
     oe_tasks_task - project tasks with checklists, assignments, and status tracking

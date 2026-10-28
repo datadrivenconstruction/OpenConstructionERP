@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimate Builder ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimate Builder ORM models.
 
 Tables:
     oe_ai_estimator_run    - one long-lived estimate job. Carries the run FSM

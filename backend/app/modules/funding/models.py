@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Public funding ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Public funding ORM models.
 
 Tables (all prefixed ``oe_funding_``):
     programme        -- what a funding body offers, and on what terms

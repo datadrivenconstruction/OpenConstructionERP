@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Coordination Hub - persisted ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Coordination Hub - persisted ORM models.
 
 The hub remains a *thin* aggregator across the sibling BIM modules; the
 only state it owns is the per-project alert threshold configuration that

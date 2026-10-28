@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for per-user inbox item states.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for per-user inbox item states.
 
 Every read takes the owner's id as a required argument rather than inferring
 it. A state row is private by construction: it says what one person did with

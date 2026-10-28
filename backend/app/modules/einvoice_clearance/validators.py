@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""E-invoice clearance validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠E-invoice clearance validation rules.
 
 These are not schema checks. A document that satisfies every Pydantic
 constraint can still be the one that gets a company fined: a Mexican CFDI with

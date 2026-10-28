@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Supplier Catalogs Pydantic schemas."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Supplier Catalogs Pydantic schemas."""
 
 from __future__ import annotations
 

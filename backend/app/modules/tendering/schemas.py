@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tendering Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tendering Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for tender packages and bids.
 v3 §10 - money fields are Decimal-as-string in JSON.

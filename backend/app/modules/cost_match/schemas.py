@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost-match Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost-match Pydantic schemas - request / response models.
 
 Money and quantities are ``Decimal`` in memory and serialise as strings, per
 the platform's "Decimal as string" contract: a unit rate that crosses the wire

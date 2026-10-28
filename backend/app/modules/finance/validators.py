@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Finance validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance validation rules.
 
 One rule, registered under the ``finance`` rule set:
 

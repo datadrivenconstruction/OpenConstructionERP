@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Source-data (prerequisite documents) register ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Source-data (prerequisite documents) register ORM models.
 
 Tables:
     oe_source_data_document - a project-scoped register of the prerequisite

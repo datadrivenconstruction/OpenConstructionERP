@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Carbon module validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Carbon module validation rules.
 
 Module-local rules registered against the global ``rule_registry`` at import
 time (the module loader imports ``validators`` for autodiscovery). Keeping the

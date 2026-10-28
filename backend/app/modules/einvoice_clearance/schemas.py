@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""E-invoice clearance Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠E-invoice clearance Pydantic schemas - request/response models.
 
 Money crosses the wire as a decimal string, never a float, matching the finance
 module it sits next to: a binary float cannot hold 0.10 and a tax authority's

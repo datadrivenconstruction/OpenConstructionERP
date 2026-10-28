@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Retrieval ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Retrieval ORM models.
 
 One table, ``oe_retrieval_saved_search``: a search the user pinned so they can
 re-run it later. Until now the pin lived in the browser's ``localStorage``,

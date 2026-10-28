@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Comments ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Comments ORM models.
 
 Tables:
     oe_file_comment         - polymorphic threaded comment on any file

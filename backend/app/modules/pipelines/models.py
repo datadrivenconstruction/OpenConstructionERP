@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pipeline Builder ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pipeline Builder ORM models.
 
 Three tables, following the match-elements conventions (§3.4):
 

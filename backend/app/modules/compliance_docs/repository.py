@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Compliance documents data-access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance documents data-access layer."""
 
 from __future__ import annotations
 

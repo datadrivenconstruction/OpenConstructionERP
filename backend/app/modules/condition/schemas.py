@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Condition assessment request and response schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition assessment request and response schemas.
 
 Money and quantities travel as decimal strings, never floats.
 """

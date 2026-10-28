@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule data access layer.
 
 All database queries for schedules, activities, and work orders live here.
 No business logic - pure data access.

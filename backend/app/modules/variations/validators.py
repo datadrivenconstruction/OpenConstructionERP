@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for a variation request's dedicated bill of quantities.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for a variation request's dedicated bill of quantities.
 
 The variations module shipped without any registered rules, so these are the
 first. They are deliberately narrow: they answer the questions a priced

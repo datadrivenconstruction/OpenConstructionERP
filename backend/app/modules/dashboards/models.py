@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Dashboards ORM models (T01 and later tasks).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Dashboards ORM models (T01 and later tasks).
 
 Tables:
     oe_dashboards_snapshot        - point-in-time Parquet dumps of entity data

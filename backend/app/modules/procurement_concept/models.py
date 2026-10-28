@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Procurement concept ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Procurement concept ORM models.
 
 Tables (all prefixed ``oe_procurement_concept_``):
     concept          -- one per project: pinned catalogue, jurisdiction, client type, lifecycle

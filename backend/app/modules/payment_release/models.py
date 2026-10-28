@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment release ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment release ORM models.
 
 Tables:
     oe_payment_release_terms              - a contract's payment terms (one row per contract)

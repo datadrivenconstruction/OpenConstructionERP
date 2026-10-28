@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tendering ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tendering ORM models.
 
 Tables:
     oe_tendering_package - tender/bid packages linked to a project and BOQ

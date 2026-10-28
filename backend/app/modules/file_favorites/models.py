@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Favourites ORM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Favourites ORM model.
 
 Single table ``oe_file_favorite``. Polymorphic on ``(file_kind,
 file_id)``; the file row's deletion is the file-manager dispatcher's

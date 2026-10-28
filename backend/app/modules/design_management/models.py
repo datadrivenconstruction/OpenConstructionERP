@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design management ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design management ORM models.
 
 Tables (all prefixed ``oe_design_``):
     setup          -- one per project: pinned numbering scheme and reports catalogue, switches

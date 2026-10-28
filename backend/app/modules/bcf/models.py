@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BCF (BIM Collaboration Format) ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BCF (BIM Collaboration Format) ORM models.
 
 Tables:
     oe_bcf_topic      - a BCF Topic (issue) scoped to a project

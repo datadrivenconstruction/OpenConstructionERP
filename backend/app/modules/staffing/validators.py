@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``staffing`` (SPEC section 7).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``staffing`` (SPEC section 7).
 
 The rules read one in-process payload built by
 ``StaffingService.validation_payload`` (catalogue object, plan, positions,

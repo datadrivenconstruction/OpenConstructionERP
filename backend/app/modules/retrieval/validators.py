@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for saved searches.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for saved searches.
 
 A saved search is a promise: click it later and the same evidence comes back.
 Most of the ways that promise breaks are silent, because a search that returns

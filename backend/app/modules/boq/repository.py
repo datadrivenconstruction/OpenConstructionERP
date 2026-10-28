@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BOQ data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BOQ data access layer.
 
 All database queries for BOQs, positions, markups, and activity logs live here.
 No business logic - pure data access.

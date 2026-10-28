@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tax withholding Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tax withholding Pydantic schemas - request/response models.
 
 Money is :class:`~decimal.Decimal` end to end and leaves as a decimal *string*
 in JSON. A float would be a rounding error on a figure that is filed with a tax

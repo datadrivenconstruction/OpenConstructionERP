@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CVR Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CVR Pydantic schemas - request/response models.
 
 Money contract (matches costs/schemas.py): every monetary value is a
 ``decimal.Decimal`` in Python and on the database (``NUMERIC(18, 4)``), and is

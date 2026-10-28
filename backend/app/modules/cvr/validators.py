@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CVR validation guards (first-class, pure, DB-free).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CVR validation guards (first-class, pure, DB-free).
 
 Two rules matter for a Cost-Value Reconciliation:
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Takeoff ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Takeoff ORM models.
 
 Tables:
     oe_takeoff_document        - uploaded PDF documents for quantity takeoff

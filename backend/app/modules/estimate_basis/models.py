@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate-basis ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate-basis ORM models.
 
 Tables:
     oe_estimate_basis_document - one drafted, editable basis-of-estimate per

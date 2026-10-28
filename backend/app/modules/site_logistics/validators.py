@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site Logistics validation - delivery window rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site Logistics validation - delivery window rules.
 
 Two layers share the pure helpers in this file:
 

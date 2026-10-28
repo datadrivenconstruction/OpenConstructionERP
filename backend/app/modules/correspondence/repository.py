@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Correspondence data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Correspondence data access layer."""
 
 import uuid
 

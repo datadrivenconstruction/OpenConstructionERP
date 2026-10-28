@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""HSE Advanced ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HSE Advanced ORM models.
 
 Tables:
     oe_hse_advanced_incident_investigation

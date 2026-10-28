@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Markups & Annotations Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Markups & Annotations Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for markups, scale configs,
 and stamp templates.

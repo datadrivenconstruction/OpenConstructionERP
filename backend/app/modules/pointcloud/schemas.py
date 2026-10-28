@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Point Cloud / Reality Capture Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Point Cloud / Reality Capture Pydantic schemas - request / response models.
 
 Decimal quantities (RMS, coverage, confidence, hole area, lat/lon) are stored
 as ``Decimal`` and emitted as plain decimal *strings* in JSON, mirroring the v3

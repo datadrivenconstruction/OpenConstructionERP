@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Temporary-works ORM models (safety-critical governance register).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Temporary-works ORM models (safety-critical governance register).
 
 Tables:
     oe_temp_works_item    - one temporary-works item on a project (falsework,

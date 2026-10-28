@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for the saved-views module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for the saved-views module.
 
 Pure CRUD on the ``SavedView`` / ``SavedViewRun`` rows ONLY. The repository never
 runs a user view (that is the builder's job). Every list method is itself scoped

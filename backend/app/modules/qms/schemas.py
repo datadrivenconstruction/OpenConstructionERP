@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""QMS Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠QMS Pydantic schemas - request / response models.
 
 All UUIDs are :class:`uuid.UUID`; cost amounts use :class:`Decimal`.
 Read schemas declare ``from_attributes=True`` so they hydrate directly

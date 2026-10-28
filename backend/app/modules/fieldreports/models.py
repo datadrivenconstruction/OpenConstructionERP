@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Field Reports ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Reports ORM models.
 
 Tables:
     oe_fieldreports_report     - daily/inspection/safety/concrete pour field reports

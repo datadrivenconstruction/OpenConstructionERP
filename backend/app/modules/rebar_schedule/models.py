@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rebar schedule ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rebar schedule ORM models.
 
 Tables:
     oe_rebar_schedule_import - one imported ABS file

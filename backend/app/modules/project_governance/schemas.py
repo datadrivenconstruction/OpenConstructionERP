@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response models of the project governance API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response models of the project governance API.
 
 Codes (catalogue ids, phase, gate, area and document type codes) are plain
 strings: they are data from a catalogue, not enums. Outcomes and statuses are

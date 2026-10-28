@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Cost Explorer ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost Explorer ORM models.
 
 Tables:
     oe_cost_item_resource - the resource -> work reverse index. One row per

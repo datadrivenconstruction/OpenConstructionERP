@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost-match module-specific validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost-match module-specific validation rules.
 
 Matching a foreign bill onto a cost base is fast, which is exactly why it is
 dangerous: a few hundred rates are adopted in an afternoon and nothing on the

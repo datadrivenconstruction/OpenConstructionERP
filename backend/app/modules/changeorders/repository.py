@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Change Order data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Change Order data access layer.
 
 All database queries for change orders live here.
 No business logic - pure data access.

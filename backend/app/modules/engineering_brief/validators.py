@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``engineering_brief``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``engineering_brief``.
 
 The rules read one payload, built by ``EngineeringBriefService.validation_payload``::
 

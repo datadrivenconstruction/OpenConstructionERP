@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Waste-factor ORM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Waste-factor ORM model.
 
 Table:
     oe_waste_factors_factor - one waste / lap / coverage multiplier keyed by

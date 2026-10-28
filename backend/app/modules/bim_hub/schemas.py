@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM Hub Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM Hub Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for BIM models, elements,
 BOQ links, quantity maps, element groups, and model diffs.

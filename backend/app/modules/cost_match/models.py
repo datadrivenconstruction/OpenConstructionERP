@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost-match ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost-match ORM models.
 
 Tables:
     oe_cost_match_run       - one batch of pasted descriptions matched at once

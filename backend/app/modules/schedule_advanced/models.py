@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule Advanced ORM models - Last Planner System (LPS) + baselines.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule Advanced ORM models - Last Planner System (LPS) + baselines.
 
 Tables:
     oe_schedule_advanced_master_schedule

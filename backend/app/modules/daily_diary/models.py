@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Daily Site Diary ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Daily Site Diary ORM models.
 
 Tables (all prefixed ``oe_daily_diary_``):
     oe_daily_diary_diary               - daily diary header with status/sign-off

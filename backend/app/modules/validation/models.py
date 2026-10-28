@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation ORM models.
 
 Tables:
     oe_validation_report - persisted validation reports with results

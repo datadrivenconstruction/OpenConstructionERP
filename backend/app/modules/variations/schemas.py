@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Variations Pydantic schemas (request/response models)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Variations Pydantic schemas (request/response models)."""
 
 from __future__ import annotations
 

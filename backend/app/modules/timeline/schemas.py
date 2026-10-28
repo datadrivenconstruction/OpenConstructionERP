@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Timeline Pydantic v2 response schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Timeline Pydantic v2 response schemas.
 
 A :class:`TimelineEntry` is a read-only projection of one
 :class:`app.core.audit_log.ActivityLog` row, and :class:`TimelineResponse`

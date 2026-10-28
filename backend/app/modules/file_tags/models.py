@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File tag ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File tag ORM models.
 
 Tables:
     oe_file_tag             - the project-scoped tag definition.

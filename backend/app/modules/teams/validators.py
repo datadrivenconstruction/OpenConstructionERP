@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Teams module-specific validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Teams module-specific validation rules.
 
 Access control is configuration, and configuration is exactly the kind of thing
 that is silently wrong. A restriction typed against the wrong team, a team

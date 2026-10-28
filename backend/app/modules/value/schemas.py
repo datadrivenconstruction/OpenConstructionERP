@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic response schemas for the value-realized API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic response schemas for the value-realized API.
 
 Money and rates are carried on the wire as strings (the Decimal rendered
 losslessly) per the platform money-as-string convention, so the read models are

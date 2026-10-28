@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule ORM models.
 
 Tables:
     oe_schedule_schedule        - project schedule (container for activities)

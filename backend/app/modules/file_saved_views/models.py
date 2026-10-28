@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Saved Views ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Saved Views ORM models.
 
 Tables:
     oe_file_saved_view - a named filter snapshot for the /files screen.

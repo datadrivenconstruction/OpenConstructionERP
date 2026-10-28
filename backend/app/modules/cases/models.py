@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cases ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cases ORM models.
 
 Tables:
     oe_cases_user_case - a case scenario written by a user

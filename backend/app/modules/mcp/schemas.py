@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""MCP server request and response schemas (the settings surface, not the protocol)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠MCP server request and response schemas (the settings surface, not the protocol)."""
 
 from __future__ import annotations
 

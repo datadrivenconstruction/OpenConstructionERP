@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the cost recovery API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the cost recovery API.
 
 Money is carried on the wire as a string (the Decimal rendered losslessly) per
 the platform money-as-string convention, so the read models are built

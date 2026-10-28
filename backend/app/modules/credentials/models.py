@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Professional-credentials registry ORM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Professional-credentials registry ORM model.
 
 Tables:
     oe_credentials_credential - a project-scoped register of the professional

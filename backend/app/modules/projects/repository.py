@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project data access layer.
 
 All database queries for projects live here.
 No business logic - pure data access.

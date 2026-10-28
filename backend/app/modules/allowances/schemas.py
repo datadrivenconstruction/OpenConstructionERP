@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the allowances & contingency register API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the allowances & contingency register API.
 
 Money contract (matches cvr/schemas.py): every monetary value is a
 :class:`decimal.Decimal` in Python and on the database (``NUMERIC(18, 4)``), and

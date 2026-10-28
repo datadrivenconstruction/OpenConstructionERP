@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Field Reports data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Reports data access layer.
 
 All database queries for field reports live here.
 No business logic - pure data access.

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Data access for the clash detection module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for the clash detection module."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Internationalization foundation ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Internationalization foundation ORM models.
 
 Tables:
     oe_i18n_exchange_rate - currency exchange rates (manual, ECB, custom sources)

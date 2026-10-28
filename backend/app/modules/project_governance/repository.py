@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for project governance.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for project governance.
 
 Every reader takes the project id, so a row id from another project never
 resolves: the router asks for ``(project_id, row_id)`` and gets ``None`` for a

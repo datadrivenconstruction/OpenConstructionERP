@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Daily Site Diary Pydantic schemas - request/response models (Pydantic v2)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Daily Site Diary Pydantic schemas - request/response models (Pydantic v2)."""
 
 from __future__ import annotations
 

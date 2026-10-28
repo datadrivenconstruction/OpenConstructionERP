@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design Options ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design Options ORM models.
 
 Tables:
     oe_design_options_set    - a set of alternative design options for a project

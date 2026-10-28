@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the client-error sink endpoint.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the client-error sink endpoint.
 
 The payload mirrors the anonymised entry produced by
 ``frontend/src/shared/lib/errorLogger.ts`` - emails, UUIDs, API keys,

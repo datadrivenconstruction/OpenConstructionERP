@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Voice-capture Pydantic schemas - request/response models (Pydantic v2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Voice-capture Pydantic schemas - request/response models (Pydantic v2).
 
 The voice module is stateless: it turns a recording (or a transcript) plus a
 target type into a structured DRAFT the caller reviews and then saves through the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Management of Change (MoC) ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Management of Change (MoC) ORM models.
 
 Tables:
     oe_moc_entry   - MoC header: a proposed change to engineering scope,

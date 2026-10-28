@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Async SQLAlchemy repositories for the Certified Payroll module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Async SQLAlchemy repositories for the Certified Payroll module."""
 
 from __future__ import annotations
 

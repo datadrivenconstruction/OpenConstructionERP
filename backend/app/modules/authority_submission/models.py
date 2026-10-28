@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Authority-submission ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Authority-submission ORM models.
 
 Tables:
     oe_authority_submission_profile - a schema definition (carried as data) for

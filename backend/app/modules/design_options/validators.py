@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design Options module-specific validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design Options module-specific validation rules.
 
 First-class validation for the option comparison. A design-option set is a set
 of alternative designs for one project, each paired with its OWN priced bill of

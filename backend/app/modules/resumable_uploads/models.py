@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resumable Uploads ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resumable Uploads ORM models.
 
 Tables:
     oe_resumable_uploads_session - one row per in-flight chunked upload.

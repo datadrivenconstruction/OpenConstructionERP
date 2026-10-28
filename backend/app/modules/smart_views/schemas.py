@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Smart Views Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views Pydantic schemas - request / response models.
 
 The :class:`SmartViewRule` is the heart of the API surface: a single
 rule has a *selector* (which elements does it match?) and an *action*

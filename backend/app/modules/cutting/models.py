@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cutting optimisation ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cutting optimisation ORM models.
 
 Tables:
     oe_cutting_job   - one cut-list problem: material, constraints, source, links

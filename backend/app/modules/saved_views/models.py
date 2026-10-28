@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Saved-views ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Saved-views ORM models.
 
 Two tables, both inheriting :class:`app.database.Base` (so ``id`` / ``created_at``
 / ``updated_at`` are free). No money is involved here, so no ``MoneyType``. JSON

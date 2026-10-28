@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response schemas for legal entities and branches.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response schemas for legal entities and branches.
 
 Codes are normalised here (trimmed, upper-cased) and checked for shape in
 :mod:`app.modules.legal_entities.validators`, so the API and the service apply

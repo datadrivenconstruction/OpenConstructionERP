@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for the HSE frame: every read is scoped by ``project_id``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for the HSE frame: every read is scoped by ``project_id``.
 
 A child row is fetched by ``(project_id, id)`` only, so an id from another
 project reads as missing and the service answers 404 (IDOR).

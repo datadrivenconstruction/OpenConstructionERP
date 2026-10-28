@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plant register ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plant register ORM models.
 
 Tables (all prefixed ``oe_plant_``):
     settings            -- the catalogue (source, id, version) one project pins

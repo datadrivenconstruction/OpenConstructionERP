@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Requirements & Quality Gates Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Requirements & Quality Gates Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for requirement sets,
 individual requirements (EAC triplets), and quality gate results.

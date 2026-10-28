@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Supplier Catalogs data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Supplier Catalogs data access layer.
 
 Thin SQLAlchemy wrappers - no business logic.
 """

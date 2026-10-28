@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Markups & Annotations ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Markups & Annotations ORM models.
 
 Tables:
     oe_markups_markup          - drawing markups (cloud, arrow, text, etc.)

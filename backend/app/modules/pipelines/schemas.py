@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic request/response schemas for the Pipeline Builder REST API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic request/response schemas for the Pipeline Builder REST API.
 
 The wire contract is PINNED - the frontend is built against it in
 parallel. Graph JSON shape:

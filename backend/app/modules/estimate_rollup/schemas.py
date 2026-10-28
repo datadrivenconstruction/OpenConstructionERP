@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimate-rollup response schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimate-rollup response schemas.
 
 Every money amount is emitted as a Decimal-as-string, matching the platform-wide
 money convention (the BOQ totals, the allowances register and the preliminaries

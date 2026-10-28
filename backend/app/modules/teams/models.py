@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Teams ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Teams ORM models.
 
 Tables:
     oe_teams_team          - project teams for entity visibility

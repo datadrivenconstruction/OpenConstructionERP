@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Certified payroll Pydantic schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Certified payroll Pydantic schemas.
 
 Money and hours are Decimal-as-string end to end, matching ``oe_payroll``, so
 the JSON never loses cents to binary float. Rates are validated as non-negative

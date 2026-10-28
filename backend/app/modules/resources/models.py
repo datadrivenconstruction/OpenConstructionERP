@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resources ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resources ORM models.
 
 Tables:
     oe_resources_resource             - people / crews / equipment / subcontractors

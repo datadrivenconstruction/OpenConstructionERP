@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tax withholding validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tax withholding validation rules.
 
 Every rule here guards money that has already left the business by the time
 anybody notices. A deduction taken on the wrong base is remitted to a tax

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Estimating-methodology ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Estimating-methodology ORM models.
 
 These tables persist the data-driven country/industry estimating templates that
 the pure cascade engine (:mod:`app.modules.methodology.cascade`) computes

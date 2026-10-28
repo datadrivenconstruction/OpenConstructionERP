@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response schemas of the delivery model API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response schemas of the delivery model API.
 
 Weights, shares and scores travel as strings or ints, never floats. Vocabulary
 fields are closed literals where the platform owns the vocabulary; catalogue

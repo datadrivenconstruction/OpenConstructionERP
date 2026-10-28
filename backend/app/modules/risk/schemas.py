@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Risk Register Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Risk Register Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for risk register items.
 Numeric values (probability, impact_cost, risk_score, response_cost) are stored

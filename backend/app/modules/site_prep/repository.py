@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data-access layer for the site-prep module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data-access layer for the site-prep module.
 
 Thin async repositories for the two site-prep tables: the per-project
 mobilisation plan and the readiness items. Every query is project-scoped so a

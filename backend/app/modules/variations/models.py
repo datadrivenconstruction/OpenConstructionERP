@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Variations & Site Measurements ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Variations & Site Measurements ORM models.
 
 Tables (all prefixed ``oe_variations_``):
     notice                  -- early-warning notice of variation

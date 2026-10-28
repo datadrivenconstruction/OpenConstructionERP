@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Connectors ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Connectors ORM models.
 
 Tables:
     oe_connectors_source - a registered inbound document source for a project.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for the FX register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for the FX register.
 
 Every function here is pure persistence: no HTTP, no rate arithmetic, no
 policy decisions. That separation is what lets the conversion maths be tested

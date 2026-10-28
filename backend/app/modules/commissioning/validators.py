@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure, database-free commissioning validation and readiness math.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure, database-free commissioning validation and readiness math.
 
 This module is deliberately side-effect free so it can be unit tested without a
 database and reused from the service, a report generator or a test. It answers

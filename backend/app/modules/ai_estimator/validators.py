@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimate Builder module-specific validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimate Builder module-specific validation rules.
 
 The assembled estimate is validated through the core engine with the universal
 ``boq_quality`` set plus the project's regional set (din276 / nrm /

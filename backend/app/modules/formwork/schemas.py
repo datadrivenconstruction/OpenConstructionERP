@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Formwork Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Formwork Pydantic schemas - request / response models.
 
 Money fields use ``Decimal`` on input and ``str`` on output to match the
 project's v3 §10 "Decimal as string" contract. Returning a float would

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the portfolio tree (T3.3).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the portfolio tree (T3.3).
 
 Pure (pydantic + stdlib) so it imports and unit-tests on the local runner.
 """

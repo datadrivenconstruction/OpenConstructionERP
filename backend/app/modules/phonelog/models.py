@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Phone-log ORM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Phone-log ORM model.
 
 Tables:
     oe_phonelog_phone_log - a captured phone call, voice note, or verbal

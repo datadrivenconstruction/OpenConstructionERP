@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CVR data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CVR data access layer.
 
 All database queries for reports, lines, cashflow points and payment
 applications live here. No business logic - pure data access.

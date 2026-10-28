@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Takeoff data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Takeoff data access layer."""
 
 import uuid
 from datetime import UTC, datetime, timedelta

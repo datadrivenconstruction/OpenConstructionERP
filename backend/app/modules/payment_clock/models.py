@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment clock ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment clock ORM models.
 
 Tables:
     oe_payment_clock_regime      - one statutory payment regime

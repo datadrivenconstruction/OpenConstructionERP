@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for staffing. Every child lookup is by ``(project_id, id)``, so a foreign id is simply absent."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for staffing. Every child lookup is by ``(project_id, id)``, so a foreign id is simply absent."""
 
 from __future__ import annotations
 

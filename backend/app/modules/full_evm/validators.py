@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for the Full EVM register (rule set ``full_evm``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for the Full EVM register (rule set ``full_evm``).
 
 Earned value is arithmetic on top of a plan, and the arithmetic is only as
 honest as the plan underneath it. A budget curve that dips, a final period that

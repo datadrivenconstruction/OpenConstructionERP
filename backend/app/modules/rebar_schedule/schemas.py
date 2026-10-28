@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Rebar schedule Pydantic schemas (request/response models)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Rebar schedule Pydantic schemas (request/response models)."""
 
 from __future__ import annotations
 

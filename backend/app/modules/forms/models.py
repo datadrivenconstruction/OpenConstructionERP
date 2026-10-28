@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Forms & Checklists ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Forms & Checklists ORM models.
 
 Tables:
     oe_forms_template   - a reusable form / checklist template (the library)

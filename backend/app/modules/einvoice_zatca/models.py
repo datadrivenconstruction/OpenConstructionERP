@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The EGS units a Saudi registration issues from, and the chain each one keeps.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The EGS units a Saudi registration issues from, and the chain each one keeps.
 
 ZATCA thinks in EGS units (e-invoice generation solutions): each unit has its
 own key pair and its own cryptographic stamp identifier (CSID), and keeps its

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules the schedule module owns.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules the schedule module owns.
 
 One rule so far, and it exists because of one defect. ``compute_duration`` took
 a region from March 2026 and no caller passed one until September, so every

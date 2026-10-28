@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request bodies of the permits API. Responses are plain dicts built by the service (``*_out``)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request bodies of the permits API. Responses are plain dicts built by the service (``*_out``)."""
 
 from __future__ import annotations
 

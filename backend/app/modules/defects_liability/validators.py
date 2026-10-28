@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Defects-liability validation rules (limitation of defect claims).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Defects-liability validation rules (limitation of defect claims).
 
 The module exists for one sentence, and it is this one: **a warranty period that
 names a legal regime and then disagrees with it is reported, never corrected.**

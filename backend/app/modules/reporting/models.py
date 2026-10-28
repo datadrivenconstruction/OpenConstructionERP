@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Reporting & Dashboards ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Reporting & Dashboards ORM models.
 
 Tables:
     oe_reporting_kpi_snapshot - periodic KPI snapshots per project

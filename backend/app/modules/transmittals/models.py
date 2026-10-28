@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Transmittals ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Transmittals ORM models.
 
 Tables:
     oe_transmittals_transmittal - formal document transmittal

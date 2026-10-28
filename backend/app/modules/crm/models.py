@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CRM ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRM ORM models.
 
 Tables:
     oe_crm_account                    - customer / prospect accounts

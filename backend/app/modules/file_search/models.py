@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File search ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File search ORM models.
 
 Table:
     oe_file_search_index - one row per (project, file_kind, file_id);

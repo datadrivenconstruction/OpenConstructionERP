@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Staffing ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Staffing ORM models.
 
 Tables (all prefixed ``oe_staffing_``):
     plan        -- one per project: pinned staffing catalogue, state, the snapshot in force

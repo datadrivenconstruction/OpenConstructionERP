@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic v2 schemas for collaboration locks."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic v2 schemas for collaboration locks."""
 
 from __future__ import annotations
 

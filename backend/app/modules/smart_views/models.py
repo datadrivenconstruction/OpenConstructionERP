@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Smart Views ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Smart Views ORM models.
 
 A :class:`SmartView` carries an ordered list of *rules* in a JSON
 column - the rules themselves are validated by Pydantic in

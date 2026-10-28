@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Commissioning (Cx) ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commissioning (Cx) ORM models.
 
 Tables (all prefixed ``oe_commissioning_``):
     oe_commissioning_system          - a commissionable building system

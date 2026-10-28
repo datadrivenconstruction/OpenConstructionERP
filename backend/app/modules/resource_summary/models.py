@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Resource Summary ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resource Summary ORM models.
 
 Tables:
     oe_resource_summary_snapshot - a saved procurement statement for a project at a

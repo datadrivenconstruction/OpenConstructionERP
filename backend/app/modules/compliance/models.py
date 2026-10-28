@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Compliance DSL ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Compliance DSL ORM models.
 
 Single table - :class:`ComplianceDSLRule` - stores the raw YAML/JSON
 definition of a user-authored validation rule plus the parsed metadata

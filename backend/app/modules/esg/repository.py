@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ESG data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ESG data access layer.
 
 All database queries for ESG entries live here - no business logic. The metric
 catalogue is code-defined (``app.modules.esg.catalogue``) and never queried.

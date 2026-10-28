@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the Backup & Restore module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the Backup & Restore module.
 
 Schemas are kept here so they appear explicitly in the OpenAPI spec.
 Bug-018: ``POST /backup/export/`` had no documented request body, which

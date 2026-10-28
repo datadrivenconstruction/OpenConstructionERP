@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Interface-register ORM models (multi-package coordination register).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Interface-register ORM models (multi-package coordination register).
 
 Tables:
     oe_interface_mgmt_interface - one interface (handshake) between two parties,

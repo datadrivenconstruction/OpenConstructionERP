@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Field Time ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Time ORM models.
 
 Tables:
     oe_field_time_timesheet       - a foreman's end-of-day, cost-coded, signed

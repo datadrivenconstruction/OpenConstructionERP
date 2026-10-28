@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Payroll Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payroll Pydantic schemas - request/response models.
 
 Money is exposed as strings (Decimal-as-string) end to end so the JSON
 never loses cents to binary-float rounding. The frontend parses them with

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""RFI data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠RFI data access layer."""
 
 import uuid
 

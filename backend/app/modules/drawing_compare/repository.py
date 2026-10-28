@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Drawing revision compare data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Drawing revision compare data access layer.
 
 Owns the two compare tables only. Revision sources (takeoff, DWG takeoff,
 documents) and follow-up targets (RFI, markups, BOQ) are reached by the

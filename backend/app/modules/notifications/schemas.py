@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Notification Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Notification Pydantic schemas - request/response models.
 
 The response schema renders English fallback strings server-side so the
 bell always has readable text even when the frontend i18n layer hasn't

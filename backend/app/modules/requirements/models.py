@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Requirements & Quality Gates ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Requirements & Quality Gates ORM models.
 
 Tables:
     oe_requirements_set - container linking requirements to a project

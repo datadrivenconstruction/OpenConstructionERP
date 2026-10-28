@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""5D Cost Model data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠5D Cost Model data access layer.
 
 All database queries for cost snapshots, budget lines, and cash flow entries
 live here.  No business logic - pure data access - *except* for the

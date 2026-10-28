@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure completeness and comparability checks for an RFQ and its bids.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure completeness and comparability checks for an RFQ and its bids.
 
 Validation is first-class for this module (platform principle #4). An RFQ has
 two moments that cannot be taken back. Publishing sends the package to vendors,

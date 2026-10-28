@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""E-signature registry ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠E-signature registry ORM models.
 
 Tables:
     oe_signing_session - a signing session: one document (referenced by an

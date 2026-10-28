@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for imported rebar schedules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for imported rebar schedules.
 
 Nothing in this codebase imports without validation, and a bending schedule is
 a case where that matters more than most: the file downstream of this one

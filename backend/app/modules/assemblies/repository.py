@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Assembly data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Assembly data access layer.
 
 All database queries for assemblies and components live here.
 No business logic - pure data access.

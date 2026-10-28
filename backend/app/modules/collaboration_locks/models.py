@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Collaboration-lock ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Collaboration-lock ORM models.
 
 Tables:
     oe_collab_lock - pessimistic per-entity soft lock.

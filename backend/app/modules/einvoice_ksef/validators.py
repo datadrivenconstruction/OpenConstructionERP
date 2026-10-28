@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""KSeF rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠KSeF rules.
 
 The document rules register into the ``einvoice_clearance`` rule set, the way
 Egypt's do. That set's ERROR rules are the gate the clearance service runs

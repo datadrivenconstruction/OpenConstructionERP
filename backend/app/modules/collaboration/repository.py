@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Collaboration data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Collaboration data access layer.
 
 All database queries for comments, mentions, and viewpoints live here.
 No business logic - pure data access.

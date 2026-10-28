@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure completeness and arithmetic checks for a subcontract agreement.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure completeness and arithmetic checks for a subcontract agreement.
 
 Validation is first-class for this module (platform principle #4). A
 subcontract agreement leaving ``draft`` for ``active`` is the moment a

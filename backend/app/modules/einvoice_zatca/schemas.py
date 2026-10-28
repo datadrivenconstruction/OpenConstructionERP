@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response shapes for the ZATCA onboarding API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response shapes for the ZATCA onboarding API.
 
 No response shape has a field for a private key, a secret or a token: the
 unit's credentials never leave the service.

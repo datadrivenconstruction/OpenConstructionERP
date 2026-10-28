@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project ORM models.
 
 Tables:
     oe_projects_project          - construction estimation projects

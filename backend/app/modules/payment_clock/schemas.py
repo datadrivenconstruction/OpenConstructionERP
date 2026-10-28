@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment clock Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment clock Pydantic schemas - request/response models.
 
 Money and percentages leave as plain-decimal **strings**. Pydantic v2 would
 serialise a ``Decimal`` to a JSON number, which JavaScript truncates to a

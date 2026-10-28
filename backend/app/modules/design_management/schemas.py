@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request bodies of the design management API (Pydantic v2).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request bodies of the design management API (Pydantic v2).
 
 Responses are plain dicts built by ``router._out`` from the ORM rows (every
 column, ``status`` mirrored as ``state``), wrapped in the list envelope

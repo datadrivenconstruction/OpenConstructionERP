@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Catalog resource Pydantic schemas for request/response validation.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalog resource Pydantic schemas for request/response validation.
 
 The catalog stores **resources** - single material / labour / equipment /
 operator items with one price per region. Each resource can be referenced

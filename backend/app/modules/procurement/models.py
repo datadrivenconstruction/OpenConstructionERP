@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Procurement ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Procurement ORM models.
 
 Tables:
     oe_procurement_po            - purchase orders

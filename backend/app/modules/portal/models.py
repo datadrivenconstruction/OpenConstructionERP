@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Customer & Partner Portal ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Customer & Partner Portal ORM models.
 
 Tables:
     oe_portal_user                   - external portal accounts (clients,

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Subcontractor ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Subcontractor ORM models.
 
 Tables:
     oe_subcontractors_subcontractor              - legal entity

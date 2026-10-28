@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tax withholding data access.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tax withholding data access.
 
 Query and persistence only. Every decision - what the base is, which band a
 party actually falls into, whether the figures hold together - lives in

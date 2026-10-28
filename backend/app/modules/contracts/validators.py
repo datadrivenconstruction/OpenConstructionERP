@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contracts validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contracts validation rules.
 
 Ships five first-class rules registered with the platform rule registry under
 the ``contracts`` rule set, of which the first three are:

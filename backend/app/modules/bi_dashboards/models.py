@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""BI Dashboards ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BI Dashboards ORM models.
 
 All tables prefixed ``oe_bi_dashboards_``. Cross-module references
 (project_id, owner_user_id, widget→dashboard) deliberately omit ORM

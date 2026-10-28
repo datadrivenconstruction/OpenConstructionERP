@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data-access layer for compliance DSL rules."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data-access layer for compliance DSL rules."""
 
 from __future__ import annotations
 

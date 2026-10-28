@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost item data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost item data access layer.
 
 All database queries for cost items live here.
 No business logic - pure data access.

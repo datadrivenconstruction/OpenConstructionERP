@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for legal entities and branches. Pure, no database.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for legal entities and branches. Pure, no database.
 
 Each rule returns a list of :class:`Issue`. ``error`` blocks the write and
 ``warning`` is returned beside a successful one, so a person sees it without

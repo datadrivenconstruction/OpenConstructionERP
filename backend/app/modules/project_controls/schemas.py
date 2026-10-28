@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Pydantic schemas for the Project Controls snapshot + drill-down API."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the Project Controls snapshot + drill-down API."""
 
 from __future__ import annotations
 

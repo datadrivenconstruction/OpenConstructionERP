@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""5D Cost Model Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠5D Cost Model Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for cost snapshots,
 budget lines, and cash flow entries. v3 §10 - monetary values are

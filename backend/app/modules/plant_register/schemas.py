@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response models of the plant register API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response models of the plant register API.
 
 Money and quantities travel as decimal strings; a JSON float is refused (422),
 because a float has already lost the cents. Calendar days are ``YYYY-MM-DD``.

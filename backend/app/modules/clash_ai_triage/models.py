@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ORM models for the clash AI triage module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ORM models for the clash AI triage module.
 
 Tables:
     oe_clash_triage_result - one LLM triage verdict for a clash subject.

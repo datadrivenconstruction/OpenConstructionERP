@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pure, database-free site-supervision domain logic.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pure, database-free site-supervision domain logic.
 
 Everything here is side-effect free (except the explicit in-place refusal
 helper) so it can be unit tested without a database and reused from the service,

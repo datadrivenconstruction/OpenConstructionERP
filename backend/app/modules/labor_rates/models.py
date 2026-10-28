@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Labor rate ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Labor rate ORM models.
 
 Tables:
     oe_labor_rates_template     - a reusable all-in labor rate build-up (a base

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Async SQLAlchemy repositories for the Payroll module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Async SQLAlchemy repositories for the Payroll module."""
 
 from __future__ import annotations
 

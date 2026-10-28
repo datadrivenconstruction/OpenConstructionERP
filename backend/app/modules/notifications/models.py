@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Notification ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Notification ORM models.
 
 Tables:
     oe_notifications_notification - per-user in-app notifications

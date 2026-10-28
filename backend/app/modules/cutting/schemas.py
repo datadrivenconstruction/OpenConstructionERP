@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cutting optimisation request and response schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cutting optimisation request and response schemas.
 
 Dimensions are millimetres. Money and quantities serialise as strings (the
 project's Decimal-as-string contract), never floats.

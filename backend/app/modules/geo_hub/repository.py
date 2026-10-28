@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Geo Hub data access layer - one repository per entity."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub data access layer - one repository per entity."""
 
 from __future__ import annotations
 

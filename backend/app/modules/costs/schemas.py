@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cost item Pydantic schemas for request/response validation."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cost item Pydantic schemas for request/response validation."""
 
 from __future__ import annotations
 

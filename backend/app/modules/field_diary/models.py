@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Field Diary ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Diary ORM models.
 
 Tables (all prefixed ``oe_field_diary_``):
     oe_field_diary_entry              - header per (project, author, date)

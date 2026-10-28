@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request bodies of the stakeholders API. Responses are plain JSON built by the service.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request bodies of the stakeholders API. Responses are plain JSON built by the service.
 
 Every request model forbids unknown fields, so a client that sends a computed
 value (a classification, ``next_due``, ``overdue``) is told so instead of

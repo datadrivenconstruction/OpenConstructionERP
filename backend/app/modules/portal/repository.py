@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Customer & Partner Portal data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Customer & Partner Portal data access layer."""
 
 from __future__ import annotations
 

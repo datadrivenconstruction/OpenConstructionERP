@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Legal entity and branch ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Legal entity and branch ORM models.
 
 Tables:
     oe_legal_entities_entity - one company in the group: the registered name,

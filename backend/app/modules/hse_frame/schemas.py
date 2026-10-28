@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response schemas of the HSE frame."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response schemas of the HSE frame."""
 
 from __future__ import annotations
 

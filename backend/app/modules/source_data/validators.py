@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for the source-data register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for the source-data register.
 
 Ships the module-local ``source_data_completeness`` rule: a delivery must not
 proceed while a required prerequisite (permit, survey, technical conditions, ...)

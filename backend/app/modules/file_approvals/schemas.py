@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Approvals (W8) Pydantic schemas."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Approvals (W8) Pydantic schemas."""
 
 from __future__ import annotations
 

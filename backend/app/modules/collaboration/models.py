@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Collaboration ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Collaboration ORM models.
 
 Tables:
     oe_collaboration_comment   - threaded comments on any entity

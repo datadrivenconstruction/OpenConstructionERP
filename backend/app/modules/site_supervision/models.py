@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Design-side site-supervision ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Design-side site-supervision ORM models.
 
 Tables:
     oe_site_supervision_visit - a supervision visit to a project by a member of

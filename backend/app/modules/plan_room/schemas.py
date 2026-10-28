@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan Room Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan Room Pydantic schemas - request / response models.
 
 The read-only overlay composite (positioned pins, markups, measurements and
 photos) for one document page, plus the create schema for a positioned photo /

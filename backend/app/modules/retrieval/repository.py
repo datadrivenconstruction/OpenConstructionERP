@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for saved searches.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for saved searches.
 
 Every read takes the owner's id as a required argument rather than inferring
 it, so a caller cannot reach another user's pins by forgetting a filter. A pin

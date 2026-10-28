@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Invoice and payment release rules V11 to V14 and V16 to V19, rule set ``payment_release``.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Invoice and payment release rules V11 to V14 and V16 to V19, rule set ``payment_release``.
 
 The checks a controller runs before money leaves the project, in the order an
 invoice goes through its release. V15 (a supplier invoice belongs to a

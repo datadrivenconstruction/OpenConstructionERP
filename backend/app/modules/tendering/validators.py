@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule set ``tendering_sealed`` for the sealed submission mode.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule set ``tendering_sealed`` for the sealed submission mode.
 
 The rules read the payload built by ``SealedTenderService.validation_payload``::
 

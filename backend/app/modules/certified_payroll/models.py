@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Certified payroll ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Certified payroll ORM models.
 
 Tables:
     oe_certpay_determination  - a wage determination the contractor has on file

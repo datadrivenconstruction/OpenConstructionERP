@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Timeline data access over the shared activity-log table.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Timeline data access over the shared activity-log table.
 
 The timeline owns no table of its own, so this repository is read-only: it
 builds the selects against :class:`app.core.audit_log.ActivityLog` and hands

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Formwork module-specific validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Formwork module-specific validation rules.
 
 A formwork rate is one of the easiest numbers on a concrete job to get wrong,
 and wrong in a direction that is invisible until the panels arrive on site.

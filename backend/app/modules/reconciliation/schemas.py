@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the event-reconciliation API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the event-reconciliation API.
 
 There is no money in this module. ``confidence`` is a ratio in ``[0, 1]`` and
 is carried on the wire as a plain ``float`` (the field is not money-named, so it

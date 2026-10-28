@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Customer & Partner Portal Pydantic schemas - request / response models."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Customer & Partner Portal Pydantic schemas - request / response models."""
 
 from __future__ import annotations
 

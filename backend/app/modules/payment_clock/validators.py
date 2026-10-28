@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment clock validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment clock validation rules.
 
 The whole module exists for one sentence, and it is this one: **if no valid
 payment notice is served in time, the notified sum is the sum the contractor

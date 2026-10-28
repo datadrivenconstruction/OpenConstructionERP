@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Allowances & contingency register ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Allowances & contingency register ORM models.
 
 Tables:
     oe_allowances_allowance   - one allowance carried in the estimate but not yet

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File References ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File References ORM models.
 
 Tables:
     oe_file_naming_violation - one row per (project_id, file_kind,

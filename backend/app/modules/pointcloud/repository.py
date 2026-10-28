@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Point Cloud data access layer - one repository per entity.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Point Cloud data access layer - one repository per entity.
 
 Mirrors the ``geo_hub`` repository style: a tiny shared ``_BaseRepo`` for the
 create / get / update / delete boilerplate, plus per-entity list queries that

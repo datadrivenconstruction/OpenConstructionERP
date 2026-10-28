@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Timeline validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Timeline validation rules.
 
 A timeline is only worth reading if the rows on it can be reached, linked and
 attributed. These rules are the reader that objects when they cannot:

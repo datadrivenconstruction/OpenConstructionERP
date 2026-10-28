@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Closeout data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout data access layer.
 
 Async SQLAlchemy. Project scoping is enforced at the service / router layer
 (every package is unique per project); this layer is pure CRUD.

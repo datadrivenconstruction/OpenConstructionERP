@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Formwork ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Formwork ORM models.
 
 Tables:
     oe_formwork_system            - catalogue row (framed wall panel, slab deck, ...)

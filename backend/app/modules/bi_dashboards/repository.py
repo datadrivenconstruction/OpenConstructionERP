@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Data-access layer for the BI Dashboards module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data-access layer for the BI Dashboards module."""
 
 from __future__ import annotations
 

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project handbook ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project handbook ORM models.
 
 Tables (all prefixed ``oe_handbook_``):
     handbook         -- one per project: pinned chapter catalogue, title and edition

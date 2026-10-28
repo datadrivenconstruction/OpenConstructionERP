@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for schedules, activities,
 and work orders.  Numeric values are stored as strings in SQLite-compatible

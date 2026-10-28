@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contacts data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contacts data access layer.
 
 All database queries for contacts live here.
 No business logic - pure data access.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic request/response schemas for the Design Options module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic request/response schemas for the Design Options module.
 
 Base request/response shapes for design-option sets and the individual options
 inside them. The side-by-side comparison shapes (per-option columns, by-trade

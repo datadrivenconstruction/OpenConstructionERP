@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Plan Room data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Plan Room data access layer.
 
 Owns only the positioned-pin table (:class:`PlanPin`). Every other overlay
 source is read directly by the service from its owning module with fail-soft

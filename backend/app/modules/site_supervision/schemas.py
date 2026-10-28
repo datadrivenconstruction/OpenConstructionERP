@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas and canonical vocabularies for site supervision."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas and canonical vocabularies for site supervision."""
 
 from __future__ import annotations
 

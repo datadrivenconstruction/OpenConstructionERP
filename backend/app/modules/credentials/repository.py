@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Professional-credentials data-access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Professional-credentials data-access layer.
 
 Holds the SQL half of the one status rule. :func:`effective_status_expr` is the
 database mirror of :func:`app.modules.credentials.service.recompute_status`, and

@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Preliminaries (general conditions) ORM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Preliminaries (general conditions) ORM model.
 
 Table:
     oe_preliminaries_item - one preliminaries / general-conditions line for a

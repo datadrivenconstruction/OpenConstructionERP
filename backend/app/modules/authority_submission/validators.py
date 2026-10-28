@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rule for the authority-submission factory.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rule for the authority-submission factory.
 
 ``submission_schema_valid`` is the gate that a submission must pass before it can
 be marked submitted: the payload has to satisfy its profile's ``field_spec`` (no

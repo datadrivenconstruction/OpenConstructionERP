@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CRM data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CRM data access layer."""
 
 from __future__ import annotations
 

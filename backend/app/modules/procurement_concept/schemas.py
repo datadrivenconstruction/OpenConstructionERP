@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request and response schemas of the procurement concept API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request and response schemas of the procurement concept API.
 
 Money travels as a decimal string ("1250000.00"); a JSON number for an amount
 is refused (422), so no float ever touches a threshold comparison. Calendar

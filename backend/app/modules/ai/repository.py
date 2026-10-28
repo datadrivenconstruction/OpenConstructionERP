@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI module data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI module data access layer.
 
 All database queries for AI settings and estimate jobs live here.
 No business logic - pure data access.

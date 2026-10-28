@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""DWG Takeoff Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠DWG Takeoff Pydantic schemas - request/response models.
 
 Defines create, update, and response schemas for DWG drawings,
 drawing versions, annotations, and measurement results.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Approvals (W8) ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Approvals (W8) ORM models.
 
 Tables
 ------

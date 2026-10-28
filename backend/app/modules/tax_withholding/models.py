@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tax withholding ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tax withholding ORM models.
 
 Tables:
     oe_tax_withholding_regime         - a statutory withholding scheme

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas and canonical vocabularies for the review-authority module.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas and canonical vocabularies for the review-authority module.
 
 The vocabularies below are the built-in, jurisdiction-neutral code sets. The DB
 columns are plain ``String`` so a regional pack can persist a value outside

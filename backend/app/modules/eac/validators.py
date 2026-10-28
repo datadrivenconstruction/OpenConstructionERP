@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for the EAC visual block graph.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for the EAC visual block graph.
 
 A block graph is the estimator's own drawing of a rule: blocks at canvas
 coordinates, wired together through typed slots. It is saved constantly and

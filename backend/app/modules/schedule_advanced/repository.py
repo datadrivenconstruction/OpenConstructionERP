@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schedule Advanced data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schedule Advanced data access layer.
 
 One repository per entity, mirroring the pattern used by ``safety/repository.py``.
 """

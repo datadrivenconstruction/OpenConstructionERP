@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Quality concept ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Quality concept ORM models.
 
 Tables (all prefixed ``oe_qconcept_``):
     concept         -- one per project: pinned catalogue, state, package scope

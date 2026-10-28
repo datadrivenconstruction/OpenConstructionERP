@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules of the technical request register (rule set ``rfi``).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules of the technical request register (rule set ``rfi``).
 
 Two rules, both reading the pure functions in
 :mod:`app.modules.rfi.request_types` that the create and issue paths enforce:

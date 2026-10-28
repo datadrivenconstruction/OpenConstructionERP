@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Submittals ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Submittals ORM models.
 
 Tables:
     oe_submittals_submittal - construction submittals with review/approval workflow

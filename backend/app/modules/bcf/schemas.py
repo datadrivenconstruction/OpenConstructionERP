@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BCF module Pydantic schemas (request / response).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BCF module Pydantic schemas (request / response).
 
 These are the *API* shapes. They are deliberately decoupled from the
 on-the-wire BCF-XML element names (which live in :mod:`app.modules.bcf.

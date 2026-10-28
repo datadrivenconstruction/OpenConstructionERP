@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Record Publishing schemas - request/response for publish-and-distribute."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Record Publishing schemas - request/response for publish-and-distribute."""
 
 from __future__ import annotations
 

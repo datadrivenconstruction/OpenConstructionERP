@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Work-type route classifier validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Work-type route classifier validation rules.
 
 Ships one first-class rule registered with the platform rule registry:
 

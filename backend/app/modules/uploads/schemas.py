@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Schemas for the direct-upload endpoints."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Schemas for the direct-upload endpoints."""
 
 from pydantic import BaseModel
 

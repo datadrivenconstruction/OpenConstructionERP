@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Request bodies of the quality concept API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Request bodies of the quality concept API.
 
 Responses are plain dicts built in the router (``_out`` helpers), one shape per
 entity, documented in the module's API contract. Points are Decimal strings;

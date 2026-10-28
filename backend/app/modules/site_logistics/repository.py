@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site Logistics data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site Logistics data access layer.
 
 Pure data access for gates, laydown zones, delivery bookings and the bill
 positions those deliveries are booked against - no business logic. All queries

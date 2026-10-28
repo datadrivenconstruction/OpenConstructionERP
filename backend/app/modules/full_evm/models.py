@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Full EVM ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Full EVM ORM models.
 
 Tables:
     oe_evm_forecast             - forecast rows derived from a finance EVM snapshot

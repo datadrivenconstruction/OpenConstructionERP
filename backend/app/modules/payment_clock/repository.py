@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment clock data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment clock data access layer.
 
 Pure database queries with no business logic. The service layer calls these
 and adds the statutory arithmetic, the schedule computation and the breach

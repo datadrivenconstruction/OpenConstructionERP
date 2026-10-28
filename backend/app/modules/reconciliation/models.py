@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Event-reconciliation ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Event-reconciliation ORM models.
 
 Tables:
     oe_record_link - a scored, reviewable correlation between two heterogeneous

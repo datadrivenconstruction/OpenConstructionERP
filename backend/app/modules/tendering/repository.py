@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Tendering data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Tendering data access layer.
 
 All database queries for tender packages and bids live here.
 No business logic - pure data access.

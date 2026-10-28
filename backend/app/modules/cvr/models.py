@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""CVR (Cost-Value Reconciliation) & Cashflow ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠CVR (Cost-Value Reconciliation) & Cashflow ORM models.
 
 Tables:
     oe_cvr_report               - a monthly CVR report for a project

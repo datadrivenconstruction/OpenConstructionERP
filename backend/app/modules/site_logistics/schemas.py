@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Site Logistics Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Site Logistics Pydantic schemas - request/response models.
 
 Covers gates, laydown zones and delivery bookings following the create /
 update / response split used across the platform.

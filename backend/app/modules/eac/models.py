@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""EAC v2 ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠EAC v2 ORM models.
 
 Tables (per RFC 35 §5):
 

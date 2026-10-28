@@ -1,6 +1,6 @@
 # OpenConstructionERP - DataDrivenConstruction (DDC)
 # DDC-CWICR-OE-2026
-"""Progress tracking data access layer."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Progress tracking data access layer."""
 
 from __future__ import annotations
 

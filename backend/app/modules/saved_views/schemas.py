@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""The FilterSpec DSL and the request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠The FilterSpec DSL and the request/response models.
 
 The client never sends SQL. It sends a small, typed JSON spec that the engine
 compiles into a parameterized SQLAlchemy ``select()``. There is no ``eval``, no

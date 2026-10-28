@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Document Management ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Document Management ORM models.
 
 Tables:
     oe_documents_document - uploaded project documents with metadata

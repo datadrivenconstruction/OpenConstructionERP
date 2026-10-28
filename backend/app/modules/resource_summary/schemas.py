@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Pydantic schemas for the Resource Summary API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the Resource Summary API.
 
 Money and quantities are ``Decimal`` and serialise to fixed-precision strings
 (money 2dp, quantities 4dp) so a JSON consumer never loses cents or drifts a

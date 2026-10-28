@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""File Trash ORM model.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠File Trash ORM model.
 
 Single table ``oe_file_trash`` holds soft-deleted rows from any of the
 8 file-kind tables. The original row is removed and its full payload

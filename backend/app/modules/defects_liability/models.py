@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Defects-liability ORM models (post-handover warranty and DLP register).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Defects-liability ORM models (post-handover warranty and DLP register).
 
 Tables:
     oe_dlp_warranty - one warranty / defects-liability-period entry on a project

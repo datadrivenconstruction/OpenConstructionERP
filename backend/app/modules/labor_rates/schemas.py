@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Labor rate Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Labor rate Pydantic schemas - request/response models.
 
 Every monetary value follows the platform money contract: it is accepted as a
 ``Decimal`` and emitted in JSON as a plain decimal string so large amounts

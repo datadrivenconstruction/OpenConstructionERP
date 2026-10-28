@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Async SQLAlchemy repositories for the Field Diary module."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Async SQLAlchemy repositories for the Field Diary module."""
 
 from __future__ import annotations
 

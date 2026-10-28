@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Teams data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Teams data access layer.
 
 All database queries for teams, memberships, and visibility restrictions live
 here. No business logic - pure data access.

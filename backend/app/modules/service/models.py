@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Service & Maintenance ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Service & Maintenance ORM models.
 
 Tables:
     oe_service_contract               - customer-scoped service agreement

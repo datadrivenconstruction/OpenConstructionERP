@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Resource-assignment validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Resource-assignment validation rules.
 
 An assignment can now name the schedule activity it staffs. That link is only
 worth having if something reads it and objects, so these rules are that reader:

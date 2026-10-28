@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Off-site / Prefab / DfMA ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Off-site / Prefab / DfMA ORM models.
 
 Tables:
     oe_prefab_unit             - an off-site manufactured unit (pod/panel/module/...)

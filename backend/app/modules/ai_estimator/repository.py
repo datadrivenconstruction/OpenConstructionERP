@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""AI Estimate Builder data-access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠AI Estimate Builder data-access layer.
 
 Three thin repositories over the module's tables, mirroring the
 :mod:`app.modules.ai_agents.repository` style: ``add`` + ``flush`` so the row

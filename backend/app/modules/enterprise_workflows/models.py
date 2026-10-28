@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Enterprise Workflows ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Enterprise Workflows ORM models.
 
 Tables:
     oe_workflows_approval  - configurable approval workflow definitions

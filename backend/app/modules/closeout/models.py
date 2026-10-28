@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Closeout ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Closeout ORM models.
 
 Tables:
     oe_closeout_package - one closeout package per project (configurable checklist)

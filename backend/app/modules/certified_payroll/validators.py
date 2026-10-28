@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Certified payroll validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Certified payroll validation rules.
 
 A certified payroll is a statement somebody signs and an awarding body relies
 on. These rules are what reads it before the signature goes on, and they are

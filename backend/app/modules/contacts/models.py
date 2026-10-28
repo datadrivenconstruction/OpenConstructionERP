@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Contacts ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Contacts ORM models.
 
 Tables:
     oe_contacts_contact - unified contacts directory

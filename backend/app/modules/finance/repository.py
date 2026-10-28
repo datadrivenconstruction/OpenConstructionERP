@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Finance data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Finance data access layer.
 
 All database queries for finance entities live here.
 No business logic - pure data access.

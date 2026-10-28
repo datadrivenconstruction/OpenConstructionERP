@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Equipment & Fleet ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Equipment & Fleet ORM models.
 
 Tables:
     oe_equipment_type                   - Catalog of equipment types

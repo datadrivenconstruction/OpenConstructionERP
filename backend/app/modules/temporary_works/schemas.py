@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Temporary-works Pydantic v2 schemas (request / response models).
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Temporary-works Pydantic v2 schemas (request / response models).
 
 Calendar dates cross the wire as ISO-8601 strings (``YYYY-MM-DD``) and are typed
 as :class:`datetime.date` on create/update so Pydantic parses and validates them.

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Phone-log Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Phone-log Pydantic schemas - request/response models.
 
 The create schema accepts a raw, free-form capture: the caller posts whatever it
 has (a party line, an informal direction hint, a couple of timestamps or a

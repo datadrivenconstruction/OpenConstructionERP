@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Condition assessment data access (pure CRUD; scoping happens in service and router)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition assessment data access (pure CRUD; scoping happens in service and router)."""
 
 from __future__ import annotations
 

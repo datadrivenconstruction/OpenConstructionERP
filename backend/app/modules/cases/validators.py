@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Cases module validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Cases module validation rules.
 
 A case scenario is teaching material, and the ways it goes wrong are not syntax
 errors: it opens screens without saying why, it claims five minutes for twenty

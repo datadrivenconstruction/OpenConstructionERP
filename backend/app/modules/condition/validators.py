@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Condition validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Condition validation rules.
 
 Rules, registered under the ``condition`` rule set, read a plain dict built by
 the router: ``{"scales": {key: scale}, "assessments": [...], "actions": [...]}``.

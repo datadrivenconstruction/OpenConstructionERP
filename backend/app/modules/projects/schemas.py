@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Project Pydantic schemas for request/response validation."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Project Pydantic schemas for request/response validation."""
 
 import re
 from datetime import datetime

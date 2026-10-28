@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Commitment and release matrix ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Commitment and release matrix ORM models.
 
 Tables (all prefixed ``oe_commitment_``):
     matrix       -- one per project: pinned authority schedule, enforcement, FX policy, tier routes

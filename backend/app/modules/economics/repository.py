@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Data access for economics. Every child lookup is by ``(project_id, id)``."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Data access for economics. Every child lookup is by ``(project_id, id)``."""
 
 from __future__ import annotations
 

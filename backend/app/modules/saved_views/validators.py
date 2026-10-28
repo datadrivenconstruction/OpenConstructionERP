@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Saved-views module validation rules.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Saved-views module validation rules.
 
 A saved view outlives the register it was written against. Fields get renamed,
 enum vocabularies get pruned, whole modules get disabled - and the stored spec

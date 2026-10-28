@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""Field Time Pydantic schemas - request / response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Field Time Pydantic schemas - request / response models.
 
 Hours are ``Decimal`` in and out but serialised to a string in JSON (the
 platform-wide "money / quantity as string" convention) so a large or high

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Validation rules for the FX register.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Validation rules for the FX register.
 
 An exchange rate is the quietest way to get a cost report wrong. Nothing about
 a project priced against a stale set, or against a set that does not quote the

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Full EVM Pydantic schemas - request/response models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Full EVM Pydantic schemas - request/response models.
 
 Money on the wire is a **string**, not a JSON number. Every amount is a
 :class:`~decimal.Decimal` server-side and is serialised through

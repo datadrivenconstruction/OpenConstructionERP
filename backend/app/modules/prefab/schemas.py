@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Off-site / Prefab / DfMA Pydantic schemas (request/response models)."""
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Off-site / Prefab / DfMA Pydantic schemas (request/response models)."""
 
 from datetime import date, datetime
 from uuid import UUID

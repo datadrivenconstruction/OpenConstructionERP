@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Construction-control ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Construction-control ORM models.
 
 Tables:
     oe_cc_acceptance_criterion - referenceable acceptance clause + tolerance +

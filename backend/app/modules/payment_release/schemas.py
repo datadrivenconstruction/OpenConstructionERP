@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Payment release request and response schemas.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Payment release request and response schemas.
 
 Money travels as decimal strings in both directions, never as floats.
 """

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""FX rate register ORM models: published rate sets, quotes, policy and PPP.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠FX rate register ORM models: published rate sets, quotes, policy and PPP.
 
 A construction project is routinely estimated in one currency, procured in a
 second and reported to the client in a third, so "what is the rate" is never a

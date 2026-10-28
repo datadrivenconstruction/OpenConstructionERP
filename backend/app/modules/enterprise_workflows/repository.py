@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Enterprise Workflows data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Enterprise Workflows data access layer.
 
 All database queries for workflow entities live here.
 No business logic - pure data access.

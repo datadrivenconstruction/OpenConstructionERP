@@ -1,5 +1,5 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
-"""Geo Hub ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Geo Hub ORM models.
 
 Tables (all prefixed ``oe_geo_hub_``):
 

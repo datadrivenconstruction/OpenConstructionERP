@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Catalog resource data access layer.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Catalog resource data access layer.
 
 All database queries for catalog resources live here.
 No business logic - pure data access.

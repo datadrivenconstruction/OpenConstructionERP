@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""Pydantic schemas for the inbound capture API.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠Pydantic schemas for the inbound capture API.
 
 The request bodies stay deliberately permissive: the pure
 :mod:`~app.modules.inbound_capture.normalize` engine already tolerates missing /

@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""BIM Hub ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠BIM Hub ORM models.
 
 Tables:
     oe_bim_model        - imported BIM/CAD model metadata

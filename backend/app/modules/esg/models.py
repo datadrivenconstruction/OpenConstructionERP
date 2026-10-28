@@ -1,6 +1,6 @@
 # DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-"""ESG Site Performance ORM models.
+"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠ESG Site Performance ORM models.
 
 Tables:
     oe_esg_entry - one operational ESG reading for a metric in a period.
