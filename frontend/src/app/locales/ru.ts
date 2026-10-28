@@ -64295,6 +64295,7 @@ const resource = {
     "packages.remove_warning": "Удаление {{name}} скроет эти модули: {{modules}}. Их данные сохранятся и вернутся, когда вы снова добавите пакет.",
     "packages.remove_none": "Удаление {{name}} не скрывает ни одного модуля, потому что они всё ещё нужны другим пакетам.",
     "packages.remove_confirm": "Удалить пакет",
+    "packages.use_packages": "Начать с готовых пакетов решений",
     "tables.total": "Итого",
     "tables.filter": "Фильтр",
     "tables.filter_placeholder": "Содержит...",

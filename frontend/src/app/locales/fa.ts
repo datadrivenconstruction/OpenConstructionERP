@@ -61035,6 +61035,7 @@ const resource = {
     "packages.remove_warning": "با حذف {{name}} این ماژول‌ها پنهان می‌شوند: {{modules}}. داده‌های آن‌ها باقی می‌ماند و با افزودن دوباره بسته برمی‌گردد.",
     "packages.remove_none": "با حذف {{name}} هیچ ماژولی پنهان نمی‌شود، چون بسته‌های دیگر هنوز به آن‌ها نیاز دارند.",
     "packages.remove_confirm": "حذف بسته",
+    "packages.use_packages": "به‌جای آن با بسته‌های راهکار شروع کنید",
     "tables.total": "جمع کل",
     "tables.filter": "فیلتر",
     "tables.filter_placeholder": "شامل...",

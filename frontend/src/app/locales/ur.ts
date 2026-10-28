@@ -61041,6 +61041,7 @@ const resource = {
     "packages.remove_warning": "{{name}} ہٹانے سے یہ ماڈیول چھپ جائیں گے: {{modules}}۔ ان کا ڈیٹا محفوظ رہے گا اور پیکیج دوبارہ شامل کرنے پر واپس آ جائے گا۔",
     "packages.remove_none": "{{name}} ہٹانے سے کوئی ماڈیول نہیں چھپے گا، کیونکہ دوسرے پیکیجز کو اب بھی ان کی ضرورت ہے۔",
     "packages.remove_confirm": "پیکیج ہٹائیں",
+    "packages.use_packages": "اس کے بجائے حل کے پیکجوں سے شروع کریں",
     "tables.total": "کل",
     "tables.filter": "فلٹر",
     "tables.filter_placeholder": "شامل ہے...",

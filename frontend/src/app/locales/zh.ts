@@ -63294,6 +63294,7 @@ const resource = {
     "packages.remove_warning": "移除 {{name}} 会隐藏以下模块：{{modules}}。其数据会保留，重新添加该方案包后即可恢复。",
     "packages.remove_none": "移除 {{name}} 不会隐藏任何模块，因为其他方案包仍需要它们。",
     "packages.remove_confirm": "移除方案包",
+    "packages.use_packages": "改为从解决方案包开始",
     "tables.total": "合计",
     "tables.filter": "筛选",
     "tables.filter_placeholder": "包含...",

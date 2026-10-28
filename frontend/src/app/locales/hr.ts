@@ -61423,6 +61423,7 @@ const resource = {
     "packages.remove_warning": "Uklanjanje paketa {{name}} skriva ove module: {{modules}}. Njihovi podaci ostaju i vraćaju se kad paket ponovno dodate.",
     "packages.remove_none": "Uklanjanje paketa {{name}} ne skriva nijedan modul jer ih drugi paketi i dalje trebaju.",
     "packages.remove_confirm": "Ukloni paket",
+    "packages.use_packages": "Umjesto toga započnite s paketima rješenja",
     "tables.total": "Ukupno",
     "tables.filter": "Filtar",
     "tables.filter_placeholder": "Sadrži...",

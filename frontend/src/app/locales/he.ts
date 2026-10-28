@@ -61372,6 +61372,7 @@ const resource = {
     "packages.remove_warning": "הסרת {{name}} תסתיר את המודולים האלה: {{modules}}. הנתונים שלהם נשמרים וחוזרים כשמוסיפים את החבילה שוב.",
     "packages.remove_none": "הסרת {{name}} לא תסתיר אף מודול, כי חבילות אחרות עדיין צריכות אותם.",
     "packages.remove_confirm": "הסרת החבילה",
+    "packages.use_packages": "להתחיל במקום זאת מחבילות פתרונות",
     "tables.total": "סך הכול",
     "tables.filter": "סינון",
     "tables.filter_placeholder": "מכיל...",

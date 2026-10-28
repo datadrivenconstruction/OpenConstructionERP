@@ -62297,6 +62297,7 @@ const resource = {
     "packages.remove_warning": "Rimuovere {{name}} nasconde questi moduli: {{modules}}. I loro dati restano e tornano quando aggiungi di nuovo il pacchetto.",
     "packages.remove_none": "Rimuovere {{name}} non nasconde alcun modulo, perché altri pacchetti ne hanno ancora bisogno.",
     "packages.remove_confirm": "Rimuovi pacchetto",
+    "packages.use_packages": "Inizia invece dai pacchetti di soluzioni",
     "tables.total": "Totale",
     "tables.filter": "Filtra",
     "tables.filter_placeholder": "Contiene...",

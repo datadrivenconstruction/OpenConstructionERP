@@ -61354,6 +61354,7 @@ const resource = {
     "packages.remove_warning": "{{name}}을(를) 제거하면 다음 모듈이 숨겨집니다: {{modules}}. 데이터는 남아 있으며 패키지를 다시 추가하면 돌아옵니다.",
     "packages.remove_none": "{{name}}을(를) 제거해도 다른 패키지가 아직 필요로 하므로 숨겨지는 모듈은 없습니다.",
     "packages.remove_confirm": "패키지 제거",
+    "packages.use_packages": "대신 솔루션 패키지로 시작",
     "tables.total": "합계",
     "tables.filter": "필터",
     "tables.filter_placeholder": "포함...",

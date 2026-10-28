@@ -31,10 +31,10 @@ export function StepSolutionPackages({
       {isError && (
         <p className="text-sm text-content-secondary">{t('packages.load_error')}</p>
       )}
-      {data && (
+      {data && Array.isArray(data.packages) && (
         <PackagePicker
           packages={data.packages}
-          installed={data.state.installed}
+          installed={data.state?.installed ?? []}
           submitLabel={t('packages.install_continue')}
           onInstalled={(result) => onInstalled(result.enabled_modules)}
         />

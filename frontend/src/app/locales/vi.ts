@@ -60833,6 +60833,7 @@ const resource = {
     "packages.remove_warning": "Gỡ {{name}} sẽ ẩn các mô-đun này: {{modules}}. Dữ liệu được giữ lại và sẽ quay lại khi bạn thêm lại gói.",
     "packages.remove_none": "Gỡ {{name}} không ẩn mô-đun nào vì các gói khác vẫn cần chúng.",
     "packages.remove_confirm": "Gỡ gói",
+    "packages.use_packages": "Bắt đầu từ các gói giải pháp",
     "tables.total": "Tổng cộng",
     "tables.filter": "Bộ lọc",
     "tables.filter_placeholder": "Chứa...",

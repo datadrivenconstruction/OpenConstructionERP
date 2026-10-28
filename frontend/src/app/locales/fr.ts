@@ -63996,6 +63996,7 @@ const resource = {
     "packages.remove_warning": "Retirer {{name}} masque ces modules : {{modules}}. Leurs données sont conservées et reviennent si vous rajoutez le lot.",
     "packages.remove_none": "Retirer {{name}} ne masque aucun module, car d'autres lots en ont encore besoin.",
     "packages.remove_confirm": "Retirer le lot",
+    "packages.use_packages": "Commencer plutôt par des packs de solutions",
     "tables.total": "Total",
     "tables.filter": "Filtrer",
     "tables.filter_placeholder": "Contient...",

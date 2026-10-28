@@ -61079,6 +61079,7 @@ const resource = {
     "packages.remove_warning": "Премахването на {{name}} скрива тези модули: {{modules}}. Данните им се запазват и се връщат, когато добавите пакета отново.",
     "packages.remove_none": "Премахването на {{name}} не скрива нито един модул, защото други пакети още ги използват.",
     "packages.remove_confirm": "Премахни пакета",
+    "packages.use_packages": "Започнете с готови пакети решения",
     "tables.total": "Общо",
     "tables.filter": "Филтър",
     "tables.filter_placeholder": "Съдържа...",

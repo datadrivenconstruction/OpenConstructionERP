@@ -63174,6 +63174,7 @@ const resource = {
     "packages.remove_warning": "Видалення {{name}} приховає ці модулі: {{modules}}. Їхні дані зберігаються і повертаються, коли ви знову додасте пакет.",
     "packages.remove_none": "Видалення {{name}} не приховує жодного модуля, бо їм ще потрібні інші пакети.",
     "packages.remove_confirm": "Видалити пакет",
+    "packages.use_packages": "Почати з готових пакетів рішень",
     "tables.total": "Разом",
     "tables.filter": "Фільтр",
     "tables.filter_placeholder": "Містить...",

@@ -61192,6 +61192,7 @@ const resource = {
     "packages.remove_warning": "{{name}} алып салынса, бул модулдар жашырылат: {{modules}}. Алардын маалыматы сакталат жана пакетти кайра кошкондо кайтып келет.",
     "packages.remove_none": "{{name}} алып салынганда эч бир модуль жашырылбайт, анткени башка пакеттер аларга дагы муктаж.",
     "packages.remove_confirm": "Пакетти алып салуу",
+    "packages.use_packages": "Анын ордуна даяр чечим пакеттеринен баштоо",
     "tables.total": "Жалпы",
     "tables.filter": "Чыпкалоо",
     "tables.filter_placeholder": "Камтыйт...",

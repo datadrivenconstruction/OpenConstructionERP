@@ -61075,6 +61075,7 @@ const resource = {
     "packages.remove_warning": "Fjerner du {{name}}, skjules disse moduler: {{modules}}. Deres data bliver, og de kommer tilbage, når du tilføjer pakken igen.",
     "packages.remove_none": "Fjerner du {{name}}, skjules ingen moduler, fordi andre pakker stadig har brug for dem.",
     "packages.remove_confirm": "Fjern pakke",
+    "packages.use_packages": "Start i stedet med løsningspakker",
     "tables.total": "I alt",
     "tables.filter": "Filter",
     "tables.filter_placeholder": "Indeholder...",

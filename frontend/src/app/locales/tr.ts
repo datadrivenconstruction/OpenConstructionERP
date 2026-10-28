@@ -61956,6 +61956,7 @@ const resource = {
     "packages.remove_warning": "{{name}} paketini kaldırmak şu modülleri gizler: {{modules}}. Verileri korunur ve paketi yeniden eklediğinizde geri gelir.",
     "packages.remove_none": "{{name}} paketini kaldırmak hiçbir modülü gizlemez, çünkü diğer paketler hâlâ bunlara ihtiyaç duyuyor.",
     "packages.remove_confirm": "Paketi kaldır",
+    "packages.use_packages": "Bunun yerine çözüm paketleriyle başlayın",
     "tables.total": "Toplam",
     "tables.filter": "Filtre",
     "tables.filter_placeholder": "İçeren...",

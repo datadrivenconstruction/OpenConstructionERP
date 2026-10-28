@@ -61345,6 +61345,7 @@ const resource = {
     "packages.remove_warning": "{{name}} সরালে এই মডিউলগুলো লুকিয়ে যাবে: {{modules}}। তাদের ডেটা থাকবে এবং প্যাকেজ আবার যোগ করলে ফিরে আসবে।",
     "packages.remove_none": "{{name}} সরালে কোনো মডিউল লুকাবে না, কারণ অন্য প্যাকেজগুলোর এখনও সেগুলো দরকার।",
     "packages.remove_confirm": "প্যাকেজ সরান",
+    "packages.use_packages": "এর বদলে সমাধান প্যাকেজ দিয়ে শুরু করুন",
     "tables.total": "মোট",
     "tables.filter": "ফিল্টার",
     "tables.filter_placeholder": "এতে আছে...",

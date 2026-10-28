@@ -31,6 +31,7 @@ import { BrandDraftSection, type BrandDraft } from './BrandDraft';
 const RADIUS_PX: Record<Appearance['radius'], number> = { sharp: 2, standard: 6, round: 12 };
 
 export const PRESET_NAME: Record<string, string> = {
+  standard: 'Standard',
   classic: 'Classic',
   studio: 'Studio',
   engineering: 'Engineering',

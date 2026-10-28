@@ -62366,6 +62366,7 @@ const resource = {
     "packages.remove_warning": "Odebráním {{name}} se skryjí tyto moduly: {{modules}}. Jejich data zůstanou a vrátí se, až balíček znovu přidáte.",
     "packages.remove_none": "Odebráním {{name}} se neskryje žádný modul, protože ho stále potřebují jiné balíčky.",
     "packages.remove_confirm": "Odebrat balíček",
+    "packages.use_packages": "Začít raději balíčky řešení",
     "tables.total": "Celkem",
     "tables.filter": "Filtr",
     "tables.filter_placeholder": "Obsahuje...",

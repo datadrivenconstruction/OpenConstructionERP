@@ -62007,6 +62007,7 @@ const resource = {
     "packages.remove_warning": "{{name}} ni olib tashlash quyidagi modullarni yashiradi: {{modules}}. Ularning ma'lumotlari saqlanadi va paketni qayta qo'shganda qaytadi.",
     "packages.remove_none": "{{name}} ni olib tashlash hech qanday modulni yashirmaydi, chunki boshqa paketlar ularga hali ham muhtoj.",
     "packages.remove_confirm": "Paketni olib tashlash",
+    "packages.use_packages": "Buning o‘rniga tayyor yechim paketlaridan boshlash",
     "tables.total": "Jami",
     "tables.filter": "Filtr",
     "tables.filter_placeholder": "Tarkibida...",

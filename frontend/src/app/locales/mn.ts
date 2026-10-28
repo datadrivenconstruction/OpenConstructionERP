@@ -60753,6 +60753,7 @@ const resource = {
     "packages.remove_warning": "{{name}}-г устгавал эдгээр модулиуд нуугдана: {{modules}}. Тэдгээрийн өгөгдөл хадгалагдаж, багцыг дахин нэмэхэд буцаж ирнэ.",
     "packages.remove_none": "{{name}}-г устгахад бусад багц эдгээрт хэрэгтэй хэвээр байгаа тул ямар ч модуль нуугдахгүй.",
     "packages.remove_confirm": "Багцыг устгах",
+    "packages.use_packages": "Оронд нь бэлэн шийдлийн багцаас эхлэх",
     "tables.total": "Нийт",
     "tables.filter": "Шүүлтүүр",
     "tables.filter_placeholder": "Агуулсан...",

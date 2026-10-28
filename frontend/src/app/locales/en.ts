@@ -55277,6 +55277,7 @@ const resource = {
     "packages.remove_warning": "Removing {{name}} hides these modules: {{modules}}. Their data stays and comes back when you add the package again.",
     "packages.remove_none": "Removing {{name}} hides no module, because other packages still need them.",
     "packages.remove_confirm": "Remove package",
+    "packages.use_packages": "Start from solution packages instead",
     "tables.total": "Total",
     "tables.filter": "Filter",
     "tables.filter_placeholder": "Contains...",

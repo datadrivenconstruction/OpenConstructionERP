@@ -61025,6 +61025,7 @@ const resource = {
     "packages.remove_warning": "{{name}} eemaldamine peidab need moodulid: {{modules}}. Nende andmed jäävad alles ja naasevad, kui paketi uuesti lisad.",
     "packages.remove_none": "{{name}} eemaldamine ei peida ühtegi moodulit, sest teised paketid vajavad neid veel.",
     "packages.remove_confirm": "Eemalda pakett",
+    "packages.use_packages": "Alusta hoopis lahenduspakettidest",
     "tables.total": "Kokku",
     "tables.filter": "Filter",
     "tables.filter_placeholder": "Sisaldab...",

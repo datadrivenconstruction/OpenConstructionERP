@@ -62357,6 +62357,7 @@ const resource = {
     "packages.remove_warning": "{{name}} を削除すると、次のモジュールが非表示になります: {{modules}}。データは残り、パッケージを再度追加すると戻ります。",
     "packages.remove_none": "{{name}} を削除しても、他のパッケージがまだ必要としているためモジュールは非表示になりません。",
     "packages.remove_confirm": "パッケージを削除",
+    "packages.use_packages": "代わりにソリューションパッケージから始める",
     "tables.total": "合計",
     "tables.filter": "フィルター",
     "tables.filter_placeholder": "含む...",

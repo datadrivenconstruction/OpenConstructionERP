@@ -61079,6 +61079,7 @@ const resource = {
     "packages.remove_warning": "{{name}}-paketin poistaminen piilottaa nämä moduulit: {{modules}}. Niiden tiedot säilyvät ja palaavat, kun lisäät paketin uudelleen.",
     "packages.remove_none": "{{name}}-paketin poistaminen ei piilota yhtään moduulia, koska muut paketit tarvitsevat niitä edelleen.",
     "packages.remove_confirm": "Poista paketti",
+    "packages.use_packages": "Aloita sen sijaan ratkaisupaketeista",
     "tables.total": "Yhteensä",
     "tables.filter": "Suodatin",
     "tables.filter_placeholder": "Sisältää...",

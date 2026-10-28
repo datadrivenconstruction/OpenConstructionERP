@@ -61035,6 +61035,7 @@ const resource = {
     "packages.remove_warning": "Η αφαίρεση του {{name}} αποκρύπτει αυτές τις μονάδες: {{modules}}. Τα δεδομένα τους μένουν και επανέρχονται όταν προσθέσετε ξανά το πακέτο.",
     "packages.remove_none": "Η αφαίρεση του {{name}} δεν αποκρύπτει καμία μονάδα, επειδή άλλα πακέτα τις χρειάζονται ακόμη.",
     "packages.remove_confirm": "Αφαίρεση πακέτου",
+    "packages.use_packages": "Ξεκινήστε αντί γι' αυτό από πακέτα λύσεων",
     "tables.total": "Σύνολο",
     "tables.filter": "Φίλτρο",
     "tables.filter_placeholder": "Περιέχει...",

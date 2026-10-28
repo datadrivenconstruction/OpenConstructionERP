@@ -61033,6 +61033,7 @@ const resource = {
     "packages.remove_warning": "Ang pag-alis ng {{name}} ay magtatago sa mga module na ito: {{modules}}. Mananatili ang data nila at babalik kapag idinagdag mo ulit ang package.",
     "packages.remove_none": "Walang module na matatago sa pag-alis ng {{name}}, dahil kailangan pa ito ng ibang package.",
     "packages.remove_confirm": "Alisin ang package",
+    "packages.use_packages": "Magsimula na lang sa mga solution package",
     "tables.total": "Kabuuan",
     "tables.filter": "Salain",
     "tables.filter_placeholder": "Naglalaman ng...",

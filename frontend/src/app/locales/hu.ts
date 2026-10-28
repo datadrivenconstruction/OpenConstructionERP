@@ -63640,6 +63640,7 @@ const resource = {
     "packages.remove_warning": "A(z) {{name}} eltávolítása elrejti ezeket a modulokat: {{modules}}. Adataik megmaradnak, és visszajönnek, ha újra hozzáadja a csomagot.",
     "packages.remove_none": "A(z) {{name}} eltávolítása egyetlen modult sem rejt el, mert más csomagok még szükségük van rájuk.",
     "packages.remove_confirm": "Csomag eltávolítása",
+    "packages.use_packages": "Inkább megoldáscsomagokkal kezdés",
     "tables.total": "Összesen",
     "tables.filter": "Szűrő",
     "tables.filter_placeholder": "Tartalmazza...",

@@ -60824,6 +60824,7 @@ const resource = {
     "packages.remove_warning": "Menghapus {{name}} akan menyembunyikan modul ini: {{modules}}. Datanya tetap ada dan kembali saat paket ditambahkan lagi.",
     "packages.remove_none": "Menghapus {{name}} tidak menyembunyikan modul apa pun, karena paket lain masih membutuhkannya.",
     "packages.remove_confirm": "Hapus paket",
+    "packages.use_packages": "Mulai dari paket solusi saja",
     "tables.total": "Total",
     "tables.filter": "Filter",
     "tables.filter_placeholder": "Berisi...",

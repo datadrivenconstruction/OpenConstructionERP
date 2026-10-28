@@ -63710,6 +63710,7 @@ const resource = {
     "packages.remove_warning": "Wenn Sie {{name}} entfernen, werden diese Module ausgeblendet: {{modules}}. Ihre Daten bleiben erhalten und kehren zurück, wenn Sie das Paket wieder hinzufügen.",
     "packages.remove_none": "Wenn Sie {{name}} entfernen, wird kein Modul ausgeblendet, weil andere Pakete sie weiterhin brauchen.",
     "packages.remove_confirm": "Paket entfernen",
+    "packages.use_packages": "Stattdessen mit Lösungspaketen beginnen",
     "tables.total": "Summe",
     "tables.filter": "Filter",
     "tables.filter_placeholder": "Enthält...",

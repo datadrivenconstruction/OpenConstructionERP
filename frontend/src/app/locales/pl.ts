@@ -62627,6 +62627,7 @@ const resource = {
     "packages.remove_warning": "Usunięcie pakietu {{name}} ukryje te moduły: {{modules}}. Ich dane zostaną i wrócą po ponownym dodaniu pakietu.",
     "packages.remove_none": "Usunięcie pakietu {{name}} nie ukryje żadnego modułu, bo inne pakiety nadal ich potrzebują.",
     "packages.remove_confirm": "Usuń pakiet",
+    "packages.use_packages": "Zacznij zamiast tego od pakietów rozwiązań",
     "tables.total": "Razem",
     "tables.filter": "Filtr",
     "tables.filter_placeholder": "Zawiera...",

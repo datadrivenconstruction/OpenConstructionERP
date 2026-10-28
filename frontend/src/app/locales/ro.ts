@@ -61413,6 +61413,7 @@ const resource = {
     "packages.remove_warning": "Eliminarea pachetului {{name}} ascunde aceste module: {{modules}}. Datele lor rămân și revin când adăugați din nou pachetul.",
     "packages.remove_none": "Eliminarea pachetului {{name}} nu ascunde niciun modul, pentru că alte pachete au încă nevoie de ele.",
     "packages.remove_confirm": "Elimină pachetul",
+    "packages.use_packages": "Începeți în schimb cu pachete de soluții",
     "tables.total": "Total",
     "tables.filter": "Filtru",
     "tables.filter_placeholder": "Conține...",

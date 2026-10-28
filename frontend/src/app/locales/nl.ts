@@ -61956,6 +61956,7 @@ const resource = {
     "packages.remove_warning": "Het verwijderen van {{name}} verbergt deze modules: {{modules}}. Hun gegevens blijven bewaard en komen terug als u het pakket weer toevoegt.",
     "packages.remove_none": "Het verwijderen van {{name}} verbergt geen module, omdat andere pakketten ze nog nodig hebben.",
     "packages.remove_confirm": "Pakket verwijderen",
+    "packages.use_packages": "Begin in plaats daarvan met oplossingspakketten",
     "tables.total": "Totaal",
     "tables.filter": "Filter",
     "tables.filter_placeholder": "Bevat...",

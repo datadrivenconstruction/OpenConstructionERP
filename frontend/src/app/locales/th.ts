@@ -60825,6 +60825,7 @@ const resource = {
     "packages.remove_warning": "การลบ {{name}} จะซ่อนโมดูลเหล่านี้: {{modules}} ข้อมูลยังคงอยู่และจะกลับมาเมื่อเพิ่มแพ็กเกจอีกครั้ง",
     "packages.remove_none": "การลบ {{name}} ไม่ซ่อนโมดูลใด เพราะแพ็กเกจอื่นยังต้องใช้อยู่",
     "packages.remove_confirm": "ลบแพ็กเกจ",
+    "packages.use_packages": "เริ่มจากแพ็กเกจโซลูชันแทน",
     "tables.total": "รวม",
     "tables.filter": "ตัวกรอง",
     "tables.filter_placeholder": "มี...",

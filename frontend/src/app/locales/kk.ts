@@ -61036,6 +61036,7 @@ const resource = {
     "packages.remove_warning": "{{name}} жойылса, мына модульдер жасырылады: {{modules}}. Олардың деректері сақталады және пакетті қайта қосқанда оралады.",
     "packages.remove_none": "{{name}} жойылса, басқа пакеттер оларға әлі мұқтаж болғандықтан ешқандай модуль жасырылмайды.",
     "packages.remove_confirm": "Пакетті жою",
+    "packages.use_packages": "Оның орнына дайын шешім пакеттерінен бастау",
     "tables.total": "Жиыны",
     "tables.filter": "Сүзгі",
     "tables.filter_placeholder": "Құрамында...",

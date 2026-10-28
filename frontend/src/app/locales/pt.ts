@@ -63989,6 +63989,7 @@ const resource = {
     "packages.remove_warning": "Remover {{name}} oculta estes módulos: {{modules}}. Os dados mantêm-se e voltam quando adicionar o pacote novamente.",
     "packages.remove_none": "Remover {{name}} não oculta nenhum módulo, porque outros pacotes ainda precisam deles.",
     "packages.remove_confirm": "Remover pacote",
+    "packages.use_packages": "Começar antes pelos pacotes de soluções",
     "tables.total": "Total",
     "tables.filter": "Filtrar",
     "tables.filter_placeholder": "Contém...",
