@@ -52,10 +52,14 @@ def upgrade() -> None:
         if name not in present:
             op.add_column(_TABLE, sa.Column(name, sa.String(length), nullable=True))
 
-    units = sa.table(_TABLE, sa.column("id", sa.String(36)), sa.column("qr_token", sa.String(64)))
-    ids = bind.execute(sa.select(units.c.id).where(units.c.qr_token.is_(None))).scalars().all()
+    # data-rewrite-ack: table=oe_prefab_unit growth=tenure rows=one row per off-site unit of every project; each existing unit gets a token once
+    # boot-repair: registry=prefab_unit_qr_token
+    ids = bind.execute(sa.text(f"SELECT id FROM {_TABLE} WHERE qr_token IS NULL")).scalars().all()
     for unit_id in ids:
-        bind.execute(sa.update(units).where(units.c.id == unit_id).values(qr_token=secrets.token_urlsafe(18)))
+        bind.execute(
+            sa.text(f"UPDATE {_TABLE} SET qr_token = :token WHERE id = :id"),
+            {"token": secrets.token_urlsafe(18), "id": unit_id},
+        )
 
     inspector = sa.inspect(bind)
     if not any(ix["name"] == _IX_QR for ix in inspector.get_indexes(_TABLE)):
