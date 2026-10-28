@@ -61273,6 +61273,7 @@ const resource = {
     "service_charges.new": "Bagong asosasyon",
     "service_charges.empty_title": "Wala pang asosasyon ng mga may-ari",
     "service_charges.empty_desc": "Gumawa ng isa para sa gusali, pagkatapos ay idagdag ang mga bahagi ng mga unit nito.",
+    "packages.use_packages": "Magsimula na lang sa mga solution package",
   }
 } as { translation: Record<string, string> };
 

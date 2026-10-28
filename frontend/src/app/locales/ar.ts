@@ -64425,6 +64425,7 @@ const resource = {
     "service_charges.new": "اتحاد ملاك جديد",
     "service_charges.empty_title": "لا يوجد اتحاد ملاك بعد",
     "service_charges.empty_desc": "أنشئ اتحادًا للمبنى ثم أضف حصص وحداته.",
+    "packages.use_packages": "ابدأ بحزم الحلول بدلاً من ذلك",
   }
 } as { translation: Record<string, string> };
 

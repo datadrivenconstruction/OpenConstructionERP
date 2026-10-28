@@ -62247,6 +62247,7 @@ const resource = {
     "service_charges.new": "Yangi birlashma",
     "service_charges.empty_title": "Hali uy-joy egalari birlashmasi yo‘q",
     "service_charges.empty_desc": "Bino uchun birlashma yarating, so‘ng xonadonlar ulushlarini qo‘shing.",
+    "packages.use_packages": "Buning o‘rniga tayyor yechim paketlaridan boshlash",
   }
 } as { translation: Record<string, string> };
 

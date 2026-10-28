@@ -63950,6 +63950,7 @@ const resource = {
     "service_charges.new": "Neue Eigentümergemeinschaft",
     "service_charges.empty_title": "Noch keine Eigentümergemeinschaft",
     "service_charges.empty_desc": "Legen Sie eine für das Gebäude an und erfassen Sie dann die Anteile der Einheiten.",
+    "packages.use_packages": "Stattdessen mit Lösungspaketen beginnen",
   }
 } as { translation: Record<string, string> };
 

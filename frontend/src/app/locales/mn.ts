@@ -60993,6 +60993,7 @@ const resource = {
     "service_charges.new": "Шинэ холбоо",
     "service_charges.empty_title": "Эзэмшигчдийн холбоо одоогоор алга",
     "service_charges.empty_desc": "Барилгад зориулж холбоо үүсгээд, орны хувийг нэмнэ үү.",
+    "packages.use_packages": "Оронд нь бэлэн шийдлийн багцаас эхлэх",
   }
 } as { translation: Record<string, string> };
 

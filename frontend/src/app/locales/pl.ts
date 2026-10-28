@@ -62867,6 +62867,7 @@ const resource = {
     "service_charges.new": "Nowa wspólnota",
     "service_charges.empty_title": "Brak wspólnoty mieszkaniowej",
     "service_charges.empty_desc": "Utwórz ją dla budynku, a potem dodaj udziały lokali.",
+    "packages.use_packages": "Zacznij zamiast tego od pakietów rozwiązań",
   }
 } as { translation: Record<string, string> };
 

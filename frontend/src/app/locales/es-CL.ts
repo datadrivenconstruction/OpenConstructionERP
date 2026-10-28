@@ -57152,6 +57152,7 @@ const resource = {
     "service_charges.new": "Nueva comunidad",
     "service_charges.empty_title": "Aún no hay comunidad de propietarios",
     "service_charges.empty_desc": "Cree una para el edificio y luego agregue las partes de sus unidades.",
+    "packages.use_packages": "Empezar con paquetes de soluciones",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

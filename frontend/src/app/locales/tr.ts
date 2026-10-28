@@ -62196,6 +62196,7 @@ const resource = {
     "service_charges.new": "Yeni site yönetimi",
     "service_charges.empty_title": "Henüz site yönetimi yok",
     "service_charges.empty_desc": "Bina için bir tane oluşturun, sonra bölümlerin paylarını ekleyin.",
+    "packages.use_packages": "Bunun yerine çözüm paketleriyle başlayın",
   }
 } as { translation: Record<string, string> };
 

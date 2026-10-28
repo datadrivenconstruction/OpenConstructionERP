@@ -63534,6 +63534,7 @@ const resource = {
     "service_charges.new": "新建业主委员会",
     "service_charges.empty_title": "尚无业主委员会",
     "service_charges.empty_desc": "先为楼宇创建一个,再添加各单元的份额。",
+    "packages.use_packages": "改为从解决方案包开始",
   }
 } as { translation: Record<string, string> };
 

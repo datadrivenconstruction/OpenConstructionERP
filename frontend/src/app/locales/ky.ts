@@ -61432,6 +61432,7 @@ const resource = {
     "service_charges.new": "Жаңы бирикме",
     "service_charges.empty_title": "Ээлердин бирикмеси азырынча жок",
     "service_charges.empty_desc": "Имарат үчүн бирикме түзүп, андан соң квартиралардын үлүштөрүн кошуңуз.",
+    "packages.use_packages": "Анын ордуна даяр чечим пакеттеринен баштоо",
   }
 } as { translation: Record<string, string> };
 

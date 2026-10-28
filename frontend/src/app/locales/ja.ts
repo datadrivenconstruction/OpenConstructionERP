@@ -62597,6 +62597,7 @@ const resource = {
     "service_charges.new": "新規管理組合",
     "service_charges.empty_title": "管理組合はまだありません",
     "service_charges.empty_desc": "建物ごとに作成し、住戸の負担割合を追加してください。",
+    "packages.use_packages": "代わりにソリューションパッケージから始める",
   }
 } as { translation: Record<string, string> };
 

@@ -56958,6 +56958,7 @@ const resource = {
     "service_charges.new": "Novo condomínio",
     "service_charges.empty_title": "Nenhum condomínio ainda",
     "service_charges.empty_desc": "Crie um para o prédio e depois adicione as partes das unidades.",
+    "packages.use_packages": "Começar pelos pacotes de soluções",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

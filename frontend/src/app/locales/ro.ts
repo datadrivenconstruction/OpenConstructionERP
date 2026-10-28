@@ -61653,6 +61653,7 @@ const resource = {
     "service_charges.new": "Asociație nouă",
     "service_charges.empty_title": "Nicio asociație de proprietari încă",
     "service_charges.empty_desc": "Creează una pentru clădire, apoi adaugă cotele unităților.",
+    "packages.use_packages": "Începeți în schimb cu pachete de soluții",
   }
 } as { translation: Record<string, string> };
 

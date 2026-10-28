@@ -62537,6 +62537,7 @@ const resource = {
     "service_charges.new": "Nuovo condominio",
     "service_charges.empty_title": "Nessun condominio per ora",
     "service_charges.empty_desc": "Creane uno per l'edificio, poi aggiungi le quote delle sue unità.",
+    "packages.use_packages": "Inizia invece dai pacchetti di soluzioni",
   }
 } as { translation: Record<string, string> };
 

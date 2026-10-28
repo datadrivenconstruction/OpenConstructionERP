@@ -5228,9 +5228,9 @@ export function OnboardingWizard() {
     setStep(3); // always go to module review
   }, []);
 
-  // Solution packages are the default way through the Profile step; the
-  // single company profile stays one click away.
-  const [useProfiles, setUseProfiles] = useState(false);
+  // The company profile stays the default way through the Profile step;
+  // solution packages are one click away and hand their modules back.
+  const [usePackages, setUsePackages] = useState(false);
   const handlePackagesInstalled = useCallback((modules: string[]) => {
     setCompanyType(null);
     setProfileTouched(true);
@@ -5373,22 +5373,33 @@ export function OnboardingWizard() {
                   onFinish={() => setStep(STEP.finish)}
                 />
               )}
-              {step === 2 && !useProfiles && (
+              {step === 2 && usePackages && (
                 <StepSolutionPackages
                   onInstalled={handlePackagesInstalled}
-                  onUseProfiles={() => setUseProfiles(true)}
+                  onUseProfiles={() => setUsePackages(false)}
                   onBack={goBack}
                 />
               )}
-              {step === 2 && useProfiles && (
-                <StepCompanyProfile
-                  onNext={handleNextFromProfile}
-                  onBack={goBack}
-                  presets={presets}
-                  selectedType={companyType}
-                  onSelectType={handleSelectCompanyType}
-                  onConfigureIndividually={handleConfigureIndividually}
-                />
+              {step === 2 && !usePackages && (
+                <>
+                  <StepCompanyProfile
+                    onNext={handleNextFromProfile}
+                    onBack={goBack}
+                    presets={presets}
+                    selectedType={companyType}
+                    onSelectType={handleSelectCompanyType}
+                    onConfigureIndividually={handleConfigureIndividually}
+                  />
+                  <div className="mt-3 text-center">
+                    <button
+                      type="button"
+                      onClick={() => setUsePackages(true)}
+                      className="text-sm font-semibold text-oe-blue"
+                    >
+                      {t('packages.use_packages', { defaultValue: 'Start from solution packages instead' })}
+                    </button>
+                  </div>
+                </>
               )}
               {step === 3 && (
                 <StepModuleConfig

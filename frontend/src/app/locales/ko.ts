@@ -61681,6 +61681,7 @@ const resource = {
     "service_charges.new": "새 관리단",
     "service_charges.empty_title": "아직 관리단이 없습니다",
     "service_charges.empty_desc": "건물별로 관리단을 만든 뒤 호실의 분담 몫을 추가하세요.",
+    "packages.use_packages": "대신 솔루션 패키지로 시작",
   }
 } as { translation: Record<string, string> };
 

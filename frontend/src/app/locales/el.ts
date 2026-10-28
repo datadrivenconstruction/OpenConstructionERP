@@ -61275,6 +61275,7 @@ const resource = {
     "service_charges.new": "Νέα ένωση",
     "service_charges.empty_title": "Δεν υπάρχει ακόμη ένωση ιδιοκτητών",
     "service_charges.empty_desc": "Δημιουργήστε μία για το κτίριο και προσθέστε έπειτα τα μερίδια των διαμερισμάτων του.",
+    "packages.use_packages": "Ξεκινήστε αντί γι' αυτό από πακέτα λύσεων",
   }
 } as { translation: Record<string, string> };
 

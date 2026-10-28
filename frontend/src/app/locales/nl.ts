@@ -62196,6 +62196,7 @@ const resource = {
     "service_charges.new": "Nieuwe vereniging",
     "service_charges.empty_title": "Nog geen vereniging van eigenaars",
     "service_charges.empty_desc": "Maak er een aan voor het gebouw en voeg dan de aandelen van de units toe.",
+    "packages.use_packages": "Begin in plaats daarvan met oplossingspakketten",
   }
 } as { translation: Record<string, string> };
 

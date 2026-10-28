@@ -61265,6 +61265,7 @@ const resource = {
     "service_charges.new": "Uus korteriühistu",
     "service_charges.empty_title": "Korteriühistut pole veel",
     "service_charges.empty_desc": "Loo üks hoone jaoks ja lisa seejärel selle üksuste osad.",
+    "packages.use_packages": "Alusta hoopis lahenduspakettidest",
   }
 } as { translation: Record<string, string> };
 

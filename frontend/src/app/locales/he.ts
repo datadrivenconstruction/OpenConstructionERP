@@ -61612,6 +61612,7 @@ const resource = {
     "service_charges.new": "ועד בית חדש",
     "service_charges.empty_title": "עדיין אין ועד בית",
     "service_charges.empty_desc": "צרו ועד לבניין ואז הוסיפו את חלקי היחידות.",
+    "packages.use_packages": "להתחיל במקום זאת מחבילות פתרונות",
   }
 } as { translation: Record<string, string> };
 

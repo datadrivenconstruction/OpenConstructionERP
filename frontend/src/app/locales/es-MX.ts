@@ -57143,6 +57143,7 @@ const resource = {
     "service_charges.new": "Nueva asociación",
     "service_charges.empty_title": "Aún no hay asociación de condóminos",
     "service_charges.empty_desc": "Cree una para el edificio y luego agregue las partes de sus unidades.",
+    "packages.use_packages": "Empezar con paquetes de soluciones",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

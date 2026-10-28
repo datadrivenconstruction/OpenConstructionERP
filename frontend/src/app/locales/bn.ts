@@ -61585,6 +61585,7 @@ const resource = {
     "service_charges.new": "নতুন সমিতি",
     "service_charges.empty_title": "এখনও কোনো মালিক সমিতি নেই",
     "service_charges.empty_desc": "ভবনের জন্য একটি তৈরি করুন, তারপর এর ইউনিটগুলোর অংশ যোগ করুন।",
+    "packages.use_packages": "এর বদলে সমাধান প্যাকেজ দিয়ে শুরু করুন",
   }
 } as { translation: Record<string, string> };
 

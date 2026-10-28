@@ -61276,6 +61276,7 @@ const resource = {
     "service_charges.new": "Жаңа бірлестік",
     "service_charges.empty_title": "Иелер бірлестігі әлі жоқ",
     "service_charges.empty_desc": "Ғимарат үшін құрып, содан кейін пәтерлердің үлестерін қосыңыз.",
+    "packages.use_packages": "Оның орнына дайын шешім пакеттерінен бастау",
   }
 } as { translation: Record<string, string> };
 

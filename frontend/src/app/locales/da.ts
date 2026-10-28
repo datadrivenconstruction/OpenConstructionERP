@@ -61315,6 +61315,7 @@ const resource = {
     "service_charges.new": "Ny ejerforening",
     "service_charges.empty_title": "Ingen ejerforening endnu",
     "service_charges.empty_desc": "Opret en for bygningen, og tilføj derefter andelene for dens enheder.",
+    "packages.use_packages": "Start i stedet med løsningspakker",
   }
 } as { translation: Record<string, string> };
 

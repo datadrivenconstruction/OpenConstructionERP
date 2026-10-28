@@ -64235,6 +64235,7 @@ const resource = {
     "service_charges.new": "Nueva comunidad",
     "service_charges.empty_title": "Aún no hay comunidad de propietarios",
     "service_charges.empty_desc": "Cree una para el edificio y luego añada las cuotas de sus unidades.",
+    "packages.use_packages": "Empezar con paquetes de soluciones",
   }
 } as { translation: Record<string, string> };
 

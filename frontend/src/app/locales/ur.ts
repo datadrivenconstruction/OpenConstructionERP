@@ -61281,6 +61281,7 @@ const resource = {
     "service_charges.new": "نئی انجمن",
     "service_charges.empty_title": "ابھی مالکان کی کوئی انجمن نہیں",
     "service_charges.empty_desc": "عمارت کے لیے ایک بنائیں، پھر اس کے یونٹس کے حصے شامل کریں۔",
+    "packages.use_packages": "اس کے بجائے حل کے پیکجوں سے شروع کریں",
   }
 } as { translation: Record<string, string> };
 

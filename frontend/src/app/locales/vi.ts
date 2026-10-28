@@ -61073,6 +61073,7 @@ const resource = {
     "service_charges.new": "Ban quản trị mới",
     "service_charges.empty_title": "Chưa có ban quản trị nào",
     "service_charges.empty_desc": "Tạo một ban quản trị cho tòa nhà, sau đó thêm phần chia của các căn hộ.",
+    "packages.use_packages": "Bắt đầu từ các gói giải pháp",
   }
 } as { translation: Record<string, string> };
 

@@ -57155,6 +57155,7 @@ const resource = {
     "service_charges.new": "Nueva copropiedad",
     "service_charges.empty_title": "Aún no hay copropiedad",
     "service_charges.empty_desc": "Cree una para el edificio y luego agregue las participaciones de sus unidades.",
+    "packages.use_packages": "Empezar con paquetes de soluciones",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

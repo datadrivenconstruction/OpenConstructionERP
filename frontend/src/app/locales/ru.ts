@@ -64535,6 +64535,7 @@ const resource = {
     "service_charges.new": "Новое объединение",
     "service_charges.empty_title": "Объединений собственников пока нет",
     "service_charges.empty_desc": "Создайте объединение для здания, затем добавьте доли помещений.",
+    "packages.use_packages": "Начать с готовых пакетов решений",
   }
 } as { translation: Record<string, string> };
 

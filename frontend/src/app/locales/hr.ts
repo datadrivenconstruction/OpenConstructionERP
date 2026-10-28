@@ -61663,6 +61663,7 @@ const resource = {
     "service_charges.new": "Nova zajednica",
     "service_charges.empty_title": "Još nema zajednice vlasnika",
     "service_charges.empty_desc": "Osnujte je za zgradu, zatim dodajte udjele njezinih jedinica.",
+    "packages.use_packages": "Umjesto toga započnite s paketima rješenja",
   }
 } as { translation: Record<string, string> };
 

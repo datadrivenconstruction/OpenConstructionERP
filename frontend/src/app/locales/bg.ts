@@ -61319,6 +61319,7 @@ const resource = {
     "service_charges.new": "Ново сдружение",
     "service_charges.empty_title": "Още няма сдружение на собствениците",
     "service_charges.empty_desc": "Създайте го за сградата, после добавете дяловете на нейните обекти.",
+    "packages.use_packages": "Започнете с готови пакети решения",
   }
 } as { translation: Record<string, string> };
 

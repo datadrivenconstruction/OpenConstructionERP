@@ -55511,6 +55511,7 @@ const resource = {
     "service_charges.new": "New association",
     "service_charges.empty_title": "No owners association yet",
     "service_charges.empty_desc": "Create one for the building, then add the shares of its units.",
+    "packages.use_packages": "Start from solution packages instead",
   }
 } as { translation: Record<string, string> };
 

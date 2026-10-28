@@ -62606,6 +62606,7 @@ const resource = {
     "service_charges.new": "Nové společenství",
     "service_charges.empty_title": "Zatím žádné společenství vlastníků",
     "service_charges.empty_desc": "Založte jej pro budovu a poté přidejte podíly jejích jednotek.",
+    "packages.use_packages": "Začít raději balíčky řešení",
   }
 } as { translation: Record<string, string> };
 

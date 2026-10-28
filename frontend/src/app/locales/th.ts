@@ -61065,6 +61065,7 @@ const resource = {
     "service_charges.new": "นิติบุคคลใหม่",
     "service_charges.empty_title": "ยังไม่มีนิติบุคคลอาคารชุด",
     "service_charges.empty_desc": "สร้างนิติบุคคลสำหรับอาคาร แล้วเพิ่มส่วนแบ่งของยูนิตต่างๆ",
+    "packages.use_packages": "เริ่มจากแพ็กเกจโซลูชันแทน",
   }
 } as { translation: Record<string, string> };
 

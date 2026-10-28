@@ -61319,6 +61319,7 @@ const resource = {
     "service_charges.new": "Uusi taloyhtiö",
     "service_charges.empty_title": "Ei vielä taloyhtiötä",
     "service_charges.empty_desc": "Luo taloyhtiö rakennukselle ja lisää sen huoneistojen osuudet.",
+    "packages.use_packages": "Aloita sen sijaan ratkaisupaketeista",
   }
 } as { translation: Record<string, string> };
 

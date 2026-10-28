@@ -63414,6 +63414,7 @@ const resource = {
     "service_charges.new": "Нове об'єднання",
     "service_charges.empty_title": "Об'єднань співвласників ще немає",
     "service_charges.empty_desc": "Створіть об'єднання для будівлі, потім додайте частки приміщень.",
+    "packages.use_packages": "Почати з готових пакетів рішень",
   }
 } as { translation: Record<string, string> };
 

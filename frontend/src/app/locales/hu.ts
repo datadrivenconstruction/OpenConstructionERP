@@ -63880,6 +63880,7 @@ const resource = {
     "service_charges.new": "Új társasház",
     "service_charges.empty_title": "Még nincs társasház",
     "service_charges.empty_desc": "Hozzon létre egyet az épülethez, majd adja meg a lakásai részesedését.",
+    "packages.use_packages": "Inkább megoldáscsomagokkal kezdés",
   }
 } as { translation: Record<string, string> };
 

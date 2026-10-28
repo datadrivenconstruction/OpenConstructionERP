@@ -61318,6 +61318,7 @@ const resource = {
     "service_charges.new": "नई सोसाइटी",
     "service_charges.empty_title": "अभी कोई मालिकों की सोसाइटी नहीं है",
     "service_charges.empty_desc": "इमारत के लिए एक बनाएँ, फिर उसकी यूनिट के हिस्से जोड़ें।",
+    "packages.use_packages": "इसके बजाय समाधान पैकेज से शुरू करें",
   }
 } as { translation: Record<string, string> };
 

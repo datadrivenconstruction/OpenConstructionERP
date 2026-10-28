@@ -64236,6 +64236,7 @@ const resource = {
     "service_charges.new": "Nouveau syndicat",
     "service_charges.empty_title": "Aucun syndicat de copropriété",
     "service_charges.empty_desc": "Créez-en un pour l'immeuble, puis ajoutez les quote-parts de ses lots.",
+    "packages.use_packages": "Commencer plutôt par des packs de solutions",
   }
 } as { translation: Record<string, string> };
 

@@ -61064,6 +61064,7 @@ const resource = {
     "service_charges.new": "Asosiasi baru",
     "service_charges.empty_title": "Belum ada asosiasi pemilik",
     "service_charges.empty_desc": "Buat satu untuk gedung, lalu tambahkan bagian unit-unitnya.",
+    "packages.use_packages": "Mulai dari paket solusi saja",
   }
 } as { translation: Record<string, string> };
 

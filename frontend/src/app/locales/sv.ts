@@ -61930,6 +61930,7 @@ const resource = {
     "service_charges.new": "Ny förening",
     "service_charges.empty_title": "Ingen bostadsrättsförening ännu",
     "service_charges.empty_desc": "Skapa en för byggnaden och lägg sedan till lägenheternas andelar.",
+    "packages.use_packages": "Börja i stället med lösningspaket",
   }
 } as { translation: Record<string, string> };
 

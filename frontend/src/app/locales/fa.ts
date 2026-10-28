@@ -61275,6 +61275,7 @@ const resource = {
     "service_charges.new": "اتحادیهٔ جدید",
     "service_charges.empty_title": "هنوز اتحادیهٔ مالکانی وجود ندارد",
     "service_charges.empty_desc": "برای ساختمان یکی بسازید، سپس سهم واحدها را اضافه کنید.",
+    "packages.use_packages": "به‌جای آن با بسته‌های راهکار شروع کنید",
   }
 } as { translation: Record<string, string> };
 
