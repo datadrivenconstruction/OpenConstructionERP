@@ -2133,5 +2133,15 @@
     "en_value": "SE",
     "note": "compass-point abbreviations E, NE and SE, identical in es, fr, it, pl and pt where east is also written E",
     "reason_category": "abbreviation"
+  },
+  "crumbs.version": {
+    "en_value": "v{{n}}",
+    "note": "version number template in a breadcrumb, the letter v is the convention in every locale we ship",
+    "reason_category": "version_string"
+  },
+  "einvoice.profile.ubl_pe": {
+    "en_value": "SUNAT UBL 2.1 (factura electrónica)",
+    "note": "official name of the Peruvian electronic invoice profile, a standard name kept in its own language",
+    "reason_category": "standard_code"
   }
 }
