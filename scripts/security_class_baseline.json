@@ -863,6 +863,8 @@
     "backend/app/modules/legal_entities/router.py::PATCH /entities/{entity_id}",
     "backend/app/modules/legal_entities/router.py::PATCH /entities/{entity_id}/branches/{branch_id}",
     "backend/app/modules/legal_entities/router.py::POST /entities/{entity_id}/branches/",
+    "backend/app/modules/list_views/router.py::DELETE /{view_id}",
+    "backend/app/modules/list_views/router.py::PATCH /{view_id}",
     "backend/app/modules/markups/router.py::DELETE /scales/{config_id}",
     "backend/app/modules/match_elements/router.py::DELETE /prompt-templates/{template_id}",
     "backend/app/modules/match_elements/router.py::DELETE /templates/{template_id}",

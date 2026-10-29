@@ -75,6 +75,9 @@ MIN_FILES_SCANNED = 500
 # towards zero rather than towards the size of this list.
 CANNOT_TRUNCATE: frozenset[str] = frozenset(
     {
+        # The saved-view picker of one scope. The user chooses among every view
+        # they may use, so a short answer would hide a view that exists.
+        "list_views/router.py::list_views",
         # A fixed taxonomy, not a register. WORKING_TIME_REGIMES in
         # field_time/working_time.py is a frozen tuple of statutes compiled into
         # the source, today just MiLoG (German minimum wage act) section 17 (1);
