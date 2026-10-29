@@ -797,6 +797,11 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
         "export_tender_pdf",
         "export_award_letter_pdf",
         "export_rejection_letter_pdf",
+        "link_invitation_party",
+        "unlink_invitation_party",
+        "link_bid_party",
+        "unlink_bid_party",
+        "validate_package_parties",
     ],
     "design_management": [
         "get_setup",
