@@ -89,5 +89,7 @@ export function unlinkInvitationParty(packageId: string, invitationId: string): 
 
 /** Confirm (true) or reject (false) the matcher's suggestion. */
 export function decidePartySuggestion(reviewId: string, confirm: boolean): Promise<unknown> {
-  return apiPost(`/v1/contacts/parties/review/${reviewId}/${confirm ? 'confirm' : 'reject'}/`, {});
+  return confirm
+    ? apiPost(`/v1/contacts/parties/review/${reviewId}/confirm/`, {})
+    : apiPost(`/v1/contacts/parties/review/${reviewId}/reject/`, {});
 }

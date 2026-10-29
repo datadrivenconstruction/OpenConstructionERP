@@ -59232,6 +59232,8 @@
         "lookup.py",
         "manifest.py",
         "models.py",
+        "parties.py",
+        "parties_router.py",
         "permissions.py",
         "repository.py",
         "router.py",
@@ -59432,6 +59434,70 @@
               "annotation": "Mapped[dict]",
               "sql_type": "JSON",
               "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "PartyLinkReview",
+          "tablename": "oe_contacts_party_review",
+          "docstring": "A possible link from a row of another module to a contact, awaiting a decision.\n\nThe matcher never links on a weak or ambiguous signal. It records each\ncandidate here; a person confirms one (the row then gets ``contact_id``) or\nrejects it (the matcher does not offer that pair again).",
+          "columns": [
+            {
+              "name": "entity_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "entity_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_contacts_contact.id"
+            },
+            {
+              "name": "method",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "confidence",
+              "annotation": "Mapped[float]",
+              "sql_type": "Float",
+              "nullable": false
+            },
+            {
+              "name": "reason",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "owner_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "reviewed_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -59983,7 +60049,10 @@
         }
       ],
       "import_dependencies": [
+        "portal",
+        "projects",
         "property_dev",
+        "tendering",
         "users"
       ]
     },
@@ -176395,6 +176464,26 @@
               "annotation": "Mapped[bool]",
               "sql_type": "Boolean",
               "nullable": false
+            },
+            {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_contacts_contact.id"
+            },
+            {
+              "name": "contact_match_method",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "contact_match_confidence",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -277857,6 +277946,7 @@
         "invitation_email.py",
         "manifest.py",
         "models.py",
+        "parties.py",
         "pdf_documents.py",
         "permissions.py",
         "recipient_import.py",
@@ -277998,6 +278088,26 @@
               "nullable": false
             },
             {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_contacts_contact.id"
+            },
+            {
+              "name": "contact_match_method",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "contact_match_confidence",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
+              "nullable": true
+            },
+            {
               "name": "line_items",
               "annotation": "Mapped[list]",
               "sql_type": "JSON",
@@ -278104,6 +278214,26 @@
               "name": "created_by",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "contact_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_contacts_contact.id"
+            },
+            {
+              "name": "contact_match_method",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "contact_match_confidence",
+              "annotation": "Mapped[float | None]",
+              "sql_type": "Float",
               "nullable": true
             }
           ],
@@ -278462,6 +278592,40 @@
           "path": "/packages/{package_id}/bid-invitations/{invitation_id}/revoke/",
           "handler": "revoke_bid_invitation",
           "response_model": "BidInvitationResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "PUT",
+          "path": "/packages/{package_id}/bid-invitations/{invitation_id}/party/",
+          "handler": "link_invitation_party",
+          "response_model": "PartyLinkResponse",
+          "request_schema": "PartyLink"
+        },
+        {
+          "method": "DELETE",
+          "path": "/packages/{package_id}/bid-invitations/{invitation_id}/party/",
+          "handler": "unlink_invitation_party",
+          "response_model": "PartyLinkResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "PUT",
+          "path": "/bids/{bid_id}/party/",
+          "handler": "link_bid_party",
+          "response_model": "PartyLinkResponse",
+          "request_schema": "PartyLink"
+        },
+        {
+          "method": "DELETE",
+          "path": "/bids/{bid_id}/party/",
+          "handler": "unlink_bid_party",
+          "response_model": "PartyLinkResponse",
+          "request_schema": "TenderingService"
+        },
+        {
+          "method": "GET",
+          "path": "/packages/{package_id}/parties/validation/",
+          "handler": "validate_package_parties",
           "request_schema": "TenderingService"
         },
         {
@@ -278952,6 +279116,21 @@
               "name": "sealed",
               "type": "bool",
               "default": "False"
+            },
+            {
+              "name": "contact_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_match_method",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_match_confidence",
+              "type": "float | None",
+              "default": "None"
             }
           ]
         },
@@ -280569,6 +280748,82 @@
           ]
         },
         {
+          "class_name": "PartySuggestion",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A possible party for a bidder, waiting for a person to confirm it.",
+          "fields": [
+            {
+              "name": "review_id",
+              "type": "UUID"
+            },
+            {
+              "name": "contact_id",
+              "type": "UUID"
+            },
+            {
+              "name": "contact_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "method",
+              "type": "str"
+            },
+            {
+              "name": "confidence",
+              "type": "float"
+            }
+          ]
+        },
+        {
+          "class_name": "PartyLink",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Body of a link request.",
+          "fields": [
+            {
+              "name": "contact_id",
+              "type": "UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "PartyLinkResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A bidder row's party after a link or unlink.",
+          "fields": [
+            {
+              "name": "entity_id",
+              "type": "UUID"
+            },
+            {
+              "name": "contact_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "contact_match_method",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_match_confidence",
+              "type": "float | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
           "class_name": "BidInvitationResponse",
           "bases": [
             "BaseModel"
@@ -280631,6 +280886,31 @@
             {
               "name": "created_at",
               "type": "datetime"
+            },
+            {
+              "name": "contact_id",
+              "type": "UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_name",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "contact_match_method",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "contact_match_confidence",
+              "type": "float | None",
+              "default": "None"
+            },
+            {
+              "name": "suggestion",
+              "type": "PartySuggestion | None",
+              "default": "None"
             }
           ]
         },
@@ -292744,10 +293024,10 @@
     },
     {
       "name": "tendering",
-      "ts_files": 32,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 12,
-      "total_files": 32
+      "test_files": 13,
+      "total_files": 34
     },
     {
       "name": "timeline",
@@ -293205,7 +293485,10 @@
       "users"
     ],
     "contacts": [
+      "portal",
+      "projects",
       "property_dev",
+      "tendering",
       "users"
     ],
     "contracts": [
@@ -294533,14 +294816,14 @@
   "statistics": {
     "backend_modules": 224,
     "modules_with_manifests": 222,
-    "total_models": 836,
-    "total_columns": 9846,
+    "total_models": 837,
+    "total_columns": 9864,
     "total_relationships": 254,
-    "total_routes": 4821,
-    "total_schemas": 4329,
-    "total_python_files": 3015,
+    "total_routes": 4826,
+    "total_schemas": 4332,
+    "total_python_files": 3018,
     "frontend_features": 219,
-    "frontend_ts_files": 3852,
+    "frontend_ts_files": 3854,
     "frontend_backend_mapped": 197
   },
   "frontend_backend_mapping": {
