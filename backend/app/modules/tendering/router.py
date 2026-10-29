@@ -30,7 +30,9 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.tendering import parties as tender_parties
 from app.modules.tendering.bid_portal import BidPortalService, enforce_rate_limit
+from app.modules.tendering.models import TenderBidInvitation
 from app.modules.tendering.recipient_import import MAX_IMPORT_BYTES
 from app.modules.tendering.schemas import (
     AddendumAcknowledgeRequest,
@@ -59,6 +61,8 @@ from app.modules.tendering.schemas import (
     PackageScopeResponse,
     PackageUpdate,
     PackageWithBidsResponse,
+    PartyLink,
+    PartyLinkResponse,
     RecipientCreate,
     RecipientImportPreview,
     RecipientImportResult,
@@ -965,6 +969,113 @@ async def revoke_bid_invitation(
     """Revoke one link. A submitted bid stays; only the link stops working."""
     await _verify_package_owner(service, session, package_id, user_id, payload)
     return await _get_bid_portal(session).revoke(package_id, invitation_id)
+
+
+async def _invitation_of(session: SessionDep, package_id: uuid.UUID, invitation_id: uuid.UUID) -> TenderBidInvitation:
+    invitation = await session.get(TenderBidInvitation, invitation_id)
+    if invitation is None or invitation.package_id != package_id:
+        raise HTTPException(status_code=404, detail="Invitation not found")
+    return invitation
+
+
+@router.put(
+    "/packages/{package_id}/bid-invitations/{invitation_id}/party/",
+    response_model=PartyLinkResponse,
+)
+async def link_invitation_party(
+    package_id: uuid.UUID,
+    invitation_id: uuid.UUID,
+    data: PartyLink,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> PartyLinkResponse:
+    """Link an invited firm to a directory contact (confidence 1, method manual)."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    invitation = await _invitation_of(session, package_id, invitation_id)
+    return await tender_parties.link(session, invitation, data.contact_id, str(user_id))
+
+
+@router.delete(
+    "/packages/{package_id}/bid-invitations/{invitation_id}/party/",
+    response_model=PartyLinkResponse,
+)
+async def unlink_invitation_party(
+    package_id: uuid.UUID,
+    invitation_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.distribute")),
+) -> PartyLinkResponse:
+    """Remove the party link of an invited firm. The contact stays untouched."""
+    await _verify_package_owner(service, session, package_id, user_id, payload)
+    invitation = await _invitation_of(session, package_id, invitation_id)
+    return await tender_parties.unlink(session, invitation)
+
+
+@router.put("/bids/{bid_id}/party/", response_model=PartyLinkResponse)
+async def link_bid_party(
+    bid_id: uuid.UUID,
+    data: PartyLink,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.bid.update")),
+) -> PartyLinkResponse:
+    """Link a bid to a directory contact (confidence 1, method manual)."""
+    bid = await _verify_bid_access(service, session, bid_id, user_id, payload)
+    return await tender_parties.link(session, bid, data.contact_id, str(user_id))  # type: ignore[arg-type]
+
+
+@router.delete("/bids/{bid_id}/party/", response_model=PartyLinkResponse)
+async def unlink_bid_party(
+    bid_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.bid.update")),
+) -> PartyLinkResponse:
+    """Remove the party link of a bid. The contact stays untouched."""
+    bid = await _verify_bid_access(service, session, bid_id, user_id, payload)
+    return await tender_parties.unlink(session, bid)  # type: ignore[arg-type]
+
+
+@router.get("/packages/{package_id}/parties/validation/")
+async def validate_package_parties(
+    package_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: TenderingService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("tendering.read")),
+) -> dict:
+    """Run the ``tendering_parties`` rule set: bidders without a party are warned about."""
+    from app.core.validation.engine import ValidationContext, rule_registry  # noqa: PLC0415
+    from app.modules.tendering.validators import PARTIES_RULE_SET  # noqa: PLC0415
+
+    package = await _verify_package_owner(service, session, package_id, user_id, payload)
+    data = await tender_parties.validation_payload(session, package_id)
+    context = ValidationContext(data=data, project_id=str(package.project_id))  # type: ignore[attr-defined]
+    results = []
+    for rule in rule_registry.get_rules_for_sets([PARTIES_RULE_SET]):
+        for result in await rule.validate(context):
+            results.append(
+                {
+                    "rule_id": result.rule_id,
+                    "severity": str(result.severity),
+                    "passed": result.passed,
+                    "message": result.message,
+                    "element_ref": result.element_ref,
+                    "suggestion": result.suggestion,
+                }
+            )
+    return {"package_id": str(package_id), "passed": all(r["passed"] for r in results), "results": results}
 
 
 def _public_headers(response: Response) -> None:

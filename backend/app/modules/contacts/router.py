@@ -51,6 +51,10 @@ from app.modules.contacts.schemas import (
 from app.modules.contacts.service import ContactService
 
 router = APIRouter(tags=["contacts"])
+# Included first: ``/parties/...`` must be matched before the ``/{contact_id}/...`` routes.
+from app.modules.contacts.parties_router import router as _parties_router  # noqa: E402
+
+router.include_router(_parties_router)
 logger = logging.getLogger(__name__)
 
 

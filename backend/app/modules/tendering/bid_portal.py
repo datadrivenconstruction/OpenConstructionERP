@@ -58,6 +58,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.requests import Request
 
 from app.core.rate_limiter import RateLimiter, client_identifier
+from app.modules.contacts.parties import recipient_party
 from app.modules.tendering.addenda import current_boq_revision
 from app.modules.tendering.intl import _parse_deadline
 from app.modules.tendering.models import TenderBidInvitation, TenderPackage
@@ -71,6 +72,7 @@ from app.modules.tendering.schemas import (
     BidPortalPricesRequest,
     BidPortalView,
     BidUpdate,
+    PartySuggestion,
 )
 from app.modules.tendering.sealed import SealedTenderService
 
@@ -423,6 +425,9 @@ class BidPortalService:
             revoked_at=_aware(invitation.revoked_at),
             bid_id=invitation.bid_id,
             created_at=_aware(invitation.created_at) or now,
+            contact_id=invitation.contact_id,
+            contact_match_method=invitation.contact_match_method,
+            contact_match_confidence=invitation.contact_match_confidence,
         )
 
     async def _invitations_for(
@@ -438,7 +443,52 @@ class BidPortalService:
         """Every link of a package, newest first."""
         package = await self.tendering.get_package(package_id)
         rows = await self._invitations_for(package_id)
-        return [self.to_response(row, package.deadline) for row in rows]
+        items = [self.to_response(row, package.deadline) for row in rows]
+        await self._add_party_names(items)
+        return items
+
+    async def _add_party_names(self, items: list[BidInvitationResponse]) -> None:
+        """Fill the party name, and the best pending suggestion for unlinked rows."""
+        from app.modules.contacts.lookup import contact_display_name  # noqa: PLC0415
+        from app.modules.contacts.models import Contact, PartyLinkReview  # noqa: PLC0415
+
+        linked = {i.contact_id for i in items if i.contact_id}
+        ids = {i.id for i in items if not i.contact_id}
+        pending: dict[uuid.UUID, PartyLinkReview] = {}
+        if ids:
+            reviews = (
+                (
+                    await self.session.execute(
+                        select(PartyLinkReview)
+                        .where(
+                            PartyLinkReview.entity_type == "tender_invitation",
+                            PartyLinkReview.entity_id.in_(ids),
+                            PartyLinkReview.status == "pending",
+                        )
+                        .order_by(PartyLinkReview.confidence.asc())
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            pending = {r.entity_id: r for r in reviews}  # highest confidence wins (written last)
+        wanted = linked | {r.contact_id for r in pending.values()}
+        names: dict[uuid.UUID, str] = {}
+        if wanted:
+            contacts = (await self.session.execute(select(Contact).where(Contact.id.in_(wanted)))).scalars().all()
+            names = {c.id: contact_display_name(c) for c in contacts}
+        for item in items:
+            if item.contact_id:
+                item.contact_name = names.get(item.contact_id, "")
+            elif item.id in pending:
+                review = pending[item.id]
+                item.suggestion = PartySuggestion(
+                    review_id=review.id,
+                    contact_id=review.contact_id,
+                    contact_name=names.get(review.contact_id, ""),
+                    method=review.method,
+                    confidence=review.confidence,
+                )
 
     async def mint(
         self,
@@ -480,6 +530,7 @@ class BidPortalService:
             submitted_at=carried.submitted_at if carried is not None and not reopen else None,
             bid_id=carried.bid_id if carried is not None else None,
             created_by=str(actor_id) if actor_id else None,
+            **recipient_party(recipient),
         )
         self.session.add(invitation)
         await self.session.flush()
@@ -853,6 +904,10 @@ class BidPortalService:
         invitation.draft_saved_at = now
         invitation.submitted_at = now
         invitation.bid_id = bid.id
+        if invitation.contact_id is not None and bid.contact_id is None:
+            bid.contact_id = invitation.contact_id
+            bid.contact_match_method = invitation.contact_match_method
+            bid.contact_match_confidence = invitation.contact_match_confidence
         if invitation.opened_at is None:
             invitation.opened_at = now
         await self.session.flush()

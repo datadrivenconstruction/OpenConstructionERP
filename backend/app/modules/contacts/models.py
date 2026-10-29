@@ -4,11 +4,12 @@
 
 Tables:
     oe_contacts_contact - unified contacts directory
+    oe_contacts_party_review - suggested links from a tender/portal row to a contact, awaiting a human
 """
 
 import uuid
 
-from sqlalchemy import JSON, Boolean, ForeignKey, String, Text
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -142,3 +143,35 @@ class Contact(Base):
     def __repr__(self) -> str:
         label = self.company_name or f"{self.first_name or ''} {self.last_name or ''}".strip()
         return f"<Contact {label} ({self.contact_type})>"
+
+
+class PartyLinkReview(Base):
+    """A possible link from a row of another module to a contact, awaiting a decision.
+
+    The matcher never links on a weak or ambiguous signal. It records each
+    candidate here; a person confirms one (the row then gets ``contact_id``) or
+    rejects it (the matcher does not offer that pair again).
+    """
+
+    __tablename__ = "oe_contacts_party_review"
+    __table_args__ = (UniqueConstraint("entity_type", "entity_id", "contact_id", name="uq_oe_contacts_party_review"),)
+
+    # tender_invitation | tender_bid | portal_user
+    entity_type: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
+    entity_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    contact_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_contacts_contact.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    method: Mapped[str] = mapped_column(String(20), nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    # Why it needs a person: ambiguous (several candidates) or weak (name only).
+    reason: Mapped[str] = mapped_column(String(20), nullable=False, default="weak")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", index=True)
+    owner_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    reviewed_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    def __repr__(self) -> str:
+        return f"<PartyLinkReview {self.entity_type}:{self.entity_id} -> {self.contact_id} ({self.status})>"

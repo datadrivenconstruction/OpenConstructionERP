@@ -26,7 +26,7 @@ import uuid
 from datetime import datetime
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -104,6 +104,15 @@ class PortalUser(Base):
         default=True,
         server_default="1",
     )
+    # Directory party this account belongs to (see TenderBid.contact_id).
+    contact_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_contacts_contact.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    contact_match_method: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    contact_match_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     def __repr__(self) -> str:  # pragma: no cover - debug only
         return f"<PortalUser {self.email} ({self.portal_role}/{self.status})>"

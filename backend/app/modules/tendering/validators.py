@@ -169,6 +169,7 @@ def register_tendering_validation_rules() -> None:
     ):
         rule_registry.register(rule, [SEALED_RULE_SET])
     register_tendering_addenda_rules()
+    register_tendering_parties_rules()
 
 
 # ── Addenda, revisions, questions and bid bonds ─────────────────────────────
@@ -298,3 +299,35 @@ def register_tendering_addenda_rules() -> None:
         BidBondCoversValidity(),
     ):
         rule_registry.register(rule, [ADDENDA_RULE_SET])
+
+
+# ── Parties ─────────────────────────────────────────────────────────────────
+# Reads the payload built by ``parties.validation_payload``:
+# ``{"bidders": [{"id", "kind", "name", "contact_id"}]}``.
+
+PARTIES_RULE_SET = "tendering_parties"
+
+
+class BidderHasParty(_SealedRule):
+    rule_id = "tendering_parties.bidder_has_party"
+    name = "Bidder is linked to a party"
+    description = "Every invited firm and every bid should be linked to a contact, so one firm is one identity."
+    severity = Severity.WARNING
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        raw = _data(context).get("bidders") or []
+        return [
+            self._result(
+                bool(b.get("contact_id")),
+                f"{b.get('kind', 'bidder')}:{b.get('id', '')}",
+                f"{b.get('name') or 'A bidder'} is not linked to a party",
+                "Link the bidder to a contact, or confirm the suggested one",
+            )
+            for b in raw
+            if isinstance(b, dict)
+        ]
+
+
+def register_tendering_parties_rules() -> None:
+    """Register the party rules with the platform rule registry."""
+    rule_registry.register(BidderHasParty(), [PARTIES_RULE_SET])

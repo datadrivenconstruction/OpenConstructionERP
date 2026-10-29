@@ -196,6 +196,10 @@ class BidResponse(BaseModel):
     updated_at: datetime
     # True while the package is sealed and unopened: content fields are empty.
     sealed: bool = False
+    # Directory party this bid belongs to (see PartyLink).
+    contact_id: UUID | None = None
+    contact_match_method: str | None = None
+    contact_match_confidence: float | None = None
 
 
 # ── Sealed mode ─────────────────────────────────────────────────────────────
@@ -901,6 +905,32 @@ class LevelBidsResponse(BaseModel):
 # ``total`` on purpose, so a test can assert on the keys of the payload.
 
 
+class PartySuggestion(BaseModel):
+    """A possible party for a bidder, waiting for a person to confirm it."""
+
+    review_id: UUID
+    contact_id: UUID
+    contact_name: str = ""
+    method: str
+    confidence: float
+
+
+class PartyLink(BaseModel):
+    """Body of a link request."""
+
+    contact_id: UUID
+
+
+class PartyLinkResponse(BaseModel):
+    """A bidder row's party after a link or unlink."""
+
+    entity_id: UUID
+    contact_id: UUID | None = None
+    contact_name: str = ""
+    contact_match_method: str | None = None
+    contact_match_confidence: float | None = None
+
+
 class BidInvitationResponse(BaseModel):
     """One bidder link as staff see it (never the token itself)."""
 
@@ -918,6 +948,13 @@ class BidInvitationResponse(BaseModel):
     revoked_at: datetime | None = None
     bid_id: UUID | None = None
     created_at: datetime
+    # Directory party of this bidder; ``contact_name`` is its display name.
+    contact_id: UUID | None = None
+    contact_name: str = ""
+    contact_match_method: str | None = None
+    contact_match_confidence: float | None = None
+    # Best pending suggestion waiting for a person, if there is no link yet.
+    suggestion: PartySuggestion | None = None
 
 
 class BidInvitationCreated(BidInvitationResponse):

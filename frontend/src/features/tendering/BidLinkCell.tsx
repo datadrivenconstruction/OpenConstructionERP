@@ -22,6 +22,7 @@ import { useConfirm } from '@/shared/hooks/useConfirm';
 import { ConfirmDialog } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 
+import { PartyChip } from './PartyChip';
 import { createBidLink, listBidInvitations, type BidInvitation, type BidInvitationStatus } from './bidInvitations';
 
 const STATUS_VARIANT: Record<BidInvitationStatus, BadgeVariant> = {
@@ -151,6 +152,7 @@ export function BidLinkCell({ packageId, recipientId }: { packageId: string; rec
           {t('tendering.bid_link.copy', { defaultValue: 'Copy bidder link' })}
         </button>
       </div>
+      {latest && !latest.revoked_at && <PartyChip invitation={latest} />}
       {shownUrl && (
         <input
           readOnly

@@ -14,7 +14,7 @@ Tables:
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -76,6 +76,18 @@ class TenderBid(Base):
     submitted_at: Mapped[str | None] = mapped_column(String(100), nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False, default="pending")
     notes: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    # The directory party this row is the same person or firm as. Nullable: a
+    # row never needs a contact. ``contact_match_method`` says how the link was
+    # made (email, vat, name, recipient, manual); ``contact_match_confidence``
+    # is 0..1 and 1.0 for a link a person made or confirmed.
+    contact_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_contacts_contact.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    contact_match_method: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    contact_match_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
     line_items: Mapped[list] = mapped_column(  # type: ignore[assignment]
         JSON,
         nullable=False,
@@ -142,6 +154,18 @@ class TenderBidInvitation(Base):
         server_default="{}",
     )
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    # The directory party this row is the same person or firm as. Nullable: a
+    # row never needs a contact. ``contact_match_method`` says how the link was
+    # made (email, vat, name, recipient, manual); ``contact_match_confidence``
+    # is 0..1 and 1.0 for a link a person made or confirmed.
+    contact_id: Mapped[uuid.UUID | None] = mapped_column(
+        GUID(),
+        ForeignKey("oe_contacts_contact.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    contact_match_method: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    contact_match_confidence: Mapped[float | None] = mapped_column(Float, nullable=True)
 
     def __repr__(self) -> str:
         return f"<TenderBidInvitation {self.company_name} package={self.package_id}>"

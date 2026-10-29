@@ -8,7 +8,7 @@
  * `url`, by `createBidLink`; listings never carry it.
  */
 
-import { apiGet, apiPost } from '@/shared/lib/api';
+import { apiDelete, apiGet, apiPost, apiPut } from '@/shared/lib/api';
 
 export type BidInvitationStatus = 'not_opened' | 'opened' | 'submitted' | 'expired' | 'revoked';
 
@@ -26,6 +26,27 @@ export interface BidInvitation {
   revoked_at: string | null;
   bid_id: string | null;
   created_at: string;
+  contact_id?: string | null;
+  contact_name?: string;
+  contact_match_method?: string | null;
+  contact_match_confidence?: number | null;
+  suggestion?: PartySuggestion | null;
+}
+
+export interface PartySuggestion {
+  review_id: string;
+  contact_id: string;
+  contact_name: string;
+  method: string;
+  confidence: number;
+}
+
+export interface PartyLinkResult {
+  entity_id: string;
+  contact_id: string | null;
+  contact_name: string;
+  contact_match_method: string | null;
+  contact_match_confidence: number | null;
 }
 
 export interface BidInvitationCreated extends BidInvitation {
@@ -51,4 +72,22 @@ export function createBidLink(
     `/v1/tendering/packages/${packageId}/recipients/${encodeURIComponent(recipientId)}/bid-link/${query}`,
     {},
   );
+}
+
+const partyPath = (packageId: string, invitationId: string) =>
+  `/v1/tendering/packages/${packageId}/bid-invitations/${invitationId}/party/`;
+
+/** Link an invited firm to a directory contact (a person's decision, confidence 1). */
+export function linkInvitationParty(packageId: string, invitationId: string, contactId: string): Promise<PartyLinkResult> {
+  return apiPut<PartyLinkResult>(partyPath(packageId, invitationId), { contact_id: contactId });
+}
+
+/** Remove the link. The contact itself is untouched. */
+export function unlinkInvitationParty(packageId: string, invitationId: string): Promise<PartyLinkResult> {
+  return apiDelete<PartyLinkResult>(partyPath(packageId, invitationId));
+}
+
+/** Confirm (true) or reject (false) the matcher's suggestion. */
+export function decidePartySuggestion(reviewId: string, confirm: boolean): Promise<unknown> {
+  return apiPost(`/v1/contacts/parties/review/${reviewId}/${confirm ? 'confirm' : 'reject'}/`, {});
 }
