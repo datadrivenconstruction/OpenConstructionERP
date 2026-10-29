@@ -1,0 +1,4 @@
+{
+  "_comment": "Residential and commercial lease limits per country, read by app/modules/leasing/country_rules.py. A country is listed only with a published source; an absent country or an absent field means no limit is applied. Fields: deposit_cap_months (deposit at most this many months of rent, by lease_kind), tenant_identifier_schemes (the tenant contact must carry one of these party identifier schemes), source_url, effective_from, confidence (H official, M one reliable secondary source).",
+  "countries": {}
+}

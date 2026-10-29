@@ -1166,6 +1166,27 @@ ROUTER_HANDLERS: dict[str, list[str]] = {
     # The menu badge counts: with ?project_id= the handler checks that project
     # first; without it the counts cover accessible_project_ids only.
     "dashboard": ["get_nav_badges"],
+    # Leases are project scoped; every handler checks the lease's (or the query's) project.
+    "leasing": [
+        "list_leases",
+        "create_lease",
+        "rent_roll",
+        "arrears",
+        "export_leases",
+        "run_schedule",
+        "get_lease",
+        "update_lease",
+        "delete_lease",
+        "activate_lease",
+        "terminate_lease",
+        "renew_lease",
+        "review_lease",
+        "get_schedule",
+        "regenerate_schedule",
+        "validate_lease",
+        "link_document",
+        "unlink_document",
+    ],
 }
 
 
