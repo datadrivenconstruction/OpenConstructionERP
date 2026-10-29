@@ -2077,5 +2077,19 @@
     ],
     "key_count_at_seed": 3,
     "note": "Register is the native word in each of these languages (guarantees.back, stakeholders.ui.tab_register), and Element A is shared by clash.col_a."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "en-GB",
+      "fr",
+      "it",
+      "no",
+      "ro",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Standard is the native word in each of these languages for the default option of a setting; reviewed 2026-10-29"
   }
 ]
