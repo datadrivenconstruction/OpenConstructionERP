@@ -59,7 +59,7 @@ export function ddcInjectMeta(): void {
   const tags: [string, string][] = [
     ['ddc:origin', 'DataDrivenConstruction/CWICR-OE'],
     ['ddc:build', `${new Date().getFullYear()}-OE`],
-    ['ddc:author', 'Artem Boiko · datadrivenconstruction.io'],
+    ['ddc:author', 'DataDrivenConstruction · datadrivenconstruction.io'],
     ['ddc:signature', 'DDC-CWICR-OE-2026'],
   ];
   for (const [name, content] of tags) {
@@ -71,7 +71,7 @@ export function ddcInjectMeta(): void {
   // CSS custom properties — invisible to the eye, visible to the inspector.
   try {
     document.documentElement.style.setProperty('--ddc-origin', '"DDC-CWICR-OE"');
-    document.documentElement.style.setProperty('--ddc-author', '"Artem Boiko"');
+    document.documentElement.style.setProperty('--ddc-author', '"DataDrivenConstruction"');
   } catch { /* noop */ }
   // Opaque-looking local key — looks like a feature-flag hash, actually
   // encodes the authorship fingerprint.

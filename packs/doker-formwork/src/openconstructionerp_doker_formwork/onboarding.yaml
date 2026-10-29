@@ -1,4 +1,4 @@
-# Doker formwork pack - onboarding wizard
+# Formwork pack - onboarding wizard
 # Streamed via GET /api/v1/partner-pack/onboarding-script
 # Replaces the default OnboardingWizard step sequence when this pack is active.
 
@@ -8,7 +8,7 @@ locale: de
 
 steps:
   - id: welcome
-    title: "Willkommen bei OCERP × Doker"
+    title: "Willkommen bei OpenConstructionERP"
     body: >-
       Diese Installation ist für Schalungs- und Betonbau-Unternehmen
       vorkonfiguriert. In den nächsten Schritten richten wir Ihre
@@ -69,7 +69,7 @@ steps:
           - { value: "CH",     label: "Schweiz" }
 
   - id: doker_systems_inventory
-    title: "Doker-Schalungssysteme in Ihrem Bestand"
+    title: "Schalungssysteme in Ihrem Bestand"
     body: >-
       Welche Schalungssysteme setzen Sie aktuell ein? Wir hinterlegen
       die passenden Lastklassen, Modulraster und typischen Nutzungshäufigkeiten

@@ -18,7 +18,7 @@ const DEMO = { email: 'demo@openconstructionerp.com', password: 'DemoPass1234!' 
 const API = 'http://localhost:8000/api/v1';
 
 // Real-world fixtures from the cad2data Sample_Projects folder
-const SAMPLES = 'C:\\Users\\Artem Boiko\\Downloads\\cad2data-Revit-IFC-DWG-DGN-main\\cad2data-Revit-IFC-DWG-DGN-main\\Sample_Projects\\test';
+const SAMPLES = 'C:\\Users\\dev\\Downloads\\cad2data-Revit-IFC-DWG-DGN-main\\cad2data-Revit-IFC-DWG-DGN-main\\Sample_Projects\\test';
 const FIXTURE_RVT = `${SAMPLES}\\Technicalschoolcurrentm_sample.rvt`;
 const FIXTURE_IFC = `${SAMPLES}\\Ifc2x3_Duplex_Architecture.ifc`;
 const FIXTURE_DWG = `${SAMPLES}\\Example_House_Project_DDC.dwg`;

@@ -96,6 +96,7 @@ frontend/e2e/*-diagnostic.spec.ts
 # New Playwright E2E harness (tests/e2e/) — generated artefacts only
 frontend/qa-report/
 frontend/qa-screenshots/
+frontend/qa-shots/
 frontend/qa-output/
 frontend/qa-results.json
 frontend/playwright/.auth/

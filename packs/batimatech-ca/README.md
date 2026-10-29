@@ -1,6 +1,6 @@
-# OpenConstructionERP × Canada Batimatech
+# OpenConstructionERP Canada Regional Pack
 
-Partner pack pre-configuring [OpenConstructionERP](https://github.com/DataDrivenConstruction/openconstructionerp)
+Regional pack pre-configuring [OpenConstructionERP](https://github.com/DataDrivenConstruction/openconstructionerp)
 for Canadian construction companies.
 
 > **Pré-configuré pour les entreprises canadiennes de construction —
@@ -29,8 +29,6 @@ When installed alongside the OCERP core, this pack registers via the
   - `csa_s16` — CSA S16:19 Design of Steel Structures
   - `quebec_ccq` — Québec CCQ / RBQ licensing & compliance (Loi R-20)
   - `ontario_obc` — Ontario Building Code (O. Reg. 332/12) + WSIB
-- Applies batimatech branding (`#BE1B2F` red + `#0F2C5F` Canadian navy)
-  and replaces the boot logo / favicon.
 - Replaces the default first-login onboarding wizard with a 9-step
   Canadian workflow (firm profile + province, GST/QST/HST + RBQ/CCQ/WSIB
   registrations, NBC 2020 Parts, CCDC contract default, CWICR regions,
@@ -52,6 +50,4 @@ and restart.
 
 ## License
 
-AGPL-3.0-or-later, same as the OCERP core. The batimatech name and red
-brand colour are trademarks of batimatech and used under partnership
-agreement.
+AGPL-3.0-or-later, same as the OCERP core. No partner or third-party branding is bundled.

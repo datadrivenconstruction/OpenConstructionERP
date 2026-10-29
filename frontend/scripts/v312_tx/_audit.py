@@ -6,13 +6,13 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 from _parse_helper import parse_ts
 
-LOCALES_DIR = r'C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500/frontend/src/app/locales'
+LOCALES_DIR = r'C:/Users/dev/Desktop/CodeProjects/ERP_26030500/frontend/src/app/locales'
 TARGETS = ['ar', 'bg', 'cs', 'da', 'fi', 'hi', 'hr', 'id', 'ja', 'ko', 'mn', 'no', 'ro', 'sv', 'th', 'tr', 'vi']
 
 en, _, _ = parse_ts(f'{LOCALES_DIR}/en.ts')
 
 # load reference key list (use ru.json — same 485 keys)
-with open(r'C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500/frontend/scripts/v312_tx/ru.json',
+with open(r'C:/Users/dev/Desktop/CodeProjects/ERP_26030500/frontend/scripts/v312_tx/ru.json',
           'r', encoding='utf-8') as f:
     ru = json.load(f)
 

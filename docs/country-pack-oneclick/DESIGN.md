@@ -217,7 +217,7 @@ Each onboarding country needs **2** demos. Inventory by country:
 | US      | medical-us (built-in)                | commercial-denver (us-costdata pack) ✓ |
 | FR      | school-paris (built-in)              | **AUTHOR** |
 | AE      | warehouse-dubai (built-in)           | **AUTHOR** |
-| CA      | office-montreal (batimatech pack)    | **AUTHOR** |
+| CA      | office-montreal (Canadian pack)      | **AUTHOR** |
 | AU      | mixed-use-sydney (aus pack)          | **AUTHOR** |
 | NZ      | commercial-auckland (nzs pack)       | **AUTHOR** |
 | BR      | residential-saopaulo (brazil pack)   | **AUTHOR** |

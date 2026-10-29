@@ -110,9 +110,8 @@ COPY data/match/ data/match/
 #
 # Licensing. Four packs in this repo are deliberately held out of the
 # community wheel: aus-nzs (deprecated, superseded by aus and nzs),
-# batimatech-ca and bimhessen-de (partnership agreements stated in their
-# licence sections), and doker-formwork (carries a named third party's logo,
-# partner name and URL). Copying the tree would bake all four into this layer
+# batimatech-ca, bimhessen-de and doker-formwork (regional and industry packs
+# not yet released). Copying the tree would bake all four into this layer
 # permanently, since deleting a file in a later layer does not remove it from
 # the layer that added it, and these images are published publicly to ghcr.io.
 # Listing the tree would also ship whichever pack lands in it next, which is

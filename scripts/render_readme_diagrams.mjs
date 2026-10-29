@@ -20,7 +20,7 @@ const req = createRequire(
 );
 const { chromium } = req('playwright');
 
-const REPO = 'C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500';
+const REPO = 'C:/Users/dev/Desktop/CodeProjects/ERP_26030500';
 const README = path.join(REPO, 'README.md');
 const OUTDIR = path.join(REPO, 'docs', 'readme-diagrams');
 

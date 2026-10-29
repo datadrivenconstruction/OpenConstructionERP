@@ -7,8 +7,8 @@
     "note": "BIM- und HOAI-spezifische Terminologie für deutsche Ingenieur- und Architekturbüros (Standard-Deutsch de-DE, formelle Sie-Form). Überschreibt Kern-Locale-Schlüssel nur dort, wo das Pack-Vokabular präziser ist."
   },
 
-  "partner_pack.banner": "Powered by OpenConstructionERP · In Partnerschaft mit BIMHessen",
-  "partner_pack.header_chip": "BIMHessen Edition",
+  "partner_pack.banner": "Powered by OpenConstructionERP",
+  "partner_pack.header_chip": "Hessen BIM Edition",
   "partner_pack.cta_help": "Hilfe und Schulungen",
   "partner_pack.footer_legal": "Konfiguriert für deutsche BIM-Praxis nach DIN 276, GAEB, VOB, ISO 19650 und HOAI.",
 
@@ -129,7 +129,7 @@
   "bki.baujahr": "Baujahr / Kostenstand",
   "bki.baupreisindex": "Baupreisindex (Destatis)",
 
-  "onboarding.welcome.title": "Willkommen bei OpenConstructionERP — BIMHessen Edition",
+  "onboarding.welcome.title": "Willkommen bei OpenConstructionERP — Hessen BIM Edition",
   "onboarding.welcome.body": "Diese Installation ist für deutsche BIM-Beratungs- und Ingenieurbüros vorkonfiguriert. In sechs Schritten richten wir Ihr Büroprofil, die HOAI-Leistungsphasen, die ISO-19650-CDE, die Pflicht-Standards (VOB / DIN 276 / GAEB) und die BKI-Benchmarks ein.",
   "onboarding.cta.start": "Einrichtung starten",
   "onboarding.cta.finish": "Arbeitsbereich anlegen",

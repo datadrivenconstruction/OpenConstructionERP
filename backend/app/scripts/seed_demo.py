@@ -34,7 +34,7 @@ async def main() -> None:
             json={
                 "email": ADMIN_EMAIL,
                 "password": password,
-                "full_name": "Artem Boiko",
+                "full_name": "Alex Morgan",
             },
         )
         if r.status_code == 409:

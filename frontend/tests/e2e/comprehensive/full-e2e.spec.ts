@@ -16,7 +16,7 @@ import path from 'node:path';
 const BASE = process.env.OE_TEST_BASE_URL ?? 'http://localhost:8000';
 const DEMO_EMAIL = process.env.OE_TEST_DEMO_EMAIL ?? 'demo@openconstructionerp.com';
 const DEMO_PASSWORD = process.env.OE_TEST_DEMO_PASSWORD ?? 'DemoPass1234!';
-const SHOTS = 'C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500/backend/_e2e_shots';
+const SHOTS = 'C:/Users/dev/Desktop/CodeProjects/ERP_26030500/backend/_e2e_shots';
 const HOST = new URL(BASE).host;
 
 const PROJ = {

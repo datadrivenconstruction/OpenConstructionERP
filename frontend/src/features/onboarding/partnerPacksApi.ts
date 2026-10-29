@@ -536,7 +536,7 @@ export { packCountryCode };
  *   1. ``metadata.country`` ISO code, when it's a real 2-letter country
  *      (skips placeholder ``XX``) — gives "US", "DE", "CA", "BR"…
  *   2. Initials of the partner name's words ("US Construction Pack" → "US",
- *      "New Zealand Construction Pack" → "NZ", "batimatech" → "BA").
+ *      "New Zealand Construction Pack" → "NZ", "acme" → "AC").
  */
 export function packInitials(pack: InstalledPartnerPack): string {
   const country = pack.metadata?.country;

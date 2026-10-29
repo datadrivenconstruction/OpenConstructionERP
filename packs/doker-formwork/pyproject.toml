@@ -5,21 +5,18 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "openconstructionerp-doker-formwork"
 version = "0.2.0"
-description = "Doka formwork partner pack for OpenConstructionERP - DIN 18218, EN 12812, EN 13670, EN 206, VOB/C 18331, DGUV 101-008 + Doka systems catalogue."
+description = "Formwork pack for OpenConstructionERP - DIN 18218, EN 12812, EN 13670, EN 206, VOB/C 18331, DGUV 101-008 + formwork systems catalogue."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "AGPL-3.0-or-later" }
 authors = [
     { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
-    { name = "Doka Formwork", email = "info@datadrivenconstruction.io" },
 ]
 keywords = [
     "openconstructionerp",
     "partner-pack",
     "formwork",
     "schalung",
-    "doker",
-    "doka",
     "din-18218",
     "vob",
     "dguv",
@@ -37,7 +34,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://www.doka.com"
+Homepage = "https://github.com/DataDrivenConstruction/openconstructionerp"
 Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
 
 [project.entry-points."openconstructionerp.partner_packs"]
@@ -51,7 +48,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 openconstructionerp_doker_formwork = [
-    "logo.png",
     "onboarding.yaml",
     "locales/*.json",
     "rule_packs/*.json",

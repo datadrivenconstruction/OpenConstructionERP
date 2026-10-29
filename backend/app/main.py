@@ -2272,7 +2272,7 @@ def create_app() -> FastAPI:
             ).decode("ascii")
             schema.setdefault("info", {})
             schema["info"]["x-ddc-origin"] = "OpenConstructionERP · DataDrivenConstruction · " + _oa_tok
-            schema["info"]["x-ddc-author"] = "Artem Boiko <info@datadrivenconstruction.io>"
+            schema["info"]["x-ddc-author"] = "DataDrivenConstruction <info@datadrivenconstruction.io>"
             app.openapi_schema = schema
             app._openapi_routes_version = version
             return schema

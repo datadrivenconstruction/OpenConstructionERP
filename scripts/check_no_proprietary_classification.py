@@ -144,9 +144,8 @@ _ALLOWED_NOMINATIVE: dict[str, frozenset[str]] = {
     "backend/app/modules/eac/aliases/seed_catalog.json": frozenset({"name"}),
     # A whole pack whose job is to name the standards US work interoperates with.
     "packs/us-costdata/": frozenset({"title", "label", "name", "standard", "description"}),
-    # Partner pack: naming this supplier's database as the pack's data source is
-    # sanctioned under a real partnership agreement, so it is not a finding here and
-    # must not be rewritten. An earlier wave read it as an unlicensed claim and
+    # Regional pack: naming the cost database it is built on is the pack's purpose,
+    # so it is not a finding here and must not be rewritten. An earlier wave read it as an unlicensed claim and
     # rewrote it; the entry exists so that cannot happen a second time.
     "packs/batimatech-ca/": frozenset({"title", "label", "name", "standard", "description"}),
     # Canada country pack. Its catalogue copy (the PyPI description and the pack

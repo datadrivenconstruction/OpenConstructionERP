@@ -2,7 +2,7 @@
   "$schema": "openconstructionerp.partner_pack.rule_pack/v1",
   "slug": "formwork_cycle_economics",
   "display_name": "Schalungsökonomie — Nutzungshäufigkeit, Taktzeit, Modulrastung",
-  "description": "Doker-spezifische Wirtschaftlichkeits-Regeln für Schalungseinsätze: Nutzungshäufigkeit (Einsatzzahl pro Element), Taktzeit (Wand/Stütze/Decke/Träger), Modulraster-Effizienz (m² nutzbar / m² geliefert), Schalungssystem-spezifische Wiederverwendungs-Caps und Abbruchkosten bei unvollständigen Zyklen.",
+  "description": "Spezifische Wirtschaftlichkeits-Regeln für Schalungseinsätze: Nutzungshäufigkeit (Einsatzzahl pro Element), Taktzeit (Wand/Stütze/Decke/Träger), Modulraster-Effizienz (m² nutzbar / m² geliefert), Schalungssystem-spezifische Wiederverwendungs-Caps und Abbruchkosten bei unvollständigen Zyklen.",
   "standard": "internal-doker",
   "severity_default": "warning",
   "category": "economics",

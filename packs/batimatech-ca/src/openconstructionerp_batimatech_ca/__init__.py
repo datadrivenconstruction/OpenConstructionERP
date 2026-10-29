@@ -1,4 +1,4 @@
-"""OpenConstructionERP × batimatech (Canada) partner pack.
+"""OpenConstructionERP Canada regional pack.
 
 This package exports a module-level ``MANIFEST`` instance of
 :class:`PartnerPackManifest` referenced from ``pyproject.toml``::

@@ -59,8 +59,8 @@ class TestPackTypeInference:
         """A pre-umbrella manifest with country metadata loads as 'country'."""
         m = PartnerPackManifest(
             slug="batimatech-ca",
-            partner_name="Batimatech",
-            branding=PartnerBranding(powered_by_text="Powered by ... Batimatech"),
+            partner_name="Example Co",
+            branding=PartnerBranding(powered_by_text="Powered by ... Example Co"),
             metadata={"country": "CA", "country_name_en": "Canada"},
         )
         # No pack_type authored -> still valid, and resolves to country

@@ -10,8 +10,7 @@ from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 
 MANIFEST = PartnerPackManifest(
     slug="batimatech-ca",
-    partner_name="Canada Batimatech",
-    partner_url="https://www.batimatech.com",
+    partner_name="Canada Regional Pack",
     pack_version="0.2.0",
     description=(
         "Pré-configuré pour les entreprises canadiennes de construction: "
@@ -65,11 +64,9 @@ MANIFEST = PartnerPackManifest(
     hidden_modules=[],
     demo_template_ids=["office-montreal"],
     branding=PartnerBranding(
-        primary_color="#1C9BD7",  # batimatech cyan
-        accent_color="#1B3A5B",  # batimatech navy
-        logo_path="logo.png",
-        favicon_path="favicon.ico",
-        powered_by_text="Powered by OpenConstructionERP, in partnership with Batimatech",
+        primary_color="#0071E3",
+        accent_color="#1E293B",
+        powered_by_text="Powered by OpenConstructionERP",
     ),
     onboarding_script_path="onboarding.yaml",
     metadata={

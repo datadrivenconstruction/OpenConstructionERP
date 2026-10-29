@@ -85,8 +85,8 @@ def patch(ts_path: str, en_path: str, tx_path: str) -> int:
 if __name__ == '__main__':
     import io
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-    LOC = r'C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500/frontend/src/app/locales'
-    DICTS = r'C:/Users/Artem Boiko/Desktop/CodeProjects/ERP_26030500/frontend/scripts/v312_tx'
+    LOC = r'C:/Users/dev/Desktop/CodeProjects/ERP_26030500/frontend/src/app/locales'
+    DICTS = r'C:/Users/dev/Desktop/CodeProjects/ERP_26030500/frontend/scripts/v312_tx'
     langs = sys.argv[1:] if len(sys.argv) > 1 else ['ja']
     for lang in langs:
         r, ns, nk = patch(f'{LOC}/{lang}.ts', f'{LOC}/en.ts', f'{DICTS}/{lang}.json')

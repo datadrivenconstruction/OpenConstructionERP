@@ -1110,7 +1110,7 @@ if (typeof window !== 'undefined' && typeof console !== 'undefined') {
   try {
     // eslint-disable-next-line no-console
     console.info(
-      `%c${DDC_ORIGIN}%c · Artem Boiko · datadrivenconstruction.io`,
+      `%c${DDC_ORIGIN}%c · DataDrivenConstruction · datadrivenconstruction.io`,
       'color:#0071E3;font-weight:700',
       'color:#64748b',
     );

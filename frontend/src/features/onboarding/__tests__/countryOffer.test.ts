@@ -40,8 +40,8 @@ function pack(slug: string, country: string, partnerName: string): InstalledPart
  * the loader never registers it and it is absent from a checkout as much as
  * from a release.
  *
- * The two missing ones are batimatech-ca (partnership) and doker-formwork
- * (third-party logo). bimhessen-de is also checkout-only (partnership), so
+ * The two missing ones are batimatech-ca and doker-formwork
+ * (not yet released). bimhessen-de is also checkout-only, so
  * Canada reaches the curated-preset branch on every real install.
  *
  * Keep this list equal to the force-include block.
@@ -81,7 +81,7 @@ const WHEEL_PACKS: InstalledPartnerPack[] = [
 
 /** The two the wheel drops for licensing, present only in a checkout. */
 const CHECKOUT_ONLY: InstalledPartnerPack[] = [
-  pack('batimatech-ca', 'CA', 'Batimatech'),
+  pack('batimatech-ca', 'CA', 'Canada Pack'),
   pack('bimhessen-de', 'DE', 'BIM-Cluster Hessen'),
 ];
 

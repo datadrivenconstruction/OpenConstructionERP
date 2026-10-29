@@ -1,4 +1,4 @@
-"""Manifest for the Doker formwork partner pack.
+"""Manifest for the formwork pack.
 
 Pre-configures OpenConstructionERP for formwork (Schalung) and
 concrete contractors operating in the DACH region. Activates DIN-, EN-,
@@ -37,8 +37,7 @@ except (OSError, json.JSONDecodeError):
 
 MANIFEST = PartnerPackManifest(
     slug="doker-formwork",
-    partner_name="Doka Formwork",
-    partner_url="https://www.doka.com",
+    partner_name="Formwork Pack",
     pack_version="0.2.0",
     description=(
         "Pre-configured for formwork and concrete contractors in Germany, Austria "
@@ -78,11 +77,9 @@ MANIFEST = PartnerPackManifest(
     default_modules=[],
     hidden_modules=[],
     branding=PartnerBranding(
-        primary_color="#004899",  # Doka blue
-        accent_color="#FEDC00",  # Doka yellow
-        logo_path="logo.png",
-        favicon_path=None,
-        powered_by_text="Powered by OpenConstructionERP, in partnership with Doka Formwork",
+        primary_color="#0071E3",
+        accent_color="#1E293B",
+        powered_by_text="Powered by OpenConstructionERP",
     ),
     onboarding_script_path="onboarding.yaml",
     metadata={

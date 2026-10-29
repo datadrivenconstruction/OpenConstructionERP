@@ -53,9 +53,8 @@ function packOf(slug: string, country: string, name = slug) {
 /**
  * The packs the community wheel force-includes, NOT the packs a checkout of
  * this repository holds. backend/pyproject.toml names seventeen of the twenty
- * servable ones, and the three it leaves out are held back for licensing:
- * batimatech-ca and bimhessen-de under partnership agreements, doker-formwork
- * for a named third party's logo.
+ * servable ones, and the three it leaves out are not yet released:
+ * batimatech-ca, bimhessen-de and doker-formwork.
  *
  * bimhessen-de stood in this list until the fixture was corrected, which made
  * Germany the best covered market in the suite while being one of the two the

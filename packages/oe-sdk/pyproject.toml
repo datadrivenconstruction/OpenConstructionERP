@@ -5,7 +5,7 @@ description = "Module SDK for OpenConstructionERP. One clean import surface for 
 license = "AGPL-3.0-or-later"
 requires-python = ">=3.12"
 authors = [
-    { name = "Artem Boiko", email = "info@datadrivenconstruction.io" },
+    { name = "DataDrivenConstruction", email = "info@datadrivenconstruction.io" },
 ]
 maintainers = [
     { name = "Data Driven Construction", email = "info@datadrivenconstruction.io" },

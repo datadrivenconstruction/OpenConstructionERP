@@ -29,7 +29,7 @@ license = "AGPL-3.0-or-later"
 license-files = ["LICENSE", "NOTICE"]
 requires-python = ">=3.12"
 authors = [
-    { name = "Artem Boiko", email = "info@datadrivenconstruction.io" }
+    { name = "DataDrivenConstruction", email = "info@datadrivenconstruction.io" }
 ]
 maintainers = [
     { name = "Data Driven Construction", email = "info@datadrivenconstruction.io" }
@@ -600,16 +600,13 @@ artifacts = ["app/scripts/flagship_assets/site_photos/*.jpg"]
 # desktop user saw "no packs available", always.
 #
 # Each pack is named on its own line rather than force-including the tree, and
-# that is the licensing control, not verbosity. A pack whose README licence
-# section reserves its name and colours under a partnership agreement, and a
-# pack deprecated in favour of its successors, must not go out in the
+# that is the licensing control, not verbosity. A pack not yet released
+# to the community wheel, and a pack deprecated in favour of its successors, must not go out in the
 # community wheel; listing the tree would ship whichever pack lands in it
 # next, which is the wrong direction to fail in. Held back deliberately:
 # ``aus-nzs`` (carries DEPRECATED.txt, superseded by ``aus`` and ``nzs``),
-# ``batimatech-ca`` and ``bimhessen-de`` (partnership agreement stated in
-# their licence sections), and ``doker-formwork`` (licence section is plain
-# AGPL, but the pack carries a named third party's logo, partner name and
-# URL, and a PyPI release cannot be taken back).
+# ``batimatech-ca``, ``bimhessen-de`` and ``doker-formwork`` (regional and
+# industry packs not yet released; a PyPI release cannot be taken back).
 #
 # ``src`` only, not the pack root: the runtime reads the manifest, the locale
 # JSON and the assets under ``src/openconstructionerp_*``, and never the pack

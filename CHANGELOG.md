@@ -4069,13 +4069,13 @@ A security and data-integrity hardening release from a deep internal audit.
 ### Added
 
 - A simple builder on the AI Agents page. Alongside more ready-made agents, you can now create your own from the screen: give it a name and a short description, pick the tools it may use and write its instructions, with no code involved. Your agents are saved to your account and run next to the built-in ones.
-- Activating a partner pack now narrows the whole workspace to that client. Only the pack's projects appear across the projects page, the dashboard and the rollup widgets, and the interface switches to the pack's language, so an operator running a single-client install sees a clean, localised workspace. The Batimatech pack, for example, comes up in French. Deactivating the pack reverses all of it, shown step by step with a progress bar: the projects are released back into the full list and the language returns to English.
+- Activating a partner pack now narrows the whole workspace to that client. Only the pack's projects appear across the projects page, the dashboard and the rollup widgets, and the interface switches to the pack's language, so an operator running a single-client install sees a clean, localised workspace. The Canadian regional pack, for example, comes up in French. Deactivating the pack reverses all of it, shown step by step with a progress bar: the projects are released back into the full list and the language returns to English.
 
 ### Changed
 
 - All 27 interface languages are now fully translated. The pass focused on the dashboard and the project screens, where some English words were still showing through, and went over every module so the app reads naturally in each language.
 - The example projects are filled out across every module. Each demo now arrives with a real RVT, IFC and DWG model and a PDF plan set attached, so the BIM viewer, the quantity takeoff and the reports all have real content to work with, and validation runs at install time and stores a report against the bill of quantities.
-- Partner packs ship the real company logos for Doka Formwork, Batimatech and BIM-Cluster Hessen, and each pack installs cleanly together with its catalogue and demo data. The Batimatech pack now defaults to French and loads the Canadian CWICR cost database for Toronto through the DDC parser.
+- Regional and industry packs install cleanly together with their catalogue and demo data. The Canadian pack now defaults to French and loads the Canadian CWICR cost database for Toronto through the DDC parser.
 - Every partner pack now installs two demo projects instead of one. The cross-region packs that had no in-country second demo (Australia, modular and prefab, renewables EPC) now ship a sensible second project in the same currency and standards.
 
 ### Fixed
@@ -4457,12 +4457,12 @@ browser session - the badge reappears on next browser launch
 (sessionStorage, not localStorage).
 
 Five reference packs ship under `packs/`:
-- `batimatech-ca` - Canadian construction conferences (fr-CA primary
+- `batimatech-ca` - Canadian regional pack (fr-CA primary
   + en-CA, Toronto + Montréal CWICR, NBC 2020 + CCDC + CSA-A23 rule
-  packs, CAD, ca_gst_pst tax, batimatech red `#BE1B2F`).
-- `doker-formwork` - formwork supplier (de, Berlin CWICR, DIN 18218
-  + concrete + formwork-cycle rule packs, EUR, Doker blue `#003D7A`).
-- `bimhessen-de` - German BIM consultancy (de, Berlin CWICR, DIN
+  packs, CAD, ca_gst_pst tax).
+- `doker-formwork` - formwork pack (de, Berlin CWICR, DIN 18218
+  + concrete + formwork-cycle rule packs, EUR).
+- `bimhessen-de` - Hessen BIM pack (de, Berlin CWICR, DIN
   276 + GAEB X83/X86 + VOB 2023 + ISO 19650 CDE + BKI rule packs,
   EUR, Hessen blue `#005CA9`).
 - `uk-jct` - UK general contractor (en-GB, London CWICR, NRM 1+2 +
@@ -4476,7 +4476,7 @@ Install pattern:
 ```
 pip install openconstructionerp openconstructionerp-batimatech-ca
 openconstructionerp serve
-# logs: Partner pack active: batimatech-ca (batimatech) v0.1.0
+# logs: Partner pack active: batimatech-ca v0.1.0
 ```
 
 ### Added

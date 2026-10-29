@@ -31,9 +31,8 @@ A map entry with no COPY is the failure above: the image does not build.
 A COPY with no map entry is quieter and worse. Four packs in this repo are
 deliberately held out of the community wheel, and out of these images with
 it: ``aus-nzs`` (deprecated, superseded by ``aus`` and ``nzs``),
-``batimatech-ca`` and ``bimhessen-de`` (partnership agreements stated in their
-licence sections), and ``doker-formwork`` (its licence section is plain AGPL,
-but it carries a named third party's logo, partner name and URL). A COPY that
+``batimatech-ca``, ``bimhessen-de`` and ``doker-formwork`` (regional and
+industry packs not yet released). A COPY that
 puts one of those into the build context bakes it into that image layer
 permanently, because deleting a file in a later layer does not remove it from
 the layer that added it, and these images go to ghcr.io publicly. Nothing

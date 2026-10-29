@@ -1,5 +1,5 @@
 {
-  "$schema_note": "Partial locale overlay for Doker formwork pack. Falls back to bundled de.json for any key not listed here.",
+  "$schema_note": "Partial locale overlay for the formwork pack. Falls back to bundled de.json for any key not listed here.",
   "$locale": "de",
   "$pack": "doker-formwork",
   "$version": "0.2.0",

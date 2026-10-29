@@ -39,7 +39,7 @@ time with a logged warning.
 | Default | _required_ |
 | Validation | `min_length=2`, `max_length=80` |
 | Purpose | Display name shown in the co-brand chip, the dashboard banner, and the "About" modal. |
-| Example | `"BIMHessen"` |
+| Example | `"Example Co"` |
 
 ### `partner_url`
 
@@ -48,7 +48,7 @@ time with a logged warning.
 | Type | `str \| None` |
 | Default | `None` |
 | Purpose | Used as the link target on the partner logo strip. When `None`, the logo is rendered as a plain image. |
-| Example | `"https://bimhessen.de"` |
+| Example | `"https://example.com"` |
 
 ### `pack_version`
 
@@ -216,7 +216,7 @@ for the list of rule sets the core currently implements.
 | Type | `str` |
 | Default | `"#0F2C5F"` |
 | Purpose | Hex `#RRGGBB`. Replaces the CSS variable `--oe-primary` at boot. |
-| Example | `"#BE1B2F"` (Batimatech red) |
+| Example | `"#BE1B2F"` |
 
 #### `branding.accent_color`
 
@@ -282,7 +282,7 @@ for the list of rule sets the core currently implements.
 | Default | `{}` |
 | Purpose | Free-form bag for partners who want to surface extra structured data through `/api/v1/partner-pack/current` and `/installed`. The frontend ignores unknown keys. |
 | Suggested keys | `country` (ISO 3166-1 alpha-2), `country_name_en`, `regulator_refs` (list of strings), `support_email`, `support_phone`, `partner_tier` |
-| Example | `{"country": "CA", "country_name_en": "Canada", "regulator_refs": ["NBC 2020", "CCDC 2"], "support_email": "support@batimatech.ca"}` |
+| Example | `{"country": "CA", "country_name_en": "Canada", "regulator_refs": ["NBC 2020", "CCDC 2"], "support_email": "support@example.com"}` |
 
 ---
 
@@ -313,8 +313,8 @@ from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 MANIFEST = PartnerPackManifest(
     # Identity
     slug="batimatech-ca",
-    partner_name="batimatech",
-    partner_url="https://batimatech.ca",
+    partner_name="Example Co",
+    partner_url="https://example.com",
     pack_version="0.1.0",
     description=(
         "Pre-configured partner pack for Canadian construction companies — "
@@ -338,7 +338,7 @@ MANIFEST = PartnerPackManifest(
     hidden_modules=[],
     # Branding
     branding=PartnerBranding(
-        primary_color="#BE1B2F",   # Batimatech red
+        primary_color="#BE1B2F",   
         accent_color="#FFFFFF",
         logo_path="logo.svg",
         favicon_path="favicon.ico",
@@ -351,7 +351,7 @@ MANIFEST = PartnerPackManifest(
         "country": "CA",
         "country_name_en": "Canada",
         "regulator_refs": ["NBC 2020", "CCDC 2", "CSA A23"],
-        "support_email": "contact@batimatech.ca",
+        "support_email": "contact@example.com",
     },
 )
 ```

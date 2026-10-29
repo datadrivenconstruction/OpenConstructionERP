@@ -56,7 +56,7 @@ class DDCFingerprintMiddleware(BaseHTTPMiddleware):
         # `curl -I` of any endpoint will surface the DDC origin and
         # author e-mail without requiring source-code access.
         response.headers["X-DDC-Origin"] = "DataDrivenConstruction/OpenConstructionERP/CWICR"
-        response.headers["X-DDC-Author"] = "Artem Boiko <info@datadrivenconstruction.io>"
+        response.headers["X-DDC-Author"] = "DataDrivenConstruction <info@datadrivenconstruction.io>"
         # ASCII-only value: HTTP header values are latin-1/ASCII, and
         # Starlette's TestClient decodes them as UTF-8. A non-ASCII byte
         # (the old "·" = U+00B7 = 0xB7) made every TestClient-based test

@@ -1,4 +1,4 @@
-"""Doka formwork partner pack for OpenConstructionERP.
+"""Formwork pack for OpenConstructionERP.
 
 Exposes ``MANIFEST`` for the ``openconstructionerp.partner_packs`` entry-point.
 """

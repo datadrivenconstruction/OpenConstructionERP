@@ -15,7 +15,7 @@ const API = 'http://localhost:8000/api/v1';
 
 // Reuse the cad2data fixture path from q2-verify-all.spec.ts
 const SAMPLES =
-  'C:\\Users\\Artem Boiko\\Downloads\\cad2data-Revit-IFC-DWG-DGN-main\\cad2data-Revit-IFC-DWG-DGN-main\\Sample_Projects\\test';
+  'C:\\Users\\dev\\Downloads\\cad2data-Revit-IFC-DWG-DGN-main\\cad2data-Revit-IFC-DWG-DGN-main\\Sample_Projects\\test';
 const FIXTURE_IFC = `${SAMPLES}\\Ifc2x3_Duplex_Architecture.ifc`;
 
 async function injectAuth(page: Page): Promise<void> {

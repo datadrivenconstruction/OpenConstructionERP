@@ -214,7 +214,7 @@ if __name__ == "__main__":
     section_a_synthetic()
 
     parquet = Path(
-        r"C:\Users\Artem Boiko\Desktop\CodeProjects\legal-restructure-2026-04"
+        r"C:\Users\dev\Desktop\CodeProjects\legal-restructure-2026-04"
         r"\OpenConstructionEstimate-DDC-CWICR\EN___DDC_CWICR"
         r"\ENG_TORONTO_workitems_costs_resources_DDC_CWICR.parquet"
     )

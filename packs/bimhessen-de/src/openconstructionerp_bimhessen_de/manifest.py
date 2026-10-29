@@ -1,4 +1,4 @@
-"""BIM-Cluster Hessen partner pack manifest.
+"""Hessen BIM pack manifest.
 
 Pre-configures OpenConstructionERP for German BIM consultancies and
 engineering offices, especially those active in Hessen (Frankfurt /
@@ -20,8 +20,7 @@ from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 
 MANIFEST = PartnerPackManifest(
     slug="bimhessen-de",
-    partner_name="BIM-Cluster Hessen",
-    partner_url="https://bim-cluster-hessen.com",
+    partner_name="Hessen BIM Pack",
     pack_version="0.2.0",
     description=(
         "Pre-configured for German BIM consultancies and engineering firms: "
@@ -57,11 +56,9 @@ MANIFEST = PartnerPackManifest(
     hidden_modules=[],
     demo_template_ids=["residential-berlin"],
     branding=PartnerBranding(
-        primary_color="#0C9CB7",  # BIM-Cluster Hessen teal
-        accent_color="#7A7A7A",  # BIM-Cluster Hessen grey
-        logo_path="logo.png",
-        favicon_path=None,
-        powered_by_text="Powered by OpenConstructionERP, in partnership with BIM-Cluster Hessen",
+        primary_color="#0071E3",
+        accent_color="#1E293B",
+        powered_by_text="Powered by OpenConstructionERP",
     ),
     onboarding_script_path="onboarding.yaml",
     metadata={

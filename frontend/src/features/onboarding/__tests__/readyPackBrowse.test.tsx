@@ -56,9 +56,9 @@ function pack(slug, country, name, type = 'country', extra = {}) {
 
 /** Listed the way the server lists them, by slug: Canada sorts before Belgium. */
 const WHEEL = [
-  pack('batimatech-ca', 'CA', 'Canada Batimatech', 'partner'),
+  pack('batimatech-ca', 'CA', 'Canada Pack', 'partner'),
   pack('belgium-be', 'BE', 'Belgium Construction Pack', 'country', { default_currency: 'EUR' }),
-  pack('doka-formwork', 'XX', 'Doka Formwork Pack', 'industry'),
+  pack('doka-formwork', 'XX', 'Formwork Pack', 'industry'),
   pack('germany-de', 'DE', 'Germany Construction Pack', 'country', {
     default_locale: 'de',
     default_currency: 'EUR',
@@ -153,8 +153,8 @@ describe('the pack step as a catalogue', () => {
     ]);
     // The Canadian partner pack is not a country between Brazil and nothing.
     expect(tileNames(americas)).toEqual(['Brazil Construction Pack']);
-    expect(tileNames(screen.getByTestId('ready-pack-group-partner'))).toEqual(['Canada Batimatech']);
-    expect(tileNames(screen.getByTestId('ready-pack-group-industry'))).toEqual(['Doka Formwork Pack']);
+    expect(tileNames(screen.getByTestId('ready-pack-group-partner'))).toEqual(['Canada Pack']);
+    expect(tileNames(screen.getByTestId('ready-pack-group-industry'))).toEqual(['Formwork Pack']);
     expect(tileNames(screen.getByTestId('ready-pack-group-showcase'))).toEqual(['Discount Retail Showcase']);
     // No industry pack sits among the countries.
     expect(within(europe).queryByTestId('ready-pack-tile-doka-formwork')).toBeNull();
@@ -205,7 +205,7 @@ describe('the pack step as a catalogue', () => {
     fireEvent.click(chip('industry'));
     expect(chip('industry').getAttribute('aria-checked')).toBe('true');
     expect(screen.queryAllByTestId(/^ready-pack-tile-/).map((el) => el.getAttribute('title'))).toEqual([
-      'Doka Formwork Pack',
+      'Formwork Pack',
     ]);
     expect(screen.queryByTestId('ready-pack-company-types')).toBeNull();
 
@@ -222,9 +222,9 @@ describe('the pack step as a catalogue', () => {
     browser('en-US');
     await renderPicker();
     const tile = screen.getByTestId('ready-pack-tile-batimatech-ca');
-    const name = within(tile).getByText('Canada Batimatech');
+    const name = within(tile).getByText('Canada Pack');
     expect(name.className).toMatch(/line-clamp-2/);
-    expect(name.getAttribute('title')).toBe('Canada Batimatech');
+    expect(name.getAttribute('title')).toBe('Canada Pack');
     expect(tile.className).toMatch(/min-w-0/);
   });
 });

@@ -1,4 +1,4 @@
-# BIMHessen - Onboarding-Assistent (Erstanmeldung)
+# Hessen BIM pack - Onboarding-Assistent (Erstanmeldung)
 # Wird über GET /api/v1/partner-pack/onboarding-script bereitgestellt und
 # ersetzt den OnboardingWizard-Standardablauf, sobald dieses Pack aktiv ist.
 #
@@ -7,7 +7,7 @@
 version: 1
 pack: bimhessen-de
 locale: de
-title: "Willkommen bei OpenConstructionERP: BIMHessen Edition"
+title: "Willkommen bei OpenConstructionERP: Hessen BIM Edition"
 subtitle: "In sechs Schritten ist Ihr Büro auf deutsche BIM-Praxis ausgerichtet (DIN 276, GAEB, VOB, ISO 19650, BKI, HOAI)."
 
 steps:

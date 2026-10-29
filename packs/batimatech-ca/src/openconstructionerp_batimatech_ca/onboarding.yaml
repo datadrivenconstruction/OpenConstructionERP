@@ -1,4 +1,4 @@
-# OCERP × batimatech (Canada) - first-login onboarding script.
+# Canada regional pack - first-login onboarding script.
 #
 # Replaces the default OnboardingWizard when this partner pack is active.
 # Each step is rendered by the frontend OnboardingWizard component;
@@ -22,9 +22,9 @@ steps:
     kind: intro
     skippable: false
     title_i18n:
-      en: "Welcome to OCERP × batimatech"
-      fr-CA: "Bienvenue dans OCERP × batimatech"
-      en-CA: "Welcome to OCERP × batimatech"
+      en: "Welcome to OpenConstructionERP"
+      fr-CA: "Bienvenue dans OpenConstructionERP"
+      en-CA: "Welcome to OpenConstructionERP"
     body_i18n:
       en: "Your OpenConstructionERP install is pre-configured for the Canadian construction market - NBC 2020, CCDC contracts, CSA standards and provincial overlays (Québec CCQ/RBQ, Ontario OBC). Eight quick steps and you are ready to estimate."
       fr-CA: "Votre installation OpenConstructionERP est préconfigurée pour le marché canadien de la construction - CNB 2020, contrats CCDC, normes CSA et surcouches provinciales (Québec CCQ/RBQ, Ontario CBO). Huit étapes rapides et vous êtes prêt à estimer."

@@ -1,4 +1,4 @@
-# OpenConstructionERP × Doker — Formwork Partner Pack
+# OpenConstructionERP Formwork Pack
 
 Pre-configures OpenConstructionERP for **formwork (Schalung) and concrete
 contractors** in the DACH region.
@@ -12,7 +12,7 @@ When installed alongside `openconstructionerp`, this pack:
   Aufschüttungsgeschwindigkeit, Nutzungshäufigkeit, Taktzeit, Sichtbeton,
   Bewehrung, Biegeliste, Sichtbeton-Klassen SB1–SB4 …)
 - Preloads three CWICR cost regions — Berlin (national average),
-  München (Bavaria / Doker HQ), Düsseldorf (NRW)
+  München (Bavaria), Düsseldorf (NRW)
 - German VAT (19 %) is not set by the pack
 - Enables **eight** validation rule packs:
   - `din_18218_formwork_pressure` — fresh-concrete pressure σ_h_max
@@ -44,8 +44,6 @@ When installed alongside `openconstructionerp`, this pack:
   that asks the questions a formwork contractor actually needs to answer
   (company size, project type, systems in inventory, default pour rate,
   default consistency class, BG-BAU membership, VOB/B vs BGB default)
-- Applies Doker branding — primary `#003D7A` (industrial blue),
-  accent `#F58220` (safety orange)
 
 ## Install
 

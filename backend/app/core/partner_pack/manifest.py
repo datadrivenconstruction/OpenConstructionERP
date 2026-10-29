@@ -475,8 +475,7 @@ class PartnerPackManifest(BaseModel):
         pack. A country or industry pack we author carries a ``partner_name``
         too ("Germany Construction Pack"), and the old default turned that into
         "In partnership with Germany Construction Pack", a partnership that
-        does not exist. Packs under a real partnership agreement (see the
-        License section of their README) state their line explicitly.
+        does not exist. A pack with its own credit line states it explicitly.
         """
         if self.branding.powered_by_text:
             return self.branding.powered_by_text

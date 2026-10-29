@@ -105,7 +105,7 @@ async def test_formwork_end_to_end(client: AsyncClient):
         json={
             "name": "Smoke Test Framed Panel",
             "system_type": "wall",
-            "supplier": "Doker",
+            "supplier": "Acme Formwork",
             "material": "steel",
             "reuses_max": 100,
             "unit_rate": "65.00",

@@ -8,8 +8,8 @@
 
 ## Context
 
-Three partnership conversations during v5.5.x (batimatech, BIMHessen, an
-unnamed Saudi consultancy) all asked the same question with different
+Three requests during v5.5.x (a Canadian regional pack, a Hessen BIM pack,
+and a Saudi consultancy pack) all asked the same question with different
 wording: *"How do we ship a regional/brand-specific version of OCERP
 without forking the repo?"*
 

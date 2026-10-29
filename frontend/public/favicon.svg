@@ -3,7 +3,7 @@
     <rdf:RDF>
       <rdf:Description rdf:about="">
         <dc:title>OpenConstructionERP</dc:title>
-        <dc:creator>Artem Boiko · Data Driven Construction</dc:creator>
+        <dc:creator>DataDrivenConstruction</dc:creator>
         <dc:source>https://datadrivenconstruction.io</dc:source>
         <dc:identifier>urn:ddc:oce:cwicr:2026</dc:identifier>
         <dc:rights>AGPL-3.0-or-later · DDC-CWICR-OE-2026</dc:rights>

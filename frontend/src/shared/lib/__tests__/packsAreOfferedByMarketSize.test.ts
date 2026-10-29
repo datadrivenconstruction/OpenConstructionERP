@@ -98,7 +98,7 @@ describe('ordering inside a band', () => {
     // This is the batimatech-ca case. By slug it lands between Austria and
     // Belgium; by the name the reader can actually see it belongs with Canada.
     const packs = [
-      pack('batimatech-ca', 'CA', 'fr-CA', 'Batimatech'),
+      pack('batimatech-ca', 'CA', 'fr-CA', 'Canada Pack'),
       pack('canada-ca', 'CA', 'en-CA', 'Canada Construction Pack'),
       pack('us-texas', 'US', 'en-US', 'Texas Construction Pack'),
       pack('brazil-sinapi', 'BR', 'pt-BR', 'Brazil SINAPI Pack'),

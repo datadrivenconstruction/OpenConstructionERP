@@ -10,7 +10,7 @@ readme = "README.md"
 license = { text = "AGPL-3.0-or-later" }
 requires-python = ">=3.11"
 authors = [
-    { name = "Batimatech", email = "info@datadrivenconstruction.io" },
+    { name = "OpenConstructionERP", email = "info@datadrivenconstruction.io" },
 ]
 keywords = ["openconstructionerp", "ocerp", "partner-pack", "canada", "nbc", "ccdc"]
 classifiers = [
@@ -29,7 +29,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://www.batimatech.com"
+Homepage = "https://github.com/DataDrivenConstruction/openconstructionerp"
 Source = "https://github.com/DataDrivenConstruction/openconstructionerp"
 
 [project.entry-points."openconstructionerp.partner_packs"]
@@ -43,8 +43,6 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 openconstructionerp_batimatech_ca = [
-    "logo.png",
-    "favicon.ico",
     "onboarding.yaml",
     "locales/*.json",
     "rule_packs/*.json",

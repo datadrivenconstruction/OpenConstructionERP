@@ -418,7 +418,7 @@ keeps the existing copy (`:654-666`) plus the install-requires-restart caveat (�
 │   existing projects. New packs need admin install + restart.   [Rescan]       │
 │                                                                                │
 │ ┌──────────────────────┐ ┌──────────────────────┐ ┌──────────────────────┐   │
-│ │▌US Construction Pack  │ │▌Batimatech (CA)       │ │▌BIM Hessen (DE)       │  │
+│ │▌US Construction Pack  │ │▌Canada pack (CA)      │ │▌Hessen pack (DE)      │  │
 │ │ us-costdata · v0.2.0  │ │ batimatech-ca · v0.2.0│ │ bimhessen-de · v0.2.0 │  │
 │ │ [USD] [us_state_tax]  │ │ [CAD] [ca_gst_pst]    │ │ [EUR] [de_ust_19]     │  │
 │ │ Standards: MF2020 +6  │ │ Standards: NBC +4     │ │ Standards: VOB +3     │  │

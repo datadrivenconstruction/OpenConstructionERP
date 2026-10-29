@@ -78,6 +78,7 @@ DENY_PATTERNS = [
     r"(^|/)qa-sweep/",
     r"(^|/)qa-personas/",
     r"(^|/)qa-screenshots/",
+    r"(^|/)qa-shots/",
     r"(^|/)scripts/[^/]*_report\.(json|txt)$",
     r"(^|/)[^/]*__audit_report\.md$",
     # Screen-flow mockups for a feature that has not been built. They are a

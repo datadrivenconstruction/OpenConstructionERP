@@ -18,7 +18,7 @@
  *
  * Why a curated preset is a real answer and not a consolation prize: the
  * community wheel deliberately does not ship every pack in this repository.
- * batimatech-ca and bimhessen-de are held back under partnership agreements,
+ * batimatech-ca and bimhessen-de are held back from the community wheel,
  * so a first-run user in Germany or Canada has no partner pack and never
  * will, however the discovery code is written. Those are two of the markets
  * with the most case studies. Spain has ten cases and no pack at all. So

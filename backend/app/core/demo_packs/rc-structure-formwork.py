@@ -5,7 +5,7 @@ from __future__ import annotations
 from app.core.demo_projects import DemoTemplate
 
 # ---------------------------------------------------------------------------
-# Demo pack: doker-formwork (Doker - Schalung / formwork specialist, DACH)
+# Demo pack: doker-formwork (formwork specialist, DACH)
 #
 # Flagship project where the cast-in-place reinforced-concrete structure and
 # the FORMWORK SYSTEMS are the hero of the BOQ: a 7-storey reinforced-concrete

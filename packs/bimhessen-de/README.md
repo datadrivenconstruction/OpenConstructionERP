@@ -1,6 +1,6 @@
-# BIM-Cluster Hessen Pack (Germany)
+# Hessen BIM Pack (Germany)
 
-Partner pack pre-configuring OpenConstructionERP for German BIM consultancies
+Regional pack pre-configuring OpenConstructionERP for German BIM consultancies
 and engineering offices, with a regional focus on Hessen. Loads the German
 standards stack: DIN 276 cost groups, GAEB exchange, VOB contract conditions,
 ISO 19650 information management and the HOAI fee phases.
@@ -16,7 +16,6 @@ ISO 19650 information management and the HOAI fee phases.
 - A six-step onboarding wizard: company profile, HOAI scope, BIM capability,
   standards compliance, cost data and review
 - The `residential-berlin` demo project
-- BIM-Cluster Hessen teal and grey for co-branding
 
 No modules are hidden and no new rule classes ship with the pack; it switches
 on rules already present in the core.
@@ -66,5 +65,4 @@ OE_PACK=bimhessen-de openconstructionerp serve
 
 ## License
 
-AGPL-3.0-or-later, same as the OpenConstructionERP core. The BIM-Cluster
-Hessen name and brand colours are used under partnership agreement.
+AGPL-3.0-or-later, same as the OpenConstructionERP core. No partner or third-party branding is bundled.
