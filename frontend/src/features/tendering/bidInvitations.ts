@@ -74,17 +74,14 @@ export function createBidLink(
   );
 }
 
-const partyPath = (packageId: string, invitationId: string) =>
-  `/v1/tendering/packages/${packageId}/bid-invitations/${invitationId}/party/`;
-
 /** Link an invited firm to a directory contact (a person's decision, confidence 1). */
 export function linkInvitationParty(packageId: string, invitationId: string, contactId: string): Promise<PartyLinkResult> {
-  return apiPut<PartyLinkResult>(partyPath(packageId, invitationId), { contact_id: contactId });
+  return apiPut<PartyLinkResult>(`/v1/tendering/packages/${packageId}/bid-invitations/${invitationId}/party/`, { contact_id: contactId });
 }
 
 /** Remove the link. The contact itself is untouched. */
 export function unlinkInvitationParty(packageId: string, invitationId: string): Promise<PartyLinkResult> {
-  return apiDelete<PartyLinkResult>(partyPath(packageId, invitationId));
+  return apiDelete<PartyLinkResult>(`/v1/tendering/packages/${packageId}/bid-invitations/${invitationId}/party/`);
 }
 
 /** Confirm (true) or reject (false) the matcher's suggestion. */
