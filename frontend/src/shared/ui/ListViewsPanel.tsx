@@ -21,6 +21,7 @@ import {
   setColumnHidden,
 } from '@/shared/lib/tableEnhancer';
 import { useToastStore } from '@/stores/useToastStore';
+import { compareNames } from '@/shared/lib/collator';
 
 export function ListViewsPanel() {
   const { t } = useTranslation();
@@ -69,7 +70,7 @@ export function ListViewsPanel() {
     onSuccess: (res) => {
       setName('');
       qc.setQueryData<ListView[]>(['list-views', scope], (old) =>
-        [...(old ?? []), res.view].sort((a, b) => a.name.localeCompare(b.name)),
+        [...(old ?? []), res.view].sort((a, b) => compareNames(a.name, b.name)),
       );
       for (const f of res.findings) useToastStore.getState().addToast({ type: 'warning', title: f.message });
     },

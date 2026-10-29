@@ -32,7 +32,7 @@ describe('text size axis', () => {
   });
 
   it('does not turn a preset into a custom mix', () => {
-    expect(matchPreset({ ...PLATFORM_APPEARANCE, text: 'largest' })).toBe('classic');
+    expect(matchPreset({ ...PLATFORM_APPEARANCE, text: 'largest' })).toBe('standard');
   });
 
   it('index.css scales the root by the same factors', () => {

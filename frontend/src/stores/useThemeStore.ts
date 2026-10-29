@@ -33,7 +33,7 @@ interface ThemeState {
 const STORAGE_KEY = THEME_KEY;
 
 function getSystemPreference(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'light';
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
