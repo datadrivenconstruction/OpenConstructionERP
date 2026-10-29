@@ -1,0 +1,33 @@
+name: Converter pins
+
+# Upstream can re-upload converter assets under an existing tag. Every installed
+# version then refuses the download. Check the pins against the live releases daily,
+# on every change of the pin table, and before a release tag builds anything.
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  push:
+    branches: [main]
+    paths: ["backend/app/core/converter_source.py", "scripts/check_converter_pins.py"]
+  pull_request:
+    paths: ["backend/app/core/converter_source.py", "scripts/check_converter_pins.py"]
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  converter-pins:
+    name: Converter pins match the releases
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7
+        with:
+          python-version: "3.12"
+      - name: Compare pinned digests and sizes with the published checksum files
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: python scripts/check_converter_pins.py

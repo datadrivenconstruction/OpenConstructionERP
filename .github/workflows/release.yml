@@ -18,12 +18,16 @@ env:
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
+  converter-pins:
+    uses: ./.github/workflows/converter-pins.yml
+
   # ── Build & Push Docker Image ──────────────────────────────────────
   # Note: CI runs separately on push/PR. The release pipeline trusts
   # that the tagged commit was already vetted on main and goes straight
   # to building the image — releases shouldn't be blocked by flaky
   # snapshot tests or lint debt that's tracked elsewhere.
   docker:
+    needs: [converter-pins]
     permissions:
       contents: read
       packages: write
