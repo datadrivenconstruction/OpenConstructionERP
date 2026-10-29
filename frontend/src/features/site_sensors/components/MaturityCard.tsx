@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { Card, CardContent, CardHeader } from '@/shared/ui';
-import { fmtNumber } from '@/shared/lib/formatters';
+import { fmtDate, fmtNumber } from '@/shared/lib/formatters';
 import { fetchMaturity, type SensorDevice } from '../api';
 import { strengthProgressPct } from '../sensorData';
 
@@ -20,7 +20,7 @@ export function MaturityCard({ device }: { device: SensorDevice }) {
   });
   const m = q.data;
   const pct = strengthProgressPct(m?.strength_mpa, m?.target_strength_mpa);
-  const series = (m?.series ?? []).map((p) => ({ ...p, label: new Date(p.t).toLocaleString() }));
+  const series = (m?.series ?? []).map((p) => ({ ...p, label: fmtDate(String(p.t), { dateStyle: 'short', timeStyle: 'short' }) }));
 
   return (
     <Card>

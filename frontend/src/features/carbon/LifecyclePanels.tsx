@@ -6,6 +6,7 @@
 
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { fmtNumber } from '@/shared/lib/formatters';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import { AlertTriangle, Download, FileUp, Flame, Truck } from 'lucide-react';
@@ -195,7 +196,7 @@ export function LifecyclePanel({ projectId }: { projectId: string }) {
                       : h.group}
                   </td>
                   <td className="py-1 text-right tabular-nums">{kgToTonnes(h.carbon_kg, i18n.language)}</td>
-                  <td className="py-1 text-right tabular-nums">{h.share_pct.toFixed(1)}</td>
+                  <td className="py-1 text-right tabular-nums">{fmtNumber(h.share_pct, 1)}</td>
                 </tr>
               ))}
             </tbody>

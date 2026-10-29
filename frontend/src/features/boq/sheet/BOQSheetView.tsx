@@ -38,6 +38,7 @@ import { formatClipboardNumber, formatLocaleNumber, parseLocaleNumber } from './
 import { buildPreview, type PreviewRow } from './pasteRows';
 import { isTypingKey, navigate, rectOf, single, type Rect, type Selection } from './selection';
 import { parseTSV, toTSV } from './tsv';
+import { fmtList } from '@/shared/lib/formatters';
 
 export const SHEET_ROW_HEIGHT = 28;
 const OVERSCAN = 8;
@@ -948,10 +949,10 @@ export function BOQSheetView({
       <div className="flex min-h-[20px] flex-wrap items-center gap-3 text-2xs text-content-tertiary" aria-live="polite">
         {status?.formula && <span className="font-mono text-content-secondary">{status.formula}</span>}
         {status?.deps && status.deps.uses.length > 0 && (
-          <span>{t('boq.sheet.uses', { defaultValue: 'Uses: {{list}}', list: status.deps.uses.join(', ') })}</span>
+          <span>{t('boq.sheet.uses', { defaultValue: 'Uses: {{list}}', list: fmtList(status.deps.uses) })}</span>
         )}
         {status?.deps && status.deps.usedBy.length > 0 && (
-          <span>{t('boq.sheet.used_by', { defaultValue: 'Used by: {{list}}', list: status.deps.usedBy.join(', ') })}</span>
+          <span>{t('boq.sheet.used_by', { defaultValue: 'Used by: {{list}}', list: fmtList(status.deps.usedBy) })}</span>
         )}
         {status?.audit.map((a) => (
           <span key={a.name}>

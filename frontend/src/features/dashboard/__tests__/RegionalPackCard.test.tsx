@@ -52,6 +52,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RegionalPackCard } from '../RegionalPackCard';
 import { isOnboardingCompleted } from '@/features/onboarding';
 import { apiGet } from '@/shared/lib/api';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // The shared setup (`src/test/setup.ts`) replaces `useNavigate` with a fresh
 // no-op spy for every test in the suite. That is why no existing test could
@@ -145,6 +146,7 @@ const location = () => screen.getByTestId('location').textContent;
 
 describe('RegionalPackCard, no pack active', () => {
   beforeEach(() => {
+    useAuthStore.setState({ isAuthenticated: true });
     // Every reader who reaches a dashboard has finished onboarding: either the
     // wizard wrote this flag, or the dashboard wrote it after the server said
     // so. This is the only interesting state, not an edge case.
@@ -237,6 +239,7 @@ const ACTIVE_PACK = {
 
 describe('RegionalPackCard, a pack already active', () => {
   beforeEach(() => {
+    useAuthStore.setState({ isAuthenticated: true });
     localStorage.setItem('oe_onboarding_completed', 'true');
     vi.mocked(apiGet).mockResolvedValue(ACTIVE_PACK);
   });

@@ -27,6 +27,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import type { InsightDataset, InsightDef } from '@/features/insights';
+import { fmtList } from '@/shared/lib/formatters';
 import {
   captureProject,
   compareEstimate,
@@ -110,7 +111,7 @@ export function BandBar({ band, value, position }: { band: Band; value: string |
   const lo = Math.min(p10, v ?? p10);
   const hi = Math.max(p90, v ?? p90);
   const span = hi - lo || 1;
-  const pct = (x: number) => `${(((x - lo) / span) * 100).toFixed(2)}%`;
+  const pct = (x: number) => `${((x - lo) / span) * 100}%`;
   return (
     <div className="relative h-4 w-full min-w-[120px]" data-testid="band-bar">
       <div className="absolute top-1/2 h-1 w-full -translate-y-1/2 rounded bg-surface-secondary" />
@@ -344,7 +345,7 @@ function CompareResultView({ result, onExport }: { result: CompareResult; onExpo
         <p className="text-xs text-content-tertiary">
           {t('cost_benchmarks.missing_quantity', {
             defaultValue: 'Left out for missing floor area or quantity: {{names}}',
-            names: cohort.missing_quantity.join(', '),
+            names: fmtList(cohort.missing_quantity),
           })}
         </p>
       )}

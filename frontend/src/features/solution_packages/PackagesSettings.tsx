@@ -15,6 +15,7 @@ import { ApiError } from '@/shared/lib/api';
 import { PACKAGES_QUERY_KEY, removePackage, setModuleEnabled, useSolutionPackages } from './api';
 import { PackageCard, PackagePicker } from './PackagePicker';
 import { directDependents, enabledModules } from './logic';
+import { fmtList } from '@/shared/lib/formatters';
 
 export function PackagesSettings() {
   const { t } = useTranslation();
@@ -94,7 +95,7 @@ export function PackagesSettings() {
               {removing.hidden.length
                 ? t('packages.remove_warning', {
                     name: t(`packages.${removing.id}.name`),
-                    modules: removing.hidden.map(name).join(', '),
+                    modules: fmtList(removing.hidden.map(name)),
                   })
                 : t('packages.remove_none', { name: t(`packages.${removing.id}.name`) })}
             </p>
@@ -137,7 +138,7 @@ export function PackagesSettings() {
             <p>
               {t('packages.dependency_warning', {
                 module: name(pending.module),
-                dependents: pending.dependents.map(name).join(', '),
+                dependents: fmtList(pending.dependents.map(name)),
               })}
             </p>
             <div className="mt-2 flex gap-2">
@@ -164,7 +165,7 @@ export function PackagesSettings() {
                   <div className="text-sm text-content-primary">{name(m.key)}</div>
                   {needs.length > 0 && (
                     <div className="text-2xs text-content-tertiary">
-                      {t('packages.needed_by', { modules: needs.map(name).join(', ') })}
+                      {t('packages.needed_by', { modules: fmtList(needs.map(name)) })}
                     </div>
                   )}
                 </div>

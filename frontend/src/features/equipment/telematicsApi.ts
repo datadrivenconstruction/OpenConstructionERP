@@ -21,6 +21,8 @@ export interface UtilisationMachine {
   fuel_l: string;
   co2_kg: string;
   hire_cost: string;
+  /** Currency of the hire cost; blank when the machine's rentals mix currencies. */
+  currency: string;
   days: number;
   utilisation_pct: string;
   idle_pct: string;
@@ -37,6 +39,8 @@ export interface UtilisationTotals {
   utilisation_pct: string;
   idle_pct: string;
   machines: number;
+  /** Currency of the hire cost total; blank when the rentals mix currencies. */
+  currency: string;
 }
 
 export interface Utilisation {

@@ -11,6 +11,7 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut, apiDelete, downloadWithAuth, type Page } from '@/shared/lib/api';
+import { compareNames } from '@/shared/lib/collator';
 
 export interface WipRow {
   project_id: string;
@@ -195,7 +196,7 @@ export function sortRows(rows: WipRow[], key: WipSortKey, dir: 'asc' | 'desc' = 
     .sort((a, b) => {
       let c: number;
       if (key === 'project_name') {
-        c = a.r.project_name.localeCompare(b.r.project_name);
+        c = compareNames(a.r.project_name, b.r.project_name);
       } else if (key === 'fade') {
         const x = a.r.fade;
         const y = b.r.fade;

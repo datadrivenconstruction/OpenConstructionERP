@@ -13,6 +13,7 @@ import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import { importTelematics, type ImportResult } from '../telematicsApi';
 import { importKindFor } from '../telematicsFormat';
+import { fmtList } from '@/shared/lib/formatters';
 
 export function TelematicsImport() {
   const { t } = useTranslation();
@@ -109,7 +110,7 @@ export function TelematicsImport() {
               <p className="text-sm text-content-secondary">
                 {t('equipment.telematics.import_unmatched_list', {
                   defaultValue: 'No machine with this code or serial: {{refs}}',
-                  refs: result.unmatched.slice(0, 20).join(', '),
+                  refs: fmtList(result.unmatched.slice(0, 20)),
                 })}
               </p>
             )}

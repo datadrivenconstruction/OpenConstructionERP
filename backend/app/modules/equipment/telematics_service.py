@@ -381,6 +381,7 @@ class TelematicsService:
                     "hire_cost": _ZERO,
                     "days": 0,
                     "project_ids": set(),
+                    "currencies": set(),
                 },
             )
             m["worked_hours"] += d.worked_hours
@@ -390,6 +391,8 @@ class TelematicsService:
             m["co2_kg"] += d.co2_kg or _ZERO
             m["hire_cost"] += d.hire_cost or _ZERO
             m["days"] += 1
+            if d.hire_cost and d.currency:
+                m["currencies"].add(d.currency)
             if d.project_id:
                 m["project_ids"].add(str(d.project_id))
         eqs = {}
@@ -400,7 +403,12 @@ class TelematicsService:
             }
         rows = []
         totals = dict.fromkeys(("worked_hours", "idle_hours", "off_hours", "fuel_l", "co2_kg", "hire_cost"), _ZERO)
+        all_currencies: set[str] = set()
         for eq_id, m in machines.items():
+            # One currency names the hire cost; mixed currencies leave it blank rather than add them up silently.
+            currencies = m.pop("currencies")
+            all_currencies |= currencies
+            m["currency"] = next(iter(currencies)) if len(currencies) == 1 else ""
             eq = eqs.get(eq_id)
             engine = m["worked_hours"] + m["idle_hours"]
             m["code"] = eq.code if eq else ""
@@ -416,6 +424,7 @@ class TelematicsService:
         summary["utilisation_pct"] = _pct(totals["worked_hours"], engine_total + totals["off_hours"])
         summary["idle_pct"] = _pct(totals["idle_hours"], engine_total)
         summary["machines"] = len(rows)
+        summary["currency"] = next(iter(all_currencies)) if len(all_currencies) == 1 else ""
         return {
             "date_from": date_from.isoformat(),
             "date_to": date_to.isoformat(),

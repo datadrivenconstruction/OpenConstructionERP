@@ -30,7 +30,7 @@ import {
   WideModalSection,
 } from '@/shared/ui/WideModal';
 import { useToastStore } from '@/stores/useToastStore';
-import { formatDateValue, getIntlLocale } from '@/shared/lib/formatters';
+import { fmtList, formatDateValue, getIntlLocale } from '@/shared/lib/formatters';
 import { TenderTimeline } from './TenderTimeline';
 import {
   type Addendum,
@@ -452,7 +452,7 @@ export function PendingFirms({ addendum, recipients }: { addendum: Addendum; rec
       </span>
       {names.length > 0 && (
         <span className="ml-2 text-semantic-warning">
-          {t('tendering.addendum.pending_firms', { defaultValue: 'Waiting for: {{names}}', names: names.join(', ') })}
+          {t('tendering.addendum.pending_firms', { defaultValue: 'Waiting for: {{names}}', names: fmtList(names) })}
         </span>
       )}
     </div>

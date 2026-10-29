@@ -34,6 +34,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DashboardMarketCasesCard } from '../DashboardMarketCasesCard';
 import { useDashboardLayoutStore } from '@/stores/useDashboardLayoutStore';
 import { useCasesStore } from '@/features/cases/useCasesStore';
+import { useAuthStore } from '@/stores/useAuthStore';
 import { PLAYBOOKS } from '@/features/cases/playbooks';
 import { regionDisplayName } from '@/features/cases/regions';
 
@@ -149,6 +150,7 @@ function allCasesLabel(market: string): string {
 }
 
 beforeEach(() => {
+  useAuthStore.setState({ isAuthenticated: true });
   navigateSpy.mockClear();
   language.tag = 'en';
   language.translated = 'all';

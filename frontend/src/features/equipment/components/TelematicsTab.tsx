@@ -10,7 +10,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Wallet } from 'lucide-react';
 import { Button, Card, CardContent, CardHeader, EmptyState, ErrorState } from '@/shared/ui';
 import { RuleResultsList } from '@/shared/ui/RuleResultsList';
-import { fmtNumber } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtNumber } from '@/shared/lib/formatters';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -148,7 +148,7 @@ export function TelematicsTab() {
                         </td>
                         <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.fuel_l, 1)}</td>
                         <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(m.co2_kg, 1)}</td>
-                        <td className="py-2 pl-2 text-right tabular-nums">{fmtNumber(m.hire_cost, 2)}</td>
+                        <td className="py-2 pl-2 text-right tabular-nums">{m.currency ? fmtCurrency(m.hire_cost, m.currency) : fmtNumber(m.hire_cost, 2)}</td>
                       </tr>
                     );
                   })}
@@ -166,7 +166,7 @@ export function TelematicsTab() {
                       <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.idle_pct, 1)}%</td>
                       <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.fuel_l, 1)}</td>
                       <td className="px-2 py-2 text-right tabular-nums">{fmtNumber(totals.co2_kg, 1)}</td>
-                      <td className="py-2 pl-2 text-right tabular-nums">{fmtNumber(totals.hire_cost, 2)}</td>
+                      <td className="py-2 pl-2 text-right tabular-nums">{totals.currency ? fmtCurrency(totals.hire_cost, totals.currency) : fmtNumber(totals.hire_cost, 2)}</td>
                     </tr>
                   </tfoot>
                 )}
