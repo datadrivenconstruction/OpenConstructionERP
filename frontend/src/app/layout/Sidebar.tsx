@@ -293,6 +293,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   // Real estate development
   '/property-dev': 'oe_property_dev',
   '/accommodation': 'oe_accommodation',
+  '/leasing': 'oe_leasing',
   // Planning
   '/schedule': 'oe_schedule',
   '/schedule-advanced': 'oe_schedule_advanced',
@@ -451,6 +452,7 @@ const PRODUCT_TOUR_NAV_TESTIDS: Record<string, string> = {
   '/bim': 'sidebar-nav-bim',
   '/property-dev': 'sidebar-nav-property-dev',
   '/accommodation': 'sidebar-nav-accommodation',
+  '/leasing': 'sidebar-nav-leasing',
   '/geo': 'sidebar-nav-geo-hub',
 };
 

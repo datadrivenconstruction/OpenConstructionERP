@@ -103,6 +103,7 @@ import {
   Flag,
   Wrench,
   MonitorPlay,
+  KeyRound,
 } from 'lucide-react';
 
 
@@ -870,6 +871,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.property_dev', to: '/property-dev', icon: Building2 },
       { labelKey: 'nav.accommodation', to: '/accommodation', icon: Building2, badge: 'BETA' },
+      { labelKey: 'nav.leasing', to: '/leasing', icon: KeyRound },
       { labelKey: 'nav.property_dev_dashboards', to: '/property-dev/dashboards', icon: BarChart3, advancedOnly: true },
       { labelKey: 'nav.property_dev_house_types', to: '/property-dev/settings/house-types', icon: Building2, advancedOnly: true },
       { labelKey: 'nav.property_dev_doc_templates', to: '/property-dev/settings/document-templates', icon: FileText, advancedOnly: true },

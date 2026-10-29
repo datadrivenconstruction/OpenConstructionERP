@@ -102,6 +102,7 @@ import {
   ScanEye,
   AlarmClock,
   type LucideIcon,
+  KeyRound,
 } from 'lucide-react';
 import { getIconOverride } from './menuIcons';
 import { navGroups } from './navCatalog';
@@ -250,6 +251,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   // ── 16. Real Estate ───────────────────────────────────────────────
   '/property-dev': Building2,
   '/accommodation': Building2,
+  '/leasing': KeyRound,
   '/property-dev/dashboards': BarChart3,
   '/property-dev/settings/house-types': Building2,
   '/property-dev/settings/document-templates': FileText,

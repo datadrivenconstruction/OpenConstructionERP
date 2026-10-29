@@ -305,6 +305,12 @@ const InterfaceManagementPage = lazy(() =>
 const ConditionPage = lazy(() =>
   import('@/features/condition').then((m) => ({ default: m.ConditionPage }))
 );
+const LeasingPage = lazy(() =>
+  import('@/features/leasing').then((m) => ({ default: m.LeasingPage }))
+);
+const LeaseDetailPage = lazy(() =>
+  import('@/features/leasing').then((m) => ({ default: m.LeaseDetailPage }))
+);
 const DefectsLiabilityPage = lazy(() =>
   import('@/features/defects-liability/DefectsLiabilityPage').then((m) => ({
     default: m.DefectsLiabilityPage,
@@ -1776,6 +1782,8 @@ export default function App() {
           }
         />
         <Route path="/property-dev/dashboards/:key" element={<P title="Property Development Dashboard"><PropertyDevDashboardFullView /></P>} />
+        <Route path="/leasing" element={<P title="Leasing"><LeasingPage /></P>} />
+        <Route path="/leasing/:leaseId" element={<P title="Leasing"><LeaseDetailPage /></P>} />
         <Route path="/accommodation" element={<P title="Accommodation"><AccommodationListPage /></P>} />
         <Route path="/accommodation/calendar" element={<P title="Accommodation Calendar"><AccommodationCalendarPage /></P>} />
         <Route path="/accommodation/:id" element={<P title="Accommodation"><AccommodationDetailPage /></P>} />
