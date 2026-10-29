@@ -230,6 +230,7 @@ class RentRollRow(BaseModel):
     unit_ref: str
     unit_label: str
     tenant_contact_id: str
+    tenant_name: str = ""
     status: str
     start_date: date
     end_date: date
@@ -253,6 +254,7 @@ class ArrearsRow(BaseModel):
     code: str
     unit_label: str
     tenant_contact_id: str
+    tenant_name: str = ""
     currency: str
     invoice_id: str
     invoice_number: str

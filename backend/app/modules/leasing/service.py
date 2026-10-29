@@ -503,11 +503,33 @@ class LeasingService:
 
     # ── Reports ──────────────────────────────────────────────────────────
 
+    async def tenant_names(self, leases: Sequence[Lease]) -> dict[str, str]:
+        """Display names of the tenant contacts, by contact id."""
+        from sqlalchemy import select
+
+        from app.modules.contacts.models import Contact
+
+        ids = []
+        for x in leases:
+            try:
+                ids.append(uuid.UUID(str(x.tenant_contact_id)))
+            except ValueError:
+                continue
+        if not ids:
+            return {}
+        rows = await self.session.execute(select(Contact).where(Contact.id.in_(ids)))
+        out: dict[str, str] = {}
+        for c in rows.scalars().all():
+            person = " ".join(p for p in (c.first_name, c.last_name) if p)
+            out[str(c.id)] = c.company_name or c.legal_name or person or ""
+        return out
+
     async def rent_roll(self, leases: Sequence[Lease], as_of: date) -> dict[str, Any]:
         lines = await self.repo.lines_for_leases([x.id for x in leases])
         by_lease: dict[uuid.UUID, list[RentScheduleLine]] = {}
         for line in lines:
             by_lease.setdefault(line.lease_id, []).append(line)
+        names = await self.tenant_names(leases)
         rows: list[dict[str, Any]] = []
         totals: dict[str, Decimal] = {}
         for lease in leases:
@@ -533,6 +555,7 @@ class LeasingService:
                     "unit_ref": lease.unit_ref,
                     "unit_label": lease.unit_label,
                     "tenant_contact_id": lease.tenant_contact_id,
+                    "tenant_name": names.get(lease.tenant_contact_id, ""),
                     "status": lease.status,
                     "start_date": lease.start_date,
                     "end_date": lease.end_date,
@@ -565,6 +588,7 @@ class LeasingService:
             direction="receivable",
             invoice_ids=[uuid.UUID(i) for i in lease_by_invoice],
         )
+        names = await self.tenant_names(leases)
         rows: list[dict[str, Any]] = []
         totals: dict[str, dict[str, Decimal]] = {}
         for inv in invoices:
@@ -581,6 +605,7 @@ class LeasingService:
                     "code": lease.code,
                     "unit_label": lease.unit_label or lease.unit_ref,
                     "tenant_contact_id": lease.tenant_contact_id,
+                    "tenant_name": names.get(lease.tenant_contact_id, ""),
                     "currency": inv.currency_code,
                     "invoice_id": str(inv.invoice_id),
                     "invoice_number": inv.invoice_number,
