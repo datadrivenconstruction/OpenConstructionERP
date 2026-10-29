@@ -1,0 +1,35 @@
+# DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
+# Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+"""Jurisdiction codes a procurement profile may carry: ISO 3166-1 alpha-2, ISO 3166-2, and ``EU``.
+
+``EU`` is the exceptionally reserved ISO 3166-1 code for the European Union, the
+one supranational level the profiles know. A subdivision code (``DE-BY``) is
+checked for its form and for a known country prefix; the subdivision list itself
+is not shipped, so a data slice cites the ISO 3166-2 entry as its source.
+"""
+
+from __future__ import annotations
+
+import re
+
+SUPRANATIONAL = frozenset({"EU"})
+
+ISO_3166_1_ALPHA2 = frozenset(
+    ["AD", "AE", "AF", "AG", "AI", "AL", "AM", "AO", "AQ", "AR", "AS", "AT", "AU", "AW", "AX", "AZ", "BA", "BB", "BD", "BE", "BF", "BG", "BH", "BI", "BJ", "BL", "BM", "BN", "BO", "BQ", "BR", "BS", "BT", "BV", "BW", "BY", "BZ", "CA", "CC", "CD", "CF", "CG", "CH", "CI", "CK", "CL", "CM", "CN", "CO", "CR", "CU", "CV", "CW", "CX", "CY", "CZ", "DE", "DJ", "DK", "DM", "DO", "DZ", "EC", "EE", "EG", "EH", "ER", "ES", "ET", "FI", "FJ", "FK", "FM", "FO", "FR", "GA", "GB", "GD", "GE", "GF", "GG", "GH", "GI", "GL", "GM", "GN", "GP", "GQ", "GR", "GS", "GT", "GU", "GW", "GY", "HK", "HM", "HN", "HR", "HT", "HU", "ID", "IE", "IL", "IM", "IN", "IO", "IQ", "IR", "IS", "IT", "JE", "JM", "JO", "JP", "KE", "KG", "KH", "KI", "KM", "KN", "KP", "KR", "KW", "KY", "KZ", "LA", "LB", "LC", "LI", "LK", "LR", "LS", "LT", "LU", "LV", "LY", "MA", "MC", "MD", "ME", "MF", "MG", "MH", "MK", "ML", "MM", "MN", "MO", "MP", "MQ", "MR", "MS", "MT", "MU", "MV", "MW", "MX", "MY", "MZ", "NA", "NC", "NE", "NF", "NG", "NI", "NL", "NO", "NP", "NR", "NU", "NZ", "OM", "PA", "PE", "PF", "PG", "PH", "PK", "PL", "PM", "PN", "PR", "PS", "PT", "PW", "PY", "QA", "RE", "RO", "RS", "RU", "RW", "SA", "SB", "SC", "SD", "SE", "SG", "SH", "SI", "SJ", "SK", "SL", "SM", "SN", "SO", "SR", "SS", "ST", "SV", "SX", "SY", "SZ", "TC", "TD", "TF", "TG", "TH", "TJ", "TK", "TL", "TM", "TN", "TO", "TR", "TT", "TV", "TW", "TZ", "UA", "UG", "UM", "US", "UY", "UZ", "VA", "VC", "VE", "VG", "VI", "VN", "VU", "WF", "WS", "YE", "YT", "ZA", "ZM", "ZW"]
+)
+
+_SUBDIVISION = re.compile(r"^([A-Z]{2})-[A-Z0-9]{1,3}$")
+
+
+def country_of(code: str) -> str | None:
+    """The ISO 3166-1 country of ``code`` (itself for a country, the prefix for a subdivision)."""
+    m = _SUBDIVISION.fullmatch(code)
+    return m.group(1) if m else code if code in ISO_3166_1_ALPHA2 else None
+
+
+def is_known_jurisdiction(code: str) -> bool:
+    """Whether ``code`` is ``EU``, an ISO 3166-1 alpha-2 code, or a well-formed subdivision of one."""
+    if code in SUPRANATIONAL or code in ISO_3166_1_ALPHA2:
+        return True
+    m = _SUBDIVISION.fullmatch(code)
+    return bool(m) and m.group(1) in ISO_3166_1_ALPHA2

@@ -1,0 +1,158 @@
+{
+  "schema_version": 2,
+  "header": {
+    "jurisdiction": "DE",
+    "parent": "EU",
+    "name_key": "procurement_concept.catalogue.jurisdiction.de_national",
+    "legacy_codes": [
+      "de_national"
+    ],
+    "authority_types": [],
+    "private_authority_type": "private"
+  },
+  "thresholds": [
+    {
+      "contract_type": "supplies",
+      "authority_type": "central",
+      "effect": "below_allows_direct",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "request_for_quotation"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "15000",
+        "unit": "EUR",
+        "source_url": "https://vergabeblog.de/2026-01-13/bund-verlaengert-befristete-auftragswertgrenze-von-15-000-eur-fuer-direktauftraege/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "central",
+      "effect": "below_allows_direct",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "request_for_quotation"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "15000",
+        "unit": "EUR",
+        "source_url": "https://vergabeblog.de/2026-01-13/bund-verlaengert-befristete-auftragswertgrenze-von-15-000-eur-fuer-direktauftraege/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "central",
+      "effect": "below_allows_direct",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "request_for_quotation"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "15000",
+        "unit": "EUR",
+        "source_url": "https://vergabeblog.de/2026-01-13/bund-verlaengert-befristete-auftragswertgrenze-von-15-000-eur-fuer-direktauftraege/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    }
+  ],
+  "procedures": [],
+  "publication": [],
+  "requirements": [],
+  "award": {
+    "criteria": null,
+    "weights_published": null,
+    "abnormally_low_rule": null
+  },
+  "notification": {
+    "standstill": []
+  },
+  "signature": {
+    "framework": "eidas",
+    "bid_level": null
+  },
+  "locale": {
+    "languages": null,
+    "currency": null,
+    "vat_basis": null
+  }
+}

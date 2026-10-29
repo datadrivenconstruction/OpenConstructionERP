@@ -1,0 +1,314 @@
+{
+  "schema_version": 2,
+  "header": {
+    "jurisdiction": "US",
+    "parent": null,
+    "name_key": "procurement_concept.catalogue.jurisdiction.us_federal",
+    "legacy_codes": [
+      "us_federal"
+    ],
+    "authority_types": [
+      "central",
+      "private"
+    ],
+    "private_authority_type": "private"
+  },
+  "thresholds": [
+    {
+      "contract_type": "works",
+      "authority_type": "central",
+      "effect": "below_allows_direct",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "15000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "central",
+      "effect": "below_allows_direct",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "15000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "central",
+      "effect": "below_allows_direct",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "15000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "central",
+      "effect": "below_allows_direct",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "15000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "works",
+      "authority_type": "central",
+      "effect": "below_allows_simplified",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "350000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "central",
+      "effect": "below_allows_simplified",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "350000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "central",
+      "effect": "below_allows_simplified",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "350000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "central",
+      "effect": "below_allows_simplified",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off"
+      ],
+      "allowed_below": [
+        "sealed_bid",
+        "negotiated_best_value",
+        "restricted",
+        "framework_call_off",
+        "request_for_quotation",
+        "direct_award"
+      ],
+      "amount": {
+        "value": "350000",
+        "unit": "USD",
+        "source_url": "https://centrelawgroup.com/blog/inflation-updates-to-far-thresholds-what-changed-on-october-1-2025/",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2025-10-01",
+        "effective_to": null
+      }
+    }
+  ],
+  "procedures": [],
+  "publication": [],
+  "requirements": [],
+  "award": {
+    "criteria": null,
+    "weights_published": null,
+    "abnormally_low_rule": null
+  },
+  "notification": {
+    "standstill": []
+  },
+  "signature": {
+    "framework": "eidas",
+    "bid_level": null
+  },
+  "locale": {
+    "languages": null,
+    "currency": null,
+    "vat_basis": null
+  }
+}

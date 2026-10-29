@@ -1,0 +1,840 @@
+{
+  "schema_version": 2,
+  "header": {
+    "jurisdiction": "EU",
+    "parent": null,
+    "name_key": "procurement_concept.catalogue.jurisdiction.eu",
+    "legacy_codes": [
+      "eu"
+    ],
+    "authority_types": [
+      "central",
+      "sub_central",
+      "utility",
+      "private"
+    ],
+    "private_authority_type": "private"
+  },
+  "thresholds": [
+    {
+      "contract_type": "works",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5538000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "works",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5538000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "143000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "221000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "143000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "221000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "143000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "221000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32023R2495",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2024-01-01",
+        "effective_to": "2025-12-31"
+      }
+    },
+    {
+      "contract_type": "works",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5404000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "works",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5404000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "140000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "216000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "140000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "216000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "140000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "216000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:32025R2152",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "432000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/eli/dir/2014/25/oj",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "432000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/eli/dir/2014/25/oj",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "432000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/eli/dir/2014/25/oj",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    },
+    {
+      "contract_type": "works",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "net",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5404000",
+        "unit": "EUR",
+        "source_url": "https://eur-lex.europa.eu/eli/dir/2014/25/oj",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": "2027-12-31"
+      }
+    }
+  ],
+  "procedures": [],
+  "publication": [],
+  "requirements": [],
+  "award": {
+    "criteria": null,
+    "weights_published": null,
+    "abnormally_low_rule": null
+  },
+  "notification": {
+    "standstill": []
+  },
+  "signature": {
+    "framework": "eidas",
+    "bid_level": null
+  },
+  "locale": {
+    "languages": null,
+    "currency": null,
+    "vat_basis": null
+  }
+}

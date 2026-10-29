@@ -1,0 +1,534 @@
+{
+  "schema_version": 2,
+  "header": {
+    "jurisdiction": "GB",
+    "parent": null,
+    "name_key": "procurement_concept.catalogue.jurisdiction.uk",
+    "legacy_codes": [
+      "uk"
+    ],
+    "authority_types": [
+      "central",
+      "sub_central",
+      "utility",
+      "private"
+    ],
+    "private_authority_type": "private"
+  },
+  "thresholds": [
+    {
+      "contract_type": "works",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5193000",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "works",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5193000",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "works",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "all_lots",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "5193000",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "135018",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "135018",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "135018",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "207720",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "207720",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "sub_central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "207720",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "supplies",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "415440",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "services",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "415440",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "design_services",
+      "authority_type": "utility",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "415440",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    },
+    {
+      "contract_type": "light_touch",
+      "authority_type": "central",
+      "effect": "above_requires_publication",
+      "vat_basis": "gross",
+      "lot_aggregation": "per_lot",
+      "allowed_above": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "framework_call_off",
+        "mini_competition"
+      ],
+      "allowed_below": [
+        "open",
+        "restricted",
+        "competitive_negotiated",
+        "competitive_dialogue",
+        "innovation_partnership",
+        "framework_call_off",
+        "mini_competition",
+        "direct_award",
+        "request_for_quotation"
+      ],
+      "amount": {
+        "value": "663540",
+        "unit": "GBP",
+        "source_url": "https://www.blakemorgan.co.uk/new-public-procurement-thresholds-from-1-january-2026",
+        "source_ref": null,
+        "retrieved_at": null,
+        "confidence": null,
+        "review_status": "unconfirmed",
+        "confirmed_by": null,
+        "confirmed_at": null,
+        "effective_from": "2026-01-01",
+        "effective_to": null
+      }
+    }
+  ],
+  "procedures": [],
+  "publication": [],
+  "requirements": [],
+  "award": {
+    "criteria": null,
+    "weights_published": null,
+    "abnormally_low_rule": null
+  },
+  "notification": {
+    "standstill": []
+  },
+  "signature": {
+    "framework": "eidas",
+    "bid_level": null
+  },
+  "locale": {
+    "languages": null,
+    "currency": null,
+    "vat_basis": null
+  }
+}
