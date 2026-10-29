@@ -11,7 +11,7 @@ The step is inspector-guarded, so a database whose table ``create_all`` already
 built reaches this revision and does nothing.
 
 Revision ID: v200_project_color
-Revises: v199_subcontractor_contact_link
+Revises: vlv01_list_views
 Create Date: 2026-10-24
 """
 
@@ -23,7 +23,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v200_project_color"
-down_revision: str | Sequence[str] | None = "v199_subcontractor_contact_link"
+down_revision: str | Sequence[str] | None = "vlv01_list_views"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
