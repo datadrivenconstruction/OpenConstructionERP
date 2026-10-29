@@ -2085,5 +2085,19 @@
     ],
     "key_count_at_seed": 3,
     "note": "German and British English share the words Position and Name; identical by language, not by leak."
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "en-GB",
+      "fr",
+      "it",
+      "no",
+      "ro",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Standard is the native word in each of these languages for the default option of a setting; reviewed 2026-10-29"
   }
 ]
