@@ -2093,5 +2093,19 @@
     ],
     "key_count_at_seed": 3,
     "note": "Position and GAEB import labels read the same in French and Swedish; reviewed 2026-10-28"
+  },
+  {
+    "locale_set": [
+      "da",
+      "de",
+      "en-GB",
+      "fr",
+      "it",
+      "no",
+      "ro",
+      "sv"
+    ],
+    "key_count_at_seed": 3,
+    "note": "Standard is the native word in each of these languages for the default option of a setting; reviewed 2026-10-29"
   }
 ]
