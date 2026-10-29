@@ -13,6 +13,7 @@ import { ExternalLink, Scale } from 'lucide-react';
 
 import { Button } from '@/shared/ui/Button';
 import { EmptyState } from '@/shared/ui/EmptyState';
+import { fmtList } from '@/shared/lib/formatters';
 import { fmtDate } from '@/shared/lib/formatters';
 
 import {
@@ -32,7 +33,7 @@ const STATUS_TONE: Record<ProfileValueStatus, 'success' | 'warning' | 'error'> =
 };
 
 function shown(v: unknown): string {
-  if (Array.isArray(v)) return v.join(', ');
+  if (Array.isArray(v)) return fmtList(v.map(String));
   if (v === null || v === undefined) return '';
   return String(v);
 }

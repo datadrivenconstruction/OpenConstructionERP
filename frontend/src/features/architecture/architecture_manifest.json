@@ -185825,6 +185825,9 @@
         "permissions.py",
         "permit_conditions.py",
         "plan_source.py",
+        "profile.py",
+        "profile_codes.py",
+        "profile_service.py",
         "router.py",
         "rule_snapshot.py",
         "schemas.py",
@@ -186671,6 +186674,62 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "ProfileConfirmation",
+          "tablename": "oe_procurement_concept_profile_confirmation",
+          "docstring": "This instance's confirmation of one profile value: the exact value (hash) at one path, checked at source.",
+          "columns": [
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "jurisdiction",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "path",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "value_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "confirmed_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "confirmed_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "source_checked",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -186938,6 +186997,23 @@
           "method": "GET",
           "path": "/frameworks/{framework_id}/ledger",
           "handler": "framework_ledger"
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/{code}/values",
+          "handler": "profile_values",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "POST",
+          "path": "/profiles/{code}/confirmations",
+          "handler": "confirm_profile_value",
+          "request_schema": "ProfileConfirmIn"
+        },
+        {
+          "method": "DELETE",
+          "path": "/profiles/confirmations/{confirmation_id}",
+          "handler": "revoke_profile_value"
         }
       ],
       "schemas": [
@@ -187205,6 +187281,31 @@
             },
             {
               "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileConfirmIn",
+          "bases": [
+            "_In"
+          ],
+          "docstring": "Confirm one profile value on this instance: the value the person saw (path + hash) and where they checked it.",
+          "fields": [
+            {
+              "name": "path",
+              "type": "str"
+            },
+            {
+              "name": "value_hash",
+              "type": "str"
+            },
+            {
+              "name": "source_checked",
+              "type": "str"
+            },
+            {
+              "name": "note",
               "type": "str"
             }
           ]
@@ -292625,10 +292726,10 @@
     },
     {
       "name": "procurement_concept",
-      "ts_files": 25,
+      "ts_files": 26,
       "css_files": 0,
       "test_files": 3,
-      "total_files": 25
+      "total_files": 26
     },
     {
       "name": "progress",
@@ -294816,14 +294917,14 @@
   "statistics": {
     "backend_modules": 224,
     "modules_with_manifests": 222,
-    "total_models": 837,
-    "total_columns": 9864,
+    "total_models": 838,
+    "total_columns": 9872,
     "total_relationships": 254,
-    "total_routes": 4826,
-    "total_schemas": 4332,
-    "total_python_files": 3018,
+    "total_routes": 4829,
+    "total_schemas": 4333,
+    "total_python_files": 3021,
     "frontend_features": 219,
-    "frontend_ts_files": 3854,
+    "frontend_ts_files": 3855,
     "frontend_backend_mapped": 197
   },
   "frontend_backend_mapping": {
