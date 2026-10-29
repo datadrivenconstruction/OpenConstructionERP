@@ -60946,7 +60946,7 @@ const resource = {
     "packages.trades.name": "دستکاری اور چھوٹے کاروبار",
     "packages.trades.value": "پیشکش، عملے کی منصوبہ بندی، اوقات کا اندراج اور بل سب ایک جگہ۔",
     "packages.trades.audience": "بجلی کے کارکن، پلمبر، بڑھئی اور چھوٹے ٹھیکیدار",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "مقدار کا تخمینہ",
     "packages.takeoff.value": "PDF اور DWG ڈرائنگز سے مقدار ناپیں اور براہِ راست BoQ میں منتقل کریں۔",
     "packages.takeoff.audience": "ڈرائنگ سے پیمائش کرنے والے تخمینہ کار",
     "packages.tender_procurement.name": "ٹینڈر اور خریداری",

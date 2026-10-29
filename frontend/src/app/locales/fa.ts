@@ -60940,7 +60940,7 @@ const resource = {
     "packages.trades.name": "حرفه‌ها و کسب‌وکارهای فنی",
     "packages.trades.value": "پیشنهاد قیمت، برنامه‌ریزی نیروها، ثبت ساعت کار و صدور صورتحساب در یک جا.",
     "packages.trades.audience": "برق‌کاران، لوله‌کشان، نجاران و پیمانکاران کوچک",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "برآورد مقادیر",
     "packages.takeoff.value": "متره را از نقشه‌های PDF و DWG بردارید و مستقیم به BoQ منتقل کنید.",
     "packages.takeoff.audience": "برآوردکنندگانی که از روی نقشه متره می‌کنند",
     "packages.tender_procurement.name": "مناقصه و خرید",

@@ -61595,7 +61595,7 @@ const resource = {
     "packages.trades.name": "Hantverksföretag",
     "packages.trades.value": "Offert, planering av arbetslag, tidrapportering och fakturering på ett ställe.",
     "packages.trades.audience": "Elektriker, rörmokare, snickare och små byggare",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Mängduttag",
     "packages.takeoff.value": "Mät mängder från PDF- och DWG-ritningar och för dem direkt till BoQ.",
     "packages.takeoff.audience": "Kalkylatorer som mäter från ritningar",
     "packages.tender_procurement.name": "Upphandling och inköp",

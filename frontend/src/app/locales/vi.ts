@@ -60738,7 +60738,7 @@ const resource = {
     "packages.trades.name": "Doanh nghiệp thủ công",
     "packages.trades.value": "Báo giá, lập kế hoạch tổ đội, ghi giờ công và xuất hóa đơn ở một nơi.",
     "packages.trades.audience": "Thợ điện, thợ nước, thợ mộc và nhà thầu nhỏ",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Bóc tách khối lượng",
     "packages.takeoff.value": "Đo khối lượng từ bản vẽ PDF và DWG rồi đưa thẳng vào BoQ.",
     "packages.takeoff.audience": "Người lập dự toán đo bóc từ bản vẽ",
     "packages.tender_procurement.name": "Đấu thầu và mua sắm",

@@ -62271,7 +62271,7 @@ const resource = {
     "packages.trades.name": "Řemeslné firmy",
     "packages.trades.value": "Nabídka, plánování čet, evidence hodin a fakturace na jednom místě.",
     "packages.trades.audience": "Elektrikáři, instalatéři, truhláři a malí stavitelé",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Výkaz výměr",
     "packages.takeoff.value": "Odměřujte množství z výkresů PDF a DWG a přenášejte je přímo do BoQ.",
     "packages.takeoff.audience": "Kalkulanti, kteří měří z výkresů",
     "packages.tender_procurement.name": "Výběrová řízení a nákup",

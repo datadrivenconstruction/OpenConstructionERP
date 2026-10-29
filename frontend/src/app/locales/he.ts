@@ -61277,7 +61277,7 @@ const resource = {
     "packages.trades.name": "בתי מלאכה ועסקים קטנים",
     "packages.trades.value": "הצעה, תכנון צוותים, רישום שעות וחשבוניות במקום אחד.",
     "packages.trades.audience": "חשמלאים, אינסטלטורים, נגרים ובוני בתים קטנים",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "מדידת כמויות",
     "packages.takeoff.value": "מדדו כמויות מתוך שרטוטי PDF ו-DWG והעבירו אותן ישירות ל-BoQ.",
     "packages.takeoff.audience": "מאמדים שמודדים מתוך שרטוטים",
     "packages.tender_procurement.name": "מכרזים ורכש",

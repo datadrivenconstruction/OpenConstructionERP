@@ -63894,7 +63894,7 @@ const resource = {
     "packages.trades.name": "Negócio de ofícios",
     "packages.trades.value": "Proposta, planeamento de equipas, registo de horas e faturação num só lugar.",
     "packages.trades.audience": "Eletricistas, canalizadores, carpinteiros e pequenos construtores",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Medições",
     "packages.takeoff.value": "Medir quantidades em plantas PDF e DWG e passá-las diretamente para o BoQ.",
     "packages.takeoff.audience": "Orçamentistas que medem a partir de plantas",
     "packages.tender_procurement.name": "Concursos e compras",

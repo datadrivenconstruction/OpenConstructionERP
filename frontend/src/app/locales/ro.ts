@@ -61318,7 +61318,7 @@ const resource = {
     "packages.trades.name": "Meșteșugari și firme de specialitate",
     "packages.trades.value": "Ofertă, planificarea echipelor, evidența orelor și facturare, totul într-un loc.",
     "packages.trades.audience": "Electricieni, instalatori, tâmplari și constructori mici",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Extragere cantități",
     "packages.takeoff.value": "Măsurați cantități din planuri PDF și DWG și transferați-le direct în BoQ.",
     "packages.takeoff.audience": "Devizieri care măsoară din planuri",
     "packages.tender_procurement.name": "Licitații și achiziții",

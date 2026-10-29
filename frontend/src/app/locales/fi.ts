@@ -60984,7 +60984,7 @@ const resource = {
     "packages.trades.name": "Käsityöyritykset",
     "packages.trades.value": "Tarjous, työryhmien suunnittelu, tuntikirjaukset ja laskutus yhdessä paikassa.",
     "packages.trades.audience": "Sähkömiehet, putkimiehet, puuseppät ja pienet rakentajat",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Määrälaskenta",
     "packages.takeoff.value": "Mittaa määrät PDF- ja DWG-piirustuksista ja vie ne suoraan BoQ:hun.",
     "packages.takeoff.audience": "Arvioijat, jotka mittaavat piirustuksista",
     "packages.tender_procurement.name": "Kilpailutus ja hankinta",

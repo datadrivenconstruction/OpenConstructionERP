@@ -56623,7 +56623,7 @@ const resource = {
     "packages.trades.name": "Negócios de serviços",
     "packages.trades.value": "Proposta, planejamento de equipes, registro de horas e faturamento em um só lugar.",
     "packages.trades.audience": "Eletricistas, encanadores, marceneiros e pequenas construtoras",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Levantamento de quantitativos",
     "packages.takeoff.value": "Medir quantidades em plantas PDF e DWG e levá-las direto para o BoQ.",
     "packages.takeoff.audience": "Orçamentistas que medem a partir de projetos",
     "packages.tender_procurement.name": "Licitação e suprimentos",

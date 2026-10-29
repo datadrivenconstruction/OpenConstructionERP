@@ -60983,7 +60983,7 @@ const resource = {
     "packages.trades.name": "शिल्पकार और छोटे व्यवसाय",
     "packages.trades.value": "कोटेशन, टीम की योजना, घंटों का लॉग और बिलिंग, सब एक जगह।",
     "packages.trades.audience": "इलेक्ट्रीशियन, प्लंबर, बढ़ई और छोटे बिल्डर",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "मात्रा निकासी",
     "packages.takeoff.value": "PDF और DWG ड्रॉइंग से मात्रा नापें और सीधे BoQ में डालें।",
     "packages.takeoff.audience": "ड्रॉइंग से माप लेने वाले अनुमानकर्ता",
     "packages.tender_procurement.name": "टेंडर और खरीद",

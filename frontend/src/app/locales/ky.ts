@@ -61097,7 +61097,7 @@ const resource = {
     "packages.trades.name": "Кол өнөр ишканалары",
     "packages.trades.value": "Сунуш, бригаданы пландоо, саат эсеби жана эсеп-фактура бир жерде.",
     "packages.trades.audience": "Электриктер, сантехниктер, жыгач устасы жана кичи курулушчулар",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Көлөмдү эсептөө",
     "packages.takeoff.value": "PDF жана DWG чиймелеринен көлөмдөрдү өлчөп, түздөн-түз BoQ'ка өткөрүңүз.",
     "packages.takeoff.audience": "Чиймеден өлчөгөн сметачылар",
     "packages.tender_procurement.name": "Тендер жана сатып алуу",

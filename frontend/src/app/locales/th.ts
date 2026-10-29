@@ -60730,7 +60730,7 @@ const resource = {
     "packages.trades.name": "ธุรกิจช่างฝีมือ",
     "packages.trades.value": "ใบเสนอราคา วางแผนทีมงาน บันทึกชั่วโมงงาน และออกใบแจ้งหนี้ ในที่เดียว",
     "packages.trades.audience": "ช่างไฟฟ้า ช่างประปา ช่างไม้ และผู้รับเหมาขนาดเล็ก",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "ถอดแบบปริมาณงาน",
     "packages.takeoff.value": "วัดปริมาณจากแบบ PDF และ DWG แล้วส่งเข้า BoQ โดยตรง",
     "packages.takeoff.audience": "ผู้ประมาณราคาที่วัดปริมาณจากแบบ",
     "packages.tender_procurement.name": "การประมูลและจัดซื้อ",

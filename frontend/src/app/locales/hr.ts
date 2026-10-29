@@ -61328,7 +61328,7 @@ const resource = {
     "packages.trades.name": "Obrtnički poslovi",
     "packages.trades.value": "Ponuda, planiranje ekipa, evidencija sati i fakturiranje na jednom mjestu.",
     "packages.trades.audience": "Električari, vodoinstalateri, stolari i mali graditelji",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Iskaz količina",
     "packages.takeoff.value": "Izmjerite količine s PDF i DWG nacrta i prenesite ih izravno u BoQ.",
     "packages.takeoff.audience": "Procjenitelji koji mjere s nacrta",
     "packages.tender_procurement.name": "Nabava i natječaji",

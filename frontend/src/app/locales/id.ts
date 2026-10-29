@@ -60729,7 +60729,7 @@ const resource = {
     "packages.trades.name": "Usaha pertukangan",
     "packages.trades.value": "Penawaran, perencanaan tim, pencatatan jam kerja, dan faktur di satu tempat.",
     "packages.trades.audience": "Tukang listrik, tukang ledeng, tukang kayu, dan kontraktor kecil",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Perhitungan Volume",
     "packages.takeoff.value": "Ukur kuantitas dari gambar PDF dan DWG dan langsung masukkan ke BoQ.",
     "packages.takeoff.audience": "Estimator yang mengukur dari gambar",
     "packages.tender_procurement.name": "Tender & Pengadaan",

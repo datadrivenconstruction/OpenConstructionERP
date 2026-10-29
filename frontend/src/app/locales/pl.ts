@@ -62532,7 +62532,7 @@ const resource = {
     "packages.trades.name": "Firmy rzemieślnicze",
     "packages.trades.value": "Oferta, planowanie ekip, rejestracja godzin i fakturowanie w jednym miejscu.",
     "packages.trades.audience": "Elektrycy, hydraulicy, stolarze i mali wykonawcy",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Przedmiar",
     "packages.takeoff.value": "Mierz ilości z rysunków PDF i DWG i przenoś je prosto do BoQ.",
     "packages.takeoff.audience": "Kosztorysanci mierzący z rysunków",
     "packages.tender_procurement.name": "Przetargi i zakupy",

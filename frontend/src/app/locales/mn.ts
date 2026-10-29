@@ -60658,7 +60658,7 @@ const resource = {
     "packages.trades.name": "Гар урлалын бизнес",
     "packages.trades.value": "Санал, багийн төлөвлөлт, цагийн бүртгэл, нэхэмжлэх нэг дор.",
     "packages.trades.audience": "Цахилгаанчид, сантехникчид, мод боловсруулагчид, жижиг барилгачид",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Хэмжээ гаргалт",
     "packages.takeoff.value": "PDF ба DWG зургаас хэмжээг авч шууд BoQ руу оруулна.",
     "packages.takeoff.audience": "Зургаас хэмждэг тооцоочид",
     "packages.tender_procurement.name": "Тендер ба худалдан авалт",

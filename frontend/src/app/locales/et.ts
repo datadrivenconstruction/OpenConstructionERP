@@ -60930,7 +60930,7 @@ const resource = {
     "packages.trades.name": "Käsitööettevõtted",
     "packages.trades.value": "Pakkumine, meeskondade planeerimine, tundide arvestus ja arved ühes kohas.",
     "packages.trades.audience": "Elektrikud, torutöölised, puusepad, väikesed ehitajad",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Mahuarvestus",
     "packages.takeoff.value": "Mõõda kogused PDF- ja DWG-jooniselt ja vii need otse BoQ-sse.",
     "packages.takeoff.audience": "Eelarvestajad, kes mõõdavad jooniselt",
     "packages.tender_procurement.name": "Hanked ja hange",

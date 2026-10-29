@@ -150,6 +150,8 @@ async function toProfileStep() {
   click(/Get Started/);
   await heading('How would you like to start?');
   click(/Choose Your Profile/);
+  await heading('Choose your packages');
+  click('Pick a single company profile instead');
   await heading('What does your company do?');
   await screen.findByTestId('profile-card-general_contractor');
 }
@@ -232,6 +234,8 @@ describe('the onboarding wizard, first screen to the app', () => {
     await heading('How would you like to start?');
     expect(stepLabel()).toBe('Step 2 of 7');
     click(/Choose Your Profile/);
+    await heading('Choose your packages');
+    click('Pick a single company profile instead');
     await heading('What does your company do?');
     expect(stepLabel()).toBe('Step 3 of 7');
 
@@ -318,6 +322,8 @@ describe('the onboarding wizard, first screen to the app', () => {
     click(/Get Started/);
     await heading('How would you like to start?');
     click(/Choose Your Profile/);
+    await heading('Choose your packages');
+    click('Pick a single company profile instead');
     await heading('What does your company do?');
     expect(screen.getByTestId('profile-card-subcontractor').getAttribute('aria-pressed')).toBe('true');
     click('Continue');

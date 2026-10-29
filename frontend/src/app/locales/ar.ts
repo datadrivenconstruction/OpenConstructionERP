@@ -64090,7 +64090,7 @@ const resource = {
     "packages.trades.name": "الحرفيون والمقاولون الصغار",
     "packages.trades.value": "عرض السعر وتخطيط الفرق وتسجيل ساعات العمل وإصدار الفواتير في مكان واحد.",
     "packages.trades.audience": "الكهربائيون والسباكون والنجارون وصغار المقاولين",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "حصر الكميات",
     "packages.takeoff.value": "أخذ الكميات من مخططات PDF وDWG ونقلها مباشرة إلى BoQ.",
     "packages.takeoff.audience": "مقدرو الكميات الذين يأخذون القياسات من المخططات",
     "packages.tender_procurement.name": "المناقصات والمشتريات",

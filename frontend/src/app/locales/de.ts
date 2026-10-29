@@ -63615,7 +63615,7 @@ const resource = {
     "packages.trades.name": "Handwerksbetriebe",
     "packages.trades.value": "Angebot, Personaleinsatz, Stundenerfassung und Rechnung – alles an einem Ort.",
     "packages.trades.audience": "Elektriker, Installateure, Zimmerer, kleine Bauunternehmen",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Mengenermittlung",
     "packages.takeoff.value": "Mengen aus PDF- und DWG-Plänen direkt ins LV übernehmen.",
     "packages.takeoff.audience": "Kalkulatoren, die aus Plänen messen",
     "packages.tender_procurement.name": "Ausschreibung & Beschaffung",

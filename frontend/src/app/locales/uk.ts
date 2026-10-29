@@ -63079,7 +63079,7 @@ const resource = {
     "packages.trades.name": "Ремісничі компанії",
     "packages.trades.value": "Пропозиція, графік бригад, облік годин і рахунки в одному місці.",
     "packages.trades.audience": "Електрики, сантехніки, тесляри та невеликі будівельні бригади",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Підрахунок обсягів",
     "packages.takeoff.value": "Знімайте обсяги з креслень PDF і DWG та переносьте їх прямо в BoQ.",
     "packages.takeoff.audience": "Кошторисники, які рахують обсяги за кресленнями",
     "packages.tender_procurement.name": "Тендери та закупівлі",

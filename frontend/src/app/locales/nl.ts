@@ -61861,7 +61861,7 @@ const resource = {
     "packages.trades.name": "Ambachtelijke bedrijven",
     "packages.trades.value": "Offerte, ploegplanning, uren registreren en factureren op één plek.",
     "packages.trades.audience": "Elektriciens, loodgieters, timmerlieden en kleine bouwers",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Hoeveelheden",
     "packages.takeoff.value": "Hoeveelheden uit PDF- en DWG-tekeningen direct in de BoQ zetten.",
     "packages.takeoff.audience": "Calculators die van tekeningen opmeten",
     "packages.tender_procurement.name": "Aanbesteding & inkoop",

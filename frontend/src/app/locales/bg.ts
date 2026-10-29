@@ -60984,7 +60984,7 @@ const resource = {
     "packages.trades.name": "Занаятчийски фирми",
     "packages.trades.value": "Оферта, планиране на екипите, отчитане на часове и фактуриране на едно място.",
     "packages.trades.audience": "Електротехници, водопроводчици, дърводелци, малки строители",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Количествени сметки",
     "packages.takeoff.value": "Измервайте количества от PDF и DWG чертежи и ги прехвърляйте направо в BoQ.",
     "packages.takeoff.audience": "Бюджетанти, които измерват от чертежи",
     "packages.tender_procurement.name": "Търгове и доставки",

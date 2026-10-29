@@ -60941,7 +60941,7 @@ const resource = {
     "packages.trades.name": "Кәсіпкерлік шеберханалар",
     "packages.trades.value": "Ұсыныс, бригаданы жоспарлау, сағат есебі және шот бір жерде.",
     "packages.trades.audience": "Электриктер, сантехниктер, ұста-ағаш шебері және шағын құрылысшылар",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Көлемдерді есептеу",
     "packages.takeoff.value": "PDF және DWG сызбаларынан көлемдерді өлшеп, тікелей BoQ-ға көшіріңіз.",
     "packages.takeoff.audience": "Сызбадан өлшейтін сметашылар",
     "packages.tender_procurement.name": "Тендер және сатып алу",

@@ -64200,7 +64200,7 @@ const resource = {
     "packages.trades.name": "Ремесленные компании",
     "packages.trades.value": "Коммерческое предложение, график бригад, учёт часов и счета в одном месте.",
     "packages.trades.audience": "Электрики, сантехники, плотники, небольшие строительные бригады",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Подсчёт объёмов",
     "packages.takeoff.value": "Снимайте объёмы с чертежей PDF и DWG и переносите их прямо в BoQ.",
     "packages.takeoff.audience": "Сметчики, которые считают объёмы по чертежам",
     "packages.tender_procurement.name": "Тендеры и закупки",

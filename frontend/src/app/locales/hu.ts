@@ -63545,7 +63545,7 @@ const resource = {
     "packages.trades.name": "Kisiparosok és szakipari cégek",
     "packages.trades.value": "Ajánlat, csapattervezés, órarögzítés és számlázás egy helyen.",
     "packages.trades.audience": "Villanyszerelők, vízvezeték-szerelők, asztalosok, kisebb építők",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Mennyiségkimutatás",
     "packages.takeoff.value": "Mérje ki a mennyiségeket PDF és DWG tervekből, és vigye át közvetlenül a BoQ-ba.",
     "packages.takeoff.audience": "Tervekből mérő költségbecslők",
     "packages.tender_procurement.name": "Közbeszerzés és beszerzés",

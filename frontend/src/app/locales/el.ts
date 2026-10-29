@@ -60940,7 +60940,7 @@ const resource = {
     "packages.trades.name": "Τεχνικές επιχειρήσεις",
     "packages.trades.value": "Προσφορά, προγραμματισμός συνεργείων, καταγραφή ωρών και τιμολόγηση σε ένα σημείο.",
     "packages.trades.audience": "Ηλεκτρολόγοι, υδραυλικοί, ξυλουργοί, μικροί εργολάβοι",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Επιμετρήσεις",
     "packages.takeoff.value": "Μετρήστε ποσότητες από σχέδια PDF και DWG και περάστε τις απευθείας στο BoQ.",
     "packages.takeoff.audience": "Εκτιμητές που μετρούν από σχέδια",
     "packages.tender_procurement.name": "Διαγωνισμοί και προμήθειες",

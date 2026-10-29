@@ -56808,7 +56808,7 @@ const resource = {
     "packages.trades.name": "Oficios y gremios",
     "packages.trades.value": "Oferta, planificación de cuadrillas, registro de horas y facturación en un solo lugar.",
     "packages.trades.audience": "Electricistas, fontaneros, carpinteros y pequeños constructores",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Cuantificación",
     "packages.takeoff.value": "Medir cantidades en planos PDF y DWG y pasarlas directamente al BoQ.",
     "packages.takeoff.audience": "Presupuestistas que miden sobre planos",
     "packages.tender_procurement.name": "Licitación y compras",

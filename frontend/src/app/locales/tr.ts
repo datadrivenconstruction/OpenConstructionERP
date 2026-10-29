@@ -61861,7 +61861,7 @@ const resource = {
     "packages.trades.name": "Zanaat işletmeleri",
     "packages.trades.value": "Teklif, ekip planlaması, saat kaydı ve faturalama tek yerde.",
     "packages.trades.audience": "Elektrikçiler, tesisatçılar, marangozlar ve küçük inşaat firmaları",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Metraj",
     "packages.takeoff.value": "PDF ve DWG çizimlerinden miktarları ölçün ve doğrudan BoQ'ya aktarın.",
     "packages.takeoff.audience": "Çizimden ölçüm yapan metrajcılar",
     "packages.tender_procurement.name": "İhale ve satın alma",

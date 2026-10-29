@@ -61250,7 +61250,7 @@ const resource = {
     "packages.trades.name": "কারিগরি ব্যবসা",
     "packages.trades.value": "দরপত্র, দল পরিকল্পনা, সময় লগ ও বিল তৈরি, সবকিছু এক জায়গায়।",
     "packages.trades.audience": "ইলেকট্রিশিয়ান, প্লাম্বার, কাঠমিস্ত্রি ও ছোট ঠিকাদার",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "পরিমাণ নিরূপণ",
     "packages.takeoff.value": "PDF ও DWG নকশা থেকে পরিমাণ মেপে সরাসরি BoQ-তে নিন।",
     "packages.takeoff.audience": "নকশা থেকে পরিমাপ করেন এমন এস্টিমেটররা",
     "packages.tender_procurement.name": "টেন্ডার ও ক্রয়",

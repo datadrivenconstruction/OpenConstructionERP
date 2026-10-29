@@ -61912,7 +61912,7 @@ const resource = {
     "packages.trades.name": "Hunarmandchilik korxonalari",
     "packages.trades.value": "Taklif, brigadalarni rejalashtirish, soat hisobi va hisob-faktura bir joyda.",
     "packages.trades.audience": "Elektriklar, santexniklar, duradgorlar va kichik quruvchilar",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Hajmlarni hisoblash",
     "packages.takeoff.value": "PDF va DWG chizmalaridan hajmlarni o'lchab, to'g'ridan-to'g'ri BoQ ga o'tkazing.",
     "packages.takeoff.audience": "Chizmadan o'lchaydigan smetachilar",
     "packages.tender_procurement.name": "Tender va xarid",

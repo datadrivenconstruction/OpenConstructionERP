@@ -60980,7 +60980,7 @@ const resource = {
     "packages.trades.name": "Håndverksbedrifter",
     "packages.trades.value": "Tilbud, mannskapsplanlegging, timeregistrering og fakturering på ett sted.",
     "packages.trades.audience": "Elektrikere, rørleggere, snekkere og små byggefirmaer",
-    "packages.takeoff.name": "Takeoff",
+    "packages.takeoff.name": "Mengdeuttrekk",
     "packages.takeoff.value": "Mål mengder fra PDF- og DWG-tegninger og før dem rett inn i BoQ.",
     "packages.takeoff.audience": "Kalkulatorer som måler fra tegninger",
     "packages.tender_procurement.name": "Anbud og innkjøp",
