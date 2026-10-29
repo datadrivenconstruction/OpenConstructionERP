@@ -9,7 +9,7 @@ connection), ``oe_acctsync_external_ref`` (remote id per pushed record, the
 idempotency anchor) and ``oe_acctsync_log`` (one row per record attempt).
 
 Revision ID: v3327_accounting_sync
-Revises: v3331_cost_benchmarks_payroll_periods
+Revises: v3331_user_avatar_key
 Create Date: 2026-10-26
 """
 
@@ -21,7 +21,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3327_accounting_sync"
-down_revision: str | Sequence[str] | None = "v3331_cost_benchmarks_payroll_periods"
+down_revision: str | Sequence[str] | None = "v3331_user_avatar_key"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
