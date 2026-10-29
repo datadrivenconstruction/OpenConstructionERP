@@ -89,7 +89,7 @@
     "workbox-window": "^7.4.1"
   },
   "overrides": {
-    "dompurify": "^3.4.16",
+    "dompurify": "^3.4.17",
     "protobufjs": "^8.6.0",
     "tmp": "^0.2.7",
     "rollup": "4.59.0",
