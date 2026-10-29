@@ -16,6 +16,7 @@ import {
   getConcept,
   getLedger,
   getPinnedCatalogue,
+  getProfileValues,
   getSchedule,
   getThreshold,
   listCandidates,
@@ -248,5 +249,15 @@ export function usePermitLotRequirements(projectId: string, enabled = true) {
     queryKey: procurementKeys.permitConditions(projectId),
     queryFn: () => getPermitLotRequirements(projectId),
     enabled: !!projectId && enabled,
+  });
+}
+
+/** The merged procurement profile of a jurisdiction with this company's confirmations. */
+export function useProfileValues(code: string | null | undefined, enabled = true) {
+  return useQuery({
+    queryKey: procurementKeys.profileValues(code ?? ''),
+    queryFn: () => getProfileValues(code ?? ''),
+    enabled: !!code && enabled,
+    retry: false,
   });
 }

@@ -682,6 +682,7 @@ export const procurementKeys = {
   ruleSnapshots: (projectId: string, packageId: string) =>
     ['procurement-concept', projectId, 'rule-snapshots', packageId] as const,
   profiles: (projectId: string) => ['procurement-concept', projectId, 'profiles'] as const,
+  profileValues: (code: string) => ['procurement-concept', 'profile-values', code] as const,
   candidates: (projectId: string, packageId: string) =>
     ['procurement-concept', projectId, 'candidates', packageId] as const,
   soundings: (projectId: string) => ['procurement-concept', projectId, 'soundings'] as const,
@@ -1003,4 +1004,57 @@ export interface RuleSnapshot {
 
 export function listRuleSnapshots(projectId: string, packageId: string): Promise<Page<RuleSnapshot>> {
   return apiGet<Page<RuleSnapshot>>(`/v1/procurement-concept/projects/${projectId}/packages/${packageId}/rule-snapshots`);
+}
+
+// ── procurement profile v2: legal values and this company's confirmations ──
+
+export type ProfileValueStatus = 'confirmed' | 'unconfirmed' | 'stale';
+
+export interface ProfileConfirmation {
+  id: string;
+  confirmed_by: string | null;
+  confirmed_at: string | null;
+  source_checked: string;
+  note: string;
+}
+
+export interface ProfileValueRow {
+  path: string;
+  origin: string;
+  status: ProfileValueStatus;
+  value_hash: string;
+  value: unknown;
+  unit: string | null;
+  source_url: string | null;
+  source_ref: string | null;
+  effective_from: string | null;
+  effective_to: string | null;
+  confirmation: ProfileConfirmation | null;
+}
+
+export interface ProfileValues {
+  jurisdiction: string;
+  chain: string[];
+  day: string;
+  values: ProfileValueRow[];
+  can: { confirm: Capability };
+}
+
+export interface ProfileConfirmInput {
+  path: string;
+  value_hash: string;
+  source_checked: string;
+  note?: string;
+}
+
+export function getProfileValues(code: string): Promise<ProfileValues> {
+  return apiGet<ProfileValues>(`/v1/procurement-concept/profiles/${encodeURIComponent(code)}/values`);
+}
+
+export function confirmProfileValue(code: string, body: ProfileConfirmInput): Promise<unknown> {
+  return apiPost(`/v1/procurement-concept/profiles/${encodeURIComponent(code)}/confirmations`, body);
+}
+
+export function revokeProfileValue(confirmationId: string): Promise<unknown> {
+  return apiDelete(`/v1/procurement-concept/profiles/confirmations/${encodeURIComponent(confirmationId)}`);
 }

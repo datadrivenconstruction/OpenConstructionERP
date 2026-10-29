@@ -13,7 +13,7 @@ import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProjectName } from '@/shared/hooks/useProjectName';
 import { useParams, useSearchParams } from 'react-router-dom';
-import { Boxes, Calendar, ClipboardList, Compass, FileText, MessageSquare, Users } from 'lucide-react';
+import { Boxes, Calendar, ClipboardList, Compass, FileText, MessageSquare, Scale, Users } from 'lucide-react';
 
 import { Breadcrumb } from '@/shared/ui/Breadcrumb';
 import { Button } from '@/shared/ui/Button';
@@ -27,6 +27,7 @@ import { AwardSchedule } from './AwardSchedule';
 import { ConceptDialog } from './ConceptDialog';
 import { ConceptRecord } from './ConceptRecord';
 import { Frameworks } from './Frameworks';
+import { ProfileValuesPanel } from './ProfileValuesPanel';
 import {
   refusalText,
   useCatalogues,
@@ -51,8 +52,8 @@ import { PrequalPanel } from './PrequalPanel';
 import { CONCEPT_TONE, ToneBadge } from './ProcurementBits';
 import { splitFindings } from './rules';
 
-type Tab = 'packages' | 'prequalification' | 'market' | 'schedule' | 'frameworks' | 'record';
-const TABS: Tab[] = ['packages', 'prequalification', 'market', 'schedule', 'frameworks', 'record'];
+type Tab = 'packages' | 'prequalification' | 'market' | 'schedule' | 'frameworks' | 'profile' | 'record';
+const TABS: Tab[] = ['packages', 'prequalification', 'market', 'schedule', 'frameworks', 'profile', 'record'];
 
 export function ProcurementConceptPage() {
   const { t } = useTranslation();
@@ -211,6 +212,8 @@ export function ProcurementConceptPage() {
         onChanged={invalidate}
       />
     );
+  } else if (tab === 'profile') {
+    body = <ProfileValuesPanel jurisdiction={concept.jurisdiction} />;
   } else if (tab === 'frameworks') {
     body = loading(frameworksQ) ??
       failed(frameworksQ, t('procurement_concept.ui.page.frameworks_failed', { defaultValue: 'The framework agreements could not be loaded' })) ?? (
@@ -299,6 +302,7 @@ export function ProcurementConceptPage() {
           { id: 'market', label: t('procurement_concept.tabs.market', { defaultValue: 'Market sounding' }), icon: <MessageSquare size={14} /> },
           { id: 'schedule', label: t('procurement_concept.tabs.schedule', { defaultValue: 'Award schedule' }), icon: <Calendar size={14} /> },
           { id: 'frameworks', label: t('procurement_concept.tabs.frameworks', { defaultValue: 'Frameworks' }), icon: <FileText size={14} /> },
+          { id: 'profile', label: t('procurement_concept.tabs.profile', { defaultValue: 'Legal values' }), icon: <Scale size={14} /> },
           {
             id: 'record',
             label: t('procurement_concept.tabs.record', { defaultValue: 'Concept record' }),
