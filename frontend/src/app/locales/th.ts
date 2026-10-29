@@ -50012,6 +50012,7 @@ const resource = {
     "onboarding.summary_team": "ทีม",
     "onboarding.summary_team_hint": "เพิ่มเพื่อนร่วมงานและเลือกบทบาท",
     "onboarding.summary_team_open": "เปิด",
+    "onboarding.load_database_named": "โหลด {{name}}",
     "modules.pp_name_aus": "แพ็กก่อสร้างออสเตรเลีย",
     "modules.pp_name_austria_at": "แพ็กก่อสร้างออสเตรีย",
     "modules.pp_name_brazil_sinapi": "แพ็กก่อสร้างบราซิล",

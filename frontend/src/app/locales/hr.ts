@@ -50470,6 +50470,7 @@ const resource = {
     "onboarding.summary_team": "Tim",
     "onboarding.summary_team_hint": "Dodajte kolege i odaberite njihove uloge",
     "onboarding.summary_team_open": "Otvori",
+    "onboarding.load_database_named": "Učitaj {{name}}",
     "modules.pp_name_aus": "Građevinski paket Australija",
     "modules.pp_name_austria_at": "Građevinski paket Austrija",
     "modules.pp_name_brazil_sinapi": "Građevinski paket Brazil",

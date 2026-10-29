@@ -51064,6 +51064,7 @@ const resource = {
     "onboarding.summary_team": "Team",
     "onboarding.summary_team_hint": "Voeg collega's toe en kies hun rollen",
     "onboarding.summary_team_open": "Openen",
+    "onboarding.load_database_named": "{{name}} laden",
     "modules.pp_name_aus": "Bouwpakket Australië",
     "modules.pp_name_austria_at": "Bouwpakket Oostenrijk",
     "modules.pp_name_brazil_sinapi": "Bouwpakket Brazilië",

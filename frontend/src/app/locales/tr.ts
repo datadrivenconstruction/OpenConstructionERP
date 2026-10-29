@@ -51146,6 +51146,7 @@ const resource = {
     "onboarding.summary_team": "Ekip",
     "onboarding.summary_team_hint": "Meslektaş ekleyin ve rollerini seçin",
     "onboarding.summary_team_open": "Aç",
+    "onboarding.load_database_named": "{{name}} yükle",
     "modules.pp_name_aus": "Avustralya İnşaat Paketi",
     "modules.pp_name_austria_at": "Avusturya İnşaat Paketi",
     "modules.pp_name_brazil_sinapi": "Brezilya İnşaat Paketi",

@@ -50197,6 +50197,7 @@ const resource = {
     "onboarding.summary_team": "Meeskond",
     "onboarding.summary_team_hint": "Lisage kolleegid ja valige nende rollid",
     "onboarding.summary_team_open": "Ava",
+    "onboarding.load_database_named": "Laadi {{name}}",
     "modules.pp_name_aus": "Austraalia ehituspakett",
     "modules.pp_name_austria_at": "Ehituspakett: Austria",
     "modules.pp_name_brazil_sinapi": "Brasiilia ehituspakett",

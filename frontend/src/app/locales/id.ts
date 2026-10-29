@@ -49917,6 +49917,7 @@ const resource = {
     "onboarding.summary_team": "Tim",
     "onboarding.summary_team_hint": "Tambahkan rekan kerja dan pilih peran mereka",
     "onboarding.summary_team_open": "Buka",
+    "onboarding.load_database_named": "Muat {{name}}",
     "modules.pp_name_aus": "Paket Konstruksi Australia",
     "modules.pp_name_austria_at": "Paket Konstruksi Austria",
     "modules.pp_name_brazil_sinapi": "Paket Konstruksi Brasil",

@@ -50225,6 +50225,7 @@ const resource = {
     "onboarding.summary_team": "Ομάδα",
     "onboarding.summary_team_hint": "Προσθέστε συναδέλφους και επιλέξτε τους ρόλους τους",
     "onboarding.summary_team_open": "Άνοιγμα",
+    "onboarding.load_database_named": "Φόρτωση {{name}}",
     "modules.pp_name_aus": "Πακέτο Κατασκευών Αυστραλίας",
     "modules.pp_name_austria_at": "Πακέτο Κατασκευών: Αυστρία",
     "modules.pp_name_brazil_sinapi": "Πακέτο Κατασκευών Βραζιλίας",

@@ -50138,6 +50138,7 @@ const resource = {
     "onboarding.summary_team": "Команда",
     "onboarding.summary_team_hint": "Әріптестерді қосып, олардың рөлдерін таңдаңыз",
     "onboarding.summary_team_open": "Ашу",
+    "onboarding.load_database_named": "{{name}} жүктеу",
     "modules.pp_name_aus": "Австралия құрылыс пакеті",
     "modules.pp_name_austria_at": "Аустрия құрылыс пакеті",
     "modules.pp_name_brazil_sinapi": "Бразилия құрылыс пакеті",

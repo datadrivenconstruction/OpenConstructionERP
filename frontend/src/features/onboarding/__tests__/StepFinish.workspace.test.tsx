@@ -151,6 +151,7 @@ const onboardingReads = () =>
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   api.apiGet.mockReset();
   api.apiPost.mockReset();
   api.apiPut.mockReset();

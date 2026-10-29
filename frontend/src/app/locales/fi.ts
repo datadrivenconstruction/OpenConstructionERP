@@ -50096,6 +50096,7 @@ const resource = {
     "onboarding.summary_team": "Tiimi",
     "onboarding.summary_team_hint": "Lisää kollegoita ja valitse heidän roolinsa",
     "onboarding.summary_team_open": "Avaa",
+    "onboarding.load_database_named": "Lataa {{name}}",
     "modules.pp_name_aus": "Australian rakennuspaketti",
     "modules.pp_name_austria_at": "Rakennuspaketti: Itävalta",
     "modules.pp_name_brazil_sinapi": "Brasilian rakennuspaketti",

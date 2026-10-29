@@ -50510,6 +50510,7 @@ const resource = {
     "onboarding.summary_team": "দল",
     "onboarding.summary_team_hint": "সহকর্মীদের যোগ করুন এবং তাদের ভূমিকা বেছে নিন",
     "onboarding.summary_team_open": "খুলুন",
+    "onboarding.load_database_named": "{{name}} লোড করুন",
     "modules.pp_name_aus": "অস্ট্রেলিয়া নির্মাণ প্যাক",
     "modules.pp_name_austria_at": "অস্ট্রিয়া নির্মাণ প্যাক",
     "modules.pp_name_brazil_sinapi": "ব্রাজিল নির্মাণ প্যাক",

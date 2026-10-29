@@ -52753,6 +52753,7 @@ const resource = {
     "onboarding.summary_team": "Équipe",
     "onboarding.summary_team_hint": "Ajoutez des collègues et choisissez leurs rôles",
     "onboarding.summary_team_open": "Ouvrir",
+    "onboarding.load_database_named": "Charger {{name}}",
     "modules.pp_name_aus": "Pack Construction Australie",
     "modules.pp_name_austria_at": "Pack Construction Autriche",
     "modules.pp_name_brazil_sinapi": "Pack Construction Brésil",

@@ -304,3 +304,29 @@ describe('while an install runs', () => {
     expect(onAdjustAppearance).toHaveBeenCalledTimes(1);
   });
 });
+
+describe('when the pack list cannot be read', () => {
+  it('says so and loads the packs again on Retry', async () => {
+    browser('en-US');
+    fetchInstalledPacks.mockRejectedValueOnce(new Error('offline'));
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <MemoryRouter>
+          <ReadyPackPicker
+            onActivateLocale={vi.fn()}
+            onInstalled={vi.fn()}
+            onFallback={vi.fn()}
+            onBack={vi.fn()}
+            onInstallStarted={vi.fn()}
+            onCompanyApplied={vi.fn()}
+          />
+        </MemoryRouter>
+      </QueryClientProvider>,
+    );
+    const alert = await screen.findByTestId('ready-pack-load-error');
+    fireEvent.click(within(alert).getByRole('button', { name: 'Retry' }));
+    await screen.findByTestId('ready-pack-browser');
+    expect(screen.queryByTestId('ready-pack-load-error')).toBeNull();
+  });
+});

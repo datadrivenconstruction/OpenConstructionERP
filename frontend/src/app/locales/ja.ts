@@ -51435,6 +51435,7 @@ const resource = {
     "onboarding.summary_team": "チーム",
     "onboarding.summary_team_hint": "同僚を追加して役割を選択",
     "onboarding.summary_team_open": "開く",
+    "onboarding.load_database_named": "{{name}} を読み込む",
     "modules.pp_name_aus": "オーストラリア建設パック",
     "modules.pp_name_austria_at": "オーストリア建設パック",
     "modules.pp_name_brazil_sinapi": "ブラジル建設パック",

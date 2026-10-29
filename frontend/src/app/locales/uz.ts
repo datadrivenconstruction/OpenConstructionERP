@@ -51904,6 +51904,7 @@ const resource = {
     "onboarding.summary_team": "Jamoa",
     "onboarding.summary_team_hint": "Hamkasblarni qoʻshing va ularning rollarini tanlang",
     "onboarding.summary_team_open": "Ochish",
+    "onboarding.load_database_named": "{{name}} yuklash",
     "modules.pp_name_aus": "Avstraliya qurilish paketi",
     "modules.pp_name_austria_at": "Avstriya qurilish paketi",
     "modules.pp_name_brazil_sinapi": "Braziliya qurilish paketi",

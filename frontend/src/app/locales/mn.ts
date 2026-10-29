@@ -49882,6 +49882,7 @@ const resource = {
     "onboarding.summary_team": "Баг",
     "onboarding.summary_team_hint": "Хамт ажиллагсдаа нэмж, үүргийг нь сонгоно уу",
     "onboarding.summary_team_open": "Нээх",
+    "onboarding.load_database_named": "{{name}} ачаалах",
     "modules.pp_name_aus": "Австралийн барилгын багц",
     "modules.pp_name_austria_at": "Барилгын багц: Австри",
     "modules.pp_name_brazil_sinapi": "Бразилийн барилгын багц",

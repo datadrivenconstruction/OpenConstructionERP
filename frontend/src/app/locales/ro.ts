@@ -50543,6 +50543,7 @@ const resource = {
     "onboarding.summary_team": "Echipă",
     "onboarding.summary_team_hint": "Adăugați colegi și alegeți-le rolurile",
     "onboarding.summary_team_open": "Deschide",
+    "onboarding.load_database_named": "Încarcă {{name}}",
     "modules.pp_name_aus": "Pachet de construcții Australia",
     "modules.pp_name_austria_at": "Pachet de construcții Austria",
     "modules.pp_name_brazil_sinapi": "Pachet de construcții Brazilia",

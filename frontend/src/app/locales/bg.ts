@@ -50269,6 +50269,7 @@ const resource = {
     "onboarding.summary_team": "Екип",
     "onboarding.summary_team_hint": "Добавете колеги и изберете ролите им",
     "onboarding.summary_team_open": "Отвори",
+    "onboarding.load_database_named": "Зареждане: {{name}}",
     "modules.pp_name_aus": "Строителен пакет Австралия",
     "modules.pp_name_austria_at": "Строителен пакет Австрия",
     "modules.pp_name_brazil_sinapi": "Строителен пакет Бразилия",

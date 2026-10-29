@@ -52061,6 +52061,7 @@ const resource = {
     "onboarding.summary_team": "Csapat",
     "onboarding.summary_team_hint": "Adjon hozzá kollégákat, és válassza ki a szerepkörüket",
     "onboarding.summary_team_open": "Megnyitás",
+    "onboarding.load_database_named": "{{name}} betöltése",
     "modules.pp_name_aus": "Ausztrál építőipari csomag",
     "modules.pp_name_austria_at": "Építőipari csomag: Ausztria",
     "modules.pp_name_brazil_sinapi": "Brazil építőipari csomag",

@@ -127,7 +127,7 @@ describe('StepDataSetup, a national market card', () => {
     renderStep();
 
     await clickParisCard();
-    fireEvent.click(screen.getByRole('button', { name: /Load Database/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Load France' }));
 
     await waitFor(() => expect(loadBaseMarket).toHaveBeenCalledTimes(1));
     expect(followCostDbLoad.mock.calls[0][0]).toBe('TR_NATIONAL');
@@ -140,7 +140,7 @@ describe('StepDataSetup, a national market card', () => {
     renderStep();
 
     await clickParisCard();
-    fireEvent.click(screen.getByRole('button', { name: /Load Database/i }));
+    fireEvent.click(screen.getByRole('button', { name: 'Load France' }));
 
     const failed = await screen.findByTestId('onboarding-market-failed');
     expect(failed.textContent).toMatch(/could not be loaded/);

@@ -53111,6 +53111,7 @@ const resource = {
     "onboarding.summary_team": "الفريق",
     "onboarding.summary_team_hint": "أضف زملاء واختر أدوارهم",
     "onboarding.summary_team_open": "فتح",
+    "onboarding.load_database_named": "تحميل {{name}}",
     "modules.pp_name_aus": "حزمة إنشاءات أستراليا",
     "modules.pp_name_austria_at": "حزمة إنشاءات النمسا",
     "modules.pp_name_brazil_sinapi": "حزمة إنشاءات البرازيل",

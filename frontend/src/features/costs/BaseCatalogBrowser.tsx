@@ -527,6 +527,9 @@ export function BaseCatalogBrowser({
             placeholder={t('costs.base_search_placeholder', {
               defaultValue: 'Search country, city, currency, language or norm...',
             })}
+            aria-label={t('costs.base_search_placeholder', {
+              defaultValue: 'Search country, city, currency, language or norm...',
+            })}
             className="w-full rounded-lg border border-transparent bg-surface-secondary/70 py-2 ps-9 pe-3 text-sm text-content-primary placeholder:text-content-quaternary focus:border-oe-blue/40 focus:bg-surface-secondary focus:outline-none"
           />
         </div>

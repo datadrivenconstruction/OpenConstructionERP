@@ -50069,6 +50069,7 @@ const resource = {
     "onboarding.summary_team": "Team",
     "onboarding.summary_team_hint": "Magdagdag ng mga kasamahan at piliin ang kanilang mga role",
     "onboarding.summary_team_open": "Buksan",
+    "onboarding.load_database_named": "I-load ang {{name}}",
     "modules.pp_name_aus": "Construction Pack ng Australia",
     "modules.pp_name_austria_at": "Construction Pack ng Austria",
     "modules.pp_name_brazil_sinapi": "Construction Pack ng Brazil",

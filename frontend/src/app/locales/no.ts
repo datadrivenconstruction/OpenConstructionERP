@@ -50271,6 +50271,7 @@ const resource = {
     "onboarding.summary_team": "Team",
     "onboarding.summary_team_hint": "Legg til kolleger og velg rollene deres",
     "onboarding.summary_team_open": "Åpne",
+    "onboarding.load_database_named": "Last inn {{name}}",
     "modules.pp_name_aus": "Byggepakke Australia",
     "modules.pp_name_austria_at": "Byggepakke Østerrike",
     "modules.pp_name_brazil_sinapi": "Byggepakke Brasil",

@@ -48177,6 +48177,7 @@ const resource = {
     "onboarding.stepper_locked_ahead": "Termine primero los pasos anteriores",
     "onboarding.stepper_locked_pack_data": "Su paquete listo para usar ya incluye sus propios datos",
     "onboarding.stepper_locked_pack_pending": "Disponible cuando su paquete haya aplicado su idioma",
+    "onboarding.load_database_named": "Cargar {{name}}",
     "modules.pp_name_aus": "Paquete de Construcción de Australia",
     "modules.pp_name_brazil_sinapi": "Paquete de Construcción de Brasil",
     "modules.pp_name_china_gbt50500": "Paquete de Construcción de China",

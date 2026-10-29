@@ -52231,6 +52231,7 @@ const resource = {
     "onboarding.summary_team": "Команда",
     "onboarding.summary_team_hint": "Додайте колег і виберіть їхні ролі",
     "onboarding.summary_team_open": "Відкрити",
+    "onboarding.load_database_named": "Завантажити: {{name}}",
     "modules.pp_name_aus": "Будівельний пакет Австралія",
     "modules.pp_name_austria_at": "Будівельний пакет Австрія",
     "modules.pp_name_brazil_sinapi": "Будівельний пакет Бразилія",

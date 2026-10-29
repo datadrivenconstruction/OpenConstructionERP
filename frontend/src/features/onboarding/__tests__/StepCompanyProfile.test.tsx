@@ -109,6 +109,7 @@ const sizeFetches = () =>
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   api.apiGet.mockReset();
   api.apiPost.mockReset();
   api.apiGet.mockImplementation((path: string) => {

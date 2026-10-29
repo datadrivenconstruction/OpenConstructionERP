@@ -562,6 +562,7 @@ const resource = {
     "prefab.receive_qr_label": "Scanned QR code",
     "prefab.receive_submit": "Book delivery",
     "prefab.type_rebar_cage": "Rebar cage",
+    "onboarding.load_database_named": "Load {{name}}",
   }
 } as { translation: Record<string, string> };
 
