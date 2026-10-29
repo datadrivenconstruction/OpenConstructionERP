@@ -704,3 +704,40 @@ def framework_findings(
     if not call_off:
         out.append(finding("framework_procedure_mismatch", ERROR, pkg.code))
     return out
+
+
+def profile_paths(facts: ConceptFacts, contract_kind: str | None, procedure_code: str | None) -> tuple[str, ...]:
+    """Profile paths the procedure test of one package reads (thresholds of its kind and client, its procedure)."""
+    out = []
+    if contract_kind and facts.client_type:
+        out.append(f"thresholds/{contract_kind}/{facts.client_type}/")
+    if procedure_code:
+        out.append(f"procedures/{procedure_code}/")
+    return tuple(out)
+
+
+def profile_findings(resolved: Any, prefixes: Sequence[str], ref: str) -> list[dict[str, Any]]:
+    """Advisory warnings for every unconfirmed or stale profile value under ``prefixes``; they never block.
+
+    ``resolved`` is a :class:`~app.modules.procurement_concept.profile.ResolvedProfile`.
+    """
+    if resolved is None or not prefixes:
+        return []
+    out = []
+    for v in resolved.under(*prefixes):
+        if v.status == "confirmed":
+            continue
+        out.append(
+            finding(
+                f"profile_value_{v.status}",
+                WARNING,
+                ref,
+                blocks_approval=False,
+                path=v.path,
+                jurisdiction=v.origin,
+                source_url=v.value.source_url,
+                effective_from=v.value.effective_from.isoformat() if v.value.effective_from else None,
+                effective_to=v.value.effective_to.isoformat() if v.value.effective_to else None,
+            )
+        )
+    return out

@@ -328,6 +328,30 @@ def _snapshot_is_frozen(*_: Any) -> None:
     raise ValueError("a rule snapshot is frozen")
 
 
+class ProfileConfirmation(Base):
+    """This instance's confirmation of one profile value: the exact value (hash) at one path, checked at source."""
+
+    __tablename__ = "oe_procurement_concept_profile_confirmation"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "jurisdiction", "path", "value_hash", name="uq_oe_pcc_profile_confirmation"),
+        Index("ix_oe_pcc_profile_confirmation_tenant", "tenant_id", "jurisdiction"),
+    )
+
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    jurisdiction: Mapped[str] = mapped_column(String(6), nullable=False)
+    path: Mapped[str] = mapped_column(String(255), nullable=False)
+    value_hash: Mapped[str] = mapped_column(String(64), nullable=False)
+    confirmed_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    confirmed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    # The source the person checked the value against (may differ from the shipped one).
+    source_checked: Mapped[str] = mapped_column(String(1000), nullable=False)
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="")
+
+
+# Revision v3340 builds this one.
+PROFILE_MODELS: tuple[type[Base], ...] = (ProfileConfirmation,)
+
+
 # Not in ALL_MODELS: that tuple is what revision v72 builds.
 SNAPSHOT_MODELS: tuple[type[Base], ...] = (RuleSnapshot, RuleOverride)
 

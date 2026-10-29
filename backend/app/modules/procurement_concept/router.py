@@ -52,6 +52,7 @@ from app.modules.procurement_concept.schemas import (
     FrameworkStateIn,
     PackagePut,
     PackageStateIn,
+    ProfileConfirmIn,
     ProfileIn,
     ReferenceIn,
     RuleOverrideIn,
@@ -70,6 +71,8 @@ MANAGE_PERMISSION = "procurement_concept.manage"
 EDIT_PERMISSION = "procurement_concept.edit"
 FRAMEWORKS_PERMISSION = "procurement_concept.frameworks.manage"
 FRAMEWORKS = Depends(RequirePermission("procurement_concept.frameworks.manage"))
+PROFILES_CONFIRM_PERMISSION = "procurement_concept.profiles.confirm"
+PROFILES_CONFIRM = Depends(RequirePermission(PROFILES_CONFIRM_PERMISSION))
 
 
 async def _run[T](awaitable: Awaitable[T]) -> T:
@@ -996,3 +999,44 @@ async def framework_ledger(framework_id: uuid.UUID, session: SessionDep, payload
     """Call-off ledger: linked packages and tagged purchase orders, call-off and remaining value."""
     data = await _run(ProcurementConceptService(session).ledger(resolve_tenant_id(payload), framework_id))
     return {**data, "offset": 0, "limit": data["total"]}
+
+
+# ── procurement profiles v2 (tenant-level confirmations) ─────────────────
+
+
+@router.get("/profiles/{code}/values", dependencies=[READ])
+async def profile_values(
+    code: str, session: SessionDep, payload: CurrentUserPayload, day: date | None = Query(default=None)
+) -> dict[str, Any]:
+    """Every value of the jurisdiction's merged profile on ``day`` with its status and this company's confirmation."""
+    from app.modules.procurement_concept.profile_service import ProfileConfirmationService
+
+    svc = ProfileConfirmationService(session)
+    out = await _run(svc.list_values(resolve_tenant_id(payload), code, day or datetime.now(UTC).date()))
+    allowed = await _has(payload, PROFILES_CONFIRM_PERMISSION)
+    out["can"] = {"confirm": {"allowed": allowed, "reason": None if allowed else "permission_denied"}}
+    return out
+
+
+@router.post("/profiles/{code}/confirmations", status_code=201, dependencies=[PROFILES_CONFIRM])
+async def confirm_profile_value(
+    code: str, body: ProfileConfirmIn, session: SessionDep, user_id: CurrentUserId, payload: CurrentUserPayload
+) -> dict[str, Any]:
+    from app.modules.procurement_concept.profile_service import ProfileConfirmationService, confirmation_out
+
+    row = await _run(
+        ProfileConfirmationService(session).confirm(
+            resolve_tenant_id(payload), code, body.model_dump(), actor_id=_uid(user_id), day=datetime.now(UTC).date()
+        )
+    )
+    return confirmation_out(row)
+
+
+@router.delete("/profiles/confirmations/{confirmation_id}", status_code=204, dependencies=[PROFILES_CONFIRM])
+async def revoke_profile_value(
+    confirmation_id: uuid.UUID, session: SessionDep, payload: CurrentUserPayload
+) -> Response:
+    from app.modules.procurement_concept.profile_service import ProfileConfirmationService
+
+    await _run(ProfileConfirmationService(session).revoke(resolve_tenant_id(payload), confirmation_id))
+    return Response(status_code=204)

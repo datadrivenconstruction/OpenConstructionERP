@@ -198,6 +198,15 @@ class RuleOverrideIn(_In):
     reason: str = Field(default="", max_length=4000)
 
 
+class ProfileConfirmIn(_In):
+    """Confirm one profile value on this instance: the value the person saw (path + hash) and where they checked it."""
+
+    path: str = Field(min_length=1, max_length=255)
+    value_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    source_checked: str = Field(min_length=5, max_length=1000)
+    note: str = Field(default="", max_length=4000)
+
+
 # ── Prequalification ─────────────────────────────────────────────────────
 
 

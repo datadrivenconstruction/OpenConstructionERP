@@ -123,6 +123,13 @@ PROCUREMENT_RULES: tuple[type[ValidationRule], ...] = (
         Severity.WARNING,
     ),
     _rule(
+        "profile_value_confirmed",
+        "Profile Value Confirmed",
+        "A legal value of the procurement profile is not confirmed on this instance or has expired.",
+        ("profile_value_unconfirmed", "profile_value_stale"),
+        Severity.WARNING,
+    ),
+    _rule(
         "procedure_consistent_with_delivery_form",
         "Procedure Consistent With Delivery Form",
         "Procedure and tender basis fit the chosen delivery form.",

@@ -748,6 +748,27 @@ class ProcurementConceptService:
         bp = ev.backward_pass(cat, p)
         return bp.start_date if bp else today
 
+    async def _profile(self, project_id: uuid.UUID, facts: ev.ConceptFacts, day: date) -> Any:
+        """The v2 profile of the concept's jurisdiction on ``day`` with this company's confirmations."""
+        from app.modules.procurement_concept.profile_service import ProfileConfirmationService
+
+        # Per-request memo: the plan check resolves once per package and most share a day.
+        memo = self.__dict__.setdefault("_profile_memo", {})
+        key = (project_id, facts.jurisdiction, day)
+        if key not in memo:
+            tenant = await self.project_tenant(project_id)
+            memo[key] = await ProfileConfirmationService(self.session).resolve_legacy(tenant, facts.jurisdiction, day)
+        return memo[key]
+
+    async def _profile_findings(
+        self, project_id: uuid.UUID, cat: ProcurementCatalogue, facts: ev.ConceptFacts, p: ev.PackageFacts, day: date
+    ) -> list[dict[str, Any]]:
+        """Advisory warnings for unconfirmed or stale profile values the package's procedure test reads."""
+        prefixes = ev.profile_paths(facts, ev.contract_kind_of(cat, p), p.procedure_code)
+        if not prefixes:
+            return []
+        return ev.profile_findings(await self._profile(project_id, facts, day), prefixes, p.code)
+
     async def _plan_findings(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
         cps = await plan.list_packages(self.session, project_id)
         ids = {str(r.id) for r in await self._award_rows(project_id)}
@@ -780,6 +801,7 @@ class ProcurementConceptService:
                 continue
             out += ev.package_findings(cat, p)
             out += ev.procedure_findings(cat, facts, p, pkgs, self._check_day(p, cat, today))
+            out += await self._profile_findings(project_id, cat, facts, p, self._check_day(p, cat, today))
             bp = ev.backward_pass(cat, p)
             if p.state not in _EXECUTION_OPEN:
                 # A package already in tender or awarded is past its planning dates and its call-off: time
@@ -1072,13 +1094,15 @@ class ProcurementConceptService:
         facts = await self._concept_facts(concept)
         _cps, _rows, pkgs = await self._package_facts(project_id)
         p = next(x for x in pkgs if x.id == str(row.id))
+        day = self._check_day(p, cat, datetime.now(UTC).date())
         body = snap.build_snapshot(
             cat,
             facts,
             p,
             pkgs,
-            self._check_day(p, cat, datetime.now(UTC).date()),
+            day,
             catalogue_pin=(concept.catalogue_source, concept.catalogue_id, concept.catalogue_version),
+            profile=await self._profile(project_id, facts, day),
         )
         shot = RuleSnapshot(project_id=project_id, package_id=row.id, taken_by=actor_id, **body)
         self.session.add(shot)

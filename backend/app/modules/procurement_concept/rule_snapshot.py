@@ -67,8 +67,13 @@ def build_snapshot(
     day: date,
     *,
     catalogue_pin: tuple[str, str, int],
+    profile: Any = None,
 ) -> dict[str, Any]:
-    """Everything the evaluator used and decided for ``pkg`` on ``day``, as plain JSON."""
+    """Everything the evaluator used and decided for ``pkg`` on ``day``, as plain JSON.
+
+    ``profile`` (a resolved v2 procurement profile) adds the status of every profile value
+    the test read: confirmed on this instance, unconfirmed or stale, each with its source.
+    """
     view = ev.threshold_view(catalogue, facts, pkg, packages, day)
     findings = ev.procedure_findings(catalogue, facts, pkg, packages, day)
     ck = ev.contract_kind_of(catalogue, pkg)
@@ -142,6 +147,14 @@ def build_snapshot(
         "findings": findings,
         "outcomes": _outcomes(findings),
     }
+    if profile is not None:
+        prefixes = ev.profile_paths(facts, ck, pkg.procedure_code)
+        result["profile"] = {
+            "jurisdiction": profile.jurisdiction,
+            "chain": list(profile.chain),
+            "values": [v.as_json() for v in profile.under(*prefixes)] if prefixes else [],
+            "advisories": ev.profile_findings(profile, prefixes, pkg.code),
+        }
     source, cid, version = catalogue_pin
     body = {
         "procedure_code": pkg.procedure_code,

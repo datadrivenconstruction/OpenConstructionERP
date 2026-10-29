@@ -21,5 +21,7 @@ def register_procurement_concept_permissions() -> None:
             "procurement_concept.manage": Role.MANAGER,
             # Company framework agreements outlive projects.
             "procurement_concept.frameworks.manage": Role.MANAGER,
+            # Confirming a legal value of a procurement profile for the whole company.
+            "procurement_concept.profiles.confirm": Role.MANAGER,
         },
     )
