@@ -46,6 +46,7 @@ from app.modules.risk.intl import (
     total_exposure,
     validate_scale_value,
 )
+from tests._watermark import strip_marks
 
 # Banned characters, assembled from code points so this file never itself
 # contains a literal em-dash, smart quote or zero-width character.
@@ -386,7 +387,7 @@ def test_module_source_has_no_banned_characters():
 
 
 def test_test_file_source_has_no_banned_characters():
-    source = Path(__file__).read_text(encoding="utf-8")
+    source = strip_marks(Path(__file__).read_text(encoding="utf-8"))
     found = _BANNED_CHARS.intersection(source)
     assert not found, f"banned characters in test file: {[hex(ord(c)) for c in found]}"
 

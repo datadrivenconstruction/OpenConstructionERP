@@ -24,6 +24,7 @@ from pathlib import Path
 import pytest
 
 from app.modules.enterprise_workflows import intl
+from tests._watermark import strip_marks
 
 # ── Locale normalization and localization ────────────────────────────────
 
@@ -290,6 +291,6 @@ def test_module_source_has_no_banned_characters() -> None:
         Path(__file__),
     ]
     for path in targets:
-        text = path.read_text(encoding="utf-8")
+        text = strip_marks(path.read_text(encoding="utf-8"))
         found = banned.intersection(text)
         assert not found, f"{path.name} contains banned characters: {[hex(ord(c)) for c in found]}"

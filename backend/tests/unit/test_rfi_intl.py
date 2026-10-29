@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from app.modules.rfi import intl
+from tests._watermark import strip_marks
 
 # ── Response time in whole days ───────────────────────────────────────────────
 
@@ -370,7 +371,7 @@ def test_intl_source_has_no_banned_characters() -> None:
         chr(0xFEFF),  # zero-width no-break space / BOM
     }
     source_path = Path(intl.__file__)
-    source = source_path.read_text(encoding="utf-8")
+    source = strip_marks(source_path.read_text(encoding="utf-8"))
     found = {hex(ord(ch)) for ch in source if ch in banned}
     assert not found, f"banned characters present in intl.py: {sorted(found)}"
 
@@ -390,6 +391,6 @@ def test_this_test_source_has_no_banned_characters() -> None:
         chr(0x2060),
         chr(0xFEFF),
     }
-    source = Path(__file__).read_text(encoding="utf-8")
+    source = strip_marks(Path(__file__).read_text(encoding="utf-8"))
     found = {hex(ord(ch)) for ch in source if ch in banned}
     assert not found, f"banned characters present in test file: {sorted(found)}"

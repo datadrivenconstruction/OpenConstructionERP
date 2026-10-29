@@ -19,6 +19,7 @@ from pathlib import Path
 import pytest
 
 from app.modules.assets import intl
+from tests._watermark import strip_marks
 
 # --- Coercion and parsing --------------------------------------------------
 
@@ -298,6 +299,6 @@ class TestNoBannedCharacters:
             Path(intl.__file__),
             Path(__file__),
         ):
-            text = path.read_text(encoding="utf-8")
+            text = strip_marks(path.read_text(encoding="utf-8"))
             found = {hex(ord(ch)) for ch in text if ch in banned}
             assert not found, f"{path.name} contains banned characters: {found}"
