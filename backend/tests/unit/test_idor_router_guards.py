@@ -1440,6 +1440,9 @@ _NOT_ROUTER_GATED: dict[str, str] = {
     "procurement_concept.patch_framework": "framework_id names a tenant framework agreement, not a project record; the service resolves it under the caller's tenant",
     "procurement_concept.framework_state": "framework_id names a tenant framework agreement, not a project record; the service resolves it under the caller's tenant",
     "procurement_concept.framework_ledger": "framework_id names a tenant framework agreement, not a project record; the service resolves it under the caller's tenant",
+    "procurement_concept.profile_values": "code names a jurisdiction profile shipped with the platform, not a project record; confirmations are read under the caller's tenant",
+    "procurement_concept.confirm_profile_value": "code names a jurisdiction profile shipped with the platform, not a project record; the confirmation is written under the caller's tenant",
+    "procurement_concept.revoke_profile_value": "confirmation_id names a tenant confirmation, not a project record; the delete filters on the caller's tenant",
     "stakeholders.get_shipped_framework": (
         "framework_id names a framework shipped with the product (a file in the package), the same for "
         "every tenant, so there is no owning project to check."
