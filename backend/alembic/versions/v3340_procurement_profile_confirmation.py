@@ -8,7 +8,7 @@ against a source. A changed value has a new hash and is unconfirmed again.
 Inspector-guarded.
 
 Revision ID: v3340_procurement_profile_confirmation
-Revises: v3331_cost_benchmarks_payroll_periods
+Revises: vp01_unified_parties
 Create Date: 2026-10-29
 """
 
@@ -22,7 +22,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "v3340_procurement_profile_confirmation"
-down_revision: str | Sequence[str] | None = "v3331_cost_benchmarks_payroll_periods"
+down_revision: str | Sequence[str] | None = "vp01_unified_parties"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
