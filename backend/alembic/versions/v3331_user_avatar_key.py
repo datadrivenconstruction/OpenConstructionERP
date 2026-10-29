@@ -8,7 +8,7 @@ falls back to initials. Inspector-guarded, so a fresh install whose table
 ``create_all`` already built is a no-op.
 
 Revision ID: v3331_user_avatar_key
-Revises: v3326_subcontractor_insurance_compliance
+Revises: v200_project_color
 Create Date: 2026-10-27
 """
 
@@ -20,7 +20,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3331_user_avatar_key"
-down_revision: str | Sequence[str] | None = "v3326_subcontractor_insurance_compliance"
+down_revision: str | Sequence[str] | None = "v200_project_color"
 branch_labels = None
 depends_on = None
 
