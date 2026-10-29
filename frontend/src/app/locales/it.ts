@@ -62334,7 +62334,7 @@ const resource = {
     "cost_benchmarks.no_completed_desc": "Aggiungi allo storico un progetto concluso per costruire le tue fasce di costo.",
     "cost_benchmarks.estimates_title": "Preventivi",
     "packages.estimate_quote.name": "Stima e offerta",
-    "packages.estimate_quote.value": "Valorizzare le lavorazioni dai database di costo e trasformarle in un computo verificato e in un'offerta.",
+    "packages.estimate_quote.value": "Stimare le lavorazioni dalle banche dati dei costi e trasformarle in un computo metrico verificato e in un preventivo.",
     "packages.estimate_quote.audience": "Stimatori, computisti e imprese che preventivano lavori",
     "packages.trades.name": "Attività artigiane",
     "packages.trades.value": "Preventivi, pianificazione delle squadre, ore registrate e fatturazione in un unico posto.",
