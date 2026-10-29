@@ -748,7 +748,7 @@ class ProcurementConceptService:
         bp = ev.backward_pass(cat, p)
         return bp.start_date if bp else today
 
-    async def _profile(self, project_id: uuid.UUID, facts: ev.ConceptFacts, day: date) -> Any:
+    async def _procurement_profile(self, project_id: uuid.UUID, facts: ev.ConceptFacts, day: date) -> Any:
         """The v2 profile of the concept's jurisdiction on ``day`` with this company's confirmations."""
         from app.modules.procurement_concept.profile_service import ProfileConfirmationService
 
@@ -767,7 +767,7 @@ class ProcurementConceptService:
         prefixes = ev.profile_paths(facts, ev.contract_kind_of(cat, p), p.procedure_code)
         if not prefixes:
             return []
-        return ev.profile_findings(await self._profile(project_id, facts, day), prefixes, p.code)
+        return ev.profile_findings(await self._procurement_profile(project_id, facts, day), prefixes, p.code)
 
     async def _plan_findings(self, project_id: uuid.UUID) -> list[dict[str, Any]]:
         cps = await plan.list_packages(self.session, project_id)
@@ -1102,7 +1102,7 @@ class ProcurementConceptService:
             pkgs,
             day,
             catalogue_pin=(concept.catalogue_source, concept.catalogue_id, concept.catalogue_version),
-            profile=await self._profile(project_id, facts, day),
+            profile=await self._procurement_profile(project_id, facts, day),
         )
         shot = RuleSnapshot(project_id=project_id, package_id=row.id, taken_by=actor_id, **body)
         self.session.add(shot)
