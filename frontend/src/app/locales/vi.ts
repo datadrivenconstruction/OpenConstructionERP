@@ -49988,6 +49988,7 @@ const resource = {
     "onboarding.summary_team": "Nhóm",
     "onboarding.summary_team_hint": "Thêm đồng nghiệp và chọn vai trò của họ",
     "onboarding.summary_team_open": "Mở",
+    "onboarding.load_database_named": "Tải {{name}}",
     "modules.pp_name_aus": "Gói Xây dựng Úc",
     "modules.pp_name_austria_at": "Gói Xây dựng Áo",
     "modules.pp_name_brazil_sinapi": "Gói Xây dựng Brazil",

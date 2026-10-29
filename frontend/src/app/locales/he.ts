@@ -50430,6 +50430,7 @@ const resource = {
     "onboarding.summary_team": "צוות",
     "onboarding.summary_team_hint": "הוסיפו עמיתים ובחרו את התפקידים שלהם",
     "onboarding.summary_team_open": "פתיחה",
+    "onboarding.load_database_named": "טעינת {{name}}",
     "modules.pp_name_aus": "חבילת בנייה לאוסטרליה",
     "modules.pp_name_austria_at": "חבילת בנייה לאוסטריה",
     "modules.pp_name_brazil_sinapi": "חבילת בנייה לברזיל",

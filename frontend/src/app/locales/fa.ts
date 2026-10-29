@@ -50072,6 +50072,7 @@ const resource = {
     "onboarding.summary_team": "تیم",
     "onboarding.summary_team_hint": "همکاران را اضافه کنید و نقش آن‌ها را انتخاب کنید",
     "onboarding.summary_team_open": "باز کردن",
+    "onboarding.load_database_named": "بارگذاری {{name}}",
     "modules.pp_name_aus": "بسته ساخت‌وساز استرالیا",
     "modules.pp_name_austria_at": "بسته ساخت‌وساز اتریش",
     "modules.pp_name_brazil_sinapi": "بسته ساخت‌وساز برزیل",

@@ -126,6 +126,7 @@ let languageReady;
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   useBackgroundInstallStore.getState().dismiss();
   api.apiGet.mockReset();
   api.apiPost.mockReset();

@@ -53082,6 +53082,7 @@ const resource = {
     "onboarding.summary_team": "Equipa",
     "onboarding.summary_team_hint": "Adicione colegas e escolha as suas funções",
     "onboarding.summary_team_open": "Abrir",
+    "onboarding.load_database_named": "Carregar {{name}}",
     "modules.pp_name_aus": "Pacote de Construção da Austrália",
     "modules.pp_name_austria_at": "Pacote de Construção: Áustria",
     "modules.pp_name_brazil_sinapi": "Pacote de Construção do Brasil",

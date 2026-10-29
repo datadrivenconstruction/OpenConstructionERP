@@ -51658,6 +51658,7 @@ const resource = {
     "onboarding.summary_team": "Zespół",
     "onboarding.summary_team_hint": "Dodaj współpracowników i wybierz ich role",
     "onboarding.summary_team_open": "Otwórz",
+    "onboarding.load_database_named": "Wczytaj {{name}}",
     "modules.pp_name_aus": "Pakiet budowlany Australia",
     "modules.pp_name_austria_at": "Pakiet budowlany Austria",
     "modules.pp_name_brazil_sinapi": "Pakiet budowlany Brazylia",

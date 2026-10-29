@@ -47562,6 +47562,7 @@ const resource = {
     "onboarding.stepper_locked_ahead": "Conclua primeiro as etapas anteriores",
     "onboarding.stepper_locked_pack_data": "Seu pacote pronto já inclui os próprios dados",
     "onboarding.stepper_locked_pack_pending": "Disponível quando o pacote aplicar o idioma dele",
+    "onboarding.load_database_named": "Carregar {{name}}",
     "modules.pp_name_aus": "Pacote de Construção da Austrália",
     "modules.pp_name_austria_at": "Pacote de Construção: Áustria",
     "modules.pp_name_brazil_sinapi": "Pacote de Construção do Brasil",

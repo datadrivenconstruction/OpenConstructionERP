@@ -52682,6 +52682,7 @@ const resource = {
     "onboarding.summary_team": "Team",
     "onboarding.summary_team_hint": "Kollegen hinzufügen und ihre Rollen wählen",
     "onboarding.summary_team_open": "Öffnen",
+    "onboarding.load_database_named": "{{name}} laden",
     "modules.pp_name_aus": "Australien-Baupaket",
     "modules.pp_name_austria_at": "Österreich-Baupaket",
     "modules.pp_name_brazil_sinapi": "Brasilien-Baupaket",

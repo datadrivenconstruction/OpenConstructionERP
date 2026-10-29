@@ -488,6 +488,7 @@ const resource = {
     "punch.description_saved": "Description saved",
     "punch.no_description": "No description yet.",
     "punch.edit_description": "Edit description",
+    "onboarding.load_database_named": "Load {{name}}",
   }
 } as { translation: Record<string, string> };
 

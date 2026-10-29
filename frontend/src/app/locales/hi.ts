@@ -50167,6 +50167,7 @@ const resource = {
     "onboarding.summary_team": "टीम",
     "onboarding.summary_team_hint": "सहकर्मियों को जोड़ें और उनकी भूमिकाएँ चुनें",
     "onboarding.summary_team_open": "खोलें",
+    "onboarding.load_database_named": "{{name}} लोड करें",
     "modules.pp_name_aus": "ऑस्ट्रेलिया निर्माण पैक",
     "modules.pp_name_austria_at": "ऑस्ट्रिया निर्माण पैक",
     "modules.pp_name_brazil_sinapi": "ब्राज़ील निर्माण पैक",

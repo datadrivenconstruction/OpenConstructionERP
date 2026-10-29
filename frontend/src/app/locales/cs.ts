@@ -51397,6 +51397,7 @@ const resource = {
     "onboarding.summary_team": "Tým",
     "onboarding.summary_team_hint": "Přidejte kolegy a zvolte jejich role",
     "onboarding.summary_team_open": "Otevřít",
+    "onboarding.load_database_named": "Načíst {{name}}",
     "modules.pp_name_aus": "Stavební balíček Austrálie",
     "modules.pp_name_austria_at": "Stavební balíček Rakousko",
     "modules.pp_name_brazil_sinapi": "Stavební balíček Brazílie",

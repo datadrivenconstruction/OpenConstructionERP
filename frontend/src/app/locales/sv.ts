@@ -50854,6 +50854,7 @@ const resource = {
     "onboarding.summary_team": "Team",
     "onboarding.summary_team_hint": "Lägg till kollegor och välj deras roller",
     "onboarding.summary_team_open": "Öppna",
+    "onboarding.load_database_named": "Läs in {{name}}",
     "modules.pp_name_aus": "Byggpaket Australien",
     "modules.pp_name_austria_at": "Byggpaket Österrike",
     "modules.pp_name_brazil_sinapi": "Byggpaket Brasilien",

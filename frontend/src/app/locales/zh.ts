@@ -52449,6 +52449,7 @@ const resource = {
     "onboarding.summary_team": "团队",
     "onboarding.summary_team_hint": "添加同事并选择他们的角色",
     "onboarding.summary_team_open": "打开",
+    "onboarding.load_database_named": "加载 {{name}}",
     "modules.pp_name_aus": "澳大利亚建筑数据包",
     "modules.pp_name_austria_at": "奥地利建筑数据包",
     "modules.pp_name_brazil_sinapi": "巴西建筑数据包",

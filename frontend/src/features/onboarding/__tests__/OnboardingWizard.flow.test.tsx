@@ -178,6 +178,7 @@ const onboardingPost = () => {
 
 beforeEach(() => {
   localStorage.clear();
+  sessionStorage.clear();
   api.apiGet.mockReset();
   api.apiPost.mockReset();
   changeLanguage.mockClear();
@@ -377,6 +378,16 @@ describe('the ways out of the wizard', () => {
     expect(posts('/v1/users/me/onboarding/')).toHaveLength(0);
   });
 
+  it('the escape hatch marks the cached server flag done, so the dashboard does not send the reader back', async () => {
+    const client = renderWizard();
+    await heading('Welcome to OpenConstructionERP');
+    // What the dashboard fetched before it sent the reader here.
+    client.setQueryData(['me-onboarding', USER_ID], { completed: false, company_type: null });
+    click('Skip setup - open in English');
+    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/dashboard'));
+    expect(client.getQueryData(['me-onboarding', USER_ID])).toMatchObject({ completed: true });
+  });
+
   it('Quick Start skips the profile and module steps, Back returns to the start', async () => {
     renderWizard();
     await heading('Welcome to OpenConstructionERP');
@@ -556,7 +567,8 @@ describe('loading a cost base by hand on the data step', () => {
       await heading('How would you like to start?');
       click(/Quick Start/);
       await heading('Data Setup');
-      click('Load Database');
+      // Named after the base it loads, here the one the UI language suggests.
+      click(/^Load (?!Database)/);
 
       await waitFor(
         () => expect(useToastStore.getState().toasts.some((t) => / loaded$/.test(t.title))).toBe(true),
@@ -690,5 +702,26 @@ describe('on an installation whose pack names a company profile', () => {
     await Promise.resolve();
     expect(screen.queryByTestId('location')).toBeNull();
     expect(posts('/v1/users/me/onboarding/complete/')).toHaveLength(0);
+  });
+});
+
+describe('a reload in the middle of the wizard', () => {
+  it('returns to the same step with the same profile, and finishing forgets it', async () => {
+    renderWizard();
+    await toProfileStep();
+    fireEvent.click(screen.getByTestId('profile-card-general_contractor'));
+    click('Continue');
+    await screen.findByRole('searchbox', { name: 'Search modules' });
+    const before = stepLabel();
+    cleanup();
+
+    renderWizard();
+    await screen.findByRole('searchbox', { name: 'Search modules' });
+    expect(stepLabel()).toBe(before);
+    expect(moduleSwitch('payroll').getAttribute('aria-checked')).toBe('true');
+    expect(moduleSwitch('eac').getAttribute('aria-checked')).toBe('false');
+    await fromModulesToSummary();
+    await startWorking();
+    expect(sessionStorage.getItem('oe_onboarding_progress')).toBeNull();
   });
 });

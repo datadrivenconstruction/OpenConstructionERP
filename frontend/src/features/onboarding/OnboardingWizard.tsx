@@ -164,6 +164,7 @@ import {
 import { SemanticModelCard } from './SemanticModelCard';
 import { StepLook } from './StepLook';
 import { SetupSummary } from './SetupSummary';
+import { loadWizardProgress, saveWizardProgress, clearWizardProgress } from './wizardProgress';
 import { aiEstimatorApi } from '@/features/ai-estimator/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { fmtList } from '@/shared/lib/formatters';
@@ -653,7 +654,8 @@ function maskApiKey(key: string): string {
 export const ONBOARDING_COMPLETED_EVENT = 'oe:onboarding-completed';
 
 /** Mark onboarding as completed (local fast-path + best-effort server sync). */
-export function markOnboardingCompleted(): void {
+export function markOnboardingCompleted(): Promise<MeOnboarding | null> {
+  clearWizardProgress();
   try {
     localStorage.setItem('oe_onboarding_completed', 'true');
     localStorage.setItem('oe_onboarding_completed_version', APP_VERSION);
@@ -676,9 +678,7 @@ export function markOnboardingCompleted(): void {
   // "finish" save. Fire-and-forget: the local flag already stops a re-prompt
   // on this browser, and the dashboard first-run redirect reads the server
   // flag for fresh browsers and brand-new accounts.
-  void apiPost('/v1/users/me/onboarding/complete/', undefined).catch(() => {
-    /* non-critical */
-  });
+  return apiPost<MeOnboarding>('/v1/users/me/onboarding/complete/', undefined).catch(() => null);
 }
 
 /** Check whether onboarding has been completed. */
@@ -1159,7 +1159,7 @@ function ToggleSwitch({
       <span
         className={clsx(
           'pointer-events-none flex h-5 w-5 items-center justify-center rounded-full bg-white shadow-lg ring-0 transition-all duration-300 ease-in-out',
-          enabled ? 'translate-x-[22px] scale-[1.05]' : 'translate-x-0 scale-100',
+          enabled ? 'translate-x-[22px] rtl:-translate-x-[22px] scale-[1.05]' : 'translate-x-0 scale-100',
         )}
       >
         {enabled && <Check size={11} className="text-oe-blue" strokeWidth={3} />}
@@ -1182,10 +1182,14 @@ function StepWelcome({
     () => matchSupportedLanguage(navigator.language) ?? 'en',
   );
 
+  // A language bundle is fetched on first use and can take seconds on a slow
+  // link; the picked card shows that it is loading instead of looking dead.
+  const [loadingLang, setLoadingLang] = useState<string | null>(null);
   const handleSelect = useCallback(
     (code: string) => {
       setSelected(code);
-      void changeLanguage(code);
+      setLoadingLang(code);
+      void changeLanguage(code).finally(() => setLoadingLang((cur) => (cur === code ? null : cur)));
       onLanguageChange(code);
     },
     [onLanguageChange],
@@ -1259,6 +1263,8 @@ function StepWelcome({
               <button
                 key={lang.code}
                 onClick={() => handleSelect(lang.code)}
+                aria-pressed={isSelected}
+                aria-busy={loadingLang === lang.code}
                 className={clsx(
                   'relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-start',
                   'backdrop-blur-md transition-all duration-normal ease-oe',
@@ -1276,8 +1282,10 @@ function StepWelcome({
                     {lang.code}
                   </div>
                 </div>
-                {isSelected && (
-                  <CheckCircle2 size={14} className="text-oe-blue shrink-0" />
+                {isSelected && loadingLang === lang.code ? (
+                  <Loader2 size={14} className="text-oe-blue shrink-0 animate-spin" aria-hidden />
+                ) : (
+                  isSelected && <CheckCircle2 size={14} className="text-oe-blue shrink-0" />
                 )}
               </button>
             );
@@ -1503,7 +1511,13 @@ export function ReadyPackPicker({
   const { t } = useTranslation();
   const addToast = useToastStore((s) => s.addToast);
 
-  const { data, isLoading } = useQuery({
+  const {
+    data,
+    isLoading,
+    isError: packsFailed,
+    isFetching: packsRefetching,
+    refetch: refetchPacks,
+  } = useQuery({
     queryKey: ['partner-pack', 'installed'],
     queryFn: fetchInstalledPacks,
     staleTime: 60_000,
@@ -1789,6 +1803,32 @@ export function ReadyPackPicker({
         <div className="mt-8 flex items-center justify-center gap-2 py-8 text-sm text-content-tertiary">
           <Loader2 size={16} className="animate-spin text-oe-blue" />
           {t('onboarding.pp_loading', { defaultValue: 'Loading available country packs…' })}
+        </div>
+      )}
+
+      {/* A failed list read as "this deployment has no packs" and showed the
+          presets alone, with no way to try again. */}
+      {!isLoading && packsFailed && (
+        <div
+          role="alert"
+          data-testid="ready-pack-load-error"
+          className="mt-6 flex w-full max-w-lg items-center gap-3 rounded-xl bg-amber-50 dark:bg-amber-950/20 px-4 py-3 text-xs text-amber-700 dark:text-amber-400"
+        >
+          <AlertTriangle size={15} className="shrink-0" />
+          <span className="flex-1">
+            {t('onboarding.pp_load_error', {
+              defaultValue: 'Could not load country packs. You can still pick a country below.',
+            })}
+          </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => void refetchPacks()}
+            loading={packsRefetching}
+            disabled={packsRefetching}
+          >
+            {t('costs.load_failed_retry', { defaultValue: 'Retry' })}
+          </Button>
         </div>
       )}
 
@@ -2730,6 +2770,9 @@ function StepModuleConfig({
                 if (!anyEnabled && !enabledModules.has(k)) onToggleModule(k);
               }
             }}
+            role="switch"
+            aria-checked={ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))}
+            aria-label={t('onboarding.ai_tools', { defaultValue: 'AI-Powered Tools' })}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out ${
               ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))
                 ? 'bg-oe-blue'
@@ -2739,7 +2782,7 @@ function StepModuleConfig({
             <span
               className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow transition duration-200 ease-in-out ${
                 ALL_MODULES.filter((m) => m.group === 'ai').some((m) => enabledModules.has(m.key))
-                  ? 'translate-x-5'
+                  ? 'translate-x-5 rtl:-translate-x-5'
                   : 'translate-x-0'
               }`}
             />
@@ -3030,6 +3073,8 @@ function PartnerPackInstaller({
     data,
     isLoading,
     isError,
+    isFetching,
+    refetch,
   } = useQuery({
     queryKey: ['partner-pack', 'installed'],
     queryFn: fetchInstalledPacks,
@@ -3221,9 +3266,14 @@ function PartnerPackInstaller({
       {!isLoading && isError && (
         <div className="flex items-center gap-2 rounded-xl bg-amber-50 dark:bg-amber-950/20 px-3 py-3 text-xs text-amber-700 dark:text-amber-400">
           <AlertTriangle size={15} className="shrink-0" />
-          {t('onboarding.pp_load_error', {
-            defaultValue: 'Could not load country packs. You can still pick a country below.',
-          })}
+          <span className="flex-1">
+            {t('onboarding.pp_load_error', {
+              defaultValue: 'Could not load country packs. You can still pick a country below.',
+            })}
+          </span>
+          <Button variant="secondary" size="sm" onClick={() => void refetch()} loading={isFetching}>
+            {t('costs.load_failed_retry', { defaultValue: 'Retry' })}
+          </Button>
         </div>
       )}
 
@@ -3522,6 +3572,9 @@ function CountryPackCard({
           placeholder={t('onboarding.country_pack_filter_placeholder', {
             defaultValue: 'Find your country…',
           })}
+          aria-label={t('onboarding.country_pack_filter_placeholder', {
+            defaultValue: 'Find your country…',
+          })}
           disabled={installing}
           className="w-full rounded-lg bg-surface-secondary/70 px-3 py-1.5 text-xs text-content-primary placeholder:text-content-quaternary border border-transparent focus:border-oe-blue/40 focus:outline-none focus:bg-surface-secondary disabled:opacity-50"
         />
@@ -3781,30 +3834,10 @@ export function StepDataSetup({
 
   const selectedPack = getCountryPack(selectedPackId) ?? DEFAULT_COUNTRY_PACK;
 
-  // ── DB loading progress simulation ──
+  // The bar follows the import job itself. A timer used to run it to 95% in
+  // half a minute while the job was still at 15%.
   useEffect(() => {
-    if (!loadingDb) {
-      setDbProgress(0);
-      return;
-    }
-    const start = Date.now();
-    const interval = setInterval(() => {
-      const secs = Math.floor((Date.now() - start) / 1000);
-      const pct = Math.min(
-        95,
-        Math.round(
-          secs < 3
-            ? secs * 8
-            : secs < 10
-              ? 24 + (secs - 3) * 6
-              : secs < 30
-                ? 66 + (secs - 10) * 1.2
-                : 90 + Math.min(5, (secs - 30) * 0.2),
-        ),
-      );
-      setDbProgress(pct);
-    }, 500);
-    return () => clearInterval(interval);
+    if (!loadingDb) setDbProgress(0);
   }, [loadingDb]);
 
   const addQueueTask = useUploadQueueStore((s) => s.addTask);
@@ -3839,11 +3872,13 @@ export function StepDataSetup({
         // aborted after five minutes, so a large region read "Connection error"
         // while the import carried on and finished on the server.
         const result = await followCostDbLoad(region, {
-          onProgress: (job) =>
+          onProgress: (job) => {
+            setDbProgress(Math.max(0, Math.min(99, Math.round(job.pct))));
             updateQueueTask(taskId, {
               progress: Math.max(10, Math.min(95, job.pct)),
               message: t('onboarding.db_importing', { defaultValue: 'Importing items...' }),
-            }),
+            });
+          },
         });
         const report = costDbLoadReport(result, dbName);
         const loaded = result.outcome === 'completed' || result.outcome === 'partial';
@@ -3916,6 +3951,11 @@ export function StepDataSetup({
     },
     [addToast, t],
   );
+
+  // Named on the button, so a reader who only opened another family sees which
+  // base the click loads (the browser pre-picks one from the UI language).
+  const selectedBaseName =
+    selectedMarket?.market ?? CWICR_DATABASES.find((d) => d.id === selectedRegion)?.name ?? null;
 
   const handleLoadDb = useCallback(async () => {
     const market = selectedMarket;
@@ -4294,8 +4334,10 @@ export function StepDataSetup({
                 </div>
               </div>
             ) : (
-              <Button variant="secondary" size="sm" onClick={handleLoadDb}>
-                {t('onboarding.load_database', { defaultValue: 'Load Database' })}
+              <Button variant="secondary" size="sm" onClick={handleLoadDb} disabled={!selectedRegion}>
+                {selectedBaseName
+                  ? t('onboarding.load_database_named', { defaultValue: 'Load {{name}}', name: selectedBaseName })
+                  : t('onboarding.load_database', { defaultValue: 'Load Database' })}
               </Button>
             )}
           </div>
@@ -4375,6 +4417,7 @@ export function StepDataSetup({
                 <ToggleSwitch
                   enabled={installDemo}
                   onToggle={() => setInstallDemo(!installDemo)}
+                  label={t('onboarding.install_demo', { defaultValue: 'Install Demo Project' })}
                 />
               )}
             </div>
@@ -4394,13 +4437,14 @@ export function StepDataSetup({
           <button
             type="button"
             onClick={() => setAiExpanded(!aiExpanded)}
+            aria-expanded={aiExpanded}
             className="w-full flex items-center justify-between p-6"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-oe-blue-subtle text-oe-blue-text">
                 <Sparkles size={20} />
               </div>
-              <div className="text-left">
+              <div className="text-start">
                 <h3 className="text-base font-bold text-content-primary">
                   {t('onboarding.connect_ai', { defaultValue: 'Connect AI Provider' })}
                 </h3>
@@ -4413,7 +4457,7 @@ export function StepDataSetup({
               size={16}
               className={clsx(
                 'text-content-tertiary transition-transform duration-200 shrink-0',
-                aiExpanded && 'rotate-90',
+                aiExpanded ? 'rotate-90' : 'rtl:rotate-180',
               )}
             />
           </button>
@@ -4812,12 +4856,13 @@ export function OnboardingWizard() {
   useEffect(() => {
     document.title = `${t('onboarding.page_title', { defaultValue: 'Getting started' })} | ${brandName ?? 'OpenConstructionERP'}`;
   }, [t, i18nInstance.language, brandName]);
-  const [step, setStep] = useState(0);
+  const [restored] = useState(() => loadWizardProgress(TOTAL_STEPS));
+  const [step, setStep] = useState(() => restored?.step ?? 0);
   const [selectedLang, setSelectedLang] = useState(() => i18n.language?.split('-')[0] || 'en');
   const presets = useOnboardingPresets();
-  const [companyType, setCompanyType] = useState<string | null>(null);
+  const [companyType, setCompanyType] = useState<string | null>(() => restored?.companyType ?? null);
   const [enabledModules, setEnabledModules] = useState<Set<string>>(
-    () => new Set(ALL_MODULES.filter((m) => !m.core).map((m) => m.key)),
+    () => new Set(restored?.enabledModules ?? ALL_MODULES.filter((m) => !m.core).map((m) => m.key)),
   );
 
   /* ONBOARD-MODAL: the wizard itself had NO completed-flag guard — it
@@ -4903,12 +4948,28 @@ export function OnboardingWizard() {
 
   // Which steps the reader has been on. The stepper opens those, and Back
   // returns to the nearest earlier one.
-  const [maxReached, setMaxReached] = useState(0);
-  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set([0]));
+  const [maxReached, setMaxReached] = useState(() => Math.max(0, ...(restored?.visited ?? [])));
+  const [visited, setVisited] = useState<ReadonlySet<number>>(() => new Set([0, ...(restored?.visited ?? [])]));
   useEffect(() => {
     setMaxReached((m) => Math.max(m, step));
     setVisited((v) => (v.has(step) ? v : new Set(v).add(step)));
   }, [step]);
+
+  // A reload mid-way returns here. The pack flow is not kept: its install
+  // state lives in the running request, which a reload ends.
+  useEffect(() => {
+    if (alreadyCompleted || isOnboardingCompleted()) return;
+    if (packFlow) {
+      clearWizardProgress();
+      return;
+    }
+    saveWizardProgress({
+      step,
+      visited: [...visited],
+      companyType,
+      enabledModules: [...enabledModules],
+    });
+  }, [alreadyCompleted, packFlow, step, visited, companyType, enabledModules]);
 
   // Persistent escape hatch (top-right, every step): switch the whole app to
   // English, mark the language choice as explicit so the locale auto-detect
@@ -4921,9 +4982,16 @@ export function OnboardingWizard() {
     } catch {
       // Storage unavailable -- ignore.
     }
-    markOnboardingCompleted();
+    // The dashboard redirects on the cached server flag, which still says "not
+    // completed" here, so Skip bounced straight back to the welcome screen.
+    passQueryClient.setQueryData<MeOnboarding | undefined>(passOnboardingKey, (old) =>
+      old ? { ...old, completed: true } : old,
+    );
+    void markOnboardingCompleted().then((saved) => {
+      if (saved) passQueryClient.setQueryData(passOnboardingKey, saved);
+    });
     navigate('/dashboard');
-  }, [navigate]);
+  }, [navigate, passQueryClient, passOnboardingKey]);
 
   // Next and Back walk the same order the stepper shows. Next skips Data
   // after a pack install (the pack brings its own); Back returns to the
