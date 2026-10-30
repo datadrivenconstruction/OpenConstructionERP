@@ -70,7 +70,10 @@ class ApportionmentKey(Base):
     method: Mapped[str] = mapped_column(String(10), nullable=False, default="permille", server_default="permille")
 
     lines: Mapped[list[ApportionmentKeyLine]] = relationship(
-        "ApportionmentKeyLine", cascade="all, delete-orphan", lazy="selectin", order_by="ApportionmentKeyLine.unit_ref"
+        lambda: ApportionmentKeyLine,
+        cascade="all, delete-orphan",
+        lazy="selectin",
+        order_by=lambda: ApportionmentKeyLine.unit_ref,
     )
 
 
@@ -110,7 +113,10 @@ class ChargeBudget(Base):
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     lines: Mapped[list[BudgetLine]] = relationship(
-        "BudgetLine", cascade="all, delete-orphan", lazy="selectin", order_by="BudgetLine.category"
+        lambda: BudgetLine,
+        cascade="all, delete-orphan",
+        lazy="selectin",
+        order_by=lambda: BudgetLine.category,
     )
 
 
