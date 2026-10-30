@@ -21,10 +21,7 @@ import urllib.request
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = Path(
-    os.environ.get("CONVERTER_SOURCE")
-    or ROOT / "backend" / "app" / "core" / "converter_source.py"
-)
+SOURCE = Path(os.environ.get("CONVERTER_SOURCE") or ROOT / "backend" / "app" / "core" / "converter_source.py")
 
 
 def _load_source():
@@ -45,9 +42,7 @@ def _get(url: str, *, api: bool = False) -> bytes:
         headers["Accept"] = "application/vnd.github+json"
         if token:
             headers["Authorization"] = f"Bearer {token}"
-    with urllib.request.urlopen(
-        urllib.request.Request(url, headers=headers), timeout=60
-    ) as resp:
+    with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=60) as resp:
         return resp.read()
 
 
@@ -60,26 +55,14 @@ def main() -> int:
     problems: list[str] = []
     checked = 0
     for pkg in cs.all_packages():
-        tag = (
-            cs.package_tag(pkg, env)
-            if hasattr(cs, "package_tag")
-            else cs.resolve_converter_tag(env)
-        )
+        tag = cs.package_tag(pkg, env) if hasattr(cs, "package_tag") else cs.resolve_converter_tag(env)
         key = (tag, pkg.checksums_asset)
         if key not in sums_cache:
-            text = _get(
-                cs.release_asset_url(pkg.checksums_asset, repo=repo, tag=tag)
-            ).decode("utf-8", "replace")
+            text = _get(cs.release_asset_url(pkg.checksums_asset, repo=repo, tag=tag)).decode("utf-8", "replace")
             sums_cache[key] = cs.parse_sha256sums(text)
         if tag not in sizes_cache:
-            rel = json.loads(
-                _get(
-                    f"https://api.github.com/repos/{repo}/releases/tags/{tag}", api=True
-                )
-            )
-            sizes_cache[tag] = {
-                a["name"]: int(a["size"]) for a in rel.get("assets", [])
-            }
+            rel = json.loads(_get(f"https://api.github.com/repos/{repo}/releases/tags/{tag}", api=True))
+            sizes_cache[tag] = {a["name"]: int(a["size"]) for a in rel.get("assets", [])}
         published = sums_cache[key].get(pkg.asset)
         size = sizes_cache[tag].get(pkg.asset)
         where = f"{pkg.asset} ({pkg.platform_key}, {tag})"
@@ -90,17 +73,13 @@ def main() -> int:
         if published is None:
             problems.append(f"{where}: not listed in {pkg.checksums_asset}")
         elif published != pkg.sha256.lower():
-            problems.append(
-                f"{where}: sha256 pinned {pkg.sha256}, published {published}"
-            )
+            problems.append(f"{where}: sha256 pinned {pkg.sha256}, published {published}")
         checked += 1
     if problems:
         print(f"{len(problems)} converter pin problem(s) in {checked} packages:")
         for p in problems:
             print(f"  {p}")
-        print(
-            "Repin backend/app/core/converter_source.py from the release's own checksum file."
-        )
+        print("Repin backend/app/core/converter_source.py from the release's own checksum file.")
         return 1
     print(f"converter pins OK: {checked} packages match their releases")
     return 0
