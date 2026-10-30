@@ -334,9 +334,8 @@ describe('the onboarding wizard, first screen to the app', () => {
     // And forward again to the end, where the pick made at the start is saved.
     click(/Get Started/);
     await heading('How would you like to start?');
+    // The wizard remembers that profiles were chosen over packages.
     click(/Choose Your Profile/);
-    await heading('Choose your packages');
-    click('Pick a single company profile instead');
     await heading('What does your company do?');
     expect(screen.getByTestId('profile-card-subcontractor').getAttribute('aria-pressed')).toBe('true');
     click('Continue');
