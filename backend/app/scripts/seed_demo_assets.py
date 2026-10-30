@@ -343,6 +343,7 @@ BUNDLE_MAP: dict[str, str] = {
     "mixed-use-mexico-city": "commercial_rvt",
     "mixed-use-riyadh": "commercial_rvt",
     "consultancy-riyadh": "residential_ifc",
+    "residential-riyadh-offplan": "residential_ifc",
     "contractor-jeddah": "residential_ifc",
     "site-development-dammam": "commercial_rvt",
     "full-showcase-riyadh": "commercial_rvt",

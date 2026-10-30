@@ -4,7 +4,7 @@
  * API helpers for leases, rent schedules, rent roll and arrears (/v1/leasing).
  * Money arrives and leaves as decimal strings.
  */
-import { API_BASE, apiDelete, apiGet, apiPatch, apiPost, downloadWithAuth } from '@/shared/lib/api';
+import { API_BASE, apiDelete, apiGet, apiPatch, apiPost, downloadWithAuth, type Page } from '@/shared/lib/api';
 
 const BASE = '/v1/leasing';
 
@@ -200,6 +200,6 @@ export const downloadExport = (projectId: string, format: string) =>
   downloadWithAuth(`${API_BASE}${BASE}/export?project_id=${projectId}&format=${format}`, `leases.${format}`);
 
 export const fetchProjectDocuments = (projectId: string) =>
-  apiGet<{ items: { id: string; name: string; category: string }[]; total: number }>(
+  apiGet<Page<{ id: string; name: string; category: string }>>(
     `/v1/documents/?project_id=${projectId}&limit=200`,
   ).then((r) => r.items);

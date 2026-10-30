@@ -614,8 +614,8 @@
       "suggestion": "Limite los modificadores entre -50% y +200% para evitar precios de parcela poco realistas"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Cuenta de depósito en garantía {account}: lo liberado {released} supera el tope {cap} (avance certificado del {progress}% del dinero cobrado)",
+      "suggestion": "Retenga nuevas liberaciones hasta el próximo certificado de avance, o registre el certificado que eleva el avance"
     }
   },
   "schedule_5d": {

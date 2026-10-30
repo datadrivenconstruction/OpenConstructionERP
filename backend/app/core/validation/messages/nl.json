@@ -614,8 +614,8 @@
       "suggestion": "Beperk prijsaanpassingen tot -50% tot +200% om onrealistische kavelprijzen te voorkomen"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Escrowrekening {account}: vrijgegeven {released} overschrijdt het plafond {cap} (gecertificeerde voortgang {progress}% van het ontvangen geld)",
+      "suggestion": "Houd verdere vrijgaven tegen tot het volgende voortgangscertificaat, of registreer het certificaat dat de voortgang verhoogt"
     }
   },
   "schedule_5d": {

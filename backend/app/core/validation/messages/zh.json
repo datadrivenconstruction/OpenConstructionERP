@@ -614,8 +614,8 @@
       "suggestion": "请将调整幅度限制在 -50% 至 +200% 之间，避免地块价格失真。"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "托管账户 {account}：已释放 {released} 超过上限 {cap}（已收资金的认证进度为 {progress}%）",
+      "suggestion": "在下一份进度证书出具前暂停后续释放，或登记可提高进度的证书"
     }
   },
   "schedule_5d": {

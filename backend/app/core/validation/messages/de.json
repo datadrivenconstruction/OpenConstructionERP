@@ -614,8 +614,8 @@
       "suggestion": "Modifikatoren auf -50% bis +200% begrenzen, um unrealistische Preise zu vermeiden"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Treuhandkonto {account}: freigegeben {released} überschreitet die Obergrenze {cap} (bescheinigter Baufortschritt {progress}% der eingezahlten Mittel)",
+      "suggestion": "Weitere Freigaben bis zur nächsten Fortschrittsbescheinigung zurückhalten oder die Bescheinigung erfassen, die den Fortschritt erhöht"
     }
   },
   "schedule_5d": {

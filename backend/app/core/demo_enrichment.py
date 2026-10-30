@@ -376,9 +376,6 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # Benchmarks from the demo projects plus synthetic completed offices
             # and one estimate with two outlier elements. Self-guards per tenant.
             ("cost_benchmarks", None, lambda s: seed_cost_benchmarks_demo(s, _demo_pids)),
-            # Offline capture and a resolved sync conflict (diary entry, punch
-            # items, merge audit). Idempotent on fixed client_op_id values.
-            ("offline_conflict", None, lambda s: _offline_conflict_counts(s, _first_pid)),
             # Position-level progress for the positions field time just booked
             # approved hours to, so hours per installed unit has a denominator
             # on a fresh demo. Self-guards per project on an existing reading.
@@ -524,6 +521,10 @@ async def enrich_projects(project_ids: list[uuid.UUID]) -> dict[str, Any]:
             # Must run after "photos" above, which commits the image files this
             # register points at. Self-guards per project on its own diaries.
             ("daily_diary_showcase_de", None, lambda s: seed_daily_diary_showcase_de(s, _demo_pids)),
+            # After both diary seeders: they delete the installer's placeholder
+            # diaries, and an entry written into one before that is cascaded away
+            # and written again by the next install.
+            ("offline_conflict", None, lambda s: _offline_conflict_counts(s, _first_pid)),
             ("temporary_works", None, lambda s: seed_temporary_works_demo(s, _demo_pids)),
             # Mobilisation plan and readiness register. Demo-only: it records
             # signed consents, issued certificates and closed commencement gates,

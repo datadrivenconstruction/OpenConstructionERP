@@ -614,8 +614,8 @@
       "suggestion": "پلاٹوں کی غیر حقیقی قیمت سے بچنے کے لیے تعدیلات -50% اور +200% کے درمیان رکھیں"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "ایسکرو اکاؤنٹ {account}: جاری کردہ {released} حد {cap} سے تجاوز کر گئی ہے (جمع شدہ رقم کی تصدیق شدہ پیش رفت {progress}%)",
+      "suggestion": "اگلے پیش رفت سرٹیفکیٹ تک مزید اجرا روک دیں، یا پیش رفت بڑھانے والا سرٹیفکیٹ درج کریں"
     }
   },
   "schedule_5d": {

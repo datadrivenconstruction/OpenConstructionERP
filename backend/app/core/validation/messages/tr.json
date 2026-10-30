@@ -614,8 +614,8 @@
       "suggestion": "Gerçekçi olmayan parsel fiyatlarından kaçınmak için düzeltmeleri -%50 ile +%200 arasında sınırlayın"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Emanet hesabı {account}: serbest bırakılan {released}, {cap} sınırını aşıyor (tahsil edilen paranın onaylı ilerlemesi %{progress})",
+      "suggestion": "Sonraki hakediş belgesine kadar yeni serbest bırakmaları bekletin veya ilerlemeyi yükselten belgeyi kaydedin"
     }
   },
   "schedule_5d": {

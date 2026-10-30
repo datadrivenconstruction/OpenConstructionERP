@@ -614,8 +614,8 @@
       "suggestion": "Limitare i modificatori tra -50% e +200% per evitare prezzi di lotto irrealistici"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Conto di deposito a garanzia {account}: l'importo rilasciato {released} supera il tetto {cap} (avanzamento certificato del {progress}% dei fondi incassati)",
+      "suggestion": "Sospendi ulteriori rilasci fino al prossimo certificato di avanzamento, oppure registra il certificato che aumenta l'avanzamento"
     }
   },
   "schedule_5d": {

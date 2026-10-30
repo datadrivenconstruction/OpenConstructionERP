@@ -614,8 +614,8 @@
       "suggestion": "अवास्तविक भूखंड मूल्यों से बचने के लिए समायोजन -50% से +200% के बीच रखें"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "एस्क्रो खाता {account}: जारी की गई राशि {released} सीमा {cap} से अधिक है (एकत्र धन की प्रमाणित प्रगति {progress}%)",
+      "suggestion": "अगला प्रगति प्रमाणपत्र मिलने तक आगे की रिहाई रोकें, या प्रगति बढ़ाने वाला प्रमाणपत्र दर्ज करें"
     }
   },
   "schedule_5d": {

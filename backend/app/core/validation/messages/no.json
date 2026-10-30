@@ -614,8 +614,8 @@
       "suggestion": "Begrens justeringene til mellom -50% og +200% for å unngå urealistiske tomtepriser"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Sperret konto {account}: frigitt {released} overstiger taket {cap} (sertifisert fremdrift {progress}% av innbetalte midler)",
+      "suggestion": "Hold tilbake ytterligere frigivelser til neste fremdriftssertifikat, eller registrer sertifikatet som øker fremdriften"
     }
   },
   "schedule_5d": {

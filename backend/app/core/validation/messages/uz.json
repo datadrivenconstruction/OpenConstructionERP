@@ -614,8 +614,8 @@
       "suggestion": "Yer uchastkalarining noreal narxlarini oldini olish uchun tuzatishlarni -50% dan +200% gacha cheklang"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Eskrou hisobi {account}: chiqarilgan {released} chegaradan {cap} oshib ketdi (yig'ilgan mablag'ning tasdiqlangan bajarilishi {progress}%)",
+      "suggestion": "Keyingi bajarilish sertifikatigacha keyingi chiqarishlarni to'xtating yoki bajarilishni oshiradigan sertifikatni qayd eting"
     }
   },
   "schedule_5d": {

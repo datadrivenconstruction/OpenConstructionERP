@@ -125,7 +125,7 @@ EXPECTED: dict[str, str] = {
     "tests/unit": DECLARED_FULL,
     "tests/pg": DECLARED_FULL,
     "tests/integration": DECLARED_FILTERED,
-    "tests/modules": DECLARED_FILTERED,
+    "tests/modules": DECLARED_FULL,
     "tests/eval": DECLARED_PATH_FILTERED,
     "tests/benchmarks": DECLARED_ON_DEMAND,
     "tests/perf": DECLARED_ON_DEMAND,

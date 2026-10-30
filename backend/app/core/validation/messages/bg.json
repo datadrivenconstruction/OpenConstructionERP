@@ -614,8 +614,8 @@
       "suggestion": "Ограничете корекциите между -50% и +200%, за да избегнете нереалистични цени на парцели"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Ескроу сметка {account}: освободените {released} надвишават лимита {cap} (удостоверен напредък {progress}% от събраните средства)",
+      "suggestion": "Задръжте следващите освобождавания до следващия сертификат за напредък или запишете сертификата, който повишава напредъка"
     }
   },
   "schedule_5d": {

@@ -614,8 +614,8 @@
       "suggestion": "비현실적인 필지 가격을 피하려면 조정률을 -50%에서 +200% 사이로 제한하세요"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "에스크로 계좌 {account}: 해제액 {released}이(가) 한도 {cap}을(를) 초과했습니다 (수금액 대비 인증 진행률 {progress}%)",
+      "suggestion": "다음 기성 증명서가 나올 때까지 추가 해제를 보류하거나, 진행률을 높이는 증명서를 기록하십시오"
     }
   },
   "schedule_5d": {

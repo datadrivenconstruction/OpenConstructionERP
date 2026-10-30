@@ -614,8 +614,8 @@
       "suggestion": "Обмежте модифікатори діапазоном від -50% до +200%, щоб уникнути нереалістичних цін ділянок"
     },
     "escrow_release_within_progress": {
-      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
-      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
+      "fail": "Ескроу-рахунок {account}: випущено {released}, що перевищує ліміт {cap} (підтверджена готовність {progress}% зібраних коштів)",
+      "suggestion": "Затримайте подальші виплати до наступного акта готовності або внесіть акт, що підвищує готовність"
     }
   },
   "schedule_5d": {
