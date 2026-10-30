@@ -74,6 +74,15 @@ const ART: Record<string, ReactNode> = {
       <path d="M22 66h76" />
     </>
   ),
+  real_estate_gcc: (
+    <>
+      <path d="M34 66V20h26v46M60 66V36h24v30" />
+      <path d="M40 28h4M50 28h4M40 38h4M50 38h4M40 48h4M50 48h4" />
+      <circle cx="72" cy="46" r="5" className="oe-pk-accent" />
+      <path d="M72 51v9M72 56h4" className="oe-pk-accent" />
+      <path d="M22 66h76" />
+    </>
+  ),
   supply_chain: (
     <>
       <path d="M24 30h36v26H24zM60 38h14l10 10v8H60" />

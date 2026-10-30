@@ -35,6 +35,19 @@ def test_registry_has_ten_to_twelve_distinct_packages() -> None:
         assert pkg.widgets and pkg.demo_id
 
 
+def test_gulf_real_estate_package_brings_its_modules_and_demo() -> None:
+    from app.core.demo_real_estate import REAL_ESTATE_DEMOS
+    from app.core.regional_packages import get_regional_package
+
+    pkg = sp.get_package("real_estate_gcc")
+    assert pkg is not None
+    for module in ("property_dev", "leasing", "service_charges", "finance", "boq", "costs"):
+        assert module in sp.resolve_modules([pkg.id]), module
+    assert pkg.demo_id in REAL_ESTATE_DEMOS
+    regional = get_regional_package("real_estate_gcc")
+    assert regional is not None and regional["demo_id"] == pkg.demo_id
+
+
 def test_validation_flags_unknown_module(monkeypatch: pytest.MonkeyPatch) -> None:
     bad = sp.SolutionPackage(id="bad", icon="X", required=("no_such_module",), depends_on=("nope",))
     monkeypatch.setitem(sp.SOLUTION_PACKAGES, "bad", bad)
