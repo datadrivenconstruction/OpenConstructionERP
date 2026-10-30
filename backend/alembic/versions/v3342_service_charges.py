@@ -6,7 +6,7 @@ New tables only, inspector-guarded, so a database that ``create_all`` already bu
 reaches this revision and does nothing.
 
 Revision ID: v3342_service_charges
-Revises: vp01_unified_parties
+Revises: v3341_leasing_module
 Create Date: 2026-10-30
 """
 
@@ -20,7 +20,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "v3342_service_charges"
-down_revision: str | Sequence[str] | None = "vp01_unified_parties"
+down_revision: str | Sequence[str] | None = "v3341_leasing_module"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
