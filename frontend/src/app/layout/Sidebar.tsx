@@ -55,6 +55,7 @@ import { useNavPendingStore } from '@/shared/lib/navigationProgress';
 import { useRecentStore } from '@/stores/useRecentStore';
 import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { getModuleNavItems, navItemModuleId } from '@/modules/_registry';
+import { RUNTIME_MODULE_ICONS, runtimeModuleRoute, useRuntimeUiEntries } from '@/features/modules/runtimeModules';
 import { APP_VERSION } from '@/shared/lib/version';
 import { useSidebarBadges } from '@/shared/hooks/useSidebarBadges';
 import { useHiddenModules } from '@/shared/hooks/useHiddenModules';
@@ -629,6 +630,7 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   // query key with the Modules page so a successful toggle there invalidates
   // this query and the sidebar updates immediately. Fail-open: if the fetch
   // errors or is still loading, no route is hidden.
+  const { data: runtimeUiEntries } = useRuntimeUiEntries();
   const { data: backendModules } = useQuery({
     queryKey: ['system-modules'],
     queryFn: () => apiGet<BackendModuleState[]>('/v1/modules/'),
@@ -1117,7 +1119,16 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         moduleKey: navItemModuleId(mi),
         advancedOnly: mi.advancedOnly,
       }));
-    return [...group.items, ...dynamicItems];
+    // Pages of ZIP-installed modules; the server lists only loaded, enabled ones.
+    const runtimeItems: NavItem[] = (runtimeUiEntries ?? [])
+      .filter((e) => e.group === group.id)
+      .map((e) => ({
+        labelKey: `module_packages.nav.${e.module}`,
+        defaultLabel: e.label,
+        to: runtimeModuleRoute(e.module),
+        icon: RUNTIME_MODULE_ICONS[e.icon] ?? RUNTIME_MODULE_ICONS.package!,
+      }));
+    return [...group.items, ...dynamicItems, ...runtimeItems];
   };
 
   // The gates every row passes whatever the mode: module-enabled, admin and

@@ -52,6 +52,7 @@ import {
   type ModuleSearchContext,
 } from './moduleSearch';
 import { PacksCatalog } from './packs/PacksCatalog';
+import { ModulePackagesPanel } from './ModulePackagesPanel';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import { apiGet, apiPost, apiDelete } from '@/shared/lib/api';
@@ -1498,6 +1499,8 @@ function SystemModulesTab({ query, onClearQuery }: SystemModulesTabProps) {
           </p>
         )}
       </div>
+
+      {isAdmin && <ModulePackagesPanel />}
 
       {/* Category chips. 14 regional packs are a group a reader thinks in, and
           the list is far too long to scan without one. */}

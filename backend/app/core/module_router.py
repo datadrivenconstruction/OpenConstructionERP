@@ -66,12 +66,17 @@ async def enable_module(module_name: str, request: Request) -> dict[str, Any]:
 
     try:
         result = await module_loader.enable_module(module_name, request.app)
-        return result
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         )
+    # A ZIP-installed module gets its missing tables on enable (additive only).
+    from app.core import module_package
+
+    if module_package.read_marker(module_package.runtime_modules_dir() / module_name.removeprefix("oe_")):
+        result["tables"] = await module_package.create_missing_tables(module_name)
+    return result
 
 
 @router.post(

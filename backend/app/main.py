@@ -2536,6 +2536,11 @@ def create_app() -> FastAPI:
 
     app.add_middleware(SecurityHeadersMiddleware)
 
+    # Module page tokens stay inside their module; sandboxed module pages get CORS
+    from app.middleware.module_ui_scope import ModuleUiScopeMiddleware
+
+    app.add_middleware(ModuleUiScopeMiddleware)
+
     # ── Request correlation ID (must precede SlowRequestLogger so its log
     # lines carry the ID via the RequestIDLogFilter context) ───────────────
     # ── Universal audit capture context (Epic H) ──────────────────────────
@@ -2777,6 +2782,11 @@ def create_app() -> FastAPI:
     from app.core.module_router import router as module_mgmt_router
 
     app.include_router(module_mgmt_router)
+
+    # Third-party module ZIPs: upload, review, install, hosted pages
+    from app.core.module_package_router import router as module_package_router
+
+    app.include_router(module_package_router)
 
     # Processes center API (admin-only): background processes on/off/restart
     from app.core.processes.router import router as processes_router

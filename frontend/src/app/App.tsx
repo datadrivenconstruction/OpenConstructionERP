@@ -224,6 +224,9 @@ const ModuleBuilderPage = lazy(() =>
 // One screen for every module ever built on this instance: it renders from the
 // specification the module serves, because a runtime module cannot ship a
 // compiled screen of its own.
+const RuntimeModulePage = lazy(() =>
+  import('@/features/modules/RuntimeModulePage').then((m) => ({ default: m.RuntimeModulePage })),
+);
 const GeneratedModulePage = lazy(() =>
   import('@/features/module-builder/GeneratedModulePage').then((m) => ({
     default: m.GeneratedModulePage,
@@ -1537,6 +1540,8 @@ export default function App() {
             on. `:moduleKey` is the module's key, not its URL: the loader owns
             the key-to-URL rule and the page asks the server for it. */}
         <Route path="/module-builder" element={<P title="Module Builder"><ModuleBuilderPage /></P>} />
+        {/* Pages of modules installed from a ZIP, hosted in the shell (#540). */}
+        <Route path="/modules/runtime/:moduleName" element={<P title="Module"><RuntimeModulePage /></P>} />
         <Route path="/modules/:moduleKey" element={<P title="Module"><GeneratedModulePage /></P>} />
         <Route path="/projects/:projectId/modules/:moduleKey" element={<P title="Module"><GeneratedModulePage /></P>} />
 
