@@ -5,6 +5,7 @@
 Tables:
     oe_leasing_lease          - one lease of one unit to one tenant
     oe_leasing_schedule_line  - one rent period; ``invoice_id`` names the finance invoice raised for it
+    oe_leasing_lease_document - project document attached to a lease (FK to the document)
     oe_leasing_event          - lifecycle record: created, activated, notice, renewed, terminated, reviewed
 
 Parties and units are referenced softly: ``tenant_contact_id`` is a contacts row,
@@ -21,12 +22,12 @@ from datetime import date
 from decimal import Decimal
 
 from sqlalchemy import JSON, ForeignKey, Index, Integer, Numeric, String, Text, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db_types import SafeDate
 from app.database import GUID, Base
 
-__all__ = ["Lease", "LeaseEvent", "RentScheduleLine"]
+__all__ = ["Lease", "LeaseDocument", "LeaseEvent", "RentScheduleLine"]
 
 
 class Lease(Base):
@@ -66,13 +67,35 @@ class Lease(Base):
     notice_date: Mapped[date | None] = mapped_column(SafeDate(), nullable=True)
     ended_on: Mapped[date | None] = mapped_column(SafeDate(), nullable=True)
     renewed_from_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
-    document_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list, server_default="[]")  # type: ignore[assignment]
     ext_refs: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict, server_default="{}")  # type: ignore[assignment]
     notes: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
 
+    document_links: Mapped[list[LeaseDocument]] = relationship(
+        "LeaseDocument", cascade="all, delete-orphan", lazy="selectin", order_by="LeaseDocument.created_at"
+    )
+
+    @property
+    def document_ids(self) -> list[str]:
+        """Ids of the linked documents, oldest link first."""
+        return [str(x.document_id) for x in self.document_links]
+
     def __repr__(self) -> str:
         return f"<Lease {self.code} {self.status}>"
+
+
+class LeaseDocument(Base):
+    """A project document attached to a lease. The foreign key drops the link when the document is deleted."""
+
+    __tablename__ = "oe_leasing_lease_document"
+    __table_args__ = (UniqueConstraint("lease_id", "document_id", name="uq_leasing_lease_document"),)
+
+    lease_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_leasing_lease.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_documents_document.id", ondelete="CASCADE"), nullable=False, index=True
+    )
 
 
 class RentScheduleLine(Base):

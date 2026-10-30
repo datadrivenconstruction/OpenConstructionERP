@@ -26,7 +26,7 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.leasing.models import Lease, LeaseEvent, RentScheduleLine
+from app.modules.leasing.models import Lease, LeaseDocument, LeaseEvent, RentScheduleLine
 from app.modules.leasing.repository import HOLDING_STATUSES, LeasingRepository
 from app.modules.leasing.schedule import FREQUENCY_MONTHS, add_months, build_schedule, q2, term_months
 from app.modules.leasing.schemas import LeaseCreate, LeaseUpdate, RenewRequest, ReviewRequest, TerminateRequest
@@ -273,7 +273,7 @@ class LeasingService:
     async def create(self, data: LeaseCreate, actor: str | None) -> Lease:
         if await self.repo.code_taken(data.project_id, data.code):
             raise HTTPException(status.HTTP_409_CONFLICT, detail="Lease code already used in this project")
-        lease = Lease(**data.model_dump(), status="draft", created_by=actor, document_ids=[])
+        lease = Lease(**data.model_dump(), status="draft", created_by=actor, document_links=[])
         lease.term_months = term_months(data.start_date, data.end_date) if data.end_date >= data.start_date else 0
         await self._refuse_on_errors(lease)
         self.session.add(lease)
@@ -636,7 +636,7 @@ class LeasingService:
     # ── Documents ────────────────────────────────────────────────────────
 
     async def documents(self, lease: Lease) -> list[dict[str, str]]:
-        ids = [uuid.UUID(str(i)) for i in lease.document_ids or []]
+        ids = [x.document_id for x in lease.document_links]
         if not ids:
             return []
         from sqlalchemy import select
@@ -654,17 +654,16 @@ class LeasingService:
         doc = await self.session.get(Document, document_id)
         if doc is None or doc.project_id != lease.project_id:
             raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Document not found")
-        ids = [str(i) for i in lease.document_ids or []]
-        if str(document_id) not in ids:
-            lease.document_ids = [*ids, str(document_id)]
+        if all(x.document_id != document_id for x in lease.document_links):
+            lease.document_links.append(LeaseDocument(document_id=document_id))
             await self._event(lease, "document_linked", date.today(), actor, document_id=str(document_id))
             await self.session.flush()
         return lease
 
     async def unlink_document(self, lease: Lease, document_id: uuid.UUID, actor: str | None) -> Lease:
-        ids = [str(i) for i in lease.document_ids or []]
-        if str(document_id) in ids:
-            lease.document_ids = [i for i in ids if i != str(document_id)]
+        kept = [x for x in lease.document_links if x.document_id != document_id]
+        if len(kept) != len(lease.document_links):
+            lease.document_links[:] = kept
             await self._event(lease, "document_unlinked", date.today(), actor, document_id=str(document_id))
             await self.session.flush()
         return lease

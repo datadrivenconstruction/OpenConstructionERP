@@ -154,6 +154,8 @@ async def test_lifecycle_schedule_invoices_and_arrears(db_session):
             Payment(invoice_id=first.id, payment_date="2026-01-20", amount=Decimal("500.00"), currency_code="EUR")
         )
         await db_session.flush()
+        # The earlier arrears call loaded this invoice's payments into the shared session.
+        await db_session.refresh(first, ["payments"])
         arrears = (await c.get(f"/v1/leasing/arrears?project_id={project}&as_of=2026-03-01")).json()
         assert sorted(x["due"] for x in arrears["items"]) == ["1000.00", "1500.00"]
         assert arrears["totals"]["EUR"]["total"] == "2500.00"

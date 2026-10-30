@@ -2,12 +2,12 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """leasing module: leases, rent schedule lines and lease events
 
-Creates ``oe_leasing_lease``, ``oe_leasing_schedule_line`` and
-``oe_leasing_event``. New tables only, inspector-guarded, so a database that
+Creates ``oe_leasing_lease``, ``oe_leasing_lease_document``,
+``oe_leasing_schedule_line`` and ``oe_leasing_event``. New tables only, inspector-guarded, so a database that
 ``create_all`` already built reaches this revision and does nothing.
 
-Revision ID: v3340_leasing_module
-Revises: v3331_cost_benchmarks_payroll_periods
+Revision ID: v3341_leasing_module
+Revises: vp01_unified_parties
 Create Date: 2026-10-29
 """
 
@@ -20,8 +20,8 @@ from alembic import op
 
 from app.database import GUID
 
-revision: str = "v3340_leasing_module"
-down_revision: str | Sequence[str] | None = "v3331_cost_benchmarks_payroll_periods"
+revision: str = "v3341_leasing_module"
+down_revision: str | Sequence[str] | None = "vp01_unified_parties"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
@@ -72,7 +72,6 @@ def upgrade() -> None:
             sa.Column("notice_date", sa.Date(), nullable=True),
             sa.Column("ended_on", sa.Date(), nullable=True),
             sa.Column("renewed_from_id", GUID(), nullable=True),
-            sa.Column("document_ids", sa.JSON(), nullable=False, server_default="[]"),
             sa.Column("ext_refs", sa.JSON(), nullable=False, server_default="{}"),
             sa.Column("notes", sa.Text(), nullable=True),
             sa.Column("created_by", sa.String(36), nullable=True),
@@ -85,6 +84,18 @@ def upgrade() -> None:
         )
         op.create_index("ix_oe_leasing_lease_status", "oe_leasing_lease", ["status"])
         op.create_index("ix_leasing_lease_unit", "oe_leasing_lease", ["unit_kind", "unit_ref"])
+    if "oe_leasing_lease_document" not in tables:
+        op.create_table(
+            "oe_leasing_lease_document",
+            *_base(),
+            sa.Column("lease_id", GUID(), sa.ForeignKey("oe_leasing_lease.id", ondelete="CASCADE"), nullable=False),
+            sa.Column(
+                "document_id", GUID(), sa.ForeignKey("oe_documents_document.id", ondelete="CASCADE"), nullable=False
+            ),
+            sa.UniqueConstraint("lease_id", "document_id", name="uq_leasing_lease_document"),
+        )
+        op.create_index("ix_oe_leasing_lease_document_lease_id", "oe_leasing_lease_document", ["lease_id"])
+        op.create_index("ix_oe_leasing_lease_document_document_id", "oe_leasing_lease_document", ["document_id"])
     if "oe_leasing_schedule_line" not in tables:
         op.create_table(
             "oe_leasing_schedule_line",
@@ -121,6 +132,6 @@ def upgrade() -> None:
 
 def downgrade() -> None:
     tables = set(sa.inspect(op.get_bind()).get_table_names())
-    for name in ("oe_leasing_event", "oe_leasing_schedule_line", "oe_leasing_lease"):
+    for name in ("oe_leasing_event", "oe_leasing_schedule_line", "oe_leasing_lease_document", "oe_leasing_lease"):
         if name in tables:
             op.drop_table(name)
