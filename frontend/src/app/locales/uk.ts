@@ -57422,6 +57422,8 @@ const resource = {
     "modules.catalog.quote_capture": "Приймання та вирівнювання комерційних пропозицій",
     "modules.catalog.site_sensors": "Датчики на об'єкті",
     "modules.catalog.wip_report": "Звіт WIP (незавершене виробництво)",
+    "modules.catalog.leasing": "Оренда",
+    "modules.catalog.service_charges": "Внески на утримання",
     "modules.pp_desc_eleven_areas_framework": "Управління проєктом із боку замовника в одинадцяти сферах управління, у два етапи: розвиток проєкту та будівельне виконання. Між ними один гейт і один затверджений рамковий документ на кожну сферу.",
     "modules.pp_name_pakistan_pk": "Будівельний пакет Пакистан",
     "notifications.stakeholders.commitment_overdue.body": "Строк зобов’язання {{code}} минув {{due}}.",

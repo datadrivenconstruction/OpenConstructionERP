@@ -55364,6 +55364,8 @@ const resource = {
     "modules.catalog.quote_capture": "Улавяне и изравняване на оферти",
     "modules.catalog.site_sensors": "Сензори на обекта",
     "modules.catalog.wip_report": "WIP отчет (незавършено производство)",
+    "modules.catalog.leasing": "Отдаване под наем",
+    "modules.catalog.service_charges": "Общи разходи",
     "modules.pp_desc_eleven_areas_framework": "Управление на проекта от страна на инвеститора в единадесет области на управление през два етапа - развитие на проекта и изпълнение на строителството, с един гейт между тях и по един одобрен рамков документ за всяка област.",
     "modules.pp_name_pakistan_pk": "Строителен пакет Пакистан",
     "notifications.stakeholders.commitment_overdue.body": "Срокът на ангажимент {{code}} изтече на {{due}}.",

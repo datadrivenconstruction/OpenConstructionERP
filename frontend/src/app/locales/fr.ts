@@ -58262,6 +58262,8 @@ const resource = {
     "modules.catalog.quote_capture": "Saisie et comparaison des devis",
     "modules.catalog.site_sensors": "Capteurs de chantier",
     "modules.catalog.wip_report": "Rapport WIP (travaux en cours)",
+    "modules.catalog.leasing": "Location",
+    "modules.catalog.service_charges": "Charges de copropriété",
     "modules.pp_desc_eleven_areas_framework": "Pilotage du projet côté maître d'ouvrage sur onze domaines de management, en deux phases, développement du projet et exécution des travaux, avec un jalon de décision entre les deux et un document-cadre approuvé par domaine.",
     "modules.pp_name_pakistan_pk": "Pack Construction Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "L'engagement {{code}} était dû le {{due}}.",

@@ -55320,6 +55320,8 @@ const resource = {
     "modules.catalog.quote_capture": "ثبت و همسان‌سازی پیشنهادهای قیمت",
     "modules.catalog.site_sensors": "حسگرهای کارگاه",
     "modules.catalog.wip_report": "گزارش WIP (کار در جریان)",
+    "modules.catalog.leasing": "اجاره‌داری",
+    "modules.catalog.service_charges": "شارژ ساختمان",
     "modules.pp_desc_eleven_areas_framework": "مدیریت پروژه از سوی کارفرما در یازده حوزه مدیریتی و در دو فاز، توسعه پروژه و اجرای ساخت، با یک گیت میان آن‌ها و یک سند چارچوب تأییدشده برای هر حوزه.",
     "modules.pp_name_pakistan_pk": "بسته ساخت‌وساز پاکستان",
     "notifications.stakeholders.commitment_overdue.body": "تعهد {{code}} در {{due}} سررسید شده بود.",

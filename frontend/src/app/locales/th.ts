@@ -55116,6 +55116,8 @@ const resource = {
     "modules.catalog.quote_capture": "รับใบเสนอราคาและปรับให้เทียบกันได้",
     "modules.catalog.site_sensors": "เซนเซอร์หน้างาน",
     "modules.catalog.wip_report": "รายงาน WIP (งานระหว่างก่อสร้าง)",
+    "modules.catalog.leasing": "การให้เช่า",
+    "modules.catalog.service_charges": "ค่าส่วนกลาง",
     "modules.pp_desc_eleven_areas_framework": "การบริหารโครงการจากฝั่งเจ้าของใน 11 ด้านการจัดการ แบ่งเป็นสองระยะ ได้แก่การพัฒนาโครงการและการดำเนินการก่อสร้าง มีจุดตรวจสอบหนึ่งจุดคั่นกลาง และเอกสารกรอบที่ได้รับอนุมัติหนึ่งฉบับต่อด้าน",
     "modules.pp_name_pakistan_pk": "แพ็กก่อสร้างปากีสถาน",
     "notifications.stakeholders.commitment_overdue.body": "ข้อผูกพัน {{code}} ครบกำหนดเมื่อ {{due}}",

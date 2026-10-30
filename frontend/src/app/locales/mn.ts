@@ -55038,6 +55038,8 @@ const resource = {
     "modules.catalog.quote_capture": "Үнийн санал авах ба тэнцүүлэх",
     "modules.catalog.site_sensors": "Талбайн мэдрэгч",
     "modules.catalog.wip_report": "WIP тайлан (явагдаж буй ажил)",
+    "modules.catalog.leasing": "Түрээслэлт",
+    "modules.catalog.service_charges": "Үйлчилгээний төлбөр",
     "modules.pp_desc_eleven_areas_framework": "Захиалагчийн талаас төслийг арван нэгэн удирдлагын салбарт, хоёр үе шатанд удирдах: төслийн хөгжүүлэлт ба барилгын гүйцэтгэл. Хоёрын хооронд нэг гарц, салбар бүрт нэг батлагдсан төлөвлөгөөний баримт бичигтэй.",
     "modules.pp_name_pakistan_pk": "Барилгын багц: Пакистан",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} амлалтын хугацаа {{due}} байсан.",

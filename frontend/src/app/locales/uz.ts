@@ -56292,6 +56292,8 @@ const resource = {
     "modules.catalog.quote_capture": "Takliflarni qabul qilish va tenglashtirish",
     "modules.catalog.site_sensors": "Obyekt sensorlari",
     "modules.catalog.wip_report": "WIP hisoboti (bajarilayotgan ishlar)",
+    "modules.catalog.leasing": "Ijara",
+    "modules.catalog.service_charges": "Xizmat to‘lovlari",
     "modules.pp_desc_eleven_areas_framework": "Loyihani buyurtmachi tomonidan oʻn bir boshqaruv sohasida, ikki bosqichda boshqarish: loyihani ishlab chiqish va qurilishni amalga oshirish. Ular orasida bitta gate va har bir soha uchun bitta tasdiqlangan ramka hujjati bor.",
     "modules.pp_name_pakistan_pk": "Pokiston qurilish paketi",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} majburiyatining muddati {{due}} edi.",

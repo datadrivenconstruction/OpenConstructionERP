@@ -55360,6 +55360,8 @@ const resource = {
     "modules.catalog.quote_capture": "Tilbudsindhentning og tilbudssammenligning",
     "modules.catalog.site_sensors": "Sensorer på byggepladsen",
     "modules.catalog.wip_report": "WIP-rapport (igangværende arbejder)",
+    "modules.catalog.leasing": "Udlejning",
+    "modules.catalog.service_charges": "Fællesudgifter",
     "modules.pp_desc_eleven_areas_framework": "Bygherrens projektstyring i elleve styringsområder over to faser, projektudvikling og udførelse, med én gate imellem og ét godkendt rammedokument pr. område.",
     "modules.pp_name_pakistan_pk": "Byggepakke Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Tilsagn {{code}} havde frist {{due}}.",

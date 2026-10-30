@@ -55630,6 +55630,8 @@ const resource = {
     "modules.catalog.quote_capture": "কোটেশন সংগ্রহ ও সমতাকরণ",
     "modules.catalog.site_sensors": "সাইট সেন্সর",
     "modules.catalog.wip_report": "WIP রিপোর্ট (চলমান কাজ)",
+    "modules.catalog.leasing": "লিজিং",
+    "modules.catalog.service_charges": "সার্ভিস চার্জ",
     "modules.pp_desc_eleven_areas_framework": "মালিকপক্ষের প্রকল্প ব্যবস্থাপনা এগারোটি ব্যবস্থাপনা ক্ষেত্রে, দুটি পর্যায়ে - প্রকল্প উন্নয়ন ও নির্মাণ বাস্তবায়ন, এদের মাঝে একটি গেট এবং প্রতিটি ক্ষেত্রের জন্য একটি অনুমোদিত কাঠামো নথি।",
     "modules.pp_name_pakistan_pk": "পাকিস্তান নির্মাণ প্যাক",
     "notifications.stakeholders.commitment_overdue.body": "প্রতিশ্রুতি {{code}} এর নির্ধারিত তারিখ ছিল {{due}}।",

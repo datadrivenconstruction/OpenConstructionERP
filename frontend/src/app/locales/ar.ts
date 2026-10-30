@@ -58390,6 +58390,8 @@ const resource = {
     "modules.catalog.quote_capture": "التقاط عروض الأسعار ومقارنتها",
     "modules.catalog.site_sensors": "مستشعرات الموقع",
     "modules.catalog.wip_report": "تقرير WIP (الأعمال قيد التنفيذ)",
+    "modules.catalog.leasing": "التأجير",
+    "modules.catalog.service_charges": "رسوم الخدمات",
     "modules.pp_desc_eleven_areas_framework": "إطار إدارة المشروع من جهة المالك عبر أحد عشر مجالاً إدارياً على مرحلتين، هما تطوير المشروع وتنفيذ البناء، مع بوابة واحدة بينهما ووثيقة إطار معتمدة واحدة لكل مجال.",
     "modules.pp_name_pakistan_pk": "حزمة إنشاءات باكستان",
     "notifications.stakeholders.commitment_overdue.body": "الالتزام {{code}} كان مستحقًا في {{due}}.",

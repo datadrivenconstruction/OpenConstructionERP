@@ -55680,6 +55680,8 @@ const resource = {
     "modules.catalog.quote_capture": "Preluarea și nivelarea ofertelor",
     "modules.catalog.site_sensors": "Senzori de șantier",
     "modules.catalog.wip_report": "Raport WIP (lucrări în curs)",
+    "modules.catalog.leasing": "Închirieri",
+    "modules.catalog.service_charges": "Cote de întreținere",
     "modules.pp_desc_eleven_areas_framework": "Managementul proiectului din partea beneficiarului în unsprezece arii de management, în două faze, dezvoltarea proiectului și execuția lucrărilor, cu o poartă între ele și un document-cadru aprobat pentru fiecare arie.",
     "modules.pp_name_pakistan_pk": "Pachet de construcții Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Angajamentul {{code}} avea termen la {{due}}.",

@@ -56241,6 +56241,8 @@ const resource = {
     "modules.catalog.quote_capture": "Offertes inlezen en vergelijken",
     "modules.catalog.site_sensors": "Bouwplaatssensoren",
     "modules.catalog.wip_report": "WIP-rapport (onderhanden werk)",
+    "modules.catalog.leasing": "Verhuur",
+    "modules.catalog.service_charges": "Servicekosten",
     "modules.pp_desc_eleven_areas_framework": "Projectsturing vanuit de opdrachtgever in elf managementgebieden, in twee fasen, projectontwikkeling en uitvoering, met één go/no-go-moment ertussen en één goedgekeurd kaderdocument per gebied.",
     "modules.pp_name_pakistan_pk": "Bouwpakket Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Toezegging {{code}} had uiterlijk {{due}} nagekomen moeten zijn.",

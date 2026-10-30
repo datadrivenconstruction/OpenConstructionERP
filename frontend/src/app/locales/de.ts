@@ -57804,6 +57804,8 @@ const resource = {
     "modules.catalog.quote_capture": "Angebotserfassung und Preisspiegel",
     "modules.catalog.site_sensors": "Baustellen-Sensorik",
     "modules.catalog.wip_report": "WIP-Bericht (Bauleistungsstand)",
+    "modules.catalog.leasing": "Vermietung",
+    "modules.catalog.service_charges": "Hausgeld",
     "modules.pp_name_pakistan_pk": "Pakistan-Baupaket",
     // stakeholders (module 8) frontend keys: start
     "notifications.stakeholders.commitment_overdue.body": "Zusage {{code}} war am {{due}} fällig.",

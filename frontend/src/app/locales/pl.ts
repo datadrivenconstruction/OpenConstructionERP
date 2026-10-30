@@ -56875,6 +56875,8 @@ const resource = {
     "modules.catalog.quote_capture": "Rejestracja i zestawienie ofert",
     "modules.catalog.site_sensors": "Czujniki na budowie",
     "modules.catalog.wip_report": "Raport WIP (roboty w toku)",
+    "modules.catalog.leasing": "Wynajem",
+    "modules.catalog.service_charges": "Koszty wspólne",
     "modules.pp_desc_eleven_areas_framework": "Zarządzanie projektem po stronie inwestora w jedenastu obszarach zarządzania, w dwóch fazach, rozwoju projektu i realizacji budowy, z jedną bramką między nimi i jednym zatwierdzonym dokumentem ramowym dla każdego obszaru.",
     "modules.pp_name_pakistan_pk": "Pakiet budowlany Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Zobowiązanie {{code}} miało termin {{due}}.",

@@ -58255,6 +58255,8 @@ const resource = {
     "modules.catalog.quote_capture": "Captura e nivelamento de propostas",
     "modules.catalog.site_sensors": "Sensores de obra",
     "modules.catalog.wip_report": "Relatório WIP (obra em curso)",
+    "modules.catalog.leasing": "Locação",
+    "modules.catalog.service_charges": "Encargos de condomínio",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do dono de obra em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre ambas e um documento-quadro aprovado para cada área.",
     "modules.pp_name_pakistan_pk": "Pacote de Construção: Paquistão",
     "notifications.stakeholders.commitment_overdue.body": "O compromisso {{code}} tinha prazo em {{due}}.",

@@ -55318,6 +55318,8 @@ const resource = {
     "modules.catalog.quote_capture": "Pagkuha at pag-level ng mga quote",
     "modules.catalog.site_sensors": "Mga sensor sa site",
     "modules.catalog.wip_report": "WIP Report (mga gawaing kasalukuyang ginagawa)",
+    "modules.catalog.leasing": "Pag-upa",
+    "modules.catalog.service_charges": "Singil sa serbisyo",
     "modules.pp_desc_eleven_areas_framework": "Pamamahala ng proyekto sa panig ng may-ari sa labing-isang lugar ng pamamahala, sa dalawang yugto, ang pagpapaunlad ng proyekto at ang konstruksyon, na may isang gate sa pagitan at isang naaprubahang balangkas na dokumento sa bawat lugar.",
     "modules.pp_name_pakistan_pk": "Construction Pack ng Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Ang pangakong {{code}} ay due noong {{due}}.",

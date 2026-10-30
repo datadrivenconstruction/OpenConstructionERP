@@ -52428,6 +52428,8 @@ const resource = {
     "modules.catalog.condition": "Plan de estado y mantenimiento",
     "modules.catalog.cutting": "Optimización de cortes",
     "modules.catalog.drawing_compare": "Comparación de revisiones de planos",
+    "modules.catalog.leasing": "Alquiler",
+    "modules.catalog.service_charges": "Cuotas de condominio",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "notifications.stakeholders.commitment_overdue.body": "El compromiso {{code}} vencía el {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Un compromiso ha pasado su fecha límite",

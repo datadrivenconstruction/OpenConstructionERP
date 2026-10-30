@@ -57925,6 +57925,8 @@ const resource = {
     "modules.catalog.quote_capture": "Ajánlatok rögzítése és kiegyenlítése",
     "modules.catalog.site_sensors": "Építési terület szenzorai",
     "modules.catalog.wip_report": "WIP-jelentés (folyamatban lévő munkák)",
+    "modules.catalog.leasing": "Bérbeadás",
+    "modules.catalog.service_charges": "Közös költségek",
     "modules.pp_desc_eleven_areas_framework": "Projektirányítás a megrendelő oldalán tizenegy irányítási területen, két szakaszban, a projektfejlesztés és a kivitelezés során, köztük egy kapuval és területenként egy jóváhagyott keretdokumentummal.",
     "modules.pp_name_pakistan_pk": "Építőipari csomag: Pakisztán",
     "notifications.stakeholders.commitment_overdue.body": "A(z) {{code}} vállalás határideje lejárt: {{due}}.",

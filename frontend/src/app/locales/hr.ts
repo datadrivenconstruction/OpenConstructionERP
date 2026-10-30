@@ -55690,6 +55690,8 @@ const resource = {
     "modules.catalog.quote_capture": "Prikupljanje i izravnavanje ponuda",
     "modules.catalog.site_sensors": "Senzori na gradilištu",
     "modules.catalog.wip_report": "WIP izvještaj (radovi u tijeku)",
+    "modules.catalog.leasing": "Najam",
+    "modules.catalog.service_charges": "Zajednički troškovi",
     "modules.pp_desc_eleven_areas_framework": "Upravljanje projektom od strane investitora u jedanaest područja upravljanja u dvije faze, razvoj projekta i izvedba građenja, s jednom prekretnicom između njih i jednim odobrenim okvirnim dokumentom za svako područje.",
     "modules.pp_name_pakistan_pk": "Građevinski paket Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Rok obveze {{code}} istekao je {{due}}.",

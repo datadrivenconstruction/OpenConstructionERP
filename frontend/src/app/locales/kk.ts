@@ -55321,6 +55321,8 @@ const resource = {
     "modules.catalog.quote_capture": "Бағалама ұсыныстарды қабылдау және теңестіру",
     "modules.catalog.site_sensors": "Нысан сенсорлары",
     "modules.catalog.wip_report": "WIP есебі (орындалып жатқан жұмыстар)",
+    "modules.catalog.leasing": "Жалдау",
+    "modules.catalog.service_charges": "Қызмет ақысы",
     "modules.pp_desc_eleven_areas_framework": "Иеленушінің жағынан жобаны басқару он бір басқару саласында, екі кезеңде: жобаны әзірлеу және құрылысты орындау. Олардың арасында бір қақпа және әр сала үшін бекітілген бір негіздеме құжаты бар.",
     "modules.pp_name_pakistan_pk": "Пәкістан құрылыс пакеті",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} міндеттемесінің мерзімі {{due}} болды.",
