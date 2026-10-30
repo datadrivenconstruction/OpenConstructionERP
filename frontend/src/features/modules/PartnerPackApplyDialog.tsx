@@ -91,6 +91,8 @@ import { fmtList } from '@/shared/lib/formatters';
 interface PartnerPackApplyDialogProps {
   open: boolean;
   onClose: () => void;
+  /** Called instead of ``onClose`` when Done closes a successful install. */
+  onInstalled?: () => void;
   slug: string;
   partnerName: string;
 }
@@ -271,6 +273,7 @@ export function PartnerPackApplyDialog({
   onClose,
   slug,
   partnerName: rawPartnerName,
+  onInstalled,
 }: PartnerPackApplyDialogProps) {
   const { t } = useTranslation();
   // The name the caller passes is the pack's own (English) one; the title,
@@ -1044,8 +1047,9 @@ export function PartnerPackApplyDialog({
               )}
               <button
                 type="button"
-                onClick={onClose}
+                onClick={!failedBeforeStart && onInstalled ? onInstalled : onClose}
                 disabled={installing}
+                data-testid="pack-apply-done"
                 className="inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-oe-blue/90 disabled:opacity-60"
               >
                 {failedBeforeStart

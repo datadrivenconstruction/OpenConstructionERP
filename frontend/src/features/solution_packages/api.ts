@@ -30,6 +30,25 @@ export interface PackageState {
   optional: string[];
   modules: Record<string, boolean>;
   packaged: boolean;
+  /** Pack slug (or `package:<id>`) the menu is focused on, or null. */
+  focus_pack?: string | null;
+}
+
+/** What focusing on a pack turns on, and the facts its guided start uses. */
+export interface FocusPreview {
+  slug: string;
+  name: string;
+  name_key: string | null;
+  type: string;
+  source: 'manifest' | 'fallback';
+  modules: string[];
+  hidden: string[];
+  demo_template_ids: string[];
+  rule_sets: string[];
+  standard: string | null;
+  cwicr_regions: string[];
+  currency: string | null;
+  menu: string[];
 }
 
 export interface PackageListing {
@@ -71,6 +90,27 @@ export function removePackage(
 
 export function seedPackageDemo(packageId: string): Promise<{ demo_id: string | null; project_id?: string }> {
   return apiPost(`/v1/solution-packages/${encodeURIComponent(packageId)}/demo/`);
+}
+
+export function fetchFocusPreview(slug: string): Promise<FocusPreview> {
+  return apiGet<FocusPreview>(`/v1/solution-packages/focus/${encodeURIComponent(slug)}/preview/`);
+}
+
+export function focusOnPack(slug: string): Promise<PackageState & { preview: FocusPreview }> {
+  return apiPost(`/v1/solution-packages/focus/${encodeURIComponent(slug)}/`);
+}
+
+export function showAllModules(): Promise<PackageState> {
+  return apiPost('/v1/solution-packages/show-all/');
+}
+
+export function useFocusPreview(slug: string | null | undefined) {
+  return useQuery({
+    queryKey: ['solution-packages', 'focus-preview', slug],
+    queryFn: () => fetchFocusPreview(slug as string),
+    enabled: !!slug,
+    staleTime: 5 * 60 * 1000,
+  });
 }
 
 export function useSolutionPackages(enabled = true) {

@@ -15,6 +15,7 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
+from app.core import pack_focus
 from app.core import solution_packages as sp
 from app.core.module_guard import invalidate_user
 from app.dependencies import CurrentUserId, get_current_user_payload
@@ -74,6 +75,7 @@ def _state_payload(metadata: dict[str, Any]) -> dict[str, Any]:
         "optional": state["optional"],
         "modules": state["modules"],
         "packaged": bool(state["modules"]),
+        "focus_pack": state["focus_pack"],
     }
 
 
@@ -186,3 +188,42 @@ async def seed_package_demo(package_id: str, user_id: CurrentUserId) -> dict[str
             result = await install_demo_project(session, pkg.demo_id, owner_id=uuid.UUID(user_id))
         await session.commit()
     return {"package_id": package_id, "demo_id": pkg.demo_id, **result}
+
+
+@router.get("/focus/{slug}/preview/")
+async def focus_preview(slug: str) -> dict[str, Any]:
+    """Modules a pack turns on, the ones it would hide, and the facts for its guided start."""
+    out = pack_focus.preview(slug)
+    if out is None:
+        raise HTTPException(status_code=404, detail="unknown pack")
+    return out
+
+
+@router.post("/focus/{slug}/", dependencies=_ADMIN)
+async def focus_on_pack(
+    slug: str,
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Show only this pack's modules. Others are hidden, not uninstalled; data stays."""
+    out = pack_focus.preview(slug)
+    if out is None:
+        raise HTTPException(status_code=404, detail="unknown pack")
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata = pack_focus.focus(dict(user.metadata_ or {}), out["slug"], out["modules"])
+    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+    invalidate_user(user_id)
+    return {**_state_payload(metadata), "preview": out}
+
+
+@router.post("/show-all/", dependencies=_ADMIN)
+async def show_all_modules(
+    user_id: CurrentUserId,
+    service: UserService = Depends(_get_service),
+) -> dict[str, Any]:
+    """Show every module again and drop the pack focus."""
+    user = await service.get_user(uuid.UUID(user_id))
+    metadata = pack_focus.show_all(dict(user.metadata_ or {}))
+    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+    invalidate_user(user_id)
+    return _state_payload(metadata)

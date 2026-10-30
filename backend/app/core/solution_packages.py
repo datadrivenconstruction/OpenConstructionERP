@@ -320,6 +320,7 @@ def read_state(metadata: dict[str, Any]) -> dict[str, Any]:
         "installed": [p for p in raw.get("installed", []) if p in SOLUTION_PACKAGES],
         "optional": list(raw.get("optional", [])),
         "modules": {k: bool(v) for k, v in (raw.get("modules") or {}).items()},
+        "focus_pack": raw.get("focus_pack") or None,
     }
 
 
@@ -366,7 +367,13 @@ def install(
         if mod in gateable_modules():
             modules[mod] = True
 
-    metadata[STATE_KEY] = {"installed": installed, "optional": chosen_optional, "modules": modules}
+    metadata[STATE_KEY] = {
+        "installed": installed,
+        "optional": chosen_optional,
+        "modules": modules,
+        # The first install focuses the menu on it; /packs/focus then explains what was hidden.
+        "focus_pack": f"package:{installed[0]}" if first else state["focus_pack"],
+    }
     _sync_preferences(metadata, modules)
     return metadata, added
 

@@ -12,12 +12,14 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
+import { PACKAGES_QUERY_KEY, focusOnPack } from '@/features/solution_packages/api';
+import { PackFocusPreview } from '@/features/solution_packages/PackFocusPreview';
 import clsx from 'clsx';
 import {
   AlertTriangle,
   ArrowLeft,
-  Boxes,
   Check,
   Database,
   ExternalLink,
@@ -41,7 +43,6 @@ import { useToastStore } from '@/stores/useToastStore';
 import { PartnerPackApplyDialog } from '../PartnerPackApplyDialog';
 import { PartnerPackDeactivateDialog } from '../PartnerPackDeactivateDialog';
 import { canInstallPacks, useApplyPreview } from '../partnerPacks';
-import { presetModuleName } from '../companyProfiles';
 import { asStringArray } from './packCatalog';
 import { usePackCatalogData } from './PacksCatalog';
 import { ViewerPackNotice } from './InstallPackPanel';
@@ -117,7 +118,7 @@ function Fact({ label, children }: { label: string; children: React.ReactNode })
 }
 
 export function PackDetailPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { slug = '' } = useParams<{ slug: string }>();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -133,6 +134,21 @@ export function PackDetailPage() {
 
   const [applyOpen, setApplyOpen] = useState(false);
   const [deactivateOpen, setDeactivateOpen] = useState(false);
+  const [focusAfter, setFocusAfter] = useState(true);
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+
+  async function afterInstall() {
+    setApplyOpen(false);
+    if (!focusAfter) return;
+    try {
+      await focusOnPack(slug);
+      await qc.invalidateQueries({ queryKey: PACKAGES_QUERY_KEY });
+      navigate('/packs/focus');
+    } catch {
+      addToast({ type: 'warning', title: t('packs.focus_failed', { defaultValue: 'The pack is installed, but the menu could not be focused.' }) });
+    }
+  }
 
   const backTo =
     typeof (location.state as { backTo?: unknown } | null)?.backTo === 'string'
@@ -204,7 +220,6 @@ export function PackDetailPage() {
   const regulatorRefs = asStringArray(pack.metadata.regulator_refs);
   const supportEmail = typeof pack.metadata.support_email === 'string' ? pack.metadata.support_email : null;
   const accent = pack.branding.accent_color ?? pack.branding.primary_color;
-  const moduleName = (id: string) => presetModuleName(t, i18n.language, id);
   const languageList = entry.languages.map((l) => names.languageName(l) ?? l.toUpperCase());
 
   let primaryAction: React.ReactNode = null;
@@ -345,32 +360,12 @@ export function PackDetailPage() {
                 </dl>
               </Section>
 
-              <Section icon={Boxes} title={t('packs.modules', { defaultValue: 'Modules' })} testId="pack-detail-modules">
-                {plan.modules_to_enable.length === 0 && plan.modules_to_disable.length === 0 ? (
-                  <p className="text-sm text-content-secondary">
-                    {t('packs.modules_unchanged', { defaultValue: 'Leaves your modules as they are. Every module stays available.' })}
-                  </p>
-                ) : (
-                  <div className="space-y-3">
-                    {plan.modules_to_enable.length > 0 && (
-                      <div>
-                        <p className="mb-1.5 text-xs font-medium text-content-secondary">
-                          {t('packs.modules_on_n', { defaultValue: 'Switched on: {{n}}', n: plan.modules_to_enable.length })}
-                        </p>
-                        <Chips items={plan.modules_to_enable.map(moduleName)} tone="on" />
-                      </div>
-                    )}
-                    {plan.modules_to_disable.length > 0 && (
-                      <div>
-                        <p className="mb-1.5 text-xs font-medium text-content-secondary">
-                          {t('packs.modules_off_n', { defaultValue: 'Hidden: {{n}}', n: plan.modules_to_disable.length })}
-                        </p>
-                        <Chips items={plan.modules_to_disable.map(moduleName)} tone="off" />
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Section>
+              <PackFocusPreview slug={pack.slug} focus={focusAfter} onFocusChange={setFocusAfter} canChoose={canInstall && !isActive} />
+              {isActive && (
+                <Link to="/packs/focus" className="inline-flex items-center gap-1.5 text-sm font-medium text-oe-blue hover:underline" data-testid="pack-detail-focus-link">
+                  {t('packs.focus_more', { defaultValue: 'Show more modules' })}
+                </Link>
+              )}
 
               <Section icon={ShieldCheck} title={t('packs.sec_validation', { defaultValue: 'Validation rules' })} testId="pack-detail-rules">
                 {plan.rule_packs_active.length === 0 && (plan.rule_sets_enabled ?? []).length === 0 ? (
@@ -555,6 +550,7 @@ export function PackDetailPage() {
       <PartnerPackApplyDialog
         open={applyOpen}
         onClose={() => setApplyOpen(false)}
+        onInstalled={() => void afterInstall()}
         slug={pack.slug}
         partnerName={pack.partner_name}
       />

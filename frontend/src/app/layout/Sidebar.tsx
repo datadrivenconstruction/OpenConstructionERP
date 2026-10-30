@@ -5,7 +5,7 @@ import { isRouteHiddenByPackages } from '@/features/solution_packages/logic';
 import { useState, useCallback, useEffect, useMemo, useRef, Fragment, Suspense, lazy } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { CustomBranding } from './CustomBranding';
 import { useTranslation } from 'react-i18next';
 import clsx from 'clsx';
@@ -252,7 +252,7 @@ interface BackendModuleState {
  *  them is on: the compliance view is the Requirements tab (oe_requirements)
  *  and the Rule Library (oe_bim_requirements), and the page drops the tab of
  *  whichever is off. */
-const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
+export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = {
   // Takeoff
   '/quantities': 'oe_takeoff',
   '/takeoff': 'oe_takeoff',
@@ -1711,6 +1711,27 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
                 </>
               )}
             </button>
+          </div>
+        )}
+        {packageState?.focus_pack && (
+          <div className={clsx('mt-2', iconified ? 'flex justify-center' : '')}>
+            <Link
+              to="/packs/focus#more-modules"
+              data-testid="sidebar-pack-hidden-modules"
+              aria-label={iconified ? t('packs.focus_more', { defaultValue: 'Show more modules' }) : undefined}
+              className={clsx(
+                'flex items-center rounded-lg border border-dashed border-border-light text-content-secondary',
+                'hover:border-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors',
+                iconified ? 'h-8 w-8 justify-center' : 'w-full gap-2 px-2.5 py-1.5',
+              )}
+            >
+              <Plus size={13} strokeWidth={2} className="shrink-0 text-content-tertiary" aria-hidden />
+              {!iconified && (
+                <span className="min-w-0 flex-1 truncate text-left text-[12px] font-medium">
+                  {t('packs.focus_more', { defaultValue: 'Show more modules' })}
+                </span>
+              )}
+            </Link>
           </div>
         )}
         {/* Project focus is applied IN PLACE inside the original groups

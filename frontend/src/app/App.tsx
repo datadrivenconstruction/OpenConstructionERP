@@ -688,6 +688,9 @@ const PacksPage = lazy(() =>
 const DemoChooserPage = lazy(() =>
   import('@/features/demo/DemoChooserPage').then((m) => ({ default: m.DemoChooserPage }))
 );
+const PackFocusPage = lazy(() =>
+  import('@/features/solution_packages/PackFocusPage').then((m) => ({ default: m.PackFocusPage }))
+);
 const PackDetailPage = lazy(() =>
   import('@/features/modules/packs/PackDetailPage').then((m) => ({ default: m.PackDetailPage }))
 );
@@ -1648,6 +1651,7 @@ export default function App() {
             the router ranks a static segment above a dynamic one regardless. */}
         <Route path="/videos" element={<P title="Videos"><VideosPage /></P>} />
         <Route path="/packs" element={<P title="Packs"><PacksPage /></P>} />
+        <Route path="/packs/focus" element={<P title="Packs"><PackFocusPage /></P>} />
         <Route path="/packs/:slug" element={<P title="Packs"><PackDetailPage /></P>} />
         <Route path="/onboarding/demo" element={<P title="Demo projects"><DemoChooserPage /></P>} />
         <Route path="/cases" element={<P title="Cases"><CasesPage /></P>} />
