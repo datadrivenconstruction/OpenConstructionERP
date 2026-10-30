@@ -95,8 +95,8 @@ describe('pack market bands', () => {
 
 describe('ordering inside a band', () => {
   it('sorts by the name on the card, not by the slug', () => {
-    // This is the batimatech-ca case. By slug it lands between Austria and
-    // Belgium; by the name the reader can actually see it belongs with Canada.
+    // This is the batimatech-ca case. By slug it lands first in the band; by
+    // the name the reader can see it belongs with Canada.
     const packs = [
       pack('batimatech-ca', 'CA', 'fr-CA', 'Canada Pack'),
       pack('canada-ca', 'CA', 'en-CA', 'Canada Construction Pack'),
@@ -104,7 +104,7 @@ describe('ordering inside a band', () => {
       pack('brazil-sinapi', 'BR', 'pt-BR', 'Brazil SINAPI Pack'),
     ];
     const ordered = sortPacksByMarket(packs, { nameOf, locale: 'en' }).map((p) => p.slug);
-    expect(ordered).toEqual(['batimatech-ca', 'brazil-sinapi', 'canada-ca', 'us-texas']);
+    expect(ordered).toEqual(['brazil-sinapi', 'canada-ca', 'batimatech-ca', 'us-texas']);
   });
 
   it('collates in the reader language, so the same list reads right in two of them', () => {
