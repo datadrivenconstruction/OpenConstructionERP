@@ -11,7 +11,7 @@ units get a token so they can be scanned too.
 Idempotent. The downgrade drops the index and the columns.
 
 Revision ID: v3332_prefab_supply_chain_tracking
-Revises: vp01_unified_parties
+Revises: v3340_procurement_profile_confirmation
 Create Date: 2026-10-27
 """
 
@@ -24,7 +24,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3332_prefab_supply_chain_tracking"
-down_revision: Union[str, Sequence[str], None] = "vp01_unified_parties"
+down_revision: Union[str, Sequence[str], None] = "v3340_procurement_profile_confirmation"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
