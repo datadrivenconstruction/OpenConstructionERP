@@ -122,6 +122,13 @@ CI_ONLY_BY_DESIGN = {
         "scoped to locale files would miss a prose change, and a hook scoped to "
         "the docs would miss a locale addition; the gate needs both sides at once."
     ),
+    "check_converter_pins.py": (
+        "Reads every pinned converter release from GitHub over the network, so it "
+        "would make each commit depend on GitHub being reachable and on its rate "
+        "limit. The drift it catches happens upstream, not in a commit: it runs "
+        "daily, on changes to the pin table, and before a release image is built "
+        "(converter-pins.yml)."
+    ),
     "check_frontend_api_routes.py": (
         "Needs the backend installed, because it builds the real route table with "
         "create_app() and every module router mounted, and that import takes minutes "
