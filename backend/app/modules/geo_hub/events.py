@@ -188,14 +188,29 @@ async def _do_geocode_and_persist(
                 "status": "ignored",
                 "reason": "geocoder returned no result",
             }
+        from app.modules.geo_hub import coord_reconcile
+        from app.modules.geo_hub.service import _address_coords
+        from app.modules.projects.models import Project
+
         now = datetime.now(UTC).isoformat()
+        project = await session.get(Project, project_id)
+        project_address = dict(project.address) if project is not None and isinstance(project.address, dict) else {}
+        decision = coord_reconcile.reconcile(
+            _address_coords(project_address),
+            project_address.get("coord_source"),
+            (result.lat, result.lon),
+        )
+        assert decision is not None
         geo_meta = {
             "geocoded_from": "project_address",
             "geocode_precision": result.precision,
             "geocode_source": result.source,
             "geocode_display_name": result.display_name,
             "geocoded_at": now,
+            **coord_reconcile.anchor_metadata(decision, now),
         }
+        if project is not None:
+            project.address = coord_reconcile.apply_to_address(project_address, decision, now)
         address_line = ", ".join(
             part
             for part in (
@@ -210,8 +225,8 @@ async def _do_geocode_and_persist(
         if existing is None:
             anchor = GeoAnchor(
                 project_id=project_id,
-                lat=result.lat,
-                lon=result.lon,
+                lat=decision.lat,
+                lon=decision.lon,
                 alt=Decimal("0"),
                 epsg_code=4326,
                 address=address_line or None,
@@ -223,8 +238,8 @@ async def _do_geocode_and_persist(
             merged_meta = merge_metadata(existing.metadata_, geo_meta)
             await repo.update_fields(
                 existing.id,
-                lat=result.lat,
-                lon=result.lon,
+                lat=decision.lat,
+                lon=decision.lon,
                 epsg_code=4326,
                 address=address_line or existing.address,
                 metadata_=merged_meta,
@@ -236,10 +251,10 @@ async def _do_geocode_and_persist(
         {
             "anchor_id": str(anchor_id),
             "project_id": str(project_id),
-            "lat": str(result.lat),
-            "lon": str(result.lon),
+            "lat": str(decision.lat),
+            "lon": str(decision.lon),
             "precision": result.precision,
-            "source": result.source,
+            "source": decision.source,
         },
         source_module="geo_hub",
     )

@@ -333,10 +333,25 @@ class GeoHubService:
                 if part
             )
 
+        from app.modules.geo_hub import coord_reconcile
+
+        now_iso = datetime.now(UTC).isoformat()
+        geocoded = None if result.source == "project_coordinates" else (result.lat, result.lon)
+        decision = coord_reconcile.reconcile(
+            saved_coords,
+            project.address.get("coord_source") if isinstance(project.address, dict) else None,
+            geocoded,
+        )
+        assert decision is not None
+        provenance = coord_reconcile.anchor_metadata(decision, now_iso)
+        project.address = coord_reconcile.apply_to_address(
+            project.address if isinstance(project.address, dict) else {}, decision, now_iso
+        )
+
         if existing is not None:
             # Overwrite in place (force=True path).
-            existing.lat = result.lat
-            existing.lon = result.lon
+            existing.lat = decision.lat
+            existing.lon = decision.lon
             existing.epsg_code = 4326
             existing.address = address_line or existing.address
             metadata = dict(existing.metadata_ or {})
@@ -346,7 +361,8 @@ class GeoHubService:
                     "geocode_precision": result.precision,
                     "geocode_source": result.source,
                     "geocode_display_name": result.display_name,
-                    "geocoded_at": datetime.now(UTC).isoformat(),
+                    "geocoded_at": now_iso,
+                    **provenance,
                 },
             )
             existing.metadata_ = metadata
@@ -356,8 +372,8 @@ class GeoHubService:
         else:
             anchor = GeoAnchor(
                 project_id=project_id,
-                lat=result.lat,
-                lon=result.lon,
+                lat=decision.lat,
+                lon=decision.lon,
                 alt=Decimal("0"),
                 epsg_code=4326,
                 address=address_line or None,
@@ -366,7 +382,8 @@ class GeoHubService:
                     "geocode_precision": result.precision,
                     "geocode_source": result.source,
                     "geocode_display_name": result.display_name,
-                    "geocoded_at": datetime.now(UTC).isoformat(),
+                    "geocoded_at": now_iso,
+                    **provenance,
                 },
             )
             anchor = await self.anchors.create(anchor)
@@ -376,8 +393,8 @@ class GeoHubService:
             {
                 "anchor_id": str(anchor.id),
                 "project_id": str(project_id),
-                "lat": str(result.lat),
-                "lon": str(result.lon),
+                "lat": str(decision.lat),
+                "lon": str(decision.lon),
                 "precision": result.precision,
                 "source": result.source,
             },

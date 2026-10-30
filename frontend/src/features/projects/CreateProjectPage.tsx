@@ -886,6 +886,7 @@ export function CreateProjectModal({
         // extra geocoding (#284). Omitted (null) for hand-typed addresses.
         lat: addressLat,
         lng: addressLon,
+        coord_source: addressLat != null && addressLon != null ? 'suggestion' : null,
         location_precision: locationPrecision as ProjectAddress['location_precision'] ?? null,
       };
       // Coordinates alone shouldn't count as "has an address" for the

@@ -15,6 +15,11 @@ export interface ProjectAddress {
   lng?: number | null;
   /** OC-11: precision of the geocoded location (city/street/address). */
   location_precision?: 'city' | 'street' | 'address' | 'region' | 'country' | null;
+  /** Where lat/lng came from: 'suggestion' (picked), 'pin' / 'user_pick' (decided), 'geocoder' (server), 'client_geocode'. */
+  coord_source?: string | null;
+  coord_at?: string | null;
+  /** The point that lost a reconciliation by more than a few km; offered to the user as an alternative. */
+  coord_conflict?: { lat: number; lng: number; source: string; distance_km: number } | null;
 }
 
 /** RFC 37 §3 — single FX rate row attached to a project.

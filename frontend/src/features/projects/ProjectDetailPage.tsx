@@ -686,10 +686,47 @@ function ProjectLocationPanel({ project }: { project: Project }) {
           ...(project.address ?? {}),
           lat: coords.lat,
           lng: coords.lng,
+          coord_source: 'client_geocode',
+          coord_at: new Date().toISOString(),
         },
       }),
     onSuccess: () => {
       setPersisted(true);
+      queryClient.invalidateQueries({ queryKey: ['project', project.id] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+
+  // A large gap between the saved point and the server geocode: let the user pick.
+  const conflict = project.address?.coord_conflict ?? null;
+  const useConflictPoint = useMutation({
+    mutationFn: () =>
+      apiPatch(`/v1/projects/${project.id}`, {
+        address: {
+          ...(project.address ?? {}),
+          lat: conflict?.lat,
+          lng: conflict?.lng,
+          coord_source: 'user_pick',
+          coord_at: new Date().toISOString(),
+          coord_conflict: null,
+        },
+      }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['project', project.id] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+  });
+  const keepCurrentPoint = useMutation({
+    mutationFn: () =>
+      apiPatch(`/v1/projects/${project.id}`, {
+        address: {
+          ...(project.address ?? {}),
+          coord_source: 'user_pick',
+          coord_at: new Date().toISOString(),
+          coord_conflict: null,
+        },
+      }),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['project', project.id] });
       queryClient.invalidateQueries({ queryKey: ['projects'] });
     },
@@ -731,6 +768,37 @@ function ProjectLocationPanel({ project }: { project: Project }) {
   };
 
   return (
+    <>
+    {mapEnabled && conflict && (
+      <div
+        role="alert"
+        className="mb-3 flex flex-wrap items-center gap-3 rounded-lg border border-semantic-warning/40 bg-semantic-warning-bg p-3 text-sm text-content-primary"
+      >
+        <span className="min-w-0 flex-1">
+          {t('projects.location_conflict', {
+            defaultValue:
+              'The saved map point and the geocoded address are about {{km}} km apart. Which location is right?',
+            km: Math.round(conflict.distance_km),
+          })}
+        </span>
+        <button
+          type="button"
+          onClick={() => useConflictPoint.mutate()}
+          disabled={useConflictPoint.isPending || keepCurrentPoint.isPending}
+          className="rounded-md bg-oe-blue px-3 py-1.5 text-xs font-medium text-white disabled:opacity-60"
+        >
+          {t('projects.location_use_this', { defaultValue: 'Use this location' })}
+        </button>
+        <button
+          type="button"
+          onClick={() => keepCurrentPoint.mutate()}
+          disabled={useConflictPoint.isPending || keepCurrentPoint.isPending}
+          className="rounded-md border border-border-medium px-3 py-1.5 text-xs font-medium disabled:opacity-60"
+        >
+          {t('projects.location_keep_current', { defaultValue: 'Keep current' })}
+        </button>
+      </div>
+    )}
     <div
       className={clsx(
         'grid gap-3 items-stretch',
@@ -769,6 +837,7 @@ function ProjectLocationPanel({ project }: { project: Project }) {
         <ProjectWeather lat={resolved?.lat} lng={resolved?.lng} />
       )}
     </div>
+    </>
   );
 }
 
