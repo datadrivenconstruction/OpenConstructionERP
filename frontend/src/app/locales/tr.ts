@@ -20891,7 +20891,7 @@ const resource = {
     "propdev.compliance.loading": "Doğrulama kuralları çalıştırılıyor…",
     "propdev.compliance.no_rules": "Bu geliştirme için kayıtlı kural yok.",
     "propdev.compliance.quarter": "Çeyrek",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Suudi Arabistan)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Suudi Arabistan)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusya)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (Hindistan)",
     "propdev.compliance.regulator.rera": "RERA / DLD (BAE)",

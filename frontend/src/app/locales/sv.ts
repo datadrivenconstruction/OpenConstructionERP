@@ -16326,7 +16326,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",
     "propdev.compliance.regulator.maharera": "MAHARERA blankett 5 (Indien)",
     "propdev.compliance.regulator.fz214": "214-FZ (Ryssland)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudiarabien)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudiarabien)",
     "propdev.compliance.regulator_desc.rera": "Dubai Land Department kvartalsvis redovisning för off-plan-försäljning.",
     "propdev.compliance.regulator_desc.maharera": "Blankett 5 kvartalsvis redovisning av framsteg och ekonomi.",
     "propdev.compliance.regulator_desc.214fz": "Kvartalsrapport för exploatör inlämnad till EISZS.",

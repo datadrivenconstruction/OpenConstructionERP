@@ -13527,7 +13527,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (ОАЕ)",
     "propdev.compliance.regulator.maharera": "MAHARERA форма 5 (Індія)",
     "propdev.compliance.regulator.fz214": "214-ФЗ (Росія)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Саудівська Аравія)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Саудівська Аравія)",
     "propdev.compliance.regulator_desc.rera": "Квартальне розкриття інформації Земельного департаменту Дубая для продажів на етапі будівництва.",
     "propdev.compliance.regulator_desc.maharera": "Квартальне розкриття прогресу й фінансів за формою 5.",
     "propdev.compliance.regulator_desc.214fz": "Квартальний звіт забудовника, що подається до ЕІСЖС.",

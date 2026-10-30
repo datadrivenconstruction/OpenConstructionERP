@@ -14146,7 +14146,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (BAA)",
     "propdev.compliance.regulator.maharera": "MAHARERA 5-shakl (Hindiston)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rossiya)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudiya Arabistoni)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudiya Arabistoni)",
     "propdev.compliance.regulator_desc.rera": "Dubay Yer Departamentining loyihada sotish boʻyicha choraklik hisoboti.",
     "propdev.compliance.regulator_desc.maharera": "5-shakl choraklik progress + moliya hisoboti.",
     "propdev.compliance.regulator_desc.214fz": "EISZS ga topshiriladigan devaloperning choraklik hisoboti.",

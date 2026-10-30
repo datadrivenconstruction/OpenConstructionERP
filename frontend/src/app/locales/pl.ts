@@ -21400,7 +21400,7 @@ const resource = {
     "portal.status.suspended": "Zawieszony",
     "propdev.compliance.badge.pass": "OK",
     "propdev.compliance.quarter": "Kwartał",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Arabia Saudyjska)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Arabia Saudyjska)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rosja)",
     "propdev.compliance.regulator.rera": "RERA / DLD (ZEA)",
     "propdev.compliance.regulator_desc.cma": "Dwujęzyczne ujawnienie licencji off-plan Wafi (angielski + arabski).",

@@ -20333,7 +20333,7 @@ const resource = {
     "propdev.compliance.loading": "Εκτέλεση κανόνων validation…",
     "propdev.compliance.no_rules": "Δεν έχουν καταχωρηθεί κανόνες για αυτή την ανάπτυξη.",
     "propdev.compliance.quarter": "Τρίμηνο",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Σαουδική Αραβία)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Σαουδική Αραβία)",
     "propdev.compliance.regulator.fz214": "214-FZ (Ρωσία)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (Ινδία)",
     "propdev.compliance.regulator.rera": "RERA / DLD (ΗΑΕ)",

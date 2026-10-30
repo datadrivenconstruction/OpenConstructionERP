@@ -16362,7 +16362,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",
     "propdev.compliance.regulator.maharera": "MAHARERA Formular 5 (Indien)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusland)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudi-Arabien)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudi-Arabien)",
     "propdev.compliance.regulator_desc.rera": "Dubai Land Department kvartalsvise oplysning for off-plan salg.",
     "propdev.compliance.regulator_desc.maharera": "Formular 5 kvartalsvis fremdrift + finansiel oplysning.",
     "propdev.compliance.regulator_desc.214fz": "Kvartalsvise udviklingsrapport indsendt til EISZS.",

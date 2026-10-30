@@ -21013,7 +21013,7 @@ const resource = {
     "portal.status.suspended": "Pozastaven",
     "propdev.compliance.badge.pass": "Vyhovuje",
     "propdev.compliance.quarter": "Čtvrtletí",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saúdská Arábie)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saúdská Arábie)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusko)",
     "propdev.compliance.regulator.rera": "RERA / DLD (SAE)",
     "propdev.compliance.regulator_desc.cma": "Dvoujazyčné zveřejnění licence Wafi pro prodej mimo plán (angličtina + arabština).",

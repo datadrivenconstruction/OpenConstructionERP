@@ -19491,7 +19491,7 @@ const resource = {
     "propdev.compliance.loading": "Validatieregels uitvoeren…",
     "propdev.compliance.no_rules": "Geen regels geregistreerd voor deze ontwikkeling.",
     "propdev.compliance.quarter": "Kwartaal",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saoedi-Arabië)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saoedi-Arabië)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusland)",
     "propdev.compliance.regulator.maharera": "MAHARERA formulier 5 (India)",
     "propdev.compliance.regulator.rera": "RERA / DLD (VAE)",

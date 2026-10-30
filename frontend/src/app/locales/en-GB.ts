@@ -605,6 +605,7 @@ const resource = {
     "module_packages.host_open_modules": "Open Modules",
     "module_packages.host_token_failed": "The module page could not be signed in. Reload to try again.",
     "module_packages.host_pick_project": "Select a project in the top bar to open this module.",
+    "propdev.compliance.regulator.rega": "<missing>",
   }
 } as { translation: Record<string, string> };
 

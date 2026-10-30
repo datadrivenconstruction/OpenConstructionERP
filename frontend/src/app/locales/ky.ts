@@ -12364,7 +12364,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (БАЭ)",
     "propdev.compliance.regulator.maharera": "MAHARERA 5-форма (Индия)",
     "propdev.compliance.regulator.fz214": "214-ФЗ (Россия)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Сауд Арабиясы)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Сауд Арабиясы)",
     "propdev.compliance.regulator_desc.rera": "Дубай жер башкармалыгынын пландагы сатуулар үчүн чейректик ачыкка чыгаруусу.",
     "propdev.compliance.regulator_desc.maharera": "5-форма боюнча чейректик прогресс жана каржы ачыкка чыгаруусу.",
     "propdev.compliance.regulator_desc.214fz": "EISZS'ке тапшырылган чейректик өнүктүрүүчү отчету.",

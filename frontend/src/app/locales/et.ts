@@ -20877,7 +20877,7 @@ const resource = {
     "propdev.compliance.loading": "Valideerimisreeglite käitamine…",
     "propdev.compliance.no_rules": "Selle arenduse jaoks pole reegleid registreeritud.",
     "propdev.compliance.quarter": "Kvartal",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudi Araabia)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudi Araabia)",
     "propdev.compliance.regulator.fz214": "214-FZ (Venemaa)",
     "propdev.compliance.regulator.maharera": "MAHARERA vorm 5 (India)",
     "propdev.compliance.regulator.rera": "RERA / DLD (AÜE)",

@@ -20354,7 +20354,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD（UAE）",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (インド)",
     "propdev.compliance.regulator.fz214": "214-FZ (ロシア)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (サウジアラビア)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (サウジアラビア)",
     "propdev.compliance.regulator_desc.rera": "オフプラン販売向けドバイ土地局の四半期開示。",
     "propdev.compliance.regulator_desc.maharera": "Form 5 四半期進捗＋財務開示。",
     "propdev.compliance.regulator_desc.214fz": "EISZSに提出する四半期デベロッパーレポート。",

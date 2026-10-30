@@ -20004,7 +20004,7 @@ const resource = {
     "propdev.compliance.loading": "Menjalankan aturan validasi…",
     "propdev.compliance.no_rules": "Tidak ada aturan terdaftar untuk pengembangan ini.",
     "propdev.compliance.quarter": "Kuartal",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Arab Saudi)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Arab Saudi)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusia)",
     "propdev.compliance.regulator.maharera": "MAHARERA Formulir 5 (India)",
     "propdev.compliance.regulator.rera": "RERA / DLD (UEA)",

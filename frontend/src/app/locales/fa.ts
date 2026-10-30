@@ -20250,7 +20250,7 @@ const resource = {
     "propdev.compliance.loading": "در حال اجرای قواعد اعتبارسنجی…",
     "propdev.compliance.no_rules": "قاعده‌ای برای این پروژه توسعه ثبت نشده.",
     "propdev.compliance.quarter": "فصل",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (عربستان سعودی)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (عربستان سعودی)",
     "propdev.compliance.regulator.fz214": "214-FZ (روسیه)",
     "propdev.compliance.regulator.maharera": "MAHARERA فرم ۵ (هند)",
     "propdev.compliance.regulator.rera": "RERA / DLD (امارات)",

@@ -19971,7 +19971,7 @@ const resource = {
     "propdev.compliance.loading": "ভ্যালিডেশন নিয়ম চালানো হচ্ছে…",
     "propdev.compliance.no_rules": "এই উন্নয়নের জন্য কোনো নিয়ম নিবন্ধিত নেই।",
     "propdev.compliance.quarter": "কোয়ার্টার",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (সৌদি আরব)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (সৌদি আরব)",
     "propdev.compliance.regulator.fz214": "214-FZ (রাশিয়া)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (ভারত)",
     "propdev.compliance.regulator.rera": "RERA / DLD (ইউএই)",

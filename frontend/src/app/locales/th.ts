@@ -20224,7 +20224,7 @@ const resource = {
     "propdev.compliance.loading": "กำลังรันกฎการตรวจสอบ…",
     "propdev.compliance.no_rules": "ไม่มีกฎที่ลงทะเบียนสำหรับโครงการพัฒนานี้",
     "propdev.compliance.quarter": "ไตรมาส",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (ซาอุดีอาระเบีย)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (ซาอุดีอาระเบีย)",
     "propdev.compliance.regulator.fz214": "214-FZ (รัสเซีย)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (อินเดีย)",
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",

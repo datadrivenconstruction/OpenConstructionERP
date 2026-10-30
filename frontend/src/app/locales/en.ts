@@ -11523,7 +11523,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (India)",
     "propdev.compliance.regulator.fz214": "214-FZ (Russia)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudi Arabia)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudi Arabia)",
     "propdev.compliance.regulator_desc.rera": "Dubai Land Department quarterly disclosure for off-plan sales.",
     "propdev.compliance.regulator_desc.maharera": "Form 5 quarterly progress + finances disclosure.",
     "propdev.compliance.regulator_desc.214fz": "Quarterly developer report submitted to EISZS.",

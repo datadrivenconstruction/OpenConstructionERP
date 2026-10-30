@@ -20874,7 +20874,7 @@ const resource = {
     "portal.status.suspended": "Suspendiran",
     "propdev.compliance.badge.pass": "Prolaz",
     "propdev.compliance.quarter": "Kvartal",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudijska Arabija)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudijska Arabija)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusija)",
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",
     "propdev.compliance.regulator_desc.cma": "Dvojezično Wafi off-plan licencno otkrivanje (engleski + arapski).",

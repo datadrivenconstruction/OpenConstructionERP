@@ -13809,7 +13809,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (VAE)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (Indien)",
     "propdev.compliance.regulator.fz214": "214-FZ (Russland)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudi-Arabien)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudi-Arabien)",
     "propdev.compliance.regulator_desc.rera": "Quartalsweise Offenlegung der Dubai Land Department für Off-Plan-Verkäufe.",
     "propdev.compliance.regulator_desc.maharera": "Form 5 - quartalsweiser Baufortschritt + Finanzbericht.",
     "propdev.compliance.regulator_desc.214fz": "Quartalsbericht des Bauträgers für EISZS.",

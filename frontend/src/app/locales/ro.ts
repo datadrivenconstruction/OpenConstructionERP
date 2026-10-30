@@ -21088,7 +21088,7 @@ const resource = {
     "portal.status.suspended": "Suspendat",
     "propdev.compliance.badge.pass": "Trecut",
     "propdev.compliance.quarter": "Trimestru",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Arabia Saudită)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Arabia Saudită)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusia)",
     "propdev.compliance.regulator.rera": "RERA / DLD (EAU)",
     "propdev.compliance.regulator_desc.cma": "Publicare licență Wafi off-plan bilingvă (engleză + arabă).",

@@ -19977,7 +19977,7 @@ const resource = {
     "propdev.compliance.loading": "Pinapatakbo ang mga validation rule…",
     "propdev.compliance.no_rules": "Walang nakarehistrong rule para sa development na ito.",
     "propdev.compliance.quarter": "Kwarter",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Arabia Saudita)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Arabia Saudita)",
     "propdev.compliance.regulator.fz214": "214-FZ (Rusya)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (India)",
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",

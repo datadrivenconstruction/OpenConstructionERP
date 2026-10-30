@@ -19998,7 +19998,7 @@ const resource = {
     "propdev.compliance.loading": "Validációs szabályok futtatása…",
     "propdev.compliance.no_rules": "Ehhez a fejlesztéshez nincs regisztrált szabály.",
     "propdev.compliance.quarter": "Negyedév",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Szaúd-Arábia)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Szaúd-Arábia)",
     "propdev.compliance.regulator.fz214": "214-FZ (Oroszország)",
     "propdev.compliance.regulator.maharera": "MAHARERA 5. űrlap (India)",
     "propdev.compliance.regulator.rera": "RERA / DLD (EAE)",

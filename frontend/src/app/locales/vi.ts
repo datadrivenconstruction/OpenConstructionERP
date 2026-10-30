@@ -20057,7 +20057,7 @@ const resource = {
     "propdev.compliance.loading": "Đang chạy quy tắc kiểm tra…",
     "propdev.compliance.no_rules": "Không có quy tắc nào đăng ký cho dự án phát triển này.",
     "propdev.compliance.quarter": "Quý",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Ả Rập Xê Út)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Ả Rập Xê Út)",
     "propdev.compliance.regulator.fz214": "214-FZ (Nga)",
     "propdev.compliance.regulator.maharera": "MAHARERA Mẫu 5 (Ấn Độ)",
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",

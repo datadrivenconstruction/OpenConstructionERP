@@ -20456,7 +20456,7 @@ const resource = {
     "propdev.compliance.loading": "מריץ כללי אימות…",
     "propdev.compliance.no_rules": "לא נרשמו כללים לפיתוח זה.",
     "propdev.compliance.quarter": "רבעון",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (סעודיה)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (סעודיה)",
     "propdev.compliance.regulator.fz214": "214-FZ (רוסיה)",
     "propdev.compliance.regulator.maharera": "MAHARERA טופס 5 (הודו)",
     "propdev.compliance.regulator.rera": "RERA / DLD (איחוד האמירויות)",

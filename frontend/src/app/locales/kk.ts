@@ -20284,7 +20284,7 @@ const resource = {
     "propdev.compliance.loading": "Тексеру ережелері жүргізілуде…",
     "propdev.compliance.no_rules": "Осы даму жобасы үшін тіркелген ереже жоқ.",
     "propdev.compliance.quarter": "Тоқсан",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Сауд Арабиясы)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Сауд Арабиясы)",
     "propdev.compliance.regulator.fz214": "214-ФЗ (Ресей)",
     "propdev.compliance.regulator.maharera": "MAHARERA 5-Форма (Үндістан)",
     "propdev.compliance.regulator.rera": "RERA / DLD (БАӘ)",

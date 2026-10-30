@@ -20376,7 +20376,7 @@ const resource = {
     "propdev.compliance.loading": "वैलिडेशन नियम चल रहे हैं…",
     "propdev.compliance.no_rules": "इस विकास के लिए कोई नियम पंजीकृत नहीं।",
     "propdev.compliance.quarter": "तिमाही",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (सऊदी अरब)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (सऊदी अरब)",
     "propdev.compliance.regulator.fz214": "214-FZ (रूस)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (भारत)",
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",

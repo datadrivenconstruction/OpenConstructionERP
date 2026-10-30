@@ -13835,7 +13835,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (ОАЭ)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (Индия)",
     "propdev.compliance.regulator.fz214": "214-ФЗ (Россия)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Саудовская Аравия)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Саудовская Аравия)",
     "propdev.compliance.regulator_desc.rera": "Ежеквартальное раскрытие Dubai Land Department для off-plan продаж.",
     "propdev.compliance.regulator_desc.maharera": "Form 5: ежеквартальный отчёт о ходе строительства и финансах.",
     "propdev.compliance.regulator_desc.214fz": "Ежеквартальный отчёт застройщика для ЕИСЖС.",

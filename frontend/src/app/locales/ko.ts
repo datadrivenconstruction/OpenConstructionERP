@@ -19445,7 +19445,7 @@ const resource = {
     "propdev.compliance.loading": "검증 규칙 실행 중…",
     "propdev.compliance.no_rules": "이 개발에 등록된 규칙이 없습니다.",
     "propdev.compliance.quarter": "분기",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (사우디아라비아)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (사우디아라비아)",
     "propdev.compliance.regulator.fz214": "214-FZ (러시아)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (인도)",
     "propdev.compliance.regulator.rera": "RERA / DLD (아랍에미리트)",

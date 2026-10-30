@@ -529,6 +529,7 @@ const resource = {
     "integrations.intro_more": "Connectors are grouped into Notifications, Automation, and Data and Analytics. For a chat or email connector (Teams, Slack, Telegram, Discord, email or a signed webhook), click Connect, follow the numbered setup steps, paste in the webhook URL or credentials, and press Test Connection to send a live test before you Save. For a webhook you also tick which events to subscribe to, such as task created, RFI answered, invoice approved, document uploaded or bid schedule changed. Once saved, the connector shows as Connected and you can test or disconnect it any time.\n\nEvents that fire here are the same ones the Notifications inbox collects, and the signed-webhook connector overlaps with the outbound endpoints managed under Webhook targets.\n\n**Getting the most out of it:**\n- Always run Test Connection before Save so a wrong URL fails on your screen, not in production.\n- Copy the calendar feed URL to see project due dates in Google Calendar or Outlook.\n- For anything beyond chat, point n8n, Zapier, Make or a BI tool at the REST API documented at /api/docs.",
     "meetings.status_cancelled": "Canceled",
     "propdev.compliance.regulator_desc.cma": "Bilingual Wafi off-plan license disclosure (English + Arabic).",
+    "propdev.compliance.regulator.rega": "<missing>",
     "notifications.boq.created.title": "Bid Schedule created",
     "notifications.boq.created.body": "Your bid schedule '{{boq_name}}' was saved.",
     "notifications.contracts.retention_released.title": "Retainage released",

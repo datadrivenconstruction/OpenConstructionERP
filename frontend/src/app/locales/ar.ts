@@ -21813,7 +21813,7 @@ const resource = {
     "propdev.compliance.loading": "جارٍ تشغيل قواعد التحقق…",
     "propdev.compliance.no_rules": "لا توجد قواعد مسجلة لهذا التطوير.",
     "propdev.compliance.quarter": "الربع",
-    "propdev.compliance.regulator.cma": "CMA / وافي (المملكة العربية السعودية)",
+    "propdev.compliance.regulator.rega": "الهيئة العامة للعقار (REGA) / وافي (المملكة العربية السعودية)",
     "propdev.compliance.regulator.fz214": "214-FZ (روسيا)",
     "propdev.compliance.regulator.maharera": "نموذج 5 MAHARERA (الهند)",
     "propdev.compliance.regulator.rera": "RERA / DLD (الإمارات)",

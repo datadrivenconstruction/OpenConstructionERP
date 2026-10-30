@@ -20340,7 +20340,7 @@ const resource = {
     "propdev.compliance.loading": "Validation قواعد چلائے جا رہے ہیں…",
     "propdev.compliance.no_rules": "اس ڈویلپمنٹ کے لیے کوئی قواعد رجسٹرڈ نہیں ہیں۔",
     "propdev.compliance.quarter": "سہ ماہی",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (سعودی عرب)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (سعودی عرب)",
     "propdev.compliance.regulator.fz214": "214-FZ (روس)",
     "propdev.compliance.regulator.maharera": "MAHARERA Form 5 (بھارت)",
     "propdev.compliance.regulator.rera": "RERA / DLD (متحدہ عرب امارات)",

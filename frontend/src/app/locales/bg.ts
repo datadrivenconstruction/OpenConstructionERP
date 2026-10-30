@@ -19729,7 +19729,7 @@ const resource = {
     "propdev.compliance.loading": "Изпълнение на правила за валидация…",
     "propdev.compliance.no_rules": "Няма регистрирани правила за тази разработка.",
     "propdev.compliance.quarter": "Тримесечие",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Саудитска Арабия)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Саудитска Арабия)",
     "propdev.compliance.regulator.fz214": "214-ФЗ (Русия)",
     "propdev.compliance.regulator.maharera": "MAHARERA Формуляр 5 (Индия)",
     "propdev.compliance.regulator.rera": "RERA / DLD (ОАЕ)",

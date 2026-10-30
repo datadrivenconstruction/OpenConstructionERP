@@ -20722,7 +20722,7 @@ const resource = {
     "portal.status.suspended": "已暂停",
     "propdev.compliance.badge.pass": "通过",
     "propdev.compliance.quarter": "季度",
-    "propdev.compliance.regulator.cma": "CMA / Wafi（沙特阿拉伯）",
+    "propdev.compliance.regulator.rega": "REGA / Wafi（沙特阿拉伯）",
     "propdev.compliance.regulator.fz214": "214-FZ（俄罗斯）",
     "propdev.compliance.regulator.maharera": "MAHARERA 表格 5（印度）",
     "propdev.compliance.regulator.rera": "RERA / DLD（阿联酋）",

@@ -19352,7 +19352,7 @@ const resource = {
     "propdev.compliance.regulator.rera": "RERA / DLD (UAE)",
     "propdev.compliance.regulator.maharera": "MAHARERA Lomake 5 (Intia)",
     "propdev.compliance.regulator.fz214": "214-FZ (Venäjä)",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Saudi-Arabia)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Saudi-Arabia)",
     "propdev.compliance.regulator_desc.rera": "Dubain maaviraston neljännesvuosittainen tiedonantovelvollisuus ennakkomyynneille.",
     "propdev.compliance.regulator_desc.maharera": "Lomake 5 neljännesvuosittainen edistymisen ja talouden tiedonanto.",
     "propdev.compliance.regulator_desc.214fz": "EISZS:lle toimitettava neljännesvuosittainen kehittäjäraportti.",

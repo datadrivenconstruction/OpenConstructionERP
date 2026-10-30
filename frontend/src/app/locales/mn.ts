@@ -20490,7 +20490,7 @@ const resource = {
     "propdev.compliance.loading": "Баталгаажуулалтын дүрмүүд ажиллаж байна…",
     "propdev.compliance.no_rules": "Энэ хөгжүүлэлтэд бүртгэлтэй дүрэм байхгүй.",
     "propdev.compliance.quarter": "Улирал",
-    "propdev.compliance.regulator.cma": "CMA / Wafi (Саудын Арабын Вант Улс)",
+    "propdev.compliance.regulator.rega": "REGA / Wafi (Саудын Арабын Вант Улс)",
     "propdev.compliance.regulator.fz214": "214-FZ (Орос)",
     "propdev.compliance.regulator.maharera": "MAHARERA Маягт 5 (Энэтхэг)",
     "propdev.compliance.regulator.rera": "RERA / DLD (АНЭ)",
