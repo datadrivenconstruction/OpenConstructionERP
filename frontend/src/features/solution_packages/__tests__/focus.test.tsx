@@ -94,7 +94,7 @@ describe('PackFocusSummary', () => {
     renderSummary(modules);
     await waitFor(() => {
       const first = within(screen.getByTestId('pack-focus-steps')).getAllByRole('link')[0];
-      expect(first.getAttribute('href')).toBe('/projects/p-berlin');
+      expect(first?.getAttribute('href')).toBe('/projects/p-berlin');
     });
     const text = screen.getByTestId('pack-focus-steps').textContent ?? '';
     expect(text).not.toMatch(/din276|DIN276/);
