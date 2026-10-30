@@ -49924,6 +49924,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Belum ada proyek contoh untuk pasar Anda. Yang ini menampilkan seluruh platform.",
     "onboarding.pp_grid_label": "Paket mitra",
     "onboarding.country_pack_grid_label": "Negara",
+    "onboarding.flagship_none_for_market": "Belum ada proyek demo untuk pasar ini; Anda dapat menambahkan demo apa pun nanti dari Proyek.",
+    "onboarding.country_pack_standin_base": "Terdekat yang tersedia: harga {{base}} ({{city}}), {{currency}}. Belum ada basis biaya untuk {{country}}.",
     "modules.pp_name_aus": "Paket Konstruksi Australia",
     "modules.pp_name_austria_at": "Paket Konstruksi Austria",
     "modules.pp_name_brazil_sinapi": "Paket Konstruksi Brasil",

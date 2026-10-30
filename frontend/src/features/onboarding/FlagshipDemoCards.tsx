@@ -58,10 +58,11 @@ export function FlagshipDemoCards({ country }: { country: string | null }) {
           ? t('onboarding.flagship_lede_market', {
               defaultValue: 'Sample projects from your market, ready to open.',
             })
-          : t('onboarding.flagship_lede_global', {
-              defaultValue: 'No sample project for your market yet. This one shows the whole platform.',
+          : t('onboarding.flagship_none_for_market', {
+              defaultValue: 'No demo project for this market yet; you can add any demo later from Projects.',
             })}
       </p>
+      {demos.length > 0 && (
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         {demos.map((d) => {
           const k = d.key ? `onboarding.flagship_${d.key}` : null;
@@ -102,6 +103,7 @@ export function FlagshipDemoCards({ country }: { country: string | null }) {
           );
         })}
       </div>
+      )}
     </section>
   );
 }

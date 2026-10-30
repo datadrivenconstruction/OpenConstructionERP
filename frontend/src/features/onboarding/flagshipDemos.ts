@@ -22,9 +22,8 @@ export interface DemoCatalogRow {
   type?: string;
 }
 
-/** Curated cards are all Saudi; the full showcase doubles as the market-neutral tour. */
+/** The curated cards are all Saudi. */
 const FLAGSHIP_COUNTRY = 'sa';
-const NEUTRAL_DEMO_ID = 'full-showcase-riyadh';
 const MAX_CARDS = 4;
 
 export const FLAGSHIP_DEMOS: FlagshipDemo[] = [
@@ -80,7 +79,8 @@ export const FLAGSHIP_DEMOS: FlagshipDemo[] = [
 
 /**
  * The demo cards for a market: the curated cards when they are that market's,
- * else the catalog's demos for that country, else the one neutral tour.
+ * else the catalog's demos for that country, else none: a foreign project is
+ * never offered as the reader's own.
  *
  * @param country lower-case ISO 3166-1 alpha-2 of the chosen market.
  * @param catalog rows of the server's demo catalog.
@@ -107,5 +107,5 @@ export function demosForMarket(
       })),
     };
   }
-  return { demos: FLAGSHIP_DEMOS.filter((d) => d.id === NEUTRAL_DEMO_ID), matched: false };
+  return { demos: [], matched: false };
 }

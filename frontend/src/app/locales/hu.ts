@@ -52068,6 +52068,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Az Ön piacára még nincs mintaprojekt. Ez a teljes platformot bemutatja.",
     "onboarding.pp_grid_label": "Partnercsomagok",
     "onboarding.country_pack_grid_label": "Országok",
+    "onboarding.flagship_none_for_market": "Ehhez a piachoz még nincs demóprojekt; később bármelyik demót hozzáadhatja a Projektek menüben.",
+    "onboarding.country_pack_standin_base": "Legközelebbi elérhető: {{base}} ({{city}}) árak, {{currency}}. {{country}} számára még nincs költségadatbázis.",
     "modules.pp_name_aus": "Ausztrál építőipari csomag",
     "modules.pp_name_austria_at": "Építőipari csomag: Ausztria",
     "modules.pp_name_brazil_sinapi": "Brazil építőipari csomag",

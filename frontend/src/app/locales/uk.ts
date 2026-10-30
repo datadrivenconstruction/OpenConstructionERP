@@ -52238,6 +52238,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Для вашого ринку ще немає прикладу проєкту. Цей показує всю платформу.",
     "onboarding.pp_grid_label": "Партнерські пакети",
     "onboarding.country_pack_grid_label": "Країни",
+    "onboarding.flagship_none_for_market": "Для цього ринку ще немає демо-проєкту; будь-яке демо можна додати пізніше в розділі «Проєкти».",
+    "onboarding.country_pack_standin_base": "Найближча доступна: ціни {{base}} ({{city}}), {{currency}}. Бази цін для {{country}} ще немає.",
     "modules.pp_name_aus": "Будівельний пакет Австралія",
     "modules.pp_name_austria_at": "Будівельний пакет Австрія",
     "modules.pp_name_brazil_sinapi": "Будівельний пакет Бразилія",

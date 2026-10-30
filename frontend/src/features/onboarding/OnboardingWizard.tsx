@@ -67,7 +67,7 @@ import {
   SUPPORTED_LANGUAGES,
 } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
-import { adoptMarketCurrency } from './marketCurrency';
+import { adoptMarketCurrency, marketCurrencyFor } from './marketCurrency';
 import { useToastStore } from '@/stores/useToastStore';
 import { FlagshipDemoCards } from './FlagshipDemoCards';
 import { StepSolutionPackages } from '@/features/solution_packages/StepSolutionPackages';
@@ -3701,6 +3701,23 @@ function CountryPackCard({
         </div>
       </div>
 
+      {(() => {
+        // A preset whose base is a neighbour's says so, so nobody reads Dubai prices as their own.
+        const base = CWICR_DATABASES.find((d) => d.id === selectedPack.region);
+        if (!base || base.flagId === selectedPack.flagId) return null;
+        return (
+          <p data-testid="country-pack-standin-base" className="mb-3 text-xs text-content-tertiary">
+            {t('onboarding.country_pack_standin_base', {
+              defaultValue: 'Closest available: {{base}} ({{city}}) prices, {{currency}}. No cost base for {{country}} yet.',
+              base: base.name,
+              city: base.city,
+              currency: base.currency,
+              country: packLabel,
+            })}
+          </p>
+        );
+      })()}
+
       {/* Primary one-click install */}
       <Button
         variant="primary"
@@ -4237,8 +4254,10 @@ export function StepDataSetup({
       handleInstallDemo();
     }
     const baseId = loadedDb?.id ?? selectedRegion;
+    // A national market card names its own market; otherwise the chosen country decides.
     void adoptMarketCurrency(
-      selectedMarket?.currency ?? CWICR_DATABASES.find((d) => d.id === baseId)?.currency,
+      selectedMarket?.currency ??
+        marketCurrencyFor(selectedPack.flagId, CWICR_DATABASES.find((d) => d.id === baseId)?.currency),
     );
     // Ask for the semantic search model if the user left it ticked and nothing
     // has fetched it yet. Deliberately not awaited and deliberately not

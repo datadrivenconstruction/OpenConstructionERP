@@ -50301,6 +50301,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Рыногуңуз үчүн азырынча үлгү долбоор жок. Бул бүт платформаны көрсөтөт.",
     "onboarding.pp_grid_label": "Өнөктөш пакеттери",
     "onboarding.country_pack_grid_label": "Өлкөлөр",
+    "onboarding.flagship_none_for_market": "Бул рынок үчүн азырынча демо долбоор жок; каалаган демону кийин Долбоорлордон кошо аласыз.",
+    "onboarding.country_pack_standin_base": "Эң жакын жеткиликтүү: {{base}} ({{city}}) баалары, {{currency}}. {{country}} үчүн азырынча чыгым базасы жок.",
     "modules.pp_name_aus": "Австралия курулуш пакети",
     "modules.pp_name_austria_at": "Австрия курулуш пакети",
     "modules.pp_name_brazil_sinapi": "Бразилия курулуш пакети",

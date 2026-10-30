@@ -51071,6 +51071,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Nog geen voorbeeldproject voor uw markt. Dit project toont het hele platform.",
     "onboarding.pp_grid_label": "Partnerpakketten",
     "onboarding.country_pack_grid_label": "Landen",
+    "onboarding.flagship_none_for_market": "Nog geen demoproject voor deze markt; u kunt later elk demo toevoegen via Projecten.",
+    "onboarding.country_pack_standin_base": "Dichtstbijzijnde beschikbaar: prijzen {{base}} ({{city}}), {{currency}}. Nog geen kostendatabase voor {{country}}.",
     "modules.pp_name_aus": "Bouwpakket Australië",
     "modules.pp_name_austria_at": "Bouwpakket Oostenrijk",
     "modules.pp_name_brazil_sinapi": "Bouwpakket Brazilië",

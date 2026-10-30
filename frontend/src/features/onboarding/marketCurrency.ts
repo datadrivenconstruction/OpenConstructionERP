@@ -14,6 +14,22 @@ import { usePreferencesStore } from '@/stores/usePreferencesStore';
 
 const ISO_4217 = /^[A-Z]{3}$/;
 
+/** Currency of each market a curated preset serves, keyed by ISO 3166-1 alpha-2. */
+const CURRENCY_BY_COUNTRY: Record<string, string> = {
+  us: 'USD', gb: 'GBP', de: 'EUR', fr: 'EUR', br: 'BRL', ae: 'AED', sa: 'SAR', in: 'INR',
+  cn: 'CNY', ca: 'CAD', au: 'AUD', nz: 'NZD', it: 'EUR', es: 'EUR', nl: 'EUR', pl: 'PLN',
+  tr: 'TRY', ru: 'RUB', jp: 'JPY', kr: 'KRW', mx: 'MXN', za: 'ZAR',
+};
+
+/**
+ * The account currency for a market: the market country's own, never the cost
+ * base's, which can be a neighbour's stand-in (a Saudi reader on the Dubai base).
+ * Falls back to ``baseCurrency`` only for a country this table does not know.
+ */
+export function marketCurrencyFor(country: string | null | undefined, baseCurrency?: string | null): string | null {
+  return CURRENCY_BY_COUNTRY[(country ?? '').toLowerCase()] ?? baseCurrency ?? null;
+}
+
 /** Resolves to true when the account now uses ``currency``; never rejects. */
 export async function adoptMarketCurrency(currency: string | null | undefined): Promise<boolean> {
   if (!currency || !ISO_4217.test(currency)) return false;

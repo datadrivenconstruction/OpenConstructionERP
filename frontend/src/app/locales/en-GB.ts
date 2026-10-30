@@ -569,6 +569,8 @@ const resource = {
     "onboarding.flagship_lede_global": "No sample project for your market yet. This one shows the whole platform.",
     "onboarding.pp_grid_label": "Partner packs",
     "onboarding.country_pack_grid_label": "Countries",
+    "onboarding.flagship_none_for_market": "No demo project for this market yet; you can add any demo later from Projects.",
+    "onboarding.country_pack_standin_base": "Closest available: {{base}} ({{city}}) prices, {{currency}}. No cost base for {{country}} yet.",
   }
 } as { translation: Record<string, string> };
 

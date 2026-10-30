@@ -50469,6 +50469,8 @@ const resource = {
     "onboarding.flagship_lede_global": "עדיין אין פרויקט לדוגמה לשוק שלך. זה מציג את כל הפלטפורמה.",
     "onboarding.pp_grid_label": "חבילות שותפים",
     "onboarding.country_pack_grid_label": "מדינות",
+    "onboarding.flagship_none_for_market": "עדיין אין פרויקט הדגמה לשוק זה; אפשר להוסיף כל הדגמה מאוחר יותר מתוך פרויקטים.",
+    "onboarding.country_pack_standin_base": "הקרוב ביותר הזמין: מחירי {{base}} ({{city}}), {{currency}}. עדיין אין מאגר עלויות עבור {{country}}.",
     "modules.pp_name_aus": "חבילת בנייה לאוסטרליה",
     "modules.pp_name_austria_at": "חבילת בנייה לאוסטריה",
     "modules.pp_name_brazil_sinapi": "חבילת בנייה לברזיל",

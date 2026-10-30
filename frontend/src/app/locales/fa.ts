@@ -50111,6 +50111,8 @@ const resource = {
     "onboarding.flagship_lede_global": "هنوز پروژه نمونه‌ای برای بازار شما نیست. این یکی کل پلتفرم را نشان می‌دهد.",
     "onboarding.pp_grid_label": "بسته‌های شرکا",
     "onboarding.country_pack_grid_label": "کشورها",
+    "onboarding.flagship_none_for_market": "هنوز پروژه نمایشی برای این بازار وجود ندارد؛ بعداً می‌توانید هر نمونه‌ای را از پروژه‌ها اضافه کنید.",
+    "onboarding.country_pack_standin_base": "نزدیک‌ترین گزینه موجود: قیمت‌های {{base}} ({{city}})، {{currency}}. هنوز پایگاه هزینه‌ای برای {{country}} نیست.",
     "modules.pp_name_aus": "بسته ساخت‌وساز استرالیا",
     "modules.pp_name_austria_at": "بسته ساخت‌وساز اتریش",
     "modules.pp_name_brazil_sinapi": "بسته ساخت‌وساز برزیل",

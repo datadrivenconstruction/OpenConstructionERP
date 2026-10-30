@@ -51911,6 +51911,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Bozoringiz uchun hali namunaviy loyiha yo‘q. Bu butun platformani ko‘rsatadi.",
     "onboarding.pp_grid_label": "Hamkor paketlari",
     "onboarding.country_pack_grid_label": "Mamlakatlar",
+    "onboarding.flagship_none_for_market": "Bu bozor uchun hali demo loyiha yo‘q; istalgan demoni keyinroq Loyihalar bo‘limidan qo‘shishingiz mumkin.",
+    "onboarding.country_pack_standin_base": "Eng yaqin mavjud: {{base}} ({{city}}) narxlari, {{currency}}. {{country}} uchun hali xarajat bazasi yo‘q.",
     "modules.pp_name_aus": "Avstraliya qurilish paketi",
     "modules.pp_name_austria_at": "Avstriya qurilish paketi",
     "modules.pp_name_brazil_sinapi": "Braziliya qurilish paketi",

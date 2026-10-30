@@ -52760,6 +52760,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Pas encore de projet d’exemple pour votre marché. Celui-ci présente toute la plateforme.",
     "onboarding.pp_grid_label": "Packs partenaires",
     "onboarding.country_pack_grid_label": "Pays",
+    "onboarding.flagship_none_for_market": "Pas encore de projet de démonstration pour ce marché ; vous pourrez en ajouter un plus tard depuis Projets.",
+    "onboarding.country_pack_standin_base": "Le plus proche disponible : prix {{base}} ({{city}}), {{currency}}. Pas encore de base de coûts pour {{country}}.",
     "modules.pp_name_aus": "Pack Construction Australie",
     "modules.pp_name_austria_at": "Pack Construction Autriche",
     "modules.pp_name_brazil_sinapi": "Pack Construction Brésil",

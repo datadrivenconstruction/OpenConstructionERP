@@ -50204,6 +50204,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Teie turule pole veel näidisprojekti. See näitab kogu platvormi.",
     "onboarding.pp_grid_label": "Partneripaketid",
     "onboarding.country_pack_grid_label": "Riigid",
+    "onboarding.flagship_none_for_market": "Sellel turul pole veel demoprojekti; saate hiljem lisada mis tahes demo jaotisest Projektid.",
+    "onboarding.country_pack_standin_base": "Lähim saadaval: {{base}} ({{city}}) hinnad, {{currency}}. Riigile {{country}} pole veel kulubaasi.",
     "modules.pp_name_aus": "Austraalia ehituspakett",
     "modules.pp_name_austria_at": "Ehituspakett: Austria",
     "modules.pp_name_brazil_sinapi": "Brasiilia ehituspakett",

@@ -55,14 +55,20 @@ describe('demosForMarket', () => {
     expect(r.demos.map((d) => d.id)).toEqual(['residential-berlin', 'office-frankfurt']);
   });
 
-  it('falls back to the one neutral tour when the market has none', () => {
+  it('offers no foreign project when the market has none', () => {
     const r = demosForMarket('is', CATALOG);
     expect(r.matched).toBe(false);
-    expect(r.demos.map((d) => d.id)).toEqual(['full-showcase-riyadh']);
+    expect(r.demos).toEqual([]);
   });
 });
 
 describe('FlagshipDemoCards', () => {
+  it('says plainly that a market has no demo yet', async () => {
+    renderCards('is');
+    await screen.findByText(/No demo project for this market yet/);
+    expect(screen.queryAllByRole('button')).toHaveLength(0);
+  });
+
   it('shows a German reader German demos and no Saudi ones', async () => {
     renderCards('de');
     await screen.findByText('Berlin flats');

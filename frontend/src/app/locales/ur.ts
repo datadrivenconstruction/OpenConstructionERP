@@ -50246,6 +50246,8 @@ const resource = {
     "onboarding.flagship_lede_global": "آپ کی مارکیٹ کے لیے ابھی کوئی نمونہ منصوبہ نہیں۔ یہ پورا پلیٹ فارم دکھاتا ہے۔",
     "onboarding.pp_grid_label": "پارٹنر پیکس",
     "onboarding.country_pack_grid_label": "ممالک",
+    "onboarding.flagship_none_for_market": "اس مارکیٹ کے لیے ابھی کوئی ڈیمو منصوبہ نہیں؛ آپ بعد میں منصوبوں سے کوئی بھی ڈیمو شامل کر سکتے ہیں۔",
+    "onboarding.country_pack_standin_base": "قریب ترین دستیاب: {{base}} ({{city}}) قیمتیں، {{currency}}۔ {{country}} کے لیے ابھی کوئی لاگت ڈیٹا بیس نہیں۔",
     "modules.pp_name_aus": "آسٹریلیا تعمیراتی پیکج",
     "modules.pp_name_austria_at": "آسٹریا تعمیراتی پیکج",
     "modules.pp_name_brazil_sinapi": "برازیل تعمیراتی پیکج",

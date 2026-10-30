@@ -50550,6 +50550,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Încă nu există un proiect exemplu pentru piața dvs. Acesta arată întreaga platformă.",
     "onboarding.pp_grid_label": "Pachete partener",
     "onboarding.country_pack_grid_label": "Țări",
+    "onboarding.flagship_none_for_market": "Încă nu există un proiect demo pentru această piață; puteți adăuga oricând unul din Proiecte.",
+    "onboarding.country_pack_standin_base": "Cel mai apropiat disponibil: prețuri {{base}} ({{city}}), {{currency}}. Încă nu există bază de costuri pentru {{country}}.",
     "modules.pp_name_aus": "Pachet de construcții Australia",
     "modules.pp_name_austria_at": "Pachet de construcții Austria",
     "modules.pp_name_brazil_sinapi": "Pachet de construcții Brazilia",

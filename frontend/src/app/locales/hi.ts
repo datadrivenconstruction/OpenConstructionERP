@@ -50206,6 +50206,8 @@ const resource = {
     "onboarding.flagship_lede_global": "आपके बाज़ार के लिए अभी कोई नमूना परियोजना नहीं है। यह पूरा प्लेटफ़ॉर्म दिखाती है।",
     "onboarding.pp_grid_label": "पार्टनर पैक",
     "onboarding.country_pack_grid_label": "देश",
+    "onboarding.flagship_none_for_market": "इस बाज़ार के लिए अभी कोई डेमो परियोजना नहीं है; आप बाद में परियोजनाओं से कोई भी डेमो जोड़ सकते हैं।",
+    "onboarding.country_pack_standin_base": "निकटतम उपलब्ध: {{base}} ({{city}}) मूल्य, {{currency}}। {{country}} के लिए अभी कोई लागत आधार नहीं है।",
     "modules.pp_name_aus": "ऑस्ट्रेलिया निर्माण पैक",
     "modules.pp_name_austria_at": "ऑस्ट्रिया निर्माण पैक",
     "modules.pp_name_brazil_sinapi": "ब्राज़ील निर्माण पैक",

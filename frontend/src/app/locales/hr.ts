@@ -50477,6 +50477,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Za vaše tržište još nema oglednog projekta. Ovaj prikazuje cijelu platformu.",
     "onboarding.pp_grid_label": "Partnerski paketi",
     "onboarding.country_pack_grid_label": "Države",
+    "onboarding.flagship_none_for_market": "Za ovo tržište još nema demo projekta; bilo koji demo možete dodati kasnije iz Projekata.",
+    "onboarding.country_pack_standin_base": "Najbliže dostupno: cijene {{base}} ({{city}}), {{currency}}. Za {{country}} još nema baze troškova.",
     "modules.pp_name_aus": "Građevinski paket Australija",
     "modules.pp_name_austria_at": "Građevinski paket Austrija",
     "modules.pp_name_brazil_sinapi": "Građevinski paket Brazil",

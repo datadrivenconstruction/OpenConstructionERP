@@ -51345,6 +51345,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Non c’è ancora un progetto di esempio per il tuo mercato. Questo mostra l’intera piattaforma.",
     "onboarding.pp_grid_label": "Pacchetti partner",
     "onboarding.country_pack_grid_label": "Paesi",
+    "onboarding.flagship_none_for_market": "Non c’è ancora un progetto demo per questo mercato; potrai aggiungerne uno più tardi da Progetti.",
+    "onboarding.country_pack_standin_base": "Più vicino disponibile: prezzi {{base}} ({{city}}), {{currency}}. Non c’è ancora una base costi per {{country}}.",
     "modules.pp_name_aus": "Pacchetto Costruzioni Australia",
     "modules.pp_name_austria_at": "Pacchetto Costruzioni Austria",
     "modules.pp_name_brazil_sinapi": "Pacchetto Costruzioni Brasile",

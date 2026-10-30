@@ -50076,6 +50076,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Wala pang sample na proyekto para sa iyong merkado. Ipinapakita nito ang buong platform.",
     "onboarding.pp_grid_label": "Mga partner pack",
     "onboarding.country_pack_grid_label": "Mga bansa",
+    "onboarding.flagship_none_for_market": "Wala pang demo project para sa merkadong ito; maaari kang magdagdag ng anumang demo mamaya mula sa Projects.",
+    "onboarding.country_pack_standin_base": "Pinakamalapit na available: presyo ng {{base}} ({{city}}), {{currency}}. Wala pang cost base para sa {{country}}.",
     "modules.pp_name_aus": "Construction Pack ng Australia",
     "modules.pp_name_austria_at": "Construction Pack ng Austria",
     "modules.pp_name_brazil_sinapi": "Construction Pack ng Brazil",

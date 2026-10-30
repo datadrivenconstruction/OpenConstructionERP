@@ -50103,6 +50103,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Markkinallesi ei vielä ole esimerkkiprojektia. Tämä esittelee koko alustan.",
     "onboarding.pp_grid_label": "Kumppanipaketit",
     "onboarding.country_pack_grid_label": "Maat",
+    "onboarding.flagship_none_for_market": "Tälle markkinalle ei vielä ole demoprojektia; voit lisätä minkä tahansa demon myöhemmin Projekteista.",
+    "onboarding.country_pack_standin_base": "Lähin saatavilla: {{base}} ({{city}}) -hinnat, {{currency}}. Maalle {{country}} ei vielä ole kustannuskantaa.",
     "modules.pp_name_aus": "Australian rakennuspaketti",
     "modules.pp_name_austria_at": "Rakennuspaketti: Itävalta",
     "modules.pp_name_brazil_sinapi": "Brasilian rakennuspaketti",

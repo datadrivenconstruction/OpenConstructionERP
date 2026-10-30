@@ -50548,6 +50548,8 @@ const resource = {
     "onboarding.flagship_lede_global": "귀하의 시장용 샘플 프로젝트는 아직 없습니다. 이 프로젝트는 플랫폼 전체를 보여줍니다.",
     "onboarding.pp_grid_label": "파트너 팩",
     "onboarding.country_pack_grid_label": "국가",
+    "onboarding.flagship_none_for_market": "이 시장용 데모 프로젝트는 아직 없습니다. 나중에 프로젝트에서 데모를 추가할 수 있습니다.",
+    "onboarding.country_pack_standin_base": "가장 가까운 사용 가능 항목: {{base}}({{city}}) 가격, {{currency}}. {{country}}용 원가 데이터베이스는 아직 없습니다.",
     "modules.pp_name_aus": "호주 건설 팩",
     "modules.pp_name_austria_at": "오스트리아 건설 팩",
     "modules.pp_name_brazil_sinapi": "브라질 건설 팩",

@@ -41823,6 +41823,8 @@ const resource = {
     "onboarding.flagship_lede_global": "No sample project for your market yet. This one shows the whole platform.",
     "onboarding.pp_grid_label": "Partner packs",
     "onboarding.country_pack_grid_label": "Countries",
+    "onboarding.flagship_none_for_market": "No demo project for this market yet; you can add any demo later from Projects.",
+    "onboarding.country_pack_standin_base": "Closest available: {{base}} ({{city}}) prices, {{currency}}. No cost base for {{country}} yet.",
     "settings.semantic_title": "Semantic search",
     "settings.semantic_desc": "Finds cost items, positions and documents by meaning, not only by exact words. Off by default to keep the app fast and light.",
     "settings.semantic_memory": "Needs about {{required}} MB of free memory when on. Available now: {{available}} MB.",

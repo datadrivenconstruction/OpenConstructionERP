@@ -52771,6 +52771,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Для вашего рынка пока нет примера проекта. Этот показывает всю платформу.",
     "onboarding.pp_grid_label": "Партнёрские пакеты",
     "onboarding.country_pack_grid_label": "Страны",
+    "onboarding.flagship_none_for_market": "Для этого рынка пока нет демо-проекта; любой демо-проект можно добавить позже в разделе «Проекты».",
+    "onboarding.country_pack_standin_base": "Ближайшая доступная: цены {{base}} ({{city}}), {{currency}}. Базы цен для страны {{country}} пока нет.",
     "modules.pp_name_aus": "Строительный пакет: Австралия",
     "modules.pp_name_austria_at": "Строительный пакет: Австрия",
     "modules.pp_name_brazil_sinapi": "Строительный пакет: Бразилия",

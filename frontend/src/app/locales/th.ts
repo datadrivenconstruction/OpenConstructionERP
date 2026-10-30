@@ -50019,6 +50019,8 @@ const resource = {
     "onboarding.flagship_lede_global": "ยังไม่มีโครงการตัวอย่างสำหรับตลาดของคุณ โครงการนี้แสดงทั้งแพลตฟอร์ม",
     "onboarding.pp_grid_label": "แพ็กพันธมิตร",
     "onboarding.country_pack_grid_label": "ประเทศ",
+    "onboarding.flagship_none_for_market": "ยังไม่มีโครงการสาธิตสำหรับตลาดนี้ คุณเพิ่มโครงการสาธิตใดก็ได้ภายหลังจากหน้าโครงการ",
+    "onboarding.country_pack_standin_base": "ที่ใกล้เคียงที่สุด: ราคา {{base}} ({{city}}), {{currency}} ยังไม่มีฐานต้นทุนสำหรับ {{country}}",
     "modules.pp_name_aus": "แพ็กก่อสร้างออสเตรเลีย",
     "modules.pp_name_austria_at": "แพ็กก่อสร้างออสเตรีย",
     "modules.pp_name_brazil_sinapi": "แพ็กก่อสร้างบราซิล",

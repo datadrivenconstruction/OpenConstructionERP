@@ -50893,6 +50893,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Inget exempelprojekt för din marknad ännu. Det här visar hela plattformen.",
     "onboarding.pp_grid_label": "Partnerpaket",
     "onboarding.country_pack_grid_label": "Länder",
+    "onboarding.flagship_none_for_market": "Inget demoprojekt för den här marknaden ännu; du kan lägga till en demo senare under Projekt.",
+    "onboarding.country_pack_standin_base": "Närmast tillgängliga: {{base}} ({{city}})-priser, {{currency}}. Ännu ingen kostnadsbas för {{country}}.",
     "modules.pp_name_aus": "Byggpaket Australien",
     "modules.pp_name_austria_at": "Byggpaket Österrike",
     "modules.pp_name_brazil_sinapi": "Byggpaket Brasilien",

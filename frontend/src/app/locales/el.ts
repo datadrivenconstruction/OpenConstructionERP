@@ -50232,6 +50232,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Δεν υπάρχει ακόμη δείγμα έργου για την αγορά σας. Αυτό δείχνει όλη την πλατφόρμα.",
     "onboarding.pp_grid_label": "Πακέτα συνεργατών",
     "onboarding.country_pack_grid_label": "Χώρες",
+    "onboarding.flagship_none_for_market": "Δεν υπάρχει ακόμη έργο επίδειξης για αυτή την αγορά· μπορείτε να προσθέσετε οποιοδήποτε αργότερα από τα Έργα.",
+    "onboarding.country_pack_standin_base": "Πλησιέστερη διαθέσιμη: τιμές {{base}} ({{city}}), {{currency}}. Δεν υπάρχει ακόμη βάση κόστους για {{country}}.",
     "modules.pp_name_aus": "Πακέτο Κατασκευών Αυστραλίας",
     "modules.pp_name_austria_at": "Πακέτο Κατασκευών: Αυστρία",
     "modules.pp_name_brazil_sinapi": "Πακέτο Κατασκευών Βραζιλίας",

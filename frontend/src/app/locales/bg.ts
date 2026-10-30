@@ -50276,6 +50276,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Все още няма примерен проект за вашия пазар. Този показва цялата платформа.",
     "onboarding.pp_grid_label": "Партньорски пакети",
     "onboarding.country_pack_grid_label": "Държави",
+    "onboarding.flagship_none_for_market": "Все още няма демо проект за този пазар; можете да добавите демо по-късно от Проекти.",
+    "onboarding.country_pack_standin_base": "Най-близко налично: цени {{base}} ({{city}}), {{currency}}. Все още няма база с разходи за {{country}}.",
     "modules.pp_name_aus": "Строителен пакет Австралия",
     "modules.pp_name_austria_at": "Строителен пакет Австрия",
     "modules.pp_name_brazil_sinapi": "Строителен пакет Бразилия",

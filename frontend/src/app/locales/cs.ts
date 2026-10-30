@@ -51436,6 +51436,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Pro váš trh zatím není ukázkový projekt. Tento ukazuje celou platformu.",
     "onboarding.pp_grid_label": "Partnerské balíčky",
     "onboarding.country_pack_grid_label": "Země",
+    "onboarding.flagship_none_for_market": "Pro tento trh zatím není demo projekt; jakékoli demo můžete přidat později v Projektech.",
+    "onboarding.country_pack_standin_base": "Nejbližší dostupné: ceny {{base}} ({{city}}), {{currency}}. Pro {{country}} zatím není cenová databáze.",
     "modules.pp_name_aus": "Stavební balíček Austrálie",
     "modules.pp_name_austria_at": "Stavební balíček Rakousko",
     "modules.pp_name_brazil_sinapi": "Stavební balíček Brazílie",

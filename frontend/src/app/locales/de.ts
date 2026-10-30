@@ -52721,6 +52721,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Für Ihren Markt gibt es noch kein Beispielprojekt. Dieses zeigt die ganze Plattform.",
     "onboarding.pp_grid_label": "Partnerpakete",
     "onboarding.country_pack_grid_label": "Länder",
+    "onboarding.flagship_none_for_market": "Für diesen Markt gibt es noch kein Demoprojekt; Sie können später jedes Demo unter Projekte hinzufügen.",
+    "onboarding.country_pack_standin_base": "Nächstliegend verfügbar: Preise {{base}} ({{city}}), {{currency}}. Für {{country}} gibt es noch keine Kostendatenbank.",
     "modules.pp_name_aus": "Australien-Baupaket",
     "modules.pp_name_austria_at": "Österreich-Baupaket",
     "modules.pp_name_brazil_sinapi": "Brasilien-Baupaket",

@@ -49889,6 +49889,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Таны зах зээлд жишээ төсөл хараахан алга. Энэ нь платформыг бүхэлд нь харуулна.",
     "onboarding.pp_grid_label": "Түншийн багцууд",
     "onboarding.country_pack_grid_label": "Улсууд",
+    "onboarding.flagship_none_for_market": "Энэ зах зээлд демо төсөл хараахан алга; дурын демог дараа нь Төслүүдээс нэмж болно.",
+    "onboarding.country_pack_standin_base": "Хамгийн ойр боломжтой: {{base}} ({{city}}) үнэ, {{currency}}. {{country}}-д зардлын сан хараахан алга.",
     "modules.pp_name_aus": "Австралийн барилгын багц",
     "modules.pp_name_austria_at": "Барилгын багц: Австри",
     "modules.pp_name_brazil_sinapi": "Бразилийн барилгын багц",

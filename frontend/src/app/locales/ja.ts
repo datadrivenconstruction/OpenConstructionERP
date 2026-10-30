@@ -51442,6 +51442,8 @@ const resource = {
     "onboarding.flagship_lede_global": "お住まいの市場のサンプルはまだありません。こちらでプラットフォーム全体をご覧いただけます。",
     "onboarding.pp_grid_label": "パートナーパック",
     "onboarding.country_pack_grid_label": "国",
+    "onboarding.flagship_none_for_market": "この市場のデモプロジェクトはまだありません。後から「プロジェクト」で任意のデモを追加できます。",
+    "onboarding.country_pack_standin_base": "利用可能な最も近いもの：{{base}}（{{city}}）の価格、{{currency}}。{{country}}のコストベースはまだありません。",
     "modules.pp_name_aus": "オーストラリア建設パック",
     "modules.pp_name_austria_at": "オーストリア建設パック",
     "modules.pp_name_brazil_sinapi": "ブラジル建設パック",

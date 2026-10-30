@@ -53118,6 +53118,8 @@ const resource = {
     "onboarding.flagship_lede_global": "لا يوجد بعد مشروع نموذجي لسوقك. هذا المشروع يعرض المنصة بأكملها.",
     "onboarding.pp_grid_label": "الحزم الشريكة",
     "onboarding.country_pack_grid_label": "الدول",
+    "onboarding.flagship_none_for_market": "لا يوجد مشروع تجريبي لهذا السوق بعد؛ يمكنك إضافة أي مشروع تجريبي لاحقًا من المشاريع.",
+    "onboarding.country_pack_standin_base": "الأقرب المتاح: أسعار {{base}} ({{city}})، {{currency}}. لا توجد قاعدة تكاليف لـ {{country}} بعد.",
     "modules.pp_name_aus": "حزمة إنشاءات أستراليا",
     "modules.pp_name_austria_at": "حزمة إنشاءات النمسا",
     "modules.pp_name_brazil_sinapi": "حزمة إنشاءات البرازيل",

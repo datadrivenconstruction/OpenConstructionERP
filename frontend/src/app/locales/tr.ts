@@ -51153,6 +51153,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Pazarınız için henüz örnek proje yok. Bu, platformun tamamını gösterir.",
     "onboarding.pp_grid_label": "İş ortağı paketleri",
     "onboarding.country_pack_grid_label": "Ülkeler",
+    "onboarding.flagship_none_for_market": "Bu pazar için henüz demo proje yok; dilediğiniz demoyu daha sonra Projeler bölümünden ekleyebilirsiniz.",
+    "onboarding.country_pack_standin_base": "Mevcut en yakın: {{base}} ({{city}}) fiyatları, {{currency}}. {{country}} için henüz maliyet tabanı yok.",
     "modules.pp_name_aus": "Avustralya İnşaat Paketi",
     "modules.pp_name_austria_at": "Avusturya İnşaat Paketi",
     "modules.pp_name_brazil_sinapi": "Brezilya İnşaat Paketi",

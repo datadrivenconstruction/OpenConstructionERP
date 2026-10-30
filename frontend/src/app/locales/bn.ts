@@ -50517,6 +50517,8 @@ const resource = {
     "onboarding.flagship_lede_global": "আপনার বাজারের জন্য এখনও কোনো নমুনা প্রকল্প নেই। এটি পুরো প্ল্যাটফর্মটি দেখায়।",
     "onboarding.pp_grid_label": "পার্টনার প্যাক",
     "onboarding.country_pack_grid_label": "দেশসমূহ",
+    "onboarding.flagship_none_for_market": "এই বাজারের জন্য এখনও কোনো ডেমো প্রকল্প নেই; পরে প্রকল্প থেকে যেকোনো ডেমো যোগ করতে পারবেন।",
+    "onboarding.country_pack_standin_base": "নিকটতম উপলব্ধ: {{base}} ({{city}}) মূল্য, {{currency}}। {{country}}-এর জন্য এখনও কোনো খরচ ডাটাবেস নেই।",
     "modules.pp_name_aus": "অস্ট্রেলিয়া নির্মাণ প্যাক",
     "modules.pp_name_austria_at": "অস্ট্রিয়া নির্মাণ প্যাক",
     "modules.pp_name_brazil_sinapi": "ব্রাজিল নির্মাণ প্যাক",

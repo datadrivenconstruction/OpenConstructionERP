@@ -50027,6 +50027,8 @@ const resource = {
     "onboarding.flagship_lede_global": "Chưa có dự án mẫu cho thị trường của bạn. Dự án này giới thiệu toàn bộ nền tảng.",
     "onboarding.pp_grid_label": "Gói đối tác",
     "onboarding.country_pack_grid_label": "Quốc gia",
+    "onboarding.flagship_none_for_market": "Chưa có dự án demo cho thị trường này; bạn có thể thêm demo bất kỳ sau từ mục Dự án.",
+    "onboarding.country_pack_standin_base": "Gần nhất hiện có: giá {{base}} ({{city}}), {{currency}}. Chưa có cơ sở chi phí cho {{country}}.",
     "modules.pp_name_aus": "Gói Xây dựng Úc",
     "modules.pp_name_austria_at": "Gói Xây dựng Áo",
     "modules.pp_name_brazil_sinapi": "Gói Xây dựng Brazil",

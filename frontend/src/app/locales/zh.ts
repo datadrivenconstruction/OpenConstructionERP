@@ -52488,6 +52488,8 @@ const resource = {
     "onboarding.flagship_lede_global": "您所在市场暂无示例项目。此项目展示整个平台。",
     "onboarding.pp_grid_label": "合作伙伴包",
     "onboarding.country_pack_grid_label": "国家/地区",
+    "onboarding.flagship_none_for_market": "此市场暂无演示项目；您可以稍后在“项目”中添加任意演示。",
+    "onboarding.country_pack_standin_base": "最接近的可用数据：{{base}}（{{city}}）价格，{{currency}}。{{country}} 暂无成本库。",
     "modules.pp_name_aus": "澳大利亚建筑数据包",
     "modules.pp_name_austria_at": "奥地利建筑数据包",
     "modules.pp_name_brazil_sinapi": "巴西建筑数据包",
