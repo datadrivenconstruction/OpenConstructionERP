@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "Матриця цін {matrix}: множник {multiplier} правила «{factor}» поза діапазоном [-0.50, 2.00]",
       "suggestion": "Обмежте модифікатори діапазоном від -50% до +200%, щоб уникнути нереалістичних цін ділянок"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
+      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
     }
   },
   "schedule_5d": {

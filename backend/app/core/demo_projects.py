@@ -14477,6 +14477,14 @@ async def install_demo_project(
             module_data.update(await seed_insurance_demo(session, demo_id, template.currency))
     except Exception:
         logger.warning("Demo insurance certificates not seeded for %s", demo_id, exc_info=True)
+    try:
+        from app.core.demo_real_estate import REAL_ESTATE_DEMOS, seed_real_estate_demo
+
+        if demo_id in REAL_ESTATE_DEMOS:
+            async with session.begin_nested():
+                module_data.update(await seed_real_estate_demo(session, project.id, owner_id, demo_id))
+    except Exception:
+        logger.warning("Demo real estate data not seeded for %s", demo_id, exc_info=True)
 
     # ── 14. Real BIM geometry + downloadable PDF (baked assets, no convert) ─
     # Attach a real BIM model with real geometry and a real plan-set PDF from

@@ -1,0 +1,33 @@
+{
+  "_comment": "Data-only lease export profiles read by app/modules/leasing/export_profiles.py. Each profile is a CSV whose columns map a header to a field of the enriched lease row (lease fields plus tenant_name, tenant_kind, tenant_id_scheme, tenant_id_number, tenant_phone, start_date_hijri, end_date_hijri, annual_rent, payments_count, payments_per_year, vat_rate_percent). A profile prepares a file for upload; it is not an integration with the registry and claims no certification. Confirm the column set against the registry's current template per instance.",
+  "profiles": {
+    "ejar": {
+      "country": "SA",
+      "label": "Ejar (Saudi lease registry) upload file",
+      "source_url": "https://www.ejar.sa/",
+      "confidence": "M",
+      "columns": [
+        ["contract_reference", "code"],
+        ["contract_type", "contract_type"],
+        ["unit_number", "unit_ref"],
+        ["unit_description", "unit_label"],
+        ["tenant_type", "tenant_kind"],
+        ["tenant_name", "tenant_name"],
+        ["tenant_id_type", "tenant_id_scheme"],
+        ["tenant_id_number", "tenant_id_number"],
+        ["tenant_mobile", "tenant_phone"],
+        ["start_date_gregorian", "start_date"],
+        ["end_date_gregorian", "end_date"],
+        ["start_date_hijri", "start_date_hijri"],
+        ["end_date_hijri", "end_date_hijri"],
+        ["annual_rent", "annual_rent"],
+        ["payment_frequency", "frequency"],
+        ["payments_per_year", "payments_per_year"],
+        ["number_of_payments", "payments_count"],
+        ["security_deposit", "deposit"],
+        ["currency", "currency"],
+        ["vat_rate_percent", "vat_rate_percent"]
+      ]
+    }
+  }
+}

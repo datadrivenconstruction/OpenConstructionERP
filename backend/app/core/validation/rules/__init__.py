@@ -7737,7 +7737,7 @@ def _propdev_context(context: ValidationContext) -> tuple[Any, Any] | None:
 # Regulators that mandate a dedicated escrow account before sales can
 # open. Used by ``PropDevEscrowAccountRequired`` and surfaced to the UI
 # via the dashboard's ``rule_sets`` field.
-_PROPDEV_REGULATORS_REQUIRING_ESCROW = {"RERA", "MAHARERA", "214FZ", "CMA"}
+_PROPDEV_REGULATORS_REQUIRING_ESCROW = {"RERA", "MAHARERA", "214FZ", "REGA", "CMA"}
 
 
 # ISO 13616 IBAN length table (country code → expected total length).
@@ -7851,7 +7851,7 @@ class PropDevEscrowAccountRequired(ValidationRule):
             elif jurisdiction.startswith("RU"):
                 regulator = "214FZ"
             elif jurisdiction.startswith("SA"):
-                regulator = "CMA"
+                regulator = "REGA"
         if regulator not in _PROPDEV_REGULATORS_REQUIRING_ESCROW:
             # Not subject to escrow rules - pass.
             return [
@@ -7902,6 +7902,104 @@ class PropDevEscrowAccountRequired(ValidationRule):
                 ),
             )
         ]
+
+
+class PropDevEscrowReleaseWithinProgress(ValidationRule):
+    """ERROR: escrow released to the developer exceeds certified progress x collected.
+
+    Off-plan escrow regimes release buyer money only against certified
+    construction progress. The cap per account is the average certified
+    progress of the development's units times the money credited to escrow.
+    """
+
+    rule_id = "property_dev.escrow_release_within_progress"
+    name = "Escrow release within certified progress"
+    standard = "property_dev"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = (
+        "Money released from an off-plan escrow account must not exceed the certified "
+        "construction progress times the money collected into it."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        ctx = _propdev_context(context)
+        if ctx is None:
+            return []
+        session, dev_id = ctx
+        locale = _get_locale(context)
+
+        from decimal import Decimal as _D
+
+        from sqlalchemy import func as _func
+        from sqlalchemy import select as _sql_select
+
+        from app.modules.property_dev.models import EscrowAccount, EscrowTransaction, Plot
+
+        progress = (
+            await session.execute(
+                _sql_select(_func.avg(Plot.construction_status_percent)).where(Plot.development_id == dev_id)
+            )
+        ).scalar()
+        progress = _D(str(progress or 0))
+        accounts = (
+            (await session.execute(_sql_select(EscrowAccount).where(EscrowAccount.development_id == dev_id)))
+            .scalars()
+            .all()
+        )
+        results: list[RuleResult] = []
+        for acc in accounts:
+            rows = (
+                await session.execute(
+                    _sql_select(EscrowTransaction.direction, _func.sum(EscrowTransaction.amount))
+                    .where(EscrowTransaction.escrow_account_id == acc.id)
+                    .group_by(EscrowTransaction.direction)
+                )
+            ).all()
+            sums = {d: _D(str(v or 0)) for d, v in rows}
+            credited, released = sums.get("credit", _D("0")), sums.get("debit", _D("0"))
+            cap = (credited * progress / _D("100")).quantize(_D("0.01"))
+            details = {
+                "account": acc.regulator_account_number or str(acc.id),
+                "credited": str(credited),
+                "released": str(released),
+                "cap": str(cap),
+                "progress_percent": str(progress.quantize(_D("0.01"))),
+            }
+            if released <= cap:
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=self.severity,
+                        category=self.category,
+                        passed=True,
+                        message=_ok(locale),
+                        details=details,
+                    )
+                )
+                continue
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "property_dev.escrow_release_within_progress.fail",
+                        locale=locale,
+                        account=details["account"],
+                        released=details["released"],
+                        cap=details["cap"],
+                        progress=details["progress_percent"],
+                    ),
+                    element_ref=f"property_dev:escrow_account:{acc.id}",
+                    details=details,
+                    suggestion=translate("property_dev.escrow_release_within_progress.suggestion", locale=locale),
+                )
+            )
+        return results
 
 
 class PropDevEscrowIBANValid(ValidationRule):
@@ -12213,6 +12311,7 @@ def register_builtin_rules() -> None:
         (PipelineSideEffectGated(), None),
         # Property Development (task #139)
         (PropDevEscrowAccountRequired(), None),
+        (PropDevEscrowReleaseWithinProgress(), None),
         (PropDevEscrowIBANValid(), None),
         (PropDevEscrowBalanceReconciled(), None),
         (PropDevSalesContractPartyOwnershipSumsTo100(), None),

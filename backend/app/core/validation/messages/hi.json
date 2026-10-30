@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "मूल्य मैट्रिक्स {matrix}: नियम '{factor}' का गुणक {multiplier}, [-0.50, 2.00] से बाहर है",
       "suggestion": "अवास्तविक भूखंड मूल्यों से बचने के लिए समायोजन -50% से +200% के बीच रखें"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
+      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
     }
   },
   "schedule_5d": {

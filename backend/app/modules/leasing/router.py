@@ -155,7 +155,7 @@ async def export_leases(
     await verify_project_access(project_id, user_id or "", session)
     service = LeasingService(session)
     leases = await service.repo.list_leases([project_id], limit=10_000)
-    body, media_type, ext = service.export(leases, format)
+    body, media_type, ext = await service.export(leases, format)
     return Response(
         content=body,
         media_type=media_type,

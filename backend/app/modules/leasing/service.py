@@ -624,14 +624,55 @@ class LeasingService:
             "totals": {c: {k: format(q2(v), "f") for k, v in b.items()} for c, b in totals.items()},
         }
 
-    def export(self, leases: Sequence[Lease], profile: str) -> tuple[bytes, str, str]:
-        fn = _EXPORT_PROFILES.get(profile.lower())
-        if fn is None:
+    async def tenant_parties(self, leases: Sequence[Lease]) -> dict[str, dict[str, Any]]:
+        """Name, phone and identifiers of each tenant contact, by contact id."""
+        from sqlalchemy import select
+
+        from app.modules.contacts.models import Contact
+
+        ids = []
+        for x in leases:
+            try:
+                ids.append(uuid.UUID(str(x.tenant_contact_id)))
+            except ValueError:
+                continue
+        if not ids:
+            return {}
+        rows = await self.session.execute(select(Contact).where(Contact.id.in_(ids)))
+        out: dict[str, dict[str, Any]] = {}
+        for c in rows.scalars().all():
+            person = " ".join(p for p in (c.first_name, c.last_name) if p)
+            idents: list[dict[str, str]] = []
+            for source in (c.custom_properties or {}, c.metadata_ or {}):
+                for ident in source.get("identifiers") or source.get("party_identifiers") or []:
+                    if isinstance(ident, dict) and ident.get("scheme") and ident.get("value"):
+                        idents.append({"scheme": str(ident["scheme"]), "value": str(ident["value"])})
+            if c.vat_number:
+                idents.append({"scheme": "vat", "value": c.vat_number})
+            out[str(c.id)] = {
+                "name": c.company_name or c.legal_name or person or "",
+                "phone": c.primary_phone or "",
+                "is_company": bool(c.company_name and not person),
+                "identifiers": idents,
+            }
+        return out
+
+    async def export(self, leases: Sequence[Lease], profile: str) -> tuple[bytes, str, str]:
+        from app.modules.leasing.export_profiles import enrich_row, load_profiles, render_csv
+
+        name = profile.lower()
+        data_profile = load_profiles().get(name)
+        fn = _EXPORT_PROFILES.get(name)
+        if fn is None and data_profile is None:
             raise HTTPException(
                 status.HTTP_422_UNPROCESSABLE_CONTENT,
                 detail=f"Unknown export profile {profile!r}; available: {', '.join(export_profiles())}",
             )
-        return fn([lease_row(x) for x in leases])
+        parties = await self.tenant_parties(leases)
+        rows = [enrich_row(lease_row(x), parties.get(str(x.tenant_contact_id))) for x in leases]
+        if fn is not None:
+            return fn(rows)
+        return render_csv(data_profile or {}, rows)
 
     # ── Documents ────────────────────────────────────────────────────────
 

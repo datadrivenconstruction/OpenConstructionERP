@@ -1833,7 +1833,7 @@ _REGULATOR_REFS = (
     "section32_au",
     "other",
 )
-_REGULATOR_REF_PATTERN = r"^(rera_dubai|rera_abu_dhabi|maharera|214_FZ_RU|cma_saudi|section32_au|other)$"
+_REGULATOR_REF_PATTERN = r"^(rera_dubai|rera_abu_dhabi|maharera|214_FZ_RU|cma_saudi|rega_saudi|section32_au|other)$"
 
 # Loose IBAN format: 15-34 alphanumeric, first 2 letters = country code,
 # next 2 = check digits. Real-world IBANs span this range; we do not run

@@ -214,7 +214,7 @@ def test_the_regulator_report_declares_russian_for_the_russian_filing() -> None:
         assert isinstance(regulator, ast.Constant)
         languages[str(regulator.value)] = str(language.value)
 
-    assert languages == {"RERA": "en", "MAHARERA": "en", "214FZ": "ru", "CMA": "en"}
+    assert languages == {"RERA": "en", "MAHARERA": "en", "214FZ": "ru", "REGA": "en"}
 
     route = _function_source(APP_ROOT / "modules/property_dev/router.py", "compliance_regulator_report")
     assert "report.language" in route, (

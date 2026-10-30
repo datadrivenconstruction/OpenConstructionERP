@@ -84,3 +84,14 @@ def check_unified_700(value: str) -> IdentifierCheck:
     if number[0] != "7":
         return _result("unified_700", number, "A unified national number starts with 7.")
     return _result("unified_700", number, None)
+
+
+@register("SA", "national_id")
+def check_national_id(value: str) -> IdentifierCheck:
+    """A person's identity number: 10 digits, 1 (citizen) or 2 (resident)."""
+    number = _normalise(value)
+    if not number.isdigit() or len(number) != 10:
+        return _result("national_id", number, "A Saudi identity number has 10 digits.")
+    if number[0] not in "12":
+        return _result("national_id", number, "A Saudi identity number starts with 1 (citizen) or 2 (resident).")
+    return _result("national_id", number, None, holder="citizen" if number[0] == "1" else "resident")

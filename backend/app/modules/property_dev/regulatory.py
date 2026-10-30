@@ -10,7 +10,8 @@ Four jurisdictions are supported out of the box:
                  Form 5 quarterly progress + finances disclosure.
 * ``214FZ``    - Russia, Federal Law 214-ФЗ on shared construction.
                  Квартальная отчётность застройщика, submitted to ЕИСЖС.
-* ``CMA``      - Saudi Arabia, Capital Market Authority + Wafi off-plan
+* ``REGA``     - Saudi Arabia, Real Estate General Authority, Wafi off-plan
+  programme (``CMA`` is still accepted as an alias for older records)
                  licence. Bilingual (Arabic + English) disclosure.
 
 Each generator returns a :class:`RegulatorReport` value object carrying both
@@ -299,7 +300,10 @@ async def _load_aggregates(
             "rera_number": (meta.get("rera_registration_number") if isinstance(meta, dict) else "") or "",
             "maharera_number": (meta.get("maharera_registration_number") if isinstance(meta, dict) else "") or "",
             "fz214_project_id": (meta.get("fz214_project_id") if isinstance(meta, dict) else "") or "",
-            "cma_licence_no": (meta.get("cma_licence_no") if isinstance(meta, dict) else "") or "",
+            "cma_licence_no": (
+                (meta.get("rega_licence_no") or meta.get("cma_licence_no")) if isinstance(meta, dict) else ""
+            )
+            or "",
             "authorised_signatory": (meta.get("authorised_signatory") if isinstance(meta, dict) else "") or "",
             "estimated_cost_to_completion": (meta.get("estimated_cost_to_completion") if isinstance(meta, dict) else "")
             or "",
@@ -910,7 +914,7 @@ async def generate_regulator_report_214fz(
     )
 
 
-# ── CMA (Saudi Wafi off-plan licence) ───────────────────────────────────
+# ── REGA (Saudi Wafi off-plan licence) ───────────────────────────────────
 
 
 async def generate_regulator_report_cma(
@@ -918,7 +922,7 @@ async def generate_regulator_report_cma(
     dev_id: uuid.UUID | str,
     quarter: str,
 ) -> RegulatorReport:
-    """Generate the Saudi CMA / Wafi quarterly disclosure (bilingual PDF)."""
+    """Generate the Saudi REGA / Wafi quarterly off-plan disclosure."""
     dev_uuid = _coerce_uuid(dev_id)
     agg = await _load_aggregates(session, dev_uuid, quarter)
     dev_meta = agg["development"]
@@ -984,12 +988,12 @@ async def generate_regulator_report_cma(
             ],
         ),
     ]
-    qr_payload = f"CMA|{dev_meta['cma_licence_no'] or dev_meta['code']}|{quarter}"
+    qr_payload = f"REGA|{dev_meta['cma_licence_no'] or dev_meta['code']}|{quarter}"
     # Laying out the PDF is pure CPU, so it runs in a worker thread and the
     # event loop keeps serving requests.
     pdf_bytes = await asyncio.to_thread(
         _render_pdf,
-        title="CMA / Wafi - Quarterly Off-plan Disclosure",
+        title="REGA / Wafi - Quarterly Off-plan Disclosure",
         subtitle=f"{dev_meta['name']} ({dev_meta['code']}) - {quarter}",
         sections=sections,
         signature_line=dev_meta["authorised_signatory"] or "Authorised signatory",
@@ -997,7 +1001,7 @@ async def generate_regulator_report_cma(
     )
 
     payload = {
-        "regulator": "CMA",
+        "regulator": "REGA",
         "format_version": "1.0",
         "submission": {
             "wafi_licence_no": dev_meta["cma_licence_no"],
@@ -1013,7 +1017,7 @@ async def generate_regulator_report_cma(
     }
     payload_bytes = json.dumps(payload, ensure_ascii=False, indent=2).encode("utf-8")
     return RegulatorReport(
-        regulator="CMA",
+        regulator="REGA",
         development_id=str(dev_uuid),
         quarter=quarter,
         generated_at=datetime.now(UTC).isoformat(timespec="seconds"),
@@ -1039,7 +1043,7 @@ async def generate_regulator_report_cma(
 # ── Dispatcher ──────────────────────────────────────────────────────────
 
 
-SUPPORTED_REGULATORS = ("RERA", "MAHARERA", "214FZ", "CMA")
+SUPPORTED_REGULATORS = ("RERA", "MAHARERA", "214FZ", "REGA")
 
 
 async def generate_regulator_report(

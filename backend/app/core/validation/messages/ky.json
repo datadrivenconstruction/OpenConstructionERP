@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "{matrix} баа матрицасы: '{factor}' эрежесинин {multiplier} көбөйткүчү [-0.50, 2.00] чегинен тышкары",
       "suggestion": "Жер тилкелеринин реалдуу эмес бааларын болтурбоо үчүн түзөтүүлөрдү -50% менен +200% ортосунда чектеңиз"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
+      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
     }
   },
   "schedule_5d": {

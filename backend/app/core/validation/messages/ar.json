@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "مصفوفة الأسعار {matrix}: معامل {multiplier} للقاعدة '{factor}' خارج [-0.50, 2.00]",
       "suggestion": "قيّد التعديلات بين -50% و+200% لتجنب أسعار أراضٍ غير واقعية"
+    },
+    "escrow_release_within_progress": {
+      "fail": "حساب الضمان {account}: المبلغ المصروف {released} يتجاوز الحد {cap} (نسبة الإنجاز المعتمدة {progress}% من المبالغ المحصلة)",
+      "suggestion": "أوقف الصرف حتى صدور شهادة الإنجاز التالية، أو سجّل الشهادة التي ترفع نسبة الإنجاز"
     }
   },
   "schedule_5d": {

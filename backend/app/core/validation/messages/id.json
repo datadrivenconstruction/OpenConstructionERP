@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "Matriks harga {matrix}: pengali {multiplier} pada aturan '{factor}' berada di luar [-0.50, 2.00]",
       "suggestion": "Batasi penyesuaian antara -50% dan +200% untuk menghindari harga kavling yang tidak realistis"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
+      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
     }
   },
   "schedule_5d": {

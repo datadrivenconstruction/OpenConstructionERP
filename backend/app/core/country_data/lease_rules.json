@@ -1,4 +1,16 @@
 {
   "_comment": "Residential and commercial lease limits per country, read by app/modules/leasing/country_rules.py. A country is listed only with a published source; an absent country or an absent field means no limit is applied. Fields: deposit_cap_months (deposit at most this many months of rent, by lease_kind), tenant_identifier_schemes (the tenant contact must carry one of these party identifier schemes), source_url, effective_from, confidence (H official, M one reliable secondary source).",
-  "countries": {}
+  "countries": {
+    "SA": {
+      "tenant_identifier_schemes": [
+        "national_id",
+        "cr",
+        "unified_700"
+      ],
+      "source_url": "https://www.ejar.sa/",
+      "note": "A lease registered on the national Ejar platform names the tenant by national ID or residence permit (individuals) or Commercial Registration / unified number (establishments). No statutory deposit cap is published, so none is applied.",
+      "effective_from": "2018-01-01",
+      "confidence": "M"
+    }
+  }
 }

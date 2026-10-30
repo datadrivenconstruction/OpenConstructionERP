@@ -1762,6 +1762,7 @@ export type RegulatorRef =
   | 'rera_abu_dhabi'
   | 'maharera'
   | '214_FZ_RU'
+  | 'rega_saudi'
   | 'cma_saudi'
   | 'section32_au'
   | 'other';
@@ -2358,7 +2359,7 @@ export interface ComplianceRegulatorReport {
   summary: Record<string, unknown>;
 }
 
-export type RegulatorCode = 'RERA' | 'MAHARERA' | '214FZ' | 'CMA';
+export type RegulatorCode = 'RERA' | 'MAHARERA' | '214FZ' | 'REGA';
 
 export function fetchComplianceDashboard(
   devId: string,

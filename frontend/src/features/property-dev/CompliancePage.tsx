@@ -44,7 +44,7 @@ const REGULATORS: { code: RegulatorCode; labelKey: string }[] = [
   { code: 'RERA', labelKey: 'propdev.compliance.regulator.rera' },
   { code: 'MAHARERA', labelKey: 'propdev.compliance.regulator.maharera' },
   { code: '214FZ', labelKey: 'propdev.compliance.regulator.fz214' },
-  { code: 'CMA', labelKey: 'propdev.compliance.regulator.cma' },
+  { code: 'REGA', labelKey: 'propdev.compliance.regulator.rega' },
 ];
 
 function currentQuarter(now: Date = new Date()): string {

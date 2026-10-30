@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "মূল্য ম্যাট্রিক্স {matrix}: নিয়ম '{factor}'-এর গুণক {multiplier} [-0.50, 2.00]-এর বাইরে",
       "suggestion": "অবাস্তব জমির মূল্য এড়াতে সমন্বয় -50% থেকে +200%-এর মধ্যে রাখুন"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
+      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
     }
   },
   "schedule_5d": {

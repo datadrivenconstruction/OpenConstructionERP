@@ -1,0 +1,25 @@
+{
+  "_comment": "Regional solution packages: a worldwide solution package (see solution_packages on the package catalogue branch) plus the neutral modules and the country profile a region needs. Read by app/core/regional_packages.py. Every country value names its source and must be confirmed per instance.",
+  "packages": {
+    "real_estate_gcc": {
+      "base_package": "developer_owner",
+      "regions": ["SA"],
+      "required": ["property_dev", "leasing", "service_charges", "finance", "contacts", "documents", "projects"],
+      "optional": ["boq", "costs", "contracts", "funding", "crm", "portal", "reporting", "middle_east_pack"],
+      "menu": ["/property-dev", "/leasing", "/service-charges", "/finance", "/contacts", "/documents"],
+      "demo_id": "residential-riyadh-offplan",
+      "profiles": {
+        "SA": {
+          "currency": "SAR",
+          "languages": ["ar", "en"],
+          "calendar": {"primary": "gregorian", "secondary": "hijri_umm_al_qura"},
+          "vat": {"standard_rate_percent": "15", "source_url": "https://zatca.gov.sa/en/RulesRegulations/Taxes/Pages/default.aspx"},
+          "offplan_regulator": {"code": "REGA", "label": "REGA (Real Estate General Authority), Wafi off-plan programme", "licence_field": "rega_licence_no", "escrow_regulator_ref": "rega_saudi", "source_url": "https://rega.gov.sa/"},
+          "lease_export_profile": "ejar",
+          "tenant_identifier_schemes": ["national_id", "cr", "unified_700"],
+          "confidence": "M"
+        }
+      }
+    }
+  }
+}

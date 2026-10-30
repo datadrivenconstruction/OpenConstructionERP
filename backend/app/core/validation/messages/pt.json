@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "Matriz de preços {matrix}: o multiplicador {multiplier} da regra «{factor}» está fora do intervalo [-0,50; 2,00]",
       "suggestion": "Limite os modificadores a valores entre -50% e +200% para evitar preços de terrenos irrealistas"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
+      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
     }
   },
   "schedule_5d": {

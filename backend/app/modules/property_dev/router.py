@@ -6270,7 +6270,7 @@ async def compliance_regulator_report(
     # via this endpoint. Collapses "not yours" / "doesn't exist" to 404.
     await _verify_owner_via_development(session, dev_id, user_payload)
     reg_code = (regulator or "").strip().upper()
-    if reg_code not in {"RERA", "MAHARERA", "214FZ", "214-FZ", "214", "CMA"}:
+    if reg_code not in {"RERA", "MAHARERA", "214FZ", "214-FZ", "214", "REGA", "CMA"}:
         raise HTTPException(
             status_code=422,
             detail=(f"unsupported_regulator:{regulator} (supported: {', '.join(SUPPORTED_REGULATORS)})"),

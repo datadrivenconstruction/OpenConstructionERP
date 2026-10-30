@@ -3004,7 +3004,8 @@ function EscrowAccountFormModal({
             <option value="rera_abu_dhabi">RERA Abu Dhabi</option>
             <option value="maharera">MahaRERA</option>
             <option value="214_FZ_RU">214-FZ (RU)</option>
-            <option value="cma_saudi">CMA Saudi</option>
+            <option value="rega_saudi">REGA Saudi (Wafi)</option>
+            <option value="cma_saudi">CMA Saudi (legacy)</option>
             <option value="section32_au">Section 32 (AU)</option>
             <option value="other">Other</option>
           </select>

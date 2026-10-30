@@ -612,6 +612,10 @@
     "price_matrix_no_negative_modifier": {
       "fail": "قیمت میٹرکس {matrix}: قاعدے '{factor}' کا ضارب {multiplier}، [-0.50, 2.00] سے باہر ہے",
       "suggestion": "پلاٹوں کی غیر حقیقی قیمت سے بچنے کے لیے تعدیلات -50% اور +200% کے درمیان رکھیں"
+    },
+    "escrow_release_within_progress": {
+      "fail": "Escrow account {account}: released {released} exceeds the cap {cap} (certified progress {progress}% of money collected)",
+      "suggestion": "Hold further releases until the next progress certificate, or record the certificate that raises the progress"
     }
   },
   "schedule_5d": {

@@ -927,7 +927,7 @@ async def test_regulator_report_cma_generates_pdf_and_json(session, seeded_dev):
     assert report.pdf_bytes.startswith(b"%PDF")
     assert report.payload_format == "json"
     payload = json.loads(report.payload_bytes.decode("utf-8"))
-    assert payload["regulator"] == "CMA"
+    assert payload["regulator"] == "REGA"
 
 
 @pytest.mark.asyncio
