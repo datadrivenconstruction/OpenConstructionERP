@@ -85,11 +85,13 @@ function renderWizard() {
   );
 }
 
-/** Welcome -> start choice -> the profile step. */
+/** Welcome -> start choice -> packages -> the profile step. */
 async function openProfileStep() {
   renderWizard();
   fireEvent.click(await screen.findByRole('button', { name: /Get Started/ }));
   fireEvent.click(await screen.findByRole('button', { name: /Choose Your Profile/ }));
+  await screen.findByRole('heading', { name: 'Choose your packages' });
+  fireEvent.click(screen.getByRole('button', { name: 'Pick a single company profile instead' }));
   await screen.findByRole('heading', { name: 'What does your company do?' });
   // The catalogue arrives after the first paint.
   await screen.findByTestId('profile-card-general_contractor');

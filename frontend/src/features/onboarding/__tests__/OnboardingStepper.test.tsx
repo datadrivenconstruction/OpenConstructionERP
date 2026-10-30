@@ -235,6 +235,8 @@ describe('the stepper in the wizard', () => {
 
     // The language lands while the reader is on another step.
     fireEvent.click(step(2));
+    await heading('Choose your packages');
+    fireEvent.click(screen.getByRole('button', { name: 'Pick a single company profile instead' }));
     await heading('What does your company do?');
     languageReady();
     await waitFor(() => expect(locked(6)).toBe(false));
