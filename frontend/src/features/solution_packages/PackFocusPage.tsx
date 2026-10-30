@@ -8,12 +8,14 @@
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, CheckCircle2, EyeOff, Layers3, Loader2, Rocket } from 'lucide-react';
 import { Breadcrumb, Button } from '@/shared/ui';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
 import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
+import { projectsApi } from '@/features/projects/api';
+import { ruleSetLabel } from '@/features/validation/ruleSetLabels';
 import {
   PACKAGES_QUERY_KEY,
   setModuleEnabled,
@@ -22,7 +24,7 @@ import {
   useSolutionPackages,
   type FocusPreview,
 } from './api';
-import { buildFirstSteps, type FirstStep } from './focus';
+import { buildFirstSteps, findDemoProjectId, type FirstStep } from './focus';
 import { FocusModuleList } from './FocusModuleList';
 
 export function usePackDisplayName() {
@@ -33,17 +35,23 @@ export function usePackDisplayName() {
       : t(`modules.pp_name_${packNameSlug(p.slug)}`, { defaultValue: p.name });
 }
 
+/** A standard or rule set id as people write it: `din276` reads "DIN 276", an unknown id gets a capital. */
+function standardLabel(id: string, t: ReturnType<typeof useTranslation>['t']): string {
+  const label = ruleSetLabel(id, t);
+  return label === id.replace(/_/g, ' ') ? label.charAt(0).toUpperCase() + label.slice(1) : label;
+}
+
 function stepLabel(t: ReturnType<typeof useTranslation>['t'], step: FirstStep): string {
   switch (step.id) {
     case 'demo':
       return t('packs.step_demo', { defaultValue: 'Open the demo project: it is filled in, so every screen has data' });
     case 'boq':
       return step.param
-        ? t('packs.step_boq_standard', { defaultValue: 'See the bill of quantities structured by {{standard}}', standard: step.param.toUpperCase() })
+        ? t('packs.step_boq_standard', { defaultValue: 'See the bill of quantities structured by {{standard}}', standard: standardLabel(step.param, t) })
         : t('packs.step_boq', { defaultValue: 'See the bill of quantities with prices' });
     case 'validation':
       return step.param
-        ? t('packs.step_validation_rules', { defaultValue: 'Run validation with the pack rules ({{rules}})', rules: step.param })
+        ? t('packs.step_validation_rules', { defaultValue: 'Run validation with the pack rules ({{rules}})', rules: step.param.split(/,\s*/).map((r) => standardLabel(r, t)).join(', ') })
         : t('packs.step_validation', { defaultValue: 'Run validation and fix what it finds' });
     case 'export_gaeb':
       return t('packs.step_export_gaeb', { defaultValue: 'Export the bill as GAEB XML for the tender' });
@@ -68,7 +76,10 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
 
   const on = Object.keys(modules).filter((k) => modules[k]).sort();
   const hidden = Object.keys(modules).filter((k) => modules[k] === false).sort();
-  const steps = buildFirstSteps(preview, ROUTE_BACKEND_MODULE);
+  const hasDemo = preview.demo_template_ids.length > 0;
+  const projects = useQuery({ queryKey: ['projects'], queryFn: projectsApi.list, enabled: hasDemo });
+  const demoProjectId = hasDemo ? findDemoProjectId(projects.data ?? [], preview.demo_template_ids) : null;
+  const steps = buildFirstSteps(preview, ROUTE_BACKEND_MODULE, demoProjectId);
 
   async function show(module: string) {
     await setModuleEnabled(module, true);

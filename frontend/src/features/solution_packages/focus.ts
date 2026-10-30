@@ -62,14 +62,26 @@ export function routeForModule(
   return null;
 }
 
+/** The project seeded from one of the pack's demo templates, newest first; null if none is installed. */
+export function findDemoProjectId(
+  projects: readonly { id: string; metadata?: Record<string, unknown> | null; created_at?: string }[],
+  demoTemplateIds: readonly string[],
+): string | null {
+  const match = projects
+    .filter((p) => demoTemplateIds.includes(String(p.metadata?.demo_id ?? '')))
+    .sort((a, b) => String(b.created_at ?? '').localeCompare(String(a.created_at ?? '')));
+  return match[0]?.id ?? null;
+}
+
 /** Three to five first steps that link to real routes the focus keeps visible. */
 export function buildFirstSteps(
   preview: Pick<FocusPreview, 'modules' | 'demo_template_ids' | 'rule_sets' | 'standard' | 'cwicr_regions' | 'menu'>,
   routeMap: Record<string, string | readonly string[]>,
+  demoProjectId?: string | null,
 ): FirstStep[] {
   const has = (m: string) => preview.modules.includes(m);
   const steps: FirstStep[] = [];
-  if (preview.demo_template_ids.length) steps.push({ id: 'demo', to: '/projects' });
+  if (preview.demo_template_ids.length) steps.push({ id: 'demo', to: demoProjectId ? `/projects/${demoProjectId}` : '/projects' });
   if (has('boq')) steps.push({ id: 'boq', to: '/boq', param: preview.standard ?? undefined });
   if (has('validation')) steps.push({ id: 'validation', to: '/validation', param: preview.rule_sets.join(', ') || undefined });
   const gaeb = preview.rule_sets.some((r) => GAEB.test(r)) || GAEB.test(preview.standard ?? '');
