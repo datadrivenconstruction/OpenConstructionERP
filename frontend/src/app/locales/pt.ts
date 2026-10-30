@@ -62366,6 +62366,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Falta a unidade",
     "boq.sheet.issue_negative": "Valor negativo",
     "boq.sheet.issue_not_a_number": "Não é um número",
+    "boq.markup_tender_adjustment": "Sobrepreço / desconto da proposta",
+    "boq.markup_pct_invalid_signed_title": "Introduza uma percentagem de -100 a 100 (negativo = abaixo da tabela de preços unitários)",
     "guide.cost_control.title": "Controlo de custos",
     "guide.cost_control.intro": "O controlo de custos responde a uma pergunta: quanto vai custar o projeto no fim e porquê. Lê o orçamento, a estimativa, os contratos, as alterações, o trabalho medido e as faturas que já vivem nos seus módulos, por isso nada é escrito duas vezes.",
     "guide.cost_control.methods.title": "Quatro formas de ler a previsão",

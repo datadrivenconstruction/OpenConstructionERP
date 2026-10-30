@@ -62372,6 +62372,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Falta la unidad",
     "boq.sheet.issue_negative": "Valor negativo",
     "boq.sheet.issue_not_a_number": "No es un número",
+    "boq.markup_tender_adjustment": "Recargo / baja de licitación",
+    "boq.markup_pct_invalid_signed_title": "Introduzca un porcentaje de -100 a 100 (negativo = por debajo de los precios unitarios)",
     "guide.cost_control.title": "Control de costes",
     "guide.cost_control.intro": "El control de costes responde a una pregunta: cuánto costará el proyecto al final y por qué. Lee el presupuesto, la estimación, los contratos, los cambios, la obra medida y las facturas que ya viven en sus propios módulos, así que nada se escribe dos veces.",
     "guide.cost_control.methods.title": "Cuatro formas de leer la previsión",

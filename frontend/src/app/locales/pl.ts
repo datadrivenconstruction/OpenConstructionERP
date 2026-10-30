@@ -60993,6 +60993,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Brak jednostki",
     "boq.sheet.issue_negative": "Wartość ujemna",
     "boq.sheet.issue_not_a_number": "To nie jest liczba",
+    "boq.markup_tender_adjustment": "Narzut / upust przetargowy",
+    "boq.markup_pct_invalid_signed_title": "Wpisz procent od -100 do 100 (wartość ujemna = poniżej cennika)",
     "guide.cost_control.title": "Kontrola kosztów",
     "guide.cost_control.intro": "Kontrola kosztów odpowiada na jedno pytanie: ile projekt będzie kosztował na koniec i dlaczego. Czyta budżet, kosztorys, umowy, zmiany, roboty obmierzone i faktury, które już są w swoich modułach, więc nic nie jest wpisywane dwa razy.",
     "guide.cost_control.methods.title": "Cztery sposoby odczytu prognozy",

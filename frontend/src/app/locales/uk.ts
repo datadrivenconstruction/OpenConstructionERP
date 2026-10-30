@@ -61540,6 +61540,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Не вказано одиницю виміру",
     "boq.sheet.issue_negative": "Від'ємне значення",
     "boq.sheet.issue_not_a_number": "Не число",
+    "boq.markup_tender_adjustment": "Надбавка / знижка за тендером",
+    "boq.markup_pct_invalid_signed_title": "Введіть відсоток від -100 до 100 (від'ємний = нижче розцінок)",
     "guide.cost_control.title": "Контроль витрат",
     "guide.cost_control.intro": "Контроль витрат відповідає на одне питання: скільки проєкт коштуватиме в підсумку і чому. Він бере бюджет, кошторис, договори, зміни, виконані за обмірами роботи та рахунки з тих модулів, де вони вже є, тож нічого не вводиться двічі.",
     "guide.cost_control.methods.title": "Чотири способи читати прогноз",

@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "« {markup} » s'applique à « {apply_to} », mais aucune ligne ne la précède ; le calcul porte donc uniquement sur le coût direct",
       "suggestion": "Placez-la après les lignes sur lesquelles elle doit se cumuler, ou appliquez-la au coût direct"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" propose {percentage}% par rapport au bordereau de prix, hors de la fourchette plausible de plus ou moins {band}%",
+      "duplicate": "\"{markup}\" est une seconde majoration ou remise sur le même périmètre que \"{other}\", les deux se cumulent donc",
+      "suggestion": "Ne gardez qu'une majoration ou une remise par lot ou section, et vérifiez le signe et le séparateur décimal. La ligne est de toute façon chiffrée exactement comme saisie"
     }
   },
   "common": {

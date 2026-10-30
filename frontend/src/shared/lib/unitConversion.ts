@@ -381,6 +381,8 @@ const DIMENSION_FACTORS: Record<string, Record<string, number>> = {
     // digits than the older neighbours above rather than being rounded to
     // match them. Kept identical to _DIMENSION_FACTORS in unit_conversion.py.
     ton_us: 0.0011023113109,
+    // Long hundredweight, 112 lb = 50.80234544 kg; reciprocal stored.
+    cwt: 0.019684130552221,
   },
   count: {
     pcs: 1,

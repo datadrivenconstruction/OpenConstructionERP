@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "“{markup}”的计取基数为“{apply_to}”，但它之前没有其他费用项，因此仅按直接费计算。",
       "suggestion": "将其移至应纳入计取基数的费用项之后，或改为按直接费计取。"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" 相对单价表报价 {percentage}%，超出 ±{band}% 的合理范围",
+      "duplicate": "\"{markup}\" 与 \"{other}\" 针对同一范围的第二个投标上浮或下浮，两者会叠加计算",
+      "suggestion": "每份清单或分部只保留一个上浮或下浮，并核对正负号和小数点。无论如何，该项均按输入值计价"
     }
   },
   "common": {

@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" anvendes på \"{apply_to}\", men ingen linjer står før den, så den beregnes kun på de direkte omkostninger",
       "suggestion": "Flyt den efter de linjer, der skal indgå i beregningsgrundlaget, eller beregn den på de direkte omkostninger"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" byder {percentage}% i forhold til prisbogen, uden for det plausible interval på plus eller minus {band}%",
+      "duplicate": "\"{markup}\" er et andet tilbudspåslag eller rabat på samme omfang som \"{other}\", så de to lægges sammen",
+      "suggestion": "Behold ét påslag eller én rabat pr. opgørelse eller afsnit, og kontrollér fortegn og decimaltegn. Linjen prissættes præcis som indtastet under alle omstændigheder"
     }
   },
   "common": {

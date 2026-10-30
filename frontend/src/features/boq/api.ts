@@ -264,7 +264,7 @@ export interface Markup {
    * the ratio arrives as ``escalation_factor``.
    */
   markup_type: 'percentage' | 'fixed' | 'banded' | 'escalation';
-  category: 'overhead' | 'profit' | 'tax' | 'contingency' | 'insurance' | 'bond' | 'other';
+  category: 'overhead' | 'profit' | 'tax' | 'contingency' | 'insurance' | 'bond' | 'tender_adjustment' | 'other';
   percentage: number;
   /**
    * v3 §10 contract: the backend serialises this Decimal money field as a

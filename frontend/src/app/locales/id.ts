@@ -59214,6 +59214,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Satuan belum diisi",
     "boq.sheet.issue_negative": "Nilai negatif",
     "boq.sheet.issue_not_a_number": "Bukan angka",
+    "boq.markup_tender_adjustment": "Premi / diskon tender",
+    "boq.markup_pct_invalid_signed_title": "Masukkan persentase dari -100 sampai 100 (negatif = di bawah daftar harga satuan)",
     "guide.cost_control.title": "Pengendalian biaya",
     "guide.cost_control.intro": "Pengendalian biaya menjawab satu pertanyaan: berapa biaya proyek pada akhirnya, dan mengapa. Modul ini membaca anggaran, estimasi, kontrak, perubahan, pekerjaan terukur, dan faktur yang sudah ada di modulnya masing-masing, sehingga tidak ada yang diketik dua kali.",
     "guide.cost_control.methods.title": "Empat cara membaca prakiraan",

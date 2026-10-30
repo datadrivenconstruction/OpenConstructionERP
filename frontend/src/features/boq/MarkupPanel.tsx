@@ -104,10 +104,11 @@ const CATEGORY_COLORS: Record<string, string> = {
   contingency: 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300',
   insurance: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300',
   bond: 'bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300',
+  tender_adjustment: 'bg-teal-100 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300',
   other: 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300',
 };
 
-const CATEGORIES = ['overhead', 'profit', 'tax', 'contingency', 'insurance', 'bond', 'other'] as const;
+const CATEGORIES = ['overhead', 'profit', 'tax', 'contingency', 'insurance', 'bond', 'tender_adjustment', 'other'] as const;
 
 /**
  * Charge each tranche of `base` at its own band rate and add them up.
@@ -411,15 +412,23 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       updateMutation.mutate({ markupId, data: { name: value } });
     } else if (field === 'percentage') {
       const num = parseDecimalInput(value);
-      if (num === null || num < 0 || num > 100) {
+      // A tender premium (+) or rebate (-) on a schedule of rates may be negative.
+      const signed = (Array.isArray(markups) ? markups : []).some(
+        (m) => m.id === markupId && m.category === 'tender_adjustment',
+      );
+      if (num === null || num < (signed ? -100 : 0) || num > 100) {
         // Keep the editor open and explain, rather than silently reverting the
         // typed value with no feedback (a number input's min/max does not block
         // out-of-range typing).
         addToast({
           type: 'error',
-          title: t('boq.markup_pct_invalid_title', {
-            defaultValue: 'Enter a percentage from 0 to 100',
-          }),
+          title: signed
+            ? t('boq.markup_pct_invalid_signed_title', {
+                defaultValue: 'Enter a percentage from -100 to 100 (negative = below the schedule of rates)',
+              })
+            : t('boq.markup_pct_invalid_title', {
+                defaultValue: 'Enter a percentage from 0 to 100',
+              }),
           message: t('boq.markup_pct_invalid_msg', {
             defaultValue: 'The markup percentage must be a number between 0 and 100.',
           }),
@@ -431,7 +440,7 @@ export function MarkupPanel({ boqId, markups, directCost, currencySymbol, curren
       updateMutation.mutate({ markupId, data: { category: value } });
     }
     setEditState(null);
-  }, [editState, updateMutation, addToast, t]);
+  }, [editState, updateMutation, addToast, t, markups]);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {

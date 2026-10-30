@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" se aplica a \"{apply_to}\" pero nada la precede, por lo que se calcula solo sobre el coste directo",
       "suggestion": "Colóquela después de las líneas sobre las que debe acumularse, o aplíquela al coste directo"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" oferta un {percentage}% frente a los precios unitarios, fuera del margen razonable de ±{band}%",
+      "duplicate": "\"{markup}\" es un segundo recargo o baja de licitación sobre el mismo alcance que \"{other}\", por lo que ambos se acumulan",
+      "suggestion": "Mantenga un solo recargo o baja por presupuesto o capítulo y revise el signo y el separador decimal. La partida se valora exactamente como se introdujo en cualquier caso"
     }
   },
   "common": {

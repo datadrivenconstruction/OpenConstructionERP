@@ -60674,6 +60674,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Unità mancante",
     "boq.sheet.issue_negative": "Valore negativo",
     "boq.sheet.issue_not_a_number": "Non è un numero",
+    "boq.markup_tender_adjustment": "Maggiorazione / ribasso d’asta",
+    "boq.markup_pct_invalid_signed_title": "Inserire una percentuale da -100 a 100 (negativo = sotto il prezziario)",
     "guide.cost_control.title": "Controllo dei costi",
     "guide.cost_control.intro": "Il controllo dei costi risponde a una domanda: quanto costerà il progetto alla fine e perché. Legge budget, stima, contratti, varianti, lavori misurati e fatture che vivono già nei loro moduli, così nulla viene scritto due volte.",
     "guide.cost_control.methods.title": "Quattro modi di leggere la previsione",

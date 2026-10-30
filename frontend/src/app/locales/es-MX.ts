@@ -50085,6 +50085,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Falta la unidad",
     "boq.sheet.issue_negative": "Valor negativo",
     "boq.sheet.issue_not_a_number": "No es un número",
+    "boq.markup_tender_adjustment": "Sobreprecio / descuento de licitación",
+    "boq.markup_pct_invalid_signed_title": "Ingrese un porcentaje de -100 a 100 (negativo = por debajo de los precios unitarios)",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "La semana laboral regional no está disponible. Se utiliza una semana de planificación estándar.",
     "schedule.calendar.holidays_missing": "No hay datos de días festivos para {{years}}. Revise el calendario antes de basarse en estas fechas.",

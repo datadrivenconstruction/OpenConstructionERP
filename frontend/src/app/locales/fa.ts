@@ -59423,6 +59423,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "واحد وجود ندارد",
     "boq.sheet.issue_negative": "مقدار منفی",
     "boq.sheet.issue_not_a_number": "عدد نیست",
+    "boq.markup_tender_adjustment": "اضافه‌بها / تخفیف مناقصه",
+    "boq.markup_pct_invalid_signed_title": "درصدی از -100 تا 100 وارد کنید (منفی = پایین‌تر از فهرست بها)",
     "guide.cost_control.title": "کنترل هزینه",
     "guide.cost_control.intro": "کنترل هزینه به یک پرسش پاسخ می‌دهد: پروژه در پایان چقدر هزینه خواهد داشت و چرا. بودجه، برآورد، قراردادها، تغییرات، کار اندازه‌گیری‌شده و صورتحساب‌هایی را می‌خواند که از پیش در ماژول‌های خودشان هستند، پس چیزی دوبار وارد نمی‌شود.",
     "guide.cost_control.methods.title": "چهار روش برای خواندن پیش‌بینی",

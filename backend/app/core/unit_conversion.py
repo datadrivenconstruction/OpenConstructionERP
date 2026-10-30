@@ -324,6 +324,8 @@ _DIMENSION_FACTORS: Final[dict[str, dict[str, str]]] = {
         # expansion, so it is written to the precision Decimal can carry
         # rather than rounded to match the older neighbours above.
         "ton_us": "0.0011023113109",
+        # Long hundredweight, 112 lb = 50.80234544 kg exactly; reciprocal stored.
+        "cwt": "0.019684130552221",
     },
     "count": {
         "pcs": "1",

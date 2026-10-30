@@ -62028,6 +62028,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Hiányzik az egység",
     "boq.sheet.issue_negative": "Negatív érték",
     "boq.sheet.issue_not_a_number": "Nem szám",
+    "boq.markup_tender_adjustment": "Ajánlati felár / engedmény",
+    "boq.markup_pct_invalid_signed_title": "Adjon meg egy százalékot -100 és 100 között (negatív = az árjegyzék alatt)",
     "guide.cost_control.title": "Költségkövetés",
     "guide.cost_control.intro": "A költségkövetés egy kérdésre válaszol: mennyibe fog kerülni a projekt a végén, és miért. A költségvetést, a költségbecslést, a szerződéseket, a módosításokat, a felmért munkát és a számlákat olvassa, amelyek már a saját moduljukban vannak, így semmit nem kell kétszer beírni.",
     "guide.cost_control.methods.title": "Az előrejelzés négy olvasata",

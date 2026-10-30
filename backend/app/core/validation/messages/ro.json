@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "„{markup}” se aplică la „{apply_to}”, dar nu există linii precedente, deci se calculează doar asupra costului direct",
       "suggestion": "Mutați-o după liniile care trebuie să intre în baza sa sau aplicați-o la costul direct"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" oferă {percentage}% față de lista de prețuri unitare, în afara intervalului plauzibil de plus/minus {band}%",
+      "duplicate": "\"{markup}\" este o a doua majorare sau reducere pentru aceeași sferă ca \"{other}\", deci cele două se cumulează",
+      "suggestion": "Păstrați o singură majorare sau reducere pe deviz sau capitol și verificați semnul și separatorul zecimal. Linia este prețuită exact cum a fost introdusă, oricum"
     }
   },
   "common": {

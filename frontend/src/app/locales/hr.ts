@@ -59800,6 +59800,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Nedostaje jedinica mjere",
     "boq.sheet.issue_negative": "Negativna vrijednost",
     "boq.sheet.issue_not_a_number": "Nije broj",
+    "boq.markup_tender_adjustment": "Premija / popust na ponudu",
+    "boq.markup_pct_invalid_signed_title": "Unesite postotak od -100 do 100 (negativno = ispod cjenika)",
     "guide.cost_control.title": "Kontrola troškova",
     "guide.cost_control.intro": "Kontrola troškova odgovara na jedno pitanje: koliko će projekt na kraju koštati i zašto. Čita proračun, troškovnik, ugovore, izmjene, izmjerene radove i račune koji već postoje u svojim modulima, pa se ništa ne unosi dvaput.",
     "guide.cost_control.methods.title": "Četiri načina čitanja prognoze",

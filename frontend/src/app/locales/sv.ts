@@ -60078,6 +60078,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Enhet saknas",
     "boq.sheet.issue_negative": "Negativt värde",
     "boq.sheet.issue_not_a_number": "Inte ett tal",
+    "boq.markup_tender_adjustment": "Anbudspåslag / rabatt",
+    "boq.markup_pct_invalid_signed_title": "Ange en procentsats från -100 till 100 (negativ = under prislistan)",
     "guide.cost_control.title": "Kostnadsstyrning",
     "guide.cost_control.intro": "Kostnadsstyrningen svarar på en fråga: vad kommer projektet att kosta till slut, och varför. Den läser budget, kalkyl, kontrakt, ändringar, uppmätt arbete och fakturor som redan finns i sina egna moduler, så ingenting skrivs in två gånger.",
     "guide.cost_control.methods.title": "Fyra sätt att läsa prognosen",

@@ -60395,6 +60395,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Oʻlchov birligi kiritilmagan",
     "boq.sheet.issue_negative": "Manfiy qiymat",
     "boq.sheet.issue_not_a_number": "Son emas",
+    "boq.markup_tender_adjustment": "Tender ustamasi / chegirma",
+    "boq.markup_pct_invalid_signed_title": "-100 dan 100 gacha foiz kiriting (manfiy = birlik narxlar ro'yxatidan past)",
     "guide.cost_control.title": "Xarajatlarni nazorat qilish",
     "guide.cost_control.intro": "Xarajatlarni nazorat qilish bitta savolga javob beradi: loyiha oxirida qancha turadi va nima uchun. U oʻz modullarida allaqachon turgan byudjet, smeta, shartnomalar, oʻzgartirishlar, oʻlchangan ish va hisob-fakturalarni oʻqiydi, shuning uchun hech narsa ikki marta kiritilmaydi.",
     "guide.cost_control.methods.title": "Prognozni oʻqishning toʻrt usuli",

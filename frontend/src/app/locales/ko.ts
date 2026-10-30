@@ -59831,6 +59831,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "단위가 없습니다",
     "boq.sheet.issue_negative": "음수 값",
     "boq.sheet.issue_not_a_number": "숫자가 아닙니다",
+    "boq.markup_tender_adjustment": "입찰 할증 / 할인",
+    "boq.markup_pct_invalid_signed_title": "-100에서 100 사이의 비율을 입력하세요 (음수 = 단가표보다 낮음)",
     "guide.cost_control.title": "원가 관리",
     "guide.cost_control.intro": "원가 관리는 한 가지 질문에 답합니다. 프로젝트가 결국 얼마가 들고, 그 이유는 무엇인가. 예산, 견적, 계약, 변경, 실측 물량, 청구서는 각자의 모듈에 이미 있는 것을 읽어 오므로 두 번 입력할 필요가 없습니다.",
     "guide.cost_control.methods.title": "예측을 보는 네 가지 방법",

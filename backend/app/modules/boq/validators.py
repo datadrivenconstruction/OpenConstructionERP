@@ -96,6 +96,13 @@ _DEFAULT_CEILING = Decimal("50")
 
 _CUMULATIVE = ("cumulative", "subtotal")
 
+#: Category of a bid quoted as a percentage above (+) or below (-) a schedule
+#: of rates. Mirrors ``schemas.TENDER_ADJUSTMENT_CATEGORY``.
+TENDER_ADJUSTMENT_CATEGORY = "tender_adjustment"
+
+#: Beyond this many percent either way a premium or rebate is usually a typo.
+_TENDER_ADJUSTMENT_BAND = Decimal("50")
+
 
 def _get_markups(context: ValidationContext) -> list[dict[str, Any]]:
     """Pull the markup rows out of the validated payload.
@@ -281,6 +288,8 @@ class MarkupPercentageWithinBand(ValidationRule):
             if pct is None:
                 continue
             cat = str(markup.get("category") or "other").lower()
+            if cat == TENDER_ADJUSTMENT_CATEGORY:
+                continue  # signed by design, judged by TenderAdjustmentIsPlausible
             ceiling = _PERCENTAGE_CEILING.get(cat, _DEFAULT_CEILING)
             if 0 <= pct <= ceiling:
                 continue
@@ -605,11 +614,85 @@ class ManualDrawingRefWithoutRevision(_DrawingRule):
 
 # ── Registration ────────────────────────────────────────────────────────────
 
+
+class TenderAdjustmentIsPlausible(ValidationRule):
+    """A premium or rebate on a schedule of rates is one line per scope, inside a sane band."""
+
+    rule_id = "boq.markup.tender_adjustment_plausible"
+    name = "Tender premium or rebate is single and plausible"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = (
+        "A bid quoted as a percentage above or below a schedule of rates is one "
+        "line for the bill or for a section. Two lines on the same scope compound, "
+        "and a figure beyond 50% either way is usually a typo."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """Flag duplicate tender adjustment lines per scope and out-of-band values."""
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        seen: dict[str, str] = {}
+        for markup in _active(_get_markups(context)):
+            if str(markup.get("category") or "").lower() != TENDER_ADJUSTMENT_CATEGORY:
+                continue
+            name = str(markup.get("name") or "")
+            scope = _scope(markup)
+            if scope in seen:
+                results.append(
+                    RuleResult(
+                        rule_id=self.rule_id,
+                        rule_name=self.name,
+                        severity=self.severity,
+                        category=self.category,
+                        passed=False,
+                        message=translate(
+                            "boq_markup.tender_adjustment_plausible.duplicate",
+                            locale,
+                            markup=name,
+                            other=seen[scope],
+                        ),
+                        element_ref=_ref(markup),
+                        suggestion=translate("boq_markup.tender_adjustment_plausible.suggestion", locale),
+                        details={"scope_position_id": scope or None},
+                    )
+                )
+            else:
+                seen[scope] = name
+            pct = _percentage(markup)
+            if pct is None or str(markup.get("markup_type") or "percentage").lower() != "percentage":
+                continue
+            if abs(pct) <= _TENDER_ADJUSTMENT_BAND:
+                continue
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=False,
+                    message=translate(
+                        "boq_markup.tender_adjustment_plausible.fail",
+                        locale,
+                        markup=name,
+                        percentage=f"{pct}",
+                        band=f"{_TENDER_ADJUSTMENT_BAND}",
+                    ),
+                    element_ref=_ref(markup),
+                    suggestion=translate("boq_markup.tender_adjustment_plausible.suggestion", locale),
+                    details={"percentage": str(pct), "band": str(_TENDER_ADJUSTMENT_BAND)},
+                )
+            )
+        return results
+
+
 _BOQ_MARKUP_RULES: tuple[ValidationRule, ...] = (
     MarkupContingencyNotOnProfit(),
     MarkupOrderIsDeclared(),
     MarkupPercentageWithinBand(),
     MarkupCumulativeBaseIsSettled(),
+    TenderAdjustmentIsPlausible(),
 )
 
 _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (

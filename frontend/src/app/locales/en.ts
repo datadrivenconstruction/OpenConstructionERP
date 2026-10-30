@@ -53656,6 +53656,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Unit is missing",
     "boq.sheet.issue_negative": "Negative value",
     "boq.sheet.issue_not_a_number": "Not a number",
+    "boq.markup_tender_adjustment": "Tender premium / rebate",
+    "boq.markup_pct_invalid_signed_title": "Enter a percentage from -100 to 100 (negative = below the schedule of rates)",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Cost control answers one question: what will the project cost in the end, and why. It reads the budget, the estimate, contracts, changes, measured work and invoices that already live in their own modules, so nothing is typed in twice.",
     "guide.cost_control.methods.title": "Four ways to read the forecast",

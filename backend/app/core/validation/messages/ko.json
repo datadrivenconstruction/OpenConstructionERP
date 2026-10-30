@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\"은 \"{apply_to}\"에 적용되지만 앞선 항목이 없어 직접비만을 기준으로 계산됩니다",
       "suggestion": "산정 기준에 포함할 항목 뒤로 이동하거나 직접비에 적용하세요"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\"의 입찰가가 단가표 대비 {percentage}%로, 합리적 범위인 ±{band}%를 벗어납니다",
+      "duplicate": "\"{markup}\"은(는) \"{other}\"과 같은 범위에 대한 두 번째 입찰 할증 또는 할인이라 두 값이 중복 적용됩니다",
+      "suggestion": "내역서나 공종마다 할증 또는 할인은 하나만 두고, 부호와 소수점을 확인하세요. 어느 경우든 해당 항목은 입력한 값 그대로 산출됩니다"
     }
   },
   "common": {

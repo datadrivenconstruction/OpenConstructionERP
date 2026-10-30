@@ -59413,6 +59413,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Ühik puudub",
     "boq.sheet.issue_negative": "Negatiivne väärtus",
     "boq.sheet.issue_not_a_number": "Ei ole arv",
+    "boq.markup_tender_adjustment": "Pakkumise lisatasu / allahindlus",
+    "boq.markup_pct_invalid_signed_title": "Sisestage protsent vahemikus -100 kuni 100 (negatiivne = allpool hinnakirja)",
     "guide.cost_control.title": "Kuluseire",
     "guide.cost_control.intro": "Kuluseire vastab ühele küsimusele: mis saab projekt lõpuks maksma ja miks. See loeb eelarvet, hinnangut, lepinguid, muudatusi, mõõdetud tööd ja arveid, mis juba asuvad oma moodulites, nii et midagi ei sisestata kaks korda.",
     "guide.cost_control.methods.title": "Neli viisi prognoosi lugeda",

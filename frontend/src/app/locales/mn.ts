@@ -59141,6 +59141,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Нэгж дутуу байна",
     "boq.sheet.issue_negative": "Сөрөг утга",
     "boq.sheet.issue_not_a_number": "Тоо биш",
+    "boq.markup_tender_adjustment": "Тендерийн нэмэлт / хөнгөлөлт",
+    "boq.markup_pct_invalid_signed_title": "-100-с 100 хооронд хувь оруулна уу (сөрөг = нэгж үнийн жагсаалтаас доош)",
     "guide.cost_control.title": "Зардлын хяналт",
     "guide.cost_control.intro": "Зардлын хяналт нэг асуултад хариулна: төсөл эцэст нь хэдэд өртөх вэ, яагаад. Энэ нь төсөв, тооцоо, гэрээ, өөрчлөлт, хэмжсэн ажил, нэхэмжлэхийг өөрсдийн модуль дээрээс нь уншдаг тул юу ч хоёр удаа оруулахгүй.",
     "guide.cost_control.methods.title": "Таамаглалыг унших дөрвөн арга",

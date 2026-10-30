@@ -109,6 +109,8 @@ const resource = {
     "boq.drawing_ref.measurements_n_other": "{{count}} measurements",
     "boq.filter_drawing_revised_one": "On revised drawing ({{count}})",
     "boq.filter_drawing_revised_other": "On revised drawings ({{count}})",
+    "boq.markup_tender_adjustment": "Tender premium / rebate",
+    "boq.markup_pct_invalid_signed_title": "Enter a percentage from -100 to 100 (negative = below the schedule of rates)",
     "auth.or": "or",
     "auth.sso_login": "Sign in with SSO",
     "auth.oidc_errors.no_code": "No authorisation code received from the identity provider.",

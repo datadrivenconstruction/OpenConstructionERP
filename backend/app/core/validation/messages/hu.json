@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "A(z) „{markup}” alapja „{apply_to}”, de nem előzi meg más tétel, ezért csak a közvetlen költségre számítódik",
       "suggestion": "Helyezze azok után a tételek után, amelyekkel növelt alapra kell számítani, vagy alkalmazza a közvetlen költségre"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" {percentage}%-ot ajánl az árjegyzékhez képest, ami a ±{band}%-os észszerű sávon kívül esik",
+      "duplicate": "\"{markup}\" a \"{other}\"-val azonos tételkörre vonatkozó második ajánlati felár vagy engedmény, így a kettő halmozódik",
+      "suggestion": "Soronként, illetve fejezetenként csak egy felárat vagy engedményt tartson meg, és ellenőrizze az előjelet és a tizedespontot. A tétel így is, úgy is pontosan a megadott módon kerül árazásra"
     }
   },
   "common": {

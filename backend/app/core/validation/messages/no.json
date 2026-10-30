@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" gjelder \"{apply_to}\", men ingen linjer står foran den, så den beregnes bare på direkte kostnader",
       "suggestion": "Flytt den etter linjene som skal inngå i beregningsgrunnlaget, eller beregn den på direkte kostnader"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" byr {percentage}% mot enhetsprisene, utenfor det plausible intervallet på pluss/minus {band}%",
+      "duplicate": "\"{markup}\" er et andre anbudspåslag eller rabatt på samme omfang som \"{other}\", så de to legges sammen",
+      "suggestion": "Behold ett påslag eller én rabatt per kalkyle eller kapittel, og kontroller fortegn og desimaltegn. Linjen prises nøyaktig slik den ble lagt inn uansett"
     }
   },
   "common": {

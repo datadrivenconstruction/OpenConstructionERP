@@ -59749,6 +59749,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "היחידה חסרה",
     "boq.sheet.issue_negative": "ערך שלילי",
     "boq.sheet.issue_not_a_number": "לא מספר",
+    "boq.markup_tender_adjustment": "תוספת / הנחה במכרז",
+    "boq.markup_pct_invalid_signed_title": "הזן אחוז מ-100- עד 100 (שלילי = מתחת לתעריף היחידה)",
     "guide.cost_control.title": "בקרת עלויות",
     "guide.cost_control.intro": "בקרת עלויות עונה על שאלה אחת: כמה הפרויקט יעלה בסוף, ולמה. היא קוראת את התקציב, האומדן, החוזים, השינויים, העבודה שנמדדה והחשבוניות שכבר נמצאים במודולים שלהם, כך שאין הקלדה כפולה.",
     "guide.cost_control.methods.title": "ארבע דרכים לקרוא את התחזית",

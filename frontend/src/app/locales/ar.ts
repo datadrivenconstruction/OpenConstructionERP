@@ -62529,6 +62529,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "الوحدة مفقودة",
     "boq.sheet.issue_negative": "قيمة سالبة",
     "boq.sheet.issue_not_a_number": "ليست رقمًا",
+    "boq.markup_tender_adjustment": "علاوة / خصم العطاء",
+    "boq.markup_pct_invalid_signed_title": "أدخل نسبة من -100 إلى 100 (السالب = أقل من جدول الأسعار)",
     "guide.cost_control.title": "ضبط التكاليف",
     "guide.cost_control.intro": "يجيب ضبط التكاليف عن سؤال واحد: كم سيكلّف المشروع في النهاية، ولماذا. يقرأ الميزانية والتقدير والعقود والتغييرات والأعمال المقاسة والفواتير الموجودة أصلًا في وحداتها، فلا يُدخل شيء مرتين.",
     "guide.cost_control.methods.title": "أربع طرق لقراءة التوقع",

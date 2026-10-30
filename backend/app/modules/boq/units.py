@@ -82,6 +82,9 @@ APPROVED_UNITS: Final[frozenset[str]] = frozenset(
         # 10.2% heavy.  See the alias table for how "ton" resolves.
         "lb",
         "ton_us",
+        # Imperial (long) hundredweight, 112 lb = 50.80234544 kg, as still used
+        # for steel and cement in South Asian and older British bills.
+        "cwt",
         # counts / lump
         "pcs",
         "ea",
@@ -183,6 +186,17 @@ _UNIT_ALIASES: Final[dict[str, str]] = {
     "cft": "ft3",
     "c.ft": "ft3",
     "rft": "ft",
+    # Running metre: "rmt" / "r.mt" are the South Asian spellings of "lm".
+    "rmt": "lm",
+    "r.mt": "lm",
+    "r.m": "lm",
+    "running metre": "lm",
+    "running metres": "lm",
+    "running meter": "lm",
+    "running meters": "lm",
+    "hundredweight": "cwt",
+    "hundredweights": "cwt",
+    "cwts": "cwt",
     "r.ft": "ft",
     "running ft": "ft",
     "running foot": "ft",
@@ -200,6 +214,8 @@ _UNIT_ALIASES: Final[dict[str, str]] = {
     "lumpsum": "lsum",
     "lump-sum": "lsum",
     "lump sum": "lsum",
+    # "job" is the lump-sum unit of Commonwealth schedules of rates.
+    "job": "lsum",
     # time / labour
     "hours": "hr",
     "hour": "hr",

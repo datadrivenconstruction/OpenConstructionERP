@@ -1194,6 +1194,22 @@ class PositionResponse(BaseModel):
 # ── Markup schemas ────────────────────────────────────────────────────────────
 
 
+#: The one markup category that may be negative: the bidder's percentage above
+#: (positive) or below (negative) a schedule of rates, on the bill or a section.
+TENDER_ADJUSTMENT_CATEGORY = "tender_adjustment"
+
+
+def check_markup_sign(category: str | None, percentage: float | None) -> None:
+    """Refuse a negative percentage on any category but ``tender_adjustment``.
+
+    Raises:
+        ValueError: When the percentage is negative on another category.
+    """
+    if percentage is not None and percentage < 0 and category != TENDER_ADJUSTMENT_CATEGORY:
+        msg = "A negative percentage is allowed only on a tender_adjustment line (below the schedule of rates)."
+        raise ValueError(msg)
+
+
 class _MarkupBase(BaseModel):
     """Shared serializer for ``fixed_amount`` (v3 §10 - Decimal-as-string)."""
 
@@ -1250,9 +1266,11 @@ class MarkupCreate(_MarkupBase):
     markup_type: str = Field(default="percentage", pattern=r"^(percentage|fixed|banded|escalation)$")
     category: str = Field(
         default="overhead",
-        pattern=r"^(overhead|profit|tax|contingency|insurance|bond|other)$",
+        pattern=r"^(overhead|profit|tax|contingency|insurance|bond|tender_adjustment|other)$",
     )
-    percentage: float = Field(default=0.0, ge=0.0, le=100.0)
+    # Negative only for ``tender_adjustment``: a bid quoted as a percentage
+    # below a schedule of rates. Every other category stays 0..100.
+    percentage: float = Field(default=0.0, ge=-100.0, le=100.0)
     fixed_amount: Decimal = Field(default=Decimal("0"), ge=0)
     apply_to: str = Field(default="direct_cost", pattern=r"^(direct_cost|subtotal|cumulative)$")
     sort_order: int = Field(default=0, ge=0)
@@ -1260,6 +1278,11 @@ class MarkupCreate(_MarkupBase):
     scope_position_id: UUID | None = None
     overrides_id: UUID | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _negative_only_for_tender_adjustment(self) -> "MarkupCreate":
+        check_markup_sign(self.category, self.percentage)
+        return self
 
 
 class MarkupUpdate(_MarkupBase):
@@ -1271,9 +1294,9 @@ class MarkupUpdate(_MarkupBase):
     markup_type: str | None = Field(default=None, pattern=r"^(percentage|fixed|banded|escalation)$")
     category: str | None = Field(
         default=None,
-        pattern=r"^(overhead|profit|tax|contingency|insurance|bond|other)$",
+        pattern=r"^(overhead|profit|tax|contingency|insurance|bond|tender_adjustment|other)$",
     )
-    percentage: float | None = Field(default=None, ge=0.0, le=100.0)
+    percentage: float | None = Field(default=None, ge=-100.0, le=100.0)
     fixed_amount: Decimal | None = Field(default=None, ge=0)
     apply_to: str | None = Field(default=None, pattern=r"^(direct_cost|subtotal|cumulative)$")
     sort_order: int | None = Field(default=None, ge=0)

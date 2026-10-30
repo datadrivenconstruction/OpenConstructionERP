@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\", \"{apply_to}\" üzerine uygulanıyor ancak öncesinde kalem yok; bu yüzden yalnızca doğrudan maliyet üzerinden hesaplanıyor",
       "suggestion": "Üzerine hesaplanması gereken kalemlerden sonraya taşıyın veya doğrudan maliyete uygulayın"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" birim fiyat listesine karşı {percentage}% ile teklif veriyor; bu, ±{band}% olan makul aralığın dışında",
+      "duplicate": "\"{markup}\", \"{other}\" ile aynı kapsam üzerinde ikinci bir ihale primi veya indirimi; bu yüzden ikisi birleşerek uygulanır",
+      "suggestion": "Her metraj veya bölümde tek bir prim veya indirim bulundurun; işaretini ve ondalık ayracını kontrol edin. Satır her durumda girildiği gibi fiyatlandırılır"
     }
   },
   "common": {

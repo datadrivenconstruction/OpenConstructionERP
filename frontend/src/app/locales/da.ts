@@ -59463,6 +59463,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Enhed mangler",
     "boq.sheet.issue_negative": "Negativ værdi",
     "boq.sheet.issue_not_a_number": "Ikke et tal",
+    "boq.markup_tender_adjustment": "Tilbudspåslag / rabat",
+    "boq.markup_pct_invalid_signed_title": "Angiv en procentsats fra -100 til 100 (negativ = under prisbogen)",
     "guide.cost_control.title": "Omkostningsstyring",
     "guide.cost_control.intro": "Omkostningsstyring svarer på ét spørgsmål: hvad kommer projektet til at koste til sidst, og hvorfor. Den læser budget, kalkulation, kontrakter, ændringer, opmålt arbejde og fakturaer, som allerede ligger i deres egne moduler, så intet skrives ind to gange.",
     "guide.cost_control.methods.title": "Fire måder at læse prognosen på",

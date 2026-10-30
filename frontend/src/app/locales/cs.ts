@@ -60732,6 +60732,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Chybí jednotka",
     "boq.sheet.issue_negative": "Záporná hodnota",
     "boq.sheet.issue_not_a_number": "Není číslo",
+    "boq.markup_tender_adjustment": "Přirážka / sleva v nabídce",
+    "boq.markup_pct_invalid_signed_title": "Zadejte procento od -100 do 100 (záporné = pod sazebníkem)",
     "guide.cost_control.title": "Řízení nákladů",
     "guide.cost_control.intro": "Řízení nákladů odpovídá na jednu otázku: kolik bude projekt nakonec stát a proč. Čte rozpočet, odhad, smlouvy, změny, naměřené práce a faktury, které už jsou ve svých modulech, takže se nic nezadává dvakrát.",
     "guide.cost_control.methods.title": "Čtyři způsoby, jak číst prognózu",

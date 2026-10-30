@@ -59790,6 +59790,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Lipsește unitatea de măsură",
     "boq.sheet.issue_negative": "Valoare negativă",
     "boq.sheet.issue_not_a_number": "Nu este un număr",
+    "boq.markup_tender_adjustment": "Majorare / reducere la ofertă",
+    "boq.markup_pct_invalid_signed_title": "Introduceți un procent între -100 și 100 (negativ = sub lista de prețuri unitare)",
     "guide.cost_control.title": "Controlul costurilor",
     "guide.cost_control.intro": "Controlul costurilor răspunde la o singură întrebare: cât va costa proiectul la final și de ce. Citește bugetul, devizul, contractele, modificările, lucrările măsurate și facturile care există deja în modulele lor, așa că nimic nu se introduce de două ori.",
     "guide.cost_control.methods.title": "Patru moduri de a citi prognoza",

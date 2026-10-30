@@ -59467,6 +59467,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Yksikkö puuttuu",
     "boq.sheet.issue_negative": "Negatiivinen arvo",
     "boq.sheet.issue_not_a_number": "Ei ole luku",
+    "boq.markup_tender_adjustment": "Tarjouslisä / alennus",
+    "boq.markup_pct_invalid_signed_title": "Syötä prosentti väliltä -100–100 (negatiivinen = hintaluettelon alapuolella)",
     "guide.cost_control.title": "Kustannusseuranta",
     "guide.cost_control.intro": "Kustannusseuranta vastaa yhteen kysymykseen: paljonko hanke maksaa lopulta ja miksi. Se lukee budjetin, kustannusarvion, sopimukset, muutokset, mitatun työn ja laskut, jotka ovat jo omissa moduuleissaan, joten mitään ei kirjata kahdesti.",
     "guide.cost_control.methods.title": "Neljä tapaa lukea ennuste",

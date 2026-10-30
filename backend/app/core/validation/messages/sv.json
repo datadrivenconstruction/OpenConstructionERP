@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" tillämpas på \"{apply_to}\", men inga rader föregår den, så den beräknas enbart på direkt kostnad",
       "suggestion": "Flytta den efter de rader som ska ingå i beräkningsunderlaget eller beräkna den på direkt kostnad"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" lägger {percentage}% mot prislistan, utanför det rimliga intervallet plus/minus {band}%",
+      "duplicate": "\"{markup}\" är ett andra anbudspåslag eller en andra rabatt på samma omfattning som \"{other}\", så de två adderas",
+      "suggestion": "Behåll ett påslag eller en rabatt per kalkyl eller avdelning och kontrollera tecknet och decimaltecknet. Raden prissätts ändå exakt så som den angavs"
     }
   },
   "common": {

@@ -60747,6 +60747,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "単位が未入力です",
     "boq.sheet.issue_negative": "負の値",
     "boq.sheet.issue_not_a_number": "数値ではありません",
+    "boq.markup_tender_adjustment": "入札の割増 / 割引",
+    "boq.markup_pct_invalid_signed_title": "-100から100までの割合を入力(マイナス = 単価表より下)",
     "guide.cost_control.title": "原価管理",
     "guide.cost_control.intro": "原価管理が答えるのは一つの問いです。最終的にプロジェクトはいくらかかるのか、そしてなぜか。予算、見積、契約、変更、実測した出来高、請求書は、それぞれのモジュールにすでにあるものを読み込むので、二重に入力する必要はありません。",
     "guide.cost_control.methods.title": "予測の見方は4通り",

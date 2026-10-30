@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "„{markup}” primjenjuje se na „{apply_to}”, ali joj ništa ne prethodi, pa se računa samo na izravni trošak",
       "suggestion": "Premjestite je iza stavki na koje se treba nadovezati ili je primijenite na izravni trošak"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" nudi {percentage}% u odnosu na cjenik, izvan prihvatljivog raspona od plus/minus {band}%",
+      "duplicate": "\"{markup}\" je druga premija ili popust na ponudu za isti opseg kao \"{other}\", pa se oba zbrajaju",
+      "suggestion": "Zadržite jednu premiju ili popust po troškovniku ili razdjelu i provjerite predznak i decimalnu točku. Stavka se u svakom slučaju cijeni točno onako kako je unesena"
     }
   },
   "common": {

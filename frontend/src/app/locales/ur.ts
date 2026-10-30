@@ -59429,6 +59429,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "اکائی موجود نہیں",
     "boq.sheet.issue_negative": "منفی قدر",
     "boq.sheet.issue_not_a_number": "عدد نہیں ہے",
+    "boq.markup_tender_adjustment": "ٹینڈر پریمیم / رعایت",
+    "boq.markup_pct_invalid_signed_title": "-100 سے 100 تک فیصد درج کریں (منفی = ریٹ شیڈول سے کم)",
     "guide.cost_control.title": "لاگت کنٹرول",
     "guide.cost_control.intro": "لاگت کنٹرول ایک سوال کا جواب دیتا ہے: پروجیکٹ کی آخر میں لاگت کیا ہوگی، اور کیوں۔ یہ بجٹ، تخمینہ، کنٹریکٹس، تبدیلیاں، ناپا ہوا کام اور انوائسز پڑھتا ہے جو پہلے ہی اپنے ماڈیولز میں موجود ہیں، اس لیے کچھ دو بار نہیں لکھنا پڑتا۔",
     "guide.cost_control.methods.title": "پیش گوئی پڑھنے کے چار طریقے",

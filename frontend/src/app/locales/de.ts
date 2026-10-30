@@ -62098,6 +62098,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Einheit fehlt",
     "boq.sheet.issue_negative": "Negativer Wert",
     "boq.sheet.issue_not_a_number": "Keine Zahl",
+    "boq.markup_tender_adjustment": "Angebotsaufschlag / Nachlass",
+    "boq.markup_pct_invalid_signed_title": "Prozentsatz von -100 bis 100 eingeben (negativ = unter den Einheitspreisen)",
     "guide.cost_control.title": "Kostenkontrolle",
     "guide.cost_control.intro": "Die Kostenkontrolle beantwortet eine Frage: Was kostet das Projekt am Ende, und warum. Sie liest Budget, Kostenschätzung, Verträge, Änderungen, aufgemessene Leistungen und Rechnungen aus den Modulen, in denen sie ohnehin liegen. Nichts wird doppelt erfasst.",
     "guide.cost_control.methods.title": "Vier Arten, die Prognose zu lesen",

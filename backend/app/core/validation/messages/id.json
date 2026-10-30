@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" diterapkan pada \"{apply_to}\", tetapi tidak ada baris sebelumnya, sehingga hanya dihitung dari biaya langsung",
       "suggestion": "Pindahkan ke setelah baris yang harus menjadi dasarnya, atau terapkan pada biaya langsung"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" menawarkan {percentage}% terhadap daftar harga satuan, di luar rentang wajar plus atau minus {band}%",
+      "duplicate": "\"{markup}\" adalah premi atau diskon tender kedua untuk lingkup yang sama dengan \"{other}\", sehingga keduanya bertumpuk",
+      "suggestion": "Pertahankan satu premi atau diskon per BoQ atau bagian, dan periksa tanda serta tanda desimal. Item tetap dihargai persis seperti yang dimasukkan"
     }
   },
   "common": {

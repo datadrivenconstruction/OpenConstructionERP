@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "「{markup}」は「{apply_to}」に適用されますが、先行する項目がないため、直接工事費だけを基礎として計算されます",
       "suggestion": "計算基礎に含める項目の後に移動するか、直接工事費に適用してください"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" は単価表に対して {percentage}% で入札しており、許容範囲 ±{band}% の外にあります",
+      "duplicate": "\"{markup}\" は \"{other}\" と同じ範囲に対する2つ目の入札割増または割引で、両方が重ねて適用されます",
+      "suggestion": "内訳書または章ごとに割増または割引は1つにし、符号と小数点を確認してください。いずれの場合も、行は入力どおりの単価で計算されます"
     }
   },
   "common": {

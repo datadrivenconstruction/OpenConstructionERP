@@ -60344,6 +60344,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Eenheid ontbreekt",
     "boq.sheet.issue_negative": "Negatieve waarde",
     "boq.sheet.issue_not_a_number": "Geen getal",
+    "boq.markup_tender_adjustment": "Aanbiedingstoeslag / korting",
+    "boq.markup_pct_invalid_signed_title": "Voer een percentage in van -100 tot 100 (negatief = onder de eenheidsprijzen)",
     "guide.cost_control.title": "Kostenbeheersing",
     "guide.cost_control.intro": "Kostenbeheersing beantwoordt één vraag: wat gaat het project uiteindelijk kosten, en waarom. Het leest budget, raming, contracten, wijzigingen, opgemeten werk en facturen uit de modules waar ze al staan, dus niets wordt dubbel ingevoerd.",
     "guide.cost_control.methods.title": "Vier manieren om de prognose te lezen",

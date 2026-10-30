@@ -59215,6 +59215,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "ไม่มีหน่วย",
     "boq.sheet.issue_negative": "ค่าติดลบ",
     "boq.sheet.issue_not_a_number": "ไม่ใช่ตัวเลข",
+    "boq.markup_tender_adjustment": "ค่าเผื่อ / ส่วนลดการประมูล",
+    "boq.markup_pct_invalid_signed_title": "ป้อนเปอร์เซ็นต์ตั้งแต่ -100 ถึง 100 (ค่าลบ = ต่ำกว่าราคาต่อหน่วย)",
     "guide.cost_control.title": "การควบคุมต้นทุน",
     "guide.cost_control.intro": "การควบคุมต้นทุนตอบคำถามเดียวว่าโครงการจะมีต้นทุนเท่าไรในที่สุด และเพราะอะไร โดยอ่านงบประมาณ ประมาณการ สัญญา การเปลี่ยนแปลง งานที่วัดแล้ว และใบแจ้งหนี้ที่อยู่ในโมดูลของตัวเองอยู่แล้ว จึงไม่ต้องกรอกซ้ำ",
     "guide.cost_control.methods.title": "สี่วิธีอ่านค่าคาดการณ์",

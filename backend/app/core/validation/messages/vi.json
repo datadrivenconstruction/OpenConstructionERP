@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" áp dụng cho \"{apply_to}\" nhưng không có dòng nào đứng trước, nên chỉ được tính trên chi phí trực tiếp",
       "suggestion": "Chuyển dòng này xuống sau các dòng cần tính cộng dồn hoặc áp dụng cho chi phí trực tiếp"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" chào {percentage}% so với bảng đơn giá, nằm ngoài khoảng hợp lý ±{band}%",
+      "duplicate": "\"{markup}\" là phụ phí hoặc giảm giá thầu thứ hai trên cùng phạm vi với \"{other}\", nên hai mức này cộng dồn",
+      "suggestion": "Chỉ giữ một phụ phí hoặc giảm giá cho mỗi bảng khối lượng hoặc hạng mục và kiểm tra dấu cũng như dấu thập phân. Dù sao, dòng này vẫn được tính đúng như đã nhập"
     }
   },
   "common": {

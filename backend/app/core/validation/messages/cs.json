@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" se vztahuje na \"{apply_to}\", ale žádný řádek mu nepředchází, takže se počítá pouze z přímých nákladů",
       "suggestion": "Přesuňte jej za řádky, které mají vstoupit do jeho základu, nebo jej počítejte z přímých nákladů"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" nabízí {percentage}% oproti sazebníku, což je mimo věrohodné pásmo plus/minus {band}%",
+      "duplicate": "\"{markup}\" je druhá přirážka nebo sleva z nabídky na stejný rozsah jako \"{other}\", takže se obě sčítají",
+      "suggestion": "Ponechte u každého rozpočtu nebo oddílu jednu přirážku nebo slevu a zkontrolujte znaménko i desetinnou čárku. Položka se v každém případě ocení přesně podle zadání"
     }
   },
   "common": {

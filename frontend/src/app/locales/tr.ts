@@ -60344,6 +60344,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Birim eksik",
     "boq.sheet.issue_negative": "Negatif değer",
     "boq.sheet.issue_not_a_number": "Sayı değil",
+    "boq.markup_tender_adjustment": "İhale primi / indirimi",
+    "boq.markup_pct_invalid_signed_title": "-100 ile 100 arasında bir yüzde girin (negatif = birim fiyat listesinin altında)",
     "guide.cost_control.title": "Maliyet kontrolü",
     "guide.cost_control.intro": "Maliyet kontrolü tek bir soruya cevap verir: proje sonunda neye mal olacak ve neden. Bütçeyi, keşfi, sözleşmeleri, değişiklikleri, ölçülen işi ve faturaları, zaten kendi modüllerinde durdukları yerden okur; böylece hiçbir şey iki kez girilmez.",
     "guide.cost_control.methods.title": "Tahmini okumanın dört yolu",

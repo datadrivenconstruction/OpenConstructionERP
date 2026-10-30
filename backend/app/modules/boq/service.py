@@ -354,6 +354,7 @@ from app.modules.boq.schemas import (
     SectionResponse,
     SheetEditRequest,
     TemplateInfo,
+    check_markup_sign,
 )
 from app.modules.boq.templates import TEMPLATES
 from app.modules.costs.repository import CostItemRepository
@@ -370,6 +371,14 @@ logger = logging.getLogger(__name__)
 # They are re-exported above so every existing reader keeps working, and they
 # left this file because the methodology catalogue now derives its country
 # templates from them and cannot import a module that pulls in SQLAlchemy.
+
+
+def _float_or_none(value: object) -> float | None:
+    """Read a stored percentage string as a float, None when it is not a number."""
+    try:
+        return float(str(value))
+    except (TypeError, ValueError):
+        return None
 
 
 def _to_decimal(
@@ -6559,6 +6568,15 @@ class BOQService:
                 fields.get("markup_type") or markup.markup_type,
                 merged_meta,
             )
+
+        if "percentage" in fields or "category" in fields:
+            try:
+                check_markup_sign(
+                    fields.get("category", markup.category),
+                    fields.get("percentage", _float_or_none(markup.percentage)),
+                )
+            except ValueError as exc:
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
 
         # Convert float values to strings for storage
         if "percentage" in fields:

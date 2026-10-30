@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "„{markup}” dotyczy „{apply_to}”, ale nie poprzedza go żadna pozycja, więc jest naliczany wyłącznie od kosztów bezpośrednich",
       "suggestion": "Przenieś go za pozycje, które mają wejść do jego podstawy, lub nalicz go od kosztów bezpośrednich"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" składa ofertę {percentage}% w stosunku do cennika, poza wiarygodnym przedziałem plus/minus {band}%",
+      "duplicate": "\"{markup}\" to drugi narzut lub upust przetargowy na ten sam zakres co \"{other}\", więc oba się sumują",
+      "suggestion": "Zostaw jeden narzut lub upust na kosztorys lub dział i sprawdź znak oraz separator dziesiętny. Pozycja i tak zostanie wyceniona dokładnie tak, jak wpisano"
     }
   },
   "common": {

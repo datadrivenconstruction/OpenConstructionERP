@@ -59223,6 +59223,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Thiếu đơn vị",
     "boq.sheet.issue_negative": "Giá trị âm",
     "boq.sheet.issue_not_a_number": "Không phải số",
+    "boq.markup_tender_adjustment": "Phụ phí / giảm giá thầu",
+    "boq.markup_pct_invalid_signed_title": "Nhập tỷ lệ phần trăm từ -100 đến 100 (âm = thấp hơn bảng đơn giá)",
     "guide.cost_control.title": "Kiểm soát chi phí",
     "guide.cost_control.intro": "Kiểm soát chi phí trả lời một câu hỏi: cuối cùng dự án sẽ tốn bao nhiêu, và vì sao. Nó đọc ngân sách, dự toán, hợp đồng, thay đổi, khối lượng đã đo và hóa đơn vốn đã nằm trong các module riêng, nên không phải nhập hai lần.",
     "guide.cost_control.methods.title": "Bốn cách đọc dự báo",

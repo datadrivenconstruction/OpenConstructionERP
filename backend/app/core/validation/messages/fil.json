@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "Inilalapat ang \"{markup}\" sa \"{apply_to}\" ngunit wala itong nauunang linya, kaya direktang gastos lamang ang base nito",
       "suggestion": "Ilipat ito pagkatapos ng mga linyang dapat nitong patungan, o ilapat ito sa direktang gastos"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" ay nag-bid ng {percentage}% laban sa schedule of rates, labas sa makatwirang saklaw na ±{band}%",
+      "duplicate": "\"{markup}\" ay pangalawang premyo o rebate sa parehong saklaw ng \"{other}\", kaya nagdaragdag ang dalawa",
+      "suggestion": "Panatilihin ang isang premyo o rebate kada bill o seksyon, at suriin ang sign at decimal point. Ang linya ay ipepresyo nang eksakto ayon sa inilagay"
     }
   },
   "common": {

@@ -59421,6 +59421,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "Walang yunit",
     "boq.sheet.issue_negative": "Negatibong halaga",
     "boq.sheet.issue_not_a_number": "Hindi numero",
+    "boq.markup_tender_adjustment": "Premyo / rebate sa tender",
+    "boq.markup_pct_invalid_signed_title": "Maglagay ng porsyento mula -100 hanggang 100 (negatibo = mas mababa sa unit rates)",
     "guide.cost_control.title": "Cost control",
     "guide.cost_control.intro": "Isang tanong ang sinasagot ng cost control: magkano ang aabutin ng proyekto sa huli, at bakit. Binabasa nito ang budget, estimate, mga kontrata, mga pagbabago, nasukat na trabaho at mga invoice na nasa sarili nilang module na, kaya walang tina-type nang dalawang beses.",
     "guide.cost_control.methods.title": "Apat na paraan ng pagbasa sa forecast",

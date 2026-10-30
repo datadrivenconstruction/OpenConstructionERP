@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "\"{markup}\" wordt toegepast op \"{apply_to}\", maar er gaan geen posten aan vooraf; de berekening gebruikt daarom alleen de directe kosten",
       "suggestion": "Plaats deze post na de posten die in de grondslag moeten worden opgenomen, of bereken hem over de directe kosten"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" biedt {percentage}% ten opzichte van de eenheidsprijzen, buiten de aannemelijke marge van plus of min {band}%",
+      "duplicate": "\"{markup}\" is een tweede aanbiedingstoeslag of korting op dezelfde werkomvang als \"{other}\", dus de twee tellen samen op",
+      "suggestion": "Houd per staat of hoofdstuk één toeslag of korting aan en controleer het teken en de decimale komma of punt. De regel wordt in beide gevallen precies geprijsd zoals ingevoerd"
     }
   },
   "common": {

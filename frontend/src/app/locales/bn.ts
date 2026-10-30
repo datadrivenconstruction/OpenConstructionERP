@@ -59733,6 +59733,8 @@ const resource = {
     "boq.sheet.issue_unit_missing": "একক নেই",
     "boq.sheet.issue_negative": "ঋণাত্মক মান",
     "boq.sheet.issue_not_a_number": "সংখ্যা নয়",
+    "boq.markup_tender_adjustment": "টেন্ডার প্রিমিয়াম / ছাড়",
+    "boq.markup_pct_invalid_signed_title": "-100 থেকে 100 এর মধ্যে শতাংশ লিখুন (ঋণাত্মক = রেট তালিকার নিচে)",
     "guide.cost_control.title": "খরচ নিয়ন্ত্রণ",
     "guide.cost_control.intro": "খরচ নিয়ন্ত্রণ একটি প্রশ্নের উত্তর দেয়: শেষে প্রকল্পের খরচ কত হবে, এবং কেন। এটি বাজেট, প্রাক্কলন, চুক্তি, পরিবর্তন, মাপা কাজ ও চালান পড়ে, যা আগে থেকেই নিজ নিজ মডিউলে আছে, তাই কিছু দুবার লিখতে হয় না।",
     "guide.cost_control.methods.title": "পূর্বাভাস পড়ার চারটি উপায়",

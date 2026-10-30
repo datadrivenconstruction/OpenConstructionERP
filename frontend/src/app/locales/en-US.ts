@@ -1164,6 +1164,8 @@ const resource = {
     "boq.provenance_catalogue_short": "Catalog",
     "boq.provenance_catalogue": "Priced from a cost catalog.",
     "boq.total_tip_resources": "Total is the sum of this position's resources (labor, material, equipment).",
+    "boq.markup_tender_adjustment": "Tender premium / rebate",
+    "boq.markup_pct_invalid_signed_title": "Enter a percentage from -100 to 100 (negative = below the schedule of rates)",
     "explorer.feat_pivot_desc": "Group elements by story, discipline, or type. Aggregate volumes, areas, and counts.",
     "explorer.thresholds_subtitle": "Color pivot cells by value. Add up to {{max}} rules - one per numeric column.",
     "explorer.thresholds_empty_hint": "Add a rule to color cells red / amber / green based on their value.",

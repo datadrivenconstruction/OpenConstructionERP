@@ -87,6 +87,11 @@
     "cumulative_base_is_settled": {
       "fail": "«{markup}» aplica-se a «{apply_to}», mas nenhuma linha a precede; por isso, incide apenas sobre o custo direto",
       "suggestion": "Mova-a para depois das linhas sobre as quais deve incidir ou aplique-a ao custo direto"
+    },
+    "tender_adjustment_plausible": {
+      "fail": "\"{markup}\" propõe {percentage}% face à tabela de preços unitários, fora da margem plausível de mais ou menos {band}%",
+      "duplicate": "\"{markup}\" é um segundo sobrepreço ou desconto sobre o mesmo âmbito de \"{other}\", pelo que os dois se acumulam",
+      "suggestion": "Mantenha um só sobrepreço ou desconto por orçamento ou capítulo e verifique o sinal e o separador decimal. A linha é valorizada exatamente como introduzida em qualquer caso"
     }
   },
   "common": {
