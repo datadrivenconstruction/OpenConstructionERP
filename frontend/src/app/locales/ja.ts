@@ -36540,7 +36540,7 @@ const resource = {
     "projects.status.cancelled": "キャンセル",
     "projects.delete_permanently": "完全に削除",
     "projects.purge_title": "このプロジェクトを完全に削除しますか？",
-    "projects.purge_body": "プロジェクトと、その中のすべてを削除します。対象は BOQ、工程表、文書およびアップロードされたファイル、タスク、財務、調達、BIM モデル、その他の関連レコードです。監査ログには削除の記録が残ります。この操作は元に戻せません。",
+    "projects.purge_body": "プロジェクトと、その中のすべてを削除します。対象は内訳書、工程表、文書およびアップロードされたファイル、タスク、財務、調達、BIM モデル、その他の関連レコードです。監査ログには削除の記録が残ります。この操作は元に戻せません。",
     "projects.purge_type_name": "確認のためプロジェクト名を入力してください: {{name}}",
     "projects.location_conflict": "保存された地図上の地点と、ジオコーディングされた住所は約 {{km}} km 離れています。どちらの場所が正しいですか？",
     "projects.location_use_this": "この場所を使用",

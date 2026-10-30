@@ -36600,7 +36600,7 @@ const resource = {
     "projects.status.archived": "已归档",
     "projects.delete_permanently": "永久删除",
     "projects.purge_title": "确定要永久删除此项目吗？",
-    "projects.purge_body": "此操作将删除该项目及其全部内容，包括 BOQ、进度计划、文档和已上传文件、任务、财务、采购、BIM 模型以及所有其他关联记录。审计日志会保留删除记录。此操作无法撤销。",
+    "projects.purge_body": "此操作将删除该项目及其全部内容，包括工程量清单、进度计划、文档和已上传文件、任务、财务、采购、BIM 模型以及所有其他关联记录。审计日志会保留删除记录。此操作无法撤销。",
     "projects.purge_type_name": "请输入项目名称以确认：{{name}}",
     "projects.location_conflict": "已保存的地图点与地理编码地址相距约 {{km}} 公里。哪个位置是正确的？",
     "projects.location_use_this": "使用此位置",
