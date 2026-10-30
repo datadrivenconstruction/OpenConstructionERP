@@ -7,7 +7,7 @@ Creates ``oe_leasing_lease``, ``oe_leasing_lease_document``,
 ``create_all`` already built reaches this revision and does nothing.
 
 Revision ID: v3341_leasing_module
-Revises: vp01_unified_parties
+Revises: v3332_prefab_supply_chain_tracking
 Create Date: 2026-10-29
 """
 
@@ -21,7 +21,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "v3341_leasing_module"
-down_revision: str | Sequence[str] | None = "vp01_unified_parties"
+down_revision: str | Sequence[str] | None = "v3332_prefab_supply_chain_tracking"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
