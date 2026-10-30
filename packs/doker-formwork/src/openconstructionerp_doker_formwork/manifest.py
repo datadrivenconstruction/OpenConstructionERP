@@ -38,7 +38,7 @@ except (OSError, json.JSONDecodeError):
 MANIFEST = PartnerPackManifest(
     slug="doker-formwork",
     partner_name="Formwork Pack",
-    partner_url="https://www.doka.com",
+    partner_url=None,
     pack_version="0.2.0",
     description=(
         "Pre-configured for formwork and concrete contractors in Germany, Austria "

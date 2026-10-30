@@ -11,7 +11,7 @@ from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 MANIFEST = PartnerPackManifest(
     slug="batimatech-ca",
     partner_name="Canada Regional Pack",
-    partner_url="https://www.batimatech.com",
+    partner_url=None,
     pack_version="0.2.0",
     description=(
         "Pré-configuré pour les entreprises canadiennes de construction: "

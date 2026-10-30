@@ -21,7 +21,7 @@ from app.core.partner_pack.manifest import PartnerBranding, PartnerPackManifest
 MANIFEST = PartnerPackManifest(
     slug="bimhessen-de",
     partner_name="Hessen BIM Pack",
-    partner_url="https://bim-cluster-hessen.com",
+    partner_url=None,
     pack_version="0.2.0",
     description=(
         "Pre-configured for German BIM consultancies and engineering firms: "

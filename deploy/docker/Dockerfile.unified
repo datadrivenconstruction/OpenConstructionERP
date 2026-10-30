@@ -124,13 +124,16 @@ COPY data/match/ data/match/
 # would break that glob even for the packs that are meant to ship.
 COPY packs/aus/src/ packs/aus/src/
 COPY packs/austria-at/src/ packs/austria-at/src/
+COPY packs/batimatech-ca/src/ packs/batimatech-ca/src/
 COPY packs/belgium-be/src/ packs/belgium-be/src/
+COPY packs/bimhessen-de/src/ packs/bimhessen-de/src/
 COPY packs/brazil-sinapi/src/ packs/brazil-sinapi/src/
 COPY packs/canada-ca/src/ packs/canada-ca/src/
 COPY packs/china-gbt50500/src/ packs/china-gbt50500/src/
 COPY packs/croatia-hr/src/ packs/croatia-hr/src/
 COPY packs/czechia-cz/src/ packs/czechia-cz/src/
 COPY packs/denmark-dk/src/ packs/denmark-dk/src/
+COPY packs/doker-formwork/src/ packs/doker-formwork/src/
 COPY packs/egypt-eg/src/ packs/egypt-eg/src/
 COPY packs/eleven-areas-framework/src/ packs/eleven-areas-framework/src/
 COPY packs/france-fr/src/ packs/france-fr/src/
@@ -144,12 +147,12 @@ COPY packs/italy-it/src/ packs/italy-it/src/
 COPY packs/japan-jp/src/ packs/japan-jp/src/
 COPY packs/korea-kr/src/ packs/korea-kr/src/
 COPY packs/mexico-mx/src/ packs/mexico-mx/src/
-COPY packs/pakistan-pk/src/ packs/pakistan-pk/src/
 COPY packs/modular-prefab/src/ packs/modular-prefab/src/
 COPY packs/netherlands-nl/src/ packs/netherlands-nl/src/
 COPY packs/nigeria-ng/src/ packs/nigeria-ng/src/
 COPY packs/norway-no/src/ packs/norway-no/src/
 COPY packs/nzs/src/ packs/nzs/src/
+COPY packs/pakistan-pk/src/ packs/pakistan-pk/src/
 COPY packs/poland-pl/src/ packs/poland-pl/src/
 COPY packs/portugal-pt/src/ packs/portugal-pt/src/
 COPY packs/renewables-epc/src/ packs/renewables-epc/src/
@@ -158,8 +161,8 @@ COPY packs/romania-ro/src/ packs/romania-ro/src/
 COPY packs/russia-gesn/src/ packs/russia-gesn/src/
 COPY packs/saudi-vision2030/src/ packs/saudi-vision2030/src/
 COPY packs/singapore-sg/src/ packs/singapore-sg/src/
-COPY packs/spain-es/src/ packs/spain-es/src/
 COPY packs/south-africa/src/ packs/south-africa/src/
+COPY packs/spain-es/src/ packs/spain-es/src/
 COPY packs/sweden-se/src/ packs/sweden-se/src/
 COPY packs/switzerland-ch/src/ packs/switzerland-ch/src/
 COPY packs/turkey-tr/src/ packs/turkey-tr/src/
