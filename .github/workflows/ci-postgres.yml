@@ -873,6 +873,11 @@ jobs:
       - name: Run leasing module tests
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pytest tests/modules/leasing -q -p no:cacheprovider --timeout=300 --timeout-method=thread
+      # The service charges API tests (demands, finance invoices, reconciliation) sit under
+      # tests/modules, which the sharded backend lane does not run.
+      - name: Run service charges module tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pytest tests/modules/service_charges -q -p no:cacheprovider --timeout=300 --timeout-method=thread
       # The cost base pipeline produces the parquet editions people download from us, so it
       # needs a blocking gate. It needs no database; it is attached here because this is the
       # only merge-blocking lane that runs pytest, and an ungated test is the situation this
