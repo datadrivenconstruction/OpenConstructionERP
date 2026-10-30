@@ -11,21 +11,20 @@ units get a token so they can be scanned too.
 Idempotent. The downgrade drops the index and the columns.
 
 Revision ID: v3332_prefab_supply_chain_tracking
-Revises: v3331_cost_benchmarks_payroll_periods
+Revises: vp01_unified_parties
 Create Date: 2026-10-27
 """
 
 from __future__ import annotations
 
 import logging
-import secrets
 from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3332_prefab_supply_chain_tracking"
-down_revision: Union[str, Sequence[str], None] = "v3331_cost_benchmarks_payroll_periods"
+down_revision: Union[str, Sequence[str], None] = "vp01_unified_parties"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -52,15 +51,19 @@ def upgrade() -> None:
         if name not in present:
             op.add_column(_TABLE, sa.Column(name, sa.String(length), nullable=True))
 
-    units = sa.table(_TABLE, sa.column("id", sa.String(36)), sa.column("qr_token", sa.String(64)))
-    ids = bind.execute(sa.select(units.c.id).where(units.c.qr_token.is_(None))).scalars().all()
-    for unit_id in ids:
-        bind.execute(sa.update(units).where(units.c.id == unit_id).values(qr_token=secrets.token_urlsafe(18)))
+    # One set-based UPDATE; both functions draw from a CSPRNG and need no extension.
+    token = (
+        "replace(gen_random_uuid()::text, '-', '')"
+        if bind.dialect.name == "postgresql"
+        else "lower(hex(randomblob(16)))"
+    )
+    # data-rewrite-ack: table=oe_prefab_unit growth=bounded rows=one row per off-site unit; backfills the new nullable qr_token column once
+    issued = bind.execute(sa.text(f"UPDATE {_TABLE} SET qr_token = {token} WHERE qr_token IS NULL")).rowcount
 
     inspector = sa.inspect(bind)
     if not any(ix["name"] == _IX_QR for ix in inspector.get_indexes(_TABLE)):
         op.create_index(_IX_QR, _TABLE, ["qr_token"], unique=True)
-    logger.info("v3332 prefab supply chain: schema ensured, %d tokens issued", len(ids))
+    logger.info("v3332 prefab supply chain: schema ensured, %d tokens issued", issued)
 
 
 def downgrade() -> None:

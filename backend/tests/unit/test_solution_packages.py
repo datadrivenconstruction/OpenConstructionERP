@@ -222,7 +222,8 @@ async def test_only_admin_or_owner_may_change_packages(payload: dict[str, Any], 
         codes = [(await c).status_code for c in calls]
         assert (codes[0] == 200) is allowed and (codes[1] == 200) is allowed
         if not allowed:
-            assert codes == [403, 403, 403] and service.metadata == {}
+            demo = await client.post("/api/v1/solution-packages/site_field/demo/")
+            assert codes == [403, 403, 403] and demo.status_code == 403 and service.metadata == {}
         assert (await client.get("/api/v1/solution-packages/")).status_code == 200
 
 
@@ -238,3 +239,35 @@ async def test_http_remove_previews_then_confirms() -> None:
         assert done["removed"] is True and done["modules"]["prefab"] is False
         missing = await client.post("/api/v1/solution-packages/supply_chain/remove/", json={"confirm": True})
         assert missing.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_toggle_invalidates_the_guard_cache() -> None:
+    module_guard._cache[USER_ID] = (float("inf"), {"stale": True})
+    async with _client(_Service()) as client:
+        res = await client.put("/api/v1/solution-packages/modules/prefab/", json={"enabled": True})
+    assert res.status_code == 200
+    assert USER_ID not in module_guard._cache
+
+
+def test_guard_cache_is_bounded(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(module_guard, "_MAX_ENTRIES", 3)
+    monkeypatch.setattr(module_guard, "_cache", {f"u{i}": (float("inf"), None) for i in range(3)})
+
+    class _Session:
+        async def __aenter__(self) -> _Session:
+            return self
+
+        async def __aexit__(self, *exc: object) -> None:
+            return None
+
+        async def execute(self, _stmt: object) -> SimpleNamespace:
+            return SimpleNamespace(scalar=lambda: {})
+
+    import app.database
+
+    monkeypatch.setattr(app.database, "async_session_factory", _Session)
+    import asyncio
+
+    asyncio.run(module_guard._load_metadata(str(uuid.uuid4())))
+    assert len(module_guard._cache) == 3 and "u0" not in module_guard._cache

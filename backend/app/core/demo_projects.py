@@ -12496,6 +12496,7 @@ async def install_demo_project(
     force_reinstall: bool = False,
     partner_pack: str | None = None,
     respect_retirement: bool = False,
+    owner_id: uuid.UUID | None = None,
 ) -> dict:
     """Install a demo project with full BOQ, Schedule, Budget, and Tendering data.
 
@@ -12515,6 +12516,9 @@ async def install_demo_project(
     caller is a person asking for the demo, so the install goes ahead and the
     record of the earlier removal is cleared.
 
+    ``owner_id`` makes the caller own the new project and limits the duplicate
+    check to their projects; without it the showcase owner gets it.
+
     Raises ``ValueError`` if ``demo_id`` is not in the registry.
     """
     from app.core.demo_marker import restore_demo_id, retired_demo_ids
@@ -12533,6 +12537,8 @@ async def install_demo_project(
     existing_demo = [
         p for p in existing_rows if isinstance(p.metadata_, dict) and p.metadata_.get("demo_id") == demo_id
     ]
+    if owner_id is not None:
+        existing_demo = [p for p in existing_demo if str(p.owner_id) == str(owner_id)]
 
     if existing_demo and not force_reinstall:
         proj = existing_demo[0]
@@ -12568,7 +12574,8 @@ async def install_demo_project(
             await session.delete(old_proj)
         await session.flush()
 
-    owner_id = await _get_or_create_owner(session)
+    if owner_id is None:
+        owner_id = await _get_or_create_owner(session)
 
     # ── 1. Project ────────────────────────────────────────────────────
     project = Project(

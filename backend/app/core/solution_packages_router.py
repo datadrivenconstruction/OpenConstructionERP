@@ -183,6 +183,6 @@ async def seed_package_demo(package_id: str, user_id: CurrentUserId) -> dict[str
         else:
             from app.core.demo_projects import install_demo_project
 
-            result = await install_demo_project(session, pkg.demo_id)
+            result = await install_demo_project(session, pkg.demo_id, owner_id=uuid.UUID(user_id))
         await session.commit()
     return {"package_id": package_id, "demo_id": pkg.demo_id, **result}

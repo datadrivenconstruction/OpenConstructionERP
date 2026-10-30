@@ -23,6 +23,8 @@ from app.core.solution_packages import gateable_modules, is_blocked
 logger = logging.getLogger(__name__)
 
 _TTL_SECONDS = 30.0
+_MAX_ENTRIES = 4096
+# Per process: writes here call invalidate_user; other workers converge within the TTL.
 _cache: dict[str, tuple[float, dict[str, Any] | None]] = {}
 
 
@@ -71,6 +73,11 @@ async def _load_metadata(user_id: str) -> dict[str, Any] | None:
     except Exception:
         logger.debug("module guard: metadata lookup failed, passing through", exc_info=True)
         return None
+    if len(_cache) >= _MAX_ENTRIES:
+        for key in [k for k, (expires, _m) in _cache.items() if expires <= now]:
+            del _cache[key]
+        while len(_cache) >= _MAX_ENTRIES:
+            del _cache[next(iter(_cache))]
     _cache[user_id] = (now + _TTL_SECONDS, meta)
     return meta
 
