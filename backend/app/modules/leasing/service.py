@@ -140,6 +140,7 @@ def lease_row(lease: Lease) -> dict[str, Any]:
         "escalation_kind": lease.escalation_kind,
         "escalation_rate": format(lease.escalation_rate, "f") if lease.escalation_rate is not None else None,
         "break_date": lease.break_date.isoformat() if lease.break_date else None,
+        "tax_rate": format(Decimal(lease.tax_rate or 0), "f"),
         "ext_refs": dict(lease.ext_refs or {}),
     }
 

@@ -86,3 +86,4 @@ async def test_demo_fills_sales_leasing_and_service_charges(db_session) -> None:
     assert media == "text/csv" and len(rows) == 2
     assert all(r["tenant_id_type"] == "national_id" and len(r["tenant_id_number"]) == 10 for r in rows)
     assert all(r["start_date_hijri"].startswith("1447-") for r in rows)
+    assert all(r["vat_rate_percent"] == "15" for r in rows)
