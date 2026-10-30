@@ -1,6 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
@@ -1164,6 +1165,7 @@ export function ProjectCard({
   const addToast = useToastStore((s) => s.addToast);
   const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [typedName, setTypedName] = useState('');
   const menuRef = React.useRef<HTMLDivElement>(null);
 
   // Close dropdown on outside click
@@ -1189,9 +1191,13 @@ export function ProjectCard({
   }, [menuOpen]);
 
   const deleteMutation = useMutation({
-    mutationFn: () => apiDelete(`/v1/projects/${project.id}`),
+    mutationFn: () =>
+      project.status === 'archived'
+        ? apiPost(`/v1/projects/${project.id}/purge/`, { confirm_name: typedName })
+        : apiDelete(`/v1/projects/${project.id}`),
     onSuccess: () => {
       setConfirmDelete(false);
+      setTypedName('');
       invalidateProjectLists(queryClient);
       addToast({ type: 'success', title: t('projects.deleted', 'Project deleted successfully') });
       onDeleted?.();
@@ -1472,51 +1478,87 @@ export function ProjectCard({
                 <Archive size={14} /> {t('common.archive', 'Archive')}
               </button>
             )}
-            <div className="h-px bg-border-light" />
-            <button
-              onClick={() => {
-                setConfirmDelete(true);
-                setMenuOpen(false);
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-semantic-error hover:bg-semantic-error-bg transition-colors"
-            >
-              <Trash2 size={14} /> {t('common.delete', 'Delete')}
-            </button>
+            {isArchived && (
+              <>
+                <div className="h-px bg-border-light" />
+                <button
+                  onClick={() => {
+                    setConfirmDelete(true);
+                    setMenuOpen(false);
+                  }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-sm text-semantic-error hover:bg-semantic-error-bg transition-colors"
+                >
+                  <Trash2 size={14} /> {t('projects.delete_permanently', { defaultValue: 'Delete permanently' })}
+                </button>
+              </>
+            )}
           </div>
         )}
 
-        {/* Delete confirmation */}
-        {confirmDelete && (
-          <div
-            className="absolute inset-0 z-30 flex items-center justify-center rounded-xl bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm p-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="text-center">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-error-bg mx-auto mb-3">
-                <Trash2 size={18} className="text-semantic-error" />
+        {/* Permanent delete: typed-name confirmation (archived projects only) */}
+        {confirmDelete &&
+          createPortal(
+            <div
+              className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div
+                role="dialog"
+                aria-modal="true"
+                className="w-full max-w-md rounded-xl bg-surface-elevated p-5 shadow-xl"
+              >
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-semantic-error-bg">
+                    <Trash2 size={18} className="text-semantic-error" />
+                  </div>
+                  <p className="text-base font-semibold text-content-primary">
+                    {t('projects.purge_title', { defaultValue: 'Delete this project permanently?' })}
+                  </p>
+                </div>
+                <p className="mb-2 text-sm text-content-secondary">
+                  {t('projects.purge_body', {
+                    defaultValue:
+                      'This removes the project and everything in it: BOQs, schedules, documents and uploaded files, tasks, finance, procurement, BIM models and all other linked records. The audit log keeps a record of the deletion. This cannot be undone.',
+                  })}
+                </p>
+                <label className="mb-1 block text-xs text-content-tertiary" htmlFor={`purge-${project.id}`}>
+                  {t('projects.purge_type_name', {
+                    defaultValue: 'Type the project name to confirm: {{name}}',
+                    name: project.name,
+                  })}
+                </label>
+                <input
+                  id={`purge-${project.id}`}
+                  value={typedName}
+                  onChange={(e) => setTypedName(e.target.value)}
+                  autoFocus
+                  className="mb-4 w-full rounded-lg border border-border-light bg-surface-primary px-3 py-2 text-sm text-content-primary"
+                />
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setConfirmDelete(false);
+                      setTypedName('');
+                    }}
+                  >
+                    {t('common.cancel', 'Cancel')}
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => deleteMutation.mutate()}
+                    loading={deleteMutation.isPending}
+                    disabled={typedName.trim() !== project.name.trim()}
+                  >
+                    {t('projects.delete_permanently', { defaultValue: 'Delete permanently' })}
+                  </Button>
+                </div>
               </div>
-              <p className="text-sm font-semibold text-content-primary mb-1">
-                {t('projects.confirm_delete', 'Delete this project?')}
-              </p>
-              <p className="text-xs text-content-tertiary mb-4 max-w-[200px] mx-auto">
-                {project.name}
-              </p>
-              <div className="flex items-center justify-center gap-2">
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => deleteMutation.mutate()}
-                  loading={deleteMutation.isPending}
-                >
-                  {t('common.delete', 'Delete')}
-                </Button>
-                <Button variant="secondary" size="sm" onClick={() => setConfirmDelete(false)}>
-                  {t('common.cancel', 'Cancel')}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body,
+          )}
 
         <h3 className="mt-4 text-base font-semibold tracking-tight text-content-primary truncate">
           {project.name}

@@ -95,12 +95,13 @@ function openMenu() {
 }
 
 describe('project card: every path that removes or returns a project', () => {
-  it('delete refreshes analytics and the dashboard', async () => {
-    const client = renderCard(project('active'));
+  it('permanent delete of an archived project refreshes analytics and the dashboard', async () => {
+    const client = renderCard(project('archived'));
     openMenu();
-    fireEvent.click(screen.getByRole('button', { name: /common\.delete/ }));
-    // The confirmation overlay carries its own Delete button.
-    fireEvent.click(screen.getByRole('button', { name: /common\.delete/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Delete permanently/ }));
+    // The confirmation asks for the project name before its own Delete button works.
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Tower' } });
+    fireEvent.click(screen.getAllByRole('button', { name: /Delete permanently/ }).at(-1)!);
     await expectListsStale(client);
   });
 

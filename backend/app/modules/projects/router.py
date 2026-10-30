@@ -439,6 +439,43 @@ async def restore_project(
     return ProjectResponse.model_validate(restored)
 
 
+# ── Permanent delete of an archived project ─────────────────────────────
+
+
+@router.post(
+    "/{project_id}/purge/",
+    summary="Delete archived project permanently",
+    description="Permanently delete an archived project with all its data and uploaded files. "
+    "Only the project owner or an admin can do this, only for an archived project, and the "
+    "project name must be typed as confirmation. This cannot be undone.",
+)
+async def purge_project(
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    confirm_name: str = Body(..., embed=True),
+    service: ProjectService = Depends(_get_service),
+) -> dict:
+    """Hard-delete one archived project (owner or admin)."""
+    project = await service.get_project(project_id, include_archived=True)
+    is_admin = bool(payload and payload.get("role") == "admin")
+    if not is_admin and str(project.owner_id) != user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have access to this project",
+        )
+    try:
+        return await service.purge_project(project_id, confirm_name=confirm_name, actor_id=user_id)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        logger.exception("Failed to purge project %s", project_id)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to delete project. Check server logs for details.",
+        ) from exc
+
+
 # ── Status history (read-only audit trail) ───────────────────────────────
 
 

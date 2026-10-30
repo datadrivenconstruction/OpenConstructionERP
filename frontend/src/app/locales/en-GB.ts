@@ -571,6 +571,13 @@ const resource = {
     "onboarding.country_pack_grid_label": "Countries",
     "onboarding.flagship_none_for_market": "No demo project for this market yet; you can add any demo later from Projects.",
     "onboarding.country_pack_standin_base": "Closest available: {{base}} ({{city}}) prices, {{currency}}. No cost base for {{country}} yet.",
+    "projects.delete_permanently": "Delete permanently",
+    "projects.purge_title": "Delete this project permanently?",
+    "projects.purge_body": "This removes the project and everything in it: BOQs, schedules, documents and uploaded files, tasks, finance, procurement, BIM models and all other linked records. The audit log keeps a record of the deletion. This cannot be undone.",
+    "projects.purge_type_name": "Type the project name to confirm: {{name}}",
+    "projects.location_conflict": "The saved map point and the geocoded address are about {{km}} km apart. Which location is right?",
+    "projects.location_use_this": "Use this location",
+    "projects.location_keep_current": "Keep current",
   }
 } as { translation: Record<string, string> };
 

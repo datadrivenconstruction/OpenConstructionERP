@@ -15,6 +15,7 @@ import asyncio
 import logging
 import uuid
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from fastapi import HTTPException, status
@@ -192,6 +193,35 @@ async def purge_project_children_without_cascade(
         await session.execute(sa_delete(Resource).where(Resource.home_project_id.in_(project_ids)))
     except ImportError:
         logger.debug("resources models unavailable - skipping resource purge")
+
+
+def _remove_project_files(project_id: uuid.UUID, file_paths: list[str]) -> int:
+    """Delete a purged project's uploaded files; returns how many files went.
+
+    Per-project upload directories go whole; stray paths recorded on rows are
+    removed only when they sit under the data directory.
+    """
+    import shutil
+
+    from app.modules.documents import service as docs
+
+    removed = 0
+    pid = str(project_id)
+    for base in (docs.UPLOAD_BASE, docs.PHOTO_BASE, docs.PHOTO_THUMB_BASE, docs.SHEET_THUMB_BASE):
+        target = base / pid
+        if target.is_dir():
+            removed += sum(1 for f in target.rglob("*") if f.is_file())
+            shutil.rmtree(target, ignore_errors=True)
+    roots = [b.resolve() for b in (docs.UPLOAD_BASE, docs.PHOTO_BASE, docs.SHEET_THUMB_BASE)]
+    for raw in file_paths:
+        try:
+            path = Path(raw).resolve()
+            if path.is_file() and any(path.is_relative_to(r) for r in roots):
+                path.unlink()
+                removed += 1
+        except (OSError, ValueError):
+            logger.debug("Stray file not removed: %s", raw)
+    return removed
 
 
 async def purge_demo_tagged_global_rows(
@@ -1650,6 +1680,85 @@ class ProjectService:
             global_deleted or "none",
         )
         return deleted
+
+    # ── Permanent delete of one archived project ─────────────────────────
+
+    async def purge_project(
+        self,
+        project_id: uuid.UUID,
+        *,
+        confirm_name: str,
+        actor_id: str | None = None,
+    ) -> dict[str, int | str]:
+        """Permanently delete one archived project and everything that references it.
+
+        Only an archived project can be purged: an active one must be archived
+        first, so a single click can never destroy live work. ``confirm_name``
+        must equal the project name (the typed-name confirmation). Rows go
+        through the same sweep the demo purge uses (bare ``project_id`` columns,
+        SET NULL links, approval instances), then the project row itself, whose
+        DB cascades remove the rest. Uploaded files are removed from storage
+        after the rows, and an audit entry is kept.
+        """
+        project = await self.get_project(project_id, include_archived=True)
+        if project.status != "archived":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Only an archived project can be deleted permanently. Archive it first.",
+            )
+        if (confirm_name or "").strip() != (project.name or "").strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="The typed name does not match the project name.",
+            )
+        project_name = project.name
+        from app.core.demo_marker import demo_id_of, retire_demo_ids
+
+        demo_id = demo_id_of(project.metadata_)
+        if demo_id:
+            await retire_demo_ids(self.session, {demo_id: project_id}, reason="purged")
+
+        file_paths = await self._collect_project_file_paths(project_id)
+
+        from sqlalchemy import delete as sa_delete
+
+        await purge_project_children_without_cascade(self.session, [project_id])
+        if demo_id:
+            await purge_demo_tagged_global_rows(self.session, {demo_id})
+        await self.session.execute(sa_delete(Project).where(Project.id == project_id))
+        await self.session.flush()
+        self.session.expire_all()
+
+        removed_files = _remove_project_files(project_id, file_paths)
+
+        await _safe_audit(
+            self.session,
+            action="purge",
+            entity_type="project",
+            entity_id=str(project_id),
+            user_id=actor_id,
+            details={"name": project_name, "removed_files": removed_files},
+        )
+        logger.info("Project purged: %s (%d file(s) removed)", project_id, removed_files)
+        return {"id": str(project_id), "name": project_name, "removed_files": removed_files}
+
+    async def _collect_project_file_paths(self, project_id: uuid.UUID) -> list[str]:
+        """File paths stored on the project's document and photo rows, read before the rows go."""
+        from sqlalchemy import select as sa_select
+
+        paths: list[str] = []
+        try:
+            from app.modules.documents.models import Document, ProjectPhoto, Sheet
+        except ImportError:
+            return paths
+        for model in (Document, ProjectPhoto, Sheet):
+            for col_name in ("file_path", "thumbnail_path"):
+                col = getattr(model, col_name, None)
+                if col is None:
+                    continue
+                rows = (await self.session.execute(sa_select(col).where(model.project_id == project_id))).scalars()
+                paths.extend(r for r in rows if r)
+        return paths
 
     # ── Restore (un-archive) ─────────────────────────────────────────────
 
