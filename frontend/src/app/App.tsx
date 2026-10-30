@@ -544,6 +544,12 @@ const PropertyDevPage = lazy(() =>
 const PropertyDevInventoryMapPage = lazy(() =>
   import('@/features/property-dev').then((m) => ({ default: m.InventoryMapPage }))
 );
+const ServiceChargesPage = lazy(() =>
+  import('@/features/service-charges').then((m) => ({ default: m.ServiceChargesPage }))
+);
+const ServiceChargesAssociationPage = lazy(() =>
+  import('@/features/service-charges').then((m) => ({ default: m.AssociationDetailPage }))
+);
 const AccommodationListPage = lazy(() =>
   import('@/features/accommodation').then((m) => ({
     default: m.AccommodationListPage,
@@ -1789,6 +1795,8 @@ export default function App() {
         <Route path="/property-dev/dashboards/:key" element={<P title="Property Development Dashboard"><PropertyDevDashboardFullView /></P>} />
         <Route path="/leasing" element={<P title="Leasing"><LeasingPage /></P>} />
         <Route path="/leasing/:leaseId" element={<P title="Leasing"><LeaseDetailPage /></P>} />
+        <Route path="/service-charges" element={<P title="Service charges"><ServiceChargesPage /></P>} />
+        <Route path="/service-charges/:associationId" element={<P title="Service charges"><ServiceChargesAssociationPage /></P>} />
         <Route path="/accommodation" element={<P title="Accommodation"><AccommodationListPage /></P>} />
         <Route path="/accommodation/calendar" element={<P title="Accommodation Calendar"><AccommodationCalendarPage /></P>} />
         <Route path="/accommodation/:id" element={<P title="Accommodation"><AccommodationDetailPage /></P>} />

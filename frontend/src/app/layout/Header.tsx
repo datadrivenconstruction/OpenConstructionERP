@@ -267,6 +267,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Cost benchmarks': 'nav.cost_benchmarks',
   'Condition & Maintenance Plan': 'condition.title',
   'Leasing': 'leasing.title',
+  'Service charges': 'service_charges.title',
   'Cutting Optimisation': 'cutting.title',
   'Guarantees': 'guarantees.title',
   'Guarantee': 'guarantees.title',

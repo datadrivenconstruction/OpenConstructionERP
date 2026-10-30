@@ -137201,7 +137201,6 @@
       "files": [
         "__init__.py",
         "consent.py",
-        "coord_reconcile.py",
         "coord_transforms.py",
         "events.py",
         "geocoder.py",
@@ -137212,7 +137211,6 @@
         "ogc_router.py",
         "permissions.py",
         "raster_pipeline.py",
-        "repairs.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -152542,1426 +152540,6 @@
       ],
       "schemas": [],
       "import_dependencies": []
-    },
-    {
-      "module_id": "leasing",
-      "module_label": "Leasing",
-      "module_category": "business",
-      "files": [
-        "__init__.py",
-        "country_rules.py",
-        "manifest.py",
-        "models.py",
-        "permissions.py",
-        "repository.py",
-        "router.py",
-        "schedule.py",
-        "schemas.py",
-        "service.py",
-        "validators.py"
-      ],
-      "manifest": {
-        "name": "oe_leasing",
-        "version": "0.1.0",
-        "display_name": "Leasing",
-        "description": "Leases of units to tenants in any country: terms, deposit, escalation (fixed or index), rent schedule raised as finance invoices, rent roll, arrears read from finance payments, renewals, notices and terminations with an event trail, export with pluggable profiles",
-        "author": "OpenConstructionERP Core Team",
-        "category": "business",
-        "depends": [
-          "oe_projects",
-          "oe_contacts",
-          "oe_finance"
-        ],
-        "auto_install": true,
-        "enabled": true
-      },
-      "models": [
-        {
-          "class_name": "Lease",
-          "tablename": "oe_leasing_lease",
-          "docstring": "A lease of one unit to one tenant for a period.",
-          "columns": [
-            {
-              "name": "project_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_projects_project.id"
-            },
-            {
-              "name": "code",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "unit_kind",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "unit_ref",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "unit_label",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "tenant_contact_id",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "landlord_legal_entity_id",
-              "annotation": "Mapped[uuid.UUID | None]",
-              "sql_type": "GUID",
-              "nullable": true
-            },
-            {
-              "name": "start_date",
-              "annotation": "Mapped[date]",
-              "sql_type": "SafeDate",
-              "nullable": false
-            },
-            {
-              "name": "end_date",
-              "annotation": "Mapped[date]",
-              "sql_type": "SafeDate",
-              "nullable": false
-            },
-            {
-              "name": "term_months",
-              "annotation": "Mapped[int]",
-              "sql_type": "Integer",
-              "nullable": false
-            },
-            {
-              "name": "rent_amount",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "currency",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "frequency",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "deposit",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "escalation_kind",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "escalation_rate",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "escalation_index",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "escalation_every_months",
-              "annotation": "Mapped[int]",
-              "sql_type": "Integer",
-              "nullable": false
-            },
-            {
-              "name": "tax_code",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "tax_rate",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "payment_terms_days",
-              "annotation": "Mapped[int]",
-              "sql_type": "Integer",
-              "nullable": false
-            },
-            {
-              "name": "status",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "break_date",
-              "annotation": "Mapped[date | None]",
-              "sql_type": "SafeDate",
-              "nullable": true
-            },
-            {
-              "name": "notice_date",
-              "annotation": "Mapped[date | None]",
-              "sql_type": "SafeDate",
-              "nullable": true
-            },
-            {
-              "name": "ended_on",
-              "annotation": "Mapped[date | None]",
-              "sql_type": "SafeDate",
-              "nullable": true
-            },
-            {
-              "name": "renewed_from_id",
-              "annotation": "Mapped[uuid.UUID | None]",
-              "sql_type": "GUID",
-              "nullable": true
-            },
-            {
-              "name": "ext_refs",
-              "annotation": "Mapped[dict]",
-              "sql_type": "JSON",
-              "nullable": false
-            },
-            {
-              "name": "notes",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "Text",
-              "nullable": true
-            },
-            {
-              "name": "created_by",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            }
-          ],
-          "relationships": [
-            {
-              "name": "document_links",
-              "type": "one-to-many",
-              "annotation": "Mapped[list[LeaseDocument]]"
-            }
-          ]
-        },
-        {
-          "class_name": "LeaseDocument",
-          "tablename": "oe_leasing_lease_document",
-          "docstring": "A project document attached to a lease. The foreign key drops the link when the document is deleted.",
-          "columns": [
-            {
-              "name": "lease_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_leasing_lease.id"
-            },
-            {
-              "name": "document_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_documents_document.id"
-            }
-          ],
-          "relationships": []
-        },
-        {
-          "class_name": "RentScheduleLine",
-          "tablename": "oe_leasing_schedule_line",
-          "docstring": "One rent period of a lease. Unique per (lease, period start), so regenerating is idempotent.",
-          "columns": [
-            {
-              "name": "lease_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_leasing_lease.id"
-            },
-            {
-              "name": "project_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false
-            },
-            {
-              "name": "seq",
-              "annotation": "Mapped[int]",
-              "sql_type": "Integer",
-              "nullable": false
-            },
-            {
-              "name": "period_start",
-              "annotation": "Mapped[date]",
-              "sql_type": "SafeDate",
-              "nullable": false
-            },
-            {
-              "name": "period_end",
-              "annotation": "Mapped[date]",
-              "sql_type": "SafeDate",
-              "nullable": false
-            },
-            {
-              "name": "due_date",
-              "annotation": "Mapped[date]",
-              "sql_type": "SafeDate",
-              "nullable": false
-            },
-            {
-              "name": "amount",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "tax_code",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "tax_amount",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "review_number",
-              "annotation": "Mapped[int]",
-              "sql_type": "Integer",
-              "nullable": false
-            },
-            {
-              "name": "invoice_id",
-              "annotation": "Mapped[uuid.UUID | None]",
-              "sql_type": "GUID",
-              "nullable": true
-            }
-          ],
-          "relationships": []
-        },
-        {
-          "class_name": "LeaseEvent",
-          "tablename": "oe_leasing_event",
-          "docstring": "A lifecycle record of a lease, newest last.",
-          "columns": [
-            {
-              "name": "lease_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_leasing_lease.id"
-            },
-            {
-              "name": "project_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false
-            },
-            {
-              "name": "kind",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "event_date",
-              "annotation": "Mapped[date]",
-              "sql_type": "SafeDate",
-              "nullable": false
-            },
-            {
-              "name": "payload",
-              "annotation": "Mapped[dict]",
-              "sql_type": "JSON",
-              "nullable": false
-            },
-            {
-              "name": "actor_id",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            }
-          ],
-          "relationships": []
-        }
-      ],
-      "routes": [
-        {
-          "method": "GET",
-          "path": "/",
-          "handler": "list_leases",
-          "response_model": "LeaseListResponse",
-          "request_schema": "None"
-        },
-        {
-          "method": "POST",
-          "path": "/",
-          "handler": "create_lease",
-          "response_model": "LeaseResponse",
-          "request_schema": "LeaseCreate"
-        },
-        {
-          "method": "GET",
-          "path": "/export-profiles",
-          "handler": "list_export_profiles",
-          "request_schema": "None"
-        },
-        {
-          "method": "GET",
-          "path": "/rent-roll",
-          "handler": "rent_roll",
-          "response_model": "RentRollResponse",
-          "request_schema": "date | None"
-        },
-        {
-          "method": "GET",
-          "path": "/arrears",
-          "handler": "arrears",
-          "response_model": "ArrearsResponse",
-          "request_schema": "date | None"
-        },
-        {
-          "method": "GET",
-          "path": "/export",
-          "handler": "export_leases",
-          "response_model": "None",
-          "request_schema": "None"
-        },
-        {
-          "method": "POST",
-          "path": "/schedule/run",
-          "handler": "run_schedule",
-          "response_model": "ScheduleRunResponse",
-          "request_schema": "ScheduleRunRequest"
-        },
-        {
-          "method": "GET",
-          "path": "/{lease_id}",
-          "handler": "get_lease",
-          "response_model": "LeaseDetailResponse",
-          "request_schema": "None"
-        },
-        {
-          "method": "PATCH",
-          "path": "/{lease_id}",
-          "handler": "update_lease",
-          "response_model": "LeaseResponse",
-          "request_schema": "LeaseUpdate"
-        },
-        {
-          "method": "DELETE",
-          "path": "/{lease_id}",
-          "handler": "delete_lease",
-          "response_model": "None",
-          "request_schema": "None"
-        },
-        {
-          "method": "POST",
-          "path": "/{lease_id}/activate",
-          "handler": "activate_lease",
-          "response_model": "LeaseResponse",
-          "request_schema": "ActivateRequest | None"
-        },
-        {
-          "method": "POST",
-          "path": "/{lease_id}/terminate",
-          "handler": "terminate_lease",
-          "response_model": "LeaseResponse",
-          "request_schema": "TerminateRequest"
-        },
-        {
-          "method": "POST",
-          "path": "/{lease_id}/renew",
-          "handler": "renew_lease",
-          "response_model": "LeaseResponse",
-          "request_schema": "RenewRequest"
-        },
-        {
-          "method": "POST",
-          "path": "/{lease_id}/review",
-          "handler": "review_lease",
-          "response_model": "LeaseResponse",
-          "request_schema": "ReviewRequest"
-        },
-        {
-          "method": "GET",
-          "path": "/{lease_id}/schedule",
-          "handler": "get_schedule",
-          "response_model": "ScheduleResponse",
-          "request_schema": "None"
-        },
-        {
-          "method": "POST",
-          "path": "/{lease_id}/schedule",
-          "handler": "regenerate_schedule",
-          "response_model": "ScheduleResponse",
-          "request_schema": "None"
-        },
-        {
-          "method": "GET",
-          "path": "/{lease_id}/validate",
-          "handler": "validate_lease",
-          "response_model": "ValidationResponse",
-          "request_schema": "None"
-        },
-        {
-          "method": "POST",
-          "path": "/{lease_id}/documents",
-          "handler": "link_document",
-          "response_model": "LeaseResponse",
-          "request_schema": "DocumentLinkRequest"
-        },
-        {
-          "method": "DELETE",
-          "path": "/{lease_id}/documents/{document_id}",
-          "handler": "unlink_document",
-          "response_model": "LeaseResponse",
-          "request_schema": "None"
-        }
-      ],
-      "schemas": [
-        {
-          "class_name": "LeaseCreate",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "A new lease, created as a draft.",
-          "fields": [
-            {
-              "name": "project_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "code",
-              "type": "str"
-            },
-            {
-              "name": "unit_kind",
-              "type": "UnitKind",
-              "default": "'plot'"
-            },
-            {
-              "name": "unit_ref",
-              "type": "str"
-            },
-            {
-              "name": "unit_label",
-              "type": "str"
-            },
-            {
-              "name": "tenant_contact_id",
-              "type": "str"
-            },
-            {
-              "name": "landlord_legal_entity_id",
-              "type": "uuid.UUID | None",
-              "default": "None"
-            },
-            {
-              "name": "start_date",
-              "type": "date"
-            },
-            {
-              "name": "end_date",
-              "type": "date"
-            },
-            {
-              "name": "rent_amount",
-              "type": "Decimal"
-            },
-            {
-              "name": "currency",
-              "type": "str"
-            },
-            {
-              "name": "frequency",
-              "type": "Frequency",
-              "default": "'monthly'"
-            },
-            {
-              "name": "deposit",
-              "type": "Decimal"
-            },
-            {
-              "name": "escalation_kind",
-              "type": "EscalationKind",
-              "default": "'none'"
-            },
-            {
-              "name": "escalation_rate",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "escalation_index",
-              "type": "str | None"
-            },
-            {
-              "name": "escalation_every_months",
-              "type": "int"
-            },
-            {
-              "name": "tax_code",
-              "type": "str | None"
-            },
-            {
-              "name": "tax_rate",
-              "type": "Decimal"
-            },
-            {
-              "name": "payment_terms_days",
-              "type": "int"
-            },
-            {
-              "name": "break_date",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "ext_refs",
-              "type": "dict[str, Any]"
-            },
-            {
-              "name": "notes",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "LeaseUpdate",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "Partial update; money and dates only change while the lease is a draft.",
-          "fields": [
-            {
-              "name": "code",
-              "type": "str | None"
-            },
-            {
-              "name": "unit_kind",
-              "type": "UnitKind | None",
-              "default": "None"
-            },
-            {
-              "name": "unit_ref",
-              "type": "str | None"
-            },
-            {
-              "name": "unit_label",
-              "type": "str | None"
-            },
-            {
-              "name": "tenant_contact_id",
-              "type": "str | None"
-            },
-            {
-              "name": "landlord_legal_entity_id",
-              "type": "uuid.UUID | None",
-              "default": "None"
-            },
-            {
-              "name": "start_date",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "end_date",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "rent_amount",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "currency",
-              "type": "str | None"
-            },
-            {
-              "name": "frequency",
-              "type": "Frequency | None",
-              "default": "None"
-            },
-            {
-              "name": "deposit",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "escalation_kind",
-              "type": "EscalationKind | None",
-              "default": "None"
-            },
-            {
-              "name": "escalation_rate",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "escalation_index",
-              "type": "str | None"
-            },
-            {
-              "name": "escalation_every_months",
-              "type": "int | None"
-            },
-            {
-              "name": "tax_code",
-              "type": "str | None"
-            },
-            {
-              "name": "tax_rate",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "payment_terms_days",
-              "type": "int | None"
-            },
-            {
-              "name": "break_date",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "ext_refs",
-              "type": "dict[str, Any] | None",
-              "default": "None"
-            },
-            {
-              "name": "notes",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "LeaseResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "project_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "code",
-              "type": "str"
-            },
-            {
-              "name": "unit_kind",
-              "type": "str"
-            },
-            {
-              "name": "unit_ref",
-              "type": "str"
-            },
-            {
-              "name": "unit_label",
-              "type": "str"
-            },
-            {
-              "name": "tenant_contact_id",
-              "type": "str"
-            },
-            {
-              "name": "landlord_legal_entity_id",
-              "type": "uuid.UUID | None"
-            },
-            {
-              "name": "start_date",
-              "type": "date"
-            },
-            {
-              "name": "end_date",
-              "type": "date"
-            },
-            {
-              "name": "term_months",
-              "type": "int"
-            },
-            {
-              "name": "rent_amount",
-              "type": "Decimal"
-            },
-            {
-              "name": "currency",
-              "type": "str"
-            },
-            {
-              "name": "frequency",
-              "type": "str"
-            },
-            {
-              "name": "deposit",
-              "type": "Decimal"
-            },
-            {
-              "name": "escalation_kind",
-              "type": "str"
-            },
-            {
-              "name": "escalation_rate",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "escalation_index",
-              "type": "str | None"
-            },
-            {
-              "name": "escalation_every_months",
-              "type": "int"
-            },
-            {
-              "name": "tax_code",
-              "type": "str | None"
-            },
-            {
-              "name": "tax_rate",
-              "type": "Decimal"
-            },
-            {
-              "name": "payment_terms_days",
-              "type": "int"
-            },
-            {
-              "name": "status",
-              "type": "str"
-            },
-            {
-              "name": "break_date",
-              "type": "date | None"
-            },
-            {
-              "name": "notice_date",
-              "type": "date | None"
-            },
-            {
-              "name": "ended_on",
-              "type": "date | None"
-            },
-            {
-              "name": "renewed_from_id",
-              "type": "uuid.UUID | None"
-            },
-            {
-              "name": "document_ids",
-              "type": "list[str]"
-            },
-            {
-              "name": "ext_refs",
-              "type": "dict[str, Any]"
-            },
-            {
-              "name": "notes",
-              "type": "str | None"
-            },
-            {
-              "name": "created_at",
-              "type": "datetime | None",
-              "default": "None"
-            },
-            {
-              "name": "updated_at",
-              "type": "datetime | None",
-              "default": "None"
-            }
-          ]
-        },
-        {
-          "class_name": "LeaseListResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "items",
-              "type": "list[LeaseResponse]"
-            },
-            {
-              "name": "total",
-              "type": "int"
-            }
-          ]
-        },
-        {
-          "class_name": "ScheduleLineResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "lease_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "seq",
-              "type": "int"
-            },
-            {
-              "name": "period_start",
-              "type": "date"
-            },
-            {
-              "name": "period_end",
-              "type": "date"
-            },
-            {
-              "name": "due_date",
-              "type": "date"
-            },
-            {
-              "name": "amount",
-              "type": "Decimal"
-            },
-            {
-              "name": "tax_code",
-              "type": "str | None"
-            },
-            {
-              "name": "tax_amount",
-              "type": "Decimal"
-            },
-            {
-              "name": "review_number",
-              "type": "int"
-            },
-            {
-              "name": "invoice_id",
-              "type": "uuid.UUID | None"
-            }
-          ]
-        },
-        {
-          "class_name": "ScheduleResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "lease_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "currency",
-              "type": "str"
-            },
-            {
-              "name": "total",
-              "type": "str"
-            },
-            {
-              "name": "items",
-              "type": "list[ScheduleLineResponse]"
-            }
-          ]
-        },
-        {
-          "class_name": "ScheduleRunRequest",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "project_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "as_of",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "lease_id",
-              "type": "uuid.UUID | None",
-              "default": "None"
-            }
-          ]
-        },
-        {
-          "class_name": "ScheduleRunResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "as_of",
-              "type": "date"
-            },
-            {
-              "name": "invoices_created",
-              "type": "int"
-            },
-            {
-              "name": "invoice_ids",
-              "type": "list[str]"
-            },
-            {
-              "name": "skipped",
-              "type": "int"
-            }
-          ]
-        },
-        {
-          "class_name": "EventResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "lease_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "kind",
-              "type": "str"
-            },
-            {
-              "name": "event_date",
-              "type": "date"
-            },
-            {
-              "name": "payload",
-              "type": "dict[str, Any]"
-            },
-            {
-              "name": "actor_id",
-              "type": "str | None"
-            },
-            {
-              "name": "created_at",
-              "type": "datetime | None",
-              "default": "None"
-            }
-          ]
-        },
-        {
-          "class_name": "ActivateRequest",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "on",
-              "type": "date | None",
-              "default": "None"
-            }
-          ]
-        },
-        {
-          "class_name": "TerminateRequest",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "Give notice (``effective`` in the future) or end the lease now.",
-          "fields": [
-            {
-              "name": "effective",
-              "type": "date"
-            },
-            {
-              "name": "notice_given_on",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "reason",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "RenewRequest",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "A renewal is a new draft lease that follows on from this one.",
-          "fields": [
-            {
-              "name": "end_date",
-              "type": "date"
-            },
-            {
-              "name": "rent_amount",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "code",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "ReviewRequest",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "Record the rate of one rent review, e.g. the index movement.",
-          "fields": [
-            {
-              "name": "review_number",
-              "type": "int"
-            },
-            {
-              "name": "rate",
-              "type": "Decimal"
-            },
-            {
-              "name": "event_date",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "note",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "DocumentLinkRequest",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "document_id",
-              "type": "uuid.UUID"
-            }
-          ]
-        },
-        {
-          "class_name": "LeaseDocument",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "id",
-              "type": "str"
-            },
-            {
-              "name": "name",
-              "type": "str"
-            },
-            {
-              "name": "category",
-              "type": "str"
-            }
-          ]
-        },
-        {
-          "class_name": "LeaseDetailResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "lease",
-              "type": "LeaseResponse"
-            },
-            {
-              "name": "events",
-              "type": "list[EventResponse]"
-            },
-            {
-              "name": "documents",
-              "type": "list[LeaseDocument]"
-            }
-          ]
-        },
-        {
-          "class_name": "RentRollRow",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "lease_id",
-              "type": "str"
-            },
-            {
-              "name": "code",
-              "type": "str"
-            },
-            {
-              "name": "unit_kind",
-              "type": "str"
-            },
-            {
-              "name": "unit_ref",
-              "type": "str"
-            },
-            {
-              "name": "unit_label",
-              "type": "str"
-            },
-            {
-              "name": "tenant_contact_id",
-              "type": "str"
-            },
-            {
-              "name": "tenant_name",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "status",
-              "type": "str"
-            },
-            {
-              "name": "start_date",
-              "type": "date"
-            },
-            {
-              "name": "end_date",
-              "type": "date"
-            },
-            {
-              "name": "currency",
-              "type": "str"
-            },
-            {
-              "name": "frequency",
-              "type": "str"
-            },
-            {
-              "name": "current_rent",
-              "type": "str"
-            },
-            {
-              "name": "annual_rent",
-              "type": "str"
-            },
-            {
-              "name": "deposit",
-              "type": "str"
-            },
-            {
-              "name": "next_due_date",
-              "type": "date | None"
-            },
-            {
-              "name": "break_date",
-              "type": "date | None"
-            }
-          ]
-        },
-        {
-          "class_name": "RentRollResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "as_of",
-              "type": "date"
-            },
-            {
-              "name": "items",
-              "type": "list[RentRollRow]"
-            },
-            {
-              "name": "totals",
-              "type": "dict[str, str]"
-            }
-          ]
-        },
-        {
-          "class_name": "ArrearsRow",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "lease_id",
-              "type": "str"
-            },
-            {
-              "name": "code",
-              "type": "str"
-            },
-            {
-              "name": "unit_label",
-              "type": "str"
-            },
-            {
-              "name": "tenant_contact_id",
-              "type": "str"
-            },
-            {
-              "name": "tenant_name",
-              "type": "str",
-              "default": "''"
-            },
-            {
-              "name": "currency",
-              "type": "str"
-            },
-            {
-              "name": "invoice_id",
-              "type": "str"
-            },
-            {
-              "name": "invoice_number",
-              "type": "str"
-            },
-            {
-              "name": "due_date",
-              "type": "str | None"
-            },
-            {
-              "name": "days_past_due",
-              "type": "int"
-            },
-            {
-              "name": "bucket",
-              "type": "str"
-            },
-            {
-              "name": "total",
-              "type": "str"
-            },
-            {
-              "name": "paid",
-              "type": "str"
-            },
-            {
-              "name": "due",
-              "type": "str"
-            }
-          ]
-        },
-        {
-          "class_name": "ArrearsResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "as_of",
-              "type": "date"
-            },
-            {
-              "name": "items",
-              "type": "list[ArrearsRow]"
-            },
-            {
-              "name": "totals",
-              "type": "dict[str, dict[str, str]]"
-            }
-          ]
-        },
-        {
-          "class_name": "ValidationIssue",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "rule_id",
-              "type": "str"
-            },
-            {
-              "name": "severity",
-              "type": "str"
-            },
-            {
-              "name": "message",
-              "type": "str"
-            },
-            {
-              "name": "element_ref",
-              "type": "str | None",
-              "default": "None"
-            },
-            {
-              "name": "details",
-              "type": "dict[str, Any]"
-            }
-          ]
-        },
-        {
-          "class_name": "ValidationResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "status",
-              "type": "str"
-            },
-            {
-              "name": "checked",
-              "type": "int"
-            },
-            {
-              "name": "results",
-              "type": "list[ValidationIssue]"
-            }
-          ]
-        }
-      ],
-      "import_dependencies": [
-        "contacts",
-        "documents",
-        "finance",
-        "legal_entities",
-        "projects"
-      ]
     },
     {
       "module_id": "legal_entities",
@@ -180999,24 +179577,6 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
-            },
-            {
-              "name": "qr_token",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "delivery_note_ref",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "element_ref",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
             }
           ],
           "relationships": []
@@ -181133,13 +179693,6 @@
           "request_schema": "AdvanceStageRequest"
         },
         {
-          "method": "POST",
-          "path": "/units/receive/",
-          "handler": "receive_by_qr",
-          "response_model": "PrefabUnitResponse",
-          "request_schema": "ReceiveByQrRequest"
-        },
-        {
           "method": "GET",
           "path": "/units/{unit_id}/events/",
           "handler": "list_unit_events",
@@ -181185,10 +179738,6 @@
               "default": "None"
             },
             {
-              "name": "element_ref",
-              "type": "str | None"
-            },
-            {
               "name": "notes",
               "type": "str | None",
               "default": "None"
@@ -181223,10 +179772,6 @@
               "name": "bim_element_ids",
               "type": "list[str] | None",
               "default": "None"
-            },
-            {
-              "name": "element_ref",
-              "type": "str | None"
             },
             {
               "name": "notes",
@@ -181288,21 +179833,6 @@
               "default": "None"
             },
             {
-              "name": "qr_token",
-              "type": "str | None",
-              "default": "None"
-            },
-            {
-              "name": "delivery_note_ref",
-              "type": "str | None",
-              "default": "None"
-            },
-            {
-              "name": "element_ref",
-              "type": "str | None",
-              "default": "None"
-            },
-            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -181357,28 +179887,6 @@
             {
               "name": "assembly_id",
               "type": "UUID | None",
-              "default": "None"
-            }
-          ]
-        },
-        {
-          "class_name": "ReceiveByQrRequest",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "A unit scanned on arrival: its QR token and the delivery note it came with.",
-          "fields": [
-            {
-              "name": "qr_token",
-              "type": "str"
-            },
-            {
-              "name": "delivery_note_ref",
-              "type": "str"
-            },
-            {
-              "name": "note",
-              "type": "str | None",
               "default": "None"
             }
           ]
@@ -187317,9 +185825,6 @@
         "permissions.py",
         "permit_conditions.py",
         "plan_source.py",
-        "profile.py",
-        "profile_codes.py",
-        "profile_service.py",
         "router.py",
         "rule_snapshot.py",
         "schemas.py",
@@ -188166,62 +186671,6 @@
             }
           ],
           "relationships": []
-        },
-        {
-          "class_name": "ProfileConfirmation",
-          "tablename": "oe_procurement_concept_profile_confirmation",
-          "docstring": "This instance's confirmation of one profile value: the exact value (hash) at one path, checked at source.",
-          "columns": [
-            {
-              "name": "tenant_id",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "jurisdiction",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "path",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "value_hash",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "confirmed_by",
-              "annotation": "Mapped[uuid.UUID | None]",
-              "sql_type": "GUID",
-              "nullable": true
-            },
-            {
-              "name": "confirmed_at",
-              "annotation": "Mapped[datetime]",
-              "sql_type": "DateTime",
-              "nullable": false
-            },
-            {
-              "name": "source_checked",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "note",
-              "annotation": "Mapped[str]",
-              "sql_type": "Text",
-              "nullable": false
-            }
-          ],
-          "relationships": []
         }
       ],
       "routes": [
@@ -188489,23 +186938,6 @@
           "method": "GET",
           "path": "/frameworks/{framework_id}/ledger",
           "handler": "framework_ledger"
-        },
-        {
-          "method": "GET",
-          "path": "/profiles/{code}/values",
-          "handler": "profile_values",
-          "request_schema": "date | None"
-        },
-        {
-          "method": "POST",
-          "path": "/profiles/{code}/confirmations",
-          "handler": "confirm_profile_value",
-          "request_schema": "ProfileConfirmIn"
-        },
-        {
-          "method": "DELETE",
-          "path": "/profiles/confirmations/{confirmation_id}",
-          "handler": "revoke_profile_value"
         }
       ],
       "schemas": [
@@ -188773,31 +187205,6 @@
             },
             {
               "name": "reason",
-              "type": "str"
-            }
-          ]
-        },
-        {
-          "class_name": "ProfileConfirmIn",
-          "bases": [
-            "_In"
-          ],
-          "docstring": "Confirm one profile value on this instance: the value the person saw (path + hash) and where they checked it.",
-          "fields": [
-            {
-              "name": "path",
-              "type": "str"
-            },
-            {
-              "name": "value_hash",
-              "type": "str"
-            },
-            {
-              "name": "source_checked",
-              "type": "str"
-            },
-            {
-              "name": "note",
               "type": "str"
             }
           ]
@@ -195513,12 +193920,6 @@
           "path": "/{project_id}/restore/",
           "handler": "restore_project",
           "response_model": "ProjectResponse",
-          "request_schema": "ProjectService"
-        },
-        {
-          "method": "POST",
-          "path": "/{project_id}/purge/",
-          "handler": "purge_project",
           "request_schema": "ProjectService"
         },
         {
@@ -248814,6 +247215,1311 @@
       ]
     },
     {
+      "module_id": "service_charges",
+      "module_label": "Service Charges",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "apportion.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_service_charges",
+        "version": "0.1.0",
+        "display_name": "Service Charges",
+        "description": "Owners associations and service charge budgets in any country: apportionment keys by area, permille, equal or custom shares, approved yearly budgets, demands raised as finance receivables, year-end reconciliation against actual costs from finance payables and service work orders",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_projects",
+          "oe_finance"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "OwnersAssociation",
+          "tablename": "oe_service_charges_association",
+          "docstring": "An owners association (or the landlord's service charge account) of one property.",
+          "columns": [
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "legal_entity_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "registration",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "fiscal_year_start_month",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "ApportionmentKey",
+          "tablename": "oe_service_charges_key",
+          "docstring": "How a cost is split over the units: by area, permille, equally or by custom percent.",
+          "columns": [
+            {
+              "name": "association_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_service_charges_association.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "method",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": [
+            {
+              "name": "lines",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[ApportionmentKeyLine]]"
+            }
+          ]
+        },
+        {
+          "class_name": "ApportionmentKeyLine",
+          "tablename": "oe_service_charges_key_line",
+          "docstring": "One unit's share under a key, and who pays for that unit.",
+          "columns": [
+            {
+              "name": "key_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_service_charges_key.id"
+            },
+            {
+              "name": "unit_ref",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "unit_label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "share",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "payer_contact_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "ChargeBudget",
+          "tablename": "oe_service_charges_budget",
+          "docstring": "The yearly service charge budget of an association.",
+          "columns": [
+            {
+              "name": "association_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_service_charges_association.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "year",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "demand_frequency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "default_key_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "approved_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "approved_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            }
+          ],
+          "relationships": [
+            {
+              "name": "lines",
+              "type": "one-to-many",
+              "annotation": "Mapped[list[BudgetLine]]"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetLine",
+          "tablename": "oe_service_charges_budget_line",
+          "docstring": "One cost category of a budget, split over the units by one key.",
+          "columns": [
+            {
+              "name": "budget_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_service_charges_budget.id"
+            },
+            {
+              "name": "category",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "description",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "key_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_service_charges_key.id"
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "ChargeDemand",
+          "tablename": "oe_service_charges_demand",
+          "docstring": "One unit's demand for one period; unique per (budget, unit, period), so a rerun is idempotent.",
+          "columns": [
+            {
+              "name": "budget_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_service_charges_budget.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "unit_ref",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "period",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "issue_date",
+              "annotation": "Mapped[date]",
+              "sql_type": "SafeDate",
+              "nullable": false
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "payer_contact_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "invoice_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "YearEndReconciliation",
+          "tablename": "oe_service_charges_reconciliation",
+          "docstring": "Year-end balance of a budget: actual costs by category and the balance of every unit.",
+          "columns": [
+            {
+              "name": "budget_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_service_charges_budget.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "actual_by_category",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "unit_balances",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "unallocated",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "sources",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "total_actual",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "total_demanded",
+              "annotation": "Mapped[Decimal]",
+              "sql_type": "Numeric",
+              "nullable": false
+            },
+            {
+              "name": "posted_invoice_ids",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "posted_credit_ids",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "posted_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "posted_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/",
+          "handler": "list_associations",
+          "response_model": "AssociationListResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/",
+          "handler": "create_association",
+          "response_model": "AssociationResponse",
+          "request_schema": "AssociationCreate"
+        },
+        {
+          "method": "POST",
+          "path": "/demands/run",
+          "handler": "run_demands",
+          "response_model": "DemandRunResponse",
+          "request_schema": "DemandRunRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/keys/{key_id}",
+          "handler": "get_key",
+          "response_model": "KeyResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PATCH",
+          "path": "/keys/{key_id}",
+          "handler": "update_key",
+          "response_model": "KeyResponse",
+          "request_schema": "KeyUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/keys/{key_id}",
+          "handler": "delete_key",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/budgets/{budget_id}",
+          "handler": "get_budget",
+          "response_model": "BudgetResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PATCH",
+          "path": "/budgets/{budget_id}",
+          "handler": "update_budget",
+          "response_model": "BudgetResponse",
+          "request_schema": "BudgetUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/budgets/{budget_id}",
+          "handler": "delete_budget",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/budgets/{budget_id}/approve",
+          "handler": "approve_budget",
+          "response_model": "BudgetResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/budgets/{budget_id}/units",
+          "handler": "budget_units",
+          "response_model": "BudgetUnitsResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/budgets/{budget_id}/lines",
+          "handler": "add_budget_line",
+          "response_model": "BudgetLineResponse",
+          "request_schema": "BudgetLineIn"
+        },
+        {
+          "method": "PATCH",
+          "path": "/budget-lines/{line_id}",
+          "handler": "update_budget_line",
+          "response_model": "BudgetLineResponse",
+          "request_schema": "BudgetLineUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/budget-lines/{line_id}",
+          "handler": "delete_budget_line",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/budgets/{budget_id}/demands",
+          "handler": "list_demands",
+          "response_model": "list[DemandResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/budgets/{budget_id}/reconciliation",
+          "handler": "get_reconciliation",
+          "response_model": "ReconciliationResponse | None",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/budgets/{budget_id}/reconciliation/compute",
+          "handler": "compute_reconciliation",
+          "response_model": "ReconciliationResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/budgets/{budget_id}/reconciliation/post",
+          "handler": "post_reconciliation",
+          "response_model": "ReconciliationResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/{association_id}",
+          "handler": "get_association",
+          "response_model": "AssociationResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{association_id}",
+          "handler": "update_association",
+          "response_model": "AssociationResponse",
+          "request_schema": "AssociationUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/{association_id}",
+          "handler": "delete_association",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/{association_id}/keys",
+          "handler": "list_keys",
+          "response_model": "list[KeyResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/{association_id}/keys",
+          "handler": "create_key",
+          "response_model": "KeyResponse",
+          "request_schema": "KeyCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/{association_id}/budgets",
+          "handler": "list_budgets",
+          "response_model": "list[BudgetResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/{association_id}/budgets",
+          "handler": "create_budget",
+          "response_model": "BudgetResponse",
+          "request_schema": "BudgetCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/{association_id}/validate",
+          "handler": "validate_association",
+          "response_model": "ValidationResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/{association_id}/export",
+          "handler": "export_association",
+          "response_model": "None",
+          "request_schema": "None"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "AssociationCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "registration",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "fiscal_year_start_month",
+              "type": "int"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "AssociationUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "registration",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            },
+            {
+              "name": "currency",
+              "type": "str | None"
+            },
+            {
+              "name": "fiscal_year_start_month",
+              "type": "int | None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "AssociationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "legal_entity_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "registration",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "fiscal_year_start_month",
+              "type": "int"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "AssociationListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[AssociationResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "KeyLineIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "unit_ref",
+              "type": "str"
+            },
+            {
+              "name": "unit_label",
+              "type": "str"
+            },
+            {
+              "name": "share",
+              "type": "Decimal"
+            },
+            {
+              "name": "payer_contact_id",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "KeyCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "method",
+              "type": "KeyMethod",
+              "default": "'permille'"
+            },
+            {
+              "name": "lines",
+              "type": "list[KeyLineIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "KeyUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "method",
+              "type": "KeyMethod | None",
+              "default": "None"
+            },
+            {
+              "name": "lines",
+              "type": "list[KeyLineIn] | None"
+            }
+          ]
+        },
+        {
+          "class_name": "KeyLineResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "unit_ref",
+              "type": "str"
+            },
+            {
+              "name": "unit_label",
+              "type": "str"
+            },
+            {
+              "name": "share",
+              "type": "Money"
+            },
+            {
+              "name": "payer_contact_id",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "KeyResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "association_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "method",
+              "type": "str"
+            },
+            {
+              "name": "lines",
+              "type": "list[KeyLineResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetLineIn",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "category",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal"
+            },
+            {
+              "name": "key_id",
+              "type": "uuid.UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetLineUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "category",
+              "type": "str | None"
+            },
+            {
+              "name": "description",
+              "type": "str | None"
+            },
+            {
+              "name": "amount",
+              "type": "Decimal | None"
+            },
+            {
+              "name": "key_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "year",
+              "type": "int"
+            },
+            {
+              "name": "demand_frequency",
+              "type": "Frequency",
+              "default": "'quarterly'"
+            },
+            {
+              "name": "default_key_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            },
+            {
+              "name": "lines",
+              "type": "list[BudgetLineIn]"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "demand_frequency",
+              "type": "Frequency | None",
+              "default": "None"
+            },
+            {
+              "name": "default_key_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetLineResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "category",
+              "type": "str"
+            },
+            {
+              "name": "description",
+              "type": "str"
+            },
+            {
+              "name": "amount",
+              "type": "Money"
+            },
+            {
+              "name": "key_id",
+              "type": "uuid.UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "association_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "year",
+              "type": "int"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "demand_frequency",
+              "type": "str"
+            },
+            {
+              "name": "default_key_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "approved_at",
+              "type": "datetime | None",
+              "default": "None"
+            },
+            {
+              "name": "approved_by",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "lines",
+              "type": "list[BudgetLineResponse]"
+            },
+            {
+              "name": "total",
+              "type": "Money"
+            }
+          ]
+        },
+        {
+          "class_name": "UnitChargeResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "unit_ref",
+              "type": "str"
+            },
+            {
+              "name": "yearly",
+              "type": "Money"
+            },
+            {
+              "name": "per_period",
+              "type": "list[Money]"
+            }
+          ]
+        },
+        {
+          "class_name": "BudgetUnitsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "budget_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "periods",
+              "type": "int"
+            },
+            {
+              "name": "units",
+              "type": "list[UnitChargeResponse]"
+            }
+          ]
+        },
+        {
+          "class_name": "DemandRunRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "budget_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "period",
+              "type": "int"
+            },
+            {
+              "name": "issue_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "payment_terms_days",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "DemandResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "budget_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "unit_ref",
+              "type": "str"
+            },
+            {
+              "name": "period",
+              "type": "int"
+            },
+            {
+              "name": "issue_date",
+              "type": "date"
+            },
+            {
+              "name": "amount",
+              "type": "Money"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "payer_contact_id",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "invoice_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "DemandRunResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "period",
+              "type": "int"
+            },
+            {
+              "name": "created",
+              "type": "int"
+            },
+            {
+              "name": "skipped",
+              "type": "int"
+            },
+            {
+              "name": "invoice_ids",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "ReconciliationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "budget_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "actual_by_category",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "unit_balances",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "unallocated",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "sources",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "total_actual",
+              "type": "Money"
+            },
+            {
+              "name": "total_demanded",
+              "type": "Money"
+            },
+            {
+              "name": "posted_invoice_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "posted_credit_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "posted_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ValidationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "checked",
+              "type": "int"
+            },
+            {
+              "name": "results",
+              "type": "list[dict[str, Any]]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "finance",
+        "legal_entities",
+        "service"
+      ]
+    },
+    {
       "module_id": "signing",
       "module_label": "E-Signature Registry",
       "module_category": "core",
@@ -294013,13 +293719,6 @@
       "total_files": 4
     },
     {
-      "name": "leasing",
-      "ts_files": 6,
-      "css_files": 0,
-      "test_files": 0,
-      "total_files": 6
-    },
-    {
       "name": "legal-entities",
       "ts_files": 4,
       "css_files": 0,
@@ -294084,10 +293783,10 @@
     },
     {
       "name": "modules",
-      "ts_files": 38,
+      "ts_files": 34,
       "css_files": 0,
-      "test_files": 14,
-      "total_files": 39
+      "test_files": 13,
+      "total_files": 35
     },
     {
       "name": "ncr",
@@ -294112,10 +293811,10 @@
     },
     {
       "name": "onboarding",
-      "ts_files": 42,
+      "ts_files": 38,
       "css_files": 0,
-      "test_files": 22,
-      "total_files": 42
+      "test_files": 20,
+      "total_files": 38
     },
     {
       "name": "payment-clock",
@@ -294196,10 +293895,10 @@
     },
     {
       "name": "prefab",
-      "ts_files": 6,
+      "ts_files": 5,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 6
+      "total_files": 5
     },
     {
       "name": "preliminaries",
@@ -294231,10 +293930,10 @@
     },
     {
       "name": "procurement_concept",
-      "ts_files": 26,
+      "ts_files": 25,
       "css_files": 0,
       "test_files": 3,
-      "total_files": 26
+      "total_files": 25
     },
     {
       "name": "progress",
@@ -294468,6 +294167,13 @@
       "total_files": 8
     },
     {
+      "name": "service-charges",
+      "ts_files": 4,
+      "css_files": 0,
+      "test_files": 0,
+      "total_files": 4
+    },
+    {
       "name": "settings",
       "ts_files": 50,
       "css_files": 0,
@@ -294529,13 +294235,6 @@
       "css_files": 0,
       "test_files": 6,
       "total_files": 14
-    },
-    {
-      "name": "solution_packages",
-      "ts_files": 15,
-      "css_files": 0,
-      "test_files": 4,
-      "total_files": 15
     },
     {
       "name": "source-data",
@@ -295642,13 +295341,6 @@
       "users"
     ],
     "latam_pack": [],
-    "leasing": [
-      "contacts",
-      "documents",
-      "finance",
-      "legal_entities",
-      "projects"
-    ],
     "legal_entities": [
       "projects"
     ],
@@ -296232,6 +295924,12 @@
       "projects",
       "users"
     ],
+    "service_charges": [
+      "finance",
+      "legal_entities",
+      "projects",
+      "service"
+    ],
     "signing": [
       "projects",
       "users"
@@ -296436,14 +296134,14 @@
   "statistics": {
     "backend_modules": 225,
     "modules_with_manifests": 223,
-    "total_models": 842,
-    "total_columns": 9923,
-    "total_relationships": 255,
-    "total_routes": 4850,
-    "total_schemas": 4356,
-    "total_python_files": 3034,
-    "frontend_features": 221,
-    "frontend_ts_files": 3885,
+    "total_models": 844,
+    "total_columns": 9917,
+    "total_relationships": 256,
+    "total_routes": 4853,
+    "total_schemas": 4354,
+    "total_python_files": 3028,
+    "frontend_features": 220,
+    "frontend_ts_files": 3858,
     "frontend_backend_mapped": 198
   },
   "frontend_backend_mapping": {
@@ -296567,7 +296265,6 @@
     "issues": null,
     "jobs": "jobs",
     "labor-rates": "labor_rates",
-    "leasing": "leasing",
     "legal-entities": "legal_entities",
     "markups": "markups",
     "match": "match",
@@ -296632,6 +296329,7 @@
     "schedule-advanced": "schedule_advanced",
     "search": "search",
     "service": "service",
+    "service-charges": "service_charges",
     "settings": null,
     "setup": null,
     "signing": "signing",
@@ -296641,7 +296339,6 @@
     "site-supervision": "site_supervision",
     "site_sensors": "site_sensors",
     "smart_views": "smart_views",
-    "solution_packages": null,
     "source-data": "source_data",
     "staffing": "staffing",
     "stakeholders": "stakeholders",

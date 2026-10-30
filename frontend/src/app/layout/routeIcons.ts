@@ -252,6 +252,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/property-dev': Building2,
   '/accommodation': Building2,
   '/leasing': KeyRound,
+  '/service-charges': Scale,
   '/property-dev/dashboards': BarChart3,
   '/property-dev/settings/house-types': Building2,
   '/property-dev/settings/document-templates': FileText,
