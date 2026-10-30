@@ -146,8 +146,13 @@ describe('<StepLook>', () => {
 
     await waitFor(() => expect(onNext).toHaveBeenCalledTimes(1));
     const blueprint = MENU_PRESETS.find((p) => p.id === 'blueprint')!.value;
+    // The server's WorkspaceAppearance forbids extra keys: the personal text size
+    // in this payload made every save a 422.
+    const { text: _text, accentHex: _hex, ...axes } = PLATFORM_APPEARANCE as typeof PLATFORM_APPEARANCE & {
+      accentHex?: string;
+    };
     expect(apiPut).toHaveBeenCalledWith('/v1/branding/', {
-      appearance: { ...PLATFORM_APPEARANCE, accent: 'emerald', menu: blueprint },
+      appearance: { ...axes, accent: 'emerald', accent_hex: null, menu: blueprint },
     });
     const s = useAppearanceStore.getState();
     expect(s.workspace?.accent).toBe('emerald');

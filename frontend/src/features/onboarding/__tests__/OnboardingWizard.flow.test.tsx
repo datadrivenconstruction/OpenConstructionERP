@@ -292,6 +292,18 @@ describe('the onboarding wizard, first screen to the app', () => {
     expect(useViewModeStore.getState().mode).toBe('advanced');
   }, 30_000);
 
+  it('moves keyboard focus to the new step heading on every step change, not on first paint', async () => {
+    renderWizard();
+    const welcome = await heading('Welcome to OpenConstructionERP');
+    expect(document.activeElement).not.toBe(welcome);
+    click(/Get Started/);
+    const start = await heading('How would you like to start?');
+    await waitFor(() => expect(document.activeElement).toBe(start));
+    click('Back');
+    const again = await heading('Welcome to OpenConstructionERP');
+    await waitFor(() => expect(document.activeElement).toBe(again));
+  });
+
   it('goes back one step at a time from the summary to the welcome screen, keeping the pick', async () => {
     renderWizard();
     await toProfileStep();

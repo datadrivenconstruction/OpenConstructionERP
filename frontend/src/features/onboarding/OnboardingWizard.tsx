@@ -1,6 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-import { useState, useCallback, useEffect, useMemo, type ReactNode } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -67,6 +67,7 @@ import {
   SUPPORTED_LANGUAGES,
 } from '@/app/i18n';
 import { sortLanguagesByName } from '@/shared/lib/languageOrder';
+import { adoptMarketCurrency } from './marketCurrency';
 import { useToastStore } from '@/stores/useToastStore';
 import { FlagshipDemoCards } from './FlagshipDemoCards';
 import { ReadyPackBrowser } from './ReadyPackBrowser';
@@ -3348,8 +3349,16 @@ function PartnerPackInstaller({
 
       {/* Progress checklist — the five orchestrated steps */}
       {showChecklist && selectedPack && (
-        <div className="mb-4 rounded-xl bg-surface-secondary/50 p-3">
-          <div className="mb-2 text-xs font-semibold text-content-secondary">
+        <div className="mb-4 rounded-xl bg-surface-secondary/50 p-3" data-testid="pp-checklist">
+          {/* The rows only change glyphs, which a screen reader never hears;
+              announce the step that is running and how the install ended. */}
+          <span className="sr-only" role="status" aria-live="polite">
+            {(() => {
+              const running = installing ? FULL_INSTALL_STEPS.find((k) => stepStates[k] === 'running') : undefined;
+              return running ? stepLabel(running) : '';
+            })()}
+          </span>
+          <div className="mb-2 text-xs font-semibold text-content-secondary" role="status">
             {installedSlug
               ? t('onboarding.pp_checklist_done', { defaultValue: 'Workspace ready' })
               : installFailed
@@ -4171,9 +4180,8 @@ export function StepDataSetup({
     if (backgroundLoad && dbUntouched && selectedRegion) {
       // Fire and forget — don't await, just start in background.
       void handleLoadDb();
-      // Apply the active preset's locale + classification too, so a one-tap
-      // "Continue" still localizes the workspace.
-      applyLocale(selectedPack.locale);
+      // The language stays the one picked on the first step: the preset's
+      // locale here switched an English reader in India to Hindi.
       recordClassification(selectedPack.classification);
       addToast({
         type: 'info',
@@ -4182,10 +4190,16 @@ export function StepDataSetup({
           defaultValue: 'You can continue working. We\'ll notify you when it\'s ready.',
         }),
       });
-    } else if (installDemo && !demoInstalled && !installingDemo) {
-      // Advanced manual path: install the toggled built-in demo project.
+    }
+    // Independent of the base: the untouched path used to skip the demo the
+    // toggle had on.
+    if (installDemo && !demoInstalled && !installingDemo && packDemoState === 'idle') {
       handleInstallDemo();
     }
+    const baseId = loadedDb?.id ?? selectedRegion;
+    void adoptMarketCurrency(
+      selectedMarket?.currency ?? CWICR_DATABASES.find((d) => d.id === baseId)?.currency,
+    );
     // Ask for the semantic search model if the user left it ticked and nothing
     // has fetched it yet. Deliberately not awaited and deliberately not
     // reported: the server answers as soon as the transfer is scheduled, a
@@ -4209,8 +4223,9 @@ export function StepDataSetup({
     handleLoadDb,
     packDbState,
     packLocaleState,
+    packDemoState,
     selectedPack,
-    applyLocale,
+    selectedMarket,
     recordClassification,
     installDemo,
     demoInstalled,
@@ -4996,6 +5011,23 @@ export function OnboardingWizard() {
   // Next and Back walk the same order the stepper shows. Next skips Data
   // after a pack install (the pack brings its own); Back returns to the
   // nearest earlier step the reader was actually on.
+  // A step change replaces the whole card, so keyboard and screen-reader users
+  // were left on <body>. Move focus to the new step's heading (not on mount).
+  const stepBodyRef = useRef<HTMLDivElement>(null);
+  const shownStep = useRef(step);
+  useEffect(() => {
+    if (shownStep.current === step) return;
+    shownStep.current = step;
+    const frame = requestAnimationFrame(() => {
+      const heading = stepBodyRef.current?.querySelector<HTMLElement>('h1, h2');
+      if (!heading) return;
+      if (!heading.hasAttribute('tabindex')) heading.setAttribute('tabindex', '-1');
+      heading.focus({ preventScroll: true });
+      heading.scrollIntoView?.({ block: 'nearest' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [step]);
+
   const goNext = useCallback(() => {
     setStep((s) => nextStep(s, packFlow));
   }, [packFlow]);
@@ -5228,7 +5260,7 @@ export function OnboardingWizard() {
           ``py-8 sm:py-12`` added ~150px of shell chrome alone. */}
       <div className="relative flex flex-1 items-start justify-center px-4 sm:px-6 pt-4 pb-8">
         <div className="w-full max-w-[960px]">
-          <div className="px-6 sm:px-10 py-6 sm:py-8">
+          <div ref={stepBodyRef} className="px-6 sm:px-10 py-6 sm:py-8">
             <StepTransition stepKey={step}>
               {step === 0 && (
                 <StepWelcome onNext={goNext} onLanguageChange={handleLanguageChange} />

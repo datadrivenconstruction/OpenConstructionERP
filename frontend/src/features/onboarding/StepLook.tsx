@@ -295,7 +295,10 @@ export function StepLook({ onNext, onBack }: { onNext: () => void; onBack: () =>
     if (isAdmin) {
       setSaving(true);
       try {
-        await apiPut('/v1/branding/', { appearance: { ...style, menu } });
+        // Same wire shape as Settings: text size is personal and the server
+        // rejects the whole save on it (422), and the company colour is snake_case.
+        const { accentHex, text: _text, ...axes } = style;
+        await apiPut('/v1/branding/', { appearance: { ...axes, accent_hex: accentHex ?? null, menu } });
         store.setWorkspaceDefault(style);
         store.setWorkspaceMenu(menu);
       } catch {
