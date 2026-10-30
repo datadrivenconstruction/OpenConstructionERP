@@ -137201,6 +137201,7 @@
       "files": [
         "__init__.py",
         "consent.py",
+        "coord_reconcile.py",
         "coord_transforms.py",
         "events.py",
         "geocoder.py",
@@ -137211,6 +137212,7 @@
         "ogc_router.py",
         "permissions.py",
         "raster_pipeline.py",
+        "repairs.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -180998,6 +181000,24 @@
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
+            },
+            {
+              "name": "qr_token",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "delivery_note_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "element_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
             }
           ],
           "relationships": []
@@ -181114,6 +181134,13 @@
           "request_schema": "AdvanceStageRequest"
         },
         {
+          "method": "POST",
+          "path": "/units/receive/",
+          "handler": "receive_by_qr",
+          "response_model": "PrefabUnitResponse",
+          "request_schema": "ReceiveByQrRequest"
+        },
+        {
           "method": "GET",
           "path": "/units/{unit_id}/events/",
           "handler": "list_unit_events",
@@ -181159,6 +181186,10 @@
               "default": "None"
             },
             {
+              "name": "element_ref",
+              "type": "str | None"
+            },
+            {
               "name": "notes",
               "type": "str | None",
               "default": "None"
@@ -181193,6 +181224,10 @@
               "name": "bim_element_ids",
               "type": "list[str] | None",
               "default": "None"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None"
             },
             {
               "name": "notes",
@@ -181254,6 +181289,21 @@
               "default": "None"
             },
             {
+              "name": "qr_token",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "delivery_note_ref",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
               "name": "created_at",
               "type": "datetime"
             },
@@ -181308,6 +181358,28 @@
             {
               "name": "assembly_id",
               "type": "UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ReceiveByQrRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A unit scanned on arrival: its QR token and the delivery note it came with.",
+          "fields": [
+            {
+              "name": "qr_token",
+              "type": "str"
+            },
+            {
+              "name": "delivery_note_ref",
+              "type": "str"
+            },
+            {
+              "name": "note",
+              "type": "str | None",
               "default": "None"
             }
           ]
@@ -187246,6 +187318,9 @@
         "permissions.py",
         "permit_conditions.py",
         "plan_source.py",
+        "profile.py",
+        "profile_codes.py",
+        "profile_service.py",
         "router.py",
         "rule_snapshot.py",
         "schemas.py",
@@ -188092,6 +188167,62 @@
             }
           ],
           "relationships": []
+        },
+        {
+          "class_name": "ProfileConfirmation",
+          "tablename": "oe_procurement_concept_profile_confirmation",
+          "docstring": "This instance's confirmation of one profile value: the exact value (hash) at one path, checked at source.",
+          "columns": [
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "jurisdiction",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "path",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "value_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "confirmed_by",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "confirmed_at",
+              "annotation": "Mapped[datetime]",
+              "sql_type": "DateTime",
+              "nullable": false
+            },
+            {
+              "name": "source_checked",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "note",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            }
+          ],
+          "relationships": []
         }
       ],
       "routes": [
@@ -188359,6 +188490,23 @@
           "method": "GET",
           "path": "/frameworks/{framework_id}/ledger",
           "handler": "framework_ledger"
+        },
+        {
+          "method": "GET",
+          "path": "/profiles/{code}/values",
+          "handler": "profile_values",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "POST",
+          "path": "/profiles/{code}/confirmations",
+          "handler": "confirm_profile_value",
+          "request_schema": "ProfileConfirmIn"
+        },
+        {
+          "method": "DELETE",
+          "path": "/profiles/confirmations/{confirmation_id}",
+          "handler": "revoke_profile_value"
         }
       ],
       "schemas": [
@@ -188626,6 +188774,31 @@
             },
             {
               "name": "reason",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ProfileConfirmIn",
+          "bases": [
+            "_In"
+          ],
+          "docstring": "Confirm one profile value on this instance: the value the person saw (path + hash) and where they checked it.",
+          "fields": [
+            {
+              "name": "path",
+              "type": "str"
+            },
+            {
+              "name": "value_hash",
+              "type": "str"
+            },
+            {
+              "name": "source_checked",
+              "type": "str"
+            },
+            {
+              "name": "note",
               "type": "str"
             }
           ]
@@ -195341,6 +195514,12 @@
           "path": "/{project_id}/restore/",
           "handler": "restore_project",
           "response_model": "ProjectResponse",
+          "request_schema": "ProjectService"
+        },
+        {
+          "method": "POST",
+          "path": "/{project_id}/purge/",
+          "handler": "purge_project",
           "request_schema": "ProjectService"
         },
         {
@@ -295211,10 +295390,10 @@
     },
     {
       "name": "modules",
-      "ts_files": 34,
+      "ts_files": 38,
       "css_files": 0,
-      "test_files": 13,
-      "total_files": 35
+      "test_files": 14,
+      "total_files": 39
     },
     {
       "name": "ncr",
@@ -295239,10 +295418,10 @@
     },
     {
       "name": "onboarding",
-      "ts_files": 38,
+      "ts_files": 42,
       "css_files": 0,
-      "test_files": 20,
-      "total_files": 38
+      "test_files": 22,
+      "total_files": 42
     },
     {
       "name": "payment-clock",
@@ -295323,10 +295502,10 @@
     },
     {
       "name": "prefab",
-      "ts_files": 5,
+      "ts_files": 6,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 5
+      "total_files": 6
     },
     {
       "name": "preliminaries",
@@ -295358,10 +295537,10 @@
     },
     {
       "name": "procurement_concept",
-      "ts_files": 25,
+      "ts_files": 26,
       "css_files": 0,
       "test_files": 3,
-      "total_files": 25
+      "total_files": 26
     },
     {
       "name": "progress",
@@ -295663,6 +295842,13 @@
       "css_files": 0,
       "test_files": 6,
       "total_files": 14
+    },
+    {
+      "name": "solution_packages",
+      "ts_files": 15,
+      "css_files": 0,
+      "test_files": 4,
+      "total_files": 15
     },
     {
       "name": "source-data",
@@ -297569,14 +297755,14 @@
   "statistics": {
     "backend_modules": 226,
     "modules_with_manifests": 224,
-    "total_models": 848,
-    "total_columns": 9965,
+    "total_models": 849,
+    "total_columns": 9976,
     "total_relationships": 257,
-    "total_routes": 4872,
-    "total_schemas": 4376,
-    "total_python_files": 3040,
-    "frontend_features": 221,
-    "frontend_ts_files": 3864,
+    "total_routes": 4877,
+    "total_schemas": 4378,
+    "total_python_files": 3045,
+    "frontend_features": 222,
+    "frontend_ts_files": 3889,
     "frontend_backend_mapped": 199
   },
   "frontend_backend_mapping": {
@@ -297775,6 +297961,7 @@
     "site-supervision": "site_supervision",
     "site_sensors": "site_sensors",
     "smart_views": "smart_views",
+    "solution_packages": null,
     "source-data": "source_data",
     "staffing": "staffing",
     "stakeholders": "stakeholders",
