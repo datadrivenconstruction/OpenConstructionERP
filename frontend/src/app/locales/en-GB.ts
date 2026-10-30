@@ -563,6 +563,12 @@ const resource = {
     "prefab.receive_submit": "Book delivery",
     "prefab.type_rebar_cage": "Rebar cage",
     "onboarding.load_database_named": "Load {{name}}",
+    "onboarding.pack_sa": "Saudi Arabia",
+    "onboarding.installing_label": "Installing…",
+    "onboarding.flagship_lede_market": "Sample projects from your market, ready to open.",
+    "onboarding.flagship_lede_global": "No sample project for your market yet. This one shows the whole platform.",
+    "onboarding.pp_grid_label": "Partner packs",
+    "onboarding.country_pack_grid_label": "Countries",
   }
 } as { translation: Record<string, string> };
 

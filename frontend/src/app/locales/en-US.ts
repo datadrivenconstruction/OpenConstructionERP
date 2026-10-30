@@ -1563,7 +1563,6 @@ const resource = {
     "benchmarks.portfolio_note_budget_and_boq_other": "Based on {{count}} of your projects with an approved budget and a priced bid schedule.",
     "onboarding.mod_field_time_desc": "Signed daily timesheets for labor and equipment, coded to bid schedule",
     "onboarding.mod_portfolio_desc": "Schedule tree across projects with cross-schedule links and rollup CPM",
-    "onboarding.load_database_named": "Load {{name}}",
     "contracts.retention_release": "Retainage release",
     "contracts.tpl_family_hint": "Free text used to group the catalog, not a fixed list.",
     "credentials.empty_desc": "Add the licenses, certifications and training the people and firms on this project hold, and the register starts warning you before any of them lapse.",

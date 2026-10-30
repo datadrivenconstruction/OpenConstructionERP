@@ -71,6 +71,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       <button
         ref={ref}
         disabled={isDisabled}
+        aria-busy={loading || undefined}
         className={clsx(
           'inline-flex items-center justify-center',
           'font-medium whitespace-nowrap select-none',
@@ -78,13 +79,18 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2',
           variantStyles[variant],
           sizeStyles[size],
-          isDisabled && 'opacity-40 pointer-events-none',
+          isDisabled && 'pointer-events-none',
+          isDisabled && !loading && 'opacity-40',
           className,
         )}
         {...props}
       >
         {loading ? (
-          <Spinner size={size} />
+          // Keep the label beside the spinner: a bare spinner tells nobody what is running.
+          <>
+            <Spinner size={size} />
+            {children && <span className="ms-2 inline-flex items-center">{children}</span>}
+          </>
         ) : (
           <>
             {icon && iconPosition === 'left' && <span className="shrink-0">{icon}</span>}
@@ -107,7 +113,8 @@ function Spinner({ size = 'md' }: { size?: ButtonSize }) {
   const sizeMap = { sm: 'h-3.5 w-3.5', md: 'h-4 w-4', lg: 'h-5 w-5' };
   return (
     <svg
-      className={clsx('animate-spin', sizeMap[size])}
+      aria-hidden="true"
+      className={clsx('shrink-0 animate-spin', sizeMap[size])}
       xmlns="http://www.w3.org/2000/svg"
       fill="none"
       viewBox="0 0 24 24"

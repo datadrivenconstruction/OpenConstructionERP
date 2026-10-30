@@ -2329,8 +2329,10 @@ export function SettingsPage() {
                             localStorage.removeItem('oe_onboarding_completed_version');
                             localStorage.removeItem('oe_lang_explicit');
                           } catch { /* ignore storage errors */ }
-                          void apiDelete('/v1/users/me/onboarding/complete/').catch(() => {});
-                          window.location.href = '/onboarding';
+                          // Clear the server flag first: it, not this browser, decides whether the wizard shows.
+                          void apiDelete('/v1/users/me/onboarding/complete/').catch(() => {}).finally(() => {
+                            window.location.href = '/onboarding';
+                          });
                         }}
                       >
                         {t('common.open', { defaultValue: 'Open' })}

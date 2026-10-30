@@ -429,7 +429,29 @@ describe('the ways out of the wizard', () => {
     expect(onboardingPost().company_type).toBe('full_enterprise');
   });
 
-  it('a wizard already finished on this browser sends the user straight to the app', async () => {
+  it('an account finished on another browser goes straight to the app', async () => {
+    const base = api.apiGet.getMockImplementation()!;
+    api.apiGet.mockImplementation((path: string) =>
+      path === '/v1/users/me/onboarding/' ? Promise.resolve({ completed: true }) : base(path),
+    );
+    renderWizard();
+    await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));
+    expect(screen.queryByRole('heading', { name: 'Welcome to OpenConstructionERP' })).toBeNull();
+    expect(localStorage.getItem('oe_onboarding_completed')).toBe('true');
+  });
+
+  it('a restart cleared on the server shows the wizard despite a stale local flag', async () => {
+    localStorage.setItem('oe_onboarding_completed', 'true');
+    renderWizard();
+    await heading('Welcome to OpenConstructionERP');
+    expect(localStorage.getItem('oe_onboarding_completed')).toBeNull();
+  });
+
+  it('a failed server read falls back to the local flag', async () => {
+    const base = api.apiGet.getMockImplementation()!;
+    api.apiGet.mockImplementation((path: string) =>
+      path === '/v1/users/me/onboarding/' ? Promise.reject(new Error('offline')) : base(path),
+    );
     localStorage.setItem('oe_onboarding_completed', 'true');
     renderWizard();
     await waitFor(() => expect(screen.getByTestId('location').textContent).toBe('/'));

@@ -88,7 +88,7 @@ function renderWizard() {
 /** Welcome -> start choice -> the profile step. */
 async function openProfileStep() {
   renderWizard();
-  fireEvent.click(screen.getByRole('button', { name: /Get Started/ }));
+  fireEvent.click(await screen.findByRole('button', { name: /Get Started/ }));
   fireEvent.click(await screen.findByRole('button', { name: /Choose Your Profile/ }));
   await screen.findByRole('heading', { name: 'What does your company do?' });
   // The catalogue arrives after the first paint.

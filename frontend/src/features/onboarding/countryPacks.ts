@@ -143,6 +143,18 @@ export const COUNTRY_PACKS: CountryPack[] = [
     classification: 'MasterFormat',
   },
   {
+    // No Saudi cost base ships yet, so the Gulf market base stands in; the
+    // preset still gives a Saudi reader their own country and a Riyadh example.
+    id: 'sa',
+    labelKey: 'onboarding.pack_sa',
+    labelDefault: 'Saudi Arabia',
+    flagId: 'sa',
+    locale: 'ar',
+    region: 'AR_DUBAI',
+    demoId: 'mixed-use-riyadh',
+    classification: 'MasterFormat',
+  },
+  {
     id: 'in',
     labelKey: 'onboarding.pack_in',
     labelDefault: 'India / South Asia',

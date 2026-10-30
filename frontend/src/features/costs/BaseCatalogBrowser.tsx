@@ -20,6 +20,7 @@ import type { BaseCatalog, BaseFamily, BaseVariant } from './baseCatalog';
 import { canReturnHome, effectiveActiveMarkets, languageName, variantMatches } from './baseCatalog';
 import { DEPTH_BANDS, baseDepthLevel } from './baseDepth';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { onRovingListKeyDown } from '@/shared/lib/rovingFocus';
 
 // Founder-requested family order for the base picker: China first, then the
 // flagship Global CWICR base (GESN / FER / TER) second, then every other family
@@ -560,8 +561,9 @@ export function BaseCatalogBrowser({
           family is a special block and there is no separate grouping heading;
           China is first, the Global CWICR (GESN / FER / TER) base second, then
           the rest. */}
-      <div className="space-y-3">
-        {familyRows.map(({ family, variants }) => {
+      {/* One Tab stop for the family headers; arrows move between them. */}
+      <div className="space-y-3" onKeyDown={(e) => onRovingListKeyDown(e, '[data-family-header]')}>
+        {familyRows.map(({ family, variants }, familyIndex) => {
           // Every family badges with its own origin flag; the Russia base
           // (GESN / FER / TER norm lineage) carries the Russian flag from its
           // backend origin_flag.
@@ -595,6 +597,8 @@ export function BaseCatalogBrowser({
             <section key={family.key}>
               <button
                 type="button"
+                data-family-header=""
+                tabIndex={familyIndex === 0 ? 0 : -1}
                 aria-expanded={open}
                 onClick={() => toggleFamily(family.key)}
                 className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left shadow-xs transition-all duration-normal ease-oe hover:shadow-sm ${

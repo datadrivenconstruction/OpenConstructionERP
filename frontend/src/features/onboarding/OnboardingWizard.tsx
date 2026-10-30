@@ -166,6 +166,7 @@ import {
 import { SemanticModelCard } from './SemanticModelCard';
 import { StepLook } from './StepLook';
 import { SetupSummary } from './SetupSummary';
+import { onRadioGroupKeyDown, rovingTabIndex } from '@/shared/lib/rovingFocus';
 import { loadWizardProgress, saveWizardProgress, clearWizardProgress } from './wizardProgress';
 import { aiEstimatorApi } from '@/features/ai-estimator/api';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
@@ -683,6 +684,26 @@ export function markOnboardingCompleted(): Promise<MeOnboarding | null> {
   return apiPost<MeOnboarding>('/v1/users/me/onboarding/complete/', undefined).catch(() => null);
 }
 
+/**
+ * Gate decision from the server record: completed there means completed on
+ * every browser, and not completed clears a stale local cache. A failed fetch
+ * (null) falls back to the local flag.
+ */
+export function resolveCompletedGate(server: { completed?: boolean } | null): boolean {
+  if (server == null) return isOnboardingCompleted();
+  try {
+    if (server.completed) {
+      localStorage.setItem('oe_onboarding_completed', 'true');
+    } else {
+      localStorage.removeItem('oe_onboarding_completed');
+      localStorage.removeItem('oe_onboarding_completed_version');
+    }
+  } catch {
+    // Storage unavailable -- the server answer still decides.
+  }
+  return !!server.completed;
+}
+
 /** Check whether onboarding has been completed. */
 export function isOnboardingCompleted(): boolean {
   try {
@@ -1091,9 +1112,12 @@ export function suggestDataSetup(
   const region = ownBase ?? getSuggestedRegion(lang);
   if (preset) return { region, packId: preset.id };
   const base = lang.split('-')[0] ?? 'en';
+  // Country before language: a country's own base names its market, the
+  // language only guesses one (Arabic would otherwise always mean the UAE).
   const byLocale = COUNTRY_PACKS.find((p) => p.locale === base);
   const byRegion = COUNTRY_PACKS.find((p) => p.region === region);
-  return { region, packId: (byLocale ?? byRegion ?? DEFAULT_COUNTRY_PACK).id };
+  const pick = ownBase ? (byRegion ?? byLocale) : (byLocale ?? byRegion);
+  return { region, packId: (pick ?? DEFAULT_COUNTRY_PACK).id };
 }
 
 /** Get the suggested demo project IDs for the current language */
@@ -3289,8 +3313,13 @@ function PartnerPackInstaller({
 
       {/* Pack grid */}
       {!isLoading && packs.length > 0 && (
-        <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {packs.map((pack) => {
+        <div
+          role="radiogroup"
+          aria-label={t('onboarding.pp_grid_label', { defaultValue: 'Partner packs' })}
+          onKeyDown={onRadioGroupKeyDown}
+          className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2"
+        >
+          {packs.map((pack, index) => {
             const isSelected = selectedSlug === pack.slug;
             // Same title, same reason as the first-run picker above.
             const name = packDisplayName(t, pack);
@@ -3301,7 +3330,9 @@ function PartnerPackInstaller({
                 type="button"
                 onClick={() => handleSelect(pack.slug)}
                 disabled={installing}
-                aria-pressed={isSelected}
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={rovingTabIndex(isSelected, index, packs.some((p) => p.slug === selectedSlug))}
                 className={clsx(
                   'flex items-start gap-3 rounded-xl p-3 text-left transition-all duration-200',
                   isSelected
@@ -3487,9 +3518,10 @@ function PackComponentRow({
             size="sm"
             onClick={onAction}
             disabled={disabled || state === 'running'}
-            icon={state === 'running' ? <Loader2 size={12} className="animate-spin" /> : undefined}
+            aria-busy={state === 'running' || undefined}
+            icon={state === 'running' ? <Loader2 size={12} className="animate-spin" aria-hidden /> : undefined}
           >
-            {actionLabel}
+            {state === 'running' ? t('onboarding.installing_label', { defaultValue: 'Installing…' }) : actionLabel}
           </Button>
         )}
       </div>
@@ -3591,7 +3623,12 @@ function CountryPackCard({
       </div>
 
       {/* Country grid */}
-      <div className="mb-4 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto pr-1 -mr-1 sm:grid-cols-3">
+      <div
+        role="radiogroup"
+        aria-label={t('onboarding.country_pack_grid_label', { defaultValue: 'Countries' })}
+        onKeyDown={onRadioGroupKeyDown}
+        className="mb-4 grid max-h-56 grid-cols-2 gap-2 overflow-y-auto pr-1 -mr-1 sm:grid-cols-3"
+      >
         {filteredPacks.length === 0 && (
           <div className="col-span-full py-6 text-center text-xs text-content-tertiary">
             {t('onboarding.country_pack_no_results', {
@@ -3600,7 +3637,7 @@ function CountryPackCard({
             })}
           </div>
         )}
-        {filteredPacks.map((pack) => {
+        {filteredPacks.map((pack, index) => {
           const isSelected = selectedPack.id === pack.id;
           return (
             <button
@@ -3608,7 +3645,9 @@ function CountryPackCard({
               type="button"
               onClick={() => !installing && onSelectPack(pack)}
               disabled={installing}
-              aria-pressed={isSelected}
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={rovingTabIndex(isSelected, index, filteredPacks.some((p) => p.id === selectedPack.id))}
               className={clsx(
                 'flex items-center gap-2 rounded-xl px-3 py-2 text-left transition-all duration-200',
                 isSelected
@@ -4366,7 +4405,7 @@ export function StepDataSetup({
             actually read on arrival. The partner pack installer is offered
             to admins only, like the Ready-made Pack card on the start step. */}
         {canInstallPartnerPacks && <PartnerPackInstaller onActivateLocale={applyLocale} />}
-        <FlagshipDemoCards />
+        <FlagshipDemoCards country={selectedPack.flagId} />
         <CountryPackCard
           packs={COUNTRY_PACKS}
           selectedPack={selectedPack}
@@ -4426,8 +4465,9 @@ export function StepDataSetup({
                   </span>
                 </div>
               ) : installingDemo ? (
-                <div className="flex items-center gap-2 text-sm text-content-secondary">
-                  <Loader2 size={14} className="animate-spin text-oe-blue" />
+                <div role="status" aria-busy="true" className="flex items-center gap-2 text-sm text-content-secondary">
+                  <Loader2 size={14} className="animate-spin text-oe-blue" aria-hidden />
+                  <span>{t('onboarding.installing_label', { defaultValue: 'Installing…' })}</span>
                 </div>
               ) : (
                 <ToggleSwitch
@@ -4894,7 +4934,21 @@ export function OnboardingWizard() {
      works (flag absent → guard passes → wizard shows). Computed once at
      mount so finishing the wizard (which sets the flag) doesn't yank the
      UI out from under the success step. */
-  const [alreadyCompleted] = useState(() => isOnboardingCompleted());
+  // The server flag decides, decided once on its first answer so finishing the
+  // wizard does not yank the success step; the local flag only covers a failed fetch.
+  const gateKey = useMeOnboardingQueryKey();
+  const { data: serverOnboarding, isFetchedAfterMount: gateFresh } = useQuery({
+    queryKey: gateKey,
+    queryFn: () => apiGet<{ completed: boolean }>('/v1/users/me/onboarding/').catch(() => null),
+    retry: false,
+    staleTime: 0,
+  });
+  const [alreadyCompleted, setAlreadyCompleted] = useState<boolean | null>(null);
+  useEffect(() => {
+    // A cached record can predate a restart made a moment ago, so wait for a fresh read.
+    if (alreadyCompleted !== null || !gateFresh || serverOnboarding === undefined) return;
+    setAlreadyCompleted(resolveCompletedGate(serverOnboarding));
+  }, [alreadyCompleted, gateFresh, serverOnboarding]);
 
   useEffect(() => {
     if (alreadyCompleted) {
@@ -4918,7 +4972,7 @@ export function OnboardingWizard() {
   const passQueryClient = useQueryClient();
   const passOnboardingKey = useMeOnboardingQueryKey();
   useEffect(() => {
-    if (alreadyCompleted || canInstallPacks || !packProfile) return;
+    if (alreadyCompleted !== false || canInstallPacks || !packProfile) return;
     let cancelled = false;
     // The dashboard sends back here anyone whose server record is not
     // completed, and it reads that record from the shared cache entry. So the
@@ -5170,7 +5224,7 @@ export function OnboardingWizard() {
   // redirects to the app. Returning null (instead of the wizard) is what
   // actually stops the "Welcome to OpenConstructionERP" modal from
   // flashing on top of /settings & friends. (ONBOARD-MODAL)
-  if (alreadyCompleted) {
+  if (alreadyCompleted !== false) {
     return null;
   }
 

@@ -4,12 +4,28 @@
 /** The four flagship demo projects (backend/app/core/demo_packs), same cards as the site. */
 export interface FlagshipDemo {
   id: string;
-  key: string;
+  /** i18n key stem for curated cards; null for a card built from catalog data. */
+  key: string | null;
   tag: string;
   title: string;
   forWho: string;
-  points: [string, string, string];
+  points: string[];
 }
+
+/** One row of `GET /api/demo/catalog`. */
+export interface DemoCatalogRow {
+  demo_id: string;
+  name: string;
+  description: string;
+  country: string;
+  budget?: string;
+  type?: string;
+}
+
+/** Curated cards are all Saudi; the full showcase doubles as the market-neutral tour. */
+const FLAGSHIP_COUNTRY = 'sa';
+const NEUTRAL_DEMO_ID = 'full-showcase-riyadh';
+const MAX_CARDS = 4;
 
 export const FLAGSHIP_DEMOS: FlagshipDemo[] = [
   {
@@ -61,3 +77,35 @@ export const FLAGSHIP_DEMOS: FlagshipDemo[] = [
     ],
   },
 ];
+
+/**
+ * The demo cards for a market: the curated cards when they are that market's,
+ * else the catalog's demos for that country, else the one neutral tour.
+ *
+ * @param country lower-case ISO 3166-1 alpha-2 of the chosen market.
+ * @param catalog rows of the server's demo catalog.
+ */
+export function demosForMarket(
+  country: string | null | undefined,
+  catalog: DemoCatalogRow[],
+): { demos: FlagshipDemo[]; matched: boolean } {
+  const code = (country ?? '').toLowerCase();
+  if (code === FLAGSHIP_COUNTRY) return { demos: FLAGSHIP_DEMOS, matched: true };
+  const own = code
+    ? catalog.filter((r) => r.country?.toLowerCase() === code).slice(0, MAX_CARDS)
+    : [];
+  if (own.length > 0) {
+    return {
+      matched: true,
+      demos: own.map((r) => ({
+        id: r.demo_id,
+        key: null,
+        tag: r.type ?? '',
+        title: r.name,
+        forWho: '',
+        points: [r.description, r.budget ?? ''].filter(Boolean),
+      })),
+    };
+  }
+  return { demos: FLAGSHIP_DEMOS.filter((d) => d.id === NEUTRAL_DEMO_ID), matched: false };
+}

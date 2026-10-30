@@ -149,6 +149,12 @@ describe('the setup wizard defaults', () => {
     expect(suggestDataSetup('gb', 'en').packId).toBe('uk');
     expect(suggestDataSetup('gb', 'en').region).toBe('UK_GBP');
   });
+
+  it('preselects the Saudi preset for a Saudi reader, not the UAE one', () => {
+    expect(suggestDataSetup('sa', 'ar').packId).toBe('sa');
+    expect(suggestDataSetup('ae', 'ar').packId).toBe('ae');
+    expect(suggestDataSetup(null, 'ar').packId).toBe('ae');
+  });
 });
 
 describe("the dashboard's home market", () => {

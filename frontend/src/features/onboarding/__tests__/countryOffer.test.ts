@@ -173,9 +173,12 @@ describe('resolveCountryOffer, on the packs the wheel ships', () => {
   it('does not offer a Saudi reader the United Arab Emirates', () => {
     // Both are filed under "Middle East" and they are different countries.
     // With the Saudi pack present SA gets its pack; with it absent SA gets
-    // nothing, because there is no Saudi preset and 'ae' is not a synonym.
+    // its own preset, never 'ae'.
     const noSaudiPack = WHEEL_PACKS.filter((p) => p.slug !== 'saudi-vision2030');
-    expect(resolveCountryOffer('sa', noSaudiPack)).toBeNull();
+    expect(resolveCountryOffer('sa', noSaudiPack)).toEqual({
+      kind: 'preset',
+      preset: expect.objectContaining({ id: 'sa' }),
+    });
     expect(resolveCountryOffer('sa', WHEEL_PACKS)).toEqual({
       kind: 'pack',
       pack: expect.objectContaining({ slug: 'saudi-vision2030' }),

@@ -3050,8 +3050,10 @@ function DashboardPageInner() {
                       localStorage.removeItem('oe_onboarding_completed_version');
                       localStorage.removeItem('oe_lang_explicit');
                     } catch { /* ignore */ }
-                    void apiDelete('/v1/users/me/onboarding/complete/').catch(() => {});
-                    navigate('/onboarding', { replace: true });
+                    // Clear the server flag first: it, not this browser, decides whether the wizard shows.
+                    void apiDelete('/v1/users/me/onboarding/complete/').catch(() => {}).finally(() => {
+                      navigate('/onboarding', { replace: true });
+                    });
                   }}
                 >
                   {t('dashboard.update_rerun_setup', { defaultValue: 'Re-run setup' })}
