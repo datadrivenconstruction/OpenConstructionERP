@@ -52571,6 +52571,10 @@ const resource = {
     "settings.chords_reset_all": "Ripristina tutte le scorciatoie",
     "settings.tab_packages": "Pacchetti e moduli",
     "settings.tab_packages_desc": "Pacchetti di soluzioni installati, aggiunta di un pacchetto, attivazione o disattivazione dei singoli moduli",
+    "settings.secondary_calendar": "Calendario secondario",
+    "settings.secondary_calendar_none": "Nessuno",
+    "settings.secondary_calendar_umalqura": "Egira (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Mostra la data islamica (egira) accanto alla data gregoriana in ogni data dell'app.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordine di modifica",
     "approvalRoutes.kind_contract": "Contratto",

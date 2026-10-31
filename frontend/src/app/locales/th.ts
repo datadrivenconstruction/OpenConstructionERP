@@ -51155,6 +51155,10 @@ const resource = {
     "settings.chords_reset_all": "รีเซ็ตทางลัดทั้งหมด",
     "settings.tab_packages": "แพ็กเกจและโมดูล",
     "settings.tab_packages_desc": "แพ็กเกจโซลูชันที่ติดตั้งแล้ว เพิ่มแพ็กเกจ เปิดหรือปิดโมดูลทีละรายการ",
+    "settings.secondary_calendar": "ปฏิทินรอง",
+    "settings.secondary_calendar_none": "ไม่มี",
+    "settings.secondary_calendar_umalqura": "ฮิจเราะห์ (อุมม์ อัล-กุรอา)",
+    "settings.secondary_calendar_hint": "แสดงวันที่ฮิจเราะห์ควบคู่กับวันที่แบบเกรกอเรียนในทุกวันที่ของแอป",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "คำสั่งเปลี่ยนแปลง",
     "approvalRoutes.kind_contract": "สัญญา",

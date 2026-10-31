@@ -53047,6 +53047,10 @@ const resource = {
     "settings.chords_reset_all": "Barcha tezkor tugmalarni qaytarish",
     "settings.tab_packages": "Paketlar va modullar",
     "settings.tab_packages_desc": "Oʻrnatilgan yechim paketlari, paket qoʻshish, alohida modullarni yoqish yoki oʻchirish",
+    "settings.secondary_calendar": "Qoʻshimcha taqvim",
+    "settings.secondary_calendar_none": "Yoʻq",
+    "settings.secondary_calendar_umalqura": "Hijriy (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Ilovadagi har bir sananing yonida milodiy sanaga qoʻshib hijriy sanani koʻrsatadi.",
     // --- /Settings → Company & documents ---
     "boq.import_preview.back": "Orqaga",
     "boq.import_preview.cancel": "Bekor qilish",

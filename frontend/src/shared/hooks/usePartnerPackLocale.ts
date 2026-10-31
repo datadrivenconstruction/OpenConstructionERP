@@ -35,6 +35,7 @@ import { useEffect } from 'react';
 import i18n, { loadLocaleResource, normalizePackLocale } from '@/app/i18n';
 import { setMarketNumberLocale } from '@/shared/lib/marketNumberLocale';
 import { packCountryCode } from '@/shared/lib/regionalPack';
+import { secondaryCalendarForCountry, setMarketSecondaryCalendar } from '@/shared/lib/secondaryCalendar';
 import { numberLocaleForCountry } from '@/stores/usePreferencesStore';
 
 import { revertPackVocabulary, syncPackVocabulary } from './partnerPackVocabulary';
@@ -61,6 +62,7 @@ export async function resetPackLocale(): Promise<void> {
   // lakh grouping for the rest of the session with no control in the UI able
   // to reach it.
   setMarketNumberLocale(null);
+  setMarketSecondaryCalendar(null);
   // Drop the pack's words before the language switch. Switching to English is
   // not enough on its own: a pack whose locale normalizes to ``en`` (uk-jct,
   // aus, nzs) merged its overlay straight onto the English bundle, and
@@ -141,5 +143,12 @@ export function usePartnerPackLocale(): void {
   // an inactive pack has to clear it rather than leave the last market behind.
   useEffect(() => {
     setMarketNumberLocale(manifest ? numberLocaleForCountry(packCountryCode(manifest)) : null);
+  }, [manifest]);
+
+  // Fourth: the market's secondary calendar (Hijri for Saudi and the Gulf).
+  // Same shape as the number locale: resolved at read time, never stored, and a
+  // user's explicit choice outranks it.
+  useEffect(() => {
+    setMarketSecondaryCalendar(manifest ? secondaryCalendarForCountry(packCountryCode(manifest)) : null);
   }, [manifest]);
 }

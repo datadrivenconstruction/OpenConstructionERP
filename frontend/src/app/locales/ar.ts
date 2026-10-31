@@ -54262,6 +54262,10 @@ const resource = {
     "settings.chords_reset_all": "إعادة كل الاختصارات إلى الافتراضي",
     "settings.tab_packages": "الحزم والوحدات",
     "settings.tab_packages_desc": "حزم الحلول المثبّتة، وإضافة حزمة، وتفعيل الوحدات أو إيقافها فردياً",
+    "settings.secondary_calendar": "التقويم الثانوي",
+    "settings.secondary_calendar_none": "لا شيء",
+    "settings.secondary_calendar_umalqura": "الهجري (أم القرى)",
+    "settings.secondary_calendar_hint": "يعرض التاريخ الهجري بجانب التاريخ الميلادي في كل التواريخ داخل التطبيق.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "أمر تغيير",
     "approvalRoutes.kind_contract": "عقد",

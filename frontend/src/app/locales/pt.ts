@@ -54259,6 +54259,10 @@ const resource = {
     "settings.chords_reset_all": "Repor todos os atalhos",
     "settings.tab_packages": "Pacotes e módulos",
     "settings.tab_packages_desc": "Pacotes de solução instalados, adicionar um pacote, ativar ou desativar módulos individuais",
+    "settings.secondary_calendar": "Calendário secundário",
+    "settings.secondary_calendar_none": "Nenhum",
+    "settings.secondary_calendar_umalqura": "Hégira (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Mostra a data hégira ao lado da data gregoriana em todas as datas do aplicativo.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordem de alteração",
     "approvalRoutes.kind_contract": "Contrato",

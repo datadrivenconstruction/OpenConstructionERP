@@ -23,6 +23,11 @@ import {
   type DigitSystem,
 } from '@/shared/lib/intlLocale';
 import { getMarketNumberLocale, useMarketNumberLocale } from '@/shared/lib/marketNumberLocale';
+import {
+  getMarketSecondaryCalendar,
+  useMarketSecondaryCalendar,
+  type SecondaryCalendar,
+} from '@/shared/lib/secondaryCalendar';
 
 const STORAGE_KEY = 'oe_preferences';
 
@@ -78,9 +83,13 @@ interface Preferences {
    */
   digitSystem: DigitSystem;
   defaultCurrency: string;
+  /** Second date printed beside the Gregorian one. See `resolveSecondaryCalendar`. */
+  secondaryCalendar: SecondaryCalendar;
+  /** True once the user picked a value, so the market default no longer applies. */
+  secondaryCalendarChosen: boolean;
 }
 
-export type { DigitSystem };
+export type { DigitSystem, SecondaryCalendar };
 
 /**
  * Keys this store used to carry and no longer does.
@@ -103,6 +112,8 @@ const DEFAULTS: Preferences = {
   numberLocale: 'auto',
   digitSystem: 'auto',
   defaultCurrency: 'EUR',
+  secondaryCalendar: 'none',
+  secondaryCalendarChosen: false,
 };
 
 /**
@@ -204,6 +215,32 @@ export function useNumberLocale(): string {
   const marketLocale = useMarketNumberLocale();
   if (preference !== 'auto') return withDigitSystem(preference, digits);
   return withDigitSystem(marketLocale ?? intlLocale, digits);
+}
+
+/**
+ * The secondary calendar to print: the user's choice once made, otherwise the
+ * market's (a Saudi or GCC pack defaults to Hijri), otherwise none.
+ */
+export function resolveSecondaryCalendar(
+  value: SecondaryCalendar,
+  chosen: boolean,
+  market: SecondaryCalendar | null = getMarketSecondaryCalendar(),
+): SecondaryCalendar {
+  return chosen ? value : (market ?? 'none');
+}
+
+/** `resolveSecondaryCalendar` for plain formatters that cannot hold a hook. */
+export function getSecondaryCalendar(): SecondaryCalendar {
+  const s = usePreferencesStore.getState();
+  return resolveSecondaryCalendar(s.secondaryCalendar, s.secondaryCalendarChosen);
+}
+
+/** `getSecondaryCalendar` for a component; repaints on a setting or market change. */
+export function useSecondaryCalendar(): SecondaryCalendar {
+  const value = usePreferencesStore((s) => s.secondaryCalendar);
+  const chosen = usePreferencesStore((s) => s.secondaryCalendarChosen);
+  const market = useMarketSecondaryCalendar();
+  return resolveSecondaryCalendar(value, chosen, market);
 }
 
 /* ── Server hydration (issue #335) ────────────────────────────────────── */

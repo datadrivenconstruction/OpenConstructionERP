@@ -51688,6 +51688,10 @@ const resource = {
     "settings.chords_reset_all": "Resetează toate scurtăturile",
     "settings.tab_packages": "Pachete și module",
     "settings.tab_packages_desc": "Pachete de soluții instalate, adăugarea unui pachet, activarea sau dezactivarea modulelor individuale",
+    "settings.secondary_calendar": "Calendar secundar",
+    "settings.secondary_calendar_none": "Niciunul",
+    "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Afișează data hijri lângă data gregoriană, pentru fiecare dată din aplicație.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Dispoziție de modificare",
     "approvalRoutes.kind_contract": "Contract",

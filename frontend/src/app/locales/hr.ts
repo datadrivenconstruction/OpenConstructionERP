@@ -51692,6 +51692,10 @@ const resource = {
     "settings.chords_reset_all": "Vrati sve prečace",
     "settings.tab_packages": "Paketi i moduli",
     "settings.tab_packages_desc": "Instalirani paketi rješenja, dodavanje paketa, uključivanje ili isključivanje pojedinačnih modula",
+    "settings.secondary_calendar": "Sekundarni kalendar",
+    "settings.secondary_calendar_none": "Ništa",
+    "settings.secondary_calendar_umalqura": "Hidžra (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Prikazuje hidžretski datum uz gregorijanski datum na svim datumima u aplikaciji.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Nalog za izmjenu",
     "approvalRoutes.kind_contract": "Ugovor",

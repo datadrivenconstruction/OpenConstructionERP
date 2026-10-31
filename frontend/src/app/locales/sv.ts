@@ -52029,6 +52029,10 @@ const resource = {
     "settings.chords_reset_all": "Återställ alla genvägar",
     "settings.tab_packages": "Paket och moduler",
     "settings.tab_packages_desc": "Installerade lösningspaket, lägg till ett paket, slå på eller av enskilda moduler",
+    "settings.secondary_calendar": "Sekundär kalender",
+    "settings.secondary_calendar_none": "Ingen",
+    "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Visar hijri-datumet bredvid det gregorianska datumet för alla datum i appen.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ändringsorder",
     "approvalRoutes.kind_contract": "Kontrakt",

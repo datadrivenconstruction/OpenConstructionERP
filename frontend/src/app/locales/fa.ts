@@ -51376,6 +51376,10 @@ const resource = {
     "settings.chords_reset_all": "بازگردانی همه میانبرها",
     "settings.tab_packages": "بسته‌ها و ماژول‌ها",
     "settings.tab_packages_desc": "بسته‌های راه‌حل نصب‌شده، افزودن بسته، روشن یا خاموش کردن ماژول‌های جدا",
+    "settings.secondary_calendar": "تقویم ثانویه",
+    "settings.secondary_calendar_none": "هیچ",
+    "settings.secondary_calendar_umalqura": "هجری (ام‌القری)",
+    "settings.secondary_calendar_hint": "تاریخ هجری را کنار تاریخ میلادی در همه تاریخ‌های برنامه نمایش می‌دهد.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "دستور تغییر",
     "approvalRoutes.kind_contract": "قرارداد",

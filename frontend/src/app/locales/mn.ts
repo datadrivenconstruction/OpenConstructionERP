@@ -51055,6 +51055,10 @@ const resource = {
     "settings.chords_reset_all": "Бүх товчлолыг анхдагч руу буцаах",
     "settings.tab_packages": "Багц ба модулиуд",
     "settings.tab_packages_desc": "Суулгасан шийдлийн багцууд, багц нэмэх, модулиудыг тус тусад нь асаах эсвэл унтраах",
+    "settings.secondary_calendar": "Нэмэлт хуанли",
+    "settings.secondary_calendar_none": "Байхгүй",
+    "settings.secondary_calendar_umalqura": "Хижра (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Програмын бүх огнооны григорийн огнооны хажууд хижра огноогоор харуулна.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өөрчлөлтийн тушаал",
     "approvalRoutes.kind_contract": "Гэрээ",

@@ -53378,6 +53378,10 @@ const resource = {
     "settings.chords_reset_all": "Скинути всі швидкі клавіші",
     "settings.tab_packages": "Пакети і модулі",
     "settings.tab_packages_desc": "Встановлені пакети рішень, додавання пакета, увімкнення або вимкнення окремих модулів",
+    "settings.secondary_calendar": "Додатковий календар",
+    "settings.secondary_calendar_none": "Немає",
+    "settings.secondary_calendar_umalqura": "Хіджра (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Показує дату за хіджрі поруч із григоріанською датою для всіх дат у застосунку.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Розпорядження про зміни",
     "approvalRoutes.kind_contract": "Договір",

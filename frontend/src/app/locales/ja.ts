@@ -52687,6 +52687,10 @@ const resource = {
     "settings.chords_reset_all": "すべてのショートカットを初期設定に戻す",
     "settings.tab_packages": "パッケージとモジュール",
     "settings.tab_packages_desc": "インストール済みのソリューションパッケージ、パッケージの追加、個別モジュールの有効化・無効化",
+    "settings.secondary_calendar": "補助カレンダー",
+    "settings.secondary_calendar_none": "なし",
+    "settings.secondary_calendar_umalqura": "ヒジュラ暦（ウンム・アル＝クラー）",
+    "settings.secondary_calendar_hint": "アプリ内のすべての日付で、西暦の横にヒジュラ暦の日付を表示します。",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "変更指示",
     "approvalRoutes.kind_contract": "契約",

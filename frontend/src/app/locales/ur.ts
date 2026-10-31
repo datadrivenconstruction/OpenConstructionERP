@@ -51382,6 +51382,10 @@ const resource = {
     "settings.chords_reset_all": "تمام شارٹ کٹس ری سیٹ کریں",
     "settings.tab_packages": "پیکیجز اور ماڈیولز",
     "settings.tab_packages_desc": "انسٹال شدہ حل پیکیجز، پیکیج شامل کرنا، الگ الگ ماڈیول آن یا آف کرنا",
+    "settings.secondary_calendar": "ثانوی کیلنڈر",
+    "settings.secondary_calendar_none": "کوئی نہیں",
+    "settings.secondary_calendar_umalqura": "ہجری (ام القریٰ)",
+    "settings.secondary_calendar_hint": "ایپ میں ہر تاریخ کے ساتھ عیسوی تاریخ کے آگے ہجری تاریخ دکھاتا ہے۔",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "تبدیلی آرڈر",
     "approvalRoutes.kind_contract": "کنٹریکٹ",

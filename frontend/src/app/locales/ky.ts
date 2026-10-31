@@ -51525,6 +51525,10 @@ const resource = {
     "settings.chords_reset_all": "Бардык тез баскычтарды кайтаруу",
     "settings.tab_packages": "Пакеттер жана модулдар",
     "settings.tab_packages_desc": "Орнотулган чечим пакеттери, пакет кошуу, айрым модулдарды иштетүү же өчүрүү",
+    "settings.secondary_calendar": "Кошумча календарь",
+    "settings.secondary_calendar_none": "Жок",
+    "settings.secondary_calendar_umalqura": "Хижра (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Колдонмодогу ар бир датанын жанында григориан датасы менен бирге хижра датасын көрсөтөт.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгөртүү буйругу",
     "approvalRoutes.kind_contract": "Келишим",

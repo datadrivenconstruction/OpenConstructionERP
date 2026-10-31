@@ -54269,6 +54269,10 @@ const resource = {
     "settings.chords_reset_all": "Restablecer todos los atajos",
     "settings.tab_packages": "Paquetes y módulos",
     "settings.tab_packages_desc": "Paquetes de solución instalados, añadir un paquete, activar o desactivar módulos sueltos",
+    "settings.secondary_calendar": "Calendario secundario",
+    "settings.secondary_calendar_none": "Ninguno",
+    "settings.secondary_calendar_umalqura": "Hégira (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Muestra la fecha hiyrí junto a la fecha gregoriana en todas las fechas de la aplicación.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Orden de cambio",
     "approvalRoutes.kind_contract": "Contrato",

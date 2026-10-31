@@ -5,7 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { formatDistanceToNow } from 'date-fns';
 import { getIntlLocale, formatDateWithPreference } from '../lib/formatters';
 import { getDateFnsLocale } from '../lib/dateFnsLocale';
-import { usePreferencesStore } from '@/stores/usePreferencesStore';
+import { usePreferencesStore, useSecondaryCalendar } from '@/stores/usePreferencesStore';
+import { formatSecondaryDate } from '../lib/secondaryCalendar';
 
 export interface DateDisplayProps {
   value: string | Date | null | undefined;
@@ -55,6 +56,7 @@ export function DateDisplay({ value, format = 'date', className }: DateDisplayPr
   // repaints the pages that are already open. Both hooks stay above the early
   // returns below: a null date must not render fewer hooks than a real one.
   const datePref = usePreferencesStore((s) => s.dateFormat);
+  const secondaryCalendar = useSecondaryCalendar();
 
   if (value == null) {
     return <span className={clsx('text-content-tertiary', className)}>&mdash;</span>;
@@ -116,9 +118,15 @@ export function DateDisplay({ value, format = 'date', className }: DateDisplayPr
     formatted = dateObj.toLocaleDateString(getIntlLocale());
   }
 
+  const hasFullDate = format === 'date' || format === 'numeric' || format === 'datetime' || format === undefined;
+  const secondary = hasFullDate
+    ? formatSecondaryDate(dateObj, locale, secondaryCalendar, isDateOnly ? 'UTC' : undefined)
+    : '';
+
   return (
-    <time dateTime={dateObj.toISOString()} className={className}>
+    <time dateTime={dateObj.toISOString()} className={className} title={secondary || undefined}>
       {formatted}
+      {secondary && <span className="block text-xs text-content-tertiary">{secondary}</span>}
     </time>
   );
 }

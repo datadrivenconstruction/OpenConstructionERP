@@ -54270,6 +54270,10 @@ const resource = {
     "settings.chords_reset_all": "Rétablir tous les raccourcis",
     "settings.tab_packages": "Lots et modules",
     "settings.tab_packages_desc": "Lots de solutions installés, ajout d'un lot, activation ou désactivation de modules individuels",
+    "settings.secondary_calendar": "Calendrier secondaire",
+    "settings.secondary_calendar_none": "Aucun",
+    "settings.secondary_calendar_umalqura": "Hégire (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Affiche la date hégirienne à côté de la date grégorienne pour chaque date de l'application.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Ordre de modification",
     "approvalRoutes.kind_contract": "Contrat",
