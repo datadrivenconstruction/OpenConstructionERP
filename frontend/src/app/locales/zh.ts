@@ -63336,7 +63336,7 @@ const resource = {
     "packages.trades.name": "专业工种与小型承包商",
     "packages.trades.value": "报价、班组排期、工时记录和开票，一处完成。",
     "packages.trades.audience": "电工、水暖工、木工以及小型施工团队",
-    "packages.takeoff.name": "工程量提取",
+    "packages.takeoff.name": "工程量计算",
     "packages.takeoff.value": "直接从 PDF 和 DWG 图纸量取工程量，并导入工程量清单。",
     "packages.takeoff.audience": "从图纸量取工程量的估价师",
     "packages.tender_procurement.name": "招标与采购",
