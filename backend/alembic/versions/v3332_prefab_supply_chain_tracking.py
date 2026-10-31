@@ -58,6 +58,7 @@ def upgrade() -> None:
         else "lower(hex(randomblob(16)))"
     )
     # data-rewrite-ack: table=oe_prefab_unit growth=bounded rows=one row per off-site unit; backfills the new nullable qr_token column once
+    # boot-repair: gap - the boot heal adds qr_token empty, so on an install that never runs alembic units created before it carry no QR label until re-created
     issued = bind.execute(sa.text(f"UPDATE {_TABLE} SET qr_token = {token} WHERE qr_token IS NULL")).rowcount
 
     inspector = sa.inspect(bind)

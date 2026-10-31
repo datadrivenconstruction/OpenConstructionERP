@@ -6,8 +6,6 @@
  */
 import { API_BASE, apiDelete, apiGet, apiPatch, apiPost, downloadWithAuth, type Page } from '@/shared/lib/api';
 
-const BASE = '/v1/leasing';
-
 export type LeaseStatus = 'draft' | 'active' | 'notice' | 'ended';
 export type Frequency = 'monthly' | 'quarterly' | 'semiannual' | 'annual';
 export type EscalationKind = 'none' | 'fixed' | 'index';
@@ -147,57 +145,57 @@ export interface ValidationIssue {
 }
 
 export const fetchLeases = (projectId: string) =>
-  apiGet<{ items: Lease[]; total: number }>(`${BASE}/?project_id=${projectId}`).then((r) => r.items);
+  apiGet<{ items: Lease[]; total: number }>(`/v1/leasing/?project_id=${projectId}`).then((r) => r.items);
 
-export const fetchLease = (id: string) => apiGet<LeaseDetail>(`${BASE}/${id}`);
+export const fetchLease = (id: string) => apiGet<LeaseDetail>(`/v1/leasing/${id}`);
 
-export const createLease = (payload: LeaseCreate) => apiPost<Lease>(`${BASE}/`, payload);
+export const createLease = (payload: LeaseCreate) => apiPost<Lease>(`/v1/leasing/`, payload);
 
-export const updateLease = (id: string, payload: Partial<LeaseCreate>) => apiPatch<Lease>(`${BASE}/${id}`, payload);
+export const updateLease = (id: string, payload: Partial<LeaseCreate>) => apiPatch<Lease>(`/v1/leasing/${id}`, payload);
 
-export const deleteLease = (id: string) => apiDelete(`${BASE}/${id}`);
+export const deleteLease = (id: string) => apiDelete(`/v1/leasing/${id}`);
 
-export const activateLease = (id: string) => apiPost<Lease>(`${BASE}/${id}/activate`, {});
+export const activateLease = (id: string) => apiPost<Lease>(`/v1/leasing/${id}/activate`, {});
 
 export const terminateLease = (id: string, payload: { effective: string; reason?: string }) =>
-  apiPost<Lease>(`${BASE}/${id}/terminate`, payload);
+  apiPost<Lease>(`/v1/leasing/${id}/terminate`, payload);
 
 export const renewLease = (id: string, payload: { end_date: string; rent_amount?: string }) =>
-  apiPost<Lease>(`${BASE}/${id}/renew`, payload);
+  apiPost<Lease>(`/v1/leasing/${id}/renew`, payload);
 
-export const fetchSchedule = (id: string) => apiGet<Schedule>(`${BASE}/${id}/schedule`);
+export const fetchSchedule = (id: string) => apiGet<Schedule>(`/v1/leasing/${id}/schedule`);
 
-export const regenerateSchedule = (id: string) => apiPost<Schedule>(`${BASE}/${id}/schedule`, {});
+export const regenerateSchedule = (id: string) => apiPost<Schedule>(`/v1/leasing/${id}/schedule`, {});
 
 export const validateLease = (id: string) =>
-  apiGet<{ status: string; checked: number; results: ValidationIssue[] }>(`${BASE}/${id}/validate`);
+  apiGet<{ status: string; checked: number; results: ValidationIssue[] }>(`/v1/leasing/${id}/validate`);
 
 export const linkDocument = (id: string, documentId: string) =>
-  apiPost<Lease>(`${BASE}/${id}/documents`, { document_id: documentId });
+  apiPost<Lease>(`/v1/leasing/${id}/documents`, { document_id: documentId });
 
-export const unlinkDocument = (id: string, documentId: string) => apiDelete(`${BASE}/${id}/documents/${documentId}`);
+export const unlinkDocument = (id: string, documentId: string) => apiDelete(`/v1/leasing/${id}/documents/${documentId}`);
 
 export const runSchedule = (projectId: string, asOf?: string) =>
-  apiPost<{ invoices_created: number; skipped: number }>(`${BASE}/schedule/run`, {
+  apiPost<{ invoices_created: number; skipped: number }>(`/v1/leasing/schedule/run`, {
     project_id: projectId,
     as_of: asOf || null,
   });
 
 export const fetchRentRoll = (projectId: string) =>
   apiGet<{ as_of: string; items: RentRollRow[]; totals: Record<string, string> }>(
-    `${BASE}/rent-roll?project_id=${projectId}`,
+    `/v1/leasing/rent-roll?project_id=${projectId}`,
   );
 
 export const fetchArrears = (projectId: string) =>
   apiGet<{ as_of: string; items: ArrearsRow[]; totals: Record<string, Record<string, string>> }>(
-    `${BASE}/arrears?project_id=${projectId}`,
+    `/v1/leasing/arrears?project_id=${projectId}`,
   );
 
 export const fetchExportProfiles = () =>
-  apiGet<{ profiles: string[] }>(`${BASE}/export-profiles`).then((r) => r.profiles);
+  apiGet<{ profiles: string[] }>(`/v1/leasing/export-profiles`).then((r) => r.profiles);
 
 export const downloadExport = (projectId: string, format: string) =>
-  downloadWithAuth(`${API_BASE}${BASE}/export?project_id=${projectId}&format=${format}`, `leases.${format}`);
+  downloadWithAuth(`${API_BASE}/v1/leasing/export?project_id=${projectId}&format=${format}`, `leases.${format}`);
 
 export const fetchProjectDocuments = (projectId: string) =>
   apiGet<Page<{ id: string; name: string; category: string }>>(

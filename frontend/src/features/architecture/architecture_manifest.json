@@ -195518,19 +195518,6 @@
         },
         {
           "method": "POST",
-          "path": "/{project_id}/purge/",
-          "handler": "purge_project",
-          "request_schema": "ProjectService"
-        },
-        {
-          "method": "GET",
-          "path": "/{project_id}/status-history",
-          "handler": "project_status_history",
-          "response_model": "list[ProjectStatusHistoryResponse]",
-          "request_schema": "ProjectService"
-        },
-        {
-          "method": "POST",
           "path": "/demo-data/purge/",
           "handler": "purge_demo_data",
           "request_schema": "ProjectService"
@@ -195544,6 +195531,19 @@
           "method": "POST",
           "path": "/demo-data/leftovers/remove/",
           "handler": "remove_demo_leftovers"
+        },
+        {
+          "method": "POST",
+          "path": "/{project_id}/purge/",
+          "handler": "purge_project",
+          "request_schema": "ProjectService"
+        },
+        {
+          "method": "GET",
+          "path": "/{project_id}/status-history",
+          "handler": "project_status_history",
+          "response_model": "list[ProjectStatusHistoryResponse]",
+          "request_schema": "ProjectService"
         },
         {
           "method": "POST",

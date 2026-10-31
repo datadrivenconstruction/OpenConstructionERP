@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, CheckCircle2, EyeOff, Layers3, Loader2, Rocket } from 'lucide-react';
 import { Breadcrumb, Button } from '@/shared/ui';
 import { packNameSlug } from '@/shared/lib/regionalPack';
+import { fmtList } from '@/shared/lib/formatters';
 import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
 import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
 import { projectsApi } from '@/features/projects/api';
@@ -51,7 +52,7 @@ function stepLabel(t: ReturnType<typeof useTranslation>['t'], step: FirstStep): 
         : t('packs.step_boq', { defaultValue: 'See the bill of quantities with prices' });
     case 'validation':
       return step.param
-        ? t('packs.step_validation_rules', { defaultValue: 'Run validation with the pack rules ({{rules}})', rules: step.param.split(/,\s*/).map((r) => standardLabel(r, t)).join(', ') })
+        ? t('packs.step_validation_rules', { defaultValue: 'Run validation with the pack rules ({{rules}})', rules: fmtList(step.param.split(/,\s*/).map((r) => standardLabel(r, t))) })
         : t('packs.step_validation', { defaultValue: 'Run validation and fix what it finds' });
     case 'export_gaeb':
       return t('packs.step_export_gaeb', { defaultValue: 'Export the bill as GAEB XML for the tender' });
@@ -104,14 +105,15 @@ export function PackFocusSummary({ preview, modules }: { preview: FocusPreview; 
           <CheckCircle2 size={16} aria-hidden />
           {t('packs.focus_installed', { defaultValue: '{{pack}} is set up', pack: packName })}
         </p>
-        <h1 className="mt-2 text-xl font-bold text-content-primary" data-testid="pack-focus-headline">
+        <h1 className="sr-only">{t('nav.packs', { defaultValue: 'Packs' })}</h1>
+        <h2 className="mt-2 text-xl font-bold text-content-primary" data-testid="pack-focus-headline">
           {t('packs.focus_headline', {
             defaultValue: '{{on}} modules are on for {{pack}}. {{hidden}} others are hidden.',
             on: on.length,
             hidden: hidden.length,
             pack: packName,
           })}
-        </h1>
+        </h2>
         <p className="mt-1 max-w-3xl text-sm text-content-secondary">
           {t('packs.focus_explain', {
             defaultValue: 'Hidden modules are not removed and keep their data. Add any of them back below with one click, or show everything again.',

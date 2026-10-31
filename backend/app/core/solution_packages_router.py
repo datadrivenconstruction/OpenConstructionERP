@@ -190,7 +190,7 @@ async def seed_package_demo(package_id: str, user_id: CurrentUserId) -> dict[str
     return {"package_id": package_id, "demo_id": pkg.demo_id, **result}
 
 
-@router.get("/focus/{slug}/preview/")
+@router.get("/focus/{slug}/preview/", dependencies=[Depends(get_current_user_payload)])
 async def focus_preview(slug: str) -> dict[str, Any]:
     """Modules a pack turns on, the ones it would hide, and the facts for its guided start."""
     out = pack_focus.preview(slug)

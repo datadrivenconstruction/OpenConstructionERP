@@ -207,7 +207,7 @@ class TestLifecycle:
     def test_install_enable_uninstall_roundtrip(self, _runtime_root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         import app.modules
         from app.core import module_state
-        from app.core.module_loader import module_loader
+        from app.core.module_loader import module_loader, served_paths
 
         monkeypatch.setattr(module_state, "set_module_enabled", lambda *a, **k: None)
         monkeypatch.setattr(module_loader, "discover", lambda *a, **k: module_loader._discover_in(_runtime_root))
@@ -221,7 +221,7 @@ class TestLifecycle:
             result = asyncio.run(pkg.install(preview.token, host, enable=True, actor="admin"))
             assert result["status"] == "active"
             assert (_runtime_root / "zipdemo" / pkg.MARKER_FILE).is_file()
-            assert any(getattr(r, "path", "") == "/api/v1/zipdemo/ui/" for r in host.routes)
+            assert "/api/v1/zipdemo/ui/" in set(served_paths(host))
             assert [e["module"] for e in pkg.ui_entries()] == ["oe_zipdemo"]
             assert "/api/v1/zipdemo" in pkg.hosted_prefixes()
 

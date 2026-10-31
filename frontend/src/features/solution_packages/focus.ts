@@ -83,7 +83,7 @@ export function buildFirstSteps(
   const steps: FirstStep[] = [];
   if (preview.demo_template_ids.length) steps.push({ id: 'demo', to: demoProjectId ? `/projects/${demoProjectId}` : '/projects' });
   if (has('boq')) steps.push({ id: 'boq', to: '/boq', param: preview.standard ?? undefined });
-  if (has('validation')) steps.push({ id: 'validation', to: '/validation', param: preview.rule_sets.join(', ') || undefined });
+  if (has('validation')) steps.push({ id: 'validation', to: '/validation', param: preview.rule_sets.join(',') || undefined });
   const gaeb = preview.rule_sets.some((r) => GAEB.test(r)) || GAEB.test(preview.standard ?? '');
   if (has('boq') && gaeb) steps.push({ id: 'export_gaeb', to: '/boq' });
   else if (has('reporting')) steps.push({ id: 'reports', to: '/reports' });

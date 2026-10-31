@@ -5,6 +5,7 @@ import { AlertTriangle, CheckCircle2, FileArchive, Info, Trash2, Upload, XCircle
 import { Badge, Button, Card } from '@/shared/ui';
 import { apiDelete, apiGet, apiPost, API_BASE, fetchWithAuth, getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
+import { fmtNumber } from '@/shared/lib/formatters';
 import { RUNTIME_UI_ENTRIES_KEY } from './runtimeModules';
 
 interface PackageCheck {
@@ -48,8 +49,8 @@ const INSTALLED_KEY = ['module-packages-installed'] as const;
 
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024 * 1024) return `${fmtNumber(bytes / 1024, 1)} KB`;
+  return `${fmtNumber(bytes / (1024 * 1024), 1)} MB`;
 }
 
 /**

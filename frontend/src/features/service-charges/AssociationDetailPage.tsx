@@ -12,7 +12,7 @@ import { ArrowLeft, CheckCircle2, Download, Plus, Receipt, Scale, Trash2 } from 
 import { Badge, Button, Card, EmptyState, SkeletonTable } from '@/shared/ui';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { getErrorMessage } from '@/shared/lib/api';
-import { fmtCurrency } from '@/shared/lib/formatters';
+import { fmtCurrency, fmtList } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
 import {
   PERIODS,
@@ -361,9 +361,9 @@ function BudgetCard({ budget, keys, currency }: { budget: Budget; keys: Apportio
             <p className="mt-2 text-2xs text-semantic-warning">
               {t('service_charges.unallocated', {
                 defaultValue: 'Costs without a budget line or default key, charged to nobody: {{list}}',
-                list: Object.entries(rec.unallocated)
-                  .map(([c, v]) => `${c} ${fmtCurrency(v, currency)}`)
-                  .join(', '),
+                list: fmtList(
+                  Object.entries(rec.unallocated).map(([c, v]) => `${c} ${fmtCurrency(v, currency)}`),
+                ),
               })}
             </p>
           )}

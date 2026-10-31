@@ -6,8 +6,6 @@
  */
 import { API_BASE, apiDelete, apiGet, apiPatch, apiPost, downloadWithAuth } from '@/shared/lib/api';
 
-const BASE = '/v1/service-charges';
-
 export type KeyMethod = 'area' | 'permille' | 'equal' | 'custom';
 export type Frequency = 'annual' | 'semiannual' | 'quarterly' | 'monthly';
 export type BudgetStatus = 'draft' | 'approved' | 'closed';
@@ -99,41 +97,41 @@ export interface Reconciliation {
 }
 
 export const fetchAssociations = (projectId: string) =>
-  apiGet<{ items: Association[]; total: number }>(`${BASE}/?project_id=${projectId}`).then((r) => r.items);
-export const createAssociation = (body: AssociationCreate) => apiPost<Association>(`${BASE}/`, body);
-export const fetchAssociation = (id: string) => apiGet<Association>(`${BASE}/${id}`);
+  apiGet<{ items: Association[]; total: number }>(`/v1/service-charges/?project_id=${projectId}`).then((r) => r.items);
+export const createAssociation = (body: AssociationCreate) => apiPost<Association>(`/v1/service-charges/`, body);
+export const fetchAssociation = (id: string) => apiGet<Association>(`/v1/service-charges/${id}`);
 export const updateAssociation = (id: string, body: Partial<AssociationCreate>) =>
-  apiPatch<Association>(`${BASE}/${id}`, body);
-export const deleteAssociation = (id: string) => apiDelete(`${BASE}/${id}`);
+  apiPatch<Association>(`/v1/service-charges/${id}`, body);
+export const deleteAssociation = (id: string) => apiDelete(`/v1/service-charges/${id}`);
 
-export const fetchKeys = (associationId: string) => apiGet<ApportionmentKey[]>(`${BASE}/${associationId}/keys`);
+export const fetchKeys = (associationId: string) => apiGet<ApportionmentKey[]>(`/v1/service-charges/${associationId}/keys`);
 export const createKey = (associationId: string, body: { name: string; method: KeyMethod; lines: Omit<KeyLine, 'unit_label'>[] }) =>
-  apiPost<ApportionmentKey>(`${BASE}/${associationId}/keys`, body);
-export const deleteKey = (keyId: string) => apiDelete(`${BASE}/keys/${keyId}`);
+  apiPost<ApportionmentKey>(`/v1/service-charges/${associationId}/keys`, body);
+export const deleteKey = (keyId: string) => apiDelete(`/v1/service-charges/keys/${keyId}`);
 
-export const fetchBudgets = (associationId: string) => apiGet<Budget[]>(`${BASE}/${associationId}/budgets`);
+export const fetchBudgets = (associationId: string) => apiGet<Budget[]>(`/v1/service-charges/${associationId}/budgets`);
 export const createBudget = (associationId: string, body: { year: number; demand_frequency: Frequency }) =>
-  apiPost<Budget>(`${BASE}/${associationId}/budgets`, body);
-export const approveBudget = (budgetId: string) => apiPost<Budget>(`${BASE}/budgets/${budgetId}/approve`, {});
+  apiPost<Budget>(`/v1/service-charges/${associationId}/budgets`, body);
+export const approveBudget = (budgetId: string) => apiPost<Budget>(`/v1/service-charges/budgets/${budgetId}/approve`, {});
 export const addBudgetLine = (budgetId: string, body: { category: string; amount: string; key_id: string }) =>
-  apiPost<BudgetLine>(`${BASE}/budgets/${budgetId}/lines`, body);
-export const deleteBudgetLine = (lineId: string) => apiDelete(`${BASE}/budget-lines/${lineId}`);
+  apiPost<BudgetLine>(`/v1/service-charges/budgets/${budgetId}/lines`, body);
+export const deleteBudgetLine = (lineId: string) => apiDelete(`/v1/service-charges/budget-lines/${lineId}`);
 
-export const fetchDemands = (budgetId: string) => apiGet<Demand[]>(`${BASE}/budgets/${budgetId}/demands`);
+export const fetchDemands = (budgetId: string) => apiGet<Demand[]>(`/v1/service-charges/budgets/${budgetId}/demands`);
 export const runDemands = (budgetId: string, period: number) =>
-  apiPost<{ period: number; created: number; skipped: number; invoice_ids: string[] }>(`${BASE}/demands/run`, {
+  apiPost<{ period: number; created: number; skipped: number; invoice_ids: string[] }>(`/v1/service-charges/demands/run`, {
     budget_id: budgetId,
     period,
   });
 
 export const fetchReconciliation = (budgetId: string) =>
-  apiGet<Reconciliation | null>(`${BASE}/budgets/${budgetId}/reconciliation`);
+  apiGet<Reconciliation | null>(`/v1/service-charges/budgets/${budgetId}/reconciliation`);
 export const computeReconciliation = (budgetId: string) =>
-  apiPost<Reconciliation>(`${BASE}/budgets/${budgetId}/reconciliation/compute`, {});
+  apiPost<Reconciliation>(`/v1/service-charges/budgets/${budgetId}/reconciliation/compute`, {});
 export const postReconciliation = (budgetId: string) =>
-  apiPost<Reconciliation>(`${BASE}/budgets/${budgetId}/reconciliation/post`, {});
+  apiPost<Reconciliation>(`/v1/service-charges/budgets/${budgetId}/reconciliation/post`, {});
 
 export const downloadExport = (associationId: string, format: 'csv' | 'json') =>
-  downloadWithAuth(`${API_BASE}${BASE}/${associationId}/export?format=${format}`, `service-charges.${format}`);
+  downloadWithAuth(`${API_BASE}/v1/service-charges/${associationId}/export?format=${format}`, `service-charges.${format}`);
 
 export const PERIODS: Record<Frequency, number> = { annual: 1, semiannual: 2, quarterly: 4, monthly: 12 };

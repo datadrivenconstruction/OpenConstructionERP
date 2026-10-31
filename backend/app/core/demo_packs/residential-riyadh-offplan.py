@@ -363,7 +363,7 @@ TEMPLATE = DemoTemplate(
         ),
         (
             "07",
-            "07 - العزل والحماية الحرارية (Thermal and moisture protection)",
+            "07 - العزل والحماية الحرارية (insulation and waterproofing)",
             {"masterformat": "07", "sbc": "SBC 601"},
             [
                 (

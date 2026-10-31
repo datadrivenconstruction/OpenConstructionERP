@@ -189,7 +189,7 @@ exports[`Visual Regression - Button > danger button 1`] = `
 exports[`Visual Regression - Button > disabled state 1`] = `
 <div>
   <button
-    class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-8 px-3.5 text-sm gap-1.5 rounded-lg opacity-40 pointer-events-none"
+    class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-8 px-3.5 text-sm gap-1.5 rounded-lg pointer-events-none opacity-40"
     disabled=""
   >
     <span
@@ -218,11 +218,13 @@ exports[`Visual Regression - Button > ghost button 1`] = `
 exports[`Visual Regression - Button > loading state 1`] = `
 <div>
   <button
-    class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-8 px-3.5 text-sm gap-1.5 rounded-lg opacity-40 pointer-events-none"
+    aria-busy="true"
+    class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-8 px-3.5 text-sm gap-1.5 rounded-lg pointer-events-none"
     disabled=""
   >
     <svg
-      class="animate-spin h-4 w-4"
+      aria-hidden="true"
+      class="shrink-0 animate-spin h-4 w-4"
       fill="none"
       viewBox="0 0 24 24"
       xmlns="http://www.w3.org/2000/svg"
@@ -241,6 +243,11 @@ exports[`Visual Regression - Button > loading state 1`] = `
         fill="currentColor"
       />
     </svg>
+    <span
+      class="ms-2 inline-flex items-center"
+    >
+      Saving...
+    </span>
   </button>
 </div>
 `;
@@ -2065,7 +2072,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                 class="flex shrink-0 items-center gap-2"
               >
                 <button
-                  class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md opacity-40 pointer-events-none"
+                  class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-oe-blue text-content-inverse hover:bg-oe-blue-hover active:bg-oe-blue-active shadow-xs hover:shadow-md border border-transparent hover:scale-[1.02] active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md pointer-events-none opacity-40"
                   disabled=""
                 >
                   <span
@@ -2433,7 +2440,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     class="mt-4"
                   >
                     <button
-                      class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md opacity-40 pointer-events-none w-full"
+                      class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md pointer-events-none opacity-40 w-full"
                       disabled=""
                     >
                       <span
@@ -2809,7 +2816,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     class="mt-4"
                   >
                     <button
-                      class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md opacity-40 pointer-events-none w-full"
+                      class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md pointer-events-none opacity-40 w-full"
                       disabled=""
                     >
                       <span
@@ -2911,7 +2918,7 @@ exports[`Visual Regression - DashboardPage > renders loading/skeleton state 1`] 
                     class="mt-4"
                   >
                     <button
-                      class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md opacity-40 pointer-events-none w-full"
+                      class="inline-flex items-center justify-center font-medium whitespace-nowrap select-none transition-all duration-normal ease-oe transform-gpu will-change-transform focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue focus-visible:ring-offset-2 bg-surface-primary text-content-primary border border-border hover:bg-surface-secondary active:bg-surface-tertiary shadow-xs hover:shadow-sm active:scale-[0.98] h-7 px-2.5 text-xs gap-1.5 rounded-md pointer-events-none opacity-40 w-full"
                       disabled=""
                     >
                       <span
