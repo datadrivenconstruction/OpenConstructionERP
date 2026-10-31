@@ -295,6 +295,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/property-dev': 'oe_property_dev',
   '/accommodation': 'oe_accommodation',
   '/leasing': 'oe_leasing',
+  '/measurement-book': 'oe_measurement_book',
   '/service-charges': 'oe_service_charges',
   // Planning
   '/schedule': 'oe_schedule',
@@ -455,6 +456,7 @@ const PRODUCT_TOUR_NAV_TESTIDS: Record<string, string> = {
   '/property-dev': 'sidebar-nav-property-dev',
   '/accommodation': 'sidebar-nav-accommodation',
   '/leasing': 'sidebar-nav-leasing',
+  '/measurement-book': 'sidebar-nav-measurement-book',
   '/service-charges': 'sidebar-nav-service-charges',
   '/geo': 'sidebar-nav-geo-hub',
 };

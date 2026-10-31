@@ -952,6 +952,7 @@ const resource = {
     "rebar_schedule.export": "Export .abs",
     "rebar_schedule.shapes": "Shapes",
     "rebar_schedule.total_weight": "Weight (kg)",
+    "rebar_schedule.bbs_diameter": "Diameter (mm)",
     "regional.intro_body": "Import and export bid schedule data in your region's native structure (NRM in the UK, MasterFormat in the US, DPGF in France and others), with the right trade-section breakdown applied. The data lands in or comes from a normal bid schedule, so the same estimate moves across markets without re-keying.",
     "regional.intro_more": "This one page adapts to your country. The header shows the flag and the native standard, NRM for the UK, MasterFormat for the US, DPGF for France, DIN 276 for the DACH region and others. On the Import tab, drop your Excel, CSV or TSV file (Spain also accepts BC3), preview the parsed positions against the trade-section reference for that standard, pick the target project and bid schedule, then Import. On the Export tab, choose a bid schedule and export it as a detailed (priced) or summary CSV, or print it to PDF.\n\nThe data lands in or is read from an ordinary bid schedule, so the same estimate moves between markets without re-keying. Imports run through the country-specific validator pack on the way in, and the result link opens the bid schedule for review in Validation.\n\n**Getting the most out of it:**\n\n- Use the \"Download a sample file\" link to see the exact column layout your country expects.\n- The classification reference chips show the trade sections (NRM elements, MasterFormat divisions, DPGF lots) you should be coding against.\n- Money travels as exact decimals, so unit rates are not rounded in transit.",
     "assemblies_new.intro_more": "This is the quick setup step for a brand-new assembly. You give it a name and a code, choose its unit and category, set the currency (it defaults to your preferred currency from Regional Settings), and optionally attach a classification standard and code such as DIN 276, NRM, MasterFormat, UniFormat or Uniclass. Creating it does not finish the job, it opens the assembly editor.\n\nWhat happens next and where it connects:\n\n- After create, you land in the **assembly editor** to add the material, labor and equipment lines that build the composite rate.\n- If you want a head start instead of a blank recipe, browse the **Assembly Library** for a template to save and adapt.\n\n**Getting the most out of it:** Set the currency correctly here, because it stamps every component you add afterward. Pick the right classification standard up front so the assembly maps cleanly to your project's cost structure and shows up where you expect in reports.",
@@ -1164,8 +1165,6 @@ const resource = {
     "boq.provenance_catalogue_short": "Catalog",
     "boq.provenance_catalogue": "Priced from a cost catalog.",
     "boq.total_tip_resources": "Total is the sum of this position's resources (labor, material, equipment).",
-    "boq.markup_tender_adjustment": "Tender premium / rebate",
-    "boq.markup_pct_invalid_signed_title": "Enter a percentage from -100 to 100 (negative = below the schedule of rates)",
     "explorer.feat_pivot_desc": "Group elements by story, discipline, or type. Aggregate volumes, areas, and counts.",
     "explorer.thresholds_subtitle": "Color pivot cells by value. Add up to {{max}} rules - one per numeric column.",
     "explorer.thresholds_empty_hint": "Add a rule to color cells red / amber / green based on their value.",
@@ -1674,6 +1673,8 @@ const resource = {
     "tax_rates.flow_intro": "Some countries have one sales tax rate and some do not. Canada has a federal rate that one province replaces with a single harmonized one, that several add their own to, and that four charge on its own. There is no Canadian rate, only a rate for a place on a date, so this page asks for both before it answers.",
     "schedule.tabular_import.match_none": "Not recognized",
     "supplier_catalogs.err_unknown_unit": "unit not recognized",
+    "measurement_book.explainer": "Record what was actually built, one dated line per location: number x length x width x height, or a direct quantity. A second person checks each line. Checked quantities make the running bill, which progress claims then pick up.",
+    "measurement_book.f_breadth": "Width",
   }
 } as { translation: Record<string, string> };
 

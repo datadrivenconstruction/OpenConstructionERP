@@ -544,6 +544,9 @@ const PropertyDevPage = lazy(() =>
 const PropertyDevInventoryMapPage = lazy(() =>
   import('@/features/property-dev').then((m) => ({ default: m.InventoryMapPage }))
 );
+const MeasurementBookPage = lazy(() =>
+  import('@/features/measurement-book').then((m) => ({ default: m.MeasurementBookPage }))
+);
 const ServiceChargesPage = lazy(() =>
   import('@/features/service-charges').then((m) => ({ default: m.ServiceChargesPage }))
 );
@@ -1795,6 +1798,7 @@ export default function App() {
         <Route path="/property-dev/dashboards/:key" element={<P title="Property Development Dashboard"><PropertyDevDashboardFullView /></P>} />
         <Route path="/leasing" element={<P title="Leasing"><LeasingPage /></P>} />
         <Route path="/leasing/:leaseId" element={<P title="Leasing"><LeaseDetailPage /></P>} />
+        <Route path="/measurement-book" element={<P title="Measurement book"><MeasurementBookPage /></P>} />
         <Route path="/service-charges" element={<P title="Service charges"><ServiceChargesPage /></P>} />
         <Route path="/service-charges/:associationId" element={<P title="Service charges"><ServiceChargesAssociationPage /></P>} />
         <Route path="/accommodation" element={<P title="Accommodation"><AccommodationListPage /></P>} />

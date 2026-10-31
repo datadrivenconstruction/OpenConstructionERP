@@ -468,6 +468,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.cost_control', to: '/cost-control', icon: Scale, moduleKey: '5d' },
       { labelKey: 'nav.5d_cost_model', to: '/5d', icon: TrendingUp, moduleKey: '5d', advancedOnly: true },
       { labelKey: 'nav.progress', to: '/progress', icon: Activity, advancedOnly: true },
+      { labelKey: 'nav.measurement_book', to: '/measurement-book', icon: Ruler, advancedOnly: true },
       { labelKey: 'nav.full_evm', to: '/full-evm', icon: LineChart, advancedOnly: true },
       { labelKey: 'nav.capacity_planning', to: '/portfolio/capacity', icon: CalendarRange, advancedOnly: true },
       { labelKey: 'nav.resource_leveling', to: '/portfolio/leveling', icon: Scale, advancedOnly: true },

@@ -183,6 +183,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/5d': TrendingUp,
   '/cost-control': Scale,
   '/progress': Activity,
+  '/measurement-book': Ruler,
   '/portfolio/capacity': CalendarRange,
   '/portfolio/leveling': Scale,
   '/risks': ShieldAlert,

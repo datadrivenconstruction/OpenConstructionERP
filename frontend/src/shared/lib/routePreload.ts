@@ -132,6 +132,7 @@ const preloaders: Record<string, () => void> = {
   '/reports': () => void import('@/features/reports/ReportsPage'),
   '/reporting': () => void import('@/features/reporting/ReportingPage'),
   '/risks': () => void import('@/features/risk/RiskRegisterPage'),
+  '/measurement-book': () => void import('@/features/measurement-book'),
   '/progress': () => void import('@/features/progress/ProgressPage'),
   '/project-controls': () => void import('@/features/project-controls'),
   '/bi-dashboards': () => void import('@/features/bi-dashboards'),

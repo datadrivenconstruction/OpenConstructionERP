@@ -26,6 +26,7 @@ import { Badge, CollapsibleSection, EmptyState, StatCard } from '@/shared/ui';
 import type { BadgeVariant } from '@/shared/ui';
 import { ConfirmDialog } from '@/shared/ui/ConfirmDialog';
 import { PageHeader } from '@/shared/ui/PageHeader';
+import { BarBendingSchedulePanel } from './BarBendingSchedulePanel';
 import { downloadWithAuth, getErrorMessage, isTruncated } from '@/shared/lib/api';
 import { normalizeRole, ROLE_RANK } from '@/shared/lib/roles';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -404,6 +405,7 @@ export function RebarSchedulePage() {
 
   // -- State ---------------------------------------------------------------
   const [view, setView] = useState<View>('list');
+  const [section, setSection] = useState<'imports' | 'bbs'>('imports');
   const [selectedImportId, setSelectedImportId] = useState<string | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<RebarImport | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -893,6 +895,44 @@ export function RebarSchedulePage() {
     );
   }
 
+  const sectionTabs = (
+    <div className="flex gap-1 border-b border-border-light" role="tablist">
+      {(['imports', 'bbs'] as const).map((id) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={section === id}
+          onClick={() => setSection(id)}
+          className={`border-b-2 px-3 py-2 text-sm font-medium ${
+            section === id
+              ? 'border-oe-blue text-oe-blue-text'
+              : 'border-transparent text-content-tertiary hover:text-content-primary'
+          }`}
+        >
+          {id === 'imports'
+            ? t('rebar_schedule.tab_imports', { defaultValue: 'Imported schedules' })
+            : t('rebar_schedule.tab_bbs', { defaultValue: 'Bar bending schedule' })}
+        </button>
+      ))}
+    </div>
+  );
+
+  if (section === 'bbs' && projectId) {
+    return (
+      <div className="space-y-5">
+        <PageHeader
+          srTitle={t('rebar_schedule.title', { defaultValue: 'Rebar Schedule' })}
+          subtitle={t('rebar_schedule.subtitle_bbs', {
+            defaultValue: 'Type bars by standard shape code and get cut lengths, weights and totals per diameter.',
+          })}
+        />
+        {sectionTabs}
+        <BarBendingSchedulePanel projectId={projectId} />
+      </div>
+    );
+  }
+
   // -- List view (default) -------------------------------------------------
   return (
     <div className="space-y-5">
@@ -905,6 +945,8 @@ export function RebarSchedulePage() {
       />
 
       <RebarScheduleExplainer />
+
+      {projectId && sectionTabs}
 
       {/* Stats */}
       {importsPage && imports.length > 0 && (
