@@ -56,6 +56,7 @@ import {
   getEquipmentCostSummary,
   createEquipment,
   updateEquipment,
+  listCertificationTypes,
   deleteEquipment,
   listTelemetry,
   recordTelemetry,
@@ -87,6 +88,7 @@ import { WorkOrderFormModal } from './modals/WorkOrderFormModal';
 import { InspectionFormModal } from './modals/InspectionFormModal';
 import { DamageReportFormModal } from './modals/DamageReportFormModal';
 import { TypeFormModal } from './modals/TypeFormModal';
+import { RequiredCertificatesInput } from './components/RequiredCertificatesInput';
 import { EquipmentHealthDashboard } from './components/EquipmentHealthDashboard';
 import { FleetOptimizationPanel } from './components/FleetOptimizationPanel';
 import { TelematicsTab } from './components/TelematicsTab';
@@ -2484,6 +2486,7 @@ interface EquipmentFormState {
   location_lat: string;
   location_lng: string;
   notes: string;
+  required_certificates: string[];
 }
 
 function _toFormState(eq: Equipment | undefined): EquipmentFormState {
@@ -2514,6 +2517,7 @@ function _toFormState(eq: Equipment | undefined): EquipmentFormState {
     location_lat: numStr(eq?.location_lat),
     location_lng: numStr(eq?.location_lng),
     notes: eq?.notes ?? '',
+    required_certificates: eq?.required_certificates ?? [],
   };
 }
 
@@ -2551,6 +2555,7 @@ function _toPayload(
     residual_value: toOptNum(form.residual_value),
     currency: toOptStr(form.currency),
     notes: toOptStr(form.notes),
+    required_certificates: form.required_certificates,
   };
 }
 
@@ -2572,6 +2577,11 @@ function EquipmentFormModal({
   const [form, setForm] = useState<EquipmentFormState>(() =>
     _toFormState(existing),
   );
+  const { data: certTypes } = useQuery({
+    queryKey: ['equipment', 'certification-types'],
+    queryFn: listCertificationTypes,
+    staleTime: 60_000,
+  });
 
   // Close on Escape — symmetric with the rest of the modal stack so
   // keyboard users get a predictable dismissal.
@@ -2619,7 +2629,12 @@ function EquipmentFormModal({
         const diffRecord = diff as unknown as Record<string, unknown>;
         (Object.keys(payload) as (keyof CreateEquipmentPayload)[]).forEach(
           (k) => {
-            if (originalRecord[k] !== newRecord[k]) {
+            const before = originalRecord[k];
+            const after = newRecord[k];
+            const same = Array.isArray(before) && Array.isArray(after)
+              ? before.join(' ') === after.join(' ')
+              : before === after;
+            if (!same) {
               diffRecord[k] = newRecord[k];
             }
           },
@@ -3013,6 +3028,20 @@ function EquipmentFormModal({
                 />
               </div>
             </div>
+          </section>
+
+          {/* ── Section: Required certificates ───────────────── */}
+          <section>
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-content-tertiary mb-2">
+              {t('equipment.required_certs_title', {
+                defaultValue: 'Required operator certificates',
+              })}
+            </h3>
+            <RequiredCertificatesInput
+              value={form.required_certificates}
+              onChange={(next) => set('required_certificates', next)}
+              suggestions={certTypes ?? []}
+            />
           </section>
 
           {/* ── Section: Notes ───────────────────────────────── */}

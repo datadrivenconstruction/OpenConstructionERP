@@ -123,6 +123,10 @@ _TEMPLATES: dict[str, str] = {
     # ── Punch list (auto-created from clash / inspection) ─────────────
     "notifications.punchlist.auto_created.title": "Punch item created",
     "notifications.punchlist.auto_created.body": "{title}",
+    # ── Dispatch board ───────────────────────────────────────────────
+    # Non-English locales carry this English text until translated (locales/*.json, document_catalogue).
+    "dispatch.notify.plan_title": "Your daily plan is ready",
+    "dispatch.notify.plan_body": "Plan for {day}: {lines} lines.",
     # ── Digests (Epic B / B3) ────────────────────────────────────────
     "notifications.digest.title": "Notification digest",
     "notifications.digest.body": "You have {count} new updates on the {channel} channel.",
