@@ -35,9 +35,11 @@ import {
   Gavel,
   ShoppingCart,
   Upload,
+  Timer,
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, RecoveryCard, DismissibleInfo, IntroRichText, SkeletonTable, Breadcrumb, ConfirmDialog, ModuleGuideButton, CollapsibleSection } from '@/shared/ui';
 import { RequiresProject } from '@/shared/auth/RequiresProject';
+import { useModuleStore } from '@/stores/useModuleStore';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import {
@@ -1511,6 +1513,7 @@ function PackageDetail({
 }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const bidDayEnabled = useModuleStore((st) => st.isModuleEnabled('bid_day'));
   const queryClient = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
   const { confirm, ...confirmProps } = useConfirm();
@@ -1942,6 +1945,20 @@ function PackageDetail({
             </RelatedRecordStrip>
           </div>
           <div className="flex items-center gap-2">
+            {bidDayEnabled && pkg.status !== 'awarded' && pkg.status !== 'closed' && (
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Timer size={14} />}
+                onClick={() => navigate(`/tendering/${pkg.id}/bid-day`)}
+                data-testid="bid-day-open"
+                title={t('bid_day.open_hint', {
+                  defaultValue: 'Live board for the last hours before submission: quotes, choices, markups and the bid total',
+                })}
+              >
+                {t('bid_day.open', { defaultValue: 'Bid day' })}
+              </Button>
+            )}
             {/* An awarded or closed tender is decided: the server refuses a
                 new bid there, so the button is not offered. */}
             {pkg.status !== 'awarded' && pkg.status !== 'closed' && (
