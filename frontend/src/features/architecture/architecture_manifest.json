@@ -60085,6 +60085,7 @@
         "permissions.py",
         "price_adjustment.py",
         "public_procurement.py",
+        "public_procurement_pe.py",
         "public_procurement_sa.py",
         "repairs.py",
         "repository.py",
@@ -106395,6 +106396,7 @@
         "tr_mapper.py",
         "tr_words.py",
         "ubl.py",
+        "ubl_pe.py",
         "ubl_tr.py"
       ],
       "manifest": {
@@ -154562,6 +154564,273 @@
       ]
     },
     {
+      "module_id": "list_views",
+      "module_label": "List Views",
+      "module_category": "core",
+      "files": [
+        "__init__.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_list_views",
+        "version": "1.0.0",
+        "display_name": "List Views",
+        "description": "Saved table layouts for every list page: visible columns, widths, sort and the header filters as a named layout, personal or shared with the team. Separate from oe_saved_views, which runs server-side filter specs against registered entities and stores no column layout; this one keeps presentation state for any table, registered or not.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "core",
+        "depends": [
+          "oe_users"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "ListView",
+          "tablename": "oe_list_views_view",
+          "docstring": "A named list layout (filters, columns, sort) for one page key.",
+          "columns": [
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_users_user.id"
+            },
+            {
+              "name": "tenant_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "scope_key",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "state",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "is_shared",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "is_default",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/",
+          "handler": "list_views",
+          "response_model": "list[ListViewResponse]"
+        },
+        {
+          "method": "POST",
+          "path": "/",
+          "handler": "create_view",
+          "response_model": "ListViewSaved",
+          "request_schema": "ListViewCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/{view_id}",
+          "handler": "update_view",
+          "response_model": "ListViewSaved",
+          "request_schema": "ListViewUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/{view_id}",
+          "handler": "delete_view"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ListSort",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Sort of a list: one column, ascending or descending.",
+          "fields": [
+            {
+              "name": "key",
+              "type": "str"
+            },
+            {
+              "name": "dir",
+              "type": "Literal['asc', 'desc']",
+              "default": "'asc'"
+            }
+          ]
+        },
+        {
+          "class_name": "ListViewState",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "What a view restores on a list page.",
+          "fields": [
+            {
+              "name": "filters",
+              "type": "dict[str, str]"
+            },
+            {
+              "name": "columns",
+              "type": "list[str]"
+            },
+            {
+              "name": "widths",
+              "type": "dict[str, int]"
+            },
+            {
+              "name": "sort",
+              "type": "ListSort | None",
+              "default": "None"
+            },
+            {
+              "name": "query",
+              "type": "dict[str, str | int | float | bool | list[str] | None]"
+            }
+          ]
+        },
+        {
+          "class_name": "ListViewCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Save the current layout of a list page under a name.",
+          "fields": [
+            {
+              "name": "scope_key",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "ListViewState"
+            },
+            {
+              "name": "is_shared",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "is_default",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "ListViewUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Rename, re-share or overwrite the layout of an existing view.",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "state",
+              "type": "ListViewState | None",
+              "default": "None"
+            },
+            {
+              "name": "is_shared",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "is_default",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ListViewResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "A view as the picker shows it.",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "scope_key",
+              "type": "str"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "state",
+              "type": "ListViewState"
+            },
+            {
+              "name": "is_shared",
+              "type": "bool"
+            },
+            {
+              "name": "is_default",
+              "type": "bool"
+            },
+            {
+              "name": "is_own",
+              "type": "bool"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime"
+            },
+            {
+              "name": "updated_at",
+              "type": "datetime"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "users"
+      ]
+    },
+    {
       "module_id": "markups",
       "module_label": "Markups & Annotations",
       "module_category": "core",
@@ -158994,564 +159263,6 @@
       "routes": [],
       "schemas": [],
       "import_dependencies": []
-    },
-    {
-      "module_id": "measurement_book",
-      "module_label": "Measurement Book",
-      "module_category": "business",
-      "files": [
-        "__init__.py",
-        "manifest.py",
-        "models.py",
-        "permissions.py",
-        "repository.py",
-        "router.py",
-        "schemas.py",
-        "service.py",
-        "validators.py"
-      ],
-      "manifest": {
-        "name": "oe_measurement_book",
-        "version": "0.1.0",
-        "display_name": "Measurement Book",
-        "description": "Dated site measurements per BOQ position with dimensions, measured by and check-measured by, cumulative measured and checked quantities, and a running bill that feeds progress claims",
-        "author": "OpenConstructionERP Core Team",
-        "category": "business",
-        "depends": [
-          "oe_projects",
-          "oe_boq",
-          "oe_progress"
-        ],
-        "auto_install": true,
-        "enabled": true
-      },
-      "models": [
-        {
-          "class_name": "MeasurementBookEntry",
-          "tablename": "oe_measurement_book_entry",
-          "docstring": "One dated measurement of one BOQ position.",
-          "columns": [
-            {
-              "name": "project_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_projects_project.id"
-            },
-            {
-              "name": "boq_position_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_boq_position.id"
-            },
-            {
-              "name": "entry_date",
-              "annotation": "Mapped[date]",
-              "sql_type": "Date",
-              "nullable": false
-            },
-            {
-              "name": "location",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "description",
-              "annotation": "Mapped[str]",
-              "sql_type": "Text",
-              "nullable": false
-            },
-            {
-              "name": "length",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "breadth",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "height",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "number",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "direct_quantity",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "quantity",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "measured_by",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "check_status",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "check_quantity",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "checked_by",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "checked_at",
-              "annotation": "Mapped[datetime | None]",
-              "sql_type": "DateTime",
-              "nullable": true
-            },
-            {
-              "name": "bill_ref",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "notes",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "Text",
-              "nullable": true
-            },
-            {
-              "name": "created_by",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            }
-          ],
-          "relationships": []
-        }
-      ],
-      "routes": [
-        {
-          "method": "GET",
-          "path": "/entries/",
-          "handler": "list_entries",
-          "response_model": "list[EntryResponse]"
-        },
-        {
-          "method": "POST",
-          "path": "/entries/",
-          "handler": "create_entry",
-          "response_model": "EntryResponse",
-          "request_schema": "EntryCreate"
-        },
-        {
-          "method": "PATCH",
-          "path": "/entries/{entry_id}",
-          "handler": "update_entry",
-          "response_model": "EntryResponse",
-          "request_schema": "EntryUpdate"
-        },
-        {
-          "method": "DELETE",
-          "path": "/entries/{entry_id}",
-          "handler": "delete_entry"
-        },
-        {
-          "method": "POST",
-          "path": "/entries/{entry_id}/check",
-          "handler": "check_entry",
-          "response_model": "EntryResponse",
-          "request_schema": "EntryCheck"
-        },
-        {
-          "method": "GET",
-          "path": "/positions/",
-          "handler": "list_positions",
-          "response_model": "list[PositionSummary]"
-        },
-        {
-          "method": "GET",
-          "path": "/running-bill/",
-          "handler": "running_bill",
-          "response_model": "RunningBill"
-        },
-        {
-          "method": "POST",
-          "path": "/running-bill/post-to-progress",
-          "handler": "post_to_progress",
-          "response_model": "PostToProgressResult",
-          "request_schema": "PostToProgress"
-        },
-        {
-          "method": "GET",
-          "path": "/validation/",
-          "handler": "validate_book",
-          "response_model": "ValidationResponse",
-          "request_schema": "Decimal"
-        }
-      ],
-      "schemas": [
-        {
-          "class_name": "EntryBase",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "entry_date",
-              "type": "date | None",
-              "default": "None"
-            },
-            {
-              "name": "location",
-              "type": "str | None"
-            },
-            {
-              "name": "description",
-              "type": "str | None"
-            },
-            {
-              "name": "length",
-              "type": "_Dim"
-            },
-            {
-              "name": "breadth",
-              "type": "_Dim"
-            },
-            {
-              "name": "height",
-              "type": "_Dim"
-            },
-            {
-              "name": "number",
-              "type": "_Dim"
-            },
-            {
-              "name": "direct_quantity",
-              "type": "_Dim",
-              "default": "None"
-            },
-            {
-              "name": "measured_by",
-              "type": "str | None"
-            },
-            {
-              "name": "bill_ref",
-              "type": "str | None"
-            },
-            {
-              "name": "notes",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "EntryCreate",
-          "bases": [
-            "EntryBase"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "project_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "boq_position_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "entry_date",
-              "type": "date"
-            }
-          ]
-        },
-        {
-          "class_name": "EntryUpdate",
-          "bases": [
-            "EntryBase"
-          ],
-          "docstring": "",
-          "fields": []
-        },
-        {
-          "class_name": "EntryCheck",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "status",
-              "type": "CheckStatus"
-            },
-            {
-              "name": "check_quantity",
-              "type": "Decimal | None",
-              "default": "None"
-            },
-            {
-              "name": "checked_by",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "EntryResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "project_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "boq_position_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "entry_date",
-              "type": "date"
-            },
-            {
-              "name": "location",
-              "type": "str"
-            },
-            {
-              "name": "description",
-              "type": "str"
-            },
-            {
-              "name": "length",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "breadth",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "height",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "number",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "direct_quantity",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "quantity",
-              "type": "Decimal"
-            },
-            {
-              "name": "measured_by",
-              "type": "str"
-            },
-            {
-              "name": "check_status",
-              "type": "str"
-            },
-            {
-              "name": "check_quantity",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "checked_by",
-              "type": "str | None"
-            },
-            {
-              "name": "checked_at",
-              "type": "datetime | None"
-            },
-            {
-              "name": "bill_ref",
-              "type": "str | None"
-            },
-            {
-              "name": "notes",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "PositionSummary",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "boq_position_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "ordinal",
-              "type": "str"
-            },
-            {
-              "name": "description",
-              "type": "str"
-            },
-            {
-              "name": "unit",
-              "type": "str"
-            },
-            {
-              "name": "boq_quantity",
-              "type": "Decimal"
-            },
-            {
-              "name": "unit_rate",
-              "type": "Decimal"
-            },
-            {
-              "name": "measured_quantity",
-              "type": "Decimal"
-            },
-            {
-              "name": "checked_quantity",
-              "type": "Decimal"
-            },
-            {
-              "name": "entry_count",
-              "type": "int"
-            },
-            {
-              "name": "unchecked_count",
-              "type": "int"
-            },
-            {
-              "name": "percent_measured",
-              "type": "Decimal"
-            },
-            {
-              "name": "value_to_date",
-              "type": "Decimal"
-            }
-          ]
-        },
-        {
-          "class_name": "RunningBill",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "project_id",
-              "type": "uuid.UUID"
-            },
-            {
-              "name": "currency",
-              "type": "str"
-            },
-            {
-              "name": "lines",
-              "type": "list[PositionSummary]"
-            },
-            {
-              "name": "total_value",
-              "type": "Decimal"
-            },
-            {
-              "name": "unchecked_count",
-              "type": "int"
-            },
-            {
-              "name": "can_certify",
-              "type": "bool"
-            }
-          ]
-        },
-        {
-          "class_name": "PostToProgress",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "period_label",
-              "type": "str"
-            }
-          ]
-        },
-        {
-          "class_name": "PostToProgressResult",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "recorded",
-              "type": "int"
-            },
-            {
-              "name": "skipped",
-              "type": "int"
-            }
-          ]
-        },
-        {
-          "class_name": "ValidationResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "status",
-              "type": "str"
-            },
-            {
-              "name": "checked",
-              "type": "int"
-            },
-            {
-              "name": "results",
-              "type": "list[dict[str, Any]]"
-            }
-          ]
-        }
-      ],
-      "import_dependencies": [
-        "boq",
-        "progress",
-        "projects"
-      ]
     },
     {
       "module_id": "meetings",
@@ -181462,6 +181173,7 @@
         "manifest.py",
         "models.py",
         "permissions.py",
+        "repairs.py",
         "repository.py",
         "router.py",
         "schemas.py",
@@ -195396,6 +195108,12 @@
               "nullable": true
             },
             {
+              "name": "color",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
               "name": "project_code",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
@@ -196476,6 +196194,10 @@
               "description": "Whether the client is a public buyer: 'public' or 'private'. Where a country's retention law follows the client (France), new contracts start from that law's terms. Omitted means not recorded, and the country's neutral figures apply."
             },
             {
+              "name": "color",
+              "type": "str | None"
+            },
+            {
               "name": "subdivision_code",
               "type": "str | None",
               "description": "ISO 3166-2 state or province where the work is (e.g. US-CA, AU-VIC). Scopes rules a state sets on its own, such as a cap on the deposit for home improvement."
@@ -196623,6 +196345,10 @@
             },
             {
               "name": "works",
+              "type": "str | None"
+            },
+            {
+              "name": "color",
               "type": "str | None"
             },
             {
@@ -196853,6 +196579,11 @@
             },
             {
               "name": "works",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "color",
               "type": "str | None",
               "default": "None"
             },
@@ -219700,9 +219431,6 @@
       "files": [
         "__init__.py",
         "abs_format.py",
-        "bbs.py",
-        "bbs_service.py",
-        "bbs_validators.py",
         "events.py",
         "manifest.py",
         "models.py",
@@ -219959,148 +219687,6 @@
               "back_populates": "shapes"
             }
           ]
-        },
-        {
-          "class_name": "BarBendingEntry",
-          "tablename": "oe_rebar_bbs_entry",
-          "docstring": "One manually entered bar mark of a bar bending schedule.\n\nThe computed columns are stored as written so the schedule the site works\nfrom does not shift when a shape formula in the data file is corrected.",
-          "columns": [
-            {
-              "name": "project_id",
-              "annotation": "Mapped[uuid.UUID]",
-              "sql_type": "GUID",
-              "nullable": false,
-              "is_fk": true,
-              "fk_target": "oe_projects_project.id"
-            },
-            {
-              "name": "member",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "bar_mark",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "diameter_mm",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "shape_standard",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "shape_code",
-              "annotation": "Mapped[str]",
-              "sql_type": "String",
-              "nullable": false
-            },
-            {
-              "name": "dim_a",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "dim_b",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "dim_c",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "dim_d",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "dim_e",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "members_count",
-              "annotation": "Mapped[int]",
-              "sql_type": "Integer",
-              "nullable": false
-            },
-            {
-              "name": "bars_per_member",
-              "annotation": "Mapped[int]",
-              "sql_type": "Integer",
-              "nullable": false
-            },
-            {
-              "name": "steel_grade",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            },
-            {
-              "name": "lap_length_mm",
-              "annotation": "Mapped[Decimal | None]",
-              "sql_type": "Numeric",
-              "nullable": true
-            },
-            {
-              "name": "boq_position_id",
-              "annotation": "Mapped[uuid.UUID | None]",
-              "sql_type": "GUID",
-              "nullable": true
-            },
-            {
-              "name": "notes",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "Text",
-              "nullable": true
-            },
-            {
-              "name": "cut_length_mm",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "unit_weight_kg_m",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "total_length_m",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "weight_kg",
-              "annotation": "Mapped[Decimal]",
-              "sql_type": "Numeric",
-              "nullable": false
-            },
-            {
-              "name": "created_by",
-              "annotation": "Mapped[str | None]",
-              "sql_type": "String",
-              "nullable": true
-            }
-          ],
-          "relationships": []
         }
       ],
       "routes": [
@@ -220164,49 +219750,6 @@
           "method": "GET",
           "path": "/imports/{import_id}/export",
           "handler": "export_schedule"
-        },
-        {
-          "method": "GET",
-          "path": "/shape-codes",
-          "handler": "list_shape_codes",
-          "response_model": "list[ShapeCodeInfo]"
-        },
-        {
-          "method": "GET",
-          "path": "/bbs",
-          "handler": "list_bbs",
-          "response_model": "BbsScheduleResponse"
-        },
-        {
-          "method": "POST",
-          "path": "/bbs",
-          "handler": "create_bbs_entry",
-          "response_model": "BbsEntryResponse",
-          "request_schema": "BbsEntryCreate"
-        },
-        {
-          "method": "GET",
-          "path": "/bbs/validation",
-          "handler": "validate_bbs",
-          "response_model": "BbsValidationResponse",
-          "request_schema": "Decimal"
-        },
-        {
-          "method": "GET",
-          "path": "/bbs/export.csv",
-          "handler": "export_bbs_csv"
-        },
-        {
-          "method": "PATCH",
-          "path": "/bbs/{entry_id}",
-          "handler": "update_bbs_entry",
-          "response_model": "BbsEntryResponse",
-          "request_schema": "BbsEntryUpdate"
-        },
-        {
-          "method": "DELETE",
-          "path": "/bbs/{entry_id}",
-          "handler": "delete_bbs_entry"
         }
       ],
       "schemas": [
@@ -220712,328 +220255,9 @@
               "type": "int"
             }
           ]
-        },
-        {
-          "class_name": "ShapeCodeInfo",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "One shape code and its cut-length formula.",
-          "fields": [
-            {
-              "name": "standard",
-              "type": "str"
-            },
-            {
-              "name": "code",
-              "type": "str"
-            },
-            {
-              "name": "description",
-              "type": "str"
-            },
-            {
-              "name": "dimensions",
-              "type": "list[str]"
-            },
-            {
-              "name": "formula",
-              "type": "str"
-            }
-          ]
-        },
-        {
-          "class_name": "BbsEntryBase",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "member",
-              "type": "str | None"
-            },
-            {
-              "name": "bar_mark",
-              "type": "str | None"
-            },
-            {
-              "name": "diameter_mm",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "shape_standard",
-              "type": "str | None"
-            },
-            {
-              "name": "shape_code",
-              "type": "str | None"
-            },
-            {
-              "name": "dim_a",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_b",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_c",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_d",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_e",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "members_count",
-              "type": "int | None"
-            },
-            {
-              "name": "bars_per_member",
-              "type": "int | None"
-            },
-            {
-              "name": "steel_grade",
-              "type": "str | None"
-            },
-            {
-              "name": "lap_length_mm",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "boq_position_id",
-              "type": "UUID | None",
-              "default": "None"
-            },
-            {
-              "name": "notes",
-              "type": "str | None"
-            }
-          ]
-        },
-        {
-          "class_name": "BbsEntryCreate",
-          "bases": [
-            "BbsEntryBase"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "project_id",
-              "type": "UUID"
-            },
-            {
-              "name": "member",
-              "type": "str"
-            },
-            {
-              "name": "bar_mark",
-              "type": "str"
-            },
-            {
-              "name": "diameter_mm",
-              "type": "Decimal"
-            },
-            {
-              "name": "shape_standard",
-              "type": "str"
-            },
-            {
-              "name": "shape_code",
-              "type": "str"
-            },
-            {
-              "name": "members_count",
-              "type": "int"
-            },
-            {
-              "name": "bars_per_member",
-              "type": "int"
-            }
-          ]
-        },
-        {
-          "class_name": "BbsEntryUpdate",
-          "bases": [
-            "BbsEntryBase"
-          ],
-          "docstring": "",
-          "fields": []
-        },
-        {
-          "class_name": "BbsEntryResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "id",
-              "type": "UUID"
-            },
-            {
-              "name": "project_id",
-              "type": "UUID"
-            },
-            {
-              "name": "member",
-              "type": "str"
-            },
-            {
-              "name": "bar_mark",
-              "type": "str"
-            },
-            {
-              "name": "diameter_mm",
-              "type": "Decimal"
-            },
-            {
-              "name": "shape_standard",
-              "type": "str"
-            },
-            {
-              "name": "shape_code",
-              "type": "str"
-            },
-            {
-              "name": "dim_a",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_b",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_c",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_d",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "dim_e",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "members_count",
-              "type": "int"
-            },
-            {
-              "name": "bars_per_member",
-              "type": "int"
-            },
-            {
-              "name": "steel_grade",
-              "type": "str | None"
-            },
-            {
-              "name": "lap_length_mm",
-              "type": "Decimal | None"
-            },
-            {
-              "name": "boq_position_id",
-              "type": "UUID | None"
-            },
-            {
-              "name": "notes",
-              "type": "str | None"
-            },
-            {
-              "name": "cut_length_mm",
-              "type": "Decimal"
-            },
-            {
-              "name": "unit_weight_kg_m",
-              "type": "Decimal"
-            },
-            {
-              "name": "total_length_m",
-              "type": "Decimal"
-            },
-            {
-              "name": "weight_kg",
-              "type": "Decimal"
-            }
-          ]
-        },
-        {
-          "class_name": "BbsDiameterTotal",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "diameter_mm",
-              "type": "Decimal"
-            },
-            {
-              "name": "bar_count",
-              "type": "int"
-            },
-            {
-              "name": "total_length_m",
-              "type": "Decimal"
-            },
-            {
-              "name": "weight_kg",
-              "type": "Decimal"
-            }
-          ]
-        },
-        {
-          "class_name": "BbsScheduleResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "items",
-              "type": "list[BbsEntryResponse]"
-            },
-            {
-              "name": "totals_by_diameter",
-              "type": "list[BbsDiameterTotal]"
-            },
-            {
-              "name": "total_weight_kg",
-              "type": "Decimal"
-            }
-          ]
-        },
-        {
-          "class_name": "BbsValidationResponse",
-          "bases": [
-            "BaseModel"
-          ],
-          "docstring": "",
-          "fields": [
-            {
-              "name": "status",
-              "type": "str"
-            },
-            {
-              "name": "checked",
-              "type": "int"
-            },
-            {
-              "name": "results",
-              "type": "list[dict]"
-            }
-          ]
         }
       ],
-      "import_dependencies": [
-        "boq",
-        "measurement"
-      ]
+      "import_dependencies": []
     },
     {
       "module_id": "reconciliation",
@@ -286353,6 +285577,7 @@
       "module_category": "core",
       "files": [
         "__init__.py",
+        "avatar.py",
         "manifest.py",
         "models.py",
         "oidc.py",
@@ -286441,6 +285666,12 @@
             },
             {
               "name": "oidc_issuer",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "avatar_key",
               "annotation": "Mapped[str | None]",
               "sql_type": "String",
               "nullable": true
@@ -286711,6 +285942,26 @@
           "handler": "update_me",
           "response_model": "UserResponse",
           "request_schema": "UserUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/me/avatar/",
+          "handler": "upload_my_avatar",
+          "response_model": "UserResponse",
+          "request_schema": "UploadFile"
+        },
+        {
+          "method": "GET",
+          "path": "/me/avatar/",
+          "handler": "get_my_avatar",
+          "request_schema": "UserService"
+        },
+        {
+          "method": "DELETE",
+          "path": "/me/avatar/",
+          "handler": "delete_my_avatar",
+          "response_model": "UserResponse",
+          "request_schema": "UserService"
         },
         {
           "method": "POST",
@@ -287330,6 +286581,11 @@
             {
               "name": "currency_code",
               "type": "str"
+            },
+            {
+              "name": "avatar_url",
+              "type": "str | None",
+              "default": "None"
             },
             {
               "name": "created_at",
@@ -295629,10 +294885,10 @@
     },
     {
       "name": "auth",
-      "ts_files": 21,
+      "ts_files": 22,
       "css_files": 0,
       "test_files": 7,
-      "total_files": 21
+      "total_files": 22
     },
     {
       "name": "authority-submission",
@@ -296426,13 +295682,6 @@
       "total_files": 6
     },
     {
-      "name": "measurement-book",
-      "ts_files": 3,
-      "css_files": 0,
-      "test_files": 0,
-      "total_files": 3
-    },
-    {
       "name": "meetings",
       "ts_files": 19,
       "css_files": 0,
@@ -296658,10 +295907,10 @@
     },
     {
       "name": "projects",
-      "ts_files": 41,
+      "ts_files": 42,
       "css_files": 0,
       "test_files": 18,
-      "total_files": 41
+      "total_files": 42
     },
     {
       "name": "property-dev",
@@ -296707,10 +295956,10 @@
     },
     {
       "name": "rebar-schedule",
-      "ts_files": 6,
+      "ts_files": 4,
       "css_files": 0,
       "test_files": 1,
-      "total_files": 6
+      "total_files": 4
     },
     {
       "name": "reconciliation",
@@ -296854,10 +296103,10 @@
     },
     {
       "name": "settings",
-      "ts_files": 50,
+      "ts_files": 57,
       "css_files": 0,
-      "test_files": 19,
-      "total_files": 50
+      "test_files": 20,
+      "total_files": 57
     },
     {
       "name": "setup",
@@ -297078,10 +296327,10 @@
     },
     {
       "name": "videos",
-      "ts_files": 27,
+      "ts_files": 31,
       "css_files": 0,
-      "test_files": 7,
-      "total_files": 27
+      "test_files": 8,
+      "total_files": 31
     },
     {
       "name": "voice",
@@ -298037,6 +297286,9 @@
     "legal_entities": [
       "projects"
     ],
+    "list_views": [
+      "users"
+    ],
     "markups": [
       "documents",
       "file_versions",
@@ -298074,11 +297326,6 @@
       "users"
     ],
     "measurement": [],
-    "measurement_book": [
-      "boq",
-      "progress",
-      "projects"
-    ],
     "meetings": [
       "ai",
       "ai_agents",
@@ -298462,8 +297709,6 @@
       "tendering"
     ],
     "rebar_schedule": [
-      "boq",
-      "measurement",
       "projects",
       "users"
     ],
@@ -298834,15 +298079,15 @@
   "statistics": {
     "backend_modules": 227,
     "modules_with_manifests": 225,
-    "total_models": 851,
-    "total_columns": 10017,
+    "total_models": 850,
+    "total_columns": 9985,
     "total_relationships": 257,
-    "total_routes": 4893,
-    "total_schemas": 4396,
-    "total_python_files": 3057,
-    "frontend_features": 223,
-    "frontend_ts_files": 3894,
-    "frontend_backend_mapped": 200
+    "total_routes": 4884,
+    "total_schemas": 4383,
+    "total_python_files": 3058,
+    "frontend_features": 222,
+    "frontend_ts_files": 3902,
+    "frontend_backend_mapped": 199
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -298971,7 +298216,6 @@
     "match": "match",
     "match-elements": "match_elements",
     "mcp": "mcp",
-    "measurement-book": "measurement_book",
     "meetings": "meetings",
     "methodology": "methodology",
     "moc": "moc",
