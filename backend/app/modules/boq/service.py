@@ -6576,7 +6576,7 @@ class BOQService:
                     fields.get("percentage", _float_or_none(markup.percentage)),
                 )
             except ValueError as exc:
-                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
+                raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
 
         # Convert float values to strings for storage
         if "percentage" in fields:

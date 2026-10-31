@@ -6,8 +6,6 @@
  */
 import { API_BASE, apiDelete, apiGet, apiPost, downloadWithAuth } from '@/shared/lib/api';
 
-const BASE = '/v1/rebar-schedule';
-
 export type ShapeStandard = 'BS8666' | 'IS2502';
 export type DimKey = 'dim_a' | 'dim_b' | 'dim_c' | 'dim_d' | 'dim_e';
 
@@ -87,13 +85,13 @@ export interface BbsFinding {
 
 export const BBS_DIAMETERS = [6, 8, 10, 12, 16, 20, 25, 32, 40];
 
-export const fetchShapeCodes = () => apiGet<ShapeCode[]>(`${BASE}/shape-codes/`);
-export const fetchBbs = (projectId: string) => apiGet<BbsSchedule>(`${BASE}/bbs/?project_id=${projectId}`);
-export const createBbsEntry = (body: BbsInput) => apiPost<BbsEntry>(`${BASE}/bbs/`, body);
-export const deleteBbsEntry = (id: string) => apiDelete(`${BASE}/bbs/${id}`);
+export const fetchShapeCodes = () => apiGet<ShapeCode[]>(`/v1/rebar-schedule/shape-codes/`);
+export const fetchBbs = (projectId: string) => apiGet<BbsSchedule>(`/v1/rebar-schedule/bbs/?project_id=${projectId}`);
+export const createBbsEntry = (body: BbsInput) => apiPost<BbsEntry>(`/v1/rebar-schedule/bbs/`, body);
+export const deleteBbsEntry = (id: string) => apiDelete(`/v1/rebar-schedule/bbs/${id}`);
 export const fetchBbsValidation = (projectId: string, lapMultiple = 50, tolerancePct = 5) =>
   apiGet<{ status: string; results: BbsFinding[] }>(
-    `${BASE}/bbs/validation/?project_id=${projectId}&lap_multiple=${lapMultiple}&tolerance_pct=${tolerancePct}`,
+    `/v1/rebar-schedule/bbs/validation/?project_id=${projectId}&lap_multiple=${lapMultiple}&tolerance_pct=${tolerancePct}`,
   );
 export const downloadBbsCsv = (projectId: string) =>
-  downloadWithAuth(`${API_BASE}${BASE}/bbs/export.csv?project_id=${projectId}`, 'bar-bending-schedule.csv');
+  downloadWithAuth(`${API_BASE}/v1/rebar-schedule/bbs/export.csv?project_id=${projectId}`, 'bar-bending-schedule.csv');

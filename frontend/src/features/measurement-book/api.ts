@@ -7,8 +7,6 @@
  */
 import { apiDelete, apiGet, apiPatch, apiPost } from '@/shared/lib/api';
 
-const BASE = '/v1/measurement-book';
-
 export type CheckStatus = 'unchecked' | 'checked' | 'disputed';
 
 export interface MeasurementEntry {
@@ -86,25 +84,25 @@ export interface ValidationReport {
 }
 
 export const fetchEntries = (projectId: string, positionId: string) =>
-  apiGet<MeasurementEntry[]>(`${BASE}/entries/?project_id=${projectId}&boq_position_id=${positionId}`);
-export const createEntry = (body: EntryInput) => apiPost<MeasurementEntry>(`${BASE}/entries/`, body);
+  apiGet<MeasurementEntry[]>(`/v1/measurement-book/entries/?project_id=${projectId}&boq_position_id=${positionId}`);
+export const createEntry = (body: EntryInput) => apiPost<MeasurementEntry>(`/v1/measurement-book/entries/`, body);
 export const updateEntry = (id: string, body: Partial<EntryInput>) =>
-  apiPatch<MeasurementEntry>(`${BASE}/entries/${id}`, body);
-export const deleteEntry = (id: string) => apiDelete(`${BASE}/entries/${id}`);
+  apiPatch<MeasurementEntry>(`/v1/measurement-book/entries/${id}`, body);
+export const deleteEntry = (id: string) => apiDelete(`/v1/measurement-book/entries/${id}`);
 export const checkEntry = (
   id: string,
   body: { status: CheckStatus; check_quantity?: string; checked_by?: string },
-) => apiPost<MeasurementEntry>(`${BASE}/entries/${id}/check`, body);
+) => apiPost<MeasurementEntry>(`/v1/measurement-book/entries/${id}/check`, body);
 
 export const fetchPositions = (projectId: string) =>
-  apiGet<PositionSummary[]>(`${BASE}/positions/?project_id=${projectId}`);
+  apiGet<PositionSummary[]>(`/v1/measurement-book/positions/?project_id=${projectId}`);
 export const fetchRunningBill = (projectId: string) =>
-  apiGet<RunningBill>(`${BASE}/running-bill/?project_id=${projectId}`);
+  apiGet<RunningBill>(`/v1/measurement-book/running-bill/?project_id=${projectId}`);
 export const postToProgress = (projectId: string, periodLabel: string) =>
-  apiPost<{ recorded: number; skipped: number }>(`${BASE}/running-bill/post-to-progress?project_id=${projectId}`, {
+  apiPost<{ recorded: number; skipped: number }>(`/v1/measurement-book/running-bill/post-to-progress?project_id=${projectId}`, {
     period_label: periodLabel,
   });
 export const fetchValidation = (projectId: string, deviationThresholdPct = 5) =>
   apiGet<ValidationReport>(
-    `${BASE}/validation/?project_id=${projectId}&deviation_threshold_pct=${deviationThresholdPct}`,
+    `/v1/measurement-book/validation/?project_id=${projectId}&deviation_threshold_pct=${deviationThresholdPct}`,
   );

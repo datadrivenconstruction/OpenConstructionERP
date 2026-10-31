@@ -4669,6 +4669,7 @@ class CPWDMeasurementUnits(ValidationRule):
             "rm",
             "rmt",
             "r.m",
+            "lm",
             "km",
             # area
             "m2",
