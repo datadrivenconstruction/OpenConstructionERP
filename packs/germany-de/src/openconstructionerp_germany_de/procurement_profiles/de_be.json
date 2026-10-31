@@ -1,0 +1,13 @@
+{
+  "profile_id": "de_be",
+  "jurisdiction": "DE-BE",
+  "name": "Berlin",
+  "level": "state",
+  "extends": "de_federal",
+  "review_status": "unreviewed",
+  "active": false,
+  "pilot": false,
+  "reviewed_by": null,
+  "reviewed_on": null,
+  "versions": []
+}

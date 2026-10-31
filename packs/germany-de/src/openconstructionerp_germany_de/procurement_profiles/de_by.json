@@ -1,0 +1,13 @@
+{
+  "profile_id": "de_by",
+  "jurisdiction": "DE-BY",
+  "name": "Bayern",
+  "level": "state",
+  "extends": "de_federal",
+  "review_status": "unreviewed",
+  "active": false,
+  "pilot": false,
+  "reviewed_by": null,
+  "reviewed_on": null,
+  "versions": []
+}

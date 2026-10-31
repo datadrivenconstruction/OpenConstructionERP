@@ -44,4 +44,5 @@ where = ["src"]
 openconstructionerp_germany_de = [
     "onboarding.yaml",
     "rule_packs/*.json",
+    "procurement_profiles/*.json",
 ]

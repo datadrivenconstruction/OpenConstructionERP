@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "German procurement rule profile (federal baseline or one federal state)",
+  "description": "A profile stays inactive and non-authoritative until a legal reviewer sets review_status to reviewed, names themselves and the date, and every rule cites its primary source. Values are never filled in without a source.",
+  "type": "object",
+  "required": ["profile_id", "jurisdiction", "name", "level", "extends", "review_status", "active", "pilot", "reviewed_by", "reviewed_on", "versions"],
+  "additionalProperties": false,
+  "properties": {
+    "profile_id": {"type": "string", "pattern": "^de_[a-z]+$"},
+    "jurisdiction": {"type": "string", "pattern": "^DE(-[A-Z]{2})?$"},
+    "name": {"type": "string"},
+    "level": {"enum": ["federal", "state"]},
+    "extends": {"type": ["string", "null"]},
+    "review_status": {"enum": ["unreviewed", "in_review", "reviewed"]},
+    "active": {"type": "boolean"},
+    "pilot": {"type": "boolean"},
+    "reviewed_by": {"type": ["string", "null"]},
+    "reviewed_on": {"type": ["string", "null"], "format": "date"},
+    "versions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["effective_from", "effective_to", "source_url", "source_text_version", "rules"],
+        "properties": {
+          "effective_from": {"type": "string", "format": "date"},
+          "effective_to": {"type": ["string", "null"], "format": "date"},
+          "transition_note": {"type": ["string", "null"]},
+          "source_url": {"type": "string"},
+          "source_text_version": {"type": "string"},
+          "rules": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["rule_id", "contract_type", "authority_types", "procedure", "net_value_from", "net_value_to", "source_url"],
+              "properties": {
+                "rule_id": {"type": "string"},
+                "contract_type": {"enum": ["works", "supplies", "services"]},
+                "authority_types": {"type": "array", "items": {"enum": ["state", "municipal", "municipal_company", "funded_recipient"]}},
+                "procedure": {"type": "string"},
+                "net_value_from": {"type": ["string", "null"]},
+                "net_value_to": {"type": ["string", "null"]},
+                "lot_aggregation": {"type": ["string", "null"]},
+                "min_invitations": {"type": ["integer", "null"]},
+                "min_period_days": {"type": ["integer", "null"]},
+                "publication_required": {"type": ["boolean", "null"]},
+                "justification_required": {"type": ["boolean", "null"]},
+                "evidence_stages": {"type": "array", "items": {"enum": ["registration", "bid", "intended_award", "before_payment"]}},
+                "source_url": {"type": "string"}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

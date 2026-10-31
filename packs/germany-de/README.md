@@ -61,6 +61,17 @@ without the withholding complexity found elsewhere. The pack does not set VAT.
   Karlsruhe. All are structured to DIN 276, measured to VOB/C, and priced at
   regional rates with 19% USt.
 
+## Procurement rule profiles
+
+`procurement_profiles/` holds the federal baseline and one profile for each of the 16 federal states
+(Hessen is the pilot), in the shape given by `_schema.json`: effective dates, primary source and text
+version, authority types (state, municipal, municipality-owned company, funded recipient), works or
+supplies and services, net value bands, lots, invitations, periods, publication and evidence stages.
+Every profile ships inactive and unreviewed with no values. A profile becomes active only after a
+legal reviewer fills it from the primary legislation, names the review and date, and cites a source
+for every rule. The platform freezes the rules applied to each procedure, so a later change never
+alters a past decision.
+
 ## Cost data
 
 Two CWICR cost regions are available: Berlin and Munich. Other German cities
