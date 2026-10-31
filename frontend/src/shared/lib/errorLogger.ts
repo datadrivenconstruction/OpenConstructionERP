@@ -10,6 +10,7 @@
  */
 
 import { APP_VERSION } from './version';
+import { isDemoReadOnly } from '@/stores/useDemoReadOnlyStore';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -562,6 +563,9 @@ function postToBackend(entry: ErrorLogEntry): void {
       // Reset window expired — allow one probe; circuit stays open until
       // the probe succeeds.
     }
+
+    // The read-only demo has nowhere to keep a report.
+    if (isDemoReadOnly()) return;
 
     const stackLines = (entry.stack ?? '')
       .split('\n')

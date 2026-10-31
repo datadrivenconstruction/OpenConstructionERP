@@ -2207,8 +2207,8 @@ export function ProjectDetailPage() {
               </div>
             ) : (
               <>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold text-content-primary">{project.name}</h1>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                  <h1 className="min-w-0 max-w-full break-words text-2xl font-bold text-content-primary">{project.name}</h1>
                   <ProjectStatusBadge status={project.status} size="md" />
                   {/* Owner/admin status picker (#274). Archiving stays its
                       own action (the project menu / list), so 'archived' is
@@ -2523,7 +2523,7 @@ export function ProjectDetailPage() {
       )}
 
       {/* ── Tab Bar ──────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-1 border-b border-border-light">
+      <div className="flex items-center gap-1 overflow-x-auto border-b border-border-light">
         {([
           { key: 'dashboard' as ProjectTab, label: t('projects.dashboard', { defaultValue: 'Dashboard' }), icon: <LayoutDashboard size={15} /> },
           { key: 'overview' as ProjectTab, label: t('projects.overview'), icon: <Table2 size={15} /> },
@@ -2537,7 +2537,7 @@ export function ProjectDetailPage() {
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`
-              flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all
+              flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm font-medium border-b-2 transition-all
               ${
                 activeTab === tab.key
                   ? 'border-oe-blue text-oe-blue'

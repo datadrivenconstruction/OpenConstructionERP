@@ -11,6 +11,9 @@ Each rule reads a plain dict built by ``ServiceChargesService.validation_payload
   custom shares to exactly 100, area shares are all positive; Decimal, no tolerance.
 * ``service_charges.demand_needs_approved_budget`` (ERROR): demands are raised only from an
   approved budget.
+* ``service_charges.budget_lines_non_negative`` (ERROR): every budget line is a number of zero or more.
+* ``service_charges.demands_match_budget`` (ERROR): per period, the demands of all units add up to
+  that period's instalment of the budget, within one cent per unit for the split rounding.
 * ``service_charges.one_budget_per_year`` (ERROR): one budget per association and year.
 * ``service_charges.reconciliation_balance`` (ERROR): every unit's balance is exactly its
   demands minus its share of actual costs, and the shares plus the unallocated part add up
@@ -33,7 +36,7 @@ from app.core.validation.engine import (
     ValidationRule,
     rule_registry,
 )
-from app.modules.service_charges.apportion import check_shares
+from app.modules.service_charges.apportion import CENT, ZERO, check_shares, period_amount
 
 logger = logging.getLogger(__name__)
 
@@ -115,6 +118,65 @@ class DemandNeedsApprovedBudgetRule(_Rule):
         ]
 
 
+class BudgetLinesNonNegativeRule(_Rule):
+    rule_id = "service_charges.budget_lines_non_negative"
+    name = "Budget lines are not negative"
+    category = RuleCategory.CONSISTENCY
+    description = "Every service charge budget line is a number of zero or more"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        budget = _data(context).get("budget") or {}
+        out = []
+        for line in budget.get("lines") or []:
+            amount = _dec(line.get("amount"))
+            out.append(
+                self._result(
+                    str(line.get("id") or ""),
+                    amount.is_finite() and amount >= ZERO,
+                    f"Budget line '{line.get('category')}' is {line.get('amount')}; it must be zero or more.",
+                    category=line.get("category"),
+                    amount=amount,
+                )
+            )
+        return out
+
+
+class DemandsMatchBudgetRule(_Rule):
+    rule_id = "service_charges.demands_match_budget"
+    name = "Demands add up to the budget per period"
+    category = RuleCategory.CONSISTENCY
+    description = "Per period the demands of all units equal the budget instalment, within the split rounding"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        budget = _data(context).get("budget") or {}
+        periods = int(budget.get("periods") or 0)
+        if periods < 1:
+            return []
+        total = sum((_dec(ln.get("amount")) for ln in budget.get("lines") or []), Decimal("0"))
+        if not total.is_finite():
+            return []
+        out = []
+        for row in budget.get("demand_periods") or []:
+            period = int(row.get("period") or 0)
+            if not 1 <= period <= periods:
+                continue
+            expected = period_amount(total, periods, period)
+            demanded = _dec(row.get("demanded"))
+            tolerance = CENT * max(int(row.get("units") or 0), 1)
+            out.append(
+                self._result(
+                    f"{budget.get('id') or ''}:{period}",
+                    demanded.is_finite() and abs(demanded - expected) <= tolerance,
+                    f"Period {period}: demands add up to {demanded}, the approved budget asks for {expected}.",
+                    period=period,
+                    demanded=demanded,
+                    expected=expected,
+                    tolerance=tolerance,
+                )
+            )
+        return out
+
+
 class OneBudgetPerYearRule(_Rule):
     rule_id = "service_charges.one_budget_per_year"
     name = "One budget per association per year"
@@ -189,6 +251,8 @@ class CurrencyConsistentRule(_Rule):
 _RULES: tuple[ValidationRule, ...] = (
     KeySharesTotalRule(),
     DemandNeedsApprovedBudgetRule(),
+    BudgetLinesNonNegativeRule(),
+    DemandsMatchBudgetRule(),
     OneBudgetPerYearRule(),
     ReconciliationBalanceRule(),
     CurrencyConsistentRule(),

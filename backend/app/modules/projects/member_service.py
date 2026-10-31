@@ -38,6 +38,12 @@ from app.modules.teams.models import Team, TeamMembership
 from app.modules.users.models import User
 
 
+async def _find_team(session: AsyncSession, project_id: uuid.UUID) -> Team | None:
+    """The project's default team, else any team, else None. Never writes."""
+    stmt = select(Team).where(Team.project_id == project_id).order_by(Team.is_default.desc(), Team.created_at).limit(1)
+    return (await session.execute(stmt)).scalar_one_or_none()
+
+
 async def _get_or_create_default_team(session: AsyncSession, project_id: uuid.UUID) -> Team:
     """Fetch the project's default team, lazily creating one if missing."""
     stmt = select(Team).where(Team.project_id == project_id, Team.is_default.is_(True)).limit(1)
@@ -74,16 +80,20 @@ async def list_project_members(session: AsyncSession, project_id: uuid.UUID) -> 
     membership row was never created (e.g. data imported from an older dump).
     """
     project = await _load_project(session, project_id)
-    team = await _get_or_create_default_team(session, project_id)
+    # A read must not write: the read-only demo refuses the insert, so a
+    # project without a team lists just its owner.
+    team = await _find_team(session, project_id)
 
     # Join membership → user so we can return email + name in one shot.
-    stmt = (
-        select(TeamMembership, User)
-        .join(User, User.id == TeamMembership.user_id)
-        .where(TeamMembership.team_id == team.id)
-        .order_by(TeamMembership.created_at)
-    )
-    rows = (await session.execute(stmt)).all()
+    rows: list = []
+    if team is not None:
+        stmt = (
+            select(TeamMembership, User)
+            .join(User, User.id == TeamMembership.user_id)
+            .where(TeamMembership.team_id == team.id)
+            .order_by(TeamMembership.created_at)
+        )
+        rows = list((await session.execute(stmt)).all())
 
     members: list[ProjectMemberResponse] = []
     seen: set[uuid.UUID] = set()

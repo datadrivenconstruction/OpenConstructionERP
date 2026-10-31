@@ -21,6 +21,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { AlertTriangle, Gauge, X, Download, ExternalLink, UploadCloud } from 'lucide-react';
 import { apiGet } from '@/shared/lib/api';
+import { markDemoReadOnly } from '@/stores/useDemoReadOnlyStore';
 
 const SESSION_KEY = 'oe_demo_modal_dismissed';
 
@@ -32,14 +33,19 @@ export function DemoBanner() {
   // share a single network call instead of firing /api/system/status twice on
   // every page render. ``staleTime: Infinity`` is fine — demo_mode is fixed
   // for the life of the deployment and the query is invalidated on logout.
-  const { data } = useQuery<{ demo_mode?: boolean; demo_uploads_disabled?: boolean }>({
+  const { data } = useQuery<{ demo_mode?: boolean; demo_uploads_disabled?: boolean; demo_read_only?: boolean }>({
     queryKey: ['system-status'],
-    queryFn: () => apiGet<{ demo_mode?: boolean; demo_uploads_disabled?: boolean }>('/system/status'),
+    queryFn: () => apiGet<{ demo_mode?: boolean; demo_uploads_disabled?: boolean; demo_read_only?: boolean }>('/system/status'),
     retry: false,
     staleTime: Infinity,
   });
   const demoMode = data?.demo_mode === true;
   const uploadsDisabled = data?.demo_uploads_disabled === true;
+  const readOnly = data?.demo_read_only === true;
+
+  useEffect(() => {
+    if (readOnly) markDemoReadOnly();
+  }, [readOnly]);
 
   useEffect(() => {
     if (demoMode && sessionStorage.getItem(SESSION_KEY) !== '1') {

@@ -202,6 +202,8 @@ _READ_ONLY_ENDPOINTS = (
     "app.modules.costs.router:suggest_costs_for_element",
     "app.modules.costs.router:suggest_costs_for_element_by_id",
     "app.modules.costs.router:preview_cost_file",
+    # Logs the report and writes no row; a browser reports errors before sign-in too.
+    "app.modules.client_errors.router:submit_client_error",
 )
 
 #: WebSocket endpoints a visitor is allowed to open on the demo. Sockets are

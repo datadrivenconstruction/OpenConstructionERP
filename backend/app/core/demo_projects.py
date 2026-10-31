@@ -3065,6 +3065,27 @@ async def find_showcase_owner(session: AsyncSession) -> User | None:
     return None
 
 
+def _register_module_rule_sets(rule_sets: list[str]) -> None:
+    """Register rule sets a module owns, for an install run outside the app.
+
+    A module registers its rules in its startup hook, which a CLI or server
+    shell never runs. Each set is looked up as ``app.modules.<set>.validators``
+    with a ``register_<set>_validation_rules`` function.
+    """
+    import importlib
+
+    from app.core.validation.engine import rule_registry
+
+    for name in rule_sets:
+        if rule_registry.has_rules(name) or not name.isidentifier():
+            continue
+        try:
+            module = importlib.import_module(f"app.modules.{name}.validators")
+            getattr(module, f"register_{name}_validation_rules")()
+        except (ImportError, AttributeError):
+            logger.debug("No module registers rule set %s", name)
+
+
 async def _get_or_create_owner(session: AsyncSession) -> uuid.UUID:
     """Find the showcase owner or create the demo user to own the project."""
     user = await find_showcase_owner(session)
@@ -12608,6 +12629,16 @@ async def install_demo_project(
     session.add(project)
     await session.flush()
 
+    # The Team Strip lists members on every project page, and the read-only
+    # demo refuses the write a missing default team would need.
+    from app.modules.teams.models import Team, TeamMembership
+
+    default_team = Team(project_id=project.id, name="Default Team", is_default=True)
+    session.add(default_team)
+    await session.flush()
+    session.add(TeamMembership(team_id=default_team.id, user_id=owner_id, role="lead"))
+    await session.flush()
+
     # ── 2. BOQ ────────────────────────────────────────────────────────
     boq_id = _id()
     boq = BOQ(
@@ -12803,6 +12834,7 @@ async def install_demo_project(
         # Idempotent: populates the registry on first call, no-op thereafter.
         register_builtin_rules()
         rule_sets = template.validation_rule_sets or ["boq_quality"]
+        _register_module_rule_sets(rule_sets)
         await ValidationModuleService(session).run_validation(
             project_id=project.id,
             boq_id=boq.id,

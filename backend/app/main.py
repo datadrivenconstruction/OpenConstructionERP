@@ -71,6 +71,7 @@ from app.config import (
 )
 from app.core.demo_read_only import (
     DemoReadOnlyError,
+    demo_read_only_enabled,
     demo_read_only_guard,
     read_only_refusal,
 )
@@ -3350,6 +3351,7 @@ def create_app() -> FastAPI:
             "cache": {"status": "unknown"},
             "demo_mode": demo_mode,
             "demo_uploads_disabled": settings.demo_block_uploads,
+            "demo_read_only": demo_read_only_enabled(),
         }
 
         # Cache check

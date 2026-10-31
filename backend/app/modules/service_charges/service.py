@@ -136,6 +136,23 @@ class ServiceChargesService:
         budgets = await self.repo.budgets(assoc.id)
         years = [b.year for b in budgets]
         currencies: list[dict[str, str]] = list(extra_currencies)
+        budget_info: dict[str, Any] | None = None
+        if budget is not None:
+            demand_rows = await self.repo.demands(budget.id)
+            by_period: dict[int, list[Decimal]] = {}
+            for d in demand_rows:
+                by_period.setdefault(d.period, []).append(Decimal(d.amount))
+            budget_info = {
+                "id": str(budget.id),
+                "status": budget.status,
+                "year": budget.year,
+                "periods": PERIODS_PER_YEAR[budget.demand_frequency],
+                "lines": [{"id": str(ln.id), "category": ln.category, "amount": _s(ln.amount)} for ln in budget.lines],
+                "demand_periods": [
+                    {"period": p, "units": len(a), "demanded": _s(sum(a, Decimal("0")))}
+                    for p, a in sorted(by_period.items())
+                ],
+            }
         if assoc.legal_entity_id:
             try:
                 from app.modules.legal_entities.models import LegalEntity
@@ -154,7 +171,7 @@ class ServiceChargesService:
                 {"id": str(k.id), "name": k.name, "method": k.method, "shares": [_s(ln.share) for ln in k.lines]}
                 for k in keys
             ],
-            "budget": None if budget is None else {"id": str(budget.id), "status": budget.status, "year": budget.year},
+            "budget": budget_info,
             "duplicate_years": sorted({y for y in years if years.count(y) > 1}),
             "operation": operation,
             "reconciliation": reconciliation,

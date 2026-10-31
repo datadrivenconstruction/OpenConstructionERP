@@ -1,14 +1,19 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 /**
- * The four showcase demos on the public hosted demo. Each one is a company
+ * The showcase demos on the public hosted demo. Each one is a company
  * type: it brings its own look and a menu cut down to the sections that kind
  * of company works in, so a visitor sees their own day, not all 200 modules.
  */
 
 import type { Appearance } from './appearance';
 
-export type DemoSlug = 'consultancy-riyadh' | 'contractor-jeddah' | 'site-development-dammam' | 'full-showcase-riyadh';
+export type DemoSlug =
+  | 'consultancy-riyadh'
+  | 'contractor-jeddah'
+  | 'site-development-dammam'
+  | 'full-showcase-riyadh'
+  | 'residential-riyadh-offplan';
 
 export interface DemoProfile {
   slug: DemoSlug;
@@ -59,6 +64,12 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
     appearance: { accent: 'blue', font: 'system', density: 'comfortable', radius: 'standard', text: 'default' },
     groups: null,
     stem: 'demo_profiles.full_showcase',
+  },
+  {
+    slug: 'residential-riyadh-offplan',
+    appearance: { accent: 'teal', font: 'system', density: 'comfortable', radius: 'standard', text: 'default' },
+    groups: null,
+    stem: 'demo_profiles.developer',
   },
 ];
 
