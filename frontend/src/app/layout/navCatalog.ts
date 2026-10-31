@@ -694,6 +694,7 @@ export const navGroups: NavGroup[] = [
     items: [
       { labelKey: 'nav.equipment', to: '/equipment', icon: Truck },
       { labelKey: 'nav.resources', to: '/resources', icon: Users },
+      { labelKey: 'nav.dispatch', to: '/dispatch', icon: CalendarRange },
       // What the crew is licensed to do, and what the project demands of them.
       // The module has shipped installed since it was written and had no menu
       // entry and no route, so the only way to reach it was to know the URL.

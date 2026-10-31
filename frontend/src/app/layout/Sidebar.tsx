@@ -312,6 +312,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/site-sensors': 'oe_site_sensors',
   '/equipment': 'oe_equipment',
   '/resources': 'oe_resources',
+  '/dispatch': 'oe_dispatch',
   '/payroll': 'oe_payroll',
   '/cost-benchmarks': 'oe_cost_benchmarks',
   '/certified-payroll': 'oe_certified_payroll',

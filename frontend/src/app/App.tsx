@@ -484,6 +484,9 @@ const ServicePage = lazy(() =>
 const SubcontractorsPage = lazy(() =>
   import('@/features/subcontractors').then((m) => ({ default: m.SubcontractorsPage }))
 );
+const DispatchPage = lazy(() =>
+  import('@/features/dispatch').then((m) => ({ default: m.DispatchPage }))
+);
 const EquipmentPage = lazy(() =>
   import('@/features/equipment').then((m) => ({ default: m.EquipmentPage }))
 );
@@ -1754,6 +1757,7 @@ export default function App() {
         <Route path="/service" element={<P title="Service & Maintenance"><ServicePage /></P>} />
         <Route path="/projects/:projectId/service" element={<P title="Service & Maintenance"><ServicePage /></P>} />
         <Route path="/equipment" element={<P title="Equipment & Fleet"><EquipmentPage /></P>} />
+        <Route path="/dispatch" element={<P title="Dispatch board"><DispatchPage /></P>} />
         {/* The fleet is a company register, not a project one: only a hire
             (EquipmentRental) carries a project, the machine itself does not.
             A route with :projectId in it promised a filter the data cannot
