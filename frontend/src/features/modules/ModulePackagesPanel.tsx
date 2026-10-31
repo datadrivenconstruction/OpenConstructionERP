@@ -4,8 +4,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2, FileArchive, Info, Trash2, Upload, XCircle } from 'lucide-react';
 import { Badge, Button, Card } from '@/shared/ui';
 import { apiDelete, apiGet, apiPost, API_BASE, fetchWithAuth, getErrorMessage } from '@/shared/lib/api';
+import { formatFileSize } from '@/shared/lib/formatters';
 import { useToastStore } from '@/stores/useToastStore';
-import { fmtNumber } from '@/shared/lib/formatters';
 import { RUNTIME_UI_ENTRIES_KEY } from './runtimeModules';
 
 interface PackageCheck {
@@ -46,12 +46,6 @@ interface InstallResult {
 }
 
 const INSTALLED_KEY = ['module-packages-installed'] as const;
-
-function formatSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${fmtNumber(bytes / 1024, 1)} KB`;
-  return `${fmtNumber(bytes / (1024 * 1024), 1)} MB`;
-}
 
 /**
  * Admin-only: upload a third-party module ZIP, review every file and every
@@ -184,7 +178,7 @@ export function ModulePackagesPanel() {
             </Badge>
           </div>
           <p className="break-all text-2xs text-content-tertiary">
-            SHA-256 {preview.archive_sha256} · {formatSize(preview.archive_size)}
+            SHA-256 {preview.archive_sha256} · {formatFileSize(preview.archive_size)}
           </p>
 
           <ul className="space-y-1">
@@ -217,7 +211,7 @@ export function ModulePackagesPanel() {
                 {preview.files.map((f) => (
                   <tr key={f.path} className="border-t border-border">
                     <td className="px-3 py-1 font-mono text-content-primary">{f.path}</td>
-                    <td className="px-3 py-1 text-right text-content-secondary">{formatSize(f.size)}</td>
+                    <td className="px-3 py-1 text-right text-content-secondary">{formatFileSize(f.size)}</td>
                     <td className="hidden px-3 py-1 font-mono text-content-tertiary md:table-cell">{f.sha256.slice(0, 16)}</td>
                   </tr>
                 ))}
