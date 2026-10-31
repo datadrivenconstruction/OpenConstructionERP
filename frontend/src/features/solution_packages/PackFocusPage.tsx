@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, CheckCircle2, EyeOff, Layers3, Loader2, Rocket } from 'lucide-react';
+import { fmtList } from '@/shared/lib/formatters';
 import { Breadcrumb, Button } from '@/shared/ui';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
@@ -51,7 +52,7 @@ function stepLabel(t: ReturnType<typeof useTranslation>['t'], step: FirstStep): 
         : t('packs.step_boq', { defaultValue: 'See the bill of quantities with prices' });
     case 'validation':
       return step.param
-        ? t('packs.step_validation_rules', { defaultValue: 'Run validation with the pack rules ({{rules}})', rules: step.param.split(/,\s*/).map((r) => standardLabel(r, t)).join(', ') })
+        ? t('packs.step_validation_rules', { defaultValue: 'Run validation with the pack rules ({{rules}})', rules: fmtList(step.param.split(/,\s*/).map((r) => standardLabel(r, t))) })
         : t('packs.step_validation', { defaultValue: 'Run validation and fix what it finds' });
     case 'export_gaeb':
       return t('packs.step_export_gaeb', { defaultValue: 'Export the bill as GAEB XML for the tender' });
