@@ -1978,7 +1978,9 @@
       "notifications.portal.user_invited.title": "Portaali kasutaja kutsuti",
       "notifications.portal.user_invited.body": "{portal_user_email} kutsuti rolli: {portal_role}.",
       "notifications.portal.message_received.title": "Uus portaalisõnum",
-      "notifications.portal.message_received.body": "{buyer_name} saatis sõnumi."
+      "notifications.portal.message_received.body": "{buyer_name} saatis sõnumi.",
+      "dispatch.notify.plan_title": "Your daily plan is ready",
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
     },
     "schedule_headers": {
       "headers": {

@@ -716,6 +716,11 @@ class ResourcesService:
         cutoff = today + timedelta(days=max(1, days))
         return await self.cert_repo.list_expiring(today_iso=today.isoformat(), cutoff_iso=cutoff.isoformat())
 
+    async def list_certification_types(self) -> list[str]:
+        """Distinct certificate types on file: the vocabulary equipment requirements are picked from."""
+        rows = await self.session.execute(select(Certification.cert_type).distinct().order_by(Certification.cert_type))
+        return [r for r in rows.scalars().all() if r]
+
     async def update_certification(self, cert_id: uuid.UUID, data: CertificationUpdate) -> Certification:
         cert = await self.get_certification(cert_id)
         fields: dict[str, Any] = data.model_dump(exclude_unset=True)
