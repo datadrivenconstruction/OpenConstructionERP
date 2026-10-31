@@ -32,6 +32,7 @@
 
 import { useEffect } from 'react';
 
+import { languageChoiceMade, markLanguageAutomatic } from '@/app/accountLanguage';
 import i18n, { loadLocaleResource, normalizePackLocale } from '@/app/i18n';
 import { setMarketNumberLocale } from '@/shared/lib/marketNumberLocale';
 import { packCountryCode } from '@/shared/lib/regionalPack';
@@ -100,6 +101,8 @@ export function usePartnerPackLocale(): void {
     }
     // Force once per activation, so a later manual language pick sticks.
     if (alreadyForced) return;
+    // A language picked on the login page or in the header outranks the pack's.
+    if (languageChoiceMade()) return;
 
     try {
       window.localStorage.setItem(PACK_LOCALE_MARKER, slug);
@@ -108,6 +111,7 @@ export function usePartnerPackLocale(): void {
       // localStorage unavailable — the changeLanguage below still applies it
       // for this session.
     }
+    markLanguageAutomatic(target);
     void loadLocaleResource(target).then(() => i18n.changeLanguage(target));
   }, [data]);
 

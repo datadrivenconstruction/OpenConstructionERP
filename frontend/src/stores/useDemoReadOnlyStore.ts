@@ -50,3 +50,15 @@ export const useDemoReadOnlyStore = create<DemoReadOnlyStore>((set, get) => ({
 
   dismiss: () => set({ open: false }),
 }));
+
+let readOnlyDeployment = false;
+
+/** Whether this deployment is the read-only demo, as reported by /system/status or a refusal. */
+export function isDemoReadOnly(): boolean {
+  return readOnlyDeployment;
+}
+
+/** Record that the deployment refuses writes, so background writes can stay quiet. */
+export function markDemoReadOnly(value = true): void {
+  readOnlyDeployment = value;
+}

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import importlib.util
 import lzma
+import shutil
 from pathlib import Path
 
 import pytest
@@ -75,3 +76,17 @@ def test_small_asset_and_missing_asset(dist: Path) -> None:
 def test_traversal_through_packed_lookup_is_refused(dist: Path, tmp_path: Path) -> None:
     (tmp_path / "secret.js.xz").write_bytes(lzma.compress(b"secret"))
     assert cli_static.expand_packed_asset(dist / "assets", "../../secret.js") is None
+
+
+@pytest.mark.parametrize("packed", [False, True])
+@pytest.mark.parametrize("name", ["fonts", "inter", "ibm-plex-sans", "source-sans-3"])
+def test_self_hosted_font_stylesheets_are_css_not_the_spa_page(dist: Path, name: str, packed: bool) -> None:
+    fonts = dist / "assets" / "vendor" / "fonts"
+    fonts.mkdir(parents=True)
+    shutil.copy(REPO / "frontend" / "public" / "assets" / "vendor" / "fonts" / f"{name}.css", fonts / f"{name}.css")
+    if packed:
+        _load_packer().pack(dist / "assets")
+    r = _client().get(f"/assets/vendor/fonts/{name}.css")
+    assert r.status_code == 200
+    assert r.headers["content-type"].startswith("text/css")
+    assert "@font-face" in r.text

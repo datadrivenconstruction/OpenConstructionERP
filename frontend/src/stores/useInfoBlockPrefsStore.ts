@@ -31,6 +31,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { apiGet, apiPut } from '@/shared/lib/api';
+import { isDemoReadOnly } from '@/stores/useDemoReadOnlyStore';
 
 interface InfoBlockPrefsState {
   /** storageKey -> collapsed. Only keys the user has toggled appear here. */
@@ -109,6 +110,8 @@ let lastSentPayload = '';
 async function syncToServer(blocks: Record<string, boolean>): Promise<void> {
   const serialised = JSON.stringify(blocks);
   if (serialised === lastSentPayload) return;
+  // The read-only demo refuses profile writes; localStorage keeps the change.
+  if (isDemoReadOnly()) return;
   try {
     await apiPut<ServerInfoBlocksPayload, ServerInfoBlocksPayload>(ENDPOINT, { blocks });
     lastSentPayload = serialised;

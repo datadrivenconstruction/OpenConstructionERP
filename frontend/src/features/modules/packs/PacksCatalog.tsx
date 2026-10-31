@@ -522,6 +522,8 @@ export function PacksCatalog({ embedded = false, spotlight: withSpotlight = embe
         : key === 'company'
           ? companyCount
           : counts.types[key];
+    // A type with no pack in this catalogue is not offered at all.
+    if (key !== 'all' && count === 0 && !selected) return null;
     const meta = key === 'all' || key === 'company' ? null : PACK_TYPE_META[key];
     const Icon = key === 'company' ? Briefcase : meta?.icon ?? Package;
     const label = meta
