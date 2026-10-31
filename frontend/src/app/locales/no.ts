@@ -55387,6 +55387,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP-rapport (pågående arbeider)",
     "modules.catalog.leasing": "Utleie",
     "modules.catalog.service_charges": "Fellesutgifter",
+    "modules.catalog.measurement_book": "Målebok",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens prosjektstyring i elleve styringsområder over to faser, prosjektutvikling og utførelse, med én gate mellom og ett godkjent rammedokument per område.",
     "modules.pp_name_pakistan_pk": "Byggepakke Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Tilsagn {{code}} hadde frist {{due}}.",

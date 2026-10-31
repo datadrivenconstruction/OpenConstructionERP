@@ -49380,6 +49380,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP Report",
     "modules.catalog.leasing": "Leasing",
     "modules.catalog.service_charges": "Service Charges",
+    "modules.catalog.measurement_book": "Measurement Book",
     "modules.pp_name_pakistan_pk": "Pakistan Construction Pack",
     // stakeholders (module 8) frontend keys: start
     "notifications.stakeholders.commitment_overdue.body": "Commitment {{code}} was due on {{due}}.",

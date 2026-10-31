@@ -55142,6 +55142,7 @@ const resource = {
     "modules.catalog.wip_report": "Laporan WIP (pekerjaan dalam proses)",
     "modules.catalog.leasing": "Penyewaan",
     "modules.catalog.service_charges": "Iuran layanan",
+    "modules.catalog.measurement_book": "Buku ukur",
     "modules.pp_desc_eleven_areas_framework": "Manajemen proyek dari sisi pemilik dalam sebelas area manajemen, dalam dua fase, pengembangan proyek dan pelaksanaan konstruksi, dengan satu gerbang di antaranya dan satu dokumen kerangka yang disetujui untuk setiap area.",
     "modules.pp_name_pakistan_pk": "Paket Konstruksi Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Komitmen {{code}} jatuh tempo pada {{due}}.",

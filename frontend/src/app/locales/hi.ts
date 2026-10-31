@@ -55390,6 +55390,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP रिपोर्ट (चालू कार्य)",
     "modules.catalog.leasing": "लीज़िंग",
     "modules.catalog.service_charges": "सर्विस चार्ज",
+    "modules.catalog.measurement_book": "माप पुस्तिका",
     "modules.pp_desc_eleven_areas_framework": "ग्यारह प्रबंधन क्षेत्रों में स्वामी की ओर से परियोजना प्रबंधन, दो चरणों में, परियोजना विकास और निर्माण निष्पादन, जिनके बीच एक गेट और प्रत्येक क्षेत्र के लिए एक स्वीकृत ढाँचा दस्तावेज़।",
     "modules.pp_name_pakistan_pk": "पाकिस्तान निर्माण पैक",
     "notifications.stakeholders.commitment_overdue.body": "प्रतिबद्धता {{code}} की नियत तारीख़ {{due}} थी।",

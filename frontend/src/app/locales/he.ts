@@ -55663,6 +55663,7 @@ const resource = {
     "modules.catalog.wip_report": "דוח WIP (עבודות בביצוע)",
     "modules.catalog.leasing": "השכרה",
     "modules.catalog.service_charges": "מס ועד הבית",
+    "modules.catalog.measurement_book": "ספר מדידות",
     "modules.pp_desc_eleven_areas_framework": "ניהול הפרויקט מצד הבעלים באחד-עשר תחומי ניהול, בשני שלבים, פיתוח הפרויקט וביצוע הבנייה, עם שער החלטה אחד ביניהם ומסמך מסגרת מאושר אחד לכל תחום.",
     "modules.pp_name_pakistan_pk": "חבילת בנייה לפקיסטן",
     "notifications.stakeholders.commitment_overdue.body": "מועד ההתחייבות {{code}} חלף ב-{{due}}.",

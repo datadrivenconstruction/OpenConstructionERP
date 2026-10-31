@@ -50,6 +50,7 @@ const resource = {
     "modules.catalog.catalog": "Product & Resource Catalogue",
     "modules.catalog.supplier_catalogs": "Supplier Catalogues & Vendor Management",
     "modules.catalog.labor_rates": "Labour & Crew Rates",
+    "modules.catalog.measurement_book": "Measurement Book",
     "dashboard.layout.customize": "Customise",
     "dashboard.layout.title": "Customise dashboard",
     "rebar_schedule.diameter": "Dia (mm)",

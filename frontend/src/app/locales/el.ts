@@ -55347,6 +55347,7 @@ const resource = {
     "modules.catalog.wip_report": "Αναφορά WIP (έργα υπό εκτέλεση)",
     "modules.catalog.leasing": "Μισθώσεις",
     "modules.catalog.service_charges": "Κοινόχρηστα",
+    "modules.catalog.measurement_book": "Βιβλίο επιμετρήσεων",
     "modules.pp_desc_eleven_areas_framework": "Διαχείριση του έργου από την πλευρά του κυρίου του έργου σε έντεκα τομείς διαχείρισης, σε δύο φάσεις, την ανάπτυξη του έργου και την εκτέλεση της κατασκευής, με μία πύλη μεταξύ τους και ένα εγκεκριμένο πλαίσιο εγγράφου για κάθε τομέα.",
     "modules.pp_name_pakistan_pk": "Πακέτο Κατασκευών: Πακιστάν",
     "notifications.stakeholders.commitment_overdue.body": "Η προθεσμία της δέσμευσης {{code}} έληξε στις {{due}}.",

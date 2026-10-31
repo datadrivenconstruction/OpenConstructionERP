@@ -55759,6 +55759,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP 보고서 (진행 중 공사)",
     "modules.catalog.leasing": "임대 관리",
     "modules.catalog.service_charges": "관리비",
+    "modules.catalog.measurement_book": "계측 대장",
     "modules.pp_desc_eleven_areas_framework": "발주자 측에서 수행하는 프로젝트 관리로, 프로젝트 개발과 시공 실행의 두 단계에 걸쳐 11개 관리 영역에서 진행됩니다. 두 단계 사이에는 게이트 하나가 있고, 영역마다 승인된 기본 문서가 하나씩 있습니다.",
     "modules.pp_name_pakistan_pk": "파키스탄 건설 팩",
     "notifications.stakeholders.commitment_overdue.body": "약속 {{code}}의 기한은 {{due}}였습니다.",

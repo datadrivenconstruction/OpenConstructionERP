@@ -58288,6 +58288,7 @@ const resource = {
     "modules.catalog.wip_report": "Informe WIP (obra en curso)",
     "modules.catalog.leasing": "Alquiler",
     "modules.catalog.service_charges": "Gastos de comunidad",
+    "modules.catalog.measurement_book": "Libro de mediciones",
     "modules.pp_desc_eleven_areas_framework": "Gestión del proyecto por parte de la propiedad en once áreas de gestión, en dos fases, desarrollo del proyecto y ejecución de la obra, con una puerta de control entre ambas y un documento marco aprobado por área.",
     "modules.pp_name_pakistan_pk": "Paquete de Construcción de Pakistán",
     "notifications.stakeholders.commitment_overdue.body": "El compromiso {{code}} vencía el {{due}}.",

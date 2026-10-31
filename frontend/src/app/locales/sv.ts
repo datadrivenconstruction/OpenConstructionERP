@@ -56002,6 +56002,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP-rapport (pågående arbeten)",
     "modules.catalog.leasing": "Uthyrning",
     "modules.catalog.service_charges": "Avgifter",
+    "modules.catalog.measurement_book": "Mätbok",
     "modules.pp_desc_eleven_areas_framework": "Byggherrens projektstyrning i elva styrningsområden under två faser, projektutveckling och genomförande, med en gate mellan dem och ett godkänt ramdokument per område.",
     "modules.pp_name_pakistan_pk": "Byggpaket Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Åtagande {{code}} förföll {{due}}.",

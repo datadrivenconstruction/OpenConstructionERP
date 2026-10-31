@@ -56641,6 +56641,7 @@ const resource = {
     "modules.catalog.wip_report": "Přehled WIP (rozpracovanost)",
     "modules.catalog.leasing": "Pronájem",
     "modules.catalog.service_charges": "Společné náklady",
+    "modules.catalog.measurement_book": "Kniha měření",
     "modules.pp_desc_eleven_areas_framework": "Řízení projektu ze strany investora v jedenácti oblastech řízení ve dvou fázích, vývoj projektu a realizace stavby, s jednou branou mezi nimi a jedním schváleným rámcovým dokumentem pro každou oblast.",
     "modules.pp_name_pakistan_pk": "Stavební balíček Pákistánu",
     "notifications.stakeholders.commitment_overdue.body": "Závazek {{code}} měl termín {{due}}.",

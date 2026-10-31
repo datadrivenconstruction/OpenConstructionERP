@@ -55707,6 +55707,7 @@ const resource = {
     "modules.catalog.wip_report": "Raport WIP (lucrări în curs)",
     "modules.catalog.leasing": "Închirieri",
     "modules.catalog.service_charges": "Cote de întreținere",
+    "modules.catalog.measurement_book": "Registrul de măsurători",
     "modules.pp_desc_eleven_areas_framework": "Managementul proiectului din partea beneficiarului în unsprezece arii de management, în două faze, dezvoltarea proiectului și execuția lucrărilor, cu o poartă între ele și un document-cadru aprobat pentru fiecare arie.",
     "modules.pp_name_pakistan_pk": "Pachet de construcții Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Angajamentul {{code}} avea termen la {{due}}.",

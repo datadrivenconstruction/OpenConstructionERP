@@ -57612,6 +57612,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP 报告(在建工程)",
     "modules.catalog.leasing": "租赁管理",
     "modules.catalog.service_charges": "物业费",
+    "modules.catalog.measurement_book": "计量簿",
     "modules.pp_desc_eleven_areas_framework": "业主方在十一个管理领域开展项目管理，分为项目开发和施工实施两个阶段，两阶段之间设一个关口，每个领域有一份经批准的框架文件。",
     "modules.pp_name_pakistan_pk": "巴基斯坦建筑数据包",
     "notifications.stakeholders.commitment_overdue.body": "承诺 {{code}} 已于 {{due}} 到期。",

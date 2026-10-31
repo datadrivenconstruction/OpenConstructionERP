@@ -55151,6 +55151,7 @@ const resource = {
     "modules.catalog.wip_report": "Báo cáo WIP (công việc dở dang)",
     "modules.catalog.leasing": "Cho thuê",
     "modules.catalog.service_charges": "Phí dịch vụ",
+    "modules.catalog.measurement_book": "Sổ đo đạc",
     "modules.pp_desc_eleven_areas_framework": "Quản lý dự án từ phía chủ đầu tư gồm mười một lĩnh vực quản lý, chia hai giai đoạn là phát triển dự án và thi công xây dựng, giữa hai giai đoạn có một cổng kiểm soát và mỗi lĩnh vực có một tài liệu khung đã được phê duyệt.",
     "modules.pp_name_pakistan_pk": "Gói Xây dựng Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Cam kết {{code}} đến hạn vào {{due}}.",

@@ -56268,6 +56268,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP raporu (devam eden işler)",
     "modules.catalog.leasing": "Kiralama",
     "modules.catalog.service_charges": "Aidat ve ortak giderler",
+    "modules.catalog.measurement_book": "Ölçü defteri",
     "modules.pp_desc_eleven_areas_framework": "Proje yönetimi işveren tarafından on bir yönetim alanında, iki aşamada yürütülür: proje geliştirme ve yapım uygulaması. Aralarında bir kapı ve her alan için onaylanmış bir çerçeve belge bulunur.",
     "modules.pp_name_pakistan_pk": "Pakistan İnşaat Paketi",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} taahhüdünün süresi {{due}} tarihinde doldu.",

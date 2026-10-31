@@ -55504,6 +55504,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP отчету (аткарылып жаткан иштер)",
     "modules.catalog.leasing": "Ижара",
     "modules.catalog.service_charges": "Кызмат акылары",
+    "modules.catalog.measurement_book": "Өлчөө китеби",
     "modules.pp_desc_eleven_areas_framework": "Иеси тарабынан долбоорду башкаруу он бир башкаруу тармагында, эки этапта: долбоорду иштеп чыгуу жана курулушту аткаруу. Экөөнүн ортосунда бир дарбаза жана ар бир тармак үчүн бир бекитилген алкактык документ бар.",
     "modules.pp_name_pakistan_pk": "Пакистан курулуш пакети",
     "notifications.stakeholders.commitment_overdue.body": "{{code}} милдеттенмесинин мөөнөтү {{due}} болчу.",

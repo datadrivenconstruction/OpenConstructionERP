@@ -58378,6 +58378,7 @@ const resource = {
     "modules.catalog.wip_report": "Отчёт WIP (незавершённое производство)",
     "modules.catalog.leasing": "Аренда",
     "modules.catalog.service_charges": "Взносы на содержание",
+    "modules.catalog.measurement_book": "Журнал обмеров",
     "modules.pp_desc_eleven_areas_framework": "Управление проектом со стороны заказчика в одиннадцати областях управления в два этапа: развитие проекта и строительное исполнение. Между ними один гейт, а на каждую область один утверждённый рамочный документ.",
     "modules.pp_name_pakistan_pk": "Строительный пакет: Пакистан",
     "notifications.stakeholders.commitment_overdue.body": "Срок обязательства {{code}} истёк {{due}}.",

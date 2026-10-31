@@ -55353,6 +55353,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP رپورٹ (جاری کام)",
     "modules.catalog.leasing": "لیزنگ",
     "modules.catalog.service_charges": "سروس چارجز",
+    "modules.catalog.measurement_book": "پیمائش کی کتاب",
     "modules.pp_desc_eleven_areas_framework": "مالک کی جانب سے گیارہ انتظامی شعبوں میں پروجیکٹ مینجمنٹ، دو مراحل میں: پروجیکٹ کی ترقی اور تعمیراتی عمل درآمد، ان کے درمیان ایک گیٹ اور ہر شعبے کے لیے ایک منظور شدہ فریم ورک دستاویز۔",
     "modules.pp_name_pakistan_pk": "پاکستان تعمیراتی پیکج",
     "notifications.stakeholders.commitment_overdue.body": "عہد {{code}} کی مقررہ تاریخ {{due}} تھی۔",

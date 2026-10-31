@@ -55391,6 +55391,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP-raportti (keskeneräiset työt)",
     "modules.catalog.leasing": "Vuokraus",
     "modules.catalog.service_charges": "Hoitovastikkeet",
+    "modules.catalog.measurement_book": "Mittauskirja",
     "modules.pp_desc_eleven_areas_framework": "Hankkeen ohjaus tilaajan puolelta yhdessätoista ohjausalueessa kahdessa vaiheessa, hankkeen kehittämisessä ja rakentamisen toteutuksessa, niiden välissä yksi porttivaihe ja yksi hyväksytty kehysasiakirja kullekin alueelle.",
     "modules.pp_name_pakistan_pk": "Rakennuspaketti: Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Sitoumuksen {{code}} määräpäivä oli {{due}}.",

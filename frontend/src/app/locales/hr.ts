@@ -55717,6 +55717,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP izvještaj (radovi u tijeku)",
     "modules.catalog.leasing": "Najam",
     "modules.catalog.service_charges": "Zajednički troškovi",
+    "modules.catalog.measurement_book": "Knjiga izmjera",
     "modules.pp_desc_eleven_areas_framework": "Upravljanje projektom od strane investitora u jedanaest područja upravljanja u dvije faze, razvoj projekta i izvedba građenja, s jednom prekretnicom između njih i jednim odobrenim okvirnim dokumentom za svako područje.",
     "modules.pp_name_pakistan_pk": "Građevinski paket Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Rok obveze {{code}} istekao je {{due}}.",

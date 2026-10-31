@@ -52170,6 +52170,7 @@ const resource = {
     "modules.catalog.drawing_compare": "Comparação de Revisões de Desenhos",
     "modules.catalog.leasing": "Locação",
     "modules.catalog.service_charges": "Taxas condominiais",
+    "modules.catalog.measurement_book": "Livro de medições",
     "modules.pp_desc_eleven_areas_framework": "Gestão do projeto pelo lado do contratante em onze áreas de gestão, em duas fases, desenvolvimento do projeto e execução da obra, com um gate entre elas e um documento-quadro aprovado para cada área.",
     "notifications.stakeholders.commitment_overdue.body": "O compromisso {{code}} tinha prazo em {{due}}.",
     "notifications.stakeholders.commitment_overdue.title": "Um compromisso passou o prazo",

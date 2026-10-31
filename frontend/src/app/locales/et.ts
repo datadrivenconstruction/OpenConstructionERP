@@ -55337,6 +55337,7 @@ const resource = {
     "modules.catalog.wip_report": "WIP-aruanne (pooleli tööd)",
     "modules.catalog.leasing": "Üürimine",
     "modules.catalog.service_charges": "Üldkulud",
+    "modules.catalog.measurement_book": "Mõõtmisraamat",
     "modules.pp_desc_eleven_areas_framework": "Tellija poolne projektijuhtimine üheteistkümnes juhtimisvaldkonnas kahes faasis, projekti arendus ja ehitusteostus, nende vahel üks värav ning iga valdkonna kohta üks kinnitatud raamdokument.",
     "modules.pp_name_pakistan_pk": "Ehituspakett: Pakistan",
     "notifications.stakeholders.commitment_overdue.body": "Lubaduse {{code}} tähtaeg oli {{due}}.",
