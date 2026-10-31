@@ -1232,6 +1232,1070 @@
       ]
     },
     {
+      "module_id": "accounting_sync",
+      "module_label": "Accounting Sync",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "demo.py",
+        "events.py",
+        "exports/__init__.py",
+        "exports/datev.py",
+        "exports/journal.py",
+        "exports/saft.py",
+        "manifest.py",
+        "models.py",
+        "permissions.py",
+        "postings.py",
+        "providers/__init__.py",
+        "providers/base.py",
+        "providers/qbo.py",
+        "providers/xero.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "templates.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_accounting_sync",
+        "version": "1.0.0",
+        "display_name": "Accounting Sync",
+        "description": "Connects the platform to the company's accounting: pushes receivable invoices and interim payment certificates, subcontractor and supplier bills and guarantee fees with contacts and a project dimension to Xero or QuickBooks Online and pulls payments back, or exports DATEV EXTF, a generic journal (CSV, Excel) or OECD SAF-T. Account and tax-code mapping per company from country templates, idempotent pushes with a sync log, retry and validation.",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_projects",
+          "oe_finance"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "AccountingConnection",
+          "tablename": "oe_acctsync_connection",
+          "docstring": "A company ledger the platform pushes to or exports for.",
+          "columns": [
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "provider",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "country_code",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "chart_template",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "base_currency",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "is_sandbox",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "client_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "client_secret_enc",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "tokens_enc",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "external_tenant_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "lock_date",
+              "annotation": "Mapped[date | None]",
+              "sql_type": "SafeDate",
+              "nullable": true
+            },
+            {
+              "name": "project_ids",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "settings_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "last_sync_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "last_sync_status",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "AccountMapping",
+          "tablename": "oe_acctsync_account_map",
+          "docstring": "Posting category -> account code for one connection.",
+          "columns": [
+            {
+              "name": "connection_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_acctsync_connection.id"
+            },
+            {
+              "name": "category",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "account_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "account_name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "TaxCodeMapping",
+          "tablename": "oe_acctsync_tax_map",
+          "docstring": "Platform tax code (from the dated tax seed) -> external tax key.",
+          "columns": [
+            {
+              "name": "connection_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_acctsync_connection.id"
+            },
+            {
+              "name": "tax_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "direction",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "external_code",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "rate_pct",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "ExternalRef",
+          "tablename": "oe_acctsync_external_ref",
+          "docstring": "Remote id of one pushed record; the idempotency anchor of every push.",
+          "columns": [
+            {
+              "name": "connection_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_acctsync_connection.id"
+            },
+            {
+              "name": "record_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "record_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "external_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "external_version",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "payload_hash",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "pushed_total",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "remote_total",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "last_pushed_at",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "SyncLogEntry",
+          "tablename": "oe_acctsync_log",
+          "docstring": "One attempt to push, pull or export one record.",
+          "columns": [
+            {
+              "name": "connection_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_acctsync_connection.id"
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "action",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "record_type",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "record_id",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "record_label",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "attempt",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "error_reason",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "Text",
+              "nullable": true
+            },
+            {
+              "name": "external_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "amount",
+              "annotation": "Mapped[Decimal | None]",
+              "sql_type": "Numeric",
+              "nullable": true
+            },
+            {
+              "name": "resolved",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            },
+            {
+              "name": "details_",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/status",
+          "handler": "sync_status"
+        },
+        {
+          "method": "GET",
+          "path": "/templates",
+          "handler": "list_templates"
+        },
+        {
+          "method": "GET",
+          "path": "/connections",
+          "handler": "list_connections",
+          "response_model": "list[ConnectionResponse]"
+        },
+        {
+          "method": "POST",
+          "path": "/connections",
+          "handler": "create_connection",
+          "response_model": "ConnectionResponse",
+          "request_schema": "ConnectionCreate"
+        },
+        {
+          "method": "GET",
+          "path": "/connections/{connection_id}",
+          "handler": "get_connection",
+          "response_model": "ConnectionResponse"
+        },
+        {
+          "method": "PATCH",
+          "path": "/connections/{connection_id}",
+          "handler": "update_connection",
+          "response_model": "ConnectionResponse",
+          "request_schema": "ConnectionUpdate"
+        },
+        {
+          "method": "DELETE",
+          "path": "/connections/{connection_id}",
+          "handler": "delete_connection"
+        },
+        {
+          "method": "POST",
+          "path": "/connections/{connection_id}/oauth/start",
+          "handler": "oauth_start",
+          "response_model": "OAuthStartResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/connections/{connection_id}/oauth/complete",
+          "handler": "oauth_complete",
+          "response_model": "ConnectionResponse",
+          "request_schema": "OAuthComplete"
+        },
+        {
+          "method": "GET",
+          "path": "/connections/{connection_id}/mappings",
+          "handler": "get_mappings",
+          "response_model": "MappingsResponse"
+        },
+        {
+          "method": "PUT",
+          "path": "/connections/{connection_id}/mappings",
+          "handler": "put_mappings",
+          "response_model": "MappingsResponse",
+          "request_schema": "MappingsUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/connections/{connection_id}/mappings/template",
+          "handler": "apply_template",
+          "response_model": "MappingsResponse",
+          "request_schema": "TemplateApply"
+        },
+        {
+          "method": "GET",
+          "path": "/connections/{connection_id}/documents",
+          "handler": "preview_documents",
+          "response_model": "list[PreviewDocument]",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/connections/{connection_id}/findings",
+          "handler": "findings",
+          "response_model": "list[Finding]"
+        },
+        {
+          "method": "POST",
+          "path": "/connections/{connection_id}/push",
+          "handler": "push",
+          "response_model": "SyncCounts",
+          "request_schema": "PushRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/connections/{connection_id}/pull-payments",
+          "handler": "pull_payments",
+          "response_model": "SyncCounts"
+        },
+        {
+          "method": "GET",
+          "path": "/connections/{connection_id}/export",
+          "handler": "export",
+          "response_model": "None",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/connections/{connection_id}/log",
+          "handler": "sync_log",
+          "response_model": "LogListResponse"
+        },
+        {
+          "method": "POST",
+          "path": "/log/{entry_id}/retry",
+          "handler": "retry",
+          "response_model": "LogEntryResponse"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "ConnectionCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "provider",
+              "type": "Provider"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "chart_template",
+              "type": "str | None"
+            },
+            {
+              "name": "base_currency",
+              "type": "str"
+            },
+            {
+              "name": "is_sandbox",
+              "type": "bool",
+              "default": "True"
+            },
+            {
+              "name": "client_id",
+              "type": "str | None"
+            },
+            {
+              "name": "client_secret",
+              "type": "str | None"
+            },
+            {
+              "name": "external_tenant_id",
+              "type": "str | None"
+            },
+            {
+              "name": "lock_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "project_ids",
+              "type": "list[uuid.UUID]"
+            },
+            {
+              "name": "settings",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "ConnectionUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "base_currency",
+              "type": "str | None"
+            },
+            {
+              "name": "is_sandbox",
+              "type": "bool | None",
+              "default": "None"
+            },
+            {
+              "name": "client_id",
+              "type": "str | None"
+            },
+            {
+              "name": "client_secret",
+              "type": "str | None"
+            },
+            {
+              "name": "external_tenant_id",
+              "type": "str | None"
+            },
+            {
+              "name": "lock_date",
+              "type": "date | None",
+              "default": "None"
+            },
+            {
+              "name": "clear_lock_date",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "project_ids",
+              "type": "list[uuid.UUID] | None",
+              "default": "None"
+            },
+            {
+              "name": "settings",
+              "type": "dict[str, Any] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "ConnectionResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "provider",
+              "type": "str"
+            },
+            {
+              "name": "country_code",
+              "type": "str | None"
+            },
+            {
+              "name": "chart_template",
+              "type": "str"
+            },
+            {
+              "name": "base_currency",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "is_sandbox",
+              "type": "bool"
+            },
+            {
+              "name": "client_id",
+              "type": "str | None"
+            },
+            {
+              "name": "has_client_secret",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "is_authorised",
+              "type": "bool",
+              "default": "False"
+            },
+            {
+              "name": "external_tenant_id",
+              "type": "str | None"
+            },
+            {
+              "name": "lock_date",
+              "type": "date | None"
+            },
+            {
+              "name": "project_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "settings",
+              "type": "dict[str, Any]"
+            },
+            {
+              "name": "last_sync_at",
+              "type": "str | None"
+            },
+            {
+              "name": "last_sync_status",
+              "type": "str | None"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "AccountMappingRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "category",
+              "type": "str"
+            },
+            {
+              "name": "account_code",
+              "type": "str"
+            },
+            {
+              "name": "account_name",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "TaxMappingRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "tax_code",
+              "type": "str"
+            },
+            {
+              "name": "direction",
+              "type": "Literal['sales', 'purchase']"
+            },
+            {
+              "name": "external_code",
+              "type": "str"
+            },
+            {
+              "name": "rate_pct",
+              "type": "Money",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "MappingsResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "chart_template",
+              "type": "str"
+            },
+            {
+              "name": "templates",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "tax_codes",
+              "type": "list[dict[str, Any]]"
+            },
+            {
+              "name": "accounts",
+              "type": "list[AccountMappingRow]"
+            },
+            {
+              "name": "taxes",
+              "type": "list[TaxMappingRow]"
+            }
+          ]
+        },
+        {
+          "class_name": "MappingsUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "accounts",
+              "type": "list[AccountMappingRow]"
+            },
+            {
+              "name": "taxes",
+              "type": "list[TaxMappingRow]"
+            }
+          ]
+        },
+        {
+          "class_name": "TemplateApply",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "chart_template",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "Finding",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "rule_id",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "element_ref",
+              "type": "str | None",
+              "default": "None"
+            },
+            {
+              "name": "record_id",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LogEntryResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "connection_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "action",
+              "type": "str"
+            },
+            {
+              "name": "record_type",
+              "type": "str"
+            },
+            {
+              "name": "record_id",
+              "type": "str"
+            },
+            {
+              "name": "record_label",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "attempt",
+              "type": "int"
+            },
+            {
+              "name": "error_reason",
+              "type": "str | None"
+            },
+            {
+              "name": "external_id",
+              "type": "str | None"
+            },
+            {
+              "name": "amount",
+              "type": "Money",
+              "default": "None"
+            },
+            {
+              "name": "resolved",
+              "type": "bool"
+            },
+            {
+              "name": "created_at",
+              "type": "datetime | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LogListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[LogEntryResponse]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "SyncCounts",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "success",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "failed",
+              "type": "int",
+              "default": "0"
+            },
+            {
+              "name": "skipped",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "PushRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "record_ids",
+              "type": "list[str] | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "OAuthStartResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "authorization_url",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "OAuthComplete",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "code",
+              "type": "str"
+            },
+            {
+              "name": "redirect_uri",
+              "type": "str"
+            },
+            {
+              "name": "tenant_id",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PreviewDocument",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "record_id",
+              "type": "str"
+            },
+            {
+              "name": "record_type",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "number",
+              "type": "str"
+            },
+            {
+              "name": "doc_date",
+              "type": "date"
+            },
+            {
+              "name": "counterparty",
+              "type": "str"
+            },
+            {
+              "name": "project_code",
+              "type": "str"
+            },
+            {
+              "name": "currency",
+              "type": "str"
+            },
+            {
+              "name": "net_total",
+              "type": "Money"
+            },
+            {
+              "name": "tax_total",
+              "type": "Money"
+            },
+            {
+              "name": "gross_total",
+              "type": "Money"
+            },
+            {
+              "name": "external_id",
+              "type": "str | None",
+              "default": "None"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "contacts",
+        "finance",
+        "guarantees",
+        "notifications",
+        "payroll",
+        "projects"
+      ]
+    },
+    {
       "module_id": "admin",
       "module_label": "Admin",
       "module_category": "core",
@@ -294814,6 +295878,13 @@
       "total_files": 11
     },
     {
+      "name": "accounting-sync",
+      "ts_files": 13,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 13
+    },
+    {
       "name": "admin",
       "ts_files": 8,
       "css_files": 0,
@@ -296361,6 +297432,14 @@
       "property_dev",
       "teams",
       "users"
+    ],
+    "accounting_sync": [
+      "contacts",
+      "finance",
+      "guarantees",
+      "notifications",
+      "payroll",
+      "projects"
     ],
     "admin": [
       "costs",
@@ -298077,21 +299156,22 @@
     ]
   },
   "statistics": {
-    "backend_modules": 227,
-    "modules_with_manifests": 225,
-    "total_models": 850,
-    "total_columns": 9985,
+    "backend_modules": 228,
+    "modules_with_manifests": 226,
+    "total_models": 855,
+    "total_columns": 10033,
     "total_relationships": 257,
-    "total_routes": 4884,
-    "total_schemas": 4383,
-    "total_python_files": 3058,
-    "frontend_features": 222,
-    "frontend_ts_files": 3902,
-    "frontend_backend_mapped": 199
+    "total_routes": 4903,
+    "total_schemas": 4399,
+    "total_python_files": 3079,
+    "frontend_features": 223,
+    "frontend_ts_files": 3915,
+    "frontend_backend_mapped": 200
   },
   "frontend_backend_mapping": {
     "about": null,
     "accommodation": "accommodation",
+    "accounting-sync": "accounting_sync",
     "admin": "admin",
     "ai": "ai",
     "ai-agents": "ai_agents",
