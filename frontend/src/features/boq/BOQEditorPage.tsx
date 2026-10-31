@@ -110,6 +110,7 @@ import { reportFromHeaders } from './exchangeFidelityApi';
 import type { ScaleMetric } from './resourceScalingApi';
 import { BOQFilterBar, type BoqFilterKind } from './BOQFilterBar';
 import { BOQOutline } from './BOQOutline';
+import { EstimateCheckBadge } from '@/features/estimate-checks/EstimateCheckBadge';
 import type { TenderPackageRef } from './api';
 import { BOQSheetMode, SheetModeToggle, useSheetMode } from './sheet/SheetMode';
 import { boqGuide } from './boqGuide';
@@ -5559,6 +5560,7 @@ export function BOQEditorPage() {
               <Send size={14} className="mr-1" />
               {t('boq.tender_btn', { defaultValue: 'To tender' })}
             </Button>
+            <EstimateCheckBadge boqId={boq.id} onJumpToPosition={handleOutlineJump} />
             <BOQOutline positions={boq.positions} onJump={handleOutlineJump} />
             {/* Per-module Tour CTA — launches the BOQ-specific guided tour
                 via the registered TOUR_REGISTRY entry, independent of any
