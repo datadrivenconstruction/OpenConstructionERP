@@ -13,7 +13,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import clsx from 'clsx';
 import { ArrowUpRight, BookOpen, Building2, Globe2, Layers3, Plus, Power } from 'lucide-react';
 import { Breadcrumb } from '@/shared/ui';
@@ -305,6 +305,7 @@ function HowPacksWork() {
 export function PacksPage() {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const canInstall = canInstallPacks(useAuthStore((s) => s.userRole));
   const { list, entries, activeSlug, activeSource } = usePackCatalogData();
   const profiles = useCompanyProfiles();
@@ -318,6 +319,11 @@ export function PacksPage() {
   // Links from before the single catalogue carried ``family=company``; read
   // it once as the company-type filter so they still land on the right list.
   const legacyFamily = searchParams.get('family');
+  // Solution packages are a separate list (/packs/focus), not a catalogue type.
+  const wantsSolutions = (searchParams.get('type') ?? '').split(',').some((s) => s.trim() === 'solution');
+  useEffect(() => {
+    if (wantsSolutions) navigate('/packs/focus', { replace: true });
+  }, [wantsSolutions, navigate]);
   useEffect(() => {
     if (legacyFamily === null) return;
     setSearchParams(

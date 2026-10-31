@@ -11,7 +11,7 @@
 
 import i18next from 'i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useDemoReadOnlyStore } from '@/stores/useDemoReadOnlyStore';
+import { markDemoReadOnly, useDemoReadOnlyStore } from '@/stores/useDemoReadOnlyStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { cacheResponse, getCachedResponse, queueMutation } from './offlineStore';
 import { logApiError, logError } from './errorLogger';
@@ -348,6 +348,7 @@ export function isDemoReadOnlyRefusal(status: number, body: unknown): boolean {
  */
 export function reportIfDemoReadOnly(status: number, body: unknown): boolean {
   if (!isDemoReadOnlyRefusal(status, body)) return false;
+  markDemoReadOnly();
   useDemoReadOnlyStore.getState().raise();
   return true;
 }

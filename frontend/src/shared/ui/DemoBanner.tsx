@@ -59,23 +59,23 @@ export function DemoBanner() {
       {/* Persistent strip at the very top */}
       <div
         role="alert"
-        className="sticky top-0 z-50 flex flex-wrap items-center justify-center gap-x-3 gap-y-1.5 px-4 py-2.5 text-[13px] font-medium text-amber-950 bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 border-b border-amber-500/40 shadow-sm dark:text-amber-100 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-900/40 dark:border-amber-500/30"
+        className="relative z-30 flex items-center justify-center gap-x-3 gap-y-1.5 px-3 py-1.5 text-[13px] md:sticky md:top-0 md:z-50 md:flex-wrap md:px-4 md:py-2.5 font-medium text-amber-950 bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 border-b border-amber-500/40 shadow-sm dark:text-amber-100 dark:from-amber-900/40 dark:via-amber-800/40 dark:to-amber-900/40 dark:border-amber-500/30"
       >
-        <span className="flex items-center gap-2">
+        <span className="flex min-w-0 items-center gap-2">
           <AlertTriangle size={14} className="shrink-0" />
-          <span>
+          <span className="truncate md:overflow-visible md:whitespace-normal">
             {t('demo_banner.strip_no_real_data')}
           </span>
         </span>
         {/* Performance / sample-data caveat — always visible, not just in the modal */}
-        <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-[12px]">
+        <span className="hidden items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-[12px] md:flex">
           <Gauge size={12} className="shrink-0 text-amber-700 dark:text-amber-300" />
           <span className="text-amber-900 dark:text-amber-200">
             {t('demo_banner.strip_perf_caveat')}
           </span>
         </span>
         {uploadsDisabled && (
-          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-[12px]">
+          <span className="hidden items-center gap-1.5 px-2 py-0.5 rounded bg-amber-900/10 dark:bg-amber-100/10 text-[12px] md:flex">
             <UploadCloud size={12} className="shrink-0 text-amber-700 dark:text-amber-300" />
             <span className="text-amber-900 dark:text-amber-200">
               {t('demo_banner.strip_uploads_off', {
@@ -84,10 +84,10 @@ export function DemoBanner() {
             </span>
           </span>
         )}
-        <code className="px-1.5 py-0.5 rounded bg-amber-900/15 text-amber-950 font-mono text-[11px] dark:bg-amber-100/10 dark:text-amber-100">
+        <code className="hidden md:inline px-1.5 py-0.5 rounded bg-amber-900/15 text-amber-950 font-mono text-[11px] dark:bg-amber-100/10 dark:text-amber-100">
           pip install openconstructionerp
         </code>
-        <span className="flex items-center gap-2.5">
+        <span className="hidden items-center gap-2.5 md:flex">
           <span className="opacity-80">{t('demo_banner.strip_or_download')}</span>
           <a
             href="https://openconstructionerp.com/download"
@@ -118,7 +118,7 @@ export function DemoBanner() {
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-50"
+          className="shrink-0 underline underline-offset-2 hover:text-amber-900 dark:hover:text-amber-50"
         >
           {t('demo_banner.strip_why')}
         </button>

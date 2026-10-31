@@ -623,7 +623,7 @@ export function ProcurementPage() {
 
       {/* Tab Bar */}
       <div
-        className="flex items-center gap-1 border-b border-border-light"
+        className="flex items-center gap-1 overflow-x-auto border-b border-border-light"
         role="tablist"
         aria-label={t('procurement.title', { defaultValue: 'Procurement' })}
       >
@@ -635,7 +635,7 @@ export function ProcurementPage() {
             aria-selected={activeTab === tab.key}
             onClick={() => setActiveTab(tab.key)}
             className={`
-              flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-all
+              flex shrink-0 items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm font-medium border-b-2 transition-all
               ${
                 activeTab === tab.key
                   ? 'border-oe-blue text-oe-blue'
@@ -1810,16 +1810,16 @@ function PurchaseOrdersTab({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
                 {t('procurement.po_number', { defaultValue: 'PO #' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
                 {t('procurement.vendor', { defaultValue: 'Vendor' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
                 {t('procurement.issue_date', { defaultValue: 'Date' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
                 {t('procurement.delivery_date', { defaultValue: 'Delivery' })}
               </th>
               <th className="px-4 py-3 text-right font-medium text-content-tertiary">
@@ -1888,7 +1888,7 @@ function PurchaseOrdersTab({
                             name: po.vendor_name,
                           })
                         }
-                        className="text-left text-oe-blue hover:underline focus:underline focus:outline-none"
+                        className="text-start text-oe-blue hover:underline focus:underline focus:outline-none"
                         title={t('procurement.open_scorecard', {
                           defaultValue: 'Open supplier scorecard',
                         })}
@@ -2372,13 +2372,13 @@ function GoodsReceiptsTab({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border-light bg-surface-secondary/50">
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
                 {t('procurement.gr_ref', { defaultValue: 'GR Reference' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
                 {t('procurement.po_ref', { defaultValue: 'PO Reference' })}
               </th>
-              <th className="px-4 py-3 text-left font-medium text-content-tertiary">
+              <th className="px-4 py-3 text-start font-medium text-content-tertiary">
                 {t('procurement.receipt_date', { defaultValue: 'Date' })}
               </th>
               <th className="px-4 py-3 text-center font-medium text-content-tertiary">

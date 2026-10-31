@@ -133,7 +133,6 @@ export function AppLayout({ title, children }: AppLayoutProps) {
           paints above the `fixed -z-10` backdrop in the root stacking
           context and hides the tinted spotlight. */}
       <DashboardBackdrop variant={backdropVariant} />
-      <DemoBanner />
       <GlobalProgress />
 
       {/* Mobile overlay */}
@@ -166,6 +165,8 @@ export function AppLayout({ title, children }: AppLayoutProps) {
           Full-bleed pages (BIM viewer, DWG takeoff, AI chat) negate it
           via `-mx-4 sm:-mx-7` on their root div. */}
       <div className="lg:pl-sidebar">
+        {/* Inside the offset wrapper so the fixed sidebar never covers the banner's start edge. */}
+        <DemoBanner />
         {/* Desktop-only browser-style chrome (Back/Forward/Reload/Home,
             address field, open-in-browser, favorites). Renders null in the
             normal web build. Sits above the Header so it reads as window

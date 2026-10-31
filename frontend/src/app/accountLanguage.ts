@@ -44,6 +44,20 @@ export function accountLanguageToApply(
 }
 
 let started = false;
+// Module scope so a language applied on its own (a pack's default) can ask
+// whether the person already picked one, and can step aside for it.
+let settled: string = i18n.language;
+let chosenHere = languageChosenHere;
+
+/** Whether the person has picked a language in this browser (login page included). */
+export function languageChoiceMade(): boolean {
+  return chosenHere;
+}
+
+/** Record a language the app switches to by itself, so it is not read as a pick. */
+export function markLanguageAutomatic(lng: string): void {
+  settled = lng;
+}
 
 /** Start keeping the account's language. Safe to call more than once. */
 export function startAccountLanguageSync(): void {
@@ -54,10 +68,7 @@ export function startAccountLanguageSync(): void {
   // at start. Only a change away from it is written, so the language the page
   // simply loaded in is never pushed over what the account holds, and one that
   // came from the account is not written straight back to it.
-  let settled: string = i18n.language;
-  // A language picked on this page before signing in counts as a choice made
-  // here, like one found in storage at load.
-  let chosenHere = languageChosenHere;
+  settled = i18n.language;
   let restoreTried = false;
   // While the account is being read, a language event is the page settling,
   // not the person choosing; writing it would race the read it is waiting on.
@@ -93,6 +104,7 @@ export function startAccountLanguageSync(): void {
     }
     if (restoring || lng === settled) return;
     settled = lng;
+    chosenHere = true;
     // A plain request rather than the api client: this is a side effect of
     // switching the language, not something the person asked to save, so a
     // refusal (the public demonstration refuses every profile write) must not
