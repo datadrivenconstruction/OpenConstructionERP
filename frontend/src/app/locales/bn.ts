@@ -51677,6 +51677,10 @@ const resource = {
     "settings.chords_reset_all": "সব শর্টকাট রিসেট করুন",
     "settings.tab_packages": "প্যাকেজ ও মডিউল",
     "settings.tab_packages_desc": "ইনস্টল করা সমাধান প্যাকেজ, প্যাকেজ যোগ, আলাদা মডিউল চালু বা বন্ধ",
+    "settings.secondary_calendar": "দ্বিতীয় ক্যালেন্ডার",
+    "settings.secondary_calendar_none": "কিছু নয়",
+    "settings.secondary_calendar_umalqura": "হিজরি (উম্মুল কুরা)",
+    "settings.secondary_calendar_hint": "অ্যাপের প্রতিটি তারিখে গ্রেগরিয়ান তারিখের পাশে হিজরি তারিখ দেখায়।",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "পরিবর্তন আদেশ",
     "approvalRoutes.kind_contract": "চুক্তি",

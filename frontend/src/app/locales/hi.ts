@@ -51443,6 +51443,10 @@ const resource = {
     "settings.chords_reset_all": "सभी शॉर्टकट रीसेट करें",
     "settings.tab_packages": "पैकेज और मॉड्यूल",
     "settings.tab_packages_desc": "इंस्टॉल किए गए समाधान पैकेज, पैकेज जोड़ना, अलग-अलग मॉड्यूल चालू या बंद करना",
+    "settings.secondary_calendar": "द्वितीयक कैलेंडर",
+    "settings.secondary_calendar_none": "कोई नहीं",
+    "settings.secondary_calendar_umalqura": "हिजरी (उम्म अल-क़ुरा)",
+    "settings.secondary_calendar_hint": "ऐप की हर तारीख पर ग्रेगोरियन तारीख के साथ हिजरी तारीख दिखाता है।",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "परिवर्तन आदेश",
     "approvalRoutes.kind_contract": "अनुबंध",

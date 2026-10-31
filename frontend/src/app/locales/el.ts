@@ -51392,6 +51392,10 @@ const resource = {
     "settings.chords_reset_all": "Επαναφορά όλων των συντομεύσεων",
     "settings.tab_packages": "Πακέτα και μονάδες",
     "settings.tab_packages_desc": "Εγκατεστημένα πακέτα λύσεων, προσθήκη πακέτου, ενεργοποίηση ή απενεργοποίηση μεμονωμένων μονάδων",
+    "settings.secondary_calendar": "Δευτερεύον ημερολόγιο",
+    "settings.secondary_calendar_none": "Κανένα",
+    "settings.secondary_calendar_umalqura": "Χιζρί (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Εμφανίζει την ημερομηνία Χιζρί δίπλα στη γρηγοριανή ημερομηνία σε κάθε ημερομηνία της εφαρμογής.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Εντολή αλλαγής",
     "approvalRoutes.kind_contract": "Σύμβαση",

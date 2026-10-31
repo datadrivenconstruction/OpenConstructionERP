@@ -54331,6 +54331,10 @@ const resource = {
     "settings.chords_reset_all": "Сбросить все клавиши",
     "settings.tab_packages": "Пакеты и модули",
     "settings.tab_packages_desc": "Установленные пакеты решений, добавление пакета, включение и отключение отдельных модулей",
+    "settings.secondary_calendar": "Вспомогательный календарь",
+    "settings.secondary_calendar_none": "Нет",
+    "settings.secondary_calendar_umalqura": "Хиджра (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Показывает дату по хиджре рядом с григорианской датой для всех дат в приложении.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Распоряжение об изменении",
     "approvalRoutes.kind_contract": "Договор",

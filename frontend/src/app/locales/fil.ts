@@ -51365,6 +51365,10 @@ const resource = {
     "settings.chords_reset_all": "I-reset ang lahat ng shortcut",
     "settings.tab_packages": "Mga package at module",
     "settings.tab_packages_desc": "Mga naka-install na solution package, magdagdag ng package, i-on o i-off ang mga indibidwal na module",
+    "settings.secondary_calendar": "Pangalawang kalendaryo",
+    "settings.secondary_calendar_none": "Wala",
+    "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Ipinapakita ang petsang Hijri sa tabi ng petsang Gregorian sa bawat petsa sa app.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Change order",
     "approvalRoutes.kind_contract": "Kontrata",

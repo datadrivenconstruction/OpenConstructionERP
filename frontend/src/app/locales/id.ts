@@ -51172,6 +51172,10 @@ const resource = {
     "settings.chords_reset_all": "Atur ulang semua pintasan",
     "settings.tab_packages": "Paket & modul",
     "settings.tab_packages_desc": "Paket solusi terpasang, tambah paket, aktifkan atau nonaktifkan modul satu per satu",
+    "settings.secondary_calendar": "Kalender sekunder",
+    "settings.secondary_calendar_none": "Tidak ada",
+    "settings.secondary_calendar_umalqura": "Hijriah (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Menampilkan tanggal Hijriah di samping tanggal Masehi pada setiap tanggal di aplikasi.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Perintah perubahan",
     "approvalRoutes.kind_contract": "Kontrak",

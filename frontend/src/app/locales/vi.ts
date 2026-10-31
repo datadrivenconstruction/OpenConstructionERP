@@ -51187,6 +51187,10 @@ const resource = {
     "settings.chords_reset_all": "Đặt lại tất cả phím tắt",
     "settings.tab_packages": "Gói và mô-đun",
     "settings.tab_packages_desc": "Các gói giải pháp đã cài đặt, thêm gói, bật hoặc tắt từng mô-đun",
+    "settings.secondary_calendar": "Lịch phụ",
+    "settings.secondary_calendar_none": "Không",
+    "settings.secondary_calendar_umalqura": "Hồi lịch (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Hiển thị ngày Hồi lịch bên cạnh ngày dương lịch ở mọi ngày trong ứng dụng.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Lệnh thay đổi",
     "approvalRoutes.kind_contract": "Hợp đồng",

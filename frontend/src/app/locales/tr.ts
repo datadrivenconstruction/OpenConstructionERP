@@ -52313,6 +52313,10 @@ const resource = {
     "settings.chords_reset_all": "Tüm kısayolları sıfırla",
     "settings.tab_packages": "Paketler ve modüller",
     "settings.tab_packages_desc": "Yüklü çözüm paketleri, paket ekleme, tek tek modülleri açma veya kapatma",
+    "settings.secondary_calendar": "İkincil takvim",
+    "settings.secondary_calendar_none": "Yok",
+    "settings.secondary_calendar_umalqura": "Hicri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Uygulamadaki her tarihin yanında miladi tarihin yanı sıra Hicri tarihi gösterir.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Değişiklik emri",
     "approvalRoutes.kind_contract": "Sözleşme",

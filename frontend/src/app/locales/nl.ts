@@ -52319,6 +52319,10 @@ const resource = {
     "settings.chords_reset_all": "Alle sneltoetsen terugzetten",
     "settings.tab_packages": "Pakketten & modules",
     "settings.tab_packages_desc": "Geïnstalleerde oplossingspakketten, een pakket toevoegen, losse modules aan- of uitzetten",
+    "settings.secondary_calendar": "Secundaire kalender",
+    "settings.secondary_calendar_none": "Geen",
+    "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Toont de hijri-datum naast de gregoriaanse datum bij elke datum in de app.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Wijzigingsopdracht",
     "approvalRoutes.kind_contract": "Contract",

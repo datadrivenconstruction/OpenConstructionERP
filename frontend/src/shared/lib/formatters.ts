@@ -27,7 +27,13 @@
  * `getFileExtension`) — they used to live inside AI feature files but
  * were lifted out so any feature can reuse them.
  */
-import { getNumberLocale, usePreferencesStore, type DateFormat } from '@/stores/usePreferencesStore';
+import {
+  getNumberLocale,
+  getSecondaryCalendar,
+  usePreferencesStore,
+  type DateFormat,
+} from '@/stores/usePreferencesStore';
+import { formatSecondaryDate } from './secondaryCalendar';
 import { getIntlLocale } from './intlLocale';
 import { dateOnlyFormatOptions } from './dates';
 
@@ -388,10 +394,24 @@ export function fmtDate(dateStr: string, options?: Intl.DateTimeFormatOptions): 
   // is preserved; full timestamps keep their local-zone rendering.
   const finalOpts = dateOnlyFormatOptions(dateStr, opts);
   const pref = getDateFormatPreference();
-  if (pref === 'auto') {
-    return new Date(dateStr).toLocaleDateString(getIntlLocale(), finalOpts);
-  }
-  return formatDateWithPreference(new Date(dateStr), getIntlLocale(), finalOpts, pref);
+  const date = new Date(dateStr);
+  const main =
+    pref === 'auto'
+      ? date.toLocaleDateString(getIntlLocale(), finalOpts)
+      : formatDateWithPreference(date, getIntlLocale(), finalOpts, pref);
+  return withSecondaryDate(main, date, getIntlLocale(), finalOpts);
+}
+
+/** Append the secondary-calendar date in brackets when one is set and the options ask for a full date. */
+export function withSecondaryDate(
+  main: string,
+  date: Date,
+  locale: string | undefined,
+  options: Intl.DateTimeFormatOptions,
+): string {
+  if (!options.day || !options.month || !options.year) return main;
+  const second = formatSecondaryDate(date, locale, getSecondaryCalendar(), options.timeZone);
+  return second ? `${main} (${second})` : main;
 }
 
 /**

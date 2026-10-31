@@ -51436,6 +51436,10 @@ const resource = {
     "settings.chords_reset_all": "Palauta kaikki pikanäppäimet",
     "settings.tab_packages": "Paketit ja moduulit",
     "settings.tab_packages_desc": "Asennetut ratkaisupaketit, paketin lisääminen, yksittäisten moduulien käyttöönotto ja poisto",
+    "settings.secondary_calendar": "Toissijainen kalenteri",
+    "settings.secondary_calendar_none": "Ei mitään",
+    "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Näyttää hijri-päivämäärän gregoriaanisen päivämäärän vieressä kaikissa sovelluksen päivämäärissä.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Muutostilaus",
     "approvalRoutes.kind_contract": "Sopimus",

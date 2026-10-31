@@ -52861,6 +52861,10 @@ const resource = {
     "settings.chords_reset_all": "Przywróć wszystkie skróty",
     "settings.tab_packages": "Pakiety i moduły",
     "settings.tab_packages_desc": "Zainstalowane pakiety rozwiązań, dodawanie pakietu, włączanie lub wyłączanie pojedynczych modułów",
+    "settings.secondary_calendar": "Kalendarz pomocniczy",
+    "settings.secondary_calendar_none": "Brak",
+    "settings.secondary_calendar_umalqura": "Hidżra (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Pokazuje datę hidżry obok daty gregoriańskiej przy każdej dacie w aplikacji.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Zlecenie zmiany",
     "approvalRoutes.kind_contract": "Umowa",

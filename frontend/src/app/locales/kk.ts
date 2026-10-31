@@ -51393,6 +51393,10 @@ const resource = {
     "settings.chords_reset_all": "Барлық жылдам пернелерді қайтару",
     "settings.tab_packages": "Пакеттер және модульдер",
     "settings.tab_packages_desc": "Орнатылған шешім пакеттері, пакет қосу, жеке модульдерді қосу немесе өшіру",
+    "settings.secondary_calendar": "Қосымша күнтізбе",
+    "settings.secondary_calendar_none": "Жоқ",
+    "settings.secondary_calendar_umalqura": "Хижра (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Қолданбадағы барлық күндердің жанында григориан күнімен бірге хижра күнін көрсетеді.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Өзгеріс бұйрығы",
     "approvalRoutes.kind_contract": "Келісімшарт",

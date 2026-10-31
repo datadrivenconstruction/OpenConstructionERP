@@ -51364,6 +51364,10 @@ const resource = {
     "settings.chords_reset_all": "Lähtesta kõik kiirklahvid",
     "settings.tab_packages": "Paketid ja moodulid",
     "settings.tab_packages_desc": "Paigaldatud lahenduspaketid, paketi lisamine, üksikute moodulite sisse- ja väljalülitamine",
+    "settings.secondary_calendar": "Teine kalender",
+    "settings.secondary_calendar_none": "Puudub",
+    "settings.secondary_calendar_umalqura": "Hidžra (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Kuvab kõigi rakenduse kuupäevade juures hidžra kuupäeva Gregoriuse kuupäeva kõrval.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Muudatuskorraldus",
     "approvalRoutes.kind_contract": "Leping",

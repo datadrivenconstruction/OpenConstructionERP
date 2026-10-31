@@ -51670,6 +51670,10 @@ const resource = {
     "settings.chords_reset_all": "איפוס כל קיצורי הדרך",
     "settings.tab_packages": "חבילות ומודולים",
     "settings.tab_packages_desc": "חבילות פתרונות מותקנות, הוספת חבילה, הפעלה או כיבוי של מודולים בודדים",
+    "settings.secondary_calendar": "לוח שנה משני",
+    "settings.secondary_calendar_none": "ללא",
+    "settings.secondary_calendar_umalqura": "היג'רי (אום אל-קורא)",
+    "settings.secondary_calendar_hint": "מציג את התאריך ההיג'רי לצד התאריך הלועזי בכל תאריך באפליקציה.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "צו שינוי",
     "approvalRoutes.kind_contract": "חוזה",

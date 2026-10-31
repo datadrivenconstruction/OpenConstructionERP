@@ -46268,6 +46268,10 @@ const resource = {
     "settings.chords_reset_all": "Reset all shortcuts",
     "settings.tab_packages": "Packages & modules",
     "settings.tab_packages_desc": "Installed solution packages, add a package, switch single modules",
+    "settings.secondary_calendar": "Secondary calendar",
+    "settings.secondary_calendar_none": "None",
+    "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Shows the Hijri date next to the Gregorian date on every date in the app.",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",

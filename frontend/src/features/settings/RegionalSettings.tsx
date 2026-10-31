@@ -25,7 +25,7 @@ import clsx from 'clsx';
 import { Card, CardHeader, CardContent } from '@/shared/ui';
 import { apiGet, apiPatch } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
-import { usePreferencesStore, resolveNumberLocale, adoptServerNumberFormat, useNumberLocale, NUMBER_LOCALES, type MeasurementSystem, type DateFormat, type NumberLocale, type DigitSystem } from '@/stores/usePreferencesStore';
+import { usePreferencesStore, useSecondaryCalendar, type SecondaryCalendar, resolveNumberLocale, adoptServerNumberFormat, useNumberLocale, NUMBER_LOCALES, type MeasurementSystem, type DateFormat, type NumberLocale, type DigitSystem } from '@/stores/usePreferencesStore';
 import { DIGIT_SYSTEMS } from '@/shared/lib/intlLocale';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -366,6 +366,8 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
   const storeDateFormat = usePreferencesStore((s) => s.dateFormat);
   const storeNumberLocale = usePreferencesStore((s) => s.numberLocale);
   const storeDigitSystem = usePreferencesStore((s) => s.digitSystem);
+  const setPreferences = usePreferencesStore((s) => s.setPreferences);
+  const secondaryCalendar = useSecondaryCalendar();
 
   // Fetch current preferences from backend
   const { data: prefs } = useQuery({
@@ -634,6 +636,35 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
               ]}
               onChange={(val) => handleChange('date_format', val)}
             />
+          </div>
+
+          {/* Secondary calendar (local preference; the market supplies the default) */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-content-primary mb-1.5">
+              <Calendar size={14} className="text-content-tertiary" />
+              {t('settings.secondary_calendar', { defaultValue: 'Secondary calendar' })}
+            </label>
+            <ToggleGroup
+              value={secondaryCalendar}
+              options={[
+                {
+                  value: 'none' as SecondaryCalendar,
+                  label: t('settings.secondary_calendar_none', { defaultValue: 'None' }),
+                },
+                {
+                  value: 'islamic-umalqura' as SecondaryCalendar,
+                  label: t('settings.secondary_calendar_umalqura', { defaultValue: 'Hijri (Umm al-Qura)' }),
+                },
+              ]}
+              onChange={(val) =>
+                setPreferences({ secondaryCalendar: val as SecondaryCalendar, secondaryCalendarChosen: true })
+              }
+            />
+            <p className="mt-1.5 text-xs text-content-tertiary">
+              {t('settings.secondary_calendar_hint', {
+                defaultValue: 'Shows the Hijri date next to the Gregorian date on every date in the app.',
+              })}
+            </p>
           </div>
 
           {/* Number Format */}

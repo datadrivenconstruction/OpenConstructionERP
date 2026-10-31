@@ -52600,6 +52600,10 @@ const resource = {
     "settings.chords_reset_all": "Obnovit všechny zkratky",
     "settings.tab_packages": "Balíčky a moduly",
     "settings.tab_packages_desc": "Nainstalované balíčky řešení, přidání balíčku, zapínání nebo vypínání jednotlivých modulů",
+    "settings.secondary_calendar": "Druhý kalendář",
+    "settings.secondary_calendar_none": "Žádný",
+    "settings.secondary_calendar_umalqura": "Hidžra (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Zobrazuje datum podle hidžry vedle gregoriánského data u každého data v aplikaci.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Změnový příkaz",
     "approvalRoutes.kind_contract": "Smlouva",

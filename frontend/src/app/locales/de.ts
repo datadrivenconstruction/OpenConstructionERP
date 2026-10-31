@@ -53882,6 +53882,10 @@ const resource = {
     "settings.chords_reset_all": "Alle Kürzel zurücksetzen",
     "settings.tab_packages": "Pakete & Module",
     "settings.tab_packages_desc": "Installierte Lösungspakete, Paket hinzufügen, einzelne Module ein- und ausschalten",
+    "settings.secondary_calendar": "Zweiter Kalender",
+    "settings.secondary_calendar_none": "Keiner",
+    "settings.secondary_calendar_umalqura": "Hidschri (Umm al-Qura)",
+    "settings.secondary_calendar_hint": "Zeigt bei jedem Datum in der App das Hidschri-Datum neben dem gregorianischen Datum an.",
     // --- /Settings → Company & documents ---
     "approvalRoutes.kind_change_order": "Änderungsauftrag",
     "approvalRoutes.kind_contract": "Vertrag",
