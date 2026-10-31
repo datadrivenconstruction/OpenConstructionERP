@@ -9,10 +9,25 @@ from decimal import Decimal
 from typing import Any
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, field_serializer
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_serializer, field_validator
 
 # Reused enum-like patterns
 _ISO_DATE_PATTERN = r"^\d{4}-\d{2}-\d{2}$"
+
+REQUIRED_CERTIFICATES_KEY = "required_certificates"
+
+
+def clean_certificates(values: object) -> list[str]:
+    """Trimmed, de-duplicated (case-insensitive), order-preserving certificate type names."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for raw in values if isinstance(values, (list, tuple)) else []:
+        name = str(raw).strip()[:128]
+        if name and name.lower() not in seen:
+            seen.add(name.lower())
+            out.append(name)
+    return out
+
 
 # ── EquipmentType ────────────────────────────────────────────────────────
 
@@ -113,6 +128,12 @@ class EquipmentCreate(BaseModel):
     notes: str | None = None
     cost_code: str = Field(default="", max_length=100)
     emission_class: str | None = Field(default=None, max_length=30)
+    required_certificates: list[str] | None = Field(default=None, max_length=50)
+
+    @field_validator("required_certificates")
+    @classmethod
+    def _clean_certificates(cls, v: list[str] | None) -> list[str] | None:
+        return None if v is None else clean_certificates(v)
 
 
 class EquipmentUpdate(BaseModel):
@@ -144,6 +165,12 @@ class EquipmentUpdate(BaseModel):
     notes: str | None = None
     cost_code: str | None = Field(default=None, max_length=100)
     emission_class: str | None = Field(default=None, max_length=30)
+    required_certificates: list[str] | None = Field(default=None, max_length=50)
+
+    @field_validator("required_certificates")
+    @classmethod
+    def _clean_certificates(cls, v: list[str] | None) -> list[str] | None:
+        return None if v is None else clean_certificates(v)
 
 
 class EquipmentResponse(BaseModel):
@@ -178,6 +205,12 @@ class EquipmentResponse(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
     created_at: datetime
     updated_at: datetime
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def required_certificates(self) -> list[str]:
+        """Certificate types an operator needs for this machine (kept in metadata)."""
+        return clean_certificates((self.metadata or {}).get(REQUIRED_CERTIFICATES_KEY))
 
 
 class EquipmentFleetListResponse(BaseModel):

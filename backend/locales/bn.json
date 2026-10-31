@@ -1138,7 +1138,9 @@
       "notifications.portal.user_invited.title": "পোর্টাল ব্যবহারকারীকে আমন্ত্রণ জানানো হয়েছে",
       "notifications.portal.user_invited.body": "{portal_user_email}-কে {portal_role} হিসেবে আমন্ত্রণ জানানো হয়েছে।",
       "notifications.portal.message_received.title": "পোর্টালে নতুন বার্তা",
-      "notifications.portal.message_received.body": "{buyer_name} একটি বার্তা পাঠিয়েছেন।"
+      "notifications.portal.message_received.body": "{buyer_name} একটি বার্তা পাঠিয়েছেন।",
+      "dispatch.notify.plan_title": "Your daily plan is ready",
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
     },
     "schedule_headers": {
       "headers": {

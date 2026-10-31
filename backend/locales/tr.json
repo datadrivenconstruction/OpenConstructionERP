@@ -1957,7 +1957,9 @@
       "notifications.portal.user_invited.title": "Portal kullanıcısı davet edildi",
       "notifications.portal.user_invited.body": "{portal_user_email} davet edildi, rol: {portal_role}.",
       "notifications.portal.message_received.title": "Yeni portal mesajı",
-      "notifications.portal.message_received.body": "Gönderen: {buyer_name}. Yeni bir mesajınız var."
+      "notifications.portal.message_received.body": "Gönderen: {buyer_name}. Yeni bir mesajınız var.",
+      "dispatch.notify.plan_title": "Günlük planınız hazır",
+      "dispatch.notify.plan_body": "{day} planı: {lines} satır."
     },
     "schedule_headers": {
       "headers": {

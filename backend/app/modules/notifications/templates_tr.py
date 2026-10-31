@@ -99,6 +99,8 @@ TEMPLATES_TR: dict[str, str] = {
     # Punch list
     "notifications.punchlist.auto_created.title": "Eksik iş kaydı oluşturuldu",
     "notifications.punchlist.auto_created.body": "{title}",
+    "dispatch.notify.plan_title": "Günlük planınız hazır",
+    "dispatch.notify.plan_body": "{day} planı: {lines} satır.",
     # Digests
     "notifications.digest.title": "Bildirim özeti",
     "notifications.digest.body": "Kanal: {channel}. {count} yeni güncellemeniz var.",

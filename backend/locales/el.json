@@ -1978,7 +1978,9 @@
       "notifications.portal.user_invited.title": "Προσκλήθηκε χρήστης της πύλης",
       "notifications.portal.user_invited.body": "Ο χρήστης {portal_user_email} προσκλήθηκε με ρόλο: {portal_role}.",
       "notifications.portal.message_received.title": "Νέο μήνυμα στην πύλη",
-      "notifications.portal.message_received.body": "Μήνυμα από: {buyer_name}."
+      "notifications.portal.message_received.body": "Μήνυμα από: {buyer_name}.",
+      "dispatch.notify.plan_title": "Your daily plan is ready",
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
     },
     "schedule_headers": {
       "headers": {

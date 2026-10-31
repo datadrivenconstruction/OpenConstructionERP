@@ -52,6 +52,7 @@ from app.modules.equipment.repository import (
     utilization_for_equipment,
 )
 from app.modules.equipment.schemas import (
+    REQUIRED_CERTIFICATES_KEY,
     DamageReportCreate,
     EquipmentCostSummaryResponse,
     EquipmentCreate,
@@ -337,7 +338,11 @@ class EquipmentService:
                 status_code=status.HTTP_409_CONFLICT,
                 detail=f"Equipment with code '{data.code}' already exists",
             )
-        entity = Equipment(**data.model_dump())
+        values = data.model_dump()
+        certificates = values.pop("required_certificates", None)
+        if certificates:
+            values["metadata_"] = {REQUIRED_CERTIFICATES_KEY: certificates}
+        entity = Equipment(**values)
         await self.equipment_repo.create(entity)
         logger.info("Equipment created: %s (%s)", entity.code, entity.name)
         return entity
@@ -360,6 +365,14 @@ class EquipmentService:
         fields = data.model_dump(exclude_unset=True)
         if not fields:
             return equipment
+        if "required_certificates" in fields:
+            certificates = fields.pop("required_certificates") or []
+            meta = dict(equipment.metadata_ or {})
+            if certificates:
+                meta[REQUIRED_CERTIFICATES_KEY] = certificates
+            else:
+                meta.pop(REQUIRED_CERTIFICATES_KEY, None)
+            fields["metadata_"] = meta
         await self.equipment_repo.update_fields(equipment_id, **fields)
         await self.session.refresh(equipment)
         return equipment

@@ -98894,6 +98894,1374 @@
       ]
     },
     {
+      "module_id": "dispatch",
+      "module_label": "Dispatch board",
+      "module_category": "business",
+      "files": [
+        "__init__.py",
+        "logic.py",
+        "manifest.py",
+        "models.py",
+        "pdf.py",
+        "permissions.py",
+        "repository.py",
+        "router.py",
+        "schemas.py",
+        "service.py",
+        "validators.py"
+      ],
+      "manifest": {
+        "name": "oe_dispatch",
+        "version": "0.1.0",
+        "display_name": "Dispatch board",
+        "description": "Magnet board for crews, people and machines: place them on sites, yard and shop day by day, see conflicts, book moves ahead, send each foreman tomorrow's plan and prefill the site timesheet",
+        "author": "OpenConstructionERP Core Team",
+        "category": "business",
+        "depends": [
+          "oe_projects",
+          "oe_resources",
+          "oe_equipment"
+        ],
+        "auto_install": true,
+        "enabled": true
+      },
+      "models": [
+        {
+          "class_name": "DispatchLocation",
+          "tablename": "oe_dispatch_location",
+          "docstring": "One column of the board.",
+          "columns": [
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "project_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true,
+              "is_fk": true,
+              "fk_target": "oe_projects_project.id"
+            },
+            {
+              "name": "sort_order",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "is_active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DispatchCrew",
+          "tablename": "oe_dispatch_crew",
+          "docstring": "A gang of people who are dispatched together.",
+          "columns": [
+            {
+              "name": "name",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "foreman_resource_id",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "foreman_user_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "member_ids",
+              "annotation": "Mapped[list]",
+              "sql_type": "JSON",
+              "nullable": false
+            },
+            {
+              "name": "min_size",
+              "annotation": "Mapped[int]",
+              "sql_type": "Integer",
+              "nullable": false
+            },
+            {
+              "name": "trade",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "labor_crew_id",
+              "annotation": "Mapped[uuid.UUID | None]",
+              "sql_type": "GUID",
+              "nullable": true
+            },
+            {
+              "name": "is_active",
+              "annotation": "Mapped[bool]",
+              "sql_type": "Boolean",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DispatchPlacement",
+          "tablename": "oe_dispatch_placement",
+          "docstring": "One card on one column on one day.",
+          "columns": [
+            {
+              "name": "day",
+              "annotation": "Mapped[date]",
+              "sql_type": "SafeDate",
+              "nullable": false
+            },
+            {
+              "name": "card_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "card_ref",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "location_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_dispatch_location.id"
+            },
+            {
+              "name": "operator_ref",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            },
+            {
+              "name": "start_time",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "source",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DispatchScheduledMove",
+          "tablename": "oe_dispatch_scheduled_move",
+          "docstring": "A move booked for a future date; applied on that date and then kept as history.",
+          "columns": [
+            {
+              "name": "card_kind",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "card_ref",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "to_location_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false,
+              "is_fk": true,
+              "fk_target": "oe_dispatch_location.id"
+            },
+            {
+              "name": "effective_date",
+              "annotation": "Mapped[date]",
+              "sql_type": "SafeDate",
+              "nullable": false
+            },
+            {
+              "name": "start_time",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "notes",
+              "annotation": "Mapped[str]",
+              "sql_type": "Text",
+              "nullable": false
+            },
+            {
+              "name": "status",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "applied_at",
+              "annotation": "Mapped[datetime | None]",
+              "sql_type": "DateTime",
+              "nullable": true
+            },
+            {
+              "name": "created_by",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
+            }
+          ],
+          "relationships": []
+        },
+        {
+          "class_name": "DispatchViewPref",
+          "tablename": "oe_dispatch_view_pref",
+          "docstring": "How one user likes the board drawn.",
+          "columns": [
+            {
+              "name": "user_id",
+              "annotation": "Mapped[uuid.UUID]",
+              "sql_type": "GUID",
+              "nullable": false
+            },
+            {
+              "name": "card_density",
+              "annotation": "Mapped[str]",
+              "sql_type": "String",
+              "nullable": false
+            },
+            {
+              "name": "settings",
+              "annotation": "Mapped[dict]",
+              "sql_type": "JSON",
+              "nullable": false
+            }
+          ],
+          "relationships": []
+        }
+      ],
+      "routes": [
+        {
+          "method": "GET",
+          "path": "/locations",
+          "handler": "list_locations",
+          "response_model": "list[LocationResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/locations",
+          "handler": "create_location",
+          "response_model": "LocationResponse",
+          "request_schema": "LocationCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/locations/{location_id}",
+          "handler": "update_location",
+          "response_model": "LocationResponse",
+          "request_schema": "LocationUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/crews",
+          "handler": "list_crews",
+          "response_model": "list[CrewResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/crews",
+          "handler": "create_crew",
+          "response_model": "CrewResponse",
+          "request_schema": "CrewCreate"
+        },
+        {
+          "method": "PATCH",
+          "path": "/crews/{crew_id}",
+          "handler": "update_crew",
+          "response_model": "CrewResponse",
+          "request_schema": "CrewUpdate"
+        },
+        {
+          "method": "GET",
+          "path": "/cards",
+          "handler": "list_cards",
+          "response_model": "CardListResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/board",
+          "handler": "get_board",
+          "response_model": "BoardResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/week",
+          "handler": "get_week",
+          "response_model": "WeekResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "POST",
+          "path": "/placements",
+          "handler": "place_cards",
+          "request_schema": "PlaceRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/placements/move",
+          "handler": "move_cards",
+          "request_schema": "MoveRequest"
+        },
+        {
+          "method": "PATCH",
+          "path": "/placements/{placement_id}",
+          "handler": "update_placement",
+          "request_schema": "PlacementUpdate"
+        },
+        {
+          "method": "POST",
+          "path": "/placements/remove",
+          "handler": "remove_cards",
+          "request_schema": "RemoveRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/copy-day",
+          "handler": "copy_day",
+          "request_schema": "CopyDayRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/moves",
+          "handler": "list_moves",
+          "response_model": "list[ScheduledMoveResponse]",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/moves",
+          "handler": "schedule_move",
+          "response_model": "ScheduledMoveResponse",
+          "request_schema": "ScheduleMoveRequest"
+        },
+        {
+          "method": "POST",
+          "path": "/moves/{move_id}/cancel",
+          "handler": "cancel_move",
+          "response_model": "ScheduledMoveResponse",
+          "request_schema": "None"
+        },
+        {
+          "method": "POST",
+          "path": "/moves/apply",
+          "handler": "apply_moves",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
+          "path": "/plan",
+          "handler": "daily_plan",
+          "response_model": "DailyPlanResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/plan/pdf",
+          "handler": "daily_plan_pdf",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "POST",
+          "path": "/plan/share",
+          "handler": "share_plan",
+          "response_model": "ShareResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "POST",
+          "path": "/timesheet-prefill",
+          "handler": "timesheet_prefill",
+          "response_model": "PrefillResponse",
+          "request_schema": "PrefillRequest"
+        },
+        {
+          "method": "GET",
+          "path": "/utilisation",
+          "handler": "utilisation",
+          "response_model": "UtilisationResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/validate",
+          "handler": "validate_day",
+          "response_model": "ValidationResponse",
+          "request_schema": "date | None"
+        },
+        {
+          "method": "GET",
+          "path": "/preferences",
+          "handler": "get_preferences",
+          "response_model": "ViewPref",
+          "request_schema": "None"
+        },
+        {
+          "method": "PUT",
+          "path": "/preferences",
+          "handler": "set_preferences",
+          "response_model": "ViewPref",
+          "request_schema": "ViewPref"
+        }
+      ],
+      "schemas": [
+        {
+          "class_name": "_Out",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": []
+        },
+        {
+          "class_name": "LocationCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "sort_order",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "LocationUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "sort_order",
+              "type": "int | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "LocationResponse",
+          "bases": [
+            "_Out"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "project_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "sort_order",
+              "type": "int"
+            },
+            {
+              "name": "is_active",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "CrewCreate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "foreman_resource_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "foreman_user_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "member_ids",
+              "type": "list[uuid.UUID]"
+            },
+            {
+              "name": "min_size",
+              "type": "int"
+            },
+            {
+              "name": "trade",
+              "type": "str"
+            },
+            {
+              "name": "labor_crew_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CrewUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "name",
+              "type": "str | None"
+            },
+            {
+              "name": "foreman_resource_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "foreman_user_id",
+              "type": "uuid.UUID | None",
+              "default": "None"
+            },
+            {
+              "name": "member_ids",
+              "type": "list[uuid.UUID] | None"
+            },
+            {
+              "name": "min_size",
+              "type": "int | None"
+            },
+            {
+              "name": "trade",
+              "type": "str | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool | None",
+              "default": "None"
+            }
+          ]
+        },
+        {
+          "class_name": "CrewResponse",
+          "bases": [
+            "_Out"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "name",
+              "type": "str"
+            },
+            {
+              "name": "foreman_resource_id",
+              "type": "str | None"
+            },
+            {
+              "name": "foreman_user_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "member_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "min_size",
+              "type": "int"
+            },
+            {
+              "name": "trade",
+              "type": "str"
+            },
+            {
+              "name": "labor_crew_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "is_active",
+              "type": "bool"
+            }
+          ]
+        },
+        {
+          "class_name": "CardRef",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "card_ref",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "PlaceRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "Put one or more cards on a column for a day (multi-select drop).",
+          "fields": [
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "location_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "cards",
+              "type": "list[CardRef]"
+            },
+            {
+              "name": "start_time",
+              "type": "str"
+            },
+            {
+              "name": "notes",
+              "type": "str"
+            },
+            {
+              "name": "operator_ref",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "MoveRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "placement_ids",
+              "type": "list[uuid.UUID]"
+            },
+            {
+              "name": "to_location_id",
+              "type": "uuid.UUID"
+            }
+          ]
+        },
+        {
+          "class_name": "PlacementUpdate",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "start_time",
+              "type": "str | None"
+            },
+            {
+              "name": "notes",
+              "type": "str | None"
+            },
+            {
+              "name": "operator_ref",
+              "type": "str | None"
+            }
+          ]
+        },
+        {
+          "class_name": "RemoveRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "placement_ids",
+              "type": "list[uuid.UUID]"
+            }
+          ]
+        },
+        {
+          "class_name": "CopyDayRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "from_day",
+              "type": "date"
+            },
+            {
+              "name": "to_day",
+              "type": "date"
+            },
+            {
+              "name": "replace",
+              "type": "bool",
+              "default": "False"
+            }
+          ]
+        },
+        {
+          "class_name": "ScheduleMoveRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "card_ref",
+              "type": "str"
+            },
+            {
+              "name": "to_location_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "effective_date",
+              "type": "date"
+            },
+            {
+              "name": "start_time",
+              "type": "str"
+            },
+            {
+              "name": "notes",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ScheduledMoveResponse",
+          "bases": [
+            "_Out"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "card_ref",
+              "type": "str"
+            },
+            {
+              "name": "to_location_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "effective_date",
+              "type": "date"
+            },
+            {
+              "name": "start_time",
+              "type": "str"
+            },
+            {
+              "name": "notes",
+              "type": "str"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "applied_at",
+              "type": "datetime | None"
+            }
+          ]
+        },
+        {
+          "class_name": "PlacementResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "card_ref",
+              "type": "str"
+            },
+            {
+              "name": "location_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "operator_ref",
+              "type": "str | None"
+            },
+            {
+              "name": "start_time",
+              "type": "str"
+            },
+            {
+              "name": "notes",
+              "type": "str"
+            },
+            {
+              "name": "source",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "subtitle",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "members",
+              "type": "list[dict[str, str]]"
+            },
+            {
+              "name": "conflict_kinds",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "ConflictResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "kind",
+              "type": "str"
+            },
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "card_ref",
+              "type": "str"
+            },
+            {
+              "name": "message",
+              "type": "str"
+            },
+            {
+              "name": "severity",
+              "type": "str"
+            },
+            {
+              "name": "placement_ids",
+              "type": "list[str]"
+            },
+            {
+              "name": "details",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "BoardResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "locations",
+              "type": "list[LocationResponse]"
+            },
+            {
+              "name": "placements",
+              "type": "list[PlacementResponse]"
+            },
+            {
+              "name": "conflicts",
+              "type": "list[ConflictResponse]"
+            },
+            {
+              "name": "pending_moves",
+              "type": "list[ScheduledMoveResponse]"
+            },
+            {
+              "name": "applied_moves",
+              "type": "int",
+              "default": "0"
+            }
+          ]
+        },
+        {
+          "class_name": "WeekDay",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "placements",
+              "type": "list[PlacementResponse]"
+            },
+            {
+              "name": "conflict_count",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "WeekResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "start",
+              "type": "date"
+            },
+            {
+              "name": "locations",
+              "type": "list[LocationResponse]"
+            },
+            {
+              "name": "days",
+              "type": "list[WeekDay]"
+            }
+          ]
+        },
+        {
+          "class_name": "Card",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "card_ref",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "subtitle",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "status",
+              "type": "str",
+              "default": "''"
+            }
+          ]
+        },
+        {
+          "class_name": "CardListResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "items",
+              "type": "list[Card]"
+            },
+            {
+              "name": "total",
+              "type": "int"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            },
+            {
+              "name": "offset",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "PlanLine",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "location",
+              "type": "str"
+            },
+            {
+              "name": "location_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "who_or_what",
+              "type": "str"
+            },
+            {
+              "name": "operator",
+              "type": "str",
+              "default": "''"
+            },
+            {
+              "name": "start_time",
+              "type": "str"
+            },
+            {
+              "name": "notes",
+              "type": "str"
+            }
+          ]
+        },
+        {
+          "class_name": "ForemanPlan",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "foreman",
+              "type": "str"
+            },
+            {
+              "name": "foreman_user_id",
+              "type": "uuid.UUID | None"
+            },
+            {
+              "name": "lines",
+              "type": "list[PlanLine]"
+            }
+          ]
+        },
+        {
+          "class_name": "DailyPlanResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "plans",
+              "type": "list[ForemanPlan]"
+            }
+          ]
+        },
+        {
+          "class_name": "ShareResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "notified",
+              "type": "int"
+            },
+            {
+              "name": "without_user",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "PrefillRequest",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "location_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "hours",
+              "type": "Decimal"
+            }
+          ]
+        },
+        {
+          "class_name": "PrefillResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "timesheet_id",
+              "type": "uuid.UUID"
+            },
+            {
+              "name": "reference",
+              "type": "str"
+            },
+            {
+              "name": "created",
+              "type": "bool"
+            },
+            {
+              "name": "lines_added",
+              "type": "int"
+            }
+          ]
+        },
+        {
+          "class_name": "UtilisationRow",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "unit_ref",
+              "type": "str"
+            },
+            {
+              "name": "card_kind",
+              "type": "str"
+            },
+            {
+              "name": "label",
+              "type": "str"
+            },
+            {
+              "name": "days_assigned",
+              "type": "int"
+            },
+            {
+              "name": "days_idle",
+              "type": "int"
+            },
+            {
+              "name": "working_days",
+              "type": "int"
+            },
+            {
+              "name": "percent",
+              "type": "int"
+            },
+            {
+              "name": "assigned_days",
+              "type": "list[str]"
+            }
+          ]
+        },
+        {
+          "class_name": "UtilisationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "start",
+              "type": "date"
+            },
+            {
+              "name": "end",
+              "type": "date"
+            },
+            {
+              "name": "items",
+              "type": "list[UtilisationRow]"
+            }
+          ]
+        },
+        {
+          "class_name": "ViewPref",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "card_density",
+              "type": "str"
+            },
+            {
+              "name": "settings",
+              "type": "dict[str, Any]"
+            }
+          ]
+        },
+        {
+          "class_name": "ValidationResponse",
+          "bases": [
+            "BaseModel"
+          ],
+          "docstring": "",
+          "fields": [
+            {
+              "name": "day",
+              "type": "date"
+            },
+            {
+              "name": "status",
+              "type": "str"
+            },
+            {
+              "name": "checked",
+              "type": "int"
+            },
+            {
+              "name": "results",
+              "type": "list[dict[str, Any]]"
+            }
+          ]
+        }
+      ],
+      "import_dependencies": [
+        "equipment",
+        "field_time",
+        "notifications",
+        "resources"
+      ]
+    },
+    {
       "module_id": "documents",
       "module_label": "Documents",
       "module_category": "core",
@@ -113110,6 +114478,10 @@
             {
               "name": "emission_class",
               "type": "str | None"
+            },
+            {
+              "name": "required_certificates",
+              "type": "list[str] | None"
             }
           ]
         },
@@ -113208,6 +114580,10 @@
             {
               "name": "emission_class",
               "type": "str | None"
+            },
+            {
+              "name": "required_certificates",
+              "type": "list[str] | None"
             }
           ]
         },
@@ -225695,6 +227071,13 @@
         },
         {
           "method": "GET",
+          "path": "/certifications/types",
+          "handler": "list_certification_types",
+          "response_model": "list[str]",
+          "request_schema": "None"
+        },
+        {
+          "method": "GET",
           "path": "/certifications/expiring",
           "handler": "list_expiring_certifications",
           "response_model": "list[CertificationResponse]",
@@ -296347,6 +297730,13 @@
       "total_files": 27
     },
     {
+      "name": "dispatch",
+      "ts_files": 5,
+      "css_files": 0,
+      "test_files": 1,
+      "total_files": 5
+    },
+    {
       "name": "documents",
       "ts_files": 11,
       "css_files": 0,
@@ -296404,10 +297794,10 @@
     },
     {
       "name": "equipment",
-      "ts_files": 19,
+      "ts_files": 21,
       "css_files": 0,
-      "test_files": 2,
-      "total_files": 19
+      "test_files": 3,
+      "total_files": 21
     },
     {
       "name": "erp-chat",
@@ -298032,6 +299422,13 @@
       "projects",
       "schedule"
     ],
+    "dispatch": [
+      "equipment",
+      "field_time",
+      "notifications",
+      "projects",
+      "resources"
+    ],
     "documents": [
       "ai",
       "bim_hub",
@@ -299156,17 +300553,17 @@
     ]
   },
   "statistics": {
-    "backend_modules": 228,
-    "modules_with_manifests": 226,
-    "total_models": 855,
-    "total_columns": 10033,
+    "backend_modules": 229,
+    "modules_with_manifests": 227,
+    "total_models": 860,
+    "total_columns": 10067,
     "total_relationships": 257,
-    "total_routes": 4903,
-    "total_schemas": 4399,
-    "total_python_files": 3079,
-    "frontend_features": 223,
-    "frontend_ts_files": 3915,
-    "frontend_backend_mapped": 200
+    "total_routes": 4930,
+    "total_schemas": 4431,
+    "total_python_files": 3090,
+    "frontend_features": 224,
+    "frontend_ts_files": 3922,
+    "frontend_backend_mapped": 201
   },
   "frontend_backend_mapping": {
     "about": null,
@@ -299238,6 +300635,7 @@
     "demo": null,
     "design-options": "design_options",
     "design_management": "design_management",
+    "dispatch": "dispatch",
     "documents": "documents",
     "drawing-compare": "drawing_compare",
     "dwg-takeoff": "dwg_takeoff",

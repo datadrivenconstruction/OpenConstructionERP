@@ -1978,7 +1978,9 @@
       "notifications.variation.rejected.title": "Variation rejected: {code}",
       "notifications.variation.rejected_reason.body": "Variation {code} \"{title}\" on {project} was rejected and returned to you. Reason: {reason}",
       "notifications.variation.submitted.body": "Variation {code} \"{title}\" on {project} was submitted and is waiting for a decision.",
-      "notifications.variation.submitted.title": "Variation awaiting decision: {code}"
+      "notifications.variation.submitted.title": "Variation awaiting decision: {code}",
+      "dispatch.notify.plan_title": "Your daily plan is ready",
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
     },
     "schedule_headers": {
       "headers": {

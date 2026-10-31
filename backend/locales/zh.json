@@ -1962,7 +1962,9 @@
       "notifications.portal.user_invited.title": "门户用户已受邀",
       "notifications.portal.user_invited.body": "已邀请 {portal_user_email}，角色：{portal_role}。",
       "notifications.portal.message_received.title": "门户有新消息",
-      "notifications.portal.message_received.body": "{buyer_name} 发来一条消息。"
+      "notifications.portal.message_received.body": "{buyer_name} 发来一条消息。",
+      "dispatch.notify.plan_title": "Your daily plan is ready",
+      "dispatch.notify.plan_body": "Plan for {day}: {lines} lines."
     },
     "schedule_headers": {
       "headers": {
