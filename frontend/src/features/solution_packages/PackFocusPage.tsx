@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowRight, CheckCircle2, EyeOff, Layers3, Loader2, Rocket } from 'lucide-react';
+import { fmtList } from '@/shared/lib/formatters';
 import { Breadcrumb, Button } from '@/shared/ui';
 import { packNameSlug } from '@/shared/lib/regionalPack';
 import { fmtList } from '@/shared/lib/formatters';
