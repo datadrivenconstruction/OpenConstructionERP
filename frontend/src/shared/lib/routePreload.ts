@@ -44,6 +44,7 @@ const preloaders: Record<string, () => void> = {
   '/takt': () => void import('@/features/schedule-advanced'),
   '/deadlines': () => void import('@/features/deadlines/DeadlinesPage'),
   '/resources': () => void import('@/features/resources'),
+  '/dispatch': () => void import('@/features/dispatch'),
   '/timeline': () => void import('@/features/timeline'),
 
   // ── BIM & CAD ──
