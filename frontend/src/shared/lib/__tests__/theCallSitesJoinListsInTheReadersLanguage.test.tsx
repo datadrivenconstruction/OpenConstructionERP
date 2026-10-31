@@ -186,6 +186,8 @@ describe('auditRowTooltip', () => {
 type Excluded = { file: string; sites: number; why: string };
 
 const KEPT_AS_PLAIN_COMMAS: readonly Excluded[] = [
+  // Route parameter, split back apart by PackFocusPage before it is shown.
+  { file: 'features/solution_packages/focus.ts', sites: 1, why: 'machine-read route parameter' },
   // Joined to seed a text input, split back apart when the form is saved.
   { file: 'features/correspondence/CorrespondencePage.tsx', sites: 2, why: 'round-trip form field' },
   { file: 'features/forms/TemplateBuilder.tsx', sites: 4, why: 'round-trip form field' },
@@ -260,7 +262,7 @@ describe('the rest of the product', () => {
     // root, or a regex that quietly stopped matching, returns an empty map and
     // every assertion after this one passes while checking nothing at all.
     expect(files.length).toBeGreaterThan(2000);
-    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(37);
+    expect([...found.values()].reduce((a, b) => a + b, 0)).toBe(38);
   });
 
   it('routes every list a reader sees through the helper, except the recorded ones', () => {

@@ -16,7 +16,6 @@ import { fmtList } from '@/shared/lib/formatters';
 import { PACKAGES_QUERY_KEY, removePackage, setModuleEnabled, useSolutionPackages } from './api';
 import { PackageCard, PackagePicker } from './PackagePicker';
 import { directDependents, enabledModules } from './logic';
-import { fmtList } from '@/shared/lib/formatters';
 
 export function PackagesSettings() {
   const { t } = useTranslation();
