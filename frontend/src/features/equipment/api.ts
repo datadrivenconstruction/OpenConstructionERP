@@ -68,6 +68,8 @@ export interface Equipment {
   residual_value?: number | string | null;
   currency: string;
   notes?: string | null;
+  /** Certificate types an operator needs for this machine. */
+  required_certificates?: string[];
   metadata: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -93,6 +95,7 @@ export interface CreateEquipmentPayload {
   residual_value?: number;
   currency?: string;
   notes?: string;
+  required_certificates?: string[];
 }
 
 export interface TelemetryReading {
@@ -373,6 +376,11 @@ export function updateEquipment(
   data: Partial<CreateEquipmentPayload>,
 ): Promise<Equipment> {
   return apiPatch<Equipment>(`/v1/equipment/equipment/${id}`, data);
+}
+
+/** Certificate types on file in the resources module, the vocabulary for machine requirements. */
+export function listCertificationTypes(): Promise<string[]> {
+  return apiGet<string[]>('/v1/resources/certifications/types');
 }
 
 export function deleteEquipment(id: string): Promise<void> {

@@ -286,6 +286,14 @@ async def list_certifications_for_resource(
     return [CertificationResponse.model_validate(r) for r in rows]
 
 
+@router.get("/certifications/types", response_model=list[str])
+async def list_certification_types(
+    _perm: None = Depends(RequirePermission("resources.read")),
+    service: ResourcesService = Depends(_get_service),
+) -> list[str]:
+    return await service.list_certification_types()
+
+
 @router.get("/certifications/expiring", response_model=list[CertificationResponse])
 async def list_expiring_certifications(
     days: int = Query(default=60, ge=1, le=365),
