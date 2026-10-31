@@ -321,6 +321,11 @@ const DefectsLiabilityPage = lazy(() =>
     default: m.DefectsLiabilityPage,
   }))
 );
+const BidDayPage = lazy(() =>
+  import('@/features/bid-day/BidDayPage').then((m) => ({
+    default: m.BidDayPage,
+  }))
+);
 const QuoteCapturePage = lazy(() =>
   import('@/features/quote-capture/QuoteCapturePage').then((m) => ({
     default: m.QuoteCapturePage,
@@ -1512,6 +1517,7 @@ export default function App() {
 
         <Route path="/funding" element={<P title="Public Funding"><FundingPage /></P>} />
         <Route path="/tendering" element={<P title="Tendering"><TenderingPage /></P>} />
+        <Route path="/tendering/:tenderId/bid-day" element={<P title="Bid day"><BidDayPage /></P>} />
 
         <Route path="/changeorders" element={<P title="Change Orders"><ChangeOrdersPage /></P>} />
         <Route path="/documents" element={<Navigate to="/files" replace />} />
