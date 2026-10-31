@@ -122,3 +122,48 @@ class RebarShape(Base):
 
     def __repr__(self) -> str:
         return f"<RebarShape {self.super_group} pos={self.position} d={self.diameter_mm}>"
+
+
+class BarBendingEntry(Base):
+    """One manually entered bar mark of a bar bending schedule.
+
+    The computed columns are stored as written so the schedule the site works
+    from does not shift when a shape formula in the data file is corrected.
+    """
+
+    __tablename__ = "oe_rebar_bbs_entry"
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    member: Mapped[str] = mapped_column(String(120), nullable=False)
+    bar_mark: Mapped[str] = mapped_column(String(32), nullable=False)
+    diameter_mm: Mapped[Decimal] = mapped_column(Numeric(6, 2), nullable=False)
+    shape_standard: Mapped[str] = mapped_column(String(16), nullable=False)
+    shape_code: Mapped[str] = mapped_column(String(8), nullable=False)
+    dim_a: Mapped[Decimal | None] = mapped_column(Numeric(10, 1), nullable=True)
+    dim_b: Mapped[Decimal | None] = mapped_column(Numeric(10, 1), nullable=True)
+    dim_c: Mapped[Decimal | None] = mapped_column(Numeric(10, 1), nullable=True)
+    dim_d: Mapped[Decimal | None] = mapped_column(Numeric(10, 1), nullable=True)
+    dim_e: Mapped[Decimal | None] = mapped_column(Numeric(10, 1), nullable=True)
+    members_count: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    bars_per_member: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    steel_grade: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    # Lap or anchorage length the drawing calls for at this bar mark, checked against a diameter multiple.
+    lap_length_mm: Mapped[Decimal | None] = mapped_column(Numeric(10, 1), nullable=True)
+    # The BOQ reinforcement position this steel is billed under, for the total-steel check.
+    boq_position_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cut_length_mm: Mapped[Decimal] = mapped_column(Numeric(10, 1), nullable=False)
+    unit_weight_kg_m: Mapped[Decimal] = mapped_column(Numeric(10, 4), nullable=False)
+    total_length_m: Mapped[Decimal] = mapped_column(Numeric(14, 3), nullable=False)
+    weight_kg: Mapped[Decimal] = mapped_column(Numeric(14, 3), nullable=False)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+
+    __table_args__ = (UniqueConstraint("project_id", "member", "bar_mark", name="uq_rebar_bbs_member_mark"),)
+
+    def __repr__(self) -> str:
+        return f"<BarBendingEntry {self.member}/{self.bar_mark} d={self.diameter_mm}>"

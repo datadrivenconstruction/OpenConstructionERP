@@ -177,3 +177,98 @@ class SuperGroupsResponse(BaseModel):
     rule_set: str
     rule_ids: list[str]
     max_record_length: int
+
+
+# ── Manual bar bending schedule ──────────────────────────────────────────
+
+
+class ShapeCodeInfo(BaseModel):
+    """One shape code and its cut-length formula."""
+
+    standard: str
+    code: str
+    description: str
+    dimensions: list[str]
+    formula: str
+
+
+class BbsEntryBase(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    member: str | None = Field(default=None, min_length=1, max_length=120)
+    bar_mark: str | None = Field(default=None, min_length=1, max_length=32)
+    diameter_mm: Decimal | None = Field(default=None, gt=0, le=100)
+    shape_standard: str | None = Field(default=None, max_length=16)
+    shape_code: str | None = Field(default=None, max_length=8)
+    dim_a: Decimal | None = Field(default=None, ge=0)
+    dim_b: Decimal | None = Field(default=None, ge=0)
+    dim_c: Decimal | None = Field(default=None, ge=0)
+    dim_d: Decimal | None = Field(default=None, ge=0)
+    dim_e: Decimal | None = Field(default=None, ge=0)
+    members_count: int | None = Field(default=None, ge=1, le=100000)
+    bars_per_member: int | None = Field(default=None, ge=1, le=100000)
+    steel_grade: str | None = Field(default=None, max_length=32)
+    lap_length_mm: Decimal | None = Field(default=None, ge=0)
+    boq_position_id: UUID | None = None
+    notes: str | None = Field(default=None, max_length=2000)
+
+
+class BbsEntryCreate(BbsEntryBase):
+    project_id: UUID
+    member: str = Field(..., min_length=1, max_length=120)
+    bar_mark: str = Field(..., min_length=1, max_length=32)
+    diameter_mm: Decimal = Field(..., gt=0, le=100)
+    shape_standard: str = Field(..., max_length=16)
+    shape_code: str = Field(..., max_length=8)
+    members_count: int = Field(default=1, ge=1, le=100000)
+    bars_per_member: int = Field(default=1, ge=1, le=100000)
+
+
+class BbsEntryUpdate(BbsEntryBase):
+    pass
+
+
+class BbsEntryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    project_id: UUID
+    member: str
+    bar_mark: str
+    diameter_mm: Decimal
+    shape_standard: str
+    shape_code: str
+    dim_a: Decimal | None
+    dim_b: Decimal | None
+    dim_c: Decimal | None
+    dim_d: Decimal | None
+    dim_e: Decimal | None
+    members_count: int
+    bars_per_member: int
+    steel_grade: str | None
+    lap_length_mm: Decimal | None
+    boq_position_id: UUID | None
+    notes: str | None
+    cut_length_mm: Decimal
+    unit_weight_kg_m: Decimal
+    total_length_m: Decimal
+    weight_kg: Decimal
+
+
+class BbsDiameterTotal(BaseModel):
+    diameter_mm: Decimal
+    bar_count: int
+    total_length_m: Decimal
+    weight_kg: Decimal
+
+
+class BbsScheduleResponse(BaseModel):
+    items: list[BbsEntryResponse]
+    totals_by_diameter: list[BbsDiameterTotal]
+    total_weight_kg: Decimal
+
+
+class BbsValidationResponse(BaseModel):
+    status: str
+    checked: int
+    results: list[dict]

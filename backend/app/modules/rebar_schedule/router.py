@@ -14,6 +14,13 @@ Mounted at ``/api/v1/rebar-schedule``.
     GET    /imports/{import_id}/shapes       - the bending shapes of one import
     GET    /imports/{import_id}/cutting      - bars and weight per bar diameter
     GET    /imports/{import_id}/export       - write the shapes back out as .abs
+    GET    /shape-codes                      - BS 8666 and IS 2502 shape codes and formulas
+    GET    /bbs?project_id=X                 - manual bar bending schedule with totals
+    POST   /bbs                              - add a bar mark
+    PATCH  /bbs/{entry_id}                   - edit a bar mark
+    DELETE /bbs/{entry_id}                   - delete a bar mark
+    GET    /bbs/validation?project_id=X      - bar_bending_schedule rule set
+    GET    /bbs/export.csv?project_id=X      - the schedule as CSV
 
 Reads need ``rebar_schedule.read``, importing needs ``rebar_schedule.import``,
 deleting needs ``rebar_schedule.delete``. Every project-scoped route also
@@ -23,6 +30,7 @@ verifies the caller may reach the project.
 from __future__ import annotations
 
 import uuid
+from decimal import Decimal
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import Response
@@ -35,15 +43,24 @@ from app.dependencies import (
     verify_project_access,
 )
 from app.modules.rebar_schedule.abs_format import MAX_RECORD_LENGTH, SUPER_GROUP_KINDS, SUPER_GROUPS
+from app.modules.rebar_schedule.bbs import shape_codes
+from app.modules.rebar_schedule.bbs_service import BarBendingService
+from app.modules.rebar_schedule.bbs_validators import DEFAULT_LAP_MULTIPLE, DEFAULT_TOLERANCE_PCT
 from app.modules.rebar_schedule.schemas import (
     AbsPreviewRequest,
     AbsPreviewResponse,
+    BbsEntryCreate,
+    BbsEntryResponse,
+    BbsEntryUpdate,
+    BbsScheduleResponse,
+    BbsValidationResponse,
     CuttingItem,
     RebarImportListResponse,
     RebarImportResponse,
     RebarImportResult,
     RebarShapeListResponse,
     RebarShapeResponse,
+    ShapeCodeInfo,
     SuperGroupInfo,
     SuperGroupsResponse,
 )
@@ -55,6 +72,7 @@ router = APIRouter()
 _READ = Depends(RequirePermission("rebar_schedule.read"))
 _IMPORT = Depends(RequirePermission("rebar_schedule.import"))
 _DELETE = Depends(RequirePermission("rebar_schedule.delete"))
+_EDIT = Depends(RequirePermission("rebar_schedule.edit"))
 
 #: The standard's compactness target is 1000 characters per shape. A bending
 #: schedule of ten thousand shapes is already an outlier, so this cap is
@@ -319,3 +337,82 @@ async def export_schedule(
         media_type="text/plain; charset=us-ascii",
         headers={"Content-Disposition": f'attachment; filename="{name}"'},
     )
+
+
+# ── Manual bar bending schedule ───────────────────────────────────────────
+
+
+@router.get("/shape-codes", response_model=list[ShapeCodeInfo], include_in_schema=False, dependencies=[_READ])
+@router.get("/shape-codes/", response_model=list[ShapeCodeInfo], dependencies=[_READ])
+async def list_shape_codes() -> list[ShapeCodeInfo]:
+    """Shape codes and cut-length formulas of every standard in the data file."""
+    return [ShapeCodeInfo(**s) for s in shape_codes()]
+
+
+@router.get("/bbs", response_model=BbsScheduleResponse, include_in_schema=False, dependencies=[_READ])
+@router.get("/bbs/", response_model=BbsScheduleResponse, dependencies=[_READ])
+async def list_bbs(
+    session: SessionDep, user_id: CurrentUserId, project_id: uuid.UUID = Query(...)
+) -> BbsScheduleResponse:
+    await verify_project_access(project_id, user_id, session)
+    return BbsScheduleResponse.model_validate(
+        await BarBendingService(session).schedule(project_id), from_attributes=True
+    )
+
+
+@router.post("/bbs", response_model=BbsEntryResponse, status_code=201, include_in_schema=False, dependencies=[_EDIT])
+@router.post("/bbs/", response_model=BbsEntryResponse, status_code=201, dependencies=[_EDIT])
+async def create_bbs_entry(body: BbsEntryCreate, session: SessionDep, user_id: CurrentUserId) -> BbsEntryResponse:
+    await verify_project_access(body.project_id, user_id, session)
+    row = await BarBendingService(session).create(body, user_id)
+    await session.commit()
+    return BbsEntryResponse.model_validate(row)
+
+
+@router.get("/bbs/validation", response_model=BbsValidationResponse, include_in_schema=False, dependencies=[_READ])
+@router.get("/bbs/validation/", response_model=BbsValidationResponse, dependencies=[_READ])
+async def validate_bbs(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+    lap_multiple: Decimal = Query(default=DEFAULT_LAP_MULTIPLE, gt=0, le=200),
+    tolerance_pct: Decimal = Query(default=DEFAULT_TOLERANCE_PCT, ge=0, le=100),
+) -> BbsValidationResponse:
+    await verify_project_access(project_id, user_id, session)
+    result = await BarBendingService(session).validate(
+        project_id, lap_multiple=lap_multiple, tolerance_pct=tolerance_pct
+    )
+    return BbsValidationResponse(**result)
+
+
+@router.get("/bbs/export.csv", dependencies=[_READ])
+async def export_bbs_csv(session: SessionDep, user_id: CurrentUserId, project_id: uuid.UUID = Query(...)) -> Response:
+    await verify_project_access(project_id, user_id, session)
+    body = await BarBendingService(session).csv(project_id)
+    return Response(
+        content=body,
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": 'attachment; filename="bar_bending_schedule.csv"'},
+    )
+
+
+@router.patch("/bbs/{entry_id}", response_model=BbsEntryResponse, dependencies=[_EDIT])
+async def update_bbs_entry(
+    entry_id: uuid.UUID, body: BbsEntryUpdate, session: SessionDep, user_id: CurrentUserId
+) -> BbsEntryResponse:
+    service = BarBendingService(session)
+    row = await service.entry(entry_id)
+    await verify_project_access(row.project_id, user_id, session)
+    row = await service.update(row, body)
+    await session.commit()
+    return BbsEntryResponse.model_validate(row)
+
+
+@router.delete("/bbs/{entry_id}", status_code=status.HTTP_204_NO_CONTENT, dependencies=[_EDIT])
+async def delete_bbs_entry(entry_id: uuid.UUID, session: SessionDep, user_id: CurrentUserId) -> Response:
+    service = BarBendingService(session)
+    row = await service.entry(entry_id)
+    await verify_project_access(row.project_id, user_id, session)
+    await service.delete(row)
+    await session.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

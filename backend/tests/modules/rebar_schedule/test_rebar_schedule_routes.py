@@ -192,7 +192,7 @@ async def test_the_cutting_summary_reaches_the_project_access_check(
 
 
 def test_every_call_site_passes_the_helpers_arguments_in_order() -> None:
-    """The seven call sites are positional, so only the order keeps them correct.
+    """The thirteen call sites are positional, so only the order keeps them correct.
 
     A route test can only cover the routes it drives; this reads the module's
     source so a new endpoint copying the old order is caught too.
@@ -212,7 +212,7 @@ def test_every_call_site_passes_the_helpers_arguments_in_order() -> None:
         for node in ast.walk(tree)
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "verify_project_access"
     ]
-    assert len(calls) == 7, f"expected 7 call sites, found {len(calls)}"
+    assert len(calls) == 13, f"expected 13 call sites, found {len(calls)}"
 
     for call in calls:
         assert not call.keywords, f"line {call.lineno}: call is keyword-based, update this test"

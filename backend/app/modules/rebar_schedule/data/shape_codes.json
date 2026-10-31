@@ -1,0 +1,276 @@
+{
+  "_note": "Cut-length formulas per shape code. Variables: A-E dimensions in mm, dia = bar diameter in mm, r = minimum bend radius in mm. Formulas follow the published tables and can be edited here without code changes; verify against the edition your contract names.",
+  "standards": {
+    "BS8666": {
+      "title": "BS 8666 shape codes",
+      "bend_radius": [
+        {
+          "max_dia": 16,
+          "factor": 2
+        },
+        {
+          "max_dia": 999,
+          "factor": 3.5
+        }
+      ],
+      "shapes": [
+        {
+          "code": "00",
+          "description": "Straight bar",
+          "dimensions": [
+            "A"
+          ],
+          "formula": "A"
+        },
+        {
+          "code": "01",
+          "description": "Straight bar, stock length",
+          "dimensions": [
+            "A"
+          ],
+          "formula": "A"
+        },
+        {
+          "code": "11",
+          "description": "One 90 degree bend",
+          "dimensions": [
+            "A",
+            "B"
+          ],
+          "formula": "A + B - 0.5*r - dia"
+        },
+        {
+          "code": "12",
+          "description": "One 90 degree bend, large radius",
+          "dimensions": [
+            "A",
+            "B"
+          ],
+          "formula": "A + B - 0.43*r - 1.2*dia"
+        },
+        {
+          "code": "13",
+          "description": "Two 90 degree bends, U-turn on the radius",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "A + 0.57*B + C - 1.6*dia"
+        },
+        {
+          "code": "15",
+          "description": "One bend, any angle",
+          "dimensions": [
+            "A",
+            "C"
+          ],
+          "formula": "A + C"
+        },
+        {
+          "code": "21",
+          "description": "U-bar, two 90 degree bends",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "A + B + C - r - 2*dia"
+        },
+        {
+          "code": "22",
+          "description": "Three bends, hooked U",
+          "dimensions": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "formula": "A + B + C + D - 1.5*r - 3*dia"
+        },
+        {
+          "code": "23",
+          "description": "Two 90 degree bends, Z shape",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "A + B + C - r - 2*dia"
+        },
+        {
+          "code": "25",
+          "description": "Two bends in different planes",
+          "dimensions": [
+            "A",
+            "B",
+            "E"
+          ],
+          "formula": "A + B + E"
+        },
+        {
+          "code": "26",
+          "description": "Cranked bar, two bends",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "A + B + C"
+        },
+        {
+          "code": "31",
+          "description": "Three 90 degree bends",
+          "dimensions": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "formula": "A + B + C + D - 1.5*r - 3*dia"
+        },
+        {
+          "code": "33",
+          "description": "Closed loop with lap",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "2*A + 1.7*B + 2*(C - 4*dia)"
+        },
+        {
+          "code": "41",
+          "description": "Four 90 degree bends",
+          "dimensions": [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E"
+          ],
+          "formula": "A + B + C + D + E - 2*r - 4*dia"
+        },
+        {
+          "code": "46",
+          "description": "Cranked bar, four bends",
+          "dimensions": [
+            "A",
+            "B",
+            "C",
+            "E"
+          ],
+          "formula": "A + 2*B + C + E"
+        },
+        {
+          "code": "51",
+          "description": "Closed link with two 135 degree hooks",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "2*(A + B + C) - 2.5*r - 5*dia"
+        },
+        {
+          "code": "63",
+          "description": "Closed link, overlapping hooks",
+          "dimensions": [
+            "A",
+            "B",
+            "C",
+            "D"
+          ],
+          "formula": "2*A + 3*B + 2*C - 3*r - 6*dia"
+        },
+        {
+          "code": "77",
+          "description": "Helix: A outside diameter, B pitch, C number of turns",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "C * sqrt((3.14159265 * (A - dia))**2 + B**2)"
+        }
+      ]
+    },
+    "IS2502": {
+      "title": "IS 2502 bar shapes",
+      "bend_radius": [
+        {
+          "max_dia": 25,
+          "factor": 2
+        },
+        {
+          "max_dia": 999,
+          "factor": 3
+        }
+      ],
+      "shapes": [
+        {
+          "code": "A",
+          "description": "Straight bar",
+          "dimensions": [
+            "A"
+          ],
+          "formula": "A"
+        },
+        {
+          "code": "B",
+          "description": "Straight bar with a standard hook at each end (9 dia each)",
+          "dimensions": [
+            "A"
+          ],
+          "formula": "A + 18*dia"
+        },
+        {
+          "code": "C",
+          "description": "L-bar, one 90 degree bend (2 dia deduction)",
+          "dimensions": [
+            "A",
+            "B"
+          ],
+          "formula": "A + B - 2*dia"
+        },
+        {
+          "code": "D",
+          "description": "U-bar, two 90 degree bends",
+          "dimensions": [
+            "A",
+            "B",
+            "C"
+          ],
+          "formula": "A + B + C - 4*dia"
+        },
+        {
+          "code": "E",
+          "description": "Bent-up bar, two 45 degree cranks of height D",
+          "dimensions": [
+            "A",
+            "D"
+          ],
+          "formula": "A + 2*0.42*D - 2*dia"
+        },
+        {
+          "code": "F",
+          "description": "Rectangular stirrup with two 135 degree hooks (10 dia each)",
+          "dimensions": [
+            "A",
+            "B"
+          ],
+          "formula": "2*(A + B) + 20*dia - 3*2*dia - 2*3*dia"
+        },
+        {
+          "code": "G",
+          "description": "Circular link or ring, one lap",
+          "dimensions": [
+            "A",
+            "B"
+          ],
+          "formula": "3.14159265 * A + B"
+        }
+      ]
+    }
+  }
+}

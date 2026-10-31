@@ -24,9 +24,11 @@ calls.
 
 
 async def on_startup() -> None:
-    """Module startup hook - register permissions and the ``bvbs_abs`` rule set."""
+    """Module startup hook - register permissions and the ``bvbs_abs`` rule set and the ``bar_bending_schedule`` rule set."""
+    from app.modules.rebar_schedule.bbs_validators import register_bbs_rules
     from app.modules.rebar_schedule.permissions import register_rebar_schedule_permissions
     from app.modules.rebar_schedule.validators import register_rules
 
     register_rebar_schedule_permissions()
     register_rules()
+    register_bbs_rules()

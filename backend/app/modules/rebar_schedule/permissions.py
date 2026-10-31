@@ -18,6 +18,7 @@ def register_rebar_schedule_permissions() -> None:
         {
             "rebar_schedule.read": Role.VIEWER,
             "rebar_schedule.import": Role.EDITOR,
+            "rebar_schedule.edit": Role.EDITOR,
             "rebar_schedule.delete": Role.MANAGER,
         },
     )

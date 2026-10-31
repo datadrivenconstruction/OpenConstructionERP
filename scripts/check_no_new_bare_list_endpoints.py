@@ -75,6 +75,16 @@ MIN_FILES_SCANNED = 500
 # towards zero rather than towards the size of this list.
 CANNOT_TRUNCATE: frozenset[str] = frozenset(
     {
+        # The shape codes of the data file shape_codes.json, a fixed table per
+        # standard compiled into the release; the picker must offer every code.
+        "rebar_schedule/router.py::list_shape_codes",
+        # Every measurable BOQ position with its cumulative quantities: the
+        # running bill and the over-measure rule read the whole set, and a
+        # position missing from the answer would read as never measured.
+        "measurement_book/router.py::list_positions",
+        # The entries behind a position's cumulative quantity, shown beside that
+        # total; a partial list would not add up to the figure it explains.
+        "measurement_book/router.py::list_entries",
         # A fixed taxonomy, not a register. WORKING_TIME_REGIMES in
         # field_time/working_time.py is a frozen tuple of statutes compiled into
         # the source, today just MiLoG (German minimum wage act) section 17 (1);

@@ -878,6 +878,10 @@ jobs:
       - name: Run service charges module tests
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: pytest tests/modules/service_charges -q -p no:cacheprovider --timeout=300 --timeout-method=thread
+      # Measurement book and the manual bar bending schedule (entries, running bill, progress hand-off).
+      - name: Run measurement book and bar bending schedule tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: pytest tests/modules/measurement_book tests/modules/rebar_schedule/test_bbs_api.py -q -p no:cacheprovider --timeout=300 --timeout-method=thread
       # The cost base pipeline produces the parquet editions people download from us, so it
       # needs a blocking gate. It needs no database; it is attached here because this is the
       # only merge-blocking lane that runs pytest, and an ungated test is the situation this
