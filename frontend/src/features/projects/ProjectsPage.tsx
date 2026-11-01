@@ -17,6 +17,7 @@ import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { useWidgetSettingsStore } from '@/stores/useWidgetSettingsStore';
 import { fmtNumber, getIntlLocale, fmtFixed } from '@/shared/lib/formatters';
+import { formatSecondaryDate } from '@/shared/lib/secondaryCalendar';
 import { toNum } from '@/shared/lib/money';
 import { useNameCollator } from '@/shared/lib/collator';
 import { getDateFnsLocale } from '@/shared/lib/dateFnsLocale';
@@ -30,7 +31,7 @@ import { CreateProjectModal } from './CreateProjectPage';
 import { projectsGuide } from './projectsGuide';
 import { ProjectStatusBadge, CURATED_PROJECT_STATUSES, useProjectStatusLabel } from './ProjectStatusBadge';
 import { BIMConverterStatusBanner } from '../bim/BIMConverterStatusBanner';
-import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { getNumberLocale, useSecondaryCalendar } from '@/stores/usePreferencesStore';
 import { invalidateProjectLists } from './invalidateProjectLists';
 import { DemoSeedingHint } from '@/features/processes/DemoSeedingHint';
 
@@ -1320,6 +1321,11 @@ export function ProjectCard({
   const absoluteModified = modifiedDate && isValidDate(modifiedDate)
     ? modifiedDate.toLocaleDateString(getIntlLocale())
     : '';
+  const secondaryCalendar = useSecondaryCalendar();
+  const secondaryModified =
+    modifiedDate && isValidDate(modifiedDate)
+      ? formatSecondaryDate(modifiedDate, getIntlLocale(), secondaryCalendar)
+      : '';
 
   // Variations marker — rendered only when project metadata exposes a
   // non-zero count. Acts as a passive warning chip; clicking the card
@@ -1673,9 +1679,10 @@ export function ProjectCard({
             {relativeModified && (
               <span
                 className="text-2xs text-content-tertiary"
-                title={absoluteModified}
+                title={secondaryModified ? `${absoluteModified} / ${secondaryModified}` : absoluteModified}
               >
                 {relativeModified}
+                {secondaryModified && <span className="block">{secondaryModified}</span>}
               </span>
             )}
             {boqStats && boqStats.boqCount > 0 && (
