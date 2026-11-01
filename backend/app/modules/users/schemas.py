@@ -363,6 +363,10 @@ class UserMeResponse(UserResponse):
 DigitSystem = Literal["auto", "latn", "arab", "arabext"]
 
 
+#: Second calendar a reader can ask for. ``None`` on the account means "never chose".
+SecondaryCalendarChoice = Literal["none", "hijri"]
+
+
 class UserPreferencesUpdate(BaseModel):
     """Update regional preferences only."""
 
@@ -373,6 +377,7 @@ class UserPreferencesUpdate(BaseModel):
     date_format: str | None = Field(default=None, max_length=20)
     currency_code: str | None = Field(default=None, max_length=10)
     digit_system: DigitSystem | None = None
+    secondary_calendar: SecondaryCalendarChoice | None = None
 
 
 class UserPreferencesResponse(BaseModel):
@@ -387,6 +392,7 @@ class UserPreferencesResponse(BaseModel):
     date_format: str
     currency_code: str
     digit_system: str = "auto"
+    secondary_calendar: str | None = None
 
 
 class ChangePasswordRequest(BaseModel):

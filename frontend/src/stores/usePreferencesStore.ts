@@ -252,6 +252,19 @@ interface ServerPreferences {
   number_format?: string;
   currency_code?: string;
   digit_system?: string;
+  secondary_calendar?: string | null;
+}
+
+/** Wire value of the account's secondary calendar <-> the store's calendar id. */
+export function secondaryCalendarToWire(value: SecondaryCalendar): 'none' | 'hijri' {
+  return value === 'islamic-umalqura' ? 'hijri' : 'none';
+}
+
+/** `null` (never chose) and unknown values adopt nothing, so the market default stays in charge. */
+export function secondaryCalendarFromWire(value: string | null | undefined): SecondaryCalendar | null {
+  if (value === 'hijri') return 'islamic-umalqura';
+  if (value === 'none') return 'none';
+  return null;
 }
 
 // Allow-lists so a server value is applied ONLY when it matches a value the
@@ -475,6 +488,11 @@ export const usePreferencesStore = create<PreferencesState>((set, get) => ({
       // the default.
       if (r.digit_system && r.digit_system !== 'auto' && (DIGIT_SYSTEMS as readonly string[]).includes(r.digit_system)) {
         updates.digitSystem = r.digit_system as DigitSystem;
+      }
+      const calendar = secondaryCalendarFromWire(r.secondary_calendar);
+      if (calendar) {
+        updates.secondaryCalendar = calendar;
+        updates.secondaryCalendarChosen = true;
       }
       // An empty currency_code means "not chosen" on the account; only a real
       // ISO-4217 code overrides the local currency.

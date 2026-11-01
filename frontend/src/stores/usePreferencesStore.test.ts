@@ -1,7 +1,7 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { adoptServerNumberFormat, usePreferencesStore } from './usePreferencesStore';
+import { adoptServerNumberFormat, secondaryCalendarToWire, usePreferencesStore } from './usePreferencesStore';
 import { apiGet } from '@/shared/lib/api';
 
 vi.mock('@/shared/lib/api', () => ({ apiGet: vi.fn() }));
@@ -131,6 +131,37 @@ describe('usePreferencesStore', () => {
       mockApiGet.mockRejectedValueOnce(new Error('offline'));
       await expect(usePreferencesStore.getState().hydrateFromServer()).resolves.toBeUndefined();
       expect(usePreferencesStore.getState().measurementSystem).toBe('imperial');
+    });
+  });
+
+  describe('secondary calendar hydration', () => {
+    it('adopts hijri from the account and marks it chosen', async () => {
+      mockApiGet.mockResolvedValueOnce({ secondary_calendar: 'hijri' });
+      await usePreferencesStore.getState().hydrateFromServer();
+      const s = usePreferencesStore.getState();
+      expect(s.secondaryCalendar).toBe('islamic-umalqura');
+      expect(s.secondaryCalendarChosen).toBe(true);
+    });
+
+    it('adopts an explicit none as a choice', async () => {
+      usePreferencesStore.getState().setPreferences({ secondaryCalendar: 'islamic-umalqura', secondaryCalendarChosen: true });
+      mockApiGet.mockResolvedValueOnce({ secondary_calendar: 'none' });
+      await usePreferencesStore.getState().hydrateFromServer();
+      const s = usePreferencesStore.getState();
+      expect(s.secondaryCalendar).toBe('none');
+      expect(s.secondaryCalendarChosen).toBe(true);
+    });
+
+    it('keeps the local value when the account never chose', async () => {
+      usePreferencesStore.getState().setPreferences({ secondaryCalendar: 'islamic-umalqura', secondaryCalendarChosen: true });
+      mockApiGet.mockResolvedValueOnce({ secondary_calendar: null });
+      await usePreferencesStore.getState().hydrateFromServer();
+      expect(usePreferencesStore.getState().secondaryCalendar).toBe('islamic-umalqura');
+    });
+
+    it('maps store ids to wire values', () => {
+      expect(secondaryCalendarToWire('islamic-umalqura')).toBe('hijri');
+      expect(secondaryCalendarToWire('none')).toBe('none');
     });
   });
 
