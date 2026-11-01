@@ -453,7 +453,7 @@ TEMPLATE = DemoTemplate(
         ("Contractor's profit", 10.0, "profit", "direct_cost"),
         ("Punjab sales tax on services (16 %)", 16.0, "tax", "cumulative"),
     ],
-    total_months=8,
+    total_months=12,
     tender_name="Contract for Works - Basic Health Unit",
     tender_companies=[
         ("Sahiwal Builders", "tenders@sahiwal-builders.example", 0.97),
