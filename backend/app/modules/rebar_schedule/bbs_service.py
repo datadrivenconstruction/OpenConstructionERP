@@ -109,6 +109,7 @@ class BarBendingService:
     ) -> dict[str, Any]:
         """Run the ``bar_bending_schedule`` rule set; failed results only."""
         from app.core.validation.engine import validation_engine  # noqa: PLC0415
+        from app.core.validation.project_context import with_project_context  # noqa: PLC0415
         from app.modules.boq.models import Position  # noqa: PLC0415
 
         rows = await self.entries(project_id)
@@ -135,6 +136,7 @@ class BarBendingService:
             "lap_multiple": lap_multiple,
             "tolerance_pct": tolerance_pct,
         }
+        data = await with_project_context(self.session, project_id, data)
         report = await validation_engine.validate(
             data=data,
             rule_sets=[RULE_SET],

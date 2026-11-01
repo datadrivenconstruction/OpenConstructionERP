@@ -58,7 +58,9 @@ vi.mock('@/features/projects/useProjectProfile', () => ({
 
 // MoneyDisplay reads preferences — same shim as in KPI test.
 const __mockPrefState = { currency: 'EUR', numberLocale: 'en-US' };
-vi.mock('@/stores/usePreferencesStore', () => ({
+vi.mock('@/stores/usePreferencesStore', async (importOriginal) => ({
+  // Keep the real exports so a newly added one never breaks this mock.
+  ...(await importOriginal<Record<string, unknown>>()),
   usePreferencesStore: (sel?: (s: unknown) => unknown) =>
     sel ? sel(__mockPrefState) : __mockPrefState,
   // Money surfaces resolve the locale through this rather than off the raw

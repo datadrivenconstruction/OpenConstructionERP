@@ -229,6 +229,7 @@ class MeasurementBookService:
     ) -> dict[str, Any]:
         """Run the measurement_book rule set; failed results only."""
         from app.core.validation.engine import validation_engine  # noqa: PLC0415
+        from app.core.validation.project_context import with_project_context  # noqa: PLC0415
         from app.modules.measurement_book.validators import RULE_SET  # noqa: PLC0415
 
         data = {
@@ -246,6 +247,7 @@ class MeasurementBookService:
             ],
             "deviation_threshold_pct": deviation_threshold_pct,
         }
+        data = await with_project_context(self.session, project_id, data)
         report = await validation_engine.validate(
             data=data,
             rule_sets=[RULE_SET],

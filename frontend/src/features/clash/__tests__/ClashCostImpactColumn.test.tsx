@@ -37,7 +37,9 @@ vi.mock('@/shared/lib/api', () => ({
 // destructures the result, so the mock returns the state object directly
 // (Zustand's stores DO support that pattern when called bare).
 const __mockPrefState = { currency: 'EUR', numberLocale: 'en-US' };
-vi.mock('@/stores/usePreferencesStore', () => ({
+vi.mock('@/stores/usePreferencesStore', async (importOriginal) => ({
+  // Keep the real exports so a newly added one never breaks this mock.
+  ...(await importOriginal<Record<string, unknown>>()),
   usePreferencesStore: (sel?: (s: any) => any) =>
     sel ? sel(__mockPrefState) : __mockPrefState,
   // Money surfaces resolve the locale through this rather than off the raw

@@ -34,7 +34,9 @@ vi.mock('@/shared/lib/api', () => ({
 
 // MoneyDisplay reads a preferences store for the number locale; give it one so
 // the component renders a real formatted value rather than throwing.
-vi.mock('@/stores/usePreferencesStore', () => ({
+vi.mock('@/stores/usePreferencesStore', async (importOriginal) => ({
+  // Keep the real exports so a newly added one never breaks this mock.
+  ...(await importOriginal<Record<string, unknown>>()),
   usePreferencesStore: (sel: (s: { numberLocale: string }) => unknown) => sel({ numberLocale: 'en-US' }),
   // Money surfaces resolve the locale through this rather than off the raw
   // preference, so a wholesale mock of the store has to carry it too, and it
