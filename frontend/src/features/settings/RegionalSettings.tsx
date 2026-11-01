@@ -25,7 +25,7 @@ import clsx from 'clsx';
 import { Card, CardHeader, CardContent } from '@/shared/ui';
 import { apiGet, apiPatch } from '@/shared/lib/api';
 import { formatCurrency } from '@/shared/lib/money';
-import { usePreferencesStore, useSecondaryCalendar, type SecondaryCalendar, resolveNumberLocale, adoptServerNumberFormat, useNumberLocale, NUMBER_LOCALES, type MeasurementSystem, type DateFormat, type NumberLocale, type DigitSystem } from '@/stores/usePreferencesStore';
+import { usePreferencesStore, useSecondaryCalendar, type SecondaryCalendar, resolveNumberLocale, adoptServerNumberFormat, secondaryCalendarToWire, useNumberLocale, NUMBER_LOCALES, type MeasurementSystem, type DateFormat, type NumberLocale, type DigitSystem } from '@/stores/usePreferencesStore';
 import { DIGIT_SYSTEMS } from '@/shared/lib/intlLocale';
 import { useToastStore } from '@/stores/useToastStore';
 import {
@@ -199,6 +199,7 @@ interface UserPreferencesResponse {
   // vanished on reload. Use the real wire key so it persists server-side.
   currency_code?: string;
   digit_system?: string;
+  secondary_calendar?: string | null;
 }
 
 // ── Searchable Dropdown ──────────────────────────────────────────────────────
@@ -656,9 +657,10 @@ export function RegionalSettings({ animationDelay = '0ms' }: { animationDelay?: 
                   label: t('settings.secondary_calendar_umalqura', { defaultValue: 'Hijri (Umm al-Qura)' }),
                 },
               ]}
-              onChange={(val) =>
-                setPreferences({ secondaryCalendar: val as SecondaryCalendar, secondaryCalendarChosen: true })
-              }
+              onChange={(val) => {
+                setPreferences({ secondaryCalendar: val as SecondaryCalendar, secondaryCalendarChosen: true });
+                patchMutation.mutate({ secondary_calendar: secondaryCalendarToWire(val as SecondaryCalendar) });
+              }}
             />
             <p className="mt-1.5 text-xs text-content-tertiary">
               {t('settings.secondary_calendar_hint', {
