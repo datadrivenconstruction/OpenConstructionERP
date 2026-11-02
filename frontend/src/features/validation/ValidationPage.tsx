@@ -30,6 +30,8 @@ import { EstimateAuditPanel } from './EstimateAuditPanel';
 import { SummaryStrip, ValidationResults } from './ValidationResults';
 import { ruleTitle } from './ruleTitles';
 import type { FindingFilter, PositionRef } from './validationFindings';
+import { useMarketScope } from '@/features/market/api';
+import { ruleSetsFromScope } from '@/features/market/logic';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -151,33 +153,6 @@ interface ValidationReportResponse {
     rule_sets?: string[];
     unsupported_rule_sets?: string[];
   } | null;
-}
-
-/* ── Rule-set resolution ──────────────────────────────────────────────── */
-
-/**
- * Resolve which rule sets a project validates against, from its
- * classification standard. `boq_quality` is universal and always applied;
- * the classification-specific sets are layered on top. This mirrors the
- * engine's registered rule sets and is the exact list sent to /run/.
- */
-function resolveRuleSets(classificationStandard: string | undefined): string[] {
-  const sets = ['boq_quality'];
-  const std = (classificationStandard ?? '').trim().toLowerCase();
-  switch (std) {
-    case 'din276':
-      sets.push('din276', 'gaeb');
-      break;
-    case 'nrm':
-      sets.push('nrm');
-      break;
-    case 'masterformat':
-      sets.push('masterformat');
-      break;
-    default:
-      break;
-  }
-  return sets;
 }
 
 /** Normalise an engine severity/status string to the UI severity union. */
@@ -463,12 +438,11 @@ export function ValidationPage() {
     }
   }, [selectedBoqId, activeBOQId, setActiveBOQ]);
 
-  // Rule sets the engine will apply to this project — derived from its
-  // classification standard. Shown as chips and sent verbatim to /run/.
-  const resolvedRuleSets = useMemo(
-    () => resolveRuleSets(selectedProject?.classification_standard),
-    [selectedProject],
-  );
+  // Rule sets the engine will apply to this project: the server resolves them
+  // from the project's market and classification. Shown as chips and sent
+  // verbatim to /run/.
+  const { data: projectMarket } = useMarketScope(!!selectedProjectId, selectedProjectId || null);
+  const resolvedRuleSets = useMemo(() => ruleSetsFromScope(projectMarket), [projectMarket]);
 
   // Validation report state (from a run, or restored from the latest
   // persisted report for the selected BOQ).

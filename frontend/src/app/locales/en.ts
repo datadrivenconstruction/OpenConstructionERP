@@ -46272,6 +46272,8 @@ const resource = {
     "settings.secondary_calendar_none": "None",
     "settings.secondary_calendar_umalqura": "Hijri (Umm al-Qura)",
     "settings.secondary_calendar_hint": "Shows the Hijri date next to the Gregorian date on every date in the app.",
+    "settings.tab_market": "Market & standards",
+    "settings.tab_market_desc": "Country, packs, standards and units",
     // --- /Settings → Company & documents ---
     // --- AI dock: docked assistant and human-confirmed AI actions ---
     "chat.dock.choose_project": "Choose a project",
@@ -55601,6 +55603,29 @@ const resource = {
     "measurement_book.tab_bill": "Running bill",
     "measurement_book.empty_title": "No BOQ positions yet",
     "measurement_book.empty_desc": "Add positions to a bill of quantities first, then measure them here.",
+    "market.primary": "Primary market",
+    "market.company_type": "Company type",
+    "market.active_packs": "Active packs",
+    "market.other_markets": "Other markets",
+    "market.add": "Add market",
+    "market.add_empty": "Working abroad? Add a market.",
+    "market.add_confirm": "Add {{country}}",
+    "market.remove": "Remove market",
+    "market.standards": "Standards",
+    "market.classification": "Classification",
+    "market.contract_family": "Contract forms",
+    "market.units": "Units system",
+    "market.units_metric": "Metric",
+    "market.units_imperial": "Imperial",
+    "market.units_both": "Metric and imperial",
+    "market.default_for": "(default for {{country}})",
+    "market.reset_default": "Reset to default",
+    "market.data_safe": "Your data is never deleted; hidden modules can be shown again.",
+    "market.show_other": "Show other markets",
+    "market.other_badge": "Other market",
+    "market.add_this": "Add this market…",
+    "market.load_error": "Could not load market settings",
+    "market.regional_empty": "No regional pack for your market yet.",
   }
 } as { translation: Record<string, string> };
 

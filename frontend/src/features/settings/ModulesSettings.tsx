@@ -43,6 +43,8 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { resolveModuleDisplayName } from '@/features/modules/moduleDisplayName';
+import { useMarketScope } from '@/features/market/api';
+import { isModuleOtherMarket } from '@/features/market/logic';
 import { fmtList } from '@/shared/lib/formatters';
 
 /* ── Types ───────────────────────────────────────────────────────────────── */
@@ -163,6 +165,8 @@ function ModuleRow({
   locked,
   busy,
   onToggle,
+  otherMarket = false,
+  onAddMarket,
 }: {
   mod: SettingsModule;
   displayName: string;
@@ -171,17 +175,28 @@ function ModuleRow({
   locked: boolean;
   busy: boolean;
   onToggle: () => void;
+  /** Belongs to a market the tenant does not work in (shown only to admins who asked). */
+  otherMarket?: boolean;
+  onAddMarket?: () => void;
 }) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex items-start justify-between gap-4 px-4 py-3">
+    <div
+      className={clsx('flex items-start justify-between gap-4 px-4 py-3', otherMarket && 'opacity-60')}
+      data-testid={otherMarket ? `module-other-market-${mod.name}` : undefined}
+    >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-medium text-content-primary">{displayName}</span>
           {mod.is_core && (
             <Badge variant="blue" size="sm">
               {t('settings.modules_core_badge', { defaultValue: 'Always on' })}
+            </Badge>
+          )}
+          {otherMarket && (
+            <Badge variant="neutral" size="sm">
+              {t('market.other_badge', { defaultValue: 'Other market' })}
             </Badge>
           )}
           <span className="text-2xs text-content-quaternary tabular-nums">v{mod.version}</span>
@@ -209,13 +224,19 @@ function ModuleRow({
           </p>
         )}
       </div>
-      <ModuleToggle
-        enabled={mod.enabled}
-        disabled={locked}
-        busy={busy}
-        label={displayName}
-        onToggle={onToggle}
-      />
+      {otherMarket ? (
+        <Button variant="secondary" size="sm" onClick={onAddMarket}>
+          {t('market.add_this', { defaultValue: 'Add this market…' })}
+        </Button>
+      ) : (
+        <ModuleToggle
+          enabled={mod.enabled}
+          disabled={locked}
+          busy={busy}
+          label={displayName}
+          onToggle={onToggle}
+        />
+      )}
     </div>
   );
 }
@@ -235,6 +256,8 @@ export function ModulesSettings() {
   const [busyModule, setBusyModule] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showCore, setShowCore] = useState(false);
+  const [showOtherMarkets, setShowOtherMarkets] = useState(false);
+  const { data: marketScope } = useMarketScope();
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ['system-modules'],
@@ -295,7 +318,14 @@ export function ModulesSettings() {
     [byName],
   );
 
-  const optional = useMemo(() => modules.filter((m) => !m.is_core), [modules]);
+  // Other markets' modules never show, except greyed to an admin who asked for them.
+  const optional = useMemo(
+    () =>
+      modules.filter(
+        (m) => !m.is_core && (!isModuleOtherMarket(m.name, marketScope) || (isAdmin && showOtherMarkets)),
+      ),
+    [modules, marketScope, isAdmin, showOtherMarkets],
+  );
   const core = useMemo(() => modules.filter((m) => m.is_core), [modules]);
   const installedCount = useMemo(() => optional.filter((m) => m.enabled).length, [optional]);
 
@@ -429,6 +459,7 @@ export function ModulesSettings() {
   /** Everything a row needs, resolved here so the row itself stays dumb. */
   const rowFor = useCallback(
     (mod: SettingsModule) => {
+      const otherMarket = isModuleOtherMarket(mod.name, marketScope);
       const blockers = mod.enabled && !mod.is_core ? blockingDependents(mod) : [];
       const alsoInstalls = !mod.enabled ? pendingDependencies(mod) : [];
       return (
@@ -441,6 +472,8 @@ export function ModulesSettings() {
           locked={mod.is_core || !isAdmin || blockers.length > 0}
           busy={busyModule === mod.name}
           onToggle={() => void handleToggle(mod)}
+          otherMarket={otherMarket}
+          onAddMarket={() => navigate('/settings?tab=market')}
         />
       );
     },
@@ -448,7 +481,7 @@ export function ModulesSettings() {
     // is intentionally not a dependency: it only reads state that changes in
     // lockstep with the values already listed here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [blockingDependents, pendingDependencies, nameOf, isAdmin, busyModule],
+    [blockingDependents, pendingDependencies, nameOf, isAdmin, busyModule, marketScope, navigate],
   );
 
   /* ── Render ────────────────────────────────────────────────────────────── */
@@ -523,6 +556,20 @@ export function ModulesSettings() {
               />
             </div>
           </div>
+
+          {isAdmin && (marketScope?.hidden_modules.length ?? 0) > 0 && (
+            <label className="mt-3 flex cursor-pointer items-center gap-2 text-xs text-content-secondary">
+              <input
+                type="checkbox"
+                role="switch"
+                aria-checked={showOtherMarkets}
+                checked={showOtherMarkets}
+                onChange={(e) => setShowOtherMarkets(e.target.checked)}
+                data-testid="modules-show-other-markets"
+              />
+              {t('market.show_other', { defaultValue: 'Show other markets' })}
+            </label>
+          )}
 
           {!isAdmin && (
             <div className="mt-4 flex items-start gap-2 rounded-lg bg-surface-secondary px-3 py-2.5">

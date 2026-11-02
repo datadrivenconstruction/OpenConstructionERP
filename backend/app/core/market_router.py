@@ -88,7 +88,7 @@ async def _payload(
             project_countries=await _project_countries(session, owner_id),
             active_pack_country=_active_pack_country(),
         )
-    project_country = None
+    project_country = project_classification = None
     if project_id is not None:
         from app.modules.projects.models import Project
 
@@ -96,7 +96,9 @@ async def _payload(
         if project is None or project.owner_id != owner_id:
             raise HTTPException(status_code=404, detail="Project not found")
         project_country = project.country_code
-    return {"profile": profile, "derived": derived, **ms.resolve(profile, project_country=project_country)}
+        project_classification = getattr(project, "classification_standard", None)
+    scope = ms.resolve(profile, project_country=project_country, project_classification=project_classification)
+    return {"profile": profile, "derived": derived, **scope}
 
 
 @router.get("/")

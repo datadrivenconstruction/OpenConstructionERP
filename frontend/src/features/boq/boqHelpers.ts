@@ -293,13 +293,59 @@ export function saveCustomUnit(unit: string): void {
  * for. Behind the hundred-odd base tokens a Croatian "kom" or "kpl" sat at the
  * bottom of the dropdown, far enough down to read as missing.
  */
-export function getUnitsForLocale(lang?: string): string[] {
+export function getUnitsForLocale(
+  lang?: string,
+  system: UnitsSystem = activeUnitsSystem,
+  keep: readonly string[] = [],
+): string[] {
   const code = (lang || 'en').split('-')[0] ?? 'en';
   const locale = LOCALE_UNITS[code] ?? [];
   const custom = loadCustomUnits();
-  const all = [...locale, ...BASE_UNITS, ...custom];
-  // Deduplicate preserving order
-  return [...new Set(all)];
+  const catalogue = filterUnitsBySystem([...locale, ...BASE_UNITS], system, keep);
+  // Deduplicate preserving order; custom and already-used units always stay.
+  return [...new Set([...catalogue, ...custom, ...keep.filter(Boolean)])];
+}
+
+/* ── Units system (from the market profile) ───────────────────────────── */
+
+export type UnitsSystem = 'metric' | 'imperial' | 'both';
+
+/** Tokens that belong to the imperial / US customary system. */
+export const IMPERIAL_UNITS: ReadonlySet<string> = new Set([
+  'in', 'ft', 'yd', 'mi', 'sqft', 'sqyd', 'acre', 'sq', 'cuft', 'cuyd', 'gal', 'oz', 'lb', 'cwt',
+  'ton', 'cy', 'lf', 'msf', 'mbf', 'bdft', 'BTU',
+]);
+
+/** Metric length, area, volume and mass tokens. Neutral tokens (pcs, h, ls...) are in neither set. */
+export const METRIC_UNITS: ReadonlySet<string> = new Set([
+  'mm', 'cm', 'dm', 'm', 'km', 'lm', 'mm2', 'cm2', 'dm2', 'm2', 'km2', 'ha', 'a',
+  'mm3', 'cm3', 'dm3', 'm3', 'l', 'ml', 'cl', 'hl', 'mg', 'g', 'kg', 't', 'kg/m', 'kg/m2', 'kg/m3',
+]);
+
+let activeUnitsSystem: UnitsSystem = 'both';
+
+/** Set by the market scope once it loads; pickers read it through getUnitsForLocale. */
+export function setActiveUnitsSystem(system: UnitsSystem | null | undefined): void {
+  activeUnitsSystem = system === 'metric' || system === 'imperial' ? system : 'both';
+}
+
+export function getActiveUnitsSystem(): UnitsSystem {
+  return activeUnitsSystem;
+}
+
+/**
+ * Drop the other system's tokens. Neutral tokens always stay, and so does any
+ * unit in `keep` (units already used in the BOQ), so nothing turns invalid.
+ */
+export function filterUnitsBySystem(
+  units: readonly string[],
+  system: UnitsSystem,
+  keep: readonly string[] = [],
+): string[] {
+  if (system === 'both') return [...units];
+  const foreign = system === 'metric' ? IMPERIAL_UNITS : METRIC_UNITS;
+  const kept = new Set(keep.map(unitIdentityKey));
+  return units.filter((u) => !foreign.has(u) || kept.has(unitIdentityKey(u)));
 }
 
 /** Default export for backward compatibility. */

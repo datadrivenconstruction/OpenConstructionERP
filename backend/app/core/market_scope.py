@@ -353,13 +353,15 @@ def resolve(
     profile: Mapping[str, Any],
     *,
     project_country: str | None = None,
+    project_classification: str | None = None,
     markets_by_module: Mapping[str, Iterable[str]] | None = None,
     packs: Iterable[Any] | None = None,
     registered_rule_sets: Iterable[str] | None = None,
 ) -> dict[str, Any]:
     """Everything the frontend needs to scope its menus, pickers and rule sets.
 
-    A ``project_country`` narrows the scope to that project's market.
+    A ``project_country`` narrows the scope to that project's market, and a
+    ``project_classification`` picks that project's classification rule set.
     """
     markets = profile_markets(profile)
     if _code(project_country):
@@ -388,6 +390,9 @@ def resolve(
         "standards": standards,
         "options": standards_options(markets),
         "rule_sets": rule_sets_for(
-            markets, standards.get("classification"), packs=pack_list, registered=registered_rule_sets
+            markets,
+            project_classification or standards.get("classification"),
+            packs=pack_list,
+            registered=registered_rule_sets,
         ),
     }

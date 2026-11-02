@@ -13,6 +13,7 @@ import { EInvoiceSettings } from './EInvoiceSettings';
 import { ModulesSettings } from './ModulesSettings';
 import { SettingsTeamPanel } from './SettingsTeamPanel';
 import { CompanyDocumentsSettings } from './CompanyDocumentsSettings';
+import { MarketSettings } from '@/features/market/MarketSettings';
 import { WebhookLeads } from './WebhookLeads';
 import { McpSettingsPanel } from '@/features/mcp';
 import { DesktopServerCard } from './DesktopServerCard';
@@ -1431,7 +1432,7 @@ function DemoLoginAdminRow() {
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'regional' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
+type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
 
 interface TabDef {
   id: SettingsTab;
@@ -1459,7 +1460,8 @@ const TABS: readonly TabDef[] = [
   // Company & documents - logos and the letterhead printed on exported
   // documents. Visible to everyone; the panel is read-only below admin.
   { id: 'company',      labelKey: 'settings.tab_company',      defaultLabel: 'Company & documents', icon: Building2, descKey: 'settings.tab_company_desc', descDefault: 'Logos, letterhead, and how printed documents look' },
-  { id: 'regional',     labelKey: 'settings.tab_regional',     defaultLabel: 'Regional',     icon: Globe,    descKey: 'settings.tab_regional_desc',     descDefault: 'Language, timezone, and formats' },
+  // Market & standards: country, packs, standards and units; language and formats sit below as display formats.
+  { id: 'market',       labelKey: 'settings.tab_market',       defaultLabel: 'Market & standards', icon: Globe, descKey: 'settings.tab_market_desc', descDefault: 'Country, packs, standards and units' },
   { id: 'einvoice',     labelKey: 'settings.tab_einvoice',     defaultLabel: 'E-invoice',    icon: ReceiptText, descKey: 'settings.tab_einvoice_desc',  descDefault: 'Seller identity and bank account for electronic invoices' },
   { id: 'converters',   labelKey: 'settings.tab_converters',   defaultLabel: 'Converters',  icon: Layers,   descKey: 'settings.tab_converters_desc',   descDefault: 'DDC converters - installed versions and GitHub sources' },
   { id: 'ai',           labelKey: 'settings.tab_ai',           defaultLabel: 'AI',           icon: Sparkles, descKey: 'settings.tab_ai_desc',           descDefault: 'AI provider and semantic search' },
@@ -1596,6 +1598,7 @@ export function SettingsPage() {
     'bim_cad': 'converters',
     cad: 'converters',
     mcp: 'integrations',
+    regional: 'market',
   };
   // Audit log is Manager+ only. Hide the tab for everyone else so a viewer
   // never lands on a section that 403s on load. The backend `audit.view`
@@ -2060,8 +2063,9 @@ export function SettingsPage() {
           {activeTab === 'company' && <CompanyDocumentsSettings />}
 
           {/* ── REGIONAL ─────────────────────────────────────────── */}
-          {activeTab === 'regional' && (
+          {activeTab === 'market' && (
             <>
+              <MarketSettings />
               {/* Language picker */}
               <Card className="lg:col-span-2">
                 <CardHeader
