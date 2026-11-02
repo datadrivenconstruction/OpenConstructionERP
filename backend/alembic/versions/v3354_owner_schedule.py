@@ -7,7 +7,7 @@ Creates ``oe_owner_schedule_profile`` (profiles saved from the mapping wizard),
 and ``oe_owner_schedule_item`` (the owner's pay items and the pricing position).
 
 Revision ID: v3354_owner_schedule
-Revises: v3327_accounting_sync
+Revises: v3353_haul_tickets
 Create Date: 2026-10-31
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3354_owner_schedule"
-down_revision: str | Sequence[str] | None = "v3327_accounting_sync"
+down_revision: str | Sequence[str] | None = "v3353_haul_tickets"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 

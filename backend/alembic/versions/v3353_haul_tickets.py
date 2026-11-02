@@ -6,7 +6,7 @@ Creates the five ``oe_haul_tickets_*`` tables. New tables only; nothing
 existing changes.
 
 Revision ID: v3353_haul_tickets
-Revises: v3327_accounting_sync
+Revises: v3352_dispatch_board
 Create Date: 2026-10-31
 """
 
@@ -18,7 +18,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3353_haul_tickets"
-down_revision: str | Sequence[str] | None = "v3327_accounting_sync"
+down_revision: str | Sequence[str] | None = "v3352_dispatch_board"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
