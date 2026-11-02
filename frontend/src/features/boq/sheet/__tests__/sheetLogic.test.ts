@@ -218,7 +218,7 @@ describe('paste of new rows', () => {
     );
     expect(preview).toHaveLength(2);
     expect(preview[0]).toEqual({
-      row: { ordinal: '03.010', description: 'Screed', unit: 'm2', quantity: 1250.5, unit_rate: 18.4 },
+      row: { ordinal: '03.010', description: 'Screed', unit: 'm2', quantity: 1250.5, unit_rate: 18.4, level: 0 },
       issues: [],
     });
     expect(preview[1]!.issues.map((i) => i.code)).toEqual(['not_a_number', 'description_missing']);

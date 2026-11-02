@@ -15,6 +15,7 @@ import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { fmtList } from '@/shared/lib/formatters';
 import { decimalMarkEvidence, parsePastedNumber } from '@/shared/lib/parseDecimal';
+import { isNumbering, ordinalDepth } from './boqStructure';
 
 export interface PastedRow {
   ordinal: string;
@@ -22,6 +23,8 @@ export interface PastedRow {
   unit: string;
   quantity: number;
   unit_rate: number;
+  /** 0 = position, n = section of level n (a chapter line of the bill). */
+  level: number;
 }
 
 interface ExcelPasteModalProps {
@@ -40,14 +43,31 @@ const HEADER_MAP: Record<string, string> = {
   unit: 'unit', einheit: 'unit', eh: 'unit', uom: 'unit',
   qty: 'quantity', quantity: 'quantity', menge: 'quantity', amount: 'quantity', 'qty.': 'quantity',
   rate: 'unit_rate', 'unit rate': 'unit_rate', 'unit_rate': 'unit_rate', price: 'unit_rate',
-  einzelpreis: 'unit_rate', ep: 'unit_rate', 'unit price': 'unit_rate',
+  einzelpreis: 'unit_rate', ep: 'unit_rate', 'unit price': 'unit_rate', 'unit cost': 'unit_rate',
+  // French, Spanish, Italian tender bills (DPGF / DQE / BPU, presupuesto, computo)
+  'n°': 'ordinal', 'nº': 'ordinal', n: 'ordinal', ref: 'ordinal', réf: 'ordinal', repère: 'ordinal', art: 'ordinal', partida: 'ordinal',
+  désignation: 'description', designation: 'description', libellé: 'description', descriptif: 'description',
+  descripción: 'description', descripcion: 'description', descrizione: 'description', concepto: 'description',
+  u: 'unit', unité: 'unit', unite: 'unit', unidad: 'unit', ud: 'unit', unità: 'unit', um: 'unit',
+  qté: 'quantity', qte: 'quantity', quantité: 'quantity', quantite: 'quantity', cantidad: 'quantity', quantità: 'quantity', qta: 'quantity',
+  pu: 'unit_rate', 'pu ht': 'unit_rate', 'prix unitaire': 'unit_rate', 'prix unitaire ht': 'unit_rate',
+  'precio unitario': 'unit_rate', precio: 'unit_rate', 'prezzo unitario': 'unit_rate',
+  // Total columns are recognised so they are not read as data, then ignored: the total is recomputed.
+  total: 'total', 'total ht': 'total', montant: 'total', 'montant ht': 'total', gesamtpreis: 'total', gp: 'total',
+  importe: 'total', importo: 'total', 'line total': 'total', 'total price': 'total',
 };
 
 function detectColumns(headerCells: string[]): Record<number, string> {
   const mapping: Record<number, string> = {};
   for (let i = 0; i < headerCells.length; i++) {
     const cell = headerCells[i] ?? '';
-    const key = cell.trim().toLowerCase().replace(/[.*]/g, '');
+    const key = cell
+      .trim()
+      .toLowerCase()
+      .replace(/\(.*?\)/g, '')
+      .replace(/[.*:]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     const mapped = HEADER_MAP[key];
     if (mapped) {
       mapping[i] = mapped;
@@ -96,17 +116,24 @@ export function parseRows(raw: string, locale: string | null = getNumberLocale()
   const firstLine = lines[0] ?? '';
   const firstRow = firstLine.split('\t');
   let colMap = detectColumns(firstRow);
-  const hasHeaders = Object.keys(colMap).length >= 2;
+  const hasHeaders = Object.values(colMap).filter((f) => f !== 'total').length >= 2;
 
   const detectedHeaders: string[] = [];
   if (hasHeaders) {
-    for (const [, field] of Object.entries(colMap)) {
-      detectedHeaders.push(field);
+    for (const [idx, field] of Object.entries(colMap)) {
+      if (field === 'total') delete colMap[Number(idx)];
+      else detectedHeaders.push(field);
     }
   } else {
-    // No headers — use default positional order
-    for (let i = 0; i < Math.min(firstRow.length, DEFAULT_ORDER.length); i++) {
-      colMap[i] = DEFAULT_ORDER[i] ?? 'description';
+    // No headers: positional order over the widest line, because a bill often
+    // opens on a two-cell chapter line. A numbering first column is the ordinal.
+    colMap = {};
+    const split = lines.map((l) => l.split('\t'));
+    const widest = Math.max(...split.map((c) => c.length));
+    const numbered = split.filter((c) => c.length > 1 && isNumbering(c[0] ?? '')).length;
+    const order = widest > 1 && numbered * 2 > split.length ? ['ordinal', ...DEFAULT_ORDER] : DEFAULT_ORDER;
+    for (let i = 0; i < Math.min(widest, order.length); i++) {
+      colMap[i] = order[i] ?? 'description';
     }
   }
 
@@ -120,6 +147,9 @@ export function parseRows(raw: string, locale: string | null = getNumberLocale()
   const colIdx = (field: string) => Number(Object.entries(colMap).find(([, f]) => f === field)?.[0] ?? -1);
   const qtyLocale = columnLocale(splitLines.map((c) => c[colIdx('quantity')] ?? ''), locale);
   const rateLocale = columnLocale(splitLines.map((c) => c[colIdx('unit_rate')] ?? ''), locale);
+  // Chapter lines exist only in a paste that carries figures somewhere.
+  const figureCols = ['unit', 'quantity', 'unit_rate'].map(colIdx).filter((i) => i >= 0);
+  const hasFigures = splitLines.some((c) => figureCols.some((i) => (c[i] ?? '').trim() !== ''));
 
   for (const cells of splitLines) {
     const row: Record<string, string> = {};
@@ -137,6 +167,11 @@ export function parseRows(raw: string, locale: string | null = getNumberLocale()
 
     const rawQty = row['quantity'] ?? '';
     const rawRate = row['unit_rate'] ?? '';
+    if (hasFigures && !row['unit'] && !rawQty && !rawRate) {
+      const ordinal = row['ordinal'] || String(autoOrdinal++).padStart(2, '0');
+      rows.push({ ordinal, description: desc, unit: '', quantity: 0, unit_rate: 0, level: ordinalDepth(ordinal) || 1 });
+      continue;
+    }
     const q = rawQty ? parseNumber(rawQty, qtyLocale) : { value: 1, ambiguous: false };
     const r = rawRate ? parseNumber(rawRate, rateLocale) : { value: 0, ambiguous: false };
     let quantity = q.value;
@@ -158,6 +193,7 @@ export function parseRows(raw: string, locale: string | null = getNumberLocale()
       unit: row['unit'] || 'pcs',
       quantity,
       unit_rate,
+      level: 0,
     });
   }
 
@@ -166,6 +202,26 @@ export function parseRows(raw: string, locale: string | null = getNumberLocale()
 
 /* ── Component ────────────────────────────────────────────────────── */
 
+/** Level picker shared with the structure dialog: position, or section 1..6. */
+export function LevelSelect({ value, onChange }: { value: number; onChange: (level: number) => void }) {
+  const { t } = useTranslation();
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(Number(e.target.value))}
+      aria-label={t('boq.structure_level', { defaultValue: 'Level' })}
+      className="rounded-md border border-border-light bg-surface-primary px-1.5 py-0.5 text-xs"
+    >
+      <option value={0}>{t('boq.structure_level_position', { defaultValue: 'Position' })}</option>
+      {[1, 2, 3, 4, 5, 6].map((n) => (
+        <option key={n} value={n}>
+          {t('boq.structure_level_section', { defaultValue: 'Section {{level}}', level: n })}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPasteModalProps) {
   const { t } = useTranslation();
   const [raw, setRaw] = useState('');
@@ -173,10 +229,16 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
   const titleId = useId();
   useFocusTrap(panelRef, open);
 
-  const { rows, detectedHeaders, skippedEmpty, invalidNumbers, reviewCells } = useMemo(
-    () => parseRows(raw),
-    [raw],
+  const parsed = useMemo(() => parseRows(raw), [raw]);
+  const { detectedHeaders, skippedEmpty, invalidNumbers, reviewCells } = parsed;
+  // The estimator can correct each row's level before importing (0 = position).
+  const [levels, setLevels] = useState<Record<number, number>>({});
+  useEffect(() => setLevels({}), [raw]);
+  const rows = useMemo(
+    () => parsed.rows.map((r, i) => (levels[i] === undefined ? r : { ...r, level: levels[i]! })),
+    [parsed.rows, levels],
   );
+  const headingCount = rows.filter((r) => r.level > 0).length;
   const reviewSet = useMemo(() => new Set(reviewCells), [reviewCells]);
   const reviewClass = (i: number, field: string) =>
     reviewSet.has(`${i}:${field}`)
@@ -313,6 +375,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
                   <thead className="bg-surface-secondary sticky top-0">
                     <tr>
                       <th className="px-3 py-2 text-left font-semibold text-content-secondary">#</th>
+                      <th className="px-3 py-2 text-left font-semibold text-content-secondary">{t('boq.structure_level', { defaultValue: 'Level' })}</th>
                       <th className="px-3 py-2 text-left font-semibold text-content-secondary">{t('boq.description', { defaultValue: 'Description' })}</th>
                       <th className="px-3 py-2 text-center font-semibold text-content-secondary">{t('boq.unit', { defaultValue: 'Unit' })}</th>
                       <th className="px-3 py-2 text-right font-semibold text-content-secondary">{t('boq.quantity', { defaultValue: 'Qty' })}</th>
@@ -324,7 +387,10 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
                     {rows.slice(0, 50).map((r, i) => (
                       <tr key={`${r.ordinal}-${i}`} className="hover:bg-surface-secondary/50">
                         <td className="px-3 py-1.5 font-mono text-content-tertiary">{r.ordinal}</td>
-                        <td className="px-3 py-1.5 max-w-[300px] truncate">{r.description}</td>
+                        <td className="px-3 py-1.5">
+                          <LevelSelect value={r.level} onChange={(v) => setLevels((m) => ({ ...m, [i]: v }))} />
+                        </td>
+                        <td className={`px-3 py-1.5 max-w-[300px] truncate ${r.level > 0 ? 'font-semibold' : ''}`}>{r.description}</td>
                         <td className="px-3 py-1.5 text-center font-mono uppercase">{r.unit}</td>
                         <td className={reviewClass(i, 'quantity')} title={reviewTitle(i, 'quantity')}>{r.quantity.toLocaleString(getNumberLocale())}</td>
                         <td className={reviewClass(i, 'unit_rate')} title={reviewTitle(i, 'unit_rate')}>{r.unit_rate.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}</td>
@@ -348,7 +414,9 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
           <div className="text-xs text-content-secondary">
             {rows.length > 0 && (
               <span>
-                {rows.length} {t('boq.positions', { defaultValue: 'positions' })} · {t('boq.total', { defaultValue: 'Total' })}: {totalSum.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}
+                {rows.length - headingCount} {t('boq.positions', { defaultValue: 'positions' })}
+                {headingCount > 0 && <> · {t('boq.structure_sections_count', { defaultValue: 'Sections: {{count}}', count: headingCount })}</>}
+                {' '}· {t('boq.total', { defaultValue: 'Total' })}: {totalSum.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}
               </span>
             )}
           </div>

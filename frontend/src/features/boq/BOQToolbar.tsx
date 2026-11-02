@@ -45,6 +45,7 @@ import {
   Clock,
   Columns3,
   ListOrdered,
+  Repeat,
   Variable as VariableIcon,
   FileSpreadsheet,
   FileText,
@@ -149,6 +150,10 @@ export interface BOQToolbarProps {
   onManageVariables?: () => void;
   // Renumber positions (gap-of-10 scheme)
   onRenumber?: () => void;
+  /** Open the dialog that sets a level per row and rebuilds sections. */
+  onStructure?: () => void;
+  /** Open the recurring-lines panel (one rate per repeated line). */
+  onRecurringLines?: () => void;
   isRenumbering?: boolean;
   // Quality
   hasPositions: boolean;
@@ -259,6 +264,8 @@ export function BOQToolbar({
   customColumnCount,
   onManageVariables,
   onRenumber,
+  onStructure,
+  onRecurringLines,
   isRenumbering,
   hasPositions,
   qualityScoreRing,
@@ -659,6 +666,22 @@ export function BOQToolbar({
               onClick={onRenumber}
               disabled={isRenumbering}
               testId="boq-renumber-button"
+            />
+          )}
+          {onStructure && !readOnly && (
+            <IconBtn
+              icon={<ListTree size={15} />}
+              title={t('boq.structure_title', { defaultValue: 'Structure the bill' })}
+              onClick={onStructure}
+              testId="boq-structure-button"
+            />
+          )}
+          {onRecurringLines && (
+            <IconBtn
+              icon={<Repeat size={15} />}
+              title={t('boq.recurring_title', { defaultValue: 'Recurring lines' })}
+              onClick={onRecurringLines}
+              testId="boq-recurring-lines-button"
             />
           )}
           {/* Resource-split control: ONE button cycling three states so an

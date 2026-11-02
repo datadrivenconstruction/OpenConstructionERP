@@ -140,6 +140,9 @@ import {
 import { BOQToolbar } from './BOQToolbar';
 import { PriceReviewPanel } from './PriceReviewPanel';
 import { ExcelPasteModal, type PastedRow } from './ExcelPasteModal';
+import { pastedStructure } from './boqStructure';
+import { StructureBillDialog } from './StructureBillDialog';
+import { RecurringLinesPanel } from './RecurringLinesPanel';
 import { QualityScoreRing, TipsPanel, QuickAddFAB, EmptyBOQOnboarding, ExportWarningDialog } from './BOQSummaryPanel';
 import { ActivityPanel } from './ActivityPanel';
 import { CostDatabaseSearchModal, AssemblyPickerModal } from './BOQModals';
@@ -951,6 +954,8 @@ export function BOQEditorPage() {
   });
 
   const [renumberDialogOpen, setRenumberDialogOpen] = useState(false);
+  const [structureOpen, setStructureOpen] = useState(false);
+  const [recurringOpen, setRecurringOpen] = useState(false);
 
   const renumberMutation = useMutation({
     mutationFn: ({ scheme, pad, start, step }: { scheme: RenumberScheme; pad: boolean; start?: number; step?: number }) =>
@@ -3675,11 +3680,14 @@ export function BOQEditorPage() {
         boq_id: boqId,
         ordinal: r.ordinal,
         description: r.description,
-        unit: r.unit,
-        quantity: r.quantity,
-        unit_rate: r.unit_rate,
+        unit: r.level > 0 ? 'section' : r.unit,
+        quantity: r.level > 0 ? 0 : r.quantity,
+        unit_rate: r.level > 0 ? 0 : r.unit_rate,
       }));
-      await apiPost(`/v1/boq/boqs/${boqId}/positions/bulk/`, { items });
+      const created = await apiPost<Position[]>(`/v1/boq/boqs/${boqId}/positions/bulk/`, { items });
+      if (rows.some((r) => r.level > 0) && Array.isArray(created) && created.length === rows.length) {
+        await boqApi.restructurePositions(boqId, await pastedStructure(boqId, created, rows));
+      }
       addToast({
         type: 'success',
         title: t('boq.paste_import_success', { defaultValue: 'Imported successfully' }),
@@ -5660,6 +5668,8 @@ export function BOQEditorPage() {
           onCycleResourceSplit={cycleResourceSplit}
           onManageVariables={() => setVariablesOpen(true)}
           onRenumber={handleRenumber}
+          onStructure={hasPositions ? () => setStructureOpen(true) : undefined}
+          onRecurringLines={hasPositions ? () => setRecurringOpen(true) : undefined}
           isRenumbering={renumberMutation.isPending}
           hasPositions={hasPositions}
           qualityScoreRing={<QualityScoreRing score={qualityBreakdown.score} breakdown={qualityBreakdown} t={t} />}
@@ -6344,6 +6354,35 @@ export function BOQEditorPage() {
           onClose={() => { setVariablesOpen(false); setVariableSeed(null); }}
           boqId={boqId}
           seed={variableSeed}
+        />
+      )}
+
+      {boqId && (
+        <StructureBillDialog
+          open={structureOpen}
+          boqId={boqId}
+          positions={boq?.positions ?? []}
+          onClose={() => setStructureOpen(false)}
+          onDone={(message) => {
+            setStructureOpen(false);
+            invalidateAll();
+            addToast({ type: 'success', title: t('boq.structure_title', { defaultValue: 'Structure the bill' }), message });
+          }}
+          onError={(message) => addToast({ type: 'error', title: t('boq.structure_title', { defaultValue: 'Structure the bill' }), message })}
+        />
+      )}
+      {boqId && (
+        <RecurringLinesPanel
+          open={recurringOpen}
+          boqId={boqId}
+          positions={boq?.positions ?? []}
+          readOnly={Boolean(boq?.is_locked)}
+          onClose={() => setRecurringOpen(false)}
+          onDone={(message) => {
+            invalidateAll();
+            addToast({ type: 'success', title: t('boq.recurring_title', { defaultValue: 'Recurring lines' }), message });
+          }}
+          onError={(message) => addToast({ type: 'error', title: t('boq.recurring_title', { defaultValue: 'Recurring lines' }), message })}
         />
       )}
 

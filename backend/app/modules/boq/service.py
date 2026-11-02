@@ -314,6 +314,7 @@ from app.modules.boq.resource_norms import (
     stamp_unit_rate_kept,
     untrusted_buildup_reason,
 )
+from app.modules.boq.restructure import plan_restructure, to_position_fields, to_section_fields
 from app.modules.boq.schemas import (
     ActivityLogList,
     ActivityLogResponse,
@@ -349,6 +350,8 @@ from app.modules.boq.schemas import (
     QuantityLinkResponse,
     ResourceCodeLookupResponse,
     ResourceCodeMatch,
+    RestructureRequest,
+    RestructureResult,
     ScenarioCreate,
     SectionCreate,
     SectionResponse,
@@ -5552,10 +5555,30 @@ class BOQService:
                 )
             positions[pid] = row
 
+        # A link-group master propagates its rate to its instances, so an
+        # instance whose master is in the same request must not be written twice.
+        master_groups = {
+            row.link_group_id
+            for row in positions.values()
+            if getattr(row, "link_role", None) == "master" and row.link_group_id is not None
+        }
+
         # Materialise the per-row PositionUpdate payload.
         for pid, row in positions.items():
             try:
-                if payload.updates is not None:
+                if payload.set_rate is not None:
+                    if (
+                        _is_section(row)
+                        or _has_contributing_resources((row.metadata_ or {}).get("resources"))
+                        or (getattr(row, "link_role", None) == "instance" and row.link_group_id in master_groups)
+                    ):
+                        unchanged += 1
+                        continue
+                    if _to_decimal(row.unit_rate, default=Decimal("0")) == payload.set_rate:
+                        unchanged += 1
+                        continue
+                    update_data = PositionUpdate(unit_rate=payload.set_rate)
+                elif payload.updates is not None:
                     update_data = PositionUpdate(**payload.updates)
                 elif payload.rate_factor is not None:
                     current = _to_decimal(row.unit_rate, default=Decimal("0"))
@@ -5616,6 +5639,8 @@ class BOQService:
                     if payload.rate_factor is not None
                     else "quantity_factor"
                     if payload.quantity_factor is not None
+                    else "set_rate"
+                    if payload.set_rate is not None
                     else "find_replace"
                 )
                 entry = await self.log_activity(
@@ -5635,6 +5660,7 @@ class BOQService:
                         "updates": payload.updates,
                         "rate_factor": payload.rate_factor,
                         "quantity_factor": payload.quantity_factor,
+                        "set_rate": str(payload.set_rate) if payload.set_rate is not None else None,
                         "find_replace": (
                             {
                                 "field": payload.find_replace.field,
@@ -6188,6 +6214,59 @@ class BOQService:
                 boq_id,
                 exc,
             )
+
+    async def restructure_positions(self, boq_id: uuid.UUID, data: RestructureRequest) -> RestructureResult:
+        """Rebuild the bill's sections from one level per row, in document order.
+
+        Every row of the bill must be listed once. A row that becomes a
+        section keeps its figures under ``metadata.converted_from_position``;
+        a section that becomes a position gets them back, or an unpriced
+        lump sum when it never had any.
+
+        Raises:
+            HTTPException 409: BOQ is locked.
+            HTTPException 422: rows missing, unknown, repeated, too deep, or a
+                linked line would become a section.
+        """
+        await self._ensure_not_locked(boq_id)
+        existing = {row.id: row for row in await self.position_repo.list_all_for_boq(boq_id)}
+        requested = [r.position_id for r in data.rows]
+        if set(requested) != set(existing) or len(requested) != len(existing):
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                detail="List every row of the bill exactly once, in document order.",
+            )
+        try:
+            plan = plan_restructure([(r.position_id, r.level) for r in data.rows], MAX_NESTING_DEPTH)
+        except ValueError as exc:
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)) from exc
+
+        result = RestructureResult()
+        for item in plan:
+            row = existing[item.position_id]
+            was_section = _is_section(row)
+            if item.is_section and not was_section:
+                if row.link_group_id is not None:
+                    raise HTTPException(
+                        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+                        detail=f"Linked line {row.ordinal} cannot become a section; unlink it first.",
+                    )
+                for key, value in to_section_fields(row).items():
+                    setattr(row, key, value)
+                result.converted_to_section += 1
+            elif was_section and not item.is_section:
+                for key, value in to_position_fields(row).items():
+                    setattr(row, key, value)
+                result.converted_to_position += 1
+            row.parent_id = item.parent_id
+            row.sort_order = item.sort_order
+            if item.is_section:
+                result.sections += 1
+            else:
+                result.positions += 1
+        await self.session.flush()
+        logger.info("Restructured BOQ %s: %s", boq_id, result.model_dump())
+        return result
 
     async def reorder_positions(self, boq_id: uuid.UUID, position_ids: list[uuid.UUID]) -> None:
         """Reorder positions within a BOQ.

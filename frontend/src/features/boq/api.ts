@@ -537,6 +537,21 @@ export interface BulkPositionUpdateData {
   quantity_factor?: number;
   /** Rewrite the description text across every selected row. */
   find_replace?: FindReplaceSpec;
+  /** One unit rate written to every row (a recurring line priced once). */
+  set_rate?: string;
+}
+
+export interface RestructureRow {
+  position_id: string;
+  /** 0 = position, n = section of level n. */
+  level: number;
+}
+
+export interface RestructureResult {
+  sections: number;
+  positions: number;
+  converted_to_section: number;
+  converted_to_position: number;
 }
 
 export interface BulkUpdateResult {
@@ -2042,6 +2057,10 @@ export const boqApi = {
     apiGet<ResourceCodeLookupResponse>(
       `/v1/boq/projects/${projectId}/resource-by-code/?code=${encodeURIComponent(code)}`,
     ),
+
+  /** Rebuild sections from one level per row; every row, in document order. */
+  restructurePositions: (boqId: string, rows: RestructureRow[]) =>
+    apiPost<RestructureResult>(`/v1/boq/boqs/${boqId}/positions/restructure/`, { rows }),
 
   /* Position reorder (drag-and-drop) */
   reorderPositions: (boqId: string, positionIds: string[]) =>

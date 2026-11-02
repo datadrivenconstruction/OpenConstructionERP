@@ -41,7 +41,7 @@ export function buildPreview(matrix: string[][], fields: SheetField[], locale: s
   const lines = matrix.filter((cells) => cells.some((c) => c.trim() !== ''));
   if (lines.length > 0 && isHeaderLine(lines[0]!, fields, locale)) lines.shift();
   return lines.map((cells) => {
-    const row: PastedRow = { ordinal: '', description: '', unit: '', quantity: 0, unit_rate: 0 };
+    const row: PastedRow = { ordinal: '', description: '', unit: '', quantity: 0, unit_rate: 0, level: 0 };
     const issues: RowIssue[] = [];
     fields.forEach((field, i) => {
       const raw = (cells[i] ?? '').trim();

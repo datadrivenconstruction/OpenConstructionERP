@@ -891,6 +891,8 @@ class BulkPositionUpdate(BaseModel):
     * ``quantity_factor`` - same as ``rate_factor`` but for ``quantity``.
     * ``find_replace`` - find-and-replace text within the ``description``
       field. Rows with no match are skipped (not failed).
+    * ``set_rate`` - write one unit rate to every row (a recurring line
+      priced once, the unit-price schedule view of the bill).
 
     Exactly one of ``updates`` / ``rate_factor`` / ``quantity_factor`` /
     ``find_replace`` must be supplied. Mixing styles is rejected with 422
@@ -929,6 +931,16 @@ class BulkPositionUpdate(BaseModel):
         default=None,
         description="Find-and-replace specification for description text.",
     )
+    set_rate: Decimal | None = Field(
+        default=None,
+        ge=0,
+        le=Decimal("1e12"),
+        description=(
+            "One unit rate written to every selected row (a recurring line priced once). "
+            "Sections, rows priced from their resources and link-group instances whose "
+            "master is in the same request are left alone."
+        ),
+    )
 
     @model_validator(mode="after")
     def _exactly_one_mutation(self) -> "BulkPositionUpdate":
@@ -937,10 +949,12 @@ class BulkPositionUpdate(BaseModel):
             self.rate_factor is not None,
             self.quantity_factor is not None,
             self.find_replace is not None,
+            self.set_rate is not None,
         ]
         if sum(1 for s in styles if s) != 1:
             raise ValueError(
-                "Exactly one of 'updates', 'rate_factor', 'quantity_factor', 'find_replace' must be supplied.",
+                "Exactly one of 'updates', 'rate_factor', 'quantity_factor', 'find_replace', "
+                "'set_rate' must be supplied.",
             )
         if isinstance(self.updates, dict):
             # Tight allowlist - bulk operations must not silently rewrite
@@ -979,6 +993,28 @@ class BulkUpdateResult(BaseModel):
         default=None,
         description="Activity-log entry id for the umbrella bulk action.",
     )
+
+
+class RestructureRow(BaseModel):
+    """One row of the bill with the level it should take."""
+
+    position_id: UUID
+    level: int = Field(..., ge=0, le=32, description="0 = position, n = section of level n.")
+
+
+class RestructureRequest(BaseModel):
+    """Every row of the bill, in document order, with its level."""
+
+    rows: list[RestructureRow] = Field(..., min_length=1, max_length=50_000)
+
+
+class RestructureResult(BaseModel):
+    """What restructuring changed."""
+
+    sections: int = 0
+    positions: int = 0
+    converted_to_section: int = 0
+    converted_to_position: int = 0
 
 
 class SheetCellEdit(BaseModel):

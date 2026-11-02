@@ -208,6 +208,8 @@ from app.modules.boq.schemas import (
     ResourceTypeSummary,
     RestoreFieldRequest,
     RestoreFieldResponse,
+    RestructureRequest,
+    RestructureResult,
     ScenarioCreate,
     ScopeMissingItem,
     SectionCreate,
@@ -2311,6 +2313,42 @@ async def bulk_update_positions(
             status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
             detail=str(exc),
         ) from exc
+
+
+@router.post(
+    "/boqs/{boq_id}/positions/restructure/",
+    response_model=RestructureResult,
+    summary="Rebuild sections from one level per row",
+    description=(
+        "Takes every row of the bill in document order with a level (0 = position, n = section of "
+        "level n) and rebuilds the tree: a section hangs under the nearest open section of a lower "
+        "level, a position under the deepest open section."
+    ),
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def restructure_positions(
+    boq_id: uuid.UUID,
+    data: RestructureRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> RestructureResult:
+    """Turn a flat bill into sections and sub-sections in one step."""
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    result = await service.restructure_positions(boq_id, data)
+    await _log_activity(
+        service,
+        user_id=user_id,
+        action="position_updated",
+        target_type="boq",
+        description=(
+            f"Restructured bill: {result.sections} sections, {result.positions} positions "
+            f"({result.converted_to_section} to section, {result.converted_to_position} to position)"
+        ),
+        boq_id=boq_id,
+    )
+    return result
 
 
 @router.patch(

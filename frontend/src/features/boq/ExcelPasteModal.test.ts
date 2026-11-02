@@ -130,3 +130,30 @@ describe('parseRows - market number spellings (issue 554)', () => {
     expect(one('Concrete\tm3\t1.250\t10', null).reviewCells).toEqual(['0:quantity']);
   });
 });
+
+describe('parseRows - tender bills pasted as they are (issue 554)', () => {
+  it('recognises DPGF headings and ignores the total column', () => {
+    const raw = 'N°\tDésignation\tU\tQté\tPU HT\tMontant HT\n1.1\tBéton C25/30\tm3\t2,625\t120,00\t315,00';
+    const out = parseRows(raw, 'fr-FR');
+    expect(out.rows[0]).toMatchObject({ ordinal: '1.1', description: 'Béton C25/30', unit: 'm3', quantity: 2.625, unit_rate: 120, level: 0 });
+    expect(out.detectedHeaders).not.toContain('total');
+  });
+
+  it('a chapter line is a heading, not a pcs x 1 item, and the widest line sets the columns', () => {
+    const raw = ['1\tGros oeuvre', '1.1\tFondations', '1.1.1\tBéton\tm3\t2,5\t120', '2\tCharpente'].join('\n');
+    const out = parseRows(raw, 'fr-FR');
+    expect(out.rows.map((r) => [r.ordinal, r.level])).toEqual([
+      ['1', 1],
+      ['1.1', 2],
+      ['1.1.1', 0],
+      ['2', 1],
+    ]);
+    expect(out.rows[0]).toMatchObject({ unit: '', quantity: 0, unit_rate: 0 });
+    expect(out.rows[2]).toMatchObject({ description: 'Béton', unit: 'm3', quantity: 2.5, unit_rate: 120 });
+  });
+
+  it('without numbering the first column stays the description', () => {
+    const out = parseRows('Excavation\tm3\t50\t12.5\nBackfill\tm3\t20\t8');
+    expect(out.rows[0]).toMatchObject({ ordinal: '01', description: 'Excavation', level: 0 });
+  });
+});
