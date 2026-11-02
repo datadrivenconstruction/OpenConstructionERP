@@ -1,0 +1,82 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "FR",
+  "markets": [
+    "FR"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "plateforme agreee / Chorus Pro",
+    "label": "France - domestic B2B through an accredited platform, Chorus Pro for the public sector",
+    "identifier_label": "transmission id",
+    "document_format": "facturx_1_0",
+    "en16931_profile": "facturx",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "document_fields": [
+      "service_code"
+    ],
+    "optional_document_fields": [
+      "customer_siren",
+      "transaction_scope",
+      "operation_category",
+      "delivery_differs",
+      "delivery_address",
+      "vat_on_debits_mention",
+      "insurance_mention"
+    ],
+    "profile_setting_fields": [
+      "company_size",
+      "vat_on_debits_option"
+    ],
+    "cancellation_window_days": null,
+    "additional_regimes": [
+      "reporting"
+    ],
+    "scope": "Every company, whatever its size, must already be able to receive. Issuing and the e-reporting duty reached large and mid-size companies at the same moment and reach the smaller ones a year later.",
+    "commencement": [
+      {
+        "obligation": "receive",
+        "effective_date": "2026-09-01",
+        "scope": "Domestic B2B, all companies regardless of size",
+        "legal_status": "in_force",
+        "source_url": "https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+        "read_date": "2026-09-07"
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2026-09-01",
+        "scope": "Domestic B2B, grandes entreprises and ETI",
+        "legal_status": "in_force",
+        "source_url": "https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+        "read_date": "2026-09-07"
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2027-09-01",
+        "scope": "Domestic B2B, PME and TPE",
+        "legal_status": "enacted",
+        "source_url": "https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+        "read_date": "2026-09-07"
+      },
+      {
+        "obligation": "report",
+        "effective_date": "2026-09-01",
+        "scope": "Transaction and payment data to the DGFiP, grandes entreprises and ETI",
+        "legal_status": "in_force",
+        "source_url": "https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+        "read_date": "2026-09-07"
+      },
+      {
+        "obligation": "report",
+        "effective_date": "2027-09-01",
+        "scope": "Transaction and payment data to the DGFiP, PME and TPE",
+        "legal_status": "enacted",
+        "source_url": "https://www.impots.gouv.fr/professionnel/questions/partir-de-quand-suis-je-concerne-par-la-reforme-de-la-facturation",
+        "read_date": "2026-09-07"
+      }
+    ],
+    "notes": "The reporting leg is an obligation of its own and not a byproduct of the routing, which is what makes France hybrid rather than a network country. Chorus Pro is the public-sector path only; the domestic B2B document travels through an accredited platform, so the row named the smaller half of the country's arrangement until this was corrected. Corroborated against the European Commission's France page, read on the same day."
+  }
+}

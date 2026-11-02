@@ -1,0 +1,31 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "NL",
+  "markets": [
+    "NL"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "Peppol (NLCIUS)",
+    "label": "Netherlands - NLCIUS over Peppol",
+    "identifier_label": "transmission id",
+    "document_format": "nlcius_1_0",
+    "en16931_profile": "nlcius",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "cancellation_window_days": null
+  },
+  "lifecycle": {
+    "network": {
+      "participant_field": "buyer_endpoint_id",
+      "rule_id": "EINV-PEP-001",
+      "schemes": [
+        "0106",
+        "0190"
+      ],
+      "source_url": "https://docs.peppol.eu/poacc/billing/3.0/",
+      "read_on": ""
+    }
+  }
+}

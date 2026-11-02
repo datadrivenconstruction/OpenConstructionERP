@@ -1,0 +1,52 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "NO",
+  "markets": [
+    "NO"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "Peppol (EHF)",
+    "label": "Norway - EHF Billing 3.0 over Peppol",
+    "identifier_label": "transmission id",
+    "document_format": "ehf_3_0",
+    "en16931_profile": "ehf",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "cancellation_window_days": null,
+    "scope": "The statute covers sales to other bokforingspliktige. It names no network and no format itself, leaving both to regulation, and a size-based exemption for the smallest sole proprietorships is proposed rather than in force.",
+    "commencement": [
+      {
+        "obligation": "issue",
+        "scope": "Sales to other bokforingspliktige",
+        "legal_status": "enacted",
+        "source_url": "https://lovdata.no/dokument/LTI/lov/2026-06-19-39",
+        "read_date": "2026-09-07",
+        "notes": "LOV-2026-06-19-39, sanctioned 19 June 2026. Commencement is by royal decree and unpublished.",
+        "effective_date": ""
+      },
+      {
+        "obligation": "receive",
+        "scope": "Sales to other bokforingspliktige",
+        "legal_status": "enacted",
+        "source_url": "https://lovdata.no/dokument/LTI/lov/2026-06-19-39",
+        "read_date": "2026-09-07",
+        "notes": "Same statute. The King may commence individual provisions at different times.",
+        "effective_date": ""
+      }
+    ],
+    "notes": "Norway is the case that shows why a date and its legal status are two separate claims. The statute is enacted and carries no dates whatsoever: commencement is left to royal decree, and the decree may bring individual provisions into force at different times, which is the legal mechanism that produces the split between issuing and receiving in the first place. Commentary sources agree that issuing starts in 2027 and receiving in 2030, and that split is believed to be the widest of any country here, but no primary document read for this row carries either date, so neither is stated as data. Fill them in when the commencement decree is published."
+  },
+  "lifecycle": {
+    "network": {
+      "participant_field": "buyer_endpoint_id",
+      "rule_id": "EINV-PEP-001",
+      "schemes": [
+        "0192"
+      ],
+      "source_url": "https://docs.peppol.eu/poacc/billing/3.0/",
+      "read_on": ""
+    }
+  }
+}

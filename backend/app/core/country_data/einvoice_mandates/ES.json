@@ -1,0 +1,44 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "ES",
+  "markets": [
+    "ES"
+  ],
+  "regime": {
+    "regime": "reporting",
+    "platform": "SII and Verifactu",
+    "label": "Spain - immediate supply of information and verifiable invoicing",
+    "identifier_label": "CSV (acknowledgement reference)",
+    "document_format": "sii_es",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "document_fields": [
+      "nif_issuer"
+    ],
+    "cancellation_window_days": 4,
+    "correction_mechanism": "annulment record, then a corrected record",
+    "scope": "SII is in force for larger taxpayers and reports invoice records within days of issue. Verifactu is a separate obligation on invoicing software, and it has not commenced for anyone yet.",
+    "commencement": [
+      {
+        "obligation": "issue",
+        "effective_date": "2027-01-01",
+        "scope": "Verifactu, contribuyentes del Impuesto sobre Sociedades",
+        "legal_status": "enacted",
+        "source_url": "https://www.fiscal-impuestos.com/aplazamiento-entrada-vigor-Verifactu-2027",
+        "read_date": "2026-09-07",
+        "notes": "Postponed by one year by Real Decreto-ley 15/2025. The widely republished 2026-01-01 date is superseded and is still printed by at least one major public source."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2027-07-01",
+        "scope": "Verifactu, remaining companies and autonomos",
+        "legal_status": "enacted",
+        "source_url": "https://www.fiscal-impuestos.com/aplazamiento-entrada-vigor-Verifactu-2027",
+        "read_date": "2026-09-07",
+        "notes": "Postponed by one year by Real Decreto-ley 15/2025. The superseded date was 2026-07-01."
+      }
+    ],
+    "notes": "The invoice is valid on issue. Late reporting is a penalty, not an invalid invoice. Two caveats a reader should carry. The two dates above rest on a specialist tax commentary site that names the instrument; the official AEAT page confirms that an extension exists but prints no dates and cites different instruments, so the official source corroborates the direction of the change and not the numbers. And SII's own commencement is not recorded here at all, because no source to hand covers it, so this row states when Verifactu starts and not when SII did."
+  }
+}

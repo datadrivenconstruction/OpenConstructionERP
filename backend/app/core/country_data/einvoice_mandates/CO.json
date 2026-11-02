@@ -1,0 +1,27 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "CO",
+  "markets": [
+    "CO"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "Facturacion electronica via DIAN",
+    "label": "Colombia - invoice validated by the DIAN before it is delivered",
+    "identifier_label": "CUFE",
+    "document_format": "ubl_dian",
+    "profile_fields": [
+      "tax_registration_id",
+      "certificate_reference"
+    ],
+    "document_fields": [
+      "nit_issuer",
+      "nit_receiver",
+      "resolucion_number",
+      "prefix"
+    ],
+    "cancellation_window_days": null,
+    "correction_mechanism": "nota credito, itself an electronic document with its own CUFE",
+    "notes": "Validacion previa: the invoice goes to the DIAN and comes back validated before it reaches the buyer, so the CUFE is what makes it an invoice at all rather than a receipt for one. Numbering is not the issuer's own - a resolucion de facturacion grants a prefix and a range with an expiry date, and a submission fails for an exhausted or expired range without anything being wrong with the invoice itself. Worth pairing with the colombia_aiu methodology, where IVA falls on the utilidad alone and the invoice has to show that split rather than one taxed total."
+  }
+}

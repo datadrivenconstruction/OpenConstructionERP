@@ -99,6 +99,7 @@ export interface ClearanceProfile {
   certificate_reference: string;
   adapter_key: string;
   sandbox: boolean;
+  mode?: string;
   is_active: boolean;
   settings: Record<string, unknown>;
   notes: string;
@@ -209,6 +210,8 @@ export interface ProfileWriteBody {
   adapter_key?: string;
   /** True is the server default and stays the default here. See `createProfile`. */
   sandbox?: boolean;
+  /** export (default for new setups) | sandbox | live. Empty keeps legacy behaviour. */
+  mode?: '' | 'export' | 'sandbox' | 'live';
   is_active?: boolean;
   settings?: Record<string, unknown>;
   notes?: string;

@@ -278,7 +278,7 @@ export function InvoiceInboxTab({ projectId }: { projectId: string }) {
             <input
               ref={fileRef}
               type="file"
-              accept=".pdf,image/*"
+              accept=".pdf,image/*,.xml,application/xml"
               className="hidden"
               onChange={onPickFile}
             />

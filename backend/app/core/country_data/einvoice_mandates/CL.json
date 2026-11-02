@@ -1,0 +1,27 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "CL",
+  "markets": [
+    "CL"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "DTE via SII",
+    "label": "Chile - DTE with a folio authorised by the SII",
+    "identifier_label": "folio (from the CAF range)",
+    "document_format": "dte_sii",
+    "profile_fields": [
+      "tax_registration_id",
+      "certificate_reference"
+    ],
+    "document_fields": [
+      "rut_issuer",
+      "rut_receiver",
+      "tipo_dte",
+      "caf_reference"
+    ],
+    "cancellation_window_days": null,
+    "correction_mechanism": "nota de credito, itself a DTE with its own folio",
+    "notes": "Folios are drawn in advance: the issuer requests a range from the SII as a CAF file and stamps each document from it, so a submission can fail for having no folios left rather than for anything wrong with the invoice. The buyer's window to reject runs from receipt, and an invoice that passes it becomes enforceable in its own right, which is why the acknowledgement date matters as much as the clearance."
+  }
+}

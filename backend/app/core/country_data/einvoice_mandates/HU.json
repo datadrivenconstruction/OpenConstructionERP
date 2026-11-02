@@ -1,0 +1,23 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "HU",
+  "markets": [
+    "HU"
+  ],
+  "regime": {
+    "regime": "reporting",
+    "platform": "RTIR (Online Szamla)",
+    "label": "Hungary - real-time invoice reporting",
+    "identifier_label": "transaction id",
+    "document_format": "rtir_hu",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "document_fields": [
+      "tax_number_issuer"
+    ],
+    "cancellation_window_days": null,
+    "correction_mechanism": "modification or annulment invoice, itself reported",
+    "notes": "Reporting is expected immediately on issue; there is no report to withdraw afterwards."
+  }
+}

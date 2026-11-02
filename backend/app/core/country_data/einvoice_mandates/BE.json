@@ -1,0 +1,30 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "BE",
+  "markets": [
+    "BE"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "Peppol",
+    "label": "Belgium - Peppol BIS Billing 3.0",
+    "identifier_label": "transmission id",
+    "document_format": "peppol_bis_3_0",
+    "en16931_profile": "peppol",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "cancellation_window_days": null
+  },
+  "lifecycle": {
+    "network": {
+      "participant_field": "buyer_endpoint_id",
+      "rule_id": "EINV-PEP-001",
+      "schemes": [
+        "0208"
+      ],
+      "source_url": "https://docs.peppol.eu/poacc/billing/3.0/",
+      "read_on": ""
+    }
+  }
+}

@@ -64,9 +64,9 @@ MAX_UPLOAD_BYTES = 30 * 1024 * 1024
 MAX_EXTRACT_BYTES = 25 * 1024 * 1024
 EXTRACTED_TEXT_CAP = 20_000
 
-# PDF + raster image only. XML e-invoice ingestion is a future extension; the
-# strict signature gate keeps executables / archives out of the inbox.
-ALLOWED_INVOICE_TYPES = frozenset({"pdf", "png", "jpeg", "gif", "webp"})
+# PDF, raster image, and UBL / CII e-invoice XML. The strict signature gate
+# keeps executables / archives out of the inbox.
+ALLOWED_INVOICE_TYPES = frozenset({"pdf", "png", "jpeg", "gif", "webp", "xml"})
 
 # Status machine. A posted row is terminal and sealed (read-only).
 _CAPTURE_TRANSITIONS: dict[str, set[str]] = {
@@ -222,6 +222,8 @@ class InvoiceCaptureService:
         """Run text extraction + heuristic parsing. Returns (engine, text, fields, conf)."""
         if not payload:
             return "none", "", {}, {}
+        if mime == "application/xml":
+            return self._extract_einvoice(payload)
         try:
             from app.modules.file_search.extractors import extract_text
 
@@ -233,6 +235,23 @@ class InvoiceCaptureService:
 
         fields, conf = logic.extract_fields_from_text(text)
         return engine, text, fields, conf
+
+    @staticmethod
+    def _extract_einvoice(payload: bytes) -> tuple[str, str, dict, dict[str, float]]:
+        """Read a structured UBL / CII e-invoice. Fields are exact, so confidence is 1."""
+        from app.modules.einvoice.inbound import InboundParseError, parse_inbound
+
+        try:
+            parsed = parse_inbound(payload)
+        except InboundParseError as exc:
+            logger.info("Inbound XML is not a UBL/CII invoice: %s", exc)
+            return "none", "", {}, {}
+        fields = {k: v for k, v in parsed.capture_fields().items() if v not in ("", None)}
+        summary = (
+            f"{parsed.syntax.upper()} e-invoice {parsed.invoice_number} from {parsed.supplier_name}"
+            f" ({parsed.supplier_endpoint or 'no endpoint'})"
+        )
+        return f"einvoice_{parsed.syntax}", summary, fields, dict.fromkeys(fields, 1.0)
 
     async def enrich_with_llm(self, capture_id: uuid.UUID, user_id: str | None) -> CapturedInvoice:
         """Optional AI pass over the stored text to fill gaps. Degrades to no-op."""

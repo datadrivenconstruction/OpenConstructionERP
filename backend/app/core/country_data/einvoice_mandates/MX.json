@@ -1,0 +1,28 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "MX",
+  "markets": [
+    "MX"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "CFDI 4.0",
+    "label": "Mexico - CFDI 4.0 stamped by a certified provider",
+    "identifier_label": "UUID (Folio Fiscal)",
+    "document_format": "cfdi_4_0",
+    "profile_fields": [
+      "tax_registration_id",
+      "certificate_reference"
+    ],
+    "document_fields": [
+      "rfc_issuer",
+      "rfc_receiver",
+      "uso_cfdi",
+      "regimen_fiscal"
+    ],
+    "cancellation_window_days": 365,
+    "cancellation_basis": "fiscal_year_of_issue",
+    "correction_mechanism": "cancellation with the buyer's acceptance, then a replacement CFDI",
+    "notes": "The stamp (timbrado) is applied by a certified provider, not by the tax authority directly. The UUID it returns is what makes the document deductible."
+  }
+}

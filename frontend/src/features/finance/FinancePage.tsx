@@ -92,6 +92,8 @@ import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/featur
 import { buildFinanceInsights } from './financeInsights';
 import { ConnectorsTab } from './ConnectorsTab';
 import { InvoiceInboxTab } from './InvoiceInboxTab';
+import { EInvoicesTab } from '@/features/einvoice-clearance/EInvoicesTab';
+import { useEInvoiceMarkets } from '@/features/einvoice-clearance/useEInvoiceMarkets';
 import { StatementsTab } from './StatementsTab';
 import { RetentionLedgerTab } from './RetentionLedgerTab';
 import { AgeingTab } from './AgeingTab';
@@ -974,7 +976,8 @@ export function FinancePage() {
     [insightInvoices, insightDashboard, t],
   );
 
-  const tabs: { key: FinanceTab; label: string; icon: React.ReactNode }[] = [
+  const einvoiceMarkets = useEInvoiceMarkets();
+  const allTabs: { key: FinanceTab; label: string; icon: React.ReactNode }[] = [
     {
       key: 'budgets',
       label: t('finance.budgets', { defaultValue: 'Budgets' }),
@@ -984,6 +987,11 @@ export function FinancePage() {
       key: 'invoices',
       label: t('finance.invoices', { defaultValue: 'Invoices' }),
       icon: <FileText size={15} />,
+    },
+    {
+      key: 'einvoices',
+      label: t('einvoice.tab', { defaultValue: 'E-invoices' }),
+      icon: <ReceiptText size={15} />,
     },
     {
       key: 'inbox',
@@ -1031,6 +1039,8 @@ export function FinancePage() {
       icon: <Plug size={15} />,
     },
   ];
+  // Absent, not empty, for a tenant without an e-invoicing market.
+  const tabs = allTabs.filter((tab) => tab.key !== 'einvoices' || einvoiceMarkets.enabled);
 
   return (
     <div className="space-y-5 animate-fade-in">
@@ -1148,6 +1158,7 @@ export function FinancePage() {
           {projectId && activeTab === 'budgets' && <BudgetsTab projectId={projectId} />}
           {projectId && activeTab === 'invoices' && <InvoicesTab projectId={projectId} />}
           {projectId && activeTab === 'inbox' && <InvoiceInboxTab projectId={projectId} />}
+          {projectId && activeTab === 'einvoices' && einvoiceMarkets.enabled && <EInvoicesTab projectId={projectId} />}
           {projectId && activeTab === 'statements' && <StatementsTab projectId={projectId} />}
           {projectId && activeTab === 'ageing' && <AgeingTab projectId={projectId} />}
           {projectId && activeTab === 'payment_runs' && <PaymentRunsTab projectId={projectId} />}
@@ -3007,6 +3018,7 @@ export function InvoicesTab({ projectId }: { projectId: string }) {
           onClose={() => setEinvoiceFor(null)}
           invoiceId={einvoiceFor.id}
           invoiceNumber={einvoiceFor.invoice_number}
+          projectId={projectId}
           // A return (IADE) names the invoice it answers. The register is
           // already loaded, so the other invoices of the project are offered
           // from it instead of being typed in by id.
