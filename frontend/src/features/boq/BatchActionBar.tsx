@@ -7,6 +7,7 @@ import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { getUnitsForLocale } from './boqHelpers';
+import type { SectionToDelete } from './batchSelection';
 
 const UNITS = getUnitsForLocale();
 
@@ -47,6 +48,8 @@ export interface BatchActionBarProps {
   ) => void;
   /** Set an exact unit_rate / quantity on all selected positions (Excel-style fill). */
   onBatchSetValue?: (ids: string[], field: 'unit_rate' | 'quantity', value: number) => void;
+  /** Selected sections the delete cascades through, named in the confirmation. */
+  sectionsToDelete?: SectionToDelete[];
 }
 
 interface FactorDialogState {
@@ -79,6 +82,7 @@ export function BatchActionBar({
   onBatchSetClassification,
   onBatchFindReplace,
   onBatchSetValue,
+  sectionsToDelete = [],
 }: BatchActionBarProps) {
   const { t } = useTranslation();
   // Same gate as the grid's delete controls: the server answers `boq.delete`.
@@ -379,6 +383,26 @@ export function BatchActionBar({
                   count,
                 })}
               </p>
+              {sectionsToDelete.length > 0 && (
+                <div data-testid="batch-delete-sections" className="mt-3 rounded-lg border border-semantic-error/30 bg-semantic-error/5 px-3 py-2 text-xs text-content-secondary">
+                  <p className="font-medium text-content-primary">
+                    {t('boq.batch_delete_sections_note', {
+                      defaultValue: 'Sections are deleted with all {{count}} positions inside them:',
+                      count: sectionsToDelete.reduce((n, s) => n + s.positionCount, 0),
+                    })}
+                  </p>
+                  <ul className="mt-1 max-h-32 overflow-y-auto space-y-0.5">
+                    {sectionsToDelete.map((s) => (
+                      <li key={s.id} className="flex justify-between gap-2">
+                        <span className="truncate">{[s.ordinal, s.description].filter(Boolean).join(' ')}</span>
+                        <span className="shrink-0 tabular-nums">
+                          {t('boq.batch_delete_section_count', { defaultValue: '{{count}} positions', count: s.positionCount })}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
             <div className="flex gap-3 px-6 pb-6">
               <button

@@ -14,6 +14,7 @@ import { Button } from '@/shared/ui';
 import { useFocusTrap } from '@/shared/hooks/useFocusTrap';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
 import { fmtList } from '@/shared/lib/formatters';
+import { decimalMarkEvidence, parsePastedNumber } from '@/shared/lib/parseDecimal';
 
 export interface PastedRow {
   ordinal: string;
@@ -58,21 +59,22 @@ function detectColumns(headerCells: string[]): Record<number, string> {
 const DEFAULT_ORDER = ['description', 'unit', 'quantity', 'unit_rate'];
 
 /**
- * Parse a human-entered number in either 1,234.56 or 1.234,56 grouping.
- * Returns NaN when the cell holds something that is not a number, so the
- * caller can flag it instead of silently reading a bad value as zero.
+ * The locale a pasted column is written in, from the unambiguous cells of that
+ * column: a column holding `2,5` was written with a decimal comma whatever the
+ * reader's settings say. `null` when its cells contradict each other.
  */
-function parseNumber(s: string): number {
-  const trimmed = s.trim();
-  if (!trimmed) return NaN;
-  const cleaned = trimmed.replace(/[^\d.,-]/g, '');
-  if (!/\d/.test(cleaned)) return NaN;
-  // Detect European format: 1.234,56
-  if (/^\d{1,3}(\.\d{3})*(,\d+)?$/.test(cleaned)) {
-    return parseFloat(cleaned.replace(/\./g, '').replace(',', '.'));
-  }
-  // US/UK format: 1,234.56
-  return parseFloat(cleaned.replace(/,/g, ''));
+function columnLocale(cells: string[], fallback: string | null): string | null {
+  const marks = new Set(cells.map(decimalMarkEvidence).filter((m) => m !== null));
+  if (marks.size > 1) return null;
+  if (marks.has(',')) return 'de-DE';
+  if (marks.has('.')) return 'en-US';
+  return fallback;
+}
+
+/** NaN when the cell holds something that is not a number, so the caller can flag it. */
+function parseNumber(s: string, locale: string | null): { value: number; ambiguous: boolean } {
+  const r = parsePastedNumber(s, locale);
+  return { value: r.value ?? NaN, ambiguous: r.ambiguous };
 }
 
 export interface ParseResult {
@@ -82,12 +84,14 @@ export interface ParseResult {
   skippedEmpty: number;
   /** Number cells that were present but could not be read as a number. */
   invalidNumbers: number;
+  /** `rowIndex:field` of number cells whose decimal mark could not be decided. */
+  reviewCells: string[];
 }
 
-export function parseRows(raw: string): ParseResult {
+export function parseRows(raw: string, locale: string | null = getNumberLocale()): ParseResult {
   const lines = raw.split('\n').filter((l) => l.trim());
   if (lines.length === 0)
-    return { rows: [], detectedHeaders: [], skippedEmpty: 0, invalidNumbers: 0 };
+    return { rows: [], detectedHeaders: [], skippedEmpty: 0, invalidNumbers: 0, reviewCells: [] };
 
   const firstLine = lines[0] ?? '';
   const firstRow = firstLine.split('\t');
@@ -111,9 +115,13 @@ export function parseRows(raw: string): ParseResult {
   let autoOrdinal = 1;
   let skippedEmpty = 0;
   let invalidNumbers = 0;
+  const reviewCells: string[] = [];
+  const splitLines = dataLines.map((l) => l.split('	'));
+  const colIdx = (field: string) => Number(Object.entries(colMap).find(([, f]) => f === field)?.[0] ?? -1);
+  const qtyLocale = columnLocale(splitLines.map((c) => c[colIdx('quantity')] ?? ''), locale);
+  const rateLocale = columnLocale(splitLines.map((c) => c[colIdx('unit_rate')] ?? ''), locale);
 
-  for (const line of dataLines) {
-    const cells = line.split('\t');
+  for (const cells of splitLines) {
     const row: Record<string, string> = {};
     for (const [idx, field] of Object.entries(colMap)) {
       row[field] = (cells[Number(idx)] ?? '').trim();
@@ -129,8 +137,12 @@ export function parseRows(raw: string): ParseResult {
 
     const rawQty = row['quantity'] ?? '';
     const rawRate = row['unit_rate'] ?? '';
-    let quantity = rawQty ? parseNumber(rawQty) : 1;
-    let unit_rate = rawRate ? parseNumber(rawRate) : 0;
+    const q = rawQty ? parseNumber(rawQty, qtyLocale) : { value: 1, ambiguous: false };
+    const r = rawRate ? parseNumber(rawRate, rateLocale) : { value: 0, ambiguous: false };
+    let quantity = q.value;
+    let unit_rate = r.value;
+    if (q.ambiguous) reviewCells.push(`${rows.length}:quantity`);
+    if (r.ambiguous) reviewCells.push(`${rows.length}:unit_rate`);
     if (Number.isNaN(quantity)) {
       invalidNumbers++;
       quantity = 1;
@@ -149,7 +161,7 @@ export function parseRows(raw: string): ParseResult {
     });
   }
 
-  return { rows, detectedHeaders, skippedEmpty, invalidNumbers };
+  return { rows, detectedHeaders, skippedEmpty, invalidNumbers, reviewCells };
 }
 
 /* ── Component ────────────────────────────────────────────────────── */
@@ -161,10 +173,19 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
   const titleId = useId();
   useFocusTrap(panelRef, open);
 
-  const { rows, detectedHeaders, skippedEmpty, invalidNumbers } = useMemo(
+  const { rows, detectedHeaders, skippedEmpty, invalidNumbers, reviewCells } = useMemo(
     () => parseRows(raw),
     [raw],
   );
+  const reviewSet = useMemo(() => new Set(reviewCells), [reviewCells]);
+  const reviewClass = (i: number, field: string) =>
+    reviewSet.has(`${i}:${field}`)
+      ? 'px-3 py-1.5 text-right tabular-nums bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300'
+      : 'px-3 py-1.5 text-right tabular-nums';
+  const reviewTitle = (i: number, field: string) =>
+    reviewSet.has(`${i}:${field}`)
+      ? t('boq.paste_ambiguous_cell', { defaultValue: 'This value could be read two ways. Check it before importing.' })
+      : undefined;
   const totalSum = useMemo(() => rows.reduce((s, r) => s + r.quantity * r.unit_rate, 0), [rows]);
 
   const handleImport = useCallback(() => {
@@ -255,7 +276,7 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
           )}
 
           {/* Nothing is dropped in silence: tell the user what could not be read. */}
-          {(skippedEmpty > 0 || invalidNumbers > 0) && (
+          {(skippedEmpty > 0 || invalidNumbers > 0 || reviewCells.length > 0) && (
             <div className="space-y-1 rounded-lg border border-amber-200 bg-amber-50/60 px-3 py-2">
               {skippedEmpty > 0 && (
                 <div className="flex items-center gap-2 text-amber-700">
@@ -270,6 +291,14 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
                   <AlertTriangle size={14} />
                   <span className="text-xs">
                     {t('boq.paste_invalid_numbers', { defaultValue: '{{count}} number cells could not be read and kept their default (qty 1, rate 0)', count: invalidNumbers })}
+                  </span>
+                </div>
+              )}
+              {reviewCells.length > 0 && (
+                <div className="flex items-center gap-2 text-amber-700">
+                  <AlertTriangle size={14} />
+                  <span className="text-xs">
+                    {t('boq.paste_ambiguous_numbers', { defaultValue: '{{count}} number cells could be read two ways (for example 1,250) and are marked below: check them before importing', count: reviewCells.length })}
                   </span>
                 </div>
               )}
@@ -297,8 +326,8 @@ export function ExcelPasteModal({ open, onClose, onImport, loading }: ExcelPaste
                         <td className="px-3 py-1.5 font-mono text-content-tertiary">{r.ordinal}</td>
                         <td className="px-3 py-1.5 max-w-[300px] truncate">{r.description}</td>
                         <td className="px-3 py-1.5 text-center font-mono uppercase">{r.unit}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums">{r.quantity.toLocaleString(getNumberLocale())}</td>
-                        <td className="px-3 py-1.5 text-right tabular-nums">{r.unit_rate.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}</td>
+                        <td className={reviewClass(i, 'quantity')} title={reviewTitle(i, 'quantity')}>{r.quantity.toLocaleString(getNumberLocale())}</td>
+                        <td className={reviewClass(i, 'unit_rate')} title={reviewTitle(i, 'unit_rate')}>{r.unit_rate.toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}</td>
                         <td className="px-3 py-1.5 text-right tabular-nums font-medium">{(r.quantity * r.unit_rate).toLocaleString(getNumberLocale(), { minimumFractionDigits: 2 })}</td>
                       </tr>
                     ))}

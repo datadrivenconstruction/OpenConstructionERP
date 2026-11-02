@@ -181,3 +181,87 @@ export function toDecimalPayloadString(raw: string, fallback = '0'): string {
   if (parseDecimalInput(trimmed) === null) return trimmed;
   return normalizeDecimalSeparators(trimmed);
 }
+
+/** True when `locale` writes its decimal separator as a comma (`de-DE`, `fr-FR`, ...). */
+export function localeUsesDecimalComma(locale: string): boolean {
+  try {
+    const part = new Intl.NumberFormat(locale).formatToParts(1.5).find((p) => p.type === 'decimal');
+    return part?.value === ',';
+  } catch {
+    return false;
+  }
+}
+
+/** A lone `,` or `.` followed by exactly three digits: `1,250` / `1.250`. */
+const AMBIGUOUS_GROUP_RE = /^([-+]?[1-9]\d{0,2})([.,])(\d{3})$/;
+
+/**
+ * Decide `1,250` / `1.250`, the one shape the grammar cannot settle on its own.
+ *
+ * Returns the canonical dot-decimal string, or `null` when the value is not of
+ * that shape. With no locale there is nothing to decide by and the caller must
+ * ask the user. In a comma-decimal locale the comma is the decimal mark
+ * (`1,250` = 1.25, `1.250` = 1250); in a dot-decimal one the reverse.
+ */
+export function resolveAmbiguousSeparator(s: string, locale: string | null | undefined): string | null {
+  const m = AMBIGUOUS_GROUP_RE.exec(s);
+  if (!m || !locale) return null;
+  const decimalMark = localeUsesDecimalComma(locale) ? ',' : '.';
+  return m[2] === decimalMark ? `${m[1]}.${m[3]}` : `${m[1]}${m[3]}`;
+}
+
+/**
+ * Strip a pasted cell down to digits, separators and sign: currency signs,
+ * unit labels, Swiss apostrophes and space grouping go.
+ */
+export function cleanPastedNumber(raw: string): string {
+  let s = foldNonAsciiDigits(stripCurrencySigns(raw));
+  s = s.replace(/[A-Za-z²³À-ɏЀ-ӿ/%]+[0-9²³]*\s*$/u, '');
+  s = s.replace(/^[A-Za-zÀ-ɏ]+\.?\s*/u, '');
+  s = s.replace(/(\d)['’](?=\d{3}(\D|$))/g, '$1').trim();
+  return s.replace(/(\d)[   ](?=\d)/g, '$1');
+}
+
+/**
+ * Which decimal mark an unambiguous pasted value proves its writer uses, or
+ * `null` when the value says nothing (`1250`, or the ambiguous `1,250`).
+ */
+export function decimalMarkEvidence(raw: string): ',' | '.' | null {
+  const s = cleanPastedNumber(raw);
+  const hasComma = s.includes(',');
+  const hasDot = s.includes('.');
+  if (hasComma && hasDot) return s.lastIndexOf(',') > s.lastIndexOf('.') ? ',' : '.';
+  if (!hasComma && !hasDot) return null;
+  if (AMBIGUOUS_GROUP_RE.test(s)) return null;
+  const sep = hasComma ? ',' : '.';
+  // Two or more groups of three (`1.234.567`) prove the separator is grouping.
+  if (s.split(sep).length > 2) return sep === ',' ? '.' : ',';
+  return sep;
+}
+
+/** Result of {@link parsePastedNumber}. */
+export interface PastedNumber {
+  /** The number, or `null` when the cell holds no readable number. */
+  value: number | null;
+  /** True when the value could not be resolved and needs a human to look at it. */
+  ambiguous: boolean;
+}
+
+/**
+ * Read a number pasted from a spreadsheet cell, whatever market wrote it.
+ *
+ * Currency signs, unit labels (`m3`, `m²`, `EUR`) and Swiss apostrophes are
+ * dropped first, then the shared grammar applies: `1 250,00`, `1.234,56`,
+ * `1,234.56`, `0,250`, `12'500.50`. A lone separator before exactly three
+ * digits is decided by `locale`; without one the cell is flagged `ambiguous`.
+ */
+export function parsePastedNumber(raw: string, locale: string | null | undefined): PastedNumber {
+  const s = cleanPastedNumber(raw);
+  if (!/\d/.test(s)) return { value: null, ambiguous: false };
+  if (AMBIGUOUS_GROUP_RE.test(s)) {
+    const resolved = resolveAmbiguousSeparator(s, locale);
+    if (resolved === null) return { value: parseDecimalInput(s), ambiguous: true };
+    return { value: Number(resolved), ambiguous: false };
+  }
+  return { value: parseDecimalInput(s), ambiguous: false };
+}

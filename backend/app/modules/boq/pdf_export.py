@@ -184,6 +184,35 @@ def _fmt(value: float, decimals: int = 2, currency: str = "", country: str = "")
     return format_number(value, decimals, number_style(country, ccy))
 
 
+def _quantity_decimals(value: Any) -> int:
+    """Decimals a printed quantity needs: those it carries, from 2 to 4.
+
+    A measured 2.625 m3 prints as 2.625, not 2.63, so quantity x rate on the
+    printed bill reconciles with the line total priced on the full value.
+    Trailing zeros beyond the second decimal are dropped (2.50, 0.2205).
+    """
+    try:
+        dec = Decimal(str(value)).quantize(Decimal("0.0001"))
+    except (ArithmeticError, ValueError):
+        return 2
+    exponent = dec.normalize().as_tuple().exponent
+    carried = -exponent if isinstance(exponent, int) and exponent < 0 else 0
+    return min(4, max(2, carried))
+
+
+def _fmt_quantity(value: Any, country: str = "", currency: str = "") -> str:
+    """A quantity in the market's separators with the decimals it carries.
+
+    Never routed through :func:`_fmt`: a quantity is not an amount of money, so
+    a zero-decimal currency must not round 2.5 m3 to 3.
+    """
+    try:
+        num = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    return format_number(num, _quantity_decimals(value), number_style(country, (currency or "").upper()))
+
+
 def _fmt_rate(value: float, decimals: int, currency: str = "", country: str = "") -> str:
     """A percentage in the market's separators, never rounded to a currency's units.
 
@@ -1062,7 +1091,7 @@ def _build_boq_table(
         thousands / decimal separators stay consistent.
         """
         result = convert_units(quantity, unit, measurement_system)
-        return _fv(result.value), result.display_unit
+        return _fmt_quantity(result.value, country_code, currency), result.display_unit
 
     def _rate_cell(rate: Any, unit: str) -> str:
         """Return the per-unit rate text for a row.
