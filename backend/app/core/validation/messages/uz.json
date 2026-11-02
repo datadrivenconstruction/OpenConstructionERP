@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Eskrou hisobi {account}: chiqarilgan {released} chegaradan {cap} oshib ketdi (yig'ilgan mablag'ning tasdiqlangan bajarilishi {progress}%)",
       "suggestion": "Keyingi bajarilish sertifikatigacha keyingi chiqarishlarni to'xtating yoki bajarilishni oshiradigan sertifikatni qayd eting"
+    },
+    "broker_licence_default_label": "ko‘chmas mulk brokeri litsenziyasi",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "{broker} brokerda {date} sanasida {deal} bitimi uchun amal qiluvchi {label} yo‘q edi",
+      "suggestion": "Bitim sanasini qamrab oluvchi litsenziyani qayd eting yoki bitimni litsenziyali brokerga o‘tkazing"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{broker} brokerning {label} {date} kuni tugaydi, {days} kundan keyin",
+      "suggestion": "Muddat tugashidan oldin litsenziyani yangilang va litsenziya yozuvini yangilang"
     }
   },
   "schedule_5d": {

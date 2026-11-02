@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Letéti számla {account}: a felszabadított {released} meghaladja a {cap} felső korlátot (igazolt készültség: a beszedett pénz {progress}%-a)",
       "suggestion": "Tartsa vissza a további felszabadításokat a következő készültségi igazolásig, vagy rögzítse a készültséget növelő igazolást"
+    },
+    "broker_licence_default_label": "ingatlanközvetítői engedély",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "A(z) {broker} közvetítő a(z) {date} napon nem rendelkezett érvényes {label}-nel a(z) {deal} ügylethez",
+      "suggestion": "Rögzítsen olyan engedélyt, amely lefedi az ügylet dátumát, vagy adja át az ügyletet engedéllyel rendelkező közvetítőnek"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "A(z) {broker} közvetítő {label}-e {date} napon lejár, {days} napon belül",
+      "suggestion": "Az engedélyt lejárta előtt újítsa meg, és frissítse az engedély nyilvántartását"
     }
   },
   "schedule_5d": {

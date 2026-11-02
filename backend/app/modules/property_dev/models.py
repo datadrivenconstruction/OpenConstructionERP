@@ -25,7 +25,7 @@ External references (kept as plain UUID columns, NO FK):
 from __future__ import annotations
 
 import uuid
-from datetime import datetime  # noqa: F401  - used in Mapped[datetime] annotations
+from datetime import date, datetime  # noqa: F401  - used in Mapped[datetime] annotations
 from decimal import Decimal
 
 from sqlalchemy import (
@@ -1156,6 +1156,46 @@ class Broker(Base):
         return f"<Broker {self.name!r} ({self.kyc_status})>"
 
 
+class BrokerLicence(Base):
+    """One licence a broker holds with a licensing authority.
+
+    Neutral on purpose: the authority code, the number and the validity window
+    are data. Which authority a country expects, and what it calls the
+    licence, lives in the country data (``broker_licence`` in the regional
+    profile), never here.
+    """
+
+    __tablename__ = "oe_property_dev_broker_licence"
+    __table_args__ = (
+        UniqueConstraint(
+            "broker_id",
+            "authority_code",
+            "licence_number",
+            name="uq_oe_property_dev_broker_licence_number",
+        ),
+    )
+
+    broker_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_property_dev_broker.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    authority_code: Mapped[str] = mapped_column(String(40), nullable=False, default="", index=True)
+    licence_number: Mapped[str] = mapped_column(String(120), nullable=False, default="")
+    valid_from: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # NULL means the licence has no end date.
+    valid_to: Mapped[date | None] = mapped_column(Date, nullable=True)
+    # active | suspended | revoked | expired. Only "active" counts as held.
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="active", index=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata", JSON, nullable=False, default=dict, server_default="{}"
+    )
+
+    def __repr__(self) -> str:
+        return f"<BrokerLicence {self.authority_code}:{self.licence_number} ({self.status})>"
+
+
 class CommissionAgreement(Base):
     """A broker's commission contract on a development (or all developments).
 
@@ -1788,6 +1828,7 @@ class PortalToken(Base):
 __all__ = [
     "Block",
     "Broker",
+    "BrokerLicence",
     "Buyer",
     "BuyerOption",
     "BuyerOptionGroup",

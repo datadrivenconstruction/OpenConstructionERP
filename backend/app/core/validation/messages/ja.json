@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "エスクロー口座 {account}：解除額 {released} が上限 {cap} を超えています（回収済み資金に対する認定進捗率 {progress}%）",
       "suggestion": "次の出来高証明書が出るまで追加の解除を保留するか、進捗を引き上げる証明書を登録してください"
+    },
+    "broker_licence_default_label": "宅建業免許",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "取引業者{broker}は、{deal}に関して{date}時点で有効な{label}を保有していません",
+      "suggestion": "取引日をカバーする免許を登録するか、取引を免許を持つ業者に移管してください"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "取引業者{broker}の{label}は{date}に満了し、あと{days}日です",
+      "suggestion": "満了前に免許を更新し、免許記録を更新してください"
     }
   },
   "schedule_5d": {

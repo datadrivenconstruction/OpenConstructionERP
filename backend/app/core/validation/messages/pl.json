@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Rachunek powierniczy {account}: uwolnione {released} przekracza limit {cap} (zatwierdzony postęp {progress}% zebranych środków)",
       "suggestion": "Wstrzymaj dalsze uwolnienia do kolejnego certyfikatu postępu lub zarejestruj certyfikat podnoszący postęp"
+    },
+    "broker_licence_default_label": "licencja pośrednika w obrocie nieruchomościami",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Pośrednik {broker} nie miał ważnej {label} w dniu {date} dla transakcji {deal}",
+      "suggestion": "Zarejestruj licencję obejmującą datę transakcji albo przekaż transakcję pośrednikowi z licencją"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} pośrednika {broker} kończy się {date}, za {days} dni",
+      "suggestion": "Odnów licencję przed wygaśnięciem i zaktualizuj rejestr licencji"
     }
   },
   "schedule_5d": {

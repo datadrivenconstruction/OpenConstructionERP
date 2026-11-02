@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "حساب الضمان {account}: المبلغ المصروف {released} يتجاوز الحد {cap} (نسبة الإنجاز المعتمدة {progress}% من المبالغ المحصلة)",
       "suggestion": "أوقف الصرف حتى صدور شهادة الإنجاز التالية، أو سجّل الشهادة التي ترفع نسبة الإنجاز"
+    },
+    "broker_licence_default_label": "ترخيص الوسيط العقاري",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "الوسيط {broker} لا يملك {label} ساريًا بتاريخ {date} للصفقة {deal}",
+      "suggestion": "سجّل ترخيصًا يغطي تاريخ الصفقة، أو أسند الصفقة إلى وسيط مرخّص"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "ينتهي {label} للوسيط {broker} بتاريخ {date}، أي خلال {days} يومًا",
+      "suggestion": "جدّد الترخيص قبل انتهائه وحدّث سجل الترخيص"
     }
   },
   "schedule_5d": {

@@ -50,6 +50,13 @@ _PLAN = (
     (Decimal("0.30"), "Handover", "handover", 100),
 )
 _PROGRESS = Decimal("62")  # certified construction progress, percent
+# Fictitious brokers: (name, licence number, valid from, valid to). The numbers are not real
+# registrations. Every licence covers the demo deal dates.
+_BROKERS = (
+    ("Najd Real Estate Brokerage (demo)", "DEMO-FAL-1100201", "2025-01-01", "2027-12-31"),
+    ("Al Wasit Property Advisors (demo)", "DEMO-FAL-1100202", "2024-06-01", "2027-06-30"),
+    ("Riyadh Home Finders (demo)", "DEMO-FAL-1100203", "2023-01-01", "2027-03-31"),
+)
 
 
 def _q(v: Decimal) -> Decimal:
@@ -108,15 +115,19 @@ async def seed_real_estate_demo(
     # ── Property development: tower, units, buyers, contracts, plans, escrow ──
     from app.modules.property_dev.models import (
         Block,
+        Broker,
+        BrokerLicence,
         Buyer,
         ContractParty,
         Development,
         EscrowAccount,
         EscrowTransaction,
         Instalment,
+        Lead,
         PaymentSchedule,
         Phase,
         Plot,
+        Reservation,
         SalesContract,
     )
 
@@ -202,6 +213,34 @@ async def seed_real_estate_demo(
     dev.sales_target_amount = total_target
     await session.flush()
 
+    licence_policy = profile.get("broker_licence") or {}
+    brokers: list[Broker] = []
+    for name, number, valid_from, valid_to in _BROKERS:
+        broker = Broker(
+            name=name,
+            license_number=number,
+            jurisdiction=f"{country}-01",
+            contact_email=f"info@{name.split()[0].lower()}.example.sa",
+            default_commission_pct=Decimal("2.00"),
+            kyc_status="verified",
+            metadata_={"is_demo": True},
+        )
+        session.add(broker)
+        brokers.append(broker)
+    await session.flush()
+    for broker, (_, number, valid_from, valid_to) in zip(brokers, _BROKERS, strict=True):
+        session.add(
+            BrokerLicence(
+                broker_id=broker.id,
+                authority_code=licence_policy.get("authority_code") or regulator or "",
+                licence_number=number,
+                valid_from=date.fromisoformat(valid_from),
+                valid_to=date.fromisoformat(valid_to),
+                status="active",
+                metadata_={"is_demo": True},
+            )
+        )
+
     buyers: dict[str, Contact] = {}
     contracts = 0
     instalments = 0
@@ -232,12 +271,43 @@ async def seed_real_estate_demo(
             jurisdiction=country,
         )
         session.add(buyer)
+        # Every third deal is direct; the others come through one of the demo brokers.
+        broker = None if i % 3 == 2 else brokers[(i // 3) % len(brokers)]
+        signing = buyer.contract_signed_at or f"2026-{1 + i % 9:02d}-{10 + i % 15:02d}"
+        lead = Lead(
+            development_id=dev.id,
+            source="broker" if broker else "website",
+            contact_id=person.id,
+            status="converted",
+            full_name=buyer.full_name,
+            email=buyer.email,
+            phone=buyer.phone,
+            language="ar",
+            currency=currency,
+            broker_id=broker.id if broker else None,
+            metadata_={"is_demo": True},
+        )
+        session.add(lead)
+        await session.flush()
+        reservation = Reservation(
+            plot_id=plot.id,
+            lead_id=lead.id,
+            buyer_id=buyer.id,
+            reservation_number=f"RSV-{dev.code}-{plot.plot_number}",
+            deposit_amount=buyer.deposit_amount,
+            currency=currency,
+            deposit_paid_at=datetime.fromisoformat(f"{signing}T09:00:00+00:00"),
+            status="active" if reserved else "converted",
+            metadata_={"is_demo": True},
+        )
+        session.add(reservation)
         if reserved:
             continue
         await session.flush()
         contract = SalesContract(
             contract_number=f"SPA-{dev.code}-{plot.plot_number}",
             plot_id=plot.id,
+            reservation_id=reservation.id,
             signing_date=buyer.contract_signed_at,
             governing_law=country,
             language="ar",
@@ -382,7 +452,7 @@ async def seed_real_estate_demo(
                 tax_code="S",
                 tax_rate=vat_rate,
                 payment_terms_days=10,
-                ext_refs={"use": use},
+                ext_refs={"use": use, "broker_id": str(brokers[n - 1].id)},
             ),
             owner,
         )

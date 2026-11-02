@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Conto di deposito a garanzia {account}: l'importo rilasciato {released} supera il tetto {cap} (avanzamento certificato del {progress}% dei fondi incassati)",
       "suggestion": "Sospendi ulteriori rilasci fino al prossimo certificato di avanzamento, oppure registra il certificato che aumenta l'avanzamento"
+    },
+    "broker_licence_default_label": "licenza di mediatore immobiliare",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Il mediatore {broker} non aveva una {label} valida alla data del {date} per {deal}",
+      "suggestion": "Registrare una licenza che copra la data dell'operazione oppure affidare l'operazione a un mediatore abilitato"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "La {label} del mediatore {broker} scade il {date}, tra {days} giorni",
+      "suggestion": "Rinnovare la licenza prima della scadenza e aggiornare la relativa scheda"
     }
   },
   "schedule_5d": {

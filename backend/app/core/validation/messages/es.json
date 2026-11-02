@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Cuenta de depósito en garantía {account}: lo liberado {released} supera el tope {cap} (avance certificado del {progress}% del dinero cobrado)",
       "suggestion": "Retenga nuevas liberaciones hasta el próximo certificado de avance, o registre el certificado que eleva el avance"
+    },
+    "broker_licence_default_label": "licencia de agente inmobiliario",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "El agente {broker} no tenía una {label} válida el {date} para {deal}",
+      "suggestion": "Registre una licencia que cubra la fecha de la operación o traslade la operación a un agente con licencia"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "La {label} del agente {broker} vence el {date}, en {days} días",
+      "suggestion": "Renueve la licencia antes de su vencimiento y actualice el registro de la licencia"
     }
   },
   "schedule_5d": {

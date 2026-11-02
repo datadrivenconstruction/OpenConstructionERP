@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Rekening escrow {account}: dana yang dicairkan {released} melebihi batas {cap} (progres tersertifikasi {progress}% dari dana yang terkumpul)",
       "suggestion": "Tahan pencairan berikutnya hingga sertifikat progres berikutnya, atau catat sertifikat yang menaikkan progres"
+    },
+    "broker_licence_default_label": "lisensi broker",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Broker {broker} tidak memiliki {label} yang berlaku pada {date} untuk {deal}",
+      "suggestion": "Catat lisensi yang mencakup tanggal transaksi, atau alihkan transaksi ke broker berlisensi"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} broker {broker} berakhir pada {date}, dalam {days} hari",
+      "suggestion": "Perpanjang lisensi sebelum berakhir dan perbarui catatan lisensi"
     }
   },
   "schedule_5d": {

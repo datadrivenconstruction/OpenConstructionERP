@@ -48,6 +48,7 @@ from app.core.validation.messages import translate
 from app.modules.property_dev.models import (
     Block,
     Broker,
+    BrokerLicence,
     Buyer,
     BuyerOption,
     BuyerOptionGroup,
@@ -77,6 +78,7 @@ from app.modules.property_dev.models import (
 )
 from app.modules.property_dev.repository import (
     BlockRepository,
+    BrokerLicenceRepository,
     BrokerRepository,
     BuyerOptionGroupRepository,
     BuyerOptionRepository,
@@ -1542,6 +1544,7 @@ class PropertyDevService:
         self.phases = PhaseRepository(session)
         self.blocks = BlockRepository(session)
         self.brokers = BrokerRepository(session)
+        self.broker_licences = BrokerLicenceRepository(session)
         self.commission_agreements = CommissionAgreementRepository(session)
         self.commission_accruals = CommissionAccrualRepository(session)
         self.escrow_accounts = EscrowAccountRepository(session)
@@ -6229,6 +6232,54 @@ async def _svc_update_broker(
     return await _svc_get_broker(svc, broker_id)
 
 
+def _licence_window_error(valid_from: Any, valid_to: Any) -> HTTPException | None:
+    if valid_from and valid_to and valid_to < valid_from:
+        return HTTPException(status_code=422, detail="valid_to must not be before valid_from")
+    return None
+
+
+async def _svc_create_broker_licence(svc: PropertyDevService, broker_id: uuid.UUID, data: Any) -> BrokerLicence:
+    await _svc_get_broker(svc, broker_id)
+    authority = data.authority_code.upper()
+    if await svc.broker_licences.find_duplicate(broker_id, authority, data.licence_number) is not None:
+        raise HTTPException(status_code=409, detail="This licence is already recorded for the broker")
+    obj = BrokerLicence(
+        broker_id=broker_id,
+        authority_code=authority,
+        licence_number=data.licence_number,
+        valid_from=data.valid_from,
+        valid_to=data.valid_to,
+        status=data.status,
+        metadata_=data.metadata,
+    )
+    return await svc.broker_licences.create(obj)
+
+
+async def _svc_get_broker_licence(
+    svc: PropertyDevService, broker_id: uuid.UUID, licence_id: uuid.UUID
+) -> BrokerLicence:
+    obj = await svc.broker_licences.get_by_id(licence_id)
+    if obj is None or obj.broker_id != broker_id:
+        raise HTTPException(status_code=404, detail="Broker licence not found")
+    return obj
+
+
+async def _svc_update_broker_licence(
+    svc: PropertyDevService, broker_id: uuid.UUID, licence_id: uuid.UUID, data: Any
+) -> BrokerLicence:
+    licence = await _svc_get_broker_licence(svc, broker_id, licence_id)
+    fields = _dump(data, licence)
+    if isinstance(fields.get("authority_code"), str):
+        fields["authority_code"] = fields["authority_code"].upper()
+    error = _licence_window_error(
+        fields.get("valid_from", licence.valid_from), fields.get("valid_to", licence.valid_to)
+    )
+    if error is not None:
+        raise error
+    await svc.broker_licences.update_fields(licence_id, **fields)
+    return await _svc_get_broker_licence(svc, broker_id, licence_id)
+
+
 async def _svc_verify_broker_kyc(
     svc: PropertyDevService,
     broker_id: uuid.UUID,
@@ -7193,6 +7244,9 @@ _QUARTER_RE = re.compile(r"^\d{4}-Q[1-4]$")
 PropertyDevService.create_broker = _svc_create_broker  # type: ignore[attr-defined]
 PropertyDevService.get_broker = _svc_get_broker  # type: ignore[attr-defined]
 PropertyDevService.update_broker = _svc_update_broker  # type: ignore[attr-defined]
+PropertyDevService.create_broker_licence = _svc_create_broker_licence  # type: ignore[attr-defined]
+PropertyDevService.get_broker_licence = _svc_get_broker_licence  # type: ignore[attr-defined]
+PropertyDevService.update_broker_licence = _svc_update_broker_licence  # type: ignore[attr-defined]
 PropertyDevService.verify_broker_kyc = _svc_verify_broker_kyc  # type: ignore[attr-defined]
 PropertyDevService.create_agreement = _svc_create_agreement  # type: ignore[attr-defined]
 PropertyDevService.get_agreement = _svc_get_agreement  # type: ignore[attr-defined]

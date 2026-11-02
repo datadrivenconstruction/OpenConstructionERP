@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "ایسکرو اکاؤنٹ {account}: جاری کردہ {released} حد {cap} سے تجاوز کر گئی ہے (جمع شدہ رقم کی تصدیق شدہ پیش رفت {progress}%)",
       "suggestion": "اگلے پیش رفت سرٹیفکیٹ تک مزید اجرا روک دیں، یا پیش رفت بڑھانے والا سرٹیفکیٹ درج کریں"
+    },
+    "broker_licence_default_label": "پراپرٹی بروکر کا لائسنس",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "بروکر {broker} کے پاس {date} کو {deal} کے لیے کوئی درست {label} نہیں تھا",
+      "suggestion": "معاملے کی تاریخ کا احاطہ کرنے والا لائسنس درج کریں، یا معاملہ کسی لائسنس یافتہ بروکر کو منتقل کریں"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "بروکر {broker} کا {label} {date} کو ختم ہوگا، {days} دنوں میں",
+      "suggestion": "میعاد ختم ہونے سے پہلے لائسنس تجدید کریں اور لائسنس کا ریکارڈ اپڈیٹ کریں"
     }
   },
   "schedule_5d": {

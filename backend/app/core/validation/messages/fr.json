@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Compte séquestre {account} : le montant libéré {released} dépasse le plafond {cap} (avancement certifié de {progress}% des fonds encaissés)",
       "suggestion": "Suspendez les libérations suivantes jusqu'au prochain certificat d'avancement, ou enregistrez le certificat qui fait progresser l'avancement"
+    },
+    "broker_licence_default_label": "licence de courtier immobilier",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Le courtier {broker} ne détenait pas de {label} valide à la date du {date} pour {deal}",
+      "suggestion": "Enregistrez une licence couvrant la date de la transaction ou confiez la transaction à un courtier titulaire d'une licence"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "La {label} du courtier {broker} prend fin le {date}, dans {days} jours",
+      "suggestion": "Renouvelez la licence avant son échéance et mettez à jour la fiche de licence"
     }
   },
   "schedule_5d": {

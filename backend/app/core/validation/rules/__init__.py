@@ -12182,6 +12182,7 @@ def register_builtin_rules() -> None:
     # Imported here and not at the top of the file: the module reads its
     # locale, position and currency helpers from this package, so a top-level
     # import would run before those names exist.
+    from app.core.validation.rules.broker_licence import BROKER_LICENCE_RULES
     from app.core.validation.rules.field_clock import FIELD_CLOCK_RULES
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
     from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
@@ -12320,6 +12321,7 @@ def register_builtin_rules() -> None:
         (PropDevReservationExpiryInFuture(), None),
         (PropDevBrokerCommissionRateWithinBounds(), None),
         (PropDevPriceMatrixNoNegativeModifier(), None),
+        *((rule, None) for rule in BROKER_LICENCE_RULES),
         # Schedule Quality (C1 - DCMA-14-style health checks)
         (ScheduleOpenEnds(), None),
         (ScheduleNegativeLag(), None),

@@ -19,6 +19,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.modules.property_dev.models import (
     Block,
     Broker,
+    BrokerLicence,
     Buyer,
     BuyerOption,
     BuyerOptionGroup,
@@ -1008,6 +1009,37 @@ class BrokerRepository(_BaseRepo):
         stmt = stmt.order_by(Broker.name).offset(offset).limit(limit)
         result = await self.session.execute(stmt)
         return list(result.scalars().all())
+
+
+class BrokerLicenceRepository(_BaseRepo):
+    """Data access for BrokerLicence."""
+
+    model = BrokerLicence
+
+    async def list_for_broker(self, broker_id: uuid.UUID) -> list[BrokerLicence]:
+        stmt = (
+            select(BrokerLicence)
+            .where(BrokerLicence.broker_id == broker_id)
+            .order_by(BrokerLicence.valid_to.desc().nulls_first(), BrokerLicence.licence_number)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def list_for_tenant(self, tenant_id: uuid.UUID | None) -> list[BrokerLicence]:
+        """Every licence of the brokers visible to ``tenant_id`` (own tenant, or the tenant-less cohort)."""
+        stmt = select(BrokerLicence).join(Broker, Broker.id == BrokerLicence.broker_id)
+        stmt = stmt.where(Broker.tenant_id.is_(None) if tenant_id is None else Broker.tenant_id == tenant_id)
+        stmt = stmt.order_by(BrokerLicence.broker_id, BrokerLicence.valid_to.desc().nulls_first())
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def find_duplicate(
+        self, broker_id: uuid.UUID, authority_code: str, licence_number: str
+    ) -> BrokerLicence | None:
+        stmt = select(BrokerLicence).where(
+            BrokerLicence.broker_id == broker_id,
+            BrokerLicence.authority_code == authority_code,
+            BrokerLicence.licence_number == licence_number,
+        )
+        return (await self.session.execute(stmt)).scalars().first()
 
 
 # ── CommissionAgreement ────────────────────────────────────────────────

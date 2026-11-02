@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Emanet hesabı {account}: serbest bırakılan {released}, {cap} sınırını aşıyor (tahsil edilen paranın onaylı ilerlemesi %{progress})",
       "suggestion": "Sonraki hakediş belgesine kadar yeni serbest bırakmaları bekletin veya ilerlemeyi yükselten belgeyi kaydedin"
+    },
+    "broker_licence_default_label": "emlak komisyoncusu lisansı",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "{broker} komisyoncusunun {deal} işlemi için {date} tarihinde geçerli bir {label} yoktu",
+      "suggestion": "İşlem tarihini kapsayan bir lisans kaydedin veya işlemi lisanslı bir komisyoncuya devredin"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{broker} komisyoncusunun {label} {date} tarihinde sona eriyor, {days} gün kaldı",
+      "suggestion": "Lisansın süresi dolmadan yenileyin ve lisans kaydını güncelleyin"
     }
   },
   "schedule_5d": {

@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Escrow račun {account}: oslobođeno {released} premašuje gornju granicu {cap} (ovjereni napredak {progress}% prikupljenog novca)",
       "suggestion": "Zadržite daljnja oslobađanja do sljedeće potvrde napretka ili evidentirajte potvrdu koja povećava napredak"
+    },
+    "broker_licence_default_label": "licenca posrednika za nekretnine",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Posrednik {broker} na dan {date} za {deal} nije imao važeću {label}",
+      "suggestion": "Evidentirajte licencu koja pokriva datum posla ili prenesite posao na licenciranog posrednika"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} posrednika {broker} završava {date}, za {days} dana",
+      "suggestion": "Obnovite licencu prije isteka i ažurirajte evidenciju licence"
     }
   },
   "schedule_5d": {
