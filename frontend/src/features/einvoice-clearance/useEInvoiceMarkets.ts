@@ -12,7 +12,8 @@ import { getEInvoiceSetup, type EInvoiceSetupRow } from './lifecycleApi';
 import { einvoiceVisible } from './lifecycleView';
 
 export const EINVOICE_SETUP_QUERY_KEY = ['einvoice-clearance', 'setup'] as const;
-export const EINVOICE_MODULE = 'oe_einvoice_clearance';
+/** The scope API names modules without the `oe_` prefix. */
+export const EINVOICE_MODULE = 'einvoice_clearance';
 
 /** Mandate markets of the module that the tenant's profile covers. */
 export function einvoiceScopeMarkets(scope: MarketScope | undefined): string[] {
