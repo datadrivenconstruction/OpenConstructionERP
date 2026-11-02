@@ -67,7 +67,7 @@ export const DEMO_PROFILES: readonly DemoProfile[] = [
   },
   {
     slug: 'residential-riyadh-offplan',
-    appearance: { accent: 'teal', font: 'system', density: 'comfortable', radius: 'standard', text: 'default' },
+    appearance: { accent: 'teal', font: 'system', density: 'comfortable', radius: 'standard', text: 'default', look: 'standard' },
     groups: null,
     stem: 'demo_profiles.developer',
   },
