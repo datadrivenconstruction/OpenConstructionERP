@@ -14,6 +14,7 @@ import { Button, SideDrawer } from '@/shared/ui';
 import { getErrorMessage } from '@/shared/lib/api';
 import { useToastStore } from '@/stores/useToastStore';
 import type { Position } from './api';
+import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import {
   drawingRefLabel,
   useSetManualDrawingRef,
@@ -26,6 +27,7 @@ const inputCls =
 
 export function DrawingRefsDrawer({
   boqId,
+  projectId,
   position,
   entry,
   readOnly,
@@ -34,6 +36,7 @@ export function DrawingRefsDrawer({
   onCompareRef,
 }: {
   boqId: string;
+  projectId?: string | null;
   position: Position;
   entry: PositionDrawingRefs | undefined;
   readOnly: boolean;
@@ -168,6 +171,7 @@ export function DrawingRefsDrawer({
             )}
           </div>
         </div>
+        <PhotoStrip projectId={projectId} kind="boq_position" targetId={position.id} canUpload={!readOnly} />
       </div>
     </SideDrawer>
   );

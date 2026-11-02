@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import { Fragment, useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -2455,6 +2456,9 @@ export function ScheduleDetail({
             />
             <div className="border-t border-border-light pt-4">
               <BoqLinkEditor scheduleId={schedule.id} projectId={projectId} activity={selectedActivity} />
+            </div>
+            <div className="border-t border-border-light pt-4">
+              <PhotoStrip projectId={projectId} kind="schedule_activity" targetId={selectedActivity.id} />
             </div>
             <div className="flex items-center justify-between pt-1">
               {canDeleteSchedule ? (
