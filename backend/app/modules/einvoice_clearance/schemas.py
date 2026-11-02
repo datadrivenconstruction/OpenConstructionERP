@@ -86,6 +86,9 @@ class _ProfileBody(BaseModel):
     certificate_reference: str = Field(default="", max_length=255)
     adapter_key: str = Field(default="", max_length=64)
     sandbox: bool = True
+    # export | sandbox | live. Empty keeps the behaviour of a registration made
+    # before modes existed. Live needs an installed live adapter at send time.
+    mode: str = Field(default="", pattern=r"^(|export|sandbox|live)$")
     is_active: bool = True
     settings: dict[str, Any] = Field(default_factory=dict)
     notes: str = Field(default="", max_length=2000)
@@ -124,6 +127,7 @@ class ProfileResponse(BaseModel):
     certificate_reference: str
     adapter_key: str
     sandbox: bool
+    mode: str = ""
     is_active: bool
     settings: dict[str, Any]
     notes: str
@@ -154,6 +158,9 @@ class DocumentCreateRequest(BaseModel):
     currency_code: str = Field(default="", max_length=3)
     total_amount: str = Field(default="0", max_length=50)
     country_fields: dict[str, str] = Field(default_factory=dict)
+    # standard | simplified: picks the country's lifecycle rules (e.g. a 24 h
+    # reporting deadline for simplified). Consolidated documents have their own route.
+    document_kind: str = Field(default="standard", pattern=r"^(standard|simplified)$")
     payload: str | None = Field(default=None, max_length=MAX_PAYLOAD_CHARS)
     payload_media_type: str = Field(default="application/xml", max_length=80)
 
@@ -243,6 +250,9 @@ class DocumentResponse(BaseModel):
     cancellation_reason: str
     retry_count: int
     adapter_key: str
+    document_kind: str = "standard"
+    previous_hash: str = ""
+    period: str = ""
     created_at: datetime
     updated_at: datetime
 
@@ -464,3 +474,95 @@ __all__ = [
     "SubmissionResponse",
     "SubmitRequest",
 ]
+
+
+# ── Lifecycle, setup, consolidated ───────────────────────────────────────────
+
+
+class LifecycleFinding(BaseModel):
+    rule_id: str
+    severity: str
+    message: str
+    params: dict[str, Any] = Field(default_factory=dict)
+
+
+class DeadlineResponse(BaseModel):
+    id: str
+    action: str
+    starts_at: str
+    due_at: str
+    state: str
+    seconds_left: int
+
+
+class LifecycleResponse(BaseModel):
+    """What the invoice card shows: state, deadline, next actions, findings."""
+
+    document_id: UUID
+    country: str
+    platform: str
+    status: str
+    mode: str
+    document_kind: str
+    identifier_label: str
+    authority_identifier: str
+    deadlines: list[DeadlineResponse]
+    allowed_actions: list[str]
+    findings: list[LifecycleFinding]
+    has_consolidation: bool = False
+
+
+class SetupRow(BaseModel):
+    """One e-invoicing market as the setup card and the visibility gate read it."""
+
+    country: str
+    platform: str
+    label: str
+    profile_id: UUID | None = None
+    mode: str = ""
+    ready: bool = False
+    missing: list[str] = Field(default_factory=list)
+    has_consolidation: bool = False
+
+
+class ConsolidatedPreviewRequest(BaseModel):
+    project_id: UUID
+    profile_id: UUID
+    period: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$")
+
+
+class ConsolidatedReceipt(BaseModel):
+    number: str
+    date: str
+    net: str
+    tax: str
+    gross: str
+    source_id: str = ""
+    reason: str | None = None
+
+
+class ConsolidatedPreviewResponse(BaseModel):
+    period: str
+    due_date: str | None
+    count: int
+    net: str
+    tax: str
+    total: str
+    currency_code: str = ""
+    included: list[ConsolidatedReceipt]
+    excluded: list[ConsolidatedReceipt]
+
+
+class OverviewRow(BaseModel):
+    id: UUID
+    invoice_id: UUID | None
+    invoice_number: str
+    invoice_date: str
+    buyer_name: str
+    currency_code: str
+    total_amount: str
+    country: str
+    status: str
+    document_kind: str
+    deadline: DeadlineResponse | None
+    blocking: int

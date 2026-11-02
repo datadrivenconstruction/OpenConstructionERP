@@ -1,0 +1,58 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "IN",
+  "markets": [
+    "IN"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "GST e-invoice (IRP)",
+    "label": "India - Invoice Registration Portal",
+    "identifier_label": "IRN (Invoice Reference Number)",
+    "document_format": "gst_einvoice_irn",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "document_fields": [
+      "gstin_issuer",
+      "gstin_buyer",
+      "hsn_code"
+    ],
+    "cancellation_window_days": 1,
+    "correction_mechanism": "credit note (an IRN older than the window cannot be cancelled)"
+  },
+  "lifecycle": {
+    "deadlines": [
+      {
+        "id": "irp_age_limit",
+        "action": "submit",
+        "within_days": 30,
+        "from": "invoice_date",
+        "warn": false,
+        "rule_id": "EINV-IN-001",
+        "effective_from": "2025-04-01",
+        "condition": {
+          "setting": "annual_turnover",
+          "gte": "100000000",
+          "label": "AATO >= INR 10 crore"
+        },
+        "source_url": "https://www.mahagst.gov.in/public/uploads/gstnadvisory/1760531580_293%20Advisory%20Time%20Limit%20for%20Reporting%20e%20Invoice%20on%20the%20IRP%20Portal%20%20Lowering%20of%20Threshold%20to%20AATO%2010%20Crores%20and%20Above.pdf",
+        "read_on": "2026-11-02",
+        "needs_review": true,
+        "notes": "GSTN advisory of 2024-11-05, an IRP operational rule rather than statute. State portal host unreachable from the build machine on 2026-11-02; value carried from the scoping read.",
+        "message": "Invoice date older than 30 days; the IRP will reject it (AATO >= INR 10 crore)."
+      }
+    ],
+    "cancel": {
+      "within_hours": 24,
+      "from": "cleared",
+      "blocked_by": [
+        "eway_bill_active"
+      ],
+      "source_url": "https://einvoice1.gst.gov.in/Others/Faqs",
+      "read_on": "",
+      "needs_review": true,
+      "notes": "IRP FAQ. Not re-read: the IRP hosts were unreachable from the build machine on 2026-11-02."
+    }
+  }
+}

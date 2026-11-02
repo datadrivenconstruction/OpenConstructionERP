@@ -1,0 +1,52 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "EG",
+  "markets": [
+    "EG"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "ETA e-Invoicing",
+    "label": "Egypt - Egyptian Tax Authority e-invoicing",
+    "identifier_label": "ETA document UUID",
+    "document_format": "eta_json_1_0",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "cancellation_window_days": null,
+    "cancellation_basis": "read_from_authority",
+    "correction_mechanism": "credit note (document type c) referencing the original invoice UUID; debit note (d) for an increase",
+    "scope": "Taxpayers ETA has notified, in waves since 2020. A taxpayer checks its own obligation in ETA's obligated-taxpayer inquiry. B2C sales go through the separate e-receipt system, which this row does not model.",
+    "commencement": [
+      {
+        "obligation": "issue",
+        "scope": "Taxpayers named in ETA notification lists, phased from 2020 (ETA Decision 188/2020)",
+        "legal_status": "in_force",
+        "source_url": "https://eg.andersen.com/vat-in-egypt/",
+        "read_date": "2026-10-19",
+        "notes": "Legal basis Unified Tax Procedures Law 206/2020, Art. 35. The wave dates come from secondary sources only and are not stated here. The same-day submission deadline widely reported from 2023-01-01 is not enforced by this platform.",
+        "effective_date": ""
+      }
+    ],
+    "notes": "Submission is asynchronous: ETA answers 202 with a UUID, then validates; the document stays submitted until a refresh reads valid or invalid. Every document carries a CAdES-BES signature made with an eSeal certificate on a USB token or HSM. An identical request body within 10 minutes is refused as a duplicate. Source: https://sdk.invoicing.eta.gov.eg/ read 2026-10-19.",
+    "extra": {
+      "sdk_url": "https://sdk.invoicing.eta.gov.eg/",
+      "environments": {
+        "source_url": "https://sdk.invoicing.eta.gov.eg/faq/",
+        "read_date": "2026-10-19",
+        "preprod": {
+          "identity_base_url": "https://id.preprod.eta.gov.eg",
+          "api_base_url": "https://api.preprod.invoicing.eta.gov.eg",
+          "portal_url": "https://preprod.invoicing.eta.gov.eg",
+          "profile_url": "https://profile.preprod.eta.gov.eg"
+        },
+        "prod": {
+          "identity_base_url": "https://id.eta.gov.eg",
+          "api_base_url": "https://api.invoicing.eta.gov.eg",
+          "portal_url": "https://invoicing.eta.gov.eg",
+          "profile_url": "https://profile.eta.gov.eg"
+        }
+      }
+    }
+  }
+}

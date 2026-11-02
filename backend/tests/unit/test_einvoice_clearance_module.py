@@ -1406,6 +1406,31 @@ class _RecordingOps:
     def create_index(self, name, table, columns, **kwargs):
         self.indexes[name] = (table, list(columns))
 
+    def add_column(self, table, column, **kwargs):
+        self.tables[table].append(column.name)
+
+
+class _RecordedInspector:
+    """Reports the tables an earlier revision built into the recorder."""
+
+    def __init__(self, recorder):
+        self._recorder = recorder
+
+    def get_table_names(self) -> list[str]:
+        return list(self._recorder.tables)
+
+    def get_columns(self, table: str) -> list[dict]:
+        return [{"name": c} for c in self._recorder.tables[table]]
+
+
+class _FollowUpShim(_SaShim):
+    def __init__(self, real, recorder):
+        super().__init__(real)
+        self._recorder = recorder
+
+    def inspect(self, bind):
+        return _RecordedInspector(self._recorder)
+
 
 def _run_revision() -> _RecordingOps:
     """Execute the revision's ``upgrade()`` against a recorder, not a database.
@@ -1431,6 +1456,15 @@ def _run_revision() -> _RecordingOps:
     module.op = recorder
     module.sa = _SaShim(sa)
     module.upgrade()
+    # Later additive revisions on the same tables replay over the recorded state.
+    for name in ("v3345_einvoice_lifecycle",):
+        follow = importlib.util.spec_from_file_location(f"_rev_{name}", path.parent / f"{name}.py")
+        assert follow is not None and follow.loader is not None
+        later = importlib.util.module_from_spec(follow)
+        follow.loader.exec_module(later)
+        later.op = recorder
+        later.sa = _FollowUpShim(sa, recorder)
+        later.upgrade()
     return recorder, module
 
 

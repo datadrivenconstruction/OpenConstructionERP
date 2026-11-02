@@ -1,0 +1,19 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "AU",
+  "markets": [
+    "AU"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "Peppol A-NZ",
+    "label": "Australia - Peppol A-NZ Billing 3.0",
+    "identifier_label": "transmission id",
+    "document_format": "peppol_aunz_3_0",
+    "en16931_profile": "peppol_aunz",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "cancellation_window_days": null
+  }
+}

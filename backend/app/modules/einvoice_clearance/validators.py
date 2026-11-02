@@ -282,6 +282,10 @@ class CancellationAllowed(ValidationRule):
             # Guessing a day count here would refuse cancellations the
             # authority still allows, or let through ones it does not.
             details["cancellation_basis"] = CANCELLATION_BASIS_AUTHORITY
+        elif (regime.get("lifecycle") or {}).get("cancel"):
+            # The mandate file states the window in hours and from which event;
+            # the lifecycle rule (EINV-CORE-005) owns that check.
+            details["cancellation_basis"] = "lifecycle"
         elif window is None:
             correction = _text(regime.get("correction_mechanism")) or "a correcting document"
             problems.append(f"{country or 'this country'} has no cancellation flow (correct with {correction})")
@@ -461,6 +465,56 @@ def _mention_results(rule: ValidationRule, context: ValidationContext, severity:
     ]
 
 
+class LifecycleRules(ValidationRule):
+    """Pack-driven lifecycle checks (EINV-CORE-*, country EINV-* ids from the mandate file).
+
+    Each finding keeps its own rule id and severity, so a country rule raised by
+    the neutral engine reads as that rule and a warning never blocks a send.
+    """
+
+    rule_id = "einvoice_clearance.lifecycle"
+    name = "Deadlines, Windows And Chains From The Mandate"
+    standard = "einvoice_clearance"
+    severity = Severity.ERROR
+    category = RuleCategory.COMPLIANCE
+    description = "Submission deadlines, cancellation windows, hash chain and grouping read from the country pack."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from app.modules.einvoice_clearance import consolidation, lifecycle
+
+        regime = _section(context, "regime")
+        document = _section(context, "document")
+        profile = _section(context, "profile")
+        now = _as_datetime(_root(context).get("reference_time")) or datetime.now(UTC)
+        findings = lifecycle.evaluate(regime, document, profile=profile, intent=_intent(context), now=now)
+        rule = (regime.get("lifecycle") or {}).get("consolidation") or {}
+        if rule and document.get("document_kind") == "consolidated" and document.get("period"):
+            receipts = consolidation.receipts_from_fields(document.get("country_fields") or {})
+            findings += consolidation.check(
+                rule,
+                receipts,
+                str(document["period"]),
+                settings=profile.get("settings") or {},
+                today=now.date(),
+                submitted=_text(document.get("status")) not in lifecycle.PRE_SUBMIT_STATUSES,
+            )
+        severity = {"error": Severity.ERROR, "warning": Severity.WARNING, "info": Severity.INFO}
+        out = [
+            RuleResult(
+                rule_id=f.rule_id,
+                rule_name=self.name,
+                severity=severity.get(f.severity, Severity.WARNING),
+                category=self.category,
+                passed=False,
+                message=f.message,
+                element_ref=_text(document.get("id")) or None,
+                details={"params": f.params},
+            )
+            for f in findings
+        ]
+        return out or [_result(self, True, "OK")]
+
+
 class InvoiceMentionsRequired(ValidationRule):
     rule_id = "einvoice_clearance.invoice_mentions"
     name = "Mandatory Invoice Mentions For The Country"
@@ -493,6 +547,7 @@ _EINVOICE_CLEARANCE_RULES: tuple[ValidationRule, ...] = (
     PayloadNotReused(),
     IdentifierPresent(),
     SandboxProfileInUse(),
+    LifecycleRules(),
     InvoiceMentionsRequired(),
     InvoiceMentionsUnconfirmed(),
 )
@@ -553,7 +608,9 @@ async def hard_blockers(payload: dict[str, Any]) -> list[RuleResult]:
     for rule in _gate_rules():
         if rule.severity != Severity.ERROR:
             continue
-        found.extend(result for result in await rule.validate(context) if not result.passed)
+        found.extend(
+            result for result in await rule.validate(context) if not result.passed and result.severity == Severity.ERROR
+        )
     return found
 
 

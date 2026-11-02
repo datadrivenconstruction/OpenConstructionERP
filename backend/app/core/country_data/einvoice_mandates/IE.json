@@ -1,0 +1,19 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "IE",
+  "markets": [
+    "IE"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "Peppol",
+    "label": "Ireland - Peppol BIS Billing 3.0",
+    "identifier_label": "transmission id",
+    "document_format": "peppol_bis_3_0",
+    "en16931_profile": "peppol",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "cancellation_window_days": null
+  }
+}
