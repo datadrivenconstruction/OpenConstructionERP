@@ -659,6 +659,7 @@ export const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'nav.daily_diary', to: '/daily-diary', icon: BookOpen },
+      { labelKey: 'nav.photos', to: '/photos', icon: Camera },
       { labelKey: 'nav.field_reports', to: '/field-reports', icon: ClipboardList, advancedOnly: true },
       { labelKey: 'nav.field_time', to: '/field-time', icon: Timer, advancedOnly: true },
       { labelKey: 'nav.site_sensors', to: '/site-sensors', icon: Gauge, advancedOnly: true },
@@ -859,7 +860,6 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'cde.title', to: '/cde', icon: Database },
       { labelKey: 'source_data.title', to: '/source-data', icon: Database, advancedOnly: true },
       { labelKey: 'signing.title', to: '/signing', icon: PenTool, advancedOnly: true },
-      { labelKey: 'nav.photos', to: '/photos', icon: Camera },
     ],
   },
   // ── 17. REAL ESTATE ────────────────────────────────────────────────
