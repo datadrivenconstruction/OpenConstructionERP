@@ -694,6 +694,7 @@ export const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'nav.equipment', to: '/equipment', icon: Truck },
+      { labelKey: 'nav.haul_tickets', to: '/haul-tickets', icon: Truck },
       { labelKey: 'nav.resources', to: '/resources', icon: Users },
       { labelKey: 'nav.dispatch', to: '/dispatch', icon: CalendarRange },
       // What the crew is licensed to do, and what the project demands of them.
