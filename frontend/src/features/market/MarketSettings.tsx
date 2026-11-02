@@ -132,6 +132,7 @@ export function MarketSettings() {
             <label className="block text-xs font-medium text-content-secondary">
               {t('market.primary', { defaultValue: 'Primary market' })}
               <select
+                aria-label={t('market.primary', { defaultValue: 'Primary market' })}
                 className={`mt-1 ${selectClass}`}
                 value={primaryCode}
                 disabled={readOnly}
@@ -210,6 +211,7 @@ export function MarketSettings() {
               <label className="block flex-1 text-xs font-medium text-content-secondary">
                 {t('market.add', { defaultValue: 'Add market' })}
                 <select
+                  aria-label={t('market.add', { defaultValue: 'Add market' })}
                   className={`mt-1 ${selectClass}`}
                   value={adding}
                   disabled={saving}
@@ -262,6 +264,7 @@ export function MarketSettings() {
             <label className="block text-xs font-medium text-content-secondary">
               {t('market.classification', { defaultValue: 'Classification' })}
               <select
+                aria-label={t('market.classification', { defaultValue: 'Classification' })}
                 className={`mt-1 ${selectClass}`}
                 value={draft.standards.classification}
                 disabled={readOnly}
@@ -278,6 +281,7 @@ export function MarketSettings() {
             <label className="block text-xs font-medium text-content-secondary">
               {t('market.contract_family', { defaultValue: 'Contract forms' })}
               <select
+                aria-label={t('market.contract_family', { defaultValue: 'Contract forms' })}
                 className={`mt-1 ${selectClass}`}
                 value={draft.standards.contract_family}
                 disabled={readOnly}
@@ -294,6 +298,7 @@ export function MarketSettings() {
             <label className="block text-xs font-medium text-content-secondary">
               {t('market.units', { defaultValue: 'Units system' })}
               <select
+                aria-label={t('market.units', { defaultValue: 'Units system' })}
                 className={`mt-1 ${selectClass}`}
                 value={draft.standards.units}
                 disabled={readOnly}

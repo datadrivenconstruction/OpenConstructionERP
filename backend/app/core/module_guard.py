@@ -33,6 +33,11 @@ def invalidate_user(user_id: str) -> None:
     _cache.pop(str(user_id), None)
 
 
+def invalidate_all() -> None:
+    """Drop every cached package state, after a company-wide change such as the market profile."""
+    _cache.clear()
+
+
 def module_from_path(path: str) -> str | None:
     """The gateable module a ``/api/v1/<segment>/`` path belongs to, or ``None``."""
     if not path.startswith("/api/v1/"):

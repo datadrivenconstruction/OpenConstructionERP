@@ -313,15 +313,25 @@ async def test_two_tenants_do_not_see_each_others_profile() -> None:
 
 
 @pytest.mark.asyncio
-async def test_get_with_another_users_project_is_404_own_project_narrows() -> None:
-    from tests.unit.test_solution_packages import USER_ID
+async def test_project_scope_follows_platform_access_check(monkeypatch) -> None:
+    from fastapi import HTTPException
 
-    foreign = SimpleNamespace(owner_id=uuid.uuid4(), country_code="US", classification_standard="masterformat")
-    async with _http(_service(), session=_Session(project=foreign)) as client:
-        assert (await client.get("/api/v1/market/", params={"project_id": str(uuid.uuid4())})).status_code == 404
-    own = SimpleNamespace(owner_id=uuid.UUID(USER_ID), country_code="US", classification_standard=None)
-    async with _http(_service(), session=_Session(project=own)) as client:
-        body = (await client.get("/api/v1/market/", params={"project_id": str(uuid.uuid4())})).json()
+    from app.core import market_router
+
+    allowed: set[str] = set()
+
+    async def _access(project_id, _user_id, _session):
+        if str(project_id) not in allowed:
+            raise HTTPException(status_code=404, detail="Project not found")
+
+    monkeypatch.setattr(market_router, "verify_project_access", _access)
+    # Owned by someone else: a team member or admin the access check lets through still gets the scope.
+    project = SimpleNamespace(owner_id=uuid.uuid4(), country_code="US", classification_standard=None)
+    pid = str(uuid.uuid4())
+    async with _http(_service(), session=_Session(project=project)) as client:
+        assert (await client.get("/api/v1/market/", params={"project_id": pid})).status_code == 404
+        allowed.add(pid)
+        body = (await client.get("/api/v1/market/", params={"project_id": pid})).json()
         assert body["markets"] == ["US"]
 
 
@@ -461,3 +471,65 @@ def test_supranational_members_come_from_country_data() -> None:
     assert set(data["markets"]["EU"]) == ms.supranational_markets()["EU"]
     assert "EU" in ms.expand_markets(["AT"]) and "EU" not in ms.expand_markets(["GB"])
     assert not hasattr(ms, "EU_MEMBERS")
+
+
+def _admin(email, *, active=True, metadata=None, uid=None):
+    return (uid or uuid.uuid4(), email, active, metadata or {}, None)
+
+
+def test_holder_is_newest_saved_profile_even_on_inactive_admin() -> None:
+    from app.core.market_router import SAVED_AT_KEY, pick_holder
+
+    old = ms.save_profile({SAVED_AT_KEY: "2026-01-01T00:00:00+00:00"}, {"primary": {"country": "DE"}})
+    new = ms.save_profile({SAVED_AT_KEY: "2026-06-01T00:00:00+00:00"}, {"primary": {"country": "SA"}})
+    rows = [_admin("a@x.io", metadata=old), _admin("demo@openconstructionerp.com", active=False, metadata=new)]
+    assert pick_holder(rows) == rows[1][0]
+
+
+def test_new_holder_skips_demo_admin() -> None:
+    from app.core.market_router import pick_holder
+
+    rows = [_admin("demo@openconstructionerp.com"), _admin("boss@acme.io"), _admin("x@acme.io", active=False)]
+    assert pick_holder(rows) == rows[1][0]
+    assert pick_holder(rows[:1]) == rows[0][0]
+    assert pick_holder([]) is None
+
+
+@pytest.mark.asyncio
+async def test_two_users_of_one_company_get_same_menu(monkeypatch) -> None:
+    from app.core import market_router
+
+    holder = uuid.uuid4()
+
+    async def _holder(_session, _payload, _caller):
+        return holder
+
+    monkeypatch.setattr(market_router, "company_holder_id", _holder)
+    users = _Users()
+    session = _Session(countries=("SA", "DE"))
+    bodies = []
+    for sub in (str(uuid.uuid4()), str(uuid.uuid4())):
+        async with _http(users, {"sub": sub, "role": "viewer"}, session) as client:
+            bodies.append((await client.get("/api/v1/market/")).json())
+    assert bodies[0]["markets"] == bodies[1]["markets"] == ["SA", "DE"]
+    assert bodies[0]["hidden_modules"] == bodies[1]["hidden_modules"]
+
+
+@pytest.mark.asyncio
+async def test_put_records_holder_and_clears_every_guard_cache(monkeypatch) -> None:
+    from app.core import market_router, module_guard
+    from tests.unit.test_solution_packages import USER_ID
+
+    holder = uuid.uuid4()
+
+    async def _holder(_session, _payload, _caller):
+        return holder
+
+    monkeypatch.setattr(market_router, "company_holder_id", _holder)
+    module_guard._cache["someone-else"] = (0.0, None)
+    users = _Users()
+    async with _http(users) as client:
+        assert (await client.put("/api/v1/market/", json={"primary": {"country": "DE"}})).status_code == 200
+    assert "someone-else" not in module_guard._cache
+    saved = users.by_id[holder]
+    assert saved[market_router.SAVED_BY_KEY] == USER_ID and saved[market_router.SAVED_AT_KEY]

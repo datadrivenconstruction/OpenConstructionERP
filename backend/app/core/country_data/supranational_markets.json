@@ -1,5 +1,7 @@
 {
   "_comment": "Supranational markets and their member states (ISO 3166-1 alpha-2). A module tagged with the market key serves every member.",
+  "source": "https://european-union.europa.eu/principles-countries-history/eu-countries_en",
+  "as_of": "2026-11-02",
   "markets": {
     "EU": ["AT", "BE", "BG", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GR", "HR", "HU", "IE", "IT", "LT", "LU", "LV", "MT", "NL", "PL", "PT", "RO", "SE", "SI", "SK"]
   }
