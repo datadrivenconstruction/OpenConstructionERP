@@ -613,12 +613,11 @@ def test_lifecycle_uses_float_only_for_durations() -> None:
             assert "timedelta(hours=float(" in line, f"lifecycle.py:{i} uses float outside a duration"
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason="DEFECT: manifest.py declares auto_install=True enabled=True with no `markets` tag, so the module, "
-    "its /einvoice-clearance page and its rules load for every market (SPEC section 2 requires a tag)",
-)
 def test_manifest_is_market_tagged() -> None:
+    from app.core.market_scope import is_visible
     from app.modules.einvoice_clearance.manifest import manifest
+    from app.modules.einvoice_clearance.regimes import SUPPORTED_COUNTRIES
 
-    assert getattr(manifest, "markets", ["*"]) != ["*"]
+    assert sorted(manifest.markets) == sorted(SUPPORTED_COUNTRIES)
+    assert is_visible(manifest.markets, ["DE"])
+    assert not is_visible(manifest.markets, ["US"])

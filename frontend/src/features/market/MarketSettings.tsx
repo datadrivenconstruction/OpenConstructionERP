@@ -17,6 +17,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { COUNTRIES } from '@/shared/lib/countries';
 import { regionDisplayName } from '@/features/cases/regions';
 import { MarketPreviewModal } from './MarketPreviewModal';
+import { EInvoiceSetupCard } from '@/features/einvoice-clearance/EInvoiceSetupCard';
+import { einvoiceScopeMarkets } from '@/features/einvoice-clearance/useEInvoiceMarkets';
 import { MARKET_QUERY_KEY, saveMarketProfile, useMarketScope, type MarketProfile } from './api';
 
 const UNITS_OPTIONS = [
@@ -329,6 +331,7 @@ export function MarketSettings() {
           )}
         </CardContent>
       </Card>
+      {einvoiceScopeMarkets(scope).length > 0 && <EInvoiceSetupCard canEdit={canEdit} />}
       {pending && scope && (
         <MarketPreviewModal
           open
