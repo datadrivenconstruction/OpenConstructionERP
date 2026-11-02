@@ -297,7 +297,7 @@ describe('ModulesSettings other markets', () => {
 });
 
 describe('MarketSettings e-invoicing card', () => {
-  const einvoice = { oe_einvoice_clearance: ['DE', 'IT', 'SA'] };
+  const einvoice = { einvoice_clearance: ['DE', 'IT', 'SA'] };
 
   it('shows the setup card for a DE tenant (a mandate market)', () => {
     scopeState = { data: scope({ module_markets: { ...scope().module_markets, ...einvoice } }) };
@@ -310,7 +310,7 @@ describe('MarketSettings e-invoicing card', () => {
       data: scope({
         markets: ['US'],
         expanded_markets: ['US'],
-        hidden_modules: ['oe_einvoice_clearance'],
+        hidden_modules: ['einvoice_clearance'],
         module_markets: { ...scope().module_markets, ...einvoice },
       }),
     };
