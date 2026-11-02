@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Ескроу-рахунок {account}: випущено {released}, що перевищує ліміт {cap} (підтверджена готовність {progress}% зібраних коштів)",
       "suggestion": "Затримайте подальші виплати до наступного акта готовності або внесіть акт, що підвищує готовність"
+    },
+    "broker_licence_default_label": "ліцензія брокера з нерухомості",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Брокер {broker} на {date} не мав чинної {label} для угоди {deal}",
+      "suggestion": "Внесіть ліцензію, чинну на дату угоди, або передайте угоду ліцензованому брокеру"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} брокера {broker} спливає {date}, через {days} дн.",
+      "suggestion": "Поновіть ліцензію до закінчення строку та оновіть запис про ліцензію"
     }
   },
   "schedule_5d": {

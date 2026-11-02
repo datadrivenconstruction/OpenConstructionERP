@@ -197,12 +197,44 @@ class LeasingService:
         overlaps = await self.repo.overlapping(
             lease.unit_kind, lease.unit_ref, lease.start_date, lease.end_date, lease.id
         )
+        broker = await self._broker(lease)
         return {
             "lease": lease_row(lease),
+            "broker": broker,
             "country": country,
             "entity_currency": entity_currency,
             "overlaps": [o.code for o in overlaps],
             "tenant_identifier_schemes": schemes,
+        }
+
+    async def _broker(self, lease: Lease) -> dict[str, Any] | None:
+        """The letting broker named in ``ext_refs.broker_id`` with its licences, or ``None``."""
+        raw = (lease.ext_refs or {}).get("broker_id")
+        if not raw:
+            return None
+        try:
+            from sqlalchemy import select
+
+            from app.modules.property_dev.models import Broker, BrokerLicence
+
+            broker = await self.session.get(Broker, uuid.UUID(str(raw)))
+        except (ImportError, ValueError):
+            return None
+        if broker is None:
+            return {"id": str(raw), "name": "", "licences": []}
+        rows = (await self.session.execute(select(BrokerLicence).where(BrokerLicence.broker_id == broker.id))).scalars()
+        return {
+            "id": str(broker.id),
+            "name": broker.name,
+            "licences": [
+                {
+                    "authority_code": lic.authority_code,
+                    "status": lic.status,
+                    "valid_from": lic.valid_from.isoformat() if lic.valid_from else None,
+                    "valid_to": lic.valid_to.isoformat() if lic.valid_to else None,
+                }
+                for lic in rows
+            ],
         }
 
     async def validate(self, lease: Lease) -> dict[str, Any]:

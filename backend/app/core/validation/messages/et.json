@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Eskrokonto {account}: vabastatud {released} ületab piiri {cap} (kinnitatud edenemine {progress}% kogutud rahast)",
       "suggestion": "Peatage edasised vabastamised kuni järgmise edenemistõendini või registreerige tõend, mis edenemist suurendab"
+    },
+    "broker_licence_default_label": "kinnisvaramaakleri litsents",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Maakleril {broker} ei olnud kuupäeval {date} tehingu {deal} jaoks kehtivat {label}",
+      "suggestion": "Salvestage litsents, mis katab tehingu kuupäeva, või suunake tehing litsentsitud maaklerile"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "Maakleri {broker} {label} lõpeb {date}, {days} päeva pärast",
+      "suggestion": "Uuendage litsents enne lõppemist ja uuendage litsentsi andmed"
     }
   },
   "schedule_5d": {

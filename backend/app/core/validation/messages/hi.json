@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "एस्क्रो खाता {account}: जारी की गई राशि {released} सीमा {cap} से अधिक है (एकत्र धन की प्रमाणित प्रगति {progress}%)",
       "suggestion": "अगला प्रगति प्रमाणपत्र मिलने तक आगे की रिहाई रोकें, या प्रगति बढ़ाने वाला प्रमाणपत्र दर्ज करें"
+    },
+    "broker_licence_default_label": "ब्रोकर लाइसेंस",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "ब्रोकर {broker} के पास {deal} के लिए {date} को कोई वैध {label} नहीं था",
+      "suggestion": "सौदे की तिथि को कवर करने वाला लाइसेंस दर्ज करें, या सौदा किसी लाइसेंसधारी ब्रोकर को सौंपें"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "ब्रोकर {broker} का {label} {date} को समाप्त होता है, {days} दिनों में",
+      "suggestion": "समाप्ति से पहले लाइसेंस नवीनीकृत करें और लाइसेंस रिकॉर्ड अपडेट करें"
     }
   },
   "schedule_5d": {

@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Conta caucionada {account}: o valor liberado {released} excede o teto {cap} (avanço certificado de {progress}% do dinheiro arrecadado)",
       "suggestion": "Retenha novas liberações até o próximo certificado de avanço, ou registe o certificado que eleva o avanço"
+    },
+    "broker_licence_default_label": "licença de mediador imobiliário",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "O mediador {broker} não tinha uma {label} válida em {date} para {deal}",
+      "suggestion": "Registe uma licença que cubra a data do negócio ou transfira o negócio para um mediador licenciado"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "A {label} do mediador {broker} termina em {date}, dentro de {days} dias",
+      "suggestion": "Renove a licença antes de expirar e atualize o registo da licença"
     }
   },
   "schedule_5d": {

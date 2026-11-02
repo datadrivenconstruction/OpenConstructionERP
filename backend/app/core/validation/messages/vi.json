@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Tài khoản ký quỹ {account}: số đã giải ngân {released} vượt mức trần {cap} (tiến độ được chứng nhận {progress}% số tiền đã thu)",
       "suggestion": "Tạm dừng các lần giải ngân tiếp theo cho đến chứng nhận tiến độ kế tiếp, hoặc ghi nhận chứng nhận làm tăng tiến độ"
+    },
+    "broker_licence_default_label": "giấy phép môi giới bất động sản",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Môi giới {broker} không có {label} còn hiệu lực vào ngày {date} cho giao dịch {deal}",
+      "suggestion": "Ghi nhận giấy phép bao trùm ngày giao dịch, hoặc chuyển giao dịch cho môi giới có giấy phép"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} của môi giới {broker} hết hạn vào ngày {date}, còn {days} ngày",
+      "suggestion": "Gia hạn giấy phép trước khi hết hạn và cập nhật hồ sơ giấy phép"
     }
   },
   "schedule_5d": {

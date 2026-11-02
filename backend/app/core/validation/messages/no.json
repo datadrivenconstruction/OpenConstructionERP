@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Sperret konto {account}: frigitt {released} overstiger taket {cap} (sertifisert fremdrift {progress}% av innbetalte midler)",
       "suggestion": "Hold tilbake ytterligere frigivelser til neste fremdriftssertifikat, eller registrer sertifikatet som øker fremdriften"
+    },
+    "broker_licence_default_label": "meglerlisens",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Megler {broker} hadde ingen gyldig {label} den {date} for {deal}",
+      "suggestion": "Registrer en lisens som dekker datoen for avtalen, eller flytt avtalen til en lisensiert megler"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} for megler {broker} utløper {date}, om {days} dager",
+      "suggestion": "Forny lisensen før den utløper, og oppdater lisensregisteret"
     }
   },
   "schedule_5d": {

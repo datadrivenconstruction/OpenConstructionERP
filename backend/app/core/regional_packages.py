@@ -43,3 +43,18 @@ def module_closure(package_id: str) -> list[str]:
     pkg = get_regional_package(package_id) or {}
     seen: set[str] = set()
     return [m for m in [*pkg.get("required", []), *pkg.get("optional", [])] if not (m in seen or seen.add(m))]
+
+
+def broker_licence_policy(country: str | None) -> dict[str, Any]:
+    """Broker licence policy of ``country`` from any package profile, or an empty dict.
+
+    The first profile that carries a ``broker_licence`` block for the country wins.
+    An empty dict means the country asks nothing of brokers by default.
+    """
+    if not country:
+        return {}
+    for pkg in regional_packages().values():
+        policy = ((pkg.get("profiles") or {}).get(country.upper()) or {}).get("broker_licence")
+        if isinstance(policy, dict):
+            return dict(policy)
+    return {}
