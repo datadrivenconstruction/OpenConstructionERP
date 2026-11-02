@@ -1452,5 +1452,21 @@
       "fail": "{project} is active but has no contract, invoice, order, subcontract or plan to forecast cash from.",
       "suggestion": "Enter the client contract with its payment plan, or a planned cash flow in the cost model."
     }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Position {ref} has {hours} h booked between {date_from} and {date_to} but no measured progress",
+      "suggestion": "Record a measurement or progress for the position, or move the hours to the position that was actually worked on"
+    },
+    "factor_implausible": {
+      "fail": "Position {ref} productivity factor {factor} is outside the plausible band {low} to {high}",
+      "suggestion": "Check the booked hours, the installed quantity and the unit of the estimate norm"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Activity {activity} ({project}) loads labour but names no trade, so its demand cannot be matched to anyone",
+      "suggestion": "Set a trade on the labour resource of the activity"
+    }
   }
 }
