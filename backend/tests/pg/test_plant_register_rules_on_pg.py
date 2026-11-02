@@ -569,15 +569,26 @@ async def test_readiness_counts_a_long_lead_item_with_no_need_date_as_open_until
 async def _evidence(
     w: World, area_code: str, gate_code: str = "development_to_execution", *, label: bool = False
 ) -> list[tuple[str, str, str]]:
+    from datetime import UTC, datetime
     from types import SimpleNamespace
+    from unittest import mock
 
     from app.modules.plant_register.evidence import plant_readiness
     from app.modules.project_governance.evidence import GateAttempt
 
+    class _Clock(datetime):
+        @classmethod
+        def now(cls, tz=None):  # the provider reads the wall clock; pin it to the suite's TODAY
+            return datetime(TODAY.year, TODAY.month, TODAY.day, 12, tzinfo=tz or UTC)
+
     async with w.factory() as s:
-        found = await plant_readiness(
-            s, w.project_id, GateAttempt(uuid.uuid4(), gate_code, 1), SimpleNamespace(code=area_code, applicable=True)
-        )
+        with mock.patch("app.modules.plant_register.evidence.datetime", _Clock):
+            found = await plant_readiness(
+                s,
+                w.project_id,
+                GateAttempt(uuid.uuid4(), gate_code, 1),
+                SimpleNamespace(code=area_code, applicable=True),
+            )
     # A reason the reader must understand travels as the label key; ``detail`` carries data only.
     return [
         (e.code, e.state, (e.label_key or "").removeprefix("plant.evidence.") if label else e.detail) for e in found
