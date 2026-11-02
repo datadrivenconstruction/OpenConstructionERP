@@ -12184,6 +12184,7 @@ def register_builtin_rules() -> None:
     # import would run before those names exist.
     from app.core.validation.rules.broker_licence import BROKER_LICENCE_RULES
     from app.core.validation.rules.field_clock import FIELD_CLOCK_RULES
+    from app.core.validation.rules.field_productivity import PRODUCTIVITY_RULES
     from app.core.validation.rules.italy_prezzario import ITALY_PREZZARIO_RULES
     from app.core.validation.rules.pakistan_boq import PAKISTAN_RULES
     from app.core.validation.rules.peru_presupuesto import PERU_RULES
@@ -12361,6 +12362,7 @@ def register_builtin_rules() -> None:
         # Offline sync (merge of a device edit against a newer server version)
         (OfflineSyncMergeComplete(), ["offline_sync"]),
         *((rule, None) for rule in FIELD_CLOCK_RULES),
+        *((rule, None) for rule in PRODUCTIVITY_RULES),
         # Estimate Audit (curated cross-checks: wrong unit, near-duplicate,
         # missing companion, catalogue-benchmarked rate outlier)
         (WrongUnitOfMeasure(), ["estimate_audit"]),

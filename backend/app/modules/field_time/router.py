@@ -37,7 +37,7 @@ import io
 import uuid
 from datetime import UTC, date, datetime
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import StreamingResponse
 
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep, verify_project_access
@@ -199,6 +199,33 @@ async def get_summary(
         plant_hours=str(data["plant_hours"]),
         overtime_hours=str(data.get("overtime_hours", "0")),
     )
+
+
+@router.get("/productivity/", response_model=None)
+async def get_productivity(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    date_from: date = Query(...),
+    date_to: date = Query(...),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("field_time.read")),
+) -> dict:
+    """Foreman productivity per bill position for a period: installed vs hours vs norm.
+
+    Decimal figures travel as strings. ``findings`` carries the
+    ``field_productivity`` validation results for the same rows.
+    """
+    from app.core.i18n import get_locale
+    from app.modules.field_time.productivity import MAX_PERIOD_DAYS, ProductivityService
+
+    await verify_project_access(project_id, user_id, session)
+    if date_to < date_from:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="date_to must not be before date_from")
+    if (date_to - date_from).days > MAX_PERIOD_DAYS:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail=f"The period may span at most {MAX_PERIOD_DAYS} days"
+        )
+    return await ProductivityService(session).report(project_id, date_from, date_to, locale=get_locale())
 
 
 @router.post("/timesheets/suggest-cost-codes/", response_model=SuggestCostCodeResponse)

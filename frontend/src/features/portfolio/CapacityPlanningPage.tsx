@@ -26,6 +26,7 @@ import {
   type PortfolioResourceRow,
 } from './api';
 import { portfolioGuide } from './portfolioGuide';
+import { TradeDemandPanel } from './TradeDemandPanel';
 
 /** Bucket horizon presets: how many buckets to show per bucket size. */
 const HORIZON: Record<'week' | 'month', number> = { week: 12, month: 6 };
@@ -64,6 +65,7 @@ export function CapacityPlanningPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [bucket, setBucket] = useState<'week' | 'month'>('week');
+  const [view, setView] = useState<'resources' | 'trades'>('resources');
   const range = useMemo(() => rangeFor(bucket), [bucket]);
 
   const { data, isLoading, isError, error } = useQuery({
@@ -165,8 +167,35 @@ export function CapacityPlanningPage() {
         })}
       </DismissibleInfo>
 
+      <div
+        role="tablist"
+        aria-label={t('workforce.view_label', { defaultValue: 'Capacity view' })}
+        className="inline-flex rounded-xl border border-border bg-surface-secondary/50 p-1"
+      >
+        {(['resources', 'trades'] as const).map((v) => (
+          <button
+            key={v}
+            type="button"
+            role="tab"
+            aria-selected={view === v}
+            onClick={() => setView(v)}
+            className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+              view === v
+                ? 'bg-surface-primary text-content-primary shadow-sm'
+                : 'text-content-tertiary hover:text-content-secondary'
+            }`}
+          >
+            {v === 'resources'
+              ? t('workforce.view_resources', { defaultValue: 'Named resources' })
+              : t('workforce.view_trades', { defaultValue: 'Demand by trade' })}
+          </button>
+        ))}
+      </div>
+
+      {view === 'trades' && <TradeDemandPanel />}
+
       {/* ── Summary chips ───────────────────────────────────────────────── */}
-      {data && (
+      {view === 'resources' && data && (
         <div className="flex flex-wrap gap-3">
           <SummaryChip
             label={t('capacity.summary_resources', { defaultValue: 'Resources booked' })}
@@ -185,6 +214,7 @@ export function CapacityPlanningPage() {
       )}
 
       {/* ── Heatmap ─────────────────────────────────────────────────────── */}
+      {view === 'resources' && (
       <Card>
         <CardContent>
           {isLoading && (
@@ -350,6 +380,7 @@ export function CapacityPlanningPage() {
           )}
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }

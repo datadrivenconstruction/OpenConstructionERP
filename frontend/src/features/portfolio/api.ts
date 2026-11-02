@@ -130,3 +130,60 @@ export const portfolioApi = {
       }`,
     ),
 };
+
+export interface WorkforceContributor {
+  kind: 'activity' | 'staffing';
+  id: string;
+  name: string;
+  project_id: string | null;
+  project_name: string;
+  fte: string;
+  start: string;
+  end: string;
+}
+
+export interface WorkforceCell {
+  week_index: number;
+  demand_fte: string;
+  available_fte: string;
+  gap_fte: string;
+  status: 'short' | 'tight' | 'balanced' | 'surplus' | 'idle';
+  contributors: WorkforceContributor[];
+  more_contributors: number;
+}
+
+export interface WorkforceTradeRow {
+  trade: string;
+  label: string;
+  unassigned: boolean;
+  available_resources: number;
+  peak_demand_fte: string;
+  peak_shortfall_fte: string;
+  short_weeks: number;
+  cells: WorkforceCell[];
+}
+
+export interface WorkforceFinding {
+  rule_id: string;
+  severity: string;
+  message: string;
+  suggestion: string | null;
+  element_ref: string | null;
+}
+
+export interface WorkforceDemandResponse {
+  start: string;
+  end: string;
+  weeks: { index: number; start: string; end: string; label: string }[];
+  hours_per_fte_week: string;
+  trades: WorkforceTradeRow[];
+  short_trades: number;
+  capacity_unknown: number;
+  findings: WorkforceFinding[];
+}
+
+/** Labour demand by trade per week across every project, against availability. */
+export const getWorkforceDemand = (params: { start: string; weeks: number }) =>
+  apiGet<WorkforceDemandResponse>(
+    `/v1/resources/portfolio/workforce-demand?start=${encodeURIComponent(params.start)}&weeks=${params.weeks}`,
+  );
