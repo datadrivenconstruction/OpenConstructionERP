@@ -272,6 +272,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Condition & Maintenance Plan': 'condition.title',
   'Leasing': 'leasing.title',
   'Measurement book': 'measurement_book.title',
+  'Haul tickets': 'haul.title',
   'Service charges': 'service_charges.title',
   'Cutting Optimisation': 'cutting.title',
   'Guarantees': 'guarantees.title',

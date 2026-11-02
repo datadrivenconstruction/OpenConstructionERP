@@ -312,6 +312,7 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/field-time': 'oe_field_time',
   '/site-sensors': 'oe_site_sensors',
   '/equipment': 'oe_equipment',
+  '/haul-tickets': 'oe_haul_tickets',
   '/resources': 'oe_resources',
   '/payroll': 'oe_payroll',
   '/cost-benchmarks': 'oe_cost_benchmarks',

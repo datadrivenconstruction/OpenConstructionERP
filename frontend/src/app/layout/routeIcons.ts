@@ -215,6 +215,7 @@ const EXTRA_ROUTE_ICONS: Record<string, LucideIcon> = {
   '/portal/payments': FileText,
   // ── 11. Resources & Assets ────────────────────────────────────────
   '/equipment': Truck,
+  '/haul-tickets': Truck,
   '/resources': Users,
   '/payroll': Wallet,
   '/certified-payroll': FileCheck,

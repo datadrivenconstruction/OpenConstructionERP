@@ -694,6 +694,7 @@ export const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'nav.equipment', to: '/equipment', icon: Truck },
+      { labelKey: 'nav.haul_tickets', to: '/haul-tickets', icon: Truck },
       { labelKey: 'nav.resources', to: '/resources', icon: Users },
       // What the crew is licensed to do, and what the project demands of them.
       // The module has shipped installed since it was written and had no menu
