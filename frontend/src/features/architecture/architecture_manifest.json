@@ -286486,6 +286486,12 @@
               "annotation": "Mapped[str]",
               "sql_type": "String",
               "nullable": false
+            },
+            {
+              "name": "secondary_calendar",
+              "annotation": "Mapped[str | None]",
+              "sql_type": "String",
+              "nullable": true
             }
           ],
           "relationships": [
@@ -287389,6 +287395,11 @@
               "name": "digit_system",
               "type": "DigitSystem | None",
               "default": "None"
+            },
+            {
+              "name": "secondary_calendar",
+              "type": "SecondaryCalendarChoice | None",
+              "default": "None"
             }
           ]
         },
@@ -287427,6 +287438,11 @@
               "name": "digit_system",
               "type": "str",
               "default": "'auto'"
+            },
+            {
+              "name": "secondary_calendar",
+              "type": "str | None",
+              "default": "None"
             }
           ]
         },
@@ -298835,7 +298851,7 @@
     "backend_modules": 227,
     "modules_with_manifests": 225,
     "total_models": 851,
-    "total_columns": 10017,
+    "total_columns": 10018,
     "total_relationships": 257,
     "total_routes": 4893,
     "total_schemas": 4396,
