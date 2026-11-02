@@ -7,7 +7,7 @@ Creates ``oe_bid_day_board``, ``oe_bid_day_row``, ``oe_bid_day_quote``,
 existing changes.
 
 Revision ID: v3351_bid_day
-Revises: v3327_accounting_sync
+Revises: v3350_estimate_checks
 Create Date: 2026-10-31
 """
 
@@ -19,7 +19,7 @@ import sqlalchemy as sa
 from alembic import op
 
 revision: str = "v3351_bid_day"
-down_revision: str | Sequence[str] | None = "v3327_accounting_sync"
+down_revision: str | Sequence[str] | None = "v3350_estimate_checks"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
