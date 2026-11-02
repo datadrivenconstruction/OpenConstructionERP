@@ -145,8 +145,9 @@ const RiskRegisterPage = lazy(() =>
 // DocumentsPage merged into the unified File Manager — /documents now
 // redirects to /files. Keeping the source file on disk for cleanup in a
 // later release; nothing imports DocumentsPage today.
-const PhotoGalleryPage = lazy(() =>
-  import('@/features/documents/PhotoGalleryPage').then((m) => ({ default: m.PhotoGalleryPage }))
+const PhotosPage = lazy(() => import('@/features/photos/PhotosPage').then((m) => ({ default: m.PhotosPage })));
+const PhotoComparePage = lazy(() =>
+  import('@/features/photos/ComparePage').then((m) => ({ default: m.PhotoComparePage }))
 );
 // RequirementsPage merged into /bim/rules — route removed, redirect added
 // const RequirementsPage = lazy(() =>
@@ -1533,7 +1534,8 @@ export default function App() {
 
         <Route path="/changeorders" element={<P title="Change Orders"><ChangeOrdersPage /></P>} />
         <Route path="/documents" element={<Navigate to="/files" replace />} />
-        <Route path="/photos" element={<P title="Project Photos"><PhotoGalleryPage /></P>} />
+        <Route path="/photos" element={<P title="Project Photos"><PhotosPage /></P>} />
+        <Route path="/photos/compare/:compareId" element={<P title="Project Photos"><PhotoComparePage /></P>} />
         <Route path="/files/trash" element={<P title="Recycle Bin"><TrashPage /></P>} />
         <Route path="/files/search" element={<P title="Search across projects"><GlobalSearchPage /></P>} />
         <Route path="/files/transmittals" element={<P title="Transmittals"><TransmittalLogPage /></P>} />
