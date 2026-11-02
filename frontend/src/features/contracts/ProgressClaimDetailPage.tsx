@@ -163,7 +163,7 @@ export function ProgressClaimDetailPage() {
 
   const claim = claimQ.data;
   // AIA needs both: a tenant market whose packs offer AIA forms, and an eligible project country.
-  const { data: marketScope } = useMarketScope();
+  const { data: marketScope } = useMarketScope(!!projectId, projectId ?? null);
   const aiaEligible = showAiaForProject(marketScope, projectQ.data?.is_aia_eligible === true);
   // The certificate is asked for only where the project's country or the
   // contract's own terms give it a layout; anywhere else the answer is a 404.

@@ -6,8 +6,11 @@
     GET /api/v1/market/?project_id=...  - the same, narrowed to that project's country.
     PUT /api/v1/market/                 - package admins: save the market profile.
 
-The profile lives in the tenant's metadata beside the solution package state,
-so this needs no migration. See :mod:`app.core.market_scope`.
+There is no tenant table yet, so the company profile lives in the metadata of
+the company's holder user: the ``tenant_id`` claim when present, else the
+oldest active admin. Every user of the install reads the same profile; a
+profile saved per user by an earlier build is read as a fallback and moved to
+the holder on the next admin read. No migration. See :mod:`app.core.market_scope`.
 """
 
 from __future__ import annotations
@@ -23,6 +26,7 @@ from sqlalchemy import select
 from app.core import market_scope as ms
 from app.core.module_guard import invalidate_user
 from app.core.solution_packages_router import can_manage_packages, require_package_admin
+from app.core.tenant_scope import resolve_tenant_id
 from app.dependencies import CurrentUserId, SessionDep, get_current_user_payload
 from app.modules.users.router import _get_service
 from app.modules.users.service import UserService
@@ -101,6 +105,41 @@ async def _payload(
     return {"profile": profile, "derived": derived, **scope}
 
 
+async def company_holder_id(session: Any, payload: dict[str, Any], caller: uuid.UUID) -> uuid.UUID:
+    """The user whose metadata carries the company-wide market profile."""
+    tenant = resolve_tenant_id(payload)
+    if tenant and tenant != str(payload.get("sub")):
+        try:
+            return uuid.UUID(tenant)
+        except ValueError:
+            return caller
+    try:
+        from app.modules.users.models import User
+
+        rows = await session.execute(
+            select(User.id).where(User.role == "admin", User.is_active.is_(True)).order_by(User.created_at).limit(1)
+        )
+        for (holder,) in rows:
+            return holder if isinstance(holder, uuid.UUID) else uuid.UUID(str(holder))
+    except Exception:  # noqa: BLE001 - no admin found means the caller holds its own profile
+        logger.debug("market: holder lookup failed", exc_info=True)
+    return caller
+
+
+async def _company_metadata(
+    service: Any, session: Any, payload: dict[str, Any], caller: uuid.UUID
+) -> tuple[uuid.UUID, dict[str, Any]]:
+    holder = await company_holder_id(session, payload, caller)
+    metadata = dict((await service.get_user(holder)).metadata_ or {})
+    if holder != caller and ms.stored_profile(metadata) is None:
+        legacy = ms.stored_profile(dict((await service.get_user(caller)).metadata_ or {}))
+        if legacy is not None:
+            metadata = ms.save_profile(metadata, legacy)
+            if can_manage_packages(payload):
+                await service.update_profile(holder, metadata_=metadata)
+    return holder, metadata
+
+
 @router.get("/")
 async def get_market_scope(
     user_id: CurrentUserId,
@@ -110,8 +149,8 @@ async def get_market_scope(
     service: UserService = Depends(_get_service),
 ) -> dict[str, Any]:
     """The resolved market scope: markets, hidden modules, units, standards, rule sets."""
-    user = await service.get_user(uuid.UUID(user_id))
-    out = await _payload(dict(user.metadata_ or {}), session, uuid.UUID(user_id), project_id)
+    _, metadata = await _company_metadata(service, session, payload, uuid.UUID(user_id))
+    out = await _payload(metadata, session, uuid.UUID(user_id), project_id)
     return {**out, "can_edit": can_manage_packages(payload)}
 
 
@@ -120,13 +159,15 @@ async def put_market_profile(
     body: MarketProfileBody,
     user_id: CurrentUserId,
     session: SessionDep,
+    payload: dict[str, Any] = Depends(get_current_user_payload),
     service: UserService = Depends(_get_service),
 ) -> dict[str, Any]:
-    """Save the market profile. Nothing is uninstalled and no data is touched."""
-    user = await service.get_user(uuid.UUID(user_id))
-    metadata = ms.save_profile(dict(user.metadata_ or {}), body.model_dump())
-    await service.update_profile(uuid.UUID(user_id), metadata_=metadata)
+    """Save the company market profile. Nothing is uninstalled and no data is touched."""
+    holder, metadata = await _company_metadata(service, session, payload, uuid.UUID(user_id))
+    metadata = ms.save_profile(metadata, body.model_dump())
+    await service.update_profile(holder, metadata_=metadata)
     invalidate_user(user_id)
+    invalidate_user(str(holder))
     out = await _payload(metadata, session, uuid.UUID(user_id), None)
     return {**out, "can_edit": True}
 

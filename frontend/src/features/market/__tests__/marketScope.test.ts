@@ -130,3 +130,18 @@ describe('market preview and scoped lists', () => {
     expect(isCountryInScope('DE', scope({ all_markets: true, expanded_markets: ['SA'] }))).toBe(true);
   });
 });
+
+describe('units system hydration', () => {
+  it('follows the tenant scope query, not project scopes', async () => {
+    const { QueryClient } = await import('@tanstack/react-query');
+    const { hydrateUnitsSystem, MARKET_QUERY_KEY } = await import('../api');
+    const { getActiveUnitsSystem } = await import('@/features/boq/boqHelpers');
+    const client = new QueryClient();
+    const stop = hydrateUnitsSystem(client);
+    client.setQueryData([...MARKET_QUERY_KEY, 'p1'], scope({ units_system: 'imperial' }));
+    expect(getActiveUnitsSystem()).toBe('both');
+    client.setQueryData([...MARKET_QUERY_KEY, null], scope({ units_system: 'metric' }));
+    expect(getActiveUnitsSystem()).toBe('metric');
+    stop();
+  });
+});

@@ -43,6 +43,7 @@ import {
   getUnitsForLocale,
   hasContributingResources,
   saveCustomUnit,
+  type UnitsSystem,
 } from '../boqHelpers';
 import { RESOURCE_TYPES, getResourceTypeLabel, getResourceTypeShortCode } from '../boqResourceTypes';
 import { countComments } from '../CommentDrawer';
@@ -673,6 +674,10 @@ export interface VariationLineTraceBadge {
 export type FullGridContext = ActionsContext & ResourceGridContext & SectionGroupContext & {
   /** The bill is locked: renderers show values and offer no write. */
   readOnly?: boolean;
+  /** Project of the bill; the unit picker remembers its "More units" picks per project. */
+  projectId?: string | null;
+  /** Units system of the project's market (falls back to the tenant default). */
+  unitsSystem?: UnitsSystem;
   /**
    * Issue #435 - present only when the bill belongs to a variation request.
    * Keyed by position id; a line missing from the map is untraced and paints

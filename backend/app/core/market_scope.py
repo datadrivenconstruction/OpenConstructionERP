@@ -38,39 +38,21 @@ PROFILE_KEY = "market_profile"
 #: The tag meaning "every market".
 ALL_MARKETS = "*"
 
-#: Supranational markets a country belongs to. A module tagged ``"EU"`` serves
-#: every member state (the EU Late Payment Directive is one such case).
-EU_MEMBERS: frozenset[str] = frozenset(
-    [
-        "AT",
-        "BE",
-        "BG",
-        "CY",
-        "CZ",
-        "DE",
-        "DK",
-        "EE",
-        "ES",
-        "FI",
-        "FR",
-        "GR",
-        "HR",
-        "HU",
-        "IE",
-        "IT",
-        "LT",
-        "LU",
-        "LV",
-        "MT",
-        "NL",
-        "PL",
-        "PT",
-        "RO",
-        "SE",
-        "SI",
-        "SK",
-    ]
-)
+_SUPRANATIONAL_FILE = Path(__file__).resolve().parent / "country_data" / "supranational_markets.json"
+
+
+@lru_cache(maxsize=1)
+def supranational_markets() -> dict[str, frozenset[str]]:
+    """Supranational market -> member states, from ``country_data`` (read once)."""
+    import json
+
+    try:
+        raw = json.loads(_SUPRANATIONAL_FILE.read_text(encoding="utf-8")).get("markets") or {}
+    except (OSError, ValueError):
+        logger.warning("market: %s unreadable, no supranational markets", _SUPRANATIONAL_FILE.name)
+        return {}
+    return {_code(k): frozenset(_code(c) for c in v) for k, v in raw.items() if isinstance(v, list)}
+
 
 UNITS_SYSTEMS: tuple[str, ...] = ("metric", "imperial", "both")
 
@@ -101,8 +83,9 @@ def normalise_tags(tags: Iterable[Any] | None) -> tuple[str, ...]:
 def expand_markets(markets: Iterable[str]) -> frozenset[str]:
     """Active market codes plus the supranational markets they belong to."""
     codes = {_code(m) for m in markets if _code(m)}
-    if codes & EU_MEMBERS:
-        codes.add("EU")
+    for market, members in supranational_markets().items():
+        if codes & members:
+            codes.add(market)
     return frozenset(codes)
 
 

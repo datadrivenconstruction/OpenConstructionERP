@@ -322,15 +322,52 @@ export const METRIC_UNITS: ReadonlySet<string> = new Set([
   'mm3', 'cm3', 'dm3', 'm3', 'l', 'ml', 'cl', 'hl', 'mg', 'g', 'kg', 't', 'kg/m', 'kg/m2', 'kg/m3',
 ]);
 
+// Tenant default, kept in step with the market scope query by hydrateUnitsSystem (main.tsx).
 let activeUnitsSystem: UnitsSystem = 'both';
 
-/** Set by the market scope once it loads; pickers read it through getUnitsForLocale. */
+/** Set from the tenant market scope query; project pickers pass their own system instead. */
 export function setActiveUnitsSystem(system: UnitsSystem | null | undefined): void {
   activeUnitsSystem = system === 'metric' || system === 'imperial' ? system : 'both';
 }
 
 export function getActiveUnitsSystem(): UnitsSystem {
   return activeUnitsSystem;
+}
+
+const PROJECT_UNITS_PREFIX = 'oe.boq.project-units.';
+
+/** Units this project's estimators picked through "More units...", outside the market's system. */
+export function loadProjectExtraUnits(projectId: string | null | undefined): string[] {
+  if (!projectId) return [];
+  try {
+    const raw = JSON.parse(localStorage.getItem(PROJECT_UNITS_PREFIX + projectId) ?? '[]');
+    return Array.isArray(raw) ? raw.filter((u): u is string => typeof u === 'string' && !!u) : [];
+  } catch {
+    return [];
+  }
+}
+
+/** Remember a "More units..." pick so the project's picker keeps offering it. */
+export function rememberProjectExtraUnit(projectId: string | null | undefined, unit: string): void {
+  const u = unit.trim();
+  if (!projectId || !u) return;
+  const list = loadProjectExtraUnits(projectId);
+  if (list.includes(u)) return;
+  try {
+    localStorage.setItem(PROJECT_UNITS_PREFIX + projectId, JSON.stringify([...list, u].slice(-50)));
+  } catch {
+    /* storage full or blocked: the pick still commits */
+  }
+}
+
+/** Units used by the bill's positions, so a filtered picker never drops them. */
+export function unitsInUse(positions: readonly { unit?: string | null }[] | undefined): string[] {
+  const out = new Set<string>();
+  for (const p of positions ?? []) {
+    const u = (p.unit ?? '').trim();
+    if (u) out.add(u);
+  }
+  return [...out];
 }
 
 /**

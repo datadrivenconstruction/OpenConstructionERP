@@ -388,3 +388,76 @@ def test_single_alembic_head() -> None:
     cfg = Config(str(_BACKEND / "alembic.ini"))
     cfg.set_main_option("script_location", str(_BACKEND / "alembic"))
     assert len(ScriptDirectory.from_config(cfg).get_heads()) == 1
+
+
+# ── Company-wide profile and country data ────────────────────────────────────
+
+
+class _Users:
+    """Per-user metadata store standing in for UserService."""
+
+    def __init__(self) -> None:
+        self.by_id: dict[uuid.UUID, dict] = {}
+
+    async def get_user(self, user_id: uuid.UUID) -> SimpleNamespace:
+        return SimpleNamespace(metadata_=dict(self.by_id.get(user_id, {})))
+
+    async def update_profile(self, user_id: uuid.UUID, **fields) -> None:
+        self.by_id[user_id] = dict(fields["metadata_"])
+
+
+@pytest.mark.asyncio
+async def test_profile_is_company_wide_viewer_reads_admin_profile(monkeypatch) -> None:
+    from app.core import market_router
+    from tests.unit.test_solution_packages import USER_ID
+
+    holder = uuid.uuid4()
+
+    async def _holder(_session, _payload, _caller):
+        return holder
+
+    monkeypatch.setattr(market_router, "company_holder_id", _holder)
+    users = _Users()
+    async with _http(users) as admin:
+        assert (await admin.put("/api/v1/market/", json={"primary": {"country": "SA"}})).status_code == 200
+    assert ms.PROFILE_KEY in users.by_id[holder] and uuid.UUID(USER_ID) not in users.by_id
+    async with _http(users, {"sub": USER_ID, "role": "viewer"}) as viewer:
+        body = (await viewer.get("/api/v1/market/")).json()
+    assert body["markets"] == ["SA"] and body["derived"] is False
+
+
+@pytest.mark.asyncio
+async def test_legacy_per_user_profile_moves_to_holder_on_admin_read(monkeypatch) -> None:
+    from app.core import market_router
+    from tests.unit.test_solution_packages import USER_ID
+
+    holder = uuid.uuid4()
+
+    async def _holder(_session, _payload, _caller):
+        return holder
+
+    monkeypatch.setattr(market_router, "company_holder_id", _holder)
+    users = _Users()
+    users.by_id[uuid.UUID(USER_ID)] = ms.save_profile({}, {"primary": {"country": "DE"}})
+    async with _http(users) as client:
+        assert (await client.get("/api/v1/market/")).json()["markets"] == ["DE"]
+    assert ms.stored_profile(users.by_id[holder])["primary"]["country"] == "DE"
+
+
+@pytest.mark.asyncio
+async def test_holder_prefers_foreign_tenant_claim() -> None:
+    from app.core.market_router import company_holder_id
+
+    tenant, caller = uuid.uuid4(), uuid.uuid4()
+    got = await company_holder_id(_Session(), {"sub": str(caller), "tenant_id": str(tenant)}, caller)
+    assert got == tenant
+    assert await company_holder_id(_Session(), {"sub": str(caller)}, caller) == caller
+
+
+def test_supranational_members_come_from_country_data() -> None:
+    import json
+
+    data = json.loads((_BACKEND / "app" / "core" / "country_data" / "supranational_markets.json").read_text("utf-8"))
+    assert set(data["markets"]["EU"]) == ms.supranational_markets()["EU"]
+    assert "EU" in ms.expand_markets(["AT"]) and "EU" not in ms.expand_markets(["GB"])
+    assert not hasattr(ms, "EU_MEMBERS")

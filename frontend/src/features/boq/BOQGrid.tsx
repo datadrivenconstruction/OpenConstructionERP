@@ -115,6 +115,7 @@ import {
   resourceExpansionState,
   type ResourceExpansionState,
 } from './resourceExpansion';
+import type { UnitsSystem } from './boqHelpers';
 import { CURRENCY_GROUPS } from '@/features/projects/CreateProjectPage';
 import { useToastStore } from '@/stores/useToastStore';
 import { useBoqDescDensityStore, BOQ_DESC_ROW_HEIGHT } from '@/stores/useBoqDescDensityStore';
@@ -516,6 +517,10 @@ export interface BOQGridProps {
    * the project's own standard when a row carries more than one.
    */
   classificationStandard?: string;
+  /** Project whose market narrows the unit picker and remembers its extra units. */
+  projectId?: string | null;
+  /** Units system of the project's market; the tenant default when absent. */
+  unitsSystem?: UnitsSystem;
   /**
    * Issue #435 - open the provenance control for one line of a variation's
    * bill: which contract line or estimate position it comes from, and
@@ -740,6 +745,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
   onShowProcurementTrace,
   onShowMeasurement,
   classificationStandard,
+  projectId,
+  unitsSystem,
   onTraceLine,
   variationTraces,
   variationUntracedBadge,
@@ -1502,6 +1509,8 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       variationTraces,
       variationUntracedBadge,
       readOnly,
+      projectId: projectId ?? null,
+      unitsSystem,
     }) as FullGridContext,
     [descDensity, currencySymbol, currencyCode, fxRates, onUpsertProjectFxRate, displayCurrency, onOpenFxRateSettings, locale, fmt, t, collapsedSections, onToggleSection, onAddPosition, onAddSubSection,
      expandedPositions, toggleResources, onRemoveResource, onUpdateResource, onUpdateResourceFields,
@@ -1511,7 +1520,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
      onDuplicatePosition, showContextMenu, anomalyMap, onApplyAnomalySuggestion, bimModelId,
      onUpdatePosition, onHighlightBIMElements, onLinkFromModel, onDeleteSection, onReorderSections, onFormulaApplied,
      positions, boqVariablesMap, customColumns, showResourceSplit, showResourceSplitPill, showCostAllocation, costAllocations, onOpenCostAllocation, drawingRefs, onOpenDrawingRef, onCompareDrawingRef, onOpenDrawingRefs, renderInlineCopilot, displayQuantity,
-     sectionTotalBasis, variationTraces, variationUntracedBadge, readOnly, canDelete, addToast],
+     sectionTotalBasis, variationTraces, variationUntracedBadge, readOnly, canDelete, addToast, projectId, unitsSystem],
   );
 
   /* ── Column defs (standard + custom) ─────────────────────────────── */

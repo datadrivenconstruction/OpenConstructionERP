@@ -10,6 +10,7 @@ import { startAccountLanguageSync } from './app/accountLanguage';
 import { applyStoredUiScale } from '@/shared/lib/uiScale';
 import { retireStaleCaches } from './pwa/retireStaleCaches';
 import { captureDemoPick } from '@/shared/ui/DemoSwitcherBar';
+import { hydrateUnitsSystem } from '@/features/market/api';
 import './index.css';
 
 captureDemoPick();
@@ -75,6 +76,8 @@ const queryClient = new QueryClient({
     onError: (error, _variables, _context, mutation) => notifyMutationError(error, mutation),
   }),
 });
+
+hydrateUnitsSystem(queryClient);
 
 // Stamp the root element with an origin token. Survives in the live DOM
 // and any saved-page snapshot — looks like a deterministic build id.

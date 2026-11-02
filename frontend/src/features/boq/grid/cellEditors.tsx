@@ -16,7 +16,14 @@ import { AlertTriangle, X as XIcon } from 'lucide-react';
 import type { ICellEditorParams } from 'ag-grid-community';
 import { AutocompleteInput } from '../AutocompleteInput';
 import type { CostAutocompleteItem, Position } from '../api';
-import { getUnitsForLocale, saveCustomUnit } from '../boqHelpers';
+import {
+  getUnitsForLocale,
+  loadProjectExtraUnits,
+  rememberProjectExtraUnit,
+  saveCustomUnit,
+  unitsInUse,
+  type UnitsSystem,
+} from '../boqHelpers';
 import { parseDecimalInput, parseMoneyInput } from '@/shared/lib/parseDecimal';
 import { useToastStore } from '@/stores/useToastStore';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
@@ -1139,11 +1146,24 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
   // Locale-aware multilingual list + user's custom units. Current value
   // is appended when not already in the list so the existing token still
   // shows up.
+  const unitCtx = props.context as
+    | { projectId?: string | null; unitsSystem?: UnitsSystem; positions?: { unit?: string | null }[] }
+    | undefined;
+  const projectId = unitCtx?.projectId ?? null;
+  const unitsSystem = unitCtx?.unitsSystem;
+  const ctxPositions = unitCtx?.positions;
+  // Units already in the bill and earlier "More units..." picks stay offered.
+  const keepUnits = useMemo(
+    () => [...unitsInUse(ctxPositions), ...loadProjectExtraUnits(projectId)],
+    [ctxPositions, projectId],
+  );
   const allOptions = useMemo(() => {
-    const list = showAllUnits ? getUnitsForLocale(lang, 'both') : getUnitsForLocale(lang);
+    const list = showAllUnits
+      ? getUnitsForLocale(lang, 'both', keepUnits)
+      : getUnitsForLocale(lang, unitsSystem, keepUnits);
     if (initial && !list.includes(initial)) return [...list, initial];
     return list;
-  }, [lang, initial, showAllUnits]);
+  }, [lang, initial, showAllUnits, unitsSystem, keepUnits]);
 
   // Filter as the user types. Empty / unchanged value shows the FULL list
   // (the previous datalist-based implementation hid all-but-one options
@@ -1244,8 +1264,9 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
   }, [applyCommit, value]);
 
   const pick = useCallback((u: string) => {
+    if (showAllUnits) rememberProjectExtraUnit(projectId, u);
     applyCommit(u);
-  }, [applyCommit]);
+  }, [applyCommit, showAllUnits, projectId]);
 
   // Scroll the active option into view as the user navigates.
   useEffect(() => {
@@ -1305,11 +1326,12 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
       // before our applyCommit runs) and stop AG Grid's outside-click
       // detector via preventDefault on mousedown.
       e.preventDefault();
-      applyCommit(picked);
+      pick(picked);
     };
     ul.addEventListener('mousedown', handler);
     return () => ul.removeEventListener('mousedown', handler);
-  }, [open, applyCommit]);
+    // The list is portalled once anchorRect is known, so re-attach when it mounts.
+  }, [open, pick, anchorRect]);
 
   return (
     <div className="relative w-full h-full">

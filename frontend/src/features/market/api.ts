@@ -7,8 +7,7 @@
  * of modules, packs and rule sets. This file types the answer and offers the
  * hook every menu, picker and rule-set list reads.
  */
-import { useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, type QueryClient } from '@tanstack/react-query';
 import { apiGet, apiPost, apiPut } from '@/shared/lib/api';
 import { setActiveUnitsSystem, type UnitsSystem } from '@/features/boq/boqHelpers';
 
@@ -64,17 +63,37 @@ export function saveMarketProfile(profile: MarketProfile): Promise<MarketScope> 
 
 /** The tenant's market scope (or one project's, when `projectId` is given). */
 export function useMarketScope(enabled = true, projectId?: string | null) {
-  const query = useQuery({
+  return useQuery({
     queryKey: [...MARKET_QUERY_KEY, projectId ?? null],
     queryFn: () => fetchMarketScope(projectId),
     enabled,
     staleTime: 60 * 1000,
   });
-  const units = projectId ? undefined : query.data?.units_system;
-  useEffect(() => {
-    if (units) setActiveUnitsSystem(units);
-  }, [units]);
-  return query;
+}
+
+/**
+ * Units system for pickers: the project's country narrows the tenant's when a
+ * project is given; until the scope loads every unit shows.
+ */
+export function useUnitsSystem(projectId?: string | null): UnitsSystem {
+  const { data } = useMarketScope(true, projectId);
+  return data?.units_system ?? 'both';
+}
+
+/**
+ * Keep the tenant-wide default units system (used by pickers outside a project)
+ * in step with the tenant scope query. Called once at app start.
+ */
+export function hydrateUnitsSystem(client: QueryClient): () => void {
+  const key = JSON.stringify([...MARKET_QUERY_KEY, null]);
+  const sync = () => {
+    const scope = client.getQueryData<MarketScope>([...MARKET_QUERY_KEY, null]);
+    if (scope?.units_system) setActiveUnitsSystem(scope.units_system);
+  };
+  sync();
+  return client.getQueryCache().subscribe((event) => {
+    if (JSON.stringify(event.query.queryKey) === key) sync();
+  });
 }
 
 export interface MarketPreview extends Omit<MarketScope, 'derived' | 'can_edit'> {

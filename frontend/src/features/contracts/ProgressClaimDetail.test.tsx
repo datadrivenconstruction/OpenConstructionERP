@@ -81,6 +81,9 @@ vi.mock('./api', () => ({
   getPaymentApplication: vi.fn().mockResolvedValue({ summary: { previous_certificates_basis: 'snapshot' } }),
 }));
 
+const marketScopeSpy = vi.hoisted(() => vi.fn((_enabled?: boolean, _projectId?: string | null) => ({ data: undefined })));
+vi.mock('@/features/market/api', () => ({ useMarketScope: marketScopeSpy }));
+
 vi.mock('@/stores/useToastStore', () => ({
   useToastStore: (sel) => sel({ addToast: vi.fn() }),
 }));
@@ -244,6 +247,14 @@ describe('ProgressClaimDetailPage', () => {
     // assert on at least one match rather than a unique element.
     await waitFor(() => expect(screen.getAllByText(/PC-0001/).length).toBeGreaterThan(0));
     expect(screen.getByTestId('progress-claim-detail')).toBeTruthy();
+  });
+
+  it('reads the market scope of the claim project', async () => {
+    api.getProgressClaim.mockResolvedValue(claim());
+    api.listClaimLines.mockResolvedValue([]);
+    renderDetail();
+    await waitFor(() => expect(screen.getAllByText(/PC-0001/).length).toBeGreaterThan(0));
+    expect(marketScopeSpy).toHaveBeenCalledWith(true, PROJECT_ID);
   });
 
   it('says a certified client claim is a receivable and a subcontract claim a payable', async () => {

@@ -4,6 +4,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useUnitsSystem } from '@/features/market/api';
 // lucide-react icons used by sub-components (BOQToolbar, BOQGrid, etc.) — none needed directly here
 import { Database, Download, ExternalLink, X, Sparkles, AlertTriangle as WarnTriangle, Lock, Copy, Wallet, Keyboard, GitCompare, RefreshCw, ShieldCheck, FlaskConical, Send, Percent, CheckCircle, ArrowLeft, LayoutList, SlidersHorizontal } from 'lucide-react';
 import { Button, Badge, Breadcrumb, ModuleHelpButton, ModuleGuideButton, ConfirmDialog, DismissibleInfo, IntroRichText } from '@/shared/ui';
@@ -559,6 +560,8 @@ export function BOQEditorPage() {
     return null;
   }, [selectedPositionIds, activePositionId, boq?.positions]);
   const boqGridRef = useRef<BOQGridHandle>(null);
+  // The project's country narrows the unit picker's system.
+  const projectUnitsSystem = useUnitsSystem(boq?.project_id ?? null);
 
   /** Tracks the pending deferred delete so it can be cancelled by undo. */
   const pendingDeleteRef = useRef<{
@@ -5707,6 +5710,8 @@ export function BOQEditorPage() {
         ) : (
         <BOQGrid
           ref={boqGridRef}
+          projectId={boq?.project_id ?? null}
+          unitsSystem={projectUnitsSystem}
           positions={filteredGridPositions}
           onUpdatePosition={trackedUpdate}
           onDeletePosition={trackedDelete}
