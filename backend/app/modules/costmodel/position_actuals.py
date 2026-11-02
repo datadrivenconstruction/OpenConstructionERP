@@ -206,6 +206,11 @@ class PositionActuals:
     labour_hours: Decimal = _ZERO
     plant_hours: Decimal = _ZERO
 
+    #: Verified haul tickets booked against the position: delivered quantity in
+    #: the ticket unit and its haulage cost.
+    hauled_quantity: Decimal = _ZERO
+    haul_amount: Decimal = _ZERO
+
     @property
     def labour_hours_per_installed_unit(self) -> Decimal | None:
         """Booked labour hours per unit of work actually in place.
@@ -291,6 +296,7 @@ def assemble_rows(
     installed_pct: dict[uuid.UUID, float],
     consumed: dict[uuid.UUID, tuple[Decimal, Decimal]],
     booked_hours: dict[uuid.UUID, tuple[Decimal, Decimal]] | None = None,
+    hauled: dict[uuid.UUID, tuple[Decimal, Decimal]] | None = None,
 ) -> list[PositionActuals]:
     """Join the aggregates onto the positions. Pure, so it can be tested alone.
 
@@ -315,6 +321,7 @@ def assemble_rows(
         )
         consumed_qty, consumed_amount = consumed.get(pos.id, (_ZERO, _ZERO))
         labour_hours, plant_hours = (booked_hours or {}).get(pos.id, (_ZERO, _ZERO))
+        hauled_qty, haul_amount = (hauled or {}).get(pos.id, (_ZERO, _ZERO))
         norm_id, norm_work_key = norm_provenance_of(pos)
 
         rows.append(
@@ -341,6 +348,8 @@ def assemble_rows(
                 consumed_amount=consumed_amount.quantize(_MONEY_Q),
                 labour_hours=labour_hours.quantize(_HOURS_Q),
                 plant_hours=plant_hours.quantize(_HOURS_Q),
+                hauled_quantity=hauled_qty.quantize(_QTY_Q),
+                haul_amount=haul_amount.quantize(_MONEY_Q),
             )
         )
     return rows
@@ -542,6 +551,12 @@ async def build_position_actuals(
     installed_pct = await ProgressRepository(session).latest_pct_for_positions(project_id, ids)
     consumed = await consumption_by_position(session, project_id, ids)
     booked_hours = await hours_by_position(session, project_id, ids)
+    try:
+        from app.modules.haul_tickets.service import haul_by_position
+
+        hauled = await haul_by_position(session, project_id, ids)
+    except ImportError:
+        hauled = {}
 
     report.rows = assemble_rows(
         list(positions),
@@ -553,6 +568,7 @@ async def build_position_actuals(
         installed_pct=installed_pct,
         consumed=consumed,
         booked_hours=booked_hours,
+        hauled=hauled,
     )
     report.currency = await _project_currency(session, project_id)
     return report

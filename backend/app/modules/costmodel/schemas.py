@@ -922,8 +922,13 @@ class PositionActualsRow(BaseModel):
     #: billed quantity, which would make a half-built item read as twice as
     #: productive as it is and an untouched one as the best on the project.
     labour_hours_per_installed_unit: Decimal | None = None
+    #: Verified haul tickets against the position (quantity, haulage cost).
+    hauled_quantity: Decimal = Decimal("0")
+    haul_amount: Decimal = Decimal("0")
 
     @field_serializer(
+        "hauled_quantity",
+        "haul_amount",
         "estimate_quantity",
         "estimate_unit_rate",
         "estimate_amount",
