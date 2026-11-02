@@ -68,7 +68,7 @@ vi.mock('@/features/market/api', async (importOriginal) => ({
       expanded_markets: ['DE', 'SA', 'MY', 'PL'],
       all_markets: false,
       hidden_modules: [],
-      module_markets: { oe_einvoice_clearance: ['DE', 'SA', 'MY', 'PL', 'IT'] },
+      module_markets: { einvoice_clearance: ['DE', 'SA', 'MY', 'PL', 'IT'] },
     },
   }),
 }));
@@ -463,7 +463,7 @@ describe('EInvoicesTab', () => {
     mocks.getDocumentsOverview.mockResolvedValue([overviewRow({ total_amount: '1437500.00', currency_code: 'SAR' })]);
     wrap(<EInvoicesTab projectId="pr" />);
     const cell = (await screen.findByText('SIM-0001')).closest('tr')!;
-    expect(cell.textContent).toMatch(/1[,.\s  ]?437[,.\s  ]?500/);
+    expect(cell.textContent).toMatch(/1[,.\s\u00a0\u202f]?437[,.\s\u00a0\u202f]?500/);
     expect(cell.textContent).toContain('SAR');
   });
 

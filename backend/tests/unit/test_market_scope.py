@@ -210,3 +210,13 @@ async def test_http_preview_does_not_save() -> None:
         assert "middle_east_pack" not in body["hidden_modules"]
         assert "real_estate_gcc" in body["suggested_packages"]
         assert ms.PROFILE_KEY not in service.metadata
+
+
+def test_einvoice_module_is_keyed_without_prefix_and_hidden_for_a_non_mandate_market(tagged, packs) -> None:
+    # The frontend gate reads these exact unprefixed keys.
+    de = _tenant("DE", tagged, packs)
+    assert "DE" in de["module_markets"]["einvoice_clearance"]
+    assert "oe_einvoice_clearance" not in de["module_markets"]
+    us = _tenant("US", tagged, packs)
+    assert "einvoice_clearance" in us["hidden_modules"]
+    assert "oe_einvoice_clearance" not in us["hidden_modules"]
