@@ -1379,6 +1379,10 @@
     "manual_ref_without_revision": {
       "fail": "Position {ordinal}: Plan {drawing} ist ohne Planindex erfasst",
       "suggestion": "Den Planindex des Plans ergänzen, aus dem die Menge kalkuliert wurde"
+    },
+    "carried_unconfirmed": {
+      "fail": "Position {ordinal}: {count} Aufmaß(e) wurden aus einem früheren Planindex übernommen und sind noch nicht bestätigt",
+      "suggestion": "Jedes übernommene Aufmaß auf dem neuen Index prüfen und bestätigen oder neu messen"
     }
   },
   "offline_sync": {
@@ -1460,6 +1464,12 @@
     "partida_numbering": {
       "fail": "Position {ordinal} ist nicht als partida nummeriert (zwei Ziffern pro Ebene, z. B. 03.02 oder 03.02.01)",
       "suggestion": "Nummerieren Sie jede bepreiste Zeile nach Kapitel und Posten, so wie ein peruanisches presupuesto seine partidas gliedert, z. B. 03.02"
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "fail": "Die Risikozeile „{markup}“ wurde am {applied_at} mit P{percentile} angesetzt, seither haben sich die Positionssummen der Risikoanalyse geändert",
+      "suggestion": "Risikoanalyse neu rechnen und den Risikozuschlag erneut übernehmen, oder die Zeile behalten und den Grund vermerken"
     }
   }
 }

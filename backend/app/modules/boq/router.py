@@ -144,6 +144,7 @@ from app.modules.boq.schemas import (
     AIChatResponse,
     AnomalyCheckResponse,
     AnomalyResponse,
+    ApplyRiskContingencyRequest,
     BOQCompareResponse,
     BOQCreate,
     BOQFromTemplateRequest,
@@ -210,6 +211,7 @@ from app.modules.boq.schemas import (
     RestoreFieldResponse,
     RestructureRequest,
     RestructureResult,
+    RiskContingencyStatus,
     ScenarioCreate,
     ScopeMissingItem,
     SectionCreate,
@@ -4147,6 +4149,12 @@ async def validate_boq(
     branch_block = await BranchService(session).divergence(boq_id)
     if branch_block is not None:
         markup_context["branch"] = branch_block
+    # The applied risk contingency against the current risk inputs, for boq.risk.contingency_stale.
+    from app.modules.boq.risk_contingency import risk_inputs, stale_block
+
+    risk_block = stale_block(await service.list_markups(boq_id), risk_inputs(list(boq_data.positions)))
+    if risk_block is not None:
+        markup_context["risk_contingency"] = risk_block
 
     # Determine rule sets from project config. Empty classification /
     # region means "no preference"; the rule registry resolves to a
@@ -10759,6 +10767,100 @@ async def get_cost_risk(
         cdf=cdf,
         risk_drivers=risk_drivers,
     )
+
+
+# ── Monte Carlo contingency -> estimate ─────────────────────────────────────
+
+
+@router.get(
+    "/boqs/{boq_id}/cost-risk/contingency/",
+    response_model=RiskContingencyStatus,
+    summary="Preview a risk contingency and read the applied one",
+    dependencies=[Depends(RequirePermission("boq.read"))],
+)
+async def get_risk_contingency(
+    boq_id: uuid.UUID,
+    _user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    percentile: int | None = Query(default=None, ge=50, le=99, description="Percentile to preview"),
+    iterations: int = Query(default=cre.DEFAULT_ITERATIONS, ge=100, le=cre.MAX_ITERATIONS),
+    optimistic_pct: float = Query(default=15.0, ge=0.0, le=50.0),
+    pessimistic_pct: float = Query(default=25.0, ge=0.0, le=100.0),
+    correlation: float = Query(default=cre.DEFAULT_CORRELATION, ge=0.0, le=0.95),
+    service: BOQService = Depends(_get_service),
+) -> RiskContingencyStatus:
+    """Suggested contingency at ``percentile`` (when given) plus the applied line.
+
+    The applied line is re-simulated like for like (same percentile, seed,
+    iterations and band), so ``drift_amount`` says how far the contingency
+    would move if applied again today; ``stale`` says the risk inputs changed.
+    """
+    from app.modules.boq.risk_contingency import RiskContingencyService, RunParams
+
+    await _verify_boq_owner(session, boq_id, _user_id, payload)
+    params = (
+        RunParams(percentile, iterations, optimistic_pct, pessimistic_pct, correlation)
+        if percentile is not None
+        else None
+    )
+    return RiskContingencyStatus(**await RiskContingencyService(service).status(boq_id, params))
+
+
+@router.post(
+    "/boqs/{boq_id}/cost-risk/contingency/",
+    response_model=RiskContingencyStatus,
+    summary="Apply a risk contingency to the estimate",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def apply_risk_contingency(
+    boq_id: uuid.UUID,
+    data: ApplyRiskContingencyRequest,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> RiskContingencyStatus:
+    """Write (or replace) the bill's risk contingency line from a server-side run.
+
+    The estimator confirmed a percentile in the cost-risk panel; the amount is
+    recomputed here and refused with 409 when it no longer matches the
+    ``expected_amount`` the estimator saw. The previous application is kept so
+    ``DELETE`` can step back to it.
+    """
+    from app.modules.boq.risk_contingency import RiskContingencyService, RunParams
+
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    params = RunParams(data.percentile, data.iterations, data.optimistic_pct, data.pessimistic_pct, data.correlation)
+    result = await RiskContingencyService(service).apply(
+        boq_id,
+        params,
+        user_id=str(user_id),
+        user_email=(payload or {}).get("email") if isinstance(payload, dict) else None,
+        expected_amount=data.expected_amount,
+        name=data.name,
+    )
+    return RiskContingencyStatus(**result)
+
+
+@router.delete(
+    "/boqs/{boq_id}/cost-risk/contingency/",
+    response_model=RiskContingencyStatus,
+    summary="Undo the last risk contingency application",
+    dependencies=[Depends(RequirePermission("boq.update"))],
+)
+async def undo_risk_contingency(
+    boq_id: uuid.UUID,
+    user_id: CurrentUserId,
+    payload: CurrentUserPayload,
+    session: SessionDep,
+    service: BOQService = Depends(_get_service),
+) -> RiskContingencyStatus:
+    """Restore the previous risk contingency, or remove the line when it was the first."""
+    from app.modules.boq.risk_contingency import RiskContingencyService
+
+    await _verify_boq_owner(session, boq_id, user_id, payload)
+    return RiskContingencyStatus(**await RiskContingencyService(service).undo(boq_id))
 
 
 # ── Custom Column Definitions ────────────────────────────────────────────────

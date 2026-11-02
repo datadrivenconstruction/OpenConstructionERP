@@ -317,6 +317,44 @@ export interface TakeoffMeasurementDiffRow {
    *  measurement is unlinked / unpriced. */
   cost_impact: string | null;
   cost_currency: string | null;
+  /** 'needs_review' | 'confirmed' when the row was carried from an earlier revision. */
+  carry_status?: string | null;
+  /** 'same' | 'changed' | 'unverified' | 'not_applicable' scale verdict of a carried row. */
+  scale_check?: string | null;
+  is_deduction?: boolean;
+}
+
+/** Measured quantity per BOQ position on each revision, and what the re-measure changed. */
+export interface TakeoffPositionDelta {
+  position_id: string;
+  ordinal: string | null;
+  description: string | null;
+  unit: string | null;
+  /** The quantity the bill holds now (string, as stored). */
+  boq_quantity: string | null;
+  old_quantity: number;
+  new_quantity: number;
+  delta_quantity: number;
+  cost_impact: string | null;
+  carried_pending: number;
+  measurements: number;
+}
+
+export interface CarryOverResult {
+  carried: number;
+  carried_ids: string[];
+  already_carried: number;
+  skipped_unreviewed: number;
+  skipped_page_missing: number;
+  scale_checks: Record<string, number>;
+  revision_link: 'register' | 'unlinked' | string;
+}
+
+export interface ConfirmCarriedResult {
+  confirmed: number;
+  confirmed_ids: string[];
+  pushed: number;
+  not_pending: number;
 }
 
 export interface TakeoffCompareResponse {
@@ -340,6 +378,9 @@ export interface TakeoffCompareResponse {
     truncated: boolean;
     /** The ceiling that was applied, or null when nothing was truncated. */
     truncation_limit: number | null;
+    /** Carried measurements on the target still waiting for review. */
+    carried_needs_review?: number;
+    position_deltas?: TakeoffPositionDelta[];
   };
 }
 
@@ -604,6 +645,23 @@ export const takeoffApi = {
     apiPost<TakeoffCompareResponse>(
       `/v1/takeoff/measurements/compare/?project_id=${encodeURIComponent(projectId)}&from_document_id=${encodeURIComponent(fromDocumentId)}&to_document_id=${encodeURIComponent(toDocumentId)}`,
     ),
+
+  /** Carry the confirmed measurements of the old revision onto the new one,
+   *  same coordinates, scale re-checked, each flagged "carried, needs review". */
+  carryOver: (projectId: string, fromDocumentId: string, toDocumentId: string) =>
+    apiPost<CarryOverResult>('/v1/takeoff/measurements/carry-over/', {
+      project_id: projectId,
+      from_document_id: fromDocumentId,
+      to_document_id: toDocumentId,
+    }),
+
+  /** Confirm carried measurements after checking them on the new sheet. */
+  confirmCarried: (projectId: string, measurementIds: string[], pushQuantity = false) =>
+    apiPost<ConfirmCarriedResult>('/v1/takeoff/measurements/carry-over/confirm/', {
+      project_id: projectId,
+      measurement_ids: measurementIds,
+      push_quantity: pushQuantity,
+    }),
 
   /** Turn a PDF revision-compare delta into a DRAFT variation request.
    *  The backend recomputes the deterministic compare and shapes its net
