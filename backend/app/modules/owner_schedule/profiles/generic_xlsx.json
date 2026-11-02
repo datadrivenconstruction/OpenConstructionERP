@@ -1,0 +1,14 @@
+{
+  "key": "generic_xlsx",
+  "name": "Spreadsheet bid schedule (columns found by their headings)",
+  "file_type": "xlsx",
+  "header_aliases": {
+    "item_no": ["item", "item no", "item no.", "item number", "pay item", "no", "no.", "ref", "position", "pos"],
+    "description": ["description", "item description", "work description", "description of work", "text"],
+    "unit": ["unit", "units", "uom", "unit of measure"],
+    "quantity": ["quantity", "qty", "est. quantity", "estimated quantity", "quantities"],
+    "unit_price": ["unit price", "unit rate", "rate", "price", "unit bid price", "bid unit price"],
+    "amount": ["amount", "total", "extended amount", "total price", "extension", "bid amount"],
+    "alternate_flag": ["alternate", "alt", "option", "type"]
+  }
+}
