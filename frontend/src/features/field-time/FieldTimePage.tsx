@@ -51,6 +51,7 @@ import { ClockApprovals } from './ClockApprovals';
 import { ClockEventsLog } from './ClockEventsLog';
 import { ClockSettingsCard } from './ClockSettingsCard';
 import { GeofenceEditor } from './GeofenceEditor';
+import { ProductivityPanel } from './ProductivityPanel';
 import { useClockStatus } from './clockApi';
 import {
   listTimesheets,
@@ -200,8 +201,8 @@ export function FieldTimePage() {
   );
 }
 
-type FieldTab = 'timesheets' | 'clock' | 'approvals' | 'geofences' | 'settings';
-const FIELD_TABS: FieldTab[] = ['timesheets', 'clock', 'approvals', 'geofences', 'settings'];
+type FieldTab = 'timesheets' | 'productivity' | 'clock' | 'approvals' | 'geofences' | 'settings';
+const FIELD_TABS: FieldTab[] = ['timesheets', 'productivity', 'clock', 'approvals', 'geofences', 'settings'];
 
 function FieldTimeContent() {
   const { t } = useTranslation();
@@ -223,6 +224,7 @@ function FieldTimeContent() {
 
   const labels: Record<FieldTab, string> = {
     timesheets: t('field_clock.tab_timesheets', { defaultValue: 'Timesheets' }),
+    productivity: t('field_productivity.tab', { defaultValue: 'Productivity' }),
     clock: t('field_clock.tab_clock', { defaultValue: 'Clock' }),
     approvals: t('field_clock.tab_approvals', { defaultValue: 'Approvals' }),
     geofences: t('field_clock.tab_geofences', { defaultValue: 'Geofences' }),
@@ -263,6 +265,7 @@ function FieldTimeContent() {
       {tab === 'timesheets' && (
         <TimesheetsTab externalOpenId={openId} onExternalOpened={() => setOpenId(null)} />
       )}
+      {tab === 'productivity' && <ProductivityPanel projectId={projectId} />}
       {tab === 'clock' && <ClockPanel projectId={projectId} />}
       {tab === 'approvals' && (
         <div className="space-y-6">

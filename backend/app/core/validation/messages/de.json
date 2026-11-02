@@ -1471,5 +1471,21 @@
       "fail": "Die Risikozeile „{markup}“ wurde am {applied_at} mit P{percentile} angesetzt, seither haben sich die Positionssummen der Risikoanalyse geändert",
       "suggestion": "Risikoanalyse neu rechnen und den Risikozuschlag erneut übernehmen, oder die Zeile behalten und den Grund vermerken"
     }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Position {ref} hat zwischen {date_from} und {date_to} {hours} h gebucht, aber keinen gemessenen Fortschritt",
+      "suggestion": "Für die Position ein Aufmaß oder einen Fortschritt erfassen oder die Stunden auf die tatsächlich bearbeitete Position umbuchen"
+    },
+    "factor_implausible": {
+      "fail": "Der Leistungsfaktor {factor} der Position {ref} liegt außerhalb des plausiblen Bereichs {low} bis {high}",
+      "suggestion": "Gebuchte Stunden, eingebaute Menge und die Einheit des Kalkulationsansatzes prüfen"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Vorgang {activity} ({project}) plant Arbeitskräfte ohne Gewerk, daher kann der Bedarf niemandem zugeordnet werden",
+      "suggestion": "Der Arbeitskraft-Ressource des Vorgangs ein Gewerk zuweisen"
+    }
   }
 }

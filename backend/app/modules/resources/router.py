@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
@@ -849,6 +849,25 @@ async def portfolio_capacity(
         )
     payload = await service.portfolio_capacity(start, end, bucket=bucket)
     return PortfolioCapacityResponse.model_validate(payload)
+
+
+@router.get("/portfolio/workforce-demand", response_model=None)
+async def portfolio_workforce_demand(
+    session: SessionDep,
+    start: date = Query(...),
+    weeks: int = Query(default=12, ge=1, le=52),
+    _perm: None = Depends(RequirePermission("resources.read")),
+) -> dict:
+    """Labour demand by trade per week across every project, against availability.
+
+    Demand comes from schedule activity labour and open staffing positions,
+    availability from active people, crews and subcontractors. Each cell lists
+    the activities and positions behind its demand. FTE figures are strings.
+    """
+    from app.core.i18n import get_locale
+    from app.modules.resources.workforce_demand import WorkforceDemandService
+
+    return await WorkforceDemandService(session).forecast(start, weeks, locale=get_locale())
 
 
 @router.get("/portfolio/leveling", response_model=PortfolioLevelingResponse)

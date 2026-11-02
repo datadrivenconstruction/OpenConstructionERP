@@ -1471,5 +1471,21 @@
       "fail": "Contingency line \"{markup}\" was applied at P{percentile} on {applied_at}, but the line totals the risk run sampled have changed since",
       "suggestion": "Re-run the cost risk analysis and apply the contingency again, or keep the line and note why"
     }
+  },
+  "field_productivity": {
+    "hours_without_progress": {
+      "fail": "Position {ref} has {hours} h booked between {date_from} and {date_to} but no measured progress",
+      "suggestion": "Record a measurement or progress for the position, or move the hours to the position that was actually worked on"
+    },
+    "factor_implausible": {
+      "fail": "Position {ref} productivity factor {factor} is outside the plausible band {low} to {high}",
+      "suggestion": "Check the booked hours, the installed quantity and the unit of the estimate norm"
+    }
+  },
+  "workforce": {
+    "activity_labour_without_trade": {
+      "fail": "Activity {activity} ({project}) loads labour but names no trade, so its demand cannot be matched to anyone",
+      "suggestion": "Set a trade on the labour resource of the activity"
+    }
   }
 }
