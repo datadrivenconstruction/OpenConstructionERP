@@ -124,4 +124,19 @@ describe('BOQGrid rowSelection identity', () => {
     expect(isRowSelectable({ data: { id: 'r', _isResource: true } })).toBe(false);
     expect(isRowSelectable({ data: { id: 'a', _isAddResource: true } })).toBe(false);
   });
+
+  it('ticks section rows with the same checkbox and select-all as positions', () => {
+    render(createElement(BOQGrid, gridProps()));
+    const sel = rowSelectionAt(0) as unknown as {
+      checkboxes: boolean;
+      headerCheckbox: boolean;
+      selectAll: string;
+      isRowSelectable: (n: { data: Record<string, unknown> }) => boolean;
+    };
+    expect(sel.checkboxes).toBe(true);
+    expect(sel.headerCheckbox).toBe(true);
+    // select-all walks the selectable rows, so sections follow the header box.
+    expect(sel.selectAll).toBe('filtered');
+    expect(sel.isRowSelectable({ data: { id: 's', _isSection: true } })).toBe(true);
+  });
 });
