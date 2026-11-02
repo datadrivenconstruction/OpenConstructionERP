@@ -45604,6 +45604,7 @@ const resource = {
     "units.ea": "Chaque",
     "units.set": "Ensemble",
     "units.lsum": "Forfait",
+    "units.more": "Plus d'unités…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Ensemble de documents",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Soumission provisoire",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Résultats de validation",
@@ -64351,6 +64352,11 @@ const resource = {
     "market.add_this": "Ajouter ce marché…",
     "market.load_error": "Impossible de charger les paramètres du marché",
     "market.regional_empty": "Pas encore de pack régional pour votre marché.",
+    "market.preview_appear": "Apparaîtra ({{count}})",
+    "market.preview_disappear": "Disparaîtra ({{count}})",
+    "market.preview_unchanged": "Inchangé ({{count}})",
+    "market.onboarding_sets": "Configuration : {{items}}",
+    "market.change_later": "Vous pourrez le modifier plus tard dans les paramètres.",
   }
 } as { translation: Record<string, string> };
 

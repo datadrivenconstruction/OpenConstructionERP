@@ -44246,6 +44246,7 @@ const resource = {
     "units.ea": "Bawat isa",
     "units.set": "Kumpol",
     "units.lsum": "Kabuuang Halaga",
+    "units.more": "Iba pang yunit…",
     "resources.insights.c_by_type": "Resource ayon sa uri",
     "resources.insights.c_by_status": "Resource ayon sa status",
     "resources.insights.c_rate_by_type": "Avg rate ayon sa uri",
@@ -61388,6 +61389,11 @@ const resource = {
     "market.add_this": "Idagdag ang merkadong ito…",
     "market.load_error": "Hindi ma-load ang mga setting ng merkado",
     "market.regional_empty": "Wala pang regional pack para sa iyong merkado.",
+    "market.preview_appear": "Lalabas ({{count}})",
+    "market.preview_disappear": "Itatago ({{count}})",
+    "market.preview_unchanged": "Walang pagbabago ({{count}})",
+    "market.onboarding_sets": "Itinatakda nito: {{items}}",
+    "market.change_later": "Mababago mo ito mamaya sa Settings.",
   }
 } as { translation: Record<string, string> };
 

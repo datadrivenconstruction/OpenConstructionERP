@@ -45124,6 +45124,7 @@ const resource = {
     "units.ea": "Iga",
     "units.set": "Komplekt",
     "units.lsum": "Kogusumma",
+    "units.more": "Rohkem ühikuid…",
     "resources.insights.c_by_type": "Ressursid tüübi järgi",
     "resources.insights.c_by_status": "Ressursid oleku järgi",
     "resources.insights.c_rate_by_type": "Keskmine hind tüübi järgi",
@@ -61380,6 +61381,11 @@ const resource = {
     "market.add_this": "Lisa see turg…",
     "market.load_error": "Turu seadeid ei õnnestunud laadida",
     "market.regional_empty": "Sinu turule pole veel regionaalset paketti.",
+    "market.preview_appear": "Ilmub ({{count}})",
+    "market.preview_disappear": "Kaob ({{count}})",
+    "market.preview_unchanged": "Muutmata ({{count}})",
+    "market.onboarding_sets": "See seadistab: {{items}}",
+    "market.change_later": "Saate seda hiljem seadetes muuta.",
   }
 } as { translation: Record<string, string> };
 

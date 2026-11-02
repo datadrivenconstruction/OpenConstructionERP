@@ -44246,6 +44246,7 @@ const resource = {
     "units.ea": "প্রতিটি",
     "units.set": "সেট",
     "units.lsum": "লাম্প সাম",
+    "units.more": "আরও একক…",
     "resources.insights.c_by_type": "ধরন অনুযায়ী রিসোর্স",
     "resources.insights.c_by_status": "স্ট্যাটাস অনুযায়ী রিসোর্স",
     "resources.insights.c_rate_by_type": "ধরন অনুযায়ী গড় রেট",
@@ -61700,6 +61701,11 @@ const resource = {
     "market.add_this": "এই বাজার যোগ করুন…",
     "market.load_error": "বাজারের সেটিংস লোড করা যায়নি",
     "market.regional_empty": "আপনার বাজারের জন্য এখনো কোনো আঞ্চলিক প্যাক নেই।",
+    "market.preview_appear": "দেখা যাবে ({{count}})",
+    "market.preview_disappear": "লুকানো হবে ({{count}})",
+    "market.preview_unchanged": "অপরিবর্তিত ({{count}})",
+    "market.onboarding_sets": "এটি সেট করে: {{items}}",
+    "market.change_later": "আপনি পরে সেটিংসে এটি পরিবর্তন করতে পারেন।",
   }
 } as { translation: Record<string, string> };
 

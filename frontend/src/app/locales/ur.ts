@@ -44347,6 +44347,7 @@ const resource = {
     "units.ea": "فی عدد",
     "units.set": "سیٹ",
     "units.lsum": "لمپ سم",
+    "units.more": "مزید اکائیاں…",
     "resources.insights.c_by_type": "قسم کے مطابق ریسورسز",
     "resources.insights.c_by_status": "اسٹیٹس کے مطابق ریسورسز",
     "resources.insights.c_rate_by_type": "قسم کے مطابق اوسط ریٹ",
@@ -61396,6 +61397,11 @@ const resource = {
     "market.add_this": "یہ مارکیٹ شامل کریں…",
     "market.load_error": "مارکیٹ کی ترتیبات لوڈ نہیں ہو سکیں",
     "market.regional_empty": "آپ کی مارکیٹ کے لیے ابھی کوئی علاقائی پیک نہیں۔",
+    "market.preview_appear": "ظاہر ہوں گے ({{count}})",
+    "market.preview_disappear": "چھپ جائیں گے ({{count}})",
+    "market.preview_unchanged": "بغیر تبدیلی ({{count}})",
+    "market.onboarding_sets": "یہ ترتیب دیتا ہے: {{items}}",
+    "market.change_later": "آپ اسے بعد میں ترتیبات میں بدل سکتے ہیں۔",
   }
 } as { translation: Record<string, string> };
 

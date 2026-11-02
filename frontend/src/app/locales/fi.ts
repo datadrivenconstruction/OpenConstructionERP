@@ -45168,6 +45168,7 @@ const resource = {
     "units.ea": "Kpl",
     "units.set": "Sarja",
     "units.lsum": "Urakkahinta",
+    "units.more": "Lisää yksiköitä…",
     "resources.insights.c_by_type": "Resurssit tyypin mukaan",
     "resources.insights.c_by_status": "Resurssit tilan mukaan",
     "resources.insights.c_rate_by_type": "Keskim. hinta tyypin mukaan",
@@ -61434,6 +61435,11 @@ const resource = {
     "market.add_this": "Lisää tämä markkina…",
     "market.load_error": "Markkina-asetuksia ei voitu ladata",
     "market.regional_empty": "Markkinallesi ei vielä ole aluepakettia.",
+    "market.preview_appear": "Tulee näkyviin ({{count}})",
+    "market.preview_disappear": "Piilotetaan ({{count}})",
+    "market.preview_unchanged": "Ennallaan ({{count}})",
+    "market.onboarding_sets": "Tämä määrittää: {{items}}",
+    "market.change_later": "Voit muuttaa tätä myöhemmin asetuksissa.",
   }
 } as { translation: Record<string, string> };
 

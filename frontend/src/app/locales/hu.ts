@@ -45054,6 +45054,7 @@ const resource = {
     "units.ea": "Darabonként",
     "units.set": "Készlet",
     "units.lsum": "Átalányösszeg",
+    "units.more": "További mértékegységek…",
     "resources.insights.c_by_type": "Erőforrások típus szerint",
     "resources.insights.c_by_status": "Erőforrások állapot szerint",
     "resources.insights.c_rate_by_type": "Átlagos ráta típus szerint",
@@ -63995,6 +63996,11 @@ const resource = {
     "market.add_this": "Ennek a piacnak a hozzáadása…",
     "market.load_error": "A piaci beállítások nem tölthetők be",
     "market.regional_empty": "Az Ön piacához még nincs regionális csomag.",
+    "market.preview_appear": "Megjelenik ({{count}})",
+    "market.preview_disappear": "Eltűnik ({{count}})",
+    "market.preview_unchanged": "Változatlan ({{count}})",
+    "market.onboarding_sets": "Ez beállítja: {{items}}",
+    "market.change_later": "Ezt később a Beállításokban módosíthatja.",
   }
 } as { translation: Record<string, string> };
 

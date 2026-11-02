@@ -46215,6 +46215,7 @@ const resource = {
     "units.ea": "كل",
     "units.set": "مجموعة",
     "units.lsum": "مبلغ مقطوع",
+    "units.more": "مزيد من الوحدات…",
     "resources.insights.c_by_type": "الموارد حسب النوع",
     "resources.insights.c_by_status": "الموارد حسب الحالة",
     "resources.insights.c_rate_by_type": "متوسط المعدل حسب النوع",
@@ -64540,6 +64541,11 @@ const resource = {
     "market.add_this": "إضافة هذا السوق…",
     "market.load_error": "تعذر تحميل إعدادات السوق",
     "market.regional_empty": "لا توجد حزمة إقليمية لسوقك بعد.",
+    "market.preview_appear": "سيظهر ({{count}})",
+    "market.preview_disappear": "سيختفي ({{count}})",
+    "market.preview_unchanged": "بلا تغيير ({{count}})",
+    "market.onboarding_sets": "يضبط هذا: {{items}}",
+    "market.change_later": "يمكنك تغيير ذلك لاحقًا من الإعدادات.",
   }
 } as { translation: Record<string, string> };
 

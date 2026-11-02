@@ -19556,6 +19556,7 @@ const resource = {
     "units.sqft": "Square foot",
     "units.cy": "Cubic yard",
     "units.lf": "Linear foot",
+    "units.more": "More units…",
   "assemblies.intro_title": "Price recurring work once, reuse it everywhere",
   "assemblies.intro_body": "Assemblies are reusable cost recipes that bundle materials, labour and equipment into one composite rate, for example a reinforced concrete wall combining concrete, rebar, formwork and labour. Apply an assembly to a BOQ position to auto-populate its component costs and keep rates consistent across the project.",
   "assemblies.intro_more": "Assemblies are reusable cost recipes. Instead of pricing a reinforced concrete wall line by line every time, you build it once as concrete plus rebar plus formwork plus labour, and reuse the composite rate everywhere. The list view shows each assembly's category, component count, total rate and how often it has been used, in either a grid or a table, with search, category filter and sorting. You can clone, export to CSV, or generate one with AI.\n\nWhere it fits:\n\n- Build atomic components from the **Catalog** and the **Cost Database**.\n- Apply a finished assembly to a position in the **BOQ** editor to auto-populate its component costs.\n\n**Getting the most out of it:** Standardise the work you repeat across projects into assemblies so rates stay consistent and nobody re-prices the same wall twice. Sort by usage count to see which recipes earn their keep, and clone a close match rather than starting a new one from scratch.",
@@ -55626,6 +55627,11 @@ const resource = {
     "market.add_this": "Add this market…",
     "market.load_error": "Could not load market settings",
     "market.regional_empty": "No regional pack for your market yet.",
+    "market.preview_appear": "Will appear ({{count}})",
+    "market.preview_disappear": "Will disappear ({{count}})",
+    "market.preview_unchanged": "Unchanged ({{count}})",
+    "market.onboarding_sets": "This sets up: {{items}}",
+    "market.change_later": "You can change this later in Settings.",
   }
 } as { translation: Record<string, string> };
 

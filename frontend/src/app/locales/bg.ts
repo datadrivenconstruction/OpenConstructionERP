@@ -45341,6 +45341,7 @@ const resource = {
     "units.ea": "Брой",
     "units.set": "Комплект",
     "units.lsum": "Обща сума",
+    "units.more": "Още единици…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Документ",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Чернова заявка",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Резултати от валидацията",
@@ -61434,6 +61435,11 @@ const resource = {
     "market.add_this": "Добавяне на този пазар…",
     "market.load_error": "Настройките на пазара не можаха да се заредят",
     "market.regional_empty": "Все още няма регионален пакет за вашия пазар.",
+    "market.preview_appear": "Ще се появи ({{count}})",
+    "market.preview_disappear": "Ще изчезне ({{count}})",
+    "market.preview_unchanged": "Без промяна ({{count}})",
+    "market.onboarding_sets": "Това настройва: {{items}}",
+    "market.change_later": "Можете да го промените по-късно в Настройки.",
   }
 } as { translation: Record<string, string> };
 

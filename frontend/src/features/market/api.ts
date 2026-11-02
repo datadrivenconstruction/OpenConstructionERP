@@ -9,7 +9,7 @@
  */
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { apiGet, apiPut } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPut } from '@/shared/lib/api';
 import { setActiveUnitsSystem, type UnitsSystem } from '@/features/boq/boqHelpers';
 
 export interface MarketEntry {
@@ -75,4 +75,13 @@ export function useMarketScope(enabled = true, projectId?: string | null) {
     if (units) setActiveUnitsSystem(units);
   }, [units]);
   return query;
+}
+
+export interface MarketPreview extends Omit<MarketScope, 'derived' | 'can_edit'> {
+  suggested_packages: string[];
+}
+
+/** What a draft profile would show, without saving it. */
+export function previewMarketProfile(profile: MarketProfile): Promise<MarketPreview> {
+  return apiPost<MarketPreview>('/v1/market/preview/', profile);
 }

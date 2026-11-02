@@ -43747,6 +43747,7 @@ const resource = {
     "units.ea": "Cada",
     "units.set": "Conjunto",
     "units.lsum": "Soma global",
+    "units.more": "Mais unidades…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Conjunto de documentos",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Submissão preliminar",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Resultados da validação",
@@ -57073,6 +57074,11 @@ const resource = {
     "market.add_this": "Adicionar este mercado…",
     "market.load_error": "Não foi possível carregar as configurações de mercado",
     "market.regional_empty": "Ainda não há pacote regional para o seu mercado.",
+    "market.preview_appear": "Vai aparecer ({{count}})",
+    "market.preview_disappear": "Vai desaparecer ({{count}})",
+    "market.preview_unchanged": "Inalterado ({{count}})",
+    "market.onboarding_sets": "Isto configura: {{items}}",
+    "market.change_later": "Você pode alterar isso depois nas Configurações.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

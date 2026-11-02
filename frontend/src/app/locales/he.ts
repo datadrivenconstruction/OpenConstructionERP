@@ -44548,6 +44548,7 @@ const resource = {
     "units.ea": "כל אחד",
     "units.set": "ערכה",
     "units.lsum": "סכום גלובלי",
+    "units.more": "יחידות נוספות…",
     "resources.insights.c_by_type": "משאבים לפי סוג",
     "resources.insights.c_by_status": "משאבים לפי סטטוס",
     "resources.insights.c_rate_by_type": "תעריף ממוצע לפי סוג",
@@ -61727,6 +61728,11 @@ const resource = {
     "market.add_this": "הוספת שוק זה…",
     "market.load_error": "לא ניתן לטעון את הגדרות השוק",
     "market.regional_empty": "עדיין אין חבילה אזורית לשוק שלכם.",
+    "market.preview_appear": "יופיעו ({{count}})",
+    "market.preview_disappear": "ייעלמו ({{count}})",
+    "market.preview_unchanged": "ללא שינוי ({{count}})",
+    "market.onboarding_sets": "זה מגדיר: {{items}}",
+    "market.change_later": "אפשר לשנות זאת מאוחר יותר בהגדרות.",
   }
 } as { translation: Record<string, string> };
 

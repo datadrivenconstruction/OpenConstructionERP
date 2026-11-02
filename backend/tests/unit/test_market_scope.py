@@ -198,3 +198,15 @@ async def test_http_put_needs_admin() -> None:
     async with _http(_Service(), {"sub": "u", "role": "viewer"}) as client:
         assert (await client.put("/api/v1/market/", json={"primary": {"country": "DE"}})).status_code == 403
         assert (await client.get("/api/v1/market/")).json()["can_edit"] is False
+
+
+@pytest.mark.asyncio
+async def test_http_preview_does_not_save() -> None:
+    from tests.unit.test_solution_packages import _Service
+
+    service = _Service()
+    async with _http(service) as client:
+        body = (await client.post("/api/v1/market/preview/", json={"primary": {"country": "SA"}})).json()
+        assert "middle_east_pack" not in body["hidden_modules"]
+        assert "real_estate_gcc" in body["suggested_packages"]
+        assert ms.PROFILE_KEY not in service.metadata

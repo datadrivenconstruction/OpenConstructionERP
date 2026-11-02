@@ -16,6 +16,7 @@ import { Card, CardHeader, CardContent, Button, Badge } from '@/shared/ui';
 import { useToastStore } from '@/stores/useToastStore';
 import { COUNTRIES } from '@/shared/lib/countries';
 import { regionDisplayName } from '@/features/cases/regions';
+import { MarketPreviewModal } from './MarketPreviewModal';
 import { MARKET_QUERY_KEY, saveMarketProfile, useMarketScope, type MarketProfile } from './api';
 
 const UNITS_OPTIONS = [
@@ -45,6 +46,7 @@ export function MarketSettings() {
   const [draft, setDraft] = useState<MarketProfile>(emptyProfile);
   const [adding, setAdding] = useState('');
   const [saving, setSaving] = useState(false);
+  const [pending, setPending] = useState<{ profile: MarketProfile; country: string; adding: boolean } | null>(null);
 
   useEffect(() => {
     if (scope?.profile) setDraft(scope.profile);
@@ -68,10 +70,11 @@ export function MarketSettings() {
   const setStandard = (key: keyof MarketProfile['standards'], value: string) =>
     setDraft((d) => ({ ...d, standards: { ...d.standards, [key]: value } }));
 
-  async function handleSave() {
+  async function handleSave(profile: MarketProfile = draft) {
     setSaving(true);
     try {
-      const next = await saveMarketProfile(draft);
+      const next = await saveMarketProfile(profile);
+      setDraft(next.profile ?? profile);
       queryClient.setQueryData([...MARKET_QUERY_KEY, null], next);
       void queryClient.invalidateQueries({ queryKey: MARKET_QUERY_KEY });
       addToast({ type: 'success', title: t('common.saved', { defaultValue: 'Saved' }) });
@@ -189,7 +192,11 @@ export function MarketSettings() {
                     type="button"
                     aria-label={t('market.remove', { defaultValue: 'Remove market' })}
                     onClick={() =>
-                      setDraft((d) => ({ ...d, extra_markets: d.extra_markets.filter((x) => x.country !== m.country) }))
+                      setPending({
+                        profile: { ...draft, extra_markets: draft.extra_markets.filter((x) => x.country !== m.country) },
+                        country: m.country,
+                        adding: false,
+                      })
                     }
                   >
                     <X size={12} aria-hidden />
@@ -224,7 +231,11 @@ export function MarketSettings() {
                 size="sm"
                 disabled={!adding}
                 onClick={() => {
-                  setDraft((d) => ({ ...d, extra_markets: [...d.extra_markets, { country: adding, subdivision: '' }] }));
+                  setPending({
+                    profile: { ...draft, extra_markets: [...draft.extra_markets, { country: adding, subdivision: '' }] },
+                    country: adding,
+                    adding: true,
+                  });
                   setAdding('');
                 }}
               >
@@ -313,6 +324,27 @@ export function MarketSettings() {
           )}
         </CardContent>
       </Card>
+      {pending && scope && (
+        <MarketPreviewModal
+          open
+          current={scope}
+          next={pending.profile}
+          title={
+            pending.adding
+              ? t('market.add_confirm', {
+                  defaultValue: 'Add {{country}}',
+                  country: regionDisplayName(pending.country, i18n.language),
+                })
+              : t('market.remove', { defaultValue: 'Remove market' })
+          }
+          confirmLabel={t('common.save', { defaultValue: 'Save' })}
+          onClose={() => setPending(null)}
+          onConfirm={async () => {
+            await handleSave(pending.profile);
+            setPending(null);
+          }}
+        />
+      )}
     </div>
   );
 }

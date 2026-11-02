@@ -60,6 +60,8 @@ import { useToastStore } from '@/stores/useToastStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import { regionDisplayName } from '@/features/cases/regions';
 import { COUNTRY_TEMPLATES } from './regionalRegistry';
+import { useMarketScope } from '@/features/market/api';
+import { isCountryInScope } from '@/features/market/logic';
 import {
   IMPORT_ENDPOINT,
   exportEndpoint,
@@ -224,6 +226,7 @@ export default function RegionalExchangeHubPage() {
   const shown: ExchangeFormatInfo[] = useMemo(() => formatsForMarket(formats, market), [formats, market]);
   const selected = useMemo(() => formats.find((f) => f.format_id === formatId) ?? null, [formats, formatId]);
 
+  const { data: marketScope } = useMarketScope();
   const markets = useMemo(() => {
     // The union of what the catalogue reports and what we have a dedicated
     // screen for. The second half is what keeps this honest when the
@@ -233,14 +236,17 @@ export default function RegionalExchangeHubPage() {
     // typing the URL, which is the defect this page was written to close.
     const codes = new Set(marketsIn(formats));
     for (const tpl of COUNTRY_TEMPLATES) codes.add(tpl.countryCode.toUpperCase());
-    const named = [...codes].map((code) => ({ code, name: regionDisplayName(code, i18n.language) }));
+    // Only the tenant's markets (and the one already chosen); routes stay mounted for direct links.
+    const named = [...codes]
+      .filter((code) => code === market?.toUpperCase() || isCountryInScope(code, marketScope))
+      .map((code) => ({ code, name: regionDisplayName(code, i18n.language) }));
     named.sort((a, b) => a.name.localeCompare(b.name, i18n.language));
     const query = search.trim().toLowerCase();
     if (!query) return named;
     return named.filter(
       (entry) => entry.name.toLowerCase().includes(query) || entry.code.toLowerCase().includes(query),
     );
-  }, [formats, i18n.language, search]);
+  }, [formats, i18n.language, search, market, marketScope]);
 
   const specialist = useMemo(() => specialistPageFor(market), [market]);
 

@@ -44197,6 +44197,7 @@ const resource = {
     "units.ea": "Әрқайсысы",
     "units.set": "Жинақ",
     "units.lsum": "Жиынтық сома",
+    "units.more": "Басқа бірліктер…",
     "resources.insights.c_by_type": "Түрі бойынша ресурстар",
     "resources.insights.c_by_status": "Мәртебесі бойынша ресурстар",
     "resources.insights.c_rate_by_type": "Түрі бойынша орт. мөлшерлеме",
@@ -61391,6 +61392,11 @@ const resource = {
     "market.add_this": "Осы нарықты қосу…",
     "market.load_error": "Нарық баптауларын жүктеу мүмкін болмады",
     "market.regional_empty": "Нарығыңыз үшін әзірге аймақтық пакет жоқ.",
+    "market.preview_appear": "Көрсетіледі ({{count}})",
+    "market.preview_disappear": "Жасырылады ({{count}})",
+    "market.preview_unchanged": "Өзгеріссіз ({{count}})",
+    "market.onboarding_sets": "Бапталады: {{items}}",
+    "market.change_later": "Мұны кейін баптауларда өзгертуге болады.",
   }
 } as { translation: Record<string, string> };
 

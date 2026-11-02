@@ -45317,6 +45317,7 @@ const resource = {
     "units.ea": "प्रत्येक",
     "units.set": "सेट",
     "units.lsum": "लंप सम",
+    "units.more": "और इकाइयाँ…",
     "resources.insights.c_by_type": "प्रकार के अनुसार संसाधन",
     "resources.insights.c_by_status": "स्थिति के अनुसार संसाधन",
     "resources.insights.c_rate_by_type": "प्रकार के अनुसार औसत दर",
@@ -61433,6 +61434,11 @@ const resource = {
     "market.add_this": "यह बाज़ार जोड़ें…",
     "market.load_error": "बाज़ार सेटिंग्स लोड नहीं हो सकीं",
     "market.regional_empty": "आपके बाज़ार के लिए अभी कोई क्षेत्रीय पैक नहीं है।",
+    "market.preview_appear": "दिखेंगे ({{count}})",
+    "market.preview_disappear": "छिप जाएंगे ({{count}})",
+    "market.preview_unchanged": "अपरिवर्तित ({{count}})",
+    "market.onboarding_sets": "यह सेट करता है: {{items}}",
+    "market.change_later": "आप इसे बाद में सेटिंग्स में बदल सकते हैं।",
   }
 } as { translation: Record<string, string> };
 

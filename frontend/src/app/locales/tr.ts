@@ -45667,6 +45667,7 @@ const resource = {
     "units.ea": "Her biri",
     "units.set": "Takım",
     "units.lsum": "Toplu Fiyat",
+    "units.more": "Daha fazla birim…",
     "resources.insights.c_by_type": "Türlere Göre Kaynaklar",
     "resources.insights.c_by_status": "Durumlara Göre Kaynaklar",
     "resources.insights.c_rate_by_type": "Tür Başına Ortalama Maliyet",
@@ -62311,6 +62312,11 @@ const resource = {
     "market.add_this": "Bu pazarı ekle…",
     "market.load_error": "Pazar ayarları yüklenemedi",
     "market.regional_empty": "Pazarınız için henüz bölgesel paket yok.",
+    "market.preview_appear": "Görünecek ({{count}})",
+    "market.preview_disappear": "Gizlenecek ({{count}})",
+    "market.preview_unchanged": "Değişmedi ({{count}})",
+    "market.onboarding_sets": "Bu şunları ayarlar: {{items}}",
+    "market.change_later": "Bunu daha sonra Ayarlar'dan değiştirebilirsiniz.",
   }
 } as { translation: Record<string, string> };
 

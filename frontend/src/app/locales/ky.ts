@@ -40039,6 +40039,7 @@ const resource = {
     "units.ea": "Ар бир",
     "units.set": "Топтом",
     "units.lsum": "Жалпы сумма",
+    "units.more": "Башка бирдиктер…",
     "resources.insights.c_by_type": "Түрү боюнча ресурстар",
     "resources.insights.c_by_status": "Статусу боюнча ресурстар",
     "resources.insights.c_rate_by_type": "Орточо тариф түрү боюнча",
@@ -61547,6 +61548,11 @@ const resource = {
     "market.add_this": "Бул рынокту кошуу…",
     "market.load_error": "Рынок жөндөөлөрүн жүктөө мүмкүн болгон жок",
     "market.regional_empty": "Рыногуңуз үчүн азырынча аймактык пакет жок.",
+    "market.preview_appear": "Көрсөтүлөт ({{count}})",
+    "market.preview_disappear": "Жашырылат ({{count}})",
+    "market.preview_unchanged": "Өзгөрүүсүз ({{count}})",
+    "market.onboarding_sets": "Орнотулат: {{items}}",
+    "market.change_later": "Муну кийин жөндөөлөрдөн өзгөртсөңүз болот.",
   }
 } as { translation: Record<string, string> };
 

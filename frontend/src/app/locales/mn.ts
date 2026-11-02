@@ -45009,6 +45009,7 @@ const resource = {
     "units.ea": "Тускан",
     "units.set": "Багц",
     "units.lsum": "Бөөнөөр",
+    "units.more": "Бусад нэгж…",
     "resources.insights.c_by_type": "Төрлөөр нь нөөц",
     "resources.insights.c_by_status": "Төлөв байдлаар нь нөөц",
     "resources.insights.c_rate_by_type": "Дундаж үнээр нь төрөл",
@@ -61108,6 +61109,11 @@ const resource = {
     "market.add_this": "Энэ зах зээлийг нэмэх…",
     "market.load_error": "Зах зээлийн тохиргоог ачаалж чадсангүй",
     "market.regional_empty": "Таны зах зээлд одоогоор бүс нутгийн багц алга.",
+    "market.preview_appear": "Харагдана ({{count}})",
+    "market.preview_disappear": "Нуугдана ({{count}})",
+    "market.preview_unchanged": "Өөрчлөлтгүй ({{count}})",
+    "market.onboarding_sets": "Тохируулна: {{items}}",
+    "market.change_later": "Үүнийг дараа Тохиргоонд өөрчилж болно.",
   }
 } as { translation: Record<string, string> };
 

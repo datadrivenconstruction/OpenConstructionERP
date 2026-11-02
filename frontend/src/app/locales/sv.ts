@@ -45362,6 +45362,7 @@ const resource = {
     "units.ea": "Varje",
     "units.set": "Set",
     "units.lsum": "Fast pris",
+    "units.more": "Fler enheter…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Dokumentuppsättning",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Utkast till inlämning",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Valideringsresultat",
@@ -62045,6 +62046,11 @@ const resource = {
     "market.add_this": "Lägg till denna marknad…",
     "market.load_error": "Det gick inte att läsa in marknadsinställningarna",
     "market.regional_empty": "Det finns ännu inget regionalt paket för din marknad.",
+    "market.preview_appear": "Visas ({{count}})",
+    "market.preview_disappear": "Döljs ({{count}})",
+    "market.preview_unchanged": "Oförändrat ({{count}})",
+    "market.onboarding_sets": "Detta ställer in: {{items}}",
+    "market.change_later": "Du kan ändra det senare under Inställningar.",
   }
 } as { translation: Record<string, string> };
 

@@ -45149,6 +45149,7 @@ const resource = {
     "units.ea": "Mỗi",
     "units.set": "Bộ",
     "units.lsum": "Tổng giá trị",
+    "units.more": "Thêm đơn vị…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Bộ tài liệu",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Bản nháp",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Kết quả xác thực",
@@ -61188,6 +61189,11 @@ const resource = {
     "market.add_this": "Thêm thị trường này…",
     "market.load_error": "Không thể tải cài đặt thị trường",
     "market.regional_empty": "Chưa có gói khu vực cho thị trường của bạn.",
+    "market.preview_appear": "Sẽ hiển thị ({{count}})",
+    "market.preview_disappear": "Sẽ ẩn ({{count}})",
+    "market.preview_unchanged": "Không đổi ({{count}})",
+    "market.onboarding_sets": "Thiết lập: {{items}}",
+    "market.change_later": "Bạn có thể đổi sau trong Cài đặt.",
   }
 } as { translation: Record<string, string> };
 

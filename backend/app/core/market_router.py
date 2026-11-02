@@ -129,3 +129,18 @@ async def put_market_profile(
     invalidate_user(user_id)
     out = await _payload(metadata, session, uuid.UUID(user_id), None)
     return {**out, "can_edit": True}
+
+
+@router.post("/preview/", dependencies=[Depends(get_current_user_payload)])
+async def preview_market_profile(body: MarketProfileBody) -> dict[str, Any]:
+    """What a draft profile would show, without saving it: modules, packs and suggested regional packages."""
+    from app.core import regional_packages
+
+    profile = ms.sanitise_profile(body.model_dump())
+    countries = set(ms.profile_markets(profile))
+    suggested = sorted(
+        pid
+        for pid, pkg in regional_packages.regional_packages().items()
+        if countries & {str(c).upper() for c in (pkg.get("profiles") or {})}
+    )
+    return {"profile": profile, **ms.resolve(profile), "suggested_packages": suggested}

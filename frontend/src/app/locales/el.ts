@@ -44228,6 +44228,7 @@ const resource = {
     "units.ea": "Τεμάχιο",
     "units.set": "Σετ",
     "units.lsum": "Κατ' αποκοπή",
+    "units.more": "Περισσότερες μονάδες…",
     "resources.insights.c_by_type": "Πόροι ανά τύπο",
     "resources.insights.c_by_status": "Πόροι ανά κατάσταση",
     "resources.insights.c_rate_by_type": "Μέση τιμή ανά τύπο",
@@ -61390,6 +61391,11 @@ const resource = {
     "market.add_this": "Προσθήκη αυτής της αγοράς…",
     "market.load_error": "Δεν ήταν δυνατή η φόρτωση των ρυθμίσεων αγοράς",
     "market.regional_empty": "Δεν υπάρχει ακόμη περιφερειακό πακέτο για την αγορά σας.",
+    "market.preview_appear": "Θα εμφανιστούν ({{count}})",
+    "market.preview_disappear": "Θα αποκρυφτούν ({{count}})",
+    "market.preview_unchanged": "Χωρίς αλλαγή ({{count}})",
+    "market.onboarding_sets": "Ρυθμίζει: {{items}}",
+    "market.change_later": "Μπορείτε να το αλλάξετε αργότερα στις Ρυθμίσεις.",
   }
 } as { translation: Record<string, string> };
 

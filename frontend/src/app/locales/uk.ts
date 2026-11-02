@@ -46061,6 +46061,7 @@ const resource = {
     "units.ea": "За одиницю",
     "units.set": "Комплект",
     "units.lsum": "Паушальна сума",
+    "units.more": "Інші одиниці…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Комплект документів",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Чернетка подання",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Результати валідації",
@@ -63529,6 +63530,11 @@ const resource = {
     "market.add_this": "Додати цей ринок…",
     "market.load_error": "Не вдалося завантажити налаштування ринку",
     "market.regional_empty": "Для вашого ринку ще немає регіонального пакета.",
+    "market.preview_appear": "З'явиться ({{count}})",
+    "market.preview_disappear": "Зникне ({{count}})",
+    "market.preview_unchanged": "Без змін ({{count}})",
+    "market.onboarding_sets": "Буде налаштовано: {{items}}",
+    "market.change_later": "Це можна змінити пізніше в налаштуваннях.",
   }
 } as { translation: Record<string, string> };
 

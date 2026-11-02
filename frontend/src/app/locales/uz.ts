@@ -45234,6 +45234,7 @@ const resource = {
     "units.ea": "Har biri",
     "units.set": "Toʻplam",
     "units.lsum": "Yalpi summa",
+    "units.more": "Boshqa birliklar…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Hujjatlar toʻplami",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Qoralama topshiriq",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Validatsiya natijalari",
@@ -62362,6 +62363,11 @@ const resource = {
     "market.add_this": "Ushbu bozorni qo‘shish…",
     "market.load_error": "Bozor sozlamalarini yuklab bo‘lmadi",
     "market.regional_empty": "Bozoringiz uchun hali hududiy paket yo‘q.",
+    "market.preview_appear": "Koʻrinadi ({{count}})",
+    "market.preview_disappear": "Yashiriladi ({{count}})",
+    "market.preview_unchanged": "Oʻzgarishsiz ({{count}})",
+    "market.onboarding_sets": "Sozlanadi: {{items}}",
+    "market.change_later": "Buni keyinroq Sozlamalarda oʻzgartirishingiz mumkin.",
   }
 } as { translation: Record<string, string> };
 

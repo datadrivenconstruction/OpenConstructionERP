@@ -45784,6 +45784,7 @@ const resource = {
     "units.ea": "Штука",
     "units.set": "Комплект",
     "units.lsum": "Сумма",
+    "units.more": "Другие единицы…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Набор документов",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Черновик подачи",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Результаты проверки",
@@ -64650,6 +64651,11 @@ const resource = {
     "market.add_this": "Добавить этот рынок…",
     "market.load_error": "Не удалось загрузить настройки рынка",
     "market.regional_empty": "Для вашего рынка пока нет регионального пакета.",
+    "market.preview_appear": "Появится ({{count}})",
+    "market.preview_disappear": "Скроется ({{count}})",
+    "market.preview_unchanged": "Без изменений ({{count}})",
+    "market.onboarding_sets": "Будет настроено: {{items}}",
+    "market.change_later": "Это можно изменить позже в настройках.",
   }
 } as { translation: Record<string, string> };
 

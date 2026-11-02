@@ -45647,6 +45647,7 @@ const resource = {
     "units.ea": "Unità",
     "units.set": "Set",
     "units.lsum": "Somma forfettaria",
+    "units.more": "Altre unità…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Set di documenti",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Bozza di invio",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Risultati della validazione",
@@ -62652,6 +62653,11 @@ const resource = {
     "market.add_this": "Aggiungi questo mercato…",
     "market.load_error": "Impossibile caricare le impostazioni del mercato",
     "market.regional_empty": "Nessun pacchetto regionale per il tuo mercato.",
+    "market.preview_appear": "Comparirà ({{count}})",
+    "market.preview_disappear": "Scomparirà ({{count}})",
+    "market.preview_unchanged": "Invariato ({{count}})",
+    "market.onboarding_sets": "Configura: {{items}}",
+    "market.change_later": "Potrai modificarlo più tardi nelle Impostazioni.",
   }
 } as { translation: Record<string, string> };
 

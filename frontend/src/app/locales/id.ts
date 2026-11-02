@@ -44947,6 +44947,7 @@ const resource = {
     "units.ea": "Unit",
     "units.set": "Set",
     "units.lsum": "Jumlah total",
+    "units.more": "Satuan lainnya…",
     "resources.insights.c_by_type": "Sumber daya berdasarkan tipe",
     "resources.insights.c_by_status": "Sumber daya berdasarkan status",
     "resources.insights.c_rate_by_type": "Tarif rata-rata berdasarkan tipe",
@@ -61179,6 +61180,11 @@ const resource = {
     "market.add_this": "Tambah pasar ini…",
     "market.load_error": "Pengaturan pasar tidak dapat dimuat",
     "market.regional_empty": "Belum ada paket regional untuk pasar Anda.",
+    "market.preview_appear": "Akan muncul ({{count}})",
+    "market.preview_disappear": "Akan disembunyikan ({{count}})",
+    "market.preview_unchanged": "Tidak berubah ({{count}})",
+    "market.onboarding_sets": "Ini mengatur: {{items}}",
+    "market.change_later": "Anda dapat mengubahnya nanti di Pengaturan.",
   }
 } as { translation: Record<string, string> };
 

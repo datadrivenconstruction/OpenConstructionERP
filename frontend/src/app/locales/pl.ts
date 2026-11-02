@@ -46209,6 +46209,7 @@ const resource = {
     "units.ea": "Sztuka",
     "units.set": "Zestaw",
     "units.lsum": "Suma ryczałtowa",
+    "units.more": "Więcej jednostek…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Zestaw dokumentów",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Wersja robocza zgłoszenia",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Wyniki walidacji",
@@ -62982,6 +62983,11 @@ const resource = {
     "market.add_this": "Dodaj ten rynek…",
     "market.load_error": "Nie udało się wczytać ustawień rynku",
     "market.regional_empty": "Brak jeszcze pakietu regionalnego dla Twojego rynku.",
+    "market.preview_appear": "Pojawi się ({{count}})",
+    "market.preview_disappear": "Zniknie ({{count}})",
+    "market.preview_unchanged": "Bez zmian ({{count}})",
+    "market.onboarding_sets": "To ustawia: {{items}}",
+    "market.change_later": "Możesz to zmienić później w Ustawieniach.",
   }
 } as { translation: Record<string, string> };
 

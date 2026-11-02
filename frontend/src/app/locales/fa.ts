@@ -44287,6 +44287,7 @@ const resource = {
     "units.ea": "واحد",
     "units.set": "دست",
     "units.lsum": "مقطوع",
+    "units.more": "واحدهای بیشتر…",
     "resources.insights.c_by_type": "منابع بر اساس نوع",
     "resources.insights.c_by_status": "منابع بر اساس وضعیت",
     "resources.insights.c_rate_by_type": "میانگین نرخ بر اساس نوع",
@@ -61390,6 +61391,11 @@ const resource = {
     "market.add_this": "افزودن این بازار…",
     "market.load_error": "بارگیری تنظیمات بازار ممکن نشد",
     "market.regional_empty": "هنوز بسته منطقه‌ای برای بازار شما وجود ندارد.",
+    "market.preview_appear": "نمایش داده می‌شود ({{count}})",
+    "market.preview_disappear": "پنهان می‌شود ({{count}})",
+    "market.preview_unchanged": "بدون تغییر ({{count}})",
+    "market.onboarding_sets": "این تنظیم می‌کند: {{items}}",
+    "market.change_later": "بعداً می‌توانید در تنظیمات تغییر دهید.",
   }
 } as { translation: Record<string, string> };
 

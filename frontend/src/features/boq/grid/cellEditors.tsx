@@ -1112,6 +1112,8 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
   // AG Grid's per-cell ``overflow:hidden`` no longer clips it — the
   // earlier ``open=false`` workaround is replaced by the portal fix.
   const [open, setOpen] = useState(true);
+  // "More units..." lifts the market's units-system filter for this one pick.
+  const [showAllUnits, setShowAllUnits] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   // Whether the estimator moved the highlight with the arrow keys since they
   // last typed. The first suggestion is highlighted on its own, and Enter on
@@ -1138,10 +1140,10 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
   // is appended when not already in the list so the existing token still
   // shows up.
   const allOptions = useMemo(() => {
-    const list = getUnitsForLocale(lang);
+    const list = showAllUnits ? getUnitsForLocale(lang, 'both') : getUnitsForLocale(lang);
     if (initial && !list.includes(initial)) return [...list, initial];
     return list;
-  }, [lang, initial]);
+  }, [lang, initial, showAllUnits]);
 
   // Filter as the user types. Empty / unchanged value shows the FULL list
   // (the previous datalist-based implementation hid all-but-one options
@@ -1292,6 +1294,11 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
       const target = e.target as HTMLElement | null;
       const li = target?.closest?.('li[role="option"]') as HTMLElement | null;
       if (!li || !ul.contains(li)) return;
+      if (li.hasAttribute('data-unit-more')) {
+        e.preventDefault();
+        setShowAllUnits(true);
+        return;
+      }
       const picked = li.getAttribute('data-unit-value');
       if (picked == null) return;
       // Prevent the input from blurring (which would close the editor
@@ -1459,6 +1466,17 @@ export const UnitCellEditor = forwardRef((props: ICellEditorParams, ref) => {
                   {u}
                 </li>
               ))}
+              {!showAllUnits && (
+                <li
+                  role="option"
+                  aria-selected={false}
+                  data-unit-more="true"
+                  data-testid="unit-picker-more"
+                  className="cursor-pointer border-t border-border-light px-2 py-1 text-xs text-oe-blue hover:bg-surface-secondary"
+                >
+                  {t('units.more', { defaultValue: 'More units…' })}
+                </li>
+              )}
             </ul>
           );
         })(),

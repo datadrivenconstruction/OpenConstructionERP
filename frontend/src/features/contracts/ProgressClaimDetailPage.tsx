@@ -61,6 +61,8 @@ import { contractsTabHref } from './contractsTabs';
 import { PopulatePreviewModal } from './PopulatePreviewModal';
 import { ProgressClaimLineTable } from './ProgressClaimLineTable';
 import { AIAApplicationPanel } from './AIAApplicationPanel';
+import { useMarketScope } from '@/features/market/api';
+import { showAiaForProject } from '@/features/market/logic';
 import { GaebInvoicePanel } from './GaebInvoicePanel';
 import { HakedisPanel, claimMayHaveHakedis, recordHakedisRefusal } from './hakedis';
 import { SubRollupPanel } from './SubRollupPanel';
@@ -160,7 +162,9 @@ export function ProgressClaimDetailPage() {
   });
 
   const claim = claimQ.data;
-  const aiaEligible = projectQ.data?.is_aia_eligible === true;
+  // AIA needs both: a tenant market whose packs offer AIA forms, and an eligible project country.
+  const { data: marketScope } = useMarketScope();
+  const aiaEligible = showAiaForProject(marketScope, projectQ.data?.is_aia_eligible === true);
   // The certificate is asked for only where the project's country or the
   // contract's own terms give it a layout; anywhere else the answer is a 404.
   const hakedisMayApply = claimMayHaveHakedis(

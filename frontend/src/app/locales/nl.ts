@@ -45319,6 +45319,7 @@ const resource = {
     "units.ea": "Stuk",
     "units.set": "Set",
     "units.lsum": "Totaalprijs",
+    "units.more": "Meer eenheden…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Documentenset",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Conceptinzending",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Validatieresultaten",
@@ -62311,6 +62312,11 @@ const resource = {
     "market.add_this": "Deze markt toevoegen…",
     "market.load_error": "Marktinstellingen konden niet worden geladen",
     "market.regional_empty": "Nog geen regionaal pakket voor uw markt.",
+    "market.preview_appear": "Verschijnt ({{count}})",
+    "market.preview_disappear": "Verdwijnt ({{count}})",
+    "market.preview_unchanged": "Ongewijzigd ({{count}})",
+    "market.onboarding_sets": "Dit stelt in: {{items}}",
+    "market.change_later": "U kunt dit later wijzigen in Instellingen.",
   }
 } as { translation: Record<string, string> };
 

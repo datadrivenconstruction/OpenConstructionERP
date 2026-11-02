@@ -45095,6 +45095,7 @@ const resource = {
     "units.ea": "各",
     "units.set": "セット",
     "units.lsum": "一括請負",
+    "units.more": "その他の単位…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "ドキュメントセット",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "下書き提出",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "検証結果",
@@ -62712,6 +62713,11 @@ const resource = {
     "market.add_this": "この市場を追加…",
     "market.load_error": "市場設定を読み込めませんでした",
     "market.regional_empty": "お使いの市場向けの地域パックはまだありません。",
+    "market.preview_appear": "表示されるもの ({{count}})",
+    "market.preview_disappear": "非表示になるもの ({{count}})",
+    "market.preview_unchanged": "変更なし ({{count}})",
+    "market.onboarding_sets": "設定内容: {{items}}",
+    "market.change_later": "後から設定で変更できます。",
   }
 } as { translation: Record<string, string> };
 

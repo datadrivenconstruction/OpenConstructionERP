@@ -45510,6 +45510,7 @@ const resource = {
     "units.ea": "Svaki",
     "units.set": "Set",
     "units.lsum": "Ukupan iznos",
+    "units.more": "Više jedinica…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Dokumentacija",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Nacrt predaje",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Rezultati provjere",
@@ -61778,6 +61779,11 @@ const resource = {
     "market.add_this": "Dodaj ovo tržište…",
     "market.load_error": "Postavke tržišta nije moguće učitati",
     "market.regional_empty": "Za vaše tržište još nema regionalnog paketa.",
+    "market.preview_appear": "Pojavit će se ({{count}})",
+    "market.preview_disappear": "Nestat će ({{count}})",
+    "market.preview_unchanged": "Nepromijenjeno ({{count}})",
+    "market.onboarding_sets": "Ovo postavlja: {{items}}",
+    "market.change_later": "To možete promijeniti kasnije u Postavkama.",
   }
 } as { translation: Record<string, string> };
 

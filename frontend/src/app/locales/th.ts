@@ -45141,6 +45141,7 @@ const resource = {
     "units.ea": "แต่ละ",
     "units.set": "ชุด",
     "units.lsum": "ราคารวม",
+    "units.more": "หน่วยเพิ่มเติม…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "ชุดเอกสาร",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "ร่างการยื่น",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "ผลการตรวจสอบ",
@@ -61180,6 +61181,11 @@ const resource = {
     "market.add_this": "เพิ่มตลาดนี้…",
     "market.load_error": "ไม่สามารถโหลดการตั้งค่าตลาด",
     "market.regional_empty": "ยังไม่มีแพ็กระดับภูมิภาคสำหรับตลาดของคุณ",
+    "market.preview_appear": "จะแสดง ({{count}})",
+    "market.preview_disappear": "จะซ่อน ({{count}})",
+    "market.preview_unchanged": "ไม่เปลี่ยนแปลง ({{count}})",
+    "market.onboarding_sets": "ตั้งค่า: {{items}}",
+    "market.change_later": "คุณเปลี่ยนได้ภายหลังในการตั้งค่า",
   }
 } as { translation: Record<string, string> };
 

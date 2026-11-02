@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { Loader2 } from 'lucide-react';
 import { useSolutionPackages } from './api';
 import { PackagePicker } from './PackagePicker';
+import { MarketSummary } from '@/features/market/MarketSummary';
 
 export function StepSolutionPackages({
   onInstalled,
@@ -39,6 +40,7 @@ export function StepSolutionPackages({
           onInstalled={(result) => onInstalled(result.enabled_modules)}
         />
       )}
+      <MarketSummary />
       <div className="flex items-center justify-between pt-2">
         <button type="button" onClick={onBack} className="text-sm text-content-secondary hover:text-content-primary">
           {t('packages.back', { defaultValue: 'Back' })}

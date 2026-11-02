@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import type { MarketScope } from '../api';
-import { isModuleOtherMarket, isRouteHiddenByMarket, marketOffersAia, ruleSetsFromScope } from '../logic';
+import {
+  diffHidden,
+  isCountryInScope,
+  isModuleOtherMarket,
+  isRouteHiddenByMarket,
+  marketOffersAia,
+  ruleSetsFromScope,
+  showAiaForProject,
+} from '../logic';
 import { filterUnitsBySystem, getUnitsForLocale, setActiveUnitsSystem } from '@/features/boq/boqHelpers';
 
 function scope(over: Partial<MarketScope>): MarketScope {
@@ -94,5 +102,31 @@ describe('unit picker by units system', () => {
     expect(units).not.toContain('bdft');
     setActiveUnitsSystem('both');
     expect(getUnitsForLocale('de')).toContain('bdft');
+  });
+});
+
+describe('market preview and scoped lists', () => {
+  it('diffs hidden modules into appear, disappear and unchanged', () => {
+    expect(diffHidden(['aia', 'gaeb'], ['gaeb', 'zatca'], ['aia', 'gaeb', 'zatca', 'nrm'])).toEqual({
+      appear: ['aia'],
+      disappear: ['zatca'],
+      unchanged: 1,
+    });
+  });
+
+  it('shows AIA only for a US market and an eligible project', () => {
+    const us = scope({ options: { standards: [], contract_forms: ['AIA_A101'] } });
+    const de = scope({ options: { standards: [], contract_forms: ['VOB_B'] } });
+    expect(showAiaForProject(us, true)).toBe(true);
+    expect(showAiaForProject(us, false)).toBe(false);
+    expect(showAiaForProject(de, true)).toBe(false);
+  });
+
+  it('filters countries by market and fails open while loading', () => {
+    const sa = scope({ expanded_markets: ['SA'] });
+    expect(isCountryInScope('sa', sa)).toBe(true);
+    expect(isCountryInScope('DE', sa)).toBe(false);
+    expect(isCountryInScope('DE', undefined)).toBe(true);
+    expect(isCountryInScope('DE', scope({ all_markets: true, expanded_markets: ['SA'] }))).toBe(true);
   });
 });

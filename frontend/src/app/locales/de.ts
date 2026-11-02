@@ -45326,6 +45326,7 @@ const resource = {
     "units.ea": "Stück",
     "units.set": "Satz",
     "units.lsum": "Pauschalpreis",
+    "units.more": "Weitere Einheiten…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Dokumentensatz",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Entwurfseinreichung",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Validierungsergebnisse",
@@ -64065,6 +64066,11 @@ const resource = {
     "market.add_this": "Diesen Markt hinzufügen…",
     "market.load_error": "Markteinstellungen konnten nicht geladen werden",
     "market.regional_empty": "Für Ihren Markt gibt es noch kein Regionalpaket.",
+    "market.preview_appear": "Wird angezeigt ({{count}})",
+    "market.preview_disappear": "Wird ausgeblendet ({{count}})",
+    "market.preview_unchanged": "Unverändert ({{count}})",
+    "market.onboarding_sets": "Damit eingerichtet: {{items}}",
+    "market.change_later": "Sie können das später in den Einstellungen ändern.",
   }
 } as { translation: Record<string, string> };
 

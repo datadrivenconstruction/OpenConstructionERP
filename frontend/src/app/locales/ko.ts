@@ -45045,6 +45045,7 @@ const resource = {
     "units.ea": "개",
     "units.set": "세트",
     "units.lsum": "일괄 합계",
+    "units.more": "단위 더 보기…",
     "resources.insights.c_by_type": "유형별 리소스",
     "resources.insights.c_by_status": "상태별 리소스",
     "resources.insights.c_rate_by_type": "유형별 평균 요율",
@@ -61796,6 +61797,11 @@ const resource = {
     "market.add_this": "이 시장 추가…",
     "market.load_error": "시장 설정을 불러올 수 없습니다",
     "market.regional_empty": "아직 해당 시장용 지역 팩이 없습니다.",
+    "market.preview_appear": "표시됨 ({{count}})",
+    "market.preview_disappear": "숨겨짐 ({{count}})",
+    "market.preview_unchanged": "변경 없음 ({{count}})",
+    "market.onboarding_sets": "설정 항목: {{items}}",
+    "market.change_later": "나중에 설정에서 변경할 수 있습니다.",
   }
 } as { translation: Record<string, string> };
 

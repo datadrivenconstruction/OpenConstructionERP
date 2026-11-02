@@ -45792,6 +45792,7 @@ const resource = {
     "units.ea": "Ks",
     "units.set": "Sada",
     "units.lsum": "Paušál",
+    "units.more": "Další jednotky…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Sada dokumentů",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Koncept podání",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Výsledky ověření",
@@ -62721,6 +62722,11 @@ const resource = {
     "market.add_this": "Přidat tento trh…",
     "market.load_error": "Nastavení trhu se nepodařilo načíst",
     "market.regional_empty": "Pro váš trh zatím není regionální balíček.",
+    "market.preview_appear": "Zobrazí se ({{count}})",
+    "market.preview_disappear": "Skryje se ({{count}})",
+    "market.preview_unchanged": "Beze změny ({{count}})",
+    "market.onboarding_sets": "Toto nastaví: {{items}}",
+    "market.change_later": "Později to můžete změnit v Nastavení.",
   }
 } as { translation: Record<string, string> };
 

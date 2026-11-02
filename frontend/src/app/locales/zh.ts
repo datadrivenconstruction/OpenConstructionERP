@@ -45093,6 +45093,7 @@ const resource = {
     "units.ea": "个",
     "units.set": "套",
     "units.lsum": "总价",
+    "units.more": "更多单位…",
     "resources.insights.c_by_type": "按类型资源",
     "resources.insights.c_by_status": "按状态资源",
     "resources.insights.c_rate_by_type": "平均费率（按类型）",
@@ -63649,6 +63650,11 @@ const resource = {
     "market.add_this": "添加此市场…",
     "market.load_error": "无法加载市场设置",
     "market.regional_empty": "您的市场暂无区域包。",
+    "market.preview_appear": "将显示 ({{count}})",
+    "market.preview_disappear": "将隐藏 ({{count}})",
+    "market.preview_unchanged": "不变 ({{count}})",
+    "market.onboarding_sets": "将设置：{{items}}",
+    "market.change_later": "之后可在设置中更改。",
   }
 } as { translation: Record<string, string> };
 

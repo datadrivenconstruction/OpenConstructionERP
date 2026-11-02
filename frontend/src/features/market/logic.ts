@@ -32,3 +32,30 @@ export function marketOffersAia(scope: MarketScope | undefined): boolean {
   const forms = scope?.options?.contract_forms;
   return Array.isArray(forms) && forms.some((code) => String(code).toUpperCase().startsWith('AIA'));
 }
+
+/** Modules a profile change shows, hides, and leaves visible (among market-tagged modules). */
+export function diffHidden(
+  currentHidden: readonly string[],
+  nextHidden: readonly string[],
+  tagged: readonly string[],
+): { appear: string[]; disappear: string[]; unchanged: number } {
+  const now = new Set(currentHidden);
+  const next = new Set(nextHidden);
+  return {
+    appear: currentHidden.filter((m) => !next.has(m)),
+    disappear: nextHidden.filter((m) => !now.has(m)),
+    unchanged: tagged.filter((m) => !now.has(m) && !next.has(m)).length,
+  };
+}
+
+/** AIA G702/G703 applies when the tenant's market offers AIA forms and the project's country is eligible. */
+export function showAiaForProject(scope: MarketScope | undefined, projectEligible: boolean): boolean {
+  return projectEligible && marketOffersAia(scope);
+}
+
+/** Whether a country belongs to the tenant's markets. Fail-open while loading or when every market is active. */
+export function isCountryInScope(code: string, scope: MarketScope | undefined): boolean {
+  const markets = scope?.expanded_markets;
+  if (!Array.isArray(markets) || markets.length === 0 || scope?.all_markets || markets.includes('*')) return true;
+  return markets.includes(code.toUpperCase());
+}

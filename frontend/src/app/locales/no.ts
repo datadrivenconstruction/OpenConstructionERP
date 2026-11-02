@@ -45312,6 +45312,7 @@ const resource = {
     "units.ea": "Stykke",
     "units.set": "Sett",
     "units.lsum": "Fastpris",
+    "units.more": "Flere enheter…",
     "resources.insights.c_by_type": "Ressurser etter type",
     "resources.insights.c_by_status": "Ressurser etter status",
     "resources.insights.c_rate_by_type": "Gj.snittlig rate etter type",
@@ -61430,6 +61431,11 @@ const resource = {
     "market.add_this": "Legg til dette markedet…",
     "market.load_error": "Kunne ikke laste markedsinnstillingene",
     "market.regional_empty": "Det finnes ennå ingen regional pakke for markedet ditt.",
+    "market.preview_appear": "Vises ({{count}})",
+    "market.preview_disappear": "Skjules ({{count}})",
+    "market.preview_unchanged": "Uendret ({{count}})",
+    "market.onboarding_sets": "Dette setter opp: {{items}}",
+    "market.change_later": "Du kan endre dette senere i Innstillinger.",
   }
 } as { translation: Record<string, string> };
 

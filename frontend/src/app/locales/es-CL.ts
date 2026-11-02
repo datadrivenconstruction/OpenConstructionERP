@@ -43708,6 +43708,7 @@ const resource = {
     "units.ea": "Unidad",
     "units.set": "Conjunto",
     "units.lsum": "Suma global",
+    "units.more": "Más unidades…",
     "resources.insights.c_by_type": "Recursos por tipo",
     "resources.insights.c_by_status": "Recursos por estado",
     "resources.insights.c_rate_by_type": "Tarifa media por tipo",
@@ -57267,6 +57268,11 @@ const resource = {
     "market.add_this": "Añadir este mercado…",
     "market.load_error": "No se pudo cargar la configuración del mercado",
     "market.regional_empty": "Aún no hay un paquete regional para su mercado.",
+    "market.preview_appear": "Aparecerá ({{count}})",
+    "market.preview_disappear": "Desaparecerá ({{count}})",
+    "market.preview_unchanged": "Sin cambios ({{count}})",
+    "market.onboarding_sets": "Esto configura: {{items}}",
+    "market.change_later": "Puede cambiarlo más tarde en Ajustes.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

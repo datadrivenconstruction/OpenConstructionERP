@@ -45332,6 +45332,7 @@ const resource = {
     "units.ea": "Stykke",
     "units.set": "Sæt",
     "units.lsum": "Fast pris",
+    "units.more": "Flere enheder…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Dokumentsæt",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Udkast til indsendelse",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Valideringsresultater",
@@ -61430,6 +61431,11 @@ const resource = {
     "market.add_this": "Tilføj dette marked…",
     "market.load_error": "Markedsindstillinger kunne ikke indlæses",
     "market.regional_empty": "Der er endnu ingen regional pakke til dit marked.",
+    "market.preview_appear": "Vises ({{count}})",
+    "market.preview_disappear": "Skjules ({{count}})",
+    "market.preview_unchanged": "Uændret ({{count}})",
+    "market.onboarding_sets": "Dette opsætter: {{items}}",
+    "market.change_later": "Du kan ændre det senere under Indstillinger.",
   }
 } as { translation: Record<string, string> };
 

@@ -43700,6 +43700,7 @@ const resource = {
     "units.ea": "Unidad",
     "units.set": "Juego",
     "units.lsum": "Suma global",
+    "units.more": "Más unidades…",
     "cases.submit_a_permit_package_to_the_authority.step.build.in.set": "Conjunto de documentos",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.submission": "Envío preliminar",
     "cases.submit_a_permit_package_to_the_authority.step.build.out.checks": "Resultados de validación",
@@ -57258,6 +57259,11 @@ const resource = {
     "market.add_this": "Añadir este mercado…",
     "market.load_error": "No se pudo cargar la configuración del mercado",
     "market.regional_empty": "Aún no hay un paquete regional para su mercado.",
+    "market.preview_appear": "Aparecerá ({{count}})",
+    "market.preview_disappear": "Desaparecerá ({{count}})",
+    "market.preview_unchanged": "Sin cambios ({{count}})",
+    "market.onboarding_sets": "Esto configura: {{items}}",
+    "market.change_later": "Puede cambiarlo más tarde en Ajustes.",
     // --- /Draft lender preparation ---
   }
 } as { translation: Record<string, string> };

@@ -45544,6 +45544,7 @@ const resource = {
     "units.ea": "Fiecare",
     "units.set": "Set",
     "units.lsum": "Sumă forfetară",
+    "units.more": "Mai multe unități…",
     "resources.insights.c_by_type": "Resurse pe tip",
     "resources.insights.c_by_status": "Resurse pe status",
     "resources.insights.c_rate_by_type": "Tarif mediu pe tip",
@@ -61768,6 +61769,11 @@ const resource = {
     "market.add_this": "Adaugă această piață…",
     "market.load_error": "Setările pieței nu au putut fi încărcate",
     "market.regional_empty": "Încă nu există un pachet regional pentru piața dvs.",
+    "market.preview_appear": "Va apărea ({{count}})",
+    "market.preview_disappear": "Va dispărea ({{count}})",
+    "market.preview_unchanged": "Neschimbat ({{count}})",
+    "market.onboarding_sets": "Aceasta configurează: {{items}}",
+    "market.change_later": "Puteți modifica ulterior în Setări.",
   }
 } as { translation: Record<string, string> };
 
