@@ -1,0 +1,6 @@
+{
+  "key": "gaeb_xml",
+  "name": "GAEB DA XML (X83 in, X84 out) - handled by GAEB exchange",
+  "file_type": "xml",
+  "handled_by": "gaeb"
+}
