@@ -175,7 +175,7 @@ def _market_entry(value: Any) -> dict[str, str] | None:
     if not isinstance(value, dict):
         return None
     country = _code(value.get("country"))
-    if len(country) != 2 or not country.isalpha():
+    if len(country) != 2 or not (country.isascii() and country.isalpha()):
         return None
     return {"country": country, "subdivision": _code(value.get("subdivision"))}
 
