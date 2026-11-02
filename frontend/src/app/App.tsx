@@ -324,6 +324,9 @@ const DefectsLiabilityPage = lazy(() =>
 const BidDayPage = lazy(() =>
   import('@/features/bid-day/BidDayPage').then((m) => ({
     default: m.BidDayPage,
+const OwnerSchedulePage = lazy(() =>
+  import('@/features/owner-schedule/OwnerSchedulePage').then((m) => ({
+    default: m.OwnerSchedulePage,
   }))
 );
 const QuoteCapturePage = lazy(() =>
@@ -1446,6 +1449,7 @@ export default function App() {
 
         <Route path="/boq" element={<P title="Bill of Quantities"><BOQListPage /></P>} />
         <Route path="/boq/:boqId" element={<P title="BOQ Editor"><BOQEditorPage /></P>} />
+        <Route path="/boq/:boqId/owner-schedule" element={<P title="Owner bid schedule"><OwnerSchedulePage /></P>} />
         <Route path="/templates" element={<P title="BOQ Templates"><TemplatesPage /></P>} />
 
         <Route path="/costs" element={<P title="Cost Database"><CostsPage /></P>} />
