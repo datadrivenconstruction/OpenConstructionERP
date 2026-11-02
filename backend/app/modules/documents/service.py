@@ -496,6 +496,11 @@ def _generate_photo_thumbnail(
         return False
 
 
+#: Public names for the photos module, which builds thumbnails in a job and gates bytes it did not upload.
+generate_photo_thumbnail = _generate_photo_thumbnail
+ensure_photo_within_pixel_cap = _ensure_photo_within_pixel_cap
+
+
 def _remove_file(file_path_str: str) -> None:
     """Unlink one stored file, best-effort: a failure leaves an orphan, not an error."""
     try:

@@ -2540,5 +2540,55 @@
         "cumulative": "Kumulativní pozice"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Fotografie nebyla nalezena",
+      "no_files": "Vyberte alespoň jednu fotografii k nahrání",
+      "too_many_files": "Najednou lze nahrát nejvýše {max} fotografií",
+      "target_not_found": "Záznam k propojení nebyl v tomto projektu nalezen",
+      "link_not_found": "Tato fotografie není s tímto záznamem propojena",
+      "album_not_found": "Album nebylo nalezeno",
+      "album_name_required": "Zadejte název alba",
+      "album_exists": "Album s názvem '{name}' už v tomto projektu existuje",
+      "plan_room_unavailable": "Špendlíky na výkresech vyžadují modul Plan Room",
+      "document_not_found": "Výkres nebyl v tomto projektu nalezen",
+      "compare_same_photo": "Pro porovnání vyberte dvě různé fotografie",
+      "compare_not_found": "Porovnání nebylo nalezeno",
+      "suggestion_not_found": "Návrh nebyl nalezen",
+      "suggestion_reviewed": "Tento návrh už byl posouzen",
+      "suggestion_invalid": "Upravený návrh není platný",
+      "bad_source": "Neznámý zdroj fotografie",
+      "bad_device": "Data o pořízení ze zařízení nelze přečíst",
+      "target_incomplete": "Zadejte typ záznamu i jeho ID",
+      "rate_limited": "Příliš mnoho požadavků, zkuste to za minutu",
+      "export_not_found": "Export nebyl nalezen",
+      "export_not_ready": "Export ještě není připraven",
+      "gps_pair": "Zadejte zeměpisnou šířku i délku společně",
+      "bad_ai_kinds": "Vyberte: popisek, štítky, postup nebo nebezpečí",
+      "file_missing": "Soubor fotografie není v úložišti"
+    },
+    "validation": {
+      "taken_at_missing": "Fotografie '{name}' nemá čas pořízení",
+      "taken_at_missing_fix": "Zadejte datum pořízení fotografie nebo ji znovu pořiďte v aplikaci",
+      "taken_at_future": "Fotografie '{name}' je datována {taken_at}, tedy v budoucnosti",
+      "taken_at_before_project": "Fotografie '{name}' je datována {taken_at}, více než rok před zahájením projektu",
+      "taken_at_fix": "Opravte datum pořízení nebo zkontrolujte hodiny fotoaparátu",
+      "gps_inaccurate": "Poloha '{name}' je přesná jen na {accuracy} m",
+      "gps_off_site": "Fotografie '{name}' byla pořízena {distance_km} km od staveniště",
+      "gps_fix": "Zkontrolujte polohu nebo fotografii znovu pořiďte na stavbě se zapnutou polohou",
+      "link_missing": "Fotografie '{name}' je propojena s položkou ({kind}), která už v tomto projektu neexistuje",
+      "link_missing_fix": "Odstraňte propojení nebo fotografii propojte se správným záznamem",
+      "duplicate": "Fotografie '{name}' je archivována ještě {count}×",
+      "duplicate_fix": "Ponechte jednu kopii a propojte ji tam, kde je potřeba",
+      "evidence_weak": "Fotografie '{name}' má stupeň průkaznosti '{grade}'",
+      "evidence_weak_fix": "Pořiďte fotografii v aplikaci se zapnutou polohou",
+      "ai_unreviewed": "Návrh AI ({kind}) čeká na posouzení déle než {days} dní",
+      "ai_unreviewed_fix": "Návrh přijměte nebo zamítněte",
+      "hazard_open": "Přijaté nebezpečí '{hazard}' nemá záznam o bezpečnosti",
+      "hazard_open_fix": "Zapište bezpečnostní zjištění a propojte s ním fotografii",
+      "file_missing": "Soubor fotografie '{name}' chybí v úložišti",
+      "file_missing_fix": "Nahrajte fotografii znovu nebo ji obnovte ze zálohy"
+    }
   }
 }

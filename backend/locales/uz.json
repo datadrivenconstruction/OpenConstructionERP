@@ -2535,5 +2535,55 @@
         "cumulative": "Yig'ma qoldiq"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Rasm topilmadi",
+      "no_files": "Yuklash uchun kamida bitta rasm tanlang",
+      "too_many_files": "Bir vaqtda ko'pi bilan {max} ta rasm yuklang",
+      "target_not_found": "Bog'lanadigan yozuv bu loyihada topilmadi",
+      "link_not_found": "Bu rasm o'sha yozuvga bog'lanmagan",
+      "album_not_found": "Albom topilmadi",
+      "album_name_required": "Albomga nom bering",
+      "album_exists": "Bu loyihada '{name}' nomli albom allaqachon mavjud",
+      "plan_room_unavailable": "Chizmadagi belgilar uchun Plan Room moduli kerak",
+      "document_not_found": "Chizma bu loyihada topilmadi",
+      "compare_same_photo": "Taqqoslash uchun ikkita turli rasm tanlang",
+      "compare_not_found": "Taqqoslash topilmadi",
+      "suggestion_not_found": "Taklif topilmadi",
+      "suggestion_reviewed": "Bu taklif allaqachon ko'rib chiqilgan",
+      "suggestion_invalid": "Tahrirlangan taklif yaroqsiz",
+      "bad_source": "Rasm manbasi noma'lum",
+      "bad_device": "Qurilmaning suratga olish ma'lumotlarini o'qib bo'lmadi",
+      "target_incomplete": "Yozuv turi va yozuv identifikatorini birga kiriting",
+      "rate_limited": "So'rovlar juda ko'p, bir daqiqadan keyin qayta urinib ko'ring",
+      "export_not_found": "Eksport topilmadi",
+      "export_not_ready": "Eksport hali tayyor emas",
+      "gps_pair": "Kenglik va uzunlikni birga kiriting",
+      "bad_ai_kinds": "Izoh, teglar, jarayon yoki xavfni tanlang",
+      "file_missing": "Rasm fayli saqlash joyida yo'q"
+    },
+    "validation": {
+      "taken_at_missing": "'{name}' rasmida olingan vaqt yo'q",
+      "taken_at_missing_fix": "Rasm olingan sanani kiriting yoki ilovada qayta oling",
+      "taken_at_future": "'{name}' rasmining sanasi {taken_at}, ya'ni kelajakda",
+      "taken_at_before_project": "'{name}' rasmining sanasi {taken_at}, loyiha boshlanishidan bir yildan ko'proq oldin",
+      "taken_at_fix": "Olingan sanani tuzating yoki kamera soatini tekshiring",
+      "gps_inaccurate": "'{name}' joylashuvi faqat {accuracy} m aniqlikda",
+      "gps_off_site": "'{name}' rasmi obyektdan {distance_km} km narida olingan",
+      "gps_fix": "Joylashuvni tekshiring yoki obyektda geolokatsiyani yoqib qayta oling",
+      "link_missing": "'{name}' rasmi bu loyihada endi mavjud bo'lmagan {kind} bilan bog'langan",
+      "link_missing_fix": "Bog'lanishni olib tashlang yoki rasmni to'g'ri yozuvga bog'lang",
+      "duplicate": "'{name}' rasmi yana {count} marta arxivlangan",
+      "duplicate_fix": "Bitta nusxasini qoldirib, kerakli joyga bog'lang",
+      "evidence_weak": "'{name}' rasmining dalil darajasi '{grade}'",
+      "evidence_weak_fix": "Rasmni ilovada geolokatsiyani yoqib oling",
+      "ai_unreviewed": "AI'ning {kind} taklifi {days} kundan ortiq ko'rib chiqilishini kutmoqda",
+      "ai_unreviewed_fix": "Taklifni qabul qiling yoki rad eting",
+      "hazard_open": "Qabul qilingan '{hazard}' xavfi uchun xavfsizlik kuzatuvi yo'q",
+      "hazard_open_fix": "Xavfsizlik kuzatuvini yozing va rasmni unga bog'lang",
+      "file_missing": "'{name}' rasmining fayli saqlash joyida yo'q",
+      "file_missing_fix": "Rasmni qayta yuklang yoki zaxira nusxadan tiklang"
+    }
   }
 }

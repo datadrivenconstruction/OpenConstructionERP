@@ -2539,5 +2539,55 @@
         "cumulative": "Posisi kumulatif"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Foto tidak ditemukan",
+      "no_files": "Pilih setidaknya satu foto untuk diunggah",
+      "too_many_files": "Unggah paling banyak {max} foto sekaligus",
+      "target_not_found": "Rekaman yang akan ditautkan tidak ditemukan di proyek ini",
+      "link_not_found": "Foto ini tidak tertaut ke rekaman tersebut",
+      "album_not_found": "Album tidak ditemukan",
+      "album_name_required": "Beri nama album",
+      "album_exists": "Album bernama '{name}' sudah ada di proyek ini",
+      "plan_room_unavailable": "Pin gambar memerlukan modul Plan Room",
+      "document_not_found": "Gambar tidak ditemukan di proyek ini",
+      "compare_same_photo": "Pilih dua foto yang berbeda untuk dibandingkan",
+      "compare_not_found": "Perbandingan tidak ditemukan",
+      "suggestion_not_found": "Saran tidak ditemukan",
+      "suggestion_reviewed": "Saran ini sudah ditinjau",
+      "suggestion_invalid": "Saran yang diedit tidak valid",
+      "bad_source": "Sumber foto tidak dikenal",
+      "bad_device": "Data pengambilan perangkat tidak dapat dibaca",
+      "target_incomplete": "Isi jenis rekaman dan ID rekaman",
+      "rate_limited": "Terlalu banyak permintaan, coba lagi dalam semenit",
+      "export_not_found": "Ekspor tidak ditemukan",
+      "export_not_ready": "Ekspor belum siap",
+      "gps_pair": "Isi lintang dan bujur bersamaan",
+      "bad_ai_kinds": "Pilih keterangan, tag, progres, atau bahaya",
+      "file_missing": "File foto tidak ada di penyimpanan"
+    },
+    "validation": {
+      "taken_at_missing": "Foto '{name}' tidak memiliki waktu pengambilan",
+      "taken_at_missing_fix": "Isi tanggal foto diambil, atau ambil ulang di aplikasi",
+      "taken_at_future": "Foto '{name}' bertanggal {taken_at}, yaitu di masa depan",
+      "taken_at_before_project": "Foto '{name}' bertanggal {taken_at}, lebih dari setahun sebelum proyek dimulai",
+      "taken_at_fix": "Perbaiki tanggal pengambilan atau periksa jam kamera",
+      "gps_inaccurate": "Lokasi '{name}' hanya akurat hingga {accuracy} m",
+      "gps_off_site": "Foto '{name}' diambil {distance_km} km dari lokasi proyek",
+      "gps_fix": "Periksa lokasi atau ambil ulang foto di lokasi proyek dengan layanan lokasi aktif",
+      "link_missing": "Foto '{name}' tertaut ke {kind} yang sudah tidak ada di proyek ini",
+      "link_missing_fix": "Hapus tautan atau tautkan foto ke rekaman yang benar",
+      "duplicate": "Foto '{name}' diarsipkan {count} kali lagi",
+      "duplicate_fix": "Simpan satu salinan dan tautkan di tempat yang diperlukan",
+      "evidence_weak": "Foto '{name}' memiliki tingkat bukti '{grade}'",
+      "evidence_weak_fix": "Ambil foto di aplikasi dengan layanan lokasi aktif",
+      "ai_unreviewed": "Saran {kind} dari AI menunggu tinjauan lebih dari {days} hari",
+      "ai_unreviewed_fix": "Terima atau tolak saran",
+      "hazard_open": "Bahaya yang diterima '{hazard}' belum punya observasi keselamatan",
+      "hazard_open_fix": "Catat observasi keselamatan dan tautkan foto ke sana",
+      "file_missing": "File foto '{name}' tidak ada di penyimpanan",
+      "file_missing_fix": "Unggah ulang foto atau pulihkan dari cadangan"
+    }
   }
 }

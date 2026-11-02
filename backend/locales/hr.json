@@ -2536,5 +2536,55 @@
         "cumulative": "Kumulativni položaj"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Fotografija nije pronađena",
+      "no_files": "Odaberite barem jednu fotografiju za prijenos",
+      "too_many_files": "Prenesite najviše {max} fotografija odjednom",
+      "target_not_found": "Zapis za povezivanje nije pronađen u ovom projektu",
+      "link_not_found": "Ova fotografija nije povezana s tim zapisom",
+      "album_not_found": "Album nije pronađen",
+      "album_name_required": "Dajte albumu naziv",
+      "album_exists": "Album naziva '{name}' već postoji u ovom projektu",
+      "plan_room_unavailable": "Pribadače na nacrtima zahtijevaju modul Plan Room",
+      "document_not_found": "Nacrt nije pronađen u ovom projektu",
+      "compare_same_photo": "Odaberite dvije različite fotografije za usporedbu",
+      "compare_not_found": "Usporedba nije pronađena",
+      "suggestion_not_found": "Prijedlog nije pronađen",
+      "suggestion_reviewed": "Ovaj je prijedlog već pregledan",
+      "suggestion_invalid": "Uređeni prijedlog nije valjan",
+      "bad_source": "Nepoznat izvor fotografije",
+      "bad_device": "Podaci o snimanju uređaja nisu se mogli pročitati",
+      "target_incomplete": "Unesite i vrstu zapisa i ID zapisa",
+      "rate_limited": "Previše zahtjeva, pokušajte ponovno za minutu",
+      "export_not_found": "Izvoz nije pronađen",
+      "export_not_ready": "Izvoz još nije spreman",
+      "gps_pair": "Unesite zemljopisnu širinu i dužinu zajedno",
+      "bad_ai_kinds": "Odaberite opis, oznake, napredak ili opasnost",
+      "file_missing": "Datoteka fotografije nije u pohrani"
+    },
+    "validation": {
+      "taken_at_missing": "Fotografija '{name}' nema vrijeme snimanja",
+      "taken_at_missing_fix": "Unesite datum snimanja fotografije ili je ponovno snimite u aplikaciji",
+      "taken_at_future": "Fotografija '{name}' datirana je {taken_at}, dakle u budućnosti",
+      "taken_at_before_project": "Fotografija '{name}' datirana je {taken_at}, više od godinu dana prije početka projekta",
+      "taken_at_fix": "Ispravite datum snimanja ili provjerite sat fotoaparata",
+      "gps_inaccurate": "Lokacija '{name}' točna je samo na {accuracy} m",
+      "gps_off_site": "Fotografija '{name}' snimljena je {distance_km} km od gradilišta",
+      "gps_fix": "Provjerite lokaciju ili ponovno snimite fotografiju na gradilištu s uključenom lokacijom",
+      "link_missing": "Fotografija '{name}' povezana je sa stavkom ({kind}) koja više ne postoji u ovom projektu",
+      "link_missing_fix": "Uklonite poveznicu ili povežite fotografiju s ispravnim zapisom",
+      "duplicate": "Fotografija '{name}' arhivirana je još {count} put(a)",
+      "duplicate_fix": "Zadržite jednu kopiju i povežite je gdje je potrebna",
+      "evidence_weak": "Fotografija '{name}' ima stupanj dokaza '{grade}'",
+      "evidence_weak_fix": "Snimite fotografiju u aplikaciji s uključenom lokacijom",
+      "ai_unreviewed": "AI prijedlog ({kind}) čeka pregled dulje od {days} dana",
+      "ai_unreviewed_fix": "Prihvatite ili odbijte prijedlog",
+      "hazard_open": "Prihvaćena opasnost '{hazard}' nema zapažanje o sigurnosti",
+      "hazard_open_fix": "Zabilježite zapažanje o sigurnosti i povežite fotografiju s njim",
+      "file_missing": "Datoteka fotografije '{name}' nedostaje u pohrani",
+      "file_missing_fix": "Ponovno prenesite fotografiju ili je vratite iz sigurnosne kopije"
+    }
   }
 }

@@ -2514,5 +2514,55 @@
         "cumulative": "累计头寸"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "未找到照片",
+      "no_files": "请至少选择一张要上传的照片",
+      "too_many_files": "一次最多上传 {max} 张照片",
+      "target_not_found": "在此项目中未找到要关联的记录",
+      "link_not_found": "这张照片未关联到该记录",
+      "album_not_found": "未找到相册",
+      "album_name_required": "请为相册命名",
+      "album_exists": "此项目中已有名为“{name}”的相册",
+      "plan_room_unavailable": "图纸标注需要 Plan Room 模块",
+      "document_not_found": "在此项目中未找到图纸",
+      "compare_same_photo": "请选择两张不同的照片进行对比",
+      "compare_not_found": "未找到对比",
+      "suggestion_not_found": "未找到建议",
+      "suggestion_reviewed": "此建议已审阅过",
+      "suggestion_invalid": "编辑后的建议无效",
+      "bad_source": "照片来源未知",
+      "bad_device": "无法读取设备的拍摄数据",
+      "target_incomplete": "请同时填写记录类型和记录 ID",
+      "rate_limited": "请求过多，请一分钟后重试",
+      "export_not_found": "未找到导出",
+      "export_not_ready": "导出尚未就绪",
+      "gps_pair": "请同时设置纬度和经度",
+      "bad_ai_kinds": "请选择说明、标签、进度或隐患",
+      "file_missing": "存储中没有该照片文件"
+    },
+    "validation": {
+      "taken_at_missing": "照片“{name}”没有拍摄时间",
+      "taken_at_missing_fix": "请填写拍摄日期，或在应用中重新拍摄",
+      "taken_at_future": "照片“{name}”的日期为 {taken_at}，晚于当前时间",
+      "taken_at_before_project": "照片“{name}”的日期为 {taken_at}，比项目开工早了一年多",
+      "taken_at_fix": "请更正拍摄日期，或检查相机时钟",
+      "gps_inaccurate": "“{name}”的定位精度仅为 {accuracy} 米",
+      "gps_off_site": "照片“{name}”拍摄于距工地 {distance_km} 公里处",
+      "gps_fix": "请核对位置，或开启定位后在工地重新拍摄",
+      "link_missing": "照片“{name}”关联的{kind}已不在此项目中",
+      "link_missing_fix": "请移除关联，或将照片关联到正确的记录",
+      "duplicate": "照片“{name}”另外还归档了 {count} 次",
+      "duplicate_fix": "保留一份副本，并关联到需要的地方",
+      "evidence_weak": "照片“{name}”的证据等级为“{grade}”",
+      "evidence_weak_fix": "请开启定位后在应用中拍摄",
+      "ai_unreviewed": "AI 的{kind}建议已等待审阅超过 {days} 天",
+      "ai_unreviewed_fix": "请接受或拒绝该建议",
+      "hazard_open": "已确认的隐患“{hazard}”没有安全巡查记录",
+      "hazard_open_fix": "请记录一条安全巡查并将照片关联到它",
+      "file_missing": "存储中缺少照片“{name}”的文件",
+      "file_missing_fix": "请重新上传照片，或从备份中恢复"
+    }
   }
 }

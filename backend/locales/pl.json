@@ -2513,5 +2513,55 @@
         "cumulative": "Saldo narastająco"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Nie znaleziono zdjęcia",
+      "no_files": "Wybierz co najmniej jedno zdjęcie do przesłania",
+      "too_many_files": "Przesyłaj najwyżej {max} zdjęć naraz",
+      "target_not_found": "Nie znaleziono w tym projekcie rekordu do powiązania",
+      "link_not_found": "To zdjęcie nie jest powiązane z tym rekordem",
+      "album_not_found": "Nie znaleziono albumu",
+      "album_name_required": "Nadaj albumowi nazwę",
+      "album_exists": "W tym projekcie istnieje już album o nazwie '{name}'",
+      "plan_room_unavailable": "Pinezki na rysunkach wymagają modułu Plan Room",
+      "document_not_found": "Nie znaleziono rysunku w tym projekcie",
+      "compare_same_photo": "Wybierz dwa różne zdjęcia do porównania",
+      "compare_not_found": "Nie znaleziono porównania",
+      "suggestion_not_found": "Nie znaleziono sugestii",
+      "suggestion_reviewed": "Ta sugestia została już sprawdzona",
+      "suggestion_invalid": "Edytowana sugestia jest nieprawidłowa",
+      "bad_source": "Nieznane źródło zdjęcia",
+      "bad_device": "Nie udało się odczytać danych z urządzenia",
+      "target_incomplete": "Podaj zarówno typ rekordu, jak i jego identyfikator",
+      "rate_limited": "Zbyt wiele żądań, spróbuj ponownie za minutę",
+      "export_not_found": "Nie znaleziono eksportu",
+      "export_not_ready": "Eksport nie jest jeszcze gotowy",
+      "gps_pair": "Podaj szerokość i długość geograficzną razem",
+      "bad_ai_kinds": "Wybierz opis, tagi, postęp lub zagrożenie",
+      "file_missing": "Pliku zdjęcia nie ma w magazynie"
+    },
+    "validation": {
+      "taken_at_missing": "Zdjęcie '{name}' nie ma czasu wykonania",
+      "taken_at_missing_fix": "Wpisz datę wykonania zdjęcia albo zrób je ponownie w aplikacji",
+      "taken_at_future": "Zdjęcie '{name}' ma datę {taken_at}, czyli z przyszłości",
+      "taken_at_before_project": "Zdjęcie '{name}' ma datę {taken_at}, ponad rok przed początkiem projektu",
+      "taken_at_fix": "Popraw datę wykonania lub sprawdź zegar aparatu",
+      "gps_inaccurate": "Lokalizacja '{name}' jest dokładna tylko do {accuracy} m",
+      "gps_off_site": "Zdjęcie '{name}' wykonano {distance_km} km od budowy",
+      "gps_fix": "Sprawdź lokalizację albo zrób zdjęcie ponownie na budowie z włączoną lokalizacją",
+      "link_missing": "Zdjęcie '{name}' jest powiązane z pozycją ({kind}), której nie ma już w tym projekcie",
+      "link_missing_fix": "Usuń powiązanie albo powiąż zdjęcie z właściwym rekordem",
+      "duplicate": "Zdjęcie '{name}' jest zarchiwizowane jeszcze {count} razy",
+      "duplicate_fix": "Zostaw jedną kopię i powiąż ją tam, gdzie jest potrzebna",
+      "evidence_weak": "Zdjęcie '{name}' ma stopień dowodowy '{grade}'",
+      "evidence_weak_fix": "Zrób zdjęcie w aplikacji z włączoną lokalizacją",
+      "ai_unreviewed": "Sugestia AI ({kind}) czeka na sprawdzenie dłużej niż {days} dni",
+      "ai_unreviewed_fix": "Zaakceptuj lub odrzuć sugestię",
+      "hazard_open": "Zaakceptowane zagrożenie '{hazard}' nie ma obserwacji BHP",
+      "hazard_open_fix": "Zapisz obserwację BHP i powiąż z nią zdjęcie",
+      "file_missing": "Pliku zdjęcia '{name}' brakuje w magazynie",
+      "file_missing_fix": "Prześlij zdjęcie ponownie lub przywróć je z kopii zapasowej"
+    }
   }
 }

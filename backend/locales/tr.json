@@ -2497,5 +2497,55 @@
         "cumulative": "Birikimli durum"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Fotoğraf bulunamadı",
+      "no_files": "Yüklemek için en az bir fotoğraf seçin",
+      "too_many_files": "Aynı anda en fazla {max} fotoğraf yükleyin",
+      "target_not_found": "Bağlanacak kayıt bu projede bulunamadı",
+      "link_not_found": "Bu fotoğraf o kayda bağlı değil",
+      "album_not_found": "Albüm bulunamadı",
+      "album_name_required": "Albüme bir ad verin",
+      "album_exists": "Bu projede '{name}' adlı bir albüm zaten var",
+      "plan_room_unavailable": "Çizim iğneleri için Plan Room modülü gerekir",
+      "document_not_found": "Çizim bu projede bulunamadı",
+      "compare_same_photo": "Karşılaştırmak için iki farklı fotoğraf seçin",
+      "compare_not_found": "Karşılaştırma bulunamadı",
+      "suggestion_not_found": "Öneri bulunamadı",
+      "suggestion_reviewed": "Bu öneri zaten incelendi",
+      "suggestion_invalid": "Düzenlenen öneri geçerli değil",
+      "bad_source": "Bilinmeyen fotoğraf kaynağı",
+      "bad_device": "Cihazın çekim verileri okunamadı",
+      "target_incomplete": "Kayıt türünü ve kayıt kimliğini birlikte girin",
+      "rate_limited": "Çok fazla istek, bir dakika sonra yeniden deneyin",
+      "export_not_found": "Dışa aktarım bulunamadı",
+      "export_not_ready": "Dışa aktarım henüz hazır değil",
+      "gps_pair": "Enlem ve boylamı birlikte girin",
+      "bad_ai_kinds": "Açıklama, etiket, ilerleme veya tehlike seçin",
+      "file_missing": "Fotoğraf dosyası depolamada yok"
+    },
+    "validation": {
+      "taken_at_missing": "'{name}' fotoğrafında çekim zamanı yok",
+      "taken_at_missing_fix": "Fotoğrafın çekildiği tarihi girin veya uygulamada yeniden çekin",
+      "taken_at_future": "'{name}' fotoğrafının tarihi {taken_at}, yani gelecekte",
+      "taken_at_before_project": "'{name}' fotoğrafının tarihi {taken_at}, proje başlangıcından bir yıldan fazla önce",
+      "taken_at_fix": "Çekim tarihini düzeltin veya kameranın saatini kontrol edin",
+      "gps_inaccurate": "'{name}' konumu yalnızca {accuracy} m doğrulukta",
+      "gps_off_site": "'{name}' fotoğrafı şantiyeden {distance_km} km uzakta çekilmiş",
+      "gps_fix": "Konumu kontrol edin veya konum açıkken şantiyede yeniden çekin",
+      "link_missing": "'{name}' fotoğrafı bu projede artık bulunmayan bir {kind} kaydına bağlı",
+      "link_missing_fix": "Bağlantıyı kaldırın veya fotoğrafı doğru kayda bağlayın",
+      "duplicate": "'{name}' fotoğrafı {count} kez daha arşivlenmiş",
+      "duplicate_fix": "Bir kopyayı saklayın ve gerekli yere bağlayın",
+      "evidence_weak": "'{name}' fotoğrafının kanıt derecesi '{grade}'",
+      "evidence_weak_fix": "Fotoğrafı konum açıkken uygulamada çekin",
+      "ai_unreviewed": "Bir yapay zekâ önerisi ({kind}) {days} günden uzun süredir incelenmeyi bekliyor",
+      "ai_unreviewed_fix": "Öneriyi kabul edin veya reddedin",
+      "hazard_open": "Kabul edilen '{hazard}' tehlikesinin iş güvenliği gözlemi yok",
+      "hazard_open_fix": "Bir iş güvenliği gözlemi kaydedin ve fotoğrafı ona bağlayın",
+      "file_missing": "'{name}' fotoğrafının dosyası depolamada yok",
+      "file_missing_fix": "Fotoğrafı yeniden yükleyin veya yedekten geri getirin"
+    }
   }
 }
