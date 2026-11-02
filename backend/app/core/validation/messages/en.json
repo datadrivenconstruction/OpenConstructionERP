@@ -1388,6 +1388,10 @@
     "manual_ref_without_revision": {
       "fail": "Position {ordinal}: drawing {drawing} is entered without a revision",
       "suggestion": "Add the revision of the drawing the quantity was priced from"
+    },
+    "carried_unconfirmed": {
+      "fail": "Position {ordinal}: {count} measurement(s) were carried over from an earlier drawing revision and are not confirmed yet",
+      "suggestion": "Check each carried measurement on the new revision and confirm it, or re-measure it"
     }
   },
   "offline_sync": {
@@ -1451,6 +1455,12 @@
     "forecast_missing": {
       "fail": "{project} is active but has no contract, invoice, order, subcontract or plan to forecast cash from.",
       "suggestion": "Enter the client contract with its payment plan, or a planned cash flow in the cost model."
+    }
+  },
+  "boq_risk": {
+    "contingency_stale": {
+      "fail": "Contingency line \"{markup}\" was applied at P{percentile} on {applied_at}, but the line totals the risk run sampled have changed since",
+      "suggestion": "Re-run the cost risk analysis and apply the contingency again, or keep the line and note why"
     }
   }
 }

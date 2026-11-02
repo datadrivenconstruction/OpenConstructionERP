@@ -12,6 +12,7 @@ import {
 } from './api';
 import { fmtPercent, fmtFixed } from '@/shared/lib/formatters';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { RiskContingencyApply } from './RiskContingencyApply';
 
 /* ── Helpers ─────────────────────────────────────────────────────────── */
 
@@ -613,6 +614,9 @@ export function CostRiskPanel({ boqId, locale = 'de-DE' }: { boqId: string; loca
                 fmt={fmt}
                 t={t}
               />
+
+              {/* ── Apply as contingency (estimator confirms) ───────── */}
+              <RiskContingencyApply boqId={boqId} correlation={correlation} fmt={fmt} />
 
               {/* ── Distribution + S-curve ───────────────────────────── */}
               {data.histogram.length > 0 && (

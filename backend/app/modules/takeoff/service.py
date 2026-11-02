@@ -3495,6 +3495,18 @@ class TakeoffService:
                 }
             )
 
+        # Carry-over state per row, and the per-position quantity delta an estimator reads first.
+        from app.modules.takeoff.carry_over import NEEDS_REVIEW, carry_status, position_deltas  # noqa: PLC0415
+
+        by_id = {str(m.id): m for m in (*from_measurements, *to_measurements)}
+        for row in rows:
+            m = by_id.get(row["measurement_id"])
+            row["carry_status"], row["scale_check"] = carry_status(m) if m is not None else (None, None)
+            row["is_deduction"] = bool(getattr(m, "is_deduction", False))
+            row["review_status"] = getattr(m, "review_status", None) or "confirmed"
+        position_ids = {row["linked_boq_position_id"] for row in rows if row.get("linked_boq_position_id")}
+        position_info = await self._positions_for_compare(position_ids)
+
         def _tally(diff_rows: list[dict[str, Any]]) -> dict[str, int]:
             tally = {"added": 0, "removed": 0, "modified": 0, "unchanged": 0}
             for row in diff_rows:
@@ -3527,6 +3539,8 @@ class TakeoffService:
             "truncated": truncated,
             "truncation_limit": MAX_COMPARE_MEASUREMENTS if truncated else None,
             "collapsed_duplicate_keys": collapsed,
+            "carried_needs_review": sum(1 for row in rows if row.get("carry_status") == NEEDS_REVIEW),
+            "position_deltas": position_deltas(rows, position_info),
         }
 
         return {
@@ -3535,6 +3549,30 @@ class TakeoffService:
             "to_document_id": to_document_id,
             "measurement_rows": rows,
             "summary": summary,
+        }
+
+    async def _positions_for_compare(self, position_ids: set[str]) -> dict[str, dict[str, Any]]:
+        """Ordinal, description, unit and current quantity of the BOQ positions a compare touches."""
+        from sqlalchemy import select  # noqa: PLC0415
+
+        from app.modules.boq.models import Position  # noqa: PLC0415 - avoid import cycle
+
+        ids: list[uuid.UUID] = []
+        for raw in position_ids:
+            try:
+                ids.append(uuid.UUID(str(raw)))
+            except ValueError:
+                continue
+        if not ids:
+            return {}
+        rows = await self.session.execute(
+            select(Position.id, Position.ordinal, Position.description, Position.unit, Position.quantity).where(
+                Position.id.in_(ids)
+            )
+        )
+        return {
+            str(pid): {"ordinal": ordinal, "description": description, "unit": unit, "quantity": str(quantity)}
+            for pid, ordinal, description, unit, quantity in rows.all()
         }
 
     async def _resolve_position_rate(

@@ -1630,6 +1630,61 @@ export interface CostRiskCdfPoint {
   cumulative_prob: number;
 }
 
+export interface RiskContingencySuggestion {
+  percentile: number;
+  /* Money as Decimal-as-strings (v3 §10). */
+  amount: string;
+  pct_of_base: number;
+  base_total: string;
+  budget: string;
+  below_base: boolean;
+  iterations: number;
+  seed: number;
+  optimistic_pct: number;
+  pessimistic_pct: number;
+  correlation: number;
+  convergence_status: string;
+  convergence_margin_pct: number;
+  prob_within_base: number;
+  confidence: number;
+  fingerprint: string;
+}
+
+export interface AppliedRiskContingency {
+  markup_id: string;
+  name: string;
+  is_active: boolean;
+  line_amount: string;
+  percentile: number;
+  amount: string;
+  pct_of_base: number | null;
+  seed: number | null;
+  iterations: number | null;
+  correlation: number | null;
+  convergence_status: string | null;
+  applied_at: string | null;
+  applied_by: string | null;
+  applied_by_email: string | null;
+  can_undo_to_previous: boolean;
+}
+
+export interface RiskContingencyStatus {
+  suggestion: RiskContingencySuggestion | null;
+  applied: AppliedRiskContingency | null;
+  stale: boolean;
+  drift_amount: string | null;
+  drift_pct: number | null;
+  current_fingerprint: string | null;
+}
+
+export interface ApplyRiskContingencyBody {
+  percentile: number;
+  correlation: number;
+  iterations?: number;
+  expected_amount?: string;
+  name?: string;
+}
+
 export interface CostRiskResponse {
   iterations: number;
   /* Money fields arrive as Decimal-as-strings on the wire (v3 §10). */
@@ -2225,6 +2280,19 @@ export const boqApi = {
     const qs = correlation == null ? '' : `?correlation=${correlation}`;
     return apiGet<CostRiskResponse>(`/v1/boq/boqs/${boqId}/cost-risk/${qs}`);
   },
+
+  /* Risk contingency: preview at a percentile, apply (server recomputes), undo. */
+  getRiskContingency: (boqId: string, percentile?: number, correlation?: number) => {
+    const qs = new URLSearchParams();
+    if (percentile != null) qs.set('percentile', String(percentile));
+    if (correlation != null) qs.set('correlation', String(correlation));
+    const q = qs.toString();
+    return apiGet<RiskContingencyStatus>(`/v1/boq/boqs/${boqId}/cost-risk/contingency/${q ? `?${q}` : ''}`);
+  },
+  applyRiskContingency: (boqId: string, body: ApplyRiskContingencyBody) =>
+    apiPost<RiskContingencyStatus, ApplyRiskContingencyBody>(`/v1/boq/boqs/${boqId}/cost-risk/contingency/`, body),
+  undoRiskContingency: (boqId: string) =>
+    apiDelete<RiskContingencyStatus>(`/v1/boq/boqs/${boqId}/cost-risk/contingency/`),
 
   /* Statistics — aggregated BOQ metrics.
    * Money fields (direct_cost / grand_total / avg_unit_rate) follow the
