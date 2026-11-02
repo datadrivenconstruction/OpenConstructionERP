@@ -211,6 +211,9 @@ class EInvoiceProfile(Base):
 
     sandbox: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    # Transport mode: export (file only), sandbox or live; empty is a registration
+    # made before modes existed and keeps its adapter behaviour. Live is never a default.
+    mode: Mapped[str] = mapped_column(String(8), nullable=False, default="", server_default="")
 
     # Adapter-specific configuration that is not a credential: endpoint names,
     # a provider's account reference, a series prefix.
@@ -319,6 +322,16 @@ class EInvoiceDocument(Base):
     # Which adapter actually handled it, copied off the profile at submission so
     # a later reconfiguration cannot rewrite history.
     adapter_key: Mapped[str] = mapped_column(String(64), nullable=False, default="", server_default="")
+
+    # standard | simplified | consolidated. Picks which lifecycle rules of the
+    # country's mandate file apply (e.g. a reporting deadline for simplified).
+    document_kind: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="standard", server_default="standard"
+    )
+    # Hash of the previous document in the profile's chain, where the country chains.
+    previous_hash: Mapped[str] = mapped_column(String(128), nullable=False, default="", server_default="")
+    # ``YYYY-MM`` for a consolidated document; empty otherwise.
+    period: Mapped[str] = mapped_column(String(7), nullable=False, default="", server_default="")
 
     def __repr__(self) -> str:
         return (

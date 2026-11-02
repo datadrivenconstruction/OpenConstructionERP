@@ -1,0 +1,25 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "IT",
+  "markets": [
+    "IT"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "FatturaPA via SdI",
+    "label": "Italy - FatturaPA delivered through the Sistema di Interscambio",
+    "identifier_label": "numero di protocollo",
+    "document_format": "fatturapa_1_2_2",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "document_fields": [
+      "partita_iva_issuer",
+      "codice_destinatario",
+      "tipo_documento"
+    ],
+    "cancellation_window_days": null,
+    "correction_mechanism": "nota di credito (credit note) through SdI",
+    "notes": "A rejected document may be corrected and resent within five days keeping its original date."
+  }
+}

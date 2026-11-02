@@ -1,0 +1,337 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "SA",
+  "markets": [
+    "SA"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "ZATCA phase 2 (Fatoora)",
+    "label": "Saudi Arabia - ZATCA phase 2 integration",
+    "identifier_label": "cryptographic stamp and QR",
+    "document_format": "zatca_phase2",
+    "profile_fields": [
+      "tax_registration_id",
+      "certificate_reference"
+    ],
+    "cancellation_window_days": null,
+    "correction_mechanism": "credit note (381) or debit note (383) through the same integration",
+    "additional_regimes": [
+      "reporting"
+    ],
+    "scope": "Phase 1 applies to every resident VAT taxpayer. Phase 2 has reached taxpayers through wave 24 (revenue above SAR 375,000); wave 25 (above SAR 187,500 in any of 2022 to 2025) integrates by 2027-02-01.",
+    "commencement": [
+      {
+        "obligation": "issue",
+        "effective_date": "2021-12-04",
+        "scope": "Phase 1 (generation): every resident VAT taxpayer issues invoices from a compliant e-invoicing solution",
+        "legal_status": "in_force",
+        "source_url": "https://zatca.gov.sa/en/E-Invoicing/Introduction/LawsAndRegulations/Documents/E-invoicing-Regulations.pdf",
+        "read_date": "2026-10-19",
+        "notes": "QR code mandatory on simplified invoices from this date; integration with Fatoora came in waves."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2023-06-30",
+        "scope": "Phase 2 (integration) wave 1: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 3,000,000,000 in 2021",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 3,000,000,000 VAT-subject revenue in 2021",
+        "notes": "Integration window 2023-01-01 to 2023-06-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2023-12-31",
+        "scope": "Phase 2 (integration) wave 2: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 500,000,000 in 2021",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 500,000,000 VAT-subject revenue in 2021",
+        "notes": "Integration window 2023-07-01 to 2023-12-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-01-31",
+        "scope": "Phase 2 (integration) wave 3: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 250,000,000 in 2021 or 2022",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 250,000,000 VAT-subject revenue in 2021 or 2022",
+        "notes": "Integration window 2023-10-01 to 2024-01-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-02-29",
+        "scope": "Phase 2 (integration) wave 4: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 150,000,000 in 2021 or 2022",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 150,000,000 VAT-subject revenue in 2021 or 2022",
+        "notes": "Integration window 2023-11-01 to 2024-02-29. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-03-31",
+        "scope": "Phase 2 (integration) wave 5: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 100,000,000 in 2021 or 2022",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 100,000,000 VAT-subject revenue in 2021 or 2022",
+        "notes": "Integration window 2023-12-01 to 2024-03-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-04-30",
+        "scope": "Phase 2 (integration) wave 6: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 70,000,000 in 2021 or 2022",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 70,000,000 VAT-subject revenue in 2021 or 2022",
+        "notes": "Integration window 2024-01-01 to 2024-04-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-05-31",
+        "scope": "Phase 2 (integration) wave 7: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 50,000,000 in 2021 or 2022",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 50,000,000 VAT-subject revenue in 2021 or 2022",
+        "notes": "Integration window 2024-02-01 to 2024-05-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-06-30",
+        "scope": "Phase 2 (integration) wave 8: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 40,000,000 in 2021 or 2022",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 40,000,000 VAT-subject revenue in 2021 or 2022",
+        "notes": "Integration window 2024-03-01 to 2024-06-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-09-30",
+        "scope": "Phase 2 (integration) wave 9: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 30,000,000 in 2021 or 2022",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 30,000,000 VAT-subject revenue in 2021 or 2022",
+        "notes": "Integration window 2024-06-01 to 2024-09-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2024-12-31",
+        "scope": "Phase 2 (integration) wave 10: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 25,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 25,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2024-10-01 to 2024-12-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-01-31",
+        "scope": "Phase 2 (integration) wave 11: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 15,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 15,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2024-11-01 to 2025-01-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-02-28",
+        "scope": "Phase 2 (integration) wave 12: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 10,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 10,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2024-12-01 to 2025-02-28. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-03-31",
+        "scope": "Phase 2 (integration) wave 13: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 7,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 7,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-01-01 to 2025-03-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-04-30",
+        "scope": "Phase 2 (integration) wave 14: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 5,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 5,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-02-01 to 2025-04-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-05-31",
+        "scope": "Phase 2 (integration) wave 15: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 4,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 4,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-03-01 to 2025-05-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-06-30",
+        "scope": "Phase 2 (integration) wave 16: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 3,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 3,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-04-01 to 2025-06-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-07-31",
+        "scope": "Phase 2 (integration) wave 17: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 2,500,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 2,500,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-05-01 to 2025-07-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-08-31",
+        "scope": "Phase 2 (integration) wave 18: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 2,000,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 2,000,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-06-01 to 2025-08-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-09-30",
+        "scope": "Phase 2 (integration) wave 19: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 1,750,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 1,750,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-07-01 to 2025-09-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-10-31",
+        "scope": "Phase 2 (integration) wave 20: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 1,500,000 in 2022 or 2023",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 1,500,000 VAT-subject revenue in 2022 or 2023",
+        "notes": "Integration window 2025-08-01 to 2025-10-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-11-30",
+        "scope": "Phase 2 (integration) wave 21: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 1,250,000 in 2022, 2023 or 2024",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 1,250,000 VAT-subject revenue in 2022, 2023 or 2024",
+        "notes": "Integration window 2025-09-01 to 2025-11-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-12-31",
+        "scope": "Phase 2 (integration) wave 22: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 1,000,000 in 2022, 2023 or 2024",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 1,000,000 VAT-subject revenue in 2022, 2023 or 2024",
+        "notes": "Integration window 2025-10-01 to 2025-12-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2026-03-31",
+        "scope": "Phase 2 (integration) wave 23: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 750,000 in 2022, 2023 or 2024",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 750,000 VAT-subject revenue in 2022, 2023 or 2024",
+        "notes": "Integration window 2026-01-01 to 2026-03-31. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2026-06-30",
+        "scope": "Phase 2 (integration) wave 24: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 375,000 in 2022, 2023 or 2024",
+        "legal_status": "in_force",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 375,000 VAT-subject revenue in 2022, 2023 or 2024",
+        "notes": "Integration window 2026-04-01 to 2026-06-30. As reproduced by EY from ZATCA's announcements; needs expert review against ZATCA's own list."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2027-02-01",
+        "scope": "Phase 2 (integration) wave 25: clearance of standard and reporting of simplified invoices through Fatoora, for VAT-subject revenue above SAR 187,500 in 2022, 2023, 2024 or 2025",
+        "legal_status": "enacted",
+        "source_url": "https://taxnews.ey.com/news/2026-1705-saudi-arabia-announces-25th-wave-of-phase-2-e-invoicing-integration",
+        "read_date": "2026-10-19",
+        "threshold": "SAR 187,500 VAT-subject revenue in 2022, 2023, 2024 or 2025",
+        "notes": "Integration deadline 2027-02-01. Also reported by KPMG (2026-07). Whether further waves follow is not announced: needs expert review."
+      }
+    ],
+    "notes": "Standard tax invoices (KSA-2 01xxxxx, B2B and B2G) are cleared before they reach the buyer; simplified invoices (02xxxxx, B2C) are stamped by the seller and reported within 24 hours. Which act a document goes through is read from its own subtype."
+  },
+  "lifecycle": {
+    "document_kinds": [
+      "standard",
+      "simplified"
+    ],
+    "deadlines": [
+      {
+        "id": "report_simplified",
+        "action": "submit",
+        "applies_to": [
+          "simplified"
+        ],
+        "within_hours": 24,
+        "from": "issued",
+        "warn": true,
+        "source_url": "https://zatca.gov.sa/en/E-Invoicing/Introduction/Guidelines/Documents/E-Invoicing_Detailed__Guideline.pdf",
+        "read_on": "2026-11-02",
+        "notes": "Simplified invoices are reported within 24 hours of issuance; standard invoices are cleared before they are shared with the buyer."
+      }
+    ],
+    "hash_chain": {
+      "algorithm": "sha256",
+      "encoding": "base64",
+      "rule_id": "EINV-SA-001",
+      "applies_to": [
+        "standard",
+        "simplified"
+      ],
+      "genesis": "NWZlY2ViNjZmZmM4NmYzOGQ5NTI3ODZjNmQ2OTZjNzljMmRiYzIzOWRkNGU5MWI0NjcyOWQ3M2EyN2ZiNTdlOQ==",
+      "source_url": "https://zatca.gov.sa/en/E-Invoicing/Introduction/Guidelines/Documents/E-Invoicing_Detailed__Guideline.pdf",
+      "read_on": "2026-11-02"
+    },
+    "qr": {
+      "format": "tlv_base64",
+      "tags": {
+        "1": "seller_name",
+        "2": "vat_number",
+        "3": "timestamp",
+        "4": "total_with_vat",
+        "5": "vat_total",
+        "6": "invoice_hash"
+      },
+      "source_url": "https://zatca.gov.sa/en/E-Invoicing/Introduction/Guidelines/Documents/E-Invoicing_Detailed__Guideline.pdf",
+      "read_on": "2026-11-02",
+      "notes": "Tags 7 to 9 (ECDSA signature and keys) are written by the signing step with the tenant's CSID."
+    },
+    "submit_terminal": {
+      "simplified": "reported",
+      "standard": "cleared"
+    }
+  }
+}

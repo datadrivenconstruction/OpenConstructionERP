@@ -1,0 +1,24 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "RO",
+  "markets": [
+    "RO"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "e-Factura",
+    "label": "Romania - e-Factura through the national portal",
+    "identifier_label": "index incarcare (upload index)",
+    "document_format": "efactura_ro_cius",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "document_fields": [
+      "cui_issuer",
+      "cui_buyer"
+    ],
+    "cancellation_window_days": null,
+    "correction_mechanism": "storno invoice through the portal",
+    "notes": "RO_CIUS is a national specification of EN 16931 in UBL syntax. The platform's UBL writer produces the base document; the national restrictions on top of it are not implemented here, so the payload is taken from the caller."
+  }
+}

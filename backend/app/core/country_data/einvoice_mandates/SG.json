@@ -1,0 +1,19 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "SG",
+  "markets": [
+    "SG"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "Peppol SG",
+    "label": "Singapore - Peppol SG Billing 3.0",
+    "identifier_label": "transmission id",
+    "document_format": "peppol_sg_3_0",
+    "en16931_profile": "peppol_sg",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "cancellation_window_days": null
+  }
+}

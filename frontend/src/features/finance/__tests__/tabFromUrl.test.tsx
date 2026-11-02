@@ -34,6 +34,12 @@ vi.mock('@/shared/hooks/useActiveProjectId', () => ({
   useActiveProjectId: () => '',
 }));
 
+// A tenant with an e-invoicing market sees every tab the list declares.
+vi.mock('@/features/einvoice-clearance/useEInvoiceMarkets', () => ({
+  EINVOICE_SETUP_QUERY_KEY: ['einvoice-clearance', 'setup'],
+  useEInvoiceMarkets: () => ({ enabled: true, rows: [], isVisibleFor: () => true }),
+}));
+
 vi.mock('@/features/insights', () => ({
   InsightsPanel: () => null,
   InsightsToggleButton: () => null,

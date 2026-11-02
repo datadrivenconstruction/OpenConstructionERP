@@ -26,6 +26,7 @@
  *
  * Self-contained; FinancePage only opens it.
  */
+import { EInvoiceCard } from '@/features/einvoice-clearance/EInvoiceCard';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -72,6 +73,8 @@ export interface EInvoiceModalProps {
    * (UBL-TR only). The caller passes what it already has loaded.
    */
   returnCandidates?: EInvoiceReturnCandidate[];
+  /** When set, the clearance card (status, deadline, next action) shows on top. */
+  projectId?: string;
 }
 
 /** The profile checked when the registry names none for the seller's country. */
@@ -92,6 +95,7 @@ export function EInvoiceModal({
   invoiceId,
   invoiceNumber,
   returnCandidates = NO_CANDIDATES,
+  projectId,
 }: EInvoiceModalProps) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
@@ -400,6 +404,7 @@ export function EInvoiceModal({
         </div>
       }
     >
+      {projectId && <EInvoiceCard projectId={projectId} invoiceId={invoiceId} />}
       <WideModalSection title={t('finance.einvoice.formatSection')}>
         <p className="mb-3 text-xs text-content-tertiary">{t('finance.einvoice.formatHint')}</p>
         <WideModalField label={t('finance.einvoice.profile')}>

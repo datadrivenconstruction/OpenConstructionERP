@@ -119,6 +119,20 @@ async def list_documents(
     return list((await session.execute(stmt)).scalars().all())
 
 
+async def last_chained_document(
+    session: AsyncSession, *, profile_id: uuid.UUID, exclude_id: uuid.UUID | None = None
+) -> EInvoiceDocument | None:
+    """The newest document of a profile that already carries its own invoice hash."""
+    stmt = select(EInvoiceDocument).where(EInvoiceDocument.profile_id == profile_id)
+    if exclude_id is not None:
+        stmt = stmt.where(EInvoiceDocument.id != exclude_id)
+    stmt = stmt.order_by(EInvoiceDocument.created_at.desc()).limit(50)
+    for row in (await session.execute(stmt)).scalars():
+        if (row.country_fields or {}).get("invoice_hash"):
+            return row
+    return None
+
+
 async def get_document(session: AsyncSession, document_id: uuid.UUID) -> EInvoiceDocument | None:
     """One document by id."""
     return (

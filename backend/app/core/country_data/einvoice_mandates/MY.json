@@ -1,0 +1,92 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "MY",
+  "markets": [
+    "MY"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "MyInvois",
+    "label": "Malaysia - MyInvois validation by IRBM",
+    "identifier_label": "UUID (IRBM validation)",
+    "document_format": "myinvois_ubl_2_1",
+    "profile_fields": [
+      "tax_registration_id"
+    ],
+    "document_fields": [
+      "tin_issuer",
+      "brn_issuer"
+    ],
+    "cancellation_window_days": 3,
+    "correction_mechanism": "credit note, debit note or refund note e-Invoice",
+    "scope": "Phased by annual turnover from 2024-08-01; taxpayers up to RM5 million from 2026-01-01, with interim relaxation to 2027-12-31.",
+    "commencement": [
+      {
+        "obligation": "issue",
+        "effective_date": "2024-08-01",
+        "scope": "Annual turnover or revenue above RM100 million",
+        "legal_status": "in_force",
+        "source_url": "https://www.hasil.gov.my/wp-content/uploads/IRBM-e-Invoice-Guideline.pdf",
+        "read_date": "2026-11-02"
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-01-01",
+        "scope": "Annual turnover or revenue above RM25 million up to RM100 million",
+        "legal_status": "in_force",
+        "source_url": "https://www.hasil.gov.my/wp-content/uploads/IRBM-e-Invoice-Guideline.pdf",
+        "read_date": "2026-11-02"
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2025-07-01",
+        "scope": "Annual turnover or revenue above RM5 million up to RM25 million",
+        "legal_status": "in_force",
+        "source_url": "https://www.hasil.gov.my/wp-content/uploads/IRBM-e-Invoice-Guideline.pdf",
+        "read_date": "2026-11-02"
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2026-01-01",
+        "scope": "Annual turnover or revenue up to RM5 million",
+        "legal_status": "in_force",
+        "source_url": "https://www.hasil.gov.my/wp-content/uploads/IRBM-e-Invoice-Guideline.pdf",
+        "read_date": "2026-11-02"
+      }
+    ],
+    "notes": "IRBM validates each e-Invoice and returns a UUID before it is shared with the buyer. B2C sales without a buyer request may be grouped into one consolidated e-Invoice per month. Construction contractors under the Income Tax (Construction Contracts) Regulations 2007 may not consolidate (Specific Guideline section 3.7)."
+  },
+  "lifecycle": {
+    "cancel": {
+      "within_hours": 72,
+      "from": "validated",
+      "source_url": "https://www.hasil.gov.my/wp-content/uploads/IRBM-e-Invoice-Guideline.pdf",
+      "read_on": "2026-11-02",
+      "notes": "Guideline v4.8 section 2.3.6: the supplier may cancel within 72 hours from the time of validation."
+    },
+    "consolidation": {
+      "period": "month",
+      "due_days_after_period": 7,
+      "buyer_name": "General Public",
+      "buyer_tin": "EI00000000010",
+      "allowed_buyer_types": [
+        "consumer"
+      ],
+      "due_rule_id": "EINV-MY-001",
+      "single_transaction_cap": "10000",
+      "cap_rule_id": "EINV-MY-002",
+      "cap_effective_from": "2026-01-01",
+      "cap_relief": {
+        "setting": "annual_turnover",
+        "lte": "5000000",
+        "until": "2027-12-31"
+      },
+      "excluded_activities": [
+        "construction_contract"
+      ],
+      "source_url": "https://www.hasil.gov.my/wp-content/uploads/IRBM-e-Invoice-Specific-Guideline.pdf",
+      "read_on": "2026-11-02",
+      "notes": "Specific Guideline v4.9 sections 3.6.2 (seven calendar days after month end), 3.7.2 item 7 (single transaction above RM10,000 from 2026-01-01) and table 16.1 (relaxation to 2027-12-31 for turnover up to RM5 million)."
+    }
+  }
+}

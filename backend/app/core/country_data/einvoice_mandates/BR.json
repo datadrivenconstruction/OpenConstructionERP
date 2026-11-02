@@ -1,0 +1,26 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "BR",
+  "markets": [
+    "BR"
+  ],
+  "regime": {
+    "regime": "clearance",
+    "platform": "NF-e via SEFAZ",
+    "label": "Brazil - NF-e authorised by the state SEFAZ",
+    "identifier_label": "chave de acesso (44 digits)",
+    "document_format": "nfe_4_0",
+    "profile_fields": [
+      "tax_registration_id",
+      "certificate_reference"
+    ],
+    "document_fields": [
+      "cnpj_issuer",
+      "cfop",
+      "ncm"
+    ],
+    "cancellation_window_days": 1,
+    "correction_mechanism": "cancellation inside the SEFAZ window, otherwise a carta de correcao",
+    "notes": "Authorisation is per state. The chave de acesso encodes the state, the issuer and the document."
+  }
+}

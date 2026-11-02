@@ -52,17 +52,22 @@ from app.modules.einvoice_clearance.schemas import (
     AdapterResponse,
     CancelRequest,
     ClearanceFinding,
+    ConsolidatedPreviewRequest,
+    ConsolidatedPreviewResponse,
     CountryRegimeResponse,
     DocumentCreateRequest,
     DocumentResponse,
     DocumentSaveResponse,
     DocumentUpdateRequest,
     EventResponse,
+    LifecycleResponse,
     MetaResponse,
+    OverviewRow,
     ProfileCreateRequest,
     ProfileResponse,
     ProfileUpdateRequest,
     ResolveRequest,
+    SetupRow,
     SubmissionResponse,
     SubmitRequest,
 )
@@ -219,6 +224,7 @@ async def create_registration(
         certificate_reference=payload.certificate_reference,
         adapter_key=payload.adapter_key,
         sandbox=payload.sandbox,
+        mode=payload.mode,
         is_active=payload.is_active,
         settings=dict(payload.settings or {}),
         notes=payload.notes,
@@ -286,6 +292,7 @@ async def replace_registration(
     profile.certificate_reference = payload.certificate_reference
     profile.adapter_key = payload.adapter_key
     profile.sandbox = payload.sandbox
+    profile.mode = payload.mode
     profile.is_active = payload.is_active
     profile.settings = dict(payload.settings or {})
     profile.notes = payload.notes
@@ -376,6 +383,21 @@ async def create_clearance_document(
         document=DocumentResponse.model_validate(document),
         findings=_to_findings(findings),
     )
+
+
+@router.get(
+    "/documents/overview",
+    response_model=list[OverviewRow],
+    dependencies=[Depends(RequirePermission("einvoice_clearance.read"))],
+)
+async def documents_overview(
+    session: SessionDep,
+    user_id: CurrentUserId,
+    project_id: uuid.UUID = Query(...),
+) -> list[OverviewRow]:
+    """Outbound e-invoices of a project, nearest deadline first."""
+    await verify_project_access(project_id, user_id, session)
+    return [OverviewRow(**row) for row in await service.documents_overview(session, project_id=project_id)]
 
 
 @router.get(
@@ -629,3 +651,84 @@ async def cancel_clearance_document(
         findings=_to_findings(findings),
         pending=outcome.pending,
     )
+
+
+# ── Lifecycle, setup, consolidated ───────────────────────────────────────────
+
+
+@router.get(
+    "/setup/",
+    response_model=list[SetupRow],
+    dependencies=[Depends(RequirePermission("einvoice_clearance.read"))],
+)
+async def einvoice_setup(session: SessionDep) -> list[SetupRow]:
+    """E-invoicing markets with an active registration. Empty means the UI shows nothing."""
+    return [SetupRow(**row) for row in await service.setup_rows(session)]
+
+
+@router.get(
+    "/documents/{document_id}/lifecycle",
+    response_model=LifecycleResponse,
+    dependencies=[Depends(RequirePermission("einvoice_clearance.read"))],
+)
+async def read_document_lifecycle(
+    document_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> LifecycleResponse:
+    """Status, deadlines, allowed actions and findings for the invoice card."""
+    document, profile = await _load_document(session, document_id, user_id)
+    return LifecycleResponse(**service.lifecycle_view(document, profile))
+
+
+async def _consolidation_profile(
+    session: SessionDep, payload: ConsolidatedPreviewRequest, user_id: str
+) -> EInvoiceProfile:
+    await verify_project_access(payload.project_id, user_id, session)
+    profile = await repository.get_profile(session, payload.profile_id)
+    if profile is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Registration not found")
+    return profile
+
+
+@router.post(
+    "/consolidated/preview",
+    response_model=ConsolidatedPreviewResponse,
+    dependencies=[Depends(RequirePermission("einvoice_clearance.read"))],
+)
+async def preview_consolidated(
+    payload: ConsolidatedPreviewRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> ConsolidatedPreviewResponse:
+    """Receipts of the period that would be consolidated, and those excluded with a reason."""
+    profile = await _consolidation_profile(session, payload, user_id)
+    try:
+        plan = await service.consolidated_preview(
+            session, profile=profile, project_id=payload.project_id, period=payload.period
+        )
+    except service.ClearanceError as exc:
+        raise _refuse(exc) from exc
+    return ConsolidatedPreviewResponse(**plan)
+
+
+@router.post(
+    "/consolidated/",
+    response_model=DocumentSaveResponse,
+    status_code=status.HTTP_201_CREATED,
+    dependencies=[Depends(RequirePermission("einvoice_clearance.write"))],
+)
+async def create_consolidated(
+    payload: ConsolidatedPreviewRequest,
+    session: SessionDep,
+    user_id: CurrentUserId,
+) -> DocumentSaveResponse:
+    """Create one consolidated e-invoice for the period. A person submits it afterwards."""
+    profile = await _consolidation_profile(session, payload, user_id)
+    try:
+        document, findings = await service.create_consolidated(
+            session, profile=profile, project_id=payload.project_id, period=payload.period, actor_id=_actor(user_id)
+        )
+    except service.ClearanceError as exc:
+        raise _refuse(exc) from exc
+    return DocumentSaveResponse(document=DocumentResponse.model_validate(document), findings=_to_findings(findings))

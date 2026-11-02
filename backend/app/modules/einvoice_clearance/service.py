@@ -305,6 +305,7 @@ def profile_as_dict(profile: EInvoiceProfile) -> dict[str, Any]:
         "certificate_reference": profile.certificate_reference,
         "adapter_key": profile.adapter_key,
         "sandbox": bool(profile.sandbox),
+        "mode": profile.mode or "",
         "is_active": bool(profile.is_active),
         "settings": dict(profile.settings or {}),
     }
@@ -335,6 +336,9 @@ def document_as_dict(document: EInvoiceDocument, **overrides: Any) -> dict[str, 
         "cancellation_reason": document.cancellation_reason,
         "rejection_code": document.rejection_code,
         "retry_count": document.retry_count,
+        "document_kind": document.document_kind or "standard",
+        "previous_hash": document.previous_hash or "",
+        "period": document.period or "",
     }
     payload.update(overrides)
     return payload
@@ -382,6 +386,47 @@ def build_context(
             "text": document.payload or "",
         },
     }
+
+
+async def apply_chain_and_qr(
+    session: AsyncSession, *, document: EInvoiceDocument, profile: EInvoiceProfile, regime: CountryRegime
+) -> None:
+    """Fill the hash chain and the QR where the country's mandate file asks for them.
+
+    The previous hash is the last chained document of the same registration, or
+    the chain's genesis value for the first one. A caller-supplied value wins.
+    """
+    from app.modules.einvoice_clearance import chain
+
+    hash_chain = regime.lifecycle.get("hash_chain") or {}
+    qr = regime.lifecycle.get("qr") or {}
+    if not hash_chain and not qr:
+        return
+    fields = dict(document.country_fields or {})
+    if document.payload:
+        fields["invoice_hash"] = chain.invoice_hash(document.payload)
+    if hash_chain and not document.previous_hash:
+        supplied = str(fields.get("previous_invoice_hash") or "")
+        if supplied:
+            document.previous_hash = supplied
+        else:
+            last = await repository.last_chained_document(session, profile_id=profile.id, exclude_id=document.id)
+            previous = (last.country_fields or {}).get("invoice_hash") if last is not None else None
+            document.previous_hash = chain.previous_hash_or_genesis(previous, hash_chain)
+    if qr and qr.get("format") == "tlv_base64":
+        settings = dict(profile.settings or {})
+        fields["qr"] = chain.qr_payload(
+            qr,
+            {
+                "seller_name": str(settings.get("seller_name") or profile.company_key),
+                "vat_number": profile.tax_registration_id,
+                "timestamp": document.invoice_date,
+                "total_with_vat": format(_decimal(document.total_amount), "f"),
+                "vat_total": str(fields.get("vat_total") or ""),
+                "invoice_hash": str(fields.get("invoice_hash") or ""),
+            },
+        )
+    document.country_fields = fields
 
 
 # ── State machine ────────────────────────────────────────────────────────────
@@ -475,7 +520,10 @@ async def create_document(
         country_fields=dict(body.country_fields or {}),
         status=STATUS_DRAFT,
         adapter_key=profile.adapter_key,
+        document_kind=getattr(body, "document_kind", "standard") or "standard",
+        period=getattr(body, "period", "") or "",
     )
+    await apply_chain_and_qr(session, document=document, profile=profile, regime=regime)
     await repository.add_document(session, document)
     await repository.append_event(
         session,
@@ -636,6 +684,18 @@ async def submit_document(
     a tax clearance.
     """
     regime = regime_for(profile)
+    mode = profile.mode or ""
+    if mode == "export":
+        raise ClearanceError(
+            f"Export only: download the file and upload it to {regime.platform} yourself. "
+            "Switch the registration to sandbox to send it.",
+            conflict=True,
+        )
+    if mode == "live" and not getattr(adapter_registry.get(profile.adapter_key), "live", False):
+        raise ClearanceError(
+            f"No live adapter for {regime.platform} is installed and configured. Use sandbox or export.",
+            conflict=True,
+        )
     if not can_be_sent(document.status):
         # Asked of the state machine, not of a list kept here. The move to
         # ``queued`` below would refuse the same states anyway; refusing up
@@ -1096,3 +1156,244 @@ __all__ = [
     "update_document",
     "validate_document",
 ]
+
+
+# ── Lifecycle view, setup, consolidated ──────────────────────────────────────
+
+
+def lifecycle_view(
+    document: EInvoiceDocument, profile: EInvoiceProfile, *, now: datetime | None = None
+) -> dict[str, Any]:
+    """Everything the invoice card needs, computed from the country's mandate file."""
+    from app.modules.einvoice_clearance import consolidation, lifecycle
+
+    regime = regime_for(profile)
+    regime_dict = regime_as_dict(regime)
+    doc = document_as_dict(document)
+    prof = profile_as_dict(profile)
+    moment = now or _now()
+    deadlines = []
+    if doc["status"] in lifecycle.PRE_SUBMIT_STATUSES:
+        deadlines = lifecycle.resolve_deadlines(regime.lifecycle, doc, prof.get("settings") or {})
+    cancel = lifecycle.cancel_deadline(regime.lifecycle, doc)
+    if cancel is not None and doc["status"] in lifecycle.DONE_STATUSES:
+        deadlines.append(cancel)
+    findings = lifecycle.evaluate(regime_dict, doc, profile=prof, now=moment)
+    rule = regime.lifecycle.get("consolidation") or {}
+    if rule and document.document_kind == "consolidated" and document.period:
+        findings += consolidation.check(
+            rule,
+            consolidation.receipts_from_fields(doc["country_fields"]),
+            document.period,
+            settings=prof.get("settings") or {},
+            today=moment.date(),
+            submitted=doc["status"] not in lifecycle.PRE_SUBMIT_STATUSES,
+        )
+    return {
+        "document_id": document.id,
+        "country": document.country,
+        "platform": regime.platform,
+        "status": document.status,
+        "mode": profile.mode or "",
+        "document_kind": document.document_kind or "standard",
+        "identifier_label": regime.identifier_label,
+        "authority_identifier": document.authority_identifier,
+        "deadlines": [d.as_dict(moment) for d in deadlines],
+        "allowed_actions": lifecycle.allowed_actions(regime_dict, doc, prof),
+        "findings": [f.as_dict() for f in findings],
+        "has_consolidation": bool(rule),
+    }
+
+
+def _missing_setup(profile: EInvoiceProfile, regime: CountryRegime) -> list[str]:
+    missing = [name for name in regime.profile_fields if not str(getattr(profile, name, "") or "").strip()]
+    if regime.lifecycle.get("network") and not profile.network_participant_id:
+        missing.append("network_participant_id")
+    return missing
+
+
+async def setup_rows(session: AsyncSession) -> list[dict[str, Any]]:
+    """One row per country that has an active registration.
+
+    This is the visibility gate for the e-invoice card and the Finance tabs: no
+    row, nothing shown. Market scoping can later narrow it to the tenant's markets.
+    """
+    rows: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for profile in await repository.list_profiles(session, active_only=True):
+        regime = get_country_regime(profile.country)
+        if regime is None or profile.country in seen:
+            continue
+        seen.add(profile.country)
+        missing = _missing_setup(profile, regime)
+        rows.append(
+            {
+                "country": profile.country,
+                "platform": regime.platform,
+                "label": regime.label,
+                "profile_id": profile.id,
+                "mode": profile.mode or "",
+                "ready": not missing,
+                "missing": missing,
+                "has_consolidation": bool(regime.lifecycle.get("consolidation")),
+            }
+        )
+    return rows
+
+
+async def _period_receipts(session: AsyncSession, *, project_id: uuid.UUID, period: str) -> tuple[list[Any], str]:
+    """B2C receivable invoices of a project dated inside the period, as receipts.
+
+    B2C means no contact on the invoice, or ``metadata.buyer_type == "consumer"``.
+    Invoices already carried by a live e-invoice document are left out.
+    """
+    from datetime import date as _date
+
+    from app.modules.einvoice_clearance.consolidation import Receipt, period_bounds
+    from app.modules.finance.models import Invoice
+
+    start, end = period_bounds(period)
+    linked = {
+        row.invoice_id
+        for row in await repository.list_documents(session, project_id=project_id, limit=1000)
+        if row.invoice_id is not None and row.status != STATUS_CANCELLED
+    }
+    stmt = select(Invoice).where(Invoice.project_id == project_id, Invoice.invoice_direction == "receivable")
+    receipts: list[Receipt] = []
+    currency = ""
+    for invoice in (await session.execute(stmt)).scalars():
+        meta = dict(invoice.metadata_ or {})
+        if (invoice.contact_id is not None and meta.get("buyer_type") != "consumer") or invoice.id in linked:
+            continue
+        try:
+            day = _date.fromisoformat(str(invoice.invoice_date)[:10])
+        except ValueError:
+            continue
+        if not start <= day <= end:
+            continue
+        currency = currency or invoice.currency_code
+        receipts.append(
+            Receipt(
+                number=invoice.invoice_number,
+                date=day,
+                net=_decimal(invoice.amount_subtotal),
+                tax=_decimal(invoice.tax_amount),
+                activity=str(meta.get("activity") or ""),
+                source_id=str(invoice.id),
+            )
+        )
+    return receipts, currency
+
+
+def _consolidation_rule(profile: EInvoiceProfile) -> tuple[CountryRegime, dict[str, Any]]:
+    regime = regime_for(profile)
+    rule = regime.lifecycle.get("consolidation") or {}
+    if not rule:
+        raise ClearanceError(f"{regime.label} has no consolidated e-invoice.", conflict=True)
+    return regime, rule
+
+
+async def consolidated_preview(
+    session: AsyncSession, *, profile: EInvoiceProfile, project_id: uuid.UUID, period: str
+) -> dict[str, Any]:
+    """Which receipts of the period would go into the consolidated document, and why not the rest."""
+    from app.modules.einvoice_clearance import consolidation
+
+    _regime, rule = _consolidation_rule(profile)
+    receipts, currency = await _period_receipts(session, project_id=project_id, period=period)
+    plan = consolidation.plan(rule, receipts, period, dict(profile.settings or {}))
+    return plan.as_dict() | {"currency_code": currency}
+
+
+async def create_consolidated(
+    session: AsyncSession,
+    *,
+    profile: EInvoiceProfile,
+    project_id: uuid.UUID,
+    period: str,
+    actor_id: uuid.UUID | None = None,
+) -> tuple[EInvoiceDocument, list[RuleResult]]:
+    """Create one consolidated document from the eligible receipts of a period."""
+    from app.modules.einvoice_clearance import consolidation
+
+    regime, rule = _consolidation_rule(profile)
+    receipts, currency = await _period_receipts(session, project_id=project_id, period=period)
+    plan = consolidation.plan(rule, receipts, period, dict(profile.settings or {}))
+    if not plan.included:
+        raise ClearanceError(f"No eligible receipts in {period}.")
+    _start, end = consolidation.period_bounds(period)
+    document = EInvoiceDocument(
+        project_id=project_id,
+        invoice_id=None,
+        profile_id=profile.id,
+        country=profile.country,
+        regime=regime.regime,
+        document_format=regime.document_format,
+        invoice_number=f"CONS-{period}",
+        invoice_date=end.isoformat(),
+        currency_code=currency[:3],
+        total_amount=plan.total,
+        payload="",
+        payload_hash="",
+        payload_media_type="application/json",
+        payload_size=0,
+        country_fields={
+            "buyer_name": str(rule.get("buyer_name") or ""),
+            "buyer_tin": str(rule.get("buyer_tin") or ""),
+            "receipts": consolidation.receipts_to_fields(plan.included),
+            "net": str(plan.net),
+            "tax": str(plan.tax),
+        },
+        status=STATUS_DRAFT,
+        adapter_key=profile.adapter_key,
+        document_kind="consolidated",
+        period=period,
+    )
+    await repository.add_document(session, document)
+    await repository.append_event(
+        session,
+        document_id=document.id,
+        event_type="created",
+        to_status=STATUS_DRAFT,
+        message=f"Consolidated {len(plan.included)} receipts for {period}.",
+        actor_id=actor_id,
+    )
+    findings = await evaluate(
+        build_context(intent=INTENT_SAVE, profile=profile, regime=regime, document=document),
+        document_id=str(document.id),
+    )
+    return document, findings
+
+
+async def documents_overview(session: AsyncSession, *, project_id: uuid.UUID) -> list[dict[str, Any]]:
+    """Outbound list for Finance > E-invoices: one row per document, nearest deadline first."""
+    profiles: dict[uuid.UUID, EInvoiceProfile | None] = {}
+    moment = _now()
+    rows: list[dict[str, Any]] = []
+    for document in await repository.list_documents(session, project_id=project_id, limit=1000):
+        if document.profile_id not in profiles:
+            profiles[document.profile_id] = await repository.get_profile(session, document.profile_id)
+        profile = profiles[document.profile_id]
+        if profile is None or get_country_regime(profile.country) is None:
+            continue
+        view = lifecycle_view(document, profile, now=moment)
+        upcoming = sorted(view["deadlines"], key=lambda d: d["due_at"])
+        rows.append(
+            {
+                "id": document.id,
+                "invoice_id": document.invoice_id,
+                "invoice_number": document.invoice_number,
+                "invoice_date": document.invoice_date,
+                "buyer_name": str((document.country_fields or {}).get("buyer_name") or ""),
+                "currency_code": document.currency_code,
+                "total_amount": format(_decimal(document.total_amount), "f"),
+                "country": document.country,
+                "status": document.status,
+                "document_kind": view["document_kind"],
+                "deadline": upcoming[0] if upcoming else None,
+                "blocking": sum(1 for f in view["findings"] if f["severity"] == "error"),
+            }
+        )
+    far = "9999"
+    rows.sort(key=lambda r: (r["deadline"]["due_at"] if r["deadline"] else far, r["invoice_number"]))
+    return rows

@@ -1,0 +1,64 @@
+{
+  "schema": "oe.einvoice_mandate/1",
+  "country": "DE",
+  "markets": [
+    "DE"
+  ],
+  "regime": {
+    "regime": "network",
+    "platform": "XRechnung / Peppol",
+    "label": "Germany - domestic B2B e-invoicing, and XRechnung into the public sector over Peppol",
+    "identifier_label": "transmission id",
+    "document_format": "xrechnung_3_0",
+    "en16931_profile": "xrechnung",
+    "profile_fields": [
+      "network_participant_id"
+    ],
+    "document_fields": [
+      "buyer_reference"
+    ],
+    "cancellation_window_days": null,
+    "scope": "Every domestic company must already be able to receive a B2B electronic invoice, with no turnover threshold. The duty to issue one is the part that is still phasing in, by prior-year turnover.",
+    "commencement": [
+      {
+        "obligation": "receive",
+        "effective_date": "2025-01-01",
+        "scope": "Domestic B2B, all companies",
+        "legal_status": "in_force",
+        "source_url": "https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108886/eInvoicing+in+Germany",
+        "read_date": "2026-09-07",
+        "notes": "No threshold. The receiving duty landed on everyone at once."
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2027-01-01",
+        "scope": "Domestic B2B, larger companies",
+        "legal_status": "enacted",
+        "source_url": "https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108886/eInvoicing+in+Germany",
+        "read_date": "2026-09-07",
+        "threshold": "EUR 800000 prior-year turnover"
+      },
+      {
+        "obligation": "issue",
+        "effective_date": "2028-01-01",
+        "scope": "Domestic B2B, all remaining companies",
+        "legal_status": "enacted",
+        "source_url": "https://ec.europa.eu/digital-building-blocks/sites/spaces/DIGITAL/pages/467108886/eInvoicing+in+Germany",
+        "read_date": "2026-09-07"
+      }
+    ],
+    "notes": "The Leitweg-ID travels as the buyer reference (BT-10) and public-sector receivers reject without it. Germany has no reporting leg: the source above states there is no real-time reporting system, which is why this stays a network country and does not become a hybrid one. The label said public sector only until the domestic B2B receiving duty had been in force for over a year. Both future phases are recorded as enacted on the European Commission's characterisation of the timetable, not on a reading of the German statute itself."
+  },
+  "lifecycle": {
+    "network": {
+      "participant_field": "buyer_endpoint_id",
+      "rule_id": "EINV-PEP-001",
+      "schemes": [
+        "0204",
+        "9930"
+      ],
+      "source_url": "https://docs.peppol.eu/poacc/billing/3.0/",
+      "read_on": ""
+    }
+  }
+}
