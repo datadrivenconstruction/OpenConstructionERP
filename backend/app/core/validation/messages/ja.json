@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "担当者 {contact} が連絡先ディレクトリにリンクされていないため、同一人物が二重に登録される可能性があります",
       "suggestion": "担当者にメールアドレスを追加すると、ディレクトリと照合できます"
+    },
+    "change_owner_linked": {
+      "fail": "下請変更 {code} はバックトゥバックですが、発注者の変更指示や変更契約が指定されていません",
+      "suggestion": "引き継ぐ発注者の変更を紐付けるか、バックトゥバックの指定を外してください"
+    },
+    "change_amount_set": {
+      "fail": "下請変更 {code} に金額がありません",
+      "suggestion": "変更の合意金額を入力してください(減額は負の値)"
+    },
+    "change_within_owner_value": {
+      "fail": "{code} の下請変更の合計は {sub_total} で、発注者の変更額 {owner_value} を上回っています",
+      "suggestion": "承認する前に下請の単価を確認するか、差額を発注者に請求してください"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "項目{ordinal}はpartidaとして番号付けされていません（各階層は2桁、例: 03.02 や 03.02.01）",
       "suggestion": "ペルーのpresupuestoにあるpartidaのように、各単価行を章と項目で番号付けしてください。例: 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: 補填(plug)した範囲は調整後合計 {leveled_total} のうち {plug_total} です({share}%、しきい値 {threshold}%)",
+      "suggestion": "調整後合計を信用する前に、入札者に不足項目の価格を入れてもらってください"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: 不足または除外の {count} 項目に補填値(plug)がありません",
+      "suggestion": "各欠落について、積算単価・他社入札・手入力のいずれかで plug を設定してください"
+    },
+    "award_leveled": {
+      "fail": "パッケージ {package} は入札調整(bid leveling)の計算なしで発注されようとしています",
+      "suggestion": "発注前に不足範囲が積算されるよう、入札調整を計算してください"
     }
   }
 }

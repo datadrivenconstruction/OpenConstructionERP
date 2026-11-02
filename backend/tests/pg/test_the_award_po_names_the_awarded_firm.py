@@ -36,7 +36,11 @@ async def test_the_award_po_names_the_directory_firm(pg_session, monkeypatch) ->
         pg_session,
         project,
         boq,
-        metadata={"recipients": [{"email": "Bids@Rheinbeton.test", "subcontractor_id": str(sub.id)}]},
+        # A supply tender: only a supply award drafts a purchase order (bid_management/award_route.py).
+        metadata={
+            "package_type": "supply",
+            "recipients": [{"email": "Bids@Rheinbeton.test", "subcontractor_id": str(sub.id)}],
+        },
     )
     bid = await _bid(
         pg_session, package, "Rheinbeton", "700", [{"position_id": str(pos["wall"].id), "unit_rate": "70"}]

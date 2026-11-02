@@ -51,6 +51,15 @@ from app.modules.contracts.schemas import (
     HakedisResponse,
     HakedisTaxesInput,
 )
+from app.modules.subcontractors.change_chain import (
+    OwnerChangeChainResponse,
+    SpawnFromOwnerChange,
+    SubcontractChangeCreate,
+    SubcontractChangeDecision,
+    SubcontractChangeResponse,
+    SubcontractChangeService,
+    SubcontractChangeUpdate,
+)
 from app.modules.subcontractors.models import LienWaiver
 from app.modules.subcontractors.repository import PrimeContractReader
 from app.modules.subcontractors.schemas import (
@@ -1881,3 +1890,144 @@ async def run_insurance_alerts(
     from app.modules.subcontractors.insurance import InsuranceComplianceService  # noqa: PLC0415
 
     return {"sent": await InsuranceComplianceService(session).run_expiry_alerts()}
+
+
+# ── Subcontract changes (owner change -> subcontract change chain) ──────────
+
+
+async def _change_service(session: SessionDep, user_id: str, change_id: uuid.UUID) -> SubcontractChangeService:
+    svc = SubcontractChangeService(session)
+    row = await svc.get(change_id)
+    await verify_project_access(row.project_id, user_id, session)
+    return svc
+
+
+@router.get("/agreements/{agreement_id}/changes/", response_model=list[SubcontractChangeResponse])
+async def list_agreement_changes(
+    agreement_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> list[SubcontractChangeResponse]:
+    """Every change to one subcontract agreement, oldest first."""
+    await _verify_agreement_project(agreement_id, user_id, session, SubcontractorService(session))
+    rows = await SubcontractChangeService(session).list_for_agreement(agreement_id)
+    return [SubcontractChangeResponse.of(r) for r in rows]
+
+
+@router.post("/changes/", response_model=SubcontractChangeResponse, status_code=201)
+async def create_subcontract_change(
+    data: SubcontractChangeCreate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> SubcontractChangeResponse:
+    """Raise a change against a subcontract agreement, optionally linked to an owner change."""
+    await _verify_agreement_project(data.agreement_id, user_id, session, SubcontractorService(session))
+    row = await SubcontractChangeService(session).create(data, user_id=user_id)
+    return SubcontractChangeResponse.of(row)
+
+
+@router.post("/changes/from-owner-change/", response_model=list[SubcontractChangeResponse], status_code=201)
+async def spawn_subcontract_changes(
+    data: SpawnFromOwnerChange,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> list[SubcontractChangeResponse]:
+    """Pass one owner change down to one or more subcontract agreements."""
+    svc = SubcontractorService(session)
+    for line in data.lines:
+        await _verify_agreement_project(line.agreement_id, user_id, session, svc)
+    rows = await SubcontractChangeService(session).spawn_from_owner_change(data, user_id=user_id)
+    return [SubcontractChangeResponse.of(r) for r in rows]
+
+
+@router.get("/changes/by-owner-change/{owner_change_type}/{owner_change_id}", response_model=OwnerChangeChainResponse)
+async def owner_change_chain(
+    owner_change_type: str,
+    owner_change_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> OwnerChangeChainResponse:
+    """Owner value, subcontract cost and margin for one owner change."""
+    svc = SubcontractChangeService(session)
+    owner = await svc.owner_change(owner_change_type, owner_change_id)
+    if owner is None:
+        raise HTTPException(status_code=404, detail="Owner change not found")
+    await verify_project_access(owner["project_id"], user_id, session)
+    return await svc.chain(owner_change_type, owner_change_id)
+
+
+@router.patch("/changes/{change_id}", response_model=SubcontractChangeResponse)
+async def update_subcontract_change(
+    change_id: uuid.UUID,
+    data: SubcontractChangeUpdate,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> SubcontractChangeResponse:
+    svc = await _change_service(session, user_id, change_id)
+    return SubcontractChangeResponse.of(await svc.update(change_id, data))
+
+
+@router.post("/changes/{change_id}/submit/", response_model=SubcontractChangeResponse)
+async def submit_subcontract_change(
+    change_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> SubcontractChangeResponse:
+    svc = await _change_service(session, user_id, change_id)
+    return SubcontractChangeResponse.of(await svc.transition(change_id, "submitted", user_id))
+
+
+@router.post("/changes/{change_id}/approve/", response_model=SubcontractChangeResponse)
+async def approve_subcontract_change(
+    change_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    data: SubcontractChangeDecision | None = None,
+    _perm: None = Depends(RequirePermission("subcontractors.approve_change")),
+) -> SubcontractChangeResponse:
+    """Approve: the agreement value and the cost-control commitment move by the change amount, once."""
+    svc = await _change_service(session, user_id, change_id)
+    note = data.note if data else ""
+    return SubcontractChangeResponse.of(await svc.transition(change_id, "approved", user_id, note))
+
+
+@router.post("/changes/{change_id}/reject/", response_model=SubcontractChangeResponse)
+async def reject_subcontract_change(
+    change_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    data: SubcontractChangeDecision | None = None,
+    _perm: None = Depends(RequirePermission("subcontractors.approve_change")),
+) -> SubcontractChangeResponse:
+    svc = await _change_service(session, user_id, change_id)
+    note = data.note if data else ""
+    return SubcontractChangeResponse.of(await svc.transition(change_id, "rejected", user_id, note))
+
+
+@router.post("/changes/{change_id}/withdraw/", response_model=SubcontractChangeResponse)
+async def withdraw_subcontract_change(
+    change_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.update")),
+) -> SubcontractChangeResponse:
+    svc = await _change_service(session, user_id, change_id)
+    return SubcontractChangeResponse.of(await svc.transition(change_id, "withdrawn", user_id))
+
+
+@router.get("/changes/{change_id}/validate/")
+async def validate_subcontract_change(
+    change_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("subcontractors.read")),
+) -> dict[str, Any]:
+    """Run the subcontract-change checks (owner link, amount, margin); read-only."""
+    svc = await _change_service(session, user_id, change_id)
+    return SubcontractorService._agreement_report_to_dict(await svc.validate(change_id))

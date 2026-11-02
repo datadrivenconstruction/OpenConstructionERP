@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "Persoana de contact {contact} nu este legată de registrul de contacte, așa că aceeași persoană poate fi înregistrată de două ori",
       "suggestion": "Adăugați o adresă de e-mail persoanei de contact, ca să poată fi potrivită cu registrul"
+    },
+    "change_owner_linked": {
+      "fail": "Modificarea de subcontract {code} este back-to-back, dar nu indică nicio modificare sau ordin de modificare al beneficiarului",
+      "suggestion": "Legați modificarea beneficiarului care se transmite sau eliminați marcajul back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "Modificarea de subcontract {code} nu are sumă",
+      "suggestion": "Introduceți prețul convenit al modificării, negativ pentru o omisiune"
+    },
+    "change_within_owner_value": {
+      "fail": "Modificările de subcontract pentru {code} însumează {sub_total}, mai mult decât valoarea modificării beneficiarului {owner_value}",
+      "suggestion": "Verificați prețurile subcontractorului sau recuperați diferența de la beneficiar înainte de aprobare"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "Poziția {ordinal} nu este numerotată ca partida (două cifre pe fiecare nivel, de exemplu 03.02 sau 03.02.01)",
       "suggestion": "Numerotați fiecare linie evaluată după capitol și articol, așa cum un presupuesto peruan enumeră partidas, de exemplu 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: sfera completată este {plug_total} dintr-un total nivelat de {leveled_total} ({share}%, prag {threshold}%)",
+      "suggestion": "Cereți ofertantului să evalueze liniile lipsă înainte de a vă baza pe totalul nivelat"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} linii lipsă sau excluse nu au valoare de completare (plug)",
+      "suggestion": "Setați un plug din prețul devizului, din celelalte oferte sau o valoare manuală pentru fiecare lipsă"
+    },
+    "award_leveled": {
+      "fail": "Pachetul {package} este atribuit fără o nivelare a ofertelor calculată",
+      "suggestion": "Calculați nivelarea astfel încât sfera lipsă să fie evaluată înainte de atribuire"
     }
   }
 }

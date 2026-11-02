@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "联系人 {contact} 未关联到联系人目录，因此同一人可能被重复录入",
       "suggestion": "为联系人添加电子邮件地址，以便与目录进行匹配"
+    },
+    "change_owner_linked": {
+      "fail": "分包变更 {code} 为背靠背,但未指明业主的变更或变更指令",
+      "suggestion": "关联被转递的业主变更,或取消背靠背标记"
+    },
+    "change_amount_set": {
+      "fail": "分包变更 {code} 没有金额",
+      "suggestion": "填写变更的约定价格,减项为负数"
+    },
+    "change_within_owner_value": {
+      "fail": "{code} 的分包变更合计 {sub_total},高于业主变更价值 {owner_value}",
+      "suggestion": "批准前请核对分包单价,或向业主追回差额"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "第 {ordinal} 项未按 partida 编号（每级两位数字，如 03.02 或 03.02.01）",
       "suggestion": "按章节和子项为每个计价行编号，与秘鲁 presupuesto 列示 partida 的方式一致，例如 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}:补足(plug)的范围为 {plug_total},占调平后合计 {leveled_total}({share}%,阈值 {threshold}%)",
+      "suggestion": "在采信调平后合计之前,请让投标人对漏项报价"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}:{count} 个漏项或除外项没有补足值(plug)",
+      "suggestion": "为每个缺口按估算单价、其他投标或手工值设置 plug"
+    },
+    "award_leveled": {
+      "fail": "标段 {package} 在未计算投标调平(bid leveling)的情况下被授标",
+      "suggestion": "请先计算调平,使漏项在授标前已有定价"
     }
   }
 }

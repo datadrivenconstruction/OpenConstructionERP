@@ -29,5 +29,7 @@ def register_subcontractors_permissions() -> None:
             "subcontractors.block": Role.MANAGER,
             # Paying despite lapsed mandatory insurance, with a recorded reason.
             "subcontractors.override_insurance": Role.MANAGER,
+            # Approving a subcontract change moves the agreement value and the commitment.
+            "subcontractors.approve_change": Role.MANAGER,
         },
     )

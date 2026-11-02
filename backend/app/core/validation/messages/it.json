@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "La persona di contatto {contact} non è collegata alla rubrica dei contatti, quindi la stessa persona potrebbe risultare registrata due volte",
       "suggestion": "Aggiungi un indirizzo e-mail alla persona di contatto così può essere abbinata alla rubrica"
+    },
+    "change_owner_linked": {
+      "fail": "La variante di subappalto {code} è back-to-back ma non cita alcuna variante o ordine di modifica del committente",
+      "suggestion": "Collegate la modifica del committente che viene trasferita o rimuovete il flag back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "La variante di subappalto {code} non ha importo",
+      "suggestion": "Inserite il prezzo concordato della variante, negativo per uno stralcio"
+    },
+    "change_within_owner_value": {
+      "fail": "Le varianti di subappalto per {code} sommano {sub_total}, più del valore della modifica del committente {owner_value}",
+      "suggestion": "Verificate i prezzi del subappaltatore o recuperate la differenza dal committente prima di approvare"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "La voce {ordinal} non è numerata come partida (due cifre per livello, ad esempio 03.02 o 03.02.01)",
       "suggestion": "Numera ogni voce prezzata per capitolo e voce, come fa un presupuesto peruviano con le sue partidas, ad esempio 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: l'ambito compensato è {plug_total} su un totale normalizzato di {leveled_total} ({share}%, soglia {threshold}%)",
+      "suggestion": "Chiedete all'offerente di quotare le voci mancanti prima di fidarvi del totale normalizzato"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} voci mancanti o escluse non hanno valore di compensazione (plug)",
+      "suggestion": "Impostate un plug dal prezzo di stima, dalle altre offerte o da un valore manuale per ogni lacuna"
+    },
+    "award_leveled": {
+      "fail": "Il pacchetto {package} viene aggiudicato senza un livellamento delle offerte calcolato",
+      "suggestion": "Calcolate il livellamento così che l'ambito mancante sia quotato prima dell'aggiudicazione"
     }
   }
 }

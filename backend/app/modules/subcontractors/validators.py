@@ -827,3 +827,62 @@ def check_unlinked_contract_twin(agreement: dict[str, Any]) -> list[Finding]:
             )
         )
     return findings
+
+
+# ── Subcontract changes ────────────────────────────────────────────────────
+#
+# Payload for the ``subcontract_change`` set: the change flattened under the top
+# level (code, title, amount, currency, back_to_back, owner_change_type,
+# owner_change_id) plus ``owner_change_value`` (the owner-side value, absent when
+# unlinked) and ``linked_sub_total`` (every non-rejected sub change against the
+# same owner change, this one included).
+
+
+def _change_ref(change: dict[str, Any]) -> str:
+    return str(change.get("code") or change.get("title") or "change")
+
+
+def check_change_owner_link(change: dict[str, Any]) -> list[Finding]:
+    """A back-to-back change must name the owner change it passes down.
+
+    Without the link nobody can recover the variation from the owner, and the
+    margin on the change cannot be seen.
+    """
+    if not change.get("back_to_back"):
+        return []
+    if change.get("owner_change_id"):
+        return []
+    return [Finding(element_ref=_change_ref(change), params={"code": _change_ref(change)})]
+
+
+def check_change_amount_nonzero(change: dict[str, Any]) -> list[Finding]:
+    """A change with no amount changes nothing and is usually a forgotten price."""
+    amount = parse_money(change.get("amount"))
+    if amount is not None and amount != 0:
+        return []
+    return [Finding(element_ref=_change_ref(change), params={"code": _change_ref(change)})]
+
+
+def check_change_margin(change: dict[str, Any]) -> list[Finding]:
+    """The subcontract side of an owner change should not cost more than the owner pays.
+
+    Only judged when the change is linked and the owner value is known. A loss is
+    sometimes accepted (a goodwill omission), so this warns rather than blocks.
+    """
+    owner_value = parse_money(change.get("owner_change_value"))
+    sub_total = parse_money(change.get("linked_sub_total"))
+    if owner_value is None or sub_total is None or not change.get("owner_change_id"):
+        return []
+    if sub_total <= owner_value + MONEY_TOLERANCE:
+        return []
+    return [
+        Finding(
+            element_ref=_change_ref(change),
+            params={
+                "code": _change_ref(change),
+                "sub_total": _amount(sub_total, change),
+                "owner_value": _amount(owner_value, change),
+            },
+            details={"sub_total": str(sub_total), "owner_value": str(owner_value)},
+        )
+    ]

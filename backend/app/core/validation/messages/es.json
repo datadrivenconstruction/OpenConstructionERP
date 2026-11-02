@@ -905,6 +905,18 @@
     "contact_linked": {
       "fail": "La persona de contacto {contact} no está vinculada al directorio de contactos, así que la misma persona podría quedar registrada dos veces",
       "suggestion": "Añada una dirección de correo electrónico a la persona de contacto para poder vincularla con el directorio"
+    },
+    "change_owner_linked": {
+      "fail": "El cambio de subcontrato {code} es back-to-back pero no indica ninguna variación ni orden de cambio del propietario",
+      "suggestion": "Vincule el cambio del propietario que se traslada o quite la marca back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "El cambio de subcontrato {code} no tiene importe",
+      "suggestion": "Introduzca el precio acordado del cambio, negativo si es una omisión"
+    },
+    "change_within_owner_value": {
+      "fail": "Los cambios de subcontrato de {code} suman {sub_total}, más que el valor del cambio del propietario {owner_value}",
+      "suggestion": "Revise los precios del subcontrato o recupere la diferencia del propietario antes de aprobar"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "forecast_missing": {
       "fail": "{project} está activo pero no tiene contrato, factura, pedido, subcontrato ni plan a partir de los cuales prever el flujo de caja.",
       "suggestion": "Registre el contrato con el cliente y su plan de pagos, o un flujo de caja planificado en el modelo de costes."
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: el alcance compensado es {plug_total} de un total nivelado de {leveled_total} ({share}%, umbral {threshold}%)",
+      "suggestion": "Pida al oferente que valore las partidas que faltan antes de fiarse del total nivelado"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} partidas omitidas o excluidas no tienen valor de compensación (plug)",
+      "suggestion": "Fije un plug a partir del precio del presupuesto, las otras ofertas o un valor manual para cada hueco"
+    },
+    "award_leveled": {
+      "fail": "El paquete {package} se adjudica sin una nivelación de ofertas calculada",
+      "suggestion": "Calcule la nivelación para que el alcance faltante esté valorado antes de adjudicar"
     }
   }
 }

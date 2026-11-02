@@ -38,6 +38,7 @@ def _serialize_money_string(value: Any) -> str | None:
 # Status / category patterns
 _NOTICE_STATUS = r"^(issued|acknowledged|responded|closed)$"
 _NOTICE_RECIPIENT = r"^(owner|contractor|architect|engineer|consultant)$"
+_NOTICE_SOURCE = r"^(daily_diary|daily_diary_entry|field_report|rfi|site_instruction)$"
 _VR_STATUS = r"^(draft|submitted|under_review|approved|rejected|converted_to_vo)$"
 _VR_CLASSIFICATION = r"^(scope_change|unforeseen|owner_change|design_dev|regulatory|other)$"
 _VR_URGENCY = r"^(low|med|high)$"
@@ -69,7 +70,26 @@ class NoticeCreate(BaseModel):
     response_summary: str = Field(default="", max_length=10000)
     status: str = Field(default="issued", pattern=_NOTICE_STATUS)
     reference_change_order_id: UUID | None = None
+    source_type: str | None = Field(default=None, pattern=_NOTICE_SOURCE)
+    source_id: UUID | None = None
+    source_ref: str = Field(default="", max_length=120)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+
+class NoticeFromFieldEvent(BaseModel):
+    """Raise a notice from a field event; title and description default to the event's own."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    project_id: UUID
+    source_type: str = Field(pattern=_NOTICE_SOURCE)
+    source_id: UUID | None = None
+    source_ref: str = Field(default="", max_length=120)
+    title: str = Field(default="", max_length=500)
+    description: str = Field(default="", max_length=10000)
+    recipient_type: str = Field(default="owner", pattern=_NOTICE_RECIPIENT)
+    recipient_name: str = Field(default="", max_length=255)
+    target_response_date: str | None = Field(default=None, max_length=20)
 
 
 class NoticeUpdate(BaseModel):
@@ -106,6 +126,9 @@ class NoticeResponse(BaseModel):
     response_summary: str = ""
     status: str = "issued"
     reference_change_order_id: UUID | None = None
+    source_type: str | None = None
+    source_id: UUID | None = None
+    source_ref: str = ""
     ball_in_court: str | None = None
     response_due_date: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")

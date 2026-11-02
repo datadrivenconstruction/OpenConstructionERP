@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "{contact} irtibat kişisi kişi rehberine bağlı değil, bu yüzden aynı kişi iki kez kaydedilmiş olabilir",
       "suggestion": "Irtibat kişisine e-posta adresi ekleyin, böylece rehberle eşleştirilebilsin"
+    },
+    "change_owner_linked": {
+      "fail": "{code} alt yüklenici değişikliği back-to-back olarak işaretli ancak işverenin hiçbir değişiklik veya değişiklik emrini belirtmiyor",
+      "suggestion": "Aktarılan işveren değişikliğini bağlayın veya back-to-back işaretini kaldırın"
+    },
+    "change_amount_set": {
+      "fail": "{code} alt yüklenici değişikliğinin tutarı yok",
+      "suggestion": "Değişikliğin üzerinde anlaşılan fiyatını girin, işten çıkarma için negatif"
+    },
+    "change_within_owner_value": {
+      "fail": "{code} için alt yüklenici değişiklikleri toplam {sub_total}, işveren değişiklik değeri {owner_value} tutarından fazla",
+      "suggestion": "Onaylamadan önce alt yüklenici fiyatlarını kontrol edin veya farkı işverenden tahsil edin"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "{ordinal} numaralı pozisyon partida olarak numaralandırılmamış (her düzeyde iki hane, örneğin 03.02 veya 03.02.01)",
       "suggestion": "Her fiyatlandırılmış satırı, bir Peru presupuesto'sunun partida'ları listelediği gibi bölüm ve kalem numarasıyla numaralandırın, örneğin 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: tamamlanan kapsam, {leveled_total} tutarındaki dengelenmiş toplamın {plug_total} kadarıdır (%{share}, eşik %{threshold})",
+      "suggestion": "Dengelenmiş toplama güvenmeden önce teklif verenden eksik kalemleri fiyatlandırmasını isteyin"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} eksik veya hariç tutulan kalemin tamamlama değeri (plug) yok",
+      "suggestion": "Her boşluk için keşif birim fiyatından, diğer tekliflerden veya elle girilen değerden plug belirleyin"
+    },
+    "award_leveled": {
+      "fail": "{package} paketi hesaplanmış teklif dengelemesi olmadan veriliyor",
+      "suggestion": "İhaleden önce eksik kapsamın fiyatlandırılması için dengelemeyi hesaplayın"
     }
   }
 }

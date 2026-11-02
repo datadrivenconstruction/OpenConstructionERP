@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "Die Kontaktperson {contact} ist nicht mit dem Kontaktverzeichnis verknüpft, daher kann dieselbe Person doppelt erfasst sein",
       "suggestion": "Hinterlegen Sie eine E-Mail-Adresse für die Kontaktperson, damit sie dem Verzeichnis zugeordnet werden kann"
+    },
+    "change_owner_linked": {
+      "fail": "Nachtrag {code} an den Nachunternehmer ist durchgereicht, nennt aber keinen Nachtrag oder keine Änderungsanordnung des Bauherrn",
+      "suggestion": "Verknüpfen Sie die Bauherren-Änderung, die hier weitergegeben wird, oder entfernen Sie die Kennzeichnung als durchgereicht"
+    },
+    "change_amount_set": {
+      "fail": "Nachtrag {code} an den Nachunternehmer hat keinen Betrag",
+      "suggestion": "Tragen Sie den vereinbarten Preis ein, negativ bei einem Entfall"
+    },
+    "change_within_owner_value": {
+      "fail": "Die Nachunternehmer-Nachträge zu {code} betragen {sub_total} und liegen über dem Wert der Bauherren-Änderung von {owner_value}",
+      "suggestion": "Prüfen Sie die Nachunternehmerpreise oder fordern Sie die Differenz vor der Freigabe beim Bauherrn ein"
     }
   },
   "submittal": {
@@ -1486,6 +1498,20 @@
     "activity_labour_without_trade": {
       "fail": "Vorgang {activity} ({project}) plant Arbeitskräfte ohne Gewerk, daher kann der Bedarf niemandem zugeordnet werden",
       "suggestion": "Der Arbeitskraft-Ressource des Vorgangs ein Gewerk zuweisen"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: ergänzte Leistungen betragen {plug_total} von bereinigt {leveled_total} ({share} %, Schwelle {threshold} %)",
+      "suggestion": "Lassen Sie die fehlenden Positionen vom Bieter bepreisen, bevor Sie sich auf die bereinigte Summe stützen"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} fehlende oder ausgeschlossene Positionen haben keinen Ergänzungswert",
+      "suggestion": "Setzen Sie für jede Lücke einen Wert aus dem Kalkulationspreis, den anderen Angeboten oder manuell"
+    },
+    "award_leveled": {
+      "fail": "Paket {package} wird ohne berechneten Preisspiegel vergeben",
+      "suggestion": "Berechnen Sie den Preisspiegel, damit fehlende Leistungen vor der Vergabe bepreist sind"
     }
   }
 }
