@@ -324,6 +324,8 @@ const DefectsLiabilityPage = lazy(() =>
 const BidDayPage = lazy(() =>
   import('@/features/bid-day/BidDayPage').then((m) => ({
     default: m.BidDayPage,
+  }))
+);
 const OwnerSchedulePage = lazy(() =>
   import('@/features/owner-schedule/OwnerSchedulePage').then((m) => ({
     default: m.OwnerSchedulePage,

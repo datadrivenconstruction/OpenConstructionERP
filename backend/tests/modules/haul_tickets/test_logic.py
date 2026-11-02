@@ -131,12 +131,12 @@ def test_waste_catalogue_hook():
 
 def test_import_mapping_and_dedupe():
     csv_bytes = (
-        "Ticket No;Date;Haulier;Registration;Material;Gross kg;Tare kg;Net kg;Time out\n"
-        "A1;2026-10-30;Kies AG;AB 123;Gravel;32500;14200;18300;2026-10-30 07:15\n"
-        "A1;2026-10-30;Kies AG;AB 123;Gravel;32500;14200;18300;2026-10-30 07:15\n"
-        "A2;30.10.2026;Kies AG;AB 124;Gravel;31000;14000;17000;30.10.2026 08:05\n"
-        "A3;2026-10-30;Kies AG;AB 125;Gravel;30000;14000;16000;2026-10-30 09:00\n"
-    ).encode()
+        b"Ticket No;Date;Haulier;Registration;Material;Gross kg;Tare kg;Net kg;Time out\n"
+        b"A1;2026-10-30;Kies AG;AB 123;Gravel;32500;14200;18300;2026-10-30 07:15\n"
+        b"A1;2026-10-30;Kies AG;AB 123;Gravel;32500;14200;18300;2026-10-30 07:15\n"
+        b"A2;30.10.2026;Kies AG;AB 124;Gravel;31000;14000;17000;30.10.2026 08:05\n"
+        b"A3;2026-10-30;Kies AG;AB 125;Gravel;30000;14000;16000;2026-10-30 09:00\n"
+    )
     headers, rows = importer.read_table(csv_bytes, "wb.csv")
     mapping = importer.suggest_mapping(headers)
     assert mapping["ticket_number"] == 0
