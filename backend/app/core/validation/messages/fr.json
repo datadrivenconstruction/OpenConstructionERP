@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Le contact {contact} n'est pas lié au répertoire des contacts, la même personne risque donc d'être saisie deux fois",
       "suggestion": "Renseignez une adresse e-mail pour ce contact afin de pouvoir le rapprocher du répertoire"
+    },
+    "change_owner_linked": {
+      "fail": "L'avenant de sous-traitance {code} est en back-to-back mais ne cite aucun avenant ni ordre de modification du maître d'ouvrage",
+      "suggestion": "Liez la modification du maître d'ouvrage répercutée ou retirez l'indicateur back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "L'avenant de sous-traitance {code} n'a pas de montant",
+      "suggestion": "Saisissez le prix convenu de la modification, négatif pour une moins-value"
+    },
+    "change_within_owner_value": {
+      "fail": "Les avenants de sous-traitance de {code} totalisent {sub_total}, soit plus que la valeur de la modification du maître d'ouvrage {owner_value}",
+      "suggestion": "Vérifiez les prix du sous-traitant ou récupérez l'écart auprès du maître d'ouvrage avant d'approuver"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "La position {ordinal} n'est pas numérotée en partida (deux chiffres par niveau, par exemple 03.02 ou 03.02.01)",
       "suggestion": "Numérotez chaque ligne chiffrée par chapitre et article, comme le presupuesto péruvien énumère ses partidas, par exemple 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder} : le périmètre complété s'élève à {plug_total} sur un total rééquilibré de {leveled_total} ({share} %, seuil {threshold} %)",
+      "suggestion": "Demandez au soumissionnaire de chiffrer les lignes manquantes avant de se fier au total rééquilibré"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder} : {count} lignes manquantes ou exclues n'ont pas de valeur de complément (plug)",
+      "suggestion": "Définissez un plug à partir du prix de l'estimation, des autres offres ou d'une valeur manuelle pour chaque lacune"
+    },
+    "award_leveled": {
+      "fail": "Le lot {package} est attribué sans analyse comparative des offres calculée",
+      "suggestion": "Calculez le rééquilibrage pour que le périmètre manquant soit chiffré avant l'attribution"
     }
   }
 }

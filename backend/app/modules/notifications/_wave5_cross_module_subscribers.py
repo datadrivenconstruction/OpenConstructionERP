@@ -368,6 +368,11 @@ async def _on_bid_package_awarded(event: Event) -> None:
         package = await session.get(BidPackage, package_id)
         if package is None:
             return
+        from app.modules.bid_management.award_route import SUPPLY, bid_package_route  # noqa: PLC0415
+
+        if bid_package_route(package) == SUPPLY:
+            # One award, one commitment: a supply package is the purchase order's.
+            return
         bidder = await session.get(Bidder, awarded_bidder_id)
         if bidder is None:
             return

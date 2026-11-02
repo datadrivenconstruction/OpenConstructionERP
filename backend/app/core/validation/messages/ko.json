@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "담당자 {contact}이(가) 연락처 디렉터리와 연결되어 있지 않아 같은 사람이 두 번 기록될 수 있습니다",
       "suggestion": "담당자에 이메일 주소를 추가하면 디렉터리와 대조할 수 있습니다"
+    },
+    "change_owner_linked": {
+      "fail": "하도급 변경 {code}은(는) back-to-back이지만 발주자의 변경 또는 변경지시를 지정하지 않았습니다",
+      "suggestion": "전달되는 발주자 변경을 연결하거나 back-to-back 표시를 해제하세요"
+    },
+    "change_amount_set": {
+      "fail": "하도급 변경 {code}에 금액이 없습니다",
+      "suggestion": "변경의 합의 금액을 입력하세요(감액은 음수)"
+    },
+    "change_within_owner_value": {
+      "fail": "{code}의 하도급 변경 합계 {sub_total}이(가) 발주자 변경 금액 {owner_value}보다 큽니다",
+      "suggestion": "승인 전에 하도급 단가를 확인하거나 차액을 발주자에게 청구하세요"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "{ordinal}번 항목이 partida 형식으로 번호가 매겨져 있지 않습니다 (단계마다 두 자리, 예: 03.02 또는 03.02.01)",
       "suggestion": "페루 presupuesto의 partida처럼 각 단가 항목을 장과 세부 항목으로 번호 매기십시오. 예: 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: 보정(plug)된 범위는 평준화 합계 {leveled_total} 중 {plug_total}입니다({share}%, 기준 {threshold}%)",
+      "suggestion": "평준화 합계를 신뢰하기 전에 입찰자에게 누락 항목의 가격을 요청하세요"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: 누락 또는 제외된 {count}개 항목에 보정값(plug)이 없습니다",
+      "suggestion": "각 누락 항목에 대해 견적 단가, 다른 입찰가 또는 수기 값으로 plug를 설정하세요"
+    },
+    "award_leveled": {
+      "fail": "패키지 {package}이(가) 계산된 입찰 평준화(bid leveling) 없이 낙찰되려 합니다",
+      "suggestion": "낙찰 전에 누락 범위가 가격에 반영되도록 평준화를 계산하세요"
     }
   }
 }

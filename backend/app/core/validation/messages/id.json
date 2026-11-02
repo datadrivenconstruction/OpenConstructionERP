@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Kontak person {contact} belum terhubung dengan direktori kontak, sehingga orang yang sama bisa tercatat dua kali",
       "suggestion": "Tambahkan alamat email pada kontak person agar dapat dicocokkan dengan direktori"
+    },
+    "change_owner_linked": {
+      "fail": "Perubahan subkontrak {code} bersifat back-to-back tetapi tidak menyebut variasi atau perintah perubahan dari pemilik",
+      "suggestion": "Hubungkan perubahan pemilik yang diteruskan, atau hapus penanda back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "Perubahan subkontrak {code} tidak memiliki nilai",
+      "suggestion": "Masukkan harga perubahan yang disepakati, negatif untuk pekerjaan yang dikurangi"
+    },
+    "change_within_owner_value": {
+      "fail": "Perubahan subkontrak untuk {code} berjumlah {sub_total}, lebih besar dari nilai perubahan pemilik {owner_value}",
+      "suggestion": "Periksa harga subkontraktor atau tagih selisihnya dari pemilik sebelum menyetujui"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Posisi {ordinal} tidak dinomori sebagai partida (dua digit per tingkat, misalnya 03.02 atau 03.02.01)",
       "suggestion": "Beri nomor setiap baris berbiaya sesuai bab dan item, seperti partida dalam presupuesto Peru, misalnya 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: lingkup yang ditambal (plug) sebesar {plug_total} dari total yang disetarakan {leveled_total} ({share}%, ambang {threshold}%)",
+      "suggestion": "Minta penawar menghargai item yang hilang sebelum mengandalkan total yang disetarakan"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} item hilang atau dikecualikan tidak punya nilai tambal (plug)",
+      "suggestion": "Tetapkan plug dari harga satuan estimasi, penawaran lain, atau nilai manual untuk setiap celah"
+    },
+    "award_leveled": {
+      "fail": "Paket {package} akan diberikan tanpa penyetaraan penawaran (bid leveling) yang dihitung",
+      "suggestion": "Hitung penyetaraan agar lingkup yang hilang sudah dihargai sebelum penunjukan"
     }
   }
 }

@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Kontaktpersonen {contact} är inte kopplad till kontaktregistret, så samma person kan finnas med två gånger",
       "suggestion": "Lägg till en e-postadress för kontaktpersonen så att den kan matchas mot registret"
+    },
+    "change_owner_linked": {
+      "fail": "Underentreprenadändring {code} är back-to-back men anger ingen ÄTA eller ändringsorder från beställaren",
+      "suggestion": "Koppla beställarens ändring som förs vidare eller ta bort back-to-back-markeringen"
+    },
+    "change_amount_set": {
+      "fail": "Underentreprenadändring {code} saknar belopp",
+      "suggestion": "Ange det överenskomna priset för ändringen, negativt för bortfall"
+    },
+    "change_within_owner_value": {
+      "fail": "Underentreprenadändringarna för {code} uppgår till {sub_total}, mer än beställarens ändringsvärde {owner_value}",
+      "suggestion": "Kontrollera underentreprenörens priser eller driv in skillnaden från beställaren innan du godkänner"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Position {ordinal} är inte numrerad som partida (två siffror per nivå, till exempel 03.02 eller 03.02.01)",
       "suggestion": "Numrera varje prissatt rad efter kapitel och post, så som en peruansk presupuesto listar sina partidas, till exempel 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: kompletterad omfattning är {plug_total} av en utjämnad summa på {leveled_total} ({share} %, tröskel {threshold} %)",
+      "suggestion": "Be anbudsgivaren prissätta de saknade posterna innan du förlitar dig på den utjämnade summan"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} saknade eller uteslutna poster har inget kompletteringsvärde (plug)",
+      "suggestion": "Sätt en plug från kalkylpriset, övriga anbud eller ett manuellt värde för varje lucka"
+    },
+    "award_leveled": {
+      "fail": "Paket {package} tilldelas utan beräknad anbudsutjämning",
+      "suggestion": "Beräkna utjämningen så att saknad omfattning är prissatt före tilldelning"
     }
   }
 }

@@ -66,6 +66,7 @@ from app.modules.variations.schemas import (
     FinalAccountCreate,
     FinalAccountUpdate,
     NoticeCreate,
+    NoticeFromFieldEvent,
     NoticeUpdate,
     SiteMeasurementCreate,
     SiteMeasurementUpdate,
@@ -1349,6 +1350,9 @@ class VariationsService:
             response_summary=data.response_summary,
             status=data.status,
             reference_change_order_id=data.reference_change_order_id,
+            source_type=data.source_type,
+            source_id=data.source_id,
+            source_ref=data.source_ref,
             metadata_=data.metadata,
         )
         notice = await self.notice_repo.create(notice)
@@ -1359,6 +1363,96 @@ class VariationsService:
                 "notice_id": str(notice.id),
                 "code": code,
                 "recipient_type": data.recipient_type,
+            },
+        )
+        return notice
+
+    async def _resolve_field_event(
+        self, project_id: uuid.UUID, source_type: str, source_id: uuid.UUID | None
+    ) -> tuple[str, str, str]:
+        """Read the field event a notice is raised from: (title, description, readable ref).
+
+        A site instruction may be paper only, so it needs no row; every other
+        source must exist and belong to the same project.
+        """
+        if source_type == "site_instruction" and source_id is None:
+            return "", "", ""
+        if source_id is None:
+            raise HTTPException(status_code=422, detail="source_id is required for this source type")
+        from sqlalchemy import select  # noqa: PLC0415
+
+        row: Any = None
+        row_project: Any = None
+        title = description = ref = ""
+        if source_type == "rfi":
+            from app.modules.rfi.models import RFI  # noqa: PLC0415
+
+            row = await self.session.get(RFI, source_id)
+            if row is not None:
+                row_project = row.project_id
+                title, description, ref = row.subject or "", row.question or "", row.rfi_number or ""
+        elif source_type == "field_report":
+            from app.modules.fieldreports.models import FieldReport  # noqa: PLC0415
+
+            row = await self.session.get(FieldReport, source_id)
+            if row is not None:
+                row_project = row.project_id
+                ref = str(row.report_date)
+                description = "\n".join(p for p in (row.work_performed or "", row.delays or "") if p)
+        elif source_type == "daily_diary":
+            from app.modules.daily_diary.models import DailyDiary  # noqa: PLC0415
+
+            row = await self.session.get(DailyDiary, source_id)
+            if row is not None:
+                row_project = row.project_id
+                ref, description = str(row.diary_date), row.notes or ""
+        elif source_type == "daily_diary_entry":
+            from app.modules.daily_diary.models import DailyDiary, DiaryEntry  # noqa: PLC0415
+
+            row = await self.session.get(DiaryEntry, source_id)
+            if row is not None:
+                diary_row = (
+                    await self.session.execute(
+                        select(DailyDiary.project_id, DailyDiary.diary_date).where(DailyDiary.id == row.diary_id)
+                    )
+                ).first()
+                if diary_row is not None:
+                    row_project, ref = diary_row[0], str(diary_row[1])
+                title, description = row.title or "", row.description or ""
+        if row is None or (source_type != "site_instruction" and row_project != project_id):
+            raise HTTPException(status_code=404, detail="Field event not found in this project")
+        return title, description, ref
+
+    async def raise_notice_from_field_event(self, data: NoticeFromFieldEvent, user_id: str | None = None) -> Notice:
+        """Raise a notice from a diary entry, field report, RFI or site instruction, with a backlink.
+
+        One field event raises one notice: a second call returns the notice it already raised.
+        """
+        if data.source_id is not None:
+            for existing in await self.notice_repo.list_for_source(data.project_id, data.source_type, data.source_id):
+                return existing
+        title, description, ref = await self._resolve_field_event(data.project_id, data.source_type, data.source_id)
+        notice = await self.create_notice(
+            NoticeCreate(
+                project_id=data.project_id,
+                title=(data.title or title or ref or data.source_ref)[:500],
+                description=data.description or description,
+                recipient_type=data.recipient_type,
+                recipient_name=data.recipient_name,
+                target_response_date=data.target_response_date,
+                source_type=data.source_type,
+                source_id=data.source_id,
+                source_ref=(data.source_ref or ref)[:120],
+            ),
+            user_id=user_id,
+        )
+        _safe_publish(
+            "variations.notice.raised_from_field_event",
+            {
+                "project_id": str(data.project_id),
+                "notice_id": str(notice.id),
+                "source_type": data.source_type,
+                "source_id": str(data.source_id) if data.source_id else "",
             },
         )
         return notice

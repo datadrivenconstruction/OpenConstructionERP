@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "O contacto {contact} não está associado ao diretório de contactos, pelo que a mesma pessoa pode ficar registada duas vezes",
       "suggestion": "Adicione um endereço de e-mail ao contacto para que possa ser associado ao diretório"
+    },
+    "change_owner_linked": {
+      "fail": "A alteração de subempreitada {code} é back-to-back mas não indica nenhuma variação ou ordem de alteração do dono da obra",
+      "suggestion": "Associe a alteração do dono da obra repassada ou remova a marca back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "A alteração de subempreitada {code} não tem valor",
+      "suggestion": "Introduza o preço acordado da alteração, negativo para uma omissão"
+    },
+    "change_within_owner_value": {
+      "fail": "As alterações de subempreitada de {code} somam {sub_total}, mais do que o valor da alteração do dono da obra {owner_value}",
+      "suggestion": "Verifique os preços da subempreitada ou recupere a diferença junto do dono da obra antes de aprovar"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "A posição {ordinal} não está numerada como partida (dois dígitos por nível, como 03.02 ou 03.02.01)",
       "suggestion": "Numere cada item precificado pelo capítulo e pela subposição, como um presupuesto peruano lista suas partidas, por exemplo 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: o escopo complementado é {plug_total} de um total nivelado de {leveled_total} ({share}%, limite {threshold}%)",
+      "suggestion": "Peça ao proponente que oriente os itens em falta antes de confiar no total nivelado"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} itens em falta ou excluídos não têm valor de complemento (plug)",
+      "suggestion": "Defina um plug a partir do preço do orçamento, das outras propostas ou de um valor manual para cada lacuna"
+    },
+    "award_leveled": {
+      "fail": "O pacote {package} está a ser adjudicado sem um nivelamento de propostas calculado",
+      "suggestion": "Calcule o nivelamento para que o escopo em falta seja orçado antes da adjudicação"
     }
   }
 }

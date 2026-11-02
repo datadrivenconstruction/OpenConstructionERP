@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Yhteyshenkilö {contact} ei ole linkitetty yhteystietoluetteloon, joten sama henkilö voi olla tallennettu kahdesti",
       "suggestion": "Lisää yhteyshenkilölle sähköpostiosoite, jotta hänet voidaan yhdistää luetteloon"
+    },
+    "change_owner_linked": {
+      "fail": "Aliurakan muutos {code} on back-to-back, mutta ei nimeä tilaajan muutostyötä tai muutostilausta",
+      "suggestion": "Liitä eteenpäin siirrettävä tilaajan muutos tai poista back-to-back-merkintä"
+    },
+    "change_amount_set": {
+      "fail": "Aliurakan muutoksella {code} ei ole summaa",
+      "suggestion": "Syötä muutoksen sovittu hinta, vähennystyössä negatiivinen"
+    },
+    "change_within_owner_value": {
+      "fail": "Aliurakan muutokset kohteelle {code} ovat yhteensä {sub_total}, enemmän kuin tilaajan muutoksen arvo {owner_value}",
+      "suggestion": "Tarkista aliurakoitsijan hinnat tai peri erotus tilaajalta ennen hyväksyntää"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Kohtaa {ordinal} ei ole numeroitu partidana (kaksi numeroa tasoa kohden, esimerkiksi 03.02 tai 03.02.01)",
       "suggestion": "Numeroi jokainen hinnoiteltu rivi luvun ja kohdan mukaan, kuten perulainen presupuesto luettelee partidansa, esimerkiksi 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: täydennetty laajuus on {plug_total} tasatusta kokonaissummasta {leveled_total} ({share} %, raja {threshold} %)",
+      "suggestion": "Pyydä tarjoajaa hinnoittelemaan puuttuvat rivit ennen kuin luotat tasattuun summaan"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} puuttuvalla tai suljetulla rivillä ei ole täydennysarvoa (plug)",
+      "suggestion": "Aseta plug laskelman yksikköhinnasta, muista tarjouksista tai käsin annetusta arvosta jokaiselle aukolle"
+    },
+    "award_leveled": {
+      "fail": "Pakettia {package} ollaan myöntämässä ilman laskettua tarjousten tasausta",
+      "suggestion": "Laske tasaus, jotta puuttuva laajuus on hinnoiteltu ennen myöntämistä"
     }
   }
 }

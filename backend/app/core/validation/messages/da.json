@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Kontaktpersonen {contact} er ikke knyttet til kontaktregistret, så den samme person kan være registreret to gange",
       "suggestion": "Tilføj en e-mailadresse til kontaktpersonen, så den kan matches med registret"
+    },
+    "change_owner_linked": {
+      "fail": "Underentreprisetillæg {code} er back-to-back, men angiver ingen ændring eller tillægsarbejde fra bygherren",
+      "suggestion": "Knyt den bygherreændring, der videregives, eller fjern back-to-back-markeringen"
+    },
+    "change_amount_set": {
+      "fail": "Underentreprisetillæg {code} har intet beløb",
+      "suggestion": "Indtast den aftalte pris for ændringen, negativ ved fravalg"
+    },
+    "change_within_owner_value": {
+      "fail": "Underentreprisetillæggene for {code} udgør i alt {sub_total}, mere end bygherrens ændringsværdi {owner_value}",
+      "suggestion": "Kontroller underentreprenørens priser, eller kræv forskellen hos bygherren, før du godkender"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Position {ordinal} er ikke nummereret som partida (to cifre pr. niveau, f.eks. 03.02 eller 03.02.01)",
       "suggestion": "Nummerér hver prissat linje efter kapitel og post, sådan som et peruviansk presupuesto opfører sine partidas, f.eks. 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: suppleret omfang er {plug_total} af en udlignet sum på {leveled_total} ({share} %, grænse {threshold} %)",
+      "suggestion": "Bed tilbudsgiveren prissætte de manglende poster, før du stoler på den udlignede sum"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} manglende eller udeladte poster har ingen supplerende værdi (plug)",
+      "suggestion": "Sæt en plug ud fra kalkulationens pris, de øvrige tilbud eller en manuel værdi for hvert hul"
+    },
+    "award_leveled": {
+      "fail": "Pakke {package} tildeles uden en beregnet tilbudsudligning",
+      "suggestion": "Beregn udligningen, så manglende omfang er prissat før tildeling"
     }
   }
 }

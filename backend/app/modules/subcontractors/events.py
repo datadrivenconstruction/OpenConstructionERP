@@ -263,3 +263,13 @@ def register_subcontractor_rating_subscribers() -> None:
 # Eagerly register on import - module_loader picks this up when the
 # subcontractors module is loaded (same pattern as procurement.events).
 register_subcontractor_rating_subscribers()
+
+
+def register_award_bridge() -> None:
+    """A subcontract package award writes its subcontract agreement (see ``award_bridge``)."""
+    from app.modules.subcontractors.award_bridge import on_contract_drafted_from_bid_award  # noqa: PLC0415
+
+    event_bus.subscribe_once("contracts.contract.drafted_from_bid_award", on_contract_drafted_from_bid_award)  # type: ignore[arg-type]
+
+
+register_award_bridge()

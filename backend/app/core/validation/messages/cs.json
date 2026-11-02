@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Kontaktní osoba {contact} není propojena s adresářem kontaktů, takže stejná osoba může být evidována dvakrát",
       "suggestion": "Doplňte kontaktní osobě e-mailovou adresu, aby ji bylo možné spárovat s adresářem"
+    },
+    "change_owner_linked": {
+      "fail": "Změna subdodávky {code} je back-to-back, ale neuvádí žádné vícepráce ani změnový list investora",
+      "suggestion": "Propojte změnu investora, kterou předává dál, nebo zrušte příznak back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "Změna subdodávky {code} nemá částku",
+      "suggestion": "Zadejte dohodnutou cenu změny, u méněprací zápornou"
+    },
+    "change_within_owner_value": {
+      "fail": "Změny subdodávky pro {code} činí celkem {sub_total}, více než hodnota změny investora {owner_value}",
+      "suggestion": "Zkontrolujte ceny subdodavatele nebo před schválením vymáhejte rozdíl od investora"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Pozice {ordinal} není očíslována jako partida (dvě číslice na úroveň, například 03.02 nebo 03.02.01)",
       "suggestion": "Očíslujte každý oceněný řádek podle kapitoly a položky, jak peruánský presupuesto uvádí své partidy, například 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: doplněný rozsah činí {plug_total} z vyrovnaného součtu {leveled_total} ({share} %, limit {threshold} %)",
+      "suggestion": "Požádejte uchazeče o ocenění chybějících položek, než se spolehnete na vyrovnaný součet"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} chybějících nebo vyloučených položek nemá doplňkovou hodnotu (plug)",
+      "suggestion": "Nastavte plug podle ceny z rozpočtu, ostatních nabídek nebo ručně pro každou mezeru"
+    },
+    "award_leveled": {
+      "fail": "Balíček {package} se zadává bez vypočteného vyrovnání nabídek",
+      "suggestion": "Vypočtěte vyrovnání, aby byl chybějící rozsah před zadáním oceněn"
     }
   }
 }

@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Contactpersoon {contact} is niet gekoppeld aan de contactenlijst, waardoor dezelfde persoon dubbel kan worden opgeslagen",
       "suggestion": "Voeg een e-mailadres toe aan de contactpersoon zodat deze met de lijst kan worden gekoppeld"
+    },
+    "change_owner_linked": {
+      "fail": "Subcontractwijziging {code} is back-to-back maar noemt geen meer- of minderwerk of wijzigingsopdracht van de opdrachtgever",
+      "suggestion": "Koppel de wijziging van de opdrachtgever die wordt doorgegeven of verwijder de back-to-back-markering"
+    },
+    "change_amount_set": {
+      "fail": "Subcontractwijziging {code} heeft geen bedrag",
+      "suggestion": "Voer de overeengekomen prijs van de wijziging in, negatief voor minderwerk"
+    },
+    "change_within_owner_value": {
+      "fail": "De subcontractwijzigingen voor {code} bedragen samen {sub_total}, meer dan de waarde van de wijziging van de opdrachtgever {owner_value}",
+      "suggestion": "Controleer de prijzen van de onderaannemer of verhaal het verschil op de opdrachtgever voordat u goedkeurt"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Post {ordinal} is niet genummerd als partida (twee cijfers per niveau, zoals 03.02 of 03.02.01)",
       "suggestion": "Nummer elke geprijsde regel naar hoofdstuk en post, zoals een Peruaanse presupuesto de partidas indeelt, bijvoorbeeld 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: aangevuld werkpakket is {plug_total} van een genivelleerd totaal van {leveled_total} ({share}%, drempel {threshold}%)",
+      "suggestion": "Vraag de inschrijver de ontbrekende regels te prijzen voordat u op het genivelleerde totaal vertrouwt"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} ontbrekende of uitgesloten regels hebben geen aanvulwaarde (plug)",
+      "suggestion": "Stel per hiaat een plug in op basis van het begrotingstarief, de andere offertes of een handmatige waarde"
+    },
+    "award_leveled": {
+      "fail": "Pakket {package} wordt gegund zonder berekende offertenivellering",
+      "suggestion": "Bereken de nivellering zodat ontbrekend werk vóór de gunning is geprijsd"
     }
   }
 }

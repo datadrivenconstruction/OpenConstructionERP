@@ -11932,6 +11932,112 @@ class _SubmittalRule(ValidationRule):
         ]
 
 
+class SubcontractChangeOwnerLinked(_SubcontractRule):
+    """A back-to-back subcontract change must name the owner change it passes down."""
+
+    rule_id = "subcontract.change_owner_linked"
+    name = "Subcontract Change Linked To Owner Change"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a back-to-back subcontract change with no owner variation or change order linked."
+    check_name = "check_change_owner_link"
+
+
+class SubcontractChangeAmountSet(_SubcontractRule):
+    """A subcontract change must carry an amount."""
+
+    rule_id = "subcontract.change_amount_set"
+    name = "Subcontract Change Amount Set"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a subcontract change with a zero amount."
+    check_name = "check_change_amount_nonzero"
+
+
+class SubcontractChangeWithinOwnerValue(_SubcontractRule):
+    """The subcontract side of an owner change should not exceed what the owner pays."""
+
+    rule_id = "subcontract.change_within_owner_value"
+    name = "Subcontract Changes Within Owner Change Value"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Flags an owner change whose subcontract changes cost more than the owner grants."
+    check_name = "check_change_margin"
+
+
+class _BidLevelingRule(_SubcontractRule):
+    """Same translation body as the subcontract rules, over ``bid_management.validators``."""
+
+    standard = "bid_management"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        payload = context.data if isinstance(context.data, dict) else {}
+        if not payload:
+            return []
+        from app.modules.bid_management import validators as bid_checks
+
+        findings = getattr(bid_checks, self.check_name)(payload)
+        if not findings:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message=_ok(locale),
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(self._message_key("fail"), locale=locale, **finding.params),
+                element_ref=finding.element_ref,
+                details=dict(finding.details),
+                suggestion=translate(self._message_key("suggestion"), locale=locale),
+            )
+            for finding in findings
+        ]
+
+
+class BidPlugShareWithinThreshold(_BidLevelingRule):
+    """Plugs should not make up a large part of a leveled bid."""
+
+    rule_id = "bid_leveling.plug_share"
+    name = "Bid Plug Share Within Threshold"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Flags a bidder whose plugged scope is more than the threshold share of the leveled total."
+    check_name = "check_plug_share"
+
+
+class BidGapsPlugged(_BidLevelingRule):
+    """Every missing or excluded line should carry a plug value."""
+
+    rule_id = "bid_leveling.gaps_plugged"
+    name = "Bid Scope Gaps Plugged"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags missing or excluded scope lines with no estimate rate, other bid or manual plug."
+    check_name = "check_gaps_plugged"
+
+
+class BidAwardLeveled(_BidLevelingRule):
+    """An award should follow a computed leveling."""
+
+    rule_id = "bid_leveling.award_leveled"
+    name = "Bid Award After Leveling"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags an award on a package whose bids were never leveled."
+    check_name = "check_award_leveled"
+
+
 class SubmittalReviewerAssigned(_SubmittalRule):
     """A submitted submittal must name the reviewer it is waiting on."""
 
@@ -12425,6 +12531,14 @@ def register_builtin_rules() -> None:
         (SubcontractInsuranceValidAtStart(), ["subcontract"]),
         (SubcontractUnlinkedContractTwin(), ["subcontract"]),
         (SubcontractContactLinked(), ["subcontract"]),
+        # Subcontract changes (owner change -> subcontract change chain)
+        (SubcontractChangeOwnerLinked(), ["subcontract_change"]),
+        (SubcontractChangeAmountSet(), ["subcontract_change"]),
+        (SubcontractChangeWithinOwnerValue(), ["subcontract_change"]),
+        # Bid leveling with plugs, and the award that follows it
+        (BidPlugShareWithinThreshold(), ["bid_leveling", "bid_award"]),
+        (BidGapsPlugged(), ["bid_leveling", "bid_award"]),
+        (BidAwardLeveled(), ["bid_award"]),
         # Submittals (submission gate)
         # Registered into the "submittal" set, which
         # SubmittalService._validate_submittal passes on submit and on the

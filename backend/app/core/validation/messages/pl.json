@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Osoba kontaktowa {contact} nie jest powiązana z katalogiem kontaktów, więc ta sama osoba może zostać zapisana dwukrotnie",
       "suggestion": "Dodaj osobie kontaktowej adres e-mail, aby można ją było dopasować do katalogu"
+    },
+    "change_owner_linked": {
+      "fail": "Zmiana podwykonawcza {code} jest typu back-to-back, ale nie wskazuje żadnej zmiany ani zlecenia zmiany inwestora",
+      "suggestion": "Powiąż zmianę inwestora, którą przekazuje, albo usuń znacznik back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "Zmiana podwykonawcza {code} nie ma kwoty",
+      "suggestion": "Wpisz uzgodnioną cenę zmiany, ujemną dla robót zaniechanych"
+    },
+    "change_within_owner_value": {
+      "fail": "Zmiany podwykonawcze dla {code} wynoszą razem {sub_total}, więcej niż wartość zmiany inwestora {owner_value}",
+      "suggestion": "Sprawdź ceny podwykonawcy lub odzyskaj różnicę od inwestora przed zatwierdzeniem"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Pozycja {ordinal} nie jest numerowana jako partida (po dwie cyfry na każdym poziomie, np. 03.02 lub 03.02.01)",
       "suggestion": "Numeruj każdą wycenioną pozycję według działu i podpozycji, tak jak peruwiański presupuesto wykazuje partidas, np. 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: uzupełniony zakres to {plug_total} z wyrównanej sumy {leveled_total} ({share}%, próg {threshold}%)",
+      "suggestion": "Poproś oferenta o wycenę brakujących pozycji, zanim zaufasz wyrównanej sumie"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} brakujących lub wyłączonych pozycji nie ma wartości uzupełniającej (plug)",
+      "suggestion": "Ustaw plug na podstawie stawki z kosztorysu, pozostałych ofert lub wartości ręcznej dla każdej luki"
+    },
+    "award_leveled": {
+      "fail": "Pakiet {package} jest udzielany bez obliczonego wyrównania ofert",
+      "suggestion": "Oblicz wyrównanie, aby brakujący zakres był wyceniony przed udzieleniem zamówienia"
     }
   }
 }

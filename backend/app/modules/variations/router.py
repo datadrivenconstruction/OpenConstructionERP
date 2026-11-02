@@ -43,6 +43,7 @@ from app.modules.variations.schemas import (
     FinalAccountUpdate,
     NEC4TimerStatusResponse,
     NoticeCreate,
+    NoticeFromFieldEvent,
     NoticeListResponse,
     NoticeResponse,
     NoticeUpdate,
@@ -180,6 +181,36 @@ async def create_notice(
     await verify_project_access(data.project_id, user_id, session)
     notice = await service.create_notice(data, user_id=user_id)
     return NoticeResponse.model_validate(notice)
+
+
+@router.post("/notices/from-field-event/", response_model=NoticeResponse, status_code=201)
+async def raise_notice_from_field_event(
+    data: NoticeFromFieldEvent,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("variations.create")),
+    service: VariationsService = Depends(_get_service),
+) -> NoticeResponse:
+    """Raise a notice from a diary entry, field report, RFI or site instruction (idempotent per event)."""
+    await verify_project_access(data.project_id, user_id, session)
+    notice = await service.raise_notice_from_field_event(data, user_id=user_id)
+    return NoticeResponse.model_validate(notice)
+
+
+@router.get("/notices/by-source/{source_type}/{source_id}", response_model=list[NoticeResponse])
+async def notices_for_field_event(
+    source_type: str,
+    source_id: uuid.UUID,
+    project_id: uuid.UUID,
+    user_id: CurrentUserId,
+    session: SessionDep,
+    _perm: None = Depends(RequirePermission("variations.read")),
+    service: VariationsService = Depends(_get_service),
+) -> list[NoticeResponse]:
+    """The notices a field event raised, so the diary or RFI can show its backlink."""
+    await verify_project_access(project_id, user_id, session)
+    rows = await service.notice_repo.list_for_source(project_id, source_type, source_id)
+    return [NoticeResponse.model_validate(r) for r in rows]
 
 
 @router.get("/notices/{notice_id}", response_model=NoticeResponse)

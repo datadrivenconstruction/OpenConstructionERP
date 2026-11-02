@@ -52,6 +52,7 @@ from app.modules.bid_management.award_contract import (
     free_contract_code,
     resolve_award_counterparty,
 )
+from app.modules.bid_management.award_route import CONTRACT, tender_award_route
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +154,12 @@ async def _draft(package_id: uuid.UUID, bid_id: uuid.UUID, *, awarded_by: object
             logger.warning(
                 "tender.awarded: package %s is not awarded to bid %s; no contract drafted", package_id, bid_id
             )
+            return
+        # One award, one commitment (award_route): a tender that a bid package is
+        # linked to is awarded through that package; a supply tender becomes an order.
+        route = await tender_award_route(session, package)
+        if route != CONTRACT:
+            logger.info("tender.awarded: package %s routes to %s; no contract drafted", package_id, route)
             return
 
         linked_bid_packages = (

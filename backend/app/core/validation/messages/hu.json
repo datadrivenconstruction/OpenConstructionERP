@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "A {contact} kapcsolattartó nincs összekapcsolva a partnerlistával, ezért ugyanaz a személy kétszer is szerepelhet",
       "suggestion": "Adjon e-mail-címet a kapcsolattartóhoz, hogy össze lehessen párosítani a listával"
+    },
+    "change_owner_linked": {
+      "fail": "A {code} alvállalkozói módosítás back-to-back, de nem nevez meg megrendelői pótmunkát vagy módosítási megrendelést",
+      "suggestion": "Kapcsolja a továbbadott megrendelői módosítást, vagy törölje a back-to-back jelölést"
+    },
+    "change_amount_set": {
+      "fail": "A {code} alvállalkozói módosításnak nincs összege",
+      "suggestion": "Adja meg a módosítás megállapodott árát, elmaradó munkánál negatívan"
+    },
+    "change_within_owner_value": {
+      "fail": "A(z) {code} alvállalkozói módosításai összesen {sub_total}, ami több, mint a megrendelői módosítás értéke ({owner_value})",
+      "suggestion": "Ellenőrizze az alvállalkozó árait, vagy jóváhagyás előtt hárítsa a különbözetet a megrendelőre"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "A(z) {ordinal}. pozíció nincs partidaként számozva (szintenként két számjegy, például 03.02 vagy 03.02.01)",
       "suggestion": "Minden árazott tételt fejezete és tételszáma szerint számozzon, ahogy a perui presupuesto listázza a partidákat, például 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: a pótolt tartalom {plug_total} a {leveled_total} kiegyenlített összesenből ({share}%, küszöb {threshold}%)",
+      "suggestion": "Kérje meg az ajánlattevőt a hiányzó tételek beárazására, mielőtt a kiegyenlített összesenre támaszkodik"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} hiányzó vagy kizárt tételnek nincs pótlóértéke (plug)",
+      "suggestion": "Állítson be plug-ot a költségvetési egységárból, a többi ajánlatból vagy kézi értékkel minden hiányhoz"
+    },
+    "award_leveled": {
+      "fail": "A(z) {package} csomagot számított ajánlatkiegyenlítés nélkül ítélik oda",
+      "suggestion": "Számolja ki a kiegyenlítést, hogy a hiányzó tartalom az odaítélés előtt be legyen árazva"
     }
   }
 }

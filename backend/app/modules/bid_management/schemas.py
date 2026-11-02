@@ -14,6 +14,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 # ── BidPackage ────────────────────────────────────────────────────────────
 
 _PACKAGE_STATUS = r"^(draft|published|open|closed|cancelled|awarded)$"
+_PACKAGE_TYPE = r"^(subcontract|supply)$"
 _CONFIDENTIALITY = r"^(public|limited|confidential)$"
 _INVITATION_STATUS = r"^(pending|sent|opened|submitted|declined|expired)$"
 _BIDDER_STATUS = r"^(active|disqualified|withdrawn)$"
@@ -43,6 +44,7 @@ class BidPackageCreate(BaseModel):
     total_budget_estimate: Decimal = Decimal("0")
     status: str = Field(default="draft", pattern=_PACKAGE_STATUS)
     confidentiality_level: str = Field(default="limited", pattern=_CONFIDENTIALITY)
+    package_type: str = Field(default="subcontract", pattern=_PACKAGE_TYPE)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
     _currency_required = field_validator("currency")(_required_package_currency)
@@ -63,6 +65,7 @@ class BidPackageUpdate(BaseModel):
     total_budget_estimate: Decimal | None = None
     status: str | None = Field(default=None, pattern=_PACKAGE_STATUS)
     confidentiality_level: str | None = Field(default=None, pattern=_CONFIDENTIALITY)
+    package_type: str | None = Field(default=None, pattern=_PACKAGE_TYPE)
     metadata: dict[str, Any] | None = None
 
     _currency_required = field_validator("currency")(_required_package_currency)
@@ -86,6 +89,7 @@ class BidPackageResponse(BaseModel):
     total_budget_estimate: Decimal = Decimal("0")
     status: str = "draft"
     confidentiality_level: str = "limited"
+    package_type: str = "subcontract"
     published_at: str | None = None
     closed_at: str | None = None
     awarded_at: str | None = None
@@ -538,8 +542,40 @@ class BidLevelingResponse(BaseModel):
     rank: int = 0
     manual_adjustment: Decimal = Decimal("0")
     manual_adjustment_reason: str = ""
+    # Totals with and without plugs: raw_total is what the bidder priced,
+    # plugged_total adds the plugs for the scope the bidder left out.
+    plug_total: Decimal = Decimal("0")
+    plugged_total: Decimal = Decimal("0")
+    gap_lines: int = 0
+    unpriced_gap_lines: int = 0
     created_at: datetime
     updated_at: datetime
+
+
+class BidLevelingPlugResponse(BaseModel):
+    """A plug on one gap, with where its value came from."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    comparison_id: UUID
+    bidder_id: UUID
+    line_item_id: UUID
+    amount: Decimal = Decimal("0")
+    source: str = "none"
+    reason: str = "missing"
+    note: str = ""
+
+
+class BidLevelingPlugSet(BaseModel):
+    """Set a manual plug, or clear it (``amount`` null) to return to the computed one."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    bidder_id: UUID
+    line_item_id: UUID
+    amount: Decimal | None = Field(default=None, ge=0, max_digits=18, decimal_places=2)
+    note: str = Field(default="", max_length=2000)
 
 
 class LevelingTableResponse(BaseModel):

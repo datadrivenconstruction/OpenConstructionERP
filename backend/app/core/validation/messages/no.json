@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Kontaktpersonen {contact} er ikke koblet til kontaktregisteret, så samme person kan være registrert to ganger",
       "suggestion": "Legg til en e-postadresse for kontaktpersonen, så den kan matches mot registeret"
+    },
+    "change_owner_linked": {
+      "fail": "Underentreprisenedring {code} er back-to-back, men oppgir ingen endring eller endringsordre fra byggherren",
+      "suggestion": "Knytt byggherrens endring som videreføres, eller fjern back-to-back-markeringen"
+    },
+    "change_amount_set": {
+      "fail": "Underentreprisenedring {code} har ikke beløp",
+      "suggestion": "Angi avtalt pris for endringen, negativ ved bortfall"
+    },
+    "change_within_owner_value": {
+      "fail": "Underentreprisendringene for {code} utgjør til sammen {sub_total}, mer enn byggherrens endringsverdi {owner_value}",
+      "suggestion": "Kontroller underentreprenørens priser, eller krev differansen fra byggherren før godkjenning"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Post {ordinal} er ikke nummerert som partida (to siffer per nivå, for eksempel 03.02 eller 03.02.01)",
       "suggestion": "Nummerer hver prissatt linje etter kapittel og post, slik en peruansk presupuesto lister sine partidas, for eksempel 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: supplert omfang er {plug_total} av en utjevnet sum på {leveled_total} ({share} %, grense {threshold} %)",
+      "suggestion": "Be tilbyderen prise de manglende postene før du stoler på den utjevnede summen"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} manglende eller utelatte poster har ingen suppleringsverdi (plug)",
+      "suggestion": "Sett en plug fra kalkylepris, de andre tilbudene eller en manuell verdi for hvert hull"
+    },
+    "award_leveled": {
+      "fail": "Pakke {package} tildeles uten en beregnet tilbudsutjevning",
+      "suggestion": "Beregn utjevningen slik at manglende omfang er priset før tildeling"
     }
   }
 }

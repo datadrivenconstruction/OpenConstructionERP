@@ -878,6 +878,18 @@
     "contact_linked": {
       "fail": "Ang contact person na {contact} ay hindi naka-link sa directory ng mga contact, kaya maaaring doble ang pagkakatala ng iisang tao",
       "suggestion": "Maglagay ng email address sa contact person upang maitugma ito sa directory"
+    },
+    "change_owner_linked": {
+      "fail": "Ang pagbabago sa subcontract na {code} ay back-to-back pero walang binanggit na variation o change order ng may-ari",
+      "suggestion": "Iugnay ang pagbabago ng may-ari na ipinapasa, o alisin ang back-to-back na marka"
+    },
+    "change_amount_set": {
+      "fail": "Walang halaga ang pagbabago sa subcontract na {code}",
+      "suggestion": "Ilagay ang napagkasunduang presyo ng pagbabago, negatibo kapag binawas"
+    },
+    "change_within_owner_value": {
+      "fail": "Ang mga pagbabago sa subcontract para sa {code} ay may kabuuang {sub_total}, mas mataas kaysa sa halaga ng pagbabago ng may-ari na {owner_value}",
+      "suggestion": "Suriin ang presyo ng subcontractor o singilin ang pagkakaiba sa may-ari bago aprubahan"
     }
   },
   "submittal": {
@@ -1451,6 +1463,20 @@
     "partida_numbering": {
       "fail": "Hindi naka-numero bilang partida ang posisyon {ordinal} (dalawang digit bawat antas, tulad ng 03.02 o 03.02.01)",
       "suggestion": "I-numero ang bawat presyong linya ayon sa kabanata at item, gaya ng paglista ng presupuesto ng Peru sa mga partida nito, halimbawa 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: ang pinunan (plug) na saklaw ay {plug_total} mula sa naka-level na kabuuang {leveled_total} ({share}%, limitasyon {threshold}%)",
+      "suggestion": "Hilingin sa bidder na presyuhan ang mga kulang na linya bago umasa sa naka-level na kabuuan"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} kulang o hindi isinamang linya ang walang plug value",
+      "suggestion": "Magtakda ng plug mula sa rate ng estimate, sa ibang bid, o manu-manong halaga para sa bawat kulang"
+    },
+    "award_leveled": {
+      "fail": "Ang package na {package} ay igagawad nang walang kinuwentang bid leveling",
+      "suggestion": "Kuwentahin ang leveling para mapresyuhan ang kulang na saklaw bago igawad"
     }
   }
 }
