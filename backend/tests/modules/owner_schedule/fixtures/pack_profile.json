@@ -1,0 +1,11 @@
+{
+  "key": "agency_unit_price",
+  "name": "Example agency unit price schedule",
+  "file_type": "xlsx",
+  "sheet": "Bid Schedule",
+  "first_data_row": 6,
+  "columns": {"item_no": "A", "description": "B", "unit": "C", "quantity": "D", "unit_price": "E", "amount": "F"},
+  "numbering_pattern": "[0-9]{4}-[0-9]{3}",
+  "rounding": {"unit_price_decimals": 2, "amount_decimals": 2, "amount_mode": "round_qty_x_price"},
+  "alternates_required": true
+}
