@@ -19,6 +19,7 @@ manifest = ModuleManifest(
     author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_projects", "oe_users"],
+    markets=["DE", "ES", "FR", "GB", "HU", "IE", "IT", "US"],
     auto_install=True,
     enabled=True,
 )

@@ -2829,6 +2829,10 @@ def create_app() -> FastAPI:
     from app.core.solution_packages_router import router as solution_packages_router
 
     app.include_router(solution_packages_router)
+    # Market scope: which country-specific modules, units and rule sets a tenant sees.
+    from app.core.market_router import router as market_router
+
+    app.include_router(market_router)
     # Canonical Packs-umbrella alias (/api/v1/packs/*) sharing the same handlers.
     app.include_router(packs_alias_router)
     _active_pack = get_active_pack()

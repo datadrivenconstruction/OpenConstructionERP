@@ -216,6 +216,9 @@ class ModuleManifest:
     display_name_i18n: dict[str, str] = field(default_factory=dict)  # {"de": "...", "ru": "..."}
     auto_install: bool = False
     enabled: bool = True
+    # ISO 3166-1 alpha-2 markets this module serves; "*" is every market. A tagged
+    # module is hidden for tenants whose market profile does not overlap it.
+    markets: list[str] = field(default_factory=lambda: ["*"])
     # What this module does with inference, or None when nobody has said yet.
     #
     # The default is None rather than InferenceRole.NONE, and the difference is
@@ -661,6 +664,7 @@ class ModuleLoader:
                     "loaded": loaded,
                     "enabled": name not in self._disabled,
                     "is_core": manifest.category == "core",
+                    "markets": list(manifest.markets),
                 }
             )
 
@@ -879,6 +883,7 @@ class ModuleLoader:
             "depends": manifest.depends,
             "optional_depends": manifest.optional_depends,
             "auto_install": manifest.auto_install,
+            "markets": list(manifest.markets),
             "is_core": manifest.category == "core",
             "enabled": name not in self._disabled,
             "loaded": loaded is not None,
