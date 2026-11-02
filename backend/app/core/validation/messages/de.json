@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Treuhandkonto {account}: freigegeben {released} überschreitet die Obergrenze {cap} (bescheinigter Baufortschritt {progress}% der eingezahlten Mittel)",
       "suggestion": "Weitere Freigaben bis zur nächsten Fortschrittsbescheinigung zurückhalten oder die Bescheinigung erfassen, die den Fortschritt erhöht"
+    },
+    "broker_licence_default_label": "Maklerlizenz",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Makler {broker} verfügte am {date} für {deal} über keine gültige {label}",
+      "suggestion": "Erfassen Sie eine Lizenz, die das Abschlussdatum abdeckt, oder übertragen Sie den Abschluss an einen lizenzierten Makler"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "Die {label} von Makler {broker} endet am {date}, in {days} Tagen",
+      "suggestion": "Erneuern Sie die Lizenz vor Ablauf und aktualisieren Sie den Lizenzeintrag"
     }
   },
   "schedule_5d": {

@@ -15,6 +15,8 @@ Each rule reads a plain dict built by the service (see ``LeasingService.validati
   functional currency.
 * ``leasing.tenant_identifier`` (ERROR): the tenant carries an identifier the country requires;
   no requirement in the country data, nothing to check.
+* ``leasing.broker_licence`` (ERROR): a lease let through a broker (``ext_refs.broker_id``) needs a
+  licence active on the start date, where the country's broker licence policy is on.
 
 Messages are English with ``details`` carrying the figures; the UI renders them
 from its own keys per ``rule_id``.
@@ -194,6 +196,56 @@ class TenantIdentifierRule(_LeaseRule):
         ]
 
 
+class BrokerLicenceRule(_LeaseRule):
+    rule_id = "leasing.broker_licence"
+    name = "Letting broker holds a valid licence"
+    category = RuleCategory.COMPLIANCE
+    description = "A lease let through a broker needs a broker licence valid on the start date, where the country asks"
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        from datetime import date
+        from types import SimpleNamespace
+
+        from app.core.regional_packages import broker_licence_policy
+        from app.core.validation.rules.broker_licence import licence_held_on
+
+        data = _data(context)
+        broker = data.get("broker")
+        policy = broker_licence_policy(data.get("country"))
+        if not isinstance(broker, dict) or not policy.get("enabled_by_default"):
+            return []
+        try:
+            start = date.fromisoformat(str(_lease(context).get("start_date") or "")[:10])
+        except ValueError:
+            return []
+
+        def _d(value: object) -> date | None:
+            return date.fromisoformat(str(value)[:10]) if value else None
+
+        licences = [
+            SimpleNamespace(
+                status=str(lic.get("status") or ""),
+                authority_code=str(lic.get("authority_code") or ""),
+                valid_from=_d(lic.get("valid_from")),
+                valid_to=_d(lic.get("valid_to")),
+            )
+            for lic in broker.get("licences") or []
+        ]
+        authority = str(policy.get("authority_code") or "")
+        label = str(policy.get("licence_label") or "broker licence")
+        held = licence_held_on(licences, start, authority)
+        return [
+            self._result(
+                context,
+                held is not None,
+                f"The broker {broker.get('name') or ''} holds no valid {label} on {start.isoformat()}.",
+                broker_id=str(broker.get("id") or ""),
+                start_date=start.isoformat(),
+                authority=authority,
+            )
+        ]
+
+
 _RULES: tuple[ValidationRule, ...] = (
     EndAfterStartRule(),
     NoOverlapRule(),
@@ -201,6 +253,7 @@ _RULES: tuple[ValidationRule, ...] = (
     DepositWithinCapRule(),
     CurrencyMatchesEntityRule(),
     TenantIdentifierRule(),
+    BrokerLicenceRule(),
 )
 
 

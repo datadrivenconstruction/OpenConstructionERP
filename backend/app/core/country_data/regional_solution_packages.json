@@ -15,6 +15,15 @@
           "calendar": {"primary": "gregorian", "secondary": "hijri_umm_al_qura"},
           "vat": {"standard_rate_percent": "15", "source_url": "https://zatca.gov.sa/en/RulesRegulations/Taxes/Pages/default.aspx"},
           "offplan_regulator": {"code": "REGA", "label": "REGA (Real Estate General Authority), Wafi off-plan programme", "licence_field": "rega_licence_no", "escrow_regulator_ref": "rega_saudi", "source_url": "https://rega.gov.sa/"},
+          "broker_licence": {
+            "enabled_by_default": true,
+            "authority_code": "REGA",
+            "authority_label": "Real Estate General Authority",
+            "licence_label": "FAL licence",
+            "expiry_warning_days": [60, 30],
+            "note": "Configurable per instance. The authority, the label and the default enforcement are the platform's reading of the broker licensing regime; confirm the licence classes, validity rules and any grace period against the regulator before relying on them.",
+            "source_url": "https://rega.gov.sa/"
+          },
           "lease_export_profile": "ejar",
           "tenant_identifier_schemes": ["national_id", "cr", "unified_700"],
           "confidence": "M"

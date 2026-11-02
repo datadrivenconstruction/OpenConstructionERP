@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Spärrkonto {account}: frisläppt {released} överstiger taket {cap} (certifierad framdrift {progress}% av inbetalda medel)",
       "suggestion": "Håll inne ytterligare frisläppningar till nästa framdriftscertifikat, eller registrera certifikatet som höjer framdriften"
+    },
+    "broker_licence_default_label": "mäklarlicens",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Mäklaren {broker} hade ingen giltig {label} den {date} för {deal}",
+      "suggestion": "Registrera en licens som täcker affärsdatumet eller flytta affären till en licensierad mäklare"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} för mäklaren {broker} går ut {date}, om {days} dagar",
+      "suggestion": "Förnya licensen innan den går ut och uppdatera licensregistret"
     }
   },
   "schedule_5d": {

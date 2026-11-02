@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Escrow účet {account}: uvolněno {released} překračuje limit {cap} (certifikovaný postup {progress}% vybraných prostředků)",
       "suggestion": "Další uvolnění pozdržte do dalšího certifikátu postupu, nebo zaznamenejte certifikát, který postup zvyšuje"
+    },
+    "broker_licence_default_label": "makléřská licence",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Makléř {broker} k datu {date} pro {deal} neměl platnou {label}",
+      "suggestion": "Zaznamenejte licenci pokrývající datum obchodu, nebo převeďte obchod na licencovaného makléře"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} makléře {broker} končí {date}, za {days} dní",
+      "suggestion": "Obnovte licenci před jejím koncem a aktualizujte záznam o licenci"
     }
   },
   "schedule_5d": {

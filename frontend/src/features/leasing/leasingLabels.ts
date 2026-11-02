@@ -102,6 +102,10 @@ export function ruleLabel(ruleId: string, fallback: string, t: Translate): strin
       return t('leasing.rule_tenant_identifier', {
         defaultValue: 'The tenant needs the identifier the country requires.',
       });
+    case 'leasing.broker_licence':
+      return t('leasing.rule_broker_licence', {
+        defaultValue: 'The letting broker holds no valid licence on the lease start date.',
+      });
     default:
       return fallback;
   }

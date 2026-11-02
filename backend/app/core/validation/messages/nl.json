@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Escrowrekening {account}: vrijgegeven {released} overschrijdt het plafond {cap} (gecertificeerde voortgang {progress}% van het ontvangen geld)",
       "suggestion": "Houd verdere vrijgaven tegen tot het volgende voortgangscertificaat, of registreer het certificaat dat de voortgang verhoogt"
+    },
+    "broker_licence_default_label": "makelaarsvergunning",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Makelaar {broker} had op {date} geen geldige {label} voor {deal}",
+      "suggestion": "Registreer een vergunning die de datum van de transactie dekt, of draag de transactie over aan een gecertificeerde makelaar"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "De {label} van makelaar {broker} loopt af op {date}, over {days} dagen",
+      "suggestion": "Verleng de vergunning voordat deze verloopt en werk het vergunningsrecord bij"
     }
   },
   "schedule_5d": {

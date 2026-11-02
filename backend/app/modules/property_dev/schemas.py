@@ -2033,6 +2033,58 @@ class BrokerResponse(BaseModel):
     updated_at: datetime
 
 
+_LICENCE_STATUS = r"^(active|suspended|revoked|expired)$"
+
+
+class BrokerLicenceCreate(BaseModel):
+    """Create a licence record for a broker."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    authority_code: str = Field(..., min_length=1, max_length=40)
+    licence_number: str = Field(..., min_length=1, max_length=120)
+    valid_from: date | None = None
+    valid_to: date | None = None
+    status: str = Field(default="active", pattern=_LICENCE_STATUS)
+    metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _window_is_ordered(self) -> BrokerLicenceCreate:
+        if self.valid_from and self.valid_to and self.valid_to < self.valid_from:
+            raise ValueError("valid_to must not be before valid_from")
+        return self
+
+
+class BrokerLicenceUpdate(BaseModel):
+    """Partial update for a licence record."""
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    authority_code: str | None = Field(default=None, min_length=1, max_length=40)
+    licence_number: str | None = Field(default=None, min_length=1, max_length=120)
+    valid_from: date | None = None
+    valid_to: date | None = None
+    status: str | None = Field(default=None, pattern=_LICENCE_STATUS)
+    metadata: dict[str, Any] | None = None
+
+
+class BrokerLicenceResponse(BaseModel):
+    """Broker licence as returned by the API."""
+
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True)
+
+    id: UUID
+    broker_id: UUID
+    authority_code: str
+    licence_number: str
+    valid_from: date | None = None
+    valid_to: date | None = None
+    status: str = "active"
+    metadata: dict[str, Any] = Field(default_factory=dict, validation_alias="metadata_")
+    created_at: datetime
+    updated_at: datetime
+
+
 # ── Commission structure (discriminated union) ─────────────────────────
 
 
@@ -2749,6 +2801,9 @@ __all_task_138__ = (
     "BlockResponse",
     "BlockUpdate",
     "BrokerCreate",
+    "BrokerLicenceCreate",
+    "BrokerLicenceResponse",
+    "BrokerLicenceUpdate",
     "BrokerResponse",
     "BrokerUpdate",
     "CommissionAccrualPayRequest",

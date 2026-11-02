@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Cont escrow {account}: suma eliberată {released} depășește plafonul {cap} (progres certificat de {progress}% din banii încasați)",
       "suggestion": "Rețineți eliberările ulterioare până la următorul certificat de progres sau înregistrați certificatul care ridică progresul"
+    },
+    "broker_licence_default_label": "licență de agent imobiliar",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Agentul {broker} nu avea o {label} valabilă la data de {date} pentru {deal}",
+      "suggestion": "Înregistrați o licență care acoperă data tranzacției sau transferați tranzacția unui agent autorizat"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} a agentului {broker} expiră la {date}, peste {days} zile",
+      "suggestion": "Reînnoiți licența înainte de expirare și actualizați înregistrarea licenței"
     }
   },
   "schedule_5d": {

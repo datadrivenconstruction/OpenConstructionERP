@@ -1796,6 +1796,21 @@ export interface Broker {
   updated_at: string;
 }
 
+export type BrokerLicenceStatus = 'active' | 'suspended' | 'revoked' | 'expired';
+
+export interface BrokerLicence {
+  id: string;
+  broker_id: string;
+  authority_code: string;
+  licence_number: string;
+  valid_from: string | null;
+  valid_to: string | null;
+  status: BrokerLicenceStatus;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface CommissionAgreement {
   id: string;
   broker_id: string;
@@ -2013,6 +2028,33 @@ export function verifyBrokerKyc(id: string): Promise<Broker> {
 
 export function deleteBroker(id: string): Promise<void> {
   return apiDelete(`/v1/property-dev/brokers/${id}`);
+}
+
+export function listBrokerLicences(): Promise<BrokerLicence[]> {
+  return apiGet<BrokerLicence[]>(`/v1/property-dev/broker-licences/`);
+}
+
+export function createBrokerLicence(
+  brokerId: string,
+  data: {
+    authority_code: string;
+    licence_number: string;
+    valid_from?: string | null;
+    valid_to?: string | null;
+    status?: BrokerLicenceStatus;
+  },
+): Promise<BrokerLicence> {
+  return apiPost<BrokerLicence>(
+    `/v1/property-dev/brokers/${brokerId}/licences/`,
+    data,
+  );
+}
+
+export function deleteBrokerLicence(
+  brokerId: string,
+  licenceId: string,
+): Promise<void> {
+  return apiDelete(`/v1/property-dev/brokers/${brokerId}/licences/${licenceId}`);
 }
 
 /* ── Commission Agreements ───────────────────────────────────────── */

@@ -63,17 +63,20 @@ import {
   bulkRecomputePrices,
   createBlock,
   createBroker,
+  createBrokerLicence,
   createEscrowAccount,
   createEscrowTransaction,
   createPhase,
   createPriceMatrix,
   deleteBlock,
   deleteBroker,
+  deleteBrokerLicence,
   deleteEscrowAccount,
   deletePhase,
   deletePriceMatrix,
   getEscrowBalance,
   listBlocks,
+  listBrokerLicences,
   listBrokers,
   listEscrowAccounts,
   listEscrowTransactions,
@@ -93,6 +96,7 @@ import type {
   Block,
   BlockStatus,
   Broker,
+  BrokerLicence,
   EscrowAccount,
   EscrowDirection,
   EscrowSourceType,
@@ -1322,6 +1326,16 @@ export function BrokersTab() {
     queryFn: () => listBrokers({ active_only: activeOnly, limit: 200 }),
   });
   const brokers = brokersQ.data ?? [];
+  const licencesQ = useQuery({
+    queryKey: ['propdev', 'broker-licences'],
+    queryFn: listBrokerLicences,
+  });
+  const licencesByBroker = new Map<string, BrokerLicence[]>();
+  for (const lic of licencesQ.data ?? []) {
+    const list = licencesByBroker.get(lic.broker_id) ?? [];
+    list.push(lic);
+    licencesByBroker.set(lic.broker_id, list);
+  }
 
   const deleteMu = useMutation({
     mutationFn: (id: string) => deleteBroker(id),
@@ -1415,6 +1429,9 @@ export function BrokersTab() {
                     })}
                   </th>
                   <th className="text-left py-2 pr-3">
+                    {t('propdev.broker.licence', { defaultValue: 'Licence' })}
+                  </th>
+                  <th className="text-left py-2 pr-3">
                     {t('propdev.broker.jurisdiction', {
                       defaultValue: 'Region',
                     })}
@@ -1447,6 +1464,11 @@ export function BrokersTab() {
                     <td className="py-2 pr-3 font-medium">{b.name}</td>
                     <td className="py-2 pr-3 font-mono text-xs">
                       {b.license_number}
+                    </td>
+                    <td className="py-2 pr-3 text-xs">
+                      <BrokerLicenceCell
+                        licences={licencesByBroker.get(b.id) ?? []}
+                      />
                     </td>
                     <td className="py-2 pr-3 text-xs">
                       {b.jurisdiction || '—'}
@@ -1576,6 +1598,226 @@ export function BrokersTab() {
         />
       )}
     </div>
+  );
+}
+
+/** Days left before a licence ends; null when it has no end date. */
+function licenceDaysLeft(lic: BrokerLicence): number | null {
+  if (!lic.valid_to) return null;
+  const end = new Date(`${lic.valid_to}T00:00:00Z`).getTime();
+  const now = new Date();
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((end - today) / 86_400_000);
+}
+
+const byLatestEnd = (a: BrokerLicence, b: BrokerLicence) =>
+  (b.valid_to ?? '9999-12-31').localeCompare(a.valid_to ?? '9999-12-31');
+
+/** The licence held today (latest end first), else the most recent one. */
+function pickCurrentLicence(licences: BrokerLicence[]): BrokerLicence | null {
+  const held = licences
+    .filter((l) => l.status === 'active')
+    .filter((l) => {
+      const left = licenceDaysLeft(l);
+      return left === null || left >= 0;
+    })
+    .sort(byLatestEnd);
+  return held[0] ?? [...licences].sort(byLatestEnd)[0] ?? null;
+}
+
+function BrokerLicenceCell({ licences }: { licences: BrokerLicence[] }) {
+  const { t } = useTranslation();
+  const lic = pickCurrentLicence(licences);
+  if (!lic) {
+    return (
+      <span className="text-content-tertiary">
+        {t('propdev.broker.licence_none', {
+          defaultValue: 'No licence recorded',
+        })}
+      </span>
+    );
+  }
+  const left = licenceDaysLeft(lic);
+  const lapsed = lic.status !== 'active' || (left !== null && left < 0);
+  const soon = !lapsed && left !== null && left <= 60;
+  const shownStatus = lapsed && lic.status === 'active' ? 'expired' : lic.status;
+  return (
+    <div className="flex flex-col gap-0.5">
+      <span className="font-mono">
+        {lic.authority_code} {lic.licence_number}
+      </span>
+      <span className="text-content-tertiary">
+        {lic.valid_to
+          ? t('propdev.broker.licence_until', {
+              defaultValue: 'until {{date}}',
+              date: lic.valid_to,
+            })
+          : t('propdev.broker.licence_open_ended', {
+              defaultValue: 'no end date',
+            })}
+      </span>
+      <Badge variant={lapsed ? 'error' : soon ? 'warning' : 'success'} dot>
+        {soon
+          ? t('propdev.broker.licence_expires_soon', {
+              defaultValue: 'Expires in {{days}} days',
+              days: left,
+            })
+          : t(`propdev.broker.licence_status_${shownStatus}`, {
+              defaultValue: shownStatus,
+            })}
+      </Badge>
+    </div>
+  );
+}
+
+function BrokerLicencesSection({ broker }: { broker: Broker }) {
+  const { t } = useTranslation();
+  const qc = useQueryClient();
+  const addToast = useToastStore((s) => s.addToast);
+  const emptyDraft = {
+    authority_code: '',
+    licence_number: '',
+    valid_from: '',
+    valid_to: '',
+  };
+  const [draft, setDraft] = useState(emptyDraft);
+  const licencesQ = useQuery({
+    queryKey: ['propdev', 'broker-licences'],
+    queryFn: listBrokerLicences,
+  });
+  const mine = (licencesQ.data ?? []).filter((l) => l.broker_id === broker.id);
+  const refresh = () =>
+    qc.invalidateQueries({ queryKey: ['propdev', 'broker-licences'] });
+  const addMu = useMutation({
+    mutationFn: () =>
+      createBrokerLicence(broker.id, {
+        authority_code: draft.authority_code,
+        licence_number: draft.licence_number,
+        valid_from: draft.valid_from || null,
+        valid_to: draft.valid_to || null,
+      }),
+    onSuccess: () => {
+      addToast({
+        type: 'success',
+        title: t('propdev.broker.licence_added', {
+          defaultValue: 'Licence added',
+        }),
+      });
+      setDraft(emptyDraft);
+      refresh();
+    },
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+  const removeMu = useMutation({
+    mutationFn: (id: string) => deleteBrokerLicence(broker.id, id),
+    onSuccess: () => {
+      addToast({
+        type: 'success',
+        title: t('propdev.broker.licence_removed', {
+          defaultValue: 'Licence removed',
+        }),
+      });
+      refresh();
+    },
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+  const canAdd =
+    draft.authority_code.trim().length > 0 &&
+    draft.licence_number.trim().length > 0;
+
+  return (
+    <WideModalSection
+      columns={2}
+      title={t('propdev.broker.licences', { defaultValue: 'Licences' })}
+    >
+      {mine.map((lic) => (
+        <div
+          key={lic.id}
+          className="sm:col-span-2 flex items-center justify-between gap-2 text-xs"
+        >
+          <span className="font-mono">
+            {lic.authority_code} {lic.licence_number}
+          </span>
+          <span className="text-content-tertiary">
+            {lic.valid_from ?? '…'} – {lic.valid_to ?? '…'} ·{' '}
+            {t(`propdev.broker.licence_status_${lic.status}`, {
+              defaultValue: lic.status,
+            })}
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            icon={<Trash2 size={12} />}
+            onClick={() => removeMu.mutate(lic.id)}
+            aria-label={t('common.delete', { defaultValue: 'Delete' })}
+          />
+        </div>
+      ))}
+      <WideModalField
+        label={t('propdev.broker.licence_authority', {
+          defaultValue: 'Authority',
+        })}
+      >
+        <input
+          value={draft.authority_code}
+          onChange={(e) =>
+            setDraft({ ...draft, authority_code: e.target.value })
+          }
+          className={inputCls}
+          maxLength={40}
+        />
+      </WideModalField>
+      <WideModalField
+        label={t('propdev.broker.licence_number', {
+          defaultValue: 'Licence number',
+        })}
+      >
+        <input
+          value={draft.licence_number}
+          onChange={(e) =>
+            setDraft({ ...draft, licence_number: e.target.value })
+          }
+          className={inputCls}
+          maxLength={120}
+        />
+      </WideModalField>
+      <WideModalField
+        label={t('propdev.broker.licence_valid_from', {
+          defaultValue: 'Valid from',
+        })}
+      >
+        <input
+          type="date"
+          value={draft.valid_from}
+          onChange={(e) => setDraft({ ...draft, valid_from: e.target.value })}
+          className={inputCls}
+        />
+      </WideModalField>
+      <WideModalField
+        label={t('propdev.broker.licence_valid_to', {
+          defaultValue: 'Valid to',
+        })}
+      >
+        <input
+          type="date"
+          value={draft.valid_to}
+          onChange={(e) => setDraft({ ...draft, valid_to: e.target.value })}
+          className={inputCls}
+        />
+      </WideModalField>
+      <div className="sm:col-span-2">
+        <Button
+          size="sm"
+          variant="secondary"
+          icon={<Plus size={12} />}
+          onClick={() => addMu.mutate()}
+          loading={addMu.isPending}
+          disabled={!canAdd}
+        >
+          {t('propdev.broker.licence_add', { defaultValue: 'Add licence' })}
+        </Button>
+      </div>
+    </WideModalSection>
   );
 }
 
@@ -1776,6 +2018,7 @@ function BrokerFormModal({
           </label>
         </WideModalField>
       </WideModalSection>
+      {broker && <BrokerLicencesSection broker={broker} />}
     </WideModal>
   );
 }

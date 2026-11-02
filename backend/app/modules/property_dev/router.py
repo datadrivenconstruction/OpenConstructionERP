@@ -63,6 +63,9 @@ from app.modules.property_dev.schemas import (
     BlockResponse,
     BlockUpdate,
     BrokerCreate,
+    BrokerLicenceCreate,
+    BrokerLicenceResponse,
+    BrokerLicenceUpdate,
     BrokerPerformanceResponse,
     BrokerResponse,
     BrokerUpdate,
@@ -3603,6 +3606,67 @@ async def verify_broker_kyc(
     broker = await service.get_broker(broker_id)
     _ensure_broker_owner(broker, payload)
     return BrokerResponse.model_validate(await service.verify_broker_kyc(broker_id))
+
+
+@router.get("/broker-licences/", response_model=list[BrokerLicenceResponse])
+async def list_broker_licences(
+    payload: CurrentUserPayload,
+    service: PropertyDevService = Depends(_svc),
+    _perm: None = Depends(RequirePermission("property_dev.read")),
+) -> list[BrokerLicenceResponse]:
+    """Every licence of the caller's brokers, for the broker register."""
+    rows = await service.broker_licences.list_for_tenant(_payload_tenant_id(payload))
+    return [BrokerLicenceResponse.model_validate(r) for r in rows]
+
+
+@router.get("/brokers/{broker_id}/licences/", response_model=list[BrokerLicenceResponse])
+async def list_licences_of_broker(
+    broker_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    service: PropertyDevService = Depends(_svc),
+    _perm: None = Depends(RequirePermission("property_dev.read")),
+) -> list[BrokerLicenceResponse]:
+    _ensure_broker_owner(await service.get_broker(broker_id), payload)
+    rows = await service.broker_licences.list_for_broker(broker_id)
+    return [BrokerLicenceResponse.model_validate(r) for r in rows]
+
+
+@router.post("/brokers/{broker_id}/licences/", response_model=BrokerLicenceResponse, status_code=201)
+async def create_broker_licence(
+    broker_id: uuid.UUID,
+    data: BrokerLicenceCreate,
+    payload: CurrentUserPayload,
+    service: PropertyDevService = Depends(_svc),
+    _perm: None = Depends(RequirePermission("property_dev.update")),
+) -> BrokerLicenceResponse:
+    _ensure_broker_owner(await service.get_broker(broker_id), payload)
+    return BrokerLicenceResponse.model_validate(await service.create_broker_licence(broker_id, data))
+
+
+@router.patch("/brokers/{broker_id}/licences/{licence_id}", response_model=BrokerLicenceResponse)
+async def update_broker_licence(
+    broker_id: uuid.UUID,
+    licence_id: uuid.UUID,
+    data: BrokerLicenceUpdate,
+    payload: CurrentUserPayload,
+    service: PropertyDevService = Depends(_svc),
+    _perm: None = Depends(RequirePermission("property_dev.update")),
+) -> BrokerLicenceResponse:
+    _ensure_broker_owner(await service.get_broker(broker_id), payload)
+    return BrokerLicenceResponse.model_validate(await service.update_broker_licence(broker_id, licence_id, data))
+
+
+@router.delete("/brokers/{broker_id}/licences/{licence_id}", status_code=204)
+async def delete_broker_licence(
+    broker_id: uuid.UUID,
+    licence_id: uuid.UUID,
+    payload: CurrentUserPayload,
+    service: PropertyDevService = Depends(_svc),
+    _perm: None = Depends(RequirePermission("property_dev.update")),
+) -> None:
+    _ensure_broker_owner(await service.get_broker(broker_id), payload)
+    await service.get_broker_licence(broker_id, licence_id)
+    await service.broker_licences.delete(licence_id)
 
 
 def _ensure_broker_owner(broker: Any, payload: dict[str, Any]) -> None:

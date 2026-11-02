@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Spærret konto {account}: frigivet {released} overstiger loftet {cap} (certificeret fremdrift {progress}% af indbetalte penge)",
       "suggestion": "Hold yderligere frigivelser tilbage til næste fremdriftscertifikat, eller registrer det certifikat, der hæver fremdriften"
+    },
+    "broker_licence_default_label": "mæglerlicens",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Mægler {broker} havde ingen gyldig {label} den {date} for {deal}",
+      "suggestion": "Registrer en licens, der dækker handelsdatoen, eller flyt handlen til en autoriseret mægler"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} for mægler {broker} udløber den {date}, om {days} dage",
+      "suggestion": "Forny licensen, før den udløber, og opdatér licensposten"
     }
   },
   "schedule_5d": {

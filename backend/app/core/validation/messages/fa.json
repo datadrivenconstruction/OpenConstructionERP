@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "حساب امانی {account}: مبلغ آزادشده {released} از سقف {cap} فراتر رفته است (پیشرفت تأییدشده {progress}% از وجوه دریافتی)",
       "suggestion": "آزادسازی‌های بعدی را تا صدور گواهی پیشرفت بعدی متوقف کنید یا گواهی‌ای را که پیشرفت را بالا می‌برد ثبت کنید"
+    },
+    "broker_licence_default_label": "مجوز کارگزار املاک",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "کارگزار {broker} در تاریخ {date} برای معامله {deal} {label} معتبری نداشت",
+      "suggestion": "مجوزی را ثبت کنید که تاریخ معامله را پوشش دهد، یا معامله را به کارگزار دارای مجوز منتقل کنید"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} کارگزار {broker} در تاریخ {date} به پایان می‌رسد، {days} روز دیگر",
+      "suggestion": "پیش از پایان مجوز آن را تمدید کنید و سوابق مجوز را به‌روز کنید"
     }
   },
   "schedule_5d": {

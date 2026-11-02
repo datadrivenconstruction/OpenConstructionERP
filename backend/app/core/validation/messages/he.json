@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "חשבון נאמנות {account}: הסכום ששוחרר {released} חורג מהתקרה {cap} (התקדמות מאושרת של {progress}% מהכספים שנגבו)",
       "suggestion": "עכבו שחרורים נוספים עד לאישור ההתקדמות הבא, או רשמו את האישור שמעלה את ההתקדמות"
+    },
+    "broker_licence_default_label": "רישיון מתווך מקרקעין",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "למתווך {broker} לא היה {label} בתוקף בתאריך {date} עבור העסקה {deal}",
+      "suggestion": "יש לרשום רישיון שמכסה את תאריך העסקה, או להעביר את העסקה למתווך בעל רישיון"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "{label} של המתווך {broker} מסתיים בתאריך {date}, בעוד {days} ימים",
+      "suggestion": "יש לחדש את הרישיון לפני פקיעתו ולעדכן את רשומת הרישיון"
     }
   },
   "schedule_5d": {

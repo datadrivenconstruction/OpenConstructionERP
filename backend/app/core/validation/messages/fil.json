@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Escrow account {account}: ang inilabas na {released} ay lumampas sa limitasyong {cap} (sertipikadong progreso na {progress}% ng nakolektang pera)",
       "suggestion": "Ipagpaliban ang karagdagang paglalabas hanggang sa susunod na sertipiko ng progreso, o itala ang sertipikong magpapataas ng progreso"
+    },
+    "broker_licence_default_label": "lisensya ng broker sa real estate",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Walang balidong {label} ang broker na si {broker} noong {date} para sa {deal}",
+      "suggestion": "Magtala ng lisensyang sumasaklaw sa petsa ng deal, o ilipat ang deal sa lisensyadong broker"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "Ang {label} ng broker na si {broker} ay magtatapos sa {date}, sa loob ng {days} araw",
+      "suggestion": "I-renew ang lisensya bago ito mag-expire at i-update ang rekord ng lisensya"
     }
   },
   "schedule_5d": {

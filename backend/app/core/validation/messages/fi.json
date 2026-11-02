@@ -621,6 +621,15 @@
     "escrow_release_within_progress": {
       "fail": "Escrow-tili {account}: vapautettu {released} ylittää enimmäismäärän {cap} (todennettu edistyminen {progress}% kerätyistä varoista)",
       "suggestion": "Pidätä lisävapautukset seuraavaan edistymistodistukseen asti tai kirjaa todistus, joka nostaa edistymistä"
+    },
+    "broker_licence_default_label": "kiinteistönvälittäjän lupa",
+    "broker_licence_valid_on_deal_date": {
+      "fail": "Välittäjällä {broker} ei ollut kelvollista {label}a päivänä {date} kaupalle {deal}",
+      "suggestion": "Kirjaa lupa, joka kattaa kaupantekopäivän, tai siirrä kauppa luvan omaavalle välittäjälle"
+    },
+    "broker_licence_expiring_soon": {
+      "fail": "Välittäjän {broker} {label} päättyy {date}, {days} päivän kuluttua",
+      "suggestion": "Uusi lupa ennen sen päättymistä ja päivitä luvan tiedot"
     }
   },
   "schedule_5d": {
