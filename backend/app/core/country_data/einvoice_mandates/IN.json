@@ -28,6 +28,7 @@
         "action": "submit",
         "within_days": 30,
         "from": "invoice_date",
+        "timezone": "Asia/Kolkata",
         "warn": false,
         "rule_id": "EINV-IN-001",
         "effective_from": "2025-04-01",

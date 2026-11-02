@@ -27,6 +27,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 SEV_ERROR = "error"
 SEV_WARNING = "warning"
@@ -126,9 +127,10 @@ def parse_time(value: Any) -> datetime | None:
 
 def _dec(value: Any) -> Decimal | None:
     try:
-        return Decimal(str(value))
+        out = Decimal(str(value))
     except (InvalidOperation, TypeError, ValueError):
         return None
+    return out if out.is_finite() else None
 
 
 def condition_holds(condition: dict[str, Any] | None, settings: dict[str, Any]) -> bool:
@@ -161,6 +163,13 @@ def issued_at(document: dict[str, Any]) -> datetime | None:
     return parse_time(fields.get("issued_at")) or parse_time(document.get("invoice_date"))
 
 
+def _zone(name: Any) -> ZoneInfo | None:
+    try:
+        return ZoneInfo(str(name)) if name else None
+    except (ZoneInfoNotFoundError, ValueError):
+        return None
+
+
 def resolve_deadlines(
     lifecycle: dict[str, Any], document: dict[str, Any], settings: dict[str, Any] | None = None
 ) -> list[Deadline]:
@@ -176,15 +185,20 @@ def resolve_deadlines(
         start = issued if rule.get("from", "issued") in ("issued", "invoice_date") else None
         if start is None:
             continue
+        calendar_days = rule.get("from") == "invoice_date" and rule.get("within_days") is not None
         if rule.get("from") == "invoice_date":
-            start = datetime(start.year, start.month, start.day, tzinfo=start.tzinfo)
+            start = datetime(start.year, start.month, start.day, tzinfo=_zone(rule.get("timezone")) or start.tzinfo)
         effective = parse_time(rule.get("effective_from"))
         if effective is not None and start < effective:
             continue
         if rule.get("within_hours") is not None:
             span = timedelta(hours=float(rule["within_hours"]))
+            due = start + span
         elif rule.get("within_days") is not None:
-            span = timedelta(days=int(rule["within_days"]))
+            # Whole calendar days in the jurisdiction's zone: day N stays open until its local midnight ends.
+            days = int(rule["within_days"]) + (1 if calendar_days else 0)
+            span = None
+            due = (start.replace(tzinfo=None) + timedelta(days=days)).replace(tzinfo=start.tzinfo)
         else:
             continue
         out.append(
@@ -192,7 +206,7 @@ def resolve_deadlines(
                 id=str(rule.get("id") or "submit"),
                 action="submit",
                 starts_at=start,
-                due_at=start + span,
+                due_at=due,
                 rule_id=str(rule.get("rule_id") or ""),
                 warn=bool(rule.get("warn", True)),
                 message=str(rule.get("message") or ""),
