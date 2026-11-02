@@ -44,9 +44,9 @@ def test_amount_per_basis():
     assert logic.amount(D("95"), logic.billable_quantity("load", net_t=None, volume_m3=None, loads=2, hours=None)) == D(
         "190.00"
     )
-    assert logic.amount(D("80"), logic.billable_quantity("hour", net_t=None, volume_m3=None, loads=1, hours=D("1.5"))) == D(
-        "120.00"
-    )
+    assert logic.amount(
+        D("80"), logic.billable_quantity("hour", net_t=None, volume_m3=None, loads=1, hours=D("1.5"))
+    ) == D("120.00")
     assert logic.amount(None, D("10")) == D("0")
 
 
@@ -62,10 +62,38 @@ def test_status_machine():
 
 def _tickets():
     return [
-        {"id": "a", "ticket_number": "1001", "status": "verified", "quantity": D("18"), "rate": D("7"), "amount": D("126")},
-        {"id": "b", "ticket_number": "1002", "status": "verified", "quantity": D("20"), "rate": D("7"), "amount": D("140")},
-        {"id": "c", "ticket_number": "1003", "status": "verified", "quantity": D("19"), "rate": D("7"), "amount": D("133")},
-        {"id": "d", "ticket_number": "1004", "status": "rejected", "quantity": D("19"), "rate": D("7"), "amount": D("133")},
+        {
+            "id": "a",
+            "ticket_number": "1001",
+            "status": "verified",
+            "quantity": D("18"),
+            "rate": D("7"),
+            "amount": D("126"),
+        },
+        {
+            "id": "b",
+            "ticket_number": "1002",
+            "status": "verified",
+            "quantity": D("20"),
+            "rate": D("7"),
+            "amount": D("140"),
+        },
+        {
+            "id": "c",
+            "ticket_number": "1003",
+            "status": "verified",
+            "quantity": D("19"),
+            "rate": D("7"),
+            "amount": D("133"),
+        },
+        {
+            "id": "d",
+            "ticket_number": "1004",
+            "status": "rejected",
+            "quantity": D("19"),
+            "rate": D("7"),
+            "amount": D("133"),
+        },
     ]
 
 
@@ -118,7 +146,13 @@ def test_import_mapping_and_dedupe():
     assert drafts[0]["net_t"] == D("18.3")
     assert drafts[2]["ticket_date"].isoformat() == "2026-10-30"
     existing = [
-        {"haulier_name": "Kies AG", "ticket_number": "X9", "plate": "AB125", "time_out": datetime(2026, 10, 30, 9, 0), "net_t": D("16")}
+        {
+            "haulier_name": "Kies AG",
+            "ticket_number": "X9",
+            "plate": "AB125",
+            "time_out": datetime(2026, 10, 30, 9, 0),
+            "net_t": D("16"),
+        }
     ]
     importer.mark_duplicates(drafts, existing)
     assert [d["duplicate"] for d in drafts] == [None, "in_file", None, "existing"]
