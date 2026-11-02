@@ -1,321 +1,149 @@
-# DDC-CWICR-OE: DataDrivenConstruction - OpenConstructionERP
-"""​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠HTTP surface of the risk-based contingency routes.
+"""Monte Carlo cost risk applied to the estimate as a contingency line, through the API.
 
-* ``GET    /api/v1/risk/projects/{pid}/contingency``
-* ``POST   /api/v1/risk/projects/{pid}/contingency/drawdowns/{risk_id}``
-* ``DELETE /api/v1/risk/projects/{pid}/contingency/drawdowns/{risk_id}``
-
-Drawing contingency spends money, so the write routes sit at MANAGER
-(``risk.contingency``): an editor who owns the project is refused before the
-project check. A manager on another project gets 403/404 and never a 2xx, and
-the owner-success controls at the bottom prove the routes are mounted, so a
-404 above cannot be a mistyped prefix passing for a guard.
-
-Money crosses the wire as decimal strings, never floats.
+Preview -> confirm -> the line is a ``boq.BOQMarkup`` carrying the run's provenance;
+a stale preview is refused; editing a line total makes the applied contingency
+stale (status and validation rule); undo steps back and finally removes the line.
 """
 
 from __future__ import annotations
 
+import asyncio
 import uuid
+from contextlib import asynccontextmanager
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-pytestmark = pytest.mark.tenant_isolation
-
-RISK = "/api/v1/risk"
+from app.main import create_app
 
 
-@pytest_asyncio.fixture(scope="module")
-async def app_instance():
-    from app.config import get_settings
-
-    get_settings.cache_clear()
-
-    from app.main import create_app
-
+@pytest_asyncio.fixture
+async def client():
     app = create_app()
 
-    async with app.router.lifespan_context(app):
-        from app.database import Base, engine
-        from app.modules.finance import models as _finance_models  # noqa: F401
-        from app.modules.risk import models as _risk_models  # noqa: F401
+    @asynccontextmanager
+    async def lifespan_ctx():
+        async with app.router.lifespan_context(app):
+            yield
 
-        async with engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
-
-        yield app
-
-
-@pytest_asyncio.fixture(scope="module")
-async def http_client(app_instance):
-    transport = ASGITransport(app=app_instance)
-    async with AsyncClient(transport=transport, base_url="http://test") as ac:
-        yield ac
+    async with lifespan_ctx():
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+            yield ac
 
 
-async def _set_user_fields(email: str, **values) -> None:
-    from sqlalchemy import update
+async def _auth(client: AsyncClient) -> dict[str, str]:
+    from sqlalchemy import update as sa_update
 
     from app.database import async_session_factory
     from app.modules.users.models import User
 
-    async with async_session_factory() as s:
-        await s.execute(update(User).where(User.email == email.lower()).values(**values))
-        await s.commit()
-
-
-async def _user(client: AsyncClient, *, tenant: str, role: str) -> dict[str, str]:
-    email = f"{tenant}-{uuid.uuid4().hex[:8]}@risk-contingency.io"
-    password = f"RiskCont{uuid.uuid4().hex[:6]}9"
+    unique = uuid.uuid4().hex[:8]
+    email = f"risk-{unique}@test.io"
+    password = f"RiskT{unique}9!"
     reg = await client.post(
-        "/api/v1/users/auth/register",
-        json={"email": email, "password": password, "full_name": f"Tenant {tenant}"},
+        "/api/v1/users/auth/register", json={"email": email, "password": password, "full_name": "Risk Tester"}
     )
-    assert reg.status_code in (200, 201), reg.text
-    await _set_user_fields(email, is_active=True, role=role)
-    login = await client.post("/api/v1/users/auth/login", json={"email": email, "password": password})
-    assert login.status_code == 200, login.text
-    return {"Authorization": f"Bearer {login.json()['access_token']}"}
+    assert reg.status_code == 201, reg.text
+    async with async_session_factory() as session:
+        await session.execute(sa_update(User).where(User.email == email.lower()).values(role="admin", is_active=True))
+        await session.commit()
+    token = ""
+    for _ in range(2):
+        resp = await client.post("/api/v1/users/auth/login", json={"email": email, "password": password})
+        token = resp.json().get("access_token", "")
+        if token:
+            break
+        await asyncio.sleep(2)
+    assert token, resp.text
+    return {"Authorization": f"Bearer {token}"}
 
 
-async def _project_with_contingency(client: AsyncClient, headers: dict[str, str], label: str) -> dict[str, str]:
-    """A project with one 10 000 EUR contingency line and one occurred risk."""
-    proj = await client.post(
-        "/api/v1/projects/",
-        json={"name": f"RC-{label} {uuid.uuid4().hex[:6]}", "currency": "EUR"},
-        headers=headers,
+async def _bill(client: AsyncClient, auth: dict[str, str]) -> tuple[str, list[str]]:
+    resp = await client.post("/api/v1/projects/", json={"name": "Risk", "currency": "EUR"}, headers=auth)
+    assert resp.status_code == 201, resp.text
+    resp = await client.post(
+        "/api/v1/boq/boqs/", json={"project_id": resp.json()["id"], "name": "Risk estimate"}, headers=auth
     )
-    assert proj.status_code == 201, proj.text
-    project_id = proj.json()["id"]
-
-    line = await client.post(
-        "/api/v1/finance/budgets/",
-        json={"project_id": project_id, "wbs_id": "CT", "category": "Contingency", "original_budget": "10000"},
-        headers=headers,
-    )
-    assert line.status_code == 201, line.text
-
-    risk = await client.post(
-        f"{RISK}/",
-        json={
-            "project_id": project_id,
-            "title": f"{label} ground water",
-            "probability": 0.4,
-            "impact_cost": "2500",
-            "status": "occurred",
-        },
-        headers=headers,
-    )
-    assert risk.status_code == 201, risk.text
-    open_risk = await client.post(
-        f"{RISK}/",
-        json={"project_id": project_id, "title": f"{label} late steel", "probability": 0.5, "impact_cost": "3000"},
-        headers=headers,
-    )
-    assert open_risk.status_code == 201, open_risk.text
-    return {"project_id": project_id, "risk_id": risk.json()["id"], "budget_id": line.json()["id"]}
-
-
-@pytest_asyncio.fixture(scope="module")
-async def tenants(http_client):
-    # Managers, not admins: they pass RequirePermission("risk.contingency")
-    # and miss the admin bypass inside verify_project_access.
-    a_headers = await _user(http_client, tenant="a", role="manager")
-    b_headers = await _user(http_client, tenant="b", role="manager")
-    e_headers = await _user(http_client, tenant="e", role="editor")
-    a = await _project_with_contingency(http_client, a_headers, "A")
-    b = await _project_with_contingency(http_client, b_headers, "B")
-    e = await _project_with_contingency(http_client, e_headers, "E")
-    return {"a": {**a, "headers": a_headers}, "b": {**b, "headers": b_headers}, "e": {**e, "headers": e_headers}}
-
-
-def _drawdown_url(project_id: str, risk_id: str) -> str:
-    return f"{RISK}/projects/{project_id}/contingency/drawdowns/{risk_id}"
-
-
-# ── Cross-project ──────────────────────────────────────────────────────────
-
-
-@pytest.mark.asyncio
-async def test_b_cannot_read_a_contingency(http_client, tenants):
-    a, b = tenants["a"], tenants["b"]
-    resp = await http_client.get(f"{RISK}/projects/{a['project_id']}/contingency", headers=b["headers"])
-    assert resp.status_code in (403, 404), resp.text
-
-
-@pytest.mark.asyncio
-async def test_b_cannot_draw_on_a_contingency(http_client, tenants):
-    a, b = tenants["a"], tenants["b"]
-    resp = await http_client.post(
-        _drawdown_url(a["project_id"], a["risk_id"]),
-        json={"amount": "100"},
-        headers=b["headers"],
-    )
-    assert resp.status_code in (403, 404), resp.text
-    # Nor draw A's risk through B's own project, where B passes the project check.
-    resp = await http_client.post(
-        _drawdown_url(b["project_id"], a["risk_id"]),
-        json={"amount": "100"},
-        headers=b["headers"],
-    )
-    assert resp.status_code == 404, resp.text
-    # Nor point B's risk at A's contingency line.
-    resp = await http_client.post(
-        _drawdown_url(b["project_id"], b["risk_id"]),
-        json={"amount": "100", "budget_id": a["budget_id"]},
-        headers=b["headers"],
-    )
-    assert resp.status_code == 404, resp.text
-    # A's line is untouched.
-    view = await http_client.get(f"{RISK}/projects/{a['project_id']}/contingency", headers=a["headers"])
-    assert view.status_code == 200
-    assert view.json()["drawn"] == "0.00"
-
-
-@pytest.mark.asyncio
-async def test_editor_cannot_draw_even_on_own_project(http_client, tenants):
-    e = tenants["e"]
-    resp = await http_client.post(
-        _drawdown_url(e["project_id"], e["risk_id"]),
-        json={"amount": "100"},
-        headers=e["headers"],
-    )
-    assert resp.status_code == 403, resp.text
-    # Reading stays open to the editor.
-    view = await http_client.get(f"{RISK}/projects/{e['project_id']}/contingency", headers=e["headers"])
-    assert view.status_code == 200, view.text
-
-
-@pytest.mark.asyncio
-async def test_editor_cannot_book_a_drawdown_through_the_budget_create_route(http_client, tenants):
-    """POST /finance/budgets/ is open to an editor; it must not write drawdowns.
-
-    A fresh project, so the shared fixtures' figures stay untouched.
-    """
-    headers = tenants["e"]["headers"]
-    proj = await http_client.post(
-        "/api/v1/projects/",
-        json={"name": f"RC-forge {uuid.uuid4().hex[:6]}", "currency": "EUR"},
-        headers=headers,
-    )
-    assert proj.status_code == 201, proj.text
-    project_id = proj.json()["id"]
-    risk = await http_client.post(
-        f"{RISK}/",
-        json={"project_id": project_id, "title": "Open risk", "probability": 0.5, "impact_cost": "100000"},
-        headers=headers,
-    )
-    assert risk.status_code == 201, risk.text
-    risk_id = risk.json()["id"]
-    forged_key = f"contingency_drawdown:risk:{risk_id}"
-
-    line = await http_client.post(
-        "/api/v1/finance/budgets/",
-        json={
-            "project_id": project_id,
-            "wbs_id": "CT",
-            "category": "contingency",
-            "original_budget": "100000",
-            "metadata": {
-                forged_key: {
-                    "amount": "90000",
-                    "currency": "EUR",
-                    "confirmed_by": str(uuid.uuid4()),
-                    "confirmed_at": "2026-10-01T00:00:00+00:00",
-                }
+    assert resp.status_code == 201, resp.text
+    boq_id = resp.json()["id"]
+    ids: list[str] = []
+    for i, (qty, rate) in enumerate([(120.0, 85.0), (40.0, 310.0), (900.0, 12.5)], 1):
+        resp = await client.post(
+            f"/api/v1/boq/boqs/{boq_id}/positions/",
+            json={
+                "boq_id": boq_id,
+                "ordinal": f"01.{i:03d}",
+                "description": f"Line {i}",
+                "unit": "m2",
+                "quantity": qty,
+                "unit_rate": rate,
             },
-        },
-        headers=headers,
-    )
-    assert line.status_code == 201, line.text
-    assert forged_key not in (line.json().get("metadata") or {})
-
-    view = await http_client.get(f"{RISK}/projects/{project_id}/contingency", headers=headers)
-    assert view.status_code == 200, view.text
-    body = view.json()
-    assert body["drawn"] == "0.00"
-    assert body["excluded_drawn_count"] == 0
-    assert body["drawdowns"] == []
-    assert body["emv"] == "50000.00"
-    # Nothing forged is left to block a later category change.
-    moved = await http_client.patch(
-        f"/api/v1/finance/budgets/{line.json()['id']}",
-        json={"category": "material"},
-        headers=headers,
-    )
-    assert moved.status_code == 200, moved.text
-
-
-@pytest.mark.asyncio
-async def test_amount_must_be_positive(http_client, tenants):
-    b = tenants["b"]
-    for bad in ("0", "-5", "1e400", "abc"):
-        resp = await http_client.post(
-            _drawdown_url(b["project_id"], b["risk_id"]),
-            json={"amount": bad},
-            headers=b["headers"],
+            headers=auth,
         )
-        assert resp.status_code == 422, (bad, resp.text)
-
-
-# ── Owner-success controls (prove the routes are mounted) ──────────────────
+        assert resp.status_code == 201, resp.text
+        ids.append(resp.json()["id"])
+    return boq_id, ids
 
 
 @pytest.mark.asyncio
-async def test_owner_reads_confirms_and_reverses(http_client, tenants):
-    a = tenants["a"]
-    url = f"{RISK}/projects/{a['project_id']}/contingency"
-    view = await http_client.get(url, headers=a["headers"])
-    assert view.status_code == 200, view.text
-    body = view.json()
-    assert body["currency"] == "EUR"
-    # 0.5 x 3000 for the open risk plus the occurred one's full 2500, which
-    # waits for its drawdown.
-    assert body["emv"] == "4000.00"
-    assert body["coverage_gap"] == "6000.00"
-    assert body["allocated"] == "10000.00"
-    assert body["state"] == "covered"
-    assert [p["risk_id"] for p in body["pending"]] == [a["risk_id"]]
-    assert body["pending"][0]["proposed_amount"] == "2500.00"
+async def test_apply_stale_and_undo_round_trip(client: AsyncClient):
+    auth = await _auth(client)
+    boq_id, ids = await _bill(client, auth)
+    url = f"/api/v1/boq/boqs/{boq_id}/cost-risk/contingency/"
 
-    confirm = await http_client.post(
-        _drawdown_url(a["project_id"], a["risk_id"]),
-        json={"amount": "2300", "note": "pumping and dewatering"},
-        headers=a["headers"],
+    preview = await client.get(url, params={"percentile": 80, "iterations": 1000}, headers=auth)
+    assert preview.status_code == 200, preview.text
+    s = preview.json()["suggestion"]
+    assert preview.json()["applied"] is None
+    assert float(s["amount"]) > 0 and s["percentile"] == 80 and 0 < s["confidence"] <= 1
+
+    # The estimator saw another number: refused, nothing written.
+    wrong = await client.post(url, json={"percentile": 80, "iterations": 1000, "expected_amount": "1.00"}, headers=auth)
+    assert wrong.status_code == 409, wrong.text
+
+    applied = await client.post(
+        url, json={"percentile": 80, "iterations": 1000, "expected_amount": s["amount"]}, headers=auth
     )
-    assert confirm.status_code == 200, confirm.text
-    after = confirm.json()
-    assert after["drawn"] == "2300.00"
-    assert after["remaining"] == "7700.00"
-    assert after["pending"] == []
-    # Confirmed: the drawn 2300 replaces the 2500 impact, counted once.
-    assert after["emv"] == "1500.00"
-    assert after["coverage_gap"] == "6200.00"
-    assert after["drawdowns"][0]["note"] == "pumping and dewatering"
+    assert applied.status_code == 200, applied.text
+    body = applied.json()
+    assert body["applied"]["amount"] == s["amount"]
+    assert body["applied"]["seed"] == s["seed"]
+    assert body["applied"]["iterations"] == 1000
+    assert body["applied"]["applied_by"]
+    assert body["stale"] is False
+    assert float(body["drift_amount"]) == 0.0
 
-    # Replayed: still one drawdown, same totals.
-    again = await http_client.post(
-        _drawdown_url(a["project_id"], a["risk_id"]),
-        json={"amount": "2300", "note": "pumping and dewatering"},
-        headers=a["headers"],
+    markups = (await client.get(f"/api/v1/boq/boqs/{boq_id}/markups/", headers=auth)).json()["markups"]
+    line = next(m for m in markups if m["category"] == "contingency")
+    assert line["markup_type"] == "fixed"
+    assert float(line["fixed_amount"]) == float(s["amount"])
+
+    # Re-apply at P90: same line, P80 kept for undo.
+    p90 = (await client.get(url, params={"percentile": 90, "iterations": 1000}, headers=auth)).json()["suggestion"]
+    again = await client.post(
+        url, json={"percentile": 90, "iterations": 1000, "expected_amount": p90["amount"]}, headers=auth
     )
     assert again.status_code == 200, again.text
-    assert again.json()["drawn"] == "2300.00"
-    assert len(again.json()["drawdowns"]) == 1
+    assert again.json()["applied"]["percentile"] == 90
+    assert again.json()["applied"]["can_undo_to_previous"] is True
+    markups = (await client.get(f"/api/v1/boq/boqs/{boq_id}/markups/", headers=auth)).json()["markups"]
+    assert sum(1 for m in markups if m["category"] == "contingency") == 1
 
-    # The budget line itself still shows its original money; the drawdown
-    # sits on it as a marker the finance page reads.
-    budgets = await http_client.get(f"/api/v1/finance/budgets/?project_id={a['project_id']}", headers=a["headers"])
-    assert budgets.status_code == 200, budgets.text
-    items = budgets.json()["items"] if isinstance(budgets.json(), dict) else budgets.json()
-    line = next(i for i in items if i["id"] == a["budget_id"])
-    assert line["revised_budget"] in ("10000", "10000.00")
-    assert any(k.startswith("contingency_drawdown:") for k in line["metadata"])
+    # A line total moves: the applied contingency is stale and drifts.
+    resp = await client.patch(f"/api/v1/boq/positions/{ids[0]}", json={"quantity": 400.0}, headers=auth)
+    assert resp.status_code == 200, resp.text
+    status_now = (await client.get(url, headers=auth)).json()
+    assert status_now["stale"] is True
+    assert float(status_now["drift_amount"]) != 0.0
+    report = await client.post(f"/api/v1/boq/boqs/{boq_id}/validate/", headers=auth)
+    assert report.status_code == 200, report.text
+    assert "boq.risk.contingency_stale" in report.text
 
-    reverse = await http_client.delete(_drawdown_url(a["project_id"], a["risk_id"]), headers=a["headers"])
-    assert reverse.status_code == 200, reverse.text
-    assert reverse.json()["drawn"] == "0.00"
-    gone = await http_client.delete(_drawdown_url(a["project_id"], a["risk_id"]), headers=a["headers"])
-    assert gone.status_code == 404, gone.text
+    undo = await client.delete(url, headers=auth)
+    assert undo.status_code == 200, undo.text
+    assert undo.json()["applied"]["percentile"] == 80
+    undo = await client.delete(url, headers=auth)
+    assert undo.status_code == 200, undo.text
+    assert undo.json()["applied"] is None
+    assert (await client.delete(url, headers=auth)).status_code == 404

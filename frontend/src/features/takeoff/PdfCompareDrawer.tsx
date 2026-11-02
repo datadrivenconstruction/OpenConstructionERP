@@ -19,7 +19,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import {
@@ -30,6 +30,8 @@ import {
   MessageSquare,
   FilePlus2,
   AlertTriangle,
+  CopyPlus,
+  CheckCheck,
 } from 'lucide-react';
 
 import { SideDrawer, MoneyDisplay, Badge } from '@/shared/ui';
@@ -39,7 +41,9 @@ import {
   type TakeoffDocumentResponse,
   type TakeoffCompareResponse,
   type TakeoffMeasurementDiffRow,
+  type TakeoffPositionDelta,
 } from './api';
+import { getErrorMessage } from '@/shared/lib/api';
 import { fmtFixed } from '@/shared/lib/formatters';
 
 type CompareTab = 'measurements' | 'summary';
@@ -173,10 +177,79 @@ export function PdfCompareDrawer({
     },
   });
 
+  const queryClient = useQueryClient();
+  const refreshCompare = () =>
+    queryClient.invalidateQueries({ queryKey: ['takeoff-compare', projectId, fromId, toId] });
+
+  const carryMutation = useMutation({
+    mutationFn: () => takeoffApi.carryOver(projectId, fromId, toId),
+    onSuccess: (r) => {
+      refreshCompare();
+      const rescaled = (r.scale_checks.changed ?? 0) + (r.scale_checks.unverified ?? 0);
+      addToast(
+        {
+          type: r.carried > 0 ? 'success' : 'info',
+          title: t('takeoff_compare.carry_done', {
+            defaultValue: '{{n}} measurements carried onto the new revision',
+            n: r.carried,
+          }),
+          message: [
+            r.already_carried > 0
+              ? t('takeoff_compare.carry_already', {
+                  defaultValue: '{{n}} were carried before.',
+                  n: r.already_carried,
+                })
+              : '',
+            rescaled > 0
+              ? t('takeoff_compare.carry_scale_hint', {
+                  defaultValue: '{{n}} sit on a sheet with a different or missing scale: check them first.',
+                  n: rescaled,
+                })
+              : '',
+            r.revision_link !== 'register'
+              ? t('takeoff_compare.carry_unlinked', {
+                  defaultValue: 'Project Files does not link these two files as revisions of one drawing.',
+                })
+              : '',
+          ]
+            .filter(Boolean)
+            .join(' '),
+        },
+        { duration: 8000 },
+      );
+    },
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+
+  const [pushQuantity, setPushQuantity] = useState(false);
+  const confirmMutation = useMutation({
+    mutationFn: (ids: string[]) => takeoffApi.confirmCarried(projectId, ids, pushQuantity),
+    onSuccess: (r) => {
+      refreshCompare();
+      if (r.pushed > 0) queryClient.invalidateQueries({ queryKey: ['boq'] });
+      addToast({
+        type: 'success',
+        title: t('takeoff_compare.carry_confirmed', {
+          defaultValue: '{{n}} carried measurements confirmed',
+          n: r.confirmed,
+        }),
+      });
+    },
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+
+  const pendingIds = useMemo(
+    () =>
+      (diff?.measurement_rows ?? [])
+        .filter((r) => r.carry_status === 'needs_review')
+        .map((r) => r.measurement_id),
+    [diff],
+  );
+
   const rows = useMemo(
     () =>
       (diff?.measurement_rows ?? []).filter(
-        (r) => !hideUnchanged || r.change_type !== 'unchanged',
+        (r) => !hideUnchanged || r.change_type !== 'unchanged' || r.carry_status === 'needs_review',
       ),
     [diff, hideUnchanged],
   );
@@ -344,18 +417,185 @@ export function PdfCompareDrawer({
         {diff && !diffQuery.isLoading && (
           <>
             {tab === 'summary' && (
-              <SummaryTab
-                diff={diff}
-                canCreateVariation={hasChanges && canCompare}
-                creating={createVariationMutation.isPending}
-                onCreateVariation={() => createVariationMutation.mutate()}
+              <>
+                <CarryOverPanel
+                  canCarry={canCompare && (diff.summary.from_measurement_total ?? 0) > 0}
+                  carrying={carryMutation.isPending}
+                  onCarry={() => carryMutation.mutate()}
+                  pendingCount={pendingIds.length}
+                  confirming={confirmMutation.isPending}
+                  onConfirmAll={() => confirmMutation.mutate(pendingIds)}
+                  pushQuantity={pushQuantity}
+                  onPushQuantity={setPushQuantity}
+                />
+                <PositionDeltas deltas={diff.summary.position_deltas ?? []} currency={diff.summary.cost_currency} />
+                <SummaryTab
+                  diff={diff}
+                  canCreateVariation={hasChanges && canCompare}
+                  creating={createVariationMutation.isPending}
+                  onCreateVariation={() => createVariationMutation.mutate()}
+                />
+              </>
+            )}
+            {tab === 'measurements' && (
+              <MeasurementsTab
+                rows={rows}
+                hideUnchanged={hideUnchanged}
+                confirming={confirmMutation.isPending}
+                onConfirm={(id) => confirmMutation.mutate([id])}
               />
             )}
-            {tab === 'measurements' && <MeasurementsTab rows={rows} hideUnchanged={hideUnchanged} />}
           </>
         )}
       </div>
     </SideDrawer>
+  );
+}
+
+/* ── Carry-over onto the new revision ──────────────────────────────────── */
+
+function CarryOverPanel({
+  canCarry,
+  carrying,
+  onCarry,
+  pendingCount,
+  confirming,
+  onConfirmAll,
+  pushQuantity,
+  onPushQuantity,
+}: {
+  canCarry: boolean;
+  carrying: boolean;
+  onCarry: () => void;
+  pendingCount: number;
+  confirming: boolean;
+  onConfirmAll: () => void;
+  pushQuantity: boolean;
+  onPushQuantity: (v: boolean) => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="mb-4 rounded-lg border border-border-light p-3" data-testid="takeoff-carry-panel">
+      <div className="text-[11px] font-medium text-content-tertiary mb-1">
+        {t('takeoff_compare.carry_heading', { defaultValue: 'Carry measurements to the new revision' })}
+      </div>
+      <p className="text-[11px] text-content-secondary">
+        {t('takeoff_compare.carry_hint', {
+          defaultValue:
+            'Copies every confirmed measurement of the baseline onto the target at the same place, re-checks the scale, and marks each copy for review.',
+        })}
+      </p>
+      <button
+        type="button"
+        onClick={onCarry}
+        disabled={!canCarry || carrying}
+        data-testid="takeoff-carry-over"
+        className="mt-2 inline-flex items-center gap-2 rounded-md border border-oe-blue px-3 py-1.5 text-xs font-semibold text-oe-blue transition hover:bg-oe-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {carrying ? <Loader2 size={14} className="animate-spin" /> : <CopyPlus size={14} />}
+        {t('takeoff_compare.carry_action', { defaultValue: 'Carry measurements' })}
+      </button>
+      {pendingCount > 0 && (
+        <div
+          className="mt-3 rounded-md border border-amber-500/40 bg-amber-500/10 p-2"
+          data-testid="takeoff-carry-pending"
+        >
+          <p className="text-xs text-content-primary">
+            {t('takeoff_compare.carry_pending', {
+              defaultValue: '{{n}} carried measurements need review on the new sheet.',
+              n: pendingCount,
+            })}
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <label className="inline-flex items-center gap-1.5 text-[11px] text-content-secondary cursor-pointer">
+              <input
+                type="checkbox"
+                checked={pushQuantity}
+                onChange={(e) => onPushQuantity(e.target.checked)}
+                className="h-3.5 w-3.5 accent-oe-blue"
+              />
+              {t('takeoff_compare.carry_push', { defaultValue: 'Also update the linked BOQ quantities' })}
+            </label>
+            <button
+              type="button"
+              onClick={onConfirmAll}
+              disabled={confirming}
+              data-testid="takeoff-carry-confirm-all"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-md bg-oe-blue px-2.5 py-1 text-[11px] font-semibold text-white disabled:opacity-50"
+            >
+              <CheckCheck size={13} />
+              {t('takeoff_compare.carry_confirm_all', { defaultValue: 'Confirm all after review' })}
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function PositionDeltas({ deltas, currency }: { deltas: TakeoffPositionDelta[]; currency: string | null }) {
+  const { t } = useTranslation();
+  if (deltas.length === 0) return null;
+  return (
+    <div className="mb-4 rounded-lg border border-border-light p-3" data-testid="takeoff-position-deltas">
+      <div className="text-[11px] font-medium text-content-tertiary mb-2">
+        {t('takeoff_compare.position_deltas', { defaultValue: 'Quantity change per BOQ position' })}
+      </div>
+      <table className="w-full text-xs">
+        <thead>
+          <tr className="text-[10px] text-content-tertiary">
+            <th className="text-left font-medium pb-1">{t('takeoff_compare.position', { defaultValue: 'Position' })}</th>
+            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_in_boq', { defaultValue: 'In BOQ' })}</th>
+            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_before', { defaultValue: 'Before' })}</th>
+            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_after', { defaultValue: 'After' })}</th>
+            <th className="text-right font-medium pb-1">{t('takeoff_compare.qty_delta', { defaultValue: 'Delta' })}</th>
+            <th className="text-right font-medium pb-1">{t('takeoff_compare.cost', { defaultValue: 'Cost' })}</th>
+          </tr>
+        </thead>
+        <tbody>
+          {deltas.map((d) => (
+            <tr key={d.position_id} className="border-t border-border-light" data-testid="takeoff-position-delta">
+              <td className="py-1 pr-2 truncate max-w-[10rem]" title={d.description ?? undefined}>
+                <span className="font-medium text-content-primary">{d.ordinal ?? '?'}</span>
+                {d.carried_pending > 0 && (
+                  <Badge variant="warning" className="ml-1 text-[9px]">
+                    {t('takeoff_compare.carried_pending_short', {
+                      defaultValue: '{{n}} to review',
+                      n: d.carried_pending,
+                    })}
+                  </Badge>
+                )}
+              </td>
+              <td className="py-1 text-right tabular-nums text-content-tertiary">
+                {d.boq_quantity != null ? fmtFixed(Number(d.boq_quantity), 2) : '—'}
+              </td>
+              <td className="py-1 text-right tabular-nums">{fmtFixed(d.old_quantity, 2)}</td>
+              <td className="py-1 text-right tabular-nums">{fmtFixed(d.new_quantity, 2)}</td>
+              <td
+                className={clsx(
+                  'py-1 text-right tabular-nums font-semibold',
+                  d.delta_quantity > 0
+                    ? 'text-amber-600'
+                    : d.delta_quantity < 0
+                      ? 'text-oe-blue'
+                      : 'text-content-tertiary',
+                )}
+              >
+                {d.delta_quantity > 0 ? '+' : ''}
+                {fmtFixed(d.delta_quantity, 2)} {d.unit ?? ''}
+              </td>
+              <td className="py-1 text-right">
+                {d.cost_impact != null && currency ? (
+                  <MoneyDisplay amount={d.cost_impact} currency={currency} colorize className="text-xs" />
+                ) : (
+                  <span className="text-content-tertiary">—</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -486,9 +726,13 @@ function SummaryTab({
 function MeasurementsTab({
   rows,
   hideUnchanged,
+  confirming,
+  onConfirm,
 }: {
   rows: TakeoffMeasurementDiffRow[];
   hideUnchanged: boolean;
+  confirming: boolean;
+  onConfirm: (measurementId: string) => void;
 }) {
   const { t } = useTranslation();
   if (rows.length === 0) {
@@ -514,6 +758,35 @@ function MeasurementsTab({
             </span>
             <ChangeBadge type={r.change_type} />
           </div>
+          {r.carry_status === 'needs_review' && (
+            <div className="mt-1.5 flex flex-wrap items-center gap-2" data-testid="takeoff-carried-row">
+              <Badge variant="warning" className="text-[9px]">
+                {t('takeoff_compare.carried_needs_review', { defaultValue: 'Carried, needs review' })}
+              </Badge>
+              {r.scale_check === 'changed' && (
+                <span className="text-[10px] text-amber-600">
+                  {t('takeoff_compare.scale_changed', {
+                    defaultValue: 'New sheet has a different scale: value recomputed from the same points',
+                  })}
+                </span>
+              )}
+              {r.scale_check === 'unverified' && (
+                <span className="text-[10px] text-amber-600">
+                  {t('takeoff_compare.scale_unverified', {
+                    defaultValue: 'New sheet is not calibrated: old scale kept',
+                  })}
+                </span>
+              )}
+              <button
+                type="button"
+                onClick={() => onConfirm(r.measurement_id)}
+                disabled={confirming}
+                className="ml-auto rounded border border-border-light px-2 py-0.5 text-[10px] font-medium text-content-secondary hover:bg-surface-secondary disabled:opacity-50"
+              >
+                {t('takeoff_compare.carry_confirm', { defaultValue: 'Confirm' })}
+              </button>
+            </div>
+          )}
           <div className="mt-1.5 flex items-center gap-2 text-xs text-content-secondary">
             <span className="text-[10px] text-content-tertiary">
               {t('takeoff_compare.page_n', { defaultValue: 'p.{{n}}', n: r.page })}

@@ -2952,3 +2952,87 @@ class ImportPreviewResponse(BaseModel):
     errors: list[dict[str, Any]] = Field(default_factory=list)
     metadata: dict[str, Any] = Field(default_factory=dict)
     truncated: bool = False
+
+
+# ── Monte Carlo contingency applied to the estimate ─────────────────────────
+
+
+class RiskContingencySuggestion(BaseModel):
+    """What applying a contingency at one percentile would write (AI-free, but still a suggestion)."""
+
+    percentile: int
+    amount: Decimal
+    pct_of_base: float
+    base_total: Decimal
+    budget: Decimal
+    below_base: bool = False
+    iterations: int
+    seed: int
+    optimistic_pct: float
+    pessimistic_pct: float
+    correlation: float
+    convergence_status: str
+    convergence_margin_pct: float
+    prob_within_base: float
+    confidence: float = Field(..., ge=0.0, le=1.0)
+    fingerprint: str
+
+    @field_serializer("amount", "base_total", "budget", when_used="json")
+    def _ser_money(self, v: Decimal) -> str | None:
+        return _serialise_money(v)
+
+
+class AppliedRiskContingency(BaseModel):
+    """The contingency line written from a risk run, with the run behind it."""
+
+    markup_id: UUID
+    name: str
+    is_active: bool
+    line_amount: str
+    percentile: int
+    amount: str
+    pct_of_base: float | None = None
+    base_total: str | None = None
+    seed: int | None = None
+    iterations: int | None = None
+    optimistic_pct: float | None = None
+    pessimistic_pct: float | None = None
+    correlation: float | None = None
+    convergence_status: str | None = None
+    fingerprint: str | None = None
+    applied_at: str | None = None
+    applied_by: str | None = None
+    applied_by_email: str | None = None
+    can_undo_to_previous: bool = False
+
+
+class RiskContingencyStatus(BaseModel):
+    """Suggestion, what is applied, and how far the risk picture moved since."""
+
+    suggestion: RiskContingencySuggestion | None = None
+    applied: AppliedRiskContingency | None = None
+    #: Risk inputs (line totals and bands) changed since the contingency was applied.
+    stale: bool = False
+    #: Like-for-like re-run (same percentile, seed, iterations, band) minus the applied amount.
+    drift_amount: str | None = None
+    drift_pct: float | None = None
+    current_fingerprint: str | None = None
+
+
+class ApplyRiskContingencyRequest(BaseModel):
+    """The estimator confirms one percentile; the server recomputes the amount.
+
+    ``expected_amount`` is the figure the estimator saw. When the bill moved
+    between preview and confirm the server refuses (409) rather than write a
+    number nobody looked at.
+    """
+
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    percentile: int = Field(..., ge=50, le=99)
+    iterations: int = Field(default=5000, ge=100, le=20000)
+    optimistic_pct: float = Field(default=15.0, ge=0.0, le=50.0)
+    pessimistic_pct: float = Field(default=25.0, ge=0.0, le=100.0)
+    correlation: float = Field(default=0.2, ge=0.0, le=0.95)
+    expected_amount: Decimal | None = Field(default=None, ge=0)
+    name: str | None = Field(default=None, max_length=255)

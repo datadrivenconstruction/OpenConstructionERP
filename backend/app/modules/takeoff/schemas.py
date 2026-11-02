@@ -507,6 +507,11 @@ class TakeoffMeasurementDiffRow(BaseModel):
     linked_boq_position_id: str | None = None
     cost_impact: str | None = None  # signed Decimal string in base currency
     cost_currency: str | None = None
+    #: ``needs_review`` / ``confirmed`` for a measurement carried from an earlier revision.
+    carry_status: str | None = None
+    #: ``same`` / ``changed`` / ``unverified`` / ``not_applicable`` scale verdict of a carried row.
+    scale_check: str | None = None
+    is_deduction: bool = False
 
 
 class TakeoffCompareResponse(BaseModel):
@@ -566,6 +571,50 @@ class CreateVariationFromCompareResponse(BaseModel):
     code: str
     estimated_cost_impact: str = "0"  # signed Decimal string in base currency
     currency: str = ""
+
+
+# ── Carry measurements onto a new drawing revision ──────────────────────
+
+
+class CarryOverRequest(BaseModel):
+    """Copy the measurements of one revision onto the next, flagged for review."""
+
+    project_id: UUID
+    from_document_id: str = Field(..., min_length=1, max_length=255)
+    to_document_id: str = Field(..., min_length=1, max_length=255)
+    #: Carry only these measurements of ``from``; all confirmed ones when omitted.
+    measurement_ids: list[str] | None = Field(default=None, max_length=20000)
+
+
+class CarryOverResponse(BaseModel):
+    """Outcome of a carry-over."""
+
+    carried: int = 0
+    carried_ids: list[str] = Field(default_factory=list)
+    already_carried: int = 0
+    skipped_unreviewed: int = 0
+    skipped_page_missing: int = 0
+    scale_checks: dict[str, int] = Field(default_factory=dict)
+    #: ``register`` when Project Files says ``to`` replaced ``from``; ``unlinked`` for loose uploads.
+    revision_link: str = "unlinked"
+
+
+class ConfirmCarriedRequest(BaseModel):
+    """Confirm carried measurements after checking them on the new sheet."""
+
+    project_id: UUID
+    measurement_ids: list[str] = Field(..., min_length=1, max_length=5000)
+    #: Also write each confirmed value into its linked BOQ position.
+    push_quantity: bool = False
+
+
+class ConfirmCarriedResponse(BaseModel):
+    """Outcome of a confirm."""
+
+    confirmed: int = 0
+    confirmed_ids: list[str] = Field(default_factory=list)
+    pushed: int = 0
+    not_pending: int = 0
 
 
 class LinkToBoqRequest(BaseModel):

@@ -100,6 +100,10 @@ from app.modules.takeoff.manifest_verifier import (
 from app.modules.takeoff.models import CadExtractionSession
 from app.modules.takeoff.schemas import (
     AiTakeoffRunResponse,
+    CarryOverRequest,
+    CarryOverResponse,
+    ConfirmCarriedRequest,
+    ConfirmCarriedResponse,
     CreateBoqPositionFromMeasurementRequest,
     CreateBoqPositionFromMeasurementResponse,
     CreateVariationFromCompareRequest,
@@ -4971,6 +4975,62 @@ async def compare_takeoff_documents(
     await verify_project_access(project_id, str(user_id), session)
     payload = await service.compare_documents(project_id, from_document_id, to_document_id)
     return TakeoffCompareResponse(**payload)
+
+
+@router.post(
+    "/measurements/carry-over/",
+    response_model=CarryOverResponse,
+    dependencies=[Depends(RequirePermission("takeoff.update"))],
+)
+async def carry_over_measurements(
+    body: CarryOverRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+    session: SessionDep = None,  # type: ignore[assignment]
+) -> CarryOverResponse:
+    """Carry every confirmed measurement of the old revision onto the new one.
+
+    Same page, same coordinates, scale re-checked against the new sheet's
+    calibration; each copy is flagged ``carried, needs review`` until it is
+    confirmed. Refused when Project Files says the two are different drawings.
+    """
+    from app.modules.takeoff.carry_over import carry_measurements
+
+    await verify_project_access(body.project_id, str(user_id), session)
+    result = await carry_measurements(
+        service,
+        body.project_id,
+        body.from_document_id,
+        body.to_document_id,
+        user_id=str(user_id),
+        measurement_ids=body.measurement_ids,
+    )
+    return CarryOverResponse(**result)
+
+
+@router.post(
+    "/measurements/carry-over/confirm/",
+    response_model=ConfirmCarriedResponse,
+    dependencies=[Depends(RequirePermission("takeoff.update"))],
+)
+async def confirm_carried_measurements(
+    body: ConfirmCarriedRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+    session: SessionDep = None,  # type: ignore[assignment]
+) -> ConfirmCarriedResponse:
+    """Confirm carried measurements, optionally pushing their values into the linked BOQ positions."""
+    from app.modules.takeoff.carry_over import confirm_carried
+
+    await verify_project_access(body.project_id, str(user_id), session)
+    result = await confirm_carried(
+        service,
+        body.project_id,
+        body.measurement_ids,
+        user_id=str(user_id),
+        push_quantity=body.push_quantity,
+    )
+    return ConfirmCarriedResponse(**result)
 
 
 @router.post(

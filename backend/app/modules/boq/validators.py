@@ -612,6 +612,67 @@ class ManualDrawingRefWithoutRevision(_DrawingRule):
         return None
 
 
+class CarriedMeasurementUnconfirmed(_DrawingRule):
+    """A measurement carried over from an earlier drawing revision still waits for review."""
+
+    rule_id = "boq.drawing.carried_unconfirmed"
+    name = "Carried-over measurement not yet confirmed"
+    description = "A measurement was carried onto a new drawing revision and nobody has checked it there yet."
+    severity = Severity.INFO
+    message_key = "boq_drawing.carried_unconfirmed"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        count = int(entry.get("carried_unconfirmed") or 0)
+        return {"count": count} if count else None
+
+
+class RiskContingencyFromStaleRun(ValidationRule):
+    """The risk contingency in the estimate was applied from a run whose inputs have since changed."""
+
+    rule_id = "boq.risk.contingency_stale"
+    name = "Risk contingency matches the current risk picture"
+    standard = "universal"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = (
+        "A contingency taken from a Monte Carlo run is only as good as the line totals the run "
+        "sampled. When they change after the contingency was applied, the money no longer "
+        "represents the percentile it says."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding when the applied run's fingerprint differs from the bill's current one."""
+        data = context.data
+        block = data.get("risk_contingency") if isinstance(data, dict) else None
+        if not isinstance(block, dict) or not block.get("stale"):
+            return []
+        locale = _locale(context)
+        applied_at = str(block.get("applied_at") or "")[:10]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    "boq_risk.contingency_stale.fail",
+                    locale,
+                    markup=str(block.get("name") or ""),
+                    percentile=str(block.get("percentile") or "?"),
+                    applied_at=applied_at or "?",
+                ),
+                element_ref=str(block.get("markup_id") or "") or None,
+                suggestion=translate("boq_risk.contingency_stale.suggestion", locale),
+                details={
+                    "percentile": block.get("percentile"),
+                    "amount": block.get("amount"),
+                    "applied_at": block.get("applied_at"),
+                },
+            )
+        ]
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
 
@@ -701,6 +762,8 @@ _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
     TakeoffQuantityWithoutDrawingRevision(),
     PositionOnSupersededDrawing(),
     ManualDrawingRefWithoutRevision(),
+    CarriedMeasurementUnconfirmed(),
+    RiskContingencyFromStaleRun(),
 )
 
 

@@ -154,6 +154,8 @@ class PositionDrawingRefs:
     manual_outdated: bool = False
     #: Measurements linked to the position that carry no recorded revision.
     unrevised_measurements: int = 0
+    #: Measurements carried over from an earlier revision that nobody has confirmed yet.
+    carried_unconfirmed: int = 0
 
     @property
     def outdated(self) -> bool:
@@ -169,6 +171,7 @@ class PositionDrawingRefs:
             "manual": self.manual,
             "manual_outdated": self.manual_outdated,
             "unrevised_measurements": self.unrevised_measurements,
+            "carried_unconfirmed": self.carried_unconfirmed,
             "refs": [r.as_dict() for r in self.refs],
         }
 
@@ -338,6 +341,9 @@ async def drawing_refs_for_boq(
         entry = _entry(pid)
         if not m.drawing_revision:
             entry.unrevised_measurements += 1
+        carry = (m.metadata_ or {}).get("carry_over") if isinstance(m.metadata_, dict) else None
+        if isinstance(carry, dict) and carry.get("status") == "needs_review":
+            entry.carried_unconfirmed += 1
         key = (pid, (m.drawing_document_id or m.document_id, m.drawing_sheet_id, m.drawing_revision, m.page))
         ref = grouped.get(key)
         if ref is None:
