@@ -58,6 +58,10 @@ const SIZE_CLASSES: Record<WideModalSize, string> = {
 export interface WideModalProps {
   open: boolean;
   onClose: () => void;
+
+  // Opt-in: CSS selector of the element that takes initial focus (e.g. the
+  // Cancel button of a destructive confirm). Default keeps first-focusable.
+  initialFocusSelector?: string;
   title: string;
   /** Optional descriptive subtitle rendered under the title. */
   subtitle?: React.ReactNode;
@@ -88,6 +92,7 @@ export interface WideModalProps {
 export function WideModal({
   open,
   onClose,
+  initialFocusSelector,
   title,
   subtitle,
   size = 'lg',
@@ -134,10 +139,18 @@ export function WideModal({
     if (!open) return;
     const node = panelRef.current;
     if (!node) return;
+    const preferred = initialFocusSelector
+      ? node.querySelector<HTMLElement>(initialFocusSelector)
+      : null;
+    if (preferred) {
+      preferred.focus();
+      return;
+    }
     const focusable = node.querySelector<HTMLElement>(
       'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])',
     );
     focusable?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   // Trap Tab inside the panel and restore focus to the triggering

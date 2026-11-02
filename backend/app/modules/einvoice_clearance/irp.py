@@ -11,6 +11,7 @@ rounded to two decimals as the schema expects.
 from __future__ import annotations
 
 import json
+import re
 from decimal import ROUND_HALF_UP, Decimal
 from typing import Any
 
@@ -18,10 +19,15 @@ from app.modules.einvoice.cii import EInvoice
 
 IRP_SCHEMA_VERSION = "1.1"
 _CENT = Decimal("0.01")
+_DEC_MARK = "@@dec:"
 
 
-def _m(value: Decimal) -> float:
-    return float(Decimal(value).quantize(_CENT, ROUND_HALF_UP))
+def _m(value: Decimal) -> Decimal:
+    return Decimal(value).quantize(_CENT, ROUND_HALF_UP)
+
+
+def _num(value: Decimal) -> Decimal:
+    return Decimal(value).normalize() + 0
 
 
 def _ddmmyyyy(iso: str) -> str:
@@ -61,12 +67,12 @@ def build_irp_document(inv: EInvoice, country_fields: dict[str, Any]) -> dict[st
                 "PrdDesc": line.name,
                 "IsServc": "Y" if str(fields.get("is_service", "Y")).upper().startswith("Y") else "N",
                 "HsnCd": hsn,
-                "Qty": float(line.quantity),
+                "Qty": _num(line.quantity),
                 "Unit": (line.unit or "OTH")[:8],
                 "UnitPrice": _m(line.net_unit_price),
                 "TotAmt": _m(line.line_net_amount),
                 "AssAmt": _m(line.line_net_amount),
-                "GstRt": float(line.vat_rate),
+                "GstRt": _num(line.vat_rate),
                 "IgstAmt": _m(igst),
                 "CgstAmt": _m(half),
                 "SgstAmt": _m(half),
@@ -99,7 +105,14 @@ def build_irp_document(inv: EInvoice, country_fields: dict[str, Any]) -> dict[st
 
 
 def render_irp_json(inv: EInvoice, country_fields: dict[str, Any]) -> str:
-    return json.dumps(build_irp_document(inv, country_fields), ensure_ascii=False, separators=(",", ":"))
+    """Serialise with every amount as its exact decimal text, never through binary float."""
+    text = json.dumps(
+        build_irp_document(inv, country_fields),
+        ensure_ascii=False,
+        separators=(",", ":"),
+        default=lambda v: f"{_DEC_MARK}{format(v, 'f')}" if isinstance(v, Decimal) else str(v),
+    )
+    return re.sub(rf'"{_DEC_MARK}(-?[0-9.]+)"', lambda m: m.group(1), text)
 
 
 __all__ = ["IRP_SCHEMA_VERSION", "build_irp_document", "render_irp_json"]

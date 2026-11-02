@@ -248,9 +248,7 @@ describe('EInvoiceSetupCard', () => {
 });
 
 describe('EInvoiceSetupCard live confirm focus', () => {
-  // DEFECT: WideModal moves focus to its first focusable (the close button) after the
-  // Cancel button's autoFocus ran, so the dialog does not open on Cancel (UX.md, Accessibility).
-  it.fails('opens the live confirm with focus on Cancel', async () => {
+  it('opens the live confirm with focus on Cancel', async () => {
     mocks.listProfiles.mockResolvedValue([
       profile('SA', 'ZATCA', { settings: { sandbox_success_at: '2026-11-01T10:00:00Z' } }),
     ]);
