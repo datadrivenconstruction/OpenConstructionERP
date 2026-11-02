@@ -24,6 +24,7 @@ import {
   type ScheduleCalendar,
   type ScheduleCalendarUpdateBody,
 } from '@/features/schedule-advanced/api';
+import { HolidayImport } from './HolidayImport';
 
 /** The seven weekdays, in Mon..Sun order, mapped to ``work_days`` ints (Mon=0). */
 const WEEKDAYS: { day: number; key: string; label: string }[] = [
@@ -423,6 +424,12 @@ function CalendarCard({
             {t('schedule.calendar.add_holiday', { defaultValue: 'Add holiday' })}
           </Button>
         </div>
+        <HolidayImport
+          projectId={projectId}
+          existing={calendar.holidays}
+          disabled={busy}
+          onImport={(dates) => patchMutation.mutate({ holidays: dates })}
+        />
       </div>
     </Card>
   );

@@ -17,6 +17,7 @@ import asyncio
 import logging
 import math
 import uuid
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
@@ -1103,6 +1104,41 @@ def calendar_holiday_coverage(country: str | None, year: int) -> dict:
         "omitted": list(answer["omitted"]),
         "placeholder_spans": list(answer["placeholder_spans"]),
     }
+
+
+def public_holidays_for_import(country: str, years: list[int]) -> dict:
+    """Public holiday dates of ``country`` over ``years``, for copying into a work calendar.
+
+    Raises:
+        ValueError: no holiday table covers ``country``, so an import would copy nothing true.
+    """
+    code = (country or "").upper().strip()
+    dates: set[date] = set()
+    coverage = []
+    for year in sorted(set(years)):
+        answer = resolve_holidays(code, year)
+        if not answer["jurisdiction"].answered:
+            raise ValueError(f"No public holiday table covers country {code!r}")
+        dates.update(answer["dates"])
+        coverage.append(calendar_holiday_coverage(code, year))
+    return {"country": code, "dates": sorted(d.isoformat() for d in dates), "coverage": coverage}
+
+
+def end_from_working_days(start_date: str, working_days: int, duration_of: Callable[[str, str], int]) -> str:
+    """The end date that makes ``duration_of(start_date, end)`` equal ``working_days``: the inverse of it.
+
+    Zero days is a milestone and ends on its start. The walk is bounded so a
+    calendar without a single working day cannot loop forever.
+    """
+    start = date.fromisoformat(start_date)
+    if working_days <= 0:
+        return start_date
+    current = start
+    for _ in range(working_days * 7 + 400):
+        if duration_of(start_date, current.isoformat()) >= working_days:
+            return current.isoformat()
+        current += timedelta(days=1)
+    raise ValueError("The calendar has too few working days to fit this duration")
 
 
 def calendar_region_for(region: str | None, country_code: str | None) -> str | None:
@@ -2507,6 +2543,28 @@ class ScheduleService:
                 else _incoming
             )
 
+        # A typed duration moves the end date on the working week; an end date
+        # sent with it wins, and a summary's span comes from its children.
+        typed_milestone = False
+        if fields.get("duration_days") is not None and "end_date" not in fields:
+            if activity.activity_type == "summary":
+                raise HTTPException(
+                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    detail="A summary's duration comes from its children and cannot be typed",
+                )
+            typed_start = fields.get("start_date", activity.start_date)
+            if typed_start:
+                schedule = await self.get_schedule(schedule_id)
+                fields["end_date"] = await self.working_end_date(
+                    schedule.project_id,
+                    fields.get("calendar_id", getattr(activity, "calendar_id", None)),
+                    typed_start,
+                    fields["duration_days"],
+                )
+                if fields["duration_days"] == 0:
+                    fields["activity_type"] = "milestone"
+                    typed_milestone = True
+
         # Recalculate duration if dates changed. Use the activity's own
         # calendar when assigned, falling back to the project's regional week.
         new_start = fields.get("start_date", activity.start_date)
@@ -2518,9 +2576,10 @@ class ScheduleService:
         if dates_change:
             schedule = await self.get_schedule(schedule_id)
             slip_project_id = schedule.project_id
-            fields["duration_days"] = await self.working_duration(
-                schedule.project_id, getattr(activity, "calendar_id", None), new_start, new_end
-            )
+            if not typed_milestone:
+                fields["duration_days"] = await self.working_duration(
+                    schedule.project_id, getattr(activity, "calendar_id", None), new_start, new_end
+                )
 
         # Completion guard (mirrors tasks.complete_task): reject the transition
         # to completed while any canonical predecessor is still open. Skipped
@@ -3564,6 +3623,30 @@ class ScheduleService:
                 )
         region = await self.resolve_project_region(project_id)
         return compute_duration(start_date or "", end_date or "", region)
+
+    async def working_end_date(
+        self,
+        project_id: uuid.UUID,
+        calendar_id: uuid.UUID | None,
+        start_date: str,
+        working_days: int,
+    ) -> str:
+        """The end date ``working_days`` working days from ``start_date``, inverse of :meth:`working_duration`."""
+        if calendar_id is not None:
+            from app.modules.schedule_advanced.models import Calendar
+
+            cal = await self.session.get(Calendar, calendar_id)
+            if cal is not None and cal.project_id == project_id:
+                cal_data = {
+                    "work_days": readable_work_days(cal.work_days, source=f"calendar {cal.id} work days")
+                    or [0, 1, 2, 3, 4],
+                    "exceptions": readable_exception_dates(cal.holidays, source=f"calendar {cal.id} holidays"),
+                }
+                return end_from_working_days(
+                    start_date, working_days, lambda s, e: _compute_duration_from_cal(s, e, cal_data)
+                )
+        region = await self.resolve_project_region(project_id)
+        return end_from_working_days(start_date, working_days, lambda s, e: compute_duration(s, e, region))
 
     async def sync_schedule_end_date(self, schedule_id: uuid.UUID) -> None:
         """Move the schedule's end date to its latest activity end.
