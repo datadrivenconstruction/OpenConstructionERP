@@ -69,7 +69,7 @@ const preloaders: Record<string, () => void> = {
   '/markups': () => void import('@/features/markups/MarkupsPage'),
   '/plan-room': () => void import('@/features/plan-room/PlanRoomPage'),
   '/sheets': () => void import('@/features/file-manager/SheetsIndexPage'),
-  '/photos': () => void import('@/features/documents/PhotoGalleryPage'),
+  '/photos': () => void import('@/features/photos/PhotosPage'),
 
   // ── Commercial & Finance ──
   '/finance': () => void import('@/features/finance/FinancePage'),
