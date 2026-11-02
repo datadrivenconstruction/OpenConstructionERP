@@ -229,12 +229,14 @@ def _seed_bid_award(
     *,
     project_id: uuid.UUID,
     tender_id: uuid.UUID | None = None,
+    package_type: str = "supply",
 ) -> tuple[BidPackage, Bidder]:
-    """Seed a closed bid package with one valid winning submission."""
+    """Seed a closed bid package with one valid winning submission (a supply package by default)."""
     package = BidPackage(
         id=uuid.uuid4(),
         project_id=project_id,
         tender_id=tender_id,
+        package_type=package_type,
         code="BP-001",
         title="Concrete works",
         currency="EUR",
@@ -375,13 +377,12 @@ async def test_tender_then_bid_does_not_double_create(patched: _FakeStore) -> No
         source_module="oe_tendering",
     )
     await proc_events._create_po_from_award(tender_event)
-    assert len(patched.purchase_orders) == 1
-    # Shared reconciliation key stamped by the tender path.
-    assert patched.purchase_orders[0].metadata_["tender_package_id"] == str(tender_pkg.id)
+    # The tender is awarded through its linked bid package, so its own event drafts nothing.
+    assert patched.purchase_orders == []
 
-    # Bid award for the same logical package must reconcile to the existing PO.
     await proc_events._create_po_from_bid_award(_bid_award_event(package, bidder))
     assert len(patched.purchase_orders) == 1
+    assert patched.purchase_orders[0].metadata_["tender_package_id"] == str(tender_pkg.id)
 
 
 @pytest.mark.asyncio
@@ -456,7 +457,9 @@ async def test_handler_dispatches_detached(monkeypatch: pytest.MonkeyPatch) -> N
 
 
 def _tender_award(store: _FakeStore, project_id: uuid.UUID) -> Event:
-    tender_pkg = TenderPackage(id=uuid.uuid4(), project_id=project_id, name="Concrete works")
+    tender_pkg = TenderPackage(
+        id=uuid.uuid4(), project_id=project_id, name="Concrete works", metadata_={"package_type": "supply"}
+    )
     store.tender_packages.append(tender_pkg)
     tender_bid = TenderBid(
         id=uuid.uuid4(),
@@ -500,3 +503,20 @@ async def test_a_project_without_settings_keeps_drafting_award_orders(patched: _
     project_id = uuid.uuid4()
     await proc_events._create_po_from_award(_tender_award(patched, project_id))
     assert len(patched.purchase_orders) == 1
+
+
+@pytest.mark.asyncio
+async def test_a_subcontract_package_award_drafts_no_order(patched: _FakeStore) -> None:
+    """A subcontract package commits through its subcontract agreement, never an order too."""
+    package, bidder = _seed_bid_award(patched, project_id=uuid.uuid4(), package_type="subcontract")
+    await proc_events._create_po_from_bid_award(_bid_award_event(package, bidder))
+    assert patched.purchase_orders == []
+
+
+@pytest.mark.asyncio
+async def test_a_main_contract_tender_award_drafts_no_order(patched: _FakeStore) -> None:
+    """A tender package not marked supply is the main contract tender: its award is the contract."""
+    event = _tender_award(patched, uuid.uuid4())
+    patched.tender_packages[-1].metadata_ = {}
+    await proc_events._create_po_from_award(event)
+    assert patched.purchase_orders == []

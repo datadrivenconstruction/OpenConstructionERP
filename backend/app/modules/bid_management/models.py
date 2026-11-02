@@ -8,6 +8,7 @@ Tables:
     oe_bid_management_invitation        - invitation to a bidder
     oe_bid_management_bidder            - denormalised bidder snapshot
     oe_bid_management_submission        - submitted envelope from a bidder
+    oe_bid_management_leveling_plug     - value put on a line a bidder left out
     oe_bid_management_submission_line   - priced line in a submission
     oe_bid_management_qa                - Q&A thread on a package
     oe_bid_management_comparison        - leveling header (one per package)
@@ -24,7 +25,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Integer, Numeric, String, Text
+from sqlalchemy import JSON, Boolean, ForeignKey, Integer, Numeric, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import GUID, Base
@@ -71,6 +72,11 @@ class BidPackage(Base):
         nullable=False,
         default="limited",
         server_default="limited",
+    )
+    # What the award commits: "subcontract" (works with labour, becomes a
+    # subcontract agreement) or "supply" (materials, becomes a purchase order).
+    package_type: Mapped[str] = mapped_column(
+        String(16), nullable=False, default="subcontract", server_default="subcontract"
     )
     published_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
     closed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
@@ -470,9 +476,71 @@ class BidLeveling(Base):
         server_default="0",
     )
     manual_adjustment_reason: Mapped[str] = mapped_column(Text, nullable=False, default="")
+    # Plugs price the scope a bidder left out, so bids compare on the same scope.
+    plug_total: Mapped[str] = mapped_column(
+        Numeric(18, 2),  # type: ignore[arg-type]
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    plugged_total: Mapped[str] = mapped_column(
+        Numeric(18, 2),  # type: ignore[arg-type]
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    gap_lines: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    unpriced_gap_lines: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
 
     def __repr__(self) -> str:
         return f"<BidLeveling bidder={self.bidder_id} rank={self.rank}>"
+
+
+class BidLevelingPlug(Base):
+    """The value a leveling puts on one line a bidder did not price.
+
+    ``source`` says where it came from: ``estimate`` (the bill rate times the
+    package quantity), ``median`` (the median of the other bidders' prices for
+    the line), ``manual`` (typed by the estimator, kept across recomputes) or
+    ``none`` (nothing to plug from; the gap stays visible).
+    """
+
+    __tablename__ = "oe_bid_management_leveling_plug"
+    __table_args__ = (
+        UniqueConstraint("comparison_id", "bidder_id", "line_item_id", name="uq_oe_bid_management_leveling_plug"),
+    )
+
+    comparison_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_bid_management_comparison.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    bidder_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_bid_management_bidder.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    line_item_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_bid_management_line_item.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    amount: Mapped[str] = mapped_column(
+        Numeric(18, 2),  # type: ignore[arg-type]
+        nullable=False,
+        default=0,
+        server_default="0",
+    )
+    source: Mapped[str] = mapped_column(String(16), nullable=False, default="none", server_default="none")
+    # Why the line is a gap: "missing" (not priced), "excluded" (priced as excluded).
+    reason: Mapped[str] = mapped_column(String(16), nullable=False, default="missing", server_default="missing")
+    note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+
+    def __repr__(self) -> str:
+        return f"<BidLevelingPlug line={self.line_item_id} {self.amount} ({self.source})>"
 
 
 class BidAward(Base):

@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "Kontakt osoba {contact} nije povezana s imenikom kontakata, pa ista osoba može biti upisana dvaput",
       "suggestion": "Dodajte kontakt osobi e-adresu kako bi se mogla uskladiti s imenikom"
+    },
+    "change_owner_linked": {
+      "fail": "Izmjena podugovora {code} je back-to-back, ali ne navodi nikakav dodatni rad ni nalog za izmjenu naručitelja",
+      "suggestion": "Povežite izmjenu naručitelja koja se prenosi ili uklonite oznaku back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "Izmjena podugovora {code} nema iznos",
+      "suggestion": "Unesite dogovorenu cijenu izmjene, negativnu za izostavljene radove"
+    },
+    "change_within_owner_value": {
+      "fail": "Izmjene podugovora za {code} iznose ukupno {sub_total}, više od vrijednosti izmjene naručitelja {owner_value}",
+      "suggestion": "Provjerite cijene podizvođača ili naplatite razliku od naručitelja prije odobrenja"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "Pozicija {ordinal} nije označena kao partida (po dvije znamenke na svakoj razini, npr. 03.02 ili 03.02.01)",
       "suggestion": "Označite svaku stavku s cijenom brojem poglavlja i stavke, kako je navedeno u peruanskom presupuestu, npr. 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: nadopunjeni opseg je {plug_total} od izjednačenog ukupnog iznosa {leveled_total} ({share} %, prag {threshold} %)",
+      "suggestion": "Zatražite od ponuditelja da procijeni stavke koje nedostaju prije nego se oslonite na izjednačeni iznos"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} stavki koje nedostaju ili su isključene nema nadomjesnu vrijednost (plug)",
+      "suggestion": "Postavite plug prema cijeni iz troškovnika, drugim ponudama ili ručnoj vrijednosti za svaki propust"
+    },
+    "award_leveled": {
+      "fail": "Paket {package} dodjeljuje se bez izračunatog izjednačavanja ponuda",
+      "suggestion": "Izračunajte izjednačavanje kako bi opseg koji nedostaje bio procijenjen prije dodjele"
     }
   }
 }

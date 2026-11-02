@@ -2,8 +2,12 @@
 # Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 """Procurement event handlers - auto-create PO from awarded tender / bid.
 
-Subscribes to BOTH award events emitted by the two sister tendering
-modules and creates a draft Purchase Order pre-populated from the winner:
+Subscribes to BOTH award events emitted by the tendering and bid
+management modules and creates a draft Purchase Order pre-populated from the
+winner, only when the award routes to an order
+(``bid_management/award_route.py``: a supply bid package, or a tender package
+marked supply). Subcontract and main-contract awards commit through their
+contract or subcontract agreement instead:
 
 * ``tendering.package.awarded`` (oe_tendering) - see
   :func:`_create_po_from_award`.
@@ -64,6 +68,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import Event, _log_failures, event_bus
 from app.database import async_session_factory
+from app.modules.bid_management.award_route import SUPPLY, bid_package_route, tender_award_route
 from app.modules.bid_management.award_selection import select_awarded_submission
 from app.modules.bid_management.models import (
     Bidder,
@@ -196,6 +201,12 @@ async def _create_po_from_award(event: Event) -> None:
                     package.project_id,
                     package_id,
                 )
+                return
+            # One award, one commitment: a main-contract tender becomes a contract,
+            # and a tender a bid package is linked to is awarded through that package.
+            route = await tender_award_route(session, package)
+            if route != SUPPLY:
+                logger.info("tender.awarded: package %s routes to %s; no purchase order", package_id, route)
                 return
 
             # Idempotency + cross-module reconciliation. Skip if a PO
@@ -427,6 +438,10 @@ async def _create_po_from_bid_award(event: Event) -> None:
                     package.project_id,
                     package_id,
                 )
+                return
+            # A subcontract package commits through the subcontract agreement, not an order.
+            if bid_package_route(package) != SUPPLY:
+                logger.info("bid_management.awarded: package %s is a subcontract; no purchase order", package_id)
                 return
 
             # Idempotency + reconciliation. Skip if a PO already exists for

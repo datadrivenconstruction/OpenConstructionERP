@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "Người liên hệ {contact} chưa được liên kết với danh bạ liên hệ, nên cùng một người có thể bị ghi trùng hai lần",
       "suggestion": "Thêm địa chỉ email cho người liên hệ để có thể đối chiếu với danh bạ"
+    },
+    "change_owner_linked": {
+      "fail": "Thay đổi hợp đồng thầu phụ {code} là back-to-back nhưng không nêu biến đổi hay lệnh thay đổi nào của chủ đầu tư",
+      "suggestion": "Liên kết thay đổi của chủ đầu tư được chuyển tiếp, hoặc bỏ cờ back-to-back"
+    },
+    "change_amount_set": {
+      "fail": "Thay đổi hợp đồng thầu phụ {code} chưa có giá trị",
+      "suggestion": "Nhập giá đã thỏa thuận của thay đổi, âm nếu là cắt giảm"
+    },
+    "change_within_owner_value": {
+      "fail": "Các thay đổi thầu phụ của {code} tổng cộng {sub_total}, cao hơn giá trị thay đổi của chủ đầu tư {owner_value}",
+      "suggestion": "Kiểm tra đơn giá thầu phụ hoặc thu hồi chênh lệch từ chủ đầu tư trước khi duyệt"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "Hạng mục {ordinal} chưa được đánh số như partida (hai chữ số cho mỗi cấp, ví dụ 03.02 hoặc 03.02.01)",
       "suggestion": "Đánh số từng dòng đã có đơn giá theo chương và mục, như một presupuesto của Peru liệt kê các partida, ví dụ 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: phạm vi bù thêm (plug) là {plug_total} trên tổng đã cân bằng {leveled_total} ({share}%, ngưỡng {threshold}%)",
+      "suggestion": "Yêu cầu nhà thầu báo giá các dòng còn thiếu trước khi dựa vào tổng đã cân bằng"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} dòng thiếu hoặc bị loại trừ chưa có giá trị bù (plug)",
+      "suggestion": "Đặt plug từ đơn giá dự toán, các hồ sơ thầu khác hoặc giá trị nhập tay cho từng chỗ thiếu"
+    },
+    "award_leveled": {
+      "fail": "Gói {package} đang được trao thầu mà chưa tính cân bằng hồ sơ thầu (bid leveling)",
+      "suggestion": "Tính cân bằng để phạm vi còn thiếu được định giá trước khi trao thầu"
     }
   }
 }

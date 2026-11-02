@@ -21,6 +21,7 @@ from __future__ import annotations
 import logging
 import uuid
 from decimal import Decimal
+from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
@@ -59,6 +60,8 @@ from app.modules.bid_management.schemas import (
     BidInvitationCreate,
     BidInvitationResponse,
     BidInvitationUpdate,
+    BidLevelingPlugResponse,
+    BidLevelingPlugSet,
     BidLevelingResponse,
     BidPackageCreate,
     BidPackageDashboard,
@@ -1033,6 +1036,70 @@ async def compute_leveling(
     svc = BidManagementService(session)
     rows = await svc.compute_leveling(comparison_id)
     return [BidLevelingResponse.model_validate(r) for r in rows]
+
+
+@router.get(
+    "/comparisons/{comparison_id}/plugs",
+    response_model=list[BidLevelingPlugResponse],
+)
+async def list_leveling_plugs(
+    comparison_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bid_management.read")),
+) -> list[BidLevelingPlugResponse]:
+    """Plugs on every gap of every bidder, each with its source (estimate, median, manual, none)."""
+    await _verify_comparison_access(session, comparison_id, user_id)
+    rows = await BidManagementService(session).list_plugs(comparison_id)
+    return [BidLevelingPlugResponse.model_validate(r) for r in rows]
+
+
+@router.put(
+    "/comparisons/{comparison_id}/plugs",
+    response_model=list[BidLevelingPlugResponse],
+)
+async def set_leveling_plug(
+    comparison_id: uuid.UUID,
+    data: BidLevelingPlugSet,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    _perm: None = Depends(RequirePermission("bid_management.compute_leveling")),
+) -> list[BidLevelingPlugResponse]:
+    """Set (or clear) a manual plug on one gap and recompute the leveling."""
+    await _verify_comparison_access(session, comparison_id, user_id)
+    rows = await BidManagementService(session).set_manual_plug(comparison_id, data)
+    return [BidLevelingPlugResponse.model_validate(r) for r in rows]
+
+
+@router.get("/bid-packages/{package_id}/leveling-check")
+async def package_leveling_check(
+    package_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    operation: str = "read",
+    _perm: None = Depends(RequirePermission("bid_management.read")),
+) -> dict[str, Any]:
+    """Plug share, unplugged gaps and (operation=award) award-before-leveling findings; read-only."""
+    await _verify_package_access(session, package_id, user_id)
+    report = await BidManagementService(session).leveling_check(
+        package_id, operation="award" if operation == "award" else "read"
+    )
+    summary = report.summary()
+    return {
+        "status": summary["status"],
+        "counts": summary["counts"],
+        "results": [
+            {
+                "rule_id": r.rule_id,
+                "severity": r.severity.value,
+                "passed": r.passed,
+                "message": r.message,
+                "element_ref": r.element_ref,
+                "suggestion": r.suggestion,
+            }
+            for r in report.results
+        ],
+    }
 
 
 @router.get(

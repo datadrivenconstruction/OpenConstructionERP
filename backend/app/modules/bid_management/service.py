@@ -19,11 +19,13 @@ from decimal import Decimal
 from typing import Any
 
 from fastapi import HTTPException, status
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.events import event_bus, publish_after_commit
 from app.core.i18n import get_locale
 from app.core.json_merge import merge_metadata
+from app.core.validation.engine import ValidationReport, validation_engine
 from app.core.validation.messages import translate
 from app.modules.bid_management.award_selection import select_awarded_submission
 from app.modules.bid_management.models import (
@@ -32,6 +34,7 @@ from app.modules.bid_management.models import (
     Bidder,
     BidInvitation,
     BidLeveling,
+    BidLevelingPlug,
     BidPackage,
     BidPackageLineItem,
     BidQA,
@@ -39,6 +42,7 @@ from app.modules.bid_management.models import (
     BidSubmission,
     BidSubmissionLine,
 )
+from app.modules.bid_management.plugs import Plug, compute_plugs, plug_summary
 from app.modules.bid_management.repository import (
     BidAwardRepository,
     BidComparisonRepository,
@@ -61,6 +65,7 @@ from app.modules.bid_management.schemas import (
     BidderUpdate,
     BidInvitationCreate,
     BidInvitationUpdate,
+    BidLevelingPlugSet,
     BidPackageCreate,
     BidPackageLineItemCreate,
     BidPackageLineItemUpdate,
@@ -983,6 +988,7 @@ class BidManagementService:
             total_budget_estimate=str(data.total_budget_estimate),
             status=data.status,
             confidentiality_level=data.confidentiality_level,
+            package_type=data.package_type,
             created_by=user_id,
             metadata_=data.metadata,
         )
@@ -1031,6 +1037,9 @@ class BidManagementService:
             await self._require_tender_package_in_project(fields["tender_id"], package.project_id)
         if "currency" in fields:
             fields["currency"] = self._require_package_currency(fields["currency"])
+        if fields.get("package_type") not in (None, package.package_type) and package.status == "awarded":
+            # The award already committed as one kind; switching would orphan that commitment.
+            raise HTTPException(status_code=409, detail="The package type cannot change after award")
         # Lifecycle status is owned by the state machine. A generic PATCH
         # must not be able to jump (e.g. draft → awarded) bypassing the
         # transition guards, timestamp stamping, auto-rejections and
@@ -1349,6 +1358,18 @@ class BidManagementService:
             await self.rejection_repo.create(rejection)
 
         await self.session.flush()
+
+        # Advisory, like agreement activation: an award without leveling, or one
+        # resting on large plugs, is logged with its rule ids, never refused.
+        try:
+            report = await self.leveling_check(package_id, operation="award")
+            if report.warnings or report.errors:
+                logger.warning(
+                    "bid_management.award_with_findings %s",
+                    {"package_id": str(package_id), "rules": [r.rule_id for r in report.warnings + report.errors]},
+                )
+        except Exception as exc:  # pragma: no cover - an advisory check never blocks an award
+            logger.debug("Award leveling check skipped for %s: %s", package_id, exc)
 
         # Deferred to the commit: the award bridge inserts
         # BidPackage(project_id=...) from its own session.
@@ -2143,8 +2164,23 @@ class BidManagementService:
             and bidder_lookup[s.bidder_id].status == "active"
         ]
 
+        # Plugs price the scope each bidder left out; with line-level plugs the
+        # flat per-exclusion penalty would count the same gap twice, so it drops out.
+        level_plugs = await self._level_plugs(comparison_id, package, valid)
+        has_lines = level_plugs is not None
+        plugs_by_submission = level_plugs or {}
+        plug_stats = {s.id: plug_summary(plugs_by_submission.get(s.id, [])) for s in valid}
+
         # Normalize and compute commercial score: lowest normalized total gets 100.
-        normalized_totals = {s.id: normalize_submission_for_leveling(s, package) for s in valid}
+        normalized_totals = {
+            s.id: (
+                normalize_submission_for_leveling(
+                    s, package, exclusion_penalty_pct=Decimal("0") if has_lines else Decimal("5")
+                )
+                + plug_stats[s.id][0]
+            ).quantize(Decimal("0.01"))
+            for s in valid
+        }
         if normalized_totals:
             best = min(normalized_totals.values())
         else:
@@ -2178,6 +2214,10 @@ class BidManagementService:
                 rank=0,
                 manual_adjustment="0",
                 manual_adjustment_reason="",
+                plug_total=str(plug_stats[sub.id][0]),
+                plugged_total=str((raw_total + plug_stats[sub.id][0]).quantize(Decimal("0.01"))),
+                gap_lines=plug_stats[sub.id][1],
+                unpriced_gap_lines=plug_stats[sub.id][2],
             )
             rows.append(row)
 
@@ -2199,6 +2239,152 @@ class BidManagementService:
 
         await self.session.flush()
         return rows
+
+    async def _estimate_rates(self, lines: list[BidPackageLineItem]) -> dict[uuid.UUID, Decimal]:
+        """Unit rate of each line's BOQ position, the estimate a plug can fall back on."""
+        by_position = {line.boq_position_id: line.id for line in lines if line.boq_position_id is not None}
+        if not by_position:
+            return {}
+        from app.modules.boq.models import Position  # noqa: PLC0415
+
+        rows = (
+            await self.session.execute(
+                select(Position.id, Position.unit_rate).where(Position.id.in_(list(by_position)))
+            )
+        ).all()
+        rates: dict[uuid.UUID, Decimal] = {}
+        for position_id, rate in rows:
+            value = _to_decimal(rate)
+            if value > 0:
+                rates[by_position[position_id]] = value
+        return rates
+
+    async def _level_plugs(
+        self, comparison_id: uuid.UUID, package: BidPackage, valid: list[BidSubmission]
+    ) -> dict[uuid.UUID, list[Plug]] | None:
+        """Recompute the plugs of a comparison; manual plugs are kept as typed.
+
+        Returns plugs per submission id, or ``None`` when the package has no
+        mandatory scope lines to plug against (the leveling then stays penalty based).
+        """
+        lines = await self.line_repo.list_for_package(package.id)
+        stored = list(
+            (await self.session.execute(select(BidLevelingPlug).where(BidLevelingPlug.comparison_id == comparison_id)))
+            .scalars()
+            .all()
+        )
+        manual_rows = {(p.bidder_id, p.line_item_id): p for p in stored if p.source == "manual"}
+        await self.session.execute(
+            delete(BidLevelingPlug).where(
+                BidLevelingPlug.comparison_id == comparison_id, BidLevelingPlug.source != "manual"
+            )
+        )
+        if not any(line.is_mandatory for line in lines):
+            return None
+        grouped = await self.submission_line_repo.list_for_submissions([s.id for s in valid])
+        priced = {
+            s.id: {ln.line_item_id: (ln.total_price, ln.inclusion_status) for ln in grouped.get(s.id, [])}
+            for s in valid
+        }
+        bidder_of = {s.id: s.bidder_id for s in valid}
+        manual = {
+            (sub_id, line_id): (_to_decimal(row.amount), row.note)
+            for sub_id, bidder_id in bidder_of.items()
+            for (m_bidder, line_id), row in manual_rows.items()
+            if m_bidder == bidder_id
+        }
+        plugs = compute_plugs(lines, priced, estimate_rates=await self._estimate_rates(lines), manual=manual)
+        seen: set[tuple[uuid.UUID, uuid.UUID]] = set(manual_rows)
+        for sub_id, items in plugs.items():
+            for plug in items:
+                key = (bidder_of[sub_id], plug.line_item_id)
+                if key in seen:  # manual rows stay as stored; one plug per bidder and line
+                    if key in manual_rows:
+                        manual_rows[key].reason = plug.reason
+                    continue
+                seen.add(key)
+                self.session.add(
+                    BidLevelingPlug(
+                        comparison_id=comparison_id,
+                        bidder_id=key[0],
+                        line_item_id=plug.line_item_id,
+                        amount=str(plug.amount),
+                        source=plug.source,
+                        reason=plug.reason,
+                        note=plug.note,
+                    )
+                )
+        await self.session.flush()
+        return plugs
+
+    async def list_plugs(self, comparison_id: uuid.UUID) -> list[BidLevelingPlug]:
+        """Every plug of a comparison, with its source."""
+        stmt = select(BidLevelingPlug).where(BidLevelingPlug.comparison_id == comparison_id)
+        return list((await self.session.execute(stmt)).scalars().all())
+
+    async def set_manual_plug(self, comparison_id: uuid.UUID, data: BidLevelingPlugSet) -> list[BidLevelingPlug]:
+        """Type a plug for one gap (or clear it, ``amount`` null) and recompute the leveling."""
+        comparison = await self.comparison_repo.get_by_id(comparison_id)
+        if comparison is None:
+            raise HTTPException(status_code=404, detail="Comparison not found")
+        bidder = await self.bidder_repo.get_by_id(data.bidder_id)
+        line = await self.line_repo.get_by_id(data.line_item_id)
+        if bidder is None or bidder.package_id != comparison.package_id:
+            raise HTTPException(status_code=404, detail="Bidder not found for this package")
+        if line is None or line.package_id != comparison.package_id:
+            raise HTTPException(status_code=404, detail="Line not found for this package")
+        await self.session.execute(
+            delete(BidLevelingPlug).where(
+                BidLevelingPlug.comparison_id == comparison_id,
+                BidLevelingPlug.bidder_id == data.bidder_id,
+                BidLevelingPlug.line_item_id == data.line_item_id,
+            )
+        )
+        if data.amount is not None:
+            self.session.add(
+                BidLevelingPlug(
+                    comparison_id=comparison_id,
+                    bidder_id=data.bidder_id,
+                    line_item_id=data.line_item_id,
+                    amount=str(data.amount),
+                    source="manual",
+                    reason="missing",
+                    note=data.note,
+                )
+            )
+        await self.session.flush()
+        await self.compute_leveling(comparison_id)
+        return await self.list_plugs(comparison_id)
+
+    async def leveling_check(self, package_id: uuid.UUID, *, operation: str = "read") -> ValidationReport:
+        """Run the plug-share and gap checks, and for an award the leveled-before-award check."""
+        package = await self.get_package(package_id)
+        comparison = await self.get_comparison_for_package(package_id)
+        rows = await self.leveling_repo.levelings_for_comparison(comparison.id) if comparison else []
+        bidders = {b.id: b for b in await self.bidder_repo.list_for_package(package_id)}
+        payload = {
+            "package": package.code,
+            "currency": package.currency or "",
+            "threshold_pct": str((package.metadata_ or {}).get("plug_share_threshold_pct") or ""),
+            "leveling_computed": bool(comparison is not None and comparison.computed_at and rows),
+            "bidders": [
+                {
+                    "name": bidders[r.bidder_id].company_name if r.bidder_id in bidders else str(r.bidder_id),
+                    "plug_total": str(r.plug_total),
+                    "plugged_total": str(r.plugged_total),
+                    "unpriced_gap_lines": r.unpriced_gap_lines,
+                }
+                for r in rows
+            ],
+        }
+        return await validation_engine.validate(
+            data=payload,
+            rule_sets=["bid_award" if operation == "award" else "bid_leveling"],
+            target_type="bid_package",
+            target_id=str(package.id),
+            project_id=str(package.project_id),
+            metadata={"locale": get_locale(), "operation": operation},
+        )
 
     async def leveling_table(self, comparison_id: uuid.UUID) -> list[BidLeveling]:
         return await self.leveling_repo.levelings_for_comparison(comparison_id)

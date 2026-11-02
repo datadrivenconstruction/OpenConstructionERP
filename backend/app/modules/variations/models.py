@@ -52,6 +52,12 @@ class Notice(Base):
     status: Mapped[str] = mapped_column(String(40), nullable=False, default="issued", index=True)
     # Soft link to oe_changeorders_change_order.id (plain UUID, no DB FK)
     reference_change_order_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    # The field event that raised this notice (daily_diary_entry, daily_diary,
+    # field_report, rfi or site_instruction). Soft link, no FK across modules;
+    # source_ref keeps a readable number for a site instruction with no row.
+    source_type: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    source_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    source_ref: Mapped[str] = mapped_column(String(120), nullable=False, default="", server_default="")
     # Change intelligence: who owes the next action and by when.
     ball_in_court: Mapped[str | None] = mapped_column(String(36), nullable=True)
     response_due_date: Mapped[str | None] = mapped_column(String(40), nullable=True)

@@ -887,6 +887,18 @@
     "contact_linked": {
       "fail": "{contact} kontakt shaxsi kontaktlar katalogiga bog'lanmagan, shuning uchun bir xil shaxs ikki marta yozilishi mumkin",
       "suggestion": "Kontakt shaxsga elektron pochta manzilini qo'shing, shunda u katalog bilan solishtirilishi mumkin"
+    },
+    "change_owner_linked": {
+      "fail": "{code} pudrat osti o'zgarishi back-to-back, lekin buyurtmachining hech qanday o'zgarishi yoki o'zgartirish buyrug'i ko'rsatilmagan",
+      "suggestion": "Uzatilayotgan buyurtmachi o'zgarishini bog'lang yoki back-to-back belgisini olib tashlang"
+    },
+    "change_amount_set": {
+      "fail": "{code} pudrat osti o'zgarishida summa yo'q",
+      "suggestion": "O'zgarishning kelishilgan narxini kiriting, chiqarib tashlansa manfiy"
+    },
+    "change_within_owner_value": {
+      "fail": "{code} bo'yicha pudrat osti o'zgarishlari jami {sub_total}, bu buyurtmachi o'zgarishi qiymati {owner_value} dan ko'p",
+      "suggestion": "Tasdiqlashdan oldin pudrat osti narxlarini tekshiring yoki farqni buyurtmachidan undiring"
     }
   },
   "submittal": {
@@ -1460,6 +1472,20 @@
     "partida_numbering": {
       "fail": "{ordinal}-pozitsiya partida sifatida raqamlanmagan (har bir darajada ikki raqam, masalan 03.02 yoki 03.02.01)",
       "suggestion": "Har bir narxlangan qatorni bob va band bo'yicha raqamlang, Peru presupuesto partidalarni ko'rsatganidek, masalan 03.02"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: to'ldirilgan hajm (plug) tenglashtirilgan {leveled_total} jamidan {plug_total} ni tashkil etadi ({share}%, chegara {threshold}%)",
+      "suggestion": "Tenglashtirilgan jamiga tayanishdan oldin ishtirokchidan yetishmayotgan satrlarni baholashni so'rang"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: yetishmayotgan yoki chiqarib tashlangan {count} satrda to'ldiruvchi qiymat (plug) yo'q",
+      "suggestion": "Har bir bo'shliq uchun plug ni smeta narxidan, boshqa takliflardan yoki qo'lda kiritilgan qiymatdan belgilang"
+    },
+    "award_leveled": {
+      "fail": "{package} paketi hisoblangan takliflarni tenglashtirishsiz berilmoqda",
+      "suggestion": "Berishdan oldin yetishmayotgan hajm baholanishi uchun tenglashtirishni hisoblang"
     }
   }
 }

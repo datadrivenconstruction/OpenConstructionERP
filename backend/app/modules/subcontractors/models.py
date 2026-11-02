@@ -9,6 +9,7 @@ Tables:
     oe_subcontractors_certificate                - insurance / license / iso / etc.
     oe_subcontractors_agreement                  - master contract per project
     oe_subcontractors_work_package               - scope of work under an agreement
+    oe_subcontractors_change                     - change to an agreement, linked to the owner change
     oe_subcontractors_payment_application        - periodic payment claim
     oe_subcontractors_payment_application_line   - line under a payment application
     oe_subcontractors_retention_ledger           - retention accrual / release entries
@@ -340,6 +341,63 @@ class WorkPackage(Base):
 
     def __repr__(self) -> str:
         return f"<WorkPackage {self.name!r} ({self.status})>"
+
+
+class SubcontractChange(Base):
+    """A change to a subcontract agreement, usually passed down from an owner change.
+
+    ``owner_change_type``/``owner_change_id`` name the owner-side record
+    (``variation_order`` in variations, ``change_order`` in changeorders) as a
+    plain GUID with no FK. Approval adds ``amount`` to the agreement value
+    once (``applied_amount`` records what was added) and the commitment
+    follows through the finance budget sync.
+    """
+
+    __tablename__ = "oe_subcontractors_change"
+    __table_args__ = (UniqueConstraint("agreement_id", "code", name="uq_oe_subcontractors_change_code"),)
+
+    agreement_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_subcontractors_agreement.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    code: Mapped[str] = mapped_column(String(50), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    description: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    # Signed: an omission passed down to the subcontractor is negative.
+    amount: Mapped[Decimal] = mapped_column(Numeric(18, 2), nullable=False, default=Decimal("0"), server_default="0")
+    currency: Mapped[str] = mapped_column(String(3), nullable=False, default="", server_default="")
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="draft", server_default="draft", index=True)
+    # Back-to-back: the subcontractor gets exactly what the owner granted, so the
+    # change must name the owner change it mirrors.
+    back_to_back: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True, server_default="1")
+    owner_change_type: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    owner_change_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    decision_note: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
+    # What approval added to the agreement value; NULL until approved, so a
+    # replayed approval never adds it twice.
+    applied_amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata",
+        JSON,
+        nullable=False,
+        default=dict,
+        server_default="{}",
+    )
+
+    def __repr__(self) -> str:
+        return f"<SubcontractChange {self.code} {self.amount} ({self.status})>"
 
 
 class PaymentApplication(Base):

@@ -167,6 +167,15 @@ class NoticeRepository(_BaseRepo):
         count = (await self.session.execute(stmt)).scalar_one()
         return f"NOT-{count + 1:04d}"
 
+    async def list_for_source(self, project_id: uuid.UUID, source_type: str, source_id: uuid.UUID) -> list[Notice]:
+        """Notices raised from one field event, oldest first."""
+        stmt = (
+            select(Notice)
+            .where(Notice.project_id == project_id, Notice.source_type == source_type, Notice.source_id == source_id)
+            .order_by(Notice.created_at)
+        )
+        return list((await self.session.execute(stmt)).scalars().all())
+
 
 class VariationRequestRepository(_BaseRepo):
     model = VariationRequest

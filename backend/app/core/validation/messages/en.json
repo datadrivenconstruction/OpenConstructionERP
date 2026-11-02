@@ -905,6 +905,18 @@
     "contact_linked": {
       "fail": "The contact person {contact} is not linked to the contacts directory, so the same person may be kept twice",
       "suggestion": "Add an email address to the contact person so it can be matched to the directory"
+    },
+    "change_owner_linked": {
+      "fail": "Subcontract change {code} is back-to-back but names no owner variation or change order",
+      "suggestion": "Link the owner change this passes down, or clear the back-to-back flag"
+    },
+    "change_amount_set": {
+      "fail": "Subcontract change {code} has no amount",
+      "suggestion": "Enter the agreed price of the change, negative for an omission"
+    },
+    "change_within_owner_value": {
+      "fail": "Subcontract changes for {code} total {sub_total}, more than the owner change value {owner_value}",
+      "suggestion": "Check the subcontract prices or recover the difference from the owner before approving"
     }
   },
   "submittal": {
@@ -1486,6 +1498,20 @@
     "activity_labour_without_trade": {
       "fail": "Activity {activity} ({project}) loads labour but names no trade, so its demand cannot be matched to anyone",
       "suggestion": "Set a trade on the labour resource of the activity"
+    }
+  },
+  "bid_leveling": {
+    "plug_share": {
+      "fail": "{bidder}: plugged scope is {plug_total} of a leveled total of {leveled_total} ({share}%, threshold {threshold}%)",
+      "suggestion": "Ask the bidder to price the missing lines before relying on the leveled total"
+    },
+    "gaps_plugged": {
+      "fail": "{bidder}: {count} missing or excluded lines have no plug value",
+      "suggestion": "Set a plug from the estimate rate, the other bids or a manual value for each gap"
+    },
+    "award_leveled": {
+      "fail": "Package {package} is being awarded without a computed bid leveling",
+      "suggestion": "Compute the leveling so missing scope is priced before the award"
     }
   }
 }
