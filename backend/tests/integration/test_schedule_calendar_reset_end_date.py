@@ -168,3 +168,35 @@ async def test_the_schedule_ends_with_its_latest_activity() -> None:
 
         await service.update_activity(first.id, ActivityUpdate(name="Footings"))
         assert await _end_date(service, schedule_id) == END
+
+
+@pytest.mark.asyncio
+async def test_a_typed_duration_moves_the_end_on_the_activitys_calendar() -> None:
+    async with transactional_session() as session:
+        service, schedule_id, project_id = await _schedule(session)
+        act = await _task(service, schedule_id, "Screed", START, START)
+        six_days = await _calendar(session, project_id, [0, 1, 2, 3, 4, 5])
+        await ScheduleProgressService(session).set_calendar(act.id, six_days)
+
+        typed = await service.update_activity(act.id, ActivityUpdate(duration_days=11))
+        assert (typed.end_date, typed.duration_days) == (END, 11)
+
+        explicit = await service.update_activity(act.id, ActivityUpdate(duration_days=3, end_date="2026-05-06"))
+        assert explicit.end_date == "2026-05-06"
+
+        milestone = await service.update_activity(act.id, ActivityUpdate(duration_days=0))
+        assert (milestone.end_date, milestone.duration_days, milestone.activity_type) == (START, 0, "milestone")
+
+
+@pytest.mark.asyncio
+async def test_a_summary_refuses_a_typed_duration() -> None:
+    async with transactional_session() as session:
+        service, schedule_id, _ = await _schedule(session)
+        summary = await service.create_activity(
+            ActivityCreate(
+                schedule_id=schedule_id, name="Shell", start_date=START, end_date=END, activity_type="summary"
+            )
+        )
+        with pytest.raises(HTTPException) as exc:
+            await service.update_activity(summary.id, ActivityUpdate(duration_days=4))
+        assert exc.value.status_code == 422

@@ -106,6 +106,7 @@ from app.modules.schedule.service import (
     coded_http_error,
     compute_duration,
     get_work_calendar,
+    public_holidays_for_import,
 )
 
 router = APIRouter(tags=["schedule"])
@@ -2836,6 +2837,24 @@ async def schedule_stats(
         total_duration_days=total_duration,
         next_milestone=next_milestone,
     )
+
+
+@router.get(
+    "/holidays/",
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def schedule_public_holidays(
+    country: str = Query(..., min_length=2, max_length=10, description="ISO 3166-1 code, or a subdivision code"),
+    years: list[int] = Query(..., min_length=1, max_length=10, description="Years to list"),
+    _user_id: CurrentUserId = None,  # type: ignore[assignment]
+) -> dict:
+    """Public holiday dates of a country for the given years, to import into a work calendar."""
+    if any(y < 1900 or y > 2200 for y in years):
+        raise HTTPException(status_code=422, detail="Years must lie between 1900 and 2200")
+    try:
+        return public_holidays_for_import(country, years)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @router.get(
