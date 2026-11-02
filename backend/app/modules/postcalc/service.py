@@ -956,10 +956,13 @@ class PostCalcService:
                 actuals[pid] = slot
             return slot
 
+        known_pids = set(code_to_pid.values()) | set(wbs_to_pid.values())
         for ts in approved:
             for tline in ts.lines:
-                code = str(tline.cost_code or "").strip()
-                pid = code_to_pid.get(code)
+                # The direct position link wins over cost code and WBS, as in field-time productivity.
+                pid = tline.boq_position_id if tline.boq_position_id in known_pids else None
+                if pid is None:
+                    pid = code_to_pid.get(str(tline.cost_code or "").strip())
                 if pid is None:
                     wbs = str(tline.wbs or "").strip()
                     pid = wbs_to_pid.get(wbs)
