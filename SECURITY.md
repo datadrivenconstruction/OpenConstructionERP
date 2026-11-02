@@ -58,7 +58,7 @@ advisory and in the CVE record unless they ask for anonymity.
 
 | Version track           | Security updates                                    |
 |-------------------------|-----------------------------------------------------|
-| Latest release (18.x)   | Yes                                                 |
+| Latest release (19.x)   | Yes                                                 |
 | Previous minor          | Critical fixes only, for six months after superseded |
 | Older releases          | No - upgrade path published in release notes         |
 

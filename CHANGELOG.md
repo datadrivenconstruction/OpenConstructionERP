@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 > **Tip:** This file is long. Use your browser's **Find** (Ctrl+F) to jump to a version number, or see the [Releases page](https://github.com/datadrivenconstruction/OpenConstructionERP/releases) for a per-release view with download links.
 
+## [19.0.0] - 2026-11-02
+
+### Added
+
+- Solution packages: install a package for your kind of company in one step during onboarding or in Settings. The menu focuses on the package's modules, the rest stays one click away, and only administrators can add or remove packages.
+- Gulf real estate package: off-plan sales with escrow, the Saudi regulator shown as REGA, and a Riyadh off-plan demo project.
+- Leasing module: leases with deposit, yearly increase and VAT, a rent schedule that raises invoices in Finance, a rent roll and arrears. Leases export to a CSV with the columns an Ejar upload needs, with Gregorian and Hijri dates.
+- Service charges module: owners' associations, apportionment by floor area, yearly budget and approval, quarterly demands raised as invoices, and a year-end reconciliation.
+- Measurement Book: dated measurements per bill item, checked or disputed, with cumulative quantities and a running bill that feeds Progress and the interim payment claim.
+- Manual bar bending schedule beside the BVBS import, with BS 8666 and IS 2502 shape codes, cut lengths, weights per diameter and CSV export.
+- Tender premium or rebate on a schedule of rates, on the whole bill or a section, and the units rmt, cwt and job.
+- Hijri dates beside Gregorian dates, chosen in Settings, kept on the account and shown on project cards.
+- Procurement profiles with per-project confirmation of legal values, and federal and state procurement profiles for Germany.
+- Prefab supply chain: receive units by QR code with a delivery note.
+- One contact identity across tenders and the client portal.
+- Third-party module ZIPs can be installed from System Modules.
+
+### Fixed
+
+- Archived projects can be deleted permanently.
+- A project's address and map anchor stay in one reconciled location.
+- Onboarding keeps the language and progress on reload, adopts the market currency and installs the chosen demo.
+- Updated dependencies with known vulnerabilities in the web app and the desktop app.
+
 ## [18.9.0] - 2026-10-28
 
 ### Added

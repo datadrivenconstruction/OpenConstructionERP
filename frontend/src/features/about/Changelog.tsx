@@ -67,6 +67,13 @@ const UNRELEASED: ChangelogEntry | null = null;
 // carry the long form and are left alone as the record of what shipped.
 const CHANGELOG: ChangelogEntry[] = [
   {
+    version: '19.0.0',
+    date: '2026-11-02',
+    tag: 'NEW',
+    summary:
+      'Solution packages with a focused menu, a Gulf real estate package with leasing, service charges and an Ejar lease export, a measurement book and manual bar bending schedules, and Hijri dates beside Gregorian ones. Third-party module ZIPs install from System Modules, and dependencies with known vulnerabilities are updated.',
+  },
+  {
     version: '18.9.0',
     date: '2026-10-28',
     tag: 'NEW',
