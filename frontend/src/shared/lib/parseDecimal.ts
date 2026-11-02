@@ -221,7 +221,7 @@ export function cleanPastedNumber(raw: string): string {
   s = s.replace(/[A-Za-z²³À-ɏЀ-ӿ/%]+[0-9²³]*\s*$/u, '');
   s = s.replace(/^[A-Za-zÀ-ɏ]+\.?\s*/u, '');
   s = s.replace(/(\d)['’](?=\d{3}(\D|$))/g, '$1').trim();
-  return s.replace(/(\d)[   ](?=\d)/g, '$1');
+  return s.replace(/(\d)[ \u00a0\u202f](?=\d)/g, '$1');
 }
 
 /**
