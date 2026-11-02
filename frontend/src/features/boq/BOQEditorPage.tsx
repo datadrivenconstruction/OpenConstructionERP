@@ -583,6 +583,7 @@ export function BOQEditorPage() {
   /** Stable ref for handleDuplicatePosition — allows keyboard shortcut access before declaration. */
   const duplicatePositionRef = useRef<((id: string) => void) | null>(null);
   /** Stable ref for trackedDelete — allows keyboard shortcut access before declaration. */
+  const [batchDeleteSignal, setBatchDeleteSignal] = useState(0);
   const trackedDeleteRef = useRef<((id: string) => void) | null>(null);
   /** Stable ref for handleExport — allows keyboard shortcut access before declaration. */
   const handleExportRef = useRef<((format: string) => void) | null>(null);
@@ -1767,62 +1768,6 @@ export function BOQEditorPage() {
 
   /* ── Batch action handlers ──────────────────────────────────────── */
 
-  const handleBatchDelete = useCallback(
-    (ids: string[]) => {
-      // Selected sections cascade like the single section delete; rows under
-      // them go with them and are not deleted a second time.
-      const plan = planBatchDelete(boq?.positions ?? [], ids);
-      if (plan.sections.length > 0 && boq) {
-        const removed = new Set(plan.sections.map((sec) => sec.id));
-        let grew = true;
-        while (grew) {
-          grew = false;
-          for (const p of boq.positions) {
-            if (p.parent_id && removed.has(p.parent_id) && !removed.has(p.id)) {
-              removed.add(p.id);
-              grew = true;
-            }
-          }
-        }
-        for (const id of removed) deletedIdsRef.current.add(id);
-        queryClient.setQueryData(['boq', boqId], (old: unknown) => {
-          if (!old || typeof old !== 'object') return old;
-          const data = old as { positions: Position[]; [key: string]: unknown };
-          return { ...data, positions: data.positions.filter((p) => !removed.has(p.id)) };
-        });
-        void Promise.allSettled(
-          plan.sections.map((sec) => boqApi.deletePosition(sec.id, { cascade: true })),
-        ).then((results) => {
-          if (results.some((r) => r.status === 'rejected')) {
-            for (const id of removed) deletedIdsRef.current.delete(id);
-            addToast({
-              type: 'error',
-              title: t('boq.section_delete_failed', { defaultValue: 'Failed to delete section' }),
-            });
-          }
-          invalidateAll();
-        });
-      }
-      let deleted = plan.containedPositions;
-      for (const id of plan.positionIds) {
-        trackedDelete(id);
-        deleted++;
-      }
-      setSelectedPositionIds([]);
-      boqGridRef.current?.clearSelection();
-      if (deleted > 0) {
-        addToast({
-          type: 'success',
-          title: t('boq.batch_deleted', {
-            defaultValue: '{{count}} positions deleted',
-            count: String(deleted),
-          } as Record<string, string>),
-        });
-      }
-    },
-    [boq, boqId, queryClient, invalidateAll, trackedDelete, addToast, t],
-  );
-
   const handleBatchChangeUnit = useCallback(
     (ids: string[], unit: string) => {
       for (const id of ids) {
@@ -2238,8 +2183,12 @@ export function BOQEditorPage() {
         case 'delete_selected':
           // Same tracked-delete pipeline as the context menu / batch bar, so
           // the undo toast and the 5 s deferred API call still apply.
-          // Sections are left to the batch bar, whose confirmation names them.
+          // Sections need the batch bar's confirmation, which names them.
           e.preventDefault();
+          if (selectedPositionIds.length > 0 && planBatchDelete(boq?.positions ?? [], selectedPositionIds).sections.length > 0) {
+            setBatchDeleteSignal((n) => n + 1);
+            return;
+          }
           for (const id of withoutSections(boq?.positions ?? [], selectedPositionIds)) {
             trackedDeleteRef.current?.(id);
           }
@@ -2364,7 +2313,7 @@ export function BOQEditorPage() {
   /* ── Delete section with all its positions ──────────────────── */
   /** The section delete waiting out its undo window, if any. */
   const pendingSectionDeleteRef = useRef<{
-    sectionId: string;
+    sectionIds: string[];
     timeoutId: ReturnType<typeof setTimeout>;
     toastId: string;
     removedIds: string[];
@@ -2379,7 +2328,11 @@ export function BOQEditorPage() {
       }
       let sent = true;
       try {
-        await boqApi.deletePosition(pending.sectionId, { cascade: true });
+        const results = await Promise.allSettled(
+          pending.sectionIds.map((id) => boqApi.deletePosition(id, { cascade: true })),
+        );
+        const failed = results.find((r): r is PromiseRejectedResult => r.status === 'rejected');
+        if (failed) throw failed.reason;
       } catch (err) {
         sent = false;
         // The rows come back with the refetch, so nothing is lost silently.
@@ -2414,6 +2367,73 @@ export function BOQEditorPage() {
   }, [flushSectionDelete, removeToast]);
   /** True while an add is waiting on that delete, so a second click does not race it. */
   const sectionAddSettlingRef = useRef(false);
+
+  /** Take sections and everything below them off the grid and send the cascade after the undo window. */
+  const startSectionDelete = useCallback(
+    (sectionIds: string[], descendantIds: string[]) => {
+      if (!boq) return;
+      // One delete waits at a time; an older one goes out now.
+      if (pendingSectionDeleteRef.current) {
+        const prev = pendingSectionDeleteRef.current;
+        removeToast(prev.toastId);
+        void flushSectionDelete(prev);
+      }
+
+      const removedIds = [...sectionIds, ...descendantIds];
+      const removed = new Set(removedIds);
+      const snapshot = boq.positions.filter((p) => removed.has(p.id));
+      const order = new Map(boq.positions.map((p, i) => [p.id, i]));
+      const descendantCount = descendantIds.length;
+      for (const id of removedIds) deletedIdsRef.current.add(id);
+      queryClient.setQueryData(['boq', boqId], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old;
+        const data = old as { positions: Position[]; [key: string]: unknown };
+        return { ...data, positions: data.positions.filter((p) => !removed.has(p.id)) };
+      });
+
+      const toastId = addToast(
+        {
+          type: 'info',
+          title: descendantCount > 0
+            ? t('boq.section_deleted', {
+                defaultValue: 'Section deleted with {{count}} positions',
+                count: descendantCount,
+              })
+            : t('boq.section_deleted_empty', { defaultValue: 'Section deleted' }),
+          action: {
+            label: t('common.undo', { defaultValue: 'Undo' }),
+            onClick: () => {
+              const pending = pendingSectionDeleteRef.current;
+              if (!pending || pending.toastId !== toastId) return;
+              clearTimeout(pending.timeoutId);
+              pendingSectionDeleteRef.current = null;
+              for (const id of removedIds) deletedIdsRef.current.delete(id);
+              queryClient.setQueryData(['boq', boqId], (old: unknown) => {
+                if (!old || typeof old !== 'object') return old;
+                const data = old as { positions: Position[]; [key: string]: unknown };
+                const present = new Set(data.positions.map((p) => p.id));
+                return { ...data, positions: [...data.positions, ...snapshot.filter((p) => !present.has(p.id))].sort(
+                    (x, y) => (order.get(x.id) ?? 0) - (order.get(y.id) ?? 0),
+                  ),
+                };
+              });
+              addToast({
+                type: 'info',
+                title: t('boq.section_restored', { defaultValue: 'Section restored' }),
+              });
+            },
+          },
+        },
+        { duration: SECTION_UNDO_MS },
+      );
+      const timeoutId = setTimeout(() => {
+        const pending = pendingSectionDeleteRef.current;
+        if (pending?.toastId === toastId) void flushSectionDelete(pending);
+      }, SECTION_UNDO_MS);
+      pendingSectionDeleteRef.current = { sectionIds, timeoutId, toastId, removedIds };
+    },
+    [boq, boqId, queryClient, addToast, removeToast, flushSectionDelete, t],
+  );
 
   const handleDeleteSection = useCallback(
     async (sectionId: string) => {
@@ -2453,62 +2473,46 @@ export function BOQEditorPage() {
         });
         if (!ok) return;
       }
-      // One delete waits at a time; an older one goes out now.
-      if (pendingSectionDeleteRef.current) {
-        const prev = pendingSectionDeleteRef.current;
-        removeToast(prev.toastId);
-        void flushSectionDelete(prev);
-      }
-
-      const removedIds = [sectionId, ...descendantIds];
-      const removed = new Set(removedIds);
-      const snapshot = boq.positions.filter((p) => removed.has(p.id));
-      for (const id of removedIds) deletedIdsRef.current.add(id);
-      queryClient.setQueryData(['boq', boqId], (old: unknown) => {
-        if (!old || typeof old !== 'object') return old;
-        const data = old as { positions: Position[]; [key: string]: unknown };
-        return { ...data, positions: data.positions.filter((p) => !removed.has(p.id)) };
-      });
-
-      const toastId = addToast(
-        {
-          type: 'info',
-          title: descendantCount > 0
-            ? t('boq.section_deleted', {
-                defaultValue: 'Section deleted with {{count}} positions',
-                count: descendantCount,
-              })
-            : t('boq.section_deleted_empty', { defaultValue: 'Section deleted' }),
-          action: {
-            label: t('common.undo', { defaultValue: 'Undo' }),
-            onClick: () => {
-              const pending = pendingSectionDeleteRef.current;
-              if (!pending || pending.toastId !== toastId) return;
-              clearTimeout(pending.timeoutId);
-              pendingSectionDeleteRef.current = null;
-              for (const id of removedIds) deletedIdsRef.current.delete(id);
-              queryClient.setQueryData(['boq', boqId], (old: unknown) => {
-                if (!old || typeof old !== 'object') return old;
-                const data = old as { positions: Position[]; [key: string]: unknown };
-                const present = new Set(data.positions.map((p) => p.id));
-                return { ...data, positions: [...data.positions, ...snapshot.filter((p) => !present.has(p.id))] };
-              });
-              addToast({
-                type: 'info',
-                title: t('boq.section_restored', { defaultValue: 'Section restored' }),
-              });
-            },
-          },
-        },
-        { duration: SECTION_UNDO_MS },
-      );
-      const timeoutId = setTimeout(() => {
-        const pending = pendingSectionDeleteRef.current;
-        if (pending?.toastId === toastId) void flushSectionDelete(pending);
-      }, SECTION_UNDO_MS);
-      pendingSectionDeleteRef.current = { sectionId, timeoutId, toastId, removedIds };
+      startSectionDelete([sectionId], descendantIds);
     },
-    [boq, boqId, confirm, queryClient, addToast, removeToast, flushSectionDelete, t],
+    [boq, confirm, startSectionDelete, t],
+  );
+
+
+  const handleBatchDelete = useCallback(
+    (ids: string[]) => {
+      // Selected sections cascade like the single section delete and share its
+      // undo window; rows under them go with them and are not deleted twice.
+      const plan = planBatchDelete(boq?.positions ?? [], ids);
+      if (plan.sections.length > 0 && boq) {
+        const roots = new Set(plan.sections.map((sec) => sec.id));
+        const below = new Set<string>();
+        let grew = true;
+        while (grew) {
+          grew = false;
+          for (const p of boq.positions) {
+            if (p.parent_id && (roots.has(p.parent_id) || below.has(p.parent_id)) && !below.has(p.id)) {
+              below.add(p.id);
+              grew = true;
+            }
+          }
+        }
+        startSectionDelete([...roots], [...below]);
+      }
+      for (const id of plan.positionIds) trackedDelete(id);
+      setSelectedPositionIds([]);
+      boqGridRef.current?.clearSelection();
+      if (plan.sections.length === 0 && plan.positionIds.length > 0) {
+        addToast({
+          type: 'success',
+          title: t('boq.batch_deleted', {
+            defaultValue: '{{count}} positions deleted',
+            count: String(plan.positionIds.length),
+          } as Record<string, string>),
+        });
+      }
+    },
+    [boq, startSectionDelete, trackedDelete, addToast, t],
   );
 
   /** A section delete still in its undo window goes out when the page closes. */
@@ -2518,9 +2522,11 @@ export function BOQEditorPage() {
       if (pending) {
         clearTimeout(pending.timeoutId);
         pendingSectionDeleteRef.current = null;
-        boqApi.deletePosition(pending.sectionId, { cascade: true }).catch((err) => {
-          if (import.meta.env.DEV) console.error('Failed to flush pending section delete on unmount:', err);
-        });
+        for (const id of pending.sectionIds) {
+          boqApi.deletePosition(id, { cascade: true }).catch((err) => {
+            if (import.meta.env.DEV) console.error('Failed to flush pending section delete on unmount:', err);
+          });
+        }
       }
     };
   }, []);
@@ -6080,6 +6086,7 @@ export function BOQEditorPage() {
         <BatchActionBar
           selectedIds={selectedPositionIds}
           sectionsToDelete={batchDeleteSections}
+          openDeleteSignal={batchDeleteSignal}
           onBatchDelete={handleBatchDelete}
           onBatchChangeUnit={(ids, unit) => {
             const leaf = withoutSections(boq.positions, ids);

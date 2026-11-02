@@ -50,6 +50,8 @@ export interface BatchActionBarProps {
   onBatchSetValue?: (ids: string[], field: 'unit_rate' | 'quantity', value: number) => void;
   /** Selected sections the delete cascades through, named in the confirmation. */
   sectionsToDelete?: SectionToDelete[];
+  /** Bumped by the page (keyboard Delete) to open the same delete confirmation. */
+  openDeleteSignal?: number;
 }
 
 interface FactorDialogState {
@@ -83,6 +85,7 @@ export function BatchActionBar({
   onBatchFindReplace,
   onBatchSetValue,
   sectionsToDelete = [],
+  openDeleteSignal = 0,
 }: BatchActionBarProps) {
   const { t } = useTranslation();
   // Same gate as the grid's delete controls: the server answers `boq.delete`.
@@ -99,6 +102,13 @@ export function BatchActionBar({
   const factorPanelRef = useRef<HTMLDivElement>(null);
   const classPanelRef = useRef<HTMLDivElement>(null);
   const count = selectedIds.length;
+
+  const lastDeleteSignal = useRef(openDeleteSignal);
+  useEffect(() => {
+    if (openDeleteSignal === lastDeleteSignal.current) return;
+    lastDeleteSignal.current = openDeleteSignal;
+    if (canDelete) setConfirmDeleteOpen(true);
+  }, [openDeleteSignal, canDelete]);
 
   // Trap Tab / restore focus on close, matching the shared modal a11y pattern.
   useFocusTrap(findReplacePanelRef, !!findReplaceDialog);
