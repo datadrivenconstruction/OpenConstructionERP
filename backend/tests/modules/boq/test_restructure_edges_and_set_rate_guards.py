@@ -86,9 +86,16 @@ def test_section_fields_keep_the_exact_decimal_strings_and_the_other_metadata() 
 
 def test_position_fields_round_trip_restores_figures_and_resources() -> None:
     row = _Row()
-    section = _Row(unit="section", quantity="0", unit_rate="0", total="0", metadata_=to_section_fields(row)["metadata_"])
+    section = _Row(
+        unit="section", quantity="0", unit_rate="0", total="0", metadata_=to_section_fields(row)["metadata_"]
+    )
     back = to_position_fields(section)
-    assert (back["unit"], back["quantity"], back["unit_rate"], back["total"]) == ("m3", "2.625", "120.005", "315.013125")
+    assert (back["unit"], back["quantity"], back["unit_rate"], back["total"]) == (
+        "m3",
+        "2.625",
+        "120.005",
+        "315.013125",
+    )
     assert back["metadata_"]["resources"] == [{"quantity": "1"}]
     assert "converted_from_position" not in back["metadata_"]
 
@@ -332,9 +339,7 @@ async def test_set_rate_leaves_an_instance_whose_master_is_in_the_request(sessio
     inst = await _add(svc, boq_id, "2", "Béton", "m3", "1", "10")
     master.link_group_id = inst.link_group_id = group
     master.link_role, inst.link_role = "master", "instance"
-    res = await svc.bulk_update_positions(
-        boq_id, BulkPositionUpdate(ids=[master.id, inst.id], set_rate=Decimal("25"))
-    )
+    res = await svc.bulk_update_positions(boq_id, BulkPositionUpdate(ids=[master.id, inst.id], set_rate=Decimal("25")))
     assert res.updated == 1 and res.unchanged == 1
     assert Decimal(master.unit_rate) == Decimal("25")
 

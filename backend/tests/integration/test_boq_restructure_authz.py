@@ -261,7 +261,9 @@ async def test_outsider_cannot_set_a_rate_on_the_owners_bill(http_client, owner_
         headers=outsider_b["headers"],
     )
     assert resp.status_code in DENIED, resp.text
-    row = next(r for r in await _bill_rows(http_client, owner_a["headers"], a_boq["boq_id"]) if r["id"] == a_boq["position_id"])
+    row = next(
+        r for r in await _bill_rows(http_client, owner_a["headers"], a_boq["boq_id"]) if r["id"] == a_boq["position_id"]
+    )
     assert float(row["unit_rate"]) == 185.0
     assert row["unit"] == "m3"
 
