@@ -7,7 +7,7 @@ Creates ``oe_dispatch_location``, ``oe_dispatch_crew``, ``oe_dispatch_placement`
 inspector-guarded, so a database that ``create_all`` already built does nothing.
 
 Revision ID: v3352_dispatch_board
-Revises: v3327_accounting_sync
+Revises: v3351_bid_day
 Create Date: 2026-10-31
 """
 
@@ -21,7 +21,7 @@ from alembic import op
 from app.database import GUID
 
 revision: str = "v3352_dispatch_board"
-down_revision: str | Sequence[str] | None = "v3327_accounting_sync"
+down_revision: str | Sequence[str] | None = "v3351_bid_day"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
