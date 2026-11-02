@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -263,12 +264,17 @@ function CreateInspectionModal({
   isPending,
   projectName,
   initialData,
+  projectId,
+  inspectionId,
 }: {
   onClose: () => void;
   onSubmit: (data: InspectionFormData) => void;
   isPending: boolean;
   projectName?: string;
   initialData?: InspectionFormData | null;
+  /** Set in edit mode: the saved inspection whose photos are shown. */
+  projectId?: string | null;
+  inspectionId?: string | null;
 }) {
   const { t } = useTranslation();
   const isEdit = !!initialData;
@@ -590,6 +596,7 @@ function CreateInspectionModal({
               {t('inspections.checklist_add', { defaultValue: 'Add checklist item' })}
             </Button>
           </div>
+          {inspectionId && <PhotoStrip projectId={projectId} kind="inspection" targetId={inspectionId} />}
         </div>
 
         {/* Footer */}
@@ -2003,6 +2010,8 @@ export function InspectionsPage() {
           isPending={editingInspection ? editMut.isPending : createMut.isPending}
           projectName={projectName}
           initialData={editingInspection ? inspectionFormData(editingInspection) : null}
+          projectId={selectedProjectId}
+          inspectionId={editingInspection?.id ?? null}
         />
       )}
 

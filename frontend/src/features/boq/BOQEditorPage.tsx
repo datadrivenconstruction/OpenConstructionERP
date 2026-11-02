@@ -6451,6 +6451,7 @@ export function BOQEditorPage() {
           <DrawingRefsDrawer
             key={drawingPositionId}
             boqId={boqId}
+            projectId={boq.project_id}
             position={pos}
             entry={drawingRefs.get(pos.id)}
             readOnly={Boolean(boq.is_locked)}

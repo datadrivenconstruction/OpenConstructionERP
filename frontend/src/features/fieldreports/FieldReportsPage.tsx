@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
@@ -1918,7 +1919,16 @@ function ReportModal({
       {effectiveReport ? (
         // A report (existing or just-created draft) exists, so its id can
         // anchor uploaded photos/documents.
-        <ReportAttachments reportId={effectiveReport.id} projectId={projectId} />
+        <>
+          <ReportAttachments reportId={effectiveReport.id} projectId={projectId} />
+          <PhotoStrip
+            projectId={projectId}
+            kind="field_report"
+            targetId={effectiveReport.id}
+            hideSource="fieldreports"
+            canUpload={false}
+          />
+        </>
       ) : (
         // No report yet: offer to start attaching now. The first click
         // persists a draft (date/type only) so the existing uploader can
