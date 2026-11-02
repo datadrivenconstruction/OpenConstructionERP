@@ -49832,6 +49832,11 @@ const resource = {
     "boq.sheet.issue_not_a_number": "Não é um número",
     "boq.markup_tender_adjustment": "Acréscimo / desconto da licitação",
     "boq.markup_pct_invalid_signed_title": "Informe um percentual de -100 a 100 (negativo = abaixo da tabela de preços unitários)",
+    "boq.paste_ambiguous_numbers": "{{count}} células numéricas podem ser lidas de duas formas (por exemplo 1,250) e estão marcadas abaixo. Confira antes de importar.",
+    "boq.paste_ambiguous_cell": "Este valor pode ser lido de duas formas. Confira antes de importar.",
+    "boq.select_section": "Selecionar seção",
+    "boq.batch_delete_sections_note": "As seções são excluídas com todos os {{count}} itens que contêm:",
+    "boq.batch_delete_section_count": "{{count}} itens",
     // --- /Learn ---
     "schedule.calendar.week_fallback": "A semana de trabalho regional não está disponível. É utilizada uma semana de planejamento padrão.",
     "schedule.calendar.holidays_missing": "Os feriados não estão disponíveis para {{years}}. Verifique o calendário antes de se basear nestas datas.",

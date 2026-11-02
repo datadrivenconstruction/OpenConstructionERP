@@ -172,7 +172,8 @@ describe('parseClipboardNumber', () => {
   });
 
   it('should handle "1,000" as thousand separator (3-digit after comma)', () => {
-    expect(parseClipboardNumber('1,000')).toBe(1000);
+    expect(parseClipboardNumber('1,000', 'en-US')).toBe(1000);
+    expect(parseClipboardNumber('1,000', 'fr-FR')).toBe(1);
   });
 
   it('should handle "1,5" as decimal (less than 3 digits after comma)', () => {
@@ -211,5 +212,28 @@ describe('bulk writers skip the rates the Unit Rate cell locks', () => {
       expect(isResourceDrivenRate(field, driven)).toBe(false);
     }
     expect(isResourceDrivenRate('unit_rate', null)).toBe(false);
+  });
+});
+
+describe('parseClipboardNumber - market spellings (issue 554)', () => {
+  it.each([
+    ['1 250,00', 1250],
+    ['1 250.00', 1250],
+    ['0,250', 0.25],
+    ['1.234,56', 1234.56],
+    ['1,234.56', 1234.56],
+    ['1\u00A0250,00', 1250],
+    ['1\u202F250,00', 1250],
+    ["12'500.50", 12500.5],
+    ['2,625 m3', 2.625],
+  ])('%s reads as %s', (raw, expected) => {
+    expect(parseClipboardNumber(raw, 'fr-FR')).toBe(expected);
+  });
+
+  it('a lone separator before three digits follows the locale', () => {
+    expect(parseClipboardNumber('1,250', 'fr-FR')).toBe(1.25);
+    expect(parseClipboardNumber('1,250', 'en-US')).toBe(1250);
+    expect(parseClipboardNumber('1.250', 'de-DE')).toBe(1250);
+    expect(parseClipboardNumber('1.250', 'en-US')).toBe(1.25);
   });
 });

@@ -98,6 +98,7 @@ import BOQGrid from './BOQGrid';
 import type { BOQGridHandle } from './BOQGrid';
 import { allResourcesExpanded, type ResourceExpansionState } from './resourceExpansion';
 import { BatchActionBar } from './BatchActionBar';
+import { planBatchDelete, withoutSections } from './batchSelection';
 import { ScenarioDialog } from './ScenarioDialog';
 import { BranchControls } from './branches/BranchControls';
 import { SendToTenderDialog } from './SendToTenderDialog';
@@ -1768,8 +1769,42 @@ export function BOQEditorPage() {
 
   const handleBatchDelete = useCallback(
     (ids: string[]) => {
-      let deleted = 0;
-      for (const id of ids) {
+      // Selected sections cascade like the single section delete; rows under
+      // them go with them and are not deleted a second time.
+      const plan = planBatchDelete(boq?.positions ?? [], ids);
+      if (plan.sections.length > 0 && boq) {
+        const removed = new Set(plan.sections.map((sec) => sec.id));
+        let grew = true;
+        while (grew) {
+          grew = false;
+          for (const p of boq.positions) {
+            if (p.parent_id && removed.has(p.parent_id) && !removed.has(p.id)) {
+              removed.add(p.id);
+              grew = true;
+            }
+          }
+        }
+        for (const id of removed) deletedIdsRef.current.add(id);
+        queryClient.setQueryData(['boq', boqId], (old: unknown) => {
+          if (!old || typeof old !== 'object') return old;
+          const data = old as { positions: Position[]; [key: string]: unknown };
+          return { ...data, positions: data.positions.filter((p) => !removed.has(p.id)) };
+        });
+        void Promise.allSettled(
+          plan.sections.map((sec) => boqApi.deletePosition(sec.id, { cascade: true })),
+        ).then((results) => {
+          if (results.some((r) => r.status === 'rejected')) {
+            for (const id of removed) deletedIdsRef.current.delete(id);
+            addToast({
+              type: 'error',
+              title: t('boq.section_delete_failed', { defaultValue: 'Failed to delete section' }),
+            });
+          }
+          invalidateAll();
+        });
+      }
+      let deleted = plan.containedPositions;
+      for (const id of plan.positionIds) {
         trackedDelete(id);
         deleted++;
       }
@@ -1785,7 +1820,7 @@ export function BOQEditorPage() {
         });
       }
     },
-    [trackedDelete, addToast, t],
+    [boq, boqId, queryClient, invalidateAll, trackedDelete, addToast, t],
   );
 
   const handleBatchChangeUnit = useCallback(
@@ -2203,8 +2238,9 @@ export function BOQEditorPage() {
         case 'delete_selected':
           // Same tracked-delete pipeline as the context menu / batch bar, so
           // the undo toast and the 5 s deferred API call still apply.
+          // Sections are left to the batch bar, whose confirmation names them.
           e.preventDefault();
-          for (const id of selectedPositionIds) {
+          for (const id of withoutSections(boq?.positions ?? [], selectedPositionIds)) {
             trackedDeleteRef.current?.(id);
           }
           return;
@@ -2221,7 +2257,7 @@ export function BOQEditorPage() {
     // these app-level shortcuts before we see them.
     document.addEventListener('keydown', handleKeyDown, true);
     return () => document.removeEventListener('keydown', handleKeyDown, true);
-  }, [handleUndo, handleRedo, selectedPositionIds, handleLock, handleUnlock, boq?.is_locked, canDeletePositions]);
+  }, [handleUndo, handleRedo, selectedPositionIds, handleLock, handleUnlock, boq?.is_locked, boq?.positions, canDeletePositions]);
 
   /* ── Activity panel ───────────────────────────────────────────────── */
 
@@ -3227,6 +3263,11 @@ export function BOQEditorPage() {
     [project?.classification_standard, positions],
   );
   const [markupOpenSignal, setMarkupOpenSignal] = useState(0);
+
+  const batchDeleteSections = useMemo(
+    () => planBatchDelete(boq?.positions ?? [], selectedPositionIds).sections,
+    [boq?.positions, selectedPositionIds],
+  );
 
   // Top-level sections inside the current selection. Empty means the tender
   // dialog packages the whole BOQ (the backend treats [] as every section).
@@ -6038,11 +6079,21 @@ export function BOQEditorPage() {
       {!boq.is_locked && (
         <BatchActionBar
           selectedIds={selectedPositionIds}
+          sectionsToDelete={batchDeleteSections}
           onBatchDelete={handleBatchDelete}
-          onBatchChangeUnit={handleBatchChangeUnit}
+          onBatchChangeUnit={(ids, unit) => {
+            const leaf = withoutSections(boq.positions, ids);
+            if (leaf.length > 0) handleBatchChangeUnit(leaf, unit);
+          }}
           onClearSelection={handleClearSelection}
-          onBatchFactor={handleBatchFactor}
-          onBatchSetClassification={handleBatchSetClassification}
+          onBatchFactor={(ids, kind, factor) => {
+            const leaf = withoutSections(boq.positions, ids);
+            if (leaf.length > 0) handleBatchFactor(leaf, kind, factor);
+          }}
+          onBatchSetClassification={(ids, standard, code) => {
+            const leaf = withoutSections(boq.positions, ids);
+            if (leaf.length > 0) handleBatchSetClassification(leaf, standard, code);
+          }}
           onBatchFindReplace={handleBatchFindReplace}
           onBatchSetValue={handleBatchSetValue}
         />

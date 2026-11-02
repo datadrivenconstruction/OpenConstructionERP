@@ -56,6 +56,7 @@ import { fmtList, fmtFixed } from '@/shared/lib/formatters';
 import { reuseNumberFormat } from '@/shared/lib/money';
 import { parseDecimalInput } from '@/shared/lib/parseDecimal';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { quantityFractionDigits } from './quantityFormat';
 import { localizedUnitCode } from '@/shared/lib/unitLabels';
 import type { DisplayQuantityApi } from '@/shared/hooks/useDisplayQuantity';
 import { useFxRatesStore, getFxRate } from '@/stores/useFxRatesStore';
@@ -205,6 +206,18 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
     }
   }, [nameDraft, description, ctx, data]);
 
+  // Full-width rows have no checkbox column, so a section carries its own,
+  // kept in step with the grid's selection (select-all included).
+  const node = params.node;
+  const [selected, setSelected] = useState<boolean>(() => Boolean(node?.isSelected?.()));
+  useEffect(() => {
+    if (!node?.addEventListener) return undefined;
+    setSelected(Boolean(node.isSelected()));
+    const onSel = () => setSelected(Boolean(node.isSelected()));
+    node.addEventListener('rowSelected', onSel);
+    return () => node.removeEventListener('rowSelected', onSel);
+  }, [node]);
+
   if (!data?._isSection || !ctx) return null;
   const readOnly = Boolean(ctx.readOnly);
 
@@ -266,6 +279,17 @@ export function SectionFullWidthRenderer(params: ICellRendererParams) {
           contrast the token was chosen for, so the class would have read as
           fixed while the grip stayed invisible. The step on hover is colour
           now, not opacity. */}
+      {!readOnly && node?.setSelected && (
+        <input
+          type="checkbox"
+          data-testid="section-select"
+          className="shrink-0 h-3.5 w-3.5 cursor-pointer accent-oe-blue"
+          checked={selected}
+          aria-label={t('boq.select_section', { defaultValue: 'Select section' })}
+          onClick={(e) => e.stopPropagation()}
+          onChange={(e) => node.setSelected(e.target.checked)}
+        />
+      )}
       {!readOnly && (
         <span
           data-testid="section-drag-grip"
@@ -5261,7 +5285,7 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
   }
 
   const ctx = context as FullGridContext | undefined;
-  // Smart formatting: >=1 → 2 decimals; <1 → up to 4; <0.01 → show all significant digits
+  // Three fixed decimals, whole counts without; see quantityFractionDigits.
   let formatted = '';
   if (value != null) {
     const rawNum = typeof value === 'number' ? value : parseFloat(String(value));
@@ -5274,19 +5298,11 @@ export function QuantityCellRenderer(params: ICellRendererParams) {
       ? ctx.displayQuantity.convert(rawNum, unit).value
       : rawNum;
     if (!isNaN(num)) {
-      const absVal = Math.abs(num);
-      let maxFrac = 2;
-      if (absVal > 0 && absVal < 0.01) {
-        maxFrac = Math.max(6, Math.ceil(-Math.log10(absVal)) + 2);
-      } else if (absVal > 0 && absVal < 1) {
-        maxFrac = 4;
-      }
-      // Always use a dedicated formatter with the computed maxFrac
-      // (ctx.fmt is fixed at 2 decimals and would hide small values).
+      const { min: minFrac, max: maxFrac } = quantityFractionDigits(num, unit);
       // Shared instance: this runs for every visible quantity cell on every
       // refresh, and building a formatter costs far more than using one.
-      const f = reuseNumberFormat(`cell.quantity|${ctx?.locale ?? getNumberLocale()}|${maxFrac}`, () => new Intl.NumberFormat(ctx?.locale ?? getNumberLocale(), {
-        minimumFractionDigits: 2,
+      const f = reuseNumberFormat(`cell.quantity|${ctx?.locale ?? getNumberLocale()}|${minFrac}|${maxFrac}`, () => new Intl.NumberFormat(ctx?.locale ?? getNumberLocale(), {
+        minimumFractionDigits: minFrac,
         maximumFractionDigits: maxFrac,
       }));
       formatted = f.format(num);

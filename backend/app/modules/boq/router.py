@@ -5185,7 +5185,7 @@ def _render_boq_xlsx(
             return d if d.is_finite() else _Dec("0")
 
         qty_cell = ws.cell(row=current_row, column=4, value=_num_cell(pos.quantity))
-        qty_cell.number_format = number_format
+        qty_cell.number_format = "#,##0.00##"  # the decimals the quantity carries, 2 to 4
 
         rate_cell = ws.cell(row=current_row, column=5, value=_num_cell(pos.unit_rate))
         rate_cell.number_format = number_format

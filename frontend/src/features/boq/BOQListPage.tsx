@@ -422,6 +422,15 @@ function CompareModal({ boqIdA, boqIdB, currencyA, currencyB, onClose }: Compare
 
 type SortField = 'name' | 'total' | 'positions' | 'date';
 
+/**
+ * Where the empty list's "Create BOQ" goes: the create dialog, like the header
+ * button, unless the user has no project to put an estimate in yet. While the
+ * project list is still loading the dialog opens; it has its own project picker.
+ */
+export function emptyStateCreateTarget(projectCount: number | undefined): 'modal' | 'project' {
+  return projectCount === 0 ? 'project' : 'modal';
+}
+
 export function BOQListPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -617,6 +626,12 @@ export function BOQListPage() {
     queryFn: () => fetchProjectList<Project[]>(),
     staleTime: 5 * 60_000,
   });
+
+  const openCreateModal = () => {
+    const pid = projectIdFromUrl || activeProjectId || projectFilter || (projects && projects.length === 1 ? projects[0]!.id : undefined) || undefined;
+    setCreateModalProjectId(pid);
+    setCreateModalOpen(true);
+  };
 
   // A persisted project filter can name a project that no longer exists
   // (deleted, demo reinstalled); it would hide every estimate. Drop it.
@@ -939,11 +954,7 @@ export function BOQListPage() {
               variant="primary"
               size="sm"
               icon={<Plus size={14} />}
-              onClick={() => {
-                const pid = projectIdFromUrl || activeProjectId || projectFilter || (projects && projects.length === 1 ? projects[0]!.id : undefined) || undefined;
-                setCreateModalProjectId(pid);
-                setCreateModalOpen(true);
-              }}
+              onClick={openCreateModal}
             >
               {t('boq.new_estimate', { defaultValue: 'New Estimate' })}
             </Button>
@@ -1238,7 +1249,10 @@ export function BOQListPage() {
           description={t('boq.no_boqs_hint', { defaultValue: 'A Bill of Quantities is the foundation of your estimate. Start by creating a project, then add sections (trade groups) and positions (work items) with quantities and rates.' })}
           action={{
             label: t('boq.create_boq', { defaultValue: 'Create BOQ' }),
-            onClick: () => navigate('/projects/new'),
+            onClick: () => {
+              if (emptyStateCreateTarget(projects?.length) === 'project') navigate('/projects/new');
+              else openCreateModal();
+            },
           }}
         />
       ) : (

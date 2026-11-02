@@ -15,6 +15,7 @@ describe('parseRows', () => {
       detectedHeaders: [],
       skippedEmpty: 0,
       invalidNumbers: 0,
+      reviewCells: [],
     });
   });
 
@@ -89,5 +90,43 @@ describe('parseRows', () => {
     expect(out.rows).toHaveLength(2);
     expect(out.invalidNumbers).toBe(1);
     expect(out.skippedEmpty).toBe(1);
+  });
+});
+
+describe('parseRows - market number spellings (issue 554)', () => {
+  const H = 'Description\tUnit\tQty\tRate\n';
+  const one = (line: string, locale: string | null = 'fr-FR') => parseRows(H + line, locale);
+
+  it.each([
+    ['1 250,00', 1250],
+    ['1 250.00', 1250],
+    ['0,250', 0.25],
+    ['1.234,56', 1234.56],
+    ['1,234.56', 1234.56],
+    ['1\u00A0250,00', 1250],
+    ['1\u202F250,00', 1250],
+    ["12'500.50", 12500.5],
+  ])('rate %s reads as %s', (rate, expected) => {
+    expect(one(`Concrete\tm3\t1\t${rate}`).rows[0]!.unit_rate).toBe(expected);
+  });
+
+  it('a lone separator before three digits follows the number locale', () => {
+    expect(one('Concrete\tm3\t1,250\t10', 'fr-FR').rows[0]!.quantity).toBe(1.25);
+    expect(one('Concrete\tm3\t1,250\t10', 'en-US').rows[0]!.quantity).toBe(1250);
+  });
+
+  it('the column decides before the locale when its other cells prove the mark', () => {
+    const out = parseRows(H + 'A\tm3\t1,250\t1\nB\tm3\t2.5\t1', 'fr-FR');
+    expect(out.rows[0]!.quantity).toBe(1250);
+    expect(out.reviewCells).toEqual([]);
+  });
+
+  it('a column that proves both marks flags its ambiguous cells for review', () => {
+    const out = parseRows(H + 'A\tm3\t1,250\t1\nB\tm3\t2.5\t1\nC\tm3\t2,5\t1', 'fr-FR');
+    expect(out.reviewCells).toEqual(['0:quantity']);
+  });
+
+  it('with no locale an ambiguous cell is flagged, never silently read', () => {
+    expect(one('Concrete\tm3\t1.250\t10', null).reviewCells).toEqual(['0:quantity']);
   });
 });

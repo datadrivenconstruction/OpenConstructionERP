@@ -114,12 +114,12 @@ describe('BOQGrid rowSelection identity', () => {
     }
   });
 
-  it('still lets only real positions be selected', () => {
+  it('lets positions and sections be selected, never footers or resources', () => {
     render(createElement(BOQGrid, gridProps()));
     const { mode, isRowSelectable } = rowSelectionAt(0);
     expect(mode).toBe('multiRow');
     expect(isRowSelectable({ data: { id: 'pos-1' } })).toBe(true);
-    expect(isRowSelectable({ data: { id: 's', _isSection: true } })).toBe(false);
+    expect(isRowSelectable({ data: { id: 's', _isSection: true } })).toBe(true);
     expect(isRowSelectable({ data: { id: 'f', _isFooter: true } })).toBe(false);
     expect(isRowSelectable({ data: { id: 'r', _isResource: true } })).toBe(false);
     expect(isRowSelectable({ data: { id: 'a', _isAddResource: true } })).toBe(false);

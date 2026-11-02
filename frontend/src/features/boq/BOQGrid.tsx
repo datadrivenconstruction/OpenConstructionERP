@@ -124,7 +124,7 @@ import { useDisplayQuantity } from '@/shared/hooks/useDisplayQuantity';
 import { VariantPicker } from '@/features/costs/VariantPicker';
 import type { CostVariant, VariantStats } from '@/features/costs/api';
 import { copyToClipboard, readClipboard } from '@/shared/lib/browser';
-import { parseDecimalInput } from '@/shared/lib/parseDecimal';
+import { parseDecimalInput, parsePastedNumber } from '@/shared/lib/parseDecimal';
 import { useHasPermission } from '@/shared/lib/permissionGates';
 import { isAltOrAltGraph } from './boqShortcuts';
 
@@ -182,7 +182,7 @@ const BOQ_ROW_SELECTION = {
   selectAll: 'filtered',
   enableClickSelection: false,
   isRowSelectable: (node: { data?: Record<string, unknown> }) =>
-    !node.data?._isFooter && !node.data?._isSection && !node.data?._isResource && !node.data?._isAddResource,
+    !node.data?._isFooter && !node.data?._isResource && !node.data?._isAddResource,
 } as const;
 
 /**
@@ -196,39 +196,14 @@ export function parseTypedAmount(raw: string, fallback: number): number {
 }
 
 /**
- * Parse a pasted string into a number. Handles thousand separators
- * (both comma and period variants) and strips currency symbols.
+ * Parse a pasted string into a number through the shared paste grammar:
+ * currency and unit signs are dropped, then `1 250,00`, `1.234,56`,
+ * `1,234.56`, `0,250` and `12'500.50` all read as written. A lone separator
+ * before three digits (`1,250`) is decided by the reader's number locale.
  * Returns NaN when the string is not a valid number.
  */
-export function parseClipboardNumber(raw: string): number {
-  // Strip leading/trailing whitespace
-  let cleaned = raw.trim();
-  // Remove common currency symbols / prefixes that users may copy from spreadsheets
-  cleaned = cleaned.replace(/^[€$£¥₹₽Fr.C\$A\$NZ\$zł₺Kčkr]+/i, '').trim();
-  // If both comma and period are present, the last one is the decimal separator
-  const hasComma = cleaned.includes(',');
-  const hasPeriod = cleaned.includes('.');
-  if (hasComma && hasPeriod) {
-    if (cleaned.lastIndexOf(',') > cleaned.lastIndexOf('.')) {
-      // e.g. "1.234,56" → period is thousand sep, comma is decimal
-      cleaned = cleaned.replace(/\./g, '').replace(',', '.');
-    } else {
-      // e.g. "1,234.56" → comma is thousand sep, period is decimal
-      cleaned = cleaned.replace(/,/g, '');
-    }
-  } else if (hasComma && !hasPeriod) {
-    // Could be "1,5" (decimal) or "1,000" (thousand sep).
-    // Heuristic: if exactly 3 digits after the last comma, treat as thousand sep.
-    const parts = cleaned.split(',');
-    const lastPart = parts[parts.length - 1] ?? '';
-    if (parts.length === 2 && lastPart.length === 3 && (parts[0] ?? '').length <= 3) {
-      // Ambiguous — but "1,000" is more likely thousand-separated in BOQ context
-      cleaned = cleaned.replace(/,/g, '');
-    } else {
-      cleaned = cleaned.replace(',', '.');
-    }
-  }
-  return parseFloat(cleaned);
+export function parseClipboardNumber(raw: string, locale: string = getNumberLocale()): number {
+  return parsePastedNumber(raw, locale).value ?? NaN;
 }
 
 /* ── Types ─────────────────────────────────────────────────────────── */
@@ -2556,7 +2531,7 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
       const api = event.api;
       const selectedRows = api.getSelectedRows();
       const ids = selectedRows
-        .filter((row: Record<string, unknown>) => row.id && !row._isFooter && !row._isSection)
+        .filter((row: Record<string, unknown>) => row.id && !row._isFooter)
         .map((row: Record<string, unknown>) => row.id as string);
       onSelectionChanged(ids);
     },
@@ -2716,7 +2691,9 @@ const BOQGrid = forwardRef<BOQGridHandle, BOQGridProps>(function BOQGrid({
         // metric-canonical storage. Identity for the metric system / unmapped
         // units, so metric pastes are byte-for-byte unchanged. Numeric columns
         // that do not carry a unit (custom fields) are stored as typed.
-        const roundedDisplay = Math.round(parsed * 100) / 100;
+        // Quantities keep the measured precision (2.625 m3); money keeps cents.
+        const scale = colId === 'quantity' ? 10_000 : 100;
+        const roundedDisplay = Math.round(parsed * scale) / scale;
         const unit = (data.unit as string | undefined) ?? '';
         if (colId === 'quantity') newValue = displayQuantity.toMetric(roundedDisplay, unit);
         else if (colId === 'unit_rate') newValue = displayQuantity.toMetricRate(roundedDisplay, unit);
