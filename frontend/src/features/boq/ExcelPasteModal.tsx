@@ -44,6 +44,8 @@ const HEADER_MAP: Record<string, string> = {
   qty: 'quantity', quantity: 'quantity', menge: 'quantity', amount: 'quantity', 'qty.': 'quantity',
   rate: 'unit_rate', 'unit rate': 'unit_rate', 'unit_rate': 'unit_rate', price: 'unit_rate',
   einzelpreis: 'unit_rate', ep: 'unit_rate', 'unit price': 'unit_rate', 'unit cost': 'unit_rate',
+  // German LV (GAEB) headings
+  oz: 'ordinal', kurztext: 'description', me: 'unit',
   // French, Spanish, Italian tender bills (DPGF / DQE / BPU, presupuesto, computo)
   'n°': 'ordinal', 'nº': 'ordinal', n: 'ordinal', ref: 'ordinal', réf: 'ordinal', repère: 'ordinal', art: 'ordinal', partida: 'ordinal',
   désignation: 'description', designation: 'description', libellé: 'description', descriptif: 'description',

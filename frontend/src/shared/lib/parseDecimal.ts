@@ -216,6 +216,8 @@ export function resolveAmbiguousSeparator(s: string, locale: string | null | und
  */
 export function cleanPastedNumber(raw: string): string {
   let s = foldNonAsciiDigits(stripCurrencySigns(raw));
+  // Accounting negatives: (12.5) is -12.5.
+  s = s.replace(/^\s*\(\s*([^()]*\d[^()]*?)\s*\)\s*$/, '-$1');
   s = s.replace(/[A-Za-z²³À-ɏЀ-ӿ/%]+[0-9²³]*\s*$/u, '');
   s = s.replace(/^[A-Za-zÀ-ɏ]+\.?\s*/u, '');
   s = s.replace(/(\d)['’](?=\d{3}(\D|$))/g, '$1').trim();

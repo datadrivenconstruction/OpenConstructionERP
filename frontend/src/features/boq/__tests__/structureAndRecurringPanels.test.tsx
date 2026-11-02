@@ -92,7 +92,7 @@ describe('StructureBillDialog', () => {
       { position_id: 'c', level: 1 },
       { position_id: 'd', level: 0 },
     ]);
-    expect(p.onDone.mock.calls[0]![0]).toContain('Sections: 2');
+    expect(vi.mocked(p.onDone as (m: string) => void).mock.calls[0]![0]).toContain('Sections: 2');
   });
 
   it('a manual level choice is what gets sent', async () => {
@@ -180,7 +180,7 @@ describe('RecurringLinesPanel', () => {
     fireEvent.click(screen.getByText('Apply to all'));
     await waitFor(() => expect(p.onDone).toHaveBeenCalled());
     expect(spy).toHaveBeenCalledWith('b1', { ids: ['1', '2'], set_rate: '118.5' });
-    expect(p.onDone.mock.calls[0]![0]).toContain('Rate applied: 1');
+    expect(vi.mocked(p.onDone as (m: string) => void).mock.calls[0]![0]).toContain('Rate applied: 1');
   });
 
   it('refuses a negative or unreadable rate without calling the server', async () => {

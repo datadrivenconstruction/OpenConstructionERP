@@ -6,6 +6,7 @@
  * Pure functions, no React.
  */
 
+import { compareNames } from '@/shared/lib/collator';
 import { boqApi, isSection, type Position, type RestructureRow } from './api';
 
 /** `1`, `1.2`, `01.02.003`, `A`, `A.1`, `IV.3`, with an optional trailing dot. */
@@ -118,8 +119,8 @@ export function recurringLines(positions: ReadonlyArray<Pick<Position, 'id' | 'd
     groups.set(key, g);
   }
   const out = [...groups.values()].filter((g) => g.ids.length > 1);
-  for (const g of out) g.drifting = new Set(g.rates.map((r) => r.toFixed(4))).size > 1;
-  return out.sort((a, b) => b.ids.length - a.ids.length || a.description.localeCompare(b.description));
+  for (const g of out) g.drifting = new Set(g.rates.map((r) => Math.round(r * 10000))).size > 1;
+  return out.sort((a, b) => b.ids.length - a.ids.length || compareNames(a.description, b.description));
 }
 
 /**
