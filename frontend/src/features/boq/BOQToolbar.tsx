@@ -273,6 +273,7 @@ export function BOQToolbar({
   // Routes are registered per enabled module (ModuleRoutes filters on the same
   // flag), so linking to a module the operator switched off would dead-end.
   const gaebExchangeEnabled = useModuleStore((s) => s.isModuleEnabled('gaeb-exchange'));
+  const ownerScheduleEnabled = useModuleStore((s) => s.isModuleEnabled('owner_schedule'));
 
   /* ── Export dropdown (portaled so it floats above the grid) ────────── */
   const [showExportMenu, setShowExportMenu] = useState(false);
@@ -599,6 +600,17 @@ export function BOQToolbar({
                         {t('boq.export_gaeb_exchange', { defaultValue: 'GAEB Exchange (X81 / X83 / X84)' })}
                       </Link>
                     </>
+                  )}
+                  {ownerScheduleEnabled && (
+                    <Link
+                      role="menuitem"
+                      to={`/boq/${encodeURIComponent(boqId)}/owner-schedule`}
+                      onClick={() => setShowExportMenu(false)}
+                      className="flex w-full items-center gap-2.5 border-t border-border-light px-3 py-2.5 text-left text-sm leading-snug text-content-primary hover:bg-surface-secondary transition-colors rounded-b-lg"
+                    >
+                      <ArrowUpRight size={15} className="shrink-0 text-content-tertiary" />
+                      {t('owner_schedule.menu', { defaultValue: 'Owner bid schedule (import / priced file)' })}
+                    </Link>
                   )}
                 </div>,
                 document.body,
