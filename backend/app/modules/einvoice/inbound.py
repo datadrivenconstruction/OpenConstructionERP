@@ -73,10 +73,16 @@ def _t(node: Any, path: str) -> str:
 
 
 def _d(text: str) -> Decimal:
-    try:
-        return Decimal(text) if text else Decimal("0")
-    except InvalidOperation:
+    """Decimal of an amount; unreadable text becomes NaN so ``_check`` flags it, NaN/Infinity is rejected."""
+    if not text:
         return Decimal("0")
+    try:
+        value = Decimal(text)
+    except InvalidOperation:
+        return Decimal("NaN")
+    if not value.is_finite():
+        raise InboundParseError(f"amount {text!r} is not a finite number")
+    return value
 
 
 def _cii_date(text: str) -> str:
@@ -138,6 +144,7 @@ def _parse_cii(root: Any) -> InboundInvoice:
 
 
 def _check(inv: InboundInvoice) -> None:
+    unreadable = False
     for name, code in (("invoice_number", "BR-02"), ("invoice_date", "BR-03"), ("currency_code", "BR-05")):
         if not getattr(inv, name):
             inv.findings.append({"severity": "error", "code": code, "field": name, "message": f"{name} missing"})
@@ -145,7 +152,14 @@ def _check(inv: InboundInvoice) -> None:
         inv.findings.append(
             {"severity": "error", "code": "BR-06", "field": "supplier_name", "message": "seller name missing"}
         )
-    if inv.amount_gross and inv.amount_net + inv.amount_tax != inv.amount_gross:
+    for name in ("amount_net", "amount_tax", "amount_gross"):
+        if getattr(inv, name).is_nan():
+            inv.findings.append(
+                {"severity": "error", "code": "PARSE-AMOUNT", "field": name, "message": f"{name} is not a number"}
+            )
+            setattr(inv, name, Decimal("0"))
+            unreadable = True
+    if not unreadable and inv.amount_gross and inv.amount_net + inv.amount_tax != inv.amount_gross:
         inv.findings.append(
             {
                 "severity": "error",

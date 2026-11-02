@@ -62,11 +62,6 @@ class TestIndiaThresholdAndDefaults:
     def test_unusable_turnover_does_not_apply_the_rule(self, bad: str) -> None:
         assert _in(bad, datetime(2025, 9, 1, tzinfo=UTC)) == []
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="DEFECT: lifecycle.py _dec/condition_holds accept 'NaN' and the comparison raises "
-        "decimal.InvalidOperation (a free-form turnover setting breaks every validation of the document)",
-    )
     def test_nan_turnover_does_not_apply_the_rule(self) -> None:
         assert _in("NaN", datetime(2025, 9, 1, tzinfo=UTC)) == []
 
@@ -92,11 +87,6 @@ class TestIndiaThresholdAndDefaults:
         doc = {**_IN_DOC, "status": "submitted"}
         assert _in("520000000", datetime(2025, 9, 1, tzinfo=UTC), doc) == []
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="DEFECT: 30-day IRP age limit is measured from midnight, so day 30 is overdue after 00:00 "
-        "(lifecycle.py resolve_deadlines, from=invoice_date); IRP counts whole calendar days",
-    )
     def test_day_30_is_reportable_all_day(self) -> None:
         assert _in("520000000", datetime(2025, 6, 1, 12, 0, tzinfo=UTC)) == []
 
@@ -586,20 +576,10 @@ class TestInbound:
         big = _CII.replace(b"<ram:ID>CN-7</ram:ID>", b"<ram:ID>" + b"9" * 200_000 + b"</ram:ID>")
         assert len(parse_inbound(big).invoice_number) == 200_000
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="DEFECT: inbound.py _d() turns an unparsable amount into 0 and the BR-CO-15 check is skipped "
-        "when gross is 0, so '1.000,50' is accepted silently as zero",
-    )
     def test_unparsable_amount_is_flagged_not_zero(self) -> None:
         inv = parse_inbound(_CII.replace(b">119.00<", b">1.000,50<"))
         assert inv.findings, "an unreadable gross amount must raise a finding"
 
-    @pytest.mark.xfail(
-        strict=True,
-        reason="DEFECT: inbound.py _check compares a signalling NaN and raises decimal.InvalidOperation "
-        "instead of InboundParseError (HTTP 500 on an uploaded file)",
-    )
     def test_signalling_nan_amount_is_a_parse_error(self) -> None:
         with pytest.raises(InboundParseError):
             parse_inbound(_CII.replace(b">119.00<", b">sNaN<"))

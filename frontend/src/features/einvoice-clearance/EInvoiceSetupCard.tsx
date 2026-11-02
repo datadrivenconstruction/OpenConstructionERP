@@ -120,11 +120,12 @@ export function EInvoiceSetupCard({ canEdit }: { canEdit: boolean }) {
         <WideModal
           open
           size="sm"
+          initialFocusSelector="[data-initial-focus]"
           onClose={() => setLiveFor(null)}
           title={modeLabel('live')}
           footer={
             <div className="flex justify-end gap-2">
-              <Button variant="secondary" autoFocus onClick={() => setLiveFor(null)}>
+              <Button variant="secondary" data-initial-focus onClick={() => setLiveFor(null)}>
                 {t('common.cancel', { defaultValue: 'Cancel' })}
               </Button>
               <Button
