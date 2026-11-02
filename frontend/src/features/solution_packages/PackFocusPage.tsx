@@ -13,7 +13,6 @@ import { ArrowRight, CheckCircle2, EyeOff, Layers3, Loader2, Rocket } from 'luci
 import { fmtList } from '@/shared/lib/formatters';
 import { Breadcrumb, Button } from '@/shared/ui';
 import { packNameSlug } from '@/shared/lib/regionalPack';
-import { fmtList } from '@/shared/lib/formatters';
 import { moduleDisplayNameKey } from '@/features/modules/moduleDisplayName';
 import { ROUTE_BACKEND_MODULE } from '@/app/layout/Sidebar';
 import { projectsApi } from '@/features/projects/api';
