@@ -2533,5 +2533,55 @@
         "cumulative": "Số dư lũy kế"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Không tìm thấy ảnh",
+      "no_files": "Chọn ít nhất một ảnh để tải lên",
+      "too_many_files": "Mỗi lần tải lên tối đa {max} ảnh",
+      "target_not_found": "Không tìm thấy bản ghi cần liên kết trong dự án này",
+      "link_not_found": "Ảnh này chưa được liên kết với bản ghi đó",
+      "album_not_found": "Không tìm thấy album",
+      "album_name_required": "Hãy đặt tên cho album",
+      "album_exists": "Dự án này đã có album tên '{name}'",
+      "plan_room_unavailable": "Ghim trên bản vẽ cần có mô-đun Plan Room",
+      "document_not_found": "Không tìm thấy bản vẽ trong dự án này",
+      "compare_same_photo": "Chọn hai ảnh khác nhau để so sánh",
+      "compare_not_found": "Không tìm thấy bản so sánh",
+      "suggestion_not_found": "Không tìm thấy đề xuất",
+      "suggestion_reviewed": "Đề xuất này đã được xem xét",
+      "suggestion_invalid": "Đề xuất đã chỉnh sửa không hợp lệ",
+      "bad_source": "Nguồn ảnh không xác định",
+      "bad_device": "Không đọc được dữ liệu chụp của thiết bị",
+      "target_incomplete": "Hãy nhập cả loại bản ghi và mã bản ghi",
+      "rate_limited": "Quá nhiều yêu cầu, hãy thử lại sau một phút",
+      "export_not_found": "Không tìm thấy bản xuất",
+      "export_not_ready": "Bản xuất chưa sẵn sàng",
+      "gps_pair": "Hãy nhập vĩ độ và kinh độ cùng nhau",
+      "bad_ai_kinds": "Chọn chú thích, thẻ, tiến độ hoặc nguy cơ",
+      "file_missing": "Tệp ảnh không có trong kho lưu trữ"
+    },
+    "validation": {
+      "taken_at_missing": "Ảnh '{name}' không có thời gian chụp",
+      "taken_at_missing_fix": "Nhập ngày chụp ảnh hoặc chụp lại trong ứng dụng",
+      "taken_at_future": "Ảnh '{name}' ghi ngày {taken_at}, tức là ở tương lai",
+      "taken_at_before_project": "Ảnh '{name}' ghi ngày {taken_at}, sớm hơn ngày bắt đầu dự án hơn một năm",
+      "taken_at_fix": "Sửa ngày chụp hoặc kiểm tra đồng hồ máy ảnh",
+      "gps_inaccurate": "Vị trí của '{name}' chỉ chính xác trong khoảng {accuracy} m",
+      "gps_off_site": "Ảnh '{name}' được chụp cách công trường {distance_km} km",
+      "gps_fix": "Kiểm tra vị trí hoặc chụp lại ảnh tại công trường khi đã bật định vị",
+      "link_missing": "Ảnh '{name}' được liên kết với {kind} không còn trong dự án này",
+      "link_missing_fix": "Gỡ liên kết hoặc liên kết ảnh với đúng bản ghi",
+      "duplicate": "Ảnh '{name}' còn được lưu trữ thêm {count} lần",
+      "duplicate_fix": "Giữ một bản và liên kết ở nơi cần dùng",
+      "evidence_weak": "Ảnh '{name}' có mức chứng cứ '{grade}'",
+      "evidence_weak_fix": "Chụp ảnh trong ứng dụng khi đã bật định vị",
+      "ai_unreviewed": "Một đề xuất {kind} của AI đã chờ xem xét hơn {days} ngày",
+      "ai_unreviewed_fix": "Chấp nhận hoặc từ chối đề xuất",
+      "hazard_open": "Nguy cơ '{hazard}' đã được chấp nhận nhưng chưa có ghi nhận an toàn",
+      "hazard_open_fix": "Ghi nhận một quan sát an toàn và liên kết ảnh với nó",
+      "file_missing": "Tệp của ảnh '{name}' không có trong kho lưu trữ",
+      "file_missing_fix": "Tải ảnh lên lại hoặc khôi phục từ bản sao lưu"
+    }
   }
 }

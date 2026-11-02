@@ -2512,5 +2512,55 @@
         "cumulative": "Position cumulée"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Photo introuvable",
+      "no_files": "Choisissez au moins une photo à téléverser",
+      "too_many_files": "Téléversez au plus {max} photos à la fois",
+      "target_not_found": "L'enregistrement à lier est introuvable dans ce projet",
+      "link_not_found": "Cette photo n'est pas liée à cet enregistrement",
+      "album_not_found": "Album introuvable",
+      "album_name_required": "Donnez un nom à l'album",
+      "album_exists": "Un album nommé '{name}' existe déjà dans ce projet",
+      "plan_room_unavailable": "Les épingles sur plan nécessitent le module Plan Room",
+      "document_not_found": "Plan introuvable dans ce projet",
+      "compare_same_photo": "Choisissez deux photos différentes à comparer",
+      "compare_not_found": "Comparaison introuvable",
+      "suggestion_not_found": "Suggestion introuvable",
+      "suggestion_reviewed": "Cette suggestion a déjà été examinée",
+      "suggestion_invalid": "La suggestion modifiée n'est pas valide",
+      "bad_source": "Source de photo inconnue",
+      "bad_device": "Les données de capture de l'appareil sont illisibles",
+      "target_incomplete": "Indiquez le type et l'identifiant de l'enregistrement",
+      "rate_limited": "Trop de requêtes, réessayez dans une minute",
+      "export_not_found": "Export introuvable",
+      "export_not_ready": "L'export n'est pas encore prêt",
+      "gps_pair": "Renseignez ensemble la latitude et la longitude",
+      "bad_ai_kinds": "Choisissez légende, étiquettes, avancement ou danger",
+      "file_missing": "Le fichier de la photo est absent du stockage"
+    },
+    "validation": {
+      "taken_at_missing": "La photo '{name}' n'a pas d'heure de prise de vue",
+      "taken_at_missing_fix": "Saisissez la date de la photo ou reprenez-la dans l'application",
+      "taken_at_future": "La photo '{name}' est datée du {taken_at}, soit dans le futur",
+      "taken_at_before_project": "La photo '{name}' est datée du {taken_at}, plus d'un an avant le début du projet",
+      "taken_at_fix": "Corrigez la date de prise de vue ou vérifiez l'horloge de l'appareil",
+      "gps_inaccurate": "La position de '{name}' n'est précise qu'à {accuracy} m",
+      "gps_off_site": "La photo '{name}' a été prise à {distance_km} km du chantier",
+      "gps_fix": "Vérifiez la position ou reprenez la photo sur le chantier avec la localisation activée",
+      "link_missing": "La photo '{name}' est liée à un élément ({kind}) qui n'existe plus dans ce projet",
+      "link_missing_fix": "Supprimez le lien ou liez la photo au bon enregistrement",
+      "duplicate": "La photo '{name}' est archivée {count} autre(s) fois",
+      "duplicate_fix": "Gardez une copie et liez-la là où elle est utile",
+      "evidence_weak": "La photo '{name}' a un niveau de preuve '{grade}'",
+      "evidence_weak_fix": "Prenez la photo dans l'application avec la localisation activée",
+      "ai_unreviewed": "Une suggestion IA ({kind}) attend sa revue depuis plus de {days} jours",
+      "ai_unreviewed_fix": "Acceptez ou rejetez la suggestion",
+      "hazard_open": "Le danger accepté '{hazard}' n'a pas d'observation de sécurité",
+      "hazard_open_fix": "Enregistrez une observation de sécurité et liez-y la photo",
+      "file_missing": "Le fichier de la photo '{name}' est absent du stockage",
+      "file_missing_fix": "Téléversez à nouveau la photo ou restaurez-la depuis une sauvegarde"
+    }
   }
 }

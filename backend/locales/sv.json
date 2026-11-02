@@ -2535,5 +2535,55 @@
         "cumulative": "Ackumulerad position"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Bilden hittades inte",
+      "no_files": "Välj minst en bild att ladda upp",
+      "too_many_files": "Ladda upp högst {max} bilder åt gången",
+      "target_not_found": "Posten som ska kopplas hittades inte i det här projektet",
+      "link_not_found": "Den här bilden är inte kopplad till den posten",
+      "album_not_found": "Albumet hittades inte",
+      "album_name_required": "Ge albumet ett namn",
+      "album_exists": "Det finns redan ett album med namnet '{name}' i det här projektet",
+      "plan_room_unavailable": "Ritningsnålar kräver modulen Plan Room",
+      "document_not_found": "Ritningen hittades inte i det här projektet",
+      "compare_same_photo": "Välj två olika bilder att jämföra",
+      "compare_not_found": "Jämförelsen hittades inte",
+      "suggestion_not_found": "Förslaget hittades inte",
+      "suggestion_reviewed": "Det här förslaget är redan granskat",
+      "suggestion_invalid": "Det redigerade förslaget är ogiltigt",
+      "bad_source": "Okänd bildkälla",
+      "bad_device": "Enhetens inspelningsdata kunde inte läsas",
+      "target_incomplete": "Ange både posttyp och post-id",
+      "rate_limited": "För många förfrågningar, försök igen om en minut",
+      "export_not_found": "Exporten hittades inte",
+      "export_not_ready": "Exporten är inte klar än",
+      "gps_pair": "Ange latitud och longitud tillsammans",
+      "bad_ai_kinds": "Välj bildtext, taggar, framsteg eller fara",
+      "file_missing": "Bildfilen finns inte i lagringen"
+    },
+    "validation": {
+      "taken_at_missing": "Bilden '{name}' saknar tagningstid",
+      "taken_at_missing_fix": "Ange datumet då bilden togs, eller ta om den i appen",
+      "taken_at_future": "Bilden '{name}' är daterad {taken_at}, alltså i framtiden",
+      "taken_at_before_project": "Bilden '{name}' är daterad {taken_at}, mer än ett år före projektstart",
+      "taken_at_fix": "Rätta tagningsdatumet eller kontrollera kamerans klocka",
+      "gps_inaccurate": "Platsen för '{name}' är bara exakt till {accuracy} m",
+      "gps_off_site": "Bilden '{name}' togs {distance_km} km från byggplatsen",
+      "gps_fix": "Kontrollera platsen eller ta om bilden på byggplatsen med platstjänster på",
+      "link_missing": "Bilden '{name}' är kopplad till en {kind} som inte längre finns i det här projektet",
+      "link_missing_fix": "Ta bort kopplingen eller koppla bilden till rätt post",
+      "duplicate": "Bilden '{name}' är arkiverad {count} gång(er) till",
+      "duplicate_fix": "Behåll en kopia och koppla den där den behövs",
+      "evidence_weak": "Bilden '{name}' har bevisgrad '{grade}'",
+      "evidence_weak_fix": "Ta bilden i appen med platstjänster på",
+      "ai_unreviewed": "Ett AI-förslag ({kind}) har väntat på granskning i mer än {days} dagar",
+      "ai_unreviewed_fix": "Godkänn eller avvisa förslaget",
+      "hazard_open": "Den godkända faran '{hazard}' saknar säkerhetsobservation",
+      "hazard_open_fix": "Registrera en säkerhetsobservation och koppla bilden till den",
+      "file_missing": "Filen för bilden '{name}' saknas i lagringen",
+      "file_missing_fix": "Ladda upp bilden igen eller återställ den från en säkerhetskopia"
+    }
   }
 }

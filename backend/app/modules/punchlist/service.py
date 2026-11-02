@@ -778,7 +778,19 @@ class PunchListService:
         await self.repo.update_fields(item_id, **fields)
         await self.session.refresh(item)
         logger.info("Photo added to punch item %s: %s", item_id, photo_path)
+        self._photos_changed(item)
         return item
+
+    def _photos_changed(self, item: PunchItem) -> None:
+        """Tell the photo archive after commit, so its own session sees the new list."""
+        from app.core.events import publish_after_commit
+
+        publish_after_commit(
+            self.session,
+            "punchlist.item.updated",
+            {"item_id": str(item.id), "project_id": str(item.project_id), "updated_fields": ["photos"]},
+            source_module="oe_punchlist",
+        )
 
     async def remove_photo(self, item_id: uuid.UUID, index: int) -> PunchItem:
         """Remove a photo by index from the punch item's photos list."""
@@ -808,6 +820,7 @@ class PunchListService:
         await self.repo.update_fields(item_id, **fields)
         await self.session.refresh(item)
         logger.info("Photo removed from punch item %s: %s", item_id, removed)
+        self._photos_changed(item)
         return item
 
     # ── Summary ───────────────────────────────────────────────────────────

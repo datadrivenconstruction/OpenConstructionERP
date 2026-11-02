@@ -2512,5 +2512,55 @@
         "cumulative": "Kumulierte Position"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Foto nicht gefunden",
+      "no_files": "Wählen Sie mindestens ein Foto zum Hochladen",
+      "too_many_files": "Laden Sie höchstens {max} Fotos auf einmal hoch",
+      "target_not_found": "Der zu verknüpfende Datensatz wurde in diesem Projekt nicht gefunden",
+      "link_not_found": "Dieses Foto ist nicht mit diesem Datensatz verknüpft",
+      "album_not_found": "Album nicht gefunden",
+      "album_name_required": "Geben Sie dem Album einen Namen",
+      "album_exists": "In diesem Projekt gibt es bereits ein Album mit dem Namen '{name}'",
+      "plan_room_unavailable": "Planmarkierungen erfordern das Modul Plan Room",
+      "document_not_found": "Plan in diesem Projekt nicht gefunden",
+      "compare_same_photo": "Wählen Sie zwei verschiedene Fotos zum Vergleichen",
+      "compare_not_found": "Vergleich nicht gefunden",
+      "suggestion_not_found": "Vorschlag nicht gefunden",
+      "suggestion_reviewed": "Dieser Vorschlag wurde bereits geprüft",
+      "suggestion_invalid": "Der bearbeitete Vorschlag ist ungültig",
+      "bad_source": "Unbekannte Fotoquelle",
+      "bad_device": "Die Aufnahmedaten des Geräts konnten nicht gelesen werden",
+      "target_incomplete": "Geben Sie Datensatztyp und Datensatz-ID an",
+      "rate_limited": "Zu viele Anfragen, versuchen Sie es in einer Minute erneut",
+      "export_not_found": "Export nicht gefunden",
+      "export_not_ready": "Der Export ist noch nicht fertig",
+      "gps_pair": "Breiten- und Längengrad nur zusammen angeben",
+      "bad_ai_kinds": "Wählen Sie Beschriftung, Tags, Baufortschritt oder Gefährdung",
+      "file_missing": "Die Fotodatei ist nicht im Speicher vorhanden"
+    },
+    "validation": {
+      "taken_at_missing": "Foto '{name}' hat keine Aufnahmezeit",
+      "taken_at_missing_fix": "Geben Sie das Aufnahmedatum ein oder fotografieren Sie erneut in der App",
+      "taken_at_future": "Foto '{name}' ist auf {taken_at} datiert, also in der Zukunft",
+      "taken_at_before_project": "Foto '{name}' ist auf {taken_at} datiert, mehr als ein Jahr vor Projektbeginn",
+      "taken_at_fix": "Aufnahmedatum korrigieren oder die Kamerauhr prüfen",
+      "gps_inaccurate": "Der Standort von '{name}' ist nur auf {accuracy} m genau",
+      "gps_off_site": "Foto '{name}' wurde {distance_km} km von der Baustelle entfernt aufgenommen",
+      "gps_fix": "Standort prüfen oder das Foto auf der Baustelle mit aktivierter Ortung erneut aufnehmen",
+      "link_missing": "Foto '{name}' ist mit einem Objekt ({kind}) verknüpft, das in diesem Projekt nicht mehr existiert",
+      "link_missing_fix": "Verknüpfung entfernen oder das Foto mit dem richtigen Datensatz verknüpfen",
+      "duplicate": "Foto '{name}' ist noch {count} weitere(s) Mal archiviert",
+      "duplicate_fix": "Eine Kopie behalten und dort verknüpfen, wo sie gebraucht wird",
+      "evidence_weak": "Foto '{name}' hat die Beweisgüte '{grade}'",
+      "evidence_weak_fix": "Foto in der App mit aktivierter Ortung aufnehmen",
+      "ai_unreviewed": "Ein KI-Vorschlag ({kind}) wartet seit mehr als {days} Tagen auf Prüfung",
+      "ai_unreviewed_fix": "Vorschlag annehmen oder ablehnen",
+      "hazard_open": "Für die akzeptierte Gefährdung '{hazard}' gibt es keine Sicherheitsbeobachtung",
+      "hazard_open_fix": "Sicherheitsbeobachtung erfassen und das Foto damit verknüpfen",
+      "file_missing": "Die Datei von Foto '{name}' fehlt im Speicher",
+      "file_missing_fix": "Foto erneut hochladen oder aus einer Sicherung wiederherstellen"
+    }
   }
 }

@@ -2510,5 +2510,55 @@
         "cumulative": "Cumulatieve positie"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Foto niet gevonden",
+      "no_files": "Kies minstens één foto om te uploaden",
+      "too_many_files": "Upload maximaal {max} foto's tegelijk",
+      "target_not_found": "Het te koppelen record is niet gevonden in dit project",
+      "link_not_found": "Deze foto is niet aan dat record gekoppeld",
+      "album_not_found": "Album niet gevonden",
+      "album_name_required": "Geef het album een naam",
+      "album_exists": "Er bestaat al een album met de naam '{name}' in dit project",
+      "plan_room_unavailable": "Tekeningpins vereisen de module Plan Room",
+      "document_not_found": "Tekening niet gevonden in dit project",
+      "compare_same_photo": "Kies twee verschillende foto's om te vergelijken",
+      "compare_not_found": "Vergelijking niet gevonden",
+      "suggestion_not_found": "Suggestie niet gevonden",
+      "suggestion_reviewed": "Deze suggestie is al beoordeeld",
+      "suggestion_invalid": "De bewerkte suggestie is ongeldig",
+      "bad_source": "Onbekende fotobron",
+      "bad_device": "De opnamegegevens van het apparaat konden niet worden gelezen",
+      "target_incomplete": "Geef zowel het recordtype als de record-id op",
+      "rate_limited": "Te veel verzoeken, probeer het over een minuut opnieuw",
+      "export_not_found": "Export niet gevonden",
+      "export_not_ready": "De export is nog niet klaar",
+      "gps_pair": "Geef breedtegraad en lengtegraad samen op",
+      "bad_ai_kinds": "Kies bijschrift, tags, voortgang of gevaar",
+      "file_missing": "Het fotobestand staat niet in de opslag"
+    },
+    "validation": {
+      "taken_at_missing": "Foto '{name}' heeft geen opnametijd",
+      "taken_at_missing_fix": "Vul de opnamedatum in of maak de foto opnieuw in de app",
+      "taken_at_future": "Foto '{name}' is gedateerd op {taken_at}, dus in de toekomst",
+      "taken_at_before_project": "Foto '{name}' is gedateerd op {taken_at}, meer dan een jaar voor de start van het project",
+      "taken_at_fix": "Corrigeer de opnamedatum of controleer de klok van de camera",
+      "gps_inaccurate": "De locatie van '{name}' is slechts nauwkeurig tot {accuracy} m",
+      "gps_off_site": "Foto '{name}' is {distance_km} km van de bouwplaats genomen",
+      "gps_fix": "Controleer de locatie of maak de foto opnieuw op de bouwplaats met locatie ingeschakeld",
+      "link_missing": "Foto '{name}' is gekoppeld aan een {kind} die niet meer bestaat in dit project",
+      "link_missing_fix": "Verwijder de koppeling of koppel de foto aan het juiste record",
+      "duplicate": "Foto '{name}' is nog {count} keer gearchiveerd",
+      "duplicate_fix": "Bewaar één kopie en koppel die waar nodig",
+      "evidence_weak": "Foto '{name}' heeft bewijsklasse '{grade}'",
+      "evidence_weak_fix": "Maak de foto in de app met locatie ingeschakeld",
+      "ai_unreviewed": "Een AI-suggestie ({kind}) wacht al meer dan {days} dagen op beoordeling",
+      "ai_unreviewed_fix": "Accepteer of weiger de suggestie",
+      "hazard_open": "Voor het geaccepteerde gevaar '{hazard}' is geen veiligheidsobservatie",
+      "hazard_open_fix": "Leg een veiligheidsobservatie vast en koppel de foto eraan",
+      "file_missing": "Het bestand van foto '{name}' ontbreekt in de opslag",
+      "file_missing_fix": "Upload de foto opnieuw of herstel hem vanuit een back-up"
+    }
   }
 }

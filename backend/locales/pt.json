@@ -2515,5 +2515,55 @@
         "cumulative": "Posição acumulada"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Foto não encontrada",
+      "no_files": "Escolha pelo menos uma foto para enviar",
+      "too_many_files": "Envie no máximo {max} fotos por vez",
+      "target_not_found": "O registro a vincular não foi encontrado neste projeto",
+      "link_not_found": "Esta foto não está vinculada a esse registro",
+      "album_not_found": "Álbum não encontrado",
+      "album_name_required": "Dê um nome ao álbum",
+      "album_exists": "Já existe um álbum chamado '{name}' neste projeto",
+      "plan_room_unavailable": "Os marcadores em desenhos exigem o módulo Plan Room",
+      "document_not_found": "Desenho não encontrado neste projeto",
+      "compare_same_photo": "Escolha duas fotos diferentes para comparar",
+      "compare_not_found": "Comparação não encontrada",
+      "suggestion_not_found": "Sugestão não encontrada",
+      "suggestion_reviewed": "Esta sugestão já foi revisada",
+      "suggestion_invalid": "A sugestão editada não é válida",
+      "bad_source": "Origem da foto desconhecida",
+      "bad_device": "Não foi possível ler os dados de captura do dispositivo",
+      "target_incomplete": "Informe o tipo e o id do registro",
+      "rate_limited": "Muitas solicitações, tente novamente em um minuto",
+      "export_not_found": "Exportação não encontrada",
+      "export_not_ready": "A exportação ainda não está pronta",
+      "gps_pair": "Informe latitude e longitude juntas",
+      "bad_ai_kinds": "Escolha legenda, tags, avanço da obra ou perigo",
+      "file_missing": "O arquivo da foto não está no armazenamento"
+    },
+    "validation": {
+      "taken_at_missing": "A foto '{name}' não tem horário de captura",
+      "taken_at_missing_fix": "Informe a data da foto ou tire-a de novo no aplicativo",
+      "taken_at_future": "A foto '{name}' está datada de {taken_at}, ou seja, no futuro",
+      "taken_at_before_project": "A foto '{name}' está datada de {taken_at}, mais de um ano antes do início do projeto",
+      "taken_at_fix": "Corrija a data de captura ou confira o relógio da câmera",
+      "gps_inaccurate": "A localização de '{name}' só é precisa até {accuracy} m",
+      "gps_off_site": "A foto '{name}' foi tirada a {distance_km} km da obra",
+      "gps_fix": "Confira a localização ou tire a foto de novo na obra com a localização ativada",
+      "link_missing": "A foto '{name}' está vinculada a um item ({kind}) que não existe mais neste projeto",
+      "link_missing_fix": "Remova o vínculo ou vincule a foto ao registro correto",
+      "duplicate": "A foto '{name}' está arquivada mais {count} vez(es)",
+      "duplicate_fix": "Mantenha uma cópia e vincule onde for necessário",
+      "evidence_weak": "A foto '{name}' tem grau de evidência '{grade}'",
+      "evidence_weak_fix": "Tire a foto no aplicativo com a localização ativada",
+      "ai_unreviewed": "Uma sugestão de IA ({kind}) aguarda revisão há mais de {days} dias",
+      "ai_unreviewed_fix": "Aceite ou rejeite a sugestão",
+      "hazard_open": "O perigo aceito '{hazard}' não tem observação de segurança",
+      "hazard_open_fix": "Registre uma observação de segurança e vincule a foto",
+      "file_missing": "O arquivo da foto '{name}' não está no armazenamento",
+      "file_missing_fix": "Envie a foto de novo ou restaure-a de um backup"
+    }
   }
 }

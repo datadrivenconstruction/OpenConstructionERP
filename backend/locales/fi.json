@@ -2539,5 +2539,55 @@
         "cumulative": "Kertynyt asema"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Kuvaa ei löytynyt",
+      "no_files": "Valitse vähintään yksi ladattava kuva",
+      "too_many_files": "Lataa enintään {max} kuvaa kerrallaan",
+      "target_not_found": "Linkitettävää tietuetta ei löytynyt tästä projektista",
+      "link_not_found": "Tätä kuvaa ei ole linkitetty kyseiseen tietueeseen",
+      "album_not_found": "Albumia ei löytynyt",
+      "album_name_required": "Anna albumille nimi",
+      "album_exists": "Tässä projektissa on jo albumi nimeltä '{name}'",
+      "plan_room_unavailable": "Piirustusneulat vaativat Plan Room -moduulin",
+      "document_not_found": "Piirustusta ei löytynyt tästä projektista",
+      "compare_same_photo": "Valitse vertailuun kaksi eri kuvaa",
+      "compare_not_found": "Vertailua ei löytynyt",
+      "suggestion_not_found": "Ehdotusta ei löytynyt",
+      "suggestion_reviewed": "Tämä ehdotus on jo tarkistettu",
+      "suggestion_invalid": "Muokattu ehdotus ei kelpaa",
+      "bad_source": "Tuntematon kuvalähde",
+      "bad_device": "Laitteen tallennustietoja ei voitu lukea",
+      "target_incomplete": "Anna sekä tietueen tyyppi että tunnus",
+      "rate_limited": "Liian monta pyyntöä, yritä minuutin kuluttua uudelleen",
+      "export_not_found": "Vientiä ei löytynyt",
+      "export_not_ready": "Vienti ei ole vielä valmis",
+      "gps_pair": "Anna leveys- ja pituusaste yhdessä",
+      "bad_ai_kinds": "Valitse kuvaus, tunnisteet, edistyminen tai vaara",
+      "file_missing": "Kuvatiedosto puuttuu tallennustilasta"
+    },
+    "validation": {
+      "taken_at_missing": "Kuvalla '{name}' ei ole ottoaikaa",
+      "taken_at_missing_fix": "Anna kuvan ottopäivä tai ota kuva uudelleen sovelluksessa",
+      "taken_at_future": "Kuvan '{name}' päiväys on {taken_at}, eli tulevaisuudessa",
+      "taken_at_before_project": "Kuvan '{name}' päiväys on {taken_at}, yli vuosi ennen projektin alkua",
+      "taken_at_fix": "Korjaa ottopäivä tai tarkista kameran kello",
+      "gps_inaccurate": "Kohteen '{name}' sijainti on tarkka vain {accuracy} m",
+      "gps_off_site": "Kuva '{name}' otettiin {distance_km} km:n päässä työmaalta",
+      "gps_fix": "Tarkista sijainti tai ota kuva uudelleen työmaalla sijainti käytössä",
+      "link_missing": "Kuva '{name}' on linkitetty kohteeseen ({kind}), jota ei enää ole tässä projektissa",
+      "link_missing_fix": "Poista linkki tai linkitä kuva oikeaan tietueeseen",
+      "duplicate": "Kuva '{name}' on arkistoitu vielä {count} kertaa",
+      "duplicate_fix": "Säilytä yksi kopio ja linkitä se sinne, missä sitä tarvitaan",
+      "evidence_weak": "Kuvan '{name}' todistusarvo on '{grade}'",
+      "evidence_weak_fix": "Ota kuva sovelluksessa sijainti käytössä",
+      "ai_unreviewed": "Tekoälyn ehdotus ({kind}) on odottanut tarkistusta yli {days} päivää",
+      "ai_unreviewed_fix": "Hyväksy tai hylkää ehdotus",
+      "hazard_open": "Hyväksytylle vaaralle '{hazard}' ei ole turvallisuushavaintoa",
+      "hazard_open_fix": "Kirjaa turvallisuushavainto ja linkitä kuva siihen",
+      "file_missing": "Kuvan '{name}' tiedosto puuttuu tallennustilasta",
+      "file_missing_fix": "Lataa kuva uudelleen tai palauta se varmuuskopiosta"
+    }
   }
 }

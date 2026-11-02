@@ -2536,5 +2536,55 @@
         "cumulative": "Akkumulert posisjon"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Fant ikke bildet",
+      "no_files": "Velg minst ett bilde å laste opp",
+      "too_many_files": "Last opp høyst {max} bilder om gangen",
+      "target_not_found": "Posten som skal kobles ble ikke funnet i dette prosjektet",
+      "link_not_found": "Dette bildet er ikke koblet til den posten",
+      "album_not_found": "Fant ikke albumet",
+      "album_name_required": "Gi albumet et navn",
+      "album_exists": "Det finnes allerede et album med navnet '{name}' i dette prosjektet",
+      "plan_room_unavailable": "Tegningsnåler krever modulen Plan Room",
+      "document_not_found": "Fant ikke tegningen i dette prosjektet",
+      "compare_same_photo": "Velg to forskjellige bilder å sammenligne",
+      "compare_not_found": "Fant ikke sammenligningen",
+      "suggestion_not_found": "Fant ikke forslaget",
+      "suggestion_reviewed": "Dette forslaget er allerede gjennomgått",
+      "suggestion_invalid": "Det redigerte forslaget er ugyldig",
+      "bad_source": "Ukjent bildekilde",
+      "bad_device": "Enhetens opptaksdata kunne ikke leses",
+      "target_incomplete": "Oppgi både posttype og post-id",
+      "rate_limited": "For mange forespørsler, prøv igjen om et minutt",
+      "export_not_found": "Fant ikke eksporten",
+      "export_not_ready": "Eksporten er ikke klar ennå",
+      "gps_pair": "Oppgi bredde- og lengdegrad sammen",
+      "bad_ai_kinds": "Velg bildetekst, tagger, fremdrift eller fare",
+      "file_missing": "Bildefilen finnes ikke i lagringen"
+    },
+    "validation": {
+      "taken_at_missing": "Bildet '{name}' har ikke opptakstidspunkt",
+      "taken_at_missing_fix": "Oppgi datoen bildet ble tatt, eller ta det på nytt i appen",
+      "taken_at_future": "Bildet '{name}' er datert {taken_at}, altså i fremtiden",
+      "taken_at_before_project": "Bildet '{name}' er datert {taken_at}, mer enn ett år før prosjektstart",
+      "taken_at_fix": "Rett opptaksdatoen eller sjekk kameraets klokke",
+      "gps_inaccurate": "Posisjonen til '{name}' er bare nøyaktig til {accuracy} m",
+      "gps_off_site": "Bildet '{name}' ble tatt {distance_km} km fra byggeplassen",
+      "gps_fix": "Sjekk posisjonen, eller ta bildet på nytt på byggeplassen med posisjon slått på",
+      "link_missing": "Bildet '{name}' er koblet til en {kind} som ikke lenger finnes i dette prosjektet",
+      "link_missing_fix": "Fjern koblingen eller koble bildet til riktig post",
+      "duplicate": "Bildet '{name}' er arkivert {count} ganger til",
+      "duplicate_fix": "Behold én kopi og koble den dit den trengs",
+      "evidence_weak": "Bildet '{name}' har bevisgrad '{grade}'",
+      "evidence_weak_fix": "Ta bildet i appen med posisjon slått på",
+      "ai_unreviewed": "Et AI-forslag ({kind}) har ventet på gjennomgang i mer enn {days} dager",
+      "ai_unreviewed_fix": "Godta eller avvis forslaget",
+      "hazard_open": "Den godtatte faren '{hazard}' har ingen sikkerhetsobservasjon",
+      "hazard_open_fix": "Registrer en sikkerhetsobservasjon og koble bildet til den",
+      "file_missing": "Filen til bildet '{name}' mangler i lagringen",
+      "file_missing_fix": "Last opp bildet på nytt, eller gjenopprett det fra sikkerhetskopi"
+    }
   }
 }

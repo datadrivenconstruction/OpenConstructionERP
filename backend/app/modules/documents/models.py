@@ -21,6 +21,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    Index,
     Integer,
     String,
     Text,
@@ -160,6 +161,15 @@ class ProjectPhoto(Base):
     """Project photo with EXIF/GPS metadata for site documentation gallery."""
 
     __tablename__ = "oe_documents_photo"
+    # Indexing columns added by the photos module (migration vph01_photos): diary, punch, field report and
+    # progress photos get a row here that points at their existing file, so the file never moves.
+    __table_args__ = (
+        Index("ix_oe_documents_photo_project_taken", "project_id", "taken_at"),
+        Index("ix_oe_documents_photo_project_source", "project_id", "source_module", "source_id"),
+        UniqueConstraint(
+            "project_id", "source_module", "source_id", "file_path", name="uq_oe_documents_photo_source_file"
+        ),
+    )
 
     project_id: Mapped[uuid.UUID] = mapped_column(
         GUID(),
@@ -190,6 +200,18 @@ class ProjectPhoto(Base):
         server_default="{}",
     )
     created_by: Mapped[str] = mapped_column(String(36), nullable=False, default="")
+    source_module: Mapped[str] = mapped_column(
+        String(32), nullable=False, default="documents", server_default="documents"
+    )
+    source_id: Mapped[str | None] = mapped_column(String(64), nullable=True, default=None)
+    sha256: Mapped[str | None] = mapped_column(String(64), nullable=True, default=None)
+    width: Mapped[int | None] = mapped_column(Integer, nullable=True, default=None)
+    height: Mapped[int | None] = mapped_column(Integer, nullable=True, default=None)
+    gps_accuracy_m: Mapped[float | None] = mapped_column(Float, nullable=True, default=None)
+    thumb_status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending", server_default="pending")
+    location_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, default=None)
+    zone: Mapped[str | None] = mapped_column(String(128), nullable=True, default=None)
+    is_archived: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False, server_default="false")
 
     def __repr__(self) -> str:
         return f"<ProjectPhoto {self.filename} ({self.category})>"

@@ -2531,5 +2531,55 @@
         "cumulative": "累計残高"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "写真が見つかりません",
+      "no_files": "アップロードする写真を1枚以上選んでください",
+      "too_many_files": "一度にアップロードできるのは最大{max}枚です",
+      "target_not_found": "リンクする対象のレコードがこのプロジェクトに見つかりません",
+      "link_not_found": "この写真はそのレコードにリンクされていません",
+      "album_not_found": "アルバムが見つかりません",
+      "album_name_required": "アルバム名を入力してください",
+      "album_exists": "このプロジェクトには「{name}」というアルバムが既にあります",
+      "plan_room_unavailable": "図面ピンにはPlan Roomモジュールが必要です",
+      "document_not_found": "このプロジェクトに図面が見つかりません",
+      "compare_same_photo": "比較する写真を2枚（別々のもの）選んでください",
+      "compare_not_found": "比較が見つかりません",
+      "suggestion_not_found": "提案が見つかりません",
+      "suggestion_reviewed": "この提案は確認済みです",
+      "suggestion_invalid": "編集した提案が正しくありません",
+      "bad_source": "写真の取得元が不明です",
+      "bad_device": "端末の撮影データを読み取れませんでした",
+      "target_incomplete": "レコードの種類とレコードIDの両方を指定してください",
+      "rate_limited": "リクエストが多すぎます。1分後にもう一度お試しください",
+      "export_not_found": "エクスポートが見つかりません",
+      "export_not_ready": "エクスポートはまだ準備できていません",
+      "gps_pair": "緯度と経度は両方まとめて指定してください",
+      "bad_ai_kinds": "キャプション、タグ、進捗、危険のいずれかを選んでください",
+      "file_missing": "写真ファイルがストレージにありません"
+    },
+    "validation": {
+      "taken_at_missing": "写真「{name}」には撮影日時がありません",
+      "taken_at_missing_fix": "撮影日を入力するか、アプリで撮り直してください",
+      "taken_at_future": "写真「{name}」の日付は{taken_at}で、未来になっています",
+      "taken_at_before_project": "写真「{name}」の日付は{taken_at}で、プロジェクト開始の1年以上前です",
+      "taken_at_fix": "撮影日を修正するか、カメラの時計を確認してください",
+      "gps_inaccurate": "「{name}」の位置情報は{accuracy} m程度の精度しかありません",
+      "gps_off_site": "写真「{name}」は現場から{distance_km} km離れた場所で撮影されています",
+      "gps_fix": "位置情報を確認するか、位置情報をオンにして現場で撮り直してください",
+      "link_missing": "写真「{name}」は、このプロジェクトに既にない{kind}にリンクされています",
+      "link_missing_fix": "リンクを外すか、正しいレコードにリンクし直してください",
+      "duplicate": "写真「{name}」は、さらに{count}件アーカイブされています",
+      "duplicate_fix": "1件だけ残し、必要な箇所にリンクしてください",
+      "evidence_weak": "写真「{name}」の証拠レベルは「{grade}」です",
+      "evidence_weak_fix": "位置情報をオンにして、アプリで撮影してください",
+      "ai_unreviewed": "AIの{kind}の提案が{days}日以上確認待ちです",
+      "ai_unreviewed_fix": "提案を承認または却下してください",
+      "hazard_open": "承認済みの危険「{hazard}」に安全観察記録がありません",
+      "hazard_open_fix": "安全観察を記録し、写真をリンクしてください",
+      "file_missing": "写真「{name}」のファイルがストレージにありません",
+      "file_missing_fix": "写真を再アップロードするか、バックアップから復元してください"
+    }
   }
 }
