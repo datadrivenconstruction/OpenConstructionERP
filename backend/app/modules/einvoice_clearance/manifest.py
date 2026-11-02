@@ -3,6 +3,7 @@
 """E-invoice clearance module manifest."""
 
 from app.core.module_loader import ModuleManifest
+from app.modules.einvoice_clearance.regimes import SUPPORTED_COUNTRIES
 
 manifest = ModuleManifest(
     name="oe_einvoice_clearance",
@@ -22,34 +23,8 @@ manifest = ModuleManifest(
     author="OpenConstructionERP Core Team",
     category="core",
     depends=["oe_finance", "oe_projects"],
-    markets=[
-        "AU",
-        "BE",
-        "BR",
-        "CL",
-        "CO",
-        "DE",
-        "DK",
-        "EG",
-        "ES",
-        "FI",
-        "FR",
-        "GB",
-        "HU",
-        "IE",
-        "IN",
-        "IT",
-        "MX",
-        "NL",
-        "NO",
-        "NZ",
-        "PL",
-        "RO",
-        "SA",
-        "SE",
-        "SG",
-        "TR",
-    ],
+    # Only markets whose pack ships an e-invoice mandate file see the module.
+    markets=list(SUPPORTED_COUNTRIES),
     auto_install=True,
     enabled=True,
 )
