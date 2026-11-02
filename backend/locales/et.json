@@ -2537,5 +2537,55 @@
         "cumulative": "Kumulatiivne seis"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Fotot ei leitud",
+      "no_files": "Valige üleslaadimiseks vähemalt üks foto",
+      "too_many_files": "Laadige korraga üles kuni {max} fotot",
+      "target_not_found": "Seotavat kirjet ei leitud sellest projektist",
+      "link_not_found": "See foto ei ole selle kirjega seotud",
+      "album_not_found": "Albumit ei leitud",
+      "album_name_required": "Andke albumile nimi",
+      "album_exists": "Selles projektis on juba album nimega '{name}'",
+      "plan_room_unavailable": "Joonisenööbid vajavad moodulit Plan Room",
+      "document_not_found": "Joonist ei leitud sellest projektist",
+      "compare_same_photo": "Valige võrdlemiseks kaks erinevat fotot",
+      "compare_not_found": "Võrdlust ei leitud",
+      "suggestion_not_found": "Ettepanekut ei leitud",
+      "suggestion_reviewed": "See ettepanek on juba üle vaadatud",
+      "suggestion_invalid": "Muudetud ettepanek ei kehti",
+      "bad_source": "Tundmatu foto allikas",
+      "bad_device": "Seadme jäädvustusandmeid ei õnnestunud lugeda",
+      "target_incomplete": "Sisestage nii kirje tüüp kui ka kirje ID",
+      "rate_limited": "Liiga palju päringuid, proovige minuti pärast uuesti",
+      "export_not_found": "Eksporti ei leitud",
+      "export_not_ready": "Eksport pole veel valmis",
+      "gps_pair": "Määrake laius- ja pikkuskraad koos",
+      "bad_ai_kinds": "Valige kirjeldus, sildid, edenemine või oht",
+      "file_missing": "Foto faili pole salvestusruumis"
+    },
+    "validation": {
+      "taken_at_missing": "Fotol '{name}' puudub tegemise aeg",
+      "taken_at_missing_fix": "Sisestage foto tegemise kuupäev või tehke foto rakenduses uuesti",
+      "taken_at_future": "Foto '{name}' kuupäev on {taken_at}, see on tulevikus",
+      "taken_at_before_project": "Foto '{name}' kuupäev on {taken_at}, rohkem kui aasta enne projekti algust",
+      "taken_at_fix": "Parandage tegemise kuupäev või kontrollige kaamera kella",
+      "gps_inaccurate": "'{name}' asukoht on täpne vaid {accuracy} m piires",
+      "gps_off_site": "Foto '{name}' tehti ehitusplatsist {distance_km} km kaugusel",
+      "gps_fix": "Kontrollige asukohta või tehke foto platsil asukohateenus sees uuesti",
+      "link_missing": "Foto '{name}' on seotud kirjega ({kind}), mida selles projektis enam ei ole",
+      "link_missing_fix": "Eemaldage seos või siduge foto õige kirjega",
+      "duplicate": "Foto '{name}' on arhiveeritud veel {count} korda",
+      "duplicate_fix": "Jätke üks koopia ja siduge see seal, kus seda vaja on",
+      "evidence_weak": "Foto '{name}' tõendusaste on '{grade}'",
+      "evidence_weak_fix": "Tehke foto rakenduses asukohateenus sees",
+      "ai_unreviewed": "AI ettepanek ({kind}) ootab ülevaatust üle {days} päeva",
+      "ai_unreviewed_fix": "Võtke ettepanek vastu või lükake tagasi",
+      "hazard_open": "Aktsepteeritud ohul '{hazard}' puudub ohutusvaatlus",
+      "hazard_open_fix": "Salvestage ohutusvaatlus ja siduge foto sellega",
+      "file_missing": "Foto '{name}' faili pole salvestusruumis",
+      "file_missing_fix": "Laadige foto uuesti üles või taastage see varukoopiast"
+    }
   }
 }

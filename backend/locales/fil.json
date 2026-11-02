@@ -2547,5 +2547,55 @@
         "cumulative": "Pinagsamang posisyon"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Hindi nahanap ang larawan",
+      "no_files": "Pumili ng kahit isang larawang i-a-upload",
+      "too_many_files": "Hanggang {max} larawan lang ang i-upload nang sabay",
+      "target_not_found": "Hindi nahanap sa proyektong ito ang record na ili-link",
+      "link_not_found": "Hindi naka-link ang larawang ito sa record na iyon",
+      "album_not_found": "Hindi nahanap ang album",
+      "album_name_required": "Bigyan ng pangalan ang album",
+      "album_exists": "May album na nakapangalang '{name}' na sa proyektong ito",
+      "plan_room_unavailable": "Kailangan ng Plan Room module ang mga pin sa drowing",
+      "document_not_found": "Hindi nahanap sa proyektong ito ang drowing",
+      "compare_same_photo": "Pumili ng dalawang magkaibang larawan para ihambing",
+      "compare_not_found": "Hindi nahanap ang paghahambing",
+      "suggestion_not_found": "Hindi nahanap ang mungkahi",
+      "suggestion_reviewed": "Nasuri na ang mungkahing ito",
+      "suggestion_invalid": "Hindi balido ang na-edit na mungkahi",
+      "bad_source": "Hindi kilalang pinagmulan ng larawan",
+      "bad_device": "Hindi mabasa ang datos ng pagkuha ng device",
+      "target_incomplete": "Ibigay ang uri at id ng record",
+      "rate_limited": "Masyadong maraming request, subukan ulit pagkalipas ng isang minuto",
+      "export_not_found": "Hindi nahanap ang export",
+      "export_not_ready": "Hindi pa handa ang export",
+      "gps_pair": "Itakda nang magkasama ang latitude at longitude",
+      "bad_ai_kinds": "Pumili ng caption, tags, progreso o panganib",
+      "file_missing": "Wala sa storage ang file ng larawan"
+    },
+    "validation": {
+      "taken_at_missing": "Walang oras ng pagkuha ang larawang '{name}'",
+      "taken_at_missing_fix": "Ilagay ang petsa ng pagkuha ng larawan, o kunin ulit sa app",
+      "taken_at_future": "Ang larawang '{name}' ay may petsang {taken_at}, na nasa hinaharap",
+      "taken_at_before_project": "Ang larawang '{name}' ay may petsang {taken_at}, mahigit isang taon bago ang simula ng proyekto",
+      "taken_at_fix": "Itama ang petsa ng pagkuha o tingnan ang orasan ng camera",
+      "gps_inaccurate": "Ang lokasyon ng '{name}' ay tumpak lang hanggang {accuracy} m",
+      "gps_off_site": "Ang larawang '{name}' ay kinuha {distance_km} km mula sa site",
+      "gps_fix": "Suriin ang lokasyon o kunin ulit ang larawan sa site nang naka-on ang lokasyon",
+      "link_missing": "Ang larawang '{name}' ay naka-link sa {kind} na wala na sa proyektong ito",
+      "link_missing_fix": "Alisin ang link o i-link ang larawan sa tamang record",
+      "duplicate": "Ang larawang '{name}' ay naka-archive pa nang {count} beses",
+      "duplicate_fix": "Magtira ng isang kopya at i-link kung saan kailangan",
+      "evidence_weak": "Ang larawang '{name}' ay may antas ng ebidensiyang '{grade}'",
+      "evidence_weak_fix": "Kunin ang larawan sa app nang naka-on ang lokasyon",
+      "ai_unreviewed": "Ang mungkahing {kind} ng AI ay naghihintay ng pagsusuri nang mahigit {days} araw",
+      "ai_unreviewed_fix": "Tanggapin o tanggihan ang mungkahi",
+      "hazard_open": "Ang tinanggap na panganib na '{hazard}' ay walang obserbasyon sa kaligtasan",
+      "hazard_open_fix": "Magtala ng obserbasyon sa kaligtasan at i-link ang larawan dito",
+      "file_missing": "Nawawala sa storage ang file ng larawang '{name}'",
+      "file_missing_fix": "I-upload ulit ang larawan o ibalik mula sa backup"
+    }
   }
 }

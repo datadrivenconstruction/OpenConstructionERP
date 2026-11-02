@@ -2554,5 +2554,55 @@
         "cumulative": "Cumulative position"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Photo not found",
+      "no_files": "Choose at least one photo to upload",
+      "too_many_files": "Upload at most {max} photos at a time",
+      "target_not_found": "The record to link was not found in this project",
+      "link_not_found": "This photo is not linked to that record",
+      "album_not_found": "Album not found",
+      "album_name_required": "Give the album a name",
+      "album_exists": "An album named '{name}' already exists in this project",
+      "plan_room_unavailable": "Drawing pins need the Plan Room module",
+      "document_not_found": "Drawing not found in this project",
+      "compare_same_photo": "Pick two different photos to compare",
+      "compare_not_found": "Comparison not found",
+      "suggestion_not_found": "Suggestion not found",
+      "suggestion_reviewed": "This suggestion was already reviewed",
+      "suggestion_invalid": "The edited suggestion is not valid",
+      "bad_source": "Unknown photo source",
+      "bad_device": "The device capture data could not be read",
+      "target_incomplete": "Give both the record type and the record id",
+      "rate_limited": "Too many requests, try again in a minute",
+      "export_not_found": "Export not found",
+      "export_not_ready": "The export is not ready yet",
+      "gps_pair": "Set latitude and longitude together",
+      "bad_ai_kinds": "Choose caption, tags, progress or hazard",
+      "file_missing": "The photo file is not in storage"
+    },
+    "validation": {
+      "taken_at_missing": "Photo '{name}' has no capture time",
+      "taken_at_missing_fix": "Enter the date the photo was taken, or retake it in the app",
+      "taken_at_future": "Photo '{name}' is dated {taken_at}, in the future",
+      "taken_at_before_project": "Photo '{name}' is dated {taken_at}, more than a year before the project start",
+      "taken_at_fix": "Correct the capture date or check the camera clock",
+      "gps_inaccurate": "Location of '{name}' is only accurate to {accuracy} m",
+      "gps_off_site": "Photo '{name}' was taken {distance_km} km from the site",
+      "gps_fix": "Check the location or retake the photo on site with location enabled",
+      "link_missing": "Photo '{name}' is linked to a {kind} that no longer exists in this project",
+      "link_missing_fix": "Remove the link or link the photo to the right record",
+      "duplicate": "Photo '{name}' is archived {count} more time(s)",
+      "duplicate_fix": "Keep one copy and link it where it is needed",
+      "evidence_weak": "Photo '{name}' has evidence grade '{grade}'",
+      "evidence_weak_fix": "Take the photo in the app with location enabled",
+      "ai_unreviewed": "An AI {kind} suggestion has waited more than {days} days for review",
+      "ai_unreviewed_fix": "Accept or reject the suggestion",
+      "hazard_open": "Accepted hazard '{hazard}' has no safety observation",
+      "hazard_open_fix": "Record a safety observation and link the photo to it",
+      "file_missing": "File of photo '{name}' is missing from storage",
+      "file_missing_fix": "Upload the photo again or restore it from a backup"
+    }
   }
 }

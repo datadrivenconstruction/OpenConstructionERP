@@ -2536,5 +2536,55 @@
         "cumulative": "누적 잔액"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "사진을 찾을 수 없습니다",
+      "no_files": "업로드할 사진을 하나 이상 선택하세요",
+      "too_many_files": "한 번에 최대 {max}장까지 업로드할 수 있습니다",
+      "target_not_found": "연결할 레코드를 이 프로젝트에서 찾을 수 없습니다",
+      "link_not_found": "이 사진은 해당 레코드에 연결되어 있지 않습니다",
+      "album_not_found": "앨범을 찾을 수 없습니다",
+      "album_name_required": "앨범 이름을 입력하세요",
+      "album_exists": "이 프로젝트에 '{name}' 앨범이 이미 있습니다",
+      "plan_room_unavailable": "도면 핀은 Plan Room 모듈이 필요합니다",
+      "document_not_found": "이 프로젝트에서 도면을 찾을 수 없습니다",
+      "compare_same_photo": "비교할 사진을 서로 다른 것으로 두 장 선택하세요",
+      "compare_not_found": "비교 항목을 찾을 수 없습니다",
+      "suggestion_not_found": "제안을 찾을 수 없습니다",
+      "suggestion_reviewed": "이미 검토된 제안입니다",
+      "suggestion_invalid": "수정한 제안이 올바르지 않습니다",
+      "bad_source": "알 수 없는 사진 출처입니다",
+      "bad_device": "기기의 촬영 데이터를 읽을 수 없습니다",
+      "target_incomplete": "레코드 유형과 레코드 ID를 모두 입력하세요",
+      "rate_limited": "요청이 너무 많습니다. 1분 후에 다시 시도하세요",
+      "export_not_found": "내보내기를 찾을 수 없습니다",
+      "export_not_ready": "내보내기가 아직 준비되지 않았습니다",
+      "gps_pair": "위도와 경도를 함께 입력하세요",
+      "bad_ai_kinds": "캡션, 태그, 진행률, 위험 중에서 선택하세요",
+      "file_missing": "사진 파일이 저장소에 없습니다"
+    },
+    "validation": {
+      "taken_at_missing": "사진 '{name}'에 촬영 시각이 없습니다",
+      "taken_at_missing_fix": "사진을 찍은 날짜를 입력하거나 앱에서 다시 촬영하세요",
+      "taken_at_future": "사진 '{name}'의 날짜가 {taken_at}로, 미래입니다",
+      "taken_at_before_project": "사진 '{name}'의 날짜가 {taken_at}로, 프로젝트 시작보다 1년 넘게 앞섭니다",
+      "taken_at_fix": "촬영 날짜를 수정하거나 카메라 시계를 확인하세요",
+      "gps_inaccurate": "'{name}'의 위치는 {accuracy}m 정도의 정확도뿐입니다",
+      "gps_off_site": "사진 '{name}'은 현장에서 {distance_km}km 떨어진 곳에서 촬영되었습니다",
+      "gps_fix": "위치를 확인하거나 위치 서비스를 켜고 현장에서 다시 촬영하세요",
+      "link_missing": "사진 '{name}'이 이 프로젝트에 더 이상 없는 {kind}에 연결되어 있습니다",
+      "link_missing_fix": "연결을 해제하거나 올바른 레코드에 다시 연결하세요",
+      "duplicate": "사진 '{name}'이 {count}회 더 보관되어 있습니다",
+      "duplicate_fix": "사본 하나만 남기고 필요한 곳에 연결하세요",
+      "evidence_weak": "사진 '{name}'의 증거 등급은 '{grade}'입니다",
+      "evidence_weak_fix": "위치 서비스를 켜고 앱에서 촬영하세요",
+      "ai_unreviewed": "AI {kind} 제안이 {days}일 넘게 검토를 기다리고 있습니다",
+      "ai_unreviewed_fix": "제안을 수락하거나 거절하세요",
+      "hazard_open": "수락된 위험 '{hazard}'에 안전 관찰 기록이 없습니다",
+      "hazard_open_fix": "안전 관찰을 기록하고 사진을 연결하세요",
+      "file_missing": "사진 '{name}'의 파일이 저장소에 없습니다",
+      "file_missing_fix": "사진을 다시 업로드하거나 백업에서 복원하세요"
+    }
   }
 }

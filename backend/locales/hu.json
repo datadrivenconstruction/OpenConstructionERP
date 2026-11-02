@@ -2535,5 +2535,55 @@
         "cumulative": "Halmozott pozíció"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "A fotó nem található",
+      "no_files": "Válasszon ki legalább egy feltöltendő fotót",
+      "too_many_files": "Egyszerre legfeljebb {max} fotót tölthet fel",
+      "target_not_found": "A csatolandó rekord nem található ebben a projektben",
+      "link_not_found": "Ez a fotó nincs ehhez a rekordhoz csatolva",
+      "album_not_found": "Az album nem található",
+      "album_name_required": "Adjon nevet az albumnak",
+      "album_exists": "Ebben a projektben már van '{name}' nevű album",
+      "plan_room_unavailable": "A rajzi tűk a Plan Room modult igénylik",
+      "document_not_found": "A rajz nem található ebben a projektben",
+      "compare_same_photo": "Válasszon két különböző fotót az összehasonlításhoz",
+      "compare_not_found": "Az összehasonlítás nem található",
+      "suggestion_not_found": "A javaslat nem található",
+      "suggestion_reviewed": "Ez a javaslat már át lett nézve",
+      "suggestion_invalid": "A szerkesztett javaslat érvénytelen",
+      "bad_source": "Ismeretlen fotóforrás",
+      "bad_device": "Az eszköz rögzítési adatai nem olvashatók",
+      "target_incomplete": "Adja meg a rekord típusát és azonosítóját is",
+      "rate_limited": "Túl sok kérés, próbálja újra egy perc múlva",
+      "export_not_found": "Az exportálás nem található",
+      "export_not_ready": "Az exportálás még nem készült el",
+      "gps_pair": "A szélességet és a hosszúságot együtt adja meg",
+      "bad_ai_kinds": "Válasszon: felirat, címkék, haladás vagy veszély",
+      "file_missing": "A fotó fájlja nincs a tárhelyen"
+    },
+    "validation": {
+      "taken_at_missing": "A(z) '{name}' fotónak nincs készítési ideje",
+      "taken_at_missing_fix": "Adja meg a fotó készítésének dátumát, vagy készítse el újra az alkalmazásban",
+      "taken_at_future": "A(z) '{name}' fotó dátuma {taken_at}, vagyis a jövőben van",
+      "taken_at_before_project": "A(z) '{name}' fotó dátuma {taken_at}, több mint egy évvel a projekt kezdete előtt",
+      "taken_at_fix": "Javítsa a készítés dátumát, vagy ellenőrizze a fényképezőgép óráját",
+      "gps_inaccurate": "A(z) '{name}' helyadata csak {accuracy} m pontosságú",
+      "gps_off_site": "A(z) '{name}' fotó az építési területtől {distance_km} km-re készült",
+      "gps_fix": "Ellenőrizze a helyadatot, vagy készítse el újra a fotót a helyszínen bekapcsolt helymeghatározással",
+      "link_missing": "A(z) '{name}' fotó olyan elemhez ({kind}) van csatolva, amely már nem létezik ebben a projektben",
+      "link_missing_fix": "Törölje a csatolást, vagy csatolja a fotót a megfelelő rekordhoz",
+      "duplicate": "A(z) '{name}' fotó még {count} alkalommal szerepel az archívumban",
+      "duplicate_fix": "Tartson meg egy példányt, és csatolja oda, ahol szükség van rá",
+      "evidence_weak": "A(z) '{name}' fotó bizonyítékfokozata '{grade}'",
+      "evidence_weak_fix": "Készítse el a fotót az alkalmazásban bekapcsolt helymeghatározással",
+      "ai_unreviewed": "Egy AI-javaslat ({kind}) több mint {days} napja vár átnézésre",
+      "ai_unreviewed_fix": "Fogadja el vagy utasítsa el a javaslatot",
+      "hazard_open": "Az elfogadott '{hazard}' veszélyhez nincs biztonsági megfigyelés",
+      "hazard_open_fix": "Rögzítsen biztonsági megfigyelést, és csatolja hozzá a fotót",
+      "file_missing": "A(z) '{name}' fotó fájlja hiányzik a tárhelyről",
+      "file_missing_fix": "Töltse fel újra a fotót, vagy állítsa vissza biztonsági mentésből"
+    }
   }
 }

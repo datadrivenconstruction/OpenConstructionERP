@@ -2536,5 +2536,55 @@
         "cumulative": "Poziție cumulată"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "Fotografia nu a fost găsită",
+      "no_files": "Alegeți cel puțin o fotografie de încărcat",
+      "too_many_files": "Încărcați cel mult {max} fotografii o dată",
+      "target_not_found": "Înregistrarea de asociat nu a fost găsită în acest proiect",
+      "link_not_found": "Această fotografie nu este asociată cu acea înregistrare",
+      "album_not_found": "Albumul nu a fost găsit",
+      "album_name_required": "Dați albumului un nume",
+      "album_exists": "Există deja un album numit '{name}' în acest proiect",
+      "plan_room_unavailable": "Pinurile pe desene necesită modulul Plan Room",
+      "document_not_found": "Desenul nu a fost găsit în acest proiect",
+      "compare_same_photo": "Alegeți două fotografii diferite de comparat",
+      "compare_not_found": "Comparația nu a fost găsită",
+      "suggestion_not_found": "Sugestia nu a fost găsită",
+      "suggestion_reviewed": "Această sugestie a fost deja revizuită",
+      "suggestion_invalid": "Sugestia editată nu este validă",
+      "bad_source": "Sursă necunoscută a fotografiei",
+      "bad_device": "Datele de captură ale dispozitivului nu au putut fi citite",
+      "target_incomplete": "Indicați atât tipul, cât și ID-ul înregistrării",
+      "rate_limited": "Prea multe cereri, încercați din nou peste un minut",
+      "export_not_found": "Exportul nu a fost găsit",
+      "export_not_ready": "Exportul nu este încă gata",
+      "gps_pair": "Indicați împreună latitudinea și longitudinea",
+      "bad_ai_kinds": "Alegeți descriere, etichete, progres sau pericol",
+      "file_missing": "Fișierul fotografiei lipsește din stocare"
+    },
+    "validation": {
+      "taken_at_missing": "Fotografia '{name}' nu are ora capturii",
+      "taken_at_missing_fix": "Introduceți data fotografiei sau refaceți fotografia în aplicație",
+      "taken_at_future": "Fotografia '{name}' are data {taken_at}, adică în viitor",
+      "taken_at_before_project": "Fotografia '{name}' are data {taken_at}, cu mai mult de un an înainte de începerea proiectului",
+      "taken_at_fix": "Corectați data capturii sau verificați ceasul camerei",
+      "gps_inaccurate": "Locația '{name}' este precisă doar până la {accuracy} m",
+      "gps_off_site": "Fotografia '{name}' a fost făcută la {distance_km} km de șantier",
+      "gps_fix": "Verificați locația sau refaceți fotografia pe șantier cu localizarea activată",
+      "link_missing": "Fotografia '{name}' este asociată cu un element ({kind}) care nu mai există în acest proiect",
+      "link_missing_fix": "Eliminați asocierea sau asociați fotografia cu înregistrarea corectă",
+      "duplicate": "Fotografia '{name}' este arhivată încă de {count} ori",
+      "duplicate_fix": "Păstrați o copie și asociați-o unde este nevoie",
+      "evidence_weak": "Fotografia '{name}' are gradul de dovadă '{grade}'",
+      "evidence_weak_fix": "Faceți fotografia în aplicație cu localizarea activată",
+      "ai_unreviewed": "O sugestie AI ({kind}) așteaptă revizuirea de peste {days} zile",
+      "ai_unreviewed_fix": "Acceptați sau respingeți sugestia",
+      "hazard_open": "Pericolul acceptat '{hazard}' nu are observație de securitate",
+      "hazard_open_fix": "Înregistrați o observație de securitate și asociați fotografia cu ea",
+      "file_missing": "Fișierul fotografiei '{name}' lipsește din stocare",
+      "file_missing_fix": "Încărcați din nou fotografia sau restaurați-o dintr-o copie de rezervă"
+    }
   }
 }

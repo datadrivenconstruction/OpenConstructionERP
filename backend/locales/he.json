@@ -2538,5 +2538,55 @@
         "cumulative": "מצב מצטבר"
       }
     }
+  },
+  "photos": {
+    "errors": {
+      "not_found": "התמונה לא נמצאה",
+      "no_files": "בחרו לפחות תמונה אחת להעלאה",
+      "too_many_files": "אפשר להעלות עד {max} תמונות בכל פעם",
+      "target_not_found": "הרשומה לקישור לא נמצאה בפרויקט הזה",
+      "link_not_found": "התמונה הזו אינה מקושרת לרשומה הזו",
+      "album_not_found": "האלבום לא נמצא",
+      "album_name_required": "תנו שם לאלבום",
+      "album_exists": "כבר קיים בפרויקט הזה אלבום בשם '{name}'",
+      "plan_room_unavailable": "סימוני סיכה על תוכניות דורשים את המודול Plan Room",
+      "document_not_found": "התוכנית לא נמצאה בפרויקט הזה",
+      "compare_same_photo": "בחרו שתי תמונות שונות להשוואה",
+      "compare_not_found": "ההשוואה לא נמצאה",
+      "suggestion_not_found": "ההצעה לא נמצאה",
+      "suggestion_reviewed": "ההצעה הזו כבר נבדקה",
+      "suggestion_invalid": "ההצעה הערוכה אינה תקינה",
+      "bad_source": "מקור תמונה לא מוכר",
+      "bad_device": "לא ניתן לקרוא את נתוני הצילום מהמכשיר",
+      "target_incomplete": "ציינו גם את סוג הרשומה וגם את מזהה הרשומה",
+      "rate_limited": "יותר מדי בקשות, נסו שוב בעוד דקה",
+      "export_not_found": "הייצוא לא נמצא",
+      "export_not_ready": "הייצוא עדיין לא מוכן",
+      "gps_pair": "הגדירו קו רוחב וקו אורך יחד",
+      "bad_ai_kinds": "בחרו כיתוב, תגיות, התקדמות או סיכון",
+      "file_missing": "קובץ התמונה חסר באחסון"
+    },
+    "validation": {
+      "taken_at_missing": "לתמונה '{name}' אין שעת צילום",
+      "taken_at_missing_fix": "הזינו את תאריך הצילום או צלמו שוב באפליקציה",
+      "taken_at_future": "התמונה '{name}' מתוארכת ל-{taken_at}, כלומר בעתיד",
+      "taken_at_before_project": "התמונה '{name}' מתוארכת ל-{taken_at}, יותר משנה לפני תחילת הפרויקט",
+      "taken_at_fix": "תקנו את תאריך הצילום או בדקו את שעון המצלמה",
+      "gps_inaccurate": "מיקום '{name}' מדויק רק עד {accuracy} מ'",
+      "gps_off_site": "התמונה '{name}' צולמה {distance_km} ק\"מ מהאתר",
+      "gps_fix": "בדקו את המיקום או צלמו שוב באתר כשהמיקום מופעל",
+      "link_missing": "התמונה '{name}' מקושרת ל-{kind} שכבר אינו קיים בפרויקט הזה",
+      "link_missing_fix": "הסירו את הקישור או קשרו את התמונה לרשומה הנכונה",
+      "duplicate": "התמונה '{name}' מאורכבת עוד {count} פעמים",
+      "duplicate_fix": "שמרו עותק אחד וקשרו אותו איפה שצריך",
+      "evidence_weak": "לתמונה '{name}' דרגת ראיה '{grade}'",
+      "evidence_weak_fix": "צלמו באפליקציה כשהמיקום מופעל",
+      "ai_unreviewed": "הצעת {kind} של AI ממתינה לבדיקה יותר מ-{days} ימים",
+      "ai_unreviewed_fix": "אשרו או דחו את ההצעה",
+      "hazard_open": "לסיכון שאושר '{hazard}' אין תצפית בטיחות",
+      "hazard_open_fix": "רשמו תצפית בטיחות וקשרו אליה את התמונה",
+      "file_missing": "קובץ התמונה '{name}' חסר באחסון",
+      "file_missing_fix": "העלו את התמונה שוב או שחזרו אותה מגיבוי"
+    }
   }
 }
