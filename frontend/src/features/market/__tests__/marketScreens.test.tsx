@@ -268,6 +268,22 @@ describe('ModulesSettings other markets', () => {
     expect(screen.getByTestId('modules-show-other-markets').getAttribute('aria-checked')).toBe('true');
   });
 
+  it('opens the Add-market preview prefilled and saves only on confirm', async () => {
+    previewMarketProfile.mockResolvedValue({ ...scope(), hidden_modules: ['us_pack'], suggested_packages: [] });
+    saveMarketProfile.mockResolvedValue(scope());
+    wrap(<ModulesSettings />);
+    await screen.findByText('dach_pack');
+    fireEvent.click(screen.getByTestId('modules-show-other-markets'));
+    const row = await screen.findByTestId('module-other-market-oe_sa_pack');
+    fireEvent.click(row.querySelector('button:not([role="switch"])') as HTMLElement);
+    expect(await screen.findByTestId('market-preview-modal')).toBeTruthy();
+    const expected = profile(['SA']);
+    await waitFor(() => expect(previewMarketProfile).toHaveBeenCalledWith(expected));
+    expect(saveMarketProfile).not.toHaveBeenCalled();
+    fireEvent.click(await screen.findByTestId('market-preview-confirm'));
+    await waitFor(() => expect(saveMarketProfile).toHaveBeenCalledWith(expected));
+  });
+
   it('shows no toggle when nothing is hidden', async () => {
     scopeState = { data: scope({ hidden_modules: [] }) };
     wrap(<ModulesSettings />);

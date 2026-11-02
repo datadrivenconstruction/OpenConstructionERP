@@ -43,7 +43,9 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useToastStore } from '@/stores/useToastStore';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { resolveModuleDisplayName } from '@/features/modules/moduleDisplayName';
-import { useMarketScope } from '@/features/market/api';
+import { MARKET_QUERY_KEY, saveMarketProfile, useMarketScope, type MarketProfile } from '@/features/market/api';
+import { MarketPreviewModal } from '@/features/market/MarketPreviewModal';
+import { regionDisplayName } from '@/features/cases/regions';
 import { isModuleOtherMarket } from '@/features/market/logic';
 import { fmtList } from '@/shared/lib/formatters';
 
@@ -257,6 +259,7 @@ export function ModulesSettings() {
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
   const [showCore, setShowCore] = useState(false);
   const [showOtherMarkets, setShowOtherMarkets] = useState(false);
+  const [addingMarket, setAddingMarket] = useState<{ country: string; profile: MarketProfile } | null>(null);
   const { data: marketScope } = useMarketScope();
 
   const { data, isLoading, isError, refetch } = useQuery({
@@ -456,6 +459,23 @@ export function ModulesSettings() {
     }
   }
 
+  /** Open the Add-market preview for the module's market; nothing is saved until confirmed. */
+  const openAddMarket = useCallback(
+    (moduleName: string) => {
+      const profile = marketScope?.profile;
+      const country = marketScope?.module_markets?.[moduleName.replace(/^oe_/, '')]?.[0];
+      if (!profile || !country) {
+        navigate('/settings?tab=market');
+        return;
+      }
+      setAddingMarket({
+        country,
+        profile: { ...profile, extra_markets: [...profile.extra_markets, { country, subdivision: '' }] },
+      });
+    },
+    [marketScope, navigate],
+  );
+
   /** Everything a row needs, resolved here so the row itself stays dumb. */
   const rowFor = useCallback(
     (mod: SettingsModule) => {
@@ -473,7 +493,7 @@ export function ModulesSettings() {
           busy={busyModule === mod.name}
           onToggle={() => void handleToggle(mod)}
           otherMarket={otherMarket}
-          onAddMarket={() => navigate('/settings?tab=market')}
+          onAddMarket={() => openAddMarket(mod.name)}
         />
       );
     },
@@ -481,7 +501,7 @@ export function ModulesSettings() {
     // is intentionally not a dependency: it only reads state that changes in
     // lockstep with the values already listed here.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [blockingDependents, pendingDependencies, nameOf, isAdmin, busyModule, marketScope, navigate],
+    [blockingDependents, pendingDependencies, nameOf, isAdmin, busyModule, marketScope, openAddMarket],
   );
 
   /* ── Render ────────────────────────────────────────────────────────────── */
@@ -718,6 +738,35 @@ export function ModulesSettings() {
           </p>
         </CardContent>
       </Card>
+
+      {addingMarket && marketScope && (
+        <MarketPreviewModal
+          open
+          current={marketScope}
+          next={addingMarket.profile}
+          title={t('market.add_confirm', {
+            defaultValue: 'Add {{country}}',
+            country: regionDisplayName(addingMarket.country, i18n.language),
+          })}
+          confirmLabel={t('common.save', { defaultValue: 'Save' })}
+          onClose={() => setAddingMarket(null)}
+          onConfirm={async () => {
+            try {
+              const next = await saveMarketProfile(addingMarket.profile);
+              queryClient.setQueryData([...MARKET_QUERY_KEY, null], next);
+              void queryClient.invalidateQueries({ queryKey: MARKET_QUERY_KEY });
+              addToast({ type: 'success', title: t('common.saved', { defaultValue: 'Saved' }) });
+              setAddingMarket(null);
+            } catch (err) {
+              addToast({
+                type: 'error',
+                title: t('market.load_error', { defaultValue: 'Could not load market settings' }),
+                message: err instanceof Error ? err.message : undefined,
+              });
+            }
+          }}
+        />
+      )}
 
       <ConfirmDialog {...confirmProps} />
     </div>
