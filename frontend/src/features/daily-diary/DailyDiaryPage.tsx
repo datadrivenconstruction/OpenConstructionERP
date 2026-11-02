@@ -1,5 +1,6 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP​‌‍⁠​‌‍⁠​‌‍⁠​‌‍⁠
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import { useState, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -1531,6 +1532,7 @@ function TodayTab({
         onUpload={() => setPhotoOpen(true)}
       />
       {photosQ.data && <TruncationNotice page={photosQ.data} className="-mt-2" />}
+      <PhotoStrip projectId={projectId} kind="diary" targetId={diary.id} hideSource="daily_diary" canUpload={false} />
 
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         <DroneSection

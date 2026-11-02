@@ -13,6 +13,7 @@
  * had so the panel paints instantly.
  */
 
+import { PhotoStrip } from '@/features/photos/components/PhotoStrip';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -477,6 +478,14 @@ export function PunchDetailDrawer({
         {/* ── Photos ──────────────────────────────────────────────────── */}
         <section>
           <PunchPhotoGallery item={item} projectId={projectId} onChanged={refresh} />
+          <PhotoStrip
+            projectId={projectId}
+            kind="punch_item"
+            targetId={item.id}
+            hideSource="punchlist"
+            canUpload={false}
+            className="mt-3"
+          />
         </section>
 
         {/* ── Reopen history ──────────────────────────────────────────── */}
