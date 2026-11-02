@@ -59,6 +59,20 @@ vi.mock('./api', async (importOriginal) => ({
   fetchDocumentPayload: mocks.fetchDocumentPayload,
 }));
 
+vi.mock('@/features/market/api', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@/features/market/api')>()),
+  useMarketScope: () => ({
+    isLoading: false,
+    data: {
+      markets: ['DE', 'SA', 'MY', 'PL'],
+      expanded_markets: ['DE', 'SA', 'MY', 'PL'],
+      all_markets: false,
+      hidden_modules: [],
+      module_markets: { oe_einvoice_clearance: ['DE', 'SA', 'MY', 'PL', 'IT'] },
+    },
+  }),
+}));
+
 function market(country: string, platform: string, over: Partial<EInvoiceSetupRow> = {}): EInvoiceSetupRow {
   return {
     country,
@@ -209,10 +223,10 @@ describe('EInvoiceSetupCard', () => {
   it('switches to sandbox in one step', async () => {
     wrap(<EInvoiceSetupCard canEdit />);
     await screen.findByText(/\[SA\]/);
-    fireEvent.change(screen.getAllByRole('combobox')[0], { target: { value: 'sandbox' } });
+    fireEvent.change(screen.getAllByRole('combobox')[0]!, { target: { value: 'sandbox' } });
     await waitFor(() => expect(mocks.updateProfile).toHaveBeenCalled());
-    expect(mocks.updateProfile.mock.calls[0][0]).toBe('p-SA');
-    expect(mocks.updateProfile.mock.calls[0][1]).toMatchObject({ mode: 'sandbox', country: 'SA' });
+    expect(mocks.updateProfile.mock.calls[0]![0]).toBe('p-SA');
+    expect(mocks.updateProfile.mock.calls[0]![1]).toMatchObject({ mode: 'sandbox', country: 'SA' });
   });
 
   it('disables Live until a sandbox run succeeded and a certificate exists', async () => {
@@ -241,9 +255,9 @@ describe('EInvoiceSetupCard', () => {
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'live' } });
     const again = await screen.findByRole('dialog');
     const buttons = within(again).getAllByRole('button');
-    fireEvent.click(buttons[buttons.length - 1]);
+    fireEvent.click(buttons[buttons.length - 1]!);
     await waitFor(() => expect(mocks.updateProfile).toHaveBeenCalledTimes(1));
-    expect(mocks.updateProfile.mock.calls[0][1]).toMatchObject({ mode: 'live' });
+    expect(mocks.updateProfile.mock.calls[0]![1]).toMatchObject({ mode: 'live' });
   });
 });
 
@@ -328,7 +342,7 @@ describe('EInvoiceCard', () => {
     const items = within(list).getAllByRole('listitem');
     expect(items).toHaveLength(5);
     expect(items.filter((li) => li.getAttribute('aria-current') === 'step')).toHaveLength(1);
-    expect(items[1].getAttribute('aria-current')).toBe('step');
+    expect(items[1]!.getAttribute('aria-current')).toBe('step');
   });
 
   it('shows the export banner with the link to the single setup place', async () => {

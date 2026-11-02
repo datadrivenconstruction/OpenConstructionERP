@@ -30,6 +30,10 @@ vi.mock('@/stores/useAuthStore', () => ({
   useAuthStore: (sel: (s: { userRole: string }) => unknown) => sel({ userRole: role }),
 }));
 
+vi.mock('@/features/einvoice-clearance/EInvoiceSetupCard', () => ({
+  EInvoiceSetupCard: ({ canEdit }) => <div data-testid="einvoice-setup-card" data-can-edit={String(canEdit)} />,
+}));
+
 import { MarketPreviewModal } from '../MarketPreviewModal';
 import { MarketSettings } from '../MarketSettings';
 import { MarketSummary } from '../MarketSummary';
@@ -289,5 +293,34 @@ describe('ModulesSettings other markets', () => {
     wrap(<ModulesSettings />);
     await screen.findByText('dach_pack');
     expect(screen.queryByTestId('modules-show-other-markets')).toBeNull();
+  });
+});
+
+describe('MarketSettings e-invoicing card', () => {
+  const einvoice = { oe_einvoice_clearance: ['DE', 'IT', 'SA'] };
+
+  it('shows the setup card for a DE tenant (a mandate market)', () => {
+    scopeState = { data: scope({ module_markets: { ...scope().module_markets, ...einvoice } }) };
+    wrap(<MarketSettings />);
+    expect(screen.getByTestId('einvoice-setup-card').getAttribute('data-can-edit')).toBe('true');
+  });
+
+  it('hides the setup card for a US-only tenant', () => {
+    scopeState = {
+      data: scope({
+        markets: ['US'],
+        expanded_markets: ['US'],
+        hidden_modules: ['oe_einvoice_clearance'],
+        module_markets: { ...scope().module_markets, ...einvoice },
+      }),
+    };
+    wrap(<MarketSettings />);
+    expect(screen.queryByTestId('einvoice-setup-card')).toBeNull();
+  });
+
+  it('hides the setup card when the tenant market has no mandate', () => {
+    scopeState = { data: scope({ markets: ['US'], expanded_markets: ['US'], module_markets: einvoice }) };
+    wrap(<MarketSettings />);
+    expect(screen.queryByTestId('einvoice-setup-card')).toBeNull();
   });
 });
