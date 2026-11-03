@@ -8,8 +8,8 @@ A fresh install gets the table from ``create_all``. The production deploy is
 never run this file; a working install that is upgraded in place must run
 ``alembic upgrade``. Only a new table is added, so nothing else needs backfill.
 
-Revision ID: v3345_broker_licence_register
-Revises: v3344_user_secondary_calendar
+Revision ID: v3346_broker_licence_register
+Revises: v3345_einvoice_lifecycle
 Create Date: 2026-11-01
 """
 
@@ -20,8 +20,8 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-revision: str = "v3345_broker_licence_register"
-down_revision: Union[str, Sequence[str], None] = "v3344_user_secondary_calendar"
+revision: str = "v3346_broker_licence_register"
+down_revision: Union[str, Sequence[str], None] = "v3345_einvoice_lifecycle"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
