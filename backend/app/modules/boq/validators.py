@@ -612,6 +612,19 @@ class ManualDrawingRefWithoutRevision(_DrawingRule):
         return None
 
 
+class CarriedLowConfidencePending(_DrawingRule):
+    """A carried measurement the sheet matcher was unsure about still waits for review."""
+
+    rule_id = "takeoff.carry.low_confidence_pending"
+    name = "Low-confidence carried measurement not yet confirmed"
+    description = "A measurement was placed on the new revision with match confidence under 0.6 and is unconfirmed."
+    message_key = "boq_drawing.low_confidence_pending"
+
+    def _hit(self, entry: dict[str, Any]) -> dict[str, Any] | None:
+        count = int(entry.get("carried_low_confidence") or 0)
+        return {"count": count} if count else None
+
+
 class CarriedMeasurementUnconfirmed(_DrawingRule):
     """A measurement carried over from an earlier drawing revision still waits for review."""
 
@@ -763,6 +776,7 @@ _BOQ_RESOURCE_RULES: tuple[ValidationRule, ...] = (
     PositionOnSupersededDrawing(),
     ManualDrawingRefWithoutRevision(),
     CarriedMeasurementUnconfirmed(),
+    CarriedLowConfidencePending(),
     RiskContingencyFromStaleRun(),
 )
 

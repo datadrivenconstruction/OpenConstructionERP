@@ -102,6 +102,8 @@ from app.modules.takeoff.schemas import (
     AiTakeoffRunResponse,
     CarryOverRequest,
     CarryOverResponse,
+    CarryPreviewRequest,
+    CarryPreviewResponse,
     ConfirmCarriedRequest,
     ConfirmCarriedResponse,
     CreateBoqPositionFromMeasurementRequest,
@@ -5004,8 +5006,36 @@ async def carry_over_measurements(
         body.to_document_id,
         user_id=str(user_id),
         measurement_ids=body.measurement_ids,
+        align=body.align,
+        page_map=body.page_map,
     )
     return CarryOverResponse(**result)
+
+
+@router.post(
+    "/measurements/carry-over/preview/",
+    response_model=CarryPreviewResponse,
+    dependencies=[Depends(RequirePermission("takeoff.read"))],
+)
+async def preview_carry_over(
+    body: CarryPreviewRequest,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    service: TakeoffService = Depends(_get_service),
+    session: SessionDep = None,  # type: ignore[assignment]
+) -> CarryPreviewResponse:
+    """Show where each measurement would land on the new revision, with a confidence. Writes nothing."""
+    from app.modules.takeoff.carry_over import preview_carry
+
+    await verify_project_access(body.project_id, str(user_id), session)
+    result = await preview_carry(
+        service,
+        body.project_id,
+        body.from_document_id,
+        body.to_document_id,
+        align=body.align,
+        page_map=body.page_map,
+    )
+    return CarryPreviewResponse(**result)
 
 
 @router.post(

@@ -584,6 +584,50 @@ class CarryOverRequest(BaseModel):
     to_document_id: str = Field(..., min_length=1, max_length=255)
     #: Carry only these measurements of ``from``; all confirmed ones when omitted.
     measurement_ids: list[str] | None = Field(default=None, max_length=20000)
+    #: ``none`` copies to the same page and pixels; ``auto`` matches sheets and fits the geometry.
+    align: Literal["none", "auto"] = "none"
+    #: Human override of the sheet match, old page -> new page.
+    page_map: dict[int, int] | None = Field(default=None, max_length=2000)
+
+
+class CarryPreviewRequest(BaseModel):
+    """Ask what a carry-over would do. Nothing is written."""
+
+    project_id: UUID
+    from_document_id: str = Field(..., min_length=1, max_length=255)
+    to_document_id: str = Field(..., min_length=1, max_length=255)
+    align: Literal["none", "auto"] = "auto"
+    page_map: dict[int, int] | None = Field(default=None, max_length=2000)
+
+
+class CarryPagePreview(BaseModel):
+    """One old sheet and the new sheet proposed for it."""
+
+    old: int
+    new: int | None = None
+    score: float = 0.0
+    method: str = "index"
+
+
+class CarryItemPreview(BaseModel):
+    """Proposed landing of one measurement."""
+
+    measurement_id: str
+    page_old: int
+    page_new: int | None = None
+    confidence: float = 0.0
+    #: ``high`` (>= 0.85), ``review`` (0.6 - 0.85) or ``remeasure`` (< 0.6, not copied).
+    band: str = "remeasure"
+    points_after: list[dict[str, float]] = Field(default_factory=list)
+
+
+class CarryPreviewResponse(BaseModel):
+    """Page matches, geometry fit and per-measurement confidence of a prospective carry-over."""
+
+    revision_link: str = "unlinked"
+    pages: list[CarryPagePreview] = Field(default_factory=list)
+    transform: dict[str, float | bool] = Field(default_factory=dict)
+    items: list[CarryItemPreview] = Field(default_factory=list)
 
 
 class CarryOverResponse(BaseModel):
@@ -594,6 +638,8 @@ class CarryOverResponse(BaseModel):
     already_carried: int = 0
     skipped_unreviewed: int = 0
     skipped_page_missing: int = 0
+    #: Measurements whose proposal fell under the review band; not copied, to be measured again.
+    remeasure_ids: list[str] = Field(default_factory=list)
     scale_checks: dict[str, int] = Field(default_factory=dict)
     #: ``register`` when Project Files says ``to`` replaced ``from``; ``unlinked`` for loose uploads.
     revision_link: str = "unlinked"
