@@ -133,7 +133,7 @@ export function RiskContingencyApply({
     v === 'percentage'
       ? t('boq.risk_contingency_mode_percentage', { defaultValue: 'Follows quantities' })
       : t('boq.risk_contingency_mode_fixed', { defaultValue: 'Fixed amount' });
-  const previewMessage = previewError ? getErrorMessage(previewError) : null;
+  const previewMessage = previewError ? getErrorMessage(previewError) : (data?.suggestion_error ?? null);
 
   const pickCustom = (raw: string) => {
     setCustom(raw);

@@ -1716,6 +1716,7 @@ export interface RiskContingencyStatus {
   drift_amount: string | null;
   drift_pct: number | null;
   current_fingerprint: string | null;
+  suggestion_error?: string | null;
 }
 
 export interface ApplyRiskContingencyBody {

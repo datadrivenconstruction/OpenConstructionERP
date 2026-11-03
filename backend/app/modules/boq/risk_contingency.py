@@ -699,7 +699,13 @@ class RiskContingencyService:
             "current_fingerprint": ctx.fingerprint(applied_source or (params.source if params else "positions"))
         }
         if params is not None:
-            out["suggestion"] = self._suggest(ctx, params, seed, strict=False).as_dict()
+            try:
+                out["suggestion"] = self._suggest(ctx, params, seed, strict=False).as_dict()
+            except HTTPException as exc:
+                if line is None:
+                    raise
+                # A preview the inputs cannot back must not hide the applied line or its undo.
+                out["suggestion_error"] = str(exc.detail)
         if line is not None:
             out["applied"] = _applied_view(line, ctx.direct_cost)
             value = line_amount(line, ctx.direct_cost)
