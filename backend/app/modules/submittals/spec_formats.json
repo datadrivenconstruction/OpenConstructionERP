@@ -1,0 +1,29 @@
+{
+  "version": "1",
+  "section_headers": [
+    {"id": "masterformat", "pattern": "^\\s*SECTION\\s+(\\d{2}\\s?\\d{2}\\s?\\d{2}(?:\\.\\d{1,2})?)\\s*[-\\u2013\\u2014:.]?\\s*(.+?)\\s*$", "group": "digits"},
+    {"id": "masterformat_5", "pattern": "^\\s*SECTION\\s+(\\d{5})\\s*[-\\u2013\\u2014:.]?\\s*(.+?)\\s*$", "group": "digits"},
+    {"id": "din", "pattern": "^\\s*(?:Leistungsbereich|LB|Abschnitt|Kapitel)\\s+(\\d{3})\\s*[-\\u2013\\u2014:.]?\\s*(.+?)\\s*$", "group": "prefix:LB"},
+    {"id": "nbs", "pattern": "^\\s*(?:NBS\\s+)?(?:Section\\s+)?([A-Z]\\d{2})\\s*[-\\u2013\\u2014]\\s*(.+?)\\s*$", "group": "as_is"}
+  ],
+  "submittal_headings": [
+    "^\\s*(?:\\d+\\.\\d+\\s+)?(?:[A-Z]+\\s+)?SUBMITTALS?\\b",
+    "^\\s*(?:\\d+\\.\\d+\\s+)?(?:Einzureichende\\s+Unterlagen|Vorzulegende\\s+Unterlagen|Nachweise|Vorlagen)\\b"
+  ],
+  "submit_words": ["submit", "einzureichen", "einreichen", "vorzulegen", "vorlegen"],
+  "types": [
+    {"kind": "mix_design", "submittal_type": "calculation", "label": "Mix design", "patterns": ["mix\\s+designs?", "mixture\\s+proportions?", "betonrezeptur", "mischungsentwurf", "rezeptur"]},
+    {"kind": "shop_drawing", "submittal_type": "shop_drawing", "label": "Shop drawings", "patterns": ["shop\\s+drawings?", "fabrication\\s+drawings?", "erection\\s+drawings?", "werkstattzeichnung\\w*", "montageplan\\w*", "werkplan\\w*"]},
+    {"kind": "test_report", "submittal_type": "test_report", "label": "Test reports", "patterns": ["test\\s+reports?", "laboratory\\s+reports?", "pr\\u00fcfbericht\\w*", "pr\\u00fcfzeugnis\\w*"]},
+    {"kind": "certificate", "submittal_type": "certificate", "label": "Certificates", "patterns": ["certificates?", "certifications?", "zertifikat\\w*", "zulassung\\w*", "\\u00fcbereinstimmungs\\w*"]},
+    {"kind": "sample", "submittal_type": "sample", "label": "Samples", "patterns": ["samples?", "muster", "bemusterung"]},
+    {"kind": "om_manual", "submittal_type": "product_data", "label": "Operation and maintenance data", "patterns": ["operation\\s+and\\s+maintenance", "operating\\s+and\\s+maintenance", "\\bO\\s*&\\s*M\\b", "wartungsanleitung\\w*", "bedienungs-?\\s*und\\s+wartung\\w*"]},
+    {"kind": "warranty", "submittal_type": "warranty", "label": "Warranties", "patterns": ["warrant(?:y|ies)", "gew\\u00e4hrleistung\\w*", "garantie\\w*"]},
+    {"kind": "product_data", "submittal_type": "product_data", "label": "Product data", "patterns": ["product\\s+data", "data\\s+sheets?", "manufacturer.?s?\\s+(?:data|literature)", "produktdatenbl\\u00e4tter", "datenbl\\u00e4tter", "technische\\s+datenbl\\u00e4tter"]}
+  ],
+  "required_kinds": {
+    "03 30 00": ["mix_design"],
+    "03 31 00": ["mix_design"],
+    "LB 013": ["mix_design"]
+  }
+}

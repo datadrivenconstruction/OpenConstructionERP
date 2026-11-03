@@ -82,6 +82,10 @@ router.include_router(export_router)
 from app.modules.submittals.register_routes import register_router  # noqa: E402
 
 router.include_router(register_router)
+
+from app.modules.submittals.spec_routes import spec_router  # noqa: E402
+
+router.include_router(spec_router)
 logger = logging.getLogger(__name__)
 
 # Magic-byte allow-list for direct submittal-attachment uploads.

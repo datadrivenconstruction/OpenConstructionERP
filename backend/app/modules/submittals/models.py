@@ -8,7 +8,7 @@ Tables:
 
 import uuid
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -126,3 +126,54 @@ class Submittal(Base):
 
     def __repr__(self) -> str:
         return f"<Submittal {self.submittal_number} - {self.title[:40]} ({self.status})>"
+
+
+class SpecImport(Base):
+    """One parse of a specification book (a Document) into proposed submittals."""
+
+    __tablename__ = "oe_submittals_spec_import"
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_projects_project.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    document_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    # uploaded -> parsed -> confirmed; ``failed`` carries ``error_code``.
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="uploaded", server_default="uploaded")
+    parser_version: Mapped[str] = mapped_column(String(20), nullable=False, default="", server_default="")
+    section_count: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    pages_total: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    pages_done: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    error_code: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
+    metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
+        "metadata", JSON, nullable=False, default=dict, server_default="{}"
+    )
+
+
+class SpecProposal(Base):
+    """A submittal the specification asks for, proposed with a confidence, never created by itself."""
+
+    __tablename__ = "oe_submittals_spec_proposal"
+
+    import_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(),
+        ForeignKey("oe_submittals_spec_import.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    project_id: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False, index=True)
+    spec_section: Mapped[str] = mapped_column(String(100), nullable=False, default="", server_default="")
+    section_title: Mapped[str] = mapped_column(String(500), nullable=False, default="", server_default="")
+    # The reading of what was asked for ("mix_design", "om_manual", ...); ``submittal_type`` is the register's type.
+    kind: Mapped[str] = mapped_column(String(30), nullable=False, default="", server_default="")
+    submittal_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False)
+    source_page: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    source_excerpt: Mapped[str] = mapped_column(String(2000), nullable=False, default="", server_default="")
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.0, server_default="0")
+    # pending | accepted | rejected | edited
+    decision: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", server_default="pending")
+    submittal_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)

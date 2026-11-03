@@ -15,5 +15,6 @@ def register_submittals_permissions() -> None:
             "submittals.read": Role.VIEWER,
             "submittals.update": Role.EDITOR,
             "submittals.delete": Role.MANAGER,
+            "submittals.import": Role.EDITOR,
         },
     )

@@ -955,6 +955,18 @@
     "linked_scope_present": {
       "fail": "This submittal is linked to no scope item, so it never rolls up to a package",
       "suggestion": "Link the BOQ items this submittal covers"
+    },
+    "spec_section_format": {
+      "fail": "Spec section {section} is not a recognised section number",
+      "suggestion": "Use a MasterFormat number such as 03 30 00, or an LB or NBS code"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} for section {section} is already in the register",
+      "suggestion": "Skip this proposal or edit it so it is a different submittal"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Section {section} normally needs a submittal of kind {kind}, which the specification did not list",
+      "suggestion": "Check the specification, or add the submittal by hand"
     }
   },
   "rfq": {
@@ -1554,6 +1566,12 @@
     "low_confidence_unconfirmed": {
       "fail": "Sheet {sheet} was read by OCR at {confidence} and is not confirmed",
       "suggestion": "Check the title block fields and confirm the reading"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "No specification section could be read from {pages} pages",
+      "suggestion": "If the book is a scan, run the import again with OCR on; otherwise check that section headers read SECTION 03 30 00 - Title"
     }
   }
 }
