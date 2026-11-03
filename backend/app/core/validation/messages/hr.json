@@ -931,6 +931,10 @@
     "change_time_within_owner": {
       "fail": "Vremenski utjecaji podugovora za {code} ukupno iznose {sub_days} dana, više od {owner_days} dana koje je odobrio naručitelj",
       "suggestion": "Provjerite zahtjeve podizvođača za vrijeme ili od naručitelja zatražite odgovarajuće produljenje"
+    },
+    "notice_window": {
+      "fail": "Izmjena podugovora {code} prijavljena je {late} dana nakon roka od {days} dana iz ugovora",
+      "suggestion": "Provjerite uvjete obavještavanja prije prihvaćanja troška: zakašnjela prijava može isključiti zahtjev"
     }
   },
   "submittal": {
@@ -961,6 +965,18 @@
     "linked_scope_present": {
       "fail": "Ovaj podnesak nije povezan ni s jednom stavkom opsega, pa se ne objedinjuje ni u jedan paket",
       "suggestion": "Povežite stavke troškovnika koje ovaj podnesak pokriva"
+    },
+    "spec_section_format": {
+      "fail": "Odjeljak {section} nije prepoznat broj odjeljka",
+      "suggestion": "Koristite MasterFormat broj poput 03 30 00 ili LB odnosno NBS šifru"
+    },
+    "duplicate_in_register": {
+      "fail": "{title} za odjeljak {section} već je u registru",
+      "suggestion": "Preskočite ovaj prijedlog ili ga izmijenite tako da bude drugi dokument za odobrenje"
+    },
+    "required_type_missing_for_section": {
+      "fail": "Odjeljak {section} obično traži dokument za odobrenje vrste {kind}, kojeg specifikacija ne navodi",
+      "suggestion": "Provjerite specifikaciju ili dodajte dokument ručno"
     }
   },
   "rfq": {
@@ -2014,6 +2030,30 @@
     "crew_without_record": {
       "fail": "Na gradilištu je bila ekipa od {headcount}, ali nisu zabilježeni radovi, pregled ni zastoj.",
       "suggestion": "Dodajte što je ekipa radila ili zastoj koji je zaustavio radove."
+    }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Stranica {page} nema čitljiv broj nacrta",
+      "suggestion": "Unesite broj nacrta iz zaglavlja nacrta"
+    },
+    "number_unique_in_set": {
+      "fail": "Broj nacrta {sheet} pojavljuje se na {count} stranica ovog učitavanja",
+      "suggestion": "Provjerite komplet nacrta zbog udvojene ili pogrešno numerirane stranice"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Revizija {revision} nacrta {sheet} niža je od trenutne revizije {current}",
+      "suggestion": "Potvrdite da je riječ o starijem izdanju prije nego što uđe u povijest"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Nacrt {sheet} pročitan je prepoznavanjem teksta s pouzdanošću {confidence} i nije potvrđen",
+      "suggestion": "Provjerite polja u zaglavlju nacrta i potvrdite očitanje"
+    }
+  },
+  "spec_import": {
+    "no_sections_found": {
+      "fail": "Iz {pages} stranica nije se mogao pročitati nijedan odjeljak specifikacije",
+      "suggestion": "Ako je knjiga skenirana, ponovite uvoz s uključenim prepoznavanjem teksta; inače provjerite izgledaju li naslovi odjeljaka kao SECTION 03 30 00 - Title"
     }
   }
 }
