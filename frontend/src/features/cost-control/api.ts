@@ -558,6 +558,104 @@ export const costControlApi = {
     ),
 };
 
+/* ── Budget ledger: transfers between cost lines, owner-approved budget modifications ── */
+
+export type LedgerStatus = 'draft' | 'submitted' | 'approved' | 'rejected';
+export type LedgerKind = 'transfer' | 'modification';
+
+export interface LedgerLeg {
+  cost_line_id: string;
+  code: string;
+  amount: string;
+}
+
+export interface BudgetTransfer {
+  id: string;
+  code: string;
+  status: LedgerStatus;
+  reason: string;
+  legs: LedgerLeg[];
+  moved: string;
+  decision_note: string;
+  created_at: string | null;
+}
+
+export interface BudgetModification {
+  id: string;
+  code: string;
+  status: LedgerStatus;
+  cost_line_id: string;
+  line_code: string;
+  amount: string;
+  reason: string;
+  approval_ref: string;
+  decision_note: string;
+  created_at: string | null;
+}
+
+export interface LedgerLineEffect {
+  cost_line_id: string;
+  code: string;
+  original: string;
+  transfers: string;
+  modifications: string;
+  revised: string;
+  committed: string;
+}
+
+export interface LedgerAuditRow {
+  entity_kind: LedgerKind;
+  entity_id: string;
+  action: string;
+  from_status: string;
+  to_status: string;
+  actor: string | null;
+  note: string;
+  created_at: string | null;
+}
+
+export interface BudgetLedger {
+  project_id: string;
+  currency: string;
+  transfers: BudgetTransfer[];
+  modifications: BudgetModification[];
+  lines: LedgerLineEffect[];
+  pending_transfers: number;
+  pending_modifications: number;
+  audit: LedgerAuditRow[];
+}
+
+export interface TransferBody {
+  reason: string;
+  legs: { cost_line_id: string; amount: string }[];
+}
+
+export interface ModificationBody {
+  cost_line_id: string;
+  amount: string;
+  reason: string;
+  approval_ref: string;
+}
+
+export type LedgerStep = 'submit' | 'approve' | 'reject';
+
+const ledgerBase = (projectId: string) => `/v1/costmodel/projects/${projectId}/budget-ledger`;
+
+export const budgetLedgerApi = {
+  get: (projectId: string) => apiGet<BudgetLedger>(`${ledgerBase(projectId)}/`),
+  createTransfer: (projectId: string, body: TransferBody) =>
+    apiPost<BudgetTransfer, TransferBody>(`${ledgerBase(projectId)}/transfers/`, body),
+  createModification: (projectId: string, body: ModificationBody) =>
+    apiPost<BudgetModification, ModificationBody>(`${ledgerBase(projectId)}/modifications/`, body),
+  remove: (projectId: string, kind: LedgerKind, id: string) =>
+    apiDelete(`${ledgerBase(projectId)}/${kind === 'transfer' ? 'transfers' : 'modifications'}/${id}/`),
+  step: (projectId: string, kind: LedgerKind, id: string, step: LedgerStep, note = '') =>
+    apiPost<BudgetTransfer | BudgetModification, { note: string }>(
+      `${ledgerBase(projectId)}/${kind === 'transfer' ? 'transfers' : 'modifications'}/${id}/${step}/`,
+      { note },
+    ),
+};
+
 /** Money string to number for display and geometry only. */
 export function num(value: string | null | undefined): number {
   const n = Number(value ?? 0);
