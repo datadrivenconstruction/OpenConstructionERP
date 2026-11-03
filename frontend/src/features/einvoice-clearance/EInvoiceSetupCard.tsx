@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Button, Card } from '@/shared/ui';
+import { fmtList } from '@/shared/lib/formatters';
 import { WideModal } from '@/shared/ui/WideModal';
 import { listProfiles, updateProfile, type ClearanceProfile, type ProfileWriteBody } from './api';
 import { EINVOICE_SETUP_QUERY_KEY, useEInvoiceMarkets } from './useEInvoiceMarkets';
@@ -109,7 +110,7 @@ export function EInvoiceSetupCard({ canEdit }: { canEdit: boolean }) {
             ) : (
               <span className="flex items-center gap-1 text-semantic-warning">
                 <AlertTriangle size={14} aria-hidden="true" />
-                {t('einvoice.setup.missing', { defaultValue: 'Missing: {{fields}}', fields: row.missing.join(', ') })}
+                {t('einvoice.setup.missing', { defaultValue: 'Missing: {{fields}}', fields: fmtList(row.missing) })}
               </span>
             )}
           </div>

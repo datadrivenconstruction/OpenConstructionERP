@@ -2549,7 +2549,7 @@ class ScheduleService:
         if fields.get("duration_days") is not None and "end_date" not in fields:
             if activity.activity_type == "summary":
                 raise HTTPException(
-                    status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                    status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
                     detail="A summary's duration comes from its children and cannot be typed",
                 )
             typed_start = fields.get("start_date", activity.start_date)
