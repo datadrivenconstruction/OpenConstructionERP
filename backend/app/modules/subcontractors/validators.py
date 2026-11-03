@@ -886,3 +886,58 @@ def check_change_margin(change: dict[str, Any]) -> list[Finding]:
             details={"sub_total": str(sub_total), "owner_value": str(owner_value)},
         )
     ]
+
+
+#: Owner-side statuses that count as "the owner change stands" per owner change type.
+OWNER_APPROVED_STATUSES = {
+    "variation_order": {"issued", "in_progress", "completed"},
+    "change_order": {"approved", "executed", "implemented", "closed", "completed"},
+}
+
+
+def owner_change_is_approved(owner_type: str | None, owner_status: str | None) -> bool:
+    """True when the owner change a back-to-back change passes down has been approved."""
+    return (owner_status or "").lower() in OWNER_APPROVED_STATUSES.get(owner_type or "", set())
+
+
+def check_change_owner_approved(change: dict[str, Any]) -> list[Finding]:
+    """Passing down an owner change that is not approved commits the GC to money it may never recover."""
+    if not change.get("back_to_back") or not change.get("owner_change_id"):
+        return []
+    status = change.get("owner_change_status")
+    if status is None or owner_change_is_approved(change.get("owner_change_type"), str(status)):
+        return []
+    return [
+        Finding(
+            element_ref=_change_ref(change),
+            params={"code": _change_ref(change), "status": str(status)},
+        )
+    ]
+
+
+def check_change_notice_window(change: dict[str, Any]) -> list[Finding]:
+    """The sub must notify the GC within the contract days of the event (downstream clock)."""
+    window = change.get("notice_window_days")
+    event = _as_date(change.get("event_date"))
+    notified = _as_date(change.get("notified_on"))
+    if not isinstance(window, int) or window <= 0 or event is None or notified is None:
+        return []
+    late = (notified - event).days - window
+    if late <= 0:
+        return []
+    return [
+        Finding(
+            element_ref=_change_ref(change),
+            params={"code": _change_ref(change), "days": str(window), "late": str(late)},
+            details={"window_days": window, "days_late": late},
+        )
+    ]
+
+
+def _as_date(raw: Any) -> date | None:
+    if isinstance(raw, date):
+        return raw
+    try:
+        return date.fromisoformat(str(raw)[:10])
+    except (TypeError, ValueError):
+        return None

@@ -32,6 +32,7 @@ from app.core.events import publish_after_commit
 from app.core.i18n import get_locale
 from app.core.validation.engine import ValidationReport, validation_engine
 from app.modules.subcontractors.models import SubcontractAgreement, SubcontractChange
+from app.modules.subcontractors.validators import owner_change_is_approved
 
 logger = logging.getLogger(__name__)
 
@@ -296,6 +297,13 @@ class SubcontractChangeService:
             return row  # replayed approval: nothing moves twice
         if new_status not in _TRANSITIONS.get(row.status, set()):
             raise HTTPException(status_code=409, detail=f"Cannot move a change from '{row.status}' to '{new_status}'")
+        if new_status == "approved" and row.back_to_back and row.owner_change_type and row.owner_change_id:
+            owner = await self.owner_change(row.owner_change_type, row.owner_change_id)
+            if owner is not None and not owner_change_is_approved(row.owner_change_type, owner["status"]):
+                raise HTTPException(
+                    status_code=409,
+                    detail=f"The owner change is '{owner['status']}'; approve it before passing it down",
+                )
         row.status = new_status
         if new_status == "submitted":
             row.submitted_at = _now()
@@ -396,10 +404,21 @@ class SubcontractChangeService:
             owner = await self.owner_change(row.owner_change_type, row.owner_change_id)
             if owner is not None:
                 siblings = await self.list_for_owner_change(row.owner_change_type, row.owner_change_id)
+                payload["owner_change_status"] = owner["status"]
                 payload["owner_change_value"] = str(owner["value"])
                 payload["linked_sub_total"] = str(
                     sum((Decimal(str(c.amount)) for c in siblings if c.status in _LIVE_STATUSES), Decimal("0"))
                 )
+        agreement = await self.session.get(SubcontractAgreement, row.agreement_id)
+        terms = (agreement.metadata_ or {}) if agreement is not None else {}
+        days = terms.get("change_notice_days")
+        meta = row.metadata_ or {}
+        if isinstance(days, int):
+            payload["notice_window_days"] = days
+            payload["event_date"] = meta.get("event_date")
+            payload["notified_on"] = meta.get("notified_on") or (
+                row.created_at.date().isoformat() if row.created_at else None
+            )
         return payload
 
     async def validate(self, change_id: uuid.UUID) -> ValidationReport:

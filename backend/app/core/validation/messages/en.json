@@ -917,6 +917,14 @@
     "change_within_owner_value": {
       "fail": "Subcontract changes for {code} total {sub_total}, more than the owner change value {owner_value}",
       "suggestion": "Check the subcontract prices or recover the difference from the owner before approving"
+    },
+    "owner_change_approved": {
+      "fail": "Subcontract change {code} passes down an owner change that is still '{status}'",
+      "suggestion": "Approve the owner change first, or clear the back-to-back flag"
+    },
+    "notice_window": {
+      "fail": "Subcontract change {code} was notified {late} days after the {days}-day window in the agreement",
+      "suggestion": "Check the notice terms before accepting the cost, a late notice may bar the claim"
     }
   },
   "submittal": {
