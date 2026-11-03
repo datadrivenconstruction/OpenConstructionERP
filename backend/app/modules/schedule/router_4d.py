@@ -138,6 +138,32 @@ class SnapshotResponse(BaseModel):
     elements: dict[str, str] = Field(default_factory=dict)
 
 
+class SnapshotCostResponse(BaseModel):
+    """Cost at ``as_of_date`` next to the elements that carry it (5D).
+
+    Money is Decimal-as-string in ``currency``. ``elements`` holds the largest
+    500 by planned cost; the remainder is summed into ``other_elements_cost``,
+    so ``sum(elements) + other_elements_cost + unlinked_cost == totals.bac``
+    to the minor unit. ``unlinked_cost`` is budget no element can carry.
+    """
+
+    schedule_id: uuid.UUID
+    as_of_date: str
+    model_version_id: uuid.UUID | None = None
+    currency: str = ""
+    has_cost_data: bool = False
+    totals: dict[str, str] = Field(default_factory=dict)
+    spi: float | None = None
+    cpi: float | None = None
+    by_status: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    elements: dict[str, dict[str, Any]] = Field(default_factory=dict)
+    elements_total: int = 0
+    other_elements_cost: str = "0"
+    unlinked_cost: str = "0"
+    coverage_pct: float = 0.0
+    coverage_low: bool = False
+
+
 class DashboardResponse(BaseModel):
     """Planned-vs-actual (EVM) dashboard for a schedule on ``as_of_date``.
 
@@ -377,6 +403,47 @@ async def get_snapshot(
         as_of_date=target.isoformat(),
         model_version_id=model_version_id,
         elements=statuses,
+    )
+
+
+@schedules_v2_router.get(
+    "/{schedule_id}/snapshot-cost",
+    response_model=SnapshotCostResponse,
+    dependencies=[Depends(RequirePermission("schedule.read"))],
+)
+async def get_snapshot_cost(
+    schedule_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId,
+    as_of_date: str | None = Query(default=None),
+    model_version_id: uuid.UUID | None = Query(default=None),
+) -> SnapshotCostResponse:
+    """Return PV/EV/AC/BAC at ``as_of_date`` and the cost carried by each linked element."""
+    from app.modules.schedule.snapshot_cost import COVERAGE_LOW_PCT
+
+    await _verify_schedule_access(session, schedule_id, user_id)
+    target = _parse_as_of(as_of_date)
+    data = await ScheduleSnapshotService(session).cost_snapshot(schedule_id, target, model_version_id)
+
+    def money_row(row: dict[str, Any]) -> dict[str, Any]:
+        return {k: (str(v) if not isinstance(v, (str, int)) else v) for k, v in row.items()}
+
+    return SnapshotCostResponse(
+        schedule_id=schedule_id,
+        as_of_date=target.isoformat(),
+        model_version_id=model_version_id,
+        currency=data["currency"],
+        has_cost_data=data["has_cost_data"],
+        totals={k: str(v) for k, v in data["totals"].items()},
+        spi=data["spi"],
+        cpi=data["cpi"],
+        by_status={k: money_row(v) for k, v in data["by_status"].items()},
+        elements={k: money_row(v) for k, v in data["elements"].items()},
+        elements_total=data["elements_total"],
+        other_elements_cost=str(data["other_elements_cost"]),
+        unlinked_cost=str(data["unlinked_cost"]),
+        coverage_pct=data["coverage_pct"],
+        coverage_low=data["has_cost_data"] and data["coverage_pct"] < COVERAGE_LOW_PCT,
     )
 
 

@@ -1701,5 +1701,13 @@
       "fail": "{code} has been decided and can no longer be changed or deleted.",
       "suggestion": "Enter a new transfer or budget change that corrects it."
     }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Only {coverage}% of the budget sits on elements linked to tasks (limit {limit}%); the rest cannot be shown next to the model.",
+        "suggestion": "Link more elements to cost-loaded tasks, or check the EAC link rules."
+      }
+    }
   }
 }
