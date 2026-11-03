@@ -42,3 +42,9 @@ async def on_startup() -> None:
     register_progress_reporter()
     # Prompt-only advisory agents (help me think / draft / structure):
     register_advisor_agents()
+    # Project catalogue (RFI, daily report, clause review, submittal check) and its rule set.
+    from app.modules.ai_agents.catalogue import register_catalogue
+    from app.modules.ai_agents.validators import register_ai_agent_rules
+
+    register_catalogue()
+    register_ai_agent_rules()

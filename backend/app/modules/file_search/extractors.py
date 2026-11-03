@@ -119,7 +119,8 @@ def _extract_pdf_text(payload: bytes) -> tuple[str, int]:
                 except Exception:
                     logger.exception("PDF page text read failed; continuing")
                     continue
-            text = "\n".join(parts).strip()
+            # A form feed between pages lets the document assistant cite a page number.
+            text = "\f".join(parts).strip()
             return text, page_count
     except Exception:
         logger.exception("PDF reader failed to open PDF payload")
@@ -179,7 +180,7 @@ def _extract_ocr_text(payload: bytes, mime: str | None) -> tuple[str, int | None
                         # iteration so peak memory is a single page, never the
                         # whole document's rasters.
                         pix = None
-                return "\n".join(parts).strip(), page_count
+                return "\f".join(parts).strip(), page_count
         except Exception:
             logger.exception("OCR rasterisation pipeline failed for PDF")
             return "", None

@@ -1517,5 +1517,17 @@
       "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
       "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "The saved answer cites no project document, so nothing backs it.",
+      "suggestion": "Ask again until the answer cites a document, or mark the text as your own note."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Agent draft '{title}' has waited {days} days for review (limit {limit}).",
+      "suggestion": "Accept or reject the draft, or switch off the agent if its drafts are not used."
+    }
   }
 }

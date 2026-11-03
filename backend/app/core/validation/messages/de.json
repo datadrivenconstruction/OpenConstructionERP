@@ -1517,5 +1517,17 @@
       "fail": "Paket {package} ist mit der Hauptauftragsausschreibung {tender} verknüpft und noch nicht vergeben, daher hat diese Ausschreibung keinen Vertrag",
       "suggestion": "Vergeben Sie das Paket (es erzeugt den Vertrag) oder lösen Sie die Verknüpfung, damit die Ausschreibung einen eigenen Vertrag erstellt"
     }
+  },
+  "doc_assistant": {
+    "citations_present": {
+      "fail": "Die gespeicherte Antwort zitiert kein Projektdokument und ist daher nicht belegt.",
+      "suggestion": "Stellen Sie die Frage erneut, bis die Antwort ein Dokument zitiert, oder kennzeichnen Sie den Text als eigene Notiz."
+    }
+  },
+  "ai_agent_drafts": {
+    "review_overdue": {
+      "fail": "Der Agentenentwurf '{title}' wartet seit {days} Tagen auf Prüfung (Grenze {limit}).",
+      "suggestion": "Nehmen Sie den Entwurf an oder lehnen Sie ihn ab, oder schalten Sie den Agenten ab, wenn seine Entwürfe nicht genutzt werden."
+    }
   }
 }

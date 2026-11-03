@@ -7,6 +7,9 @@ Tables:
     oe_ai_agents_step   - chronological steps within a run
                           (thought / tool_call / observation / answer / error).
     oe_ai_agents_custom - user-authored agents (name, prompt, icon, category).
+    oe_ai_agents_project_setting - catalogue agent enabled / configured per project.
+    oe_ai_agents_project_guard   - per-project kill switch for catalogue agents.
+    oe_ai_agents_draft           - draft records produced by catalogue agents, reviewed by people.
 
 The run/step tables are append-only from a user's perspective (the runner
 writes incrementally as the loop progresses; the API only ever lets you
@@ -16,7 +19,7 @@ ARE editable/deletable by their creator through the dedicated endpoints.
 
 import uuid
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -225,3 +228,66 @@ class CustomAgent(Base):
     def agent_name(self) -> str:
         """The runner-facing slug for this custom agent (``custom:<uuid>``)."""
         return f"{CUSTOM_AGENT_PREFIX}{self.id}"
+
+
+class ProjectAgentSetting(Base):
+    """A catalogue agent enabled (or not) on one project, with its configuration.
+
+    ``config`` holds the agent's own options (for the clause reviewer, the
+    checklist; for every agent, ``review_after_days``). ``max_tokens_per_run``
+    caps model usage per run; the runner halts with ``token_limit`` beyond it.
+    """
+
+    __tablename__ = "oe_ai_agents_project_setting"
+    __table_args__ = (UniqueConstraint("project_id", "agent_name", name="uq_ai_agents_project_setting"),)
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    agent_name: Mapped[str] = mapped_column(String(100), nullable=False)
+    enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    config: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)  # type: ignore[type-arg]
+    max_tokens_per_run: Mapped[int] = mapped_column(Integer, nullable=False, default=8000)
+    updated_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+
+class ProjectAgentGuard(Base):
+    """Per-project kill switch: when ``halted`` no catalogue agent may start on the project."""
+
+    __tablename__ = "oe_ai_agents_project_guard"
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    halted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    reason: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    set_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+
+
+class AgentDraft(Base):
+    """A draft record produced by a catalogue agent, waiting for a human to review it.
+
+    Nothing an agent produces becomes a project record on its own: ``status``
+    moves from ``pending`` to ``accepted`` (optionally creating the target
+    record, whose id lands in ``applied_record_id``) or ``rejected`` only by a
+    person, and ``reviewed_by`` / ``reviewed_at`` record who and when.
+    """
+
+    __tablename__ = "oe_ai_agents_draft"
+
+    project_id: Mapped[uuid.UUID] = mapped_column(
+        GUID(), ForeignKey("oe_projects_project.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    run_id: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True, index=True)
+    agent_name: Mapped[str] = mapped_column(String(100), nullable=False, index=True)
+    draft_kind: Mapped[str] = mapped_column(String(40), nullable=False)
+    title: Mapped[str] = mapped_column(String(500), nullable=False, default="")
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)  # type: ignore[type-arg]
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    sources: Mapped[list] = mapped_column(JSON, nullable=False, default=list)  # type: ignore[type-arg]
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pending", index=True)
+    created_by: Mapped[uuid.UUID] = mapped_column(GUID(), nullable=False)
+    reviewed_by: Mapped[uuid.UUID | None] = mapped_column(GUID(), nullable=True)
+    reviewed_at: Mapped[str | None] = mapped_column(String(40), nullable=True)
+    review_note: Mapped[str | None] = mapped_column(Text, nullable=True)
+    applied_record_id: Mapped[str | None] = mapped_column(String(36), nullable=True)

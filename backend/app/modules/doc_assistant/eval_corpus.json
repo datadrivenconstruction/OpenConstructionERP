@@ -1,0 +1,117 @@
+{
+  "documents": [
+    {
+      "source_id": "doc-spec-03",
+      "source_kind": "specification",
+      "title": "Specification Section 03 30 00 Cast-in-Place Concrete",
+      "revision": "C",
+      "pages": [
+        "SECTION 03 30 00 CAST-IN-PLACE CONCRETE\n1.1 Summary\nThis section covers cast-in-place concrete for foundations, slabs on grade, suspended slabs, walls and columns.\n1.2 Submittals\nSubmit mix designs for each concrete class at least 21 days before the first placement. Submit product data for curing compounds and waterstops.",
+        "2.1 Concrete mixes\nStructural concrete for suspended slabs and columns shall be strength class C30/37 with a maximum water cement ratio of 0.50. Foundations shall be class C25/30. Maximum aggregate size is 20 mm.\n2.2 Reinforcement cover\nNominal concrete cover to reinforcement shall be 50 mm for concrete cast against earth, 35 mm for exposed external faces and 25 mm for internal faces.",
+        "3.1 Curing\nCure all exposed concrete surfaces for a minimum of 7 days by wet hessian or an approved curing compound. Protect fresh concrete from frost; do not place concrete when the air temperature is below 5 degrees Celsius without an approved cold weather plan.\n3.2 Tolerances\nSlab flatness shall meet FF 35 and FL 25 for floors receiving finishes."
+      ]
+    },
+    {
+      "source_id": "doc-spec-08",
+      "source_kind": "specification",
+      "title": "Specification Section 08 11 13 Hollow Metal Doors and Frames",
+      "revision": "B",
+      "pages": [
+        "SECTION 08 11 13 HOLLOW METAL DOORS AND FRAMES\n2.1 Doors\nFire-rated door assemblies shall be labelled and tested for 60 minutes where shown on the door schedule. Door leaves shall be 44 mm thick, 1.2 mm galvanised steel faces with honeycomb core.\n2.2 Frames\nFrames shall be 1.5 mm galvanised steel, welded, with three hinge reinforcements per leaf."
+      ]
+    },
+    {
+      "source_id": "doc-dwg-a201",
+      "source_kind": "document",
+      "title": "Architectural drawings set A",
+      "revision": "P4",
+      "sheets": {
+        "1": {"sheet_number": "A-201", "sheet_title": "Level 1 floor plan", "revision": "P4"},
+        "2": {"sheet_number": "A-501", "sheet_title": "Roof details", "revision": "P3"}
+      },
+      "pages": [
+        "A-201 LEVEL 1 FLOOR PLAN\nGeneral notes: all internal partitions are 100 mm metal stud with 12.5 mm plasterboard each side unless noted. Corridor ceiling height 2700 mm. Stair core walls 200 mm reinforced concrete.",
+        "A-501 ROOF DETAILS\nDetail 3: parapet upstand 300 mm above finished roof level. Roof membrane is a two layer bituminous system on 160 mm PIR insulation with a minimum fall of 1 in 60 to outlets."
+      ]
+    },
+    {
+      "source_id": "doc-contract",
+      "source_kind": "contract",
+      "title": "Main contract conditions",
+      "revision": "Signed",
+      "pages": [
+        "Clause 14 Payment\n14.1 The Contractor shall submit an interim payment application at the end of each month. The Employer shall pay the certified amount within 30 days of receipt of the application.\n14.2 Retention of 5 percent shall be deducted from each interim payment until practical completion, when half of the retention is released.",
+        "Clause 8 Delay\n8.7 If the Contractor fails to complete the Works by the completion date, the Contractor shall pay liquidated damages of 2500 EUR per calendar day, capped at 10 percent of the contract sum.\nClause 17 Indemnity\n17.1 The Contractor shall indemnify the Employer against all claims arising from injury to persons or damage to property caused by the Works."
+      ]
+    },
+    {
+      "source_id": "doc-spec-de",
+      "source_kind": "specification",
+      "title": "Leistungsbeschreibung Abdichtung",
+      "revision": "A",
+      "pages": [
+        "3.1 Abdichtung erdberührter Bauteile\nDie Kelleraußenwände erhalten eine kunststoffmodifizierte Bitumendickbeschichtung mit einer Trockenschichtdicke von mindestens 4 mm. Die Abdichtung ist 30 cm über Geländeoberkante hochzuführen."
+      ]
+    },
+    {
+      "source_id": "doc-restricted",
+      "source_kind": "document",
+      "title": "Commercial tender analysis",
+      "revision": "1",
+      "restricted": true,
+      "pages": [
+        "Tender analysis: the lowest bidder for the facade package priced 1.42 million EUR, the second bidder 1.58 million EUR."
+      ]
+    }
+  ],
+  "records": [
+    {
+      "source_id": "rfi-12",
+      "source_kind": "rfi",
+      "title": "RFI-012 Stair core wall thickness",
+      "text": "Question: drawing A-201 shows the stair core walls at 200 mm but the structural drawings show 250 mm. Which thickness governs? Response: the structural drawings govern, stair core walls are 250 mm reinforced concrete."
+    },
+    {
+      "source_id": "sub-7",
+      "source_kind": "submittal",
+      "title": "SUB-007 Curing compound product data",
+      "section": "03 30 00",
+      "text": "Submittal of product data for a water based curing compound, membrane forming, for spec section 03 30 00. Manufacturer data sheet attached, coverage 5 square metres per litre."
+    },
+    {
+      "source_id": "cor-31",
+      "source_kind": "correspondence",
+      "title": "Letter 031 Notice of delay due to steel delivery",
+      "text": "We give notice that structural steel deliveries are delayed by three weeks because the fabricator's galvanising plant is closed. We expect an extension of time claim under clause 8."
+    },
+    {
+      "source_id": "min-5",
+      "source_kind": "minutes",
+      "title": "Протокол совещания 5",
+      "text": "Решение: монтаж фасадных панелей начинается 15 марта. Ответственный за график поставки панелей генподрядчик."
+    }
+  ],
+  "questions": [
+    {"q": "What concrete strength class is required for suspended slabs?", "expect": [["doc-spec-03", 2]]},
+    {"q": "What is the nominal cover to reinforcement for concrete cast against earth?", "expect": [["doc-spec-03", 2]]},
+    {"q": "How long must exposed concrete be cured?", "expect": [["doc-spec-03", 3]]},
+    {"q": "Can concrete be placed below 5 degrees?", "expect": [["doc-spec-03", 3]]},
+    {"q": "When are concrete mix designs due?", "expect": [["doc-spec-03", 1]]},
+    {"q": "What fire rating do the door assemblies need?", "expect": [["doc-spec-08", 1]]},
+    {"q": "How thick are the hollow metal frames?", "expect": [["doc-spec-08", 1]]},
+    {"q": "What is the parapet upstand height on the roof?", "expect": [["doc-dwg-a201", 2]]},
+    {"q": "What are the internal partitions made of on level 1?", "expect": [["doc-dwg-a201", 1]]},
+    {"q": "How thick are the stair core walls?", "expect": [["rfi-12", null], ["doc-dwg-a201", 1]]},
+    {"q": "Within how many days must the employer pay a payment application?", "expect": [["doc-contract", 1]]},
+    {"q": "What are the liquidated damages per day for delay?", "expect": [["doc-contract", 2]]},
+    {"q": "How much retention is deducted from interim payments?", "expect": [["doc-contract", 1]]},
+    {"q": "Has a curing compound been submitted?", "expect": [["sub-7", null], ["doc-spec-03", 3]]},
+    {"q": "Why is the structural steel delivery delayed?", "expect": [["cor-31", null]]},
+    {"q": "Wie dick ist die Bitumendickbeschichtung der Kelleraußenwände?", "expect": [["doc-spec-de", 1]]},
+    {"q": "Когда начинается монтаж фасадных панелей?", "expect": [["min-5", null]]},
+    {"q": "What is the roof membrane system?", "expect": [["doc-dwg-a201", 2]]},
+    {"q": "What elevator speed is specified for the passenger lifts?", "expect": []},
+    {"q": "Which landscaping plant species are required?", "expect": []},
+    {"q": "What did the lowest bidder price for the facade package?", "expect": [], "note": "only in a restricted document the viewer may not read"}
+  ]
+}

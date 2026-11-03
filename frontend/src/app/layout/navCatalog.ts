@@ -990,6 +990,8 @@ export const navGroups: NavGroup[] = [
     hideInSimple: true,
     items: [
       { labelKey: 'nav.ai_agents', to: '/ai-agents', icon: Bot, badge: 'BETA' },
+      { labelKey: 'nav.project_agents', defaultLabel: 'Project Agents', to: '/ai-agents/catalogue', icon: Bot, moduleKey: 'ai_agents', badge: 'BETA' },
+      { labelKey: 'nav.doc_assistant', defaultLabel: 'Document Assistant', to: '/document-assistant', icon: MessageSquare, moduleKey: 'doc_assistant' },
       { labelKey: 'nav.ai_advisor', to: '/advisor', icon: MessageSquare },
       { labelKey: 'nav.erp_chat', to: '/chat', icon: MessageSquare },
       { labelKey: 'nav.pipelines', to: '/pipelines', icon: GitBranch, moduleKey: 'pipelines', advancedOnly: true, badge: 'BETA' },

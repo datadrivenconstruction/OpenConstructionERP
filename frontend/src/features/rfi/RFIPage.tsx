@@ -91,6 +91,7 @@ import { SaveDefaultFilter } from '@/shared/ui/SaveDefaultFilter';
 import { initialFilter } from '@/shared/lib/defaultFilters';
 import { fmtDate, getIntlLocale } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
+import { RunAgentButton } from '@/features/ai-agents/components/RunAgentButton';
 
 // English fallbacks for the computed `rfi.status_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -2378,6 +2379,7 @@ export function RFIPage() {
         actions={
           <>
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
+            <RunAgentButton agent="rfi_drafter" />
             {/* How it works guide - explains the raise / attach / track /
                 respond flow and the impact-to-Variation handoff. Sits at the
                 head of the action cluster as the leading help pill. */}
