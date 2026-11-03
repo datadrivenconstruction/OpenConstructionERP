@@ -32,6 +32,7 @@ judged on the DEFAULT week, where the rule cannot fire and says nothing.
 from __future__ import annotations
 
 import logging
+from datetime import date
 from typing import Any
 
 from app.core.validation.engine import (
@@ -43,6 +44,7 @@ from app.core.validation.engine import (
     rule_registry,
 )
 from app.core.validation.messages import DEFAULT_LOCALE, translate
+from app.modules.schedule.constraints import DATED_CONSTRAINT_TYPES, normalize_constraint
 from app.modules.schedule.service import compute_duration, get_work_calendar
 
 logger = logging.getLogger(__name__)
@@ -284,6 +286,109 @@ class DatesMatchImportSource(ValidationRule):
         return results
 
 
+class ConstraintDateMissing(ValidationRule):
+    """A dated constraint (start no earlier, must finish on ...) without a date.
+
+    The scheduler cannot honour it and ignores it, so the plan silently
+    differs from what the constraint says. Rows with no constraint, or with
+    ``as_soon_as_possible`` / ``as_late_as_possible``, are not judged.
+    """
+
+    rule_id = "schedule_quality.constraint_date_missing"
+    name = "Dated constraint has a date"
+    standard = SCHEDULE_RULE_SET
+    severity = Severity.ERROR
+    category = RuleCategory.CONSISTENCY
+    description = "Flags an activity whose date constraint carries no readable constraint date."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for activity in _activities(context):
+            c_type = normalize_constraint(activity.get("constraint_type"))
+            if c_type not in DATED_CONSTRAINT_TYPES:
+                continue
+            passed = _day(activity.get("constraint_date")) is not None
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=translate("common.ok", locale=locale)
+                    if passed
+                    else translate(f"{self.rule_id}.fail", locale=locale, activity=_label(activity), constraint=c_type),
+                    element_ref=str(activity.get("id")) if activity.get("id") else None,
+                    details={"constraint_type": c_type},
+                    suggestion=None if passed else translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
+class ConstraintConflictsWithLogic(ValidationRule):
+    """A ``must_*`` date earlier than the date the predecessors allow.
+
+    Reads ``early_start_date`` / ``early_finish_date`` (the network-driven
+    dates, ISO) from each row and warns where a mandatory start or finish falls
+    before them: the constraint overrides the logic and the schedule shows
+    negative float. Rows that carry no network-driven dates are not judged.
+    """
+
+    rule_id = "schedule_quality.constraint_conflict"
+    name = "Mandatory constraint agrees with the logic"
+    standard = SCHEDULE_RULE_SET
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a must-start-on or must-finish-on date that precedes what the predecessors allow."
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _locale(context)
+        results: list[RuleResult] = []
+        for activity in _activities(context):
+            c_type = normalize_constraint(activity.get("constraint_type"))
+            if c_type not in ("must_start_on", "must_finish_on"):
+                continue
+            wanted = _day(activity.get("constraint_date"))
+            earliest = _day(activity.get("early_start_date" if c_type == "must_start_on" else "early_finish_date"))
+            if wanted is None or earliest is None:
+                continue
+            days = (earliest - wanted).days
+            passed = days <= 0
+            results.append(
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=passed,
+                    message=translate("common.ok", locale=locale)
+                    if passed
+                    else translate(
+                        f"{self.rule_id}.fail",
+                        locale=locale,
+                        activity=_label(activity),
+                        constraint=c_type,
+                        date=wanted.isoformat(),
+                        days=days,
+                    ),
+                    element_ref=str(activity.get("id")) if activity.get("id") else None,
+                    details={"late_by_days": max(days, 0)},
+                    suggestion=None if passed else translate(f"{self.rule_id}.suggestion", locale=locale),
+                )
+            )
+        return results
+
+
+def _day(value: Any) -> date | None:
+    """An ISO date from a row value, or None."""
+    try:
+        return date.fromisoformat(str(value).strip()[:10])
+    except ValueError:
+        return None
+
+
 # ── Progress sheet rules ────────────────────────────────────────────────────
 # An uploaded progress sheet is validated through the engine before anything
 # is applied. Payload ``{"rows": [...]}``, one dict per sheet row (built in
@@ -443,7 +548,12 @@ class ProgressSheetPlausibility(_SheetRule):
 
 # ── Registration ────────────────────────────────────────────────────────────
 
-_SCHEDULE_RULES: tuple[ValidationRule, ...] = (DurationCountedOnProjectWeek(), DatesMatchImportSource())
+_SCHEDULE_RULES: tuple[ValidationRule, ...] = (
+    DurationCountedOnProjectWeek(),
+    DatesMatchImportSource(),
+    ConstraintDateMissing(),
+    ConstraintConflictsWithLogic(),
+)
 _PROGRESS_SHEET_RULES: tuple[ValidationRule, ...] = (
     ProgressSheetKnownActivity(),
     ProgressSheetValuesInRange(),

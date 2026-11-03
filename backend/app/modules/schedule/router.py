@@ -54,6 +54,7 @@ from app.dependencies import (
     SessionDep,
     verify_project_access,
 )
+from app.modules.schedule.constraints import normalize_constraint
 from app.modules.schedule.import_source import ImportSourceService, stable_export_uids
 from app.modules.schedule.schemas import (
     ActivityBimLinkRequest,
@@ -1925,7 +1926,7 @@ async def import_xer(
             pct = 0.0
 
         # Constraint
-        constraint_type = task_row.get("cstr_type", None)
+        constraint_type = normalize_constraint(task_row.get("cstr_type"))
         constraint_date = task_row.get("cstr_date", None)
         if constraint_date:
             constraint_date = constraint_date[:10]
@@ -2215,7 +2216,7 @@ async def import_msp_xml(
             "6": "finish_no_later",
             "7": "as_late_as_possible",
         }
-        constraint_type = constraint_map.get(constraint_type_str)
+        constraint_type = normalize_constraint(constraint_map.get(constraint_type_str))
         constraint_date = constraint_date_str[:10] if constraint_date_str else None
 
         max_seq += 1

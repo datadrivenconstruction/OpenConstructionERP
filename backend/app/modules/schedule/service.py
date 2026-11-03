@@ -86,6 +86,7 @@ def _normalize_deps(deps: list | None) -> list[dict]:
 
 
 from app.modules.schedule.boq_plan import PlanFit
+from app.modules.schedule.constraints import normalize_constraint
 from app.modules.schedule.milestone_events import announce_if_milestone_reached
 from app.modules.schedule.models import (
     Activity,
@@ -3501,6 +3502,29 @@ class ScheduleService:
             return 0
         return max((d - project_start).days, 0)
 
+    @staticmethod
+    def _constraint_input(activity: Activity, project_start: date, warnings: list[str]) -> dict[str, object]:
+        """The CPM engine's view of an activity's stored constraint.
+
+        A dated constraint becomes a calendar-day offset from the project origin.
+        One whose date is missing or unparseable is left out and reported in
+        ``warnings`` so the plan is still computed, never silently mis-scheduled.
+        """
+        c_type = normalize_constraint(activity.constraint_type)
+        if c_type is None or c_type == "as_soon_as_possible":
+            return {}
+        if c_type == "as_late_as_possible":
+            return {"constraint_type": c_type}
+        label = activity.name or str(activity.id)
+        raw = str(activity.constraint_date or "").strip()
+        try:
+            day = date.fromisoformat(raw[:10])
+        except ValueError:
+            reason = "has no date" if not raw else f"has an unreadable date {raw!r}"
+            warnings.append(f"{label}: constraint {c_type} {reason}; it was ignored")
+            return {}
+        return {"constraint_type": c_type, "constraint_offset": (day - project_start).days}
+
     async def _resolve_activity_calendars(self, activities: list[Activity], project_id: uuid.UUID) -> dict[str, dict]:
         """Load each activity's per-activity work calendar as ``{work_days, exceptions}``.
 
@@ -3717,8 +3741,9 @@ class ScheduleService:
         Root activities (no predecessor) keep their manually set dates - only
         their critical-path flag, float columns and colour are refreshed.
 
-        Constraint pinning (must-start-on / as-late-as-possible) is out of
-        scope for this pass; roots anchor the network at their manual start.
+        Stored constraints (start no earlier, must finish on, as late as
+        possible ...) are honoured by the engine; roots anchor the network at
+        their manual start.
 
         Args:
             schedule_id: The schedule to reschedule.
@@ -3765,6 +3790,7 @@ class ScheduleService:
             activity_calendar = activity_calendars.get(str(a.id))
             if activity_calendar is not None:
                 entry["calendar"] = activity_calendar
+            entry.update(self._constraint_input(a, project_start, []))
             act_dicts.append(entry)
         rel_dicts = [
             {
@@ -5023,6 +5049,7 @@ class ScheduleService:
         project_start = self._resolve_project_start(schedule, activities)
         has_predecessor = {str(r["successor_id"]) for r in rel_dicts}
         activity_calendars = await self._resolve_activity_calendars(network, schedule.project_id)
+        constraint_warnings: list[str] = []
         act_dicts: list[dict[str, object]] = []
         for a in network:
             entry: dict[str, object] = {
@@ -5034,6 +5061,7 @@ class ScheduleService:
             activity_calendar = activity_calendars.get(str(a.id))
             if activity_calendar is not None:
                 entry["calendar"] = activity_calendar
+            entry.update(self._constraint_input(a, project_start, constraint_warnings))
             act_dicts.append(entry)
 
         default_calendar = calendar if calendar is not None else await self._resolve_schedule_default_calendar(schedule)
@@ -5176,6 +5204,7 @@ class ScheduleService:
             project_duration_days=project_duration,
             critical_path=critical_results,
             all_activities=all_results,
+            constraint_warnings=constraint_warnings,
         )
 
     # ── Risk Analysis (PERT) ──────────────────────────────────────────────
