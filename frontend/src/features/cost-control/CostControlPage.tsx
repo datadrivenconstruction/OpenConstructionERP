@@ -42,6 +42,7 @@ import { SnapshotDrawer } from './SnapshotDrawer';
 import { CostControlTable } from './CostControlTable';
 import { ForecastHistory } from './ForecastHistory';
 import { AssignDrawer } from './AssignDrawer';
+import { BudgetLedgerPanel } from './BudgetLedgerPanel';
 import { ChainPanel } from './ChainPanel';
 import { LineDrawer } from './LineDrawer';
 import { PaymentsPanel } from './PaymentsPanel';
@@ -416,6 +417,10 @@ export function CostControlPage() {
 
           <Card>
             <ChainPanel projectId={projectId} currency={currency} canEdit={canEdit} />
+          </Card>
+
+          <Card className="p-0">
+            <BudgetLedgerPanel projectId={projectId} currency={currency} canEdit={canEdit} canManage={canManage} />
           </Card>
 
           <div className="flex flex-wrap items-center gap-3">
