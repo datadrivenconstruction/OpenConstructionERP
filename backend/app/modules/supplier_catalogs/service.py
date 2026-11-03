@@ -1582,67 +1582,19 @@ class SupplierCatalogsService(PriceListOps):
                 )
                 # Update stock balance for accepted_qty only
                 if accepted > 0 and po_line.catalog_item_id is not None:
-                    batch = gr_line.batch_lot or ""
-                    balance = await self.stock.get_or_create_balance(
+                    alert = await self.receive_into_stock(
                         warehouse_id=data.warehouse_id,
                         catalog_item_id=po_line.catalog_item_id,
-                        batch_lot=batch,
+                        quantity=accepted,
+                        unit_price=po_line.unit_price,
+                        currency=po.currency,
+                        batch_lot=gr_line.batch_lot,
+                        gr_id=gr.id,
+                        project_id=po.project_id,
+                        user_id=user_id,
                     )
-                    # Weighted-average cost, within one ISO currency only. See
-                    # _fold_receipt_into_cost: when this receipt's currency
-                    # disagrees with the stock already on hand, the average is
-                    # withheld instead of blended.
-                    prev_qty = balance.quantity_on_hand
-                    new_qty = prev_qty + accepted
-                    po_currency = _normalise_currency(po.currency)
-                    new_cost, new_currency, new_state = _fold_receipt_into_cost(
-                        prev_qty=prev_qty,
-                        prev_cost=balance.unit_cost_avg,
-                        prev_currency=balance.currency,
-                        prev_state=balance.cost_state,
-                        incoming_qty=accepted,
-                        incoming_price=po_line.unit_price,
-                        incoming_currency=po_currency,
-                    )
-                    await self.stock.update_balance(
-                        balance.id,
-                        quantity_on_hand=new_qty,
-                        unit_cost_avg=new_cost,
-                        currency=new_currency,
-                        cost_state=new_state,
-                        last_movement_at=_now_iso(),
-                    )
-                    # Movement audit
-                    await self.stock.record_movement(
-                        StockMovement(
-                            warehouse_id=data.warehouse_id,
-                            catalog_item_id=po_line.catalog_item_id,
-                            movement_type="in",
-                            quantity=accepted,
-                            unit_cost=po_line.unit_price,
-                            currency=po_currency,
-                            reference_type="gr",
-                            reference_id=str(gr.id),
-                            batch_lot=batch or None,
-                            project_id=po.project_id,
-                            performed_by=user_id,
-                            performed_at=_now_iso(),
-                        )
-                    )
-                    # Check low-stock threshold
-                    catalog_item = await self.items.get(po_line.catalog_item_id)
-                    if catalog_item is not None and catalog_item.reorder_point > 0:
-                        available = new_qty - balance.quantity_reserved
-                        if available < catalog_item.reorder_point:
-                            low_stock_alerts.append(
-                                {
-                                    "catalog_item_id": str(catalog_item.id),
-                                    "sku": catalog_item.sku,
-                                    "warehouse_id": str(data.warehouse_id),
-                                    "available_qty": str(available),
-                                    "reorder_point": str(catalog_item.reorder_point),
-                                }
-                            )
+                    if alert is not None:
+                        low_stock_alerts.append(alert)
 
         # Advance PO status
         refreshed_po = await self.pos.get(po.id)
@@ -1677,6 +1629,84 @@ class SupplierCatalogsService(PriceListOps):
         refreshed = await self.grs.get(gr_id)
         assert refreshed is not None
         return refreshed
+
+    async def receive_into_stock(
+        self,
+        *,
+        warehouse_id: uuid.UUID,
+        catalog_item_id: uuid.UUID,
+        quantity: Decimal,
+        unit_price: Decimal,
+        currency: str | None,
+        batch_lot: str | None,
+        gr_id: uuid.UUID,
+        project_id: uuid.UUID | None,
+        user_id: str | None = None,
+    ) -> dict[str, Any] | None:
+        """Book one accepted receipt quantity into a warehouse; the one stock-in path.
+
+        Rolls the weighted-average cost forward within a single ISO currency
+        (never across two), records the IN movement against ``gr_id`` and
+        returns a low-stock alert payload when the item fell under its
+        reorder point, else ``None``.
+        """
+        batch = batch_lot or ""
+        balance = await self.stock.get_or_create_balance(
+            warehouse_id=warehouse_id,
+            catalog_item_id=catalog_item_id,
+            batch_lot=batch,
+        )
+        # Weighted-average cost, within one ISO currency only. See
+        # _fold_receipt_into_cost: when this receipt's currency disagrees with
+        # the stock already on hand, the average is withheld instead of blended.
+        prev_qty = balance.quantity_on_hand
+        new_qty = prev_qty + quantity
+        po_currency = _normalise_currency(currency)
+        new_cost, new_currency, new_state = _fold_receipt_into_cost(
+            prev_qty=prev_qty,
+            prev_cost=balance.unit_cost_avg,
+            prev_currency=balance.currency,
+            prev_state=balance.cost_state,
+            incoming_qty=quantity,
+            incoming_price=unit_price,
+            incoming_currency=po_currency,
+        )
+        await self.stock.update_balance(
+            balance.id,
+            quantity_on_hand=new_qty,
+            unit_cost_avg=new_cost,
+            currency=new_currency,
+            cost_state=new_state,
+            last_movement_at=_now_iso(),
+        )
+        await self.stock.record_movement(
+            StockMovement(
+                warehouse_id=warehouse_id,
+                catalog_item_id=catalog_item_id,
+                movement_type="in",
+                quantity=quantity,
+                unit_cost=unit_price,
+                currency=po_currency,
+                reference_type="gr",
+                reference_id=str(gr_id),
+                batch_lot=batch or None,
+                project_id=project_id,
+                performed_by=user_id,
+                performed_at=_now_iso(),
+            )
+        )
+        catalog_item = await self.items.get(catalog_item_id)
+        if catalog_item is not None and catalog_item.reorder_point > 0:
+            available = new_qty - balance.quantity_reserved
+            if available < catalog_item.reorder_point:
+                return {
+                    "catalog_item_id": str(catalog_item.id),
+                    "sku": catalog_item.sku,
+                    "warehouse_id": str(warehouse_id),
+                    "available_qty": str(available),
+                    "reorder_point": str(catalog_item.reorder_point),
+                }
+        return None
 
     # ── Invoice & 3-way match ─────────────────────────────────────────────────
 
