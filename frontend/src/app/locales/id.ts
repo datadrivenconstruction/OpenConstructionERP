@@ -60210,6 +60210,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Pesanan pembelian tidak ditemukan.",
     "api_errors.invoice_capture_po_not_billable": "Pesanan {{po_number}} belum dapat ditagih: hanya pesanan yang diterbitkan yang dapat ditagih.",
     "api_errors.invoice_capture_invoice_read_only": "Faktur yang disetujui atau diposting bersifat hanya-baca. Kembalikan dulu ke draf.",
+    "api_errors.module_disabled": "Modul {{module}} dinonaktifkan untuk ruang kerja ini. Administrator dapat mengaktifkannya di Modul > Paket solusi.",
     "conv.stage_upload": "Mengunggah file",
     "conv.stage_upload_hint": "Mengirim file ke server. Biarkan tab ini terbuka sampai selesai.",
     "conv.stage_converter": "Menyiapkan konverter",

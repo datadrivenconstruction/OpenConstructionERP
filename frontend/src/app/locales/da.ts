@@ -60459,6 +60459,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Indkøbsordren blev ikke fundet.",
     "api_errors.invoice_capture_po_not_billable": "Ordre {{po_number}} kan endnu ikke faktureres: kun en udstedt ordre kan faktureres.",
     "api_errors.invoice_capture_invoice_read_only": "En godkendt eller bogført faktura er skrivebeskyttet. Flyt den først tilbage til udkast.",
+    "api_errors.module_disabled": "Modulet {{module}} er slået fra for dette arbejdsområde. En administrator kan slå det til under Moduler > Løsningspakker.",
     "conv.stage_upload": "Uploader filen",
     "conv.stage_upload_hint": "Filen sendes til serveren. Hold fanen åben, indtil den er færdig.",
     "conv.stage_converter": "Klargør konverteren",

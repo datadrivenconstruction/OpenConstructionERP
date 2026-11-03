@@ -284,3 +284,45 @@ def test_guard_cache_is_bounded(monkeypatch: pytest.MonkeyPatch) -> None:
 
     asyncio.run(module_guard._load_metadata(str(uuid.uuid4())))
     assert len(module_guard._cache) == 3 and "u0" not in module_guard._cache
+
+
+def test_fresh_install_package_hides_ai_but_settings_stay_reachable() -> None:
+    # Fresh install: the first package hides every module it does not bring, AI included.
+    meta, _ = sp.install({}, ["estimate_quote"])
+    assert sp.is_blocked(meta, "ai")
+    # Saving the AI provider must still work, other modules read that key.
+    assert module_guard.module_from_path("/api/v1/ai/settings/") is None
+    assert module_guard.module_from_path("/api/v1/ai/settings/test/") is None
+    assert module_guard.module_from_path("/api/v1/ai/quick-estimate/") == "ai"
+
+
+def test_unblock_switches_on_granted_modules_only() -> None:
+    meta, _ = sp.install({}, ["estimate_quote"])
+    meta, switched = sp.unblock(meta, ["ai", "users", "not_a_module"])
+    assert "ai" in switched
+    assert not sp.is_blocked(meta, "ai")
+    assert meta["module_preferences"]["ai"] is True
+    # Without packages nothing is blocked, so nothing changes.
+    assert sp.unblock({}, ["ai"]) == ({}, [])
+
+
+@pytest.mark.asyncio
+async def test_full_access_grant_lifts_the_package_gate(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.modules.users import router as users_router
+
+    meta, _ = sp.install({}, ["estimate_quote"])
+    user = SimpleNamespace(id=uuid.UUID(USER_ID), metadata_=meta)
+    saved: dict[str, Any] = {}
+
+    class _Svc:
+        async def get_user(self, _uid: uuid.UUID) -> Any:
+            return user
+
+        async def update_profile(self, _uid: uuid.UUID, metadata_: dict[str, Any]) -> None:
+            saved.update(metadata_)
+
+    payload = users_router.UserModuleAccessPayload(
+        modules={"ai": users_router.ModuleAccessLevel(visible=True, access="full")}
+    )
+    await users_router.set_user_module_access(uuid.UUID(USER_ID), payload, _Svc())  # type: ignore[arg-type]
+    assert not sp.is_blocked(saved, "ai")

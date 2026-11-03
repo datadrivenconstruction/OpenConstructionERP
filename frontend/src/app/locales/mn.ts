@@ -60131,6 +60131,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Худалдан авалтын захиалга олдсонгүй.",
     "api_errors.invoice_capture_po_not_billable": "{{po_number}} захиалгад одоохондоо нэхэмжлэх үүсгэх боломжгүй: зөвхөн гаргасан захиалгад үүсгэнэ.",
     "api_errors.invoice_capture_invoice_read_only": "Баталсан эсвэл бүртгэсэн нэхэмжлэх зөвхөн унших эрхтэй. Эхлээд ноорог руу буцаана уу.",
+    "api_errors.module_disabled": "{{module}} модуль энэ ажлын орчинд унтраалттай байна. Администратор Модулиуд > Шийдлийн багцууд хэсэгт асааж болно.",
     "conv.stage_upload": "Файлыг байршуулж байна",
     "conv.stage_upload_hint": "Файлыг сервер рүү илгээж байна. Дуусах хүртэл энэ табыг нээлттэй байлгана уу.",
     "conv.stage_converter": "Хөрвүүлэгчийг бэлдэж байна",

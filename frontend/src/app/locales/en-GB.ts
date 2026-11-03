@@ -1299,6 +1299,7 @@ const resource = {
     "takeoff_compare.carry_recheck": "Re-check with my pages",
     "takeoff_compare.carry_accept_high": "Carry high confidence only",
     "takeoff_compare.carry_accept_matched": "Carry matched, review each",
+    "api_errors.module_disabled": "The {{module}} module is switched off for this workspace. An administrator can switch it on under Modules > Solution packages.",
   }
 } as { translation: Record<string, string> };
 

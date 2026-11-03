@@ -1684,6 +1684,7 @@ const resource = {
     "accountingSync.sync.push_hint_review": "Check the documents you reviewed below, then post them. Payments recorded in your books come back.",
     "api_errors.auth.sso_required": "Your organization requires single sign-on. Use the SSO button to sign in.",
     "capital_plan.empty_desc": "Import the projects of this program to see how their cost lands on the yearly budget.",
+    "api_errors.module_disabled": "The {{module}} module is switched off for this workspace. An administrator can switch it on under Modules > Solution packages.",
   }
 } as { translation: Record<string, string> };
 

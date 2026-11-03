@@ -61736,6 +61736,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Objednávka nenalezena.",
     "api_errors.invoice_capture_po_not_billable": "Objednávku {{po_number}} zatím nelze fakturovat: fakturovat lze pouze vystavenou objednávku.",
     "api_errors.invoice_capture_invoice_read_only": "Schválená nebo zaúčtovaná faktura je jen pro čtení. Nejprve ji vraťte do konceptu.",
+    "api_errors.module_disabled": "Modul {{module}} je pro tento pracovní prostor vypnutý. Správce ho může zapnout v Moduly > Balíčky řešení.",
     "conv.stage_upload": "Nahrávání souboru",
     "conv.stage_upload_hint": "Soubor se odesílá na server. Nechte kartu otevřenou, dokud se nahrávání nedokončí.",
     "conv.stage_converter": "Příprava konvertoru",

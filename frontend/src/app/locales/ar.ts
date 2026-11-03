@@ -63541,6 +63541,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "لم يتم العثور على أمر الشراء.",
     "api_errors.invoice_capture_po_not_billable": "لا يمكن إصدار فاتورة للطلب {{po_number}} بعد: لا يمكن فوترة سوى طلب صادر.",
     "api_errors.invoice_capture_invoice_read_only": "الفاتورة المعتمدة أو المرحّلة للقراءة فقط. أعدها إلى مسودة أولًا.",
+    "api_errors.module_disabled": "الوحدة {{module}} متوقفة في مساحة العمل هذه. يمكن للمسؤول تشغيلها من الوحدات > حزم الحلول.",
     "conv.stage_upload": "جارٍ رفع الملف",
     "conv.stage_upload_hint": "يُرسل الملف إلى الخادم. أبقِ هذه التبويبة مفتوحة حتى ينتهي الرفع.",
     "conv.stage_converter": "تجهيز المحوّل",

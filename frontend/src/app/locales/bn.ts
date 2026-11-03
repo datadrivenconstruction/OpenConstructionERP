@@ -60729,6 +60729,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "ক্রয় আদেশ পাওয়া যায়নি।",
     "api_errors.invoice_capture_po_not_billable": "অর্ডার {{po_number}} এখনো ইনভয়েস করা যাবে না: শুধু ইস্যু করা অর্ডারের ইনভয়েস করা যায়।",
     "api_errors.invoice_capture_invoice_read_only": "অনুমোদিত বা পোস্ট করা ইনভয়েস শুধু পড়ার জন্য। আগে এটি খসড়ায় ফিরিয়ে আনুন।",
+    "api_errors.module_disabled": "এই ওয়ার্কস্পেসে {{module}} মডিউল বন্ধ আছে। একজন প্রশাসক মডিউল > সমাধান প্যাকেজ থেকে এটি চালু করতে পারেন।",
     "conv.stage_upload": "ফাইল আপলোড হচ্ছে",
     "conv.stage_upload_hint": "ফাইলটি সার্ভারে পাঠানো হচ্ছে। শেষ না হওয়া পর্যন্ত এই ট্যাব খোলা রাখুন।",
     "conv.stage_converter": "কনভার্টার প্রস্তুত হচ্ছে",

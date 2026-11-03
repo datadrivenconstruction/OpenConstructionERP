@@ -60417,6 +60417,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Hindi nahanap ang purchase order.",
     "api_errors.invoice_capture_po_not_billable": "Hindi pa maaaring i-invoice ang order na {{po_number}}: ang inilabas na order lang ang maaaring i-invoice.",
     "api_errors.invoice_capture_invoice_read_only": "Read-only ang inaprubahan o na-post na invoice. Ibalik muna ito sa draft.",
+    "api_errors.module_disabled": "Naka-off ang module na {{module}} para sa workspace na ito. Maaari itong i-on ng administrator sa Modules > Solution packages.",
     "conv.stage_upload": "Ina-upload ang file",
     "conv.stage_upload_hint": "Ipinapadala ang file sa server. Panatilihing bukas ang tab hanggang matapos ito.",
     "conv.stage_converter": "Inihahanda ang converter",

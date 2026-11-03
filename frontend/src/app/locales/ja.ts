@@ -61743,6 +61743,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "発注書が見つかりません。",
     "api_errors.invoice_capture_po_not_billable": "発注 {{po_number}} はまだ請求できません。請求できるのは発行済みの発注のみです。",
     "api_errors.invoice_capture_invoice_read_only": "承認済みまたは転記済みの請求書は読み取り専用です。先に下書きに戻してください。",
+    "api_errors.module_disabled": "このワークスペースでは {{module}} モジュールがオフになっています。管理者は「モジュール > ソリューションパッケージ」でオンにできます。",
     "conv.stage_upload": "ファイルをアップロード中",
     "conv.stage_upload_hint": "ファイルをサーバーへ送信しています。完了するまでこのタブを開いたままにしてください。",
     "conv.stage_converter": "コンバーターを準備中",

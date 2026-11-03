@@ -60827,6 +60827,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "구매 주문을 찾을 수 없습니다.",
     "api_errors.invoice_capture_po_not_billable": "주문 {{po_number}}은(는) 아직 청구할 수 없습니다. 발행된 주문만 청구할 수 있습니다.",
     "api_errors.invoice_capture_invoice_read_only": "승인되었거나 전기된 청구서는 읽기 전용입니다. 먼저 초안으로 되돌리세요.",
+    "api_errors.module_disabled": "이 작업 공간에서 {{module}} 모듈이 꺼져 있습니다. 관리자가 모듈 > 솔루션 패키지에서 켤 수 있습니다.",
     "conv.stage_upload": "파일 업로드 중",
     "conv.stage_upload_hint": "파일을 서버로 보내는 중입니다. 완료될 때까지 이 탭을 열어 두세요.",
     "conv.stage_converter": "변환기 준비 중",

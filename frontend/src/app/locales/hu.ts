@@ -63024,6 +63024,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "A megrendelés nem található.",
     "api_errors.invoice_capture_po_not_billable": "A(z) {{po_number}} megrendelés még nem számlázható: csak kiadott megrendelés számlázható.",
     "api_errors.invoice_capture_invoice_read_only": "A jóváhagyott vagy könyvelt számla csak olvasható. Előbb állítsa vissza piszkozatra.",
+    "api_errors.module_disabled": "A(z) {{module}} modul ki van kapcsolva ebben a munkaterületben. Egy rendszergazda bekapcsolhatja a Modulok > Megoldáscsomagok menüben.",
     "conv.stage_upload": "Fájl feltöltése",
     "conv.stage_upload_hint": "A fájl küldése a szervernek. Ne zárja be a lapot, amíg be nem fejeződik.",
     "conv.stage_converter": "Konverter előkészítése",

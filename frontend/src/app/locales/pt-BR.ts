@@ -56100,6 +56100,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Pedido de compra não encontrado.",
     "api_errors.invoice_capture_po_not_billable": "O pedido {{po_number}} ainda não pode ser faturado: somente um pedido emitido pode ser faturado.",
     "api_errors.invoice_capture_invoice_read_only": "Uma nota aprovada ou lançada é somente leitura. Volte-a primeiro para rascunho.",
+    "api_errors.module_disabled": "O módulo {{module}} está desativado neste espaço de trabalho. Um administrador pode ativá-lo em Módulos > Pacotes de soluções.",
     "conv.stage_upload": "Enviando o arquivo",
     "conv.stage_upload_hint": "Enviando o arquivo para o servidor. Mantenha esta aba aberta até terminar.",
     "conv.stage_converter": "Preparando o conversor",

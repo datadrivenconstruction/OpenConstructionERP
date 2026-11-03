@@ -63102,6 +63102,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Bestellung nicht gefunden.",
     "api_errors.invoice_capture_po_not_billable": "Die Bestellung {{po_number}} kann noch nicht abgerechnet werden: Nur eine erteilte Bestellung kann in Rechnung gestellt werden.",
     "api_errors.invoice_capture_invoice_read_only": "Eine genehmigte oder gebuchte Rechnung ist schreibgeschützt. Setzen Sie sie zuerst auf Entwurf zurück.",
+    "api_errors.module_disabled": "Das Modul {{module}} ist für diesen Arbeitsbereich ausgeschaltet. Ein Administrator kann es unter Module > Lösungspakete einschalten.",
     "conv.stage_upload": "Datei wird hochgeladen",
     "conv.stage_upload_hint": "Die Datei wird an den Server gesendet. Lassen Sie den Tab offen, bis der Vorgang abgeschlossen ist.",
     "conv.stage_converter": "Konverter wird vorbereitet",

@@ -54742,6 +54742,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Purchase order not found.",
     "api_errors.invoice_capture_po_not_billable": "Order {{po_number}} cannot be invoiced yet: only an issued order can be invoiced.",
     "api_errors.invoice_capture_invoice_read_only": "An approved or posted invoice is read-only. Move it back to draft first.",
+    "api_errors.module_disabled": "The {{module}} module is switched off for this workspace. An administrator can switch it on under Modules > Solution packages.",
     "conv.stage_upload": "Uploading the file",
     "conv.stage_upload_hint": "Sending the file to the server. Keep this tab open until it finishes.",
     "conv.stage_converter": "Preparing the converter",

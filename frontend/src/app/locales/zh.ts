@@ -62680,6 +62680,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "未找到采购订单。",
     "api_errors.invoice_capture_po_not_billable": "订单 {{po_number}} 尚不能开票:只有已发出的订单才能开票。",
     "api_errors.invoice_capture_invoice_read_only": "已批准或已过账的发票为只读。请先将其退回草稿。",
+    "api_errors.module_disabled": "此工作区已关闭 {{module}} 模块。管理员可在“模块 > 解决方案包”中开启。",
     "conv.stage_upload": "正在上传文件",
     "conv.stage_upload_hint": "正在将文件发送到服务器。上传完成前请保持此标签页打开。",
     "conv.stage_converter": "正在准备转换器",

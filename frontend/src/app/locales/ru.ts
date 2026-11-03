@@ -63673,6 +63673,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Заказ на закупку не найден.",
     "api_errors.invoice_capture_po_not_billable": "Заказ {{po_number}} пока нельзя выставить к оплате: счёт можно привязать только к выпущенному заказу.",
     "api_errors.invoice_capture_invoice_read_only": "Утверждённый или проведённый счёт доступен только для чтения. Сначала верните его в черновик.",
+    "api_errors.module_disabled": "Модуль {{module}} отключён для этого рабочего пространства. Администратор может включить его в разделе Модули > Пакеты решений.",
     "conv.stage_upload": "Загрузка файла",
     "conv.stage_upload_hint": "Файл отправляется на сервер. Не закрывайте вкладку до завершения.",
     "conv.stage_converter": "Подготовка конвертера",

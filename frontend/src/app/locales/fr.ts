@@ -63373,6 +63373,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Bon de commande introuvable.",
     "api_errors.invoice_capture_po_not_billable": "La commande {{po_number}} ne peut pas encore être facturée : seule une commande émise peut l'être.",
     "api_errors.invoice_capture_invoice_read_only": "Une facture approuvée ou comptabilisée est en lecture seule. Repassez-la d'abord en brouillon.",
+    "api_errors.module_disabled": "Le module {{module}} est désactivé pour cet espace de travail. Un administrateur peut l'activer dans Modules > Packs de solutions.",
     "conv.stage_upload": "Envoi du fichier",
     "conv.stage_upload_hint": "Le fichier est envoyé au serveur. Gardez cet onglet ouvert jusqu'à la fin.",
     "conv.stage_converter": "Préparation du convertisseur",

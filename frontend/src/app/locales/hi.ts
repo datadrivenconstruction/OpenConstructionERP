@@ -60462,6 +60462,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "खरीद आदेश नहीं मिला।",
     "api_errors.invoice_capture_po_not_billable": "आदेश {{po_number}} का अभी चालान नहीं बन सकता: केवल जारी किए गए आदेश का चालान बन सकता है।",
     "api_errors.invoice_capture_invoice_read_only": "स्वीकृत या पोस्ट किया गया चालान केवल पढ़ने के लिए है। पहले इसे ड्राफ़्ट में वापस करें।",
+    "api_errors.module_disabled": "इस वर्कस्पेस के लिए {{module}} मॉड्यूल बंद है। व्यवस्थापक इसे मॉड्यूल > समाधान पैकेज में चालू कर सकता है।",
     "conv.stage_upload": "फ़ाइल अपलोड हो रही है",
     "conv.stage_upload_hint": "फ़ाइल सर्वर को भेजी जा रही है। पूरा होने तक यह टैब खुला रखें।",
     "conv.stage_converter": "कन्वर्टर तैयार हो रहा है",

@@ -240,6 +240,12 @@ export function extractErrorMessageFromBody(body: unknown): string | null {
 
   const obj = body as Record<string, unknown>;
 
+  // Route guard refusal: the workspace's solution packages hide this module.
+  if (obj.detail === 'module_disabled') {
+    const module = typeof obj.module === 'string' ? obj.module : '';
+    return i18next.t('api_errors.module_disabled', { module });
+  }
+
   // FastAPI HTTPException — `detail` as a string
   if (typeof obj.detail === 'string' && obj.detail.length > 0) {
     return obj.detail;

@@ -60211,6 +60211,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "ไม่พบใบสั่งซื้อ",
     "api_errors.invoice_capture_po_not_billable": "ใบสั่งซื้อ {{po_number}} ยังออกใบแจ้งหนี้ไม่ได้ เฉพาะใบสั่งซื้อที่ออกแล้วเท่านั้นที่ออกใบแจ้งหนี้ได้",
     "api_errors.invoice_capture_invoice_read_only": "ใบแจ้งหนี้ที่อนุมัติหรือลงบัญชีแล้วเป็นแบบอ่านอย่างเดียว ให้ย้อนกลับเป็นฉบับร่างก่อน",
+    "api_errors.module_disabled": "โมดูล {{module}} ถูกปิดสำหรับพื้นที่ทำงานนี้ ผู้ดูแลระบบสามารถเปิดได้ที่ โมดูล > แพ็กเกจโซลูชัน",
     "conv.stage_upload": "กำลังอัปโหลดไฟล์",
     "conv.stage_upload_hint": "กำลังส่งไฟล์ไปยังเซิร์ฟเวอร์ โปรดเปิดแท็บนี้ค้างไว้จนกว่าจะเสร็จ",
     "conv.stage_converter": "กำลังเตรียมตัวแปลง",

@@ -60800,6 +60800,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Narudžbenica nije pronađena.",
     "api_errors.invoice_capture_po_not_billable": "Narudžbenica {{po_number}} još se ne može fakturirati: fakturirati se može samo izdana narudžbenica.",
     "api_errors.invoice_capture_invoice_read_only": "Odobren ili knjižen račun samo je za čitanje. Prvo ga vratite u skicu.",
+    "api_errors.module_disabled": "Modul {{module}} isključen je za ovaj radni prostor. Administrator ga može uključiti u Moduli > Paketi rješenja.",
     "conv.stage_upload": "Prijenos datoteke",
     "conv.stage_upload_hint": "Šaljemo datoteku na server. Ostavite karticu otvorenom dok ne završi.",
     "conv.stage_converter": "Priprema konvertera",

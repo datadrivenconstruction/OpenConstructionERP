@@ -61074,6 +61074,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Inköpsordern hittades inte.",
     "api_errors.invoice_capture_po_not_billable": "Order {{po_number}} kan inte faktureras än: bara en utfärdad order kan faktureras.",
     "api_errors.invoice_capture_invoice_read_only": "En godkänd eller bokförd faktura är skrivskyddad. Flytta tillbaka den till utkast först.",
+    "api_errors.module_disabled": "Modulen {{module}} är avstängd för den här arbetsytan. En administratör kan slå på den under Moduler > Lösningspaket.",
     "conv.stage_upload": "Laddar upp filen",
     "conv.stage_upload_hint": "Filen skickas till servern. Håll fliken öppen tills det är klart.",
     "conv.stage_converter": "Förbereder konverteraren",

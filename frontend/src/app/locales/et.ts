@@ -60409,6 +60409,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Ostutellimust ei leitud.",
     "api_errors.invoice_capture_po_not_billable": "Tellimust {{po_number}} ei saa veel arveldada: arveldada saab ainult väljastatud tellimust.",
     "api_errors.invoice_capture_invoice_read_only": "Kinnitatud või kantud arve on kirjutuskaitstud. Viige see esmalt tagasi mustandiks.",
+    "api_errors.module_disabled": "Moodul {{module}} on selles tööruumis välja lülitatud. Administraator saab selle sisse lülitada jaotises Moodulid > Lahenduspaketid.",
     "conv.stage_upload": "Faili üleslaadimine",
     "conv.stage_upload_hint": "Faili saatmine serverisse. Hoidke vahekaart avatuna, kuni see lõpeb.",
     "conv.stage_converter": "Teisendaja ettevalmistamine",

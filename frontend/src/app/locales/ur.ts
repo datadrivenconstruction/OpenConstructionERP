@@ -60425,6 +60425,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "خریداری کا آرڈر نہیں ملا۔",
     "api_errors.invoice_capture_po_not_billable": "آرڈر {{po_number}} کا ابھی بل نہیں بن سکتا: صرف جاری شدہ آرڈر کا بل بن سکتا ہے۔",
     "api_errors.invoice_capture_invoice_read_only": "منظور شدہ یا پوسٹ شدہ انوائس صرف پڑھنے کے لیے ہے۔ پہلے اسے مسودے میں واپس کریں۔",
+    "api_errors.module_disabled": "ماڈیول {{module}} اس ورک اسپیس کے لیے بند ہے۔ ایڈمنسٹریٹر اسے ماڈیولز > سلوشن پیکجز میں آن کر سکتا ہے۔",
     "conv.stage_upload": "فائل اپ لوڈ ہو رہی ہے",
     "conv.stage_upload_hint": "فائل سرور کو بھیجی جا رہی ہے۔ مکمل ہونے تک یہ ٹیب کھلا رکھیں۔",
     "conv.stage_converter": "Converter تیار ہو رہا ہے",

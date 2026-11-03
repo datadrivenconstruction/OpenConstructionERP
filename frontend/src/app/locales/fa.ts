@@ -60419,6 +60419,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "سفارش خرید یافت نشد.",
     "api_errors.invoice_capture_po_not_billable": "سفارش {{po_number}} هنوز قابل صدور صورتحساب نیست: فقط سفارش صادرشده قابل صدور صورتحساب است.",
     "api_errors.invoice_capture_invoice_read_only": "صورتحساب تأییدشده یا ثبت‌شده فقط‌خواندنی است. ابتدا آن را به پیش‌نویس برگردانید.",
+    "api_errors.module_disabled": "ماژول {{module}} برای این فضای کاری خاموش است. مدیر می‌تواند آن را از ماژول‌ها > بسته‌های راهکار روشن کند.",
     "conv.stage_upload": "در حال بارگذاری فایل",
     "conv.stage_upload_hint": "فایل به سرور ارسال می‌شود. تا پایان کار این زبانه را باز نگه دارید.",
     "conv.stage_converter": "آماده‌سازی مبدل",

@@ -60790,6 +60790,7 @@ const resource = {
     "api_errors.invoice_capture_po_not_found": "Comanda de achiziție nu a fost găsită.",
     "api_errors.invoice_capture_po_not_billable": "Comanda {{po_number}} nu poate fi facturată încă: poate fi facturată doar o comandă emisă.",
     "api_errors.invoice_capture_invoice_read_only": "O factură aprobată sau înregistrată este doar în citire. Readuceți-o mai întâi la ciornă.",
+    "api_errors.module_disabled": "Modulul {{module}} este dezactivat pentru acest spațiu de lucru. Un administrator îl poate activa din Module > Pachete de soluții.",
     "conv.stage_upload": "Se încarcă fișierul",
     "conv.stage_upload_hint": "Fișierul se trimite către server. Lasă fila deschisă până se termină.",
     "conv.stage_converter": "Se pregătește convertorul",
