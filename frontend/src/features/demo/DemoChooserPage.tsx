@@ -13,6 +13,26 @@ import { DEMO_PROFILES } from '@/shared/lib/demoProfiles';
 import { fmtNumber } from '@/shared/lib/formatters';
 import { navGroups } from '@/app/layout/navCatalog';
 import { useDemoProjects } from '@/shared/ui/DemoSwitcherBar';
+import { HexMark, type HexBuildingKind } from '@/shared/ui/HexMark';
+import { companyThumbFor } from '@/features/cases/caseFaces';
+
+/**
+ * The picture in each card's hex: the site scene of the company type the demo
+ * plays (the same thumbs the Cases hub uses), and a building drawing when none.
+ */
+const DEMO_FACE: Record<string, { companyType: string; kind: HexBuildingKind }> = {
+  'consultancy-riyadh': { companyType: 'architecture_engineering', kind: 'tower' },
+  'contractor-jeddah': { companyType: 'general_contractor', kind: 'tower' },
+  'site-development-dammam': { companyType: 'civil_infrastructure', kind: 'bridge' },
+  'full-showcase-riyadh': { companyType: 'full_enterprise', kind: 'hospital' },
+  'residential-riyadh-offplan': { companyType: 'real_estate_developer', kind: 'residential' },
+};
+
+export function demoFaceFor(slug: string): { src: string | null; kind: HexBuildingKind } {
+  const face = DEMO_FACE[slug];
+  if (!face) return { src: null, kind: 'warehouse' };
+  return { src: companyThumbFor(face.companyType), kind: face.kind };
+}
 
 export function DemoChooserPage() {
   const { t } = useTranslation();
@@ -21,7 +41,7 @@ export function DemoChooserPage() {
   const cards = DEMO_PROFILES.filter((p) => bySlug.has(p.slug));
 
   return (
-    <div className="mx-auto max-w-6xl py-6">
+    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
       <header className="mb-8 text-center">
         <h1 className="text-sm font-semibold uppercase tracking-wide text-content-tertiary">
           {t('demo_switcher.label', { defaultValue: 'Demo projects' })}
@@ -43,27 +63,29 @@ export function DemoChooserPage() {
         </p>
       )}
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-8 pt-3 sm:grid-cols-2 lg:grid-cols-3">
         {cards.map((profile) => {
           const accent = ACCENT_SWATCH[profile.appearance.accent];
           const sections = profile.groups ? profile.groups.length : allSections;
           const list = [1, 2, 3].map((i) => t(`${profile.stem}.point_${i}`));
+          const face = demoFaceFor(profile.slug);
           return (
             <button
               key={profile.slug}
               type="button"
               onClick={() => open(profile.slug)}
               data-testid={`demo-card-${profile.slug}`}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-border-light bg-surface-primary text-start shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+              className="group relative flex min-w-0 flex-col rounded-2xl border border-border-light bg-surface-primary text-start shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               style={{ outlineColor: accent }}
             >
-              <div className="h-2 w-full" style={{ backgroundColor: accent }} />
+              <HexMark src={face.src} kind={face.kind} accent={accent} size={64} className="-top-4 -start-4" />
+              <div className="h-2 w-full rounded-t-2xl" style={{ backgroundColor: accent }} />
               <div className="flex flex-1 flex-col p-6">
-                <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: accent }}>
+                <p className="ps-12 text-xs font-semibold uppercase tracking-wide" style={{ color: accent }}>
                   {t(`${profile.stem}.audience`)}
                 </p>
                 <h2
-                  className="mt-1 text-xl font-bold text-content-primary"
+                  className="mt-1 ps-12 text-xl font-bold text-content-primary"
                   style={{ fontFamily: FONT_STACK[profile.appearance.font] }}
                 >
                   {t(`${profile.stem}.title`)}
