@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Les avenants de sous-traitance de {code} totalisent {sub_total}, soit plus que la valeur de la modification du maître d'ouvrage {owner_value}",
       "suggestion": "Vérifiez les prix du sous-traitant ou récupérez l'écart auprès du maître d'ouvrage avant d'approuver"
+    },
+    "change_owner_approved": {
+      "fail": "L'avenant de sous-traitance {code} est en back-to-back, mais la modification du maître d'ouvrage n'est pas encore approuvée (statut : {status})",
+      "suggestion": "Attendez l'approbation de la modification par le maître d'ouvrage avant d'approuver l'avenant de sous-traitance"
+    },
+    "change_time_within_owner": {
+      "fail": "Les impacts de délai des sous-traitants pour {code} totalisent {sub_days} jours, soit plus que les {owner_days} jours accordés par le maître d'ouvrage",
+      "suggestion": "Vérifiez les demandes de délai des sous-traitants ou demandez au maître d'ouvrage une prolongation équivalente"
     }
   },
   "submittal": {

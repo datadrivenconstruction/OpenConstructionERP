@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Zmiany podwykonawcze dla {code} wynoszą razem {sub_total}, więcej niż wartość zmiany inwestora {owner_value}",
       "suggestion": "Sprawdź ceny podwykonawcy lub odzyskaj różnicę od inwestora przed zatwierdzeniem"
+    },
+    "change_owner_approved": {
+      "fail": "Zmiana podwykonawcy {code} jest typu back-to-back, ale zmiana inwestora nie została jeszcze zatwierdzona (status: {status})",
+      "suggestion": "Poczekaj na zatwierdzenie zmiany przez inwestora, zanim zatwierdzisz zmianę podwykonawcy"
+    },
+    "change_time_within_owner": {
+      "fail": "Wpływ podwykonawców na termin dla {code} wynosi łącznie {sub_days} dni, więcej niż {owner_days} dni przyznanych przez inwestora",
+      "suggestion": "Sprawdź roszczenia podwykonawców dotyczące czasu lub poproś inwestora o odpowiednie przedłużenie"
     }
   },
   "submittal": {

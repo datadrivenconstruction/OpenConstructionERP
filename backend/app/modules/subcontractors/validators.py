@@ -886,3 +886,35 @@ def check_change_margin(change: dict[str, Any]) -> list[Finding]:
             details={"sub_total": str(sub_total), "owner_value": str(owner_value)},
         )
     ]
+
+
+def check_change_owner_approved(change: dict[str, Any]) -> list[Finding]:
+    """A back-to-back change must not be approved before the owner change it mirrors."""
+    if not change.get("back_to_back") or not change.get("owner_change_id"):
+        return []
+    if change.get("owner_change_approved") is not False:
+        return []
+    return [
+        Finding(
+            element_ref=_change_ref(change),
+            params={"code": _change_ref(change), "status": str(change.get("owner_change_status") or "-")},
+            details={"owner_change_status": str(change.get("owner_change_status") or "")},
+        )
+    ]
+
+
+def check_change_time_within_owner(change: dict[str, Any]) -> list[Finding]:
+    """Subcontract time claims should not add up to more days than the owner granted."""
+    owner_days = change.get("owner_time_days")
+    linked = change.get("linked_time_days")
+    if owner_days is None or linked is None or not change.get("owner_change_id"):
+        return []
+    if int(linked) <= int(owner_days):
+        return []
+    return [
+        Finding(
+            element_ref=_change_ref(change),
+            params={"code": _change_ref(change), "sub_days": str(int(linked)), "owner_days": str(int(owner_days))},
+            details={"sub_days": int(linked), "owner_days": int(owner_days)},
+        )
+    ]

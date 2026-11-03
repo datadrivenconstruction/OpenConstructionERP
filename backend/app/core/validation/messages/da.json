@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Underentreprisetillæggene for {code} udgør i alt {sub_total}, mere end bygherrens ændringsværdi {owner_value}",
       "suggestion": "Kontroller underentreprenørens priser, eller kræv forskellen hos bygherren, før du godkender"
+    },
+    "change_owner_approved": {
+      "fail": "Underentreprisetillægget {code} er back-to-back, men bygherrens ændring er endnu ikke godkendt (status: {status})",
+      "suggestion": "Vent på, at bygherren godkender ændringen, før underentreprisetillægget godkendes"
+    },
+    "change_time_within_owner": {
+      "fail": "Underentreprenørernes tidspåvirkning for {code} er i alt {sub_days} dage, mere end de {owner_days} dage bygherren har givet",
+      "suggestion": "Kontroller underentreprenørernes tidskrav, eller bed bygherren om en tilsvarende forlængelse"
     }
   },
   "submittal": {

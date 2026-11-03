@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Izmjene podugovora za {code} iznose ukupno {sub_total}, više od vrijednosti izmjene naručitelja {owner_value}",
       "suggestion": "Provjerite cijene podizvođača ili naplatite razliku od naručitelja prije odobrenja"
+    },
+    "change_owner_approved": {
+      "fail": "Izmjena podugovora {code} je back-to-back, ali izmjena naručitelja još nije odobrena (status: {status})",
+      "suggestion": "Pričekajte da naručitelj odobri izmjenu prije odobravanja izmjene podugovora"
+    },
+    "change_time_within_owner": {
+      "fail": "Vremenski utjecaji podugovora za {code} ukupno iznose {sub_days} dana, više od {owner_days} dana koje je odobrio naručitelj",
+      "suggestion": "Provjerite zahtjeve podizvođača za vrijeme ili od naručitelja zatražite odgovarajuće produljenje"
     }
   },
   "submittal": {

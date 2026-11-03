@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Underentreprenadändringarna för {code} uppgår till {sub_total}, mer än beställarens ändringsvärde {owner_value}",
       "suggestion": "Kontrollera underentreprenörens priser eller driv in skillnaden från beställaren innan du godkänner"
+    },
+    "change_owner_approved": {
+      "fail": "Underentreprenadändringen {code} är back-to-back, men beställarens ändring är ännu inte godkänd (status: {status})",
+      "suggestion": "Vänta på att beställaren godkänner ändringen innan underentreprenadändringen godkänns"
+    },
+    "change_time_within_owner": {
+      "fail": "Underentreprenörernas tidspåverkan för {code} uppgår till {sub_days} dagar, mer än de {owner_days} dagar beställaren beviljat",
+      "suggestion": "Kontrollera underentreprenörernas tidskrav eller begär motsvarande förlängning från beställaren"
     }
   },
   "submittal": {

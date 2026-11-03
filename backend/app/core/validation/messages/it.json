@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Le varianti di subappalto per {code} sommano {sub_total}, più del valore della modifica del committente {owner_value}",
       "suggestion": "Verificate i prezzi del subappaltatore o recuperate la differenza dal committente prima di approvare"
+    },
+    "change_owner_approved": {
+      "fail": "La variante di subappalto {code} è back-to-back, ma la variante del committente non è ancora approvata (stato: {status})",
+      "suggestion": "Attendere l'approvazione della variante da parte del committente prima di approvare la variante di subappalto"
+    },
+    "change_time_within_owner": {
+      "fail": "Gli impatti sui tempi dei subappalti per {code} sommano {sub_days} giorni, più dei {owner_days} giorni concessi dal committente",
+      "suggestion": "Verificare le richieste di tempo dei subappaltatori o chiedere al committente una proroga equivalente"
     }
   },
   "submittal": {

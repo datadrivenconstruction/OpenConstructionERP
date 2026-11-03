@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code}의 하도급 변경 합계 {sub_total}이(가) 발주자 변경 금액 {owner_value}보다 큽니다",
       "suggestion": "승인 전에 하도급 단가를 확인하거나 차액을 발주자에게 청구하세요"
+    },
+    "change_owner_approved": {
+      "fail": "하도급 변경 {code}은(는) 백투백이지만 발주자 변경이 아직 승인되지 않았습니다(상태: {status})",
+      "suggestion": "하도급 변경을 승인하기 전에 발주자의 변경 승인을 기다리십시오"
+    },
+    "change_time_within_owner": {
+      "fail": "{code}의 하도급 공기 영향은 총 {sub_days}일로, 발주자가 인정한 {owner_days}일보다 많습니다",
+      "suggestion": "하도급업체의 공기 청구를 확인하거나 발주자에게 동일한 연장을 요청하십시오"
     }
   },
   "submittal": {

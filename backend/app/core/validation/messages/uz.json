@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "{code} bo'yicha pudrat osti o'zgarishlari jami {sub_total}, bu buyurtmachi o'zgarishi qiymati {owner_value} dan ko'p",
       "suggestion": "Tasdiqlashdan oldin pudrat osti narxlarini tekshiring yoki farqni buyurtmachidan undiring"
+    },
+    "change_owner_approved": {
+      "fail": "{code} pudrat osti o'zgarishi «orqama-orqa» turida, lekin buyurtmachining o'zgarishi hali tasdiqlanmagan (holati: {status})",
+      "suggestion": "Pudrat osti o'zgarishini tasdiqlashdan oldin buyurtmachi o'zgarishni tasdiqlashini kuting"
+    },
+    "change_time_within_owner": {
+      "fail": "{code} bo'yicha pudratchilarning vaqtga ta'siri jami {sub_days} kun, buyurtmachi bergan {owner_days} kundan ko'p",
+      "suggestion": "Pudratchilarning muddat talablarini tekshiring yoki buyurtmachidan mos uzaytirishni so'rang"
     }
   },
   "submittal": {

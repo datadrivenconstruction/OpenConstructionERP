@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Aliurakan muutokset kohteelle {code} ovat yhteensä {sub_total}, enemmän kuin tilaajan muutoksen arvo {owner_value}",
       "suggestion": "Tarkista aliurakoitsijan hinnat tai peri erotus tilaajalta ennen hyväksyntää"
+    },
+    "change_owner_approved": {
+      "fail": "Aliurakan muutos {code} on back-to-back, mutta tilaajan muutosta ei ole vielä hyväksytty (tila: {status})",
+      "suggestion": "Odota tilaajan hyväksyntää ennen aliurakan muutoksen hyväksymistä"
+    },
+    "change_time_within_owner": {
+      "fail": "Aliurakoitsijoiden aikavaikutukset kohteessa {code} ovat yhteensä {sub_days} päivää, enemmän kuin tilaajan myöntämät {owner_days} päivää",
+      "suggestion": "Tarkista aliurakoitsijoiden aikavaatimukset tai pyydä tilaajalta vastaava jatkoaika"
     }
   },
   "submittal": {

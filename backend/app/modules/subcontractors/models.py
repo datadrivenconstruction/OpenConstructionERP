@@ -351,6 +351,11 @@ class SubcontractChange(Base):
     plain GUID with no FK. Approval adds ``amount`` to the agreement value
     once (``applied_amount`` records what was added) and the commitment
     follows through the finance budget sync.
+
+    Pass-through economics: ``owner_amount`` is the owner-granted value this
+    change mirrors, ``markup_pct`` the GC fee kept on a back-to-back pass-through,
+    ``time_impact_days`` the signed schedule effect and ``owner_time_days`` the
+    days the owner granted.
     """
 
     __tablename__ = "oe_subcontractors_change"
@@ -387,6 +392,10 @@ class SubcontractChange(Base):
     # What approval added to the agreement value; NULL until approved, so a
     # replayed approval never adds it twice.
     applied_amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    owner_amount: Mapped[Decimal | None] = mapped_column(Numeric(18, 2), nullable=True)
+    markup_pct: Mapped[Decimal] = mapped_column(Numeric(7, 3), nullable=False, default=Decimal("0"), server_default="0")
+    time_impact_days: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    owner_time_days: Mapped[int | None] = mapped_column(Integer, nullable=True)
     created_by: Mapped[str | None] = mapped_column(String(36), nullable=True)
     metadata_: Mapped[dict] = mapped_column(  # type: ignore[assignment]
         "metadata",

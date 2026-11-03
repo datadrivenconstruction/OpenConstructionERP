@@ -917,6 +917,14 @@
     "change_within_owner_value": {
       "fail": "Los cambios de subcontrato de {code} suman {sub_total}, más que el valor del cambio del propietario {owner_value}",
       "suggestion": "Revise los precios del subcontrato o recupere la diferencia del propietario antes de aprobar"
+    },
+    "change_owner_approved": {
+      "fail": "El cambio de subcontrato {code} es back-to-back, pero el cambio del propietario aún no está aprobado (estado: {status})",
+      "suggestion": "Espere a que el propietario apruebe el cambio antes de aprobar el cambio de subcontrato"
+    },
+    "change_time_within_owner": {
+      "fail": "Los impactos de plazo de los subcontratos de {code} suman {sub_days} días, más de los {owner_days} días concedidos por el propietario",
+      "suggestion": "Revise las reclamaciones de plazo de los subcontratistas o solicite al propietario una ampliación equivalente"
     }
   },
   "submittal": {

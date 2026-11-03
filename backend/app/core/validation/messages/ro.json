@@ -899,6 +899,14 @@
     "change_within_owner_value": {
       "fail": "Modificările de subcontract pentru {code} însumează {sub_total}, mai mult decât valoarea modificării beneficiarului {owner_value}",
       "suggestion": "Verificați prețurile subcontractorului sau recuperați diferența de la beneficiar înainte de aprobare"
+    },
+    "change_owner_approved": {
+      "fail": "Modificarea de subcontract {code} este back-to-back, dar modificarea beneficiarului nu este încă aprobată (stare: {status})",
+      "suggestion": "Așteptați aprobarea modificării de către beneficiar înainte de a aproba modificarea de subcontract"
+    },
+    "change_time_within_owner": {
+      "fail": "Impacturile de timp ale subcontractelor pentru {code} însumează {sub_days} zile, mai mult decât cele {owner_days} zile acordate de beneficiar",
+      "suggestion": "Verificați cererile de timp ale subcontractorilor sau cereți beneficiarului o prelungire echivalentă"
     }
   },
   "submittal": {
