@@ -443,7 +443,7 @@ DOCUMENT_TYPES: dict[str, DocumentType] = {
             "Payment application (G702/G703)",
             "settings.document_templates.types.pay_application",
             _LETTERHEAD_FIELDS,
-            # app.modules.contracts.aia_pdf. The top margin is the 18 mm a form
+            # app.modules.us_pack.aia_pdf. The top margin is the 18 mm a form
             # with a letterhead or a logo gets; one with neither starts at 14.
             DocumentSheet("LETTER", True, (14.0, 14.0, 18.0, 14.0), _SIMPLE_DOC_PADDING),
         ),

@@ -173,8 +173,8 @@ async def test_the_certificate_face_agrees_with_the_register(pg_session) -> None
     claim register shows, which is worse than an empty sheet because it looks
     finished.
     """
-    from app.modules.contracts.aia import build_g702_summary, build_g703
     from app.modules.contracts.models import Contract, ContractLine, ProgressClaim, ProgressClaimLine
+    from app.modules.contracts.pay_application import build_g702_summary, build_g703
     from app.modules.contracts.seed import seed_contracts_demo
 
     pid = await _make_demo_project(pg_session)

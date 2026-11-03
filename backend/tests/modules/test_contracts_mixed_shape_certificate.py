@@ -35,7 +35,7 @@ flat branch is right on a uniform contract, and the passing lump-sum case is
 here to localize the fault: the same stored value on the retention engine's
 path produces a certificate that does agree, so the defect is the flat
 branch in ``roll_claim_retention`` and not the certificate builder. Without
-that case a reader can conclude ``build_aia_application`` is broken in
+that case a reader can conclude ``build_form_application`` is broken in
 general and go and change the wrong file.
 
 One xfail mark is left, on the stored-material case, and it is strict, so
@@ -56,7 +56,7 @@ import pytest_asyncio
 from app.core.events import event_bus
 from app.core.i18n import get_locale, load_translations, set_locale
 from app.modules.contracts.models import Contract, ContractLine, ProgressClaim
-from app.modules.contracts.router import create_claim_line, export_aia_application_pdf, get_aia_application
+from app.modules.contracts.router import create_claim_line, export_form_application_pdf, get_form_application
 from app.modules.contracts.schemas import AIAApplicationResponse, AutoGenerateClaimRequest, ProgressClaimLineCreate
 from app.modules.contracts.service import BOQ_POSITION_META_KEY, ContractsService
 from app.modules.projects.models import Project
@@ -173,7 +173,7 @@ async def _certify(session, claim: ProgressClaim) -> None:
 
 
 async def _certificate(session, claim: ProgressClaim) -> dict:
-    return (await ContractsService(session).build_aia_application(claim.id))["summary"]
+    return (await ContractsService(session).build_form_application("aia-application", claim.id))["summary"]
 
 
 # ── The rule holds while every month has the same shape ───────────────────
@@ -229,7 +229,7 @@ async def test_the_row_carrying_march_leaves_scheduled_percent_and_balance_empty
     await _certify(session, await _generated(session, job, "PC-1", 3, "10000"))
     april = await _with_line(session, job, "PC-2", 4, "10000")
 
-    payload = await ContractsService(session).build_aia_application(april.id)
+    payload = await ContractsService(session).build_form_application("aia-application", april.id)
     lines = AIAApplicationResponse.model_validate(payload).model_dump(mode="json")["lines"]
 
     assert len(lines) == 2
@@ -282,7 +282,7 @@ async def test_the_row_carrying_march_is_described_in_the_language_of_the_screen
 
     _read_in(locale)
     try:
-        response = await get_aia_application(april.id, session, str(OWNER_ID))
+        response = await get_form_application(april.id, "aia-application", session, str(OWNER_ID))
     finally:
         set_locale("en")
 
@@ -301,7 +301,7 @@ async def test_the_printed_form_describes_that_row_in_english_like_the_rest_of_t
 
     _read_in("de")
     try:
-        response = await export_aia_application_pdf(april.id, session, str(OWNER_ID))
+        response = await export_form_application_pdf(april.id, "aia-application", session, str(OWNER_ID))
         chunks: list[bytes] = []
         async for chunk in response.body_iterator:
             chunks.append(chunk.encode() if isinstance(chunk, str) else bytes(chunk))
