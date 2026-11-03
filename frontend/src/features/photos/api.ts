@@ -45,6 +45,7 @@ export interface ArchivePhoto {
   sha256: string | null;
   source_module: string;
   source_id: string | null;
+  category_suggestion?: Record<string, unknown> | null;
   thumb_status: 'pending' | 'ready' | 'failed' | 'skipped' | string;
   location_id: string | null;
   zone: string | null;

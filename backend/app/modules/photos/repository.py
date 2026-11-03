@@ -54,6 +54,7 @@ class PhotoFilters:
     date_from: datetime | None = None
     date_to: datetime | None = None
     source: str | None = None
+    category: str | None = None
     target_kind: str | None = None
     target_id: str | None = None
     has_gps: bool | None = None
@@ -91,6 +92,8 @@ class PhotosRepository:
             )
         if f.source:
             stmt = stmt.where(ProjectPhoto.source_module == f.source)
+        if f.category:
+            stmt = stmt.where(ProjectPhoto.category == f.category)
         if f.date_from is not None:
             stmt = stmt.where(_sort_at() >= f.date_from)
         if f.date_to is not None:
