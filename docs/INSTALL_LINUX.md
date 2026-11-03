@@ -256,6 +256,18 @@ OE_CSP_CONNECT_SRC_EXTRA=https://tiles.example.com,https://maps.example.com:8443
 
 Only `https://host[:port]` origins and `http://localhost[:port]` are accepted. Paths, wildcards and other plain-http hosts are logged once at startup and dropped. Restart the service after changing it.
 
+## 6c. Scanned drawing sheets (optional OCR)
+
+A scanned sheet has no text layer. With Tesseract installed, the title block corner is read by OCR and
+the sheet is flagged for review; without it the sheet is still created and flagged `ocr_unavailable`.
+
+```bash
+sudo apt install tesseract-ocr    # ~40 MB disk, ~150 MB RAM transient per page
+pip install pytesseract
+```
+
+Set `OE_SHEET_OCR_LANGS` (Tesseract codes, default `eng`, e.g. `eng+deu`) for non-Latin title blocks.
+
 ## 7. BIM/CAD converters (.rvt / .ifc / .dwg)
 
 Native CAD/BIM files are turned into element data (and, for RVT, 3D geometry) by

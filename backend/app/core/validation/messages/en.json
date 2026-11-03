@@ -1537,5 +1537,23 @@
       "fail": "Agent draft '{title}' has waited {days} days for review (limit {limit}).",
       "suggestion": "Accept or reject the draft, or switch off the agent if its drafts are not used."
     }
+  },
+  "sheet": {
+    "number_present": {
+      "fail": "Page {page} has no readable sheet number",
+      "suggestion": "Enter the sheet number from the title block"
+    },
+    "number_unique_in_set": {
+      "fail": "Sheet number {sheet} appears on {count} pages of this upload",
+      "suggestion": "Check the drawing set for a duplicated or misnumbered page"
+    },
+    "revision_not_lower_than_current": {
+      "fail": "Sheet {sheet} revision {revision} is lower than the current revision {current}",
+      "suggestion": "Confirm this is an older issue before it is stacked into the history"
+    },
+    "low_confidence_unconfirmed": {
+      "fail": "Sheet {sheet} was read by OCR at {confidence} and is not confirmed",
+      "suggestion": "Check the title block fields and confirm the reading"
+    }
   }
 }

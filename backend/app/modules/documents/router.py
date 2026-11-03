@@ -25,6 +25,7 @@ import mimetypes
 import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Query, Response, UploadFile, status
 from fastapi.responses import FileResponse
@@ -975,6 +976,7 @@ async def list_sheets(
     revision: str | None = Query(default=None),
     document_id: str | None = Query(default=None),
     current_only: bool = Query(default=False),
+    needs_review: bool | None = Query(default=None),
     offset: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
     user_id: CurrentUserId = None,  # type: ignore[assignment]
@@ -997,6 +999,7 @@ async def list_sheets(
         revision=revision,
         document_id=document_id,
         current_only=current_only,
+        needs_review=needs_review,
     )
     response.headers["X-Total-Count"] = str(total)
     return SheetListResponse(
@@ -1031,6 +1034,7 @@ async def split_pdf(
     project_id: uuid.UUID = Query(...),
     file: UploadFile = File(...),
     content_length: int | None = Header(default=None),
+    response: Response = None,  # type: ignore[assignment]
     user_id: CurrentUserId = "",  # type: ignore[assignment]
     _perm: None = Depends(RequirePermission("documents.create")),
     service: SheetService = Depends(_get_sheet_service),
@@ -1045,6 +1049,9 @@ async def split_pdf(
     # No upload size cap - per product policy.
     try:
         sheets = await service.split_pdf_to_sheets(project_id, file, user_id)
+        response.headers["X-Needs-Review"] = str(
+            sum(1 for s in sheets if (s.metadata_ or {}).get("extraction", {}).get("needs_review"))
+        )
         return [_sheet_to_response(s) for s in sheets]
     except HTTPException:
         raise
@@ -1054,6 +1061,48 @@ async def split_pdf(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to split PDF into sheets",
         )
+
+
+@router.post("/sheets/confirm-extractions/")
+async def confirm_extractions(
+    session: SessionDep,
+    project_id: uuid.UUID = Query(...),
+    min_confidence: float = Query(default=0.8, ge=0.0, le=1.0),
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> dict[str, int]:
+    """Confirm every OCR-read sheet of the project at or above ``min_confidence``."""
+    await verify_project_access(project_id, user_id, session)
+    return {"confirmed": await service.confirm_extractions(project_id, min_confidence)}
+
+
+@router.post("/sheets/{sheet_id}/confirm-extraction/", response_model=SheetResponse)
+async def confirm_extraction(
+    sheet_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.update")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> SheetResponse:
+    """Accept the OCR reading of one sheet; a held scan is stacked onto its drawing now."""
+    sheet = await service.get_sheet(sheet_id)
+    await verify_project_access(sheet.project_id, user_id, session)
+    return _sheet_to_response(await service.confirm_extraction(sheet_id))
+
+
+@router.get("/sheets/{sheet_id}/validate/")
+async def validate_sheet(
+    sheet_id: uuid.UUID,
+    session: SessionDep,
+    user_id: CurrentUserId = None,  # type: ignore[assignment]
+    _perm: None = Depends(RequirePermission("documents.read")),
+    service: SheetService = Depends(_get_sheet_service),
+) -> dict[str, Any]:
+    """Failed sheet register rules for one sheet."""
+    sheet = await service.get_sheet(sheet_id)
+    await verify_project_access(sheet.project_id, user_id, session)
+    return await service.validate_sheet(sheet_id)
 
 
 @router.post("/sheets/reread-title-blocks/", response_model=SheetRereadSummary)

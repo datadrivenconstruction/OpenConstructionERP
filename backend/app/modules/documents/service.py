@@ -34,6 +34,7 @@ from app.core.json_merge import merge_metadata
 from app.core.upload_streaming import stream_upload_to_temp
 from app.core.validation.messages import translate
 from app.modules.bim_hub.models import BIMElement
+from app.modules.documents import sheet_ocr
 from app.modules.documents.activity_service import record_activity
 from app.modules.documents.models import Document, DocumentBIMLink, ProjectPhoto, Sheet
 from app.modules.documents.repository import DocumentRepository, PhotoRepository, SheetRepository
@@ -2252,12 +2253,24 @@ def _read_sheet_pages(
     import pdfplumber
 
     pages: list[dict[str, Any]] = []
-    with pdfplumber.open(str(pdf_path)) as pdf:
+    with pdfplumber.open(str(pdf_path)) as pdf, sheet_ocr.TitleBlockOcr(pdf_path) as ocr:
         filename = original_name if len(pdf.pages) == 1 else None
         for page_idx, page in enumerate(pdf.pages):
             page_number = page_idx + 1
             try:
-                info = _page_fields(page, filename)
+                info = None
+                extraction = sheet_ocr.extraction_meta("text")
+                text = page.extract_text() or ""
+                if len(text.strip()) < sheet_ocr.SCAN_CHAR_THRESHOLD:
+                    ocr_read = ocr.read(page_idx)
+                    if ocr_read.text.strip():
+                        info = _page_fields(page, filename, ocr_text=ocr_read.text)
+                        extraction = sheet_ocr.extraction_meta("ocr", ocr_read)
+                    elif not page.chars:
+                        # Nothing to read at all: a blank scan or no engine. Keep the sheet, flag it.
+                        extraction = sheet_ocr.extraction_meta("ocr", ocr_read)
+                if info is None:
+                    info = _page_fields(page, filename, text=text)
 
                 # Generate thumbnail
                 thumbnail_path_str: str | None = None
@@ -2281,17 +2294,28 @@ def _read_sheet_pages(
                 # server whose floor is 3 GB.
                 page.close()
 
-            pages.append({"page_number": page_number, **info, "thumbnail_path": thumbnail_path_str})
+            pages.append(
+                {"page_number": page_number, **info, "thumbnail_path": thumbnail_path_str, "extraction": extraction}
+            )
     return pages
 
 
-def _page_fields(page: Any, filename: str | None) -> dict[str, Any]:
-    """The title block fields of one pdfplumber page, as the ``Sheet`` columns hold them."""
-    info = detect_sheet_info(
-        page.extract_text() or "",
-        title_block_text=_title_block_text(page),
-        filename=filename,
-    )
+def _page_fields(
+    page: Any, filename: str | None, ocr_text: str | None = None, text: str | None = None
+) -> dict[str, Any]:
+    """The title block fields of one pdfplumber page, as the ``Sheet`` columns hold them.
+
+    ``ocr_text`` replaces the text layer for a scanned page: the same parser,
+    fed by the OCR'd title block corner instead.
+    """
+    if ocr_text is not None:
+        info = detect_sheet_info(ocr_text, title_block_text=ocr_text, filename=filename)
+    else:
+        info = detect_sheet_info(
+            page.extract_text() or "" if text is None else text,
+            title_block_text=_title_block_text(page),
+            filename=filename,
+        )
     return {
         "sheet_number": info["sheet_number"],
         "sheet_title": info["sheet_title"],
@@ -2370,10 +2394,12 @@ class SheetService:
         revision: str | None = None,
         document_id: str | None = None,
         current_only: bool = False,
+        needs_review: bool | None = None,
     ) -> tuple[list[Sheet], int]:
         """List sheets for a project with filters."""
         return await self.repo.list_for_project(
             project_id,
+            needs_review=needs_review,
             offset=offset,
             limit=limit,
             discipline=discipline,
@@ -2641,6 +2667,8 @@ class SheetService:
     @staticmethod
     def _apply_reread(sheet: Sheet, read: dict[str, Any]) -> int:
         """Write a re-read's fields onto ``sheet`` where nobody edited them; return how many changed."""
+        if ((sheet.metadata_ or {}).get("extraction") or {}).get("source") == "ocr":
+            return 0  # the text layer is empty on a scan; a re-read would blank what OCR found
         hand_edited = _hand_edited(sheet)
         derived_before = detect_discipline_from_sheet_number(sheet.sheet_number)
 
@@ -2660,6 +2688,68 @@ class SheetService:
             sheet.discipline = derived
             changed += 1
         return changed
+
+    # ── OCR review ─────────────────────────────────────────────────────────
+
+    async def confirm_extraction(self, sheet_id: uuid.UUID) -> Sheet:
+        """Accept an OCR reading: clear the review flag and stack a held scan onto its drawing."""
+        sheet = await self.get_sheet(sheet_id)
+        metadata = dict(sheet.metadata_ or {})
+        extraction = metadata.get("extraction")
+        if not isinstance(extraction, dict) or not extraction.get("needs_review"):
+            return sheet
+        was_held = sheet_ocr.is_held(metadata)
+        metadata["extraction"] = {**extraction, "needs_review": False, "confirmed": True}
+        sheet.metadata_ = metadata
+        if was_held:
+            await self._supersede_previous_sheets(sheet.project_id, [sheet])
+        await self.session.flush()
+        return sheet
+
+    async def validate_sheet(self, sheet_id: uuid.UUID) -> dict[str, Any]:
+        """Run the ``sheet_register`` rules over one sheet (read-only)."""
+        from app.core.validation.engine import validation_engine  # noqa: PLC0415
+
+        sheet = await self.get_sheet(sheet_id)
+        key = sheet_chain_key(sheet.sheet_number)
+        siblings, _ = await self.repo.list_for_project(sheet.project_id, document_id=sheet.document_id, limit=100000)
+        duplicates = sum(1 for o in siblings if o.id != sheet.id and key and sheet_chain_key(o.sheet_number) == key)
+        heads = await self.repo.current_by_chain_key(sheet.project_id)
+        others = [h for h in heads.get(key, []) if h.id != sheet.id and not sheet_ocr.is_held(h.metadata_)]
+        payload = {
+            "sheet_number": sheet.sheet_number,
+            "page_number": sheet.page_number,
+            "revision": sheet.revision,
+            "extraction": (sheet.metadata_ or {}).get("extraction"),
+            "duplicates": duplicates,
+            "current_revision": others[-1].revision if others else None,
+        }
+        report = await validation_engine.validate(
+            data=payload,
+            rule_sets=["sheet_register"],
+            target_type="sheet",
+            target_id=str(sheet.id),
+            project_id=str(sheet.project_id),
+            metadata={"locale": get_locale(), "operation": "read"},
+        )
+        return {
+            "sheet_id": str(sheet.id),
+            "results": [
+                {"rule_id": r.rule_id, "severity": str(r.severity), "message": r.message, "suggestion": r.suggestion}
+                for r in report.results
+                if not r.passed
+            ],
+        }
+
+    async def confirm_extractions(self, project_id: uuid.UUID, min_confidence: float = 0.8) -> int:
+        """Confirm every flagged sheet of the project read at or above ``min_confidence``."""
+        sheets, _ = await self.repo.list_for_project(project_id, limit=100000, needs_review=True)
+        confirmed = 0
+        for sheet in sheets:
+            if float((sheet.metadata_ or {}).get("extraction", {}).get("confidence") or 0.0) >= min_confidence:
+                await self.confirm_extraction(sheet.id)
+                confirmed += 1
+        return confirmed
 
     # ── Split PDF ──────────────────────────────────────────────────────────
 
@@ -2808,11 +2898,13 @@ class SheetService:
         Returns:
             How many existing sheets were retired.
         """
-        numbered = [s for s in sheets if sheet_chain_key(s.sheet_number)]
+        numbered = [s for s in sheets if sheet_chain_key(s.sheet_number) and not sheet_ocr.is_held(s.metadata_)]
         if not numbered:
             return 0
 
         heads = await self.repo.current_by_chain_key(project_id)
+        # A scan held for review is not a head: nothing stacks on a reading nobody has confirmed.
+        heads = {k: [h for h in v if not sheet_ocr.is_held(h.metadata_)] for k, v in heads.items()}
         if not heads:
             return 0
 
@@ -2952,6 +3044,7 @@ class SheetService:
                 is_current=True,
                 thumbnail_path=page["thumbnail_path"],
                 created_by=user_id,
+                metadata_={"extraction": page["extraction"]},
             )
             for page in pages
         ]

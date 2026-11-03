@@ -11044,6 +11044,82 @@ def _reconcile_from_context(context: ValidationContext) -> Any:
     return result
 
 
+class _SheetRule(ValidationRule):
+    """One pure check from ``documents.sheet_checks`` over a sheet payload."""
+
+    standard = "sheet"
+    check_name: str = ""
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        locale = _get_locale(context)
+        payload = context.data if isinstance(context.data, dict) else {}
+        if not payload:
+            return []
+        from app.modules.documents import sheet_checks  # noqa: PLC0415
+
+        findings = getattr(sheet_checks, self.check_name)(payload)
+        if not findings:
+            return [
+                RuleResult(
+                    rule_id=self.rule_id,
+                    rule_name=self.name,
+                    severity=self.severity,
+                    category=self.category,
+                    passed=True,
+                    message=_ok(locale),
+                )
+            ]
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(f"{self.rule_id}.fail", locale=locale, **f.params),
+                element_ref=f.element_ref,
+                suggestion=translate(f"{self.rule_id}.suggestion", locale=locale),
+            )
+            for f in findings
+        ]
+
+
+class SheetNumberPresent(_SheetRule):
+    rule_id = "sheet.number_present"
+    name = "Sheet Number Present"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "A sheet needs a number to be indexed and stacked on its earlier revision."
+    check_name = "check_number_present"
+
+
+class SheetNumberUniqueInSet(_SheetRule):
+    rule_id = "sheet.number_unique_in_set"
+    name = "Sheet Number Unique In Set"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags two pages of one drawing set that carry the same sheet number."
+    check_name = "check_number_unique_in_set"
+
+
+class SheetRevisionNotLower(_SheetRule):
+    rule_id = "sheet.revision_not_lower_than_current"
+    name = "Sheet Revision Not Lower Than Current"
+    severity = Severity.WARNING
+    category = RuleCategory.CONSISTENCY
+    description = "Flags a sheet whose revision is lower than the current one for the same number."
+    check_name = "check_revision_not_lower"
+
+
+class SheetLowConfidenceUnconfirmed(_SheetRule):
+    rule_id = "sheet.low_confidence_unconfirmed"
+    name = "Low Confidence OCR Reading Unconfirmed"
+    severity = Severity.WARNING
+    category = RuleCategory.QUALITY
+    description = "Flags a scanned sheet read with low confidence that nobody has confirmed."
+    check_name = "check_low_confidence_unconfirmed"
+
+
 class SheetCompletenessMissing(ValidationRule):
     rule_id = "sheet_completeness.missing"
     name = "Sheet in index is missing from the set"
@@ -12607,6 +12683,10 @@ def register_builtin_rules() -> None:
         (RFQBidsStillValid(), ["rfq_award"]),
         (RFQAwardHasCompetition(), ["rfq_award"]),
         # Sheet completeness (drawing index / issue register reconciliation)
+        (SheetNumberPresent(), ["sheet_register"]),
+        (SheetNumberUniqueInSet(), ["sheet_register"]),
+        (SheetRevisionNotLower(), ["sheet_register"]),
+        (SheetLowConfidenceUnconfirmed(), ["sheet_register"]),
         (SheetCompletenessMissing(), ["sheet_completeness"]),
         (SheetCompletenessExtra(), ["sheet_completeness"]),
         (SheetRevisionMismatch(), ["sheet_completeness"]),

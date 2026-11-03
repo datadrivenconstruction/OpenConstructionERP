@@ -44,7 +44,8 @@ import { AlertTriangle, ArrowRight, FileText, History, ImageOff, Pencil, Ruler }
 import { Badge, Button, DateDisplay, SideDrawer } from '@/shared/ui';
 import { apiGet } from '@/shared/lib/api';
 import { useHasPermission } from '@/shared/lib/permissionGates';
-import { updateSheet, type SheetPatch } from './api';
+import { confirmSheetExtraction, updateSheet, type SheetPatch } from './api';
+import { confidencePercent, sheetExtraction } from './sheetOcr';
 import { SheetEditForm } from './SheetEditForm';
 import { orderStack, revisionOrderUnclear } from './sheetStack';
 import type { SheetRow } from './types';
@@ -105,6 +106,14 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
         `/v1/documents/sheets/disciplines/?project_id=${encodeURIComponent(projectId)}`,
       ),
     enabled: editing && !!projectId,
+  });
+
+  const confirmMutation = useMutation({
+    mutationFn: () => confirmSheetExtraction(sheet.id),
+    onSuccess: (updated) => {
+      queryClient.invalidateQueries({ queryKey: ['sheets', updated.project_id] });
+      queryClient.invalidateQueries({ queryKey: ['sheet-versions'] });
+    },
   });
 
   const saveMutation = useMutation({
@@ -171,6 +180,38 @@ export function SheetDetailDrawer({ sheet, onClose, onSheetChange }: SheetDetail
             })}
           </p>
         </div>
+
+        {(() => {
+          const ocr = sheetExtraction(sheet);
+          if (!ocr || !ocr.needsReview) return null;
+          return (
+            <div className="mb-3 rounded-lg border border-semantic-warning/30 bg-semantic-warning/5 p-3 text-sm text-content-primary">
+              <p>
+                {ocr.reason === 'ocr_unavailable'
+                  ? t('sheets.ocr_install_hint', {
+                      defaultValue:
+                        'This sheet is a scan and no OCR engine is installed. Enter the title block by hand, or ask your administrator to install tesseract-ocr.',
+                    })
+                  : t('sheets.ocr_review_hint', {
+                      defaultValue:
+                        'Read from a scan by OCR at {{percent}}%. Check the number, title and revision. A low reading is not stacked on earlier revisions until you confirm it.',
+                      percent: confidencePercent(ocr),
+                    })}
+              </p>
+              {canEdit && (
+                <Button
+                  className="mt-2"
+                  size="sm"
+                  variant="secondary"
+                  loading={confirmMutation.isPending}
+                  onClick={() => confirmMutation.mutate()}
+                >
+                  {t('sheets.ocr_confirm', { defaultValue: 'Confirm reading' })}
+                </Button>
+              )}
+            </div>
+          );
+        })()}
 
         {/* Metadata, or the form that corrects it. The button is left out for
             a role the PATCH would refuse rather than offered and failed. */}

@@ -362,9 +362,13 @@ class SheetRepository:
         revision: str | None = None,
         document_id: str | None = None,
         current_only: bool = False,
+        needs_review: bool | None = None,
     ) -> tuple[list[Sheet], int]:
         """List sheets for a project with pagination and filters."""
         base = select(Sheet).where(Sheet.project_id == project_id)
+        if needs_review is not None:
+            flag = Sheet.metadata_["extraction"]["needs_review"].as_boolean()
+            base = base.where(flag.is_(True)) if needs_review else base.where(flag.is_distinct_from(True))
 
         if discipline is not None:
             base = base.where(Sheet.discipline == discipline)

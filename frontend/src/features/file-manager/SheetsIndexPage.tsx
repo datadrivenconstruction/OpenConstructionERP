@@ -38,12 +38,14 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
 import {
   bulkUpdateSheets,
+  confirmSheetExtractions,
   rereadTitleBlocks,
   splitPdfIntoSheets,
   SheetSplitError,
   type SheetBulkPatch,
   type SheetRereadSummary,
 } from './api';
+import { confidencePercent, confirmable, sheetExtraction } from './sheetOcr';
 import { SheetsBulkEditBar } from './SheetsBulkEditBar';
 import { SheetDetailDrawer } from './SheetDetailDrawer';
 import { buildSheetsInsights } from './sheetsInsights';
@@ -231,6 +233,7 @@ export function SheetsIndexPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [disciplineFilter, setDisciplineFilter] = useState<string | null>(null);
   const [currentOnly, setCurrentOnly] = useState(false);
+  const [reviewOnly, setReviewOnly] = useState(false);
   const [openSheet, setOpenSheet] = useState<SheetRow | null>(null);
   const [splitError, setSplitError] = useState<string | null>(null);
   const [splitAdded, setSplitAdded] = useState<number | null>(null);
@@ -333,6 +336,14 @@ export function SheetsIndexPage() {
      sheet is read again from the PDF already stored, so a revision read as
      "ole" or a number not read at all is corrected without a re-upload, which
      would add a second copy of every drawing. Fields corrected by hand stay. */
+  const confirmAllMutation = useMutation({
+    mutationFn: () => confirmSheetExtractions(projectId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sheets', projectId] });
+      queryClient.invalidateQueries({ queryKey: ['sheet-versions'] });
+    },
+  });
+
   const rereadMutation = useMutation({
     mutationFn: () => rereadTitleBlocks(projectId),
     onSuccess: (summary) => {
@@ -386,6 +397,7 @@ export function SheetsIndexPage() {
     return sheets.filter((s) => {
       if (disciplineFilter && s.discipline !== disciplineFilter) return false;
       if (currentOnly && !s.is_current) return false;
+      if (reviewOnly && !sheetExtraction(s)?.needsReview) return false;
       if (!q) return true;
       const hay = [
         s.sheet_number,
@@ -399,7 +411,10 @@ export function SheetsIndexPage() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [sheets, disciplineFilter, currentOnly, searchQuery]);
+  }, [sheets, disciplineFilter, currentOnly, reviewOnly, searchQuery]);
+
+  const reviewCount = useMemo(() => sheets.filter((s) => sheetExtraction(s)?.needsReview).length, [sheets]);
+  const confirmableCount = useMemo(() => confirmable(sheets).length, [sheets]);
   // A bulk edit changes only the ticked sheets the filters still show, so a
   // sheet ticked and then filtered away is never changed out of sight.
   const selectedShown = useMemo(
@@ -539,7 +554,27 @@ export function SheetsIndexPage() {
               />
               {t('sheets.filter_current_only', { defaultValue: 'Current revisions only' })}
             </label>
+            {reviewCount > 0 && (
+              <label className="inline-flex items-center gap-2 text-sm text-content-secondary">
+                <input
+                  type="checkbox"
+                  checked={reviewOnly}
+                  onChange={(e) => setReviewOnly(e.target.checked)}
+                  className="h-4 w-4 rounded border-border accent-oe-blue"
+                />
+                {t('sheets.filter_needs_review', { defaultValue: 'Needs review' })} ({reviewCount})
+              </label>
+            )}
             <div className="sm:ms-auto flex flex-wrap items-center gap-2">
+              {canEdit && confirmableCount > 0 && (
+                <Button
+                  variant="secondary"
+                  loading={confirmAllMutation.isPending}
+                  onClick={() => confirmAllMutation.mutate()}
+                >
+                  {t('sheets.ocr_confirm_all', { defaultValue: 'Confirm all above 80%' })} ({confirmableCount})
+                </Button>
+              )}
               {canEdit && sheets.length > 0 && (
                 <Button
                   variant="secondary"
@@ -811,6 +846,24 @@ export function SheetsIndexPage() {
                           >
                             {s.sheet_number ?? `p.${s.page_number}`}
                           </button>
+                          {(() => {
+                            const ocr = sheetExtraction(s);
+                            if (!ocr) return null;
+                            return (
+                              <Badge
+                                variant={ocr.needsReview ? 'warning' : 'neutral'}
+                                size="sm"
+                                className="ms-2 font-sans"
+                              >
+                                {ocr.reason === 'ocr_unavailable'
+                                  ? t('sheets.ocr_unavailable_badge', { defaultValue: 'OCR not installed' })
+                                  : t('sheets.ocr_badge', {
+                                      defaultValue: 'Read by OCR, {{percent}}%',
+                                      percent: confidencePercent(ocr),
+                                    })}
+                              </Badge>
+                            );
+                          })()}
                         </td>
                         <td className="px-4 py-3 text-content-primary">
                           {s.sheet_title ?? (

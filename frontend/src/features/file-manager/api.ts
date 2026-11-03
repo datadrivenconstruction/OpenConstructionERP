@@ -637,3 +637,21 @@ export async function rereadTitleBlocks(projectId: string): Promise<SheetRereadS
     `${DOCUMENTS_BASE}/sheets/reread-title-blocks/?project_id=${encodeURIComponent(projectId)}`,
   );
 }
+
+/**
+ * Accept the OCR reading of one sheet.
+ *
+ * Backed by ``POST /v1/documents/sheets/{id}/confirm-extraction/``. A scan held
+ * back for low confidence is stacked onto its drawing by this call, so the
+ * caller refetches the register.
+ */
+export async function confirmSheetExtraction(sheetId: string): Promise<SheetRow> {
+  return apiPost<SheetRow, void>(`${DOCUMENTS_BASE}/sheets/${sheetId}/confirm-extraction/`);
+}
+
+/** Confirm every flagged sheet of a project read at or above `minConfidence` (0..1). */
+export async function confirmSheetExtractions(projectId: string, minConfidence = 0.8): Promise<{ confirmed: number }> {
+  return apiPost<{ confirmed: number }, void>(
+    `${DOCUMENTS_BASE}/sheets/confirm-extractions/?project_id=${encodeURIComponent(projectId)}&min_confidence=${minConfidence}`,
+  );
+}
