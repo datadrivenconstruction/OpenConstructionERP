@@ -95,6 +95,7 @@ import {
 import { WorkPackageSovPicker } from './WorkPackageSovPicker';
 import { certTypeLabel, describeComplianceReasons } from './complianceReasons';
 import { AgreementFormModal, PaymentApplicationFormModal, SignAgreementButton } from './AgreementForms';
+import { AgreementChangesSection } from './AgreementChangesSection';
 import { UnlinkedTwinBanner } from './UnlinkedTwinBanner';
 import { PayAppAmount } from './PaymentApprovalActions';
 import {
@@ -1392,6 +1393,7 @@ function AgreementRow({ agreement }: { agreement: Agreement }) {
         </span>
       </div>
       <LienWaiverRequirementToggle agreement={agreement} />
+      <AgreementChangesSection agreementId={agreement.id} />
       {packages.length > 0 && (
         <div className="mt-3 border-t border-border-light pt-3 space-y-1.5">
           {packages.map((wp) => (

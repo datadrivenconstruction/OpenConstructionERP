@@ -501,7 +501,7 @@ class BidLevelingPlug(Base):
 
     ``source`` says where it came from: ``estimate`` (the bill rate times the
     package quantity), ``median`` (the median of the other bidders' prices for
-    the line), ``manual`` (typed by the estimator, kept across recomputes) or
+    the line), ``single_bid`` (the only other price), ``manual`` (typed by the estimator, kept across recomputes) or
     ``none`` (nothing to plug from; the gap stays visible).
     """
 

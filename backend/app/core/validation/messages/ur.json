@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "پیکیج {package} بغیر حساب شدہ bid leveling کے دیا جا رہا ہے",
       "suggestion": "bid leveling کا حساب لگائیں تاکہ ایوارڈ سے پہلے غائب دائرہ کار کی قیمت لگ جائے"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

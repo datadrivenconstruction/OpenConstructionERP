@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "প্যাকেজ {package} গণনা করা bid leveling ছাড়াই প্রদান করা হচ্ছে",
       "suggestion": "bid leveling গণনা করুন যাতে প্রদানের আগে বাদ পড়া পরিধির দাম ঠিক হয়"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

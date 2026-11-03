@@ -12038,6 +12038,17 @@ class BidAwardLeveled(_BidLevelingRule):
     check_name = "check_award_leveled"
 
 
+class BidLinkedTenderAwarded(_BidLevelingRule):
+    """A main contract tender linked to a package gets its contract only from the package award."""
+
+    rule_id = "bid_leveling.linked_tender_awarded"
+    name = "Linked Tender Awaits Package Award"
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = "Flags a package linked to a main contract tender that has not been awarded yet."
+    check_name = "check_linked_tender_awarded"
+
+
 class SubmittalReviewerAssigned(_SubmittalRule):
     """A submitted submittal must name the reviewer it is waiting on."""
 
@@ -12539,6 +12550,7 @@ def register_builtin_rules() -> None:
         (BidPlugShareWithinThreshold(), ["bid_leveling", "bid_award"]),
         (BidGapsPlugged(), ["bid_leveling", "bid_award"]),
         (BidAwardLeveled(), ["bid_award"]),
+        (BidLinkedTenderAwarded(), ["bid_leveling"]),
         # Submittals (submission gate)
         # Registered into the "submittal" set, which
         # SubmittalService._validate_submittal passes on submit and on the

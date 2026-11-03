@@ -137,6 +137,7 @@ import {
 import { VariationSourcePicker } from './VariationSourcePicker';
 import { variationsGuide } from './variationsGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
+import { SubcontractChangesPanel } from '@/features/subcontractors/SubcontractChangesPanel';
 import { buildVariationsInsights, classLabel, statusLabel, urgencyLabel } from './variationsInsights';
 import {
   DEFAULT_VARIATIONS_TAB,
@@ -3142,6 +3143,13 @@ export function DetailDrawer({
                   </button>
                 )}
               </div>
+
+              <SubcontractChangesPanel
+                ownerType="variation_order"
+                ownerId={order.id}
+                projectId={order.project_id}
+                ownerTitle={order.title}
+              />
 
               {order.status === 'voided' && voidReasonText && (
                 <div className="rounded-lg border border-border bg-surface-secondary px-3 py-2 text-sm">

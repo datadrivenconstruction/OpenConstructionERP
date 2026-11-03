@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "Il pacchetto {package} viene aggiudicato senza un livellamento delle offerte calcolato",
       "suggestion": "Calcolate il livellamento così che l'ambito mancante sia quotato prima dell'aggiudicazione"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

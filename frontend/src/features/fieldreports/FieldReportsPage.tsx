@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
+import { RaiseNoticeButton } from '@/features/variations/RaiseNoticeButton';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import clsx from 'clsx';
 import {
@@ -1862,6 +1863,17 @@ function ReportModal({
         </>
       }
     >
+      {isEdit && effectiveReport && (
+        <div className="mb-3 flex justify-end">
+          <RaiseNoticeButton
+            projectId={projectId}
+            sourceType="field_report"
+            sourceId={effectiveReport.id}
+            sourceRef={effectiveReport.report_date}
+            title={t('fieldreports.title', { defaultValue: 'Field Reports' }) + ' ' + effectiveReport.report_date}
+          />
+        </div>
+      )}
       {isEdit && effectiveReport?.status === 'approved' && (
         <div className="mb-5 flex items-start gap-2 rounded-lg border border-border-light bg-surface-secondary/50 p-3 text-xs text-content-secondary">
           <Lock size={14} className="mt-0.5 shrink-0 text-content-tertiary" />

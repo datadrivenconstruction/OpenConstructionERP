@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "Le lot {package} est attribué sans analyse comparative des offres calculée",
       "suggestion": "Calculez le rééquilibrage pour que le périmètre manquant soit chiffré avant l'attribution"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "Gói {package} đang được trao thầu mà chưa tính cân bằng hồ sơ thầu (bid leveling)",
       "suggestion": "Tính cân bằng để phạm vi còn thiếu được định giá trước khi trao thầu"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

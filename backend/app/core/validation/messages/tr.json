@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "{package} paketi hesaplanmış teklif dengelemesi olmadan veriliyor",
       "suggestion": "İhaleden önce eksik kapsamın fiyatlandırılması için dengelemeyi hesaplayın"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

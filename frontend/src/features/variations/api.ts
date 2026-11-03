@@ -318,6 +318,36 @@ export function listNotices(params: {
   return apiGet<Page<Notice>>(`/v1/variations/notices/?${qs.toString()}`);
 }
 
+export type NoticeSourceType =
+  | 'daily_diary'
+  | 'daily_diary_entry'
+  | 'field_report'
+  | 'rfi'
+  | 'site_instruction';
+
+export interface RaiseNoticeFromEventPayload {
+  project_id: string;
+  source_type: NoticeSourceType;
+  source_id?: string;
+  source_ref?: string;
+  title?: string;
+  description?: string;
+  recipient_type?: NoticeRecipient;
+}
+
+export function raiseNoticeFromEvent(data: RaiseNoticeFromEventPayload): Promise<Notice> {
+  return apiPost<Notice>('/v1/variations/notices/from-field-event/', data);
+}
+
+export function listNoticesBySource(
+  sourceType: NoticeSourceType,
+  sourceId: string,
+  projectId: string,
+): Promise<Notice[]> {
+  const qs = new URLSearchParams({ project_id: projectId });
+  return apiGet<Notice[]>(`/v1/variations/notices/by-source/${sourceType}/${sourceId}?${qs.toString()}`);
+}
+
 export function createNotice(data: CreateNoticePayload): Promise<Notice> {
   return apiPost<Notice>('/v1/variations/notices/', data);
 }

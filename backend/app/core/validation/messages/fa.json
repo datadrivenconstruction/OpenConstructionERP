@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "بسته {package} بدون همترازسازی محاسبه‌شده پیشنهادها واگذار می‌شود",
       "suggestion": "همترازسازی را محاسبه کنید تا دامنه ناقص پیش از واگذاری قیمت‌گذاری شود"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

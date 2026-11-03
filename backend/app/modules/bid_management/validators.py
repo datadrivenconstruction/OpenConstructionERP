@@ -93,3 +93,16 @@ def check_award_leveled(payload: dict[str, Any]) -> list[Finding]:
         return []
     package = str(payload.get("package") or "package")
     return [Finding(element_ref=package, params={"package": package})]
+
+
+def check_linked_tender_awarded(payload: dict[str, Any]) -> list[Finding]:
+    """Flag a package linked to a main contract tender that is still not awarded.
+
+    The tender drafts no contract of its own while a package is linked (the
+    package award does), so an unawarded package leaves the tender contract-less.
+    """
+    tender = payload.get("linked_tender")
+    if not tender or payload.get("status") in ("awarded", "cancelled"):
+        return []
+    package = str(payload.get("package") or "package")
+    return [Finding(element_ref=package, params={"package": package, "tender": str(tender)})]

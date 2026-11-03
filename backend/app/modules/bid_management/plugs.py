@@ -11,7 +11,7 @@ the leveling adds a plug for it. Where the plug comes from is always shown:
   when at least two others priced it (the market for that line).
 * ``estimate``: the bill rate of the line's BOQ position times the package
   quantity, when fewer than two others priced it.
-* ``median`` of a single other bid, when there is no estimate rate.
+* ``single_bid``: the one other bid that priced the line, when there is no estimate rate.
 * ``none``: nothing to plug from; the gap stays at zero and is reported.
 
 Only mandatory lines are gaps: an optional line nobody has to price is not
@@ -106,7 +106,7 @@ def compute_plugs(
             elif estimate is not None and estimate > 0:
                 amount, source = estimate, "estimate"
             elif others:
-                amount, source = others[0].quantize(_CENT), "median"
+                amount, source = others[0].quantize(_CENT), "single_bid"
             else:
                 amount, source = Decimal("0.00"), "none"
             result[bidder].append(Plug(bidder, line_id, amount, source, reason))

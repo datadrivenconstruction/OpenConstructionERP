@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "Paket {package} wird ohne berechneten Preisspiegel vergeben",
       "suggestion": "Berechnen Sie den Preisspiegel, damit fehlende Leistungen vor der Vergabe bepreist sind"
+    },
+    "linked_tender_awarded": {
+      "fail": "Paket {package} ist mit der Hauptauftragsausschreibung {tender} verknüpft und noch nicht vergeben, daher hat diese Ausschreibung keinen Vertrag",
+      "suggestion": "Vergeben Sie das Paket (es erzeugt den Vertrag) oder lösen Sie die Verknüpfung, damit die Ausschreibung einen eigenen Vertrag erstellt"
     }
   }
 }

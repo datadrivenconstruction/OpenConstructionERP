@@ -1477,6 +1477,10 @@
     "award_leveled": {
       "fail": "标段 {package} 在未计算投标调平(bid leveling)的情况下被授标",
       "suggestion": "请先计算调平,使漏项在授标前已有定价"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }
