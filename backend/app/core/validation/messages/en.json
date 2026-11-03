@@ -967,6 +967,10 @@
     "change_time_within_owner": {
       "fail": "Subcontract time impacts for {code} total {sub_days} days, more than the {owner_days} days the owner granted",
       "suggestion": "Check the subcontract time claims or request a matching extension from the owner"
+    },
+    "notice_window": {
+      "fail": "Subcontract change {code} was notified {late} days after the {days}-day window in the agreement",
+      "suggestion": "Check the notice terms before accepting the cost, a late notice may bar the claim"
     }
   },
   "submittal": {
