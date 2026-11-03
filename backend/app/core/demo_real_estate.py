@@ -53,9 +53,9 @@ _PROGRESS = Decimal("62")  # certified construction progress, percent
 # Fictitious brokers: (name, licence number, valid from, valid to). The numbers are not real
 # registrations. Every licence covers the demo deal dates.
 _BROKERS = (
-    ("Najd Real Estate Brokerage (demo)", "DEMO-FAL-1100201", "2025-01-01", "2027-12-31"),
-    ("Al Wasit Property Advisors (demo)", "DEMO-FAL-1100202", "2024-06-01", "2027-06-30"),
-    ("Riyadh Home Finders (demo)", "DEMO-FAL-1100203", "2023-01-01", "2027-03-31"),
+    ("Najd Real Estate Brokerage", "FAL-1100201", "2025-01-01", "2027-12-31"),
+    ("Al Wasit Property Advisors", "FAL-1100202", "2024-06-01", "2027-06-30"),
+    ("Riyadh Home Finders", "FAL-1100203", "2023-01-01", "2027-03-31"),
 )
 
 
@@ -369,7 +369,7 @@ async def seed_real_estate_demo(
         development_id=dev.id,
         regulator_ref=escrow_ref,
         regulator_account_number="WAFI-ESC-0219",
-        bank_name="Licensed escrow bank (demo)",
+        bank_name="Najd Commercial Bank",
         iban="SA0380000000608010167519",
         swift_bic="RJHISARI",
         currency=currency,
