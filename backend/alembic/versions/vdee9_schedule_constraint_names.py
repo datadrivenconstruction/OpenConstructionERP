@@ -44,6 +44,8 @@ _XER_TO_NEUTRAL: dict[str, str | None] = {
 
 
 def upgrade() -> None:
+    if _TABLE not in sa.inspect(op.get_bind()).get_table_names():
+        return
     activity = sa.table(_TABLE, sa.column("constraint_type", sa.String))
     for code, neutral in _XER_TO_NEUTRAL.items():
         op.execute(
