@@ -9,7 +9,9 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { CalendarClock, Box, Layers, Info } from 'lucide-react';
+import { formatCurrency } from '@/shared/lib/money';
 import { Card, Badge, SkeletonText, RecoveryCard, ViewInBIMButton } from '@/shared/ui';
 import { fetchBIMModels } from '@/features/bim/api';
 import { scheduleApi } from './api';
@@ -91,6 +93,20 @@ export function Snapshot4DView({
       }),
     enabled: Boolean(scheduleId),
   });
+
+  // Cost at the same date. A failure here only hides the strip; the status view stays usable.
+  const { data: cost } = useQuery({
+    queryKey: ['schedule', scheduleId, 'snapshot-cost', asOf, modelId || 'all'],
+    queryFn: () =>
+      scheduleApi.getSnapshotCost(scheduleId, {
+        asOfDate: asOf,
+        modelVersionId: modelId || undefined,
+      }),
+    enabled: Boolean(scheduleId),
+    retry: false,
+  });
+  const showCost = Boolean(cost?.has_cost_data);
+  const money = (v: string | undefined) => formatCurrency(v ?? '0', cost?.currency);
 
   const tally = useMemo(() => tallySnapshot(snapshot), [snapshot]);
   const total = snapshotTotal(snapshot);
@@ -197,6 +213,65 @@ export function Snapshot4DView({
         </div>
       </div>
 
+      {showCost && cost && (
+        <div
+          className="mt-3 rounded-xl border border-border-light bg-surface-secondary/40 p-3"
+          data-testid="snapshot-cost-strip"
+        >
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {(
+              [
+                ['pv', t('schedule.snapshot.cost_pv', { defaultValue: 'Planned (PV)' })],
+                ['ev', t('schedule.snapshot.cost_ev', { defaultValue: 'Earned (EV)' })],
+                ['ac', t('schedule.snapshot.cost_ac', { defaultValue: 'Actual (AC)' })],
+                ['bac', t('schedule.snapshot.cost_bac', { defaultValue: 'Budget (BAC)' })],
+              ] as const
+            ).map(([key, label]) => (
+              <div key={key}>
+                <div className="text-2xs font-semibold uppercase tracking-wide text-content-tertiary">
+                  {label}
+                </div>
+                <div className="text-sm font-semibold tabular-nums text-content-primary">
+                  {money(cost.totals[key])}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <Badge variant={cost.spi != null && cost.spi < 1 ? 'warning' : 'neutral'} size="sm">
+              SPI {cost.spi != null ? cost.spi.toFixed(2) : '-'}
+            </Badge>
+            <Badge variant={cost.cpi != null && cost.cpi < 1 ? 'warning' : 'neutral'} size="sm">
+              CPI {cost.cpi != null ? cost.cpi.toFixed(2) : '-'}
+            </Badge>
+            <span className="text-2xs text-content-tertiary">
+              {t('schedule.snapshot.cost_coverage', {
+                defaultValue: '{{pct}}% of the budget sits on model elements',
+                pct: Math.round(cost.coverage_pct),
+              })}
+              {Number(cost.unlinked_cost) > 0 &&
+                ` - ${t('schedule.snapshot.cost_unlinked', {
+                  defaultValue: 'not linked: {{amount}}',
+                  amount: money(cost.unlinked_cost),
+                })}`}
+            </span>
+            {cost.coverage_low && (
+              <Badge variant="warning" size="sm">
+                {t('schedule.snapshot.cost_coverage_low', {
+                  defaultValue: 'Low cost coverage',
+                })}
+              </Badge>
+            )}
+            <Link
+              to={`/5d?date=${encodeURIComponent(asOf)}`}
+              className="ml-auto text-xs font-medium text-oe-blue hover:underline"
+            >
+              {t('schedule.snapshot.cost_open_5d', { defaultValue: 'Open in 5D at this date' })}
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* Body */}
       <div className="mt-3">
         {isLoading ? (
@@ -275,6 +350,11 @@ export function Snapshot4DView({
                       <Badge variant={style?.badge ?? 'neutral'} size="sm">
                         {bucket.count} - {pct}%
                       </Badge>
+                      {showCost && cost?.by_status[bucket.status] && (
+                        <span className="text-xs tabular-nums text-content-secondary">
+                          {money(cost.by_status[bucket.status].planned_cost)}
+                        </span>
+                      )}
                       <ViewInBIMButton
                         elementIds={idsByStatus.get(bucket.status) ?? []}
                         iconSize={11}

@@ -441,9 +441,57 @@ class ProgressSheetPlausibility(_SheetRule):
         return out
 
 
+class SnapshotCostCoverage(ValidationRule):
+    """Warns when the 4D cost-at-date view can place too little of the budget on model elements."""
+
+    rule_id = "schedule.4d.cost_coverage_low"
+    name = "4D cost coverage"
+    standard = SCHEDULE_RULE_SET
+    severity = Severity.WARNING
+    category = RuleCategory.COMPLETENESS
+    description = (
+        "Budget that no linked element carries cannot be shown next to the model. "
+        "Below 80% the cost-at-date view under-represents the programme."
+    )
+
+    async def validate(self, context: ValidationContext) -> list[RuleResult]:
+        """One finding when ``data['cost_snapshot']`` reports cost data with coverage under the threshold."""
+        from app.modules.schedule.snapshot_cost import COVERAGE_LOW_PCT
+
+        data = context.data if isinstance(context.data, dict) else {}
+        block = data.get("cost_snapshot")
+        if not isinstance(block, dict) or not block.get("has_cost_data"):
+            return []
+        try:
+            coverage = float(block.get("coverage_pct"))
+        except (TypeError, ValueError):
+            return []
+        if coverage >= COVERAGE_LOW_PCT:
+            return []
+        locale = _locale(context)
+        return [
+            RuleResult(
+                rule_id=self.rule_id,
+                rule_name=self.name,
+                severity=self.severity,
+                category=self.category,
+                passed=False,
+                message=translate(
+                    f"{self.rule_id}.fail", locale=locale, coverage=f"{coverage:.0f}", limit=f"{COVERAGE_LOW_PCT:.0f}"
+                ),
+                details={"coverage_pct": coverage, "unlinked_cost": block.get("unlinked_cost")},
+                suggestion=translate(f"{self.rule_id}.suggestion", locale=locale),
+            )
+        ]
+
+
 # ── Registration ────────────────────────────────────────────────────────────
 
-_SCHEDULE_RULES: tuple[ValidationRule, ...] = (DurationCountedOnProjectWeek(), DatesMatchImportSource())
+_SCHEDULE_RULES: tuple[ValidationRule, ...] = (
+    DurationCountedOnProjectWeek(),
+    DatesMatchImportSource(),
+    SnapshotCostCoverage(),
+)
 _PROGRESS_SHEET_RULES: tuple[ValidationRule, ...] = (
     ProgressSheetKnownActivity(),
     ProgressSheetValuesInRange(),

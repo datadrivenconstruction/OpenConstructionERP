@@ -1529,5 +1529,13 @@
       "fail": "Agent draft '{title}' has waited {days} days for review (limit {limit}).",
       "suggestion": "Accept or reject the draft, or switch off the agent if its drafts are not used."
     }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Only {coverage}% of the budget sits on elements linked to tasks (limit {limit}%); the rest cannot be shown next to the model.",
+        "suggestion": "Link more elements to cost-loaded tasks, or check the EAC link rules."
+      }
+    }
   }
 }

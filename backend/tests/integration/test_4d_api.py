@@ -366,6 +366,74 @@ async def test_snapshot_returns_status_map(client: AsyncClient, schedule_id: str
 
 
 @pytest.mark.asyncio
+async def test_snapshot_cost_reconciles_to_bac(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
+    _engine, factory = temp_engine_and_factory
+    from app.modules.schedule.models import Activity, EacScheduleLink
+
+    async with factory() as session:
+        linked = Activity(
+            schedule_id=uuid.UUID(schedule_id),
+            name="Linked",
+            wbs_code="1",
+            start_date="2026-01-01",
+            end_date="2026-12-31",
+            duration_days=365,
+            progress_pct="50",
+            cost_planned=Decimal("1000.01"),
+        )
+        loose = Activity(
+            schedule_id=uuid.UUID(schedule_id),
+            name="No elements",
+            wbs_code="2",
+            start_date="2027-01-01",
+            end_date="2027-12-31",
+            duration_days=365,
+            progress_pct="0",
+            cost_planned=Decimal("200.00"),
+        )
+        session.add_all([linked, loose])
+        await session.commit()
+        await session.refresh(linked)
+        session.add(EacScheduleLink(task_id=linked.id, predicate_json={"selector": "alpha"}, mode="partial_match"))
+        await session.commit()
+
+    resp = await client.get(f"/api/v2/schedules/{schedule_id}/snapshot-cost", params={"as_of_date": "2026-04-15"})
+    assert resp.status_code == 200, resp.text
+    body = resp.json()
+    assert body["has_cost_data"] is True
+    parts = sum(Decimal(e["planned_cost"]) for e in body["elements"].values())
+    assert parts + Decimal(body["other_elements_cost"]) + Decimal(body["unlinked_cost"]) == Decimal(
+        body["totals"]["bac"]
+    )
+    assert Decimal(body["unlinked_cost"]) == Decimal("200.00")
+    assert Decimal(body["totals"]["ev"]) == Decimal("500.01")
+    assert body["coverage_low"] is True
+
+
+@pytest.mark.asyncio
+async def test_snapshot_cost_hides_foreign_project(client: AsyncClient, temp_engine_and_factory):
+    _engine, factory = temp_engine_and_factory
+    from app.modules.projects.models import Project
+    from app.modules.schedule.models import Schedule
+    from app.modules.users.models import User
+
+    async with factory() as session:
+        other = User(email=f"o-{uuid.uuid4().hex[:6]}@test.io", hashed_password="x", full_name="Other")
+        session.add(other)
+        await session.flush()
+        proj = Project(id=uuid.uuid4(), name="Foreign", owner_id=other.id)
+        session.add(proj)
+        await session.flush()
+        sched = Schedule(project_id=proj.id, name="Foreign schedule")
+        session.add(sched)
+        await session.commit()
+        sid = str(sched.id)
+
+    resp = await client.get(f"/api/v2/schedules/{sid}/snapshot-cost")
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
 async def test_dashboard_returns_evm_payload(client: AsyncClient, schedule_id: str, temp_engine_and_factory):
     _engine, factory = temp_engine_and_factory
     from app.modules.schedule.models import Activity

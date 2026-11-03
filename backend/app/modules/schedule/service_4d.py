@@ -416,6 +416,82 @@ class ScheduleSnapshotService:
                     result[element_id] = status
         return result
 
+    async def cost_snapshot(
+        self,
+        schedule_id: uuid.UUID,
+        as_of_date: date,
+        model_version_id: uuid.UUID | None,
+        *,
+        resolver: EacPredicateResolver | None = None,
+    ) -> dict[str, Any]:
+        """Cost at ``as_of_date`` together with the elements that carry it (5D).
+
+        Reuses :func:`activity_evm_terms` (the dashboard's EVM math) and the
+        link resolution of :meth:`snapshot`; every link is resolved once per
+        distinct rule/predicate. Money is returned as Decimal-as-string.
+        """
+        from app.modules.schedule.snapshot_cost import TaskCost, build_cost_snapshot, pick_weights
+
+        active = resolver or self._get_resolver()
+        currency = await resolve_schedule_currency(self.session, schedule_id)
+        activities = list(
+            (await self.session.execute(select(Activity).where(Activity.schedule_id == schedule_id))).scalars().all()
+        )
+        links = []
+        if activities:
+            link_stmt = select(EacScheduleLink).where(EacScheduleLink.task_id.in_([a.id for a in activities]))
+            links = list((await self.session.execute(link_stmt)).scalars().all())
+
+        resolved: dict[str, list[str]] = {}
+        ids_by_task: dict[uuid.UUID, list[str]] = {}
+        for link in links:
+            if link.mode == "excluded":
+                continue
+            key = f"{link.rule_id}|{sorted((link.predicate_json or {}).items(), key=str)}"
+            if key not in resolved:
+                resolved[key] = await active.resolve(
+                    rule_id=link.rule_id,
+                    predicate_json=link.predicate_json,
+                    model_version_id=model_version_id,
+                )
+            ids_by_task.setdefault(link.task_id, []).extend(resolved[key])
+
+        elements: dict[str, dict] = {}
+        if ids_by_task:
+            try:
+                loaded = await _default_element_loader(self.session, model_version_id=model_version_id)
+            except Exception:  # pragma: no cover - weights are optional
+                loaded = []
+            elements = {str(e.get("stable_id")): e for e in loaded if e.get("stable_id")}
+
+        tasks: list[TaskCost] = []
+        has_cost = False
+        for a in activities:
+            bac, pv, ev, ac = activity_evm_terms(a, as_of_date)
+            if a.cost_planned is not None or a.cost_actual is not None:
+                has_cost = True
+            ids = list(dict.fromkeys(ids_by_task.get(a.id, [])))
+            tasks.append(
+                TaskCost(
+                    status=_derive_task_status(a, as_of_date),
+                    bac=bac,
+                    ev=ev,
+                    pv=pv,
+                    ac=ac,
+                    element_ids=ids,
+                    weights=pick_weights(elements, ids),
+                )
+            )
+        out = build_cost_snapshot(tasks, currency)
+        totals = out["totals"]
+        spi = round(float(totals["ev"] / totals["pv"]), 4) if has_cost and totals["pv"] > 0 else None
+        cpi = round(float(totals["ev"] / totals["ac"]), 4) if has_cost and totals["ac"] > 0 else None
+        out["currency"] = currency
+        out["has_cost_data"] = has_cost
+        out["spi"] = spi
+        out["cpi"] = cpi
+        return out
+
 
 def _status_priority(status: str) -> int:
     """Higher number = "worse" / more urgent (FR-6.5 colour grade)."""
@@ -613,6 +689,15 @@ def _q_money(value: Decimal, currency: str) -> Decimal:
     return value.quantize(money_quantum(currency), rounding=ROUND_HALF_UP)
 
 
+def activity_evm_terms(a: Activity, as_of_date: date) -> tuple[Decimal, Decimal, Decimal, Decimal]:
+    """Return ``(bac, pv, ev, ac)`` for one activity at ``as_of_date``; shared by the dashboard and the 5D snapshot."""
+    bac = a.cost_planned if a.cost_planned is not None else Decimal("0")
+    ac = a.cost_actual if a.cost_actual is not None else Decimal("0")
+    pv = planned_value_decimal(a.start_date, a.end_date, bac, as_of_date)
+    ev = bac * (coerce_progress_decimal(a.progress_pct) / _HUNDRED_D) if bac else Decimal("0")
+    return bac, pv, ev, ac
+
+
 async def resolve_schedule_currency(session: AsyncSession, schedule_id: uuid.UUID) -> str:
     """Read the ISO currency of the project owning ``schedule_id``.
 
@@ -682,12 +767,9 @@ class ScheduleDashboardService:
         total_ac = Decimal("0")
         any_cost = False
         for a in activities:
-            bac = a.cost_planned if a.cost_planned is not None else Decimal("0")
-            ac = a.cost_actual if a.cost_actual is not None else Decimal("0")
+            bac, pv, ev, ac = activity_evm_terms(a, as_of_date)
             if a.cost_planned is not None or a.cost_actual is not None:
                 any_cost = True
-            pv = planned_value_decimal(a.start_date, a.end_date, bac, as_of_date)
-            ev = bac * (coerce_progress_decimal(a.progress_pct) / _HUNDRED_D) if bac else Decimal("0")
             total_pv += pv
             total_ev += ev
             total_ac += ac

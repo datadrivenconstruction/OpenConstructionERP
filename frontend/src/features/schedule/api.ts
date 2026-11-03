@@ -422,6 +422,32 @@ export interface ScheduleSnapshot {
   elements: Record<string, string>;
 }
 
+/**
+ * 4D cost-at-date: PV/EV/AC/BAC at the data date plus the cost carried by each
+ * linked element. Money is Decimal-as-string in ``currency``; ``elements`` is
+ * capped at the 500 largest, the rest is in ``other_elements_cost``.
+ */
+export interface ScheduleSnapshotCost {
+  schedule_id: string;
+  as_of_date: string;
+  model_version_id: string | null;
+  currency: string;
+  has_cost_data: boolean;
+  totals: { pv: string; ev: string; ac: string; bac: string };
+  spi: number | null;
+  cpi: number | null;
+  by_status: Record<string, { elements: number; planned_cost: string }>;
+  elements: Record<
+    string,
+    { status: string; planned_cost: string; earned_cost: string; allocation: 'quantity' | 'equal' }
+  >;
+  elements_total: number;
+  other_elements_cost: string;
+  unlinked_cost: string;
+  coverage_pct: number;
+  coverage_low: boolean;
+}
+
 /* ── Baselines ─────────────────────────────────────────────────────────── */
 
 /**
@@ -1175,6 +1201,14 @@ export const scheduleApi = {
     if (params?.modelVersionId) qs.set('model_version_id', params.modelVersionId);
     const query = qs.toString() ? `?${qs.toString()}` : '';
     return apiGet<ScheduleSnapshot>(`/v2/schedules/${scheduleId}/snapshot${query}`);
+  },
+  /** 4D cost-at-date (PV/EV/AC + cost per element) for a schedule at a data date. */
+  getSnapshotCost: (scheduleId: string, params?: { asOfDate?: string; modelVersionId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.asOfDate) qs.set('as_of_date', params.asOfDate);
+    if (params?.modelVersionId) qs.set('model_version_id', params.modelVersionId);
+    const query = qs.toString() ? `?${qs.toString()}` : '';
+    return apiGet<ScheduleSnapshotCost>(`/v2/schedules/${scheduleId}/snapshot-cost${query}`);
   },
 
   // Work Orders
