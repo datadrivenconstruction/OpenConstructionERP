@@ -326,3 +326,35 @@ async def test_full_access_grant_lifts_the_package_gate(monkeypatch: pytest.Monk
     )
     await users_router.set_user_module_access(uuid.UUID(USER_ID), payload, _Svc())  # type: ignore[arg-type]
     assert not sp.is_blocked(saved, "ai")
+
+
+def test_modules_page_reports_the_gate_state() -> None:
+    from app.core.module_router import apply_gate
+
+    meta, _ = sp.install({}, ["estimate_quote"])
+    rows = apply_gate([{"name": "oe_ai", "enabled": True}, {"name": "oe_users", "enabled": True}], meta)
+    assert rows[0]["enabled"] is False
+    assert rows[0]["blocked_by_package"] is True
+    assert rows[1]["enabled"] is True
+    assert apply_gate([{"name": "oe_ai", "enabled": True}], None)[0]["enabled"] is True
+
+
+@pytest.mark.asyncio
+async def test_modules_page_toggle_writes_the_package_state(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.core import module_router
+
+    store: dict[str, Any] = {"meta": sp.install({}, ["estimate_quote"])[0]}
+
+    async def _load(_tid: str | None) -> dict[str, Any]:
+        return store["meta"]
+
+    async def _save(_tid: str, metadata: dict[str, Any]) -> None:
+        store["meta"] = metadata
+
+    monkeypatch.setattr(module_router, "_load_tenant_metadata", _load)
+    monkeypatch.setattr(module_router, "_save_tenant_metadata", _save)
+    payload = {"sub": USER_ID}
+    await module_router._sync_package_state(payload, "oe_ai", True)
+    assert not sp.is_blocked(store["meta"], "ai")
+    await module_router._sync_package_state(payload, "oe_ai", False)
+    assert sp.is_blocked(store["meta"], "ai")
