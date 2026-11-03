@@ -47,7 +47,7 @@ def test_with_one_other_price_the_estimate_rate_wins() -> None:
 def test_without_estimate_a_single_other_bid_is_used_and_nothing_is_none() -> None:
     line = _line()
     priced = {A: {}, B: {line.id: ("900", "included")}}
-    assert compute_plugs([line], priced)[A][0].source == "median"
+    assert compute_plugs([line], priced)[A][0].source == "single_bid"
     lonely = {A: {}}
     [plug] = compute_plugs([line], lonely)[A]
     assert (plug.amount, plug.source) == (Decimal("0.00"), "none")
@@ -102,3 +102,12 @@ def test_rules_are_registered_and_messages_exist_in_en_de_ru() -> None:
 )
 def test_a_package_routes_to_exactly_one_commitment_kind(package_type: str | None, route: str) -> None:
     assert bid_package_route(SimpleNamespace(package_type=package_type)) == route
+
+
+def test_linked_tender_without_award_is_flagged() -> None:
+    from app.modules.bid_management.validators import check_linked_tender_awarded
+
+    base = {"package": "BP-001", "linked_tender": "Main works"}
+    assert check_linked_tender_awarded({**base, "status": "evaluating"})[0].params["tender"] == "Main works"
+    assert check_linked_tender_awarded({**base, "status": "awarded"}) == []
+    assert check_linked_tender_awarded({"package": "BP-002", "status": "open"}) == []

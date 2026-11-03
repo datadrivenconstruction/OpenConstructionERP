@@ -2367,6 +2367,8 @@ class BidManagementService:
             "currency": package.currency or "",
             "threshold_pct": str((package.metadata_ or {}).get("plug_share_threshold_pct") or ""),
             "leveling_computed": bool(comparison is not None and comparison.computed_at and rows),
+            "status": package.status,
+            "linked_tender": await self._linked_tender_label(package.tender_id),
             "bidders": [
                 {
                     "name": bidders[r.bidder_id].company_name if r.bidder_id in bidders else str(r.bidder_id),
@@ -2385,6 +2387,16 @@ class BidManagementService:
             project_id=str(package.project_id),
             metadata={"locale": get_locale(), "operation": operation},
         )
+
+    async def _linked_tender_label(self, tender_id: uuid.UUID | None) -> str | None:
+        if tender_id is None:
+            return None
+        from app.modules.tendering.models import TenderPackage
+
+        tender = await self.session.get(TenderPackage, tender_id)
+        if tender is None:
+            return str(tender_id)
+        return getattr(tender, "name", None) or getattr(tender, "code", None) or str(tender_id)
 
     async def leveling_table(self, comparison_id: uuid.UUID) -> list[BidLeveling]:
         return await self.leveling_repo.levelings_for_comparison(comparison_id)

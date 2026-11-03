@@ -8,6 +8,19 @@ owner change); adds ``package_type`` to ``oe_bid_management_package`` and the
 plug totals to ``oe_bid_management_leveling``; creates
 ``oe_bid_management_leveling_plug`` (the value put on each gap with its source).
 
+Backfill of ``package_type`` for packages that exist before this revision, so an
+award on a live install keeps doing what it did (a purchase order) where that was
+the established route. A package becomes ``supply`` when any of these holds:
+
+* a purchase order's metadata names it (``bid_package_id``) or names its linked
+  tender package (``tender_package_id``): its award already produced a PO;
+* its own metadata, or the metadata of its linked tender package, says
+  ``package_type: supply``;
+* its metadata carries a procurement link (``requisition_id`` / ``rfq_id``).
+
+Every other package stays ``subcontract``. The backfill runs only when the
+column is added, so a re-run never overrides a choice made since.
+
 Revision ID: vcc01_change_chain_award
 Revises: v3354_owner_schedule
 Create Date: 2026-11-02
@@ -15,6 +28,7 @@ Create Date: 2026-11-02
 
 from __future__ import annotations
 
+import json
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -53,6 +67,56 @@ def _add_missing(table: str, tables: set[str], columns: list[sa.Column]) -> None
             op.add_column(table, column)
 
 
+def _meta(raw: object) -> dict:
+    if isinstance(raw, dict):
+        return raw
+    if isinstance(raw, str) and raw:
+        try:
+            value = json.loads(raw)
+        except ValueError:
+            return {}
+        return value if isinstance(value, dict) else {}
+    return {}
+
+
+def backfill_package_type(bind: sa.engine.Connection) -> int:
+    """Mark existing packages ``supply`` per the rule in the module docstring.
+
+    Returns:
+        The number of packages set to ``supply``.
+    """
+    tables = set(sa.inspect(bind).get_table_names())
+    po_bid: set[str] = set()
+    po_tender: set[str] = set()
+    if "oe_procurement_po" in tables:
+        for (raw,) in bind.execute(sa.text("SELECT metadata FROM oe_procurement_po")):
+            meta = _meta(raw)
+            if meta.get("bid_package_id"):
+                po_bid.add(str(meta["bid_package_id"]))
+            if meta.get("tender_package_id"):
+                po_tender.add(str(meta["tender_package_id"]))
+    supply_tenders: set[str] = set()
+    if "oe_tendering_package" in tables:
+        for tid, raw in bind.execute(sa.text("SELECT id, metadata FROM oe_tendering_package")):
+            if _meta(raw).get("package_type") == "supply":
+                supply_tenders.add(str(tid))
+    supply: list[str] = []
+    for pid, tender_id, raw in bind.execute(sa.text(f"SELECT id, tender_id, metadata FROM {_PACKAGE}")):
+        meta = _meta(raw)
+        tid = str(tender_id) if tender_id else None
+        if (
+            str(pid) in po_bid
+            or (tid and (tid in po_tender or tid in supply_tenders))
+            or meta.get("package_type") == "supply"
+            or meta.get("requisition_id")
+            or meta.get("rfq_id")
+        ):
+            supply.append(str(pid))
+    for pid in supply:
+        bind.execute(sa.text(f"UPDATE {_PACKAGE} SET package_type = 'supply' WHERE id = :id"), {"id": pid})
+    return len(supply)
+
+
 def upgrade() -> None:
     tables = set(sa.inspect(op.get_bind()).get_table_names())
     _add_missing(
@@ -69,11 +133,14 @@ def upgrade() -> None:
         if f"ix_{_NOTICE}_source_id" not in indexes:
             op.create_index(f"ix_{_NOTICE}_source_id", _NOTICE, ["source_id"])
 
+    had_type = _PACKAGE in tables and "package_type" in _columns(_PACKAGE)
     _add_missing(
         _PACKAGE,
         tables,
         [sa.Column("package_type", sa.String(16), nullable=False, server_default="subcontract")],
     )
+    if _PACKAGE in tables and not had_type:
+        backfill_package_type(op.get_bind())
     _add_missing(
         _LEVELING,
         tables,
