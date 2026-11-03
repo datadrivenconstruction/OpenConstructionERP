@@ -2581,5 +2581,6 @@
       "file_missing": "写真「{name}」のファイルがストレージにありません",
       "file_missing_fix": "写真を再アップロードするか、バックアップから復元してください"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "投資計画","col": {"title": "プロジェクト","priority": "優先度","status": "ステータス","total": "総費用"},"row": {"envelope": "予算枠","demand": "需要","gap": "過不足"}}}
 }

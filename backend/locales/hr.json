@@ -2586,5 +2586,8 @@
       "file_missing": "Datoteka fotografije '{name}' nedostaje u pohrani",
       "file_missing_fix": "Ponovno prenesite fotografiju ili je vratite iz sigurnosne kopije"
     }
+  },
+  "capital_plan": {
+    "export": "Izvezi"
   }
 }

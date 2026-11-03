@@ -2563,5 +2563,8 @@
       "file_missing": "Pliku zdjęcia '{name}' brakuje w magazynie",
       "file_missing_fix": "Prześlij zdjęcie ponownie lub przywróć je z kopii zapasowej"
     }
+  },
+  "capital_plan": {
+    "export": "Eksportuj"
   }
 }

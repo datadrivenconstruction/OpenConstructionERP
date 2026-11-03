@@ -2565,5 +2565,6 @@
       "file_missing": "O arquivo da foto '{name}' não está no armazenamento",
       "file_missing_fix": "Envie a foto de novo ou restaure-a de um backup"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Plano de investimentos", "col": {"title": "Projeto", "priority": "Prioridade", "status": "Estado", "total": "Custo total"}, "row": {"envelope": "Teto orçamental", "demand": "Procura", "gap": "Défice"}}}
 }

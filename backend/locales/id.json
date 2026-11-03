@@ -2589,5 +2589,21 @@
       "file_missing": "File foto '{name}' tidak ada di penyimpanan",
       "file_missing_fix": "Unggah ulang foto atau pulihkan dari cadangan"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Rencana modal",
+      "col": {
+        "title": "Proyek",
+        "priority": "Prioritas",
+        "status": "Status",
+        "total": "Total biaya"
+      },
+      "row": {
+        "envelope": "Anggaran",
+        "demand": "Kebutuhan",
+        "gap": "Selisih"
+      }
+    }
   }
 }

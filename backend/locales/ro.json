@@ -2586,5 +2586,6 @@
       "file_missing": "Fișierul fotografiei '{name}' lipsește din stocare",
       "file_missing_fix": "Încărcați din nou fotografia sau restaurați-o dintr-o copie de rezervă"
     }
-  }
+  },
+  "capital_plan": {"export": {"sheet": "Plan de investiții","col": {"title": "Proiect","priority": "Prioritate","status": "Stare","total": "Cost total"},"row": {"envelope": "Buget anual","demand": "Cerere","gap": "Diferență"}}}
 }

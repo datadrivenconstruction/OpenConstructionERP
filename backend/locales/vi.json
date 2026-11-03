@@ -2583,5 +2583,21 @@
       "file_missing": "Tệp của ảnh '{name}' không có trong kho lưu trữ",
       "file_missing_fix": "Tải ảnh lên lại hoặc khôi phục từ bản sao lưu"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Kế hoạch vốn đầu tư",
+      "col": {
+        "title": "Dự án",
+        "priority": "Ưu tiên",
+        "status": "Trạng thái",
+        "total": "Tổng chi phí"
+      },
+      "row": {
+        "envelope": "Ngân sách",
+        "demand": "Nhu cầu",
+        "gap": "Chênh lệch"
+      }
+    }
   }
 }

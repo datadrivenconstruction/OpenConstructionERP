@@ -1,4 +1,5 @@
 {
+  "capital_plan": {"export": {"sheet": "মূলধন পরিকল্পনা", "col": {"title": "প্রকল্প", "priority": "অগ্রাধিকার", "status": "অবস্থা", "total": "মোট ব্যয়"}, "row": {"envelope": "বাজেট সীমা", "demand": "চাহিদা", "gap": "ঘাটতি"}}},
   "costs.catalog_name_unavailable": "এই নাম নতুন ক্যাটালগের জন্য ব্যবহার করা যাবে না। অন্য নাম বেছে নিন।",
   "app": {
     "name": "OpenConstructionERP",

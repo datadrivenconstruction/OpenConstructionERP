@@ -2590,5 +2590,8 @@
       "file_missing": "Soubor fotografie '{name}' chybí v úložišti",
       "file_missing_fix": "Nahrajte fotografii znovu nebo ji obnovte ze zálohy"
     }
+  },
+  "capital_plan": {
+    "export": "Exportovat"
   }
 }

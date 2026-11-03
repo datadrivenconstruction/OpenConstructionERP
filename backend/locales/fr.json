@@ -2562,5 +2562,21 @@
       "file_missing": "Le fichier de la photo '{name}' est absent du stockage",
       "file_missing_fix": "Téléversez à nouveau la photo ou restaurez-la depuis une sauvegarde"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Plan d'investissement",
+      "col": {
+        "title": "Projet",
+        "priority": "Priorité",
+        "status": "Statut",
+        "total": "Coût total"
+      },
+      "row": {
+        "envelope": "Enveloppe",
+        "demand": "Besoin",
+        "gap": "Écart"
+      }
+    }
   }
 }

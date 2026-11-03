@@ -2586,5 +2586,21 @@
       "file_missing": "Filen til billedet '{name}' mangler i lageret",
       "file_missing_fix": "Upload billedet igen, eller gendan det fra en sikkerhedskopi"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Kapitalplan",
+      "col": {
+        "title": "Projekt",
+        "priority": "Prioritet",
+        "status": "Status",
+        "total": "Samlet omkostning"
+      },
+      "row": {
+        "envelope": "Budget",
+        "demand": "Behov",
+        "gap": "Forskel"
+      }
+    }
   }
 }

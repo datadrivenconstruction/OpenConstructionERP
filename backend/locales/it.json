@@ -2557,5 +2557,21 @@
       "file_missing": "Il file della foto '{name}' manca nell'archivio",
       "file_missing_fix": "Carica di nuovo la foto o ripristinala da un backup"
     }
+  },
+  "capital_plan": {
+    "export": {
+      "sheet": "Piano investimenti",
+      "col": {
+        "title": "Progetto",
+        "priority": "Priorità",
+        "status": "Stato",
+        "total": "Costo totale"
+      },
+      "row": {
+        "envelope": "Budget",
+        "demand": "Fabbisogno",
+        "gap": "Divario"
+      }
+    }
   }
 }
