@@ -47,6 +47,7 @@ import {
 } from '@/shared/ui';
 import { useConfirm } from '@/shared/hooks/useConfirm';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
+import { RaiseNoticeButton } from '@/features/variations/RaiseNoticeButton';
 import { RecordPdfButton } from '@/shared/ui/RegisterExport';
 import { useToastStore } from '@/stores/useToastStore';
 import { apiGet, type Page } from '@/shared/lib/api';
@@ -682,6 +683,13 @@ export function RFIDetailPage() {
               {t('rfi.action_edit', { defaultValue: 'Edit' })}
             </Button>
           )}
+          <RaiseNoticeButton
+            projectId={rfi.project_id}
+            sourceType="rfi"
+            sourceId={rfi.id}
+            sourceRef={`RFI-${rfi.rfi_number}`}
+            title={rfi.subject}
+          />
           <RecordPdfButton
             label={t('rfi.export_pdf', { defaultValue: 'Export PDF' })}
             download={downloadPdf}

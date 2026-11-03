@@ -1486,6 +1486,10 @@
     "award_leveled": {
       "fail": "पैकेज {package} बिना गणना की गई बोली समतलन (bid leveling) के दिया जा रहा है",
       "suggestion": "समतलन की गणना करें ताकि आवंटन से पहले छूटे दायरे की कीमत तय हो"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

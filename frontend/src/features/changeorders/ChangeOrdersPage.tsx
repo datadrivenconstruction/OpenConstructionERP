@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { Button, Card, Badge, EmptyState, Breadcrumb, InfoHint, DismissibleInfo, IntroRichText, ConfirmDialog, RecoveryCard, SkeletonTable, SkeletonCard, ModuleGuideButton } from '@/shared/ui';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SubcontractChangesPanel } from '@/features/subcontractors/SubcontractChangesPanel';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { RegisterExportButton, RecordPdfButton } from '@/shared/ui/RegisterExport';
 import type { DocumentExportItem } from '@/shared/ui/DocumentExportMenu';
@@ -2367,6 +2368,15 @@ function DetailView({
           busy={startChainMut.isPending}
         />
       )}
+
+      <div className="mb-4">
+        <SubcontractChangesPanel
+          ownerType="change_order"
+          ownerId={order.id}
+          projectId={order.project_id}
+          ownerTitle={order.title}
+        />
+      </div>
 
       {/* Items */}
       <div className="flex items-center justify-between mb-4">

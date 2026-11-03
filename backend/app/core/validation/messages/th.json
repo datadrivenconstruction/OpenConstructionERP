@@ -1486,6 +1486,10 @@
     "award_leveled": {
       "fail": "แพ็กเกจ {package} กำลังถูกตัดสินให้โดยไม่มีการคำนวณ bid leveling",
       "suggestion": "คำนวณ bid leveling เพื่อให้ขอบเขตที่ขาดมีราคาก่อนตัดสินให้"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

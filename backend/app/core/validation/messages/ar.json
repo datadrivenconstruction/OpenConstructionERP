@@ -1486,6 +1486,10 @@
     "award_leveled": {
       "fail": "تتم ترسية الحزمة {package} دون معادلة عطاءات محسوبة",
       "suggestion": "احسب المعادلة ليتم تسعير النطاق الناقص قبل الترسية"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

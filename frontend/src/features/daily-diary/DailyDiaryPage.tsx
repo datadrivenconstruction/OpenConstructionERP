@@ -74,6 +74,7 @@ import { TruncationNotice } from '@/shared/ui/TruncationNotice';
 import { todayLocalISO, isoDateFromLocal, nowLocalISO } from '@/shared/lib/dates';
 import { useWeekStartsOn } from '@/shared/lib/weekStart';
 import { projectsApi } from '@/features/projects/api';
+import { RaiseNoticeButton } from '@/features/variations/RaiseNoticeButton';
 import {
   listDiaries,
   getDiary,
@@ -1285,7 +1286,14 @@ function TodayTab({
             <CompletenessChip data={completenessQ.data} />
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <RaiseNoticeButton
+            projectId={projectId}
+            sourceType="daily_diary"
+            sourceId={diary.id}
+            sourceRef={diary.diary_date}
+            title={`${t('daily_diary.title', { defaultValue: 'Daily Site Diary' })} ${diary.diary_date}`}
+          />
           {/* The diary in the reader's language by default, or another one
               it is printed in: the site keeps it in one language and the
               employer's representative may read another. */}
@@ -2226,6 +2234,18 @@ function EntriesTimeline({
                     <DateDisplay value={e.entry_time} />
                   </p>
                 </div>
+                <div className="flex shrink-0 items-start gap-1">
+                {!e._offline && (
+                  <RaiseNoticeButton
+                    projectId={projectId}
+                    sourceType="daily_diary_entry"
+                    sourceId={e.id}
+                    sourceRef={e.title}
+                    title={e.title}
+                    description={e.description}
+                    compact
+                  />
+                )}
                 {!sealed && (
                   <button
                     type="button"
@@ -2237,6 +2257,7 @@ function EntriesTimeline({
                     <Trash2 size={14} />
                   </button>
                 )}
+                </div>
               </div>
             </li>
           ))}

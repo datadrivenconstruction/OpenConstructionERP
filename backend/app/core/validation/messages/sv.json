@@ -1486,6 +1486,10 @@
     "award_leveled": {
       "fail": "Paket {package} tilldelas utan beräknad anbudsutjämning",
       "suggestion": "Beräkna utjämningen så att saknad omfattning är prissatt före tilldelning"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }

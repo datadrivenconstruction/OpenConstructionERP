@@ -7,7 +7,7 @@
  * backend/app/modules/bid_management/router.py
  */
 
-import { apiGet, apiPost, apiPatch, apiDelete } from '@/shared/lib/api';
+import { apiGet, apiPost, apiPatch, apiPut, apiDelete } from '@/shared/lib/api';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -38,6 +38,8 @@ export type BidRejectionCode =
   | 'qualification'
   | 'other';
 
+export type PackageType = 'subcontract' | 'supply';
+
 export interface BidPackage {
   id: string;
   project_id: string;
@@ -52,6 +54,7 @@ export interface BidPackage {
   total_budget_estimate: number | string;
   status: BidPackageStatus;
   confidentiality_level: BidConfidentiality;
+  package_type?: PackageType;
   published_at: string | null;
   closed_at: string | null;
   awarded_at: string | null;
@@ -185,6 +188,10 @@ export interface BidLevelingRow {
   bidder_id: string;
   raw_total: number | string;
   normalized_total: number | string;
+  plug_total?: number | string;
+  plugged_total?: number | string;
+  gap_lines?: number;
+  unpriced_gap_lines?: number;
   commercial_score: number | string;
   technical_score: number | string;
   total_score: number | string;
@@ -280,6 +287,7 @@ export interface CreatePackagePayload {
   total_budget_estimate?: number | string;
   status?: BidPackageStatus;
   confidentiality_level?: BidConfidentiality;
+  package_type?: PackageType;
 }
 
 export interface CreateBidderPayload {
@@ -576,5 +584,55 @@ export function computeLeveling(comparisonId: string): Promise<BidLevelingRow[]>
 export function levelingTable(comparisonId: string): Promise<LevelingTable> {
   return apiGet<LevelingTable>(
     `/v1/bid-management/comparisons/${comparisonId}/leveling-table`,
+  );
+}
+
+/* ── Plugs (gap fills) and leveling check ─────────────────────────────── */
+
+export type PlugSource = 'median' | 'estimate' | 'single_bid' | 'manual' | 'none';
+
+export interface LevelingPlug {
+  id: string;
+  bidder_id: string;
+  line_item_id: string;
+  amount: number | string | null;
+  source: PlugSource;
+  reason: 'missing' | 'excluded';
+  note: string;
+}
+
+export interface LevelingCheckResult {
+  rule_id: string;
+  severity: string;
+  passed: boolean;
+  message: string;
+  element_ref?: string | null;
+  suggestion?: string | null;
+}
+
+export interface LevelingCheck {
+  status: string;
+  counts: Record<string, number>;
+  results: LevelingCheckResult[];
+}
+
+export function listPlugs(comparisonId: string): Promise<LevelingPlug[]> {
+  return apiGet<LevelingPlug[]>(`/v1/bid-management/comparisons/${comparisonId}/plugs`);
+}
+
+/** amount null clears the manual plug and reverts to the computed one. */
+export function setPlug(
+  comparisonId: string,
+  data: { bidder_id: string; line_item_id: string; amount: string | null; note?: string },
+): Promise<LevelingPlug[]> {
+  return apiPut<LevelingPlug[]>(`/v1/bid-management/comparisons/${comparisonId}/plugs`, data);
+}
+
+export function levelingCheck(
+  packageId: string,
+  operation: 'read' | 'award' = 'read',
+): Promise<LevelingCheck> {
+  return apiGet<LevelingCheck>(
+    `/v1/bid-management/bid-packages/${packageId}/leveling-check?operation=${operation}`,
   );
 }

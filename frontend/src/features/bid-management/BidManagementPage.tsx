@@ -77,6 +77,11 @@ import {
   computeLeveling,
   levelingTable,
   levelingMatrix,
+  getPackageComparison,
+  listPlugs,
+  setPlug,
+  levelingCheck,
+  type PackageType,
   createLineItem,
   createSubmission,
   bulkCreateSubmissionLines,
@@ -96,6 +101,7 @@ import {
   type Subcontractor,
   type PrequalStatus,
 } from '@/features/subcontractors/api';
+import { PlugCell, PlugTotalsRows, LevelingCheckBanner, PackageTypeField } from './LevelingPlugs';
 import { bidManagementGuide } from './bidManagementGuide';
 import { bidderPayload, linkStillHolds, type PickedSubcontractor } from './inviteBidder';
 import { AddFromBoqModal } from './AddFromBoqModal';
@@ -1215,6 +1221,24 @@ function LevelingTable({
     queryFn: () => listBiddersForPackage(packageId),
   });
 
+  const comparisonQ = useQuery({
+    queryKey: ['bid-management', 'comparison', packageId],
+    queryFn: () => getPackageComparison(packageId),
+  });
+  const comparisonId = comparisonQ.data?.id;
+  const plugsQ = useQuery({
+    queryKey: ['bid-management', 'plugs', comparisonId],
+    queryFn: () => listPlugs(comparisonId as string),
+    enabled: !!comparisonId,
+  });
+  const checkQ = useQuery({
+    queryKey: ['bid-management', 'leveling-check', packageId, 'read'],
+    queryFn: () => levelingCheck(packageId, 'read'),
+  });
+  const plugByCell = new Map(
+    (plugsQ.data ?? []).map((p) => [`${p.bidder_id}:${p.line_item_id}`, p] as const),
+  );
+
   const matrix = matrixQ.data;
   const bidders = biddersQ.data ?? [];
 
@@ -1243,10 +1267,32 @@ function LevelingTable({
     onSuccess: (table) => {
       setLeveling(table);
       qc.invalidateQueries({ queryKey: ['bid-management', 'leveling-matrix', packageId] });
+      qc.invalidateQueries({ queryKey: ['bid-management', 'comparison', packageId] });
+      qc.invalidateQueries({ queryKey: ['bid-management', 'plugs'] });
+      qc.invalidateQueries({ queryKey: ['bid-management', 'leveling-check', packageId] });
       addToast({
         type: 'success',
         title: t('bid_management.leveling_done', { defaultValue: 'Leveling computed' }),
       });
+    },
+    onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
+  });
+
+  const plugMut = useMutation({
+    mutationFn: async (vars: { bidderId: string; lineItemId: string; amount: string | null }) => {
+      const cid = comparisonId as string;
+      await setPlug(cid, {
+        bidder_id: vars.bidderId,
+        line_item_id: vars.lineItemId,
+        amount: vars.amount,
+      });
+      return levelingTable(cid);
+    },
+    onSuccess: (table) => {
+      setLeveling(table);
+      qc.invalidateQueries({ queryKey: ['bid-management', 'leveling-matrix', packageId] });
+      qc.invalidateQueries({ queryKey: ['bid-management', 'plugs'] });
+      qc.invalidateQueries({ queryKey: ['bid-management', 'leveling-check', packageId] });
     },
     onError: (err) => addToast({ type: 'error', title: getErrorMessage(err) }),
   });
@@ -1440,6 +1486,7 @@ function LevelingTable({
             </div>
           )}
 
+          <LevelingCheckBanner check={checkQ.data} />
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
@@ -1475,6 +1522,7 @@ function LevelingTable({
                         const competitive =
                           cell != null &&
                           ['included', 'alternative', 'noted'].includes(cell.inclusion_status);
+                        const plug = plugByCell.get(`${col.id}:${row.line_item_id}`);
                         const cls = cell?.is_low
                           ? 'text-green-700 font-semibold'
                           : 'text-content-primary';
@@ -1485,6 +1533,20 @@ function LevelingTable({
                           >
                             {competitive && price > 0 ? (
                               <MoneyDisplay amount={price} currency={currency} />
+                            ) : plug ? (
+                              <PlugCell
+                                plug={plug}
+                                currency={currency}
+                                busy={plugMut.isPending}
+                                readOnly={!awardable}
+                                onSave={(amount) =>
+                                  plugMut.mutate({
+                                    bidderId: col.id,
+                                    lineItemId: row.line_item_id,
+                                    amount,
+                                  })
+                                }
+                              />
                             ) : (
                               <span className="text-content-tertiary">—</span>
                             )}
@@ -1517,6 +1579,9 @@ function LevelingTable({
                     );
                   })}
                 </tr>
+                {leveling && leveling.rows.length > 0 && (
+                  <PlugTotalsRows columns={columns} rows={leveling.rows} currency={currency} />
+                )}
                 <tr className="border-t border-border-light">
                   <td className="px-3 py-2 sticky left-0 bg-surface-primary text-xs text-content-secondary">
                     {t('bid_management.action', { defaultValue: 'Action' })}
@@ -1557,6 +1622,7 @@ function LevelingTable({
       {awardTarget && (
         <AwardConfirmModal
           target={awardTarget}
+          packageId={packageId}
           currency={currency}
           levelingComputed={!!leveling && leveling.rows.length > 0}
           busy={awardMut.isPending}
@@ -1578,6 +1644,7 @@ function LevelingTable({
 
 function AwardConfirmModal({
   target,
+  packageId,
   currency,
   levelingComputed,
   busy,
@@ -1585,6 +1652,7 @@ function AwardConfirmModal({
   onConfirm,
 }: {
   target: { bidderId: string; name: string; amount: number };
+  packageId: string;
   currency?: string;
   levelingComputed: boolean;
   busy: boolean;
@@ -1594,6 +1662,10 @@ function AwardConfirmModal({
   const { t } = useTranslation();
   const [amount, setAmount] = useState(String(target.amount || 0));
   const [summary, setSummary] = useState('');
+  const awardCheckQ = useQuery({
+    queryKey: ['bid-management', 'leveling-check', packageId, 'award'],
+    queryFn: () => levelingCheck(packageId, 'award'),
+  });
 
   return (
     <WideModal
@@ -1623,6 +1695,7 @@ function AwardConfirmModal({
       }
     >
       <div className="space-y-3">
+        <LevelingCheckBanner check={awardCheckQ.data} />
         {!levelingComputed && (
           <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-200">
             <Info size={14} className="mt-0.5 shrink-0" />
@@ -2893,6 +2966,7 @@ function CreatePackageModal({
     // EUR) so the user must enter an explicit ISO-4217 code.
     currency: currency ?? '',
     total_budget_estimate: '0',
+    package_type: 'subcontract' as PackageType,
   });
   const [busy, setBusy] = useState(false);
 
@@ -2914,6 +2988,7 @@ function CreatePackageModal({
         submission_deadline: form.submission_deadline || null,
         currency: form.currency.trim() || currency,
         total_budget_estimate: Number(form.total_budget_estimate) || 0,
+        package_type: form.package_type,
       });
       qc.invalidateQueries({ queryKey: ['bid-management'] });
       addToast({
@@ -3018,6 +3093,13 @@ function CreatePackageModal({
             maxLength={3}
           />
         </WideModalField>
+        <div className="col-span-2">
+          <PackageTypeField
+            value={form.package_type}
+            onChange={(v) => setForm({ ...form, package_type: v })}
+            className={inputCls}
+          />
+        </div>
         <WideModalField
           label={t('bid_management.budget', { defaultValue: 'Budget estimate' })}
           hint={t('bid_management.budget_hint', {

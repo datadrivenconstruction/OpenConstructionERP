@@ -1486,6 +1486,10 @@
     "award_leveled": {
       "fail": "O pacote {package} está a ser adjudicado sem um nivelamento de propostas calculado",
       "suggestion": "Calcule o nivelamento para que o escopo em falta seja orçado antes da adjudicação"
+    },
+    "linked_tender_awarded": {
+      "fail": "Package {package} is linked to main contract tender {tender} and is not awarded yet, so that tender has no contract",
+      "suggestion": "Award the package (it creates the contract) or unlink the tender so it drafts its own"
     }
   }
 }
