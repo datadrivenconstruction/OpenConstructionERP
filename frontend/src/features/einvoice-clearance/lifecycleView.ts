@@ -55,8 +55,8 @@ export function formatDuration(seconds: number, locale: string): string {
   try {
     return new Intl.NumberFormat(locale, { style: 'unit', unit, unitDisplay: 'long' }).format(value);
   } catch {
-    // An unknown locale tag still gets a unit-correct string.
-    return new Intl.NumberFormat('en', { style: 'unit', unit, unitDisplay: 'long' }).format(value);
+    // An unknown locale tag still gets a unit-correct string in the runtime default.
+    return new Intl.NumberFormat(undefined, { style: 'unit', unit, unitDisplay: 'long' }).format(value);
   }
 }
 
