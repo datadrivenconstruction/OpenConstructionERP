@@ -144,6 +144,7 @@ import { ClaimPeriod } from './ClaimPeriod';
 import { fmtList, fmtPercent } from '@/shared/lib/formatters';
 import { matchesSearch } from '@/shared/lib/highlightMatch';
 import { getNumberLocale } from '@/stores/usePreferencesStore';
+import { RunAgentButton } from '@/features/ai-agents/components/RunAgentButton';
 
 // English fallbacks for the computed `contracts.type_*` keys. The default used to be
 // the raw value, so until the key lands in a locale the screen shows the bare
@@ -722,6 +723,7 @@ export function ContractsPage() {
         actions={
           <>
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
+            <RunAgentButton agent="clause_reviewer" />
             <ModuleGuideButton content={contractsGuide} />
             <Button
               variant="primary"

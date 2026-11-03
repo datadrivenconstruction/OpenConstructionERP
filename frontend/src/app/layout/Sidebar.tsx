@@ -272,6 +272,8 @@ export const ROUTE_BACKEND_MODULE: Record<string, string | readonly string[]> = 
   '/geo': 'oe_geo_hub',
   // AI & tools
   '/ai-agents': 'oe_ai_agents',
+  '/ai-agents/catalogue': 'oe_ai_agents',
+  '/document-assistant': 'oe_doc_assistant',
   '/advisor': 'oe_ai',
   '/chat': 'oe_erp_chat',
   '/pipelines': 'oe_pipelines',
