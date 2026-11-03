@@ -9,8 +9,9 @@ Tables:
 """
 
 import uuid
+from datetime import datetime
 
-from sqlalchemy import JSON, Boolean, ForeignKey, Index, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Index, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.database import GUID, Base
@@ -21,7 +22,8 @@ class WebhookEndpoint(Base):
 
     When events matching the ``events`` list occur, an HTTP POST is sent
     to ``url`` with a JSON payload.  If a ``secret`` is set, the request
-    includes an ``X-Webhook-Signature`` header (HMAC-SHA256).
+    carries ``X-OE-Signature`` (``t=<unix>,v1=<hmac>``) and the legacy
+    ``X-Webhook-Signature`` header (HMAC-SHA256).
     """
 
     __tablename__ = "oe_integrations_webhook"
@@ -87,6 +89,13 @@ class WebhookDelivery(Base):
     status_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
     response_body: Mapped[str | None] = mapped_column(Text, nullable=True)
     duration_ms: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    # Retry state. ``attempt`` counts sends made; ``status`` is
+    # pending | delivered | retrying | dead; the retry worker scans
+    # ``next_retry_at`` for pending and retrying rows.
+    attempt: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    next_retry_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="pending", server_default="pending")
+    last_error: Mapped[str] = mapped_column(Text, nullable=False, default="", server_default="")
 
     def __repr__(self) -> str:
         return f"<WebhookDelivery {self.event_type} -> {self.status_code}>"

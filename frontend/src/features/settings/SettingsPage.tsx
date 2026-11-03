@@ -53,6 +53,7 @@ import {
   Globe,
   Sparkles,
   Plug,
+  KeyRound,
   ShieldAlert,
   ShieldCheck,
   SlidersHorizontal,
@@ -103,6 +104,7 @@ import { invalidateProjectLists } from '@/features/projects/invalidateProjectLis
 // Audit log now lives as a Settings section (moved out of the sidebar admin
 // grid). We reuse the exact same page component - lazy-loaded so its filter /
 // table code only enters the bundle when an admin actually opens the tab.
+const DeveloperTab = lazy(() => import('./DeveloperTab'));
 const AuditLogPanel = lazy(() =>
   import('@/features/admin/AuditLogPage').then((m) => ({ default: m.AuditLogPage })),
 );
@@ -1471,7 +1473,7 @@ function DemoLoginAdminRow() {
 
 // ── Tab definitions ──────────────────────────────────────────────────────────
 
-type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'datafeeds' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
+type SettingsTab = 'general' | 'dashboard' | 'team' | 'company' | 'account' | 'market' | 'einvoice' | 'converters' | 'ai' | 'security' | 'integrations' | 'datafeeds' | 'developer' | 'packages' | 'modules' | 'governance' | 'audit' | 'advanced';
 
 interface TabDef {
   id: SettingsTab;
@@ -1507,6 +1509,7 @@ const TABS: readonly TabDef[] = [
   { id: 'security',     labelKey: 'settings.tab_security',     defaultLabel: 'Data & Security', icon: ShieldCheck, descKey: 'settings.tab_security_desc', descDefault: 'Where your data lives and what leaves this instance' },
   { id: 'integrations', labelKey: 'settings.tab_integrations', defaultLabel: 'Integrations', icon: Plug,     descKey: 'settings.tab_integrations_desc', descDefault: 'Slack, Teams, Telegram, webhooks' },
   { id: 'datafeeds',    labelKey: 'settings.tab_datafeeds',    defaultLabel: 'Data feeds',   icon: Database, descKey: 'settings.tab_datafeeds_desc',    descDefault: 'Tables for Excel, Power Query and BI tools' },
+  { id: 'developer',    labelKey: 'settings.tab_developer',    defaultLabel: 'Developer',    icon: KeyRound, descKey: 'settings.tab_developer_desc',    descDefault: 'API keys and signed webhooks for your own systems' },
   // Modules — installing and removing backend modules. Visible to everyone
   // (seeing what this instance runs is not privileged), but the toggles are
   // admin-only inside the panel because `system.modules.enable/disable` is.
@@ -2244,6 +2247,21 @@ export function SettingsPage() {
 
           {/* ── DATA FEEDS ───────────────────────────────────────── */}
           {activeTab === 'datafeeds' && (<div className="lg:col-span-2"><DataFeedsSettings /></div>)}
+          {/* ── DEVELOPER ────────────────────────────────────────── */}
+          {activeTab === 'developer' && (
+            <div className="lg:col-span-2">
+              <Suspense
+                fallback={
+                  <div className="space-y-3" aria-busy="true">
+                    <Skeleton className="h-40 w-full rounded-2xl" />
+                    <Skeleton className="h-40 w-full rounded-2xl" />
+                  </div>
+                }
+              >
+                <DeveloperTab />
+              </Suspense>
+            </div>
+          )}
 
           {/* ── GOVERNANCE ─────────────────────────────────────── */}
           {activeTab === 'governance' && (

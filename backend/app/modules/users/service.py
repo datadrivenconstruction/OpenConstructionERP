@@ -39,6 +39,7 @@ async def _safe_publish(name: str, data: dict, source_module: str = "") -> None:
         _logger_ev.debug("Event publish skipped: %s", name)
 
 
+from app.modules.users import validators as key_rules
 from app.modules.users.models import APIKey, User, UserSession
 from app.modules.users.repository import (
     LOCAL_DESKTOP_OWNER_EMAIL,
@@ -1635,43 +1636,123 @@ class UserService:
 
     # ── API Keys ───────────────────────────────────────────────────────
 
+    def _key_created_response(self, api_key: APIKey, full_key: str) -> APIKeyCreatedResponse:
+        return APIKeyCreatedResponse(
+            id=api_key.id,
+            name=api_key.name,
+            key_prefix=api_key.key_prefix,
+            key=full_key,
+            description=api_key.description,
+            is_active=api_key.is_active,
+            permissions=list(api_key.permissions or []),
+            rate_limit_per_min=api_key.rate_limit_per_min,
+            allowed_cidrs=list(api_key.allowed_cidrs or []),
+            request_count=api_key.request_count or 0,
+            rotated_from_id=api_key.rotated_from_id,
+            expires_at=api_key.expires_at,
+            last_used_at=api_key.last_used_at,
+            created_at=api_key.created_at,
+        )
+
+    async def _audit_api_key(self, user_id: uuid.UUID, key: APIKey, action: str) -> None:
+        """Record who did what to which key. Only the id and the visible prefix, never the secret."""
+        try:
+            from app.core.audit_log import log_activity as _log_activity
+
+            await _log_activity(
+                self.session,
+                actor_id=str(user_id),
+                entity_type="api_key",
+                entity_id=str(key.id),
+                action=action,
+                module="users",
+                after_state={"key_prefix": key.key_prefix},
+            )
+        except Exception:  # noqa: BLE001
+            logger.debug("audit log skipped for api_key.%s (non-fatal)", action)
+
     async def create_api_key(
         self,
         user_id: uuid.UUID,
         data: APIKeyCreate,
     ) -> APIKeyCreatedResponse:
-        """Create a new API key for a user."""
-        full_key, key_hash, key_prefix = generate_api_key()
-
-        expires_at = None
+        """Create a new API key for a user, after the issuing rules pass."""
+        now = datetime.now(UTC)
+        expires_at = data.expires_at
+        if expires_at is not None and expires_at.tzinfo is None:
+            expires_at = expires_at.replace(tzinfo=UTC)
         if data.expires_in_days:
-            expires_at = datetime.now(UTC) + timedelta(days=data.expires_in_days)
+            expires_at = now + timedelta(days=data.expires_in_days)
+        try:
+            scopes = key_rules.validate_scopes(data.permissions)
+            key_rules.validate_expiry(expires_at, now)
+            live = await self.api_key_repo.list_live_for_user(user_id, now)
+            key_rules.validate_name_unique(data.name, [k.name for k in live])
+            key_rules.validate_active_cap(len(live))
+        except key_rules.ApiKeyRuleError as exc:
+            raise HTTPException(status_code=exc.status, detail={"code": exc.code, "message": str(exc)}) from exc
 
+        full_key, key_hash, key_prefix = generate_api_key()
         api_key = APIKey(
             user_id=user_id,
             name=data.name,
             key_hash=key_hash,
             key_prefix=key_prefix,
             description=data.description,
-            permissions=data.permissions,
+            permissions=scopes,
+            rate_limit_per_min=data.rate_limit_per_min,
+            allowed_cidrs=list(data.allowed_cidrs),
             expires_at=expires_at,
         )
         api_key = await self.api_key_repo.create(api_key)
+        await self._audit_api_key(user_id, api_key, "api_key.created")
 
         logger.info("API key created: %s... for user %s", key_prefix, user_id)
+        return self._key_created_response(api_key, full_key)
 
-        return APIKeyCreatedResponse(
-            id=api_key.id,
-            name=api_key.name,
+    async def rotate_api_key(self, user_id: uuid.UUID, key_id: uuid.UUID) -> APIKeyCreatedResponse:
+        """Issue a replacement with the same name, scopes and limits; the old key lives 24 h more.
+
+        404 when the key is not the caller's, 409 when it is no longer usable
+        or was already rotated. The old key's own earlier expiry is kept.
+        """
+        old = await self.api_key_repo.get_by_id(key_id)
+        if old is None or old.user_id != user_id:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="API key not found")
+        now = datetime.now(UTC)
+        old_expiry = old.expires_at
+        if old_expiry is not None and old_expiry.tzinfo is None:
+            old_expiry = old_expiry.replace(tzinfo=UTC)
+        if not old.is_active or (old_expiry is not None and old_expiry <= now):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"code": "api_key.inactive", "message": "Key is revoked or expired"},
+            )
+        if await self.api_key_repo.has_successor(old.id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={"code": "api_key.already_rotated", "message": "Key was already rotated"},
+            )
+
+        full_key, key_hash, key_prefix = generate_api_key()
+        new = APIKey(
+            user_id=user_id,
+            name=old.name,
+            key_hash=key_hash,
             key_prefix=key_prefix,
-            key=full_key,
-            description=api_key.description,
-            is_active=api_key.is_active,
-            permissions=api_key.permissions,
-            expires_at=api_key.expires_at,
-            last_used_at=api_key.last_used_at,
-            created_at=api_key.created_at,
+            description=old.description,
+            permissions=list(old.permissions or []),
+            rate_limit_per_min=old.rate_limit_per_min,
+            allowed_cidrs=list(old.allowed_cidrs or []),
+            expires_at=old_expiry,
+            rotated_from_id=old.id,
         )
+        overlap_end = now + key_rules.ROTATION_OVERLAP
+        old.expires_at = overlap_end if old_expiry is None else min(old_expiry, overlap_end)
+        new = await self.api_key_repo.create(new)
+        await self._audit_api_key(user_id, new, "api_key.rotated")
+        logger.info("API key rotated: %s... -> %s...", old.key_prefix, key_prefix)
+        return self._key_created_response(new, full_key)
 
     async def list_api_keys(self, user_id: uuid.UUID) -> list[APIKey]:
         """List all API keys for a user."""
@@ -1683,4 +1764,5 @@ class UserService:
         if key is None or key.user_id != user_id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="API key not found")
         await self.api_key_repo.deactivate(key_id)
+        await self._audit_api_key(user_id, key, "api_key.revoked")
         logger.info("API key revoked: %s", key.key_prefix)

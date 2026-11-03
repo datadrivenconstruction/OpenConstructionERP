@@ -19,6 +19,7 @@ PERIODIC = [
     "phonelog_retention",
     "meetings_audio_retention",
     "file_trash_purge",
+    "webhook_retry",
 ]
 
 

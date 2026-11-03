@@ -73,10 +73,10 @@ class TestWebhookCreate:
             url="https://example.com/hook",
             events=["*"],
             project_id=pid,
-            secret="my-secret",
+            secret="my-secret-of-at-least-24-chars",
         )
         assert data.project_id == pid
-        assert data.secret == "my-secret"
+        assert data.secret == "my-secret-of-at-least-24-chars"
 
 
 class TestWebhookUpdate:

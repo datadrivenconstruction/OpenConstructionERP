@@ -33,6 +33,7 @@ from app.core.rate_limiter import approval_limiter
 from app.core.url_safety import UnsafeUrlError, resolve_and_validate_external_url
 from app.core.validation.messages import translate
 from app.dependencies import CurrentUserId, RequirePermission, SessionDep
+from app.modules.integrations import event_catalogue
 from app.modules.integrations.models import IntegrationConfig
 from app.modules.integrations.schemas import (
     DeliveryResponse,
@@ -43,6 +44,8 @@ from app.modules.integrations.schemas import (
     TestConnectionRequest,
     TestNotificationResponse,
     WebhookCreate,
+    WebhookCreatedResponse,
+    WebhookEventInfo,
     WebhookResponse,
     WebhookUpdate,
 )
@@ -506,7 +509,27 @@ async def test_integration_config(
 # ---------------------------------------------------------------------------
 
 
-@router.get("/webhooks/", response_model=list[WebhookResponse])
+_PARTNER = ["Partner API"]
+
+
+@router.get(
+    "/webhooks/events/",
+    response_model=list[WebhookEventInfo],
+    tags=_PARTNER,
+    summary="List the events a webhook can subscribe to",
+)
+async def list_webhook_events(
+    _perm: None = Depends(RequirePermission("integrations.read")),
+):
+    """Event catalogue, generated from the names modules publish on the event bus.
+
+    Subscribe an endpoint with these names, or with `*` for all. Names are
+    additive: a new event may appear in a release, an existing one is not renamed.
+    """
+    return event_catalogue.catalogue()
+
+
+@router.get("/webhooks/", response_model=list[WebhookResponse], tags=_PARTNER)
 async def list_webhooks(
     user_id: CurrentUserId,
     svc: WebhookService = Depends(_get_service),
@@ -517,19 +540,24 @@ async def list_webhooks(
     return [WebhookResponse.model_validate(w) for w in items]
 
 
-@router.post("/webhooks/", response_model=WebhookResponse, status_code=201)
+@router.post("/webhooks/", response_model=WebhookCreatedResponse, status_code=201, tags=_PARTNER)
 async def create_webhook(
     body: WebhookCreate,
     user_id: CurrentUserId,
     svc: WebhookService = Depends(_get_service),
     _perm: None = Depends(RequirePermission("integrations.create")),
 ):
-    """Create a new webhook endpoint."""
+    """Create a webhook endpoint (https only, at most 20 per user).
+
+    Every delivery is signed. When `secret` is omitted the server generates a
+    32-byte one; it is returned in `signing_secret` in this response only.
+    """
     webhook = await svc.create_webhook(body.model_dump(), user_id)
-    return WebhookResponse.model_validate(webhook)
+    base = WebhookResponse.model_validate(webhook)
+    return WebhookCreatedResponse(**base.model_dump(), signing_secret=webhook.secret or "")
 
 
-@router.patch("/webhooks/{webhook_id}", response_model=WebhookResponse)
+@router.patch("/webhooks/{webhook_id}", response_model=WebhookResponse, tags=_PARTNER)
 async def update_webhook(
     webhook_id: uuid.UUID,
     body: WebhookUpdate,
@@ -545,7 +573,7 @@ async def update_webhook(
     return WebhookResponse.model_validate(updated)
 
 
-@router.delete("/webhooks/{webhook_id}", status_code=204)
+@router.delete("/webhooks/{webhook_id}", status_code=204, tags=_PARTNER)
 async def delete_webhook(
     webhook_id: uuid.UUID,
     user_id: CurrentUserId,
@@ -562,6 +590,7 @@ async def delete_webhook(
 @router.get(
     "/webhooks/{webhook_id}/deliveries/",
     response_model=list[DeliveryResponse],
+    tags=_PARTNER,
 )
 async def list_deliveries(
     webhook_id: uuid.UUID,
@@ -569,7 +598,7 @@ async def list_deliveries(
     svc: WebhookService = Depends(_get_service),
     _perm: None = Depends(RequirePermission("integrations.read")),
 ):
-    """Return the last 50 delivery log entries for a webhook."""
+    """Return the last 50 delivery log entries for a webhook, with retry state."""
     webhook = await svc.get_webhook(webhook_id)
     if webhook is None or str(webhook.user_id) != str(user_id):
         raise HTTPException(status_code=404, detail=translate("errors.webhook_not_found", locale=get_locale()))
@@ -578,8 +607,35 @@ async def list_deliveries(
 
 
 @router.post(
+    "/webhooks/deliveries/{delivery_id}/redeliver/",
+    response_model=DeliveryResponse,
+    tags=_PARTNER,
+    summary="Send a delivery again",
+)
+async def redeliver_webhook_delivery(
+    delivery_id: uuid.UUID,
+    user_id: CurrentUserId,
+    svc: WebhookService = Depends(_get_service),
+    _perm: None = Depends(RequirePermission("integrations.update")),
+):
+    """Reset a delivery to `pending` with a fresh retry schedule.
+
+    The retry worker sends it within about 30 seconds, with the same
+    `X-OE-Delivery` id so receivers can de-duplicate.
+    """
+    delivery = await svc.get_delivery(delivery_id)
+    webhook = await svc.get_webhook(delivery.webhook_id) if delivery is not None else None
+    if delivery is None or webhook is None or str(webhook.user_id) != str(user_id):
+        raise HTTPException(status_code=404, detail=translate("errors.webhook_not_found", locale=get_locale()))
+    await svc.redeliver(delivery)
+    return DeliveryResponse.model_validate(delivery)
+
+
+@router.post(
     "/webhooks/{webhook_id}/test/",
     response_model=DeliveryResponse,
+    tags=_PARTNER,
+    summary="Send a ping event",
 )
 async def test_webhook(
     webhook_id: uuid.UUID,
@@ -587,7 +643,7 @@ async def test_webhook(
     svc: WebhookService = Depends(_get_service),
     _perm: None = Depends(RequirePermission("integrations.update")),
 ):
-    """Send a test payload to the webhook and return the delivery result.
+    """Send a signed `ping` event to the webhook once and return the delivery result.
 
     Rate-limited at 20/min/user via ``approval_limiter`` - without a
     cap, a compromised account could fan out test deliveries against
