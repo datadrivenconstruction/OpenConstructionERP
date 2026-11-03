@@ -1701,5 +1701,13 @@
       "fail": "{code} ist entschieden und kann nicht mehr geändert oder gelöscht werden.",
       "suggestion": "Erfassen Sie eine neue Umbuchung oder Budgetänderung, die sie korrigiert."
     }
+  },
+  "schedule": {
+    "4d": {
+      "cost_coverage_low": {
+        "fail": "Nur {coverage} % des Budgets liegen auf Elementen, die mit Vorgängen verknüpft sind (Grenze {limit} %); der Rest lässt sich nicht am Modell zeigen.",
+        "suggestion": "Mehr Elemente mit kostenbehafteten Vorgängen verknüpfen oder die EAC-Verknüpfungsregeln prüfen."
+      }
+    }
   }
 }
