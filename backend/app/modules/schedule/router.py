@@ -389,7 +389,7 @@ async def restore_schedule(
 @router.delete(
     "/schedules/{schedule_id}/permanent/",
     status_code=204,
-    dependencies=[Depends(RequirePermission("schedule.delete"))],
+    dependencies=[Depends(RequirePermission("schedule.purge"))],
 )
 async def purge_schedule(
     schedule_id: uuid.UUID,
@@ -662,7 +662,7 @@ async def preview_generate_from_boq(
     summary="Calculate critical path (CPM)",
     description="Run CPM forward/backward pass on a schedule. Returns early/late start/finish, "
     "total float, and critical path. Updates activity colors (red=critical, blue=non-critical).",
-    dependencies=[Depends(RequirePermission("schedule.read"))],
+    dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def calculate_cpm(
     schedule_id: uuid.UUID,
@@ -1423,7 +1423,7 @@ async def reschedule_schedule(
     description="Full CPM calculation using the core engine. Reads activities and "
     "ScheduleRelationship records, runs forward/backward pass, computes floats, "
     "identifies the critical path, and persists results on each activity.",
-    dependencies=[Depends(RequirePermission("schedule.read"))],
+    dependencies=[Depends(RequirePermission("schedule.update"))],
 )
 async def calculate_cpm_full(
     _user_id: CurrentUserId,
