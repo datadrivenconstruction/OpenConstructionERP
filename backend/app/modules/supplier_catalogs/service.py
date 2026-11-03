@@ -1499,6 +1499,12 @@ class SupplierCatalogsService(PriceListOps):
         # IDOR: a GR advances stock + commitment against the PO's project;
         # resolve the project from the trusted PO row and gate before posting.
         await self._guard_project(po.project_id, user_id)
+        if po.migrated_to_id is not None:
+            # The order now lives in Procurement; receiving here would book its stock twice.
+            raise HTTPException(
+                status_code=409,
+                detail="This order was moved to Procurement; record the receipt there",
+            )
         if po.status not in ("sent", "acknowledged", "partial"):
             raise HTTPException(
                 status_code=400,
